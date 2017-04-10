@@ -1,0 +1,29 @@
+module top
+
+imports
+  
+  lex/literal
+  func
+
+context-free syntax
+
+  Start.Program = <<{Def "\n"}*>>
+  Def = DataDef
+  Def = FuncDef
+
+context-free syntax
+
+  DataDef.DataDef = <<DataDefMods> data <ID><SuperType> = <DataImpl>>
+  
+  DataDefMod.Transient = <transient>
+  DataDefMods.DataDefMods = <<{DataDefMod " "}*>>
+  
+  SuperType.NoSuperType =
+  SuperType.SuperType = < : <ID>>
+  
+  DataImpl =
+
+context-free syntax
+
+  FuncDef.FuncDef = <func <FuncHead> = <FuncImpl>>
+  FuncImpl =

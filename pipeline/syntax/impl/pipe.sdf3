@@ -1,0 +1,45 @@
+module impl/pipe
+
+imports
+  
+  lex/literal
+  type
+  func
+
+context-free syntax
+
+  DataImpl =
+
+context-free syntax
+  
+  FuncImpl.FuncImpl = <<Block>>
+
+context-free syntax
+  
+  Block.Block = <{
+  <{Stm "\n"}*>
+}>
+  Stm = <<Block>>
+  
+  Stm.Assign = <<Params> = <Exp>;>
+  Stm.If = <if(<Exp>) <Stm>>
+  Stm.Return = <return <Exp>;>
+  
+  Stm.Exp = <<Exp>;>
+  
+context-free syntax
+
+  Exp.Eq = <<Exp> == <Exp>>
+
+  Exp.Ref = <<ID>> {avoid}
+  Exp.Call = <<ID>(<Args>)>
+  Exp.QCall = <<Exp>.<ID>(<Args>)>
+  Exp.Init = <init <ID>(<Args>)>
+  Args.Args = <<{Exp ", "}*>>
+  
+  Exp.BoolLit = <<Bool>>
+  Bool.True   = <<TRUE>>
+  Bool.False  = <<FALSE>>
+  Exp.IntLit  = <<INT>>
+  Exp.StrLit  = <<STRING>>
+  Exp.NullLit = <null>

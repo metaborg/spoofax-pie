@@ -1,0 +1,9 @@
+module lex/layout
+
+lexical syntax
+
+  LAYOUT = [\ \t\n\r] 
+
+context-free restrictions
+  
+  LAYOUT? -/- [\ \t\n\r]

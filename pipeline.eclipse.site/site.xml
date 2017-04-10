@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/pipeline.eclipse.feature_0.1.0.qualifier.jar" id="pipeline.eclipse.feature" version="0.1.0.qualifier">
+      <category name="pipeline"/>
+   </feature>
+   <category-def name="pipeline" label="pipeline language Eclipse plugin">
+      <description>
+         pipeline language Eclipse plugin.
+      </description>
+   </category-def>
+</site>

@@ -1,0 +1,11 @@
+/target
+
+/.classpath
+/.project
+/.settings
+
+*.constraints
+*.scope-graph
+*.name-resolution
+*.unifier
+*.symbolic

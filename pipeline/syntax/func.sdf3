@@ -1,0 +1,14 @@
+module func
+
+imports
+  
+  lex/literal
+  type
+
+context-free syntax
+
+  FuncHead.FuncHead = <<ID>(<Params>) : <Params>>
+  
+  Param.Param = <<Type>>
+  Param.NParam = <<ID> : <Type>>
+  Params.Params = <<{Param ", "}*>>

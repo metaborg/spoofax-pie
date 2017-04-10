@@ -1,0 +1,36 @@
+module lex/literal
+
+lexical syntax // Identifier
+
+  ID  = [a-zA-Z\-\_] [a-zA-Z0-9\-\_]*
+  QID = [a-zA-Z\-\_] [a-zA-Z0-9\-\_\.]*
+
+lexical restrictions
+
+  ID  -/- [a-zA-Z0-9\-\_]
+  QID -/- [a-zA-Z0-9\-\_\.]
+
+lexical syntax // Number
+
+  INT = "-"? [0-9]+
+
+lexical restrictions
+
+  INT -/- [0-9]
+
+lexical syntax // Boolean
+
+  TRUE  = "true"
+  FALSE = "false"
+
+lexical syntax // String
+
+  STRING        = "\"" StringChar* "\"" 
+  StringChar    = ~[\"\n] 
+  StringChar    = "\\\"" 
+  StringChar    = BackSlashChar 
+  BackSlashChar = "\\"
+
+lexical restrictions
+
+  BackSlashChar -/- [\"]

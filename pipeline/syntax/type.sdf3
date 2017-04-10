@@ -1,0 +1,19 @@
+module type
+
+imports
+  
+  lex/literal
+
+context-free syntax
+
+  Type.BoolTy = <bool>
+  Type.IntTy  = <int>
+  Type.StrTy  = <string>
+  
+  Type.FuncTy = [[{Type ", "}*] -> [{Type ", "}*]]
+  Type.InitTy = [[{Type ", "}*] -init> [Type]]
+  Type.DataTy = <<ID>> {avoid}
+  
+  Type.NullableTy = <<Type>?>
+  
+  Type.TopTy = <^>

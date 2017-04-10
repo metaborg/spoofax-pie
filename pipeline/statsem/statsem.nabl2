@@ -1,0 +1,165 @@
+module statsem
+
+imports
+
+  signatures/-
+
+signature
+
+  namespaces Type Func Init Var
+
+  name resolution
+
+    labels          P
+    order           D < P
+    well-formedness P*
+
+rules // Init
+
+  init ^ (s_root) := 
+    new s_root.
+
+rules // Program
+
+  [[ Program(defs) ^ (s_root) ]] := 
+    Map1 [[ defs ^ (s_root) ]].
+
+rules // Data definition
+
+  [[ DataDef(DataDefMods(mods), id_data, super, impl) ^ (s) ]] :=
+    Type{id_data} <- s,
+    Type{id_data} : DataTy(Type{id_data}) !,
+    new s_data,
+    s_data -P-> s,
+    Type{id_data}.mods := mods,
+    // TODO super
+    [[ impl ^ (s_data) : DataTy(Type{id_data}) ]].
+
+rules // Java data definition implementation
+
+  [[ JDataImpl(id_class_java, membs) ^ (s) : DataTy(occ_data) ]] :=
+    occ_data.javaClassId := id_class_java,
+    Map1 [[ membs ^ (s) ]].
+
+  [[ JFuncDef(FuncHead(id_func, params_in, params_out)) ^ (s) ]] :=
+    Func{id_func} <- s,
+    [[ params_in ^ (s) : tys_in ]],
+    [[ params_out ^ (s) : tys_out ]],
+    Func{id_func} : FuncTy(tys_in, tys_out) !.
+
+  [[ JInitDef(params) ^ (s) ]] := true.
+//    Init{"init"} <- s,
+//    [[ params ^ (s) : tys ]],
+//    Init{"init"} : InitTy(tys, ty_data) !.
+
+rules // Function definition
+
+  [[ FuncDef(FuncHead(id_func, params_in, params_out), impl) ^ (s) ]] :=
+    Func{id_func} <- s,
+    [[ params_in ^ (s) : tys_in ]],
+    [[ params_out ^ (s) : tys_out ]],
+    Func{id_func} : FuncTy(tys_in, tys_out) !,
+    new s_func,
+    s_func -P-> s,
+    [[ impl ^ (s_func) ]].
+
+rules // Java function definition implementation
+
+  [[ JFuncImpl(id_java_class, id_java_method) ^ (s) ]] := true.
+
+rules // Pipeline function definition implementation
+
+  [[ FuncImpl(stm) ^ (s) ]] :=
+    [[ stmt ^ (s) ]].
+    
+rules // Statements
+    
+  [[ Block(stms) ^ (s) ]] :=
+    Map1 [[ stms ^ (s) ]].
+    
+  [[ Assign(params, exp) ^ (s) ]] :=
+    [[ params ^ (s) : tys_out_expected ]],
+    [[ exp ^ (s) : FuncTy(_, tys_out) ]],
+    tys_out == tys_out_expected | error $[Type mismatch] @ exp.
+    
+  [[ If(exp, stm) ^ (s) ]] :=
+    [[ exp ^ (s) : ty ]],
+    ty == BoolTy() | error $[Expected boolean type] @ exp,
+    [[ stm ^ (s) ]].
+    
+  [[ Return(exp) ^ (s) ]] :=
+    // TODO: expected return type
+    [[ exp ^ (s) : _ ]].
+    
+  [[ Exp(exp) ^ (s) ]] :=
+    [[ exp ^ (s) : _ ]].
+
+rules // Expressions
+
+  [[ t@Eq(exp1, exp2) ^ (s) : BoolTy() ]] :=
+    [[ exp1 ^ (s) : ty1 ]],
+    [[ exp2 ^ (s) : ty2 ]],
+    ty1 == ty2 | error $[Type mismatch] @ t.
+    
+  [[ Ref(id_var) ^ (s) : ty ]] :=
+    Var{id_var} -> s,
+    Var{id_var} |-> v,
+    v : ty.
+    
+  [[ Call(id_func, args) ^ (s) : tys_out ]] :=
+    Func{id_func} -> s,
+    Func{id_func} |-> f,
+    f : FuncTy(tys_in_expected, tys_out),
+    [[ args ^ (s) : tys_in ]],
+    tys_in == tys_in_expected | error $[Type mismatch] @ args.
+
+  [[ QCall(exp, id_func, args) ^ (s) : tys_out ]] :=
+    [[ args ^ (s) ]], 
+    // TODO: qualified call
+    true.
+  
+  [[ Init(id_type, args) ^ (s) : ty_out ]] := 
+    [[ args ^ (s) ]],
+    // TODO: init
+    true.
+  
+  [[ Args(exps) ^ (s) : tys ]] :=
+    Map1T [[ exps ^ (s) : tys ]].
+  
+  [[ BoolLit(_) ^ (s) : BoolTy() ]] := true.
+  [[ IntLit(_)  ^ (s) : IntTy()  ]] := true.
+  [[ StrLit(_)  ^ (s) : StrTy()  ]] := true.
+  [[ NullLit()  ^ (s) : TopTy()  ]] := true.
+
+rules // Params
+
+  [[ Params(params) ^ (s) : tys ]] :=
+    Map1T [[ params ^ (s) : tys ]].
+    
+  [[ Param(ty) ^ (s) : ty ]] :=
+    [[ ty ^ (s) ]].
+    
+  [[ NParam(id_var, ty) ^ (s) : ty ]] :=
+     Var{id_var} <- s,
+     Var{id_var} : ty !,
+     [[ ty ^ (s) ]].
+
+rules // Types
+
+  [[ BoolTy()   ^ (s) ]] := true.
+  [[ IntTy()    ^ (s) ]] := true.
+  [[ StrTy()    ^ (s) ]] := true.
+  [[ TopTy()    ^ (s) ]] := true.
+  
+  [[ DataTy(id_type) ^ (s) ]] :=
+    Type{id_type} -> s,
+    Type{id_type} |-> t.
+  [[ FuncTy(tys_in, tys_out) ^ (s) ]] :=
+    Map1 [[ tys_in ^ (s) ]],
+    Map1 [[ tys_out ^ (s) ]].
+  [[ InitTy(tys_in, ty_out) ^ (s) ]] :=
+    Map1 [[ tys_in ^ (s) ]],
+    [[ ty_out ^ (s) ]].
+
+  [[ NullableTy(ty) ^ (s) ]] :=
+    [[ ty ^ (s) ]].

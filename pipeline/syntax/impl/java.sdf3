@@ -1,0 +1,18 @@
+module impl/java
+
+imports
+  
+  lex/literal
+  func
+
+context-free syntax
+
+  DataImpl.JDataImpl = <java <QID> {
+  <{JDataMemb "\n"}*>
+}>
+  JDataMemb.JFuncDef = <func <FuncHead>>
+  JDataMemb.JInitDef = <init(<Params>)>
+
+context-free syntax
+  
+  FuncImpl.JFuncImpl = <java <QID>#<ID>>
