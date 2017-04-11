@@ -23,19 +23,18 @@ context-free syntax
   
   Stm.Assign = <<Params> = <Exp>;>
   Stm.If = <if(<Exp>) <Stm>>
-  Stm.Return = <return <Exp>;>
+  Stm.Return = <return <Exps>;>
   
   Stm.Exp = <<Exp>;>
   
 context-free syntax
 
-  Exp.Eq = <<Exp> == <Exp>>
+  Exp.Eq = <<Exps> == <Exps>>
 
   Exp.Ref = <<ID>> {avoid}
-  Exp.Call = <<ID>(<Args>)>
-  Exp.QCall = <<Exp>.<ID>(<Args>)>
-  Exp.Init = <init <ID>(<Args>)>
-  Args.Args = <<{Exp ", "}*>>
+  Exp.Call = <<ID>(<Exps>)>
+  Exp.QCall = <<Exp>.<ID>(<Exps>)>
+  Exps.Exps = <<{Exp ", "}*>>
   
   Exp.BoolLit = <<Bool>>
   Bool.True   = <<TRUE>>

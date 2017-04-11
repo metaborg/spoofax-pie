@@ -11,7 +11,6 @@ context-free syntax
   <{JDataMemb "\n"}*>
 }>
   JDataMemb.JFuncDef = <func <FuncHead>>
-  JDataMemb.JInitDef = <init(<Params>)>
 
 context-free syntax
   

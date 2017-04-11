@@ -1,3 +1,0 @@
-data Path = java bla {
-  func uri() : string
-}

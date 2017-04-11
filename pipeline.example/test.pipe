@@ -57,26 +57,28 @@ func parse(LangId, Path, string) : Ast? = java mb.pipeline.Parse#build
 
 
 /// Analysis
-func analyze(LangId, projectPath : Path, filePath : Path, Ast) : Ast? = java mb.pipeline.Analyze#build
+func analyze(LangId, projectPath : Path, filePath : Path, Ast?) : Ast? = java mb.pipeline.Analyze#build
 // NOTE: analyze must ensure a rebuild when the analysis of a language changes.
 
 
 /// Transformation
 data Goal = java org.metaborg.core.action.ITransformGoal {}
-data CompileGoal : Goal = java org.metaborg.core.action.CompileGoal {
-  init() // NOTE: constructor without arguments
-}
+data CompileGoal : Goal = java org.metaborg.core.action.CompileGoal {}
+func make-compile-goal() : CompileGoal = java org.metaborg.core.action.CompileGoal#create
 data NamedGoal : Goal = java org.metaborg.core.action.EndNamedGoal {
-  init(string) // NOTE: constructor with string as argument
   func name() : string
 }
-func transform(LangId, projectPath : Path, filePath : Path, Ast, Goal) : Ast?, Path? = java mb.pipeline.Trans#build
-// NOTE: transform must ensure a rebuild when the transformations of a language change, or when the output Path it generates changes.
+func make-named-goal(string) : NamedGoal = java org.metaborg.core.action.NamedGoal#create
+func transform(LangId, projectPath : Path, filePath : Path, Ast?, Goal) : Ast?, Path 
+  = java mb.pipeline.Trans#build
+// NOTE: transform must ensure a rebuild when the transformations of a language change, 
+// or when the output Path it generates changes.
 
 
 /// Sdf2Table
 func sdf2table(input : Path, target : Path) : Path = java mb.pipeline.Sdf2Table#build
-// NOTE: sdf2table must ensure a rebuild when the input Path changes, or when the output Path it generates changes.
+// NOTE: sdf2table must ensure a rebuild when the input Path changes, 
+// or when the output Path it generates changes.
 
 
 
@@ -104,7 +106,7 @@ func build-lang-esv(langSpecPath : Path, esvLangPath : Path) : Path = {
   project     : Project = load-proj(langSpecPath);
   projectPath : Path    = project.path();
   
-  goal : Goal = init CompileGoal(); // NOTE: invoking CompileGoal constructor
+  goal : Goal = make-compile-goal();
   _ : Ast?, outputPath : Path = transform(langId, projectPath, mainPath, ast, goal);
   return outputPath;
 }
@@ -113,7 +115,7 @@ func build-lang-esv(langSpecPath : Path, esvLangPath : Path) : Path = {
 /// SDF build - parse syntax/{langName}.sdf3, analyze it, transform it, generate parse table
 func build-lang-sdf(langSpecPath : Path, sdfLangPath: Path, langName: string) : Path = {
   mainPath  : Path     = langSpecPath.resolve("syntax/{langName}.sdf3");
-  text      : String   = mainPath.read();
+  text      : string   = mainPath.read();
   lang      : LangImpl = load-lang(sdfLangPath);
   langId    : LangId   = lang.id();
   parsedAst : Ast?     = parse(langId, mainPath, text);
@@ -128,7 +130,7 @@ func build-lang-sdf(langSpecPath : Path, sdfLangPath: Path, langName: string) : 
     // TODO: fail build
   }
   
-  goal : Goal = init NamedGoal("to Normal Form (abstract)");
+  goal : Goal = make-named-goal("to Normal Form (abstract)");
   _ : Ast?, normalizedSdfPath : Path = transform(langId, projectPath, mainPath, analyzedAst, goal);
   
   parseTablePath : Path = langSpecPath.resolve("target/metaborg/sdf.tbl");
@@ -139,7 +141,7 @@ func build-lang-sdf(langSpecPath : Path, sdfLangPath: Path, langName: string) : 
 
 /// Parsing a program
 func parse-program(langSpecPath : Path, fileToParsePath : Path) : Ast? = {
-  text   : String   = fileToParsePath.read();
+  text   : string   = fileToParsePath.read();
   lang   : LangImpl = load-lang(langSpecPath);
   langId : LangId   = lang.id();
   ast    : Ast?     = parse(langId, fileToParsePath, text);
@@ -148,7 +150,8 @@ func parse-program(langSpecPath : Path, fileToParsePath : Path) : Ast? = {
 
 
 /// Pipeline that brings everything together
-func pipeline(langSpecPath: Path, langName : string, esvLangPath : Path, sdfLangPath : Path, fileToParsePath : Path) : Ast? = {
+func pipeline(langSpecPath: Path, langName : string, esvLangPath : Path, sdfLangPath : Path, 
+  fileToParsePath : Path) : Ast? = {
   build-lang-config(langSpecPath);
   build-lang-esv(langSpecPath, esvLangPath);
   build-lang-sdf(langSpecPath, sdfLangPath, langName);
