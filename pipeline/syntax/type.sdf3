@@ -6,11 +6,15 @@ imports
 
 context-free syntax
 
-  Type.BoolTy = <bool>
-  Type.IntTy  = <int>
-  Type.StrTy  = <string>
-  Type.DataTy = <<ID>> {avoid}
-  Type.NullableTy = <<Type>?>
+  BaseType.BoolTy = <bool>
+  BaseType.IntTy  = <int>
+  BaseType.StrTy  = <string>
+  BaseType.DataTy = <<ID>> {avoid}
+  
+  TypeMod.NullableTy = <<BaseType>?>
+  
+  Type = BaseType
+  Type = TypeMod
 
 context-free syntax
 

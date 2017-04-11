@@ -1,160 +1,119 @@
 /// Paths
-data Path = java mb.pipeline.Resource {
-  // NOTE: 'java' denotes a mapping to a Java class (like DynSem native datatypes)
-  func uri    ()       : string
+data Path = java mb.pipeline.Path {
+  func uri()           : string
   func resolve(string) : Path
-
-  func read      ()       : string
-  func write     (string) :
-  func createFile()       :
-  func createDir ()       :
-  func copyFrom  (Path)   :
-  func copyTo    (Path)   :
-  // NOTE: these functions should trigger a rebuild (of the function that calls this function), when files at the path change.
 }
-func resolve(string) : Path? = java mb.pipeline.Path#resolve
-// NOTE: # denotes static function in a Java class
-
-
+func resolve(string) : Path = java mb.pipeline.Path#resolve
+func read(Path) : string = java lol#lol // TODO: map to actual java class
+func copy(from : Path, to : Path) : to : Path = java lol#lol // TODO: map to actual java class
 
 /// Languages
 transient data LangImpl = java org.metaborg.core.language.ILanguageImpl {
   func id() : LangId
 }
-// NOTE: transient denotes that the type is transient, or in other words, not serializable.
-// This breaks deployability because transient objects cannot be serialized to disk.
-// This partially breaks incrementality, because the loadLang function needs to be re-executed after a restart, even if the language hasn't changed.
-// Transient objects should be avoided, but are currently required to interface with Spoofax Core.
-data LangId = java org.metaborg.core.language.LanguageIdentifier {
-  func groupId() : string
-  func id     () : string
-  func version() : LangVer
-}
-data LangVer = java org.metaborg.core.language.LanguageVersion {
-  func major    () : int
-  func minor    () : int? // NOTE: ? denotes optional/nullable
-  func patch    () : int?
-  func qualifier() : string?
-}
+data LangId = java org.metaborg.core.language.LanguageIdentifier {}
 func load-lang(Path) : LangImpl = java mb.pipeline.LoadLang#build
 
 
-
 /// Projects
-transient data Project = java org.metaborg.core.project.IProject {
-  func path() : Path
-}
+transient data Project = java org.metaborg.core.project.IProject {}
 func load-proj(Path) : Project = java mb.pipeline.LoadProject#build
-
-
+func project-path(Project): Path = java lol#lol // TODO: map to actual java class
 
 /// Parsing
 data Ast = java org.spoofax.interpreter.terms.IStrategoTerm {}
-func parse(LangId, Path, string) : Ast? = java mb.pipeline.Parse#build
-// NOTE: passing LangId here instead of LangImpl$, because LangId is serializable.
-// NOTE: passing Path to identify which file is being parsed, which Spoofax Core requires.
-// NOTE: parse must ensure a rebuild when the parse table of a language changes.
+func parse(langId : LangId, file : Path, text : string) : ast : Ast? = java mb.pipeline.Parse#build
 
 
 /// Analysis
-func analyze(LangId, projectPath : Path, filePath : Path, Ast?) : Ast? = java mb.pipeline.Analyze#build
-// NOTE: analyze must ensure a rebuild when the analysis of a language changes.
+func analyze(langId : LangId, project : Path, path : Path, ast : Ast?) : ast : Ast? = java mb.pipeline.Analyze#build
 
 
 /// Transformation
 data Goal = java org.metaborg.core.action.ITransformGoal {}
+
 data CompileGoal : Goal = java org.metaborg.core.action.CompileGoal {}
 func make-compile-goal() : CompileGoal = java org.metaborg.core.action.CompileGoal#create
-data NamedGoal : Goal = java org.metaborg.core.action.EndNamedGoal {
-  func name() : string
-}
+
+data NamedGoal : Goal = java org.metaborg.core.action.EndNamedGoal {}
 func make-named-goal(string) : NamedGoal = java org.metaborg.core.action.NamedGoal#create
-func transform(LangId, projectPath : Path, filePath : Path, Ast?, Goal) : Ast?, Path 
-  = java mb.pipeline.Trans#build
-// NOTE: transform must ensure a rebuild when the transformations of a language change, 
-// or when the output Path it generates changes.
+
+func transform(langId : LangId, project : Path, file : Path, ast : Ast?, goal : Goal) : ast : Ast?, writtenFile : Path? = java mb.pipeline.Trans#build
 
 
 /// Sdf2Table
-func sdf2table(input : Path, target : Path) : Path = java mb.pipeline.Sdf2Table#build
-// NOTE: sdf2table must ensure a rebuild when the input Path changes, 
-// or when the output Path it generates changes.
+func sdf2table(input : Path?, target : Path) : output : Path = java mb.pipeline.Sdf2Table#build
 
 
-
-/// Language specification build
-/// Configuration build - copy metaborg.yaml : src-gen/metaborg.component.yaml
-func build-lang-config(langSpecPath : Path) : Path = {
-  configPath : Path = langSpecPath.resolve("metaborg.yaml");
-  targetPath : Path = langSpecPath.resolve("src-gen/metaborg.component.yaml");
-  configPath.copyTo(targetPath);
-  return targetPath;
+/// Configuration build
+func build-lang-config(langSpec : Path) : = {
+  config : Path = langSpec.resolve("metaborg.yaml");
+  output : Path = langSpec.resolve("src-gen/metaborg.component.yaml");
+  copy(config, output);
 }
 
 
-/// ESV build - parse editor/Main.esv, transform to target/metaborg/editor.esv.af
-func build-lang-esv(langSpecPath : Path, esvLangPath : Path) : Path = {
-  mainPath : Path     = langSpecPath.resolve("editor/Main.esv");
-  text     : string   = mainPath.read();
-  lang     : LangImpl = load-lang(esvLangPath);
-  langId   : LangId   = lang.id();
-  ast      : Ast?     = parse(langId, mainPath, text);
+/// ESV build
+func build-lang-esv(langSpec : Path, esv : Path) : = {
+  mainPath : Path     = langSpec.resolve("editor/Main.esv");
+  text     : string   = read(mainPath);
+  
+  lang   : LangImpl = load-lang(esv);
+  langId : LangId   = lang.id();
+  ast    : Ast?     = parse(langId, mainPath, text);
   if(ast == null) {
     // TODO: ast can be null, need to fail this function call here.
   }
-  
-  project     : Project = load-proj(langSpecPath);
-  projectPath : Path    = project.path();
-  
+
+  project     : Project = load-proj(langSpec);
+  projectPath : Path    = project-path(project);
+
   goal : Goal = make-compile-goal();
-  _ : Ast?, outputPath : Path = transform(langId, projectPath, mainPath, ast, goal);
-  return outputPath;
+  transform(langId, projectPath, mainPath, ast, goal);
 }
 
 
-/// SDF build - parse syntax/{langName}.sdf3, analyze it, transform it, generate parse table
-func build-lang-sdf(langSpecPath : Path, sdfLangPath: Path, langName: string) : Path = {
-  mainPath  : Path     = langSpecPath.resolve("syntax/{langName}.sdf3");
-  text      : string   = mainPath.read();
-  lang      : LangImpl = load-lang(sdfLangPath);
+/// SDF build
+func build-lang-sdf(langSpec : Path, sdf : Path, langName : string) : = {
+  mainPath  : Path     = langSpec.resolve("syntax/{langName}.sdf3");
+  text      : string   = read(mainPath);
+  
+  lang      : LangImpl = load-lang(sdf);
   langId    : LangId   = lang.id();
   parsedAst : Ast?     = parse(langId, mainPath, text);
   if(parsedAst == null) {
     // TODO: fail build
   }
-  
-  project     : Project = load-proj(langSpecPath);
-  projectPath : Path    = project.path();
+
+  project     : Project = load-proj(langSpec);
+  projectPath : Path    = project-path(project);
   analyzedAst : Ast?    = analyze(langId, projectPath, mainPath, parsedAst);
   if(analyzedAst == null) {
     // TODO: fail build
   }
-  
+
   goal : Goal = make-named-goal("to Normal Form (abstract)");
-  _ : Ast?, normalizedSdfPath : Path = transform(langId, projectPath, mainPath, analyzedAst, goal);
-  
-  parseTablePath : Path = langSpecPath.resolve("target/metaborg/sdf.tbl");
+  _ : Ast?, normalizedSdfPath : Path? = transform(langId, projectPath, mainPath, analyzedAst, goal);
+
+  parseTablePath : Path = langSpec.resolve("target/metaborg/sdf.tbl");
   outputPath     : Path = sdf2table(normalizedSdfPath, parseTablePath);
-  return outputPath;
 }
 
-
-/// Parsing a program
-func parse-program(langSpecPath : Path, fileToParsePath : Path) : Ast? = {
-  text   : string   = fileToParsePath.read();
-  lang   : LangImpl = load-lang(langSpecPath);
+/// Parsing
+func parse-program(langSpec : Path, file : Path) : ast : Ast? = {
+  text   : string   = read(file);
+  lang   : LangImpl = load-lang(langSpec);
   langId : LangId   = lang.id();
-  ast    : Ast?     = parse(langId, fileToParsePath, text);
+  ast    : Ast?     = parse(langId, file, text);
   return ast;
 }
 
 
-/// Pipeline that brings everything together
-func pipeline(langSpecPath: Path, langName : string, esvLangPath : Path, sdfLangPath : Path, 
-  fileToParsePath : Path) : Ast? = {
-  build-lang-config(langSpecPath);
-  build-lang-esv(langSpecPath, esvLangPath);
-  build-lang-sdf(langSpecPath, sdfLangPath, langName);
-  ast : Ast? = parse-program(langSpecPath, fileToParsePath);
+/// Pipeline combiner
+func pipeline(langSpec: Path, langName : string, esv : Path, sdf : Path, file : Path) : ast : Ast? = {
+  build-lang-config(langSpec);
+  build-lang-esv(langSpec, esv);
+  build-lang-sdf(langSpec, sdf, langName);
+  ast : Ast? = parse-program(langSpec, file);
   return ast;
 }

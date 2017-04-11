@@ -6,6 +6,7 @@ imports
   pp
   outline
   analysis
+  gen/build
 
 rules // Debugging
   
