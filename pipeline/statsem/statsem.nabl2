@@ -30,8 +30,10 @@ rules // Init
 
 rules // Program
 
-  [[ Program(defs) ^ (s_root) ]] := 
-    Map1 [[ defs ^ (s_root) ]].
+  [[ Program(defs) ^ (s_root) ]] :=
+    Map1 [[ defs ^ (s_root) ]],
+    distinct/name D(s_root)/Type | error "Duplicate types" @NAMES,
+    distinct/name D(s_root)/Func | error "Duplicate functions" @NAMES.
 
 rules // Data definition
 
@@ -48,7 +50,8 @@ rules // Data definition
     new s_data,
     s_data -P-> s,
     Type{id_type} =I=> s_data,
-    [[ impl ^ (s_data, ty) ]].
+    [[ impl ^ (s_data, ty) ]],
+    distinct/name D(s_data)/Func | error "Duplicate functions" @NAMES.
   
   [[ NoSuperType() ^ (_, _) ]] := true.
   [[ SuperType(id_type) ^ (s, ty_type_outer) ]] :=
@@ -72,7 +75,6 @@ rules // Java data definition implementation
     Func{id_func} : ty !.
 
 rules // Function definition
-
   [[ FuncDef(FuncHead(id_func, params_in, params_out), impl) ^ (s) ]] :=
     Func{id_func} <- s,
     new s_func,
@@ -81,7 +83,8 @@ rules // Function definition
     [[ params_out ^ (s_func) : tys_out ]],
     ty == FuncTy(tys_in, tys_out),
     Func{id_func} : ty !,
-    [[ impl ^ (s_func, ty, Func{id_func}) ]].
+    [[ impl ^ (s_func, ty, Func{id_func}) ]],
+    distinct/name D(s_func)/Var | error "Duplicate variables" @NAMES.
 
 rules // Java function definition implementation
 
