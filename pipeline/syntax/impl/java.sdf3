@@ -5,13 +5,18 @@ imports
   lex/literal
   func
 
+lexical syntax
+
+  JQTYPEID = QID
+  JFUNCID  = ID
+
 context-free syntax
 
-  DataImpl.JDataImpl = <java <QID> {
+  DataImpl.JDataImpl = <java <JQTYPEID> {
   <{JDataMemb "\n"}*>
 }>
   JDataMemb.JFuncDef = <func <FuncHead>>
 
 context-free syntax
   
-  FuncImpl.JFuncImpl = <java <QID>#<ID>>
+  FuncImpl.JStaticFuncImpl = <java <JQTYPEID>#<JFUNCID>>

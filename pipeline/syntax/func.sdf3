@@ -5,9 +5,13 @@ imports
   lex/literal
   type
 
+lexical syntax
+
+  FUNCID = ID
+
 context-free syntax
 
-  FuncHead.FuncHead = <<ID>(<Params>) : <Params>>
+  FuncHead.FuncHead = <<FUNCID>(<Params>) : <Params>>
   
   Param.Param = <<Type>>
   Param.NParam = <<ID> : <Type>>

@@ -4,6 +4,7 @@ imports
   
   lex/literal
   func
+  type
 
 context-free syntax
 
@@ -13,13 +14,13 @@ context-free syntax
 
 context-free syntax
 
-  DataDef.DataDef = <<DataDefMods> data <ID><SuperType> = <DataImpl>>
+  DataDef.DataDef = <<DataDefMods> data <TYPEID><SuperType> = <DataImpl>>
   
   DataDefMod.Transient = <transient>
   DataDefMods.DataDefMods = <<{DataDefMod " "}*>>
   
   SuperType.NoSuperType =
-  SuperType.SuperType = < : <ID>>
+  SuperType.SuperType = < : <TYPEID>>
   
   DataImpl =
 

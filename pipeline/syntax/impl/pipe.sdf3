@@ -32,13 +32,13 @@ context-free syntax
   Exp.Eq = <<Exps> == <Exps>>
 
   Exp.Ref = <<ID>> {avoid}
-  Exp.Call = <<ID>(<Exps>)>
-  Exp.QCall = <<Exp>.<ID>(<Exps>)>
+  Exp.Call = <<FUNCID>(<Exps>)>
+  Exp.QCall = <<Exp>.<FUNCID>(<Exps>)>
   Exps.Exps = <<{Exp ", "}*>>
   
   Exp.BoolLit = <<Bool>>
-  Bool.True   = <<TRUE>>
-  Bool.False  = <<FALSE>>
+  Bool.True   = <true>
+  Bool.False  = <false>
   Exp.IntLit  = <<INT>>
   Exp.StrLit  = <<STRING>>
   Exp.NullLit = <null>

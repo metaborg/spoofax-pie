@@ -1,48 +1,49 @@
 /// Paths
-data Path = java mb.pipeline.Path {
-  func uri()           : string
+data Path = java org.metaborg.pipeline.util.Path {
+  func uri() : string
+  
   func resolve(string) : Path
+  func resolveWithExt(path : string, ext : string) : Path
 }
-func resolve(string) : Path = java mb.pipeline.Path#resolve
-func read(Path) : string = java lol#lol // TODO: map to actual java class
-func copy(from : Path, to : Path) : to : Path = java lol#lol // TODO: map to actual java class
+func read(file : Path) : text : string = pluto org.metaborg.pipeline.builder.generic.Read
+func copy(from : Path, to : Path) : to : Path = pluto org.metaborg.pipeline.builder.generic.Copy
 
 /// Languages
 transient data LangImpl = java org.metaborg.core.language.ILanguageImpl {
   func id() : LangId
 }
 data LangId = java org.metaborg.core.language.LanguageIdentifier {}
-func load-lang(Path) : LangImpl = java mb.pipeline.LoadLang#build
+func load-lang(location : Path) : langImpl : LangImpl = pluto org.metaborg.pipeline.builder.spoofax.LoadLang
 
 
 /// Projects
 transient data Project = java org.metaborg.core.project.IProject {}
-func load-proj(Path) : Project = java mb.pipeline.LoadProject#build
-func project-path(Project): Path = java lol#lol // TODO: map to actual java class
+func load-proj(location : Path) : project : Project = pluto org.metaborg.pipeline.builder.spoofax.LoadProject
+func project-path(project : Project) : location : Path = java org.metaborg.pipeline.util.Path#projectPath
 
 /// Parsing
 data Ast = java org.spoofax.interpreter.terms.IStrategoTerm {}
-func parse(langId : LangId, file : Path, text : string) : ast : Ast? = java mb.pipeline.Parse#build
+func parse(langId : LangId, file : Path, text : string) : ast : Ast? = pluto org.metaborg.pipeline.builder.spoofax.Parse
 
 
 /// Analysis
-func analyze(langId : LangId, project : Path, path : Path, ast : Ast?) : ast : Ast? = java mb.pipeline.Analyze#build
+func analyze(langId : LangId, project : Path, file : Path, ast : Ast?) : ast : Ast? = pluto org.metaborg.pipeline.builder.spoofax.Analyze
 
 
 /// Transformation
 data Goal = java org.metaborg.core.action.ITransformGoal {}
 
 data CompileGoal : Goal = java org.metaborg.core.action.CompileGoal {}
-func make-compile-goal() : CompileGoal = java org.metaborg.core.action.CompileGoal#create
+func make-compile-goal() : CompileGoal = java org.metaborg.pipeline.util.GoalUtil#makeCompileGoal
 
 data NamedGoal : Goal = java org.metaborg.core.action.EndNamedGoal {}
-func make-named-goal(string) : NamedGoal = java org.metaborg.core.action.NamedGoal#create
+func make-named-goal(string) : NamedGoal = java org.metaborg.pipeline.util.GoalUtil#makeNamedGoal
 
-func transform(langId : LangId, project : Path, file : Path, ast : Ast?, goal : Goal) : ast : Ast?, writtenFile : Path? = java mb.pipeline.Trans#build
+func transform(langId : LangId, project : Path, file : Path, ast : Ast?, goal : Goal) : ast : Ast?, writtenFile : Path? = pluto org.metaborg.pipeline.builder.spoofax.Trans
 
 
 /// Sdf2Table
-func sdf2table(input : Path?, target : Path) : output : Path = java mb.pipeline.Sdf2Table#build
+func sdf2table(input : Path?, output : Path) : output : Path = pluto org.metaborg.pipeline.builder.spoofax.sdf.Sdf2Table
 
 
 /// Configuration build
@@ -53,7 +54,7 @@ func build-lang-config(langSpec : Path) : = {
 }
 
 
-/// ESV build
+/// ESV build 
 func build-lang-esv(langSpec : Path, esv : Path) : = {
   mainPath : Path     = langSpec.resolve("editor/Main.esv");
   text     : string   = read(mainPath);
@@ -75,7 +76,8 @@ func build-lang-esv(langSpec : Path, esv : Path) : = {
 
 /// SDF build
 func build-lang-sdf(langSpec : Path, sdf : Path, langName : string) : = {
-  mainPath  : Path     = langSpec.resolve("syntax/{langName}.sdf3");
+  synPath   : Path     = langSpec.resolve("syntax");
+  mainPath  : Path     = synPath.resolveWithExt(langName, "sdf3");
   text      : string   = read(mainPath);
   
   lang      : LangImpl = load-lang(sdf);

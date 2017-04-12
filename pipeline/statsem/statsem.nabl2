@@ -14,6 +14,20 @@ signature
     order           D < I, D < P, I < P
     well-formedness P*.I*
 
+  constructors
+  
+    FuncTy : list(Type) * list(Type) -> Type
+    NullTy : Type
+    
+    JavaTypeKind : TypeKind
+    
+    JavaStaticFuncKind   : FuncKind
+    PlutoBuilderFuncKind : FuncKind
+    PipelineFuncKind     : FuncKind
+    
+    LocalVarKind : VarKind
+    InputVarKind : VarKind
+
 rules // Init
 
   init ^ (s_root) :=
@@ -65,38 +79,49 @@ rules // Java data definition implementation
   [[ JDataImpl(id_class_java, membs) ^ (s, ty_type_outer) ]] :=
     ty_type_outer == DataTy(occ_type_outer),
     occ_type_outer.javaClassId := id_class_java !,
+    occ_type_outer.kind := JavaTypeKind() !,
     Map1 [[ membs ^ (s) ]].
 
   [[ JFuncDef(FuncHead(id_func, params_in, params_out)) ^ (s) ]] :=
     Func{id_func} <- s,
-    [[ params_in ^ (s) : tys_in ]],
-    [[ params_out ^ (s) : tys_out ]],
+    LocalParams [[ params_in ^ (s) : tys_in ]],
+    LocalParams [[ params_out ^ (s) : tys_out ]],
     ty == FuncTy(tys_in, tys_out),
     Func{id_func} : ty !.
 
 rules // Function definition
+
   [[ FuncDef(FuncHead(id_func, params_in, params_out), impl) ^ (s) ]] :=
     Func{id_func} <- s,
+    Func{id_func}.outParams := params_out !,
     new s_func,
     s_func -P-> s,
-    [[ params_in ^ (s_func) : tys_in ]],
+    InputParams [[ params_in ^ (s_func) : tys_in ]],
     new s_func_out,
     s_func_out -P-> s_func,
-    [[ params_out ^ (s_func_out) : tys_out ]],
+    LocalParams [[ params_out ^ (s_func_out) : tys_out ]],
     ty == FuncTy(tys_in, tys_out),
     Func{id_func} : ty !,
     [[ impl ^ (s_func, ty, Func{id_func}) ]],
     distinct/name D(s_func)/Var | error "Duplicate variables" @NAMES.
 
-rules // Java function definition implementation
+rules // Java static function implementation
 
-  [[ JFuncImpl(id_class_java, id_method_java) ^ (s, _, occ_func_outer) ]] := 
-    occ_func_outer.javaClassId := id_class_java !,
+  [[ JStaticFuncImpl(id_class_java, id_method_java) ^ (s, _, occ_func_outer) ]] :=
+    occ_func_outer.kind         := JavaStaticFuncKind() !,
+    occ_func_outer.javaClassId  := id_class_java !,
     occ_func_outer.javaMethodId := id_method_java !.
+    
+rules // Pluto builder function implementation
 
-rules // Pipeline function definition implementation
+  [[ PBuilderImpl(id_class_java) ^ (s, _, occ_func_outer) ]] :=
+    occ_func_outer.kind        := PlutoBuilderFuncKind() !,
+    occ_func_outer.javaClassId := id_class_java !.
 
-  [[ FuncImpl(stm) ^ (s, ty_func_outer, _) ]] :=
+rules // Pipeline function implementation
+
+  [[ FuncImpl(stm) ^ (s, ty_func_outer, occ_func_outer) ]] :=
+    occ_func_outer.kind := PipelineFuncKind() !,
     [[ stm ^ (s, ty_func_outer) ]].
     
 rules // Statements
@@ -105,7 +130,7 @@ rules // Statements
     Map2 [[ stms ^ (s, ty_func_outer) ]].
     
   [[ Assign(params, exp) ^ (s, _) ]] :=
-    [[ params ^ (s) : tys_out_expected ]],
+    LocalParams [[ params ^ (s) : tys_out_expected ]],
     [[ exp ^ (s) : tys_out ]],
     tys_out <? tys_out_expected | error $[Type mismatch, expected [tys_out_expected], got [tys_out]] @ exp.
     
@@ -165,14 +190,18 @@ rules // Expressions
 
 rules // Params
 
-  [[ Params(params) ^ (s) : tys ]] :=
-    Map1T [[ params ^ (s) : tys ]].
+  LocalParams [[ Params(params) ^ (s) : tys ]] :=
+    Map1T [[ params ^ (s, LocalVarKind()) : tys ]].
+
+  InputParams [[ Params(params) ^ (s) : tys ]] :=
+    Map1T [[ params ^ (s, InputVarKind()) : tys ]].
     
-  [[ Param(ty) ^ (s) : ty_bound ]] :=
+  [[ Param(ty) ^ (s, kindProp) : ty_bound ]] :=
     [[ ty ^ (s) : ty_bound ]].
     
-  [[ NParam(id_var, ty) ^ (s) : ty_bound ]] :=
+  [[ NParam(id_var, ty) ^ (s, kindProp) : ty_bound ]] :=
      Var{id_var} <- s,
+     Var{id_var}.kind := kindProp !,
      [[ ty ^ (s) : ty_bound ]],
      Var{id_var} : ty_bound !.
 

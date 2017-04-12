@@ -1,0 +1,14 @@
+module impl/pluto
+
+imports
+  
+  lex/literal
+  func
+
+lexical syntax
+
+  PQTYPEID = QID
+
+context-free syntax
+  
+  FuncImpl.PBuilderImpl = <pluto <PQTYPEID>>
