@@ -1,0 +1,32 @@
+module bind
+
+rules // Binders
+
+  Binder [[ SingleBinder(bind) ^ (s, ty) ]] :=
+    Bind [[ bind ^ (s, ty) ]].
+
+  Binder [[ t@TupleBinder(binds) ^ (s, ty) ]] :=
+    ty == TupleTy(tys) | error $[Type mismatch: expected tuple type, got [ty]] @ t,
+    Binds [[ binds ^ (s, tys) ]].
+
+
+  Bind [[ Bind(id_var) ^ (s, ty_expected) ]] :=
+     Var{id_var} <- s,
+     Var{id_var}.kind := LocalVarKind() !,
+     Var{id_var} : ty_expected !.
+
+  Bind [[ TBind(id_var, ty) ^ (s, ty_expected) ]] :=
+     Var{id_var} <- s,
+     Var{id_var}.kind := LocalVarKind() !,
+     [[ ty ^ (s) : ty_bound ]],
+     ty_bound <? ty_expected | error $[Type mismatch: expected [ty_expected], got [ty_bound]] @ ty,
+     Var{id_var} : ty_bound !.
+
+
+  Binds [[ t@[bind|binds] ^ (s, tys_expected) ]] :=
+    tys_expected == [ty|tys] | error $[Inconsistent number of bindings] @ t,
+    Bind [[ bind ^ (s, ty) ]],
+    Binds [[ binds ^ (s, tys) ]].
+
+  Binds [[ t@[] ^ (s, tys_expected) ]] :=
+    tys_expected == [] | error $[Inconsistent number of bindings] @ t.

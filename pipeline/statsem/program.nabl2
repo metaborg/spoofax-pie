@@ -1,0 +1,59 @@
+module program
+
+imports
+
+  signatures/-
+  
+  top
+  type
+  param
+  bind
+  
+  java
+  pluto
+  pipe
+
+signature
+
+  namespaces Type Func Var
+
+  name resolution
+
+    labels          P I
+    order           D < I, D < P, I < P
+    well-formedness P*.I*
+
+  constructors
+  
+    FuncTy : list(Type) * Type -> Type // TODO: fix gen
+    TopTy  : Type
+    
+    JavaTypeKind : TypeKind
+    
+    JavaStaticFuncKind   : FuncKind
+    PlutoBuilderFuncKind : FuncKind
+    PipelineFuncKind     : FuncKind
+    
+    LocalVarKind : VarKind
+    InputVarKind : VarKind
+
+rules // Init
+
+  init ^ (s_root) :=
+    new s_root,
+    
+    TopTy()  <! NullableTy(BoolTy()),
+    BoolTy() <! NullableTy(BoolTy()),
+    
+    TopTy()  <! NullableTy(IntTy()),
+    IntTy()  <! NullableTy(IntTy()),
+    
+    TopTy()  <! NullableTy(StrTy()),
+    StrTy()  <! NullableTy(StrTy()).
+
+rules // Program
+
+  [[ Program(defs) ^ (s_root) ]] :=
+    Map1 [[ defs ^ (s_root) ]],
+    distinct/name D(s_root)/Type | error "Duplicate types" @NAMES,
+    distinct/name D(s_root)/Func | error "Duplicate functions" @NAMES.

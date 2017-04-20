@@ -11,8 +11,8 @@ lexical syntax
 
 context-free syntax
 
-  FuncHead.FuncHead = <<FUNCID>(<Params>) : <Params>>
-  
-  Param.Param = <<Type>>
-  Param.NParam = <<ID> : <Type>>
+  FuncHead.FuncHead = [[FUNCID]([Params]) -> [Type]] // TODO: fix gen (Params output to Type)
+
+  Param.Param   = <<Type>>
+  Param.NParam  = <<ID> : <Type>>
   Params.Params = <<{Param ", "}*>>
