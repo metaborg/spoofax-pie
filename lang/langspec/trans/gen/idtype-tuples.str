@@ -1,0 +1,45 @@
+module gen/idtype-tuples
+
+imports
+
+  signatures/-
+  signatures/lex/-
+  signatures/impl/-
+
+rules // Params to idtype tuples
+
+  pipe-idtype-tuples:
+    Params(params) -> idTypeTuples
+    with
+      idTypeTuples := <nmap(pipe-idtype-tuple|1)> params
+    
+  pipe-idtype-tuple(|i):
+    Param(ty) -> ($[p[<int-to-string>i]], ty)
+//    with
+//      genId := <pipe-gen-typeid> ty
+
+  pipe-idtype-tuple(|i):
+    NParam(varId, ty) -> (varId, ty)
+
+//rules // Tuple type to idtype tuples
+//
+//  pipe-idtype-tuples:
+//    TupleTy(tys) -> idTypeTuples
+//    with
+//      idTypeTuples := <map(\ty -> (<pipe-gen-typeid> ty, ty)\)> tys
+//
+//rules // Name generation
+//
+//  pipe-gen-typeid: BoolTy()   -> "b"
+//  pipe-gen-typeid: IntTy()    -> "i"
+//  pipe-gen-typeid: StrTy()    -> "s"
+//  pipe-gen-typeid: TupleTy(_) -> "t"
+//
+//  pipe-gen-typeid:
+//    DataTy(dataId) -> <explode-string; [to-lower|id]; implode-string> dataId
+//
+//  pipe-gen-typeid:
+//    ListTy(ty) -> $[[<pipe-gen-typeid> ty]s]
+//
+//  pipe-gen-typeid: 
+//    NullableTy(ty) -> <pipe-gen-typeid> ty

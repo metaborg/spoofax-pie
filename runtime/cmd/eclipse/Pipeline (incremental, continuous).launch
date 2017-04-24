@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
+<stringAttribute key="bad_container_name" value="/pipe.run.cmd/eclipse"/>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/pipe.run.cmd/src/main/java/mb/pipe/run/cmd/Main.java"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="1"/>
+</listAttribute>
+<booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
+<stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.eclipse.m2e.launchconfig.classpathProvider"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="mb.pipe.run.cmd.Main"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="--esv &quot;/Users/gohla/spoofax/master/repo/spoofax-releng/esv/org.metaborg.meta.lang.esv&quot; \&#10;--sdf &quot;/Users/gohla/spoofax/master/repo/spoofax-releng/sdf/org.metaborg.meta.lang.template&quot; \&#10;--langspec &quot;${project_loc:minimal}&quot; \&#10;--config &quot;${project_loc:minimal}/metaborg.yaml&quot; \&#10;--esv-spec &quot;${project_loc:minimal}/editor/Main.esv&quot; \&#10;--sdf-spec &quot;${project_loc:minimal}/syntax/minimal.sdf3&quot; \&#10;--file &quot;${project_loc:minimal}/example/test.min&quot; \&#10;--continuous"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="pipe.run.cmd"/>
+<stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
+</launchConfiguration>

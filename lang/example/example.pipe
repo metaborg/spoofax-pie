@@ -1,0 +1,71 @@
+/// Generic library
+// Path
+data Path = java mb.pipe.vfs.Path {
+  func uri() -> string
+  
+  func resolve(string) -> Path
+  func resolveWithExt(path : string, ext : string) -> Path
+}
+func readFile(Path) -> string = pluto mb.pipe.vfs.Read
+func resolve(string) -> Path = java mb.pipe.vfs.Path#resolve
+func resolveAll(string*) -> Path* = java mb.pipe.vfs.Path#resolveAll
+
+
+/// Interface that Spoofax expects from a language
+data Message = java mb.pipe.model.Message {}
+data Ast = java mb.pipe.model.Ast {}
+data Token = java mb.pipe.model.Token {}
+// func parse(text : string) -> (Ast?, Token*?, Message*)
+
+data Styling = java mb.pipe.model.Styling {}
+// func style(ast : Ast, tokenStream : Token*) -> Styling
+
+
+/// Library with functions to build SDF and ESV specifications
+data ParseTable = java mb.pipe.impl.sdf.Table {}
+func sdf2table(files : Path*) -> ParseTable? = pluto mb.pipe.impl.sdf.GenerateTable
+func jsglrParse(text : string, pt : ParseTable) -> (Ast?, Token*?, Message*) = pluto mb.pipe.impl.sdf.Parse
+
+data SyntaxStyler = java mb.pipe.impl.esv.SyntaxStyler {}
+func esv2styler(files : Path*) -> SyntaxStyler? = pluto mb.pipe.impl.esv.GenerateStyler
+func esvStyle(ast : Ast, tokenStream : Token*, st : SyntaxStyler) -> Styling = pluto mb.pipe.impl.esv.Style
+
+
+/// Implement parse and style
+func parse(text : string) -> (Ast?, Token*?, Message*) = {
+  var sdfFiles = resolveAll(["syntax/Lang.sdf3", "syntax/Common.sdf3", "syntax/stuff.sdf3"]);
+  var parseTable = sdf2table(sdfFiles);
+  if(parseTable == null) fail "Unable to build parse table";
+  return jsglrParse(text, parseTable!);
+}
+
+func style(ast : Ast, tokenStream : Token*) -> Styling = {
+  var esvFiles = resolveAll(["editor/Main.esv", "editor/Syntax.esv"]);
+  var syntaxStyler = esv2styler(esvFiles);
+  if(syntaxStyler == null) fail "Unable to build syntax styler";
+  return esvStyle(ast, tokenStream, syntaxStyler!);
+}
+
+
+/// Implement pipelines
+// File pipeline
+func filePipeline(file : Path) -> (Path, Ast?, Token*?, Message*) = {
+  var text = readFile(file); // Creates a dependency to file changes
+  var (ast, tokenStream, messages) = parse(text);
+  return (file, ast, tokenStream, messages);
+}
+
+// Eclipse editor pipeline
+data EclipseEditor = java mb.pipe.eclipse.Editor {}
+func readEditorBuffer(EclipseEditor) -> string = pluto mb.pipe.eclipse.ReadEditorBuffer 
+func editorPipeline(editor : EclipseEditor) -> (EclipseEditor, Ast?, Token*?, Message*, Styling?) = {
+  var text = readEditorBuffer(editor); // Creates a dependency to editor buffer changes
+  var (ast, tokenStream, messages) = parse(text);
+  var styling : Styling?;
+  if(ast != null && tokenStream != null) {
+    styling = style(ast!, tokenStream!);
+  } else {
+    styling = null;
+  }
+  return (editor, ast, tokenStream, messages, styling);
+}

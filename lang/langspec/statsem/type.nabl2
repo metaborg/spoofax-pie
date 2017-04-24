@@ -1,0 +1,33 @@
+module statsem/type
+
+rules // Simple types
+
+  [[ VoidTy() ^ (s) : VoidTy() ]] := true.
+  [[ BoolTy() ^ (s) : BoolTy() ]] := true.
+  [[ IntTy()  ^ (s) : IntTy()  ]] := true.
+  [[ StrTy()  ^ (s) : StrTy()  ]] := true.
+
+rules // Composite types
+
+  [[ DataTy(id_type) ^ (s) : DataTy(t) ]] :=
+    Type{id_type} -> s,
+    Type{id_type} |-> t.
+
+  [[ TupleTy(tys) ^ (s) : TupleTy(tys_bound) ]] :=
+    Map1T [[ tys ^ (s) : tys_bound ]].
+
+  [[ ListTy(ty) ^ (s) : ListTy(ty_bound) ]] :=
+    [[ ty ^ (s) : ty_bound ]],
+    ListTy(ty_bound) <! ListTy(TopTy()).
+
+rules // Builtin types
+
+  [[ FuncTy(tys_in, ty_out) ^ (s) : FuncTy(tys_in_bound, ty_out_bound) ]] :=
+    Map1T [[ tys_in ^ (s) : tys_in_bound ]],
+    [[ ty_out ^ (s) : ty_out_bound ]].
+
+rules // Type modifiers
+
+  [[ NullableTy(ty) ^ (s) : NullableTy(ty_bound) ]] :=
+    [[ ty ^ (s) : ty_bound ]],
+    TopTy() <! NullableTy(ty_bound).

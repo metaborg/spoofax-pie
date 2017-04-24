@@ -1,7 +1,0 @@
-module pluto
-
-rules // Pluto builder function implementation
-
-  [[ PBuilderImpl(id_class_java) ^ (s, _, occ_func_outer) ]] :=
-    occ_func_outer.kind        := PlutoBuilderFuncKind() !,
-    occ_func_outer.javaClassId := id_class_java !.

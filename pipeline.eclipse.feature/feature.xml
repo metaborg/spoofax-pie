@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<feature
-  id="pipeline.eclipse.feature"
-  label="pipeline language Eclipse plugin"
-  version="0.1.0.qualifier"
->
-  <plugin id="pipeline.eclipse" version="0.1.0.qualifier" unpack="true" />
-  <includes id="org.metaborg.spoofax.eclipse.feature" version="0" />
-</feature>

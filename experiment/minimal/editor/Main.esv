@@ -1,0 +1,10 @@
+module Main
+
+language
+
+  extensions : min
+
+language
+
+  table         : target/metaborg/sdf.tbl
+  start symbols : Start
