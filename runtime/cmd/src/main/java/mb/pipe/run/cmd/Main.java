@@ -11,6 +11,7 @@ import com.google.inject.Injector;
 import mb.pipe.run.core.PipeFacade;
 import mb.pipe.run.core.PipeModule;
 import mb.pipe.run.core.StaticPipeFacade;
+import mb.pipe.run.spoofax.PipeSpoofaxModule;
 import mb.pipe.run.spoofax.util.StaticSpoofax;
 
 public final class Main {
@@ -22,7 +23,7 @@ public final class Main {
             StaticSpoofax.init(spoofaxMeta);
 
             final Logger rootLogger = LoggerFactory.getLogger("root");
-            final PipeFacade pipe = new PipeFacade(new PipeModule(rootLogger));
+            final PipeFacade pipe = new PipeFacade(new PipeModule(rootLogger), new PipeSpoofaxModule());
             StaticPipeFacade.init(pipe);
 
             final Runner runner = injector.getInstance(Runner.class);

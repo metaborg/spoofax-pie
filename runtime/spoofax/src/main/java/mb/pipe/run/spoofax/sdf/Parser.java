@@ -62,9 +62,23 @@ public class Parser {
             final ITokenizer tokenizer = rootImploderAttachment.getLeftToken().getTokenizer();
             final int tokenCount = tokenizer.getTokenCount();
             final Collection<mb.pipe.run.core.model.parse.IToken> tokenStream =
-                Lists.newArrayListWithExpectedSize(tokenCount);
+                Lists.newArrayListWithCapacity(tokenCount);
+            int offset = -1;
             for(int i = 0; i < tokenCount; ++i) {
                 final IToken token = tokenizer.getTokenAt(i);
+                if(tokenizer.isAmbigous() && token.getStartOffset() < offset) {
+                    // In case of ambiguities, tokens inside the ambiguity are duplicated, ignore.
+                    continue;
+                }
+                if(token.getStartOffset() > token.getEndOffset()) {
+                    // Indicates an invalid region. Empty lists have regions like this.
+                    continue;
+                }
+                if(offset >= token.getStartOffset()) {
+                    // Duplicate region, skip.
+                    continue;
+                }
+                offset = token.getEndOffset();
                 tokenStream.add(convertToken(token));
             }
 

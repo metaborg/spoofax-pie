@@ -174,7 +174,6 @@ public class GenerateTable extends ABuilder<GenerateTable.Input, GenerateTable.O
         // }
 
         // Transform
-        final Origin.Builder normalizedOriginBuilder = Origin.Builder();
         final ITransformGoal transformGoal = new EndNamedGoal("to Normal Form (abstract)");
         final Map<IResource, Trans.Output> normalized = Maps.newHashMap();
         for(Entry<IResource, IStrategoTerm> pair : asts.entrySet()) {
@@ -182,7 +181,6 @@ public class GenerateTable extends ABuilder<GenerateTable.Input, GenerateTable.O
             final IStrategoTerm ast = pair.getValue();
             final Result<Trans.Output> output = Trans.requireBuild(this,
                 new Trans.Input(input.depDir, null, langId, input.langLoc, file, ast, transformGoal));
-            normalizedOriginBuilder.add(output.origin);
             final Trans.Output trans = output.output;
             if(trans.ast == null || trans.writtenFile == null) {
                 reportError("Unable to transform SDF file " + file + ", skipping file");
@@ -190,7 +188,6 @@ public class GenerateTable extends ABuilder<GenerateTable.Input, GenerateTable.O
             }
             normalized.put(file, trans);
         }
-        // final Origin normalizedOrigin = normalizedOriginBuilder.get();
 
         if(!normalized.containsKey(input.mainFile)) {
             throw new PipeRunEx("Main file " + input.mainFile + " could not be normalized");

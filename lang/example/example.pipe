@@ -1,6 +1,6 @@
 /// Generic library
 // Resource
-data Resource = java mb.pipe.run.vfs.IResource {
+data Resource = java mb.pipe.run.core.vfs.IResource {
   func uri() -> string
   
   func resolve(string) -> Resource
@@ -12,9 +12,9 @@ func resolveAll(string*) -> Resource* = java mb.pipe.run.core.vfs.VFSResource#re
 
 
 /// Interface that Spoofax expects from a language
-data Message = java mb.pipe.run.core.model.IMsg {}
+data Message = java mb.pipe.run.core.model.message.IMsg {}
 data Ast = java org.spoofax.interpreter.terms.IStrategoTerm {}
-data Token = java org.spoofax.jsglr.client.imploder.IToken {}
+data Token = java mb.pipe.run.core.model.parse.IToken {}
 // func parse(text : string) -> (Ast?, Token*?, Message*)
 
 data Styling = java mb.pipe.run.core.model.Styling {}
@@ -26,17 +26,18 @@ data ParseTable = java mb.pipe.run.spoofax.sdf.Table {}
 func sdf2table(langLoc : Resource, specDir : Resource, mainFile : Resource, includedFiles : Resource*) -> ParseTable? = pluto mb.pipe.run.pluto.sdf.GenerateTable
 func jsglrParse(text : string, startSymbol : string, pt : ParseTable) -> (Ast?, Token*?, Message*) = pluto mb.pipe.run.pluto.sdf.Parse
 
-data SyntaxStyler = java mb.pipe.run.impl.esv.SyntaxStyler {}
-func esv2styler(files : Resource*) -> SyntaxStyler? = pluto mb.pipe.run.impl.esv.GenerateStyler
-func esvStyle(ast : Ast, tokenStream : Token*, st : SyntaxStyler) -> Styling = pluto mb.pipe.run.impl.esv.Style
+data SyntaxStyler = java mb.pipe.run.spoofax.esv.StylingRules {}
+func esv2styler(langLoc : Resource, specDir : Resource, mainFile : Resource, includedFiles : Resource*) -> SyntaxStyler? = pluto mb.pipe.run.pluto.esv.GenerateStylingRules
+func esvStyle(ast : Ast, tokenStream : Token*, st : SyntaxStyler) -> Styling = pluto mb.pipe.run.pluto.esv.Style
 
 
 /// Implement parse and style
 func parse(text : string) -> (Ast?, Token*?, Message*) = {
   var langLoc = resolve("/Users/gohla/.m2/repository/org/metaborg/org.metaborg.meta.lang.template/2.2.0/org.metaborg.meta.lang.template-2.2.0.spoofax-language");
   var specDir = resolve(".");  
-  var mainFile = resolve("syntax/Lang.sdf3");
-  var includedFiles = resolveAll(["syntax/Common.sdf3", "syntax/stuff.sdf3"]);
+  var mainFile = resolve("syntax/minimal.sdf3");
+  var includedFiles : Resource* = [];
+
   var parseTable = sdf2table(langLoc, specDir, mainFile, includedFiles);
   if(parseTable == null) fail "Unable to build parse table";
   
@@ -44,9 +45,14 @@ func parse(text : string) -> (Ast?, Token*?, Message*) = {
 }
 
 func style(ast : Ast, tokenStream : Token*) -> Styling = {
-  var esvFiles = resolveAll(["editor/Main.esv", "editor/Syntax.esv"]);
-  var syntaxStyler = esv2styler(esvFiles);
+  var langLoc = resolve("/Users/gohla/.m2/repository/org/metaborg/org.metaborg.meta.lang.esv/2.2.0/org.metaborg.meta.lang.esv-2.2.0.spoofax-language");
+  var specDir = resolve(".");
+  var mainFile = resolve("editor/Main.esv");
+  var includedFiles : Resource* = [];
+  
+  var syntaxStyler = esv2styler(langLoc, specDir, mainFile, includedFiles);
   if(syntaxStyler == null) fail "Unable to build syntax styler";
+  
   return esvStyle(ast, tokenStream, syntaxStyler!);
 }
 

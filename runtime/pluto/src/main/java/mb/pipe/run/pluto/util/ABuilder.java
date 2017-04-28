@@ -18,6 +18,8 @@ import build.pluto.builder.factory.BuilderFactoryFactory;
 import build.pluto.dependency.Origin;
 import build.pluto.output.Output;
 import build.pluto.output.OutputTransient;
+import mb.pipe.run.core.PipeFacade;
+import mb.pipe.run.core.StaticPipeFacade;
 import mb.pipe.run.spoofax.util.StaticSpoofax;
 
 public abstract class ABuilder<In extends AInput, Out extends Output> extends Builder<In, Out> {
@@ -65,6 +67,10 @@ public abstract class ABuilder<In extends AInput, Out extends Output> extends Bu
         return StaticSpoofax.spoofaxMeta();
     }
 
+    protected static PipeFacade pipe() {
+        return StaticPipeFacade.facade();
+    }
+    
     protected static File toFile(FileObject fileObject) {
         return spoofax().resourceService.localPath(fileObject);
     }
