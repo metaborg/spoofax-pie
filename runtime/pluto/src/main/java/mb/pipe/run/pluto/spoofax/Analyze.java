@@ -23,7 +23,7 @@ import build.pluto.builder.BuildRequest;
 import build.pluto.builder.Builder;
 import build.pluto.builder.factory.BuilderFactory;
 import build.pluto.dependency.Origin;
-import mb.pipe.run.core.util.Path;
+import mb.pipe.run.core.vfs.IResource;
 import mb.pipe.run.pluto.util.ABuilder;
 import mb.pipe.run.pluto.util.AInput;
 import mb.pipe.run.pluto.util.Result;
@@ -33,12 +33,12 @@ public class Analyze extends ABuilder<Analyze.Input, Analyze.Output> {
         private static final long serialVersionUID = 1L;
 
         public final LanguageIdentifier langId;
-        public final Path project;
-        public final Path file;
+        public final IResource project;
+        public final IResource file;
         public final @Nullable IStrategoTerm ast;
 
 
-        public Input(File depDir, @Nullable Origin origin, LanguageIdentifier langId, Path project, Path file,
+        public Input(File depDir, @Nullable Origin origin, LanguageIdentifier langId, IResource project, IResource file,
             @Nullable IStrategoTerm ast) {
             super(depDir, origin);
 
@@ -97,6 +97,10 @@ public class Analyze extends ABuilder<Analyze.Input, Analyze.Output> {
 
     public static Result<Output> requireBuild(Builder<?, ?> requiree, Input input) throws IOException {
         return requireBuild(requiree, input, Analyze.class, Input.class);
+    }
+
+    public static @Nullable IStrategoTerm build(Builder<?, ?> requiree, Input input) throws IOException {
+        return requireBuild(requiree, input, Analyze.class, Input.class).output.ast;
     }
 
 

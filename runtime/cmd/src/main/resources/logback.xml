@@ -9,7 +9,7 @@
     </encoder>
   </appender>
 
-  <root level="info">
+  <root level="debug">
     <appender-ref ref="stdout" />
   </root>
 
@@ -18,5 +18,8 @@
     level="warn" />
   <logger
     name="org.apache.commons.vfs2"
+    level="warn" />
+  <logger
+    name="org.metaborg.newsdf2table"
     level="warn" />
 </configuration>

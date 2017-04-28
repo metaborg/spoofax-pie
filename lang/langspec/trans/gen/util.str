@@ -61,6 +61,13 @@ rules
   pipe-sep-concat(|sep) = pipe-remove-emptystrings; separate-by(|sep); concat-strings
   pipe-concat-nl = pipe-sep-concat(|"\n")
   pipe-concat-comma = pipe-sep-concat(|", ")
+  
+  pipe-prepend-comma-nonempty: 
+    [] -> []
+  pipe-prepend-comma-nonempty: 
+    list -> [", "|list]
+    where
+      <not(?[])> list
 
 rules
 

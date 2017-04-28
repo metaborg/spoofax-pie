@@ -37,9 +37,9 @@ rules
   t2j-sig(isref):
     DataTy(occ) -> javaClassId
     where 
-      JavaTypeKind() := <debug1; pipe-prop(|"Type", "kind"); debug2> occ
+      JavaTypeKind() := <pipe-prop(|"Type", "kind")> occ
     with  
-      javaClassId := <debug2; pipe-prop(|"Type", "javaClassId"); debug3> occ
+      javaClassId := <pipe-prop(|"Type", "javaClassId")> occ
   t2j-sig(isref):
     NullableTy(d@DataTy(ty)) -> <t2j-sig(isref)> d
     where isref
@@ -48,7 +48,7 @@ rules
     where not(isref)
     
   t2j-sig(isref):
-    t@TupleTy(tys) -> $[List<Object>]
+    t@TupleTy(tys) -> $[mb.pipe.run.core.util.ITuple]
   t2j-sig(isref):
     NullableTy(t@TupleTy(_)) -> <t2j-sig(isref)> t
     where isref
@@ -57,7 +57,7 @@ rules
     where not(isref)
 
   t2j-sig(isref):
-    ListTy(ty) -> $[List<[<t2j-sig(isref)> ty]>]
+    ListTy(ty) -> $[Collection<[<t2j-sig(isref)> ty]>]
   t2j-sig(isref):
     NullableTy(l@ListTy(_)) -> <t2j-sig(isref)> l
     where isref
@@ -67,16 +67,53 @@ rules
 
 rules
 
-  t2j-create-dataclass(is-static|name, nameSuffix, paramsPrefix, constructorStms):
+  t2j-singular-dataclass(is-static|name, nameSuffix, paramsPrefix, constructorStms):
+    (typeId, ty) -> 
+$[public[<(is-static; !" static") <+ !"">] class [name] [nameSuffix]{
+    private static final long serialVersionUID = 1L;
+    
+    public final [<t2j-def-sig> ty] [typeId];
+    
+    public [name]([paramsPrefix][<t2j-def-sig> ty] [typeId]) {
+        [constructorStms]
+        this.[typeId] = [typeId];
+    }
+    
+    public [<t2j-def-sig> ty] getPipeVal() {
+        return [typeId];
+    }
+    
+    @Override public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (([typeId] == null) ? 0 : [typeId].hashCode());
+        return result;
+    }
+    
+    @Override public boolean equals(Object obj) {
+        if(this == obj) return true;
+        if(obj == null) return false;
+        if(getClass() != obj.getClass()) return false;
+        final [name] other = ([name]) obj;
+        if([typeId] == null) { if(other.[typeId] != null) return false; } else if(![typeId].equals(other.[typeId])) return false;
+        return true;
+    }
+}]
+
+  t2j-multi-dataclass(is-static|name, nameSuffix, paramsPrefix, constructorStms):
     idTypeTuples -> 
 $[public[<(is-static; !" static") <+ !"">] class [name] [nameSuffix]{
     private static final long serialVersionUID = 1L;
     
     [fields]
     
-    public [name]([paramsPrefix][params]) {
+    public [name]([paramsPrefix][commaSep][params]) {
         [constructorStms]
         [assigns]
+    }
+    
+    public mb.pipe.run.core.util.ITuple getPipeVal() {
+        return new mb.pipe.run.core.util.Tuple([tupleValStr]);
     }
     
     @Override public int hashCode() {
@@ -100,6 +137,9 @@ $[public[<(is-static; !" static") <+ !"">] class [name] [nameSuffix]{
     ; fields       := <pipe-sep-nl; concat-strings> fieldStrs
     ; paramStrs    := <map(\(typeId, ty) -> $[[<t2j-def-sig> ty] [typeId]]\)> idTypeTuples
     ; params       := <pipe-sep-comma; concat-strings> paramStrs
+    ; commaSep     := <if ?[] then !"" else !", " end> idTypeTuples
+    ; tupleValStrs := <map(\(typeId, _) -> typeId\)> idTypeTuples
+    ; tupleValStr  := <pipe-sep-comma; concat-strings> tupleValStrs
     ; assignStrs   := <map(\(typeId, _) -> $[this.[typeId] = [typeId];]\)> idTypeTuples
     ; assigns      := <pipe-sep-nl; concat-strings> assignStrs
     ; hashCodeStrs := <map(\(typeId, _) -> $[result = prime * result + (([typeId] == null) ? 0 : [typeId].hashCode());]\)> idTypeTuples

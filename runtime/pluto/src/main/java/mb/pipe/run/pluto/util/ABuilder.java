@@ -18,7 +18,7 @@ import build.pluto.builder.factory.BuilderFactoryFactory;
 import build.pluto.dependency.Origin;
 import build.pluto.output.Output;
 import build.pluto.output.OutputTransient;
-import mb.pipe.run.core.util.StaticFacade;
+import mb.pipe.run.spoofax.util.StaticSpoofax;
 
 public abstract class ABuilder<In extends AInput, Out extends Output> extends Builder<In, Out> {
     protected static <In extends AInput, Out extends Output, T extends Builder<In, Out>> BuilderFactory<In, Out, T>
@@ -58,11 +58,11 @@ public abstract class ABuilder<In extends AInput, Out extends Output> extends Bu
     }
 
     protected static Spoofax spoofax() {
-        return StaticFacade.spoofax();
+        return StaticSpoofax.spoofax();
     }
 
     protected static SpoofaxMeta spoofaxMeta() {
-        return StaticFacade.spoofaxMeta();
+        return StaticSpoofax.spoofaxMeta();
     }
 
     protected static File toFile(FileObject fileObject) {

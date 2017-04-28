@@ -21,7 +21,7 @@ import build.pluto.builder.factory.BuilderFactory;
 import build.pluto.dependency.Origin;
 import build.pluto.output.OutputTransient;
 import build.pluto.stamp.FileHashStamper;
-import mb.pipe.run.core.util.Path;
+import mb.pipe.run.core.vfs.IResource;
 import mb.pipe.run.pluto.util.ABuilder;
 import mb.pipe.run.pluto.util.AInput;
 import mb.pipe.run.pluto.util.Result;
@@ -30,10 +30,10 @@ public class LoadLang extends ABuilder<LoadLang.Input, OutputTransient<LoadLang.
     public static class Input extends AInput {
         private static final long serialVersionUID = 1L;
 
-        public final Path location;
+        public final IResource location;
 
 
-        public Input(File depDir, @Nullable Origin origin, Path location) {
+        public Input(File depDir, @Nullable Origin origin, IResource location) {
             super(depDir, origin);
             this.location = location;
         }
@@ -70,6 +70,10 @@ public class LoadLang extends ABuilder<LoadLang.Input, OutputTransient<LoadLang.
         final Origin origin = Origin.from(br);
         final Output out = requiree.requireBuild(br).val();
         return new Result<Output>(out, origin);
+    }
+
+    public static ILanguageImpl build(Builder<?, ?> requiree, Input input) throws IOException {
+        return requireBuild(requiree, input, LoadLang.class, Input.class).output.val().langImpl;
     }
 
 

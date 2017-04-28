@@ -30,7 +30,8 @@ import build.pluto.builder.BuildRequest;
 import build.pluto.builder.Builder;
 import build.pluto.builder.factory.BuilderFactory;
 import build.pluto.dependency.Origin;
-import mb.pipe.run.core.util.Path;
+import mb.pipe.run.core.vfs.IResource;
+import mb.pipe.run.core.vfs.VFSResource;
 import mb.pipe.run.pluto.util.ABuilder;
 import mb.pipe.run.pluto.util.AInput;
 import mb.pipe.run.pluto.util.Result;
@@ -40,13 +41,13 @@ public class Trans extends ABuilder<Trans.Input, Trans.Output> {
         private static final long serialVersionUID = 1L;
 
         public final LanguageIdentifier langId;
-        public final Path project;
-        public final Path file;
+        public final IResource project;
+        public final IResource file;
         public final @Nullable IStrategoTerm ast;
         public final ITransformGoal goal;
 
 
-        public Input(File depDir, @Nullable Origin origin, LanguageIdentifier langId, Path project, Path file,
+        public Input(File depDir, @Nullable Origin origin, LanguageIdentifier langId, IResource project, IResource file,
             @Nullable IStrategoTerm ast, ITransformGoal goal) {
             super(depDir, origin);
 
@@ -62,10 +63,10 @@ public class Trans extends ABuilder<Trans.Input, Trans.Output> {
         private static final long serialVersionUID = 1L;
 
         public final @Nullable IStrategoTerm ast;
-        public final @Nullable Path writtenFile;
+        public final @Nullable IResource writtenFile;
 
 
-        public Output(@Nullable IStrategoTerm ast, @Nullable Path writtenFile) {
+        public Output(@Nullable IStrategoTerm ast, @Nullable IResource writtenFile) {
             this.ast = ast;
             this.writtenFile = writtenFile;
         }
@@ -116,7 +117,11 @@ public class Trans extends ABuilder<Trans.Input, Trans.Output> {
         return requireBuild(requiree, input, Trans.class, Input.class);
     }
 
+    public static Output build(Builder<?, ?> requiree, Input input) throws IOException {
+        return requireBuild(requiree, input, Trans.class, Input.class).output;
+    }
 
+    
     public Trans(Input input) {
         super(input);
     }
@@ -158,10 +163,10 @@ public class Trans extends ABuilder<Trans.Input, Trans.Output> {
             final IStrategoTerm ast = unit.ast();
             final ISpoofaxTransformOutput output = Iterables.get(unit.outputs(), 0);
             final FileObject outputResource = output.output();
-            final @Nullable Path writtenFile;
+            final @Nullable IResource writtenFile;
             if(outputResource != null) {
                 provide(outputResource);
-                writtenFile = new Path(outputResource);
+                writtenFile = new VFSResource(outputResource);
             } else {
                 writtenFile = null;
             }

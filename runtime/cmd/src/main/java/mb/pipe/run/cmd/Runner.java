@@ -31,10 +31,8 @@ import build.pluto.builder.BuildManager;
 import build.pluto.builder.BuildRequest;
 import build.pluto.dependency.database.XodusDatabase;
 import build.pluto.util.LogReporting;
-import mb.pipe.run.core.util.Path;
-import mb.pipe.run.pluto.main.Pipeline;
-import mb.pipe.run.pluto.main.Pipeline.Input;
-import mb.pipe.run.pluto.main.Pipeline.Output;
+import mb.pipe.run.pluto.generated.main;
+import mb.pipe.run.pluto.generated.main.Output;
 
 @SuppressWarnings("restriction")
 public class Runner {
@@ -130,16 +128,7 @@ public class Runner {
 
 
     private static void build(File depDir, Arguments arguments) throws Throwable {
-        final Path langSpec = new Path(arguments.langSpec);
-        final Path config = new Path(arguments.config);
-        final Path esvLang = new Path(arguments.esv);
-        final Path esvSpec = new Path(arguments.esvSpec);
-        final Path sdfLang = new Path(arguments.sdf);
-        final Path sdfSpec = new Path(arguments.sdfSpec);
-        final Path file = new Path(arguments.file);
-
-        final BuildRequest<?, Output, ?, ?> buildRequest =
-            Pipeline.request(new Input(depDir, null, langSpec, config, esvLang, esvSpec, sdfLang, sdfSpec, file));
+        final BuildRequest<?, Output, ?, ?> buildRequest = main.request(new main.Input(depDir, null));
 
         try(final BuildManager buildManager =
             new BuildManager(new LogReporting(), XodusDatabase.createFileDatabase("pipeline-experiment"))) {
@@ -148,7 +137,7 @@ public class Runner {
             }
 
             final Output output = buildManager.requireInitially(buildRequest).getBuildResult();
-            logger.info("Output: {}", output.ast);
+            logger.info("Output: {}", output.getPipeVal().get(0));
         } catch(MetaborgException | IOException e) {
             logger.error("Build failed", e);
         }

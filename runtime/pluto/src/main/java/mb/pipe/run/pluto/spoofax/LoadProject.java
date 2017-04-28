@@ -15,7 +15,7 @@ import build.pluto.builder.Builder;
 import build.pluto.builder.factory.BuilderFactory;
 import build.pluto.dependency.Origin;
 import build.pluto.output.OutputTransient;
-import mb.pipe.run.core.util.Path;
+import mb.pipe.run.core.vfs.IResource;
 import mb.pipe.run.pluto.util.ABuilder;
 import mb.pipe.run.pluto.util.AInput;
 import mb.pipe.run.pluto.util.Result;
@@ -24,10 +24,10 @@ public class LoadProject extends ABuilder<LoadProject.Input, OutputTransient<Loa
     public static class Input extends AInput {
         private static final long serialVersionUID = 1L;
 
-        public final Path location;
+        public final IResource location;
 
 
-        public Input(File depDir, @Nullable Origin origin, Path location) {
+        public Input(File depDir, @Nullable Origin origin, IResource location) {
             super(depDir, origin);
             this.location = location;
         }
@@ -65,6 +65,11 @@ public class LoadProject extends ABuilder<LoadProject.Input, OutputTransient<Loa
         final Output out = requiree.requireBuild(br).val();
         return new Result<Output>(out, origin);
     }
+
+    public static IProject build(Builder<?, ?> requiree, Input input) throws IOException {
+        return requireBuild(requiree, input, LoadProject.class, Input.class).output.val().project;
+    }
+
 
 
     public LoadProject(Input input) {

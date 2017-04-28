@@ -17,7 +17,7 @@ import build.pluto.builder.BuildRequest;
 import build.pluto.builder.Builder;
 import build.pluto.builder.factory.BuilderFactory;
 import build.pluto.dependency.Origin;
-import mb.pipe.run.core.util.Path;
+import mb.pipe.run.core.vfs.IResource;
 import mb.pipe.run.pluto.util.ABuilder;
 import mb.pipe.run.pluto.util.AInput;
 import mb.pipe.run.pluto.util.Result;
@@ -27,11 +27,11 @@ public class Parse extends ABuilder<Parse.Input, Parse.Output> {
         private static final long serialVersionUID = 1L;
 
         public final LanguageIdentifier langId;
-        public final Path file;
+        public final IResource file;
         public final String text;
 
 
-        public Input(File depDir, @Nullable Origin origin, LanguageIdentifier langId, Path file, String text) {
+        public Input(File depDir, @Nullable Origin origin, LanguageIdentifier langId, IResource file, String text) {
             super(depDir, origin);
 
             this.langId = langId;
@@ -90,6 +90,10 @@ public class Parse extends ABuilder<Parse.Input, Parse.Output> {
         return requireBuild(requiree, input, Parse.class, Input.class);
     }
 
+    public static @Nullable IStrategoTerm build(Builder<?, ?> requiree, Input input) throws IOException {
+        return requireBuild(requiree, input, Parse.class, Input.class).output.ast;
+    }
+
 
     public Parse(Input input) {
         super(input);
@@ -108,7 +112,16 @@ public class Parse extends ABuilder<Parse.Input, Parse.Output> {
         requireOrigins();
 
         final ILanguageImpl langImpl = spoofax().languageService.getImpl(input.langId);
-        require(langImpl.facet(SyntaxFacet.class).parseTable);
+        final SyntaxFacet facet = langImpl.facet(SyntaxFacet.class);
+        if(facet != null) {
+            final FileObject parseTableFile = facet.parseTable;
+            if(parseTableFile != null) {
+                final File localFile = spoofax().resourceService.localPath(parseTableFile);
+                if(localFile != null) {
+                    require(localFile);
+                }
+            }
+        }
         final FileObject resource = input.file.fileObject();
         final ISpoofaxInputUnit inputUnit = spoofax().unitService.inputUnit(resource, input.text, langImpl, null);
         final ISpoofaxParseUnit parseUnit = spoofax().syntaxService.parse(inputUnit);

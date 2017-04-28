@@ -34,29 +34,29 @@ rules // definitions
       className := <pipe-sanitize-class-id> funcId
     with
       idTypeTuples := <pipe-idtype-tuples> params
-    ; inputClass := <t2j-create-dataclass(id|"Input", "extends AInput", "File depDir, @Nullable Origin origin, ", "super(depDir, origin);")> idTypeTuples
+    ; inputClass := <t2j-multi-dataclass(id|"Input", "extends AInput", "File depDir, @Nullable Origin origin", "super(depDir, origin);")> idTypeTuples
     with
-      outputClass := <t2j-create-dataclass(id|"Output", "implements build.pluto.output.Output", "", "")> [("out", type)]
+      outputClass := <t2j-singular-dataclass(id|"Output", "implements build.pluto.output.Output", "", "")> ("out", type)
     with
-      persistentPathImpl := <map(\(typeId, _) -> $[input.[typeId]]\); pipe-concat-comma> idTypeTuples
+      commaSep           := <if ?[] then !"" else !", " end> idTypeTuples
+    ; persistentPathImpl := <map(\(typeId, _) -> $[input.[typeId]]\); pipe-concat-comma> idTypeTuples
     with
       buildImpl   := <p2p-stms> stms
     ; emptyReturn := <?VoidTy(); !"return new Output();" <+ !""> type
     with
       str := 
-$[package org.metaborg.pipeline.generated;
+$[package mb.pipe.run.pluto.generated;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.util.Collection;
 
 import javax.annotation.Nullable;
 
 import org.apache.commons.vfs2.FileObject;
-import org.metaborg.pipeline.util.ABuilder;
-import org.metaborg.pipeline.util.AInput;
-import org.metaborg.pipeline.util.Result;
-import org.metaborg.util.file.FileUtils;
+import mb.pipe.run.pluto.util.ABuilder;
+import mb.pipe.run.pluto.util.AInput;
+import mb.pipe.run.pluto.util.Result;
 
 import com.google.common.collect.Lists;
 
@@ -84,6 +84,10 @@ public class [className] extends ABuilder<[className].Input, [className].Output>
     public static Result<Output> requireBuild(Builder<?, ?> requiree, Input input) throws IOException {
         return requireBuild(requiree, input, [className].class, Input.class);
     }
+    
+    public static [<t2j-ref-sig> type] build(Builder<?, ?> requiree, Input input) throws IOException {
+        return requireBuild(requiree, input, [className].class, Input.class).output.getPipeVal();
+    }
 
 
     public [className](Input input) {
@@ -96,14 +100,12 @@ public class [className] extends ABuilder<[className].Input, [className].Output>
     }
 
     @Override public File persistentPath(Input input) {
-        return depFile("[className]", [persistentPathImpl]);
+        return depFile("[className]"[commaSep][persistentPathImpl]);
     }
 
-    @Override protected Output build(Input input) throws Throwable {
+    @SuppressWarnings("unchecked") @Override protected Output build(Input input) throws Throwable {
         requireOrigins();
 
-        Origin origin = input.origin;
-        
         [buildImpl]
         [emptyReturn]
     }
@@ -132,8 +134,8 @@ $[[initStmsStr]
 [tyStr] [varId] = [expStr];]
     with
       type                  := <pipe-ast-type> exp
-    ; tyStr                 := <t2j-def-sig> type
-    ; (varId, _)            := <p2p-bind-idtype-tuple> (bind, type)
+    ; (varId, actualType)   := <p2p-bind-idtype-tuple> (bind, type)
+    ; tyStr                 := <t2j-def-sig> actualType
     ; (initStmsStr, expStr) := <try-p2p-exp> exp
   
   p2p-stm:
@@ -241,21 +243,21 @@ rules
   p2p-exp:
     Ref(varId) -> ("", varId) 
     where
-      LocalVarKind() := <debuga; pipe-ast-ref-prop(|"Var", "kind"); debugb> varId
+      LocalVarKind() := <pipe-ast-ref-prop(|"Var", "kind")> varId
   
   p2p-exp: 
     Ref(varId) -> ("", $[input.[varId]])
     where
-      InputVarKind() := <debugc; pipe-ast-ref-prop(|"Var", "kind"); debugd> varId
+      InputVarKind() := <pipe-ast-ref-prop(|"Var", "kind")> varId
 
 
   p2p-exp:
     Call(funcId, exps) -> (initStmsStr, $[[javaClassId].[javaMethodId]([expStr])])
     where
-      JavaStaticFuncKind() := <debuge; pipe-ast-ref-prop(|"Func", "kind"); debugf> funcId
+      JavaStaticFuncKind() := <pipe-ast-ref-prop(|"Func", "kind")> funcId
     with
-      javaClassId             := <debugg; pipe-ast-ref-prop(|"Func", "javaClassId"); debugh> funcId
-    ; javaMethodId            := <debugi; pipe-ast-ref-prop(|"Func", "javaMethodId"); debugj> funcId
+      javaClassId             := <pipe-ast-ref-prop(|"Func", "javaClassId")> funcId
+    ; javaMethodId            := <pipe-ast-ref-prop(|"Func", "javaMethodId")> funcId
     ; (initStmsStrs, expStrs) := <map(try-p2p-exp); unzip> exps
     ; initStmsStr             := <pipe-concat-nl> initStmsStrs
     ; expStr                  := <pipe-concat-comma> expStrs
@@ -263,27 +265,26 @@ rules
   p2p-exp:
     c@Call(funcId, _) -> <p2p-exp-pluto-call(|javaClassId)> c
     where
-      PlutoBuilderFuncKind() := <debugk; pipe-ast-ref-prop(|"Func", "kind"); debugl> funcId
+      PlutoBuilderFuncKind() := <pipe-ast-ref-prop(|"Func", "kind")> funcId
     with
-      javaClassId := <debugm; pipe-ast-ref-prop(|"Func", "javaClassId"); debugn> funcId
+      javaClassId := <pipe-ast-ref-prop(|"Func", "javaClassId")> funcId
     
   p2p-exp: 
     c@Call(funcId, _) -> <p2p-exp-pluto-call(|javaClassId)> c 
     where
-      PipelineFuncKind() := <debugo; pipe-ast-ref-prop(|"Func", "kind"); debugp> funcId
+      PipelineFuncKind() := <pipe-ast-ref-prop(|"Func", "kind")> funcId
     with
       javaClassId := <pipe-sanitize-class-id> funcId
   
   p2p-exp-pluto-call(|javaClassId):
-   Call(funcId, exps) -> (allInitStmsStr, $[[initId].output])
+   Call(funcId, exps) -> (allInitStmsStr, $[[initId].output.getPipeVal()])
     with
       (initStmsStrs, expStrs) := <map(try-p2p-exp); unzip> exps
     ; expStr                  := <pipe-concat-comma> expStrs
     ; initId                  := <newname> "init"
-    ; initStr                 := $[final Result<[javaClassId].Output> [initId] = [javaClassId].requireBuild(this, new [javaClassId].Input(input.depDir, origin, [expStr]));]
+    ; initStr                 := $[final Result<[javaClassId].Output> [initId] = [javaClassId].requireBuild(this, new [javaClassId].Input(input.depDir, null, [expStr]));]
     ; allInitStmsStr          := <concat; pipe-concat-nl> [initStmsStrs, [initStr]]
 
-  // TODO: exp = exps!
   p2p-exp: 
     QCall(exp, funcId, argsExps) -> (allInitStmsStr, $[[expStr].[funcId]([argsExpStr])])
     with
@@ -300,14 +301,14 @@ rules
   p2p-exp: NullLit()        -> ("", $[null])
   
   p2p-exp:
-    TupleLit(exps) -> (allInitStmsStr, $[Lists.<Object>newArrayList([expsStr])])
+    TupleLit(exps) -> (allInitStmsStr, $[new mb.pipe.run.core.util.Tuple([expsStr])])
     with
       (initStmsStrs, expStrs) := <map(try-p2p-exp); unzip> exps
     ; allInitStmsStr          := <pipe-concat-nl> initStmsStrs
     ; expsStr                 := <pipe-concat-comma> expStrs
     
   p2p-exp:
-    ListLit(exps) -> (allInitStmsStr, $[Lists.newArrayList([expsStr])])
+    l@ListLit(exps) -> (allInitStmsStr, $[Lists.newArrayList([expsStr])])
     with
       (initStmsStrs, expStrs) := <map(try-p2p-exp); unzip> exps
     ; allInitStmsStr          := <pipe-concat-nl> initStmsStrs
