@@ -2,8 +2,8 @@ package mb.pipe.run.spoofax.sdf;
 
 import org.spoofax.jsglr.client.imploder.IToken;
 
-import mb.pipe.run.core.model.IRegion;
-import mb.pipe.run.core.model.Region;
+import mb.pipe.run.core.model.region.IRegion;
+import mb.pipe.run.core.model.region.Region;
 
 public class RegionFactory {
     public static IRegion fromToken(IToken token) {

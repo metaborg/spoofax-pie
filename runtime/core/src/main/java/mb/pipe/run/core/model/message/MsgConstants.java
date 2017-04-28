@@ -1,4 +1,4 @@
-package mb.pipe.run.core.model;
+package mb.pipe.run.core.model.message;
 
 public class MsgConstants {
     public static final IMsgSeverity infoSeverity = new InfoMsgSeverity();

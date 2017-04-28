@@ -5,11 +5,11 @@ import java.util.Collection;
 import javax.annotation.Nullable;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.jsglr.client.imploder.IToken;
 
-import mb.pipe.run.core.model.IMsg;
+import mb.pipe.run.core.model.message.IMsg;
+import mb.pipe.run.core.model.parse.IToken;
 
-public class ParseOutput implements IParseOutput {
+public class ParseOutput {
     public final boolean recovered;
     public final @Nullable IStrategoTerm ast;
     public final @Nullable Collection<IToken> tokenStream;
@@ -22,16 +22,5 @@ public class ParseOutput implements IParseOutput {
         this.ast = ast;
         this.tokenStream = tokenStream;
         this.messages = messages;
-    }
-
-
-    @Override public void accept(IParseOutputVisitor visitor) {
-        if(ast == null || tokenStream == null) {
-            visitor.failed(messages);
-        } else if(recovered) {
-            visitor.recovered(ast, tokenStream, messages);
-        } else {
-            visitor.success(ast, tokenStream, messages);
-        }
     }
 }

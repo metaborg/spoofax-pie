@@ -20,9 +20,9 @@ import org.spoofax.jsglr.shared.TokenExpectedException;
 
 import com.google.common.collect.Lists;
 
-import mb.pipe.run.core.model.IMsg;
-import mb.pipe.run.core.model.IRegion;
-import mb.pipe.run.core.model.MsgBuilder;
+import mb.pipe.run.core.model.message.IMsg;
+import mb.pipe.run.core.model.message.MsgBuilder;
+import mb.pipe.run.core.model.region.IRegion;
 import mb.pipe.run.core.parse.ParseMsgType;
 
 public class ParserErrorHandler {

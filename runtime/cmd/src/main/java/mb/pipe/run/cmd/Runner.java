@@ -11,8 +11,11 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.annotation.Nullable;
 
 import org.apache.commons.vfs2.AllFileSelector;
 import org.apache.commons.vfs2.FileObject;
@@ -21,6 +24,7 @@ import org.metaborg.core.build.CommonPaths;
 import org.metaborg.core.resource.IResourceService;
 import org.metaborg.util.log.ILogger;
 import org.metaborg.util.log.LoggerUtils;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
@@ -31,6 +35,8 @@ import build.pluto.builder.BuildManager;
 import build.pluto.builder.BuildRequest;
 import build.pluto.dependency.database.XodusDatabase;
 import build.pluto.util.LogReporting;
+import mb.pipe.run.core.model.message.IMsg;
+import mb.pipe.run.core.model.parse.IToken;
 import mb.pipe.run.pluto.generated.main;
 import mb.pipe.run.pluto.generated.main.Output;
 
@@ -72,13 +78,13 @@ public class Runner {
             return 0;
         }
 
-        final FileObject langSpecLoc = resourceService.resolve(arguments.langSpec);
-        final CommonPaths paths = new CommonPaths(langSpecLoc);
+        final FileObject currentDir = resourceService.resolve(".");
+        final CommonPaths paths = new CommonPaths(currentDir);
         final FileObject depLoc = paths.targetDir().resolveFile("dep");
         final File depDir = resourceService.localPath(depLoc);
         if(depDir == null) {
             throw new MetaborgException(
-                "Language specification directory " + langSpecLoc + " is not on the local file system");
+                "Language specification directory " + currentDir + " is not on the local file system");
         }
 
         clean(depLoc, arguments);
@@ -88,7 +94,7 @@ public class Runner {
             return 0;
         }
 
-        final java.nio.file.Path path = FileSystems.getDefault().getPath(langSpecLoc.getName().getPath());
+        final java.nio.file.Path path = FileSystems.getDefault().getPath(currentDir.getName().getPath());
         try(final WatchService watchService = FileSystems.getDefault().newWatchService()) {
             registerWatcher(path, watchService);
             Files.walkFileTree(path, new SimpleFileVisitor<java.nio.file.Path>() {
@@ -137,7 +143,34 @@ public class Runner {
             }
 
             final Output output = buildManager.requireInitially(buildRequest).getBuildResult();
-            logger.info("Output: {}", output.getPipeVal().get(0));
+            final @Nullable IStrategoTerm ast = (IStrategoTerm) output.getPipeVal().get(0);
+            final @Nullable Collection<IToken> tokenStream = (Collection<IToken>) output.getPipeVal().get(1);
+            final Collection<IMsg> messages = (Collection<IMsg>) output.getPipeVal().get(2);
+            if(ast == null || tokenStream == null) {
+                logger.info("Parsing failed, messages: ");
+                for(IMsg msg : messages) {
+                    logger.info(msg.text());
+                }
+            } else {
+                final boolean recovered = !messages.isEmpty();
+                if(!recovered) {
+                    logger.info("Parsing successful");
+                } else {
+                    logger.info("Parsed with errors, AST and token stream were recovered:");
+                }
+                logger.info("AST: {}", ast);
+                logger.info("Token stream: ");
+                for(IToken token : tokenStream) {
+                    logger.info("'{}'", token);
+                }
+                if(recovered) {
+                    logger.info("Messages: ");
+                    for(IMsg msg : messages) {
+                        logger.info(msg.text());
+                    }
+                }
+            }
+
         } catch(MetaborgException | IOException e) {
             logger.error("Build failed", e);
         }

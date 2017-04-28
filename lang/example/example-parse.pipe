@@ -12,9 +12,9 @@ func resolveAll(string*) -> Resource* = java mb.pipe.run.core.vfs.VFSResource#re
 
 
 /// Interface that Spoofax expects from a language
-data Message = java mb.pipe.run.core.model.IMsg {}
+data Message = java mb.pipe.run.core.model.message.IMsg {}
 data Ast = java org.spoofax.interpreter.terms.IStrategoTerm {}
-data Token = java org.spoofax.jsglr.client.imploder.IToken {}
+data Token = java mb.pipe.run.core.model.parse.IToken {}
 // func parse(text : string) -> (Ast?, Token*?, Message*)
 
 

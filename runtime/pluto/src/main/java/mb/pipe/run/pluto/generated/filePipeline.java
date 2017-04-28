@@ -121,8 +121,8 @@ public class filePipeline extends ABuilder<filePipeline.Input, filePipeline.Outp
         String text = init2.output.getPipeVal();
         final Result<parse.Output> init3 = parse.requireBuild(this, new parse.Input(input.depDir, null, text));
         org.spoofax.interpreter.terms.IStrategoTerm ast = (org.spoofax.interpreter.terms.IStrategoTerm) init3.output.getPipeVal().get(0);
-        Collection<org.spoofax.jsglr.client.imploder.IToken> tokenStream = (Collection<org.spoofax.jsglr.client.imploder.IToken>) init3.output.getPipeVal().get(1);
-        Collection<mb.pipe.run.core.model.IMsg> messages = (Collection<mb.pipe.run.core.model.IMsg>) init3.output.getPipeVal().get(2);
+        Collection<mb.pipe.run.core.model.parse.IToken> tokenStream = (Collection<mb.pipe.run.core.model.parse.IToken>) init3.output.getPipeVal().get(1);
+        Collection<mb.pipe.run.core.model.message.IMsg> messages = (Collection<mb.pipe.run.core.model.message.IMsg>) init3.output.getPipeVal().get(2);
         
         return new Output(new mb.pipe.run.core.util.Tuple(ast, tokenStream, messages));
         

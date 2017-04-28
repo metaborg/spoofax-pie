@@ -1,15 +1,11 @@
-package mb.pipe.run.core.parse;
+package mb.pipe.run.core.model.message;
 
-import mb.pipe.run.core.model.message.IMsg;
-import mb.pipe.run.core.model.message.IMsgType;
-import mb.pipe.run.core.model.message.MsgTypeVisitor;
-
-public class ParseMsgType implements IMsgType {
+public class WarningMsgSeverity implements IMsgSeverity {
     private static final long serialVersionUID = 1L;
 
 
-    @Override public void accept(MsgTypeVisitor visitor, IMsg message) {
-        visitor.parse(message);
+    @Override public void accept(MsgSeverityVisitor visitor, IMsg message) {
+        visitor.warning(message);
     }
 
 
@@ -28,6 +24,6 @@ public class ParseMsgType implements IMsgType {
     }
 
     @Override public String toString() {
-        return "parse";
+        return "warning";
     }
 }

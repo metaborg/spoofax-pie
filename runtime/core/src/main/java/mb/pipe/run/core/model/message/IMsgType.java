@@ -1,4 +1,4 @@
-package mb.pipe.run.core.model;
+package mb.pipe.run.core.model.message;
 
 import java.io.Serializable;
 

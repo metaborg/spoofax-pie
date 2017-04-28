@@ -7,14 +7,14 @@ import java.util.Collection;
 import javax.annotation.Nullable;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.jsglr.client.imploder.IToken;
 import org.spoofax.terms.TermFactory;
 
 import build.pluto.builder.BuildRequest;
 import build.pluto.builder.Builder;
 import build.pluto.builder.factory.BuilderFactory;
 import build.pluto.dependency.Origin;
-import mb.pipe.run.core.model.IMsg;
+import mb.pipe.run.core.model.message.IMsg;
+import mb.pipe.run.core.model.parse.IToken;
 import mb.pipe.run.core.util.ITuple;
 import mb.pipe.run.core.util.Tuple;
 import mb.pipe.run.pluto.util.ABuilder;

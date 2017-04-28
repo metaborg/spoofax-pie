@@ -1,4 +1,4 @@
-package mb.pipe.run.core.model;
+package mb.pipe.run.core.model.message;
 
 public interface MsgSeverityVisitor {
     void info(IMsg message);

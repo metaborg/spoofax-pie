@@ -1,11 +1,11 @@
-package mb.pipe.run.core.model;
+package mb.pipe.run.core.model.parse;
 
-public class InternalMsgType implements IMsgType {
+public class LayoutTokenKind implements ITokenType {
     private static final long serialVersionUID = 1L;
 
-    
-    @Override public void accept(MsgTypeVisitor visitor, IMsg message) {
-        visitor.internal(message);
+
+    @Override public void accept(ITokenKindVisitor visitor, IToken token) {
+        visitor.layout(token);
     }
 
 
@@ -24,6 +24,6 @@ public class InternalMsgType implements IMsgType {
     }
 
     @Override public String toString() {
-        return "internal";
+        return "layout";
     }
 }

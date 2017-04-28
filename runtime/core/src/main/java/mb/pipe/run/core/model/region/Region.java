@@ -1,4 +1,4 @@
-package mb.pipe.run.core.model;
+package mb.pipe.run.core.model.region;
 
 public class Region implements IRegion {
     private static final long serialVersionUID = 1L;

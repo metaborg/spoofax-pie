@@ -22,8 +22,12 @@ import org.spoofax.terms.attachments.ParentTermFactory;
 import com.google.common.collect.Lists;
 
 import mb.pipe.run.core.PipeRunEx;
-import mb.pipe.run.core.model.IMsg;
-import mb.pipe.run.core.model.Msgs;
+import mb.pipe.run.core.model.message.IMsg;
+import mb.pipe.run.core.model.message.Msgs;
+import mb.pipe.run.core.model.parse.ITokenType;
+import mb.pipe.run.core.model.parse.Token;
+import mb.pipe.run.core.model.parse.TokenConstants;
+import mb.pipe.run.core.model.region.IRegion;
 
 public class Parser {
     private final SGLR parser;
@@ -57,10 +61,11 @@ public class Parser {
             final ImploderAttachment rootImploderAttachment = ImploderAttachment.get(ast);
             final ITokenizer tokenizer = rootImploderAttachment.getLeftToken().getTokenizer();
             final int tokenCount = tokenizer.getTokenCount();
-            final Collection<IToken> tokenStream = Lists.newArrayListWithExpectedSize(tokenCount);
+            final Collection<mb.pipe.run.core.model.parse.IToken> tokenStream =
+                Lists.newArrayListWithExpectedSize(tokenCount);
             for(int i = 0; i < tokenCount; ++i) {
                 final IToken token = tokenizer.getTokenAt(i);
-                tokenStream.add(token);
+                tokenStream.add(convertToken(token));
             }
 
             final ParserErrorHandler errorHandler = new ParserErrorHandler(true, false, parser.getCollectedErrors());
@@ -74,6 +79,32 @@ public class Parser {
             errorHandler.processFatalException(new NullTokenizer(text, "file"), e);
             final Collection<IMsg> messages = errorHandler.messages();
             return new ParseOutput(false, null, null, messages);
+        }
+    }
+
+    private static mb.pipe.run.core.model.parse.IToken convertToken(IToken token) {
+        final IRegion region = RegionFactory.fromToken(token);
+        final ITokenType tokenType = convertTokenKind(token.getKind());
+        final String text = token.toString();
+        return new Token(region, tokenType, text);
+    }
+
+    private static ITokenType convertTokenKind(int kind) {
+        switch(kind) {
+            case IToken.TK_IDENTIFIER:
+                return TokenConstants.identifierType;
+            case IToken.TK_STRING:
+                return TokenConstants.stringType;
+            case IToken.TK_NUMBER:
+                return TokenConstants.numberType;
+            case IToken.TK_KEYWORD:
+                return TokenConstants.keywordType;
+            case IToken.TK_OPERATOR:
+                return TokenConstants.operatorType;
+            case IToken.TK_LAYOUT:
+                return TokenConstants.layoutType;
+            default:
+                return TokenConstants.unknownType;
         }
     }
 }

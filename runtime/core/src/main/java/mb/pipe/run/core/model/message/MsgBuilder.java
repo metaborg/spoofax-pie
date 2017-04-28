@@ -1,6 +1,8 @@
-package mb.pipe.run.core.model;
+package mb.pipe.run.core.model.message;
 
 import javax.annotation.Nullable;
+
+import mb.pipe.run.core.model.region.IRegion;
 
 public class MsgBuilder {
     private String text = "";

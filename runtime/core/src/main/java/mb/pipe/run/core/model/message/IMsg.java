@@ -1,8 +1,10 @@
-package mb.pipe.run.core.model;
+package mb.pipe.run.core.model.message;
 
 import java.io.Serializable;
 
 import javax.annotation.Nullable;
+
+import mb.pipe.run.core.model.region.IRegion;
 
 /**
  * Interface representing a message on a region in a source file.

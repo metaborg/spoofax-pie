@@ -1,13 +1,11 @@
-package mb.pipe.run.core.model;
+package mb.pipe.run.core.model.region;
 
 import java.io.Serializable;
 
 /**
- * Interface for representing a finite region in source code text. A region has:
- * <ul>
- * <li>Offset - number of characters from the beginning of the source text, with interval [0,#chars).</li>
- * </ul>
- * Both the starting and ending numbers are inclusive.
+ * Interface for representing a finite region in source code text. A region has a start and end offset, represented by
+ * the number of characters from the beginning of the source text, with interval [0,#chars). Both the starting and
+ * ending numbers are inclusive.
  */
 public interface IRegion extends Serializable {
     /**
@@ -24,7 +22,7 @@ public interface IRegion extends Serializable {
 
 
     /**
-     * @return Length of the source region.
+     * @return Length of the region.
      */
     default int length() {
         return (this.endOffset() - this.startOffset()) + 1;

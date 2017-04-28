@@ -1,11 +1,11 @@
-package mb.pipe.run.core.model;
+package mb.pipe.run.core.model.parse;
 
-public class InfoMsgSeverity implements IMsgSeverity {
+public class IdentifierTokenKind implements ITokenType {
     private static final long serialVersionUID = 1L;
 
 
-    @Override public void accept(MsgSeverityVisitor visitor, IMsg message) {
-        visitor.info(message);
+    @Override public void accept(ITokenKindVisitor visitor, IToken token) {
+        visitor.identifier(token);
     }
 
 
@@ -24,6 +24,6 @@ public class InfoMsgSeverity implements IMsgSeverity {
     }
 
     @Override public String toString() {
-        return "info";
+        return "identifier";
     }
 }
