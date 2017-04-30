@@ -61,6 +61,11 @@ public class GenerateStylerRules extends ABuilder<GenerateStylerRules.Input, Gen
         }
 
 
+        public StylingRules getPipeVal() {
+            return stylingRules;
+        }
+
+
         @Override public int hashCode() {
             final int prime = 31;
             int result = 1;

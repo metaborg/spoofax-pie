@@ -1,11 +1,11 @@
-package mb.pipe.run.spoofax.esv;
+package mb.pipe.run.core.model.style;
 
 import java.awt.Color;
 import java.io.Serializable;
 
 import javax.annotation.Nullable;
 
-public class Style implements Serializable {
+public class Style implements Serializable, IStyle {
     private static final long serialVersionUID = 1L;
 
     private final @Nullable Color color;
@@ -27,30 +27,29 @@ public class Style implements Serializable {
     }
 
 
-    public @Nullable Color color() {
+    @Override public Color color() {
         return color;
     }
 
-    public @Nullable Color backgroundColor() {
+    @Override public Color backgroundColor() {
         return backgroundColor;
     }
 
-    public boolean bold() {
+    @Override public boolean bold() {
         return bold;
     }
 
-    public boolean italic() {
+    @Override public boolean italic() {
         return italic;
     }
 
-    public boolean underscore() {
+    @Override public boolean underscore() {
         return underscore;
     }
 
-    public boolean strikeout() {
+    @Override public boolean strikeout() {
         return strikeout;
     }
-
 
 
     @Override public int hashCode() {
@@ -64,7 +63,6 @@ public class Style implements Serializable {
         result = prime * result + (strikeout ? 1231 : 1237);
         return result;
     }
-
 
     @Override public boolean equals(Object obj) {
         if(this == obj)

@@ -37,6 +37,9 @@ import build.pluto.dependency.database.XodusDatabase;
 import build.pluto.util.LogReporting;
 import mb.pipe.run.core.model.message.IMsg;
 import mb.pipe.run.core.model.parse.IToken;
+import mb.pipe.run.core.model.style.IStyling;
+import mb.pipe.run.core.model.style.ITokenStyle;
+import mb.pipe.run.core.vfs.IResource;
 import mb.pipe.run.pluto.generated.main;
 import mb.pipe.run.pluto.generated.main.Output;
 
@@ -143,9 +146,12 @@ public class Runner {
             }
 
             final Output output = buildManager.requireInitially(buildRequest).getBuildResult();
-            final @Nullable IStrategoTerm ast = (IStrategoTerm) output.getPipeVal().get(0);
-            final @Nullable Collection<IToken> tokenStream = (Collection<IToken>) output.getPipeVal().get(1);
-            final Collection<IMsg> messages = (Collection<IMsg>) output.getPipeVal().get(2);
+            final IResource resource = (IResource) output.getPipeVal().get(0);
+            final String text = (String) output.getPipeVal().get(1);
+            final @Nullable IStrategoTerm ast = (IStrategoTerm) output.getPipeVal().get(2);
+            final @Nullable Collection<IToken> tokenStream = (Collection<IToken>) output.getPipeVal().get(3);
+            final Collection<IMsg> messages = (Collection<IMsg>) output.getPipeVal().get(4);
+            final @Nullable IStyling styling = (IStyling) output.getPipeVal().get(5);
             if(ast == null || tokenStream == null) {
                 logger.info("Parsing failed, messages: ");
                 for(IMsg msg : messages) {
@@ -161,7 +167,7 @@ public class Runner {
                 logger.info("AST: {}", ast);
                 logger.info("Token stream: ");
                 for(IToken token : tokenStream) {
-                    logger.info("'{}'", token);
+                    logger.info("{} ({}): '{}'", token, token.type(), token.textPart(text));
                 }
                 if(recovered) {
                     logger.info("Messages: ");
@@ -169,8 +175,16 @@ public class Runner {
                         logger.info(msg.text());
                     }
                 }
-            }
 
+                if(styling == null) {
+                    logger.info("Styling failed");
+                } else {
+                    logger.info("Styling: ");
+                    for(ITokenStyle tokenStyle : styling.stylePerToken()) {
+                        logger.info("Token {} - Style {}", tokenStyle.token(), tokenStyle.style());
+                    }
+                }
+            }
         } catch(MetaborgException | IOException e) {
             logger.error("Build failed", e);
         }

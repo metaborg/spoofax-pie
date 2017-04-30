@@ -1,5 +1,8 @@
 package mb.pipe.run.core.model.style;
 
-public interface IStyling {
+import java.io.Serializable;
+import java.util.List;
 
+public interface IStyling extends Serializable {
+    List<ITokenStyle> stylePerToken();
 }

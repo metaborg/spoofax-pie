@@ -17,8 +17,8 @@ data Ast = java org.spoofax.interpreter.terms.IStrategoTerm {}
 data Token = java mb.pipe.run.core.model.parse.IToken {}
 // func parse(text : string) -> (Ast?, Token*?, Message*)
 
-data Styling = java mb.pipe.run.core.model.Styling {}
-// func style(ast : Ast, tokenStream : Token*) -> Styling
+data Styling = java mb.pipe.run.core.model.style.IStyling {}
+// func style(tokenStream : Token*) -> Styling
 
 
 /// Library with functions to build SDF and ESV specifications
@@ -27,8 +27,8 @@ func sdf2table(langLoc : Resource, specDir : Resource, mainFile : Resource, incl
 func jsglrParse(text : string, startSymbol : string, pt : ParseTable) -> (Ast?, Token*?, Message*) = pluto mb.pipe.run.pluto.sdf.Parse
 
 data SyntaxStyler = java mb.pipe.run.spoofax.esv.StylingRules {}
-func esv2styler(langLoc : Resource, specDir : Resource, mainFile : Resource, includedFiles : Resource*) -> SyntaxStyler? = pluto mb.pipe.run.pluto.esv.GenerateStylingRules
-func esvStyle(ast : Ast, tokenStream : Token*, st : SyntaxStyler) -> Styling = pluto mb.pipe.run.pluto.esv.Style
+func esv2styler(langLoc : Resource, specDir : Resource, mainFile : Resource, includedFiles : Resource*) -> SyntaxStyler? = pluto mb.pipe.run.pluto.esv.GenerateStylerRules
+func esvStyle(tokenStream : Token*, st : SyntaxStyler) -> Styling = pluto mb.pipe.run.pluto.esv.Style
 
 
 /// Implement parse and style
@@ -44,7 +44,7 @@ func parse(text : string) -> (Ast?, Token*?, Message*) = {
   return jsglrParse(text, "Start", parseTable!);
 }
 
-func style(ast : Ast, tokenStream : Token*) -> Styling = {
+func style(tokenStream : Token*) -> Styling = {
   var langLoc = resolve("/Users/gohla/.m2/repository/org/metaborg/org.metaborg.meta.lang.esv/2.2.0/org.metaborg.meta.lang.esv-2.2.0.spoofax-language");
   var specDir = resolve(".");
   var mainFile = resolve("editor/Main.esv");
@@ -53,29 +53,35 @@ func style(ast : Ast, tokenStream : Token*) -> Styling = {
   var syntaxStyler = esv2styler(langLoc, specDir, mainFile, includedFiles);
   if(syntaxStyler == null) fail "Unable to build syntax styler";
   
-  return esvStyle(ast, tokenStream, syntaxStyler!);
+  return esvStyle(tokenStream, syntaxStyler!);
 }
 
 
 /// Implement pipelines
 // File pipeline
-func filePipeline(file : Resource) -> (Resource, Ast?, Token*?, Message*) = {
+func filePipeline(file : Resource) -> (Resource, string, Ast?, Token*?, Message*, Styling?) = {
   var text = readFile(file); // Creates a dependency to file changes
   var (ast, tokenStream, messages) = parse(text);
-  return (file, ast, tokenStream, messages);
+  var styling : Styling?;
+  if(tokenStream != null) {
+    styling = style(tokenStream!);
+  } else {
+    styling = null;
+  }
+  return (file, text, ast, tokenStream, messages, styling);
 }
 
 // Eclipse editor pipeline
 data EclipseEditor = java mb.pipe.run.eclipse.Editor {}
 func readEditorBuffer(EclipseEditor) -> string = pluto mb.pipe.run.eclipse.ReadEditorBuffer 
-func editorPipeline(editor : EclipseEditor) -> (EclipseEditor, Ast?, Token*?, Message*, Styling?) = {
+func editorPipeline(editor : EclipseEditor) -> (EclipseEditor, string, Ast?, Token*?, Message*, Styling?) = {
   var text = readEditorBuffer(editor); // Creates a dependency to editor buffer changes
   var (ast, tokenStream, messages) = parse(text);
   var styling : Styling?;
-  if(ast != null && tokenStream != null) {
-    styling = style(ast!, tokenStream!);
+  if(tokenStream != null) {
+    styling = style(tokenStream!);
   } else {
     styling = null;
   }
-  return (editor, ast, tokenStream, messages, styling);
+  return (editor, text, ast, tokenStream, messages, styling);
 }

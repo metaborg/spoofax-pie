@@ -1,5 +1,9 @@
 package mb.pipe.run.core.model.parse;
 
+import javax.annotation.Nullable;
+
+import org.spoofax.interpreter.terms.IStrategoTerm;
+
 import mb.pipe.run.core.model.region.IRegion;
 
 public class Token implements IToken {
@@ -7,13 +11,13 @@ public class Token implements IToken {
 
     private final IRegion region;
     private final ITokenType type;
-    private final String text;
+    private final @Nullable IStrategoTerm associatedTerm;
 
 
-    public Token(IRegion region, ITokenType type, String text) {
+    public Token(IRegion region, ITokenType type, @Nullable IStrategoTerm associatedTerm) {
         this.region = region;
         this.type = type;
-        this.text = text;
+        this.associatedTerm = associatedTerm;
     }
 
 
@@ -25,8 +29,12 @@ public class Token implements IToken {
         return type;
     }
 
-    @Override public String text() {
-        return text;
+    @Override public @Nullable IStrategoTerm associatedTerm() {
+        return associatedTerm;
+    }
+
+    @Override public String textPart(String fullText) {
+        return fullText.substring(region.startOffset(), region.endOffset() + 1);
     }
 
 
@@ -35,7 +43,7 @@ public class Token implements IToken {
         int result = 1;
         result = prime * result + region.hashCode();
         result = prime * result + type.hashCode();
-        result = prime * result + text.hashCode();
+        result = prime * result + ((associatedTerm == null) ? 0 : associatedTerm.hashCode());
         return result;
     }
 
@@ -51,12 +59,15 @@ public class Token implements IToken {
             return false;
         if(!type.equals(other.type))
             return false;
-        if(!text.equals(other.text))
+        if(associatedTerm == null) {
+            if(other.associatedTerm != null)
+                return false;
+        } else if(!associatedTerm.equals(other.associatedTerm))
             return false;
         return true;
     }
 
     @Override public String toString() {
-        return text;
+        return region.toString();
     }
 }

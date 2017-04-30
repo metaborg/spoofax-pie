@@ -1,6 +1,7 @@
 package mb.pipe.run.spoofax.sdf;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -61,25 +62,25 @@ public class Parser {
             final ImploderAttachment rootImploderAttachment = ImploderAttachment.get(ast);
             final ITokenizer tokenizer = rootImploderAttachment.getLeftToken().getTokenizer();
             final int tokenCount = tokenizer.getTokenCount();
-            final Collection<mb.pipe.run.core.model.parse.IToken> tokenStream =
-                Lists.newArrayListWithCapacity(tokenCount);
+            final List<mb.pipe.run.core.model.parse.IToken> tokenStream = Lists.newArrayListWithCapacity(tokenCount);
             int offset = -1;
             for(int i = 0; i < tokenCount; ++i) {
-                final IToken token = tokenizer.getTokenAt(i);
-                if(tokenizer.isAmbigous() && token.getStartOffset() < offset) {
+                final IToken jsglrToken = tokenizer.getTokenAt(i);
+                if(tokenizer.isAmbigous() && jsglrToken.getStartOffset() < offset) {
                     // In case of ambiguities, tokens inside the ambiguity are duplicated, ignore.
                     continue;
                 }
-                if(token.getStartOffset() > token.getEndOffset()) {
+                if(jsglrToken.getStartOffset() > jsglrToken.getEndOffset()) {
                     // Indicates an invalid region. Empty lists have regions like this.
                     continue;
                 }
-                if(offset >= token.getStartOffset()) {
+                if(offset >= jsglrToken.getStartOffset()) {
                     // Duplicate region, skip.
                     continue;
                 }
-                offset = token.getEndOffset();
-                tokenStream.add(convertToken(token));
+                offset = jsglrToken.getEndOffset();
+                final mb.pipe.run.core.model.parse.IToken token = convertToken(jsglrToken);
+                tokenStream.add(token);
             }
 
             final ParserErrorHandler errorHandler = new ParserErrorHandler(true, false, parser.getCollectedErrors());
@@ -99,8 +100,7 @@ public class Parser {
     private static mb.pipe.run.core.model.parse.IToken convertToken(IToken token) {
         final IRegion region = RegionFactory.fromToken(token);
         final ITokenType tokenType = convertTokenKind(token.getKind());
-        final String text = token.toString();
-        return new Token(region, tokenType, text);
+        return new Token(region, tokenType, (IStrategoTerm) token.getAstNode());
     }
 
     private static ITokenType convertTokenKind(int kind) {

@@ -3,36 +3,38 @@ package mb.pipe.run.spoofax.esv;
 import java.awt.Color;
 import java.util.Map;
 
-import javax.annotation.Nullable;
-
 import org.metaborg.spoofax.core.esv.ESVReader;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoConstructor;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
+import com.google.inject.Inject;
 
 import mb.pipe.run.core.log.ILogger;
+import mb.pipe.run.core.model.parse.ITokenType;
+import mb.pipe.run.core.model.parse.TokenConstants;
+import mb.pipe.run.core.model.style.IStyle;
+import mb.pipe.run.core.model.style.Style;
 
 public class StylingRulesFromESV {
     private final ILogger logger;
 
 
-    public StylingRulesFromESV(ILogger logger) {
+    @Inject public StylingRulesFromESV(ILogger logger) {
         this.logger = logger.forContext(getClass());
     }
 
 
-    public @Nullable StylingRules create(IStrategoAppl esv) {
+    public StylingRules create(IStrategoAppl esv) {
         final StylingRules styler = new StylingRules();
 
         final Iterable<IStrategoAppl> styleDefs = ESVReader.collectTerms(esv, "ColorDef");
-        final Map<String, Style> namedStyles = Maps.newHashMap();
+        final Map<String, IStyle> namedStyles = Maps.newHashMap();
         for(IStrategoAppl styleDef : styleDefs) {
             final IStrategoAppl styleTerm = (IStrategoAppl) styleDef.getSubterm(1);
             final IStrategoConstructor styleCons = styleTerm.getConstructor();
-            final Style style;
+            final IStyle style;
             if(styleCons.getName().equals("Attribute")) {
                 style = style(styleTerm);
             } else if(styleCons.getName().equals("AttributeRef")) {
@@ -51,13 +53,10 @@ public class StylingRulesFromESV {
         }
 
         final Iterable<IStrategoAppl> styleRules = ESVReader.collectTerms(esv, "ColorRule");
-        if(Iterables.isEmpty(styleRules)) {
-            return null;
-        }
         for(IStrategoAppl styleRule : styleRules) {
             final IStrategoAppl styleTerm = (IStrategoAppl) styleRule.getSubterm(1);
             final IStrategoConstructor styleCons = styleTerm.getConstructor();
-            final Style style;
+            final IStyle style;
             if(styleCons.getName().equals("Attribute")) {
                 style = style(styleTerm);
             } else if(styleCons.getName().equals("AttributeRef")) {
@@ -86,8 +85,9 @@ public class StylingRulesFromESV {
                 styler.mapSortToStyle(sort, style);
             } else if(nodeCons.getName().equals("Token")) {
                 final IStrategoAppl tokenAppl = (IStrategoAppl) node.getSubterm(0);
-                final String token = tokenAppl.getConstructor().getName();
-                styler.mapTokenToStyle(token, style);
+                final String tokenTypeStr = tokenAppl.getConstructor().getName();
+                final ITokenType tokenType = tokenType(tokenTypeStr);
+                styler.mapTokenTypeToStyle(tokenType, style);
             } else {
                 logger.error("Unhandled node " + nodeCons + " in style rule " + styleRule);
                 continue;
@@ -97,7 +97,7 @@ public class StylingRulesFromESV {
         return styler;
     }
 
-    private static Style style(IStrategoAppl attribute) {
+    private static IStyle style(IStrategoAppl attribute) {
         final Color color = color((IStrategoAppl) attribute.getSubterm(0));
         final Color backgroundColor = color((IStrategoAppl) attribute.getSubterm(1));
         final boolean bold;
@@ -139,6 +139,25 @@ public class StylingRulesFromESV {
                 return new Color(0, 0, 0);
             default:
                 return null;
+        }
+    }
+
+    private ITokenType tokenType(String str) {
+        switch(str) {
+            case "TK_IDENTIFIER":
+                return TokenConstants.identifierType;
+            case "TK_STRING":
+                return TokenConstants.stringType;
+            case "TK_NUMBER":
+                return TokenConstants.numberType;
+            case "TK_KEYWORD":
+                return TokenConstants.keywordType;
+            case "TK_OPERATOR":
+                return TokenConstants.operatorType;
+            case "TK_LAYOUT":
+                return TokenConstants.layoutType;
+            default:
+                return TokenConstants.unknownType;
         }
     }
 }

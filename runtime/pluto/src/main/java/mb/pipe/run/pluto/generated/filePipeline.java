@@ -117,14 +117,26 @@ public class filePipeline extends ABuilder<filePipeline.Input, filePipeline.Outp
     @SuppressWarnings("unchecked") @Override protected Output build(Input input) throws Throwable {
         requireOrigins();
 
-        final Result<mb.pipe.run.pluto.vfs.Read.Output> init2 = mb.pipe.run.pluto.vfs.Read.requireBuild(this, new mb.pipe.run.pluto.vfs.Read.Input(input.depDir, null, input.file));
-        String text = init2.output.getPipeVal();
-        final Result<parse.Output> init3 = parse.requireBuild(this, new parse.Input(input.depDir, null, text));
-        org.spoofax.interpreter.terms.IStrategoTerm ast = (org.spoofax.interpreter.terms.IStrategoTerm) init3.output.getPipeVal().get(0);
-        Collection<mb.pipe.run.core.model.parse.IToken> tokenStream = (Collection<mb.pipe.run.core.model.parse.IToken>) init3.output.getPipeVal().get(1);
-        Collection<mb.pipe.run.core.model.message.IMsg> messages = (Collection<mb.pipe.run.core.model.message.IMsg>) init3.output.getPipeVal().get(2);
+        final Result<mb.pipe.run.pluto.vfs.Read.Output> init4 = mb.pipe.run.pluto.vfs.Read.requireBuild(this, new mb.pipe.run.pluto.vfs.Read.Input(input.depDir, null, input.file));
+        String text = init4.output.getPipeVal();
+        final Result<parse.Output> init5 = parse.requireBuild(this, new parse.Input(input.depDir, null, text));
+        org.spoofax.interpreter.terms.IStrategoTerm ast = (org.spoofax.interpreter.terms.IStrategoTerm) init5.output.getPipeVal().get(0);
+        Collection<mb.pipe.run.core.model.parse.IToken> tokenStream = (Collection<mb.pipe.run.core.model.parse.IToken>) init5.output.getPipeVal().get(1);
+        Collection<mb.pipe.run.core.model.message.IMsg> messages = (Collection<mb.pipe.run.core.model.message.IMsg>) init5.output.getPipeVal().get(2);
+        @Nullable mb.pipe.run.core.model.style.IStyling styling;
         
-        return new Output(new mb.pipe.run.core.util.Tuple(ast, tokenStream, messages));
+        if(tokenStream != null)
+            {
+              final Result<style.Output> init6 = style.requireBuild(this, new style.Input(input.depDir, null, tokenStream));
+              styling = init6.output.getPipeVal();
+            }
+        else
+            {
+              
+              styling = null;
+            }
+        
+        return new Output(new mb.pipe.run.core.util.Tuple(input.file, text, ast, tokenStream, messages, styling));
         
     }
 }
