@@ -7,6 +7,7 @@ import java.util.Collection;
 import javax.annotation.Nullable;
 
 import org.apache.commons.vfs2.FileObject;
+import mb.pipe.run.core.model.IContext;
 import mb.pipe.run.pluto.util.ABuilder;
 import mb.pipe.run.pluto.util.AInput;
 import mb.pipe.run.pluto.util.Result;
@@ -23,20 +24,23 @@ public class style extends ABuilder<style.Input, style.Output> {
       private static final long serialVersionUID = 1L;
       
       public final Collection<mb.pipe.run.core.model.parse.IToken> tokenStream;
+      public final mb.pipe.run.core.model.IContext context;
       
-      public Input(File depDir, @Nullable Origin origin, Collection<mb.pipe.run.core.model.parse.IToken> tokenStream) {
-          super(depDir, origin);
+      public Input(IContext _internal_context, @Nullable Origin origin, Collection<mb.pipe.run.core.model.parse.IToken> tokenStream, mb.pipe.run.core.model.IContext context) {
+          super(_internal_context, origin);
           this.tokenStream = tokenStream;
+          this.context = context;
       }
       
       public mb.pipe.run.core.util.ITuple getPipeVal() {
-          return new mb.pipe.run.core.util.Tuple(tokenStream);
+          return new mb.pipe.run.core.util.Tuple(tokenStream, context);
       }
       
       @Override public int hashCode() {
           final int prime = 31;
           int result = 1;
           result = prime * result + ((tokenStream == null) ? 0 : tokenStream.hashCode());
+          result = prime * result + ((context == null) ? 0 : context.hashCode());
           return result;
       }
       
@@ -46,6 +50,7 @@ public class style extends ABuilder<style.Input, style.Output> {
           if(getClass() != obj.getClass()) return false;
           final Input other = (Input) obj;
           if(tokenStream == null) { if(other.tokenStream != null) return false; } else if(!tokenStream.equals(other.tokenStream)) return false;
+          if(context == null) { if(other.context != null) return false; } else if(!context.equals(other.context)) return false;
           return true;
       }
     }
@@ -111,27 +116,29 @@ public class style extends ABuilder<style.Input, style.Output> {
     }
 
     @Override public File persistentPath(Input input) {
-        return depFile("style", input.tokenStream);
+        return depFile("style", input.tokenStream, input.context);
     }
 
     @SuppressWarnings("unchecked") @Override protected Output build(Input input) throws Throwable {
         requireOrigins();
 
         
+        mb.pipe.run.core.vfs.IResource currentDir = input.context.currentDir();
+        
         mb.pipe.run.core.vfs.IResource langLoc = mb.pipe.run.core.vfs.VFSResource.resolveStatic("/Users/gohla/.m2/repository/org/metaborg/org.metaborg.meta.lang.esv/2.2.0/org.metaborg.meta.lang.esv-2.2.0.spoofax-language");
         
-        mb.pipe.run.core.vfs.IResource specDir = mb.pipe.run.core.vfs.VFSResource.resolveStatic(".");
+        mb.pipe.run.core.vfs.IResource specDir = currentDir;
         
-        mb.pipe.run.core.vfs.IResource mainFile = mb.pipe.run.core.vfs.VFSResource.resolveStatic("editor/Main.esv");
+        mb.pipe.run.core.vfs.IResource mainFile = currentDir.resolve("editor/Main.esv");
         
         Collection<mb.pipe.run.core.vfs.IResource> includedFiles = Lists.newArrayList();
-        final Result<mb.pipe.run.pluto.esv.GenerateStylerRules.Output> init2 = mb.pipe.run.pluto.esv.GenerateStylerRules.requireBuild(this, new mb.pipe.run.pluto.esv.GenerateStylerRules.Input(input.depDir, null, langLoc, specDir, mainFile, includedFiles));
+        final Result<mb.pipe.run.pluto.esv.GenerateStylerRules.Output> init2 = mb.pipe.run.pluto.esv.GenerateStylerRules.requireBuild(this, new mb.pipe.run.pluto.esv.GenerateStylerRules.Input(input.context, null, langLoc, specDir, mainFile, includedFiles));
         @Nullable mb.pipe.run.spoofax.esv.StylingRules syntaxStyler = init2.output.getPipeVal();
         
         if(syntaxStyler == null)
             
             throw new RuntimeException("Unable to build syntax styler".toString());
-        final Result<mb.pipe.run.pluto.esv.Style.Output> init3 = mb.pipe.run.pluto.esv.Style.requireBuild(this, new mb.pipe.run.pluto.esv.Style.Input(input.depDir, null, input.tokenStream, syntaxStyler));
+        final Result<mb.pipe.run.pluto.esv.Style.Output> init3 = mb.pipe.run.pluto.esv.Style.requireBuild(this, new mb.pipe.run.pluto.esv.Style.Input(input.context, null, input.tokenStream, syntaxStyler));
         return new Output(init3.output.getPipeVal());
         
     }

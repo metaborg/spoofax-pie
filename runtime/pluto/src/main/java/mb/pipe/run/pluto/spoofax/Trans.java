@@ -9,7 +9,6 @@ import javax.annotation.Nullable;
 import org.apache.commons.vfs2.FileObject;
 import org.metaborg.core.MetaborgException;
 import org.metaborg.core.action.ITransformGoal;
-import org.metaborg.core.context.IContext;
 import org.metaborg.core.language.ILanguageImpl;
 import org.metaborg.core.language.LanguageIdentifier;
 import org.metaborg.core.project.IProject;
@@ -30,6 +29,7 @@ import build.pluto.builder.BuildRequest;
 import build.pluto.builder.Builder;
 import build.pluto.builder.factory.BuilderFactory;
 import build.pluto.dependency.Origin;
+import mb.pipe.run.core.model.IContext;
 import mb.pipe.run.core.vfs.IResource;
 import mb.pipe.run.core.vfs.VFSResource;
 import mb.pipe.run.pluto.util.ABuilder;
@@ -47,9 +47,9 @@ public class Trans extends ABuilder<Trans.Input, Trans.Output> {
         public final ITransformGoal goal;
 
 
-        public Input(File depDir, @Nullable Origin origin, LanguageIdentifier langId, IResource project, IResource file,
-            @Nullable IStrategoTerm ast, ITransformGoal goal) {
-            super(depDir, origin);
+        public Input(IContext context, @Nullable Origin origin, LanguageIdentifier langId, IResource project,
+            IResource file, @Nullable IStrategoTerm ast, ITransformGoal goal) {
+            super(context, origin);
 
             this.langId = langId;
             this.project = project;
@@ -121,7 +121,7 @@ public class Trans extends ABuilder<Trans.Input, Trans.Output> {
         return requireBuild(requiree, input, Trans.class, Input.class).output;
     }
 
-    
+
     public Trans(Input input) {
         super(input);
     }
@@ -152,7 +152,8 @@ public class Trans extends ABuilder<Trans.Input, Trans.Output> {
         final ISpoofaxInputUnit inputUnit = spoofax().unitService.inputUnit(resource, "hack", langImpl, null);
         final ISpoofaxParseUnit parseUnit =
             spoofax().unitService.parseUnit(inputUnit, new ParseContrib(true, true, input.ast, Iterables2.empty(), -1));
-        final IContext spoofaxContext = spoofax().contextService.get(project.location(), project, langImpl);
+        final org.metaborg.core.context.IContext spoofaxContext =
+            spoofax().contextService.get(project.location(), project, langImpl);
         final ISpoofaxAnalyzeUnit analyzeUnit = spoofax().unitService.analyzeUnit(parseUnit,
             new AnalyzeContrib(true, true, true, input.ast, Iterables2.empty(), -1), spoofaxContext);
 
@@ -165,7 +166,7 @@ public class Trans extends ABuilder<Trans.Input, Trans.Output> {
             final FileObject outputResource = output.output();
             final @Nullable IResource writtenFile;
             if(outputResource != null) {
-                provide(outputResource);
+                provide(toFile(outputResource));
                 writtenFile = new VFSResource(outputResource);
             } else {
                 writtenFile = null;

@@ -4,8 +4,8 @@ public class ErrorMsgSeverity implements IMsgSeverity {
     private static final long serialVersionUID = 1L;
 
 
-    @Override public void accept(MsgSeverityVisitor visitor, IMsg message) {
-        visitor.error(message);
+    @Override public <T> T accept(MsgSeverityVisitor<T> visitor, IMsg message) {
+        return visitor.error(message);
     }
 
 

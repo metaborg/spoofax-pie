@@ -7,6 +7,7 @@ import java.util.Collection;
 import javax.annotation.Nullable;
 
 import org.apache.commons.vfs2.FileObject;
+import mb.pipe.run.core.model.IContext;
 import mb.pipe.run.pluto.util.ABuilder;
 import mb.pipe.run.pluto.util.AInput;
 import mb.pipe.run.pluto.util.Result;
@@ -23,20 +24,23 @@ public class filePipeline extends ABuilder<filePipeline.Input, filePipeline.Outp
       private static final long serialVersionUID = 1L;
       
       public final mb.pipe.run.core.vfs.IResource file;
+      public final mb.pipe.run.core.model.IContext context;
       
-      public Input(File depDir, @Nullable Origin origin, mb.pipe.run.core.vfs.IResource file) {
-          super(depDir, origin);
+      public Input(IContext _internal_context, @Nullable Origin origin, mb.pipe.run.core.vfs.IResource file, mb.pipe.run.core.model.IContext context) {
+          super(_internal_context, origin);
           this.file = file;
+          this.context = context;
       }
       
       public mb.pipe.run.core.util.ITuple getPipeVal() {
-          return new mb.pipe.run.core.util.Tuple(file);
+          return new mb.pipe.run.core.util.Tuple(file, context);
       }
       
       @Override public int hashCode() {
           final int prime = 31;
           int result = 1;
           result = prime * result + ((file == null) ? 0 : file.hashCode());
+          result = prime * result + ((context == null) ? 0 : context.hashCode());
           return result;
       }
       
@@ -46,6 +50,7 @@ public class filePipeline extends ABuilder<filePipeline.Input, filePipeline.Outp
           if(getClass() != obj.getClass()) return false;
           final Input other = (Input) obj;
           if(file == null) { if(other.file != null) return false; } else if(!file.equals(other.file)) return false;
+          if(context == null) { if(other.context != null) return false; } else if(!context.equals(other.context)) return false;
           return true;
       }
     }
@@ -111,15 +116,15 @@ public class filePipeline extends ABuilder<filePipeline.Input, filePipeline.Outp
     }
 
     @Override public File persistentPath(Input input) {
-        return depFile("filePipeline", input.file);
+        return depFile("filePipeline", input.file, input.context);
     }
 
     @SuppressWarnings("unchecked") @Override protected Output build(Input input) throws Throwable {
         requireOrigins();
 
-        final Result<mb.pipe.run.pluto.vfs.Read.Output> init4 = mb.pipe.run.pluto.vfs.Read.requireBuild(this, new mb.pipe.run.pluto.vfs.Read.Input(input.depDir, null, input.file));
+        final Result<mb.pipe.run.pluto.vfs.Read.Output> init4 = mb.pipe.run.pluto.vfs.Read.requireBuild(this, new mb.pipe.run.pluto.vfs.Read.Input(input.context, null, input.file));
         String text = init4.output.getPipeVal();
-        final Result<parse.Output> init5 = parse.requireBuild(this, new parse.Input(input.depDir, null, text));
+        final Result<parse.Output> init5 = parse.requireBuild(this, new parse.Input(input.context, null, text, input.context));
         org.spoofax.interpreter.terms.IStrategoTerm ast = (org.spoofax.interpreter.terms.IStrategoTerm) init5.output.getPipeVal().get(0);
         Collection<mb.pipe.run.core.model.parse.IToken> tokenStream = (Collection<mb.pipe.run.core.model.parse.IToken>) init5.output.getPipeVal().get(1);
         Collection<mb.pipe.run.core.model.message.IMsg> messages = (Collection<mb.pipe.run.core.model.message.IMsg>) init5.output.getPipeVal().get(2);
@@ -127,7 +132,7 @@ public class filePipeline extends ABuilder<filePipeline.Input, filePipeline.Outp
         
         if(tokenStream != null)
             {
-              final Result<style.Output> init6 = style.requireBuild(this, new style.Input(input.depDir, null, tokenStream));
+              final Result<style.Output> init6 = style.requireBuild(this, new style.Input(input.context, null, tokenStream, input.context));
               styling = init6.output.getPipeVal();
             }
         else

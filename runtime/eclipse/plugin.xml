@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+  <!-- Startup -->
+  <extension
+    point="org.eclipse.ui.startup"
+  >
+    <startup class="mb.pipe.run.eclipse.PipePlugin"/>
+  </extension>
+
+  
+  <!-- Editor -->
+  <extension
+    point="org.eclipse.ui.editors"
+  >
+    <editor
+      id="pipe.run.eclipse.editor"
+      name="Pipe Editor"
+      icon="icons/editor.gif"
+      contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
+      class="mb.pipe.run.eclipse.editor.PipeEditor"
+      extensions="min"
+    />
+  </extension>
+  <!-- Editor context -->
+  <extension point="org.eclipse.ui.contexts">
+    <context 
+      id="pipe.run.eclipse.editor.context" 
+      parentId="org.eclipse.ui.textEditorScope"
+      name="Editing Pipe files"
+      description="Editing Pipe files"
+    />
+  </extension>
+  
+  <!-- Nature, builder, and support commands -->
+  <extension
+    id="nature"
+    name="Pipe nature"
+    point="org.eclipse.core.resources.natures"
+  >
+    <runtime>
+      <run class="mb.pipe.run.eclipse.nature.PipeNature"/>
+    </runtime>
+    <builder id="pipe.run.eclipse.builder" />
+  </extension>
+  <extension
+    id="builder"
+    name="Pipe builder"
+    point="org.eclipse.core.resources.builders"
+  >
+    <builder
+      callOnEmptyDelta="false"
+      hasNature="true"
+      isConfigurable="false"
+      supportsConfigurations="false"
+    >
+      <run class="mb.pipe.run.eclipse.build.PipeProjectBuilder"/>
+    </builder>
+  </extension>
+  <extension point="org.eclipse.ui.commands">
+    <command id="pipe.run.eclipse.command.nature.add" name="Add Pipe nature"/>
+    <command id="pipe.run.eclipse.command.nature.remove" name="Remove Pipe nature"/>
+  </extension>  
+   <extension point="org.eclipse.ui.handlers">
+    <handler
+      commandId="pipe.run.eclipse.command.nature.add"
+      class="mb.pipe.run.eclipse.nature.AddNatureHandler"
+    />
+    <handler
+      commandId="pipe.run.eclipse.command.nature.remove"
+      class="mb.pipe.run.eclipse.nature.RemoveNatureHandler"
+    />
+  </extension>
+  
+  <!-- Markers -->
+  <extension
+    id="pipe.run.eclipse.marker"
+    point="org.eclipse.core.resources.markers"
+  >
+    <super type="org.eclipse.core.resources.textmarker" />
+    <persistent value="true" />
+  </extension>
+  <extension
+    id="pipe.run.eclipse.marker.info"
+    point="org.eclipse.core.resources.markers"
+    name="Pipe info marker"
+  >
+    <super type="pipe.run.eclipse.marker"/>
+    <persistent value="true" />
+  </extension>
+  <extension
+    id="pipe.run.eclipse.marker.warning"
+    point="org.eclipse.core.resources.markers"
+    name="Pipe warning marker"
+  >
+    <super type="pipe.run.eclipse.marker"/>
+    <persistent value="true" />
+  </extension>
+  <extension
+    id="pipe.run.eclipse.marker.error"
+    point="org.eclipse.core.resources.markers"
+    name="Pipe error marker"
+  >
+    <super type="pipe.run.eclipse.marker"/>
+    <persistent value="true" />
+  </extension>
+  <extension
+    point="org.eclipse.ui.editors.annotationTypes"
+  >
+    <type
+      markerType="pipe.run.eclipse.marker.info"
+      super="org.eclipse.ui.workbench.texteditor.info"
+      markerSeverity="0"
+      name="Pipe info annotation"
+    />
+    <type
+      markerType="pipe.run.eclipse.marker.warning"
+      super="org.eclipse.ui.workbench.texteditor.warning"
+      markerSeverity="1"
+      name="Pipe warning annotation"
+    />
+    <type
+      markerType="pipe.run.eclipse.marker.error"
+      super="org.eclipse.ui.workbench.texteditor.error"
+      markerSeverity="2"
+      name="Pipe error annotation"
+    />
+  </extension>
+</plugin>

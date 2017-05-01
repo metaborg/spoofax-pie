@@ -13,6 +13,7 @@ import build.pluto.builder.BuildRequest;
 import build.pluto.builder.Builder;
 import build.pluto.builder.factory.BuilderFactory;
 import build.pluto.dependency.Origin;
+import mb.pipe.run.core.model.IContext;
 import mb.pipe.run.core.model.message.IMsg;
 import mb.pipe.run.core.model.parse.IToken;
 import mb.pipe.run.core.util.ITuple;
@@ -33,8 +34,8 @@ public class Parse extends ABuilder<Parse.Input, Parse.Output> {
         public final Table table;
 
 
-        public Input(File depDir, @Nullable Origin origin, String text, String startSymbol, Table table) {
-            super(depDir, origin);
+        public Input(IContext context, @Nullable Origin origin, String text, String startSymbol, Table table) {
+            super(context, origin);
 
             this.text = text;
             this.startSymbol = startSymbol;

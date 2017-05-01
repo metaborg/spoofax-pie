@@ -10,6 +10,7 @@ import org.apache.commons.vfs2.FileSystemException;
 
 import com.google.common.collect.Lists;
 
+import mb.pipe.run.core.PipeRunEx;
 import mb.pipe.run.core.StaticPipeFacade;
 
 public class VFSResource implements Serializable, IResource {
@@ -50,10 +51,14 @@ public class VFSResource implements Serializable, IResource {
         return uri;
     }
 
-    @Override public IResource resolve(String subUri) throws FileSystemException {
+    @Override public IResource resolve(String subUri) {
         init();
-        final FileObject resolved = fileObject.resolveFile(subUri);
-        return new VFSResource(resolved);
+        try {
+            final FileObject resolved = fileObject.resolveFile(subUri);
+            return new VFSResource(resolved);
+        } catch(FileSystemException e) {
+            throw new PipeRunEx("Resolving uri " + subUri + " in " + uri + " failed", e);
+        }
     }
 
 

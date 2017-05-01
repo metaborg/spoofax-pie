@@ -1,24 +1,27 @@
 /// Generic library
+data Context = java mb.pipe.run.core.model.IContext {
+  func currentDir() -> Resource
+}
 // Resource
 data Resource = java mb.pipe.run.core.vfs.IResource {
   func uri() -> string
   
   func resolve(string) -> Resource
-  func resolveWithExt(uri : string, ext : string) -> Resource
+  func resolveAll(string*) -> Resource*
 }
 func readFile(Resource) -> string = pluto mb.pipe.run.pluto.vfs.Read
-func resolve(string) -> Resource = java mb.pipe.run.core.vfs.VFSResource#resolveStatic
-func resolveAll(string*) -> Resource* = java mb.pipe.run.core.vfs.VFSResource#resolveAllStatic
+func resolveAbs(string) -> Resource = java mb.pipe.run.core.vfs.VFSResource#resolveStatic
+func resolveAllAbs(string*) -> Resource* = java mb.pipe.run.core.vfs.VFSResource#resolveAllStatic
 
 
 /// Interface that Spoofax expects from a language
 data Message = java mb.pipe.run.core.model.message.IMsg {}
 data Ast = java org.spoofax.interpreter.terms.IStrategoTerm {}
 data Token = java mb.pipe.run.core.model.parse.IToken {}
-// func parse(text : string) -> (Ast?, Token*?, Message*)
+// func parse(text : string, context : Context) -> (Ast?, Token*?, Message*)
 
 data Styling = java mb.pipe.run.core.model.style.IStyling {}
-// func style(tokenStream : Token*) -> Styling
+// func style(tokenStream : Token*, context : Context) -> Styling
 
 
 /// Library with functions to build SDF and ESV specifications
@@ -32,10 +35,11 @@ func esvStyle(tokenStream : Token*, st : SyntaxStyler) -> Styling = pluto mb.pip
 
 
 /// Implement parse and style
-func parse(text : string) -> (Ast?, Token*?, Message*) = {
-  var langLoc = resolve("/Users/gohla/.m2/repository/org/metaborg/org.metaborg.meta.lang.template/2.2.0/org.metaborg.meta.lang.template-2.2.0.spoofax-language");
-  var specDir = resolve(".");  
-  var mainFile = resolve("syntax/minimal.sdf3");
+func parse(text : string, context : Context) -> (Ast?, Token*?, Message*) = {
+  var currentDir = context.currentDir();
+  var langLoc = resolveAbs("/Users/gohla/.m2/repository/org/metaborg/org.metaborg.meta.lang.template/2.2.0/org.metaborg.meta.lang.template-2.2.0.spoofax-language");
+  var specDir = currentDir; 
+  var mainFile = currentDir.resolve("syntax/minimal.sdf3");
   var includedFiles : Resource* = [];
 
   var parseTable = sdf2table(langLoc, specDir, mainFile, includedFiles);
@@ -44,10 +48,11 @@ func parse(text : string) -> (Ast?, Token*?, Message*) = {
   return jsglrParse(text, "Start", parseTable!);
 }
 
-func style(tokenStream : Token*) -> Styling = {
-  var langLoc = resolve("/Users/gohla/.m2/repository/org/metaborg/org.metaborg.meta.lang.esv/2.2.0/org.metaborg.meta.lang.esv-2.2.0.spoofax-language");
-  var specDir = resolve(".");
-  var mainFile = resolve("editor/Main.esv");
+func style(tokenStream : Token*, context : Context) -> Styling = {
+  var currentDir = context.currentDir();
+  var langLoc = resolveAbs("/Users/gohla/.m2/repository/org/metaborg/org.metaborg.meta.lang.esv/2.2.0/org.metaborg.meta.lang.esv-2.2.0.spoofax-language");
+  var specDir = currentDir;
+  var mainFile = currentDir.resolve("editor/Main.esv");
   var includedFiles : Resource* = [];
   
   var syntaxStyler = esv2styler(langLoc, specDir, mainFile, includedFiles);
@@ -59,12 +64,12 @@ func style(tokenStream : Token*) -> Styling = {
 
 /// Implement pipelines
 // File pipeline
-func filePipeline(file : Resource) -> (Resource, string, Ast?, Token*?, Message*, Styling?) = {
+func filePipeline(file : Resource, context : Context) -> (Resource, string, Ast?, Token*?, Message*, Styling?) = {
   var text = readFile(file); // Creates a dependency to file changes
-  var (ast, tokenStream, messages) = parse(text);
+  var (ast, tokenStream, messages) = parse(text, context);
   var styling : Styling?;
   if(tokenStream != null) {
-    styling = style(tokenStream!);
+    styling = style(tokenStream!, context);
   } else {
     styling = null;
   }
@@ -72,16 +77,13 @@ func filePipeline(file : Resource) -> (Resource, string, Ast?, Token*?, Message*
 }
 
 // Eclipse editor pipeline
-data EclipseEditor = java mb.pipe.run.eclipse.Editor {}
-func readEditorBuffer(EclipseEditor) -> string = pluto mb.pipe.run.eclipse.ReadEditorBuffer 
-func editorPipeline(editor : EclipseEditor) -> (EclipseEditor, string, Ast?, Token*?, Message*, Styling?) = {
-  var text = readEditorBuffer(editor); // Creates a dependency to editor buffer changes
-  var (ast, tokenStream, messages) = parse(text);
+func editorPipeline(text : string, context : Context) -> (string, Ast?, Token*?, Message*, Styling?) = {
+  var (ast, tokenStream, messages) = parse(text, context);
   var styling : Styling?;
   if(tokenStream != null) {
-    styling = style(tokenStream!);
+    styling = style(tokenStream!, context);
   } else {
     styling = null;
   }
-  return (editor, text, ast, tokenStream, messages, styling);
+  return (text, ast, tokenStream, messages, styling);
 }

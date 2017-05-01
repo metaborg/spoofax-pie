@@ -21,6 +21,7 @@ import build.pluto.builder.factory.BuilderFactory;
 import build.pluto.dependency.Origin;
 import build.pluto.output.OutputTransient;
 import build.pluto.stamp.FileHashStamper;
+import mb.pipe.run.core.model.IContext;
 import mb.pipe.run.core.vfs.IResource;
 import mb.pipe.run.pluto.util.ABuilder;
 import mb.pipe.run.pluto.util.AInput;
@@ -33,8 +34,8 @@ public class LoadLang extends ABuilder<LoadLang.Input, OutputTransient<LoadLang.
         public final IResource location;
 
 
-        public Input(File depDir, @Nullable Origin origin, IResource location) {
-            super(depDir, origin);
+        public Input(IContext context, @Nullable Origin origin, IResource location) {
+            super(context, origin);
             this.location = location;
         }
     }
@@ -97,7 +98,7 @@ public class LoadLang extends ABuilder<LoadLang.Input, OutputTransient<LoadLang.
         final IComponentCreationConfigRequest request;
         if(langResource.isFile()) {
             request = spoofax().languageComponentFactory.requestFromArchive(langResource);
-            require(toFile(langResource), FileHashStamper.instance);
+            require(toFile(input.location), FileHashStamper.instance);
         } else {
             request = spoofax().languageComponentFactory.requestFromDirectory(langResource);
             // HACK: hardcode required files for language in directory.

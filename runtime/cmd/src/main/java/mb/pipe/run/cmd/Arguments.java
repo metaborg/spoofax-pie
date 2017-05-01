@@ -8,6 +8,7 @@ public class Arguments {
     @Parameter(names = { "--continuous" },
         description = "Listens for changes and continuously builds") public boolean continuous;
 
+    @Parameter(names = { "--file" }, description = "File to parse and style") public String file;
 
     @Parameter(names = { "-h", "--help" }, description = "Shows this usage information",
         help = true) public boolean help;

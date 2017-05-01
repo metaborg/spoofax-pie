@@ -7,7 +7,7 @@ import org.apache.commons.vfs2.FileObject;
 public interface IResource {
     String uri();
 
-    IResource resolve(String subUri) throws IOException;
+    IResource resolve(String subUri);
 
     FileObject fileObject(); // HACK: getter for Apache VFS FileObjects
 }

@@ -5,13 +5,12 @@ import java.io.IOException;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.vfs2.FileObject;
-
 import build.pluto.builder.BuildRequest;
 import build.pluto.builder.Builder;
 import build.pluto.builder.factory.BuilderFactory;
 import build.pluto.dependency.Origin;
 import build.pluto.stamp.FileHashStamper;
+import mb.pipe.run.core.model.IContext;
 import mb.pipe.run.core.vfs.IResource;
 import mb.pipe.run.pluto.util.ABuilder;
 import mb.pipe.run.pluto.util.AInput;
@@ -24,14 +23,14 @@ public class Read extends ABuilder<Read.Input, Read.Output> {
         public final IResource file;
 
 
-        public Input(File depDir, @Nullable Origin origin, IResource file) {
-            super(depDir, origin);
+        public Input(IContext context, @Nullable Origin origin, IResource file) {
+            super(context, origin);
 
             this.file = file;
         }
 
-        public Input(File depDir, IResource file) {
-            this(depDir, null, file);
+        public Input(IContext context, IResource file) {
+            this(context, null, file);
         }
     }
 
@@ -45,11 +44,11 @@ public class Read extends ABuilder<Read.Input, Read.Output> {
             this.text = text;
         }
 
-        
+
         public String getPipeVal() {
             return text;
         }
-        
+
 
         @Override public int hashCode() {
             final int prime = 31;
@@ -107,9 +106,8 @@ public class Read extends ABuilder<Read.Input, Read.Output> {
     }
 
     @Override protected Output build(Input input) throws Throwable {
-        final FileObject resource = input.file.fileObject();
-        require(toFile(resource), FileHashStamper.instance);
-        final String text = spoofax().sourceTextService.text(resource);
+        require(toFile(input.file), FileHashStamper.instance);
+        final String text = spoofax().sourceTextService.text(input.file.fileObject());
         return new Output(text);
     }
 }

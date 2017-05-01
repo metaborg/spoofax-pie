@@ -17,6 +17,7 @@ import build.pluto.builder.Builder;
 import build.pluto.builder.factory.BuilderFactory;
 import build.pluto.dependency.Origin;
 import mb.pipe.run.core.PipeRunEx;
+import mb.pipe.run.core.model.IContext;
 import mb.pipe.run.core.vfs.IResource;
 import mb.pipe.run.pluto.spoofax.LoadLang;
 import mb.pipe.run.pluto.spoofax.LoadProject;
@@ -39,9 +40,9 @@ public class GenerateStylerRules extends ABuilder<GenerateStylerRules.Input, Gen
         public final Collection<IResource> includedFiles;
 
 
-        public Input(File depDir, @Nullable Origin origin, IResource langLoc, IResource specDir, IResource mainFile,
-            Collection<IResource> includedFiles) {
-            super(depDir, origin);
+        public Input(IContext context, @Nullable Origin origin, IResource langLoc, IResource specDir,
+            IResource mainFile, Collection<IResource> includedFiles) {
+            super(context, origin);
 
             this.langLoc = langLoc;
             this.specDir = specDir;
@@ -122,31 +123,31 @@ public class GenerateStylerRules extends ABuilder<GenerateStylerRules.Input, Gen
         requireOrigins();
 
         // Read input file
-        final String text = Read.build(this, new Read.Input(input.depDir, input.mainFile));
+        final String text = Read.build(this, new Read.Input(input.context, input.mainFile));
 
         // Create dependencies to included files
         for(IResource includedFile : input.includedFiles) {
-            require(includedFile.fileObject());
+            require(includedFile);
         }
 
         // Load ESV, required for parsing, analysis, and transformation.
-        final ILanguageImpl langImpl = LoadLang.build(this, new LoadLang.Input(input.depDir, null, input.langLoc));
+        final ILanguageImpl langImpl = LoadLang.build(this, new LoadLang.Input(input.context, null, input.langLoc));
         final LanguageIdentifier langId = langImpl.id();
 
         // Parse input file
         final @Nullable IStrategoTerm ast =
-            Parse.build(this, new Parse.Input(input.depDir, null, langId, input.mainFile, text));
+            Parse.build(this, new Parse.Input(input.context, null, langId, input.mainFile, text));
 
         if(ast == null) {
             throw new PipeRunEx("Main ESV file " + input.mainFile + " could not be parsed");
         }
 
         // Load project, required for analysis and transformation.
-        LoadProject.build(this, new LoadProject.Input(input.depDir, null, input.specDir));
+        LoadProject.build(this, new LoadProject.Input(input.context, null, input.specDir));
 
         // Transform
         final Trans.Output output = Trans.build(this,
-            new Trans.Input(input.depDir, null, langId, input.langLoc, input.mainFile, ast, new CompileGoal()));
+            new Trans.Input(input.context, null, langId, input.langLoc, input.mainFile, ast, new CompileGoal()));
 
         if(output.ast == null) {
             throw new PipeRunEx("Main ESV file " + input.mainFile + " could not be compiled");

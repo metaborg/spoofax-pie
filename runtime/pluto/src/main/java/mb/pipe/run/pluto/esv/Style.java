@@ -10,6 +10,7 @@ import build.pluto.builder.BuildRequest;
 import build.pluto.builder.Builder;
 import build.pluto.builder.factory.BuilderFactory;
 import build.pluto.dependency.Origin;
+import mb.pipe.run.core.model.IContext;
 import mb.pipe.run.core.model.parse.IToken;
 import mb.pipe.run.core.model.style.IStyling;
 import mb.pipe.run.pluto.util.ABuilder;
@@ -26,8 +27,8 @@ public class Style extends ABuilder<Style.Input, Style.Output> {
         public final StylingRules stylingRules;
 
 
-        public Input(File depDir, @Nullable Origin origin, Collection<IToken> tokenStream, StylingRules stylingRules) {
-            super(depDir, origin);
+        public Input(IContext context, @Nullable Origin origin, Collection<IToken> tokenStream, StylingRules stylingRules) {
+            super(context, origin);
 
             this.tokenStream = tokenStream;
             this.stylingRules = stylingRules;

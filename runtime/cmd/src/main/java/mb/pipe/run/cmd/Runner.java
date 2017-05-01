@@ -1,6 +1,5 @@
 package mb.pipe.run.cmd;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
@@ -20,7 +19,6 @@ import javax.annotation.Nullable;
 import org.apache.commons.vfs2.AllFileSelector;
 import org.apache.commons.vfs2.FileObject;
 import org.metaborg.core.MetaborgException;
-import org.metaborg.core.build.CommonPaths;
 import org.metaborg.core.resource.IResourceService;
 import org.metaborg.util.log.ILogger;
 import org.metaborg.util.log.LoggerUtils;
@@ -35,13 +33,16 @@ import build.pluto.builder.BuildManager;
 import build.pluto.builder.BuildRequest;
 import build.pluto.dependency.database.XodusDatabase;
 import build.pluto.util.LogReporting;
+import mb.pipe.run.core.model.Context;
+import mb.pipe.run.core.model.IContext;
 import mb.pipe.run.core.model.message.IMsg;
 import mb.pipe.run.core.model.parse.IToken;
 import mb.pipe.run.core.model.style.IStyling;
 import mb.pipe.run.core.model.style.ITokenStyle;
 import mb.pipe.run.core.vfs.IResource;
-import mb.pipe.run.pluto.generated.main;
-import mb.pipe.run.pluto.generated.main.Output;
+import mb.pipe.run.core.vfs.VFSResource;
+import mb.pipe.run.pluto.generated.filePipeline;
+import mb.pipe.run.pluto.generated.filePipeline.Output;
 
 @SuppressWarnings("restriction")
 public class Runner {
@@ -82,16 +83,10 @@ public class Runner {
         }
 
         final FileObject currentDir = resourceService.resolve(".");
-        final CommonPaths paths = new CommonPaths(currentDir);
-        final FileObject depLoc = paths.targetDir().resolveFile("dep");
-        final File depDir = resourceService.localPath(depLoc);
-        if(depDir == null) {
-            throw new MetaborgException(
-                "Language specification directory " + currentDir + " is not on the local file system");
-        }
+        final IContext context = new Context(new VFSResource(currentDir));
 
-        clean(depLoc, arguments);
-        build(depDir, arguments);
+        clean(context, arguments);
+        build(context, arguments);
 
         if(!arguments.continuous) {
             return 0;
@@ -126,7 +121,7 @@ public class Runner {
                     build |= relevantChange;
                 }
                 if(build) {
-                    build(depDir, arguments);
+                    build(context, arguments);
                 }
                 key.reset();
             }
@@ -136,8 +131,10 @@ public class Runner {
     }
 
 
-    private static void build(File depDir, Arguments arguments) throws Throwable {
-        final BuildRequest<?, Output, ?, ?> buildRequest = main.request(new main.Input(depDir, null));
+    private static void build(IContext context, Arguments arguments) throws Throwable {
+        final IResource file = new VFSResource(arguments.file);
+        final BuildRequest<?, Output, ?, ?> buildRequest =
+            filePipeline.request(new filePipeline.Input(context, null, file, context));
 
         try(final BuildManager buildManager =
             new BuildManager(new LogReporting(), XodusDatabase.createFileDatabase("pipeline-experiment"))) {
@@ -190,12 +187,12 @@ public class Runner {
         }
     }
 
-    private static void clean(FileObject depLoc, Arguments arguments) throws Throwable {
+    private static void clean(IContext context, Arguments arguments) throws Throwable {
         if(!arguments.clean) {
             return;
         }
 
-        depLoc.delete(new AllFileSelector());
+        context.persistentDir().fileObject().delete(new AllFileSelector());
         try(final BuildManager buildManager =
             new BuildManager(new LogReporting(), XodusDatabase.createFileDatabase("pipeline-experiment"))) {
             buildManager.resetDynamicAnalysis();

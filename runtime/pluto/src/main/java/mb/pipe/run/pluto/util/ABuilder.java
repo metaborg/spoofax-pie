@@ -19,7 +19,9 @@ import build.pluto.dependency.Origin;
 import build.pluto.output.Output;
 import build.pluto.output.OutputTransient;
 import mb.pipe.run.core.PipeFacade;
+import mb.pipe.run.core.PipeRunEx;
 import mb.pipe.run.core.StaticPipeFacade;
+import mb.pipe.run.core.vfs.IResource;
 import mb.pipe.run.spoofax.util.StaticSpoofax;
 
 public abstract class ABuilder<In extends AInput, Out extends Output> extends Builder<In, Out> {
@@ -70,31 +72,57 @@ public abstract class ABuilder<In extends AInput, Out extends Output> extends Bu
     protected static PipeFacade pipe() {
         return StaticPipeFacade.facade();
     }
-    
+
+
+    protected static File toFile(IResource resource) {
+        final File file = pipe().resourceSrv.localPath(resource);
+        if(file == null) {
+            throw new PipeRunEx("Cannot convert " + resource + " to a local file, it is not on the local file system");
+        }
+        return file;
+    }
+
+    protected static File toFileReplicate(IResource resource) {
+        return pipe().resourceSrv.localFile(resource);
+    }
+
+    protected void require(IResource resource) {
+        require(toFile(resource));
+    }
+
+    protected void provide(IResource resource) {
+        provide(toFile(resource));
+    }
+
+
     protected static File toFile(FileObject fileObject) {
-        return spoofax().resourceService.localPath(fileObject);
+        final File file = spoofax().resourceService.localPath(fileObject);
+        if(file == null) {
+            throw new PipeRunEx(
+                "Cannot convert " + fileObject + " to a local file, it is not on the local file system");
+        }
+        return file;
     }
 
-    protected static File toFileReplicate(FileObject fileObject) {
-        return spoofax().resourceService.localFile(fileObject);
-    }
 
-    protected void require(FileObject file) {
-        require(toFile(file));
-    }
-
-    protected void provide(FileObject file) {
-        provide(toFile(file));
+    protected File persistentDir() {
+        final IResource persistentDir = getInput().context.persistentDir();
+        final File localPersistentDir = pipe().resourceSrv.localPath(persistentDir);
+        if(localPersistentDir == null) {
+            throw new PipeRunEx(
+                "Could not get persistent directory at " + persistentDir + ", it is not on the local filesystem");
+        }
+        return localPersistentDir;
     }
 
     protected File depFile(String relative) {
-        return new File(getInput().depDir, relative + ".dep");
+        return new File(persistentDir(), relative + ".dep");
     }
 
     protected File depFile(String name, Object... objs) {
         final String str = Arrays.toString(objs);
         final String hash = hash(str);
-        return new File(getInput().depDir, name + "-" + hash + ".dep");
+        return new File(persistentDir(), name + "-" + hash + ".dep");
     }
 
     protected void requireOrigins() throws IOException {

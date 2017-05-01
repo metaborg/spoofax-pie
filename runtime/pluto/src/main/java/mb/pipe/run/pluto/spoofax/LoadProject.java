@@ -15,6 +15,7 @@ import build.pluto.builder.Builder;
 import build.pluto.builder.factory.BuilderFactory;
 import build.pluto.dependency.Origin;
 import build.pluto.output.OutputTransient;
+import mb.pipe.run.core.model.IContext;
 import mb.pipe.run.core.vfs.IResource;
 import mb.pipe.run.pluto.util.ABuilder;
 import mb.pipe.run.pluto.util.AInput;
@@ -27,8 +28,8 @@ public class LoadProject extends ABuilder<LoadProject.Input, OutputTransient<Loa
         public final IResource location;
 
 
-        public Input(File depDir, @Nullable Origin origin, IResource location) {
-            super(depDir, origin);
+        public Input(IContext context, @Nullable Origin origin, IResource location) {
+            super(context, origin);
             this.location = location;
         }
     }

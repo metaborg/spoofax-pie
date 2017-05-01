@@ -34,7 +34,7 @@ rules // definitions
       className := <pipe-sanitize-class-id> funcId
     with
       idTypeTuples := <pipe-idtype-tuples> params
-    ; inputClass := <t2j-multi-dataclass(id|"Input", "extends AInput", "File depDir, @Nullable Origin origin", "super(depDir, origin);")> idTypeTuples
+    ; inputClass := <t2j-multi-dataclass(id|"Input", "extends AInput", "IContext _internal_context, @Nullable Origin origin", "super(_internal_context, origin);")> idTypeTuples
     with
       outputClass := <t2j-singular-dataclass(id|"Output", "implements build.pluto.output.Output", "", "")> ("out", type)
     with
@@ -54,6 +54,7 @@ import java.util.Collection;
 import javax.annotation.Nullable;
 
 import org.apache.commons.vfs2.FileObject;
+import mb.pipe.run.core.model.IContext;
 import mb.pipe.run.pluto.util.ABuilder;
 import mb.pipe.run.pluto.util.AInput;
 import mb.pipe.run.pluto.util.Result;
@@ -282,7 +283,7 @@ rules
       (initStmsStrs, expStrs) := <map(try-p2p-exp); unzip> exps
     ; expStr                  := <pipe-concat-comma> expStrs
     ; initId                  := <newname> "init"
-    ; initStr                 := $[final Result<[javaClassId].Output> [initId] = [javaClassId].requireBuild(this, new [javaClassId].Input(input.depDir, null, [expStr]));]
+    ; initStr                 := $[final Result<[javaClassId].Output> [initId] = [javaClassId].requireBuild(this, new [javaClassId].Input(input.context, null, [expStr]));]
     ; allInitStmsStr          := <concat; pipe-concat-nl> [initStmsStrs, [initStr]]
 
   p2p-exp: 

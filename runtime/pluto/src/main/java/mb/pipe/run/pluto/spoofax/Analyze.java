@@ -7,7 +7,6 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.vfs2.FileObject;
 import org.metaborg.core.MetaborgException;
-import org.metaborg.core.context.IContext;
 import org.metaborg.core.language.ILanguageImpl;
 import org.metaborg.core.language.LanguageIdentifier;
 import org.metaborg.core.project.IProject;
@@ -23,6 +22,7 @@ import build.pluto.builder.BuildRequest;
 import build.pluto.builder.Builder;
 import build.pluto.builder.factory.BuilderFactory;
 import build.pluto.dependency.Origin;
+import mb.pipe.run.core.model.IContext;
 import mb.pipe.run.core.vfs.IResource;
 import mb.pipe.run.pluto.util.ABuilder;
 import mb.pipe.run.pluto.util.AInput;
@@ -38,9 +38,9 @@ public class Analyze extends ABuilder<Analyze.Input, Analyze.Output> {
         public final @Nullable IStrategoTerm ast;
 
 
-        public Input(File depDir, @Nullable Origin origin, LanguageIdentifier langId, IResource project, IResource file,
+        public Input(IContext context, @Nullable Origin origin, LanguageIdentifier langId, IResource project, IResource file,
             @Nullable IStrategoTerm ast) {
-            super(depDir, origin);
+            super(context, origin);
 
             this.langId = langId;
             this.project = project;
@@ -135,7 +135,7 @@ public class Analyze extends ABuilder<Analyze.Input, Analyze.Output> {
         final ISpoofaxParseUnit parseUnit =
             spoofax().unitService.parseUnit(inputUnit, new ParseContrib(true, true, input.ast, Iterables2.empty(), -1));
 
-        final IContext spoofaxContext = spoofax().contextService.get(project.location(), project, langImpl);
+        final org.metaborg.core.context.IContext spoofaxContext = spoofax().contextService.get(project.location(), project, langImpl);
         try(IClosableLock lock = spoofaxContext.write()) {
             final ISpoofaxAnalyzeResult analyzeResult = spoofax().analysisService.analyze(parseUnit, spoofaxContext);
             return new Output(analyzeResult.result().ast());

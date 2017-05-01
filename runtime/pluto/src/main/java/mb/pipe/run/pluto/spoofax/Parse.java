@@ -17,6 +17,7 @@ import build.pluto.builder.BuildRequest;
 import build.pluto.builder.Builder;
 import build.pluto.builder.factory.BuilderFactory;
 import build.pluto.dependency.Origin;
+import mb.pipe.run.core.model.IContext;
 import mb.pipe.run.core.vfs.IResource;
 import mb.pipe.run.pluto.util.ABuilder;
 import mb.pipe.run.pluto.util.AInput;
@@ -31,8 +32,8 @@ public class Parse extends ABuilder<Parse.Input, Parse.Output> {
         public final String text;
 
 
-        public Input(File depDir, @Nullable Origin origin, LanguageIdentifier langId, IResource file, String text) {
-            super(depDir, origin);
+        public Input(IContext context, @Nullable Origin origin, LanguageIdentifier langId, IResource file, String text) {
+            super(context, origin);
 
             this.langId = langId;
             this.file = file;

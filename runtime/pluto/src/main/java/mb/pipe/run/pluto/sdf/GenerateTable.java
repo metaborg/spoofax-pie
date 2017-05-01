@@ -26,6 +26,7 @@ import build.pluto.builder.Builder;
 import build.pluto.builder.factory.BuilderFactory;
 import build.pluto.dependency.Origin;
 import mb.pipe.run.core.PipeRunEx;
+import mb.pipe.run.core.model.IContext;
 import mb.pipe.run.core.vfs.IResource;
 import mb.pipe.run.pluto.spoofax.LoadLang;
 import mb.pipe.run.pluto.spoofax.LoadProject;
@@ -47,9 +48,9 @@ public class GenerateTable extends ABuilder<GenerateTable.Input, GenerateTable.O
         public final Collection<IResource> includedFiles;
 
 
-        public Input(File depDir, @Nullable Origin origin, IResource langLoc, IResource specDir, IResource mainFile,
+        public Input(IContext context, @Nullable Origin origin, IResource langLoc, IResource specDir, IResource mainFile,
             Collection<IResource> includedFiles) {
-            super(depDir, origin);
+            super(context, origin);
 
             this.langLoc = langLoc;
             this.specDir = specDir;
@@ -130,16 +131,16 @@ public class GenerateTable extends ABuilder<GenerateTable.Input, GenerateTable.O
         requireOrigins();
 
         // Read input files
-        final String mainFileText = Read.build(this, new Read.Input(input.depDir, input.mainFile));
+        final String mainFileText = Read.build(this, new Read.Input(input.context, input.mainFile));
         final Map<IResource, String> texts = Maps.newHashMap();
         for(IResource file : input.includedFiles) {
-            final String text = Read.build(this, new Read.Input(input.depDir, input.mainFile));
+            final String text = Read.build(this, new Read.Input(input.context, input.mainFile));
             texts.put(file, text);
         }
         texts.put(input.mainFile, mainFileText);
 
         // Load SDF3, required for parsing, analysis, and transformation.
-        final ILanguageImpl langImpl = LoadLang.build(this, new LoadLang.Input(input.depDir, null, input.langLoc));
+        final ILanguageImpl langImpl = LoadLang.build(this, new LoadLang.Input(input.context, null, input.langLoc));
         final LanguageIdentifier langId = langImpl.id();
 
         // Parse input files
@@ -148,7 +149,7 @@ public class GenerateTable extends ABuilder<GenerateTable.Input, GenerateTable.O
             final IResource file = pair.getKey();
             final String text = pair.getValue();
             final @Nullable IStrategoTerm ast =
-                Parse.build(this, new Parse.Input(input.depDir, null, langId, file, text));
+                Parse.build(this, new Parse.Input(input.context, null, langId, file, text));
             if(ast == null) {
                 reportError("Unable to parse SDF file " + file + ", skipping file");
                 continue;
@@ -157,7 +158,7 @@ public class GenerateTable extends ABuilder<GenerateTable.Input, GenerateTable.O
         }
 
         // Load project, required for analysis and transformation.
-        LoadProject.build(this, new LoadProject.Input(input.depDir, null, input.specDir));
+        LoadProject.build(this, new LoadProject.Input(input.context, null, input.specDir));
 
         // // Analyze
         // final Map<IResource, IStrategoTerm> analyzedAsts = Maps.newHashMap();
@@ -165,7 +166,7 @@ public class GenerateTable extends ABuilder<GenerateTable.Input, GenerateTable.O
         // final IResource file = pair.getKey();
         // final IStrategoTerm ast = pair.getValue();
         // final @Nullable IStrategoTerm analyzedAst =
-        // Analyze.build(this, new Analyze.Input(input.depDir, null, langId, input.langDir, file, ast));
+        // Analyze.build(this, new Analyze.Input(input.context, null, langId, input.langDir, file, ast));
         // if(analyzedAst == null) {
         // reportError("Unable to analyze SDF file " + file + ", skipping file");
         // continue;
@@ -180,7 +181,7 @@ public class GenerateTable extends ABuilder<GenerateTable.Input, GenerateTable.O
             final IResource file = pair.getKey();
             final IStrategoTerm ast = pair.getValue();
             final Result<Trans.Output> output = Trans.requireBuild(this,
-                new Trans.Input(input.depDir, null, langId, input.langLoc, file, ast, transformGoal));
+                new Trans.Input(input.context, null, langId, input.langLoc, file, ast, transformGoal));
             final Trans.Output trans = output.output;
             if(trans.ast == null || trans.writtenFile == null) {
                 reportError("Unable to transform SDF file " + file + ", skipping file");
