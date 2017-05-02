@@ -45,13 +45,13 @@ rules // Statements
     s_if_false -P-> s,
     [[ stm_false ^ (s_if_false, ty_func_outer) ]].
 
-//  [[ ForEach(binder, exp, stm) ^ (s, ty_func_outer) ]] :=
-//    [[ exp ^ (s) : ty ]],
-//    ty == ListTy(ty_inner) | error $[Type mismatch: expected list type, got [ty]] @ exp,
-//    new s_foreach,
-//    s_foreach -P-> s,
-//    Binder [[ binder ^ (s_foreach, ty_inner) ]],
-//    [[ stm ^ (s_foreach, ty_func_outer) ]].
+  [[ ForEach(binder, exp, stm) ^ (s, ty_func_outer) ]] :=
+    [[ exp ^ (s) : ty ]],
+    ty == ListTy(ty_inner) | error $[Type mismatch: expected list type, got [ty]] @ exp,
+    new s_foreach,
+    s_foreach -P-> s,
+    Binder [[ binder ^ (s_foreach, ty_inner) ]],
+    [[ stm ^ (s_foreach, ty_func_outer) ]].
 
 
   [[ Return(exp) ^ (s, ty_func_outer) ]] :=
@@ -150,11 +150,11 @@ rules // Composite literals
     [[ exp ^ (s) : ty ]],
     CompareTypes [[ exps ^ (s, ty) ]].
     
-//  [[ ListAppendLit(exp, exps) ^ (s) : ty ]] :=
-//    // TODO: this should calculate the LUB of the expression types.
-//    [[ exp ^ (s) : ty ]],
-//    ty == ListTy(ty_inner) | error $[Type mismatch: expected list type, got [ty]] @ exp,
-//    CompareTypes [[ exps ^ (s, ty_inner) ]].
+  [[ ListAppendLit(exp, exps) ^ (s) : ty ]] :=
+    // TODO: this should calculate the LUB of the expression types.
+    [[ exp ^ (s) : ty ]],
+    ty == ListTy(ty_inner) | error $[Type mismatch: expected list type, got [ty]] @ exp,
+    CompareTypes [[ exps ^ (s, ty_inner) ]].
     
   CompareTypes [[ [exp|exps] ^ (s, ty_expected) ]] :=
     [[ exp ^ (s) : ty ]],

@@ -18,3 +18,5 @@ colorer // Default, token-based highlighting
   var        : 139 69 19 italic
   operator   : 0 0 128
   layout     : 63 127 95 italic
+  default    : 0 0 0
+  unknown    : 0 0 0

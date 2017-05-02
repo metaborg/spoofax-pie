@@ -6,12 +6,11 @@ import javax.annotation.Nullable;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.IEditorInput;
 
 import build.pluto.builder.BuildManager;
@@ -22,14 +21,15 @@ import mb.pipe.run.core.log.ILogger;
 import mb.pipe.run.core.model.IContext;
 import mb.pipe.run.core.model.message.IMsg;
 import mb.pipe.run.core.model.style.IStyling;
-import mb.pipe.run.eclipse.util.MarkerUtils;
+import mb.pipe.run.eclipse.build.Updater;
 import mb.pipe.run.eclipse.util.StatusUtils;
-import mb.pipe.run.pluto.generated.editorPipeline;
-import mb.pipe.run.pluto.generated.editorPipeline.Input;
-import mb.pipe.run.pluto.generated.editorPipeline.Output;
+import mb.pipe.run.pluto.generated.processString;
 
 public class EditorUpdateJob extends Job {
     private final ILogger logger;
+
+    private final Updater updater;
+    private final ISourceViewer sourceViewer;
 
     private final String text;
     private final IContext context;
@@ -37,10 +37,12 @@ public class EditorUpdateJob extends Job {
     private final IResource eclipseResource;
 
 
-    public EditorUpdateJob(ILogger logger, String text, IContext context, IEditorInput input,
-        IResource eclipseResource) {
+    public EditorUpdateJob(ILogger logger, Updater updater, ISourceViewer sourceViewer, String text, IContext context,
+        IEditorInput input, IResource eclipseResource) {
         super("Editor update");
         this.logger = logger;
+        this.updater = updater;
+        this.sourceViewer = sourceViewer;
         this.text = text;
         this.context = context;
         this.input = input;
@@ -66,31 +68,18 @@ public class EditorUpdateJob extends Job {
     }
 
     private IStatus update(IWorkspace workspace, final IProgressMonitor monitor) throws Throwable {
-
-        final BuildRequest<?, Output, ?, ?> buildRequest =
-            editorPipeline.request(new Input(context, null, text, context));
+        final BuildRequest<?, processString.Output, ?, ?> buildRequest =
+            processString.request(new processString.Input(context, null, text, context));
 
         try(final BuildManager buildManager =
             new BuildManager(new LogReporting(), XodusDatabase.createFileDatabase("pipeline-experiment"))) {
-            final Output output = buildManager.requireInitially(buildRequest).getBuildResult();
-            final Collection<IMsg> messages = (Collection<IMsg>) output.getPipeVal().get(3);
+            final processString.Output output = buildManager.requireInitially(buildRequest).getBuildResult();
 
-            final IWorkspaceRunnable parseMarkerUpdater = new IWorkspaceRunnable() {
-                @Override public void run(IProgressMonitor workspaceMonitor) throws CoreException {
-                    if(workspaceMonitor.isCanceled())
-                        return;
-                    MarkerUtils.clearAll(eclipseResource);
-                    for(IMsg msg : messages) {
-                        MarkerUtils.createMarker(eclipseResource, msg);
-                    }
-                }
-            };
-            workspace.run(parseMarkerUpdater, eclipseResource, IWorkspace.AVOID_UPDATE, monitor);
+            final Collection<IMsg> messages = (Collection<IMsg>) output.getPipeVal().get(3);
+            updater.updateMessagesSync(eclipseResource, messages, monitor);
 
             final @Nullable IStyling styling = (IStyling) output.getPipeVal().get(4);
-            if(styling != null) {
-
-            }
+            updater.updateStyle(sourceViewer, styling, monitor);
         }
 
         return StatusUtils.success();

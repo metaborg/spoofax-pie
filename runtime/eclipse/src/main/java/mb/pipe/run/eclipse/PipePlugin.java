@@ -5,6 +5,7 @@ import org.eclipse.ui.IStartup;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.metaborg.core.MetaborgException;
 import org.metaborg.spoofax.core.Spoofax;
+import org.metaborg.spoofax.meta.core.SpoofaxExtensionModule;
 import org.metaborg.spoofax.meta.core.SpoofaxMeta;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -45,7 +46,7 @@ public class PipePlugin extends AbstractUIPlugin implements IStartup {
         }
 
         try {
-            spoofaxFacade = new Spoofax(new SpoofaxEclipseModule());
+            spoofaxFacade = new Spoofax(new SpoofaxEclipseModule(), new SpoofaxExtensionModule());
             spoofaxMetaFacade = new SpoofaxMeta(spoofaxFacade);
             StaticSpoofax.init(spoofaxMetaFacade);
         } catch(MetaborgException e) {

@@ -11,6 +11,7 @@ import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.editors.text.TextEditor;
+import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 
 import com.google.inject.Injector;
 
@@ -20,6 +21,7 @@ import mb.pipe.run.core.model.Context;
 import mb.pipe.run.core.model.IContext;
 import mb.pipe.run.core.vfs.IResource;
 import mb.pipe.run.eclipse.PipePlugin;
+import mb.pipe.run.eclipse.build.Updater;
 import mb.pipe.run.eclipse.vfs.IEclipseResourceSrv;
 
 public class PipeEditor extends TextEditor {
@@ -34,15 +36,33 @@ public class PipeEditor extends TextEditor {
     }
 
     private IJobManager jobManager;
-
     private ILogger logger;
     private IEclipseResourceSrv resourceSrv;
-
-    private DocumentListener documentListener;
+    private Editors editors;
+    private Updater updater;
 
     private IEditorInput input;
+    private String inputName;
     private IDocument document;
     private org.eclipse.core.resources.IResource eclipseResource;
+    private DocumentListener documentListener;
+
+
+    public String text() {
+        return document.get();
+    }
+
+    public String name() {
+        return inputName;
+    }
+
+    public ISourceViewer sourceViewer() {
+        return getSourceViewer();
+    }
+
+    public org.eclipse.core.resources.IResource eclipseResource() {
+        return eclipseResource;
+    }
 
 
     @Override protected void initializeEditor() {
@@ -55,6 +75,8 @@ public class PipeEditor extends TextEditor {
 
         this.logger = pipeFacade.rootLogger;
         this.resourceSrv = injector.getInstance(IEclipseResourceSrv.class);
+        this.editors = injector.getInstance(Editors.class);
+        this.updater = injector.getInstance(Updater.class);
 
         setDocumentProvider(new DocumentProvider(logger, resourceSrv));
         setSourceViewerConfiguration(new PipeSourceViewerConfiguration());
@@ -66,8 +88,10 @@ public class PipeEditor extends TextEditor {
 
         final IResource resource = resourceSrv.resolve(input);
         if(resource != null) {
+            inputName = resource.toString();
             eclipseResource = resourceSrv.unresolve(resource);
         } else {
+            inputName = input.getName();
             logger.warn("Resource for editor on {} is null, cannot update the editor", input);
         }
 
@@ -75,6 +99,10 @@ public class PipeEditor extends TextEditor {
         document.addDocumentListener(documentListener);
 
         final ISourceViewer sourceViewer = super.createSourceViewer(parent, ruler, styles);
+        final SourceViewerDecorationSupport decorationSupport = getSourceViewerDecorationSupport(sourceViewer);
+        configureSourceViewerDecorationSupport(decorationSupport);
+
+        editors.addEditor(this);
 
         scheduleJob(true);
 
@@ -88,6 +116,8 @@ public class PipeEditor extends TextEditor {
             document.removeDocumentListener(documentListener);
         }
 
+        editors.removeEditor(this);
+
         input = null;
         document = null;
         documentListener = null;
@@ -100,8 +130,9 @@ public class PipeEditor extends TextEditor {
         final IProject project = eclipseResource.getProject();
         final IResource projectDir = resourceSrv.resolve(project);
         final IContext context = new Context(projectDir);
-        final Job job = new EditorUpdateJob(logger, document.get(), context, input, eclipseResource);
-        job.setRule(eclipseResource);
+        final Job job =
+            new EditorUpdateJob(logger, updater, getSourceViewer(), document.get(), context, input, eclipseResource);
+        job.setRule(project);
         job.schedule(instantaneous ? 0 : 300);
     }
 

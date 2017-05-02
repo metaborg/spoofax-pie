@@ -18,6 +18,9 @@ rules
   t2j-def-sig = t2j-sig(fail) 
   t2j-ref-sig = t2j-sig(id)
 
+  t2j-sig(isref): VoidTy()             -> "void"
+  t2j-sig(isref): NullableTy(VoidTy()) -> "void"
+
   t2j-sig(isref): BoolTy()             -> "bool"
   t2j-sig(isref): NullableTy(BoolTy()) -> "Boolean"           where isref
   t2j-sig(isref): NullableTy(BoolTy()) -> "@Nullable Boolean" where not(isref)

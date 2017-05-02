@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.vfs2.FileObject;
 import mb.pipe.run.core.model.IContext;
+import mb.pipe.run.core.util.Lists2;
 import mb.pipe.run.pluto.util.ABuilder;
 import mb.pipe.run.pluto.util.AInput;
 import mb.pipe.run.pluto.util.Result;
@@ -19,7 +20,7 @@ import build.pluto.builder.Builder;
 import build.pluto.builder.factory.BuilderFactory;
 import build.pluto.dependency.Origin;
 
-public class filePipeline extends ABuilder<filePipeline.Input, filePipeline.Output> {
+public class processFile extends ABuilder<processFile.Input, processFile.Output> {
     public static class Input extends AInput{
       private static final long serialVersionUID = 1L;
       
@@ -87,36 +88,36 @@ public class filePipeline extends ABuilder<filePipeline.Input, filePipeline.Outp
     }
 
 
-    public static final BuilderFactory<Input, Output, filePipeline> factory = factory(filePipeline.class, Input.class);
+    public static final BuilderFactory<Input, Output, processFile> factory = factory(processFile.class, Input.class);
 
-    public static BuildRequest<Input, Output, filePipeline, BuilderFactory<Input, Output, filePipeline>> request(Input input) {
-        return request(input, filePipeline.class, Input.class);
+    public static BuildRequest<Input, Output, processFile, BuilderFactory<Input, Output, processFile>> request(Input input) {
+        return request(input, processFile.class, Input.class);
     }
 
     public static Origin origin(Input input) {
-        return origin(input, filePipeline.class, Input.class);
+        return origin(input, processFile.class, Input.class);
     }
 
     public static Result<Output> requireBuild(Builder<?, ?> requiree, Input input) throws IOException {
-        return requireBuild(requiree, input, filePipeline.class, Input.class);
+        return requireBuild(requiree, input, processFile.class, Input.class);
     }
     
     public static mb.pipe.run.core.util.ITuple build(Builder<?, ?> requiree, Input input) throws IOException {
-        return requireBuild(requiree, input, filePipeline.class, Input.class).output.getPipeVal();
+        return requireBuild(requiree, input, processFile.class, Input.class).output.getPipeVal();
     }
 
 
-    public filePipeline(Input input) {
+    public processFile(Input input) {
         super(input);
     }
 
 
     @Override protected String description(Input input) {
-        return "filePipeline";
+        return "processFile";
     }
 
     @Override public File persistentPath(Input input) {
-        return depFile("filePipeline", input.file, input.context);
+        return depFile("processFile", input.file, input.context);
     }
 
     @SuppressWarnings("unchecked") @Override protected Output build(Input input) throws Throwable {
@@ -124,22 +125,12 @@ public class filePipeline extends ABuilder<filePipeline.Input, filePipeline.Outp
 
         final Result<mb.pipe.run.pluto.vfs.Read.Output> init4 = mb.pipe.run.pluto.vfs.Read.requireBuild(this, new mb.pipe.run.pluto.vfs.Read.Input(input.context, null, input.file));
         String text = init4.output.getPipeVal();
-        final Result<parse.Output> init5 = parse.requireBuild(this, new parse.Input(input.context, null, text, input.context));
-        org.spoofax.interpreter.terms.IStrategoTerm ast = (org.spoofax.interpreter.terms.IStrategoTerm) init5.output.getPipeVal().get(0);
-        Collection<mb.pipe.run.core.model.parse.IToken> tokenStream = (Collection<mb.pipe.run.core.model.parse.IToken>) init5.output.getPipeVal().get(1);
-        Collection<mb.pipe.run.core.model.message.IMsg> messages = (Collection<mb.pipe.run.core.model.message.IMsg>) init5.output.getPipeVal().get(2);
-        @Nullable mb.pipe.run.core.model.style.IStyling styling;
-        
-        if(tokenStream != null)
-            {
-              final Result<style.Output> init6 = style.requireBuild(this, new style.Input(input.context, null, tokenStream, input.context));
-              styling = init6.output.getPipeVal();
-            }
-        else
-            {
-              
-              styling = null;
-            }
+        final Result<processString.Output> init5 = processString.requireBuild(this, new processString.Input(input.context, null, text, input.context));
+        String _ = (String) init5.output.getPipeVal().get(0);
+        org.spoofax.interpreter.terms.IStrategoTerm ast = (org.spoofax.interpreter.terms.IStrategoTerm) init5.output.getPipeVal().get(1);
+        Collection<mb.pipe.run.core.model.parse.IToken> tokenStream = (Collection<mb.pipe.run.core.model.parse.IToken>) init5.output.getPipeVal().get(2);
+        Collection<mb.pipe.run.core.model.message.IMsg> messages = (Collection<mb.pipe.run.core.model.message.IMsg>) init5.output.getPipeVal().get(3);
+        mb.pipe.run.core.model.style.IStyling styling = (mb.pipe.run.core.model.style.IStyling) init5.output.getPipeVal().get(4);
         
         return new Output(new mb.pipe.run.core.util.Tuple(input.file, text, ast, tokenStream, messages, styling));
         

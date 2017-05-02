@@ -6,7 +6,6 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 
-import mb.pipe.run.eclipse.PipePlugin;
 import mb.pipe.run.eclipse.util.AbstractHandlerUtils;
 import mb.pipe.run.eclipse.util.NatureUtils;
 
@@ -17,7 +16,7 @@ public class AddNatureHandler extends AbstractHandler {
             return null;
 
         try {
-            NatureUtils.addTo(PipePlugin.id, project, null);
+            NatureUtils.addTo(PipeNature.id, project, null);
         } catch(CoreException e) {
             throw new ExecutionException("Cannot add Pipe nature", e);
         }

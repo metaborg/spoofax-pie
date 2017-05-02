@@ -29,6 +29,7 @@ import com.google.inject.name.Named;
 
 import mb.pipe.run.core.vfs.FileUtils;
 import mb.pipe.run.eclipse.util.Nullable;
+import mb.pipe.run.eclipse.vfs.EclipseFileObject;
 
 public class EclipseResourceService extends ResourceService implements IEclipseResourceService {
     private final IWorkspaceRoot root;
@@ -114,6 +115,15 @@ public class EclipseResourceService extends ResourceService implements IEclipseR
     }
 
     @Override public @Nullable IResource unresolve(FileObject resource) {
+        if(resource instanceof EclipseFileObject) {
+            final EclipseFileObject eclipseResource = (EclipseFileObject) resource;
+            try {
+                return eclipseResource.resource();
+            } catch(Exception e) {
+                return null;
+            }
+        }
+
         if(resource instanceof EclipseResourceFileObject) {
             final EclipseResourceFileObject eclipseResource = (EclipseResourceFileObject) resource;
             try {
@@ -145,7 +155,7 @@ public class EclipseResourceService extends ResourceService implements IEclipseR
     }
 
     @Override public File localFile(FileObject resource) {
-        if(!(resource instanceof EclipseResourceFileObject)) {
+        if(!(resource instanceof EclipseResourceFileObject) && !(resource instanceof EclipseFileObject)) {
             return super.localFile(resource);
         }
 
@@ -157,7 +167,8 @@ public class EclipseResourceService extends ResourceService implements IEclipseR
     }
 
     @Override public File localFile(FileObject resource, FileObject dir) {
-        if(!(dir instanceof EclipseResourceFileObject) || !(resource instanceof EclipseResourceFileObject)) {
+        if((!(dir instanceof EclipseFileObject) && !(dir instanceof EclipseResourceFileObject))
+            || (!(resource instanceof EclipseFileObject) && !(resource instanceof EclipseResourceFileObject))) {
             return super.localFile(resource, dir);
         }
 

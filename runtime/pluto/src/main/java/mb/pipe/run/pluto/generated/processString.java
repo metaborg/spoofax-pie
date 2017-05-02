@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.vfs2.FileObject;
 import mb.pipe.run.core.model.IContext;
+import mb.pipe.run.core.util.Lists2;
 import mb.pipe.run.pluto.util.ABuilder;
 import mb.pipe.run.pluto.util.AInput;
 import mb.pipe.run.pluto.util.Result;
@@ -19,7 +20,7 @@ import build.pluto.builder.Builder;
 import build.pluto.builder.factory.BuilderFactory;
 import build.pluto.dependency.Origin;
 
-public class editorPipeline extends ABuilder<editorPipeline.Input, editorPipeline.Output> {
+public class processString extends ABuilder<processString.Input, processString.Output> {
     public static class Input extends AInput{
       private static final long serialVersionUID = 1L;
       
@@ -87,51 +88,51 @@ public class editorPipeline extends ABuilder<editorPipeline.Input, editorPipelin
     }
 
 
-    public static final BuilderFactory<Input, Output, editorPipeline> factory = factory(editorPipeline.class, Input.class);
+    public static final BuilderFactory<Input, Output, processString> factory = factory(processString.class, Input.class);
 
-    public static BuildRequest<Input, Output, editorPipeline, BuilderFactory<Input, Output, editorPipeline>> request(Input input) {
-        return request(input, editorPipeline.class, Input.class);
+    public static BuildRequest<Input, Output, processString, BuilderFactory<Input, Output, processString>> request(Input input) {
+        return request(input, processString.class, Input.class);
     }
 
     public static Origin origin(Input input) {
-        return origin(input, editorPipeline.class, Input.class);
+        return origin(input, processString.class, Input.class);
     }
 
     public static Result<Output> requireBuild(Builder<?, ?> requiree, Input input) throws IOException {
-        return requireBuild(requiree, input, editorPipeline.class, Input.class);
+        return requireBuild(requiree, input, processString.class, Input.class);
     }
     
     public static mb.pipe.run.core.util.ITuple build(Builder<?, ?> requiree, Input input) throws IOException {
-        return requireBuild(requiree, input, editorPipeline.class, Input.class).output.getPipeVal();
+        return requireBuild(requiree, input, processString.class, Input.class).output.getPipeVal();
     }
 
 
-    public editorPipeline(Input input) {
+    public processString(Input input) {
         super(input);
     }
 
 
     @Override protected String description(Input input) {
-        return "editorPipeline";
+        return "processString";
     }
 
     @Override public File persistentPath(Input input) {
-        return depFile("editorPipeline", input.text, input.context);
+        return depFile("processString", input.text, input.context);
     }
 
     @SuppressWarnings("unchecked") @Override protected Output build(Input input) throws Throwable {
         requireOrigins();
 
-        final Result<parse.Output> init7 = parse.requireBuild(this, new parse.Input(input.context, null, input.text, input.context));
-        org.spoofax.interpreter.terms.IStrategoTerm ast = (org.spoofax.interpreter.terms.IStrategoTerm) init7.output.getPipeVal().get(0);
-        Collection<mb.pipe.run.core.model.parse.IToken> tokenStream = (Collection<mb.pipe.run.core.model.parse.IToken>) init7.output.getPipeVal().get(1);
-        Collection<mb.pipe.run.core.model.message.IMsg> messages = (Collection<mb.pipe.run.core.model.message.IMsg>) init7.output.getPipeVal().get(2);
+        final Result<parse.Output> init6 = parse.requireBuild(this, new parse.Input(input.context, null, input.text, input.context));
+        org.spoofax.interpreter.terms.IStrategoTerm ast = (org.spoofax.interpreter.terms.IStrategoTerm) init6.output.getPipeVal().get(0);
+        Collection<mb.pipe.run.core.model.parse.IToken> tokenStream = (Collection<mb.pipe.run.core.model.parse.IToken>) init6.output.getPipeVal().get(1);
+        Collection<mb.pipe.run.core.model.message.IMsg> messages = (Collection<mb.pipe.run.core.model.message.IMsg>) init6.output.getPipeVal().get(2);
         @Nullable mb.pipe.run.core.model.style.IStyling styling;
         
         if(tokenStream != null)
             {
-              final Result<style.Output> init8 = style.requireBuild(this, new style.Input(input.context, null, tokenStream, input.context));
-              styling = init8.output.getPipeVal();
+              final Result<style.Output> init7 = style.requireBuild(this, new style.Input(input.context, null, tokenStream, input.context));
+              styling = init7.output.getPipeVal();
             }
         else
             {

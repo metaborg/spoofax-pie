@@ -28,6 +28,7 @@ import build.pluto.dependency.Origin;
 import mb.pipe.run.core.PipeRunEx;
 import mb.pipe.run.core.model.IContext;
 import mb.pipe.run.core.vfs.IResource;
+import mb.pipe.run.core.vfs.VFSResource;
 import mb.pipe.run.pluto.spoofax.LoadLang;
 import mb.pipe.run.pluto.spoofax.LoadProject;
 import mb.pipe.run.pluto.spoofax.Parse;
@@ -48,8 +49,8 @@ public class GenerateTable extends ABuilder<GenerateTable.Input, GenerateTable.O
         public final Collection<IResource> includedFiles;
 
 
-        public Input(IContext context, @Nullable Origin origin, IResource langLoc, IResource specDir, IResource mainFile,
-            Collection<IResource> includedFiles) {
+        public Input(IContext context, @Nullable Origin origin, IResource langLoc, IResource specDir,
+            IResource mainFile, Collection<IResource> includedFiles) {
             super(context, origin);
 
             this.langLoc = langLoc;
@@ -198,21 +199,21 @@ public class GenerateTable extends ABuilder<GenerateTable.Input, GenerateTable.O
         // Create table
         // Main input file
         final IResource mainResource = normalizedMain.writtenFile;
-        final File mainFile = spoofax().resourceService.localPath(mainResource.fileObject());
+        final File mainFile = pipe().resourceSrv.localPath(mainResource);
         if(mainFile == null) {
             throw new PipeRunEx("Normalized main file " + mainResource + " is not on the local file system");
         }
         // Output file
         final CommonPaths spoofaxPaths = new CommonPaths(input.specDir.fileObject());
         final FileObject vfsOutputFile = spoofaxPaths.targetMetaborgDir().resolveFile("sdf-new.tbl");
-        final File outputFile = spoofax().resourceService.localPath(vfsOutputFile);
+        final File outputFile = pipe().resourceSrv.localPath(new VFSResource(vfsOutputFile));
         if(outputFile == null) {
             throw new PipeRunEx("Parse table output file " + vfsOutputFile + " is not on the local file system");
         }
         // Dummy output file for context grammar
-        final FileObject vfsDummyfile = spoofax().resourceService.resolve("ram://ctx.grammar");
-        vfsDummyfile.createFile();
-        final File dummyFile = spoofax().resourceService.localFile(vfsDummyfile);
+        final IResource vfsDummyfile = pipe().resourceSrv.resolve("ram://ctx.grammar");
+        vfsDummyfile.fileObject().createFile();
+        final File dummyFile = pipe().resourceSrv.localFile(vfsDummyfile);
         if(dummyFile == null) {
             throw new PipeRunEx(
                 "Context grammar dummy output file " + vfsDummyfile + " is not on the local file system");

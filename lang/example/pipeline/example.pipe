@@ -37,7 +37,7 @@ func esvStyle(tokenStream : Token*, st : SyntaxStyler) -> Styling = pluto mb.pip
 /// Implement parse and style
 func parse(text : string, context : Context) -> (Ast?, Token*?, Message*) = {
   var currentDir = context.currentDir();
-  var langLoc = resolveAbs("/Users/gohla/.m2/repository/org/metaborg/org.metaborg.meta.lang.template/2.2.0/org.metaborg.meta.lang.template-2.2.0.spoofax-language");
+  var langLoc = resolveAbs("/Users/gohla/.m2/repository/org/metaborg/org.metaborg.meta.lang.template/2.3.0-SNAPSHOT/org.metaborg.meta.lang.template-2.3.0-SNAPSHOT.spoofax-language");
   var specDir = currentDir; 
   var mainFile = currentDir.resolve("syntax/minimal.sdf3");
   var includedFiles : Resource* = [];
@@ -50,7 +50,7 @@ func parse(text : string, context : Context) -> (Ast?, Token*?, Message*) = {
 
 func style(tokenStream : Token*, context : Context) -> Styling = {
   var currentDir = context.currentDir();
-  var langLoc = resolveAbs("/Users/gohla/.m2/repository/org/metaborg/org.metaborg.meta.lang.esv/2.2.0/org.metaborg.meta.lang.esv-2.2.0.spoofax-language");
+  var langLoc = resolveAbs("/Users/gohla/.m2/repository/org/metaborg/org.metaborg.meta.lang.esv/2.3.0-SNAPSHOT/org.metaborg.meta.lang.esv-2.3.0-SNAPSHOT.spoofax-language");
   var specDir = currentDir;
   var mainFile = currentDir.resolve("editor/Main.esv");
   var includedFiles : Resource* = [];
@@ -62,22 +62,16 @@ func style(tokenStream : Token*, context : Context) -> Styling = {
 }
 
 
-/// Implement pipelines
-// File pipeline
-func filePipeline(file : Resource, context : Context) -> (Resource, string, Ast?, Token*?, Message*, Styling?) = {
+/// Processing
+// Files
+func processFile(file : Resource, context : Context) -> (Resource, string, Ast?, Token*?, Message*, Styling?) = {
   var text = readFile(file); // Creates a dependency to file changes
-  var (ast, tokenStream, messages) = parse(text, context);
-  var styling : Styling?;
-  if(tokenStream != null) {
-    styling = style(tokenStream!, context);
-  } else {
-    styling = null;
-  }
+  var (_, ast, tokenStream, messages, styling) =  processString(text, context);
   return (file, text, ast, tokenStream, messages, styling);
 }
 
-// Eclipse editor pipeline
-func editorPipeline(text : string, context : Context) -> (string, Ast?, Token*?, Message*, Styling?) = {
+// Strings
+func processString(text : string, context : Context) -> (string, Ast?, Token*?, Message*, Styling?) = {
   var (ast, tokenStream, messages) = parse(text, context);
   var styling : Styling?;
   if(tokenStream != null) {
@@ -87,3 +81,34 @@ func editorPipeline(text : string, context : Context) -> (string, Ast?, Token*?,
   }
   return (text, ast, tokenStream, messages, styling);
 }
+
+
+///// Eclipse pipeline
+//// TODO: void functions are not compiled properly, return context for now.
+//func eclipseUpdateFile(file : Resource, messages : Message*) -> Context = pluto mb.pipe.run.eclipse.pluto.UpdateFile
+//
+//func eclipseKeepFilesConsistent(files : Resource*, context : Context) -> Context = {
+//  foreach(var file in files) {
+//    var (_1, _2, _3, _4, messages, _5) = processFile(file, context);
+//    // When input to eclipseUpdateFile is unchanged, it is not re-executed, preventing expensive update overhead
+//    eclipseUpdateFile(file, messages);
+//  }
+//  return context; // TODO: void functions are not compiled properly, return context for now.
+//}
+//
+//transient data Editor = java mb.pipe.run.eclipse.editor.IEditor {
+//  func text() -> string
+//}
+//
+//// TODO: void functions are not compiled properly, return context for now.
+//func eclipseUpdateEditor(editor : Editor, messages : Message*, styling : Styling?) -> Context = pluto mb.pipe.run.eclipse.pluto.UpdateEditor
+//
+//func eclipseKeepEditorsConsistent(editors : Editor*, context : Context) -> Context = {
+//  foreach(var editor in editors) {
+//    var text = editor.text();
+//    var (_1, _2, _3, messages, styling) = processString(text, context);
+//    // When input to eclipseUpdateEditor is unchanged, it is not re-executed, preventing expensive update overhead
+//    eclipseUpdateEditor(editor, messages, styling);
+//  }
+//  return context; // TODO: void functions are not compiled properly, return context for now.
+//}

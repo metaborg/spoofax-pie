@@ -21,22 +21,22 @@ context-free syntax
 }>
   Stm = <<Block>>
 
-  Binder.SingleBinder = <<Bind>> // TODO: implement gen
-  Binder.TupleBinder  = <(<{Bind ", "}*>)> // TODO: implement gen
+  Binder.SingleBinder = <<Bind>>
+  Binder.TupleBinder  = <(<{Bind ", "}*>)>
 
-  Bind.Bind   = <<ID>> // TODO: implement gen
-  Bind.TBind = <<ID> : <Type>> // TODO: implement gen
+  Bind.Bind   = <<ID>>
+  Bind.TBind = <<ID> : <Type>>
 
-  Stm.VarDecBinder = <var <Binder> = <Exp>;>  // TODO: implement gen
-  Stm.VarDec = <var <ID> : <Type>;>  // TODO: implement gen
-  Stm.Assign = <<Ref> = <Exp>;>  // TODO: fix gen
+  Stm.VarDecBinder = <var <Binder> = <Exp>;>
+  Stm.VarDec = <var <ID> : <Type>;>
+  Stm.Assign = <<Ref> = <Exp>;>
 
   Stm.If = <if(<Exp>) <Stm>>
   Stm.IfElse = <if(<Exp>) <Stm> else <Stm>>
-//  Stm.ForEach = <foreach(var <Binder> in <Exp>) <Stm>>
+  Stm.ForEach = <foreach(var <Binder> in <Exp>) <Stm>>
   
-  Stm.Return = <return <Exp>;> // TODO: fix gen
-  Stm.Fail = <fail <Exp>;> // TODO: implement gen
+  Stm.Return = <return <Exp>;>
+  Stm.Fail = <fail <Exp>;>
   
   Stm.Exp = <<Exp>;>
 
@@ -45,16 +45,16 @@ context-free syntax
   Exp.ToNullable = <<Exp>?>
   Exp.ToNonNullable = <<Exp>!>
 
-  Exp.Eq = <<Exp> == <Exp>> {left} // TODO: fix gen
-  Exp.Neq = <<Exp> != <Exp>> {left} // TODO: implement gen
-  Exp.Lor = <<Exp> || <Exp>> {left} // TODO: implement gen
-  Exp.Land = <<Exp> && <Exp>> {left} // TODO: implement gen
+  Exp.Eq = <<Exp> == <Exp>> {left}
+  Exp.Neq = <<Exp> != <Exp>> {left}
+  Exp.Lor = <<Exp> || <Exp>> {left}
+  Exp.Land = <<Exp> && <Exp>> {left}
 
   Ref.Ref = <<ID>> {avoid}
   Exp = Ref
   
-  Exp.Call = <<FUNCID>(<{Exp ", "}*>)> // TODO: fix gen
-  Exp.QCall = <<Exp>.<FUNCID>(<{Exp ", "}*>)> // TODO: fix gen
+  Exp.Call = <<FUNCID>(<{Exp ", "}*>)>
+  Exp.QCall = <<Exp>.<FUNCID>(<{Exp ", "}*>)>
 
   Exp.BoolLit = <<Bool>>
   Bool.True   = <true>
@@ -65,9 +65,9 @@ context-free syntax
 
   Exp.NullLit = <null>
 
-  Exp.TupleLit = <(<{Exp ","}*>)> // TODO: implement gen
-  Exp.ListLit  = <[<{Exp ","}*>]> // TODO: implement gen
-//  Exp.ListAppendLit  = <[<Exp> | <{Exp ","}+>]> // TODO: implement gen
+  Exp.TupleLit = <(<{Exp ","}*>)>
+  Exp.ListLit  = <[<{Exp ","}*>]>
+  Exp.ListAppendLit  = <[<Exp> | <{Exp ","}+>]>
 
   Exp = <(<Exp>)> {bracket}
 

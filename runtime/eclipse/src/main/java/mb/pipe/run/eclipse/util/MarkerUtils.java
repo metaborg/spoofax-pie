@@ -25,7 +25,9 @@ public final class MarkerUtils {
         final IRegion region = msg.region();
         if(region != null) {
             marker.setAttribute(IMarker.CHAR_START, region.startOffset());
+            // CHAR_END is exclusive, while region is inclusive: add 1
             marker.setAttribute(IMarker.CHAR_END, region.endOffset() + 1);
+            // TODO: should line number be set? seems to work without it
             // marker.setAttribute(IMarker.LINE_NUMBER, region.startRow() + 1);
         } else {
             marker.setAttribute(IMarker.LINE_NUMBER, 1);

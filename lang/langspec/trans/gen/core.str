@@ -55,6 +55,7 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.vfs2.FileObject;
 import mb.pipe.run.core.model.IContext;
+import mb.pipe.run.core.util.Lists2;
 import mb.pipe.run.pluto.util.ABuilder;
 import mb.pipe.run.pluto.util.AInput;
 import mb.pipe.run.pluto.util.Result;
@@ -116,7 +117,7 @@ public class [className] extends ABuilder<[className].Input, [className].Output>
 
 rules // statements
 
-  try-p2p-stm    = pipe-try-debug(p2p-stm|"p2p-stm") <+ !""
+  try-p2p-stm    = pipe-try-debug(p2p-stm|"p2p-stm") <+ !"{}"
   p2p-stms       = p2p-stms(|"\n")
   p2p-stms(|sep) = map(try-p2p-stm); separate-by(|sep); concat-strings
 
@@ -180,7 +181,7 @@ $[[initStmsStr]
 if([expStr])
     [strStm]]
     with
-      strStm := <try-p2p-stm> stm
+      strStm                := <try-p2p-stm> stm
     ; (initStmsStr, expStr) := <try-p2p-exp> exp
 
   p2p-stm:
@@ -191,9 +192,23 @@ if([expStr])
 else
     [falseStmStr]]
     with
-      trueStmStr := <try-p2p-stm> trueStm
-    ; falseStmStr := <try-p2p-stm> falseStm
+      trueStmStr            := <try-p2p-stm> trueStm
+    ; falseStmStr           := <try-p2p-stm> falseStm
     ; (initStmsStr, expStr) := <try-p2p-exp> exp
+
+  p2p-stm:
+    ForEach(SingleBinder(bind), exp, stm) ->
+$[[initStmsStr]
+for([tyStr] [varId] : [expStr])
+    [strStm]]
+    with
+      ListTy(type)          := <pipe-ast-type> exp
+    ; (varId, actualType)   := <p2p-bind-idtype-tuple> (bind, type)
+    ; tyStr                 := <t2j-def-sig> actualType
+    ; (initStmsStr, expStr) := <try-p2p-exp> exp
+    ; strStm                := <try-p2p-stm> stm
+
+  // TODO: ForEach with TupleBinder
 
   p2p-stm:
     Return(exp) -> 
@@ -314,3 +329,11 @@ rules
       (initStmsStrs, expStrs) := <map(try-p2p-exp); unzip> exps
     ; allInitStmsStr          := <pipe-concat-nl> initStmsStrs
     ; expsStr                 := <pipe-concat-comma> expStrs
+
+  p2p-exp:
+    l@ListAppendLit(listExp, exps) -> (allInitStmsStr, $[Lists2.concat([listExpStr], [expsStr])])
+    with
+      (listInitStmStr, listExpStr) := <try-p2p-exp> listExp
+    ; (initStmsStrs, expStrs)      := <map(try-p2p-exp); unzip> exps
+    ; allInitStmsStr               := <concat; pipe-concat-nl> [[listInitStmStr], initStmsStrs]
+    ; expsStr                      := <pipe-concat-comma> expStrs

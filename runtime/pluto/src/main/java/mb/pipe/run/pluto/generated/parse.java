@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.vfs2.FileObject;
 import mb.pipe.run.core.model.IContext;
+import mb.pipe.run.core.util.Lists2;
 import mb.pipe.run.pluto.util.ABuilder;
 import mb.pipe.run.pluto.util.AInput;
 import mb.pipe.run.pluto.util.Result;
@@ -125,7 +126,7 @@ public class parse extends ABuilder<parse.Input, parse.Output> {
         
         mb.pipe.run.core.vfs.IResource currentDir = input.context.currentDir();
         
-        mb.pipe.run.core.vfs.IResource langLoc = mb.pipe.run.core.vfs.VFSResource.resolveStatic("/Users/gohla/.m2/repository/org/metaborg/org.metaborg.meta.lang.template/2.2.0/org.metaborg.meta.lang.template-2.2.0.spoofax-language");
+        mb.pipe.run.core.vfs.IResource langLoc = mb.pipe.run.core.vfs.VFSResource.resolveStatic("/Users/gohla/.m2/repository/org/metaborg/org.metaborg.meta.lang.template/2.3.0-SNAPSHOT/org.metaborg.meta.lang.template-2.3.0-SNAPSHOT.spoofax-language");
         
         mb.pipe.run.core.vfs.IResource specDir = currentDir;
         

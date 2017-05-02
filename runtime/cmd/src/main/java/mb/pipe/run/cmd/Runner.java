@@ -41,8 +41,7 @@ import mb.pipe.run.core.model.style.IStyling;
 import mb.pipe.run.core.model.style.ITokenStyle;
 import mb.pipe.run.core.vfs.IResource;
 import mb.pipe.run.core.vfs.VFSResource;
-import mb.pipe.run.pluto.generated.filePipeline;
-import mb.pipe.run.pluto.generated.filePipeline.Output;
+import mb.pipe.run.pluto.generated.processFile;
 
 @SuppressWarnings("restriction")
 public class Runner {
@@ -133,8 +132,8 @@ public class Runner {
 
     private static void build(IContext context, Arguments arguments) throws Throwable {
         final IResource file = new VFSResource(arguments.file);
-        final BuildRequest<?, Output, ?, ?> buildRequest =
-            filePipeline.request(new filePipeline.Input(context, null, file, context));
+        final BuildRequest<?, processFile.Output, ?, ?> buildRequest =
+            processFile.request(new processFile.Input(context, null, file, context));
 
         try(final BuildManager buildManager =
             new BuildManager(new LogReporting(), XodusDatabase.createFileDatabase("pipeline-experiment"))) {
@@ -142,7 +141,7 @@ public class Runner {
                 buildManager.resetDynamicAnalysis();
             }
 
-            final Output output = buildManager.requireInitially(buildRequest).getBuildResult();
+            final processFile.Output output = buildManager.requireInitially(buildRequest).getBuildResult();
             final IResource resource = (IResource) output.getPipeVal().get(0);
             final String text = (String) output.getPipeVal().get(1);
             final @Nullable IStrategoTerm ast = (IStrategoTerm) output.getPipeVal().get(2);

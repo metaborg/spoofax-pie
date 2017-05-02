@@ -19,6 +19,7 @@ import org.eclipse.ui.IPathEditorInput;
 import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.IURIEditorInput;
 import org.metaborg.core.MetaborgRuntimeException;
+import org.metaborg.spoofax.eclipse.resource.EclipseResourceFileObject;
 
 import com.google.inject.Inject;
 
@@ -100,6 +101,16 @@ public class EclipseResourceSrv extends VFSResourceSrv implements IEclipseResour
             }
         }
 
+        if(vfsFile instanceof EclipseResourceFileObject) {
+            final EclipseResourceFileObject eclipseResource = (EclipseResourceFileObject) vfsFile;
+            try {
+                return eclipseResource.resource();
+            } catch(Exception e) {
+                logger.error("Could not unresolve resource {} to an Eclipse resource", e, resource);
+                return null;
+            }
+        }
+
         if(vfsFile instanceof LocalFile) {
             // LEGACY: analysis returns messages with relative local file resources, try to convert as relative first.
             final IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
@@ -124,7 +135,7 @@ public class EclipseResourceSrv extends VFSResourceSrv implements IEclipseResour
     @Override public File localFile(IResource resource) {
         // TODO: remove conversion to FileObject
         final FileObject vfsFile = resource.fileObject();
-        if(!(vfsFile instanceof EclipseFileObject)) {
+        if(!(vfsFile instanceof EclipseFileObject) && !(vfsFile instanceof EclipseResourceFileObject)) {
             return super.localFile(resource);
         }
 
@@ -139,7 +150,8 @@ public class EclipseResourceSrv extends VFSResourceSrv implements IEclipseResour
         // TODO: remove conversion to FileObject
         final FileObject vfsFile = resource.fileObject();
         final FileObject vfsDir = dir.fileObject();
-        if(!(vfsDir instanceof EclipseFileObject) || !(vfsFile instanceof EclipseFileObject)) {
+        if((!(vfsDir instanceof EclipseFileObject) && !(vfsDir instanceof EclipseResourceFileObject))
+            || (!(vfsFile instanceof EclipseFileObject) && !(vfsFile instanceof EclipseResourceFileObject))) {
             return super.localFile(resource, dir);
         }
 
@@ -159,7 +171,7 @@ public class EclipseResourceSrv extends VFSResourceSrv implements IEclipseResour
         // TODO: remove conversion to FileObject
         final FileObject vfsFile = resource.fileObject();
 
-        if(!(vfsFile instanceof EclipseFileObject)) {
+        if(!(vfsFile instanceof EclipseFileObject) && !(vfsFile instanceof EclipseResourceFileObject)) {
             return super.localPath(resource);
         }
 
