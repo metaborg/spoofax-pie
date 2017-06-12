@@ -10,9 +10,9 @@ import build.pluto.builder.BuildRequest;
 import build.pluto.builder.Builder;
 import build.pluto.builder.factory.BuilderFactory;
 import build.pluto.dependency.Origin;
-import mb.pipe.run.core.model.IContext;
-import mb.pipe.run.core.model.parse.IToken;
-import mb.pipe.run.core.model.style.IStyling;
+import mb.pipe.run.core.model.Context;
+import mb.pipe.run.core.model.parse.Token;
+import mb.pipe.run.core.model.style.Styling;
 import mb.pipe.run.pluto.util.ABuilder;
 import mb.pipe.run.pluto.util.AInput;
 import mb.pipe.run.pluto.util.Result;
@@ -23,11 +23,11 @@ public class Style extends ABuilder<Style.Input, Style.Output> {
     public static class Input extends AInput {
         private static final long serialVersionUID = 1L;
 
-        public final Collection<IToken> tokenStream;
+        public final Collection<Token> tokenStream;
         public final StylingRules stylingRules;
 
 
-        public Input(IContext context, @Nullable Origin origin, Collection<IToken> tokenStream, StylingRules stylingRules) {
+        public Input(Context context, @Nullable Origin origin, Collection<Token> tokenStream, StylingRules stylingRules) {
             super(context, origin);
 
             this.tokenStream = tokenStream;
@@ -38,15 +38,15 @@ public class Style extends ABuilder<Style.Input, Style.Output> {
     public static class Output implements build.pluto.output.Output {
         private static final long serialVersionUID = 1L;
 
-        public final IStyling styling;
+        public final Styling styling;
 
 
-        public Output(IStyling styling) {
+        public Output(Styling styling) {
             this.styling = styling;
         }
 
 
-        public IStyling getPipeVal() {
+        public Styling getPipeVal() {
             return styling;
         }
 
@@ -87,7 +87,7 @@ public class Style extends ABuilder<Style.Input, Style.Output> {
         return requireBuild(requiree, input, Style.class, Input.class);
     }
 
-    public static @Nullable IStyling build(Builder<?, ?> requiree, Input input) throws IOException {
+    public static @Nullable Styling build(Builder<?, ?> requiree, Input input) throws IOException {
         return requireBuild(requiree, input, Style.class, Input.class).output.styling;
     }
 
@@ -109,7 +109,7 @@ public class Style extends ABuilder<Style.Input, Style.Output> {
         requireOrigins();
 
         final Styler styler = new Styler(input.stylingRules);
-        final IStyling styling = styler.style(input.tokenStream);
+        final Styling styling = styler.style(input.tokenStream);
 
         return new Output(styling);
     }

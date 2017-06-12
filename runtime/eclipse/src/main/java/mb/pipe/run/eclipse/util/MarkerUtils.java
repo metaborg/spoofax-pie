@@ -4,9 +4,9 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 
-import mb.pipe.run.core.model.message.IMsg;
+import mb.pipe.run.core.model.message.Msg;
 import mb.pipe.run.core.model.message.MsgSeverityVisitor;
-import mb.pipe.run.core.model.region.IRegion;
+import mb.pipe.run.core.model.region.Region;
 import mb.pipe.run.eclipse.PipePlugin;
 
 /**
@@ -19,10 +19,10 @@ public final class MarkerUtils {
     private static final String errorPostfix = ".error";
 
 
-    public static IMarker createMarker(IResource resource, IMsg msg) throws CoreException {
+    public static IMarker createMarker(IResource resource, Msg msg) throws CoreException {
         final String markerId = id(msg);
         final IMarker marker = resource.createMarker(markerId);
-        final IRegion region = msg.region();
+        final Region region = msg.region();
         if(region != null) {
             marker.setAttribute(IMarker.CHAR_START, region.startOffset());
             // CHAR_END is exclusive, while region is inclusive: add 1
@@ -47,33 +47,33 @@ public final class MarkerUtils {
     }
 
 
-    public static int severity(IMsg msg) {
+    public static int severity(Msg msg) {
         return msg.severity().accept(new MsgSeverityVisitor<Integer>() {
-            @Override public Integer info(IMsg message) {
+            @Override public Integer info(Msg message) {
                 return IMarker.SEVERITY_INFO;
             }
 
-            @Override public Integer warning(IMsg message) {
+            @Override public Integer warning(Msg message) {
                 return IMarker.SEVERITY_WARNING;
             }
 
-            @Override public Integer error(IMsg message) {
+            @Override public Integer error(Msg message) {
                 return IMarker.SEVERITY_ERROR;
             }
         }, msg);
     }
 
-    public static String id(IMsg msg) {
+    public static String id(Msg msg) {
         return msg.severity().accept(new MsgSeverityVisitor<String>() {
-            @Override public String info(IMsg message) {
+            @Override public String info(Msg message) {
                 return id + infoPostfix;
             }
 
-            @Override public String warning(IMsg message) {
+            @Override public String warning(Msg message) {
                 return id + warningPostfix;
             }
 
-            @Override public String error(IMsg message) {
+            @Override public String error(Msg message) {
                 return id + errorPostfix;
             }
         }, msg);

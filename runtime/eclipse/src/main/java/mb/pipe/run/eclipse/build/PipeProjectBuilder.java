@@ -23,13 +23,13 @@ import build.pluto.builder.BuildManager;
 import build.pluto.builder.BuildRequest;
 import build.pluto.dependency.database.XodusDatabase;
 import build.pluto.util.LogReporting;
-import mb.pipe.run.core.log.ILogger;
+import mb.pipe.run.core.log.Logger;
+import mb.pipe.run.core.model.ContextImpl;
 import mb.pipe.run.core.model.Context;
-import mb.pipe.run.core.model.IContext;
-import mb.pipe.run.core.model.message.IMsg;
-import mb.pipe.run.core.model.style.IStyling;
-import mb.pipe.run.core.vfs.IResource;
-import mb.pipe.run.core.vfs.VFSResource;
+import mb.pipe.run.core.model.message.Msg;
+import mb.pipe.run.core.model.style.Styling;
+import mb.pipe.run.core.path.PPath;
+import mb.pipe.run.core.path.VFSResource;
 import mb.pipe.run.eclipse.PipePlugin;
 import mb.pipe.run.eclipse.editor.Editors;
 import mb.pipe.run.eclipse.editor.PipeEditor;
@@ -41,7 +41,7 @@ import mb.pipe.run.pluto.generated.processString;
 public class PipeProjectBuilder extends IncrementalProjectBuilder {
     public static final String id = PipePlugin.id + ".builder";
 
-    private final ILogger logger;
+    private final Logger logger;
     private final IEclipseResourceSrv resourceSrv;
     private final Editors editors;
     private final Updater updater;
@@ -49,7 +49,7 @@ public class PipeProjectBuilder extends IncrementalProjectBuilder {
 
     public PipeProjectBuilder() {
         final Injector injector = PipePlugin.pipeFacade().injector;
-        this.logger = injector.getInstance(ILogger.class).forContext(getClass());
+        this.logger = injector.getInstance(Logger.class).forContext(getClass());
         this.resourceSrv = injector.getInstance(IEclipseResourceSrv.class);
         this.editors = injector.getInstance(Editors.class);
         this.updater = injector.getInstance(Updater.class);
@@ -62,8 +62,8 @@ public class PipeProjectBuilder extends IncrementalProjectBuilder {
 
         final IProject project = getProject();
         logger.info("Building project " + project);
-        final IResource projectDir = resourceSrv.resolve(project);
-        final IContext context = new Context(projectDir);
+        final PPath projectDir = resourceSrv.resolve(project);
+        final Context context = new ContextImpl(projectDir);
 
         FileObject[] files;
         try {
@@ -82,7 +82,7 @@ public class PipeProjectBuilder extends IncrementalProjectBuilder {
         } catch(FileSystemException e) {
             throw new CoreException(StatusUtils.error("Could not list files of project " + project, e));
         }
-        final Collection<IResource> resources = Lists.newArrayList();
+        final Collection<PPath> resources = Lists.newArrayList();
         for(FileObject file : files) {
             resources.add(new VFSResource(file));
         }
@@ -91,13 +91,13 @@ public class PipeProjectBuilder extends IncrementalProjectBuilder {
             try(final BuildManager buildManager =
                 new BuildManager(new LogReporting(), XodusDatabase.createFileDatabase("pipeline-experiment"))) {
                 try {
-                    for(IResource file : resources) {
+                    for(PPath file : resources) {
                         final BuildRequest<?, processFile.Output, ?, ?> req =
                             processFile.request(new processFile.Input(context, null, file, context));
                         final processFile.Output output = buildManager.requireInitially(req).getBuildResult();
 
                         logger.info("Updating file {}", file);
-                        final Collection<IMsg> messages = (Collection<IMsg>) output.getPipeVal().get(4);
+                        final Collection<Msg> messages = (Collection<Msg>) output.getPipeVal().get(4);
                         updater.updateMessagesSync(project, messages, monitor);
                     }
                     for(PipeEditor editor : editors.editors()) {
@@ -107,9 +107,9 @@ public class PipeProjectBuilder extends IncrementalProjectBuilder {
                         final processString.Output output = buildManager.requireInitially(req).getBuildResult();
 
                         logger.info("Updating editor {}", editor.name());
-                        final Collection<IMsg> messages = (Collection<IMsg>) output.getPipeVal().get(3);
+                        final Collection<Msg> messages = (Collection<Msg>) output.getPipeVal().get(3);
                         updater.updateMessagesSync(editor.eclipseResource(), messages, monitor);
-                        final @Nullable IStyling styling = (IStyling) output.getPipeVal().get(4);
+                        final @Nullable Styling styling = (Styling) output.getPipeVal().get(4);
                         updater.updateStyle(editor.sourceViewer(), styling, monitor);
                     }
                 } catch(Throwable e) {

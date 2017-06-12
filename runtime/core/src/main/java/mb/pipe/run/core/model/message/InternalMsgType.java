@@ -1,10 +1,10 @@
 package mb.pipe.run.core.model.message;
 
-public class InternalMsgType implements IMsgType {
+public class InternalMsgType implements MsgType {
     private static final long serialVersionUID = 1L;
 
     
-    @Override public void accept(MsgTypeVisitor visitor, IMsg message) {
+    @Override public void accept(MsgTypeVisitor visitor, Msg message) {
         visitor.internal(message);
     }
 

@@ -2,19 +2,19 @@ package mb.pipe.run.spoofax.sdf;
 
 import org.spoofax.jsglr.client.imploder.IToken;
 
-import mb.pipe.run.core.model.region.IRegion;
 import mb.pipe.run.core.model.region.Region;
+import mb.pipe.run.core.model.region.RegionImpl;
 
 public class RegionFactory {
-    public static IRegion fromToken(IToken token) {
-        return new Region(token.getStartOffset(), token.getEndOffset());
+    public static Region fromToken(IToken token) {
+        return new RegionImpl(token.getStartOffset(), token.getEndOffset());
     }
 
-    public static IRegion fromTokens(IToken left, IToken right) {
-        return new Region(left.getStartOffset(), right.getEndOffset());
+    public static Region fromTokens(IToken left, IToken right) {
+        return new RegionImpl(left.getStartOffset(), right.getEndOffset());
     }
 
-    public static IRegion fromTokensLayout(IToken left, IToken right, boolean isNullable) {
+    public static Region fromTokensLayout(IToken left, IToken right, boolean isNullable) {
         int leftStartOffset = left.getStartOffset();
         int rightEndOffset = right.getEndOffset();
 
@@ -27,6 +27,6 @@ public class RegionFactory {
             rightEndOffset++;
         }
 
-        return new Region(leftStartOffset, rightEndOffset);
+        return new RegionImpl(leftStartOffset, rightEndOffset);
     }
 }

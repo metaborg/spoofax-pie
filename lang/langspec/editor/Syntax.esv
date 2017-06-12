@@ -26,10 +26,14 @@ colorer // Default, token-based highlighting
 
   ID         : darkblue
   TYPEID     : blue
+  QID        : blue
   JQTYPEID   : blue
   PQTYPEID   : blue
+  CQTYPEID   : blue
+  KQTYPEORPACKAGEID   : blue
   FUNCID     : 153 51 0
   JFUNCID    : 153 51 0
+  KFUNCID    : 153 51 0
   STRING     : 177 47 2
 
 menus

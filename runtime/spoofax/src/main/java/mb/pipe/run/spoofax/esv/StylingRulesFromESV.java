@@ -1,27 +1,25 @@
 package mb.pipe.run.spoofax.esv;
 
-import java.awt.Color;
-import java.util.Map;
-
-import org.metaborg.spoofax.core.esv.ESVReader;
+import com.google.common.collect.Maps;
+import com.google.inject.Inject;
+import mb.pipe.run.core.log.Logger;
+import mb.pipe.run.core.model.parse.TokenConstants;
+import mb.pipe.run.core.model.parse.TokenType;
+import mb.pipe.run.core.model.style.Style;
+import mb.pipe.run.core.model.style.StyleImpl;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoConstructor;
 
-import com.google.common.collect.Maps;
-import com.google.inject.Inject;
-
-import mb.pipe.run.core.log.ILogger;
-import mb.pipe.run.core.model.parse.ITokenType;
-import mb.pipe.run.core.model.parse.TokenConstants;
-import mb.pipe.run.core.model.style.IStyle;
-import mb.pipe.run.core.model.style.Style;
+import java.awt.*;
+import java.util.Map;
 
 public class StylingRulesFromESV {
-    private final ILogger logger;
+    private final Logger logger;
 
 
-    @Inject public StylingRulesFromESV(ILogger logger) {
+    @Inject
+    public StylingRulesFromESV(Logger logger) {
         this.logger = logger.forContext(getClass());
     }
 
@@ -30,17 +28,17 @@ public class StylingRulesFromESV {
         final StylingRules styler = new StylingRules();
 
         final Iterable<IStrategoAppl> styleDefs = ESVReader.collectTerms(esv, "ColorDef");
-        final Map<String, IStyle> namedStyles = Maps.newHashMap();
-        for(IStrategoAppl styleDef : styleDefs) {
+        final Map<String, Style> namedStyles = Maps.newHashMap();
+        for (IStrategoAppl styleDef : styleDefs) {
             final IStrategoAppl styleTerm = (IStrategoAppl) styleDef.getSubterm(1);
             final IStrategoConstructor styleCons = styleTerm.getConstructor();
-            final IStyle style;
-            if(styleCons.getName().equals("Attribute")) {
+            final Style style;
+            if (styleCons.getName().equals("Attribute")) {
                 style = style(styleTerm);
-            } else if(styleCons.getName().equals("AttributeRef")) {
+            } else if (styleCons.getName().equals("AttributeRef")) {
                 final String name = Tools.asJavaString(styleTerm.getSubterm(0));
                 style = namedStyles.get(name);
-                if(style == null) {
+                if (style == null) {
                     logger.error("Cannot resolve style definition " + name + " in style definition " + styleDef);
                     continue;
                 }
@@ -53,16 +51,16 @@ public class StylingRulesFromESV {
         }
 
         final Iterable<IStrategoAppl> styleRules = ESVReader.collectTerms(esv, "ColorRule");
-        for(IStrategoAppl styleRule : styleRules) {
+        for (IStrategoAppl styleRule : styleRules) {
             final IStrategoAppl styleTerm = (IStrategoAppl) styleRule.getSubterm(1);
             final IStrategoConstructor styleCons = styleTerm.getConstructor();
-            final IStyle style;
-            if(styleCons.getName().equals("Attribute")) {
+            final Style style;
+            if (styleCons.getName().equals("Attribute")) {
                 style = style(styleTerm);
-            } else if(styleCons.getName().equals("AttributeRef")) {
+            } else if (styleCons.getName().equals("AttributeRef")) {
                 final String name = Tools.asJavaString(styleTerm.getSubterm(0));
                 style = namedStyles.get(name);
-                if(style == null) {
+                if (style == null) {
                     logger.error("Cannot resolve style definition " + name + " in style rule " + styleRule);
                     continue;
                 }
@@ -73,20 +71,20 @@ public class StylingRulesFromESV {
 
             final IStrategoAppl node = (IStrategoAppl) styleRule.getSubterm(0);
             final IStrategoConstructor nodeCons = node.getConstructor();
-            if(nodeCons.getName().equals("SortAndConstructor")) {
+            if (nodeCons.getName().equals("SortAndConstructor")) {
                 final String sort = Tools.asJavaString(node.getSubterm(0).getSubterm(0));
                 final String cons = Tools.asJavaString(node.getSubterm(1).getSubterm(0));
                 styler.mapSortConsToStyle(sort, cons, style);
-            } else if(nodeCons.getName().equals("ConstructorOnly")) {
+            } else if (nodeCons.getName().equals("ConstructorOnly")) {
                 final String cons = Tools.asJavaString(node.getSubterm(0).getSubterm(0));
                 styler.mapConsToStyle(cons, style);
-            } else if(nodeCons.getName().equals("Sort")) {
+            } else if (nodeCons.getName().equals("Sort")) {
                 final String sort = Tools.asJavaString(node.getSubterm(0));
                 styler.mapSortToStyle(sort, style);
-            } else if(nodeCons.getName().equals("Token")) {
+            } else if (nodeCons.getName().equals("Token")) {
                 final IStrategoAppl tokenAppl = (IStrategoAppl) node.getSubterm(0);
                 final String tokenTypeStr = tokenAppl.getConstructor().getName();
-                final ITokenType tokenType = tokenType(tokenTypeStr);
+                final TokenType tokenType = tokenType(tokenTypeStr);
                 styler.mapTokenTypeToStyle(tokenType, style);
             } else {
                 logger.error("Unhandled node " + nodeCons + " in style rule " + styleRule);
@@ -97,7 +95,7 @@ public class StylingRulesFromESV {
         return styler;
     }
 
-    private static IStyle style(IStrategoAppl attribute) {
+    private static Style style(IStrategoAppl attribute) {
         final Color color = color((IStrategoAppl) attribute.getSubterm(0));
         final Color backgroundColor = color((IStrategoAppl) attribute.getSubterm(1));
         final boolean bold;
@@ -106,7 +104,7 @@ public class StylingRulesFromESV {
         final boolean strikeout = false;
         final IStrategoAppl fontSetting = (IStrategoAppl) attribute.getSubterm(2);
         final String fontSettingCons = fontSetting.getConstructor().getName();
-        switch(fontSettingCons) {
+        switch (fontSettingCons) {
             case "BOLD":
                 bold = true;
                 italic = false;
@@ -124,12 +122,12 @@ public class StylingRulesFromESV {
                 italic = false;
                 break;
         }
-        return new Style(color, backgroundColor, bold, italic, underline, strikeout);
+        return new StyleImpl(color, backgroundColor, bold, italic, underline, strikeout);
     }
 
     private static Color color(IStrategoAppl color) {
         final String colorCons = color.getConstructor().getName();
-        switch(colorCons) {
+        switch (colorCons) {
             case "ColorRGB":
                 final int r = Integer.parseInt(Tools.asJavaString(color.getSubterm(0)));
                 final int g = Integer.parseInt(Tools.asJavaString(color.getSubterm(1)));
@@ -142,8 +140,8 @@ public class StylingRulesFromESV {
         }
     }
 
-    private ITokenType tokenType(String str) {
-        switch(str) {
+    private TokenType tokenType(String str) {
+        switch (str) {
             case "TK_IDENTIFIER":
                 return TokenConstants.identifierType;
             case "TK_STRING":

@@ -1,6 +1,5 @@
 package mb.pipe.run.eclipse.util;
 
-import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.swt.SWT;
@@ -9,10 +8,10 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 
-import mb.pipe.run.core.model.region.IRegion;
-import mb.pipe.run.core.model.style.IStyle;
-import mb.pipe.run.core.model.style.IStyling;
-import mb.pipe.run.core.model.style.ITokenStyle;
+import mb.pipe.run.core.model.region.Region;
+import mb.pipe.run.core.model.style.Style;
+import mb.pipe.run.core.model.style.Styling;
+import mb.pipe.run.core.model.style.TokenStyle;
 
 /**
  * Utility functions for creating Eclipse text styles.
@@ -36,19 +35,19 @@ public final class StyleUtils {
         return presentation;
     }
 
-    public TextPresentation createTextPresentation(IStyling styling) {
+    public TextPresentation createTextPresentation(Styling styling) {
         return createTextPresentation(styling.stylePerToken());
     }
 
-    public TextPresentation createTextPresentation(Iterable<ITokenStyle> stylePerToken) {
+    public TextPresentation createTextPresentation(Iterable<TokenStyle> stylePerToken) {
         final TextPresentation presentation = new TextPresentation();
-        for(ITokenStyle tokenStyle : stylePerToken) {
+        for(TokenStyle tokenStyle : stylePerToken) {
             final StyleRange styleRange = createStyleRange(tokenStyle);
             presentation.addStyleRange(styleRange);
         }
         org.eclipse.jface.text.IRegion extent = presentation.getExtent();
         if(extent == null) {
-            extent = new Region(0, 0);
+            extent = new org.eclipse.jface.text.Region(0, 0);
         }
         final StyleRange defaultStyleRange = new StyleRange();
         defaultStyleRange.start = extent.getOffset();
@@ -59,9 +58,9 @@ public final class StyleUtils {
         return presentation;
     }
 
-    public StyleRange createStyleRange(ITokenStyle tokenStyle) {
-        final IStyle style = tokenStyle.style();
-        final IRegion region = tokenStyle.token().region();
+    public StyleRange createStyleRange(TokenStyle tokenStyle) {
+        final Style style = tokenStyle.style();
+        final Region region = tokenStyle.token().region();
 
         final StyleRange styleRange = new StyleRange();
         final java.awt.Color foreground = style.color();

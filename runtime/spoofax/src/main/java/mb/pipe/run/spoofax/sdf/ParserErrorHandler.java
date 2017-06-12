@@ -20,9 +20,9 @@ import org.spoofax.jsglr.shared.TokenExpectedException;
 
 import com.google.common.collect.Lists;
 
-import mb.pipe.run.core.model.message.IMsg;
+import mb.pipe.run.core.model.message.Msg;
 import mb.pipe.run.core.model.message.MsgBuilder;
-import mb.pipe.run.core.model.region.IRegion;
+import mb.pipe.run.core.model.region.Region;
 import mb.pipe.run.core.parse.ParseMsgType;
 
 public class ParserErrorHandler {
@@ -34,7 +34,7 @@ public class ParserErrorHandler {
     private final boolean recoveryFailed;
     private final Set<BadTokenException> parseErrors;
 
-    private final Collection<IMsg> messages = Lists.newArrayList();
+    private final Collection<Msg> messages = Lists.newArrayList();
     private final MsgBuilder msgBuilder = new MsgBuilder().withType(new ParseMsgType()).withoutException();
 
 
@@ -46,7 +46,7 @@ public class ParserErrorHandler {
     }
 
 
-    public Collection<IMsg> messages() {
+    public Collection<Msg> messages() {
         return messages;
     }
 
@@ -179,7 +179,7 @@ public class ParserErrorHandler {
 
     private void reportErrorNearOffset(ITokenizer tokenizer, int offset, String message) {
         final IToken errorToken = tokenizer.getErrorTokenOrAdjunct(offset);
-        final IRegion region = RegionFactory.fromTokens(errorToken, errorToken);
+        final Region region = RegionFactory.fromTokens(errorToken, errorToken);
         reportErrorAtRegion(region, message);
     }
 
@@ -197,7 +197,7 @@ public class ParserErrorHandler {
 
     private void createErrorAtFirstLine(String text) {
         final String errorText = text + getErrorExplanation();
-        final IMsg msg = msgBuilder.asError().withoutRegion().withText(errorText).build();
+        final Msg msg = msgBuilder.asError().withoutRegion().withText(errorText).build();
         messages.add(msg);
     }
 
@@ -205,8 +205,8 @@ public class ParserErrorHandler {
         reportErrorAtRegion(RegionFactory.fromTokens(left, right), text);
     }
 
-    private void reportErrorAtRegion(IRegion region, String text) {
-        final IMsg msg = msgBuilder.asError().withRegion(region).withText(text).build();
+    private void reportErrorAtRegion(Region region, String text) {
+        final Msg msg = msgBuilder.asError().withRegion(region).withText(text).build();
         messages.add(msg);
     }
 
@@ -214,8 +214,8 @@ public class ParserErrorHandler {
         reportWarningAtRegion(RegionFactory.fromTokens(left, right), text);
     }
 
-    private void reportWarningAtRegion(IRegion region, String text) {
-        final IMsg msg = msgBuilder.asWarning().withRegion(region).withText(text).build();
+    private void reportWarningAtRegion(Region region, String text) {
+        final Msg msg = msgBuilder.asWarning().withRegion(region).withText(text).build();
         messages.add(msg);
     }
 

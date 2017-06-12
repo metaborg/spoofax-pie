@@ -7,16 +7,16 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.Maps;
 
-import mb.pipe.run.core.model.parse.ITokenType;
-import mb.pipe.run.core.model.style.IStyle;
+import mb.pipe.run.core.model.parse.TokenType;
+import mb.pipe.run.core.model.style.Style;
 
 public class StylingRules implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private final Map<SortCons, IStyle> sortConsToStyle = Maps.newHashMap();
-    private final Map<String, IStyle> consToStyle = Maps.newHashMap();
-    private final Map<String, IStyle> sortToStyle = Maps.newHashMap();
-    private final Map<ITokenType, IStyle> tokenTypeToStyle = Maps.newHashMap();
+    private final Map<SortCons, Style> sortConsToStyle = Maps.newHashMap();
+    private final Map<String, Style> consToStyle = Maps.newHashMap();
+    private final Map<String, Style> sortToStyle = Maps.newHashMap();
+    private final Map<TokenType, Style> tokenTypeToStyle = Maps.newHashMap();
 
 
     public boolean hasSortConsStyle(String sort, String cons) {
@@ -36,36 +36,36 @@ public class StylingRules implements Serializable {
     }
 
 
-    public @Nullable IStyle sortConsStyle(String sort, String cons) {
+    public @Nullable Style sortConsStyle(String sort, String cons) {
         return sortConsToStyle.get(new SortCons(sort, cons));
     }
 
-    public @Nullable IStyle consStyle(String cons) {
+    public @Nullable Style consStyle(String cons) {
         return consToStyle.get(cons);
     }
 
-    public @Nullable IStyle sortStyle(String sort) {
+    public @Nullable Style sortStyle(String sort) {
         return sortToStyle.get(sort);
     }
 
-    public @Nullable IStyle tokenTypeStyle(ITokenType type) {
+    public @Nullable Style tokenTypeStyle(TokenType type) {
         return tokenTypeToStyle.get(type);
     }
 
 
-    public void mapSortConsToStyle(String sort, String cons, IStyle style) {
+    public void mapSortConsToStyle(String sort, String cons, Style style) {
         sortConsToStyle.put(new SortCons(sort, cons), style);
     }
 
-    public void mapConsToStyle(String cons, IStyle style) {
+    public void mapConsToStyle(String cons, Style style) {
         consToStyle.put(cons, style);
     }
 
-    public void mapSortToStyle(String sort, IStyle style) {
+    public void mapSortToStyle(String sort, Style style) {
         sortToStyle.put(sort, style);
     }
 
-    public void mapTokenTypeToStyle(ITokenType type, IStyle style) {
+    public void mapTokenTypeToStyle(TokenType type, Style style) {
         tokenTypeToStyle.put(type, style);
     }
 

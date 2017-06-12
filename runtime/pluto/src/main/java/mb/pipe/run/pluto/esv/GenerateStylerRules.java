@@ -17,8 +17,8 @@ import build.pluto.builder.Builder;
 import build.pluto.builder.factory.BuilderFactory;
 import build.pluto.dependency.Origin;
 import mb.pipe.run.core.PipeRunEx;
-import mb.pipe.run.core.model.IContext;
-import mb.pipe.run.core.vfs.IResource;
+import mb.pipe.run.core.model.Context;
+import mb.pipe.run.core.path.PPath;
 import mb.pipe.run.pluto.spoofax.LoadLang;
 import mb.pipe.run.pluto.spoofax.LoadProject;
 import mb.pipe.run.pluto.spoofax.Parse;
@@ -34,14 +34,14 @@ public class GenerateStylerRules extends ABuilder<GenerateStylerRules.Input, Gen
     public static class Input extends AInput {
         private static final long serialVersionUID = 1L;
 
-        public final IResource langLoc;
-        public final IResource specDir;
-        public final IResource mainFile;
-        public final Collection<IResource> includedFiles;
+        public final PPath langLoc;
+        public final PPath specDir;
+        public final PPath mainFile;
+        public final Collection<PPath> includedFiles;
 
 
-        public Input(IContext context, @Nullable Origin origin, IResource langLoc, IResource specDir,
-            IResource mainFile, Collection<IResource> includedFiles) {
+        public Input(Context context, @Nullable Origin origin, PPath langLoc, PPath specDir,
+            PPath mainFile, Collection<PPath> includedFiles) {
             super(context, origin);
 
             this.langLoc = langLoc;
@@ -126,7 +126,7 @@ public class GenerateStylerRules extends ABuilder<GenerateStylerRules.Input, Gen
         final String text = Read.build(this, new Read.Input(input.context, input.mainFile));
 
         // Create dependencies to included files
-        for(IResource includedFile : input.includedFiles) {
+        for(PPath includedFile : input.includedFiles) {
             require(includedFile);
         }
 

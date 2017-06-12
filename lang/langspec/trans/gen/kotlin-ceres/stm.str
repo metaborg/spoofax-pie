@@ -1,0 +1,133 @@
+module gen/kotlin-ceres/stm
+
+imports
+
+  signatures/-
+  signatures/lex/-
+  signatures/impl/-
+  
+  statsem/program
+  
+  gen/idtype-tuples
+  gen/util
+  gen/debug
+  gen/kotlin/type2kotlin
+  gen/kotlin-ceres/exp
+
+rules
+
+  try-p2c-stm    = pipe-try-debug(p2c-stm|"p2c-stm") <+ !"{}"
+  p2c-stms       = p2c-stms(|"\n")
+  p2c-stms(|sep) = map(try-p2c-stm); separate-by(|sep); concat-strings
+
+rules
+
+  p2c-stm:
+    Block(stms) -> 
+$[{
+  [str]
+}]
+    with
+      str := <p2c-stms> stms
+
+rules // Bindings and assignment
+
+  p2c-stm:
+    VarDecBinder(SingleBinder(bind), exp) -> 
+$[[initStmsStr]var [bindStr] = [expStr]]
+    with
+      bindStr               := <p2c-bind-tostr> bind
+    ; (initStmsStr, expStr) := <try-p2c-exp> exp
+  
+  p2c-stm:
+    VarDecBinder(TupleBinder(binds), exp) -> 
+$[[initStmsStr]var ([bindsStr]) = [expStr]]
+    with
+      (initStmsStr, expStr) := <try-p2c-exp> exp
+    ; bindsStr              := <map(p2c-bind-tostr); pipe-sep-comma; concat-strings> binds
+
+  p2c-bind-tostr: Bind(varId)      -> $[[varId]]
+  p2c-bind-tostr: TBind(varId, ty) -> $[[varId] : [[<t2k-sig> ty]]]
+
+  p2c-stm:
+    VarDec(varId, type) -> $[var [varId] : [tyStr]]
+    with
+      tyStr := <t2k-sig> type
+
+  p2c-stm:
+    Assign(Ref(varId), exp) -> 
+$[[initStmsStr][varId] = [expStr]]
+    with
+      (initStmsStr, expStr) := <try-p2c-exp> exp
+
+rules // Control flow
+
+  p2c-stm:
+    If(exp, stm) -> 
+$[[initStmsStr]if([expStr])
+  [strStm]]
+    with
+      strStm                := <try-p2c-stm> stm
+    ; (initStmsStr, expStr) := <try-p2c-exp> exp
+
+  p2c-stm:
+    IfElse(exp, trueStm, falseStm) ->
+$[[initStmsStr]if([expStr])
+  [trueStmStr]
+else
+  [falseStmStr]]
+    with
+      trueStmStr            := <try-p2c-stm> trueStm
+    ; falseStmStr           := <try-p2c-stm> falseStm
+    ; (initStmsStr, expStr) := <try-p2c-exp> exp
+
+  p2c-stm:
+    ForEach(SingleBinder(bind), exp, stm) ->
+$[[initStmsStr]for([bindStr] in [expStr])
+  [strStm]]
+    with
+      bindStr               := <p2c-bind-tostr> bind
+    ; (initStmsStr, expStr) := <try-p2c-exp> exp
+    ; strStm                := <try-p2c-stm> stm
+
+  p2c-stm:
+    ForEach(TupleBinder(binds), exp, stm) ->
+$[[initStmsStr]for(([bindsStr]) in [expStr])
+  [strStm]]
+    with
+      bindsStr              := <map(p2c-bind-tostr); pipe-sep-comma; concat-strings> binds
+    ; (initStmsStr, expStr) := <try-p2c-exp> exp
+    ; strStm                := <try-p2c-stm> stm
+
+rules // Return and fail
+
+  p2c-stm:
+    Return(exp) -> 
+$[[initStmsStr]return Output([expStr])]
+    where
+      <pipe-ast-type; ?TupleTy(_)> exp
+    with
+      (initStmsStr, expStr) := <try-p2c-exp> exp
+
+  p2c-stm:
+    Return(exp) -> 
+$[[initStmsStr]return [expStr]]
+    where
+      <pipe-ast-type; not(?TupleTy(_))> exp
+    with
+      (initStmsStr, expStr) := <try-p2c-exp> exp
+
+
+  p2c-stm:
+    Fail(exp) ->
+$[[initStmsStr]throw PipeRunEx([expStr].toString())]
+    with
+      (initStmsStr, expStr) := <try-p2c-exp> exp
+
+rules // Expression as statement
+
+  p2c-stm:
+    Exp(exp) -> 
+$[[initStmsStr][expStr]]
+    with
+      (initStmsStr, expStr) := <try-p2c-exp> exp

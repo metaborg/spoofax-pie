@@ -12,10 +12,10 @@ import javax.annotation.Nullable;
 import org.apache.commons.vfs2.FileObject;
 import org.metaborg.core.action.EndNamedGoal;
 import org.metaborg.core.action.ITransformGoal;
-import org.metaborg.core.build.CommonPaths;
 import org.metaborg.core.language.ILanguageImpl;
 import org.metaborg.core.language.LanguageIdentifier;
-import org.metaborg.newsdf2table.parsetable.ParseTableGenerator;
+import org.metaborg.sdf2table.parsetable.ParseTableGenerator;
+import org.metaborg.spoofax.core.build.SpoofaxCommonPaths;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.google.common.collect.Lists;
@@ -26,9 +26,9 @@ import build.pluto.builder.Builder;
 import build.pluto.builder.factory.BuilderFactory;
 import build.pluto.dependency.Origin;
 import mb.pipe.run.core.PipeRunEx;
-import mb.pipe.run.core.model.IContext;
-import mb.pipe.run.core.vfs.IResource;
-import mb.pipe.run.core.vfs.VFSResource;
+import mb.pipe.run.core.model.Context;
+import mb.pipe.run.core.path.PPath;
+import mb.pipe.run.core.path.VFSResource;
 import mb.pipe.run.pluto.spoofax.LoadLang;
 import mb.pipe.run.pluto.spoofax.LoadProject;
 import mb.pipe.run.pluto.spoofax.Parse;
@@ -43,14 +43,14 @@ public class GenerateTable extends ABuilder<GenerateTable.Input, GenerateTable.O
     public static class Input extends AInput {
         private static final long serialVersionUID = 1L;
 
-        public final IResource langLoc;
-        public final IResource specDir;
-        public final IResource mainFile;
-        public final Collection<IResource> includedFiles;
+        public final PPath langLoc;
+        public final PPath specDir;
+        public final PPath mainFile;
+        public final Collection<PPath> includedFiles;
 
 
-        public Input(IContext context, @Nullable Origin origin, IResource langLoc, IResource specDir,
-            IResource mainFile, Collection<IResource> includedFiles) {
+        public Input(Context context, @Nullable Origin origin, PPath langLoc, PPath specDir,
+            PPath mainFile, Collection<PPath> includedFiles) {
             super(context, origin);
 
             this.langLoc = langLoc;
@@ -133,8 +133,8 @@ public class GenerateTable extends ABuilder<GenerateTable.Input, GenerateTable.O
 
         // Read input files
         final String mainFileText = Read.build(this, new Read.Input(input.context, input.mainFile));
-        final Map<IResource, String> texts = Maps.newHashMap();
-        for(IResource file : input.includedFiles) {
+        final Map<PPath, String> texts = Maps.newHashMap();
+        for(PPath file : input.includedFiles) {
             final String text = Read.build(this, new Read.Input(input.context, input.mainFile));
             texts.put(file, text);
         }
@@ -145,9 +145,9 @@ public class GenerateTable extends ABuilder<GenerateTable.Input, GenerateTable.O
         final LanguageIdentifier langId = langImpl.id();
 
         // Parse input files
-        final Map<IResource, IStrategoTerm> asts = Maps.newHashMap();
-        for(Entry<IResource, String> pair : texts.entrySet()) {
-            final IResource file = pair.getKey();
+        final Map<PPath, IStrategoTerm> asts = Maps.newHashMap();
+        for(Entry<PPath, String> pair : texts.entrySet()) {
+            final PPath file = pair.getKey();
             final String text = pair.getValue();
             final @Nullable IStrategoTerm ast =
                 Parse.build(this, new Parse.Input(input.context, null, langId, file, text));
@@ -177,9 +177,9 @@ public class GenerateTable extends ABuilder<GenerateTable.Input, GenerateTable.O
 
         // Transform
         final ITransformGoal transformGoal = new EndNamedGoal("to Normal Form (abstract)");
-        final Map<IResource, Trans.Output> normalized = Maps.newHashMap();
-        for(Entry<IResource, IStrategoTerm> pair : asts.entrySet()) {
-            final IResource file = pair.getKey();
+        final Map<PPath, Trans.Output> normalized = Maps.newHashMap();
+        for(Entry<PPath, IStrategoTerm> pair : asts.entrySet()) {
+            final PPath file = pair.getKey();
             final IStrategoTerm ast = pair.getValue();
             final Result<Trans.Output> output = Trans.requireBuild(this,
                 new Trans.Input(input.context, null, langId, input.langLoc, file, ast, transformGoal));
@@ -198,22 +198,22 @@ public class GenerateTable extends ABuilder<GenerateTable.Input, GenerateTable.O
 
         // Create table
         // Main input file
-        final IResource mainResource = normalizedMain.writtenFile;
-        final File mainFile = pipe().resourceSrv.localPath(mainResource);
+        final PPath mainResource = normalizedMain.writtenFile;
+        final File mainFile = pipe().pathSrv.localPath(mainResource);
         if(mainFile == null) {
             throw new PipeRunEx("Normalized main file " + mainResource + " is not on the local file system");
         }
         // Output file
-        final CommonPaths spoofaxPaths = new CommonPaths(input.specDir.fileObject());
+        final SpoofaxCommonPaths spoofaxPaths = new SpoofaxCommonPaths(input.specDir.fileObject());
         final FileObject vfsOutputFile = spoofaxPaths.targetMetaborgDir().resolveFile("sdf-new.tbl");
-        final File outputFile = pipe().resourceSrv.localPath(new VFSResource(vfsOutputFile));
+        final File outputFile = pipe().pathSrv.localPath(new VFSResource(vfsOutputFile));
         if(outputFile == null) {
             throw new PipeRunEx("Parse table output file " + vfsOutputFile + " is not on the local file system");
         }
         // Dummy output file for context grammar
-        final IResource vfsDummyfile = pipe().resourceSrv.resolve("ram://ctx.grammar");
+        final PPath vfsDummyfile = pipe().pathSrv.resolve("ram://ctx.grammar");
         vfsDummyfile.fileObject().createFile();
-        final File dummyFile = pipe().resourceSrv.localFile(vfsDummyfile);
+        final File dummyFile = pipe().pathSrv.localFile(vfsDummyfile);
         if(dummyFile == null) {
             throw new PipeRunEx(
                 "Context grammar dummy output file " + vfsDummyfile + " is not on the local file system");
@@ -221,8 +221,9 @@ public class GenerateTable extends ABuilder<GenerateTable.Input, GenerateTable.O
         // Paths
         final List<String> paths = Lists.newArrayList(spoofaxPaths.syntaxSrcGenDir().getName().getURI());
         // Create table and make dependencies
-        final ParseTableGenerator generator = new ParseTableGenerator(mainFile, outputFile, dummyFile, paths, false);
-        generator.createTable();
+        final ParseTableGenerator generator =
+            new ParseTableGenerator(mainFile, outputFile, null, dummyFile, paths, false);
+        generator.createTable(false);
         for(File required : generator.requiredFiles()) {
             require(required);
         }

@@ -16,8 +16,8 @@ context-free syntax
   BaseType.IntTy   = <int>
   BaseType.StrTy   = <string>
   BaseType.DataTy  = <<TYPEID>> {avoid}
-  BaseType.TupleTy = <(<{Type ", "}*>)> // TODO: add gen
-  BaseType.ListTy  = <<Type>*> // TODO: add gen
+  BaseType.TupleTy = <(<{Type ", "}*>)>
+  BaseType.ListTy  = <<Type>*>
 
   TypeMod.NullableTy = <<BaseType>?>
 

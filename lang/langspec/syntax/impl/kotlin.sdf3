@@ -1,0 +1,15 @@
+module impl/kotlin
+
+imports
+  
+  lex/literal
+  func
+
+lexical syntax
+
+  KQTYPEORPACKAGEID = QID
+  KFUNCID           = ID
+
+context-free syntax
+  
+  FuncImpl.KFuncImpl = <kotlin <KQTYPEORPACKAGEID>#<KFUNCID>>

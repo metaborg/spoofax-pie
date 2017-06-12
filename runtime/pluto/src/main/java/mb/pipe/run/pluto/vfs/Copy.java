@@ -11,8 +11,8 @@ import build.pluto.builder.BuildRequest;
 import build.pluto.builder.Builder;
 import build.pluto.builder.factory.BuilderFactory;
 import build.pluto.dependency.Origin;
-import mb.pipe.run.core.model.IContext;
-import mb.pipe.run.core.vfs.IResource;
+import mb.pipe.run.core.model.Context;
+import mb.pipe.run.core.path.PPath;
 import mb.pipe.run.pluto.util.ABuilder;
 import mb.pipe.run.pluto.util.AInput;
 import mb.pipe.run.pluto.util.Result;
@@ -21,11 +21,11 @@ public class Copy extends ABuilder<Copy.Input, Copy.Output> {
     public static class Input extends AInput {
         private static final long serialVersionUID = 1L;
 
-        public final IResource from;
-        public final IResource to;
+        public final PPath from;
+        public final PPath to;
 
 
-        public Input(IContext context, @Nullable Origin origin, IResource from, IResource to) {
+        public Input(Context context, @Nullable Origin origin, PPath from, PPath to) {
             super(context, origin);
 
             this.from = from;
@@ -36,10 +36,10 @@ public class Copy extends ABuilder<Copy.Input, Copy.Output> {
     public static class Output implements build.pluto.output.Output {
         private static final long serialVersionUID = 1L;
 
-        public final IResource to;
+        public final PPath to;
 
 
-        public Output(IResource to) {
+        public Output(PPath to) {
             this.to = to;
         }
 

@@ -23,37 +23,37 @@ import org.metaborg.spoofax.eclipse.resource.EclipseResourceFileObject;
 
 import com.google.inject.Inject;
 
-import mb.pipe.run.core.log.ILogger;
-import mb.pipe.run.core.vfs.FileUtils;
-import mb.pipe.run.core.vfs.IResource;
-import mb.pipe.run.core.vfs.VFSResourceSrv;
+import mb.pipe.run.core.log.Logger;
+import mb.pipe.run.core.path.FileUtils;
+import mb.pipe.run.core.path.PPath;
+import mb.pipe.run.core.path.PathSrvImpl;
 import mb.pipe.run.eclipse.util.Nullable;
 
-public class EclipseResourceSrv extends VFSResourceSrv implements IEclipseResourceSrv {
-    private final ILogger logger;
+public class EclipseResourceSrv extends PathSrvImpl implements IEclipseResourceSrv {
+    private final Logger logger;
     private final IWorkspaceRoot root;
 
 
-    @Inject public EclipseResourceSrv(ILogger logger, FileSystemManager fileSystemManager, FileSystemOptions options) {
+    @Inject public EclipseResourceSrv(Logger logger, FileSystemManager fileSystemManager, FileSystemOptions options) {
         super(logger, fileSystemManager, options);
         this.logger = logger.forContext(getClass());
         this.root = ResourcesPlugin.getWorkspace().getRoot();
     }
 
 
-    @Override public IResource resolve(org.eclipse.core.resources.IResource resource) {
+    @Override public PPath resolve(org.eclipse.core.resources.IResource resource) {
         return resolve(resource.getFullPath());
     }
 
-    @Override public IResource resolve(IPath path) {
+    @Override public PPath resolve(IPath path) {
         return resolve("eclipse://" + path.toString());
     }
 
-    @Override public IResource resolveWorkspaceRoot() {
+    @Override public PPath resolveWorkspaceRoot() {
         return resolve(root);
     }
 
-    @Override public @Nullable IResource resolve(IEditorInput input) {
+    @Override public @Nullable PPath resolve(IEditorInput input) {
         if(input instanceof IFileEditorInput) {
             final IFileEditorInput fileInput = (IFileEditorInput) input;
             return resolve(fileInput.getFile());
@@ -77,7 +77,7 @@ public class EclipseResourceSrv extends VFSResourceSrv implements IEclipseResour
                 return resolve(path);
             } else {
                 try {
-                    final IResource ramFile = resolve("ram://eclipse/" + input.getName());
+                    final PPath ramFile = resolve("ram://eclipse/" + input.getName());
                     return ramFile;
                 } catch(MetaborgRuntimeException e) {
                     return null;
@@ -89,7 +89,7 @@ public class EclipseResourceSrv extends VFSResourceSrv implements IEclipseResour
     }
 
 
-    @Override public @Nullable org.eclipse.core.resources.IResource unresolve(IResource resource) {
+    @Override public @Nullable org.eclipse.core.resources.IResource unresolve(PPath resource) {
         final FileObject vfsFile = resource.fileObject();
         if(vfsFile instanceof EclipseFileObject) {
             final EclipseFileObject eclipseResource = (EclipseFileObject) vfsFile;
@@ -132,7 +132,7 @@ public class EclipseResourceSrv extends VFSResourceSrv implements IEclipseResour
         return null;
     }
 
-    @Override public File localFile(IResource resource) {
+    @Override public File localFile(PPath resource) {
         // TODO: remove conversion to FileObject
         final FileObject vfsFile = resource.fileObject();
         if(!(vfsFile instanceof EclipseFileObject) && !(vfsFile instanceof EclipseResourceFileObject)) {
@@ -146,7 +146,7 @@ public class EclipseResourceSrv extends VFSResourceSrv implements IEclipseResour
         return super.localFile(resolve(localResource));
     }
 
-    @Override public File localFile(IResource resource, IResource dir) {
+    @Override public File localFile(PPath resource, PPath dir) {
         // TODO: remove conversion to FileObject
         final FileObject vfsFile = resource.fileObject();
         final FileObject vfsDir = dir.fileObject();
@@ -167,7 +167,7 @@ public class EclipseResourceSrv extends VFSResourceSrv implements IEclipseResour
         return super.localFile(resolve(localResource), resolve(localDir));
     }
 
-    @Override public @Nullable File localPath(IResource resource) {
+    @Override public @Nullable File localPath(PPath resource) {
         // TODO: remove conversion to FileObject
         final FileObject vfsFile = resource.fileObject();
 

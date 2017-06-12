@@ -1,10 +1,10 @@
 package mb.pipe.run.core.model.parse;
 
-public class NumberTokenKind implements ITokenType {
+public class NumberTokenKind implements TokenType {
     private static final long serialVersionUID = 1L;
 
 
-    @Override public void accept(ITokenKindVisitor visitor, IToken token) {
+    @Override public void accept(TokenKindVisitor visitor, Token token) {
         visitor.number(token);
     }
 

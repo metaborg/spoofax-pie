@@ -1,6 +1,5 @@
 package mb.pipe.run.spoofax.esv;
 
-
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -12,12 +11,12 @@ import org.spoofax.terms.attachments.ParentAttachment;
 
 import com.google.common.collect.Lists;
 
-import mb.pipe.run.core.model.parse.IToken;
-import mb.pipe.run.core.model.style.IStyle;
-import mb.pipe.run.core.model.style.IStyling;
-import mb.pipe.run.core.model.style.ITokenStyle;
+import mb.pipe.run.core.model.parse.Token;
+import mb.pipe.run.core.model.style.Style;
 import mb.pipe.run.core.model.style.Styling;
+import mb.pipe.run.core.model.style.StylingImpl;
 import mb.pipe.run.core.model.style.TokenStyle;
+import mb.pipe.run.core.model.style.TokenStyleImpl;
 
 public class Styler {
     private final StylingRules rules;
@@ -28,22 +27,22 @@ public class Styler {
     }
 
 
-    public IStyling style(Iterable<IToken> tokenStream) {
-        final List<ITokenStyle> tokenStyles = Lists.newArrayList();
-        for(IToken token : tokenStream) {
-            final IStyle style = tokenStyle(token);
+    public Styling style(Iterable<Token> tokenStream) {
+        final List<TokenStyle> tokenStyles = Lists.newArrayList();
+        for(Token token : tokenStream) {
+            final Style style = tokenStyle(token);
             if(style != null) {
-                tokenStyles.add(new TokenStyle(token, style));
+                tokenStyles.add(new TokenStyleImpl(token, style));
             }
         }
-        return new Styling(tokenStyles);
+        return new StylingImpl(tokenStyles);
     }
 
 
-    private @Nullable IStyle tokenStyle(IToken token) {
+    private @Nullable Style tokenStyle(Token token) {
         final IStrategoTerm term = token.associatedTerm();
         if(term != null) {
-            final IStyle style = termStyle(term);
+            final Style style = termStyle(term);
             if(style != null) {
                 return style;
             }
@@ -52,13 +51,13 @@ public class Styler {
         return rules.tokenTypeStyle(token.type());
     }
 
-    private @Nullable IStyle termStyle(IStrategoTerm term) {
+    private @Nullable Style termStyle(IStrategoTerm term) {
         final int termType = term.getTermType();
         if(termType != IStrategoTerm.APPL && termType != IStrategoTerm.TUPLE && termType != IStrategoTerm.LIST) {
             // Try to use the parent of terminal nodes, mimicking behavior of old Spoofax/IMP runtime.
             final IStrategoTerm parentTerm = ParentAttachment.getParent(term);
             if(parentTerm != null) {
-                final IStyle style = sortConsStyle(parentTerm);
+                final Style style = sortConsStyle(parentTerm);
                 if(style != null) {
                     return style;
                 }
@@ -68,12 +67,15 @@ public class Styler {
         return sortConsStyle(term);
     }
 
-    private @Nullable IStyle sortConsStyle(IStrategoTerm term) {
+    private @Nullable Style sortConsStyle(IStrategoTerm term) {
         if(term.getTermType() != IStrategoTerm.APPL) {
             return null;
         }
 
         final ImploderAttachment imploderAttachment = ImploderAttachment.get(term);
+        if(imploderAttachment == null) {
+            return null;
+        }
         final String sort = imploderAttachment.getSort();
         if(sort == null) {
             return null;

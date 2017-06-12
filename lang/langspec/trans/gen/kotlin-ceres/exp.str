@@ -1,0 +1,179 @@
+module gen/kotlin-ceres/exp
+
+imports
+
+  libspoofax/stratego/debug
+  nabl2/api
+
+  signatures/-
+  signatures/lex/-
+  signatures/impl/-
+  
+  statsem/program
+  
+  gen/kotlin/type2kotlin
+  gen/idtype-tuples
+  gen/util
+  gen/debug
+
+rules 
+
+  try-p2c-exp = pipe-try-debug(p2c-exp|"p2c-exp") <+ !("", "Any()")
+  
+rules // Nullable
+  
+  p2c-exp:
+    ToNullable(exp) -> <p2c-exp> exp
+    where
+      NullableTy(ty) := <pipe-ast-type> exp
+
+  p2c-exp:
+    ToNullable(exp) -> (initStr, $[[expStr] as [tySig]?])
+    with
+      ty := <pipe-ast-type> exp
+    where
+      not(NullableTy(_) := ty)
+    with
+      tySig := <t2k-sig> ty
+    ; (initStr, expStr) := <p2c-exp> exp
+
+  p2c-exp:
+    ToNonNullable(exp) -> (initStr, $[[expStr]!!])
+    with
+      (initStr, expStr) := <p2c-exp> exp
+  
+rules // Binary expressions
+
+  p2c-binexp(|symbol):
+    (lExp, rExp) -> (allInitStmStr, $[[lExpStr] [symbol] [rExpStr]])
+    with
+      (lInitStmStr, lExpStr) := <try-p2c-exp> lExp
+    ; (rInitStmStr, rExpStr) := <try-p2c-exp> rExp
+    ; allInitStmStr := <pipe-concat-nl> [lInitStmStr, rInitStmStr]
+  
+  p2c-exp: Eq(lExp, rExp) -> <p2c-binexp(|"==")> (lExp, rExp)
+  p2c-exp: Neq(lExp, rExp) -> <p2c-binexp(|"!=")> (lExp, rExp)
+  p2c-exp: Lor(lExp, rExp) -> <p2c-binexp(|"||")> (lExp, rExp)
+  p2c-exp: Land(lExp, rExp) -> <p2c-binexp(|"&&")> (lExp, rExp)
+
+rules // References
+
+  p2c-exp:
+    Ref(varId) -> ("", varId) 
+    where
+      LocalVarKind() := <pipe-ast-ref-prop(|"Var", "kind")> varId
+  
+  p2c-exp: 
+    Ref(varId) -> ("", $[input.[varId]])
+    where
+      InputVarKind() := <pipe-ast-ref-prop(|"Var", "kind")> varId
+
+rules // External function calls
+
+  p2c-exp:
+    Call(funcId, exps) -> (initStmsStr, $[[javaClassId].[javaMethodId]([expStr])])
+    where
+      JavaStaticFuncKind() := <pipe-ast-ref-prop(|"Func", "kind")> funcId
+    with
+      javaClassId             := <pipe-ast-ref-prop(|"Func", "javaClassId")> funcId
+    ; javaMethodId            := <pipe-ast-ref-prop(|"Func", "javaMethodId")> funcId
+    ; (initStmsStrs, expStrs) := <map(try-p2c-exp); unzip> exps
+    ; initStmsStr             := <pipe-concat-nl> initStmsStrs
+    ; expStr                  := <pipe-concat-comma> expStrs
+    
+  p2c-exp:
+    Call(funcId, exps) -> (initStmsStr, $[[kotlinClassOrPackageId].[kotlinFuncId]([expStr])])
+    where
+      KotlinFuncKind() := <pipe-ast-ref-prop(|"Func", "kind")> funcId
+    with
+      kotlinClassOrPackageId  := <pipe-ast-ref-prop(|"Func", "kotlinClassOrPackageId")> funcId
+    ; kotlinFuncId            := <pipe-ast-ref-prop(|"Func", "kotlinFuncId")> funcId
+    ; (initStmsStrs, expStrs) := <map(try-p2c-exp); unzip> exps
+    ; initStmsStr             := <pipe-concat-nl> initStmsStrs
+    ; expStr                  := <pipe-concat-comma> expStrs
+
+rules // Data type function calls
+
+  p2c-exp: 
+    QCall(exp, funcId, argsExps) -> (allInitStmsStr, $[[expStr].[funcId]([argsExpStr])])
+    with
+      (argsInitStmsStrs, argsExpStrs) := <map(try-p2c-exp); unzip> argsExps
+    ; argsExpStr                      := <pipe-concat-comma> argsExpStrs
+    ; (initStmsStr, expStr)           := <try-p2c-exp> exp
+    ; allInitStmsStr                  := <concat; pipe-concat-nl> [argsInitStmsStrs, [initStmsStr]]
+
+rules // Ceres builder calls
+  
+  p2c-exp:
+    c@Call(funcId, _) -> <p2c-exp-ceres-call(|javaClassId)> c
+    where
+      CeresBuilderFuncKind() := <pipe-ast-ref-prop(|"Func", "kind")> funcId
+    with
+      javaClassId := <pipe-ast-ref-prop(|"Func", "javaClassId")> funcId
+    
+  p2c-exp: 
+    c@Call(funcId, _) -> <p2c-exp-ceres-call(|javaClassId)> c 
+    where
+      PipelineFuncKind() := <pipe-ast-ref-prop(|"Func", "kind")> funcId
+    with
+      javaClassId := <pipe-sanitize-class-id> funcId
+
+
+  p2c-exp-ceres-call(|javaClassId):
+   Call(funcId, exps) -> (initStmsStr, $[requireOutput([javaClassId]::class.java, [expStr])])
+    with
+      (initStmsStr, expStr) := <p2c-exp-ceres-call-inputexp(|javaClassId)> exps
+
+
+  p2c-exp-ceres-call-inputexp(|javaClassId):
+    exps -> ("", "None.instance")
+    where
+      0 := <length> exps
+
+  p2c-exp-ceres-call-inputexp(|javaClassId):
+    exps -> (initStmStr, expStr)
+    where
+      1 := <length> exps
+    with
+      [exp]                := exps
+    ; (initStmStr, expStr) := <try-p2c-exp> exp
+    
+  p2c-exp-ceres-call-inputexp(|javaClassId):
+    exps -> (initStmsStr, $[[javaClassId].Input([expStr])])
+    where
+      length := <length> exps
+    ; <gt> (length, 1)
+    with
+     (initStmsStrs, expStrs) := <map(try-p2c-exp); unzip> exps
+   ; initStmsStr             := <pipe-concat-nl> initStmsStrs
+   ; expStr                  := <pipe-concat-comma> expStrs
+
+rules // Literals
+
+  p2c-exp: BoolLit(True())  -> ("", $[true])
+  p2c-exp: BoolLit(False()) -> ("", $[false])
+  p2c-exp: IntLit(i)        -> ("", i)
+  p2c-exp: StrLit(str)      -> ("", str)
+  p2c-exp: NullLit()        -> ("", $[null])
+  
+  p2c-exp:
+    t@TupleLit(exps) -> (allInitStmsStr, $[tuple([expsStr])])
+    with
+      (initStmsStrs, expStrs) := <map(try-p2c-exp); unzip> exps
+    ; allInitStmsStr          := <pipe-concat-nl> initStmsStrs
+    ; expsStr                 := <pipe-concat-comma> expStrs
+    
+  p2c-exp:
+    l@ListLit(exps) -> (allInitStmsStr, $[listOf([expsStr])])
+    with
+      (initStmsStrs, expStrs) := <map(try-p2c-exp); unzip> exps
+    ; allInitStmsStr          := <pipe-concat-nl> initStmsStrs
+    ; expsStr                 := <pipe-concat-comma> expStrs
+
+  p2c-exp:
+    l@ListAppendLit(listExp, exps) -> (allInitStmsStr, $[[listExpStr] + [expsStr]])
+    with
+      (listInitStmStr, listExpStr) := <try-p2c-exp> listExp
+    ; (initStmsStrs, expStrs)      := <map(try-p2c-exp); unzip> exps
+    ; allInitStmsStr               := <concat; pipe-concat-nl> [[listInitStmStr], initStmsStrs]
+    ; expsStr                      := <separate-by(|" + "); concat-strings> expStrs

@@ -7,17 +7,15 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 
-import mb.pipe.run.core.log.ILogger;
-import mb.pipe.run.core.vfs.IResourceSrv;
-import mb.pipe.run.core.vfs.IVfsSrv;
+import mb.pipe.run.core.log.Logger;
+import mb.pipe.run.core.path.PathSrv;
 
 public class PipeFacade {
     public final Injector injector;
 
-    public final ILogger rootLogger;
+    public final Logger rootLogger;
 
-    public final IResourceSrv resourceSrv;
-    public final IVfsSrv fileObjectSrv;
+    public final PathSrv pathSrv;
 
 
     public PipeFacade(PipeModule module, Module... additionalModules) throws PipeEx {
@@ -27,9 +25,8 @@ public class PipeFacade {
         final Injector injector = Guice.createInjector(modules);
         this.injector = injector;
 
-        this.rootLogger = injector.getInstance(ILogger.class);
+        this.rootLogger = injector.getInstance(Logger.class);
 
-        this.resourceSrv = injector.getInstance(IResourceSrv.class);
-        this.fileObjectSrv = injector.getInstance(IVfsSrv.class);
+        this.pathSrv = injector.getInstance(PathSrv.class);
     }
 }

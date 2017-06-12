@@ -1,5 +1,23 @@
+# Eclipse
 /bin
-/target
-/.classpath
 /.project
+/.classpath
+/.factorypath
 /.settings
+
+# IntelliJ
+/out
+/.idea
+*.iml
+
+# Maven
+/target
+
+# Gradle
+/build
+/.gradle
+
+# Java
+*.class
+*.jar
+hs_err_pid*

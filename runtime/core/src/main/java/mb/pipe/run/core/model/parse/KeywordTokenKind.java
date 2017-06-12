@@ -1,10 +1,10 @@
 package mb.pipe.run.core.model.parse;
 
-public class KeywordTokenKind implements ITokenType {
+public class KeywordTokenKind implements TokenType {
     private static final long serialVersionUID = 1L;
 
 
-    @Override public void accept(ITokenKindVisitor visitor, IToken token) {
+    @Override public void accept(TokenKindVisitor visitor, Token token) {
         visitor.keyword(token);
     }
 

@@ -1,7 +1,7 @@
 package mb.pipe.run.core.model.message;
 
 public interface MsgTypeVisitor {
-    void internal(IMsg message);
+    void internal(Msg message);
 
-    void parse(IMsg message);
+    void parse(Msg message);
 }

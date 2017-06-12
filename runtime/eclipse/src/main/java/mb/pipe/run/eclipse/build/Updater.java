@@ -16,9 +16,9 @@ import org.eclipse.swt.widgets.Display;
 
 import com.google.inject.Inject;
 
-import mb.pipe.run.core.model.message.IMsg;
-import mb.pipe.run.core.model.style.IStyling;
-import mb.pipe.run.core.vfs.IResource;
+import mb.pipe.run.core.model.message.Msg;
+import mb.pipe.run.core.model.style.Styling;
+import mb.pipe.run.core.path.PPath;
 import mb.pipe.run.eclipse.util.MarkerUtils;
 import mb.pipe.run.eclipse.util.Nullable;
 import mb.pipe.run.eclipse.util.StatusUtils;
@@ -36,14 +36,14 @@ public class Updater {
     }
 
 
-    public void updateMessagesAsync(IResource file, Collection<IMsg> msgs) {
+    public void updateMessagesAsync(PPath file, Collection<Msg> msgs) {
         final org.eclipse.core.resources.IResource eclipseFile = resourceSrv.unresolve(file);
         final WorkspaceJob job = new WorkspaceJob("Update file") {
             @Override public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
                 if(monitor != null && monitor.isCanceled())
                     return StatusUtils.cancel();
                 MarkerUtils.clearAll(eclipseFile);
-                for(IMsg msg : msgs) {
+                for(Msg msg : msgs) {
                     MarkerUtils.createMarker(eclipseFile, msg);
                 }
                 return StatusUtils.success();
@@ -53,20 +53,20 @@ public class Updater {
         job.schedule();
     }
 
-    public void updateMessagesSync(IResource file, Collection<IMsg> msgs, @Nullable IProgressMonitor monitor)
+    public void updateMessagesSync(PPath file, Collection<Msg> msgs, @Nullable IProgressMonitor monitor)
         throws CoreException {
         final org.eclipse.core.resources.IResource eclipseFile = resourceSrv.unresolve(file);
         updateMessagesSync(eclipseFile, msgs, monitor);
     }
 
-    public void updateMessagesSync(org.eclipse.core.resources.IResource eclipseFile, Collection<IMsg> msgs,
+    public void updateMessagesSync(org.eclipse.core.resources.IResource eclipseFile, Collection<Msg> msgs,
         @Nullable IProgressMonitor monitor) throws CoreException {
         final IWorkspaceRunnable parseMarkerUpdater = new IWorkspaceRunnable() {
             @Override public void run(IProgressMonitor workspaceMonitor) throws CoreException {
                 if(workspaceMonitor.isCanceled())
                     return;
                 MarkerUtils.clearAll(eclipseFile);
-                for(IMsg msg : msgs) {
+                for(Msg msg : msgs) {
                     MarkerUtils.createMarker(eclipseFile, msg);
                 }
             }
@@ -74,7 +74,7 @@ public class Updater {
         ResourcesPlugin.getWorkspace().run(parseMarkerUpdater, eclipseFile, IWorkspace.AVOID_UPDATE, monitor);
     }
 
-    public void updateStyle(ISourceViewer sourceViewer, IStyling styling, @Nullable IProgressMonitor monitor) {
+    public void updateStyle(ISourceViewer sourceViewer, Styling styling, @Nullable IProgressMonitor monitor) {
         final TextPresentation textPresentation;
         if(styling != null) {
             textPresentation = styleUtils.createTextPresentation(styling);

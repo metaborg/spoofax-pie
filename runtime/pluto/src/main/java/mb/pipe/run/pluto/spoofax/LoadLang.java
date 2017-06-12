@@ -21,8 +21,8 @@ import build.pluto.builder.factory.BuilderFactory;
 import build.pluto.dependency.Origin;
 import build.pluto.output.OutputTransient;
 import build.pluto.stamp.FileHashStamper;
-import mb.pipe.run.core.model.IContext;
-import mb.pipe.run.core.vfs.IResource;
+import mb.pipe.run.core.model.Context;
+import mb.pipe.run.core.path.PPath;
 import mb.pipe.run.pluto.util.ABuilder;
 import mb.pipe.run.pluto.util.AInput;
 import mb.pipe.run.pluto.util.Result;
@@ -31,10 +31,10 @@ public class LoadLang extends ABuilder<LoadLang.Input, OutputTransient<LoadLang.
     public static class Input extends AInput {
         private static final long serialVersionUID = 1L;
 
-        public final IResource location;
+        public final PPath location;
 
 
-        public Input(IContext context, @Nullable Origin origin, IResource location) {
+        public Input(Context context, @Nullable Origin origin, PPath location) {
             super(context, origin);
             this.location = location;
         }

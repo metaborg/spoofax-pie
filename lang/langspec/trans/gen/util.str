@@ -4,7 +4,7 @@ imports
 
   nabl2/api
   
-  gen/core
+  gen/pluto-java/core
 
 rules // Generic strategies for getting properties and types of anything
 

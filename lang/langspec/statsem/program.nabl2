@@ -24,7 +24,9 @@ signature
     JavaTypeKind : TypeKind
     
     JavaStaticFuncKind   : FuncKind
+    KotlinFuncKind       : FuncKind
     PlutoBuilderFuncKind : FuncKind
+    CeresBuilderFuncKind : FuncKind
     PipelineFuncKind     : FuncKind
     
     LocalVarKind : VarKind

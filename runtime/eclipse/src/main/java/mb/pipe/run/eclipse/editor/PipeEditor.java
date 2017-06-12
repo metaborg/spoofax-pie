@@ -16,10 +16,10 @@ import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import com.google.inject.Injector;
 
 import mb.pipe.run.core.PipeFacade;
-import mb.pipe.run.core.log.ILogger;
+import mb.pipe.run.core.log.Logger;
+import mb.pipe.run.core.model.ContextImpl;
+import mb.pipe.run.core.path.PPath;
 import mb.pipe.run.core.model.Context;
-import mb.pipe.run.core.model.IContext;
-import mb.pipe.run.core.vfs.IResource;
 import mb.pipe.run.eclipse.PipePlugin;
 import mb.pipe.run.eclipse.build.Updater;
 import mb.pipe.run.eclipse.vfs.IEclipseResourceSrv;
@@ -36,7 +36,7 @@ public class PipeEditor extends TextEditor {
     }
 
     private IJobManager jobManager;
-    private ILogger logger;
+    private Logger logger;
     private IEclipseResourceSrv resourceSrv;
     private Editors editors;
     private Updater updater;
@@ -86,7 +86,7 @@ public class PipeEditor extends TextEditor {
         input = getEditorInput();
         document = getDocumentProvider().getDocument(input);
 
-        final IResource resource = resourceSrv.resolve(input);
+        final PPath resource = resourceSrv.resolve(input);
         if(resource != null) {
             inputName = resource.toString();
             eclipseResource = resourceSrv.unresolve(resource);
@@ -128,8 +128,8 @@ public class PipeEditor extends TextEditor {
     private void scheduleJob(boolean instantaneous) {
         cancelJobs(input);
         final IProject project = eclipseResource.getProject();
-        final IResource projectDir = resourceSrv.resolve(project);
-        final IContext context = new Context(projectDir);
+        final PPath projectDir = resourceSrv.resolve(project);
+        final Context context = new ContextImpl(projectDir);
         final Job job =
             new EditorUpdateJob(logger, updater, getSourceViewer(), document.get(), context, input, eclipseResource);
         job.setRule(project);

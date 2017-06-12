@@ -10,8 +10,8 @@ import build.pluto.builder.Builder;
 import build.pluto.builder.factory.BuilderFactory;
 import build.pluto.dependency.Origin;
 import build.pluto.stamp.FileHashStamper;
-import mb.pipe.run.core.model.IContext;
-import mb.pipe.run.core.vfs.IResource;
+import mb.pipe.run.core.model.Context;
+import mb.pipe.run.core.path.PPath;
 import mb.pipe.run.pluto.util.ABuilder;
 import mb.pipe.run.pluto.util.AInput;
 import mb.pipe.run.pluto.util.Result;
@@ -20,16 +20,16 @@ public class Read extends ABuilder<Read.Input, Read.Output> {
     public static class Input extends AInput {
         private static final long serialVersionUID = 1L;
 
-        public final IResource file;
+        public final PPath file;
 
 
-        public Input(IContext context, @Nullable Origin origin, IResource file) {
+        public Input(Context context, @Nullable Origin origin, PPath file) {
             super(context, origin);
 
             this.file = file;
         }
 
-        public Input(IContext context, IResource file) {
+        public Input(Context context, PPath file) {
             this(context, null, file);
         }
     }

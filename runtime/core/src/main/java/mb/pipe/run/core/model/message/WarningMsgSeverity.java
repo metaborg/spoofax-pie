@@ -1,10 +1,10 @@
 package mb.pipe.run.core.model.message;
 
-public class WarningMsgSeverity implements IMsgSeverity {
+public class WarningMsgSeverity implements MsgSeverity {
     private static final long serialVersionUID = 1L;
 
 
-    @Override public <T> T accept(MsgSeverityVisitor<T> visitor, IMsg message) {
+    @Override public <T> T accept(MsgSeverityVisitor<T> visitor, Msg message) {
         return visitor.warning(message);
     }
 

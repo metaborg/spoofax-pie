@@ -2,13 +2,13 @@ package mb.pipe.run.core.model.message;
 
 import javax.annotation.Nullable;
 
-import mb.pipe.run.core.model.region.IRegion;
+import mb.pipe.run.core.model.region.Region;
 
 public class MsgBuilder {
     private String text = "";
-    private IMsgSeverity severity = MsgConstants.errorSeverity;
-    private IMsgType type = MsgConstants.internalType;
-    private @Nullable IRegion region;
+    private MsgSeverity severity = MsgConstants.errorSeverity;
+    private MsgType type = MsgConstants.internalType;
+    private @Nullable Region region;
     private @Nullable Throwable exception;
 
 
@@ -22,7 +22,7 @@ public class MsgBuilder {
     }
 
 
-    public MsgBuilder withSeverity(IMsgSeverity severity) {
+    public MsgBuilder withSeverity(MsgSeverity severity) {
         this.severity = severity;
         return this;
     }
@@ -43,7 +43,7 @@ public class MsgBuilder {
     }
 
 
-    public MsgBuilder withType(IMsgType type) {
+    public MsgBuilder withType(MsgType type) {
         this.type = type;
         return this;
     }
@@ -54,7 +54,7 @@ public class MsgBuilder {
     }
 
 
-    public MsgBuilder withRegion(IRegion region) {
+    public MsgBuilder withRegion(Region region) {
         this.region = region;
         return this;
     }
@@ -76,7 +76,7 @@ public class MsgBuilder {
     }
 
 
-    public IMsg build() {
-        return new Msg(text, severity, type, region, exception);
+    public Msg build() {
+        return new MsgImpl(text, severity, type, region, exception);
     }
 }

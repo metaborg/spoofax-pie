@@ -4,7 +4,7 @@ import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.impl.DefaultFileSystemManager;
 import org.apache.commons.vfs2.provider.local.DefaultLocalFileProvider;
 
-import mb.pipe.run.core.vfs.VFSManagerProvider;
+import mb.pipe.run.core.path.VFSManagerProvider;
 
 public class EclipseVFSManagerProvider extends VFSManagerProvider {
     @Override protected void addDefaultProvider(DefaultFileSystemManager manager) throws FileSystemException {

@@ -1,51 +1,42 @@
 package mb.pipe.run.core.model.region;
 
-public class Region implements IRegion {
-    private static final long serialVersionUID = 1L;
+import java.io.Serializable;
 
-    private final int startOffset;
-    private final int endOffset;
+/**
+ * Interface for representing a finite region in source code text. A region has a start and end offset, represented by
+ * the number of characters from the beginning of the source text, with interval [0,#chars). Both the starting and
+ * ending numbers are inclusive.
+ */
+public interface Region extends Serializable {
+    /**
+     * @return Inclusive starting offset, the number of characters from the beginning of the source text with interval
+     *         [0,#chars).
+     */
+    int startOffset();
+
+    /**
+     * @return Inclusive ending offset, the number of characters from the beginning of the source text with interval
+     *         [0,#chars).
+     */
+    int endOffset();
 
 
-    public Region(int startOffset, int endOffset) {
-        this.startOffset = startOffset;
-        this.endOffset = endOffset;
+    /**
+     * @return Length of the region.
+     */
+    default int length() {
+        return (this.endOffset() - this.startOffset()) + 1;
     }
 
-
-    @Override public int startOffset() {
-        return startOffset;
-    }
-
-    @Override public int endOffset() {
-        return endOffset;
-    }
-
-
-    @Override public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + endOffset;
-        result = prime * result + startOffset;
-        return result;
-    }
-
-    @Override public boolean equals(Object obj) {
-        if(this == obj)
-            return true;
-        if(obj == null)
-            return false;
-        if(getClass() != obj.getClass())
-            return false;
-        final Region other = (Region) obj;
-        if(endOffset != other.endOffset)
-            return false;
-        if(startOffset != other.startOffset)
-            return false;
-        return true;
-    }
-
-    @Override public String toString() {
-        return startOffset + "-" + endOffset;
+    /**
+     * Checks if this region contains given region.
+     * 
+     * @param region
+     *            Other region to check.
+     * @return True if this region contains given region, false otherwise.
+     */
+    default boolean contains(Region region) {
+        return region.startOffset() >= this.startOffset() && region.startOffset() <= this.endOffset()
+            && region.endOffset() <= this.endOffset();
     }
 }

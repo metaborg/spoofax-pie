@@ -1,32 +1,30 @@
 package mb.pipe.run.cmd;
 
-import org.metaborg.spoofax.core.Spoofax;
-import org.metaborg.spoofax.meta.core.SpoofaxMeta;
-import org.metaborg.spoofax.meta.core.pluto.SpoofaxContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.inject.Injector;
-
+import mb.ceres.CeresModule;
+import mb.pipe.run.ceres.PipeCeresModule;
+import mb.pipe.run.ceres.generated.CeresBuilderModule;
 import mb.pipe.run.core.PipeFacade;
 import mb.pipe.run.core.PipeModule;
 import mb.pipe.run.core.StaticPipeFacade;
 import mb.pipe.run.spoofax.PipeSpoofaxModule;
 import mb.pipe.run.spoofax.util.StaticSpoofax;
+import org.metaborg.spoofax.core.Spoofax;
+import org.metaborg.spoofax.meta.core.SpoofaxMeta;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class Main {
     public static void main(String[] args) throws Throwable {
-        try(final Spoofax spoofax = new Spoofax(new NullEditorModule());
-            final SpoofaxMeta spoofaxMeta = new SpoofaxMeta(spoofax, new Module())) {
-            final Injector injector = spoofaxMeta.injector;
-            SpoofaxContext.init(injector);
+        final Logger rootLogger = LoggerFactory.getLogger("root");
+        final PipeFacade pipeFacade = new PipeFacade(new PipeModule(rootLogger), new PipeCmdModule(),
+            new PipeSpoofaxModule(), new CeresModule(), new CeresBuilderModule(), new PipeCeresModule());
+        StaticPipeFacade.init(pipeFacade);
+
+        try (final Spoofax spoofax = new Spoofax(new NullEditorModule());
+             final SpoofaxMeta spoofaxMeta = new SpoofaxMeta(spoofax)) {
             StaticSpoofax.init(spoofaxMeta);
 
-            final Logger rootLogger = LoggerFactory.getLogger("root");
-            final PipeFacade pipe = new PipeFacade(new PipeModule(rootLogger), new PipeSpoofaxModule());
-            StaticPipeFacade.init(pipe);
-
-            final Runner runner = injector.getInstance(Runner.class);
+            final Runner runner = pipeFacade.injector.getInstance(Runner.class);
             final int result = runner.run(args);
             System.exit(result);
         }

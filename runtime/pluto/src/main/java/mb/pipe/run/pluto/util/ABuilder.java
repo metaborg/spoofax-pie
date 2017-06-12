@@ -21,7 +21,7 @@ import build.pluto.output.OutputTransient;
 import mb.pipe.run.core.PipeFacade;
 import mb.pipe.run.core.PipeRunEx;
 import mb.pipe.run.core.StaticPipeFacade;
-import mb.pipe.run.core.vfs.IResource;
+import mb.pipe.run.core.path.PPath;
 import mb.pipe.run.spoofax.util.StaticSpoofax;
 
 public abstract class ABuilder<In extends AInput, Out extends Output> extends Builder<In, Out> {
@@ -74,23 +74,23 @@ public abstract class ABuilder<In extends AInput, Out extends Output> extends Bu
     }
 
 
-    protected static File toFile(IResource resource) {
-        final File file = pipe().resourceSrv.localPath(resource);
+    protected static File toFile(PPath resource) {
+        final File file = pipe().pathSrv.localPath(resource);
         if(file == null) {
             throw new PipeRunEx("Cannot convert " + resource + " to a local file, it is not on the local file system");
         }
         return file;
     }
 
-    protected static File toFileReplicate(IResource resource) {
-        return pipe().resourceSrv.localFile(resource);
+    protected static File toFileReplicate(PPath resource) {
+        return pipe().pathSrv.localFile(resource);
     }
 
-    protected void require(IResource resource) {
+    protected void require(PPath resource) {
         require(toFile(resource));
     }
 
-    protected void provide(IResource resource) {
+    protected void provide(PPath resource) {
         provide(toFile(resource));
     }
 
@@ -106,8 +106,8 @@ public abstract class ABuilder<In extends AInput, Out extends Output> extends Bu
 
 
     protected File persistentDir() {
-        final IResource persistentDir = getInput().context.persistentDir();
-        final File localPersistentDir = pipe().resourceSrv.localPath(persistentDir);
+        final PPath persistentDir = getInput().context.persistentDir();
+        final File localPersistentDir = pipe().pathSrv.localPath(persistentDir);
         if(localPersistentDir == null) {
             throw new PipeRunEx(
                 "Could not get persistent directory at " + persistentDir + ", it is not on the local filesystem");

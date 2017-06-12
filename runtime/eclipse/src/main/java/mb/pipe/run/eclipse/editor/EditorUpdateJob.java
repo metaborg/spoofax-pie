@@ -17,27 +17,27 @@ import build.pluto.builder.BuildManager;
 import build.pluto.builder.BuildRequest;
 import build.pluto.dependency.database.XodusDatabase;
 import build.pluto.util.LogReporting;
-import mb.pipe.run.core.log.ILogger;
-import mb.pipe.run.core.model.IContext;
-import mb.pipe.run.core.model.message.IMsg;
-import mb.pipe.run.core.model.style.IStyling;
+import mb.pipe.run.core.log.Logger;
+import mb.pipe.run.core.model.Context;
+import mb.pipe.run.core.model.message.Msg;
+import mb.pipe.run.core.model.style.Styling;
 import mb.pipe.run.eclipse.build.Updater;
 import mb.pipe.run.eclipse.util.StatusUtils;
 import mb.pipe.run.pluto.generated.processString;
 
 public class EditorUpdateJob extends Job {
-    private final ILogger logger;
+    private final Logger logger;
 
     private final Updater updater;
     private final ISourceViewer sourceViewer;
 
     private final String text;
-    private final IContext context;
+    private final Context context;
     private final IEditorInput input;
     private final IResource eclipseResource;
 
 
-    public EditorUpdateJob(ILogger logger, Updater updater, ISourceViewer sourceViewer, String text, IContext context,
+    public EditorUpdateJob(Logger logger, Updater updater, ISourceViewer sourceViewer, String text, Context context,
         IEditorInput input, IResource eclipseResource) {
         super("Editor update");
         this.logger = logger;
@@ -75,10 +75,10 @@ public class EditorUpdateJob extends Job {
             new BuildManager(new LogReporting(), XodusDatabase.createFileDatabase("pipeline-experiment"))) {
             final processString.Output output = buildManager.requireInitially(buildRequest).getBuildResult();
 
-            final Collection<IMsg> messages = (Collection<IMsg>) output.getPipeVal().get(3);
+            final Collection<Msg> messages = (Collection<Msg>) output.getPipeVal().get(3);
             updater.updateMessagesSync(eclipseResource, messages, monitor);
 
-            final @Nullable IStyling styling = (IStyling) output.getPipeVal().get(4);
+            final @Nullable Styling styling = (Styling) output.getPipeVal().get(4);
             updater.updateStyle(sourceViewer, styling, monitor);
         }
 

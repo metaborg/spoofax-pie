@@ -3,14 +3,14 @@ package mb.pipe.run.eclipse.vfs;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.ui.IEditorInput;
 
-import mb.pipe.run.core.vfs.IResource;
-import mb.pipe.run.core.vfs.IResourceSrv;
+import mb.pipe.run.core.path.PPath;
+import mb.pipe.run.core.path.PathSrv;
 import mb.pipe.run.eclipse.util.Nullable;
 
 /**
  * Extension of the resource service with Eclipse-specific functionality.
  */
-public interface IEclipseResourceSrv extends IResourceSrv {
+public interface IEclipseResourceSrv extends PathSrv {
     /**
      * Converts an Eclipse resource into a VFS resource.
      * 
@@ -18,7 +18,7 @@ public interface IEclipseResourceSrv extends IResourceSrv {
      *            Eclipse resource to convert.
      * @return VFS resource.
      */
-    IResource resolve(org.eclipse.core.resources.IResource resource);
+    PPath resolve(org.eclipse.core.resources.IResource resource);
 
     /**
      * Converts an Eclipse path into a VFS resource.
@@ -27,14 +27,14 @@ public interface IEclipseResourceSrv extends IResourceSrv {
      *            Path to convert.
      * @return VFS resource.
      */
-    IResource resolve(IPath path);
+    PPath resolve(IPath path);
 
     /**
      * Converts the Eclipse workspace root into a VFS resource.
      * 
      * @return VFS resource.
      */
-    IResource resolveWorkspaceRoot();
+    PPath resolveWorkspaceRoot();
 
     /**
      * Converts an Eclipse editor input into a VFS resource, if possible.
@@ -43,7 +43,7 @@ public interface IEclipseResourceSrv extends IResourceSrv {
      *            Eclipse editor input to resolve.
      * @return VFS resource, or null if it could not be converted.
      */
-    @Nullable IResource resolve(IEditorInput input);
+    @Nullable PPath resolve(IEditorInput input);
 
     /**
      * Converts a VFS resource into an Eclipse resource, if possible
@@ -52,5 +52,5 @@ public interface IEclipseResourceSrv extends IResourceSrv {
      *            VFS resource
      * @return Eclipse resource, or null if it could not be converted.
      */
-    @Nullable org.eclipse.core.resources.IResource unresolve(IResource resource);
+    @Nullable org.eclipse.core.resources.IResource unresolve(PPath resource);
 }

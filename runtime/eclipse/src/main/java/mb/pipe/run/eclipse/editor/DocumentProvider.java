@@ -8,17 +8,17 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
 
-import mb.pipe.run.core.log.ILogger;
-import mb.pipe.run.core.vfs.IResource;
+import mb.pipe.run.core.log.Logger;
+import mb.pipe.run.core.path.PPath;
 import mb.pipe.run.eclipse.util.StatusUtils;
 import mb.pipe.run.eclipse.vfs.IEclipseResourceSrv;
 
 public class DocumentProvider extends FileDocumentProvider {
-    private final ILogger logger;
+    private final Logger logger;
     private final IEclipseResourceSrv resourceService;
 
 
-    public DocumentProvider(ILogger logger, IEclipseResourceSrv resourceService) {
+    public DocumentProvider(Logger logger, IEclipseResourceSrv resourceService) {
         this.logger = logger.forContext(getClass());
         this.resourceService = resourceService;
     }
@@ -33,7 +33,7 @@ public class DocumentProvider extends FileDocumentProvider {
         if(element instanceof IEditorInput) {
             final IDocument document = createEmptyDocument();
             final IEditorInput input = (IEditorInput) element;
-            final IResource resource = resourceService.resolve(input);
+            final PPath resource = resourceService.resolve(input);
             if(resource == null) {
                 final String message =
                     "Cannot create document for input " + element + ", could not resolve input to file object";

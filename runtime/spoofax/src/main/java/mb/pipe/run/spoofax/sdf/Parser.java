@@ -23,12 +23,12 @@ import org.spoofax.terms.attachments.ParentTermFactory;
 import com.google.common.collect.Lists;
 
 import mb.pipe.run.core.PipeRunEx;
-import mb.pipe.run.core.model.message.IMsg;
+import mb.pipe.run.core.model.message.Msg;
 import mb.pipe.run.core.model.message.Msgs;
-import mb.pipe.run.core.model.parse.ITokenType;
-import mb.pipe.run.core.model.parse.Token;
+import mb.pipe.run.core.model.parse.TokenType;
+import mb.pipe.run.core.model.parse.TokenImpl;
 import mb.pipe.run.core.model.parse.TokenConstants;
-import mb.pipe.run.core.model.region.IRegion;
+import mb.pipe.run.core.model.region.Region;
 
 public class Parser {
     private final SGLR parser;
@@ -62,7 +62,7 @@ public class Parser {
             final ImploderAttachment rootImploderAttachment = ImploderAttachment.get(ast);
             final ITokenizer tokenizer = rootImploderAttachment.getLeftToken().getTokenizer();
             final int tokenCount = tokenizer.getTokenCount();
-            final List<mb.pipe.run.core.model.parse.IToken> tokenStream = Lists.newArrayListWithCapacity(tokenCount);
+            final List<mb.pipe.run.core.model.parse.Token> tokenStream = Lists.newArrayListWithCapacity(tokenCount);
             int offset = -1;
             for(int i = 0; i < tokenCount; ++i) {
                 final IToken jsglrToken = tokenizer.getTokenAt(i);
@@ -79,31 +79,31 @@ public class Parser {
                     continue;
                 }
                 offset = jsglrToken.getEndOffset();
-                final mb.pipe.run.core.model.parse.IToken token = convertToken(jsglrToken);
+                final mb.pipe.run.core.model.parse.Token token = convertToken(jsglrToken);
                 tokenStream.add(token);
             }
 
             final ParserErrorHandler errorHandler = new ParserErrorHandler(true, false, parser.getCollectedErrors());
             errorHandler.gatherNonFatalErrors(ast);
-            final Collection<IMsg> messages = errorHandler.messages();
+            final Collection<Msg> messages = errorHandler.messages();
             boolean recovered = Msgs.containsErrors(messages);
 
             return new ParseOutput(recovered, ast, tokenStream, messages);
         } catch(SGLRException e) {
             final ParserErrorHandler errorHandler = new ParserErrorHandler(true, true, parser.getCollectedErrors());
             errorHandler.processFatalException(new NullTokenizer(text, "file"), e);
-            final Collection<IMsg> messages = errorHandler.messages();
+            final Collection<Msg> messages = errorHandler.messages();
             return new ParseOutput(false, null, null, messages);
         }
     }
 
-    private static mb.pipe.run.core.model.parse.IToken convertToken(IToken token) {
-        final IRegion region = RegionFactory.fromToken(token);
-        final ITokenType tokenType = convertTokenKind(token.getKind());
-        return new Token(region, tokenType, (IStrategoTerm) token.getAstNode());
+    private static mb.pipe.run.core.model.parse.Token convertToken(IToken token) {
+        final Region region = RegionFactory.fromToken(token);
+        final TokenType tokenType = convertTokenKind(token.getKind());
+        return new TokenImpl(region, tokenType, (IStrategoTerm) token.getAstNode());
     }
 
-    private static ITokenType convertTokenKind(int kind) {
+    private static TokenType convertTokenKind(int kind) {
         switch(kind) {
             case IToken.TK_IDENTIFIER:
                 return TokenConstants.identifierType;

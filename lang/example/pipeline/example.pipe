@@ -1,37 +1,33 @@
 /// Generic library
-data Context = java mb.pipe.run.core.model.IContext {
-  func currentDir() -> Resource
+data Context = java mb.pipe.run.core.model.Context {
+  func currentDir() -> Path
 }
-// Resource
-data Resource = java mb.pipe.run.core.vfs.IResource {
-  func uri() -> string
-  
-  func resolve(string) -> Resource
-  func resolveAll(string*) -> Resource*
+// Path
+data Path = java mb.pipe.run.core.path.PPath {
+  func resolve(string) -> Path
 }
-func readFile(Resource) -> string = pluto mb.pipe.run.pluto.vfs.Read
-func resolveAbs(string) -> Resource = java mb.pipe.run.core.vfs.VFSResource#resolveStatic
-func resolveAllAbs(string*) -> Resource* = java mb.pipe.run.core.vfs.VFSResource#resolveAllStatic
+func readFile(Path) -> string = ceres mb.pipe.run.ceres.path.Read
+func resolveAbs(string) -> Path = kotlin mb.pipe.run.ceres.path#resolve
 
 
 /// Interface that Spoofax expects from a language
-data Message = java mb.pipe.run.core.model.message.IMsg {}
+data Message = java mb.pipe.run.core.model.message.Msg {}
 data Ast = java org.spoofax.interpreter.terms.IStrategoTerm {}
-data Token = java mb.pipe.run.core.model.parse.IToken {}
+data Token = java mb.pipe.run.core.model.parse.Token {}
 // func parse(text : string, context : Context) -> (Ast?, Token*?, Message*)
 
-data Styling = java mb.pipe.run.core.model.style.IStyling {}
+data Styling = java mb.pipe.run.core.model.style.Styling {}
 // func style(tokenStream : Token*, context : Context) -> Styling
 
 
 /// Library with functions to build SDF and ESV specifications
 data ParseTable = java mb.pipe.run.spoofax.sdf.Table {}
-func sdf2table(langLoc : Resource, specDir : Resource, mainFile : Resource, includedFiles : Resource*) -> ParseTable? = pluto mb.pipe.run.pluto.sdf.GenerateTable
-func jsglrParse(text : string, startSymbol : string, pt : ParseTable) -> (Ast?, Token*?, Message*) = pluto mb.pipe.run.pluto.sdf.Parse
+func sdf2table(langLoc : Path, specDir : Path, mainFile : Path, includedFiles : Path*) -> ParseTable? = ceres mb.pipe.run.ceres.spoofax.GenerateTable
+func jsglrParse(text : string, startSymbol : string, pt : ParseTable) -> (Ast?, Token*?, Message*) = ceres mb.pipe.run.ceres.spoofax.Parse
 
 data SyntaxStyler = java mb.pipe.run.spoofax.esv.StylingRules {}
-func esv2styler(langLoc : Resource, specDir : Resource, mainFile : Resource, includedFiles : Resource*) -> SyntaxStyler? = pluto mb.pipe.run.pluto.esv.GenerateStylerRules
-func esvStyle(tokenStream : Token*, st : SyntaxStyler) -> Styling = pluto mb.pipe.run.pluto.esv.Style
+func esv2styler(langLoc : Path, specDir : Path, mainFile : Path, includedFiles : Path*) -> SyntaxStyler? = ceres mb.pipe.run.ceres.spoofax.GenerateStylerRules
+func esvStyle(tokenStream : Token*, st : SyntaxStyler) -> Styling = ceres mb.pipe.run.ceres.spoofax.Style
 
 
 /// Implement parse and style
@@ -40,7 +36,7 @@ func parse(text : string, context : Context) -> (Ast?, Token*?, Message*) = {
   var langLoc = resolveAbs("/Users/gohla/.m2/repository/org/metaborg/org.metaborg.meta.lang.template/2.3.0-SNAPSHOT/org.metaborg.meta.lang.template-2.3.0-SNAPSHOT.spoofax-language");
   var specDir = currentDir; 
   var mainFile = currentDir.resolve("syntax/minimal.sdf3");
-  var includedFiles : Resource* = [];
+  var includedFiles : Path* = [];
 
   var parseTable = sdf2table(langLoc, specDir, mainFile, includedFiles);
   if(parseTable == null) fail "Unable to build parse table";
@@ -53,7 +49,7 @@ func style(tokenStream : Token*, context : Context) -> Styling = {
   var langLoc = resolveAbs("/Users/gohla/.m2/repository/org/metaborg/org.metaborg.meta.lang.esv/2.3.0-SNAPSHOT/org.metaborg.meta.lang.esv-2.3.0-SNAPSHOT.spoofax-language");
   var specDir = currentDir;
   var mainFile = currentDir.resolve("editor/Main.esv");
-  var includedFiles : Resource* = [];
+  var includedFiles : Path* = [];
   
   var syntaxStyler = esv2styler(langLoc, specDir, mainFile, includedFiles);
   if(syntaxStyler == null) fail "Unable to build syntax styler";
@@ -64,7 +60,7 @@ func style(tokenStream : Token*, context : Context) -> Styling = {
 
 /// Processing
 // Files
-func processFile(file : Resource, context : Context) -> (Resource, string, Ast?, Token*?, Message*, Styling?) = {
+func processFile(file : Path, context : Context) -> (Path, string, Ast?, Token*?, Message*, Styling?) = {
   var text = readFile(file); // Creates a dependency to file changes
   var (_, ast, tokenStream, messages, styling) =  processString(text, context);
   return (file, text, ast, tokenStream, messages, styling);
@@ -81,34 +77,3 @@ func processString(text : string, context : Context) -> (string, Ast?, Token*?, 
   }
   return (text, ast, tokenStream, messages, styling);
 }
-
-
-///// Eclipse pipeline
-//// TODO: void functions are not compiled properly, return context for now.
-//func eclipseUpdateFile(file : Resource, messages : Message*) -> Context = pluto mb.pipe.run.eclipse.pluto.UpdateFile
-//
-//func eclipseKeepFilesConsistent(files : Resource*, context : Context) -> Context = {
-//  foreach(var file in files) {
-//    var (_1, _2, _3, _4, messages, _5) = processFile(file, context);
-//    // When input to eclipseUpdateFile is unchanged, it is not re-executed, preventing expensive update overhead
-//    eclipseUpdateFile(file, messages);
-//  }
-//  return context; // TODO: void functions are not compiled properly, return context for now.
-//}
-//
-//transient data Editor = java mb.pipe.run.eclipse.editor.IEditor {
-//  func text() -> string
-//}
-//
-//// TODO: void functions are not compiled properly, return context for now.
-//func eclipseUpdateEditor(editor : Editor, messages : Message*, styling : Styling?) -> Context = pluto mb.pipe.run.eclipse.pluto.UpdateEditor
-//
-//func eclipseKeepEditorsConsistent(editors : Editor*, context : Context) -> Context = {
-//  foreach(var editor in editors) {
-//    var text = editor.text();
-//    var (_1, _2, _3, messages, styling) = processString(text, context);
-//    // When input to eclipseUpdateEditor is unchanged, it is not re-executed, preventing expensive update overhead
-//    eclipseUpdateEditor(editor, messages, styling);
-//  }
-//  return context; // TODO: void functions are not compiled properly, return context for now.
-//}

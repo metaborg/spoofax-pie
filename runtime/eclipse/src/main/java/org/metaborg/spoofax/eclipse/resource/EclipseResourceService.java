@@ -27,7 +27,7 @@ import org.metaborg.core.resource.ResourceService;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-import mb.pipe.run.core.vfs.FileUtils;
+import mb.pipe.run.core.path.FileUtils;
 import mb.pipe.run.eclipse.util.Nullable;
 import mb.pipe.run.eclipse.vfs.EclipseFileObject;
 

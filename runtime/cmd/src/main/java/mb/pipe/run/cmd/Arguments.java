@@ -3,16 +3,21 @@ package mb.pipe.run.cmd;
 import com.beust.jcommander.Parameter;
 
 public class Arguments {
-    @Parameter(names = { "--clean" }, description = "Performs a clean build") public boolean clean;
+    @Parameter(names = {"--clean"}, description = "Performs a clean build")
+    public boolean clean;
 
-    @Parameter(names = { "--continuous" },
-        description = "Listens for changes and continuously builds") public boolean continuous;
+    @Parameter(names = {"--continuous"},
+        description = "Listens for changes and continuously builds")
+    public boolean continuous;
 
-    @Parameter(names = { "--file" }, description = "File to parse and style") public String file;
+    @Parameter(names = {"--file"}, description = "File to parse and style", required = true)
+    public String file;
 
-    @Parameter(names = { "-h", "--help" }, description = "Shows this usage information",
-        help = true) public boolean help;
+    @Parameter(names = {"-h", "--help"}, description = "Shows this usage information",
+        help = true)
+    public boolean help;
 
-    @Parameter(names = { "--exit" }, description = "Immediately exit, used for testing purposes",
-        hidden = true) public boolean exit;
+    @Parameter(names = {"--exit"}, description = "Immediately exit, used for testing purposes",
+        hidden = true)
+    public boolean exit;
 }

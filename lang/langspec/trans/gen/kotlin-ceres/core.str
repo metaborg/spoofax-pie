@@ -1,0 +1,41 @@
+module gen/kotlin-ceres/core
+
+imports
+
+  nabl2/api
+
+  gen/kotlin-ceres/def
+  gen/kotlin-ceres/stm
+  gen/kotlin-ceres/exp
+
+rules
+
+  p2c:
+    Program(defs) -> str
+    with
+    {| AstAnalysis, ModuleBindings:
+      rules(AstAnalysis : _ -> <nabl2-get-ast-analysis> defs)
+      
+    ; classes  := <filter(p2c-def)> defs
+    ; bindings := <bagof-ModuleBindings; pipe-concat-nl>
+    |}
+    with
+      str := 
+$[package mb.pipe.run.ceres.generated
+
+import mb.ceres.*
+import mb.pipe.run.core.*
+import mb.pipe.run.ceres.util.*
+import com.google.inject.*
+import java.io.Serializable
+
+[classes]
+
+class CeresBuilderModule : Module {
+  override fun configure(binder: Binder) {
+    val builders = binder.builderMapBinder()
+
+    [bindings]
+  }
+}
+]

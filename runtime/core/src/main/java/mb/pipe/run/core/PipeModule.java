@@ -1,23 +1,18 @@
 package mb.pipe.run.core;
 
-import org.apache.commons.vfs2.FileSystemManager;
-import org.slf4j.Logger;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 
-import mb.pipe.run.core.log.ILogger;
+import mb.pipe.run.core.log.Logger;
 import mb.pipe.run.core.log.SLF4JLogger;
-import mb.pipe.run.core.vfs.IVfsSrv;
-import mb.pipe.run.core.vfs.IResourceSrv;
-import mb.pipe.run.core.vfs.VFSManagerProvider;
-import mb.pipe.run.core.vfs.VFSResourceSrv;
+import mb.pipe.run.core.path.PathSrv;
+import mb.pipe.run.core.path.PathSrvImpl;
 
 public class PipeModule extends AbstractModule {
-    private final Logger rootLogger;
+    private final org.slf4j.Logger rootLogger;
 
 
-    public PipeModule(Logger rootLogger) {
+    public PipeModule(org.slf4j.Logger rootLogger) {
         this.rootLogger = rootLogger;
     }
 
@@ -29,15 +24,12 @@ public class PipeModule extends AbstractModule {
 
 
     protected void bindLog() {
-        final ILogger pipeRootLogger = new SLF4JLogger(rootLogger);
-        bind(ILogger.class).toInstance(pipeRootLogger);
+        final Logger pipeRootLogger = new SLF4JLogger(rootLogger);
+        bind(Logger.class).toInstance(pipeRootLogger);
     }
 
     protected void bindResource() {
-        bind(VFSResourceSrv.class).in(Singleton.class);
-        bind(IResourceSrv.class).to(VFSResourceSrv.class).in(Singleton.class);
-        bind(IVfsSrv.class).to(VFSResourceSrv.class).in(Singleton.class);
-
-        bind(FileSystemManager.class).toProvider(VFSManagerProvider.class).in(Singleton.class);
+        bind(PathSrvImpl.class).in(Singleton.class);
+        bind(PathSrv.class).to(PathSrvImpl.class).in(Singleton.class);
     }
 }

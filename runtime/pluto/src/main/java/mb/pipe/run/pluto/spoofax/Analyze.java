@@ -22,8 +22,8 @@ import build.pluto.builder.BuildRequest;
 import build.pluto.builder.Builder;
 import build.pluto.builder.factory.BuilderFactory;
 import build.pluto.dependency.Origin;
-import mb.pipe.run.core.model.IContext;
-import mb.pipe.run.core.vfs.IResource;
+import mb.pipe.run.core.model.Context;
+import mb.pipe.run.core.path.PPath;
 import mb.pipe.run.pluto.util.ABuilder;
 import mb.pipe.run.pluto.util.AInput;
 import mb.pipe.run.pluto.util.Result;
@@ -33,12 +33,12 @@ public class Analyze extends ABuilder<Analyze.Input, Analyze.Output> {
         private static final long serialVersionUID = 1L;
 
         public final LanguageIdentifier langId;
-        public final IResource project;
-        public final IResource file;
+        public final PPath project;
+        public final PPath file;
         public final @Nullable IStrategoTerm ast;
 
 
-        public Input(IContext context, @Nullable Origin origin, LanguageIdentifier langId, IResource project, IResource file,
+        public Input(Context context, @Nullable Origin origin, LanguageIdentifier langId, PPath project, PPath file,
             @Nullable IStrategoTerm ast) {
             super(context, origin);
 

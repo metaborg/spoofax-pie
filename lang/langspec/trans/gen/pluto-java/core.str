@@ -1,0 +1,339 @@
+module gen/pluto-java/core
+
+imports
+
+  libspoofax/stratego/debug
+  nabl2/api
+
+  signatures/-
+  signatures/lex/-
+  signatures/impl/-
+  
+  statsem/program
+  
+  gen/java/type2java
+  gen/idtype-tuples
+  gen/util
+  gen/debug
+
+rules
+
+  p2p:
+    Program(defs) -> results
+    with
+    {| AstAnalysis: 
+      rules(AstAnalysis : _ -> <nabl2-get-ast-analysis> defs) 
+    ; results := <filter(p2p-def)> defs
+    |}
+
+rules // definitions
+
+  p2p-def:
+    FuncDef(FuncHead(funcId, params, type), FuncImpl(Block(stms))) -> (className, str)
+    with
+      className := <pipe-sanitize-class-id> funcId
+    with
+      idTypeTuples := <pipe-idtype-tuples> params
+    ; inputClass := <t2j-multi-dataclass(id|"Input", "extends AInput", "IContext _internal_context, @Nullable Origin origin", "super(_internal_context, origin);")> idTypeTuples
+    with
+      outputClass := <t2j-singular-dataclass(id|"Output", "implements build.pluto.output.Output", "", "")> ("out", type)
+    with
+      commaSep           := <if ?[] then !"" else !", " end> idTypeTuples
+    ; persistentPathImpl := <map(\(typeId, _) -> $[input.[typeId]]\); pipe-concat-comma> idTypeTuples
+    with
+      buildImpl   := <p2p-stms> stms
+    ; emptyReturn := <?VoidTy(); !"return new Output();" <+ !""> type
+    with
+      str := 
+$[package mb.pipe.run.pluto.generated;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Collection;
+
+import javax.annotation.Nullable;
+
+import org.apache.commons.vfs2.FileObject;
+import mb.pipe.run.core.model.IContext;
+import mb.pipe.run.core.util.Lists2;
+import mb.pipe.run.pluto.util.ABuilder;
+import mb.pipe.run.pluto.util.AInput;
+import mb.pipe.run.pluto.util.Result;
+
+import com.google.common.collect.Lists;
+
+import build.pluto.builder.BuildRequest;
+import build.pluto.builder.Builder;
+import build.pluto.builder.factory.BuilderFactory;
+import build.pluto.dependency.Origin;
+
+public class [className] extends ABuilder<[className].Input, [className].Output> {
+    [inputClass]
+
+    [outputClass]
+
+
+    public static final BuilderFactory<Input, Output, [className]> factory = factory([className].class, Input.class);
+
+    public static BuildRequest<Input, Output, [className], BuilderFactory<Input, Output, [className]>> request(Input input) {
+        return request(input, [className].class, Input.class);
+    }
+
+    public static Origin origin(Input input) {
+        return origin(input, [className].class, Input.class);
+    }
+
+    public static Result<Output> requireBuild(Builder<?, ?> requiree, Input input) throws IOException {
+        return requireBuild(requiree, input, [className].class, Input.class);
+    }
+    
+    public static [<t2j-ref-sig> type] build(Builder<?, ?> requiree, Input input) throws IOException {
+        return requireBuild(requiree, input, [className].class, Input.class).output.getPipeVal();
+    }
+
+
+    public [className](Input input) {
+        super(input);
+    }
+
+
+    @Override protected String description(Input input) {
+        return "[className]";
+    }
+
+    @Override public File persistentPath(Input input) {
+        return depFile("[className]"[commaSep][persistentPathImpl]);
+    }
+
+    @SuppressWarnings("unchecked") @Override protected Output build(Input input) throws Throwable {
+        requireOrigins();
+
+        [buildImpl]
+        [emptyReturn]
+    }
+}
+]
+    
+
+rules // statements
+
+  try-p2p-stm    = pipe-try-debug(p2p-stm|"p2p-stm") <+ !"{}"
+  p2p-stms       = p2p-stms(|"\n")
+  p2p-stms(|sep) = map(try-p2p-stm); separate-by(|sep); concat-strings
+
+
+  p2p-stm:
+    Block(stms) -> 
+$[{
+    [str]
+}]
+    with
+      str := <p2p-stms> stms
+
+  p2p-stm:
+    VarDecBinder(SingleBinder(bind), exp) -> 
+$[[initStmsStr]
+[tyStr] [varId] = [expStr];]
+    with
+      type                  := <pipe-ast-type> exp
+    ; (varId, actualType)   := <p2p-bind-idtype-tuple> (bind, type)
+    ; tyStr                 := <t2j-def-sig> actualType
+    ; (initStmsStr, expStr) := <try-p2p-exp> exp
+  
+  p2p-stm:
+    VarDecBinder(TupleBinder(binds), exp) -> 
+$[[initStmsStr]
+[varDecStr]]
+    with
+      TupleTy(types)        := <pipe-ast-type> exp
+    ; (initStmsStr, expStr) := <try-p2p-exp> exp
+    ; idTypeTuples          := <zip(p2p-bind-idtype-tuple)> (binds, types)
+    ; varDecStrs            := <map-with-index(p2p-tuplebind-str(|expStr))> idTypeTuples
+    ; varDecStr             := <pipe-concat-nl> varDecStrs
+
+  p2p-tuplebind-str(|expStr):
+    (i, (typeId, type)) -> $[[sig] [typeId] = ([sig]) [expStr].get([index]);]
+    with
+      sig   := <t2j-ref-sig> type
+    ; index := <dec; int-to-string> i
+
+  p2p-bind-idtype-tuple:
+    (Bind(varId), inferType) -> (varId, inferType)
+    
+  p2p-bind-idtype-tuple:
+    (TBind(varId, type), inferType) -> (varId, type)
+    
+  p2p-stm:
+    VarDec(varId, type) -> $[[tyStr] [varId];]
+    with
+      tyStr := <t2j-def-sig> type
+
+  p2p-stm:
+    Assign(Ref(varId), exp) -> 
+$[[initStmsStr]
+[varId] = [expStr];]
+    with
+      (initStmsStr, expStr) := <try-p2p-exp> exp
+
+  p2p-stm:
+    If(exp, stm) -> 
+$[[initStmsStr]
+if([expStr])
+    [strStm]]
+    with
+      strStm                := <try-p2p-stm> stm
+    ; (initStmsStr, expStr) := <try-p2p-exp> exp
+
+  p2p-stm:
+    IfElse(exp, trueStm, falseStm) ->
+$[[initStmsStr]
+if([expStr])
+    [trueStmStr]
+else
+    [falseStmStr]]
+    with
+      trueStmStr            := <try-p2p-stm> trueStm
+    ; falseStmStr           := <try-p2p-stm> falseStm
+    ; (initStmsStr, expStr) := <try-p2p-exp> exp
+
+  p2p-stm:
+    ForEach(SingleBinder(bind), exp, stm) ->
+$[[initStmsStr]
+for([tyStr] [varId] : [expStr])
+    [strStm]]
+    with
+      ListTy(type)          := <pipe-ast-type> exp
+    ; (varId, actualType)   := <p2p-bind-idtype-tuple> (bind, type)
+    ; tyStr                 := <t2j-def-sig> actualType
+    ; (initStmsStr, expStr) := <try-p2p-exp> exp
+    ; strStm                := <try-p2p-stm> stm
+
+  // TODO: ForEach with TupleBinder
+
+  p2p-stm:
+    Return(exp) -> 
+$[[initStmsStr]
+return new Output([expStr]);]
+    with
+      (initStmsStr, expStr) := <try-p2p-exp> exp
+
+  p2p-stm:
+    Fail(exp) ->
+$[[initStmsStr]
+throw new RuntimeException([expStr].toString());]
+    with
+      (initStmsStr, expStr) := <try-p2p-exp> exp
+
+  p2p-stm:
+    Exp(exp) -> 
+$[[initStmsStr]
+eat([expStr]);]
+    with
+      (initStmsStr, expStr) := <try-p2p-exp> exp
+  
+rules 
+
+  try-p2p-exp = pipe-try-debug(p2p-exp|"p2p-exp") <+ !("", "new Object()")
+  
+  
+  p2p-exp:
+    ToNullable(exp) -> <p2p-exp> exp
+    
+  p2p-exp:
+    ToNonNullable(exp) -> <p2p-exp> exp
+  
+  
+  p2p-binexp(|symbol):
+    (lExp, rExp) -> (allInitStmStr, $[[lExpStr] [symbol] [rExpStr]])
+    with
+      (lInitStmStr, lExpStr) := <try-p2p-exp> lExp
+    ; (rInitStmStr, rExpStr) := <try-p2p-exp> rExp
+    ; allInitStmStr := <pipe-concat-nl> [lInitStmStr, rInitStmStr]
+  
+  p2p-exp: Eq(lExp, rExp) -> <p2p-binexp(|"==")> (lExp, rExp)
+  p2p-exp: Neq(lExp, rExp) -> <p2p-binexp(|"!=")> (lExp, rExp)
+  p2p-exp: Lor(lExp, rExp) -> <p2p-binexp(|"||")> (lExp, rExp)
+  p2p-exp: Land(lExp, rExp) -> <p2p-binexp(|"&&")> (lExp, rExp)
+
+
+  p2p-exp:
+    Ref(varId) -> ("", varId) 
+    where
+      LocalVarKind() := <pipe-ast-ref-prop(|"Var", "kind")> varId
+  
+  p2p-exp: 
+    Ref(varId) -> ("", $[input.[varId]])
+    where
+      InputVarKind() := <pipe-ast-ref-prop(|"Var", "kind")> varId
+
+
+  p2p-exp:
+    Call(funcId, exps) -> (initStmsStr, $[[javaClassId].[javaMethodId]([expStr])])
+    where
+      JavaStaticFuncKind() := <pipe-ast-ref-prop(|"Func", "kind")> funcId
+    with
+      javaClassId             := <pipe-ast-ref-prop(|"Func", "javaClassId")> funcId
+    ; javaMethodId            := <pipe-ast-ref-prop(|"Func", "javaMethodId")> funcId
+    ; (initStmsStrs, expStrs) := <map(try-p2p-exp); unzip> exps
+    ; initStmsStr             := <pipe-concat-nl> initStmsStrs
+    ; expStr                  := <pipe-concat-comma> expStrs
+  
+  p2p-exp:
+    c@Call(funcId, _) -> <p2p-exp-pluto-call(|javaClassId)> c
+    where
+      PlutoBuilderFuncKind() := <pipe-ast-ref-prop(|"Func", "kind")> funcId
+    with
+      javaClassId := <pipe-ast-ref-prop(|"Func", "javaClassId")> funcId
+    
+  p2p-exp: 
+    c@Call(funcId, _) -> <p2p-exp-pluto-call(|javaClassId)> c 
+    where
+      PipelineFuncKind() := <pipe-ast-ref-prop(|"Func", "kind")> funcId
+    with
+      javaClassId := <pipe-sanitize-class-id> funcId
+  
+  p2p-exp-pluto-call(|javaClassId):
+   Call(funcId, exps) -> (allInitStmsStr, $[[initId].output.getPipeVal()])
+    with
+      (initStmsStrs, expStrs) := <map(try-p2p-exp); unzip> exps
+    ; expStr                  := <pipe-concat-comma> expStrs
+    ; initId                  := <newname> "init"
+    ; initStr                 := $[final Result<[javaClassId].Output> [initId] = [javaClassId].requireBuild(this, new [javaClassId].Input(input.context, null, [expStr]));]
+    ; allInitStmsStr          := <concat; pipe-concat-nl> [initStmsStrs, [initStr]]
+
+  p2p-exp: 
+    QCall(exp, funcId, argsExps) -> (allInitStmsStr, $[[expStr].[funcId]([argsExpStr])])
+    with
+      (argsInitStmsStrs, argsExpStrs) := <map(try-p2p-exp); unzip> argsExps
+    ; argsExpStr                      := <pipe-concat-comma> argsExpStrs
+    ; (initStmsStr, expStr)           := <try-p2p-exp> exp
+    ; allInitStmsStr                  := <concat; pipe-concat-nl> [argsInitStmsStrs, [initStmsStr]]
+
+
+  p2p-exp: BoolLit(True())  -> ("", $[true])
+  p2p-exp: BoolLit(False()) -> ("", $[false])
+  p2p-exp: IntLit(i)        -> ("", i)
+  p2p-exp: StrLit(str)      -> ("", str)
+  p2p-exp: NullLit()        -> ("", $[null])
+  
+  p2p-exp:
+    TupleLit(exps) -> (allInitStmsStr, $[new mb.pipe.run.core.util.Tuple([expsStr])])
+    with
+      (initStmsStrs, expStrs) := <map(try-p2p-exp); unzip> exps
+    ; allInitStmsStr          := <pipe-concat-nl> initStmsStrs
+    ; expsStr                 := <pipe-concat-comma> expStrs
+    
+  p2p-exp:
+    l@ListLit(exps) -> (allInitStmsStr, $[Lists.newArrayList([expsStr])])
+    with
+      (initStmsStrs, expStrs) := <map(try-p2p-exp); unzip> exps
+    ; allInitStmsStr          := <pipe-concat-nl> initStmsStrs
+    ; expsStr                 := <pipe-concat-comma> expStrs
+
+  p2p-exp:
+    l@ListAppendLit(listExp, exps) -> (allInitStmsStr, $[Lists2.concat([listExpStr], [expsStr])])
+    with
+      (listInitStmStr, listExpStr) := <try-p2p-exp> listExp
+    ; (initStmsStrs, expStrs)      := <map(try-p2p-exp); unzip> exps
+    ; allInitStmsStr               := <concat; pipe-concat-nl> [[listInitStmStr], initStmsStrs]
+    ; expsStr                      := <pipe-concat-comma> expStrs

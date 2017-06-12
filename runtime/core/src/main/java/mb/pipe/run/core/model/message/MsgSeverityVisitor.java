@@ -1,9 +1,9 @@
 package mb.pipe.run.core.model.message;
 
 public interface MsgSeverityVisitor<T> {
-    T info(IMsg message);
+    T info(Msg message);
 
-    T warning(IMsg message);
+    T warning(Msg message);
 
-    T error(IMsg message);
+    T error(Msg message);
 }

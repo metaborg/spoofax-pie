@@ -17,8 +17,8 @@ import build.pluto.builder.BuildRequest;
 import build.pluto.builder.Builder;
 import build.pluto.builder.factory.BuilderFactory;
 import build.pluto.dependency.Origin;
-import mb.pipe.run.core.model.IContext;
-import mb.pipe.run.core.vfs.IResource;
+import mb.pipe.run.core.model.Context;
+import mb.pipe.run.core.path.PPath;
 import mb.pipe.run.pluto.util.ABuilder;
 import mb.pipe.run.pluto.util.AInput;
 import mb.pipe.run.pluto.util.Result;
@@ -28,11 +28,11 @@ public class Parse extends ABuilder<Parse.Input, Parse.Output> {
         private static final long serialVersionUID = 1L;
 
         public final LanguageIdentifier langId;
-        public final IResource file;
+        public final PPath file;
         public final String text;
 
 
-        public Input(IContext context, @Nullable Origin origin, LanguageIdentifier langId, IResource file, String text) {
+        public Input(Context context, @Nullable Origin origin, LanguageIdentifier langId, PPath file, String text) {
             super(context, origin);
 
             this.langId = langId;

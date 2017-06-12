@@ -13,9 +13,9 @@ import build.pluto.builder.BuildRequest;
 import build.pluto.builder.Builder;
 import build.pluto.builder.factory.BuilderFactory;
 import build.pluto.dependency.Origin;
-import mb.pipe.run.core.model.IContext;
-import mb.pipe.run.core.model.message.IMsg;
-import mb.pipe.run.core.model.parse.IToken;
+import mb.pipe.run.core.model.Context;
+import mb.pipe.run.core.model.message.Msg;
+import mb.pipe.run.core.model.parse.Token;
 import mb.pipe.run.core.util.ITuple;
 import mb.pipe.run.core.util.Tuple;
 import mb.pipe.run.pluto.util.ABuilder;
@@ -34,7 +34,7 @@ public class Parse extends ABuilder<Parse.Input, Parse.Output> {
         public final Table table;
 
 
-        public Input(IContext context, @Nullable Origin origin, String text, String startSymbol, Table table) {
+        public Input(Context context, @Nullable Origin origin, String text, String startSymbol, Table table) {
             super(context, origin);
 
             this.text = text;
@@ -47,12 +47,12 @@ public class Parse extends ABuilder<Parse.Input, Parse.Output> {
         private static final long serialVersionUID = 1L;
 
         public final @Nullable IStrategoTerm ast;
-        public final @Nullable Collection<IToken> tokenStream;
-        public final Collection<IMsg> messages;
+        public final @Nullable Collection<Token> tokenStream;
+        public final Collection<Msg> messages;
 
 
-        public Output(@Nullable IStrategoTerm ast, @Nullable Collection<IToken> tokenStream,
-            Collection<IMsg> messages) {
+        public Output(@Nullable IStrategoTerm ast, @Nullable Collection<Token> tokenStream,
+            Collection<Msg> messages) {
             this.ast = ast;
             this.tokenStream = tokenStream;
             this.messages = messages;

@@ -1,0 +1,8 @@
+module statsem/kotlin
+
+rules // Java static function implementation
+
+  [[ KFuncImpl(id_class_or_package_kotlin, id_func_kotlin) ^ (s, _, occ_func_outer) ]] :=
+    occ_func_outer.kind                   := KotlinFuncKind() !,
+    occ_func_outer.kotlinClassOrPackageId := id_class_or_package_kotlin !,
+    occ_func_outer.kotlinFuncId           := id_func_kotlin !.

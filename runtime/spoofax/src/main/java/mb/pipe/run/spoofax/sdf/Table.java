@@ -5,8 +5,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.nio.file.Files;
 import java.util.Arrays;
 
+import mb.pipe.run.core.path.PPath;
 import org.apache.commons.io.FileUtils;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
@@ -24,8 +26,8 @@ public class Table implements Serializable {
         this.data = data;
     }
 
-    public Table(File file) throws IOException {
-        this.data = FileUtils.readFileToByteArray(file);
+    public Table(PPath path) throws IOException {
+        this.data = Files.readAllBytes(path.getJavaPath());
     }
 
 

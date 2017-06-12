@@ -1,10 +1,10 @@
 package mb.pipe.run.core.model.parse;
 
-public class LayoutTokenKind implements ITokenType {
+public class LayoutTokenKind implements TokenType {
     private static final long serialVersionUID = 1L;
 
 
-    @Override public void accept(ITokenKindVisitor visitor, IToken token) {
+    @Override public void accept(TokenKindVisitor visitor, Token token) {
         visitor.layout(token);
     }
 

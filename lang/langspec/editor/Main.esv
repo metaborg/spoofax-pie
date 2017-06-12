@@ -14,5 +14,4 @@ language
 menus
 
   menu: "Generate"
-    action: "Pluto" = generate-pluto-files
- 
+    action: "Kotlin-Ceres" = generate-kotlin-ceres-file
