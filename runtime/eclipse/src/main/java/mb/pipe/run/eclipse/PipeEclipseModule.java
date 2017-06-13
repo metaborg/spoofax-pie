@@ -1,16 +1,13 @@
 package mb.pipe.run.eclipse;
 
-import org.apache.commons.vfs2.FileSystemManager;
 import org.slf4j.Logger;
 
 import com.google.inject.Singleton;
 
 import mb.pipe.run.core.PipeModule;
-import mb.pipe.run.core.path.IVfsSrv;
 import mb.pipe.run.core.path.PathSrv;
-import mb.pipe.run.eclipse.vfs.EclipseResourceSrv;
-import mb.pipe.run.eclipse.vfs.EclipseVFSManagerProvider;
-import mb.pipe.run.eclipse.vfs.IEclipseResourceSrv;
+import mb.pipe.run.eclipse.vfs.EclipsePathSrv;
+import mb.pipe.run.eclipse.vfs.EclipsePathSrvImpl;
 
 public class PipeEclipseModule extends PipeModule {
     public PipeEclipseModule(Logger rootLogger) {
@@ -18,12 +15,9 @@ public class PipeEclipseModule extends PipeModule {
     }
 
 
-    @Override protected void bindResource() {
-        bind(EclipseResourceSrv.class).in(Singleton.class);
-        bind(PathSrv.class).to(EclipseResourceSrv.class);
-        bind(IEclipseResourceSrv.class).to(EclipseResourceSrv.class);
-        bind(IVfsSrv.class).to(EclipseResourceSrv.class).in(Singleton.class);
-
-        bind(FileSystemManager.class).toProvider(EclipseVFSManagerProvider.class).in(Singleton.class);
+    @Override protected void bindPath() {
+        bind(EclipsePathSrvImpl.class).in(Singleton.class);
+        bind(PathSrv.class).to(EclipsePathSrvImpl.class);
+        bind(EclipsePathSrv.class).to(EclipsePathSrvImpl.class);
     }
 }

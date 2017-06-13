@@ -1,48 +1,48 @@
 package mb.pipe.run.eclipse.build;
 
 import java.io.IOException;
-import java.util.Collection;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.PathMatcher;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
-
-import org.apache.commons.vfs2.FileName;
-import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSelectInfo;
-import org.apache.commons.vfs2.FileSelector;
-import org.apache.commons.vfs2.FileSystemException;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import com.google.common.collect.Lists;
 import com.google.inject.Injector;
 
-import build.pluto.builder.BuildManager;
-import build.pluto.builder.BuildRequest;
-import build.pluto.dependency.database.XodusDatabase;
-import build.pluto.util.LogReporting;
+import mb.ceres.BuildException;
+import mb.ceres.BuildManager;
+import mb.pipe.run.ceres.CeresSrv;
+import mb.pipe.run.ceres.generated.processFile;
+import mb.pipe.run.ceres.generated.processString;
 import mb.pipe.run.core.log.Logger;
-import mb.pipe.run.core.model.ContextImpl;
 import mb.pipe.run.core.model.Context;
+import mb.pipe.run.core.model.ContextFactory;
 import mb.pipe.run.core.model.message.Msg;
 import mb.pipe.run.core.model.style.Styling;
 import mb.pipe.run.core.path.PPath;
-import mb.pipe.run.core.path.VFSResource;
 import mb.pipe.run.eclipse.PipePlugin;
 import mb.pipe.run.eclipse.editor.Editors;
 import mb.pipe.run.eclipse.editor.PipeEditor;
+import mb.pipe.run.eclipse.util.Nullable;
 import mb.pipe.run.eclipse.util.StatusUtils;
-import mb.pipe.run.eclipse.vfs.IEclipseResourceSrv;
-import mb.pipe.run.pluto.generated.processFile;
-import mb.pipe.run.pluto.generated.processString;
+import mb.pipe.run.eclipse.vfs.EclipsePathSrv;
 
 public class PipeProjectBuilder extends IncrementalProjectBuilder {
     public static final String id = PipePlugin.id + ".builder";
 
     private final Logger logger;
-    private final IEclipseResourceSrv resourceSrv;
+    private final EclipsePathSrv pathSrv;
+    private final ContextFactory contextFactory;
+    private final CeresSrv ceresSrv;
     private final Editors editors;
     private final Updater updater;
 
@@ -50,7 +50,9 @@ public class PipeProjectBuilder extends IncrementalProjectBuilder {
     public PipeProjectBuilder() {
         final Injector injector = PipePlugin.pipeFacade().injector;
         this.logger = injector.getInstance(Logger.class).forContext(getClass());
-        this.resourceSrv = injector.getInstance(IEclipseResourceSrv.class);
+        this.pathSrv = injector.getInstance(EclipsePathSrv.class);
+        this.contextFactory = injector.getInstance(ContextFactory.class);
+        this.ceresSrv = injector.getInstance(CeresSrv.class);
         this.editors = injector.getInstance(Editors.class);
         this.updater = injector.getInstance(Updater.class);
     }
@@ -58,69 +60,93 @@ public class PipeProjectBuilder extends IncrementalProjectBuilder {
 
     @Override protected IProject[] build(int kind, Map<String, String> args, IProgressMonitor monitor)
         throws CoreException {
-        // TODO: check for relevant changes.
-
         final IProject project = getProject();
         logger.info("Building project " + project);
-        final PPath projectDir = resourceSrv.resolve(project);
-        final Context context = new ContextImpl(projectDir);
+        final PPath projectDir = pathSrv.resolve(project);
+        final Context context = contextFactory.create(projectDir);
 
-        FileObject[] files;
+        final List<PPath> files;
+        final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:*.{min,esv,sdf3}");
         try {
-            files = projectDir.fileObject().findFiles(new FileSelector() {
-                @Override public boolean traverseDescendents(FileSelectInfo fileInfo) throws Exception {
-                    return true;
-                }
-
-                @Override public boolean includeFile(FileSelectInfo fileInfo) throws Exception {
-                    final FileObject file = fileInfo.getFile();
-                    final FileName name = file.getName();
-                    final String ext = name.getExtension();
-                    return ext.equals("min");
-                }
-            });
-        } catch(FileSystemException e) {
-            throw new CoreException(StatusUtils.error("Could not list files of project " + project, e));
-        }
-        final Collection<PPath> resources = Lists.newArrayList();
-        for(FileObject file : files) {
-            resources.add(new VFSResource(file));
-        }
-
-        try {
-            try(final BuildManager buildManager =
-                new BuildManager(new LogReporting(), XodusDatabase.createFileDatabase("pipeline-experiment"))) {
-                try {
-                    for(PPath file : resources) {
-                        final BuildRequest<?, processFile.Output, ?, ?> req =
-                            processFile.request(new processFile.Input(context, null, file, context));
-                        final processFile.Output output = buildManager.requireInitially(req).getBuildResult();
-
-                        logger.info("Updating file {}", file);
-                        final Collection<Msg> messages = (Collection<Msg>) output.getPipeVal().get(4);
-                        updater.updateMessagesSync(project, messages, monitor);
-                    }
-                    for(PipeEditor editor : editors.editors()) {
-                        final String text = editor.text();
-                        final BuildRequest<?, processString.Output, ?, ?> req =
-                            processString.request(new processString.Input(context, null, text, context));
-                        final processString.Output output = buildManager.requireInitially(req).getBuildResult();
-
-                        logger.info("Updating editor {}", editor.name());
-                        final Collection<Msg> messages = (Collection<Msg>) output.getPipeVal().get(3);
-                        updater.updateMessagesSync(editor.eclipseResource(), messages, monitor);
-                        final @Nullable Styling styling = (Styling) output.getPipeVal().get(4);
-                        updater.updateStyle(editor.sourceViewer(), styling, monitor);
-                    }
-                } catch(Throwable e) {
-                    throw new CoreException(
-                        StatusUtils.error("Could not keep files and editors of project " + project + " consistent", e));
+            if(kind == FULL_BUILD) {
+                files = allFiles(projectDir, matcher);
+            } else {
+                final IResourceDelta delta = getDelta(project);
+                if(delta == null) {
+                    files = allFiles(projectDir, matcher);
+                } else {
+                    files = deltaFiles(delta, matcher);
                 }
             }
         } catch(IOException e) {
-            throw new CoreException(StatusUtils.error("Could not clean up Pluto build manager", e));
+            final String message = "Could not list relevant files to update";
+            logger.error(message, e);
+            throw new CoreException(StatusUtils.error(message, e));
+        }
+
+        final BuildManager buildManager = ceresSrv.get(context);
+        for(PPath file : files) {
+            logger.info("Updating file {}", file);
+            try {
+                final processFile.Output output =
+                    buildManager.build(processFile.class, new processFile.Input(file, context));
+
+                final List<Msg> messages = output.component5();
+                updater.updateMessagesSync(project, messages, monitor);
+            } catch(BuildException e) {
+                logger.error("Could not update file {}", e, file);
+            }
+        }
+        for(PipeEditor editor : editors.editors()) {
+            final String name = editor.name();
+            logger.info("Updating editor {}", name);
+            final String text = editor.text();
+            try {
+                final processString.Output output =
+                    buildManager.build(processString.class, new processString.Input(text, context));
+
+                final List<Msg> messages = output.component4();
+                updater.updateMessagesSync(editor.eclipseResource(), messages, monitor);
+
+                final @Nullable Styling styling = output.component5();
+                if(styling != null) {
+                    updater.updateStyle(editor.sourceViewer(), styling, monitor);
+                }
+            } catch(BuildException e) {
+                logger.error("Could not update editor {}", e, name);
+            }
         }
 
         return null;
+    }
+
+    private final List<PPath> allFiles(PPath dir, PathMatcher matcher) throws IOException {
+        // @formatter:off
+        return Files
+            .walk(dir.getJavaPath())
+            .filter((path) -> matcher.matches(path))
+            .map((path) -> pathSrv.resolve(path))
+            .collect(Collectors.toList());
+        // @formatter:on
+    }
+
+    private final List<PPath> deltaFiles(IResourceDelta delta, PathMatcher matcher) throws CoreException {
+        final List<PPath> paths = new ArrayList<>();
+        delta.accept(new IResourceDeltaVisitor() {
+            @Override public boolean visit(IResourceDelta innerDelta) throws CoreException {
+                switch(innerDelta.getKind()) {
+                    case IResourceDelta.REMOVED:
+                    case IResourceDelta.ADDED_PHANTOM:
+                    case IResourceDelta.REMOVED_PHANTOM:
+                        return false;
+                }
+                final PPath path = pathSrv.resolve(innerDelta.getResource());
+                if(matcher.matches(path.getJavaPath())) {
+                    paths.add(path);
+                }
+                return true;
+            }
+        });
+        return paths;
     }
 }

@@ -1,33 +1,30 @@
 package mb.pipe.run.eclipse.editor;
 
-import java.util.Collection;
-
-import javax.annotation.Nullable;
+import java.util.List;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.IEditorInput;
 
-import build.pluto.builder.BuildManager;
-import build.pluto.builder.BuildRequest;
-import build.pluto.dependency.database.XodusDatabase;
-import build.pluto.util.LogReporting;
+import mb.ceres.BuildException;
+import mb.ceres.BuildManager;
+import mb.pipe.run.ceres.generated.processString;
 import mb.pipe.run.core.log.Logger;
 import mb.pipe.run.core.model.Context;
 import mb.pipe.run.core.model.message.Msg;
 import mb.pipe.run.core.model.style.Styling;
 import mb.pipe.run.eclipse.build.Updater;
+import mb.pipe.run.eclipse.util.Nullable;
 import mb.pipe.run.eclipse.util.StatusUtils;
-import mb.pipe.run.pluto.generated.processString;
 
 public class EditorUpdateJob extends Job {
     private final Logger logger;
 
+    private final BuildManager buildManager;
     private final Updater updater;
     private final ISourceViewer sourceViewer;
 
@@ -37,10 +34,11 @@ public class EditorUpdateJob extends Job {
     private final IResource eclipseResource;
 
 
-    public EditorUpdateJob(Logger logger, Updater updater, ISourceViewer sourceViewer, String text, Context context,
-        IEditorInput input, IResource eclipseResource) {
+    public EditorUpdateJob(Logger logger, BuildManager buildManager, Updater updater, ISourceViewer sourceViewer,
+        String text, Context context, IEditorInput input, IResource eclipseResource) {
         super("Editor update");
         this.logger = logger;
+        this.buildManager = buildManager;
         this.updater = updater;
         this.sourceViewer = sourceViewer;
         this.text = text;
@@ -52,14 +50,12 @@ public class EditorUpdateJob extends Job {
 
     @Override protected IStatus run(IProgressMonitor monitor) {
         logger.debug("Running editor update job for {}", input);
-
-        final IWorkspace workspace = ResourcesPlugin.getWorkspace();
-
         try {
-            final IStatus status = update(workspace, monitor);
-            return status;
-        } catch(Throwable e) {
-            return StatusUtils.error(e);
+            return update(monitor);
+        } catch(BuildException | CoreException e) {
+            final String message = "Editor update for " + input + " failed";
+            logger.error(message, e);
+            return StatusUtils.error(message, e);
         }
     }
 
@@ -67,18 +63,15 @@ public class EditorUpdateJob extends Job {
         return input.equals(family);
     }
 
-    private IStatus update(IWorkspace workspace, final IProgressMonitor monitor) throws Throwable {
-        final BuildRequest<?, processString.Output, ?, ?> buildRequest =
-            processString.request(new processString.Input(context, null, text, context));
+    private IStatus update(IProgressMonitor monitor) throws BuildException, CoreException {
+        final processString.Output output =
+            buildManager.build(processString.class, new processString.Input(text, context));
 
-        try(final BuildManager buildManager =
-            new BuildManager(new LogReporting(), XodusDatabase.createFileDatabase("pipeline-experiment"))) {
-            final processString.Output output = buildManager.requireInitially(buildRequest).getBuildResult();
+        final List<Msg> messages = output.component4();
+        updater.updateMessagesSync(eclipseResource, messages, monitor);
 
-            final Collection<Msg> messages = (Collection<Msg>) output.getPipeVal().get(3);
-            updater.updateMessagesSync(eclipseResource, messages, monitor);
-
-            final @Nullable Styling styling = (Styling) output.getPipeVal().get(4);
+        final @Nullable Styling styling = output.component5();
+        if(styling != null) {
             updater.updateStyle(sourceViewer, styling, monitor);
         }
 

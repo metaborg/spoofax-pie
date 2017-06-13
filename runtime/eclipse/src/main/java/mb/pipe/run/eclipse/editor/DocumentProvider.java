@@ -1,8 +1,9 @@
 package mb.pipe.run.eclipse.editor;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 
-import org.apache.commons.vfs2.FileSystemException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.IEditorInput;
@@ -11,16 +12,16 @@ import org.eclipse.ui.editors.text.FileDocumentProvider;
 import mb.pipe.run.core.log.Logger;
 import mb.pipe.run.core.path.PPath;
 import mb.pipe.run.eclipse.util.StatusUtils;
-import mb.pipe.run.eclipse.vfs.IEclipseResourceSrv;
+import mb.pipe.run.eclipse.vfs.EclipsePathSrv;
 
 public class DocumentProvider extends FileDocumentProvider {
     private final Logger logger;
-    private final IEclipseResourceSrv resourceService;
+    private final EclipsePathSrv pathSrv;
 
 
-    public DocumentProvider(Logger logger, IEclipseResourceSrv resourceService) {
+    public DocumentProvider(Logger logger, EclipsePathSrv resourceService) {
         this.logger = logger.forContext(getClass());
-        this.resourceService = resourceService;
+        this.pathSrv = resourceService;
     }
 
 
@@ -33,24 +34,25 @@ public class DocumentProvider extends FileDocumentProvider {
         if(element instanceof IEditorInput) {
             final IDocument document = createEmptyDocument();
             final IEditorInput input = (IEditorInput) element;
-            final PPath resource = resourceService.resolve(input);
-            if(resource == null) {
+            final PPath path = pathSrv.resolve(input);
+            if(path == null) {
                 final String message =
                     "Cannot create document for input " + element + ", could not resolve input to file object";
                 logger.error(message);
                 throw new CoreException(StatusUtils.error(message));
             }
 
+
             try {
-                final InputStream stream = resource.fileObject().getContent().getInputStream();
+                final InputStream stream = Files.newInputStream(path.getJavaPath());
                 String encoding = getEncoding(element);
                 if(encoding == null) {
                     encoding = getDefaultEncoding();
                 }
-                setDocumentContent(document, stream, encoding);
+                setDocumentContent(document, stream, encoding); // Stream is closed here
                 setupDocument(element, document);
                 return document;
-            } catch(FileSystemException e) {
+            } catch(IOException e) {
                 final String message = "Cannot create document for input " + element;
                 logger.error(message, e);
                 throw new CoreException(StatusUtils.error(message, e));

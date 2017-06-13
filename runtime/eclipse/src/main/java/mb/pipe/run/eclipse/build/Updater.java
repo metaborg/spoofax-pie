@@ -3,6 +3,7 @@ package mb.pipe.run.eclipse.build;
 import java.awt.Color;
 import java.util.Collection;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -23,21 +24,21 @@ import mb.pipe.run.eclipse.util.MarkerUtils;
 import mb.pipe.run.eclipse.util.Nullable;
 import mb.pipe.run.eclipse.util.StatusUtils;
 import mb.pipe.run.eclipse.util.StyleUtils;
-import mb.pipe.run.eclipse.vfs.IEclipseResourceSrv;
+import mb.pipe.run.eclipse.vfs.EclipsePathSrv;
 
 public class Updater {
-    private final IEclipseResourceSrv resourceSrv;
+    private final EclipsePathSrv pathSrv;
     private final StyleUtils styleUtils;
 
 
-    @Inject public Updater(IEclipseResourceSrv resourceSrv, StyleUtils styleUtils) {
-        this.resourceSrv = resourceSrv;
+    @Inject public Updater(EclipsePathSrv pathSrv, StyleUtils styleUtils) {
+        this.pathSrv = pathSrv;
         this.styleUtils = styleUtils;
     }
 
 
-    public void updateMessagesAsync(PPath file, Collection<Msg> msgs) {
-        final org.eclipse.core.resources.IResource eclipseFile = resourceSrv.unresolve(file);
+    public void updateMessagesAsync(PPath path, Collection<Msg> msgs) {
+        final IResource eclipseFile = pathSrv.unresolve(path);
         final WorkspaceJob job = new WorkspaceJob("Update file") {
             @Override public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
                 if(monitor != null && monitor.isCanceled())
@@ -55,7 +56,7 @@ public class Updater {
 
     public void updateMessagesSync(PPath file, Collection<Msg> msgs, @Nullable IProgressMonitor monitor)
         throws CoreException {
-        final org.eclipse.core.resources.IResource eclipseFile = resourceSrv.unresolve(file);
+        final IResource eclipseFile = pathSrv.unresolve(file);
         updateMessagesSync(eclipseFile, msgs, monitor);
     }
 

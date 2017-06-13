@@ -1,6 +1,7 @@
 package mb.pipe.run.eclipse.editor;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.text.DocumentEvent;
@@ -15,14 +16,16 @@ import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 
 import com.google.inject.Injector;
 
+import mb.ceres.BuildManager;
+import mb.pipe.run.ceres.CeresSrv;
 import mb.pipe.run.core.PipeFacade;
 import mb.pipe.run.core.log.Logger;
-import mb.pipe.run.core.model.ContextImpl;
-import mb.pipe.run.core.path.PPath;
 import mb.pipe.run.core.model.Context;
+import mb.pipe.run.core.model.ContextFactory;
+import mb.pipe.run.core.path.PPath;
 import mb.pipe.run.eclipse.PipePlugin;
 import mb.pipe.run.eclipse.build.Updater;
-import mb.pipe.run.eclipse.vfs.IEclipseResourceSrv;
+import mb.pipe.run.eclipse.vfs.EclipsePathSrv;
 
 public class PipeEditor extends TextEditor {
     private final class DocumentListener implements IDocumentListener {
@@ -37,14 +40,16 @@ public class PipeEditor extends TextEditor {
 
     private IJobManager jobManager;
     private Logger logger;
-    private IEclipseResourceSrv resourceSrv;
+    private EclipsePathSrv pathSrv;
+    private ContextFactory contextFactory;
+    private CeresSrv ceresSrv;
     private Editors editors;
     private Updater updater;
 
     private IEditorInput input;
     private String inputName;
     private IDocument document;
-    private org.eclipse.core.resources.IResource eclipseResource;
+    private IResource eclipseResource;
     private DocumentListener documentListener;
 
 
@@ -60,7 +65,7 @@ public class PipeEditor extends TextEditor {
         return getSourceViewer();
     }
 
-    public org.eclipse.core.resources.IResource eclipseResource() {
+    public IResource eclipseResource() {
         return eclipseResource;
     }
 
@@ -74,11 +79,13 @@ public class PipeEditor extends TextEditor {
         final Injector injector = pipeFacade.injector;
 
         this.logger = pipeFacade.rootLogger;
-        this.resourceSrv = injector.getInstance(IEclipseResourceSrv.class);
+        this.pathSrv = injector.getInstance(EclipsePathSrv.class);
+        this.contextFactory = injector.getInstance(ContextFactory.class);
+        this.ceresSrv = injector.getInstance(CeresSrv.class);
         this.editors = injector.getInstance(Editors.class);
         this.updater = injector.getInstance(Updater.class);
 
-        setDocumentProvider(new DocumentProvider(logger, resourceSrv));
+        setDocumentProvider(new DocumentProvider(logger, pathSrv));
         setSourceViewerConfiguration(new PipeSourceViewerConfiguration());
     }
 
@@ -86,10 +93,10 @@ public class PipeEditor extends TextEditor {
         input = getEditorInput();
         document = getDocumentProvider().getDocument(input);
 
-        final PPath resource = resourceSrv.resolve(input);
+        final PPath resource = pathSrv.resolve(input);
         if(resource != null) {
             inputName = resource.toString();
-            eclipseResource = resourceSrv.unresolve(resource);
+            eclipseResource = pathSrv.unresolve(resource);
         } else {
             inputName = input.getName();
             logger.warn("Resource for editor on {} is null, cannot update the editor", input);
@@ -128,10 +135,11 @@ public class PipeEditor extends TextEditor {
     private void scheduleJob(boolean instantaneous) {
         cancelJobs(input);
         final IProject project = eclipseResource.getProject();
-        final PPath projectDir = resourceSrv.resolve(project);
-        final Context context = new ContextImpl(projectDir);
-        final Job job =
-            new EditorUpdateJob(logger, updater, getSourceViewer(), document.get(), context, input, eclipseResource);
+        final PPath projectDir = pathSrv.resolve(project);
+        final Context context = contextFactory.create(projectDir);
+        final BuildManager buildManager = ceresSrv.get(context);
+        final Job job = new EditorUpdateJob(logger, buildManager, updater, getSourceViewer(), document.get(), context,
+            input, eclipseResource);
         job.setRule(project);
         job.schedule(instantaneous ? 0 : 300);
     }

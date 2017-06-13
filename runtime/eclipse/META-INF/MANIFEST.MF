@@ -14,16 +14,18 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui.editors,
  org.eclipse.ui.views,
  org.eclipse.jface.text,
- pipe.run.core,
- pipe.run.pluto,
- pipe.run.spoofax,
  org.metaborg.spoofax.core,
  org.metaborg.core,
  org.metaborg.spoofax.meta.core,
  org.spoofax.terms,
  org.spoofax.jsglr,
  org.metaborg.spoofax.eclipse.externaldeps,
- org.metaborg.spoofax.eclipse.meta.externaldeps
+ org.metaborg.spoofax.eclipse.meta.externaldeps,
+ pipe.run.core,
+ pipe.run.ceres,
+ pipe.run.spoofax,
+ pipe.run.spoofax.legacy,
+ ceres
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: metaborg.org
 Bundle-ActivationPolicy: lazy

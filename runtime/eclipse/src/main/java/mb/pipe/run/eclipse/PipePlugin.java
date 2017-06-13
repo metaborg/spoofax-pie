@@ -11,10 +11,15 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import mb.ceres.CeresModule;
+import mb.pipe.run.ceres.PipeCeresModule;
+import mb.pipe.run.ceres.generated.CeresBuilderModule;
 import mb.pipe.run.core.PipeEx;
 import mb.pipe.run.core.PipeFacade;
+import mb.pipe.run.core.PipeModule;
 import mb.pipe.run.core.StaticPipeFacade;
 import mb.pipe.run.eclipse.util.LoggingConfiguration;
+import mb.pipe.run.spoofax.PipeSpoofaxModule;
 import mb.pipe.run.spoofax.util.StaticSpoofax;
 
 public class PipePlugin extends AbstractUIPlugin implements IStartup {
@@ -38,7 +43,8 @@ public class PipePlugin extends AbstractUIPlugin implements IStartup {
         logger.debug("Starting Pipe plugin");
 
         try {
-            pipeFacade = new PipeFacade(new PipeEclipseModule(logger), new EclipseModule());
+            pipeFacade = new PipeFacade(new PipeModule(logger), new PipeEclipseModule(logger), new EclipseModule(),
+                new PipeSpoofaxModule(), new CeresModule(), new CeresBuilderModule(), new PipeCeresModule());
             StaticPipeFacade.init(pipeFacade);
         } catch(PipeEx e) {
             logger.error("Instantiating Pipe failed", e);
@@ -46,7 +52,7 @@ public class PipePlugin extends AbstractUIPlugin implements IStartup {
         }
 
         try {
-            spoofaxFacade = new Spoofax(new SpoofaxEclipseModule(), new SpoofaxExtensionModule());
+            spoofaxFacade = new Spoofax(new SpoofaxExtensionModule());
             spoofaxMetaFacade = new SpoofaxMeta(spoofaxFacade);
             StaticSpoofax.init(spoofaxMetaFacade);
         } catch(MetaborgException e) {
