@@ -51,6 +51,7 @@ public class PipeEditor extends TextEditor {
     private IDocument document;
     private IResource eclipseResource;
     private DocumentListener documentListener;
+    private ISourceViewer sourceViewer;
 
 
     public String text() {
@@ -62,7 +63,7 @@ public class PipeEditor extends TextEditor {
     }
 
     public ISourceViewer sourceViewer() {
-        return getSourceViewer();
+        return sourceViewer;
     }
 
     public IResource eclipseResource() {
@@ -105,7 +106,7 @@ public class PipeEditor extends TextEditor {
         documentListener = new DocumentListener();
         document.addDocumentListener(documentListener);
 
-        final ISourceViewer sourceViewer = super.createSourceViewer(parent, ruler, styles);
+        sourceViewer = super.createSourceViewer(parent, ruler, styles);
         final SourceViewerDecorationSupport decorationSupport = getSourceViewerDecorationSupport(sourceViewer);
         configureSourceViewerDecorationSupport(decorationSupport);
 
@@ -138,9 +139,9 @@ public class PipeEditor extends TextEditor {
         final PPath projectDir = pathSrv.resolve(project);
         final Context context = contextFactory.create(projectDir);
         final BuildManager buildManager = ceresSrv.get(context);
-        final Job job = new EditorUpdateJob(logger, buildManager, updater, getSourceViewer(), document.get(), context,
-            input, eclipseResource);
-        job.setRule(project);
+        final Job job = new EditorUpdateJob(logger, buildManager, updater, sourceViewer, document.get(), context, input,
+            eclipseResource);
+        job.setRule(eclipseResource);
         job.schedule(instantaneous ? 0 : 300);
     }
 

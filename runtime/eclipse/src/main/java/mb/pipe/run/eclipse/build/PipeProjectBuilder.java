@@ -61,21 +61,21 @@ public class PipeProjectBuilder extends IncrementalProjectBuilder {
     @Override protected IProject[] build(int kind, Map<String, String> args, IProgressMonitor monitor)
         throws CoreException {
         final IProject project = getProject();
-        logger.info("Building project " + project);
         final PPath projectDir = pathSrv.resolve(project);
         final Context context = contextFactory.create(projectDir);
 
-        final List<PPath> files;
-        final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:*.{min,esv,sdf3}");
+        final List<PPath> minFiles;
+        final PathMatcher minFileMatcher = FileSystems.getDefault().getPathMatcher("glob:**/*.min");
+        final PathMatcher relevanceMatcher = FileSystems.getDefault().getPathMatcher("glob:**/*.{min,esv,sdf3}");
         try {
-            if(kind == FULL_BUILD) {
-                files = allFiles(projectDir, matcher);
-            } else {
+            minFiles = allFiles(projectDir, minFileMatcher);
+            if(kind != FULL_BUILD) {
                 final IResourceDelta delta = getDelta(project);
-                if(delta == null) {
-                    files = allFiles(projectDir, matcher);
-                } else {
-                    files = deltaFiles(delta, matcher);
+                if(delta != null) {
+                    final List<PPath> changedRelevantFiles = deltaFiles(delta, relevanceMatcher);
+                    if(changedRelevantFiles.isEmpty()) {
+                        return null;
+                    }
                 }
             }
         } catch(IOException e) {
@@ -84,8 +84,13 @@ public class PipeProjectBuilder extends IncrementalProjectBuilder {
             throw new CoreException(StatusUtils.error(message, e));
         }
 
+        if(minFiles.isEmpty()) {
+            return null;
+        }
+
+        logger.info("Building project " + project);
         final BuildManager buildManager = ceresSrv.get(context);
-        for(PPath file : files) {
+        for(PPath file : minFiles) {
             logger.info("Updating file {}", file);
             try {
                 final processFile.Output output =

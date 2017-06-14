@@ -16,7 +16,6 @@ import mb.pipe.run.ceres.PipeCeresModule;
 import mb.pipe.run.ceres.generated.CeresBuilderModule;
 import mb.pipe.run.core.PipeEx;
 import mb.pipe.run.core.PipeFacade;
-import mb.pipe.run.core.PipeModule;
 import mb.pipe.run.core.StaticPipeFacade;
 import mb.pipe.run.eclipse.util.LoggingConfiguration;
 import mb.pipe.run.spoofax.PipeSpoofaxModule;
@@ -43,8 +42,8 @@ public class PipePlugin extends AbstractUIPlugin implements IStartup {
         logger.debug("Starting Pipe plugin");
 
         try {
-            pipeFacade = new PipeFacade(new PipeModule(logger), new PipeEclipseModule(logger), new EclipseModule(),
-                new PipeSpoofaxModule(), new CeresModule(), new CeresBuilderModule(), new PipeCeresModule());
+            pipeFacade = new PipeFacade(new PipeEclipseModule(logger), new EclipseModule(), new PipeSpoofaxModule(),
+                new CeresModule(), new CeresBuilderModule(), new PipeCeresModule());
             StaticPipeFacade.init(pipeFacade);
         } catch(PipeEx e) {
             logger.error("Instantiating Pipe failed", e);

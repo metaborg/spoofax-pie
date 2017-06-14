@@ -6,6 +6,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 
 import mb.pipe.run.core.model.region.Region;
@@ -92,7 +93,12 @@ public final class StyleUtils {
 
     private Color createColor(java.awt.Color color) {
         final RGB rgb = new RGB(color.getRed(), color.getGreen(), color.getBlue());
-        return sharedColors.getColor(rgb);
+        try {
+            return sharedColors.getColor(rgb);
+        } catch(NullPointerException e) {
+            // HACK: sometimes throws an NPE...
+            return new Color(Display.getDefault(), rgb);
+        }
     }
 
     private static StyleRange deepCopy(StyleRange styleRangeRef) {
