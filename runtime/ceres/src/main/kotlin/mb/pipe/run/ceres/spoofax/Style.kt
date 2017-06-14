@@ -6,8 +6,12 @@ import mb.ceres.BuildException
 import mb.ceres.Builder
 import mb.pipe.run.ceres.path.cPath
 import mb.pipe.run.ceres.path.read
-import mb.pipe.run.ceres.spoofax.legacy.*
-import mb.pipe.run.core.PipeRunEx
+import mb.pipe.run.ceres.spoofax.legacy.CoreParse
+import mb.pipe.run.ceres.spoofax.legacy.CoreTrans
+import mb.pipe.run.ceres.spoofax.legacy.loadLang
+import mb.pipe.run.ceres.spoofax.legacy.loadProj
+import mb.pipe.run.ceres.spoofax.legacy.parse
+import mb.pipe.run.ceres.spoofax.legacy.trans
 import mb.pipe.run.core.model.parse.Token
 import mb.pipe.run.core.model.style.Styling
 import mb.pipe.run.core.path.PPath
@@ -36,7 +40,7 @@ class GenerateStylerRules
     val langId = langImpl.id()
 
     // Parse input file
-    val ast = parse(CoreParse.Input(langId, input.mainFile, text)) ?: throw PipeRunEx("Main ESV file " + input.mainFile + " could not be parsed")
+    val ast = parse(CoreParse.Input(langId, input.mainFile, text)) ?: throw BuildException("Main ESV file " + input.mainFile + " could not be parsed")
 
     // Load project, required for analysis and transformation.
     loadProj(input.specDir)

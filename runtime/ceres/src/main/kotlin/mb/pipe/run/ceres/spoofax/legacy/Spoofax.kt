@@ -2,6 +2,7 @@ package mb.pipe.run.ceres.spoofax.legacy
 
 import com.google.inject.Inject
 import mb.ceres.BuildContext
+import mb.ceres.BuildException
 import mb.ceres.Builder
 import mb.ceres.CPath
 import mb.ceres.OutTransient
@@ -172,13 +173,13 @@ class CoreTrans @Inject constructor(log: Logger) : Builder<CoreTrans.Input, Core
     val spoofax = Spx.spoofax()
     val langImpl = spoofax.languageService.getImpl(input.langId)
     val resource = input.file.fileObject
-    val project = spoofax.projectService.get(resource) ?: throw MetaborgException("Cannot transform $resource, it does not belong to a project")
+    val project = spoofax.projectService.get(resource) ?: throw BuildException("Cannot transform $resource, it does not belong to a project")
 
     val inputUnit = spoofax.unitService.inputUnit(resource, "hack", langImpl, null)
     val parseUnit = spoofax.unitService.parseUnit(inputUnit, ParseContrib(true, true, input.ast, Iterables2.empty<IMessage>(), -1))
     val spoofaxContext = spoofax.contextService.get(project.location(), project, langImpl)
     val analyzeUnit = spoofax.unitService.analyzeUnit(parseUnit,
-      AnalyzeContrib(true, true, true, input.ast, Iterables2.empty<IMessage>(), -1), spoofaxContext)
+            AnalyzeContrib(true, true, true, input.ast, Iterables2.empty<IMessage>(), -1), spoofaxContext)
 
     spoofaxContext.read().use {
       try {

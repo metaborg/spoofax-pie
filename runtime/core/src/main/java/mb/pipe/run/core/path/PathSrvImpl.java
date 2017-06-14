@@ -34,7 +34,8 @@ public class PathSrvImpl implements PathSrv {
             }
             return resolve(uri);
         } catch(URISyntaxException e) {
-            throw new PipeRunEx(e);
+            // Try to resolve as file
+            return resolveLocal(uriStr);
         }
     }
 

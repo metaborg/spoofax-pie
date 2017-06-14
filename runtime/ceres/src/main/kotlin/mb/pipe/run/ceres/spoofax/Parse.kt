@@ -3,11 +3,21 @@ package mb.pipe.run.ceres.spoofax
 import com.google.common.collect.Lists
 import com.google.inject.Inject
 import mb.ceres.BuildContext
+import mb.ceres.BuildException
 import mb.ceres.Builder
-import mb.pipe.run.ceres.path.*
-import mb.pipe.run.ceres.spoofax.legacy.*
-import mb.pipe.run.ceres.util.*
-import mb.pipe.run.core.PipeRunEx
+import mb.pipe.run.ceres.path.cPath
+import mb.pipe.run.ceres.path.read
+import mb.pipe.run.ceres.spoofax.legacy.CoreParse
+import mb.pipe.run.ceres.spoofax.legacy.CoreTrans
+import mb.pipe.run.ceres.spoofax.legacy.Spx
+import mb.pipe.run.ceres.spoofax.legacy.cPath
+import mb.pipe.run.ceres.spoofax.legacy.fileObject
+import mb.pipe.run.ceres.spoofax.legacy.loadLang
+import mb.pipe.run.ceres.spoofax.legacy.loadProj
+import mb.pipe.run.ceres.spoofax.legacy.pPath
+import mb.pipe.run.ceres.spoofax.legacy.parse
+import mb.pipe.run.ceres.spoofax.legacy.trans
+import mb.pipe.run.ceres.util.Tuple3
 import mb.pipe.run.core.log.Logger
 import mb.pipe.run.core.model.message.Msg
 import mb.pipe.run.core.model.parse.Token
@@ -67,16 +77,15 @@ class GenerateTable
       normalized.put(file, trans)
     }
 
-    val normalizedMain = normalized[input.mainFile] ?: throw PipeRunEx("Main file " + input.mainFile + " could not be normalized")
-    val mainResource = normalizedMain.writtenFile ?: throw PipeRunEx("Main file " + input.mainFile + " could not be normalized")
+    val mainResource = normalized[input.mainFile]?.writtenFile ?: throw BuildException("Main file " + input.mainFile + " could not be normalized")
 
     // Create table
     // Main input file
-    val mainFile = pathSrv.localPath(mainResource) ?: throw PipeRunEx("Normalized main file $mainResource is not on the local file system")
+    val mainFile = pathSrv.localPath(mainResource) ?: throw BuildException("Normalized main file $mainResource is not on the local file system")
     // Output file
     val spoofaxPaths = SpoofaxCommonPaths(input.specDir.fileObject)
     val vfsOutputFile = spoofaxPaths.targetMetaborgDir().resolveFile("sdf-new.tbl")
-    val outputFile = Spx.spoofax().resourceService.localPath(vfsOutputFile) ?: throw PipeRunEx("Parse table output file $vfsOutputFile is not on the local file system")
+    val outputFile = Spx.spoofax().resourceService.localPath(vfsOutputFile) ?: throw BuildException("Parse table output file $vfsOutputFile is not on the local file system")
     // Paths
     val paths = Lists.newArrayList(spoofaxPaths.syntaxSrcGenDir().name.uri)
     // Create table and make dependencies
@@ -92,7 +101,7 @@ class GenerateTable
 
 class Parse : Builder<Parse.Input, Parse.Output> {
   data class Input(val text: String, val startSymbol: String, val table: Table) : Serializable
-  data class Output(val ast: IStrategoTerm?, val tokenStream: List<Token>?, val messages: List<Msg>) : Tuple3<IStrategoTerm?, List<Token>?, List<Msg>> 
+  data class Output(val ast: IStrategoTerm?, val tokenStream: List<Token>?, val messages: List<Msg>) : Tuple3<IStrategoTerm?, List<Token>?, List<Msg>>
 
   override val id = "spoofaxParse"
   override fun BuildContext.build(input: Input): Output {
