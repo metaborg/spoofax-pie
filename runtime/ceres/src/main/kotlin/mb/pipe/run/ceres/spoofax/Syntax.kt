@@ -95,7 +95,7 @@ class GenerateTable
     val paths = Lists.newArrayList(spoofaxPaths.syntaxSrcGenDir().name.uri)
     // Create table and make dependencies
     val generator = ParseTableGenerator(mainFile, outputFile, null, null, paths, false)
-    generator.createTable(false)
+    generator.createTable(false, false)
     for (required in generator.requiredFiles()) {
       require(pathSrv.resolveLocal(required).cPath)
     }
