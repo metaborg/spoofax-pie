@@ -17,6 +17,7 @@ import mb.pipe.run.core.log.Logger;
 import mb.pipe.run.core.model.Context;
 import mb.pipe.run.core.model.message.Msg;
 import mb.pipe.run.core.model.style.Styling;
+import mb.pipe.run.core.path.PPath;
 import mb.pipe.run.eclipse.build.Updater;
 import mb.pipe.run.eclipse.util.Nullable;
 import mb.pipe.run.eclipse.util.StatusUtils;
@@ -31,11 +32,13 @@ public class EditorUpdateJob extends Job {
     private final String text;
     private final Context context;
     private final IEditorInput input;
-    private final IResource eclipseResource;
+    private final PPath file;
+    private final IResource eclipseFile;
+    private final PPath workspaceRoot;
 
 
     public EditorUpdateJob(Logger logger, BuildManager buildManager, Updater updater, ISourceViewer sourceViewer,
-        String text, Context context, IEditorInput input, IResource eclipseResource) {
+        String text, Context context, IEditorInput input, PPath file, IResource eclipseFile, PPath workspaceRoot) {
         super("Editor update");
         this.logger = logger;
         this.buildManager = buildManager;
@@ -44,7 +47,9 @@ public class EditorUpdateJob extends Job {
         this.text = text;
         this.context = context;
         this.input = input;
-        this.eclipseResource = eclipseResource;
+        this.file = file;
+        this.eclipseFile = eclipseFile;
+        this.workspaceRoot = workspaceRoot;
     }
 
 
@@ -65,14 +70,21 @@ public class EditorUpdateJob extends Job {
 
     private IStatus update(IProgressMonitor monitor) throws BuildException, CoreException {
         final processString.Output output =
-            buildManager.build(processString.class, new processString.Input(text, context));
+            buildManager.build(processString.class, new processString.Input(text, file, context, workspaceRoot));
 
-        final List<Msg> messages = output.component4();
-        updater.updateMessagesSync(eclipseResource, messages, monitor);
+        if(output != null) {
+            final List<Msg> messages = output.component2();
+            updater.updateMessagesSync(eclipseFile, messages, monitor);
 
-        final @Nullable Styling styling = output.component5();
-        if(styling != null) {
-            updater.updateStyle(sourceViewer, styling, monitor);
+            final @Nullable Styling styling = output.component3();
+            if(styling != null) {
+                updater.updateStyleAsync(sourceViewer, styling, monitor);
+            } else {
+                updater.removeStyleAsync(sourceViewer, text.length(), monitor);
+            }
+        } else {
+            updater.clearMessagesSync(eclipseFile, monitor);
+            updater.removeStyleAsync(sourceViewer, text.length(), monitor);
         }
 
         return StatusUtils.success();

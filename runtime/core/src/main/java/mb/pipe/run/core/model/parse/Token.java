@@ -14,6 +14,10 @@ public interface Token extends Serializable {
     TokenType type();
 
     @Nullable IStrategoTerm associatedTerm();
-    
-    String textPart(String fullText);
+
+
+    default String textPart(String fullText) {
+        final Region region = region();
+        return fullText.substring(region.startOffset(), region.endOffset() + 1);
+    }
 }

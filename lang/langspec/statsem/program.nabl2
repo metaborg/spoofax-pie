@@ -38,12 +38,21 @@ rules // Init
     new s_root,
     
     TopTy()  <! NullableTy(BoolTy()),
+    TopTy()  <! ListTy(BoolTy()),
+    TopTy()  <! NullableTy(ListTy(BoolTy())),
+    TopTy()  <! ListTy(NullableTy(BoolTy())),
     BoolTy() <! NullableTy(BoolTy()),
     
     TopTy()  <! NullableTy(IntTy()),
+    TopTy()  <! ListTy(IntTy()),
+    TopTy()  <! NullableTy(ListTy(IntTy())),
+    TopTy()  <! ListTy(NullableTy(IntTy())),
     IntTy()  <! NullableTy(IntTy()),
     
     TopTy()  <! NullableTy(StrTy()),
+    TopTy()  <! ListTy(StrTy()),
+    TopTy()  <! NullableTy(ListTy(StrTy())),
+    TopTy()  <! ListTy(NullableTy(StrTy())),
     StrTy()  <! NullableTy(StrTy()).
 
 rules // Program

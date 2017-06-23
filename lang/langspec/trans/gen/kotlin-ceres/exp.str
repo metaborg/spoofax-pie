@@ -11,6 +11,7 @@ imports
   
   statsem/program
   
+  gen/kotlin-ceres/def
   gen/kotlin/type2kotlin
   gen/idtype-tuples
   gen/util
@@ -59,14 +60,43 @@ rules // Binary expressions
 rules // References
 
   p2c-exp:
-    Ref(varId) -> ("", varId) 
+    r@Ref(varId) -> ("", <p2c-ref-add-transient-val(|varId)> r) 
     where
       LocalVarKind() := <pipe-ast-ref-prop(|"Var", "kind")> varId
   
   p2c-exp: 
-    Ref(varId) -> ("", $[input.[varId]])
+    Ref(varId) -> <fail>
     where
       InputVarKind() := <pipe-ast-ref-prop(|"Var", "kind")> varId
+    ; 0 := <InputKind>
+      
+  p2c-exp: 
+    r@Ref(varId) -> ("", <p2c-ref-add-transient-val(|"input")> r)
+    where
+      InputVarKind() := <pipe-ast-ref-prop(|"Var", "kind")> varId
+    ; 1 := <InputKind>
+      
+  p2c-exp: 
+    r@Ref(varId) -> ("", <p2c-ref-add-transient-val(|$[input.[varId]])> r)
+    where
+      InputVarKind() := <pipe-ast-ref-prop(|"Var", "kind")> varId
+    ; 2 := <InputKind>
+
+  p2c-ref-add-transient-val(|str):
+    ref -> $[[str].v]
+    where
+      <p2c-ref-is-transient> ref
+    
+  p2c-ref-add-transient-val(|str):
+    ref -> str
+    where
+      <not(p2c-ref-is-transient)> ref
+  
+  p2c-ref-is-transient = 
+      pipe-ast-type
+    ; (?DataTy(<id>) <+ ?NullableTy(DataTy(<id>)))
+    ; pipe-occ-prop(|"mods")
+    ; collect-one(?Transient())
 
 rules // External function calls
 
@@ -157,23 +187,23 @@ rules // Literals
   p2c-exp: NullLit()        -> ("", $[null])
   
   p2c-exp:
-    t@TupleLit(exps) -> (allInitStmsStr, $[tuple([expsStr])])
+    TupleLit(exps) -> (allInitStmsStr, $[tuple([expsStr])])
     with
       (initStmsStrs, expStrs) := <map(try-p2c-exp); unzip> exps
     ; allInitStmsStr          := <pipe-concat-nl> initStmsStrs
     ; expsStr                 := <pipe-concat-comma> expStrs
     
   p2c-exp:
-    l@ListLit(exps) -> (allInitStmsStr, $[listOf([expsStr])])
+    ListLit(exps) -> (allInitStmsStr, $[list([expsStr])])
     with
       (initStmsStrs, expStrs) := <map(try-p2c-exp); unzip> exps
     ; allInitStmsStr          := <pipe-concat-nl> initStmsStrs
     ; expsStr                 := <pipe-concat-comma> expStrs
 
   p2c-exp:
-    l@ListAppendLit(listExp, exps) -> (allInitStmsStr, $[[listExpStr] + [expsStr]])
+    ListAppendLit(listExp, exps) -> (allInitStmsStr, $[[listExpStr].append([expsStr])])
     with
       (listInitStmStr, listExpStr) := <try-p2c-exp> listExp
     ; (initStmsStrs, expStrs)      := <map(try-p2c-exp); unzip> exps
     ; allInitStmsStr               := <concat; pipe-concat-nl> [[listInitStmStr], initStmsStrs]
-    ; expsStr                      := <separate-by(|" + "); concat-strings> expStrs
+    ; expsStr                      := <pipe-concat-comma> expStrs

@@ -9,18 +9,21 @@ import org.eclipse.core.runtime.CoreException;
 import mb.pipe.run.eclipse.util.AbstractHandlerUtils;
 import mb.pipe.run.eclipse.util.NatureUtils;
 
-public class RemoveNatureHandler extends AbstractHandler {
+public abstract class RemoveNatureHandler extends AbstractHandler {
     @Override public Object execute(ExecutionEvent event) throws ExecutionException {
         final IProject project = AbstractHandlerUtils.toProject(event);
         if(project == null)
             return null;
 
+        final String natureId = natureId();
         try {
-            NatureUtils.removeFrom(PipeNature.id, project, null);
+            NatureUtils.removeFrom(natureId, project, null);
         } catch(CoreException e) {
-            throw new ExecutionException("Cannot remove Pipe nature", e);
+            throw new ExecutionException("Cannot remove nature '" + natureId + "' from project " + project, e);
         }
 
         return null;
     }
+
+    protected abstract String natureId();
 }

@@ -25,8 +25,18 @@ rules
     DataTy(occ) -> javaClassId
     where 
       JavaTypeKind() := <pipe-prop(|"Type", "kind")> occ
+    ; <pipe-prop(|"Type", "mods"); not(collect-one(?Transient()))> occ
     with  
       javaClassId := <pipe-prop(|"Type", "javaClassId")> occ
+
+  t2k-sig:
+    DataTy(occ) -> $[OutTransient<[javaClassId]>]
+    where 
+      JavaTypeKind() := <pipe-prop(|"Type", "kind")> occ
+    ; <pipe-prop(|"Type", "mods"); collect-one(?Transient())> occ
+    with  
+      javaClassId := <pipe-prop(|"Type", "javaClassId")> occ
+
 
   t2k-sig: 
     TupleTy(tys) -> $[Tuple[length]<[tyStr]>]
@@ -34,7 +44,7 @@ rules
       length := <length> tys
     ; tyStr  := <map(t2k-sig); pipe-concat-comma> tys
 
-  t2k-sig: ListTy(ty)     -> $[List<[<t2k-sig> ty]>]
+  t2k-sig: ListTy(ty)     -> $[ArrayList<[<t2k-sig> ty]>]
   t2k-sig: NullableTy(ty) -> $[[<t2k-sig> ty]?]
   
 rules

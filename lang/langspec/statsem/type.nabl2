@@ -17,8 +17,7 @@ rules // Composite types
     Map1T [[ tys ^ (s) : tys_bound ]].
 
   [[ ListTy(ty) ^ (s) : ListTy(ty_bound) ]] :=
-    [[ ty ^ (s) : ty_bound ]],
-    ListTy(ty_bound) <! ListTy(TopTy()).
+    [[ ty ^ (s) : ty_bound ]].
 
 rules // Builtin types
 
@@ -29,5 +28,4 @@ rules // Builtin types
 rules // Type modifiers
 
   [[ NullableTy(ty) ^ (s) : NullableTy(ty_bound) ]] :=
-    [[ ty ^ (s) : ty_bound ]],
-    TopTy() <! NullableTy(ty_bound).
+    [[ ty ^ (s) : ty_bound ]].

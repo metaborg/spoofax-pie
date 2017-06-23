@@ -4,7 +4,6 @@ import static org.spoofax.jsglr.client.imploder.AbstractTokenizer.*;
 import static org.spoofax.jsglr.client.imploder.ImploderAttachment.getTokenizer;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -17,8 +16,6 @@ import org.spoofax.jsglr.client.imploder.ITokenizer;
 import org.spoofax.jsglr.client.imploder.Token;
 import org.spoofax.jsglr.shared.BadTokenException;
 import org.spoofax.jsglr.shared.TokenExpectedException;
-
-import com.google.common.collect.Lists;
 
 import mb.pipe.run.core.model.message.Msg;
 import mb.pipe.run.core.model.message.MsgBuilder;
@@ -34,7 +31,7 @@ public class ParserErrorHandler {
     private final boolean recoveryFailed;
     private final Set<BadTokenException> parseErrors;
 
-    private final Collection<Msg> messages = Lists.newArrayList();
+    private final ArrayList<Msg> messages = new ArrayList<>();
     private final MsgBuilder msgBuilder = new MsgBuilder().withType(new ParseMsgType()).withoutException();
 
 
@@ -46,7 +43,7 @@ public class ParserErrorHandler {
     }
 
 
-    public Collection<Msg> messages() {
+    public ArrayList<Msg> messages() {
         return messages;
     }
 

@@ -69,7 +69,7 @@ context-free syntax
   Exp.ListLit  = <[<{Exp ","}*>]>
   Exp.ListAppendLit  = <[<Exp> | <{Exp ","}+>]>
 
-  Exp = <(<Exp>)> {bracket}
+  // Exp = <(<Exp>)> {bracket}
 
 context-free priorities
 

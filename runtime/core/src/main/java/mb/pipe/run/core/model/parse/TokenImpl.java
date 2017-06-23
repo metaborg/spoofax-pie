@@ -33,10 +33,6 @@ public class TokenImpl implements Token {
         return associatedTerm;
     }
 
-    @Override public String textPart(String fullText) {
-        return fullText.substring(region.startOffset(), region.endOffset() + 1);
-    }
-
 
     @Override public int hashCode() {
         final int prime = 31;

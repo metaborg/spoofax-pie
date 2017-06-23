@@ -68,10 +68,6 @@ public class Styler {
     }
 
     private @Nullable Style sortConsStyle(IStrategoTerm term) {
-        if(term.getTermType() != IStrategoTerm.APPL) {
-            return null;
-        }
-
         final ImploderAttachment imploderAttachment = ImploderAttachment.get(term);
         if(imploderAttachment == null) {
             return null;
@@ -84,12 +80,18 @@ public class Styler {
         // LEGACY: for some reason, when using concrete syntax extensions, all sorts are appended with _sort.
         final String massagedSort = sort.replace("_sort", "");
 
-        final String cons = ((IStrategoAppl) term).getConstructor().getName();
-        if(rules.hasSortConsStyle(massagedSort, cons)) {
-            return rules.sortConsStyle(massagedSort, cons);
-        } else if(rules.hasConsStyle(cons)) {
-            return rules.consStyle(cons);
-        } else if(rules.hasSortStyle(massagedSort)) {
+        if(term.getTermType() == IStrategoTerm.APPL) {
+            final String cons = ((IStrategoAppl) term).getConstructor().getName();
+            if(rules.hasSortConsStyle(massagedSort, cons)) {
+                return rules.sortConsStyle(massagedSort, cons);
+            } else if(rules.hasConsStyle(cons)) {
+                return rules.consStyle(cons);
+            } else if(rules.hasSortStyle(massagedSort)) {
+                return rules.sortStyle(massagedSort);
+            }
+        }
+        
+        if(rules.hasSortStyle(massagedSort)) {
             return rules.sortStyle(massagedSort);
         }
 

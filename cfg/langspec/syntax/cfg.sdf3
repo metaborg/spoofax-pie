@@ -1,0 +1,59 @@
+module cfg
+
+imports
+  
+  lex/literal
+  lex/layout
+  lex/comment
+  
+  literal
+
+context-free start-symbols
+  
+  Start
+
+context-free syntax
+  
+  Start.Sections = <<{Section "\n"}*>>
+
+context-free syntax
+
+Section.IdentificationSec =
+<identification
+  <{IdentificationOpt "\n"}*>
+>
+  
+  IdentificationOpt.FileExtension = <file extension: <EXT>>
+
+context-free syntax
+
+  Section.InformationSec =
+<information
+  <{InformationOpt "\n"}*>
+>
+  
+  InformationOpt.Name = <name: <String>>
+
+context-free syntax
+
+  Section.SyntaxSec =
+<syntax
+  <{SyntaxOpt "\n"}*>
+>
+  
+  SyntaxOpt.SyntaxMainFile = <main file: <Path>>
+  SyntaxOpt.SyntaxStartSymbol = <start symbol: <ID>>
+  
+context-free syntax
+
+  Section.StylingSec =
+<styling
+  <{StylingSubSec "\n"}*>
+>
+
+  StylingSubSec.SyntaxBasedStylingSubSec =
+<syntax-based
+  <{SyntaxBasedStylingOpt "\n"}*>
+>
+  
+  SyntaxBasedStylingOpt.SyntaxBasedStylingFile = <file: <Path>>

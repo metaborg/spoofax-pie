@@ -9,18 +9,21 @@ import org.eclipse.core.runtime.CoreException;
 import mb.pipe.run.eclipse.util.AbstractHandlerUtils;
 import mb.pipe.run.eclipse.util.NatureUtils;
 
-public class AddNatureHandler extends AbstractHandler {
+public abstract class AddNatureHandler extends AbstractHandler {
     @Override public Object execute(ExecutionEvent event) throws ExecutionException {
         final IProject project = AbstractHandlerUtils.toProject(event);
         if(project == null)
             return null;
 
+        final String natureId = natureId();
         try {
-            NatureUtils.addTo(PipeNature.id, project, null);
+            NatureUtils.addTo(natureId, project, null);
         } catch(CoreException e) {
-            throw new ExecutionException("Cannot add Pipe nature", e);
+            throw new ExecutionException("Cannot add nature '" + natureId + "' to project " + project, e);
         }
 
         return null;
     }
+
+    protected abstract String natureId();
 }

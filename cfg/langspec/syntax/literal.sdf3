@@ -1,0 +1,15 @@
+module literal
+
+imports
+  
+  lex/literal
+
+syntax // String
+
+  String-CF.String = LAYOUT?-CF STRING-LEX LAYOUT?-CF
+  String-CF.String = LAYOUT?-CF "\"" STRINGS-LEX "\"" LAYOUT?-CF
+
+syntax // Path
+
+  Path-CF.Path = LAYOUT?-CF PATH-LEX LAYOUT?-CF
+  Path-CF.Path = LAYOUT?-CF "\"" PATHS-LEX "\"" LAYOUT?-CF

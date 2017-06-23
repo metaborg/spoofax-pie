@@ -1,7 +1,6 @@
 package mb.pipe.run.spoofax.sdf;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
@@ -10,9 +9,6 @@ import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.jsglr.client.Disambiguator;
 import org.spoofax.jsglr.client.ParseTable;
 import org.spoofax.jsglr.client.SGLRParseResult;
-import org.spoofax.jsglr.client.imploder.IToken;
-import org.spoofax.jsglr.client.imploder.ITokenizer;
-import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 import org.spoofax.jsglr.client.imploder.NullTokenizer;
 import org.spoofax.jsglr.client.imploder.TermTreeFactory;
 import org.spoofax.jsglr.client.imploder.TreeBuilder;
@@ -20,15 +16,9 @@ import org.spoofax.jsglr.io.SGLR;
 import org.spoofax.jsglr.shared.SGLRException;
 import org.spoofax.terms.attachments.ParentTermFactory;
 
-import com.google.common.collect.Lists;
-
 import mb.pipe.run.core.PipeRunEx;
 import mb.pipe.run.core.model.message.Msg;
 import mb.pipe.run.core.model.message.Msgs;
-import mb.pipe.run.core.model.parse.TokenType;
-import mb.pipe.run.core.model.parse.TokenImpl;
-import mb.pipe.run.core.model.parse.TokenConstants;
-import mb.pipe.run.core.model.region.Region;
 
 public class Parser {
     private final SGLR parser;
@@ -59,66 +49,19 @@ public class Parser {
                 throw new PipeRunEx("Parser returned null AST even though parsing did not fail");
             }
 
-            final ImploderAttachment rootImploderAttachment = ImploderAttachment.get(ast);
-            final ITokenizer tokenizer = rootImploderAttachment.getLeftToken().getTokenizer();
-            final int tokenCount = tokenizer.getTokenCount();
-            final List<mb.pipe.run.core.model.parse.Token> tokenStream = Lists.newArrayListWithCapacity(tokenCount);
-            int offset = -1;
-            for(int i = 0; i < tokenCount; ++i) {
-                final IToken jsglrToken = tokenizer.getTokenAt(i);
-                if(tokenizer.isAmbigous() && jsglrToken.getStartOffset() < offset) {
-                    // In case of ambiguities, tokens inside the ambiguity are duplicated, ignore.
-                    continue;
-                }
-                if(jsglrToken.getStartOffset() > jsglrToken.getEndOffset()) {
-                    // Indicates an invalid region. Empty lists have regions like this.
-                    continue;
-                }
-                if(offset >= jsglrToken.getStartOffset()) {
-                    // Duplicate region, skip.
-                    continue;
-                }
-                offset = jsglrToken.getEndOffset();
-                final mb.pipe.run.core.model.parse.Token token = convertToken(jsglrToken);
-                tokenStream.add(token);
-            }
+            final ArrayList<mb.pipe.run.core.model.parse.Token> tokenStream = TokenExtractor.extract(ast);
 
             final ParserErrorHandler errorHandler = new ParserErrorHandler(true, false, parser.getCollectedErrors());
             errorHandler.gatherNonFatalErrors(ast);
-            final Collection<Msg> messages = errorHandler.messages();
+            final ArrayList<Msg> messages = errorHandler.messages();
             boolean recovered = Msgs.containsErrors(messages);
 
             return new ParseOutput(recovered, ast, tokenStream, messages);
         } catch(SGLRException e) {
             final ParserErrorHandler errorHandler = new ParserErrorHandler(true, true, parser.getCollectedErrors());
             errorHandler.processFatalException(new NullTokenizer(text, "file"), e);
-            final Collection<Msg> messages = errorHandler.messages();
+            final ArrayList<Msg> messages = errorHandler.messages();
             return new ParseOutput(false, null, null, messages);
-        }
-    }
-
-    private static mb.pipe.run.core.model.parse.Token convertToken(IToken token) {
-        final Region region = RegionFactory.fromToken(token);
-        final TokenType tokenType = convertTokenKind(token.getKind());
-        return new TokenImpl(region, tokenType, (IStrategoTerm) token.getAstNode());
-    }
-
-    private static TokenType convertTokenKind(int kind) {
-        switch(kind) {
-            case IToken.TK_IDENTIFIER:
-                return TokenConstants.identifierType;
-            case IToken.TK_STRING:
-                return TokenConstants.stringType;
-            case IToken.TK_NUMBER:
-                return TokenConstants.numberType;
-            case IToken.TK_KEYWORD:
-                return TokenConstants.keywordType;
-            case IToken.TK_OPERATOR:
-                return TokenConstants.operatorType;
-            case IToken.TK_LAYOUT:
-                return TokenConstants.layoutType;
-            default:
-                return TokenConstants.unknownType;
         }
     }
 }

@@ -49,7 +49,9 @@ public class PipeEditor extends TextEditor {
     private IEditorInput input;
     private String inputName;
     private IDocument document;
-    private IResource eclipseResource;
+    private PPath file;
+    private IResource eclipseFile;
+    private PPath workspaceRoot;
     private DocumentListener documentListener;
     private ISourceViewer sourceViewer;
 
@@ -66,8 +68,12 @@ public class PipeEditor extends TextEditor {
         return sourceViewer;
     }
 
-    public IResource eclipseResource() {
-        return eclipseResource;
+    public PPath file() {
+        return file;
+    }
+
+    public IResource eclipseFile() {
+        return eclipseFile;
     }
 
 
@@ -86,6 +92,8 @@ public class PipeEditor extends TextEditor {
         this.editors = injector.getInstance(Editors.class);
         this.updater = injector.getInstance(Updater.class);
 
+        this.workspaceRoot = pathSrv.resolveWorkspaceRoot();
+
         setDocumentProvider(new DocumentProvider(logger, pathSrv));
         setSourceViewerConfiguration(new PipeSourceViewerConfiguration());
     }
@@ -97,10 +105,13 @@ public class PipeEditor extends TextEditor {
         final PPath resource = pathSrv.resolve(input);
         if(resource != null) {
             inputName = resource.toString();
-            eclipseResource = pathSrv.unresolve(resource);
+            file = resource;
+            eclipseFile = pathSrv.unresolve(resource);
         } else {
             inputName = input.getName();
-            logger.warn("Resource for editor on {} is null, cannot update the editor", input);
+            file = null;
+            eclipseFile = null;
+            logger.warn("File for editor on {} is null, cannot update the editor", input);
         }
 
         documentListener = new DocumentListener();
@@ -135,13 +146,17 @@ public class PipeEditor extends TextEditor {
 
     private void scheduleJob(boolean instantaneous) {
         cancelJobs(input);
-        final IProject project = eclipseResource.getProject();
+        if(eclipseFile == null) {
+            return;
+        }
+
+        final IProject project = eclipseFile.getProject();
         final PPath projectDir = pathSrv.resolve(project);
         final Context context = contextFactory.create(projectDir);
         final BuildManager buildManager = ceresSrv.get(context);
         final Job job = new EditorUpdateJob(logger, buildManager, updater, sourceViewer, document.get(), context, input,
-            eclipseResource);
-        job.setRule(eclipseResource);
+            file, eclipseFile, workspaceRoot);
+        job.setRule(eclipseFile);
         job.schedule(instantaneous ? 0 : 300);
     }
 

@@ -1,0 +1,7 @@
+module test
+
+language cfg
+
+test parse [[
+
+]] parse succeeds

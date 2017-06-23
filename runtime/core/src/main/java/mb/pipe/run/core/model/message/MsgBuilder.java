@@ -2,7 +2,9 @@ package mb.pipe.run.core.model.message;
 
 import javax.annotation.Nullable;
 
+import mb.pipe.run.core.PipeRunEx;
 import mb.pipe.run.core.model.region.Region;
+import mb.pipe.run.core.path.PPath;
 
 public class MsgBuilder {
     private String text = "";
@@ -10,10 +12,7 @@ public class MsgBuilder {
     private MsgType type = MsgConstants.internalType;
     private @Nullable Region region;
     private @Nullable Throwable exception;
-
-
-    public MsgBuilder() {
-    }
+    private @Nullable PPath path;
 
 
     public MsgBuilder withText(String text) {
@@ -76,7 +75,25 @@ public class MsgBuilder {
     }
 
 
+    public MsgBuilder withPath(PPath path) {
+        this.path = path;
+        return this;
+    }
+
+    public MsgBuilder withoutPath() {
+        this.path = null;
+        return this;
+    }
+
+
     public Msg build() {
         return new MsgImpl(text, severity, type, region, exception);
+    }
+
+    public PathMsg buildWithPath() {
+        if(path == null) {
+            throw new PipeRunEx("Cannot build a message with a path, since the path has not been set");
+        }
+        return new PathMsgImpl(text, severity, type, region, exception, path);
     }
 }

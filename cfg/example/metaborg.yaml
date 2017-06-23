@@ -1,0 +1,13 @@
+---
+id: org.metaborg:pipe.cfg.example:0.1.0-SNAPSHOT
+name: cfg
+dependencies:
+  compile:
+  - org.metaborg:pipe.cfg:0.1.0-SNAPSHOT
+debug:
+  typesmart: false
+runtime:
+  nabl2:
+    debug: analysis files
+build:
+  useBuildSystemSpec: true

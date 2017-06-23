@@ -1,6 +1,7 @@
 package mb.pipe.run.eclipse.build;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.eclipse.core.resources.IResource;
@@ -37,22 +38,37 @@ public class Updater {
     }
 
 
-    public void updateMessagesAsync(PPath path, Collection<Msg> msgs) {
-        final IResource eclipseFile = pathSrv.unresolve(path);
+    public void updateMessagesAsync(PPath file, Iterable<Msg> msgs) {
+        final IResource eclipseFile = pathSrv.unresolve(file);
+        updateMessagesAsync(eclipseFile, msgs);
+    }
+
+    public void updateMessagesAsync(IResource file, Iterable<Msg> msgs) {
         final WorkspaceJob job = new WorkspaceJob("Update file") {
             @Override public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
                 if(monitor != null && monitor.isCanceled())
                     return StatusUtils.cancel();
-                MarkerUtils.clearAll(eclipseFile);
+                MarkerUtils.clearAll(file);
                 for(Msg msg : msgs) {
-                    MarkerUtils.createMarker(eclipseFile, msg);
+                    MarkerUtils.createMarker(file, msg);
                 }
                 return StatusUtils.success();
             }
         };
-        job.setRule(eclipseFile);
+        job.setRule(file);
         job.schedule();
     }
+
+
+    public void clearMessagesAsync(PPath file) {
+        final IResource eclipseFile = pathSrv.unresolve(file);
+        clearMessagesAsync(eclipseFile);
+    }
+
+    public void clearMessagesAsync(IResource file) {
+        updateMessagesAsync(file, new ArrayList<>());
+    }
+
 
     public void updateMessagesSync(PPath file, Collection<Msg> msgs, @Nullable IProgressMonitor monitor)
         throws CoreException {
@@ -60,29 +76,44 @@ public class Updater {
         updateMessagesSync(eclipseFile, msgs, monitor);
     }
 
-    public void updateMessagesSync(org.eclipse.core.resources.IResource eclipseFile, Collection<Msg> msgs,
-        @Nullable IProgressMonitor monitor) throws CoreException {
+    public void updateMessagesSync(IResource file, Collection<Msg> msgs, @Nullable IProgressMonitor monitor)
+        throws CoreException {
         final IWorkspaceRunnable parseMarkerUpdater = new IWorkspaceRunnable() {
             @Override public void run(IProgressMonitor workspaceMonitor) throws CoreException {
                 if(workspaceMonitor.isCanceled())
                     return;
-                MarkerUtils.clearAll(eclipseFile);
+                MarkerUtils.clearAll(file);
                 for(Msg msg : msgs) {
-                    MarkerUtils.createMarker(eclipseFile, msg);
+                    MarkerUtils.createMarker(file, msg);
                 }
             }
         };
-        ResourcesPlugin.getWorkspace().run(parseMarkerUpdater, eclipseFile, IWorkspace.AVOID_UPDATE, monitor);
+        ResourcesPlugin.getWorkspace().run(parseMarkerUpdater, file, IWorkspace.AVOID_UPDATE, monitor);
     }
 
-    public void updateStyle(ISourceViewer sourceViewer, Styling styling, @Nullable IProgressMonitor monitor) {
-        final TextPresentation textPresentation;
-        if(styling != null) {
-            textPresentation = styleUtils.createTextPresentation(styling);
-        } else {
-            textPresentation = styleUtils.createTextPresentation(Color.black, 0);
-        }
 
+    public void clearMessagesSync(PPath file, @Nullable IProgressMonitor monitor) throws CoreException {
+        final IResource eclipseFile = pathSrv.unresolve(file);
+        clearMessagesSync(eclipseFile, monitor);
+    }
+
+    public void clearMessagesSync(IResource file, @Nullable IProgressMonitor monitor) throws CoreException {
+        updateMessagesSync(file, new ArrayList<>(), monitor);
+    }
+
+
+    public void updateStyleAsync(ISourceViewer sourceViewer, Styling styling, @Nullable IProgressMonitor monitor) {
+        final TextPresentation textPresentation = styleUtils.createTextPresentation(styling);
+        updatePresentationAsync(sourceViewer, textPresentation, monitor);
+    }
+
+    public void removeStyleAsync(ISourceViewer sourceViewer, int textLength, @Nullable IProgressMonitor monitor) {
+        final TextPresentation textPresentation = styleUtils.createTextPresentation(Color.black, textLength);
+        updatePresentationAsync(sourceViewer, textPresentation, monitor);
+    }
+
+    private void updatePresentationAsync(ISourceViewer sourceViewer, TextPresentation textPresentation,
+        @Nullable IProgressMonitor monitor) {
         // Update styling on the main thread, required by Eclipse.
         Display.getDefault().asyncExec(new Runnable() {
             public void run() {

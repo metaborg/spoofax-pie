@@ -21,7 +21,7 @@ rules // Generic strategies for getting properties and types of anything
   pipe-type(|ns) = pipe-prop(|ns, "type")
   
   pipe-type:
-    t -> <pipe-ast-type>t
+    t -> <pipe-ast-type> t
     where
       <not(nabl2-get-occurrence-ns); not(is-string)> t
 
@@ -49,18 +49,20 @@ rules // Property of occurrence
       a   := <AstAnalysis>
     ; val := <nabl2-get-property(|a, prop)> occ
 
-  pipe-occ-type(|term) = pipe-occ-prop(|"type")
+  pipe-occ-type = pipe-occ-prop(|"type")
 
 rules
 
   pipe-sep-nl    = separate-by(|"\n")
   pipe-sep-comma = separate-by(|", ")
+  pipe-sep-space = separate-by(|" ")
   
   pipe-remove-emptystrings = filter(not(?""))
   
   pipe-sep-concat(|sep) = pipe-remove-emptystrings; separate-by(|sep); concat-strings
   pipe-concat-nl = pipe-sep-concat(|"\n")
   pipe-concat-comma = pipe-sep-concat(|", ")
+  pipe-concat-space = pipe-sep-concat(|" ")
   
   pipe-prepend-comma-nonempty: 
     [] -> []
