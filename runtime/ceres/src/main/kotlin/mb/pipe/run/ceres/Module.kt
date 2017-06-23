@@ -23,6 +23,7 @@ import mb.pipe.run.ceres.spoofax.core.CoreAnalyze
 import mb.pipe.run.ceres.spoofax.core.CoreLoadLang
 import mb.pipe.run.ceres.spoofax.core.CoreLoadProj
 import mb.pipe.run.ceres.spoofax.core.CoreParse
+import mb.pipe.run.ceres.spoofax.core.CoreStyle
 import mb.pipe.run.ceres.spoofax.core.CoreTrans
 
 open class PipeCeresModule : Module {
@@ -63,5 +64,6 @@ open class PipeCeresModule : Module {
     bindBuilder<CoreParse>(builders, CoreParse.id)
     bindBuilder<CoreAnalyze>(builders, CoreAnalyze.id)
     bindBuilder<CoreTrans>(builders, CoreTrans.id)
+    bindBuilder<CoreStyle>(builders, CoreStyle.id)
   }
 }

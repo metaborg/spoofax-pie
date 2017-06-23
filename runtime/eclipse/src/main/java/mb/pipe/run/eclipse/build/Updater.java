@@ -102,8 +102,8 @@ public class Updater {
     }
 
 
-    public void updateStyleAsync(ISourceViewer sourceViewer, Styling styling, @Nullable IProgressMonitor monitor) {
-        final TextPresentation textPresentation = styleUtils.createTextPresentation(styling);
+    public void updateStyleAsync(ISourceViewer sourceViewer, int textLength, Styling styling, @Nullable IProgressMonitor monitor) {
+        final TextPresentation textPresentation = styleUtils.createTextPresentation(styling, textLength);
         updatePresentationAsync(sourceViewer, textPresentation, monitor);
     }
 

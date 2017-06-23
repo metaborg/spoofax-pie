@@ -111,10 +111,11 @@ public class PipeLangSpecProjectBuilder extends IncrementalProjectBuilder {
                     updater.updateMessagesSync(eclipseFile, messages, monitor);
 
                     final @Nullable Styling styling = output.component3();
+                    final int textLength = text.length();
                     if(styling != null) {
-                        updater.updateStyleAsync(sourceViewer, styling, monitor);
+                        updater.updateStyleAsync(sourceViewer, textLength, styling, monitor);
                     } else {
-                        updater.removeStyleAsync(sourceViewer, text.length(), monitor);
+                        updater.removeStyleAsync(sourceViewer, textLength, monitor);
                     }
                 } else {
                     updater.clearMessagesSync(eclipseFile, monitor);

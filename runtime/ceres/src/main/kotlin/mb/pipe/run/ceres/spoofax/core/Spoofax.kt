@@ -253,7 +253,7 @@ class CoreStyle @Inject constructor(log: Logger) : Builder<CoreStyle.Input, Styl
     val id = "coreStyle"
   }
 
-  data class Input(val langId: LanguageIdentifier, val ast: IStrategoTerm) : Serializable
+  data class Input(val langId: LanguageIdentifier, val tokenStream: ArrayList<Token>, val ast: IStrategoTerm) : Serializable
 
 
   val log: Logger = log.forContext(CoreTrans::class.java)

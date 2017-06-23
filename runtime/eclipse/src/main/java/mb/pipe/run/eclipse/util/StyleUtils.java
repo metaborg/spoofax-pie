@@ -1,14 +1,16 @@
 package mb.pipe.run.eclipse.util;
 
+import java.util.ArrayList;
+
 import org.eclipse.jface.text.TextPresentation;
-import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 
+import com.google.inject.Inject;
+
+import mb.pipe.run.core.log.Logger;
 import mb.pipe.run.core.model.region.Region;
 import mb.pipe.run.core.model.style.Style;
 import mb.pipe.run.core.model.style.Styling;
@@ -18,11 +20,13 @@ import mb.pipe.run.core.model.style.TokenStyle;
  * Utility functions for creating Eclipse text styles.
  */
 public final class StyleUtils {
-    private final ISharedTextColors sharedColors;
+    private final Logger logger;
+    private final ColorShare colorShare;
 
 
-    public StyleUtils() {
-        this.sharedColors = EditorsPlugin.getDefault().getSharedTextColors();
+    @Inject public StyleUtils(Logger rootLogger, ColorShare colorShare) {
+        this.colorShare = colorShare;
+        this.logger = rootLogger.forContext(getClass());
     }
 
 
@@ -36,11 +40,37 @@ public final class StyleUtils {
         return presentation;
     }
 
-    public TextPresentation createTextPresentation(Styling styling) {
-        return createTextPresentation(styling.stylePerToken());
+    public ArrayList<TokenStyle> validateStyling(Styling styling, int length) {
+        int offset = -1;
+        final ArrayList<TokenStyle> validated = new ArrayList<>();
+        for(TokenStyle tokenStyle : styling.stylePerToken()) {
+            final Region region = tokenStyle.token().region();
+            if(offset >= region.startOffset()) {
+                logger.warn("Skipping invalid {}, starting offset is greater than offset in previous regions",
+                    tokenStyle);
+            } else if(offset >= region.endOffset()) {
+                logger.warn("Skipping invalid {}, ending offset is greater than offset in previous regions",
+                    tokenStyle);
+            } else if(region.startOffset() > region.endOffset()) {
+                logger.warn("Skipping invalid {}, starting offset is greater than ending offset", tokenStyle);
+            } else if(region.startOffset() > length) {
+                logger.warn("Skipping invalid {}, starting offset is greater than text length", tokenStyle);
+            } else if(region.endOffset() >= length) {
+                logger.warn("Skipping invalid {}, ending offset is greater than text length", tokenStyle);
+            } else {
+                validated.add(tokenStyle);
+                offset = region.endOffset();
+            }
+        }
+        return validated;
     }
 
-    public TextPresentation createTextPresentation(Iterable<TokenStyle> stylePerToken) {
+    public TextPresentation createTextPresentation(Styling styling, int length) {
+        final ArrayList<TokenStyle> validated = validateStyling(styling, length);
+        return createTextPresentation(validated);
+    }
+
+    public TextPresentation createTextPresentation(ArrayList<TokenStyle> stylePerToken) {
         final TextPresentation presentation = new TextPresentation();
         for(TokenStyle tokenStyle : stylePerToken) {
             final StyleRange styleRange = createStyleRange(tokenStyle);
@@ -93,12 +123,7 @@ public final class StyleUtils {
 
     private Color createColor(java.awt.Color color) {
         final RGB rgb = new RGB(color.getRed(), color.getGreen(), color.getBlue());
-        try {
-            return sharedColors.getColor(rgb);
-        } catch(NullPointerException e) {
-            // HACK: sometimes throws an NPE...
-            return new Color(Display.getDefault(), rgb);
-        }
+        return colorShare.getColor(rgb);
     }
 
     private static StyleRange deepCopy(StyleRange styleRangeRef) {

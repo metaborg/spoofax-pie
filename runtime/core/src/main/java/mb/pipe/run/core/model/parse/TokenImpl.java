@@ -64,6 +64,6 @@ public class TokenImpl implements Token {
     }
 
     @Override public String toString() {
-        return region.toString();
+        return "Token(region: " + region + ", type: " + type + ")";
     }
 }

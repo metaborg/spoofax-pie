@@ -73,6 +73,15 @@ class processProject : Builder<processProject.Input, ArrayList<Tuple4<mb.pipe.ru
         results = results.append(tuple(file, null, list(), null))
       }
     }
+    for (file in requireOutput(mb.pipe.run.ceres.path.WalkContents::class.java, mb.pipe.run.ceres.path.WalkContents.Input(input.context.currentDir(), mb.pipe.run.core.path.PPaths.extensionsPathWalker(workspaceConfig.spxCoreLangExtensions())))) {
+      var config = requireOutput(getSpxCoreLangConfig::class.java, getSpxCoreLangConfig.Input(file, input.workbenchRoot))
+      if (config != null) {
+        var (tokens, messages, styling) = requireOutput(processFileWithSpxCore::class.java, processFileWithSpxCore.Input(file, input.context, config!!))
+        results = results.append(tuple(file, tokens, messages, styling))
+      } else {
+        results = results.append(tuple(file, null, list(), null))
+      }
+    }
     return results
   }
 }
@@ -108,11 +117,15 @@ class processString : Builder<processString.Input, processString.Output?> {
 
   override val id = "processString"
   override fun BuildContext.build(input: processString.Input): processString.Output? {
-    var config = requireOutput(getLangSpecConfig::class.java, getLangSpecConfig.Input(input.associatedFile, input.workbenchRoot))
-    if (config == null) {
-      return null
+    var langSpecConfig = requireOutput(getLangSpecConfig::class.java, getLangSpecConfig.Input(input.associatedFile, input.workbenchRoot))
+    if (langSpecConfig != null) {
+      return output(requireOutput(processStringWithConfig::class.java, processStringWithConfig.Input(input.text, input.context, langSpecConfig!!)) as Tuple3<ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>?)
     }
-    return output(requireOutput(processStringWithConfig::class.java, processStringWithConfig.Input(input.text, input.context, config!!)) as Tuple3<ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>?)
+    var spxCoreLangConfig = requireOutput(getSpxCoreLangConfig::class.java, getSpxCoreLangConfig.Input(input.associatedFile, input.workbenchRoot))
+    if (spxCoreLangConfig != null) {
+      return output(requireOutput(processStringWithSpxCore::class.java, processStringWithSpxCore.Input(input.text, input.associatedFile, input.context, spxCoreLangConfig!!)) as Tuple3<ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>?)
+    }
+    return null
   }
 }
 
@@ -195,7 +208,7 @@ class createWorkspaceConfig : Builder<mb.pipe.run.core.path.PPath, mb.pipe.run.s
         }
       }
     }
-    var spxCoreLangConfigs: ArrayList<mb.pipe.run.spoofax.cfg.SpxCoreLangConfig> = list(mb.pipe.run.spoofax.cfg.SpxCoreLangConfig.generate(mb.pipe.run.ceres.path.resolve("/Users/gohla/spoofax/master/repo/spoofax-releng/sdf/org.metaborg.meta.lang.template"), "sdf3"), mb.pipe.run.spoofax.cfg.SpxCoreLangConfig.generate(mb.pipe.run.ceres.path.resolve("/Users/gohla/spoofax/master/repo/spoofax-releng/esv/org.metaborg.meta.lang.esv"), "esv"))
+    var spxCoreLangConfigs: ArrayList<mb.pipe.run.spoofax.cfg.SpxCoreLangConfig> = list(mb.pipe.run.spoofax.cfg.SpxCoreLangConfig.generate(mb.pipe.run.ceres.path.resolve("/Users/gohla/spoofax/master/repo/spoofax-releng/sdf/org.metaborg.meta.lang.template"), "sdf3"), mb.pipe.run.spoofax.cfg.SpxCoreLangConfig.generate(mb.pipe.run.ceres.path.resolve("/Users/gohla/spoofax/master/repo/spoofax-releng/esv/org.metaborg.meta.lang.esv"), "esv"), mb.pipe.run.spoofax.cfg.SpxCoreLangConfig.generate(mb.pipe.run.ceres.path.resolve("/Users/gohla/metaborg/repo/pipeline/cfg/langspec"), "cfg"))
     return mb.pipe.run.spoofax.cfg.WorkspaceConfig.generate(configs, spxCoreLangConfigs)
   }
 }
@@ -205,17 +218,16 @@ class processFileWithSpxCore : Builder<processFileWithSpxCore.Input, processFile
     constructor(tuple: Tuple3<mb.pipe.run.core.path.PPath, mb.pipe.run.core.model.Context, mb.pipe.run.spoofax.cfg.SpxCoreLangConfig>) : this(tuple.component1(), tuple.component2(), tuple.component3())
   }
 
-  data class Output(val _1: mb.pipe.run.core.path.PPath, val _2: String, val _3: org.spoofax.interpreter.terms.IStrategoTerm?, val _4: ArrayList<mb.pipe.run.core.model.parse.Token>?, val _5: ArrayList<mb.pipe.run.core.model.message.Msg>, val _6: mb.pipe.run.core.model.style.Styling?) : Tuple6<mb.pipe.run.core.path.PPath, String, org.spoofax.interpreter.terms.IStrategoTerm?, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?> {
-    constructor(tuple: Tuple6<mb.pipe.run.core.path.PPath, String, org.spoofax.interpreter.terms.IStrategoTerm?, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4(), tuple.component5(), tuple.component6())
+  data class Output(val _1: ArrayList<mb.pipe.run.core.model.parse.Token>?, val _2: ArrayList<mb.pipe.run.core.model.message.Msg>, val _3: mb.pipe.run.core.model.style.Styling?) : Tuple3<ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?> {
+    constructor(tuple: Tuple3<ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>) : this(tuple.component1(), tuple.component2(), tuple.component3())
   }
 
-  private fun output(tuple: Tuple6<mb.pipe.run.core.path.PPath, String, org.spoofax.interpreter.terms.IStrategoTerm?, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>) = Output(tuple)
+  private fun output(tuple: Tuple3<ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>) = Output(tuple)
 
   override val id = "processFileWithSpxCore"
   override fun BuildContext.build(input: processFileWithSpxCore.Input): processFileWithSpxCore.Output {
     var text = requireOutput(mb.pipe.run.ceres.path.Read::class.java, input.file)
-    var (_, ast, tokenStream, messages, styling) = requireOutput(processStringWithSpxCore::class.java, processStringWithSpxCore.Input(text, input.file, input.context, input.config))
-    return output(tuple(input.file, text, ast, tokenStream, messages, styling))
+    return output(requireOutput(processStringWithSpxCore::class.java, processStringWithSpxCore.Input(text, input.file, input.context, input.config)))
   }
 }
 
@@ -224,11 +236,11 @@ class processStringWithSpxCore : Builder<processStringWithSpxCore.Input, process
     constructor(tuple: Tuple4<String, mb.pipe.run.core.path.PPath, mb.pipe.run.core.model.Context, mb.pipe.run.spoofax.cfg.SpxCoreLangConfig>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
   }
 
-  data class Output(val _1: String, val _2: org.spoofax.interpreter.terms.IStrategoTerm?, val _3: ArrayList<mb.pipe.run.core.model.parse.Token>?, val _4: ArrayList<mb.pipe.run.core.model.message.Msg>, val _5: mb.pipe.run.core.model.style.Styling?) : Tuple5<String, org.spoofax.interpreter.terms.IStrategoTerm?, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?> {
-    constructor(tuple: Tuple5<String, org.spoofax.interpreter.terms.IStrategoTerm?, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4(), tuple.component5())
+  data class Output(val _1: ArrayList<mb.pipe.run.core.model.parse.Token>?, val _2: ArrayList<mb.pipe.run.core.model.message.Msg>, val _3: mb.pipe.run.core.model.style.Styling?) : Tuple3<ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?> {
+    constructor(tuple: Tuple3<ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>) : this(tuple.component1(), tuple.component2(), tuple.component3())
   }
 
-  private fun output(tuple: Tuple5<String, org.spoofax.interpreter.terms.IStrategoTerm?, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>) = Output(tuple)
+  private fun output(tuple: Tuple3<ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>) = Output(tuple)
 
   override val id = "processStringWithSpxCore"
   override fun BuildContext.build(input: processStringWithSpxCore.Input): processStringWithSpxCore.Output {
@@ -238,12 +250,12 @@ class processStringWithSpxCore : Builder<processStringWithSpxCore.Input, process
     var projectDir = project.v.directory()
     var (ast, tokens, messages) = requireOutput(mb.pipe.run.ceres.spoofax.core.CoreParse::class.java, mb.pipe.run.ceres.spoofax.core.CoreParse.Input(langId, input.associatedFile, input.text))
     var styling: mb.pipe.run.core.model.style.Styling?
-    if (ast != null) {
-      styling = requireOutput(mb.pipe.run.ceres.spoofax.core.CoreStyle::class.java, mb.pipe.run.ceres.spoofax.core.CoreStyle.Input(langId, ast!!))
+    if (ast != null && tokens != null) {
+      styling = requireOutput(mb.pipe.run.ceres.spoofax.core.CoreStyle::class.java, mb.pipe.run.ceres.spoofax.core.CoreStyle.Input(langId, tokens!!, ast!!))
     } else {
       styling = null
     }
-    return output(tuple(input.text, ast, tokens, messages, styling))
+    return output(tuple(tokens, messages, styling))
   }
 }
 

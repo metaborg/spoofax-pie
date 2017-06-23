@@ -81,6 +81,8 @@ func style(tokenStream: Token*, context: Context, langSpecConfig: LangSpecConfig
 func processProject(context: Context, workbenchRoot: Path) -> (Path, Token*?, Message*, Styling?)* = {
   var workspaceConfig = createWorkspaceConfig(workbenchRoot);
   var results: (Path, Token*?, Message*, Styling?)* = [];
+  
+  // Go over each file with a corresponding language specification config
   foreach(var file in walkContents(context.currentDir(), extensionsPathWalker(workspaceConfig.langSpecExtensions()))) {
     var config = getLangSpecConfig(file, workbenchRoot);
     if(config != null) {
@@ -92,6 +94,20 @@ func processProject(context: Context, workbenchRoot: Path) -> (Path, Token*?, Me
       results = [results|(file, null, [], null)];
     }
   }
+  
+  // Go over each file with a corresponding Spoofax Core language config
+  foreach(var file in walkContents(context.currentDir(), extensionsPathWalker(workspaceConfig.spxCoreLangExtensions()))) {
+    var config = getSpxCoreLangConfig(file, workbenchRoot);
+    if(config != null) {
+      var (tokens, messages, styling) = processFileWithSpxCore(file, context, config!);
+      results = [results|(file, tokens, messages, styling)];
+    } else {
+      // If no config was found for the file, do not process it and return an empty results.
+      // This also registers the correct dependencies.
+      results = [results|(file, null, [], null)];
+    }
+  }
+  
   return results;
 }
 func processFileWithConfig(file: Path, context: Context, langSpecConfig: LangSpecConfig) -> (Token*?, Message*, Styling?) = {
@@ -102,11 +118,16 @@ func processFileWithConfig(file: Path, context: Context, langSpecConfig: LangSpe
 
 /// String processing
 func processString(text: string, associatedFile: Path, context: Context, workbenchRoot: Path) -> (Token*?, Message*, Styling?)? = {
-  var config = getLangSpecConfig(associatedFile, workbenchRoot);
-  if(config == null) {
-    return null; // No config found for file, do not process file, but this does register a dependency.
+  var langSpecConfig = getLangSpecConfig(associatedFile, workbenchRoot);
+  if(langSpecConfig != null) {
+    return processStringWithConfig(text, context, langSpecConfig!)?; 
   }
-  return processStringWithConfig(text, context, config!)?;
+  var spxCoreLangConfig = getSpxCoreLangConfig(associatedFile, workbenchRoot);
+  if(spxCoreLangConfig != null) {
+    return processStringWithSpxCore(text, associatedFile, context, spxCoreLangConfig!)?; 
+  }
+  // No config found for file, do not process file, but this does register a dependency.
+  return null;
 }
 func processStringWithConfig(text: string, context: Context, langSpecConfig: LangSpecConfig) -> (Token*?, Message*, Styling?) = {
   var (ast, tokenStream, messages) = parse(text, context, langSpecConfig);
@@ -195,6 +216,7 @@ func createWorkspaceConfig(workbenchRoot: Path) -> WorkspaceConfig = {
   var spxCoreLangConfigs: SpxCoreLangConfig* = [
     generateSpxCoreLangConfig(resolveAbs("/Users/gohla/spoofax/master/repo/spoofax-releng/sdf/org.metaborg.meta.lang.template"), "sdf3")
   , generateSpxCoreLangConfig(resolveAbs("/Users/gohla/spoofax/master/repo/spoofax-releng/esv/org.metaborg.meta.lang.esv"), "esv")
+  , generateSpxCoreLangConfig(resolveAbs("/Users/gohla/metaborg/repo/pipeline/cfg/langspec"), "cfg")
   ];
   
   return generateWorkspaceConfig(configs, spxCoreLangConfigs);
@@ -229,25 +251,24 @@ func createNamedGoal(name: string) -> TransformGoal = kotlin mb.pipe.run.ceres.s
 func spxCoreTransform(langId: LangId, projectDir: Path, associatedFile: Path, ast: Ast, goal: TransformGoal) -> (Ast?, Path?) = ceres mb.pipe.run.ceres.spoofax.core.CoreTrans
 
 // Styling
-func spxCoreStyle(langId: LangId, ast: Ast) -> Styling = ceres mb.pipe.run.ceres.spoofax.core.CoreStyle
+func spxCoreStyle(langId: LangId, tokens: Token*, ast: Ast) -> Styling = ceres mb.pipe.run.ceres.spoofax.core.CoreStyle
 
 /// Interoperability functions
-func processFileWithSpxCore(file: Path, context: Context, config: SpxCoreLangConfig) -> (Path, string, Ast?, Token*?, Message*, Styling?) = {
+func processFileWithSpxCore(file: Path, context: Context, config: SpxCoreLangConfig) -> (Token*?, Message*, Styling?) = {
   var text = readFile(file); // Creates a dependency to file changes
-  var (_, ast, tokenStream, messages, styling) = processStringWithSpxCore(text, file, context, config);
-  return (file, text, ast, tokenStream, messages, styling);
+  return processStringWithSpxCore(text, file, context, config);
 }
-func processStringWithSpxCore(text: string, associatedFile: Path, context: Context, config: SpxCoreLangConfig) -> (string, Ast?, Token*?, Message*, Styling?) = {
+func processStringWithSpxCore(text: string, associatedFile: Path, context: Context, config: SpxCoreLangConfig) -> (Token*?, Message*, Styling?) = {
   var langImpl = spxCoreLoadLang(config.location());
   var langId = langImpl.id();
   var project = spxCoreLoadProject(context.currentDir());
   var projectDir = project.directory();
   var (ast, tokens, messages) = spxCoreParse(langId, associatedFile, text);
   var styling: Styling?;
-  if(ast != null) {
-    styling = spxCoreStyle(langId, ast!);
+  if(ast != null && tokens != null) {
+    styling = spxCoreStyle(langId, tokens!, ast!);
   } else {
     styling = null;
   }
-  return (text, ast, tokens, messages, styling);
+  return (tokens, messages, styling);
 }

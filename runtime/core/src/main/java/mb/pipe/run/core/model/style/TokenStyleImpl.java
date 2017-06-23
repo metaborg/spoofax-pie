@@ -46,4 +46,8 @@ public class TokenStyleImpl implements TokenStyle {
             return false;
         return true;
     }
+
+    @Override public String toString() {
+        return "TokenStyle(token: " + token + ", style: " + style + ")";
+    }
 }

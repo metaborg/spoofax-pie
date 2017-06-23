@@ -93,8 +93,22 @@ public class StyleImpl implements Serializable, Style {
         return true;
     }
 
+
     @Override public String toString() {
-        return String.format("Style [color=%s, backgroundColor=%s, bold=%s, italic=%s, underscore=%s, strikeout=%s]",
-            color, backgroundColor, bold, italic, underscore, strikeout);
+        final StringBuilder builder = new StringBuilder();
+        builder.append("Style(color: ");
+        builder.append(color);
+        builder.append(", backgroundColor: ");
+        builder.append(backgroundColor);
+        builder.append(", bold: ");
+        builder.append(bold);
+        builder.append(", italic: ");
+        builder.append(italic);
+        builder.append(", underscore: ");
+        builder.append(underscore);
+        builder.append(", strikeout: ");
+        builder.append(strikeout);
+        builder.append(")");
+        return builder.toString();
     }
 }
