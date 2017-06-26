@@ -7,7 +7,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.IEditorInput;
 
 import mb.ceres.BuildException;
@@ -27,7 +26,7 @@ public class EditorUpdateJob extends Job {
 
     private final BuildManager buildManager;
     private final Updater updater;
-    private final ISourceViewer sourceViewer;
+    private final PipeEditor editor;
 
     private final String text;
     private final Context context;
@@ -37,13 +36,13 @@ public class EditorUpdateJob extends Job {
     private final PPath workspaceRoot;
 
 
-    public EditorUpdateJob(Logger logger, BuildManager buildManager, Updater updater, ISourceViewer sourceViewer,
-        String text, Context context, IEditorInput input, PPath file, IResource eclipseFile, PPath workspaceRoot) {
+    public EditorUpdateJob(Logger logger, BuildManager buildManager, Updater updater, PipeEditor editor, String text,
+        Context context, IEditorInput input, PPath file, IResource eclipseFile, PPath workspaceRoot) {
         super("Editor update");
         this.logger = logger;
         this.buildManager = buildManager;
         this.updater = updater;
-        this.sourceViewer = sourceViewer;
+        this.editor = editor;
         this.text = text;
         this.context = context;
         this.input = input;
@@ -77,15 +76,14 @@ public class EditorUpdateJob extends Job {
             updater.updateMessagesSync(eclipseFile, messages, monitor);
 
             final @Nullable Styling styling = output.component3();
-            final int textLength = text.length();
             if(styling != null) {
-                updater.updateStyleAsync(sourceViewer, textLength, styling, monitor);
+                updater.updateStyleAsync(editor, text, styling, monitor);
             } else {
-                updater.removeStyleAsync(sourceViewer, textLength, monitor);
+                updater.removeStyleAsync(editor, text.length(), monitor);
             }
         } else {
             updater.clearMessagesSync(eclipseFile, monitor);
-            updater.removeStyleAsync(sourceViewer, text.length(), monitor);
+            updater.removeStyleAsync(editor, text.length(), monitor);
         }
 
         return StatusUtils.success();

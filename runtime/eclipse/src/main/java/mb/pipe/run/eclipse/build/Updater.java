@@ -21,6 +21,7 @@ import com.google.inject.Inject;
 import mb.pipe.run.core.model.message.Msg;
 import mb.pipe.run.core.model.style.Styling;
 import mb.pipe.run.core.path.PPath;
+import mb.pipe.run.eclipse.editor.PipeEditor;
 import mb.pipe.run.eclipse.util.MarkerUtils;
 import mb.pipe.run.eclipse.util.Nullable;
 import mb.pipe.run.eclipse.util.StatusUtils;
@@ -102,22 +103,25 @@ public class Updater {
     }
 
 
-    public void updateStyleAsync(ISourceViewer sourceViewer, int textLength, Styling styling, @Nullable IProgressMonitor monitor) {
-        final TextPresentation textPresentation = styleUtils.createTextPresentation(styling, textLength);
-        updatePresentationAsync(sourceViewer, textPresentation, monitor);
+    public void updateStyleAsync(PipeEditor editor, String text, Styling styling, @Nullable IProgressMonitor monitor) {
+        final TextPresentation textPresentation = styleUtils.createTextPresentation(styling, text.length());
+        updatePresentationAsync(editor, textPresentation, text, monitor);
     }
 
-    public void removeStyleAsync(ISourceViewer sourceViewer, int textLength, @Nullable IProgressMonitor monitor) {
+    public void removeStyleAsync(PipeEditor editor, int textLength, @Nullable IProgressMonitor monitor) {
         final TextPresentation textPresentation = styleUtils.createTextPresentation(Color.black, textLength);
-        updatePresentationAsync(sourceViewer, textPresentation, monitor);
+        updatePresentationAsync(editor, textPresentation, null, monitor);
     }
 
-    private void updatePresentationAsync(ISourceViewer sourceViewer, TextPresentation textPresentation,
+    private void updatePresentationAsync(PipeEditor editor, TextPresentation textPresentation, @Nullable String text,
         @Nullable IProgressMonitor monitor) {
+        final ISourceViewer sourceViewer = editor.sourceViewer();
         // Update styling on the main thread, required by Eclipse.
         Display.getDefault().asyncExec(new Runnable() {
             public void run() {
                 if(monitor != null && monitor.isCanceled())
+                    return;
+                if(text != null && !text.equals(editor.text()))
                     return;
                 sourceViewer.changeTextPresentation(textPresentation, true);
             }

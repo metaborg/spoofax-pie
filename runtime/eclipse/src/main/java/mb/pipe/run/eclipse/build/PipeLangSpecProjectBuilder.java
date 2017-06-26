@@ -13,7 +13,6 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
-import org.eclipse.jface.text.source.ISourceViewer;
 
 import com.google.inject.Injector;
 
@@ -105,21 +104,19 @@ public class PipeLangSpecProjectBuilder extends IncrementalProjectBuilder {
                     new processString.Input(text, associatedFile, context, workspaceRoot));
 
                 final IResource eclipseFile = editor.eclipseFile();
-                final ISourceViewer sourceViewer = editor.sourceViewer();
                 if(output != null) {
                     final List<Msg> messages = output.component2();
                     updater.updateMessagesSync(eclipseFile, messages, monitor);
 
                     final @Nullable Styling styling = output.component3();
-                    final int textLength = text.length();
                     if(styling != null) {
-                        updater.updateStyleAsync(sourceViewer, textLength, styling, monitor);
+                        updater.updateStyleAsync(editor, text, styling, monitor);
                     } else {
-                        updater.removeStyleAsync(sourceViewer, textLength, monitor);
+                        updater.removeStyleAsync(editor, text.length(), monitor);
                     }
                 } else {
                     updater.clearMessagesSync(eclipseFile, monitor);
-                    updater.removeStyleAsync(sourceViewer, text.length(), monitor);
+                    updater.removeStyleAsync(editor, text.length(), monitor);
                 }
             } catch(BuildException e) {
                 logger.error("Could not update editor {}", e, name);
