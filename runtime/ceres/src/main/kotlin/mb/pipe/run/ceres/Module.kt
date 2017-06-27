@@ -2,29 +2,12 @@ package mb.pipe.run.ceres
 
 import com.google.inject.Binder
 import com.google.inject.Module
-import mb.ceres.asSingleton
-import mb.ceres.bind
-import mb.ceres.bindBuilder
-import mb.ceres.builderMapBinder
+import mb.ceres.*
 import mb.ceres.impl.BuildCache
 import mb.ceres.impl.MapBuildCache
-import mb.ceres.to
-import mb.pipe.run.ceres.path.Copy
-import mb.pipe.run.ceres.path.Exists
-import mb.pipe.run.ceres.path.ListContents
-import mb.pipe.run.ceres.path.Read
-import mb.pipe.run.ceres.path.WalkContents
-import mb.pipe.run.ceres.spoofax.GenerateLangSpecConfig
-import mb.pipe.run.ceres.spoofax.GenerateStylerRules
-import mb.pipe.run.ceres.spoofax.GenerateTable
-import mb.pipe.run.ceres.spoofax.Parse
-import mb.pipe.run.ceres.spoofax.Style
-import mb.pipe.run.ceres.spoofax.core.CoreAnalyze
-import mb.pipe.run.ceres.spoofax.core.CoreLoadLang
-import mb.pipe.run.ceres.spoofax.core.CoreLoadProj
-import mb.pipe.run.ceres.spoofax.core.CoreParse
-import mb.pipe.run.ceres.spoofax.core.CoreStyle
-import mb.pipe.run.ceres.spoofax.core.CoreTrans
+import mb.pipe.run.ceres.path.*
+import mb.pipe.run.ceres.spoofax.*
+import mb.pipe.run.ceres.spoofax.core.*
 
 open class PipeCeresModule : Module {
   override fun configure(binder: Binder) {
@@ -64,6 +47,9 @@ open class PipeCeresModule : Module {
     bindBuilder<CoreParse>(builders, CoreParse.id)
     bindBuilder<CoreAnalyze>(builders, CoreAnalyze.id)
     bindBuilder<CoreTrans>(builders, CoreTrans.id)
+    bindBuilder<CoreBuild>(builders, CoreBuild.id)
+    bindBuilder<CoreBuildLangSpec>(builders, CoreBuildLangSpec.id)
+    bindBuilder<CoreExtensions>(builders, CoreExtensions.id)
     bindBuilder<CoreStyle>(builders, CoreStyle.id)
   }
 }

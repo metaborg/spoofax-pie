@@ -40,6 +40,34 @@ class getSpxCoreLangConfig : Builder<getSpxCoreLangConfig.Input, mb.pipe.run.spo
   }
 }
 
+class createSpxCoreLangSpecConfig : Builder<mb.pipe.run.core.path.PPath, mb.pipe.run.spoofax.cfg.SpxCoreLangSpecConfig> {
+  override val id = "createSpxCoreLangSpecConfig"
+  override fun BuildContext.build(input: mb.pipe.run.core.path.PPath): mb.pipe.run.spoofax.cfg.SpxCoreLangSpecConfig {
+    requireOutput(mb.pipe.run.ceres.spoofax.core.CoreBuild::class.java, input)
+    requireOutput(mb.pipe.run.ceres.spoofax.core.CoreBuildLangSpec::class.java, input)
+    var langImpl = requireOutput(mb.pipe.run.ceres.spoofax.core.CoreLoadLang::class.java, input)
+    var extensions = requireOutput(mb.pipe.run.ceres.spoofax.core.CoreExtensions::class.java, langImpl.v.id())
+    return mb.pipe.run.spoofax.cfg.SpxCoreLangSpecConfig.generate(input, extensions)
+  }
+}
+
+class getSpxCoreLangSpecConfig : Builder<getSpxCoreLangSpecConfig.Input, mb.pipe.run.spoofax.cfg.SpxCoreLangSpecConfig?> {
+  data class Input(val file: mb.pipe.run.core.path.PPath, val workbenchRoot: mb.pipe.run.core.path.PPath) : Tuple2<mb.pipe.run.core.path.PPath, mb.pipe.run.core.path.PPath> {
+    constructor(tuple: Tuple2<mb.pipe.run.core.path.PPath, mb.pipe.run.core.path.PPath>) : this(tuple.component1(), tuple.component2())
+  }
+
+  override val id = "getSpxCoreLangSpecConfig"
+  override fun BuildContext.build(input: getSpxCoreLangSpecConfig.Input): mb.pipe.run.spoofax.cfg.SpxCoreLangSpecConfig? {
+    var workspaceConfig = requireOutput(createWorkspaceConfig::class.java, input.workbenchRoot)
+    var extension = input.file.extension()
+    if (extension == null) {
+      throw PipeRunEx("Cannot process a file without an extension".toString())
+    }
+    var config = workspaceConfig.spxCoreLangSpecConfigForExt(extension!!)
+    return config
+  }
+}
+
 class createWorkspaceConfig : Builder<mb.pipe.run.core.path.PPath, mb.pipe.run.spoofax.cfg.WorkspaceConfig> {
   override val id = "createWorkspaceConfig"
   override fun BuildContext.build(input: mb.pipe.run.core.path.PPath): mb.pipe.run.spoofax.cfg.WorkspaceConfig {
@@ -62,7 +90,16 @@ class createWorkspaceConfig : Builder<mb.pipe.run.core.path.PPath, mb.pipe.run.s
       }
     }
     var spxCoreLangConfigs: ArrayList<mb.pipe.run.spoofax.cfg.SpxCoreLangConfig> = list(mb.pipe.run.spoofax.cfg.SpxCoreLangConfig.generate(mb.pipe.run.ceres.path.resolve("/Users/gohla/spoofax/master/repo/spoofax-releng/sdf/org.metaborg.meta.lang.template"), "sdf3"), mb.pipe.run.spoofax.cfg.SpxCoreLangConfig.generate(mb.pipe.run.ceres.path.resolve("/Users/gohla/spoofax/master/repo/spoofax-releng/esv/org.metaborg.meta.lang.esv"), "esv"), mb.pipe.run.spoofax.cfg.SpxCoreLangConfig.generate(cfgLangLoc, "cfg"))
-    return mb.pipe.run.spoofax.cfg.WorkspaceConfig.generate(configs, spxCoreLangConfigs)
+    var spxCoreLangSpecConfigs: ArrayList<mb.pipe.run.spoofax.cfg.SpxCoreLangSpecConfig> = list()
+    for (path in requireOutput(mb.pipe.run.ceres.path.ListContents::class.java, mb.pipe.run.ceres.path.ListContents.Input(input, null))) {
+      var pomFile = path.resolve("pom.xml")
+      var metaborgYamlFile = path.resolve("metaborg.yaml")
+      if (requireOutput(mb.pipe.run.ceres.path.Exists::class.java, pomFile) && requireOutput(mb.pipe.run.ceres.path.Exists::class.java, metaborgYamlFile)) {
+        var config = requireOutput(createSpxCoreLangSpecConfig::class.java, path)
+        spxCoreLangSpecConfigs = spxCoreLangSpecConfigs.append(config)
+      }
+    }
+    return mb.pipe.run.spoofax.cfg.WorkspaceConfig.generate(configs, spxCoreLangConfigs, spxCoreLangSpecConfigs)
   }
 }
 
@@ -75,25 +112,44 @@ class processProject : Builder<processProject.Input, ArrayList<Tuple4<mb.pipe.ru
   override fun BuildContext.build(input: processProject.Input): ArrayList<Tuple4<mb.pipe.run.core.path.PPath, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>> {
     var workspaceConfig = requireOutput(createWorkspaceConfig::class.java, input.workbenchRoot)
     var results: ArrayList<Tuple4<mb.pipe.run.core.path.PPath, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>> = list()
-    for (file in requireOutput(mb.pipe.run.ceres.path.WalkContents::class.java, mb.pipe.run.ceres.path.WalkContents.Input(input.context.currentDir(), mb.pipe.run.core.path.PPaths.extensionsPathWalker(workspaceConfig.langSpecExtensions())))) {
+    for (file in requireOutput(mb.pipe.run.ceres.path.WalkContents::class.java, mb.pipe.run.ceres.path.WalkContents.Input(input.context.currentDir(), mb.pipe.run.core.path.PPaths.extensionsPathWalker(workspaceConfig.langSpecExtensions()) as mb.pipe.run.core.path.PathWalker?))) {
       var config = requireOutput(getLangSpecConfig::class.java, getLangSpecConfig.Input(file, input.workbenchRoot))
       if (config != null) {
         var (tokens, messages, styling) = requireOutput(processFileWithLangSpecConfig::class.java, processFileWithLangSpecConfig.Input(file, input.context, config!!))
         results = results.append(tuple(file, tokens, messages, styling))
       } else {
-        results = results.append(tuple(file, null, list(), null))
+        var emptyTokens: ArrayList<mb.pipe.run.core.model.parse.Token>? = null
+        var emptyMessages: ArrayList<mb.pipe.run.core.model.message.Msg> = list()
+        var emptyStyling: mb.pipe.run.core.model.style.Styling? = null
+        results = results.append(requireOutput(emptyResult::class.java, file))
       }
     }
-    for (file in requireOutput(mb.pipe.run.ceres.path.WalkContents::class.java, mb.pipe.run.ceres.path.WalkContents.Input(input.context.currentDir(), mb.pipe.run.core.path.PPaths.extensionsPathWalker(workspaceConfig.spxCoreLangExtensions())))) {
+    for (file in requireOutput(mb.pipe.run.ceres.path.WalkContents::class.java, mb.pipe.run.ceres.path.WalkContents.Input(input.context.currentDir(), mb.pipe.run.core.path.PPaths.extensionsPathWalker(workspaceConfig.spxCoreLangExtensions()) as mb.pipe.run.core.path.PathWalker?))) {
       var config = requireOutput(getSpxCoreLangConfig::class.java, getSpxCoreLangConfig.Input(file, input.workbenchRoot))
       if (config != null) {
-        var (tokens, messages, styling) = requireOutput(processFileWithSpxCore::class.java, processFileWithSpxCore.Input(file, input.context, config!!))
+        var (tokens, messages, styling) = requireOutput(processFileWithSpxCoreLang::class.java, processFileWithSpxCoreLang.Input(file, input.context, config!!))
         results = results.append(tuple(file, tokens, messages, styling))
       } else {
-        results = results.append(tuple(file, null, list(), null))
+        results = results.append(requireOutput(emptyResult::class.java, file))
       }
     }
     return results
+  }
+}
+
+class emptyResult : Builder<mb.pipe.run.core.path.PPath, emptyResult.Output> {
+  data class Output(val _1: mb.pipe.run.core.path.PPath, val _2: ArrayList<mb.pipe.run.core.model.parse.Token>?, val _3: ArrayList<mb.pipe.run.core.model.message.Msg>, val _4: mb.pipe.run.core.model.style.Styling?) : Tuple4<mb.pipe.run.core.path.PPath, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?> {
+    constructor(tuple: Tuple4<mb.pipe.run.core.path.PPath, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
+  }
+
+  private fun output(tuple: Tuple4<mb.pipe.run.core.path.PPath, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>) = Output(tuple)
+
+  override val id = "emptyResult"
+  override fun BuildContext.build(input: mb.pipe.run.core.path.PPath): emptyResult.Output {
+    var emptyTokens: ArrayList<mb.pipe.run.core.model.parse.Token>? = null
+    var emptyMessages: ArrayList<mb.pipe.run.core.model.message.Msg> = list()
+    var emptyStyling: mb.pipe.run.core.model.style.Styling? = null
+    return output(tuple(input, emptyTokens, emptyMessages, emptyStyling))
   }
 }
 
@@ -116,7 +172,7 @@ class processString : Builder<processString.Input, processString.Output?> {
     }
     var spxCoreLangConfig = requireOutput(getSpxCoreLangConfig::class.java, getSpxCoreLangConfig.Input(input.associatedFile, input.workbenchRoot))
     if (spxCoreLangConfig != null) {
-      return output(requireOutput(processStringWithSpxCore::class.java, processStringWithSpxCore.Input(input.text, input.associatedFile, input.context, spxCoreLangConfig!!)) as Tuple3<ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>?)
+      return output(requireOutput(processStringWithSpxCoreLang::class.java, processStringWithSpxCoreLang.Input(input.text, input.associatedFile, input.context, spxCoreLangConfig!!)) as Tuple3<ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>?)
     }
     return null
   }
@@ -180,11 +236,15 @@ class parse : Builder<parse.Input, parse.Output> {
     var mainFile = input.langSpecConfig.getSyntaxMainFile()
     var startSymbol = input.langSpecConfig.getSyntaxStartSymbol()
     if (mainFile == null || startSymbol == null) {
-      return output(tuple(null, null, list()))
+      var emptyAst: org.spoofax.interpreter.terms.IStrategoTerm? = null
+      var emptyTokens: ArrayList<mb.pipe.run.core.model.parse.Token>? = null
+      var emptyMessages: ArrayList<mb.pipe.run.core.model.message.Msg> = list()
+      return output(tuple(emptyAst, emptyTokens, emptyMessages))
     }
     var langLoc = mb.pipe.run.ceres.path.resolve("/Users/gohla/spoofax/master/repo/spoofax-releng/sdf/org.metaborg.meta.lang.template")
     var specDir = input.context.currentDir()
     var includedFiles: ArrayList<mb.pipe.run.core.path.PPath> = list()
+    includedFiles = list()
     var parseTable = requireOutput(mb.pipe.run.ceres.spoofax.GenerateTable::class.java, mb.pipe.run.ceres.spoofax.GenerateTable.Input(langLoc, specDir, mainFile!!, includedFiles))
     if (parseTable == null)
       throw PipeRunEx("Unable to build parse table".toString())
@@ -209,11 +269,11 @@ class style : Builder<style.Input, mb.pipe.run.core.model.style.Styling?> {
     var syntaxStyler = requireOutput(mb.pipe.run.ceres.spoofax.GenerateStylerRules::class.java, mb.pipe.run.ceres.spoofax.GenerateStylerRules.Input(langLoc, specDir, mainFile!!, includedFiles))
     if (syntaxStyler == null)
       throw PipeRunEx("Unable to build syntax styler".toString())
-    return requireOutput(mb.pipe.run.ceres.spoofax.Style::class.java, mb.pipe.run.ceres.spoofax.Style.Input(input.tokenStream, syntaxStyler!!))
+    return requireOutput(mb.pipe.run.ceres.spoofax.Style::class.java, mb.pipe.run.ceres.spoofax.Style.Input(input.tokenStream, syntaxStyler!!)) as mb.pipe.run.core.model.style.Styling?
   }
 }
 
-class processFileWithSpxCore : Builder<processFileWithSpxCore.Input, processFileWithSpxCore.Output> {
+class processFileWithSpxCoreLang : Builder<processFileWithSpxCoreLang.Input, processFileWithSpxCoreLang.Output> {
   data class Input(val file: mb.pipe.run.core.path.PPath, val context: mb.pipe.run.core.model.Context, val config: mb.pipe.run.spoofax.cfg.SpxCoreLangConfig) : Tuple3<mb.pipe.run.core.path.PPath, mb.pipe.run.core.model.Context, mb.pipe.run.spoofax.cfg.SpxCoreLangConfig> {
     constructor(tuple: Tuple3<mb.pipe.run.core.path.PPath, mb.pipe.run.core.model.Context, mb.pipe.run.spoofax.cfg.SpxCoreLangConfig>) : this(tuple.component1(), tuple.component2(), tuple.component3())
   }
@@ -224,14 +284,14 @@ class processFileWithSpxCore : Builder<processFileWithSpxCore.Input, processFile
 
   private fun output(tuple: Tuple3<ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>) = Output(tuple)
 
-  override val id = "processFileWithSpxCore"
-  override fun BuildContext.build(input: processFileWithSpxCore.Input): processFileWithSpxCore.Output {
+  override val id = "processFileWithSpxCoreLang"
+  override fun BuildContext.build(input: processFileWithSpxCoreLang.Input): processFileWithSpxCoreLang.Output {
     var text = requireOutput(mb.pipe.run.ceres.path.Read::class.java, input.file)
-    return output(requireOutput(processStringWithSpxCore::class.java, processStringWithSpxCore.Input(text, input.file, input.context, input.config)))
+    return output(requireOutput(processStringWithSpxCoreLang::class.java, processStringWithSpxCoreLang.Input(text, input.file, input.context, input.config)))
   }
 }
 
-class processStringWithSpxCore : Builder<processStringWithSpxCore.Input, processStringWithSpxCore.Output> {
+class processStringWithSpxCoreLang : Builder<processStringWithSpxCoreLang.Input, processStringWithSpxCoreLang.Output> {
   data class Input(val text: String, val associatedFile: mb.pipe.run.core.path.PPath, val context: mb.pipe.run.core.model.Context, val config: mb.pipe.run.spoofax.cfg.SpxCoreLangConfig) : Tuple4<String, mb.pipe.run.core.path.PPath, mb.pipe.run.core.model.Context, mb.pipe.run.spoofax.cfg.SpxCoreLangConfig> {
     constructor(tuple: Tuple4<String, mb.pipe.run.core.path.PPath, mb.pipe.run.core.model.Context, mb.pipe.run.spoofax.cfg.SpxCoreLangConfig>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
   }
@@ -242,8 +302,8 @@ class processStringWithSpxCore : Builder<processStringWithSpxCore.Input, process
 
   private fun output(tuple: Tuple3<ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>) = Output(tuple)
 
-  override val id = "processStringWithSpxCore"
-  override fun BuildContext.build(input: processStringWithSpxCore.Input): processStringWithSpxCore.Output {
+  override val id = "processStringWithSpxCoreLang"
+  override fun BuildContext.build(input: processStringWithSpxCoreLang.Input): processStringWithSpxCoreLang.Output {
     var langImpl = requireOutput(mb.pipe.run.ceres.spoofax.core.CoreLoadLang::class.java, input.config.location())
     var langId = langImpl.v.id()
     var project = requireOutput(mb.pipe.run.ceres.spoofax.core.CoreLoadProj::class.java, input.context.currentDir())
@@ -251,7 +311,7 @@ class processStringWithSpxCore : Builder<processStringWithSpxCore.Input, process
     var (ast, tokens, messages) = requireOutput(mb.pipe.run.ceres.spoofax.core.CoreParse::class.java, mb.pipe.run.ceres.spoofax.core.CoreParse.Input(langId, input.associatedFile, input.text))
     var styling: mb.pipe.run.core.model.style.Styling?
     if (ast != null && tokens != null) {
-      styling = requireOutput(mb.pipe.run.ceres.spoofax.core.CoreStyle::class.java, mb.pipe.run.ceres.spoofax.core.CoreStyle.Input(langId, tokens!!, ast!!))
+      styling = requireOutput(mb.pipe.run.ceres.spoofax.core.CoreStyle::class.java, mb.pipe.run.ceres.spoofax.core.CoreStyle.Input(langId, tokens!!, ast!!)) as mb.pipe.run.core.model.style.Styling?
     } else {
       styling = null
     }
@@ -264,15 +324,18 @@ class CeresBuilderModule : Module {
   override fun configure(binder: Binder) {
     val builders = binder.builderMapBinder()
 
-    binder.bindBuilder<processStringWithSpxCore>(builders, "processStringWithSpxCore")
-    binder.bindBuilder<processFileWithSpxCore>(builders, "processFileWithSpxCore")
+    binder.bindBuilder<processStringWithSpxCoreLang>(builders, "processStringWithSpxCoreLang")
+    binder.bindBuilder<processFileWithSpxCoreLang>(builders, "processFileWithSpxCoreLang")
     binder.bindBuilder<style>(builders, "style")
     binder.bindBuilder<parse>(builders, "parse")
     binder.bindBuilder<processStringWithLangSpecConfig>(builders, "processStringWithLangSpecConfig")
     binder.bindBuilder<processFileWithLangSpecConfig>(builders, "processFileWithLangSpecConfig")
     binder.bindBuilder<processString>(builders, "processString")
+    binder.bindBuilder<emptyResult>(builders, "emptyResult")
     binder.bindBuilder<processProject>(builders, "processProject")
     binder.bindBuilder<createWorkspaceConfig>(builders, "createWorkspaceConfig")
+    binder.bindBuilder<getSpxCoreLangSpecConfig>(builders, "getSpxCoreLangSpecConfig")
+    binder.bindBuilder<createSpxCoreLangSpecConfig>(builders, "createSpxCoreLangSpecConfig")
     binder.bindBuilder<getSpxCoreLangConfig>(builders, "getSpxCoreLangConfig")
     binder.bindBuilder<getLangSpecConfig>(builders, "getLangSpecConfig")
   }

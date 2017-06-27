@@ -1,10 +1,13 @@
 package mb.pipe.run.core.path;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
@@ -96,7 +99,7 @@ public class PPathImpl implements PPath {
         // @formatter:off
         return Files
             .list(getJavaPath())
-            .map(path -> new PPathImpl(path));
+            .map(PPathImpl::new);
         // @formatter:on
     }
 
@@ -105,7 +108,7 @@ public class PPathImpl implements PPath {
         return Files
             .list(getJavaPath())
             .map(path -> (PPath) new PPathImpl(path))
-            .filter(path -> matcher.matches(path));
+            .filter(matcher::matches);
         // @formatter:on
     }
 
@@ -113,7 +116,7 @@ public class PPathImpl implements PPath {
         // @formatter:off
         return Files
             .walk(getJavaPath())
-            .map(path -> new PPathImpl(path));
+            .map(PPathImpl::new);
         // @formatter:on
     }
 
@@ -122,6 +125,16 @@ public class PPathImpl implements PPath {
         final PathWalkerVisitor visitor = new PathWalkerVisitor(walker, access, streamBuilder);
         Files.walkFileTree(getJavaPath(), visitor);
         return streamBuilder.build();
+    }
+
+
+    @Override public InputStream inputStream() throws IOException {
+        return Files.newInputStream(getJavaPath(), StandardOpenOption.READ);
+    }
+
+    @Override public OutputStream outputStream() throws IOException {
+        return Files.newOutputStream(getJavaPath(), StandardOpenOption.WRITE, StandardOpenOption.CREATE,
+            StandardOpenOption.TRUNCATE_EXISTING);
     }
 
 

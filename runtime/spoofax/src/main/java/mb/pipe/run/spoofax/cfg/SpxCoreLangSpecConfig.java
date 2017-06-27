@@ -1,23 +1,24 @@
 package mb.pipe.run.spoofax.cfg;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 import mb.pipe.run.core.path.PPath;
 
-public class SpxCoreLangConfig implements Serializable {
+public class SpxCoreLangSpecConfig implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final PPath location;
-    private final String extension;
+    private final ArrayList<String> extensions;
 
 
-    public SpxCoreLangConfig(PPath location, String extension) {
+    public SpxCoreLangSpecConfig(PPath location, ArrayList<String> extensions) {
         this.location = location;
-        this.extension = extension;
+        this.extensions = extensions;
     }
 
-    public static SpxCoreLangConfig generate(PPath location, String extension) {
-        return new SpxCoreLangConfig(location, extension);
+    public static SpxCoreLangSpecConfig generate(PPath location, ArrayList<String> extensions) {
+        return new SpxCoreLangSpecConfig(location, extensions);
     }
 
 
@@ -25,16 +26,16 @@ public class SpxCoreLangConfig implements Serializable {
         return location;
     }
 
-    public final String extension() {
-        return extension;
+    public final ArrayList<String> extensions() {
+        return extensions;
     }
 
 
     @Override public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + extension.hashCode();
         result = prime * result + location.hashCode();
+        result = prime * result + extensions.hashCode();
         return result;
     }
 
@@ -45,11 +46,12 @@ public class SpxCoreLangConfig implements Serializable {
             return false;
         if(getClass() != obj.getClass())
             return false;
-        final SpxCoreLangConfig other = (SpxCoreLangConfig) obj;
-        if(!extension.equals(other.extension))
-            return false;
+        final SpxCoreLangSpecConfig other = (SpxCoreLangSpecConfig) obj;
         if(!location.equals(other.location))
             return false;
+        if(!extensions.equals(other.extensions)) {
+            return false;
+        }
         return true;
     }
 

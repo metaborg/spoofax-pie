@@ -1,6 +1,8 @@
 package mb.pipe.run.core.path;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.URI;
 import java.nio.file.Path;
@@ -50,4 +52,9 @@ public interface PPath extends Serializable {
     }
 
     Stream<PPath> walk(PathWalker walker, @Nullable DirAccess access) throws IOException;
+
+
+    InputStream inputStream() throws IOException;
+
+    OutputStream outputStream() throws IOException;
 }

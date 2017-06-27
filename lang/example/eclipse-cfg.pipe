@@ -80,20 +80,47 @@ func getSpxCoreLangConfig(file: Path, workbenchRoot: Path) -> SpxCoreLangConfig?
 }
 
 
+/// Spoofax Core language specification configuration
+data SpxCoreLangSpecConfig = java mb.pipe.run.spoofax.cfg.SpxCoreLangSpecConfig {
+  func location() -> Path
+  func extension() -> string
+}
+func generateSpxCoreLangSpecConfig(langLoc: Path, extensions: string*) -> SpxCoreLangSpecConfig = java mb.pipe.run.spoofax.cfg.SpxCoreLangSpecConfig#generate
+func createSpxCoreLangSpecConfig(langLoc: Path) -> SpxCoreLangSpecConfig = {
+  spxCoreBuildProject(langLoc);
+  spxCoreBuildLangSpec(langLoc);
+  var langImpl = spxCoreLoadLang(langLoc);
+  var extensions = spxCoreExtensions(langImpl.id());
+  return generateSpxCoreLangSpecConfig(langLoc, extensions);
+}
+func getSpxCoreLangSpecConfig(file: Path, workbenchRoot: Path) -> SpxCoreLangSpecConfig? = {
+  var workspaceConfig = createWorkspaceConfig(workbenchRoot);
+  var extension = file.extension();
+  if(extension == null) {
+    fail "Cannot process a file without an extension";
+  }
+  var config = workspaceConfig.spxCoreLangSpecConfigForExt(extension!);
+  return config;
+}
+
+
 /// Combined configuration for the entire workspace
 data WorkspaceConfig = java mb.pipe.run.spoofax.cfg.WorkspaceConfig {
   func allExtensions() -> string*
   func langSpecExtensions() -> string*
   func spxCoreLangExtensions() -> string*
+  func spxCoreLangSpecExtensions() -> string*
   
   func langSpecConfigForExt(extension: string) -> LangSpecConfig?
   func spxCoreLangConfigForExt(extension: string) -> SpxCoreLangConfig?
+  func spxCoreLangSpecConfigForExt(extension: string) -> SpxCoreLangSpecConfig?
 }
-func generateWorkspaceConfig(langSpecConfigs: LangSpecConfig*, spxCoreLangConfigs: SpxCoreLangConfig*) -> WorkspaceConfig = java mb.pipe.run.spoofax.cfg.WorkspaceConfig#generate
+func generateWorkspaceConfig(langSpecConfigs: LangSpecConfig*, spxCoreLangConfigs: SpxCoreLangConfig*, spxCoreLangSpecConfigs: SpxCoreLangSpecConfig*) -> WorkspaceConfig = java mb.pipe.run.spoofax.cfg.WorkspaceConfig#generate
 func createWorkspaceConfig(workbenchRoot: Path) -> WorkspaceConfig = {
   var cfgLangLoc = resolveAbs("/Users/gohla/metaborg/repo/pipeline/cfg/langspec");
   var configs: LangSpecConfig* = [];
 
+  // Language specification configurations
   // Check for a config in the workbench root
   var rootConfigFile = workbenchRoot.resolve("langspec.cfg");
   if(exists(rootConfigFile)) { // Creates a dependency to config file existance
@@ -102,7 +129,6 @@ func createWorkspaceConfig(workbenchRoot: Path) -> WorkspaceConfig = {
       configs = [configs|config!];
     }
   }
-
   // Check for a config in all subdirectories
   // TODO: create a path matcher for langspec.cfg files
   foreach(var path in listContents(workbenchRoot, null)) { // Creates a dependency to directory changes
@@ -115,13 +141,26 @@ func createWorkspaceConfig(workbenchRoot: Path) -> WorkspaceConfig = {
     }
   }
   
+  // Spoofax core language configurations
   var spxCoreLangConfigs: SpxCoreLangConfig* = [
     generateSpxCoreLangConfig(resolveAbs("/Users/gohla/spoofax/master/repo/spoofax-releng/sdf/org.metaborg.meta.lang.template"), "sdf3")
   , generateSpxCoreLangConfig(resolveAbs("/Users/gohla/spoofax/master/repo/spoofax-releng/esv/org.metaborg.meta.lang.esv"), "esv")
   , generateSpxCoreLangConfig(cfgLangLoc, "cfg")
   ];
   
-  return generateWorkspaceConfig(configs, spxCoreLangConfigs);
+  // Spoofax core language specification configurations
+  var spxCoreLangSpecConfigs: SpxCoreLangSpecConfig* = [];
+  // TODO: create a path matcher for pom.xml and metaborg.yaml files
+  foreach(var path in listContents(workbenchRoot, null)) { // Creates a dependency to directory changes
+    var pomFile = path.resolve("pom.xml");
+    var metaborgYamlFile = path.resolve("metaborg.yaml");
+    if(exists(pomFile) && exists(metaborgYamlFile)) { // Creates a dependency to config file existance
+      var config = createSpxCoreLangSpecConfig(path); // Creates a dependency to file changes
+      spxCoreLangSpecConfigs = [spxCoreLangSpecConfigs|config];
+    }
+  }
+  
+  return generateWorkspaceConfig(configs, spxCoreLangConfigs, spxCoreLangSpecConfigs);
 }
 
 
@@ -132,7 +171,7 @@ func processProject(context: Context, workbenchRoot: Path) -> (Path, Token*?, Me
   var results: (Path, Token*?, Message*, Styling?)* = [];
   
   // Go over each file with a corresponding language specification config
-  foreach(var file in walkContents(context.currentDir(), extensionsPathWalker(workspaceConfig.langSpecExtensions()))) {
+  foreach(var file in walkContents(context.currentDir(), extensionsPathWalker(workspaceConfig.langSpecExtensions())?)) {
     var config = getLangSpecConfig(file, workbenchRoot);
     if(config != null) {
       var (tokens, messages, styling) = processFileWithLangSpecConfig(file, context, config!);
@@ -140,24 +179,33 @@ func processProject(context: Context, workbenchRoot: Path) -> (Path, Token*?, Me
     } else {
       // If no config was found for the file, do not process it and return an empty results.
       // This also registers the correct dependencies.
-      results = [results|(file, null, [], null)];
+      var emptyTokens: Token*? = null;
+      var emptyMessages: Message* = [];
+      var emptyStyling: Styling? = null;
+      results = [results|emptyResult(file)];
     }
   }
   
   // Go over each file with a corresponding Spoofax Core language config
-  foreach(var file in walkContents(context.currentDir(), extensionsPathWalker(workspaceConfig.spxCoreLangExtensions()))) {
+  foreach(var file in walkContents(context.currentDir(), extensionsPathWalker(workspaceConfig.spxCoreLangExtensions())?)) {
     var config = getSpxCoreLangConfig(file, workbenchRoot);
     if(config != null) {
-      var (tokens, messages, styling) = processFileWithSpxCore(file, context, config!);
+      var (tokens, messages, styling) = processFileWithSpxCoreLang(file, context, config!);
       results = [results|(file, tokens, messages, styling)];
     } else {
       // If no config was found for the file, do not process it and return an empty results.
       // This also registers the correct dependencies.
-      results = [results|(file, null, [], null)];
+      results = [results|emptyResult(file)];
     }
   }
   
   return results;
+}
+func emptyResult(file: Path) -> (Path, Token*?, Message*, Styling?) = {
+  var emptyTokens: Token*? = null;
+  var emptyMessages: Message* = [];
+  var emptyStyling: Styling? = null;
+  return (file, emptyTokens, emptyMessages, emptyStyling);
 }
 func processString(text: string, associatedFile: Path, context: Context, workbenchRoot: Path) -> (Token*?, Message*, Styling?)? = {
   var langSpecConfig = getLangSpecConfig(associatedFile, workbenchRoot);
@@ -166,7 +214,7 @@ func processString(text: string, associatedFile: Path, context: Context, workben
   }
   var spxCoreLangConfig = getSpxCoreLangConfig(associatedFile, workbenchRoot);
   if(spxCoreLangConfig != null) {
-    return processStringWithSpxCore(text, associatedFile, context, spxCoreLangConfig!)?; 
+    return processStringWithSpxCoreLang(text, associatedFile, context, spxCoreLangConfig!)?; 
   }
   // No config found for file, do not process file, but this does register a dependency.
   return null;
@@ -193,12 +241,16 @@ func parse(text: string, context: Context, langSpecConfig: LangSpecConfig) -> (A
   var mainFile = langSpecConfig.getSyntaxMainFile();
   var startSymbol = langSpecConfig.getSyntaxStartSymbol();
   if(mainFile == null || startSymbol == null) {
-    return (null, null, []);
+    var emptyAst: Ast? = null;
+    var emptyTokens: Token*? = null;
+    var emptyMessages: Message* = [];
+    return (emptyAst, emptyTokens, emptyMessages);
   }
   
   var langLoc = resolveAbs("/Users/gohla/spoofax/master/repo/spoofax-releng/sdf/org.metaborg.meta.lang.template");
-  var specDir = context.currentDir(); 
+  var specDir = context.currentDir();
   var includedFiles: Path* = [];
+  includedFiles = [];
 
   var parseTable = sdf2table(langLoc, specDir, mainFile!, includedFiles);
   if(parseTable == null) fail "Unable to build parse table";
@@ -218,7 +270,7 @@ func style(tokenStream: Token*, context: Context, langSpecConfig: LangSpecConfig
   var syntaxStyler = esv2styler(langLoc, specDir, mainFile!, includedFiles);
   if(syntaxStyler == null) fail "Unable to build syntax styler";
   
-  return esvStyle(tokenStream, syntaxStyler!);
+  return esvStyle(tokenStream, syntaxStyler!)?;
 }
 
 
@@ -250,15 +302,23 @@ func createCompileGoal() -> TransformGoal = kotlin mb.pipe.run.ceres.spoofax.cor
 func createNamedGoal(name: string) -> TransformGoal = kotlin mb.pipe.run.ceres.spoofax.core#createCompileGoal
 func spxCoreTransform(langId: LangId, projectDir: Path, associatedFile: Path, ast: Ast, goal: TransformGoal) -> (Ast?, Path?) = ceres mb.pipe.run.ceres.spoofax.core.CoreTrans
 
+// Building
+func spxCoreBuildProject(projectDir: Path) -> void = ceres mb.pipe.run.ceres.spoofax.core.CoreBuild
+func spxCoreBuildLangSpec(langSpecDir: Path) -> void = ceres mb.pipe.run.ceres.spoofax.core.CoreBuildLangSpec
+
+// Extensions
+func spxCoreExtensions(langId: LangId) -> string* = ceres mb.pipe.run.ceres.spoofax.core.CoreExtensions
+
 // Styling
 func spxCoreStyle(langId: LangId, tokens: Token*, ast: Ast) -> Styling = ceres mb.pipe.run.ceres.spoofax.core.CoreStyle
 
+
 /// Interoperability functions
-func processFileWithSpxCore(file: Path, context: Context, config: SpxCoreLangConfig) -> (Token*?, Message*, Styling?) = {
+func processFileWithSpxCoreLang(file: Path, context: Context, config: SpxCoreLangConfig) -> (Token*?, Message*, Styling?) = {
   var text = readFile(file); // Creates a dependency to file changes
-  return processStringWithSpxCore(text, file, context, config);
+  return processStringWithSpxCoreLang(text, file, context, config);
 }
-func processStringWithSpxCore(text: string, associatedFile: Path, context: Context, config: SpxCoreLangConfig) -> (Token*?, Message*, Styling?) = {
+func processStringWithSpxCoreLang(text: string, associatedFile: Path, context: Context, config: SpxCoreLangConfig) -> (Token*?, Message*, Styling?) = {
   var langImpl = spxCoreLoadLang(config.location());
   var langId = langImpl.id();
   var project = spxCoreLoadProject(context.currentDir());
@@ -266,7 +326,7 @@ func processStringWithSpxCore(text: string, associatedFile: Path, context: Conte
   var (ast, tokens, messages) = spxCoreParse(langId, associatedFile, text);
   var styling: Styling?;
   if(ast != null && tokens != null) {
-    styling = spxCoreStyle(langId, tokens!, ast!);
+    styling = spxCoreStyle(langId, tokens!, ast!)?;
   } else {
     styling = null;
   }
