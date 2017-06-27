@@ -18,8 +18,9 @@ signature
 
   constructors
   
-    FuncTy : list(Type) * Type -> Type // TODO: fix gen
+    FuncTy : list(Type) * Type -> Type
     TopTy  : Type
+    NullTy : Type
     
     JavaTypeKind : TypeKind
     
@@ -35,25 +36,7 @@ signature
 rules // Init
 
   init ^ (s_root) :=
-    new s_root,
-    
-    TopTy()  <! NullableTy(BoolTy()),
-    TopTy()  <! ListTy(BoolTy()),
-    TopTy()  <! NullableTy(ListTy(BoolTy())),
-    TopTy()  <! ListTy(NullableTy(BoolTy())),
-    BoolTy() <! NullableTy(BoolTy()),
-    
-    TopTy()  <! NullableTy(IntTy()),
-    TopTy()  <! ListTy(IntTy()),
-    TopTy()  <! NullableTy(ListTy(IntTy())),
-    TopTy()  <! ListTy(NullableTy(IntTy())),
-    IntTy()  <! NullableTy(IntTy()),
-    
-    TopTy()  <! NullableTy(StrTy()),
-    TopTy()  <! ListTy(StrTy()),
-    TopTy()  <! NullableTy(ListTy(StrTy())),
-    TopTy()  <! ListTy(NullableTy(StrTy())),
-    StrTy()  <! NullableTy(StrTy()).
+    new s_root.
 
 rules // Program
 

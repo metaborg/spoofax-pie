@@ -136,7 +136,7 @@ rules // Simple literals
   [[ BoolLit(_) ^ (s) : BoolTy() ]] := true.
   [[ IntLit(_)  ^ (s) : IntTy()  ]] := true.
   [[ StrLit(_)  ^ (s) : StrTy()  ]] := true.
-  [[ NullLit()  ^ (s) : TopTy()  ]] := true.
+  [[ NullLit()  ^ (s) : NullTy() ]] := true.
 
 rules // Composite literals
 

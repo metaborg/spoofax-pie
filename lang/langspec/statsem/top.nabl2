@@ -8,14 +8,6 @@ rules
     
     ty == DataTy(Type{id_type}),
     Type{id_type} : ty !,
-    TopTy() <! NullableTy(ty),
-    ty <! NullableTy(ty),
-    TopTy() <! NullableTy(ty),
-    TopTy() <! NullableTy(ListTy(ty)),
-    TopTy() <! ListTy(NullableTy(ty)),
-    ListTy(ty) <! ListTy(TopTy()),
-    ListTy(ty) <! NullableTy(ListTy(TopTy())),
-    ListTy(ty) <! ListTy(NullableTy(TopTy())),
     [[ super ^ (s, ty) ]],
     
     new s_data,
