@@ -44,7 +44,7 @@ public class PipePlugin extends AbstractUIPlugin implements IStartup {
 
         try {
             pipeFacade = new PipeFacade(new PipeEclipseModule(logger), new EclipseModule(), new PipeSpoofaxModule(),
-                new CeresModule(), new CeresBuilderModule(), new PipeCeresModule());
+                new PipeCeresModule(), new CeresBuilderModule());
             StaticPipeFacade.init(pipeFacade);
         } catch(PipeEx e) {
             logger.error("Instantiating Pipe failed", e);
@@ -52,7 +52,7 @@ public class PipePlugin extends AbstractUIPlugin implements IStartup {
         }
 
         try {
-            spoofaxFacade = new Spoofax(new SpoofaxExtensionModule());
+            spoofaxFacade = new Spoofax(new SpoofaxPipeModule(), new SpoofaxExtensionModule());
             spoofaxMetaFacade = new SpoofaxMeta(spoofaxFacade);
             StaticSpoofax.init(spoofaxMetaFacade);
         } catch(MetaborgException e) {
@@ -60,22 +60,26 @@ public class PipePlugin extends AbstractUIPlugin implements IStartup {
             throw e;
         }
 
-        // // Load baseline meta-languages
-        // final ILanguageDiscoveryService langDiscoverSrv = spoofaxFacade.languageDiscoveryService;
-        // langDiscoverSrv.languageFromArchive(spoofaxFacade.resolve(
-        // "/Users/gohla/.m2/repository/org/metaborg/org.metaborg.meta.lang.esv/2.2.1/org.metaborg.meta.lang.esv-2.2.1.spoofax-language"));
-        // langDiscoverSrv.languageFromArchive(spoofaxFacade.resolve(
-        // "/Users/gohla/.m2/repository/org/metaborg/org.metaborg.meta.lang.template/2.2.1/org.metaborg.meta.lang.template-2.2.1.spoofax-language"));
-        // langDiscoverSrv.languageFromArchive(spoofaxFacade.resolve(
-        // "/Users/gohla/.m2/repository/org/metaborg/meta.lib.spoofax/2.2.1/meta.lib.spoofax-2.2.1.spoofax-language"));
-        //
-        // // Load meta-languages
-        // langDiscoverSrv.languageFromArchive(spoofaxFacade.resolve(
-        // "/Users/gohla/.m2/repository/org/metaborg/org.metaborg.meta.lang.esv/2.3.0-SNAPSHOT/org.metaborg.meta.lang.esv-2.3.0-SNAPSHOT.spoofax-language"));
-        // langDiscoverSrv.languageFromArchive(spoofaxFacade.resolve(
-        // "/Users/gohla/.m2/repository/org/metaborg/org.metaborg.meta.lang.template/2.3.0-SNAPSHOT/org.metaborg.meta.lang.template-2.3.0-SNAPSHOT.spoofax-language"));
-        // langDiscoverSrv.languageFromArchive(spoofaxFacade.resolve(
-        // "/Users/gohla/.m2/repository/org/metaborg/meta.lib.spoofax/2.3.0-SNAPSHOT/meta.lib.spoofax-2.3.0-SNAPSHOT.spoofax-language"));
+        // Load meta-languages
+        final ILanguageDiscoveryService langDiscoverSrv = spoofaxFacade.languageDiscoveryService;
+        final String spoofaxDir = "/Users/gohla/spoofax";
+        final String spoofaxRelengMasterDir = spoofaxDir + "/master/repo/spoofax-releng";
+
+        langDiscoverSrv
+            .languageFromDirectory(spoofaxFacade.resolve(spoofaxRelengMasterDir + "/esv/org.metaborg.meta.lang.esv"));
+        langDiscoverSrv.languageFromDirectory(
+            spoofaxFacade.resolve(spoofaxRelengMasterDir + "/sdf/org.metaborg.meta.lang.template"));
+        langDiscoverSrv
+            .languageFromDirectory(spoofaxFacade.resolve(spoofaxRelengMasterDir + "/spoofax/meta.lib.spoofax"));
+
+        // Load baseline meta-languages
+        final String spoofaxRelengReleaseDir = spoofaxDir + "/release/repo/spoofax-releng";
+        langDiscoverSrv
+            .languageFromDirectory(spoofaxFacade.resolve(spoofaxRelengReleaseDir + "/esv/org.metaborg.meta.lang.esv"));
+        langDiscoverSrv.languageFromDirectory(
+            spoofaxFacade.resolve(spoofaxRelengReleaseDir + "/sdf/org.metaborg.meta.lang.template"));
+        langDiscoverSrv
+            .languageFromDirectory(spoofaxFacade.resolve(spoofaxRelengReleaseDir + "/spoofax/meta.lib.spoofax"));
 
         doneLoading = true;
     }

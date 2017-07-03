@@ -1,24 +1,51 @@
 package mb.pipe.run.ceres
 
 import com.google.inject.Binder
-import com.google.inject.Module
-import mb.ceres.*
+import mb.ceres.BuildReporter
+import mb.ceres.CeresModule
+import mb.ceres.asSingleton
+import mb.ceres.bind
+import mb.ceres.bindBuilder
+import mb.ceres.builderMapBinder
 import mb.ceres.impl.BuildCache
 import mb.ceres.impl.MapBuildCache
-import mb.pipe.run.ceres.path.*
-import mb.pipe.run.ceres.spoofax.*
-import mb.pipe.run.ceres.spoofax.core.*
+import mb.ceres.to
+import mb.pipe.run.ceres.path.Copy
+import mb.pipe.run.ceres.path.Exists
+import mb.pipe.run.ceres.path.ListContents
+import mb.pipe.run.ceres.path.Read
+import mb.pipe.run.ceres.path.WalkContents
+import mb.pipe.run.ceres.spoofax.GenerateLangSpecConfig
+import mb.pipe.run.ceres.spoofax.GenerateStylerRules
+import mb.pipe.run.ceres.spoofax.GenerateTable
+import mb.pipe.run.ceres.spoofax.Parse
+import mb.pipe.run.ceres.spoofax.Style
+import mb.pipe.run.ceres.spoofax.core.CoreAnalyze
+import mb.pipe.run.ceres.spoofax.core.CoreBuild
+import mb.pipe.run.ceres.spoofax.core.CoreBuildLangSpec
+import mb.pipe.run.ceres.spoofax.core.CoreExtensions
+import mb.pipe.run.ceres.spoofax.core.CoreLoadLang
+import mb.pipe.run.ceres.spoofax.core.CoreLoadProj
+import mb.pipe.run.ceres.spoofax.core.CoreParse
+import mb.pipe.run.ceres.spoofax.core.CoreStyle
+import mb.pipe.run.ceres.spoofax.core.CoreTrans
+import mb.pipe.run.ceres.util.LoggerBuildReporter
 
-open class PipeCeresModule : Module {
+open class PipeCeresModule : CeresModule() {
   override fun configure(binder: Binder) {
+    super.configure(binder);
+
     binder.bindCache();
     binder.bindCeres();
     binder.bindBuilders();
-
   }
 
   open protected fun Binder.bindCache() {
     bind<BuildCache>().to<MapBuildCache>();
+  }
+
+  override protected fun Binder.bindReporter() {
+    bind<BuildReporter>().to<LoggerBuildReporter>()
   }
 
   open protected fun Binder.bindCeres() {

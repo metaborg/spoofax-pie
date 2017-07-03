@@ -4,6 +4,7 @@ import mb.ceres.*
 import mb.pipe.run.core.*
 import mb.pipe.run.ceres.util.*
 import com.google.inject.*
+import java.io.Serializable
 
 class getLangSpecConfig : Builder<getLangSpecConfig.Input, mb.pipe.run.spoofax.cfg.LangSpecConfig?> {
   data class Input(val file: mb.pipe.run.core.path.PPath, val workbenchRoot: mb.pipe.run.core.path.PPath) : Tuple2<mb.pipe.run.core.path.PPath, mb.pipe.run.core.path.PPath> {
@@ -90,7 +91,7 @@ class createWorkspaceConfig : Builder<mb.pipe.run.core.path.PPath, mb.pipe.run.s
         }
       }
     }
-    var spxCoreLangConfigs: ArrayList<mb.pipe.run.spoofax.cfg.SpxCoreLangConfig> = list(mb.pipe.run.spoofax.cfg.SpxCoreLangConfig.generate(mb.pipe.run.ceres.path.resolve("/Users/gohla/spoofax/master/repo/spoofax-releng/sdf/org.metaborg.meta.lang.template"), "sdf3"), mb.pipe.run.spoofax.cfg.SpxCoreLangConfig.generate(mb.pipe.run.ceres.path.resolve("/Users/gohla/spoofax/master/repo/spoofax-releng/esv/org.metaborg.meta.lang.esv"), "esv"), mb.pipe.run.spoofax.cfg.SpxCoreLangConfig.generate(cfgLangLoc, "cfg"))
+    var spxCoreLangConfigs: ArrayList<mb.pipe.run.spoofax.cfg.SpxCoreLangConfig> = list(mb.pipe.run.spoofax.cfg.SpxCoreLangConfig.generate(mb.pipe.run.ceres.path.resolve("/Users/gohla/spoofax/master/repo/spoofax-releng/sdf/org.metaborg.meta.lang.template"), "sdf3"), mb.pipe.run.spoofax.cfg.SpxCoreLangConfig.generate(cfgLangLoc, "cfg"))
     var spxCoreLangSpecConfigs: ArrayList<mb.pipe.run.spoofax.cfg.SpxCoreLangSpecConfig> = list()
     for (path in requireOutput(mb.pipe.run.ceres.path.ListContents::class.java, mb.pipe.run.ceres.path.ListContents.Input(input, null))) {
       var pomFile = path.resolve("pom.xml")

@@ -15,6 +15,8 @@ import org.eclipse.jdt.core.compiler.batch.BatchCompiler
 import org.metaborg.spoofax.meta.core.build.LanguageSpecBuildInput
 import org.metaborg.spoofax.meta.core.build.SpoofaxLangSpecCommonPaths
 import java.io.PrintWriter
+import mb.pipe.run.core.log.LoggingOutputStream
+import mb.pipe.run.core.log.Level
 
 
 class CoreBuildLangSpec @Inject constructor(log: Logger, val pathSrv: PathSrv) : OutEffectBuilder<PPath> {
@@ -46,27 +48,30 @@ class CoreBuildLangSpec @Inject constructor(log: Logger, val pathSrv: PathSrv) :
 
     // Compile Java
     // Get paths to files and directories
-    val spoofaxUberJar = pathSrv.resolveLocal("/Users/gohla/spoofax/master/repo/spoofax-releng/spoofax/org.metaborg.spoofax.core.uber/target/org.metaborg.spoofax.core.uber-2.3.0-SNAPSHOT.jar");
     val commonPaths = SpoofaxLangSpecCommonPaths(input.fileObject)
     val strategiesDir = commonPaths.strJavaStratDir().pPath
-    val targetClassesDir = commonPaths.targetClassesDir().pPath
+    require(strategiesDir.cPath, PathStampers.exists)
+    if (strategiesDir.exists()) {
+      val targetClassesDir = commonPaths.targetClassesDir().pPath
+      val spoofaxUberJar = pathSrv.resolveLocal("/Users/gohla/spoofax/master/repo/spoofax-releng/spoofax/org.metaborg.spoofax.core.uber/target/org.metaborg.spoofax.core.uber-2.3.0-SNAPSHOT.jar");
 
-    // Require the java files and Spoofax uber JAR
-    require(strategiesDir.cPath, PathStampers.modified)
-    require(spoofaxUberJar.cPath, PathStampers.hash)
+      // Require the java files and Spoofax uber JAR
+      require(strategiesDir.cPath, PathStampers.modified)
+      require(spoofaxUberJar.cPath, PathStampers.hash)
 
-    // Execute the Java compiler
-    val args = arrayOf(
-      "$strategiesDir", // Input directory
-      "-cp $spoofaxUberJar", // Classpath
-      "-d $targetClassesDir", // Output directory
-      "-1.8", // Use Java 8
-      "-g" // Generate debug attributes
-    )
-    BatchCompiler.compile(args, PrintWriter(System.out), PrintWriter(System.err), null)
+      // Execute the Java compiler
+      val args = arrayOf(
+              "${strategiesDir.javaPath.toFile()}", // Input directory
+              "-cp ${spoofaxUberJar.javaPath.toFile()}", // Classpath
+              "-d ${targetClassesDir.javaPath.toFile()}", // Output directory
+              "-1.8", // Use Java 8
+              "-g" // Generate debug attributes
+      )
+      BatchCompiler.compile(args, PrintWriter(LoggingOutputStream(log, Level.Info), true), PrintWriter(LoggingOutputStream(log, Level.Error), true), null)
 
-    // Require the generated class files
-    generate(targetClassesDir.cPath)
+      // Require the generated class files
+      generate(targetClassesDir.cPath)
+    }
 
     // Package and archive
     spoofaxMeta.metaBuilder.pkg(langSpecBuildInput)

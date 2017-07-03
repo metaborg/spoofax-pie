@@ -27,7 +27,7 @@ class CeresSrvImpl @Inject constructor(
 
   override operator fun get(dir: PPath): BuildManager {
     return buildManagers.getOrPut(dir) {
-      val storeDir = dir.resolve("target/ceres");
+      val storeDir = dir.resolve(".ceres");
       val localStoreDir = pathSrv.localPath(storeDir);
       if (localStoreDir == null) {
         throw PipeRunEx("Cannot create Ceres LMDB store at $storeDir because it is not on the local filesystem");

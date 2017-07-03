@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,8 +41,12 @@ public class PathSrvImpl implements PathSrv {
     }
 
     @Override public PPath resolve(URI uri) {
+        try {
         final Path javaPath = Paths.get(uri);
         return new PPathImpl(uri, javaPath);
+        } catch(IllegalArgumentException | FileSystemNotFoundException e) {
+            throw new PipeRunEx("Could not get Java path for URI " + uri, e);
+        }
     }
 
     @Override public PPath resolve(Path path) {
