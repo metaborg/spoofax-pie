@@ -4,7 +4,6 @@ import mb.ceres.*
 import mb.pipe.run.core.*
 import mb.pipe.run.ceres.util.*
 import com.google.inject.*
-import java.io.Serializable
 
 class getLangSpecConfig : Builder<getLangSpecConfig.Input, mb.pipe.run.spoofax.cfg.LangSpecConfig?> {
   data class Input(val file: mb.pipe.run.core.path.PPath, val workbenchRoot: mb.pipe.run.core.path.PPath) : Tuple2<mb.pipe.run.core.path.PPath, mb.pipe.run.core.path.PPath> {
@@ -43,11 +42,13 @@ class getSpxCoreLangConfig : Builder<getSpxCoreLangConfig.Input, mb.pipe.run.spo
 class createSpxCoreLangSpecConfig : Builder<mb.pipe.run.core.path.PPath, mb.pipe.run.spoofax.cfg.SpxCoreLangSpecConfig> {
   override val id = "createSpxCoreLangSpecConfig"
   override fun BuildContext.build(input: mb.pipe.run.core.path.PPath): mb.pipe.run.spoofax.cfg.SpxCoreLangSpecConfig {
-    requireOutput(mb.pipe.run.ceres.spoofax.core.CoreBuild::class.java, input)
-    requireOutput(mb.pipe.run.ceres.spoofax.core.CoreBuildLangSpec::class.java, input)
-    var langImpl = requireOutput(mb.pipe.run.ceres.spoofax.core.CoreLoadLang::class.java, input)
+    var project = requireOutput(mb.pipe.run.ceres.spoofax.core.CoreLoadProj::class.java, input)
+    var langDir = project.v.directory()
+    requireOutput(mb.pipe.run.ceres.spoofax.core.CoreBuild::class.java, langDir)
+    requireOutput(mb.pipe.run.ceres.spoofax.core.CoreBuildLangSpec::class.java, langDir)
+    var langImpl = requireOutput(mb.pipe.run.ceres.spoofax.core.CoreLoadLang::class.java, langDir)
     var extensions = requireOutput(mb.pipe.run.ceres.spoofax.core.CoreExtensions::class.java, langImpl.v.id())
-    return mb.pipe.run.spoofax.cfg.SpxCoreLangSpecConfig.generate(input, extensions)
+    return mb.pipe.run.spoofax.cfg.SpxCoreLangSpecConfig.generate(langDir, extensions)
   }
 }
 

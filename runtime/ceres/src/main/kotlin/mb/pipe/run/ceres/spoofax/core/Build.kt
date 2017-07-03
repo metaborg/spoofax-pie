@@ -1,14 +1,17 @@
 package mb.pipe.run.ceres.spoofax.core
 
 import com.google.inject.Inject
-import mb.ceres.*
+import mb.ceres.BuildContext
+import mb.ceres.BuildException
+import mb.ceres.OutEffectBuilder
+import mb.ceres.PathStampers
 import mb.pipe.run.core.log.Logger
 import mb.pipe.run.core.path.PPath
 import org.metaborg.core.action.CompileGoal
 import org.metaborg.core.build.BuildInputBuilder
 import org.metaborg.spoofax.core.resource.SpoofaxIgnoresSelector
 
-class CoreBuild @Inject constructor(log: Logger) : Builder<PPath, None> {
+class CoreBuild @Inject constructor(log: Logger) : OutEffectBuilder<PPath> {
   companion object {
     val id = "coreBuild"
   }
@@ -16,7 +19,7 @@ class CoreBuild @Inject constructor(log: Logger) : Builder<PPath, None> {
   val log: Logger = log.forContext(CoreBuild::class.java)
 
   override val id = Companion.id
-  override fun BuildContext.build(input: PPath): None {
+  override fun BuildContext.effect(input: PPath) {
     val spoofax = Spx.spoofax()
     val project = spoofax.projectService.get(input.fileObject) ?: throw BuildException("Cannot build project at $input, it has not been loaded as a project")
     val inputBuilder = BuildInputBuilder(project)
@@ -41,8 +44,6 @@ class CoreBuild @Inject constructor(log: Logger) : Builder<PPath, None> {
       .flatMap { it.outputs() }
       .mapNotNull { it.output()?.cPath }
       .forEach { generate(it) }
-
-    return None.instance
   }
 }
 

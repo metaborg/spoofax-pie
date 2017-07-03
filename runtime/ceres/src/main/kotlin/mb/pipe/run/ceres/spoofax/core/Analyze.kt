@@ -13,9 +13,7 @@ import mb.pipe.run.spoofax.util.MessageConverter
 import org.metaborg.core.analysis.AnalysisException
 import org.metaborg.core.language.LanguageIdentifier
 import org.metaborg.core.messages.IMessage
-import org.metaborg.spoofax.core.analysis.AnalysisFacet
 import org.metaborg.spoofax.core.stratego.StrategoRuntimeFacet
-import org.metaborg.spoofax.core.syntax.SyntaxFacet
 import org.metaborg.spoofax.core.unit.ParseContrib
 import org.metaborg.util.iterators.Iterables2
 import org.spoofax.interpreter.terms.IStrategoTerm

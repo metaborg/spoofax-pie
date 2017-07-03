@@ -105,7 +105,7 @@ class Read : Builder<PPath, String> {
 
   override val id = Companion.id
   override fun BuildContext.build(input: PPath): String {
-    require(input.cPath)
+    require(input.cPath, PathStampers.hash)
     try {
       return String(Files.readAllBytes(input.javaPath))
     } catch(e: IOException) {

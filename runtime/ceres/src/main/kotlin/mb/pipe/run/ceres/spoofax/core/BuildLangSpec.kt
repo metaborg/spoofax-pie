@@ -1,7 +1,10 @@
 package mb.pipe.run.ceres.spoofax.core
 
 import com.google.inject.Inject
-import mb.ceres.*
+import mb.ceres.BuildContext
+import mb.ceres.BuildException
+import mb.ceres.OutEffectBuilder
+import mb.ceres.PathStampers
 import mb.pipe.run.ceres.path.cPath
 import mb.pipe.run.core.log.Logger
 import mb.pipe.run.core.path.DirAccess
@@ -14,7 +17,7 @@ import org.metaborg.spoofax.meta.core.build.SpoofaxLangSpecCommonPaths
 import java.io.PrintWriter
 
 
-class CoreBuildLangSpec @Inject constructor(log: Logger, val pathSrv: PathSrv) : Builder<PPath, None> {
+class CoreBuildLangSpec @Inject constructor(log: Logger, val pathSrv: PathSrv) : OutEffectBuilder<PPath> {
   companion object {
     val id = "coreBuildLangSpec"
   }
@@ -22,7 +25,7 @@ class CoreBuildLangSpec @Inject constructor(log: Logger, val pathSrv: PathSrv) :
   val log: Logger = log.forContext(CoreBuild::class.java)
 
   override val id = Companion.id
-  override fun BuildContext.build(input: PPath): None {
+  override fun BuildContext.effect(input: PPath) {
     val spoofax = Spx.spoofax()
     val spoofaxMeta = Spx.spoofaxMeta()
 
@@ -72,8 +75,6 @@ class CoreBuildLangSpec @Inject constructor(log: Logger, val pathSrv: PathSrv) :
     // Require the generated archives
     val targetMetaborgDir = commonPaths.targetMetaborgDir()
     require(targetMetaborgDir.cPath, PathStampers.hash)
-
-    return None.instance
   }
 }
 

@@ -4,6 +4,7 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.metaborg.core.MetaborgException;
+import org.metaborg.core.language.ILanguageDiscoveryService;
 import org.metaborg.spoofax.core.Spoofax;
 import org.metaborg.spoofax.meta.core.SpoofaxExtensionModule;
 import org.metaborg.spoofax.meta.core.SpoofaxMeta;
@@ -58,6 +59,23 @@ public class PipePlugin extends AbstractUIPlugin implements IStartup {
             logger.error("Instantiating Spoofax failed", e);
             throw e;
         }
+
+        // // Load baseline meta-languages
+        // final ILanguageDiscoveryService langDiscoverSrv = spoofaxFacade.languageDiscoveryService;
+        // langDiscoverSrv.languageFromArchive(spoofaxFacade.resolve(
+        // "/Users/gohla/.m2/repository/org/metaborg/org.metaborg.meta.lang.esv/2.2.1/org.metaborg.meta.lang.esv-2.2.1.spoofax-language"));
+        // langDiscoverSrv.languageFromArchive(spoofaxFacade.resolve(
+        // "/Users/gohla/.m2/repository/org/metaborg/org.metaborg.meta.lang.template/2.2.1/org.metaborg.meta.lang.template-2.2.1.spoofax-language"));
+        // langDiscoverSrv.languageFromArchive(spoofaxFacade.resolve(
+        // "/Users/gohla/.m2/repository/org/metaborg/meta.lib.spoofax/2.2.1/meta.lib.spoofax-2.2.1.spoofax-language"));
+        //
+        // // Load meta-languages
+        // langDiscoverSrv.languageFromArchive(spoofaxFacade.resolve(
+        // "/Users/gohla/.m2/repository/org/metaborg/org.metaborg.meta.lang.esv/2.3.0-SNAPSHOT/org.metaborg.meta.lang.esv-2.3.0-SNAPSHOT.spoofax-language"));
+        // langDiscoverSrv.languageFromArchive(spoofaxFacade.resolve(
+        // "/Users/gohla/.m2/repository/org/metaborg/org.metaborg.meta.lang.template/2.3.0-SNAPSHOT/org.metaborg.meta.lang.template-2.3.0-SNAPSHOT.spoofax-language"));
+        // langDiscoverSrv.languageFromArchive(spoofaxFacade.resolve(
+        // "/Users/gohla/.m2/repository/org/metaborg/meta.lib.spoofax/2.3.0-SNAPSHOT/meta.lib.spoofax-2.3.0-SNAPSHOT.spoofax-language"));
 
         doneLoading = true;
     }

@@ -72,7 +72,7 @@ public class PipeLangSpecProjectBuilder extends IncrementalProjectBuilder {
         final Context context = contextFactory.create(projectDir);
 
         logger.info("Building project {}", project);
-        final BuildManager buildManager = ceresSrv.get(context);
+        final BuildManager buildManager = ceresSrv.get(workspaceRoot);
         ArrayList<Tuple4<? extends PPath, @Nullable ? extends ArrayList<Token>, ? extends ArrayList<Msg>, @Nullable ? extends Styling>> results;
         try {
             results = buildManager.build(processProject.class, new processProject.Input(context, workspaceRoot));
@@ -130,9 +130,8 @@ public class PipeLangSpecProjectBuilder extends IncrementalProjectBuilder {
         final IProject project = getProject();
         MarkerUtils.clearAllRec(project);
 
-        final PPath projectDir = pathSrv.resolve(project);
-        final Context context = contextFactory.create(projectDir);
-        final BuildManager buildManager = ceresSrv.get(context);
+        final PPath workspaceRoot = pathSrv.resolveWorkspaceRoot();
+        final BuildManager buildManager = ceresSrv.get(workspaceRoot);
         buildManager.dropStore();
         buildManager.dropCache();
 

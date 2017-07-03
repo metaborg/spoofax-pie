@@ -5,28 +5,28 @@ import com.google.inject.Provider
 import mb.ceres.BuildManager
 import mb.ceres.BuildManagerFactory
 import mb.ceres.impl.BuildCache
-import mb.ceres.internal.LMDBBuildStoreFactory
+import mb.ceres.impl.LMDBBuildStoreFactory
 import mb.pipe.run.core.PipeRunEx
 import mb.pipe.run.core.model.Context
 import mb.pipe.run.core.path.PathSrv
 import java.util.concurrent.ConcurrentHashMap
+import mb.pipe.run.core.path.PPath
 
 interface CeresSrv {
-  operator fun get(context: Context): BuildManager
+  operator fun get(dir: PPath): BuildManager
 }
 
 class CeresSrvImpl @Inject constructor(
-        private val pathSrv: PathSrv,
-        private val buildManagerFactory: BuildManagerFactory,
-        private val storeFactory: LMDBBuildStoreFactory,
-        private val cacheFactory: Provider<BuildCache>)
+  private val pathSrv: PathSrv,
+  private val buildManagerFactory: BuildManagerFactory,
+  private val storeFactory: LMDBBuildStoreFactory,
+  private val cacheFactory: Provider<BuildCache>)
   : CeresSrv {
-  val buildManagers = ConcurrentHashMap<Context, BuildManager>()
+  val buildManagers = ConcurrentHashMap<PPath, BuildManager>()
 
 
-  override operator fun get(context: Context): BuildManager {
-    return buildManagers.getOrPut(context) {
-      val dir = context.currentDir();
+  override operator fun get(dir: PPath): BuildManager {
+    return buildManagers.getOrPut(dir) {
       val storeDir = dir.resolve("target/ceres");
       val localStoreDir = pathSrv.localPath(storeDir);
       if (localStoreDir == null) {

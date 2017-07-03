@@ -87,11 +87,13 @@ data SpxCoreLangSpecConfig = java mb.pipe.run.spoofax.cfg.SpxCoreLangSpecConfig 
 }
 func generateSpxCoreLangSpecConfig(langLoc: Path, extensions: string*) -> SpxCoreLangSpecConfig = java mb.pipe.run.spoofax.cfg.SpxCoreLangSpecConfig#generate
 func createSpxCoreLangSpecConfig(langLoc: Path) -> SpxCoreLangSpecConfig = {
-  spxCoreBuildProject(langLoc);
-  spxCoreBuildLangSpec(langLoc);
-  var langImpl = spxCoreLoadLang(langLoc);
+  var project = spxCoreLoadProject(langLoc);
+  var langDir = project.directory();
+  spxCoreBuildProject(langDir);
+  spxCoreBuildLangSpec(langDir);
+  var langImpl = spxCoreLoadLang(langDir);
   var extensions = spxCoreExtensions(langImpl.id());
-  return generateSpxCoreLangSpecConfig(langLoc, extensions);
+  return generateSpxCoreLangSpecConfig(langDir, extensions);
 }
 func getSpxCoreLangSpecConfig(file: Path, workbenchRoot: Path) -> SpxCoreLangSpecConfig? = {
   var workspaceConfig = createWorkspaceConfig(workbenchRoot);
