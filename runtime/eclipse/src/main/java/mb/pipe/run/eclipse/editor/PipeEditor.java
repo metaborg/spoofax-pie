@@ -153,7 +153,6 @@ public class PipeEditor extends TextEditor {
         final IProject project = eclipseFile.getProject();
         final PPath projectDir = pathSrv.resolve(project);
         final Context context = contextFactory.create(projectDir);
-        final PPath workspaceRoot = pathSrv.resolveWorkspaceRoot();
         final BuildManager buildManager = ceresSrv.get(workspaceRoot);
         final Job job = new EditorUpdateJob(logger, buildManager, updater, this, document.get(), context, input, file,
             eclipseFile, workspaceRoot);
