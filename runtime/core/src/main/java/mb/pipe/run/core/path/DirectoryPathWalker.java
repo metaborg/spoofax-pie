@@ -1,14 +1,16 @@
 package mb.pipe.run.core.path;
 
-public class AllPathWalker implements PathWalker {
+import java.nio.file.Files;
+
+class DirectoryPathWalker implements PathWalker {
     private static final long serialVersionUID = 1L;
 
 
-    @Override public boolean traverse(PPath path) {
-        return true;
+    @Override public boolean matches(PPath path) {
+        return Files.isDirectory(path.getJavaPath());
     }
 
-    @Override public boolean matches(PPath path) {
+    @Override public boolean traverse(PPath path) {
         return true;
     }
 
@@ -28,6 +30,6 @@ public class AllPathWalker implements PathWalker {
     }
 
     @Override public String toString() {
-        return "AllPathWalker";
+        return "DirectoryPathWalker";
     }
 }

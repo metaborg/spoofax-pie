@@ -77,6 +77,10 @@ rules // Unary expressions
     [[ exp ^ (s) : ty ]],
     ty == NullableTy(ty_inner) | error $[Type mismatch: expected nullable type, got [ty]] @ exp.
 
+  [[ Not(exp) ^ (s) : BoolTy() ]] :=
+    [[ exp ^ (s) : ty ]],
+    ty == BoolTy() | error $[Type mismatch: expected boolean type, got [ty]] @ exp.
+
 rules // Binary expressions
 
   // TODO: should use LUB to work both ways. However, that requires separating nullability into a property 

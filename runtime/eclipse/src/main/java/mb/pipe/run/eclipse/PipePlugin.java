@@ -1,5 +1,6 @@
 package mb.pipe.run.eclipse;
 
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -12,12 +13,12 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import mb.ceres.CeresModule;
 import mb.pipe.run.ceres.PipeCeresModule;
 import mb.pipe.run.ceres.generated.CeresBuilderModule;
 import mb.pipe.run.core.PipeEx;
 import mb.pipe.run.core.PipeFacade;
 import mb.pipe.run.core.StaticPipeFacade;
+import mb.pipe.run.eclipse.build.Projects;
 import mb.pipe.run.eclipse.util.LoggingConfiguration;
 import mb.pipe.run.spoofax.PipeSpoofaxModule;
 import mb.pipe.run.spoofax.util.StaticSpoofax;
@@ -37,11 +38,12 @@ public class PipePlugin extends AbstractUIPlugin implements IStartup {
         super.start(context);
         plugin = this;
 
+        // Initialize logging
         LoggingConfiguration.configure(PipePlugin.class, "/logback.xml");
-
         logger = LoggerFactory.getLogger(PipePlugin.class);
         logger.debug("Starting Pipe plugin");
 
+        // Initialzie pipeline runtime
         try {
             pipeFacade = new PipeFacade(new PipeEclipseModule(logger), new EclipseModule(), new PipeSpoofaxModule(),
                 new PipeCeresModule(), new CeresBuilderModule());
@@ -51,6 +53,10 @@ public class PipePlugin extends AbstractUIPlugin implements IStartup {
             throw e;
         }
 
+        // Initialize projects with projects in the workspace.
+        pipeFacade.injector.getInstance(Projects.class).addProjects(ResourcesPlugin.getWorkspace().getRoot());
+
+        // Initialize Spoofax
         try {
             spoofaxFacade = new Spoofax(new SpoofaxPipeModule(), new SpoofaxExtensionModule());
             spoofaxMetaFacade = new SpoofaxMeta(spoofaxFacade);
@@ -63,14 +69,14 @@ public class PipePlugin extends AbstractUIPlugin implements IStartup {
         // Load meta-languages
         final ILanguageDiscoveryService langDiscoverSrv = spoofaxFacade.languageDiscoveryService;
         final String spoofaxDir = "/Users/gohla/spoofax";
-        final String spoofaxRelengMasterDir = spoofaxDir + "/master/repo/spoofax-releng";
 
-        langDiscoverSrv
-            .languageFromDirectory(spoofaxFacade.resolve(spoofaxRelengMasterDir + "/esv/org.metaborg.meta.lang.esv"));
-        langDiscoverSrv.languageFromDirectory(
-            spoofaxFacade.resolve(spoofaxRelengMasterDir + "/sdf/org.metaborg.meta.lang.template"));
-        langDiscoverSrv
-            .languageFromDirectory(spoofaxFacade.resolve(spoofaxRelengMasterDir + "/spoofax/meta.lib.spoofax"));
+        // final String spoofaxRelengMasterDir = spoofaxDir + "/master/repo/spoofax-releng";
+        // langDiscoverSrv
+        // .languageFromDirectory(spoofaxFacade.resolve(spoofaxRelengMasterDir + "/esv/org.metaborg.meta.lang.esv"));
+        // langDiscoverSrv.languageFromDirectory(
+        // spoofaxFacade.resolve(spoofaxRelengMasterDir + "/sdf/org.metaborg.meta.lang.template"));
+        // langDiscoverSrv
+        // .languageFromDirectory(spoofaxFacade.resolve(spoofaxRelengMasterDir + "/spoofax/meta.lib.spoofax"));
 
         // Load baseline meta-languages
         final String spoofaxRelengReleaseDir = spoofaxDir + "/release/repo/spoofax-releng";

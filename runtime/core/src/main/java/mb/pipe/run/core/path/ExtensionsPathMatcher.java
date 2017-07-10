@@ -1,8 +1,10 @@
 package mb.pipe.run.core.path;
 
+import java.nio.file.Files;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
 
 class ExtensionsPathMatcher implements PathMatcher {
     private static final long serialVersionUID = 1L;
@@ -14,6 +16,9 @@ class ExtensionsPathMatcher implements PathMatcher {
     }
 
     @Override public boolean matches(PPath path) {
+        if(!Files.isRegularFile(path.getJavaPath())) {
+            return false;
+        }
         final String extension = path.extension();
         if(extension == null) {
             return false;

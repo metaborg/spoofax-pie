@@ -1,11 +1,9 @@
 package mb.pipe.run.eclipse.editor;
 
-import java.util.Collection;
-
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
 
 public class Editors {
-    private final Collection<PipeEditor> editors = Lists.newArrayList();
+    private final ArrayList<PipeEditor> editors = new ArrayList<>();
 
 
     public Iterable<PipeEditor> editors() {

@@ -9,9 +9,9 @@ import mb.pipe.run.ceres.util.Tuple2
 import mb.pipe.run.core.log.Logger
 import mb.pipe.run.core.model.message.Msg
 import mb.pipe.run.core.path.PPath
+import mb.pipe.run.spoofax.cfg.SpxCoreConfig
 import mb.pipe.run.spoofax.util.MessageConverter
 import org.metaborg.core.analysis.AnalysisException
-import org.metaborg.core.language.LanguageIdentifier
 import org.metaborg.core.messages.IMessage
 import org.metaborg.spoofax.core.stratego.StrategoRuntimeFacet
 import org.metaborg.spoofax.core.unit.ParseContrib
@@ -24,7 +24,7 @@ class CoreAnalyze @Inject constructor(log: Logger, val messageConverter: Message
     val id = "coreAnalyze"
   }
 
-  data class Input(val langId: LanguageIdentifier, val project: PPath, val file: PPath, val ast: IStrategoTerm) : Serializable
+  data class Input(val config: SpxCoreConfig, val project: PPath, val file: PPath, val ast: IStrategoTerm) : Serializable
   data class Output(val ast: IStrategoTerm?, val messages: ArrayList<Msg>) : Tuple2<IStrategoTerm?, ArrayList<Msg>>
 
   val log: Logger = log.forContext(CoreAnalyze::class.java)
@@ -32,7 +32,7 @@ class CoreAnalyze @Inject constructor(log: Logger, val messageConverter: Message
   override val id = Companion.id
   override fun BuildContext.build(input: Input): Output {
     val spoofax = Spx.spoofax()
-    val langImpl = spoofax.languageService.getImpl(input.langId) ?: throw BuildException("Language with id ${input.langId} does not exist or has not been loaded into Spoofax core")
+    val langImpl = buildOrLoad(input.config)
 
     // Require Stratego runtime files
     val facet = langImpl.facet<StrategoRuntimeFacet>(StrategoRuntimeFacet::class.java)

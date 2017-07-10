@@ -35,4 +35,5 @@ class CoreLoadLang : Builder<PPath, OutTransient<ILanguageImpl>> {
   }
 }
 
-fun BuildContext.loadLang(input: PPath) = requireOutput(CoreLoadLang::class.java, input).v
+fun BuildContext.loadLangRaw(input: PPath) = requireOutput(CoreLoadLang::class.java, input)
+fun BuildContext.loadLang(input: PPath) = loadLangRaw(input).v

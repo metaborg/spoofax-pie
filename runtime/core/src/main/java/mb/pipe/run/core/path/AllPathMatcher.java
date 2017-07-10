@@ -3,6 +3,7 @@ package mb.pipe.run.core.path;
 public class AllPathMatcher implements PathMatcher {
     private static final long serialVersionUID = 1L;
 
+
     @Override public boolean matches(PPath path) {
         return true;
     }
@@ -10,6 +11,7 @@ public class AllPathMatcher implements PathMatcher {
     @Override public int hashCode() {
         return 0;
     }
+
 
     @Override public boolean equals(Object obj) {
         if(this == obj)

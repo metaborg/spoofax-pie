@@ -5,13 +5,12 @@ import mb.ceres.BuildContext
 import mb.ceres.Builder
 import mb.pipe.run.ceres.path.cPath
 import mb.pipe.run.ceres.path.read
-import mb.pipe.run.ceres.spoofax.core.CoreParse
-import mb.pipe.run.ceres.spoofax.core.loadLang
 import mb.pipe.run.ceres.spoofax.core.parse
 import mb.pipe.run.core.PipeRunEx
 import mb.pipe.run.core.model.parse.Token
 import mb.pipe.run.core.model.style.Styling
 import mb.pipe.run.core.path.PPath
+import mb.pipe.run.spoofax.cfg.SpxCoreConfig
 import mb.pipe.run.spoofax.esv.Styler
 import mb.pipe.run.spoofax.esv.StylingRules
 import mb.pipe.run.spoofax.esv.StylingRulesFromESV
@@ -25,7 +24,7 @@ class GenerateStylerRules
     val id = "spoofaxGenerateStylerRules"
   }
 
-  data class Input(val langLoc: PPath, val specDir: PPath, val mainFile: PPath, val includedFiles: ArrayList<PPath>) : Serializable
+  data class Input(val esvLangConfig: SpxCoreConfig, val mainFile: PPath, val includedFiles: ArrayList<PPath>) : Serializable
 
   override val id = Companion.id
   override fun BuildContext.build(input: Input): StylingRules {
@@ -35,12 +34,8 @@ class GenerateStylerRules
       require(includedFile.cPath)
     }
 
-    // Load ESV, required for parsing, analysis, and transformation.
-    val langImpl = loadLang(input.langLoc)
-    val langId = langImpl.id()
-
     // Parse input file
-    val (ast, _, _) = parse(CoreParse.Input(langId, input.mainFile, text))
+    val (ast, _, _) = parse(input.esvLangConfig, text)
     ast ?: throw PipeRunEx("Main ESV file " + input.mainFile + " could not be parsed")
 
     val rules = stylingRulesFromESV.create(ast as IStrategoAppl)

@@ -11,11 +11,21 @@ public class PPaths {
         return new AllPathWalker();
     }
 
+
     public static PathMatcher extensionsPathMatcher(Collection<String> extensions) {
         return new ExtensionsPathMatcher(extensions);
     }
 
     public static PathWalker extensionsPathWalker(Collection<String> extensions) {
         return new ExtensionsPathWalker(extensions);
+    }
+
+
+    public static PathMatcher directoryPathMatcher() {
+        return new DirectoryPathMatcher();
+    }
+
+    public static PathWalker directoryPathWalker() {
+        return new DirectoryPathWalker();
     }
 }

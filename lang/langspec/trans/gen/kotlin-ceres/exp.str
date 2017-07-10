@@ -42,7 +42,12 @@ rules // Nullable
     ToNonNullable(exp) -> (initStr, $[[expStr]!!])
     with
       (initStr, expStr) := <p2c-exp> exp
-  
+
+  p2c-exp:
+    Not(exp) -> (initStr, $[![expStr]])
+    with
+      (initStr, expStr) := <p2c-exp> exp
+
 rules // Binary expressions
 
   p2c-binexp(|symbol):

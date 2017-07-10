@@ -44,6 +44,7 @@ context-free syntax
 
   Exp.ToNullable = <<Exp>?>
   Exp.ToNonNullable = <<Exp>!>
+  Exp.Not = <!<Exp>>
 
   Exp.Eq = <<Exp> == <Exp>> {left}
   Exp.Neq = <<Exp> != <Exp>> {left}

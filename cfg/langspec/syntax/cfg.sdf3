@@ -16,44 +16,48 @@ context-free syntax
   
   Start.Sections = <<{Section "\n"}*>>
 
-context-free syntax
+context-free syntax // Workspace config
 
-Section.IdentificationSec =
+  Section.WorkspaceSec =
+<workspace
+  <{WorkspaceOpt "\n"}*>
+>
+  WorkspaceOpt.LangSpec = <langspec <Path>>
+  WorkspaceOpt.SpxLang = <spxlang <Path>>
+  WorkspaceOpt.SpxLangSpec = <spxlangspec <Path>>
+
+context-free syntax // Language specification config
+
+  Section.LangSpecSec =
+<langspec
+  <{LangSpecSubSec "\n"}*>
+>
+
+  LangSpecSubSec.IdentificationSec =
 <identification
   <{IdentificationOpt "\n"}*>
->
-  
+>  
   IdentificationOpt.FileExtension = <file extension: <EXT>>
 
-context-free syntax
-
-  Section.InformationSec =
+  LangSpecSubSec.InformationSec =
 <information
   <{InformationOpt "\n"}*>
 >
-  
   InformationOpt.Name = <name: <String>>
 
-context-free syntax
-
-  Section.SyntaxSec =
+  LangSpecSubSec.SyntaxSec =
 <syntax
   <{SyntaxOpt "\n"}*>
 >
-  
   SyntaxOpt.SyntaxMainFile = <main file: <Path>>
   SyntaxOpt.SyntaxStartSymbol = <start symbol: <ID>>
-  
-context-free syntax
 
-  Section.StylingSec =
+  LangSpecSubSec.StylingSec =
 <styling
   <{StylingSubSec "\n"}*>
 >
-
   StylingSubSec.SyntaxBasedStylingSubSec =
 <syntax-based
   <{SyntaxBasedStylingOpt "\n"}*>
->
-  
+> 
   SyntaxBasedStylingOpt.SyntaxBasedStylingFile = <file: <Path>>

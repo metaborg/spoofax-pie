@@ -18,11 +18,13 @@ import mb.pipe.run.ceres.path.WalkContents
 import mb.pipe.run.ceres.spoofax.GenerateLangSpecConfig
 import mb.pipe.run.ceres.spoofax.GenerateStylerRules
 import mb.pipe.run.ceres.spoofax.GenerateTable
+import mb.pipe.run.ceres.spoofax.GenerateWorkspaceConfig
 import mb.pipe.run.ceres.spoofax.Parse
 import mb.pipe.run.ceres.spoofax.Style
 import mb.pipe.run.ceres.spoofax.core.CoreAnalyze
 import mb.pipe.run.ceres.spoofax.core.CoreBuild
 import mb.pipe.run.ceres.spoofax.core.CoreBuildLangSpec
+import mb.pipe.run.ceres.spoofax.core.CoreBuildOrLoad
 import mb.pipe.run.ceres.spoofax.core.CoreExtensions
 import mb.pipe.run.ceres.spoofax.core.CoreLoadLang
 import mb.pipe.run.ceres.spoofax.core.CoreLoadProj
@@ -62,6 +64,7 @@ open class PipeCeresModule : CeresModule() {
     bindBuilder<Copy>(builders, Copy.id)
 
     bindBuilder<GenerateLangSpecConfig>(builders, GenerateLangSpecConfig.id)
+    bindBuilder<GenerateWorkspaceConfig>(builders, GenerateWorkspaceConfig.id)
 
     bindBuilder<GenerateTable>(builders, GenerateTable.id)
     bindBuilder<Parse>(builders, Parse.id)
@@ -76,6 +79,7 @@ open class PipeCeresModule : CeresModule() {
     bindBuilder<CoreTrans>(builders, CoreTrans.id)
     bindBuilder<CoreBuild>(builders, CoreBuild.id)
     bindBuilder<CoreBuildLangSpec>(builders, CoreBuildLangSpec.id)
+    bindBuilder<CoreBuildOrLoad>(builders, CoreBuildOrLoad.id)
     bindBuilder<CoreExtensions>(builders, CoreExtensions.id)
     bindBuilder<CoreStyle>(builders, CoreStyle.id)
   }

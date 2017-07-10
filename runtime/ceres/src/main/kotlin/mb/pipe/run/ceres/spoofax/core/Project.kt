@@ -12,10 +12,9 @@ class CoreLoadProj : Builder<PPath, OutTransient<CoreLoadProj.Project>> {
     val id = "coreLoadProj"
   }
 
-  class Project(private val spxCoreProject: IProject) {
-    fun directory(): PPath {
-      return spxCoreProject.location().pPath;
-    }
+  class Project(val proj: IProject) {
+    val loc get() = proj.location()
+    val dir get() = loc.pPath
   }
 
   override val id = Companion.id

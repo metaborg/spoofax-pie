@@ -4,136 +4,113 @@ import static mb.pipe.run.spoofax.term.Terms.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
-import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import mb.pipe.run.core.path.PPath;
+import mb.pipe.run.spoofax.term.Terms;
 
 public class LangSpecConfig implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
-    private final IStrategoTerm root;
-    private final PPath location;
+    private final ArrayList<String> extensions;
+    private final String name;
+    private final PPath syntaxMainFile;
+    private final String syntaxStartSymbol;
+    private final PPath syntaxBasedStylingFile;
 
 
-    public LangSpecConfig(IStrategoTerm root, PPath location) {
-        this.root = root;
-        this.location = location;
+    public LangSpecConfig(IStrategoTerm root, PPath dir) {
+        // @formatter:off
+        // Sections([...])
+        final IStrategoTerm rootSections = root.getSubterm(0);
+        // Sections([LangSpecSec([...])])
+        final List<IStrategoTerm> langSpecSections = Terms
+            .stream(rootSections)
+            .filter((t) -> Terms.isAppl(t, "LangSpecSec"))
+            .flatMap((t) -> stream(t.getSubterm(0)))
+            .collect(Collectors.toList());
+        this.extensions = langSpecSections
+            .stream()
+            .filter((t) -> isAppl(t, "IdentificationSec"))
+            .flatMap((t) -> stream(t.getSubterm(0)))
+            .filter((t) -> isAppl(t, "FileExtension")) // FileExtension("...")
+            .map((t) -> asString(t.getSubterm(0)))
+            .collect(Collectors.toCollection(ArrayList::new));
+        this.name = langSpecSections
+            .stream()
+            .filter((t) -> isAppl(t, "InformationSec"))
+            .flatMap((t) -> stream(t.getSubterm(0)))
+            .filter((t) -> isAppl(t, "Name")) // Name(String("...))
+            .map((t) -> asString(t.getSubterm(0).getSubterm(0)))
+            .findFirst()
+            .orElse(null);
+        this.syntaxMainFile = langSpecSections
+            .stream()
+            .filter((t) -> isAppl(t, "SyntaxSec"))
+            .flatMap((t) -> stream(t.getSubterm(0)))
+            .filter((t) -> isAppl(t, "SyntaxMainFile")) // SyntaxMainFile(Path("...))
+            .map((t) -> asString(t.getSubterm(0).getSubterm(0)))
+            .map((s) -> dir.resolve(s))
+            .findFirst()
+            .orElse(null);
+        this.syntaxStartSymbol = langSpecSections
+            .stream()
+            .filter((t) -> isAppl(t, "SyntaxSec"))
+            .flatMap((t) -> stream(t.getSubterm(0)))
+            .filter((t) -> isAppl(t, "SyntaxStartSymbol")) // SyntaxStartSymbol("...")
+            .map((t) -> asString(t.getSubterm(0)))
+            .findFirst()
+            .orElse(null);
+        this.syntaxBasedStylingFile = langSpecSections
+            .stream()
+            .filter((t) -> isAppl(t, "StylingSec"))
+            .flatMap((t) -> stream(t.getSubterm(0)))
+            .filter((t) -> isAppl(t, "SyntaxBasedStylingSubSec"))
+            .flatMap((t) -> stream(t.getSubterm(0)))
+            .filter((t) -> isAppl(t, "SyntaxBasedStylingFile")) // SyntaxBasedStylingFile(Path("..."))
+            .map((t) -> asString(t.getSubterm(0).getSubterm(0)))
+            .map((s) -> dir.resolve(s))
+            .findFirst()
+            .orElse(null);
+        // @formatter:on
     }
 
 
     public ArrayList<String> extensions() {
-        final ArrayList<String> extensions = new ArrayList<>();
-        // Sections([IdentificationSec([...])])
-        for(IStrategoAppl option : getOptions(getSectionContents("IdentificationSec"), 1, "FileExtension")) {
-            // FileExtension("...")
-            extensions.add(asString(option.getSubterm(0)));
-        }
         return extensions;
     }
 
     public @Nullable String getName() {
-        // Sections([InformationSec([...])])
-        final IStrategoAppl option = getOption(getSectionContents("InformationSec"), 1, "Name");
-        if(option == null) {
-            return null;
-        }
-        // Name(String("...))
-        return asString(option.getSubterm(0).getSubterm(0));
+        return name;
     }
 
     public @Nullable PPath getSyntaxMainFile() {
-        // Sections([SyntaxSec([...])])
-        final IStrategoAppl option = getOption(getSectionContents("SyntaxSec"), 1, "SyntaxMainFile");
-        if(option == null) {
-            return null;
-        }
-        // SyntaxMainFile(Path("...))
-        final String str = asString(option.getSubterm(0).getSubterm(0));
-        return location.resolve(str);
+        return syntaxMainFile;
     }
-    
+
     public @Nullable String getSyntaxStartSymbol() {
-        // Sections([SyntaxSec([...])])
-        final IStrategoAppl option = getOption(getSectionContents("SyntaxSec"), 1, "SyntaxStartSymbol");
-        if(option == null) {
-            return null;
-        }
-        // SyntaxStartSymbol("...")
-        return asString(option.getSubterm(0));
+        return syntaxStartSymbol;
     }
 
     public @Nullable PPath getSyntaxBasedStylingFile() {
-        // Sections([StylingSec([SyntaxBasedStylingSubSec([...])])])
-        final IStrategoAppl option =
-            getOption(getSubSectionContents("StylingSec", "SyntaxBasedStylingSubSec"), 1, "SyntaxBasedStylingFile");
-        if(option == null) {
-            return null;
-        }
-        // SyntaxBasedStylingFile(Path("..."))
-        final String str = asString(option.getSubterm(0).getSubterm(0));
-        return location.resolve(str);
-    }
-
-
-    private ArrayList<IStrategoTerm> getSectionContents(String secConsName) {
-        final ArrayList<IStrategoTerm> contents = new ArrayList<>();
-        // Sections([...])
-        for(IStrategoTerm section : root.getSubterm(0)) {
-            if(isAppl(section, secConsName)) {
-                for(IStrategoTerm content : section.getSubterm(0)) {
-                    contents.add(content);
-                }
-            }
-        }
-        return contents;
-    }
-
-    private ArrayList<IStrategoTerm> getSubSectionContents(String secConsName, String subSecConsName) {
-        final ArrayList<IStrategoTerm> contents = new ArrayList<>();
-        for(IStrategoTerm section : root.getSubterm(0)) {
-            if(isAppl(section, secConsName)) {
-                for(IStrategoTerm subSection : section.getSubterm(0)) {
-                    if(isAppl(subSection, subSecConsName)) {
-                        for(IStrategoTerm content : subSection.getSubterm(0)) {
-                            contents.add(content);
-                        }
-                    }
-                }
-            }
-        }
-        return contents;
-    }
-
-
-    private static @Nullable IStrategoAppl getOption(Iterable<IStrategoTerm> contents, int arity, String cons) {
-        for(IStrategoTerm option : contents) {
-            if(isAppl(option, arity, cons)) {
-                return asAppl(option);
-            }
-        }
-        return null;
-    }
-
-    private static ArrayList<IStrategoAppl> getOptions(Iterable<IStrategoTerm> contents, int arity, String cons) {
-        final ArrayList<IStrategoAppl> options = new ArrayList<>();
-        for(IStrategoTerm option : contents) {
-            if(isAppl(option, arity, cons)) {
-                options.add(asAppl(option));
-            }
-        }
-        return options;
+        return syntaxBasedStylingFile;
     }
 
 
     @Override public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + root.hashCode();
-        result = prime * result + location.hashCode();
+        result = prime * result + extensions.hashCode();
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((syntaxMainFile == null) ? 0 : syntaxMainFile.hashCode());
+        result = prime * result + ((syntaxStartSymbol == null) ? 0 : syntaxStartSymbol.hashCode());
+        result = prime * result + ((syntaxBasedStylingFile == null) ? 0 : syntaxBasedStylingFile.hashCode());
         return result;
     }
 
@@ -145,15 +122,32 @@ public class LangSpecConfig implements Serializable {
         if(getClass() != obj.getClass())
             return false;
         final LangSpecConfig other = (LangSpecConfig) obj;
-        if(!location.equals(other.location))
+        if(!extensions.equals(other.extensions))
             return false;
-        if(!root.equals(other.root))
+        if(name == null) {
+            if(other.name != null)
+                return false;
+        } else if(!name.equals(other.name))
+            return false;
+        if(syntaxMainFile == null) {
+            if(other.syntaxMainFile != null)
+                return false;
+        } else if(!syntaxMainFile.equals(other.syntaxMainFile))
+            return false;
+        if(syntaxStartSymbol == null) {
+            if(other.syntaxStartSymbol != null)
+                return false;
+        } else if(!syntaxStartSymbol.equals(other.syntaxStartSymbol))
+            return false;
+        if(syntaxBasedStylingFile == null) {
+            if(other.syntaxBasedStylingFile != null)
+                return false;
+        } else if(!syntaxBasedStylingFile.equals(other.syntaxBasedStylingFile))
             return false;
         return true;
     }
 
     @Override public String toString() {
-        final String name = getName();
         if(name != null) {
             return name;
         }

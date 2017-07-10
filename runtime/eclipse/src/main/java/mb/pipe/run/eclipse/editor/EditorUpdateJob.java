@@ -68,8 +68,9 @@ public class EditorUpdateJob extends Job {
     }
 
     private IStatus update(IProgressMonitor monitor) throws BuildException, CoreException {
+        // TODO: remove context
         final processString.Output output =
-            buildManager.build(processString.class, new processString.Input(text, file, context, workspaceRoot));
+            buildManager.build(processString.class, new processString.Input(text, file, context.currentDir(), workspaceRoot));
 
         if(output != null) {
             final List<Msg> messages = output.component2();

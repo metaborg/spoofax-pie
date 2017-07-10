@@ -2,6 +2,9 @@ package mb.pipe.run.spoofax.term;
 
 import static org.spoofax.interpreter.terms.IStrategoTerm.*;
 
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoConstructor;
 import org.spoofax.interpreter.terms.IStrategoInt;
@@ -27,7 +30,7 @@ public class Terms {
     public static boolean hasCons(IStrategoTerm t, int arity) {
         return isAppl(t) && asAppl(t).getConstructor().getArity() == arity;
     }
-    
+
     public static boolean hasCons(IStrategoTerm t, int arity, String name) {
         if(!isAppl(t))
             return false;
@@ -71,7 +74,7 @@ public class Terms {
     public static boolean isAppl(IStrategoTerm t, String cons) {
         return hasType(t, APPL) && hasCons(t, cons);
     }
-    
+
     public static boolean isAppl(IStrategoTerm t, int arity, String cons) {
         return hasType(t, APPL) && hasCons(t, arity, cons);
     }
@@ -99,5 +102,10 @@ public class Terms {
 
     public static IStrategoAppl asAppl(IStrategoTerm t) {
         return (IStrategoAppl) t;
+    }
+
+
+    public static Stream<IStrategoTerm> stream(IStrategoTerm t) {
+        return StreamSupport.stream(t.spliterator(), false);
     }
 }

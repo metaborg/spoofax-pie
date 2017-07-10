@@ -21,4 +21,3 @@ val PPath.fileObject: FileObject get() = Spx.spoofax().resourceService.resolve(t
 val FileObject.cPath: CPath get() = this.name.cPath
 val FileName.cPath: CPath get() = CPath(URI(this.uri))
 val CPath.fileObject: FileObject get() = Spx.spoofax().resourceService.resolve(this.javaPath.toUri())
-

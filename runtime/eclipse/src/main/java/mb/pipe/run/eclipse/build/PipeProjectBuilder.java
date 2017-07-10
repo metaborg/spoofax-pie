@@ -19,12 +19,10 @@ import com.google.inject.Injector;
 import mb.ceres.BuildException;
 import mb.ceres.BuildManager;
 import mb.pipe.run.ceres.CeresSrv;
-import mb.pipe.run.ceres.generated.processProject;
 import mb.pipe.run.ceres.generated.processString;
+import mb.pipe.run.ceres.generated.processWorkspace;
 import mb.pipe.run.ceres.util.Tuple4;
 import mb.pipe.run.core.log.Logger;
-import mb.pipe.run.core.model.Context;
-import mb.pipe.run.core.model.ContextFactory;
 import mb.pipe.run.core.model.message.Msg;
 import mb.pipe.run.core.model.parse.Token;
 import mb.pipe.run.core.model.style.Styling;
@@ -36,22 +34,20 @@ import mb.pipe.run.eclipse.util.MarkerUtils;
 import mb.pipe.run.eclipse.util.Nullable;
 import mb.pipe.run.eclipse.vfs.EclipsePathSrv;
 
-public class PipeLangSpecProjectBuilder extends IncrementalProjectBuilder {
-    public static final String id = PipePlugin.id + ".builder.langspec";
+public class PipeProjectBuilder extends IncrementalProjectBuilder {
+    public static final String id = PipePlugin.id + ".builder";
 
     private final Logger logger;
     private final EclipsePathSrv pathSrv;
-    private final ContextFactory contextFactory;
     private final CeresSrv ceresSrv;
     private final Editors editors;
     private final Updater updater;
 
 
-    public PipeLangSpecProjectBuilder() {
+    public PipeProjectBuilder() {
         final Injector injector = PipePlugin.pipeFacade().injector;
         this.logger = injector.getInstance(Logger.class).forContext(getClass());
         this.pathSrv = injector.getInstance(EclipsePathSrv.class);
-        this.contextFactory = injector.getInstance(ContextFactory.class);
         this.ceresSrv = injector.getInstance(CeresSrv.class);
         this.editors = injector.getInstance(Editors.class);
         this.updater = injector.getInstance(Updater.class);
@@ -68,17 +64,15 @@ public class PipeLangSpecProjectBuilder extends IncrementalProjectBuilder {
 
         final IProject project = getProject();
         final PPath workspaceRoot = pathSrv.resolveWorkspaceRoot();
-        final PPath projectDir = pathSrv.resolve(project);
-        final Context context = contextFactory.create(projectDir);
 
-        logger.info("Building project {}", project);
+        logger.info("Building workspace, requested by project {}", project);
         final BuildManager buildManager = ceresSrv.get(workspaceRoot);
         ArrayList<Tuple4<? extends PPath, @Nullable ? extends ArrayList<Token>, ? extends ArrayList<Msg>, @Nullable ? extends Styling>> results;
         try {
-            results = buildManager.build(processProject.class, new processProject.Input(context, workspaceRoot));
+            results = buildManager.build(processWorkspace.class, workspaceRoot);
         } catch(BuildException e) {
             results = new ArrayList<>();
-            logger.error("Could not build project {}", e, project);
+            logger.error("Could build workspace (requested by project {})", e, project);
         }
 
         for(Tuple4<? extends PPath, @Nullable ? extends ArrayList<Token>, ? extends ArrayList<Msg>, @Nullable ? extends Styling> result : results) {
@@ -91,9 +85,8 @@ public class PipeLangSpecProjectBuilder extends IncrementalProjectBuilder {
 
         for(PipeEditor editor : editors.editors()) {
             final IProject editorProject = editor.eclipseFile().getProject();
-            if(!project.equals(editorProject)) {
-                continue;
-            }
+            final PPath projectPath = pathSrv.resolve(editorProject);
+
             final String name = editor.name();
             final String text = editor.text();
             final PPath associatedFile = editor.file();
@@ -101,7 +94,7 @@ public class PipeLangSpecProjectBuilder extends IncrementalProjectBuilder {
 
             try {
                 final processString.Output output = buildManager.build(processString.class,
-                    new processString.Input(text, associatedFile, context, workspaceRoot));
+                    new processString.Input(text, associatedFile, projectPath, workspaceRoot));
 
                 final IResource eclipseFile = editor.eclipseFile();
                 if(output != null) {
@@ -148,11 +141,11 @@ public class PipeLangSpecProjectBuilder extends IncrementalProjectBuilder {
         delta.accept(new IResourceDeltaVisitor() {
             @Override public boolean visit(IResourceDelta innerDelta) throws CoreException {
                 switch(innerDelta.getKind()) {
-                    case IResourceDelta.REMOVED:
                     case IResourceDelta.ADDED_PHANTOM:
                     case IResourceDelta.REMOVED_PHANTOM:
                         return false;
                 }
+                relevant.set(true);
                 final IResource resource = innerDelta.getResource();
                 if(resource.getType() == IResource.FILE) {
                     final String extension = resource.getFileExtension();

@@ -7,12 +7,9 @@ import mb.ceres.BuildException
 import mb.ceres.Builder
 import mb.pipe.run.ceres.path.cPath
 import mb.pipe.run.ceres.path.read
-import mb.pipe.run.ceres.spoofax.core.CoreParse
 import mb.pipe.run.ceres.spoofax.core.CoreTrans
 import mb.pipe.run.ceres.spoofax.core.Spx
 import mb.pipe.run.ceres.spoofax.core.cPath
-import mb.pipe.run.ceres.spoofax.core.fileObject
-import mb.pipe.run.ceres.spoofax.core.loadLang
 import mb.pipe.run.ceres.spoofax.core.loadProj
 import mb.pipe.run.ceres.spoofax.core.pPath
 import mb.pipe.run.ceres.spoofax.core.parse
@@ -23,6 +20,7 @@ import mb.pipe.run.core.model.message.Msg
 import mb.pipe.run.core.model.parse.Token
 import mb.pipe.run.core.path.PPath
 import mb.pipe.run.core.path.PathSrv
+import mb.pipe.run.spoofax.cfg.SpxCoreConfig
 import mb.pipe.run.spoofax.sdf.Table
 import org.metaborg.core.action.EndNamedGoal
 import org.metaborg.sdf2table.parsetable.ParseTableGenerator
@@ -38,7 +36,7 @@ class GenerateTable
     val id = "spoofaxGenerateTable"
   }
 
-  data class Input(val langLoc: PPath, val specDir: PPath, val mainFile: PPath, val includedFiles: ArrayList<PPath>) : Serializable
+  data class Input(val sdfLangConfig: SpxCoreConfig, val specDir: PPath, val mainFile: PPath, val includedFiles: ArrayList<PPath>) : Serializable
 
   override val id = Companion.id
   override fun BuildContext.build(input: Input): Table {
@@ -51,14 +49,10 @@ class GenerateTable
     }
     texts.put(input.mainFile, mainFileText)
 
-    // Load SDF3, required for parsing, analysis, and transformation.
-    val langImpl = loadLang(input.langLoc)
-    val langId = langImpl.id()
-
     // Parse input files
     val asts = mutableMapOf<PPath, IStrategoTerm>()
     for ((file, text) in texts) {
-      val (ast, _, _) = parse(CoreParse.Input(langId, file, text))
+      val (ast, _, _) = parse(input.sdfLangConfig, text)
       if (ast == null) {
         log.error("Unable to parse SDF file $file, skipping file")
         continue
@@ -67,13 +61,13 @@ class GenerateTable
     }
 
     // Load project, required for analysis and transformation.
-    loadProj(input.specDir)
+    val proj = loadProj(input.specDir)
 
     // Transform
     val transformGoal = EndNamedGoal("to Normal Form (abstract)")
     val normalized = mutableMapOf<PPath, CoreTrans.Output>()
     for ((file, ast) in asts) {
-      val trans = trans(CoreTrans.Input(langId, input.specDir, file, ast, transformGoal))
+      val trans = trans(input.sdfLangConfig, proj.dir, file, ast, transformGoal)
       if (trans.ast == null || trans.writtenFile == null) {
         log.error("Unable to transform SDF file $file, skipping file")
         continue
@@ -87,7 +81,7 @@ class GenerateTable
     // Main input file
     val mainFile = pathSrv.localPath(mainResource) ?: throw BuildException("Normalized main file $mainResource is not on the local file system")
     // Output file
-    val spoofaxPaths = SpoofaxCommonPaths(input.specDir.fileObject)
+    val spoofaxPaths = SpoofaxCommonPaths(proj.loc)
     val vfsOutputFile = spoofaxPaths.targetMetaborgDir().resolveFile("sdf-new.tbl")
     val outputFile = Spx.spoofax().resourceService.localPath(vfsOutputFile) ?: throw BuildException("Parse table output file $vfsOutputFile is not on the local file system")
     // Paths

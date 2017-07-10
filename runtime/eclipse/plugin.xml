@@ -33,17 +33,17 @@
   <!-- Language specifications -->
   <extension
     point="org.eclipse.core.resources.natures"
-    id="mb.pipe.run.eclipse.nature.langspec"
+    id="mb.pipe.run.eclipse.nature"
     name="Pipeline language specification nature"
   >
     <runtime>
-      <run class="mb.pipe.run.eclipse.nature.PipeLangSpecNature"/>
+      <run class="mb.pipe.run.eclipse.nature.PipeNature"/>
     </runtime>
-    <builder id="mb.pipe.run.eclipse.builder.langspec" />
+    <builder id="mb.pipe.run.eclipse.builder" />
   </extension>
   <extension
     point="org.eclipse.core.resources.builders"
-    id="mb.pipe.run.eclipse.builder.langspec"
+    id="mb.pipe.run.eclipse.builder"
     name="Pipeline language specification builder"
   >
     <builder
@@ -52,63 +52,24 @@
       isConfigurable="false"
       supportsConfigurations="false"
     >
-      <run class="mb.pipe.run.eclipse.build.PipeLangSpecProjectBuilder"/>
+      <run class="mb.pipe.run.eclipse.build.PipeProjectBuilder"/>
     </builder>
   </extension>
   <extension point="org.eclipse.ui.commands">
-    <command id="mb.pipe.run.eclipse.command.nature.langspec.add" name="Add pipeline language specification nature"/>
-    <command id="mb.pipe.run.eclipse.command.nature.langspec.remove" name="Remove pipeline language specification nature"/>
+    <command id="mb.pipe.run.eclipse.command.nature.add" name="Add pipeline nature"/>
+    <command id="mb.pipe.run.eclipse.command.nature.remove" name="Remove pipeline nature"/>
   </extension>  
    <extension point="org.eclipse.ui.handlers">
     <handler
-      commandId="mb.pipe.run.eclipse.command.nature.langspec.add"
-      class="mb.pipe.run.eclipse.nature.AddLangSpecNatureHandler"
+      commandId="mb.pipe.run.eclipse.command.nature.add"
+      class="mb.pipe.run.eclipse.nature.AddNatureHandler"
     />
     <handler
-      commandId="mb.pipe.run.eclipse.command.nature.langspec.remove"
-      class="mb.pipe.run.eclipse.nature.RemoveLangSpecNatureHandler"
+      commandId="mb.pipe.run.eclipse.command.nature.remove"
+      class="mb.pipe.run.eclipse.nature.RemoveNatureHandler"
     />
   </extension>
-  <!-- Programs -->
-  <extension
-    point="org.eclipse.core.resources.natures"
-    id="mb.pipe.run.eclipse.nature.program"
-    name="Pipeline program nature"
-  >
-    <runtime>
-      <run class="mb.pipe.run.eclipse.nature.PipeProgramNature"/>
-    </runtime>
-    <builder id="mb.pipe.run.eclipse.builder.program" />
-  </extension>
-  <extension
-    point="org.eclipse.core.resources.builders"
-    id="mb.pipe.run.eclipse.builder.program"
-    name="Pipeline program builder"
-  >
-    <builder
-      callOnEmptyDelta="false"
-      hasNature="true"
-      isConfigurable="false"
-      supportsConfigurations="false"
-    >
-      <run class="mb.pipe.run.eclipse.build.PipeProgramProjectBuilder"/>
-    </builder>
-  </extension>
-  <extension point="org.eclipse.ui.commands">
-    <command id="mb.pipe.run.eclipse.command.nature.program.add" name="Add pipeline program nature"/>
-    <command id="mb.pipe.run.eclipse.command.nature.program.remove" name="Remove pipeline program nature"/>
-  </extension>  
-   <extension point="org.eclipse.ui.handlers">
-    <handler
-      commandId="mb.pipe.run.eclipse.command.nature.program.add"
-      class="mb.pipe.run.eclipse.nature.AddProgramNatureHandler"
-    />
-    <handler
-      commandId="mb.pipe.run.eclipse.command.nature.program.remove"
-      class="mb.pipe.run.eclipse.nature.RemoveProgramNatureHandler"
-    />
-  </extension>
-  
+
   
   <!-- Project context menu -->
   <extension point="org.eclipse.ui.menus">
@@ -123,11 +84,8 @@
     
     <!-- Commands -->
     <menuContribution locationURI="popup:mb.pipe.run.eclipse.menu.project?after=additions">
-      <command commandId="mb.pipe.run.eclipse.command.nature.langspec.add"/>
-      <command commandId="mb.pipe.run.eclipse.command.nature.langspec.remove"/>
-      <separator name="internal-separator1" visible="true"/>
-      <command commandId="mb.pipe.run.eclipse.command.nature.program.add"/>
-      <command commandId="mb.pipe.run.eclipse.command.nature.program.remove"/>
+      <command commandId="mb.pipe.run.eclipse.command.nature.add"/>
+      <command commandId="mb.pipe.run.eclipse.command.nature.remove"/>
     </menuContribution>
   </extension>
   

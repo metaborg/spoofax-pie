@@ -8,10 +8,10 @@ import mb.ceres.PathStampers
 import mb.pipe.run.ceres.util.Tuple2
 import mb.pipe.run.core.log.Logger
 import mb.pipe.run.core.path.PPath
+import mb.pipe.run.spoofax.cfg.SpxCoreConfig
 import org.metaborg.core.action.CompileGoal
 import org.metaborg.core.action.EndNamedGoal
 import org.metaborg.core.action.ITransformGoal
-import org.metaborg.core.language.LanguageIdentifier
 import org.metaborg.core.messages.IMessage
 import org.metaborg.core.transform.TransformException
 import org.metaborg.spoofax.core.stratego.StrategoRuntimeFacet
@@ -28,9 +28,9 @@ class CoreTrans @Inject constructor(log: Logger) : Builder<CoreTrans.Input, Core
     val id = "coreTrans"
   }
 
-  data class Input(val langId: LanguageIdentifier, val project: PPath, val file: PPath, val ast: IStrategoTerm, val goal: ITransformGoal) : Serializable {
+  data class Input(val config: SpxCoreConfig, val project: PPath, val file: PPath, val ast: IStrategoTerm, val goal: ITransformGoal) : Serializable {
     fun mayOverlap(other: Input): Boolean {
-      return langId == other.langId && project == other.project && file == other.file && goal == other.goal
+      return config == other.config && project == other.project && file == other.file && goal == other.goal
     }
   }
 
@@ -41,7 +41,7 @@ class CoreTrans @Inject constructor(log: Logger) : Builder<CoreTrans.Input, Core
   override val id = Companion.id
   override fun BuildContext.build(input: Input): Output {
     val spoofax = Spx.spoofax()
-    val langImpl = spoofax.languageService.getImpl(input.langId) ?: throw BuildException("Language with id ${input.langId} does not exist or has not been loaded into Spoofax core")
+    val langImpl = buildOrLoad(input.config)
 
     // Require Stratego runtime files
     val facet = langImpl.facet<StrategoRuntimeFacet>(StrategoRuntimeFacet::class.java)
@@ -57,7 +57,7 @@ class CoreTrans @Inject constructor(log: Logger) : Builder<CoreTrans.Input, Core
     val parseUnit = spoofax.unitService.parseUnit(inputUnit, ParseContrib(true, true, input.ast, Iterables2.empty<IMessage>(), -1))
     val spoofaxContext = spoofax.contextService.get(project.location(), project, langImpl)
     val analyzeUnit = spoofax.unitService.analyzeUnit(parseUnit,
-      AnalyzeContrib(true, true, true, input.ast, Iterables2.empty<IMessage>(), -1), spoofaxContext)
+            AnalyzeContrib(true, true, true, input.ast, Iterables2.empty<IMessage>(), -1), spoofaxContext)
     spoofaxContext.read().use {
       try {
         val result = spoofax.transformService.transform(analyzeUnit, spoofaxContext, input.goal)
@@ -86,3 +86,4 @@ class CoreTrans @Inject constructor(log: Logger) : Builder<CoreTrans.Input, Core
 }
 
 fun BuildContext.trans(input: CoreTrans.Input) = requireOutput(CoreTrans::class.java, input)
+fun BuildContext.trans(config: SpxCoreConfig, project: PPath, file: PPath, ast: IStrategoTerm, goal: ITransformGoal) = trans(CoreTrans.Input(config, project, file, ast, goal))

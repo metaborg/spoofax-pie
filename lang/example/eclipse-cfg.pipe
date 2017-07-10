@@ -146,7 +146,7 @@ func createWorkspaceConfig(workbenchRoot: Path) -> WorkspaceConfig = {
   // Spoofax core language configurations
   var spxCoreLangConfigs: SpxCoreLangConfig* = [
     generateSpxCoreLangConfig(resolveAbs("/Users/gohla/spoofax/master/repo/spoofax-releng/sdf/org.metaborg.meta.lang.template"), "sdf3")
-  //, generateSpxCoreLangConfig(resolveAbs("/Users/gohla/spoofax/master/repo/spoofax-releng/esv/org.metaborg.meta.lang.esv"), "esv")
+  , generateSpxCoreLangConfig(resolveAbs("/Users/gohla/spoofax/master/repo/spoofax-releng/esv/org.metaborg.meta.lang.esv"), "esv")
   , generateSpxCoreLangConfig(cfgLangLoc, "cfg")
   ];
   

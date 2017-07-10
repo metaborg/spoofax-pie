@@ -9,13 +9,13 @@ import org.eclipse.core.runtime.CoreException;
 import mb.pipe.run.eclipse.util.AbstractHandlerUtils;
 import mb.pipe.run.eclipse.util.NatureUtils;
 
-public abstract class AddNatureHandler extends AbstractHandler {
+public class AddNatureHandler extends AbstractHandler {
     @Override public Object execute(ExecutionEvent event) throws ExecutionException {
         final IProject project = AbstractHandlerUtils.toProject(event);
         if(project == null)
             return null;
 
-        final String natureId = natureId();
+        final String natureId = PipeNature.id;
         try {
             NatureUtils.addTo(natureId, project, null);
         } catch(CoreException e) {
@@ -24,6 +24,4 @@ public abstract class AddNatureHandler extends AbstractHandler {
 
         return null;
     }
-
-    protected abstract String natureId();
 }
