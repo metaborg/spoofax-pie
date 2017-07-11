@@ -18,6 +18,7 @@ import com.google.inject.Injector;
 
 import mb.ceres.BuildException;
 import mb.ceres.BuildManager;
+import mb.ceres.BuildSession;
 import mb.pipe.run.ceres.CeresSrv;
 import mb.pipe.run.ceres.generated.processString;
 import mb.pipe.run.ceres.generated.processWorkspace;
@@ -67,9 +68,10 @@ public class PipeProjectBuilder extends IncrementalProjectBuilder {
 
         logger.info("Building workspace, requested by project {}", project);
         final BuildManager buildManager = ceresSrv.get(workspaceRoot);
+        final BuildSession buildSession = buildManager.newSession();
         ArrayList<Tuple4<? extends PPath, @Nullable ? extends ArrayList<Token>, ? extends ArrayList<Msg>, @Nullable ? extends Styling>> results;
         try {
-            results = buildManager.build(processWorkspace.class, workspaceRoot);
+            results = buildSession.build(processWorkspace.class, workspaceRoot);
         } catch(BuildException e) {
             results = new ArrayList<>();
             logger.error("Could build workspace (requested by project {})", e, project);
@@ -93,7 +95,7 @@ public class PipeProjectBuilder extends IncrementalProjectBuilder {
             logger.info("Updating editor {}", name);
 
             try {
-                final processString.Output output = buildManager.build(processString.class,
+                final processString.Output output = buildSession.build(processString.class,
                     new processString.Input(text, associatedFile, projectPath, workspaceRoot));
 
                 final IResource eclipseFile = editor.eclipseFile();
