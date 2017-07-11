@@ -47,32 +47,34 @@ class createWorkspaceConfig : Builder<mb.pipe.run.core.path.PPath, mb.pipe.run.s
   }
 }
 
-class processWorkspace : Builder<mb.pipe.run.core.path.PPath, ArrayList<Tuple4<mb.pipe.run.core.path.PPath, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>>> {
-  override val id = "processWorkspace"
-  override fun BuildContext.build(input: mb.pipe.run.core.path.PPath): ArrayList<Tuple4<mb.pipe.run.core.path.PPath, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>> {
-    var workspaceConfig = requireOutput(createWorkspaceConfig::class.java, input)
+class processProject : Builder<processProject.Input, ArrayList<Tuple4<mb.pipe.run.core.path.PPath, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>>> {
+  data class Input(val root: mb.pipe.run.core.path.PPath, val project: mb.pipe.run.core.path.PPath) : Tuple2<mb.pipe.run.core.path.PPath, mb.pipe.run.core.path.PPath> {
+    constructor(tuple: Tuple2<mb.pipe.run.core.path.PPath, mb.pipe.run.core.path.PPath>) : this(tuple.component1(), tuple.component2())
+  }
+
+  override val id = "processProject"
+  override fun BuildContext.build(input: processProject.Input): ArrayList<Tuple4<mb.pipe.run.core.path.PPath, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>> {
+    var workspaceConfig = requireOutput(createWorkspaceConfig::class.java, input.root)
     var results: ArrayList<Tuple4<mb.pipe.run.core.path.PPath, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>> = list()
     if (workspaceConfig == null)
       return results
     var workspace = workspaceConfig!!
-    for (project in requireOutput(mb.pipe.run.ceres.path.ListContents::class.java, mb.pipe.run.ceres.path.ListContents.Input(input, mb.pipe.run.core.path.PPaths.directoryPathMatcher() as mb.pipe.run.core.path.PathMatcher?))) {
-      for (file in requireOutput(mb.pipe.run.ceres.path.WalkContents::class.java, mb.pipe.run.ceres.path.WalkContents.Input(project, mb.pipe.run.core.path.PPaths.extensionsPathWalker(workspace.langSpecExtensions()) as mb.pipe.run.core.path.PathWalker?))) {
-        var config = requireOutput(langSpecConfigForPath::class.java, langSpecConfigForPath.Input(workspace, file))
-        if (config != null) {
-          var (tokens, messages, styling) = requireOutput(processFileWithLangSpecConfig::class.java, processFileWithLangSpecConfig.Input(file, project, config!!, workspace))
-          results = results.append(tuple(file, tokens, messages, styling))
-        } else {
-          results = results.append(requireOutput(emptyResult::class.java, file))
-        }
+    for (file in requireOutput(mb.pipe.run.ceres.path.WalkContents::class.java, mb.pipe.run.ceres.path.WalkContents.Input(input.project, mb.pipe.run.core.path.PPaths.extensionsPathWalker(workspace.langSpecExtensions()) as mb.pipe.run.core.path.PathWalker?))) {
+      var config = requireOutput(langSpecConfigForPath::class.java, langSpecConfigForPath.Input(workspace, file))
+      if (config != null) {
+        var (tokens, messages, styling) = requireOutput(processFileWithLangSpecConfig::class.java, processFileWithLangSpecConfig.Input(file, input.project, config!!, workspace))
+        results = results.append(tuple(file, tokens, messages, styling))
+      } else {
+        results = results.append(requireOutput(emptyResult::class.java, file))
       }
-      for (file in requireOutput(mb.pipe.run.ceres.path.WalkContents::class.java, mb.pipe.run.ceres.path.WalkContents.Input(project, mb.pipe.run.core.path.PPaths.extensionsPathWalker(workspace.spxCoreExtensions()) as mb.pipe.run.core.path.PathWalker?))) {
-        var config = requireOutput(spxCoreConfigForPath::class.java, spxCoreConfigForPath.Input(workspace, file))
-        if (config != null) {
-          var (tokens, messages, styling) = requireOutput(processFileWithSpxCore::class.java, processFileWithSpxCore.Input(file, config!!))
-          results = results.append(tuple(file, tokens, messages, styling))
-        } else {
-          results = results.append(requireOutput(emptyResult::class.java, file))
-        }
+    }
+    for (file in requireOutput(mb.pipe.run.ceres.path.WalkContents::class.java, mb.pipe.run.ceres.path.WalkContents.Input(input.project, mb.pipe.run.core.path.PPaths.extensionsPathWalker(workspace.spxCoreExtensions()) as mb.pipe.run.core.path.PathWalker?))) {
+      var config = requireOutput(spxCoreConfigForPath::class.java, spxCoreConfigForPath.Input(workspace, file))
+      if (config != null) {
+        var (tokens, messages, styling) = requireOutput(processFileWithSpxCore::class.java, processFileWithSpxCore.Input(file, config!!))
+        results = results.append(tuple(file, tokens, messages, styling))
+      } else {
+        results = results.append(requireOutput(emptyResult::class.java, file))
       }
     }
     return results
@@ -288,7 +290,7 @@ class CeresBuilderModule : Module {
     binder.bindBuilder<processFileWithLangSpecConfig>(builders, "processFileWithLangSpecConfig")
     binder.bindBuilder<emptyResult>(builders, "emptyResult")
     binder.bindBuilder<processString>(builders, "processString")
-    binder.bindBuilder<processWorkspace>(builders, "processWorkspace")
+    binder.bindBuilder<processProject>(builders, "processProject")
     binder.bindBuilder<createWorkspaceConfig>(builders, "createWorkspaceConfig")
     binder.bindBuilder<spxCoreConfigForPath>(builders, "spxCoreConfigForPath")
     binder.bindBuilder<langSpecConfigForPath>(builders, "langSpecConfigForPath")

@@ -9,7 +9,10 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
@@ -20,8 +23,8 @@ import mb.ceres.BuildException;
 import mb.ceres.BuildManager;
 import mb.ceres.BuildSession;
 import mb.pipe.run.ceres.CeresSrv;
+import mb.pipe.run.ceres.generated.processProject;
 import mb.pipe.run.ceres.generated.processString;
-import mb.pipe.run.ceres.generated.processWorkspace;
 import mb.pipe.run.ceres.util.Tuple4;
 import mb.pipe.run.core.log.Logger;
 import mb.pipe.run.core.model.message.Msg;
@@ -64,17 +67,18 @@ public class PipeProjectBuilder extends IncrementalProjectBuilder {
         }
 
         final IProject project = getProject();
+        final PPath projectPath = pathSrv.resolve(project);
         final PPath workspaceRoot = pathSrv.resolveWorkspaceRoot();
 
-        logger.info("Building workspace, requested by project {}", project);
+        logger.info("Building project {}", project);
         final BuildManager buildManager = ceresSrv.get(workspaceRoot);
         final BuildSession buildSession = buildManager.newSession();
         ArrayList<Tuple4<? extends PPath, @Nullable ? extends ArrayList<Token>, ? extends ArrayList<Msg>, @Nullable ? extends Styling>> results;
         try {
-            results = buildSession.build(processWorkspace.class, workspaceRoot);
+            results = buildSession.build(processProject.class, new processProject.Input(workspaceRoot, projectPath));
         } catch(BuildException e) {
             results = new ArrayList<>();
-            logger.error("Could build workspace (requested by project {})", e, project);
+            logger.error("Could build workspace project {}", e, project);
         }
 
         for(Tuple4<? extends PPath, @Nullable ? extends ArrayList<Token>, ? extends ArrayList<Msg>, @Nullable ? extends Styling> result : results) {
@@ -87,7 +91,9 @@ public class PipeProjectBuilder extends IncrementalProjectBuilder {
 
         for(PipeEditor editor : editors.editors()) {
             final IProject editorProject = editor.eclipseFile().getProject();
-            final PPath projectPath = pathSrv.resolve(editorProject);
+            if(!project.equals(editorProject)) {
+                continue;
+            }
 
             final String name = editor.name();
             final String text = editor.text();
@@ -118,7 +124,10 @@ public class PipeProjectBuilder extends IncrementalProjectBuilder {
             }
         }
 
-        return null;
+        // Trigger referencing projects
+        final WorkspaceJob job = new ReferencingProjectBuilder(project, logger);
+        job.schedule();
+        return project.getReferencedProjects();
     }
 
     @Override protected void clean(IProgressMonitor monitor) throws CoreException {

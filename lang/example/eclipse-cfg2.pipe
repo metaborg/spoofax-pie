@@ -87,38 +87,35 @@ func createWorkspaceConfig(workspaceRoot: Path) -> WorkspaceConfig? = {
 
 
 /// General processing
-func processWorkspace(root: Path) -> (Path, Token*?, Message*, Styling?)* = {
+func processProject(root: Path, project: Path) -> (Path, Token*?, Message*, Styling?)* = {
   var workspaceConfig = createWorkspaceConfig(root);
   var results: (Path, Token*?, Message*, Styling?)* = [];
   if(workspaceConfig == null) return results;
   var workspace = workspaceConfig!;
   
-  // Go over earch project in the workspace
-  foreach(var project in listContents(root, directoryPathMatcher()?)) {
-    // Go over each file with a corresponding language specification config
-    foreach(var file in walkContents(project, extensionsPathWalker(workspace.langSpecExtensions())?)) {
-      var config = langSpecConfigForPath(workspace, file);
-      if(config != null) {
-        var (tokens, messages, styling) = processFileWithLangSpecConfig(file, project, config!, workspace);
-        results = [results|(file, tokens, messages, styling)];
-      } else {
-        // If no config was found for the file, do not process it and return an empty results.
-        // This also registers the correct dependencies.
-        results = [results|emptyResult(file)];
-      }
+  // Go over each file with a corresponding language specification config
+  foreach(var file in walkContents(project, extensionsPathWalker(workspace.langSpecExtensions())?)) {
+    var config = langSpecConfigForPath(workspace, file);
+    if(config != null) {
+      var (tokens, messages, styling) = processFileWithLangSpecConfig(file, project, config!, workspace);
+      results = [results|(file, tokens, messages, styling)];
+    } else {
+      // If no config was found for the file, do not process it and return an empty results.
+      // This also registers the correct dependencies.
+      results = [results|emptyResult(file)];
     }
-      
-    // Go over each file with a corresponding Spoofax Core language config
-    foreach(var file in walkContents(project, extensionsPathWalker(workspace.spxCoreExtensions())?)) {
-      var config = spxCoreConfigForPath(workspace, file);
-      if(config != null) {
-        var (tokens, messages, styling) = processFileWithSpxCore(file, config!);
-        results = [results|(file, tokens, messages, styling)];
-      } else {
-        // If no config was found for the file, do not process it and return an empty results.
-        // This also registers the correct dependencies.
-        results = [results|emptyResult(file)];
-      }
+  }
+    
+  // Go over each file with a corresponding Spoofax Core language config
+  foreach(var file in walkContents(project, extensionsPathWalker(workspace.spxCoreExtensions())?)) {
+    var config = spxCoreConfigForPath(workspace, file);
+    if(config != null) {
+      var (tokens, messages, styling) = processFileWithSpxCore(file, config!);
+      results = [results|(file, tokens, messages, styling)];
+    } else {
+      // If no config was found for the file, do not process it and return an empty results.
+      // This also registers the correct dependencies.
+      results = [results|emptyResult(file)];
     }
   }
   

@@ -3,7 +3,6 @@ package mb.pipe.run.eclipse;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 
-import mb.pipe.run.eclipse.build.Projects;
 import mb.pipe.run.eclipse.build.Updater;
 import mb.pipe.run.eclipse.editor.Editors;
 import mb.pipe.run.eclipse.util.BuilderUtils;
@@ -16,7 +15,6 @@ public class EclipseModule extends AbstractModule {
         bind(ColorShare.class).in(Singleton.class);
         bind(StyleUtils.class).in(Singleton.class);
         bind(Editors.class).in(Singleton.class);
-        bind(Projects.class).in(Singleton.class);
         bind(Updater.class).in(Singleton.class);
     }
 }

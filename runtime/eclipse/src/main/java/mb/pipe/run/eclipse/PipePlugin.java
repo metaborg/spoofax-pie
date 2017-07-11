@@ -1,6 +1,5 @@
 package mb.pipe.run.eclipse;
 
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -18,7 +17,6 @@ import mb.pipe.run.ceres.generated.CeresBuilderModule;
 import mb.pipe.run.core.PipeEx;
 import mb.pipe.run.core.PipeFacade;
 import mb.pipe.run.core.StaticPipeFacade;
-import mb.pipe.run.eclipse.build.Projects;
 import mb.pipe.run.eclipse.util.LoggingConfiguration;
 import mb.pipe.run.spoofax.PipeSpoofaxModule;
 import mb.pipe.run.spoofax.util.StaticSpoofax;
@@ -52,9 +50,6 @@ public class PipePlugin extends AbstractUIPlugin implements IStartup {
             logger.error("Instantiating Pipe failed", e);
             throw e;
         }
-
-        // Initialize projects with projects in the workspace.
-        pipeFacade.injector.getInstance(Projects.class).addProjects(ResourcesPlugin.getWorkspace().getRoot());
 
         // Initialize Spoofax
         try {
