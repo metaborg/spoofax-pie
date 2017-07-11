@@ -137,6 +137,11 @@ public class PPathImpl implements PPath {
             StandardOpenOption.TRUNCATE_EXISTING);
     }
 
+    
+    @Override public String toString() {
+        return getJavaPath().toString();
+    }
+    
 
     @Override public int hashCode() {
         return uri.hashCode();
@@ -153,9 +158,5 @@ public class PPathImpl implements PPath {
         if(!uri.equals(other.uri))
             return false;
         return true;
-    }
-
-    @Override public String toString() {
-        return uri.toString();
     }
 }

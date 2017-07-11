@@ -57,4 +57,7 @@ public interface PPath extends Serializable {
     InputStream inputStream() throws IOException;
 
     OutputStream outputStream() throws IOException;
+    
+    
+    String toString();
 }

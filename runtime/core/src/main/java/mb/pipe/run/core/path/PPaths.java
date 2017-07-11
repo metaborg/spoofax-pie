@@ -22,10 +22,12 @@ public class PPaths {
 
 
     public static PathMatcher directoryPathMatcher() {
-        return new DirectoryPathMatcher();
+        // TODO: make ignoring hidden directories configurable
+        return new DirectoryPathMatcher(true);
     }
 
     public static PathWalker directoryPathWalker() {
-        return new DirectoryPathWalker();
+        // TODO: make ignoring hidden directories configurable
+        return new DirectoryPathWalker(true);
     }
 }

@@ -1,22 +1,45 @@
 package mb.pipe.run.core.path;
 
-import java.nio.file.Files;
-
 class DirectoryPathWalker implements PathWalker {
     private static final long serialVersionUID = 1L;
 
+    private final boolean ignoreHidden;
+
+
+    public DirectoryPathWalker(boolean ignoreHidden) {
+        this.ignoreHidden = ignoreHidden;
+    }
+
 
     @Override public boolean matches(PPath path) {
-        return Files.isDirectory(path.getJavaPath());
+        if(!path.isDir()) {
+            return false;
+        }
+        if(ignoreHidden) {
+            final PPath leaf = path.leaf();
+            if(leaf != null && leaf.toString().startsWith(".")) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override public boolean traverse(PPath path) {
+        if(ignoreHidden) {
+            final PPath leaf = path.leaf();
+            if(leaf != null && leaf.toString().startsWith(".")) {
+                return false;
+            }
+        }
         return true;
     }
 
 
     @Override public int hashCode() {
-        return 0;
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (ignoreHidden ? 1231 : 1237);
+        return result;
     }
 
     @Override public boolean equals(Object obj) {
@@ -25,6 +48,9 @@ class DirectoryPathWalker implements PathWalker {
         if(obj == null)
             return false;
         if(getClass() != obj.getClass())
+            return false;
+        final DirectoryPathWalker other = (DirectoryPathWalker) obj;
+        if(ignoreHidden != other.ignoreHidden)
             return false;
         return true;
     }

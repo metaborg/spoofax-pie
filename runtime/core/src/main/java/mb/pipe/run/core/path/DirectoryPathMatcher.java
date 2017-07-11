@@ -1,18 +1,35 @@
 package mb.pipe.run.core.path;
 
-import java.nio.file.Files;
-
 class DirectoryPathMatcher implements PathMatcher {
     private static final long serialVersionUID = 1L;
 
+    private final boolean ignoreHidden;
+
+
+    public DirectoryPathMatcher(boolean ignoreHidden) {
+        this.ignoreHidden = ignoreHidden;
+    }
+
 
     @Override public boolean matches(PPath path) {
-        return Files.isDirectory(path.getJavaPath());
+        if(!path.isDir()) {
+            return false;
+        }
+        if(ignoreHidden) {
+            final PPath leaf = path.leaf();
+            if(leaf != null && leaf.toString().startsWith(".")) {
+                return false;
+            }
+        }
+        return true;
     }
 
 
     @Override public int hashCode() {
-        return 0;
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (ignoreHidden ? 1231 : 1237);
+        return result;
     }
 
     @Override public boolean equals(Object obj) {
@@ -21,6 +38,9 @@ class DirectoryPathMatcher implements PathMatcher {
         if(obj == null)
             return false;
         if(getClass() != obj.getClass())
+            return false;
+        final DirectoryPathMatcher other = (DirectoryPathMatcher) obj;
+        if(ignoreHidden != other.ignoreHidden)
             return false;
         return true;
     }
