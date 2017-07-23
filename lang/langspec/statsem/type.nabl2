@@ -6,6 +6,7 @@ rules // Simple types
   [[ BoolTy() ^ (s) : BoolTy() ]] := true.
   [[ IntTy()  ^ (s) : IntTy()  ]] := true.
   [[ StrTy()  ^ (s) : StrTy()  ]] := true.
+  [[ PathTy() ^ (s) : PathTy() ]] := true.
   [[ NullTy() ^ (s) : NullTy() ]] := true.
   [[ TopTy()  ^ (s) : TopTy()  ]] := true.
 

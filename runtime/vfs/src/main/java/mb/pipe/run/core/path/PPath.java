@@ -24,6 +24,8 @@ public interface PPath extends Serializable {
     boolean isFile();
 
     boolean exists();
+    
+    long lastModifiedTimeMs() throws IOException;
 
 
     @Nullable PPath parent();
@@ -55,6 +57,8 @@ public interface PPath extends Serializable {
 
 
     InputStream inputStream() throws IOException;
+    
+    byte[] readAllBytes() throws IOException;
 
     OutputStream outputStream() throws IOException;
     

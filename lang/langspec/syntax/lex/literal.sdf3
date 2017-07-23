@@ -29,3 +29,12 @@ lexical syntax // String
 lexical restrictions
 
   BackSlashChar -/- [\"]
+
+lexical syntax // Path
+
+  APATH = "/"  PathChar*
+  RPATH = "./" PathChar*
+  PATH = APATH
+  PATH = RPATH
+  PathChar = ~[\n\r]
+  

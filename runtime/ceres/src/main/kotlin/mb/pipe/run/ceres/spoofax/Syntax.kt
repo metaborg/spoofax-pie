@@ -5,11 +5,9 @@ import com.google.inject.Inject
 import mb.ceres.BuildContext
 import mb.ceres.BuildException
 import mb.ceres.Builder
-import mb.pipe.run.ceres.path.cPath
 import mb.pipe.run.ceres.path.read
 import mb.pipe.run.ceres.spoofax.core.CoreTrans
 import mb.pipe.run.ceres.spoofax.core.Spx
-import mb.pipe.run.ceres.spoofax.core.cPath
 import mb.pipe.run.ceres.spoofax.core.loadProj
 import mb.pipe.run.ceres.spoofax.core.pPath
 import mb.pipe.run.ceres.spoofax.core.parse
@@ -90,9 +88,9 @@ class GenerateTable
     val generator = ParseTableGenerator(mainFile, outputFile, null, null, paths, false)
     generator.createTable(false, false)
     for (required in generator.requiredFiles()) {
-      require(pathSrv.resolveLocal(required).cPath)
+      require(pathSrv.resolveLocal(required))
     }
-    generate(vfsOutputFile.cPath)
+    generate(vfsOutputFile.pPath)
     return Table(vfsOutputFile.pPath)
   }
 }

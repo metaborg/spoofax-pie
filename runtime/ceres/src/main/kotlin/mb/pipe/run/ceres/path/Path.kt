@@ -4,14 +4,12 @@ import com.google.inject.Inject
 import mb.ceres.BuildContext
 import mb.ceres.BuildException
 import mb.ceres.Builder
-import mb.ceres.CPath
 import mb.ceres.In
 import mb.ceres.OutEffectBuilder
 import mb.ceres.PathStampers
 import mb.pipe.run.core.StaticPipeFacade
 import mb.pipe.run.core.path.DirAccess
 import mb.pipe.run.core.path.PPath
-import mb.pipe.run.core.path.PPathImpl
 import mb.pipe.run.core.path.PathMatcher
 import mb.pipe.run.core.path.PathSrv
 import mb.pipe.run.core.path.PathWalker
@@ -20,8 +18,6 @@ import java.io.Serializable
 import java.nio.file.Files
 import java.util.stream.Collectors
 
-val CPath.pPath get() = PPathImpl(this.javaPath)
-val PPath.cPath get() = CPath(this.javaPath)
 
 fun resolve(uriStr: String): PPath {
   return StaticPipeFacade.facade().pathSrv.resolve(uriStr)
@@ -35,7 +31,7 @@ class Exists : Builder<PPath, Boolean> {
 
   override val id = Companion.id
   override fun BuildContext.build(input: PPath): Boolean {
-    require(input.cPath, PathStampers.exists)
+    require(input, PathStampers.exists)
     return Files.exists(input.javaPath)
   }
 }
@@ -53,7 +49,7 @@ class ListContents @Inject constructor(val pathSrv: PathSrv) : Builder<ListConte
   override val id = Companion.id
   override fun BuildContext.build(input: Input): ArrayList<PPath> {
     val (path, matcher) = input
-    require(path.cPath, PathStampers.nonRecursiveModified)
+    require(path, PathStampers.nonRecursiveModified)
     if (!Files.isDirectory(path.javaPath)) {
       throw BuildException("Cannot list contents of '$input', it is not a directory")
     }
@@ -85,7 +81,7 @@ class WalkContents @Inject constructor(val pathSrv: PathSrv) : Builder<WalkConte
     try {
       val access = object : DirAccess {
         override fun writeDir(dir: PPath) = Unit // Will not occur
-        override fun readDir(dir: PPath) = require(dir.cPath, PathStampers.nonRecursiveModified)
+        override fun readDir(dir: PPath) = require(dir, PathStampers.nonRecursiveModified)
       }
       val stream = if (matcher != null) path.walk(matcher, access) else path.walk(access);
       return stream.collect(Collectors.toCollection { ArrayList<PPath>() });
@@ -105,7 +101,7 @@ class Read : Builder<PPath, String> {
 
   override val id = Companion.id
   override fun BuildContext.build(input: PPath): String {
-    require(input.cPath, PathStampers.hash)
+    require(input, PathStampers.hash)
     try {
       return String(Files.readAllBytes(input.javaPath))
     } catch(e: IOException) {
@@ -127,13 +123,13 @@ class Copy : OutEffectBuilder<Copy.Input> {
   override val id = Companion.id
   override fun BuildContext.effect(input: Input) {
     val (from, to) = input
-    require(from.cPath)
+    require(from)
     try {
       Files.copy(from.javaPath, to.javaPath)
     } catch(e: IOException) {
       throw BuildException("Copying '${input.from}' to '${input.to}' failed", e)
     }
-    generate(to.cPath)
+    generate(to)
   }
 }
 

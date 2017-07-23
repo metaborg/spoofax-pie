@@ -14,8 +14,10 @@ import org.slf4j.LoggerFactory;
 
 import mb.pipe.run.ceres.PipeCeresModule;
 import mb.pipe.run.ceres.generated.CeresBuilderModule;
+import mb.pipe.run.core.LogModule;
 import mb.pipe.run.core.PipeEx;
 import mb.pipe.run.core.PipeFacade;
+import mb.pipe.run.core.PipeModule;
 import mb.pipe.run.core.StaticPipeFacade;
 import mb.pipe.run.eclipse.util.LoggingConfiguration;
 import mb.pipe.run.spoofax.PipeSpoofaxModule;
@@ -43,8 +45,8 @@ public class PipePlugin extends AbstractUIPlugin implements IStartup {
 
         // Initialzie pipeline runtime
         try {
-            pipeFacade = new PipeFacade(new PipeEclipseModule(logger), new EclipseModule(), new PipeSpoofaxModule(),
-                new PipeCeresModule(), new CeresBuilderModule());
+            pipeFacade = new PipeFacade(new PipeModule(), new LogModule(logger), new EclipseVFSModule(),
+                new EclipseModule(), new PipeSpoofaxModule(), new PipeCeresModule(), new CeresBuilderModule());
             StaticPipeFacade.init(pipeFacade);
         } catch(PipeEx e) {
             logger.error("Instantiating Pipe failed", e);

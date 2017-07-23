@@ -46,8 +46,8 @@ class CoreTrans @Inject constructor(log: Logger) : Builder<CoreTrans.Input, Core
     // Require Stratego runtime files
     val facet = langImpl.facet<StrategoRuntimeFacet>(StrategoRuntimeFacet::class.java)
     if (facet != null) {
-      facet.ctreeFiles.forEach { require(it.cPath, PathStampers.hash) }
-      facet.jarFiles.forEach { require(it.cPath, PathStampers.hash) }
+      facet.ctreeFiles.forEach { require(it.pPath, PathStampers.hash) }
+      facet.jarFiles.forEach { require(it.pPath, PathStampers.hash) }
     }
 
     // Perform transformation
@@ -67,7 +67,7 @@ class CoreTrans @Inject constructor(log: Logger) : Builder<CoreTrans.Input, Core
         val outputResource = output?.output()
         val writtenFile: PPath?
         if (outputResource != null) {
-          generate(outputResource.cPath)
+          generate(outputResource.pPath)
           writtenFile = outputResource.pPath
         } else {
           writtenFile = null

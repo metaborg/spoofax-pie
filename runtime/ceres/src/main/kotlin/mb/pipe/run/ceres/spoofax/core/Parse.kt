@@ -36,7 +36,7 @@ class CoreParse @Inject constructor(log: Logger, val messageConverter: MessageCo
     if (facet != null) {
       val parseTableFile = facet.parseTable
       if (parseTableFile != null) {
-        require(parseTableFile.cPath, PathStampers.hash)
+        require(parseTableFile.pPath, PathStampers.hash)
       }
     }
 

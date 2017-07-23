@@ -73,6 +73,10 @@ public class PPathImpl implements PPath {
         return Files.isDirectory(getJavaPath());
     }
 
+    @Override public long lastModifiedTimeMs() throws IOException {
+        return Files.getLastModifiedTime(getJavaPath()).toMillis();
+    }
+
 
     @Override public @Nullable PPath parent() {
         final Path parent = getJavaPath().getParent();
@@ -132,16 +136,20 @@ public class PPathImpl implements PPath {
         return Files.newInputStream(getJavaPath(), StandardOpenOption.READ);
     }
 
+    @Override public byte[] readAllBytes() throws IOException {
+        return Files.readAllBytes(getJavaPath());
+    }
+
     @Override public OutputStream outputStream() throws IOException {
         return Files.newOutputStream(getJavaPath(), StandardOpenOption.WRITE, StandardOpenOption.CREATE,
             StandardOpenOption.TRUNCATE_EXISTING);
     }
 
-    
+
     @Override public String toString() {
         return getJavaPath().toString();
     }
-    
+
 
     @Override public int hashCode() {
         return uri.hashCode();

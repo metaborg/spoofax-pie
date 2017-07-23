@@ -1,0 +1,26 @@
+# Eclipse
+/bin
+/.project
+/.classpath
+/.factorypath
+/.settings
+
+# IntelliJ
+/out
+/.idea
+*.iml
+
+# Maven
+/target
+
+# Gradle
+/build
+/.gradle
+
+# Java
+*.class
+*.jar
+hs_err_pid*
+
+# Generated MANIFEST.MF
+/META-INF/MANIFEST.MF

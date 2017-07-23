@@ -15,6 +15,7 @@ context-free syntax
   BaseType.BoolTy  = <bool>
   BaseType.IntTy   = <int>
   BaseType.StrTy   = <string>
+  BaseType.PathTy  = <path>
   BaseType.DataTy  = <<TYPEID>> {avoid}
   BaseType.TupleTy = <(<{Type ", "}*>)>
   BaseType.ListTy  = <<Type>*>

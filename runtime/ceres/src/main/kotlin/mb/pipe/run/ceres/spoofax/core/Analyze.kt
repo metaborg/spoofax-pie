@@ -37,8 +37,8 @@ class CoreAnalyze @Inject constructor(log: Logger, val messageConverter: Message
     // Require Stratego runtime files
     val facet = langImpl.facet<StrategoRuntimeFacet>(StrategoRuntimeFacet::class.java)
     if (facet != null) {
-      facet.ctreeFiles.forEach { require(it.cPath, PathStampers.hash) }
-      facet.jarFiles.forEach { require(it.cPath, PathStampers.hash) }
+      facet.ctreeFiles.forEach { require(it.pPath, PathStampers.hash) }
+      facet.jarFiles.forEach { require(it.pPath, PathStampers.hash) }
     }
 
     // Perform analysis

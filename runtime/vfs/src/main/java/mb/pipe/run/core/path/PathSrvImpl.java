@@ -12,8 +12,6 @@ import java.nio.file.Paths;
 
 import javax.annotation.Nullable;
 
-import mb.pipe.run.core.PipeRunEx;
-
 public class PathSrvImpl implements PathSrv {
     private @Nullable Path tempDir = null;
 
@@ -42,10 +40,10 @@ public class PathSrvImpl implements PathSrv {
 
     @Override public PPath resolve(URI uri) {
         try {
-        final Path javaPath = Paths.get(uri);
-        return new PPathImpl(uri, javaPath);
+            final Path javaPath = Paths.get(uri);
+            return new PPathImpl(uri, javaPath);
         } catch(IllegalArgumentException | FileSystemNotFoundException e) {
-            throw new PipeRunEx("Could not get Java path for URI " + uri, e);
+            throw new RuntimeException("Could not get Java path for URI " + uri, e);
         }
     }
 

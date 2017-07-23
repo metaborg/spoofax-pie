@@ -26,7 +26,9 @@ Require-Bundle: org.eclipse.core.runtime,
  pipe.run.spoofax,
  pipe.run.spoofax.legacy,
  pipe.run.eclipse.externaldeps,
- ceres
+ ceres,
+ log,
+ vfs
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: metaborg.org
 Bundle-ActivationPolicy: lazy

@@ -63,6 +63,7 @@ context-free syntax
 
   Exp.IntLit  = <<INT>>
   Exp.StrLit  = <<STRING>>
+  Exp.PathLit = <<PATH>>
 
   Exp.NullLit = <null>
 

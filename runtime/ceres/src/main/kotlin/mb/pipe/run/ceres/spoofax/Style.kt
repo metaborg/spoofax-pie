@@ -3,7 +3,6 @@ package mb.pipe.run.ceres.spoofax
 import com.google.inject.Inject
 import mb.ceres.BuildContext
 import mb.ceres.Builder
-import mb.pipe.run.ceres.path.cPath
 import mb.pipe.run.ceres.path.read
 import mb.pipe.run.ceres.spoofax.core.parse
 import mb.pipe.run.core.PipeRunEx
@@ -31,7 +30,7 @@ class GenerateStylerRules
     val text = read(input.mainFile)
 
     for (includedFile in input.includedFiles) {
-      require(includedFile.cPath)
+      require(includedFile)
     }
 
     // Parse input file

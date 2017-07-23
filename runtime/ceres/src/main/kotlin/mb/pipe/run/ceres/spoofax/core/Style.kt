@@ -34,7 +34,7 @@ class CoreStyle @Inject constructor(log: Logger) : Builder<CoreStyle.Input, Styl
     // Require packed ESV file
     val langLoc = langImpl.components().first().location()
     val packedEsvFile = SpoofaxLangSpecCommonPaths(langLoc).targetMetaborgDir().resolveFile("editor.esv.af")
-    require(packedEsvFile.cPath, PathStampers.hash)
+    require(packedEsvFile.pPath, PathStampers.hash)
 
     // Perform styling
     val inputUnit = spoofax.unitService.inputUnit("hack", langImpl, null)

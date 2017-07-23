@@ -18,12 +18,14 @@ public class PipeFacade {
     public final PathSrv pathSrv;
 
 
-    public PipeFacade(PipeModule module, Module... additionalModules) throws PipeEx {
+    public PipeFacade(PipeModule module, LogModule logModule, VFSModule vfsModule, Module... additionalModules)
+        throws PipeEx {
         final Collection<Module> modules = Lists.newArrayList(additionalModules);
         modules.add(module);
+        modules.add(logModule);
+        modules.add(vfsModule);
 
-        final Injector injector = Guice.createInjector(modules);
-        this.injector = injector;
+        this.injector = Guice.createInjector(modules);
 
         this.rootLogger = injector.getInstance(Logger.class);
 

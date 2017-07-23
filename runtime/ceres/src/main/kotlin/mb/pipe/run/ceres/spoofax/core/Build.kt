@@ -5,7 +5,6 @@ import mb.ceres.BuildContext
 import mb.ceres.BuildException
 import mb.ceres.OutEffectBuilder
 import mb.ceres.PathStampers
-import mb.pipe.run.ceres.path.cPath
 import mb.pipe.run.core.log.Level
 import mb.pipe.run.core.log.Logger
 import mb.pipe.run.core.log.LoggingOutputStream
@@ -44,15 +43,15 @@ class CoreBuild @Inject constructor(log: Logger) : OutEffectBuilder<PPath> {
     val output = spoofax.builder.build(buildInput)
 
     // Required files
-    output.includedResources().forEach { require(it.cPath, PathStampers.hash) }
-    output.changedResources().forEach { require(it.cPath) }
+    output.includedResources().forEach { require(it.pPath, PathStampers.hash) }
+    output.changedResources().forEach { require(it.pPath) }
 
     // TODO: make requirements to changes in source and include paths, to rebuild when files are added/removed
 
     // Generated files
     output.transformResults()
             .flatMap { it.outputs() }
-            .mapNotNull { it.output()?.cPath }
+            .mapNotNull { it.output()?.pPath }
             .forEach { generate(it) }
   }
 }
@@ -78,8 +77,8 @@ class CoreBuildLangSpec @Inject constructor(log: Logger, val pathSrv: PathSrv) :
     // Require all SDF and Stratego files
     input.walk(PPaths.extensionsPathWalker(listOf("str", "sdf3")), object : DirAccess {
       override fun writeDir(dir: PPath?) = Unit // Directories are not written during path walking.
-      override fun readDir(dir: PPath) = require(dir.cPath, PathStampers.nonRecursiveModified)
-    }).forEach { require(it.cPath, PathStampers.hash) }
+      override fun readDir(dir: PPath) = require(dir, PathStampers.nonRecursiveModified)
+    }).forEach { require(it, PathStampers.hash) }
 
     // Generate sources and compile
     spoofaxMeta.metaBuilder.initialize(langSpecBuildInput)
@@ -90,14 +89,14 @@ class CoreBuildLangSpec @Inject constructor(log: Logger, val pathSrv: PathSrv) :
     // Get paths to files and directories
     val commonPaths = SpoofaxLangSpecCommonPaths(input.fileObject)
     val strategiesDir = commonPaths.strJavaStratDir().pPath
-    require(strategiesDir.cPath, PathStampers.exists)
+    require(strategiesDir, PathStampers.exists)
     if (strategiesDir.exists()) {
       val targetClassesDir = commonPaths.targetClassesDir().pPath
       val spoofaxUberJar = pathSrv.resolveLocal("/Users/gohla/spoofax/master/repo/spoofax-releng/spoofax/org.metaborg.spoofax.core.uber/target/org.metaborg.spoofax.core.uber-2.3.0-SNAPSHOT.jar");
 
       // Require the java files and Spoofax uber JAR
-      require(strategiesDir.cPath, PathStampers.modified)
-      require(spoofaxUberJar.cPath, PathStampers.hash)
+      require(strategiesDir, PathStampers.modified)
+      require(spoofaxUberJar, PathStampers.hash)
 
       // Execute the Java compiler
       val args = arrayOf(
@@ -110,7 +109,7 @@ class CoreBuildLangSpec @Inject constructor(log: Logger, val pathSrv: PathSrv) :
       BatchCompiler.compile(args, PrintWriter(LoggingOutputStream(log, Level.Info), true), PrintWriter(LoggingOutputStream(log, Level.Error), true), null)
 
       // Require the generated class files
-      generate(targetClassesDir.cPath)
+      generate(targetClassesDir)
     }
 
     // Package and archive
@@ -119,7 +118,7 @@ class CoreBuildLangSpec @Inject constructor(log: Logger, val pathSrv: PathSrv) :
 
     // Require the generated archives
     val targetMetaborgDir = commonPaths.targetMetaborgDir()
-    require(targetMetaborgDir.cPath, PathStampers.hash)
+    require(targetMetaborgDir.pPath, PathStampers.hash)
   }
 }
 

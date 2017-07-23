@@ -4,7 +4,6 @@ import mb.ceres.BuildContext
 import mb.ceres.Builder
 import mb.ceres.OutTransient
 import mb.ceres.PathStampers
-import mb.pipe.run.ceres.path.cPath
 import mb.pipe.run.core.path.PPath
 import org.metaborg.core.build.CommonPaths
 import org.metaborg.core.language.IComponentCreationConfigRequest
@@ -22,11 +21,11 @@ class CoreLoadLang : Builder<PPath, OutTransient<ILanguageImpl>> {
     val request: IComponentCreationConfigRequest
     if (resource.isFile) {
       request = spoofax.languageComponentFactory.requestFromArchive(resource)
-      require(input.cPath, PathStampers.hash)
+      require(input, PathStampers.hash)
     } else {
       request = spoofax.languageComponentFactory.requestFromDirectory(resource)
       val paths = CommonPaths(resource)
-      require(paths.targetMetaborgDir().cPath, PathStampers.hash)
+      require(paths.targetMetaborgDir().pPath, PathStampers.hash)
     }
     val config = spoofax.languageComponentFactory.createConfig(request)
     val component = spoofax.languageService.add(config)

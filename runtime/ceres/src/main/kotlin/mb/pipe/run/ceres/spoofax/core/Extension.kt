@@ -4,7 +4,6 @@ import com.google.inject.Inject
 import mb.ceres.BuildContext
 import mb.ceres.Builder
 import mb.ceres.PathStampers
-import mb.pipe.run.ceres.path.cPath
 import mb.pipe.run.core.log.Logger
 import mb.pipe.run.core.path.PPath
 import mb.pipe.run.spoofax.cfg.SpxCoreConfig
@@ -32,14 +31,14 @@ class CoreExtensions @Inject constructor(log: Logger) : Builder<CoreExtensions.I
     val langLoc = langImpl.components().first().location()
     val packedEsvFile = SpoofaxLangSpecCommonPaths(langLoc).targetMetaborgDir().resolveFile("editor.esv.af").pPath
     if (packedEsvFile.exists()) {
-      require(packedEsvFile.cPath, PathStampers.hash)
+      require(packedEsvFile, PathStampers.hash)
 
       // Get extensions
       val esvTerm = EsvUtil.read(packedEsvFile)
       val extensionsStr = ESVReader.getProperty(esvTerm, "Extensions") ?: return ArrayList()
       return ArrayList(extensionsStr.split(","))
     } else {
-      require(packedEsvFile.cPath, PathStampers.exists)
+      require(packedEsvFile, PathStampers.exists)
       return ArrayList()
     }
   }

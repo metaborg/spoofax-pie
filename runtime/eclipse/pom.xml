@@ -39,6 +39,16 @@
 
     <dependency>
       <groupId>org.metaborg</groupId>
+      <artifactId>log</artifactId>
+      <version>${metaborg-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>vfs</artifactId>
+      <version>${metaborg-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
       <artifactId>org.metaborg.core</artifactId>
       <version>${metaborg-version}</version>
     </dependency>
@@ -58,10 +68,6 @@
       <version>${metaborg-version}</version>
     </dependency>
 
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-    </dependency>
     <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
