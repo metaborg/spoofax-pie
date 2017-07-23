@@ -11,15 +11,15 @@ import org.eclipse.ui.IEditorInput;
 
 import mb.ceres.BuildException;
 import mb.ceres.BuildManager;
+import mb.log.Logger;
 import mb.pipe.run.ceres.generated.processString;
-import mb.pipe.run.core.log.Logger;
 import mb.pipe.run.core.model.Context;
 import mb.pipe.run.core.model.message.Msg;
 import mb.pipe.run.core.model.style.Styling;
-import mb.pipe.run.core.path.PPath;
 import mb.pipe.run.eclipse.build.Updater;
 import mb.pipe.run.eclipse.util.Nullable;
 import mb.pipe.run.eclipse.util.StatusUtils;
+import mb.vfs.path.PPath;
 
 public class EditorUpdateJob extends Job {
     private final Logger logger;

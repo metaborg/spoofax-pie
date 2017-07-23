@@ -3,7 +3,7 @@ package mb.pipe.run.core.model;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
-import mb.pipe.run.core.path.PPath;
+import mb.vfs.path.PPath;
 
 public class ContextImpl implements Context {
     private static final long serialVersionUID = 1L;

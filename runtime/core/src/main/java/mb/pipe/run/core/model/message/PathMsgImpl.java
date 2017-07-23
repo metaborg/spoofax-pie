@@ -3,7 +3,7 @@ package mb.pipe.run.core.model.message;
 import javax.annotation.Nullable;
 
 import mb.pipe.run.core.model.region.Region;
-import mb.pipe.run.core.path.PPath;
+import mb.vfs.path.PPath;
 
 public class PathMsgImpl extends MsgImpl implements PathMsg {
     private static final long serialVersionUID = 1L;

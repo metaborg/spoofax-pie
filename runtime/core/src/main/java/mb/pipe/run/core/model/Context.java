@@ -2,7 +2,7 @@ package mb.pipe.run.core.model;
 
 import java.io.Serializable;
 
-import mb.pipe.run.core.path.PPath;
+import mb.vfs.path.PPath;
 
 public interface Context extends Serializable {
     PPath currentDir();

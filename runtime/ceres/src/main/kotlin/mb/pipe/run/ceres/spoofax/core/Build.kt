@@ -5,13 +5,13 @@ import mb.ceres.BuildContext
 import mb.ceres.BuildException
 import mb.ceres.OutEffectBuilder
 import mb.ceres.PathStampers
-import mb.pipe.run.core.log.Level
-import mb.pipe.run.core.log.Logger
-import mb.pipe.run.core.log.LoggingOutputStream
-import mb.pipe.run.core.path.DirAccess
-import mb.pipe.run.core.path.PPath
-import mb.pipe.run.core.path.PPaths
-import mb.pipe.run.core.path.PathSrv
+import mb.log.Level
+import mb.log.Logger
+import mb.log.LoggingOutputStream
+import mb.vfs.access.DirAccess
+import mb.vfs.path.PPath
+import mb.vfs.path.PPaths
+import mb.vfs.path.PathSrv
 import org.eclipse.jdt.core.compiler.batch.BatchCompiler
 import org.metaborg.core.action.CompileGoal
 import org.metaborg.core.build.BuildInputBuilder
@@ -50,9 +50,9 @@ class CoreBuild @Inject constructor(log: Logger) : OutEffectBuilder<PPath> {
 
     // Generated files
     output.transformResults()
-            .flatMap { it.outputs() }
-            .mapNotNull { it.output()?.pPath }
-            .forEach { generate(it) }
+      .flatMap { it.outputs() }
+      .mapNotNull { it.output()?.pPath }
+      .forEach { generate(it) }
   }
 }
 
@@ -77,7 +77,9 @@ class CoreBuildLangSpec @Inject constructor(log: Logger, val pathSrv: PathSrv) :
     // Require all SDF and Stratego files
     input.walk(PPaths.extensionsPathWalker(listOf("str", "sdf3")), object : DirAccess {
       override fun writeDir(dir: PPath?) = Unit // Directories are not written during path walking.
-      override fun readDir(dir: PPath) = require(dir, PathStampers.nonRecursiveModified)
+      override fun readDir(dir: PPath) {
+        require(dir, PathStampers.nonRecursiveModified)
+      }
     }).forEach { require(it, PathStampers.hash) }
 
     // Generate sources and compile
@@ -100,11 +102,11 @@ class CoreBuildLangSpec @Inject constructor(log: Logger, val pathSrv: PathSrv) :
 
       // Execute the Java compiler
       val args = arrayOf(
-              "${strategiesDir.javaPath.toFile()}", // Input directory
-              "-cp ${spoofaxUberJar.javaPath.toFile()}", // Classpath
-              "-d ${targetClassesDir.javaPath.toFile()}", // Output directory
-              "-1.8", // Use Java 8
-              "-g" // Generate debug attributes
+        "${strategiesDir.javaPath.toFile()}", // Input directory
+        "-cp ${spoofaxUberJar.javaPath.toFile()}", // Classpath
+        "-d ${targetClassesDir.javaPath.toFile()}", // Output directory
+        "-1.8", // Use Java 8
+        "-g" // Generate debug attributes
       )
       BatchCompiler.compile(args, PrintWriter(LoggingOutputStream(log, Level.Info), true), PrintWriter(LoggingOutputStream(log, Level.Error), true), null)
 

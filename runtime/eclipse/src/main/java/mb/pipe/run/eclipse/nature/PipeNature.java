@@ -8,11 +8,11 @@ import org.eclipse.core.runtime.CoreException;
 
 import com.google.inject.Injector;
 
-import mb.pipe.run.core.path.PPath;
 import mb.pipe.run.eclipse.PipePlugin;
 import mb.pipe.run.eclipse.build.PipeProjectBuilder;
 import mb.pipe.run.eclipse.util.BuilderUtils;
 import mb.pipe.run.eclipse.vfs.EclipsePathSrv;
+import mb.vfs.path.PPath;
 
 public class PipeNature implements IProjectNature {
     public static final String id = PipePlugin.id + ".nature";

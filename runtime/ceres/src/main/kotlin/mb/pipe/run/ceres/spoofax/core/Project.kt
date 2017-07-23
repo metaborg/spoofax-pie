@@ -3,7 +3,7 @@ package mb.pipe.run.ceres.spoofax.core
 import mb.ceres.BuildContext
 import mb.ceres.Builder
 import mb.ceres.OutTransient
-import mb.pipe.run.core.path.PPath
+import mb.vfs.path.PPath
 import org.metaborg.core.project.IProject
 import org.metaborg.core.project.ISimpleProjectService
 

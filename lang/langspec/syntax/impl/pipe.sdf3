@@ -57,6 +57,13 @@ context-free syntax
   Exp.Call = <<FUNCID>(<{Exp ", "}*>)>
   Exp.QCall = <<Exp>.<FUNCID>(<{Exp ", "}*>)>
 
+  Exp.Requires       = <requires <Exp> <MatchPart?> <StamperPart?>>
+  Exp.Generates      = <generates <Exp> <StamperPart?>>
+  MatchPart.Filter   = <filter <Exp>>
+  StamperPart.StamperPart = <by <StampKind>>
+  StampKind.Modified = <modified>
+  StampKind.Hash     = <hash>
+
   Exp.BoolLit = <<Bool>>
   Bool.True   = <true>
   Bool.False  = <false>

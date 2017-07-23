@@ -4,8 +4,8 @@ import com.google.inject.Inject
 import mb.ceres.BuildContext
 import mb.ceres.Builder
 import mb.ceres.PathStampers
+import mb.log.Logger
 import mb.pipe.run.ceres.util.Tuple3
-import mb.pipe.run.core.log.Logger
 import mb.pipe.run.core.model.message.Msg
 import mb.pipe.run.core.model.parse.Token
 import mb.pipe.run.spoofax.cfg.SpxCoreConfig

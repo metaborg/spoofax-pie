@@ -3,7 +3,7 @@ package mb.pipe.run.spoofax.cfg;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import mb.pipe.run.core.path.PPath;
+import mb.vfs.path.PPath;
 
 public class SpxCoreConfig implements Serializable {
     private static final long serialVersionUID = 1L;

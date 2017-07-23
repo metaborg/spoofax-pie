@@ -4,9 +4,9 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.ui.IEditorInput;
 
-import mb.pipe.run.core.path.PPath;
-import mb.pipe.run.core.path.PathSrv;
 import mb.pipe.run.eclipse.util.Nullable;
+import mb.vfs.path.PPath;
+import mb.vfs.path.PathSrv;
 
 public interface EclipsePathSrv extends PathSrv {
     PPath resolveWorkspaceRoot();

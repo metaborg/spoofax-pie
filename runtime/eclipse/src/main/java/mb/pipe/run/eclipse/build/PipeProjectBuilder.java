@@ -22,21 +22,21 @@ import com.google.inject.Injector;
 import mb.ceres.BuildException;
 import mb.ceres.BuildManager;
 import mb.ceres.BuildSession;
+import mb.log.Logger;
 import mb.pipe.run.ceres.CeresSrv;
 import mb.pipe.run.ceres.generated.processProject;
 import mb.pipe.run.ceres.generated.processString;
 import mb.pipe.run.ceres.util.Tuple4;
-import mb.pipe.run.core.log.Logger;
 import mb.pipe.run.core.model.message.Msg;
 import mb.pipe.run.core.model.parse.Token;
 import mb.pipe.run.core.model.style.Styling;
-import mb.pipe.run.core.path.PPath;
 import mb.pipe.run.eclipse.PipePlugin;
 import mb.pipe.run.eclipse.editor.Editors;
 import mb.pipe.run.eclipse.editor.PipeEditor;
 import mb.pipe.run.eclipse.util.MarkerUtils;
 import mb.pipe.run.eclipse.util.Nullable;
 import mb.pipe.run.eclipse.vfs.EclipsePathSrv;
+import mb.vfs.path.PPath;
 
 public class PipeProjectBuilder extends IncrementalProjectBuilder {
     public static final String id = PipePlugin.id + ".builder";

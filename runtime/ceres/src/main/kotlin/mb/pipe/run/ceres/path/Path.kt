@@ -8,11 +8,11 @@ import mb.ceres.In
 import mb.ceres.OutEffectBuilder
 import mb.ceres.PathStampers
 import mb.pipe.run.core.StaticPipeFacade
-import mb.pipe.run.core.path.DirAccess
-import mb.pipe.run.core.path.PPath
-import mb.pipe.run.core.path.PathMatcher
-import mb.pipe.run.core.path.PathSrv
-import mb.pipe.run.core.path.PathWalker
+import mb.vfs.access.DirAccess
+import mb.vfs.path.PPath
+import mb.vfs.list.PathMatcher
+import mb.vfs.path.PathSrv
+import mb.vfs.list.PathWalker
 import java.io.IOException
 import java.io.Serializable
 import java.nio.file.Files
@@ -54,8 +54,8 @@ class ListContents @Inject constructor(val pathSrv: PathSrv) : Builder<ListConte
       throw BuildException("Cannot list contents of '$input', it is not a directory")
     }
     try {
-      val stream = if (matcher != null) path.list(matcher) else path.list();
-      return stream.collect(Collectors.toCollection { ArrayList<PPath>() });
+      val stream = if (matcher != null) path.list(matcher) else path.list()
+      return stream.collect(Collectors.toCollection { ArrayList<PPath>() })
     } catch(e: IOException) {
       throw BuildException("Cannot list contents of '$input'", e)
     }
@@ -81,10 +81,12 @@ class WalkContents @Inject constructor(val pathSrv: PathSrv) : Builder<WalkConte
     try {
       val access = object : DirAccess {
         override fun writeDir(dir: PPath) = Unit // Will not occur
-        override fun readDir(dir: PPath) = require(dir, PathStampers.nonRecursiveModified)
+        override fun readDir(dir: PPath) {
+          require(dir, PathStampers.nonRecursiveModified)
+        }
       }
-      val stream = if (matcher != null) path.walk(matcher, access) else path.walk(access);
-      return stream.collect(Collectors.toCollection { ArrayList<PPath>() });
+      val stream = if (matcher != null) path.walk(matcher, access) else path.walk(access)
+      return stream.collect(Collectors.toCollection { ArrayList<PPath>() })
     } catch(e: IOException) {
       throw BuildException("Cannot walk contents of '$input'", e)
     }

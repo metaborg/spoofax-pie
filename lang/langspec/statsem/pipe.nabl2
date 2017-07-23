@@ -135,6 +135,25 @@ rules // Function calls
     Map1T [[ args ^ (s) : tys_in ]], 
     tys_in <? tys_in_expected | error $[Type mismatch: expected [tys_in_expected], got [tys_in]] @ id_func.
 
+rules // Requires/generates
+
+  [[ Requires(exp, match, stamper) ^ (s) : PathTy() ]] :=
+    [[ exp ^ (s) : ty_exp ]],
+    ty_exp <? PathTy() | error $[Type mismatch: expected path type, got [ty_exp]] @ exp,
+    [[ match ^ (s) ]],
+    [[ stamper ^ (s) ]].
+
+  [[ Generates(exp, stamper) ^ (s) : PathTy() ]] :=
+    [[ exp ^ (s) : ty_exp ]],
+    ty_exp <? PathTy() | error $[Type mismatch: expected path type, got [ty_exp]] @ exp,
+    [[ stamper ^ (s) ]].
+    
+  [[ Filter(exp) ^ (s) ]] :=
+    [[ exp ^ (s) : ty_exp ]],
+    ty_exp <? StrTy() | error $[Type mismatch: expected string type, got [ty_exp]] @ exp.
+  [[ Modified() ^ (s) ]] := true.
+  [[ Hash() ^ (s) ]] := true.
+    
 rules // Simple literals
 
   [[ BoolLit(_) ^ (s) : BoolTy() ]] := true.

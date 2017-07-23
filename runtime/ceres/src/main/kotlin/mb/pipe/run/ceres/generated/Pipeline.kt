@@ -1,14 +1,23 @@
 package mb.pipe.run.ceres.generated
 
-import mb.ceres.*
-import mb.pipe.run.core.*
-import mb.pipe.run.ceres.util.*
-import com.google.inject.*
-import java.io.Serializable
+import com.google.inject.Binder
+import com.google.inject.Module
+import mb.ceres.BuildContext
+import mb.ceres.Builder
+import mb.ceres.None
+import mb.ceres.bindBuilder
+import mb.ceres.builderMapBinder
+import mb.pipe.run.ceres.util.Tuple2
+import mb.pipe.run.ceres.util.Tuple3
+import mb.pipe.run.ceres.util.Tuple4
+import mb.pipe.run.ceres.util.append
+import mb.pipe.run.ceres.util.list
+import mb.pipe.run.ceres.util.tuple
+import mb.vfs.list.PathWalker
 
 class langSpecConfigForPath : Builder<langSpecConfigForPath.Input, mb.pipe.run.spoofax.cfg.LangSpecConfig?> {
-  data class Input(val workspace: mb.pipe.run.spoofax.cfg.WorkspaceConfig, val path: mb.pipe.run.core.path.PPath) : Tuple2<mb.pipe.run.spoofax.cfg.WorkspaceConfig, mb.pipe.run.core.path.PPath> {
-    constructor(tuple: Tuple2<mb.pipe.run.spoofax.cfg.WorkspaceConfig, mb.pipe.run.core.path.PPath>) : this(tuple.component1(), tuple.component2())
+  data class Input(val workspace: mb.pipe.run.spoofax.cfg.WorkspaceConfig, val path: mb.vfs.path.PPath) : Tuple2<mb.pipe.run.spoofax.cfg.WorkspaceConfig, mb.vfs.path.PPath> {
+    constructor(tuple: Tuple2<mb.pipe.run.spoofax.cfg.WorkspaceConfig, mb.vfs.path.PPath>) : this(tuple.component1(), tuple.component2())
   }
 
   override val id = "langSpecConfigForPath"
@@ -21,8 +30,8 @@ class langSpecConfigForPath : Builder<langSpecConfigForPath.Input, mb.pipe.run.s
 }
 
 class spxCoreConfigForPath : Builder<spxCoreConfigForPath.Input, mb.pipe.run.spoofax.cfg.SpxCoreConfig?> {
-  data class Input(val workspace: mb.pipe.run.spoofax.cfg.WorkspaceConfig, val path: mb.pipe.run.core.path.PPath) : Tuple2<mb.pipe.run.spoofax.cfg.WorkspaceConfig, mb.pipe.run.core.path.PPath> {
-    constructor(tuple: Tuple2<mb.pipe.run.spoofax.cfg.WorkspaceConfig, mb.pipe.run.core.path.PPath>) : this(tuple.component1(), tuple.component2())
+  data class Input(val workspace: mb.pipe.run.spoofax.cfg.WorkspaceConfig, val path: mb.vfs.path.PPath) : Tuple2<mb.pipe.run.spoofax.cfg.WorkspaceConfig, mb.vfs.path.PPath> {
+    constructor(tuple: Tuple2<mb.pipe.run.spoofax.cfg.WorkspaceConfig, mb.vfs.path.PPath>) : this(tuple.component1(), tuple.component2())
   }
 
   override val id = "spxCoreConfigForPath"
@@ -34,9 +43,9 @@ class spxCoreConfigForPath : Builder<spxCoreConfigForPath.Input, mb.pipe.run.spo
   }
 }
 
-class createWorkspaceConfig : Builder<mb.pipe.run.core.path.PPath, mb.pipe.run.spoofax.cfg.WorkspaceConfig?> {
+class createWorkspaceConfig : Builder<mb.vfs.path.PPath, mb.pipe.run.spoofax.cfg.WorkspaceConfig?> {
   override val id = "createWorkspaceConfig"
-  override fun BuildContext.build(input: mb.pipe.run.core.path.PPath): mb.pipe.run.spoofax.cfg.WorkspaceConfig? {
+  override fun BuildContext.build(input: mb.vfs.path.PPath): mb.pipe.run.spoofax.cfg.WorkspaceConfig? {
     var cfgLang = mb.pipe.run.spoofax.cfg.SpxCoreConfig.create(mb.pipe.run.ceres.path.resolve("/Users/gohla/metaborg/repo/pipeline/cfg/langspec"), false, list("cfg"))
     var workspaceFile = input.resolve("root/workspace.cfg")
     if (!requireOutput(mb.pipe.run.ceres.path.Exists::class.java, workspaceFile))
@@ -47,19 +56,19 @@ class createWorkspaceConfig : Builder<mb.pipe.run.core.path.PPath, mb.pipe.run.s
   }
 }
 
-class processProject : Builder<processProject.Input, ArrayList<Tuple4<mb.pipe.run.core.path.PPath, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>>> {
-  data class Input(val root: mb.pipe.run.core.path.PPath, val project: mb.pipe.run.core.path.PPath) : Tuple2<mb.pipe.run.core.path.PPath, mb.pipe.run.core.path.PPath> {
-    constructor(tuple: Tuple2<mb.pipe.run.core.path.PPath, mb.pipe.run.core.path.PPath>) : this(tuple.component1(), tuple.component2())
+class processProject : Builder<processProject.Input, ArrayList<Tuple4<mb.vfs.path.PPath, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>>> {
+  data class Input(val root: mb.vfs.path.PPath, val project: mb.vfs.path.PPath) : Tuple2<mb.vfs.path.PPath, mb.vfs.path.PPath> {
+    constructor(tuple: Tuple2<mb.vfs.path.PPath, mb.vfs.path.PPath>) : this(tuple.component1(), tuple.component2())
   }
 
   override val id = "processProject"
-  override fun BuildContext.build(input: processProject.Input): ArrayList<Tuple4<mb.pipe.run.core.path.PPath, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>> {
+  override fun BuildContext.build(input: processProject.Input): ArrayList<Tuple4<mb.vfs.path.PPath, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>> {
     var workspaceConfig = requireOutput(createWorkspaceConfig::class.java, input.root)
-    var results: ArrayList<Tuple4<mb.pipe.run.core.path.PPath, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>> = list()
+    var results: ArrayList<Tuple4<mb.vfs.path.PPath, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>> = list()
     if (workspaceConfig == null)
       return results
     var workspace = workspaceConfig!!
-    for (file in requireOutput(mb.pipe.run.ceres.path.WalkContents::class.java, mb.pipe.run.ceres.path.WalkContents.Input(input.project, mb.pipe.run.core.path.PPaths.extensionsPathWalker(workspace.langSpecExtensions()) as mb.pipe.run.core.path.PathWalker?))) {
+    for (file in requireOutput(mb.pipe.run.ceres.path.WalkContents::class.java, mb.pipe.run.ceres.path.WalkContents.Input(input.project, mb.vfs.path.PPaths.extensionsPathWalker(workspace.langSpecExtensions()) as PathWalker?))) {
       var config = requireOutput(langSpecConfigForPath::class.java, langSpecConfigForPath.Input(workspace, file))
       if (config != null) {
         var (tokens, messages, styling) = requireOutput(processFileWithLangSpecConfig::class.java, processFileWithLangSpecConfig.Input(file, input.project, config!!, workspace))
@@ -68,7 +77,7 @@ class processProject : Builder<processProject.Input, ArrayList<Tuple4<mb.pipe.ru
         results = results.append(requireOutput(emptyResult::class.java, file))
       }
     }
-    for (file in requireOutput(mb.pipe.run.ceres.path.WalkContents::class.java, mb.pipe.run.ceres.path.WalkContents.Input(input.project, mb.pipe.run.core.path.PPaths.extensionsPathWalker(workspace.spxCoreExtensions()) as mb.pipe.run.core.path.PathWalker?))) {
+    for (file in requireOutput(mb.pipe.run.ceres.path.WalkContents::class.java, mb.pipe.run.ceres.path.WalkContents.Input(input.project, mb.vfs.path.PPaths.extensionsPathWalker(workspace.spxCoreExtensions()) as PathWalker?))) {
       var config = requireOutput(spxCoreConfigForPath::class.java, spxCoreConfigForPath.Input(workspace, file))
       if (config != null) {
         var (tokens, messages, styling) = requireOutput(processFileWithSpxCore::class.java, processFileWithSpxCore.Input(file, config!!))
@@ -82,8 +91,8 @@ class processProject : Builder<processProject.Input, ArrayList<Tuple4<mb.pipe.ru
 }
 
 class processString : Builder<processString.Input, processString.Output?> {
-  data class Input(val text: String, val associatedFile: mb.pipe.run.core.path.PPath, val associatedProject: mb.pipe.run.core.path.PPath, val root: mb.pipe.run.core.path.PPath) : Tuple4<String, mb.pipe.run.core.path.PPath, mb.pipe.run.core.path.PPath, mb.pipe.run.core.path.PPath> {
-    constructor(tuple: Tuple4<String, mb.pipe.run.core.path.PPath, mb.pipe.run.core.path.PPath, mb.pipe.run.core.path.PPath>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
+  data class Input(val text: String, val associatedFile: mb.vfs.path.PPath, val associatedProject: mb.vfs.path.PPath, val root: mb.vfs.path.PPath) : Tuple4<String, mb.vfs.path.PPath, mb.vfs.path.PPath, mb.vfs.path.PPath> {
+    constructor(tuple: Tuple4<String, mb.vfs.path.PPath, mb.vfs.path.PPath, mb.vfs.path.PPath>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
   }
 
   data class Output(val _1: ArrayList<mb.pipe.run.core.model.parse.Token>?, val _2: ArrayList<mb.pipe.run.core.model.message.Msg>, val _3: mb.pipe.run.core.model.style.Styling?) : Tuple3<ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?> {
@@ -113,15 +122,15 @@ class processString : Builder<processString.Input, processString.Output?> {
   }
 }
 
-class emptyResult : Builder<mb.pipe.run.core.path.PPath, emptyResult.Output> {
-  data class Output(val _1: mb.pipe.run.core.path.PPath, val _2: ArrayList<mb.pipe.run.core.model.parse.Token>?, val _3: ArrayList<mb.pipe.run.core.model.message.Msg>, val _4: mb.pipe.run.core.model.style.Styling?) : Tuple4<mb.pipe.run.core.path.PPath, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?> {
-    constructor(tuple: Tuple4<mb.pipe.run.core.path.PPath, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
+class emptyResult : Builder<mb.vfs.path.PPath, emptyResult.Output> {
+  data class Output(val _1: mb.vfs.path.PPath, val _2: ArrayList<mb.pipe.run.core.model.parse.Token>?, val _3: ArrayList<mb.pipe.run.core.model.message.Msg>, val _4: mb.pipe.run.core.model.style.Styling?) : Tuple4<mb.vfs.path.PPath, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?> {
+    constructor(tuple: Tuple4<mb.vfs.path.PPath, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
   }
 
-  private fun output(tuple: Tuple4<mb.pipe.run.core.path.PPath, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>) = Output(tuple)
+  private fun output(tuple: Tuple4<mb.vfs.path.PPath, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?>) = Output(tuple)
 
   override val id = "emptyResult"
-  override fun BuildContext.build(input: mb.pipe.run.core.path.PPath): emptyResult.Output {
+  override fun BuildContext.build(input: mb.vfs.path.PPath): emptyResult.Output {
     var emptyTokens: ArrayList<mb.pipe.run.core.model.parse.Token>? = null
     var emptyMessages: ArrayList<mb.pipe.run.core.model.message.Msg> = list()
     var emptyStyling: mb.pipe.run.core.model.style.Styling? = null
@@ -130,8 +139,8 @@ class emptyResult : Builder<mb.pipe.run.core.path.PPath, emptyResult.Output> {
 }
 
 class processFileWithLangSpecConfig : Builder<processFileWithLangSpecConfig.Input, processFileWithLangSpecConfig.Output> {
-  data class Input(val file: mb.pipe.run.core.path.PPath, val project: mb.pipe.run.core.path.PPath, val langSpec: mb.pipe.run.spoofax.cfg.LangSpecConfig, val workspace: mb.pipe.run.spoofax.cfg.WorkspaceConfig) : Tuple4<mb.pipe.run.core.path.PPath, mb.pipe.run.core.path.PPath, mb.pipe.run.spoofax.cfg.LangSpecConfig, mb.pipe.run.spoofax.cfg.WorkspaceConfig> {
-    constructor(tuple: Tuple4<mb.pipe.run.core.path.PPath, mb.pipe.run.core.path.PPath, mb.pipe.run.spoofax.cfg.LangSpecConfig, mb.pipe.run.spoofax.cfg.WorkspaceConfig>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
+  data class Input(val file: mb.vfs.path.PPath, val project: mb.vfs.path.PPath, val langSpec: mb.pipe.run.spoofax.cfg.LangSpecConfig, val workspace: mb.pipe.run.spoofax.cfg.WorkspaceConfig) : Tuple4<mb.vfs.path.PPath, mb.vfs.path.PPath, mb.pipe.run.spoofax.cfg.LangSpecConfig, mb.pipe.run.spoofax.cfg.WorkspaceConfig> {
+    constructor(tuple: Tuple4<mb.vfs.path.PPath, mb.vfs.path.PPath, mb.pipe.run.spoofax.cfg.LangSpecConfig, mb.pipe.run.spoofax.cfg.WorkspaceConfig>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
   }
 
   data class Output(val _1: ArrayList<mb.pipe.run.core.model.parse.Token>?, val _2: ArrayList<mb.pipe.run.core.model.message.Msg>, val _3: mb.pipe.run.core.model.style.Styling?) : Tuple3<ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?> {
@@ -148,8 +157,8 @@ class processFileWithLangSpecConfig : Builder<processFileWithLangSpecConfig.Inpu
 }
 
 class processStringWithLangSpecConfig : Builder<processStringWithLangSpecConfig.Input, processStringWithLangSpecConfig.Output> {
-  data class Input(val text: String, val associatedProject: mb.pipe.run.core.path.PPath, val langSpec: mb.pipe.run.spoofax.cfg.LangSpecConfig, val workspace: mb.pipe.run.spoofax.cfg.WorkspaceConfig) : Tuple4<String, mb.pipe.run.core.path.PPath, mb.pipe.run.spoofax.cfg.LangSpecConfig, mb.pipe.run.spoofax.cfg.WorkspaceConfig> {
-    constructor(tuple: Tuple4<String, mb.pipe.run.core.path.PPath, mb.pipe.run.spoofax.cfg.LangSpecConfig, mb.pipe.run.spoofax.cfg.WorkspaceConfig>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
+  data class Input(val text: String, val associatedProject: mb.vfs.path.PPath, val langSpec: mb.pipe.run.spoofax.cfg.LangSpecConfig, val workspace: mb.pipe.run.spoofax.cfg.WorkspaceConfig) : Tuple4<String, mb.vfs.path.PPath, mb.pipe.run.spoofax.cfg.LangSpecConfig, mb.pipe.run.spoofax.cfg.WorkspaceConfig> {
+    constructor(tuple: Tuple4<String, mb.vfs.path.PPath, mb.pipe.run.spoofax.cfg.LangSpecConfig, mb.pipe.run.spoofax.cfg.WorkspaceConfig>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
   }
 
   data class Output(val _1: ArrayList<mb.pipe.run.core.model.parse.Token>?, val _2: ArrayList<mb.pipe.run.core.model.message.Msg>, val _3: mb.pipe.run.core.model.style.Styling?) : Tuple3<ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?> {
@@ -172,8 +181,8 @@ class processStringWithLangSpecConfig : Builder<processStringWithLangSpecConfig.
 }
 
 class parse : Builder<parse.Input, parse.Output> {
-  data class Input(val text: String, val associatedProject: mb.pipe.run.core.path.PPath, val langSpec: mb.pipe.run.spoofax.cfg.LangSpecConfig, val workspace: mb.pipe.run.spoofax.cfg.WorkspaceConfig) : Tuple4<String, mb.pipe.run.core.path.PPath, mb.pipe.run.spoofax.cfg.LangSpecConfig, mb.pipe.run.spoofax.cfg.WorkspaceConfig> {
-    constructor(tuple: Tuple4<String, mb.pipe.run.core.path.PPath, mb.pipe.run.spoofax.cfg.LangSpecConfig, mb.pipe.run.spoofax.cfg.WorkspaceConfig>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
+  data class Input(val text: String, val associatedProject: mb.vfs.path.PPath, val langSpec: mb.pipe.run.spoofax.cfg.LangSpecConfig, val workspace: mb.pipe.run.spoofax.cfg.WorkspaceConfig) : Tuple4<String, mb.vfs.path.PPath, mb.pipe.run.spoofax.cfg.LangSpecConfig, mb.pipe.run.spoofax.cfg.WorkspaceConfig> {
+    constructor(tuple: Tuple4<String, mb.vfs.path.PPath, mb.pipe.run.spoofax.cfg.LangSpecConfig, mb.pipe.run.spoofax.cfg.WorkspaceConfig>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
   }
 
   data class Output(val _1: org.spoofax.interpreter.terms.IStrategoTerm?, val _2: ArrayList<mb.pipe.run.core.model.parse.Token>?, val _3: ArrayList<mb.pipe.run.core.model.message.Msg>) : Tuple3<org.spoofax.interpreter.terms.IStrategoTerm?, ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>> {
@@ -235,8 +244,8 @@ class style : Builder<style.Input, mb.pipe.run.core.model.style.Styling?> {
 }
 
 class processFileWithSpxCore : Builder<processFileWithSpxCore.Input, processFileWithSpxCore.Output> {
-  data class Input(val file: mb.pipe.run.core.path.PPath, val config: mb.pipe.run.spoofax.cfg.SpxCoreConfig) : Tuple2<mb.pipe.run.core.path.PPath, mb.pipe.run.spoofax.cfg.SpxCoreConfig> {
-    constructor(tuple: Tuple2<mb.pipe.run.core.path.PPath, mb.pipe.run.spoofax.cfg.SpxCoreConfig>) : this(tuple.component1(), tuple.component2())
+  data class Input(val file: mb.vfs.path.PPath, val config: mb.pipe.run.spoofax.cfg.SpxCoreConfig) : Tuple2<mb.vfs.path.PPath, mb.pipe.run.spoofax.cfg.SpxCoreConfig> {
+    constructor(tuple: Tuple2<mb.vfs.path.PPath, mb.pipe.run.spoofax.cfg.SpxCoreConfig>) : this(tuple.component1(), tuple.component2())
   }
 
   data class Output(val _1: ArrayList<mb.pipe.run.core.model.parse.Token>?, val _2: ArrayList<mb.pipe.run.core.model.message.Msg>, val _3: mb.pipe.run.core.model.style.Styling?) : Tuple3<ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?> {
@@ -253,8 +262,8 @@ class processFileWithSpxCore : Builder<processFileWithSpxCore.Input, processFile
 }
 
 class processStringWithSpxCore : Builder<processStringWithSpxCore.Input, processStringWithSpxCore.Output> {
-  data class Input(val text: String, val associatedFile: mb.pipe.run.core.path.PPath, val config: mb.pipe.run.spoofax.cfg.SpxCoreConfig) : Tuple3<String, mb.pipe.run.core.path.PPath, mb.pipe.run.spoofax.cfg.SpxCoreConfig> {
-    constructor(tuple: Tuple3<String, mb.pipe.run.core.path.PPath, mb.pipe.run.spoofax.cfg.SpxCoreConfig>) : this(tuple.component1(), tuple.component2(), tuple.component3())
+  data class Input(val text: String, val associatedFile: mb.vfs.path.PPath, val config: mb.pipe.run.spoofax.cfg.SpxCoreConfig) : Tuple3<String, mb.vfs.path.PPath, mb.pipe.run.spoofax.cfg.SpxCoreConfig> {
+    constructor(tuple: Tuple3<String, mb.vfs.path.PPath, mb.pipe.run.spoofax.cfg.SpxCoreConfig>) : this(tuple.component1(), tuple.component2(), tuple.component3())
   }
 
   data class Output(val _1: ArrayList<mb.pipe.run.core.model.parse.Token>?, val _2: ArrayList<mb.pipe.run.core.model.message.Msg>, val _3: mb.pipe.run.core.model.style.Styling?) : Tuple3<ArrayList<mb.pipe.run.core.model.parse.Token>?, ArrayList<mb.pipe.run.core.model.message.Msg>, mb.pipe.run.core.model.style.Styling?> {

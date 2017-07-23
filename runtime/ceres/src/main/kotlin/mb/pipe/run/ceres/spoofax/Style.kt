@@ -8,11 +8,11 @@ import mb.pipe.run.ceres.spoofax.core.parse
 import mb.pipe.run.core.PipeRunEx
 import mb.pipe.run.core.model.parse.Token
 import mb.pipe.run.core.model.style.Styling
-import mb.pipe.run.core.path.PPath
 import mb.pipe.run.spoofax.cfg.SpxCoreConfig
 import mb.pipe.run.spoofax.esv.Styler
 import mb.pipe.run.spoofax.esv.StylingRules
 import mb.pipe.run.spoofax.esv.StylingRulesFromESV
+import mb.vfs.path.PPath
 import org.spoofax.interpreter.terms.IStrategoAppl
 import java.io.Serializable
 

@@ -1,0 +1,18 @@
+module desugar
+
+imports
+
+  signatures/-
+  signatures/lex/-
+  signatures/impl/-
+
+strategies
+
+  desugar-all = topdown(try(\Some(t) -> t\)); topdown(try(desugar))
+  
+rules
+
+  desugar: StamperPart(kind) -> kind
+  
+  desugar: Requires(exp, match, None()) -> Requires(exp, match, Modified())
+  desugar: Generates(exp, None()) -> Generates(exp, Hash())

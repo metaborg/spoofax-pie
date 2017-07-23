@@ -8,12 +8,13 @@ import java.io.Serializable;
 import java.nio.file.Files;
 import java.util.Arrays;
 
-import mb.pipe.run.core.path.PPath;
 import org.apache.commons.io.FileUtils;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.jsglr.client.ParseTable;
 import org.spoofax.terms.io.binary.TermReader;
+
+import mb.vfs.path.PPath;
 
 public class Table implements Serializable {
     private static final long serialVersionUID = 1L;

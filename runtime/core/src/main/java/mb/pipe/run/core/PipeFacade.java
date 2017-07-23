@@ -7,8 +7,10 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 
-import mb.pipe.run.core.log.Logger;
-import mb.pipe.run.core.path.PathSrv;
+import mb.log.LogModule;
+import mb.log.Logger;
+import mb.vfs.VFSModule;
+import mb.vfs.path.PathSrv;
 
 public class PipeFacade {
     public final Injector injector;

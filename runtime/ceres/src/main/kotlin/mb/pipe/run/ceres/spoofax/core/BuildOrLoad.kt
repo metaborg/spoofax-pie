@@ -4,9 +4,9 @@ import com.google.inject.Inject
 import mb.ceres.BuildContext
 import mb.ceres.Builder
 import mb.ceres.OutTransient
-import mb.pipe.run.core.log.Logger
-import mb.pipe.run.core.path.PPath
+import mb.log.Logger
 import mb.pipe.run.spoofax.cfg.SpxCoreConfig
+import mb.vfs.path.PPath
 import org.metaborg.core.language.ILanguageImpl
 import java.io.Serializable
 

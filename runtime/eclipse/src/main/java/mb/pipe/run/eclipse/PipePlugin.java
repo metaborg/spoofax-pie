@@ -12,9 +12,9 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import mb.log.LogModule;
 import mb.pipe.run.ceres.PipeCeresModule;
 import mb.pipe.run.ceres.generated.CeresBuilderModule;
-import mb.pipe.run.core.LogModule;
 import mb.pipe.run.core.PipeEx;
 import mb.pipe.run.core.PipeFacade;
 import mb.pipe.run.core.PipeModule;

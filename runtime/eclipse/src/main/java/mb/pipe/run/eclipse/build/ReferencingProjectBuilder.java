@@ -8,7 +8,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-import mb.pipe.run.core.log.Logger;
+import mb.log.Logger;
 
 public class ReferencingProjectBuilder extends WorkspaceJob {
     private final IProject project;

@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 
 import mb.pipe.run.core.PipeRunEx;
 import mb.pipe.run.core.model.region.Region;
-import mb.pipe.run.core.path.PPath;
+import mb.vfs.path.PPath;
 
 public class MsgBuilder {
     private String text = "";

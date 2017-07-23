@@ -13,11 +13,11 @@ import mb.pipe.run.ceres.spoofax.core.pPath
 import mb.pipe.run.ceres.spoofax.core.parse
 import mb.pipe.run.ceres.spoofax.core.trans
 import mb.pipe.run.ceres.util.Tuple3
-import mb.pipe.run.core.log.Logger
+import mb.log.Logger
 import mb.pipe.run.core.model.message.Msg
 import mb.pipe.run.core.model.parse.Token
-import mb.pipe.run.core.path.PPath
-import mb.pipe.run.core.path.PathSrv
+import mb.vfs.path.PPath
+import mb.vfs.path.PathSrv
 import mb.pipe.run.spoofax.cfg.SpxCoreConfig
 import mb.pipe.run.spoofax.sdf.Table
 import org.metaborg.core.action.EndNamedGoal

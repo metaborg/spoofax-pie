@@ -5,10 +5,10 @@ import mb.ceres.BuildContext
 import mb.ceres.BuildException
 import mb.ceres.Builder
 import mb.ceres.PathStampers
+import mb.log.Logger
 import mb.pipe.run.ceres.util.Tuple2
-import mb.pipe.run.core.log.Logger
-import mb.pipe.run.core.path.PPath
 import mb.pipe.run.spoofax.cfg.SpxCoreConfig
+import mb.vfs.path.PPath
 import org.metaborg.core.action.CompileGoal
 import org.metaborg.core.action.EndNamedGoal
 import org.metaborg.core.action.ITransformGoal
@@ -57,7 +57,7 @@ class CoreTrans @Inject constructor(log: Logger) : Builder<CoreTrans.Input, Core
     val parseUnit = spoofax.unitService.parseUnit(inputUnit, ParseContrib(true, true, input.ast, Iterables2.empty<IMessage>(), -1))
     val spoofaxContext = spoofax.contextService.get(project.location(), project, langImpl)
     val analyzeUnit = spoofax.unitService.analyzeUnit(parseUnit,
-            AnalyzeContrib(true, true, true, input.ast, Iterables2.empty<IMessage>(), -1), spoofaxContext)
+      AnalyzeContrib(true, true, true, input.ast, Iterables2.empty<IMessage>(), -1), spoofaxContext)
     spoofaxContext.read().use {
       try {
         val result = spoofax.transformService.transform(analyzeUnit, spoofaxContext, input.goal)

@@ -12,8 +12,8 @@ import javax.annotation.Nullable;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
-import mb.pipe.run.core.path.PPath;
 import mb.pipe.run.spoofax.term.Terms;
+import mb.vfs.path.PPath;
 
 public class LangSpecConfig implements Serializable {
     private static final long serialVersionUID = 2L;

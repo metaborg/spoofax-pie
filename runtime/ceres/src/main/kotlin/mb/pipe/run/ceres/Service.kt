@@ -7,10 +7,9 @@ import mb.ceres.BuildManagerFactory
 import mb.ceres.impl.BuildCache
 import mb.ceres.impl.LMDBBuildStoreFactory
 import mb.pipe.run.core.PipeRunEx
-import mb.pipe.run.core.model.Context
-import mb.pipe.run.core.path.PathSrv
+import mb.vfs.path.PPath
+import mb.vfs.path.PathSrv
 import java.util.concurrent.ConcurrentHashMap
-import mb.pipe.run.core.path.PPath
 
 interface CeresSrv {
   operator fun get(dir: PPath): BuildManager

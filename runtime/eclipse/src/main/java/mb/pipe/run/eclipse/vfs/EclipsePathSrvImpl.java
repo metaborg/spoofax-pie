@@ -16,10 +16,10 @@ import org.eclipse.ui.IURIEditorInput;
 
 import com.google.inject.Inject;
 
-import mb.pipe.run.core.log.Logger;
-import mb.pipe.run.core.path.PPath;
-import mb.pipe.run.core.path.PathSrvImpl;
+import mb.log.Logger;
 import mb.pipe.run.eclipse.util.Nullable;
+import mb.vfs.path.PPath;
+import mb.vfs.path.PathSrvImpl;
 
 public class EclipsePathSrvImpl extends PathSrvImpl implements EclipsePathSrv {
     private final Logger logger;

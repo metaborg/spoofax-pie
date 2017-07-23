@@ -20,13 +20,13 @@ import com.google.inject.Inject;
 
 import mb.pipe.run.core.model.message.Msg;
 import mb.pipe.run.core.model.style.Styling;
-import mb.pipe.run.core.path.PPath;
 import mb.pipe.run.eclipse.editor.PipeEditor;
 import mb.pipe.run.eclipse.util.MarkerUtils;
 import mb.pipe.run.eclipse.util.Nullable;
 import mb.pipe.run.eclipse.util.StatusUtils;
 import mb.pipe.run.eclipse.util.StyleUtils;
 import mb.pipe.run.eclipse.vfs.EclipsePathSrv;
+import mb.vfs.path.PPath;
 
 public class Updater {
     private final EclipsePathSrv pathSrv;

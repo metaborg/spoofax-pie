@@ -23,6 +23,8 @@ rules
       str := 
 $[package mb.pipe.run.ceres.generated
 
+import mb.log.*
+import mb.vfs.path.*
 import mb.ceres.*
 import mb.pipe.run.core.*
 import mb.pipe.run.ceres.util.*

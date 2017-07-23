@@ -5,12 +5,12 @@ import mb.ceres.BuildContext
 import mb.ceres.BuildException
 import mb.ceres.Builder
 import mb.ceres.PathStampers
+import mb.log.Logger
 import mb.pipe.run.ceres.util.Tuple2
-import mb.pipe.run.core.log.Logger
 import mb.pipe.run.core.model.message.Msg
-import mb.pipe.run.core.path.PPath
 import mb.pipe.run.spoofax.cfg.SpxCoreConfig
 import mb.pipe.run.spoofax.util.MessageConverter
+import mb.vfs.path.PPath
 import org.metaborg.core.analysis.AnalysisException
 import org.metaborg.core.messages.IMessage
 import org.metaborg.spoofax.core.stratego.StrategoRuntimeFacet

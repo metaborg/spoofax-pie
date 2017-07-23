@@ -16,7 +16,7 @@ import com.google.common.collect.Maps;
 import com.google.common.primitives.Ints;
 import com.google.inject.Inject;
 
-import mb.pipe.run.core.log.Logger;
+import mb.log.Logger;
 
 public class BuilderUtils {
     private final Logger logger;

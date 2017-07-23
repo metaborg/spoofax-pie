@@ -6,12 +6,12 @@ imports
   nabl2runtime
   
   statsem/program
-
+  desugar
   pp
 
 rules // Analysis
 
-  editor-analyze = nabl2-analyze(id)
+  editor-analyze = nabl2-analyze(desugar-all)
 
 rules // Debugging
   

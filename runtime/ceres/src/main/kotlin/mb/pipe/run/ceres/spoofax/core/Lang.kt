@@ -4,7 +4,7 @@ import mb.ceres.BuildContext
 import mb.ceres.Builder
 import mb.ceres.OutTransient
 import mb.ceres.PathStampers
-import mb.pipe.run.core.path.PPath
+import mb.vfs.path.PPath
 import org.metaborg.core.build.CommonPaths
 import org.metaborg.core.language.IComponentCreationConfigRequest
 import org.metaborg.core.language.ILanguageImpl

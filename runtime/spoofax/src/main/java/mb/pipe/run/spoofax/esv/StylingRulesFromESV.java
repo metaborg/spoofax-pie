@@ -2,7 +2,8 @@ package mb.pipe.run.spoofax.esv;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
-import mb.pipe.run.core.log.Logger;
+
+import mb.log.Logger;
 import mb.pipe.run.core.model.parse.TokenConstants;
 import mb.pipe.run.core.model.parse.TokenType;
 import mb.pipe.run.core.model.style.Style;

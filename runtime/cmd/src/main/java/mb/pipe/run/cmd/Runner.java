@@ -40,8 +40,8 @@ import mb.pipe.run.core.model.message.Msg;
 import mb.pipe.run.core.model.parse.Token;
 import mb.pipe.run.core.model.style.Styling;
 import mb.pipe.run.core.model.style.TokenStyle;
-import mb.pipe.run.core.path.PPath;
-import mb.pipe.run.core.path.PathSrv;
+import mb.vfs.path.PPath;
+import mb.vfs.path.PathSrv;
 
 @SuppressWarnings("restriction")
 public class Runner {

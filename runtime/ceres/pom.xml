@@ -54,8 +54,18 @@
 
     <dependency>
       <groupId>org.metaborg</groupId>
+      <artifactId>log</artifactId>
+      <version>${metaborg-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>vfs</artifactId>
+      <version>${metaborg-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
       <artifactId>org.metaborg.spoofax.core</artifactId>
-      <version>2.3.0-SNAPSHOT</version>
+      <version>${metaborg-version}</version>
     </dependency>
 
     <dependency>

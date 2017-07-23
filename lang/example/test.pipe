@@ -1,0 +1,4 @@
+func test() -> path = {
+  var path = /t    est.bla/lol;
+  requires path filter "*.h" by hash; 
+}

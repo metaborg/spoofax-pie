@@ -33,18 +33,16 @@ $[{
 rules // Bindings and assignment
 
   p2c-stm:
-    VarDecBinder(SingleBinder(bind), exp) -> 
-$[[initStmsStr]var [bindStr] = [expStr]]
+    VarDecBinder(SingleBinder(bind), exp) -> $[var [bindStr] = [expStr]]
     with
-      bindStr               := <p2c-bind-tostr> bind
-    ; (initStmsStr, expStr) := <try-p2c-exp> exp
+      bindStr := <p2c-bind-tostr> bind
+    ; expStr  := <try-p2c-exp> exp
   
   p2c-stm:
-    VarDecBinder(TupleBinder(binds), exp) -> 
-$[[initStmsStr]var ([bindsStr]) = [expStr]]
+    VarDecBinder(TupleBinder(binds), exp) -> $[var ([bindsStr]) = [expStr]]
     with
-      (initStmsStr, expStr) := <try-p2c-exp> exp
-    ; bindsStr              := <map(p2c-bind-tostr); pipe-sep-comma; concat-strings> binds
+      expStr   := <try-p2c-exp> exp
+    ; bindsStr := <map(p2c-bind-tostr); pipe-sep-comma; concat-strings> binds
 
   p2c-bind-tostr: Bind(varId)      -> $[[varId]]
   p2c-bind-tostr: TBind(varId, ty) -> $[[varId] : [[<t2k-sig> ty]]]
@@ -55,79 +53,64 @@ $[[initStmsStr]var ([bindsStr]) = [expStr]]
       tyStr := <t2k-sig> type
 
   p2c-stm:
-    Assign(Ref(varId), exp) -> 
-$[[initStmsStr][varId] = [expStr]]
+    Assign(Ref(varId), exp) -> $[[varId] = [expStr]]
     with
-      (initStmsStr, expStr) := <try-p2c-exp> exp
+      expStr := <try-p2c-exp> exp
 
 rules // Control flow
 
   p2c-stm:
-    If(exp, stm) -> 
-$[[initStmsStr]if([expStr])
-  [strStm]]
+    If(exp, stm) -> $[if([expStr]) [strStm]]
     with
-      strStm                := <try-p2c-stm> stm
-    ; (initStmsStr, expStr) := <try-p2c-exp> exp
+      strStm := <try-p2c-stm> stm
+    ; expStr := <try-p2c-exp> exp
 
   p2c-stm:
-    IfElse(exp, trueStm, falseStm) ->
-$[[initStmsStr]if([expStr])
-  [trueStmStr]
-else
-  [falseStmStr]]
+    IfElse(exp, trueStm, falseStm) -> $[if([expStr]) [trueStmStr] else [falseStmStr]]
     with
-      trueStmStr            := <try-p2c-stm> trueStm
-    ; falseStmStr           := <try-p2c-stm> falseStm
-    ; (initStmsStr, expStr) := <try-p2c-exp> exp
+      trueStmStr  := <try-p2c-stm> trueStm
+    ; falseStmStr := <try-p2c-stm> falseStm
+    ; expStr      := <try-p2c-exp> exp
 
   p2c-stm:
-    ForEach(SingleBinder(bind), exp, stm) ->
-$[[initStmsStr]for([bindStr] in [expStr])
-  [strStm]]
+    ForEach(SingleBinder(bind), exp, stm) -> $[for([bindStr] in [expStr]) [strStm]]
     with
-      bindStr               := <p2c-bind-tostr> bind
-    ; (initStmsStr, expStr) := <try-p2c-exp> exp
-    ; strStm                := <try-p2c-stm> stm
+      bindStr := <p2c-bind-tostr> bind
+    ; expStr  := <try-p2c-exp> exp
+    ; strStm  := <try-p2c-stm> stm
 
   p2c-stm:
-    ForEach(TupleBinder(binds), exp, stm) ->
-$[[initStmsStr]for(([bindsStr]) in [expStr])
-  [strStm]]
+    ForEach(TupleBinder(binds), exp, stm) -> $[for(([bindsStr]) in [expStr]) [strStm]]
     with
-      bindsStr              := <map(p2c-bind-tostr); pipe-sep-comma; concat-strings> binds
-    ; (initStmsStr, expStr) := <try-p2c-exp> exp
-    ; strStm                := <try-p2c-stm> stm
+      bindsStr := <map(p2c-bind-tostr); pipe-sep-comma; concat-strings> binds
+    ; expStr   := <try-p2c-exp> exp
+    ; strStm   := <try-p2c-stm> stm
 
 rules // Return and fail
 
   p2c-stm:
-    Return(exp) -> 
-$[[initStmsStr]return output([expStr])]
+    Return(exp) -> $[return output([expStr])]
     where
       <pipe-ast-type; (?TupleTy(_) <+ NullableTy(?TupleTy(_)))> exp
     with
-      (initStmsStr, expStr) := <try-p2c-exp> exp
+      expStr := <try-p2c-exp> exp
 
   p2c-stm:
-    Return(exp) -> 
-$[[initStmsStr]return [expStr]]
+    Return(exp) -> $[return [expStr]]
     where
       <pipe-ast-type; not(?TupleTy(_))> exp
     with
-      (initStmsStr, expStr) := <try-p2c-exp> exp
+      expStr := <try-p2c-exp> exp
 
 
   p2c-stm:
-    Fail(exp) ->
-$[[initStmsStr]throw PipeRunEx([expStr].toString())]
+    Fail(exp) -> $[throw BuildException([expStr].toString())]
     with
-      (initStmsStr, expStr) := <try-p2c-exp> exp
+      expStr := <try-p2c-exp> exp
 
 rules // Expression as statement
 
   p2c-stm:
-    Exp(exp) -> 
-$[[initStmsStr][expStr]]
+    Exp(exp) -> $[[expStr]]
     with
-      (initStmsStr, expStr) := <try-p2c-exp> exp
+      expStr := <try-p2c-exp> exp

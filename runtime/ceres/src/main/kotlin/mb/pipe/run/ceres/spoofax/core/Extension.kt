@@ -4,11 +4,11 @@ import com.google.inject.Inject
 import mb.ceres.BuildContext
 import mb.ceres.Builder
 import mb.ceres.PathStampers
-import mb.pipe.run.core.log.Logger
-import mb.pipe.run.core.path.PPath
+import mb.log.Logger
 import mb.pipe.run.spoofax.cfg.SpxCoreConfig
 import mb.pipe.run.spoofax.esv.ESVReader
 import mb.pipe.run.spoofax.util.EsvUtil
+import mb.vfs.path.PPath
 import org.metaborg.spoofax.meta.core.build.SpoofaxLangSpecCommonPaths
 import java.io.Serializable
 

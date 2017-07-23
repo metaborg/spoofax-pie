@@ -11,7 +11,7 @@ import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.terms.ParseError;
 import org.spoofax.terms.io.binary.TermReader;
 
-import mb.pipe.run.core.path.PPath;
+import mb.vfs.path.PPath;
 
 public class EsvUtil {
     public static @Nullable IStrategoAppl read(PPath file) throws ParseError, IOException, MetaborgException {

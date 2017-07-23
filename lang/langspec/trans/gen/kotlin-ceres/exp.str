@@ -19,7 +19,7 @@ imports
 
 rules 
 
-  try-p2c-exp = pipe-try-debug(p2c-exp|"p2c-exp") <+ !("", "Any()")
+  try-p2c-exp = pipe-try-debug(p2c-exp|"p2c-exp") <+ !"Any()"
   
 rules // Nullable
   
@@ -29,33 +29,32 @@ rules // Nullable
       NullableTy(ty) := <pipe-ast-type> exp
 
   p2c-exp:
-    ToNullable(exp) -> (initStr, $[[expStr] as [tySig]?])
+    ToNullable(exp) -> $[[expStr] as [tySig]?]
     with
       ty := <pipe-ast-type> exp
     where
       not(NullableTy(_) := ty)
     with
-      tySig := <t2k-sig> ty
-    ; (initStr, expStr) := <p2c-exp> exp
+      tySig  := <t2k-sig> ty
+    ; expStr := <p2c-exp> exp
 
   p2c-exp:
-    ToNonNullable(exp) -> (initStr, $[[expStr]!!])
+    ToNonNullable(exp) -> $[[expStr]!!]
     with
-      (initStr, expStr) := <p2c-exp> exp
+      expStr := <p2c-exp> exp
 
   p2c-exp:
-    Not(exp) -> (initStr, $[![expStr]])
+    Not(exp) -> $[![expStr]]
     with
-      (initStr, expStr) := <p2c-exp> exp
+      expStr := <p2c-exp> exp
 
 rules // Binary expressions
 
   p2c-binexp(|symbol):
-    (lExp, rExp) -> (allInitStmStr, $[[lExpStr] [symbol] [rExpStr]])
+    (lExp, rExp) -> $[[lExpStr] [symbol] [rExpStr]]
     with
-      (lInitStmStr, lExpStr) := <try-p2c-exp> lExp
-    ; (rInitStmStr, rExpStr) := <try-p2c-exp> rExp
-    ; allInitStmStr := <pipe-concat-nl> [lInitStmStr, rInitStmStr]
+      lExpStr := <try-p2c-exp> lExp
+    ; rExpStr := <try-p2c-exp> rExp
   
   p2c-exp: Eq(lExp, rExp) -> <p2c-binexp(|"==")> (lExp, rExp)
   p2c-exp: Neq(lExp, rExp) -> <p2c-binexp(|"!=")> (lExp, rExp)
@@ -65,7 +64,7 @@ rules // Binary expressions
 rules // References
 
   p2c-exp:
-    r@Ref(varId) -> ("", <p2c-ref-add-transient-val(|varId)> r) 
+    r@Ref(varId) -> <p2c-ref-add-transient-val(|varId)> r 
     where
       LocalVarKind() := <pipe-ast-ref-prop(|"Var", "kind")> varId
   
@@ -76,13 +75,13 @@ rules // References
     ; 0 := <InputKind>
       
   p2c-exp: 
-    r@Ref(varId) -> ("", <p2c-ref-add-transient-val(|"input")> r)
+    r@Ref(varId) -> <p2c-ref-add-transient-val(|"input")> r
     where
       InputVarKind() := <pipe-ast-ref-prop(|"Var", "kind")> varId
     ; 1 := <InputKind>
       
   p2c-exp: 
-    r@Ref(varId) -> ("", <p2c-ref-add-transient-val(|$[input.[varId]])> r)
+    r@Ref(varId) -> <p2c-ref-add-transient-val(|$[input.[varId]])> r
     where
       InputVarKind() := <pipe-ast-ref-prop(|"Var", "kind")> varId
     ; 2 := <InputKind>
@@ -106,36 +105,30 @@ rules // References
 rules // External function calls
 
   p2c-exp:
-    Call(funcId, exps) -> (initStmsStr, $[[javaClassId].[javaMethodId]([expStr])])
+    Call(funcId, exps) -> $[[javaClassId].[javaMethodId]([expStr])]
     where
       JavaStaticFuncKind() := <pipe-ast-ref-prop(|"Func", "kind")> funcId
     with
-      javaClassId             := <pipe-ast-ref-prop(|"Func", "javaClassId")> funcId
-    ; javaMethodId            := <pipe-ast-ref-prop(|"Func", "javaMethodId")> funcId
-    ; (initStmsStrs, expStrs) := <map(try-p2c-exp); unzip> exps
-    ; initStmsStr             := <pipe-concat-nl> initStmsStrs
-    ; expStr                  := <pipe-concat-comma> expStrs
+      javaClassId  := <pipe-ast-ref-prop(|"Func", "javaClassId")> funcId
+    ; javaMethodId := <pipe-ast-ref-prop(|"Func", "javaMethodId")> funcId
+    ; expStr      := <map(try-p2c-exp); pipe-concat-comma> exps
     
   p2c-exp:
-    Call(funcId, exps) -> (initStmsStr, $[[kotlinClassOrPackageId].[kotlinFuncId]([expStr])])
+    Call(funcId, exps) -> $[[kotlinClassOrPackageId].[kotlinFuncId]([expStr])]
     where
       KotlinFuncKind() := <pipe-ast-ref-prop(|"Func", "kind")> funcId
     with
-      kotlinClassOrPackageId  := <pipe-ast-ref-prop(|"Func", "kotlinClassOrPackageId")> funcId
-    ; kotlinFuncId            := <pipe-ast-ref-prop(|"Func", "kotlinFuncId")> funcId
-    ; (initStmsStrs, expStrs) := <map(try-p2c-exp); unzip> exps
-    ; initStmsStr             := <pipe-concat-nl> initStmsStrs
-    ; expStr                  := <pipe-concat-comma> expStrs
+      kotlinClassOrPackageId := <pipe-ast-ref-prop(|"Func", "kotlinClassOrPackageId")> funcId
+    ; kotlinFuncId           := <pipe-ast-ref-prop(|"Func", "kotlinFuncId")> funcId
+    ; expStr                 := <map(try-p2c-exp); pipe-concat-comma> exps
 
 rules // Data type function calls
 
   p2c-exp: 
-    QCall(exp, funcId, argsExps) -> (allInitStmsStr, $[[expStr].[funcId]([argsExpStr])])
+    QCall(exp, funcId, argsExps) -> $[[expStr].[funcId]([argsExpStr])]
     with
-      (argsInitStmsStrs, argsExpStrs) := <map(try-p2c-exp); unzip> argsExps
-    ; argsExpStr                      := <pipe-concat-comma> argsExpStrs
-    ; (initStmsStr, expStr)           := <try-p2c-exp> exp
-    ; allInitStmsStr                  := <concat; pipe-concat-nl> [argsInitStmsStrs, [initStmsStr]]
+      argsExpStr := <map(try-p2c-exp); pipe-concat-comma> argsExps
+    ; expStr     := <try-p2c-exp> exp
 
 rules // Ceres builder calls
   
@@ -155,60 +148,79 @@ rules // Ceres builder calls
 
 
   p2c-exp-ceres-call(|javaClassId):
-   Call(funcId, exps) -> (initStmsStr, $[requireOutput([javaClassId]::class.java, [expStr])])
+   Call(funcId, exps) -> $[requireOutput([javaClassId]::class.java, [expStr])]
     with
-      (initStmsStr, expStr) := <p2c-exp-ceres-call-inputexp(|javaClassId)> exps
+      expStr := <p2c-exp-ceres-call-inputexp(|javaClassId)> exps
 
 
   p2c-exp-ceres-call-inputexp(|javaClassId):
-    exps -> ("", "None.instance")
+    exps -> "None.instance"
     where
       0 := <length> exps
 
   p2c-exp-ceres-call-inputexp(|javaClassId):
-    exps -> (initStmStr, expStr)
+    exps -> expStr
     where
       1 := <length> exps
     with
-      [exp]                := exps
-    ; (initStmStr, expStr) := <try-p2c-exp> exp
+      [exp]  := exps
+    ; expStr := <try-p2c-exp> exp
     
   p2c-exp-ceres-call-inputexp(|javaClassId):
-    exps -> (initStmsStr, $[[javaClassId].Input([expStr])])
+    exps -> $[[javaClassId].Input([expStr])]
     where
       length := <length> exps
     ; <gt> (length, 1)
     with
-     (initStmsStrs, expStrs) := <map(try-p2c-exp); unzip> exps
-   ; initStmsStr             := <pipe-concat-nl> initStmsStrs
-   ; expStr                  := <pipe-concat-comma> expStrs
+      expStr := <map(try-p2c-exp); pipe-concat-comma> exps
+
+rules // Requires / Generates
+
+  p2c-exp:
+    Requires(pathExp, matchPartOpt, stamper) -> $[require([pathExpStr], [stamperStr])]
+    with
+      pathExpStr := <p2c-exp> pathExp
+    ; stamperStr := <p2c-stamper> (matchPartOpt, stamper)
+
+  p2c-exp:
+    Generates(pathExp, stamper) -> $[generates([pathExpStr], [stamperStr])]
+    with
+      pathExpStr := <p2c-exp> pathExp
+    ; stamperStr := <p2c-stamper> (None(), stamper)
+  
+  p2c-stamper: (None(), Modified()) -> "ModifiedPathStamper()"
+  p2c-stamper: (None(), Hash()    ) -> "HashPathStamper()"
+  
+  p2c-stamper:
+    (Filter(exp), Modified()) -> $[ModifiedPathStamper([expStr])]
+    with
+      expStr := <try-p2c-exp> exp
+  p2c-stamper:
+    (Filter(exp), Hash()) -> $[HashPathStamper([expStr])]
+    with
+      expStr := <try-p2c-exp> exp 
 
 rules // Literals
 
-  p2c-exp: BoolLit(True())  -> ("", $[true])
-  p2c-exp: BoolLit(False()) -> ("", $[false])
-  p2c-exp: IntLit(i)        -> ("", i)
-  p2c-exp: StrLit(str)      -> ("", str)
-  p2c-exp: NullLit()        -> ("", $[null])
+  p2c-exp: BoolLit(True())  -> $[true]
+  p2c-exp: BoolLit(False()) -> $[false]
+  p2c-exp: IntLit(i)        -> i
+  p2c-exp: StrLit(str)      -> str
+  p2c-exp: PathLit(path)    -> $[PPathImpl(Paths.get("$[path]"))]
+  p2c-exp: NullLit()        -> $[null]
   
   p2c-exp:
-    TupleLit(exps) -> (allInitStmsStr, $[tuple([expsStr])])
+    TupleLit(exps) -> $[tuple([expsStr])]
     with
-      (initStmsStrs, expStrs) := <map(try-p2c-exp); unzip> exps
-    ; allInitStmsStr          := <pipe-concat-nl> initStmsStrs
-    ; expsStr                 := <pipe-concat-comma> expStrs
+      expsStr := <map(try-p2c-exp); pipe-concat-comma> exps
     
   p2c-exp:
-    ListLit(exps) -> (allInitStmsStr, $[list([expsStr])])
+    ListLit(exps) -> $[list([expsStr])]
     with
-      (initStmsStrs, expStrs) := <map(try-p2c-exp); unzip> exps
-    ; allInitStmsStr          := <pipe-concat-nl> initStmsStrs
-    ; expsStr                 := <pipe-concat-comma> expStrs
+      expsStr := <map(try-p2c-exp); pipe-concat-comma> exps
 
   p2c-exp:
-    ListAppendLit(listExp, exps) -> (allInitStmsStr, $[[listExpStr].append([expsStr])])
+    ListAppendLit(listExp, exps) -> $[[listExpStr].append([expsStr])]
     with
-      (listInitStmStr, listExpStr) := <try-p2c-exp> listExp
-    ; (initStmsStrs, expStrs)      := <map(try-p2c-exp); unzip> exps
-    ; allInitStmsStr               := <concat; pipe-concat-nl> [[listInitStmStr], initStmsStrs]
-    ; expsStr                      := <pipe-concat-comma> expStrs
+      listExpStr := <try-p2c-exp> listExp
+    ; expsStr    := <map(try-p2c-exp); pipe-concat-comma> exps

@@ -9,10 +9,10 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
 
-import mb.pipe.run.core.log.Logger;
-import mb.pipe.run.core.path.PPath;
+import mb.log.Logger;
 import mb.pipe.run.eclipse.util.StatusUtils;
 import mb.pipe.run.eclipse.vfs.EclipsePathSrv;
+import mb.vfs.path.PPath;
 
 public class DocumentProvider extends FileDocumentProvider {
     private final Logger logger;

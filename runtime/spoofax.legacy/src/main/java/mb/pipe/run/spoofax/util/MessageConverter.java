@@ -18,7 +18,7 @@ import mb.pipe.run.core.model.message.PathMsg;
 import mb.pipe.run.core.model.message.PathMsgImpl;
 import mb.pipe.run.core.model.region.Region;
 import mb.pipe.run.core.parse.ParseMsgType;
-import mb.pipe.run.core.path.PPath;
+import mb.vfs.path.PPath;
 
 public class MessageConverter {
     private final PathConverter pathConverter;

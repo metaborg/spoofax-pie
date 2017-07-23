@@ -5,10 +5,10 @@ import mb.ceres.Builder
 import mb.pipe.run.ceres.path.read
 import mb.pipe.run.ceres.spoofax.core.langExtensions
 import mb.pipe.run.ceres.spoofax.core.parse
-import mb.pipe.run.core.path.PPath
 import mb.pipe.run.spoofax.cfg.LangSpecConfig
 import mb.pipe.run.spoofax.cfg.SpxCoreConfig
 import mb.pipe.run.spoofax.cfg.WorkspaceConfig
+import mb.vfs.path.PPath
 import java.io.Serializable
 
 class GenerateLangSpecConfig : Builder<GenerateLangSpecConfig.Input, LangSpecConfig?> {

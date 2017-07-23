@@ -1,8 +1,8 @@
 package mb.pipe.run.ceres.spoofax.core
 
-import mb.pipe.run.core.path.PPath
-import mb.pipe.run.core.path.PPathImpl
 import mb.pipe.run.spoofax.util.StaticSpoofax
+import mb.vfs.path.PPath
+import mb.vfs.path.PPathImpl
 import org.apache.commons.vfs2.FileName
 import org.apache.commons.vfs2.FileObject
 import java.net.URI

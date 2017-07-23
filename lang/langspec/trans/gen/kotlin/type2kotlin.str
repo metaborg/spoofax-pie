@@ -19,6 +19,7 @@ rules
   t2k-sig: BoolTy() -> "Boolean"
   t2k-sig: IntTy()  -> "Int"
   t2k-sig: StrTy()  -> "String"
+  t2k-sig: PathTy() -> "PPath"
   t2k-sig: TopTy()  -> "Any"
 
   t2k-sig:

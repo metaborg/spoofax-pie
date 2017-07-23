@@ -1,6 +1,6 @@
 package mb.pipe.run.core.model.message;
 
-import mb.pipe.run.core.path.PPath;
+import mb.vfs.path.PPath;
 
 public interface PathMsg extends Msg {
     /**

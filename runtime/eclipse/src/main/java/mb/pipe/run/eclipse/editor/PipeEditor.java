@@ -17,15 +17,15 @@ import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import com.google.inject.Injector;
 
 import mb.ceres.BuildManager;
+import mb.log.Logger;
 import mb.pipe.run.ceres.CeresSrv;
 import mb.pipe.run.core.PipeFacade;
-import mb.pipe.run.core.log.Logger;
 import mb.pipe.run.core.model.Context;
 import mb.pipe.run.core.model.ContextFactory;
-import mb.pipe.run.core.path.PPath;
 import mb.pipe.run.eclipse.PipePlugin;
 import mb.pipe.run.eclipse.build.Updater;
 import mb.pipe.run.eclipse.vfs.EclipsePathSrv;
+import mb.vfs.path.PPath;
 
 public class PipeEditor extends TextEditor {
     private final class DocumentListener implements IDocumentListener {

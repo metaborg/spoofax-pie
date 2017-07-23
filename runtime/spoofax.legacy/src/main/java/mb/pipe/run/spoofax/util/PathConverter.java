@@ -4,8 +4,8 @@ import org.apache.commons.vfs2.FileObject;
 
 import com.google.inject.Inject;
 
-import mb.pipe.run.core.path.PPath;
-import mb.pipe.run.core.path.PathSrv;
+import mb.vfs.path.PPath;
+import mb.vfs.path.PathSrv;
 
 public class PathConverter {
     private final PathSrv pathSrv;

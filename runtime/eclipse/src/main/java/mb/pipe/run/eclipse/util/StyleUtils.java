@@ -10,7 +10,7 @@ import org.eclipse.swt.graphics.RGB;
 
 import com.google.inject.Inject;
 
-import mb.pipe.run.core.log.Logger;
+import mb.log.Logger;
 import mb.pipe.run.core.model.region.Region;
 import mb.pipe.run.core.model.style.Style;
 import mb.pipe.run.core.model.style.Styling;
