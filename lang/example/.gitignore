@@ -11,3 +11,4 @@
 *.symbolic
 *.aterm
 *.java
+*.kt
