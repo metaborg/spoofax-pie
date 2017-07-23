@@ -3,8 +3,7 @@ module gen/util
 imports
 
   nabl2/api
-  
-  gen/pluto-java/core
+  gen/kotlin-ceres/core
 
 rules // Generic strategies for getting properties and types of anything
 
