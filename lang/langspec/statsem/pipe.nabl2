@@ -16,25 +16,9 @@ rules // Statements
     [[ exp ^ (s) : ty ]],
     Binder [[ binder ^ (s, ty) ]].
     
-//  [[ VarDec(id_var, ty) ^ (s, _) ]] :=
-//    [[ ty ^ (s) : ty_bound ]],
-//    Var{id_var} <- s,
-//    Var{id_var}.kind := LocalVarKind() !,
-//    Var{id_var} : ty_bound !.
-//    
-//  [[ Assign(exp_ref, exp_val) ^ (s, _) ]] :=
-//    [[ exp_ref ^ (s) : ty_ref ]],
-//    [[ exp_val ^ (s) : ty_val ]],
-//    ty_val <? ty_ref | error $[Type mismatch: expected [ty_ref], got [ty_val]] @ exp_val. 
 
-
-//  [[ ForEach(binder, exp, stm) ^ (s, ty_func_outer) ]] :=
-//    [[ exp ^ (s) : ty ]],
-//    ty == ListTy(ty_inner) | error $[Type mismatch: expected list type, got [ty]] @ exp,
-//    new s_foreach,
-//    s_foreach -P-> s,
-//    Binder [[ binder ^ (s_foreach, ty_inner) ]],
-//    [[ stm ^ (s_foreach, ty_func_outer) ]].
+  [[ ListComprehensionStm(inner) ^ (s, _) ]] :=
+    [[ inner ^ (s) : _ ]].
 
 
   [[ Return(exp) ^ (s, ty_func_outer) ]] :=
@@ -104,6 +88,20 @@ rules // If else
     // TODO: this should calculate the LUB of the expression types
     ty_true <? ty_false | error $[Type mismatch: expected [ty_false], got [ty_true]] @ e.
 
+rules // List comprehension
+
+  [[ ListComprehensionExp(inner) ^ (s) : ty ]] :=
+    [[ inner ^ (s) : ty ]].
+    
+  [[ ListComprehension(exp_map, binder, exp_list) ^ (s) : ty ]] :=
+    [[ exp_list ^ (s) : ty_list ]],
+    ty_list == ListTy(ty_list_inner) | error $[Type mismatch: expected list type, got [ty_list]] @ exp_list,
+    new s_comprehension,
+    s_comprehension -P-> s,
+    Binder [[ binder ^ (s_comprehension, ty_list_inner) ]],
+    [[ exp_map ^ (s_comprehension) : ty_map ]],
+    ty == ListTy(ty_map).
+
 rules // Variable reference
     
   [[ Ref(id_var) ^ (s) : ty ]] :=
@@ -171,12 +169,6 @@ rules // Composite literals
     // TODO: this should calculate the LUB of the expression types.
     [[ exp ^ (s) : ty ]],
     CompareTypes [[ exps ^ (s, ty) ]].
-    
-//  [[ ListAppendLit(exp, exps) ^ (s) : ty ]] :=
-//    // TODO: this should calculate the LUB of the expression types.
-//    [[ exp ^ (s) : ty ]],
-//    ty == ListTy(ty_inner) | error $[Type mismatch: expected list type, got [ty]] @ exp,
-//    CompareTypes [[ exps ^ (s, ty_inner) ]].
     
   CompareTypes [[ [exp|exps] ^ (s, ty_expected) ]] :=
     [[ exp ^ (s) : ty ]],

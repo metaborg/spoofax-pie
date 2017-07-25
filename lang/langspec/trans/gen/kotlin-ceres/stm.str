@@ -9,6 +9,8 @@ imports
   statsem/program
   
   gen/kotlin-ceres/exp
+  gen/kotlin-ceres/binder
+  gen/kotlin-ceres/listcomprehension
   gen/kotlin/type2kotlin
   gen/idtype-tuples
   gen/util
@@ -30,48 +32,17 @@ $[{
     with
       str := <p2c-stms> stms
 
-rules // Bindings and assignment
+rules // Value declaration
 
   p2c-stm:
-    ValDec(SingleBinder(bind), exp) -> $[val [bindStr] = [expStr]]
+    ValDec(binder, exp) -> $[val [binderStr] = [expStr]]
     with
-      bindStr := <p2c-bind-tostr> bind
-    ; expStr  := <try-p2c-exp> exp
-  
-  p2c-stm:
-    ValDec(TupleBinder(binds), exp) -> $[val ([bindsStr]) = [expStr]]
-    with
-      expStr   := <try-p2c-exp> exp
-    ; bindsStr := <map(p2c-bind-tostr); pipe-sep-comma; concat-strings> binds
+      binderStr := <p2c-binder> binder
+    ; expStr    := <try-p2c-exp> exp
 
-  p2c-bind-tostr: Bind(varId)      -> $[[varId]]
-  p2c-bind-tostr: TBind(varId, ty) -> $[[varId] : [[<t2k-sig> ty]]]
+rules // List comprehension
 
-//  p2c-stm:
-//    VarDec(varId, type) -> $[var [varId] : [tyStr]]
-//    with
-//      tyStr := <t2k-sig> type
-//
-//  p2c-stm:
-//    Assign(Ref(varId), exp) -> $[[varId] = [expStr]]
-//    with
-//      expStr := <try-p2c-exp> exp
-
-rules // Control flow
-
-//  p2c-stm:
-//    ForEach(SingleBinder(bind), exp, stm) -> $[for([bindStr] in [expStr]) [strStm]]
-//    with
-//      bindStr := <p2c-bind-tostr> bind
-//    ; expStr  := <try-p2c-exp> exp
-//    ; strStm  := <try-p2c-stm> stm
-//
-//  p2c-stm:
-//    ForEach(TupleBinder(binds), exp, stm) -> $[for(([bindsStr]) in [expStr]) [strStm]]
-//    with
-//      bindsStr := <map(p2c-bind-tostr); pipe-sep-comma; concat-strings> binds
-//    ; expStr   := <try-p2c-exp> exp
-//    ; strStm   := <try-p2c-stm> stm
+  p2c-stm: ListComprehensionStm(inner) -> <p2c-listcomprehension> inner
 
 rules // Return and fail
 

@@ -12,6 +12,7 @@ imports
   statsem/program
   
   gen/kotlin-ceres/def
+  gen/kotlin-ceres/listcomprehension
   gen/kotlin/type2kotlin
   gen/idtype-tuples
   gen/util
@@ -75,6 +76,10 @@ rules // If else
       condExpStr  := <try-p2c-exp> condExp
     ; trueExpStr  := <try-p2c-exp> trueExp
     ; falseExpStr := <try-p2c-exp> falseExp
+
+rules // List comprehension
+
+  p2c-exp: ListComprehensionExp(inner) -> <p2c-listcomprehension> inner
 
 rules // References
 
@@ -233,9 +238,3 @@ rules // Literals
     ListLit(exps) -> $[list([expsStr])]
     with
       expsStr := <map(try-p2c-exp); pipe-concat-comma> exps
-
-//  p2c-exp:
-//    ListAppendLit(listExp, exps) -> $[[listExpStr].append([expsStr])]
-//    with
-//      listExpStr := <try-p2c-exp> listExp
-//    ; expsStr    := <map(try-p2c-exp); pipe-concat-comma> exps

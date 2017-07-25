@@ -29,6 +29,9 @@ context-free syntax
 
   Stm.ValDec = <val <Binder> = <Exp>;>
   
+  ListComprehension.ListComprehension = <<Exp> | <Binder> \<- <Exp>>
+  Stm.ListComprehensionStm = <<ListComprehension>;>
+  
   Stm.Return = <return <Exp>;>
   Stm.Fail = <fail <Exp>;>
   
@@ -47,6 +50,8 @@ context-free syntax
   
   Exp.If     = <if(<Exp>) <Exp>>
   Exp.IfElse = <if(<Exp>) <Exp> else <Exp>>
+
+  Exp.ListComprehensionExp = <[<ListComprehension>]>
 
   Ref.Ref = <<ID>> {avoid}
   Exp = Ref

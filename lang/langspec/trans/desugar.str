@@ -12,7 +12,6 @@ strategies
   
 rules
 
-  desugar: StamperPart(kind) -> kind
-  
+  desugar: StamperPart(kind) -> kind  
   desugar: Requires(exp, match, None()) -> Requires(exp, match, Modified())
   desugar: Generates(exp, None()) -> Generates(exp, Hash())

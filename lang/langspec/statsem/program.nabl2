@@ -44,3 +44,8 @@ rules // Program
     Map1 [[ defs ^ (s_root) ]],
     distinct/name D(s_root)/Type | error "Duplicate types" @NAMES,
     distinct/name D(s_root)/Func | error "Duplicate functions" @NAMES.
+
+rules // None
+
+  [[ None() ^ (s) ]] := true.
+  
