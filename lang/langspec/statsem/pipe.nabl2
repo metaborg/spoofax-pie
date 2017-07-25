@@ -12,46 +12,29 @@ rules // Statements
     Map2 [[ stms ^ (s, ty_func_outer) ]].
 
 
-  [[ VarDecBinder(binder, exp) ^ (s, _) ]] :=
+  [[ ValDec(binder, exp) ^ (s, _) ]] :=
     [[ exp ^ (s) : ty ]],
     Binder [[ binder ^ (s, ty) ]].
     
-  [[ VarDec(id_var, ty) ^ (s, _) ]] :=
-    [[ ty ^ (s) : ty_bound ]],
-    Var{id_var} <- s,
-    Var{id_var}.kind := LocalVarKind() !,
-    Var{id_var} : ty_bound !.
-    
-  [[ Assign(exp_ref, exp_val) ^ (s, _) ]] :=
-    [[ exp_ref ^ (s) : ty_ref ]],
-    [[ exp_val ^ (s) : ty_val ]],
-    ty_val <? ty_ref | error $[Type mismatch: expected [ty_ref], got [ty_val]] @ exp_val. 
+//  [[ VarDec(id_var, ty) ^ (s, _) ]] :=
+//    [[ ty ^ (s) : ty_bound ]],
+//    Var{id_var} <- s,
+//    Var{id_var}.kind := LocalVarKind() !,
+//    Var{id_var} : ty_bound !.
+//    
+//  [[ Assign(exp_ref, exp_val) ^ (s, _) ]] :=
+//    [[ exp_ref ^ (s) : ty_ref ]],
+//    [[ exp_val ^ (s) : ty_val ]],
+//    ty_val <? ty_ref | error $[Type mismatch: expected [ty_ref], got [ty_val]] @ exp_val. 
 
 
-  [[ If(exp, stm) ^ (s, ty_func_outer) ]] :=
-    [[ exp ^ (s) : ty ]],
-    ty <? BoolTy() | error $[Type mismatch: expected boolean type, got [ty]] @ exp,
-    new s_if,
-    s_if -P-> s,
-    [[ stm ^ (s_if, ty_func_outer) ]].
-
-  [[ IfElse(exp, stm_true, stm_false) ^ (s, ty_func_outer) ]] :=
-    [[ exp ^ (s) : ty ]],
-    ty <? BoolTy() | error $[Type mismatch: expected boolean type, got [ty]] @ exp,
-    new s_if_true,
-    s_if_true -P-> s,
-    [[ stm_true ^ (s_if_true, ty_func_outer) ]],
-    new s_if_false,
-    s_if_false -P-> s,
-    [[ stm_false ^ (s_if_false, ty_func_outer) ]].
-
-  [[ ForEach(binder, exp, stm) ^ (s, ty_func_outer) ]] :=
-    [[ exp ^ (s) : ty ]],
-    ty == ListTy(ty_inner) | error $[Type mismatch: expected list type, got [ty]] @ exp,
-    new s_foreach,
-    s_foreach -P-> s,
-    Binder [[ binder ^ (s_foreach, ty_inner) ]],
-    [[ stm ^ (s_foreach, ty_func_outer) ]].
+//  [[ ForEach(binder, exp, stm) ^ (s, ty_func_outer) ]] :=
+//    [[ exp ^ (s) : ty ]],
+//    ty == ListTy(ty_inner) | error $[Type mismatch: expected list type, got [ty]] @ exp,
+//    new s_foreach,
+//    s_foreach -P-> s,
+//    Binder [[ binder ^ (s_foreach, ty_inner) ]],
+//    [[ stm ^ (s_foreach, ty_func_outer) ]].
 
 
   [[ Return(exp) ^ (s, ty_func_outer) ]] :=
@@ -105,6 +88,21 @@ rules // Binary expressions
     ty_l <? BoolTy() | error $[Type mismatch: expected boolean type, got [ty_l]] @ exp_l,
     [[ exp_r ^ (s) : ty_r ]],
     ty_r <? BoolTy() | error $[Type mismatch: expected boolean type, got [ty_r]] @ exp_r.
+
+rules // If else
+
+  [[ If(exp_cond, exp) ^ (s) : ty ]] :=
+    [[ exp_cond ^ (s) : ty_cond ]],
+    ty_cond <? BoolTy() | error $[Type mismatch: expected boolean type, got [ty_cond]] @ exp_cond,
+    [[ exp ^ (s) : ty ]].
+
+  [[ e@IfElse(exp_cond, exp_true, exp_false) ^ (s) : ty_false ]] :=
+    [[ exp_cond ^ (s) : ty_cond ]],
+    ty_cond <? BoolTy() | error $[Type mismatch: expected boolean type, got [ty_cond]] @ exp_cond,
+    [[ exp_true ^ (s)  : ty_true ]],
+    [[ exp_false ^ (s) : ty_false ]],
+    // TODO: this should calculate the LUB of the expression types
+    ty_true <? ty_false | error $[Type mismatch: expected [ty_false], got [ty_true]] @ e.
 
 rules // Variable reference
     
@@ -174,11 +172,11 @@ rules // Composite literals
     [[ exp ^ (s) : ty ]],
     CompareTypes [[ exps ^ (s, ty) ]].
     
-  [[ ListAppendLit(exp, exps) ^ (s) : ty ]] :=
-    // TODO: this should calculate the LUB of the expression types.
-    [[ exp ^ (s) : ty ]],
-    ty == ListTy(ty_inner) | error $[Type mismatch: expected list type, got [ty]] @ exp,
-    CompareTypes [[ exps ^ (s, ty_inner) ]].
+//  [[ ListAppendLit(exp, exps) ^ (s) : ty ]] :=
+//    // TODO: this should calculate the LUB of the expression types.
+//    [[ exp ^ (s) : ty ]],
+//    ty == ListTy(ty_inner) | error $[Type mismatch: expected list type, got [ty]] @ exp,
+//    CompareTypes [[ exps ^ (s, ty_inner) ]].
     
   CompareTypes [[ [exp|exps] ^ (s, ty_expected) ]] :=
     [[ exp ^ (s) : ty ]],

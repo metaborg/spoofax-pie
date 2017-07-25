@@ -24,16 +24,10 @@ context-free syntax
   Binder.SingleBinder = <<Bind>>
   Binder.TupleBinder  = <(<{Bind ", "}*>)>
 
-  Bind.Bind   = <<ID>>
+  Bind.Bind  = <<ID>>
   Bind.TBind = <<ID> : <Type>>
 
-  Stm.VarDecBinder = <var <Binder> = <Exp>;>
-  Stm.VarDec = <var <ID> : <Type>;>
-  Stm.Assign = <<Ref> = <Exp>;>
-
-  Stm.If = <if(<Exp>) <Stm>>
-  Stm.IfElse = <if(<Exp>) <Stm> else <Stm>>
-  Stm.ForEach = <foreach(var <Binder> in <Exp>) <Stm>>
+  Stm.ValDec = <val <Binder> = <Exp>;>
   
   Stm.Return = <return <Exp>;>
   Stm.Fail = <fail <Exp>;>
@@ -42,14 +36,17 @@ context-free syntax
 
 context-free syntax
 
-  Exp.ToNullable = <<Exp>?>
+  Exp.ToNullable    = <<Exp>?>
   Exp.ToNonNullable = <<Exp>!>
   Exp.Not = <!<Exp>>
 
-  Exp.Eq = <<Exp> == <Exp>> {left}
-  Exp.Neq = <<Exp> != <Exp>> {left}
-  Exp.Lor = <<Exp> || <Exp>> {left}
+  Exp.Eq   = <<Exp> == <Exp>> {left}
+  Exp.Neq  = <<Exp> != <Exp>> {left}
+  Exp.Lor  = <<Exp> || <Exp>> {left}
   Exp.Land = <<Exp> && <Exp>> {left}
+  
+  Exp.If     = <if(<Exp>) <Exp>>
+  Exp.IfElse = <if(<Exp>) <Exp> else <Exp>>
 
   Ref.Ref = <<ID>> {avoid}
   Exp = Ref
@@ -57,12 +54,12 @@ context-free syntax
   Exp.Call = <<FUNCID>(<{Exp ", "}*>)>
   Exp.QCall = <<Exp>.<FUNCID>(<{Exp ", "}*>)>
 
-  Exp.Requires       = <requires <Exp> <MatchPart?> <StamperPart?>>
-  Exp.Generates      = <generates <Exp> <StamperPart?>>
-  MatchPart.Filter   = <filter <Exp>>
+  Exp.Requires            = <requires <Exp> <MatchPart?> <StamperPart?>>
+  Exp.Generates           = <generates <Exp> <StamperPart?>>
+  MatchPart.Filter        = <filter <Exp>>
   StamperPart.StamperPart = <by <StampKind>>
-  StampKind.Modified = <modified>
-  StampKind.Hash     = <hash>
+  StampKind.Modified      = <modified>
+  StampKind.Hash          = <hash>
 
   Exp.BoolLit = <<Bool>>
   Bool.True   = <true>
@@ -76,7 +73,6 @@ context-free syntax
 
   Exp.TupleLit = <(<{Exp ","}*>)>
   Exp.ListLit  = <[<{Exp ","}*>]>
-  Exp.ListAppendLit  = <[<Exp> | <{Exp ","}+>]>
 
   // Exp = <(<Exp>)> {bracket}
 

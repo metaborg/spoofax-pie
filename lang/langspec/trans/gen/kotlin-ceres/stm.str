@@ -33,13 +33,13 @@ $[{
 rules // Bindings and assignment
 
   p2c-stm:
-    VarDecBinder(SingleBinder(bind), exp) -> $[var [bindStr] = [expStr]]
+    ValDec(SingleBinder(bind), exp) -> $[val [bindStr] = [expStr]]
     with
       bindStr := <p2c-bind-tostr> bind
     ; expStr  := <try-p2c-exp> exp
   
   p2c-stm:
-    VarDecBinder(TupleBinder(binds), exp) -> $[var ([bindsStr]) = [expStr]]
+    ValDec(TupleBinder(binds), exp) -> $[val ([bindsStr]) = [expStr]]
     with
       expStr   := <try-p2c-exp> exp
     ; bindsStr := <map(p2c-bind-tostr); pipe-sep-comma; concat-strings> binds
@@ -47,44 +47,31 @@ rules // Bindings and assignment
   p2c-bind-tostr: Bind(varId)      -> $[[varId]]
   p2c-bind-tostr: TBind(varId, ty) -> $[[varId] : [[<t2k-sig> ty]]]
 
-  p2c-stm:
-    VarDec(varId, type) -> $[var [varId] : [tyStr]]
-    with
-      tyStr := <t2k-sig> type
-
-  p2c-stm:
-    Assign(Ref(varId), exp) -> $[[varId] = [expStr]]
-    with
-      expStr := <try-p2c-exp> exp
+//  p2c-stm:
+//    VarDec(varId, type) -> $[var [varId] : [tyStr]]
+//    with
+//      tyStr := <t2k-sig> type
+//
+//  p2c-stm:
+//    Assign(Ref(varId), exp) -> $[[varId] = [expStr]]
+//    with
+//      expStr := <try-p2c-exp> exp
 
 rules // Control flow
 
-  p2c-stm:
-    If(exp, stm) -> $[if([expStr]) [strStm]]
-    with
-      strStm := <try-p2c-stm> stm
-    ; expStr := <try-p2c-exp> exp
-
-  p2c-stm:
-    IfElse(exp, trueStm, falseStm) -> $[if([expStr]) [trueStmStr] else [falseStmStr]]
-    with
-      trueStmStr  := <try-p2c-stm> trueStm
-    ; falseStmStr := <try-p2c-stm> falseStm
-    ; expStr      := <try-p2c-exp> exp
-
-  p2c-stm:
-    ForEach(SingleBinder(bind), exp, stm) -> $[for([bindStr] in [expStr]) [strStm]]
-    with
-      bindStr := <p2c-bind-tostr> bind
-    ; expStr  := <try-p2c-exp> exp
-    ; strStm  := <try-p2c-stm> stm
-
-  p2c-stm:
-    ForEach(TupleBinder(binds), exp, stm) -> $[for(([bindsStr]) in [expStr]) [strStm]]
-    with
-      bindsStr := <map(p2c-bind-tostr); pipe-sep-comma; concat-strings> binds
-    ; expStr   := <try-p2c-exp> exp
-    ; strStm   := <try-p2c-stm> stm
+//  p2c-stm:
+//    ForEach(SingleBinder(bind), exp, stm) -> $[for([bindStr] in [expStr]) [strStm]]
+//    with
+//      bindStr := <p2c-bind-tostr> bind
+//    ; expStr  := <try-p2c-exp> exp
+//    ; strStm  := <try-p2c-stm> stm
+//
+//  p2c-stm:
+//    ForEach(TupleBinder(binds), exp, stm) -> $[for(([bindsStr]) in [expStr]) [strStm]]
+//    with
+//      bindsStr := <map(p2c-bind-tostr); pipe-sep-comma; concat-strings> binds
+//    ; expStr   := <try-p2c-exp> exp
+//    ; strStm   := <try-p2c-stm> stm
 
 rules // Return and fail
 
