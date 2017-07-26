@@ -73,7 +73,6 @@ context-free syntax
   Bool.False  = <false>
 
   Exp.IntLit  = <<INT>>
-  Exp.StrLit  = <<STRING>>
   Exp.PathLit = <<PATH>>
 
   Exp.NullLit = <null>
@@ -82,6 +81,24 @@ context-free syntax
   Exp.ListLit  = <[<{Exp ","}*>]>
 
   // Exp = <(<Exp>)> {bracket}
+
+syntax // Interpolated string
+
+  Exp-CF.StrLit = "\"" StrPart-CF* "\""
+  
+  StrPart-CF.Str          = StrChars-LEX
+  StrPart-CF.StrInterpRef = "$" Ref-CF
+  StrPart-CF.StrInterpExp =  "${" Exp-CF "}"
+  
+lexical syntax
+
+  StrChars = StrChar+
+  StrChar = ~[\"\$\n\r]
+  StrChar = "\\\""
+
+lexical restrictions
+
+  StrChars -/- ~[\"\$\n\r]
 
 context-free priorities
 

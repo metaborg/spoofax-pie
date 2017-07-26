@@ -159,9 +159,19 @@ rules // Simple literals
 
   [[ BoolLit(_) ^ (s) : BoolTy() ]] := true.
   [[ IntLit(_)  ^ (s) : IntTy()  ]] := true.
-  [[ StrLit(_)  ^ (s) : StrTy()  ]] := true.
   [[ PathLit(_) ^ (s) : PathTy() ]] := true.
   [[ NullLit()  ^ (s) : NullTy() ]] := true.
+
+rules // String literals with interpolation
+
+  [[ StrLit(elems) ^ (s) : StrTy() ]] :=
+    Map1 [[ elems ^ (s) ]].
+    
+  [[ Str(_) ^ (s) ]] := true.
+  [[ StrInterpRef(exp_ref) ^ (s) ]] :=
+    [[ exp_ref ^ (s) : _ ]].
+  [[ StrInterpExp(exp) ^ (s) ]] :=
+    [[ exp ^ (s) : _ ]].
 
 rules // Composite literals
 

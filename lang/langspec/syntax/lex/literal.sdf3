@@ -18,18 +18,6 @@ lexical restrictions
 
   INT -/- [0-9]
 
-lexical syntax // String
-
-  STRING        = "\"" StringChar* "\"" 
-  StringChar    = ~[\"\n] 
-  StringChar    = "\\\"" 
-  StringChar    = BackSlashChar 
-  BackSlashChar = "\\"
-
-lexical restrictions
-
-  BackSlashChar -/- [\"]
-
 lexical syntax // Path
 
   APATH = "/"  PathChar*

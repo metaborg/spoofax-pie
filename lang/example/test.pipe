@@ -1,9 +1,39 @@
-func test() -> path* = {
-  val path = /t\ est.bla/lol;
-  requires if(true) path else path filter "*.h" by hash; 
+func main(ccFlags: string*) -> string = {
+  val files : path* = [./src/lib.c, ./test/check_lib.c];
+  val includeDirs   = [./src/];
+  val objectFiles   = [compile(file, includeDirs, ccFlags) | file <- files];
   
-  val list = [(./file, "hi"), (./file/in/dir, "Woot")];
-  requires p | (p: path, s: string) <- list;
+  val ldFlags = ["-lc", "-lcheck"];
+  val testExe = link(objectFiles, ./bin/test, ldFlags);
   
-  return [./file] + [./another/file, /and/an/absolute/file] + [p | (p, _) <- list];
+  return test(testExe);
 }
+
+func compile(file: path, includeDirs: path*, flags: string*) -> path = {
+  requires file;
+  requires dir filter "*.h" | dir <- includeDirs;
+  exec("clang", "$file" + ["-I$dir" | dir <- includeDirs] + "-c" + "-MMD" + flags);
+  
+  val depFile = file.replaceExtension("d");
+  generates depFile;
+  requires dep by hash | dep <- extractCompileDeps(depFile);
+  
+  val objectFile = file.replaceExtension("o");
+  return generates objectFile;
+}
+
+func extractCompileDeps(depFile: path) -> path* = {}
+
+func link(inputFiles: path*, outputFile: path, flags: string*) -> path = {
+  requires file by hash | file <- inputFiles;
+  exec("ld", ["$file" | file <- inputFiles] + "-o $outputFile" + flags);
+  return generates outputFile;
+}
+
+func test(testExe: path) -> string = {
+  requires testExe by hash;
+  val (testReport, _) = exec(testExe, []);
+  return testReport;
+}
+
+func exec(executable: string, args: string*) -> (string, string) = {}
