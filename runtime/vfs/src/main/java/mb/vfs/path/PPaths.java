@@ -23,6 +23,11 @@ public class PPaths {
     }
 
 
+    public static PathMatcher patternPathMatcher(String pattern) {
+        return new PatternPathMatcher(pattern);
+    }
+
+
     public static PathMatcher directoryPathMatcher() {
         // TODO: make ignoring hidden directories configurable
         return new DirectoryPathMatcher(true);

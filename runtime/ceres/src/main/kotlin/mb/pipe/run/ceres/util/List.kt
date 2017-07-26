@@ -9,7 +9,14 @@ fun <T : Out> list(vararg elements: T): ArrayList<T> {
   return list
 }
 
-fun <T : Out> ArrayList<T>.append(vararg elements: T): ArrayList<T> {
-  addAll(elements)
-  return this
+operator fun <T : Out> ArrayList<T>.plus(other: T): ArrayList<T> {
+  val list = ArrayList<T>(this)
+  list.add(other)
+  return list
+}
+
+operator fun <T : Out> ArrayList<T>.plus(other: ArrayList<T>): ArrayList<T> {
+  val list = ArrayList<T>(this)
+  list.addAll(other)
+  return list
 }

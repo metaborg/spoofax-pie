@@ -1,7 +1,9 @@
 func test() -> path* = {
-  val path = /t    est.bla/lol;
+  val path = /t\ est.bla/lol;
   requires if(true) path else path filter "*.h" by hash; 
   
   val list = [(./file, "hi"), (./file/in/dir, "Woot")];
-  requires p | (p: path, s: string) <- list; 
+  requires p | (p: path, s: string) <- list;
+  
+  return [./file] + [./another/file, /and/an/absolute/file] + [p | (p, _) <- list];
 }

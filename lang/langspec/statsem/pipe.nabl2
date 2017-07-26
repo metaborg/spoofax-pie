@@ -73,6 +73,11 @@ rules // Binary expressions
     [[ exp_r ^ (s) : ty_r ]],
     ty_r <? BoolTy() | error $[Type mismatch: expected boolean type, got [ty_r]] @ exp_r.
 
+  [[ t@Add(exp_l, exp_r) ^ (s) : ty ]] :=
+    [[ exp_l ^ (s) : ty_l ]],
+    [[ exp_r ^ (s) : ty_r ]],
+    ty is addType of (ty_l, ty_r) | error $[Type mismatch: cannot add [ty_l] to [ty_r]] @ t.
+
 rules // If else
 
   [[ If(exp_cond, exp) ^ (s) : ty ]] :=

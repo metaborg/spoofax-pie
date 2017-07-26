@@ -36,5 +36,5 @@ lexical syntax // Path
   RPATH = "./" PathChar*
   PATH = APATH
   PATH = RPATH
-  PathChar = ~[\n\r\,\;\]]
-  
+  PathChar = ~[\n\r\,\;\]\ ]
+  PathChar = "\\ "

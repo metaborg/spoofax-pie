@@ -33,6 +33,15 @@ signature
     LocalVarKind : VarKind
     InputVarKind : VarKind
 
+  functions
+  
+    addType : A -> A {
+      (IntTy()  , IntTy()  ) -> IntTy(),
+      (a        , ListTy(a)) -> ListTy(a),
+      (ListTy(a), a        ) -> ListTy(a),
+      (ListTy(a), ListTy(a)) -> ListTy(a)
+    }
+
 rules // Init
 
   init ^ (s_root) :=

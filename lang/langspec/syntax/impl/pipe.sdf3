@@ -48,6 +48,8 @@ context-free syntax
   Exp.Lor  = <<Exp> || <Exp>> {left}
   Exp.Land = <<Exp> && <Exp>> {left}
   
+  Exp.Add  = <<Exp> + <Exp>> {left}
+  
   Exp.If     = <if(<Exp>) <Exp>>
   Exp.IfElse = <if(<Exp>) <Exp> else <Exp>>
 
