@@ -214,7 +214,7 @@ rules // Requires / Generates
     ; stamperStr := <p2c-stamper> (matchPartOpt, stamper)
 
   p2c-exp:
-    Generates(pathExp, stamper) -> $[generates([pathExpStr], [stamperStr])]
+    Generates(pathExp, stamper) -> $[generate([pathExpStr], [stamperStr])]
     with
       pathExpStr := <p2c-exp> pathExp
     ; stamperStr := <p2c-stamper> (None(), stamper)
