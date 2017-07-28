@@ -32,7 +32,7 @@ func link(inputFiles: path*, outputFile: path, flags: string*) -> path = {
 
 func test(testExe: path) -> string = {
   requires testExe by hash;
-  val (testReport, _) = exec(testExe, []);
+  val (testReport, _) = exec("$testExe", []);
   return testReport;
 }
 
