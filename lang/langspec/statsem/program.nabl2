@@ -35,9 +35,9 @@ signature
 
   functions
   
-    addType : A -> A {
+    addType : (Type * Type) -> Type {
       (IntTy()  , IntTy()  ) -> IntTy(),
-      (a        , ListTy(a)) -> ListTy(a),
+      (StrTy()  , _        ) -> StrTy(),
       (ListTy(a), a        ) -> ListTy(a),
       (ListTy(a), ListTy(a)) -> ListTy(a)
     }

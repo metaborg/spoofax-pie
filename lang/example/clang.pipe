@@ -12,7 +12,7 @@ func main(ccFlags: string*) -> string = {
 func compile(file: path, includeDirs: path*, flags: string*) -> path = {
   requires file;
   requires dir filter "*.h" | dir <- includeDirs;
-  exec("clang", "$file" + ["-I$dir" | dir <- includeDirs] + "-c" + "-MMD" + flags);
+  exec("clang", ["$file"] + ["-I$dir" | dir <- includeDirs] + "-c" + "-MMD" + flags);
   
   val depFile = file.replaceExtension("d");
   generates depFile;
