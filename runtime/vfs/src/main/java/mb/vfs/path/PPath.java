@@ -38,6 +38,9 @@ public interface PPath extends Serializable {
 
 
     PPath resolve(String other);
+    
+    PPath replaceExtension(String extension);
+    
 
     default Stream<PPath> list() throws IOException {
         return list(PPaths.allPathMatcher());

@@ -42,10 +42,23 @@ signature
       (ListTy(a), ListTy(a)) -> ListTy(a)
     }
 
+    typeToOcc : (Type * Occurrence * Occurrence) -> Occurrence {
+      (DataTy(occ), occ_def_str, occ_def_path) -> occ,
+      (StrTy()    , occ_def_str, occ_def_path) -> occ_def_str,
+      (PathTy()   , occ_def_str, occ_def_path) -> occ_def_path
+    }
+    
 rules // Init
 
   init ^ (s_root) :=
-    new s_root.
+    new s_root,
+    // Create definitions in type namespace for primitive types
+    Type{StrTy() } <- s_root, new s_str , s_str  -P-> s_root, Type{StrTy() } =I=> s_str,
+    Type{PathTy()} <- s_root, new s_path, s_path -P-> s_root, Type{PathTy()} =I=> s_path,
+    // Add functions to string types
+    Func{"replace"} <- s_str, Func{"replace"} : FuncTy([StrTy(), StrTy()], StrTy())!,
+    // Add functions to path types
+    Func{"replaceExtension"} <- s_path, Func{"replaceExtension"} : FuncTy([StrTy()], PathTy())!.
 
 rules // Program
 

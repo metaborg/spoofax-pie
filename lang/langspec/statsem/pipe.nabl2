@@ -125,11 +125,14 @@ rules // Function calls
     tys_in <? tys_in_expected | error $[Type mismatch: expected [tys_in_expected], got [tys_in]] @ id_func.
 
   [[ QCall(exp, id_func, args) ^ (s) : ty_out ]] :=
+    // Get definition occurrences for primitive types
+    Type{StrTy()} -> s , Type{StrTy() } |-> occ_def_str,
+    Type{PathTy()} -> s, Type{PathTy()} |-> occ_def_path,
     [[ exp ^ (s) : ty_data ]],
-    ty_data == DataTy(occ_data) | error $[Type mismatch: expected data type, got [ty_data]] @ exp, 
-    occ_data ?=I=> s_assoc_data,
+    occ is typeToOcc of (ty_data, occ_def_str, occ_def_path) | error $[Type mismatch: expected callable type, got [ty_data]] @ exp, 
+    occ ?=I=> s_assoc,
     new s_imp,
-    s_imp -I-> s_assoc_data,
+    s_imp -I-> s_assoc,
     Func{id_func} -> s_imp,
     Func{id_func} |-> f,
     f : FuncTy(tys_in_expected, ty_out),

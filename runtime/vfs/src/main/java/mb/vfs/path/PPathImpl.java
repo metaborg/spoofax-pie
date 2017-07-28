@@ -1,10 +1,5 @@
 package mb.vfs.path;
 
-import mb.vfs.access.DirAccess;
-import mb.vfs.list.PathMatcher;
-import mb.vfs.list.PathWalker;
-import mb.vfs.list.PathWalkerVisitor;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -16,6 +11,11 @@ import java.nio.file.StandardOpenOption;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
+
+import mb.vfs.access.DirAccess;
+import mb.vfs.list.PathMatcher;
+import mb.vfs.list.PathWalker;
+import mb.vfs.list.PathWalkerVisitor;
 
 public class PPathImpl implements PPath {
     private static final long serialVersionUID = 1L;
@@ -103,6 +103,20 @@ public class PPathImpl implements PPath {
     @Override public PPath resolve(String other) {
         return new PPathImpl(getJavaPath().resolve(other));
     }
+
+    @Override public PPath replaceExtension(String extension) {
+        final Path path = getJavaPath();
+        final Path filenamePath = path.getFileName();
+        if(filenamePath == null) {
+            return this;
+        }
+        final String filename = filenamePath.toString();
+        final int dotIndex = filename.lastIndexOf('.');
+        final String filenameNoExt = dotIndex != -1 ? filename.substring(0, dotIndex) : filename;
+        final String filenameNewExt = filenameNoExt + "." + extension;
+        return new PPathImpl(path.resolveSibling(filenameNewExt));
+    }
+
 
     @Override public Stream<PPath> list() throws IOException {
         // @formatter:off
