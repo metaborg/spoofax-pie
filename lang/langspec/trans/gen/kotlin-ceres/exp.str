@@ -236,12 +236,31 @@ rules // Requires / Generates
     with
       expStr := <try-p2c-exp> exp
 
+rules // Interpolated string
+
+  p2c-exp:
+    StrLit(parts) -> $["[partsStr]"]
+    with
+      partsStr := <map(p2c-strpart); concat-strings> parts
+
+  p2c-strpart:
+    Str(chars) -> chars
+
+  p2c-strpart:
+    StrInterpRef(refExp) -> $[$[refExpStr]]
+    with
+      refExpStr := <try-p2c-exp> refExp
+
+  p2c-strpart:
+    StrInterpExp(exp) -> $[${[expStr]}]
+    with
+      expStr := <try-p2c-exp> exp  
+
 rules // Literals
 
   p2c-exp: BoolLit(True())  -> $[true]
   p2c-exp: BoolLit(False()) -> $[false]
   p2c-exp: IntLit(i)        -> i
-  p2c-exp: StrLit(str)      -> str
   p2c-exp: PathLit(path)    -> $[PPathImpl(Paths.get("[path]")) as PPath]
   p2c-exp: NullLit()        -> $[null]
   

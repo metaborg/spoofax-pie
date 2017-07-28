@@ -1,39 +1,4 @@
-func main(ccFlags: string*) -> string = {
-  val files : path* = [./src/lib.c, ./test/check_lib.c];
-  val includeDirs   = [./src/];
-  val objectFiles   = [compile(file, includeDirs, ccFlags) | file <- files];
-  
-  val ldFlags = ["-lc", "-lcheck"];
-  val testExe = link(objectFiles, ./bin/test, ldFlags);
-  
-  return test(testExe);
+func test() -> string = {
+  val file = ./file;
+  return "$file and some stuff with ${1+1}";
 }
-
-func compile(file: path, includeDirs: path*, flags: string*) -> path = {
-  requires file;
-  requires dir filter "*.h" | dir <- includeDirs;
-  exec("clang", "$file" + ["-I$dir" | dir <- includeDirs] + "-c" + "-MMD" + flags);
-  
-  val depFile = file.replaceExtension("d");
-  generates depFile;
-  requires dep by hash | dep <- extractCompileDeps(depFile);
-  
-  val objectFile = file.replaceExtension("o");
-  return generates objectFile;
-}
-
-func extractCompileDeps(depFile: path) -> path* = {}
-
-func link(inputFiles: path*, outputFile: path, flags: string*) -> path = {
-  requires file by hash | file <- inputFiles;
-  exec("ld", ["$file" | file <- inputFiles] + "-o $outputFile" + flags);
-  return generates outputFile;
-}
-
-func test(testExe: path) -> string = {
-  requires testExe by hash;
-  val (testReport, _) = exec(testExe, []);
-  return testReport;
-}
-
-func exec(executable: string, args: string*) -> (string, string) = {}
