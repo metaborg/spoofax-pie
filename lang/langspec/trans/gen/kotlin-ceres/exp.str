@@ -247,7 +247,7 @@ rules // Interpolated string
     Str(chars) -> chars
 
   p2c-strpart:
-    StrInterpRef(refExp) -> $[$[refExpStr]]
+    StrInterpRef(refExp) -> $[${[refExpStr]}]
     with
       refExpStr := <try-p2c-exp> refExp
 

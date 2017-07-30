@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
-<stringAttribute key="bad_container_name" value="/pipe.run.cmd/eclipse"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
 <listEntry value="/pipe.run.cmd/src/main/java/mb/pipe/run/cmd/Main.java"/>
 </listAttribute>
@@ -13,5 +12,5 @@
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="--continuous"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="pipe.run.cmd"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
-<stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="${project_loc:minimal}"/>
+<stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="/Users/gohla/phd/repo/spoofax-papers/07_asplos17_pipeline/code/clang/make"/>
 </launchConfiguration>

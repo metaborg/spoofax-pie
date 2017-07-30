@@ -10,11 +10,13 @@ import mb.ceres.builderMapBinder
 import mb.ceres.impl.BuildCache
 import mb.ceres.impl.MapBuildCache
 import mb.ceres.to
+import mb.pipe.run.ceres.clang.ExtractCompileDeps
 import mb.pipe.run.ceres.path.Copy
 import mb.pipe.run.ceres.path.Exists
 import mb.pipe.run.ceres.path.ListContents
 import mb.pipe.run.ceres.path.Read
 import mb.pipe.run.ceres.path.WalkContents
+import mb.pipe.run.ceres.process.Execute
 import mb.pipe.run.ceres.spoofax.GenerateLangSpecConfig
 import mb.pipe.run.ceres.spoofax.GenerateStylerRules
 import mb.pipe.run.ceres.spoofax.GenerateTable
@@ -35,23 +37,23 @@ import mb.pipe.run.ceres.util.LoggerBuildReporter
 
 open class PipeCeresModule : CeresModule() {
   override fun configure(binder: Binder) {
-    super.configure(binder);
+    super.configure(binder)
 
-    binder.bindCache();
-    binder.bindCeres();
-    binder.bindBuilders();
+    binder.bindCache()
+    binder.bindCeres()
+    binder.bindBuilders()
   }
 
   open protected fun Binder.bindCache() {
-    bind<BuildCache>().to<MapBuildCache>();
+    bind<BuildCache>().to<MapBuildCache>()
   }
 
-  override protected fun Binder.bindReporter() {
+  override fun Binder.bindReporter() {
     bind<BuildReporter>().to<LoggerBuildReporter>()
   }
 
   open protected fun Binder.bindCeres() {
-    bind<CeresSrv>().to<CeresSrvImpl>().asSingleton();
+    bind<CeresSrv>().to<CeresSrvImpl>().asSingleton()
   }
 
   open protected fun Binder.bindBuilders() {
@@ -62,6 +64,8 @@ open class PipeCeresModule : CeresModule() {
     bindBuilder<WalkContents>(builders, WalkContents.id)
     bindBuilder<Read>(builders, Read.id)
     bindBuilder<Copy>(builders, Copy.id)
+    
+    bindBuilder<Execute>(builders, Execute.id)
 
     bindBuilder<GenerateLangSpecConfig>(builders, GenerateLangSpecConfig.id)
     bindBuilder<GenerateWorkspaceConfig>(builders, GenerateWorkspaceConfig.id)
@@ -82,5 +86,7 @@ open class PipeCeresModule : CeresModule() {
     bindBuilder<CoreBuildOrLoad>(builders, CoreBuildOrLoad.id)
     bindBuilder<CoreExtensions>(builders, CoreExtensions.id)
     bindBuilder<CoreStyle>(builders, CoreStyle.id)
+    
+    bindBuilder<ExtractCompileDeps>(builders, ExtractCompileDeps.id)
   }
 }

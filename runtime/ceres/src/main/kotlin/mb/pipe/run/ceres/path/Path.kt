@@ -49,7 +49,7 @@ class ListContents @Inject constructor(val pathSrv: PathSrv) : Builder<ListConte
   override val id = Companion.id
   override fun BuildContext.build(input: Input): ArrayList<PPath> {
     val (path, matcher) = input
-    require(path, PathStampers.nonRecursiveModified)
+    require(path, PathStampers.modified)
     if (!Files.isDirectory(path.javaPath)) {
       throw BuildException("Cannot list contents of '$input', it is not a directory")
     }
@@ -82,7 +82,7 @@ class WalkContents @Inject constructor(val pathSrv: PathSrv) : Builder<WalkConte
       val access = object : DirAccess {
         override fun writeDir(dir: PPath) = Unit // Will not occur
         override fun readDir(dir: PPath) {
-          require(dir, PathStampers.nonRecursiveModified)
+          require(dir, PathStampers.modified)
         }
       }
       val stream = if (matcher != null) path.walk(matcher, access) else path.walk(access)

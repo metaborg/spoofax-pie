@@ -12,11 +12,11 @@ lexical syntax
 
 context-free syntax
 
-  DataImpl.JDataImpl = <java <JQTYPEID> {
+  DataImpl.JDataImpl = <foreign java <JQTYPEID> {
   <{JDataMemb "\n"}*>
 }>
   JDataMemb.JFuncDef = <func <FuncHead>>
 
 context-free syntax
   
-  FuncImpl.JStaticFuncImpl = <java <JQTYPEID>#<JFUNCID>>
+  FuncImpl.JFuncImpl = <foreign java <JQTYPEID>#<JFUNCID>>

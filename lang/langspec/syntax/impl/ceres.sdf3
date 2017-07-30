@@ -11,4 +11,4 @@ lexical syntax
 
 context-free syntax
   
-  FuncImpl.CBuilderImpl = <ceres <CQTYPEID>>
+  FuncImpl.CBuilderImpl = <foreign <CQTYPEID>>

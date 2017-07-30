@@ -169,7 +169,6 @@ public class PPathImpl implements PPath {
         return getJavaPath().toString();
     }
 
-
     @Override public int hashCode() {
         return uri.hashCode();
     }

@@ -10,7 +10,6 @@ imports
   func
   impl/pipe
   impl/java
-  impl/kotlin
   impl/ceres
 
 context-free start-symbols

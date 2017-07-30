@@ -17,7 +17,7 @@ rules // Java data definition implementation
 
 rules // Java static function implementation
 
-  [[ JStaticFuncImpl(id_class_java, id_method_java) ^ (s, _, occ_func_outer) ]] :=
+  [[ JFuncImpl(id_class_java, id_method_java) ^ (s, _, occ_func_outer) ]] :=
     occ_func_outer.kind         := JavaStaticFuncKind() !,
     occ_func_outer.javaClassId  := id_class_java !,
     occ_func_outer.javaMethodId := id_method_java !.

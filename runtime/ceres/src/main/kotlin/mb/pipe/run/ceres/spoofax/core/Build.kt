@@ -78,7 +78,7 @@ class CoreBuildLangSpec @Inject constructor(log: Logger, val pathSrv: PathSrv) :
     input.walk(PPaths.extensionsPathWalker(listOf("str", "sdf3")), object : DirAccess {
       override fun writeDir(dir: PPath?) = Unit // Directories are not written during path walking.
       override fun readDir(dir: PPath) {
-        require(dir, PathStampers.nonRecursiveModified)
+        require(dir, PathStampers.modified)
       }
     }).forEach { require(it, PathStampers.hash) }
 

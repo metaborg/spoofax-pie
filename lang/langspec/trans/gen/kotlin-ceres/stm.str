@@ -42,7 +42,10 @@ rules // Value declaration
 
 rules // List comprehension
 
-  p2c-stm: ListComprehensionStm(inner) -> <p2c-listcomprehension> inner
+  p2c-stm:
+    ListComprehensionStm(inner) -> $[[comprehension].forEach { }]
+    with
+      comprehension := <p2c-listcomprehension> inner
 
 rules // Return and fail
 
