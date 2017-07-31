@@ -12,7 +12,7 @@ strategies
   
 rules
 
-  desugar: RequiresPath(exp, None()) -> RequiresPath(exp, Modified())
+  desugar: RequiresPath(exp, filter, None()) -> RequiresPath(exp, filter, Modified())
   desugar: GeneratesPath(exp, None()) -> GeneratesPath(exp, Hash())
   desugar: StamperPart(stamper) -> stamper
 

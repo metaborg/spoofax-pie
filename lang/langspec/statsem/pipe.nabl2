@@ -141,9 +141,10 @@ rules // Function calls
 
 rules // Path operations
 
-  [[ RequiresPath(exp, stamper) ^ (s) : PathTy() ]] :=
+  [[ RequiresPath(exp, filter, stamper) ^ (s) : PathTy() ]] :=
     [[ exp ^ (s) : ty_exp ]],
     ty_exp <? PathTy() | error $[Type mismatch: expected path type, got [ty_exp]] @ exp,
+    [[ filter ^ (s) ]],
     [[ stamper ^ (s) ]].
 
   [[ GeneratesPath(exp, stamper) ^ (s) : PathTy() ]] :=

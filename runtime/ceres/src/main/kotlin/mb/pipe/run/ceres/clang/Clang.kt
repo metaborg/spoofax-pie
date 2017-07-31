@@ -9,5 +9,9 @@ fun extractCompileDeps(text: String): ArrayList<PPath> {
   val requiredStr = result.groupValues[2] // Group 0 is the entire string, 1 the generated path, 2 the required paths
   val required = requiredStr.split(' ')
   val pathSrv = StaticPipeFacade.facade().pathSrv;
-  return required.map { pathSrv.resolveLocal(it) }.toCollection(ArrayList())
+  return required
+          .map { it.replace("\\", "").trim() }
+          .filter { !it.isNullOrBlank() }
+          .map { pathSrv.resolveLocal(it) }
+          .toCollection(ArrayList())
 }

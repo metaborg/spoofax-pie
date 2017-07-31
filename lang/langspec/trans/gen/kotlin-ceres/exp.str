@@ -208,21 +208,34 @@ rules // Ceres builder calls
 rules // Path operations
 
   p2c-exp:
-    RequiresPath(exp, stamper) -> $[require([expStr], [stamperStr])]
+    RequiresPath(exp, filterOpt, stamper) -> $[require([expStr], [stamperStr])]
     with
       expStr     := <p2c-exp> exp
-    ; stamperStr := <p2c-stamper> stamper
+    ; stamperStr := <p2c-stamper> (filterOpt, stamper)
 
   p2c-exp:
     GeneratesPath(exp, stamper) -> $[generate([expStr], [stamperStr])]
     with
       expStr     := <p2c-exp> exp
-    ; stamperStr := <p2c-stamper> stamper
+    ; stamperStr := <p2c-stamper> (None(), stamper)
   
-  p2c-stamper: Modified() -> "ModifiedPathStamper()"
-  p2c-stamper: Hash()     -> "HashPathStamper()"
-  
-  
+  p2c-stamper:
+    (None(), Modified()) -> "ModifiedPathStamper()"
+  p2c-stamper:
+    (None(), Hash()    ) -> "HashPathStamper()"
+  p2c-stamper:
+    (filter, Modified()) -> $[DirModifiedPathStamper([filterStr])]
+    where
+      <not(?None())> filter
+    with
+      filterStr := <p2c-filter> filter
+  p2c-stamper:
+    (filter, Hash()) -> $[DirHashPathStamper([filterStr])]
+    where
+      <not(?None())> filter
+    with
+      filterStr := <p2c-filter> filter
+
   p2c-exp:
     ListPath(exp, filterOpt) -> $[requireOutput(ListContents::class.java, ListContents.Input([expStr], [filterStr]))]
     with
@@ -237,7 +250,6 @@ rules // Path operations
       
   p2c-filter:
     None() -> $[null]
-    
   p2c-filter:
     Pattern(exp) -> $[PPaths.patternPathMatcher([expStr])]
     with

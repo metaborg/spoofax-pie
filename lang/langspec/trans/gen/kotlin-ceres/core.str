@@ -32,6 +32,8 @@ import mb.vfs.path.*
 import mb.ceres.*
 import mb.ceres.impl.HashPathStamper
 import mb.ceres.impl.ModifiedPathStamper
+import mb.ceres.impl.DirHashPathStamper
+import mb.ceres.impl.DirModifiedPathStamper
 import mb.pipe.run.core.*
 import mb.pipe.run.ceres.path.*
 import mb.pipe.run.ceres.util.*

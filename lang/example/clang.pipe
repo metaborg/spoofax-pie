@@ -11,7 +11,7 @@ func main(compileFlags: string*) -> string = {
 
 func compile(file: path, includeDirs: path*, flags: string*) -> path = {
   requires file;
-  [requires file | file <- list dir with pattern "*.h"] | dir <- includeDirs;
+  requires dir with pattern "*.h" | dir <- includeDirs;
   
   val objectFile = file.replaceExtension("o");
   exec(["clang"] + "$file" + ["-I$dir" | dir <- includeDirs] + "-o$objectFile" + "-c" + "-MMD" + flags);

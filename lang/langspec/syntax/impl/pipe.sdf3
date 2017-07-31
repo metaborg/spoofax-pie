@@ -60,14 +60,16 @@ context-free syntax
   Exp.Call  = <<FUNCID>(<{Exp ", "}*>)>
   Exp.QCall = <<Exp>.<FUNCID>(<{Exp ", "}*>)>
 
-  Exp.RequiresPath        = <requires <Exp> <StamperPart?>>
+  Exp.RequiresPath        = <requires <Exp> <FilterPart?> <StamperPart?>>
   Exp.GeneratesPath       = <generates <Exp> <StamperPart?>>
+  
   StamperPart.StamperPart = <by <StampKind>>
   StampKind.Modified      = <modified>
   StampKind.Hash          = <hash>
   
   Exp.ListPath            = <list <Exp> <FilterPart?>>
   Exp.WalkPath            = <walk <Exp> <FilterPart?>>
+  
   FilterPart.FilterPart   = <with <Filter>>
   Filter.Pattern          = <pattern <Exp>>
   
