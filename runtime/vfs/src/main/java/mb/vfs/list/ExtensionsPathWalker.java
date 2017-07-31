@@ -16,7 +16,7 @@ public class ExtensionsPathWalker implements PathWalker {
         this.extensions = new HashSet<>(extensions);
     }
 
-    @Override public boolean matches(PPath path) {
+    @Override public boolean matches(PPath path, PPath root) {
         if(!Files.isRegularFile(path.getJavaPath())) {
             return false;
         }
@@ -27,7 +27,7 @@ public class ExtensionsPathWalker implements PathWalker {
         return extensions.contains(extension);
     }
 
-    @Override public boolean traverse(PPath path) {
+    @Override public boolean traverse(PPath path, PPath root) {
         return true;
     }
 

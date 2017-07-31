@@ -17,7 +17,7 @@ public class ExtensionsPathMatcher implements PathMatcher {
         this.extensions = new HashSet<>(extensions);
     }
 
-    @Override public boolean matches(PPath path) {
+    @Override public boolean matches(PPath path, PPath root) {
         if(!Files.isRegularFile(path.getJavaPath())) {
             return false;
         }

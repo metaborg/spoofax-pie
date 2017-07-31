@@ -8,7 +8,7 @@ import mb.vfs.path.PPath;
 
 @FunctionalInterface
 public interface PathMatcher extends Serializable {
-    boolean matches(PPath path);
+    boolean matches(PPath path, PPath root);
 
 
     default Stream<PPath> list(PPath path) throws IOException {

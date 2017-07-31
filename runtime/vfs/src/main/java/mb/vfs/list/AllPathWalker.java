@@ -6,11 +6,11 @@ public class AllPathWalker implements PathWalker {
     private static final long serialVersionUID = 1L;
 
 
-    @Override public boolean traverse(PPath path) {
+    @Override public boolean traverse(PPath path, PPath root) {
         return true;
     }
 
-    @Override public boolean matches(PPath path) {
+    @Override public boolean matches(PPath path, PPath root) {
         return true;
     }
 

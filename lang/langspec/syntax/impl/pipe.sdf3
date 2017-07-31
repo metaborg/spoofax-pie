@@ -41,14 +41,13 @@ context-free syntax
 
   Exp.ToNullable    = <<Exp>?>
   Exp.ToNonNullable = <<Exp>!>
-  Exp.Not = <!<Exp>>
+  Exp.Not           = <!<Exp>>
 
   Exp.Eq   = <<Exp> == <Exp>> {left}
   Exp.Neq  = <<Exp> != <Exp>> {left}
   Exp.Lor  = <<Exp> || <Exp>> {left}
   Exp.Land = <<Exp> && <Exp>> {left}
-  
-  Exp.Add  = <<Exp> + <Exp>> {left}
+  Exp.Add  = <<Exp> + <Exp>>  {left}
   
   Exp.If     = <if(<Exp>) <Exp>>
   Exp.IfElse = <if(<Exp>) <Exp> else <Exp>>
@@ -56,17 +55,23 @@ context-free syntax
   Exp.ListComprehensionExp = <[<ListComprehension>]>
 
   Ref.Ref = <<ID>> {avoid}
-  Exp = Ref
+  Exp     = Ref
   
-  Exp.Call = <<FUNCID>(<{Exp ", "}*>)>
+  Exp.Call  = <<FUNCID>(<{Exp ", "}*>)>
   Exp.QCall = <<Exp>.<FUNCID>(<{Exp ", "}*>)>
 
-  Exp.Requires            = <requires <Exp> <MatchPart?> <StamperPart?>>
-  Exp.Generates           = <generates <Exp> <StamperPart?>>
-  MatchPart.Filter        = <filter <Exp>>
+  Exp.RequiresPath        = <requires <Exp> <StamperPart?>>
+  Exp.GeneratesPath       = <generates <Exp> <StamperPart?>>
   StamperPart.StamperPart = <by <StampKind>>
   StampKind.Modified      = <modified>
   StampKind.Hash          = <hash>
+  
+  Exp.ListPath            = <list <Exp> <FilterPart?>>
+  Exp.WalkPath            = <walk <Exp> <FilterPart?>>
+  FilterPart.FilterPart   = <with <Filter>>
+  Filter.Pattern          = <pattern <Exp>>
+  
+  Exp.ReadPath            = <read <Exp>>
 
   Exp.BoolLit = <<Bool>>
   Bool.True   = <true>

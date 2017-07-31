@@ -83,6 +83,17 @@ public class PPathImpl implements PPath {
     }
 
 
+    @Override public PPath normalized() {
+        final Path normalized = getJavaPath().normalize();
+        return new PPathImpl(normalized);
+    }
+
+    @Override public PPath relativizeFrom(PPath other) {
+        final Path path = getJavaPath();
+        final Path relative = path.relativize(other.getJavaPath());
+        return new PPathImpl(relative);
+    }
+
     @Override public @Nullable PPath parent() {
         final Path parent = getJavaPath().getParent();
         if(parent == null) {
@@ -131,7 +142,7 @@ public class PPathImpl implements PPath {
         return Files
             .list(getJavaPath())
             .map(path -> (PPath) new PPathImpl(path))
-            .filter(matcher::matches);
+            .filter((PPath p) -> matcher.matches(p, this));
         // @formatter:on
     }
 
@@ -145,7 +156,7 @@ public class PPathImpl implements PPath {
 
     @Override public Stream<PPath> walk(PathWalker walker, @Nullable DirAccess access) throws IOException {
         final Stream.Builder<PPath> streamBuilder = Stream.builder();
-        final PathWalkerVisitor visitor = new PathWalkerVisitor(walker, access, streamBuilder);
+        final PathWalkerVisitor visitor = new PathWalkerVisitor(walker, this, access, streamBuilder);
         Files.walkFileTree(getJavaPath(), visitor);
         return streamBuilder.build();
     }

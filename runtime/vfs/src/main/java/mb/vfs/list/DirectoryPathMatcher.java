@@ -13,7 +13,7 @@ public class DirectoryPathMatcher implements PathMatcher {
     }
 
 
-    @Override public boolean matches(PPath path) {
+    @Override public boolean matches(PPath path, PPath root) {
         if(!path.isDir()) {
             return false;
         }

@@ -31,7 +31,11 @@ public interface PPath extends Serializable {
     
     long lastModifiedTimeMs() throws IOException;
 
-
+    
+    PPath normalized();
+    
+    PPath relativizeFrom(PPath other);
+    
     @Nullable PPath parent();
 
     @Nullable PPath leaf();

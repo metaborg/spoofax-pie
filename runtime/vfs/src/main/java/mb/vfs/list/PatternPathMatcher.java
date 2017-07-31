@@ -13,8 +13,9 @@ public class PatternPathMatcher implements PathMatcher {
     }
 
 
-    @Override public boolean matches(PPath path) {
-        return pattern.match(path.toString());
+    @Override public boolean matches(PPath path, PPath root) {
+        final PPath relativePath = root.normalized().relativizeFrom(path.normalized());
+        return pattern.match(relativePath.toString());
     }
 
 

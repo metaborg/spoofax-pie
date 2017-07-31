@@ -75,6 +75,7 @@ class WalkContents @Inject constructor(val pathSrv: PathSrv) : Builder<WalkConte
   override val id = Companion.id
   override fun BuildContext.build(input: Input): ArrayList<PPath> {
     val (path, matcher) = input
+    require(path, PathStampers.modified)
     if (!Files.isDirectory(path.javaPath)) {
       throw BuildException("Cannot walk contents of '$input', it is not a directory")
     }
@@ -105,7 +106,7 @@ class Read : Builder<PPath, String> {
   override fun BuildContext.build(input: PPath): String {
     require(input, PathStampers.hash)
     try {
-      return String(Files.readAllBytes(input.javaPath))
+      return String(input.readAllBytes())
     } catch(e: IOException) {
       throw BuildException("Reading '$input' failed", e)
     }

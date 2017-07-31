@@ -12,6 +12,8 @@ strategies
   
 rules
 
-  desugar: StamperPart(kind) -> kind  
-  desugar: Requires(exp, match, None()) -> Requires(exp, match, Modified())
-  desugar: Generates(exp, None()) -> Generates(exp, Hash())
+  desugar: RequiresPath(exp, None()) -> RequiresPath(exp, Modified())
+  desugar: GeneratesPath(exp, None()) -> GeneratesPath(exp, Hash())
+  desugar: StamperPart(stamper) -> stamper
+
+  desugar: FilterPart(filter) -> filter

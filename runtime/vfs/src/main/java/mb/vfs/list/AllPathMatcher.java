@@ -6,7 +6,7 @@ public class AllPathMatcher implements PathMatcher {
     private static final long serialVersionUID = 1L;
 
 
-    @Override public boolean matches(PPath path) {
+    @Override public boolean matches(PPath path, PPath root) {
         return true;
     }
 

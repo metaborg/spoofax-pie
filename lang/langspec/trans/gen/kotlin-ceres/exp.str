@@ -205,36 +205,49 @@ rules // Ceres builder calls
     with
       expStr := <map(try-p2c-exp); pipe-concat-comma> exps
 
-rules // Requires / Generates
+rules // Path operations
 
   p2c-exp:
-    Requires(pathExp, matchPartOpt, stamper) -> $[require([pathExpStr], [stamperStr])]
+    RequiresPath(exp, stamper) -> $[require([expStr], [stamperStr])]
     with
-      pathExpStr := <p2c-exp> pathExp
-    ; stamperStr := <p2c-stamper> (matchPartOpt, stamper)
+      expStr     := <p2c-exp> exp
+    ; stamperStr := <p2c-stamper> stamper
 
   p2c-exp:
-    Generates(pathExp, stamper) -> $[generate([pathExpStr], [stamperStr])]
+    GeneratesPath(exp, stamper) -> $[generate([expStr], [stamperStr])]
     with
-      pathExpStr := <p2c-exp> pathExp
-    ; stamperStr := <p2c-stamper> (None(), stamper)
+      expStr     := <p2c-exp> exp
+    ; stamperStr := <p2c-stamper> stamper
   
-  p2c-stamper: (None(), Modified()) -> "ModifiedPathStamper()"
-  p2c-stamper: (None(), Hash()    ) -> "HashPathStamper()"
+  p2c-stamper: Modified() -> "ModifiedPathStamper()"
+  p2c-stamper: Hash()     -> "HashPathStamper()"
   
-  p2c-stamper:
-    (f@Filter(_), Modified()) -> $[ModifiedPathStamper([filterStr])]
+  
+  p2c-exp:
+    ListPath(exp, filterOpt) -> $[requireOutput(ListContents::class.java, ListContents.Input([expStr], [filterStr]))]
     with
-      filterStr := <p2c-filter> f
-  p2c-stamper:
-    (f@Filter(_), Hash()) -> $[HashPathStamper([filterStr])]
+      expStr    := <p2c-exp> exp
+    ; filterStr := <p2c-filter> filterOpt
+    
+  p2c-exp:
+    WalkPath(exp, filterOpt) -> $[requireOutput(WalkContents::class.java, ListContents.Input([expStr], [filterStr]))]
     with
-      filterStr := <p2c-filter> f
-
+      expStr    := <p2c-exp> exp
+    ; filterStr := <p2c-filter> filterOpt
+      
   p2c-filter:
-    Filter(exp) -> $[PPaths.patternPathMatcher([expStr])]
+    None() -> $[null]
+    
+  p2c-filter:
+    Pattern(exp) -> $[PPaths.patternPathMatcher([expStr])]
     with
       expStr := <try-p2c-exp> exp
+
+
+  p2c-exp:
+    ReadPath(exp) -> $[requireOutput(Read::class.java, [expStr])]
+    with
+      expStr := <p2c-exp> exp
 
 rules // Interpolated string
 

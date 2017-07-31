@@ -139,24 +139,40 @@ rules // Function calls
     Map1T [[ args ^ (s) : tys_in ]], 
     tys_in <? tys_in_expected | error $[Type mismatch: expected [tys_in_expected], got [tys_in]] @ id_func.
 
-rules // Requires/generates
+rules // Path operations
 
-  [[ Requires(exp, match, stamper) ^ (s) : PathTy() ]] :=
-    [[ exp ^ (s) : ty_exp ]],
-    ty_exp <? PathTy() | error $[Type mismatch: expected path type, got [ty_exp]] @ exp,
-    [[ match ^ (s) ]],
-    [[ stamper ^ (s) ]].
-
-  [[ Generates(exp, stamper) ^ (s) : PathTy() ]] :=
+  [[ RequiresPath(exp, stamper) ^ (s) : PathTy() ]] :=
     [[ exp ^ (s) : ty_exp ]],
     ty_exp <? PathTy() | error $[Type mismatch: expected path type, got [ty_exp]] @ exp,
     [[ stamper ^ (s) ]].
-    
-  [[ Filter(exp) ^ (s) ]] :=
+
+  [[ GeneratesPath(exp, stamper) ^ (s) : PathTy() ]] :=
     [[ exp ^ (s) : ty_exp ]],
-    ty_exp <? StrTy() | error $[Type mismatch: expected string type, got [ty_exp]] @ exp.
+    ty_exp <? PathTy() | error $[Type mismatch: expected path type, got [ty_exp]] @ exp,
+    [[ stamper ^ (s) ]].
+
   [[ Modified() ^ (s) ]] := true.
-  [[ Hash() ^ (s) ]] := true.
+  [[ Hash()     ^ (s) ]] := true.
+
+
+  [[ ListPath(exp, filter) ^ (s) : ListTy(PathTy()) ]] :=
+    [[ exp ^ (s) : ty_exp ]],
+    ty_exp <? PathTy() | error $[Type mismatch: expected path type, got [ty_exp]] @ exp,
+    [[ filter ^ (s) ]].    
+
+  [[ WalkPath(exp, filter) ^ (s) : ListTy(PathTy()) ]] :=
+    [[ exp ^ (s) : ty_exp ]],
+    ty_exp <? PathTy() | error $[Type mismatch: expected path type, got [ty_exp]] @ exp,
+    [[ filter ^ (s) ]].
+    
+  [[ Pattern(exp) ^ (s) ]] :=
+    [[ exp ^ (s) : ty_exp ]],
+    ty_exp <? StrTy() | error $[Type mismatch: expected string type, got [ty_exp]] @ exp.    
+
+
+  [[ ReadPath(exp) ^ (s) : StrTy() ]] :=
+    [[ exp ^ (s) : ty_exp ]],
+    ty_exp <? PathTy() | error $[Type mismatch: expected path type, got [ty_exp]] @ exp.  
     
 rules // Simple literals
 

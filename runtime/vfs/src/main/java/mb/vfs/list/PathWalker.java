@@ -3,7 +3,7 @@ package mb.vfs.list;
 import mb.vfs.path.PPath;
 
 public interface PathWalker extends PathMatcher {
-    boolean traverse(PPath path);
+    boolean traverse(PPath path, PPath root);
 
-    boolean matches(PPath path);
+    @Override boolean matches(PPath path, PPath root);
 }

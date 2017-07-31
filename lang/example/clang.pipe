@@ -11,18 +11,19 @@ func main(compileFlags: string*) -> string = {
 
 func compile(file: path, includeDirs: path*, flags: string*) -> path = {
   requires file;
-  requires dir filter "*.h" | dir <- includeDirs;
+  [requires file | file <- list dir with pattern "*.h"] | dir <- includeDirs;
   
   val objectFile = file.replaceExtension("o");
   exec(["clang"] + "$file" + ["-I$dir" | dir <- includeDirs] + "-o$objectFile" + "-c" + "-MMD" + flags);
   
   val depFile = file.replaceExtension("d");
-  requires dep by hash | dep <- extractCompileDeps(depFile);
+  val depFileText = read depFile;
+  requires dep by hash | dep <- extractCompileDeps(depFileText);
   
   return generates objectFile;
 }
 
-func extractCompileDeps(depFile: path) -> path* = foreign mb.pipe.run.ceres.clang.ExtractCompileDeps
+func extractCompileDeps(text: string) -> path* = foreign java mb.pipe.run.ceres.clang#extractCompileDeps
 
 func link(inputFiles: path*, outputFile: path, flags: string*) -> path = {
   requires file by hash | file <- inputFiles;
@@ -36,4 +37,4 @@ func test(testExe: path) -> string = {
   return testReport;
 }
 
-func exec(arguments: string*) -> (string, string) = foreign mb.pipe.run.ceres.process.Execute
+func exec(arguments: string*) -> (string, string) = foreign java mb.pipe.run.ceres.process#execute
