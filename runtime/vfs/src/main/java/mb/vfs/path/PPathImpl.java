@@ -51,21 +51,6 @@ public class PPathImpl implements PPath {
     }
 
 
-    @Override public @Nullable String extension() {
-        final Path filePath = getJavaPath().getFileName();
-        if(filePath == null) {
-            return null;
-        }
-
-        final String fileName = getJavaPath().getFileName().toString();
-        final int i = fileName.lastIndexOf('.');
-        if(i > 0) {
-            return fileName.substring(i + 1);
-        }
-        return null;
-    }
-
-
     @Override public boolean exists() {
         return Files.exists(getJavaPath());
     }
@@ -110,6 +95,24 @@ public class PPathImpl implements PPath {
         return new PPathImpl(filePath);
     }
 
+    @Override public @Nullable String extension() {
+        final Path filePath = getJavaPath().getFileName();
+        if(filePath == null) {
+            return null;
+        }
+
+        final String fileName = getJavaPath().getFileName().toString();
+        final int i = fileName.lastIndexOf('.');
+        if(i > 0) {
+            return fileName.substring(i + 1);
+        }
+        return null;
+    }
+
+
+    @Override public PPath resolve(PPath other) {
+        return new PPathImpl(getJavaPath().resolve(other.getJavaPath()));
+    }
 
     @Override public PPath resolve(String other) {
         return new PPathImpl(getJavaPath().resolve(other));

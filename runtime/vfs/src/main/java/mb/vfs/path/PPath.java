@@ -20,9 +20,6 @@ public interface PPath extends Serializable {
     Path getJavaPath();
 
 
-    @Nullable String extension();
-
-
     boolean isDir();
 
     boolean isFile();
@@ -39,8 +36,12 @@ public interface PPath extends Serializable {
     @Nullable PPath parent();
 
     @Nullable PPath leaf();
+    
+    @Nullable String extension();
 
 
+    PPath resolve(PPath other);
+    
     PPath resolve(String other);
     
     PPath replaceExtension(String extension);

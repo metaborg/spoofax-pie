@@ -1,24 +1,29 @@
 package mb.vfs.list;
 
-import mb.vfs.path.PPath;
-
-import java.nio.file.Files;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import mb.vfs.path.PPath;
 
 public class ExtensionsPathMatcher implements PathMatcher {
     private static final long serialVersionUID = 1L;
 
     private final Set<String> extensions;
 
+
     public ExtensionsPathMatcher(Collection<String> extensions) {
         this.extensions = new HashSet<>(extensions);
     }
 
+    public ExtensionsPathMatcher(String extension) {
+        this.extensions = new HashSet<>();
+        this.extensions.add(extension);
+    }
+
+
     @Override public boolean matches(PPath path, PPath root) {
-        if(!Files.isRegularFile(path.getJavaPath())) {
+        if(!path.isFile()) {
             return false;
         }
         final String extension = path.extension();

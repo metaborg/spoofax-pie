@@ -13,10 +13,7 @@ public class DirectoryPathWalker implements PathWalker {
     }
 
 
-    @Override public boolean matches(PPath path, PPath root) {
-        if(!path.isDir()) {
-            return false;
-        }
+    @Override public boolean traverse(PPath path, PPath root) {
         if(ignoreHidden) {
             final PPath leaf = path.leaf();
             if(leaf != null && leaf.toString().startsWith(".")) {
@@ -26,7 +23,10 @@ public class DirectoryPathWalker implements PathWalker {
         return true;
     }
 
-    @Override public boolean traverse(PPath path, PPath root) {
+    @Override public boolean matches(PPath path, PPath root) {
+        if(!path.isDir()) {
+            return false;
+        }
         if(ignoreHidden) {
             final PPath leaf = path.leaf();
             if(leaf != null && leaf.toString().startsWith(".")) {

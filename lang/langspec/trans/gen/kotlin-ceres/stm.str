@@ -40,6 +40,21 @@ rules // Value declaration
       binderStr := <p2c-binder> binder
     ; expStr    := <try-p2c-exp> exp
 
+rules // If else statement
+
+  p2c-stm:
+    IfStm(condExp, stm) -> $[if([condExpStr]) [stmStr]]
+    with
+      condExpStr := <try-p2c-exp> condExp
+    ; stmStr     := <try-p2c-stm> stm
+
+  p2c-stm:
+    IfElseStm(condExp, trueStm, falseStm) -> $[if([condExpStr]) [trueStmStr] else [falseStmStr]]
+    with
+      condExpStr  := <try-p2c-exp> condExp
+    ; trueStmStr  := <try-p2c-stm> trueStm
+    ; falseStmStr := <try-p2c-stm> falseStm
+
 rules // List comprehension
 
   p2c-stm:

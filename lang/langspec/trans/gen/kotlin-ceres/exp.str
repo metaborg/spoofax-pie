@@ -228,36 +228,68 @@ rules // Path operations
     where
       <not(?None())> filter
     with
-      filterStr := <p2c-filter> filter
+      filterStr := <p2c-filter-match> filter
   p2c-stamper:
     (filter, Hash()) -> $[DirHashPathStamper([filterStr])]
     where
       <not(?None())> filter
     with
-      filterStr := <p2c-filter> filter
+      filterStr := <p2c-filter-match> filter
 
   p2c-exp:
     ListPath(exp, filterOpt) -> $[requireOutput(ListContents::class.java, ListContents.Input([expStr], [filterStr]))]
     with
       expStr    := <p2c-exp> exp
-    ; filterStr := <p2c-filter> filterOpt
+    ; filterStr := <p2c-filter-match> filterOpt
     
   p2c-exp:
-    WalkPath(exp, filterOpt) -> $[requireOutput(WalkContents::class.java, ListContents.Input([expStr], [filterStr]))]
+    WalkPath(exp, filterOpt) -> $[requireOutput(WalkContents::class.java, WalkContents.Input([expStr], [filterStr]))]
     with
       expStr    := <p2c-exp> exp
-    ; filterStr := <p2c-filter> filterOpt
+    ; filterStr := <p2c-filter-walk> filterOpt
       
-  p2c-filter:
+  p2c-filter-match:
     None() -> $[null]
-  p2c-filter:
-    Pattern(exp) -> $[PPaths.patternPathMatcher([expStr])]
+  p2c-filter-match:
+    Regex(exp) -> $[PPaths.regexPathMatcher([expStr])]
+    with
+      expStr := <try-p2c-exp> exp
+  p2c-filter-match:
+    _ -> $[PPaths.patternsPathMatcher([expStr])]
+    where ?Pattern(exp) + ?Patterns(exp)
+    with
+      expStr := <try-p2c-exp> exp
+  p2c-filter-match:
+    _ -> $[PPaths.extensionsPathMatcher([expStr])]
+    where ?Extensions(exp) + ?Extensions(exp)
+    with
+      expStr := <try-p2c-exp> exp
+      
+  p2c-filter-walk:
+    None() -> $[null]
+  p2c-filter-walk:
+    Regex(exp) -> $[PPaths.regexPathWalker([expStr])]
+    with
+      expStr := <try-p2c-exp> exp
+  p2c-filter-walk:
+    _ -> $[PPaths.patternsPathWalker([expStr])]
+    where ?Pattern(exp) + ?Patterns(exp)
+    with
+      expStr := <try-p2c-exp> exp
+  p2c-filter-walk:
+    _ -> $[PPaths.extensionsPathWalker([expStr])]
+    where ?Extensions(exp) + ?Extensions(exp)
     with
       expStr := <try-p2c-exp> exp
 
 
   p2c-exp:
     ReadPath(exp) -> $[requireOutput(Read::class.java, [expStr])]
+    with
+      expStr := <p2c-exp> exp
+      
+  p2c-exp:
+    ExistsPath(exp) -> $[requireOutput(Exists::class.java, [expStr])]
     with
       expStr := <p2c-exp> exp
 

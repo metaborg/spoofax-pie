@@ -58,7 +58,9 @@ rules // Init
     // Add functions to string types
     Func{"replace"} <- s_str, Func{"replace"} : FuncTy([StrTy(), StrTy()], StrTy())!,
     // Add functions to path types
-    Func{"replaceExtension"} <- s_path, Func{"replaceExtension"} : FuncTy([StrTy()], PathTy())!.
+    Func{"extension"} <- s_path, Func{"extension"} : FuncTy([], NullableTy(StrTy()))!,
+    Func{"replaceExtension"} <- s_path, Func{"replaceExtension"} : FuncTy([StrTy()], PathTy())!,
+    Func{"resolve"} <- s_path, Func{"resolve"} : FuncTy([PathTy()], PathTy())!.
 
 rules // Program
 

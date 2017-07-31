@@ -21,6 +21,9 @@ context-free syntax
 }>
   Stm = <<Block>>
 
+  Stm.IfStm     = <if(<Exp>) <Stm>>
+  Stm.IfElseStm = <if(<Exp>) <Stm> else <Stm>>
+
   Binder.SingleBinder = <<Bind>>
   Binder.TupleBinder  = <(<{Bind ", "}*>)>
 
@@ -71,9 +74,14 @@ context-free syntax
   Exp.WalkPath            = <walk <Exp> <FilterPart?>>
   
   FilterPart.FilterPart   = <with <Filter>>
+  Filter.Regex            = <regex <Exp>>
   Filter.Pattern          = <pattern <Exp>>
+  Filter.Patterns         = <patterns <Exp>> {prefer} // Prefer over pattern to avoid additional s from being used for something else
+  Filter.Extension        = <extension <Exp>>
+  Filter.Extensions       = <extensions <Exp>> {prefer} // Prefer over extension to avoid additional s from being used for something else
   
   Exp.ReadPath            = <read <Exp>>
+  Exp.ExistsPath          = <exists <Exp>>
 
   Exp.BoolLit = <<Bool>>
   Bool.True   = <true>
@@ -84,10 +92,10 @@ context-free syntax
 
   Exp.NullLit = <null>
 
-  Exp.TupleLit = <(<{Exp ","}*>)>
+  Exp.TupleLit = <(<{Exp ","}+>)> 
   Exp.ListLit  = <[<{Exp ","}*>]>
 
-  // Exp = <(<Exp>)> {bracket}
+  Exp = <(<Exp>)> {bracket, prefer} // Prefer bracket over tuple literal with 1 element
 
 syntax // Interpolated string
 
@@ -114,4 +122,12 @@ context-free priorities
 lexical syntax
 
   FUNCID = "return" {reject}
-  FUNCID = "foreach" {reject}
+//  FUNCID = "requires" {reject}
+//  FUNCID = "generates" {reject}
+//  FUNCID = "list" {reject}
+//  FUNCID = "walk" {reject}
+//  FUNCID = "regex" {reject}
+//  FUNCID = "pattern" {reject}
+//  FUNCID = "patterns" {reject}
+//  FUNCID = "extension" {reject}
+//  FUNCID = "extensions" {reject}

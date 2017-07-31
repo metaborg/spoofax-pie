@@ -17,12 +17,7 @@ import java.io.IOException
 import java.io.Serializable
 import java.nio.file.Files
 import java.util.stream.Collectors
-
-
-fun resolve(uriStr: String): PPath {
-  return StaticPipeFacade.facade().pathSrv.resolve(uriStr)
-}
-
+import mb.ceres.impl.DirModifiedPathStamper
 
 class Exists : Builder<PPath, Boolean> {
   companion object {
@@ -49,7 +44,7 @@ class ListContents @Inject constructor(val pathSrv: PathSrv) : Builder<ListConte
   override val id = Companion.id
   override fun BuildContext.build(input: Input): ArrayList<PPath> {
     val (path, matcher) = input
-    require(path, PathStampers.modified)
+    require(path, DirModifiedPathStamper(matcher))
     if (!Files.isDirectory(path.javaPath)) {
       throw BuildException("Cannot list contents of '$input', it is not a directory")
     }
@@ -70,12 +65,12 @@ class WalkContents @Inject constructor(val pathSrv: PathSrv) : Builder<WalkConte
     val id = "walkContents"
   }
 
-  data class Input(val path: PPath, val matcher: PathWalker?) : Serializable
+  data class Input(val path: PPath, val walker: PathWalker?) : Serializable
 
   override val id = Companion.id
   override fun BuildContext.build(input: Input): ArrayList<PPath> {
-    val (path, matcher) = input
-    require(path, PathStampers.modified)
+    val (path, walker) = input
+    require(path, DirModifiedPathStamper(walker))
     if (!Files.isDirectory(path.javaPath)) {
       throw BuildException("Cannot walk contents of '$input', it is not a directory")
     }
@@ -83,10 +78,10 @@ class WalkContents @Inject constructor(val pathSrv: PathSrv) : Builder<WalkConte
       val access = object : DirAccess {
         override fun writeDir(dir: PPath) = Unit // Will not occur
         override fun readDir(dir: PPath) {
-          require(dir, PathStampers.modified)
+          require(path, DirModifiedPathStamper(walker))
         }
       }
-      val stream = if (matcher != null) path.walk(matcher, access) else path.walk(access)
+      val stream = if (walker != null) path.walk(walker, access) else path.walk(access)
       return stream.collect(Collectors.toCollection { ArrayList<PPath>() })
     } catch(e: IOException) {
       throw BuildException("Cannot walk contents of '$input'", e)

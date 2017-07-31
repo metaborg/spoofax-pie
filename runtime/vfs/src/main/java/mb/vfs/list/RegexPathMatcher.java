@@ -1,28 +1,33 @@
 package mb.vfs.list;
 
+import java.util.regex.Pattern;
+
 import mb.vfs.path.PPath;
 
-public class PatternPathMatcher implements PathMatcher {
+public class RegexPathMatcher implements PathMatcher {
     private static final long serialVersionUID = 1L;
 
-    private final AntPattern pattern;
+    private final Pattern regex;
 
 
-    public PatternPathMatcher(String pattern) {
-        this.pattern = new AntPattern(pattern);
+    public RegexPathMatcher(Pattern regex) {
+        this.regex = regex;
+    }
+    
+    public RegexPathMatcher(String regex) {
+        this.regex = Pattern.compile(regex);
     }
 
 
     @Override public boolean matches(PPath path, PPath root) {
-        final PPath relativePath = root.normalized().relativizeFrom(path.normalized());
-        return pattern.match(relativePath.toString());
+        return regex.matcher(path.toString()).matches();
     }
 
 
     @Override public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + pattern.hashCode();
+        result = prime * result + regex.hashCode();
         return result;
     }
 
@@ -33,13 +38,13 @@ public class PatternPathMatcher implements PathMatcher {
             return false;
         if(getClass() != obj.getClass())
             return false;
-        final PatternPathMatcher other = (PatternPathMatcher) obj;
-        if(!pattern.equals(other.pattern))
+        final RegexPathMatcher other = (RegexPathMatcher) obj;
+        if(!regex.equals(other.regex))
             return false;
         return true;
     }
 
     @Override public String toString() {
-        return "PatternPathMatcher";
+        return "RegexPathMatcher";
     }
 }

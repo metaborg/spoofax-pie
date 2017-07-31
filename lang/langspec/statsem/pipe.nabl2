@@ -34,6 +34,19 @@ rules // Statements
   [[ Exp(exp) ^ (s, _) ]] :=
     [[ exp ^ (s) : _ ]].
 
+rules // If else statement
+
+  [[ IfStm(exp_cond, stm) ^ (s, ty_func_outer) ]] :=
+    [[ exp_cond ^ (s) : ty_cond ]],
+    ty_cond <? BoolTy() | error $[Type mismatch: expected boolean type, got [ty_cond]] @ exp_cond,
+    [[ stm ^ (s, ty_func_outer) ]].
+
+  [[ e@IfElseStm(exp_cond, stm_true, stm_false) ^ (s, ty_func_outer) ]] :=
+    [[ exp_cond ^ (s) : ty_cond ]],
+    ty_cond <? BoolTy() | error $[Type mismatch: expected boolean type, got [ty_cond]] @ exp_cond,
+    [[ stm_true ^ (s, ty_func_outer) ]],
+    [[ stm_false ^ (s, ty_func_outer) ]].
+
 rules // Unary expressions
 
   [[ ToNullable(exp) ^ (s) : NullableTy(ty) ]] :=
@@ -78,7 +91,7 @@ rules // Binary expressions
     [[ exp_r ^ (s) : ty_r ]],
     ty is addType of (ty_l, ty_r) | error $[Type mismatch: cannot add [ty_l] to [ty_r]] @ t.
 
-rules // If else
+rules // If else expression
 
   [[ If(exp_cond, exp) ^ (s) : ty ]] :=
     [[ exp_cond ^ (s) : ty_cond ]],
@@ -165,13 +178,34 @@ rules // Path operations
     [[ exp ^ (s) : ty_exp ]],
     ty_exp <? PathTy() | error $[Type mismatch: expected path type, got [ty_exp]] @ exp,
     [[ filter ^ (s) ]].
+
+
+  [[ Regex(exp) ^ (s) ]] :=
+    [[ exp ^ (s) : ty_exp ]],
+    ty_exp <? StrTy() | error $[Type mismatch: expected string type, got [ty_exp]] @ exp.
     
   [[ Pattern(exp) ^ (s) ]] :=
     [[ exp ^ (s) : ty_exp ]],
-    ty_exp <? StrTy() | error $[Type mismatch: expected string type, got [ty_exp]] @ exp.    
+    ty_exp <? StrTy() | error $[Type mismatch: expected string type, got [ty_exp]] @ exp.
+    
+  [[ Patterns(exp) ^ (s) ]] :=
+    [[ exp ^ (s) : ty_exp ]],
+    ty_exp <? ListTy(StrTy()) | error $[Type mismatch: expected string* type, got [ty_exp]] @ exp.
+    
+  [[ Extension(exp) ^ (s) ]] :=
+    [[ exp ^ (s) : ty_exp ]],
+    ty_exp <? StrTy() | error $[Type mismatch: expected string type, got [ty_exp]] @ exp.
+    
+  [[ Extensions(exp) ^ (s) ]] :=
+    [[ exp ^ (s) : ty_exp ]],
+    ty_exp <? ListTy(StrTy()) | error $[Type mismatch: expected string* type, got [ty_exp]] @ exp.
 
 
   [[ ReadPath(exp) ^ (s) : StrTy() ]] :=
+    [[ exp ^ (s) : ty_exp ]],
+    ty_exp <? PathTy() | error $[Type mismatch: expected path type, got [ty_exp]] @ exp.  
+
+  [[ ExistsPath(exp) ^ (s) : BoolTy() ]] :=
     [[ exp ^ (s) : ty_exp ]],
     ty_exp <? PathTy() | error $[Type mismatch: expected path type, got [ty_exp]] @ exp.  
     
