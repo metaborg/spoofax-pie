@@ -35,7 +35,7 @@ public class PPathImpl implements PPath {
     }
 
     public PPathImpl(Path path) {
-        this(path.toUri(), path);
+        this(path.toUri(), null);
     }
 
 

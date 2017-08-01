@@ -265,7 +265,7 @@ class processStringWithSpxCore : Builder<processStringWithSpxCore.Input, process
 }
 
 
-class CeresBuilderModule : Module {
+class CeresBuilderModule_spoofax : Module {
   override fun configure(binder: Binder) {
     val builders = binder.builderMapBinder()
 

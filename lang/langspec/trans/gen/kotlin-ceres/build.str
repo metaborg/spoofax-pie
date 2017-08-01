@@ -12,4 +12,5 @@ rules
     (ast, _, _, file, _) -> (filename, result)
     with
       filename := <guarantee-extension(|"kt")> file
-    ; result   := <p2c> ast
+    ; mod      := <base-filename;remove-extension> file
+    ; result   := <p2c(|mod)> ast

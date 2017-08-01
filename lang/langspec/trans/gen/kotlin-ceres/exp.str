@@ -220,17 +220,17 @@ rules // Path operations
     ; stamperStr := <p2c-stamper> (None(), stamper)
   
   p2c-stamper:
-    (None(), Modified()) -> "ModifiedPathStamper()"
+    (None(), Modified()) -> "PathStampers.modified"
   p2c-stamper:
-    (None(), Hash()    ) -> "HashPathStamper()"
+    (None(), Hash()    ) -> "PathStampers.hash"
   p2c-stamper:
-    (filter, Modified()) -> $[DirModifiedPathStamper([filterStr])]
+    (filter, Modified()) -> $[PathStampers.modified([filterStr])]
     where
       <not(?None())> filter
     with
       filterStr := <p2c-filter-match> filter
   p2c-stamper:
-    (filter, Hash()) -> $[DirHashPathStamper([filterStr])]
+    (filter, Hash()) -> $[PathStampers.hash([filterStr])]
     where
       <not(?None())> filter
     with
@@ -318,7 +318,7 @@ rules // Literals
   p2c-exp: BoolLit(True())  -> $[true]
   p2c-exp: BoolLit(False()) -> $[false]
   p2c-exp: IntLit(i)        -> i
-  p2c-exp: PathLit(path)    -> $[PPathImpl(Paths.get("[path]")) as PPath]
+  p2c-exp: PathLit(path)    -> $[resolve("[path]")]
   p2c-exp: NullLit()        -> $[null]
   
   p2c-exp:

@@ -10,7 +10,7 @@ imports
 
 rules
 
-  p2c:
+  p2c(|mod):
     Program(defs) -> str
     with
     {| AstAnalysis, ModuleBindings:
@@ -30,17 +30,13 @@ import com.google.inject.*
 import mb.log.*
 import mb.vfs.path.*
 import mb.ceres.*
-import mb.ceres.impl.HashPathStamper
-import mb.ceres.impl.ModifiedPathStamper
-import mb.ceres.impl.DirHashPathStamper
-import mb.ceres.impl.DirModifiedPathStamper
 import mb.pipe.run.core.*
 import mb.pipe.run.ceres.path.*
 import mb.pipe.run.ceres.util.*
 
 [classes]
 
-class CeresBuilderModule : Module {
+class CeresBuilderModule_[mod] : Module {
   override fun configure(binder: Binder) {
     val builders = binder.builderMapBinder()
 

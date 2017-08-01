@@ -44,7 +44,7 @@ public class PathSrvImpl implements PathSrv {
     @Override public PPath resolve(URI uri) {
         try {
             final Path javaPath = Paths.get(uri);
-            return new PPathImpl(uri, javaPath);
+            return new PPathImpl(javaPath);
         } catch(IllegalArgumentException | FileSystemNotFoundException e) {
             throw new RuntimeException("Could not get Java path for URI " + uri, e);
         }
@@ -57,7 +57,7 @@ public class PathSrvImpl implements PathSrv {
 
     @Override public PPath resolveLocal(String path) {
         final Path javaPath = FileSystems.getDefault().getPath(path);
-        return new PPathImpl(javaPath.toUri(), javaPath);
+        return new PPathImpl(javaPath);
     }
 
     @Override public PPath resolveLocal(File file) {

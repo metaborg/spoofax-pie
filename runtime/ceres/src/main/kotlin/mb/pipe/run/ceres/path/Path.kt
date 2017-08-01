@@ -1,23 +1,18 @@
 package mb.pipe.run.ceres.path
 
 import com.google.inject.Inject
-import mb.ceres.BuildContext
-import mb.ceres.BuildException
-import mb.ceres.Builder
-import mb.ceres.In
-import mb.ceres.OutEffectBuilder
-import mb.ceres.PathStampers
-import mb.pipe.run.core.StaticPipeFacade
-import mb.vfs.access.DirAccess
-import mb.vfs.path.PPath
+import mb.ceres.*
 import mb.vfs.list.PathMatcher
-import mb.vfs.path.PathSrv
 import mb.vfs.list.PathWalker
+import mb.vfs.path.PPath
+import mb.vfs.path.PathSrv
 import java.io.IOException
 import java.io.Serializable
 import java.nio.file.Files
 import java.util.stream.Collectors
-import mb.ceres.impl.DirModifiedPathStamper
+import mb.pipe.run.core.StaticPipeFacade
+
+fun resolve(path: String) = StaticPipeFacade.facade().pathSrv.resolveLocal(path);
 
 class Exists : Builder<PPath, Boolean> {
   companion object {
@@ -44,7 +39,7 @@ class ListContents @Inject constructor(val pathSrv: PathSrv) : Builder<ListConte
   override val id = Companion.id
   override fun BuildContext.build(input: Input): ArrayList<PPath> {
     val (path, matcher) = input
-    require(path, DirModifiedPathStamper(matcher))
+    require(path, PathStampers.modified(matcher))
     if (!Files.isDirectory(path.javaPath)) {
       throw BuildException("Cannot list contents of '$input', it is not a directory")
     }
@@ -70,18 +65,12 @@ class WalkContents @Inject constructor(val pathSrv: PathSrv) : Builder<WalkConte
   override val id = Companion.id
   override fun BuildContext.build(input: Input): ArrayList<PPath> {
     val (path, walker) = input
-    require(path, DirModifiedPathStamper(walker))
+    require(path, PathStampers.modified(walker))
     if (!Files.isDirectory(path.javaPath)) {
       throw BuildException("Cannot walk contents of '$input', it is not a directory")
     }
     try {
-      val access = object : DirAccess {
-        override fun writeDir(dir: PPath) = Unit // Will not occur
-        override fun readDir(dir: PPath) {
-          require(path, DirModifiedPathStamper(walker))
-        }
-      }
-      val stream = if (walker != null) path.walk(walker, access) else path.walk(access)
+      val stream = if (walker != null) path.walk(walker) else path.walk()
       return stream.collect(Collectors.toCollection { ArrayList<PPath>() })
     } catch(e: IOException) {
       throw BuildException("Cannot walk contents of '$input'", e)
