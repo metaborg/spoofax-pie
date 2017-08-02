@@ -12,7 +12,7 @@ imports
   statsem/program
   
   gen/kotlin-ceres/def
-  gen/kotlin-ceres/listcomprehension
+  gen/kotlin-ceres/binder
   gen/kotlin/type2kotlin
   gen/idtype-tuples
   gen/util
@@ -86,11 +86,13 @@ rules // If else
 rules // List comprehension
 
   p2c-exp:
-    ListComprehensionExp(inner) -> $[[comprehension].toCollection([tyStr]())]
+    e@ListComprehensionExp(mapExp, binder, listExp) -> $[[listExpStr].map {[binderStr] -> [mapExpStr]}.toCollection([tyStr]())]
     with
-      comprehension := <p2c-listcomprehension> inner
-    ; ty            := <pipe-ast-type> inner
-    ; tyStr         := <t2k-sig> ty
+      mapExpStr  := <try-p2c-exp> mapExp
+    ; binderStr  := <p2c-binder> binder
+    ; listExpStr := <try-p2c-exp> listExp
+    ; ty         := <pipe-ast-type> e
+    ; tyStr      := <t2k-sig> ty
 
 rules // References
 
@@ -208,35 +210,6 @@ rules // Ceres builder calls
 rules // Path operations
 
   p2c-exp:
-    RequiresPath(exp, filterOpt, stamper) -> $[require([expStr], [stamperStr])]
-    with
-      expStr     := <p2c-exp> exp
-    ; stamperStr := <p2c-stamper> (filterOpt, stamper)
-
-  p2c-exp:
-    GeneratesPath(exp, stamper) -> $[generate([expStr], [stamperStr])]
-    with
-      expStr     := <p2c-exp> exp
-    ; stamperStr := <p2c-stamper> (None(), stamper)
-  
-  p2c-stamper:
-    (None(), Modified()) -> "PathStampers.modified"
-  p2c-stamper:
-    (None(), Hash()    ) -> "PathStampers.hash"
-  p2c-stamper:
-    (filter, Modified()) -> $[PathStampers.modified([filterStr])]
-    where
-      <not(?None())> filter
-    with
-      filterStr := <p2c-filter-match> filter
-  p2c-stamper:
-    (filter, Hash()) -> $[PathStampers.hash([filterStr])]
-    where
-      <not(?None())> filter
-    with
-      filterStr := <p2c-filter-match> filter
-
-  p2c-exp:
     ListPath(exp, filterOpt) -> $[requireOutput(ListContents::class.java, ListContents.Input([expStr], [filterStr]))]
     with
       expStr    := <p2c-exp> exp
@@ -261,7 +234,7 @@ rules // Path operations
       expStr := <try-p2c-exp> exp
   p2c-filter-match:
     _ -> $[PPaths.extensionsPathMatcher([expStr])]
-    where ?Extensions(exp) + ?Extensions(exp)
+    where ?Extension(exp) + ?Extensions(exp)
     with
       expStr := <try-p2c-exp> exp
       
@@ -278,7 +251,7 @@ rules // Path operations
       expStr := <try-p2c-exp> exp
   p2c-filter-walk:
     _ -> $[PPaths.extensionsPathWalker([expStr])]
-    where ?Extensions(exp) + ?Extensions(exp)
+    where ?Extension(exp) + ?Extensions(exp)
     with
       expStr := <try-p2c-exp> exp
 

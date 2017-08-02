@@ -17,8 +17,28 @@ rules // Statements
     Binder [[ binder ^ (s, ty) ]].
     
 
-  [[ ListComprehensionStm(inner) ^ (s, _) ]] :=
-    [[ inner ^ (s) : _ ]].
+  [[ ListComprehensionStm(stm_map, binder, exp_list) ^ (s, ty_func_outer) ]] :=
+    [[ exp_list ^ (s) : ty_list ]],
+    ty_list == ListTy(ty_list_inner) | error $[Type mismatch: expected list type, got [ty_list]] @ exp_list,
+    new s_comprehension,
+    s_comprehension -P-> s,
+    Binder [[ binder ^ (s_comprehension, ty_list_inner) ]],
+    [[ stm_map ^ (s_comprehension, ty_func_outer) ]].
+
+
+  [[ RequiresPath(exp, filter, stamper) ^ (s, _) ]] :=
+    [[ exp ^ (s) : ty_exp ]],
+    ty_exp <? PathTy() | error $[Type mismatch: expected path type, got [ty_exp]] @ exp,
+    [[ filter ^ (s) ]],
+    [[ stamper ^ (s) ]].
+
+  [[ GeneratesPath(exp, stamper) ^ (s, _) ]] :=
+    [[ exp ^ (s) : ty_exp ]],
+    ty_exp <? PathTy() | error $[Type mismatch: expected path type, got [ty_exp]] @ exp,
+    [[ stamper ^ (s) ]].
+
+  [[ Modified() ^ (s) ]] := true.
+  [[ Hash()     ^ (s) ]] := true.
 
 
   [[ Return(exp) ^ (s, ty_func_outer) ]] :=
@@ -106,12 +126,9 @@ rules // If else expression
     // TODO: this should calculate the LUB of the expression types
     ty_true <? ty_false | error $[Type mismatch: expected [ty_false], got [ty_true]] @ e.
 
-rules // List comprehension
+rules // List comprehension expression
 
-  [[ ListComprehensionExp(inner) ^ (s) : ty ]] :=
-    [[ inner ^ (s) : ty ]].
-    
-  [[ ListComprehension(exp_map, binder, exp_list) ^ (s) : ty ]] :=
+  [[ ListComprehensionExp(exp_map, binder, exp_list) ^ (s) : ty ]] :=
     [[ exp_list ^ (s) : ty_list ]],
     ty_list == ListTy(ty_list_inner) | error $[Type mismatch: expected list type, got [ty_list]] @ exp_list,
     new s_comprehension,
@@ -153,21 +170,6 @@ rules // Function calls
     tys_in <? tys_in_expected | error $[Type mismatch: expected [tys_in_expected], got [tys_in]] @ id_func.
 
 rules // Path operations
-
-  [[ RequiresPath(exp, filter, stamper) ^ (s) : PathTy() ]] :=
-    [[ exp ^ (s) : ty_exp ]],
-    ty_exp <? PathTy() | error $[Type mismatch: expected path type, got [ty_exp]] @ exp,
-    [[ filter ^ (s) ]],
-    [[ stamper ^ (s) ]].
-
-  [[ GeneratesPath(exp, stamper) ^ (s) : PathTy() ]] :=
-    [[ exp ^ (s) : ty_exp ]],
-    ty_exp <? PathTy() | error $[Type mismatch: expected path type, got [ty_exp]] @ exp,
-    [[ stamper ^ (s) ]].
-
-  [[ Modified() ^ (s) ]] := true.
-  [[ Hash()     ^ (s) ]] := true.
-
 
   [[ ListPath(exp, filter) ^ (s) : ListTy(PathTy()) ]] :=
     [[ exp ^ (s) : ty_exp ]],

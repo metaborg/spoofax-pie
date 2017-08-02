@@ -5,7 +5,7 @@ import com.google.inject.Provider
 import mb.ceres.BuildManager
 import mb.ceres.BuildManagerFactory
 import mb.ceres.impl.BuildCache
-import mb.ceres.impl.LMDBBuildStoreFactory
+import mb.ceres.impl.store.LMDBBuildStoreFactory
 import mb.pipe.run.core.PipeRunEx
 import mb.vfs.path.PPath
 import mb.vfs.path.PathSrv

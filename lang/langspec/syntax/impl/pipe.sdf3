@@ -32,8 +32,14 @@ context-free syntax
 
   Stm.ValDec = <val <Binder> = <Exp>;>
   
-  ListComprehension.ListComprehension = <<Exp> | <Binder> \<- <Exp>>
-  Stm.ListComprehensionStm = <<ListComprehension>;>
+  Stm.ListComprehensionStm = <<Stm> | <Binder> \<- <Exp>;>
+  
+  Stm.RequiresPath        = <requires <Exp> <FilterPart?> <StamperPart?>;>
+  Stm.GeneratesPath       = <generates <Exp> <StamperPart?>;>
+  
+  StamperPart.StamperPart = <by <StampKind>>
+  StampKind.Modified      = <modified>
+  StampKind.Hash          = <hash>
   
   Stm.Return = <return <Exp>;>
   Stm.Fail = <fail <Exp>;>
@@ -55,20 +61,13 @@ context-free syntax
   Exp.If     = <if(<Exp>) <Exp>>
   Exp.IfElse = <if(<Exp>) <Exp> else <Exp>>
 
-  Exp.ListComprehensionExp = <[<ListComprehension>]>
+  Exp.ListComprehensionExp = <[<Exp> | <Binder> \<- <Exp>]>
 
   Ref.Ref = <<ID>> {avoid}
   Exp     = Ref
   
   Exp.Call  = <<FUNCID>(<{Exp ", "}*>)>
   Exp.QCall = <<Exp>.<FUNCID>(<{Exp ", "}*>)>
-
-  Exp.RequiresPath        = <requires <Exp> <FilterPart?> <StamperPart?>>
-  Exp.GeneratesPath       = <generates <Exp> <StamperPart?>>
-  
-  StamperPart.StamperPart = <by <StampKind>>
-  StampKind.Modified      = <modified>
-  StampKind.Hash          = <hash>
   
   Exp.ListPath            = <list <Exp> <FilterPart?>>
   Exp.WalkPath            = <walk <Exp> <FilterPart?>>

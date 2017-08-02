@@ -10,7 +10,6 @@ imports
   
   gen/kotlin-ceres/exp
   gen/kotlin-ceres/binder
-  gen/kotlin-ceres/listcomprehension
   gen/kotlin/type2kotlin
   gen/idtype-tuples
   gen/util
@@ -58,9 +57,42 @@ rules // If else statement
 rules // List comprehension
 
   p2c-stm:
-    ListComprehensionStm(inner) -> $[[comprehension].forEach { }]
+    ListComprehensionStm(mapStm, binder, listExp) -> $[[listExpStr].forEach {[binderStr] -> [mapStmStr]}]
     with
-      comprehension := <p2c-listcomprehension> inner
+      mapStmStr  := <try-p2c-stm> mapStm
+    ; binderStr  := <p2c-binder> binder
+    ; listExpStr := <try-p2c-exp> listExp
+
+rules // Path operations
+
+  p2c-stm:
+    RequiresPath(exp, filterOpt, stamper) -> $[require([expStr], [stamperStr])]
+    with
+      expStr     := <p2c-exp> exp
+    ; stamperStr := <p2c-stamper> (filterOpt, stamper)
+
+  p2c-stm:
+    GeneratesPath(exp, stamper) -> $[generate([expStr], [stamperStr])]
+    with
+      expStr     := <p2c-exp> exp
+    ; stamperStr := <p2c-stamper> (None(), stamper)
+  
+  p2c-stamper:
+    (None(), Modified()) -> "PathStampers.modified"
+  p2c-stamper:
+    (None(), Hash()    ) -> "PathStampers.hash"
+  p2c-stamper:
+    (filter, Modified()) -> $[PathStampers.modified([filterStr])]
+    where
+      <not(?None())> filter
+    with
+      filterStr := <p2c-filter-match> filter
+  p2c-stamper:
+    (filter, Hash()) -> $[PathStampers.hash([filterStr])]
+    where
+      <not(?None())> filter
+    with
+      filterStr := <p2c-filter-match> filter
 
 rules // Return and fail
 

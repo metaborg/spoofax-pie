@@ -24,10 +24,18 @@ public class PPaths {
     }
 
 
+    public static PathMatcher extensionsPathMatcher(String extension) {
+        return new ExtensionsPathMatcher(extension);
+    }
+    
     public static PathMatcher extensionsPathMatcher(Collection<String> extensions) {
         return new ExtensionsPathMatcher(extensions);
     }
 
+    public static PathWalker extensionsPathWalker(String extension) {
+        return new PathMatcherWalker(extensionsPathMatcher(extension));
+    }
+    
     public static PathWalker extensionsPathWalker(Collection<String> extensions) {
         return new PathMatcherWalker(extensionsPathMatcher(extensions));
     }
