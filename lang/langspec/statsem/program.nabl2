@@ -38,6 +38,8 @@ signature
     addType : (Type * Type) -> Type {
       (IntTy()  , IntTy()  ) -> IntTy(),
       (StrTy()  , _        ) -> StrTy(),
+      (PathTy() , PathTy() ) -> PathTy(),
+      (PathTy() , StrTy()  ) -> PathTy(),
       (ListTy(a), a        ) -> ListTy(a),
       (ListTy(a), ListTy(a)) -> ListTy(a)
     }

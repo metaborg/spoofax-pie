@@ -1,0 +1,54 @@
+func main_benchmarking(dummy: string*) -> path** = {
+  val benchmarkJar = build();
+
+  val pkg = "io.usethesource.criterion";
+//  val benchmarks : (string, string)* = [
+//    ("set"             , "$pkg.JmhSetBenchmarks.(timeContainsKey|timeContainsKeyNotContained|timeInsert|timeInsertContained|timeRemoveKey|timeRemoveKeyNotContained|timeIteration|timeEqualsRealDuplicate|timeEqualsDeltaDuplicate)\$")
+//  , ("map"             , "$pkg.JmhMapBenchmarks.(timeContainsKey|timeContainsKeyNotContained|timeInsert|timeInsertContained|timeRemoveKey|timeRemoveKeyNotContained|timeIteration|timeEntryIteration|timeEqualsRealDuplicate|timeEqualsDeltaDuplicate)\$")
+//  , ("setmultimap"     , "$pkg.JmhSetMultimapBenchmarks.(timeMultimapLike.*)\$")
+//  , ("mapvssetmultimap", "$pkg.JmhSetMultimapBenchmarks.(timeMapLike.*)\$")
+//  ];
+  val benchmarks: (string, string)* = [
+    ("set"             , "$pkg.JmhSetBenchmarks.(timeInsert)\$")
+  , ("map"             , "$pkg.JmhMapBenchmarks.(timeInsert)\$")
+  ];
+  
+  val javaSrcDir = ./criterion/src/main/java/io/usethesource/criterion/impl/persistent;
+  val scalaSrcDir = ./criterion/src/main/scala/io/usethesource/criterion/impl/persistent/scala;
+  val subjects: (string, string, path*)* = [
+    ("clojure"     , "VF_CLOJURE"     , walk (javaSrcDir + "clojure")      + ./lib/clojure.jar     )
+  , ("champ"       , "VF_CHAMP"       , walk (javaSrcDir + "champ")        + ./lib/champ.jar       )
+  , ("scala"       , "VF_SCALA"       , walk scalaSrcDir                   + ./lib/scala.jar       )
+  , ("javaslang"   , "VF_JAVASLANG"   , walk (javaSrcDir + "javaslang")    + ./lib/javaslang.jar   )
+  , ("unclejim"    , "VF_UNCLEJIM"    , walk (javaSrcDir + "unclejim")     + ./lib/unclejim.jar    )
+  , ("dexx"        , "VF_DEXX"        , walk (javaSrcDir + "dexx")         + ./lib/dexx.jar        )
+  , ("pcollections", "VF_PCOLLECTIONS", walk (javaSrcDir + "pcollections") + ./lib/pcollections.jar)
+  ];
+  
+  val jvmArgs = ["-Xms4G", "-Xmx4G", "-XX:-TieredCompilation", "-XX:+UseCompressedOops"];  
+  val jmhArgs = ["-wi", "1", "-i", "1", "-r", "1", "-f", "0", "-gc", "true", "-v", "NORMAL", "-foe", "true", "-p", "producer=PURE_INTEGER", "-p", "sampleDataSelection=MATCH", "-p", "size=16"];
+  return [[run_benchmark(benchmarkJar, jvmArgs, jmhArgs, benchmark, subject) | benchmark <- benchmarks] | subject <- subjects];
+}
+
+func build() -> path = {
+  val pomFile = ./criterion/pom.xml;
+  requires pomFile;
+  requires file; | file <- walk ./criterion/src with extensions ["java", "scala"]; 
+  exec(["/usr/local/bin/mvn", "verify", "-f", "$pomFile"]);
+  val benchmarkJar = ./criterion/target/benchmarks.jar; 
+  requires benchmarkJar;
+  return benchmarkJar;
+}
+
+func run_benchmark(jar: path, jvmArgs: string*, jmhArgs: string*, benchmark: (string, string), subject: (string, string, path*)) -> path = {
+  val (benchmarkName, benchmarkPattern) = benchmark;
+  val (subjectName, subjectId, subjectDeps) = subject;
+  val csv = ./results/${benchmarkName}_${subjectName}.csv; 
+  requires dep; | dep <- subjectDeps;
+  requires jar;
+  exec(["java"] + jvmArgs + ["-jar", "$jar"] + benchmarkPattern + ["-p", "valueFactoryFactory=$subjectId"] + jmhArgs + ["-rff", "$csv"]);
+  generates csv;
+  return csv;
+}
+
+func exec(arguments: string*) -> (string, string) = foreign java mb.pipe.run.ceres.process#execute

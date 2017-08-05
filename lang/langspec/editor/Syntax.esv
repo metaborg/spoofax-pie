@@ -37,7 +37,8 @@ colorer // Default, token-based highlighting
   STRING     : 177 47 2
   _.StrLit   : 177 47 2
   StrChars   : 177 47 2
-  PATH       : 177 47 2
+  _.PathLit  : 177 47 2
+  PathChars  : 177 47 2
 
 menus
   

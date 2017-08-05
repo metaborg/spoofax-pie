@@ -284,14 +284,33 @@ rules // Interpolated string
   p2c-strpart:
     StrInterpExp(exp) -> $[${[expStr]}]
     with
-      expStr := <try-p2c-exp> exp  
+      expStr := <try-p2c-exp> exp
+
+rules // Interpolated path
+
+  p2c-exp:
+    PathLit(prefix, parts) -> $[resolve("[prefix][partsStr]")]
+    with
+      partsStr := <map(p2c-strpart); concat-strings> parts
+
+  p2c-strpart:
+    Path(chars) -> chars
+
+  p2c-strpart:
+    PathInterpRef(refExp) -> $[${[refExpStr]}]
+    with
+      refExpStr := <try-p2c-exp> refExp
+
+  p2c-strpart:
+    PathInterpExp(exp) -> $[${[expStr]}]
+    with
+      expStr := <try-p2c-exp> exp
 
 rules // Literals
 
   p2c-exp: BoolLit(True())  -> $[true]
   p2c-exp: BoolLit(False()) -> $[false]
   p2c-exp: IntLit(i)        -> i
-  p2c-exp: PathLit(path)    -> $[resolve("[path]")]
   p2c-exp: NullLit()        -> $[null]
   
   p2c-exp:

@@ -69,8 +69,8 @@ context-free syntax
   Exp.Call  = <<FUNCID>(<{Exp ", "}*>)>
   Exp.QCall = <<Exp>.<FUNCID>(<{Exp ", "}*>)>
   
-  Exp.ListPath            = <list <Exp> <FilterPart?>>
-  Exp.WalkPath            = <walk <Exp> <FilterPart?>>
+  Exp.ListPath            = <list <Exp> <FilterPart?>> {left}
+  Exp.WalkPath            = <walk <Exp> <FilterPart?>> {left}
   
   FilterPart.FilterPart   = <with <Filter>>
   Filter.Regex            = <regex <Exp>>
@@ -87,7 +87,6 @@ context-free syntax
   Bool.False  = <false>
 
   Exp.IntLit  = <<INT>>
-  Exp.PathLit = <<PATH>>
 
   Exp.NullLit = <null>
 
@@ -96,7 +95,7 @@ context-free syntax
 
   Exp = <(<Exp>)> {bracket, prefer} // Prefer bracket over tuple literal with 1 element
 
-syntax // Interpolated string
+syntax // Interpolated string literal
 
   Exp-CF.StrLit = "\"" StrPart-CF* "\""
   
@@ -109,24 +108,61 @@ lexical syntax
   StrChars = StrChar+
   StrChar = ~[\"\$\n\r]
   StrChar = "\\\""
+  StrChar = "\\$"
 
 lexical restrictions
 
   StrChars -/- ~[\"\$\n\r]
+  
+syntax // Interpolated path literal
+
+  Exp-CF.PathLit = PathStart-LEX PathPart-CF*
+  
+  PathPart-CF.Path          = PathChars-LEX
+  PathPart-CF.PathInterpRef = "$" Ref-CF
+  PathPart-CF.PathInterpExp =  "${" Exp-CF "}"
+  
+lexical syntax
+
+  PathStart = "/"
+  PathStart = "./"
+  
+  PathChars = PathChar+
+  PathChar  = ~[\n\r\$\,\;\]\)\ ]
+  PathChar  = "\\ "
+  PathChar  = "\\$"
+
+lexical restrictions
+
+  PathChars -/- ~[\n\r\$\,\;\]\)\ ]
 
 context-free priorities
 
-  { left: Exp.Eq Exp.Neq } > { left: Exp.Lor Exp.Land }
+  { left: 
+    Exp.ListPath
+    Exp.WalkPath
+  } > { 
+    left: 
+    Exp.Eq
+    Exp.Neq
+  } > { 
+    left:
+    Exp.Lor
+    Exp.Land
+  } > { 
+    left:
+    Exp.Add 
+  } 
 
 lexical syntax
 
   FUNCID = "return" {reject}
-//  FUNCID = "requires" {reject}
-//  FUNCID = "generates" {reject}
-//  FUNCID = "list" {reject}
-//  FUNCID = "walk" {reject}
-//  FUNCID = "regex" {reject}
-//  FUNCID = "pattern" {reject}
-//  FUNCID = "patterns" {reject}
+  FUNCID = "requires" {reject}
+  FUNCID = "generates" {reject}
+  FUNCID = "list" {reject}
+  FUNCID = "walk" {reject}
+  FUNCID = "regex" {reject}
+  FUNCID = "pattern" {reject}
+  FUNCID = "patterns" {reject}
 //  FUNCID = "extension" {reject}
 //  FUNCID = "extensions" {reject}

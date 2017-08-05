@@ -9,8 +9,9 @@ fun execute(arguments: ArrayList<String>): Tuple2<String, String> {
   try {
     val proc = ProcessBuilder(arguments)
             .directory(null)
-            .redirectOutput(ProcessBuilder.Redirect.PIPE)
-            .redirectError(ProcessBuilder.Redirect.PIPE)
+            .inheritIO()
+            //.redirectOutput(ProcessBuilder.Redirect.PIPE)
+            //.redirectError(ProcessBuilder.Redirect.PIPE)
             .start()
     proc.waitFor()
     val stdout = proc.inputStream.bufferedReader().readText()

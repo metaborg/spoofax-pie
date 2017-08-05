@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import mb.log.LogModule;
 import mb.pipe.run.ceres.PipeCeresModule;
+import mb.pipe.run.ceres.generated.CeresBuilderModule_benchmarking;
 import mb.pipe.run.ceres.generated.CeresBuilderModule_clang;
 import mb.pipe.run.ceres.generated.CeresBuilderModule_spoofax;
 import mb.pipe.run.core.PipeFacade;
@@ -22,7 +23,7 @@ public final class Main {
         final Logger rootLogger = LoggerFactory.getLogger("root");
         final PipeFacade pipeFacade = new PipeFacade(new PipeModule(), new LogModule(rootLogger), new VFSModule(),
             new PipeCmdModule(), new PipeSpoofaxModule(), new PipeCeresModule(), new CeresBuilderModule_clang(),
-            new CeresBuilderModule_spoofax());
+            new CeresBuilderModule_spoofax(), new CeresBuilderModule_benchmarking());
         StaticPipeFacade.init(pipeFacade);
 
         try(final Spoofax spoofax = new Spoofax(new NullEditorModule(), new SpoofaxExtensionModule());

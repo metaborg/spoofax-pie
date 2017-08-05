@@ -215,7 +215,6 @@ rules // Simple literals
 
   [[ BoolLit(_) ^ (s) : BoolTy() ]] := true.
   [[ IntLit(_)  ^ (s) : IntTy()  ]] := true.
-  [[ PathLit(_) ^ (s) : PathTy() ]] := true.
   [[ NullLit()  ^ (s) : NullTy() ]] := true.
 
 rules // String literals with interpolation
@@ -227,6 +226,17 @@ rules // String literals with interpolation
   [[ StrInterpRef(exp_ref) ^ (s) ]] :=
     [[ exp_ref ^ (s) : _ ]].
   [[ StrInterpExp(exp) ^ (s) ]] :=
+    [[ exp ^ (s) : _ ]].
+
+rules // Path literals with interpolation
+
+  [[ PathLit(_, elems) ^ (s) : PathTy() ]] :=
+    Map1 [[ elems ^ (s) ]].
+    
+  [[ Path(_) ^ (s) ]] := true.
+  [[ PathInterpRef(exp_ref) ^ (s) ]] :=
+    [[ exp_ref ^ (s) : _ ]].
+  [[ PathInterpExp(exp) ^ (s) ]] :=
     [[ exp ^ (s) : _ ]].
 
 rules // Composite literals

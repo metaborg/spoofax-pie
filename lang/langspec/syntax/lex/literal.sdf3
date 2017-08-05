@@ -17,12 +17,3 @@ lexical syntax // Number
 lexical restrictions
 
   INT -/- [0-9]
-
-lexical syntax // Path
-
-  APATH = "/"  PathChar*
-  RPATH = "./" PathChar*
-  PATH = APATH
-  PATH = RPATH
-  PathChar = ~[\n\r\,\;\]\ ]
-  PathChar = "\\ "

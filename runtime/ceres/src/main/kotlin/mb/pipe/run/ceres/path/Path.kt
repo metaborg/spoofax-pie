@@ -1,7 +1,13 @@
 package mb.pipe.run.ceres.path
 
 import com.google.inject.Inject
-import mb.ceres.*
+import mb.ceres.BuildContext
+import mb.ceres.BuildException
+import mb.ceres.Builder
+import mb.ceres.In
+import mb.ceres.OutEffectBuilder
+import mb.ceres.PathStampers
+import mb.pipe.run.core.StaticPipeFacade
 import mb.vfs.list.PathMatcher
 import mb.vfs.list.PathWalker
 import mb.vfs.path.PPath
@@ -10,9 +16,19 @@ import java.io.IOException
 import java.io.Serializable
 import java.nio.file.Files
 import java.util.stream.Collectors
-import mb.pipe.run.core.StaticPipeFacade
 
-fun resolve(path: String) = StaticPipeFacade.facade().pathSrv.resolveLocal(path);
+fun resolve(path: String): PPath {
+  return StaticPipeFacade.facade().pathSrv.resolveLocal(path)
+}
+
+operator fun PPath.plus(other: PPath): PPath {
+  return this.resolve(other)
+}
+
+operator fun PPath.plus(other: String): PPath {
+  return this.resolve(other)
+}
+
 
 class Exists : Builder<PPath, Boolean> {
   companion object {

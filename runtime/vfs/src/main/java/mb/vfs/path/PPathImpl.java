@@ -111,11 +111,16 @@ public class PPathImpl implements PPath {
 
 
     @Override public PPath resolve(PPath other) {
-        return new PPathImpl(getJavaPath().resolve(other.getJavaPath()));
+        final Path thisJavaPath = getJavaPath();
+        final Path otherJavaPath = other.getJavaPath();
+        final Path resolved = thisJavaPath.resolve(otherJavaPath);
+        return new PPathImpl(resolved);
     }
 
     @Override public PPath resolve(String other) {
-        return new PPathImpl(getJavaPath().resolve(other));
+        final Path thisJavaPath = getJavaPath().normalize();
+        final Path resolved = thisJavaPath.resolve(other);
+        return new PPathImpl(resolved);
     }
 
     @Override public PPath replaceExtension(String extension) {
