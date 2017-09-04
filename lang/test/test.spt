@@ -1,7 +1,0 @@
-module test
-
-language pipeline
-
-test parse [[
-
-]] parse succeeds

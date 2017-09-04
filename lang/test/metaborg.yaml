@@ -1,9 +1,0 @@
----
-id: org.metaborg:pipe.lang.test:0.1.0-SNAPSHOT
-name: pipeline
-dependencies:
-  compile:
-  - org.metaborg:pipe.lang:0.1.0-SNAPSHOT
-  - org.metaborg:org.metaborg.meta.lang.spt:${metaborgVersion}
-build:
-  useBuildSystemSpec: true

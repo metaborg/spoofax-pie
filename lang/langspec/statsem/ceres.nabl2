@@ -1,7 +1,0 @@
-module statsem/ceres
-
-rules // Ceres builder function implementation
-
-  [[ CBuilderImpl(id_class_java) ^ (s, _, occ_func_outer) ]] :=
-    occ_func_outer.kind        := CeresBuilderFuncKind() !,
-    occ_func_outer.javaClassId := id_class_java !.

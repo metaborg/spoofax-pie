@@ -1,4 +1,0 @@
-func test() -> string = {
-  val file = ./file;
-  return "$file and some stuff with ${1+1}";
-}
