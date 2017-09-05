@@ -13,24 +13,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import mb.log.LogModule;
-import mb.pipe.run.ceres.PipeCeresModule;
-import mb.pipe.run.ceres.generated.CeresBuilderModule_spoofax;
-import mb.pipe.run.core.PipeEx;
-import mb.pipe.run.core.PipeFacade;
-import mb.pipe.run.core.PipeModule;
-import mb.pipe.run.core.StaticPipeFacade;
+import mb.pie.runtime.builtin.PieBuiltinModule;
 import mb.pipe.run.eclipse.util.LoggingConfiguration;
-import mb.pipe.run.spoofax.PipeSpoofaxModule;
-import mb.pipe.run.spoofax.util.StaticSpoofax;
+import mb.spoofax.runtime.impl.legacy.StaticSpoofaxCoreFacade;
+import mb.spoofax.runtime.model.SpoofaxEx;
+import mb.spoofax.runtime.model.SpoofaxFacade;
+import mb.spoofax.runtime.model.SpoofaxModule;
+import mb.spoofax.runtime.model.StaticSpoofaxFacade;
+import mb.spoofax.runtime.pie.SpoofaxPieModule;
+import mb.spoofax.runtime.pie.generated.CeresBuilderModule_spoofax;
 
 public class PipePlugin extends AbstractUIPlugin implements IStartup {
     public static final String id = "mb.pipe.run.eclipse";
 
     private static volatile PipePlugin plugin;
     private static volatile Logger logger;
-    private static volatile PipeFacade pipeFacade;
-    private static volatile Spoofax spoofaxFacade;
-    private static volatile SpoofaxMeta spoofaxMetaFacade;
+    private static volatile SpoofaxFacade spoofaxFacade;
+    private static volatile Spoofax spoofaxCoreFacade;
+    private static volatile SpoofaxMeta spoofaxCoreMetaFacade;
     private static volatile boolean doneLoading;
 
 
@@ -43,28 +43,28 @@ public class PipePlugin extends AbstractUIPlugin implements IStartup {
         logger = LoggerFactory.getLogger(PipePlugin.class);
         logger.debug("Starting Pipe plugin");
 
-        // Initialzie pipeline runtime
+        // Initialize Spoofax runtime
         try {
-            pipeFacade = new PipeFacade(new PipeModule(), new LogModule(logger), new EclipseVFSModule(),
-                new EclipseModule(), new PipeSpoofaxModule(), new PipeCeresModule(), new CeresBuilderModule_spoofax());
-            StaticPipeFacade.init(pipeFacade);
-        } catch(PipeEx e) {
-            logger.error("Instantiating Pipe failed", e);
+            spoofaxFacade = new SpoofaxFacade(new SpoofaxModule(), new LogModule(logger), new EclipseVFSModule(),
+                new EclipseModule(), new SpoofaxPieModule(), new PieBuiltinModule(), new CeresBuilderModule_spoofax());
+            StaticSpoofaxFacade.init(spoofaxFacade);
+        } catch(SpoofaxEx e) {
+            logger.error("Instantiating Spoofax PIE failed", e);
             throw e;
         }
 
-        // Initialize Spoofax
+        // Initialize Spoofax Core
         try {
-            spoofaxFacade = new Spoofax(new SpoofaxPipeModule(), new SpoofaxExtensionModule());
-            spoofaxMetaFacade = new SpoofaxMeta(spoofaxFacade);
-            StaticSpoofax.init(spoofaxMetaFacade);
+            spoofaxCoreFacade = new Spoofax(new SpoofaxPipeModule(), new SpoofaxExtensionModule());
+            spoofaxCoreMetaFacade = new SpoofaxMeta(spoofaxCoreFacade);
+            StaticSpoofaxCoreFacade.init(spoofaxCoreMetaFacade);
         } catch(MetaborgException e) {
-            logger.error("Instantiating Spoofax failed", e);
+            logger.error("Instantiating Spoofax Core failed", e);
             throw e;
         }
 
         // Load meta-languages
-        final ILanguageDiscoveryService langDiscoverSrv = spoofaxFacade.languageDiscoveryService;
+        final ILanguageDiscoveryService langDiscoverSrv = spoofaxCoreFacade.languageDiscoveryService;
         final String spoofaxDir = "/Users/gohla/spoofax";
 
         // final String spoofaxRelengMasterDir = spoofaxDir + "/master/repo/spoofax-releng";
@@ -77,12 +77,12 @@ public class PipePlugin extends AbstractUIPlugin implements IStartup {
 
         // Load baseline meta-languages
         final String spoofaxRelengReleaseDir = spoofaxDir + "/release/repo/spoofax-releng";
-        langDiscoverSrv
-            .languageFromDirectory(spoofaxFacade.resolve(spoofaxRelengReleaseDir + "/esv/org.metaborg.meta.lang.esv"));
         langDiscoverSrv.languageFromDirectory(
-            spoofaxFacade.resolve(spoofaxRelengReleaseDir + "/sdf/org.metaborg.meta.lang.template"));
+            spoofaxCoreFacade.resolve(spoofaxRelengReleaseDir + "/esv/org.metaborg.meta.lang.esv"));
+        langDiscoverSrv.languageFromDirectory(
+            spoofaxCoreFacade.resolve(spoofaxRelengReleaseDir + "/sdf/org.metaborg.meta.lang.template"));
         langDiscoverSrv
-            .languageFromDirectory(spoofaxFacade.resolve(spoofaxRelengReleaseDir + "/spoofax/meta.lib.spoofax"));
+            .languageFromDirectory(spoofaxCoreFacade.resolve(spoofaxRelengReleaseDir + "/spoofax/meta.lib.spoofax"));
 
         doneLoading = true;
     }
@@ -90,10 +90,10 @@ public class PipePlugin extends AbstractUIPlugin implements IStartup {
     @Override public void stop(BundleContext context) throws Exception {
         logger.debug("Stopping Spoofax plugin");
         doneLoading = false;
-        spoofaxMetaFacade = null;
-        spoofaxFacade.close();
+        spoofaxCoreMetaFacade = null;
+        spoofaxCoreFacade.close();
         spoofaxFacade = null;
-        pipeFacade = null;
+        spoofaxFacade = null;
         logger = null;
         plugin = null;
         super.stop(context);
@@ -111,12 +111,12 @@ public class PipePlugin extends AbstractUIPlugin implements IStartup {
         return plugin;
     }
 
-    public static PipeFacade pipeFacade() {
-        return pipeFacade;
+    public static SpoofaxFacade spoofaxFacade() {
+        return spoofaxFacade;
     }
 
-    public static Spoofax spoofaxFacade() {
-        return spoofaxFacade;
+    public static Spoofax spoofaxCoreFacade() {
+        return spoofaxCoreFacade;
     }
 
     public static boolean doneLoading() {

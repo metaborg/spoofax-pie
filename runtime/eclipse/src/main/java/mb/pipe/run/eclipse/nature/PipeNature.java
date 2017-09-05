@@ -24,7 +24,7 @@ public class PipeNature implements IProjectNature {
 
 
     public PipeNature() {
-        final Injector injector = PipePlugin.pipeFacade().injector;
+        final Injector injector = PipePlugin.spoofaxFacade().injector;
         this.builderUtils = injector.getInstance(BuilderUtils.class);
         this.pathSrv = injector.getInstance(EclipsePathSrv.class);
     }

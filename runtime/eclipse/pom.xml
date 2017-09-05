@@ -4,7 +4,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 >
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>pipe.run.eclipse</artifactId>
+  <artifactId>spoofax.runtime.eclipse</artifactId>
   <version>0.1.0-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
 
@@ -18,22 +18,23 @@
   <dependencies>
     <dependency>
       <groupId>org.metaborg</groupId>
-      <artifactId>pipe.run.core</artifactId>
+      <artifactId>pie.runtime.core</artifactId>
       <version>0.1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
-      <artifactId>ceres</artifactId>
+      <artifactId>pie.runtime.builtin</artifactId>
+      <version>0.1.0-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>spoofax.runtime.model</artifactId>
       <version>0.1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
-      <artifactId>pipe.run.ceres</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.metaborg</groupId>
-      <artifactId>pipe.run.spoofax</artifactId>
+      <artifactId>spoofax.runtime.impl</artifactId>
       <version>0.1.0-SNAPSHOT</version>
     </dependency>
 
@@ -47,6 +48,7 @@
       <artifactId>vfs</artifactId>
       <version>${metaborg-version}</version>
     </dependency>
+    
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.metaborg.core</artifactId>

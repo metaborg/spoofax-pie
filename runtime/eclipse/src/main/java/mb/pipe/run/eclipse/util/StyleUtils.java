@@ -11,10 +11,10 @@ import org.eclipse.swt.graphics.RGB;
 import com.google.inject.Inject;
 
 import mb.log.Logger;
-import mb.pipe.run.core.model.region.Region;
-import mb.pipe.run.core.model.style.Style;
-import mb.pipe.run.core.model.style.Styling;
-import mb.pipe.run.core.model.style.TokenStyle;
+import mb.spoofax.runtime.model.region.Region;
+import mb.spoofax.runtime.model.style.Style;
+import mb.spoofax.runtime.model.style.Styling;
+import mb.spoofax.runtime.model.style.TokenStyle;
 
 /**
  * Utility functions for creating Eclipse text styles.

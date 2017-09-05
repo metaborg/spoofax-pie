@@ -4,10 +4,10 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 
-import mb.pipe.run.core.model.message.Msg;
-import mb.pipe.run.core.model.message.MsgSeverityVisitor;
-import mb.pipe.run.core.model.region.Region;
 import mb.pipe.run.eclipse.PipePlugin;
+import mb.spoofax.runtime.model.message.Msg;
+import mb.spoofax.runtime.model.message.MsgSeverityVisitor;
+import mb.spoofax.runtime.model.region.Region;
 
 /**
  * Utility functions for creating and removing {@link IMarker} instances.

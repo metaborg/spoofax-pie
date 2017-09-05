@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Pipeline runtime Eclipse plugin
-Bundle-SymbolicName: pipe.run.eclipse;singleton:=true
+Bundle-SymbolicName: spoofax.runtime.eclipse;singleton:=true
 Bundle-Version: 0.1.0.qualifier
 Bundle-Activator: mb.pipe.run.eclipse.PipePlugin
 Require-Bundle: org.eclipse.core.runtime,
@@ -21,14 +21,15 @@ Require-Bundle: org.eclipse.core.runtime,
  org.spoofax.jsglr,
  org.metaborg.spoofax.eclipse.externaldeps,
  org.metaborg.spoofax.eclipse.meta.externaldeps,
- pipe.run.core,
- pipe.run.ceres,
- pipe.run.spoofax,
- pipe.run.spoofax.legacy,
- pipe.run.eclipse.externaldeps,
- ceres,
  log,
- vfs
+ vfs,
+ pie.runtime.core,
+ pie.runtime.builtin,
+ spoofax.runtime.model,
+ spoofax.runtime.impl,
+ spoofax.runtime.impl.legacy,
+ spoofax.runtime.eclipse.externaldeps,
+ spoofax.runtime.pie
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: metaborg.org
 Bundle-ActivationPolicy: lazy

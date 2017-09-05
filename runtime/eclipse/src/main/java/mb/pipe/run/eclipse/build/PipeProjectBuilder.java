@@ -9,9 +9,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
-import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -19,23 +17,23 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import com.google.inject.Injector;
 
-import mb.ceres.BuildException;
-import mb.ceres.BuildManager;
-import mb.ceres.BuildSession;
 import mb.log.Logger;
-import mb.pipe.run.ceres.CeresSrv;
-import mb.pipe.run.ceres.generated.processProject;
-import mb.pipe.run.ceres.generated.processString;
-import mb.pipe.run.ceres.util.Tuple4;
-import mb.pipe.run.core.model.message.Msg;
-import mb.pipe.run.core.model.parse.Token;
-import mb.pipe.run.core.model.style.Styling;
+import mb.pie.runtime.builtin.util.Tuple4;
+import mb.pie.runtime.core.BuildException;
+import mb.pie.runtime.core.BuildManager;
+import mb.pie.runtime.core.BuildSession;
 import mb.pipe.run.eclipse.PipePlugin;
 import mb.pipe.run.eclipse.editor.Editors;
 import mb.pipe.run.eclipse.editor.PipeEditor;
 import mb.pipe.run.eclipse.util.MarkerUtils;
 import mb.pipe.run.eclipse.util.Nullable;
 import mb.pipe.run.eclipse.vfs.EclipsePathSrv;
+import mb.spoofax.runtime.model.message.Msg;
+import mb.spoofax.runtime.model.parse.Token;
+import mb.spoofax.runtime.model.style.Styling;
+import mb.spoofax.runtime.pie.PieSrv;
+import mb.spoofax.runtime.pie.generated.processProject;
+import mb.spoofax.runtime.pie.generated.processString;
 import mb.vfs.path.PPath;
 
 public class PipeProjectBuilder extends IncrementalProjectBuilder {
@@ -43,16 +41,16 @@ public class PipeProjectBuilder extends IncrementalProjectBuilder {
 
     private final Logger logger;
     private final EclipsePathSrv pathSrv;
-    private final CeresSrv ceresSrv;
+    private final PieSrv pieSrv;
     private final Editors editors;
     private final Updater updater;
 
 
     public PipeProjectBuilder() {
-        final Injector injector = PipePlugin.pipeFacade().injector;
+        final Injector injector = PipePlugin.spoofaxFacade().injector;
         this.logger = injector.getInstance(Logger.class).forContext(getClass());
         this.pathSrv = injector.getInstance(EclipsePathSrv.class);
-        this.ceresSrv = injector.getInstance(CeresSrv.class);
+        this.pieSrv = injector.getInstance(PieSrv.class);
         this.editors = injector.getInstance(Editors.class);
         this.updater = injector.getInstance(Updater.class);
     }
@@ -71,7 +69,7 @@ public class PipeProjectBuilder extends IncrementalProjectBuilder {
         final PPath workspaceRoot = pathSrv.resolveWorkspaceRoot();
 
         logger.info("Building project {}", project);
-        final BuildManager buildManager = ceresSrv.get(workspaceRoot);
+        final BuildManager buildManager = pieSrv.get(workspaceRoot);
         final BuildSession buildSession = buildManager.newSession();
         ArrayList<Tuple4<? extends PPath, @Nullable ? extends ArrayList<Token>, ? extends ArrayList<Msg>, @Nullable ? extends Styling>> results;
         try {
@@ -135,7 +133,7 @@ public class PipeProjectBuilder extends IncrementalProjectBuilder {
         MarkerUtils.clearAllRec(project);
 
         final PPath workspaceRoot = pathSrv.resolveWorkspaceRoot();
-        final BuildManager buildManager = ceresSrv.get(workspaceRoot);
+        final BuildManager buildManager = pieSrv.get(workspaceRoot);
         buildManager.dropStore();
         buildManager.dropCache();
 

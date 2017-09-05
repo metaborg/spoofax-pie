@@ -9,16 +9,16 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.IEditorInput;
 
-import mb.ceres.BuildException;
-import mb.ceres.BuildManager;
 import mb.log.Logger;
-import mb.pipe.run.ceres.generated.processString;
-import mb.pipe.run.core.model.Context;
-import mb.pipe.run.core.model.message.Msg;
-import mb.pipe.run.core.model.style.Styling;
+import mb.pie.runtime.core.BuildException;
+import mb.pie.runtime.core.BuildManager;
 import mb.pipe.run.eclipse.build.Updater;
 import mb.pipe.run.eclipse.util.Nullable;
 import mb.pipe.run.eclipse.util.StatusUtils;
+import mb.spoofax.runtime.model.context.Context;
+import mb.spoofax.runtime.model.message.Msg;
+import mb.spoofax.runtime.model.style.Styling;
+import mb.spoofax.runtime.pie.generated.processString;
 import mb.vfs.path.PPath;
 
 public class EditorUpdateJob extends Job {
@@ -69,8 +69,8 @@ public class EditorUpdateJob extends Job {
 
     private IStatus update(IProgressMonitor monitor) throws BuildException, CoreException {
         // TODO: remove context
-        final processString.Output output =
-            buildManager.build(processString.class, new processString.Input(text, file, context.currentDir(), workspaceRoot));
+        final processString.Output output = buildManager.build(processString.class,
+            new processString.Input(text, file, context.currentDir(), workspaceRoot));
 
         if(output != null) {
             final List<Msg> messages = output.component2();

@@ -5,7 +5,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 >
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>pipe.cfg.test</artifactId>
+  <artifactId>spoofax.lang.cfg.test</artifactId>
   <version>0.1.0-SNAPSHOT</version>
   <packaging>spoofax-test</packaging>
 
@@ -14,11 +14,11 @@
     <artifactId>parent.language</artifactId>
     <version>2.3.0-SNAPSHOT</version>
   </parent>
-  
+
   <dependencies>
     <dependency>
       <groupId>org.metaborg</groupId>
-      <artifactId>pipe.cfg</artifactId>
+      <artifactId>spoofax.lang.cfg</artifactId>
       <version>0.1.0-SNAPSHOT</version>
       <type>spoofax-language</type>
     </dependency>
@@ -30,7 +30,7 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-  
+
   <build>
     <plugins>
       <plugin>
@@ -38,12 +38,12 @@
         <artifactId>spoofax-maven-plugin</artifactId>
         <version>${metaborg-version}</version>
         <configuration>
-          <languageUnderTest>org.metaborg:pipe.cfg:0.1.0-SNAPSHOT</languageUnderTest>
+          <languageUnderTest>org.metaborg:spoofax.lang.cfg:0.1.0-SNAPSHOT</languageUnderTest>
         </configuration>
       </plugin>
     </plugins>
   </build>
-  
+
   <repositories>
     <repository>
       <id>metaborg-release-repo</id>
@@ -66,7 +66,7 @@
       </snapshots>
     </repository>
   </repositories>
-  
+
   <pluginRepositories>
     <pluginRepository>
       <id>metaborg-release-repo</id>

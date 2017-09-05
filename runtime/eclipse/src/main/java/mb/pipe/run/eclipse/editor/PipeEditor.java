@@ -16,15 +16,15 @@ import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 
 import com.google.inject.Injector;
 
-import mb.ceres.BuildManager;
 import mb.log.Logger;
-import mb.pipe.run.ceres.CeresSrv;
-import mb.pipe.run.core.PipeFacade;
-import mb.pipe.run.core.model.Context;
-import mb.pipe.run.core.model.ContextFactory;
+import mb.pie.runtime.core.BuildManager;
 import mb.pipe.run.eclipse.PipePlugin;
 import mb.pipe.run.eclipse.build.Updater;
 import mb.pipe.run.eclipse.vfs.EclipsePathSrv;
+import mb.spoofax.runtime.model.SpoofaxFacade;
+import mb.spoofax.runtime.model.context.Context;
+import mb.spoofax.runtime.model.context.ContextFactory;
+import mb.spoofax.runtime.pie.PieSrv;
 import mb.vfs.path.PPath;
 
 public class PipeEditor extends TextEditor {
@@ -42,7 +42,7 @@ public class PipeEditor extends TextEditor {
     private Logger logger;
     private EclipsePathSrv pathSrv;
     private ContextFactory contextFactory;
-    private CeresSrv ceresSrv;
+    private PieSrv pieSrv;
     private Editors editors;
     private Updater updater;
 
@@ -82,13 +82,13 @@ public class PipeEditor extends TextEditor {
 
         this.jobManager = Job.getJobManager();
 
-        final PipeFacade pipeFacade = PipePlugin.pipeFacade();
-        final Injector injector = pipeFacade.injector;
+        final SpoofaxFacade spoofaxFacade = PipePlugin.spoofaxFacade();
+        final Injector injector = spoofaxFacade.injector;
 
-        this.logger = pipeFacade.rootLogger;
+        this.logger = spoofaxFacade.rootLogger;
         this.pathSrv = injector.getInstance(EclipsePathSrv.class);
         this.contextFactory = injector.getInstance(ContextFactory.class);
-        this.ceresSrv = injector.getInstance(CeresSrv.class);
+        this.pieSrv = injector.getInstance(PieSrv.class);
         this.editors = injector.getInstance(Editors.class);
         this.updater = injector.getInstance(Updater.class);
 
@@ -153,7 +153,7 @@ public class PipeEditor extends TextEditor {
         final IProject project = eclipseFile.getProject();
         final PPath projectDir = pathSrv.resolve(project);
         final Context context = contextFactory.create(projectDir);
-        final BuildManager buildManager = ceresSrv.get(workspaceRoot);
+        final BuildManager buildManager = pieSrv.get(workspaceRoot);
         final Job job = new EditorUpdateJob(logger, buildManager, updater, this, document.get(), context, input, file,
             eclipseFile, workspaceRoot);
         job.setRule(eclipseFile);
