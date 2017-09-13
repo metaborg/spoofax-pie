@@ -21,7 +21,7 @@ import mb.spoofax.runtime.model.SpoofaxFacade;
 import mb.spoofax.runtime.model.SpoofaxModule;
 import mb.spoofax.runtime.model.StaticSpoofaxFacade;
 import mb.spoofax.runtime.pie.SpoofaxPieModule;
-import mb.spoofax.runtime.pie.generated.CeresBuilderModule_spoofax;
+import mb.spoofax.runtime.pie.generated.PieBuilderModule_spoofax;
 
 public class PipePlugin extends AbstractUIPlugin implements IStartup {
     public static final String id = "mb.pipe.run.eclipse";
@@ -46,7 +46,7 @@ public class PipePlugin extends AbstractUIPlugin implements IStartup {
         // Initialize Spoofax runtime
         try {
             spoofaxFacade = new SpoofaxFacade(new SpoofaxModule(), new LogModule(logger), new EclipseVFSModule(),
-                new EclipseModule(), new SpoofaxPieModule(), new PieBuiltinModule(), new CeresBuilderModule_spoofax());
+                new EclipseModule(), new SpoofaxPieModule(), new PieBuiltinModule(), new PieBuilderModule_spoofax());
             StaticSpoofaxFacade.init(spoofaxFacade);
         } catch(SpoofaxEx e) {
             logger.error("Instantiating Spoofax PIE failed", e);

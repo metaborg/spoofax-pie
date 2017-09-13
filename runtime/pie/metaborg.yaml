@@ -1,0 +1,13 @@
+---
+id: org.metaborg:spoofax.runtime.pie:0.1.0-SNAPSHOT
+name: spoofax.runtime.pie
+dependencies:
+  compile:
+  - org.metaborg:pie.lang:0.1.0-SNAPSHOT
+debug:
+  typesmart: false
+runtime:
+  nabl2:
+    debug: null
+build:
+  useBuildSystemSpec: true
