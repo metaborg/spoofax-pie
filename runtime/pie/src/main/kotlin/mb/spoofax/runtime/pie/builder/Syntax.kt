@@ -1,6 +1,6 @@
 package mb.spoofax.runtime.pie.builder
 
-import com.google.common.collect.Lists
+import java.util.ArrayList
 import com.google.inject.Inject
 import mb.log.Logger
 import mb.pie.runtime.builtin.path.read
@@ -78,7 +78,7 @@ class GenerateTable
     val vfsOutputFile = spoofaxPaths.targetMetaborgDir().resolveFile("sdf-new.tbl")
     val outputFile = Spx.spoofax().resourceService.localPath(vfsOutputFile) ?: throw BuildException("Parse table output file $vfsOutputFile is not on the local file system")
     // Paths
-    val paths = Lists.newArrayList(spoofaxPaths.syntaxSrcGenDir().name.uri)
+    val paths = ArrayList(listOf(spoofaxPaths.syntaxSrcGenDir().name.uri))
     // Create table and make dependencies
     val generator = ParseTableGenerator(mainFile, outputFile, null, null, paths, false)
     generator.createTable(false, false)
