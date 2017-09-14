@@ -52,7 +52,7 @@ class createWorkspaceConfig : Builder<PPath, mb.spoofax.runtime.impl.cfg.Workspa
 class processWorkspace : Builder<PPath, ArrayList<ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>>> {
   override val id = "processWorkspace"
   override fun BuildContext.build(input: PPath): ArrayList<ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>> {
-    return requireOutput(ListContents::class.java, ListContents.Input(input, PPaths.regexPathMatcher("[^.].+"))).map { project -> requireOutput(processProject::class.java, processProject.Input(input, project)) }.toCollection(ArrayList<ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>>())
+    return requireOutput(ListContents::class.java, ListContents.Input(input, PPaths.regexPathMatcher("^[^.].+\$"))).map { project -> requireOutput(processProject::class.java, processProject.Input(input, project)) }.toCollection(ArrayList<ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>>())
   }
 }
 

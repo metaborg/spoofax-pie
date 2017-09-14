@@ -63,27 +63,6 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
             throw e;
         }
 
-        // Load meta-languages
-        final ILanguageDiscoveryService langDiscoverSrv = spoofaxCoreFacade.languageDiscoveryService;
-        final String spoofaxDir = "/Users/gohla/spoofax";
-
-        // final String spoofaxRelengMasterDir = spoofaxDir + "/master/repo/spoofax-releng";
-        // langDiscoverSrv
-        // .languageFromDirectory(spoofaxFacade.resolve(spoofaxRelengMasterDir + "/esv/org.metaborg.meta.lang.esv"));
-        // langDiscoverSrv.languageFromDirectory(
-        // spoofaxFacade.resolve(spoofaxRelengMasterDir + "/sdf/org.metaborg.meta.lang.template"));
-        // langDiscoverSrv
-        // .languageFromDirectory(spoofaxFacade.resolve(spoofaxRelengMasterDir + "/spoofax/meta.lib.spoofax"));
-
-        // Load baseline meta-languages
-        final String spoofaxRelengReleaseDir = spoofaxDir + "/release/repo/spoofax-releng";
-        langDiscoverSrv.languageFromDirectory(
-            spoofaxCoreFacade.resolve(spoofaxRelengReleaseDir + "/esv/org.metaborg.meta.lang.esv"));
-        langDiscoverSrv.languageFromDirectory(
-            spoofaxCoreFacade.resolve(spoofaxRelengReleaseDir + "/sdf/org.metaborg.meta.lang.template"));
-        langDiscoverSrv
-            .languageFromDirectory(spoofaxCoreFacade.resolve(spoofaxRelengReleaseDir + "/spoofax/meta.lib.spoofax"));
-
         doneLoading = true;
     }
 
