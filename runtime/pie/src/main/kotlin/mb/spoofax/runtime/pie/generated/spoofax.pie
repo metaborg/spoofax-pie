@@ -64,6 +64,9 @@ func createWorkspaceConfig(workspaceRoot: path) -> WorkspaceConfig? = {
 
 
 /// General processing
+func processWorkspace(root: path) -> (path, Token*?, Message*, Styling?)** = {
+  return [processProject(root, project) | project <- list root with regex "[^.].+"];
+}
 func processProject(root: path, project: path) -> (path, Token*?, Message*, Styling?)* = {
   val workspaceConfig = createWorkspaceConfig(root);
   if(workspaceConfig == null) return [];

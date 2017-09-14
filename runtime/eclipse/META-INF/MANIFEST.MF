@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Pipeline runtime Eclipse plugin
+Bundle-Name: Spoofax Eclipse plugin
 Bundle-SymbolicName: spoofax.runtime.eclipse;singleton:=true
 Bundle-Version: 0.1.0.qualifier
-Bundle-Activator: mb.pipe.run.eclipse.PipePlugin
+Bundle-Activator: mb.spoofax.runtime.eclipse.SpoofaxPlugin
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.filesystem,
  org.eclipse.core.resources,

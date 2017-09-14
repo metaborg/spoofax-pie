@@ -3,28 +3,27 @@
 <plugin>
   <!-- Startup -->
   <extension point="org.eclipse.ui.startup">
-    <startup class="mb.pipe.run.eclipse.PipePlugin"/>
+    <startup class="mb.spoofax.runtime.eclipse.SpoofaxPlugin"/>
   </extension>
 
   
   <!-- Editor -->
   <extension point="org.eclipse.ui.editors">
     <editor
-      id="mb.pipe.run.eclipse.editor"
-      name="Pipeline editor"
+      id="mb.spoofax.runtime.eclipse.editor"
+      name="Spoofax editor"
       icon="icons/editor.gif"
       contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
-      class="mb.pipe.run.eclipse.editor.PipeEditor"
-      extensions="min"
+      class="mb.spoofax.runtime.eclipse.editor.SpoofaxEditor"
     />
   </extension>
   <!-- Editor context -->
   <extension point="org.eclipse.ui.contexts">
     <context 
-      id="mb.pipe.run.eclipse.editor.context" 
+      id="mb.spoofax.runtime.eclipse.editor.context" 
       parentId="org.eclipse.ui.textEditorScope"
-      name="Editing pipeline files"
-      description="Editing pipeline files"
+      name="Editing Spoofax files"
+      description="Editing Spoofax files"
     />
   </extension>
 
@@ -33,18 +32,18 @@
   <!-- Language specifications -->
   <extension
     point="org.eclipse.core.resources.natures"
-    id="mb.pipe.run.eclipse.nature"
-    name="Pipeline language specification nature"
+    id="mb.spoofax.runtime.eclipse.nature"
+    name="Spoofax nature"
   >
     <runtime>
-      <run class="mb.pipe.run.eclipse.nature.PipeNature"/>
+      <run class="mb.spoofax.runtime.eclipse.nature.SpoofaxNature"/>
     </runtime>
-    <builder id="mb.pipe.run.eclipse.builder" />
+    <builder id="mb.spoofax.runtime.eclipse.builder" />
   </extension>
   <extension
     point="org.eclipse.core.resources.builders"
-    id="mb.pipe.run.eclipse.builder"
-    name="Pipeline language specification builder"
+    id="mb.spoofax.runtime.eclipse.builder"
+    name="Spoofax builder"
   >
     <builder
       callOnEmptyDelta="false"
@@ -52,21 +51,21 @@
       isConfigurable="false"
       supportsConfigurations="false"
     >
-      <run class="mb.pipe.run.eclipse.build.PipeProjectBuilder"/>
+      <run class="mb.spoofax.runtime.eclipse.build.SpoofaxProjectBuilder"/>
     </builder>
   </extension>
   <extension point="org.eclipse.ui.commands">
-    <command id="mb.pipe.run.eclipse.command.nature.add" name="Add pipeline nature"/>
-    <command id="mb.pipe.run.eclipse.command.nature.remove" name="Remove pipeline nature"/>
+    <command id="mb.spoofax.runtime.eclipse.command.nature.add" name="Add pipeline nature"/>
+    <command id="mb.spoofax.runtime.eclipse.command.nature.remove" name="Remove pipeline nature"/>
   </extension>  
    <extension point="org.eclipse.ui.handlers">
     <handler
-      commandId="mb.pipe.run.eclipse.command.nature.add"
-      class="mb.pipe.run.eclipse.nature.AddNatureHandler"
+      commandId="mb.spoofax.runtime.eclipse.command.nature.add"
+      class="mb.spoofax.runtime.eclipse.nature.AddNatureHandler"
     />
     <handler
-      commandId="mb.pipe.run.eclipse.command.nature.remove"
-      class="mb.pipe.run.eclipse.nature.RemoveNatureHandler"
+      commandId="mb.spoofax.runtime.eclipse.command.nature.remove"
+      class="mb.spoofax.runtime.eclipse.nature.RemoveNatureHandler"
     />
   </extension>
 
@@ -75,17 +74,17 @@
   <extension point="org.eclipse.ui.menus">
     <!-- Package Explorer -->
     <menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=additions">
-      <menu id="mb.pipe.run.eclipse.menu.project" label="Pipeline"/>
+      <menu id="mb.spoofax.runtime.eclipse.menu.project" label="Spoofax"/>
     </menuContribution>
     <!-- Project Explorer -->
     <menuContribution locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
-      <menu id="mb.pipe.run.eclipse.menu.project" label="Pipeline"/>
+      <menu id="mb.spoofax.runtime.eclipse.menu.project" label="Spoofax"/>
     </menuContribution>
     
     <!-- Commands -->
-    <menuContribution locationURI="popup:mb.pipe.run.eclipse.menu.project?after=additions">
-      <command commandId="mb.pipe.run.eclipse.command.nature.add"/>
-      <command commandId="mb.pipe.run.eclipse.command.nature.remove"/>
+    <menuContribution locationURI="popup:mb.spoofax.runtime.eclipse.menu.project?after=additions">
+      <command commandId="mb.spoofax.runtime.eclipse.command.nature.add"/>
+      <command commandId="mb.spoofax.runtime.eclipse.command.nature.remove"/>
     </menuContribution>
   </extension>
   
@@ -93,7 +92,7 @@
   <!-- Markers -->
   <extension
     point="org.eclipse.core.resources.markers"
-    id="mb.pipe.run.eclipse.marker"
+    id="mb.spoofax.runtime.eclipse.marker"
   >
     <super type="org.eclipse.core.resources.textmarker" />
     <super type="org.eclipse.core.resources.problemmarker" />
@@ -101,46 +100,46 @@
   </extension>
   <extension
     point="org.eclipse.core.resources.markers"
-    id="mb.pipe.run.eclipse.marker.info"
-    name="Pipeline info marker"
+    id="mb.spoofax.runtime.eclipse.marker.info"
+    name="Spoofax info marker"
   >
-    <super type="mb.pipe.run.eclipse.marker"/>
+    <super type="mb.spoofax.runtime.eclipse.marker"/>
     <persistent value="true" />
   </extension>
   <extension
     point="org.eclipse.core.resources.markers"
-    id="mb.pipe.run.eclipse.marker.warning"
-    name="Pipeline warning marker"
+    id="mb.spoofax.runtime.eclipse.marker.warning"
+    name="Spoofax warning marker"
   >
-    <super type="mb.pipe.run.eclipse.marker"/>
+    <super type="mb.spoofax.runtime.eclipse.marker"/>
     <persistent value="true" />
   </extension>
   <extension
     point="org.eclipse.core.resources.markers"
-    id="mb.pipe.run.eclipse.marker.error"
-    name="Pipeline error marker"
+    id="mb.spoofax.runtime.eclipse.marker.error"
+    name="Spoofax error marker"
   >
-    <super type="mb.pipe.run.eclipse.marker"/>
+    <super type="mb.spoofax.runtime.eclipse.marker"/>
     <persistent value="true" />
   </extension>
   <extension point="org.eclipse.ui.editors.annotationTypes">
     <type
-      markerType="mb.pipe.run.eclipse.marker.info"
+      markerType="mb.spoofax.runtime.eclipse.marker.info"
       super="org.eclipse.ui.workbench.texteditor.info"
       markerSeverity="0"
-      name="Pipeline info annotation"
+      name="Spoofax info annotation"
     />
     <type
-      markerType="mb.pipe.run.eclipse.marker.warning"
+      markerType="mb.spoofax.runtime.eclipse.marker.warning"
       super="org.eclipse.ui.workbench.texteditor.warning"
       markerSeverity="1"
-      name="Pipeline warning annotation"
+      name="Spoofax warning annotation"
     />
     <type
-      markerType="mb.pipe.run.eclipse.marker.error"
+      markerType="mb.spoofax.runtime.eclipse.marker.error"
       super="org.eclipse.ui.workbench.texteditor.error"
       markerSeverity="2"
-      name="Pipeline error annotation"
+      name="Spoofax error annotation"
     />
   </extension>
 </plugin>

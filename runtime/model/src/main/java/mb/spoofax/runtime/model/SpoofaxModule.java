@@ -7,8 +7,7 @@ import mb.spoofax.runtime.model.context.ContextFactory;
 import mb.spoofax.runtime.model.context.ContextImpl;
 
 public class SpoofaxModule extends AbstractModule {
-    @Override
-    protected void configure() {
+    @Override protected void configure() {
         bindContext();
     }
 
