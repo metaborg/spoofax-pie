@@ -4,7 +4,6 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.metaborg.core.MetaborgException;
-import org.metaborg.core.language.ILanguageDiscoveryService;
 import org.metaborg.spoofax.core.Spoofax;
 import org.metaborg.spoofax.meta.core.SpoofaxExtensionModule;
 import org.metaborg.spoofax.meta.core.SpoofaxMeta;
@@ -15,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import mb.log.LogModule;
 import mb.pie.runtime.builtin.PieBuiltinModule;
 import mb.spoofax.runtime.eclipse.util.LoggingConfiguration;
+import mb.spoofax.runtime.impl.SpoofaxImplModule;
 import mb.spoofax.runtime.impl.legacy.StaticSpoofaxCoreFacade;
 import mb.spoofax.runtime.model.SpoofaxEx;
 import mb.spoofax.runtime.model.SpoofaxFacade;
@@ -46,7 +46,8 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
         // Initialize Spoofax runtime
         try {
             spoofaxFacade = new SpoofaxFacade(new SpoofaxModule(), new LogModule(logger), new EclipseVFSModule(),
-                new EclipseModule(), new SpoofaxPieModule(), new PieBuiltinModule(), new PieBuilderModule_spoofax());
+                new SpoofaxImplModule(), new EclipseModule(), new SpoofaxPieModule(), new PieBuiltinModule(),
+                new PieBuilderModule_spoofax());
             StaticSpoofaxFacade.init(spoofaxFacade);
         } catch(SpoofaxEx e) {
             logger.error("Instantiating Spoofax failed", e);

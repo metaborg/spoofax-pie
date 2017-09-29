@@ -26,10 +26,19 @@
       <artifactId>org.spoofax.jsglr</artifactId>
       <version>${metaborg-version}</version>
     </dependency>
-    <!-- TODO: only needed for term tools, should copy that and delete this dependency -->
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.spoofax.interpreter.core</artifactId>
+      <version>${metaborg-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>org.metaborg.meta.nabl2.java</artifactId>
+      <version>${metaborg-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>org.strategoxt.strj</artifactId>
       <version>${metaborg-version}</version>
     </dependency>
 
@@ -37,7 +46,21 @@
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-multibindings</artifactId>
+    </dependency>
 
+    <dependency>
+      <groupId>org.immutables</groupId>
+      <artifactId>value</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.immutables</groupId>
+      <artifactId>serial</artifactId>
+      <scope>provided</scope>
+    </dependency>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>jsr305</artifactId>

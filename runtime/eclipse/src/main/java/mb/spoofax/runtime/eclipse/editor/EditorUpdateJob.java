@@ -1,6 +1,6 @@
 package mb.spoofax.runtime.eclipse.editor;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -12,10 +12,10 @@ import org.eclipse.ui.IEditorInput;
 import mb.log.Logger;
 import mb.pie.runtime.core.BuildException;
 import mb.pie.runtime.core.BuildManager;
-import mb.spoofax.runtime.eclipse.build.Updater;
+import mb.spoofax.runtime.eclipse.build.WorkspaceUpdate;
 import mb.spoofax.runtime.eclipse.util.Nullable;
 import mb.spoofax.runtime.eclipse.util.StatusUtils;
-import mb.spoofax.runtime.model.context.Context;
+import mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution;
 import mb.spoofax.runtime.model.message.Msg;
 import mb.spoofax.runtime.model.style.Styling;
 import mb.spoofax.runtime.pie.generated.processString;
@@ -25,29 +25,29 @@ public class EditorUpdateJob extends Job {
     private final Logger logger;
 
     private final BuildManager buildManager;
-    private final Updater updater;
+    private final WorkspaceUpdate update;
     private final SpoofaxEditor editor;
 
     private final String text;
-    private final Context context;
     private final IEditorInput input;
     private final PPath file;
     private final IResource eclipseFile;
+    private final PPath project;
     private final PPath workspaceRoot;
 
 
-    public EditorUpdateJob(Logger logger, BuildManager buildManager, Updater updater, SpoofaxEditor editor, String text,
-        Context context, IEditorInput input, PPath file, IResource eclipseFile, PPath workspaceRoot) {
+    public EditorUpdateJob(Logger logger, BuildManager buildManager, WorkspaceUpdate update, SpoofaxEditor editor,
+        String text, IEditorInput input, PPath file, IResource eclipseFile, PPath project, PPath workspaceRoot) {
         super("Editor update");
         this.logger = logger;
         this.buildManager = buildManager;
-        this.updater = updater;
+        this.update = update;
         this.editor = editor;
         this.text = text;
-        this.context = context;
         this.input = input;
         this.file = file;
         this.eclipseFile = eclipseFile;
+        this.project = project;
         this.workspaceRoot = workspaceRoot;
     }
 
@@ -68,24 +68,34 @@ public class EditorUpdateJob extends Job {
     }
 
     private IStatus update(IProgressMonitor monitor) throws BuildException, CoreException {
-        // TODO: remove context
-        final processString.Output output = buildManager.build(processString.class,
-            new processString.Input(text, file, context.currentDir(), workspaceRoot));
+        final processString.Output output =
+            buildManager.build(processString.class, new processString.Input(text, file, project, workspaceRoot));
 
+        update.addClear(file);
         if(output != null) {
-            final List<Msg> messages = output.component2();
-            updater.updateMessagesSync(eclipseFile, messages, monitor);
+            final ArrayList<Msg> messages = output.component2();
+            update.replaceMessages(file, messages);
 
             final @Nullable Styling styling = output.component3();
             if(styling != null) {
-                updater.updateStyleAsync(editor, text, styling, monitor);
+                update.updateStyle(editor, text, styling);
             } else {
-                updater.removeStyleAsync(editor, text.length(), monitor);
+                update.removeStyle(editor, text.length());
+            }
+            
+            final @Nullable ConstraintSolverSolution solution = output.component5();
+            if(solution != null) {
+                update.addMessages(solution.getFileMessages());
+                update.addMessages(solution.getFileUnsolvedMessages());
+                update.addMessages(project, solution.getProjectMessages());
+                update.addMessages(project, solution.getProjectUnsolvedMessages());
             }
         } else {
-            updater.clearMessagesSync(eclipseFile, monitor);
-            updater.removeStyleAsync(editor, text.length(), monitor);
+            update.removeStyle(editor, text.length());
         }
+
+        update.updateMessagesSync(eclipseFile, monitor);
+        update.updateStyleAsync(monitor);
 
         return StatusUtils.success();
     }

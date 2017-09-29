@@ -2,14 +2,18 @@ package mb.spoofax.runtime.eclipse.editor;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
+import org.eclipse.jface.text.ITextViewerExtension4;
+import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
@@ -19,18 +23,17 @@ import com.google.inject.Injector;
 import mb.log.Logger;
 import mb.pie.runtime.core.BuildManager;
 import mb.spoofax.runtime.eclipse.SpoofaxPlugin;
-import mb.spoofax.runtime.eclipse.build.Updater;
+import mb.spoofax.runtime.eclipse.build.WorkspaceUpdateFactory;
+import mb.spoofax.runtime.eclipse.util.Nullable;
 import mb.spoofax.runtime.eclipse.vfs.EclipsePathSrv;
 import mb.spoofax.runtime.model.SpoofaxFacade;
-import mb.spoofax.runtime.model.context.Context;
-import mb.spoofax.runtime.model.context.ContextFactory;
 import mb.spoofax.runtime.pie.PieSrv;
 import mb.vfs.path.PPath;
 
 public class SpoofaxEditor extends TextEditor {
     private final class DocumentListener implements IDocumentListener {
         @Override public void documentAboutToBeChanged(DocumentEvent event) {
-
+            // Don't care about this event.
         }
 
         @Override public void documentChanged(DocumentEvent event) {
@@ -38,13 +41,14 @@ public class SpoofaxEditor extends TextEditor {
         }
     }
 
+    private final PresentationMerger presentationMerger;
+
     private IJobManager jobManager;
     private Logger logger;
     private EclipsePathSrv pathSrv;
-    private ContextFactory contextFactory;
     private PieSrv pieSrv;
     private Editors editors;
-    private Updater updater;
+    private WorkspaceUpdateFactory workspaceUpdateFactory;
 
     private IEditorInput input;
     private String inputName;
@@ -54,6 +58,11 @@ public class SpoofaxEditor extends TextEditor {
     private PPath workspaceRoot;
     private DocumentListener documentListener;
     private ISourceViewer sourceViewer;
+
+
+    public SpoofaxEditor() {
+        this.presentationMerger = new PresentationMerger();
+    }
 
 
     public String text() {
@@ -77,6 +86,24 @@ public class SpoofaxEditor extends TextEditor {
     }
 
 
+    public void setStyleAsync(final TextPresentation textPresentation, @Nullable final String text,
+        @Nullable final IProgressMonitor monitor) {
+        presentationMerger.set(textPresentation);
+        // Update textPresentation on the main thread, required by Eclipse.
+        Display.getDefault().asyncExec(new Runnable() {
+            public void run() {
+                if(monitor.isCanceled())
+                    return;
+                // Also cancel if text presentation is not valid for current text any more.
+                if(document == null || (text != null && !document.get().equals(text))) {
+                    return;
+                }
+                sourceViewer.changeTextPresentation(textPresentation, true);
+            }
+        });
+    }
+
+
     @Override protected void initializeEditor() {
         super.initializeEditor();
 
@@ -87,10 +114,9 @@ public class SpoofaxEditor extends TextEditor {
 
         this.logger = spoofaxFacade.rootLogger;
         this.pathSrv = injector.getInstance(EclipsePathSrv.class);
-        this.contextFactory = injector.getInstance(ContextFactory.class);
         this.pieSrv = injector.getInstance(PieSrv.class);
         this.editors = injector.getInstance(Editors.class);
-        this.updater = injector.getInstance(Updater.class);
+        this.workspaceUpdateFactory = injector.getInstance(WorkspaceUpdateFactory.class);
 
         this.workspaceRoot = pathSrv.resolveWorkspaceRoot();
 
@@ -120,6 +146,8 @@ public class SpoofaxEditor extends TextEditor {
         sourceViewer = super.createSourceViewer(parent, ruler, styles);
         final SourceViewerDecorationSupport decorationSupport = getSourceViewerDecorationSupport(sourceViewer);
         configureSourceViewerDecorationSupport(decorationSupport);
+
+        ((ITextViewerExtension4) sourceViewer).addTextPresentationListener(presentationMerger);
 
         editors.addEditor(this);
 
@@ -152,10 +180,9 @@ public class SpoofaxEditor extends TextEditor {
 
         final IProject project = eclipseFile.getProject();
         final PPath projectDir = pathSrv.resolve(project);
-        final Context context = contextFactory.create(projectDir);
         final BuildManager buildManager = pieSrv.get(workspaceRoot);
-        final Job job = new EditorUpdateJob(logger, buildManager, updater, this, document.get(), context, input, file,
-            eclipseFile, workspaceRoot);
+        final Job job = new EditorUpdateJob(logger, buildManager, workspaceUpdateFactory.create(), this, document.get(),
+            input, file, eclipseFile, projectDir, workspaceRoot);
         job.setRule(eclipseFile);
         job.schedule(instantaneous ? 0 : 300);
     }

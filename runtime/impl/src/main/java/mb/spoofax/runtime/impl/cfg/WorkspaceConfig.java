@@ -3,11 +3,7 @@ package mb.spoofax.runtime.impl.cfg;
 import static mb.spoofax.runtime.impl.term.Terms.*;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -24,7 +20,6 @@ public class WorkspaceConfig implements Serializable {
     private final HashMap<String, LangSpecConfig> langSpecConfigPerExt = new HashMap<>();
     private final HashMap<String, SpxCoreConfig> spxCoreConfigPerExt = new HashMap<>();
     private final HashSet<String> extensions = new HashSet<>();
-
 
     public static class WorkspaceConfigPaths {
         public final ArrayList<PPath> langSpecConfigFiles;
@@ -74,6 +69,10 @@ public class WorkspaceConfig implements Serializable {
         }
     }
 
+
+    public Collection<LangSpecConfig> langSpecConfigs() { return langSpecConfigPerExt.values(); }
+
+    public Collection<SpxCoreConfig> spxCoreConfigs() { return spxCoreConfigPerExt.values(); }
 
     public Set<String> allExtensions() {
         return new HashSet<>(extensions);

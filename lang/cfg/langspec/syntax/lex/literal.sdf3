@@ -2,11 +2,11 @@ module lex/literal
 
 lexical syntax // Extension
 
-  ID = [a-zA-Z0-9\_]*
+  ID = [a-zA-Z0-9\_\-]*
 
 lexical restrictions
 
-  ID -/- [a-zA-Z0-9\_]
+  ID -/- [a-zA-Z0-9\_\-]
 
 
 lexical syntax // Extension
@@ -20,8 +20,8 @@ lexical restrictions
 
 lexical syntax // Path
 
-  PATH = [a-zA-Z0-9\-\_\/\.]*
-  PATHS = [a-zA-Z0-9\-\_\/\.\ ]*
+  PATH   = [a-zA-Z0-9\-\_\/\.]*
+  PATHWS = [a-zA-Z0-9\-\_\/\.\ ]*
 
 lexical restrictions
 
@@ -31,17 +31,20 @@ lexical restrictions
 lexical syntax // String
 
   STRING     = StringChar*
-  StringChar = ~[\"\ \t\n\r]
+  StringChar = ~[\"\}\ \t\n\r]
   StringChar = EscapeQuoteChar
+  StringChar = EscapeBracesChar
   StringChar = BackSlashChar
   
-  STRINGS     = StringSChar*
-  StringSChar = ~[\"\n]
-  StringSChar = EscapeQuoteChar
-  StringSChar = BackSlashChar
+  STRINGWS     = StringWSChar*
+  StringWSChar = ~[\"\n]
+  StringWSChar = EscapeQuoteChar
+  StringWSChar = EscapeBracesChar
+  StringWSChar = BackSlashChar
 
-  BackSlashChar   = "\\"
-  EscapeQuoteChar = "\\\""
+  BackSlashChar    = "\\"
+  EscapeBracesChar = "\\}"
+  EscapeQuoteChar  = "\\\""
 
 lexical restrictions
 

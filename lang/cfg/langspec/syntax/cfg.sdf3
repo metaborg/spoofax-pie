@@ -2,7 +2,6 @@ module cfg
 
 imports
   
-  lex/literal
   lex/layout
   lex/comment
   
@@ -19,9 +18,9 @@ context-free syntax
 context-free syntax // Workspace config
 
   Section.WorkspaceSec =
-<workspace
+<workspace {
   <{WorkspaceOpt "\n"}*>
->
+}>
   WorkspaceOpt.LangSpec = <langspec <Path>>
   WorkspaceOpt.SpxLang = <spxlang <Path>>
   WorkspaceOpt.SpxLangSpec = <spxlangspec <Path>>
@@ -29,35 +28,70 @@ context-free syntax // Workspace config
 context-free syntax // Language specification config
 
   Section.LangSpecSec =
-<langspec
+<langspec {
   <{LangSpecSubSec "\n"}*>
->
+}>
+
+context-free syntax // Identification
 
   LangSpecSubSec.IdentificationSec =
-<identification
+<identification {
   <{IdentificationOpt "\n"}*>
->  
-  IdentificationOpt.FileExtension = <file extension: <EXT>>
+}>  
+  IdentificationOpt.FileExtensions = <file extensions: <Exts>>
+
+context-free syntax // Information
 
   LangSpecSubSec.InformationSec =
-<information
+<information {
   <{InformationOpt "\n"}*>
->
+}>
   InformationOpt.Name = <name: <String>>
 
+context-free syntax // Syntax
+
   LangSpecSubSec.SyntaxSec =
-<syntax
+<syntax {
   <{SyntaxOpt "\n"}*>
->
+}>
   SyntaxOpt.SyntaxMainFile = <main file: <Path>>
-  SyntaxOpt.SyntaxStartSymbol = <start symbol: <ID>>
+  SyntaxOpt.SyntaxSignatureFiles = <signature files: <Paths>>
+  SyntaxOpt.SyntaxStartSymbolId = <start symbol id: <Id>>
+
+context-free syntax // Styling
 
   LangSpecSubSec.StylingSec =
-<styling
+<styling {
   <{StylingSubSec "\n"}*>
->
+}>
   StylingSubSec.SyntaxBasedStylingSubSec =
-<syntax-based
+<syntax based {
   <{SyntaxBasedStylingOpt "\n"}*>
-> 
+}> 
   SyntaxBasedStylingOpt.SyntaxBasedStylingFile = <file: <Path>>
+
+context-free syntax // Names and Types
+
+  LangSpecSubSec.NaTsSec = 
+<names and types {
+  <{NaTsOpt "\n"}*>
+}>
+
+  NaTsOpt.NaTsNaBL2Files = <nabl2 files: <Paths>>
+  NaTsOpt.NaTsStrategoConfig = <stratego config: <StrategoConfig>>
+  NaTsOpt.NaTsStrategoStrategyId = <stratego strategy id: <Id>>
+
+context-free syntax // Stratego config object
+
+  StrategoConfig.StrategoConfig =
+<{
+  <{StrategoConfigOpt "\n"}*>
+}>
+  StrategoConfigOpt.StrategoConfigMainFile = <main file: <Path>>
+  StrategoConfigOpt.StrategoConfigIncludeDirs = <include dirs: <Paths>>
+  StrategoConfigOpt.StrategoConfigIncludeFiles = <include files: <Paths>>
+  StrategoConfigOpt.StrategoConfigIncludeLibs = <include libs: <Ids>>
+  StrategoConfigOpt.StrategoConfigBaseDir = <base dir: <Path>>
+  StrategoConfigOpt.StrategoConfigCacheDir = <cache dir: <Path>>
+  StrategoConfigOpt.StrategoConfigOutputFile = <output file: <Path>>
+  

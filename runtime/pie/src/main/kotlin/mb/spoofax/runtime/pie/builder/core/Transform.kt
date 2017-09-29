@@ -3,15 +3,10 @@ package mb.spoofax.runtime.pie.builder.core
 import com.google.inject.Inject
 import mb.log.Logger
 import mb.pie.runtime.builtin.util.Tuple2
-import mb.pie.runtime.core.BuildContext
-import mb.pie.runtime.core.BuildException
-import mb.pie.runtime.core.Builder
-import mb.pie.runtime.core.PathStampers
+import mb.pie.runtime.core.*
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.vfs.path.PPath
-import org.metaborg.core.action.CompileGoal
-import org.metaborg.core.action.EndNamedGoal
-import org.metaborg.core.action.ITransformGoal
+import org.metaborg.core.action.*
 import org.metaborg.core.messages.IMessage
 import org.metaborg.core.transform.TransformException
 import org.metaborg.spoofax.core.stratego.StrategoRuntimeFacet
@@ -23,7 +18,7 @@ import java.io.Serializable
 
 fun createCompileGoal() = CompileGoal()
 fun createNamedGoal(name: String) = EndNamedGoal(name)
-class CoreTrans @Inject constructor(log: Logger) : Builder<CoreTrans.Input, CoreTrans.Output> {
+class CoreTrans @Inject constructor(log: Logger) : Builder<CoreTrans.Input, ArrayList<CoreTrans.Output>> {
   companion object {
     val id = "coreTrans"
   }
@@ -39,13 +34,13 @@ class CoreTrans @Inject constructor(log: Logger) : Builder<CoreTrans.Input, Core
   val log: Logger = log.forContext(CoreTrans::class.java)
 
   override val id = Companion.id
-  override fun BuildContext.build(input: Input): Output {
+  override fun BuildContext.build(input: Input): ArrayList<Output> {
     val spoofax = Spx.spoofax()
     val langImpl = buildOrLoad(input.config)
 
     // Require Stratego runtime files
     val facet = langImpl.facet<StrategoRuntimeFacet>(StrategoRuntimeFacet::class.java)
-    if (facet != null) {
+    if(facet != null) {
       facet.ctreeFiles.forEach { require(it.pPath, PathStampers.hash) }
       facet.jarFiles.forEach { require(it.pPath, PathStampers.hash) }
     }
@@ -60,22 +55,25 @@ class CoreTrans @Inject constructor(log: Logger) : Builder<CoreTrans.Input, Core
       AnalyzeContrib(true, true, true, input.ast, Iterables2.empty<IMessage>(), -1), spoofaxContext)
     spoofaxContext.read().use {
       try {
-        val result = spoofax.transformService.transform(analyzeUnit, spoofaxContext, input.goal)
-        val unit = result.first()
-        val ast = unit.ast()
-        val output = unit.outputs().firstOrNull()
-        val outputResource = output?.output()
-        val writtenFile: PPath?
-        if (outputResource != null) {
-          generate(outputResource.pPath)
-          writtenFile = outputResource.pPath
-        } else {
-          writtenFile = null
+        val results = spoofax.transformService.transform(analyzeUnit, spoofaxContext, input.goal)
+        val outputs = results.flatMap { result ->
+          val ast = result.ast()
+          result.outputs().map { output ->
+            val outputResource = output?.output()
+            val writtenFile: PPath?
+            if(outputResource != null) {
+              generate(outputResource.pPath)
+              writtenFile = outputResource.pPath
+            } else {
+              writtenFile = null
+            }
+            Output(ast, writtenFile)
+          }
         }
-        return Output(ast, writtenFile)
-      } catch (e: TransformException) {
+        return ArrayList(outputs)
+      } catch(e: TransformException) {
         log.error("Transformation failed", e)
-        return Output(null, null)
+        return ArrayList()
       }
     }
   }

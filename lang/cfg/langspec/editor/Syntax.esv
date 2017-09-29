@@ -2,7 +2,7 @@ module Syntax
 
 imports 
 
-  libspoofax/color/default
+  libspoofax/color/colors
   completion/colorer/cfg-cc-esv
 
 language
@@ -18,8 +18,8 @@ menus
   
   menu: "Syntax" (openeditor)
     
-    action: "Format"          = editor-format (source)
-    action: "Show parsed AST" = debug-show-aterm (source)
+    action: "Show parsed AST"    = debug-show-aterm (source)
+    action: "Show desugared AST" = debug-show-desugared-aterm (source)
 
 views
   
@@ -28,9 +28,17 @@ views
 
 colorer
 
-  ID      : blue
-  EXT     : blue
-  STRING  : blue
-  STRINGS : blue
-  PATH    : blue
-  PATHS   : blue
+  keyword    : 153 51 153
+  identifier : darkblue
+  string     : darkred
+  number     : darkgreen
+  var        : darkblue
+  operator   : black
+  layout     : 63 127 95 italic
+
+  ID       : darkblue
+  EXT      : darkred
+  PATH     : darkred
+  PATHWS   : darkred
+  STRING   : 200 51 0
+  STRINGWS : darkred

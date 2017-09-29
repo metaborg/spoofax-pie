@@ -2,12 +2,12 @@ package mb.spoofax.runtime.impl.sdf;
 
 import java.util.ArrayList;
 
-import mb.spoofax.runtime.model.parse.Token;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.imploder.IToken;
-import org.spoofax.jsglr.client.imploder.ITokenizer;
+import org.spoofax.jsglr.client.imploder.ITokens;
 import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 
+import mb.spoofax.runtime.model.parse.Token;
 import mb.spoofax.runtime.model.parse.TokenConstants;
 import mb.spoofax.runtime.model.parse.TokenImpl;
 import mb.spoofax.runtime.model.parse.TokenType;
@@ -16,13 +16,13 @@ import mb.spoofax.runtime.model.region.Region;
 public class TokenExtractor {
     public static ArrayList<Token> extract(IStrategoTerm ast) {
         final ImploderAttachment rootImploderAttachment = ImploderAttachment.get(ast);
-        final ITokenizer tokenizer = rootImploderAttachment.getLeftToken().getTokenizer();
-        final int tokenCount = tokenizer.getTokenCount();
+        final ITokens tokens = rootImploderAttachment.getLeftToken().getTokenizer();
+        final int tokenCount = tokens.getTokenCount();
         final ArrayList<Token> tokenStream = new ArrayList<>(tokenCount);
         int offset = -1;
         for(int i = 0; i < tokenCount; ++i) {
-            final IToken jsglrToken = tokenizer.getTokenAt(i);
-            if(tokenizer.isAmbigous() && jsglrToken.getStartOffset() < offset) {
+            final IToken jsglrToken = tokens.getTokenAt(i);
+            if(tokens.isAmbigous() && jsglrToken.getStartOffset() < offset) {
                 // In case of ambiguities, tokens inside the ambiguity are duplicated, ignore.
                 continue;
             }

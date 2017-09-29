@@ -1,0 +1,15 @@
+module desugar
+
+imports
+
+  signatures/-
+  signatures/lex/-
+
+strategies
+
+  desugar-all = alltd(desugar)
+
+rules
+
+  desugar: StringWs(str) -> String(str)
+  desugar: PathWs(path) -> Path(path)

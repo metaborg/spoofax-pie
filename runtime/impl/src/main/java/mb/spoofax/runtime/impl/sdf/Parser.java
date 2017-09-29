@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
-import mb.spoofax.runtime.model.parse.Token;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.jsglr.client.Disambiguator;
@@ -20,6 +19,8 @@ import org.spoofax.terms.attachments.ParentTermFactory;
 import mb.spoofax.runtime.model.SpoofaxRunEx;
 import mb.spoofax.runtime.model.message.Msg;
 import mb.spoofax.runtime.model.message.Msgs;
+import mb.spoofax.runtime.model.parse.Token;
+import mb.vfs.path.PPath;
 
 public class Parser {
     private final SGLR parser;
@@ -42,9 +43,10 @@ public class Parser {
     }
 
 
-    public ParseOutput parse(String text, String startSymbol) throws InterruptedException {
+    public ParseOutput parse(String text, String startSymbol, @Nullable PPath path) throws InterruptedException {
+        final String pathStr = path != null ? path.toString() : "file-not-set-during-parsing";
         try {
-            final SGLRParseResult result = parser.parse(text, "file", startSymbol);
+            final SGLRParseResult result = parser.parse(text, pathStr, startSymbol);
             final @Nullable IStrategoTerm ast = (IStrategoTerm) result.output;
             if(ast == null) {
                 throw new SpoofaxRunEx("Parser returned null AST even though parsing did not fail");
@@ -60,7 +62,7 @@ public class Parser {
             return new ParseOutput(recovered, ast, tokenStream, messages);
         } catch(SGLRException e) {
             final ParserErrorHandler errorHandler = new ParserErrorHandler(true, true, parser.getCollectedErrors());
-            errorHandler.processFatalException(new NullTokenizer(text, "file"), e);
+            errorHandler.processFatalException(new NullTokenizer(text, pathStr), e);
             final ArrayList<Msg> messages = errorHandler.messages();
             return new ParseOutput(false, null, null, messages);
         }

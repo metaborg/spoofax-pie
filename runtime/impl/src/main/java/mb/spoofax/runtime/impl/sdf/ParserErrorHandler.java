@@ -12,15 +12,15 @@ import org.spoofax.jsglr.client.MultiBadTokenException;
 import org.spoofax.jsglr.client.ParseTimeoutException;
 import org.spoofax.jsglr.client.RegionRecovery;
 import org.spoofax.jsglr.client.imploder.IToken;
-import org.spoofax.jsglr.client.imploder.ITokenizer;
+import org.spoofax.jsglr.client.imploder.ITokens;
 import org.spoofax.jsglr.client.imploder.Token;
 import org.spoofax.jsglr.shared.BadTokenException;
 import org.spoofax.jsglr.shared.TokenExpectedException;
 
 import mb.spoofax.runtime.model.message.Msg;
 import mb.spoofax.runtime.model.message.MsgBuilder;
-import mb.spoofax.runtime.model.region.Region;
 import mb.spoofax.runtime.model.parse.ParseMsgType;
+import mb.spoofax.runtime.model.region.Region;
 
 public class ParserErrorHandler {
     private static final int LARGE_REGION_SIZE = 8;
@@ -53,26 +53,26 @@ public class ParserErrorHandler {
      */
 
     public void gatherNonFatalErrors(IStrategoTerm top) {
-        final ITokenizer tokenizer = getTokenizer(top);
-        if(tokenizer != null) {
-            for(int i = 0, max = tokenizer.getTokenCount(); i < max; i++) {
-                final IToken token = tokenizer.getTokenAt(i);
+        final ITokens tokens = getTokenizer(top);
+        if(tokens != null) {
+            for(int i = 0, max = tokens.getTokenCount(); i < max; i++) {
+                final IToken token = tokens.getTokenAt(i);
                 final String error = token.getError();
                 if(error != null) {
-                    if(error == ITokenizer.ERROR_SKIPPED_REGION) {
+                    if(error == ITokens.ERROR_SKIPPED_REGION) {
                         i = findRightMostWithSameError(token, null);
-                        reportSkippedRegion(token, tokenizer.getTokenAt(i));
-                    } else if(error.startsWith(ITokenizer.ERROR_WARNING_PREFIX)) {
+                        reportSkippedRegion(token, tokens.getTokenAt(i));
+                    } else if(error.startsWith(ITokens.ERROR_WARNING_PREFIX)) {
                         i = findRightMostWithSameError(token, null);
-                        reportWarningAtTokens(token, tokenizer.getTokenAt(i), error);
-                    } else if(error.startsWith(ITokenizer.ERROR_WATER_PREFIX)) {
-                        i = findRightMostWithSameError(token, ITokenizer.ERROR_WATER_PREFIX);
-                        reportErrorAtTokens(token, tokenizer.getTokenAt(i), error);
+                        reportWarningAtTokens(token, tokens.getTokenAt(i), error);
+                    } else if(error.startsWith(ITokens.ERROR_WATER_PREFIX)) {
+                        i = findRightMostWithSameError(token, ITokens.ERROR_WATER_PREFIX);
+                        reportErrorAtTokens(token, tokens.getTokenAt(i), error);
                     } else {
                         i = findRightMostWithSameError(token, null);
                         // UNDONE: won't work for multi-token errors (as seen in
                         // SugarJ)
-                        reportErrorAtTokens(token, tokenizer.getTokenAt(i), error);
+                        reportErrorAtTokens(token, tokens.getTokenAt(i), error);
                     }
                 }
             }
@@ -81,10 +81,10 @@ public class ParserErrorHandler {
 
     private static int findRightMostWithSameError(IToken token, String prefix) {
         final String expectedError = token.getError();
-        final ITokenizer tokenizer = token.getTokenizer();
+        final ITokens tokens = token.getTokenizer();
         int i = token.getIndex();
-        for(int max = tokenizer.getTokenCount(); i + 1 < max; i++) {
-            String error = tokenizer.getTokenAt(i + 1).getError();
+        for(int max = tokens.getTokenCount(); i + 1 < max; i++) {
+            String error = tokens.getTokenAt(i + 1).getError();
             if(error != expectedError && (error == null || prefix == null || !error.startsWith(prefix)))
                 break;
         }
@@ -103,7 +103,7 @@ public class ParserErrorHandler {
 
         if(reportedLine == -1) {
             // Report entire region
-            reportErrorAtTokens(left, right, ITokenizer.ERROR_SKIPPED_REGION);
+            reportErrorAtTokens(left, right, ITokens.ERROR_SKIPPED_REGION);
         } else if(reportedLine - line >= LARGE_REGION_SIZE) {
             // Warn at start of region
             reportErrorAtTokens(findLeftMostTokenOnSameLine(left), findRightMostTokenOnSameLine(left),
@@ -128,63 +128,64 @@ public class ParserErrorHandler {
      * Fatal errors
      */
 
-    public void processFatalException(ITokenizer tokenizer, Exception exception) {
+    public void processFatalException(ITokens tokens, Exception exception) {
         try {
             throw exception;
         } catch(ParseTimeoutException e) {
-            reportTimeOut(tokenizer, e);
+            reportTimeOut(tokens, e);
         } catch(TokenExpectedException e) {
-            reportTokenExpected(tokenizer, e);
+            reportTokenExpected(tokens, e);
         } catch(MultiBadTokenException e) {
-            reportMultiBadToken(tokenizer, e);
+            reportMultiBadToken(tokens, e);
         } catch(BadTokenException e) {
-            reportBadToken(tokenizer, e);
+            reportBadToken(tokens, e);
         } catch(Exception e) {
             createErrorAtFirstLine("Internal parsing error: " + e);
         }
     }
 
-    private void reportTimeOut(ITokenizer tokenizer, ParseTimeoutException exception) {
+    private void reportTimeOut(ITokens tokens, ParseTimeoutException exception) {
         final String message = "Internal parsing error: " + exception.getMessage();
         createErrorAtFirstLine(message);
-        reportMultiBadToken(tokenizer, exception);
+        reportMultiBadToken(tokens, exception);
     }
 
-    private void reportTokenExpected(ITokenizer tokenizer, TokenExpectedException exception) {
+    private void reportTokenExpected(ITokens tokens, TokenExpectedException exception) {
         final String message = exception.getShortMessage();
-        reportErrorNearOffset(tokenizer, exception.getOffset(), message);
+        reportErrorNearOffset(tokens, exception.getOffset(), message);
     }
 
-    private void reportMultiBadToken(ITokenizer tokenizer, MultiBadTokenException exception) {
+    private void reportMultiBadToken(ITokens tokens, MultiBadTokenException exception) {
         for(BadTokenException e : exception.getCauses()) {
-            processFatalException(tokenizer, e);
+            processFatalException(tokens, e);
         }
     }
 
-    private void reportBadToken(ITokenizer tokenizer, BadTokenException exception) {
+    private void reportBadToken(ITokens tokens, BadTokenException exception) {
         final String message;
-        if(exception.isEOFToken() || tokenizer.getTokenCount() <= 1) {
+        if(exception.isEOFToken() || tokens.getTokenCount() <= 1) {
             message = exception.getShortMessage();
         } else {
-            IToken token = tokenizer.getTokenAtOffset(exception.getOffset());
+            IToken token = tokens.getTokenAtOffset(exception.getOffset());
             token = findNextNonEmptyToken(token);
-            message = ITokenizer.ERROR_WATER_PREFIX + ": " + token.toString().trim();
+            message = ITokens.ERROR_WATER_PREFIX + ": " + token.toString().trim();
         }
-        reportErrorNearOffset(tokenizer, exception.getOffset(), message);
+        reportErrorNearOffset(tokens, exception.getOffset(), message);
     }
 
 
-    private void reportErrorNearOffset(ITokenizer tokenizer, int offset, String message) {
-        final IToken errorToken = tokenizer.getErrorTokenOrAdjunct(offset);
-        final Region region = RegionFactory.fromTokens(errorToken, errorToken);
-        reportErrorAtRegion(region, message);
+    private void reportErrorNearOffset(ITokens tokens, int offset, String message) {
+        // TODO: getErrorTokenOrAdjunct was removed when JSGLR2 was merged, is there a replacement?
+        // final IToken errorToken = tokens.getErrorTokenOrAdjunct(offset);
+        // final Region region = RegionFactory.fromTokens(errorToken, errorToken);
+        // reportErrorAtRegion(region, message);
     }
 
     private static IToken findNextNonEmptyToken(IToken token) {
-        final ITokenizer tokenizer = token.getTokenizer();
+        final ITokens tokens = token.getTokenizer();
         IToken result = null;
-        for(int i = token.getIndex(), max = tokenizer.getTokenCount(); i < max; i++) {
-            result = tokenizer.getTokenAt(i);
+        for(int i = token.getIndex(), max = tokens.getTokenCount(); i < max; i++) {
+            result = tokens.getTokenAt(i);
             if(result.getLength() != 0 && !Token.isWhiteSpace(result))
                 break;
         }

@@ -4,12 +4,26 @@ imports
   
   lex/literal
 
+context-free syntax // Identifier
+
+  Id.Id = <<ID>>
+  Ids.Ids = <<{Id ", "}*>>
+
+context-free syntax // Extension
+
+  Ext.Ext = <<EXT>>
+  Exts.Exts = <<{Ext ", "}*>>
+
 syntax // String
 
-  String-CF.String = LAYOUT?-CF STRING-LEX LAYOUT?-CF
-  String-CF.String = LAYOUT?-CF "\"" STRINGS-LEX "\"" LAYOUT?-CF
+  String-CF.String   = LAYOUT?-CF STRING-LEX LAYOUT?-CF
+  String-CF.StringWs = LAYOUT?-CF "\"" STRINGWS-LEX "\"" LAYOUT?-CF
 
 syntax // Path
 
-  Path-CF.Path = LAYOUT?-CF PATH-LEX LAYOUT?-CF
-  Path-CF.Path = LAYOUT?-CF "\"" PATHS-LEX "\"" LAYOUT?-CF
+  Path-CF.Path   = LAYOUT?-CF PATH-LEX LAYOUT?-CF
+  Path-CF.PathWs = LAYOUT?-CF "\"" PATHWS-LEX "\"" LAYOUT?-CF
+
+context-free syntax // Paths
+
+  Paths.Paths = <<{Path ", "}*>>

@@ -1,6 +1,8 @@
 package mb.spoofax.runtime.eclipse.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 
 import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.swt.SWT;
@@ -8,6 +10,7 @@ import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 import mb.log.Logger;
@@ -126,11 +129,35 @@ public final class StyleUtils {
         return colorShare.getColor(rgb);
     }
 
-    private static StyleRange deepCopy(StyleRange styleRangeRef) {
+
+    /**
+     * Creates a deep copy of given style range.
+     * 
+     * @param styleRangeRef
+     *            Style range to copy.
+     * @return Deep copy of given style range.
+     */
+    public static StyleRange deepCopy(StyleRange styleRangeRef) {
         final StyleRange styleRange = new StyleRange(styleRangeRef);
         styleRange.start = styleRangeRef.start;
         styleRange.length = styleRangeRef.length;
         styleRange.fontStyle = styleRangeRef.fontStyle;
         return styleRange;
+    }
+
+    /**
+     * Creates deep copies of style ranges in given text presentation.
+     * 
+     * @param presentation
+     *            Text presentation to copy style ranges of.
+     * @return Collection of deep style range copies.
+     */
+    public static Collection<StyleRange> deepCopies(TextPresentation presentation) {
+        final Collection<StyleRange> styleRanges = Lists.newLinkedList();
+        for(Iterator<StyleRange> iter = presentation.getNonDefaultStyleRangeIterator(); iter.hasNext();) {
+            final StyleRange styleRange = iter.next();
+            styleRanges.add(deepCopy(styleRange));
+        }
+        return styleRanges;
     }
 }

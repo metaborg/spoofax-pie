@@ -1,10 +1,10 @@
 package mb.spoofax.runtime.model.message;
 
-import javax.annotation.Nullable;
-
 import mb.spoofax.runtime.model.SpoofaxRunEx;
 import mb.spoofax.runtime.model.region.Region;
 import mb.vfs.path.PPath;
+
+import javax.annotation.Nullable;
 
 public class MsgBuilder {
     private String text = "";
@@ -87,6 +87,9 @@ public class MsgBuilder {
 
 
     public Msg build() {
+        if(path != null) {
+            return new PathMsgImpl(text, severity, type, region, exception, path);
+        }
         return new MsgImpl(text, severity, type, region, exception);
     }
 

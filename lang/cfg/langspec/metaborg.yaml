@@ -5,21 +5,15 @@ dependencies:
   compile:
   - org.metaborg:org.metaborg.meta.lang.esv:${metaborgVersion}
   - org.metaborg:org.metaborg.meta.lang.template:${metaborgVersion}
-  - org.metaborg:org.metaborg.meta.nabl2.lang:${metaborgVersion}
   source:
   - org.metaborg:meta.lib.spoofax:${metaborgVersion}
-  - org.metaborg:org.metaborg.meta.nabl2.shared:${metaborgVersion}
-  - org.metaborg:org.metaborg.meta.nabl2.runtime:${metaborgVersion}
 pardonedLanguages:
 - EditorService
 - Stratego-Sugar
 - SDF
-debug:
-  typesmart: false
 language:
   sdf:
     pretty-print: cfg
-    # If set to java, set the table in editor/Syntax.esv to target/metaborg/sdf-new.tbl
     sdf2table: c
     placeholder:
       prefix: "$"
