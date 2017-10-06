@@ -3,9 +3,7 @@ package mb.spoofax.runtime.pie.builder.core
 import com.google.inject.Inject
 import mb.log.Logger
 import mb.pie.runtime.builtin.util.Tuple3
-import mb.pie.runtime.core.BuildContext
-import mb.pie.runtime.core.Builder
-import mb.pie.runtime.core.PathStampers
+import mb.pie.runtime.core.*
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.spoofax.runtime.impl.legacy.MessageConverter
 import mb.spoofax.runtime.impl.sdf.TokenExtractor
@@ -16,7 +14,7 @@ import org.metaborg.spoofax.core.syntax.SyntaxFacet
 import org.spoofax.interpreter.terms.IStrategoTerm
 import java.io.Serializable
 
-class CoreParse @Inject constructor(log: Logger, val messageConverter: MessageConverter) : Builder<CoreParse.Input, CoreParse.Output> {
+class CoreParse @Inject constructor(log: Logger, private val messageConverter: MessageConverter) : Builder<CoreParse.Input, CoreParse.Output> {
   companion object {
     val id = "coreParse"
   }
@@ -33,9 +31,9 @@ class CoreParse @Inject constructor(log: Logger, val messageConverter: MessageCo
 
     // Require parse table
     val facet = langImpl.facet<SyntaxFacet>(SyntaxFacet::class.java)
-    if (facet != null) {
+    if(facet != null) {
       val parseTableFile = facet.parseTable
-      if (parseTableFile != null) {
+      if(parseTableFile != null) {
         require(parseTableFile.pPath, PathStampers.hash)
       }
     }
@@ -45,10 +43,10 @@ class CoreParse @Inject constructor(log: Logger, val messageConverter: MessageCo
     try {
       val parseUnit = spoofax.syntaxService.parse(inputUnit)
       val ast = parseUnit.ast();
-      val tokens = if (ast != null) TokenExtractor.extract(ast) else null
+      val tokens = if(ast != null) TokenExtractor.extract(ast) else null
       val messages = messageConverter.toMsgs(parseUnit.messages());
       return Output(ast, tokens, messages)
-    } catch (e: ParseException) {
+    } catch(e: ParseException) {
       log.error("Parsing failed unexpectedly", e)
       return Output(null, null, ArrayList(0))
     }

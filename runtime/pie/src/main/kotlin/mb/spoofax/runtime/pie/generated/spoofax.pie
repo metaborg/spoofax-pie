@@ -11,7 +11,7 @@ data Styling = foreign java mb.spoofax.runtime.model.style.Styling {}
 
 /// Library with functions to build SDF3 and ESV specifications
 data ParseTable = foreign java mb.spoofax.runtime.impl.sdf.Table {}
-func sdf2table(sdfLang: SpxCoreConfig, specDir: path, mainFile: path, includedFiles: path*) -> ParseTable? = foreign mb.spoofax.runtime.pie.builder.GenerateTable
+func sdf2table(sdfLang: SpxCoreConfig, specDir: path, files: path*, mainFile: path) -> ParseTable? = foreign mb.spoofax.runtime.pie.builder.GenerateTable
 data Signatures = foreign java mb.spoofax.runtime.impl.sdf.Signatures {}
 func sdf2sig(sdfLang: SpxCoreConfig, specDir: path, files: path*) -> Signatures = foreign mb.spoofax.runtime.pie.builder.GenerateSignatures
 func jsglrParse(text: string, startSymbol: string, table: ParseTable, file: path) -> (Ast?, Token*?, Message*) = foreign mb.spoofax.runtime.pie.builder.Parse
@@ -37,29 +37,30 @@ data LangSpecConfig = foreign java mb.spoofax.runtime.impl.cfg.LangSpecConfig {
   func dir() -> path
 
   func extensions() -> string*
-  func getName() -> string?
+  func name() -> string?
   
-  func getSyntaxMainFile() -> path?
-  func getSyntaxStartSymbol() -> string? 
-  func getSyntaxSignatureFiles() -> path*
+  func syntaxParseFiles() -> path*
+  func syntaxParseMainFile() -> path?
+  func syntaxParseStartSymbolId() -> string? 
+  func syntaxSignatureFiles() -> path*
+  func syntaxStyleFile() -> path?
   
-  func getSyntaxBasedStylingFile() -> path?
-  
-  func getNaTsNaBL2Files() -> path*
-  func getNaTsStrategoConfig() -> StrategoConfig?
-  func getNaTsStrategoStrategyId() -> string?
+  func natsNaBL2Files() -> path*
+  func natsStrategoConfig() -> StrategoConfig?
+  func natsStrategoStrategyId() -> string?
+  func natsRootScopePerFile() -> bool
 }
 
 /// Spoofax Core configuration
 data SpxCoreConfig = foreign java mb.spoofax.runtime.impl.cfg.SpxCoreConfig {}
-func createSpxCoreConfig(langDir: path, isLangSpec: bool, extensions: string*) -> SpxCoreConfig = foreign java mb.spoofax.runtime.impl.cfg.SpxCoreConfig#create
+func createSpxCoreConfig(langDir: path, isLangSpec: bool, extensions: string*) -> SpxCoreConfig = foreign java mb.spoofax.runtime.impl.cfg.ImmutableSpxCoreConfig#of
 
 /// Combined configuration for the entire workspace
 data WorkspaceConfig = foreign java mb.spoofax.runtime.impl.cfg.WorkspaceConfig {
   func langSpecConfigs() -> LangSpecConfig*
   func spxCoreConfigs() -> SpxCoreConfig*
 
-  func allExtensions() -> string*
+  func extensions() -> string*
   func langSpecExtensions() -> string*
   func spxCoreExtensions() -> string*
 
@@ -90,23 +91,28 @@ func createWorkspaceConfig(workspaceRoot: path) -> WorkspaceConfig? = {
 
 
 /// General processing
-func processWorkspace(root: path) -> (path, ((path, Token*?, Message*, Styling?, PartialSolverSolution?)*, SolverSolution?)*, (path, Token*?, Message*, Styling?)*)* = {
+func processWorkspace(root: path) -> (path, ((path, Token*?, Message*, Styling?, PartialSolverSolution?)*, SolverSolution?*)*, (path, Token*?, Message*, Styling?)*)* = {
   val workspaceConfig = createWorkspaceConfig(root);
-  val noResults: (path, ((path, Token*?, Message*, Styling?, PartialSolverSolution?)*, SolverSolution?)*, (path, Token*?, Message*, Styling?)*)* = [];
+  val noResults: (path, ((path, Token*?, Message*, Styling?, PartialSolverSolution?)*, SolverSolution?*)*, (path, Token*?, Message*, Styling?)*)* = [];
   if(workspaceConfig == null) return noResults;
   val workspace = workspaceConfig!;
   return [processProject(project, workspace) | project <- list root with regex "^[^.].+\$"];
 }
-func processProject(project: path, workspace: WorkspaceConfig) -> (path, ((path, Token*?, Message*, Styling?, PartialSolverSolution?)*, SolverSolution?)*, (path, Token*?, Message*, Styling?)*) = {
+func processProject(project: path, workspace: WorkspaceConfig) -> (path, ((path, Token*?, Message*, Styling?, PartialSolverSolution?)*, SolverSolution?*)*, (path, Token*?, Message*, Styling?)*) = {
   val langSpecResults = [processLangSpecInProject(project, langSpec, workspace) | langSpec <- workspace.langSpecConfigs()];
   val spxCoreResults = [processFileWithSpxCore(file, project, workspace) | file <- walk project with extensions (workspace.spxCoreExtensions())];
   return (project, langSpecResults, spxCoreResults);
 }
-func processLangSpecInProject(project: path, langSpec: LangSpecConfig, workspace: WorkspaceConfig) -> ((path, Token*?, Message*, Styling?, PartialSolverSolution?)*, SolverSolution?) = {
+func processLangSpecInProject(project: path, langSpec: LangSpecConfig, workspace: WorkspaceConfig) -> ((path, Token*?, Message*, Styling?, PartialSolverSolution?)*, SolverSolution?*) = {
   val results = [processFileWithLangSpecConfig(file, project, workspace) | file <- walk project with extensions (langSpec.extensions())];
   val partialSolutions = filterNullPartialSolutions([extractPartialSolution(result) | result <- results]);
-  val solution = solve(partialSolutions, project, langSpec, workspace);
-  return (results, solution);
+  val solutions = 
+    if(langSpec.natsRootScopePerFile())
+      [solve([partialSolution], project, langSpec, workspace) | partialSolution <- partialSolutions]
+    else
+      [solve(partialSolutions, project, langSpec, workspace)]
+    ;
+  return (results, solutions);
 }
 func extractPartialSolution(result: (path, Token*?, Message*, Styling?, PartialSolverSolution?)) -> PartialSolverSolution? = {
   val (file, tokens, messages, styling, partialSolution) = result;
@@ -180,11 +186,12 @@ func parse(text: string, file: path, project: path, langSpec: LangSpecConfig, wo
   val sdfLang = workspace.spxCoreConfigForExt("sdf3");
   if(sdfLang == null) return emptyParse();
   
-  val mainFile = langSpec.getSyntaxMainFile();
-  val startSymbol = langSpec.getSyntaxStartSymbol();
+  val files = langSpec.syntaxParseFiles();
+  val mainFile = langSpec.syntaxParseMainFile();
+  val startSymbol = langSpec.syntaxParseStartSymbolId();
   if(mainFile == null || startSymbol == null) return emptyParse();
 
-  val parseTable = sdf2table(sdfLang!, project, mainFile!, []);
+  val parseTable = sdf2table(sdfLang!, project, files, mainFile!);
   if(parseTable == null) return emptyParse();
   return jsglrParse(text, startSymbol!, parseTable!, file);
 }
@@ -198,7 +205,7 @@ func createSignatures(langSpec: LangSpecConfig, workspace: WorkspaceConfig) -> S
   val sdfLang = workspace.spxCoreConfigForExt("sdf3");
   if(sdfLang == null) return null;
   
-  val files = langSpec.getSyntaxSignatureFiles();
+  val files = langSpec.syntaxSignatureFiles();
   
   return sdf2sig(sdfLang!, langSpec.dir(), files)?;
 }
@@ -206,7 +213,7 @@ func style(tokenStream: Token*, langSpec: LangSpecConfig, workspace: WorkspaceCo
   val esvLang = workspace.spxCoreConfigForExt("esv");
   if(esvLang == null) return null;
   
-  val mainFile = langSpec.getSyntaxBasedStylingFile();
+  val mainFile = langSpec.syntaxStyleFile();
   if(mainFile == null) return null;
 
   val syntaxStyler = esv2styler(esvLang!, mainFile!, []);
@@ -217,12 +224,12 @@ func createConstraintGenerator(langSpec: LangSpecConfig, workspace: WorkspaceCon
   val nabl2Lang = workspace.spxCoreConfigForExt("nabl2");
   if(nabl2Lang == null) return null;
   
-  val nabl2Files = langSpec.getNaTsNaBL2Files();
+  val nabl2Files = langSpec.natsNaBL2Files();
   
-  val strategoConfig = langSpec.getNaTsStrategoConfig();
+  val strategoConfig = langSpec.natsStrategoConfig();
   if(strategoConfig == null) return null;
   
-  val strategyStrategyId = langSpec.getNaTsStrategoStrategyId();
+  val strategyStrategyId = langSpec.natsStrategoStrategyId();
   if(strategyStrategyId == null) return null;
   
   val signatures = createSignatures(langSpec, workspace);

@@ -9,13 +9,10 @@
     </encoder>
   </appender>
 
-  <root level="debug">
+  <root level="trace">
     <appender-ref ref="stdout" />
   </root>
 
-  <logger
-    name="org.metaborg.spoofax.eclipse.editor.SpoofaxEditorListener"
-    level="debug" />
   <logger
     name="jetbrains.exodus"
     level="warn" />

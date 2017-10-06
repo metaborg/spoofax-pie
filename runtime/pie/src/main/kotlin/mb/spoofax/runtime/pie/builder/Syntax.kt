@@ -29,14 +29,14 @@ class GenerateTable
     val id = "spoofaxGenerateTable"
   }
 
-  data class Input(val sdfLangConfig: SpxCoreConfig, val specDir: PPath, val mainFile: PPath, val includedFiles: ArrayList<PPath>) : Serializable
+  data class Input(val sdfLangConfig: SpxCoreConfig, val specDir: PPath, val files: Iterable<PPath>, val mainFile: PPath) : Serializable
 
   override val id = Companion.id
   override fun BuildContext.build(input: Input): Table {
     // Read input files
     val mainFileText = read(input.mainFile)
     val texts = mutableMapOf<PPath, String>()
-    for(file in input.includedFiles) {
+    for(file in input.files) {
       val text = read(file)
       texts.put(file, text)
     }
@@ -60,7 +60,7 @@ class GenerateTable
     val transformGoal = EndNamedGoal("to Normal Form (abstract)")
     val normalized = mutableMapOf<PPath, CoreTrans.Output>()
     for((file, parsedAst) in parsed) {
-      val results = trans(input.sdfLangConfig, proj.dir, file, parsedAst, transformGoal)
+      val results = trans(input.sdfLangConfig, proj.path, file, parsedAst, transformGoal)
       var success = false;
       for(trans in results) {
         if(trans.ast != null && trans.writtenFile != null) {
@@ -79,7 +79,7 @@ class GenerateTable
     // Main input file
     val mainFile = pathSrv.localPath(mainResource) ?: throw BuildException("Normalized main file $mainResource is not on the local file system")
     // Output file
-    val spoofaxPaths = SpoofaxCommonPaths(proj.loc)
+    val spoofaxPaths = SpoofaxCommonPaths(proj.location())
     val vfsOutputFile = spoofaxPaths.targetMetaborgDir().resolveFile("sdf-new.tbl")
     val outputFile = Spx.spoofax().resourceService.localPath(vfsOutputFile) ?: throw BuildException("Parse table output file $vfsOutputFile is not on the local file system")
     // Paths
@@ -100,7 +100,7 @@ class GenerateSignatures
     val id = "spoofaxGenerateSignatures"
   }
 
-  data class Input(val sdfLangConfig: SpxCoreConfig, val specDir: PPath, val files: ArrayList<PPath>) : Serializable
+  data class Input(val sdfLangConfig: SpxCoreConfig, val specDir: PPath, val files: Iterable<PPath>) : Serializable
 
   override val id = Companion.id
   override fun BuildContext.build(input: Input): Signatures {
@@ -128,7 +128,7 @@ class GenerateSignatures
     // Analyze
     val analyzed = mutableMapOf<PPath, IStrategoTerm>()
     for((file, parsedAst) in parsed) {
-      val result = analyze(CoreAnalyze.Input(input.sdfLangConfig, proj.dir, file, parsedAst))
+      val result = analyze(CoreAnalyze.Input(input.sdfLangConfig, proj.path, file, parsedAst))
       if(result.ast == null) {
         log.error("Unable to analyze SDF file $file, skipping file")
         continue
@@ -140,7 +140,7 @@ class GenerateSignatures
     val transformGoal = EndNamedGoal("Generate Signature (concrete)")
     val signatureFiles = ArrayList<PPath>()
     for((file, analyzedAst) in analyzed) {
-      val results = trans(input.sdfLangConfig, proj.dir, file, analyzedAst, transformGoal)
+      val results = trans(input.sdfLangConfig, proj.path, file, analyzedAst, transformGoal)
       var success = false
       for((transformedAst, writtenFile) in results) {
         if(transformedAst != null && writtenFile != null) {

@@ -11,6 +11,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.MultiBadTokenException;
 import org.spoofax.jsglr.client.ParseTimeoutException;
 import org.spoofax.jsglr.client.RegionRecovery;
+import org.spoofax.jsglr.client.imploder.AbstractTokenizer;
 import org.spoofax.jsglr.client.imploder.IToken;
 import org.spoofax.jsglr.client.imploder.ITokens;
 import org.spoofax.jsglr.client.imploder.Token;
@@ -175,10 +176,9 @@ public class ParserErrorHandler {
 
 
     private void reportErrorNearOffset(ITokens tokens, int offset, String message) {
-        // TODO: getErrorTokenOrAdjunct was removed when JSGLR2 was merged, is there a replacement?
-        // final IToken errorToken = tokens.getErrorTokenOrAdjunct(offset);
-        // final Region region = RegionFactory.fromTokens(errorToken, errorToken);
-        // reportErrorAtRegion(region, message);
+         final IToken errorToken = ((AbstractTokenizer) tokens).getErrorTokenOrAdjunct(offset);
+         final Region region = RegionFactory.fromTokens(errorToken, errorToken);
+         reportErrorAtRegion(region, message);
     }
 
     private static IToken findNextNonEmptyToken(IToken token) {

@@ -27,3 +27,9 @@ syntax // Path
 context-free syntax // Paths
 
   Paths.Paths = <<{Path ", "}*>>
+
+context-free syntax // Boolean
+
+  Bool.Bool         = <<TrueOrFalse>>
+  TrueOrFalse.True  = TRUE
+  TrueOrFalse.False = FALSE

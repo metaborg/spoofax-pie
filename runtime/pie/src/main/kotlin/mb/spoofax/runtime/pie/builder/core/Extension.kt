@@ -2,9 +2,7 @@ package mb.spoofax.runtime.pie.builder.core
 
 import com.google.inject.Inject
 import mb.log.Logger
-import mb.pie.runtime.core.BuildContext
-import mb.pie.runtime.core.Builder
-import mb.pie.runtime.core.PathStampers
+import mb.pie.runtime.core.*
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.spoofax.runtime.impl.esv.ESVReader
 import mb.spoofax.runtime.impl.legacy.EsvUtil
@@ -30,7 +28,7 @@ class CoreExtensions @Inject constructor(log: Logger) : Builder<CoreExtensions.I
     // Require packed ESV file
     val langLoc = langImpl.components().first().location()
     val packedEsvFile = SpoofaxLangSpecCommonPaths(langLoc).targetMetaborgDir().resolveFile("editor.esv.af").pPath
-    if (packedEsvFile.exists()) {
+    if(packedEsvFile.exists()) {
       require(packedEsvFile, PathStampers.hash)
 
       // Get extensions

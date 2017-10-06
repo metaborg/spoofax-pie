@@ -2,16 +2,14 @@ package mb.spoofax.runtime.pie.builder
 
 import com.google.inject.Inject
 import mb.pie.runtime.builtin.path.read
-import mb.spoofax.runtime.pie.builder.core.parse
 import mb.pie.runtime.core.BuildContext
 import mb.pie.runtime.core.Builder
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
-import mb.spoofax.runtime.impl.esv.Styler
-import mb.spoofax.runtime.impl.esv.StylingRules
-import mb.spoofax.runtime.impl.esv.StylingRulesFromESV
+import mb.spoofax.runtime.impl.esv.*
 import mb.spoofax.runtime.model.SpoofaxRunEx
 import mb.spoofax.runtime.model.parse.Token
 import mb.spoofax.runtime.model.style.Styling
+import mb.spoofax.runtime.pie.builder.core.parse
 import mb.vfs.path.PPath
 import org.spoofax.interpreter.terms.IStrategoAppl
 import java.io.Serializable
@@ -23,13 +21,13 @@ class GenerateStylerRules
     val id = "spoofaxGenerateStylerRules"
   }
 
-  data class Input(val esvLangConfig: SpxCoreConfig, val mainFile: PPath, val includedFiles: ArrayList<PPath>) : Serializable
+  data class Input(val esvLangConfig: SpxCoreConfig, val mainFile: PPath, val includedFiles: Iterable<PPath>) : Serializable
 
   override val id = Companion.id
   override fun BuildContext.build(input: Input): StylingRules {
     val text = read(input.mainFile)
 
-    for (includedFile in input.includedFiles) {
+    for(includedFile in input.includedFiles) {
       require(includedFile)
     }
 

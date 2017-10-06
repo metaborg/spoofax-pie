@@ -34,22 +34,22 @@ class NaBL2GenerateConstraintGenerator
     val id = "spoofaxGenerateConstraintGenerator"
   }
 
-  data class Input(val nabl2LangConfig: SpxCoreConfig, val specDir: PPath, val nabl2Files: ArrayList<PPath>, val strategoConfig: ImmutableStrategoConfig, val strategoStrategyName: String, val signatures: Signatures) : Serializable
+  data class Input(val nabl2LangConfig: SpxCoreConfig, val specDir: PPath, val nabl2Files: Iterable<PPath>, val strategoConfig: ImmutableStrategoConfig, val strategoStrategyName: String, val signatures: Signatures) : Serializable
 
   override val id = Companion.id
   override fun BuildContext.build(input: Input): ConstraintGenerator {
     // Read input files
     val texts = mutableMapOf<PPath, String>()
-    for (file in input.nabl2Files) {
+    for(file in input.nabl2Files) {
       val text = read(file)
       texts.put(file, text)
     }
 
     // Parse input files
     val parsed = mutableMapOf<PPath, IStrategoTerm>()
-    for ((file, text) in texts) {
+    for((file, text) in texts) {
       val (ast, _, _) = parse(input.nabl2LangConfig, text)
-      if (ast == null) {
+      if(ast == null) {
         log.error("Unable to parse NaBL2 file $file, skipping file")
         continue
       }
@@ -61,9 +61,9 @@ class NaBL2GenerateConstraintGenerator
 
     // Analyze
     val analyzed = mutableMapOf<PPath, IStrategoTerm>()
-    for ((file, parsedAst) in parsed) {
-      val result = analyze(CoreAnalyze.Input(input.nabl2LangConfig, proj.dir, file, parsedAst))
-      if (result.ast == null) {
+    for((file, parsedAst) in parsed) {
+      val result = analyze(CoreAnalyze.Input(input.nabl2LangConfig, proj.path, file, parsedAst))
+      if(result.ast == null) {
         log.error("Unable to analyze NaBL2 file $file, skipping file")
         continue
       }
@@ -73,24 +73,24 @@ class NaBL2GenerateConstraintGenerator
     // Transform
     val transformGoal = CompileGoal()
     val nablStrFiles = mutableListOf<PPath>()
-    for ((file, analyzedAst) in analyzed) {
-      val results = trans(input.nabl2LangConfig, proj.dir, file, analyzedAst, transformGoal)
+    for((file, analyzedAst) in analyzed) {
+      val results = trans(input.nabl2LangConfig, proj.path, file, analyzedAst, transformGoal)
       var success = false;
-      for ((transformedAst, writtenFile) in results) {
-        if (transformedAst != null && writtenFile != null) {
+      for((transformedAst, writtenFile) in results) {
+        if(transformedAst != null && writtenFile != null) {
           success = true
           nablStrFiles.add(writtenFile)
         }
       }
-      if (!success) {
+      if(!success) {
         log.error("Unable to transform NaBL2 file $file, skipping file")
       }
     }
 
     val strategoConfig = ImmutableStrategoConfig.builder()
-            .from(input.strategoConfig)
-            .addIncludeDirs(input.signatures.includeDir())
-            .build()
+      .from(input.strategoConfig)
+      .addIncludeDirs(input.signatures.includeDir())
+      .build()
     val strategoCtree = compileStratego(strategoConfig)
     val constraintGenerator = ConstraintGenerator(strategoCtree, input.strategoStrategyName)
     return constraintGenerator

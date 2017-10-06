@@ -30,7 +30,7 @@ class CoreBuild @Inject constructor(log: Logger) : OutEffectBuilder<PPath> {
   override val id = Companion.id
   override fun BuildContext.effect(input: PPath) {
     val spoofax = Spx.spoofax()
-    val project = loadProj(input).proj
+    val project = loadProj(input)
     val inputBuilder = BuildInputBuilder(project)
     // @formatter:off
     val buildInput = inputBuilder
@@ -70,7 +70,7 @@ class CoreBuildLangSpec @Inject constructor(log: Logger, val pathSrv: PathSrv) :
   override fun BuildContext.effect(input: PPath) {
     val spoofaxMeta = Spx.spoofaxMeta()
 
-    val project = loadProj(input).proj
+    val project = loadProj(input)
     val langSpec = spoofaxMeta.languageSpecService.get(project) ?: throw BuildException("Cannot build language specification from project $project, it is not a language specification")
     val langSpecBuildInput = LanguageSpecBuildInput(langSpec)
 
@@ -92,9 +92,9 @@ class CoreBuildLangSpec @Inject constructor(log: Logger, val pathSrv: PathSrv) :
     val commonPaths = SpoofaxLangSpecCommonPaths(input.fileObject)
     val strategiesDir = commonPaths.strJavaStratDir().pPath
     require(strategiesDir, PathStampers.exists)
-    if (strategiesDir.exists()) {
+    if(strategiesDir.exists()) {
       val targetClassesDir = commonPaths.targetClassesDir().pPath
-      val spoofaxUberJar = pathSrv.resolveLocal("/Users/gohla/spoofax/master/repo/builder-releng/builder/org.metaborg.builder.core.uber/target/org.metaborg.builder.core.uber-2.3.0-SNAPSHOT.jar");
+      val spoofaxUberJar = pathSrv.resolveLocal("/Users/gohla/spoofax/master/repo/builder-releng/builder/org.metaborg.builder.core.uber/target/org.metaborg.builder.core.uber-2.4.0-SNAPSHOT.jar");
 
       // Require the java files and Spoofax uber JAR
       require(strategiesDir, PathStampers.modified)

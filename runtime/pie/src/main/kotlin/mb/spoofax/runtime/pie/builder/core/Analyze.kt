@@ -3,10 +3,7 @@ package mb.spoofax.runtime.pie.builder.core
 import com.google.inject.Inject
 import mb.log.Logger
 import mb.pie.runtime.builtin.util.Tuple2
-import mb.pie.runtime.core.BuildContext
-import mb.pie.runtime.core.BuildException
-import mb.pie.runtime.core.Builder
-import mb.pie.runtime.core.PathStampers
+import mb.pie.runtime.core.*
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.spoofax.runtime.impl.legacy.MessageConverter
 import mb.spoofax.runtime.model.message.Msg
@@ -36,7 +33,7 @@ class CoreAnalyze @Inject constructor(log: Logger, val messageConverter: Message
 
     // Require Stratego runtime files
     val facet = langImpl.facet<StrategoRuntimeFacet>(StrategoRuntimeFacet::class.java)
-    if (facet != null) {
+    if(facet != null) {
       facet.ctreeFiles.forEach { require(it.pPath, PathStampers.hash) }
       facet.jarFiles.forEach { require(it.pPath, PathStampers.hash) }
     }
@@ -54,7 +51,7 @@ class CoreAnalyze @Inject constructor(log: Logger, val messageConverter: Message
         val ast = result.ast();
         val messages = messageConverter.toMsgs(result.messages());
         return Output(ast, messages)
-      } catch (e: AnalysisException) {
+      } catch(e: AnalysisException) {
         log.error("Analysis failed unexpectedly", e)
         return Output(null, ArrayList(0))
       }

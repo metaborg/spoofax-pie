@@ -4,13 +4,11 @@ import com.google.inject.Inject
 import mb.log.Logger
 import mb.pie.runtime.core.BuildContext
 import mb.pie.runtime.core.Builder
-import mb.pie.runtime.core.OutTransient
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.vfs.path.PPath
-import org.metaborg.core.language.ILanguageImpl
 import java.io.Serializable
 
-class CoreBuildOrLoad @Inject constructor(log: Logger) : Builder<CoreBuildOrLoad.Input, OutTransient<ILanguageImpl>> {
+class CoreBuildOrLoad @Inject constructor(log: Logger) : Builder<CoreBuildOrLoad.Input, TransientLangImpl> {
   companion object {
     val id = "coreBuildOrLoad"
   }
@@ -22,9 +20,9 @@ class CoreBuildOrLoad @Inject constructor(log: Logger) : Builder<CoreBuildOrLoad
   val log: Logger = log.forContext(CoreBuild::class.java)
 
   override val id = Companion.id
-  override fun BuildContext.build(input: Input): OutTransient<ILanguageImpl> {
+  override fun BuildContext.build(input: Input): TransientLangImpl {
     val dir = input.dir;
-    if (input.isLangSpec) {
+    if(input.isLangSpec) {
       buildProject(dir)
       buildLangSpec(dir)
     }

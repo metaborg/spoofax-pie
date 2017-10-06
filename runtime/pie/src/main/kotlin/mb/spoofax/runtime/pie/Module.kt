@@ -8,6 +8,7 @@ import mb.pie.runtime.core.impl.BuildCache
 import mb.pie.runtime.core.impl.MapBuildCache
 import mb.pie.runtime.builtin.util.LoggerBuildReporter
 import mb.spoofax.runtime.pie.builder.stratego.CompileStratego
+import mb.pie.runtime.core.impl.ValidationLayerImpl
 
 open class SpoofaxPieModule : PieModule() {
   override fun configure(binder: Binder) {
@@ -24,6 +25,10 @@ open class SpoofaxPieModule : PieModule() {
 
   override fun Binder.bindReporter() {
     bind<BuildReporter>().to<LoggerBuildReporter>()
+  }
+  
+  override fun Binder.bindValidationLayer() {
+    bind<ValidationLayer>().to<ValidationLayerImpl>()
   }
 
   open protected fun Binder.bindPie() {

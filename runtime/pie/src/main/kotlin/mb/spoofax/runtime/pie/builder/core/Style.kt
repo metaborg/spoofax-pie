@@ -2,9 +2,7 @@ package mb.spoofax.runtime.pie.builder.core
 
 import com.google.inject.Inject
 import mb.log.Logger
-import mb.pie.runtime.core.BuildContext
-import mb.pie.runtime.core.Builder
-import mb.pie.runtime.core.PathStampers
+import mb.pie.runtime.core.*
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.spoofax.runtime.impl.legacy.StyleConverter
 import mb.spoofax.runtime.model.parse.Token
@@ -21,7 +19,7 @@ class CoreStyle @Inject constructor(log: Logger) : Builder<CoreStyle.Input, Styl
     val id = "coreStyle"
   }
 
-  data class Input(val config: SpxCoreConfig, val tokenStream: ArrayList<Token>, val ast: IStrategoTerm) : Serializable
+  data class Input(val config: SpxCoreConfig, val tokenStream: Iterable<Token>, val ast: IStrategoTerm) : Serializable
 
 
   val log: Logger = log.forContext(CoreTrans::class.java)

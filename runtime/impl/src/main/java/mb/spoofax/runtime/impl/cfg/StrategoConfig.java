@@ -17,7 +17,7 @@ import mb.spoofax.runtime.impl.term.Terms;
 import mb.vfs.path.PPath;
 
 @Value.Immutable
-@Serial.Version(value = 1)
+@Serial.Version(value = 1L)
 public interface StrategoConfig extends Serializable {
     @Value.Parameter PPath mainFile();
 

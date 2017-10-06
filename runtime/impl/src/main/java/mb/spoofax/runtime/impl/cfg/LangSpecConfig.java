@@ -1,35 +1,53 @@
 package mb.spoofax.runtime.impl.cfg;
 
-import mb.spoofax.runtime.impl.term.Terms;
-import mb.vfs.path.PPath;
-import org.spoofax.interpreter.terms.IStrategoTerm;
+import static mb.spoofax.runtime.impl.term.Terms.*;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static mb.spoofax.runtime.impl.term.Terms.*;
+import javax.annotation.Nullable;
 
-public class LangSpecConfig implements Serializable {
-    private static final long serialVersionUID = 2L;
+import org.immutables.serial.Serial;
+import org.immutables.value.Value;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 
-    private final PPath dir;
-    private final ArrayList<String> extensions;
-    private final @Nullable String name;
-    private final @Nullable PPath syntaxMainFile;
-    private final @Nullable String syntaxStartSymbol;
-    private final ArrayList<PPath> syntaxSignatureFiles;
-    private final @Nullable PPath syntaxBasedStylingFile;
-    private final ArrayList<PPath> natsNabl2Files;
-    private final @Nullable ImmutableStrategoConfig natsStrategoConfig;
-    private final @Nullable String natsStrategoStrategyId;
+import mb.spoofax.runtime.impl.term.Terms;
+import mb.vfs.path.PPath;
+
+@Value.Immutable
+@Serial.Version(value = 1L)
+public interface LangSpecConfig extends Serializable {
+    @Value.Parameter PPath dir();
 
 
-    public LangSpecConfig(IStrategoTerm root, PPath dir) {
-        this.dir = dir;
+    @Value.Parameter List<String> extensions();
 
+
+    @Value.Parameter @Nullable String name();
+
+
+    @Value.Parameter List<PPath> syntaxParseFiles();
+
+    @Value.Parameter @Nullable PPath syntaxParseMainFile();
+
+    @Value.Parameter @Nullable String syntaxParseStartSymbolId();
+
+    @Value.Parameter List<PPath> syntaxSignatureFiles();
+
+    @Value.Parameter @Nullable PPath syntaxStyleFile();
+
+
+    @Value.Parameter List<PPath> natsNaBL2Files();
+
+    @Value.Parameter @Nullable ImmutableStrategoConfig natsStrategoConfig();
+
+    @Value.Parameter @Nullable String natsStrategoStrategyId();
+
+    @Value.Parameter boolean natsRootScopePerFile();
+
+
+    public static LangSpecConfig fromTerm(IStrategoTerm root, PPath dir) {
         // @formatter:off
         // Sections([...])
         final IStrategoTerm rootSections = root.getSubterm(0);
@@ -39,15 +57,19 @@ public class LangSpecConfig implements Serializable {
             .filter((t) -> Terms.isAppl(t, "LangSpecSec"))
             .flatMap((t) -> stream(t.getSubterm(0)))
             .collect(Collectors.toList());
-        this.extensions = langSpecSections
+        
+        // Identification
+        final List<String> extensions = langSpecSections
             .stream()
             .filter((t) -> isAppl(t, "IdentificationSec"))
             .flatMap((t) -> stream(t.getSubterm(0)))
             .filter((t) -> isAppl(t, "FileExtensions")) // FileExtensions(Exts([Ext("..."), ...]))
             .flatMap((t) -> stream(t.getSubterm(0).getSubterm(0))) // [Ext("..."), ...]
             .map((t) -> asString(t.getSubterm(0)))
-            .collect(Collectors.toCollection(ArrayList::new));
-        this.name = langSpecSections
+            .collect(Collectors.toList());
+        
+        // Information
+        final @Nullable String name = langSpecSections
             .stream()
             .filter((t) -> isAppl(t, "InformationSec"))
             .flatMap((t) -> stream(t.getSubterm(0)))
@@ -55,118 +77,107 @@ public class LangSpecConfig implements Serializable {
             .map((t) -> asString(t.getSubterm(0).getSubterm(0)))
             .findFirst()
             .orElse(null);
-        this.syntaxMainFile = langSpecSections
+        
+        // Syntax
+        final List<IStrategoTerm> syntaxSubSections = langSpecSections
             .stream()
-            .filter((t) -> isAppl(t, "SyntaxSec"))
+            .filter((t) -> Terms.isAppl(t, "SyntaxSec"))
             .flatMap((t) -> stream(t.getSubterm(0)))
-            .filter((t) -> isAppl(t, "SyntaxMainFile")) // SyntaxMainFile(Path("..."))
-            .map((t) -> asString(t.getSubterm(0).getSubterm(0)))
-            .map(dir::resolve)
-            .findFirst()
-            .orElse(null);
-        this.syntaxStartSymbol = langSpecSections
+            .collect(Collectors.toList());
+        
+        // Syntax - Parsing
+        final List<IStrategoTerm> syntaxParseOpts = syntaxSubSections
             .stream()
-            .filter((t) -> isAppl(t, "SyntaxSec"))
+            .filter((t) -> Terms.isAppl(t, "SyntaxParseSubSec"))
             .flatMap((t) -> stream(t.getSubterm(0)))
-            .filter((t) -> isAppl(t, "SyntaxStartSymbolId")) // SyntaxStartSymbol(Id("..."))
-            .map((t) -> asString(t.getSubterm(0).getSubterm(0)))
-            .findFirst()
-            .orElse(null);
-        this.syntaxSignatureFiles = langSpecSections
+            .collect(Collectors.toList());
+        
+        final List<PPath> syntaxFiles = syntaxParseOpts
             .stream()
-            .filter((t) -> isAppl(t, "SyntaxSec"))
-            .flatMap((t) -> stream(t.getSubterm(0)))
-            .filter((t) -> isAppl(t, "SyntaxSignatureFiles")) // SyntaxSignatureFiles(Paths([Path("..."), ...]))
+            .filter((t) -> isAppl(t, "SyntaxParseFiles")) // SyntaxParseFiles([Path("..."), ...]))
             .flatMap((t) -> stream(t.getSubterm(0).getSubterm(0))) // [Path("..."), ...]
             .map((t) -> asString(t.getSubterm(0)))
             .map(dir::resolve)
-            .collect(Collectors.toCollection(ArrayList::new));
-        this.syntaxBasedStylingFile = langSpecSections
+            .collect(Collectors.toList());
+        final @Nullable PPath syntaxParseMainFile = syntaxParseOpts
             .stream()
-            .filter((t) -> isAppl(t, "StylingSec"))
-            .flatMap((t) -> stream(t.getSubterm(0)))
-            .filter((t) -> isAppl(t, "SyntaxBasedStylingSubSec"))
-            .flatMap((t) -> stream(t.getSubterm(0)))
-            .filter((t) -> isAppl(t, "SyntaxBasedStylingFile")) // SyntaxBasedStylingFile(Path("..."))
+            .filter((t) -> isAppl(t, "SyntaxParseMainFile")) // SyntaxParseMainFile(Path("..."))
             .map((t) -> asString(t.getSubterm(0).getSubterm(0)))
             .map(dir::resolve)
             .findFirst()
             .orElse(null);
-        this.natsNabl2Files = langSpecSections
+        final @Nullable String syntaxParseStartSymbolId = syntaxParseOpts
             .stream()
-            .filter((t) -> isAppl(t, "NaTsSec"))
+            .filter((t) -> isAppl(t, "SyntaxParseStartSymbolId")) // SyntaxParseStartSymbolId(Id("..."))
+            .map((t) -> asString(t.getSubterm(0).getSubterm(0)))
+            .findFirst()
+            .orElse(null);
+        
+        // Syntax - Signatures
+        final List<PPath> syntaxSignatureFiles = syntaxSubSections
+            .stream()
+            .filter((t) -> isAppl(t, "SyntaxSignatureSubSec"))
             .flatMap((t) -> stream(t.getSubterm(0)))
+            .filter((t) -> isAppl(t, "SignatureSyntaxFiles")) // SignatureSyntaxFiles(Paths([Path("..."), ...]))
+            .flatMap((t) -> stream(t.getSubterm(0).getSubterm(0))) // [Path("..."), ...]
+            .map((t) -> asString(t.getSubterm(0)))
+            .map(dir::resolve)
+            .collect(Collectors.toList());
+        
+        // Syntax - Styling
+        final @Nullable PPath syntaxStyleFile = syntaxSubSections
+            .stream()
+            .filter((t) -> isAppl(t, "SyntaxStyleSubSec"))
+            .flatMap((t) -> stream(t.getSubterm(0)))
+            .filter((t) -> isAppl(t, "SyntaxStyleFile")) // SyntaxStyleFile(Path("..."))
+            .map((t) -> asString(t.getSubterm(0).getSubterm(0)))
+            .map(dir::resolve)
+            .findFirst()
+            .orElse(null);
+        
+        // NaTs
+        final List<IStrategoTerm> natsOpts = langSpecSections
+            .stream()
+            .filter((t) -> Terms.isAppl(t, "NaTsSec"))
+            .flatMap((t) -> stream(t.getSubterm(0)))
+            .collect(Collectors.toList());
+        
+        final List<PPath> natsNaBL2Files = natsOpts
+            .stream()
             .filter((t) -> isAppl(t, "NaTsNaBL2Files")) // NaTsNaBL2Files(Paths([Path("...")]))
             .flatMap((t) -> stream(t.getSubterm(0).getSubterm(0))) // [Path("..."), ...]
             .map((t) -> asString(t.getSubterm(0)))
             .map(dir::resolve)
-            .collect(Collectors.toCollection(ArrayList::new));
-        this.natsStrategoConfig = langSpecSections
+            .collect(Collectors.toList());
+        final @Nullable ImmutableStrategoConfig natsStrategoConfig = natsOpts
             .stream()
-            .filter((t) -> isAppl(t, "NaTsSec"))
-            .flatMap((t) -> stream(t.getSubterm(0)))
             .filter((t) -> isAppl(t, "NaTsStrategoConfig")) // NaTsStrategoConfig(...)
             .map((t) -> StrategoConfig.fromTerm(t.getSubterm(0), dir))
             .filter((c) -> c != null)
             .findFirst()
             .orElse(null);
-        this.natsStrategoStrategyId = langSpecSections
+        final @Nullable String natsStrategoStrategyId = natsOpts
             .stream()
-            .filter((t) -> isAppl(t, "NaTsSec"))
-            .flatMap((t) -> stream(t.getSubterm(0)))
             .filter((t) -> isAppl(t, "NaTsStrategoStrategyId")) // NaTsStrategoStrategyId(Id("..."))
             .map((t) -> asString(t.getSubterm(0).getSubterm(0)))
             .findFirst()
             .orElse(null);
+        final boolean natsRootScopePerFile = natsOpts.stream()
+            .filter((t) -> isAppl(t, "NaTsSec"))
+            .flatMap((t) -> stream(t.getSubterm(0)))
+            .filter((t) -> isAppl(t, "NaTsRootScopePerFile")) // NaTsRootScopePerFile(Bool(True()|False()))
+            .map((t) -> asAppl(t.getSubterm(0).getSubterm(0)))
+            .findFirst()
+            .map((t) -> {
+                if(hasCons(t, 0, "True")) return true;
+                if(hasCons(t, 0, "False")) return false;
+                return false;
+            })
+            .orElse(false);
         // @formatter:on
-    }
 
-
-    public PPath dir() {
-        return dir;
-    }
-
-    public ArrayList<String> extensions() {
-        return extensions;
-    }
-
-    public @Nullable String getName() {
-        return name;
-    }
-
-    public @Nullable PPath getSyntaxMainFile() {
-        return syntaxMainFile;
-    }
-
-    public @Nullable String getSyntaxStartSymbol() {
-        return syntaxStartSymbol;
-    }
-
-    public ArrayList<PPath> getSyntaxSignatureFiles() {
-        return syntaxSignatureFiles;
-    }
-    
-    public @Nullable PPath getSyntaxBasedStylingFile() {
-        return syntaxBasedStylingFile;
-    }
-
-    public ArrayList<PPath> getNaTsNaBL2Files() {
-        return natsNabl2Files;
-    }
-
-    public @Nullable ImmutableStrategoConfig getNaTsStrategoConfig() {
-        return natsStrategoConfig;
-    }
-
-    public @Nullable String getNaTsStrategoStrategyId() {
-        return natsStrategoStrategyId;
-    }
-
-
-    @Override public String toString() {
-        if(name != null) {
-            return name;
-        }
-        return super.toString();
+        return ImmutableLangSpecConfig.of(dir, extensions, name, syntaxFiles, syntaxParseMainFile,
+            syntaxParseStartSymbolId, syntaxSignatureFiles, syntaxStyleFile, natsNaBL2Files, natsStrategoConfig,
+            natsStrategoStrategyId, natsRootScopePerFile);
     }
 }

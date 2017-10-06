@@ -49,3 +49,8 @@ lexical syntax // String
 lexical restrictions
 
   BackSlashChar -/- [\"]
+
+lexical syntax // Boolean
+
+  TRUE  = "true"
+  FALSE = "false"

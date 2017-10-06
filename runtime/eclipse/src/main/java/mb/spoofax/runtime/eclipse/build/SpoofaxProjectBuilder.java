@@ -48,7 +48,7 @@ public class SpoofaxProjectBuilder extends IncrementalProjectBuilder {
     private final PieSrv pieSrv;
     private final Editors editors;
     private final WorkspaceUpdateFactory workspaceUpdateFactory;
-    
+
     private final IWorkspaceRoot eclipseWorkspaceRoot;
     private final PPath workspaceRoot;
 
@@ -60,7 +60,7 @@ public class SpoofaxProjectBuilder extends IncrementalProjectBuilder {
         this.pieSrv = injector.getInstance(PieSrv.class);
         this.editors = injector.getInstance(Editors.class);
         this.workspaceUpdateFactory = injector.getInstance(WorkspaceUpdateFactory.class);
-        
+
         this.eclipseWorkspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
         this.workspaceRoot = pathSrv.resolveWorkspaceRoot();
     }
@@ -95,7 +95,7 @@ public class SpoofaxProjectBuilder extends IncrementalProjectBuilder {
                         @Nullable ? extends PartialSolution
                     >>,
                     // Constraint solver solution
-                    @Nullable ? extends ConstraintSolverSolution
+                    ? extends ArrayList<@Nullable ? extends ConstraintSolverSolution>
                 >>, 
                 // Spoofax Core per-file results
                 ? extends ArrayList<? extends Tuple4<
@@ -126,12 +126,14 @@ public class SpoofaxProjectBuilder extends IncrementalProjectBuilder {
                     final ArrayList<Msg> messages = fileResult.component3();
                     update.addMessages(file, messages);
                 });
-                final @Nullable ConstraintSolverSolution solution = result.component2();
-                if(solution != null) {
-                    update.addMessages(solution.getFileMessages());
-                    update.addMessages(solution.getFileUnsolvedMessages());
-                    update.addMessages(project, solution.getProjectMessages());
-                    update.addMessages(project, solution.getProjectUnsolvedMessages());
+                final ArrayList<@Nullable ? extends ConstraintSolverSolution> solutions = result.component2();
+                for(@Nullable ConstraintSolverSolution solution : solutions) {
+                    if(solution != null) {
+                        update.addMessages(solution.getFileMessages());
+                        update.addMessages(solution.getFileUnsolvedMessages());
+                        update.addMessages(project, solution.getProjectMessages());
+                        update.addMessages(project, solution.getProjectUnsolvedMessages());
+                    }
                 }
             });
             projectResult.component3().stream().forEach((result) -> {
@@ -146,7 +148,7 @@ public class SpoofaxProjectBuilder extends IncrementalProjectBuilder {
             final String text = editor.text();
             final PPath file = editor.file();
             update.addClear(file);
-            
+
             final IProject eclipseProject = editor.eclipseFile().getProject();
             final PPath project = pathSrv.resolve(eclipseProject);
 
@@ -163,7 +165,7 @@ public class SpoofaxProjectBuilder extends IncrementalProjectBuilder {
                     } else {
                         update.removeStyle(editor, text.length());
                     }
-                    
+
                     final @Nullable ConstraintSolverSolution solution = output.component5();
                     if(solution != null) {
                         update.addMessages(solution.getFileMessages());

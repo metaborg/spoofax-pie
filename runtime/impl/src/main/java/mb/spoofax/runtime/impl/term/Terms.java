@@ -23,14 +23,27 @@ public class Terms {
         return t.getSubtermCount() == arity;
     }
 
+    public static boolean hasCons(IStrategoAppl t, String name) {
+        return t.getConstructor().getName().equals(name);
+    }
+    
     public static boolean hasCons(IStrategoTerm t, String name) {
         return isAppl(t) && asAppl(t).getConstructor().getName().equals(name);
     }
 
+    public static boolean hasCons(IStrategoAppl t, int arity) {
+        return t.getConstructor().getArity() == arity;
+    }
+    
     public static boolean hasCons(IStrategoTerm t, int arity) {
         return isAppl(t) && asAppl(t).getConstructor().getArity() == arity;
     }
 
+    public static boolean hasCons(IStrategoAppl t, int arity, String name) {
+        final IStrategoConstructor cons = t.getConstructor();
+        return cons.getArity() == arity && cons.getName().equals(name);
+    }
+    
     public static boolean hasCons(IStrategoTerm t, int arity, String name) {
         if(!isAppl(t))
             return false;

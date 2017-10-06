@@ -52,23 +52,28 @@ context-free syntax // Syntax
 
   LangSpecSubSec.SyntaxSec =
 <syntax {
-  <{SyntaxOpt "\n"}*>
+  <{SyntaxSubSec "\n"}*>
 }>
-  SyntaxOpt.SyntaxMainFile = <main file: <Path>>
-  SyntaxOpt.SyntaxSignatureFiles = <signature files: <Paths>>
-  SyntaxOpt.SyntaxStartSymbolId = <start symbol id: <Id>>
 
-context-free syntax // Styling
-
-  LangSpecSubSec.StylingSec =
-<styling {
-  <{StylingSubSec "\n"}*>
-}>
-  StylingSubSec.SyntaxBasedStylingSubSec =
-<syntax based {
-  <{SyntaxBasedStylingOpt "\n"}*>
+  SyntaxSubSec.SyntaxParseSubSec =
+<parse {
+  <{SyntaxParseOpt "\n"}*>
 }> 
-  SyntaxBasedStylingOpt.SyntaxBasedStylingFile = <file: <Path>>
+  SyntaxParseOpt.SyntaxParseFiles = <files: <Paths>>
+  SyntaxParseOpt.SyntaxParseMainFile = <main file: <Path>>
+  SyntaxParseOpt.SyntaxParseStartSymbolId = <start symbol id: <Id>>
+
+  SyntaxSubSec.SyntaxSignatureSubSec =
+<signature {
+  <{SyntaxSignatureOpt "\n"}*>
+}> 
+  SyntaxSignatureOpt.SignatureSyntaxFiles = <files: <Paths>>
+
+  SyntaxSubSec.SyntaxStyleSubSec =
+<style {
+  <{SyntaxStyleOpt "\n"}*>
+}> 
+  SyntaxStyleOpt.SyntaxStyleFile = <file: <Path>>
 
 context-free syntax // Names and Types
 
@@ -80,6 +85,7 @@ context-free syntax // Names and Types
   NaTsOpt.NaTsNaBL2Files = <nabl2 files: <Paths>>
   NaTsOpt.NaTsStrategoConfig = <stratego config: <StrategoConfig>>
   NaTsOpt.NaTsStrategoStrategyId = <stratego strategy id: <Id>>
+  NaTsOpt.NaTsRootScopePerFile = <root scope per file: <Bool>>
 
 context-free syntax // Stratego config object
 
