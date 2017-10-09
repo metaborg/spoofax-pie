@@ -20,7 +20,7 @@ class PieSrvImpl @Inject constructor(
   private val storeFactory: LMDBBuildStoreFactory,
   private val cacheFactory: Provider<BuildCache>)
   : PieSrv {
-  val buildManagers = ConcurrentHashMap<PPath, BuildManager>()
+  private val buildManagers = ConcurrentHashMap<PPath, BuildManager>()
 
 
   override operator fun get(dir: PPath): BuildManager {

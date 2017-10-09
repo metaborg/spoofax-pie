@@ -16,83 +16,61 @@ import mb.spoofax.runtime.pie.builder.stratego.compileStratego
 import mb.vfs.path.PPath
 import org.metaborg.core.action.CompileGoal
 import org.metaborg.meta.nabl2.solver.ImmutablePartialSolution
-import org.metaborg.meta.nabl2.solver.PartialSolution
-import org.metaborg.meta.nabl2.spoofax.analysis.InitialResult
-import org.metaborg.meta.nabl2.spoofax.analysis.UnitResult
+import org.metaborg.meta.nabl2.spoofax.analysis.ImmutableInitialResult
+import org.metaborg.meta.nabl2.spoofax.analysis.ImmutableUnitResult
 import org.spoofax.interpreter.terms.IStrategoTerm
 import java.io.Serializable
 import java.util.*
-import org.metaborg.meta.nabl2.spoofax.analysis.ImmutableInitialResult
-import org.metaborg.meta.nabl2.spoofax.analysis.ImmutableUnitResult
 
 class NaBL2GenerateConstraintGenerator
 @Inject constructor(log: Logger)
   : Builder<NaBL2GenerateConstraintGenerator.Input, ConstraintGenerator> {
-  val log = log.forContext(NaBL2GenerateConstraintGenerator::class.java)
-
   companion object {
     val id = "spoofaxGenerateConstraintGenerator"
   }
 
   data class Input(val nabl2LangConfig: SpxCoreConfig, val specDir: PPath, val nabl2Files: Iterable<PPath>, val strategoConfig: ImmutableStrategoConfig, val strategoStrategyName: String, val signatures: Signatures) : Serializable
 
+  val log = log.forContext(NaBL2GenerateConstraintGenerator::class.java)
+
   override val id = Companion.id
   override fun BuildContext.build(input: Input): ConstraintGenerator {
+    val (langConfig, projDir, files, strategoConfig, strategoStrategyName, signatures) = input
+
     // Read input files
-    val texts = mutableMapOf<PPath, String>()
-    for(file in input.nabl2Files) {
-      val text = read(file)
-      texts.put(file, text)
+    val textFilePairs = files.map {
+      val text = read(it)
+      CoreParseAll.TextFilePair(text, it)
     }
 
     // Parse input files
-    val parsed = mutableMapOf<PPath, IStrategoTerm>()
-    for((file, text) in texts) {
-      val (ast, _, _) = parse(input.nabl2LangConfig, text)
-      if(ast == null) {
-        log.error("Unable to parse NaBL2 file $file, skipping file")
-        continue
-      }
-      parsed.put(file, ast)
-    }
+    val parsed = parseAll(langConfig, textFilePairs)
+    parsed.forEach { if(it.ast == null) log.error("Unable to parse NaBL2 file ${it.file}, skipping") }
 
     // Load project, required for analysis and transformation.
-    val proj = loadProj(input.specDir)
+    val proj = loadProj(projDir)
 
     // Analyze
-    val analyzed = mutableMapOf<PPath, IStrategoTerm>()
-    for((file, parsedAst) in parsed) {
-      val result = analyze(CoreAnalyze.Input(input.nabl2LangConfig, proj.path, file, parsedAst))
-      if(result.ast == null) {
-        log.error("Unable to analyze NaBL2 file $file, skipping file")
-        continue
-      }
-      analyzed.put(file, result.ast)
-    }
+    val analyzePairs = parsed
+      .filter { it.ast != null }
+      .map { CoreAnalyzeAll.AstFilePair(it.ast!!, it.file) }
+    val analyzed = analyzeAll(langConfig, proj.path, analyzePairs)
+    analyzed.forEach { if(it.ast == null) log.error("Unable to analyze NaBL2 file ${it.file}, skipping") }
 
     // Transform
     val transformGoal = CompileGoal()
-    val nablStrFiles = mutableListOf<PPath>()
-    for((file, analyzedAst) in analyzed) {
-      val results = trans(input.nabl2LangConfig, proj.path, file, analyzedAst, transformGoal)
-      var success = false;
-      for((transformedAst, writtenFile) in results) {
-        if(transformedAst != null && writtenFile != null) {
-          success = true
-          nablStrFiles.add(writtenFile)
-        }
-      }
-      if(!success) {
-        log.error("Unable to transform NaBL2 file $file, skipping file")
-      }
-    }
+    val transformPairs = analyzed
+      .filter { it.ast != null }
+      .map { CoreTransAll.AstFilePair(it.ast!!, it.file) }
+    val transformed = transAll(langConfig, proj.path, transformGoal, transformPairs)
+    transformed.forEach { if(it.ast == null || it.outputFile == null) log.error("Unable to transform NaBL2 file ${it.inputFile} with $transformGoal, skipping") }
 
-    val strategoConfig = ImmutableStrategoConfig.builder()
-      .from(input.strategoConfig)
-      .addIncludeDirs(input.signatures.includeDir())
+    val finalStrategoConfig = ImmutableStrategoConfig.builder()
+      .from(strategoConfig)
+      .addIncludeDirs(signatures.includeDir())
       .build()
-    val strategoCtree = compileStratego(strategoConfig)
-    val constraintGenerator = ConstraintGenerator(strategoCtree, input.strategoStrategyName)
+    val strategoCtree = compileStratego(finalStrategoConfig)
+    val constraintGenerator = ConstraintGenerator(strategoCtree, strategoStrategyName)
     return constraintGenerator
   }
 }

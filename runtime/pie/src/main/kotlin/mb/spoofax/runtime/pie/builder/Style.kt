@@ -32,7 +32,7 @@ class GenerateStylerRules
     }
 
     // Parse input file
-    val (ast, _, _) = parse(input.esvLangConfig, text)
+    val (ast, _, _) = parse(input.esvLangConfig, text, input.mainFile)
     ast ?: throw SpoofaxRunEx("Main ESV file " + input.mainFile + " could not be parsed")
 
     val rules = stylingRulesFromESV.create(ast as IStrategoAppl)

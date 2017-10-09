@@ -1,14 +1,12 @@
 package mb.spoofax.runtime.pie
 
 import com.google.inject.Binder
+import mb.pie.runtime.builtin.util.LoggerBuildReporter
+import mb.pie.runtime.core.*
+import mb.pie.runtime.core.impl.*
 import mb.spoofax.runtime.pie.builder.*
 import mb.spoofax.runtime.pie.builder.core.*
-import mb.pie.runtime.core.*
-import mb.pie.runtime.core.impl.BuildCache
-import mb.pie.runtime.core.impl.MapBuildCache
-import mb.pie.runtime.builtin.util.LoggerBuildReporter
 import mb.spoofax.runtime.pie.builder.stratego.CompileStratego
-import mb.pie.runtime.core.impl.ValidationLayerImpl
 
 open class SpoofaxPieModule : PieModule() {
   override fun configure(binder: Binder) {
@@ -26,7 +24,7 @@ open class SpoofaxPieModule : PieModule() {
   override fun Binder.bindReporter() {
     bind<BuildReporter>().to<LoggerBuildReporter>()
   }
-  
+
   override fun Binder.bindValidationLayer() {
     bind<ValidationLayer>().to<ValidationLayerImpl>()
   }
@@ -59,8 +57,11 @@ open class SpoofaxPieModule : PieModule() {
     bindBuilder<CoreLoadLang>(builders, CoreLoadLang.id)
     bindBuilder<CoreLoadProj>(builders, CoreLoadProj.id)
     bindBuilder<CoreParse>(builders, CoreParse.id)
+    bindBuilder<CoreParseAll>(builders, CoreParseAll.id)
     bindBuilder<CoreAnalyze>(builders, CoreAnalyze.id)
+    bindBuilder<CoreAnalyzeAll>(builders, CoreAnalyzeAll.id)
     bindBuilder<CoreTrans>(builders, CoreTrans.id)
+    bindBuilder<CoreTransAll>(builders, CoreTransAll.id)
     bindBuilder<CoreBuild>(builders, CoreBuild.id)
     bindBuilder<CoreBuildLangSpec>(builders, CoreBuildLangSpec.id)
     bindBuilder<CoreBuildOrLoad>(builders, CoreBuildOrLoad.id)

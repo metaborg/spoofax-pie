@@ -1,4 +1,4 @@
-/// Interface that Spoofax expects from a language
+/// Interface that Spoofax expects from a language 
 data Message = foreign java mb.spoofax.runtime.model.message.Msg {}
 data PathMessage : Message = foreign java mb.spoofax.runtime.model.message.PathMsg {}
 func toMessage(pathMessage : PathMessage) -> Message = { return pathMessage; } // HACK: function that does nothing to cast from PathMessage to Message
@@ -77,14 +77,14 @@ func spxCoreConfigForPath(workspace: WorkspaceConfig, path: path) -> SpxCoreConf
   if(extension == null) return null;
   return workspace.spxCoreConfigForExt(extension!);
 }
-func generateWorkspaceConfig(text: string, workspaceRoot: path, cfgLangConfig: SpxCoreConfig) -> WorkspaceConfig? = foreign mb.spoofax.runtime.pie.builder.GenerateWorkspaceConfig
+func generateWorkspaceConfig(text: string, file: path, workspaceRoot: path, cfgLangConfig: SpxCoreConfig) -> WorkspaceConfig? = foreign mb.spoofax.runtime.pie.builder.GenerateWorkspaceConfig
 func createWorkspaceConfig(workspaceRoot: path) -> WorkspaceConfig? = {
   // Manually create a config for the configuration language. This is required to bootstrap the language workbench.
   val cfgLang = createSpxCoreConfig(/Users/gohla/metaborg/repo/pie/spoofax-pie/lang/cfg/langspec, false, ["cfg"]);
   val workspaceFile = workspaceRoot.resolve(./root/workspace.cfg);
   if(!exists workspaceFile) return null;
   val text = read workspaceFile;
-  val workspaceConfig = generateWorkspaceConfig(text, workspaceRoot, cfgLang);
+  val workspaceConfig = generateWorkspaceConfig(text, workspaceFile, workspaceRoot, cfgLang);
   return workspaceConfig;
 }
 
@@ -258,16 +258,19 @@ func filterNullPartialSolutions(partialSolutions: PartialSolverSolution?*) -> Pa
 /// Spoofax Core interoperability
 /// Native functions
 // Parsing
-func spxCoreParse(config: SpxCoreConfig, text: string) -> (Ast?, Token*?, Message*) = foreign mb.spoofax.runtime.pie.builder.core.CoreParse 
+func spxCoreParse(config: SpxCoreConfig, text: string, file: path) -> (Ast?, Token*?, Message*, path) = foreign mb.spoofax.runtime.pie.builder.core.CoreParse
+func spxCoreParseAll(config: SpxCoreConfig, pairs: (string, path)*) -> (Ast?, Token*?, Message*, path)* = foreign mb.spoofax.runtime.pie.builder.core.CoreParseAll 
 
 // Analysis
-func spxCoreAnalyze(config: SpxCoreConfig, projectDir: path, associatedFile: path, ast: Ast) -> (Ast?, Message*) = foreign mb.spoofax.runtime.pie.builder.core.CoreAnalyze
+func spxCoreAnalyze(config: SpxCoreConfig, project: path, file: path, ast: Ast) -> (Ast?, Message*, path) = foreign mb.spoofax.runtime.pie.builder.core.CoreAnalyze
+func spxCoreAnalyzeAll(config: SpxCoreConfig, project: path, pairs: (Ast, path)*) -> (Ast?, Message*, path) = foreign mb.spoofax.runtime.pie.builder.core.CoreAnalyzeAll
 
 // Transformation
 data TransformGoal = foreign java org.metaborg.core.action.ITransformGoal {}
 func createCompileGoal() -> TransformGoal = foreign java mb.spoofax.runtime.pie.builder.core#createCompileGoal
 func createNamedGoal(name: string) -> TransformGoal = foreign java mb.spoofax.runtime.pie.builder.core#createCompileGoal
-func spxCoreTransform(config: SpxCoreConfig, projectDir: path, associatedFile: path, ast: Ast, goal: TransformGoal) -> (Ast?, path?) = foreign mb.spoofax.runtime.pie.builder.core.CoreTrans
+func spxCoreTransform(config: SpxCoreConfig, project: path, goal: TransformGoal, file: path, ast: Ast) -> (Ast?, path?, path) = foreign mb.spoofax.runtime.pie.builder.core.CoreTrans
+func spxCoreTransformAll(config: SpxCoreConfig, project: path, goal: TransformGoal, pairs: (Ast, path)*) -> (Ast?, path?, path) = foreign mb.spoofax.runtime.pie.builder.core.CoreTransAll
 
 // Styling
 func spxCoreStyle(config: SpxCoreConfig, tokens: Token*, ast: Ast) -> Styling = foreign mb.spoofax.runtime.pie.builder.core.CoreStyle
@@ -287,8 +290,8 @@ func processFileWithSpxCore(file: path, project: path, workspace: WorkspaceConfi
     return (file, emptyTokens, emptyMessages, emptyStyling);
   }
 }
-func processStringWithSpxCore(text: string, associatedFile: path, config: SpxCoreConfig) -> (Token*?, Message*, Styling?) = {
-  val (ast, tokens, messages) = spxCoreParse(config, text);
+func processStringWithSpxCore(text: string, file: path, config: SpxCoreConfig) -> (Token*?, Message*, Styling?) = {
+  val (ast, tokens, messages, _) = spxCoreParse(config, text, file);
   val styling: Styling? = if(ast == null || tokens == null) null else (spxCoreStyle(config, tokens!, ast!)?);
   return (tokens, messages, styling);
-}
+} 

@@ -1,17 +1,10 @@
 package mb.spoofax.runtime.pie.builder.core
 
 import com.google.inject.Inject
-import mb.log.Level
-import mb.log.Logger
-import mb.log.LoggingOutputStream
-import mb.pie.runtime.core.BuildContext
-import mb.pie.runtime.core.BuildException
-import mb.pie.runtime.core.OutEffectBuilder
-import mb.pie.runtime.core.PathStampers
+import mb.log.*
+import mb.pie.runtime.core.*
 import mb.vfs.access.DirAccess
-import mb.vfs.path.PPath
-import mb.vfs.path.PPaths
-import mb.vfs.path.PathSrv
+import mb.vfs.path.*
 import org.eclipse.jdt.core.compiler.batch.BatchCompiler
 import org.metaborg.core.action.CompileGoal
 import org.metaborg.core.build.BuildInputBuilder
@@ -32,14 +25,12 @@ class CoreBuild @Inject constructor(log: Logger) : OutEffectBuilder<PPath> {
     val spoofax = Spx.spoofax()
     val project = loadProj(input)
     val inputBuilder = BuildInputBuilder(project)
-    // @formatter:off
     val buildInput = inputBuilder
-            .withDefaultIncludePaths(true)
-            .withSourcesFromDefaultSourceLocations(true)
-            .withSelector(SpoofaxIgnoresSelector())
-            .addTransformGoal(CompileGoal())
-            .build(spoofax.dependencyService, spoofax.languagePathService)
-    // @formatter:on
+      .withDefaultIncludePaths(true)
+      .withSourcesFromDefaultSourceLocations(true)
+      .withSelector(SpoofaxIgnoresSelector())
+      .addTransformGoal(CompileGoal())
+      .build(spoofax.dependencyService, spoofax.languagePathService)
     val output = spoofax.builder.build(buildInput)
 
     // Required files

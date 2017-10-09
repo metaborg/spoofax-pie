@@ -23,7 +23,7 @@ import java.io.Serializable
 import java.util.*
 
 class GenerateTable
-@Inject constructor(private val log: Logger, private val pathSrv: PathSrv)
+@Inject constructor(log: Logger, private val pathSrv: PathSrv)
   : Builder<GenerateTable.Input, Table> {
   companion object {
     val id = "spoofaxGenerateTable"
@@ -31,62 +31,51 @@ class GenerateTable
 
   data class Input(val sdfLangConfig: SpxCoreConfig, val specDir: PPath, val files: Iterable<PPath>, val mainFile: PPath) : Serializable
 
+  val log: Logger = log.forContext(GenerateTable::class.java)
+
   override val id = Companion.id
   override fun BuildContext.build(input: Input): Table {
-    // Read input files
-    val mainFileText = read(input.mainFile)
-    val texts = mutableMapOf<PPath, String>()
-    for(file in input.files) {
-      val text = read(file)
-      texts.put(file, text)
+    val (langConfig, projDir, files, mainFile) = input
+
+    if(!files.contains(mainFile)) {
+      throw BuildException("SDF3 main file $mainFile is not in the list of files $files")
     }
-    texts.put(input.mainFile, mainFileText)
+
+    // Read input files
+    val textFilePairs = files.map {
+      val text = read(it)
+      CoreParseAll.TextFilePair(text, it)
+    }
 
     // Parse input files
-    val parsed = mutableMapOf<PPath, IStrategoTerm>()
-    for((file, text) in texts) {
-      val (ast, _, _) = parse(input.sdfLangConfig, text)
-      if(ast == null) {
-        log.error("Unable to parse SDF file $file, skipping file")
-        continue
-      }
-      parsed.put(file, ast)
-    }
+    val parsed = parseAll(langConfig, textFilePairs)
+    parsed.forEach { if(it.ast == null) log.error("Unable to parse SDF3 file ${it.file}, skipping") }
 
     // Load project, required for analysis and transformation.
-    val proj = loadProj(input.specDir)
+    val proj = loadProj(projDir)
 
     // Transform
     val transformGoal = EndNamedGoal("to Normal Form (abstract)")
-    val normalized = mutableMapOf<PPath, CoreTrans.Output>()
-    for((file, parsedAst) in parsed) {
-      val results = trans(input.sdfLangConfig, proj.path, file, parsedAst, transformGoal)
-      var success = false;
-      for(trans in results) {
-        if(trans.ast != null && trans.writtenFile != null) {
-          success = true
-          normalized.put(file, trans)
-        }
-      }
-      if(!success) {
-        log.error("Unable to transform SDF file $file, skipping file")
-      }
-    }
-
-    val mainResource = normalized[input.mainFile]?.writtenFile ?: throw BuildException("Main file " + input.mainFile + " could not be normalized")
+    val transformPairs = parsed
+      .filter { it.ast != null }
+      .map { CoreTransAll.AstFilePair(it.ast!!, it.file) }
+    val transformed = transAll(langConfig, proj.path, transformGoal, transformPairs)
+    transformed.forEach { if(it.ast == null || it.outputFile == null) log.error("Unable to transform SDF3 file ${it.inputFile} with $transformGoal, skipping") }
 
     // Create table
     // Main input file
-    val mainFile = pathSrv.localPath(mainResource) ?: throw BuildException("Normalized main file $mainResource is not on the local file system")
+    val mainResource = transformed.firstOrNull { it.inputFile == mainFile }?.outputFile ?: throw BuildException("Main file " + input.mainFile + " could not be normalized")
+    val mainResourceLocal = pathSrv.localPath(mainResource) ?: throw BuildException("Normalized main file $mainResource is not on the local file system")
     // Output file
     val spoofaxPaths = SpoofaxCommonPaths(proj.location())
     val vfsOutputFile = spoofaxPaths.targetMetaborgDir().resolveFile("sdf-new.tbl")
     val outputFile = Spx.spoofax().resourceService.localPath(vfsOutputFile) ?: throw BuildException("Parse table output file $vfsOutputFile is not on the local file system")
     // Paths
-    val paths = ArrayList(listOf(spoofaxPaths.syntaxSrcGenDir().name.uri))
+    val srcGenSyntaxDir = input.specDir.resolve("src-gen/syntax");
+    val paths = listOf(srcGenSyntaxDir.toString())
     // Create table and make dependencies
     require(mainResource);
-    val generator = ParseTableGenerator(mainFile, outputFile, null, null, paths)
+    val generator = ParseTableGenerator(mainResourceLocal, outputFile, null, null, paths)
     generator.outputTable(false)
     generate(vfsOutputFile.pPath)
     return Table(vfsOutputFile.pPath)
@@ -94,7 +83,7 @@ class GenerateTable
 }
 
 class GenerateSignatures
-@Inject constructor(private val log: Logger, private val pathSrv: PathSrv)
+@Inject constructor(log: Logger, private val pathSrv: PathSrv)
   : Builder<GenerateSignatures.Input, Signatures> {
   companion object {
     val id = "spoofaxGenerateSignatures"
@@ -102,58 +91,45 @@ class GenerateSignatures
 
   data class Input(val sdfLangConfig: SpxCoreConfig, val specDir: PPath, val files: Iterable<PPath>) : Serializable
 
+  val log: Logger = log.forContext(GenerateSignatures::class.java)
+
   override val id = Companion.id
   override fun BuildContext.build(input: Input): Signatures {
+    val (langConfig, projDir, files) = input
+
     // Read input files
-    val texts = mutableMapOf<PPath, String>()
-    for(file in input.files) {
-      val text = read(file)
-      texts.put(file, text)
+    val textFilePairs = files.map {
+      val text = read(it)
+      CoreParseAll.TextFilePair(text, it)
     }
 
     // Parse input files
-    val parsed = mutableMapOf<PPath, IStrategoTerm>()
-    for((file, text) in texts) {
-      val (ast, _, _) = parse(input.sdfLangConfig, text)
-      if(ast == null) {
-        log.error("Unable to parse SDF file $file, skipping file")
-        continue
-      }
-      parsed.put(file, ast)
-    }
+    val parsed = parseAll(langConfig, textFilePairs)
+    parsed.forEach { if(it.ast == null) log.error("Unable to parse SDF3 file ${it.file}, skipping") }
 
     // Load project, required for analysis and transformation.
-    val proj = loadProj(input.specDir)
+    val proj = loadProj(projDir)
 
     // Analyze
-    val analyzed = mutableMapOf<PPath, IStrategoTerm>()
-    for((file, parsedAst) in parsed) {
-      val result = analyze(CoreAnalyze.Input(input.sdfLangConfig, proj.path, file, parsedAst))
-      if(result.ast == null) {
-        log.error("Unable to analyze SDF file $file, skipping file")
-        continue
-      }
-      analyzed.put(file, result.ast)
-    }
+    val analyzePairs = parsed
+      .filter { it.ast != null }
+      .map { CoreAnalyzeAll.AstFilePair(it.ast!!, it.file) }
+    val analyzed = analyzeAll(langConfig, proj.path, analyzePairs)
+    analyzed.forEach { if(it.ast == null) log.error("Unable to analyze SDF3 file ${it.file}, skipping") }
 
     // Transform
     val transformGoal = EndNamedGoal("Generate Signature (concrete)")
-    val signatureFiles = ArrayList<PPath>()
-    for((file, analyzedAst) in analyzed) {
-      val results = trans(input.sdfLangConfig, proj.path, file, analyzedAst, transformGoal)
-      var success = false
-      for((transformedAst, writtenFile) in results) {
-        if(transformedAst != null && writtenFile != null) {
-          success = true
-          signatureFiles.add(file)
-        }
-      }
-      if(!success) {
-        log.error("Unable to generate signatures for SDF file $file, skipping file")
-      }
-    }
+    val transformPairs = analyzed
+      .filter { it.ast != null }
+      .map { CoreTransAll.AstFilePair(it.ast!!, it.file) }
+    val transformed = transAll(langConfig, proj.path, transformGoal, transformPairs)
+    transformed.forEach { if(it.ast == null || it.outputFile == null) log.error("Unable to transform SDF3 file ${it.inputFile} with $transformGoal, skipping") }
 
-    val includeDir = input.specDir.resolve("src-gen")
+    val signatureFiles = transformed
+      .filter { it.ast != null && it.outputFile != null }
+      .map { it.outputFile!! }
+      .toCollection(ArrayList())
+    val includeDir = projDir.resolve("src-gen")
     return Signatures(signatureFiles, includeDir)
   }
 }

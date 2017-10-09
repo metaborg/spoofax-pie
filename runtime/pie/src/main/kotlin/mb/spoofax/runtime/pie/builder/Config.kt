@@ -18,12 +18,13 @@ class GenerateLangSpecConfig : Builder<GenerateLangSpecConfig.Input, LangSpecCon
 
   override val id: String = Companion.id
   override fun BuildContext.build(input: Input): LangSpecConfig? {
-    val text = read(input.file)
-    val (ast, _, _) = parse(input.config, text)
+    val file = input.file
+    val text = read(file)
+    val (ast, _, _) = parse(input.config, text, file)
     if(ast == null) {
       return null
     }
-    val dir = input.file.parent();
+    val dir = file.parent();
     val config = LangSpecConfig.fromTerm(ast, dir)
     return config
 
@@ -35,11 +36,11 @@ class GenerateWorkspaceConfig : Builder<GenerateWorkspaceConfig.Input, Workspace
     val id = "spoofaxGenerateWorkspaceConfig"
   }
 
-  data class Input(val text: String, val workspaceRoot: PPath, val config: SpxCoreConfig) : Serializable
+  data class Input(val text: String, val file: PPath, val workspaceRoot: PPath, val config: SpxCoreConfig) : Serializable
 
   override val id: String = Companion.id
   override fun BuildContext.build(input: Input): WorkspaceConfig? {
-    val (ast, _, _) = parse(input.config, input.text)
+    val (ast, _, _) = parse(input.config, input.text, input.file)
     if(ast == null) {
       return null
     }

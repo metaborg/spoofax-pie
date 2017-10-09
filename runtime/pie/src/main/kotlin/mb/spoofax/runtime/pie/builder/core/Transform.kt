@@ -18,18 +18,19 @@ import java.io.Serializable
 
 fun createCompileGoal() = CompileGoal()
 fun createNamedGoal(name: String) = EndNamedGoal(name)
+
 class CoreTrans @Inject constructor(log: Logger) : Builder<CoreTrans.Input, ArrayList<CoreTrans.Output>> {
   companion object {
     val id = "coreTrans"
   }
 
-  data class Input(val config: SpxCoreConfig, val project: PPath, val file: PPath, val ast: IStrategoTerm, val goal: ITransformGoal) : Serializable {
+  data class Input(val config: SpxCoreConfig, val project: PPath, val goal: ITransformGoal, val file: PPath, val ast: IStrategoTerm) : Serializable {
     fun mayOverlap(other: Input): Boolean {
       return config == other.config && project == other.project && file == other.file && goal == other.goal
     }
   }
 
-  data class Output(val ast: IStrategoTerm?, val writtenFile: PPath?) : Tuple2<IStrategoTerm?, PPath?>
+  data class Output(val ast: IStrategoTerm?, val outputFile: PPath?, val inputFile: PPath) : Tuple2<IStrategoTerm?, PPath?>
 
   val log: Logger = log.forContext(CoreTrans::class.java)
 
@@ -50,7 +51,7 @@ class CoreTrans @Inject constructor(log: Logger) : Builder<CoreTrans.Input, Arra
     val project = spoofax.projectService.get(resource) ?: throw BuildException("Cannot transform $resource, it does not belong to a project")
     val inputUnit = spoofax.unitService.inputUnit(resource, "hack", langImpl, null)
     val parseUnit = spoofax.unitService.parseUnit(inputUnit, ParseContrib(true, true, input.ast, Iterables2.empty<IMessage>(), -1))
-    val spoofaxContext = spoofax.contextService.get(project.location(), project, langImpl)
+    val spoofaxContext = spoofax.contextService.get(resource, project, langImpl)
     val analyzeUnit = spoofax.unitService.analyzeUnit(parseUnit,
       AnalyzeContrib(true, true, true, input.ast, Iterables2.empty<IMessage>(), -1), spoofaxContext)
     spoofaxContext.read().use {
@@ -60,14 +61,14 @@ class CoreTrans @Inject constructor(log: Logger) : Builder<CoreTrans.Input, Arra
           val ast = result.ast()
           result.outputs().map { output ->
             val outputResource = output?.output()
-            val writtenFile: PPath?
-            if(outputResource != null) {
+            val outputFile: PPath?
+            outputFile = if(outputResource != null) {
               generate(outputResource.pPath)
-              writtenFile = outputResource.pPath
+              outputResource.pPath
             } else {
-              writtenFile = null
+              null
             }
-            Output(ast, writtenFile)
+            Output(ast, outputFile, input.file)
           }
         }
         return ArrayList(outputs)
@@ -84,4 +85,75 @@ class CoreTrans @Inject constructor(log: Logger) : Builder<CoreTrans.Input, Arra
 }
 
 fun BuildContext.trans(input: CoreTrans.Input) = requireOutput(CoreTrans::class.java, input)
-fun BuildContext.trans(config: SpxCoreConfig, project: PPath, file: PPath, ast: IStrategoTerm, goal: ITransformGoal) = trans(CoreTrans.Input(config, project, file, ast, goal))
+fun BuildContext.trans(config: SpxCoreConfig, project: PPath, goal: ITransformGoal, file: PPath, ast: IStrategoTerm) = trans(CoreTrans.Input(config, project, goal, file, ast))
+
+
+class CoreTransAll @Inject constructor(log: Logger) : Builder<CoreTransAll.Input, ArrayList<CoreTransAll.Output>> {
+  companion object {
+    val id = "coreTransAll"
+  }
+
+  data class AstFilePair(val ast: IStrategoTerm, val file: PPath) : Tuple2<IStrategoTerm, PPath>
+  data class Input(val config: SpxCoreConfig, val project: PPath, val goal: ITransformGoal, val pairs: Iterable<AstFilePair>) : Serializable {
+    fun mayOverlap(other: Input): Boolean {
+      return config == other.config && project == other.project && (pairs.zip(other.pairs).all { (l, r) -> l.file == r.file }) && goal == other.goal
+    }
+  }
+
+  data class Output(val ast: IStrategoTerm?, val outputFile: PPath?, val inputFile: PPath) : Tuple2<IStrategoTerm?, PPath?>
+
+  val log: Logger = log.forContext(CoreTransAll::class.java)
+
+  override val id = Companion.id
+  override fun BuildContext.build(input: Input): ArrayList<Output> {
+    val spoofax = Spx.spoofax()
+    val langImpl = buildOrLoad(input.config)
+
+    // Require Stratego runtime files
+    val facet = langImpl.facet<StrategoRuntimeFacet>(StrategoRuntimeFacet::class.java)
+    if(facet != null) {
+      facet.ctreeFiles.forEach { require(it.pPath, PathStampers.hash) }
+      facet.jarFiles.forEach { require(it.pPath, PathStampers.hash) }
+    }
+
+    // Perform transformation
+    val project = spoofax.projectService.get(input.project.fileObject) ?: throw BuildException("Cannot transform $input.project, it is not a project location")
+    val spoofaxContext = spoofax.contextService.get(project.location(), project, langImpl)
+    val analyzeUnits = input.pairs.map { (ast, file) ->
+      val resource = file.fileObject
+      val inputUnit = spoofax.unitService.inputUnit(resource, "hack", langImpl, null)
+      val parseUnit = spoofax.unitService.parseUnit(inputUnit, ParseContrib(true, true, ast, Iterables2.empty<IMessage>(), -1))
+      spoofax.unitService.analyzeUnit(parseUnit, AnalyzeContrib(true, true, true, ast, Iterables2.empty<IMessage>(), -1), spoofaxContext)
+    }
+    spoofaxContext.read().use {
+      try {
+        val results = spoofax.transformService.transformAllAnalyzed(analyzeUnits, spoofaxContext, input.goal)
+        val outputs = results.flatMap { result ->
+          val ast = result.ast()
+          result.outputs().map { output ->
+            val outputResource = output?.output()
+            val writtenFile: PPath?
+            writtenFile = if(outputResource != null) {
+              generate(outputResource.pPath)
+              outputResource.pPath
+            } else {
+              null
+            }
+            Output(ast, writtenFile, result.source()?.pPath!!)
+          }
+        }
+        return ArrayList(outputs)
+      } catch(e: TransformException) {
+        log.error("Transformation failed", e)
+        return ArrayList()
+      }
+    }
+  }
+
+  override fun mayOverlap(input1: Input, input2: Input): Boolean {
+    return input1.mayOverlap(input2)
+  }
+}
+
+fun BuildContext.transAll(input: CoreTransAll.Input) = requireOutput(CoreTransAll::class.java, input)
+fun BuildContext.transAll(config: SpxCoreConfig, project: PPath, goal: ITransformGoal, pairs: Iterable<CoreTransAll.AstFilePair>) = transAll(CoreTransAll.Input(config, project, goal, pairs))

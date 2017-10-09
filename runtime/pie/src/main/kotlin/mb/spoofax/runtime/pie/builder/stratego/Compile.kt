@@ -2,16 +2,14 @@ package mb.spoofax.runtime.pie.builder.stratego
 
 import com.google.inject.Inject
 import mb.log.Logger
-import mb.pie.runtime.core.BuildContext
-import mb.pie.runtime.core.Builder
+import mb.pie.runtime.core.*
+import mb.pie.runtime.core.impl.stamp.RecHashPathStamper
 import mb.pie.runtime.core.impl.stamp.RecModifiedPathStamper
+import mb.spoofax.runtime.impl.cfg.StrategoConfig
 import mb.spoofax.runtime.impl.stratego.StrategoCompiler
 import mb.vfs.path.*
 import java.io.IOException
-import java.io.Serializable
 import java.nio.charset.Charset
-import java.util.*
-import mb.spoofax.runtime.impl.cfg.StrategoConfig
 
 class CompileStratego
 @Inject constructor(private val log: Logger, private val pathSrv: PathSrv)
@@ -26,9 +24,9 @@ class CompileStratego
     val result = compiler.compile(input)
     if(result == null) {
       // Make manual dependencies, since no depfile is generated if compilation fails.
-      require(input.mainFile())
-      input.includeFiles().forEach { require(it) }
-      input.includeDirs().forEach { require(it, RecModifiedPathStamper(PPaths.extensionsPathWalker(listOf("str", "rtree")))) }
+      require(input.mainFile(), PathStampers.hash)
+      input.includeFiles().forEach { require(it, PathStampers.hash) }
+      input.includeDirs().forEach { require(it, PathStampers.hash(PPaths.extensionsPathWalker(listOf("str", "rtree")))) }
       return null
     }
     generate(result.outputFile)
@@ -36,10 +34,11 @@ class CompileStratego
     requiredPaths(result.depFile).forEach { require(it) }
     return result.outputFile
   }
+
   override fun mayOverlap(input1: StrategoConfig, input2: StrategoConfig): Boolean {
     return input1.outputFile() == input2.outputFile();
   }
-  
+
   @Throws(IOException::class)
   private fun requiredPaths(depFile: PPath) =
     depFile

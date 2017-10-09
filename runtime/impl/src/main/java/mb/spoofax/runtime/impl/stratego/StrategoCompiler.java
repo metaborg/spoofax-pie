@@ -37,7 +37,11 @@ public class StrategoCompiler {
         final PPath baseDir = config.baseDir();
         final PPath cacheDir = config.cacheDir();
 
-        // Delete rtree file to prevent it from influencing the build.
+        // Create necessary directories
+        outputFile.createParentDirectories();
+        cacheDir.createDirectories();
+        
+        // Delete rtree file (if it exists) to prevent it from influencing the build.
         outputFile.replaceExtension("rtree").deleteFile();
 
         final Arguments arguments =
