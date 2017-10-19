@@ -7,13 +7,13 @@ import org.metaborg.core.language.*
 
 typealias TransientLangImpl = OutTransientEquatable<ILanguageImpl, LanguageIdentifier>
 
-class CoreLoadLang : Builder<PPath, TransientLangImpl> {
+class CoreLoadLang : Func<PPath, TransientLangImpl> {
   companion object {
     val id = "coreLoadLang"
   }
 
   override val id = Companion.id
-  override fun BuildContext.build(input: PPath): TransientLangImpl {
+  override fun ExecContext.exec(input: PPath): TransientLangImpl {
     val spoofax = Spx.spoofax()
     val resource = input.fileObject
     val request: IComponentCreationConfigRequest
@@ -32,5 +32,5 @@ class CoreLoadLang : Builder<PPath, TransientLangImpl> {
   }
 }
 
-fun BuildContext.loadLangRaw(input: PPath) = requireOutput(CoreLoadLang::class.java, input)
-fun BuildContext.loadLang(input: PPath) = loadLangRaw(input).v
+fun ExecContext.loadLangRaw(input: PPath) = requireOutput(CoreLoadLang::class.java, input)
+fun ExecContext.loadLang(input: PPath) = loadLangRaw(input).v

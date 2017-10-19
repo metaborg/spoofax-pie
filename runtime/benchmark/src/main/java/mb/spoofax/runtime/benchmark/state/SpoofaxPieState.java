@@ -2,23 +2,23 @@ package mb.spoofax.runtime.benchmark.state;
 
 import com.google.inject.Key;
 import com.google.inject.Provider;
-import mb.pie.runtime.builtin.util.LogBuildLogger;
+import mb.pie.runtime.builtin.util.LogLogger;
 import mb.pie.runtime.core.*;
-import mb.pie.runtime.core.impl.BuildImpl;
-import mb.pie.runtime.core.impl.cache.MapBuildCache;
-import mb.pie.runtime.core.impl.cache.NoopBuildCache;
-import mb.pie.runtime.core.impl.layer.NoopBuildLayer;
-import mb.pie.runtime.core.impl.layer.ValidationBuildLayer;
-import mb.pie.runtime.core.impl.logger.NoopBuildLogger;
-import mb.pie.runtime.core.impl.logger.StreamBuildLogger;
-import mb.pie.runtime.core.impl.logger.TraceBuildLogger;
-import mb.pie.runtime.core.impl.share.BuildShare;
+import mb.pie.runtime.core.impl.PollingExec;
+import mb.pie.runtime.core.impl.cache.MapCache;
+import mb.pie.runtime.core.impl.cache.NoopCache;
+import mb.pie.runtime.core.impl.layer.NoopLayer;
+import mb.pie.runtime.core.impl.layer.ValidationLayer;
+import mb.pie.runtime.core.impl.logger.NoopLogger;
+import mb.pie.runtime.core.impl.logger.StreamLogger;
+import mb.pie.runtime.core.impl.logger.TraceLogger;
+import mb.pie.runtime.core.BuildShare;
 import mb.pie.runtime.core.impl.share.CoroutineBuildShare;
 import mb.pie.runtime.core.impl.share.NonSharingBuildShare;
-import mb.pie.runtime.core.impl.store.InMemoryBuildStore;
-import mb.pie.runtime.core.impl.store.InMemoryPathOnlyBuildStore;
+import mb.pie.runtime.core.impl.store.InMemoryStore;
+import mb.pie.runtime.core.impl.store.InMemoryPathOnlyStore;
 import mb.pie.runtime.core.impl.store.LMDBBuildStoreFactory;
-import mb.pie.runtime.core.impl.store.NoopBuildStore;
+import mb.pie.runtime.core.impl.store.NoopStore;
 import mb.vfs.path.PPath;
 import org.openjdk.jmh.annotations.*;
 
@@ -43,17 +43,17 @@ public class SpoofaxPieState {
     }
 
 
-    public BuildStore store;
-    public BuildCache cache;
+    public Store store;
+    public Cache cache;
     public BuildShare share;
-    public BuildLayer layer;
-    public BuildLogger logger;
-    public Map<String, Builder<?, ?>> builders;
-    public BuildImpl build;
+    public Layer layer;
+    public Logger logger;
+    public Map<String, Func<?, ?>> builders;
+    public PollingExec build;
 
     public void setupBuild() {
         this.store = storeKind.provider(storePath).get();
-        try(final BuildStoreWriteTxn txn = this.store.writeTxn()) {
+        try(final StoreWriteTxn txn = this.store.writeTxn()) {
             txn.drop();
         }
         this.cache = cacheKind.provider().get();
@@ -61,26 +61,26 @@ public class SpoofaxPieState {
         this.share = shareKind.provider().get();
         this.layer = layerKind.provider().get();
         this.logger = loggerKind.provider().get();
-        this.builders = injector.getInstance(new Key<Map<String, Builder<?, ?>>>() {
+        this.builders = injector.getInstance(new Key<Map<String, Func<?, ?>>>() {
         });
-        this.build = new BuildImpl(store, cache, share, layer, logger, builders, injector);
+        this.build = new PollingExec(store, cache, share, layer, logger, builders, injector);
     }
 
     public void renewBuild() {
         this.layer = layerKind.provider().get();
         this.logger = loggerKind.provider().get();
-        this.build = new BuildImpl(store, cache, share, layer, logger, builders, injector);
+        this.build = new PollingExec(store, cache, share, layer, logger, builders, injector);
     }
 
     public void resetBuild() {
-        try(final BuildStoreWriteTxn txn = this.store.writeTxn()) {
+        try(final StoreWriteTxn txn = this.store.writeTxn()) {
             txn.drop();
         }
         this.cache.drop();
     }
 
-    public BuildInfo<PPath, ? extends Serializable> runBuild() {
-        final BuildApp<PPath, ? extends Serializable> app = new BuildApp<>("processWorkspace", workspaceRoot);
+    public ExecInfo<PPath, ? extends Serializable> runBuild() {
+        final FuncApp<PPath, ? extends Serializable> app = new FuncApp<>("processWorkspace", workspaceRoot);
         return build.requireInitial(app);
     }
 
@@ -115,7 +115,7 @@ public class SpoofaxPieState {
 
     public enum BuildStoreKind {
         lmdb {
-            @Override public Provider<BuildStore> provider(PPath storePath) {
+            @Override public Provider<Store> provider(PPath storePath) {
                 final LMDBBuildStoreFactory factory = injector.getInstance(LMDBBuildStoreFactory.class);
                 final File localStorePath = pathSrv.localPath(storePath);
                 if(localStorePath == null) {
@@ -126,37 +126,37 @@ public class SpoofaxPieState {
             }
         },
         in_memory {
-            @Override public Provider<BuildStore> provider(PPath storePath) {
-                return InMemoryBuildStore::new;
+            @Override public Provider<Store> provider(PPath storePath) {
+                return InMemoryStore::new;
             }
         },
         in_memory_path_only {
-            @Override public Provider<BuildStore> provider(PPath storePath) {
-                return InMemoryPathOnlyBuildStore::new;
+            @Override public Provider<Store> provider(PPath storePath) {
+                return InMemoryPathOnlyStore::new;
             }
         },
         noop {
-            @Override public Provider<BuildStore> provider(PPath storePath) {
-                return NoopBuildStore::new;
+            @Override public Provider<Store> provider(PPath storePath) {
+                return NoopStore::new;
             }
         };
 
-        public abstract Provider<BuildStore> provider(PPath storePath);
+        public abstract Provider<Store> provider(PPath storePath);
     }
 
     public enum BuildCacheKind {
         map {
-            @Override public Provider<BuildCache> provider() {
-                return MapBuildCache::new;
+            @Override public Provider<Cache> provider() {
+                return MapCache::new;
             }
         },
         noop {
-            @Override public Provider<BuildCache> provider() {
-                return NoopBuildCache::new;
+            @Override public Provider<Cache> provider() {
+                return NoopCache::new;
             }
         };
 
-        public abstract Provider<BuildCache> provider();
+        public abstract Provider<Cache> provider();
     }
 
     public enum BuildShareKind {
@@ -176,41 +176,41 @@ public class SpoofaxPieState {
 
     public enum BuildLayerKind {
         validation {
-            @Override public Provider<BuildLayer> provider() {
-                return () -> SpoofaxPieStaticState.injector.getInstance(ValidationBuildLayer.class);
+            @Override public Provider<Layer> provider() {
+                return () -> SpoofaxPieStaticState.injector.getInstance(ValidationLayer.class);
             }
         },
         noop {
-            @Override public Provider<BuildLayer> provider() {
-                return NoopBuildLayer::new;
+            @Override public Provider<Layer> provider() {
+                return NoopLayer::new;
             }
         };
 
-        public abstract Provider<BuildLayer> provider();
+        public abstract Provider<Layer> provider();
     }
 
     public enum BuildLoggerKind {
         trace {
-            @Override public Provider<BuildLogger> provider() {
-                return TraceBuildLogger::new;
+            @Override public Provider<Logger> provider() {
+                return TraceLogger::new;
             }
         },
         log {
-            @Override public Provider<BuildLogger> provider() {
-                return () -> SpoofaxPieStaticState.injector.getInstance(LogBuildLogger.class);
+            @Override public Provider<Logger> provider() {
+                return () -> SpoofaxPieStaticState.injector.getInstance(LogLogger.class);
             }
         },
         stdout {
-            @Override public Provider<BuildLogger> provider() {
-                return StreamBuildLogger::new;
+            @Override public Provider<Logger> provider() {
+                return StreamLogger::new;
             }
         },
         noop {
-            @Override public Provider<BuildLogger> provider() {
-                return NoopBuildLogger::new;
+            @Override public Provider<Logger> provider() {
+                return NoopLogger::new;
             }
         };
 
-        public abstract Provider<BuildLogger> provider();
+        public abstract Provider<Logger> provider();
     }
 }

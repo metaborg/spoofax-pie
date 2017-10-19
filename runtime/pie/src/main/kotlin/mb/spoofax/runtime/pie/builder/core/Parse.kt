@@ -16,7 +16,7 @@ import org.metaborg.spoofax.core.syntax.SyntaxFacet
 import org.spoofax.interpreter.terms.IStrategoTerm
 import java.io.Serializable
 
-class CoreParse @Inject constructor(log: Logger, private val messageConverter: MessageConverter) : Builder<CoreParse.Input, CoreParse.Output> {
+class CoreParse @Inject constructor(log: Logger, private val messageConverter: MessageConverter) : Func<CoreParse.Input, CoreParse.Output> {
   companion object {
     val id = "coreParse"
   }
@@ -27,7 +27,7 @@ class CoreParse @Inject constructor(log: Logger, private val messageConverter: M
   val log: Logger = log.forContext(CoreTrans::class.java)
 
   override val id = Companion.id
-  override fun BuildContext.build(input: Input): Output {
+  override fun ExecContext.exec(input: Input): Output {
     val spoofax = Spx.spoofax()
     val langImpl = buildOrLoad(input.config)
 
@@ -56,11 +56,11 @@ class CoreParse @Inject constructor(log: Logger, private val messageConverter: M
   }
 }
 
-fun BuildContext.parse(input: CoreParse.Input) = requireOutput(CoreParse::class.java, input)
-fun BuildContext.parse(config: SpxCoreConfig, text: String, file: PPath) = parse(CoreParse.Input(config, text, file))
+fun ExecContext.parse(input: CoreParse.Input) = requireOutput(CoreParse::class.java, input)
+fun ExecContext.parse(config: SpxCoreConfig, text: String, file: PPath) = parse(CoreParse.Input(config, text, file))
 
 
-class CoreParseAll @Inject constructor(log: Logger, private val messageConverter: MessageConverter) : Builder<CoreParseAll.Input, ArrayList<CoreParseAll.Output>> {
+class CoreParseAll @Inject constructor(log: Logger, private val messageConverter: MessageConverter) : Func<CoreParseAll.Input, ArrayList<CoreParseAll.Output>> {
   companion object {
     val id = "coreParseAll"
   }
@@ -72,7 +72,7 @@ class CoreParseAll @Inject constructor(log: Logger, private val messageConverter
   val log: Logger = log.forContext(CoreParseAll::class.java)
 
   override val id = Companion.id
-  override fun BuildContext.build(input: Input): ArrayList<Output> {
+  override fun ExecContext.exec(input: Input): ArrayList<Output> {
     val spoofax = Spx.spoofax()
     val langImpl = buildOrLoad(input.config)
 
@@ -102,5 +102,5 @@ class CoreParseAll @Inject constructor(log: Logger, private val messageConverter
   }
 }
 
-fun BuildContext.parseAll(input: CoreParseAll.Input) = requireOutput(CoreParseAll::class.java, input)
-fun BuildContext.parseAll(config: SpxCoreConfig, pairs: Iterable<CoreParseAll.TextFilePair>) = parseAll(CoreParseAll.Input(config, pairs))
+fun ExecContext.parseAll(input: CoreParseAll.Input) = requireOutput(CoreParseAll::class.java, input)
+fun ExecContext.parseAll(config: SpxCoreConfig, pairs: Iterable<CoreParseAll.TextFilePair>) = parseAll(CoreParseAll.Input(config, pairs))

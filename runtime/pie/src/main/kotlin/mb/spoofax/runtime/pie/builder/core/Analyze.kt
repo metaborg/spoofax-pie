@@ -16,7 +16,7 @@ import org.metaborg.util.iterators.Iterables2
 import org.spoofax.interpreter.terms.IStrategoTerm
 import java.io.Serializable
 
-class CoreAnalyze @Inject constructor(log: Logger, private val messageConverter: MessageConverter) : Builder<CoreAnalyze.Input, CoreAnalyze.Output> {
+class CoreAnalyze @Inject constructor(log: Logger, private val messageConverter: MessageConverter) : Func<CoreAnalyze.Input, CoreAnalyze.Output> {
   companion object {
     val id = "coreAnalyze"
   }
@@ -27,7 +27,7 @@ class CoreAnalyze @Inject constructor(log: Logger, private val messageConverter:
   val log: Logger = log.forContext(CoreAnalyze::class.java)
 
   override val id = Companion.id
-  override fun BuildContext.build(input: Input): Output {
+  override fun ExecContext.exec(input: Input): Output {
     val spoofax = Spx.spoofax()
     val langImpl = buildOrLoad(input.config)
 
@@ -40,7 +40,7 @@ class CoreAnalyze @Inject constructor(log: Logger, private val messageConverter:
 
     // Perform analysis
     val resource = input.file.fileObject
-    val project = spoofax.projectService.get(resource) ?: throw BuildException("Cannot analyze $resource, it does not belong to a project")
+    val project = spoofax.projectService.get(resource) ?: throw ExecException("Cannot analyze $resource, it does not belong to a project")
     val inputUnit = spoofax.unitService.inputUnit(resource, "hack", langImpl, null)
     val parseUnit = spoofax.unitService.parseUnit(inputUnit, ParseContrib(true, true, input.ast, Iterables2.empty<IMessage>(), -1))
     val spoofaxContext = spoofax.contextService.get(resource, project, langImpl)
@@ -59,11 +59,11 @@ class CoreAnalyze @Inject constructor(log: Logger, private val messageConverter:
   }
 }
 
-fun BuildContext.analyze(input: CoreAnalyze.Input) = requireOutput(CoreAnalyze::class.java, input)
-fun BuildContext.analyze(config: SpxCoreConfig, project: PPath, file: PPath, ast: IStrategoTerm) = analyze(CoreAnalyze.Input(config, project, file, ast))
+fun ExecContext.analyze(input: CoreAnalyze.Input) = requireOutput(CoreAnalyze::class.java, input)
+fun ExecContext.analyze(config: SpxCoreConfig, project: PPath, file: PPath, ast: IStrategoTerm) = analyze(CoreAnalyze.Input(config, project, file, ast))
 
 
-class CoreAnalyzeAll @Inject constructor(log: Logger, private val messageConverter: MessageConverter) : Builder<CoreAnalyzeAll.Input, ArrayList<CoreAnalyzeAll.Output>> {
+class CoreAnalyzeAll @Inject constructor(log: Logger, private val messageConverter: MessageConverter) : Func<CoreAnalyzeAll.Input, ArrayList<CoreAnalyzeAll.Output>> {
   companion object {
     val id = "coreAnalyzeAll"
   }
@@ -78,7 +78,7 @@ class CoreAnalyzeAll @Inject constructor(log: Logger, private val messageConvert
   val log: Logger = log.forContext(CoreAnalyzeAll::class.java)
 
   override val id = Companion.id
-  override fun BuildContext.build(input: Input): ArrayList<Output> {
+  override fun ExecContext.exec(input: Input): ArrayList<Output> {
     val spoofax = Spx.spoofax()
     val langImpl = buildOrLoad(input.config)
 
@@ -90,11 +90,11 @@ class CoreAnalyzeAll @Inject constructor(log: Logger, private val messageConvert
     }
 
     // Perform analysis
-    val project = spoofax.projectService.get(input.project.fileObject) ?: throw BuildException("Cannot analyze $input.project, it is not a project location")
+    val project = spoofax.projectService.get(input.project.fileObject) ?: throw ExecException("Cannot analyze $input.project, it is not a project location")
     val spoofaxContext = spoofax.contextService.get(project.location(), project, langImpl)
     val parseUnits = input.pairs.map { (ast, file) ->
       val resource = file.fileObject
-      val project = spoofax.projectService.get(resource) ?: throw BuildException("Cannot analyze $resource, it does not belong to a project")
+      val project = spoofax.projectService.get(resource) ?: throw ExecException("Cannot analyze $resource, it does not belong to a project")
       val inputUnit = spoofax.unitService.inputUnit(resource, "hack", langImpl, null)
       spoofax.unitService.parseUnit(inputUnit, ParseContrib(true, true, ast, Iterables2.empty<IMessage>(), -1))
     }
@@ -114,5 +114,5 @@ class CoreAnalyzeAll @Inject constructor(log: Logger, private val messageConvert
   }
 }
 
-fun BuildContext.analyzeAll(input: CoreAnalyzeAll.Input) = requireOutput(CoreAnalyzeAll::class.java, input)
-fun BuildContext.analyzeAll(config: SpxCoreConfig, project: PPath, pairs: Iterable<CoreAnalyzeAll.AstFilePair>) = analyzeAll(CoreAnalyzeAll.Input(config, project, pairs))
+fun ExecContext.analyzeAll(input: CoreAnalyzeAll.Input) = requireOutput(CoreAnalyzeAll::class.java, input)
+fun ExecContext.analyzeAll(config: SpxCoreConfig, project: PPath, pairs: Iterable<CoreAnalyzeAll.AstFilePair>) = analyzeAll(CoreAnalyzeAll.Input(config, project, pairs))

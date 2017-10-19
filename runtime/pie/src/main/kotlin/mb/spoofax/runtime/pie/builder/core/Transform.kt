@@ -19,7 +19,7 @@ import java.io.Serializable
 fun createCompileGoal() = CompileGoal()
 fun createNamedGoal(name: String) = EndNamedGoal(name)
 
-class CoreTrans @Inject constructor(log: Logger) : Builder<CoreTrans.Input, ArrayList<CoreTrans.Output>> {
+class CoreTrans @Inject constructor(log: Logger) : Func<CoreTrans.Input, ArrayList<CoreTrans.Output>> {
   companion object {
     val id = "coreTrans"
   }
@@ -35,7 +35,7 @@ class CoreTrans @Inject constructor(log: Logger) : Builder<CoreTrans.Input, Arra
   val log: Logger = log.forContext(CoreTrans::class.java)
 
   override val id = Companion.id
-  override fun BuildContext.build(input: Input): ArrayList<Output> {
+  override fun ExecContext.exec(input: Input): ArrayList<Output> {
     val spoofax = Spx.spoofax()
     val langImpl = buildOrLoad(input.config)
 
@@ -48,7 +48,7 @@ class CoreTrans @Inject constructor(log: Logger) : Builder<CoreTrans.Input, Arra
 
     // Perform transformation
     val resource = input.file.fileObject
-    val project = spoofax.projectService.get(resource) ?: throw BuildException("Cannot transform $resource, it does not belong to a project")
+    val project = spoofax.projectService.get(resource) ?: throw ExecException("Cannot transform $resource, it does not belong to a project")
     val inputUnit = spoofax.unitService.inputUnit(resource, "hack", langImpl, null)
     val parseUnit = spoofax.unitService.parseUnit(inputUnit, ParseContrib(true, true, input.ast, Iterables2.empty<IMessage>(), -1))
     val spoofaxContext = spoofax.contextService.get(resource, project, langImpl)
@@ -84,11 +84,11 @@ class CoreTrans @Inject constructor(log: Logger) : Builder<CoreTrans.Input, Arra
   }
 }
 
-fun BuildContext.trans(input: CoreTrans.Input) = requireOutput(CoreTrans::class.java, input)
-fun BuildContext.trans(config: SpxCoreConfig, project: PPath, goal: ITransformGoal, file: PPath, ast: IStrategoTerm) = trans(CoreTrans.Input(config, project, goal, file, ast))
+fun ExecContext.trans(input: CoreTrans.Input) = requireOutput(CoreTrans::class.java, input)
+fun ExecContext.trans(config: SpxCoreConfig, project: PPath, goal: ITransformGoal, file: PPath, ast: IStrategoTerm) = trans(CoreTrans.Input(config, project, goal, file, ast))
 
 
-class CoreTransAll @Inject constructor(log: Logger) : Builder<CoreTransAll.Input, ArrayList<CoreTransAll.Output>> {
+class CoreTransAll @Inject constructor(log: Logger) : Func<CoreTransAll.Input, ArrayList<CoreTransAll.Output>> {
   companion object {
     val id = "coreTransAll"
   }
@@ -105,7 +105,7 @@ class CoreTransAll @Inject constructor(log: Logger) : Builder<CoreTransAll.Input
   val log: Logger = log.forContext(CoreTransAll::class.java)
 
   override val id = Companion.id
-  override fun BuildContext.build(input: Input): ArrayList<Output> {
+  override fun ExecContext.exec(input: Input): ArrayList<Output> {
     val spoofax = Spx.spoofax()
     val langImpl = buildOrLoad(input.config)
 
@@ -117,7 +117,7 @@ class CoreTransAll @Inject constructor(log: Logger) : Builder<CoreTransAll.Input
     }
 
     // Perform transformation
-    val project = spoofax.projectService.get(input.project.fileObject) ?: throw BuildException("Cannot transform $input.project, it is not a project location")
+    val project = spoofax.projectService.get(input.project.fileObject) ?: throw ExecException("Cannot transform $input.project, it is not a project location")
     val spoofaxContext = spoofax.contextService.get(project.location(), project, langImpl)
     val analyzeUnits = input.pairs.map { (ast, file) ->
       val resource = file.fileObject
@@ -155,5 +155,5 @@ class CoreTransAll @Inject constructor(log: Logger) : Builder<CoreTransAll.Input
   }
 }
 
-fun BuildContext.transAll(input: CoreTransAll.Input) = requireOutput(CoreTransAll::class.java, input)
-fun BuildContext.transAll(config: SpxCoreConfig, project: PPath, goal: ITransformGoal, pairs: Iterable<CoreTransAll.AstFilePair>) = transAll(CoreTransAll.Input(config, project, goal, pairs))
+fun ExecContext.transAll(input: CoreTransAll.Input) = requireOutput(CoreTransAll::class.java, input)
+fun ExecContext.transAll(config: SpxCoreConfig, project: PPath, goal: ITransformGoal, pairs: Iterable<CoreTransAll.AstFilePair>) = transAll(CoreTransAll.Input(config, project, goal, pairs))

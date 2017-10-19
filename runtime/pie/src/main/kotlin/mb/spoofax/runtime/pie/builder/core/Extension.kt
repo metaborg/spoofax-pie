@@ -10,7 +10,7 @@ import mb.vfs.path.PPath
 import org.metaborg.spoofax.meta.core.build.SpoofaxLangSpecCommonPaths
 import java.io.Serializable
 
-class CoreExtensions @Inject constructor(log: Logger) : Builder<CoreExtensions.Input, ArrayList<String>> {
+class CoreExtensions @Inject constructor(log: Logger) : Func<CoreExtensions.Input, ArrayList<String>> {
   companion object {
     val id = "coreExtensions"
   }
@@ -22,7 +22,7 @@ class CoreExtensions @Inject constructor(log: Logger) : Builder<CoreExtensions.I
   val log: Logger = log.forContext(CoreTrans::class.java)
 
   override val id = Companion.id
-  override fun BuildContext.build(input: Input): ArrayList<String> {
+  override fun ExecContext.exec(input: Input): ArrayList<String> {
     val langImpl = buildOrLoad(input.dir, input.isLangSpec)
 
     // Require packed ESV file
@@ -42,6 +42,6 @@ class CoreExtensions @Inject constructor(log: Logger) : Builder<CoreExtensions.I
   }
 }
 
-fun BuildContext.langExtensions(input: CoreExtensions.Input) = requireOutput(CoreExtensions::class.java, input)
-fun BuildContext.langExtensions(dir: PPath, isLangSpec: Boolean) = langExtensions(CoreExtensions.Input(dir, isLangSpec))
-fun BuildContext.langExtensions(input: SpxCoreConfig) = langExtensions(CoreExtensions.Input(input))
+fun ExecContext.langExtensions(input: CoreExtensions.Input) = requireOutput(CoreExtensions::class.java, input)
+fun ExecContext.langExtensions(dir: PPath, isLangSpec: Boolean) = langExtensions(CoreExtensions.Input(dir, isLangSpec))
+fun ExecContext.langExtensions(input: SpxCoreConfig) = langExtensions(CoreExtensions.Input(input))

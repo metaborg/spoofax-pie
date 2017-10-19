@@ -2,6 +2,7 @@ package mb.spoofax.runtime.pie.builder.core
 
 import com.google.inject.Inject
 import mb.log.*
+import mb.log.Logger
 import mb.pie.runtime.core.*
 import mb.vfs.access.DirAccess
 import mb.vfs.path.*
@@ -13,7 +14,7 @@ import org.metaborg.spoofax.meta.core.build.LanguageSpecBuildInput
 import org.metaborg.spoofax.meta.core.build.SpoofaxLangSpecCommonPaths
 import java.io.PrintWriter
 
-class CoreBuild @Inject constructor(log: Logger) : OutEffectBuilder<PPath> {
+class CoreBuild @Inject constructor(log: Logger) : OutEffectFunc<PPath> {
   companion object {
     val id = "coreBuild"
   }
@@ -21,7 +22,7 @@ class CoreBuild @Inject constructor(log: Logger) : OutEffectBuilder<PPath> {
   val log: Logger = log.forContext(CoreBuild::class.java)
 
   override val id = Companion.id
-  override fun BuildContext.effect(input: PPath) {
+  override fun ExecContext.effect(input: PPath) {
     val spoofax = Spx.spoofax()
     val project = loadProj(input)
     val inputBuilder = BuildInputBuilder(project)
@@ -47,10 +48,10 @@ class CoreBuild @Inject constructor(log: Logger) : OutEffectBuilder<PPath> {
   }
 }
 
-fun BuildContext.buildProject(input: PPath) = requireBuild(CoreBuild::class.java, input)
+fun ExecContext.buildProject(input: PPath) = requireExec(CoreBuild::class.java, input)
 
 
-class CoreBuildLangSpec @Inject constructor(log: Logger, val pathSrv: PathSrv) : OutEffectBuilder<PPath> {
+class CoreBuildLangSpec @Inject constructor(log: Logger, private val pathSrv: PathSrv) : OutEffectFunc<PPath> {
   companion object {
     val id = "coreBuildLangSpec"
   }
@@ -58,11 +59,11 @@ class CoreBuildLangSpec @Inject constructor(log: Logger, val pathSrv: PathSrv) :
   val log: Logger = log.forContext(CoreBuild::class.java)
 
   override val id = Companion.id
-  override fun BuildContext.effect(input: PPath) {
+  override fun ExecContext.effect(input: PPath) {
     val spoofaxMeta = Spx.spoofaxMeta()
 
     val project = loadProj(input)
-    val langSpec = spoofaxMeta.languageSpecService.get(project) ?: throw BuildException("Cannot build language specification from project $project, it is not a language specification")
+    val langSpec = spoofaxMeta.languageSpecService.get(project) ?: throw ExecException("Cannot build language specification from project $project, it is not a language specification")
     val langSpecBuildInput = LanguageSpecBuildInput(langSpec)
 
     // Require all SDF and Stratego files
@@ -115,4 +116,4 @@ class CoreBuildLangSpec @Inject constructor(log: Logger, val pathSrv: PathSrv) :
   }
 }
 
-fun BuildContext.buildLangSpec(input: PPath) = requireBuild(CoreBuildLangSpec::class.java, input)
+fun ExecContext.buildLangSpec(input: PPath) = requireExec(CoreBuildLangSpec::class.java, input)

@@ -2,8 +2,8 @@ package mb.spoofax.runtime.pie.builder
 
 import com.google.inject.Inject
 import mb.pie.runtime.builtin.path.read
-import mb.pie.runtime.core.BuildContext
-import mb.pie.runtime.core.Builder
+import mb.pie.runtime.core.ExecContext
+import mb.pie.runtime.core.Func
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.spoofax.runtime.impl.esv.*
 import mb.spoofax.runtime.model.SpoofaxRunEx
@@ -16,7 +16,7 @@ import java.io.Serializable
 
 class GenerateStylerRules
 @Inject constructor(private val stylingRulesFromESV: StylingRulesFromESV)
-  : Builder<GenerateStylerRules.Input, StylingRules?> {
+  : Func<GenerateStylerRules.Input, StylingRules?> {
   companion object {
     val id = "spoofaxGenerateStylerRules"
   }
@@ -24,7 +24,7 @@ class GenerateStylerRules
   data class Input(val esvLangConfig: SpxCoreConfig, val mainFile: PPath, val includedFiles: Iterable<PPath>) : Serializable
 
   override val id = Companion.id
-  override fun BuildContext.build(input: Input): StylingRules? {
+  override fun ExecContext.exec(input: Input): StylingRules? {
     val text = read(input.mainFile) ?: return null
 
     for(includedFile in input.includedFiles) {
@@ -40,7 +40,7 @@ class GenerateStylerRules
   }
 }
 
-class Style : Builder<Style.Input, Styling> {
+class Style : Func<Style.Input, Styling> {
   companion object {
     val id = "spoofaxStyle"
   }
@@ -48,7 +48,7 @@ class Style : Builder<Style.Input, Styling> {
   data class Input(val tokenStream: ArrayList<Token>, val rules: StylingRules) : Serializable
 
   override val id = Companion.id
-  override fun BuildContext.build(input: Input): Styling {
+  override fun ExecContext.exec(input: Input): Styling {
     val styler = Styler(input.rules)
     val styling = styler.style(input.tokenStream)
     return styling

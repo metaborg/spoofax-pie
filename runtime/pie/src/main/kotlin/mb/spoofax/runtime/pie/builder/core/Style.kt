@@ -14,7 +14,7 @@ import org.metaborg.util.iterators.Iterables2
 import org.spoofax.interpreter.terms.IStrategoTerm
 import java.io.Serializable
 
-class CoreStyle @Inject constructor(log: Logger) : Builder<CoreStyle.Input, Styling> {
+class CoreStyle @Inject constructor(log: Logger) : Func<CoreStyle.Input, Styling> {
   companion object {
     val id = "coreStyle"
   }
@@ -25,7 +25,7 @@ class CoreStyle @Inject constructor(log: Logger) : Builder<CoreStyle.Input, Styl
   val log: Logger = log.forContext(CoreTrans::class.java)
 
   override val id = Companion.id
-  override fun BuildContext.build(input: Input): Styling {
+  override fun ExecContext.exec(input: Input): Styling {
     val spoofax = Spx.spoofax()
     val langImpl = buildOrLoad(input.config)
 

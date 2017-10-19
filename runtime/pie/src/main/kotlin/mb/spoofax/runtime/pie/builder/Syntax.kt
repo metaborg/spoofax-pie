@@ -24,7 +24,7 @@ import java.util.*
 
 class GenerateTable
 @Inject constructor(log: Logger, private val pathSrv: PathSrv)
-  : Builder<GenerateTable.Input, Table> {
+  : Func<GenerateTable.Input, Table> {
   companion object {
     val id = "spoofaxGenerateTable"
   }
@@ -34,11 +34,11 @@ class GenerateTable
   val log: Logger = log.forContext(GenerateTable::class.java)
 
   override val id = Companion.id
-  override fun BuildContext.build(input: Input): Table {
+  override fun ExecContext.exec(input: Input): Table {
     val (langConfig, projDir, files, mainFile) = input
 
     if(!files.contains(mainFile)) {
-      throw BuildException("SDF3 main file $mainFile is not in the list of files $files")
+      throw ExecException("SDF3 main file $mainFile is not in the list of files $files")
     }
 
     // Read input files
@@ -69,12 +69,12 @@ class GenerateTable
 
     // Create table
     // Main input file
-    val mainResource = transformed.firstOrNull { it.inputFile == mainFile }?.outputFile ?: throw BuildException("Main file " + input.mainFile + " could not be normalized")
-    val mainResourceLocal = pathSrv.localPath(mainResource) ?: throw BuildException("Normalized main file $mainResource is not on the local file system")
+    val mainResource = transformed.firstOrNull { it.inputFile == mainFile }?.outputFile ?: throw ExecException("Main file " + input.mainFile + " could not be normalized")
+    val mainResourceLocal = pathSrv.localPath(mainResource) ?: throw ExecException("Normalized main file $mainResource is not on the local file system")
     // Output file
     val spoofaxPaths = SpoofaxCommonPaths(proj.location())
     val vfsOutputFile = spoofaxPaths.targetMetaborgDir().resolveFile("sdf-new.tbl")
-    val outputFile = Spx.spoofax().resourceService.localPath(vfsOutputFile) ?: throw BuildException("Parse table output file $vfsOutputFile is not on the local file system")
+    val outputFile = Spx.spoofax().resourceService.localPath(vfsOutputFile) ?: throw ExecException("Parse table output file $vfsOutputFile is not on the local file system")
     // Paths
     val srcGenSyntaxDir = input.specDir.resolve("src-gen/syntax");
     val paths = listOf(srcGenSyntaxDir.toString())
@@ -89,7 +89,7 @@ class GenerateTable
 
 class GenerateSignatures
 @Inject constructor(log: Logger, private val pathSrv: PathSrv)
-  : Builder<GenerateSignatures.Input, Signatures> {
+  : Func<GenerateSignatures.Input, Signatures> {
   companion object {
     val id = "spoofaxGenerateSignatures"
   }
@@ -99,7 +99,7 @@ class GenerateSignatures
   val log: Logger = log.forContext(GenerateSignatures::class.java)
 
   override val id = Companion.id
-  override fun BuildContext.build(input: Input): Signatures {
+  override fun ExecContext.exec(input: Input): Signatures {
     val (langConfig, projDir, files) = input
 
     // Read input files
@@ -144,7 +144,7 @@ class GenerateSignatures
   }
 }
 
-class Parse : Builder<Parse.Input, Parse.Output> {
+class Parse : Func<Parse.Input, Parse.Output> {
   companion object {
     val id = "spoofaxParse"
   }
@@ -153,7 +153,7 @@ class Parse : Builder<Parse.Input, Parse.Output> {
   data class Output(val ast: IStrategoTerm?, val tokenStream: ArrayList<Token>?, val messages: ArrayList<Msg>) : Tuple3<IStrategoTerm?, ArrayList<Token>?, ArrayList<Msg>>
 
   override val id = Companion.id
-  override fun BuildContext.build(input: Input): Output {
+  override fun ExecContext.exec(input: Input): Output {
     val termFactory = ImploderOriginTermFactory(TermFactory())
     val parser = input.table.createParser(termFactory)
     val output = parser.parse(input.text, input.startSymbol, input.file)

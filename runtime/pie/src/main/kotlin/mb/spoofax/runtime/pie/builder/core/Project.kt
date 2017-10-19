@@ -7,13 +7,13 @@ import org.metaborg.core.project.ISimpleProjectService
 
 typealias TransientProject = OutTransientEquatable<IProject, PPath>
 
-class CoreLoadProj : Builder<PPath, TransientProject> {
+class CoreLoadProj : Func<PPath, TransientProject> {
   companion object {
     val id = "coreLoadProj"
   }
 
   override val id = Companion.id
-  override fun BuildContext.build(input: PPath): TransientProject {
+  override fun ExecContext.exec(input: PPath): TransientProject {
     val spoofax = Spx.spoofax()
     val projLoc = input.fileObject
     var project = spoofax.projectService.get(projLoc)
@@ -27,4 +27,4 @@ class CoreLoadProj : Builder<PPath, TransientProject> {
 
 val IProject.path get() = this.location().pPath
 
-fun BuildContext.loadProj(input: PPath) = requireOutput(CoreLoadProj::class.java, input).v
+fun ExecContext.loadProj(input: PPath) = requireOutput(CoreLoadProj::class.java, input).v

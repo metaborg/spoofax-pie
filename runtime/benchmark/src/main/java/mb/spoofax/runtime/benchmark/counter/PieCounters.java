@@ -95,7 +95,7 @@ public class PieCounters {
         if(state.loggerKind != SpoofaxPieState.BuildLoggerKind.trace) {
             throw new RuntimeException("Counting was requested but logger kind was not set to 'trace'");
         }
-        final TraceBuildLogger logger = (TraceBuildLogger) state.logger;
+        final TraceLogger logger = (TraceLogger) state.logger;
         final List<Trace> traces = logger.getTraces();
 
         long timeTotal = 0;

@@ -3,8 +3,6 @@ package mb.spoofax.runtime.pie.builder.stratego
 import com.google.inject.Inject
 import mb.log.Logger
 import mb.pie.runtime.core.*
-import mb.pie.runtime.core.impl.stamp.RecHashPathStamper
-import mb.pie.runtime.core.impl.stamp.RecModifiedPathStamper
 import mb.spoofax.runtime.impl.cfg.StrategoConfig
 import mb.spoofax.runtime.impl.stratego.StrategoCompiler
 import mb.vfs.path.*
@@ -13,13 +11,13 @@ import java.nio.charset.Charset
 
 class CompileStratego
 @Inject constructor(private val log: Logger, private val pathSrv: PathSrv)
-  : Builder<StrategoConfig, PPath?> {
+  : Func<StrategoConfig, PPath?> {
   companion object {
     val id = "compileStratego"
   }
 
   override val id = Companion.id
-  override fun BuildContext.build(input: StrategoConfig): PPath? {
+  override fun ExecContext.exec(input: StrategoConfig): PPath? {
     val compiler = StrategoCompiler()
     val result = compiler.compile(input)
     if(result == null) {
@@ -60,4 +58,4 @@ class CompileStratego
       }
 }
 
-fun BuildContext.compileStratego(input: StrategoConfig) = requireOutput(CompileStratego::class.java, input)
+fun ExecContext.compileStratego(input: StrategoConfig) = requireOutput(CompileStratego::class.java, input)
