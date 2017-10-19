@@ -26,7 +26,7 @@ public class Table implements Serializable {
     }
 
     public Table(PPath path) throws IOException {
-        this.data = Files.readAllBytes(path.getJavaPath());
+        this.data = path.readAllBytes();
     }
 
 

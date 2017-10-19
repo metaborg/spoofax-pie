@@ -44,7 +44,7 @@ public class DocumentProvider extends FileDocumentProvider {
 
 
             try {
-                final InputStream stream = Files.newInputStream(path.getJavaPath());
+                final InputStream stream = path.inputStream();
                 String encoding = getEncoding(element);
                 if(encoding == null) {
                     encoding = getDefaultEncoding();

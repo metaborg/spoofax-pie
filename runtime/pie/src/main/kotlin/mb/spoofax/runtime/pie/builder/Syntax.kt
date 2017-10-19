@@ -42,9 +42,14 @@ class GenerateTable
     }
 
     // Read input files
-    val textFilePairs = files.map {
+    val textFilePairs = files.mapNotNull {
       val text = read(it)
-      CoreParseAll.TextFilePair(text, it)
+      if(text == null) {
+        log.error("Unable to read SDF3 file $it (it does not exist), skipping")
+        null
+      } else {
+        CoreParseAll.TextFilePair(text, it)
+      }
     }
 
     // Parse input files
@@ -98,9 +103,14 @@ class GenerateSignatures
     val (langConfig, projDir, files) = input
 
     // Read input files
-    val textFilePairs = files.map {
+    val textFilePairs = files.mapNotNull {
       val text = read(it)
-      CoreParseAll.TextFilePair(text, it)
+      if(text == null) {
+        log.error("Unable to read SDF3 file $it (it does not exist), skipping")
+        null
+      } else {
+        CoreParseAll.TextFilePair(text, it)
+      }
     }
 
     // Parse input files

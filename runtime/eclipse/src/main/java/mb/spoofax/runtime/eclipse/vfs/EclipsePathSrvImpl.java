@@ -80,8 +80,7 @@ public class EclipsePathSrvImpl extends PathSrvImpl implements EclipsePathSrv {
     }
 
     @Override public @Nullable IResource unresolve(PPath pipePath) {
-        final Path path = pipePath.getJavaPath();
-        final IPath eclipsePath = org.eclipse.core.runtime.Path.fromOSString(path.toString());
+        final IPath eclipsePath = org.eclipse.core.runtime.Path.fromOSString(pipePath.toString());
         IResource resource = root.getFileForLocation(eclipsePath);
         if(resource == null) {
             resource = root.getContainerForLocation(eclipsePath);

@@ -1,9 +1,11 @@
 package mb.spoofax.runtime.pie
 
 import com.google.inject.Binder
-import mb.pie.runtime.builtin.util.LoggerBuildReporter
+import com.google.inject.multibindings.MapBinder
+import mb.pie.runtime.builtin.util.LogBuildLogger
 import mb.pie.runtime.core.*
-import mb.pie.runtime.core.impl.*
+import mb.pie.runtime.core.impl.cache.MapBuildCache
+import mb.pie.runtime.core.impl.layer.ValidationBuildLayer
 import mb.spoofax.runtime.pie.builder.*
 import mb.spoofax.runtime.pie.builder.core.*
 import mb.spoofax.runtime.pie.builder.stratego.CompileStratego
@@ -12,30 +14,22 @@ open class SpoofaxPieModule : PieModule() {
   override fun configure(binder: Binder) {
     super.configure(binder)
 
-    binder.bindCache()
     binder.bindPie()
-    binder.bindBuilders()
   }
 
-  open protected fun Binder.bindCache() {
+  override fun Binder.bindCache() {
     bind<BuildCache>().to<MapBuildCache>()
   }
 
-  override fun Binder.bindReporter() {
-    bind<BuildReporter>().to<LoggerBuildReporter>()
+  override fun Binder.bindLogger() {
+    bind<BuildLogger>().to<LogBuildLogger>()
   }
 
-  override fun Binder.bindValidationLayer() {
-    bind<ValidationLayer>().to<ValidationLayerImpl>()
+  override fun Binder.bindLayer() {
+    bind<BuildLayer>().to<ValidationBuildLayer>()
   }
 
-  open protected fun Binder.bindPie() {
-    bind<PieSrv>().to<PieSrvImpl>().asSingleton()
-  }
-
-  open protected fun Binder.bindBuilders() {
-    val builders = builderMapBinder()
-
+  override fun Binder.bindBuilders(builders: MapBinder<String, UBuilder>) {
     bindBuilder<GenerateLangSpecConfig>(builders, GenerateLangSpecConfig.id)
     bindBuilder<GenerateWorkspaceConfig>(builders, GenerateWorkspaceConfig.id)
 
@@ -67,5 +61,9 @@ open class SpoofaxPieModule : PieModule() {
     bindBuilder<CoreBuildOrLoad>(builders, CoreBuildOrLoad.id)
     bindBuilder<CoreExtensions>(builders, CoreExtensions.id)
     bindBuilder<CoreStyle>(builders, CoreStyle.id)
+  }
+
+  open protected fun Binder.bindPie() {
+    bind<PieSrv>().to<PieSrvImpl>().asSingleton()
   }
 }

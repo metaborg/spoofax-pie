@@ -16,7 +16,7 @@ import java.io.Serializable
 
 class GenerateStylerRules
 @Inject constructor(private val stylingRulesFromESV: StylingRulesFromESV)
-  : Builder<GenerateStylerRules.Input, StylingRules> {
+  : Builder<GenerateStylerRules.Input, StylingRules?> {
   companion object {
     val id = "spoofaxGenerateStylerRules"
   }
@@ -24,8 +24,8 @@ class GenerateStylerRules
   data class Input(val esvLangConfig: SpxCoreConfig, val mainFile: PPath, val includedFiles: Iterable<PPath>) : Serializable
 
   override val id = Companion.id
-  override fun BuildContext.build(input: Input): StylingRules {
-    val text = read(input.mainFile)
+  override fun BuildContext.build(input: Input): StylingRules? {
+    val text = read(input.mainFile) ?: return null
 
     for(includedFile in input.includedFiles) {
       require(includedFile)

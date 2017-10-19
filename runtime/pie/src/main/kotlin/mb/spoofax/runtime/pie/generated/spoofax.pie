@@ -81,9 +81,9 @@ func generateWorkspaceConfig(text: string, file: path, workspaceRoot: path, cfgL
 func createWorkspaceConfig(workspaceRoot: path) -> WorkspaceConfig? = {
   // Manually create a config for the configuration language. This is required to bootstrap the language workbench.
   val cfgLang = createSpxCoreConfig(/Users/gohla/metaborg/repo/pie/spoofax-pie/lang/cfg/langspec, false, ["cfg"]);
-  val workspaceFile = workspaceRoot.resolve(./root/workspace.cfg);
+  val workspaceFile = workspaceRoot.resolve("root/workspace.cfg"); 
   if(!exists workspaceFile) return null;
-  val text = read workspaceFile;
+  val text = (read workspaceFile)!; // Can assume not null because workspaceFile exists
   val workspaceConfig = generateWorkspaceConfig(text, workspaceFile, workspaceRoot, cfgLang);
   return workspaceConfig;
 }
@@ -165,9 +165,12 @@ func emptyResult(file: path) -> (path, Token*?, Message*, Styling?, PartialSolve
 
 /// Processing of programs of language specifications
 func processFileWithLangSpecConfig(file: path, project: path, workspace: WorkspaceConfig) -> (path, Token*?, Message*, Styling?, PartialSolverSolution?) = {
+  if(!exists file) { // Creates a dependency to file existance changes
+    return emptyResult(file);
+  }
   val langSpec = langSpecConfigForPath(workspace, file);
   if(langSpec != null) {
-    val text = read file; // Creates a dependency to file changes
+    val text = (read file)!; // Creates a dependency to file contents changes. Can assume not null because the file exists
     val (tokens, messages, styling, partialSolution) = processStringWithLangSpecConfig(text, file, project, langSpec!, workspace);
     return (file, tokens, messages, styling, partialSolution);
   } else {
@@ -239,6 +242,7 @@ func createConstraintGenerator(langSpec: LangSpecConfig, workspace: WorkspaceCon
 }
 func partialSolve(ast: Ast, file: path, langSpec: LangSpecConfig, workspace: WorkspaceConfig) -> PartialSolverSolution? = {
   val generator = createConstraintGenerator(langSpec, workspace);
+  return null;
   if(generator == null) return null;
   val initialResult = nabl2-initial-result(generator!);
   val unitResult = nabl2-unit-result(generator!, initialResult, ast, file);
@@ -247,6 +251,7 @@ func partialSolve(ast: Ast, file: path, langSpec: LangSpecConfig, workspace: Wor
 }
 func solve(partialSolutions: PartialSolverSolution*, project: path, langSpec: LangSpecConfig, workspace: WorkspaceConfig) -> SolverSolution? = {
   val generator = createConstraintGenerator(langSpec, workspace);
+  return null;
   if(generator == null) return null;
   val initialResult = nabl2-initial-result(generator!);
   val solution = nabl2-solve(initialResult, partialSolutions, project);
@@ -278,17 +283,23 @@ func spxCoreStyle(config: SpxCoreConfig, tokens: Token*, ast: Ast) -> Styling = 
 
 /// Interoperability functions
 func processFileWithSpxCore(file: path, project: path, workspace: WorkspaceConfig) -> (path, Token*?, Message*, Styling?) = {
+  if(!exists file) { // Creates a dependency to file existance changes
+    return emptySpxCoreFile(file);
+  }
   val config = spxCoreConfigForPath(workspace, file);
   if(config != null) {
-    val text = read file; // Creates a dependency to file changes
+    val text = (read file)!; // Creates a dependency to file changes. Can assume not null because file exists
     val (tokens, messages, styling) = processStringWithSpxCore(text, file, config!);
     return (file, tokens, messages, styling);
   } else {
-    val emptyTokens: Token*? = null;
-    val emptyMessages: Message* = [];
-    val emptyStyling: Styling? = null;
-    return (file, emptyTokens, emptyMessages, emptyStyling);
+    return emptySpxCoreFile(file);
   }
+}
+func emptySpxCoreFile(file: path) -> (path, Token*?, Message*, Styling?) = {
+  val emptyTokens: Token*? = null;
+  val emptyMessages: Message* = [];
+  val emptyStyling: Styling? = null;
+  return (file, emptyTokens, emptyMessages, emptyStyling);
 }
 func processStringWithSpxCore(text: string, file: path, config: SpxCoreConfig) -> (Token*?, Message*, Styling?) = {
   val (ast, tokens, messages, _) = spxCoreParse(config, text, file);

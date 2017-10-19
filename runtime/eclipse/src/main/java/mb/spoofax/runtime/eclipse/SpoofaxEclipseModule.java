@@ -1,6 +1,8 @@
 package mb.spoofax.runtime.eclipse;
 
 import org.apache.commons.vfs2.FileSystemManager;
+import org.metaborg.core.editor.IEditorRegistry;
+import org.metaborg.core.editor.NullEditorRegistry;
 import org.metaborg.core.resource.IResourceService;
 import org.metaborg.core.resource.ResourceService;
 import org.metaborg.spoofax.core.SpoofaxModule;
@@ -15,5 +17,9 @@ public class SpoofaxEclipseModule extends SpoofaxModule {
         autoClosableBinder.addBinding().to(ResourceService.class);
 
         bind(FileSystemManager.class).toProvider(EclipseFileSystemManagerProvider.class).in(Singleton.class);
+    }
+
+    @Override protected void bindEditor() {
+        bind(IEditorRegistry.class).to(NullEditorRegistry.class).in(Singleton.class);
     }
 }

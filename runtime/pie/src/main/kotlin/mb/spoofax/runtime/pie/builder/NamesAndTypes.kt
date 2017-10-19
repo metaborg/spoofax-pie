@@ -38,9 +38,14 @@ class NaBL2GenerateConstraintGenerator
     val (langConfig, projDir, files, strategoConfig, strategoStrategyName, signatures) = input
 
     // Read input files
-    val textFilePairs = files.map {
+    val textFilePairs = files.mapNotNull {
       val text = read(it)
-      CoreParseAll.TextFilePair(text, it)
+      if(text == null) {
+        log.error("Unable to read NaBL2 file $it (it does not exist), skipping")
+        null
+      } else {
+        CoreParseAll.TextFilePair(text, it)
+      }
     }
 
     // Parse input files

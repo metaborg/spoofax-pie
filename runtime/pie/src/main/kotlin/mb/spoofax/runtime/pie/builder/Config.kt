@@ -19,7 +19,7 @@ class GenerateLangSpecConfig : Builder<GenerateLangSpecConfig.Input, LangSpecCon
   override val id: String = Companion.id
   override fun BuildContext.build(input: Input): LangSpecConfig? {
     val file = input.file
-    val text = read(file)
+    val text = read(file) ?: return null
     val (ast, _, _) = parse(input.config, text, file)
     if(ast == null) {
       return null

@@ -4,7 +4,7 @@ import com.google.inject.Inject
 import com.google.inject.Provider
 import mb.pie.runtime.core.BuildManager
 import mb.pie.runtime.core.BuildManagerFactory
-import mb.pie.runtime.core.impl.BuildCache
+import mb.pie.runtime.core.BuildCache
 import mb.pie.runtime.core.impl.store.LMDBBuildStoreFactory
 import mb.vfs.path.PPath
 import mb.vfs.path.PathSrv
