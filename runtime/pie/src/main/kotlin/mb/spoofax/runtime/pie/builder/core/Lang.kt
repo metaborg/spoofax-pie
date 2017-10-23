@@ -32,5 +32,5 @@ class CoreLoadLang : Func<PPath, TransientLangImpl> {
   }
 }
 
-fun ExecContext.loadLangRaw(input: PPath) = requireOutput(CoreLoadLang::class.java, input)
+fun ExecContext.loadLangRaw(input: PPath) = requireOutput(CoreLoadLang::class, CoreLoadLang.Companion.id, input)
 fun ExecContext.loadLang(input: PPath) = loadLangRaw(input).v

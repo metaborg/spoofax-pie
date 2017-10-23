@@ -105,7 +105,7 @@ func processProject(project: path, workspace: WorkspaceConfig) -> (path, ((path,
 }
 func processLangSpecInProject(project: path, langSpec: LangSpecConfig, workspace: WorkspaceConfig) -> ((path, Token*?, Message*, Styling?, PartialSolverSolution?)*, SolverSolution?*) = {
   val results = [processFileWithLangSpecConfig(file, project, workspace) | file <- walk project with extensions (langSpec.extensions())];
-  val partialSolutions = filterNullPartialSolutions([extractPartialSolution(result) | result <- results]);
+  val partialSolutions = filterNullPartialSolutions([extractPartialSolution(result) | resultsIn <- results]);
   val solutions = 
     if(langSpec.natsRootScopePerFile())
       [solve([partialSolution], project, langSpec, workspace) | partialSolution <- partialSolutions]
@@ -147,7 +147,7 @@ func processString(text: string, file: path, project: path, root: path) -> (Toke
 }
 func getOtherPartialSolutions(fileToIgnore: path, project: path, langSpec: LangSpecConfig, workspace: WorkspaceConfig) -> PartialSolverSolution?* = {
   val projectResults = [processFileWithLangSpecConfig(file, project, workspace) | file <- walk project with extensions (langSpec.extensions())];
-  val partialSolutions = [extractOrRemovePartialSolution(fileToIgnore, result) | result <- projectResults];
+  val partialSolutions = [extractOrRemovePartialSolution(fileToIgnore, result) | resultsIn <- projectResults];
   return partialSolutions;
 }
 func extractOrRemovePartialSolution(fileToIgnore: path, result: (path, Token*?, Message*, Styling?, PartialSolverSolution?)) -> PartialSolverSolution? = {

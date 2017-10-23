@@ -56,7 +56,7 @@ class CoreParse @Inject constructor(log: Logger, private val messageConverter: M
   }
 }
 
-fun ExecContext.parse(input: CoreParse.Input) = requireOutput(CoreParse::class.java, input)
+fun ExecContext.parse(input: CoreParse.Input) = requireOutput(CoreParse::class, CoreParse.Companion.id, input)
 fun ExecContext.parse(config: SpxCoreConfig, text: String, file: PPath) = parse(CoreParse.Input(config, text, file))
 
 
@@ -102,5 +102,5 @@ class CoreParseAll @Inject constructor(log: Logger, private val messageConverter
   }
 }
 
-fun ExecContext.parseAll(input: CoreParseAll.Input) = requireOutput(CoreParseAll::class.java, input)
+fun ExecContext.parseAll(input: CoreParseAll.Input) = requireOutput(CoreParseAll::class, CoreParseAll.Companion.id, input)
 fun ExecContext.parseAll(config: SpxCoreConfig, pairs: Iterable<CoreParseAll.TextFilePair>) = parseAll(CoreParseAll.Input(config, pairs))

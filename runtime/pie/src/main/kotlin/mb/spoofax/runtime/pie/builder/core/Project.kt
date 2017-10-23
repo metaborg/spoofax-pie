@@ -27,4 +27,4 @@ class CoreLoadProj : Func<PPath, TransientProject> {
 
 val IProject.path get() = this.location().pPath
 
-fun ExecContext.loadProj(input: PPath) = requireOutput(CoreLoadProj::class.java, input).v
+fun ExecContext.loadProj(input: PPath) = requireOutput(CoreLoadProj::class, CoreLoadProj.Companion.id, input).v

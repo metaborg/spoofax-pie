@@ -2,8 +2,7 @@ package mb.spoofax.runtime.pie.builder.core
 
 import com.google.inject.Inject
 import mb.log.Logger
-import mb.pie.runtime.core.ExecContext
-import mb.pie.runtime.core.Func
+import mb.pie.runtime.core.*
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.vfs.path.PPath
 import java.io.Serializable
@@ -30,6 +29,6 @@ class CoreBuildOrLoad @Inject constructor(log: Logger) : Func<CoreBuildOrLoad.In
   }
 }
 
-fun ExecContext.buildOrLoad(input: CoreBuildOrLoad.Input) = requireOutput(CoreBuildOrLoad::class.java, input).v
+fun ExecContext.buildOrLoad(input: CoreBuildOrLoad.Input) = requireOutput(CoreBuildOrLoad::class, CoreBuildOrLoad.Companion.id, input).v
 fun ExecContext.buildOrLoad(dir: PPath, isLangSpec: Boolean) = buildOrLoad(CoreBuildOrLoad.Input(dir, isLangSpec))
 fun ExecContext.buildOrLoad(input: SpxCoreConfig) = buildOrLoad(CoreBuildOrLoad.Input(input))

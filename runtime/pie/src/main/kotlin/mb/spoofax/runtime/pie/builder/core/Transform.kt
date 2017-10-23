@@ -6,6 +6,7 @@ import mb.pie.runtime.builtin.util.Tuple2
 import mb.pie.runtime.core.*
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.vfs.path.PPath
+import org.apache.commons.vfs2.FileObject
 import org.metaborg.core.action.*
 import org.metaborg.core.messages.IMessage
 import org.metaborg.core.transform.TransformException
@@ -42,8 +43,8 @@ class CoreTrans @Inject constructor(log: Logger) : Func<CoreTrans.Input, ArrayLi
     // Require Stratego runtime files
     val facet = langImpl.facet<StrategoRuntimeFacet>(StrategoRuntimeFacet::class.java)
     if(facet != null) {
-      facet.ctreeFiles.forEach { require(it.pPath, PathStampers.hash) }
-      facet.jarFiles.forEach { require(it.pPath, PathStampers.hash) }
+      facet.ctreeFiles.forEach<FileObject> { require(it.pPath, PathStampers.hash) }
+      facet.jarFiles.forEach<FileObject> { require(it.pPath, PathStampers.hash) }
     }
 
     // Perform transformation
@@ -84,7 +85,7 @@ class CoreTrans @Inject constructor(log: Logger) : Func<CoreTrans.Input, ArrayLi
   }
 }
 
-fun ExecContext.trans(input: CoreTrans.Input) = requireOutput(CoreTrans::class.java, input)
+fun ExecContext.trans(input: CoreTrans.Input) = requireOutput(CoreTrans::class, CoreTrans.Companion.id, input)
 fun ExecContext.trans(config: SpxCoreConfig, project: PPath, goal: ITransformGoal, file: PPath, ast: IStrategoTerm) = trans(CoreTrans.Input(config, project, goal, file, ast))
 
 
@@ -112,8 +113,8 @@ class CoreTransAll @Inject constructor(log: Logger) : Func<CoreTransAll.Input, A
     // Require Stratego runtime files
     val facet = langImpl.facet<StrategoRuntimeFacet>(StrategoRuntimeFacet::class.java)
     if(facet != null) {
-      facet.ctreeFiles.forEach { require(it.pPath, PathStampers.hash) }
-      facet.jarFiles.forEach { require(it.pPath, PathStampers.hash) }
+      facet.ctreeFiles.forEach<FileObject> { require(it.pPath, PathStampers.hash) }
+      facet.jarFiles.forEach<FileObject> { require(it.pPath, PathStampers.hash) }
     }
 
     // Perform transformation
@@ -155,5 +156,5 @@ class CoreTransAll @Inject constructor(log: Logger) : Func<CoreTransAll.Input, A
   }
 }
 
-fun ExecContext.transAll(input: CoreTransAll.Input) = requireOutput(CoreTransAll::class.java, input)
+fun ExecContext.transAll(input: CoreTransAll.Input) = requireOutput(CoreTransAll::class, CoreTransAll.Companion.id, input)
 fun ExecContext.transAll(config: SpxCoreConfig, project: PPath, goal: ITransformGoal, pairs: Iterable<CoreTransAll.AstFilePair>) = transAll(CoreTransAll.Input(config, project, goal, pairs))

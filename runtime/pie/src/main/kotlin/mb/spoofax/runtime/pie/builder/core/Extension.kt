@@ -42,6 +42,6 @@ class CoreExtensions @Inject constructor(log: Logger) : Func<CoreExtensions.Inpu
   }
 }
 
-fun ExecContext.langExtensions(input: CoreExtensions.Input) = requireOutput(CoreExtensions::class.java, input)
+fun ExecContext.langExtensions(input: CoreExtensions.Input) = requireOutput(CoreExtensions::class, CoreExtensions.Companion.id, input)
 fun ExecContext.langExtensions(dir: PPath, isLangSpec: Boolean) = langExtensions(CoreExtensions.Input(dir, isLangSpec))
 fun ExecContext.langExtensions(input: SpxCoreConfig) = langExtensions(CoreExtensions.Input(input))

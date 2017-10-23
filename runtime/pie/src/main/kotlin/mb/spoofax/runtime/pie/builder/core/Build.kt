@@ -48,7 +48,7 @@ class CoreBuild @Inject constructor(log: Logger) : OutEffectFunc<PPath> {
   }
 }
 
-fun ExecContext.buildProject(input: PPath) = requireExec(CoreBuild::class.java, input)
+fun ExecContext.buildProject(input: PPath) = requireExec(CoreBuild::class, CoreBuild.Companion.id, input)
 
 
 class CoreBuildLangSpec @Inject constructor(log: Logger, private val pathSrv: PathSrv) : OutEffectFunc<PPath> {
@@ -116,4 +116,4 @@ class CoreBuildLangSpec @Inject constructor(log: Logger, private val pathSrv: Pa
   }
 }
 
-fun ExecContext.buildLangSpec(input: PPath) = requireExec(CoreBuildLangSpec::class.java, input)
+fun ExecContext.buildLangSpec(input: PPath) = requireExec(CoreBuildLangSpec::class, CoreBuildLangSpec.Companion.id, input)

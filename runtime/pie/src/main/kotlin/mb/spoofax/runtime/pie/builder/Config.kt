@@ -1,8 +1,7 @@
 package mb.spoofax.runtime.pie.builder
 
 import mb.pie.runtime.builtin.path.read
-import mb.pie.runtime.core.ExecContext
-import mb.pie.runtime.core.Func
+import mb.pie.runtime.core.*
 import mb.spoofax.runtime.impl.cfg.*
 import mb.spoofax.runtime.pie.builder.core.langExtensions
 import mb.spoofax.runtime.pie.builder.core.parse
@@ -46,7 +45,7 @@ class GenerateWorkspaceConfig : Func<GenerateWorkspaceConfig.Input, WorkspaceCon
     }
     val data = WorkspaceConfigPaths.fromTerm(ast, input.workspaceRoot)
     val langSpecConfigs = data.langSpecConfigFiles().mapNotNull {
-      requireOutput(GenerateLangSpecConfig::class.java, GenerateLangSpecConfig.Input(input.config, it))
+      requireOutput(GenerateLangSpecConfig::class, GenerateLangSpecConfig.Companion.id, GenerateLangSpecConfig.Input(input.config, it))
     }
     val spxCoreLangConfigs = data.spxCoreLangConfigFiles().map {
       val langDir = it.parent()!!

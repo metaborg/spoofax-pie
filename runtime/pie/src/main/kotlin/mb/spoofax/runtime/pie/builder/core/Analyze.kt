@@ -8,6 +8,7 @@ import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.spoofax.runtime.impl.legacy.MessageConverter
 import mb.spoofax.runtime.model.message.Msg
 import mb.vfs.path.PPath
+import org.apache.commons.vfs2.FileObject
 import org.metaborg.core.analysis.AnalysisException
 import org.metaborg.core.messages.IMessage
 import org.metaborg.spoofax.core.stratego.StrategoRuntimeFacet
@@ -32,10 +33,10 @@ class CoreAnalyze @Inject constructor(log: Logger, private val messageConverter:
     val langImpl = buildOrLoad(input.config)
 
     // Require Stratego runtime files
-    val facet = langImpl.facet<StrategoRuntimeFacet>(StrategoRuntimeFacet::class.java)
+    val facet = langImpl.facet(StrategoRuntimeFacet::class.java)
     if(facet != null) {
-      facet.ctreeFiles.forEach { require(it.pPath, PathStampers.hash) }
-      facet.jarFiles.forEach { require(it.pPath, PathStampers.hash) }
+      facet.ctreeFiles.forEach<FileObject> { require(it.pPath, PathStampers.hash) }
+      facet.jarFiles.forEach<FileObject> { require(it.pPath, PathStampers.hash) }
     }
 
     // Perform analysis
@@ -47,9 +48,9 @@ class CoreAnalyze @Inject constructor(log: Logger, private val messageConverter:
     spoofaxContext.write().use {
       try {
         val analyzeResult = spoofax.analysisService.analyze(parseUnit, spoofaxContext)
-        val result = analyzeResult.result();
-        val ast = result.ast();
-        val messages = messageConverter.toMsgs(result.messages());
+        val result = analyzeResult.result()
+        val ast = result.ast()
+        val messages = messageConverter.toMsgs(result.messages())
         return Output(ast, messages, input.file)
       } catch(e: AnalysisException) {
         log.error("Analysis failed unexpectedly", e)
@@ -59,7 +60,7 @@ class CoreAnalyze @Inject constructor(log: Logger, private val messageConverter:
   }
 }
 
-fun ExecContext.analyze(input: CoreAnalyze.Input) = requireOutput(CoreAnalyze::class.java, input)
+fun ExecContext.analyze(input: CoreAnalyze.Input) = requireOutput(CoreAnalyze::class, CoreAnalyze.Companion.id, input)
 fun ExecContext.analyze(config: SpxCoreConfig, project: PPath, file: PPath, ast: IStrategoTerm) = analyze(CoreAnalyze.Input(config, project, file, ast))
 
 
@@ -83,10 +84,10 @@ class CoreAnalyzeAll @Inject constructor(log: Logger, private val messageConvert
     val langImpl = buildOrLoad(input.config)
 
     // Require Stratego runtime files
-    val facet = langImpl.facet<StrategoRuntimeFacet>(StrategoRuntimeFacet::class.java)
+    val facet = langImpl.facet(StrategoRuntimeFacet::class.java)
     if(facet != null) {
-      facet.ctreeFiles.forEach { require(it.pPath, PathStampers.hash) }
-      facet.jarFiles.forEach { require(it.pPath, PathStampers.hash) }
+      facet.ctreeFiles.forEach<FileObject> { require(it.pPath, PathStampers.hash) }
+      facet.jarFiles.forEach<FileObject> { require(it.pPath, PathStampers.hash) }
     }
 
     // Perform analysis
@@ -94,7 +95,7 @@ class CoreAnalyzeAll @Inject constructor(log: Logger, private val messageConvert
     val spoofaxContext = spoofax.contextService.get(project.location(), project, langImpl)
     val parseUnits = input.pairs.map { (ast, file) ->
       val resource = file.fileObject
-      val project = spoofax.projectService.get(resource) ?: throw ExecException("Cannot analyze $resource, it does not belong to a project")
+      spoofax.projectService.get(resource) ?: throw ExecException("Cannot analyze $resource, it does not belong to a project")
       val inputUnit = spoofax.unitService.inputUnit(resource, "hack", langImpl, null)
       spoofax.unitService.parseUnit(inputUnit, ParseContrib(true, true, ast, Iterables2.empty<IMessage>(), -1))
     }
@@ -108,11 +109,11 @@ class CoreAnalyzeAll @Inject constructor(log: Logger, private val messageConvert
         }.toCollection(ArrayList())
       } catch(e: AnalysisException) {
         log.error("Analysis failed unexpectedly", e)
-        return input.pairs.map { (text, file) -> Output(null, ArrayList(), file) }.toCollection(ArrayList())
+        return input.pairs.map { (_, file) -> Output(null, ArrayList(), file) }.toCollection(ArrayList())
       }
     }
   }
 }
 
-fun ExecContext.analyzeAll(input: CoreAnalyzeAll.Input) = requireOutput(CoreAnalyzeAll::class.java, input)
+fun ExecContext.analyzeAll(input: CoreAnalyzeAll.Input) = requireOutput(CoreAnalyzeAll::class, CoreAnalyzeAll.Companion.id, input)
 fun ExecContext.analyzeAll(config: SpxCoreConfig, project: PPath, pairs: Iterable<CoreAnalyzeAll.AstFilePair>) = analyzeAll(CoreAnalyzeAll.Input(config, project, pairs))

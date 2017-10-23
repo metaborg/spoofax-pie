@@ -58,4 +58,4 @@ class CompileStratego
       }
 }
 
-fun ExecContext.compileStratego(input: StrategoConfig) = requireOutput(CompileStratego::class.java, input)
+fun ExecContext.compileStratego(input: StrategoConfig) = requireOutput(CompileStratego::class, CompileStratego.Companion.id, input)
