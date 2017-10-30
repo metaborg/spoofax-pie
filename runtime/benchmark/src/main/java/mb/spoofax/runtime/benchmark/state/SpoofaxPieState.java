@@ -2,6 +2,7 @@ package mb.spoofax.runtime.benchmark.state;
 
 import com.google.inject.Injector;
 import mb.log.LogModule;
+import mb.log.Logger;
 import mb.pie.runtime.builtin.PieBuiltinModule;
 import mb.spoofax.runtime.benchmark.SpoofaxCoreModule;
 import mb.spoofax.runtime.impl.SpoofaxImplModule;
@@ -29,6 +30,7 @@ public class SpoofaxPieState {
     public final Spoofax spoofaxCoreFacade;
     public final SpoofaxMeta spoofaxCoreMetaFacade;
     public final Injector injector;
+    public final Logger logger;
     public final PathSrv pathSrv;
 
     public SpoofaxPieState() {
@@ -44,6 +46,7 @@ public class SpoofaxPieState {
 
             injector = spoofaxFacade.injector;
 
+            logger = injector.getInstance(Logger.class);
             pathSrv = injector.getInstance(PathSrv.class);
         } catch(SpoofaxEx | MetaborgException e) {
             throw new RuntimeException(e);

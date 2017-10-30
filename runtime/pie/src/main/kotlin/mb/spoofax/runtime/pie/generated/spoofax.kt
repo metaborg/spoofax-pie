@@ -2,16 +2,12 @@
 
 package mb.spoofax.runtime.pie.generated
 
-import java.io.Serializable
-import java.nio.file.Paths
-import com.google.inject.*
-
-import mb.log.*
-import mb.vfs.path.*
-import mb.pie.runtime.core.*
-import mb.pie.runtime.builtin.*
+import com.google.inject.Binder
+import com.google.inject.Module
 import mb.pie.runtime.builtin.path.*
 import mb.pie.runtime.builtin.util.*
+import mb.pie.runtime.core.*
+import mb.vfs.path.*
 
 class toMessage : Func<mb.spoofax.runtime.model.message.PathMsg, mb.spoofax.runtime.model.message.Msg> {
   companion object {
@@ -74,41 +70,41 @@ class createWorkspaceConfig : Func<PPath, mb.spoofax.runtime.impl.cfg.WorkspaceC
   }
 }
 
-class processWorkspace : Func<PPath, ArrayList<Tuple3<PPath, ArrayList<Tuple2<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>>, ArrayList<mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>>>> {
+class processWorkspace : Func<PPath, ArrayList<Tuple2<ArrayList<Tuple2<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>>, ArrayList<mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>>?>> {
   companion object {
     val id = "processWorkspace"
   }
 
   override val id = Companion.id
-  override fun ExecContext.exec(input: PPath): ArrayList<Tuple3<PPath, ArrayList<Tuple2<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>>, ArrayList<mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>>> {
-    val workspaceConfig = requireOutput(createWorkspaceConfig::class, createWorkspaceConfig.Companion.id, input)
-    val noResults: ArrayList<Tuple3<PPath, ArrayList<Tuple2<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>>, ArrayList<mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>>> = list()
-    if(workspaceConfig == null) return noResults
-    val workspace = workspaceConfig!!
-    return requireOutput(ListContents::class, ListContents.Companion.id, ListContents.Input(input, PPaths.regexPathMatcher("^[^.].+\$"))).map { project -> requireOutput(processProject::class, processProject.Companion.id, processProject.Input(project, workspace)) }.toCollection(ArrayList<Tuple3<PPath, ArrayList<Tuple2<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>>, ArrayList<mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>>>())
+  override fun ExecContext.exec(input: PPath): ArrayList<Tuple2<ArrayList<Tuple2<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>>, ArrayList<mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>>?> {
+    return requireOutput(ListContents::class, ListContents.Companion.id, ListContents.Input(input, PPaths.regexPathMatcher("^[^.].+\$"))).map { project -> requireOutput(processProject::class, processProject.Companion.id, processProject.Input(project, input)) }.toCollection(ArrayList<Tuple2<ArrayList<Tuple2<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>>, ArrayList<mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>>?>())
   }
 }
 
-class processProject : Func<processProject.Input, processProject.Output> {
+class processProject : Func<processProject.Input, processProject.Output?> {
   companion object {
     val id = "processProject"
   }
 
-  data class Input(val project: PPath, val workspace: mb.spoofax.runtime.impl.cfg.WorkspaceConfig) : Tuple2<PPath, mb.spoofax.runtime.impl.cfg.WorkspaceConfig> {
-    constructor(tuple: Tuple2<PPath, mb.spoofax.runtime.impl.cfg.WorkspaceConfig>) : this(tuple.component1(), tuple.component2())
+  data class Input(val project: PPath, val root: PPath) : Tuple2<PPath, PPath> {
+    constructor(tuple: Tuple2<PPath, PPath>) : this(tuple.component1(), tuple.component2())
   }
 
-  data class Output(val _1: PPath, val _2: ArrayList<Tuple2<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>>, ArrayList<mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>>, val _3: ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>) : Tuple3<PPath, ArrayList<Tuple2<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>>, ArrayList<mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>> {
-    constructor(tuple: Tuple3<PPath, ArrayList<Tuple2<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>>, ArrayList<mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>>) : this(tuple.component1(), tuple.component2(), tuple.component3())
+  data class Output(val _1: ArrayList<Tuple2<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>>, ArrayList<mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>>, val _2: ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>) : Tuple2<ArrayList<Tuple2<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>>, ArrayList<mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>> {
+    constructor(tuple: Tuple2<ArrayList<Tuple2<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>>, ArrayList<mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>>) : this(tuple.component1(), tuple.component2())
   }
 
-  private fun output(tuple: Tuple3<PPath, ArrayList<Tuple2<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>>, ArrayList<mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>>) = Output(tuple)
+  private fun output(tuple: Tuple2<ArrayList<Tuple2<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>>, ArrayList<mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>>?) = if(tuple == null) null else Output(tuple)
 
   override val id = Companion.id
-  override fun ExecContext.exec(input: processProject.Input): processProject.Output {
-    val langSpecResults = input.workspace.langSpecConfigs().map { langSpec -> requireOutput(processLangSpecInProject::class, processLangSpecInProject.Companion.id, processLangSpecInProject.Input(input.project, langSpec, input.workspace)) }.toCollection(ArrayList<Tuple2<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>>, ArrayList<mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>>())
-    val spxCoreResults = requireOutput(WalkContents::class, WalkContents.Companion.id, WalkContents.Input(input.project, PPaths.extensionsPathWalker(input.workspace.spxCoreExtensions()))).map { file -> requireOutput(processFileWithSpxCore::class, processFileWithSpxCore.Companion.id, processFileWithSpxCore.Input(file, input.project, input.workspace)) }.toCollection(ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>())
-    return output(tuple(input.project, langSpecResults, spxCoreResults))
+  override fun ExecContext.exec(input: processProject.Input): processProject.Output? {
+    val workspaceConfig = requireOutput(createWorkspaceConfig::class, createWorkspaceConfig.Companion.id, input.root)
+    val noResults: Tuple2<ArrayList<Tuple2<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>>, ArrayList<mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>>? = null
+    if(workspaceConfig == null) return output(noResults)
+    val workspace = workspaceConfig!!
+    val langSpecResults = workspace.langSpecConfigs().map { langSpec -> requireOutput(processLangSpecInProject::class, processLangSpecInProject.Companion.id, processLangSpecInProject.Input(input.project, langSpec, workspace)) }.toCollection(ArrayList<Tuple2<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>>, ArrayList<mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>>())
+    val spxCoreResults = requireOutput(WalkContents::class, WalkContents.Companion.id, WalkContents.Input(input.project, PPaths.extensionsPathWalker(workspace.spxCoreExtensions()))).map { file -> requireOutput(processFileWithSpxCore::class, processFileWithSpxCore.Companion.id, processFileWithSpxCore.Input(file, input.project, workspace)) }.toCollection(ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>())
+    return output(tuple(langSpecResults, spxCoreResults))
   }
 }
 
@@ -130,27 +126,15 @@ class processLangSpecInProject : Func<processLangSpecInProject.Input, processLan
   override val id = Companion.id
   override fun ExecContext.exec(input: processLangSpecInProject.Input): processLangSpecInProject.Output {
     val results = requireOutput(WalkContents::class, WalkContents.Companion.id, WalkContents.Input(input.project, PPaths.extensionsPathWalker(input.langSpec.extensions()))).map { file -> requireOutput(processFileWithLangSpecConfig::class, processFileWithLangSpecConfig.Companion.id, processFileWithLangSpecConfig.Input(file, input.project, input.workspace)) }.toCollection(ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>>())
-    val partialSolutions = mb.spoofax.runtime.pie.builder.filterNullPartialSolutions(results.map { result -> requireOutput(extractPartialSolution::class, extractPartialSolution.Companion.id, result) }.toCollection(ArrayList<org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>()))
+    val partialSolutions = mb.spoofax.runtime.pie.builder.filterNullPartialSolutions(results.map { result -> mb.spoofax.runtime.pie.builder.extractPartialSolution(result) }.toCollection(ArrayList<org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>()))
     val solutions = if(input.langSpec.natsRootScopePerFile()) partialSolutions.map { partialSolution -> requireOutput(solve::class, solve.Companion.id, solve.Input(list(partialSolution), input.project, input.langSpec, input.workspace)) }.toCollection(ArrayList<mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>()) else list(requireOutput(solve::class, solve.Companion.id, solve.Input(partialSolutions, input.project, input.langSpec, input.workspace)))
     return output(tuple(results, solutions))
   }
 }
 
-class extractPartialSolution : Func<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?> {
+class processEditor : Func<processEditor.Input, processEditor.Output?> {
   companion object {
-    val id = "extractPartialSolution"
-  }
-
-  override val id = Companion.id
-  override fun ExecContext.exec(input: Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>): org.metaborg.meta.nabl2.solver.ImmutablePartialSolution? {
-    val (file, tokens, messages, styling, partialSolution) = input
-    return partialSolution
-  }
-}
-
-class processString : Func<processString.Input, processString.Output?> {
-  companion object {
-    val id = "processString"
+    val id = "processEditor"
   }
 
   data class Input(val text: String, val file: PPath, val project: PPath, val root: PPath) : Tuple4<String, PPath, PPath, PPath> {
@@ -164,7 +148,7 @@ class processString : Func<processString.Input, processString.Output?> {
   private fun output(tuple: Tuple5<ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?, mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>?) = if(tuple == null) null else Output(tuple)
 
   override val id = Companion.id
-  override fun ExecContext.exec(input: processString.Input): processString.Output? {
+  override fun ExecContext.exec(input: processEditor.Input): processEditor.Output? {
     val workspaceConfig = requireOutput(createWorkspaceConfig::class, createWorkspaceConfig.Companion.id, input.root)
     if(workspaceConfig == null) return null
     val workspace = workspaceConfig!!
@@ -202,45 +186,8 @@ class getOtherPartialSolutions : Func<getOtherPartialSolutions.Input, ArrayList<
   override val id = Companion.id
   override fun ExecContext.exec(input: getOtherPartialSolutions.Input): ArrayList<org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?> {
     val projectResults = requireOutput(WalkContents::class, WalkContents.Companion.id, WalkContents.Input(input.project, PPaths.extensionsPathWalker(input.langSpec.extensions()))).map { file -> requireOutput(processFileWithLangSpecConfig::class, processFileWithLangSpecConfig.Companion.id, processFileWithLangSpecConfig.Input(file, input.project, input.workspace)) }.toCollection(ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>>())
-    val partialSolutions = projectResults.map { result -> requireOutput(extractOrRemovePartialSolution::class, extractOrRemovePartialSolution.Companion.id, extractOrRemovePartialSolution.Input(input.fileToIgnore, result)) }.toCollection(ArrayList<org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>())
+    val partialSolutions = projectResults.map { result -> mb.spoofax.runtime.pie.builder.extractOrRemovePartialSolution(input.fileToIgnore, result) }.toCollection(ArrayList<org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>())
     return partialSolutions
-  }
-}
-
-class extractOrRemovePartialSolution : Func<extractOrRemovePartialSolution.Input, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?> {
-  companion object {
-    val id = "extractOrRemovePartialSolution"
-  }
-
-  data class Input(val fileToIgnore: PPath, val result: Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>) : Tuple2<PPath, Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>> {
-    constructor(tuple: Tuple2<PPath, Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>>) : this(tuple.component1(), tuple.component2())
-  }
-
-  override val id = Companion.id
-  override fun ExecContext.exec(input: extractOrRemovePartialSolution.Input): org.metaborg.meta.nabl2.solver.ImmutablePartialSolution? {
-    val (file, tokens, messages, styling, partialSolution) = input.result
-    return if(file == input.fileToIgnore) null else partialSolution
-  }
-}
-
-class emptyResult : Func<PPath, emptyResult.Output> {
-  companion object {
-    val id = "emptyResult"
-  }
-
-  data class Output(val _1: PPath, val _2: ArrayList<mb.spoofax.runtime.model.parse.Token>?, val _3: ArrayList<mb.spoofax.runtime.model.message.Msg>, val _4: mb.spoofax.runtime.model.style.Styling?, val _5: org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?) : Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?> {
-    constructor(tuple: Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4(), tuple.component5())
-  }
-
-  private fun output(tuple: Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>) = Output(tuple)
-
-  override val id = Companion.id
-  override fun ExecContext.exec(input: PPath): emptyResult.Output {
-    val emptyTokens: ArrayList<mb.spoofax.runtime.model.parse.Token>? = null
-    val emptyMessages: ArrayList<mb.spoofax.runtime.model.message.Msg> = list()
-    val emptyStyling: mb.spoofax.runtime.model.style.Styling? = null
-    val emptyPartialSolution: org.metaborg.meta.nabl2.solver.ImmutablePartialSolution? = null
-    return output(tuple(input, emptyTokens, emptyMessages, emptyStyling, emptyPartialSolution))
   }
 }
 
@@ -272,6 +219,27 @@ class processFileWithLangSpecConfig : Func<processFileWithLangSpecConfig.Input, 
     } else {
       return output(requireOutput(emptyResult::class, emptyResult.Companion.id, input.file))
     }
+  }
+}
+
+class emptyResult : Func<PPath, emptyResult.Output> {
+  companion object {
+    val id = "emptyResult"
+  }
+
+  data class Output(val _1: PPath, val _2: ArrayList<mb.spoofax.runtime.model.parse.Token>?, val _3: ArrayList<mb.spoofax.runtime.model.message.Msg>, val _4: mb.spoofax.runtime.model.style.Styling?, val _5: org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?) : Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?> {
+    constructor(tuple: Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4(), tuple.component5())
+  }
+
+  private fun output(tuple: Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, org.metaborg.meta.nabl2.solver.ImmutablePartialSolution?>) = Output(tuple)
+
+  override val id = Companion.id
+  override fun ExecContext.exec(input: PPath): emptyResult.Output {
+    val emptyTokens: ArrayList<mb.spoofax.runtime.model.parse.Token>? = null
+    val emptyMessages: ArrayList<mb.spoofax.runtime.model.message.Msg> = list()
+    val emptyStyling: mb.spoofax.runtime.model.style.Styling? = null
+    val emptyPartialSolution: org.metaborg.meta.nabl2.solver.ImmutablePartialSolution? = null
+    return output(tuple(input, emptyTokens, emptyMessages, emptyStyling, emptyPartialSolution))
   }
 }
 
@@ -542,12 +510,10 @@ class PieBuilderModule_spoofax : Module {
     binder.bindFunc<emptyParse>(funcs, "emptyParse")
     binder.bindFunc<parse>(funcs, "parse")
     binder.bindFunc<processStringWithLangSpecConfig>(funcs, "processStringWithLangSpecConfig")
-    binder.bindFunc<processFileWithLangSpecConfig>(funcs, "processFileWithLangSpecConfig")
     binder.bindFunc<emptyResult>(funcs, "emptyResult")
-    binder.bindFunc<extractOrRemovePartialSolution>(funcs, "extractOrRemovePartialSolution")
+    binder.bindFunc<processFileWithLangSpecConfig>(funcs, "processFileWithLangSpecConfig")
     binder.bindFunc<getOtherPartialSolutions>(funcs, "getOtherPartialSolutions")
-    binder.bindFunc<processString>(funcs, "processString")
-    binder.bindFunc<extractPartialSolution>(funcs, "extractPartialSolution")
+    binder.bindFunc<processEditor>(funcs, "processEditor")
     binder.bindFunc<processLangSpecInProject>(funcs, "processLangSpecInProject")
     binder.bindFunc<processProject>(funcs, "processProject")
     binder.bindFunc<processWorkspace>(funcs, "processWorkspace")

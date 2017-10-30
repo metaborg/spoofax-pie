@@ -72,7 +72,7 @@ class CoreBuildLangSpec @Inject constructor(log: Logger, private val pathSrv: Pa
       override fun readDir(dir: PPath) {
         require(dir, PathStampers.modified)
       }
-    }).forEach { require(it, PathStampers.hash) }
+    }).use { pathStream -> pathStream.forEach { require(it, PathStampers.hash) } }
 
     // Generate sources and compile
     spoofaxMeta.metaBuilder.initialize(langSpecBuildInput)

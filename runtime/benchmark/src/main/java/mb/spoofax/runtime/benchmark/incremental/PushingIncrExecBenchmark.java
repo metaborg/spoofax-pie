@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 
-@BenchmarkMode(Mode.AverageTime)
+@BenchmarkMode(Mode.SingleShotTime)
 @OutputTimeUnit(TimeUnit.SECONDS)
 @State(Scope.Benchmark)
 public class PushingIncrExecBenchmark {
@@ -17,7 +17,7 @@ public class PushingIncrExecBenchmark {
         workspaceState.setup(spoofaxPieState);
         incrState.setup(workspaceState);
         infraState.setup(spoofaxPieState, workspaceState);
-        pushingExecState.setup(infraState);
+        pushingExecState.setup(spoofaxPieState, infraState);
 
         this.spoofaxPieState = spoofaxPieState;
         this.workspaceState = workspaceState;
@@ -34,12 +34,13 @@ public class PushingIncrExecBenchmark {
     private InfraState infraState;
     private PushingExecState pushingExecState;
 
-    @Setup(Level.Invocation) public void setupInvocation() {
+    @Setup(Level.Invocation) public void setupInvocation() throws IOException {
         infraState.renew(spoofaxPieState);
-        pushingExecState.renew(infraState);
+        incrState.renew();
+        pushingExecState.renew(spoofaxPieState, infraState);
     }
 
     @Benchmark public void exec() {
-        pushingExecState.exec(workspaceState, incrState.changedPaths);
+        pushingExecState.exec(workspaceState, incrState.allChangedPaths);
     }
 }

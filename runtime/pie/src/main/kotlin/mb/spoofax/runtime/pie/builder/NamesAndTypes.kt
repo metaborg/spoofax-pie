@@ -3,6 +3,7 @@ package mb.spoofax.runtime.pie.builder
 import com.google.inject.Inject
 import mb.log.Logger
 import mb.pie.runtime.builtin.path.read
+import mb.pie.runtime.builtin.util.Tuple5
 import mb.pie.runtime.core.ExecContext
 import mb.pie.runtime.core.Func
 import mb.spoofax.runtime.impl.cfg.ImmutableStrategoConfig
@@ -11,6 +12,9 @@ import mb.spoofax.runtime.impl.nabl.*
 import mb.spoofax.runtime.impl.sdf.Signatures
 import mb.spoofax.runtime.impl.stratego.StrategoRuntimeBuilder
 import mb.spoofax.runtime.impl.stratego.primitive.ScopeGraphPrimitiveLibrary
+import mb.spoofax.runtime.model.message.Msg
+import mb.spoofax.runtime.model.parse.Token
+import mb.spoofax.runtime.model.style.Styling
 import mb.spoofax.runtime.pie.builder.core.*
 import mb.spoofax.runtime.pie.builder.stratego.compileStratego
 import mb.vfs.path.PPath
@@ -145,6 +149,16 @@ class NaBL2Solve
   }
 }
 
+
 fun filterNullPartialSolutions(partialSolutions: ArrayList<ImmutablePartialSolution?>): ArrayList<ImmutablePartialSolution> {
   return partialSolutions.filterNotNull().toCollection(ArrayList())
+}
+
+fun extractPartialSolution(result: Tuple5<PPath, ArrayList<Token>?, ArrayList<Msg>, Styling?, ImmutablePartialSolution?>): ImmutablePartialSolution? {
+  return result.component5()
+}
+
+fun extractOrRemovePartialSolution(fileToIgnore: PPath, result: Tuple5<PPath, ArrayList<Token>?, ArrayList<Msg>, Styling?, ImmutablePartialSolution?>): ImmutablePartialSolution? {
+  val (file, _, _, _, partialSolution) = result
+  return if(file == fileToIgnore) null else partialSolution
 }

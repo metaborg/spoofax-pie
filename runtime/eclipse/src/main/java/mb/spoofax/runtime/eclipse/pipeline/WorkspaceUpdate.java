@@ -1,4 +1,4 @@
-package mb.spoofax.runtime.eclipse.build;
+package mb.spoofax.runtime.eclipse.pipeline;
 
 import java.awt.Color;
 import java.util.ArrayList;

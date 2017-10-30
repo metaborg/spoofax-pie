@@ -21,9 +21,10 @@ import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import com.google.inject.Injector;
 
 import mb.log.Logger;
-import mb.pie.runtime.core.BuildManager;
+import mb.pie.runtime.core.PushingExecutor;
 import mb.spoofax.runtime.eclipse.SpoofaxPlugin;
-import mb.spoofax.runtime.eclipse.build.WorkspaceUpdateFactory;
+import mb.spoofax.runtime.eclipse.pipeline.PipelineAdapterInternal;
+import mb.spoofax.runtime.eclipse.pipeline.WorkspaceUpdateFactory;
 import mb.spoofax.runtime.eclipse.util.Nullable;
 import mb.spoofax.runtime.eclipse.vfs.EclipsePathSrv;
 import mb.spoofax.runtime.model.SpoofaxFacade;
@@ -47,7 +48,7 @@ public class SpoofaxEditor extends TextEditor {
     private Logger logger;
     private EclipsePathSrv pathSrv;
     private PieSrv pieSrv;
-    private Editors editors;
+    private PipelineAdapterInternal pipelineAdapter;
     private WorkspaceUpdateFactory workspaceUpdateFactory;
 
     private IEditorInput input;
@@ -115,7 +116,7 @@ public class SpoofaxEditor extends TextEditor {
         this.logger = spoofaxFacade.rootLogger;
         this.pathSrv = injector.getInstance(EclipsePathSrv.class);
         this.pieSrv = injector.getInstance(PieSrv.class);
-        this.editors = injector.getInstance(Editors.class);
+        this.pipelineAdapter = injector.getInstance(PipelineAdapterInternal.class);
         this.workspaceUpdateFactory = injector.getInstance(WorkspaceUpdateFactory.class);
 
         this.workspaceRoot = pathSrv.resolveWorkspaceRoot();
@@ -149,7 +150,7 @@ public class SpoofaxEditor extends TextEditor {
 
         ((ITextViewerExtension4) sourceViewer).addTextPresentationListener(presentationMerger);
 
-        editors.addEditor(this);
+        pipelineAdapter.addEditor(this);
 
         scheduleJob(true);
 
@@ -163,7 +164,7 @@ public class SpoofaxEditor extends TextEditor {
             document.removeDocumentListener(documentListener);
         }
 
-        editors.removeEditor(this);
+        pipelineAdapter.removeEditor(this);
 
         input = null;
         document = null;
@@ -172,7 +173,7 @@ public class SpoofaxEditor extends TextEditor {
         super.dispose();
     }
 
-    private void scheduleJob(boolean instantaneous) {
+    private void scheduleJob(boolean initialUpdate) {
         cancelJobs(input);
         if(eclipseFile == null) {
             return;
@@ -180,11 +181,11 @@ public class SpoofaxEditor extends TextEditor {
 
         final IProject project = eclipseFile.getProject();
         final PPath projectDir = pathSrv.resolve(project);
-        final BuildManager buildManager = pieSrv.get(workspaceRoot);
-        final Job job = new EditorUpdateJob(logger, buildManager, workspaceUpdateFactory.create(), this, document.get(),
-            input, file, eclipseFile, projectDir, workspaceRoot);
+        final PushingExecutor executor = pieSrv.getPushingExecutor(workspaceRoot, SpoofaxPlugin.useInMemoryStore);
+        final Job job = new EditorUpdateJob(logger, executor, pipelineAdapter, workspaceUpdateFactory.create(), this,
+            document.get(), file, projectDir, input, eclipseFile);
         job.setRule(eclipseFile);
-        job.schedule(instantaneous ? 0 : 300);
+        job.schedule(initialUpdate ? 0 : 300);
     }
 
     private void cancelJobs(IEditorInput specificInput) {
