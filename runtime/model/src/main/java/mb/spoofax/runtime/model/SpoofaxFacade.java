@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.google.inject.Stage;
 
 import mb.log.LogModule;
 import mb.log.Logger;
@@ -27,7 +28,7 @@ public class SpoofaxFacade {
         modules.add(logModule);
         modules.add(vfsModule);
 
-        this.injector = Guice.createInjector(modules);
+        this.injector = Guice.createInjector(Stage.PRODUCTION, modules);
 
         this.rootLogger = injector.getInstance(Logger.class);
 

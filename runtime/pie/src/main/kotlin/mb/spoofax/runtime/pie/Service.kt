@@ -2,7 +2,12 @@ package mb.spoofax.runtime.pie
 
 import com.google.inject.Inject
 import com.google.inject.Provider
-import mb.pie.runtime.core.*
+import mb.pie.runtime.core.Cache
+import mb.pie.runtime.core.PullingExecutor
+import mb.pie.runtime.core.PullingExecutorFactory
+import mb.pie.runtime.core.PushingExecutor
+import mb.pie.runtime.core.PushingExecutorFactory
+import mb.pie.runtime.core.Store
 import mb.pie.runtime.core.impl.store.InMemoryStore
 import mb.pie.runtime.core.impl.store.LMDBBuildStoreFactory
 import mb.vfs.path.PPath
@@ -16,11 +21,11 @@ interface PieSrv {
 }
 
 class PieSrvImpl @Inject constructor(
-  private val pathSrv: PathSrv,
-  private val storeFactory: LMDBBuildStoreFactory,
-  private val cacheFactory: Provider<Cache>,
-  private val pullingExecutorFactory: PullingExecutorFactory,
-  private val pushingExecutorFactory: PushingExecutorFactory
+        private val pathSrv: PathSrv,
+        private val storeFactory: LMDBBuildStoreFactory,
+        private val cacheFactory: Provider<Cache>,
+        private val pullingExecutorFactory: PullingExecutorFactory,
+        private val pushingExecutorFactory: PushingExecutorFactory
 ) : PieSrv {
   private val stores = ConcurrentHashMap<PPath, Store>()
   private val caches = ConcurrentHashMap<PPath, Cache>()
@@ -29,24 +34,24 @@ class PieSrvImpl @Inject constructor(
 
 
   override fun getPullingExecutor(dir: PPath, useInMemoryStore: Boolean): PullingExecutor {
-    val store = getStore(dir, useInMemoryStore)
-    val cache = getCache(dir)
     return pullingExecutors.getOrPut(dir) {
+      val store = getStore(dir, useInMemoryStore)
+      val cache = getCache(dir)
       pullingExecutorFactory.create(store, cache)
     }
   }
 
   override fun getPushingExecutor(dir: PPath, useInMemoryStore: Boolean): PushingExecutor {
-    val store = getStore(dir, useInMemoryStore)
-    val cache = getCache(dir)
     return pushingExecutors.getOrPut(dir) {
+      val store = getStore(dir, useInMemoryStore)
+      val cache = getCache(dir)
       pushingExecutorFactory.create(store, cache)
     }
   }
 
 
   private fun getStore(dir: PPath, useInMemoryStore: Boolean) = stores.getOrPut(dir) {
-    if(useInMemoryStore) {
+    if (useInMemoryStore) {
       InMemoryStore()
     } else {
       val storeDir = dir.resolve(".pie")
