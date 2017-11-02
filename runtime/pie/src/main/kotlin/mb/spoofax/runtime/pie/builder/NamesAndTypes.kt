@@ -4,8 +4,7 @@ import com.google.inject.Inject
 import mb.log.Logger
 import mb.pie.runtime.builtin.path.read
 import mb.pie.runtime.builtin.util.Tuple5
-import mb.pie.runtime.core.ExecContext
-import mb.pie.runtime.core.Func
+import mb.pie.runtime.core.*
 import mb.spoofax.runtime.impl.cfg.ImmutableStrategoConfig
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.spoofax.runtime.impl.nabl.*
@@ -94,7 +93,7 @@ class NaBL2InitialResult
   override val id = Companion.id
   override fun ExecContext.exec(input: ConstraintGenerator): ImmutableInitialResult {
     val strategoRuntime = input.createSuitableRuntime(StrategoRuntimeBuilder(), primitiveLibrary)
-    require(input.strategoCtree())
+    require(input.strategoCtree(), PathStampers.hash)
     return input.initialResult(strategoRuntime)
   }
 }
@@ -112,7 +111,7 @@ class NaBL2UnitResult
   override fun ExecContext.exec(input: Input): ImmutableUnitResult {
     val (generator, initialResult, ast, file) = input
     val strategoRuntime = generator.createSuitableRuntime(StrategoRuntimeBuilder(), primitiveLibrary)
-    require(generator.strategoCtree())
+    require(generator.strategoCtree(), PathStampers.hash)
     return generator.unitResult(initialResult, ast, file.toString(), strategoRuntime)
   }
 }

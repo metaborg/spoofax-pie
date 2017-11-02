@@ -48,36 +48,41 @@
       <scope>compile</scope>
     </dependency>
 
-    <!-- lmdbjava -->
+    <!-- lmdbjava + agrona -->
     <dependency>
       <groupId>org.lmdbjava</groupId>
       <artifactId>lmdbjava</artifactId>
-      <version>0.0.5</version>
+      <version>0.6.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.agrona</groupId>
+      <artifactId>agrona</artifactId>
+      <version>0.9.9</version>
     </dependency>
     <!-- Dependencies of lmdbjava -->
     <dependency>
       <groupId>com.github.jnr</groupId>
       <artifactId>jnr-constants</artifactId>
-      <version>0.9.6</version>
+      <version>0.9.9</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.github.jnr</groupId>
       <artifactId>jnr-ffi</artifactId>
-      <version>2.1.2</version>
+      <version>2.1.6</version>
       <scope>compile</scope>
     </dependency>
     <!-- Dependencies of jnr-ffi of lmdbjava -->
     <dependency>
       <groupId>com.github.jnr</groupId>
       <artifactId>jffi</artifactId>
-      <version>1.2.14</version>
+      <version>1.2.16</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.github.jnr</groupId>
       <artifactId>jffi</artifactId>
-      <version>1.2.14</version>
+      <version>1.2.16</version>
       <scope>runtime</scope>
       <classifier>native</classifier>
     </dependency>
@@ -154,6 +159,7 @@
               kotlinx-coroutines-core,
               annotations,
               lmdbjava,
+              agrona,
               jnr-constants,
               jnr-ffi,
               jffi,
@@ -171,6 +177,7 @@
               kotlinx.*;provider=metaborg;mandatory:=provider;version=0,
               org.jetbrains.annotations.*;provider=metaborg;mandatory:=provider;version=0,
               org.lmdbjava.*;provider=metaborg;mandatory:=provider;version=0,
+              org.agrona.*;provider=metaborg;mandatory:=provider;version=0,
               jnr.*;provider=metaborg;mandatory:=provider;version=0,
               com.kenai.jffi.*;provider=metaborg;mandatory:=provider;version=0,
               org.objectweb.asm.*;provider=metaborg;mandatory:=provider;version=0,

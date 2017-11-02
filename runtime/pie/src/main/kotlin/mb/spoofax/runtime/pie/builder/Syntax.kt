@@ -79,7 +79,7 @@ class GenerateTable
     val srcGenSyntaxDir = input.specDir.resolve("src-gen/syntax");
     val paths = listOf(srcGenSyntaxDir.toString())
     // Create table and make dependencies
-    require(mainResource);
+    require(mainResource, PathStampers.hash);
     val generator = ParseTableGenerator(mainResourceLocal, outputFile, null, null, paths)
     generator.outputTable(false)
     generate(vfsOutputFile.pPath)

@@ -36,7 +36,7 @@ class CoreBuild @Inject constructor(log: Logger) : OutEffectFunc<PPath> {
 
     // Required files
     output.includedResources().forEach { require(it.pPath, PathStampers.hash) }
-    output.changedResources().forEach { require(it.pPath) }
+    output.changedResources().forEach { require(it.pPath, PathStampers.hash) }
 
     // TODO: make requirements to changes in source and include paths, to rebuild when files are added/removed
 

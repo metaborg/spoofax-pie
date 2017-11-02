@@ -2,8 +2,7 @@ package mb.spoofax.runtime.pie.builder
 
 import com.google.inject.Inject
 import mb.pie.runtime.builtin.path.read
-import mb.pie.runtime.core.ExecContext
-import mb.pie.runtime.core.Func
+import mb.pie.runtime.core.*
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.spoofax.runtime.impl.esv.*
 import mb.spoofax.runtime.model.SpoofaxRunEx
@@ -28,7 +27,7 @@ class GenerateStylerRules
     val text = read(input.mainFile) ?: return null
 
     for(includedFile in input.includedFiles) {
-      require(includedFile)
+      require(includedFile, PathStampers.hash)
     }
 
     // Parse input file

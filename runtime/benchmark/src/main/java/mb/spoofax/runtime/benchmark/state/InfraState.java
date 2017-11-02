@@ -11,8 +11,8 @@ import mb.pie.runtime.core.impl.layer.ValidationLayer;
 import mb.pie.runtime.core.impl.logger.NoopLogger;
 import mb.pie.runtime.core.impl.logger.StreamLogger;
 import mb.pie.runtime.core.impl.logger.TraceLogger;
-import mb.pie.runtime.core.impl.share.CoroutineBuildShare;
-import mb.pie.runtime.core.impl.share.NonSharingBuildShare;
+import mb.pie.runtime.core.impl.share.CoroutineShare;
+import mb.pie.runtime.core.impl.share.NonSharingShare;
 import mb.pie.runtime.core.impl.store.InMemoryStore;
 import mb.pie.runtime.core.impl.store.LMDBBuildStoreFactory;
 import mb.pie.runtime.core.impl.store.NoopStore;
@@ -29,7 +29,7 @@ import java.util.Map;
 public class InfraState {
     public Store store;
     public Cache cache;
-    public BuildShare share;
+    public Share share;
     public Provider<Layer> layer;
     public Provider<Logger> logger;
     public Map<String, Func<?, ?>> builders;
@@ -109,17 +109,17 @@ public class InfraState {
 
     public enum ShareKind {
         coroutine {
-            @Override public Provider<BuildShare> provider(SpoofaxPieState spoofaxPieState) {
-                return CoroutineBuildShare::new;
+            @Override public Provider<Share> provider(SpoofaxPieState spoofaxPieState) {
+                return CoroutineShare::new;
             }
         },
         non_sharing {
-            @Override public Provider<BuildShare> provider(SpoofaxPieState spoofaxPieState) {
-                return NonSharingBuildShare::new;
+            @Override public Provider<Share> provider(SpoofaxPieState spoofaxPieState) {
+                return NonSharingShare::new;
             }
         };
 
-        public abstract Provider<BuildShare> provider(SpoofaxPieState spoofaxPieState);
+        public abstract Provider<Share> provider(SpoofaxPieState spoofaxPieState);
     }
 
     public enum LayerKind {

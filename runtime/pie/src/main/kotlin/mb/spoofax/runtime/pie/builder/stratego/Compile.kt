@@ -29,7 +29,7 @@ class CompileStratego
     }
     generate(result.outputFile)
     generate(result.depFile)
-    requiredPaths(result.depFile).forEach { require(it) }
+    requiredPaths(result.depFile).forEach { require(it, PathStampers.hash) }
     return result.outputFile
   }
 
