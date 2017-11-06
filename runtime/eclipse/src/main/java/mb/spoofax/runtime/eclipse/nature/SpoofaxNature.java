@@ -10,7 +10,7 @@ import com.google.inject.Injector;
 
 import mb.spoofax.runtime.eclipse.SpoofaxPlugin;
 import mb.spoofax.runtime.eclipse.build.SpoofaxProjectBuilder;
-import mb.spoofax.runtime.eclipse.pipeline.PipelineAdapterInternal;
+import mb.spoofax.runtime.eclipse.pipeline.PipelineAdapter;
 import mb.spoofax.runtime.eclipse.util.BuilderUtils;
 import mb.spoofax.runtime.eclipse.vfs.EclipsePathSrv;
 import mb.vfs.path.PPath;
@@ -20,7 +20,7 @@ public class SpoofaxNature implements IProjectNature {
 
     private final EclipsePathSrv pathSrv;
     private final BuilderUtils builderUtils;
-    private final PipelineAdapterInternal pipelineAdapter;
+    private final PipelineAdapter pipelineAdapter;
 
     private IProject project;
 
@@ -29,7 +29,7 @@ public class SpoofaxNature implements IProjectNature {
         final Injector injector = SpoofaxPlugin.spoofaxFacade().injector;
         this.pathSrv = injector.getInstance(EclipsePathSrv.class);
         this.builderUtils = injector.getInstance(BuilderUtils.class);
-        this.pipelineAdapter = injector.getInstance(PipelineAdapterInternal.class);
+        this.pipelineAdapter = injector.getInstance(PipelineAdapter.class);
     }
 
 

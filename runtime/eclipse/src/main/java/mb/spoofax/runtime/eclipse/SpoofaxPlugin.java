@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import mb.log.LogModule;
 import mb.pie.runtime.builtin.PieBuiltinModule;
-import mb.spoofax.runtime.eclipse.pipeline.PipelineAdapterInternal;
+import mb.spoofax.runtime.eclipse.pipeline.PipelineAdapter;
 import mb.spoofax.runtime.eclipse.util.LoggingConfiguration;
 import mb.spoofax.runtime.impl.SpoofaxImplModule;
 import mb.spoofax.runtime.impl.legacy.StaticSpoofaxCoreFacade;
@@ -33,7 +33,7 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
     private static volatile Spoofax spoofaxCoreFacade;
     private static volatile SpoofaxMeta spoofaxCoreMetaFacade;
     private static volatile boolean doneLoading;
-    
+
     public static final boolean useInMemoryStore = false;
 
 
@@ -56,7 +56,7 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
             logger.error("Instantiating Spoofax failed", e);
             throw e;
         }
-        spoofaxFacade.injector.getInstance(PipelineAdapterInternal.class).scan();
+        spoofaxFacade.injector.getInstance(PipelineAdapter.class).addInitialProjects();
 
         // Initialize Spoofax Core
         try {

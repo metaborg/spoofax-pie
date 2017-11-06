@@ -21,14 +21,11 @@ import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import com.google.inject.Injector;
 
 import mb.log.Logger;
-import mb.pie.runtime.core.PushingExecutor;
 import mb.spoofax.runtime.eclipse.SpoofaxPlugin;
-import mb.spoofax.runtime.eclipse.pipeline.PipelineAdapterInternal;
-import mb.spoofax.runtime.eclipse.pipeline.WorkspaceUpdateFactory;
+import mb.spoofax.runtime.eclipse.pipeline.PipelineAdapter;
 import mb.spoofax.runtime.eclipse.util.Nullable;
 import mb.spoofax.runtime.eclipse.vfs.EclipsePathSrv;
 import mb.spoofax.runtime.model.SpoofaxFacade;
-import mb.spoofax.runtime.pie.PieSrv;
 import mb.vfs.path.PPath;
 
 public class SpoofaxEditor extends TextEditor {
@@ -47,16 +44,13 @@ public class SpoofaxEditor extends TextEditor {
     private IJobManager jobManager;
     private Logger logger;
     private EclipsePathSrv pathSrv;
-    private PieSrv pieSrv;
-    private PipelineAdapterInternal pipelineAdapter;
-    private WorkspaceUpdateFactory workspaceUpdateFactory;
+    private PipelineAdapter pipelineAdapter;
 
     private IEditorInput input;
     private String inputName;
     private IDocument document;
     private PPath file;
-    private IResource eclipseFile;
-    private PPath workspaceRoot;
+    private PPath projectPath;
     private DocumentListener documentListener;
     private ISourceViewer sourceViewer;
 
@@ -82,10 +76,6 @@ public class SpoofaxEditor extends TextEditor {
         return file;
     }
 
-    public IResource eclipseFile() {
-        return eclipseFile;
-    }
-
 
     public void setStyleAsync(final TextPresentation textPresentation, @Nullable final String text,
         @Nullable final IProgressMonitor monitor) {
@@ -93,7 +83,7 @@ public class SpoofaxEditor extends TextEditor {
         // Update textPresentation on the main thread, required by Eclipse.
         Display.getDefault().asyncExec(new Runnable() {
             public void run() {
-                if(monitor.isCanceled())
+                if(monitor != null && monitor.isCanceled())
                     return;
                 // Also cancel if text presentation is not valid for current text any more.
                 if(document == null || (text != null && !document.get().equals(text))) {
@@ -115,11 +105,7 @@ public class SpoofaxEditor extends TextEditor {
 
         this.logger = spoofaxFacade.rootLogger;
         this.pathSrv = injector.getInstance(EclipsePathSrv.class);
-        this.pieSrv = injector.getInstance(PieSrv.class);
-        this.pipelineAdapter = injector.getInstance(PipelineAdapterInternal.class);
-        this.workspaceUpdateFactory = injector.getInstance(WorkspaceUpdateFactory.class);
-
-        this.workspaceRoot = pathSrv.resolveWorkspaceRoot();
+        this.pipelineAdapter = injector.getInstance(PipelineAdapter.class);
 
         setDocumentProvider(new DocumentProvider(logger, pathSrv));
         setSourceViewerConfiguration(new SpoofaxSourceViewerConfiguration());
@@ -133,11 +119,15 @@ public class SpoofaxEditor extends TextEditor {
         if(resource != null) {
             inputName = resource.toString();
             file = resource;
-            eclipseFile = pathSrv.unresolve(resource);
+            final IResource eclipseFile = pathSrv.unresolve(resource);
+            if(eclipseFile != null) {
+                final IProject project = eclipseFile.getProject();
+                projectPath = pathSrv.resolve(project);
+            }
         } else {
             inputName = input.getName();
             file = null;
-            eclipseFile = null;
+            projectPath = null;
             logger.warn("File for editor on {} is null, cannot update the editor", input);
         }
 
@@ -150,7 +140,9 @@ public class SpoofaxEditor extends TextEditor {
 
         ((ITextViewerExtension4) sourceViewer).addTextPresentationListener(presentationMerger);
 
-        pipelineAdapter.addEditor(this);
+        if(file != null && projectPath == null) {
+            pipelineAdapter.addEditor(this, text(), file, projectPath);
+        }
 
         scheduleJob(true);
 
@@ -175,24 +167,20 @@ public class SpoofaxEditor extends TextEditor {
 
     private void scheduleJob(boolean initialUpdate) {
         cancelJobs(input);
-        if(eclipseFile == null) {
+        if(file == null || projectPath == null) {
             return;
         }
-
-        final IProject project = eclipseFile.getProject();
-        final PPath projectDir = pathSrv.resolve(project);
-        final PushingExecutor executor = pieSrv.getPushingExecutor(workspaceRoot, SpoofaxPlugin.useInMemoryStore);
-        final Job job = new EditorUpdateJob(logger, executor, pipelineAdapter, workspaceUpdateFactory.create(), this,
-            document.get(), file, projectDir, input, eclipseFile);
-        job.setRule(eclipseFile);
+        final Job job = new EditorUpdateJob(logger, pipelineAdapter, this, document.get(), file, projectPath, input);
         job.schedule(initialUpdate ? 0 : 300);
     }
 
     private void cancelJobs(IEditorInput specificInput) {
-        logger.trace("Cancelling editor update jobs for {}", specificInput);
         final Job[] existingJobs = jobManager.find(specificInput);
-        for(Job job : existingJobs) {
-            job.cancel();
+        if(existingJobs.length > 0) {
+            logger.trace("Cancelling editor update jobs for {}", specificInput);
+            for(Job job : existingJobs) {
+                job.cancel();
+            }
         }
     }
 }

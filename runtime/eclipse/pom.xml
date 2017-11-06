@@ -48,7 +48,12 @@
       <artifactId>vfs</artifactId>
       <version>${metaborg-version}</version>
     </dependency>
-    
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>util</artifactId>
+      <version>${metaborg-version}</version>
+    </dependency>
+
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.metaborg.core</artifactId>

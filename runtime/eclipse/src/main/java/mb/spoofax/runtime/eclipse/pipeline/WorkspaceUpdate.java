@@ -80,9 +80,22 @@ public class WorkspaceUpdate {
         addMessage(msg.path(), msg);
     }
 
+    public void addMessageFiltered(PathMsg msg, PPath filter) {
+        final PPath path = msg.path();
+        if(filter.equals(path)) {
+            addMessage(path, msg);
+        }
+    }
+
     public void addMessages(Iterable<PathMsg> msgs) {
         for(PathMsg msg : msgs) {
             addMessage(msg);
+        }
+    }
+    
+    public void addMessagesFiltered(Iterable<PathMsg> msgs, PPath filter) {
+        for(PathMsg msg : msgs) {
+            addMessageFiltered(msg, filter);
         }
     }
 
@@ -91,10 +104,10 @@ public class WorkspaceUpdate {
         messagesPerPath.put(path, messages);
     }
 
-    public void updateMessagesSync(ISchedulingRule rule, @Nullable IProgressMonitor monitor) throws CoreException {
+    public void updateMessagesSync(@Nullable ISchedulingRule rule, @Nullable IProgressMonitor monitor) throws CoreException {
         final ICoreRunnable parseMarkerUpdater = new IWorkspaceRunnable() {
-            @Override public void run(IProgressMonitor workspaceMonitor) throws CoreException {
-                if(workspaceMonitor.isCanceled())
+            @Override public void run(@Nullable IProgressMonitor workspaceMonitor) throws CoreException {
+                if(workspaceMonitor != null && workspaceMonitor.isCanceled())
                     return;
                 updateMessages();
             }
@@ -102,7 +115,7 @@ public class WorkspaceUpdate {
         ResourcesPlugin.getWorkspace().run(parseMarkerUpdater, rule, IWorkspace.AVOID_UPDATE, monitor);
     }
 
-    public void updateMessagesAsync(ISchedulingRule rule) {
+    public void updateMessagesAsync(@Nullable ISchedulingRule rule) {
         final WorkspaceJob job = new WorkspaceJob("Updating Spoofax messages") {
             @Override public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
                 if(monitor != null && monitor.isCanceled())
@@ -117,16 +130,16 @@ public class WorkspaceUpdate {
 
     private void updateMessages() throws CoreException {
         for(PPath path : pathsToClearRec) {
-            logger.debug("Clearing messages for {}, recursively", path);
+            logger.trace("Clearing messages for {}, recursively", path);
             MarkerUtils.clearAllRec(toResource(path));
         }
         for(PPath path : pathsToClear) {
-            logger.debug("Clearing messages for {}", path);
+            logger.trace("Clearing messages for {}", path);
             MarkerUtils.clearAll(toResource(path));
         }
         for(Entry<PPath, ArrayList<Msg>> entry : messagesPerPath.entrySet()) {
             final PPath path = entry.getKey();
-            logger.debug("Updating messages for {}", path);
+            logger.trace("Updating messages for {}", path);
             final IResource resource = toResource(path);
             if(resource == null) {
                 logger.error("Cannot get Eclipse resource for path {}, skipping", path);
@@ -166,7 +179,7 @@ public class WorkspaceUpdate {
             if(monitor != null && monitor.isCanceled())
                 return;
             final SpoofaxEditor editor = styleUpdate.editor;
-            logger.debug("Updating textPresentation for {}", editor);
+            logger.trace("Updating syntax styling for {}", editor);
             editor.setStyleAsync(styleUpdate.textPresentation, styleUpdate.text, monitor);
         }
     }

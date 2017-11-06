@@ -28,6 +28,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.metaborg.spoofax.eclipse.meta.externaldeps,
  log,
  vfs,
+ util,
  pie.runtime.core,
  pie.runtime.builtin,
  spoofax.runtime.model,
@@ -53,6 +54,7 @@ Eclipse-RegisterBuddy:
  org.metaborg.spoofax.eclipse.meta.externaldeps,
  log,
  vfs,
+ util,
  pie.runtime.core,
  pie.runtime.builtin,
  spoofax.runtime.model,
@@ -60,3 +62,4 @@ Eclipse-RegisterBuddy:
  spoofax.runtime.impl.legacy,
  spoofax.runtime.eclipse.externaldeps,
  spoofax.runtime.pie
+Import-Package: mb.util.async
