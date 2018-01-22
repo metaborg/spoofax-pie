@@ -59,8 +59,9 @@ public class ConstraintGenerator implements Serializable {
         final IOAgent ioAgent = new IOAgent();
         final ITermFactory termFactory = runtime.termFactory();
         final StrategoTerms termConverter = new StrategoTerms(termFactory);
+        // TODO: set second argument of Actions.analyzeInitial to an AST?
         final ITerm initialResultTerm =
-            doAction(termConverter, runtime, ioAgent, Actions.analyzeInitial(ConstraintSolver.globalSource))
+            doAction(termConverter, runtime, ioAgent, Actions.analyzeInitial(ConstraintSolver.globalSource, null))
                 .orElseThrow(() -> new SpoofaxEx("No initial result"));
         final ImmutableInitialResult initialResult = (ImmutableInitialResult) InitialResult.matcher()
             .match(initialResultTerm).orElseThrow(() -> new SpoofaxRunEx("Invalid initial result"));

@@ -2,8 +2,8 @@ package mb.spoofax.runtime.benchmark.state;
 
 import kotlin.Unit;
 import mb.pie.runtime.core.ExecException;
-import mb.pie.runtime.core.PushingExecutor;
-import mb.pie.runtime.core.impl.PushingExecutorImpl;
+import mb.pie.runtime.core.ObservingExecutor;
+import mb.pie.runtime.core.impl.ObservingExecutorImpl;
 import mb.spoofax.runtime.pie.builder.SpoofaxPipeline;
 import mb.util.async.NullCancelled;
 import mb.vfs.path.PPath;
@@ -17,8 +17,8 @@ import java.util.stream.Stream;
 
 
 @State(Scope.Benchmark)
-public class PushingExecState {
-    public PushingExecutor executor;
+public class ObservingExecState {
+    public ObservingExecutor executor;
 
     public void setup(SpoofaxPieState spoofaxPieState, WorkspaceState workspaceState, InfraState infraState) {
         init(spoofaxPieState, workspaceState, infraState);
@@ -29,10 +29,8 @@ public class PushingExecState {
     }
 
     public void exec(WorkspaceState workspaceState, List<PPath> changedPaths) {
-        executor.pathsChanged(changedPaths);
-        executor.dirtyFlag();
         try {
-            executor.executeAll(new NullCancelled());
+            executor.pathsChanged(changedPaths, new NullCancelled());
         } catch(ExecException | InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -40,15 +38,15 @@ public class PushingExecState {
 
     private void init(SpoofaxPieState spoofaxPieState, WorkspaceState workspaceState, InfraState infraState) {
         this.executor =
-            new PushingExecutorImpl(infraState.store, infraState.cache, infraState.share, infraState.layer,
-                infraState.logger, infraState.funcs, spoofaxPieState.logger);
+            new ObservingExecutorImpl(infraState.store, infraState.cache, infraState.share, infraState.layer,
+                infraState.logger, spoofaxPieState.logger, infraState.funcs);
         final PPath root = workspaceState.root;
         try(final Stream<PPath> stream = root.list(PPaths.directoryPathMatcher())) {
-            stream
-                .filter((path) -> !path.toString().contains("root"))
-                .forEach((path) -> executor.add(path,
-                    SpoofaxPipeline.INSTANCE.processProjectObsFunApp(path, root, o -> Unit.INSTANCE)));
-        } catch(IOException e) {
+            for(PPath path : (Iterable<PPath>) stream.filter((path) -> !path.toString().contains("root"))::iterator) {
+                executor.setObserver(SpoofaxPipeline.INSTANCE.processProjectFunApp(path, root),
+                    (result) -> Unit.INSTANCE, new NullCancelled());
+            }
+        } catch(ExecException | InterruptedException | IOException e) {
             throw new RuntimeException(e);
         }
     }

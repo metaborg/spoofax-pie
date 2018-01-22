@@ -8,7 +8,7 @@ data Token = foreign java mb.spoofax.runtime.model.parse.Token {}
 data Styling = foreign java mb.spoofax.runtime.model.style.Styling {}
 
 
- 
+
 /// Library with functions to build SDF3 and ESV specifications
 data ParseTable = foreign java mb.spoofax.runtime.impl.sdf.Table {}
 func sdf2table(sdfLang: SpxCoreConfig, specDir: path, files: path*, mainFile: path) -> ParseTable? = foreign mb.spoofax.runtime.pie.builder.GenerateTable
@@ -90,6 +90,8 @@ func createWorkspaceConfig(workspaceRoot: path) -> WorkspaceConfig? = {
   workspaceConfig
 }
 
+
+
 // Processing
 /// Process the entire workspace.
 func processWorkspace(root: path) -> (((path, Token*?, Message*, Styling?, PartialSolverSolution?)*, SolverSolution?*)*, (path, Token*?, Message*, Styling?)*)?* = {
@@ -117,6 +119,7 @@ func processLangSpecInProject(project: path, langSpec: LangSpecConfig, workspace
     ;
   (results, solutions)
 }
+
 
 
 /// Processing an editor in the workspace.

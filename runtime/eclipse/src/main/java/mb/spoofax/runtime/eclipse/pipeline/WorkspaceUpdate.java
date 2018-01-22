@@ -131,18 +131,28 @@ public class WorkspaceUpdate {
     private void updateMessages() throws CoreException {
         for(PPath path : pathsToClearRec) {
             logger.trace("Clearing messages for {}, recursively", path);
-            MarkerUtils.clearAllRec(toResource(path));
+            final IResource resource = toResource(path);
+            if(resource == null) {
+                logger.error("Failed to recursively clear messages for {}, it cannot be resolved to an Eclipse resource", path);
+                continue;
+            }
+            MarkerUtils.clearAllRec(resource);
         }
         for(PPath path : pathsToClear) {
             logger.trace("Clearing messages for {}", path);
-            MarkerUtils.clearAll(toResource(path));
+            final IResource resource = toResource(path);
+            if(resource == null) {
+                logger.error("Failed to clear messages for {}, it cannot be resolved to an Eclipse resource", path);
+                continue;
+            }
+            MarkerUtils.clearAll(resource);
         }
         for(Entry<PPath, ArrayList<Msg>> entry : messagesPerPath.entrySet()) {
             final PPath path = entry.getKey();
             logger.trace("Updating messages for {}", path);
             final IResource resource = toResource(path);
             if(resource == null) {
-                logger.error("Cannot get Eclipse resource for path {}, skipping", path);
+                logger.error("Failed to update messages for {}, it cannot be resolved to an Eclipse resource", path);
                 continue;
             }
             for(Msg msg : entry.getValue()) {
@@ -185,7 +195,7 @@ public class WorkspaceUpdate {
     }
 
 
-    private IResource toResource(PPath path) {
+    private @Nullable IResource toResource(PPath path) {
         return pathSrv.unresolve(path);
     }
 }

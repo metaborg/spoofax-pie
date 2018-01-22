@@ -8,6 +8,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import com.google.inject.Injector;
 
+import mb.log.Logger;
 import mb.spoofax.runtime.eclipse.SpoofaxPlugin;
 import mb.spoofax.runtime.eclipse.build.SpoofaxProjectBuilder;
 import mb.spoofax.runtime.eclipse.pipeline.PipelineAdapter;
@@ -18,6 +19,7 @@ import mb.vfs.path.PPath;
 public class SpoofaxNature implements IProjectNature {
     public static final String id = SpoofaxPlugin.id + ".nature";
 
+    private final Logger logger;
     private final EclipsePathSrv pathSrv;
     private final BuilderUtils builderUtils;
     private final PipelineAdapter pipelineAdapter;
@@ -27,6 +29,7 @@ public class SpoofaxNature implements IProjectNature {
 
     public SpoofaxNature() {
         final Injector injector = SpoofaxPlugin.spoofaxFacade().injector;
+        this.logger = injector.getInstance(Logger.class).forContext(getClass());
         this.pathSrv = injector.getInstance(EclipsePathSrv.class);
         this.builderUtils = injector.getInstance(BuilderUtils.class);
         this.pipelineAdapter = injector.getInstance(PipelineAdapter.class);
@@ -46,11 +49,13 @@ public class SpoofaxNature implements IProjectNature {
                 project.setDescription(projectDesc, null);
             }
         }
+        logger.debug("Spoofax nature was added to project {}", project);
         pipelineAdapter.addProject(project);
     }
 
     @Override public void deconfigure() throws CoreException {
         builderUtils.removeFrom(SpoofaxProjectBuilder.id, project, null);
+        logger.debug("Spoofax nature was removed from project {}", project);
         pipelineAdapter.removeProject(project);
     }
 

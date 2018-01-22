@@ -56,7 +56,7 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
             logger.error("Instantiating Spoofax failed", e);
             throw e;
         }
-        spoofaxFacade.injector.getInstance(PipelineAdapter.class).addInitialProjects();
+        spoofaxFacade.injector.getInstance(PipelineAdapter.class).initialize();
 
         // Initialize Spoofax Core
         try {

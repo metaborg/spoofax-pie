@@ -5,6 +5,8 @@ import java.util.ArrayList;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -34,7 +36,7 @@ import mb.util.async.Cancelled;
 import mb.util.async.NullCancelled;
 import mb.vfs.path.PPath;
 
-public class PipelineAdapter {
+public class PipelineAdapter implements IResourceChangeListener {
     private final Logger logger;
     private final EclipsePathSrv pathSrv;
     private final WorkspaceUpdateFactory workspaceUpdateFactory;
@@ -57,6 +59,12 @@ public class PipelineAdapter {
     }
 
 
+    public void initialize() throws CoreException {
+        addInitialProjects();
+        registerResourceChangeListener();
+    }
+
+
     public void addProject(IProject eclipseProject) {
         final PPath project = pathSrv.resolve(eclipseProject);
         if(project == null) {
@@ -68,7 +76,7 @@ public class PipelineAdapter {
         pushingExecutor.add(eclipseProject, projectObsFuncApp(project));
     }
 
-    public void addInitialProjects() throws CoreException {
+    private void addInitialProjects() throws CoreException {
         for(IProject project : eclipseWorkspaceRoot.getProjects()) {
             if(project.isAccessible() && NatureUtils.exists(SpoofaxNature.id, project)) {
                 addProject(project);
@@ -110,7 +118,7 @@ public class PipelineAdapter {
     }
 
 
-    public void pathsChanged(IResourceDelta delta) throws CoreException {
+    public void dirtyFlag(IResourceDelta delta) throws CoreException {
         logger.debug("Processing resource delta");
         final ArrayList<PPath> changedPaths = new ArrayList<>();
         delta.accept(new IResourceDeltaVisitor() {
@@ -162,6 +170,70 @@ public class PipelineAdapter {
         final WorkspaceUpdate update = workspaceUpdateFactory.create();
         update.addClearRec(workspaceRoot);
         update.updateMessagesSync(eclipseWorkspaceRoot, null);
+    }
+
+
+    public void registerResourceChangeListener() {
+        ResourcesPlugin.getWorkspace().addResourceChangeListener(this,
+            IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE | IResourceChangeEvent.POST_CHANGE);
+    }
+
+    @Override public void resourceChanged(IResourceChangeEvent event) {
+        try {
+            switch(event.getType()) {
+                case IResourceChangeEvent.PRE_CLOSE: {
+                    final IProject project = (IProject) event.getResource();
+                    if(NatureUtils.exists(SpoofaxNature.id, project)) {
+                        logger.debug("Spoofax project {} was closed", project);
+                        removeProject(project);
+                    }
+                    break;
+                }
+                case IResourceChangeEvent.PRE_DELETE: {
+                    final IProject project = (IProject) event.getResource();
+                    if(NatureUtils.exists(SpoofaxNature.id, project)) {
+                        logger.debug("Spoofax project {} was deleted", project);
+                        removeProject(project);
+                    }
+                    break;
+                }
+                case IResourceChangeEvent.POST_CHANGE:
+                    event.getDelta().accept(delta -> {
+                        // Only match Spoofax projects.
+                        final IResource resource = delta.getResource();
+                        if(resource.getType() != IResource.PROJECT) {
+                            return true; // Recurse into projects of workspace.
+                        }
+                        final IProject project = (IProject) resource;
+                        if(!NatureUtils.exists(SpoofaxNature.id, project)) {
+                            return false; // Never recurse into projects, since projects cannot be nested.
+                        }
+
+                        // Determine kind of change.
+                        switch(delta.getKind()) {
+                            case IResourceDelta.ADDED: {
+                                logger.debug("Spoofax project {} was added", project);
+                                if(project.isAccessible()) {
+                                    addProject(project);
+                                }
+                                break;
+                            }
+                            case IResourceDelta.CHANGED: {
+                                if((delta.getFlags() & IResourceDelta.OPEN) != 0) {
+                                    if(project.isAccessible()) { // Project was opened
+                                        logger.debug("Spoofax project {} was opened", project);
+                                        addProject(project);
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                        return false; // Never recurse into projects, since projects cannot be nested.
+                    });
+            }
+        } catch(CoreException e) {
+            logger.error("Failed to process resource delta", e);
+        }
     }
 
 

@@ -168,7 +168,7 @@ public class ConstraintSolver {
         final Optional<TermOrigin> maybeOrigin = TermOrigin.get(originatingTerm);
         if(maybeOrigin.isPresent()) {
             final TermOrigin origin = maybeOrigin.get();
-            final Region region = new RegionImpl(origin.getStartOffset(), origin.getEndOffset());
+            final Region region = new RegionImpl(origin.getLeftToken().getStartOffset(), origin.getRightToken().getEndOffset());
             final String pathStr = origin.getResource();
             final PPath path = pathSrv.resolveLocal(pathStr);
             final String relPath = projectPath.relativizeStringFrom(path);

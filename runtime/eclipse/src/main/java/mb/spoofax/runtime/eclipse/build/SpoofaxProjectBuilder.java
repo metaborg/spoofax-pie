@@ -38,7 +38,7 @@ public class SpoofaxProjectBuilder extends IncrementalProjectBuilder {
 
         final IResourceDelta delta = getDelta(currentEclipseProject);
         if(delta != null) {
-            pipelineAdapter.pathsChanged(delta);
+            pipelineAdapter.dirtyFlag(delta);
         }
 
         try {
