@@ -18,9 +18,9 @@ import com.google.inject.Inject;
 
 import kotlin.Unit;
 import mb.log.Logger;
-import mb.pie.runtime.core.DirtyFlaggingExecutor;
 import mb.pie.runtime.core.ExecException;
-import mb.pie.runtime.core.ObsFuncApp;
+import mb.pie.runtime.core.exec.DirtyFlaggingExecutor;
+import mb.pie.runtime.core.exec.ObsFuncApp;
 import mb.spoofax.runtime.eclipse.SpoofaxPlugin;
 import mb.spoofax.runtime.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.runtime.eclipse.nature.SpoofaxNature;
