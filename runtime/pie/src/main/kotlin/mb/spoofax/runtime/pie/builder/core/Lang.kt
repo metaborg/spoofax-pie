@@ -1,6 +1,7 @@
 package mb.spoofax.runtime.pie.builder.core
 
 import mb.pie.runtime.core.*
+import mb.pie.runtime.core.stamp.PathStampers
 import mb.vfs.path.PPath
 import org.metaborg.core.build.CommonPaths
 import org.metaborg.core.language.*

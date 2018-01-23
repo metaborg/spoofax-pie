@@ -3,6 +3,7 @@ package mb.spoofax.runtime.pie.builder.stratego
 import com.google.inject.Inject
 import mb.log.Logger
 import mb.pie.runtime.core.*
+import mb.pie.runtime.core.stamp.PathStampers
 import mb.spoofax.runtime.impl.cfg.StrategoConfig
 import mb.spoofax.runtime.impl.stratego.StrategoCompiler
 import mb.vfs.path.*

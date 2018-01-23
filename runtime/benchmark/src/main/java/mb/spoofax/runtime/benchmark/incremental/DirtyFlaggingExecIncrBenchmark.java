@@ -11,9 +11,9 @@ import java.util.concurrent.TimeUnit;
 @BenchmarkMode(Mode.SingleShotTime)
 @OutputTimeUnit(TimeUnit.SECONDS)
 @State(Scope.Benchmark)
-public class PushingExecIncrBenchmark {
+public class DirtyFlaggingExecIncrBenchmark {
     @Setup(Level.Trial)
-    public void setupTrial(SpoofaxPieState spoofaxPie, WorkspaceState workspace, IncrState incr, InfraState infra, PushingExecState exec) throws IOException {
+    public void setupTrial(SpoofaxPieState spoofaxPie, WorkspaceState workspace, IncrState incr, InfraState infra, DirtyFlaggingExecState exec) throws IOException {
         workspace.setup(spoofaxPie);
         incr.setup(workspace);
         infra.setup(spoofaxPie, workspace);
@@ -32,7 +32,7 @@ public class PushingExecIncrBenchmark {
     private WorkspaceState workspace;
     private IncrState incr;
     private InfraState infra;
-    private PushingExecState exec;
+    private DirtyFlaggingExecState exec;
 
     @Setup(Level.Invocation) public void setupInvocation() throws IOException {
         infra.renew(spoofaxPie);

@@ -5,6 +5,7 @@ import mb.log.Logger
 import mb.pie.runtime.builtin.path.read
 import mb.pie.runtime.builtin.util.Tuple3
 import mb.pie.runtime.core.*
+import mb.pie.runtime.core.stamp.PathStampers
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.spoofax.runtime.impl.sdf.Signatures
 import mb.spoofax.runtime.impl.sdf.Table
@@ -81,7 +82,7 @@ class GenerateTable
     // Create table and make dependencies
     require(mainResource, PathStampers.hash);
     val generator = ParseTableGenerator(mainResourceLocal, outputFile, null, null, paths)
-    generator.outputTable(false)
+    generator.outputTable(false, false, false)
     generate(vfsOutputFile.pPath)
     return Table(vfsOutputFile.pPath)
   }

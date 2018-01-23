@@ -2,8 +2,8 @@ package mb.spoofax.runtime.benchmark.state;
 
 import kotlin.Unit;
 import mb.pie.runtime.core.ExecException;
-import mb.pie.runtime.core.ObservingExecutor;
-import mb.pie.runtime.core.impl.ObservingExecutorImpl;
+import mb.pie.runtime.core.exec.ObservingExecutor;
+import mb.pie.runtime.core.impl.exec.ObservingExecutorImpl;
 import mb.spoofax.runtime.pie.builder.SpoofaxPipeline;
 import mb.util.async.NullCancelled;
 import mb.vfs.path.PPath;

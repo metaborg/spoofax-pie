@@ -1,6 +1,8 @@
 package mb.spoofax.runtime.pie.builder
 
 import mb.pie.runtime.core.*
+import mb.pie.runtime.core.exec.AnyObsFuncApp
+import mb.pie.runtime.core.exec.ObsFuncApp
 import mb.spoofax.runtime.pie.generated.processEditor
 import mb.spoofax.runtime.pie.generated.processProject
 import mb.vfs.path.PPath

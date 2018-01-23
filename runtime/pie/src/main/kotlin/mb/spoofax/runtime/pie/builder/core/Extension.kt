@@ -3,6 +3,7 @@ package mb.spoofax.runtime.pie.builder.core
 import com.google.inject.Inject
 import mb.log.Logger
 import mb.pie.runtime.core.*
+import mb.pie.runtime.core.stamp.PathStampers
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.spoofax.runtime.impl.esv.ESVReader
 import mb.spoofax.runtime.impl.legacy.EsvUtil

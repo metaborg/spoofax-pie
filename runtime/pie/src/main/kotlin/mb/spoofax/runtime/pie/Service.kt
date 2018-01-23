@@ -3,10 +3,10 @@ package mb.spoofax.runtime.pie
 import com.google.inject.Inject
 import com.google.inject.Provider
 import mb.pie.runtime.core.Cache
-import mb.pie.runtime.core.PullingExecutor
-import mb.pie.runtime.core.PullingExecutorFactory
-import mb.pie.runtime.core.PushingExecutor
-import mb.pie.runtime.core.PushingExecutorFactory
+import mb.pie.runtime.core.exec.PullingExecutor
+import mb.pie.runtime.core.exec.PullingExecutorFactory
+import mb.pie.runtime.core.exec.DirtyFlaggingExecutor
+import mb.pie.runtime.core.exec.DirtyFlaggingExecutorFactory
 import mb.pie.runtime.core.Store
 import mb.pie.runtime.core.impl.store.InMemoryStore
 import mb.pie.runtime.core.impl.store.LMDBBuildStoreFactory
@@ -17,20 +17,20 @@ import java.util.concurrent.ConcurrentHashMap
 
 interface PieSrv {
   fun getPullingExecutor(dir: PPath, useInMemoryStore: Boolean): PullingExecutor
-  fun getPushingExecutor(dir: PPath, useInMemoryStore: Boolean): PushingExecutor
+  fun getPushingExecutor(dir: PPath, useInMemoryStore: Boolean): DirtyFlaggingExecutor
 }
 
 class PieSrvImpl @Inject constructor(
-        private val pathSrv: PathSrv,
-        private val storeFactory: LMDBBuildStoreFactory,
-        private val cacheFactory: Provider<Cache>,
-        private val pullingExecutorFactory: PullingExecutorFactory,
-        private val pushingExecutorFactory: PushingExecutorFactory
+  private val pathSrv: PathSrv,
+  private val storeFactory: LMDBBuildStoreFactory,
+  private val cacheFactory: Provider<Cache>,
+  private val pullingExecutorFactory: PullingExecutorFactory,
+  private val dirtyFlaggingExecutorFactory: DirtyFlaggingExecutorFactory
 ) : PieSrv {
   private val stores = ConcurrentHashMap<PPath, Store>()
   private val caches = ConcurrentHashMap<PPath, Cache>()
   private val pullingExecutors = ConcurrentHashMap<PPath, PullingExecutor>()
-  private val pushingExecutors = ConcurrentHashMap<PPath, PushingExecutor>()
+  private val pushingExecutors = ConcurrentHashMap<PPath, DirtyFlaggingExecutor>()
 
 
   override fun getPullingExecutor(dir: PPath, useInMemoryStore: Boolean): PullingExecutor {
@@ -41,11 +41,11 @@ class PieSrvImpl @Inject constructor(
     }
   }
 
-  override fun getPushingExecutor(dir: PPath, useInMemoryStore: Boolean): PushingExecutor {
+  override fun getPushingExecutor(dir: PPath, useInMemoryStore: Boolean): DirtyFlaggingExecutor {
     return pushingExecutors.getOrPut(dir) {
       val store = getStore(dir, useInMemoryStore)
       val cache = getCache(dir)
-      pushingExecutorFactory.create(store, cache)
+      dirtyFlaggingExecutorFactory.create(store, cache)
     }
   }
 

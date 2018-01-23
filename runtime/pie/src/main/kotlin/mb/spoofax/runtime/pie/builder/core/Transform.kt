@@ -4,6 +4,7 @@ import com.google.inject.Inject
 import mb.log.Logger
 import mb.pie.runtime.builtin.util.Tuple2
 import mb.pie.runtime.core.*
+import mb.pie.runtime.core.stamp.PathStampers
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.vfs.path.PPath
 import org.apache.commons.vfs2.FileObject

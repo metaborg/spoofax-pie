@@ -18,9 +18,9 @@ import com.google.inject.Inject;
 
 import kotlin.Unit;
 import mb.log.Logger;
+import mb.pie.runtime.core.DirtyFlaggingExecutor;
 import mb.pie.runtime.core.ExecException;
 import mb.pie.runtime.core.ObsFuncApp;
-import mb.pie.runtime.core.PushingExecutor;
 import mb.spoofax.runtime.eclipse.SpoofaxPlugin;
 import mb.spoofax.runtime.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.runtime.eclipse.nature.SpoofaxNature;
@@ -43,7 +43,7 @@ public class PipelineAdapter implements IResourceChangeListener {
 
     private final IWorkspaceRoot eclipseWorkspaceRoot;
     private final PPath workspaceRoot;
-    private final PushingExecutor pushingExecutor;
+    private final DirtyFlaggingExecutor executor;
 
 
     @Inject public PipelineAdapter(Logger logger, EclipsePathSrv pathSrv, PieSrv pieSrv,
@@ -55,7 +55,7 @@ public class PipelineAdapter implements IResourceChangeListener {
         this.eclipseWorkspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
         this.workspaceRoot = pathSrv.resolve(eclipseWorkspaceRoot);
 
-        this.pushingExecutor = pieSrv.getPushingExecutor(workspaceRoot, SpoofaxPlugin.useInMemoryStore);
+        this.executor = pieSrv.getPushingExecutor(workspaceRoot, SpoofaxPlugin.useInMemoryStore);
     }
 
 
@@ -73,7 +73,7 @@ public class PipelineAdapter implements IResourceChangeListener {
             return;
         }
         logger.debug("Registering pipeline function for project {}", eclipseProject);
-        pushingExecutor.add(eclipseProject, projectObsFuncApp(project));
+        executor.add(eclipseProject, projectObsFuncApp(project));
     }
 
     private void addInitialProjects() throws CoreException {
@@ -86,18 +86,18 @@ public class PipelineAdapter implements IResourceChangeListener {
 
     public void removeProject(IProject eclipseProject) {
         logger.debug("Unregistering pipeline function for project {}", eclipseProject);
-        pushingExecutor.remove(eclipseProject);
+        executor.remove(eclipseProject);
     }
 
 
     public void addEditor(SpoofaxEditor editor, String text, PPath file, PPath project) {
         logger.debug("Registering pipeline function for editor {}", editor);
-        pushingExecutor.add(editor, editorObsFuncApp(editor, text, file, project));
+        executor.add(editor, editorObsFuncApp(editor, text, file, project));
     }
 
     public void updateEditor(SpoofaxEditor editor, String text, PPath file, PPath project) {
         logger.debug("Updating pipeline function for editor {}", editor);
-        pushingExecutor.update(editor, editorObsFuncApp(editor, text, file, project));
+        executor.update(editor, editorObsFuncApp(editor, text, file, project));
     }
 
     public void updateEditorAndExecute(SpoofaxEditor editor, String text, PPath file, PPath project,
@@ -105,7 +105,7 @@ public class PipelineAdapter implements IResourceChangeListener {
         logger.debug("Updating pipeline function for editor {}", editor);
         try {
             logger.debug("Executing pipeline function for editor {}...", editor);
-            pushingExecutor.updateAndExecute(editor, editorObsFuncApp(editor, text, file, project),
+            executor.updateAndExecute(editor, editorObsFuncApp(editor, text, file, project),
                 cancellationToken(monitor));
         } finally {
             logger.debug("Done executing pipeline function for editor {}", editor);
@@ -114,7 +114,7 @@ public class PipelineAdapter implements IResourceChangeListener {
 
     public void removeEditor(SpoofaxEditor editor) {
         logger.debug("Unregistering pipeline function for editor {}", editor);
-        pushingExecutor.remove(editor);
+        executor.remove(editor);
     }
 
 
@@ -144,9 +144,9 @@ public class PipelineAdapter implements IResourceChangeListener {
                 return true;
             }
         });
-        pushingExecutor.pathsChanged(changedPaths);
+        executor.pathsChanged(changedPaths);
         logger.debug("Dirty flagging...");
-        pushingExecutor.dirtyFlag();
+        executor.dirtyFlag();
         logger.debug("Done dirty flagging");
     }
 
@@ -154,7 +154,7 @@ public class PipelineAdapter implements IResourceChangeListener {
     public void executeAll(@Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
         try {
             logger.debug("Executing all pipeline functions...");
-            pushingExecutor.executeAll(cancellationToken(monitor));
+            executor.executeAll(cancellationToken(monitor));
         } finally {
             logger.debug("Done executing all pipeline functions");
         }
@@ -164,8 +164,8 @@ public class PipelineAdapter implements IResourceChangeListener {
     public void cleanAll() throws CoreException {
         logger.debug("Cleaning all stored pipeline data");
 
-        pushingExecutor.dropStore();
-        pushingExecutor.dropCache();
+        executor.dropStore();
+        executor.dropCache();
 
         final WorkspaceUpdate update = workspaceUpdateFactory.create();
         update.addClearRec(workspaceRoot);

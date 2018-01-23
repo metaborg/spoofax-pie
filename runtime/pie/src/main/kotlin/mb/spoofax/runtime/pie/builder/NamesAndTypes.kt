@@ -5,6 +5,7 @@ import mb.log.Logger
 import mb.pie.runtime.builtin.path.read
 import mb.pie.runtime.builtin.util.Tuple5
 import mb.pie.runtime.core.*
+import mb.pie.runtime.core.stamp.PathStampers
 import mb.spoofax.runtime.impl.cfg.ImmutableStrategoConfig
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.spoofax.runtime.impl.nabl.*

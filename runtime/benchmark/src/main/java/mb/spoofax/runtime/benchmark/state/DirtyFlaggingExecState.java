@@ -2,8 +2,8 @@ package mb.spoofax.runtime.benchmark.state;
 
 import kotlin.Unit;
 import mb.pie.runtime.core.ExecException;
-import mb.pie.runtime.core.PushingExecutor;
-import mb.pie.runtime.core.impl.PushingExecutorImpl;
+import mb.pie.runtime.core.exec.DirtyFlaggingExecutor;
+import mb.pie.runtime.core.impl.exec.DirtyFlaggingExecutorImpl;
 import mb.spoofax.runtime.pie.builder.SpoofaxPipeline;
 import mb.util.async.NullCancelled;
 import mb.vfs.path.PPath;
@@ -17,8 +17,8 @@ import java.util.stream.Stream;
 
 
 @State(Scope.Benchmark)
-public class PushingExecState {
-    public PushingExecutor executor;
+public class DirtyFlaggingExecState {
+    public DirtyFlaggingExecutor executor;
 
     public void setup(SpoofaxPieState spoofaxPieState, WorkspaceState workspaceState, InfraState infraState) {
         init(spoofaxPieState, workspaceState, infraState);
@@ -40,7 +40,7 @@ public class PushingExecState {
 
     private void init(SpoofaxPieState spoofaxPieState, WorkspaceState workspaceState, InfraState infraState) {
         this.executor =
-            new PushingExecutorImpl(infraState.store, infraState.cache, infraState.share, infraState.layer,
+            new DirtyFlaggingExecutorImpl(infraState.store, infraState.cache, infraState.share, infraState.layer,
                 infraState.logger, infraState.funcs, spoofaxPieState.logger);
         final PPath root = workspaceState.root;
         try(final Stream<PPath> stream = root.list(PPaths.directoryPathMatcher())) {
