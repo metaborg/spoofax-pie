@@ -3,6 +3,7 @@ package mb.spoofax.runtime.benchmark.state;
 import kotlin.Unit;
 import mb.pie.runtime.core.ExecException;
 import mb.pie.runtime.core.exec.DirtyFlaggingExecutor;
+import mb.pie.runtime.core.exec.ObsFuncApp;
 import mb.pie.runtime.core.impl.exec.DirtyFlaggingExecutorImpl;
 import mb.spoofax.runtime.pie.builder.SpoofaxPipeline;
 import mb.util.async.NullCancelled;
@@ -46,8 +47,8 @@ public class DirtyFlaggingExecState {
         try(final Stream<PPath> stream = root.list(PPaths.directoryPathMatcher())) {
             stream
                 .filter((path) -> !path.toString().contains("root"))
-                .forEach((path) -> executor.add(path,
-                    SpoofaxPipeline.INSTANCE.processProjectObsFunApp(path, root, o -> Unit.INSTANCE)));
+                .forEach((project) -> executor.add(project,
+                    new ObsFuncApp<>(SpoofaxPipeline.INSTANCE.project(project, root), o -> Unit.INSTANCE)));
         } catch(IOException e) {
             throw new RuntimeException(e);
         }

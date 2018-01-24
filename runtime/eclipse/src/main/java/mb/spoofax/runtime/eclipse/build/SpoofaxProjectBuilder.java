@@ -15,6 +15,7 @@ import mb.log.Logger;
 import mb.pie.runtime.core.ExecException;
 import mb.spoofax.runtime.eclipse.SpoofaxPlugin;
 import mb.spoofax.runtime.eclipse.pipeline.PipelineAdapter;
+import mb.spoofax.runtime.eclipse.util.Nullable;
 import mb.spoofax.runtime.eclipse.util.StatusUtils;
 
 public class SpoofaxProjectBuilder extends IncrementalProjectBuilder {
@@ -31,32 +32,26 @@ public class SpoofaxProjectBuilder extends IncrementalProjectBuilder {
     }
 
 
-    @Override protected IProject[] build(int kind, Map<String, String> args, IProgressMonitor monitor)
-        throws CoreException {
-        final IProject currentEclipseProject = getProject();
-        logger.info("Building project {}", currentEclipseProject);
-
-        final IResourceDelta delta = getDelta(currentEclipseProject);
-        if(delta != null) {
-            pipelineAdapter.dirtyFlag(delta);
-        }
-
+    @Override protected @Nullable IProject[] build(int kind, @Nullable Map<String, String> args,
+        @Nullable IProgressMonitor monitor) throws CoreException {
+        final IProject project = getProject();
+        final IResourceDelta delta = getDelta(project);
         try {
-            pipelineAdapter.executeAll(monitor);
-
+            pipelineAdapter.buildProject(project, kind, delta, monitor);
         } catch(@SuppressWarnings("unused") InterruptedException e) {
-            logger.debug("Pipeline execution cancelled");
+            logger.debug("Project build cancelled");
             rememberLastBuiltState();
         } catch(ExecException e) {
-            logger.error("Pipeline execution failed", e);
-            throw new CoreException(StatusUtils.buildFailure("Pipeline execution failed", e));
+            final String msg = "Project build failed unexpectedly";
+            logger.error(msg, e);
+            throw new CoreException(StatusUtils.buildFailure(msg, e));
         }
 
         return null;
     }
 
-    @Override protected void clean(IProgressMonitor monitor) throws CoreException {
-        pipelineAdapter.cleanAll();
+    @Override protected void clean(@Nullable IProgressMonitor monitor) throws CoreException {
+        pipelineAdapter.cleanAll(monitor);
         forgetLastBuiltState();
     }
 

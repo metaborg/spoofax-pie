@@ -2,9 +2,11 @@ package mb.spoofax.runtime.benchmark.state;
 
 import kotlin.Unit;
 import mb.pie.runtime.core.ExecException;
+import mb.pie.runtime.core.FuncApp;
 import mb.pie.runtime.core.exec.ObservingExecutor;
 import mb.pie.runtime.core.impl.exec.ObservingExecutorImpl;
 import mb.spoofax.runtime.pie.builder.SpoofaxPipeline;
+import mb.spoofax.runtime.pie.generated.processProject;
 import mb.util.async.NullCancelled;
 import mb.vfs.path.PPath;
 import mb.vfs.path.PPaths;
@@ -30,7 +32,7 @@ public class ObservingExecState {
 
     public void exec(WorkspaceState workspaceState, List<PPath> changedPaths) {
         try {
-            executor.pathsChanged(changedPaths, new NullCancelled());
+            executor.requireBottomUp(changedPaths, new NullCancelled());
         } catch(ExecException | InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -42,9 +44,12 @@ public class ObservingExecState {
                 infraState.logger, spoofaxPieState.logger, infraState.funcs);
         final PPath root = workspaceState.root;
         try(final Stream<PPath> stream = root.list(PPaths.directoryPathMatcher())) {
-            for(PPath path : (Iterable<PPath>) stream.filter((path) -> !path.toString().contains("root"))::iterator) {
-                executor.setObserver(SpoofaxPipeline.INSTANCE.processProjectFunApp(path, root),
-                    (result) -> Unit.INSTANCE, new NullCancelled());
+            for(PPath project : (Iterable<PPath>) stream.filter(
+                (path) -> !path.toString().contains("root"))::iterator) {
+                final FuncApp<processProject.Input, processProject.Output>
+                    app = SpoofaxPipeline.INSTANCE.project(project, root);
+                executor.setObserver(project, app, (result) -> Unit.INSTANCE);
+                executor.requireTopDown(app, new NullCancelled());
             }
         } catch(ExecException | InterruptedException | IOException e) {
             throw new RuntimeException(e);

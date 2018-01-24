@@ -2,7 +2,6 @@ package mb.spoofax.runtime.eclipse.editor;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocument;

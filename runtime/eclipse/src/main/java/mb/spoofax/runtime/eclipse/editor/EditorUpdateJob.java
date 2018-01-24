@@ -38,7 +38,7 @@ public class EditorUpdateJob extends Job {
         logger.debug("Running editor update job for {}", input);
         try {
             return update(monitor);
-        } catch(InterruptedException e) {
+        } catch(@SuppressWarnings("unused") InterruptedException e) {
             return StatusUtils.cancel();
         } catch(ExecException e) {
             final String message = "Editor update for " + input + " failed";
@@ -52,7 +52,7 @@ public class EditorUpdateJob extends Job {
     }
 
     private IStatus update(IProgressMonitor monitor) throws ExecException, InterruptedException {
-        pipelineAdapter.updateEditorAndExecute(editor, text, file, project, monitor);
+        pipelineAdapter.updateEditor(editor, text, file, project, monitor);
         return StatusUtils.success();
     }
 }
