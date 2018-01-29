@@ -1,7 +1,7 @@
 package mb.spoofax.runtime.eclipse.editor;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
@@ -26,7 +26,6 @@ import mb.spoofax.runtime.eclipse.pipeline.PipelineAdapter;
 import mb.spoofax.runtime.eclipse.util.Nullable;
 import mb.spoofax.runtime.eclipse.vfs.EclipsePathSrv;
 import mb.spoofax.runtime.model.SpoofaxFacade;
-import mb.vfs.path.PPath;
 
 public class SpoofaxEditor extends TextEditor {
     private final class DocumentListener implements IDocumentListener {
@@ -49,8 +48,8 @@ public class SpoofaxEditor extends TextEditor {
     private IEditorInput input;
     private String inputName;
     private IDocument document;
-    private PPath file;
-    private PPath projectPath;
+    private @Nullable IFile file;
+    private @Nullable IProject project;
     private DocumentListener documentListener;
     private ISourceViewer sourceViewer;
 
@@ -70,10 +69,6 @@ public class SpoofaxEditor extends TextEditor {
 
     public ISourceViewer sourceViewer() {
         return sourceViewer;
-    }
-
-    public PPath file() {
-        return file;
     }
 
 
@@ -115,19 +110,15 @@ public class SpoofaxEditor extends TextEditor {
         input = getEditorInput();
         document = getDocumentProvider().getDocument(input);
 
-        final PPath resource = pathSrv.resolve(input);
-        if(resource != null) {
-            inputName = resource.toString();
-            file = resource;
-            final IResource eclipseFile = pathSrv.unresolve(resource);
-            if(eclipseFile != null) {
-                final IProject project = eclipseFile.getProject();
-                projectPath = pathSrv.resolve(project);
-            }
+        final IFile inputFile = pathSrv.toFile(input);
+        if(inputFile != null) {
+            this.inputName = inputFile.toString();
+            this.file = inputFile;
+            this.project = inputFile.getProject();
         } else {
-            inputName = input.getName();
-            file = null;
-            projectPath = null;
+            this.inputName = input.getName();
+            this.file = null;
+            this.project = null;
             logger.warn("File for editor on {} is null, cannot update the editor", input);
         }
 
@@ -140,8 +131,8 @@ public class SpoofaxEditor extends TextEditor {
 
         ((ITextViewerExtension4) sourceViewer).addTextPresentationListener(presentationMerger);
 
-        if(file != null && projectPath == null) {
-            pipelineAdapter.addEditor(this, text(), file, projectPath);
+        if(file != null && project == null) {
+            pipelineAdapter.addEditor(this, text(), file, project);
         }
 
         scheduleJob(true);
@@ -167,10 +158,10 @@ public class SpoofaxEditor extends TextEditor {
 
     private void scheduleJob(boolean initialUpdate) {
         cancelJobs(input);
-        if(file == null || projectPath == null) {
+        if(file == null || project == null) {
             return;
         }
-        final Job job = new EditorUpdateJob(logger, pipelineAdapter, this, document.get(), file, projectPath, input);
+        final Job job = new EditorUpdateJob(logger, pipelineAdapter, this, document.get(), file, project, input);
         job.schedule(initialUpdate ? 0 : 300);
     }
 

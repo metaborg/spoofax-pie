@@ -1,7 +1,9 @@
 package mb.spoofax.runtime.eclipse.vfs;
 
-import java.nio.file.Path;
+import java.net.URI;
+import java.util.Arrays;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -66,7 +68,7 @@ public class EclipsePathSrvImpl extends PathSrvImpl implements EclipsePathSrv {
             final IStorage storage;
             try {
                 storage = storageInput.getStorage();
-            } catch(CoreException e) {
+            } catch(@SuppressWarnings("unused") CoreException e) {
                 return null;
             }
 
@@ -78,6 +80,57 @@ public class EclipsePathSrvImpl extends PathSrvImpl implements EclipsePathSrv {
         logger.error("Could not resolve editor input {}", input);
         return null;
     }
+
+
+    @Override public @Nullable IFile toFile(IPath path) {
+        return root.getFileForLocation(path);
+    }
+
+    @Override public @Nullable IFile toFile(URI uri) {
+        final IFile[] files = root.findFilesForLocationURI(uri);
+        if(files == null || files.length == 0) {
+            return null;
+        }
+        if(files.length > 1) {
+            logger.warn("Found multiple matching files {} for URI {}, returning first", Arrays.toString(files), uri);
+        }
+        return files[0];
+    }
+
+    @Override public @Nullable IFile toFile(IStorage storage) {
+        final IPath path = storage.getFullPath();
+        if(path == null) {
+            return null;
+        }
+        return toFile(path);
+    }
+
+    @Override public @Nullable IFile toFile(IEditorInput input) {
+        if(input instanceof IFileEditorInput) {
+            final IFileEditorInput fileInput = (IFileEditorInput) input;
+            return fileInput.getFile();
+        } else if(input instanceof IPathEditorInput) {
+            final IPathEditorInput pathInput = (IPathEditorInput) input;
+            final IPath path = pathInput.getPath();
+            return toFile(path);
+        } else if(input instanceof IURIEditorInput) {
+            final IURIEditorInput uriInput = (IURIEditorInput) input;
+            final URI uri = uriInput.getURI();
+            return toFile(uri);
+        } else if(input instanceof IStorageEditorInput) {
+            final IStorageEditorInput storageInput = (IStorageEditorInput) input;
+            final IStorage storage;
+            try {
+                storage = storageInput.getStorage();
+                return toFile(storage);
+            } catch(CoreException e) {
+                return null;
+            }
+        }
+        logger.error("Could not get Eclipse file for editor input {}", input);
+        return null;
+    }
+
 
     @Override public @Nullable IResource unresolve(PPath pipePath) {
         final IPath eclipsePath = org.eclipse.core.runtime.Path.fromOSString(pipePath.toString());

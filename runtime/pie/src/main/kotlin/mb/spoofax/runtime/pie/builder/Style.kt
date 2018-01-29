@@ -2,7 +2,8 @@ package mb.spoofax.runtime.pie.builder
 
 import com.google.inject.Inject
 import mb.pie.runtime.builtin.path.read
-import mb.pie.runtime.core.*
+import mb.pie.runtime.core.ExecContext
+import mb.pie.runtime.core.Func
 import mb.pie.runtime.core.stamp.PathStampers
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.spoofax.runtime.impl.esv.*
@@ -21,7 +22,9 @@ class GenerateStylerRules
     val id = "spoofaxGenerateStylerRules"
   }
 
-  data class Input(val esvLangConfig: SpxCoreConfig, val mainFile: PPath, val includedFiles: Iterable<PPath>) : Serializable
+  data class Input(val esvLangConfig: SpxCoreConfig, val mainFile: PPath, val includedFiles: Iterable<PPath>) : Serializable {
+    fun mayOverlap(other: Input) = mainFile == other.mainFile
+  }
 
   override val id = Companion.id
   override fun ExecContext.exec(input: Input): StylingRules? {
@@ -38,6 +41,8 @@ class GenerateStylerRules
     val rules = stylingRulesFromESV.create(ast as IStrategoAppl)
     return rules
   }
+
+  override fun mayOverlap(input1: Input, input2: Input) = input1.mayOverlap(input2)
 }
 
 class Style : Func<Style.Input, Styling> {

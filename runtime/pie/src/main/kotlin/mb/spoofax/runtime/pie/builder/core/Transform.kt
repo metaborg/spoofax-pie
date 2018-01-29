@@ -98,7 +98,7 @@ class CoreTransAll @Inject constructor(log: Logger) : Func<CoreTransAll.Input, A
   data class AstFilePair(val ast: IStrategoTerm, val file: PPath) : Tuple2<IStrategoTerm, PPath>
   data class Input(val config: SpxCoreConfig, val project: PPath, val goal: ITransformGoal, val pairs: Iterable<AstFilePair>) : Serializable {
     fun mayOverlap(other: Input): Boolean {
-      return config == other.config && project == other.project && (pairs.zip(other.pairs).all { (l, r) -> l.file == r.file }) && goal == other.goal
+      return config == other.config && project == other.project && goal == other.goal
     }
   }
 

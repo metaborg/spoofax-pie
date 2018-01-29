@@ -17,10 +17,13 @@ import mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution;
 import mb.spoofax.runtime.model.message.Msg;
 import mb.spoofax.runtime.model.style.Styling;
 import mb.spoofax.runtime.pie.generated.processEditor;
+import mb.spoofax.runtime.pie.generated.processEditor.Output;
 import mb.spoofax.runtime.pie.generated.processProject;
 import mb.vfs.path.PPath;
 
 public class PipelineObservers {
+
+
     private final Logger logger;
     private final WorkspaceUpdateFactory workspaceUpdateFactory;
     private final IWorkspaceRoot eclipseWorkspaceRoot;
@@ -33,8 +36,14 @@ public class PipelineObservers {
     }
 
 
-    public Function1<? super processProject.Output, Unit> project(PPath project) {
-        return (projectResult) -> {
+    private final class ProjectBuildObserver implements Function1<processProject.Output, Unit> {
+        private final PPath project;
+
+        private ProjectBuildObserver(PPath project) {
+            this.project = project;
+        }
+
+        @Override public Unit invoke(processProject.Output projectResult) {
             final WorkspaceUpdate update = workspaceUpdateFactory.create();
             update.addClearRec(project);
             if(projectResult != null) {
@@ -67,12 +76,32 @@ public class PipelineObservers {
             }
             update.updateStyleAsync(null);
             return Unit.INSTANCE;
-        };
+        }
+
+        @Override public String toString() {
+            return "ProjectBuildObserver(" + project + ")";
+        }
     }
 
-    public Function1<? super processEditor.Output, Unit> editor(SpoofaxEditor editor, String text, PPath file,
-        PPath project) {
-        return (editorResult) -> {
+    public Function1<? super processProject.Output, Unit> project(PPath project) {
+        return new ProjectBuildObserver(project);
+    }
+
+
+    private final class EditorObserver implements Function1<Output, Unit> {
+        private final SpoofaxEditor editor;
+        private final String text;
+        private final PPath file;
+        private final PPath project;
+
+        private EditorObserver(SpoofaxEditor editor, String text, PPath file, PPath project) {
+            this.project = project;
+            this.editor = editor;
+            this.text = text;
+            this.file = file;
+        }
+
+        @Override public Unit invoke(Output editorResult) {
             final WorkspaceUpdate update = workspaceUpdateFactory.create();
             update.addClear(file);
             if(editorResult != null) {
@@ -101,6 +130,16 @@ public class PipelineObservers {
             }
             update.updateStyleAsync(null);
             return Unit.INSTANCE;
-        };
+        }
+
+        @Override public String toString() {
+            return "EditorObserver(" + editor + ", " + text.substring(0, Math.max(0, Math.min(100, text.length() - 1))) + ", " + file
+                + ", " + project + ")";
+        }
+    }
+
+    public Function1<? super processEditor.Output, Unit> editor(SpoofaxEditor editor, String text, PPath file,
+        PPath project) {
+        return new EditorObserver(editor, text, file, project);
     }
 }

@@ -30,7 +30,9 @@ class GenerateTable
     val id = "spoofaxGenerateTable"
   }
 
-  data class Input(val sdfLangConfig: SpxCoreConfig, val specDir: PPath, val files: Iterable<PPath>, val mainFile: PPath) : Serializable
+  data class Input(val sdfLangConfig: SpxCoreConfig, val specDir: PPath, val files: Iterable<PPath>, val mainFile: PPath) : Serializable {
+    fun mayOverlap(other: Input) = specDir == other.specDir && mainFile == other.mainFile
+  }
 
   val log: Logger = log.forContext(GenerateTable::class.java)
 
@@ -70,12 +72,15 @@ class GenerateTable
 
     // Create table
     // Main input file
-    val mainResource = transformed.firstOrNull { it.inputFile == mainFile }?.outputFile ?: throw ExecException("Main file " + input.mainFile + " could not be normalized")
-    val mainResourceLocal = pathSrv.localPath(mainResource) ?: throw ExecException("Normalized main file $mainResource is not on the local file system")
+    val mainResource = transformed.firstOrNull { it.inputFile == mainFile }?.outputFile
+      ?: throw ExecException("Main file " + input.mainFile + " could not be normalized")
+    val mainResourceLocal = pathSrv.localPath(mainResource)
+      ?: throw ExecException("Normalized main file $mainResource is not on the local file system")
     // Output file
     val spoofaxPaths = SpoofaxCommonPaths(proj.location())
     val vfsOutputFile = spoofaxPaths.targetMetaborgDir().resolveFile("sdf-new.tbl")
-    val outputFile = Spx.spoofax().resourceService.localPath(vfsOutputFile) ?: throw ExecException("Parse table output file $vfsOutputFile is not on the local file system")
+    val outputFile = Spx.spoofax().resourceService.localPath(vfsOutputFile)
+      ?: throw ExecException("Parse table output file $vfsOutputFile is not on the local file system")
     // Paths
     val srcGenSyntaxDir = input.specDir.resolve("src-gen/syntax");
     val paths = listOf(srcGenSyntaxDir.toString())
@@ -86,6 +91,8 @@ class GenerateTable
     generate(vfsOutputFile.pPath)
     return Table(vfsOutputFile.pPath)
   }
+
+  override fun mayOverlap(input1: Input, input2: Input) = input1.mayOverlap(input2)
 }
 
 class GenerateSignatures

@@ -1,5 +1,6 @@
 package mb.spoofax.runtime.eclipse.pipeline;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.runtime.CoreException;
@@ -8,7 +9,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import mb.pie.runtime.core.ExecException;
 import mb.spoofax.runtime.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.runtime.eclipse.util.Nullable;
-import mb.vfs.path.PPath;
 
 public interface PipelineAdapter {
     void addProject(IProject project);
@@ -19,10 +19,10 @@ public interface PipelineAdapter {
     void removeProject(IProject project);
 
 
-    void addEditor(SpoofaxEditor editor, String text, PPath file, PPath project);
+    void addEditor(SpoofaxEditor editor, String text, IFile file, IProject project);
 
-    void updateEditor(SpoofaxEditor editor, String text, PPath file, PPath project, @Nullable IProgressMonitor monitor)
-        throws ExecException, InterruptedException;
+    void updateEditor(SpoofaxEditor editor, String text, IFile file, IProject project,
+        @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException;
 
     void removeEditor(SpoofaxEditor editor);
 

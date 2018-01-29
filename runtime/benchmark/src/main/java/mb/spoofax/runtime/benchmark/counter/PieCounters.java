@@ -111,21 +111,21 @@ public class PieCounters {
 //
 //        for(Trace trace : traces) {
 //            long time = trace.getTime();
-//            if(trace instanceof RequireInitialStart) {
+//            if(trace instanceof RequireTopDownInitialStart) {
 //                startTimestampTotal = time;
-//            } else if(trace instanceof RequireInitialEnd) {
+//            } else if(trace instanceof RequireTopDownInitialEnd) {
 //                timeTotal += calcTime(startTimestampTotal, time);
 //                startTimestampTotal = -1;
-//            } else if(trace instanceof RequireStart) {
-//            } else if(trace instanceof RequireEnd) {
+//            } else if(trace instanceof RequireTopDownStart) {
+//            } else if(trace instanceof RequireTopDownEnd) {
 //                ++numRequires;
-//            } else if(trace instanceof CheckConsistentStart) {
+//            } else if(trace instanceof CheckVisitedStart) {
 //                startTimestampConsistentCheck = time;
-//            } else if(trace instanceof CheckConsistentEnd) {
+//            } else if(trace instanceof CheckVisitedEnd) {
 //                timeConsistentCheck += calcTime(startTimestampConsistentCheck, time);
 //                startTimestampConsistentCheck = -1;
 //                ++numConsistentChecked;
-//                final CheckConsistentEnd end = (CheckConsistentEnd) trace;
+//                final CheckVisitedEnd end = (CheckVisitedEnd) trace;
 //                if(end.getResult() != null) {
 //                    ++numConsistent;
 //                }

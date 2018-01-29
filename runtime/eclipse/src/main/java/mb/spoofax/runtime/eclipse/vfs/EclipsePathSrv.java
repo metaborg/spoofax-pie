@@ -1,6 +1,10 @@
 package mb.spoofax.runtime.eclipse.vfs;
 
+import java.net.URI;
+
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.ui.IEditorInput;
 
@@ -16,6 +20,16 @@ public interface EclipsePathSrv extends PathSrv {
     PPath resolve(IPath path);
 
     @Nullable PPath resolve(IEditorInput input);
+
+
+    @Nullable IFile toFile(IPath path);
+
+    @Nullable IFile toFile(URI uri);
+
+    @Nullable IFile toFile(IStorage storage);
+
+    @Nullable IFile toFile(IEditorInput input);
+
 
     @Nullable IResource unresolve(PPath pipePath);
 }

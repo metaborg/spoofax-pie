@@ -3,6 +3,7 @@ package mb.spoofax.runtime.eclipse.pipeline;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -101,19 +102,45 @@ public class ObservingPipelineAdapter implements PipelineAdapter {
     }
 
 
-    @Override public void addEditor(SpoofaxEditor editor, String text, PPath file, PPath project) {
+    @Override public void addEditor(SpoofaxEditor editor, String text, IFile file, IProject project) {
+        final PPath mbFile = pathSrv.resolve(file);
+        if(mbFile == null) {
+            logger.error("Failed to set editor pipeline observer; cannot resolve Eclipse file {} to a path", file);
+            return;
+        }
+        final PPath mbProject = pathSrv.resolve(project);
+        if(mbProject == null) {
+            logger.error("Failed to set editor pipeline observer; cannot resolve Eclipse project {} to a path",
+                project);
+            return;
+        }
+
         logger.debug("Setting pipeline observer for editor {}", editor);
-        executor.setObserver(editor, editorApp(text, file, project), editorObs(editor, text, file, project));
+        executor.setObserver(editor, editorApp(text, mbFile, mbProject), editorObs(editor, text, mbFile, mbProject));
     }
 
-    @Override public void updateEditor(SpoofaxEditor editor, String text, PPath file, PPath project,
+    @Override public void updateEditor(SpoofaxEditor editor, String text, IFile file, IProject project,
         @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
+        final PPath mbFile = pathSrv.resolve(file);
+        if(mbFile == null) {
+            logger.error("Failed to set editor pipeline observer; cannot resolve Eclipse file {} to a path", file);
+            return;
+        }
+        final PPath mbProject = pathSrv.resolve(project);
+        if(mbProject == null) {
+            logger.error("Failed to set editor pipeline observer; cannot resolve Eclipse project {} to a path",
+                project);
+            return;
+        }
+
+        final FuncApp<processEditor.Input, processEditor.Output> app = editorApp(text, mbFile, mbProject);
+
         logger.debug("Setting pipeline observer for editor {}", editor);
-        executor.setObserver(editor, editorApp(text, file, project), editorObs(editor, text, file, project));
+        executor.setObserver(editor, app, editorObs(editor, text, mbFile, mbProject));
 
         try {
             logger.debug("Executing pipeline function for editor {}...", editor);
-            executor.requireTopDown(editorApp(text, file, project), PipelineCancel.cancelled(monitor));
+            executor.requireTopDown(app, PipelineCancel.cancelled(monitor));
         } finally {
             logger.debug("Done executing pipeline function for editor {}", editor);
         }
