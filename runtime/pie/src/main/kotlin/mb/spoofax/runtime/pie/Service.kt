@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap
 interface PieSrv {
   fun getPullingExecutor(dir: PPath, useInMemoryStore: Boolean): PullingExecutor
   fun getDirtyFlaggingExecutor(dir: PPath, useInMemoryStore: Boolean): DirtyFlaggingExecutor
-  fun getObservingExecutor(dir: PPath, useInMemoryStore: Boolean): ObservingExecutor
+  fun getObservingExecutor(dir: PPath, useInMemoryStore: Boolean, executionVariant: ExecutionVariant = ExecutionVariant.Naive): ObservingExecutor
 }
 
 class PieSrvImpl @Inject constructor(
@@ -49,11 +49,11 @@ class PieSrvImpl @Inject constructor(
     }
   }
 
-  override fun getObservingExecutor(dir: PPath, useInMemoryStore: Boolean): ObservingExecutor {
+  override fun getObservingExecutor(dir: PPath, useInMemoryStore: Boolean, executionVariant: ExecutionVariant): ObservingExecutor {
     return observingExecutors.getOrPut(dir) {
       val store = getStore(dir, useInMemoryStore)
       val cache = getCache(dir)
-      observingExecutorFactory.create(store, cache)
+      observingExecutorFactory.create(store, cache, executionVariant)
     }
   }
 

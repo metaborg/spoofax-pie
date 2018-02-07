@@ -3,6 +3,7 @@ package mb.spoofax.runtime.benchmark.state;
 import kotlin.Unit;
 import mb.pie.runtime.core.ExecException;
 import mb.pie.runtime.core.FuncApp;
+import mb.pie.runtime.core.exec.ExecutionVariant;
 import mb.pie.runtime.core.exec.ObservingExecutor;
 import mb.pie.runtime.core.impl.exec.ObservingExecutorImpl;
 import mb.spoofax.runtime.pie.builder.SpoofaxPipeline;
@@ -40,7 +41,8 @@ public class ObservingExecState {
 
     private void init(SpoofaxPieState spoofaxPieState, WorkspaceState workspaceState, InfraState infraState) {
         this.executor =
-            new ObservingExecutorImpl(infraState.store, infraState.cache, infraState.share, infraState.layer,
+            new ObservingExecutorImpl(infraState.store, infraState.cache, ExecutionVariant.Naive, infraState.share,
+                infraState.layer,
                 infraState.logger, spoofaxPieState.logger, infraState.funcs);
         final PPath root = workspaceState.root;
         try(final Stream<PPath> stream = root.list(PPaths.directoryPathMatcher())) {

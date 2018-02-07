@@ -19,6 +19,7 @@ import kotlin.jvm.functions.Function1;
 import mb.log.Logger;
 import mb.pie.runtime.core.ExecException;
 import mb.pie.runtime.core.FuncApp;
+import mb.pie.runtime.core.exec.ExecutionVariant;
 import mb.pie.runtime.core.exec.ObservingExecutor;
 import mb.spoofax.runtime.eclipse.SpoofaxPlugin;
 import mb.spoofax.runtime.eclipse.editor.SpoofaxEditor;
@@ -58,7 +59,7 @@ public class ObservingPipelineAdapter implements PipelineAdapter {
         this.eclipseRoot = ResourcesPlugin.getWorkspace().getRoot();
         this.root = pathSrv.resolve(eclipseRoot);
 
-        this.executor = pieSrv.getObservingExecutor(root, SpoofaxPlugin.useInMemoryStore);
+        this.executor = pieSrv.getObservingExecutor(root, SpoofaxPlugin.useInMemoryStore, ExecutionVariant.DirtyFlagging);
     }
 
 
