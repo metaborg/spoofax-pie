@@ -3,14 +3,15 @@ package mb.spoofax.runtime.benchmark.state;
 import kotlin.Unit;
 import mb.pie.runtime.core.ExecException;
 import mb.pie.runtime.core.FuncApp;
-import mb.pie.runtime.core.exec.ExecutionVariant;
-import mb.pie.runtime.core.exec.ObservingExecutor;
-import mb.pie.runtime.core.impl.exec.ObservingExecutorImpl;
+import mb.pie.runtime.core.exec.BottomUpObservingExecutor;
+import mb.pie.runtime.core.exec.BottomUpObservingExecutorFactory.Variant;
+import mb.pie.runtime.core.impl.exec.BottomUpObservingExecutorImpl;
 import mb.spoofax.runtime.pie.builder.SpoofaxPipeline;
 import mb.spoofax.runtime.pie.generated.processProject;
 import mb.util.async.NullCancelled;
 import mb.vfs.path.PPath;
 import mb.vfs.path.PPaths;
+import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 
@@ -21,7 +22,9 @@ import java.util.stream.Stream;
 
 @State(Scope.Benchmark)
 public class ObservingExecState {
-    public ObservingExecutor executor;
+    public BottomUpObservingExecutor executor;
+    @Param({"Naive", "DirtyFlagging"}) public Variant variant;
+
 
     public void setup(SpoofaxPieState spoofaxPieState, WorkspaceState workspaceState, InfraState infraState) {
         init(spoofaxPieState, workspaceState, infraState);
@@ -41,9 +44,8 @@ public class ObservingExecState {
 
     private void init(SpoofaxPieState spoofaxPieState, WorkspaceState workspaceState, InfraState infraState) {
         this.executor =
-            new ObservingExecutorImpl(infraState.store, infraState.cache, ExecutionVariant.Naive, infraState.share,
-                infraState.layer,
-                infraState.logger, spoofaxPieState.logger, infraState.funcs);
+            new BottomUpObservingExecutorImpl(infraState.store, infraState.cache, variant, infraState.share,
+                infraState.layer, infraState.logger, spoofaxPieState.logger, infraState.funcs);
         final PPath root = workspaceState.root;
         try(final Stream<PPath> stream = root.list(PPaths.directoryPathMatcher())) {
             for(PPath project : (Iterable<PPath>) stream.filter(

@@ -29,13 +29,10 @@ Require-Bundle: org.eclipse.core.runtime,
  log,
  vfs,
  util,
- pie.runtime.core,
- pie.runtime.builtin,
  spoofax.runtime.model,
  spoofax.runtime.impl,
  spoofax.runtime.impl.legacy,
- spoofax.runtime.eclipse.externaldeps,
- spoofax.runtime.pie
+ spoofax.runtime.eclipse.externaldeps
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: metaborg.org
 Bundle-ActivationPolicy: lazy
@@ -55,11 +52,8 @@ Eclipse-RegisterBuddy:
  log,
  vfs,
  util,
- pie.runtime.core,
- pie.runtime.builtin,
  spoofax.runtime.model,
  spoofax.runtime.impl,
  spoofax.runtime.impl.legacy,
- spoofax.runtime.eclipse.externaldeps,
- spoofax.runtime.pie
+ spoofax.runtime.eclipse.externaldeps
 Import-Package: mb.util.async

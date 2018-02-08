@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.SECONDS)
 @State(Scope.Benchmark)
-public class PullingExecFullBenchmark {
+public class TopDownExecFullBenchmark {
     @Setup(Level.Invocation)
     public void setup(SpoofaxPieState spoofaxPie, WorkspaceState workspace, InfraState infra, PullingExecState exec) throws IOException {
         workspace.setup(spoofaxPie);

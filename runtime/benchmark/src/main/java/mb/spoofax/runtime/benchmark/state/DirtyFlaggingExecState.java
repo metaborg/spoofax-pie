@@ -2,9 +2,9 @@ package mb.spoofax.runtime.benchmark.state;
 
 import kotlin.Unit;
 import mb.pie.runtime.core.ExecException;
-import mb.pie.runtime.core.exec.DirtyFlaggingExecutor;
+import mb.pie.runtime.core.exec.DirtyFlaggingTopDownExecutor;
 import mb.pie.runtime.core.exec.ObsFuncApp;
-import mb.pie.runtime.core.impl.exec.DirtyFlaggingExecutorImpl;
+import mb.pie.runtime.core.impl.exec.DirtyFlaggingTopDownExecutorImpl;
 import mb.spoofax.runtime.pie.builder.SpoofaxPipeline;
 import mb.util.async.NullCancelled;
 import mb.vfs.path.PPath;
@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 
 @State(Scope.Benchmark)
 public class DirtyFlaggingExecState {
-    public DirtyFlaggingExecutor executor;
+    public DirtyFlaggingTopDownExecutor executor;
 
     public void setup(SpoofaxPieState spoofaxPieState, WorkspaceState workspaceState, InfraState infraState) {
         init(spoofaxPieState, workspaceState, infraState);
@@ -41,7 +41,7 @@ public class DirtyFlaggingExecState {
 
     private void init(SpoofaxPieState spoofaxPieState, WorkspaceState workspaceState, InfraState infraState) {
         this.executor =
-            new DirtyFlaggingExecutorImpl(infraState.store, infraState.cache, infraState.share, infraState.layer,
+            new DirtyFlaggingTopDownExecutorImpl(infraState.store, infraState.cache, infraState.share, infraState.layer,
                 infraState.logger, infraState.funcs, spoofaxPieState.logger);
         final PPath root = workspaceState.root;
         try(final Stream<PPath> stream = root.list(PPaths.directoryPathMatcher())) {

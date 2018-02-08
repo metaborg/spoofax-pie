@@ -4,20 +4,19 @@ import mb.spoofax.runtime.benchmark.state.*;
 import org.openjdk.jmh.annotations.*;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 
-@BenchmarkMode(Mode.SingleShotTime)
+@BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.SECONDS)
 @State(Scope.Benchmark)
-public class ObservingExecIncrBenchmark {
+public class TopDownExecIncrBenchmark {
     @Setup(Level.Trial)
-    public void setupTrial(SpoofaxPieState spoofaxPie, WorkspaceState workspace, IncrState incr, InfraState infra, ObservingExecState exec) throws IOException {
+    public void setupTrial(SpoofaxPieState spoofaxPie, WorkspaceState workspace, IncrState incr, InfraState infra, PullingExecState exec) throws IOException {
         workspace.setup(spoofaxPie);
         incr.setup(workspace);
         infra.setup(spoofaxPie, workspace);
-        exec.setup(spoofaxPie, workspace, infra);
+        exec.setup(infra);
 
         this.spoofaxPie = spoofaxPie;
         this.workspace = workspace;
@@ -25,22 +24,21 @@ public class ObservingExecIncrBenchmark {
         this.infra = infra;
         this.exec = exec;
 
-        exec.exec(workspace, Collections.emptyList());
+        exec.exec(workspace);
     }
 
     private SpoofaxPieState spoofaxPie;
     private WorkspaceState workspace;
     private IncrState incr;
     private InfraState infra;
-    private ObservingExecState exec;
+    private PullingExecState exec;
 
-    @Setup(Level.Invocation) public void setupInvocation() throws IOException {
+    @Setup(Level.Invocation) public void setupInvocation() {
         infra.renew(spoofaxPie);
-        incr.renew();
-        exec.renew(spoofaxPie, workspace, infra);
+        exec.renew(infra);
     }
 
-    @Benchmark public void exec() {
-        exec.exec(workspace, incr.allChangedPaths);
+    @Benchmark public Object exec() {
+        return exec.exec(workspace);
     }
 }

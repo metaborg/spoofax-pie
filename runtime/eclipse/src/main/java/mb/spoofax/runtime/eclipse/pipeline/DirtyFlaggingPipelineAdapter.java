@@ -18,7 +18,7 @@ import kotlin.jvm.functions.Function1;
 import mb.log.Logger;
 import mb.pie.runtime.core.ExecException;
 import mb.pie.runtime.core.FuncApp;
-import mb.pie.runtime.core.exec.DirtyFlaggingExecutor;
+import mb.pie.runtime.core.exec.DirtyFlaggingTopDownExecutor;
 import mb.pie.runtime.core.exec.ObsFuncApp;
 import mb.spoofax.runtime.eclipse.SpoofaxPlugin;
 import mb.spoofax.runtime.eclipse.editor.SpoofaxEditor;
@@ -41,7 +41,7 @@ public class DirtyFlaggingPipelineAdapter implements PipelineAdapter {
 
     private final IWorkspaceRoot eclipseRoot;
     private final PPath root;
-    private final DirtyFlaggingExecutor executor;
+    private final DirtyFlaggingTopDownExecutor executor;
 
 
     @Inject public DirtyFlaggingPipelineAdapter(PipelineObservers observers, PipelinePathChanges pathChanges,
@@ -57,7 +57,7 @@ public class DirtyFlaggingPipelineAdapter implements PipelineAdapter {
         this.eclipseRoot = ResourcesPlugin.getWorkspace().getRoot();
         this.root = pathSrv.resolve(eclipseRoot);
 
-        this.executor = pieSrv.getDirtyFlaggingExecutor(root, SpoofaxPlugin.useInMemoryStore);
+        this.executor = pieSrv.getDirtyFlaggingTopDownExecutor(root, SpoofaxPlugin.useInMemoryStore);
     }
 
 
