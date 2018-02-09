@@ -17,7 +17,7 @@
   <properties>
     <kotlin.lang.version>1.2</kotlin.lang.version>
     <kotlin.api.version>1.2</kotlin.api.version>
-    <kotlin.runtime.version>1.2.20</kotlin.runtime.version>
+    <kotlin.runtime.version>1.2.21</kotlin.runtime.version>
     <kotlin.coroutines.version>0.21.2</kotlin.coroutines.version>
   </properties>
 
