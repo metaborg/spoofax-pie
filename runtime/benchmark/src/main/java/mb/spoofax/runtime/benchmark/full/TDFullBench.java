@@ -1,7 +1,7 @@
 package mb.spoofax.runtime.benchmark.full;
 
 import mb.spoofax.runtime.benchmark.state.InfraState;
-import mb.spoofax.runtime.benchmark.state.PullingExecState;
+import mb.spoofax.runtime.benchmark.state.exec.TDState;
 import mb.spoofax.runtime.benchmark.state.SpoofaxPieState;
 import mb.spoofax.runtime.benchmark.state.WorkspaceState;
 import org.openjdk.jmh.annotations.*;
@@ -13,9 +13,9 @@ import java.util.concurrent.TimeUnit;
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.SECONDS)
 @State(Scope.Benchmark)
-public class TopDownExecFullBenchmark {
+public class TDFullBench {
     @Setup(Level.Invocation)
-    public void setup(SpoofaxPieState spoofaxPie, WorkspaceState workspace, InfraState infra, PullingExecState exec) throws IOException {
+    public void setup(SpoofaxPieState spoofaxPie, WorkspaceState workspace, InfraState infra, TDState exec) throws IOException {
         workspace.setup(spoofaxPie);
         infra.setup(spoofaxPie, workspace);
         exec.setup(infra);
@@ -29,7 +29,7 @@ public class TopDownExecFullBenchmark {
     private SpoofaxPieState spoofaxPie;
     private WorkspaceState workspace;
     private InfraState infra;
-    private PullingExecState exec;
+    private TDState exec;
 
     @Benchmark public Object exec() {
         return exec.exec(workspace);

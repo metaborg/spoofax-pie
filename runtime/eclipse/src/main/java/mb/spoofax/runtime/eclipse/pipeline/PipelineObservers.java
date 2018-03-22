@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 
 import com.google.inject.Inject;
 
@@ -69,12 +68,9 @@ public class PipelineObservers {
                     update.addMessages(file, messages);
                 });
             }
-            try {
-                update.updateMessagesSync(eclipseWorkspaceRoot, null);
-            } catch(CoreException e) {
-                logger.error("Failed to update messages for project {}", e, project);
-            }
-            update.updateStyleAsync(null);
+
+            update.update(WorkspaceUpdate.lock, null);
+
             return Unit.INSTANCE;
         }
 
@@ -123,18 +119,16 @@ public class PipelineObservers {
             } else {
                 update.removeStyle(editor, text.length());
             }
-            try {
-                update.updateMessagesSync(null, null);
-            } catch(CoreException e) {
-                logger.error("Failed to update messages for project {}", e, project);
-            }
-            update.updateStyleAsync(null);
+
+            // TODO: pass in file as scheduling rule?
+            update.update(WorkspaceUpdate.lock, null);
+
             return Unit.INSTANCE;
         }
 
         @Override public String toString() {
-            return "EditorObserver(" + editor + ", " + text.substring(0, Math.max(0, Math.min(100, text.length() - 1))) + ", " + file
-                + ", " + project + ")";
+            return "EditorObserver(" + editor + ", " + text.substring(0, Math.max(0, Math.min(100, text.length() - 1)))
+                + ", " + file + ", " + project + ")";
         }
     }
 

@@ -17,6 +17,7 @@ interface PieSrv {
   fun getTopDownExecutor(dir: PPath, useInMemoryStore: Boolean): TopDownExecutor
   fun getDirtyFlaggingTopDownExecutor(dir: PPath, useInMemoryStore: Boolean): DirtyFlaggingTopDownExecutor
   fun getBottomUpObservingExecutor(dir: PPath, useInMemoryStore: Boolean, variant: Variant = Variant.Naive): BottomUpObservingExecutor
+  fun getBottomUpTopsortExecutor(dir: PPath, useInMemoryStore: Boolean): BottomUpTopsortExecutor
 }
 
 class PieSrvImpl @Inject constructor(
@@ -25,13 +26,15 @@ class PieSrvImpl @Inject constructor(
   private val cacheFactory: Provider<Cache>,
   private val topDownExecutorFactory: TopDownExecutorFactory,
   private val dirtyFlaggingTopDownExecutorFactory: DirtyFlaggingTopDownExecutorFactory,
-  private val bottomUpObservingExecutorFactory: BottomUpObservingExecutorFactory
+  private val bottomUpObservingExecutorFactory: BottomUpObservingExecutorFactory,
+  private val bottomUpTopsortExecutorFactory: BottomUpTopsortExecutorFactory
 ) : PieSrv {
   private val stores = ConcurrentHashMap<PPath, Store>()
   private val caches = ConcurrentHashMap<PPath, Cache>()
   private val pullingExecutors = ConcurrentHashMap<PPath, TopDownExecutor>()
   private val dirtyFlaggingExecutors = ConcurrentHashMap<PPath, DirtyFlaggingTopDownExecutor>()
   private val observingExecutors = ConcurrentHashMap<PPath, BottomUpObservingExecutor>()
+  private val topsortingExecutors = ConcurrentHashMap<PPath, BottomUpTopsortExecutor>()
 
 
   override fun getTopDownExecutor(dir: PPath, useInMemoryStore: Boolean): TopDownExecutor {
@@ -55,6 +58,14 @@ class PieSrvImpl @Inject constructor(
       val store = getStore(dir, useInMemoryStore)
       val cache = getCache(dir)
       bottomUpObservingExecutorFactory.create(store, cache, variant)
+    }
+  }
+
+  override fun getBottomUpTopsortExecutor(dir: PPath, useInMemoryStore: Boolean): BottomUpTopsortExecutor {
+    return topsortingExecutors.getOrPut(dir) {
+      val store = getStore(dir, useInMemoryStore)
+      val cache = getCache(dir)
+      bottomUpTopsortExecutorFactory.create(store, cache)
     }
   }
 

@@ -98,7 +98,7 @@ class CoreParseAll @Inject constructor(log: Logger, private val messageConverter
       }.toCollection(ArrayList())
     } catch(e: ParseException) {
       log.error("Parsing failed unexpectedly", e)
-      return input.pairs.map { (text, file) -> Output(null, null, ArrayList(), file) }.toCollection(ArrayList())
+      return input.pairs.map { (_, file) -> Output(null, null, ArrayList(), file) }.toCollection(ArrayList())
     }
   }
 }

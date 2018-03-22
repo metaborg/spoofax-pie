@@ -12,6 +12,7 @@ import mb.spoofax.runtime.model.SpoofaxFacade;
 import mb.spoofax.runtime.model.SpoofaxModule;
 import mb.spoofax.runtime.model.StaticSpoofaxFacade;
 import mb.spoofax.runtime.pie.SpoofaxPieModule;
+import mb.spoofax.runtime.pie.builder.SpoofaxPipeline;
 import mb.spoofax.runtime.pie.generated.PieBuilderModule_spoofax;
 import mb.vfs.VFSModule;
 import mb.vfs.path.PathSrv;
@@ -32,6 +33,8 @@ public class SpoofaxPieState {
     public final Injector injector;
     public final Logger logger;
     public final PathSrv pathSrv;
+    public final SpoofaxPipeline spoofaxPipeline;
+
 
     public SpoofaxPieState() {
         try {
@@ -43,11 +46,10 @@ public class SpoofaxPieState {
             spoofaxCoreFacade = new Spoofax(new SpoofaxCoreModule(), new SpoofaxExtensionModule());
             spoofaxCoreMetaFacade = new SpoofaxMeta(spoofaxCoreFacade);
             StaticSpoofaxCoreFacade.init(spoofaxCoreMetaFacade);
-
             injector = spoofaxFacade.injector;
-
             logger = injector.getInstance(Logger.class);
             pathSrv = injector.getInstance(PathSrv.class);
+            spoofaxPipeline = SpoofaxPipeline.INSTANCE;
         } catch(SpoofaxEx | MetaborgException e) {
             throw new RuntimeException(e);
         }

@@ -19,8 +19,7 @@ import kotlin.jvm.functions.Function1;
 import mb.log.Logger;
 import mb.pie.runtime.core.ExecException;
 import mb.pie.runtime.core.FuncApp;
-import mb.pie.runtime.core.exec.BottomUpObservingExecutor;
-import mb.pie.runtime.core.exec.BottomUpObservingExecutorFactory;
+import mb.pie.runtime.core.exec.BottomUpTopsortExecutor;
 import mb.spoofax.runtime.eclipse.SpoofaxPlugin;
 import mb.spoofax.runtime.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.runtime.eclipse.util.Nullable;
@@ -43,7 +42,7 @@ public class ObservingPipelineAdapter implements PipelineAdapter {
 
     private final IWorkspaceRoot eclipseRoot;
     private final PPath root;
-    private final BottomUpObservingExecutor executor;
+    private final BottomUpTopsortExecutor executor;
 
 
     @Inject public ObservingPipelineAdapter(PipelineObservers observers, PipelinePathChanges pathChanges, Logger logger,
@@ -59,8 +58,9 @@ public class ObservingPipelineAdapter implements PipelineAdapter {
         this.eclipseRoot = ResourcesPlugin.getWorkspace().getRoot();
         this.root = pathSrv.resolve(eclipseRoot);
 
-        this.executor = pieSrv.getBottomUpObservingExecutor(root, SpoofaxPlugin.useInMemoryStore,
-            BottomUpObservingExecutorFactory.Variant.DirtyFlagging);
+        // this.executor = pieSrv.getBottomUpObservingExecutor(root, SpoofaxPlugin.useInMemoryStore,
+        // BottomUpObservingExecutorFactory.Variant.DirtyFlagging);
+        this.executor = pieSrv.getBottomUpTopsortExecutor(root, SpoofaxPlugin.useInMemoryStore);
     }
 
 
@@ -160,7 +160,7 @@ public class ObservingPipelineAdapter implements PipelineAdapter {
         executor.dropCache();
         final WorkspaceUpdate update = workspaceUpdateFactory.create();
         update.addClearRec(root);
-        update.updateMessagesSync(eclipseRoot, monitor);
+        update.update(WorkspaceUpdate.lock, monitor);
     }
 
 

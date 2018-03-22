@@ -6,13 +6,11 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 
 @State(Scope.Benchmark)
 public class WorkspaceState {
-    @Param({}) public String workspaceRootStr;
+    @Param({}) private String workspaceRootStr;
 
     public PPath root;
     public PPath storePath;

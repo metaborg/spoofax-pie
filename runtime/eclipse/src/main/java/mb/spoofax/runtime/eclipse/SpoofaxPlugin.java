@@ -34,7 +34,7 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
     private static volatile SpoofaxMeta spoofaxCoreMetaFacade;
     private static volatile boolean doneLoading;
 
-    public static final boolean useInMemoryStore = false;
+    public static final boolean useInMemoryStore = true;
 
 
     @Override public void start(BundleContext context) throws Exception {

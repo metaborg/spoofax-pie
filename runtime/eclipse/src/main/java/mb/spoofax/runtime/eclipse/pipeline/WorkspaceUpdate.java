@@ -10,12 +10,12 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ICoreRunnable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.text.TextPresentation;
 
 import com.google.inject.Inject;
@@ -33,6 +33,8 @@ import mb.spoofax.runtime.model.style.Styling;
 import mb.vfs.path.PPath;
 
 public class WorkspaceUpdate {
+    public static final LockRule lock = new LockRule("Workspace update lock");
+
     private final Logger logger;
     private final EclipsePathSrv pathSrv;
     private final StyleUtils styleUtils;
@@ -92,7 +94,7 @@ public class WorkspaceUpdate {
             addMessage(msg);
         }
     }
-    
+
     public void addMessagesFiltered(Iterable<PathMsg> msgs, PPath filter) {
         for(PathMsg msg : msgs) {
             addMessageFiltered(msg, filter);
@@ -102,63 +104,6 @@ public class WorkspaceUpdate {
     public void replaceMessages(PPath path, ArrayList<Msg> msgs) {
         final ArrayList<Msg> messages = new ArrayList<>(msgs);
         messagesPerPath.put(path, messages);
-    }
-
-    public void updateMessagesSync(@Nullable ISchedulingRule rule, @Nullable IProgressMonitor monitor) throws CoreException {
-        final ICoreRunnable parseMarkerUpdater = new IWorkspaceRunnable() {
-            @Override public void run(@Nullable IProgressMonitor workspaceMonitor) throws CoreException {
-                if(workspaceMonitor != null && workspaceMonitor.isCanceled())
-                    return;
-                updateMessages();
-            }
-        };
-        ResourcesPlugin.getWorkspace().run(parseMarkerUpdater, rule, IWorkspace.AVOID_UPDATE, monitor);
-    }
-
-    public void updateMessagesAsync(@Nullable ISchedulingRule rule) {
-        final WorkspaceJob job = new WorkspaceJob("Updating Spoofax messages") {
-            @Override public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
-                if(monitor != null && monitor.isCanceled())
-                    return StatusUtils.cancel();
-                updateMessages();
-                return StatusUtils.success();
-            }
-        };
-        job.setRule(rule);
-        job.schedule();
-    }
-
-    private void updateMessages() throws CoreException {
-        for(PPath path : pathsToClearRec) {
-            logger.trace("Clearing messages for {}, recursively", path);
-            final IResource resource = toResource(path);
-            if(resource == null) {
-                logger.error("Failed to recursively clear messages for {}, it cannot be resolved to an Eclipse resource", path);
-                continue;
-            }
-            MarkerUtils.clearAllRec(resource);
-        }
-        for(PPath path : pathsToClear) {
-            logger.trace("Clearing messages for {}", path);
-            final IResource resource = toResource(path);
-            if(resource == null) {
-                logger.error("Failed to clear messages for {}, it cannot be resolved to an Eclipse resource", path);
-                continue;
-            }
-            MarkerUtils.clearAll(resource);
-        }
-        for(Entry<PPath, ArrayList<Msg>> entry : messagesPerPath.entrySet()) {
-            final PPath path = entry.getKey();
-            logger.trace("Updating messages for {}", path);
-            final IResource resource = toResource(path);
-            if(resource == null) {
-                logger.error("Failed to update messages for {}, it cannot be resolved to an Eclipse resource", path);
-                continue;
-            }
-            for(Msg msg : entry.getValue()) {
-                MarkerUtils.createMarker(resource, msg);
-            }
-        }
     }
 
 
@@ -184,14 +129,86 @@ public class WorkspaceUpdate {
         styleUpdates.add(new StyleUpdate(editor, null, textPresentation));
     }
 
-    public void updateStyleAsync(@Nullable IProgressMonitor monitor) {
-        for(StyleUpdate styleUpdate : styleUpdates) {
-            if(monitor != null && monitor.isCanceled())
-                return;
-            final SpoofaxEditor editor = styleUpdate.editor;
-            logger.trace("Updating syntax styling for {}", editor);
-            editor.setStyleAsync(styleUpdate.textPresentation, styleUpdate.text, monitor);
-        }
+
+    public Job update(@Nullable ISchedulingRule rule, @Nullable IProgressMonitor monitor) {
+        final Job job = new Job("Spoofax workspace update") {
+            @Override protected IStatus run(IProgressMonitor jobMonitor) {
+                if((jobMonitor != null && jobMonitor.isCanceled()) || (monitor != null && monitor.isCanceled()))
+                    return StatusUtils.cancel();
+
+                try {
+                    final ICoreRunnable parseMarkerUpdater = new IWorkspaceRunnable() {
+                        @Override public void run(@Nullable IProgressMonitor workspaceMonitor) throws CoreException {
+                            for(PPath path : pathsToClearRec) {
+                                if(workspaceMonitor != null && workspaceMonitor.isCanceled())
+                                    return;
+
+                                logger.trace("Clearing messages for {}, recursively", path);
+                                final IResource resource = toResource(path);
+                                if(resource == null) {
+                                    logger.error(
+                                        "Failed to recursively clear messages for {}, it cannot be resolved to an Eclipse resource",
+                                        path);
+                                    continue;
+                                }
+                                MarkerUtils.clearAllRec(resource);
+                            }
+                            for(PPath path : pathsToClear) {
+                                if(workspaceMonitor != null && workspaceMonitor.isCanceled())
+                                    return;
+
+                                logger.trace("Clearing messages for {}", path);
+                                final IResource resource = toResource(path);
+                                if(resource == null) {
+                                    logger.error(
+                                        "Failed to clear messages for {}, it cannot be resolved to an Eclipse resource",
+                                        path);
+                                    continue;
+                                }
+                                MarkerUtils.clearAll(resource);
+                            }
+                            for(Entry<PPath, ArrayList<Msg>> entry : messagesPerPath.entrySet()) {
+                                if(workspaceMonitor != null && workspaceMonitor.isCanceled())
+                                    return;
+
+                                final PPath path = entry.getKey();
+                                logger.trace("Updating messages for {}", path);
+                                final IResource resource = toResource(path);
+                                if(resource == null) {
+                                    logger.error(
+                                        "Failed to update messages for {}, it cannot be resolved to an Eclipse resource",
+                                        path);
+                                    continue;
+                                }
+                                for(Msg msg : entry.getValue()) {
+                                    if(workspaceMonitor != null && workspaceMonitor.isCanceled())
+                                        return;
+
+                                    logger.trace("Adding message {} for {}", msg, resource);
+                                    MarkerUtils.createMarker(resource, msg);
+                                }
+                            }
+                        }
+                    };
+                    ResourcesPlugin.getWorkspace().run(parseMarkerUpdater, rule, IWorkspace.AVOID_UPDATE, monitor);
+                } catch(CoreException e) {
+                    return StatusUtils.error(e);
+                }
+
+                for(StyleUpdate styleUpdate : styleUpdates) {
+                    if((jobMonitor != null && jobMonitor.isCanceled()) || (monitor != null && monitor.isCanceled()))
+                        return StatusUtils.cancel();
+                    final SpoofaxEditor editor = styleUpdate.editor;
+                    logger.trace("Updating syntax styling for {}", editor);
+                    editor.setStyleAsync(styleUpdate.textPresentation, styleUpdate.text, monitor);
+                }
+
+                return StatusUtils.success();
+            }
+        };
+        job.setRule(rule);
+        job.schedule();
+        return job;
     }
 
 

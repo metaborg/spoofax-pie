@@ -146,7 +146,7 @@ public class DirtyFlaggingPipelineAdapter implements PipelineAdapter {
         executor.dropCache();
         final WorkspaceUpdate update = workspaceUpdateFactory.create();
         update.addClearRec(root);
-        update.updateMessagesSync(eclipseRoot, monitor);
+        update.update(WorkspaceUpdate.lock, monitor);
     }
 
 
