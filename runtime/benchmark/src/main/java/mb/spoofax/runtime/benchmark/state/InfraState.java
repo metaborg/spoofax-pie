@@ -48,10 +48,6 @@ public class InfraState {
         });
     }
 
-    public void renew(SpoofaxPieState spoofaxPieState) {
-
-    }
-
     public void reset() {
         try(final StoreWriteTxn txn = this.store.writeTxn()) {
             txn.drop();
@@ -60,11 +56,11 @@ public class InfraState {
     }
 
 
-    @Param({"lmdb"}) public StoreKind storeKind;
-    @Param({"map"}) public CacheKind cacheKind;
-    @Param({"coroutine"}) public ShareKind shareKind;
+    @Param({"in_memory"}) public StoreKind storeKind;
+    @Param({"noop"}) public CacheKind cacheKind;
+    @Param({"non_sharing"}) public ShareKind shareKind;
     @Param({"validation"}) public LayerKind layerKind;
-    @Param({"trace"}) public LoggerKind loggerKind;
+    @Param({"noop"}) public LoggerKind loggerKind;
 
     public enum StoreKind {
         lmdb {

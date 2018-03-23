@@ -1,5 +1,6 @@
-package mb.spoofax.runtime.benchmark.full;
+package mb.spoofax.runtime.benchmark.incr;
 
+import mb.spoofax.runtime.benchmark.state.ChangesState;
 import mb.spoofax.runtime.benchmark.state.InfraState;
 import mb.spoofax.runtime.benchmark.state.SpoofaxPieState;
 import mb.spoofax.runtime.benchmark.state.WorkspaceState;
@@ -14,25 +15,39 @@ import java.util.concurrent.TimeUnit;
 @BenchmarkMode(Mode.SingleShotTime)
 @OutputTimeUnit(TimeUnit.SECONDS)
 @State(Scope.Benchmark)
-public class TDFullBench {
-    @Setup(Level.Invocation)
-    public void setup(SpoofaxPieState spoofaxPie, WorkspaceState workspace, InfraState infra, TDState exec) throws IOException {
+public class TDChangesBench {
+    @Setup(Level.Trial)
+    public void setupTrial(SpoofaxPieState spoofaxPie, WorkspaceState workspace, InfraState infra, ChangesState changes, TDState exec) throws IOException {
         workspace.setup(spoofaxPie);
         infra.setup(spoofaxPie, workspace);
+        changes.setup(workspace);
         exec.setup(spoofaxPie, workspace, infra);
 
         this.spoofaxPie = spoofaxPie;
         this.workspace = workspace;
         this.infra = infra;
+        this.changes = changes;
         this.exec = exec;
     }
 
     private SpoofaxPieState spoofaxPie;
     private WorkspaceState workspace;
     private InfraState infra;
+    private ChangesState changes;
     private TDState exec;
 
+    @Setup(Level.Invocation) public void setupInvocation() {
+        infra.reset();
+        changes.reset();
+        exec.setup(spoofaxPie, workspace, infra);
+    }
+
     @Benchmark public void exec(Blackhole blackhole) {
-        exec.execAll(blackhole);
+        changes.apply(exec, blackhole);
+    }
+
+    @TearDown(Level.Trial) public void tearDownTrial() {
+        infra.reset();
+        changes.reset();
     }
 }
