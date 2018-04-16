@@ -1,5 +1,6 @@
 package mb.spoofax.runtime.benchmark.incr;
 
+import mb.spoofax.runtime.benchmark.Timer;
 import mb.spoofax.runtime.benchmark.state.ChangesState;
 import mb.spoofax.runtime.benchmark.state.InfraState;
 import mb.spoofax.runtime.benchmark.state.SpoofaxPieState;
@@ -8,6 +9,7 @@ import mb.spoofax.runtime.benchmark.state.exec.TDState;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
@@ -37,13 +39,15 @@ public class TDChangesBench {
     private TDState exec;
 
     @Setup(Level.Invocation) public void setupInvocation() {
+        Timer.logFile = new File("/Users/gohla/pie/topdown.log");
+        Timer.clearFile();
         infra.reset();
         changes.reset();
         exec.setup(spoofaxPie, workspace, infra);
     }
 
     @Benchmark public void exec(Blackhole blackhole) {
-        changes.apply(exec, blackhole);
+        changes.exec(exec, blackhole);
     }
 
     @TearDown(Level.Trial) public void tearDownTrial() {

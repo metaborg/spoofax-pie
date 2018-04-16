@@ -3,7 +3,8 @@ package mb.spoofax.runtime.benchmark.state.exec;
 import mb.pie.runtime.core.ExecException;
 import mb.pie.runtime.core.FuncApp;
 import mb.pie.runtime.core.exec.TopDownExec;
-import mb.pie.runtime.core.impl.exec.TopDownExecImpl;
+import mb.pie.runtime.core.exec.TopDownExecutor;
+import mb.pie.runtime.core.impl.exec.TopDownExecutorImpl;
 import mb.spoofax.runtime.benchmark.state.InfraState;
 import mb.spoofax.runtime.benchmark.state.SpoofaxPieState;
 import mb.spoofax.runtime.benchmark.state.WorkspaceState;
@@ -22,7 +23,7 @@ import java.util.HashMap;
 public class TDState {
     private SpoofaxPieState spoofaxPieState;
     private WorkspaceState workspaceState;
-    private TopDownExec exec;
+    private TopDownExecutor executor;
     private FuncApp<PPath, ? extends Serializable> processWorkspace;
     private HashMap<PPath, FuncApp<? extends processEditor.Input, ? extends processEditor.Output>> editors =
         new HashMap<>();
@@ -31,9 +32,8 @@ public class TDState {
     public void setup(SpoofaxPieState spoofaxPieState, WorkspaceState workspaceState, InfraState infraState) {
         this.spoofaxPieState = spoofaxPieState;
         this.workspaceState = workspaceState;
-        this.exec =
-            new TopDownExecImpl(infraState.store, infraState.cache, infraState.share, infraState.layer.get(),
-                infraState.logger.get(), infraState.funcs);
+        this.executor = new TopDownExecutorImpl(infraState.store, infraState.cache, infraState.share, infraState.layer,
+            infraState.logger, infraState.funcs);
         this.processWorkspace = spoofaxPieState.spoofaxPipeline.workspace(workspaceState.root);
     }
 
@@ -46,6 +46,7 @@ public class TDState {
             spoofaxPieState.spoofaxPipeline.editor(text, file, project, workspaceState.root);
         this.editors.put(file, app);
         try {
+            final TopDownExec exec = executor.exec();
             blackhole.consume(exec.requireOutput(app, new NullCancelled()));
         } catch(InterruptedException | ExecException e) {
             throw new RuntimeException(e);
@@ -63,6 +64,7 @@ public class TDState {
      * Executes the workspace and all open editors.
      */
     public void execAll(Blackhole blackhole) {
+        final TopDownExec exec = executor.exec();
         try {
             final Serializable workspaceResult = exec.requireOutput(processWorkspace, new NullCancelled());
             blackhole.consume(workspaceResult);

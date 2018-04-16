@@ -36,10 +36,11 @@ public class BUTopsortState {
      * Adds a project, or updates a project, by setting the observer and then executing a project update in a top-down manner.
      */
     public void addProject(PPath project, Blackhole blackhole) {
-        executor.setObserver(project, spoofaxPieState.spoofaxPipeline.project(project, workspaceState.root), obj -> {
-            blackhole.consume(obj);
-            return Unit.INSTANCE;
-        });
+        executor.setObserver(project, spoofaxPieState.spoofaxPipeline.project(project, workspaceState.root),
+            obj -> {
+                blackhole.consume(obj);
+                return Unit.INSTANCE;
+            });
         try {
             blackhole.consume(
                 executor.requireTopDown(spoofaxPieState.spoofaxPipeline.project(project, workspaceState.root),
