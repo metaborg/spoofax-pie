@@ -25,7 +25,7 @@ class CoreParse @Inject constructor(log: Logger, private val messageConverter: M
   data class Input(val config: SpxCoreConfig, val text: String, val file: PPath) : Serializable
   data class Output(val ast: IStrategoTerm?, val tokens: ArrayList<Token>?, val messages: ArrayList<Msg>, val file: PPath) : Tuple3<IStrategoTerm?, ArrayList<Token>?, ArrayList<Msg>>
 
-  val log: Logger = log.forContext(CoreTrans::class.java)
+  val log: Logger = log.forContext(CoreParse::class.java)
 
   override val id = Companion.id
   override fun ExecContext.exec(input: Input): Output {

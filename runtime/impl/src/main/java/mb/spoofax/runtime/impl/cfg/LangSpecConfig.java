@@ -1,19 +1,17 @@
 package mb.spoofax.runtime.impl.cfg;
 
-import static mb.spoofax.runtime.impl.term.Terms.*;
-
-import java.io.Serializable;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-
+import mb.spoofax.runtime.impl.term.Terms;
+import mb.vfs.path.PPath;
 import org.immutables.serial.Serial;
 import org.immutables.value.Value;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
-import mb.spoofax.runtime.impl.term.Terms;
-import mb.vfs.path.PPath;
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static mb.spoofax.runtime.impl.term.Terms.*;
 
 @Value.Immutable
 @Serial.Version(value = 1L)
@@ -22,6 +20,10 @@ public interface LangSpecConfig extends Serializable {
 
 
     @Value.Parameter List<String> extensions();
+
+    default String firstExtension() {
+        return extensions().get(0);
+    }
 
 
     @Value.Parameter @Nullable String name();

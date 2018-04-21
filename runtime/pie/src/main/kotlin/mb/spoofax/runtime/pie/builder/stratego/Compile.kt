@@ -8,24 +8,40 @@ import mb.spoofax.runtime.impl.cfg.StrategoConfig
 import mb.spoofax.runtime.impl.stratego.StrategoCompiler
 import mb.vfs.path.*
 import java.io.IOException
+import java.io.Serializable
 import java.nio.charset.Charset
 
 class CompileStratego
-@Inject constructor(private val log: Logger, private val pathSrv: PathSrv)
-  : Func<StrategoConfig, PPath?> {
+@Inject constructor(
+  private val log: Logger,
+  private val pathSrv: PathSrv
+) : Func<CompileStratego.Input, PPath?> {
   companion object {
     val id = "compileStratego"
   }
 
+  data class Input(
+    val config: StrategoConfig,
+    val apps: Iterable<UFuncApp>
+  ) : Serializable
+
   override val id = Companion.id
-  override fun ExecContext.exec(input: StrategoConfig): PPath? {
+  override fun ExecContext.exec(input: Input): PPath? {
+    val (config, apps) = input
+
+    // Explicitly require hidden dependencies.
+    apps.forEach {
+      requireExec(it)
+    }
+
+    // Compile Stratego.
     val compiler = StrategoCompiler()
-    val result = compiler.compile(input)
+    val result = compiler.compile(config)
     if(result == null) {
       // Make manual dependencies, since no depfile is generated if compilation fails.
-      require(input.mainFile(), PathStampers.hash)
-      input.includeFiles().forEach { require(it, PathStampers.hash) }
-      input.includeDirs().forEach { require(it, PathStampers.hash(PPaths.extensionsPathWalker(listOf("str", "rtree")))) }
+      require(config.mainFile(), PathStampers.hash)
+      config.includeFiles().forEach { require(it, PathStampers.hash) }
+      config.includeDirs().forEach { require(it, PathStampers.hash(PPaths.extensionsPathWalker(listOf("str", "rtree")))) }
       return null
     }
     generate(result.outputFile)
@@ -34,8 +50,8 @@ class CompileStratego
     return result.outputFile
   }
 
-  override fun mayOverlap(input1: StrategoConfig, input2: StrategoConfig): Boolean {
-    return input1.outputFile() == input2.outputFile();
+  override fun mayOverlap(input1: Input, input2: Input): Boolean {
+    return input1.config.outputFile() == input2.config.outputFile()
   }
 
   @Throws(IOException::class)
@@ -59,4 +75,4 @@ class CompileStratego
       }
 }
 
-fun ExecContext.compileStratego(input: StrategoConfig) = requireOutput(CompileStratego::class, CompileStratego.Companion.id, input)
+//fun ExecContext.compileStratego(input: StrategoConfig) = requireOutput(CompileStratego::class, CompileStratego.Companion.id, input)

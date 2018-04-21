@@ -23,7 +23,7 @@ class CoreStyle @Inject constructor(log: Logger) : Func<CoreStyle.Input, Styling
   data class Input(val config: SpxCoreConfig, val tokenStream: Iterable<Token>, val ast: IStrategoTerm) : Serializable
 
 
-  val log: Logger = log.forContext(CoreTrans::class.java)
+  val log: Logger = log.forContext(CoreStyle::class.java)
 
   override val id = Companion.id
   override fun ExecContext.exec(input: Input): Styling {

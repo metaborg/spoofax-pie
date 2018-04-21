@@ -86,8 +86,8 @@ class CoreTrans @Inject constructor(log: Logger) : Func<CoreTrans.Input, ArrayLi
   }
 }
 
-fun ExecContext.trans(input: CoreTrans.Input) = requireOutput(CoreTrans::class, CoreTrans.Companion.id, input)
-fun ExecContext.trans(config: SpxCoreConfig, project: PPath, goal: ITransformGoal, file: PPath, ast: IStrategoTerm) = trans(CoreTrans.Input(config, project, goal, file, ast))
+//fun ExecContext.trans(input: CoreTrans.Input) = requireOutput(CoreTrans::class, CoreTrans.Companion.id, input)
+//fun ExecContext.trans(config: SpxCoreConfig, project: PPath, goal: ITransformGoal, file: PPath, ast: IStrategoTerm) = trans(CoreTrans.Input(config, project, goal, file, ast))
 
 
 class CoreTransAll @Inject constructor(log: Logger) : Func<CoreTransAll.Input, ArrayList<CoreTransAll.Output>> {
@@ -157,5 +157,5 @@ class CoreTransAll @Inject constructor(log: Logger) : Func<CoreTransAll.Input, A
   }
 }
 
-fun ExecContext.transAll(input: CoreTransAll.Input) = requireOutput(CoreTransAll::class, CoreTransAll.Companion.id, input)
-fun ExecContext.transAll(config: SpxCoreConfig, project: PPath, goal: ITransformGoal, pairs: Iterable<CoreTransAll.AstFilePair>) = transAll(CoreTransAll.Input(config, project, goal, pairs))
+//fun ExecContext.transAll(input: CoreTransAll.Input) = requireOutput(CoreTransAll::class, CoreTransAll.Companion.id, input)
+//fun ExecContext.transAll(config: SpxCoreConfig, project: PPath, goal: ITransformGoal, pairs: Iterable<CoreTransAll.AstFilePair>) = transAll(CoreTransAll.Input(config, project, goal, pairs))

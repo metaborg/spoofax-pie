@@ -20,7 +20,7 @@ class CoreExtensions @Inject constructor(log: Logger) : Func<CoreExtensions.Inpu
     constructor(config: SpxCoreConfig) : this(config.dir(), config.isLangSpec)
   }
 
-  val log: Logger = log.forContext(CoreTrans::class.java)
+  val log: Logger = log.forContext(CoreExtensions::class.java)
 
   override val id = Companion.id
   override fun ExecContext.exec(input: Input): ArrayList<String> {

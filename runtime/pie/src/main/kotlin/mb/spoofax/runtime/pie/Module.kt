@@ -40,6 +40,7 @@ open class SpoofaxPieModule : PieModule() {
     bindFunc<GenerateStylerRules>(builders, GenerateStylerRules.id)
     bindFunc<Style>(builders, Style.id)
 
+    bindFunc<NaBL2ToStratego>(builders, NaBL2ToStratego.id)
     bindFunc<NaBL2GenerateConstraintGenerator>(builders, NaBL2GenerateConstraintGenerator.id)
     bindFunc<NaBL2InitialResult>(builders, NaBL2InitialResult.id)
     bindFunc<NaBL2UnitResult>(builders, NaBL2UnitResult.id)

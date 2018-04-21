@@ -39,7 +39,7 @@ public class BUTopsortChangesBench {
     private BUTopsortState exec;
 
     @Setup(Level.Invocation) public void setupInvocation() {
-        Timer.logFile = new File("/Users/gohla/pie/bottomup.log");
+        Timer.logFile = new File("/Users/gohla/pie/bottomup.csv");
         Timer.clearFile();
         infra.reset();
         changes.reset();

@@ -13,7 +13,6 @@ import org.openjdk.jmh.infra.Blackhole;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.regex.Pattern;
 
 
 @State(Scope.Benchmark)
@@ -45,7 +44,7 @@ public class ChangesState {
     @Param({"medium"}) public ChangesKind changesKind;
 
     public enum ChangesKind {
-        debug {
+        debug_syntax_styling_editor_open {
             @Override public ChangeMaker createChangeMaker(PPath root, Blackhole blackhole) {
                 return new ChangeMaker() {
                     @Override protected void apply() {
@@ -54,19 +53,50 @@ public class ChangesState {
                         addProject(calcProject, blackhole, "initial lang.calc");
                         execInitial(blackhole, "initial");
 
-                        // Syntax styling specification.
-                        // Open editor.
                         final PPath stylingFile = calcProject.resolve("style/style.esv");
                         String stylingText = read(stylingFile);
-                        execEditor(stylingText, stylingFile, calcProject, blackhole, "open editor style/style.esv");
+                        execEditor(stylingText, stylingFile, calcProject, blackhole, "editor open style/style.esv");
+                    }
+                };
+            }
+        },
+        debug_nabl2_write {
+            @Override public ChangeMaker createChangeMaker(PPath root, Blackhole blackhole) {
+                return new ChangeMaker() {
+                    @Override protected void apply() {
+                        // Initial execution.
+                        final PPath calcProject = root.resolve("lang.calc");
+                        addProject(calcProject, blackhole, "initial lang.calc");
+                        execInitial(blackhole, "initial");
+
+                        final PPath natsFile = calcProject.resolve("nats/calc.nabl2");
+                        String natsText = read(natsFile);
+                        natsText = natsText.replace("{x} <- s_nxt", "{x} <- s");
+                        write(natsFile, natsText);
+                        execPathChanges(natsFile, blackhole, "write file nats/calc.nabl2");
+                    }
+                };
+            }
+        },
+        debug_sdf3_write {
+            @Override public ChangeMaker createChangeMaker(PPath root, Blackhole blackhole) {
+                return new ChangeMaker() {
+                    @Override protected void apply() {
+                        // Initial execution.
+                        final PPath calcProject = root.resolve("lang.calc");
+                        addProject(calcProject, blackhole, "initial lang.calc");
+                        execInitial(blackhole, "initial");
+
+                        final PPath syntaxFile = calcProject.resolve("syntax/CalcLexical.sdf3");
+                        String syntaxText = read(syntaxFile);
+                        syntaxText = syntaxText.replace("INT      = \"-\"? [0-9]+", "INT      = \"-\"? [8-9]+");
+                        write(syntaxFile, syntaxText);
+                        execPathChanges(syntaxFile, blackhole, "file change syntax/CalcLexical.sdf3");
                     }
                 };
             }
         },
         medium {
-//            private final Pattern disableParsingPattern =
-//                Pattern.compile("parse \\{ .*? \\}", Pattern.MULTILINE | Pattern.DOTALL);
-
             @Override public ChangeMaker createChangeMaker(PPath root, Blackhole blackhole) {
                 return new ChangeMaker() {
                     @Override protected void apply() {
@@ -83,83 +113,77 @@ public class ChangesState {
                         // Open editor.
                         final PPath programFile = calcProject.resolve("example/basic/gt.calc");
                         String programText = read(programFile);
-                        execEditor(programText, programFile, calcProject, blackhole,
-                            "editor open example/basic/gt.calc");
+                        execEditor(programText, programFile, calcProject, blackhole, "editor open example/basic/gt.calc");
                         // Change editor text.
                         programText = programText.replace("4 > 5;", "2 > 3;");
-                        execEditor(programText, programFile, calcProject, blackhole,
-                            "editor change example/basic/gt.calc");
+                        execEditor(programText, programFile, calcProject, blackhole, "editor change example/basic/gt.calc");
                         // Save file.
                         write(programFile, programText);
-                        execPathChanges(programFile, blackhole, "write change example/basic/gt.calc");
+                        execPathChanges(programFile, blackhole, "file change example/basic/gt.calc");
 
                         // Syntax styling specification.
                         // Open editor.
                         final PPath stylingFile = calcProject.resolve("style/style.esv");
                         String stylingText = read(stylingFile);
-                        execEditor(stylingText, stylingFile, calcProject, blackhole, "open editor style/style.esv");
+                        execEditor(stylingText, stylingFile, calcProject, blackhole, "editor open style/style.esv");
                         // Change editor text.
                         stylingText = stylingText.replace("127 0 85 bold", "0 0 255 255 0 0");
-                        execEditor(stylingText, stylingFile, calcProject, blackhole, "change editor style/style.esv");
+                        execEditor(stylingText, stylingFile, calcProject, blackhole, "editor change style/style.esv");
                         // Save file.
                         write(stylingFile, stylingText);
-                        execPathChanges(stylingFile, blackhole, "write change style/style.esv");
+                        execPathChanges(stylingFile, blackhole, "file change style/style.esv");
 
                         // Syntax specification.
                         // Open editor.
-                        final PPath syntaxFile = calcProject.resolve("syntax/Calc.sdf3");
+                        final PPath syntaxFile = calcProject.resolve("syntax/CalcLexical.sdf3");
                         String syntaxText = read(syntaxFile);
                         final String originalSyntaxText = syntaxText;
-                        execEditor(syntaxText, syntaxFile, calcProject, blackhole, "open editor syntax/Calc.sdf3");
+                        execEditor(syntaxText, syntaxFile, calcProject, blackhole, "editor open syntax/CalcLexical.sdf3");
                         // Change editor text.
-                        syntaxText = syntaxText.replace("Exp.Num = NUM", "Exp.Num = ID");
-                        execEditor(syntaxText, syntaxFile, calcProject, blackhole, "change editor syntax/Calc.sdf3");
+                        syntaxText = syntaxText.replace("INT      = \"-\"? [0-9]+", "INT      = \"-\"? [8-9]+");
+                        execEditor(syntaxText, syntaxFile, calcProject, blackhole, "editor change syntax/CalcLexical.sdf3");
                         // Save file.
                         write(syntaxFile, syntaxText);
-                        execPathChanges(syntaxFile, blackhole, "write change syntax/Calc.sdf3");
+                        execPathChanges(syntaxFile, blackhole, "file change syntax/CalcLexical.sdf3");
                         // Change back and save.
-                        execEditor(originalSyntaxText, syntaxFile, calcProject, blackhole,
-                            "change editor undo syntax/Calc.sdf3");
+                        execEditor(originalSyntaxText, syntaxFile, calcProject, blackhole, "editor change undo syntax/CalcLexical.sdf3");
                         write(syntaxFile, originalSyntaxText);
-                        execPathChanges(syntaxFile, blackhole, "write change undo syntax/Calc.sdf3");
+                        execPathChanges(syntaxFile, blackhole, "file change undo syntax/CalcLexical.sdf3");
 
                         // Names and types specification.
                         // Open editor.
                         final PPath natsFile = calcProject.resolve("nats/calc.nabl2");
                         String natsText = read(natsFile);
                         final String originalNatsText = natsText;
-                        execEditor(natsText, natsFile, calcProject, blackhole, "open editor nats/calc.nabl2");
+                        execEditor(natsText, natsFile, calcProject, blackhole, "editor open nats/calc.nabl2");
                         // Change editor text.
                         natsText = natsText.replace("{x} <- s_nxt", "{x} <- s");
-                        execEditor(natsText, natsFile, calcProject, blackhole, "change editor nats/calc.nabl2");
+                        execEditor(natsText, natsFile, calcProject, blackhole, "editor change nats/calc.nabl2");
                         // Save file.
                         write(natsFile, natsText);
-                        execPathChanges(natsFile, blackhole, "write editor nats/calc.nabl2");
+                        execPathChanges(natsFile, blackhole, "write file nats/calc.nabl2");
                         // Change back and save.
-                        execEditor(originalNatsText, natsFile, calcProject, blackhole,
-                            "change editor undo nats/calc.nabl2");
+                        execEditor(originalNatsText, natsFile, calcProject, blackhole, "editor change undo nats/calc.nabl2");
                         write(natsFile, originalNatsText);
-                        execPathChanges(natsFile, blackhole, "write change undo nats/calc.nabl2");
+                        execPathChanges(natsFile, blackhole, "file change undo nats/calc.nabl2");
 
                         // Language specification.
                         // Open editor.
-                        final PPath langspecFile = calcProject.resolve("langspec.cfg");
-                        String langspecText = read(langspecFile);
-                        execEditor(langspecText, langspecFile, calcProject, blackhole, "open editor langspec.cfg");
-                        // Change editor text: change file extension.
-                        langspecText = langspecText.replace("file extensions: calc", "file extensions: nope");
-                        execEditor(langspecText, langspecFile, calcProject, blackhole,
-                            "change editor langspec.cfg extension");
-                        // Save file.
-                        write(langspecFile, langspecText);
-                        execPathChanges(langspecFile, blackhole, "write change langspec.cfg extension");
-                        // Change editor text: change file extension back.
-                        langspecText = langspecText.replace("file extensions: nope", "file extensions: calc");
-                        execEditor(langspecText, langspecFile, calcProject, blackhole,
-                            "change editor undo langspec.cfg extension");
-                        // Save file.
-                        write(langspecFile, langspecText);
-                        execPathChanges(langspecFile, blackhole, "write change undo langspec.cfg extension");
+//                        final PPath langspecFile = calcProject.resolve("langspec.cfg");
+//                        String langspecText = read(langspecFile);
+//                        execEditor(langspecText, langspecFile, calcProject, blackhole, "editor open langspec.cfg");
+//                        // Change editor text: change file extension.
+//                        langspecText = langspecText.replace("file extensions: calc", "file extensions: nope");
+//                        execEditor(langspecText, langspecFile, calcProject, blackhole, "editor change langspec.cfg extension");
+//                        // Save file.
+//                        write(langspecFile, langspecText);
+//                        execPathChanges(langspecFile, blackhole, "file change langspec.cfg extension");
+//                        // Change editor text: change file extension back.
+//                        langspecText = langspecText.replace("file extensions: nope", "file extensions: calc");
+//                        execEditor(langspecText, langspecFile, calcProject, blackhole, "editor change undo langspec.cfg extension");
+//                        // Save file.
+//                        write(langspecFile, langspecText);
+//                        execPathChanges(langspecFile, blackhole, "file change undo langspec.cfg extension");
 
                         // Extrema change: noop
                         execPathChanges(Lists.newArrayList(), blackhole, "noop");
