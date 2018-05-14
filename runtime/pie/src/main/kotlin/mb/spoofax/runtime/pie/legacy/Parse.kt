@@ -5,8 +5,8 @@ import mb.log.Logger
 import mb.pie.runtime.builtin.util.Tuple2
 import mb.pie.runtime.builtin.util.Tuple3
 import mb.pie.runtime.core.ExecContext
-import mb.pie.runtime.core.Func
-import mb.pie.runtime.core.stamp.PathStampers
+import mb.pie.runtime.core.TaskDef
+import mb.pie.runtime.core.stamp.FileStampers
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.spoofax.runtime.impl.legacy.MessageConverter
 import mb.spoofax.runtime.impl.sdf.TokenExtractor
@@ -21,7 +21,7 @@ import java.io.Serializable
 class CoreParse @Inject constructor(
   log: Logger,
   private val messageConverter: MessageConverter
-) : Func<CoreParse.Input, CoreParse.Output> {
+) : TaskDef<CoreParse.Input, CoreParse.Output> {
   private val log: Logger = log.forContext(CoreParse::class.java)
 
   companion object {
@@ -41,7 +41,7 @@ class CoreParse @Inject constructor(
     if(facet != null) {
       val parseTableFile = facet.parseTable
       if(parseTableFile != null) {
-        require(parseTableFile.pPath, PathStampers.hash)
+        require(parseTableFile.pPath, FileStampers.hash)
       }
     }
 
@@ -61,13 +61,13 @@ class CoreParse @Inject constructor(
   }
 }
 
-fun ExecContext.parse(input: CoreParse.Input) = requireOutput(CoreParse::class, CoreParse.id, input)
+fun ExecContext.parse(input: CoreParse.Input) = requireOutput(CoreParse::class.java, CoreParse.id, input)
 fun ExecContext.parse(config: SpxCoreConfig, text: String, file: PPath) = parse(CoreParse.Input(config, text, file))
 
 
-class CoreParseAll @Inject constructor(log: Logger, private val messageConverter: MessageConverter) : Func<CoreParseAll.Input, ArrayList<CoreParseAll.Output>> {
+class CoreParseAll @Inject constructor(log: Logger, private val messageConverter: MessageConverter) : TaskDef<CoreParseAll.Input, ArrayList<CoreParseAll.Output>> {
   companion object {
-    val id = "coreParseAll"
+    const val id = "coreParseAll"
   }
 
   data class TextFilePair(val text: String, val file: PPath) : Tuple2<String, PPath>
@@ -86,7 +86,7 @@ class CoreParseAll @Inject constructor(log: Logger, private val messageConverter
     if(facet != null) {
       val parseTableFile = facet.parseTable
       if(parseTableFile != null) {
-        require(parseTableFile.pPath, PathStampers.hash)
+        require(parseTableFile.pPath, FileStampers.hash)
       }
     }
 
@@ -107,5 +107,5 @@ class CoreParseAll @Inject constructor(log: Logger, private val messageConverter
   }
 }
 
-fun ExecContext.parseAll(input: CoreParseAll.Input) = requireOutput(CoreParseAll::class, CoreParseAll.id, input)
+fun ExecContext.parseAll(input: CoreParseAll.Input) = requireOutput(CoreParseAll::class.java, CoreParseAll.id, input)
 fun ExecContext.parseAll(config: SpxCoreConfig, pairs: Iterable<CoreParseAll.TextFilePair>) = parseAll(CoreParseAll.Input(config, pairs))

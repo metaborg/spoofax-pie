@@ -3,7 +3,7 @@ package mb.spoofax.runtime.pie.esv
 import com.google.inject.Inject
 import mb.log.Logger
 import mb.pie.runtime.core.*
-import mb.pie.runtime.core.stamp.PathStampers
+import mb.pie.runtime.core.stamp.FileStampers
 import mb.spoofax.runtime.impl.esv.StylingRules
 import mb.spoofax.runtime.impl.esv.StylingRulesFromESV
 import mb.spoofax.runtime.pie.generated.createWorkspaceConfig
@@ -17,7 +17,7 @@ class CompileStyler
 @Inject constructor(
   log: Logger,
   private val stylingRulesFromESV: StylingRulesFromESV
-) : Func<CompileStyler.Input, StylingRules?> {
+) : TaskDef<CompileStyler.Input, StylingRules?> {
   private val log: Logger = log.forContext(CompileStyler::class.java)
 
   companion object {
@@ -33,7 +33,7 @@ class CompileStyler
   override fun ExecContext.exec(input: Input): StylingRules? {
     val (langSpecExt, root) = input
     val workspace =
-      requireOutput(createWorkspaceConfig::class, createWorkspaceConfig.id, root)
+      requireOutput(createWorkspaceConfig::class.java, createWorkspaceConfig.id, root)
         ?: throw ExecException("Could not create workspace config for root $root")
     val metaLangExt = "esv"
     val metaLangConfig = workspace.spxCoreConfigForExt(metaLangExt)
@@ -44,8 +44,8 @@ class CompileStyler
         ?: throw ExecException("Could not get language specification config for extension $langSpecExt")
     val mainFile = langSpec.syntaxStyleFile() ?: return null
     val outputs = process(arrayListOf(mainFile), metaLangImpl, null, false, null, log)
-    outputs.reqFiles.forEach { require(it, PathStampers.hash) }
-    outputs.genFiles.forEach { generate(it, PathStampers.hash) }
+    outputs.reqFiles.forEach { require(it, FileStampers.hash) }
+    outputs.genFiles.forEach { generate(it, FileStampers.hash) }
     val ast = outputs.outputs.firstOrNull()?.ast ?: return null
     return stylingRulesFromESV.create(ast as IStrategoAppl)
   }

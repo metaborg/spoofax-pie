@@ -12,7 +12,7 @@ import java.io.Serializable
 
 class CompileStrategoCGen
 @Inject constructor(
-) : Func<CompileStrategoCGen.Input, CGen?> {
+) : TaskDef<CompileStrategoCGen.Input, CGen?> {
   companion object {
     const val id = "nabl2.CompileStrategoCGen"
   }
@@ -26,18 +26,18 @@ class CompileStrategoCGen
   override fun ExecContext.exec(input: Input): CGen? {
     val (langSpecExt, root) = input
     val workspace =
-      requireOutput(createWorkspaceConfig::class, createWorkspaceConfig.id, root)
+      requireOutput(createWorkspaceConfig::class.java, createWorkspaceConfig.id, root)
         ?: throw ExecException("Could not create workspace config for root $root")
     val langSpec =
       workspace.langSpecConfigForExt(input.langSpecExt)
         ?: throw ExecException("Could not get language specification config for extension $langSpecExt")
 
     // Generate Stratego files from NaBL2 files
-    val genStrFromNablApp = FuncApp(GenerateStrategoCGen::class.java, GenerateStrategoCGen.id, GenerateStrategoCGen.Input(langSpecExt, root))
+    val genStrFromNablApp = Task(GenerateStrategoCGen::class.java, GenerateStrategoCGen.id, GenerateStrategoCGen.Input(langSpecExt, root))
     requireExec(genStrFromNablApp)
 
     // Generate Stratego signatures from SDF3.
-    val genSigApp = FuncApp(GenerateStrategoSignatures::class.java, GenerateStrategoSignatures.id, GenerateStrategoSignatures.Input(langSpecExt, root))
+    val genSigApp = Task(GenerateStrategoSignatures::class.java, GenerateStrategoSignatures.id, GenerateStrategoSignatures.Input(langSpecExt, root))
     val signatures = requireOutput(genSigApp)
 
     // Compile Stratego
@@ -47,7 +47,7 @@ class CompileStrategoCGen
       strategoConfigBuilder.addIncludeDirs(signatures.includeDir())
     }
     val finalStrategoConfig = strategoConfigBuilder.build()
-    val strategoCtree = requireOutput(Compile::class, Compile.id, Compile.Input(
+    val strategoCtree = requireOutput(Compile::class.java, Compile.id, Compile.Input(
       finalStrategoConfig, arrayListOf(genStrFromNablApp, genSigApp)
     ))
     val strategoStrategyName = langSpec.natsStrategoStrategyId() ?: return null

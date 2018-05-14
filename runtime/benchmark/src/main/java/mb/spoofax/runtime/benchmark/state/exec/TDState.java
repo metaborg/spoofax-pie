@@ -1,7 +1,7 @@
 package mb.spoofax.runtime.benchmark.state.exec;
 
 import mb.pie.runtime.core.ExecException;
-import mb.pie.runtime.core.FuncApp;
+import mb.pie.runtime.core.Task;
 import mb.pie.runtime.core.exec.TopDownExec;
 import mb.pie.runtime.core.exec.TopDownExecutor;
 import mb.pie.runtime.core.impl.exec.TopDownExecutorImpl;
@@ -24,8 +24,8 @@ public class TDState {
     private SpoofaxPieState spoofaxPieState;
     private WorkspaceState workspaceState;
     private TopDownExecutor executor;
-    private FuncApp<PPath, ? extends Serializable> processWorkspace;
-    private HashMap<PPath, FuncApp<? extends processEditor.Input, ? extends processEditor.Output>> editors =
+    private Task<PPath, ? extends Serializable> processWorkspace;
+    private HashMap<PPath, Task<? extends processEditor.Input, ? extends processEditor.Output>> editors =
         new HashMap<>();
 
 
@@ -42,12 +42,12 @@ public class TDState {
      * Adds an editor, or updates an exiting editor, and executes an editor update.
      */
     public void addOrUpdateEditor(String text, PPath file, PPath project, Blackhole blackhole) {
-        final FuncApp<? extends processEditor.Input, ? extends processEditor.Output> app =
+        final Task<? extends processEditor.Input, ? extends processEditor.Output> app =
             spoofaxPieState.spoofaxPipeline.editor(text, file, project, workspaceState.root);
         this.editors.put(file, app);
         try {
             final TopDownExec exec = executor.exec();
-            blackhole.consume(exec.requireOutput(app, new NullCancelled()));
+            blackhole.consume(exec.requireInitial(app, new NullCancelled()));
         } catch(InterruptedException | ExecException e) {
             throw new RuntimeException(e);
         }
@@ -66,10 +66,10 @@ public class TDState {
     public void execAll(Blackhole blackhole) {
         final TopDownExec exec = executor.exec();
         try {
-            final Serializable workspaceResult = exec.requireOutput(processWorkspace, new NullCancelled());
+            final Serializable workspaceResult = exec.requireInitial(processWorkspace, new NullCancelled());
             blackhole.consume(workspaceResult);
-            for(FuncApp<? extends processEditor.Input, ? extends processEditor.Output> editor : this.editors.values()) {
-                final Serializable editorResult = exec.requireOutput(editor, new NullCancelled());
+            for(Task<? extends processEditor.Input, ? extends processEditor.Output> editor : this.editors.values()) {
+                final Serializable editorResult = exec.requireInitial(editor, new NullCancelled());
                 blackhole.consume(editorResult);
             }
         } catch(ExecException | InterruptedException e) {

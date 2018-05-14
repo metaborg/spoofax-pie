@@ -2,16 +2,20 @@
 
 package mb.spoofax.runtime.pie.generated
 
-import com.google.inject.Binder
-import com.google.inject.Module
+import java.io.Serializable
+import java.nio.file.Paths
+import com.google.inject.*
+
+import mb.log.*
+import mb.vfs.path.*
+import mb.pie.runtime.core.*
+import mb.pie.runtime.builtin.*
 import mb.pie.runtime.builtin.path.*
 import mb.pie.runtime.builtin.util.*
-import mb.pie.runtime.core.*
-import mb.vfs.path.*
 
-class toMessage : Func<mb.spoofax.runtime.model.message.PathMsg, mb.spoofax.runtime.model.message.Msg> {
+class toMessage : TaskDef<mb.spoofax.runtime.model.message.PathMsg, mb.spoofax.runtime.model.message.Msg> {
   companion object {
-    val id = "toMessage"
+    const val id = "toMessage"
   }
 
   override val id = Companion.id
@@ -21,9 +25,9 @@ class toMessage : Func<mb.spoofax.runtime.model.message.PathMsg, mb.spoofax.runt
   }
 }
 
-class langSpecConfigForPath : Func<langSpecConfigForPath.Input, mb.spoofax.runtime.impl.cfg.LangSpecConfig?> {
+class langSpecConfigForPath : TaskDef<langSpecConfigForPath.Input, mb.spoofax.runtime.impl.cfg.LangSpecConfig?> {
   companion object {
-    val id = "langSpecConfigForPath"
+    const val id = "langSpecConfigForPath"
   }
 
   data class Input(val path: PPath, val root: PPath) : Tuple2<PPath, PPath> {
@@ -32,7 +36,7 @@ class langSpecConfigForPath : Func<langSpecConfigForPath.Input, mb.spoofax.runti
 
   override val id = Companion.id
   override fun ExecContext.exec(input: langSpecConfigForPath.Input): mb.spoofax.runtime.impl.cfg.LangSpecConfig? = run {
-    val workspace = requireOutput(createWorkspaceConfig::class, createWorkspaceConfig.Companion.id, input.root);
+    val workspace = requireOutput(createWorkspaceConfig::class.java, createWorkspaceConfig.id, input.root);
     if(workspace == null) run {
       return null
     };
@@ -44,9 +48,9 @@ class langSpecConfigForPath : Func<langSpecConfigForPath.Input, mb.spoofax.runti
   }
 }
 
-class spxCoreConfigForPath : Func<spxCoreConfigForPath.Input, mb.spoofax.runtime.impl.cfg.SpxCoreConfig?> {
+class spxCoreConfigForPath : TaskDef<spxCoreConfigForPath.Input, mb.spoofax.runtime.impl.cfg.SpxCoreConfig?> {
   companion object {
-    val id = "spxCoreConfigForPath"
+    const val id = "spxCoreConfigForPath"
   }
 
   data class Input(val workspace: mb.spoofax.runtime.impl.cfg.WorkspaceConfig, val path: PPath) : Tuple2<mb.spoofax.runtime.impl.cfg.WorkspaceConfig, PPath> {
@@ -61,37 +65,37 @@ class spxCoreConfigForPath : Func<spxCoreConfigForPath.Input, mb.spoofax.runtime
   }
 }
 
-class createWorkspaceConfig : Func<PPath, mb.spoofax.runtime.impl.cfg.WorkspaceConfig?> {
+class createWorkspaceConfig : TaskDef<PPath, mb.spoofax.runtime.impl.cfg.WorkspaceConfig?> {
   companion object {
-    val id = "createWorkspaceConfig"
+    const val id = "createWorkspaceConfig"
   }
 
   override val id = Companion.id
   override fun ExecContext.exec(input: PPath): mb.spoofax.runtime.impl.cfg.WorkspaceConfig? = run {
     val cfgLang = mb.spoofax.runtime.impl.cfg.ImmutableSpxCoreConfig.of(PPathImpl(java.nio.file.FileSystems.getDefault().getPath("/Users/gohla/metaborg/repo/pie/spoofax-pie/lang/cfg/langspec")), false, list("cfg"));
     val workspaceFile = input.resolve("root/workspace.cfg");
-    if(!requireOutput(Exists::class, Exists.Companion.id, workspaceFile)) return null;
-    val text = requireOutput(Read::class, Read.Companion.id, workspaceFile)!!;
-    val workspaceConfig = requireOutput(mb.spoofax.runtime.pie.config.ParseWorkspaceCfg::class, mb.spoofax.runtime.pie.config.ParseWorkspaceCfg.Companion.id, mb.spoofax.runtime.pie.config.ParseWorkspaceCfg.Input(text, workspaceFile, input, cfgLang))
+    if(!requireOutput(Exists::class.java, Exists.id, workspaceFile)) return null;
+    val text = requireOutput(Read::class.java, Read.id, workspaceFile)!!;
+    val workspaceConfig = requireOutput(mb.spoofax.runtime.pie.config.ParseWorkspaceCfg::class.java, mb.spoofax.runtime.pie.config.ParseWorkspaceCfg.id, mb.spoofax.runtime.pie.config.ParseWorkspaceCfg.Input(text, workspaceFile, input, cfgLang))
     workspaceConfig
   }
 }
 
-class processWorkspace : Func<PPath, ArrayList<Tuple2<ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>>>> {
+class processWorkspace : TaskDef<PPath, ArrayList<Tuple2<ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>>>> {
   companion object {
-    val id = "processWorkspace"
+    const val id = "processWorkspace"
   }
 
   override val id = Companion.id
   override fun ExecContext.exec(input: PPath): ArrayList<Tuple2<ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>>> = run {
 
-    requireOutput(ListContents::class, ListContents.Companion.id, ListContents.Input(input, PPaths.regexPathMatcher("^[^.]((?!src-gen).)*\$"))).map { project -> requireOutput(processProject::class, processProject.Companion.id, processProject.Input(project, input)) }.toCollection(ArrayList<Tuple2<ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>>>())
+    requireOutput(ListContents::class.java, ListContents.id, ListContents.Input(input, PPaths.regexPathMatcher("^[^.]((?!src-gen).)*\$"))).map { project -> requireOutput(processProject::class.java, processProject.id, processProject.Input(project, input)) }.toCollection(ArrayList<Tuple2<ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>>>())
   }
 }
 
-class processProject : Func<processProject.Input, processProject.Output> {
+class processProject : TaskDef<processProject.Input, processProject.Output> {
   companion object {
-    val id = "processProject"
+    const val id = "processProject"
   }
 
   data class Input(val project: PPath, val root: PPath) : Tuple2<PPath, PPath> {
@@ -106,20 +110,20 @@ class processProject : Func<processProject.Input, processProject.Output> {
 
   override val id = Companion.id
   override fun ExecContext.exec(input: processProject.Input): processProject.Output = run {
-    val workspaceConfig = requireOutput(createWorkspaceConfig::class, createWorkspaceConfig.Companion.id, input.root);
+    val workspaceConfig = requireOutput(createWorkspaceConfig::class.java, createWorkspaceConfig.id, input.root);
     val noLangSpecResults: ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>> = list();
     val noSpxCoreResults: ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>> = list();
     if(workspaceConfig == null) return output(tuple(noLangSpecResults, noSpxCoreResults));
     val workspace = workspaceConfig!!;
-    val langSpecResults = workspace.langSpecConfigs().map { langSpec -> requireOutput(processLangSpecInProject::class, processLangSpecInProject.Companion.id, processLangSpecInProject.Input(input.project, langSpec, input.root)) }.toCollection(ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>>());
-    val spxCoreResults = requireOutput(WalkContents::class, WalkContents.Companion.id, WalkContents.Input(input.project, PPaths.extensionsPathWalker(workspace.spxCoreExtensions()))).map { file -> requireOutput(processFileWithSpxCore::class, processFileWithSpxCore.Companion.id, processFileWithSpxCore.Input(file, input.project, workspace)) }.toCollection(ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>())
+    val langSpecResults = workspace.langSpecConfigs().map { langSpec -> requireOutput(processLangSpecInProject::class.java, processLangSpecInProject.id, processLangSpecInProject.Input(input.project, langSpec, input.root)) }.toCollection(ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>>());
+    val spxCoreResults = requireOutput(WalkContents::class.java, WalkContents.id, WalkContents.Input(input.project, PPaths.extensionsPathWalker(workspace.spxCoreExtensions()))).map { file -> requireOutput(processFileWithSpxCore::class.java, processFileWithSpxCore.id, processFileWithSpxCore.Input(file, input.project, workspace)) }.toCollection(ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>())
     output(tuple(langSpecResults, spxCoreResults))
   }
 }
 
-class processLangSpecInProject : Func<processLangSpecInProject.Input, ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>> {
+class processLangSpecInProject : TaskDef<processLangSpecInProject.Input, ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>> {
   companion object {
-    val id = "processLangSpecInProject"
+    const val id = "processLangSpecInProject"
   }
 
   data class Input(val project: PPath, val langSpec: mb.spoofax.runtime.impl.cfg.LangSpecConfig, val root: PPath) : Tuple3<PPath, mb.spoofax.runtime.impl.cfg.LangSpecConfig, PPath> {
@@ -129,13 +133,13 @@ class processLangSpecInProject : Func<processLangSpecInProject.Input, ArrayList<
   override val id = Companion.id
   override fun ExecContext.exec(input: processLangSpecInProject.Input): ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>> = run {
 
-    requireOutput(WalkContents::class, WalkContents.Companion.id, WalkContents.Input(input.project, PPaths.extensionsPathWalker(input.langSpec.extensions()))).map { file -> requireOutput(processFile::class, processFile.Companion.id, processFile.Input(file, input.project, input.root)) }.toCollection(ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>())
+    requireOutput(WalkContents::class.java, WalkContents.id, WalkContents.Input(input.project, PPaths.extensionsPathWalker(input.langSpec.extensions()))).map { file -> requireOutput(processFile::class.java, processFile.id, processFile.Input(file, input.project, input.root)) }.toCollection(ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>())
   }
 }
 
-class processEditor : Func<processEditor.Input, processEditor.Output?> {
+class processEditor : TaskDef<processEditor.Input, processEditor.Output?> {
   companion object {
-    val id = "processEditor"
+    const val id = "processEditor"
   }
 
   data class Input(val text: String, val file: PPath, val project: PPath, val root: PPath) : Tuple4<String, PPath, PPath, PPath> {
@@ -150,7 +154,7 @@ class processEditor : Func<processEditor.Input, processEditor.Output?> {
 
   override val id = Companion.id
   override fun ExecContext.exec(input: processEditor.Input): processEditor.Output? = run {
-    val workspaceConfig = requireOutput(createWorkspaceConfig::class, createWorkspaceConfig.Companion.id, input.root);
+    val workspaceConfig = requireOutput(createWorkspaceConfig::class.java, createWorkspaceConfig.id, input.root);
     if(workspaceConfig == null) return null;
     val workspace = workspaceConfig!!;
     val extension = input.file.extension();
@@ -158,12 +162,12 @@ class processEditor : Func<processEditor.Input, processEditor.Output?> {
     val langSpecConfig = workspace.langSpecConfigForExt(extension!!);
     if(langSpecConfig != null) run {
       val langSpec = langSpecConfig!!;
-      val (tokens, messages, styling, solution) = requireOutput(processString::class, processString.Companion.id, processString.Input(input.text, input.file, input.project, input.root));
+      val (tokens, messages, styling, solution) = requireOutput(processString::class.java, processString.id, processString.Input(input.text, input.file, input.project, input.root));
       return output(tuple(tokens, messages, styling, solution))
     };
     val spxCoreConfig = workspace.spxCoreConfigForExt(extension!!);
     if(spxCoreConfig != null) run {
-      val (tokens, messages, styling) = requireOutput(processStringWithSpxCore::class, processStringWithSpxCore.Companion.id, processStringWithSpxCore.Input(input.text, input.file, spxCoreConfig!!));
+      val (tokens, messages, styling) = requireOutput(processStringWithSpxCore::class.java, processStringWithSpxCore.id, processStringWithSpxCore.Input(input.text, input.file, spxCoreConfig!!));
       val noSolution: mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution? = null;
       return output(tuple(tokens, messages, styling, noSolution) as Tuple4<ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>?)
     }
@@ -171,9 +175,9 @@ class processEditor : Func<processEditor.Input, processEditor.Output?> {
   }
 }
 
-class processFile : Func<processFile.Input, processFile.Output> {
+class processFile : TaskDef<processFile.Input, processFile.Output> {
   companion object {
-    val id = "processFile"
+    const val id = "processFile"
   }
 
   data class Input(val file: PPath, val project: PPath, val root: PPath) : Tuple3<PPath, PPath, PPath> {
@@ -189,25 +193,25 @@ class processFile : Func<processFile.Input, processFile.Output> {
   override val id = Companion.id
   override fun ExecContext.exec(input: processFile.Input): processFile.Output = run {
     if(!mb.spoofax.runtime.pie.shouldProcessFile(input.file)) run {
-      return output(requireOutput(emptyFileResult::class, emptyFileResult.Companion.id, input.file))
+      return output(requireOutput(emptyFileResult::class.java, emptyFileResult.id, input.file))
     };
-    if(!requireOutput(Exists::class, Exists.Companion.id, input.file)) run {
-      return output(requireOutput(emptyFileResult::class, emptyFileResult.Companion.id, input.file))
+    if(!requireOutput(Exists::class.java, Exists.id, input.file)) run {
+      return output(requireOutput(emptyFileResult::class.java, emptyFileResult.id, input.file))
     };
-    val langSpec = requireOutput(langSpecConfigForPath::class, langSpecConfigForPath.Companion.id, langSpecConfigForPath.Input(input.file, input.root))
+    val langSpec = requireOutput(langSpecConfigForPath::class.java, langSpecConfigForPath.id, langSpecConfigForPath.Input(input.file, input.root))
     output(if(langSpec != null) run {
-      val text = requireOutput(Read::class, Read.Companion.id, input.file)!!;
-      val (tokens, messages, styling, solution) = requireOutput(processString::class, processString.Companion.id, processString.Input(text, input.file, input.project, input.root));
+      val text = requireOutput(Read::class.java, Read.id, input.file)!!;
+      val (tokens, messages, styling, solution) = requireOutput(processString::class.java, processString.id, processString.Input(text, input.file, input.project, input.root));
       tuple(input.file, tokens, messages, styling, solution)
     } else run {
-      requireOutput(emptyFileResult::class, emptyFileResult.Companion.id, input.file)
+      requireOutput(emptyFileResult::class.java, emptyFileResult.id, input.file)
     })
   }
 }
 
-class emptyFileResult : Func<PPath, emptyFileResult.Output> {
+class emptyFileResult : TaskDef<PPath, emptyFileResult.Output> {
   companion object {
-    val id = "emptyFileResult"
+    const val id = "emptyFileResult"
   }
 
   data class Output(val _1: PPath, val _2: ArrayList<mb.spoofax.runtime.model.parse.Token>?, val _3: ArrayList<mb.spoofax.runtime.model.message.Msg>, val _4: mb.spoofax.runtime.model.style.Styling?, val _5: mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?) : Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?> {
@@ -226,9 +230,9 @@ class emptyFileResult : Func<PPath, emptyFileResult.Output> {
   }
 }
 
-class processString : Func<processString.Input, processString.Output> {
+class processString : TaskDef<processString.Input, processString.Output> {
   companion object {
-    val id = "processString"
+    const val id = "processString"
   }
 
   data class Input(val text: String, val file: PPath, val project: PPath, val root: PPath) : Tuple4<String, PPath, PPath, PPath> {
@@ -245,19 +249,19 @@ class processString : Func<processString.Input, processString.Output> {
   override fun ExecContext.exec(input: processString.Input): processString.Output = run {
     val langSpecExt = input.file.extension()
     output(if(langSpecExt != null) run {
-      val (ast, tokenStream, messages) = requireOutput(parse::class, parse.Companion.id, parse.Input(input.text, input.file, langSpecExt!!, input.root));
-      val styling: mb.spoofax.runtime.model.style.Styling? = if(tokenStream == null) null else requireOutput(style::class, style.Companion.id, style.Input(tokenStream!!, langSpecExt!!, input.root));
-      val solution: mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution? = if(ast == null) null else requireOutput(solveFile::class, solveFile.Companion.id, solveFile.Input(ast!!, input.file, input.project, langSpecExt!!, input.root));
+      val (ast, tokenStream, messages) = requireOutput(parse::class.java, parse.id, parse.Input(input.text, input.file, langSpecExt!!, input.root));
+      val styling: mb.spoofax.runtime.model.style.Styling? = if(tokenStream == null) null else requireOutput(style::class.java, style.id, style.Input(tokenStream!!, langSpecExt!!, input.root));
+      val solution: mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution? = if(ast == null) null else requireOutput(solveFile::class.java, solveFile.id, solveFile.Input(ast!!, input.file, input.project, langSpecExt!!, input.root));
       tuple(tokenStream, messages, styling, solution)
     } else run {
-      requireOutput(emptyResult::class, emptyResult.Companion.id, None.instance)
+      requireOutput(emptyResult::class.java, emptyResult.id, None.instance)
     })
   }
 }
 
-class emptyResult : Func<None, emptyResult.Output> {
+class emptyResult : TaskDef<None, emptyResult.Output> {
   companion object {
-    val id = "emptyResult"
+    const val id = "emptyResult"
   }
 
   data class Output(val _1: ArrayList<mb.spoofax.runtime.model.parse.Token>?, val _2: ArrayList<mb.spoofax.runtime.model.message.Msg>, val _3: mb.spoofax.runtime.model.style.Styling?, val _4: mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?) : Tuple4<ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?> {
@@ -276,9 +280,9 @@ class emptyResult : Func<None, emptyResult.Output> {
   }
 }
 
-class parse : Func<parse.Input, parse.Output> {
+class parse : TaskDef<parse.Input, parse.Output> {
   companion object {
-    val id = "parse"
+    const val id = "parse"
   }
 
   data class Input(val text: String, val file: PPath, val langSpecExt: String, val root: PPath) : Tuple4<String, PPath, String, PPath> {
@@ -293,15 +297,15 @@ class parse : Func<parse.Input, parse.Output> {
 
   override val id = Companion.id
   override fun ExecContext.exec(input: parse.Input): parse.Output = run {
-    val parseTable = requireOutput(mb.spoofax.runtime.pie.sdf3.CompileParseTable::class, mb.spoofax.runtime.pie.sdf3.CompileParseTable.Companion.id, mb.spoofax.runtime.pie.sdf3.CompileParseTable.Input(input.langSpecExt, input.root));
-    if(parseTable == null) return output(requireOutput(emptyParse::class, emptyParse.Companion.id, None.instance))
-    output(requireOutput(mb.spoofax.runtime.pie.sdf3.Parse::class, mb.spoofax.runtime.pie.sdf3.Parse.Companion.id, mb.spoofax.runtime.pie.sdf3.Parse.Input(input.text, parseTable!!, input.file, input.langSpecExt, input.root)))
+    val parseTable = requireOutput(mb.spoofax.runtime.pie.sdf3.CompileParseTable::class.java, mb.spoofax.runtime.pie.sdf3.CompileParseTable.id, mb.spoofax.runtime.pie.sdf3.CompileParseTable.Input(input.langSpecExt, input.root));
+    if(parseTable == null) return output(requireOutput(emptyParse::class.java, emptyParse.id, None.instance))
+    output(requireOutput(mb.spoofax.runtime.pie.sdf3.Parse::class.java, mb.spoofax.runtime.pie.sdf3.Parse.id, mb.spoofax.runtime.pie.sdf3.Parse.Input(input.text, parseTable!!, input.file, input.langSpecExt, input.root)))
   }
 }
 
-class emptyParse : Func<None, emptyParse.Output> {
+class emptyParse : TaskDef<None, emptyParse.Output> {
   companion object {
-    val id = "emptyParse"
+    const val id = "emptyParse"
   }
 
   data class Output(val _1: org.spoofax.interpreter.terms.IStrategoTerm?, val _2: ArrayList<mb.spoofax.runtime.model.parse.Token>?, val _3: ArrayList<mb.spoofax.runtime.model.message.Msg>) : Tuple3<org.spoofax.interpreter.terms.IStrategoTerm?, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>> {
@@ -319,9 +323,9 @@ class emptyParse : Func<None, emptyParse.Output> {
   }
 }
 
-class createSignatures : Func<createSignatures.Input, mb.spoofax.runtime.impl.sdf.Signatures?> {
+class createSignatures : TaskDef<createSignatures.Input, mb.spoofax.runtime.impl.sdf.Signatures?> {
   companion object {
-    val id = "createSignatures"
+    const val id = "createSignatures"
   }
 
   data class Input(val langSpecExt: String, val root: PPath) : Tuple2<String, PPath> {
@@ -331,13 +335,13 @@ class createSignatures : Func<createSignatures.Input, mb.spoofax.runtime.impl.sd
   override val id = Companion.id
   override fun ExecContext.exec(input: createSignatures.Input): mb.spoofax.runtime.impl.sdf.Signatures? = run {
 
-    requireOutput(mb.spoofax.runtime.pie.sdf3.GenerateStrategoSignatures::class, mb.spoofax.runtime.pie.sdf3.GenerateStrategoSignatures.Companion.id, mb.spoofax.runtime.pie.sdf3.GenerateStrategoSignatures.Input(input.langSpecExt, input.root))
+    requireOutput(mb.spoofax.runtime.pie.sdf3.GenerateStrategoSignatures::class.java, mb.spoofax.runtime.pie.sdf3.GenerateStrategoSignatures.id, mb.spoofax.runtime.pie.sdf3.GenerateStrategoSignatures.Input(input.langSpecExt, input.root))
   }
 }
 
-class style : Func<style.Input, mb.spoofax.runtime.model.style.Styling?> {
+class style : TaskDef<style.Input, mb.spoofax.runtime.model.style.Styling?> {
   companion object {
-    val id = "style"
+    const val id = "style"
   }
 
   data class Input(val tokenStream: ArrayList<mb.spoofax.runtime.model.parse.Token>, val langSpecExt: String, val root: PPath) : Tuple3<ArrayList<mb.spoofax.runtime.model.parse.Token>, String, PPath> {
@@ -346,15 +350,15 @@ class style : Func<style.Input, mb.spoofax.runtime.model.style.Styling?> {
 
   override val id = Companion.id
   override fun ExecContext.exec(input: style.Input): mb.spoofax.runtime.model.style.Styling? = run {
-    val syntaxStyler = requireOutput(mb.spoofax.runtime.pie.esv.CompileStyler::class, mb.spoofax.runtime.pie.esv.CompileStyler.Companion.id, mb.spoofax.runtime.pie.esv.CompileStyler.Input(input.langSpecExt, input.root));
+    val syntaxStyler = requireOutput(mb.spoofax.runtime.pie.esv.CompileStyler::class.java, mb.spoofax.runtime.pie.esv.CompileStyler.id, mb.spoofax.runtime.pie.esv.CompileStyler.Input(input.langSpecExt, input.root));
     if(syntaxStyler == null) return null
-    requireOutput(mb.spoofax.runtime.pie.esv.Style::class, mb.spoofax.runtime.pie.esv.Style.Companion.id, mb.spoofax.runtime.pie.esv.Style.Input(input.tokenStream, syntaxStyler!!)) as mb.spoofax.runtime.model.style.Styling?
+    requireOutput(mb.spoofax.runtime.pie.esv.Style::class.java, mb.spoofax.runtime.pie.esv.Style.id, mb.spoofax.runtime.pie.esv.Style.Input(input.tokenStream, syntaxStyler!!)) as mb.spoofax.runtime.model.style.Styling?
   }
 }
 
-class solveFile : Func<solveFile.Input, mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?> {
+class solveFile : TaskDef<solveFile.Input, mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?> {
   companion object {
-    val id = "solveFile"
+    const val id = "solveFile"
   }
 
   data class Input(val ast: org.spoofax.interpreter.terms.IStrategoTerm, val file: PPath, val project: PPath, val langSpecExt: String, val root: PPath) : Tuple5<org.spoofax.interpreter.terms.IStrategoTerm, PPath, PPath, String, PPath> {
@@ -363,22 +367,22 @@ class solveFile : Func<solveFile.Input, mb.spoofax.runtime.impl.nabl.ConstraintS
 
   override val id = Companion.id
   override fun ExecContext.exec(input: solveFile.Input): mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution? = run {
-    val globalConstraints = requireOutput(mb.spoofax.runtime.pie.nabl2.CGenGlobal::class, mb.spoofax.runtime.pie.nabl2.CGenGlobal.Companion.id, mb.spoofax.runtime.pie.nabl2.CGenGlobal.Input(input.langSpecExt, input.root));
+    val globalConstraints = requireOutput(mb.spoofax.runtime.pie.nabl2.CGenGlobal::class.java, mb.spoofax.runtime.pie.nabl2.CGenGlobal.id, mb.spoofax.runtime.pie.nabl2.CGenGlobal.Input(input.langSpecExt, input.root));
     if(globalConstraints == null) return null;
-    val globalSolution = requireOutput(mb.spoofax.runtime.pie.nabl2.SolveGlobal::class, mb.spoofax.runtime.pie.nabl2.SolveGlobal.Companion.id, globalConstraints!!);
+    val globalSolution = requireOutput(mb.spoofax.runtime.pie.nabl2.SolveGlobal::class.java, mb.spoofax.runtime.pie.nabl2.SolveGlobal.id, globalConstraints!!);
     if(globalSolution == null) return null;
-    val documentConstraints = requireOutput(mb.spoofax.runtime.pie.nabl2.CGenDocument::class, mb.spoofax.runtime.pie.nabl2.CGenDocument.Companion.id, mb.spoofax.runtime.pie.nabl2.CGenDocument.Input(globalConstraints!!, input.ast, input.file, input.langSpecExt, input.root));
+    val documentConstraints = requireOutput(mb.spoofax.runtime.pie.nabl2.CGenDocument::class.java, mb.spoofax.runtime.pie.nabl2.CGenDocument.id, mb.spoofax.runtime.pie.nabl2.CGenDocument.Input(globalConstraints!!, input.ast, input.file, input.langSpecExt, input.root));
     if(documentConstraints == null) return null;
-    val documentSolution = requireOutput(mb.spoofax.runtime.pie.nabl2.SolveDocument::class, mb.spoofax.runtime.pie.nabl2.SolveDocument.Companion.id, mb.spoofax.runtime.pie.nabl2.SolveDocument.Input(documentConstraints!!, globalConstraints!!, globalSolution!!));
+    val documentSolution = requireOutput(mb.spoofax.runtime.pie.nabl2.SolveDocument::class.java, mb.spoofax.runtime.pie.nabl2.SolveDocument.id, mb.spoofax.runtime.pie.nabl2.SolveDocument.Input(documentConstraints!!, globalConstraints!!, globalSolution!!));
     if(documentSolution == null) return null;
-    val solution = requireOutput(mb.spoofax.runtime.pie.nabl2.SolveFinal::class, mb.spoofax.runtime.pie.nabl2.SolveFinal.Companion.id, mb.spoofax.runtime.pie.nabl2.SolveFinal.Input(list(documentSolution!!), globalSolution!!, input.project))
+    val solution = requireOutput(mb.spoofax.runtime.pie.nabl2.SolveFinal::class.java, mb.spoofax.runtime.pie.nabl2.SolveFinal.id, mb.spoofax.runtime.pie.nabl2.SolveFinal.Input(list(documentSolution!!), globalSolution!!, input.project))
     solution
   }
 }
 
-class processFileWithSpxCore : Func<processFileWithSpxCore.Input, processFileWithSpxCore.Output> {
+class processFileWithSpxCore : TaskDef<processFileWithSpxCore.Input, processFileWithSpxCore.Output> {
   companion object {
-    val id = "processFileWithSpxCore"
+    const val id = "processFileWithSpxCore"
   }
 
   data class Input(val file: PPath, val project: PPath, val workspace: mb.spoofax.runtime.impl.cfg.WorkspaceConfig) : Tuple3<PPath, PPath, mb.spoofax.runtime.impl.cfg.WorkspaceConfig> {
@@ -394,25 +398,25 @@ class processFileWithSpxCore : Func<processFileWithSpxCore.Input, processFileWit
   override val id = Companion.id
   override fun ExecContext.exec(input: processFileWithSpxCore.Input): processFileWithSpxCore.Output = run {
     if(!mb.spoofax.runtime.pie.shouldProcessFile(input.file)) run {
-      return output(requireOutput(emptySpxCoreFile::class, emptySpxCoreFile.Companion.id, input.file))
+      return output(requireOutput(emptySpxCoreFile::class.java, emptySpxCoreFile.id, input.file))
     };
-    if(!requireOutput(Exists::class, Exists.Companion.id, input.file)) run {
-      return output(requireOutput(emptySpxCoreFile::class, emptySpxCoreFile.Companion.id, input.file))
+    if(!requireOutput(Exists::class.java, Exists.id, input.file)) run {
+      return output(requireOutput(emptySpxCoreFile::class.java, emptySpxCoreFile.id, input.file))
     };
-    val config = requireOutput(spxCoreConfigForPath::class, spxCoreConfigForPath.Companion.id, spxCoreConfigForPath.Input(input.workspace, input.file))
+    val config = requireOutput(spxCoreConfigForPath::class.java, spxCoreConfigForPath.id, spxCoreConfigForPath.Input(input.workspace, input.file))
     output(if(config != null) run {
-      val text = requireOutput(Read::class, Read.Companion.id, input.file)!!;
-      val (tokens, messages, styling) = requireOutput(processStringWithSpxCore::class, processStringWithSpxCore.Companion.id, processStringWithSpxCore.Input(text, input.file, config!!));
+      val text = requireOutput(Read::class.java, Read.id, input.file)!!;
+      val (tokens, messages, styling) = requireOutput(processStringWithSpxCore::class.java, processStringWithSpxCore.id, processStringWithSpxCore.Input(text, input.file, config!!));
       tuple(input.file, tokens, messages, styling)
     } else run {
-      requireOutput(emptySpxCoreFile::class, emptySpxCoreFile.Companion.id, input.file)
+      requireOutput(emptySpxCoreFile::class.java, emptySpxCoreFile.id, input.file)
     })
   }
 }
 
-class emptySpxCoreFile : Func<PPath, emptySpxCoreFile.Output> {
+class emptySpxCoreFile : TaskDef<PPath, emptySpxCoreFile.Output> {
   companion object {
-    val id = "emptySpxCoreFile"
+    const val id = "emptySpxCoreFile"
   }
 
   data class Output(val _1: PPath, val _2: ArrayList<mb.spoofax.runtime.model.parse.Token>?, val _3: ArrayList<mb.spoofax.runtime.model.message.Msg>, val _4: mb.spoofax.runtime.model.style.Styling?) : Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?> {
@@ -430,9 +434,9 @@ class emptySpxCoreFile : Func<PPath, emptySpxCoreFile.Output> {
   }
 }
 
-class processStringWithSpxCore : Func<processStringWithSpxCore.Input, processStringWithSpxCore.Output> {
+class processStringWithSpxCore : TaskDef<processStringWithSpxCore.Input, processStringWithSpxCore.Output> {
   companion object {
-    val id = "processStringWithSpxCore"
+    const val id = "processStringWithSpxCore"
   }
 
   data class Input(val text: String, val file: PPath, val config: mb.spoofax.runtime.impl.cfg.SpxCoreConfig) : Tuple3<String, PPath, mb.spoofax.runtime.impl.cfg.SpxCoreConfig> {
@@ -447,8 +451,8 @@ class processStringWithSpxCore : Func<processStringWithSpxCore.Input, processStr
 
   override val id = Companion.id
   override fun ExecContext.exec(input: processStringWithSpxCore.Input): processStringWithSpxCore.Output = run {
-    val (ast, tokens, messages, _) = requireOutput(mb.spoofax.runtime.pie.legacy.CoreParse::class, mb.spoofax.runtime.pie.legacy.CoreParse.Companion.id, mb.spoofax.runtime.pie.legacy.CoreParse.Input(input.config, input.text, input.file));
-    val styling: mb.spoofax.runtime.model.style.Styling? = if(ast == null || tokens == null) null else requireOutput(mb.spoofax.runtime.pie.legacy.CoreStyle::class, mb.spoofax.runtime.pie.legacy.CoreStyle.Companion.id, mb.spoofax.runtime.pie.legacy.CoreStyle.Input(input.config, tokens!!, ast!!)) as mb.spoofax.runtime.model.style.Styling?
+    val (ast, tokens, messages, _) = requireOutput(mb.spoofax.runtime.pie.legacy.CoreParse::class.java, mb.spoofax.runtime.pie.legacy.CoreParse.id, mb.spoofax.runtime.pie.legacy.CoreParse.Input(input.config, input.text, input.file));
+    val styling: mb.spoofax.runtime.model.style.Styling? = if(ast == null || tokens == null) null else requireOutput(mb.spoofax.runtime.pie.legacy.CoreStyle::class.java, mb.spoofax.runtime.pie.legacy.CoreStyle.id, mb.spoofax.runtime.pie.legacy.CoreStyle.Input(input.config, tokens!!, ast!!)) as mb.spoofax.runtime.model.style.Styling?
     output(tuple(tokens, messages, styling))
   }
 }
@@ -456,27 +460,27 @@ class processStringWithSpxCore : Func<processStringWithSpxCore.Input, processStr
 
 class PieBuilderModule_spoofax : Module {
   override fun configure(binder: Binder) {
-    val funcs = binder.funcsMapBinder()
+    val taskDefsBinder = binder.taskDefsBinder()
 
-    binder.bindFunc<processStringWithSpxCore>(funcs, "processStringWithSpxCore")
-    binder.bindFunc<emptySpxCoreFile>(funcs, "emptySpxCoreFile")
-    binder.bindFunc<processFileWithSpxCore>(funcs, "processFileWithSpxCore")
-    binder.bindFunc<solveFile>(funcs, "solveFile")
-    binder.bindFunc<style>(funcs, "style")
-    binder.bindFunc<createSignatures>(funcs, "createSignatures")
-    binder.bindFunc<emptyParse>(funcs, "emptyParse")
-    binder.bindFunc<parse>(funcs, "parse")
-    binder.bindFunc<emptyResult>(funcs, "emptyResult")
-    binder.bindFunc<processString>(funcs, "processString")
-    binder.bindFunc<emptyFileResult>(funcs, "emptyFileResult")
-    binder.bindFunc<processFile>(funcs, "processFile")
-    binder.bindFunc<processEditor>(funcs, "processEditor")
-    binder.bindFunc<processLangSpecInProject>(funcs, "processLangSpecInProject")
-    binder.bindFunc<processProject>(funcs, "processProject")
-    binder.bindFunc<processWorkspace>(funcs, "processWorkspace")
-    binder.bindFunc<createWorkspaceConfig>(funcs, "createWorkspaceConfig")
-    binder.bindFunc<spxCoreConfigForPath>(funcs, "spxCoreConfigForPath")
-    binder.bindFunc<langSpecConfigForPath>(funcs, "langSpecConfigForPath")
-    binder.bindFunc<toMessage>(funcs, "toMessage")
+    binder.bindTaskDef<processStringWithSpxCore>(taskDefsBinder, "processStringWithSpxCore")
+    binder.bindTaskDef<emptySpxCoreFile>(taskDefsBinder, "emptySpxCoreFile")
+    binder.bindTaskDef<processFileWithSpxCore>(taskDefsBinder, "processFileWithSpxCore")
+    binder.bindTaskDef<solveFile>(taskDefsBinder, "solveFile")
+    binder.bindTaskDef<style>(taskDefsBinder, "style")
+    binder.bindTaskDef<createSignatures>(taskDefsBinder, "createSignatures")
+    binder.bindTaskDef<emptyParse>(taskDefsBinder, "emptyParse")
+    binder.bindTaskDef<parse>(taskDefsBinder, "parse")
+    binder.bindTaskDef<emptyResult>(taskDefsBinder, "emptyResult")
+    binder.bindTaskDef<processString>(taskDefsBinder, "processString")
+    binder.bindTaskDef<emptyFileResult>(taskDefsBinder, "emptyFileResult")
+    binder.bindTaskDef<processFile>(taskDefsBinder, "processFile")
+    binder.bindTaskDef<processEditor>(taskDefsBinder, "processEditor")
+    binder.bindTaskDef<processLangSpecInProject>(taskDefsBinder, "processLangSpecInProject")
+    binder.bindTaskDef<processProject>(taskDefsBinder, "processProject")
+    binder.bindTaskDef<processWorkspace>(taskDefsBinder, "processWorkspace")
+    binder.bindTaskDef<createWorkspaceConfig>(taskDefsBinder, "createWorkspaceConfig")
+    binder.bindTaskDef<spxCoreConfigForPath>(taskDefsBinder, "spxCoreConfigForPath")
+    binder.bindTaskDef<langSpecConfigForPath>(taskDefsBinder, "langSpecConfigForPath")
+    binder.bindTaskDef<toMessage>(taskDefsBinder, "toMessage")
   }
 }

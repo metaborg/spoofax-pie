@@ -1,14 +1,14 @@
 package mb.spoofax.runtime.pie.config
 
 import mb.pie.runtime.core.ExecContext
-import mb.pie.runtime.core.Func
+import mb.pie.runtime.core.TaskDef
 import mb.spoofax.runtime.impl.cfg.*
 import mb.spoofax.runtime.pie.legacy.langExtensions
 import mb.spoofax.runtime.pie.legacy.parse
 import mb.vfs.path.PPath
 import java.io.Serializable
 
-class ParseWorkspaceCfg : Func<ParseWorkspaceCfg.Input, WorkspaceConfig?> {
+class ParseWorkspaceCfg : TaskDef<ParseWorkspaceCfg.Input, WorkspaceConfig?> {
   companion object {
     const val id = "config.ParseWorkspaceCfg"
   }
@@ -23,7 +23,7 @@ class ParseWorkspaceCfg : Func<ParseWorkspaceCfg.Input, WorkspaceConfig?> {
     }
     val data = WorkspaceConfigPaths.fromTerm(ast, input.workspaceRoot)
     val langSpecConfigs = data.langSpecConfigFiles().mapNotNull {
-      requireOutput(ParseLangSpecCfg::class, ParseLangSpecCfg.id, ParseLangSpecCfg.Input(input.config, it))
+      requireOutput(ParseLangSpecCfg::class.java, ParseLangSpecCfg.id, ParseLangSpecCfg.Input(input.config, it))
     }
     val spxCoreLangConfigs = data.spxCoreLangConfigFiles().map {
       val langDir = it.parent()!!

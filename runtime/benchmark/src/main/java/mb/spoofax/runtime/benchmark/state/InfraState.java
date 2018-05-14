@@ -32,7 +32,7 @@ public class InfraState {
     public Share share;
     public Provider<Layer> layer;
     public Provider<Logger> logger;
-    public Map<String, Func<?, ?>> funcs;
+    public Map<String, TaskDef<?, ?>> funcs;
 
     public void setup(SpoofaxPieState spoofaxPieState, WorkspaceState workspaceState) {
         this.store = storeKind.provider(workspaceState.storePath, spoofaxPieState).get();
@@ -44,7 +44,7 @@ public class InfraState {
         this.share = shareKind.provider(spoofaxPieState).get();
         this.layer = layerKind.provider(spoofaxPieState);
         this.logger = loggerKind.provider(spoofaxPieState);
-        this.funcs = spoofaxPieState.injector.getInstance(new Key<Map<String, Func<?, ?>>>() {
+        this.funcs = spoofaxPieState.injector.getInstance(new Key<Map<String, TaskDef<?, ?>>>() {
         });
     }
 

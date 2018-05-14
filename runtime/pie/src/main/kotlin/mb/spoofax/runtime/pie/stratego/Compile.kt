@@ -2,7 +2,7 @@ package mb.spoofax.runtime.pie.stratego
 
 import com.google.inject.Inject
 import mb.pie.runtime.core.*
-import mb.pie.runtime.core.stamp.PathStampers
+import mb.pie.runtime.core.stamp.FileStampers
 import mb.spoofax.runtime.impl.cfg.StrategoConfig
 import mb.spoofax.runtime.impl.stratego.StrategoCompiler
 import mb.vfs.path.*
@@ -13,14 +13,14 @@ import java.nio.charset.Charset
 class Compile
 @Inject constructor(
   private val pathSrv: PathSrv
-) : Func<Compile.Input, PPath?> {
+) : TaskDef<Compile.Input, PPath?> {
   companion object {
-    const val id = "Stratego.Compile"
+    const val id = "stratego.Compile"
   }
 
   data class Input(
     val config: StrategoConfig,
-    val taskDeps: Iterable<UFuncApp>
+    val taskDeps: Iterable<UTask>
   ) : Serializable
 
   override val id = Companion.id
@@ -35,14 +35,14 @@ class Compile
     val result = compiler.compile(config)
     if(result == null) {
       // Make manual dependencies, since no depfile is generated if compilation fails.
-      require(config.mainFile(), PathStampers.hash)
-      config.includeFiles().forEach { require(it, PathStampers.hash) }
-      config.includeDirs().forEach { require(it, PathStampers.hash(PPaths.extensionsPathWalker(listOf("str", "rtree")))) }
+      require(config.mainFile(), FileStampers.hash)
+      config.includeFiles().forEach { require(it, FileStampers.hash) }
+      config.includeDirs().forEach { require(it, FileStampers.hash(PPaths.extensionsPathWalker(listOf("str", "rtree")))) }
       return null
     }
     generate(result.outputFile)
     generate(result.depFile)
-    requiredPaths(result.depFile).forEach { require(it, PathStampers.hash) }
+    requiredPaths(result.depFile).forEach { require(it, FileStampers.hash) }
     return result.outputFile
   }
 
@@ -67,5 +67,5 @@ class Compile
       }
 }
 
-fun ExecContext.compileStratego(input: Compile.Input) = requireOutput(Compile::class, Compile.id, input)
-fun ExecContext.compileStratego(config: StrategoConfig, taskDeps: Iterable<UFuncApp>) = compileStratego(Compile.Input(config, taskDeps))
+fun ExecContext.compileStratego(input: Compile.Input) = requireOutput(Compile::class.java, Compile.id, input)
+fun ExecContext.compileStratego(config: StrategoConfig, taskDeps: Iterable<UTask>) = compileStratego(Compile.Input(config, taskDeps))

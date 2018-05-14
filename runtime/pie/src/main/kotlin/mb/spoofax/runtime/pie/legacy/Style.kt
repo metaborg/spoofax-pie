@@ -3,7 +3,7 @@ package mb.spoofax.runtime.pie.legacy
 import com.google.inject.Inject
 import mb.log.Logger
 import mb.pie.runtime.core.*
-import mb.pie.runtime.core.stamp.PathStampers
+import mb.pie.runtime.core.stamp.FileStampers
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.spoofax.runtime.impl.legacy.StyleConverter
 import mb.spoofax.runtime.model.parse.Token
@@ -15,9 +15,9 @@ import org.metaborg.util.iterators.Iterables2
 import org.spoofax.interpreter.terms.IStrategoTerm
 import java.io.Serializable
 
-class CoreStyle @Inject constructor(log: Logger) : Func<CoreStyle.Input, Styling> {
+class CoreStyle @Inject constructor(log: Logger) : TaskDef<CoreStyle.Input, Styling> {
   companion object {
-    val id = "coreStyle"
+    const val id = "coreStyle"
   }
 
   data class Input(val config: SpxCoreConfig, val tokenStream: Iterable<Token>, val ast: IStrategoTerm) : Serializable
@@ -33,7 +33,7 @@ class CoreStyle @Inject constructor(log: Logger) : Func<CoreStyle.Input, Styling
     // Require packed ESV file
     val langLoc = langImpl.components().first().location()
     val packedEsvFile = SpoofaxLangSpecCommonPaths(langLoc).targetMetaborgDir().resolveFile("editor.esv.af")
-    require(packedEsvFile.pPath, PathStampers.hash)
+    require(packedEsvFile.pPath, FileStampers.hash)
 
     // Perform styling
     val inputUnit = spoofax.unitService.inputUnit("hack", langImpl, null)

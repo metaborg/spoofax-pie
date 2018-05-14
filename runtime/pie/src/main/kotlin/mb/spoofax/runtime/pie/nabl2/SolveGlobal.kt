@@ -5,7 +5,7 @@ import mb.log.Logger
 import mb.nabl2.solver.ImmutableSolution
 import mb.nabl2.spoofax.analysis.ImmutableInitialResult
 import mb.pie.runtime.core.ExecContext
-import mb.pie.runtime.core.Func
+import mb.pie.runtime.core.TaskDef
 import mb.spoofax.runtime.impl.nabl.ConstraintSolver
 import mb.spoofax.runtime.model.SpoofaxEx
 
@@ -13,7 +13,7 @@ class SolveGlobal
 @Inject constructor(
   log: Logger,
   private val solver: ConstraintSolver
-) : Func<ImmutableInitialResult, ImmutableSolution?> {
+) : TaskDef<ImmutableInitialResult, ImmutableSolution?> {
   private val log: Logger = log.forContext(SolveGlobal::class.java)
 
   companion object {

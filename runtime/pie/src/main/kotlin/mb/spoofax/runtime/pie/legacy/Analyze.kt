@@ -4,7 +4,7 @@ import com.google.inject.Inject
 import mb.log.Logger
 import mb.pie.runtime.builtin.util.Tuple2
 import mb.pie.runtime.core.*
-import mb.pie.runtime.core.stamp.PathStampers
+import mb.pie.runtime.core.stamp.FileStampers
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.spoofax.runtime.impl.legacy.MessageConverter
 import mb.spoofax.runtime.model.message.Msg
@@ -18,7 +18,7 @@ import org.metaborg.util.iterators.Iterables2
 import org.spoofax.interpreter.terms.IStrategoTerm
 import java.io.Serializable
 
-class CoreAnalyze @Inject constructor(log: Logger, private val messageConverter: MessageConverter) : Func<CoreAnalyze.Input, CoreAnalyze.Output> {
+class CoreAnalyze @Inject constructor(log: Logger, private val messageConverter: MessageConverter) : TaskDef<CoreAnalyze.Input, CoreAnalyze.Output> {
   companion object {
     const val id = "coreAnalyze"
   }
@@ -36,8 +36,8 @@ class CoreAnalyze @Inject constructor(log: Logger, private val messageConverter:
     // Require Stratego runtime files
     val facet = langImpl.facet(StrategoRuntimeFacet::class.java)
     if(facet != null) {
-      facet.ctreeFiles.forEach<FileObject> { require(it.pPath, PathStampers.hash) }
-      facet.jarFiles.forEach<FileObject> { require(it.pPath, PathStampers.hash) }
+      facet.ctreeFiles.forEach<FileObject> { require(it.pPath, FileStampers.hash) }
+      facet.jarFiles.forEach<FileObject> { require(it.pPath, FileStampers.hash) }
     }
 
     // Perform analysis
@@ -61,13 +61,13 @@ class CoreAnalyze @Inject constructor(log: Logger, private val messageConverter:
   }
 }
 
-fun ExecContext.analyze(input: CoreAnalyze.Input) = requireOutput(CoreAnalyze::class, CoreAnalyze.id, input)
+fun ExecContext.analyze(input: CoreAnalyze.Input) = requireOutput(CoreAnalyze::class.java, CoreAnalyze.id, input)
 fun ExecContext.analyze(config: SpxCoreConfig, project: PPath, file: PPath, ast: IStrategoTerm) = analyze(CoreAnalyze.Input(config, project, file, ast))
 
 
-class CoreAnalyzeAll @Inject constructor(log: Logger, private val messageConverter: MessageConverter) : Func<CoreAnalyzeAll.Input, ArrayList<CoreAnalyzeAll.Output>> {
+class CoreAnalyzeAll @Inject constructor(log: Logger, private val messageConverter: MessageConverter) : TaskDef<CoreAnalyzeAll.Input, ArrayList<CoreAnalyzeAll.Output>> {
   companion object {
-    val id = "coreAnalyzeAll"
+    const val id = "coreAnalyzeAll"
   }
 
   data class AstFilePair(val ast: IStrategoTerm, val file: PPath) : Tuple2<IStrategoTerm, PPath> {
@@ -87,12 +87,13 @@ class CoreAnalyzeAll @Inject constructor(log: Logger, private val messageConvert
     // Require Stratego runtime files
     val facet = langImpl.facet(StrategoRuntimeFacet::class.java)
     if(facet != null) {
-      facet.ctreeFiles.forEach<FileObject> { require(it.pPath, PathStampers.hash) }
-      facet.jarFiles.forEach<FileObject> { require(it.pPath, PathStampers.hash) }
+      facet.ctreeFiles.forEach<FileObject> { require(it.pPath, FileStampers.hash) }
+      facet.jarFiles.forEach<FileObject> { require(it.pPath, FileStampers.hash) }
     }
 
     // Perform analysis
-    val project = spoofax.projectService.get(input.project.fileObject) ?: throw ExecException("Cannot analyze $input.project, it is not a project location")
+    val project = spoofax.projectService.get(input.project.fileObject)
+      ?: throw ExecException("Cannot analyze $input.project, it is not a project location")
     val spoofaxContext = spoofax.contextService.get(project.location(), project, langImpl)
     val parseUnits = input.pairs.map { (ast, file) ->
       val resource = file.fileObject
@@ -116,5 +117,5 @@ class CoreAnalyzeAll @Inject constructor(log: Logger, private val messageConvert
   }
 }
 
-fun ExecContext.analyzeAll(input: CoreAnalyzeAll.Input) = requireOutput(CoreAnalyzeAll::class, CoreAnalyzeAll.id, input)
+fun ExecContext.analyzeAll(input: CoreAnalyzeAll.Input) = requireOutput(CoreAnalyzeAll::class.java, CoreAnalyzeAll.id, input)
 fun ExecContext.analyzeAll(config: SpxCoreConfig, project: PPath, pairs: Iterable<CoreAnalyzeAll.AstFilePair>) = analyzeAll(CoreAnalyzeAll.Input(config, project, pairs))

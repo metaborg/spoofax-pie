@@ -3,7 +3,7 @@ package mb.spoofax.runtime.pie.nabl2
 import com.google.inject.Inject
 import mb.log.Logger
 import mb.pie.runtime.core.*
-import mb.pie.runtime.core.stamp.PathStampers
+import mb.pie.runtime.core.stamp.FileStampers
 import mb.spoofax.runtime.pie.generated.createWorkspaceConfig
 import mb.spoofax.runtime.pie.legacy.*
 import mb.vfs.path.PPath
@@ -13,7 +13,7 @@ import java.io.Serializable
 class GenerateStrategoCGen
 @Inject constructor(
   log: Logger
-) : Func<GenerateStrategoCGen.Input, None> {
+) : TaskDef<GenerateStrategoCGen.Input, None> {
   private val log = log.forContext(GenerateStrategoCGen::class.java)
 
   companion object {
@@ -29,7 +29,7 @@ class GenerateStrategoCGen
   override fun ExecContext.exec(input: Input): None {
     val (langSpecExt, root) = input
     val workspace =
-      requireOutput(createWorkspaceConfig::class, createWorkspaceConfig.id, root)
+      requireOutput(createWorkspaceConfig::class.java, createWorkspaceConfig.id, root)
         ?: throw ExecException("Could not create workspace config for root $root")
     val metaLangExt = "nabl2"
     val metaLangConfig = workspace.spxCoreConfigForExt(metaLangExt)
@@ -41,8 +41,8 @@ class GenerateStrategoCGen
     val langSpecProject = loadProj(langSpec.dir())
     val files = langSpec.natsNaBL2Files() ?: return None.instance
     val outputs = process(files, metaLangImpl, langSpecProject, true, CompileGoal(), log)
-    outputs.reqFiles.forEach { require(it, PathStampers.hash) }
-    outputs.genFiles.forEach { generate(it, PathStampers.hash) }
+    outputs.reqFiles.forEach { require(it, FileStampers.hash) }
+    outputs.genFiles.forEach { generate(it, FileStampers.hash) }
 
     return None.instance
   }

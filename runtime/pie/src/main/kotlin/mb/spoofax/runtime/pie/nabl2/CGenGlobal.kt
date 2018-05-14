@@ -4,8 +4,8 @@ import com.google.inject.Inject
 import mb.log.Logger
 import mb.nabl2.spoofax.analysis.ImmutableInitialResult
 import mb.pie.runtime.core.ExecContext
-import mb.pie.runtime.core.Func
-import mb.pie.runtime.core.stamp.PathStampers
+import mb.pie.runtime.core.TaskDef
+import mb.pie.runtime.core.stamp.FileStampers
 import mb.spoofax.runtime.impl.stratego.StrategoRuntimeBuilder
 import mb.spoofax.runtime.impl.stratego.primitive.ScopeGraphPrimitiveLibrary
 import mb.spoofax.runtime.model.SpoofaxEx
@@ -16,7 +16,7 @@ class CGenGlobal
 @Inject constructor(
   log: Logger,
   private val primitiveLibrary: ScopeGraphPrimitiveLibrary
-) : Func<CGenGlobal.Input, ImmutableInitialResult?> {
+) : TaskDef<CGenGlobal.Input, ImmutableInitialResult?> {
   private val log: Logger = log.forContext(CGenGlobal::class.java)
 
   companion object {
@@ -31,11 +31,11 @@ class CGenGlobal
   override val id = Companion.id
   override fun ExecContext.exec(input: Input): ImmutableInitialResult? {
     val (langSpecExt, root) = input
-    val constraintGenerator = requireOutput(CompileStrategoCGen::class, CompileStrategoCGen.id, CompileStrategoCGen.Input(
+    val constraintGenerator = requireOutput(CompileStrategoCGen::class.java, CompileStrategoCGen.id, CompileStrategoCGen.Input(
       langSpecExt, root
     )) ?: return null
     val strategoRuntime = constraintGenerator.createSuitableRuntime(StrategoRuntimeBuilder(), primitiveLibrary)
-    require(constraintGenerator.strategoCtree(), PathStampers.hash)
+    require(constraintGenerator.strategoCtree(), FileStampers.hash)
     return try {
       constraintGenerator.cgenGlobal(strategoRuntime)
     } catch(e: SpoofaxEx) {

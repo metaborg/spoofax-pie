@@ -7,9 +7,9 @@ import org.metaborg.core.project.ISimpleProjectService
 
 typealias TransientProject = OutTransientEquatable<IProject, PPath>
 
-class CoreLoadProj : Func<PPath, TransientProject> {
+class CoreLoadProj : TaskDef<PPath, TransientProject> {
   companion object {
-    val id = "coreLoadProj"
+    const val id = "coreLoadProj"
   }
 
   override val id = Companion.id
@@ -27,4 +27,4 @@ class CoreLoadProj : Func<PPath, TransientProject> {
 
 val IProject.path get() = this.location().pPath
 
-fun ExecContext.loadProj(input: PPath) = requireOutput(CoreLoadProj::class, CoreLoadProj.id, input).v
+fun ExecContext.loadProj(input: PPath) = requireOutput(CoreLoadProj::class.java, CoreLoadProj.id, input).v

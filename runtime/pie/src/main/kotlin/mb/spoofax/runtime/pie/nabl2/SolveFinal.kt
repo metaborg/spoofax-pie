@@ -4,7 +4,7 @@ import com.google.inject.Inject
 import mb.log.Logger
 import mb.nabl2.solver.ImmutableSolution
 import mb.pie.runtime.core.ExecContext
-import mb.pie.runtime.core.Func
+import mb.pie.runtime.core.TaskDef
 import mb.spoofax.runtime.impl.nabl.ConstraintSolver
 import mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution
 import mb.spoofax.runtime.model.SpoofaxEx
@@ -16,7 +16,7 @@ class SolveFinal
 @Inject constructor(
   log: Logger,
   private val solver: ConstraintSolver
-) : Func<SolveFinal.Input, ConstraintSolverSolution?> {
+) : TaskDef<SolveFinal.Input, ConstraintSolverSolution?> {
   private val log: Logger = log.forContext(SolveFinal::class.java)
 
   companion object {

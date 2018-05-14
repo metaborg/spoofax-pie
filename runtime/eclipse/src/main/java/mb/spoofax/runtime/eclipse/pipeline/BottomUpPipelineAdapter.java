@@ -18,14 +18,14 @@ import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 import mb.log.Logger;
 import mb.pie.runtime.core.ExecException;
-import mb.pie.runtime.core.FuncApp;
+import mb.pie.runtime.core.Task;
 import mb.pie.runtime.core.exec.BottomUpExecutor;
 import mb.spoofax.runtime.eclipse.SpoofaxPlugin;
 import mb.spoofax.runtime.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.runtime.eclipse.util.Nullable;
 import mb.spoofax.runtime.eclipse.vfs.EclipsePathSrv;
 import mb.spoofax.runtime.pie.PieSrv;
-import mb.spoofax.runtime.pie.builder.SpoofaxPipeline;
+import mb.spoofax.runtime.pie.SpoofaxPipeline;
 import mb.spoofax.runtime.pie.generated.processEditor;
 import mb.spoofax.runtime.pie.generated.processProject;
 import mb.util.async.Cancelled;
@@ -57,9 +57,6 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
 
         this.eclipseRoot = ResourcesPlugin.getWorkspace().getRoot();
         this.root = pathSrv.resolve(eclipseRoot);
-
-        // this.executor = pieSrv.getBottomUpObservingExecutor(root, SpoofaxPlugin.useInMemoryStore,
-        // BottomUpObservingExecutorFactory.Variant.DirtyFlagging);
         this.executor = pieSrv.getBottomUpExecutor(root, SpoofaxPlugin.useInMemoryStore);
     }
 
@@ -72,7 +69,7 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
         }
 
         logger.debug("Setting pipeline observer for project {}", project);
-        executor.setObserver(project, projectApp(mbProject), projectObs(mbProject));
+        executor.setObserver(project, projectTask(mbProject), projectObs(mbProject));
     }
 
     @Override public void buildProject(IProject project, int buildKind, @Nullable IResourceDelta delta,
@@ -83,7 +80,7 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
             return;
         }
 
-        final FuncApp<processProject.Input, processProject.Output> app = projectApp(mbProject);
+        final Task<processProject.Input, processProject.Output> app = projectTask(mbProject);
         final Cancelled cancelled = PipelineCancel.cancelled(monitor);
 
         if(!executor.hasBeenRequired(app) || buildKind == IncrementalProjectBuilder.FULL_BUILD || delta == null) {
@@ -118,7 +115,7 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
         }
 
         logger.debug("Setting pipeline observer for editor {}", editor);
-        executor.setObserver(editor, editorApp(text, mbFile, mbProject), editorObs(editor, text, mbFile, mbProject));
+        executor.setObserver(editor, editorTask(text, mbFile, mbProject), editorObs(editor, text, mbFile, mbProject));
     }
 
     @Override public void updateEditor(SpoofaxEditor editor, String text, IFile file, IProject project,
@@ -135,7 +132,7 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
             return;
         }
 
-        final FuncApp<processEditor.Input, processEditor.Output> app = editorApp(text, mbFile, mbProject);
+        final Task<processEditor.Input, processEditor.Output> app = editorTask(text, mbFile, mbProject);
 
         logger.debug("Setting pipeline observer for editor {}", editor);
         executor.setObserver(editor, app, editorObs(editor, text, mbFile, mbProject));
@@ -164,7 +161,7 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
     }
 
 
-    private FuncApp<processProject.Input, processProject.Output> projectApp(PPath project) {
+    private Task<processProject.Input, processProject.Output> projectTask(PPath project) {
         return pipeline.project(project, root);
     }
 
@@ -172,7 +169,7 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
         return (Function1<Serializable, Unit>) observers.project(project);
     }
 
-    private FuncApp<processEditor.Input, processEditor.Output> editorApp(String text, PPath file, PPath project) {
+    private Task<processEditor.Input, processEditor.Output> editorTask(String text, PPath file, PPath project) {
         return pipeline.editor(text, file, project, root);
     }
 

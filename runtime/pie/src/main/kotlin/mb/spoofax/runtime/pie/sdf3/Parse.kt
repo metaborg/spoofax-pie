@@ -13,7 +13,7 @@ import org.spoofax.terms.TermFactory
 import java.io.Serializable
 import java.util.*
 
-class Parse : Func<Parse.Input, Parse.Output> {
+class Parse : TaskDef<Parse.Input, Parse.Output> {
   companion object {
     const val id = "sdf3.Parse"
   }
@@ -36,7 +36,7 @@ class Parse : Func<Parse.Input, Parse.Output> {
   override fun ExecContext.exec(input: Input): Output {
     val (text, table, file, langSpecExt, root) = input
     val workspace =
-      requireOutput(createWorkspaceConfig::class, createWorkspaceConfig.Companion.id, root)
+      requireOutput(createWorkspaceConfig::class.java, createWorkspaceConfig.Companion.id, root)
         ?: throw ExecException("Could not create workspace config for root $root")
     val langSpec =
       workspace.langSpecConfigForExt(input.langSpecExt)

@@ -6,7 +6,7 @@ import mb.nabl2.solver.ImmutableSolution
 import mb.nabl2.spoofax.analysis.ImmutableInitialResult
 import mb.nabl2.spoofax.analysis.ImmutableUnitResult
 import mb.pie.runtime.core.ExecContext
-import mb.pie.runtime.core.Func
+import mb.pie.runtime.core.TaskDef
 import mb.spoofax.runtime.impl.nabl.ConstraintSolver
 import mb.spoofax.runtime.model.SpoofaxEx
 import java.io.Serializable
@@ -15,7 +15,7 @@ class SolveDocument
 @Inject constructor(
   log: Logger,
   private val solver: ConstraintSolver
-) : Func<SolveDocument.Input, ImmutableSolution?> {
+) : TaskDef<SolveDocument.Input, ImmutableSolution?> {
   private val log: Logger = log.forContext(SolveDocument::class.java)
 
   companion object {

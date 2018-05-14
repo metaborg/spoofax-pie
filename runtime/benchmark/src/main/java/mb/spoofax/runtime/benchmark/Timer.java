@@ -54,7 +54,7 @@ public class Timer {
     public static void clearFile() {
         try {
             new FileWriter(logFile, false)
-                .append("name,time_ms,requires,executions,fileReqs,fileGens,callReqs\n")
+                .append("name,time_ms,requires,executions,fileReqs,fileGens,taskReqs\n")
                 .close();
         } catch(IOException e) {
             e.printStackTrace();

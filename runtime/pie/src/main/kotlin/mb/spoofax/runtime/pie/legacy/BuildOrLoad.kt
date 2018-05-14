@@ -2,14 +2,15 @@ package mb.spoofax.runtime.pie.legacy
 
 import com.google.inject.Inject
 import mb.log.Logger
-import mb.pie.runtime.core.*
+import mb.pie.runtime.core.ExecContext
+import mb.pie.runtime.core.TaskDef
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.vfs.path.PPath
 import java.io.Serializable
 
-class CoreBuildOrLoad @Inject constructor(log: Logger) : Func<CoreBuildOrLoad.Input, TransientLangImpl> {
+class CoreBuildOrLoad @Inject constructor(log: Logger) : TaskDef<CoreBuildOrLoad.Input, TransientLangImpl> {
   companion object {
-    val id = "coreBuildOrLoad"
+    const val id = "coreBuildOrLoad"
   }
 
   data class Input(val dir: PPath, val isLangSpec: Boolean) : Serializable {
@@ -29,6 +30,6 @@ class CoreBuildOrLoad @Inject constructor(log: Logger) : Func<CoreBuildOrLoad.In
   }
 }
 
-fun ExecContext.buildOrLoad(input: CoreBuildOrLoad.Input) = requireOutput(CoreBuildOrLoad::class, CoreBuildOrLoad.id, input).v
+fun ExecContext.buildOrLoad(input: CoreBuildOrLoad.Input) = requireOutput(CoreBuildOrLoad::class.java, CoreBuildOrLoad.id, input).v
 fun ExecContext.buildOrLoad(dir: PPath, isLangSpec: Boolean) = buildOrLoad(CoreBuildOrLoad.Input(dir, isLangSpec))
 fun ExecContext.buildOrLoad(input: SpxCoreConfig) = buildOrLoad(CoreBuildOrLoad.Input(input))
