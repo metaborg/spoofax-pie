@@ -12,7 +12,7 @@ import mb.spoofax.runtime.model.SpoofaxFacade;
 import mb.spoofax.runtime.model.SpoofaxModule;
 import mb.spoofax.runtime.model.StaticSpoofaxFacade;
 import mb.spoofax.runtime.pie.SpoofaxPieModule;
-import mb.spoofax.runtime.pie.builder.SpoofaxPipeline;
+import mb.spoofax.runtime.pie.SpoofaxPipeline;
 import mb.spoofax.runtime.pie.generated.PieBuilderModule_spoofax;
 import mb.vfs.VFSModule;
 import mb.vfs.path.PathSrv;

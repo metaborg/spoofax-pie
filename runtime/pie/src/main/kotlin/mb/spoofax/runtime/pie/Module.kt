@@ -6,9 +6,14 @@ import mb.pie.runtime.builtin.util.LogLogger
 import mb.pie.runtime.core.*
 import mb.pie.runtime.core.impl.cache.MapCache
 import mb.pie.runtime.core.impl.layer.ValidationLayer
-import mb.spoofax.runtime.pie.builder.*
-import mb.spoofax.runtime.pie.builder.core.*
-import mb.spoofax.runtime.pie.builder.stratego.CompileStratego
+import mb.spoofax.runtime.pie.config.ParseWorkspaceCfg
+import mb.spoofax.runtime.pie.config.ParseLangSpecCfg
+import mb.spoofax.runtime.pie.esv.CompileStyler
+import mb.spoofax.runtime.pie.esv.Style
+import mb.spoofax.runtime.pie.legacy.*
+import mb.spoofax.runtime.pie.nabl2.*
+import mb.spoofax.runtime.pie.sdf3.*
+import mb.spoofax.runtime.pie.stratego.Compile
 
 open class SpoofaxPieModule : PieModule() {
   override fun configure(binder: Binder) {
@@ -30,24 +35,25 @@ open class SpoofaxPieModule : PieModule() {
   }
 
   override fun Binder.bindFuncs(builders: MapBinder<String, UFunc>) {
-    bindFunc<GenerateLangSpecConfig>(builders, GenerateLangSpecConfig.id)
-    bindFunc<GenerateWorkspaceConfig>(builders, GenerateWorkspaceConfig.id)
+    bindFunc<ParseLangSpecCfg>(builders, ParseLangSpecCfg.id)
+    bindFunc<ParseWorkspaceCfg>(builders, ParseWorkspaceCfg.id)
 
-    bindFunc<GenerateTable>(builders, GenerateTable.id)
-    bindFunc<GenerateSignatures>(builders, GenerateSignatures.id)
+    bindFunc<CompileParseTable>(builders, CompileParseTable.id)
+    bindFunc<GenerateStrategoSignatures>(builders, GenerateStrategoSignatures.id)
     bindFunc<Parse>(builders, Parse.id)
 
-    bindFunc<GenerateStylerRules>(builders, GenerateStylerRules.id)
+    bindFunc<CompileStyler>(builders, CompileStyler.id)
     bindFunc<Style>(builders, Style.id)
 
-    bindFunc<NaBL2ToStratego>(builders, NaBL2ToStratego.id)
-    bindFunc<NaBL2GenerateConstraintGenerator>(builders, NaBL2GenerateConstraintGenerator.id)
-    bindFunc<NaBL2InitialResult>(builders, NaBL2InitialResult.id)
-    bindFunc<NaBL2UnitResult>(builders, NaBL2UnitResult.id)
-    bindFunc<NaBL2PartialSolve>(builders, NaBL2PartialSolve.id)
-    bindFunc<NaBL2Solve>(builders, NaBL2Solve.id)
+    bindFunc<GenerateStrategoCGen>(builders, GenerateStrategoCGen.id)
+    bindFunc<CompileStrategoCGen>(builders, CompileStrategoCGen.id)
+    bindFunc<CGenGlobal>(builders, CGenGlobal.id)
+    bindFunc<CGenDocument>(builders, CGenDocument.id)
+    bindFunc<SolveGlobal>(builders, SolveGlobal.id)
+    bindFunc<SolveDocument>(builders, SolveDocument.id)
+    bindFunc<SolveFinal>(builders, SolveFinal.id)
 
-    bindFunc<CompileStratego>(builders, CompileStratego.id)
+    bindFunc<Compile>(builders, Compile.id)
 
     bindFunc<CoreLoadLang>(builders, CoreLoadLang.id)
     bindFunc<CoreLoadProj>(builders, CoreLoadProj.id)

@@ -9,30 +9,34 @@ data Styling = foreign java mb.spoofax.runtime.model.style.Styling {}
 
 
 
-/// Library with functions to build SDF3 and ESV specifications
+/// Library with functions to build and use language specifications.
+/// SDF3
 data ParseTable = foreign java mb.spoofax.runtime.impl.sdf.Table {}
-func sdf2table(langSpecExt: string, root: path) -> ParseTable? = foreign mb.spoofax.runtime.pie.builder.GenerateTable
+func sdf2table(langSpecExt: string, root: path) -> ParseTable? = foreign mb.spoofax.runtime.pie.sdf3.CompileParseTable
 data Signatures = foreign java mb.spoofax.runtime.impl.sdf.Signatures {}
-func sdf2sig(langSpecExt: string, root: path) -> Signatures? = foreign mb.spoofax.runtime.pie.builder.GenerateSignatures
-func jsglrParse(text: string, table: ParseTable, file: path, langSpecExt: string, root: path) -> (Ast?, Token*?, Message*) = foreign mb.spoofax.runtime.pie.builder.Parse
-
+func sdf2sig(langSpecExt: string, root: path) -> Signatures? = foreign mb.spoofax.runtime.pie.sdf3.GenerateStrategoSignatures
+func jsglrParse(text: string, table: ParseTable, file: path, langSpecExt: string, root: path) -> (Ast?, Token*?, Message*) = foreign mb.spoofax.runtime.pie.sdf3.Parse
+/// ESV
 data SyntaxStyler = foreign java mb.spoofax.runtime.impl.esv.StylingRules {}
-func esv2styler(langSpecExt: string, root: path) -> SyntaxStyler? = foreign mb.spoofax.runtime.pie.builder.GenerateStylerRules
-func esvStyle(tokenStream: Token*, st: SyntaxStyler) -> Styling = foreign mb.spoofax.runtime.pie.builder.Style
+func esv2styler(langSpecExt: string, root: path) -> SyntaxStyler? = foreign mb.spoofax.runtime.pie.esv.CompileStyler
+func esvStyle(tokenStream: Token*, st: SyntaxStyler) -> Styling = foreign mb.spoofax.runtime.pie.esv.Style
+/// NaBL2
+/// Constraint generation
+data CGen = foreign java mb.spoofax.runtime.impl.nabl.ConstraintGenerator {}
+func nabl2-compile-cgen(langSpecExt: string, root: path) -> CGen? = foreign mb.spoofax.runtime.pie.nabl2.CompileStrategoCGen
+data GlobalConstraints = foreign java mb.nabl2.spoofax.analysis.ImmutableInitialResult {}
+func nabl2-cgen-global(langSpecExt: string, root: path) -> GlobalConstraints? = foreign mb.spoofax.runtime.pie.nabl2.CGenGlobal
+data DocumentConstraints = foreign java mb.nabl2.spoofax.analysis.ImmutableUnitResult {}
+func nabl2-cgen-document(globalConstraints: GlobalConstraints, ast: Ast, file: path, langSpecExt: string, root: path) -> DocumentConstraints? = foreign mb.spoofax.runtime.pie.nabl2.CGenDocument
+/// Solving
+data SolverSolution = foreign java mb.nabl2.solver.ImmutableSolution {}
+func nabl2-solve-global(globalConstraints: GlobalConstraints) -> SolverSolution? = foreign mb.spoofax.runtime.pie.nabl2.SolveGlobal
+func nabl2-solve-document(documentConstraints: DocumentConstraints, globalConstraints: GlobalConstraints, globalSolution: SolverSolution) -> SolverSolution? = foreign mb.spoofax.runtime.pie.nabl2.SolveDocument
+data FinalSolverSolution = foreign java mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution {}
+func nabl2-solve(documentsConstraints: SolverSolution*, globalSolution: SolverSolution, projectPath: path) -> FinalSolverSolution? = foreign mb.spoofax.runtime.pie.nabl2.SolveFinal
 
-data ConstraintGenerator = foreign java mb.spoofax.runtime.impl.nabl.ConstraintGenerator {}
-func nabl2-constraint-generator(langSpecExt: string, root: path) -> ConstraintGenerator? = foreign mb.spoofax.runtime.pie.builder.NaBL2GenerateConstraintGenerator
-data InitialResult = foreign java org.metaborg.meta.nabl2.spoofax.analysis.ImmutableInitialResult {}
-func nabl2-initial-result(generator: ConstraintGenerator) -> InitialResult = foreign mb.spoofax.runtime.pie.builder.NaBL2InitialResult
-data UnitResult = foreign java org.metaborg.meta.nabl2.spoofax.analysis.ImmutableUnitResult {}
-func nabl2-unit-result(generator: ConstraintGenerator, initialResult: InitialResult, ast: Ast, file: path) -> UnitResult = foreign mb.spoofax.runtime.pie.builder.NaBL2UnitResult
-data PartialSolverSolution = foreign java org.metaborg.meta.nabl2.solver.ImmutablePartialSolution {}
-func nabl2-partial-solve(initialResult: InitialResult, unitResult: UnitResult, file: path) -> PartialSolverSolution = foreign mb.spoofax.runtime.pie.builder.NaBL2PartialSolve
-data SolverSolution = foreign java mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution {}
-func nabl2-solve(initialResult: InitialResult, partialSolutions: PartialSolverSolution*, project: path) -> SolverSolution = foreign mb.spoofax.runtime.pie.builder.NaBL2Solve
 
 
- 
 /// Language specification configuration
 data StrategoConfig = foreign java mb.spoofax.runtime.impl.cfg.ImmutableStrategoConfig {}
 data LangSpecConfig = foreign java mb.spoofax.runtime.impl.cfg.LangSpecConfig {
@@ -82,7 +86,7 @@ func spxCoreConfigForPath(workspace: WorkspaceConfig, path: path) -> SpxCoreConf
   if(extension == null) return null;
   workspace.spxCoreConfigForExt(extension!)
 } 
-func generateWorkspaceConfig(text: string, file: path, workspaceRoot: path, cfgLangConfig: SpxCoreConfig) -> WorkspaceConfig? = foreign mb.spoofax.runtime.pie.builder.GenerateWorkspaceConfig
+func generateWorkspaceConfig(text: string, file: path, workspaceRoot: path, cfgLangConfig: SpxCoreConfig) -> WorkspaceConfig? = foreign mb.spoofax.runtime.pie.config.ParseWorkspaceCfg
 func createWorkspaceConfig(workspaceRoot: path) -> WorkspaceConfig? = {
   // Manually create a config for the configuration language. This is required to bootstrap the language workbench.
   val cfgLang = createSpxCoreConfig(/Users/gohla/metaborg/repo/pie/spoofax-pie/lang/cfg/langspec, false, ["cfg"]);
@@ -97,36 +101,37 @@ func createWorkspaceConfig(workspaceRoot: path) -> WorkspaceConfig? = {
 
 // Processing
 /// Process the entire workspace.
-func processWorkspace(root: path) -> (((path, Token*?, Message*, Styling?, PartialSolverSolution?)*, SolverSolution?*)*, (path, Token*?, Message*, Styling?)*)?* = {
+func processWorkspace(root: path) -> ((path, Token*?, Message*, Styling?, FinalSolverSolution?)**, (path, Token*?, Message*, Styling?)*)* = {
   [processProject(project, root) | project <- list root with regex "^[^.]((?!src-gen).)*\$"]
 }
 /// Processing a project in the workspace.
-func processProject(project: path, root: path) -> (((path, Token*?, Message*, Styling?, PartialSolverSolution?)*, SolverSolution?*)*, (path, Token*?, Message*, Styling?)*)? = {
+func processProject(project: path, root: path) -> ((path, Token*?, Message*, Styling?, FinalSolverSolution?)**, (path, Token*?, Message*, Styling?)*) = {
   val workspaceConfig = createWorkspaceConfig(root);
-  val noResults: (((path, Token*?, Message*, Styling?, PartialSolverSolution?)*, SolverSolution?*)*, (path, Token*?, Message*, Styling?)*)? = null;
-  if(workspaceConfig == null) return noResults;
+  val noLangSpecResults: (path, Token*?, Message*, Styling?, FinalSolverSolution?)** = [];
+  val noSpxCoreResults: (path, Token*?, Message*, Styling?)* = [];
+  if(workspaceConfig == null) return (noLangSpecResults, noSpxCoreResults);
   val workspace = workspaceConfig!;
   
   val langSpecResults = [processLangSpecInProject(project, langSpec, root) | langSpec <- workspace.langSpecConfigs()];
   val spxCoreResults = [processFileWithSpxCore(file, project, workspace) | file <- walk project with extensions (workspace.spxCoreExtensions())];
   (langSpecResults, spxCoreResults)
 }
-func processLangSpecInProject(project: path, langSpec: LangSpecConfig, root: path) -> ((path, Token*?, Message*, Styling?, PartialSolverSolution?)*, SolverSolution?*) = {
-  val results = [processFile(file, project, root) | file <- walk project with extensions (langSpec.extensions())];
-  val partialSolutions = filterNullPartialSolutions([extractPartialSolution(result) | result <- results]);
-  val solutions = 
-    if(langSpec.natsRootScopePerFile())
-      [solve([partialSolution], project, langSpec.firstExtension(), root) | partialSolution <- partialSolutions]
-    else
-      [solve(partialSolutions, project, langSpec.firstExtension(), root)]
-    ;
-  (results, solutions)
+func processLangSpecInProject(project: path, langSpec: LangSpecConfig, root: path) -> (path, Token*?, Message*, Styling?, FinalSolverSolution?)* = {
+  [processFile(file, project, root) | file <- walk project with extensions (langSpec.extensions())]
+//  val partialSolutions = filterNullPartialSolutions([extractPartialSolution(result) | result <- results]);
+//  val solutions = 
+//    if(langSpec.natsRootScopePerFile())
+//      [solve([partialSolution], project, langSpec.firstExtension(), root) | partialSolution <- partialSolutions]
+//    else
+//      [solve(partialSolutions, project, langSpec.firstExtension(), root)]
+//    ;
+//  (results, solutions)
 }
 
 
 
 /// Processing an editor in the workspace.
-func processEditor(text: string, file: path, project: path, root: path) -> (Token*?, Message*, Styling?, PartialSolverSolution?, SolverSolution?)? = {
+func processEditor(text: string, file: path, project: path, root: path) -> (Token*?, Message*, Styling?, FinalSolverSolution?)? = {
   val workspaceConfig = createWorkspaceConfig(root);
   if(workspaceConfig == null) return null;
   val workspace = workspaceConfig!;
@@ -137,37 +142,36 @@ func processEditor(text: string, file: path, project: path, root: path) -> (Toke
   val langSpecConfig = workspace.langSpecConfigForExt(extension!);
   if(langSpecConfig != null) {
     val langSpec = langSpecConfig!;
-    val (tokens, messages, styling, partialSolution) = processString(text, file, project, root);
-    val otherPartialSolutions = getOtherPartialSolutions(file, project, langSpec, root);
-    val partialSolutions = filterNullPartialSolutions([partialSolution] + otherPartialSolutions);
-    val solution: SolverSolution? = if(partialSolution == null) null else solve(partialSolutions, project, extension!, root);
-    return (tokens, messages, styling, partialSolution, solution)
+    val (tokens, messages, styling, solution) = processString(text, file, project, root);
+    //val otherPartialSolutions = getOtherPartialSolutions(file, project, langSpec, root);
+    //val partialSolutions = filterNullPartialSolutions([partialSolution] + otherPartialSolutions);
+    //val solution: SolverSolution? = if(partialSolution == null) null else solve(partialSolutions, project, extension!, root);
+    return (tokens, messages, styling, solution)
   };
   val spxCoreConfig = workspace.spxCoreConfigForExt(extension!);
   if(spxCoreConfig != null) {
     val (tokens, messages, styling) = processStringWithSpxCore(text, file, spxCoreConfig!);
-    val noPartialSolution: PartialSolverSolution? = null;
-    val noSolution: SolverSolution? = null;
-    return (tokens, messages, styling, noPartialSolution, noSolution)?
+    val noSolution: FinalSolverSolution? = null;
+    return (tokens, messages, styling, noSolution)?
   };
   // No config found for file, do not process file, but this does register a dependency.
   null
 }
 
 /// Partial solution utility functions
-func getOtherPartialSolutions(fileToIgnore: path, project: path, langSpec: LangSpecConfig, root: path) -> PartialSolverSolution?* = {
-  val projectResults = [processFile(file, project, root) | file <- walk project with extensions (langSpec.extensions())];
-  val partialSolutions = [extractOrRemovePartialSolution(fileToIgnore, result) | result <- projectResults];
-  partialSolutions
-}
-func extractPartialSolution(result: (path, Token*?, Message*, Styling?, PartialSolverSolution?)) -> PartialSolverSolution? = foreign java mb.spoofax.runtime.pie.builder#extractPartialSolution
-func extractOrRemovePartialSolution(fileToIgnore: path, result: (path, Token*?, Message*, Styling?, PartialSolverSolution?)) -> PartialSolverSolution? = foreign java mb.spoofax.runtime.pie.builder#extractOrRemovePartialSolution
-func filterNullPartialSolutions(partialSolutions: PartialSolverSolution?*) -> PartialSolverSolution* = foreign java mb.spoofax.runtime.pie.builder#filterNullPartialSolutions
+//func getOtherPartialSolutions(fileToIgnore: path, project: path, langSpec: LangSpecConfig, root: path) -> PartialSolverSolution?* = {
+//  val projectResults = [processFile(file, project, root) | file <- walk project with extensions (langSpec.extensions())];
+//  val partialSolutions = [extractOrRemovePartialSolution(fileToIgnore, result) | result <- projectResults];
+//  partialSolutions
+//}
+//func extractPartialSolution(result: (path, Token*?, Message*, Styling?, PartialSolverSolution?)) -> PartialSolverSolution? = foreign java mb.spoofax.runtime.pie.builder#extractPartialSolution
+//func extractOrRemovePartialSolution(fileToIgnore: path, result: (path, Token*?, Message*, Styling?, PartialSolverSolution?)) -> PartialSolverSolution? = foreign java mb.spoofax.runtime.pie.builder#extractOrRemovePartialSolution
+//func filterNullPartialSolutions(partialSolutions: PartialSolverSolution?*) -> PartialSolverSolution* = foreign java mb.spoofax.runtime.pie.builder#filterNullPartialSolutions
 
 
 /// Processing of programs of language specifications
-func shouldProcessFile(file: path) -> bool = foreign java mb.spoofax.runtime.pie.builder#shouldProcessFile 
-func processFile(file: path, project: path, root: path) -> (path, Token*?, Message*, Styling?, PartialSolverSolution?) = {
+func shouldProcessFile(file: path) -> bool = foreign java mb.spoofax.runtime.pie#shouldProcessFile 
+func processFile(file: path, project: path, root: path) -> (path, Token*?, Message*, Styling?, FinalSolverSolution?) = {
   if(!shouldProcessFile(file)) {
     return emptyFileResult(file)
   };
@@ -177,37 +181,37 @@ func processFile(file: path, project: path, root: path) -> (path, Token*?, Messa
   val langSpec = langSpecConfigForPath(file, root);
   if(langSpec != null) {
     val text = (read file)!; // Creates a dependency to file contents changes. Can assume not null because the file exists
-    val (tokens, messages, styling, partialSolution) = processString(text, file, project, root);
-    (file, tokens, messages, styling, partialSolution)
+    val (tokens, messages, styling, solution) = processString(text, file, project, root);
+    (file, tokens, messages, styling, solution)
   } else {
     emptyFileResult(file)
   }
 }
-func emptyFileResult(file: path) -> (path, Token*?, Message*, Styling?, PartialSolverSolution?) = {
+func emptyFileResult(file: path) -> (path, Token*?, Message*, Styling?, FinalSolverSolution?) = {
   val emptyTokens: Token*? = null;
   val emptyMessages: Message* = [];
   val emptyStyling: Styling? = null;
-  val emptyPartialSolution: PartialSolverSolution? = null;
-  (file, emptyTokens, emptyMessages, emptyStyling, emptyPartialSolution)
+  val emptySolution: FinalSolverSolution? = null;
+  (file, emptyTokens, emptyMessages, emptyStyling, emptySolution)
 }
 
-func processString(text: string, file: path, project: path, root: path) -> (Token*?, Message*, Styling?, PartialSolverSolution?) = {
+func processString(text: string, file: path, project: path, root: path) -> (Token*?, Message*, Styling?, FinalSolverSolution?) = {
   val langSpecExt = file.extension();
   if(langSpecExt != null) { 
     val (ast, tokenStream, messages) = parse(text, file, langSpecExt!, root);
     val styling : Styling? = if(tokenStream == null) null else style(tokenStream!, langSpecExt!, root);
-    val partialSolution: PartialSolverSolution? = if(ast == null) null else partialSolve(ast!, file, langSpecExt!, root);
-    (tokenStream, messages, styling, partialSolution)
+    val solution: FinalSolverSolution? = if(ast == null) null else solveFile(ast!, file, project, langSpecExt!, root);
+    (tokenStream, messages, styling, solution)
   } else {
     emptyResult()
   }
 }
-func emptyResult() -> (Token*?, Message*, Styling?, PartialSolverSolution?) = {
+func emptyResult() -> (Token*?, Message*, Styling?, FinalSolverSolution?) = {
   val emptyTokens: Token*? = null;
   val emptyMessages: Message* = [];
   val emptyStyling: Styling? = null;
-  val emptyPartialSolution: PartialSolverSolution? = null;
-  (emptyTokens, emptyMessages, emptyStyling, emptyPartialSolution)
+  val emptySolution: FinalSolverSolution? = null;
+  (emptyTokens, emptyMessages, emptyStyling, emptySolution)
 }
 
 
@@ -237,47 +241,50 @@ func style(tokenStream: Token*, langSpecExt: string, root: path) -> Styling? = {
 }
 
 /// Constraint solving
-func createConstraintGenerator(langSpecExt: string, root: path) -> ConstraintGenerator? = { 
-  nabl2-constraint-generator(langSpecExt, root)
+//func createConstraintGenerator(langSpecExt: string, root: path) -> ConstraintGenerator? = { 
+//  nabl2-constraint-generator(langSpecExt, root)
+//}
+func solveFile(ast: Ast, file: path, project: path, langSpecExt: string, root: path) -> FinalSolverSolution? = {
+  //return null; // HACK: disable constraint solving until it works
+  val globalConstraints = nabl2-cgen-global(langSpecExt, root);
+  if(globalConstraints == null) return null;
+  val globalSolution = nabl2-solve-global(globalConstraints!);
+  if(globalSolution == null) return null;
+  val documentConstraints = nabl2-cgen-document(globalConstraints!, ast, file, langSpecExt, root);
+  if(documentConstraints == null) return null;
+  val documentSolution = nabl2-solve-document(documentConstraints!, globalConstraints!, globalSolution!);
+  if(documentSolution == null) return null;
+  val solution = nabl2-solve([documentSolution!], globalSolution!, project);
+  solution
 }
-func partialSolve(ast: Ast, file: path, langSpecExt: string, root: path) -> PartialSolverSolution? = {
-  val generator = createConstraintGenerator(langSpecExt, root);
-  return null; // HACK: disable constraint solving until it works
-  if(generator == null) return null;
-  val initialResult = nabl2-initial-result(generator!);
-  val unitResult = nabl2-unit-result(generator!, initialResult, ast, file);
-  val partialSolution = nabl2-partial-solve(initialResult, unitResult, file);
-  partialSolution?
-}
-func solve(partialSolutions: PartialSolverSolution*, project: path, langSpecExt: string, root: path) -> SolverSolution? = {
-  val generator = createConstraintGenerator(langSpecExt, root);
-  return null; // HACK: disable constraint solving until it works
-  if(generator == null) return null;
-  val initialResult = nabl2-initial-result(generator!);
-  val solution = nabl2-solve(initialResult, partialSolutions, project);
-  solution?
-}
+//func solve(partialSolutions: PartialSolverSolution*, project: path, langSpecExt: string, root: path) -> SolverSolution? = {
+//  //return null; // HACK: disable constraint solving until it works
+//  val initialResult = nabl2-initial-result(langSpecExt, root);
+//  if(initialResult == null) return null;
+//  val solution = nabl2-solve(initialResult!, partialSolutions, project);
+//  solution?
+//}
 
 
 /// Spoofax Core interoperability
 /// Native functions
 // Parsing
-func spxCoreParse(config: SpxCoreConfig, text: string, file: path) -> (Ast?, Token*?, Message*, path) = foreign mb.spoofax.runtime.pie.builder.core.CoreParse
-func spxCoreParseAll(config: SpxCoreConfig, pairs: (string, path)*) -> (Ast?, Token*?, Message*, path)* = foreign mb.spoofax.runtime.pie.builder.core.CoreParseAll 
+func spxCoreParse(config: SpxCoreConfig, text: string, file: path) -> (Ast?, Token*?, Message*, path) = foreign mb.spoofax.runtime.pie.legacy.CoreParse
+func spxCoreParseAll(config: SpxCoreConfig, pairs: (string, path)*) -> (Ast?, Token*?, Message*, path)* = foreign mb.spoofax.runtime.pie.legacy.CoreParseAll
 
 // Analysis
-func spxCoreAnalyze(config: SpxCoreConfig, project: path, file: path, ast: Ast) -> (Ast?, Message*, path) = foreign mb.spoofax.runtime.pie.builder.core.CoreAnalyze
-func spxCoreAnalyzeAll(config: SpxCoreConfig, project: path, pairs: (Ast, path)*) -> (Ast?, Message*, path) = foreign mb.spoofax.runtime.pie.builder.core.CoreAnalyzeAll
+func spxCoreAnalyze(config: SpxCoreConfig, project: path, file: path, ast: Ast) -> (Ast?, Message*, path) = foreign mb.spoofax.runtime.pie.legacy.CoreAnalyze
+func spxCoreAnalyzeAll(config: SpxCoreConfig, project: path, pairs: (Ast, path)*) -> (Ast?, Message*, path) = foreign mb.spoofax.runtime.pie.legacy.CoreAnalyzeAll
 
 // Transformation
-data TransformGoal = foreign java org.metaborg.core.action.ITransformGoal {}
-func createCompileGoal() -> TransformGoal = foreign java mb.spoofax.runtime.pie.builder.core#createCompileGoal
-func createNamedGoal(name: string) -> TransformGoal = foreign java mb.spoofax.runtime.pie.builder.core#createCompileGoal
-func spxCoreTransform(config: SpxCoreConfig, project: path, goal: TransformGoal, file: path, ast: Ast) -> (Ast?, path?, path) = foreign mb.spoofax.runtime.pie.builder.core.CoreTrans
-func spxCoreTransformAll(config: SpxCoreConfig, project: path, goal: TransformGoal, pairs: (Ast, path)*) -> (Ast?, path?, path) = foreign mb.spoofax.runtime.pie.builder.core.CoreTransAll
+//data TransformGoal = foreign java org.metaborg.core.action.ITransformGoal {}
+//func createCompileGoal() -> TransformGoal = foreign java mb.spoofax.runtime.pie.builder.core#createCompileGoal
+//func createNamedGoal(name: string) -> TransformGoal = foreign java mb.spoofax.runtime.pie.builder.core#createCompileGoal
+//func spxCoreTransform(config: SpxCoreConfig, project: path, goal: TransformGoal, file: path, ast: Ast) -> (Ast?, path?, path) = foreign mb.spoofax.runtime.pie.CoreTrans
+//func spxCoreTransformAll(config: SpxCoreConfig, project: path, goal: TransformGoal, pairs: (Ast, path)*) -> (Ast?, path?, path) = foreign mb.spoofax.runtime.pie.CoreTransAll
 
 // Styling
-func spxCoreStyle(config: SpxCoreConfig, tokens: Token*, ast: Ast) -> Styling = foreign mb.spoofax.runtime.pie.builder.core.CoreStyle
+func spxCoreStyle(config: SpxCoreConfig, tokens: Token*, ast: Ast) -> Styling = foreign mb.spoofax.runtime.pie.legacy.CoreStyle
 
 
 /// Interoperability functions

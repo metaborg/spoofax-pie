@@ -1,4 +1,4 @@
-package mb.spoofax.runtime.pie.builder.core
+package mb.spoofax.runtime.pie.legacy
 
 import com.google.inject.Inject
 import mb.log.*
@@ -49,7 +49,7 @@ class CoreBuild @Inject constructor(log: Logger) : OutEffectFunc<PPath> {
   }
 }
 
-fun ExecContext.buildProject(input: PPath) = requireExec(CoreBuild::class, CoreBuild.Companion.id, input)
+fun ExecContext.buildProject(input: PPath) = requireExec(CoreBuild::class, CoreBuild.id, input)
 
 
 class CoreBuildLangSpec @Inject constructor(log: Logger, private val pathSrv: PathSrv) : OutEffectFunc<PPath> {
@@ -87,7 +87,7 @@ class CoreBuildLangSpec @Inject constructor(log: Logger, private val pathSrv: Pa
     require(strategiesDir, PathStampers.exists)
     if(strategiesDir.exists()) {
       val targetClassesDir = commonPaths.targetClassesDir().pPath
-      val spoofaxUberJar = pathSrv.resolveLocal("/Users/gohla/spoofax/master/repo/builder-releng/builder/org.metaborg.builder.core.uber/target/org.metaborg.builder.core.uber-2.4.0-SNAPSHOT.jar");
+      val spoofaxUberJar = pathSrv.resolveLocal("/Users/gohla/spoofax/master/repo/builder-releng/builder/org.metaborg.builder.core.uber/target/org.metaborg.builder.legacy.uber-2.4.0-SNAPSHOT.jar");
 
       // Require the java files and Spoofax uber JAR
       require(strategiesDir, PathStampers.modified)
@@ -117,4 +117,4 @@ class CoreBuildLangSpec @Inject constructor(log: Logger, private val pathSrv: Pa
   }
 }
 
-fun ExecContext.buildLangSpec(input: PPath) = requireExec(CoreBuildLangSpec::class, CoreBuildLangSpec.Companion.id, input)
+fun ExecContext.buildLangSpec(input: PPath) = requireExec(CoreBuildLangSpec::class, CoreBuildLangSpec.id, input)

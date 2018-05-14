@@ -1,4 +1,4 @@
-package mb.spoofax.runtime.pie.builder.core
+package mb.spoofax.runtime.pie.legacy
 
 import com.google.inject.Inject
 import mb.log.Logger
@@ -20,7 +20,7 @@ import java.io.Serializable
 
 class CoreAnalyze @Inject constructor(log: Logger, private val messageConverter: MessageConverter) : Func<CoreAnalyze.Input, CoreAnalyze.Output> {
   companion object {
-    val id = "coreAnalyze"
+    const val id = "coreAnalyze"
   }
 
   data class Input(val config: SpxCoreConfig, val project: PPath, val file: PPath, val ast: IStrategoTerm) : Serializable
@@ -61,7 +61,7 @@ class CoreAnalyze @Inject constructor(log: Logger, private val messageConverter:
   }
 }
 
-fun ExecContext.analyze(input: CoreAnalyze.Input) = requireOutput(CoreAnalyze::class, CoreAnalyze.Companion.id, input)
+fun ExecContext.analyze(input: CoreAnalyze.Input) = requireOutput(CoreAnalyze::class, CoreAnalyze.id, input)
 fun ExecContext.analyze(config: SpxCoreConfig, project: PPath, file: PPath, ast: IStrategoTerm) = analyze(CoreAnalyze.Input(config, project, file, ast))
 
 
@@ -116,5 +116,5 @@ class CoreAnalyzeAll @Inject constructor(log: Logger, private val messageConvert
   }
 }
 
-fun ExecContext.analyzeAll(input: CoreAnalyzeAll.Input) = requireOutput(CoreAnalyzeAll::class, CoreAnalyzeAll.Companion.id, input)
+fun ExecContext.analyzeAll(input: CoreAnalyzeAll.Input) = requireOutput(CoreAnalyzeAll::class, CoreAnalyzeAll.id, input)
 fun ExecContext.analyzeAll(config: SpxCoreConfig, project: PPath, pairs: Iterable<CoreAnalyzeAll.AstFilePair>) = analyzeAll(CoreAnalyzeAll.Input(config, project, pairs))

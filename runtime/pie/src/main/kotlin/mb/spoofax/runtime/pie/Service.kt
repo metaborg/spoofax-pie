@@ -5,7 +5,6 @@ import com.google.inject.Provider
 import mb.pie.runtime.core.Cache
 import mb.pie.runtime.core.Store
 import mb.pie.runtime.core.exec.*
-import mb.pie.runtime.core.exec.BottomUpObservingExecutorFactory.Variant
 import mb.pie.runtime.core.impl.store.InMemoryStore
 import mb.pie.runtime.core.impl.store.LMDBBuildStoreFactory
 import mb.vfs.path.PPath
@@ -15,9 +14,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 interface PieSrv {
   fun getTopDownExecutor(dir: PPath, useInMemoryStore: Boolean): TopDownExecutor
-  fun getDirtyFlaggingTopDownExecutor(dir: PPath, useInMemoryStore: Boolean): DirtyFlaggingTopDownExecutor
-  fun getBottomUpObservingExecutor(dir: PPath, useInMemoryStore: Boolean, variant: Variant = Variant.Naive): BottomUpObservingExecutor
-  fun getBottomUpTopsortExecutor(dir: PPath, useInMemoryStore: Boolean): BottomUpTopsortExecutor
+  fun getBottomUpExecutor(dir: PPath, useInMemoryStore: Boolean): BottomUpExecutor
 }
 
 class PieSrvImpl @Inject constructor(
@@ -25,47 +22,27 @@ class PieSrvImpl @Inject constructor(
   private val storeFactory: LMDBBuildStoreFactory,
   private val cacheFactory: Provider<Cache>,
   private val topDownExecutorFactory: TopDownExecutorFactory,
-  private val dirtyFlaggingTopDownExecutorFactory: DirtyFlaggingTopDownExecutorFactory,
-  private val bottomUpObservingExecutorFactory: BottomUpObservingExecutorFactory,
-  private val bottomUpTopsortExecutorFactory: BottomUpTopsortExecutorFactory
+  private val bottomUpExecutorFactory: BottomUpExecutorFactory
 ) : PieSrv {
   private val stores = ConcurrentHashMap<PPath, Store>()
   private val caches = ConcurrentHashMap<PPath, Cache>()
-  private val pullingExecutors = ConcurrentHashMap<PPath, TopDownExecutor>()
-  private val dirtyFlaggingExecutors = ConcurrentHashMap<PPath, DirtyFlaggingTopDownExecutor>()
-  private val observingExecutors = ConcurrentHashMap<PPath, BottomUpObservingExecutor>()
-  private val topsortingExecutors = ConcurrentHashMap<PPath, BottomUpTopsortExecutor>()
+  private val topDownExecutors = ConcurrentHashMap<PPath, TopDownExecutor>()
+  private val bottomUpExecutors = ConcurrentHashMap<PPath, BottomUpExecutor>()
 
 
   override fun getTopDownExecutor(dir: PPath, useInMemoryStore: Boolean): TopDownExecutor {
-    return pullingExecutors.getOrPut(dir) {
+    return topDownExecutors.getOrPut(dir) {
       val store = getStore(dir, useInMemoryStore)
       val cache = getCache(dir)
       topDownExecutorFactory.create(store, cache)
     }
   }
 
-  override fun getDirtyFlaggingTopDownExecutor(dir: PPath, useInMemoryStore: Boolean): DirtyFlaggingTopDownExecutor {
-    return dirtyFlaggingExecutors.getOrPut(dir) {
+  override fun getBottomUpExecutor(dir: PPath, useInMemoryStore: Boolean): BottomUpExecutor {
+    return bottomUpExecutors.getOrPut(dir) {
       val store = getStore(dir, useInMemoryStore)
       val cache = getCache(dir)
-      dirtyFlaggingTopDownExecutorFactory.create(store, cache)
-    }
-  }
-
-  override fun getBottomUpObservingExecutor(dir: PPath, useInMemoryStore: Boolean, variant: Variant): BottomUpObservingExecutor {
-    return observingExecutors.getOrPut(dir) {
-      val store = getStore(dir, useInMemoryStore)
-      val cache = getCache(dir)
-      bottomUpObservingExecutorFactory.create(store, cache, variant)
-    }
-  }
-
-  override fun getBottomUpTopsortExecutor(dir: PPath, useInMemoryStore: Boolean): BottomUpTopsortExecutor {
-    return topsortingExecutors.getOrPut(dir) {
-      val store = getStore(dir, useInMemoryStore)
-      val cache = getCache(dir)
-      bottomUpTopsortExecutorFactory.create(store, cache)
+      bottomUpExecutorFactory.create(store, cache)
     }
   }
 

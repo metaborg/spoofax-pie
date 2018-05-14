@@ -1,7 +1,6 @@
-package mb.spoofax.runtime.pie.builder.stratego
+package mb.spoofax.runtime.pie.stratego
 
 import com.google.inject.Inject
-import mb.log.Logger
 import mb.pie.runtime.core.*
 import mb.pie.runtime.core.stamp.PathStampers
 import mb.spoofax.runtime.impl.cfg.StrategoConfig
@@ -11,29 +10,26 @@ import java.io.IOException
 import java.io.Serializable
 import java.nio.charset.Charset
 
-class CompileStratego
+class Compile
 @Inject constructor(
-  private val log: Logger,
   private val pathSrv: PathSrv
-) : Func<CompileStratego.Input, PPath?> {
+) : Func<Compile.Input, PPath?> {
   companion object {
-    val id = "compileStratego"
+    const val id = "Stratego.Compile"
   }
 
   data class Input(
     val config: StrategoConfig,
-    val apps: Iterable<UFuncApp>
+    val taskDeps: Iterable<UFuncApp>
   ) : Serializable
 
   override val id = Companion.id
   override fun ExecContext.exec(input: Input): PPath? {
-    val (config, apps) = input
-
+    val (config, taskDeps) = input
     // Explicitly require hidden dependencies.
-    apps.forEach {
+    taskDeps.forEach {
       requireExec(it)
     }
-
     // Compile Stratego.
     val compiler = StrategoCompiler()
     val result = compiler.compile(config)
@@ -48,10 +44,6 @@ class CompileStratego
     generate(result.depFile)
     requiredPaths(result.depFile).forEach { require(it, PathStampers.hash) }
     return result.outputFile
-  }
-
-  override fun mayOverlap(input1: Input, input2: Input): Boolean {
-    return input1.config.outputFile() == input2.config.outputFile()
   }
 
   @Throws(IOException::class)
@@ -75,4 +67,5 @@ class CompileStratego
       }
 }
 
-//fun ExecContext.compileStratego(input: StrategoConfig) = requireOutput(CompileStratego::class, CompileStratego.Companion.id, input)
+fun ExecContext.compileStratego(input: Compile.Input) = requireOutput(Compile::class, Compile.id, input)
+fun ExecContext.compileStratego(config: StrategoConfig, taskDeps: Iterable<UFuncApp>) = compileStratego(Compile.Input(config, taskDeps))

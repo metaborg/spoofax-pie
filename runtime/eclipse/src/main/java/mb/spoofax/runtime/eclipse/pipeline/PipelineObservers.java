@@ -46,20 +46,16 @@ public class PipelineObservers {
             final WorkspaceUpdate update = workspaceUpdateFactory.create();
             update.addClearRec(project);
             if(projectResult != null) {
-                projectResult.component1().stream().forEach((result) -> {
-                    result.component1().stream().forEach((fileResult) -> {
-                        final PPath file = fileResult.component1();
-                        final ArrayList<Msg> messages = fileResult.component3();
-                        update.addMessages(file, messages);
-                    });
-                    final ArrayList<@Nullable ? extends ConstraintSolverSolution> solutions = result.component2();
-                    for(@Nullable ConstraintSolverSolution solution : solutions) {
-                        if(solution != null) {
-                            update.addMessages(solution.getFileMessages());
-                            update.addMessages(solution.getFileUnsolvedMessages());
-                            update.addMessages(project, solution.getProjectMessages());
-                            update.addMessages(project, solution.getProjectUnsolvedMessages());
-                        }
+                projectResult.component1().stream().flatMap((r) -> r.stream()).forEach((fileResult) -> {
+                    final PPath file = fileResult.component1();
+                    final ArrayList<Msg> messages = fileResult.component3();
+                    update.addMessages(file, messages);
+                    final @Nullable ConstraintSolverSolution solution = fileResult.component5();
+                    if(solution != null) {
+                        update.addMessages(solution.getFileMessages());
+                        //update.addMessages(solution.getFileUnsolvedMessages());
+                        update.addMessages(project, solution.getProjectMessages());
+                        //update.addMessages(project, solution.getProjectUnsolvedMessages());
                     }
                 });
                 projectResult.component2().stream().forEach((result) -> {
@@ -111,10 +107,10 @@ public class PipelineObservers {
                     update.removeStyle(editor, text.length());
                 }
 
-                final @Nullable ConstraintSolverSolution solution = editorResult.component5();
+                final @Nullable ConstraintSolverSolution solution = editorResult.component4();
                 if(solution != null) {
                     update.addMessagesFiltered(solution.getFileMessages(), file);
-                    update.addMessagesFiltered(solution.getFileUnsolvedMessages(), file);
+                    //update.addMessagesFiltered(solution.getFileUnsolvedMessages(), file);
                 }
             } else {
                 update.removeStyle(editor, text.length());

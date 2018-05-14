@@ -8,9 +8,9 @@ import org.jetbrains.annotations.Nullable;
 import org.openjdk.jmh.infra.Blackhole;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.nio.file.Files;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public abstract class ChangeMaker {
     private @Nullable TDState tdState;
@@ -52,6 +52,7 @@ public abstract class ChangeMaker {
 
     protected void addProject(PPath project, Blackhole blackhole, String name) {
         if(buTopsortState != null) {
+            gc();
             final Timer timer = startStats();
             buTopsortState.addProject(project, blackhole);
             endStats(timer, name);
@@ -60,6 +61,7 @@ public abstract class ChangeMaker {
 
     protected void execInitial(Blackhole blackhole, String name) {
         if(tdState != null) {
+            gc();
             final Timer timer = startStats();
             tdState.execAll(blackhole);
             endStats(timer, name);
@@ -67,6 +69,7 @@ public abstract class ChangeMaker {
     }
 
     protected void execEditor(String text, PPath file, PPath project, Blackhole blackhole, String name) {
+        gc();
         final Timer timer = startStats();
         if(tdState != null) {
             tdState.addOrUpdateEditor(text, file, project, blackhole);
@@ -77,10 +80,19 @@ public abstract class ChangeMaker {
     }
 
     protected void execPathChanges(PPath pathChange, Blackhole blackhole, String name) {
-        execPathChanges(Collections.singletonList(pathChange), blackhole, name);
+        final HashSet<PPath> pathChanges = new HashSet<>();
+        pathChanges.add(pathChange);
+        execPathChanges(pathChanges, blackhole, name);
     }
 
-    protected void execPathChanges(List<PPath> pathChanges, Blackhole blackhole, String name) {
+    protected void execPathChanges(Blackhole blackhole, String name, PPath... pathChanges) {
+        final HashSet<PPath> pathChangesSet = new HashSet<>();
+        Collections.addAll(pathChangesSet, pathChanges);
+        execPathChanges(pathChangesSet, blackhole, name);
+    }
+
+    protected void execPathChanges(Set<PPath> pathChanges, Blackhole blackhole, String name) {
+        gc();
         final Timer timer = startStats();
         if(tdState != null) {
             tdState.execAll(blackhole);
@@ -100,5 +112,15 @@ public abstract class ChangeMaker {
     private void endStats(Timer timer, String name) {
         timer.stopAndPrint(name, Stats.INSTANCE.getRequires(), Stats.INSTANCE.getExecutions(),
             Stats.INSTANCE.getFileReqs(), Stats.INSTANCE.getFileGens(), Stats.INSTANCE.getCallReqs());
+    }
+
+    private static void gc() {
+        Object obj = new Object();
+        final WeakReference ref = new WeakReference<>(obj);
+        //noinspection AssignmentToNull,UnusedAssignment
+        obj = null;
+        do {
+            System.gc();
+        } while(ref.get() != null);
     }
 }

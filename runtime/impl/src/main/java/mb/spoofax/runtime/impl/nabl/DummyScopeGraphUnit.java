@@ -1,14 +1,15 @@
 package mb.spoofax.runtime.impl.nabl;
 
+import mb.nabl2.constraints.IConstraint;
+import mb.nabl2.solver.Fresh;
+import mb.nabl2.solver.ISolution;
+import mb.nabl2.spoofax.analysis.CustomSolution;
+import mb.nabl2.spoofax.analysis.IScopeGraphUnit;
+
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import org.metaborg.meta.nabl2.constraints.IConstraint;
-import org.metaborg.meta.nabl2.solver.Fresh;
-import org.metaborg.meta.nabl2.solver.Solution;
-import org.metaborg.meta.nabl2.spoofax.analysis.CustomSolution;
-import org.metaborg.meta.nabl2.spoofax.analysis.IScopeGraphUnit;
 
 public class DummyScopeGraphUnit implements IScopeGraphUnit {
     private static final long serialVersionUID = 1L;
@@ -22,7 +23,7 @@ public class DummyScopeGraphUnit implements IScopeGraphUnit {
         return new HashSet<>();
     }
 
-    @Override public Optional<Solution> solution() {
+    @Override public Optional<ISolution> solution() {
         return Optional.empty();
     }
 

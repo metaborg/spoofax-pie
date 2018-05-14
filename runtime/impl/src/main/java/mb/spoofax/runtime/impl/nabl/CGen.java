@@ -1,30 +1,25 @@
 package mb.spoofax.runtime.impl.nabl;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
-import org.metaborg.meta.nabl2.spoofax.analysis.Actions;
-import org.metaborg.meta.nabl2.spoofax.analysis.Args;
-import org.metaborg.meta.nabl2.spoofax.analysis.ImmutableInitialResult;
-import org.metaborg.meta.nabl2.spoofax.analysis.ImmutableUnitResult;
-import org.metaborg.meta.nabl2.spoofax.analysis.InitialResult;
-import org.metaborg.meta.nabl2.spoofax.analysis.UnitResult;
-import org.metaborg.meta.nabl2.stratego.StrategoTerms;
-import org.metaborg.meta.nabl2.terms.ITerm;
-import org.spoofax.interpreter.library.IOAgent;
-import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.interpreter.terms.ITermFactory;
-
+import mb.nabl2.spoofax.analysis.*;
+import mb.nabl2.stratego.StrategoTerms;
+import mb.nabl2.terms.ITerm;
 import mb.spoofax.runtime.impl.stratego.StrategoRuntime;
 import mb.spoofax.runtime.impl.stratego.StrategoRuntimeBuilder;
 import mb.spoofax.runtime.impl.stratego.primitive.ScopeGraphPrimitiveLibrary;
 import mb.spoofax.runtime.model.SpoofaxEx;
 import mb.spoofax.runtime.model.SpoofaxRunEx;
 import mb.vfs.path.PPath;
+import org.spoofax.interpreter.library.IOAgent;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.interpreter.terms.ITermFactory;
 
-public class ConstraintGenerator implements Serializable {
+import java.io.Serializable;
+import java.util.Optional;
+
+import static mb.nabl2.terms.build.TermBuild.B;
+import static mb.spoofax.runtime.impl.nabl.ConstraintSolver.globalSource;
+
+public class CGen implements Serializable {
     private static final long serialVersionUID = 1L;
 
 
@@ -32,7 +27,7 @@ public class ConstraintGenerator implements Serializable {
     private final String strategyName;
 
 
-    public ConstraintGenerator(PPath strategoCtree, String strategyName) {
+    public CGen(PPath strategoCtree, String strategyName) {
         this.strategoCtree = strategoCtree;
         this.strategyName = strategyName;
     }
@@ -47,58 +42,37 @@ public class ConstraintGenerator implements Serializable {
     }
 
 
-    public StrategoRuntime createSuitableRuntime(StrategoRuntimeBuilder strategoRuntimeBuilder,
-        ScopeGraphPrimitiveLibrary primitiveLibrary) throws SpoofaxEx {
+    public StrategoRuntime createSuitableRuntime(StrategoRuntimeBuilder strategoRuntimeBuilder, ScopeGraphPrimitiveLibrary primitiveLibrary) throws SpoofaxEx {
         strategoRuntimeBuilder.addCtree(strategoCtree);
         strategoRuntimeBuilder.addLibrary(primitiveLibrary);
         final StrategoRuntime runtime = strategoRuntimeBuilder.build();
         return runtime;
     }
 
-    public ImmutableInitialResult initialResult(StrategoRuntime runtime) throws SpoofaxEx {
+    public ImmutableInitialResult cgenGlobal(StrategoRuntime runtime) throws SpoofaxEx {
         final IOAgent ioAgent = new IOAgent();
         final ITermFactory termFactory = runtime.termFactory();
         final StrategoTerms termConverter = new StrategoTerms(termFactory);
-        // TODO: set second argument of Actions.analyzeInitial to an AST?
+        final ITerm globalAST = Actions.sourceTerm(globalSource, B.EMPTY_TUPLE);
         final ITerm initialResultTerm =
-            doAction(termConverter, runtime, ioAgent, Actions.analyzeInitial(ConstraintSolver.globalSource, null))
+            doAction(termConverter, runtime, ioAgent, Actions.analyzeInitial(globalSource, globalAST))
                 .orElseThrow(() -> new SpoofaxEx("No initial result"));
         final ImmutableInitialResult initialResult = (ImmutableInitialResult) InitialResult.matcher()
             .match(initialResultTerm).orElseThrow(() -> new SpoofaxRunEx("Invalid initial result"));
         return initialResult;
     }
 
-    public ImmutableUnitResult unitResult(InitialResult initialResult, IStrategoTerm ast, String source, StrategoRuntime runtime)
+    public ImmutableUnitResult cgenDocument(InitialResult globalConstraints, IStrategoTerm ast, String source, StrategoRuntime runtime)
         throws SpoofaxEx {
         final IOAgent ioAgent = new IOAgent();
         final ITermFactory termFactory = runtime.termFactory();
         final StrategoTerms termConverter = new StrategoTerms(termFactory);
         final ITerm unitResultTerm = doAction(termConverter, runtime, ioAgent,
-            Actions.analyzeUnit(source, termConverter.fromStratego(ast), initialResult.getArgs()))
-                .orElseThrow(() -> new SpoofaxEx("No unit result"));
+            Actions.analyzeUnit(source, termConverter.fromStratego(ast), globalConstraints.getArgs()))
+            .orElseThrow(() -> new SpoofaxEx("No unit result"));
         final ImmutableUnitResult unitResult = (ImmutableUnitResult) UnitResult.matcher().match(unitResultTerm)
             .orElseThrow(() -> new SpoofaxEx("Invalid unit result"));
         return unitResult;
-    }
-
-    public HashMap<String, ImmutableUnitResult> unitResults(StrategoRuntime runtime, Map<String, IStrategoTerm> astPerPaths,
-        Args args) throws SpoofaxEx {
-        final IOAgent ioAgent = new IOAgent();
-        final ITermFactory termFactory = runtime.termFactory();
-        final StrategoTerms termConverter = new StrategoTerms(termFactory);
-        final HashMap<String, ImmutableUnitResult> results = new HashMap<>();
-        for(Map.Entry<String, IStrategoTerm> entry : astPerPaths.entrySet()) {
-            final String source = entry.getKey();
-            final IStrategoTerm ast = entry.getValue();
-            final ITerm unitResultTerm = doAction(termConverter, runtime, ioAgent,
-                Actions.analyzeUnit(source, termConverter.fromStratego(ast), args))
-                    .orElseThrow(() -> new SpoofaxEx("No unit result"));
-            final ImmutableUnitResult unitResult =
-                (ImmutableUnitResult) UnitResult.matcher().match(unitResultTerm)
-                    .orElseThrow(() -> new SpoofaxEx("Invalid unit result"));
-            results.put(source, unitResult);
-        }
-        return results;
     }
 
 
@@ -106,7 +80,7 @@ public class ConstraintGenerator implements Serializable {
         ITerm action) throws SpoofaxEx {
         try {
             final IStrategoTerm inputTerm = termConverter.toStratego(action);
-            return Optional.ofNullable(runtime.invoke(strategyName, inputTerm, ioAgent, new DummyScopeGraphContext()))
+            return Optional.ofNullable(runtime.invoke(strategyName, inputTerm, ioAgent, null))
                 .map(termConverter::fromStratego);
         } catch(SpoofaxEx e) {
             throw new SpoofaxEx("Constraint generator action failed", e);
@@ -120,7 +94,7 @@ public class ConstraintGenerator implements Serializable {
         if(o == null || getClass() != o.getClass())
             return false;
 
-        ConstraintGenerator that = (ConstraintGenerator) o;
+        CGen that = (CGen) o;
 
         if(!strategoCtree.equals(that.strategoCtree))
             return false;

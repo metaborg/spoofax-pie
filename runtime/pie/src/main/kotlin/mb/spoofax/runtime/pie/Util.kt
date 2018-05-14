@@ -1,4 +1,4 @@
-package mb.spoofax.runtime.pie.builder
+package mb.spoofax.runtime.pie
 
 import mb.vfs.path.PPath
 

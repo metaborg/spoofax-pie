@@ -1,4 +1,4 @@
-package mb.spoofax.runtime.pie.builder.core
+package mb.spoofax.runtime.pie.legacy
 
 import com.google.inject.Inject
 import mb.log.Logger
@@ -23,15 +23,10 @@ fun createNamedGoal(name: String) = EndNamedGoal(name)
 
 class CoreTrans @Inject constructor(log: Logger) : Func<CoreTrans.Input, ArrayList<CoreTrans.Output>> {
   companion object {
-    val id = "coreTrans"
+    const val id = "coreTrans"
   }
 
-  data class Input(val config: SpxCoreConfig, val project: PPath, val goal: ITransformGoal, val file: PPath, val ast: IStrategoTerm) : Serializable {
-    fun mayOverlap(other: Input): Boolean {
-      return config == other.config && project == other.project && file == other.file && goal == other.goal
-    }
-  }
-
+  data class Input(val config: SpxCoreConfig, val project: PPath, val goal: ITransformGoal, val file: PPath, val ast: IStrategoTerm) : Serializable
   data class Output(val ast: IStrategoTerm?, val outputFile: PPath?, val inputFile: PPath) : Tuple2<IStrategoTerm?, PPath?>
 
   val log: Logger = log.forContext(CoreTrans::class.java)
@@ -80,14 +75,10 @@ class CoreTrans @Inject constructor(log: Logger) : Func<CoreTrans.Input, ArrayLi
       }
     }
   }
-
-  override fun mayOverlap(input1: Input, input2: Input): Boolean {
-    return input1.mayOverlap(input2)
-  }
 }
 
 //fun ExecContext.trans(input: CoreTrans.Input) = requireOutput(CoreTrans::class, CoreTrans.Companion.id, input)
-//fun ExecContext.trans(config: SpxCoreConfig, project: PPath, goal: ITransformGoal, file: PPath, ast: IStrategoTerm) = trans(CoreTrans.Input(config, project, goal, file, ast))
+//fun ExecContext.trans(config: SpxCoreConfig, project: PPath, goal: ITransformGoal, file: PPath, ast: IStrategoTerm) = trans(CoreTrans.Input(configLangCfg, project, goal, file, ast))
 
 
 class CoreTransAll @Inject constructor(log: Logger) : Func<CoreTransAll.Input, ArrayList<CoreTransAll.Output>> {
@@ -96,11 +87,7 @@ class CoreTransAll @Inject constructor(log: Logger) : Func<CoreTransAll.Input, A
   }
 
   data class AstFilePair(val ast: IStrategoTerm, val file: PPath) : Tuple2<IStrategoTerm, PPath>
-  data class Input(val config: SpxCoreConfig, val project: PPath, val goal: ITransformGoal, val pairs: Iterable<AstFilePair>) : Serializable {
-    fun mayOverlap(other: Input): Boolean {
-      return config == other.config && project == other.project && goal == other.goal
-    }
-  }
+  data class Input(val config: SpxCoreConfig, val project: PPath, val goal: ITransformGoal, val pairs: Iterable<AstFilePair>) : Serializable
 
   data class Output(val ast: IStrategoTerm?, val outputFile: PPath?, val inputFile: PPath) : Tuple2<IStrategoTerm?, PPath?>
 
@@ -151,11 +138,7 @@ class CoreTransAll @Inject constructor(log: Logger) : Func<CoreTransAll.Input, A
       }
     }
   }
-
-  override fun mayOverlap(input1: Input, input2: Input): Boolean {
-    return input1.mayOverlap(input2)
-  }
 }
 
 //fun ExecContext.transAll(input: CoreTransAll.Input) = requireOutput(CoreTransAll::class, CoreTransAll.Companion.id, input)
-//fun ExecContext.transAll(config: SpxCoreConfig, project: PPath, goal: ITransformGoal, pairs: Iterable<CoreTransAll.AstFilePair>) = transAll(CoreTransAll.Input(config, project, goal, pairs))
+//fun ExecContext.transAll(config: SpxCoreConfig, project: PPath, goal: ITransformGoal, pairs: Iterable<CoreTransAll.AstFilePair>) = transAll(CoreTransAll.Input(configLangCfg, project, goal, pairs))

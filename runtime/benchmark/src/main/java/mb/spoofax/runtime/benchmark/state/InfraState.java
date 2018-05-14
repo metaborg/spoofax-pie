@@ -146,7 +146,12 @@ public class InfraState {
         },
         stdout {
             @Override public Provider<Logger> provider(SpoofaxPieState spoofaxPieState) {
-                return StreamLogger::new;
+                return () -> new StreamLogger(System.out, null, 200);
+            }
+        },
+        stdout_verbose {
+            @Override public Provider<Logger> provider(SpoofaxPieState spoofaxPieState) {
+                return () -> new StreamLogger(System.out, System.out, 200);
             }
         },
         noop {

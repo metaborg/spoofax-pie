@@ -1,4 +1,4 @@
-package mb.spoofax.runtime.pie.builder.core
+package mb.spoofax.runtime.pie.legacy
 
 import mb.pie.runtime.core.*
 import mb.pie.runtime.core.stamp.PathStampers
@@ -33,5 +33,5 @@ class CoreLoadLang : Func<PPath, TransientLangImpl> {
   }
 }
 
-fun ExecContext.loadLangRaw(input: PPath) = requireOutput(CoreLoadLang::class, CoreLoadLang.Companion.id, input)
+fun ExecContext.loadLangRaw(input: PPath) = requireOutput(CoreLoadLang::class, CoreLoadLang.id, input)
 fun ExecContext.loadLang(input: PPath) = loadLangRaw(input).v

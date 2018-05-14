@@ -1,28 +1,27 @@
-package mb.spoofax.runtime.pie.builder
+package mb.spoofax.runtime.pie.esv
 
 import com.google.inject.Inject
 import mb.log.Logger
 import mb.pie.runtime.core.*
 import mb.pie.runtime.core.stamp.PathStampers
-import mb.spoofax.runtime.impl.esv.*
-import mb.spoofax.runtime.model.parse.Token
-import mb.spoofax.runtime.model.style.Styling
-import mb.spoofax.runtime.pie.builder.core.buildOrLoad
-import mb.spoofax.runtime.pie.builder.core.process
+import mb.spoofax.runtime.impl.esv.StylingRules
+import mb.spoofax.runtime.impl.esv.StylingRulesFromESV
 import mb.spoofax.runtime.pie.generated.createWorkspaceConfig
+import mb.spoofax.runtime.pie.legacy.buildOrLoad
+import mb.spoofax.runtime.pie.legacy.process
 import mb.vfs.path.PPath
 import org.spoofax.interpreter.terms.IStrategoAppl
 import java.io.Serializable
 
-class GenerateStylerRules
+class CompileStyler
 @Inject constructor(
   log: Logger,
   private val stylingRulesFromESV: StylingRulesFromESV
-) : Func<GenerateStylerRules.Input, StylingRules?> {
-  val log: Logger = log.forContext(GenerateStylerRules::class.java)
+) : Func<CompileStyler.Input, StylingRules?> {
+  private val log: Logger = log.forContext(CompileStyler::class.java)
 
   companion object {
-    val id = "spoofaxGenerateStylerRules"
+    const val id = "CompileStyler"
   }
 
   data class Input(
@@ -34,7 +33,7 @@ class GenerateStylerRules
   override fun ExecContext.exec(input: Input): StylingRules? {
     val (langSpecExt, root) = input
     val workspace =
-      requireOutput(createWorkspaceConfig::class, createWorkspaceConfig.Companion.id, root)
+      requireOutput(createWorkspaceConfig::class, createWorkspaceConfig.id, root)
         ?: throw ExecException("Could not create workspace config for root $root")
     val metaLangExt = "esv"
     val metaLangConfig = workspace.spxCoreConfigForExt(metaLangExt)
@@ -48,25 +47,6 @@ class GenerateStylerRules
     outputs.reqFiles.forEach { require(it, PathStampers.hash) }
     outputs.genFiles.forEach { generate(it, PathStampers.hash) }
     val ast = outputs.outputs.firstOrNull()?.ast ?: return null
-    val rules = stylingRulesFromESV.create(ast as IStrategoAppl)
-    return rules
-  }
-}
-
-class Style : Func<Style.Input, Styling> {
-  companion object {
-    val id = "spoofaxStyle"
-  }
-
-  data class Input(
-    val tokenStream: ArrayList<Token>,
-    val rules: StylingRules
-  ) : Serializable
-
-  override val id = Companion.id
-  override fun ExecContext.exec(input: Input): Styling {
-    val styler = Styler(input.rules)
-    val styling = styler.style(input.tokenStream)
-    return styling
+    return stylingRulesFromESV.create(ast as IStrategoAppl)
   }
 }

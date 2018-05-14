@@ -1,4 +1,4 @@
-package mb.spoofax.runtime.pie.builder.core
+package mb.spoofax.runtime.pie.legacy
 
 import com.google.inject.Inject
 import mb.log.Logger

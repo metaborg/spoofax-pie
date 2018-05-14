@@ -1,4 +1,4 @@
-package mb.spoofax.runtime.pie.builder
+package mb.spoofax.runtime.pie
 
 import mb.pie.runtime.builtin.util.*
 import mb.pie.runtime.core.FuncApp
@@ -8,11 +8,10 @@ import mb.spoofax.runtime.model.parse.Token
 import mb.spoofax.runtime.model.style.Styling
 import mb.spoofax.runtime.pie.generated.*
 import mb.vfs.path.PPath
-import org.metaborg.meta.nabl2.solver.ImmutablePartialSolution
 
 
 object SpoofaxPipeline {
-  fun workspace(root: PPath): FuncApp<PPath, ArrayList<Tuple2<ArrayList<Tuple2<ArrayList<Tuple5<PPath, ArrayList<Token>?, ArrayList<Msg>, Styling?, ImmutablePartialSolution?>>, ArrayList<ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<Token>?, ArrayList<Msg>, Styling?>>>?>> {
+  fun workspace(root: PPath): FuncApp<PPath, ArrayList<Tuple2<ArrayList<ArrayList<Tuple5<PPath, ArrayList<Token>?, ArrayList<Msg>, Styling?, ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<Token>?, ArrayList<Msg>, Styling?>>>>> {
     return FuncApp(processWorkspace::class.java, processWorkspace.id, root)
   }
 

@@ -1,4 +1,4 @@
-package mb.spoofax.runtime.pie.builder.core
+package mb.spoofax.runtime.pie.legacy
 
 import mb.log.Logger
 import mb.pie.runtime.builtin.util.Tuple3

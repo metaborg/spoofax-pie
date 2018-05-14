@@ -1,52 +1,14 @@
 package mb.spoofax.runtime.impl;
 
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_analysis_has_errors;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_debug_constraints;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_debug_name_resolution;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_debug_scope_graph;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_debug_symbolic_constraints;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_debug_unifier;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_erase_ast_indices;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_focus_term;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_fresh;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_get_all_decls;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_get_all_refs;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_get_all_scopes;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_get_ast_index;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_get_ast_property;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_get_ast_resolution;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_get_custom_analysis;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_get_decl_property;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_get_decl_scope;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_get_direct_edges;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_get_direct_edges_inv;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_get_export_edges;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_get_export_edges_inv;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_get_import_edges;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_get_import_edges_inv;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_get_reachable_decls;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_get_ref_resolution;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_get_ref_scope;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_get_scope_decls;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_get_scope_refs;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_get_symbolic_facts;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_get_symbolic_goals;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_get_visible_decls;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_index_ast;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_is_debug_collection_enabled;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_is_debug_custom_enabled;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_is_debug_resolution_enabled;
-import org.metaborg.meta.nabl2.spoofax.primitives.SG_set_ast_index;
-import org.spoofax.interpreter.library.AbstractPrimitive;
-import org.spoofax.interpreter.library.IOperatorRegistry;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
-
+import mb.nabl2.spoofax.primitives.*;
 import mb.spoofax.runtime.impl.esv.StylingRulesFromESV;
 import mb.spoofax.runtime.impl.stratego.primitive.ScopeGraphPrimitiveLibrary;
+import org.spoofax.interpreter.library.AbstractPrimitive;
+import org.spoofax.interpreter.library.IOperatorRegistry;
 
 public class SpoofaxImplModule extends AbstractModule {
     @Override protected void configure() {

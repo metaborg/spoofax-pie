@@ -1,4 +1,4 @@
-package mb.spoofax.runtime.pie.builder.core
+package mb.spoofax.runtime.pie.legacy
 
 import mb.pie.runtime.core.*
 import mb.vfs.path.PPath
@@ -27,4 +27,4 @@ class CoreLoadProj : Func<PPath, TransientProject> {
 
 val IProject.path get() = this.location().pPath
 
-fun ExecContext.loadProj(input: PPath) = requireOutput(CoreLoadProj::class, CoreLoadProj.Companion.id, input).v
+fun ExecContext.loadProj(input: PPath) = requireOutput(CoreLoadProj::class, CoreLoadProj.id, input).v

@@ -2,8 +2,8 @@ package mb.spoofax.runtime.benchmark.state.exec;
 
 import kotlin.Unit;
 import mb.pie.runtime.core.ExecException;
-import mb.pie.runtime.core.exec.BottomUpTopsortExecutor;
-import mb.pie.runtime.core.impl.exec.BottomUpTopsortExecutorImpl;
+import mb.pie.runtime.core.exec.BottomUpExecutor;
+import mb.pie.runtime.core.impl.exec.BottomUpExecutorImpl;
 import mb.spoofax.runtime.benchmark.state.InfraState;
 import mb.spoofax.runtime.benchmark.state.SpoofaxPieState;
 import mb.spoofax.runtime.benchmark.state.WorkspaceState;
@@ -13,21 +13,21 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.infra.Blackhole;
 
-import java.util.List;
+import java.util.Set;
 
 
 @State(Scope.Benchmark)
 public class BUTopsortState {
     private SpoofaxPieState spoofaxPieState;
     private WorkspaceState workspaceState;
-    private BottomUpTopsortExecutor executor;
+    private BottomUpExecutor executor;
 
 
     public void setup(SpoofaxPieState spoofaxPieState, WorkspaceState workspaceState, InfraState infraState) {
         this.spoofaxPieState = spoofaxPieState;
         this.workspaceState = workspaceState;
         this.executor =
-            new BottomUpTopsortExecutorImpl(infraState.store, infraState.cache, infraState.share, infraState.layer,
+            new BottomUpExecutorImpl(infraState.store, infraState.cache, infraState.share, infraState.layer,
                 infraState.logger, infraState.funcs);
     }
 
@@ -87,7 +87,7 @@ public class BUTopsortState {
     /**
      * Executes the pipeline in a bottom-up way, with given changed paths.
      */
-    public void execPathChanges(List<PPath> changedPaths) {
+    public void execPathChanges(Set<PPath> changedPaths) {
         try {
             executor.requireBottomUp(changedPaths, new NullCancelled());
         } catch(ExecException | InterruptedException e) {

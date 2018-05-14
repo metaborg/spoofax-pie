@@ -1,6 +1,6 @@
 package mb.spoofax.runtime.eclipse.pipeline;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
@@ -22,8 +22,8 @@ public class PipelinePathChanges {
     }
 
 
-    public ArrayList<PPath> changedPaths(@Nullable IResourceDelta delta) throws CoreException {
-        final ArrayList<PPath> changedPaths = new ArrayList<>();
+    public HashSet<PPath> changedPaths(@Nullable IResourceDelta delta) throws CoreException {
+        final HashSet<PPath> changedPaths = new HashSet<>();
         if(delta == null) {
             return changedPaths;
         }

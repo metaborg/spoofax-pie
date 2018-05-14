@@ -1,10 +1,11 @@
-package mb.spoofax.runtime.pie.builder.core
+package mb.spoofax.runtime.pie.legacy
 
 import com.google.inject.Inject
 import mb.log.Logger
 import mb.pie.runtime.builtin.util.Tuple2
 import mb.pie.runtime.builtin.util.Tuple3
-import mb.pie.runtime.core.*
+import mb.pie.runtime.core.ExecContext
+import mb.pie.runtime.core.Func
 import mb.pie.runtime.core.stamp.PathStampers
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.spoofax.runtime.impl.legacy.MessageConverter
@@ -17,15 +18,18 @@ import org.metaborg.spoofax.core.syntax.SyntaxFacet
 import org.spoofax.interpreter.terms.IStrategoTerm
 import java.io.Serializable
 
-class CoreParse @Inject constructor(log: Logger, private val messageConverter: MessageConverter) : Func<CoreParse.Input, CoreParse.Output> {
+class CoreParse @Inject constructor(
+  log: Logger,
+  private val messageConverter: MessageConverter
+) : Func<CoreParse.Input, CoreParse.Output> {
+  private val log: Logger = log.forContext(CoreParse::class.java)
+
   companion object {
-    val id = "coreParse"
+    const val id = "coreParse"
   }
 
   data class Input(val config: SpxCoreConfig, val text: String, val file: PPath) : Serializable
   data class Output(val ast: IStrategoTerm?, val tokens: ArrayList<Token>?, val messages: ArrayList<Msg>, val file: PPath) : Tuple3<IStrategoTerm?, ArrayList<Token>?, ArrayList<Msg>>
-
-  val log: Logger = log.forContext(CoreParse::class.java)
 
   override val id = Companion.id
   override fun ExecContext.exec(input: Input): Output {
@@ -44,20 +48,20 @@ class CoreParse @Inject constructor(log: Logger, private val messageConverter: M
     // Perform parsing
     val resource = input.file.fileObject
     val inputUnit = spoofax.unitService.inputUnit(resource, input.text, langImpl, null)
-    try {
+    return try {
       val parseUnit = spoofax.syntaxService.parse(inputUnit)
       val ast = parseUnit.ast()
       val tokens = if(ast != null) TokenExtractor.extract(ast) else null
       val messages = messageConverter.toMsgs(parseUnit.messages())
-      return Output(ast, tokens, messages, input.file)
+      Output(ast, tokens, messages, input.file)
     } catch(e: ParseException) {
       log.error("Parsing failed unexpectedly", e)
-      return Output(null, null, ArrayList(), input.file)
+      Output(null, null, ArrayList(), input.file)
     }
   }
 }
 
-fun ExecContext.parse(input: CoreParse.Input) = requireOutput(CoreParse::class, CoreParse.Companion.id, input)
+fun ExecContext.parse(input: CoreParse.Input) = requireOutput(CoreParse::class, CoreParse.id, input)
 fun ExecContext.parse(config: SpxCoreConfig, text: String, file: PPath) = parse(CoreParse.Input(config, text, file))
 
 
@@ -103,5 +107,5 @@ class CoreParseAll @Inject constructor(log: Logger, private val messageConverter
   }
 }
 
-fun ExecContext.parseAll(input: CoreParseAll.Input) = requireOutput(CoreParseAll::class, CoreParseAll.Companion.id, input)
+fun ExecContext.parseAll(input: CoreParseAll.Input) = requireOutput(CoreParseAll::class, CoreParseAll.id, input)
 fun ExecContext.parseAll(config: SpxCoreConfig, pairs: Iterable<CoreParseAll.TextFilePair>) = parseAll(CoreParseAll.Input(config, pairs))

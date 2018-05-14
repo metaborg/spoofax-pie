@@ -1,4 +1,4 @@
-package mb.spoofax.runtime.pie.builder.core
+package mb.spoofax.runtime.pie.legacy
 
 import com.google.inject.Inject
 import mb.log.Logger
@@ -43,6 +43,6 @@ class CoreExtensions @Inject constructor(log: Logger) : Func<CoreExtensions.Inpu
   }
 }
 
-fun ExecContext.langExtensions(input: CoreExtensions.Input) = requireOutput(CoreExtensions::class, CoreExtensions.Companion.id, input)
+fun ExecContext.langExtensions(input: CoreExtensions.Input) = requireOutput(CoreExtensions::class, CoreExtensions.id, input)
 fun ExecContext.langExtensions(dir: PPath, isLangSpec: Boolean) = langExtensions(CoreExtensions.Input(dir, isLangSpec))
 fun ExecContext.langExtensions(input: SpxCoreConfig) = langExtensions(CoreExtensions.Input(input))

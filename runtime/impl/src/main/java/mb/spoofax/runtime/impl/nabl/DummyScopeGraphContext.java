@@ -1,13 +1,13 @@
 package mb.spoofax.runtime.impl.nabl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
-import org.metaborg.meta.nabl2.config.NaBL2Config;
-import org.metaborg.meta.nabl2.config.NaBL2DebugConfig;
-import org.metaborg.meta.nabl2.spoofax.analysis.IScopeGraphContext;
+import mb.nabl2.config.NaBL2Config;
+import mb.nabl2.config.NaBL2DebugConfig;
+import mb.nabl2.spoofax.analysis.IScopeGraphContext;
 import org.metaborg.util.concurrent.IClosableLock;
 import org.metaborg.util.concurrent.NullClosableLock;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class DummyScopeGraphContext implements IScopeGraphContext<DummyScopeGraphUnit> {
     @Override public IClosableLock guard() {

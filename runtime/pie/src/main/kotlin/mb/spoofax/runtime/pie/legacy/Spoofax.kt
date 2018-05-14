@@ -1,4 +1,4 @@
-package mb.spoofax.runtime.pie.builder.core
+package mb.spoofax.runtime.pie.legacy
 
 import mb.spoofax.runtime.impl.legacy.StaticSpoofaxCoreFacade
 import mb.vfs.path.PPath
