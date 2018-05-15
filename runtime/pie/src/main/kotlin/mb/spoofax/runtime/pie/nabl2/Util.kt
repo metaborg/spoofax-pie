@@ -1,7 +1,7 @@
 package mb.spoofax.runtime.pie.nabl2
 
 import mb.nabl2.solver.ImmutableSolution
-import mb.pie.runtime.builtin.util.Tuple5
+import mb.pie.builtin.util.Tuple5
 import mb.spoofax.runtime.model.message.Msg
 import mb.spoofax.runtime.model.parse.Token
 import mb.spoofax.runtime.model.style.Styling

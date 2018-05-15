@@ -3,7 +3,7 @@ package mb.spoofax.runtime.benchmark.state;
 import com.google.inject.Injector;
 import mb.log.LogModule;
 import mb.log.Logger;
-import mb.pie.runtime.builtin.PieBuiltinModule;
+import mb.pie.builtin.PieBuiltinModule;
 import mb.spoofax.runtime.benchmark.SpoofaxCoreModule;
 import mb.spoofax.runtime.impl.SpoofaxImplModule;
 import mb.spoofax.runtime.impl.legacy.StaticSpoofaxCoreFacade;

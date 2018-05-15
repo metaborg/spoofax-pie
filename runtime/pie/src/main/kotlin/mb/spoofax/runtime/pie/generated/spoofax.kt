@@ -2,18 +2,17 @@
 
 package mb.spoofax.runtime.pie.generated
 
-import java.io.Serializable
-import java.nio.file.Paths
-import com.google.inject.*
-
-import mb.log.*
+import com.google.inject.Binder
+import com.google.inject.Module
+import mb.pie.builtin.path.*
+import mb.pie.builtin.util.*
+import mb.pie.runtime.*
+import mb.spoofax.runtime.model.message.Msg
+import mb.spoofax.runtime.model.message.PathMsg
 import mb.vfs.path.*
-import mb.pie.runtime.core.*
-import mb.pie.runtime.builtin.*
-import mb.pie.runtime.builtin.path.*
-import mb.pie.runtime.builtin.util.*
+import java.nio.file.FileSystems
 
-class toMessage : TaskDef<mb.spoofax.runtime.model.message.PathMsg, mb.spoofax.runtime.model.message.Msg> {
+class toMessage : TaskDef<PathMsg, Msg> {
   companion object {
     const val id = "toMessage"
   }
@@ -72,7 +71,7 @@ class createWorkspaceConfig : TaskDef<PPath, mb.spoofax.runtime.impl.cfg.Workspa
 
   override val id = Companion.id
   override fun ExecContext.exec(input: PPath): mb.spoofax.runtime.impl.cfg.WorkspaceConfig? = run {
-    val cfgLang = mb.spoofax.runtime.impl.cfg.ImmutableSpxCoreConfig.of(PPathImpl(java.nio.file.FileSystems.getDefault().getPath("/Users/gohla/metaborg/repo/pie/spoofax-pie/lang/cfg/langspec")), false, list("cfg"));
+    val cfgLang = mb.spoofax.runtime.impl.cfg.ImmutableSpxCoreConfig.of(PPathImpl(FileSystems.getDefault().getPath("/Users/gohla/metaborg/repo/pie/spoofax-pie/lang/cfg/langspec")), false, list("cfg"));
     val workspaceFile = input.resolve("root/workspace.cfg");
     if(!requireOutput(Exists::class.java, Exists.id, workspaceFile)) return null;
     val text = requireOutput(Read::class.java, Read.id, workspaceFile)!!;

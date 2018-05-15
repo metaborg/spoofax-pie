@@ -1,8 +1,8 @@
 package mb.spoofax.runtime.pie.stratego
 
 import com.google.inject.Inject
-import mb.pie.runtime.core.*
-import mb.pie.runtime.core.stamp.FileStampers
+import mb.pie.runtime.*
+import mb.pie.runtime.stamp.FileStampers
 import mb.spoofax.runtime.impl.cfg.StrategoConfig
 import mb.spoofax.runtime.impl.stratego.StrategoCompiler
 import mb.vfs.path.*

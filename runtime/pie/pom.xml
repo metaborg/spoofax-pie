@@ -11,7 +11,7 @@
     <groupId>org.metaborg</groupId>
     <artifactId>parent.java</artifactId>
     <version>2.5.0-SNAPSHOT</version>
-    <relativePath />
+    <relativePath/>
   </parent>
 
   <properties>
@@ -36,14 +36,30 @@
 
     <dependency>
       <groupId>org.metaborg</groupId>
-      <artifactId>pie.runtime.core</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
+      <artifactId>pie.api</artifactId>
+      <version>0.1.0</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
-      <artifactId>pie.runtime.builtin</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
+      <artifactId>pie.runtime</artifactId>
+      <version>0.1.0</version>
     </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>pie.builtin</artifactId>
+      <version>0.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>pie.taskdefs.guice</artifactId>
+      <version>0.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>pie.logger.mblog</artifactId>
+      <version>0.1.0</version>
+    </dependency>
+
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>spoofax.runtime.model</artifactId>

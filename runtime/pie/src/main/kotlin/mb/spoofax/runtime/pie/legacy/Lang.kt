@@ -1,7 +1,7 @@
 package mb.spoofax.runtime.pie.legacy
 
-import mb.pie.runtime.core.*
-import mb.pie.runtime.core.stamp.FileStampers
+import mb.pie.runtime.*
+import mb.pie.runtime.stamp.FileStampers
 import mb.vfs.path.PPath
 import org.metaborg.core.build.CommonPaths
 import org.metaborg.core.language.*

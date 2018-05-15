@@ -1,7 +1,7 @@
 package mb.spoofax.runtime.pie.nabl2
 
 import com.google.inject.Inject
-import mb.pie.runtime.core.*
+import mb.pie.runtime.*
 import mb.spoofax.runtime.impl.cfg.ImmutableStrategoConfig
 import mb.spoofax.runtime.impl.nabl.CGen
 import mb.spoofax.runtime.pie.generated.createWorkspaceConfig

@@ -3,8 +3,8 @@ package mb.spoofax.runtime.pie.nabl2
 import com.google.inject.Inject
 import mb.log.Logger
 import mb.nabl2.solver.ImmutableSolution
-import mb.pie.runtime.core.ExecContext
-import mb.pie.runtime.core.TaskDef
+import mb.pie.runtime.ExecContext
+import mb.pie.runtime.TaskDef
 import mb.spoofax.runtime.impl.nabl.ConstraintSolver
 import mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution
 import mb.spoofax.runtime.model.SpoofaxEx

@@ -2,11 +2,11 @@ package mb.spoofax.runtime.pie
 
 import com.google.inject.Inject
 import com.google.inject.Provider
-import mb.pie.runtime.core.Cache
-import mb.pie.runtime.core.Store
-import mb.pie.runtime.core.exec.*
-import mb.pie.runtime.core.impl.store.InMemoryStore
-import mb.pie.runtime.core.impl.store.LMDBBuildStoreFactory
+import mb.pie.runtime.Cache
+import mb.pie.runtime.Store
+import mb.pie.runtime.exec.*
+import mb.pie.runtime.impl.store.InMemoryStore
+import mb.pie.runtime.impl.store.LMDBBuildStoreFactory
 import mb.vfs.path.PPath
 import mb.vfs.path.PathSrv
 import java.util.concurrent.ConcurrentHashMap

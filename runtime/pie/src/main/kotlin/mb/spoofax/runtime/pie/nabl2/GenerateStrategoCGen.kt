@@ -2,8 +2,8 @@ package mb.spoofax.runtime.pie.nabl2
 
 import com.google.inject.Inject
 import mb.log.Logger
-import mb.pie.runtime.core.*
-import mb.pie.runtime.core.stamp.FileStampers
+import mb.pie.runtime.*
+import mb.pie.runtime.stamp.FileStampers
 import mb.spoofax.runtime.pie.generated.createWorkspaceConfig
 import mb.spoofax.runtime.pie.legacy.*
 import mb.vfs.path.PPath

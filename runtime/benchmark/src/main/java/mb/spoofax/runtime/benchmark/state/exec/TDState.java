@@ -4,7 +4,7 @@ import mb.pie.runtime.core.ExecException;
 import mb.pie.runtime.core.Task;
 import mb.pie.runtime.core.exec.TopDownExec;
 import mb.pie.runtime.core.exec.TopDownExecutor;
-import mb.pie.runtime.core.impl.exec.TopDownExecutorImpl;
+import mb.pie.runtime.impl.exec.TopDownExecutorImpl;
 import mb.spoofax.runtime.benchmark.state.InfraState;
 import mb.spoofax.runtime.benchmark.state.SpoofaxPieState;
 import mb.spoofax.runtime.benchmark.state.WorkspaceState;

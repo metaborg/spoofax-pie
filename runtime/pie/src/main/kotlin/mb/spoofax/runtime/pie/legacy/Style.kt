@@ -2,8 +2,9 @@ package mb.spoofax.runtime.pie.legacy
 
 import com.google.inject.Inject
 import mb.log.Logger
-import mb.pie.runtime.core.*
-import mb.pie.runtime.core.stamp.FileStampers
+import mb.pie.runtime.ExecContext
+import mb.pie.runtime.TaskDef
+import mb.pie.runtime.stamp.FileStampers
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.spoofax.runtime.impl.legacy.StyleConverter
 import mb.spoofax.runtime.model.parse.Token

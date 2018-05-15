@@ -2,8 +2,8 @@ package mb.spoofax.runtime.pie.legacy
 
 import com.google.inject.Inject
 import mb.log.Logger
-import mb.pie.runtime.core.ExecContext
-import mb.pie.runtime.core.TaskDef
+import mb.pie.runtime.ExecContext
+import mb.pie.runtime.TaskDef
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.vfs.path.PPath
 import java.io.Serializable

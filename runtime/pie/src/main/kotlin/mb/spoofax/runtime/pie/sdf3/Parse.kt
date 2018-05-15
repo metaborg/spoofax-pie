@@ -1,7 +1,7 @@
 package mb.spoofax.runtime.pie.sdf3
 
-import mb.pie.runtime.builtin.util.Tuple3
-import mb.pie.runtime.core.*
+import mb.pie.builtin.util.Tuple3
+import mb.pie.runtime.*
 import mb.spoofax.runtime.impl.sdf.Table
 import mb.spoofax.runtime.model.message.Msg
 import mb.spoofax.runtime.model.parse.Token
