@@ -4,11 +4,17 @@ package mb.spoofax.runtime.pie.generated
 
 import com.google.inject.Binder
 import com.google.inject.Module
+import mb.pie.api.*
 import mb.pie.builtin.path.*
 import mb.pie.builtin.util.*
 import mb.pie.runtime.*
+import mb.spoofax.runtime.impl.cfg.*
+import mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution
+import mb.spoofax.runtime.impl.sdf.Signatures
 import mb.spoofax.runtime.model.message.Msg
 import mb.spoofax.runtime.model.message.PathMsg
+import mb.spoofax.runtime.model.parse.Token
+import mb.spoofax.runtime.model.style.Styling
 import mb.vfs.path.*
 import java.nio.file.FileSystems
 
@@ -24,7 +30,7 @@ class toMessage : TaskDef<PathMsg, Msg> {
   }
 }
 
-class langSpecConfigForPath : TaskDef<langSpecConfigForPath.Input, mb.spoofax.runtime.impl.cfg.LangSpecConfig?> {
+class langSpecConfigForPath : TaskDef<langSpecConfigForPath.Input, LangSpecConfig?> {
   companion object {
     const val id = "langSpecConfigForPath"
   }
@@ -47,7 +53,7 @@ class langSpecConfigForPath : TaskDef<langSpecConfigForPath.Input, mb.spoofax.ru
   }
 }
 
-class spxCoreConfigForPath : TaskDef<spxCoreConfigForPath.Input, mb.spoofax.runtime.impl.cfg.SpxCoreConfig?> {
+class spxCoreConfigForPath : TaskDef<spxCoreConfigForPath.Input, SpxCoreConfig?> {
   companion object {
     const val id = "spxCoreConfigForPath"
   }
@@ -64,7 +70,7 @@ class spxCoreConfigForPath : TaskDef<spxCoreConfigForPath.Input, mb.spoofax.runt
   }
 }
 
-class createWorkspaceConfig : TaskDef<PPath, mb.spoofax.runtime.impl.cfg.WorkspaceConfig?> {
+class createWorkspaceConfig : TaskDef<PPath, WorkspaceConfig?> {
   companion object {
     const val id = "createWorkspaceConfig"
   }
@@ -80,7 +86,7 @@ class createWorkspaceConfig : TaskDef<PPath, mb.spoofax.runtime.impl.cfg.Workspa
   }
 }
 
-class processWorkspace : TaskDef<PPath, ArrayList<Tuple2<ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?>>>>> {
+class processWorkspace : TaskDef<PPath, ArrayList<Tuple2<ArrayList<ArrayList<Tuple5<PPath, ArrayList<Token>?, ArrayList<Msg>, Styling?, ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<Token>?, ArrayList<Msg>, Styling?>>>>> {
   companion object {
     const val id = "processWorkspace"
   }
@@ -120,7 +126,7 @@ class processProject : TaskDef<processProject.Input, processProject.Output> {
   }
 }
 
-class processLangSpecInProject : TaskDef<processLangSpecInProject.Input, ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.runtime.model.parse.Token>?, ArrayList<mb.spoofax.runtime.model.message.Msg>, mb.spoofax.runtime.model.style.Styling?, mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?>>> {
+class processLangSpecInProject : TaskDef<processLangSpecInProject.Input, ArrayList<Tuple5<PPath, ArrayList<Token>?, ArrayList<Msg>, Styling?, ConstraintSolverSolution?>>> {
   companion object {
     const val id = "processLangSpecInProject"
   }
@@ -322,7 +328,7 @@ class emptyParse : TaskDef<None, emptyParse.Output> {
   }
 }
 
-class createSignatures : TaskDef<createSignatures.Input, mb.spoofax.runtime.impl.sdf.Signatures?> {
+class createSignatures : TaskDef<createSignatures.Input, Signatures?> {
   companion object {
     const val id = "createSignatures"
   }
@@ -338,7 +344,7 @@ class createSignatures : TaskDef<createSignatures.Input, mb.spoofax.runtime.impl
   }
 }
 
-class style : TaskDef<style.Input, mb.spoofax.runtime.model.style.Styling?> {
+class style : TaskDef<style.Input, Styling?> {
   companion object {
     const val id = "style"
   }
@@ -355,7 +361,7 @@ class style : TaskDef<style.Input, mb.spoofax.runtime.model.style.Styling?> {
   }
 }
 
-class solveFile : TaskDef<solveFile.Input, mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution?> {
+class solveFile : TaskDef<solveFile.Input, ConstraintSolverSolution?> {
   companion object {
     const val id = "solveFile"
   }

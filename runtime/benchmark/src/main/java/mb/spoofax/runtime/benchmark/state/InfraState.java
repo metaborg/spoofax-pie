@@ -2,20 +2,20 @@ package mb.spoofax.runtime.benchmark.state;
 
 import com.google.inject.Key;
 import com.google.inject.Provider;
-import mb.pie.builtin.util.LogLogger;
+import mb.pie.logger.mblog.LogLogger;
 import mb.pie.runtime.core.*;
-import mb.pie.runtime.impl.cache.MapCache;
-import mb.pie.runtime.impl.cache.NoopCache;
-import mb.pie.runtime.impl.layer.NoopLayer;
-import mb.pie.runtime.impl.layer.ValidationLayer;
-import mb.pie.runtime.impl.logger.NoopLogger;
-import mb.pie.runtime.impl.logger.StreamLogger;
-import mb.pie.runtime.impl.logger.TraceLogger;
-import mb.pie.runtime.impl.share.CoroutineShare;
-import mb.pie.runtime.impl.share.NonSharingShare;
-import mb.pie.runtime.impl.store.InMemoryStore;
-import mb.pie.runtime.impl.store.LMDBBuildStoreFactory;
-import mb.pie.runtime.impl.store.NoopStore;
+import mb.pie.runtime.cache.MapCache;
+import mb.pie.runtime.cache.NoopCache;
+import mb.pie.runtime.layer.NoopLayer;
+import mb.pie.runtime.layer.ValidationLayer;
+import mb.pie.runtime.logger.exec.NoopExecutorLogger;
+import mb.pie.runtime.logger.StreamLogger;
+import mb.pie.runtime.logger.exec.TraceExecutorLogger;
+import mb.pie.runtime.share.CoroutineShare;
+import mb.pie.runtime.share.NonSharingShare;
+import mb.pie.runtime.store.InMemoryStore;
+import mb.pie.runtime.store.LMDBBuildStoreFactory;
+import mb.pie.runtime.store.NoopStore;
 import mb.vfs.path.PPath;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
@@ -136,7 +136,7 @@ public class InfraState {
     public enum LoggerKind {
         trace {
             @Override public Provider<Logger> provider(SpoofaxPieState spoofaxPieState) {
-                return TraceLogger::new;
+                return TraceExecutorLogger::new;
             }
         },
         log {
@@ -156,7 +156,7 @@ public class InfraState {
         },
         noop {
             @Override public Provider<Logger> provider(SpoofaxPieState spoofaxPieState) {
-                return NoopLogger::new;
+                return NoopExecutorLogger::new;
             }
         };
 

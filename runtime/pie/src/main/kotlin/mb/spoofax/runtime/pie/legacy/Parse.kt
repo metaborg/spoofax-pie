@@ -4,9 +4,9 @@ import com.google.inject.Inject
 import mb.log.Logger
 import mb.pie.builtin.util.Tuple2
 import mb.pie.builtin.util.Tuple3
-import mb.pie.runtime.ExecContext
-import mb.pie.runtime.TaskDef
-import mb.pie.runtime.stamp.FileStampers
+import mb.pie.api.ExecContext
+import mb.pie.api.TaskDef
+import mb.pie.api.stamp.FileStampers
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.spoofax.runtime.impl.legacy.MessageConverter
 import mb.spoofax.runtime.impl.sdf.TokenExtractor

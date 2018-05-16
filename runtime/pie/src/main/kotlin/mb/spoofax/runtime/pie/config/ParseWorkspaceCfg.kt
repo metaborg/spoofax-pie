@@ -1,7 +1,7 @@
 package mb.spoofax.runtime.pie.config
 
-import mb.pie.runtime.ExecContext
-import mb.pie.runtime.TaskDef
+import mb.pie.api.ExecContext
+import mb.pie.api.TaskDef
 import mb.spoofax.runtime.impl.cfg.*
 import mb.spoofax.runtime.pie.legacy.langExtensions
 import mb.spoofax.runtime.pie.legacy.parse

@@ -2,8 +2,8 @@ package mb.spoofax.runtime.pie.esv
 
 import com.google.inject.Inject
 import mb.log.Logger
-import mb.pie.runtime.*
-import mb.pie.runtime.stamp.FileStampers
+import mb.pie.api.*
+import mb.pie.api.stamp.FileStampers
 import mb.spoofax.runtime.impl.esv.StylingRules
 import mb.spoofax.runtime.impl.esv.StylingRulesFromESV
 import mb.spoofax.runtime.pie.generated.createWorkspaceConfig

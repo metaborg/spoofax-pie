@@ -2,10 +2,11 @@ package mb.spoofax.runtime.pie
 
 import com.google.inject.Binder
 import com.google.inject.multibindings.MapBinder
-import mb.pie.builtin.util.LogLogger
-import mb.pie.runtime.*
-import mb.pie.runtime.impl.cache.MapCache
-import mb.pie.runtime.impl.layer.ValidationLayer
+import mb.pie.api.*
+import mb.pie.logger.mblog.LogLogger
+import mb.pie.runtime.cache.MapCache
+import mb.pie.runtime.layer.ValidationLayer
+import mb.pie.taskdefs.guice.bindTaskDef
 import mb.spoofax.runtime.pie.config.ParseLangSpecCfg
 import mb.spoofax.runtime.pie.config.ParseWorkspaceCfg
 import mb.spoofax.runtime.pie.esv.CompileStyler

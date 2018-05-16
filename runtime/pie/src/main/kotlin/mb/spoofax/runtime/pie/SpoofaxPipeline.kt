@@ -1,7 +1,7 @@
 package mb.spoofax.runtime.pie
 
 import mb.pie.builtin.util.*
-import mb.pie.runtime.Task
+import mb.pie.api.Task
 import mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution
 import mb.spoofax.runtime.model.message.Msg
 import mb.spoofax.runtime.model.parse.Token

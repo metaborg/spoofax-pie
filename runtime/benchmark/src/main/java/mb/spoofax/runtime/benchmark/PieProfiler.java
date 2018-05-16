@@ -1,6 +1,6 @@
 package mb.spoofax.runtime.benchmark;
 
-import mb.pie.runtime.impl.logger.Trace;
+import mb.pie.runtime.logger.exec.Trace;
 import org.jetbrains.annotations.Nullable;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;

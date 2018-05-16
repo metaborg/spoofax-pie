@@ -3,7 +3,7 @@ package mb.spoofax.runtime.benchmark.state.exec;
 import kotlin.Unit;
 import mb.pie.runtime.core.ExecException;
 import mb.pie.runtime.core.exec.BottomUpExecutor;
-import mb.pie.runtime.impl.exec.BottomUpExecutorImpl;
+import mb.pie.runtime.exec.BottomUpExecutorImpl;
 import mb.spoofax.runtime.benchmark.state.InfraState;
 import mb.spoofax.runtime.benchmark.state.SpoofaxPieState;
 import mb.spoofax.runtime.benchmark.state.WorkspaceState;

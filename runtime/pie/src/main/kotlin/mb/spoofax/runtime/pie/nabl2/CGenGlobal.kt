@@ -3,9 +3,9 @@ package mb.spoofax.runtime.pie.nabl2
 import com.google.inject.Inject
 import mb.log.Logger
 import mb.nabl2.spoofax.analysis.ImmutableInitialResult
-import mb.pie.runtime.ExecContext
-import mb.pie.runtime.TaskDef
-import mb.pie.runtime.stamp.FileStampers
+import mb.pie.api.ExecContext
+import mb.pie.api.TaskDef
+import mb.pie.api.stamp.FileStampers
 import mb.spoofax.runtime.impl.stratego.StrategoRuntimeBuilder
 import mb.spoofax.runtime.impl.stratego.primitive.ScopeGraphPrimitiveLibrary
 import mb.spoofax.runtime.model.SpoofaxEx

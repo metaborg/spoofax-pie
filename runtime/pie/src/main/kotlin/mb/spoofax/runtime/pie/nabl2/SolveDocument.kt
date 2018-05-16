@@ -5,8 +5,8 @@ import mb.log.Logger
 import mb.nabl2.solver.ImmutableSolution
 import mb.nabl2.spoofax.analysis.ImmutableInitialResult
 import mb.nabl2.spoofax.analysis.ImmutableUnitResult
-import mb.pie.runtime.ExecContext
-import mb.pie.runtime.TaskDef
+import mb.pie.api.ExecContext
+import mb.pie.api.TaskDef
 import mb.spoofax.runtime.impl.nabl.ConstraintSolver
 import mb.spoofax.runtime.model.SpoofaxEx
 import java.io.Serializable

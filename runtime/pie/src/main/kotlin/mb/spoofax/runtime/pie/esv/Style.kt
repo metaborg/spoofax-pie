@@ -1,7 +1,7 @@
 package mb.spoofax.runtime.pie.esv
 
-import mb.pie.runtime.ExecContext
-import mb.pie.runtime.TaskDef
+import mb.pie.api.ExecContext
+import mb.pie.api.TaskDef
 import mb.spoofax.runtime.impl.esv.Styler
 import mb.spoofax.runtime.impl.esv.StylingRules
 import mb.spoofax.runtime.model.parse.Token
