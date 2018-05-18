@@ -3,10 +3,10 @@ package mb.spoofax.runtime.pie.legacy
 import com.google.inject.Inject
 import mb.log.Logger
 import mb.pie.api.*
-import mb.pie.builtin.util.Tuple2
 import mb.pie.api.stamp.FileStampers
+import mb.pie.lang.runtime.util.Tuple2
+import mb.pie.vfs.path.PPath
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
-import mb.vfs.path.PPath
 import org.apache.commons.vfs2.FileObject
 import org.metaborg.core.action.*
 import org.metaborg.core.messages.IMessage
@@ -106,7 +106,8 @@ class CoreTransAll @Inject constructor(log: Logger) : TaskDef<CoreTransAll.Input
     }
 
     // Perform transformation
-    val project = spoofax.projectService.get(input.project.fileObject) ?: throw ExecException("Cannot transform $input.project, it is not a project location")
+    val project = spoofax.projectService.get(input.project.fileObject)
+      ?: throw ExecException("Cannot transform $input.project, it is not a project location")
     val spoofaxContext = spoofax.contextService.get(project.location(), project, langImpl)
     val analyzeUnits = input.pairs.map { (ast, file) ->
       val resource = file.fileObject

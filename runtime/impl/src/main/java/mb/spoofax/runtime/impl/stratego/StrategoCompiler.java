@@ -1,20 +1,16 @@
 package mb.spoofax.runtime.impl.stratego;
 
-import java.io.IOException;
-
-import javax.annotation.Nullable;
-
+import mb.pie.vfs.path.PPath;
+import mb.spoofax.runtime.impl.cfg.StrategoConfig;
+import mb.spoofax.runtime.impl.util.Arguments;
 import org.spoofax.interpreter.library.IOAgent;
 import org.spoofax.interpreter.terms.ITermFactory;
-import org.strategoxt.lang.Context;
-import org.strategoxt.lang.StrategoException;
-import org.strategoxt.lang.StrategoExit;
+import org.strategoxt.lang.*;
 import org.strategoxt.stratego_lib.dr_scope_all_end_0_0;
 import org.strategoxt.stratego_lib.dr_scope_all_start_0_0;
 
-import mb.spoofax.runtime.impl.cfg.StrategoConfig;
-import mb.spoofax.runtime.impl.util.Arguments;
-import mb.vfs.path.PPath;
+import javax.annotation.Nullable;
+import java.io.IOException;
 
 public class StrategoCompiler {
     public class Result {
@@ -40,7 +36,7 @@ public class StrategoCompiler {
         // Create necessary directories
         outputFile.createParentDirectories();
         cacheDir.createDirectories();
-        
+
         // Delete rtree file (if it exists) to prevent it from influencing the build.
         outputFile.replaceExtension("rtree").deleteFile();
 

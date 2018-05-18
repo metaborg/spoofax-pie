@@ -4,11 +4,11 @@ import com.google.inject.Inject
 import mb.log.Logger
 import mb.pie.api.*
 import mb.pie.api.stamp.FileStampers
+import mb.pie.vfs.path.PPath
+import mb.pie.vfs.path.PathSrv
 import mb.spoofax.runtime.impl.sdf.Table
 import mb.spoofax.runtime.pie.generated.createWorkspaceConfig
 import mb.spoofax.runtime.pie.legacy.*
-import mb.vfs.path.PPath
-import mb.vfs.path.PathSrv
 import org.metaborg.core.action.EndNamedGoal
 import org.metaborg.sdf2table.io.ParseTableGenerator
 import org.metaborg.spoofax.core.build.SpoofaxCommonPaths

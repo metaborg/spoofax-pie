@@ -1,11 +1,9 @@
 package mb.spoofax.runtime.impl.legacy;
 
-import org.apache.commons.vfs2.FileObject;
-
 import com.google.inject.Inject;
-
-import mb.vfs.path.PPath;
-import mb.vfs.path.PathSrv;
+import mb.pie.vfs.path.PPath;
+import mb.pie.vfs.path.PathSrv;
+import org.apache.commons.vfs2.FileObject;
 
 public class PathConverter {
     private final PathSrv pathSrv;

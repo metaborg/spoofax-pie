@@ -5,10 +5,10 @@ import mb.log.Logger
 import mb.nabl2.solver.ImmutableSolution
 import mb.pie.api.ExecContext
 import mb.pie.api.TaskDef
+import mb.pie.vfs.path.PPath
 import mb.spoofax.runtime.impl.nabl.ConstraintSolver
 import mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution
 import mb.spoofax.runtime.model.SpoofaxEx
-import mb.vfs.path.PPath
 import java.io.Serializable
 import java.util.*
 

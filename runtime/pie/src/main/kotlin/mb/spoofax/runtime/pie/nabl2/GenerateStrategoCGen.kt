@@ -4,9 +4,9 @@ import com.google.inject.Inject
 import mb.log.Logger
 import mb.pie.api.*
 import mb.pie.api.stamp.FileStampers
+import mb.pie.vfs.path.PPath
 import mb.spoofax.runtime.pie.generated.createWorkspaceConfig
 import mb.spoofax.runtime.pie.legacy.*
-import mb.vfs.path.PPath
 import org.metaborg.core.action.CompileGoal
 import java.io.Serializable
 

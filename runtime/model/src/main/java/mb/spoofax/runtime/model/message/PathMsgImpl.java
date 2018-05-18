@@ -1,9 +1,9 @@
 package mb.spoofax.runtime.model.message;
 
-import javax.annotation.Nullable;
-
+import mb.pie.vfs.path.PPath;
 import mb.spoofax.runtime.model.region.Region;
-import mb.vfs.path.PPath;
+
+import javax.annotation.Nullable;
 
 public class PathMsgImpl extends MsgImpl implements PathMsg {
     private static final long serialVersionUID = 1L;

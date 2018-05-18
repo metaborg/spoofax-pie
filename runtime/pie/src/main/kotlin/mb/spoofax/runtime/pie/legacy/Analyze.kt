@@ -3,12 +3,12 @@ package mb.spoofax.runtime.pie.legacy
 import com.google.inject.Inject
 import mb.log.Logger
 import mb.pie.api.*
-import mb.pie.builtin.util.Tuple2
 import mb.pie.api.stamp.FileStampers
+import mb.pie.lang.runtime.util.Tuple2
+import mb.pie.vfs.path.PPath
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.spoofax.runtime.impl.legacy.MessageConverter
 import mb.spoofax.runtime.model.message.Msg
-import mb.vfs.path.PPath
 import org.apache.commons.vfs2.FileObject
 import org.metaborg.core.analysis.AnalysisException
 import org.metaborg.core.messages.IMessage

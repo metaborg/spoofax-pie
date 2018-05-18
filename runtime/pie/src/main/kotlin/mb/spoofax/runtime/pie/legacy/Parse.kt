@@ -2,17 +2,17 @@ package mb.spoofax.runtime.pie.legacy
 
 import com.google.inject.Inject
 import mb.log.Logger
-import mb.pie.builtin.util.Tuple2
-import mb.pie.builtin.util.Tuple3
 import mb.pie.api.ExecContext
 import mb.pie.api.TaskDef
 import mb.pie.api.stamp.FileStampers
+import mb.pie.lang.runtime.util.Tuple2
+import mb.pie.lang.runtime.util.Tuple3
+import mb.pie.vfs.path.PPath
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.spoofax.runtime.impl.legacy.MessageConverter
 import mb.spoofax.runtime.impl.sdf.TokenExtractor
 import mb.spoofax.runtime.model.message.Msg
 import mb.spoofax.runtime.model.parse.Token
-import mb.vfs.path.PPath
 import org.metaborg.core.syntax.ParseException
 import org.metaborg.spoofax.core.syntax.SyntaxFacet
 import org.spoofax.interpreter.terms.IStrategoTerm

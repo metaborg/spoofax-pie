@@ -2,12 +2,12 @@ package mb.spoofax.runtime.pie.nabl2
 
 import com.google.inject.Inject
 import mb.pie.api.*
+import mb.pie.vfs.path.PPath
 import mb.spoofax.runtime.impl.cfg.ImmutableStrategoConfig
 import mb.spoofax.runtime.impl.nabl.CGen
 import mb.spoofax.runtime.pie.generated.createWorkspaceConfig
 import mb.spoofax.runtime.pie.sdf3.GenerateStrategoSignatures
 import mb.spoofax.runtime.pie.stratego.Compile
-import mb.vfs.path.PPath
 import java.io.Serializable
 
 class CompileStrategoCGen

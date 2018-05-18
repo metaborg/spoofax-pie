@@ -1,14 +1,12 @@
 package mb.spoofax.runtime.benchmark.state;
 
 import com.google.common.collect.Lists;
+import mb.pie.vfs.path.PPath;
+import mb.pie.vfs.path.PPaths;
 import mb.spoofax.runtime.benchmark.ChangeMaker;
-import mb.spoofax.runtime.benchmark.state.exec.BUTopsortState;
+import mb.spoofax.runtime.benchmark.state.exec.BUState;
 import mb.spoofax.runtime.benchmark.state.exec.TDState;
-import mb.vfs.path.PPath;
-import mb.vfs.path.PPaths;
-import org.openjdk.jmh.annotations.Param;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 
 import java.io.IOException;
@@ -35,7 +33,7 @@ public class ChangesState {
         changeMaker.run(state);
     }
 
-    public void exec(BUTopsortState state, Blackhole blackhole) {
+    public void exec(BUState state, Blackhole blackhole) {
         final ChangeMaker changeMaker = changesKind.createChangeMaker(root, blackhole);
         changeMaker.run(state);
     }
@@ -43,65 +41,7 @@ public class ChangesState {
 
     @Param({"medium"}) public ChangesKind changesKind;
 
-    public enum ChangesKind {
-        debug_syntax_cascading {
-            @Override public ChangeMaker createChangeMaker(PPath root, Blackhole blackhole) {
-                return new ChangeMaker() {
-                    @Override protected void apply() {
-                        // Initial execution.
-                        final PPath calcProject = root.resolve("lang.calc");
-                        addProject(calcProject, blackhole, "initial lang.calc");
-                        execInitial(blackhole, "initial");
-
-                        // Syntax specification: cascading change.
-                        {
-                            // Open editor.
-                            final PPath syntaxFile = calcProject.resolve("syntax/Calc.sdf3");
-                            String syntaxText = read(syntaxFile);
-                            //execEditor(syntaxText, syntaxFile, calcProject, blackhole, "editor open cascading syntax/Calc.sdf3");
-                            // Change editor text.
-                            syntaxText = syntaxText.replace("Exp.Num = NUM", "Exp.Num = ID");
-                            //execEditor(syntaxText, syntaxFile, calcProject, blackhole, "editor change cascading syntax/Calc.sdf3");
-                            // Save file.
-                            write(syntaxFile, syntaxText);
-                            execPathChanges(syntaxFile, blackhole, "file change cascading syntax/Calc.sdf3");
-                        }
-                    }
-                };
-            }
-        },
-        debug_all_change {
-            @Override public ChangeMaker createChangeMaker(PPath root, Blackhole blackhole) {
-                return new ChangeMaker() {
-                    @Override protected void apply() {
-                        // Initial execution.
-                        final PPath calcProject = root.resolve("lang.calc");
-                        addProject(calcProject, blackhole, "initial lang.calc");
-                        final PPath tigerProject = root.resolve("lang.tiger");
-                        addProject(tigerProject, blackhole, "initial lang.tiger");
-                        final PPath mjProject = root.resolve("lang.minijava");
-                        addProject(mjProject, blackhole, "initial lang.minijava");
-                        execInitial(blackhole, "initial");
-
-                        // Extrema change: everything
-                        try {
-                            final HashSet<PPath> changedPaths = new HashSet<>();
-                            root.walk(PPaths.extensionsPathWalker(Lists.newArrayList(
-                                "cfg", "esv", "sdf3", "nabl2", "str", "calc", "mj", "tig"
-                            ))).forEach(path -> {
-                                String text = read(path);
-                                text = text + " ";
-                                write(path, text);
-                                changedPaths.add(path);
-                            });
-                            execPathChanges(changedPaths, blackhole, "all files changed");
-                        } catch(IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                };
-            }
-        },
+    @SuppressWarnings("unused") public enum ChangesKind {
         medium {
             @Override public ChangeMaker createChangeMaker(PPath root, Blackhole blackhole) {
                 return new ChangeMaker() {
@@ -286,18 +226,18 @@ public class ChangesState {
                                 "        trans,\n" +
                                 "        nats,\n" +
                                 "        src-gen,\n" +
-                                "        src-gen/nabl2,\n" +
+                                "        src-gen/nabl2/collection,\n" +
                                 "        /Users/gohla/spoofax/master/repo/spoofax-releng/spoofax/meta.lib.spoofax/trans,\n" +
-                                "        /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/org.metaborg.meta.nabl2.shared/trans,\n" +
-                                "        /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/org.metaborg.meta.nabl2.shared/src-gen,\n" +
-                                "        /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/org.metaborg.meta.nabl2.runtime/trans,\n" +
-                                "        /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/org.metaborg.meta.nabl2.runtime/src-gen,\n" +
-                                "        /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/org.metaborg.meta.nabl2.runtime/src-gen/nabl2,\n" +
-                                "        /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/org.metaborg.meta.nabl2.lang/trans,\n" +
-                                "        /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/org.metaborg.meta.nabl2.lang/src-gen\n" +
+                                "        /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/nabl2.shared/trans,\n" +
+                                "        /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/nabl2.shared/src-gen,\n" +
+                                "        /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/nabl2.runtime/trans,\n" +
+                                "        /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/nabl2.runtime/src-gen,\n" +
+                                "        /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/nabl2.runtime/src-gen/nabl2,\n" +
+                                "        /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/nabl2.lang/trans,\n" +
+                                "        /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/nabl2.lang/src-gen\n" +
                                 "      include libs: stratego-lib, stratego-sglr\n" +
                                 "      base dir: .\n" +
-                                "      cache dir: target/str-cache\n" +
+                                "      cache dir: target/nats-str-cache\n" +
                                 "      output file: target/nats.ctree\n" +
                                 "    }\n" +
                                 "    stratego strategy id: nats\n" +

@@ -1,14 +1,11 @@
 package mb.spoofax.runtime.benchmark.state.exec;
 
 import kotlin.Unit;
-import mb.pie.runtime.core.ExecException;
-import mb.pie.runtime.core.exec.BottomUpExecutor;
-import mb.pie.runtime.exec.BottomUpExecutorImpl;
-import mb.spoofax.runtime.benchmark.state.InfraState;
-import mb.spoofax.runtime.benchmark.state.SpoofaxPieState;
-import mb.spoofax.runtime.benchmark.state.WorkspaceState;
-import mb.util.async.NullCancelled;
-import mb.vfs.path.PPath;
+import mb.pie.api.ExecException;
+import mb.pie.api.exec.BottomUpExecutor;
+import mb.pie.api.exec.NullCancelled;
+import mb.pie.vfs.path.PPath;
+import mb.spoofax.runtime.benchmark.state.*;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.infra.Blackhole;
@@ -17,7 +14,7 @@ import java.util.Set;
 
 
 @State(Scope.Benchmark)
-public class BUTopsortState {
+public class BUState {
     private SpoofaxPieState spoofaxPieState;
     private WorkspaceState workspaceState;
     private BottomUpExecutor executor;
@@ -26,9 +23,7 @@ public class BUTopsortState {
     public void setup(SpoofaxPieState spoofaxPieState, WorkspaceState workspaceState, InfraState infraState) {
         this.spoofaxPieState = spoofaxPieState;
         this.workspaceState = workspaceState;
-        this.executor =
-            new BottomUpExecutorImpl(infraState.store, infraState.cache, infraState.share, infraState.layer,
-                infraState.logger, infraState.funcs);
+        this.executor = infraState.pie.getBottomUpExecutor();
     }
 
 

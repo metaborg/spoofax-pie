@@ -1,9 +1,9 @@
 package mb.spoofax.runtime.impl.sdf;
 
+import mb.pie.vfs.path.PPath;
+
 import java.io.Serializable;
 import java.util.ArrayList;
-
-import mb.vfs.path.PPath;
 
 public class Signatures implements Serializable {
     private static final long serialVersionUID = 1L;

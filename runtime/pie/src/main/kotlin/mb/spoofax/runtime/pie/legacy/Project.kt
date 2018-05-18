@@ -1,7 +1,7 @@
 package mb.spoofax.runtime.pie.legacy
 
 import mb.pie.api.*
-import mb.vfs.path.PPath
+import mb.pie.vfs.path.PPath
 import org.metaborg.core.project.IProject
 import org.metaborg.core.project.ISimpleProjectService
 

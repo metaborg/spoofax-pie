@@ -5,7 +5,7 @@ import mb.spoofax.runtime.benchmark.state.ChangesState;
 import mb.spoofax.runtime.benchmark.state.InfraState;
 import mb.spoofax.runtime.benchmark.state.SpoofaxPieState;
 import mb.spoofax.runtime.benchmark.state.WorkspaceState;
-import mb.spoofax.runtime.benchmark.state.exec.BUTopsortState;
+import mb.spoofax.runtime.benchmark.state.exec.BUState;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 
@@ -17,9 +17,9 @@ import java.util.concurrent.TimeUnit;
 @BenchmarkMode(Mode.SingleShotTime)
 @OutputTimeUnit(TimeUnit.SECONDS)
 @State(Scope.Benchmark)
-public class BUTopsortChangesBench {
+public class BUChangesBench {
     @Setup(Level.Trial)
-    public void setupTrial(SpoofaxPieState spoofaxPie, WorkspaceState workspace, InfraState infra, ChangesState changes, BUTopsortState exec) throws IOException {
+    public void setupTrial(SpoofaxPieState spoofaxPie, WorkspaceState workspace, InfraState infra, ChangesState changes, BUState exec) throws IOException {
         workspace.setup(spoofaxPie);
         infra.setup(spoofaxPie, workspace);
         changes.setup(workspace);
@@ -36,7 +36,7 @@ public class BUTopsortChangesBench {
     private WorkspaceState workspace;
     private InfraState infra;
     private ChangesState changes;
-    private BUTopsortState exec;
+    private BUState exec;
 
     @Setup(Level.Invocation) public void setupInvocation() {
         Timer.logFile = new File("/Users/gohla/pie/bottomup.csv");

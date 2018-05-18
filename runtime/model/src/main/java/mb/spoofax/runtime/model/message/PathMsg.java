@@ -1,6 +1,6 @@
 package mb.spoofax.runtime.model.message;
 
-import mb.vfs.path.PPath;
+import mb.pie.vfs.path.PPath;
 
 public interface PathMsg extends Msg {
     /**

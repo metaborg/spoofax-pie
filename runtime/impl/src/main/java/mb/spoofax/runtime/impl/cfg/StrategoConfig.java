@@ -1,20 +1,18 @@
 package mb.spoofax.runtime.impl.cfg;
 
-import static mb.spoofax.runtime.impl.term.Terms.*;
+import mb.pie.vfs.path.PPath;
+import mb.spoofax.runtime.impl.term.Terms;
+import org.immutables.serial.Serial;
+import org.immutables.value.Value;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
-
-import org.immutables.serial.Serial;
-import org.immutables.value.Value;
-import org.spoofax.interpreter.terms.IStrategoTerm;
-
-import mb.spoofax.runtime.impl.term.Terms;
-import mb.vfs.path.PPath;
+import static mb.spoofax.runtime.impl.term.Terms.*;
 
 @Value.Immutable
 @Serial.Version(value = 1L)

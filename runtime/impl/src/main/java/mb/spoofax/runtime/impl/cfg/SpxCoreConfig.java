@@ -1,12 +1,11 @@
 package mb.spoofax.runtime.impl.cfg;
 
-import java.io.Serializable;
-import java.util.List;
-
+import mb.pie.vfs.path.PPath;
 import org.immutables.serial.Serial;
 import org.immutables.value.Value;
 
-import mb.vfs.path.PPath;
+import java.io.Serializable;
+import java.util.List;
 
 @Value.Immutable
 @Serial.Version(value = 1L)

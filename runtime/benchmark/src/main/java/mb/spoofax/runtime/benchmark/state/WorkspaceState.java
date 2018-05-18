@@ -1,9 +1,7 @@
 package mb.spoofax.runtime.benchmark.state;
 
-import mb.vfs.path.PPath;
-import org.openjdk.jmh.annotations.Param;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.State;
+import mb.pie.vfs.path.PPath;
+import org.openjdk.jmh.annotations.*;
 
 import java.io.IOException;
 

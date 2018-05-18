@@ -1,18 +1,13 @@
 package mb.spoofax.runtime.impl.sdf;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.nio.file.Files;
-import java.util.Arrays;
-
+import mb.pie.vfs.path.PPath;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.jsglr.client.ParseTable;
 import org.spoofax.terms.io.binary.TermReader;
 
-import mb.vfs.path.PPath;
+import java.io.*;
+import java.util.Arrays;
 
 public class Table implements Serializable {
     private static final long serialVersionUID = 1L;

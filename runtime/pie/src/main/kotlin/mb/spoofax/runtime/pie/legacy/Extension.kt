@@ -5,10 +5,10 @@ import mb.log.Logger
 import mb.pie.api.ExecContext
 import mb.pie.api.TaskDef
 import mb.pie.api.stamp.FileStampers
+import mb.pie.vfs.path.PPath
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.spoofax.runtime.impl.esv.ESVReader
 import mb.spoofax.runtime.impl.legacy.EsvUtil
-import mb.vfs.path.PPath
 import org.metaborg.spoofax.meta.core.build.SpoofaxLangSpecCommonPaths
 import java.io.Serializable
 

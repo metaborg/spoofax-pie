@@ -1,6 +1,6 @@
 package mb.spoofax.runtime.impl.util;
 
-import mb.vfs.path.PPath;
+import mb.pie.vfs.path.PPath;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;

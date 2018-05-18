@@ -1,26 +1,20 @@
 package mb.spoofax.runtime.impl.sdf;
 
-import java.util.ArrayList;
-
-import javax.annotation.Nullable;
-
-import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.interpreter.terms.ITermFactory;
-import org.spoofax.jsglr.client.Disambiguator;
-import org.spoofax.jsglr.client.ParseTable;
-import org.spoofax.jsglr.client.SGLRParseResult;
-import org.spoofax.jsglr.client.imploder.NullTokenizer;
-import org.spoofax.jsglr.client.imploder.TermTreeFactory;
-import org.spoofax.jsglr.client.imploder.TreeBuilder;
-import org.spoofax.jsglr.io.SGLR;
-import org.spoofax.jsglr.shared.SGLRException;
-import org.spoofax.terms.attachments.ParentTermFactory;
-
+import mb.pie.vfs.path.PPath;
 import mb.spoofax.runtime.model.SpoofaxRunEx;
 import mb.spoofax.runtime.model.message.Msg;
 import mb.spoofax.runtime.model.message.Msgs;
 import mb.spoofax.runtime.model.parse.Token;
-import mb.vfs.path.PPath;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.interpreter.terms.ITermFactory;
+import org.spoofax.jsglr.client.*;
+import org.spoofax.jsglr.client.imploder.*;
+import org.spoofax.jsglr.io.SGLR;
+import org.spoofax.jsglr.shared.SGLRException;
+import org.spoofax.terms.attachments.ParentTermFactory;
+
+import javax.annotation.Nullable;
+import java.util.ArrayList;
 
 public class Parser {
     private final SGLR parser;

@@ -1,7 +1,7 @@
 package mb.spoofax.runtime.impl.cfg;
 
+import mb.pie.vfs.path.PPath;
 import mb.spoofax.runtime.impl.term.Terms;
-import mb.vfs.path.PPath;
 import org.immutables.serial.Serial;
 import org.immutables.value.Value;
 import org.spoofax.interpreter.terms.IStrategoTerm;

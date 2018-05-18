@@ -1,8 +1,8 @@
 package mb.spoofax.runtime.pie.legacy
 
 import mb.log.Logger
-import mb.pie.builtin.util.Tuple3
-import mb.vfs.path.PPath
+import mb.pie.lang.runtime.util.Tuple3
+import mb.pie.vfs.path.PPath
 import org.apache.commons.vfs2.FileObject
 import org.metaborg.core.action.ITransformGoal
 import org.metaborg.core.analysis.AnalysisException

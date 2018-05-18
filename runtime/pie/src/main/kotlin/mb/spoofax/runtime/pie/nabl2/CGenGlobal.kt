@@ -6,10 +6,10 @@ import mb.nabl2.spoofax.analysis.ImmutableInitialResult
 import mb.pie.api.ExecContext
 import mb.pie.api.TaskDef
 import mb.pie.api.stamp.FileStampers
+import mb.pie.vfs.path.PPath
 import mb.spoofax.runtime.impl.stratego.StrategoRuntimeBuilder
 import mb.spoofax.runtime.impl.stratego.primitive.ScopeGraphPrimitiveLibrary
 import mb.spoofax.runtime.model.SpoofaxEx
-import mb.vfs.path.PPath
 import java.io.Serializable
 
 class CGenGlobal

@@ -1,12 +1,12 @@
 package mb.spoofax.runtime.pie.config
 
-import mb.pie.builtin.path.read
 import mb.pie.api.ExecContext
 import mb.pie.api.TaskDef
+import mb.pie.lang.runtime.path.read
+import mb.pie.vfs.path.PPath
 import mb.spoofax.runtime.impl.cfg.LangSpecConfig
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
 import mb.spoofax.runtime.pie.legacy.parse
-import mb.vfs.path.PPath
 import java.io.Serializable
 
 class ParseLangSpecCfg : TaskDef<ParseLangSpecCfg.Input, LangSpecConfig?> {

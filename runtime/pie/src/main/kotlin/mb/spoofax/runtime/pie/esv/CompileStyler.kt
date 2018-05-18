@@ -4,12 +4,12 @@ import com.google.inject.Inject
 import mb.log.Logger
 import mb.pie.api.*
 import mb.pie.api.stamp.FileStampers
+import mb.pie.vfs.path.PPath
 import mb.spoofax.runtime.impl.esv.StylingRules
 import mb.spoofax.runtime.impl.esv.StylingRulesFromESV
 import mb.spoofax.runtime.pie.generated.createWorkspaceConfig
 import mb.spoofax.runtime.pie.legacy.buildOrLoad
 import mb.spoofax.runtime.pie.legacy.process
-import mb.vfs.path.PPath
 import org.spoofax.interpreter.terms.IStrategoAppl
 import java.io.Serializable
 

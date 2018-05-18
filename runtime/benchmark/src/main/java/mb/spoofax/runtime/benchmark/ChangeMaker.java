@@ -1,9 +1,9 @@
 package mb.spoofax.runtime.benchmark;
 
-import mb.pie.runtime.core.Stats;
-import mb.spoofax.runtime.benchmark.state.exec.BUTopsortState;
+import mb.pie.runtime.exec.Stats;
+import mb.pie.vfs.path.PPath;
+import mb.spoofax.runtime.benchmark.state.exec.BUState;
 import mb.spoofax.runtime.benchmark.state.exec.TDState;
-import mb.vfs.path.PPath;
 import org.jetbrains.annotations.Nullable;
 import org.openjdk.jmh.infra.Blackhole;
 
@@ -14,18 +14,18 @@ import java.util.*;
 
 public abstract class ChangeMaker {
     private @Nullable TDState tdState;
-    private @Nullable BUTopsortState buTopsortState;
+    private @Nullable BUState buState;
 
 
     public void run(TDState state) {
         this.tdState = state;
-        this.buTopsortState = null;
+        this.buState = null;
         this.apply();
     }
 
-    public void run(BUTopsortState state) {
+    public void run(BUState state) {
         this.tdState = null;
-        this.buTopsortState = state;
+        this.buState = state;
         this.apply();
     }
 
@@ -51,10 +51,10 @@ public abstract class ChangeMaker {
 
 
     protected void addProject(PPath project, Blackhole blackhole, String name) {
-        if(buTopsortState != null) {
+        if(buState != null) {
             gc();
             final Timer timer = startStats();
-            buTopsortState.addProject(project, blackhole);
+            buState.addProject(project, blackhole);
             endStats(timer, name);
         }
     }
@@ -73,8 +73,8 @@ public abstract class ChangeMaker {
         final Timer timer = startStats();
         if(tdState != null) {
             tdState.addOrUpdateEditor(text, file, project, blackhole);
-        } else if(buTopsortState != null) {
-            buTopsortState.addOrUpdateEditor(text, file, project, blackhole);
+        } else if(buState != null) {
+            buState.addOrUpdateEditor(text, file, project, blackhole);
         }
         endStats(timer, name);
     }
@@ -96,8 +96,8 @@ public abstract class ChangeMaker {
         final Timer timer = startStats();
         if(tdState != null) {
             tdState.execAll(blackhole);
-        } else if(buTopsortState != null) {
-            buTopsortState.execPathChanges(pathChanges);
+        } else if(buState != null) {
+            buState.execPathChanges(pathChanges);
         }
         endStats(timer, name);
     }

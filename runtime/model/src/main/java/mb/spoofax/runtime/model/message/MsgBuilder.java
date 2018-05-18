@@ -1,8 +1,8 @@
 package mb.spoofax.runtime.model.message;
 
+import mb.pie.vfs.path.PPath;
 import mb.spoofax.runtime.model.SpoofaxRunEx;
 import mb.spoofax.runtime.model.region.Region;
-import mb.vfs.path.PPath;
 
 import javax.annotation.Nullable;
 

@@ -1,24 +1,14 @@
 package mb.spoofax.runtime.impl.legacy;
 
-import java.util.ArrayList;
-
-import org.metaborg.core.messages.IMessage;
-import org.metaborg.core.messages.MessageSeverity;
-import org.metaborg.core.messages.MessageType;
-
 import com.google.inject.Inject;
-
+import mb.pie.vfs.path.PPath;
 import mb.spoofax.runtime.model.SpoofaxRunEx;
-import mb.spoofax.runtime.model.message.Msg;
-import mb.spoofax.runtime.model.message.MsgConstants;
-import mb.spoofax.runtime.model.message.MsgImpl;
-import mb.spoofax.runtime.model.message.MsgSeverity;
-import mb.spoofax.runtime.model.message.MsgType;
-import mb.spoofax.runtime.model.message.PathMsg;
-import mb.spoofax.runtime.model.message.PathMsgImpl;
-import mb.spoofax.runtime.model.region.Region;
+import mb.spoofax.runtime.model.message.*;
 import mb.spoofax.runtime.model.parse.ParseMsgType;
-import mb.vfs.path.PPath;
+import mb.spoofax.runtime.model.region.Region;
+import org.metaborg.core.messages.*;
+
+import java.util.ArrayList;
 
 public class MessageConverter {
     private final PathConverter pathConverter;

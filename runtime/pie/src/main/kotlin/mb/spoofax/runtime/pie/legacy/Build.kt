@@ -5,8 +5,8 @@ import mb.log.*
 import mb.log.Logger
 import mb.pie.api.*
 import mb.pie.api.stamp.FileStampers
-import mb.vfs.access.DirAccess
-import mb.vfs.path.*
+import mb.pie.vfs.access.DirAccess
+import mb.pie.vfs.path.*
 import org.eclipse.jdt.core.compiler.batch.BatchCompiler
 import org.metaborg.core.action.CompileGoal
 import org.metaborg.core.build.BuildInputBuilder

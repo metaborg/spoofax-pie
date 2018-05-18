@@ -1,30 +1,20 @@
 package mb.spoofax.runtime.impl.stratego;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.net.URL;
-
-import javax.annotation.Nullable;
-
-import org.spoofax.interpreter.core.InterpreterErrorExit;
-import org.spoofax.interpreter.core.InterpreterException;
-import org.spoofax.interpreter.core.InterpreterExit;
-import org.spoofax.interpreter.core.Tools;
-import org.spoofax.interpreter.core.UndefinedStrategyException;
+import com.google.common.collect.Iterables;
+import mb.pie.vfs.path.PPath;
+import mb.spoofax.runtime.impl.util.MessageFormatter;
+import mb.spoofax.runtime.model.SpoofaxEx;
+import org.spoofax.interpreter.core.*;
 import org.spoofax.interpreter.library.IOAgent;
 import org.spoofax.interpreter.library.IOperatorRegistry;
-import org.spoofax.interpreter.terms.IStrategoList;
-import org.spoofax.interpreter.terms.IStrategoString;
-import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.interpreter.terms.ITermFactory;
+import org.spoofax.interpreter.terms.*;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.IncompatibleJarException;
 
-import com.google.common.collect.Iterables;
-
-import mb.spoofax.runtime.impl.util.MessageFormatter;
-import mb.spoofax.runtime.model.SpoofaxEx;
-import mb.vfs.path.PPath;
+import javax.annotation.Nullable;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.net.URL;
 
 public class StrategoRuntime {
     private final HybridInterpreter hybridInterpreter;
@@ -75,13 +65,14 @@ public class StrategoRuntime {
     public @Nullable IStrategoTerm invoke(String strategy, IStrategoTerm input, IOAgent ioAgent) throws SpoofaxEx {
         return invoke(strategy, input, ioAgent, null);
     }
-    
-    public @Nullable IStrategoTerm invoke(String strategy, IStrategoTerm input, IOAgent ioAgent, @Nullable Object contextObject) throws SpoofaxEx {
+
+    public @Nullable IStrategoTerm invoke(String strategy, IStrategoTerm input, IOAgent ioAgent,
+        @Nullable Object contextObject) throws SpoofaxEx {
         hybridInterpreter.setCurrent(input);
         hybridInterpreter.setIOAgent(ioAgent);
         hybridInterpreter.getContext().setContextObject(contextObject);
         hybridInterpreter.getCompiledContext().setContextObject(contextObject);
-        
+
         try {
             final boolean success = hybridInterpreter.invoke(strategy);
             if(!success)
@@ -93,7 +84,7 @@ public class StrategoRuntime {
         }
     }
 
-    
+
     private class ExceptionData {
         final String message;
         final @Nullable Throwable inner;

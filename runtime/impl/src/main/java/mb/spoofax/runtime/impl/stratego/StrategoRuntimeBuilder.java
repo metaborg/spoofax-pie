@@ -1,16 +1,14 @@
 package mb.spoofax.runtime.impl.stratego;
 
-import java.util.ArrayList;
-
-import javax.annotation.Nullable;
-
+import mb.pie.vfs.path.PPath;
+import mb.spoofax.runtime.model.SpoofaxEx;
 import org.spoofax.interpreter.library.IOperatorRegistry;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.jsglr.client.imploder.ImploderOriginTermFactory;
 import org.spoofax.terms.TermFactory;
 
-import mb.spoofax.runtime.model.SpoofaxEx;
-import mb.vfs.path.PPath;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
 
 public class StrategoRuntimeBuilder {
     private ITermFactory termFactory;

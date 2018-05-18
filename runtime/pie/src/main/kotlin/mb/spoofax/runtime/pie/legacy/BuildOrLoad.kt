@@ -4,8 +4,8 @@ import com.google.inject.Inject
 import mb.log.Logger
 import mb.pie.api.ExecContext
 import mb.pie.api.TaskDef
+import mb.pie.vfs.path.PPath
 import mb.spoofax.runtime.impl.cfg.SpxCoreConfig
-import mb.vfs.path.PPath
 import java.io.Serializable
 
 class CoreBuildOrLoad @Inject constructor(log: Logger) : TaskDef<CoreBuildOrLoad.Input, TransientLangImpl> {

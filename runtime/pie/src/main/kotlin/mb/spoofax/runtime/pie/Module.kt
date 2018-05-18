@@ -1,12 +1,12 @@
 package mb.spoofax.runtime.pie
 
-import com.google.inject.Binder
+import com.google.inject.*
 import com.google.inject.multibindings.MapBinder
-import mb.pie.api.*
-import mb.pie.logger.mblog.LogLogger
-import mb.pie.runtime.cache.MapCache
-import mb.pie.runtime.layer.ValidationLayer
+import mb.pie.api.UTaskDef
+import mb.pie.taskdefs.guice.TaskDefsModule
 import mb.pie.taskdefs.guice.bindTaskDef
+import mb.pie.vfs.path.PathSrv
+import mb.pie.vfs.path.PathSrvImpl
 import mb.spoofax.runtime.pie.config.ParseLangSpecCfg
 import mb.spoofax.runtime.pie.config.ParseWorkspaceCfg
 import mb.spoofax.runtime.pie.esv.CompileStyler
@@ -16,25 +16,7 @@ import mb.spoofax.runtime.pie.nabl2.*
 import mb.spoofax.runtime.pie.sdf3.*
 import mb.spoofax.runtime.pie.stratego.Compile
 
-open class SpoofaxPieModule : PieModule() {
-  override fun configure(binder: Binder) {
-    super.configure(binder)
-
-    binder.bindPie()
-  }
-
-  override fun Binder.bindCache() {
-    bind<Cache>().to<MapCache>()
-  }
-
-  override fun Binder.bindLogger() {
-    bind<Logger>().to<LogLogger>()
-  }
-
-  override fun Binder.bindLayer() {
-    bind<Layer>().to<ValidationLayer>()
-  }
-
+open class SpoofaxPieTaskDefsModule : TaskDefsModule() {
   override fun Binder.bindTaskDefs(builders: MapBinder<String, UTaskDef>) {
     bindTaskDef<ParseLangSpecCfg>(builders, ParseLangSpecCfg.id)
     bindTaskDef<ParseWorkspaceCfg>(builders, ParseWorkspaceCfg.id)
@@ -70,8 +52,11 @@ open class SpoofaxPieModule : PieModule() {
     bindTaskDef<CoreExtensions>(builders, CoreExtensions.id)
     bindTaskDef<CoreStyle>(builders, CoreStyle.id)
   }
+}
 
-  open protected fun Binder.bindPie() {
-    bind<PieSrv>().to<PieSrvImpl>().asSingleton()
+open class SpoofaxPieModule : AbstractModule() {
+  override fun configure() {
+    bind(SpoofaxPipeline::class.java).`in`(Singleton::class.java)
+    bind(PathSrv::class.java).to(PathSrvImpl::class.java).`in`(Singleton::class.java)
   }
 }

@@ -1,165 +1,215 @@
 package mb.spoofax.runtime.benchmark.state;
 
-import com.google.inject.Key;
-import com.google.inject.Provider;
-import mb.pie.logger.mblog.LogLogger;
-import mb.pie.runtime.core.*;
+import mb.log.Logger;
+import mb.pie.api.Pie;
+import mb.pie.api.PieBuilder;
+import mb.pie.api.stamp.*;
+import mb.pie.runtime.PieBuilderImpl;
 import mb.pie.runtime.cache.MapCache;
 import mb.pie.runtime.cache.NoopCache;
 import mb.pie.runtime.layer.NoopLayer;
 import mb.pie.runtime.layer.ValidationLayer;
-import mb.pie.runtime.logger.exec.NoopExecutorLogger;
+import mb.pie.runtime.logger.NoopLogger;
 import mb.pie.runtime.logger.StreamLogger;
-import mb.pie.runtime.logger.exec.TraceExecutorLogger;
-import mb.pie.runtime.share.CoroutineShare;
+import mb.pie.runtime.logger.exec.*;
 import mb.pie.runtime.share.NonSharingShare;
 import mb.pie.runtime.store.InMemoryStore;
-import mb.pie.runtime.store.LMDBBuildStoreFactory;
 import mb.pie.runtime.store.NoopStore;
-import mb.vfs.path.PPath;
-import org.openjdk.jmh.annotations.Param;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.State;
+import mb.pie.share.coroutine.CoroutineShareKt;
+import mb.pie.store.lmdb.LMDBKt;
+import mb.pie.taskdefs.guice.GuiceTaskDefsKt;
+import mb.spoofax.runtime.pie.LogLoggerKt;
+import org.openjdk.jmh.annotations.*;
 
 import java.io.File;
-import java.util.Map;
 
 
 @State(Scope.Benchmark)
 public class InfraState {
-    public Store store;
-    public Cache cache;
-    public Share share;
-    public Provider<Layer> layer;
-    public Provider<Logger> logger;
-    public Map<String, TaskDef<?, ?>> funcs;
+    public Pie pie;
 
     public void setup(SpoofaxPieState spoofaxPieState, WorkspaceState workspaceState) {
-        this.store = storeKind.provider(workspaceState.storePath, spoofaxPieState).get();
-        try(final StoreWriteTxn txn = this.store.writeTxn()) {
-            txn.drop();
-        }
-        this.cache = cacheKind.provider(spoofaxPieState).get();
-        this.cache.drop();
-        this.share = shareKind.provider(spoofaxPieState).get();
-        this.layer = layerKind.provider(spoofaxPieState);
-        this.logger = loggerKind.provider(spoofaxPieState);
-        this.funcs = spoofaxPieState.injector.getInstance(new Key<Map<String, TaskDef<?, ?>>>() {
-        });
+        final PieBuilder builder = new PieBuilderImpl();
+        storeKind.apply(builder, spoofaxPieState, workspaceState);
+        cacheKind.apply(builder);
+        shareKind.apply(builder);
+        builder.withDefaultOutputStamper(defaultOutputStamperKind.get());
+        builder.withDefaultFileReqStamper(defaultFileReqStamperKind.get());
+        builder.withDefaultFileGenStamper(defaultFileGenStamperKind.get());
+        layerKind.apply(builder);
+        loggerKind.apply(builder, spoofaxPieState);
+        executorLoggerKind.apply(builder);
+        GuiceTaskDefsKt.withGuiceTaskDefs(builder, spoofaxPieState.injector);
+        final Pie pie = builder.build();
+        pie.dropCache();
+        pie.dropStore();
+        this.pie = pie;
     }
 
     public void reset() {
-        try(final StoreWriteTxn txn = this.store.writeTxn()) {
-            txn.drop();
-        }
-        this.cache.drop();
+        pie.dropCache();
+        pie.dropStore();
     }
 
 
-    @Param({"in_memory"}) public StoreKind storeKind;
-    @Param({"noop"}) public CacheKind cacheKind;
-    @Param({"non_sharing"}) public ShareKind shareKind;
-    @Param({"validation"}) public LayerKind layerKind;
-    @Param({"noop"}) public LoggerKind loggerKind;
+    @Param({"in_memory"}) private StoreKind storeKind;
+    @Param({"noop"}) private CacheKind cacheKind;
+    @Param({"non_sharing"}) private ShareKind shareKind;
+    @Param({"equals"}) private OutputStamperKind defaultOutputStamperKind;
+    @Param({"modified"}) private FileStamperKind defaultFileReqStamperKind;
+    @Param({"modified"}) private FileStamperKind defaultFileGenStamperKind;
+    @Param({"validation"}) private LayerKind layerKind;
+    @Param({"noop"}) private LoggerKind loggerKind;
+    @Param({"noop"}) private ExecutorLoggerKind executorLoggerKind;
 
-    public enum StoreKind {
+    @SuppressWarnings("unused") public enum StoreKind {
         lmdb {
-            @Override public Provider<Store> provider(PPath storePath, SpoofaxPieState spoofaxPieState) {
-                final LMDBBuildStoreFactory factory = spoofaxPieState.injector.getInstance(LMDBBuildStoreFactory.class);
-                final File localStorePath = spoofaxPieState.pathSrv.localPath(storePath);
+            @Override public void apply(PieBuilder builder, SpoofaxPieState spoofaxPieState, WorkspaceState workspaceState) {
+                final File localStorePath = spoofaxPieState.pathSrv.localPath(workspaceState.storePath);
                 if(localStorePath == null) {
                     throw new RuntimeException(
-                        "Cannot create PIE LMDB store at " + storePath + " because it is not on the local filesystem");
+                        "Cannot create LMDB store, cannot convert " + workspaceState.storePath + " to a local filesystem path");
                 }
-                return () -> factory.create(localStorePath, 1024 * 1024 * 1024, 1024);
+                LMDBKt.withLMDBStore(builder, localStorePath);
             }
         },
         in_memory {
-            @Override public Provider<Store> provider(PPath storePath, SpoofaxPieState spoofaxPieState) {
-                return InMemoryStore::new;
+            @Override public void apply(PieBuilder builder, SpoofaxPieState spoofaxPieState, WorkspaceState workspaceState) {
+                builder.withStore(logger -> new InMemoryStore());
             }
         },
         noop {
-            @Override public Provider<Store> provider(PPath storePath, SpoofaxPieState spoofaxPieState) {
-                return NoopStore::new;
+            @Override public void apply(PieBuilder builder, SpoofaxPieState spoofaxPieState, WorkspaceState workspaceState) {
+                builder.withStore(logger -> new NoopStore());
             }
         };
 
-        public abstract Provider<Store> provider(PPath storePath, SpoofaxPieState spoofaxPieState);
+        public abstract void apply(PieBuilder builder, SpoofaxPieState spoofaxPieState, WorkspaceState workspaceState);
     }
 
-    public enum CacheKind {
+    @SuppressWarnings("unused") public enum CacheKind {
         map {
-            @Override public Provider<Cache> provider(SpoofaxPieState spoofaxPieState) {
-                return MapCache::new;
+            @Override public void apply(PieBuilder builder) {
+                builder.withCache(logger -> new MapCache());
             }
         },
         noop {
-            @Override public Provider<Cache> provider(SpoofaxPieState spoofaxPieState) {
-                return NoopCache::new;
+            @Override public void apply(PieBuilder builder) {
+                builder.withCache(logger -> new NoopCache());
             }
         };
 
-        public abstract Provider<Cache> provider(SpoofaxPieState spoofaxPieState);
+        public abstract void apply(PieBuilder builder);
     }
 
-    public enum ShareKind {
+    @SuppressWarnings("unused") public enum ShareKind {
         coroutine {
-            @Override public Provider<Share> provider(SpoofaxPieState spoofaxPieState) {
-                return CoroutineShare::new;
+            @Override public void apply(PieBuilder builder) {
+                CoroutineShareKt.withCoroutineShare(builder);
             }
         },
         non_sharing {
-            @Override public Provider<Share> provider(SpoofaxPieState spoofaxPieState) {
-                return NonSharingShare::new;
+            @Override public void apply(PieBuilder builder) {
+                builder.withShare(logger -> new NonSharingShare());
             }
         };
 
-        public abstract Provider<Share> provider(SpoofaxPieState spoofaxPieState);
+        public abstract void apply(PieBuilder builder);
     }
 
-    public enum LayerKind {
+    @SuppressWarnings("unused") public enum OutputStamperKind {
+        equals {
+            @Override public OutputStamper get() {
+                return OutputStampers.INSTANCE.getEquals();
+            }
+        },
+        inconsequential {
+            @Override public OutputStamper get() {
+                return OutputStampers.INSTANCE.getInconsequential();
+            }
+        };
+
+        public abstract OutputStamper get();
+    }
+
+    @SuppressWarnings("unused") public enum FileStamperKind {
+        exists {
+            @Override public FileStamper get() {
+                return FileStampers.INSTANCE.getExists();
+            }
+        },
+        modified {
+            @Override public FileStamper get() {
+                return FileStampers.INSTANCE.getModified();
+            }
+        },
+        hash {
+            @Override public FileStamper get() {
+                return FileStampers.INSTANCE.getHash();
+            }
+        };
+
+        public abstract FileStamper get();
+    }
+
+    @SuppressWarnings("unused") public enum LayerKind {
         validation {
-            @Override public Provider<Layer> provider(SpoofaxPieState spoofaxPieState) {
-                return () -> spoofaxPieState.injector.getInstance(ValidationLayer.class);
+            @Override public void apply(PieBuilder builder) {
+                builder.withLayer(ValidationLayer::new);
             }
         },
         noop {
-            @Override public Provider<Layer> provider(SpoofaxPieState spoofaxPieState) {
-                return NoopLayer::new;
+            @Override public void apply(PieBuilder builder) {
+                builder.withLayer(logger -> new NoopLayer());
             }
         };
 
-        public abstract Provider<Layer> provider(SpoofaxPieState spoofaxPieState);
+        public abstract void apply(PieBuilder builder);
     }
 
-    public enum LoggerKind {
-        trace {
-            @Override public Provider<Logger> provider(SpoofaxPieState spoofaxPieState) {
-                return TraceExecutorLogger::new;
-            }
-        },
-        log {
-            @Override public Provider<Logger> provider(SpoofaxPieState spoofaxPieState) {
-                return () -> spoofaxPieState.injector.getInstance(LogLogger.class);
+    @SuppressWarnings("unused") public enum LoggerKind {
+        mblog {
+            @Override public void apply(PieBuilder builder, SpoofaxPieState spoofaxPieState) {
+                Logger logger = spoofaxPieState.logger;
+                LogLoggerKt.withMbLogger(builder, logger);
             }
         },
         stdout {
-            @Override public Provider<Logger> provider(SpoofaxPieState spoofaxPieState) {
-                return () -> new StreamLogger(System.out, null, 200);
+            @Override public void apply(PieBuilder builder, SpoofaxPieState spoofaxPieState) {
+                builder.withLogger(StreamLogger.Companion.non_verbose());
             }
         },
         stdout_verbose {
-            @Override public Provider<Logger> provider(SpoofaxPieState spoofaxPieState) {
-                return () -> new StreamLogger(System.out, System.out, 200);
+            @Override public void apply(PieBuilder builder, SpoofaxPieState spoofaxPieState) {
+                builder.withLogger(StreamLogger.Companion.verbose());
             }
         },
         noop {
-            @Override public Provider<Logger> provider(SpoofaxPieState spoofaxPieState) {
-                return NoopExecutorLogger::new;
+            @Override public void apply(PieBuilder builder, SpoofaxPieState spoofaxPieState) {
+                builder.withLogger(new NoopLogger());
             }
         };
 
-        public abstract Provider<Logger> provider(SpoofaxPieState spoofaxPieState);
+        public abstract void apply(PieBuilder builder, SpoofaxPieState spoofaxPieState);
+    }
+
+    @SuppressWarnings("unused") public enum ExecutorLoggerKind {
+        trace {
+            @Override public void apply(PieBuilder builder) {
+                builder.withExecutorLogger(logger -> new TraceExecutorLogger());
+            }
+        },
+        log {
+            @Override public void apply(PieBuilder builder) {
+                builder.withExecutorLogger(LoggerExecutorLogger::new);
+            }
+        },
+        noop {
+            @Override public void apply(PieBuilder builder) {
+                builder.withExecutorLogger(logger -> new NoopExecutorLogger());
+            }
+        };
+
+        public abstract void apply(PieBuilder builder);
     }
 }

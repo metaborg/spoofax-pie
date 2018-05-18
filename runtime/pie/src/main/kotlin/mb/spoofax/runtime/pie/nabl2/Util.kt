@@ -1,13 +1,12 @@
 package mb.spoofax.runtime.pie.nabl2
 
 import mb.nabl2.solver.ImmutableSolution
-import mb.pie.builtin.util.Tuple5
+import mb.pie.lang.runtime.util.Tuple5
+import mb.pie.vfs.path.PPath
 import mb.spoofax.runtime.model.message.Msg
 import mb.spoofax.runtime.model.parse.Token
 import mb.spoofax.runtime.model.style.Styling
-import mb.vfs.path.PPath
 import java.util.*
-
 
 fun filterNullPartialSolutions(partialSolutions: ArrayList<ImmutableSolution?>): ArrayList<ImmutableSolution> {
   return partialSolutions.filterNotNull().toCollection(ArrayList())

@@ -3,9 +3,9 @@ package mb.spoofax.runtime.pie.stratego
 import com.google.inject.Inject
 import mb.pie.api.*
 import mb.pie.api.stamp.FileStampers
+import mb.pie.vfs.path.*
 import mb.spoofax.runtime.impl.cfg.StrategoConfig
 import mb.spoofax.runtime.impl.stratego.StrategoCompiler
-import mb.vfs.path.*
 import java.io.IOException
 import java.io.Serializable
 import java.nio.charset.Charset

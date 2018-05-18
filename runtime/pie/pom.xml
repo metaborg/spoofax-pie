@@ -29,11 +29,10 @@
     </dependency>
 
     <dependency>
-      <groupId>org.eclipse.jdt.core.compiler</groupId>
-      <artifactId>ecj</artifactId>
-      <version>4.6.1</version>
+      <groupId>org.metaborg</groupId>
+      <artifactId>pie.vfs</artifactId>
+      <version>0.1.0</version>
     </dependency>
-
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>pie.api</artifactId>
@@ -46,17 +45,12 @@
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
-      <artifactId>pie.builtin</artifactId>
-      <version>0.1.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.metaborg</groupId>
       <artifactId>pie.taskdefs.guice</artifactId>
       <version>0.1.0</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
-      <artifactId>pie.logger.mblog</artifactId>
+      <artifactId>pie.lang.runtime</artifactId>
       <version>0.1.0</version>
     </dependency>
 
@@ -83,11 +77,6 @@
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
-      <artifactId>vfs</artifactId>
-      <version>${metaborg-version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.metaborg</groupId>
       <artifactId>org.spoofax.terms</artifactId>
       <version>${metaborg-version}</version>
     </dependency>
@@ -105,6 +94,12 @@
       <groupId>org.metaborg</groupId>
       <artifactId>org.metaborg.spoofax.core</artifactId>
       <version>${metaborg-version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.eclipse.jdt.core.compiler</groupId>
+      <artifactId>ecj</artifactId>
+      <version>4.6.1</version>
     </dependency>
 
     <dependency>

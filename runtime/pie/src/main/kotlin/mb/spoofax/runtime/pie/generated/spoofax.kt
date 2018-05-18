@@ -5,9 +5,11 @@ package mb.spoofax.runtime.pie.generated
 import com.google.inject.Binder
 import com.google.inject.Module
 import mb.pie.api.*
-import mb.pie.builtin.path.*
-import mb.pie.builtin.util.*
-import mb.pie.runtime.*
+import mb.pie.lang.runtime.path.*
+import mb.pie.lang.runtime.util.*
+import mb.pie.taskdefs.guice.bindTaskDef
+import mb.pie.taskdefs.guice.taskDefsBinder
+import mb.pie.vfs.path.*
 import mb.spoofax.runtime.impl.cfg.*
 import mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution
 import mb.spoofax.runtime.impl.sdf.Signatures
@@ -15,7 +17,6 @@ import mb.spoofax.runtime.model.message.Msg
 import mb.spoofax.runtime.model.message.PathMsg
 import mb.spoofax.runtime.model.parse.Token
 import mb.spoofax.runtime.model.style.Styling
-import mb.vfs.path.*
 import java.nio.file.FileSystems
 
 class toMessage : TaskDef<PathMsg, Msg> {

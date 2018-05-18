@@ -2,10 +2,10 @@ package mb.spoofax.runtime.pie.config
 
 import mb.pie.api.ExecContext
 import mb.pie.api.TaskDef
+import mb.pie.vfs.path.PPath
 import mb.spoofax.runtime.impl.cfg.*
 import mb.spoofax.runtime.pie.legacy.langExtensions
 import mb.spoofax.runtime.pie.legacy.parse
-import mb.vfs.path.PPath
 import java.io.Serializable
 
 class ParseWorkspaceCfg : TaskDef<ParseWorkspaceCfg.Input, WorkspaceConfig?> {

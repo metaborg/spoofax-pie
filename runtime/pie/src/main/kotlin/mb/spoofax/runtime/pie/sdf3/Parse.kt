@@ -1,12 +1,12 @@
 package mb.spoofax.runtime.pie.sdf3
 
 import mb.pie.api.*
-import mb.pie.builtin.util.Tuple3
+import mb.pie.lang.runtime.util.Tuple3
+import mb.pie.vfs.path.PPath
 import mb.spoofax.runtime.impl.sdf.Table
 import mb.spoofax.runtime.model.message.Msg
 import mb.spoofax.runtime.model.parse.Token
 import mb.spoofax.runtime.pie.generated.createWorkspaceConfig
-import mb.vfs.path.PPath
 import org.spoofax.interpreter.terms.IStrategoTerm
 import org.spoofax.jsglr.client.imploder.ImploderOriginTermFactory
 import org.spoofax.terms.TermFactory
