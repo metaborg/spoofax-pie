@@ -12,7 +12,7 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import com.google.inject.Injector;
 
 import mb.log.Logger;
-import mb.pie.runtime.core.ExecException;
+import mb.pie.api.ExecException;
 import mb.spoofax.runtime.eclipse.SpoofaxPlugin;
 import mb.spoofax.runtime.eclipse.pipeline.PipelineAdapter;
 import mb.spoofax.runtime.eclipse.util.Nullable;

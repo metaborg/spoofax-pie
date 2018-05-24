@@ -3,8 +3,8 @@ package mb.spoofax.runtime.eclipse.pipeline;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 
-import mb.util.async.Cancel;
-import mb.util.async.Cancelled;
+import mb.pie.api.exec.Cancel;
+import mb.pie.api.exec.Cancelled;
 
 public class MonitorCancelToken implements Cancelled, Cancel {
     public SubMonitor monitor;
@@ -17,11 +17,11 @@ public class MonitorCancelToken implements Cancelled, Cancel {
         this.monitor = monitor;
     }
 
-    @Override public void cancel() {
+    @Override public void requestCancel() {
         monitor.setCanceled(true);
     }
 
-    @Override public boolean cancelled() {
+    @Override public boolean isCancelled() {
         return monitor.isCanceled();
     }
 

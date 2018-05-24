@@ -12,17 +12,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import mb.log.LogModule;
-import mb.pie.runtime.builtin.PieBuiltinModule;
+import mb.pie.lang.runtime.PieLangRuntimeModule;
+import mb.spoofax.api.SpoofaxFacade;
+import mb.spoofax.api.SpoofaxModule;
+import mb.spoofax.api.StaticSpoofaxFacade;
+import mb.spoofax.legacy.StaticSpoofaxCoreFacade;
+import mb.spoofax.pie.SpoofaxPieModule;
+import mb.spoofax.pie.SpoofaxPieTaskDefsModule;
+import mb.spoofax.pie.generated.PieBuilderModule_spoofax;
+import mb.spoofax.runtime.SpoofaxImplModule;
 import mb.spoofax.runtime.eclipse.pipeline.PipelineProjectManager;
 import mb.spoofax.runtime.eclipse.util.LoggingConfiguration;
-import mb.spoofax.runtime.impl.SpoofaxImplModule;
-import mb.spoofax.runtime.impl.legacy.StaticSpoofaxCoreFacade;
-import mb.spoofax.runtime.model.SpoofaxEx;
-import mb.spoofax.runtime.model.SpoofaxFacade;
-import mb.spoofax.runtime.model.SpoofaxModule;
-import mb.spoofax.runtime.model.StaticSpoofaxFacade;
-import mb.spoofax.runtime.pie.SpoofaxPieModule;
-import mb.spoofax.runtime.pie.generated.PieBuilderModule_spoofax;
 
 public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
     public static final String id = "mb.spoofax.runtime.eclipse";
@@ -47,15 +47,10 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
         logger.debug("Starting Spoofax plugin");
 
         // Initialize Spoofax runtime
-        try {
-            spoofaxFacade = new SpoofaxFacade(new SpoofaxModule(), new LogModule(logger), new EclipseVFSModule(),
-                new SpoofaxImplModule(), new EclipseModule(), new SpoofaxPieModule(), new PieBuiltinModule(),
-                new PieBuilderModule_spoofax());
-            StaticSpoofaxFacade.init(spoofaxFacade);
-        } catch(SpoofaxEx e) {
-            logger.error("Instantiating Spoofax failed", e);
-            throw e;
-        }
+        spoofaxFacade = new SpoofaxFacade(new SpoofaxModule(), new LogModule(logger), new SpoofaxImplModule(),
+            new SpoofaxPieModule(), new EclipseVFSModule(), new SpoofaxPieTaskDefsModule(), new PieLangRuntimeModule(),
+            new PieBuilderModule_spoofax());
+        StaticSpoofaxFacade.init(spoofaxFacade);
         spoofaxFacade.injector.getInstance(PipelineProjectManager.class).initialize();
 
         // Initialize Spoofax Core

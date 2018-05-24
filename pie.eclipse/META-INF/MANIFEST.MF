@@ -28,10 +28,10 @@ Require-Bundle: org.eclipse.core.runtime,
  org.metaborg.spoofax.eclipse.externaldeps,
  org.metaborg.spoofax.eclipse.meta.externaldeps,
  log,
- spoofax.runtime.model,
- spoofax.runtime.impl,
- spoofax.runtime.impl.legacy,
- spoofax.runtime.eclipse.externaldeps
+ spoofax.api,
+ spoofax.runtime,
+ spoofax.legacy,
+ spoofax.pie.eclipse.externaldeps
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: metaborg.org
 Bundle-ActivationPolicy: lazy
@@ -53,3 +53,4 @@ Eclipse-RegisterBuddy:
  spoofax.runtime.impl,
  spoofax.runtime.impl.legacy,
  spoofax.runtime.eclipse.externaldeps
+Import-Package: mb.spoofax.api.style

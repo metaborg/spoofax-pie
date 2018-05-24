@@ -10,15 +10,14 @@ import com.google.inject.Inject;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 import mb.log.Logger;
+import mb.pie.vfs.path.PPath;
+import mb.spoofax.api.message.Msg;
+import mb.spoofax.api.style.Styling;
+import mb.spoofax.pie.generated.processEditor;
+import mb.spoofax.pie.generated.processProject;
 import mb.spoofax.runtime.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.runtime.eclipse.util.Nullable;
-import mb.spoofax.runtime.impl.nabl.ConstraintSolverSolution;
-import mb.spoofax.runtime.model.message.Msg;
-import mb.spoofax.runtime.model.style.Styling;
-import mb.spoofax.runtime.pie.generated.processEditor;
-import mb.spoofax.runtime.pie.generated.processEditor.Output;
-import mb.spoofax.runtime.pie.generated.processProject;
-import mb.vfs.path.PPath;
+import mb.spoofax.runtime.nabl.ConstraintSolverSolution;
 
 public class PipelineObservers {
 
@@ -53,9 +52,9 @@ public class PipelineObservers {
                     final @Nullable ConstraintSolverSolution solution = fileResult.component5();
                     if(solution != null) {
                         update.addMessages(solution.getFileMessages());
-                        //update.addMessages(solution.getFileUnsolvedMessages());
+                        // update.addMessages(solution.getFileUnsolvedMessages());
                         update.addMessages(project, solution.getProjectMessages());
-                        //update.addMessages(project, solution.getProjectUnsolvedMessages());
+                        // update.addMessages(project, solution.getProjectUnsolvedMessages());
                     }
                 });
                 projectResult.component2().stream().forEach((result) -> {
@@ -80,7 +79,7 @@ public class PipelineObservers {
     }
 
 
-    private final class EditorObserver implements Function1<Output, Unit> {
+    private final class EditorObserver implements Function1<processEditor.Output, Unit> {
         private final SpoofaxEditor editor;
         private final String text;
         private final PPath file;
@@ -93,7 +92,7 @@ public class PipelineObservers {
             this.file = file;
         }
 
-        @Override public Unit invoke(Output editorResult) {
+        @Override public Unit invoke(processEditor.Output editorResult) {
             final WorkspaceUpdate update = workspaceUpdateFactory.create();
             update.addClear(file);
             if(editorResult != null) {
@@ -110,7 +109,7 @@ public class PipelineObservers {
                 final @Nullable ConstraintSolverSolution solution = editorResult.component4();
                 if(solution != null) {
                     update.addMessagesFiltered(solution.getFileMessages(), file);
-                    //update.addMessagesFiltered(solution.getFileUnsolvedMessages(), file);
+                    // update.addMessagesFiltered(solution.getFileUnsolvedMessages(), file);
                 }
             } else {
                 update.removeStyle(editor, text.length());

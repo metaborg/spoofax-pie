@@ -14,10 +14,10 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 import mb.log.Logger;
-import mb.spoofax.runtime.model.region.Region;
-import mb.spoofax.runtime.model.style.Style;
-import mb.spoofax.runtime.model.style.Styling;
-import mb.spoofax.runtime.model.style.TokenStyle;
+import mb.spoofax.api.region.Region;
+import mb.spoofax.api.style.Style;
+import mb.spoofax.api.style.Styling;
+import mb.spoofax.api.style.TokenStyle;
 
 /**
  * Utility functions for creating Eclipse text styles.

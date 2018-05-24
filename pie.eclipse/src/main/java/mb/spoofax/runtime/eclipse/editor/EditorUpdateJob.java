@@ -8,7 +8,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.IEditorInput;
 
 import mb.log.Logger;
-import mb.pie.runtime.core.ExecException;
+import mb.pie.api.ExecException;
 import mb.spoofax.runtime.eclipse.pipeline.PipelineAdapter;
 import mb.spoofax.runtime.eclipse.util.StatusUtils;
 

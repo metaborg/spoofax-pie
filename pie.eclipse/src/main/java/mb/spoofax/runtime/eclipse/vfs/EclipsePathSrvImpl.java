@@ -19,9 +19,9 @@ import org.eclipse.ui.IURIEditorInput;
 import com.google.inject.Inject;
 
 import mb.log.Logger;
+import mb.pie.vfs.path.PPath;
+import mb.pie.vfs.path.PathSrvImpl;
 import mb.spoofax.runtime.eclipse.util.Nullable;
-import mb.vfs.path.PPath;
-import mb.vfs.path.PathSrvImpl;
 
 public class EclipsePathSrvImpl extends PathSrvImpl implements EclipsePathSrv {
     private final Logger logger;

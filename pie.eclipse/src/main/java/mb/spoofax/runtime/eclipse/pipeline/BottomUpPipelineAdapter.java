@@ -17,19 +17,19 @@ import com.google.inject.Inject;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 import mb.log.Logger;
-import mb.pie.runtime.core.ExecException;
-import mb.pie.runtime.core.Task;
-import mb.pie.runtime.core.exec.BottomUpExecutor;
-import mb.spoofax.runtime.eclipse.SpoofaxPlugin;
+import mb.pie.api.ExecException;
+import mb.pie.api.Pie;
+import mb.pie.api.Task;
+import mb.pie.api.exec.BottomUpExecutor;
+import mb.pie.api.exec.Cancelled;
+import mb.pie.runtime.PieBuilderImpl;
+import mb.pie.vfs.path.PPath;
+import mb.spoofax.pie.SpoofaxPipeline;
+import mb.spoofax.pie.generated.processEditor;
+import mb.spoofax.pie.generated.processProject;
 import mb.spoofax.runtime.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.runtime.eclipse.util.Nullable;
 import mb.spoofax.runtime.eclipse.vfs.EclipsePathSrv;
-import mb.spoofax.runtime.pie.PieSrv;
-import mb.spoofax.runtime.pie.SpoofaxPipeline;
-import mb.spoofax.runtime.pie.generated.processEditor;
-import mb.spoofax.runtime.pie.generated.processProject;
-import mb.util.async.Cancelled;
-import mb.vfs.path.PPath;
 
 public class BottomUpPipelineAdapter implements PipelineAdapter {
     private final PipelineObservers observers;
@@ -42,14 +42,16 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
 
     private final IWorkspaceRoot eclipseRoot;
     private final PPath root;
+    private final Pie pie;
     private final BottomUpExecutor executor;
 
 
-    @Inject public BottomUpPipelineAdapter(PipelineObservers observers, PipelinePathChanges pathChanges, Logger logger,
-        EclipsePathSrv pathSrv, PieSrv pieSrv, WorkspaceUpdateFactory workspaceUpdateFactory) {
+    @Inject public BottomUpPipelineAdapter(PipelineObservers observers, PipelinePathChanges pathChanges,
+        SpoofaxPipeline pipeline, Logger logger, EclipsePathSrv pathSrv,
+        WorkspaceUpdateFactory workspaceUpdateFactory) {
         this.observers = observers;
         this.pathChanges = pathChanges;
-        this.pipeline = SpoofaxPipeline.INSTANCE;
+        this.pipeline = pipeline;
 
         this.logger = logger.forContext(getClass());
         this.pathSrv = pathSrv;
@@ -57,7 +59,8 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
 
         this.eclipseRoot = ResourcesPlugin.getWorkspace().getRoot();
         this.root = pathSrv.resolve(eclipseRoot);
-        this.executor = pieSrv.getBottomUpExecutor(root, SpoofaxPlugin.useInMemoryStore);
+        this.pie = new PieBuilderImpl().build();
+        this.executor = pie.getBottomUpExecutor();
     }
 
 
@@ -153,8 +156,8 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
 
     @Override public void cleanAll(@Nullable IProgressMonitor monitor) throws CoreException {
         logger.debug("Cleaning all stored pipeline data");
-        executor.dropStore();
-        executor.dropCache();
+        pie.dropCache();
+        pie.dropStore();
         final WorkspaceUpdate update = workspaceUpdateFactory.create();
         update.addClearRec(root);
         update.update(WorkspaceUpdate.lock, monitor);

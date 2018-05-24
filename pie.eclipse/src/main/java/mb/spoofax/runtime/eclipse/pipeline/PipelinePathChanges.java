@@ -9,9 +9,9 @@ import org.eclipse.core.runtime.CoreException;
 
 import com.google.inject.Inject;
 
+import mb.pie.vfs.path.PPath;
 import mb.spoofax.runtime.eclipse.util.Nullable;
 import mb.spoofax.runtime.eclipse.vfs.EclipsePathSrv;
-import mb.vfs.path.PPath;
 
 public class PipelinePathChanges {
     private final EclipsePathSrv pathSrv;

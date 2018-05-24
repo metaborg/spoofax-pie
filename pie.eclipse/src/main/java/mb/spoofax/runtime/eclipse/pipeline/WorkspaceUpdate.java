@@ -21,16 +21,16 @@ import org.eclipse.jface.text.TextPresentation;
 import com.google.inject.Inject;
 
 import mb.log.Logger;
+import mb.pie.vfs.path.PPath;
+import mb.spoofax.api.message.Msg;
+import mb.spoofax.api.message.PathMsg;
+import mb.spoofax.api.style.Styling;
 import mb.spoofax.runtime.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.runtime.eclipse.util.MarkerUtils;
 import mb.spoofax.runtime.eclipse.util.Nullable;
 import mb.spoofax.runtime.eclipse.util.StatusUtils;
 import mb.spoofax.runtime.eclipse.util.StyleUtils;
 import mb.spoofax.runtime.eclipse.vfs.EclipsePathSrv;
-import mb.spoofax.runtime.model.message.Msg;
-import mb.spoofax.runtime.model.message.PathMsg;
-import mb.spoofax.runtime.model.style.Styling;
-import mb.vfs.path.PPath;
 
 public class WorkspaceUpdate {
     public static final LockRule lock = new LockRule("Workspace update lock");

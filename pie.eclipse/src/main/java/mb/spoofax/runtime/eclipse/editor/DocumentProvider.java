@@ -9,9 +9,9 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
 
 import mb.log.Logger;
+import mb.pie.vfs.path.PPath;
 import mb.spoofax.runtime.eclipse.util.StatusUtils;
 import mb.spoofax.runtime.eclipse.vfs.EclipsePathSrv;
-import mb.vfs.path.PPath;
 
 public class DocumentProvider extends FileDocumentProvider {
     private final Logger logger;

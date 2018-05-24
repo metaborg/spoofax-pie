@@ -21,11 +21,11 @@ import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import com.google.inject.Injector;
 
 import mb.log.Logger;
+import mb.spoofax.api.SpoofaxFacade;
 import mb.spoofax.runtime.eclipse.SpoofaxPlugin;
 import mb.spoofax.runtime.eclipse.pipeline.PipelineAdapter;
 import mb.spoofax.runtime.eclipse.util.Nullable;
 import mb.spoofax.runtime.eclipse.vfs.EclipsePathSrv;
-import mb.spoofax.runtime.model.SpoofaxFacade;
 
 public class SpoofaxEditor extends TextEditor {
     private final class DocumentListener implements IDocumentListener {
