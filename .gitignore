@@ -1,0 +1,16 @@
+# Eclipse
+/**/.project
+/**/.classpath
+/**/.factorypath
+/**/.settings
+
+# IntelliJ
+/**/*.iml
+
+# Maven
+/**/target
+
+# Java
+*.class
+*.jar
+hs_err_pid*

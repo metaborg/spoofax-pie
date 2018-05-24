@@ -1,6 +1,6 @@
 ---
-id: org.metaborg:spoofax.runtime.pie:0.1.0-SNAPSHOT
-name: spoofax.runtime.pie
+id: org.metaborg:spoofax.pie:0.1.0-SNAPSHOT
+name: spoofax.pie
 dependencies:
   compile:
   - org.metaborg:pie.lang:0.1.0-SNAPSHOT

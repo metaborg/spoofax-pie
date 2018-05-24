@@ -4,7 +4,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 >
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>spoofax.runtime.model</artifactId>
+  <artifactId>spoofax.api</artifactId>
   <version>0.1.0-SNAPSHOT</version>
 
   <parent>
@@ -15,16 +15,19 @@
   </parent>
 
   <dependencies>
+    <!-- TODO: strip dependencies -->
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>pie.vfs</artifactId>
       <version>0.1.0</version>
     </dependency>
+
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>log</artifactId>
       <version>${metaborg-version}</version>
     </dependency>
+
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.spoofax.terms</artifactId>

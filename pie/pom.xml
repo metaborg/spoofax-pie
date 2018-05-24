@@ -4,7 +4,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 >
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>spoofax.runtime.pie</artifactId>
+  <artifactId>spoofax.pie</artifactId>
   <version>0.1.0-SNAPSHOT</version>
 
   <parent>
@@ -18,7 +18,6 @@
     <kotlin.lang.version>1.2</kotlin.lang.version>
     <kotlin.api.version>1.2</kotlin.api.version>
     <kotlin.runtime.version>1.2.41</kotlin.runtime.version>
-    <kotlin.coroutines.version>0.22.5</kotlin.coroutines.version>
   </properties>
 
   <dependencies>
@@ -56,17 +55,17 @@
 
     <dependency>
       <groupId>org.metaborg</groupId>
-      <artifactId>spoofax.runtime.model</artifactId>
+      <artifactId>spoofax.api</artifactId>
       <version>0.1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
-      <artifactId>spoofax.runtime.impl</artifactId>
+      <artifactId>spoofax.runtime</artifactId>
       <version>0.1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
-      <artifactId>spoofax.runtime.impl.legacy</artifactId>
+      <artifactId>spoofax.legacy</artifactId>
       <version>0.1.0-SNAPSHOT</version>
     </dependency>
 
@@ -75,6 +74,7 @@
       <artifactId>log</artifactId>
       <version>${metaborg-version}</version>
     </dependency>
+
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.spoofax.terms</artifactId>
@@ -97,15 +97,14 @@
     </dependency>
 
     <dependency>
-      <groupId>org.eclipse.jdt.core.compiler</groupId>
-      <artifactId>ecj</artifactId>
-      <version>4.6.1</version>
-    </dependency>
-
-    <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
       <version>4.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jdt.core.compiler</groupId>
+      <artifactId>ecj</artifactId>
+      <version>4.6.1</version>
     </dependency>
 
     <dependency>
