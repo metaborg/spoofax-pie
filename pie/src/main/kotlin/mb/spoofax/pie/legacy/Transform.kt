@@ -18,23 +18,28 @@ import org.metaborg.util.iterators.Iterables2
 import org.spoofax.interpreter.terms.IStrategoTerm
 import java.io.Serializable
 
-fun createCompileGoal() = CompileGoal()
-fun createNamedGoal(name: String) = EndNamedGoal(name)
+class LegacyTransform @Inject constructor(
+  log: Logger,
+  private val legacyBuildOrLoadLanguage: LegacyBuildOrLoadLanguage
+) : TaskDef<LegacyTransform.Input, ArrayList<LegacyTransform.Output>> {
+  val log: Logger = log.forContext(LegacyTransform::class.java)
 
-class CoreTrans @Inject constructor(log: Logger) : TaskDef<CoreTrans.Input, ArrayList<CoreTrans.Output>> {
   companion object {
-    const val id = "coreTrans"
+    const val id = "legacy.Transform"
   }
 
   data class Input(val config: SpxCoreConfig, val project: PPath, val goal: ITransformGoal, val file: PPath, val ast: IStrategoTerm) : Serializable
+  data class Key(val project: PPath, val goal: ITransformGoal, val file: PPath) : Serializable {
+    constructor(input: Input) : this(input.project, input.goal, input.file)
+  }
+
   data class Output(val ast: IStrategoTerm?, val outputFile: PPath?, val inputFile: PPath) : Tuple2<IStrategoTerm?, PPath?>
 
-  val log: Logger = log.forContext(CoreTrans::class.java)
-
   override val id = Companion.id
+  override fun key(input: Input) = Key(input)
   override fun ExecContext.exec(input: Input): ArrayList<Output> {
     val spoofax = Spx.spoofax()
-    val langImpl = buildOrLoad(input.config)
+    val langImpl = require(legacyBuildOrLoadLanguage.createTask(input.config)).v
 
     // Require Stratego runtime files
     val facet = langImpl.facet<StrategoRuntimeFacet>(StrategoRuntimeFacet::class.java)
@@ -77,26 +82,29 @@ class CoreTrans @Inject constructor(log: Logger) : TaskDef<CoreTrans.Input, Arra
   }
 }
 
-//fun ExecContext.trans(input: CoreTrans.Input) = requireOutput(CoreTrans::class, CoreTrans.Companion.id, input)
-//fun ExecContext.trans(config: SpxCoreConfig, project: PPath, goal: ITransformGoal, file: PPath, ast: IStrategoTerm) = trans(CoreTrans.Input(configLangCfg, project, goal, file, ast))
+class LegacyTransformAll @Inject constructor(
+  log: Logger,
+  private val legacyBuildOrLoadLanguage: LegacyBuildOrLoadLanguage
+) : TaskDef<LegacyTransformAll.Input, ArrayList<LegacyTransformAll.Output>> {
+  val log: Logger = log.forContext(LegacyTransformAll::class.java)
 
-
-class CoreTransAll @Inject constructor(log: Logger) : TaskDef<CoreTransAll.Input, ArrayList<CoreTransAll.Output>> {
   companion object {
-    const val id = "coreTransAll"
+    const val id = "legacy.TransformAll"
   }
 
   data class AstFilePair(val ast: IStrategoTerm, val file: PPath) : Tuple2<IStrategoTerm, PPath>
-  data class Input(val config: SpxCoreConfig, val project: PPath, val goal: ITransformGoal, val pairs: Iterable<AstFilePair>) : Serializable
+  data class Input(val config: SpxCoreConfig, val project: PPath, val goal: ITransformGoal, val pairs: ArrayList<AstFilePair>) : Serializable
+  data class Key(val project: PPath, val goal: ITransformGoal, val files: ArrayList<PPath>) : Serializable {
+    constructor(input: Input) : this(input.project, input.goal, input.pairs.map { it.file }.toCollection(ArrayList()))
+  }
 
   data class Output(val ast: IStrategoTerm?, val outputFile: PPath?, val inputFile: PPath) : Tuple2<IStrategoTerm?, PPath?>
 
-  val log: Logger = log.forContext(CoreTransAll::class.java)
-
   override val id = Companion.id
+  override fun key(input: Input) = Key(input)
   override fun ExecContext.exec(input: Input): ArrayList<Output> {
     val spoofax = Spx.spoofax()
-    val langImpl = buildOrLoad(input.config)
+    val langImpl = require(legacyBuildOrLoadLanguage.createTask(input.config)).v
 
     // Require Stratego runtime files
     val facet = langImpl.facet<StrategoRuntimeFacet>(StrategoRuntimeFacet::class.java)
@@ -141,5 +149,5 @@ class CoreTransAll @Inject constructor(log: Logger) : TaskDef<CoreTransAll.Input
   }
 }
 
-//fun ExecContext.transAll(input: CoreTransAll.Input) = requireOutput(CoreTransAll::class, CoreTransAll.Companion.id, input)
-//fun ExecContext.transAll(config: SpxCoreConfig, project: PPath, goal: ITransformGoal, pairs: Iterable<CoreTransAll.AstFilePair>) = transAll(CoreTransAll.Input(configLangCfg, project, goal, pairs))
+fun createCompileGoal() = CompileGoal()
+fun createNamedGoal(name: String) = EndNamedGoal(name)

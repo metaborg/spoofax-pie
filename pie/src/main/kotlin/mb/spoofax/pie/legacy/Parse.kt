@@ -2,8 +2,7 @@ package mb.spoofax.pie.legacy
 
 import com.google.inject.Inject
 import mb.log.Logger
-import mb.pie.api.ExecContext
-import mb.pie.api.TaskDef
+import mb.pie.api.*
 import mb.pie.api.stamp.FileStampers
 import mb.pie.lang.runtime.util.Tuple2
 import mb.pie.lang.runtime.util.Tuple3
@@ -18,26 +17,28 @@ import org.metaborg.spoofax.core.syntax.SyntaxFacet
 import org.spoofax.interpreter.terms.IStrategoTerm
 import java.io.Serializable
 
-class CoreParse @Inject constructor(
+class LegacyParse @Inject constructor(
   log: Logger,
-  private val messageConverter: MessageConverter
-) : TaskDef<CoreParse.Input, CoreParse.Output> {
-  private val log: Logger = log.forContext(CoreParse::class.java)
+  private val messageConverter: MessageConverter,
+  private val legacyBuildOrLoadLanguage: LegacyBuildOrLoadLanguage
+) : TaskDef<LegacyParse.Input, LegacyParse.Output> {
+  private val log: Logger = log.forContext(LegacyParse::class.java)
 
   companion object {
-    const val id = "coreParse"
+    const val id = "legacy.Parse"
   }
 
   data class Input(val config: SpxCoreConfig, val text: String, val file: PPath) : Serializable
   data class Output(val ast: IStrategoTerm?, val tokens: ArrayList<Token>?, val messages: ArrayList<Msg>, val file: PPath) : Tuple3<IStrategoTerm?, ArrayList<Token>?, ArrayList<Msg>>
 
   override val id = Companion.id
+  override fun key(input: Input) = input.file
   override fun ExecContext.exec(input: Input): Output {
     val spoofax = Spx.spoofax()
-    val langImpl = buildOrLoad(input.config)
+    val langImpl = require(legacyBuildOrLoadLanguage.createTask(input.config)).v
 
     // Require parse table
-    val facet = langImpl.facet<SyntaxFacet>(SyntaxFacet::class.java)
+    val facet = langImpl.facet(SyntaxFacet::class.java)
     if(facet != null) {
       val parseTableFile = facet.parseTable
       if(parseTableFile != null) {
@@ -59,30 +60,34 @@ class CoreParse @Inject constructor(
       Output(null, null, ArrayList(), input.file)
     }
   }
+
+  @Suppress("NOTHING_TO_INLINE")
+  inline fun createTask(config: SpxCoreConfig, text: String, file: PPath) = this.createTask(LegacyParse.Input(config, text, file))
 }
 
-fun ExecContext.parse(input: CoreParse.Input) = requireOutput(CoreParse::class.java, CoreParse.id, input)
-fun ExecContext.parse(config: SpxCoreConfig, text: String, file: PPath) = parse(CoreParse.Input(config, text, file))
+class LegacyParseAll @Inject constructor(
+  log: Logger,
+  private val messageConverter: MessageConverter,
+  private val legacyBuildOrLoadLanguage: LegacyBuildOrLoadLanguage
+) : TaskDef<LegacyParseAll.Input, ArrayList<LegacyParseAll.Output>> {
+  val log: Logger = log.forContext(LegacyParseAll::class.java)
 
-
-class CoreParseAll @Inject constructor(log: Logger, private val messageConverter: MessageConverter) : TaskDef<CoreParseAll.Input, ArrayList<CoreParseAll.Output>> {
   companion object {
-    const val id = "coreParseAll"
+    const val id = "legacy.ParseAll"
   }
 
   data class TextFilePair(val text: String, val file: PPath) : Tuple2<String, PPath>
-  data class Input(val config: SpxCoreConfig, val pairs: Iterable<TextFilePair>) : Serializable
+  data class Input(val config: SpxCoreConfig, val pairs: ArrayList<TextFilePair>) : Serializable
   data class Output(val ast: IStrategoTerm?, val tokens: ArrayList<Token>?, val messages: ArrayList<Msg>, val file: PPath) : Tuple3<IStrategoTerm?, ArrayList<Token>?, ArrayList<Msg>>
 
-  val log: Logger = log.forContext(CoreParseAll::class.java)
-
   override val id = Companion.id
+  override fun key(input: Input) = input.pairs.map { it.file }.toCollection(ArrayList())
   override fun ExecContext.exec(input: Input): ArrayList<Output> {
     val spoofax = Spx.spoofax()
-    val langImpl = buildOrLoad(input.config)
+    val langImpl = require(legacyBuildOrLoadLanguage.createTask(input.config)).v
 
     // Require parse table
-    val facet = langImpl.facet<SyntaxFacet>(SyntaxFacet::class.java)
+    val facet = langImpl.facet(SyntaxFacet::class.java)
     if(facet != null) {
       val parseTableFile = facet.parseTable
       if(parseTableFile != null) {
@@ -92,9 +97,9 @@ class CoreParseAll @Inject constructor(log: Logger, private val messageConverter
 
     // Perform parsing
     val inputs = input.pairs.map { (text, file) -> spoofax.unitService.inputUnit(file.fileObject, text, langImpl, null) }
-    try {
+    return try {
       val parseUnits = spoofax.syntaxService.parseAll(inputs)
-      return parseUnits.map {
+      parseUnits.map {
         val ast = it.ast()
         val tokens = if(ast != null) TokenExtractor.extract(ast) else null
         val messages = messageConverter.toMsgs(it.messages())
@@ -102,10 +107,7 @@ class CoreParseAll @Inject constructor(log: Logger, private val messageConverter
       }.toCollection(ArrayList())
     } catch(e: ParseException) {
       log.error("Parsing failed unexpectedly", e)
-      return input.pairs.map { (_, file) -> Output(null, null, ArrayList(), file) }.toCollection(ArrayList())
+      input.pairs.map { (_, file) -> Output(null, null, ArrayList(), file) }.toCollection(ArrayList())
     }
   }
 }
-
-fun ExecContext.parseAll(input: CoreParseAll.Input) = requireOutput(CoreParseAll::class.java, CoreParseAll.id, input)
-fun ExecContext.parseAll(config: SpxCoreConfig, pairs: Iterable<CoreParseAll.TextFilePair>) = parseAll(CoreParseAll.Input(config, pairs))

@@ -18,20 +18,29 @@ import org.metaborg.util.iterators.Iterables2
 import org.spoofax.interpreter.terms.IStrategoTerm
 import java.io.Serializable
 
-class CoreAnalyze @Inject constructor(log: Logger, private val messageConverter: MessageConverter) : TaskDef<CoreAnalyze.Input, CoreAnalyze.Output> {
+class LegacyAnalyze @Inject constructor(
+  log: Logger,
+  private val messageConverter: MessageConverter,
+  private val legacyBuildOrLoadLanguage: LegacyBuildOrLoadLanguage
+) : TaskDef<LegacyAnalyze.Input, LegacyAnalyze.Output> {
+  val log: Logger = log.forContext(LegacyAnalyze::class.java)
+
   companion object {
-    const val id = "coreAnalyze"
+    const val id = "legacy.Analyze"
   }
 
   data class Input(val config: SpxCoreConfig, val project: PPath, val file: PPath, val ast: IStrategoTerm) : Serializable
+  data class Key(val project: PPath, val file: PPath) : Serializable {
+    constructor(input: Input) : this(input.project, input.file)
+  }
+
   data class Output(val ast: IStrategoTerm?, val messages: ArrayList<Msg>, val file: PPath) : Tuple2<IStrategoTerm?, ArrayList<Msg>>
 
-  val log: Logger = log.forContext(CoreAnalyze::class.java)
-
   override val id = Companion.id
+  override fun key(input: Input) = Key(input)
   override fun ExecContext.exec(input: Input): Output {
     val spoofax = Spx.spoofax()
-    val langImpl = buildOrLoad(input.config)
+    val langImpl = require(legacyBuildOrLoadLanguage.createTask(input.config)).v
 
     // Require Stratego runtime files
     val facet = langImpl.facet(StrategoRuntimeFacet::class.java)
@@ -61,28 +70,33 @@ class CoreAnalyze @Inject constructor(log: Logger, private val messageConverter:
   }
 }
 
-fun ExecContext.analyze(input: CoreAnalyze.Input) = requireOutput(CoreAnalyze::class.java, CoreAnalyze.id, input)
-fun ExecContext.analyze(config: SpxCoreConfig, project: PPath, file: PPath, ast: IStrategoTerm) = analyze(CoreAnalyze.Input(config, project, file, ast))
+class LegacyAnalyzeAll @Inject constructor(
+  log: Logger,
+  private val messageConverter: MessageConverter,
+  private val legacyBuildOrLoadLanguage: LegacyBuildOrLoadLanguage
+) : TaskDef<LegacyAnalyzeAll.Input, ArrayList<LegacyAnalyzeAll.Output>> {
+  val log: Logger = log.forContext(LegacyAnalyzeAll::class.java)
 
-
-class CoreAnalyzeAll @Inject constructor(log: Logger, private val messageConverter: MessageConverter) : TaskDef<CoreAnalyzeAll.Input, ArrayList<CoreAnalyzeAll.Output>> {
   companion object {
-    const val id = "coreAnalyzeAll"
+    const val id = "legacy.AnalyzeAll"
   }
 
   data class AstFilePair(val ast: IStrategoTerm, val file: PPath) : Tuple2<IStrategoTerm, PPath> {
     constructor(tuple: Tuple2<IStrategoTerm, PPath>) : this(tuple.component1(), tuple.component2())
   }
 
-  data class Input(val config: SpxCoreConfig, val project: PPath, val pairs: Iterable<AstFilePair>) : Serializable
+  data class Input(val config: SpxCoreConfig, val project: PPath, val pairs: ArrayList<AstFilePair>) : Serializable
+  data class Key(val project: PPath, val files: ArrayList<PPath>) : Serializable {
+    constructor(input: Input) : this(input.project, input.pairs.map { it.file }.toCollection(ArrayList()))
+  }
+
   data class Output(val ast: IStrategoTerm?, val messages: ArrayList<Msg>, val file: PPath) : Tuple2<IStrategoTerm?, ArrayList<Msg>>
 
-  val log: Logger = log.forContext(CoreAnalyzeAll::class.java)
-
   override val id = Companion.id
+  override fun key(input: Input) = Key(input)
   override fun ExecContext.exec(input: Input): ArrayList<Output> {
     val spoofax = Spx.spoofax()
-    val langImpl = buildOrLoad(input.config)
+    val langImpl = require(legacyBuildOrLoadLanguage.createTask(input.config)).v
 
     // Require Stratego runtime files
     val facet = langImpl.facet(StrategoRuntimeFacet::class.java)
@@ -116,6 +130,3 @@ class CoreAnalyzeAll @Inject constructor(log: Logger, private val messageConvert
     }
   }
 }
-
-fun ExecContext.analyzeAll(input: CoreAnalyzeAll.Input) = requireOutput(CoreAnalyzeAll::class.java, CoreAnalyzeAll.id, input)
-fun ExecContext.analyzeAll(config: SpxCoreConfig, project: PPath, pairs: Iterable<CoreAnalyzeAll.AstFilePair>) = analyzeAll(CoreAnalyzeAll.Input(config, project, pairs))

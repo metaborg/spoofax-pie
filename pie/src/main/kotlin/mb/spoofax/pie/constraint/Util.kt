@@ -1,4 +1,4 @@
-package mb.spoofax.pie.nabl2
+package mb.spoofax.pie.constraint
 
 import mb.nabl2.solver.ImmutableSolution
 import mb.pie.lang.runtime.util.Tuple5

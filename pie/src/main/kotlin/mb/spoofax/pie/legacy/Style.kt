@@ -16,20 +16,22 @@ import org.metaborg.util.iterators.Iterables2
 import org.spoofax.interpreter.terms.IStrategoTerm
 import java.io.Serializable
 
-class CoreStyle @Inject constructor(log: Logger) : TaskDef<CoreStyle.Input, Styling> {
+class LegacyStyle @Inject constructor(
+  log: Logger,
+  private val legacyBuildOrLoadLanguage: LegacyBuildOrLoadLanguage
+) : TaskDef<LegacyStyle.Input, Styling> {
+  val log: Logger = log.forContext(LegacyStyle::class.java)
+
   companion object {
-    const val id = "coreStyle"
+    const val id = "legacy.Style"
   }
 
   data class Input(val config: SpxCoreConfig, val tokenStream: Iterable<Token>, val ast: IStrategoTerm) : Serializable
 
-
-  val log: Logger = log.forContext(CoreStyle::class.java)
-
   override val id = Companion.id
   override fun ExecContext.exec(input: Input): Styling {
     val spoofax = Spx.spoofax()
-    val langImpl = buildOrLoad(input.config)
+    val langImpl = require(legacyBuildOrLoadLanguage.createTask(input.config)).v
 
     // Require packed ESV file
     val langLoc = langImpl.components().first().location()
@@ -40,7 +42,6 @@ class CoreStyle @Inject constructor(log: Logger) : TaskDef<CoreStyle.Input, Styl
     val inputUnit = spoofax.unitService.inputUnit("hack", langImpl, null)
     val parseUnit = spoofax.unitService.parseUnit(inputUnit, ParseContrib(true, true, input.ast, Iterables2.empty<IMessage>(), -1))
     val categorization = spoofax.categorizerService.categorize(langImpl, parseUnit)
-    val styling = StyleConverter.toStyling(spoofax.stylerService.styleParsed(langImpl, categorization))
-    return styling
+    return StyleConverter.toStyling(spoofax.stylerService.styleParsed(langImpl, categorization))
   }
 }

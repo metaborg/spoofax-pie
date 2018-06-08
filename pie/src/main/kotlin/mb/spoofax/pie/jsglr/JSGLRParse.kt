@@ -1,5 +1,6 @@
-package mb.spoofax.pie.sdf3
+package mb.spoofax.pie.jsglr
 
+import com.google.inject.Inject
 import mb.pie.api.*
 import mb.pie.lang.runtime.util.Tuple3
 import mb.pie.vfs.path.PPath
@@ -13,18 +14,17 @@ import org.spoofax.terms.TermFactory
 import java.io.Serializable
 import java.util.*
 
-class Parse : TaskDef<Parse.Input, Parse.Output> {
+class JSGLRParse @Inject constructor(
+  private val createWorkspaceConfig: createWorkspaceConfig
+) : TaskDef<JSGLRParse.Input, JSGLRParse.Output> {
   companion object {
-    const val id = "sdf3.Parse"
+    const val id = "jsglr.Parse"
   }
 
-  data class Input(
-    val text: String,
-    val table: Table,
-    val file: PPath,
-    val langSpecExt: String,
-    val root: PPath
-  ) : Serializable
+  data class Input(val text: String, val table: Table, val file: PPath, val langSpecExt: String, val root: PPath) : Serializable
+  data class Key(val file: PPath, val langSpecExt: String, val root: PPath) : Serializable {
+    constructor(input: Input) : this(input.file, input.langSpecExt, input.root)
+  }
 
   data class Output(
     val ast: IStrategoTerm?,
@@ -33,14 +33,17 @@ class Parse : TaskDef<Parse.Input, Parse.Output> {
   ) : Tuple3<IStrategoTerm?, ArrayList<Token>?, ArrayList<Msg>>
 
   override val id = Companion.id
+  override fun key(input: Input) = Key(input)
   override fun ExecContext.exec(input: Input): Output {
     val (text, table, file, langSpecExt, root) = input
-    val workspace =
-      requireOutput(createWorkspaceConfig::class.java, createWorkspaceConfig.Companion.id, root)
-        ?: throw ExecException("Could not create workspace config for root $root")
-    val langSpec =
-      workspace.langSpecConfigForExt(input.langSpecExt)
-        ?: throw ExecException("Could not get language specification config for extension $langSpecExt")
+
+    // OPTO: only depend on language specification config for langSpecExt.
+    val workspaceConfig = require(createWorkspaceConfig, root)
+      ?: throw ExecException("Could not get workspace config at root $root")
+
+    // OPTO: only depend on syntax start symbol.
+    val langSpec = workspaceConfig.langSpecConfigForExt(langSpecExt)
+      ?: throw ExecException("Could not get language specification config for extension $langSpecExt")
     val startSymbol = langSpec.syntaxParseStartSymbolId()
 
     val termFactory = ImploderOriginTermFactory(TermFactory())

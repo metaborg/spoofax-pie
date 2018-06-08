@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import mb.log.LogModule;
 import mb.pie.lang.runtime.PieLangRuntimeModule;
+import mb.pie.taskdefs.guice.GuiceTaskDefsModule;
 import mb.spoofax.api.SpoofaxFacade;
 import mb.spoofax.api.SpoofaxModule;
 import mb.spoofax.api.StaticSpoofaxFacade;
@@ -47,9 +48,9 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
         logger.debug("Starting Spoofax plugin");
 
         // Initialize Spoofax runtime
-        spoofaxFacade = new SpoofaxFacade(new SpoofaxModule(), new LogModule(logger), new SpoofaxImplModule(),
-            new SpoofaxPieModule(), new EclipseVFSModule(), new SpoofaxPieTaskDefsModule(), new PieLangRuntimeModule(),
-            new PieBuilderModule_spoofax());
+        spoofaxFacade = new SpoofaxFacade(new SpoofaxModule(), new LogModule(logger), new EclipseModule(),
+            new EclipseVFSModule(), new SpoofaxImplModule(), new SpoofaxPieModule(), new GuiceTaskDefsModule(),
+            new SpoofaxPieTaskDefsModule(), new PieLangRuntimeModule(), new PieBuilderModule_spoofax());
         StaticSpoofaxFacade.init(spoofaxFacade);
         spoofaxFacade.injector.getInstance(PipelineProjectManager.class).initialize();
 

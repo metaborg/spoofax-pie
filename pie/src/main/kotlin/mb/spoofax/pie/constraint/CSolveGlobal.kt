@@ -1,4 +1,4 @@
-package mb.spoofax.pie.nabl2
+package mb.spoofax.pie.constraint
 
 import com.google.inject.Inject
 import mb.log.Logger
@@ -9,15 +9,14 @@ import mb.pie.api.TaskDef
 import mb.spoofax.api.SpoofaxEx
 import mb.spoofax.runtime.nabl.ConstraintSolver
 
-class SolveGlobal
-@Inject constructor(
+class CSolveGlobal @Inject constructor(
   log: Logger,
   private val solver: ConstraintSolver
 ) : TaskDef<ImmutableInitialResult, ImmutableSolution?> {
-  private val log: Logger = log.forContext(SolveGlobal::class.java)
+  private val log: Logger = log.forContext(CSolveGlobal::class.java)
 
   companion object {
-    const val id = "nabl2.SolveGlobal"
+    const val id = "constraint.CSolveGlobal"
   }
 
   override val id = Companion.id

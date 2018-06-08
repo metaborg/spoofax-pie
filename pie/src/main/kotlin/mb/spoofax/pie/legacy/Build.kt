@@ -15,17 +15,20 @@ import org.metaborg.spoofax.meta.core.build.LanguageSpecBuildInput
 import org.metaborg.spoofax.meta.core.build.SpoofaxLangSpecCommonPaths
 import java.io.PrintWriter
 
-class CoreBuild @Inject constructor(log: Logger) : TaskDef<PPath, None> {
-  companion object {
-    const val id = "coreBuild"
-  }
+class LegacyBuildProject @Inject constructor(
+  log: Logger,
+  private val legacyLoadProject: LegacyLoadProject
+) : TaskDef<PPath, None> {
+  val log: Logger = log.forContext(LegacyBuildProject::class.java)
 
-  val log: Logger = log.forContext(CoreBuild::class.java)
+  companion object {
+    const val id = "legacy.BuildProject"
+  }
 
   override val id = Companion.id
   override fun ExecContext.exec(input: PPath): None {
     val spoofax = Spx.spoofax()
-    val project = loadProj(input)
+    val project = require(legacyLoadProject, input).v
     val inputBuilder = BuildInputBuilder(project)
     val buildInput = inputBuilder
       .withDefaultIncludePaths(true)
@@ -51,21 +54,22 @@ class CoreBuild @Inject constructor(log: Logger) : TaskDef<PPath, None> {
   }
 }
 
-fun ExecContext.buildProject(input: PPath) = requireExec(CoreBuild::class.java, CoreBuild.id, input)
+class LegacyBuildLangSpec @Inject constructor(
+  log: Logger,
+  private val pathSrv: PathSrv,
+  private val legacyLoadProject: LegacyLoadProject
+) : TaskDef<PPath, None> {
+  val log: Logger = log.forContext(LegacyBuildLangSpec::class.java)
 
-
-class CoreBuildLangSpec @Inject constructor(log: Logger, private val pathSrv: PathSrv) : TaskDef<PPath, None> {
   companion object {
-    const val id = "coreBuildLangSpec"
+    const val id = "legacy.BuildLangSpec"
   }
-
-  val log: Logger = log.forContext(CoreBuild::class.java)
 
   override val id = Companion.id
   override fun ExecContext.exec(input: PPath): None {
     val spoofaxMeta = Spx.spoofaxMeta()
 
-    val project = loadProj(input)
+    val project = require(legacyLoadProject, input).v
     val langSpec = spoofaxMeta.languageSpecService.get(project)
       ?: throw ExecException("Cannot build language specification from project $project, it is not a language specification")
     val langSpecBuildInput = LanguageSpecBuildInput(langSpec)
@@ -90,6 +94,7 @@ class CoreBuildLangSpec @Inject constructor(log: Logger, private val pathSrv: Pa
     require(strategiesDir, FileStampers.exists)
     if(strategiesDir.exists()) {
       val targetClassesDir = commonPaths.targetClassesDir().pPath
+      // TODO: factor out fixed path
       val spoofaxUberJar = pathSrv.resolveLocal("/Users/gohla/spoofax/master/repo/builder-releng/builder/org.metaborg.builder.core.uber/target/org.metaborg.builder.legacy.uber-2.4.0-SNAPSHOT.jar")
 
       // Require the java files and Spoofax uber JAR
@@ -121,5 +126,3 @@ class CoreBuildLangSpec @Inject constructor(log: Logger, private val pathSrv: Pa
     return None.instance
   }
 }
-
-fun ExecContext.buildLangSpec(input: PPath) = requireExec(CoreBuildLangSpec::class.java, CoreBuildLangSpec.id, input)

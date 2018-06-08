@@ -5,8 +5,6 @@ import mb.pie.api.Pie;
 import mb.pie.api.PieBuilder;
 import mb.pie.api.stamp.*;
 import mb.pie.runtime.PieBuilderImpl;
-import mb.pie.runtime.cache.MapCache;
-import mb.pie.runtime.cache.NoopCache;
 import mb.pie.runtime.layer.NoopLayer;
 import mb.pie.runtime.layer.ValidationLayer;
 import mb.pie.runtime.logger.NoopLogger;
@@ -14,7 +12,6 @@ import mb.pie.runtime.logger.StreamLogger;
 import mb.pie.runtime.logger.exec.*;
 import mb.pie.runtime.share.NonSharingShare;
 import mb.pie.runtime.store.InMemoryStore;
-import mb.pie.runtime.store.NoopStore;
 import mb.pie.share.coroutine.CoroutineShareKt;
 import mb.pie.store.lmdb.LMDBKt;
 import mb.pie.taskdefs.guice.GuiceTaskDefsKt;
@@ -31,7 +28,6 @@ public class InfraState {
     public void setup(SpoofaxPieState spoofaxPieState, WorkspaceState workspaceState) {
         final PieBuilder builder = new PieBuilderImpl();
         storeKind.apply(builder, spoofaxPieState, workspaceState);
-        cacheKind.apply(builder);
         shareKind.apply(builder);
         builder.withDefaultOutputStamper(defaultOutputStamperKind.get());
         builder.withDefaultFileReqStamper(defaultFileReqStamperKind.get());
@@ -41,19 +37,16 @@ public class InfraState {
         executorLoggerKind.apply(builder);
         GuiceTaskDefsKt.withGuiceTaskDefs(builder, spoofaxPieState.injector);
         final Pie pie = builder.build();
-        pie.dropCache();
         pie.dropStore();
         this.pie = pie;
     }
 
     public void reset() {
-        pie.dropCache();
         pie.dropStore();
     }
 
 
     @Param({"in_memory"}) private StoreKind storeKind;
-    @Param({"noop"}) private CacheKind cacheKind;
     @Param({"non_sharing"}) private ShareKind shareKind;
     @Param({"equals"}) private OutputStamperKind defaultOutputStamperKind;
     @Param({"modified"}) private FileStamperKind defaultFileReqStamperKind;
@@ -77,29 +70,9 @@ public class InfraState {
             @Override public void apply(PieBuilder builder, SpoofaxPieState spoofaxPieState, WorkspaceState workspaceState) {
                 builder.withStore(logger -> new InMemoryStore());
             }
-        },
-        noop {
-            @Override public void apply(PieBuilder builder, SpoofaxPieState spoofaxPieState, WorkspaceState workspaceState) {
-                builder.withStore(logger -> new NoopStore());
-            }
         };
 
         public abstract void apply(PieBuilder builder, SpoofaxPieState spoofaxPieState, WorkspaceState workspaceState);
-    }
-
-    @SuppressWarnings("unused") public enum CacheKind {
-        map {
-            @Override public void apply(PieBuilder builder) {
-                builder.withCache(logger -> new MapCache());
-            }
-        },
-        noop {
-            @Override public void apply(PieBuilder builder) {
-                builder.withCache(logger -> new NoopCache());
-            }
-        };
-
-        public abstract void apply(PieBuilder builder);
     }
 
     @SuppressWarnings("unused") public enum ShareKind {
@@ -194,11 +167,6 @@ public class InfraState {
     }
 
     @SuppressWarnings("unused") public enum ExecutorLoggerKind {
-        trace {
-            @Override public void apply(PieBuilder builder) {
-                builder.withExecutorLogger(logger -> new TraceExecutorLogger());
-            }
-        },
         log {
             @Override public void apply(PieBuilder builder) {
                 builder.withExecutorLogger(LoggerExecutorLogger::new);

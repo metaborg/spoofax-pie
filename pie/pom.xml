@@ -18,6 +18,7 @@
     <kotlin.lang.version>1.2</kotlin.lang.version>
     <kotlin.api.version>1.2</kotlin.api.version>
     <kotlin.runtime.version>1.2.41</kotlin.runtime.version>
+    <pie.version>0.2.0-SNAPSHOT</pie.version>
   </properties>
 
   <dependencies>
@@ -30,27 +31,27 @@
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>pie.vfs</artifactId>
-      <version>0.1.0</version>
+      <version>${pie.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>pie.api</artifactId>
-      <version>0.1.0</version>
+      <version>${pie.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>pie.runtime</artifactId>
-      <version>0.1.0</version>
+      <version>${pie.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>pie.taskdefs.guice</artifactId>
-      <version>0.1.0</version>
+      <version>${pie.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>pie.lang.runtime</artifactId>
-      <version>0.1.0</version>
+      <version>${pie.version}</version>
     </dependency>
 
     <dependency>

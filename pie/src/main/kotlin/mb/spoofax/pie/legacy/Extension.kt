@@ -12,20 +12,23 @@ import mb.spoofax.runtime.esv.ESVReader
 import org.metaborg.spoofax.meta.core.build.SpoofaxLangSpecCommonPaths
 import java.io.Serializable
 
-class CoreExtensions @Inject constructor(log: Logger) : TaskDef<CoreExtensions.Input, ArrayList<String>> {
+class LegacyLanguageExtensions @Inject constructor(
+  log: Logger,
+  private val legacyBuildOrLoadLanguage: LegacyBuildOrLoadLanguage
+) : TaskDef<LegacyLanguageExtensions.Input, ArrayList<String>> {
+  val log: Logger = log.forContext(LegacyLanguageExtensions::class.java)
+
   companion object {
-    const val id = "coreExtensions"
+    const val id = "legacy.LanguageExtensions"
   }
 
   data class Input(val dir: PPath, val isLangSpec: Boolean) : Serializable {
     constructor(config: SpxCoreConfig) : this(config.dir(), config.isLangSpec)
   }
 
-  val log: Logger = log.forContext(CoreExtensions::class.java)
-
   override val id = Companion.id
   override fun ExecContext.exec(input: Input): ArrayList<String> {
-    val langImpl = buildOrLoad(input.dir, input.isLangSpec)
+    val langImpl = require(legacyBuildOrLoadLanguage.createTask(input.dir, input.isLangSpec)).v
 
     // Require packed ESV file
     val langLoc = langImpl.components().first().location()
@@ -43,7 +46,3 @@ class CoreExtensions @Inject constructor(log: Logger) : TaskDef<CoreExtensions.I
     }
   }
 }
-
-fun ExecContext.langExtensions(input: CoreExtensions.Input) = requireOutput(CoreExtensions::class.java, CoreExtensions.id, input)
-fun ExecContext.langExtensions(dir: PPath, isLangSpec: Boolean) = langExtensions(CoreExtensions.Input(dir, isLangSpec))
-fun ExecContext.langExtensions(input: SpxCoreConfig) = langExtensions(CoreExtensions.Input(input))

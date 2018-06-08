@@ -14,7 +14,6 @@ import org.metaborg.spoofax.core.stratego.StrategoRuntimeFacet
 import org.metaborg.spoofax.core.syntax.SyntaxFacet
 import org.spoofax.interpreter.terms.IStrategoTerm
 
-
 data class ProcessOutputs(
   val outputs: ArrayList<ProcessOutput>,
   val reqFiles: ArrayList<PPath>,

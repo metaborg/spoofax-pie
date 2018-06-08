@@ -19,11 +19,15 @@ import kotlin.jvm.functions.Function1;
 import mb.log.Logger;
 import mb.pie.api.ExecException;
 import mb.pie.api.Pie;
+import mb.pie.api.PieBuilder;
 import mb.pie.api.Task;
 import mb.pie.api.exec.BottomUpExecutor;
 import mb.pie.api.exec.Cancelled;
 import mb.pie.runtime.PieBuilderImpl;
+import mb.pie.taskdefs.guice.GuiceTaskDefs;
+import mb.pie.taskdefs.guice.GuiceTaskDefsKt;
 import mb.pie.vfs.path.PPath;
+import mb.spoofax.pie.LogLoggerKt;
 import mb.spoofax.pie.SpoofaxPipeline;
 import mb.spoofax.pie.generated.processEditor;
 import mb.spoofax.pie.generated.processProject;
@@ -46,8 +50,8 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
     private final BottomUpExecutor executor;
 
 
-    @Inject public BottomUpPipelineAdapter(PipelineObservers observers, PipelinePathChanges pathChanges,
-        SpoofaxPipeline pipeline, Logger logger, EclipsePathSrv pathSrv,
+    @Inject public BottomUpPipelineAdapter(PipelineObservers observers, PipelinePathChanges pathChanges, Logger logger,
+        EclipsePathSrv pathSrv, SpoofaxPipeline pipeline, GuiceTaskDefs taskDefs,
         WorkspaceUpdateFactory workspaceUpdateFactory) {
         this.observers = observers;
         this.pathChanges = pathChanges;
@@ -59,7 +63,10 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
 
         this.eclipseRoot = ResourcesPlugin.getWorkspace().getRoot();
         this.root = pathSrv.resolve(eclipseRoot);
-        this.pie = new PieBuilderImpl().build();
+        final PieBuilder pieBuilder = new PieBuilderImpl();
+        LogLoggerKt.withMbLogger(pieBuilder, logger);
+        GuiceTaskDefsKt.withGuiceTaskDefs(pieBuilder, taskDefs);
+        this.pie = pieBuilder.build();
         this.executor = pie.getBottomUpExecutor();
     }
 

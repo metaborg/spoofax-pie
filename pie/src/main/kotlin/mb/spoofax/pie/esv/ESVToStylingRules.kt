@@ -6,23 +6,23 @@ import mb.pie.api.*
 import mb.pie.api.stamp.FileStampers
 import mb.pie.vfs.path.PPath
 import mb.spoofax.pie.generated.createWorkspaceConfig
-import mb.spoofax.pie.legacy.buildOrLoad
-import mb.spoofax.pie.legacy.process
+import mb.spoofax.pie.legacy.*
 import mb.spoofax.runtime.esv.StylingRules
 import mb.spoofax.runtime.esv.StylingRulesFromESV
 import org.spoofax.interpreter.terms.IStrategoAppl
 import java.io.Serializable
 
-
-class CompileStyler
+class ESVToStylingRules
 @Inject constructor(
   log: Logger,
-  private val stylingRulesFromESV: StylingRulesFromESV
-) : TaskDef<CompileStyler.Input, StylingRules?> {
-  private val log: Logger = log.forContext(CompileStyler::class.java)
+  private val stylingRulesFromESV: StylingRulesFromESV,
+  private val createWorkspaceConfig: createWorkspaceConfig,
+  private val legacyBuildOrLoadLanguage: LegacyBuildOrLoadLanguage
+) : TaskDef<ESVToStylingRules.Input, StylingRules?> {
+  private val log: Logger = log.forContext(ESVToStylingRules::class.java)
 
   companion object {
-    const val id = "CompileStyler"
+    const val id = "esv.ESVToStylingRules"
   }
 
   data class Input(
@@ -33,16 +33,18 @@ class CompileStyler
   override val id = Companion.id
   override fun ExecContext.exec(input: Input): StylingRules? {
     val (langSpecExt, root) = input
-    val workspace =
-      requireOutput(createWorkspaceConfig::class.java, createWorkspaceConfig.id, root)
-        ?: throw ExecException("Could not create workspace config for root $root")
+
+    val workspaceConfig = require(createWorkspaceConfig, root)
+      ?: throw ExecException("Could not get workspace config at root $root")
+
     val metaLangExt = "esv"
-    val metaLangConfig = workspace.spxCoreConfigForExt(metaLangExt)
+    val metaLangConfig = workspaceConfig.spxCoreConfigForExt(metaLangExt)
       ?: throw ExecException("Could not get meta-language config for extension $metaLangExt")
-    val metaLangImpl = buildOrLoad(metaLangConfig)
-    val langSpec =
-      workspace.langSpecConfigForExt(input.langSpecExt)
-        ?: throw ExecException("Could not get language specification config for extension $langSpecExt")
+    val metaLangImpl = require(legacyBuildOrLoadLanguage.createTask(metaLangConfig)).v
+
+    val langSpec = workspaceConfig.langSpecConfigForExt(input.langSpecExt)
+      ?: throw ExecException("Could not get language specification config for extension $langSpecExt")
+
     val mainFile = langSpec.syntaxStyleFile() ?: return null
     val outputs = process(arrayListOf(mainFile), metaLangImpl, null, false, null, log)
     outputs.reqFiles.forEach { require(it, FileStampers.hash) }

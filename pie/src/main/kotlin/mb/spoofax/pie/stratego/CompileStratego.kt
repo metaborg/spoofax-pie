@@ -10,25 +10,26 @@ import java.io.IOException
 import java.io.Serializable
 import java.nio.charset.Charset
 
-class Compile
+class CompileStratego
 @Inject constructor(
   private val pathSrv: PathSrv
-) : TaskDef<Compile.Input, PPath?> {
+) : TaskDef<CompileStratego.Input, PPath?> {
   companion object {
     const val id = "stratego.Compile"
   }
 
   data class Input(
     val config: StrategoConfig,
-    val taskDeps: Iterable<UTask>
+    val taskDeps: Iterable<STask<*>>
   ) : Serializable
 
   override val id = Companion.id
+  override fun key(input: Input) = input.config.outputFile()
   override fun ExecContext.exec(input: Input): PPath? {
     val (config, taskDeps) = input
     // Explicitly require hidden dependencies.
     taskDeps.forEach {
-      requireExec(it)
+      require(it)
     }
     // Compile Stratego.
     val compiler = StrategoCompiler()
@@ -66,6 +67,3 @@ class Compile
         }
       }
 }
-
-fun ExecContext.compileStratego(input: Compile.Input) = requireOutput(Compile::class.java, Compile.id, input)
-fun ExecContext.compileStratego(config: StrategoConfig, taskDeps: Iterable<UTask>) = compileStratego(Compile.Input(config, taskDeps))

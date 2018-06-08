@@ -5,22 +5,23 @@ import mb.log.Logger
 import mb.pie.api.*
 import mb.pie.api.stamp.FileStampers
 import mb.pie.vfs.path.PPath
-import mb.pie.vfs.path.PathSrv
 import mb.spoofax.pie.generated.createWorkspaceConfig
 import mb.spoofax.pie.legacy.*
 import mb.spoofax.runtime.sdf.Signatures
 import org.metaborg.core.action.EndNamedGoal
 import java.io.Serializable
 
-class GenerateStrategoSignatures
+class SDF3ToStrategoSignatures
 @Inject constructor(
   log: Logger,
-  private val pathSrv: PathSrv
-) : TaskDef<GenerateStrategoSignatures.Input, Signatures?> {
-  val log: Logger = log.forContext(GenerateStrategoSignatures::class.java)
+  private val createWorkspaceConfig: createWorkspaceConfig,
+  private val legacyBuildOrLoadLanguage: LegacyBuildOrLoadLanguage,
+  private val legacyLoadProject: LegacyLoadProject
+) : TaskDef<SDF3ToStrategoSignatures.Input, Signatures?> {
+  val log: Logger = log.forContext(SDF3ToStrategoSignatures::class.java)
 
   companion object {
-    const val id = "sdf3.GenerateStrategoSignatures"
+    const val id = "sdf3.ToStrategoSignatures"
   }
 
   data class Input(
@@ -31,17 +32,22 @@ class GenerateStrategoSignatures
   override val id = Companion.id
   override fun ExecContext.exec(input: Input): Signatures? {
     val (langSpecExt, root) = input
-    val workspace =
-      requireOutput(createWorkspaceConfig::class.java, createWorkspaceConfig.id, root)
-        ?: throw ExecException("Could not create workspace config for root $root")
+
+    // OPTO: only depend on Spoofax Core config for SDF3, and language specification config for langSpecExt.
+    val workspaceConfig = require(createWorkspaceConfig, root)
+      ?: throw ExecException("Could not get workspace config at root $root")
+
     val metaLangExt = "sdf3"
-    val metaLangConfig = workspace.spxCoreConfigForExt(metaLangExt)
+    val metaLangConfig = workspaceConfig.spxCoreConfigForExt(metaLangExt)
       ?: throw ExecException("Could not get meta-language config for extension $metaLangExt")
-    val metaLangImpl = buildOrLoad(metaLangConfig)
-    val langSpec =
-      workspace.langSpecConfigForExt(input.langSpecExt)
-        ?: throw ExecException("Could not get language specification config for extension $langSpecExt")
-    val langSpecProject = loadProj(langSpec.dir())
+    val metaLangImpl = require(legacyBuildOrLoadLanguage.createTask(metaLangConfig)).v
+
+    // OPTO: only depend on syntax signature files.
+    val langSpec = workspaceConfig.langSpecConfigForExt(langSpecExt)
+      ?: throw ExecException("Could not get language specification config for extension $langSpecExt")
+
+    val langSpecProject = require(legacyLoadProject, langSpec.dir()).v
+
     val files = langSpec.syntaxSignatureFiles() ?: return null
     val outputs = process(files, metaLangImpl, langSpecProject, true, EndNamedGoal("Generate Signature (concrete)"), log)
     outputs.reqFiles.forEach { require(it, FileStampers.hash) }

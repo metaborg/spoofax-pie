@@ -1,4 +1,4 @@
-package mb.spoofax.pie.nabl2
+package mb.spoofax.pie.constraint
 
 import com.google.inject.Inject
 import mb.log.Logger
@@ -8,19 +8,20 @@ import mb.pie.api.TaskDef
 import mb.pie.api.stamp.FileStampers
 import mb.pie.vfs.path.PPath
 import mb.spoofax.api.SpoofaxEx
+import mb.spoofax.pie.nabl2.CompileCGen
 import mb.spoofax.runtime.stratego.StrategoRuntimeBuilder
 import mb.spoofax.runtime.stratego.primitive.ScopeGraphPrimitiveLibrary
 import java.io.Serializable
 
-class CGenGlobal
-@Inject constructor(
+class CGenGlobal @Inject constructor(
   log: Logger,
+  private val compileCGen: CompileCGen,
   private val primitiveLibrary: ScopeGraphPrimitiveLibrary
 ) : TaskDef<CGenGlobal.Input, ImmutableInitialResult?> {
   private val log: Logger = log.forContext(CGenGlobal::class.java)
 
   companion object {
-    const val id = "nabl2.CGenGlobal"
+    const val id = "constraint.CGenGlobal"
   }
 
   data class Input(
@@ -31,13 +32,11 @@ class CGenGlobal
   override val id = Companion.id
   override fun ExecContext.exec(input: Input): ImmutableInitialResult? {
     val (langSpecExt, root) = input
-    val constraintGenerator = requireOutput(CompileStrategoCGen::class.java, CompileStrategoCGen.id, CompileStrategoCGen.Input(
-      langSpecExt, root
-    )) ?: return null
-    val strategoRuntime = constraintGenerator.createSuitableRuntime(StrategoRuntimeBuilder(), primitiveLibrary)
-    require(constraintGenerator.strategoCtree(), FileStampers.hash)
+    val cgen = require(compileCGen, CompileCGen.Input(langSpecExt, root)) ?: return null
+    val strategoRuntime = cgen.createSuitableRuntime(StrategoRuntimeBuilder(), primitiveLibrary)
+    require(cgen.strategoCtree(), FileStampers.hash)
     return try {
-      constraintGenerator.cgenGlobal(strategoRuntime)
+      cgen.cgenGlobal(strategoRuntime)
     } catch(e: SpoofaxEx) {
       log.error("Generating global constraints failed", e)
       null

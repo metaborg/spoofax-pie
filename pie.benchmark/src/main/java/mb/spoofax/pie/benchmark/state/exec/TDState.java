@@ -31,6 +31,10 @@ public class TDState {
         this.processWorkspace = spoofaxPieState.spoofaxPipeline.workspace(workspaceState.root);
     }
 
+    public void reset() {
+        this.editors.clear();
+    }
+
 
     /**
      * Adds an editor, or updates an exiting editor, and executes an editor update.

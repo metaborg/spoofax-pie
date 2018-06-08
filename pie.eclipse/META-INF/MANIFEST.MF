@@ -45,12 +45,13 @@ Eclipse-RegisterBuddy:
  org.spoofax.jsglr,
  sdf2table,
  sdf2parenthesize,
- org.metaborg.meta.nabl2.java,
+ nabl2.solver,
+ nabl2.terms,
  org.metaborg.spoofax.eclipse.externaldeps,
  org.metaborg.spoofax.eclipse.meta.externaldeps,
  log,
- spoofax.runtime.model,
- spoofax.runtime.impl,
- spoofax.runtime.impl.legacy,
- spoofax.runtime.eclipse.externaldeps
+ spoofax.api,
+ spoofax.runtime,
+ spoofax.legacy,
+ spoofax.pie.eclipse.externaldeps
 Import-Package: mb.spoofax.api.style

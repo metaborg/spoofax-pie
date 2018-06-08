@@ -1,4 +1,4 @@
-package mb.spoofax.pie.nabl2
+package mb.spoofax.pie.constraint
 
 import com.google.inject.Inject
 import mb.log.Logger
@@ -11,15 +11,14 @@ import mb.spoofax.api.SpoofaxEx
 import mb.spoofax.runtime.nabl.ConstraintSolver
 import java.io.Serializable
 
-class SolveDocument
-@Inject constructor(
+class CSolveDocument @Inject constructor(
   log: Logger,
   private val solver: ConstraintSolver
-) : TaskDef<SolveDocument.Input, ImmutableSolution?> {
-  private val log: Logger = log.forContext(SolveDocument::class.java)
+) : TaskDef<CSolveDocument.Input, ImmutableSolution?> {
+  private val log: Logger = log.forContext(CSolveDocument::class.java)
 
   companion object {
-    const val id = "nabl2.SolveDocument"
+    const val id = "constraint.CSolveDocument"
   }
 
   data class Input(

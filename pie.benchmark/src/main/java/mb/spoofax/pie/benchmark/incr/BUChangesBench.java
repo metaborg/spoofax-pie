@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Benchmark)
 public class BUChangesBench {
     @Setup(Level.Trial)
-    public void setupTrial(SpoofaxPieState spoofaxPie, WorkspaceState workspace, InfraState infra, ChangesState changes, BUState exec) throws IOException {
+    public void setupTrial(SpoofaxPieState spoofaxPie, WorkspaceState workspace, InfraState infra, ChangesState changes, BUState exec) {
         workspace.setup(spoofaxPie);
         infra.setup(spoofaxPie, workspace);
         changes.setup(workspace);
@@ -44,6 +44,7 @@ public class BUChangesBench {
         infra.reset();
         changes.reset();
         exec.setup(spoofaxPie, workspace, infra);
+        exec.reset();
     }
 
     @Benchmark public void exec(Blackhole blackhole) {
@@ -53,5 +54,6 @@ public class BUChangesBench {
     @TearDown(Level.Trial) public void tearDownTrial() {
         infra.reset();
         changes.reset();
+        exec.reset();
     }
 }

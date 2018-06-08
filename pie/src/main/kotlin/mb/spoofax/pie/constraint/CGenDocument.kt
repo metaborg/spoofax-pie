@@ -1,4 +1,4 @@
-package mb.spoofax.pie.nabl2
+package mb.spoofax.pie.constraint
 
 import com.google.inject.Inject
 import mb.log.Logger
@@ -9,20 +9,21 @@ import mb.pie.api.TaskDef
 import mb.pie.api.stamp.FileStampers
 import mb.pie.vfs.path.PPath
 import mb.spoofax.api.SpoofaxEx
+import mb.spoofax.pie.nabl2.CompileCGen
 import mb.spoofax.runtime.stratego.StrategoRuntimeBuilder
 import mb.spoofax.runtime.stratego.primitive.ScopeGraphPrimitiveLibrary
 import org.spoofax.interpreter.terms.IStrategoTerm
 import java.io.Serializable
 
-class CGenDocument
-@Inject constructor(
+class CGenDocument @Inject constructor(
   log: Logger,
+  private val compileCGen: CompileCGen,
   private val primitiveLibrary: ScopeGraphPrimitiveLibrary
 ) : TaskDef<CGenDocument.Input, ImmutableUnitResult?> {
   private val log: Logger = log.forContext(CGenDocument::class.java)
 
   companion object {
-    const val id = "nabl2.CGenDocument"
+    const val id = "constraint.CGenDocument"
   }
 
   data class Input(
@@ -36,13 +37,11 @@ class CGenDocument
   override val id = Companion.id
   override fun ExecContext.exec(input: Input): ImmutableUnitResult? {
     val (globalConstraints, ast, file, langSpecExt, root) = input
-    val constraintGenerator = requireOutput(CompileStrategoCGen::class.java, CompileStrategoCGen.id, CompileStrategoCGen.Input(
-      langSpecExt, root
-    )) ?: return null
-    val strategoRuntime = constraintGenerator.createSuitableRuntime(StrategoRuntimeBuilder(), primitiveLibrary)
-    require(constraintGenerator.strategoCtree(), FileStampers.hash)
+    val cgen = require(compileCGen, CompileCGen.Input(langSpecExt, root)) ?: return null
+    val strategoRuntime = cgen.createSuitableRuntime(StrategoRuntimeBuilder(), primitiveLibrary)
+    require(cgen.strategoCtree(), FileStampers.hash)
     return try {
-      constraintGenerator.cgenDocument(globalConstraints, ast, file.toString(), strategoRuntime)
+      cgen.cgenDocument(globalConstraints, ast, file.toString(), strategoRuntime)
     } catch(e: SpoofaxEx) {
       log.error("Generating document constraints failed", e)
       null
