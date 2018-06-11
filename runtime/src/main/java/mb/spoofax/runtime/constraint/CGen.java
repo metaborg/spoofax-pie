@@ -1,4 +1,4 @@
-package mb.spoofax.runtime.nabl;
+package mb.spoofax.runtime.constraint;
 
 import mb.nabl2.spoofax.analysis.*;
 import mb.nabl2.stratego.StrategoTerms;
@@ -52,9 +52,9 @@ public class CGen implements Serializable {
         final IOAgent ioAgent = new IOAgent();
         final ITermFactory termFactory = runtime.termFactory();
         final StrategoTerms termConverter = new StrategoTerms(termFactory);
-        final ITerm globalAST = Actions.sourceTerm(ConstraintSolver.globalSource, B.EMPTY_TUPLE);
+        final ITerm globalAST = Actions.sourceTerm(CSolver.globalSource, B.EMPTY_TUPLE);
         final ITerm initialResultTerm =
-            doAction(termConverter, runtime, ioAgent, Actions.analyzeInitial(ConstraintSolver.globalSource, globalAST))
+            doAction(termConverter, runtime, ioAgent, Actions.analyzeInitial(CSolver.globalSource, globalAST))
                 .orElseThrow(() -> new SpoofaxEx("No initial result"));
         final ImmutableInitialResult initialResult = (ImmutableInitialResult) InitialResult.matcher()
             .match(initialResultTerm).orElseThrow(() -> new SpoofaxRunEx("Invalid initial result"));

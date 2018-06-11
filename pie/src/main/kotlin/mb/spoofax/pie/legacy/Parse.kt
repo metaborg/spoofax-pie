@@ -11,7 +11,7 @@ import mb.spoofax.api.message.Msg
 import mb.spoofax.api.parse.Token
 import mb.spoofax.legacy.MessageConverter
 import mb.spoofax.runtime.cfg.SpxCoreConfig
-import mb.spoofax.runtime.sdf.TokenExtractor
+import mb.spoofax.runtime.jsglr.TokenExtractor
 import org.metaborg.core.syntax.ParseException
 import org.metaborg.spoofax.core.syntax.SyntaxFacet
 import org.spoofax.interpreter.terms.IStrategoTerm

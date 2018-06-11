@@ -1,4 +1,4 @@
-package mb.spoofax.runtime.sdf;
+package mb.spoofax.runtime.jsglr;
 
 import static org.spoofax.jsglr.client.imploder.AbstractTokenizer.*;
 import static org.spoofax.jsglr.client.imploder.ImploderAttachment.getTokenizer;

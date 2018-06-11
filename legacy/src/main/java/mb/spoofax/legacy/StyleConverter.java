@@ -1,21 +1,14 @@
 package mb.spoofax.legacy;
 
-import java.util.ArrayList;
-
+import mb.spoofax.api.parse.*;
+import mb.spoofax.api.region.Region;
+import mb.spoofax.api.style.*;
 import org.metaborg.core.style.IRegionStyle;
 import org.metaborg.core.style.IStyle;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
-import mb.spoofax.api.parse.Token;
-import mb.spoofax.api.parse.TokenConstants;
-import mb.spoofax.api.parse.TokenImpl;
-import mb.spoofax.api.region.Region;
-import mb.spoofax.api.style.Style;
-import mb.spoofax.api.style.StyleImpl;
-import mb.spoofax.api.style.Styling;
-import mb.spoofax.api.style.StylingImpl;
-import mb.spoofax.api.style.TokenStyle;
-import mb.spoofax.api.style.TokenStyleImpl;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
 
 public class StyleConverter {
     public static Styling toStyling(Iterable<IRegionStyle<IStrategoTerm>> regionStyles) {
@@ -32,7 +25,14 @@ public class StyleConverter {
 
 
     private static Style toStyle(IStyle style) {
-        return new StyleImpl(style.color(), style.backgroundColor(), style.bold(), style.italic(), style.underscore(),
+        return new StyleImpl(toColor(style.color()), toColor(style.backgroundColor()), style.bold(), style.italic(), style.underscore(),
             style.strikeout());
+    }
+
+    private static Color toColor(@Nullable java.awt.Color color) {
+        if(color == null) {
+            return null;
+        }
+        return new Color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
     }
 }

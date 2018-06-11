@@ -12,13 +12,13 @@ data Styling = foreign java mb.spoofax.api.style.Styling {}
 /// Library with functions to build and use language specifications.
 /// Runtime
 // Style
-data StylingRules = foreign java mb.spoofax.runtime.esv.StylingRules {}
+data StylingRules = foreign java mb.spoofax.runtime.style.StylingRules {}
 func spoofax-style(tokenStream: Token*, st: StylingRules) -> Styling = foreign mb.spoofax.pie.style.SpoofaxStyle
 // JSGLR
-data ParseTable = foreign java mb.spoofax.runtime.sdf.Table {}
+data ParseTable = foreign java mb.spoofax.runtime.jsglr.Table {}
 func jsglr-parse(text: string, table: ParseTable, file: path, langSpecExt: string, root: path) -> (Ast?, Token*?, Message*) = foreign mb.spoofax.pie.jsglr.JSGLRParse
 // Constraint generator
-data CGen = foreign java mb.spoofax.runtime.nabl.ConstraintGenerator {}
+data CGen = foreign java mb.spoofax.runtime.constraint.CGen {}
 data GlobalConstraints = foreign java mb.nabl2.spoofax.analysis.ImmutableInitialResult {}
 func cgen-global(langSpecExt: string, root: path) -> GlobalConstraints? = foreign mb.spoofax.pie.constraint.CGenGlobal
 data DocumentConstraints = foreign java mb.nabl2.spoofax.analysis.ImmutableUnitResult {}
@@ -27,13 +27,13 @@ func cgen-document(globalConstraints: GlobalConstraints, ast: Ast, file: path, l
 data SolverSolution = foreign java mb.nabl2.solver.ImmutableSolution {}
 func csolve-global(globalConstraints: GlobalConstraints) -> SolverSolution? = foreign mb.spoofax.pie.constraint.CSolveGlobal
 func csolve-document(documentConstraints: DocumentConstraints, globalConstraints: GlobalConstraints, globalSolution: SolverSolution) -> SolverSolution? = foreign mb.spoofax.pie.constraint.CSolveDocument
-data FinalSolverSolution = foreign java mb.spoofax.runtime.nabl.ConstraintSolverSolution {}
+data FinalSolverSolution = foreign java mb.spoofax.runtime.constraint.CSolution {}
 func csolve-final(documentsConstraints: SolverSolution*, globalSolution: SolverSolution, projectPath: path) -> FinalSolverSolution? = foreign mb.spoofax.pie.constraint.CSolveFinal
 
 /// Meta-languages
 // SDF3
 func sdf3-to-jsglr-parse-table(langSpecExt: string, root: path) -> ParseTable? = foreign mb.spoofax.pie.sdf3.SDF3ToJSGLRParseTable
-data Signatures = foreign java mb.spoofax.runtime.sdf.Signatures {}
+data Signatures = foreign java mb.spoofax.runtime.sdf3.Signatures {}
 func sdf3-to-stratego-signatures(langSpecExt: string, root: path) -> Signatures? = foreign mb.spoofax.pie.sdf3.SDF3ToStrategoSignatures
 // ESV
 func esv-to-styling-rules(langSpecExt: string, root: path) -> StylingRules? = foreign mb.spoofax.pie.esv.ESVToStylingRules

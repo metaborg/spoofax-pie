@@ -7,11 +7,11 @@ import mb.nabl2.spoofax.analysis.ImmutableInitialResult
 import mb.pie.api.ExecContext
 import mb.pie.api.TaskDef
 import mb.spoofax.api.SpoofaxEx
-import mb.spoofax.runtime.nabl.ConstraintSolver
+import mb.spoofax.runtime.constraint.CSolver
 
 class CSolveGlobal @Inject constructor(
   log: Logger,
-  private val solver: ConstraintSolver
+  private val solver: CSolver
 ) : TaskDef<ImmutableInitialResult, ImmutableSolution?> {
   private val log: Logger = log.forContext(CSolveGlobal::class.java)
 

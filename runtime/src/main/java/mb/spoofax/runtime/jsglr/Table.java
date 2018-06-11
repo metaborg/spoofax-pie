@@ -1,4 +1,4 @@
-package mb.spoofax.runtime.sdf;
+package mb.spoofax.runtime.jsglr;
 
 import mb.pie.vfs.path.PPath;
 import org.spoofax.interpreter.terms.IStrategoTerm;

@@ -232,7 +232,7 @@ public class ChangesState {
                                 "        /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/nabl2.shared/src-gen,\n" +
                                 "        /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/nabl2.runtime/trans,\n" +
                                 "        /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/nabl2.runtime/src-gen,\n" +
-                                "        /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/nabl2.runtime/src-gen/nabl2,\n" +
+                                "        /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/nabl2.runtime/src-gen/nabl2/collection,\n" +
                                 "        /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/nabl2.lang/trans,\n" +
                                 "        /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/nabl2.lang/src-gen\n" +
                                 "      include libs: stratego-lib, stratego-sglr\n" +

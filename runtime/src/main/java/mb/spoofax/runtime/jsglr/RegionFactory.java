@@ -1,4 +1,4 @@
-package mb.spoofax.runtime.sdf;
+package mb.spoofax.runtime.jsglr;
 
 import org.spoofax.jsglr.client.imploder.IToken;
 

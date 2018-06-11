@@ -1,4 +1,4 @@
-package mb.spoofax.runtime.esv;
+package mb.spoofax.runtime.style;
 
 import java.util.List;
 

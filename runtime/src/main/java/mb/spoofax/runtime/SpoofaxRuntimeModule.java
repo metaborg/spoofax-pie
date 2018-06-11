@@ -10,7 +10,7 @@ import mb.spoofax.runtime.stratego.primitive.ScopeGraphPrimitiveLibrary;
 import org.spoofax.interpreter.library.AbstractPrimitive;
 import org.spoofax.interpreter.library.IOperatorRegistry;
 
-public class SpoofaxImplModule extends AbstractModule {
+public class SpoofaxRuntimeModule extends AbstractModule {
     @Override protected void configure() {
         bind(StylingRulesFromESV.class).in(Singleton.class);
 

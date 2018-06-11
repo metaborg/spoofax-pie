@@ -1,4 +1,4 @@
-package mb.spoofax.runtime.nabl;
+package mb.spoofax.runtime.constraint;
 
 import mb.spoofax.api.message.Msg;
 import mb.spoofax.api.message.PathMsg;
@@ -6,22 +6,16 @@ import mb.spoofax.api.message.PathMsg;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class ConstraintSolverSolution implements Serializable {
+public class CSolution implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private ArrayList<PathMsg> fileMessages;
     private ArrayList<Msg> projectMessages;
-//    private ArrayList<PathMsg> fileUnsolvedMessages;
-//    private ArrayList<Msg> projectUnsolvedMessages;
 
 
-    public ConstraintSolverSolution(ArrayList<PathMsg> fileMessages, ArrayList<Msg> projectMessages
-//        , ArrayList<PathMsg> fileUnsolvedMessages, ArrayList<Msg> projectUnsolvedMessages
-    ) {
+    public CSolution(ArrayList<PathMsg> fileMessages, ArrayList<Msg> projectMessages) {
         this.fileMessages = fileMessages;
         this.projectMessages = projectMessages;
-//        this.fileUnsolvedMessages = fileUnsolvedMessages;
-//        this.projectUnsolvedMessages = projectUnsolvedMessages;
     }
 
 
@@ -32,20 +26,12 @@ public class ConstraintSolverSolution implements Serializable {
     public ArrayList<Msg> getProjectMessages() {
         return projectMessages;
     }
-//
-//    public ArrayList<PathMsg> getFileUnsolvedMessages() {
-//        return fileUnsolvedMessages;
-//    }
-//
-//    public ArrayList<Msg> getProjectUnsolvedMessages() {
-//        return projectUnsolvedMessages;
-//    }
 
 
     @Override public boolean equals(Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
-        final ConstraintSolverSolution that = (ConstraintSolverSolution) o;
+        final CSolution that = (CSolution) o;
         if(!fileMessages.equals(that.fileMessages)) return false;
         return projectMessages.equals(that.projectMessages);
     }
@@ -53,8 +39,6 @@ public class ConstraintSolverSolution implements Serializable {
     @Override public int hashCode() {
         int result = fileMessages.hashCode();
         result = 31 * result + projectMessages.hashCode();
-//        result = 31 * result + fileUnsolvedMessages.hashCode();
-//        result = 31 * result + projectUnsolvedMessages.hashCode();
         return result;
     }
 
@@ -62,8 +46,6 @@ public class ConstraintSolverSolution implements Serializable {
         return "ConstraintSolverSolution(" +
             "fileMessages=" + fileMessages +
             ", projectMessages=" + projectMessages +
-//            ", fileUnsolvedMessages=" + fileUnsolvedMessages +
-//            ", projectUnsolvedMessages=" + projectUnsolvedMessages +
             ')';
     }
 }

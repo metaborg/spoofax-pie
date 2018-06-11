@@ -7,7 +7,7 @@ import mb.pie.api.stamp.FileStampers
 import mb.pie.vfs.path.PPath
 import mb.spoofax.pie.generated.createWorkspaceConfig
 import mb.spoofax.pie.legacy.*
-import mb.spoofax.runtime.esv.StylingRules
+import mb.spoofax.runtime.style.StylingRules
 import mb.spoofax.runtime.esv.StylingRulesFromESV
 import org.spoofax.interpreter.terms.IStrategoAppl
 import java.io.Serializable

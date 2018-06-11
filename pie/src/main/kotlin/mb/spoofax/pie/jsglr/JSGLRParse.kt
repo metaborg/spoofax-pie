@@ -7,7 +7,7 @@ import mb.pie.vfs.path.PPath
 import mb.spoofax.api.message.Msg
 import mb.spoofax.api.parse.Token
 import mb.spoofax.pie.generated.createWorkspaceConfig
-import mb.spoofax.runtime.sdf.Table
+import mb.spoofax.runtime.jsglr.Table
 import org.spoofax.interpreter.terms.IStrategoTerm
 import org.spoofax.jsglr.client.imploder.ImploderOriginTermFactory
 import org.spoofax.terms.TermFactory

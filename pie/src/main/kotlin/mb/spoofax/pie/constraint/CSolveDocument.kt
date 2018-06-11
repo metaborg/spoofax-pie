@@ -8,12 +8,12 @@ import mb.nabl2.spoofax.analysis.ImmutableUnitResult
 import mb.pie.api.ExecContext
 import mb.pie.api.TaskDef
 import mb.spoofax.api.SpoofaxEx
-import mb.spoofax.runtime.nabl.ConstraintSolver
+import mb.spoofax.runtime.constraint.CSolver
 import java.io.Serializable
 
 class CSolveDocument @Inject constructor(
   log: Logger,
-  private val solver: ConstraintSolver
+  private val solver: CSolver
 ) : TaskDef<CSolveDocument.Input, ImmutableSolution?> {
   private val log: Logger = log.forContext(CSolveDocument::class.java)
 

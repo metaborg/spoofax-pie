@@ -7,7 +7,7 @@ import mb.pie.api.stamp.FileStampers
 import mb.pie.vfs.path.PPath
 import mb.spoofax.pie.generated.createWorkspaceConfig
 import mb.spoofax.pie.legacy.*
-import mb.spoofax.runtime.sdf.Signatures
+import mb.spoofax.runtime.sdf3.Signatures
 import org.metaborg.core.action.EndNamedGoal
 import java.io.Serializable
 

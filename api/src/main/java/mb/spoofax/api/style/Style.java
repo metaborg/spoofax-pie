@@ -1,7 +1,5 @@
 package mb.spoofax.api.style;
 
-import java.awt.Color;
-
 import javax.annotation.Nullable;
 
 public interface Style {

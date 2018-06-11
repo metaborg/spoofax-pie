@@ -10,7 +10,7 @@ import mb.spoofax.legacy.StaticSpoofaxCoreFacade;
 import mb.spoofax.pie.*;
 import mb.spoofax.pie.benchmark.SpoofaxCoreModule;
 import mb.spoofax.pie.generated.TaskDefsModule_spoofax;
-import mb.spoofax.runtime.SpoofaxImplModule;
+import mb.spoofax.runtime.SpoofaxRuntimeModule;
 import org.metaborg.core.MetaborgException;
 import org.metaborg.spoofax.core.Spoofax;
 import org.metaborg.spoofax.meta.core.SpoofaxExtensionModule;
@@ -33,7 +33,7 @@ public class SpoofaxPieState {
     public SpoofaxPieState() {
         try {
             spoofaxFacade =
-                new SpoofaxFacade(new SpoofaxModule(), new LogModule(LoggerFactory.getLogger("root")), new SpoofaxImplModule(),
+                new SpoofaxFacade(new SpoofaxModule(), new LogModule(LoggerFactory.getLogger("root")), new SpoofaxRuntimeModule(),
                     new SpoofaxPieModule(), new PieVfsModule(), new SpoofaxPieTaskDefsModule(), new PieLangRuntimeModule(),
                     new TaskDefsModule_spoofax());
             StaticSpoofaxFacade.init(spoofaxFacade);

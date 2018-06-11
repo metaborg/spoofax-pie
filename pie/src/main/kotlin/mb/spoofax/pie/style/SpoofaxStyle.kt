@@ -3,8 +3,8 @@ package mb.spoofax.pie.style
 import mb.pie.api.*
 import mb.spoofax.api.parse.Token
 import mb.spoofax.api.style.Styling
-import mb.spoofax.runtime.esv.Styler
-import mb.spoofax.runtime.esv.StylingRules
+import mb.spoofax.runtime.style.Styler
+import mb.spoofax.runtime.style.StylingRules
 import java.io.Serializable
 
 class SpoofaxStyle : TaskDef<SpoofaxStyle.Input, Styling> {

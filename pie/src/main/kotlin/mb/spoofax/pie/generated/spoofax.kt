@@ -93,15 +93,15 @@ class createWorkspaceConfig @Inject constructor(
 class processWorkspace @Inject constructor(
   private val listContents: ListContents,
   private val _processProject: processProject
-) : TaskDef<PPath, ArrayList<Tuple2<ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.nabl.ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?>>>>> {
+) : TaskDef<PPath, ArrayList<Tuple2<ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?>>>>> {
   companion object {
     const val id = "processWorkspace"
   }
 
   override val id = Companion.id
-  override fun ExecContext.exec(input: PPath): ArrayList<Tuple2<ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.nabl.ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?>>>> = run {
+  override fun ExecContext.exec(input: PPath): ArrayList<Tuple2<ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?>>>> = run {
 
-    require(listContents, ListContents.Input(input, PPaths.regexPathMatcher("^[^.]((?!src-gen).)*\$"))).map { project -> require(_processProject, processProject.Input(project, input)) }.toCollection(ArrayList<Tuple2<ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.nabl.ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?>>>>())
+    require(listContents, ListContents.Input(input, PPaths.regexPathMatcher("^[^.]((?!src-gen).)*\$"))).map { project -> require(_processProject, processProject.Input(project, input)) }.toCollection(ArrayList<Tuple2<ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?>>>>())
   }
 }
 
@@ -119,20 +119,20 @@ class processProject @Inject constructor(
     constructor(tuple: Tuple2<PPath, PPath>) : this(tuple.component1(), tuple.component2())
   }
 
-  data class Output(val _1: ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.nabl.ConstraintSolverSolution?>>>, val _2: ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?>>) : Tuple2<ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.nabl.ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?>>> {
-    constructor(tuple: Tuple2<ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.nabl.ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?>>>) : this(tuple.component1(), tuple.component2())
+  data class Output(val _1: ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>>>, val _2: ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?>>) : Tuple2<ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?>>> {
+    constructor(tuple: Tuple2<ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?>>>) : this(tuple.component1(), tuple.component2())
   }
 
-  private fun output(tuple: Tuple2<ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.nabl.ConstraintSolverSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?>>>) = Output(tuple)
+  private fun output(tuple: Tuple2<ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?>>>) = Output(tuple)
 
   override val id = Companion.id
   override fun ExecContext.exec(input: processProject.Input): processProject.Output = run {
     val workspaceConfig = require(_createWorkspaceConfig, input.root);
-    val noLangSpecResults: ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.nabl.ConstraintSolverSolution?>>> = list();
+    val noLangSpecResults: ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>>> = list();
     val noSpxCoreResults: ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?>> = list();
     if(workspaceConfig == null) return output(tuple(noLangSpecResults, noSpxCoreResults));
     val workspace = workspaceConfig!!;
-    val langSpecResults = workspace.langSpecConfigs().map { langSpec -> require(_processLangSpecInProject, processLangSpecInProject.Input(input.project, langSpec, input.root)) }.toCollection(ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.nabl.ConstraintSolverSolution?>>>());
+    val langSpecResults = workspace.langSpecConfigs().map { langSpec -> require(_processLangSpecInProject, processLangSpecInProject.Input(input.project, langSpec, input.root)) }.toCollection(ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>>>());
     val spxCoreResults = require(walkContents, WalkContents.Input(input.project, PPaths.extensionsPathWalker(workspace.spxCoreExtensions()))).map { file -> require(_processFileWithSpxCore, processFileWithSpxCore.Input(file, input.project, workspace)) }.toCollection(ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?>>())
     output(tuple(langSpecResults, spxCoreResults))
   }
@@ -141,7 +141,7 @@ class processProject @Inject constructor(
 class processLangSpecInProject @Inject constructor(
   private val walkContents: WalkContents,
   private val _processFile: processFile
-) : TaskDef<processLangSpecInProject.Input, ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.nabl.ConstraintSolverSolution?>>> {
+) : TaskDef<processLangSpecInProject.Input, ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>>> {
   companion object {
     const val id = "processLangSpecInProject"
   }
@@ -151,9 +151,9 @@ class processLangSpecInProject @Inject constructor(
   }
 
   override val id = Companion.id
-  override fun ExecContext.exec(input: processLangSpecInProject.Input): ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.nabl.ConstraintSolverSolution?>> = run {
+  override fun ExecContext.exec(input: processLangSpecInProject.Input): ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>> = run {
 
-    require(walkContents, WalkContents.Input(input.project, PPaths.extensionsPathWalker(input.langSpec.extensions()))).map { file -> require(_processFile, processFile.Input(file, input.project, input.root)) }.toCollection(ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.nabl.ConstraintSolverSolution?>>())
+    require(walkContents, WalkContents.Input(input.project, PPaths.extensionsPathWalker(input.langSpec.extensions()))).map { file -> require(_processFile, processFile.Input(file, input.project, input.root)) }.toCollection(ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>>())
   }
 }
 
@@ -170,11 +170,11 @@ class processEditor @Inject constructor(
     constructor(tuple: Tuple4<String, PPath, PPath, PPath>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
   }
 
-  data class Output(val _1: ArrayList<mb.spoofax.api.parse.Token>?, val _2: ArrayList<mb.spoofax.api.message.Msg>, val _3: mb.spoofax.api.style.Styling?, val _4: mb.spoofax.runtime.nabl.ConstraintSolverSolution?) : Tuple4<ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.nabl.ConstraintSolverSolution?> {
-    constructor(tuple: Tuple4<ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.nabl.ConstraintSolverSolution?>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
+  data class Output(val _1: ArrayList<mb.spoofax.api.parse.Token>?, val _2: ArrayList<mb.spoofax.api.message.Msg>, val _3: mb.spoofax.api.style.Styling?, val _4: mb.spoofax.runtime.constraint.CSolution?) : Tuple4<ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?> {
+    constructor(tuple: Tuple4<ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
   }
 
-  private fun output(tuple: Tuple4<ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.nabl.ConstraintSolverSolution?>?) = if(tuple == null) null else Output(tuple)
+  private fun output(tuple: Tuple4<ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>?) = if(tuple == null) null else Output(tuple)
 
   override val id = Companion.id
   override fun ExecContext.exec(input: processEditor.Input): processEditor.Output? = run {
@@ -192,8 +192,8 @@ class processEditor @Inject constructor(
     val spxCoreConfig = workspace.spxCoreConfigForExt(extension!!);
     if(spxCoreConfig != null) run {
       val (tokens, messages, styling) = require(_processStringWithSpxCore, processStringWithSpxCore.Input(input.text, input.file, spxCoreConfig!!));
-      val noSolution: mb.spoofax.runtime.nabl.ConstraintSolverSolution? = null;
-      return output(tuple(tokens, messages, styling, noSolution) as Tuple4<ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.nabl.ConstraintSolverSolution?>?)
+      val noSolution: mb.spoofax.runtime.constraint.CSolution? = null;
+      return output(tuple(tokens, messages, styling, noSolution) as Tuple4<ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>?)
     }
     null
   }
@@ -214,11 +214,11 @@ class processFile @Inject constructor(
     constructor(tuple: Tuple3<PPath, PPath, PPath>) : this(tuple.component1(), tuple.component2(), tuple.component3())
   }
 
-  data class Output(val _1: PPath, val _2: ArrayList<mb.spoofax.api.parse.Token>?, val _3: ArrayList<mb.spoofax.api.message.Msg>, val _4: mb.spoofax.api.style.Styling?, val _5: mb.spoofax.runtime.nabl.ConstraintSolverSolution?) : Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.nabl.ConstraintSolverSolution?> {
-    constructor(tuple: Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.nabl.ConstraintSolverSolution?>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4(), tuple.component5())
+  data class Output(val _1: PPath, val _2: ArrayList<mb.spoofax.api.parse.Token>?, val _3: ArrayList<mb.spoofax.api.message.Msg>, val _4: mb.spoofax.api.style.Styling?, val _5: mb.spoofax.runtime.constraint.CSolution?) : Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?> {
+    constructor(tuple: Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4(), tuple.component5())
   }
 
-  private fun output(tuple: Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.nabl.ConstraintSolverSolution?>) = Output(tuple)
+  private fun output(tuple: Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>) = Output(tuple)
 
   override val id = Companion.id
   override fun ExecContext.exec(input: processFile.Input): processFile.Output = run {
@@ -246,18 +246,18 @@ class emptyFileResult @Inject constructor(
     const val id = "emptyFileResult"
   }
 
-  data class Output(val _1: PPath, val _2: ArrayList<mb.spoofax.api.parse.Token>?, val _3: ArrayList<mb.spoofax.api.message.Msg>, val _4: mb.spoofax.api.style.Styling?, val _5: mb.spoofax.runtime.nabl.ConstraintSolverSolution?) : Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.nabl.ConstraintSolverSolution?> {
-    constructor(tuple: Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.nabl.ConstraintSolverSolution?>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4(), tuple.component5())
+  data class Output(val _1: PPath, val _2: ArrayList<mb.spoofax.api.parse.Token>?, val _3: ArrayList<mb.spoofax.api.message.Msg>, val _4: mb.spoofax.api.style.Styling?, val _5: mb.spoofax.runtime.constraint.CSolution?) : Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?> {
+    constructor(tuple: Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4(), tuple.component5())
   }
 
-  private fun output(tuple: Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.nabl.ConstraintSolverSolution?>) = Output(tuple)
+  private fun output(tuple: Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>) = Output(tuple)
 
   override val id = Companion.id
   override fun ExecContext.exec(input: PPath): emptyFileResult.Output = run {
     val emptyTokens: ArrayList<mb.spoofax.api.parse.Token>? = null;
     val emptyMessages: ArrayList<mb.spoofax.api.message.Msg> = list();
     val emptyStyling: mb.spoofax.api.style.Styling? = null;
-    val emptySolution: mb.spoofax.runtime.nabl.ConstraintSolverSolution? = null
+    val emptySolution: mb.spoofax.runtime.constraint.CSolution? = null
     output(tuple(input, emptyTokens, emptyMessages, emptyStyling, emptySolution))
   }
 }
@@ -276,11 +276,11 @@ class processString @Inject constructor(
     constructor(tuple: Tuple4<String, PPath, PPath, PPath>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
   }
 
-  data class Output(val _1: ArrayList<mb.spoofax.api.parse.Token>?, val _2: ArrayList<mb.spoofax.api.message.Msg>, val _3: mb.spoofax.api.style.Styling?, val _4: mb.spoofax.runtime.nabl.ConstraintSolverSolution?) : Tuple4<ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.nabl.ConstraintSolverSolution?> {
-    constructor(tuple: Tuple4<ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.nabl.ConstraintSolverSolution?>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
+  data class Output(val _1: ArrayList<mb.spoofax.api.parse.Token>?, val _2: ArrayList<mb.spoofax.api.message.Msg>, val _3: mb.spoofax.api.style.Styling?, val _4: mb.spoofax.runtime.constraint.CSolution?) : Tuple4<ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?> {
+    constructor(tuple: Tuple4<ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
   }
 
-  private fun output(tuple: Tuple4<ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.nabl.ConstraintSolverSolution?>) = Output(tuple)
+  private fun output(tuple: Tuple4<ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>) = Output(tuple)
 
   override val id = Companion.id
   override fun ExecContext.exec(input: processString.Input): processString.Output = run {
@@ -288,7 +288,7 @@ class processString @Inject constructor(
     output(if(langSpecExt != null) run {
       val (ast, tokenStream, messages) = require(_parse, parse.Input(input.text, input.file, langSpecExt!!, input.root));
       val styling: mb.spoofax.api.style.Styling? = if(tokenStream == null) null else require(_style, style.Input(tokenStream!!, langSpecExt!!, input.root));
-      val solution: mb.spoofax.runtime.nabl.ConstraintSolverSolution? = if(ast == null) null else require(_solveFile, solveFile.Input(ast!!, input.file, input.project, langSpecExt!!, input.root));
+      val solution: mb.spoofax.runtime.constraint.CSolution? = if(ast == null) null else require(_solveFile, solveFile.Input(ast!!, input.file, input.project, langSpecExt!!, input.root));
       tuple(tokenStream, messages, styling, solution)
     } else run {
       require(_emptyResult, None.instance)
@@ -303,18 +303,18 @@ class emptyResult @Inject constructor(
     const val id = "emptyResult"
   }
 
-  data class Output(val _1: ArrayList<mb.spoofax.api.parse.Token>?, val _2: ArrayList<mb.spoofax.api.message.Msg>, val _3: mb.spoofax.api.style.Styling?, val _4: mb.spoofax.runtime.nabl.ConstraintSolverSolution?) : Tuple4<ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.nabl.ConstraintSolverSolution?> {
-    constructor(tuple: Tuple4<ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.nabl.ConstraintSolverSolution?>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
+  data class Output(val _1: ArrayList<mb.spoofax.api.parse.Token>?, val _2: ArrayList<mb.spoofax.api.message.Msg>, val _3: mb.spoofax.api.style.Styling?, val _4: mb.spoofax.runtime.constraint.CSolution?) : Tuple4<ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?> {
+    constructor(tuple: Tuple4<ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
   }
 
-  private fun output(tuple: Tuple4<ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.nabl.ConstraintSolverSolution?>) = Output(tuple)
+  private fun output(tuple: Tuple4<ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>) = Output(tuple)
 
   override val id = Companion.id
   override fun ExecContext.exec(input: None): emptyResult.Output = run {
     val emptyTokens: ArrayList<mb.spoofax.api.parse.Token>? = null;
     val emptyMessages: ArrayList<mb.spoofax.api.message.Msg> = list();
     val emptyStyling: mb.spoofax.api.style.Styling? = null;
-    val emptySolution: mb.spoofax.runtime.nabl.ConstraintSolverSolution? = null
+    val emptySolution: mb.spoofax.runtime.constraint.CSolution? = null
     output(tuple(emptyTokens, emptyMessages, emptyStyling, emptySolution))
   }
 }
@@ -370,7 +370,7 @@ class emptyParse @Inject constructor(
 
 class createSignatures @Inject constructor(
   private val _mb_spoofax_pie_sdf3_SDF3ToStrategoSignatures: mb.spoofax.pie.sdf3.SDF3ToStrategoSignatures
-) : TaskDef<createSignatures.Input, mb.spoofax.runtime.sdf.Signatures?> {
+) : TaskDef<createSignatures.Input, mb.spoofax.runtime.sdf3.Signatures?> {
   companion object {
     const val id = "createSignatures"
   }
@@ -380,7 +380,7 @@ class createSignatures @Inject constructor(
   }
 
   override val id = Companion.id
-  override fun ExecContext.exec(input: createSignatures.Input): mb.spoofax.runtime.sdf.Signatures? = run {
+  override fun ExecContext.exec(input: createSignatures.Input): mb.spoofax.runtime.sdf3.Signatures? = run {
 
     require(_mb_spoofax_pie_sdf3_SDF3ToStrategoSignatures, mb.spoofax.pie.sdf3.SDF3ToStrategoSignatures.Input(input.langSpecExt, input.root))
   }
@@ -412,7 +412,7 @@ class solveFile @Inject constructor(
   private val _mb_spoofax_pie_constraint_CGenDocument: mb.spoofax.pie.constraint.CGenDocument,
   private val _mb_spoofax_pie_constraint_CSolveGlobal: mb.spoofax.pie.constraint.CSolveGlobal,
   private val _mb_spoofax_pie_constraint_CGenGlobal: mb.spoofax.pie.constraint.CGenGlobal
-) : TaskDef<solveFile.Input, mb.spoofax.runtime.nabl.ConstraintSolverSolution?> {
+) : TaskDef<solveFile.Input, mb.spoofax.runtime.constraint.CSolution?> {
   companion object {
     const val id = "solveFile"
   }
@@ -422,7 +422,7 @@ class solveFile @Inject constructor(
   }
 
   override val id = Companion.id
-  override fun ExecContext.exec(input: solveFile.Input): mb.spoofax.runtime.nabl.ConstraintSolverSolution? = run {
+  override fun ExecContext.exec(input: solveFile.Input): mb.spoofax.runtime.constraint.CSolution? = run {
     val globalConstraints = require(_mb_spoofax_pie_constraint_CGenGlobal, mb.spoofax.pie.constraint.CGenGlobal.Input(input.langSpecExt, input.root));
     if(globalConstraints == null) return null;
     val globalSolution = require(_mb_spoofax_pie_constraint_CSolveGlobal, globalConstraints!!);

@@ -7,15 +7,15 @@ import mb.pie.api.ExecContext
 import mb.pie.api.TaskDef
 import mb.pie.vfs.path.PPath
 import mb.spoofax.api.SpoofaxEx
-import mb.spoofax.runtime.nabl.ConstraintSolver
-import mb.spoofax.runtime.nabl.ConstraintSolverSolution
+import mb.spoofax.runtime.constraint.CSolver
+import mb.spoofax.runtime.constraint.CSolution
 import java.io.Serializable
 import java.util.*
 
 class CSolveFinal @Inject constructor(
   log: Logger,
-  private val solver: ConstraintSolver
-) : TaskDef<CSolveFinal.Input, ConstraintSolverSolution?> {
+  private val solver: CSolver
+) : TaskDef<CSolveFinal.Input, CSolution?> {
   private val log: Logger = log.forContext(CSolveFinal::class.java)
 
   companion object {
@@ -29,7 +29,7 @@ class CSolveFinal @Inject constructor(
   ) : Serializable
 
   override val id = Companion.id
-  override fun ExecContext.exec(input: Input): ConstraintSolverSolution? {
+  override fun ExecContext.exec(input: Input): CSolution? {
     val (documentSolutions, globalSolution, projectPath) = input
     return try {
       solver.solve(documentSolutions, globalSolution, projectPath)

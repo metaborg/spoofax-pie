@@ -1,4 +1,4 @@
-package mb.spoofax.runtime.sdf;
+package mb.spoofax.runtime.sdf3;
 
 import mb.pie.vfs.path.PPath;
 

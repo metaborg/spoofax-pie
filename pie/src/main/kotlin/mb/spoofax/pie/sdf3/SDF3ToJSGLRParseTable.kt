@@ -8,7 +8,7 @@ import mb.pie.vfs.path.PPath
 import mb.pie.vfs.path.PathSrv
 import mb.spoofax.pie.generated.createWorkspaceConfig
 import mb.spoofax.pie.legacy.*
-import mb.spoofax.runtime.sdf.Table
+import mb.spoofax.runtime.jsglr.Table
 import org.metaborg.core.action.EndNamedGoal
 import org.metaborg.sdf2table.io.ParseTableGenerator
 import org.metaborg.spoofax.core.build.SpoofaxCommonPaths

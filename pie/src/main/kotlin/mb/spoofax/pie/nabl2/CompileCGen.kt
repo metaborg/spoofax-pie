@@ -7,7 +7,7 @@ import mb.spoofax.pie.generated.createWorkspaceConfig
 import mb.spoofax.pie.sdf3.SDF3ToStrategoSignatures
 import mb.spoofax.pie.stratego.CompileStratego
 import mb.spoofax.runtime.cfg.ImmutableStrategoConfig
-import mb.spoofax.runtime.nabl.CGen
+import mb.spoofax.runtime.constraint.CGen
 import java.io.Serializable
 
 class CompileCGen

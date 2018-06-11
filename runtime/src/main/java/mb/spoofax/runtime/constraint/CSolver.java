@@ -1,4 +1,4 @@
-package mb.spoofax.runtime.nabl;
+package mb.spoofax.runtime.constraint;
 
 import com.google.inject.Inject;
 import mb.nabl2.config.NaBL2DebugConfig;
@@ -21,7 +21,7 @@ import mb.pie.vfs.path.PPath;
 import mb.pie.vfs.path.PathSrv;
 import mb.spoofax.api.SpoofaxEx;
 import mb.spoofax.api.message.*;
-import mb.spoofax.api.nats.NaTsMsgType;
+import mb.spoofax.runtime.nabl.NaTsMsgType;
 import mb.spoofax.api.region.Region;
 import mb.spoofax.api.region.RegionImpl;
 import mb.spoofax.runtime.util.*;
@@ -34,14 +34,14 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class ConstraintSolver {
+public class CSolver {
     private static final MsgType messageType = new NaTsMsgType();
     static final String globalSource = "";
 
     private final PathSrv pathSrv;
 
 
-    @Inject public ConstraintSolver(PathSrv pathSrv) {
+    @Inject public CSolver(PathSrv pathSrv) {
         this.pathSrv = pathSrv;
     }
 
@@ -87,7 +87,7 @@ public class ConstraintSolver {
         }
     }
 
-    public ConstraintSolverSolution solve(Collection<? extends ISolution> documentSolutions, ISolution globalSolution, PPath projectPath) throws SpoofaxEx {
+    public CSolution solve(Collection<? extends ISolution> documentSolutions, ISolution globalSolution, PPath projectPath) throws SpoofaxEx {
         final Fresh globalFresher = new Fresh();
         final Function1<String, String> globalFresh = globalFresher::fresh;
 
@@ -117,7 +117,7 @@ public class ConstraintSolver {
                 projectMessages.add(messageInfo);
             }
         }
-        return new ConstraintSolverSolution(fileMessages, projectMessages);
+        return new CSolution(fileMessages, projectMessages);
     }
 
 

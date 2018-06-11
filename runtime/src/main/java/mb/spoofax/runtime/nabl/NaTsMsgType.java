@@ -1,4 +1,4 @@
-package mb.spoofax.api.nats;
+package mb.spoofax.runtime.nabl;
 
 import mb.spoofax.api.message.Msg;
 import mb.spoofax.api.message.MsgType;
