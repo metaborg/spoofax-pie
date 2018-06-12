@@ -15,64 +15,53 @@
     <relativePath />
   </parent>
 
-  <dependencies>
-    <!--dependency>
-      <groupId>org.metaborg</groupId>
-      <artifactId>pie.runtime.core</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.metaborg</groupId>
-      <artifactId>pie.runtime.builtin</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
-    </dependency-->
+  <properties>
+    <spoofax.version>${project.version}</spoofax.version>
+    <metaborg.version>${metaborg-version}</metaborg.version>
+    <pie.version>0.2.0-SNAPSHOT</pie.version>
+  </properties>
 
+  <dependencies>
     <dependency>
       <groupId>org.metaborg</groupId>
-      <artifactId>spoofax.api</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
+      <artifactId>${spoofax.version}</artifactId>
+      <version>${spoofax.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>spoofax.runtime</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
-    </dependency>
-    <!-->dependency>
-      <groupId>org.metaborg</groupId>
-      <artifactId>spoofax.runtime.pie</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
-    </dependency-->
-
-    <dependency>
-      <groupId>org.metaborg</groupId>
-      <artifactId>log</artifactId>
-      <version>${metaborg-version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.metaborg</groupId>
-      <artifactId>vfs</artifactId>
-      <version>${metaborg-version}</version>
+      <version>${spoofax.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.metaborg.core</artifactId>
-      <version>${metaborg-version}</version>
+      <version>${metaborg.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.metaborg.meta.core</artifactId>
-      <version>${metaborg-version}</version>
+      <version>${metaborg.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.metaborg.spoofax.core</artifactId>
-      <version>${metaborg-version}</version>
+      <version>${metaborg.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.metaborg.spoofax.meta.core</artifactId>
-      <version>${metaborg-version}</version>
+      <version>${metaborg.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>log</artifactId>
+      <version>${metaborg.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>vfs</artifactId>
+      <version>${pie.version}</version>
     </dependency>
 
     <dependency>

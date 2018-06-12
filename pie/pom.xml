@@ -18,6 +18,8 @@
     <kotlin.lang.version>1.2</kotlin.lang.version>
     <kotlin.api.version>1.2</kotlin.api.version>
     <kotlin.runtime.version>1.2.41</kotlin.runtime.version>
+    <spoofax.version>${project.version}</spoofax.version>
+    <metaborg.version>${metaborg-version}</metaborg.version>
     <pie.version>0.2.0-SNAPSHOT</pie.version>
   </properties>
 
@@ -57,44 +59,43 @@
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>spoofax.api</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
+      <version>${spoofax.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>spoofax.runtime</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
+      <version>${spoofax.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>spoofax.legacy</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.metaborg</groupId>
-      <artifactId>log</artifactId>
-      <version>${metaborg-version}</version>
+      <version>${spoofax.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.spoofax.terms</artifactId>
-      <version>${metaborg-version}</version>
+      <version>${metaborg.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.spoofax.jsglr</artifactId>
-      <version>${metaborg-version}</version>
+      <version>${metaborg.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.spoofax.interpreter.core</artifactId>
-      <version>${metaborg-version}</version>
+      <version>${metaborg.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.metaborg.spoofax.core</artifactId>
-      <version>${metaborg-version}</version>
+      <version>${metaborg.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>log</artifactId>
+      <version>${metaborg.version}</version>
     </dependency>
 
     <dependency>

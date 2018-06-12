@@ -133,7 +133,7 @@ public class StylingRulesFromESV {
                 final int b = Integer.parseInt(Tools.asJavaString(color.getSubterm(2)));
                 return new Color(r, g, b);
             case "ColorDefault":
-                return new Color(0, 0, 0);
+                return Color.black;
             default:
                 return null;
         }

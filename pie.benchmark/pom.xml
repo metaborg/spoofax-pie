@@ -28,12 +28,12 @@
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>pie.store.lmdb</artifactId>
-      <version>0.1.0</version>
+      <version>0.2.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>pie.share.coroutine</artifactId>
-      <version>0.1.0</version>
+      <version>0.2.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>

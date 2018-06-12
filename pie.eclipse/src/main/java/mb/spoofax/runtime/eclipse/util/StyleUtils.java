@@ -1,23 +1,16 @@
 package mb.spoofax.runtime.eclipse.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-
+import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import java.util.*;
+import mb.log.Logger;
+import mb.spoofax.api.region.Region;
+import mb.spoofax.api.style.*;
 import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
-
-import com.google.common.collect.Lists;
-import com.google.inject.Inject;
-
-import mb.log.Logger;
-import mb.spoofax.api.region.Region;
-import mb.spoofax.api.style.Style;
-import mb.spoofax.api.style.Styling;
-import mb.spoofax.api.style.TokenStyle;
 
 /**
  * Utility functions for creating Eclipse text styles.
@@ -33,7 +26,7 @@ public final class StyleUtils {
     }
 
 
-    public TextPresentation createTextPresentation(java.awt.Color color, int length) {
+    public TextPresentation createTextPresentation(mb.spoofax.api.style.Color color, int length) {
         final TextPresentation presentation = new TextPresentation();
         final StyleRange styleRange = new StyleRange();
         styleRange.start = 0;
@@ -86,7 +79,7 @@ public final class StyleUtils {
         final StyleRange defaultStyleRange = new StyleRange();
         defaultStyleRange.start = extent.getOffset();
         defaultStyleRange.length = extent.getLength();
-        defaultStyleRange.foreground = createColor(java.awt.Color.BLACK);
+        defaultStyleRange.foreground = createColor(mb.spoofax.api.style.Color.black);
         presentation.setDefaultStyleRange(defaultStyleRange);
 
         return presentation;
@@ -97,11 +90,11 @@ public final class StyleUtils {
         final Region region = tokenStyle.token().region();
 
         final StyleRange styleRange = new StyleRange();
-        final java.awt.Color foreground = style.color();
+        final mb.spoofax.api.style.Color foreground = style.color();
         if(foreground != null) {
             styleRange.foreground = createColor(foreground);
         }
-        final java.awt.Color background = style.backgroundColor();
+        final mb.spoofax.api.style.Color background = style.backgroundColor();
         if(background != null) {
             styleRange.background = createColor(background);
         }
@@ -124,8 +117,8 @@ public final class StyleUtils {
         return styleRange;
     }
 
-    private Color createColor(java.awt.Color color) {
-        final RGB rgb = new RGB(color.getRed(), color.getGreen(), color.getBlue());
+    private Color createColor(mb.spoofax.api.style.Color color) {
+        final RGB rgb = new RGB(color.red(), color.green(), color.blue());
         return colorShare.getColor(rgb);
     }
 

@@ -1,36 +1,22 @@
 package mb.spoofax.runtime.eclipse.pipeline;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map.Entry;
-
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRunnable;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.ICoreRunnable;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.text.TextPresentation;
-
 import com.google.inject.Inject;
-
+import java.util.*;
+import java.util.Map.Entry;
 import mb.log.Logger;
 import mb.pie.vfs.path.PPath;
 import mb.spoofax.api.message.Msg;
 import mb.spoofax.api.message.PathMsg;
+import mb.spoofax.api.style.Color;
 import mb.spoofax.api.style.Styling;
 import mb.spoofax.runtime.eclipse.editor.SpoofaxEditor;
-import mb.spoofax.runtime.eclipse.util.MarkerUtils;
-import mb.spoofax.runtime.eclipse.util.Nullable;
-import mb.spoofax.runtime.eclipse.util.StatusUtils;
-import mb.spoofax.runtime.eclipse.util.StyleUtils;
+import mb.spoofax.runtime.eclipse.util.*;
 import mb.spoofax.runtime.eclipse.vfs.EclipsePathSrv;
+import org.eclipse.core.resources.*;
+import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.text.TextPresentation;
 
 public class WorkspaceUpdate {
     public static final LockRule lock = new LockRule("Workspace update lock");

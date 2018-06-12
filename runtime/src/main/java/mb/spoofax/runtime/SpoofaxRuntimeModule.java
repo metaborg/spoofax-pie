@@ -6,6 +6,7 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import mb.nabl2.spoofax.primitives.*;
 import mb.spoofax.runtime.esv.StylingRulesFromESV;
+import mb.spoofax.runtime.nabl.*;
 import mb.spoofax.runtime.stratego.primitive.ScopeGraphPrimitiveLibrary;
 import org.spoofax.interpreter.library.AbstractPrimitive;
 import org.spoofax.interpreter.library.IOperatorRegistry;

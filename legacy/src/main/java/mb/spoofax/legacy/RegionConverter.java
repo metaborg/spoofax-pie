@@ -1,10 +1,9 @@
 package mb.spoofax.legacy;
 
-import org.metaborg.core.source.ISourceRegion;
-import org.metaborg.core.source.SourceRegion;
-
 import mb.spoofax.api.region.Region;
 import mb.spoofax.api.region.RegionImpl;
+import org.metaborg.core.source.ISourceRegion;
+import org.metaborg.core.source.SourceRegion;
 
 public class RegionConverter {
     public static Region toRegion(ISourceRegion sourceRegion) {

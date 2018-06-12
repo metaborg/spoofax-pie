@@ -1,14 +1,13 @@
 package mb.spoofax.legacy;
 
 import com.google.inject.Inject;
+import java.util.ArrayList;
 import mb.pie.vfs.path.PPath;
 import mb.spoofax.api.SpoofaxRunEx;
 import mb.spoofax.api.message.*;
 import mb.spoofax.api.parse.ParseMsgType;
 import mb.spoofax.api.region.Region;
 import org.metaborg.core.messages.*;
-
-import java.util.ArrayList;
 
 public class MessageConverter {
     private final PathConverter pathConverter;

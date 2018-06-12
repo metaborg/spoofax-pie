@@ -14,6 +14,9 @@
     <kotlin.api.version>1.2</kotlin.api.version>
     <kotlin.runtime.version>1.2.20</kotlin.runtime.version>
     <kotlin.coroutines.version>0.21.2</kotlin.coroutines.version>
+    <spoofax.version>${project.version}</spoofax.version>
+    <metaborg.version>${metaborg-version}</metaborg.version>
+    <pie.version>0.2.0-SNAPSHOT</pie.version>
   </properties>
 
   <parent>
@@ -28,34 +31,34 @@
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>pie.vfs</artifactId>
-      <version>0.1.0</version>
+      <version>${pie.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>pie.api</artifactId>
-      <version>0.1.0</version>
+      <version>${pie.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>pie.runtime</artifactId>
-      <version>0.1.0</version>
+      <version>${pie.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>pie.taskdefs.guice</artifactId>
-      <version>0.1.0</version>
+      <version>${pie.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>pie.lang.runtime</artifactId>
-      <version>0.1.0</version>
+      <version>${pie.version}</version>
     </dependency>
 
     <!-- Spoofax-PIE -->
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>spoofax.pie</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
+      <version>${spoofax.version}</version>
     </dependency>
 
     <!-- kotlin-stdlib -->
@@ -74,8 +77,8 @@
       <artifactId>kotlin-stdlib-jdk7</artifactId>
       <version>${kotlin.runtime.version}</version>
     </dependency>
-    <!-- <dependency> <groupId>org.jetbrains.kotlinx</groupId> <artifactId>kotlinx-coroutines-core</artifactId> 
-      <version>${kotlin.coroutines.version}</version> </dependency> -->
+    <!-- <dependency> <groupId>org.jetbrains.kotlinx</groupId> <artifactId>kotlinx-coroutines-core</artifactId> <version>${kotlin.coroutines.version}</version> 
+      </dependency> -->
     <dependency>
       <groupId>org.jetbrains</groupId>
       <artifactId>annotations</artifactId>
@@ -83,24 +86,22 @@
     </dependency>
 
     <!-- lmdbjava + agrona -->
-    <!-- <dependency> <groupId>org.lmdbjava</groupId> <artifactId>lmdbjava</artifactId> <version>0.6.0</version> 
-      </dependency> <dependency> <groupId>org.agrona</groupId> <artifactId>agrona</artifactId> <version>0.9.9</version> 
-      </dependency> -->
+    <!-- <dependency> <groupId>org.lmdbjava</groupId> <artifactId>lmdbjava</artifactId> <version>0.6.0</version> </dependency> 
+      <dependency> <groupId>org.agrona</groupId> <artifactId>agrona</artifactId> <version>0.9.9</version> </dependency> -->
     <!-- Dependencies of lmdbjava -->
-    <!-- <dependency> <groupId>com.github.jnr</groupId> <artifactId>jnr-constants</artifactId> <version>0.9.9</version> 
-      <scope>compile</scope> </dependency> <dependency> <groupId>com.github.jnr</groupId> <artifactId>jnr-ffi</artifactId> 
-      <version>2.1.6</version> <scope>compile</scope> </dependency> -->
+    <!-- <dependency> <groupId>com.github.jnr</groupId> <artifactId>jnr-constants</artifactId> <version>0.9.9</version> <scope>compile</scope> 
+      </dependency> <dependency> <groupId>com.github.jnr</groupId> <artifactId>jnr-ffi</artifactId> <version>2.1.6</version> <scope>compile</scope> 
+      </dependency> -->
     <!-- Dependencies of jnr-ffi of lmdbjava -->
-    <!-- <dependency> <groupId>com.github.jnr</groupId> <artifactId>jffi</artifactId> <version>1.2.16</version> 
-      <scope>compile</scope> </dependency> <dependency> <groupId>com.github.jnr</groupId> <artifactId>jffi</artifactId> 
-      <version>1.2.16</version> <scope>runtime</scope> <classifier>native</classifier> </dependency> <dependency> <groupId>org.ow2.asm</groupId> 
-      <artifactId>asm</artifactId> <version>5.0.3</version> <scope>compile</scope> </dependency> <dependency> <groupId>org.ow2.asm</groupId> 
-      <artifactId>asm-commons</artifactId> <version>5.0.3</version> <scope>compile</scope> </dependency> <dependency> 
-      <groupId>org.ow2.asm</groupId> <artifactId>asm-analysis</artifactId> <version>5.0.3</version> <scope>compile</scope> 
-      </dependency> <dependency> <groupId>org.ow2.asm</groupId> <artifactId>asm-tree</artifactId> <version>5.0.3</version> 
-      <scope>compile</scope> </dependency> <dependency> <groupId>org.ow2.asm</groupId> <artifactId>asm-util</artifactId> 
-      <version>5.0.3</version> <scope>compile</scope> </dependency> <dependency> <groupId>com.github.jnr</groupId> <artifactId>jnr-x86asm</artifactId> 
-      <version>1.0.2</version> <scope>compile</scope> </dependency> -->
+    <!-- <dependency> <groupId>com.github.jnr</groupId> <artifactId>jffi</artifactId> <version>1.2.16</version> <scope>compile</scope> 
+      </dependency> <dependency> <groupId>com.github.jnr</groupId> <artifactId>jffi</artifactId> <version>1.2.16</version> <scope>runtime</scope> 
+      <classifier>native</classifier> </dependency> <dependency> <groupId>org.ow2.asm</groupId> <artifactId>asm</artifactId> <version>5.0.3</version> 
+      <scope>compile</scope> </dependency> <dependency> <groupId>org.ow2.asm</groupId> <artifactId>asm-commons</artifactId> <version>5.0.3</version> 
+      <scope>compile</scope> </dependency> <dependency> <groupId>org.ow2.asm</groupId> <artifactId>asm-analysis</artifactId> <version>5.0.3</version> 
+      <scope>compile</scope> </dependency> <dependency> <groupId>org.ow2.asm</groupId> <artifactId>asm-tree</artifactId> <version>5.0.3</version> 
+      <scope>compile</scope> </dependency> <dependency> <groupId>org.ow2.asm</groupId> <artifactId>asm-util</artifactId> <version>5.0.3</version> 
+      <scope>compile</scope> </dependency> <dependency> <groupId>com.github.jnr</groupId> <artifactId>jnr-x86asm</artifactId> <version>1.0.2</version> 
+      <scope>compile</scope> </dependency> -->
 
     <!-- Eclipse Java compiler -->
     <dependency>
@@ -154,10 +155,10 @@
               org.eclipse.jdt.core.compiler.*;provider=metaborg;mandatory:=provider;version=0
             </Export-Package>
             <!-- kotlinx.*;provider=metaborg;mandatory:=provider;version=0,org.lmdbjava.*;provider=metaborg;mandatory:=provider;version=0, 
-              org.agrona.*;provider=metaborg;mandatory:=provider;version=0, jnr.*;provider=metaborg;mandatory:=provider;version=0, 
-              com.kenai.jffi.*;provider=metaborg;mandatory:=provider;version=0, org.objectweb.asm.*;provider=metaborg;mandatory:=provider;version=0, -->
-            <!-- Don't declare dependency on JDK, internal, non-existent packages, or optional dependencies that 
-              we do not need. -->
+              org.agrona.*;provider=metaborg;mandatory:=provider;version=0, jnr.*;provider=metaborg;mandatory:=provider;version=0, com.kenai.jffi.*;provider=metaborg;mandatory:=provider;version=0, 
+              org.objectweb.asm.*;provider=metaborg;mandatory:=provider;version=0, -->
+            <!-- Don't declare dependency on JDK, internal, non-existent packages, or optional dependencies that we do not 
+              need. -->
             <Import-Package>
               !*
             </Import-Package>
@@ -165,8 +166,8 @@
             <_nouses>true</_nouses>
             <!-- Don't use version of this package if no version can be determined. -->
             <_nodefaultversion>true</_nodefaultversion>
-            <!-- Allow buddy class loading, so that other bundles can merge their classpath with this bundle, which 
-              some libraries require. -->
+            <!-- Allow buddy class loading, so that other bundles can merge their classpath with this bundle, which some 
+              libraries require. -->
             <Eclipse-BuddyPolicy>registered</Eclipse-BuddyPolicy>
           </instructions>
         </configuration>

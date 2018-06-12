@@ -14,37 +14,48 @@
     <relativePath />
   </parent>
 
+  <properties>
+    <spoofax.version>${project.version}</spoofax.version>
+    <metaborg.version>${metaborg-version}</metaborg.version>
+    <pie.version>0.2.0-SNAPSHOT</pie.version>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>pie.vfs</artifactId>
-      <version>0.1.0</version>
+      <version>${pie.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>spoofax.api</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
+      <version>${spoofax.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.metaborg</groupId>
+      <artifactId>org.metaborg.spoofax.core</artifactId>
+      <version>${metaborg.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
       <artifactId>org.spoofax.jsglr</artifactId>
-      <version>${metaborg-version}</version>
+      <version>${metaborg.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.spoofax.interpreter.core</artifactId>
-      <version>${metaborg-version}</version>
+      <version>${metaborg.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>nabl2.solver</artifactId>
-      <version>${metaborg-version}</version>
+      <version>${metaborg.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.strategoxt.strj</artifactId>
-      <version>${metaborg-version}</version>
+      <version>${metaborg.version}</version>
     </dependency>
 
     <dependency>

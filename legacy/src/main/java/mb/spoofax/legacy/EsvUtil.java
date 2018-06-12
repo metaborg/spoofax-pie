@@ -1,13 +1,11 @@
 package mb.spoofax.legacy;
 
+import java.io.IOException;
+import javax.annotation.Nullable;
 import mb.pie.vfs.path.PPath;
-import org.metaborg.core.MetaborgException;
 import org.spoofax.interpreter.terms.*;
 import org.spoofax.terms.ParseError;
 import org.spoofax.terms.io.binary.TermReader;
-
-import javax.annotation.Nullable;
-import java.io.IOException;
 
 public class EsvUtil {
     public static @Nullable IStrategoAppl read(PPath file) throws ParseError, IOException {

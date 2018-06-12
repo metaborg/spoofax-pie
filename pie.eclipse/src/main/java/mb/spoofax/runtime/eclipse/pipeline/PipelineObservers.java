@@ -1,36 +1,24 @@
 package mb.spoofax.runtime.eclipse.pipeline;
 
-import java.util.ArrayList;
-
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import com.google.inject.Inject;
-
+import java.util.ArrayList;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
-import mb.log.Logger;
 import mb.pie.vfs.path.PPath;
 import mb.spoofax.api.message.Msg;
 import mb.spoofax.api.style.Styling;
 import mb.spoofax.pie.generated.processEditor;
 import mb.spoofax.pie.generated.processProject;
+import mb.spoofax.runtime.constraint.CSolution;
 import mb.spoofax.runtime.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.runtime.eclipse.util.Nullable;
-import mb.spoofax.runtime.nabl.ConstraintSolverSolution;
 
 public class PipelineObservers {
-
-
-    private final Logger logger;
     private final WorkspaceUpdateFactory workspaceUpdateFactory;
-    private final IWorkspaceRoot eclipseWorkspaceRoot;
 
 
-    @Inject public PipelineObservers(Logger logger, WorkspaceUpdateFactory workspaceUpdateFactory) {
-        this.logger = logger;
+    @Inject public PipelineObservers(WorkspaceUpdateFactory workspaceUpdateFactory) {
         this.workspaceUpdateFactory = workspaceUpdateFactory;
-        this.eclipseWorkspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
     }
 
 
@@ -49,12 +37,10 @@ public class PipelineObservers {
                     final PPath file = fileResult.component1();
                     final ArrayList<Msg> messages = fileResult.component3();
                     update.addMessages(file, messages);
-                    final @Nullable ConstraintSolverSolution solution = fileResult.component5();
+                    final @Nullable CSolution solution = fileResult.component5();
                     if(solution != null) {
                         update.addMessages(solution.getFileMessages());
-                        // update.addMessages(solution.getFileUnsolvedMessages());
                         update.addMessages(project, solution.getProjectMessages());
-                        // update.addMessages(project, solution.getProjectUnsolvedMessages());
                     }
                 });
                 projectResult.component2().stream().forEach((result) -> {
@@ -106,10 +92,9 @@ public class PipelineObservers {
                     update.removeStyle(editor, text.length());
                 }
 
-                final @Nullable ConstraintSolverSolution solution = editorResult.component4();
+                final @Nullable CSolution solution = editorResult.component4();
                 if(solution != null) {
                     update.addMessagesFiltered(solution.getFileMessages(), file);
-                    // update.addMessagesFiltered(solution.getFileUnsolvedMessages(), file);
                 }
             } else {
                 update.removeStyle(editor, text.length());
