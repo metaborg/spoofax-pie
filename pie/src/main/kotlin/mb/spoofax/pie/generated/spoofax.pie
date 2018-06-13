@@ -161,7 +161,7 @@ func processEditor(text: string, file: path, project: path, root: path) -> (Toke
   };
   // No config found for file, do not process file, but this does register a dependency.
   null
-}
+} @ file
 
 /// Partial solution utility functions
 //func getOtherPartialSolutions(fileToIgnore: path, project: path, langSpec: LangSpecConfig, root: path) -> PartialSolverSolution?* = {
@@ -191,7 +191,7 @@ func processFile(file: path, project: path, root: path) -> (path, Token*?, Messa
   } else {
     emptyFileResult(file)
   }
-}
+} @ file
 func emptyFileResult(file: path) -> (path, Token*?, Message*, Styling?, FinalSolverSolution?) = {
   val emptyTokens: Token*? = null;
   val emptyMessages: Message* = [];
@@ -210,7 +210,7 @@ func processString(text: string, file: path, project: path, root: path) -> (Toke
   } else {
     emptyResult()
   }
-}
+} @ file
 func emptyResult() -> (Token*?, Message*, Styling?, FinalSolverSolution?) = {
   val emptyTokens: Token*? = null;
   val emptyMessages: Message* = [];
@@ -225,7 +225,7 @@ func parse(text: string, file: path, langSpecExt: string, root: path) -> (Ast?, 
   val parseTable = sdf3-to-jsglr-parse-table(langSpecExt, root);
   if(parseTable == null) return emptyParse();
   jsglr-parse(text, parseTable!, file, langSpecExt, root)
-}
+} @ file
 func emptyParse() -> (Ast?, Token*?, Message*) = {
   val emptyAst: Ast? = null;
   val emptyTokens: Token*? = null;
@@ -261,7 +261,7 @@ func solveFile(ast: Ast, file: path, project: path, langSpecExt: string, root: p
   if(documentSolution == null) return null;
   val solution = csolve-final([documentSolution!], globalSolution!, project);
   solution
-}
+} @ file
 //func solve(partialSolutions: PartialSolverSolution*, project: path, langSpecExt: string, root: path) -> SolverSolution? = {
 //  //return null; // HACK: disable constraint solving until it works
 //  val initialResult = nabl2-initial-result(langSpecExt, root);
@@ -308,7 +308,7 @@ func processFileWithSpxCore(file: path, project: path, workspace: WorkspaceConfi
   } else {
     emptySpxCoreFile(file)
   }
-}
+} @ file
 func emptySpxCoreFile(file: path) -> (path, Token*?, Message*, Styling?) = {
   val emptyTokens: Token*? = null;
   val emptyMessages: Message* = [];
@@ -319,4 +319,4 @@ func processStringWithSpxCore(text: string, file: path, config: SpxCoreConfig) -
   val (ast, tokens, messages, _) = legacy-parse(config, text, file);
   val styling: Styling? = if(ast == null || tokens == null) null else (legacy-style(config, tokens!, ast!)?);
   (tokens, messages, styling)
-} 
+} @ file

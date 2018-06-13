@@ -4,13 +4,14 @@ package mb.spoofax.pie.generated
 
 import java.io.Serializable
 import java.nio.file.Paths
-import com.google.inject.*
+import com.google.inject.Binder
+import com.google.inject.Inject
 import com.google.inject.multibindings.MapBinder
 import mb.pie.api.*
-import mb.pie.vfs.path.*
 import mb.pie.lang.runtime.path.*
 import mb.pie.lang.runtime.util.*
-import mb.pie.taskdefs.guice.*
+import mb.pie.taskdefs.guice.TaskDefsModule
+import mb.pie.vfs.path.*
 
 class toMessage @Inject constructor(
 
@@ -20,6 +21,7 @@ class toMessage @Inject constructor(
   }
 
   override val id = Companion.id
+  override fun key(input: mb.spoofax.api.message.PathMsg): Key = input
   override fun ExecContext.exec(input: mb.spoofax.api.message.PathMsg): mb.spoofax.api.message.Msg = run {
 
     input
@@ -38,6 +40,7 @@ class langSpecConfigForPath @Inject constructor(
   }
 
   override val id = Companion.id
+  override fun key(input: langSpecConfigForPath.Input): Key = input
   override fun ExecContext.exec(input: langSpecConfigForPath.Input): mb.spoofax.runtime.cfg.LangSpecConfig? = run {
     val workspace = require(_createWorkspaceConfig, input.root);
     if(workspace == null) run {
@@ -63,6 +66,7 @@ class spxCoreConfigForPath @Inject constructor(
   }
 
   override val id = Companion.id
+  override fun key(input: spxCoreConfigForPath.Input): Key = input
   override fun ExecContext.exec(input: spxCoreConfigForPath.Input): mb.spoofax.runtime.cfg.SpxCoreConfig? = run {
     val extension = input.path.extension();
     if(extension == null) return null
@@ -80,6 +84,7 @@ class createWorkspaceConfig @Inject constructor(
   }
 
   override val id = Companion.id
+  override fun key(input: PPath): Key = input
   override fun ExecContext.exec(input: PPath): mb.spoofax.runtime.cfg.WorkspaceConfig? = run {
     val cfgLang = mb.spoofax.runtime.cfg.ImmutableSpxCoreConfig.of(PPathImpl(java.nio.file.FileSystems.getDefault().getPath("/Users/gohla/metaborg/repo/pie/spoofax-pie/lang/cfg/langspec")), false, list("cfg"));
     val workspaceFile = input.resolve("root/workspace.cfg");
@@ -99,6 +104,7 @@ class processWorkspace @Inject constructor(
   }
 
   override val id = Companion.id
+  override fun key(input: PPath): Key = input
   override fun ExecContext.exec(input: PPath): ArrayList<Tuple2<ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?>>>> = run {
 
     require(listContents, ListContents.Input(input, PPaths.regexPathMatcher("^[^.]((?!src-gen).)*\$"))).map { project -> require(_processProject, processProject.Input(project, input)) }.toCollection(ArrayList<Tuple2<ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?>>>>())
@@ -126,6 +132,7 @@ class processProject @Inject constructor(
   private fun output(tuple: Tuple2<ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>>>, ArrayList<Tuple4<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?>>>) = Output(tuple)
 
   override val id = Companion.id
+  override fun key(input: processProject.Input): Key = input
   override fun ExecContext.exec(input: processProject.Input): processProject.Output = run {
     val workspaceConfig = require(_createWorkspaceConfig, input.root);
     val noLangSpecResults: ArrayList<ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>>> = list();
@@ -151,6 +158,7 @@ class processLangSpecInProject @Inject constructor(
   }
 
   override val id = Companion.id
+  override fun key(input: processLangSpecInProject.Input): Key = input
   override fun ExecContext.exec(input: processLangSpecInProject.Input): ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>> = run {
 
     require(walkContents, WalkContents.Input(input.project, PPaths.extensionsPathWalker(input.langSpec.extensions()))).map { file -> require(_processFile, processFile.Input(file, input.project, input.root)) }.toCollection(ArrayList<Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>>())
@@ -177,6 +185,7 @@ class processEditor @Inject constructor(
   private fun output(tuple: Tuple4<ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>?) = if(tuple == null) null else Output(tuple)
 
   override val id = Companion.id
+  override fun key(input: processEditor.Input): Key = input.file
   override fun ExecContext.exec(input: processEditor.Input): processEditor.Output? = run {
     val workspaceConfig = require(_createWorkspaceConfig, input.root);
     if(workspaceConfig == null) return null;
@@ -221,6 +230,7 @@ class processFile @Inject constructor(
   private fun output(tuple: Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>) = Output(tuple)
 
   override val id = Companion.id
+  override fun key(input: processFile.Input): Key = input.file
   override fun ExecContext.exec(input: processFile.Input): processFile.Output = run {
     if(!mb.spoofax.pie.shouldProcessFile(input.file)) run {
       return output(require(_emptyFileResult, input.file))
@@ -253,6 +263,7 @@ class emptyFileResult @Inject constructor(
   private fun output(tuple: Tuple5<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>) = Output(tuple)
 
   override val id = Companion.id
+  override fun key(input: PPath): Key = input
   override fun ExecContext.exec(input: PPath): emptyFileResult.Output = run {
     val emptyTokens: ArrayList<mb.spoofax.api.parse.Token>? = null;
     val emptyMessages: ArrayList<mb.spoofax.api.message.Msg> = list();
@@ -283,6 +294,7 @@ class processString @Inject constructor(
   private fun output(tuple: Tuple4<ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>) = Output(tuple)
 
   override val id = Companion.id
+  override fun key(input: processString.Input): Key = input.file
   override fun ExecContext.exec(input: processString.Input): processString.Output = run {
     val langSpecExt = input.file.extension()
     output(if(langSpecExt != null) run {
@@ -310,6 +322,7 @@ class emptyResult @Inject constructor(
   private fun output(tuple: Tuple4<ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?, mb.spoofax.runtime.constraint.CSolution?>) = Output(tuple)
 
   override val id = Companion.id
+  override fun key(input: None): Key = input
   override fun ExecContext.exec(input: None): emptyResult.Output = run {
     val emptyTokens: ArrayList<mb.spoofax.api.parse.Token>? = null;
     val emptyMessages: ArrayList<mb.spoofax.api.message.Msg> = list();
@@ -339,6 +352,7 @@ class parse @Inject constructor(
   private fun output(tuple: Tuple3<org.spoofax.interpreter.terms.IStrategoTerm?, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>>) = Output(tuple)
 
   override val id = Companion.id
+  override fun key(input: parse.Input): Key = input.file
   override fun ExecContext.exec(input: parse.Input): parse.Output = run {
     val parseTable = require(_mb_spoofax_pie_sdf3_SDF3ToJSGLRParseTable, mb.spoofax.pie.sdf3.SDF3ToJSGLRParseTable.Input(input.langSpecExt, input.root));
     if(parseTable == null) return output(require(_emptyParse, None.instance))
@@ -360,6 +374,7 @@ class emptyParse @Inject constructor(
   private fun output(tuple: Tuple3<org.spoofax.interpreter.terms.IStrategoTerm?, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>>) = Output(tuple)
 
   override val id = Companion.id
+  override fun key(input: None): Key = input
   override fun ExecContext.exec(input: None): emptyParse.Output = run {
     val emptyAst: org.spoofax.interpreter.terms.IStrategoTerm? = null;
     val emptyTokens: ArrayList<mb.spoofax.api.parse.Token>? = null;
@@ -380,6 +395,7 @@ class createSignatures @Inject constructor(
   }
 
   override val id = Companion.id
+  override fun key(input: createSignatures.Input): Key = input
   override fun ExecContext.exec(input: createSignatures.Input): mb.spoofax.runtime.sdf3.Signatures? = run {
 
     require(_mb_spoofax_pie_sdf3_SDF3ToStrategoSignatures, mb.spoofax.pie.sdf3.SDF3ToStrategoSignatures.Input(input.langSpecExt, input.root))
@@ -399,6 +415,7 @@ class style @Inject constructor(
   }
 
   override val id = Companion.id
+  override fun key(input: style.Input): Key = input
   override fun ExecContext.exec(input: style.Input): mb.spoofax.api.style.Styling? = run {
     val syntaxStyler = require(_mb_spoofax_pie_esv_ESVToStylingRules, mb.spoofax.pie.esv.ESVToStylingRules.Input(input.langSpecExt, input.root));
     if(syntaxStyler == null) return null
@@ -422,6 +439,7 @@ class solveFile @Inject constructor(
   }
 
   override val id = Companion.id
+  override fun key(input: solveFile.Input): Key = input.file
   override fun ExecContext.exec(input: solveFile.Input): mb.spoofax.runtime.constraint.CSolution? = run {
     val globalConstraints = require(_mb_spoofax_pie_constraint_CGenGlobal, mb.spoofax.pie.constraint.CGenGlobal.Input(input.langSpecExt, input.root));
     if(globalConstraints == null) return null;
@@ -458,6 +476,7 @@ class processFileWithSpxCore @Inject constructor(
   private fun output(tuple: Tuple4<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?>) = Output(tuple)
 
   override val id = Companion.id
+  override fun key(input: processFileWithSpxCore.Input): Key = input.file
   override fun ExecContext.exec(input: processFileWithSpxCore.Input): processFileWithSpxCore.Output = run {
     if(!mb.spoofax.pie.shouldProcessFile(input.file)) run {
       return output(require(_emptySpxCoreFile, input.file))
@@ -490,6 +509,7 @@ class emptySpxCoreFile @Inject constructor(
   private fun output(tuple: Tuple4<PPath, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?>) = Output(tuple)
 
   override val id = Companion.id
+  override fun key(input: PPath): Key = input
   override fun ExecContext.exec(input: PPath): emptySpxCoreFile.Output = run {
     val emptyTokens: ArrayList<mb.spoofax.api.parse.Token>? = null;
     val emptyMessages: ArrayList<mb.spoofax.api.message.Msg> = list();
@@ -517,6 +537,7 @@ class processStringWithSpxCore @Inject constructor(
   private fun output(tuple: Tuple3<ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>, mb.spoofax.api.style.Styling?>) = Output(tuple)
 
   override val id = Companion.id
+  override fun key(input: processStringWithSpxCore.Input): Key = input.file
   override fun ExecContext.exec(input: processStringWithSpxCore.Input): processStringWithSpxCore.Output = run {
     val (ast, tokens, messages, _) = require(_mb_spoofax_pie_legacy_LegacyParse, mb.spoofax.pie.legacy.LegacyParse.Input(input.config, input.text, input.file));
     val styling: mb.spoofax.api.style.Styling? = if(ast == null || tokens == null) null else require(_mb_spoofax_pie_legacy_LegacyStyle, mb.spoofax.pie.legacy.LegacyStyle.Input(input.config, tokens!!, ast!!)) as mb.spoofax.api.style.Styling?
