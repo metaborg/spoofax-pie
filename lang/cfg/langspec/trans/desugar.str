@@ -11,5 +11,8 @@ strategies
 
 rules
 
-  desugar: StringWs(str) -> String(str)
-  desugar: PathWs(path) -> Path(path)
+  desugar: StringWs(parts) -> String(parts)
+  desugar: PlainStringWs(str) -> PlainString(str)
+  desugar: RefWrap(identifier) -> Ref(identifier)
+  desugar: Param(identifier, EnvVarImplicit()) -> Param(identifier, EnvVar(identifier))
+  desugar: Param(identifier, ProvidedImplicit()) -> Param(identifier, Provided(identifier))

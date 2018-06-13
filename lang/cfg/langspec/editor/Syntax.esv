@@ -36,9 +36,8 @@ colorer
   operator   : black
   layout     : 63 127 95 italic
 
-  ID       : darkblue
-  EXT      : darkred
-  PATH     : darkred
-  PATHWS   : darkred
-  STRING   : 200 51 0
-  STRINGWS : darkred
+  ID          : darkblue
+  STRING      : darkred
+  STRINGWS    : darkred
+  TrueOrFalse : darkgreen
+  

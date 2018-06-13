@@ -1,0 +1,9 @@
+module lex/meta
+
+lexical syntax // Identifiers
+
+  ID = [a-zA-Z0-9\_\-\.]+
+
+lexical restrictions
+
+  ID -/- [a-zA-Z0-9\_\-\.]

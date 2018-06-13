@@ -1,0 +1,20 @@
+module parameters_cfg
+
+imports
+
+  lex/meta
+  cfg
+  literal
+
+context-free syntax // Parameters config
+
+  Section.ParametersSec =
+<parameters {
+  <{Param "\n"}*>
+}>
+  Param.Param = <<ID> = <ParamImpl>>
+  ParamImpl.Provided         = <provided <ID>>
+  ParamImpl.ProvidedImplicit = <provided>
+  ParamImpl.EnvVar           = <envvar <ID>>
+  ParamImpl.EnvVarImplicit   = <envvar>
+  ParamImpl.Value            = <<PlainString>>
