@@ -52,6 +52,9 @@ open class SpoofaxPieTaskDefsModule : TaskDefsModule() {
 
     // Legacy
     bindTaskDef<LegacyLoadLanguage>(taskDefsBinder, LegacyLoadLanguage.id)
+    bindTaskDef<LegacyBuildOrLoadLanguage>(taskDefsBinder, LegacyBuildOrLoadLanguage.id)
+    bindTaskDef<LegacyUnpackMetaLanguages>(taskDefsBinder, LegacyUnpackMetaLanguages.id)
+    bindTaskDef<LegacyLoadMetaLanguages>(taskDefsBinder, LegacyLoadMetaLanguages.id)
     bindTaskDef<LegacyLoadProject>(taskDefsBinder, LegacyLoadProject.id)
     bindTaskDef<LegacyParse>(taskDefsBinder, LegacyParse.id)
     bindTaskDef<LegacyParseAll>(taskDefsBinder, LegacyParseAll.id)
@@ -61,7 +64,6 @@ open class SpoofaxPieTaskDefsModule : TaskDefsModule() {
     bindTaskDef<LegacyTransformAll>(taskDefsBinder, LegacyTransformAll.id)
     bindTaskDef<LegacyBuildProject>(taskDefsBinder, LegacyBuildProject.id)
     bindTaskDef<LegacyBuildLangSpec>(taskDefsBinder, LegacyBuildLangSpec.id)
-    bindTaskDef<LegacyBuildOrLoadLanguage>(taskDefsBinder, LegacyBuildOrLoadLanguage.id)
     bindTaskDef<LegacyLanguageExtensions>(taskDefsBinder, LegacyLanguageExtensions.id)
     bindTaskDef<LegacyStyle>(taskDefsBinder, LegacyStyle.id)
   }

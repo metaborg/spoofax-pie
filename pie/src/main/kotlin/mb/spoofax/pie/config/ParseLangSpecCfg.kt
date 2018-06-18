@@ -5,11 +5,11 @@ import mb.pie.api.ExecContext
 import mb.pie.api.TaskDef
 import mb.pie.vfs.path.PPath
 import mb.spoofax.pie.legacy.LegacyParse
-import mb.spoofax.runtime.cfg.LangSpecConfig
-import mb.spoofax.runtime.cfg.SpxCoreConfig
+import mb.spoofax.runtime.cfg.*
 import java.io.Serializable
 
 class ParseLangSpecCfg @Inject constructor(
+  private val configParser: ConfigParser,
   private val legacyParse: LegacyParse
 ) : TaskDef<ParseLangSpecCfg.Input, LangSpecConfig?> {
   companion object {
@@ -29,6 +29,6 @@ class ParseLangSpecCfg @Inject constructor(
       return null
     }
     val dir = file.parent()
-    return LangSpecConfig.fromTerm(ast, dir)
+    return configParser.parseLangSpecConfig(ast, dir)
   }
 }

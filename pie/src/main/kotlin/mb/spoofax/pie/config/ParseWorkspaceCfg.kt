@@ -10,6 +10,7 @@ import mb.spoofax.runtime.cfg.*
 import java.io.Serializable
 
 class ParseWorkspaceCfg @Inject constructor(
+  private val configParser: ConfigParser,
   private val legacyParse: LegacyParse,
   private val legacyLanguageExtensions: LegacyLanguageExtensions,
   private val parseLangSpecCfg: ParseLangSpecCfg
@@ -31,7 +32,7 @@ class ParseWorkspaceCfg @Inject constructor(
     if(ast == null) {
       return null
     }
-    val data = WorkspaceConfigPaths.fromTerm(ast, input.workspaceRoot)
+    val data = configParser.parseWorkspaceConfigPaths(ast, input.workspaceRoot)
     val langSpecConfigs = data.langSpecConfigFiles().mapNotNull {
       require(parseLangSpecCfg, ParseLangSpecCfg.Input(input.config, it))
     }

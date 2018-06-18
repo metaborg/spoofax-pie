@@ -5,6 +5,7 @@ import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import mb.nabl2.spoofax.primitives.*;
+import mb.spoofax.runtime.cfg.ConfigParser;
 import mb.spoofax.runtime.esv.StylingRulesFromESV;
 import mb.spoofax.runtime.nabl.*;
 import mb.spoofax.runtime.stratego.primitive.ScopeGraphPrimitiveLibrary;
@@ -14,6 +15,7 @@ import org.spoofax.interpreter.library.IOperatorRegistry;
 public class SpoofaxRuntimeModule extends AbstractModule {
     @Override protected void configure() {
         bind(StylingRulesFromESV.class).in(Singleton.class);
+        bind(ConfigParser.class).in(Singleton.class);
 
         bindStrategoPrimitives();
     }
