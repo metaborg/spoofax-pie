@@ -22,9 +22,10 @@ public class ChangesState {
         this.root = workspaceState.root;
     }
 
-    public void reset() {
+    public void reset(WorkspaceState workspaceState) {
         run(root, "git", "reset", "--hard");
         run(root, "git", "clean", "-ddffxx");
+        workspaceState.unpackAndLoadMetaLanguages();
     }
 
 

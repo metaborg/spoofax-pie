@@ -6,14 +6,14 @@ import mb.pie.api.TaskDef
 import mb.pie.taskdefs.guice.TaskDefsModule
 import mb.pie.vfs.path.PathSrv
 import mb.pie.vfs.path.PathSrvImpl
-import mb.spoofax.pie.config.ParseLangSpecCfg
-import mb.spoofax.pie.config.ParseWorkspaceCfg
+import mb.spoofax.pie.config.ParseWorkspaceConfig
 import mb.spoofax.pie.constraint.*
 import mb.spoofax.pie.esv.ESVToStylingRules
 import mb.spoofax.pie.jsglr.JSGLRParse
 import mb.spoofax.pie.legacy.*
 import mb.spoofax.pie.nabl2.CompileCGen
 import mb.spoofax.pie.nabl2.NaBL2ToStrategoCGen
+import mb.spoofax.pie.processing.*
 import mb.spoofax.pie.sdf3.SDF3ToJSGLRParseTable
 import mb.spoofax.pie.sdf3.SDF3ToStrategoSignatures
 import mb.spoofax.pie.stratego.CompileStratego
@@ -22,10 +22,14 @@ import mb.spoofax.pie.style.SpoofaxStyle
 open class SpoofaxPieTaskDefsModule : TaskDefsModule() {
   override fun Binder.bindTaskDefs(taskDefsBinder: MapBinder<String, TaskDef<*, *>>) {
     // Config
-    bindTaskDef<ParseLangSpecCfg>(taskDefsBinder, ParseLangSpecCfg.id)
-    bindTaskDef<ParseWorkspaceCfg>(taskDefsBinder, ParseWorkspaceCfg.id)
+//    bindTaskDef<ParseLangSpecCfg>(taskDefsBinder, ParseLangSpecCfg.id)
+    bindTaskDef<ParseWorkspaceConfig>(taskDefsBinder, ParseWorkspaceConfig.id)
 
     // Runtime
+    // Processing
+    bindTaskDef<LangSpecExtensions>(taskDefsBinder, LangSpecExtensions.id)
+    bindTaskDef<LegacyExtensions>(taskDefsBinder, LegacyExtensions.id)
+    bindTaskDef<IsLangSpecDocument>(taskDefsBinder, IsLangSpecDocument.id)
     // Spoofax styling
     bindTaskDef<SpoofaxStyle>(taskDefsBinder, SpoofaxStyle.id)
     // JSGLR
@@ -51,20 +55,20 @@ open class SpoofaxPieTaskDefsModule : TaskDefsModule() {
     bindTaskDef<CompileCGen>(taskDefsBinder, CompileCGen.id)
 
     // Legacy
-    bindTaskDef<LegacyLoadLanguage>(taskDefsBinder, LegacyLoadLanguage.id)
-    bindTaskDef<LegacyBuildOrLoadLanguage>(taskDefsBinder, LegacyBuildOrLoadLanguage.id)
-    bindTaskDef<LegacyUnpackMetaLanguages>(taskDefsBinder, LegacyUnpackMetaLanguages.id)
-    bindTaskDef<LegacyLoadMetaLanguages>(taskDefsBinder, LegacyLoadMetaLanguages.id)
+//    bindTaskDef<LegacyLoadLanguage>(taskDefsBinder, LegacyLoadLanguage.id)
+//    bindTaskDef<LegacyBuildOrLoadLanguage>(taskDefsBinder, LegacyBuildOrLoadLanguage.id)
+//    bindTaskDef<LegacyUnpackMetaLanguages>(taskDefsBinder, LegacyUnpackMetaLanguages.id)
+//    bindTaskDef<LegacyLoadMetaLanguages>(taskDefsBinder, LegacyLoadMetaLanguages.id)
     bindTaskDef<LegacyLoadProject>(taskDefsBinder, LegacyLoadProject.id)
     bindTaskDef<LegacyParse>(taskDefsBinder, LegacyParse.id)
     bindTaskDef<LegacyParseAll>(taskDefsBinder, LegacyParseAll.id)
-    bindTaskDef<LegacyAnalyze>(taskDefsBinder, LegacyAnalyze.id)
-    bindTaskDef<LegacyAnalyzeAll>(taskDefsBinder, LegacyAnalyzeAll.id)
-    bindTaskDef<LegacyTransform>(taskDefsBinder, LegacyTransform.id)
-    bindTaskDef<LegacyTransformAll>(taskDefsBinder, LegacyTransformAll.id)
-    bindTaskDef<LegacyBuildProject>(taskDefsBinder, LegacyBuildProject.id)
-    bindTaskDef<LegacyBuildLangSpec>(taskDefsBinder, LegacyBuildLangSpec.id)
-    bindTaskDef<LegacyLanguageExtensions>(taskDefsBinder, LegacyLanguageExtensions.id)
+//    bindTaskDef<LegacyAnalyze>(taskDefsBinder, LegacyAnalyze.id)
+//    bindTaskDef<LegacyAnalyzeAll>(taskDefsBinder, LegacyAnalyzeAll.id)
+//    bindTaskDef<LegacyTransform>(taskDefsBinder, LegacyTransform.id)
+//    bindTaskDef<LegacyTransformAll>(taskDefsBinder, LegacyTransformAll.id)
+//    bindTaskDef<LegacyBuildProject>(taskDefsBinder, LegacyBuildProject.id)
+//    bindTaskDef<LegacyBuildLangSpec>(taskDefsBinder, LegacyBuildLangSpec.id)
+//    bindTaskDef<LegacyLanguageExtensions>(taskDefsBinder, LegacyLanguageExtensions.id)
     bindTaskDef<LegacyStyle>(taskDefsBinder, LegacyStyle.id)
   }
 }

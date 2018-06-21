@@ -1,33 +1,43 @@
 package mb.spoofax.runtime.eclipse.pipeline;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceChangeEvent;
-import org.eclipse.core.resources.IResourceChangeListener;
-import org.eclipse.core.resources.IResourceDelta;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-
 import com.google.inject.Inject;
-
+import java.io.IOException;
 import mb.log.Logger;
+import mb.pie.vfs.path.PPath;
+import mb.spoofax.legacy.LoadMetaLanguages;
 import mb.spoofax.runtime.eclipse.nature.SpoofaxNature;
 import mb.spoofax.runtime.eclipse.util.NatureUtils;
+import mb.spoofax.runtime.eclipse.util.StatusUtils;
+import mb.spoofax.runtime.eclipse.vfs.EclipsePathSrv;
+import org.eclipse.core.resources.*;
+import org.eclipse.core.runtime.CoreException;
+import org.metaborg.core.MetaborgException;
 
 public class PipelineProjectManager implements IResourceChangeListener {
     private final Logger logger;
+    private final EclipsePathSrv pathSrv;
     private final PipelineAdapter pipelineAdapter;
 
 
-    @Inject public PipelineProjectManager(Logger logger, PipelineAdapter pipelineAdapter) {
+    @Inject public PipelineProjectManager(Logger logger, EclipsePathSrv pathSrv, PipelineAdapter pipelineAdapter) {
         this.logger = logger.forContext(getClass());
+        this.pathSrv = pathSrv;
         this.pipelineAdapter = pipelineAdapter;
     }
 
 
     public void initialize() throws CoreException {
         final IWorkspace workspace = ResourcesPlugin.getWorkspace();
+
+        // Load meta-languages
+        final PPath workspaceRoot = pathSrv.resolveWorkspaceRoot();
+        try {
+            LoadMetaLanguages.loadAll(workspaceRoot);
+        } catch(IOException | MetaborgException e) {
+            final String message = "Failed to load meta-languages";
+            logger.error(message, e);
+            throw new CoreException(StatusUtils.error(message, e));
+        }
 
         // Register existing projects
         for(IProject project : workspace.getRoot().getProjects()) {

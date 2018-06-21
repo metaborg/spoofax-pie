@@ -3,7 +3,7 @@ package mb.spoofax.pie.nabl2
 import com.google.inject.Inject
 import mb.pie.api.*
 import mb.pie.vfs.path.PPath
-import mb.spoofax.pie.generated.createWorkspaceConfig
+import mb.spoofax.pie.config.ParseWorkspaceConfig
 import mb.spoofax.pie.sdf3.SDF3ToStrategoSignatures
 import mb.spoofax.pie.stratego.CompileStratego
 import mb.spoofax.runtime.cfg.ImmutableStrategoConfig
@@ -12,7 +12,7 @@ import java.io.Serializable
 
 class CompileCGen
 @Inject constructor(
-  private val createWorkspaceConfig: createWorkspaceConfig,
+  private val parseWorkspaceConfig: ParseWorkspaceConfig,
   private val nabl2ToStrategoCGen: NaBL2ToStrategoCGen,
   private val sdf3ToStrategoSignatures: SDF3ToStrategoSignatures,
   private val compileStratego: CompileStratego
@@ -21,22 +21,26 @@ class CompileCGen
     const val id = "nabl2.CompileCGen"
   }
 
-  data class Input(
-    val langSpecExt: String,
-    val root: PPath
-  ) : Serializable
+  data class Input(val langSpecExt: String, val root: PPath) : Serializable
+  data class LangSpecConfigInfo(val strategoConfig: ImmutableStrategoConfig?, val strategyId: String?) : Serializable
 
   override val id = Companion.id
   override fun ExecContext.exec(input: Input): CGen? {
     val (langSpecExt, root) = input
 
-    // OPTO: only depend on language specification config for langSpecExt.
-    val workspaceConfig = require(createWorkspaceConfig, root)
-      ?: throw ExecException("Could not get workspace config at root $root")
-
-    // OPTO: only depend on natsStrategoConfig and natsStrategoStrategyId.
-    val langSpec = workspaceConfig.langSpecConfigForExt(langSpecExt)
-      ?: throw ExecException("Could not get language specification config for extension $langSpecExt")
+    val (strategoConfig, strategyId) = with(parseWorkspaceConfig) {
+      requireConfigValue(root) { workspaceConfig ->
+        val langSpecConfig = workspaceConfig.langSpecConfigForExt(langSpecExt)
+        if(langSpecConfig != null) {
+          LangSpecConfigInfo(langSpecConfig.natsStrategoConfig(), langSpecConfig.natsStrategoStrategyId())
+        } else {
+          null
+        }
+      }
+    } ?: throw ExecException("Could not get language specification configuration for language $langSpecExt")
+    if(strategoConfig == null || strategyId == null) {
+      return null
+    }
 
     // Generate Stratego files from NaBL2 files
     val nabl2ToStrategoCgenTask = Task(nabl2ToStrategoCGen, NaBL2ToStrategoCGen.Input(langSpecExt, root))
@@ -47,7 +51,6 @@ class CompileCGen
     val signatures = require(sdf3ToStrategoSignaturesTask)
 
     // Compile Stratego
-    val strategoConfig = langSpec.natsStrategoConfig() ?: return null
     val strategoConfigBuilder = ImmutableStrategoConfig.builder().from(strategoConfig)
     if(signatures != null) {
       strategoConfigBuilder.addIncludeDirs(signatures.includeDir())
@@ -55,7 +58,6 @@ class CompileCGen
     val finalStrategoConfig = strategoConfigBuilder.build()
     val taskDeps = arrayListOf(nabl2ToStrategoCgenTask.toSTask(), sdf3ToStrategoSignaturesTask.toSTask())
     val strategoCtree = require(compileStratego, CompileStratego.Input(finalStrategoConfig, taskDeps))
-    val strategoStrategyName = langSpec.natsStrategoStrategyId() ?: return null
-    return CGen(strategoCtree, strategoStrategyName)
+    return CGen(strategoCtree, strategyId)
   }
 }

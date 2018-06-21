@@ -24,10 +24,7 @@ public class ConfigParser {
         final ArrayList<IStrategoTerm> sections = sections(root);
         final ArrayList<IStrategoTerm> workspaceSections = subSectionsOf(sections, "WorkspaceSec");
         final ArrayList<PPath> langSpecConfigFiles = pathValuesOf(workspaceSections, "LangSpec", dir);
-        final ArrayList<PPath> spxCoreLangConfigFiles = pathValuesOf(workspaceSections, "SpxLang", dir);
-        final ArrayList<PPath> spxCoreLangSpecConfigFiles = pathValuesOf(workspaceSections, "SpxLangSpec", dir);
-        return ImmutableWorkspaceConfigPaths.of(langSpecConfigFiles, spxCoreLangConfigFiles,
-            spxCoreLangSpecConfigFiles);
+        return ImmutableWorkspaceConfigPaths.of(langSpecConfigFiles);
     }
 
     public LangSpecConfig parseLangSpecConfig(IStrategoTerm root, PPath dir) {

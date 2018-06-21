@@ -7,8 +7,8 @@ import kotlin.jvm.functions.Function1;
 import mb.pie.vfs.path.PPath;
 import mb.spoofax.api.message.Msg;
 import mb.spoofax.api.style.Styling;
-import mb.spoofax.pie.generated.processEditor;
-import mb.spoofax.pie.generated.processProject;
+import mb.spoofax.pie.processing.DocumentResult;
+import mb.spoofax.pie.processing.ProjectResult;
 import mb.spoofax.runtime.constraint.CSolution;
 import mb.spoofax.runtime.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.runtime.eclipse.util.Nullable;
@@ -22,36 +22,29 @@ public class PipelineObservers {
     }
 
 
-    private final class ProjectBuildObserver implements Function1<processProject.Output, Unit> {
+    private final class ProjectBuildObserver implements Function1<ProjectResult, Unit> {
         private final PPath project;
 
         private ProjectBuildObserver(PPath project) {
             this.project = project;
         }
 
-        @Override public Unit invoke(processProject.Output projectResult) {
+        @Override public Unit invoke(ProjectResult projectResult) {
             final WorkspaceUpdate update = workspaceUpdateFactory.create();
             update.addClearRec(project);
             if(projectResult != null) {
-                projectResult.component1().stream().flatMap((r) -> r.stream()).forEach((fileResult) -> {
-                    final PPath file = fileResult.component1();
-                    final ArrayList<Msg> messages = fileResult.component3();
+                projectResult.getDocumentResults().forEach((documentResult) -> {
+                    final PPath file = documentResult.getDocument();
+                    final ArrayList<Msg> messages = documentResult.getMessages();
                     update.addMessages(file, messages);
-                    final @Nullable CSolution solution = fileResult.component5();
-                    if(solution != null) {
-                        update.addMessages(solution.getFileMessages());
-                        update.addMessages(project, solution.getProjectMessages());
+                    final @Nullable CSolution constraintsSolution = documentResult.getConstraintsSolution();
+                    if(constraintsSolution != null) {
+                        update.addMessages(constraintsSolution.getFileMessages());
+                        update.addMessages(project, constraintsSolution.getProjectMessages());
                     }
                 });
-                projectResult.component2().stream().forEach((result) -> {
-                    final PPath file = result.component1();
-                    final ArrayList<Msg> messages = result.component3();
-                    update.addMessages(file, messages);
-                });
             }
-
             update.update(WorkspaceUpdate.lock, null);
-
             return Unit.INSTANCE;
         }
 
@@ -60,12 +53,12 @@ public class PipelineObservers {
         }
     }
 
-    public Function1<? super processProject.Output, Unit> project(PPath project) {
+    public Function1<? super ProjectResult, Unit> project(PPath project) {
         return new ProjectBuildObserver(project);
     }
 
 
-    private final class EditorObserver implements Function1<processEditor.Output, Unit> {
+    private final class EditorObserver implements Function1<DocumentResult, Unit> {
         private final SpoofaxEditor editor;
         private final String text;
         private final PPath file;
@@ -78,31 +71,29 @@ public class PipelineObservers {
             this.file = file;
         }
 
-        @Override public Unit invoke(processEditor.Output editorResult) {
+        @Override public Unit invoke(DocumentResult documentResult) {
             final WorkspaceUpdate update = workspaceUpdateFactory.create();
             update.addClear(file);
-            if(editorResult != null) {
-                final ArrayList<Msg> messages = editorResult.component2();
+            if(documentResult != null) {
+                final ArrayList<Msg> messages = documentResult.getMessages();
                 update.replaceMessages(file, messages);
 
-                final @Nullable Styling styling = editorResult.component3();
+                final @Nullable Styling styling = documentResult.getStyling();
                 if(styling != null) {
                     update.updateStyle(editor, text, styling);
                 } else {
                     update.removeStyle(editor, text.length());
                 }
 
-                final @Nullable CSolution solution = editorResult.component4();
-                if(solution != null) {
-                    update.addMessagesFiltered(solution.getFileMessages(), file);
+                final @Nullable CSolution constraintsSolution = documentResult.getConstraintsSolution();
+                if(constraintsSolution != null) {
+                    update.addMessagesFiltered(constraintsSolution.getFileMessages(), file);
                 }
             } else {
                 update.removeStyle(editor, text.length());
             }
-
             // TODO: pass in file as scheduling rule?
             update.update(WorkspaceUpdate.lock, null);
-
             return Unit.INSTANCE;
         }
 
@@ -112,7 +103,7 @@ public class PipelineObservers {
         }
     }
 
-    public Function1<? super processEditor.Output, Unit> editor(SpoofaxEditor editor, String text, PPath file,
+    public Function1<? super DocumentResult, Unit> editor(SpoofaxEditor editor, String text, PPath file,
         PPath project) {
         return new EditorObserver(editor, text, file, project);
     }

@@ -38,7 +38,7 @@ public class TDChangesBench {
         Timer.logFile = new File("/Users/gohla/pie/topdown.csv");
         Timer.clearFile();
         infra.reset();
-        changes.reset();
+        changes.reset(workspace);
         exec.setup(spoofaxPie, workspace, infra);
         exec.reset();
     }
@@ -49,7 +49,7 @@ public class TDChangesBench {
 
     @TearDown(Level.Trial) public void tearDownTrial() {
         infra.reset();
-        changes.reset();
+        changes.reset(workspace);
         exec.reset();
     }
 }

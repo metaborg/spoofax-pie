@@ -24,7 +24,7 @@ class CompileStratego
   ) : Serializable
 
   override val id = Companion.id
-  override fun key(input: Input) = input.config.outputFile()
+  override fun key(input: Input): PPath = input.config.outputFile()
   override fun ExecContext.exec(input: Input): PPath? {
     val (config, taskDeps) = input
     // Explicitly require hidden dependencies.

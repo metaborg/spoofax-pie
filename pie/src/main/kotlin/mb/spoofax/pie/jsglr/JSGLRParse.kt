@@ -6,7 +6,7 @@ import mb.pie.lang.runtime.util.Tuple3
 import mb.pie.vfs.path.PPath
 import mb.spoofax.api.message.Msg
 import mb.spoofax.api.parse.Token
-import mb.spoofax.pie.generated.createWorkspaceConfig
+import mb.spoofax.pie.config.ParseWorkspaceConfig
 import mb.spoofax.runtime.jsglr.Table
 import org.spoofax.interpreter.terms.IStrategoTerm
 import org.spoofax.jsglr.client.imploder.ImploderOriginTermFactory
@@ -15,7 +15,7 @@ import java.io.Serializable
 import java.util.*
 
 class JSGLRParse @Inject constructor(
-  private val createWorkspaceConfig: createWorkspaceConfig
+  private val parseWorkspaceConfig: ParseWorkspaceConfig
 ) : TaskDef<JSGLRParse.Input, JSGLRParse.Output> {
   companion object {
     const val id = "jsglr.Parse"
@@ -36,16 +36,11 @@ class JSGLRParse @Inject constructor(
   override fun key(input: Input) = Key(input)
   override fun ExecContext.exec(input: Input): Output {
     val (text, table, file, langSpecExt, root) = input
-
-    // OPTO: only depend on language specification config for langSpecExt.
-    val workspaceConfig = require(createWorkspaceConfig, root)
-      ?: throw ExecException("Could not get workspace config at root $root")
-
-    // OPTO: only depend on syntax start symbol.
-    val langSpec = workspaceConfig.langSpecConfigForExt(langSpecExt)
-      ?: throw ExecException("Could not get language specification config for extension $langSpecExt")
-    val startSymbol = langSpec.syntaxParseStartSymbolId()
-
+    val startSymbol = with(parseWorkspaceConfig) {
+      requireConfigValue(root) { workspaceConfig ->
+        workspaceConfig.langSpecConfigForExt(langSpecExt)?.syntaxParseStartSymbolId()
+      }
+    } ?: throw ExecException("Could not get language specification configuration for language $langSpecExt")
     val termFactory = ImploderOriginTermFactory(TermFactory())
     val parser = table.createParser(termFactory)
     val output = parser.parse(text, startSymbol, file)

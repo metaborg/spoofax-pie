@@ -28,8 +28,8 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
     private static volatile SpoofaxPlugin plugin;
     private static volatile Logger logger;
     private static volatile SpoofaxFacade spoofaxFacade;
-    private static volatile Spoofax spoofaxCoreFacade;
     private static volatile SpoofaxMeta spoofaxCoreMetaFacade;
+    private static volatile Spoofax spoofaxCoreFacade;
     private static volatile boolean doneLoading;
 
     public static final boolean useInMemoryStore = true;
@@ -44,13 +44,6 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
         logger = LoggerFactory.getLogger(SpoofaxPlugin.class);
         logger.debug("Starting Spoofax plugin");
 
-        // Initialize Spoofax runtime
-        spoofaxFacade = new SpoofaxFacade(new SpoofaxModule(), new LogModule(logger), new EclipseModule(),
-            new EclipseVFSModule(), new SpoofaxRuntimeModule(), new SpoofaxPieModule(), new GuiceTaskDefsModule(),
-            new SpoofaxPieTaskDefsModule(), new PieLangRuntimeModule(), new TaskDefsModule_spoofax());
-        StaticSpoofaxFacade.init(spoofaxFacade);
-        spoofaxFacade.injector.getInstance(PipelineProjectManager.class).initialize();
-
         // Initialize Spoofax Core
         try {
             spoofaxCoreFacade = new Spoofax(new SpoofaxEclipseModule(), new SpoofaxExtensionModule());
@@ -61,16 +54,23 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
             throw e;
         }
 
+        // Initialize Spoofax runtime
+        spoofaxFacade = new SpoofaxFacade(new SpoofaxModule(), new LogModule(logger), new EclipseModule(),
+            new EclipseVFSModule(), new SpoofaxRuntimeModule(), new SpoofaxPieModule(), new GuiceTaskDefsModule(),
+            new SpoofaxPieTaskDefsModule(), new PieLangRuntimeModule(), new TaskDefsModule_spoofax());
+        StaticSpoofaxFacade.init(spoofaxFacade);
+        spoofaxFacade.injector.getInstance(PipelineProjectManager.class).initialize();
+
         doneLoading = true;
     }
 
     @Override public void stop(BundleContext context) throws Exception {
         logger.debug("Stopping Spoofax plugin");
         doneLoading = false;
+        spoofaxFacade = null;
+        spoofaxFacade = null;
         spoofaxCoreMetaFacade = null;
         spoofaxCoreFacade.close();
-        spoofaxFacade = null;
-        spoofaxFacade = null;
         logger = null;
         plugin = null;
         super.stop(context);

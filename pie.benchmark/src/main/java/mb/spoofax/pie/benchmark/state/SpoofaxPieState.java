@@ -21,9 +21,9 @@ import org.slf4j.LoggerFactory;
 
 @State(Scope.Benchmark)
 public class SpoofaxPieState {
-    public final SpoofaxFacade spoofaxFacade;
     public final Spoofax spoofaxCoreFacade;
     public final SpoofaxMeta spoofaxCoreMetaFacade;
+    public final SpoofaxFacade spoofaxFacade;
     public final Injector injector;
     public final Logger logger;
     public final PathSrv pathSrv;
@@ -32,14 +32,16 @@ public class SpoofaxPieState {
 
     public SpoofaxPieState() {
         try {
+            spoofaxCoreFacade = new Spoofax(new SpoofaxCoreModule(), new SpoofaxExtensionModule());
+            spoofaxCoreMetaFacade = new SpoofaxMeta(spoofaxCoreFacade);
+            StaticSpoofaxCoreFacade.init(spoofaxCoreMetaFacade);
+
             spoofaxFacade =
                 new SpoofaxFacade(new SpoofaxModule(), new LogModule(LoggerFactory.getLogger("root")), new SpoofaxRuntimeModule(),
                     new SpoofaxPieModule(), new PieVfsModule(), new SpoofaxPieTaskDefsModule(), new PieLangRuntimeModule(),
                     new TaskDefsModule_spoofax());
             StaticSpoofaxFacade.init(spoofaxFacade);
-            spoofaxCoreFacade = new Spoofax(new SpoofaxCoreModule(), new SpoofaxExtensionModule());
-            spoofaxCoreMetaFacade = new SpoofaxMeta(spoofaxCoreFacade);
-            StaticSpoofaxCoreFacade.init(spoofaxCoreMetaFacade);
+
             injector = spoofaxFacade.injector;
             logger = injector.getInstance(Logger.class);
             pathSrv = injector.getInstance(PathSrv.class);

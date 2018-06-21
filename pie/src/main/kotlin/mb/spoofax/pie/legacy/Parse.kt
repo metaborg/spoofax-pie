@@ -4,13 +4,11 @@ import com.google.inject.Inject
 import mb.log.Logger
 import mb.pie.api.*
 import mb.pie.api.stamp.FileStampers
-import mb.pie.lang.runtime.util.Tuple2
 import mb.pie.lang.runtime.util.Tuple3
 import mb.pie.vfs.path.PPath
 import mb.spoofax.api.message.Msg
 import mb.spoofax.api.parse.Token
 import mb.spoofax.legacy.MessageConverter
-import mb.spoofax.runtime.cfg.SpxCoreConfig
 import mb.spoofax.runtime.jsglr.TokenExtractor
 import org.metaborg.core.syntax.ParseException
 import org.metaborg.spoofax.core.syntax.SyntaxFacet
@@ -18,24 +16,26 @@ import org.spoofax.interpreter.terms.IStrategoTerm
 import java.io.Serializable
 
 class LegacyParse @Inject constructor(
-  log: Logger,
-  private val messageConverter: MessageConverter,
-  private val legacyBuildOrLoadLanguage: LegacyBuildOrLoadLanguage
+  logFactory: Logger,
+  private val messageConverter: MessageConverter
 ) : TaskDef<LegacyParse.Input, LegacyParse.Output> {
-  private val log: Logger = log.forContext(LegacyParse::class.java)
+  private val log: Logger = logFactory.forContext(LegacyParse::class.java)
 
   companion object {
     const val id = "legacy.Parse"
   }
 
-  data class Input(val config: SpxCoreConfig, val text: String, val file: PPath) : Serializable
-  data class Output(val ast: IStrategoTerm?, val tokens: ArrayList<Token>?, val messages: ArrayList<Msg>, val file: PPath) : Tuple3<IStrategoTerm?, ArrayList<Token>?, ArrayList<Msg>>
+  data class Input(val file: PPath, val text: String) : Serializable
+  data class Output(val ast: IStrategoTerm?, val tokens: ArrayList<Token>?, val messages: ArrayList<Msg>) : Tuple3<IStrategoTerm?, ArrayList<Token>?, ArrayList<Msg>>
 
   override val id = Companion.id
   override fun key(input: Input) = input.file
   override fun ExecContext.exec(input: Input): Output {
+    val (file, text) = input
+    val resource = file.fileObject
     val spoofax = Spx.spoofax()
-    val langImpl = require(legacyBuildOrLoadLanguage.createTask(input.config)).v
+    val langImpl = spoofax.languageIdentifierService.identify(resource)
+      ?: throw ExecException("Cannot parse; could not identify language of file $file")
 
     // Require parse table
     val facet = langImpl.facet(SyntaxFacet::class.java)
@@ -47,44 +47,46 @@ class LegacyParse @Inject constructor(
     }
 
     // Perform parsing
-    val resource = input.file.fileObject
-    val inputUnit = spoofax.unitService.inputUnit(resource, input.text, langImpl, null)
+    val inputUnit = spoofax.unitService.inputUnit(resource, text, langImpl, null)
     return try {
       val parseUnit = spoofax.syntaxService.parse(inputUnit)
       val ast = parseUnit.ast()
       val tokens = if(ast != null) TokenExtractor.extract(ast) else null
       val messages = messageConverter.toMsgs(parseUnit.messages())
-      Output(ast, tokens, messages, input.file)
+      Output(ast, tokens, messages)
     } catch(e: ParseException) {
       log.error("Parsing failed unexpectedly", e)
-      Output(null, null, ArrayList(), input.file)
+      Output(null, null, ArrayList())
     }
   }
 
   @Suppress("NOTHING_TO_INLINE")
-  inline fun createTask(config: SpxCoreConfig, text: String, file: PPath) = this.createTask(LegacyParse.Input(config, text, file))
+  inline fun createTask(file: PPath, text: String) = this.createTask(LegacyParse.Input(file, text))
 }
 
 class LegacyParseAll @Inject constructor(
-  log: Logger,
-  private val messageConverter: MessageConverter,
-  private val legacyBuildOrLoadLanguage: LegacyBuildOrLoadLanguage
-) : TaskDef<LegacyParseAll.Input, ArrayList<LegacyParseAll.Output>> {
-  val log: Logger = log.forContext(LegacyParseAll::class.java)
+  logFactory: Logger,
+  private val messageConverter: MessageConverter
+) : TaskDef<ArrayList<FileTextPair>, ArrayList<LegacyParseAll.Output>> {
+  val log: Logger = logFactory.forContext(LegacyParseAll::class.java)
 
   companion object {
     const val id = "legacy.ParseAll"
   }
 
-  data class TextFilePair(val text: String, val file: PPath) : Tuple2<String, PPath>
-  data class Input(val config: SpxCoreConfig, val pairs: ArrayList<TextFilePair>) : Serializable
   data class Output(val ast: IStrategoTerm?, val tokens: ArrayList<Token>?, val messages: ArrayList<Msg>, val file: PPath) : Tuple3<IStrategoTerm?, ArrayList<Token>?, ArrayList<Msg>>
 
   override val id = Companion.id
-  override fun key(input: Input) = input.pairs.map { it.file }.toCollection(ArrayList())
-  override fun ExecContext.exec(input: Input): ArrayList<Output> {
+  override fun key(input: ArrayList<FileTextPair>) = input.map { it.file }.toCollection(ArrayList())
+  override fun ExecContext.exec(input: ArrayList<FileTextPair>): ArrayList<Output> {
+    val pairs = input
+    if(pairs.isEmpty()) {
+      return arrayListOf()
+    }
     val spoofax = Spx.spoofax()
-    val langImpl = require(legacyBuildOrLoadLanguage.createTask(input.config)).v
+    val firstFile = pairs.first().file
+    val langImpl = spoofax.languageIdentifierService.identify(firstFile.fileObject)
+      ?: throw ExecException("Could not identify language of file $firstFile")
 
     // Require parse table
     val facet = langImpl.facet(SyntaxFacet::class.java)
@@ -96,7 +98,7 @@ class LegacyParseAll @Inject constructor(
     }
 
     // Perform parsing
-    val inputs = input.pairs.map { (text, file) -> spoofax.unitService.inputUnit(file.fileObject, text, langImpl, null) }
+    val inputs = pairs.map { (file, text) -> spoofax.unitService.inputUnit(file.fileObject, text, langImpl, null) }
     return try {
       val parseUnits = spoofax.syntaxService.parseAll(inputs)
       parseUnits.map {
@@ -107,7 +109,7 @@ class LegacyParseAll @Inject constructor(
       }.toCollection(ArrayList())
     } catch(e: ParseException) {
       log.error("Parsing failed unexpectedly", e)
-      input.pairs.map { (_, file) -> Output(null, null, ArrayList(), file) }.toCollection(ArrayList())
+      pairs.map { (file, _) -> Output(null, null, ArrayList(), file) }.toCollection(ArrayList())
     }
   }
 }

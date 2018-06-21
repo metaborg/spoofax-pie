@@ -6,6 +6,7 @@ import mb.pie.api.exec.*;
 import mb.pie.vfs.path.PPath;
 import mb.spoofax.pie.benchmark.state.*;
 import mb.spoofax.pie.generated.processEditor;
+import mb.spoofax.pie.processing.DocumentResult;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.infra.Blackhole;
@@ -20,7 +21,7 @@ public class TDState {
     private WorkspaceState workspaceState;
     private TopDownExecutor executor;
     private Task<PPath, ? extends Serializable> processWorkspace;
-    private HashMap<PPath, Task<? extends processEditor.Input, ? extends processEditor.Output>> editors =
+    private HashMap<PPath, Task<? extends processEditor.Input, ? extends DocumentResult>> editors =
         new HashMap<>();
 
 
@@ -40,8 +41,8 @@ public class TDState {
      * Adds an editor, or updates an exiting editor, and executes an editor update.
      */
     public void addOrUpdateEditor(String text, PPath file, PPath project, Blackhole blackhole) {
-        final Task<? extends processEditor.Input, ? extends processEditor.Output> app =
-            spoofaxPieState.spoofaxPipeline.editor(text, file, project, workspaceState.root);
+        final Task<? extends processEditor.Input, ? extends DocumentResult> app =
+            spoofaxPieState.spoofaxPipeline.editor(file, project, workspaceState.root, text);
         this.editors.put(file, app);
         try {
             final TopDownSession session = executor.newSession();
@@ -66,7 +67,7 @@ public class TDState {
         try {
             final Serializable workspaceResult = session.requireInitial(processWorkspace, new NullCancelled());
             blackhole.consume(workspaceResult);
-            for(Task<? extends processEditor.Input, ? extends processEditor.Output> editor : this.editors.values()) {
+            for(Task<? extends processEditor.Input, ? extends DocumentResult> editor : this.editors.values()) {
                 final Serializable editorResult = session.requireInitial(editor, new NullCancelled());
                 blackhole.consume(editorResult);
             }

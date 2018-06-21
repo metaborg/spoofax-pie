@@ -8,6 +8,8 @@ import mb.pie.vfs.path.PPath;
 import mb.spoofax.pie.benchmark.state.*;
 import mb.spoofax.pie.generated.processEditor;
 import mb.spoofax.pie.generated.processProject;
+import mb.spoofax.pie.processing.DocumentResult;
+import mb.spoofax.pie.processing.ProjectResult;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.infra.Blackhole;
@@ -40,7 +42,7 @@ public class BUState {
      * Adds a project, or updates a project, by setting the observer and then executing a project update in a top-down manner.
      */
     public void addProject(PPath project, Blackhole blackhole) {
-        final Task<processProject.Input, processProject.Output> task =
+        final Task<processProject.Input, ProjectResult> task =
             spoofaxPieState.spoofaxPipeline.project(project, workspaceState.root);
         final TaskKey key = task.key();
 
@@ -60,7 +62,7 @@ public class BUState {
      * Removes a project, removing the observer for that project.
      */
     public void removeProject(PPath project) {
-        final Task<processProject.Input, processProject.Output> task =
+        final Task<processProject.Input, ProjectResult> task =
             spoofaxPieState.spoofaxPipeline.project(project, workspaceState.root);
         final TaskKey key = task.key();
 
@@ -72,8 +74,8 @@ public class BUState {
      * Adds an editor, or updates an existing editor, by setting the observer and then executing an editor update in a top-down manner.
      */
     public void addOrUpdateEditor(String text, PPath file, PPath project, Blackhole blackhole) {
-        final Task<processEditor.Input, processEditor.Output> task =
-            spoofaxPieState.spoofaxPipeline.editor(text, file, project, workspaceState.root);
+        final Task<processEditor.Input, DocumentResult> task =
+            spoofaxPieState.spoofaxPipeline.editor(file, project, workspaceState.root, text);
         final TaskKey key = task.key();
         editorKeys.put(file, key);
 

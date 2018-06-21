@@ -1,16 +1,12 @@
 package mb.spoofax.pie.benchmark.incr;
 
 import mb.spoofax.pie.benchmark.Timer;
+import mb.spoofax.pie.benchmark.state.*;
 import mb.spoofax.pie.benchmark.state.exec.BUState;
-import mb.spoofax.pie.benchmark.state.ChangesState;
-import mb.spoofax.pie.benchmark.state.InfraState;
-import mb.spoofax.pie.benchmark.state.SpoofaxPieState;
-import mb.spoofax.pie.benchmark.state.WorkspaceState;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 
@@ -42,7 +38,7 @@ public class BUChangesBench {
         Timer.logFile = new File("/Users/gohla/pie/bottomup.csv");
         Timer.clearFile();
         infra.reset();
-        changes.reset();
+        changes.reset(workspace);
         exec.setup(spoofaxPie, workspace, infra);
         exec.reset();
     }
@@ -53,7 +49,7 @@ public class BUChangesBench {
 
     @TearDown(Level.Trial) public void tearDownTrial() {
         infra.reset();
-        changes.reset();
+        changes.reset(workspace);
         exec.reset();
     }
 }

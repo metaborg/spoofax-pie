@@ -18,6 +18,8 @@ import mb.spoofax.pie.LogLoggerKt;
 import mb.spoofax.pie.SpoofaxPipeline;
 import mb.spoofax.pie.generated.processEditor;
 import mb.spoofax.pie.generated.processProject;
+import mb.spoofax.pie.processing.DocumentResult;
+import mb.spoofax.pie.processing.ProjectResult;
 import mb.spoofax.runtime.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.runtime.eclipse.util.Nullable;
 import mb.spoofax.runtime.eclipse.vfs.EclipsePathSrv;
@@ -72,7 +74,7 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
         }
 
         logger.debug("Setting pipeline observer for project {}", project);
-        final Task<processProject.Input, processProject.Output> task = projectTask(mbProject);
+        final Task<processProject.Input, ProjectResult> task = projectTask(mbProject);
         final TaskKey key = task.key();
         final TaskKey prevKey = projectKeys.put(mbProject, key);
         if(prevKey != null) {
@@ -89,7 +91,7 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
             return;
         }
 
-        final Task<processProject.Input, processProject.Output> task = projectTask(mbProject);
+        final Task<processProject.Input, ProjectResult> task = projectTask(mbProject);
         final TaskKey key = task.key();
         final Cancelled cancelled = PipelineCancel.cancelled(monitor);
 
@@ -135,7 +137,7 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
         }
 
         logger.debug("Setting pipeline observer for editor {}", editor);
-        final Task<processEditor.Input, processEditor.Output> task = editorTask(text, mbFile, mbProject);
+        final Task<processEditor.Input, DocumentResult> task = editorTask(text, mbFile, mbProject);
         final TaskKey key = task.key();
         final TaskKey prevKey = editorKeys.put(editor, key);
         if(prevKey != null) {
@@ -159,7 +161,7 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
         }
 
         logger.debug("Updating pipeline observer for editor {}", editor);
-        final Task<processEditor.Input, processEditor.Output> task = editorTask(text, mbFile, mbProject);
+        final Task<processEditor.Input, DocumentResult> task = editorTask(text, mbFile, mbProject);
         final TaskKey key = task.key();
         final TaskKey prevKey = editorKeys.put(editor, key);
         if(prevKey != null) {
@@ -194,7 +196,7 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
     }
 
 
-    private Task<processProject.Input, processProject.Output> projectTask(PPath project) {
+    private Task<processProject.Input, ProjectResult> projectTask(PPath project) {
         return pipeline.project(project, root);
     }
 
@@ -202,8 +204,8 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
         return (Function1<Serializable, Unit>) observers.project(project);
     }
 
-    private Task<processEditor.Input, processEditor.Output> editorTask(String text, PPath file, PPath project) {
-        return pipeline.editor(text, file, project, root);
+    private Task<processEditor.Input, DocumentResult> editorTask(String text, PPath document, PPath project) {
+        return pipeline.editor(document, project, root, text);
     }
 
     @SuppressWarnings("unchecked") private Function1<Serializable, Unit> editorObs(SpoofaxEditor editor, String text,
