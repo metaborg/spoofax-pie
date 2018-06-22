@@ -35,7 +35,7 @@ public class TDChangesBench {
     private TDState exec;
 
     @Setup(Level.Invocation) public void setupInvocation() {
-        Timer.logFile = new File("/Users/gohla/pie/topdown.csv");
+        Timer.logFile = new File("topdown.csv");
         Timer.clearFile();
         infra.reset();
         changes.reset(workspace);

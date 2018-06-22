@@ -35,7 +35,7 @@ public class BUChangesBench {
     private BUState exec;
 
     @Setup(Level.Invocation) public void setupInvocation() {
-        Timer.logFile = new File("/Users/gohla/pie/bottomup.csv");
+        Timer.logFile = new File("bottomup.csv");
         Timer.clearFile();
         infra.reset();
         changes.reset(workspace);
