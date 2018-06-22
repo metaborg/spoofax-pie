@@ -223,23 +223,7 @@ public class ChangesState {
                                 "    , nats/expressions.nabl2\n" +
                                 "    stratego config: {\n" +
                                 "      main file: nats/nats.str\n" +
-                                "      include dirs:\n" +
-                                "        trans,\n" +
-                                "        nats,\n" +
-                                "        src-gen,\n" +
-                                "        src-gen/nabl2/collection,\n" +
-                                "        /Users/gohla/spoofax/master/repo/spoofax-releng/spoofax/meta.lib.spoofax/trans,\n" +
-                                "        /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/nabl2.shared/trans,\n" +
-                                "        /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/nabl2.shared/src-gen,\n" +
-                                "        /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/nabl2.runtime/trans,\n" +
-                                "        /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/nabl2.runtime/src-gen,\n" +
-                                "        /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/nabl2.runtime/src-gen/nabl2/collection,\n" +
-                                "        /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/nabl2.lang/trans,\n" +
-                                "        /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/nabl2.lang/src-gen\n" +
-                                "      include libs: stratego-lib, stratego-sglr\n" +
-                                "      base dir: .\n" +
-                                "      cache dir: target/nats-str-cache\n" +
-                                "      output file: target/nats.ctree\n" +
+                                "      include dirs: trans, nats\n" +
                                 "    }\n" +
                                 "    stratego strategy id: nats\n" +
                                 "    root scope per file: true\n" +

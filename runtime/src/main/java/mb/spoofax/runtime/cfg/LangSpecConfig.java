@@ -37,7 +37,7 @@ public interface LangSpecConfig extends Serializable {
 
     @Value.Parameter List<PPath> natsNaBL2Files();
 
-    @Value.Parameter @Nullable ImmutableStrategoConfig natsStrategoConfig();
+    @Value.Parameter @Nullable ImmutableStrategoCompilerConfig natsStrategoConfig();
 
     @Value.Parameter @Nullable String natsStrategoStrategyId();
 

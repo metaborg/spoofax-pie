@@ -4,7 +4,7 @@ import com.google.inject.Inject
 import mb.pie.api.*
 import mb.pie.api.stamp.FileStampers
 import mb.pie.vfs.path.*
-import mb.spoofax.runtime.cfg.StrategoConfig
+import mb.spoofax.runtime.cfg.StrategoCompilerConfig
 import mb.spoofax.runtime.stratego.StrategoCompiler
 import java.io.IOException
 import java.io.Serializable
@@ -19,12 +19,12 @@ class CompileStratego
   }
 
   data class Input(
-    val config: StrategoConfig,
+    val compilerConfig: StrategoCompilerConfig,
     val taskDeps: Iterable<STask<*>>
   ) : Serializable
 
   override val id = Companion.id
-  override fun key(input: Input): PPath = input.config.outputFile()
+  override fun key(input: Input): PPath = input.compilerConfig.outputFileOrDefault()
   override fun ExecContext.exec(input: Input): PPath? {
     val (config, taskDeps) = input
     // Explicitly require hidden dependencies.

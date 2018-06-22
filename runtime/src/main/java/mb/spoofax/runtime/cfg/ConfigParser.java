@@ -56,8 +56,8 @@ public class ConfigParser {
         // NaTs
         final ArrayList<IStrategoTerm> natsOpts = subSectionsOf(langSpecSections, "NaTsSec");
         final List<PPath> natsNaBL2Files = pathValuesOf(natsOpts, "NaTsNaBL2Files", dir);
-        final @Nullable ImmutableStrategoConfig natsStrategoConfig = value(natsOpts, "NaTsStrategoConfig")
-            .flatMap((t) -> parseStrategoConfig(t, dir))
+        final @Nullable ImmutableStrategoCompilerConfig natsStrategoConfig = value(natsOpts, "NaTsStrategoConfig")
+            .flatMap((t) -> parseStrategoCompilerConfig(t, dir))
             .orElse(null);
         final @Nullable String natsStrategoStrategyId = stringValueOf(natsOpts, "NaTsStrategoStrategyId").orElse(null);
         final boolean natsRootScopePerFile = value(natsOpts, "NaTsRootScopePerFile")
@@ -74,7 +74,7 @@ public class ConfigParser {
             natsStrategoStrategyId, natsRootScopePerFile);
     }
 
-    public Optional<ImmutableStrategoConfig> parseStrategoConfig(IStrategoTerm root, PPath dir) {
+    public Optional<ImmutableStrategoCompilerConfig> parseStrategoCompilerConfig(IStrategoTerm root, PPath dir) {
         final ArrayList<IStrategoTerm> options = sections(root);
         final PPath mainFile = pathValueOf(options, "StrategoConfigMainFile", dir).orElse(null);
         if(mainFile == null) {
@@ -84,26 +84,10 @@ public class ConfigParser {
         final ArrayList<PPath> includeDirs = pathValuesOf(options, "StrategoConfigIncludeDirs", dir);
         final ArrayList<PPath> includeFiles = pathValuesOf(options, "StrategoConfigIncludeFiles", dir);
         final ArrayList<String> includeLibs = stringValuesOf(options, "StrategoConfigIncludeLibs");
-        final PPath baseDir = pathValueOf(options, "StrategoConfigBaseDir", dir).orElse(mainFile.parent());
-        if(baseDir == null) {
-            log.error("Invalid Stratego config of main file {}; base directory is not set and main file has no parent directory", mainFile);
-            return Optional.empty();
-        }
-        final PPath cacheDir = pathValueOf(options, "StrategoConfigCacheDir", dir).orElseGet(() -> {
-            final PPath parent = mainFile.parent();
-            if(parent != null) {
-                // Default to <parent of main file>/target/str-cache
-                return parent.resolve("target/str-cache");
-            }
-            return null;
-        });
-        if(cacheDir == null) {
-            log.error("Invalid Stratego config of main file {}; cache directory is not set and main file has no parent directory",
-                mainFile);
-            return Optional.empty();
-        }
-        final PPath outputFile = pathValueOf(options, "StrategoConfigOutputFile", dir).orElse(mainFile.extend(".ctree"));
-        return Optional.of(ImmutableStrategoConfig.of(mainFile, includeDirs, includeFiles, includeLibs, baseDir, cacheDir, outputFile));
+        final PPath baseDir = pathValueOf(options, "StrategoConfigBaseDir", dir).orElse(null);
+        final PPath cacheDir = pathValueOf(options, "StrategoConfigCacheDir", dir).orElse(null);
+        final PPath outputFile = pathValueOf(options, "StrategoConfigOutputFile", dir).orElse(null);
+        return Optional.of(ImmutableStrategoCompilerConfig.of(mainFile, includeDirs, includeFiles, includeLibs, baseDir, cacheDir, outputFile));
     }
 
 

@@ -1,7 +1,7 @@
 package mb.spoofax.runtime.stratego;
 
 import mb.pie.vfs.path.PPath;
-import mb.spoofax.runtime.cfg.StrategoConfig;
+import mb.spoofax.runtime.cfg.StrategoCompilerConfig;
 import mb.spoofax.runtime.util.Arguments;
 import org.spoofax.interpreter.library.IOAgent;
 import org.spoofax.interpreter.terms.ITermFactory;
@@ -24,14 +24,22 @@ public class StrategoCompiler {
         }
     }
 
-    public @Nullable Result compile(StrategoConfig config) throws IOException, StrategoException {
+    public @Nullable Result compile(StrategoCompilerConfig config) throws IOException, StrategoException {
         final PPath mainFile = config.mainFile();
-        final PPath outputFile = config.outputFile();
+        final PPath outputFile = config.outputFileOrDefault();
         final Iterable<PPath> includeDirs = config.includeDirs();
         final Iterable<PPath> includeFiles = config.includeFiles();
         final Iterable<String> includeLibs = config.includeLibs();
-        final PPath baseDir = config.baseDir();
-        final PPath cacheDir = config.cacheDir();
+        final PPath baseDir = config.baseDirOrDefault();
+        if(baseDir == null) {
+            throw new RuntimeException(
+                "Cannot compile Stratego code; base directory was not set, and main file " + mainFile + " has no parent directory to use as default");
+        }
+        final PPath cacheDir = config.cacheDirOrDefault();
+        if(cacheDir == null) {
+            throw new RuntimeException(
+                "Cannot compile Stratego code; cache directory was not set, and main file " + mainFile + " has no parent directory to use as default");
+        }
 
         // Create necessary directories
         outputFile.createParentDirectories();

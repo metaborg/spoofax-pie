@@ -9,7 +9,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class LoadMetaLanguages {
-    public static LoadedMetaLanguages loadAll(PPath root) throws IOException, MetaborgException {
+    public static LoadedMetaLanguages loadedMetaLanguages = null;
+
+
+    public static void loadAll(PPath root) throws IOException, MetaborgException {
         final String resourceDir = "spoofax_meta_languages";
         final ILanguageComponent config = load(unpackResource(resourceDir + "/spoofax.lang.cfg.spoofax-language", root));
         final ILanguageComponent spoofaxLib = load(unpackResource(resourceDir + "/spoofax.lib.spoofax-language", root));
@@ -19,7 +22,7 @@ public class LoadMetaLanguages {
         final ILanguageComponent nabl2Lang = load(unpackResource(resourceDir + "/nabl2.lang.spoofax-language", root));
         final ILanguageComponent nabl2Shared = load(unpackResource(resourceDir + "/nabl2.shared.spoofax-language", root));
         final ILanguageComponent nabl2Runtime = load(unpackResource(resourceDir + "/nabl2.runtime.spoofax-language", root));
-        return new LoadedMetaLanguages(config, spoofaxLib, esv, stratego, sdf3, nabl2Lang, nabl2Shared, nabl2Runtime);
+        loadedMetaLanguages = new LoadedMetaLanguages(config, spoofaxLib, esv, stratego, sdf3, nabl2Lang, nabl2Shared, nabl2Runtime);
     }
 
     private static PPath unpackResource(String resource, PPath root) throws IOException {
