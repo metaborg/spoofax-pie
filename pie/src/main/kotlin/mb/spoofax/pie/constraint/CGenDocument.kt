@@ -10,6 +10,7 @@ import mb.pie.api.stamp.FileStampers
 import mb.pie.vfs.path.PPath
 import mb.spoofax.api.SpoofaxEx
 import mb.spoofax.pie.nabl2.CompileCGen
+import mb.spoofax.runtime.cfg.LangId
 import mb.spoofax.runtime.stratego.StrategoRuntimeBuilder
 import mb.spoofax.runtime.stratego.primitive.ScopeGraphPrimitiveLibrary
 import org.spoofax.interpreter.terms.IStrategoTerm
@@ -27,21 +28,21 @@ class CGenDocument @Inject constructor(
   }
 
   data class Input(
-    val globalConstraints: ImmutableInitialResult,
+    val document: PPath,
+    val langId: LangId,
+    val root: PPath,
     val ast: IStrategoTerm,
-    val file: PPath,
-    val langSpecExt: String,
-    val root: PPath
+    val globalConstraints: ImmutableInitialResult
   ) : Serializable
 
   override val id = Companion.id
   override fun ExecContext.exec(input: Input): ImmutableUnitResult? {
-    val (globalConstraints, ast, file, langSpecExt, root) = input
-    val cgen = require(compileCGen, CompileCGen.Input(langSpecExt, root)) ?: return null
+    val (document, langId, root, ast, globalConstraints) = input
+    val cgen = require(compileCGen, CompileCGen.Input(langId, root)) ?: return null
     val strategoRuntime = cgen.createSuitableRuntime(StrategoRuntimeBuilder(), primitiveLibrary)
     require(cgen.strategoCtree(), FileStampers.hash)
     return try {
-      cgen.cgenDocument(globalConstraints, ast, file.toString(), strategoRuntime)
+      cgen.cgenDocument(globalConstraints, ast, document.toString(), strategoRuntime)
     } catch(e: SpoofaxEx) {
       log.error("Generating document constraints failed", e)
       null

@@ -7,8 +7,8 @@ import mb.pie.api.ExecContext
 import mb.pie.api.TaskDef
 import mb.pie.vfs.path.PPath
 import mb.spoofax.api.SpoofaxEx
-import mb.spoofax.runtime.constraint.CSolver
 import mb.spoofax.runtime.constraint.CSolution
+import mb.spoofax.runtime.constraint.CSolver
 import java.io.Serializable
 import java.util.*
 
@@ -23,16 +23,16 @@ class CSolveFinal @Inject constructor(
   }
 
   data class Input(
+    val project: PPath,
     val documentSolutions: ArrayList<ImmutableSolution>,
-    val globalSolution: ImmutableSolution,
-    val projectPath: PPath
+    val globalSolution: ImmutableSolution
   ) : Serializable
 
   override val id = Companion.id
   override fun ExecContext.exec(input: Input): CSolution? {
-    val (documentSolutions, globalSolution, projectPath) = input
+    val (project, documentSolutions, globalSolution) = input
     return try {
-      solver.solve(documentSolutions, globalSolution, projectPath)
+      solver.solve(documentSolutions, globalSolution, project)
     } catch(e: SpoofaxEx) {
       log.error("Finally solving constraints failed", e)
       null

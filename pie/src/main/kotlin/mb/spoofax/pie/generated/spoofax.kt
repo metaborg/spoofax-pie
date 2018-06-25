@@ -71,6 +71,7 @@ class processProject @Inject constructor(
 
 class processEditor @Inject constructor(
   private val _legacyProcessTextBuffer: legacyProcessTextBuffer,
+  private val _mb_spoofax_pie_processing_IsLegacyDocument: mb.spoofax.pie.processing.IsLegacyDocument,
   private val _processTextBuffer: processTextBuffer,
   private val _mb_spoofax_pie_processing_IsLangSpecDocument: mb.spoofax.pie.processing.IsLangSpecDocument,
   private val exists: Exists
@@ -93,7 +94,11 @@ class processEditor @Inject constructor(
       if(require(_mb_spoofax_pie_processing_IsLangSpecDocument, mb.spoofax.pie.processing.IsLangSpecDocument.Input(input.document, input.root))) run {
         require(_processTextBuffer, processTextBuffer.Input(input.document, input.project, input.root, input.text))
       } else run {
-        require(_legacyProcessTextBuffer, legacyProcessTextBuffer.Input(input.document, input.project, input.root, input.text))
+        if(require(_mb_spoofax_pie_processing_IsLegacyDocument, input.document)) run {
+          require(_legacyProcessTextBuffer, legacyProcessTextBuffer.Input(input.document, input.project, input.root, input.text))
+        } else run {
+          mb.spoofax.pie.processing.emptyDocumentResult(input.document)
+        }
       }
     }
   }
@@ -122,7 +127,8 @@ class processDocument @Inject constructor(
 class processTextBuffer @Inject constructor(
   private val _solveDocument: solveDocument,
   private val _style: style,
-  private val _parse: parse
+  private val _parse: parse,
+  private val _mb_spoofax_pie_processing_LangIdOfDocument: mb.spoofax.pie.processing.LangIdOfDocument
 ) : TaskDef<processTextBuffer.Input, mb.spoofax.pie.processing.DocumentResult> {
   companion object {
     const val id = "processTextBuffer"
@@ -135,7 +141,7 @@ class processTextBuffer @Inject constructor(
   override val id = Companion.id
   override fun key(input: processTextBuffer.Input): Key = input.document
   override fun ExecContext.exec(input: processTextBuffer.Input): mb.spoofax.pie.processing.DocumentResult = run {
-    val langId = input.document.extension()!!;
+    val langId = require(_mb_spoofax_pie_processing_LangIdOfDocument, mb.spoofax.pie.processing.LangIdOfDocument.Input(input.document, input.root));
     val (ast, tokens, messages) = require(_parse, parse.Input(input.document, langId, input.root, input.text));
     val styling: mb.spoofax.api.style.Styling? = if(tokens == null) null else require(_style, style.Input(langId, input.root, tokens!!));
     val constraintsSolution: mb.spoofax.runtime.constraint.CSolution? = if(ast == null) null else require(_solveDocument, solveDocument.Input(input.document, langId, input.project, input.root, ast!!))
@@ -151,8 +157,8 @@ class parse @Inject constructor(
     const val id = "parse"
   }
 
-  data class Input(val document: PPath, val langId: String, val root: PPath, val text: String) : Tuple4<PPath, String, PPath, String> {
-    constructor(tuple: Tuple4<PPath, String, PPath, String>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
+  data class Input(val document: PPath, val langId: mb.spoofax.runtime.cfg.LangId, val root: PPath, val text: String) : Tuple4<PPath, mb.spoofax.runtime.cfg.LangId, PPath, String> {
+    constructor(tuple: Tuple4<PPath, mb.spoofax.runtime.cfg.LangId, PPath, String>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
   }
 
   data class Output(val _1: org.spoofax.interpreter.terms.IStrategoTerm?, val _2: ArrayList<mb.spoofax.api.parse.Token>?, val _3: ArrayList<mb.spoofax.api.message.Msg>) : Tuple3<org.spoofax.interpreter.terms.IStrategoTerm?, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Msg>> {
@@ -171,7 +177,7 @@ class parse @Inject constructor(
       val emptyMessages: ArrayList<mb.spoofax.api.message.Msg> = list();
       return output(tuple(emptyAst, emptyTokens, emptyMessages))
     }
-    output(require(_mb_spoofax_pie_jsglr_JSGLRParse, mb.spoofax.pie.jsglr.JSGLRParse.Input(input.text, parseTable!!, input.document, input.langId, input.root)))
+    output(require(_mb_spoofax_pie_jsglr_JSGLRParse, mb.spoofax.pie.jsglr.JSGLRParse.Input(input.document, input.langId, input.root, input.text, parseTable!!)))
   }
 }
 
@@ -183,8 +189,8 @@ class style @Inject constructor(
     const val id = "style"
   }
 
-  data class Input(val langId: String, val root: PPath, val tokens: ArrayList<mb.spoofax.api.parse.Token>) : Tuple3<String, PPath, ArrayList<mb.spoofax.api.parse.Token>> {
-    constructor(tuple: Tuple3<String, PPath, ArrayList<mb.spoofax.api.parse.Token>>) : this(tuple.component1(), tuple.component2(), tuple.component3())
+  data class Input(val langId: mb.spoofax.runtime.cfg.LangId, val root: PPath, val tokens: ArrayList<mb.spoofax.api.parse.Token>) : Tuple3<mb.spoofax.runtime.cfg.LangId, PPath, ArrayList<mb.spoofax.api.parse.Token>> {
+    constructor(tuple: Tuple3<mb.spoofax.runtime.cfg.LangId, PPath, ArrayList<mb.spoofax.api.parse.Token>>) : this(tuple.component1(), tuple.component2(), tuple.component3())
   }
 
   override val id = Companion.id
@@ -207,8 +213,8 @@ class solveDocument @Inject constructor(
     const val id = "solveDocument"
   }
 
-  data class Input(val document: PPath, val langId: String, val project: PPath, val root: PPath, val ast: org.spoofax.interpreter.terms.IStrategoTerm) : Tuple5<PPath, String, PPath, PPath, org.spoofax.interpreter.terms.IStrategoTerm> {
-    constructor(tuple: Tuple5<PPath, String, PPath, PPath, org.spoofax.interpreter.terms.IStrategoTerm>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4(), tuple.component5())
+  data class Input(val document: PPath, val langId: mb.spoofax.runtime.cfg.LangId, val project: PPath, val root: PPath, val ast: org.spoofax.interpreter.terms.IStrategoTerm) : Tuple5<PPath, mb.spoofax.runtime.cfg.LangId, PPath, PPath, org.spoofax.interpreter.terms.IStrategoTerm> {
+    constructor(tuple: Tuple5<PPath, mb.spoofax.runtime.cfg.LangId, PPath, PPath, org.spoofax.interpreter.terms.IStrategoTerm>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4(), tuple.component5())
   }
 
   override val id = Companion.id
@@ -218,11 +224,11 @@ class solveDocument @Inject constructor(
     if(globalConstraints == null) return null;
     val globalSolution = require(_mb_spoofax_pie_constraint_CSolveGlobal, globalConstraints!!);
     if(globalSolution == null) return null;
-    val documentConstraints = require(_mb_spoofax_pie_constraint_CGenDocument, mb.spoofax.pie.constraint.CGenDocument.Input(globalConstraints!!, input.ast, input.document, input.langId, input.root));
+    val documentConstraints = require(_mb_spoofax_pie_constraint_CGenDocument, mb.spoofax.pie.constraint.CGenDocument.Input(input.document, input.langId, input.root, input.ast, globalConstraints!!));
     if(documentConstraints == null) return null;
     val documentSolution = require(_mb_spoofax_pie_constraint_CSolveDocument, mb.spoofax.pie.constraint.CSolveDocument.Input(documentConstraints!!, globalConstraints!!, globalSolution!!));
     if(documentSolution == null) return null;
-    val solution = require(_mb_spoofax_pie_constraint_CSolveFinal, mb.spoofax.pie.constraint.CSolveFinal.Input(list(documentSolution!!), globalSolution!!, input.project))
+    val solution = require(_mb_spoofax_pie_constraint_CSolveFinal, mb.spoofax.pie.constraint.CSolveFinal.Input(input.project, list(documentSolution!!), globalSolution!!))
     solution
   }
 }

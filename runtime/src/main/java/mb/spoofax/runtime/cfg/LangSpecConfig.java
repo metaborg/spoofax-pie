@@ -14,6 +14,9 @@ public interface LangSpecConfig extends Serializable {
     @Value.Parameter PPath dir();
 
 
+    @Value.Parameter LangId id();
+
+
     @Value.Parameter List<String> extensions();
 
     default String firstExtension() {

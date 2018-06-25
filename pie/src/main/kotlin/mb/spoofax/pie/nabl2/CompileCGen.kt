@@ -10,6 +10,7 @@ import mb.spoofax.pie.legacy.Spx
 import mb.spoofax.pie.sdf3.SDF3ToStrategoSignatures
 import mb.spoofax.pie.stratego.CompileStratego
 import mb.spoofax.runtime.cfg.ImmutableStrategoCompilerConfig
+import mb.spoofax.runtime.cfg.LangId
 import mb.spoofax.runtime.constraint.CGen
 import org.apache.commons.vfs2.AllFileSelector
 import org.metaborg.spoofax.core.SpoofaxConstants
@@ -29,33 +30,33 @@ class CompileCGen
     const val id = "nabl2.CompileCGen"
   }
 
-  data class Input(val langSpecExt: String, val root: PPath) : Serializable
+  data class Input(val langId: LangId, val root: PPath) : Serializable
   data class LangSpecConfigInfo(val dir: PPath, val strategoCompilerConfig: ImmutableStrategoCompilerConfig?, val strategyId: String?) : Serializable
 
   override val id = Companion.id
   override fun ExecContext.exec(input: Input): CGen? {
-    val (langSpecExt, root) = input
+    val (langId, root) = input
 
     val (langSpecDir, strategoCompilerConfig, strategyId) = with(parseWorkspaceConfig) {
       requireConfigValue(root) { workspaceConfig ->
-        val langSpecConfig = workspaceConfig.langSpecConfigForExt(langSpecExt)
+        val langSpecConfig = workspaceConfig.langSpecConfigForId(langId)
         if(langSpecConfig != null) {
           LangSpecConfigInfo(langSpecConfig.dir(), langSpecConfig.natsStrategoConfig(), langSpecConfig.natsStrategoStrategyId())
         } else {
           null
         }
       }
-    } ?: throw ExecException("Could not get language specification configuration for language $langSpecExt")
+    } ?: throw ExecException("Could not get language specification configuration for language with identifier $langId")
     if(strategoCompilerConfig == null || strategyId == null) {
       return null
     }
 
     // Generate Stratego files from NaBL2 files
-    val nabl2ToStrategoCgenTask = Task(nabl2ToStrategoCGen, NaBL2ToStrategoCGen.Input(langSpecExt, root))
+    val nabl2ToStrategoCgenTask = Task(nabl2ToStrategoCGen, NaBL2ToStrategoCGen.Input(langId, root))
     require(nabl2ToStrategoCgenTask)
 
     // Generate Stratego signatures from SDF3.
-    val sdf3ToStrategoSignaturesTask = Task(sdf3ToStrategoSignatures, SDF3ToStrategoSignatures.Input(langSpecExt, root))
+    val sdf3ToStrategoSignaturesTask = Task(sdf3ToStrategoSignatures, SDF3ToStrategoSignatures.Input(langId, root))
     val signatures = require(sdf3ToStrategoSignaturesTask)
 
     // Prepare Stratego compiler config.

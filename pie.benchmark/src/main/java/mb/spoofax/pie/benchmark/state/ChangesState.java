@@ -185,6 +185,7 @@ public class ChangesState {
                             execEditor(langSpecText, langSpecFile, mjProject, blackhole, "editor open new lang.minijava/langspec.cfg");
                             langSpecText = "langspec {\n" +
                                 "  identification {\n" +
+                                "    id: \"org.metaborg:minijava.lang\"\n" +
                                 "    file extensions: mj\n" +
                                 "  }\n" +
                                 "  information {\n" +

@@ -8,6 +8,7 @@ import mb.pie.vfs.path.PPath
 import mb.pie.vfs.path.PathSrv
 import mb.spoofax.pie.config.ParseWorkspaceConfig
 import mb.spoofax.pie.legacy.*
+import mb.spoofax.runtime.cfg.LangId
 import mb.spoofax.runtime.jsglr.Table
 import org.metaborg.core.action.EndNamedGoal
 import org.metaborg.sdf2table.io.ParseTableGenerator
@@ -28,7 +29,7 @@ class SDF3ToJSGLRParseTable
   }
 
   data class Input(
-    val langSpecExt: String,
+    val langId: LangId,
     val root: PPath
   ) : Serializable
 
@@ -40,18 +41,18 @@ class SDF3ToJSGLRParseTable
 
   override val id = Companion.id
   override fun ExecContext.exec(input: Input): Table? {
-    val (langSpecExt, root) = input
+    val (langId, root) = input
 
     val (langSpecDir, files, mainFile) = with(parseWorkspaceConfig) {
       requireConfigValue(root) { workspaceConfig ->
-        val langSpecConfig = workspaceConfig.langSpecConfigForExt(langSpecExt)
+        val langSpecConfig = workspaceConfig.langSpecConfigForId(langId)
         if(langSpecConfig != null) {
           LangSpecConfigInfo(langSpecConfig.dir(), langSpecConfig.syntaxParseFiles(), langSpecConfig.syntaxParseMainFile())
         } else {
           null
         }
       }
-    } ?: throw ExecException("Could not get language specification configuration for language $langSpecExt")
+    } ?: throw ExecException("Could not get language specification configuration for language with identifier $langId")
     if(mainFile == null || files.isEmpty()) {
       return null
     }

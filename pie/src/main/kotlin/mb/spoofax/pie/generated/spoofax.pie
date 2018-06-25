@@ -4,6 +4,8 @@ data Ast = foreign java org.spoofax.interpreter.terms.IStrategoTerm {}
 data Token = foreign java mb.spoofax.api.parse.Token {}
 data Styling = foreign java mb.spoofax.api.style.Styling {}
 
+data LangId = foreign java mb.spoofax.runtime.cfg.LangId {}
+
 data WorkspaceResult = foreign java mb.spoofax.pie.processing.WorkspaceResult {}
 func createWorkspaceResult(root: path, projectResults: ProjectResult*) -> WorkspaceResult = foreign java mb.spoofax.pie.processing#createWorkspaceResult
 data ProjectResult = foreign java mb.spoofax.pie.processing.ProjectResult {}
@@ -15,35 +17,37 @@ func emptyDocumentResult(document: path) -> DocumentResult = foreign java mb.spo
 
 
 /// Library with functions to build and use language specifications.
+/// Meta-languages
+// SDF3
+func sdf3-to-jsglr-parse-table(langId: LangId, root: path) -> ParseTable? = foreign mb.spoofax.pie.sdf3.SDF3ToJSGLRParseTable
+data Signatures = foreign java mb.spoofax.runtime.sdf3.Signatures {}
+func sdf3-to-stratego-signatures(langId: LangId, root: path) -> Signatures? = foreign mb.spoofax.pie.sdf3.SDF3ToStrategoSignatures
+// ESV
+func esv-to-styling-rules(langId: LangId, root: path) -> StylingRules? = foreign mb.spoofax.pie.esv.ESVToStylingRules
+// NaBL2
+func nabl2-compile-cgen(langId: LangId, root: path) -> CGen? = foreign mb.spoofax.pie.nabl2.CompileCGen
+
+
 /// Runtime
+// JSGLR
+data ParseTable = foreign java mb.spoofax.runtime.jsglr.Table {}
+func jsglr-parse(document: path, langId: LangId, root: path, text: string, table: ParseTable) -> (Ast?, Token*?, Message*) = foreign mb.spoofax.pie.jsglr.JSGLRParse
 // Style
 data StylingRules = foreign java mb.spoofax.runtime.style.StylingRules {}
 func spoofax-style(tokens: Token*, rules: StylingRules) -> Styling = foreign mb.spoofax.pie.style.SpoofaxStyle
-// JSGLR
-data ParseTable = foreign java mb.spoofax.runtime.jsglr.Table {}
-func jsglr-parse(text: string, table: ParseTable, file: path, langSpecExt: string, root: path) -> (Ast?, Token*?, Message*) = foreign mb.spoofax.pie.jsglr.JSGLRParse
 // Constraint generator
 data CGen = foreign java mb.spoofax.runtime.constraint.CGen {}
 data GlobalConstraints = foreign java mb.nabl2.spoofax.analysis.ImmutableInitialResult {}
-func cgen-global(langSpecExt: string, root: path) -> GlobalConstraints? = foreign mb.spoofax.pie.constraint.CGenGlobal
+func cgen-global(langId: LangId, root: path) -> GlobalConstraints? = foreign mb.spoofax.pie.constraint.CGenGlobal
 data DocumentConstraints = foreign java mb.nabl2.spoofax.analysis.ImmutableUnitResult {}
-func cgen-document(globalConstraints: GlobalConstraints, ast: Ast, file: path, langSpecExt: string, root: path) -> DocumentConstraints? = foreign mb.spoofax.pie.constraint.CGenDocument
+func cgen-document(document: path, langId: LangId, root: path, ast: Ast, globalConstraints: GlobalConstraints) -> DocumentConstraints? = foreign mb.spoofax.pie.constraint.CGenDocument
 // Constraint solver
 data SolverSolution = foreign java mb.nabl2.solver.ImmutableSolution {}
 func csolve-global(globalConstraints: GlobalConstraints) -> SolverSolution? = foreign mb.spoofax.pie.constraint.CSolveGlobal
 func csolve-document(documentConstraints: DocumentConstraints, globalConstraints: GlobalConstraints, globalSolution: SolverSolution) -> SolverSolution? = foreign mb.spoofax.pie.constraint.CSolveDocument
 data FinalSolverSolution = foreign java mb.spoofax.runtime.constraint.CSolution {}
-func csolve-final(documentsConstraints: SolverSolution*, globalSolution: SolverSolution, projectPath: path) -> FinalSolverSolution? = foreign mb.spoofax.pie.constraint.CSolveFinal
+func csolve-final(project: path, documentsConstraints: SolverSolution*, globalSolution: SolverSolution) -> FinalSolverSolution? = foreign mb.spoofax.pie.constraint.CSolveFinal
 
-/// Meta-languages
-// SDF3
-func sdf3-to-jsglr-parse-table(langSpecExt: string, root: path) -> ParseTable? = foreign mb.spoofax.pie.sdf3.SDF3ToJSGLRParseTable
-data Signatures = foreign java mb.spoofax.runtime.sdf3.Signatures {}
-func sdf3-to-stratego-signatures(langSpecExt: string, root: path) -> Signatures? = foreign mb.spoofax.pie.sdf3.SDF3ToStrategoSignatures
-// ESV
-func esv-to-styling-rules(langSpecExt: string, root: path) -> StylingRules? = foreign mb.spoofax.pie.esv.ESVToStylingRules
-// NaBL2
-func nabl2-compile-cgen(langSpecExt: string, root: path) -> CGen? = foreign mb.spoofax.pie.nabl2.CompileCGen
 
 
 
@@ -52,7 +56,9 @@ func nabl2-compile-cgen(langSpecExt: string, root: path) -> CGen? = foreign mb.s
 func shouldProcessDocument(document: path) -> bool = foreign java mb.spoofax.pie.processing#shouldProcessDocument
 func langSpecExtensions(root: path) -> string* = foreign mb.spoofax.pie.processing.LangSpecExtensions
 func isLangSpecDocument(document: path, root: path) -> bool = foreign mb.spoofax.pie.processing.IsLangSpecDocument
+func langIdOfDocument(document: path, root: path) -> LangId = foreign mb.spoofax.pie.processing.LangIdOfDocument
 func legacyExtensions() -> string* = foreign mb.spoofax.pie.processing.LegacyExtensions
+func isLegacyDocument(document: path) -> bool = foreign mb.spoofax.pie.processing.IsLegacyDocument
 // Process all projects in a workspace.
 func processWorkspace(root: path) -> WorkspaceResult = {
   val projectResults = [processProject(project, root) | project <- list root with regex "^[^.]((?!src-gen).)*\$"];
@@ -84,7 +90,11 @@ func processEditor(document: path, project: path, root: path, text: string) -> D
     if(isLangSpecDocument(document, root)) {
       processTextBuffer(document, project, root, text)
     } else {
-      legacyProcessTextBuffer(document, project, root, text)
+      if(isLegacyDocument(document)) {
+        legacyProcessTextBuffer(document, project, root, text)
+      } else {
+        emptyDocumentResult(document)
+      }
     }
   }
 } @ document
@@ -95,7 +105,7 @@ func processDocument(document: path, project: path, root: path) -> DocumentResul
 } @ document
 // Process a document, with a (modified) text buffer.
 func processTextBuffer(document: path, project: path, root: path, text: string) -> DocumentResult = {
-  val langId = document.extension()!; // TODO: use actual language id, not extension.
+  val langId = langIdOfDocument(document, root);
   val (ast, tokens, messages) = parse(document, langId, root, text);
   val styling : Styling? = if(tokens == null) null else style(langId, root, tokens!);
   val constraintsSolution: FinalSolverSolution? = if(ast == null) null else solveDocument(document, langId, project, root, ast!);
@@ -105,7 +115,7 @@ func processTextBuffer(document: path, project: path, root: path, text: string) 
 
 
 /// Parsing
-func parse(document: path, langId: string, root: path, text: string) -> (Ast?, Token*?, Message*) = {
+func parse(document: path, langId: LangId, root: path, text: string) -> (Ast?, Token*?, Message*) = {
   val parseTable = sdf3-to-jsglr-parse-table(langId, root);
   if(parseTable == null) {
     val emptyAst: Ast? = null;
@@ -113,25 +123,25 @@ func parse(document: path, langId: string, root: path, text: string) -> (Ast?, T
     val emptyMessages: Message* = [];
     return (emptyAst, emptyTokens, emptyMessages)
   };
-  jsglr-parse(text, parseTable!, document, langId, root)
+  jsglr-parse(document, langId, root, text, parseTable!)
 } @ document
 /// Styling
-func style(langId: string, root: path, tokens: Token*) -> Styling? = {
+func style(langId: LangId, root: path, tokens: Token*) -> Styling? = {
   val syntaxStyler = esv-to-styling-rules(langId, root);
   if(syntaxStyler == null) return null;
   spoofax-style(tokens, syntaxStyler!)?
 }
 /// Constraint solving
-func solveDocument(document: path, langId: string, project: path, root: path, ast: Ast) -> FinalSolverSolution? = {
+func solveDocument(document: path, langId: LangId, project: path, root: path, ast: Ast) -> FinalSolverSolution? = {
   val globalConstraints = cgen-global(langId, root);
   if(globalConstraints == null) return null;
   val globalSolution = csolve-global(globalConstraints!);
   if(globalSolution == null) return null;
-  val documentConstraints = cgen-document(globalConstraints!, ast, document, langId, root);
+  val documentConstraints = cgen-document(document, langId, root, ast, globalConstraints!);
   if(documentConstraints == null) return null;
   val documentSolution = csolve-document(documentConstraints!, globalConstraints!, globalSolution!);
   if(documentSolution == null) return null;
-  val solution = csolve-final([documentSolution!], globalSolution!, project);
+  val solution = csolve-final(project, [documentSolution!], globalSolution!);
   solution
 } @ document
 

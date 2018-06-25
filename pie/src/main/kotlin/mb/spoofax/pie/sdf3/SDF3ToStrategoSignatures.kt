@@ -8,6 +8,7 @@ import mb.pie.vfs.path.PPath
 import mb.spoofax.pie.config.ParseWorkspaceConfig
 import mb.spoofax.pie.legacy.LegacyLoadProject
 import mb.spoofax.pie.legacy.processAll
+import mb.spoofax.runtime.cfg.LangId
 import mb.spoofax.runtime.sdf3.Signatures
 import org.metaborg.core.action.EndNamedGoal
 import java.io.Serializable
@@ -25,7 +26,7 @@ class SDF3ToStrategoSignatures
   }
 
   data class Input(
-    val langSpecExt: String,
+    val langId: LangId,
     val root: PPath
   ) : Serializable
 
@@ -36,18 +37,18 @@ class SDF3ToStrategoSignatures
 
   override val id = Companion.id
   override fun ExecContext.exec(input: Input): Signatures? {
-    val (langSpecExt, root) = input
+    val (langId, root) = input
 
     val (langSpecDir, files) = with(parseWorkspaceConfig) {
       requireConfigValue(root) { workspaceConfig ->
-        val langSpecConfig = workspaceConfig.langSpecConfigForExt(langSpecExt)
+        val langSpecConfig = workspaceConfig.langSpecConfigForId(langId)
         if(langSpecConfig != null) {
           LangSpecConfigInfo(langSpecConfig.dir(), langSpecConfig.syntaxSignatureFiles())
         } else {
           null
         }
       }
-    } ?: throw ExecException("Could not get language specification configuration for language $langSpecExt")
+    } ?: throw ExecException("Could not get language specification configuration for language with identifier $langId")
 
     val langSpecProject = require(legacyLoadProject, langSpecDir).v
     val outputs = processAll(files, langSpecProject, true, EndNamedGoal("Generate Signature (concrete)"), FileStampers.hash, FileStampers.modified, log)

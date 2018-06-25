@@ -9,6 +9,7 @@ import mb.pie.api.stamp.FileStampers
 import mb.pie.vfs.path.PPath
 import mb.spoofax.api.SpoofaxEx
 import mb.spoofax.pie.nabl2.CompileCGen
+import mb.spoofax.runtime.cfg.LangId
 import mb.spoofax.runtime.stratego.StrategoRuntimeBuilder
 import mb.spoofax.runtime.stratego.primitive.ScopeGraphPrimitiveLibrary
 import java.io.Serializable
@@ -25,14 +26,14 @@ class CGenGlobal @Inject constructor(
   }
 
   data class Input(
-    val langSpecExt: String,
+    val langId: LangId,
     val root: PPath
   ) : Serializable
 
   override val id = Companion.id
   override fun ExecContext.exec(input: Input): ImmutableInitialResult? {
-    val (langSpecExt, root) = input
-    val cgen = require(compileCGen, CompileCGen.Input(langSpecExt, root)) ?: return null
+    val (langId, root) = input
+    val cgen = require(compileCGen, CompileCGen.Input(langId, root)) ?: return null
     val strategoRuntime = cgen.createSuitableRuntime(StrategoRuntimeBuilder(), primitiveLibrary)
     require(cgen.strategoCtree(), FileStampers.hash)
     return try {

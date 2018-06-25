@@ -15,6 +15,27 @@
     <version>2.5.0-SNAPSHOT</version>
   </parent>
 
+  <dependencies>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>org.metaborg.meta.lang.esv</artifactId>
+      <version>${metaborg-version}</version>
+      <type>spoofax-language</type>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>org.metaborg.meta.lang.template</artifactId>
+      <version>${metaborg-version}</version>
+      <type>spoofax-language</type>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>meta.lib.spoofax</artifactId>
+      <version>${metaborg-version}</version>
+      <type>spoofax-language</type>
+    </dependency>
+  </dependencies>
+
   <repositories>
     <repository>
       <id>metaborg-release-repo</id>

@@ -22,7 +22,6 @@ import mb.spoofax.pie.style.SpoofaxStyle
 open class SpoofaxPieTaskDefsModule : TaskDefsModule() {
   override fun Binder.bindTaskDefs(taskDefsBinder: MapBinder<String, TaskDef<*, *>>) {
     // Config
-//    bindTaskDef<ParseLangSpecCfg>(taskDefsBinder, ParseLangSpecCfg.id)
     bindTaskDef<ParseWorkspaceConfig>(taskDefsBinder, ParseWorkspaceConfig.id)
 
     // Runtime
@@ -30,6 +29,7 @@ open class SpoofaxPieTaskDefsModule : TaskDefsModule() {
     bindTaskDef<LangSpecExtensions>(taskDefsBinder, LangSpecExtensions.id)
     bindTaskDef<LegacyExtensions>(taskDefsBinder, LegacyExtensions.id)
     bindTaskDef<IsLangSpecDocument>(taskDefsBinder, IsLangSpecDocument.id)
+    bindTaskDef<IsLegacyDocument>(taskDefsBinder, IsLegacyDocument.id)
     // Spoofax styling
     bindTaskDef<SpoofaxStyle>(taskDefsBinder, SpoofaxStyle.id)
     // JSGLR

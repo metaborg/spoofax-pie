@@ -167,16 +167,21 @@ fun ExecContext.processAll(
       }
       return results.flatMap { result ->
         val ast = result.ast()
-        result.outputs().map { output ->
-          val outputResource = output?.output()
-          val writtenFile: PPath?
-          writtenFile = if(outputResource != null) {
-            generate(outputResource.pPath, genFileStamper)
-            outputResource.pPath
-          } else {
-            null
+        val outputs = result.outputs()
+        if(ast != null && outputs.count() == 0){
+          listOf(ProcessOutput(ast, null, result.source()!!.pPath))
+        } else {
+          outputs.map { output ->
+            val outputResource = output?.output()
+            val writtenFile: PPath?
+            writtenFile = if(outputResource != null) {
+              generate(outputResource.pPath, genFileStamper)
+              outputResource.pPath
+            } else {
+              null
+            }
+            ProcessOutput(ast, writtenFile, result.source()!!.pPath)
           }
-          ProcessOutput(ast, writtenFile, result.source()!!.pPath)
         }
       }.toCollection(arrayListOf())
     } catch(e: TransformException) {

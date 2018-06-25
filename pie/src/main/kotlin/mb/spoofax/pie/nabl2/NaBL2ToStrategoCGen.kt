@@ -8,6 +8,7 @@ import mb.pie.vfs.path.PPath
 import mb.spoofax.pie.config.ParseWorkspaceConfig
 import mb.spoofax.pie.legacy.LegacyLoadProject
 import mb.spoofax.pie.legacy.processAll
+import mb.spoofax.runtime.cfg.LangId
 import org.metaborg.core.action.CompileGoal
 import java.io.Serializable
 
@@ -23,23 +24,23 @@ class NaBL2ToStrategoCGen
     const val id = "nabl2.ToStrategoCGen"
   }
 
-  data class Input(val langSpecExt: String, val root: PPath) : Serializable
+  data class Input(val langId: LangId, val root: PPath) : Serializable
   data class LangSpecConfigInfo(val dir: PPath, val files: ArrayList<PPath>) : Serializable
 
   override val id = Companion.id
   override fun ExecContext.exec(input: Input): None {
-    val (langSpecExt, root) = input
+    val (langId, root) = input
 
     val (langSpecDir, files) = with(parseWorkspaceConfig) {
       requireConfigValue(root) { workspaceConfig ->
-        val langSpecConfig = workspaceConfig.langSpecConfigForExt(langSpecExt)
+        val langSpecConfig = workspaceConfig.langSpecConfigForId(langId)
         if(langSpecConfig != null) {
           LangSpecConfigInfo(langSpecConfig.dir(), ArrayList(langSpecConfig.natsNaBL2Files()))
         } else {
           null
         }
       }
-    } ?: throw ExecException("Could not get language specification configuration for language $langSpecExt")
+    } ?: throw ExecException("Could not get language specification configuration for language with identifier $langId")
 
     val langSpecProject = require(legacyLoadProject, langSpecDir).v
     processAll(files, langSpecProject, true, CompileGoal(), FileStampers.hash, FileStampers.modified, log)

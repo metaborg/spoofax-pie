@@ -27,12 +27,17 @@ public class ConfigParser {
         return ImmutableWorkspaceConfigPaths.of(langSpecConfigFiles);
     }
 
-    public LangSpecConfig parseLangSpecConfig(IStrategoTerm root, PPath dir) {
+    public Optional<LangSpecConfig> parseLangSpecConfig(IStrategoTerm root, PPath dir) {
         final ArrayList<IStrategoTerm> sections = sections(root);
         final ArrayList<IStrategoTerm> langSpecSections = subSectionsOf(sections, "LangSpecSec");
 
         // Identification
         final ArrayList<IStrategoTerm> identificationSections = subSectionsOf(langSpecSections, "IdentificationSec");
+        final LangId langId = stringValueOf(identificationSections, "LanguageIdentifier").map(LangId::new).orElse(null);
+        if(langId == null) {
+            log.error("Invalid language specification config; language identifier is not set");
+            return Optional.empty();
+        }
         final ArrayList<String> extensions = stringValuesOf(identificationSections, "FileExtensions");
 
         // Information
@@ -69,12 +74,12 @@ public class ConfigParser {
             })
             .orElse(false);
 
-        return ImmutableLangSpecConfig.of(dir, extensions, name, syntaxFiles, syntaxParseMainFile,
+        return Optional.of(ImmutableLangSpecConfig.of(dir, langId, extensions, name, syntaxFiles, syntaxParseMainFile,
             syntaxParseStartSymbolId, syntaxSignatureFiles, syntaxStyleFile, natsNaBL2Files, natsStrategoConfig,
-            natsStrategoStrategyId, natsRootScopePerFile);
+            natsStrategoStrategyId, natsRootScopePerFile));
     }
 
-    public Optional<ImmutableStrategoCompilerConfig> parseStrategoCompilerConfig(IStrategoTerm root, PPath dir) {
+    private Optional<ImmutableStrategoCompilerConfig> parseStrategoCompilerConfig(IStrategoTerm root, PPath dir) {
         final ArrayList<IStrategoTerm> options = sections(root);
         final PPath mainFile = pathValueOf(options, "StrategoConfigMainFile", dir).orElse(null);
         if(mainFile == null) {
@@ -87,7 +92,8 @@ public class ConfigParser {
         final PPath baseDir = pathValueOf(options, "StrategoConfigBaseDir", dir).orElse(null);
         final PPath cacheDir = pathValueOf(options, "StrategoConfigCacheDir", dir).orElse(null);
         final PPath outputFile = pathValueOf(options, "StrategoConfigOutputFile", dir).orElse(null);
-        return Optional.of(ImmutableStrategoCompilerConfig.of(mainFile, includeDirs, includeFiles, includeLibs, baseDir, cacheDir, outputFile));
+        return Optional.of(
+            ImmutableStrategoCompilerConfig.of(mainFile, includeDirs, includeFiles, includeLibs, baseDir, cacheDir, outputFile));
     }
 
 
@@ -132,14 +138,14 @@ public class ConfigParser {
 
     private Optional<String> stringValueOf(ArrayList<IStrategoTerm> sections, String constructorName) {
         return values(sections, constructorName)
-            .flatMap(ConfigParser::stringTerms)
+            .flatMap(this::stringTerms)
             .map(this::interpolateString)
             .findFirst();
     }
 
     private ArrayList<String> stringValuesOf(ArrayList<IStrategoTerm> sections, String constructorName) {
         return values(sections, constructorName)
-            .flatMap(ConfigParser::stringTerms)
+            .flatMap(this::stringTerms)
             .map(this::interpolateString)
             .collect(Collectors.toCollection(ArrayList::new));
     }
@@ -147,7 +153,7 @@ public class ConfigParser {
 
     private Optional<PPath> pathValueOf(ArrayList<IStrategoTerm> sections, String constructorName, PPath dir) {
         return values(sections, constructorName)
-            .flatMap(ConfigParser::stringTerms)
+            .flatMap(this::stringTerms)
             .map(this::interpolateString)
             .map(dir::resolve)
             .findFirst();
@@ -155,19 +161,20 @@ public class ConfigParser {
 
     private ArrayList<PPath> pathValuesOf(ArrayList<IStrategoTerm> sections, String constructorName, PPath dir) {
         return values(sections, constructorName)
-            .flatMap(ConfigParser::stringTerms)
+            .flatMap(this::stringTerms)
             .map(this::interpolateString)
             .map(dir::resolve)
             .collect(Collectors.toCollection(ArrayList::new));
     }
 
 
-    private static Stream<IStrategoTerm> stringTerms(IStrategoTerm stringOrStringsTerm) {
+    private Stream<IStrategoTerm> stringTerms(IStrategoTerm stringOrStringsTerm) {
         if(Terms.isAppl(stringOrStringsTerm, 1, "String")) {
             return Stream.of(stringOrStringsTerm);
         } else if(Terms.isAppl(stringOrStringsTerm, 1, "Strings")) {
             return Terms.stream(stringOrStringsTerm.getSubterm(0));
         } else {
+            log.error("Unrecognized string term {}; skipping", stringOrStringsTerm);
             return Stream.empty();
         }
     }
@@ -182,6 +189,7 @@ public class ConfigParser {
                 } else if(Terms.isAppl(t, 1, "Ref")) {
                     return ""; // TODO: replace with string value
                 } else {
+                    log.error("Unrecognized string part {}; skipping", t);
                     return "";
                 }
             })

@@ -7,6 +7,11 @@ imports
   outline
   desugar
 
+rules // Compilation
+
+  compile:
+    (_, _, ast, _, _) -> <desugar-all> ast
+
 rules // Debugging
   
   debug-show-aterm:

@@ -5,8 +5,8 @@ import mb.pie.api.*
 import mb.pie.api.stamp.FileStampers
 import mb.pie.vfs.path.PPath
 import mb.spoofax.pie.config.ParseWorkspaceConfig
-import mb.spoofax.pie.legacy.Spx
-import mb.spoofax.pie.legacy.pPath
+import mb.spoofax.pie.legacy.*
+import mb.spoofax.runtime.cfg.LangId
 import org.metaborg.core.language.ResourceExtensionFacet
 import org.metaborg.spoofax.meta.core.build.SpoofaxLangSpecCommonPaths
 import java.io.Serializable
@@ -77,5 +77,41 @@ class IsLangSpecDocument @Inject constructor(
         langSpecConfig != null
       }
     }
+  }
+}
+
+class LangIdOfDocument @Inject constructor(
+  private val parseWorkspaceConfig: ParseWorkspaceConfig
+) : TaskDef<LangIdOfDocument.Input, LangId> {
+  companion object {
+    const val id = "processing.LangIdOfDocument"
+  }
+
+  data class Input(val document: PPath, val root: PPath) : Serializable
+
+  override val id = Companion.id
+  override fun ExecContext.exec(input: Input): LangId {
+    val (document, root) = input
+    val extension = document.extension()
+      ?: throw ExecException("Cannot determine if document $document is a Spoofax-PIE document; it has no extension")
+    return with(parseWorkspaceConfig) {
+      requireConfigValue(root) { workspaceConfig ->
+        val langSpecConfig = workspaceConfig.langSpecConfigForExt(extension)
+        langSpecConfig?.id()
+      }
+    }
+      ?: throw ExecException("Cannot determine if document $document is a Spoofax-PIE document; no language specification was found for extension $extension")
+  }
+}
+
+class IsLegacyDocument : TaskDef<PPath, Boolean> {
+  companion object {
+    const val id = "processing.IsLegacyDocument"
+  }
+
+  override val id = Companion.id
+  override fun ExecContext.exec(input: PPath): Boolean {
+    val spoofax = Spx.spoofax()
+    return spoofax.languageIdentifierService.identify(input.fileObject) != null
   }
 }

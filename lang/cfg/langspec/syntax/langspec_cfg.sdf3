@@ -18,6 +18,7 @@ context-free syntax // Identification
 <identification {
   <{IdentificationOpt "\n"}*>
 }>  
+  IdentificationOpt.LanguageIdentifier = <id: <String>>
   IdentificationOpt.FileExtensions = <file extensions: <Strings>>
 
 context-free syntax // Information

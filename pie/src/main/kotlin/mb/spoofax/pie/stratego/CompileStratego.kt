@@ -19,12 +19,12 @@ class CompileStratego
   }
 
   data class Input(
-    val compilerConfig: StrategoCompilerConfig,
+    val config: StrategoCompilerConfig,
     val taskDeps: Iterable<STask<*>>
   ) : Serializable
 
   override val id = Companion.id
-  override fun key(input: Input): PPath = input.compilerConfig.outputFileOrDefault()
+  override fun key(input: Input): PPath = input.config.outputFileOrDefault()
   override fun ExecContext.exec(input: Input): PPath? {
     val (config, taskDeps) = input
     // Explicitly require hidden dependencies.

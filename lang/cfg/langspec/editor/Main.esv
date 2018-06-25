@@ -9,3 +9,5 @@ language
   extensions : cfg
 
   provider : target/metaborg/stratego.ctree
+
+  on save: compile
