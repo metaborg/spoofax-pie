@@ -6,6 +6,7 @@ import mb.pie.api.*
 import mb.pie.api.stamp.FileStampers
 import mb.pie.vfs.path.PPath
 import mb.spoofax.pie.config.ParseWorkspaceConfig
+import mb.spoofax.pie.config.requireConfigValue
 import mb.spoofax.pie.legacy.LegacyLoadProject
 import mb.spoofax.pie.legacy.processAll
 import mb.spoofax.runtime.cfg.LangId
@@ -31,14 +32,12 @@ class NaBL2ToStrategoCGen
   override fun ExecContext.exec(input: Input): None {
     val (langId, root) = input
 
-    val (langSpecDir, files) = with(parseWorkspaceConfig) {
-      requireConfigValue(root) { workspaceConfig ->
-        val langSpecConfig = workspaceConfig.langSpecConfigForId(langId)
-        if(langSpecConfig != null) {
-          LangSpecConfigInfo(langSpecConfig.dir(), ArrayList(langSpecConfig.natsNaBL2Files()))
-        } else {
-          null
-        }
+    val (langSpecDir, files) = requireConfigValue(this, parseWorkspaceConfig, root) { workspaceConfig ->
+      val langSpecConfig = workspaceConfig.langSpecConfigForId(langId)
+      if(langSpecConfig != null) {
+        LangSpecConfigInfo(langSpecConfig.dir(), ArrayList(langSpecConfig.natsNaBL2Files()))
+      } else {
+        null
       }
     } ?: throw ExecException("Could not get language specification configuration for language with identifier $langId")
 

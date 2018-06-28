@@ -6,6 +6,7 @@ import mb.pie.api.ExecContext
 import mb.pie.api.TaskDef
 import mb.pie.vfs.path.PPath
 import mb.spoofax.pie.config.ParseWorkspaceConfig
+import mb.spoofax.pie.config.requireConfigValue
 import mb.spoofax.pie.legacy.processOne
 import mb.spoofax.runtime.cfg.LangId
 import mb.spoofax.runtime.esv.StylingRulesFromESV
@@ -33,8 +34,8 @@ class ESVToStylingRules
   override val id = Companion.id
   override fun ExecContext.exec(input: Input): StylingRules? {
     val (langId, root) = input
-    val mainFile = with(parseWorkspaceConfig) {
-      requireConfigValue(root) { workspaceConfig -> workspaceConfig.langSpecConfigForId(langId)?.syntaxStyleFile() }
+    val mainFile = requireConfigValue(this, parseWorkspaceConfig, root) { workspaceConfig ->
+      workspaceConfig.langSpecConfigForId(langId)?.syntaxStyleFile()
     } ?: return null
     val ast = processOne(mainFile, log = log)?.ast ?: return null
     return stylingRulesFromESV.create(ast as IStrategoAppl)

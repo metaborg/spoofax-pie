@@ -10,6 +10,7 @@ import mb.spoofax.pie.legacy.processOne
 import mb.spoofax.runtime.cfg.ConfigParser
 import mb.spoofax.runtime.cfg.WorkspaceConfig
 import org.metaborg.core.action.CompileGoal
+import java.io.Serializable
 
 class ParseWorkspaceConfig @Inject constructor(
   logFactory: Logger,
@@ -50,11 +51,16 @@ class ParseWorkspaceConfig @Inject constructor(
     }
     return WorkspaceConfig.fromConfigs(langSpecConfigs)
   }
+}
 
-  fun <T : Out> ExecContext.requireConfigValue(root: PPath, valueFunc: (WorkspaceConfig) -> T): T {
-    val workspaceConfig = require(this@ParseWorkspaceConfig, root, FuncEqualsOutputStamper { out ->
-      valueFunc(out as WorkspaceConfig)
-    })
+fun <T : Out> requireConfigValue(ctx: ExecContext, taskDef: ParseWorkspaceConfig, root: PPath, valueFunc: (WorkspaceConfig) -> T): T {
+  val workspaceConfig = ctx.require(taskDef, root, FuncEqualsOutputStamper(ApplyValueFunc(valueFunc)))
+  return valueFunc(workspaceConfig)
+}
+
+class ApplyValueFunc<T : Out>(private val valueFunc: (WorkspaceConfig) -> T) : (Out) -> Out, Serializable {
+  override fun invoke(out: Out): Out {
+    val workspaceConfig = out as WorkspaceConfig
     return valueFunc(workspaceConfig)
   }
 }

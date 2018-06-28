@@ -1,6 +1,10 @@
 package mb.spoofax.api.style;
 
-public class Color {
+import java.io.Serializable;
+
+public class Color implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     public final static Color white = new Color(255, 255, 255);
     public final static Color black = new Color(0, 0, 0);
 

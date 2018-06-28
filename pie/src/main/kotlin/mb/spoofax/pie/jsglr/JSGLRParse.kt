@@ -7,6 +7,7 @@ import mb.pie.vfs.path.PPath
 import mb.spoofax.api.message.Msg
 import mb.spoofax.api.parse.Token
 import mb.spoofax.pie.config.ParseWorkspaceConfig
+import mb.spoofax.pie.config.requireConfigValue
 import mb.spoofax.runtime.cfg.LangId
 import mb.spoofax.runtime.jsglr.Table
 import org.spoofax.interpreter.terms.IStrategoTerm
@@ -37,10 +38,8 @@ class JSGLRParse @Inject constructor(
   override fun key(input: Input) = Key(input)
   override fun ExecContext.exec(input: Input): Output {
     val (document, langId, root, text, table) = input
-    val startSymbol = with(parseWorkspaceConfig) {
-      requireConfigValue(root) { workspaceConfig ->
-        workspaceConfig.langSpecConfigForId(langId)?.syntaxParseStartSymbolId()
-      }
+    val startSymbol = requireConfigValue(this, parseWorkspaceConfig, root) { workspaceConfig ->
+      workspaceConfig.langSpecConfigForId(langId)?.syntaxParseStartSymbolId()
     } ?: throw ExecException("Could not get language specification configuration for language with identifier $langId")
     val termFactory = ImploderOriginTermFactory(TermFactory())
     val parser = table.createParser(termFactory)

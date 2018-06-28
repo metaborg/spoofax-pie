@@ -5,8 +5,10 @@ import mb.pie.api.*
 import mb.pie.api.stamp.FileStampers
 import mb.pie.vfs.path.PPath
 import mb.spoofax.pie.config.ParseWorkspaceConfig
+import mb.spoofax.pie.config.requireConfigValue
 import mb.spoofax.pie.legacy.*
 import mb.spoofax.runtime.cfg.LangId
+import mb.spoofax.runtime.cfg.WorkspaceConfig
 import org.metaborg.core.language.ResourceExtensionFacet
 import org.metaborg.spoofax.meta.core.build.SpoofaxLangSpecCommonPaths
 import java.io.Serializable
@@ -25,10 +27,8 @@ class LangSpecExtensions @Inject constructor(
 
   override val id = Companion.id
   override fun ExecContext.exec(input: PPath): ArrayList<String> {
-    return with(parseWorkspaceConfig) {
-      requireConfigValue(input) { workspaceConfig ->
-        ArrayList(workspaceConfig.extensions())
-      }
+    return requireConfigValue(this, parseWorkspaceConfig, input) { workspaceConfig ->
+      ArrayList(workspaceConfig.extensions())
     }
   }
 }
@@ -71,11 +71,9 @@ class IsLangSpecDocument @Inject constructor(
     val (document, root) = input
     val extension = document.extension()
       ?: throw ExecException("Cannot determine if document $document is a Spoofax-PIE document; it has no extension")
-    return with(parseWorkspaceConfig) {
-      requireConfigValue(root) { workspaceConfig ->
-        val langSpecConfig = workspaceConfig.langSpecConfigForExt(extension)
-        langSpecConfig != null
-      }
+    return requireConfigValue(this, parseWorkspaceConfig, root) { workspaceConfig ->
+      val langSpecConfig = workspaceConfig.langSpecConfigForExt(extension)
+      langSpecConfig != null
     }
   }
 }
@@ -94,13 +92,15 @@ class LangIdOfDocument @Inject constructor(
     val (document, root) = input
     val extension = document.extension()
       ?: throw ExecException("Cannot determine if document $document is a Spoofax-PIE document; it has no extension")
-    return with(parseWorkspaceConfig) {
-      requireConfigValue(root) { workspaceConfig ->
-        val langSpecConfig = workspaceConfig.langSpecConfigForExt(extension)
-        langSpecConfig?.id()
-      }
-    }
+    return requireConfigValue(this, parseWorkspaceConfig, root, ConfigValueFunc(extension))
       ?: throw ExecException("Cannot determine if document $document is a Spoofax-PIE document; no language specification was found for extension $extension")
+  }
+
+  private class ConfigValueFunc(val extension: String) : (WorkspaceConfig) -> LangId?, Serializable {
+    override fun invoke(workspaceConfig: WorkspaceConfig): LangId? {
+      val langSpecConfig = workspaceConfig.langSpecConfigForExt(extension)
+      return langSpecConfig?.id()
+    }
   }
 }
 

@@ -54,6 +54,82 @@
       <version>${pie.version}</version>
     </dependency>
 
+    <!-- PIE LMDB store -->
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>pie.store.lmdb</artifactId>
+      <version>${pie.version}</version>
+    </dependency>
+    <!-- Dependencies of PIE LMDB store: LMDBjava -->
+    <dependency>
+      <groupId>org.lmdbjava</groupId>
+      <artifactId>lmdbjava</artifactId>
+      <version>0.6.1</version>
+    </dependency>
+    <!-- Dependencies of LMDBjava -->
+    <dependency>
+      <groupId>com.github.jnr</groupId>
+      <artifactId>jnr-constants</artifactId>
+      <version>0.9.9</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.jnr</groupId>
+      <artifactId>jnr-ffi</artifactId>
+      <version>2.1.7</version>
+      <scope>compile</scope>
+    </dependency>
+    <!-- Dependencies of jnr-ffi -->
+    <dependency>
+      <groupId>com.github.jnr</groupId>
+      <artifactId>jffi</artifactId>
+      <version>1.2.16</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.jnr</groupId>
+      <artifactId>jffi</artifactId>
+      <version>1.2.16</version>
+      <scope>runtime</scope>
+      <classifier>native</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm</artifactId>
+      <version>5.0.3</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm-commons</artifactId>
+      <version>5.0.3</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm-analysis</artifactId>
+      <version>5.0.3</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm-tree</artifactId>
+      <version>5.0.3</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm-util</artifactId>
+      <version>5.0.3</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.jnr</groupId>
+      <artifactId>jnr-x86asm</artifactId>
+      <version>1.0.2</version>
+      <scope>compile</scope>
+    </dependency>
+
     <!-- Spoofax-PIE -->
     <dependency>
       <groupId>org.metaborg</groupId>
@@ -77,31 +153,11 @@
       <artifactId>kotlin-stdlib-jdk7</artifactId>
       <version>${kotlin.runtime.version}</version>
     </dependency>
-    <!-- <dependency> <groupId>org.jetbrains.kotlinx</groupId> <artifactId>kotlinx-coroutines-core</artifactId> <version>${kotlin.coroutines.version}</version> 
-      </dependency> -->
     <dependency>
       <groupId>org.jetbrains</groupId>
       <artifactId>annotations</artifactId>
       <scope>compile</scope>
     </dependency>
-
-    <!-- lmdbjava + agrona -->
-    <!-- <dependency> <groupId>org.lmdbjava</groupId> <artifactId>lmdbjava</artifactId> <version>0.6.0</version> </dependency> 
-      <dependency> <groupId>org.agrona</groupId> <artifactId>agrona</artifactId> <version>0.9.9</version> </dependency> -->
-    <!-- Dependencies of lmdbjava -->
-    <!-- <dependency> <groupId>com.github.jnr</groupId> <artifactId>jnr-constants</artifactId> <version>0.9.9</version> <scope>compile</scope> 
-      </dependency> <dependency> <groupId>com.github.jnr</groupId> <artifactId>jnr-ffi</artifactId> <version>2.1.6</version> <scope>compile</scope> 
-      </dependency> -->
-    <!-- Dependencies of jnr-ffi of lmdbjava -->
-    <!-- <dependency> <groupId>com.github.jnr</groupId> <artifactId>jffi</artifactId> <version>1.2.16</version> <scope>compile</scope> 
-      </dependency> <dependency> <groupId>com.github.jnr</groupId> <artifactId>jffi</artifactId> <version>1.2.16</version> <scope>runtime</scope> 
-      <classifier>native</classifier> </dependency> <dependency> <groupId>org.ow2.asm</groupId> <artifactId>asm</artifactId> <version>5.0.3</version> 
-      <scope>compile</scope> </dependency> <dependency> <groupId>org.ow2.asm</groupId> <artifactId>asm-commons</artifactId> <version>5.0.3</version> 
-      <scope>compile</scope> </dependency> <dependency> <groupId>org.ow2.asm</groupId> <artifactId>asm-analysis</artifactId> <version>5.0.3</version> 
-      <scope>compile</scope> </dependency> <dependency> <groupId>org.ow2.asm</groupId> <artifactId>asm-tree</artifactId> <version>5.0.3</version> 
-      <scope>compile</scope> </dependency> <dependency> <groupId>org.ow2.asm</groupId> <artifactId>asm-util</artifactId> <version>5.0.3</version> 
-      <scope>compile</scope> </dependency> <dependency> <groupId>com.github.jnr</groupId> <artifactId>jnr-x86asm</artifactId> <version>1.0.2</version> 
-      <scope>compile</scope> </dependency> -->
 
     <!-- Eclipse Java compiler -->
     <dependency>
@@ -138,25 +194,36 @@
               pie.runtime,
               pie.taskdefs.guice,
               pie.lang.runtime,
+              pie.store.lmdb,
+              lmdbjava,
+              agrona,
+              jnr-constants,
+              jnr-ffi,
+              jffi,
+              asm,
+              asm-commons,
+              asm-analysis,
+              asm-tree,
+              asm-util,
+              jnr-x86asm,
               spoofax.pie,
               kotlin-stdlib,
               kotlin-stdlib-jdk8,
               kotlin-stdlib-jdk7,
               annotations,
             </Embed-Dependency>
-            <!-- kotlinx-coroutines-core, lmdbjava, agrona, jnr-constants, jnr-ffi, jffi, asm, asm-commons, asm-analysis, 
-              asm-tree, asm-util, jnr-x86asm, ecj, -->
             <!-- Export dependency packages -->
             <Export-Package>
               mb.pie.*,
               mb.spoofax.pie.*,
+              org.lmdbjava.*;provider=metaborg;mandatory:=provider;version=0,
+              jnr.*;provider=metaborg;mandatory:=provider;version=0,
+              com.kenai.jffi.*;provider=metaborg;mandatory:=provider;version=0,
+              org.objectweb.asm.*;provider=metaborg;mandatory:=provider;version=0,
               kotlin.*;provider=metaborg;mandatory:=provider;version=0,
               org.jetbrains.annotations.*;provider=metaborg;mandatory:=provider;version=0,
               org.eclipse.jdt.core.compiler.*;provider=metaborg;mandatory:=provider;version=0
             </Export-Package>
-            <!-- kotlinx.*;provider=metaborg;mandatory:=provider;version=0,org.lmdbjava.*;provider=metaborg;mandatory:=provider;version=0, 
-              org.agrona.*;provider=metaborg;mandatory:=provider;version=0, jnr.*;provider=metaborg;mandatory:=provider;version=0, com.kenai.jffi.*;provider=metaborg;mandatory:=provider;version=0, 
-              org.objectweb.asm.*;provider=metaborg;mandatory:=provider;version=0, -->
             <!-- Don't declare dependency on JDK, internal, non-existent packages, or optional dependencies that we do not 
               need. -->
             <Import-Package>

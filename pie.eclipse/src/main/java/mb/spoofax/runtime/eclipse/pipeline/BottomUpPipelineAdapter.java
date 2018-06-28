@@ -1,6 +1,7 @@
 package mb.spoofax.runtime.eclipse.pipeline;
 
 import com.google.inject.Inject;
+import java.io.File;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,6 +12,7 @@ import mb.pie.api.*;
 import mb.pie.api.exec.BottomUpExecutor;
 import mb.pie.api.exec.Cancelled;
 import mb.pie.runtime.PieBuilderImpl;
+import mb.pie.store.lmdb.LMDBStoreKt;
 import mb.pie.taskdefs.guice.GuiceTaskDefs;
 import mb.pie.taskdefs.guice.GuiceTaskDefsKt;
 import mb.pie.vfs.path.PPath;
@@ -61,6 +63,12 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
         final PieBuilder pieBuilder = new PieBuilderImpl();
         LogLoggerKt.withMbLogger(pieBuilder, logger);
         GuiceTaskDefsKt.withGuiceTaskDefs(pieBuilder, taskDefs);
+        final File lmdbStoreDir = pathSrv.localPath(this.root.resolve(".pie"));
+        if(lmdbStoreDir == null) {
+            throw new RuntimeException("Could not get local filesystem path to LMDB store location " + lmdbStoreDir
+                + "; it does not reside on the local filesystem");
+        }
+        LMDBStoreKt.withLMDBStore(pieBuilder, lmdbStoreDir);
         this.pie = pieBuilder.build();
         this.executor = pie.getBottomUpExecutor();
     }

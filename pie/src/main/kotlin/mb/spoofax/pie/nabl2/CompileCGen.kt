@@ -5,6 +5,7 @@ import mb.pie.api.*
 import mb.pie.vfs.path.PPath
 import mb.pie.vfs.path.PathSrv
 import mb.spoofax.pie.config.ParseWorkspaceConfig
+import mb.spoofax.pie.config.requireConfigValue
 import mb.spoofax.pie.legacy.LegacyLoadProject
 import mb.spoofax.pie.legacy.Spx
 import mb.spoofax.pie.sdf3.SDF3ToStrategoSignatures
@@ -37,14 +38,12 @@ class CompileCGen
   override fun ExecContext.exec(input: Input): CGen? {
     val (langId, root) = input
 
-    val (langSpecDir, strategoCompilerConfig, strategyId) = with(parseWorkspaceConfig) {
-      requireConfigValue(root) { workspaceConfig ->
-        val langSpecConfig = workspaceConfig.langSpecConfigForId(langId)
-        if(langSpecConfig != null) {
-          LangSpecConfigInfo(langSpecConfig.dir(), langSpecConfig.natsStrategoConfig(), langSpecConfig.natsStrategoStrategyId())
-        } else {
-          null
-        }
+    val (langSpecDir, strategoCompilerConfig, strategyId) = requireConfigValue(this, parseWorkspaceConfig, root) { workspaceConfig ->
+      val langSpecConfig = workspaceConfig.langSpecConfigForId(langId)
+      if(langSpecConfig != null) {
+        LangSpecConfigInfo(langSpecConfig.dir(), langSpecConfig.natsStrategoConfig(), langSpecConfig.natsStrategoStrategyId())
+      } else {
+        null
       }
     } ?: throw ExecException("Could not get language specification configuration for language with identifier $langId")
     if(strategoCompilerConfig == null || strategyId == null) {
@@ -105,7 +104,7 @@ class CompileCGen
     // Finalize includes.
     strategoConfigBuilder.includeDirs(includeDirs)
     strategoConfigBuilder.includeFiles(includeFiles)
-    strategoConfigBuilder.includeLibs(includeLibs);
+    strategoConfigBuilder.includeLibs(includeLibs)
     // Finalize config and compile.
     val finalStrategoCompilerConfig = strategoConfigBuilder.build()
     val taskDeps = arrayListOf(nabl2ToStrategoCgenTask.toSTask(), sdf3ToStrategoSignaturesTask.toSTask())

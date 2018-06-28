@@ -7,6 +7,7 @@ import mb.pie.api.stamp.FileStampers
 import mb.pie.vfs.path.PPath
 import mb.pie.vfs.path.PathSrv
 import mb.spoofax.pie.config.ParseWorkspaceConfig
+import mb.spoofax.pie.config.requireConfigValue
 import mb.spoofax.pie.legacy.*
 import mb.spoofax.runtime.cfg.LangId
 import mb.spoofax.runtime.jsglr.Table
@@ -43,14 +44,12 @@ class SDF3ToJSGLRParseTable
   override fun ExecContext.exec(input: Input): Table? {
     val (langId, root) = input
 
-    val (langSpecDir, files, mainFile) = with(parseWorkspaceConfig) {
-      requireConfigValue(root) { workspaceConfig ->
-        val langSpecConfig = workspaceConfig.langSpecConfigForId(langId)
-        if(langSpecConfig != null) {
-          LangSpecConfigInfo(langSpecConfig.dir(), langSpecConfig.syntaxParseFiles(), langSpecConfig.syntaxParseMainFile())
-        } else {
-          null
-        }
+    val (langSpecDir, files, mainFile) = requireConfigValue(this, parseWorkspaceConfig, root) { workspaceConfig ->
+      val langSpecConfig = workspaceConfig.langSpecConfigForId(langId)
+      if(langSpecConfig != null) {
+        LangSpecConfigInfo(langSpecConfig.dir(), langSpecConfig.syntaxParseFiles(), langSpecConfig.syntaxParseMainFile())
+      } else {
+        null
       }
     } ?: throw ExecException("Could not get language specification configuration for language with identifier $langId")
     if(mainFile == null || files.isEmpty()) {
