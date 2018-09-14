@@ -1,17 +1,15 @@
 package mb.spoofax.runtime.jsglr;
 
-import org.spoofax.jsglr.client.imploder.IToken;
-
 import mb.spoofax.api.region.Region;
-import mb.spoofax.api.region.RegionImpl;
+import org.spoofax.jsglr.client.imploder.IToken;
 
 public class RegionFactory {
     public static Region fromToken(IToken token) {
-        return new RegionImpl(token.getStartOffset(), token.getEndOffset());
+        return new Region(token.getStartOffset(), token.getEndOffset());
     }
 
     public static Region fromTokens(IToken left, IToken right) {
-        return new RegionImpl(left.getStartOffset(), right.getEndOffset());
+        return new Region(left.getStartOffset(), right.getEndOffset());
     }
 
     public static Region fromTokensLayout(IToken left, IToken right, boolean isNullable) {
@@ -27,6 +25,6 @@ public class RegionFactory {
             rightEndOffset++;
         }
 
-        return new RegionImpl(leftStartOffset, rightEndOffset);
+        return new Region(leftStartOffset, rightEndOffset);
     }
 }

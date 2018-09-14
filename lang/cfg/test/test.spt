@@ -3,23 +3,58 @@ module test
 language cfg
 
 test parse [[
-  workspace
+parameters {
+  cfgLangDir = provided cfgLangDir
+  sdf3Dir = provided sdf3Dir
+  esvDir = provided
+  version = envvar PIE_VERSION
+  SPOOFAX_VERSION = envvar
+  pie.version = provided
+  name = minimal
+}
+workspace {
+  spxlang: $cfgLangDir
+  spxlang: /Users/gohla/spoofax/master/repo/spoofax-releng/sdf/org.metaborg.meta.lang.template
+  spxlang: /Users/gohla/spoofax/master/repo/spoofax-releng/esv/org.metaborg.meta.lang.esv
   
-    spxlang /Users/gohla/metaborg/repo/pipeline/cfg/langspec
-    spxlang /Users/gohla/spoofax/master/repo/spoofax-releng/sdf/org.metaborg.meta.lang.template
-    spxlang /Users/gohla/spoofax/master/repo/spoofax-releng/esv/org.metaborg.meta.lang.esv
-    
-    langspec minimal/langspec.cfg
-    langspec maximal/langspec.cfg
-  langspec
-    identification
-      file extension: min
-    information
-      name:  minimal 
-    syntax
+  langspec: minimal/lan${g}spec.cfg
+  langspec: maximal/langspec.cfg
+}
+
+langspec {
+  identification {
+    id: minimal
+    file extensions: min, max
+  }
+  information {
+    name: minimal
+  } 
+  syntax {
+    parse {
+      files: syntax.sdf3
       main file: syntax.sdf3
-      start symbol: Start
-    styling
-      syntax-based
-        file: style.esv
+      start symbol id: Start
+    }
+    signature {
+      files: syntax.sdf3, "another $cool${very}file.sdf3", more.sdf3
+    }
+    style {
+      file: style.esv
+    }
+  }
+  names and types {
+    nabl2 files: nats.nabl2
+    stratego config: {
+      main file: nats.str
+      include dirs: src-gen, /Users/gohla/spoofax/master/repo/spoofax-releng/nabl/org.metaborg.meta.nabl2.shared/trans
+      include files: test.str
+      include libs: stratego-lib, stratego-sglr
+      base dir: .
+      cache dir: target/str-cache
+      output file: target/nats.ctree
+    }
+    stratego strategy id: nats
+    root scope per file: false
+  }
+}
 ]] parse succeeds

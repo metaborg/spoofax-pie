@@ -1,0 +1,93 @@
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>spoofax.parent.java</artifactId>
+  <packaging>pom</packaging>
+
+  <parent>
+    <groupId>org.metaborg</groupId>
+    <artifactId>spoofax.parent</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>..</relativePath>
+  </parent>
+
+  <properties>
+    <forceContextQualifier>qualifier</forceContextQualifier>
+  </properties>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <!-- Generate MANIFEST.MF, to make project available as an OSGI bundle/Eclipse plugin. -->
+        <plugin>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>maven-bundle-plugin</artifactId>
+          <configuration>
+            <instructions>
+              <!-- Use groupId as the vendor name. -->
+              <Bundle-Vendor>${project.groupId}</Bundle-Vendor>
+              <!-- Fix names not to include the groupId. -->
+              <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+              <Bundle-Name>${project.artifactId}</Bundle-Name>
+              <!-- Replace SNAPSHOT in the manifest version with given qualifier. -->
+              <Bundle-Version>$(replace;${project.version};-SNAPSHOT;.${forceContextQualifier})</Bundle-Version>
+              <!-- Also export packages that contain '.impl', because it would exclude '.imploder' in jsglr. -->
+              <Export-Package>*</Export-Package>
+              <!-- Don't declare dependency on Java library packages. -->
+              <!-- Allow dependencies to Metaborg artifacts without a provider. -->
+              <!-- Use Metaborg provider for rest of the packages, these are external dependencies that should not
+                conflict with other Eclipse plugins. -->
+              <Import-Package>
+                !sun.misc,
+                !sun.nio.cs,
+                !org.junit,
+                !javax.*,
+                !org.xml.*,
+                org.spoofax.*,
+                org.metaborg.*,
+                org.strategoxt.*,
+                org.apache.tools.*,
+                mb.*,
+                *;provider=metaborg;mandatory:=provider;version=0
+              </Import-Package>
+              <!-- Include transitive dependencies, so that classes of transitive dependencies are available. -->
+              <Embed-Transitive>true</Embed-Transitive>
+              <!-- Allow buddy loading -->
+              <Eclipse-BuddyPolicy>registered</Eclipse-BuddyPolicy>
+              <!-- Don't generate uses declarations in exported packages. -->
+              <_nouses>true</_nouses>
+              <!-- Don't use version of this package if no version can be determined. -->
+              <_nodefaultversion>true</_nodefaultversion>
+            </instructions>
+          </configuration>
+          <!-- Hook manifest generation into the process-classes phase, because this is not automatically done for
+            projects with 'jar' packaging. -->
+          <executions>
+            <execution>
+              <id>bundle-manifest</id>
+              <phase>process-classes</phase>
+              <goals>
+                <goal>manifest</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <!-- Add the generated MANIFEST.MF to the resulting JAR file. -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <configuration>
+            <archive>
+              <manifestFile>META-INF/MANIFEST.MF</manifestFile>
+            </archive>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <description>Spoofax-PIE parent POM for Java projects</description>
+</project>

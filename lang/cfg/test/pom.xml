@@ -6,26 +6,26 @@
 >
   <modelVersion>4.0.0</modelVersion>
   <artifactId>spoofax.lang.cfg.test</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
   <packaging>spoofax-test</packaging>
 
   <parent>
     <groupId>org.metaborg</groupId>
-    <artifactId>parent.language</artifactId>
-    <version>2.5.0-SNAPSHOT</version>
+    <artifactId>spoofax.parent.legacy.lang</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../../../pom/legacy.lang</relativePath>
   </parent>
 
   <dependencies>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>spoofax.lang.cfg</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
+      <version>${spoofax.version}</version>
       <type>spoofax-language</type>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.metaborg.meta.lang.spt</artifactId>
-      <version>${metaborg-version}</version>
+      <version>${spoofax.legacy.version}</version>
       <type>spoofax-language</type>
       <scope>test</scope>
     </dependency>
@@ -36,57 +36,11 @@
       <plugin>
         <groupId>org.metaborg</groupId>
         <artifactId>spoofax-maven-plugin</artifactId>
-        <version>${metaborg-version}</version>
+        <version>${spoofax.legacy.version}</version>
         <configuration>
-          <languageUnderTest>org.metaborg:spoofax.lang.cfg:0.1.0-SNAPSHOT</languageUnderTest>
+          <languageUnderTest>org.metaborg:spoofax.lang.cfg:${spoofax.version}</languageUnderTest>
         </configuration>
       </plugin>
     </plugins>
   </build>
-
-  <repositories>
-    <repository>
-      <id>metaborg-release-repo</id>
-      <url>http://artifacts.metaborg.org/content/repositories/releases/</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>metaborg-snapshot-repo</id>
-      <url>http://artifacts.metaborg.org/content/repositories/snapshots/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-
-  <pluginRepositories>
-    <pluginRepository>
-      <id>metaborg-release-repo</id>
-      <url>http://artifacts.metaborg.org/content/repositories/releases/</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </pluginRepository>
-    <pluginRepository>
-      <id>metaborg-snapshot-repo</id>
-      <url>http://artifacts.metaborg.org/content/repositories/snapshots/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </pluginRepository>
-  </pluginRepositories>
 </project>

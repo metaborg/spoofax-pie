@@ -13,16 +13,16 @@ import mb.spoofax.runtime.cfg.LangId
 import org.metaborg.core.action.CompileGoal
 import java.io.Serializable
 
-class NaBL2ToStrategoCGen
+class NaBL2ToStrategoAnalyzer
 @Inject constructor(
   log: Logger,
   private val parseWorkspaceConfig: ParseWorkspaceConfig,
   private val legacyLoadProject: LegacyLoadProject
-) : TaskDef<NaBL2ToStrategoCGen.Input, None> {
-  private val log = log.forContext(NaBL2ToStrategoCGen::class.java)
+) : TaskDef<NaBL2ToStrategoAnalyzer.Input, None> {
+  private val log = log.forContext(NaBL2ToStrategoAnalyzer::class.java)
 
   companion object {
-    const val id = "nabl2.ToStrategoCGen"
+    const val id = "nabl2.ToStrategoAnalyzer"
   }
 
   data class Input(val langId: LangId, val root: PPath) : Serializable

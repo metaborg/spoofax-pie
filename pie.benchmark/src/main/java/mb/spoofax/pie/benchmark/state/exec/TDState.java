@@ -5,7 +5,7 @@ import mb.pie.api.Task;
 import mb.pie.api.exec.*;
 import mb.pie.vfs.path.PPath;
 import mb.spoofax.pie.benchmark.state.*;
-import mb.spoofax.pie.generated.processEditor;
+import mb.spoofax.pie.generated.processDocumentWithText;
 import mb.spoofax.pie.processing.DocumentResult;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
@@ -21,8 +21,7 @@ public class TDState {
     private WorkspaceState workspaceState;
     private TopDownExecutor executor;
     private Task<PPath, ? extends Serializable> processWorkspace;
-    private HashMap<PPath, Task<? extends processEditor.Input, ? extends DocumentResult>> editors =
-        new HashMap<>();
+    private HashMap<PPath, Task<? extends processDocumentWithText.Input, ? extends DocumentResult>> editorTasks = new HashMap<>();
 
 
     public void setup(SpoofaxPieState spoofaxPieState, WorkspaceState workspaceState, InfraState infraState) {
@@ -33,7 +32,7 @@ public class TDState {
     }
 
     public void reset() {
-        this.editors.clear();
+        this.editorTasks.clear();
     }
 
 
@@ -41,12 +40,12 @@ public class TDState {
      * Adds an editor, or updates an exiting editor, and executes an editor update.
      */
     public void addOrUpdateEditor(String text, PPath file, PPath project, Blackhole blackhole) {
-        final Task<? extends processEditor.Input, ? extends DocumentResult> app =
-            spoofaxPieState.spoofaxPipeline.editor(file, project, workspaceState.root, text);
-        this.editors.put(file, app);
+        final Task<? extends processDocumentWithText.Input, ? extends DocumentResult> task =
+            spoofaxPieState.spoofaxPipeline.documentWithText(file, project, workspaceState.root, text);
+        this.editorTasks.put(file, task);
         try {
             final TopDownSession session = executor.newSession();
-            blackhole.consume(session.requireInitial(app, new NullCancelled()));
+            blackhole.consume(session.requireInitial(task, new NullCancelled()));
         } catch(InterruptedException | ExecException e) {
             throw new RuntimeException(e);
         }
@@ -56,7 +55,7 @@ public class TDState {
      * Removes an open editor.
      */
     public void removeEditor(PPath file) {
-        this.editors.remove(file);
+        this.editorTasks.remove(file);
     }
 
     /**
@@ -67,8 +66,8 @@ public class TDState {
         try {
             final Serializable workspaceResult = session.requireInitial(processWorkspace, new NullCancelled());
             blackhole.consume(workspaceResult);
-            for(Task<? extends processEditor.Input, ? extends DocumentResult> editor : this.editors.values()) {
-                final Serializable editorResult = session.requireInitial(editor, new NullCancelled());
+            for(Task<? extends processDocumentWithText.Input, ? extends DocumentResult> task : this.editorTasks.values()) {
+                final Serializable editorResult = session.requireInitial(task, new NullCancelled());
                 blackhole.consume(editorResult);
             }
         } catch(ExecException | InterruptedException e) {

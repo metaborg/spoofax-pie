@@ -41,21 +41,21 @@ public final class StyleUtils {
         final ArrayList<TokenStyle> validated = new ArrayList<>();
         for(TokenStyle tokenStyle : styling.stylePerToken()) {
             final Region region = tokenStyle.token().region();
-            if(offset >= region.startOffset()) {
+            if(offset >= region.startOffset) {
                 logger.warn("Skipping invalid {}, starting offset is greater than offset in previous regions",
                     tokenStyle);
-            } else if(offset >= region.endOffset()) {
+            } else if(offset >= region.endOffset) {
                 logger.warn("Skipping invalid {}, ending offset is greater than offset in previous regions",
                     tokenStyle);
-            } else if(region.startOffset() > region.endOffset()) {
+            } else if(region.startOffset > region.endOffset) {
                 logger.warn("Skipping invalid {}, starting offset is greater than ending offset", tokenStyle);
-            } else if(region.startOffset() > length) {
+            } else if(region.startOffset > length) {
                 logger.warn("Skipping invalid {}, starting offset is greater than text length", tokenStyle);
-            } else if(region.endOffset() >= length) {
+            } else if(region.endOffset >= length) {
                 logger.warn("Skipping invalid {}, ending offset is greater than text length", tokenStyle);
             } else {
                 validated.add(tokenStyle);
-                offset = region.endOffset();
+                offset = region.endOffset;
             }
         }
         return validated;
@@ -111,8 +111,8 @@ public final class StyleUtils {
             styleRange.strikeout = true;
         }
 
-        styleRange.start = region.startOffset();
-        styleRange.length = region.endOffset() - region.startOffset() + 1;
+        styleRange.start = region.startOffset;
+        styleRange.length = region.length();
 
         return styleRange;
     }

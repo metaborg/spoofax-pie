@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 import mb.pie.vfs.path.PPath;
-import mb.spoofax.api.message.Msg;
+import mb.spoofax.api.message.Message;
 import mb.spoofax.api.style.Styling;
+import mb.spoofax.pie.processing.ContainerResult;
 import mb.spoofax.pie.processing.DocumentResult;
-import mb.spoofax.pie.processing.ProjectResult;
-import mb.spoofax.runtime.constraint.CSolution;
+import mb.spoofax.runtime.analysis.Analyzer.FinalOutput;
 import mb.spoofax.runtime.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.runtime.eclipse.util.Nullable;
 
@@ -22,25 +22,24 @@ public class PipelineObservers {
     }
 
 
-    private final class ProjectBuildObserver implements Function1<ProjectResult, Unit> {
-        private final PPath project;
+    private final class ContainerBuildObserver implements Function1<ContainerResult, Unit> {
+        private final PPath container;
 
-        private ProjectBuildObserver(PPath project) {
-            this.project = project;
+        private ContainerBuildObserver(PPath container) {
+            this.container = container;
         }
 
-        @Override public Unit invoke(ProjectResult projectResult) {
+        @Override public Unit invoke(ContainerResult containerResult) {
             final WorkspaceUpdate update = workspaceUpdateFactory.create();
-            update.addClearRec(project);
-            if(projectResult != null) {
-                projectResult.getDocumentResults().forEach((documentResult) -> {
-                    final PPath file = documentResult.getDocument();
-                    final ArrayList<Msg> messages = documentResult.getMessages();
-                    update.addMessages(file, messages);
-                    final @Nullable CSolution constraintsSolution = documentResult.getConstraintsSolution();
-                    if(constraintsSolution != null) {
-                        update.addMessages(constraintsSolution.getFileMessages());
-                        update.addMessages(project, constraintsSolution.getProjectMessages());
+            update.addClearRec(container);
+            if(containerResult != null) {
+                containerResult.getDocumentResults().forEach((documentResult) -> {
+                    final PPath document = documentResult.getDocument();
+                    final ArrayList<Message> messages = documentResult.getMessages();
+                    update.addMessages(messages, document);
+                    final @Nullable FinalOutput analysis = documentResult.getAnalysis();
+                    if(analysis != null) {
+                        update.addMessages(analysis.messages);
                     }
                 });
             }
@@ -49,34 +48,34 @@ public class PipelineObservers {
         }
 
         @Override public String toString() {
-            return "ProjectBuildObserver(" + project + ")";
+            return "ContainerBuildObserver(" + container + ")";
         }
     }
 
-    public Function1<? super ProjectResult, Unit> project(PPath project) {
-        return new ProjectBuildObserver(project);
+    public Function1<? super ContainerResult, Unit> container(PPath container) {
+        return new ContainerBuildObserver(container);
     }
 
 
     private final class EditorObserver implements Function1<DocumentResult, Unit> {
         private final SpoofaxEditor editor;
         private final String text;
-        private final PPath file;
-        private final PPath project;
+        private final PPath document;
+        private final PPath container;
 
-        private EditorObserver(SpoofaxEditor editor, String text, PPath file, PPath project) {
-            this.project = project;
+        private EditorObserver(SpoofaxEditor editor, String text, PPath document, PPath container) {
             this.editor = editor;
             this.text = text;
-            this.file = file;
+            this.document = document;
+            this.container = container;
         }
 
         @Override public Unit invoke(DocumentResult documentResult) {
             final WorkspaceUpdate update = workspaceUpdateFactory.create();
-            update.addClear(file);
+            update.addClear(document);
             if(documentResult != null) {
-                final ArrayList<Msg> messages = documentResult.getMessages();
-                update.replaceMessages(file, messages);
+                final ArrayList<Message> messages = documentResult.getMessages();
+                update.replaceMessages(messages, document);
 
                 final @Nullable Styling styling = documentResult.getStyling();
                 if(styling != null) {
@@ -85,21 +84,21 @@ public class PipelineObservers {
                     update.removeStyle(editor, text.length());
                 }
 
-                final @Nullable CSolution constraintsSolution = documentResult.getConstraintsSolution();
-                if(constraintsSolution != null) {
-                    update.addMessagesFiltered(constraintsSolution.getFileMessages(), file);
+                final @Nullable FinalOutput analysis = documentResult.getAnalysis();
+                if(analysis != null) {
+                    update.addMessages(analysis.messages);
                 }
             } else {
                 update.removeStyle(editor, text.length());
             }
-            // TODO: pass in file as scheduling rule?
+            // TODO: pass in document as scheduling rule?
             update.update(WorkspaceUpdate.lock, null);
             return Unit.INSTANCE;
         }
 
         @Override public String toString() {
             return "EditorObserver(" + editor + ", " + text.substring(0, Math.max(0, Math.min(100, text.length() - 1)))
-                + ", " + file + ", " + project + ")";
+                + ", " + document + ", " + container + ")";
         }
     }
 

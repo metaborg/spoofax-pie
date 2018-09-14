@@ -2,8 +2,8 @@ package mb.spoofax.runtime.jsglr;
 
 import mb.pie.vfs.path.PPath;
 import mb.spoofax.api.SpoofaxRunEx;
-import mb.spoofax.api.message.Msg;
-import mb.spoofax.api.message.Msgs;
+import mb.spoofax.api.message.Message;
+import mb.spoofax.api.message.MessageUtils;
 import mb.spoofax.api.parse.Token;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
@@ -46,18 +46,22 @@ public class Parser {
                 throw new SpoofaxRunEx("Parser returned null AST even though parsing did not fail");
             }
 
+            if(path != null) {
+                SourcePathAttachment.setPathForTerm(ast, path);
+            }
+
             final ArrayList<Token> tokenStream = TokenExtractor.extract(ast);
 
             final ParserErrorHandler errorHandler = new ParserErrorHandler(true, false, parser.getCollectedErrors());
             errorHandler.gatherNonFatalErrors(ast);
-            final ArrayList<Msg> messages = errorHandler.messages();
-            boolean recovered = Msgs.containsErrors(messages);
+            final ArrayList<Message> messages = errorHandler.messages();
+            final boolean recovered = MessageUtils.containsError(messages);
 
             return new ParseOutput(recovered, ast, tokenStream, messages);
         } catch(SGLRException e) {
             final ParserErrorHandler errorHandler = new ParserErrorHandler(true, true, parser.getCollectedErrors());
             errorHandler.processFatalException(new NullTokenizer(text, pathStr), e);
-            final ArrayList<Msg> messages = errorHandler.messages();
+            final ArrayList<Message> messages = errorHandler.messages();
             return new ParseOutput(false, null, null, messages);
         }
     }

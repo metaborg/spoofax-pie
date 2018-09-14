@@ -18,6 +18,6 @@ public interface Token extends Serializable {
 
     default String textPart(String fullText) {
         final Region region = region();
-        return fullText.substring(region.startOffset(), region.endOffset() + 1);
+        return fullText.substring(region.startOffset, region.endOffset + 1);
     }
 }

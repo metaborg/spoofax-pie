@@ -7,12 +7,12 @@ import mb.pie.taskdefs.guice.TaskDefsModule
 import mb.pie.vfs.path.PathSrv
 import mb.pie.vfs.path.PathSrvImpl
 import mb.spoofax.pie.config.ParseWorkspaceConfig
-import mb.spoofax.pie.constraint.*
+import mb.spoofax.pie.analysis.*
 import mb.spoofax.pie.esv.ESVToStylingRules
 import mb.spoofax.pie.jsglr.JSGLRParse
 import mb.spoofax.pie.legacy.*
-import mb.spoofax.pie.nabl2.CompileCGen
-import mb.spoofax.pie.nabl2.NaBL2ToStrategoCGen
+import mb.spoofax.pie.analysis.CompileAnalyzer
+import mb.spoofax.pie.nabl2.NaBL2ToStrategoAnalyzer
 import mb.spoofax.pie.processing.*
 import mb.spoofax.pie.sdf3.SDF3ToJSGLRParseTable
 import mb.spoofax.pie.sdf3.SDF3ToStrategoSignatures
@@ -35,13 +35,11 @@ open class SpoofaxPieTaskDefsModule : TaskDefsModule() {
     bindTaskDef<SpoofaxStyle>(taskDefsBinder, SpoofaxStyle.id)
     // JSGLR
     bindTaskDef<JSGLRParse>(taskDefsBinder, JSGLRParse.id)
-    // Constraint generator
-    bindTaskDef<CGenGlobal>(taskDefsBinder, CGenGlobal.id)
-    bindTaskDef<CGenDocument>(taskDefsBinder, CGenDocument.id)
-    // Constraint solver
-    bindTaskDef<CSolveGlobal>(taskDefsBinder, CSolveGlobal.id)
-    bindTaskDef<CSolveDocument>(taskDefsBinder, CSolveDocument.id)
-    bindTaskDef<CSolveFinal>(taskDefsBinder, CSolveFinal.id)
+    // Analysis
+    bindTaskDef<CompileAnalyzer>(taskDefsBinder, CompileAnalyzer.id)
+    bindTaskDef<AnalyzeContainer>(taskDefsBinder, AnalyzeContainer.id)
+    bindTaskDef<AnalyzeDocument>(taskDefsBinder, AnalyzeDocument.id)
+    bindTaskDef<AnalyzeFinal>(taskDefsBinder, AnalyzeFinal.id)
 
     // Meta-language
     // ESV
@@ -52,8 +50,7 @@ open class SpoofaxPieTaskDefsModule : TaskDefsModule() {
     bindTaskDef<SDF3ToJSGLRParseTable>(taskDefsBinder, SDF3ToJSGLRParseTable.id)
     bindTaskDef<SDF3ToStrategoSignatures>(taskDefsBinder, SDF3ToStrategoSignatures.id)
     // NaBL2
-    bindTaskDef<NaBL2ToStrategoCGen>(taskDefsBinder, NaBL2ToStrategoCGen.id)
-    bindTaskDef<CompileCGen>(taskDefsBinder, CompileCGen.id)
+    bindTaskDef<NaBL2ToStrategoAnalyzer>(taskDefsBinder, NaBL2ToStrategoAnalyzer.id)
 
     // Legacy
     bindTaskDef<LegacyLoadProject>(taskDefsBinder, LegacyLoadProject.id)

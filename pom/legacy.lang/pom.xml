@@ -1,0 +1,183 @@
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>spoofax.parent.legacy.lang</artifactId>
+  <packaging>pom</packaging>
+
+  <parent>
+    <groupId>org.metaborg</groupId>
+    <artifactId>spoofax.parent</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>..</relativePath>
+  </parent>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.metaborg</groupId>
+        <artifactId>org.metaborg.spoofax.core</artifactId>
+        <version>${spoofax.legacy.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.metaborg</groupId>
+        <artifactId>spoofax-maven-plugin</artifactId>
+        <version>${spoofax.legacy.version}</version>
+        <extensions>true</extensions>
+      </plugin>
+    </plugins>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>add-source</id>
+              <phase>generate-sources</phase>
+              <goals>
+                <goal>add-source</goal>
+              </goals>
+              <configuration>
+                <sources>
+                  <source>src/main/ds</source>
+                  <source>src-gen/stratego-java</source>
+                  <source>src-gen/ds-java</source>
+                </sources>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <!-- Create empty sources and javadoc JAR for Maven central (https://central.sonatype.org/pages/requirements.html#supply-javadoc-and-sources) -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>empty-sources-jar</id>
+              <phase>package</phase>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+              <configuration>
+                <classifier>sources</classifier>
+                <!-- Must set classes directory to ${basedir}, as it defaults to target/classes. -->
+                <classesDirectory>${basedir}</classesDirectory>
+                <!-- Don't add unneccessary Maven descriptor files. -->
+                <archive>
+                  <addMavenDescriptor>false</addMavenDescriptor>
+                </archive>
+                <!-- Just include the README.md file. -->
+                <includes>
+                  <include>README.md</include>
+                </includes>
+              </configuration>
+            </execution>
+            <execution>
+              <id>empty-javadoc-jar</id>
+              <phase>package</phase>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+              <configuration>
+                <classifier>javadoc</classifier>
+                <!-- Must set classes directory to ${basedir}, as it defaults to target/classes. -->
+                <classesDirectory>${basedir}</classesDirectory>
+                <!-- Don't add unneccessary Maven descriptor files. -->
+                <archive>
+                  <addMavenDescriptor>false</addMavenDescriptor>
+                </archive>
+                <!-- Just include the README.md file. -->
+                <includes>
+                  <include>README.md</include>
+                </includes>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.metaborg</groupId>
+                    <artifactId>spoofax-maven-plugin</artifactId>
+                    <versionRange>[${spoofax.legacy.version},)</versionRange>
+                    <goals>
+                      <goal>compile</goal>
+                      <goal>project-generate-sources</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore/>
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <repositories>
+    <repository>
+      <id>metaborg-release-repo</id>
+      <url>http://artifacts.metaborg.org/content/repositories/releases/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>metaborg-snapshot-repo</id>
+      <url>http://artifacts.metaborg.org/content/repositories/snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>metaborg-release-repo</id>
+      <url>http://artifacts.metaborg.org/content/repositories/releases/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+    <pluginRepository>
+      <id>metaborg-snapshot-repo</id>
+      <url>http://artifacts.metaborg.org/content/repositories/snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <description>Spoofax-PIE parent POM for legacy Spoofax language projects</description>
+</project>

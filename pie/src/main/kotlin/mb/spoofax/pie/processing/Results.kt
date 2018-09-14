@@ -1,49 +1,49 @@
 package mb.spoofax.pie.processing
 
 import mb.pie.vfs.path.PPath
-import mb.spoofax.api.message.Msg
+import mb.spoofax.api.message.Message
 import mb.spoofax.api.parse.Token
 import mb.spoofax.api.style.Styling
-import mb.spoofax.runtime.constraint.CSolution
+import mb.spoofax.runtime.analysis.Analyzer
 import org.spoofax.interpreter.terms.IStrategoTerm
 import java.io.Serializable
 
 data class WorkspaceResult(
   val root: PPath,
-  val projectResults: ArrayList<ProjectResult>
+  val containerResults: ArrayList<ContainerResult>
 ) : Serializable
 
-fun createWorkspaceResult(root: PPath, projectResults: ArrayList<ProjectResult>) = WorkspaceResult(root, projectResults)
+fun createWorkspaceResult(root: PPath, containerResults: ArrayList<ContainerResult>) = WorkspaceResult(root, containerResults)
 
 fun emptyWorkspaceResult(root: PPath) = WorkspaceResult(root, arrayListOf())
 
 
-data class ProjectResult(
-  val project: PPath,
+data class ContainerResult(
+  val container: PPath,
   val documentResults: ArrayList<DocumentResult>
 ) : Serializable
 
-fun createProjectResult(project: PPath, langSpecResults: ArrayList<DocumentResult>, legacyResults: ArrayList<DocumentResult>) = ProjectResult(project, (langSpecResults + legacyResults).toCollection(ArrayList()))
+fun createContainerResult(container: PPath, langSpecResults: ArrayList<DocumentResult>, legacyResults: ArrayList<DocumentResult>) = ContainerResult(container, (langSpecResults + legacyResults).toCollection(ArrayList()))
 
-fun emptyProjectResult(project: PPath) = ProjectResult(project, arrayListOf())
+fun emptyContainerResult(container: PPath) = ContainerResult(container, arrayListOf())
 
 
 data class DocumentResult(
   val document: PPath,
-  val messages: ArrayList<Msg>,
+  val messages: ArrayList<Message>,
   val tokens: ArrayList<Token>?,
   val ast: IStrategoTerm?,
   val styling: Styling?,
-  val constraintsSolution: CSolution?
+  val analysis: Analyzer.FinalOutput?
 ) : Serializable
 
 fun createDocumentResult(
   document: PPath,
-  messages: ArrayList<Msg>,
+  messages: ArrayList<Message>,
   tokens: ArrayList<Token>?,
   ast: IStrategoTerm?,
   styling: Styling?,
-  constraintsSolution: CSolution?
-) = DocumentResult(document, messages, tokens, ast, styling, constraintsSolution)
+  analysis: Analyzer.FinalOutput?
+) = DocumentResult(document, messages, tokens, ast, styling, analysis)
 
 fun emptyDocumentResult(document: PPath) = DocumentResult(document, arrayListOf(), null, null, null, null)

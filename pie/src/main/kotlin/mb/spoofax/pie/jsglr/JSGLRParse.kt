@@ -4,7 +4,7 @@ import com.google.inject.Inject
 import mb.pie.api.*
 import mb.pie.lang.runtime.util.Tuple3
 import mb.pie.vfs.path.PPath
-import mb.spoofax.api.message.Msg
+import mb.spoofax.api.message.Message
 import mb.spoofax.api.parse.Token
 import mb.spoofax.pie.config.ParseWorkspaceConfig
 import mb.spoofax.pie.config.requireConfigValue
@@ -31,8 +31,8 @@ class JSGLRParse @Inject constructor(
   data class Output(
     val ast: IStrategoTerm?,
     val tokenStream: ArrayList<Token>?,
-    val messages: ArrayList<Msg>
-  ) : Tuple3<IStrategoTerm?, ArrayList<Token>?, ArrayList<Msg>>
+    val messages: ArrayList<Message>
+  ) : Tuple3<IStrategoTerm?, ArrayList<Token>?, ArrayList<Message>>
 
   override val id = Companion.id
   override fun key(input: Input) = Key(input)

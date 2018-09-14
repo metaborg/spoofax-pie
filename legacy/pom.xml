@@ -5,20 +5,13 @@
 >
   <modelVersion>4.0.0</modelVersion>
   <artifactId>spoofax.legacy</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
 
   <parent>
     <groupId>org.metaborg</groupId>
-    <artifactId>parent.java</artifactId>
-    <version>2.5.0-SNAPSHOT</version>
-    <relativePath />
+    <artifactId>spoofax.parent.java</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom/java</relativePath>
   </parent>
-
-  <properties>
-    <spoofax.version>${project.version}</spoofax.version>
-    <metaborg.version>${metaborg-version}</metaborg.version>
-    <pie.version>0.2.0-SNAPSHOT</pie.version>
-  </properties>
 
   <dependencies>
     <dependency>
@@ -30,22 +23,22 @@
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.metaborg.core</artifactId>
-      <version>${metaborg.version}</version>
+      <version>${spoofax.legacy.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.metaborg.meta.core</artifactId>
-      <version>${metaborg.version}</version>
+      <version>${spoofax.legacy.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.metaborg.spoofax.core</artifactId>
-      <version>${metaborg.version}</version>
+      <version>${spoofax.legacy.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.metaborg.spoofax.meta.core</artifactId>
-      <version>${metaborg.version}</version>
+      <version>${spoofax.legacy.version}</version>
     </dependency>
 
     <dependency>
@@ -60,10 +53,6 @@
       <groupId>com.google.inject.extensions</groupId>
       <artifactId>guice-multibindings</artifactId>
     </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-    </dependency>
 
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
@@ -77,13 +66,68 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
-        <!-- Required to add a dependency on the Spoofax plugin, otherwise unpacking will fail with a class cast exception 
+        <!-- Required to add a dependency on the Spoofax plugin, otherwise unpacking will fail with a class cast exception
           on archivers. Fix from: http://maven.40175.n5.nabble.com/Problems-with-register-new-archive-type-td4574906.html -->
         <dependencies>
           <dependency>
             <groupId>org.metaborg</groupId>
             <artifactId>spoofax-maven-plugin</artifactId>
-            <version>${metaborg.version}</version>
+            <version>${spoofax.legacy.version}</version>
+          </dependency>
+          <!-- Dependencies to languages to copy, to ensure they are built before this project. -->
+          <!--Spoofax-PIE config language -->
+          <dependency>
+            <groupId>org.metaborg</groupId>
+            <artifactId>spoofax.lang.cfg</artifactId>
+            <version>${spoofax.version}</version>
+            <type>spoofax-language</type>
+          </dependency>
+          <!-- Spoofax Stratego library -->
+          <dependency>
+            <groupId>org.metaborg</groupId>
+            <artifactId>meta.lib.spoofax</artifactId>
+            <version>${spoofax.legacy.version}</version>
+            <type>spoofax-language</type>
+          </dependency>
+          <!-- ESV -->
+          <dependency>
+            <groupId>org.metaborg</groupId>
+            <artifactId>org.metaborg.meta.lang.esv</artifactId>
+            <version>${spoofax.legacy.version}</version>
+            <type>spoofax-language</type>
+          </dependency>
+          <!-- Stratego -->
+          <dependency>
+            <groupId>org.metaborg</groupId>
+            <artifactId>org.metaborg.meta.lang.stratego</artifactId>
+            <version>${spoofax.legacy.version}</version>
+            <type>spoofax-language</type>
+          </dependency>
+          <!-- SDF3 -->
+          <dependency>
+            <groupId>org.metaborg</groupId>
+            <artifactId>org.metaborg.meta.lang.template</artifactId>
+            <version>${spoofax.legacy.version}</version>
+            <type>spoofax-language</type>
+          </dependency>
+          <!-- NaBL2 -->
+          <dependency>
+            <groupId>org.metaborg</groupId>
+            <artifactId>org.metaborg.meta.nabl2.lang</artifactId>
+            <version>${spoofax.legacy.version}</version>
+            <type>spoofax-language</type>
+          </dependency>
+          <dependency>
+            <groupId>org.metaborg</groupId>
+            <artifactId>org.metaborg.meta.nabl2.shared</artifactId>
+            <version>${spoofax.legacy.version}</version>
+            <type>spoofax-language</type>
+          </dependency>
+          <dependency>
+            <groupId>org.metaborg</groupId>
+            <artifactId>org.metaborg.meta.nabl2.runtime</artifactId>
+            <version>${spoofax.legacy.version}</version>
+            <type>spoofax-language</type>
           </dependency>
         </dependencies>
         <executions>
@@ -107,7 +151,7 @@
                 <artifactItem>
                   <groupId>org.metaborg</groupId>
                   <artifactId>meta.lib.spoofax</artifactId>
-                  <version>${metaborg.version}</version>
+                  <version>${spoofax.legacy.version}</version>
                   <type>spoofax-language</type>
                   <destFileName>spoofax.lib.spoofax-language</destFileName>
                 </artifactItem>
@@ -115,7 +159,7 @@
                 <artifactItem>
                   <groupId>org.metaborg</groupId>
                   <artifactId>org.metaborg.meta.lang.esv</artifactId>
-                  <version>${metaborg.version}</version>
+                  <version>${spoofax.legacy.version}</version>
                   <type>spoofax-language</type>
                   <destFileName>esv.spoofax-language</destFileName>
                 </artifactItem>
@@ -123,7 +167,7 @@
                 <artifactItem>
                   <groupId>org.metaborg</groupId>
                   <artifactId>org.metaborg.meta.lang.stratego</artifactId>
-                  <version>${metaborg.version}</version>
+                  <version>${spoofax.legacy.version}</version>
                   <type>spoofax-language</type>
                   <destFileName>stratego.spoofax-language</destFileName>
                 </artifactItem>
@@ -131,7 +175,7 @@
                 <artifactItem>
                   <groupId>org.metaborg</groupId>
                   <artifactId>org.metaborg.meta.lang.template</artifactId>
-                  <version>${metaborg.version}</version>
+                  <version>${spoofax.legacy.version}</version>
                   <type>spoofax-language</type>
                   <destFileName>sdf3.spoofax-language</destFileName>
                 </artifactItem>
@@ -139,21 +183,21 @@
                 <artifactItem>
                   <groupId>org.metaborg</groupId>
                   <artifactId>org.metaborg.meta.nabl2.lang</artifactId>
-                  <version>${metaborg.version}</version>
+                  <version>${spoofax.legacy.version}</version>
                   <type>spoofax-language</type>
                   <destFileName>nabl2.lang.spoofax-language</destFileName>
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.metaborg</groupId>
                   <artifactId>org.metaborg.meta.nabl2.shared</artifactId>
-                  <version>${metaborg.version}</version>
+                  <version>${spoofax.legacy.version}</version>
                   <type>spoofax-language</type>
                   <destFileName>nabl2.shared.spoofax-language</destFileName>
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.metaborg</groupId>
                   <artifactId>org.metaborg.meta.nabl2.runtime</artifactId>
-                  <version>${metaborg.version}</version>
+                  <version>${spoofax.legacy.version}</version>
                   <type>spoofax-language</type>
                   <destFileName>nabl2.runtime.spoofax-language</destFileName>
                 </artifactItem>
@@ -167,11 +211,15 @@
           <overWriteSnapshots>true</overWriteSnapshots>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+      </plugin>
     </plugins>
 
     <pluginManagement>
       <plugins>
-        <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build 
+        <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build
           itself. -->
         <plugin>
           <groupId>org.eclipse.m2e</groupId>

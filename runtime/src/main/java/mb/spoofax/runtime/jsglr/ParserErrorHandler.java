@@ -1,27 +1,19 @@
 package mb.spoofax.runtime.jsglr;
 
-import static org.spoofax.jsglr.client.imploder.AbstractTokenizer.*;
-import static org.spoofax.jsglr.client.imploder.ImploderAttachment.getTokenizer;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
+import mb.spoofax.api.message.Message;
+import mb.spoofax.api.message.Severity;
+import mb.spoofax.api.region.Region;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.jsglr.client.MultiBadTokenException;
-import org.spoofax.jsglr.client.ParseTimeoutException;
-import org.spoofax.jsglr.client.RegionRecovery;
-import org.spoofax.jsglr.client.imploder.AbstractTokenizer;
-import org.spoofax.jsglr.client.imploder.IToken;
-import org.spoofax.jsglr.client.imploder.ITokens;
-import org.spoofax.jsglr.client.imploder.Token;
+import org.spoofax.jsglr.client.*;
+import org.spoofax.jsglr.client.imploder.*;
 import org.spoofax.jsglr.shared.BadTokenException;
 import org.spoofax.jsglr.shared.TokenExpectedException;
 
-import mb.spoofax.api.message.Msg;
-import mb.spoofax.api.message.MsgBuilder;
-import mb.spoofax.api.parse.ParseMsgType;
-import mb.spoofax.api.region.Region;
+import java.util.*;
+
+import static org.spoofax.jsglr.client.imploder.AbstractTokenizer.findLeftMostTokenOnSameLine;
+import static org.spoofax.jsglr.client.imploder.AbstractTokenizer.findRightMostTokenOnSameLine;
+import static org.spoofax.jsglr.client.imploder.ImploderAttachment.getTokenizer;
 
 public class ParserErrorHandler {
     private static final int LARGE_REGION_SIZE = 8;
@@ -32,9 +24,7 @@ public class ParserErrorHandler {
     private final boolean recoveryFailed;
     private final Set<BadTokenException> parseErrors;
 
-    private final ArrayList<Msg> messages = new ArrayList<>();
-    private final MsgBuilder msgBuilder = new MsgBuilder().withType(new ParseMsgType()).withoutException();
-
+    private final ArrayList<Message> messages = new ArrayList<>();
 
 
     public ParserErrorHandler(boolean recoveryEnabled, boolean recoveryFailed, Set<BadTokenException> parseErrors) {
@@ -44,7 +34,7 @@ public class ParserErrorHandler {
     }
 
 
-    public ArrayList<Msg> messages() {
+    public ArrayList<Message> messages() {
         return messages;
     }
 
@@ -176,9 +166,9 @@ public class ParserErrorHandler {
 
 
     private void reportErrorNearOffset(ITokens tokens, int offset, String message) {
-         final IToken errorToken = ((AbstractTokenizer) tokens).getErrorTokenOrAdjunct(offset);
-         final Region region = RegionFactory.fromTokens(errorToken, errorToken);
-         reportErrorAtRegion(region, message);
+        final IToken errorToken = ((AbstractTokenizer) tokens).getErrorTokenOrAdjunct(offset);
+        final Region region = RegionFactory.fromTokens(errorToken, errorToken);
+        reportErrorAtRegion(region, message);
     }
 
     private static IToken findNextNonEmptyToken(IToken token) {
@@ -195,17 +185,18 @@ public class ParserErrorHandler {
 
     private void createErrorAtFirstLine(String text) {
         final String errorText = text + getErrorExplanation();
-        final Msg msg = msgBuilder.asError().withoutRegion().withText(errorText).build();
-        messages.add(msg);
+        final Message message = new Message(errorText, Severity.Error);
+        messages.add(message);
     }
 
     private void reportErrorAtTokens(IToken left, IToken right, String text) {
-        reportErrorAtRegion(RegionFactory.fromTokens(left, right), text);
+        final Region region = RegionFactory.fromTokens(left, right);
+        reportErrorAtRegion(region, text);
     }
 
     private void reportErrorAtRegion(Region region, String text) {
-        final Msg msg = msgBuilder.asError().withRegion(region).withText(text).build();
-        messages.add(msg);
+        final Message message = new Message(text, Severity.Error, region);
+        messages.add(message);
     }
 
     private void reportWarningAtTokens(IToken left, IToken right, String text) {
@@ -213,8 +204,8 @@ public class ParserErrorHandler {
     }
 
     private void reportWarningAtRegion(Region region, String text) {
-        final Msg msg = msgBuilder.asWarning().withRegion(region).withText(text).build();
-        messages.add(msg);
+        final Message message = new Message(text, Severity.Warn, region);
+        messages.add(message);
     }
 
 

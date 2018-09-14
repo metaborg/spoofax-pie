@@ -9,11 +9,12 @@ import mb.pie.runtime.layer.NoopLayer;
 import mb.pie.runtime.layer.ValidationLayer;
 import mb.pie.runtime.logger.NoopLogger;
 import mb.pie.runtime.logger.StreamLogger;
-import mb.pie.runtime.logger.exec.*;
+import mb.pie.runtime.logger.exec.LoggerExecutorLogger;
+import mb.pie.runtime.logger.exec.NoopExecutorLogger;
 import mb.pie.runtime.share.NonSharingShare;
 import mb.pie.runtime.store.InMemoryStore;
 import mb.pie.share.coroutine.CoroutineShareKt;
-import mb.pie.store.lmdb.LMDBKt;
+import mb.pie.store.lmdb.LMDBStoreKt;
 import mb.pie.taskdefs.guice.GuiceTaskDefsKt;
 import mb.spoofax.pie.LogLoggerKt;
 import org.openjdk.jmh.annotations.*;
@@ -63,7 +64,7 @@ public class InfraState {
                     throw new RuntimeException(
                         "Cannot create LMDB store, cannot convert " + workspaceState.storePath + " to a local filesystem path");
                 }
-                LMDBKt.withLMDBStore(builder, localStorePath);
+                LMDBStoreKt.withLMDBStore(builder, localStorePath);
             }
         },
         in_memory {

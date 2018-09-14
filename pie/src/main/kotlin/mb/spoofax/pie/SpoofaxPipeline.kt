@@ -8,18 +8,23 @@ import mb.spoofax.pie.processing.*
 
 class SpoofaxPipeline @Inject constructor(
   private val _processWorkspace: processWorkspace,
-  private val _processProject: processProject,
-  private val _processEditor: processEditor
+  private val _processContainer: processContainer,
+  private val _processDocumentWithText: processDocumentWithText,
+  private val _processDocument: processDocument
 ) {
   fun workspace(root: PPath): Task<PPath, WorkspaceResult> {
     return Task(_processWorkspace, root)
   }
 
-  fun project(project: PPath, root: PPath): Task<processProject.Input, ProjectResult> {
-    return Task(_processProject, processProject.Input(project, root))
+  fun container(project: PPath, root: PPath): Task<processContainer.Input, ContainerResult> {
+    return Task(_processContainer, processContainer.Input(project, root))
   }
 
-  fun editor(document: PPath, project: PPath, root: PPath, text: String): Task<processEditor.Input, DocumentResult> {
-    return Task(_processEditor, processEditor.Input(document, project, root, text))
+  fun documentWithText(document: PPath, project: PPath, root: PPath, text: String): Task<processDocumentWithText.Input, DocumentResult> {
+    return Task(_processDocumentWithText, processDocumentWithText.Input(document, project, root, text))
+  }
+
+  fun document(document: PPath, project: PPath, root: PPath): Task<processDocument.Input, DocumentResult> {
+    return Task(_processDocument, processDocument.Input(document, project, root))
   }
 }

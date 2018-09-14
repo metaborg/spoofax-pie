@@ -1,39 +1,38 @@
 package mb.spoofax.runtime.eclipse.util;
 
+import mb.spoofax.api.message.Message;
+import mb.spoofax.api.region.Region;
+import mb.spoofax.runtime.eclipse.SpoofaxPlugin;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-
-import mb.spoofax.api.message.Msg;
-import mb.spoofax.api.message.MsgSeverityVisitor;
-import mb.spoofax.api.region.Region;
-import mb.spoofax.runtime.eclipse.SpoofaxPlugin;
 
 /**
  * Utility functions for creating and removing {@link IMarker} instances.
  */
 public final class MarkerUtils {
     private static final String id = SpoofaxPlugin.id + ".marker";
-    private static final String infoPostfix = ".info";
-    private static final String warningPostfix = ".warning";
     private static final String errorPostfix = ".error";
+    private static final String warningPostfix = ".warning";
+    private static final String infoPostfix = ".info";
 
 
-    public static IMarker createMarker(IResource resource, Msg msg) throws CoreException {
-        final String markerId = id(msg);
+    public static IMarker createMarker(IResource resource, Message msg) throws CoreException {
+        final int severity = severity(msg);
+        final String markerId = id(severity);
         final IMarker marker = resource.createMarker(markerId);
-        final Region region = msg.region();
+        final Region region = msg.region;
         if(region != null) {
-            marker.setAttribute(IMarker.CHAR_START, region.startOffset());
+            marker.setAttribute(IMarker.CHAR_START, region.startOffset);
             // CHAR_END is exclusive, while region is inclusive: add 1
-            marker.setAttribute(IMarker.CHAR_END, region.endOffset() + 1);
+            marker.setAttribute(IMarker.CHAR_END, region.endOffset + 1);
             // TODO: should line number be set? seems to work without it
             // marker.setAttribute(IMarker.LINE_NUMBER, region.startRow() + 1);
         } else {
             marker.setAttribute(IMarker.LINE_NUMBER, 1);
         }
-        marker.setAttribute(IMarker.MESSAGE, msg.text());
-        marker.setAttribute(IMarker.SEVERITY, severity(msg));
+        marker.setAttribute(IMarker.MESSAGE, msg.text);
+        marker.setAttribute(IMarker.SEVERITY, severity);
         marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
         return marker;
     }
@@ -47,35 +46,33 @@ public final class MarkerUtils {
     }
 
 
-    public static int severity(Msg msg) {
-        return msg.severity().accept(new MsgSeverityVisitor<Integer>() {
-            @Override public Integer info(Msg message) {
-                return IMarker.SEVERITY_INFO;
-            }
-
-            @Override public Integer warning(Msg message) {
-                return IMarker.SEVERITY_WARNING;
-            }
-
-            @Override public Integer error(Msg message) {
+    public static int severity(Message message) {
+        switch(message.severity) {
+            case Error:
                 return IMarker.SEVERITY_ERROR;
-            }
-        }, msg);
+            case Warn:
+                return IMarker.SEVERITY_WARNING;
+            case Info:
+                return IMarker.SEVERITY_INFO;
+            case Debug:
+                return IMarker.SEVERITY_INFO;
+            case Trace:
+                return IMarker.SEVERITY_INFO;
+            default:
+                return IMarker.SEVERITY_INFO;
+        }
     }
 
-    public static String id(Msg msg) {
-        return msg.severity().accept(new MsgSeverityVisitor<String>() {
-            @Override public String info(Msg message) {
-                return id + infoPostfix;
-            }
-
-            @Override public String warning(Msg message) {
-                return id + warningPostfix;
-            }
-
-            @Override public String error(Msg message) {
+    public static String id(int severity) {
+        switch(severity) {
+            case IMarker.SEVERITY_ERROR:
                 return id + errorPostfix;
-            }
-        }, msg);
+            case IMarker.SEVERITY_WARNING:
+                return id + warningPostfix;
+            case IMarker.SEVERITY_INFO:
+                return id + infoPostfix;
+            default:
+                return id + infoPostfix;
+        }
     }
 }

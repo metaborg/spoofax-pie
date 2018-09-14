@@ -8,7 +8,6 @@ import mb.nabl2.spoofax.primitives.*;
 import mb.spoofax.runtime.cfg.ConfigParser;
 import mb.spoofax.runtime.esv.StylingRulesFromESV;
 import mb.spoofax.runtime.nabl.*;
-import mb.spoofax.runtime.stratego.primitive.ScopeGraphPrimitiveLibrary;
 import org.spoofax.interpreter.library.AbstractPrimitive;
 import org.spoofax.interpreter.library.IOperatorRegistry;
 
@@ -26,6 +25,8 @@ public class SpoofaxRuntimeModule extends AbstractModule {
 
         final Multibinder<AbstractPrimitive> spoofaxScopeGraphLibrary =
             Multibinder.newSetBinder(binder(), AbstractPrimitive.class, Names.named(ScopeGraphPrimitiveLibrary.name));
+        // bindPrimitive(spoofaxScopeGraphLibrary, C_get_resource_analysis.class);
+        // bindPrimitive(spoofaxScopeGraphLibrary, C_get_resource_partial_analysis.class);
         bindPrimitive(spoofaxScopeGraphLibrary, SG_analysis_has_errors.class);
         bindPrimitive(spoofaxScopeGraphLibrary, SG_debug_constraints.class);
         bindPrimitive(spoofaxScopeGraphLibrary, SG_debug_name_resolution.class);
@@ -33,16 +34,18 @@ public class SpoofaxRuntimeModule extends AbstractModule {
         bindPrimitive(spoofaxScopeGraphLibrary, SG_debug_symbolic_constraints.class);
         bindPrimitive(spoofaxScopeGraphLibrary, SG_debug_unifier.class);
         bindPrimitive(spoofaxScopeGraphLibrary, SG_erase_ast_indices.class);
-        bindPrimitive(spoofaxScopeGraphLibrary, SG_fresh.class);
         bindPrimitive(spoofaxScopeGraphLibrary, SG_focus_term.class);
         bindPrimitive(spoofaxScopeGraphLibrary, SG_get_all_decls.class);
         bindPrimitive(spoofaxScopeGraphLibrary, SG_get_all_refs.class);
         bindPrimitive(spoofaxScopeGraphLibrary, SG_get_all_scopes.class);
+        bindPrimitive(spoofaxScopeGraphLibrary, SG_get_ast_decls.class);
         bindPrimitive(spoofaxScopeGraphLibrary, SG_get_ast_index.class);
         bindPrimitive(spoofaxScopeGraphLibrary, SG_get_ast_property.class);
+        bindPrimitive(spoofaxScopeGraphLibrary, SG_get_ast_refs.class);
         bindPrimitive(spoofaxScopeGraphLibrary, SG_get_ast_resolution.class);
         bindPrimitive(spoofaxScopeGraphLibrary, SG_get_custom_analysis.class);
         bindPrimitive(spoofaxScopeGraphLibrary, SG_get_decl_property.class);
+        bindPrimitive(spoofaxScopeGraphLibrary, SG_get_decl_resolution.class);
         bindPrimitive(spoofaxScopeGraphLibrary, SG_get_decl_scope.class);
         bindPrimitive(spoofaxScopeGraphLibrary, SG_get_direct_edges_inv.class);
         bindPrimitive(spoofaxScopeGraphLibrary, SG_get_direct_edges.class);
@@ -63,6 +66,11 @@ public class SpoofaxRuntimeModule extends AbstractModule {
         bindPrimitive(spoofaxScopeGraphLibrary, SG_is_debug_custom_enabled.class);
         bindPrimitive(spoofaxScopeGraphLibrary, SG_is_debug_resolution_enabled.class);
         bindPrimitive(spoofaxScopeGraphLibrary, SG_set_ast_index.class);
+        bindPrimitive(spoofaxScopeGraphLibrary, SG_set_custom_analysis.class);
+        bindPrimitive(spoofaxScopeGraphLibrary, SG_solve_single_constraint.class);
+        bindPrimitive(spoofaxScopeGraphLibrary, SG_solve_multi_initial_constraint.class);
+        bindPrimitive(spoofaxScopeGraphLibrary, SG_solve_multi_unit_constraint.class);
+        bindPrimitive(spoofaxScopeGraphLibrary, SG_solve_multi_final_constraint.class);
         bindPrimitiveLibrary(libraryBinder, ScopeGraphPrimitiveLibrary.class);
     }
 
@@ -71,8 +79,7 @@ public class SpoofaxRuntimeModule extends AbstractModule {
         binder.addBinding().to(primitive).in(Singleton.class);
     }
 
-    protected static void bindPrimitiveLibrary(Multibinder<IOperatorRegistry> binder,
-        Class<? extends IOperatorRegistry> primitiveLibrary) {
+    protected static void bindPrimitiveLibrary(Multibinder<IOperatorRegistry> binder, Class<? extends IOperatorRegistry> primitiveLibrary) {
         binder.addBinding().to(primitiveLibrary).in(Singleton.class);
     }
 }

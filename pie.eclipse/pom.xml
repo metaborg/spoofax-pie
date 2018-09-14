@@ -5,26 +5,19 @@
 >
   <modelVersion>4.0.0</modelVersion>
   <artifactId>spoofax.pie.eclipse</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
 
   <parent>
     <groupId>org.metaborg</groupId>
-    <artifactId>parent.eclipse.plugin</artifactId>
-    <version>2.5.0-SNAPSHOT</version>
-    <relativePath />
+    <artifactId>spoofax.parent.eclipse.plugin</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom/eclipse.plugin</relativePath>
   </parent>
-
-  <properties>
-    <spoofax.version>${project.version}</spoofax.version>
-    <metaborg.version>${metaborg-version}</metaborg.version>
-    <pie.version>0.2.0-SNAPSHOT</pie.version>
-  </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.metaborg</groupId>
-      <artifactId>${spoofax.version}</artifactId>
+      <artifactId>spoofax.api</artifactId>
       <version>${spoofax.version}</version>
     </dependency>
     <dependency>
@@ -35,33 +28,34 @@
 
     <dependency>
       <groupId>org.metaborg</groupId>
+      <artifactId>pie.vfs</artifactId>
+      <version>${pie.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.metaborg</groupId>
       <artifactId>org.metaborg.core</artifactId>
-      <version>${metaborg.version}</version>
+      <version>${spoofax.legacy.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.metaborg.meta.core</artifactId>
-      <version>${metaborg.version}</version>
+      <version>${spoofax.legacy.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.metaborg.spoofax.core</artifactId>
-      <version>${metaborg.version}</version>
+      <version>${spoofax.legacy.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.metaborg.spoofax.meta.core</artifactId>
-      <version>${metaborg.version}</version>
+      <version>${spoofax.legacy.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>log</artifactId>
-      <version>${metaborg.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.metaborg</groupId>
-      <artifactId>vfs</artifactId>
-      <version>${pie.version}</version>
+      <version>${spoofax.legacy.version}</version>
     </dependency>
 
     <dependency>
@@ -72,10 +66,6 @@
       <groupId>com.google.inject.extensions</groupId>
       <artifactId>guice-multibindings</artifactId>
     </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-    </dependency>
 
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
@@ -83,9 +73,4 @@
       <scope>provided</scope>
     </dependency>
   </dependencies>
-
-  <build>
-    <plugins>
-    </plugins>
-  </build>
 </project>

@@ -6,7 +6,7 @@ import mb.pie.api.*
 import mb.pie.api.stamp.FileStampers
 import mb.pie.lang.runtime.util.Tuple3
 import mb.pie.vfs.path.PPath
-import mb.spoofax.api.message.Msg
+import mb.spoofax.api.message.Message
 import mb.spoofax.api.parse.Token
 import mb.spoofax.legacy.MessageConverter
 import mb.spoofax.runtime.jsglr.TokenExtractor
@@ -26,7 +26,7 @@ class LegacyParse @Inject constructor(
   }
 
   data class Input(val file: PPath, val text: String) : Serializable
-  data class Output(val ast: IStrategoTerm?, val tokens: ArrayList<Token>?, val messages: ArrayList<Msg>) : Tuple3<IStrategoTerm?, ArrayList<Token>?, ArrayList<Msg>>
+  data class Output(val ast: IStrategoTerm?, val tokens: ArrayList<Token>?, val messages: ArrayList<Message>) : Tuple3<IStrategoTerm?, ArrayList<Token>?, ArrayList<Message>>
 
   override val id = Companion.id
   override fun key(input: Input) = input.file
@@ -52,7 +52,7 @@ class LegacyParse @Inject constructor(
       val parseUnit = spoofax.syntaxService.parse(inputUnit)
       val ast = parseUnit.ast()
       val tokens = if(ast != null) TokenExtractor.extract(ast) else null
-      val messages = messageConverter.toMsgs(parseUnit.messages())
+      val messages = messageConverter.toMessages(parseUnit.messages())
       Output(ast, tokens, messages)
     } catch(e: ParseException) {
       log.error("Parsing failed unexpectedly", e)
@@ -74,7 +74,7 @@ class LegacyParseAll @Inject constructor(
     const val id = "legacy.ParseAll"
   }
 
-  data class Output(val ast: IStrategoTerm?, val tokens: ArrayList<Token>?, val messages: ArrayList<Msg>, val file: PPath) : Tuple3<IStrategoTerm?, ArrayList<Token>?, ArrayList<Msg>>
+  data class Output(val ast: IStrategoTerm?, val tokens: ArrayList<Token>?, val messages: ArrayList<Message>, val file: PPath) : Tuple3<IStrategoTerm?, ArrayList<Token>?, ArrayList<Message>>
 
   override val id = Companion.id
   override fun key(input: ArrayList<FileTextPair>) = input.map { it.file }.toCollection(ArrayList())
@@ -104,7 +104,7 @@ class LegacyParseAll @Inject constructor(
       parseUnits.map {
         val ast = it.ast()
         val tokens = if(ast != null) TokenExtractor.extract(ast) else null
-        val messages = messageConverter.toMsgs(it.messages())
+        val messages = messageConverter.toMessages(it.messages())
         Output(ast, tokens, messages, it.source()?.pPath!!)
       }.toCollection(ArrayList())
     } catch(e: ParseException) {

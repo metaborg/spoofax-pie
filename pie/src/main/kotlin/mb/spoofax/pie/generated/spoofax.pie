@@ -1,5 +1,5 @@
 /// Interface that Spoofax expects from a language
-data Message = foreign java mb.spoofax.api.message.Msg {}
+data Message = foreign java mb.spoofax.api.message.Message {}
 data Ast = foreign java org.spoofax.interpreter.terms.IStrategoTerm {}
 data Token = foreign java mb.spoofax.api.parse.Token {}
 data Styling = foreign java mb.spoofax.api.style.Styling {}
@@ -7,11 +7,11 @@ data Styling = foreign java mb.spoofax.api.style.Styling {}
 data LangId = foreign java mb.spoofax.runtime.cfg.LangId {}
 
 data WorkspaceResult = foreign java mb.spoofax.pie.processing.WorkspaceResult {}
-func createWorkspaceResult(root: path, projectResults: ProjectResult*) -> WorkspaceResult = foreign java mb.spoofax.pie.processing#createWorkspaceResult
-data ProjectResult = foreign java mb.spoofax.pie.processing.ProjectResult {}
-func createProjectResult(root: path, langSpecResults: DocumentResult*, legacyResults: DocumentResult*) -> ProjectResult = foreign java mb.spoofax.pie.processing#createProjectResult
+func createWorkspaceResult(root: path, containerResults: ContainerResult*) -> WorkspaceResult = foreign java mb.spoofax.pie.processing#createWorkspaceResult
+data ContainerResult = foreign java mb.spoofax.pie.processing.ContainerResult {}
+func createContainerResult(root: path, langSpecResults: DocumentResult*, legacyResults: DocumentResult*) -> ContainerResult = foreign java mb.spoofax.pie.processing#createContainerResult
 data DocumentResult = foreign java mb.spoofax.pie.processing.DocumentResult {}
-func createDocumentResult(document: path, messages: Message*, tokens: Token*?, ast: Ast?, styling: Styling?, constraintsSolution: FinalSolverSolution?) -> DocumentResult = foreign java mb.spoofax.pie.processing#createDocumentResult
+func createDocumentResult(document: path, messages: Message*, tokens: Token*?, ast: Ast?, styling: Styling?, analysis: FinalAnalysis?) -> DocumentResult = foreign java mb.spoofax.pie.processing#createDocumentResult
 func emptyDocumentResult(document: path) -> DocumentResult = foreign java mb.spoofax.pie.processing#emptyDocumentResult
 
 
@@ -24,8 +24,7 @@ data Signatures = foreign java mb.spoofax.runtime.sdf3.Signatures {}
 func sdf3-to-stratego-signatures(langId: LangId, root: path) -> Signatures? = foreign mb.spoofax.pie.sdf3.SDF3ToStrategoSignatures
 // ESV
 func esv-to-styling-rules(langId: LangId, root: path) -> StylingRules? = foreign mb.spoofax.pie.esv.ESVToStylingRules
-// NaBL2
-func nabl2-compile-cgen(langId: LangId, root: path) -> CGen? = foreign mb.spoofax.pie.nabl2.CompileCGen
+
 
 
 /// Runtime
@@ -35,19 +34,15 @@ func jsglr-parse(document: path, langId: LangId, root: path, text: string, table
 // Style
 data StylingRules = foreign java mb.spoofax.runtime.style.StylingRules {}
 func spoofax-style(tokens: Token*, rules: StylingRules) -> Styling = foreign mb.spoofax.pie.style.SpoofaxStyle
-// Constraint generator
-data CGen = foreign java mb.spoofax.runtime.constraint.CGen {}
-data GlobalConstraints = foreign java mb.nabl2.spoofax.analysis.ImmutableInitialResult {}
-func cgen-global(langId: LangId, root: path) -> GlobalConstraints? = foreign mb.spoofax.pie.constraint.CGenGlobal
-data DocumentConstraints = foreign java mb.nabl2.spoofax.analysis.ImmutableUnitResult {}
-func cgen-document(document: path, langId: LangId, root: path, ast: Ast, globalConstraints: GlobalConstraints) -> DocumentConstraints? = foreign mb.spoofax.pie.constraint.CGenDocument
-// Constraint solver
-data SolverSolution = foreign java mb.nabl2.solver.ImmutableSolution {}
-func csolve-global(globalConstraints: GlobalConstraints) -> SolverSolution? = foreign mb.spoofax.pie.constraint.CSolveGlobal
-func csolve-document(documentConstraints: DocumentConstraints, globalConstraints: GlobalConstraints, globalSolution: SolverSolution) -> SolverSolution? = foreign mb.spoofax.pie.constraint.CSolveDocument
-data FinalSolverSolution = foreign java mb.spoofax.runtime.constraint.CSolution {}
-func csolve-final(project: path, documentsConstraints: SolverSolution*, globalSolution: SolverSolution) -> FinalSolverSolution? = foreign mb.spoofax.pie.constraint.CSolveFinal
-
+// Analysis
+data Analyzer = foreign java mb.spoofax.runtime.analysis.Analyzer {}
+data ContainerAnalysis = foreign java mb.spoofax.runtime.analysis.Analyzer.ContainerOutput {}
+data DocumentAnalysis = foreign java mb.spoofax.runtime.analysis.Analyzer.DocumentOutput {}
+data FinalAnalysis = foreign java mb.spoofax.runtime.analysis.Analyzer.FinalOutput {}
+func compile-analyzer(langId: LangId, root: path) -> Analyzer? = foreign mb.spoofax.pie.analysis.CompileAnalyzer
+func analyze-container(container: path, langId: LangId, root: path) -> ContainerAnalysis? = foreign mb.spoofax.pie.analysis.AnalyzeContainer
+func analyze-document(document: path, langId: LangId, root: path, ast: Ast, containerAnalysis: ContainerAnalysis) -> DocumentAnalysis? = foreign mb.spoofax.pie.analysis.AnalyzeDocument
+func analyze-final(langId: LangId, root: path, containerAnalysis: ContainerAnalysis, documentAnalyses: DocumentAnalysis*) -> FinalAnalysis? = foreign mb.spoofax.pie.analysis.AnalyzeFinal
 
 
 
@@ -59,39 +54,39 @@ func isLangSpecDocument(document: path, root: path) -> bool = foreign mb.spoofax
 func langIdOfDocument(document: path, root: path) -> LangId = foreign mb.spoofax.pie.processing.LangIdOfDocument
 func legacyExtensions() -> string* = foreign mb.spoofax.pie.processing.LegacyExtensions
 func isLegacyDocument(document: path) -> bool = foreign mb.spoofax.pie.processing.IsLegacyDocument
-// Process all projects in a workspace.
+// Process all containers in a workspace.
 func processWorkspace(root: path) -> WorkspaceResult = {
-  val projectResults = [processProject(project, root) | project <- list root with regex "^[^.]((?!src-gen).)*\$"];
-  createWorkspaceResult(root, projectResults)
+  val containerResults = [processContainer(container, root) | container <- list root with regex "^[^.]((?!src-gen).)*\$"];
+  createWorkspaceResult(root, containerResults)
 } @ root
-// Process all documents in a project.
-func processProject(project: path, root: path) -> ProjectResult = {
+// Process all documents in a container.
+func processContainer(container: path, root: path) -> ContainerResult = {
   val langSpecResults = [{
     if(!shouldProcessDocument(document)) {
       emptyDocumentResult(document)
     } else {
-      processDocument(document, project, root)
+      processDocument(document, container, root)
     }
-  } | document <- walk project with extensions langSpecExtensions(root)];
+  } | document <- walk container with extensions langSpecExtensions(root)];
   val legacyResults = [{
     if(!shouldProcessDocument(document)) {
       emptyDocumentResult(document)
     } else {
-      legacyProcessDocument(document, project, root)
+      legacyProcessDocument(document, container, root)
     }
-  } | document <- walk project with extensions legacyExtensions()];
-  createProjectResult(project, langSpecResults, legacyResults)
-} @ project
+  } | document <- walk container with extensions legacyExtensions()];
+  createContainerResult(container, langSpecResults, legacyResults)
+} @ container
 // Process an editor of the workspace.
-func processEditor(document: path, project: path, root: path, text: string) -> DocumentResult = {
+func processDocumentWithText(document: path, container: path, root: path, text: string) -> DocumentResult = {
   if((!exists document) || !shouldProcessDocument(document)) {
     emptyDocumentResult(document)
   } else {
     if(isLangSpecDocument(document, root)) {
-      processTextBuffer(document, project, root, text)
+      processTextBuffer(document, container, root, text)
     } else {
       if(isLegacyDocument(document)) {
-        legacyProcessTextBuffer(document, project, root, text)
+        legacyProcessTextBuffer(document, container, root, text)
       } else {
         emptyDocumentResult(document)
       }
@@ -99,17 +94,17 @@ func processEditor(document: path, project: path, root: path, text: string) -> D
   }
 } @ document
 // Process a document.
-func processDocument(document: path, project: path, root: path) -> DocumentResult = {
+func processDocument(document: path, container: path, root: path) -> DocumentResult = {
   val text = (read document)!;
-  processTextBuffer(document, project, root, text)
+  processTextBuffer(document, container, root, text)
 } @ document
 // Process a document, with a (modified) text buffer.
-func processTextBuffer(document: path, project: path, root: path, text: string) -> DocumentResult = {
+func processTextBuffer(document: path, container: path, root: path, text: string) -> DocumentResult = {
   val langId = langIdOfDocument(document, root);
   val (ast, tokens, messages) = parse(document, langId, root, text);
   val styling : Styling? = if(tokens == null) null else style(langId, root, tokens!);
-  val constraintsSolution: FinalSolverSolution? = if(ast == null) null else solveDocument(document, langId, project, root, ast!);
-  createDocumentResult(document, messages, tokens, ast, styling, constraintsSolution)
+  val finalAnalysis: FinalAnalysis? = if(ast == null) null else analyze(document, langId, container, root, ast!);
+  createDocumentResult(document, messages, tokens, ast, styling, finalAnalysis)
 } @ document
 
 
@@ -131,18 +126,14 @@ func style(langId: LangId, root: path, tokens: Token*) -> Styling? = {
   if(syntaxStyler == null) return null;
   spoofax-style(tokens, syntaxStyler!)?
 }
-/// Constraint solving
-func solveDocument(document: path, langId: LangId, project: path, root: path, ast: Ast) -> FinalSolverSolution? = {
-  val globalConstraints = cgen-global(langId, root);
-  if(globalConstraints == null) return null;
-  val globalSolution = csolve-global(globalConstraints!);
-  if(globalSolution == null) return null;
-  val documentConstraints = cgen-document(document, langId, root, ast, globalConstraints!);
-  if(documentConstraints == null) return null;
-  val documentSolution = csolve-document(documentConstraints!, globalConstraints!, globalSolution!);
-  if(documentSolution == null) return null;
-  val solution = csolve-final(project, [documentSolution!], globalSolution!);
-  solution
+/// Analysis
+func analyze(document: path, langId: LangId, container: path, root: path, ast: Ast) -> FinalAnalysis? = {
+  val containerAnalysis = analyze-container(container, langId, root);
+  if(containerAnalysis == null) return null;
+  val documentAnalysis = analyze-document(document, langId, root, ast, containerAnalysis!);
+  if(documentAnalysis == null) return null;
+  val finalAnalysis = analyze-final(langId, root, containerAnalysis!, [documentAnalysis!]);
+  finalAnalysis
 } @ document
 
 
@@ -153,11 +144,11 @@ func legacy-parse(document: path, text: string) -> (Ast?, Token*?, Message*) = f
 // Styling
 func legacy-style(document: path, tokens: Token*, ast: Ast) -> Styling = foreign mb.spoofax.pie.legacy.LegacyStyle
 // Processing
-func legacyProcessDocument(document: path, project: path, root: path) -> DocumentResult = {
+func legacyProcessDocument(document: path, container: path, root: path) -> DocumentResult = {
   val text = (read document)!;
-  legacyProcessTextBuffer(document, project, root, text)
+  legacyProcessTextBuffer(document, container, root, text)
 } @ document
-func legacyProcessTextBuffer(document: path, project: path, root: path, text: string) -> DocumentResult = {
+func legacyProcessTextBuffer(document: path, container: path, root: path, text: string) -> DocumentResult = {
   val (ast, tokens, messages) = legacy-parse(document, text);
   val styling: Styling? = if(ast == null || tokens == null) null else (legacy-style(document, tokens!, ast!)?);
   createDocumentResult(document, messages, tokens, ast, styling, null)

@@ -1,14 +1,16 @@
 package mb.spoofax.runtime.eclipse.pipeline;
 
 import com.google.inject.Inject;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map.Entry;
 import mb.log.Logger;
 import mb.pie.vfs.path.PPath;
-import mb.spoofax.api.message.Msg;
-import mb.spoofax.api.message.PathMsg;
+import mb.spoofax.api.message.Message;
+import mb.spoofax.api.message.MessageCollection;
 import mb.spoofax.api.style.Color;
 import mb.spoofax.api.style.Styling;
+import mb.spoofax.api.util.MultiHashMap;
 import mb.spoofax.runtime.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.runtime.eclipse.util.*;
 import mb.spoofax.runtime.eclipse.vfs.EclipsePathSrv;
@@ -27,7 +29,7 @@ public class WorkspaceUpdate {
 
     private final ArrayList<PPath> pathsToClear = new ArrayList<>();
     private final ArrayList<PPath> pathsToClearRec = new ArrayList<>();
-    private final HashMap<PPath, ArrayList<Msg>> messagesPerPath = new HashMap<>();
+    private final MultiHashMap<PPath, Message> messagesPerPath = new MultiHashMap<>();
     private final ArrayList<StyleUpdate> styleUpdates = new ArrayList<>();
 
 
@@ -46,50 +48,20 @@ public class WorkspaceUpdate {
         pathsToClearRec.add(path);
     }
 
-    public void addMessage(PPath path, Msg msg) {
-        ArrayList<Msg> messages = messagesPerPath.get(path);
-        if(messages == null) {
-            messages = new ArrayList<>();
-            messagesPerPath.put(path, messages);
-        }
-        messages.add(msg);
+
+    public void addMessages(Collection<Message> msgs, PPath path) {
+        messagesPerPath.addAll(path, msgs);
     }
 
-    public void addMessages(PPath path, Collection<Msg> msgs) {
-        ArrayList<Msg> messages = messagesPerPath.get(path);
-        if(messages == null) {
-            messages = new ArrayList<>();
-            messagesPerPath.put(path, messages);
-        }
-        messages.addAll(msgs);
+    public void addMessages(MessageCollection messageCollection) {
+        // TODO: handle global messages
+        messagesPerPath.addAll(messageCollection.containerMessages());
+        messagesPerPath.addAll(messageCollection.documentMessages());
     }
 
-    public void addMessage(PathMsg msg) {
-        addMessage(msg.path(), msg);
-    }
 
-    public void addMessageFiltered(PathMsg msg, PPath filter) {
-        final PPath path = msg.path();
-        if(filter.equals(path)) {
-            addMessage(path, msg);
-        }
-    }
-
-    public void addMessages(Iterable<PathMsg> msgs) {
-        for(PathMsg msg : msgs) {
-            addMessage(msg);
-        }
-    }
-
-    public void addMessagesFiltered(Iterable<PathMsg> msgs, PPath filter) {
-        for(PathMsg msg : msgs) {
-            addMessageFiltered(msg, filter);
-        }
-    }
-
-    public void replaceMessages(PPath path, ArrayList<Msg> msgs) {
-        final ArrayList<Msg> messages = new ArrayList<>(msgs);
-        messagesPerPath.put(path, messages);
+    public void replaceMessages(ArrayList<Message> messages, PPath path) {
+        messagesPerPath.replaceAll(path, messages);
     }
 
 
@@ -153,7 +125,7 @@ public class WorkspaceUpdate {
                                 }
                                 MarkerUtils.clearAll(resource);
                             }
-                            for(Entry<PPath, ArrayList<Msg>> entry : messagesPerPath.entrySet()) {
+                            for(Entry<PPath, ArrayList<Message>> entry : messagesPerPath.entrySet()) {
                                 if(workspaceMonitor != null && workspaceMonitor.isCanceled())
                                     return;
 
@@ -166,7 +138,7 @@ public class WorkspaceUpdate {
                                         path);
                                     continue;
                                 }
-                                for(Msg msg : entry.getValue()) {
+                                for(Message msg : entry.getValue()) {
                                     if(workspaceMonitor != null && workspaceMonitor.isCanceled())
                                         return;
 

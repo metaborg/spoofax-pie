@@ -5,22 +5,16 @@
 >
   <modelVersion>4.0.0</modelVersion>
   <artifactId>spoofax.pie</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
 
   <parent>
     <groupId>org.metaborg</groupId>
-    <artifactId>parent.java</artifactId>
-    <version>2.5.0-SNAPSHOT</version>
-    <relativePath/>
+    <artifactId>spoofax.parent.kotlin</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom/kotlin</relativePath>
   </parent>
 
   <properties>
-    <kotlin.lang.version>1.2</kotlin.lang.version>
-    <kotlin.api.version>1.2</kotlin.api.version>
-    <kotlin.runtime.version>1.2.50</kotlin.runtime.version>
-    <spoofax.version>${project.version}</spoofax.version>
-    <metaborg.version>${metaborg-version}</metaborg.version>
-    <pie.version>0.2.0-SNAPSHOT</pie.version>
+    <guice.version>4.1.0</guice.version>
   </properties>
 
   <dependencies>
@@ -75,33 +69,38 @@
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.spoofax.terms</artifactId>
-      <version>${metaborg.version}</version>
+      <version>${spoofax.legacy.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.spoofax.jsglr</artifactId>
-      <version>${metaborg.version}</version>
+      <version>${spoofax.legacy.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.spoofax.interpreter.core</artifactId>
-      <version>${metaborg.version}</version>
+      <version>${spoofax.legacy.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.metaborg.spoofax.core</artifactId>
-      <version>${metaborg.version}</version>
+      <version>${spoofax.legacy.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>log</artifactId>
-      <version>${metaborg.version}</version>
+      <version>${spoofax.legacy.version}</version>
     </dependency>
 
     <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
-      <version>4.1.0</version>
+      <version>${guice.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-multibindings</artifactId>
+      <version>${guice.version}</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jdt.core.compiler</groupId>
@@ -117,122 +116,15 @@
   </dependencies>
 
   <build>
-    <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
-
     <plugins>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>add-source</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>add-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>${project.basedir}/src/main/java</source>
-              </sources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
       <plugin>
         <artifactId>kotlin-maven-plugin</artifactId>
         <groupId>org.jetbrains.kotlin</groupId>
-        <version>${kotlin.runtime.version}</version>
-        <configuration>
-          <languageVersion>${kotlin.lang.version}</languageVersion>
-          <apiVersion>${kotlin.api.version}</apiVersion>
-          <jvmTarget>${java-version}</jvmTarget>
-          <experimentalCoroutines>enable</experimentalCoroutines>
-        </configuration>
-        <executions>
-          <execution>
-            <id>compile</id>
-            <phase>compile</phase>
-            <goals>
-              <goal>compile</goal>
-            </goals>
-            <configuration>
-              <sourceDirs>
-                <source>src/main/kotlin</source>
-                <source>src/main/java</source>
-              </sourceDirs>
-            </configuration>
-          </execution>
-          <execution>
-            <id>test-compile</id>
-            <phase>test-compile</phase>
-            <goals>
-              <goal>test-compile</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
-
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>default-compile</id>
-            <phase>none</phase>
-          </execution>
-          <execution>
-            <id>default-testCompile</id>
-            <phase>none</phase>
-          </execution>
-          <execution>
-            <id>java-compile</id>
-            <phase>compile</phase>
-            <goals>
-              <goal>compile</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>java-test-compile</id>
-            <phase>test-compile</phase>
-            <goals>
-              <goal>testCompile</goal>
-            </goals>
-          </execution>
-        </executions>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
       </plugin>
     </plugins>
-
-    <pluginManagement>
-      <plugins>
-        <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the 
-          Maven build itself. -->
-        <plugin>
-          <groupId>org.eclipse.m2e</groupId>
-          <artifactId>lifecycle-mapping</artifactId>
-          <version>1.0.0</version>
-          <configuration>
-            <lifecycleMappingMetadata>
-              <pluginExecutions>
-                <pluginExecution>
-                  <pluginExecutionFilter>
-                    <groupId>org.jetbrains.kotlin</groupId>
-                    <artifactId>kotlin-maven-plugin</artifactId>
-                    <versionRange>[1.2.20,)</versionRange>
-                    <goals>
-                      <goal>compile</goal>
-                      <goal>test-compile</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <ignore/>
-                  </action>
-                </pluginExecution>
-              </pluginExecutions>
-            </lifecycleMappingMetadata>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
   </build>
 </project>

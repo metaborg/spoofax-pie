@@ -5,35 +5,34 @@
 >
   <modelVersion>4.0.0</modelVersion>
   <artifactId>spoofax.pie.benchmark</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+
+  <parent>
+    <groupId>org.metaborg</groupId>
+    <artifactId>spoofax.parent.java</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom/java</relativePath>
+  </parent>
 
   <properties>
     <jmh.version>1.19</jmh.version>
   </properties>
 
-  <parent>
-    <groupId>org.metaborg</groupId>
-    <artifactId>parent.java</artifactId>
-    <version>2.5.0-SNAPSHOT</version>
-    <relativePath/>
-  </parent>
-
   <dependencies>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>spoofax.pie</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
+      <version>${spoofax.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>pie.store.lmdb</artifactId>
-      <version>0.2.0-SNAPSHOT</version>
+      <version>${pie.version}</version>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>pie.share.coroutine</artifactId>
-      <version>0.2.0-SNAPSHOT</version>
+      <version>${pie.version}</version>
     </dependency>
 
     <dependency>

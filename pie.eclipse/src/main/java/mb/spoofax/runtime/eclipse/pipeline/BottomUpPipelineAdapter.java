@@ -18,10 +18,10 @@ import mb.pie.taskdefs.guice.GuiceTaskDefsKt;
 import mb.pie.vfs.path.PPath;
 import mb.spoofax.pie.LogLoggerKt;
 import mb.spoofax.pie.SpoofaxPipeline;
-import mb.spoofax.pie.generated.processEditor;
-import mb.spoofax.pie.generated.processProject;
+import mb.spoofax.pie.generated.processContainer;
+import mb.spoofax.pie.generated.processDocumentWithText;
+import mb.spoofax.pie.processing.ContainerResult;
 import mb.spoofax.pie.processing.DocumentResult;
-import mb.spoofax.pie.processing.ProjectResult;
 import mb.spoofax.runtime.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.runtime.eclipse.util.Nullable;
 import mb.spoofax.runtime.eclipse.vfs.EclipsePathSrv;
@@ -82,13 +82,13 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
         }
 
         logger.debug("Setting pipeline observer for project {}", project);
-        final Task<processProject.Input, ProjectResult> task = projectTask(mbProject);
+        final Task<processContainer.Input, ContainerResult> task = containerTask(mbProject);
         final TaskKey key = task.key();
         final TaskKey prevKey = projectKeys.put(mbProject, key);
         if(prevKey != null) {
             executor.removeObserver(prevKey);
         }
-        executor.setObserver(key, projectObs(mbProject));
+        executor.setObserver(key, containerObs(mbProject));
     }
 
     @Override public void buildProject(IProject project, int buildKind, @Nullable IResourceDelta delta,
@@ -99,7 +99,7 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
             return;
         }
 
-        final Task<processProject.Input, ProjectResult> task = projectTask(mbProject);
+        final Task<processContainer.Input, ContainerResult> task = containerTask(mbProject);
         final TaskKey key = task.key();
         final Cancelled cancelled = PipelineCancel.cancelled(monitor);
 
@@ -145,13 +145,13 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
         }
 
         logger.debug("Setting pipeline observer for editor {}", editor);
-        final Task<processEditor.Input, DocumentResult> task = editorTask(text, mbFile, mbProject);
+        final Task<processDocumentWithText.Input, DocumentResult> task = documentWithTextTask(text, mbFile, mbProject);
         final TaskKey key = task.key();
         final TaskKey prevKey = editorKeys.put(editor, key);
         if(prevKey != null) {
             executor.removeObserver(prevKey);
         }
-        executor.setObserver(key, editorObs(editor, text, mbFile, mbProject));
+        executor.setObserver(key, documentWithTextObs(editor, text, mbFile, mbProject));
     }
 
     @Override public void updateEditor(SpoofaxEditor editor, String text, IFile file, IProject project,
@@ -169,13 +169,13 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
         }
 
         logger.debug("Updating pipeline observer for editor {}", editor);
-        final Task<processEditor.Input, DocumentResult> task = editorTask(text, mbFile, mbProject);
+        final Task<processDocumentWithText.Input, DocumentResult> task = documentWithTextTask(text, mbFile, mbProject);
         final TaskKey key = task.key();
         final TaskKey prevKey = editorKeys.put(editor, key);
         if(prevKey != null) {
             executor.removeObserver(prevKey);
         }
-        executor.setObserver(key, editorObs(editor, text, mbFile, mbProject));
+        executor.setObserver(key, documentWithTextObs(editor, text, mbFile, mbProject));
 
         try {
             logger.debug("Executing pipeline function for editor {}...", editor);
@@ -204,20 +204,21 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
     }
 
 
-    private Task<processProject.Input, ProjectResult> projectTask(PPath project) {
-        return pipeline.project(project, root);
+    private Task<processContainer.Input, ContainerResult> containerTask(PPath container) {
+        return pipeline.container(container, root);
     }
 
-    @SuppressWarnings("unchecked") private Function1<Serializable, Unit> projectObs(PPath project) {
-        return (Function1<Serializable, Unit>) observers.project(project);
+    @SuppressWarnings("unchecked") private Function1<Serializable, Unit> containerObs(PPath container) {
+        return (Function1<Serializable, Unit>) observers.container(container);
     }
 
-    private Task<processEditor.Input, DocumentResult> editorTask(String text, PPath document, PPath project) {
-        return pipeline.editor(document, project, root, text);
+    private Task<processDocumentWithText.Input, DocumentResult> documentWithTextTask(String text, PPath document,
+        PPath container) {
+        return pipeline.documentWithText(document, container, root, text);
     }
 
-    @SuppressWarnings("unchecked") private Function1<Serializable, Unit> editorObs(SpoofaxEditor editor, String text,
-        PPath file, PPath project) {
-        return (Function1<Serializable, Unit>) observers.editor(editor, text, file, project);
+    @SuppressWarnings("unchecked") private Function1<Serializable, Unit> documentWithTextObs(SpoofaxEditor editor,
+        String text, PPath document, PPath container) {
+        return (Function1<Serializable, Unit>) observers.editor(editor, text, document, container);
     }
 }

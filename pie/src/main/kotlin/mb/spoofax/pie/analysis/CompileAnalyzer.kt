@@ -1,4 +1,4 @@
-package mb.spoofax.pie.nabl2
+package mb.spoofax.pie.analysis
 
 import com.google.inject.Inject
 import mb.pie.api.*
@@ -8,34 +8,35 @@ import mb.spoofax.pie.config.ParseWorkspaceConfig
 import mb.spoofax.pie.config.requireConfigValue
 import mb.spoofax.pie.legacy.LegacyLoadProject
 import mb.spoofax.pie.legacy.Spx
+import mb.spoofax.pie.nabl2.NaBL2ToStrategoAnalyzer
 import mb.spoofax.pie.sdf3.SDF3ToStrategoSignatures
 import mb.spoofax.pie.stratego.CompileStratego
+import mb.spoofax.runtime.analysis.Analyzer
 import mb.spoofax.runtime.cfg.ImmutableStrategoCompilerConfig
 import mb.spoofax.runtime.cfg.LangId
-import mb.spoofax.runtime.constraint.CGen
 import org.apache.commons.vfs2.AllFileSelector
 import org.metaborg.spoofax.core.SpoofaxConstants
 import org.metaborg.spoofax.meta.core.build.SpoofaxLangSpecCommonPaths
 import java.io.Serializable
 
-class CompileCGen
+class CompileAnalyzer
 @Inject constructor(
   private val pathSrv: PathSrv,
   private val parseWorkspaceConfig: ParseWorkspaceConfig,
-  private val nabl2ToStrategoCGen: NaBL2ToStrategoCGen,
+  private val nabl2ToStrategoAnalyzer: NaBL2ToStrategoAnalyzer,
   private val sdf3ToStrategoSignatures: SDF3ToStrategoSignatures,
   private val legacyLoadProject: LegacyLoadProject,
   private val compileStratego: CompileStratego
-) : TaskDef<CompileCGen.Input, CGen?> {
+) : TaskDef<CompileAnalyzer.Input, Analyzer?> {
   companion object {
-    const val id = "nabl2.CompileCGen"
+    const val id = "analysis.Compile"
   }
 
   data class Input(val langId: LangId, val root: PPath) : Serializable
   data class LangSpecConfigInfo(val dir: PPath, val strategoCompilerConfig: ImmutableStrategoCompilerConfig?, val strategyId: String?) : Serializable
 
   override val id = Companion.id
-  override fun ExecContext.exec(input: Input): CGen? {
+  override fun ExecContext.exec(input: Input): Analyzer? {
     val (langId, root) = input
 
     val (langSpecDir, strategoCompilerConfig, strategyId) = requireConfigValue(this, parseWorkspaceConfig, root) { workspaceConfig ->
@@ -51,8 +52,10 @@ class CompileCGen
     }
 
     // Generate Stratego files from NaBL2 files
-    val nabl2ToStrategoCgenTask = Task(nabl2ToStrategoCGen, NaBL2ToStrategoCGen.Input(langId, root))
+    val nabl2ToStrategoCgenTask = Task(nabl2ToStrategoAnalyzer, NaBL2ToStrategoAnalyzer.Input(langId, root))
     require(nabl2ToStrategoCgenTask)
+
+    // TODO: generate flowspec files.
 
     // Generate Stratego signatures from SDF3.
     val sdf3ToStrategoSignaturesTask = Task(sdf3ToStrategoSignatures, SDF3ToStrategoSignatures.Input(langId, root))
@@ -109,6 +112,6 @@ class CompileCGen
     val finalStrategoCompilerConfig = strategoConfigBuilder.build()
     val taskDeps = arrayListOf(nabl2ToStrategoCgenTask.toSTask(), sdf3ToStrategoSignaturesTask.toSTask())
     val strategoCtree = require(compileStratego, CompileStratego.Input(finalStrategoCompilerConfig, taskDeps))
-    return CGen(strategoCtree, strategyId)
+    return Analyzer(strategoCtree, strategyId)
   }
 }
