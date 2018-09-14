@@ -13,14 +13,7 @@
     <relativePath>../pom/java</relativePath>
   </parent>
 
-  <properties>
-    <spoofax.version>${project.version}</spoofax.version>
-    <metaborg.version>${metaborg-version}</metaborg.version>
-    <pie.version>0.2.0-SNAPSHOT</pie.version>
-  </properties>
-
   <dependencies>
-    <!-- TODO: strip dependencies -->
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>pie.vfs</artifactId>
