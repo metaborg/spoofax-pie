@@ -1,6 +1,6 @@
 package mb.spoofax.pie.benchmark.state;
 
-import mb.log.Logger;
+import mb.log.api.Logger;
 import mb.pie.api.Pie;
 import mb.pie.api.PieBuilder;
 import mb.pie.api.stamp.*;

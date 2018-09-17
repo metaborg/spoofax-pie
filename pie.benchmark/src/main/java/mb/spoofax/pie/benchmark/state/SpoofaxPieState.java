@@ -1,8 +1,8 @@
 package mb.spoofax.pie.benchmark.state;
 
 import com.google.inject.Injector;
-import mb.log.LogModule;
-import mb.log.Logger;
+import mb.log.api.Logger;
+import mb.log.slf4j.LogModule;
 import mb.pie.lang.runtime.PieLangRuntimeModule;
 import mb.pie.vfs.path.PathSrv;
 import mb.spoofax.api.*;
