@@ -4,4 +4,4 @@ script: mvn clean verify --settings .travis.settings.xml -B -U -V
 sudo: false
 cache:
   directories:
-  - $HOME/.m2
+  - "$HOME/.m2"

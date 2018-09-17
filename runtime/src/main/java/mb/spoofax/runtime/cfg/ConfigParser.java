@@ -1,7 +1,7 @@
 package mb.spoofax.runtime.cfg;
 
 import com.google.inject.Inject;
-import mb.log.Logger;
+import mb.log.api.Logger;
 import mb.pie.vfs.path.PPath;
 import mb.spoofax.runtime.term.Terms;
 import org.spoofax.interpreter.terms.IStrategoTerm;

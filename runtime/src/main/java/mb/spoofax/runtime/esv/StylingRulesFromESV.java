@@ -2,7 +2,7 @@ package mb.spoofax.runtime.esv;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
-import mb.log.Logger;
+import mb.log.api.Logger;
 import mb.spoofax.api.parse.TokenConstants;
 import mb.spoofax.api.parse.TokenType;
 import mb.spoofax.api.style.*;

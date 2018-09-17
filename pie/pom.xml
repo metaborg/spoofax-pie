@@ -26,6 +26,12 @@
 
     <dependency>
       <groupId>org.metaborg</groupId>
+      <artifactId>log.api</artifactId>
+      <version>${mb.log.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.metaborg</groupId>
       <artifactId>pie.vfs</artifactId>
       <version>${pie.version}</version>
     </dependency>
@@ -84,11 +90,6 @@
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.metaborg.spoofax.core</artifactId>
-      <version>${spoofax.legacy.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.metaborg</groupId>
-      <artifactId>log</artifactId>
       <version>${spoofax.legacy.version}</version>
     </dependency>
 

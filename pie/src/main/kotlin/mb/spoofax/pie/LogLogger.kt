@@ -1,6 +1,7 @@
 package mb.spoofax.pie
 
-import mb.log.*
+
+import mb.log.api.*
 import mb.pie.api.PieBuilder
 import mb.pie.runtime.logger.StreamLogger
 import java.io.PrintWriter

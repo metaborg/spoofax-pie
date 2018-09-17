@@ -1,6 +1,6 @@
 package mb.spoofax.pie.legacy
 
-import mb.log.Logger
+import mb.log.api.Logger
 import mb.pie.api.ExecContext
 import mb.pie.api.stamp.FileStamper
 import mb.pie.lang.runtime.util.Tuple3
@@ -168,7 +168,7 @@ fun ExecContext.processAll(
       return results.flatMap { result ->
         val ast = result.ast()
         val outputs = result.outputs()
-        if(ast != null && outputs.count() == 0){
+        if(ast != null && outputs.count() == 0) {
           listOf(ProcessOutput(ast, null, result.source()!!.pPath))
         } else {
           outputs.map { output ->

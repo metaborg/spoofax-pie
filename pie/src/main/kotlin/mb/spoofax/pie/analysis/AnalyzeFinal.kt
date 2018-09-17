@@ -1,7 +1,7 @@
 package mb.spoofax.pie.analysis
 
 import com.google.inject.Inject
-import mb.log.Logger
+import mb.log.api.Logger
 import mb.pie.api.ExecContext
 import mb.pie.api.TaskDef
 import mb.pie.api.stamp.FileStampers

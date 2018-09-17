@@ -2,8 +2,8 @@ package mb.spoofax.api;
 
 import com.google.common.collect.Lists;
 import com.google.inject.*;
-import mb.log.LogModule;
-import mb.log.Logger;
+import mb.log.api.Logger;
+import mb.log.slf4j.LogModule;
 import mb.pie.vfs.path.PathSrv;
 
 import java.util.Collection;

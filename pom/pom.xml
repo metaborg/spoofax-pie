@@ -23,6 +23,8 @@
     <kotlin.runtime.version>1.2.50</kotlin.runtime.version>
     <!-- PIE -->
     <pie.version>0.2.0</pie.version>
+    <!-- Metaborg Log -->
+    <mb.log.version>0.1.0</mb.log.version>
     <!-- Spoofax legacy (Spoofax Core/Metaborg) -->
     <spoofax.legacy.version>2.6.0-SNAPSHOT</spoofax.legacy.version>
     <!-- Guice -->
@@ -253,6 +255,18 @@
       </extension>
     </extensions>
   </build>
+
+  <repositories>
+    <!-- For mb.log artifacts -->
+    <repository>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <id>bintray-metaborg-maven</id>
+      <name>bintray</name>
+      <url>https://dl.bintray.com/metaborg/maven</url>
+    </repository>
+  </repositories>
 
   <name>${project.artifactId}</name>
   <url>${project.scm.url}</url>

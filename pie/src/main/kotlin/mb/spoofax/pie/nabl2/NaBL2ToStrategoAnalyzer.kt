@@ -1,7 +1,7 @@
 package mb.spoofax.pie.nabl2
 
 import com.google.inject.Inject
-import mb.log.Logger
+import mb.log.api.Logger
 import mb.pie.api.*
 import mb.pie.api.stamp.FileStampers
 import mb.pie.vfs.path.PPath
