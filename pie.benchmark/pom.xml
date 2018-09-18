@@ -8,9 +8,9 @@
 
   <parent>
     <groupId>org.metaborg</groupId>
-    <artifactId>spoofax.parent.java</artifactId>
+    <artifactId>spoofax.parent</artifactId>
     <version>0.1.0-SNAPSHOT</version>
-    <relativePath>../pom/java</relativePath>
+    <relativePath>../pom</relativePath>
   </parent>
 
   <properties>
@@ -50,6 +50,10 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
