@@ -3,7 +3,7 @@ package mb.spoofax.runtime.eclipse.util;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import java.util.*;
-import mb.log.Logger;
+import mb.log.api.Logger;
 import mb.spoofax.api.region.Region;
 import mb.spoofax.api.style.*;
 import org.eclipse.jface.text.TextPresentation;

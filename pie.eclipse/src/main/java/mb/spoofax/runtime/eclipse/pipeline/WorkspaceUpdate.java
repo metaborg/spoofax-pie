@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map.Entry;
-import mb.log.Logger;
+import mb.log.api.Logger;
 import mb.pie.vfs.path.PPath;
 import mb.spoofax.api.message.Message;
 import mb.spoofax.api.message.MessageCollection;

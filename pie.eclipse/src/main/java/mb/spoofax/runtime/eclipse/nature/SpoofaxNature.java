@@ -1,20 +1,15 @@
 package mb.spoofax.runtime.eclipse.nature;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.IProjectNature;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-
 import com.google.inject.Injector;
-
-import mb.log.Logger;
+import mb.log.api.Logger;
 import mb.pie.vfs.path.PPath;
 import mb.spoofax.runtime.eclipse.SpoofaxPlugin;
 import mb.spoofax.runtime.eclipse.build.SpoofaxProjectBuilder;
 import mb.spoofax.runtime.eclipse.pipeline.PipelineAdapter;
 import mb.spoofax.runtime.eclipse.util.BuilderUtils;
 import mb.spoofax.runtime.eclipse.vfs.EclipsePathSrv;
+import org.eclipse.core.resources.*;
+import org.eclipse.core.runtime.CoreException;
 
 public class SpoofaxNature implements IProjectNature {
     public static final String id = SpoofaxPlugin.id + ".nature";

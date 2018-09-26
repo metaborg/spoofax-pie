@@ -257,16 +257,60 @@
   </build>
 
   <repositories>
-    <!-- For mb.log artifacts -->
+    <!-- Metaborg logging artifacts -->
     <repository>
+      <id>bintray-metaborg-maven</id>
+      <url>https://dl.bintray.com/metaborg/maven</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
-      <id>bintray-metaborg-maven</id>
-      <name>bintray</name>
-      <url>https://dl.bintray.com/metaborg/maven</url>
+    </repository>
+    <!-- Metaborg artifacts -->
+    <repository>
+      <id>metaborg-release-repo</id>
+      <url>http://artifacts.metaborg.org/content/repositories/releases/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>metaborg-snapshot-repo</id>
+      <url>http://artifacts.metaborg.org/content/repositories/snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
     </repository>
   </repositories>
+
+  <pluginRepositories>
+    <!-- Metaborg Maven plugin artifacts -->
+    <pluginRepository>
+      <id>metaborg-release-repo</id>
+      <url>http://artifacts.metaborg.org/content/repositories/releases/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+    <pluginRepository>
+      <id>metaborg-snapshot-repo</id>
+      <url>http://artifacts.metaborg.org/content/repositories/snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
 
   <name>${project.artifactId}</name>
   <url>${project.scm.url}</url>

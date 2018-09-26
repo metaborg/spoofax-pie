@@ -1,15 +1,18 @@
 package mb.spoofax.runtime.eclipse.editor;
 
+import com.google.inject.Injector;
+import mb.log.api.Logger;
+import mb.spoofax.api.SpoofaxFacade;
+import mb.spoofax.runtime.eclipse.SpoofaxPlugin;
+import mb.spoofax.runtime.eclipse.pipeline.PipelineAdapter;
+import mb.spoofax.runtime.eclipse.util.Nullable;
+import mb.spoofax.runtime.eclipse.vfs.EclipsePathSrv;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.text.DocumentEvent;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentListener;
-import org.eclipse.jface.text.ITextViewerExtension4;
-import org.eclipse.jface.text.TextPresentation;
+import org.eclipse.jface.text.*;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.swt.widgets.Composite;
@@ -17,15 +20,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
-
-import com.google.inject.Injector;
-
-import mb.log.Logger;
-import mb.spoofax.api.SpoofaxFacade;
-import mb.spoofax.runtime.eclipse.SpoofaxPlugin;
-import mb.spoofax.runtime.eclipse.pipeline.PipelineAdapter;
-import mb.spoofax.runtime.eclipse.util.Nullable;
-import mb.spoofax.runtime.eclipse.vfs.EclipsePathSrv;
 
 public class SpoofaxEditor extends TextEditor {
     private final class DocumentListener implements IDocumentListener {
@@ -98,7 +92,7 @@ public class SpoofaxEditor extends TextEditor {
         final SpoofaxFacade spoofaxFacade = SpoofaxPlugin.spoofaxFacade();
         final Injector injector = spoofaxFacade.injector;
 
-        this.logger = spoofaxFacade.rootLogger;
+        this.logger = injector.getInstance(Logger.class);
         this.pathSrv = injector.getInstance(EclipsePathSrv.class);
         this.pipelineAdapter = injector.getInstance(PipelineAdapter.class);
 

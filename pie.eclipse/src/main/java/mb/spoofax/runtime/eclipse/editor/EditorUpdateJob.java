@@ -1,16 +1,15 @@
 package mb.spoofax.runtime.eclipse.editor;
 
+import mb.log.api.Logger;
+import mb.pie.api.ExecException;
+import mb.spoofax.runtime.eclipse.pipeline.PipelineAdapter;
+import mb.spoofax.runtime.eclipse.util.StatusUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.IEditorInput;
-
-import mb.log.Logger;
-import mb.pie.api.ExecException;
-import mb.spoofax.runtime.eclipse.pipeline.PipelineAdapter;
-import mb.spoofax.runtime.eclipse.util.StatusUtils;
 
 public class EditorUpdateJob extends Job {
     private final Logger logger;

@@ -1,27 +1,16 @@
 package mb.spoofax.runtime.eclipse.vfs;
 
+import com.google.inject.Inject;
 import java.net.URI;
 import java.util.Arrays;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IStorage;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IPathEditorInput;
-import org.eclipse.ui.IStorageEditorInput;
-import org.eclipse.ui.IURIEditorInput;
-
-import com.google.inject.Inject;
-
-import mb.log.Logger;
+import mb.log.api.Logger;
 import mb.pie.vfs.path.PPath;
 import mb.pie.vfs.path.PathSrvImpl;
 import mb.spoofax.runtime.eclipse.util.Nullable;
+import org.eclipse.core.resources.*;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.ui.*;
 
 public class EclipsePathSrvImpl extends PathSrvImpl implements EclipsePathSrv {
     private final Logger logger;
