@@ -26,6 +26,17 @@
 
     <dependency>
       <groupId>org.metaborg</groupId>
+      <artifactId>log.api</artifactId>
+      <version>${mb.log.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>log.slf4j</artifactId>
+      <version>${mb.log.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.metaborg</groupId>
       <artifactId>pie.store.lmdb</artifactId>
       <version>${pie.version}</version>
     </dependency>
