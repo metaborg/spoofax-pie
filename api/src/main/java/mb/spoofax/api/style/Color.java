@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class Color implements Serializable {
     private static final long serialVersionUID = 1L;
-    
+
     public final static Color white = new Color(255, 255, 255);
     public final static Color black = new Color(0, 0, 0);
 
@@ -37,5 +37,17 @@ public class Color implements Serializable {
 
     public int blue() {
         return (argb >> 0) & 0xFF;
+    }
+
+
+    @Override public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        final Color color = (Color) o;
+        return argb == color.argb;
+    }
+
+    @Override public int hashCode() {
+        return argb;
     }
 }
