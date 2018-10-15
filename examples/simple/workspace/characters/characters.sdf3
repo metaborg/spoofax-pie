@@ -1,0 +1,18 @@
+module characters
+
+context-free start-symbols
+
+  Start
+
+context-free syntax
+
+  Start = <<Chars>>
+
+lexical syntax
+
+  Chars  = [a-zA-Z]*
+  LAYOUT = [\ \t\n\r]
+
+context-free restrictions
+
+  LAYOUT? -/- [\ \t\n\r]

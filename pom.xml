@@ -30,6 +30,7 @@
     <module>lang/cfg/test</module>
     <!--module>pie.eclipse</module-->
     <module>pie.eclipse.externaldeps</module>
+    <module>examples/simple</module>
   </modules>
 
   <build>
