@@ -3,6 +3,7 @@ package mb.spoofax.pie.config
 import com.google.inject.Inject
 import mb.log.api.Logger
 import mb.pie.api.*
+import mb.pie.api.stamp.FileStampers
 import mb.pie.api.stamp.output.FuncEqualsOutputStamper
 import mb.pie.vfs.path.PPath
 import mb.spoofax.pie.legacy.LegacyLoadProject
@@ -33,7 +34,7 @@ class ParseWorkspaceConfig @Inject constructor(
       if(!file.exists()) {
         throw ExecException("Cannot parse workspace config; workspace config file $file does not exist")
       }
-      val ast = processOne(file, project, transformGoal = CompileGoal(), log = log)?.ast
+      val ast = processOne(file, project, transformGoal = CompileGoal(), log = log, reqFileStamper = FileStampers.hash)?.ast
         ?: throw ExecException("Cannot parse workspace config; failed to parse workspace config file $file")
       configParser.parseWorkspaceConfigPaths(ast, root)
     }
@@ -41,7 +42,7 @@ class ParseWorkspaceConfig @Inject constructor(
       val dir = langSpecFile.parent()
         ?: throw ExecException("Cannot parse workspace config; $langSpecFile has no parent directory")
       val project = require(legacyLoadProject, dir).v
-      val ast = processOne(langSpecFile, project, transformGoal = CompileGoal(), log = log)?.ast
+      val ast = processOne(langSpecFile, project, transformGoal = CompileGoal(), log = log, reqFileStamper = FileStampers.hash)?.ast
         ?: throw ExecException("Cannot parse workspace config; failed to parse language specification config file $langSpecFile")
       val langSpecConfig = configParser.parseLangSpecConfig(ast, dir)
       if(!langSpecConfig.isPresent) {
