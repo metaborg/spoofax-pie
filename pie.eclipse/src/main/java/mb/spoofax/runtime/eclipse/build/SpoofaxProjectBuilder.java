@@ -1,22 +1,17 @@
 package mb.spoofax.runtime.eclipse.build;
 
-import java.util.Map;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResourceDelta;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
-
 import com.google.inject.Injector;
-
-import mb.log.Logger;
+import java.util.Map;
+import mb.log.api.Logger;
 import mb.pie.api.ExecException;
 import mb.spoofax.runtime.eclipse.SpoofaxPlugin;
 import mb.spoofax.runtime.eclipse.pipeline.PipelineAdapter;
 import mb.spoofax.runtime.eclipse.util.Nullable;
 import mb.spoofax.runtime.eclipse.util.StatusUtils;
+import org.eclipse.core.resources.*;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 public class SpoofaxProjectBuilder extends IncrementalProjectBuilder {
     public static final String id = SpoofaxPlugin.id + ".builder";

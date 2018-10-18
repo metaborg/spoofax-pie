@@ -41,6 +41,23 @@
           <languageUnderTest>org.metaborg:spoofax.lang.cfg:${spoofax.version}</languageUnderTest>
         </configuration>
       </plugin>
+      <!-- Skip installation and deployment. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-install-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
+
+  <description>Spoofax-PIE configuration DSL tests</description>
 </project>

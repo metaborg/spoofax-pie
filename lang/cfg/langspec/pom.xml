@@ -49,4 +49,6 @@
       </plugin>
     </plugins>
   </build>
+
+  <description>Spoofax-PIE configuration DSL</description>
 </project>

@@ -20,9 +20,9 @@
     <!-- Kotlin language -->
     <kotlin.lang.version>1.2</kotlin.lang.version>
     <kotlin.api.version>1.2</kotlin.api.version>
-    <kotlin.runtime.version>1.2.50</kotlin.runtime.version>
+    <kotlin.runtime.version>1.2.71</kotlin.runtime.version>
     <!-- PIE -->
-    <pie.version>0.2.0</pie.version>
+    <pie.version>0.3.0-SNAPSHOT</pie.version>
     <!-- Metaborg Log -->
     <mb.log.version>0.1.0</mb.log.version>
     <!-- Spoofax legacy (Spoofax Core/Metaborg) -->
@@ -156,7 +156,8 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>wagon-maven-plugin</artifactId>
-          <version>2.0.0</version>
+          <!-- Stick to 1.0. Newer versions give problems (401 return code) when deploying to our artifact server. -->
+          <version>1.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -208,11 +209,6 @@
           </executions>
         </plugin>
         <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>versions-maven-plugin</artifactId>
-          <version>2.5</version>
-        </plugin>
-        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-shade-plugin</artifactId>
           <version>3.1.1</version>
@@ -244,6 +240,16 @@
             <manifestLocation>META-INF</manifestLocation>
           </configuration>
         </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>versions-maven-plugin</artifactId>
+          <version>2.5</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-enforcer-plugin</artifactId>
+          <version>1.4.1</version>
+        </plugin>
       </plugins>
     </pluginManagement>
 
@@ -251,25 +257,96 @@
       <extension>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-http</artifactId>
+        <!-- Stick to 3.0.0. Newer versions give problems (401 return code) when deploying to our artifact server. -->
         <version>3.0.0</version>
       </extension>
     </extensions>
   </build>
 
+  <profiles>
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>enforce-no-snapshots</id>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <configuration>
+                  <rules>
+                    <requireReleaseDeps>
+                      <message>No snapshot dependencies are allowed in release builds</message>
+                    </requireReleaseDeps>
+                  </rules>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
   <repositories>
-    <!-- For mb.log artifacts -->
+    <!-- Metaborg logging artifacts -->
     <repository>
+      <id>bintray-metaborg-maven</id>
+      <url>https://dl.bintray.com/metaborg/maven</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
-      <id>bintray-metaborg-maven</id>
-      <name>bintray</name>
-      <url>https://dl.bintray.com/metaborg/maven</url>
+    </repository>
+    <!-- Metaborg artifacts -->
+    <repository>
+      <id>metaborg-release-repo</id>
+      <url>http://artifacts.metaborg.org/content/repositories/releases/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>metaborg-snapshot-repo</id>
+      <url>http://artifacts.metaborg.org/content/repositories/snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
     </repository>
   </repositories>
 
-  <name>${project.artifactId}</name>
-  <url>${project.scm.url}</url>
+  <pluginRepositories>
+    <!-- Metaborg Maven plugin artifacts -->
+    <pluginRepository>
+      <id>metaborg-release-repo</id>
+      <url>http://artifacts.metaborg.org/content/repositories/releases/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+    <pluginRepository>
+      <id>metaborg-snapshot-repo</id>
+      <url>http://artifacts.metaborg.org/content/repositories/snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
 
   <licenses>
     <license>
@@ -295,10 +372,17 @@
 
   <distributionManagement>
     <repository>
-      <id>bintray-maven-metaborg-spoofax-pie</id>
+      <id>spoofax-pie-deploy-release-server</id>
       <url>https://api.bintray.com/maven/metaborg/maven/spoofax-pie/</url>
     </repository>
+    <snapshotRepository>
+      <id>spoofax-pie-deploy-snapshot-server</id>
+      <url>https://artifacts.metaborg.org/content/repositories/snapshots/</url>
+    </snapshotRepository>
   </distributionManagement>
 
   <description>Spoofax-PIE parent POM</description>
+
+  <name>${project.artifactId}</name>
+  <url>${project.scm.url}</url>
 </project>

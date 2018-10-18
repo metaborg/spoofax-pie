@@ -2,29 +2,14 @@ package mb.spoofax.api;
 
 import com.google.common.collect.Lists;
 import com.google.inject.*;
-import mb.log.api.Logger;
-import mb.log.slf4j.LogModule;
-import mb.pie.vfs.path.PathSrv;
-
 import java.util.Collection;
+import mb.pie.vfs.path.PathSrv;
 
 public class SpoofaxFacade {
     public final Injector injector;
 
-    public final Logger rootLogger;
-
-    public final PathSrv pathSrv;
-
-
-    public SpoofaxFacade(SpoofaxModule module, LogModule logModule, Module... additionalModules) {
-        final Collection<Module> modules = Lists.newArrayList(additionalModules);
-        modules.add(module);
-        modules.add(logModule);
-
-        this.injector = Guice.createInjector(Stage.PRODUCTION, modules);
-
-        this.rootLogger = injector.getInstance(Logger.class);
-
-        this.pathSrv = injector.getInstance(PathSrv.class);
+    public SpoofaxFacade(Module... modules) {
+        final Collection<Module> allModules = Lists.newArrayList(modules);
+        this.injector = Guice.createInjector(Stage.PRODUCTION, allModules);
     }
 }

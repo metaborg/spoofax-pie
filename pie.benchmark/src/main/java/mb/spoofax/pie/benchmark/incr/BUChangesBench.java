@@ -14,6 +14,8 @@ import java.util.concurrent.TimeUnit;
 @OutputTimeUnit(TimeUnit.SECONDS)
 @State(Scope.Benchmark)
 public class BUChangesBench {
+    @Param("bottomup.csv") private String bottomUpResultsFilePath;
+
     @Setup(Level.Trial)
     public void setupTrial(SpoofaxPieState spoofaxPie, WorkspaceState workspace, InfraState infra, ChangesState changes, BUState exec) {
         workspace.setup(spoofaxPie);
@@ -35,7 +37,7 @@ public class BUChangesBench {
     private BUState exec;
 
     @Setup(Level.Invocation) public void setupInvocation() {
-        Timer.logFile = new File("bottomup.csv");
+        Timer.logFile = new File(bottomUpResultsFilePath);
         Timer.clearFile();
         infra.reset();
         changes.reset(workspace);

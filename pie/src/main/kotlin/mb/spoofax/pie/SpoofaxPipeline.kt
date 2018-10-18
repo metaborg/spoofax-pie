@@ -16,15 +16,15 @@ class SpoofaxPipeline @Inject constructor(
     return Task(_processWorkspace, root)
   }
 
-  fun container(project: PPath, root: PPath): Task<processContainer.Input, ContainerResult> {
-    return Task(_processContainer, processContainer.Input(project, root))
+  fun container(container: PPath, root: PPath): Task<processContainer.Input, ContainerResult> {
+    return Task(_processContainer, processContainer.Input(container, root))
   }
 
-  fun documentWithText(document: PPath, project: PPath, root: PPath, text: String): Task<processDocumentWithText.Input, DocumentResult> {
-    return Task(_processDocumentWithText, processDocumentWithText.Input(document, project, root, text))
+  fun documentWithText(document: PPath, container: PPath, root: PPath, text: String): Task<processDocumentWithText.Input, DocumentResult> {
+    return Task(_processDocumentWithText, processDocumentWithText.Input(document, container, root, text))
   }
 
-  fun document(document: PPath, project: PPath, root: PPath): Task<processDocument.Input, DocumentResult> {
-    return Task(_processDocument, processDocument.Input(document, project, root))
+  fun document(document: PPath, container: PPath, root: PPath): Task<processDocument.Input, DocumentResult> {
+    return Task(_processDocument, processDocument.Input(document, container, root))
   }
 }

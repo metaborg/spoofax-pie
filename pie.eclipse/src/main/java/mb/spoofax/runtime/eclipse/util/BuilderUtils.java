@@ -1,22 +1,16 @@
 package mb.spoofax.runtime.eclipse.util;
 
-import java.util.Collection;
-import java.util.Map;
-
-import org.apache.commons.lang3.ArrayUtils;
-import org.eclipse.core.resources.ICommand;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.primitives.Ints;
 import com.google.inject.Inject;
-
-import mb.log.Logger;
+import java.util.Collection;
+import java.util.Map;
+import mb.log.api.Logger;
+import org.apache.commons.lang3.ArrayUtils;
+import org.eclipse.core.resources.*;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 public class BuilderUtils {
     private final Logger logger;

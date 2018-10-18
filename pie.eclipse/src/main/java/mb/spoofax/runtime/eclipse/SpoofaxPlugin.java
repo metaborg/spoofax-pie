@@ -1,6 +1,6 @@
 package mb.spoofax.runtime.eclipse;
 
-import mb.log.LogModule;
+import mb.log.slf4j.LogModule;
 import mb.pie.lang.runtime.PieLangRuntimeModule;
 import mb.pie.taskdefs.guice.GuiceTaskDefsModule;
 import mb.spoofax.api.*;

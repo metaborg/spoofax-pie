@@ -6,12 +6,18 @@
 >
   <servers>
     <server>
-      <id>bintray-maven-metaborg-spoofax-pie</id>
-      <username>${env.DEPLOY_USERNAME}</username>
-      <password>${env.DEPLOY_PASSWORD}</password>
+      <id>spoofax-pie-deploy-release-server</id>
+      <username>${env.DEPLOY_RELEASE_USERNAME}</username>
+      <password>${env.DEPLOY_RELEASE_PASSWORD}</password>
+    </server>
+    <server>
+      <id>spoofax-pie-deploy-snapshot-server</id>
+      <username>${env.DEPLOY_SNAPSHOT_USERNAME}</username>
+      <password>${env.DEPLOY_SNAPSHOT_PASSWORD}</password>
     </server>
   </servers>
 
+  <!-- Required for resolving MetaBorg artifacts in .mvn/extensions.xml files -->
   <profiles>
     <profile>
       <id>add-metaborg-release-repos</id>
@@ -40,7 +46,6 @@
         </pluginRepository>
       </pluginRepositories>
     </profile>
-
     <profile>
       <id>add-metaborg-snapshot-repos</id>
       <repositories>
@@ -69,7 +74,6 @@
       </pluginRepositories>
     </profile>
   </profiles>
-
   <activeProfiles>
     <activeProfile>add-metaborg-release-repos</activeProfile>
     <activeProfile>add-metaborg-snapshot-repos</activeProfile>

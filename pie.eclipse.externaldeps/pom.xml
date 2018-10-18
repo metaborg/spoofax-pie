@@ -20,6 +20,18 @@
   </properties>
 
   <dependencies>
+    <!-- Metaborg Log -->
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>log.api</artifactId>
+      <version>${mb.log.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>log.slf4j</artifactId>
+      <version>${mb.log.version}</version>
+    </dependency>
+
     <!-- PIE -->
     <dependency>
       <groupId>org.metaborg</groupId>
@@ -182,6 +194,8 @@
             <Bundle-Version>$(replace;${project.version};-SNAPSHOT;.${forceContextQualifier})</Bundle-Version>
             <!-- Embed dependencies into plugin bundle, so they are exportable. -->
             <Embed-Dependency>
+              log.api,
+              log.slf4j,
               pie.vfs,
               pie.api,
               pie.runtime,
@@ -207,6 +221,7 @@
             </Embed-Dependency>
             <!-- Export dependency packages -->
             <Export-Package>
+              mb.log.*,
               mb.pie.*,
               mb.spoofax.pie.*,
               org.lmdbjava.*;provider=metaborg;mandatory:=provider;version=0,
@@ -258,4 +273,6 @@
       </snapshots>
     </repository>
   </repositories>
+
+  <description>Spoofax-PIE Eclipse plugin external dependencies</description>
 </project>

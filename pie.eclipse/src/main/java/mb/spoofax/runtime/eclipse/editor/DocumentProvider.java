@@ -2,16 +2,14 @@ package mb.spoofax.runtime.eclipse.editor;
 
 import java.io.IOException;
 import java.io.InputStream;
-
+import mb.log.api.Logger;
+import mb.pie.vfs.path.PPath;
+import mb.spoofax.runtime.eclipse.util.StatusUtils;
+import mb.spoofax.runtime.eclipse.vfs.EclipsePathSrv;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
-
-import mb.log.Logger;
-import mb.pie.vfs.path.PPath;
-import mb.spoofax.runtime.eclipse.util.StatusUtils;
-import mb.spoofax.runtime.eclipse.vfs.EclipsePathSrv;
 
 public class DocumentProvider extends FileDocumentProvider {
     private final Logger logger;

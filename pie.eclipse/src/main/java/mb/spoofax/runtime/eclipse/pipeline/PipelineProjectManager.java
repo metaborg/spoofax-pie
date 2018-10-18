@@ -2,7 +2,7 @@ package mb.spoofax.runtime.eclipse.pipeline;
 
 import com.google.inject.Inject;
 import java.io.IOException;
-import mb.log.Logger;
+import mb.log.api.Logger;
 import mb.pie.vfs.path.PPath;
 import mb.spoofax.legacy.LoadMetaLanguages;
 import mb.spoofax.runtime.eclipse.nature.SpoofaxNature;

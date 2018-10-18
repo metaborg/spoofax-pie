@@ -5,7 +5,8 @@ import mb.log.api.Logger;
 import mb.log.slf4j.LogModule;
 import mb.pie.lang.runtime.PieLangRuntimeModule;
 import mb.pie.vfs.path.PathSrv;
-import mb.spoofax.api.*;
+import mb.spoofax.api.SpoofaxFacade;
+import mb.spoofax.api.StaticSpoofaxFacade;
 import mb.spoofax.legacy.StaticSpoofaxCoreFacade;
 import mb.spoofax.pie.*;
 import mb.spoofax.pie.benchmark.SpoofaxCoreModule;
@@ -36,10 +37,15 @@ public class SpoofaxPieState {
             spoofaxCoreMetaFacade = new SpoofaxMeta(spoofaxCoreFacade);
             StaticSpoofaxCoreFacade.init(spoofaxCoreMetaFacade);
 
-            spoofaxFacade =
-                new SpoofaxFacade(new SpoofaxModule(), new LogModule(LoggerFactory.getLogger("root")), new SpoofaxRuntimeModule(),
-                    new SpoofaxPieModule(), new PieVfsModule(), new SpoofaxPieTaskDefsModule(), new PieLangRuntimeModule(),
-                    new TaskDefsModule_spoofax());
+            spoofaxFacade = new SpoofaxFacade(
+                new SpoofaxRuntimeModule(), // Spoofax runtime (implementation)
+                new LogModule(LoggerFactory.getLogger("root")), // SLF4J logging support
+                new PieVfsModule(), // PIE VFS support
+                new PieLangRuntimeModule(), // PIE DSL task definitions
+                new SpoofaxPieModule(), // Spoofax-PIE support
+                new SpoofaxPieTaskDefsModule(), // Spoofax-PIE task definitions
+                new TaskDefsModule_spoofax() // Spoofax-PIE generated task definitions
+            );
             StaticSpoofaxFacade.init(spoofaxFacade);
 
             injector = spoofaxFacade.injector;
