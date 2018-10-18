@@ -260,4 +260,6 @@
       </plugins>
     </pluginManagement>
   </build>
+
+  <description>Spoofax support for legacy Spoofax Core</description>
 </project>

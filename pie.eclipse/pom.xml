@@ -73,4 +73,6 @@
       <scope>provided</scope>
     </dependency>
   </dependencies>
+
+  <description>Spoofax-PIE Eclipse plugin</description>
 </project>

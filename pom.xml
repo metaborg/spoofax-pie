@@ -29,12 +29,13 @@
     <module>lang/cfg/example</module>
     <module>lang/cfg/test</module>
     <!--module>pie.eclipse</module-->
-    <module>pie.eclipse.externaldeps</module>
+    <!--module>pie.eclipse.externaldeps</module-->
     <module>examples/simple</module>
   </modules>
 
   <build>
     <plugins>
+      <!-- Skip installation and deployment. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-install-plugin</artifactId>

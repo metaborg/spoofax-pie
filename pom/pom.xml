@@ -372,11 +372,11 @@
 
   <distributionManagement>
     <repository>
-      <id>metaborg-artifacts</id>
-      <url>https://artifacts.metaborg.org/content/repositories/releases/</url>
+      <id>spoofax-pie-deploy-release-server</id>
+      <url>https://api.bintray.com/maven/metaborg/maven/spoofax-pie/</url>
     </repository>
     <snapshotRepository>
-      <id>metaborg-artifacts</id>
+      <id>spoofax-pie-deploy-snapshot-server</id>
       <url>https://artifacts.metaborg.org/content/repositories/snapshots/</url>
     </snapshotRepository>
   </distributionManagement>

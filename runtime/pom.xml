@@ -98,4 +98,6 @@
       </plugin>
     </plugins>
   </build>
+
+  <description>Spoofax runtime</description>
 </project>

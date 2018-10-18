@@ -6,9 +6,14 @@
 >
   <servers>
     <server>
-      <id>metaborg-artifacts</id>
-      <username>${env.DEPLOY_USERNAME}</username>
-      <password>${env.DEPLOY_PASSWORD}</password>
+      <id>spoofax-pie-deploy-release-server</id>
+      <username>${env.DEPLOY_RELEASE_USERNAME}</username>
+      <password>${env.DEPLOY_RELEASE_PASSWORD}</password>
+    </server>
+    <server>
+      <id>spoofax-pie-deploy-snapshot-server</id>
+      <username>${env.DEPLOY_SNAPSHOT_USERNAME}</username>
+      <password>${env.DEPLOY_SNAPSHOT_PASSWORD}</password>
     </server>
   </servers>
 
