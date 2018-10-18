@@ -6,7 +6,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.metaborg</groupId>
   <artifactId>spoofax.parent</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>0.1.0</version>
   <packaging>pom</packaging>
 
   <properties>
@@ -22,11 +22,11 @@
     <kotlin.api.version>1.2</kotlin.api.version>
     <kotlin.runtime.version>1.2.71</kotlin.runtime.version>
     <!-- PIE -->
-    <pie.version>0.3.0-SNAPSHOT</pie.version>
+    <pie.version>0.2.1</pie.version>
     <!-- Metaborg Log -->
     <mb.log.version>0.1.0</mb.log.version>
     <!-- Spoofax legacy (Spoofax Core/Metaborg) -->
-    <spoofax.legacy.version>2.6.0-SNAPSHOT</spoofax.legacy.version>
+    <spoofax.legacy.version>2.5.1</spoofax.legacy.version>
     <!-- Guice -->
     <guice.version>4.1.0</guice.version>
     <!-- JUnit -->

@@ -1,9 +1,9 @@
 ---
-id: org.metaborg:spoofax.lang.cfg.example:0.1.0-SNAPSHOT
+id: org.metaborg:spoofax.lang.cfg.example:0.1.0
 name: cfg
 dependencies:
   compile:
-  - org.metaborg:spoofax.lang.cfg:0.1.0-SNAPSHOT
+  - org.metaborg:spoofax.lang.cfg:0.1.0
 debug:
   typesmart: false
 runtime:
