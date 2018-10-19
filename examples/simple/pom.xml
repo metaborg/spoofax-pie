@@ -9,7 +9,7 @@
   <parent>
     <groupId>org.metaborg</groupId>
     <artifactId>spoofax.parent.kotlin</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.2.0-SNAPSHOT</version>
     <relativePath>../../pom/kotlin</relativePath>
   </parent>
 
