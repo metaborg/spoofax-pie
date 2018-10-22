@@ -4,7 +4,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 >
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>spoofax.build</artifactId>
+  <artifactId>spoofax.build.eclipse</artifactId>
   <packaging>pom</packaging>
 
   <parent>
@@ -15,21 +15,7 @@
   </parent>
 
   <modules>
-    <module>pom</module>
-    <module>pom/java</module>
-    <module>pom/kotlin</module>
-    <module>pom/legacy.lang</module>
-    <module>pom/eclipse.plugin</module>
-    <module>api</module>
-    <module>legacy</module>
-    <module>runtime</module>
-    <module>pie</module>
-    <module>pie.benchmark</module>
-    <module>lang/cfg/langspec</module>
-    <module>lang/cfg/example</module>
-    <module>lang/cfg/test</module>
-    <module>pie.eclipse.externaldeps</module>
-    <module>examples/simple</module>
+    <module>pie.eclipse</module>
   </modules>
 
   <build>

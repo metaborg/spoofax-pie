@@ -25,12 +25,29 @@
       <artifactId>spoofax.runtime</artifactId>
       <version>${spoofax.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>spoofax.pie.eclipse.externaldeps</artifactId>
+      <version>${spoofax.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>pie.vfs</artifactId>
       <version>${pie.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>log.api</artifactId>
+      <version>${mb.log.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>log.slf4j</artifactId>
+      <version>${mb.log.version}</version>
+    </dependency>
+
 
     <dependency>
       <groupId>org.metaborg</groupId>
@@ -54,7 +71,12 @@
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
-      <artifactId>log</artifactId>
+      <artifactId>org.metaborg.spoofax.eclipse.externaldeps</artifactId>
+      <version>${spoofax.legacy.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>org.metaborg.spoofax.eclipse.meta.externaldeps</artifactId>
       <version>${spoofax.legacy.version}</version>
     </dependency>
 

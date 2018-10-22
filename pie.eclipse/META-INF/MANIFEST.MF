@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Spoofax Eclipse plugin
-Bundle-SymbolicName: spoofax.runtime.eclipse;singleton:=true
-Bundle-Version: 0.1.0.qualifier
+Bundle-SymbolicName: spoofax.pie.eclipse;singleton:=true
+Bundle-Version: 0.2.0.qualifier
 Bundle-Activator: mb.spoofax.runtime.eclipse.SpoofaxPlugin
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.filesystem,
