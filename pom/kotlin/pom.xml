@@ -48,6 +48,9 @@
             <apiVersion>${kotlin.api.version}</apiVersion>
             <jvmTarget>${java.lang.version}</jvmTarget>
             <experimentalCoroutines>enable</experimentalCoroutines>
+            <args>
+              <arg>-Xjvm-default=compatibility</arg>
+            </args>
           </configuration>
           <executions>
             <execution>

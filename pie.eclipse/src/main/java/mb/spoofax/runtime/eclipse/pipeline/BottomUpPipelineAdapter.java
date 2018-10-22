@@ -187,11 +187,12 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
 
     @Override public void removeEditor(SpoofaxEditor editor) {
         final TaskKey key = editorKeys.get(editor);
-        if(key == null) {
+        if(key != null) {
+            logger.debug("Removing pipeline observer for editor {}", editor);
+            executor.removeObserver(key);
+        } else {
             logger.error("Failed to remove pipeline observer; no task key for editor {}", editor);
         }
-        logger.debug("Removing pipeline observer for editor {}", editor);
-        executor.removeObserver(key);
     }
 
 

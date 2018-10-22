@@ -3,7 +3,8 @@ package mb.spoofax.runtime.eclipse;
 import mb.log.slf4j.LogModule;
 import mb.pie.lang.runtime.PieLangRuntimeModule;
 import mb.pie.taskdefs.guice.GuiceTaskDefsModule;
-import mb.spoofax.api.*;
+import mb.spoofax.api.SpoofaxFacade;
+import mb.spoofax.api.StaticSpoofaxFacade;
 import mb.spoofax.legacy.StaticSpoofaxCoreFacade;
 import mb.spoofax.pie.SpoofaxPieModule;
 import mb.spoofax.pie.SpoofaxPieTaskDefsModule;
@@ -46,7 +47,12 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
 
         // Initialize Spoofax Core
         try {
-            spoofaxCoreFacade = new Spoofax(new SpoofaxEclipseModule(), new SpoofaxExtensionModule());
+            // @formatter:off
+            spoofaxCoreFacade = new Spoofax(
+                new SpoofaxEclipseModule(), // Spoofax support, with Eclipse extensions
+                new SpoofaxExtensionModule() // Extensions from Spoofax-meta into Spoofax
+            );
+            // @formatter:on
             spoofaxCoreMetaFacade = new SpoofaxMeta(spoofaxCoreFacade);
             StaticSpoofaxCoreFacade.init(spoofaxCoreMetaFacade);
         } catch(MetaborgException e) {
@@ -55,9 +61,19 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
         }
 
         // Initialize Spoofax runtime
-        spoofaxFacade = new SpoofaxFacade(new SpoofaxModule(), new LogModule(logger), new EclipseModule(),
-            new EclipseVFSModule(), new SpoofaxRuntimeModule(), new SpoofaxPieModule(), new GuiceTaskDefsModule(),
-            new SpoofaxPieTaskDefsModule(), new PieLangRuntimeModule(), new TaskDefsModule_spoofax());
+        // @formatter:off
+        spoofaxFacade = new SpoofaxFacade(
+            new SpoofaxRuntimeModule(), // Spoofax runtime (implementation)
+            new LogModule(logger), // SLF4J logging support
+            new EclipseModule(), // Eclipse support
+            new EclipseVFSModule(), // PIE VFS support, with Eclipse extensions
+            new SpoofaxPieModule(), // Spoofax-PIE support
+            new PieLangRuntimeModule(), // PIE DSL task definitions
+            new GuiceTaskDefsModule(), // Guice support for injecting task definitions
+            new SpoofaxPieTaskDefsModule(), // Spoofax-PIE task definitions
+            new TaskDefsModule_spoofax() // Spoofax-PIE generated task definitions
+        );
+        // @formatter:on
         StaticSpoofaxFacade.init(spoofaxFacade);
         spoofaxFacade.injector.getInstance(PipelineProjectManager.class).initialize();
 
