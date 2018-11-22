@@ -16,6 +16,17 @@
   <dependencies>
     <dependency>
       <groupId>org.metaborg</groupId>
+      <artifactId>fs.api</artifactId>
+      <version>${mb.fs.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>fs.java</artifactId>
+      <version>${mb.fs.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.metaborg</groupId>
       <artifactId>spoofax.api</artifactId>
       <version>${spoofax.version}</version>
     </dependency>

@@ -1,6 +1,6 @@
 package mb.spoofax.runtime.analysis;
 
-import mb.pie.vfs.path.PPath;
+import mb.fs.java.JavaFSPath;
 import mb.spoofax.api.message.*;
 import mb.spoofax.api.region.Region;
 import mb.spoofax.runtime.term.TermOrigin;
@@ -24,7 +24,7 @@ public class TermMessages {
                 text = termMessageToString(term) + " (no tree node indicated)";
             }
             final @Nullable Region region;
-            final @Nullable PPath path;
+            final @Nullable JavaFSPath path;
             if(originTerm != null) {
                 region = TermOrigin.region(originTerm);
                 path = TermOrigin.sourcePath(originTerm);
@@ -35,10 +35,10 @@ public class TermMessages {
             final Message message = new Message(text, severity, region);
             if(path == null) {
                 messages.addGlobalMessage(message);
-            } else if(path.isFile()) {
-                messages.addDocumentMessage(path, message);
+            } else if(path.toNode().isFile()) {
+                messages.addDocumentMessage(path.toString(), message);
             } else {
-                messages.addContainerMessage(path, message);
+                messages.addContainerMessage(path.toString(), message);
             }
         }
     }

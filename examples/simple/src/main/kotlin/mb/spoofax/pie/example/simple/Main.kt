@@ -1,13 +1,12 @@
 package mb.spoofax.pie.example.simple
 
 import com.google.inject.Singleton
+import mb.fs.java.JavaFSNode
 import mb.log.slf4j.LogModule
-import mb.pie.lang.runtime.PieLangRuntimeModule
 import mb.pie.runtime.PieBuilderImpl
 import mb.pie.runtime.logger.StreamLogger
 import mb.pie.store.lmdb.withLMDBStore
 import mb.pie.taskdefs.guice.withGuiceTaskDefs
-import mb.pie.vfs.path.PathSrv
 import mb.spoofax.api.SpoofaxFacade
 import mb.spoofax.api.StaticSpoofaxFacade
 import mb.spoofax.legacy.LoadMetaLanguages
@@ -42,9 +41,7 @@ fun main(args: Array<String>) {
   // Setup Spoofax-PIE trough its facade.
   val spoofaxFacade = SpoofaxFacade(
     SpoofaxRuntimeModule(), // Spoofax runtime (implementation)
-    LogModule(LoggerFactory.getLogger("root")), // SLF4J logging support
-    PieVfsModule(), // PIE VFS support
-    PieLangRuntimeModule(), // PIE DSL task definitions
+    LogModule(LoggerFactory.getLogger("getRoot")), // SLF4J logging support
     SpoofaxPieModule(), // Spoofax-PIE support
     SpoofaxPieTaskDefsModule(), // Spoofax-PIE task definitions
     TaskDefsModule_spoofax() // Spoofax-PIE generated task definitions
@@ -54,18 +51,17 @@ fun main(args: Array<String>) {
   StaticSpoofaxFacade.init(spoofaxFacade)
 
   // Convert workspace directory to format that PIE can work with.
-  val pathSrv = injector.getInstance(PathSrv::class.java)
-  val workspaceDir = pathSrv.resolveLocal(workspaceDirStr)
-  if(!workspaceDir.exists() || !workspaceDir.isDir) {
+  val workspaceDir = JavaFSNode(workspaceDirStr)
+  if(!workspaceDir.exists() || !workspaceDir.isDirectory) {
     println("Workspace at path $workspaceDir does not exist or is not a directory")
     exitProcess(2)
   }
-  val containerDir = workspaceDir.resolve(containerDirRelStr)
-  if(!containerDir.exists() || !containerDir.isDir) {
+  val containerDir = workspaceDir.appendSegment(containerDirRelStr)
+  if(!containerDir.exists() || !containerDir.isDirectory) {
     println("Container (project) at path $containerDir does not exist or is not a directory")
     exitProcess(2)
   }
-  val documentFile = containerDir.resolve(documentFileRelStr)
+  val documentFile = containerDir.appendSegment(documentFileRelStr)
   if(!documentFile.exists() || !documentFile.isFile) {
     println("Document file at path $documentFile does not exist or is not a file")
     exitProcess(2)
@@ -83,14 +79,13 @@ fun main(args: Array<String>) {
 
   // Run workspace build incrementally, with top-down executor (since we do not have a list of changed files here).
   val session = pie.topDownExecutor.newSession()
-  session.requireInitial(spoofaxPipeline.workspace(workspaceDir))
+  session.requireInitial(spoofaxPipeline.workspace(workspaceDir.path))
   // Get result of document file and print it.
-  val result = session.requireInitial(spoofaxPipeline.document(documentFile, containerDir, workspaceDir))
+  val result = session.requireInitial(spoofaxPipeline.document(documentFile.path, containerDir.path, workspaceDir.path))
   println(result)
 
   // Finally, we clean up our resources.
   pie.close()
-  pathSrv.close()
 }
 
 /** Spoofax Core (legacy) module to disable IDE editor support, since we are running headless. */

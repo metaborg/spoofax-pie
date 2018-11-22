@@ -1,8 +1,9 @@
 package mb.spoofax.runtime.cfg;
 
 import com.google.inject.Inject;
+import mb.fs.api.path.FSPath;
+import mb.fs.java.JavaFSPath;
 import mb.log.api.Logger;
-import mb.pie.vfs.path.PPath;
 import mb.spoofax.runtime.term.Terms;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -20,14 +21,14 @@ public class ConfigParser {
     }
 
 
-    public ImmutableWorkspaceConfigPaths parseWorkspaceConfigPaths(IStrategoTerm root, PPath dir) {
+    public ImmutableWorkspaceConfigPaths parseWorkspaceConfigPaths(IStrategoTerm root, JavaFSPath dir) {
         final ArrayList<IStrategoTerm> sections = sections(root);
         final ArrayList<IStrategoTerm> workspaceSections = subSectionsOf(sections, "WorkspaceSec");
-        final ArrayList<PPath> langSpecConfigFiles = pathValuesOf(workspaceSections, "LangSpec", dir);
+        final ArrayList<JavaFSPath> langSpecConfigFiles = pathValuesOf(workspaceSections, "LangSpec", dir);
         return ImmutableWorkspaceConfigPaths.of(langSpecConfigFiles);
     }
 
-    public Optional<LangSpecConfig> parseLangSpecConfig(IStrategoTerm root, PPath dir) {
+    public Optional<LangSpecConfig> parseLangSpecConfig(IStrategoTerm root, JavaFSPath dir) {
         final ArrayList<IStrategoTerm> sections = sections(root);
         final ArrayList<IStrategoTerm> langSpecSections = subSectionsOf(sections, "LangSpecSec");
 
@@ -48,19 +49,19 @@ public class ConfigParser {
         final ArrayList<IStrategoTerm> syntaxSubSections = subSectionsOf(langSpecSections, "SyntaxSec");
         // Syntax - Parsing
         final ArrayList<IStrategoTerm> syntaxParseOpts = subSectionsOf(syntaxSubSections, "SyntaxParseSubSec");
-        final ArrayList<PPath> syntaxFiles = pathValuesOf(syntaxParseOpts, "SyntaxParseFiles", dir);
-        final @Nullable PPath syntaxParseMainFile = pathValueOf(syntaxParseOpts, "SyntaxParseMainFile", dir).orElse(null);
+        final ArrayList<JavaFSPath> syntaxFiles = pathValuesOf(syntaxParseOpts, "SyntaxParseFiles", dir);
+        final @Nullable JavaFSPath syntaxParseMainFile = pathValueOf(syntaxParseOpts, "SyntaxParseMainFile", dir).orElse(null);
         final @Nullable String syntaxParseStartSymbolId = stringValueOf(syntaxParseOpts, "SyntaxParseStartSymbolId").orElse(null);
         // Syntax - Signatures
         final ArrayList<IStrategoTerm> syntaxSignatureSections = subSectionsOf(syntaxSubSections, "SyntaxSignatureSubSec");
-        final List<PPath> syntaxSignatureFiles = pathValuesOf(syntaxSignatureSections, "SignatureSyntaxFiles", dir);
+        final List<JavaFSPath> syntaxSignatureFiles = pathValuesOf(syntaxSignatureSections, "SignatureSyntaxFiles", dir);
         // Syntax - Styling
         final ArrayList<IStrategoTerm> syntaxStyleSections = subSectionsOf(syntaxSubSections, "SyntaxStyleSubSec");
-        final @Nullable PPath syntaxStyleFile = pathValueOf(syntaxStyleSections, "SyntaxStyleFile", dir).orElse(null);
+        final @Nullable JavaFSPath syntaxStyleFile = pathValueOf(syntaxStyleSections, "SyntaxStyleFile", dir).orElse(null);
 
         // NaTs
         final ArrayList<IStrategoTerm> natsOpts = subSectionsOf(langSpecSections, "NaTsSec");
-        final List<PPath> natsNaBL2Files = pathValuesOf(natsOpts, "NaTsNaBL2Files", dir);
+        final List<JavaFSPath> natsNaBL2Files = pathValuesOf(natsOpts, "NaTsNaBL2Files", dir);
         final @Nullable ImmutableStrategoCompilerConfig natsStrategoConfig = value(natsOpts, "NaTsStrategoConfig")
             .flatMap((t) -> parseStrategoCompilerConfig(t, dir))
             .orElse(null);
@@ -79,19 +80,19 @@ public class ConfigParser {
             natsStrategoStrategyId, natsRootScopePerFile));
     }
 
-    private Optional<ImmutableStrategoCompilerConfig> parseStrategoCompilerConfig(IStrategoTerm root, PPath dir) {
+    private Optional<ImmutableStrategoCompilerConfig> parseStrategoCompilerConfig(IStrategoTerm root, JavaFSPath dir) {
         final ArrayList<IStrategoTerm> options = sections(root);
-        final PPath mainFile = pathValueOf(options, "StrategoConfigMainFile", dir).orElse(null);
+        final JavaFSPath mainFile = pathValueOf(options, "StrategoConfigMainFile", dir).orElse(null);
         if(mainFile == null) {
             log.error("Invalid Stratego config; main file is not set");
             return Optional.empty();
         }
-        final ArrayList<PPath> includeDirs = pathValuesOf(options, "StrategoConfigIncludeDirs", dir);
-        final ArrayList<PPath> includeFiles = pathValuesOf(options, "StrategoConfigIncludeFiles", dir);
+        final ArrayList<JavaFSPath> includeDirs = pathValuesOf(options, "StrategoConfigIncludeDirs", dir);
+        final ArrayList<JavaFSPath> includeFiles = pathValuesOf(options, "StrategoConfigIncludeFiles", dir);
         final ArrayList<String> includeLibs = stringValuesOf(options, "StrategoConfigIncludeLibs");
-        final PPath baseDir = pathValueOf(options, "StrategoConfigBaseDir", dir).orElse(null);
-        final PPath cacheDir = pathValueOf(options, "StrategoConfigCacheDir", dir).orElse(null);
-        final PPath outputFile = pathValueOf(options, "StrategoConfigOutputFile", dir).orElse(null);
+        final JavaFSPath baseDir = pathValueOf(options, "StrategoConfigBaseDir", dir).orElse(null);
+        final JavaFSPath cacheDir = pathValueOf(options, "StrategoConfigCacheDir", dir).orElse(null);
+        final JavaFSPath outputFile = pathValueOf(options, "StrategoConfigOutputFile", dir).orElse(null);
         return Optional.of(
             ImmutableStrategoCompilerConfig.of(mainFile, includeDirs, includeFiles, includeLibs, baseDir, cacheDir, outputFile));
     }
@@ -151,19 +152,19 @@ public class ConfigParser {
     }
 
 
-    private Optional<PPath> pathValueOf(ArrayList<IStrategoTerm> sections, String constructorName, PPath dir) {
+    private Optional<JavaFSPath> pathValueOf(ArrayList<IStrategoTerm> sections, String constructorName, JavaFSPath dir) {
         return values(sections, constructorName)
             .flatMap(this::stringTerms)
             .map(this::interpolateString)
-            .map(dir::resolve)
+            .map(dir::appendSegment)
             .findFirst();
     }
 
-    private ArrayList<PPath> pathValuesOf(ArrayList<IStrategoTerm> sections, String constructorName, PPath dir) {
+    private ArrayList<JavaFSPath> pathValuesOf(ArrayList<IStrategoTerm> sections, String constructorName, JavaFSPath dir) {
         return values(sections, constructorName)
             .flatMap(this::stringTerms)
             .map(this::interpolateString)
-            .map(dir::resolve)
+            .map(dir::appendSegment)
             .collect(Collectors.toCollection(ArrayList::new));
     }
 

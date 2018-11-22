@@ -16,8 +16,13 @@
   <dependencies>
     <dependency>
       <groupId>org.metaborg</groupId>
-      <artifactId>pie.vfs</artifactId>
-      <version>${pie.version}</version>
+      <artifactId>fs.api</artifactId>
+      <version>${mb.fs.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>fs.java</artifactId>
+      <version>${mb.fs.version}</version>
     </dependency>
 
     <dependency>

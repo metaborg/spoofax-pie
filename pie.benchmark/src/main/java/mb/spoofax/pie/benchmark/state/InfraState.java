@@ -31,8 +31,8 @@ public class InfraState {
         storeKind.apply(builder, spoofaxPieState, workspaceState);
         shareKind.apply(builder);
         builder.withDefaultOutputStamper(defaultOutputStamperKind.get());
-        builder.withDefaultFileReqStamper(defaultFileReqStamperKind.get());
-        builder.withDefaultFileGenStamper(defaultFileGenStamperKind.get());
+        builder.withDefaultRequireFileSystemStamper(defaultFileReqStamperKind.get());
+        builder.withDefaultProvideFileSystemStamper(defaultFileGenStamperKind.get());
         layerKind.apply(builder);
         loggerKind.apply(builder, spoofaxPieState);
         executorLoggerKind.apply(builder);
@@ -108,22 +108,22 @@ public class InfraState {
 
     @SuppressWarnings("unused") public enum FileStamperKind {
         exists {
-            @Override public FileStamper get() {
+            @Override public ResourceStamper get() {
                 return FileStampers.INSTANCE.getExists();
             }
         },
         modified {
-            @Override public FileStamper get() {
+            @Override public ResourceStamper get() {
                 return FileStampers.INSTANCE.getModified();
             }
         },
         hash {
-            @Override public FileStamper get() {
+            @Override public ResourceStamper get() {
                 return FileStampers.INSTANCE.getHash();
             }
         };
 
-        public abstract FileStamper get();
+        public abstract ResourceStamper get();
     }
 
     @SuppressWarnings("unused") public enum LayerKind {

@@ -1,9 +1,9 @@
 package mb.spoofax.pie.processing
 
 import com.google.inject.Inject
+import mb.fs.java.JavaFSPath
 import mb.pie.api.*
-import mb.pie.api.stamp.FileStampers
-import mb.pie.vfs.path.PPath
+import mb.pie.api.fs.stamp.FileSystemStampers
 import mb.spoofax.pie.config.ParseWorkspaceConfig
 import mb.spoofax.pie.config.requireConfigValue
 import mb.spoofax.pie.legacy.*
@@ -13,20 +13,20 @@ import org.metaborg.core.language.ResourceExtensionFacet
 import org.metaborg.spoofax.meta.core.build.SpoofaxLangSpecCommonPaths
 import java.io.Serializable
 
-fun shouldProcessDocument(document: PPath): Boolean {
+fun shouldProcessDocument(document: JavaFSPath): Boolean {
   val str = document.toString()
   return !str.contains("src-gen") && !str.contains("target")
 }
 
 class LangSpecExtensions @Inject constructor(
   private val parseWorkspaceConfig: ParseWorkspaceConfig
-) : TaskDef<PPath, ArrayList<String>> {
+) : TaskDef<JavaFSPath, ArrayList<String>> {
   companion object {
     const val id = "processing.LangSpecExtensions"
   }
 
   override val id = Companion.id
-  override fun ExecContext.exec(input: PPath): ArrayList<String> {
+  override fun ExecContext.exec(input: JavaFSPath): ArrayList<String> {
     return requireConfigValue(this, parseWorkspaceConfig, input) { workspaceConfig ->
       ArrayList(workspaceConfig.extensions())
     }
@@ -42,7 +42,7 @@ class LegacyExtensions : TaskDef<None, ArrayList<String>> {
   override fun ExecContext.exec(input: None): ArrayList<String> {
     val spoofax = Spx.spoofax()
     spoofax.languageService.allComponents.forEach {
-      require(SpoofaxLangSpecCommonPaths(it.location()).targetMetaborgDir().resolveFile("editor.esv.af").pPath, FileStampers.hash)
+      require(SpoofaxLangSpecCommonPaths(it.location()).targetMetaborgDir().resolveFile("editor.esv.af").fsPath, FileSystemStampers.hash)
     }
     return spoofax.languageService.allComponents
       .map {
@@ -64,12 +64,12 @@ class IsLangSpecDocument @Inject constructor(
     const val id = "processing.IsLangSpecDocument"
   }
 
-  data class Input(val document: PPath, val root: PPath) : Serializable
+  data class Input(val document: JavaFSPath, val root: JavaFSPath) : Serializable
 
   override val id = Companion.id
   override fun ExecContext.exec(input: Input): Boolean {
     val (document, root) = input
-    val extension = document.extension()
+    val extension = document.leafExtension
       ?: throw ExecException("Cannot determine if document $document is a Spoofax-PIE document; it has no extension")
     return requireConfigValue(this, parseWorkspaceConfig, root) { workspaceConfig ->
       val langSpecConfig = workspaceConfig.langSpecConfigForExt(extension)
@@ -85,12 +85,12 @@ class LangIdOfDocument @Inject constructor(
     const val id = "processing.LangIdOfDocument"
   }
 
-  data class Input(val document: PPath, val root: PPath) : Serializable
+  data class Input(val document: JavaFSPath, val root: JavaFSPath) : Serializable
 
   override val id = Companion.id
   override fun ExecContext.exec(input: Input): LangId {
     val (document, root) = input
-    val extension = document.extension()
+    val extension = document.leafExtension
       ?: throw ExecException("Cannot determine if document $document is a Spoofax-PIE document; it has no extension")
     return requireConfigValue(this, parseWorkspaceConfig, root, ConfigValueFunc(extension))
       ?: throw ExecException("Cannot determine if document $document is a Spoofax-PIE document; no language specification was found for extension $extension")
@@ -104,13 +104,13 @@ class LangIdOfDocument @Inject constructor(
   }
 }
 
-class IsLegacyDocument : TaskDef<PPath, Boolean> {
+class IsLegacyDocument : TaskDef<JavaFSPath, Boolean> {
   companion object {
     const val id = "processing.IsLegacyDocument"
   }
 
   override val id = Companion.id
-  override fun ExecContext.exec(input: PPath): Boolean {
+  override fun ExecContext.exec(input: JavaFSPath): Boolean {
     val spoofax = Spx.spoofax()
     return spoofax.languageIdentifierService.identify(input.fileObject) != null
   }

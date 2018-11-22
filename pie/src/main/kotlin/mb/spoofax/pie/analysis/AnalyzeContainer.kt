@@ -1,11 +1,11 @@
 package mb.spoofax.pie.analysis
 
 import com.google.inject.Inject
+import mb.fs.java.JavaFSPath
 import mb.log.api.Logger
 import mb.pie.api.ExecContext
 import mb.pie.api.TaskDef
-import mb.pie.api.stamp.FileStampers
-import mb.pie.vfs.path.PPath
+import mb.pie.api.fs.stamp.FileSystemStampers
 import mb.spoofax.api.SpoofaxEx
 import mb.spoofax.runtime.analysis.Analyzer
 import mb.spoofax.runtime.cfg.LangId
@@ -25,9 +25,9 @@ class AnalyzeContainer @Inject constructor(
   }
 
   data class Input(
-    val container: PPath,
+    val container: JavaFSPath,
     val langId: LangId,
-    val root: PPath
+    val root: JavaFSPath
   ) : Serializable
 
   override val id = Companion.id
@@ -35,7 +35,7 @@ class AnalyzeContainer @Inject constructor(
     val (container, langId, root) = input
     val analyzer = require(compileAnalyzer, CompileAnalyzer.Input(langId, root)) ?: return null
     val strategoRuntime = analyzer.createSuitableRuntime(StrategoRuntimeBuilder(), primitiveLibrary)
-    require(analyzer.strategoCtree, FileStampers.hash)
+    require(analyzer.strategoCtree, FileSystemStampers.hash)
     return try {
       analyzer.analyzeContainer(container, strategoRuntime)
     } catch(e: SpoofaxEx) {

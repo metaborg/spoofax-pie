@@ -1,9 +1,8 @@
 package mb.spoofax.pie.analysis
 
 import com.google.inject.Inject
+import mb.fs.java.JavaFSPath
 import mb.pie.api.*
-import mb.pie.vfs.path.PPath
-import mb.pie.vfs.path.PathSrv
 import mb.spoofax.pie.config.ParseWorkspaceConfig
 import mb.spoofax.pie.config.requireConfigValue
 import mb.spoofax.pie.legacy.LegacyLoadProject
@@ -21,7 +20,6 @@ import java.io.Serializable
 
 class CompileAnalyzer
 @Inject constructor(
-  private val pathSrv: PathSrv,
   private val parseWorkspaceConfig: ParseWorkspaceConfig,
   private val nabl2ToStrategoAnalyzer: NaBL2ToStrategoAnalyzer,
   private val sdf3ToStrategoSignatures: SDF3ToStrategoSignatures,
@@ -32,8 +30,8 @@ class CompileAnalyzer
     const val id = "analysis.Compile"
   }
 
-  data class Input(val langId: LangId, val root: PPath) : Serializable
-  data class LangSpecConfigInfo(val dir: PPath, val strategoCompilerConfig: ImmutableStrategoCompilerConfig?, val strategyId: String?) : Serializable
+  data class Input(val langId: LangId, val root: JavaFSPath) : Serializable
+  data class LangSpecConfigInfo(val dir: JavaFSPath, val strategoCompilerConfig: ImmutableStrategoCompilerConfig?, val strategyId: String?) : Serializable
 
   override val id = Companion.id
   override fun ExecContext.exec(input: Input): Analyzer? {
@@ -80,11 +78,11 @@ class CompileAnalyzer
       }
       if(path.isFolder) {
         val localDir = spoofax.resourceService.localFile(path, replicateDir)
-        includeDirs.add(pathSrv.resolveLocal(localDir))
+        includeDirs.add(JavaFSPath(localDir))
       }
       if(path.isFile) {
         val localFile = spoofax.resourceService.localFile(path, replicateDir)
-        includeFiles.add(pathSrv.resolveLocal(localFile))
+        includeFiles.add(JavaFSPath(localFile))
       }
     }
     // Add signatures to include directories.
@@ -99,10 +97,10 @@ class CompileAnalyzer
       strategoConfigBuilder.baseDir(langSpecDir)
     }
     if(strategoCompilerConfig.cacheDir() == null) {
-      strategoConfigBuilder.cacheDir(langSpecDir.resolve("target/nabl2-cgen-str-cache"))
+      strategoConfigBuilder.cacheDir(langSpecDir.appendSegments("target", "nabl2-cgen-str-cache"))
     }
     if(strategoCompilerConfig.outputFile() == null) {
-      strategoConfigBuilder.outputFile(langSpecDir.resolve("target/nabl2-cgen.ctree"))
+      strategoConfigBuilder.outputFile(langSpecDir.appendSegments("target", "nabl2-cgen.ctree"))
     }
     // Finalize includes.
     strategoConfigBuilder.includeDirs(includeDirs)

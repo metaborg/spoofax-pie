@@ -1,11 +1,12 @@
 package mb.spoofax.pie.legacy
 
 import com.google.inject.Inject
+import mb.fs.java.JavaFSPath
 import mb.log.api.Logger
 import mb.pie.api.*
-import mb.pie.api.stamp.FileStampers
-import mb.pie.lang.runtime.util.Tuple3
-import mb.pie.vfs.path.PPath
+import mb.pie.api.fs.stamp.FileSystemStampers
+import mb.pie.lang.runtime.Tuple3
+import mb.pie.lang.runtime.Tuple4
 import mb.spoofax.api.message.Message
 import mb.spoofax.api.parse.Token
 import mb.spoofax.legacy.MessageConverter
@@ -25,7 +26,7 @@ class LegacyParse @Inject constructor(
     const val id = "legacy.Parse"
   }
 
-  data class Input(val file: PPath, val text: String) : Serializable
+  data class Input(val file: JavaFSPath, val text: String) : Serializable
   data class Output(val ast: IStrategoTerm?, val tokens: ArrayList<Token>?, val messages: ArrayList<Message>) : Tuple3<IStrategoTerm?, ArrayList<Token>?, ArrayList<Message>>
 
   override val id = Companion.id
@@ -42,7 +43,7 @@ class LegacyParse @Inject constructor(
     if(facet != null) {
       val parseTableFile = facet.parseTable
       if(parseTableFile != null) {
-        require(parseTableFile.pPath, FileStampers.hash)
+        require(parseTableFile.fsPath, FileSystemStampers.hash)
       }
     }
 
@@ -59,9 +60,6 @@ class LegacyParse @Inject constructor(
       Output(null, null, ArrayList())
     }
   }
-
-  @Suppress("NOTHING_TO_INLINE")
-  inline fun createTask(file: PPath, text: String) = this.createTask(LegacyParse.Input(file, text))
 }
 
 class LegacyParseAll @Inject constructor(
@@ -74,7 +72,7 @@ class LegacyParseAll @Inject constructor(
     const val id = "legacy.ParseAll"
   }
 
-  data class Output(val ast: IStrategoTerm?, val tokens: ArrayList<Token>?, val messages: ArrayList<Message>, val file: PPath) : Tuple3<IStrategoTerm?, ArrayList<Token>?, ArrayList<Message>>
+  data class Output(val ast: IStrategoTerm?, val tokens: ArrayList<Token>?, val messages: ArrayList<Message>, val file: JavaFSPath) : Tuple4<IStrategoTerm?, ArrayList<Token>?, ArrayList<Message>, JavaFSPath>
 
   override val id = Companion.id
   override fun key(input: ArrayList<FileTextPair>) = input.map { it.file }.toCollection(ArrayList())
@@ -93,7 +91,7 @@ class LegacyParseAll @Inject constructor(
     if(facet != null) {
       val parseTableFile = facet.parseTable
       if(parseTableFile != null) {
-        require(parseTableFile.pPath, FileStampers.hash)
+        require(parseTableFile.fsPath, FileSystemStampers.hash)
       }
     }
 
@@ -105,7 +103,7 @@ class LegacyParseAll @Inject constructor(
         val ast = it.ast()
         val tokens = if(ast != null) TokenExtractor.extract(ast) else null
         val messages = messageConverter.toMessages(it.messages())
-        Output(ast, tokens, messages, it.source()?.pPath!!)
+        Output(ast, tokens, messages, it.source()?.fsPath!!)
       }.toCollection(ArrayList())
     } catch(e: ParseException) {
       log.error("Parsing failed unexpectedly", e)

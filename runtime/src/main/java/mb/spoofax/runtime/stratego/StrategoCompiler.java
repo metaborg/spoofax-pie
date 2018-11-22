@@ -1,6 +1,7 @@
 package mb.spoofax.runtime.stratego;
 
-import mb.pie.vfs.path.PPath;
+import mb.fs.java.JavaFSNode;
+import mb.fs.java.JavaFSPath;
 import mb.spoofax.runtime.cfg.StrategoCompilerConfig;
 import mb.spoofax.runtime.util.Arguments;
 import org.spoofax.interpreter.library.IOAgent;
@@ -14,42 +15,43 @@ import java.io.IOException;
 
 public class StrategoCompiler {
     public class Result {
-        public final PPath outputFile;
-        public final PPath depFile;
+        public final JavaFSNode outputFile;
+        public final JavaFSNode depFile;
 
 
-        public Result(PPath outputFile, PPath depFile) {
+        public Result(JavaFSNode outputFile, JavaFSNode depFile) {
             this.outputFile = outputFile;
             this.depFile = depFile;
         }
     }
 
     public @Nullable Result compile(StrategoCompilerConfig config) throws IOException, StrategoException {
-        final PPath mainFile = config.mainFile();
-        final PPath outputFile = config.outputFileOrDefault();
-        final Iterable<PPath> includeDirs = config.includeDirs();
-        final Iterable<PPath> includeFiles = config.includeFiles();
+        final JavaFSPath mainFile = config.mainFile();
+        final JavaFSNode outputFile = config.outputFileOrDefault().toNode();
+        final Iterable<JavaFSPath> includeDirs = config.includeDirs();
+        final Iterable<JavaFSPath> includeFiles = config.includeFiles();
         final Iterable<String> includeLibs = config.includeLibs();
-        final PPath baseDir = config.baseDirOrDefault();
+        final JavaFSPath baseDir = config.baseDirOrDefault();
         if(baseDir == null) {
             throw new RuntimeException(
                 "Cannot compile Stratego code; base directory was not set, and main file " + mainFile + " has no parent directory to use as default");
         }
-        final PPath cacheDir = config.cacheDirOrDefault();
+        final JavaFSPath cacheDir = config.cacheDirOrDefault();
         if(cacheDir == null) {
             throw new RuntimeException(
                 "Cannot compile Stratego code; cache directory was not set, and main file " + mainFile + " has no parent directory to use as default");
         }
 
         // Create necessary directories
-        outputFile.createParentDirectories();
-        cacheDir.createDirectories();
+        outputFile.createParents();
+        cacheDir.toNode().createDirectory(true);
 
         // Delete rtree file (if it exists) to prevent it from influencing the build.
-        outputFile.replaceExtension("rtree").deleteFile();
+        final JavaFSNode rtreeFile = outputFile.replaceLeafExtension("rtree");
+        rtreeFile.delete();
 
         final Arguments arguments =
-            new Arguments().addPath("-i", mainFile).addPath("-o", outputFile).add("--library").add("--clean").add("-F");
+            new Arguments().addPath("-i", mainFile).addPath("-o", outputFile.getPath()).add("--library").add("--clean").add("-F");
         includeFiles.forEach(path -> arguments.addPath("-i", path));
         includeDirs.forEach(path -> arguments.addPath("-I", path));
         includeLibs.forEach(path -> arguments.add("-la", path));
@@ -75,7 +77,7 @@ public class StrategoCompiler {
             dr_scope_all_end_0_0.instance.invoke(context, factory.makeTuple());
         }
 
-        final PPath depFile = outputFile.extend(".dep");
+        final JavaFSNode depFile = outputFile.appendExtensionToLeaf("dep");
 
         return new Result(outputFile, depFile);
     }

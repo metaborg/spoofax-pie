@@ -1,6 +1,7 @@
 package mb.spoofax.runtime.cfg;
 
-import mb.pie.vfs.path.PPath;
+import mb.fs.api.path.FSPath;
+import mb.fs.java.JavaFSPath;
 import org.immutables.serial.Serial;
 import org.immutables.value.Value;
 
@@ -11,7 +12,7 @@ import java.util.List;
 @Value.Immutable
 @Serial.Version(value = 1L)
 public interface LangSpecConfig extends Serializable {
-    @Value.Parameter PPath dir();
+    @Value.Parameter JavaFSPath dir();
 
 
     @Value.Parameter LangId id();
@@ -27,18 +28,18 @@ public interface LangSpecConfig extends Serializable {
     @Value.Parameter @Nullable String name();
 
 
-    @Value.Parameter List<PPath> syntaxParseFiles();
+    @Value.Parameter List<JavaFSPath> syntaxParseFiles();
 
-    @Value.Parameter @Nullable PPath syntaxParseMainFile();
+    @Value.Parameter @Nullable JavaFSPath syntaxParseMainFile();
 
     @Value.Parameter @Nullable String syntaxParseStartSymbolId();
 
-    @Value.Parameter List<PPath> syntaxSignatureFiles();
+    @Value.Parameter List<JavaFSPath> syntaxSignatureFiles();
 
-    @Value.Parameter @Nullable PPath syntaxStyleFile();
+    @Value.Parameter @Nullable JavaFSPath syntaxStyleFile();
 
 
-    @Value.Parameter List<PPath> natsNaBL2Files();
+    @Value.Parameter List<JavaFSPath> natsNaBL2Files();
 
     @Value.Parameter @Nullable ImmutableStrategoCompilerConfig natsStrategoConfig();
 

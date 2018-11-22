@@ -1,6 +1,6 @@
 package mb.spoofax.runtime.util;
 
-import mb.pie.vfs.path.PPath;
+import mb.fs.api.path.FSPath;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
@@ -50,19 +50,19 @@ public class Arguments implements Iterable<Object>, Serializable {
         return this;
     }
 
-    public Arguments addPath(PPath path) {
+    public Arguments addPath(FSPath path) {
         add(path);
         return this;
     }
 
-    public Arguments addPath(String flag, PPath path) {
+    public Arguments addPath(String flag, FSPath path) {
         add(flag);
         addPath(path);
         return this;
     }
 
-    public Arguments addPaths(PPath... paths) {
-        for(PPath path : paths) {
+    public Arguments addPaths(FSPath... paths) {
+        for(FSPath path : paths) {
             addPath(path);
         }
         return this;
@@ -93,7 +93,7 @@ public class Arguments implements Iterable<Object>, Serializable {
      *                absolute.
      * @return An iterable of strings.
      */
-    public ArrayList<String> asStrings(@Nullable PPath baseDir) {
+    public ArrayList<String> asStrings(@Nullable FSPath baseDir) {
         final ArrayList<String> result = new ArrayList<>(this.size());
         for(Object arg : this) {
             result.add(asString(arg, baseDir));
@@ -101,12 +101,12 @@ public class Arguments implements Iterable<Object>, Serializable {
         return result;
     }
 
-    private String asString(Object arg, @Nullable PPath baseDir) {
-        if(arg instanceof PPath) {
-            final PPath path = (PPath) arg;
+    private String asString(Object arg, @Nullable FSPath baseDir) {
+        if(arg instanceof FSPath) {
+            final FSPath path = (FSPath) arg;
             final String pathStr;
             if(baseDir != null) {
-                pathStr = baseDir.relativizeStringFrom(path);
+                pathStr = baseDir.relativize(path).toString();
             } else {
                 pathStr = path.toString();
             }

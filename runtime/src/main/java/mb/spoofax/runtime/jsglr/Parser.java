@@ -1,6 +1,6 @@
 package mb.spoofax.runtime.jsglr;
 
-import mb.pie.vfs.path.PPath;
+import mb.fs.java.JavaFSPath;
 import mb.spoofax.api.SpoofaxRunEx;
 import mb.spoofax.api.message.Message;
 import mb.spoofax.api.message.MessageUtils;
@@ -37,7 +37,7 @@ public class Parser {
     }
 
 
-    public ParseOutput parse(String text, String startSymbol, @Nullable PPath path) throws InterruptedException {
+    public ParseOutput parse(String text, String startSymbol, @Nullable JavaFSPath path) throws InterruptedException {
         final String pathStr = path != null ? path.toString() : "file-not-set-during-parsing";
         try {
             final SGLRParseResult result = parser.parse(text, pathStr, startSymbol);
