@@ -62,7 +62,7 @@ class SDF3ToJSGLRParseTable
 
     // Create table
     // Main input file
-    val mainResource = outputs.firstOrNull { it.inputFile == mainFile }?.outputFile
+    val mainResource = outputs.firstOrNull { it.inputFile.path == mainFile }?.outputFile
       ?: throw ExecException("Main file $mainFile could not be normalized")
     // Output file
     val spoofaxPaths = SpoofaxCommonPaths(langSpecProject.location())

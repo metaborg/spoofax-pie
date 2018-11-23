@@ -3,7 +3,10 @@ package mb.spoofax.pie.benchmark.state;
 import mb.log.api.Logger;
 import mb.pie.api.Pie;
 import mb.pie.api.PieBuilder;
-import mb.pie.api.stamp.*;
+import mb.pie.api.fs.stamp.FileSystemStampers;
+import mb.pie.api.stamp.OutputStamper;
+import mb.pie.api.stamp.ResourceStamper;
+import mb.pie.api.stamp.output.OutputStampers;
 import mb.pie.runtime.PieBuilderImpl;
 import mb.pie.runtime.layer.NoopLayer;
 import mb.pie.runtime.layer.ValidationLayer;
@@ -59,11 +62,7 @@ public class InfraState {
     @SuppressWarnings("unused") public enum StoreKind {
         lmdb {
             @Override public void apply(PieBuilder builder, SpoofaxPieState spoofaxPieState, WorkspaceState workspaceState) {
-                final File localStorePath = spoofaxPieState.pathSrv.localPath(workspaceState.storePath);
-                if(localStorePath == null) {
-                    throw new RuntimeException(
-                        "Cannot create LMDB store, cannot convert " + workspaceState.storePath + " to a local filesystem path");
-                }
+                final File localStorePath = workspaceState.storePath.getJavaPath().toFile();
                 LMDBStoreKt.withLMDBStore(builder, localStorePath);
             }
         },
@@ -109,17 +108,17 @@ public class InfraState {
     @SuppressWarnings("unused") public enum FileStamperKind {
         exists {
             @Override public ResourceStamper get() {
-                return FileStampers.INSTANCE.getExists();
+                return FileSystemStampers.INSTANCE.getExists();
             }
         },
         modified {
             @Override public ResourceStamper get() {
-                return FileStampers.INSTANCE.getModified();
+                return FileSystemStampers.INSTANCE.getModified();
             }
         },
         hash {
             @Override public ResourceStamper get() {
-                return FileStampers.INSTANCE.getHash();
+                return FileSystemStampers.INSTANCE.getHash();
             }
         };
 

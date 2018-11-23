@@ -1,7 +1,7 @@
 package mb.spoofax.pie.example.simple
 
 import com.google.inject.Singleton
-import mb.fs.java.JavaFSNode
+import mb.fs.java.JavaFSPath
 import mb.log.slf4j.LogModule
 import mb.pie.runtime.PieBuilderImpl
 import mb.pie.runtime.logger.StreamLogger
@@ -51,7 +51,7 @@ fun main(args: Array<String>) {
   StaticSpoofaxFacade.init(spoofaxFacade)
 
   // Convert workspace directory to format that PIE can work with.
-  val workspaceDir = JavaFSNode(workspaceDirStr)
+  val workspaceDir = JavaFSPath(workspaceDirStr).toAbsoluteFromWorkingDirectory().toNode()
   if(!workspaceDir.exists() || !workspaceDir.isDirectory) {
     println("Workspace at path $workspaceDir does not exist or is not a directory")
     exitProcess(2)
