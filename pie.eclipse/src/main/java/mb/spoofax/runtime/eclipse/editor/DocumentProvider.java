@@ -2,10 +2,10 @@ package mb.spoofax.runtime.eclipse.editor;
 
 import java.io.IOException;
 import java.io.InputStream;
+import mb.fs.java.JavaFSNode;
 import mb.log.api.Logger;
-import mb.pie.vfs.path.PPath;
+import mb.spoofax.runtime.eclipse.util.FileUtils;
 import mb.spoofax.runtime.eclipse.util.StatusUtils;
-import mb.spoofax.runtime.eclipse.vfs.EclipsePathSrv;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.IEditorInput;
@@ -13,12 +13,12 @@ import org.eclipse.ui.editors.text.FileDocumentProvider;
 
 public class DocumentProvider extends FileDocumentProvider {
     private final Logger logger;
-    private final EclipsePathSrv pathSrv;
+    private final FileUtils fileUtils;
 
 
-    public DocumentProvider(Logger logger, EclipsePathSrv resourceService) {
+    public DocumentProvider(Logger logger, FileUtils fileUtils) {
         this.logger = logger.forContext(getClass());
-        this.pathSrv = resourceService;
+        this.fileUtils = fileUtils;
     }
 
 
@@ -31,8 +31,8 @@ public class DocumentProvider extends FileDocumentProvider {
         if(element instanceof IEditorInput) {
             final IDocument document = createEmptyDocument();
             final IEditorInput input = (IEditorInput) element;
-            final PPath path = pathSrv.resolve(input);
-            if(path == null) {
+            final JavaFSNode node = fileUtils.toNode(input);
+            if(node == null) {
                 final String message =
                     "Cannot create document for input " + element + ", could not resolve input to file object";
                 logger.error(message);
@@ -41,7 +41,7 @@ public class DocumentProvider extends FileDocumentProvider {
 
 
             try {
-                final InputStream stream = path.inputStream();
+                final InputStream stream = node.newInputStream();
                 String encoding = getEncoding(element);
                 if(encoding == null) {
                     encoding = getDefaultEncoding();

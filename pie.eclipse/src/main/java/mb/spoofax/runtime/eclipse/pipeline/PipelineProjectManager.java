@@ -2,26 +2,24 @@ package mb.spoofax.runtime.eclipse.pipeline;
 
 import com.google.inject.Inject;
 import java.io.IOException;
+import mb.fs.java.JavaFSNode;
 import mb.log.api.Logger;
-import mb.pie.vfs.path.PPath;
 import mb.spoofax.legacy.LoadMetaLanguages;
 import mb.spoofax.runtime.eclipse.nature.SpoofaxNature;
-import mb.spoofax.runtime.eclipse.util.NatureUtils;
-import mb.spoofax.runtime.eclipse.util.StatusUtils;
-import mb.spoofax.runtime.eclipse.vfs.EclipsePathSrv;
+import mb.spoofax.runtime.eclipse.util.*;
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.CoreException;
 import org.metaborg.core.MetaborgException;
 
 public class PipelineProjectManager implements IResourceChangeListener {
     private final Logger logger;
-    private final EclipsePathSrv pathSrv;
+    private final FileUtils fileUtils;
     private final PipelineAdapter pipelineAdapter;
 
 
-    @Inject public PipelineProjectManager(Logger logger, EclipsePathSrv pathSrv, PipelineAdapter pipelineAdapter) {
+    @Inject public PipelineProjectManager(Logger logger, FileUtils fileUtils, PipelineAdapter pipelineAdapter) {
         this.logger = logger.forContext(getClass());
-        this.pathSrv = pathSrv;
+        this.fileUtils = fileUtils;
         this.pipelineAdapter = pipelineAdapter;
     }
 
@@ -30,7 +28,7 @@ public class PipelineProjectManager implements IResourceChangeListener {
         final IWorkspace workspace = ResourcesPlugin.getWorkspace();
 
         // Load meta-languages
-        final PPath workspaceRoot = pathSrv.resolveWorkspaceRoot();
+        final JavaFSNode workspaceRoot = fileUtils.workspaceRootNode();
         try {
             LoadMetaLanguages.loadAll(workspaceRoot);
         } catch(IOException | MetaborgException e) {

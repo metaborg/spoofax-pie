@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import java.util.ArrayList;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
-import mb.pie.vfs.path.PPath;
+import mb.fs.java.JavaFSPath;
 import mb.spoofax.api.message.Message;
 import mb.spoofax.api.style.Styling;
 import mb.spoofax.pie.processing.ContainerResult;
@@ -23,9 +23,9 @@ public class PipelineObservers {
 
 
     private final class ContainerBuildObserver implements Function1<ContainerResult, Unit> {
-        private final PPath container;
+        private final JavaFSPath container;
 
-        private ContainerBuildObserver(PPath container) {
+        private ContainerBuildObserver(JavaFSPath container) {
             this.container = container;
         }
 
@@ -34,7 +34,7 @@ public class PipelineObservers {
             update.addClearRec(container);
             if(containerResult != null) {
                 containerResult.getDocumentResults().forEach((documentResult) -> {
-                    final PPath document = documentResult.getDocument();
+                    final JavaFSPath document = documentResult.getDocument();
                     final ArrayList<Message> messages = documentResult.getMessages();
                     update.addMessages(messages, document);
                     final @Nullable FinalOutput analysis = documentResult.getAnalysis();
@@ -52,7 +52,7 @@ public class PipelineObservers {
         }
     }
 
-    public Function1<? super ContainerResult, Unit> container(PPath container) {
+    public Function1<? super ContainerResult, Unit> container(JavaFSPath container) {
         return new ContainerBuildObserver(container);
     }
 
@@ -60,10 +60,10 @@ public class PipelineObservers {
     private final class EditorObserver implements Function1<DocumentResult, Unit> {
         private final SpoofaxEditor editor;
         private final String text;
-        private final PPath document;
-        private final PPath container;
+        private final JavaFSPath document;
+        private final JavaFSPath container;
 
-        private EditorObserver(SpoofaxEditor editor, String text, PPath document, PPath container) {
+        private EditorObserver(SpoofaxEditor editor, String text, JavaFSPath document, JavaFSPath container) {
             this.editor = editor;
             this.text = text;
             this.document = document;
@@ -102,8 +102,8 @@ public class PipelineObservers {
         }
     }
 
-    public Function1<? super DocumentResult, Unit> editor(SpoofaxEditor editor, String text, PPath file,
-        PPath project) {
+    public Function1<? super DocumentResult, Unit> editor(SpoofaxEditor editor, String text, JavaFSPath file,
+        JavaFSPath project) {
         return new EditorObserver(editor, text, file, project);
     }
 }

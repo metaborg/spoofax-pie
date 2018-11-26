@@ -32,12 +32,19 @@
       <version>${mb.log.version}</version>
     </dependency>
 
-    <!-- PIE -->
+    <!-- Metaborg filesystem -->
     <dependency>
       <groupId>org.metaborg</groupId>
-      <artifactId>pie.vfs</artifactId>
-      <version>${pie.version}</version>
+      <artifactId>fs.api</artifactId>
+      <version>${mb.fs.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>fs.java</artifactId>
+      <version>${mb.fs.version}</version>
+    </dependency>
+
+    <!-- PIE -->
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>pie.api</artifactId>
@@ -196,7 +203,8 @@
             <Embed-Dependency>
               log.api,
               log.slf4j,
-              pie.vfs,
+              fs.api,
+              fs.java,
               pie.api,
               pie.runtime,
               pie.taskdefs.guice,
@@ -222,6 +230,7 @@
             <!-- Export dependency packages -->
             <Export-Package>
               mb.log.*,
+              mb.fs.*,
               mb.pie.*,
               mb.spoofax.pie.*,
               org.lmdbjava.*;provider=metaborg;mandatory:=provider;version=0,
@@ -232,7 +241,7 @@
               org.jetbrains.annotations.*;provider=metaborg;mandatory:=provider;version=0,
               org.eclipse.jdt.core.compiler.*;provider=metaborg;mandatory:=provider;version=0
             </Export-Package>
-            <!-- Don't declare dependency on JDK, internal, non-existent packages, or optional dependencies that we do not
+            <!-- Don't declare dependency on JDK, internal, non-existent packages, or optional dependencies that we do not 
               need. -->
             <Import-Package>
               !*
@@ -241,7 +250,7 @@
             <_nouses>true</_nouses>
             <!-- Don't use version of this package if no version can be determined. -->
             <_nodefaultversion>true</_nodefaultversion>
-            <!-- Allow buddy class loading, so that other bundles can merge their classpath with this bundle, which some
+            <!-- Allow buddy class loading, so that other bundles can merge their classpath with this bundle, which some 
               libraries require. -->
             <Eclipse-BuddyPolicy>registered</Eclipse-BuddyPolicy>
           </instructions>

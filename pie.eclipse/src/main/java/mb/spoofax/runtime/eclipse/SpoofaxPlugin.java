@@ -1,7 +1,6 @@
 package mb.spoofax.runtime.eclipse;
 
 import mb.log.slf4j.LogModule;
-import mb.pie.lang.runtime.PieLangRuntimeModule;
 import mb.pie.taskdefs.guice.GuiceTaskDefsModule;
 import mb.spoofax.api.SpoofaxFacade;
 import mb.spoofax.api.StaticSpoofaxFacade;
@@ -66,9 +65,7 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
             new SpoofaxRuntimeModule(), // Spoofax runtime (implementation)
             new LogModule(logger), // SLF4J logging support
             new EclipseModule(), // Eclipse support
-            new EclipseVFSModule(), // PIE VFS support, with Eclipse extensions
             new SpoofaxPieModule(), // Spoofax-PIE support
-            new PieLangRuntimeModule(), // PIE DSL task definitions
             new GuiceTaskDefsModule(), // Guice support for injecting task definitions
             new SpoofaxPieTaskDefsModule(), // Spoofax-PIE task definitions
             new TaskDefsModule_spoofax() // Spoofax-PIE generated task definitions

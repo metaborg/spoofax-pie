@@ -48,7 +48,6 @@ Eclipse-RegisterBuddy:
  nabl2.terms,
  org.metaborg.spoofax.eclipse.externaldeps,
  org.metaborg.spoofax.eclipse.meta.externaldeps,
- log,
  spoofax.api,
  spoofax.runtime,
  spoofax.legacy,

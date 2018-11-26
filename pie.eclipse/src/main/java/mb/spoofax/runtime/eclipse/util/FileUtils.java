@@ -1,33 +1,32 @@
-package mb.spoofax.runtime.eclipse.vfs;
+package mb.spoofax.runtime.eclipse.util;
 
 import com.google.inject.Inject;
 import java.net.URI;
 import java.util.Arrays;
+import mb.fs.java.JavaFSNode;
+import mb.fs.java.JavaFSPath;
 import mb.log.api.Logger;
-import mb.pie.vfs.path.PPath;
-import mb.pie.vfs.path.PathSrvImpl;
-import mb.spoofax.runtime.eclipse.util.Nullable;
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.ui.*;
 
-public class EclipsePathSrvImpl extends PathSrvImpl implements EclipsePathSrv {
+public class FileUtils {
     private final Logger logger;
     private final IWorkspaceRoot root;
 
 
-    @Inject public EclipsePathSrvImpl(Logger logger) {
+    @Inject public FileUtils(Logger logger) {
         this.logger = logger.forContext(getClass());
         this.root = ResourcesPlugin.getWorkspace().getRoot();
     }
 
 
-    @Override public PPath resolveWorkspaceRoot() {
-        return resolve(root);
+    public JavaFSPath workspaceRootPath() {
+        return toPath(root);
     }
 
-    @Override public @Nullable PPath resolve(IResource resource) {
+    public @Nullable JavaFSPath toPath(IResource resource) {
         IPath path = resource.getRawLocation();
         if(path == null) {
             path = resource.getLocation();
@@ -35,23 +34,27 @@ public class EclipsePathSrvImpl extends PathSrvImpl implements EclipsePathSrv {
         if(path == null) {
             return null;
         }
-        return resolve(path);
+        return toPath(path);
     }
 
-    @Override public PPath resolve(IPath path) {
-        return resolveLocal(path.toFile());
+    public JavaFSPath toPath(IPath path) {
+        return new JavaFSPath(path.toFile());
     }
 
-    @Override public @Nullable PPath resolve(IEditorInput input) {
+    public JavaFSPath toPath(URI uri) {
+        return new JavaFSPath(uri);
+    }
+
+    public @Nullable JavaFSPath toPath(IEditorInput input) {
         if(input instanceof IFileEditorInput) {
             final IFileEditorInput fileInput = (IFileEditorInput) input;
-            return resolve(fileInput.getFile());
+            return toPath(fileInput.getFile());
         } else if(input instanceof IPathEditorInput) {
             final IPathEditorInput pathInput = (IPathEditorInput) input;
-            return resolve(pathInput.getPath());
+            return toPath(pathInput.getPath());
         } else if(input instanceof IURIEditorInput) {
             final IURIEditorInput uriInput = (IURIEditorInput) input;
-            return resolve(uriInput.getURI());
+            return toPath(uriInput.getURI());
         } else if(input instanceof IStorageEditorInput) {
             final IStorageEditorInput storageInput = (IStorageEditorInput) input;
             final IStorage storage;
@@ -63,7 +66,7 @@ public class EclipsePathSrvImpl extends PathSrvImpl implements EclipsePathSrv {
 
             final IPath path = storage.getFullPath();
             if(path != null) {
-                return resolve(path);
+                return toPath(path);
             }
         }
         logger.error("Could not resolve editor input {}", input);
@@ -71,11 +74,55 @@ public class EclipsePathSrvImpl extends PathSrvImpl implements EclipsePathSrv {
     }
 
 
-    @Override public @Nullable IFile toFile(IPath path) {
+
+    public JavaFSNode workspaceRootNode() {
+        return toNode(root);
+    }
+
+    public @Nullable JavaFSNode toNode(IResource resource) {
+        final @Nullable JavaFSPath path = toPath(resource);
+        if(path == null) {
+            return null;
+        }
+        return path.toNode();
+    }
+
+    public JavaFSNode toNode(IPath path) {
+        return new JavaFSNode(path.toFile());
+    }
+
+    public JavaFSNode toNode(URI uri) {
+        return new JavaFSNode(uri);
+    }
+
+    public @Nullable JavaFSNode toNode(IEditorInput input) {
+        final @Nullable JavaFSPath path = toPath(input);
+        if(path == null) {
+            return null;
+        }
+        return path.toNode();
+    }
+
+
+    public @Nullable IResource toResource(JavaFSPath path) {
+        final IPath eclipsePath = org.eclipse.core.runtime.Path.fromOSString(path.toString());
+        IResource resource = root.getFileForLocation(eclipsePath);
+        if(resource == null) {
+            resource = root.getContainerForLocation(eclipsePath);
+        }
+        return resource;
+    }
+
+    public @Nullable IResource toResource(JavaFSNode node) {
+        return toResource(node.getPath());
+    }
+
+
+    public @Nullable IFile toFile(IPath path) {
         return root.getFileForLocation(path);
     }
 
-    @Override public @Nullable IFile toFile(URI uri) {
+    public @Nullable IFile toFile(URI uri) {
         final IFile[] files = root.findFilesForLocationURI(uri);
         if(files == null || files.length == 0) {
             return null;
@@ -86,7 +133,7 @@ public class EclipsePathSrvImpl extends PathSrvImpl implements EclipsePathSrv {
         return files[0];
     }
 
-    @Override public @Nullable IFile toFile(IStorage storage) {
+    public @Nullable IFile toFile(IStorage storage) {
         final IPath path = storage.getFullPath();
         if(path == null) {
             return null;
@@ -94,7 +141,7 @@ public class EclipsePathSrvImpl extends PathSrvImpl implements EclipsePathSrv {
         return toFile(path);
     }
 
-    @Override public @Nullable IFile toFile(IEditorInput input) {
+    public @Nullable IFile toFile(IEditorInput input) {
         if(input instanceof IFileEditorInput) {
             final IFileEditorInput fileInput = (IFileEditorInput) input;
             return fileInput.getFile();
@@ -118,15 +165,5 @@ public class EclipsePathSrvImpl extends PathSrvImpl implements EclipsePathSrv {
         }
         logger.error("Could not get Eclipse file for editor input {}", input);
         return null;
-    }
-
-
-    @Override public @Nullable IResource unresolve(PPath pipePath) {
-        final IPath eclipsePath = org.eclipse.core.runtime.Path.fromOSString(pipePath.toString());
-        IResource resource = root.getFileForLocation(eclipsePath);
-        if(resource == null) {
-            resource = root.getContainerForLocation(eclipsePath);
-        }
-        return resource;
     }
 }

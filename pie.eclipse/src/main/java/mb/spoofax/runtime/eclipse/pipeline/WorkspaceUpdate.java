@@ -4,8 +4,8 @@ import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map.Entry;
+import mb.fs.java.JavaFSPath;
 import mb.log.api.Logger;
-import mb.pie.vfs.path.PPath;
 import mb.spoofax.api.message.Message;
 import mb.spoofax.api.message.MessageCollection;
 import mb.spoofax.api.style.Color;
@@ -13,7 +13,6 @@ import mb.spoofax.api.style.Styling;
 import mb.spoofax.api.util.MultiHashMap;
 import mb.spoofax.runtime.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.runtime.eclipse.util.*;
-import mb.spoofax.runtime.eclipse.vfs.EclipsePathSrv;
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
@@ -24,33 +23,33 @@ public class WorkspaceUpdate {
     public static final LockRule lock = new LockRule("Workspace update lock");
 
     private final Logger logger;
-    private final EclipsePathSrv pathSrv;
+    private final FileUtils fileUtils;
     private final StyleUtils styleUtils;
 
-    private final ArrayList<PPath> pathsToClear = new ArrayList<>();
-    private final ArrayList<PPath> pathsToClearRec = new ArrayList<>();
-    private final MultiHashMap<PPath, Message> messagesPerPath = new MultiHashMap<>();
+    private final ArrayList<JavaFSPath> pathsToClear = new ArrayList<>();
+    private final ArrayList<JavaFSPath> pathsToClearRec = new ArrayList<>();
+    private final MultiHashMap<String, Message> messagesPerPath = new MultiHashMap<>();
     private final ArrayList<StyleUpdate> styleUpdates = new ArrayList<>();
 
 
-    @Inject public WorkspaceUpdate(Logger logger, EclipsePathSrv pathSrv, StyleUtils styleUtils) {
+    @Inject public WorkspaceUpdate(Logger logger, FileUtils fileUtils, StyleUtils styleUtils) {
         this.logger = logger.forContext(getClass());
-        this.pathSrv = pathSrv;
+        this.fileUtils = fileUtils;
         this.styleUtils = styleUtils;
     }
 
 
-    public void addClear(PPath path) {
+    public void addClear(JavaFSPath path) {
         pathsToClear.add(path);
     }
 
-    public void addClearRec(PPath path) {
+    public void addClearRec(JavaFSPath path) {
         pathsToClearRec.add(path);
     }
 
 
-    public void addMessages(Collection<Message> msgs, PPath path) {
-        messagesPerPath.addAll(path, msgs);
+    public void addMessages(Collection<Message> msgs, JavaFSPath path) {
+        messagesPerPath.addAll(path.toString(), msgs);
     }
 
     public void addMessages(MessageCollection messageCollection) {
@@ -60,8 +59,8 @@ public class WorkspaceUpdate {
     }
 
 
-    public void replaceMessages(ArrayList<Message> messages, PPath path) {
-        messagesPerPath.replaceAll(path, messages);
+    public void replaceMessages(ArrayList<Message> messages, JavaFSPath path) {
+        messagesPerPath.replaceAll(path.toString(), messages);
     }
 
 
@@ -97,7 +96,7 @@ public class WorkspaceUpdate {
                 try {
                     final ICoreRunnable parseMarkerUpdater = new IWorkspaceRunnable() {
                         @Override public void run(@Nullable IProgressMonitor workspaceMonitor) throws CoreException {
-                            for(PPath path : pathsToClearRec) {
+                            for(JavaFSPath path : pathsToClearRec) {
                                 if(workspaceMonitor != null && workspaceMonitor.isCanceled())
                                     return;
 
@@ -111,7 +110,7 @@ public class WorkspaceUpdate {
                                 }
                                 MarkerUtils.clearAllRec(resource);
                             }
-                            for(PPath path : pathsToClear) {
+                            for(JavaFSPath path : pathsToClear) {
                                 if(workspaceMonitor != null && workspaceMonitor.isCanceled())
                                     return;
 
@@ -125,11 +124,12 @@ public class WorkspaceUpdate {
                                 }
                                 MarkerUtils.clearAll(resource);
                             }
-                            for(Entry<PPath, ArrayList<Message>> entry : messagesPerPath.entrySet()) {
+                            for(Entry<String, ArrayList<Message>> entry : messagesPerPath.entrySet()) {
                                 if(workspaceMonitor != null && workspaceMonitor.isCanceled())
                                     return;
 
-                                final PPath path = entry.getKey();
+                                final String pathStr = entry.getKey();
+                                final JavaFSPath path = new JavaFSPath(pathStr);
                                 logger.trace("Updating messages for {}", path);
                                 final IResource resource = toResource(path);
                                 if(resource == null) {
@@ -170,7 +170,7 @@ public class WorkspaceUpdate {
     }
 
 
-    private @Nullable IResource toResource(PPath path) {
-        return pathSrv.unresolve(path);
+    private @Nullable IResource toResource(JavaFSPath path) {
+        return fileUtils.toResource(path);
     }
 }

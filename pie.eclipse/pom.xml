@@ -33,12 +33,6 @@
 
     <dependency>
       <groupId>org.metaborg</groupId>
-      <artifactId>pie.vfs</artifactId>
-      <version>${pie.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.metaborg</groupId>
       <artifactId>log.api</artifactId>
       <version>${mb.log.version}</version>
     </dependency>
@@ -47,7 +41,6 @@
       <artifactId>log.slf4j</artifactId>
       <version>${mb.log.version}</version>
     </dependency>
-
 
     <dependency>
       <groupId>org.metaborg</groupId>
