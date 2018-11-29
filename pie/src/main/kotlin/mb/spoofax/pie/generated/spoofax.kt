@@ -5,10 +5,10 @@ package mb.spoofax.pie.generated
 import com.google.inject.Binder
 import com.google.inject.Inject
 import com.google.inject.multibindings.MapBinder
-import mb.fs.api.node.match.PathNodeMatcher
-import mb.fs.api.node.walk.PathNodeWalker
-import mb.fs.api.path.match.ExtensionsPathMatcher
-import mb.fs.api.path.match.RegexPathMatcher
+import mb.fs.api.node.match.*
+import mb.fs.api.node.walk.*
+import mb.fs.api.path.FSPath
+import mb.fs.api.path.match.*
 import mb.fs.java.JavaFSPath
 import mb.pie.api.*
 import mb.pie.lang.runtime.*
@@ -46,7 +46,7 @@ class processContainer @Inject constructor(
   override val id = Companion.id
   override fun key(input: processContainer.Input): Key = input.container
   override fun ExecContext.exec(input: processContainer.Input): mb.spoofax.pie.processing.ContainerResult = run {
-    val langSpecResults = walk(input.container, PathNodeWalker(ExtensionsPathMatcher(require(_mb_spoofax_pie_processing_LangSpecExtensions, input.root))), PathNodeMatcher(ExtensionsPathMatcher(require(_mb_spoofax_pie_processing_LangSpecExtensions, input.root)))).map { document ->
+    val langSpecResults = walk(input.container, PathNodeWalker(NoHiddenPathMatcher.instance), PathNodeMatcher(ExtensionsPathMatcher(require(_mb_spoofax_pie_processing_LangSpecExtensions, input.root)))).map { document ->
       run {
         if(!mb.spoofax.pie.processing.shouldProcessDocument(document)) run {
           mb.spoofax.pie.processing.emptyDocumentResult(document)
@@ -55,7 +55,7 @@ class processContainer @Inject constructor(
         }
       }
     }.toCollection(ArrayList<mb.spoofax.pie.processing.DocumentResult>());
-    val legacyResults = walk(input.container, PathNodeWalker(ExtensionsPathMatcher(require(_mb_spoofax_pie_processing_LegacyExtensions, None.instance))), PathNodeMatcher(ExtensionsPathMatcher(require(_mb_spoofax_pie_processing_LegacyExtensions, None.instance)))).map { document ->
+    val legacyResults = walk(input.container, PathNodeWalker(NoHiddenPathMatcher.instance), PathNodeMatcher(ExtensionsPathMatcher(require(_mb_spoofax_pie_processing_LegacyExtensions, None.instance)))).map { document ->
       run {
         if(!mb.spoofax.pie.processing.shouldProcessDocument(document)) run {
           mb.spoofax.pie.processing.emptyDocumentResult(document)
