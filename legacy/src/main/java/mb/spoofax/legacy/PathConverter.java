@@ -1,24 +1,23 @@
 package mb.spoofax.legacy;
 
-import com.google.inject.Inject;
-import mb.pie.vfs.path.PPath;
-import mb.pie.vfs.path.PathSrv;
+import mb.fs.java.JavaFSNode;
+import mb.fs.java.JavaFSPath;
 import org.apache.commons.vfs2.FileObject;
 
 public class PathConverter {
-    private final PathSrv pathSrv;
-
-
-    @Inject public PathConverter(PathSrv pathSrv) {
-        this.pathSrv = pathSrv;
+    public JavaFSPath toPath(FileObject fileObject) {
+        return new JavaFSPath(fileObject.getName().getURI());
     }
 
-
-    public PPath toPath(FileObject fileObject) {
-        return pathSrv.resolve(fileObject.getName().getURI());
+    public JavaFSNode toNode(FileObject fileObject) {
+        return new JavaFSNode(fileObject.getName().getURI());
     }
 
-    public FileObject toFileObject(PPath path) {
-        return StaticSpoofaxCoreFacade.spoofax().resolve(path.getJavaPath().toUri());
+    public FileObject toFileObject(JavaFSPath path) {
+        return StaticSpoofaxCoreFacade.spoofax().resolve(path.getURI());
+    }
+
+    public FileObject toFileObject(JavaFSNode node) {
+        return StaticSpoofaxCoreFacade.spoofax().resolve(node.getURI());
     }
 }

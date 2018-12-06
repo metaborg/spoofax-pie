@@ -3,8 +3,6 @@ package mb.spoofax.pie.benchmark.state;
 import com.google.inject.Injector;
 import mb.log.api.Logger;
 import mb.log.slf4j.LogModule;
-import mb.pie.lang.runtime.PieLangRuntimeModule;
-import mb.pie.vfs.path.PathSrv;
 import mb.spoofax.api.SpoofaxFacade;
 import mb.spoofax.api.StaticSpoofaxFacade;
 import mb.spoofax.legacy.StaticSpoofaxCoreFacade;
@@ -27,7 +25,6 @@ public class SpoofaxPieState {
     public final SpoofaxFacade spoofaxFacade;
     public final Injector injector;
     public final Logger logger;
-    public final PathSrv pathSrv;
     public final SpoofaxPipeline spoofaxPipeline;
 
 
@@ -40,8 +37,6 @@ public class SpoofaxPieState {
             spoofaxFacade = new SpoofaxFacade(
                 new SpoofaxRuntimeModule(), // Spoofax runtime (implementation)
                 new LogModule(LoggerFactory.getLogger("root")), // SLF4J logging support
-                new PieVfsModule(), // PIE VFS support
-                new PieLangRuntimeModule(), // PIE DSL task definitions
                 new SpoofaxPieModule(), // Spoofax-PIE support
                 new SpoofaxPieTaskDefsModule(), // Spoofax-PIE task definitions
                 new TaskDefsModule_spoofax() // Spoofax-PIE generated task definitions
@@ -50,7 +45,6 @@ public class SpoofaxPieState {
 
             injector = spoofaxFacade.injector;
             logger = injector.getInstance(Logger.class);
-            pathSrv = injector.getInstance(PathSrv.class);
             spoofaxPipeline = injector.getInstance(SpoofaxPipeline.class);
         } catch(MetaborgException e) {
             throw new RuntimeException(e);

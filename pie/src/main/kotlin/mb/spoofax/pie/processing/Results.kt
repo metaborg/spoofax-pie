@@ -1,6 +1,6 @@
 package mb.spoofax.pie.processing
 
-import mb.pie.vfs.path.PPath
+import mb.fs.java.JavaFSPath
 import mb.spoofax.api.message.Message
 import mb.spoofax.api.parse.Token
 import mb.spoofax.api.style.Styling
@@ -9,27 +9,27 @@ import org.spoofax.interpreter.terms.IStrategoTerm
 import java.io.Serializable
 
 data class WorkspaceResult(
-  val root: PPath,
+  val root: JavaFSPath,
   val containerResults: ArrayList<ContainerResult>
 ) : Serializable
 
-fun createWorkspaceResult(root: PPath, containerResults: ArrayList<ContainerResult>) = WorkspaceResult(root, containerResults)
+fun createWorkspaceResult(root: JavaFSPath, containerResults: ArrayList<ContainerResult>) = WorkspaceResult(root, containerResults)
 
-fun emptyWorkspaceResult(root: PPath) = WorkspaceResult(root, arrayListOf())
+fun emptyWorkspaceResult(root: JavaFSPath) = WorkspaceResult(root, arrayListOf())
 
 
 data class ContainerResult(
-  val container: PPath,
+  val container: JavaFSPath,
   val documentResults: ArrayList<DocumentResult>
 ) : Serializable
 
-fun createContainerResult(container: PPath, langSpecResults: ArrayList<DocumentResult>, legacyResults: ArrayList<DocumentResult>) = ContainerResult(container, (langSpecResults + legacyResults).toCollection(ArrayList()))
+fun createContainerResult(container: JavaFSPath, langSpecResults: ArrayList<DocumentResult>, legacyResults: ArrayList<DocumentResult>) = ContainerResult(container, (langSpecResults + legacyResults).toCollection(ArrayList()))
 
-fun emptyContainerResult(container: PPath) = ContainerResult(container, arrayListOf())
+fun emptyContainerResult(container: JavaFSPath) = ContainerResult(container, arrayListOf())
 
 
 data class DocumentResult(
-  val document: PPath,
+  val document: JavaFSPath,
   val messages: ArrayList<Message>,
   val tokens: ArrayList<Token>?,
   val ast: IStrategoTerm?,
@@ -38,7 +38,7 @@ data class DocumentResult(
 ) : Serializable
 
 fun createDocumentResult(
-  document: PPath,
+  document: JavaFSPath,
   messages: ArrayList<Message>,
   tokens: ArrayList<Token>?,
   ast: IStrategoTerm?,
@@ -46,4 +46,4 @@ fun createDocumentResult(
   analysis: Analyzer.FinalOutput?
 ) = DocumentResult(document, messages, tokens, ast, styling, analysis)
 
-fun emptyDocumentResult(document: PPath) = DocumentResult(document, arrayListOf(), null, null, null, null)
+fun emptyDocumentResult(document: JavaFSPath) = DocumentResult(document, arrayListOf(), null, null, null, null)

@@ -1,9 +1,9 @@
 package mb.spoofax.runtime.stratego;
 
 import com.google.common.collect.Iterables;
-import mb.pie.vfs.path.PPath;
-import mb.spoofax.runtime.util.MessageFormatter;
+import mb.fs.java.JavaFSPath;
 import mb.spoofax.api.SpoofaxEx;
+import mb.spoofax.runtime.util.MessageFormatter;
 import org.spoofax.interpreter.core.*;
 import org.spoofax.interpreter.library.IOAgent;
 import org.spoofax.interpreter.library.IOperatorRegistry;
@@ -14,6 +14,7 @@ import org.strategoxt.IncompatibleJarException;
 import javax.annotation.Nullable;
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 
 public class StrategoRuntime {
@@ -21,7 +22,7 @@ public class StrategoRuntime {
 
 
     public StrategoRuntime(ITermFactory termFactory, Iterable<String> components, Iterable<IOperatorRegistry> libraries,
-        Iterable<PPath> ctrees, Iterable<PPath> jars, @Nullable ClassLoader jarClassLoader) throws SpoofaxEx {
+        Iterable<JavaFSPath> ctrees, Iterable<URI> jars, @Nullable ClassLoader jarClassLoader) throws SpoofaxEx {
         final HybridInterpreter hybridInterpreter = new HybridInterpreter(termFactory);
         for(String component : components) {
             hybridInterpreter.getCompiledContext().registerComponent(component);
@@ -31,9 +32,9 @@ public class StrategoRuntime {
             hybridInterpreter.getCompiledContext().addOperatorRegistry(library);
         }
 
-        for(PPath file : ctrees) {
+        for(JavaFSPath file : ctrees) {
             try {
-                hybridInterpreter.load(new BufferedInputStream(file.inputStream()));
+                hybridInterpreter.load(new BufferedInputStream(file.toNode().newInputStream()));
             } catch(IOException | InterpreterException e) {
                 throw new SpoofaxEx("Failed to create Stratego runtime; failed to load CTree file " + file, e);
             }
@@ -44,8 +45,8 @@ public class StrategoRuntime {
             try {
                 final URL[] classpath = new URL[numJars];
                 int i = 0;
-                for(PPath file : jars) {
-                    classpath[i] = file.getUri().toURL();
+                for(URI uri : jars) {
+                    classpath[i] = uri.toURL();
                     ++i;
                 }
                 hybridInterpreter.loadJars(jarClassLoader, classpath);

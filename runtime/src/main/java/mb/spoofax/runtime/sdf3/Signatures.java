@@ -1,6 +1,6 @@
 package mb.spoofax.runtime.sdf3;
 
-import mb.pie.vfs.path.PPath;
+import mb.fs.java.JavaFSPath;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -8,21 +8,21 @@ import java.util.ArrayList;
 public class Signatures implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private final ArrayList<PPath> signatureFiles;
-    private final PPath includeDir;
+    private final ArrayList<JavaFSPath> signatureFiles;
+    private final JavaFSPath includeDir;
 
 
-    public Signatures(ArrayList<PPath> signatureFiles, PPath includeDir) {
+    public Signatures(ArrayList<JavaFSPath> signatureFiles, JavaFSPath includeDir) {
         this.signatureFiles = signatureFiles;
         this.includeDir = includeDir;
     }
 
 
-    public ArrayList<PPath> signatureFiles() {
+    public ArrayList<JavaFSPath> signatureFiles() {
         return signatureFiles;
     }
 
-    public PPath includeDir() {
+    public JavaFSPath includeDir() {
         return includeDir;
     }
 

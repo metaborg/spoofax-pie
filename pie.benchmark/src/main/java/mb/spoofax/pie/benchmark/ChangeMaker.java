@@ -1,7 +1,8 @@
 package mb.spoofax.pie.benchmark;
 
+import mb.fs.api.node.FSNode;
+import mb.fs.java.JavaFSPath;
 import mb.pie.runtime.exec.Stats;
-import mb.pie.vfs.path.PPath;
 import mb.spoofax.pie.benchmark.state.exec.BUState;
 import mb.spoofax.pie.benchmark.state.exec.TDState;
 import org.jetbrains.annotations.Nullable;
@@ -9,7 +10,6 @@ import org.openjdk.jmh.infra.Blackhole;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.nio.file.Files;
 import java.util.*;
 
 public abstract class ChangeMaker {
@@ -33,7 +33,11 @@ public abstract class ChangeMaker {
     protected abstract void apply();
 
 
-    protected String read(PPath file) {
+    protected String read(JavaFSPath file) {
+        return read(file.toNode());
+    }
+
+    protected String read(FSNode file) {
         try {
             return new String(file.readAllBytes());
         } catch(IOException e) {
@@ -41,16 +45,20 @@ public abstract class ChangeMaker {
         }
     }
 
-    protected void write(PPath file, String text) {
+    protected void write(JavaFSPath file, String text) {
+        write(file.toNode(), text);
+    }
+
+    protected void write(FSNode file, String text) {
         try {
-            Files.write(file.getJavaPath(), text.getBytes());
+            file.writeAllBytes(text.getBytes());
         } catch(IOException e) {
             throw new RuntimeException(e);
         }
     }
 
 
-    protected void addProject(PPath project, Blackhole blackhole, String name) {
+    protected void addProject(JavaFSPath project, Blackhole blackhole, String name) {
         if(buState != null) {
             gc();
             final mb.spoofax.pie.benchmark.Timer timer = startStats();
@@ -68,7 +76,7 @@ public abstract class ChangeMaker {
         }
     }
 
-    protected void execEditor(String text, PPath file, PPath project, Blackhole blackhole, String name) {
+    protected void execEditor(String text, JavaFSPath file, JavaFSPath project, Blackhole blackhole, String name) {
         gc();
         final mb.spoofax.pie.benchmark.Timer timer = startStats();
         if(tdState != null) {
@@ -79,19 +87,19 @@ public abstract class ChangeMaker {
         endStats(timer, name);
     }
 
-    protected void execPathChanges(PPath pathChange, Blackhole blackhole, String name) {
-        final HashSet<PPath> pathChanges = new HashSet<>();
+    protected void execPathChanges(JavaFSPath pathChange, Blackhole blackhole, String name) {
+        final HashSet<JavaFSPath> pathChanges = new HashSet<>();
         pathChanges.add(pathChange);
         execPathChanges(pathChanges, blackhole, name);
     }
 
-    protected void execPathChanges(Blackhole blackhole, String name, PPath... pathChanges) {
-        final HashSet<PPath> pathChangesSet = new HashSet<>();
+    protected void execPathChanges(Blackhole blackhole, String name, JavaFSPath... pathChanges) {
+        final HashSet<JavaFSPath> pathChangesSet = new HashSet<>();
         Collections.addAll(pathChangesSet, pathChanges);
         execPathChanges(pathChangesSet, blackhole, name);
     }
 
-    protected void execPathChanges(Set<PPath> pathChanges, Blackhole blackhole, String name) {
+    protected void execPathChanges(Set<JavaFSPath> pathChanges, Blackhole blackhole, String name) {
         gc();
         final mb.spoofax.pie.benchmark.Timer timer = startStats();
         if(tdState != null) {

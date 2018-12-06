@@ -1,5 +1,5 @@
 ---
-id: org.metaborg:spoofax.lang.cfg:0.1.0
+id: org.metaborg:spoofax.lang.cfg:0.2.0
 name: cfg
 dependencies:
   compile:

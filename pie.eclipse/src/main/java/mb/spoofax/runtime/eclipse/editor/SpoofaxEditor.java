@@ -5,8 +5,8 @@ import mb.log.api.Logger;
 import mb.spoofax.api.SpoofaxFacade;
 import mb.spoofax.runtime.eclipse.SpoofaxPlugin;
 import mb.spoofax.runtime.eclipse.pipeline.PipelineAdapter;
+import mb.spoofax.runtime.eclipse.util.FileUtils;
 import mb.spoofax.runtime.eclipse.util.Nullable;
-import mb.spoofax.runtime.eclipse.vfs.EclipsePathSrv;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -36,7 +36,7 @@ public class SpoofaxEditor extends TextEditor {
 
     private IJobManager jobManager;
     private Logger logger;
-    private EclipsePathSrv pathSrv;
+    private FileUtils fileUtils;
     private PipelineAdapter pipelineAdapter;
 
     private IEditorInput input;
@@ -93,10 +93,10 @@ public class SpoofaxEditor extends TextEditor {
         final Injector injector = spoofaxFacade.injector;
 
         this.logger = injector.getInstance(Logger.class);
-        this.pathSrv = injector.getInstance(EclipsePathSrv.class);
+        this.fileUtils = injector.getInstance(FileUtils.class);
         this.pipelineAdapter = injector.getInstance(PipelineAdapter.class);
 
-        setDocumentProvider(new DocumentProvider(logger, pathSrv));
+        setDocumentProvider(new DocumentProvider(logger, fileUtils));
         setSourceViewerConfiguration(new SpoofaxSourceViewerConfiguration());
     }
 
@@ -104,7 +104,7 @@ public class SpoofaxEditor extends TextEditor {
         input = getEditorInput();
         document = getDocumentProvider().getDocument(input);
 
-        final IFile inputFile = pathSrv.toFile(input);
+        final IFile inputFile = fileUtils.toFile(input);
         if(inputFile != null) {
             this.inputName = inputFile.toString();
             this.file = inputFile;

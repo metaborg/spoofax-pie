@@ -1,10 +1,10 @@
 package mb.spoofax.pie.sdf3
 
 import com.google.inject.Inject
+import mb.fs.java.JavaFSPath
 import mb.log.api.Logger
 import mb.pie.api.*
-import mb.pie.api.stamp.FileStampers
-import mb.pie.vfs.path.PPath
+import mb.pie.api.fs.stamp.FileSystemStampers
 import mb.spoofax.pie.config.ParseWorkspaceConfig
 import mb.spoofax.pie.config.requireConfigValue
 import mb.spoofax.pie.legacy.LegacyLoadProject
@@ -28,12 +28,12 @@ class SDF3ToStrategoSignatures
 
   data class Input(
     val langId: LangId,
-    val root: PPath
+    val root: JavaFSPath
   ) : Serializable
 
   data class LangSpecConfigInfo(
-    val dir: PPath,
-    val files: List<PPath>
+    val dir: JavaFSPath,
+    val files: List<JavaFSPath>
   ) : Serializable
 
   override val id = Companion.id
@@ -50,13 +50,13 @@ class SDF3ToStrategoSignatures
     } ?: throw ExecException("Could not get language specification configuration for language with identifier $langId")
 
     val langSpecProject = require(legacyLoadProject, langSpecDir).v
-    val outputs = processAll(files, langSpecProject, true, EndNamedGoal("Generate Signature (concrete)"), FileStampers.hash, FileStampers.modified, log)
+    val outputs = processAll(files.map { it.toNode() }, langSpecProject, true, EndNamedGoal("Generate Signature (concrete)"), FileSystemStampers.hash, FileSystemStampers.modified, log)
 
     val signatureFiles = outputs
       .filter { it.ast != null && it.outputFile != null }
       .map { it.outputFile!! }
       .toCollection(ArrayList())
-    val includeDir = langSpecDir.resolve("src-gen")
-    return Signatures(signatureFiles, includeDir)
+    val includeDir = langSpecDir.appendSegment("src-gen")
+    return Signatures(signatureFiles.mapTo(ArrayList()) { it.path }, includeDir)
   }
 }

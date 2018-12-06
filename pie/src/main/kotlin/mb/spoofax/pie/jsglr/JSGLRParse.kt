@@ -1,9 +1,9 @@
 package mb.spoofax.pie.jsglr
 
 import com.google.inject.Inject
+import mb.fs.java.JavaFSPath
 import mb.pie.api.*
-import mb.pie.lang.runtime.util.Tuple3
-import mb.pie.vfs.path.PPath
+import mb.pie.lang.runtime.Tuple3
 import mb.spoofax.api.message.Message
 import mb.spoofax.api.parse.Token
 import mb.spoofax.pie.config.ParseWorkspaceConfig
@@ -23,8 +23,8 @@ class JSGLRParse @Inject constructor(
     const val id = "jsglr.Parse"
   }
 
-  data class Input(val document: PPath, val langId: LangId, val root: PPath, val text: String, val table: Table) : Serializable
-  data class Key(val document: PPath, val langId: LangId, val root: PPath) : Serializable {
+  data class Input(val document: JavaFSPath, val langId: LangId, val root: JavaFSPath, val text: String, val table: Table) : Serializable
+  data class Key(val document: JavaFSPath, val langId: LangId, val root: JavaFSPath) : Serializable {
     constructor(input: Input) : this(input.document, input.langId, input.root)
   }
 

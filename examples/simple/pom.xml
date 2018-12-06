@@ -9,17 +9,11 @@
   <parent>
     <groupId>org.metaborg</groupId>
     <artifactId>spoofax.parent.kotlin</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
     <relativePath>../../pom/kotlin</relativePath>
   </parent>
 
   <dependencies>
-    <dependency>
-      <groupId>org.metaborg</groupId>
-      <artifactId>spoofax.pie</artifactId>
-      <version>${spoofax.version}</version>
-    </dependency>
-
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>log.api</artifactId>
@@ -29,6 +23,22 @@
       <groupId>org.metaborg</groupId>
       <artifactId>log.slf4j</artifactId>
       <version>${mb.log.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>fs.api</artifactId>
+      <version>${mb.fs.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>fs.java</artifactId>
+      <version>${mb.fs.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>spoofax.pie</artifactId>
+      <version>${spoofax.version}</version>
     </dependency>
 
     <dependency>

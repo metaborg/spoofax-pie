@@ -9,15 +9,20 @@
   <parent>
     <groupId>org.metaborg</groupId>
     <artifactId>spoofax.parent.java</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
     <relativePath>../pom/java</relativePath>
   </parent>
 
   <dependencies>
     <dependency>
       <groupId>org.metaborg</groupId>
-      <artifactId>pie.vfs</artifactId>
-      <version>${pie.version}</version>
+      <artifactId>fs.api</artifactId>
+      <version>${mb.fs.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>fs.java</artifactId>
+      <version>${mb.fs.version}</version>
     </dependency>
 
     <dependency>

@@ -4,14 +4,11 @@ import com.google.inject.*
 import com.google.inject.multibindings.MapBinder
 import mb.pie.api.TaskDef
 import mb.pie.taskdefs.guice.TaskDefsModule
-import mb.pie.vfs.path.PathSrv
-import mb.pie.vfs.path.PathSrvImpl
-import mb.spoofax.pie.config.ParseWorkspaceConfig
 import mb.spoofax.pie.analysis.*
+import mb.spoofax.pie.config.ParseWorkspaceConfig
 import mb.spoofax.pie.esv.ESVToStylingRules
 import mb.spoofax.pie.jsglr.JSGLRParse
 import mb.spoofax.pie.legacy.*
-import mb.spoofax.pie.analysis.CompileAnalyzer
 import mb.spoofax.pie.nabl2.NaBL2ToStrategoAnalyzer
 import mb.spoofax.pie.processing.*
 import mb.spoofax.pie.sdf3.SDF3ToJSGLRParseTable
@@ -65,10 +62,3 @@ open class SpoofaxPieModule : AbstractModule() {
     bind(SpoofaxPipeline::class.java).`in`(Singleton::class.java)
   }
 }
-
-open class PieVfsModule : AbstractModule() {
-  override fun configure() {
-    bind(PathSrv::class.java).to(PathSrvImpl::class.java).`in`(Singleton::class.java)
-  }
-}
-

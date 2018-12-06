@@ -1,6 +1,5 @@
 package mb.spoofax.runtime.jsglr;
 
-import mb.pie.vfs.path.PPath;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.jsglr.client.ParseTable;
@@ -18,10 +17,6 @@ public class Table implements Serializable {
 
     public Table(byte[] data) {
         this.data = data;
-    }
-
-    public Table(PPath path) throws IOException {
-        this.data = path.readAllBytes();
     }
 
 

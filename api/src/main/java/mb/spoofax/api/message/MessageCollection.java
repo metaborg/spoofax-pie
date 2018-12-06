@@ -1,6 +1,5 @@
 package mb.spoofax.api.message;
 
-import mb.pie.vfs.path.PPath;
 import mb.spoofax.api.util.MultiHashMap;
 
 import java.io.Serializable;
@@ -11,27 +10,27 @@ public class MessageCollection implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final ArrayList<Message> globalMessages = new ArrayList<>();
-    private final MultiHashMap<PPath, Message> containerMessages = new MultiHashMap<>();
-    private final MultiHashMap<PPath, Message> documentMessages = new MultiHashMap<>();
+    private final MultiHashMap<String, Message> containerMessages = new MultiHashMap<>();
+    private final MultiHashMap<String, Message> documentMessages = new MultiHashMap<>();
 
 
     public ArrayList<Message> globalMessages() {
         return globalMessages;
     }
 
-    public ArrayList<Message> messagesForContainer(PPath container) {
+    public ArrayList<Message> messagesForContainer(String container) {
         return containerMessages.get(container);
     }
 
-    public MultiHashMap<PPath, Message> containerMessages() {
+    public MultiHashMap<String, Message> containerMessages() {
         return containerMessages;
     }
 
-    public ArrayList<Message> messagesForDocument(PPath document) {
+    public ArrayList<Message> messagesForDocument(String document) {
         return documentMessages.get(document);
     }
 
-    public MultiHashMap<PPath, Message> documentMessages() {
+    public MultiHashMap<String, Message> documentMessages() {
         return documentMessages;
     }
 
@@ -88,11 +87,11 @@ public class MessageCollection implements Serializable {
         globalMessages.add(message);
     }
 
-    public void addContainerMessage(PPath container, Message message) {
+    public void addContainerMessage(String container, Message message) {
         containerMessages.add(container, message);
     }
 
-    public void addDocumentMessage(PPath document, Message message) {
+    public void addDocumentMessage(String document, Message message) {
         documentMessages.add(document, message);
     }
 
@@ -101,11 +100,11 @@ public class MessageCollection implements Serializable {
         globalMessages.addAll(messages);
     }
 
-    public void addContainerMessages(PPath container, Collection<Message> messages) {
+    public void addContainerMessages(String container, Collection<Message> messages) {
         containerMessages.addAll(container, messages);
     }
 
-    public void addDocumentMessages(PPath document, Collection<Message> messages) {
+    public void addDocumentMessages(String document, Collection<Message> messages) {
         documentMessages.addAll(document, messages);
     }
 
@@ -121,14 +120,14 @@ public class MessageCollection implements Serializable {
         globalMessages.clear();
     }
 
-    public void clearContainerMessages(PPath container) {
+    public void clearContainerMessages(String container) {
         final ArrayList<Message> messages = containerMessages.get(container);
         if(messages != null) {
             messages.clear();
         }
     }
 
-    public void clearDocumentMessages(PPath document) {
+    public void clearDocumentMessages(String document) {
         final ArrayList<Message> messages = documentMessages.get(document);
         if(messages != null) {
             messages.clear();

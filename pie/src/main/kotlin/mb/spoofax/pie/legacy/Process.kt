@@ -1,10 +1,9 @@
 package mb.spoofax.pie.legacy
 
+import mb.fs.java.JavaFSNode
 import mb.log.api.Logger
-import mb.pie.api.ExecContext
-import mb.pie.api.stamp.FileStamper
-import mb.pie.lang.runtime.util.Tuple3
-import mb.pie.vfs.path.PPath
+import mb.pie.api.*
+import mb.pie.api.fs.stamp.FileSystemStamper
 import org.apache.commons.vfs2.FileObject
 import org.metaborg.core.action.ITransformGoal
 import org.metaborg.core.analysis.AnalysisException
@@ -20,39 +19,39 @@ import org.spoofax.interpreter.terms.IStrategoTerm
 
 data class ProcessOutput(
   val ast: IStrategoTerm?,
-  val outputFile: PPath?,
-  val inputFile: PPath
-) : Tuple3<IStrategoTerm?, PPath?, PPath>
+  val outputFile: JavaFSNode?,
+  val inputFile: JavaFSNode
+) //: Tuple3<IStrategoTerm?, FSPath?, FSPath>
 
 fun ExecContext.processOne(
-  file: PPath,
+  file: JavaFSNode,
   project: IProject? = null,
   analyze: Boolean = false,
   transformGoal: ITransformGoal? = null,
-  reqFileStamper: FileStamper? = null,
-  genFileStamper: FileStamper? = null,
+  requireResourceStamper: FileSystemStamper? = null,
+  provideResourceStamper: FileSystemStamper? = null,
   log: Logger? = null
 ): ProcessOutput? {
-  return processAll(arrayListOf(file), project, analyze, transformGoal, reqFileStamper, genFileStamper, log).firstOrNull()
+  return processAll(arrayListOf(file), project, analyze, transformGoal, requireResourceStamper, provideResourceStamper, log).firstOrNull()
 }
 
 fun ExecContext.processAll(
-  files: Iterable<PPath>,
+  files: Iterable<JavaFSNode>,
   project: IProject? = null,
   analyze: Boolean = false,
   transformGoal: ITransformGoal? = null,
-  reqFileStamper: FileStamper? = null,
-  genFileStamper: FileStamper? = null,
+  requireResourceStamper: FileSystemStamper? = null,
+  provideResourceStamper: FileSystemStamper? = null,
   log: Logger? = null
 ): ArrayList<ProcessOutput> {
   val spoofax = Spx.spoofax()
   // Read input files.
   val inputUnits = files.mapNotNull { file ->
-    require(file, reqFileStamper)
+    require(file, requireResourceStamper)
     if(!file.exists()) {
       log?.warn("File $file does not exist, skipping")
       null
-    } else if(file.isDir) {
+    } else if(file.isDirectory) {
       log?.warn("Path $file is a directory, skipping")
       null
     } else {
@@ -77,7 +76,7 @@ fun ExecContext.processAll(
     if(parseFacet != null) {
       val parseTableFile = parseFacet.parseTable
       if(parseTableFile != null) {
-        require(parseTableFile.pPath, reqFileStamper)
+        require(parseTableFile.fsPath, requireResourceStamper)
       }
     }
   }
@@ -92,7 +91,7 @@ fun ExecContext.processAll(
 
   if(!analyze && transformGoal == null) {
     return parseUnits.map {
-      ProcessOutput(it.ast(), null, it.input().source()!!.pPath)
+      ProcessOutput(it.ast(), null, it.input().source()!!.fsNode)
     }.toCollection(arrayListOf())
   }
 
@@ -101,10 +100,10 @@ fun ExecContext.processAll(
     val strategoRuntimeFacet = langImpl.facet(StrategoRuntimeFacet::class.java)
     if(strategoRuntimeFacet != null) {
       strategoRuntimeFacet.ctreeFiles.forEach<FileObject> {
-        require(it.pPath, reqFileStamper)
+        require(it.fsPath, requireResourceStamper)
       }
       strategoRuntimeFacet.jarFiles.forEach<FileObject> {
-        require(it.pPath, reqFileStamper)
+        require(it.fsPath, requireResourceStamper)
       }
     }
   }
@@ -169,18 +168,18 @@ fun ExecContext.processAll(
         val ast = result.ast()
         val outputs = result.outputs()
         if(ast != null && outputs.count() == 0) {
-          listOf(ProcessOutput(ast, null, result.source()!!.pPath))
+          listOf(ProcessOutput(ast, null, result.source()!!.fsNode))
         } else {
           outputs.map { output ->
             val outputResource = output?.output()
-            val writtenFile: PPath?
-            writtenFile = if(outputResource != null) {
-              generate(outputResource.pPath, genFileStamper)
-              outputResource.pPath
+            val writtenFile = if(outputResource != null) {
+              val node = outputResource.fsNode
+              provide(node, provideResourceStamper)
+              node
             } else {
               null
             }
-            ProcessOutput(ast, writtenFile, result.source()!!.pPath)
+            ProcessOutput(ast, writtenFile, result.source()!!.fsNode)
           }
         }
       }.toCollection(arrayListOf())
@@ -190,7 +189,7 @@ fun ExecContext.processAll(
     }
   } else {
     return analyzeUnitsPerContext!!.flatMap { it.value }.map {
-      ProcessOutput(it.ast(), null, it.input().source()!!.pPath)
+      ProcessOutput(it.ast(), null, it.input().source()!!.fsNode)
     }.toCollection(ArrayList())
   }
 }

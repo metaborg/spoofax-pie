@@ -1,11 +1,10 @@
 package mb.spoofax.pie.sdf3
 
 import com.google.inject.Inject
+import mb.fs.java.JavaFSPath
 import mb.log.api.Logger
 import mb.pie.api.*
-import mb.pie.api.stamp.FileStampers
-import mb.pie.vfs.path.PPath
-import mb.pie.vfs.path.PathSrv
+import mb.pie.api.fs.stamp.FileSystemStampers
 import mb.spoofax.pie.config.ParseWorkspaceConfig
 import mb.spoofax.pie.config.requireConfigValue
 import mb.spoofax.pie.legacy.*
@@ -19,7 +18,6 @@ import java.io.Serializable
 class SDF3ToJSGLRParseTable
 @Inject constructor(
   logFactory: Logger,
-  private val pathSrv: PathSrv,
   private val parseWorkspaceConfig: ParseWorkspaceConfig,
   private val legacyLoadProject: LegacyLoadProject
 ) : TaskDef<SDF3ToJSGLRParseTable.Input, Table?> {
@@ -31,13 +29,13 @@ class SDF3ToJSGLRParseTable
 
   data class Input(
     val langId: LangId,
-    val root: PPath
+    val root: JavaFSPath
   ) : Serializable
 
   data class LangSpecConfigInfo(
-    val dir: PPath,
-    val files: List<PPath>,
-    val mainFile: PPath?
+    val dir: JavaFSPath,
+    val files: List<JavaFSPath>,
+    val mainFile: JavaFSPath?
   ) : Serializable
 
   override val id = Companion.id
@@ -60,27 +58,25 @@ class SDF3ToJSGLRParseTable
     }
 
     val langSpecProject = require(legacyLoadProject, langSpecDir).v
-    val outputs = processAll(files, langSpecProject, true, EndNamedGoal("to Normal Form (abstract)"), FileStampers.hash, FileStampers.modified, log)
+    val outputs = processAll(files.map { it.toNode() }, langSpecProject, true, EndNamedGoal("to Normal Form (abstract)"), FileSystemStampers.hash, FileSystemStampers.modified, log)
 
     // Create table
     // Main input file
-    val mainResource = outputs.firstOrNull { it.inputFile == mainFile }?.outputFile
+    val mainResource = outputs.firstOrNull { it.inputFile.path == mainFile }?.outputFile
       ?: throw ExecException("Main file $mainFile could not be normalized")
-    val mainResourceLocal = pathSrv.localPath(mainResource)
-      ?: throw ExecException("Normalized main file $mainResource is not on the local file system")
     // Output file
     val spoofaxPaths = SpoofaxCommonPaths(langSpecProject.location())
     val vfsOutputFile = spoofaxPaths.targetMetaborgDir().resolveFile("sdf-new.tbl")
     val outputFile = Spx.spoofax().resourceService.localPath(vfsOutputFile)
       ?: throw ExecException("Parse table output file $vfsOutputFile is not on the local file system")
     // Paths
-    val srcGenSyntaxDir = langSpecDir.resolve("src-gen/syntax")
+    val srcGenSyntaxDir = langSpecDir.appendSegments("src-gen", "syntax")
     val paths = listOf(srcGenSyntaxDir.toString())
     // Create table and make dependencies
-    require(mainResource, FileStampers.modified)
-    val generator = ParseTableGenerator(mainResourceLocal, outputFile, null, null, paths)
+    require(mainResource, FileSystemStampers.modified)
+    val generator = ParseTableGenerator(mainResource.javaPath.toFile(), outputFile, null, null, paths)
     generator.outputTable(false, false, false)
-    generate(vfsOutputFile.pPath, FileStampers.modified)
-    return Table(vfsOutputFile.pPath)
+    provide(vfsOutputFile.fsPath, FileSystemStampers.modified)
+    return Table(vfsOutputFile.fsNode.readAllBytes())
   }
 }

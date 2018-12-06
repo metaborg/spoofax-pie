@@ -1,14 +1,12 @@
 package mb.spoofax.runtime.jsglr;
 
-import mb.pie.vfs.path.PPath;
-import mb.pie.vfs.path.PPathImpl;
+import mb.fs.java.JavaFSPath;
 import mb.spoofax.api.SpoofaxRunEx;
 import org.spoofax.interpreter.terms.ISimpleTerm;
 import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 import org.spoofax.terms.attachments.*;
 
 import javax.annotation.Nullable;
-import java.nio.file.Paths;
 
 import static org.spoofax.jsglr.client.imploder.ImploderAttachment.hasImploderOrigin;
 import static org.spoofax.terms.attachments.OriginAttachment.getOrigin;
@@ -23,10 +21,10 @@ public class SourcePathAttachment extends AbstractTermAttachment {
     public static final TermAttachmentType<SourcePathAttachment> TYPE = new VolatileTermAttachmentType<>(
         SourcePathAttachment.class);
 
-    public final PPath path;
+    public final JavaFSPath path;
 
 
-    public SourcePathAttachment(PPath path) {
+    public SourcePathAttachment(JavaFSPath path) {
         this.path = path;
     }
 
@@ -36,7 +34,7 @@ public class SourcePathAttachment extends AbstractTermAttachment {
     }
 
 
-    public static @Nullable PPath getPathForTerm(ISimpleTerm term) {
+    public static @Nullable JavaFSPath getPathForTerm(ISimpleTerm term) {
         final SourcePathAttachment attachment = ParentAttachment.getRoot(term).getAttachment(TYPE);
         if(attachment != null) {
             return attachment.path;
@@ -57,14 +55,13 @@ public class SourcePathAttachment extends AbstractTermAttachment {
         if(fileName == null) {
             return null;
         }
-
-        return new PPathImpl(Paths.get(fileName));
+        return new JavaFSPath(fileName);
     }
 
     /**
      * Sets the resource for a term tree. Should only be applied to the root of a tree.
      */
-    public static void setPathForTerm(ISimpleTerm term, PPath path) {
+    public static void setPathForTerm(ISimpleTerm term, JavaFSPath path) {
         final ISimpleTerm root = ParentAttachment.getRoot(term);
         if(term != root) {
             throw new SpoofaxRunEx(

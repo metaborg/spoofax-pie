@@ -1,10 +1,10 @@
 package mb.spoofax.pie.legacy
 
 import com.google.inject.Inject
+import mb.fs.java.JavaFSPath
 import mb.log.api.Logger
 import mb.pie.api.*
-import mb.pie.api.stamp.FileStampers
-import mb.pie.vfs.path.PPath
+import mb.pie.api.fs.stamp.FileSystemStampers
 import mb.spoofax.api.parse.Token
 import mb.spoofax.api.style.Styling
 import mb.spoofax.legacy.StyleConverter
@@ -24,7 +24,7 @@ class LegacyStyle @Inject constructor(
     const val id = "legacy.Style"
   }
 
-  data class Input(val file: PPath, val tokenStream: Iterable<Token>, val ast: IStrategoTerm) : Serializable
+  data class Input(val file: JavaFSPath, val tokenStream: Iterable<Token>, val ast: IStrategoTerm) : Serializable
 
   override val id = Companion.id
   override fun ExecContext.exec(input: Input): Styling {
@@ -36,7 +36,7 @@ class LegacyStyle @Inject constructor(
     // Require packed ESV file
     val langLoc = langImpl.components().first().location()
     val packedEsvFile = SpoofaxLangSpecCommonPaths(langLoc).targetMetaborgDir().resolveFile("editor.esv.af")
-    require(packedEsvFile.pPath, FileStampers.hash)
+    require(packedEsvFile.fsPath, FileSystemStampers.hash)
 
     // Perform styling
     val inputUnit = spoofax.unitService.inputUnit("hack", langImpl, null)

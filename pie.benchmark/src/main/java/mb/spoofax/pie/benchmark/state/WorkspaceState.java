@@ -1,6 +1,6 @@
 package mb.spoofax.pie.benchmark.state;
 
-import mb.pie.vfs.path.PPath;
+import mb.fs.java.JavaFSPath;
 import mb.spoofax.legacy.LoadMetaLanguages;
 import org.metaborg.core.MetaborgException;
 import org.openjdk.jmh.annotations.*;
@@ -12,19 +12,19 @@ import java.io.IOException;
 public class WorkspaceState {
     @Param({}) private String workspaceRootStr;
 
-    public PPath root;
-    public PPath storePath;
+    public JavaFSPath root;
+    public JavaFSPath storePath;
 
 
     public void setup(SpoofaxPieState spoofaxPieState) {
-        this.root = spoofaxPieState.pathSrv.resolve(workspaceRootStr);
-        this.storePath = root.resolve(".pie/");
+        this.root = new JavaFSPath(workspaceRootStr).toAbsoluteFromWorkingDirectory();
+        this.storePath = root.appendSegment(".pie");
         unpackAndLoadMetaLanguages();
     }
 
     public void unpackAndLoadMetaLanguages() {
         try {
-            LoadMetaLanguages.loadAll(this.root);
+            LoadMetaLanguages.loadAll(this.root.toNode());
         } catch(IOException | MetaborgException e) {
             throw new RuntimeException("Could not unpack and load meta-languages", e);
         }

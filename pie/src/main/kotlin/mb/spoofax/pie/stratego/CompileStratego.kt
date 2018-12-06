@@ -1,19 +1,18 @@
 package mb.spoofax.pie.stratego
 
-import com.google.inject.Inject
+import mb.fs.api.node.match.PathNodeMatcher
+import mb.fs.api.path.match.ExtensionsPathMatcher
+import mb.fs.java.JavaFSNode
+import mb.fs.java.JavaFSPath
 import mb.pie.api.*
-import mb.pie.api.stamp.FileStampers
-import mb.pie.vfs.path.*
+import mb.pie.api.fs.stamp.FileSystemStampers
 import mb.spoofax.runtime.cfg.StrategoCompilerConfig
 import mb.spoofax.runtime.stratego.StrategoCompiler
 import java.io.IOException
 import java.io.Serializable
 import java.nio.charset.Charset
 
-class CompileStratego
-@Inject constructor(
-  private val pathSrv: PathSrv
-) : TaskDef<CompileStratego.Input, PPath?> {
+class CompileStratego : TaskDef<CompileStratego.Input, JavaFSPath?> {
   companion object {
     const val id = "stratego.Compile"
   }
@@ -24,8 +23,8 @@ class CompileStratego
   ) : Serializable
 
   override val id = Companion.id
-  override fun key(input: Input): PPath = input.config.outputFileOrDefault()
-  override fun ExecContext.exec(input: Input): PPath? {
+  override fun key(input: Input): JavaFSPath = input.config.outputFileOrDefault()
+  override fun ExecContext.exec(input: Input): JavaFSPath? {
     val (config, taskDeps) = input
     // Explicitly require hidden dependencies.
     taskDeps.forEach {
@@ -36,19 +35,19 @@ class CompileStratego
     val result = compiler.compile(config)
     if(result == null) {
       // Make manual dependencies, since no depfile is generated if compilation fails.
-      require(config.mainFile(), FileStampers.hash)
-      config.includeFiles().forEach { require(it, FileStampers.hash) }
-      config.includeDirs().forEach { require(it, FileStampers.hash(PPaths.extensionsPathWalker(listOf("str", "rtree")))) }
+      require(config.mainFile(), FileSystemStampers.hash)
+      config.includeFiles().forEach { require(it, FileSystemStampers.hash) }
+      config.includeDirs().forEach { require(it, FileSystemStampers.hash(PathNodeMatcher(ExtensionsPathMatcher("str", "rtree")))) }
       return null
     }
-    generate(result.outputFile)
-    generate(result.depFile)
-    requiredPaths(result.depFile).forEach { require(it, FileStampers.hash) }
-    return result.outputFile
+    provide(result.outputFile)
+    provide(result.depFile)
+    requiredPaths(result.depFile).forEach { require(it, FileSystemStampers.hash) }
+    return result.outputFile.path
   }
 
   @Throws(IOException::class)
-  private fun requiredPaths(depFile: PPath) =
+  private fun requiredPaths(depFile: JavaFSNode) =
     depFile
       .readAllLines(Charset.defaultCharset())
       .drop(1) // Skip first line (start at 1 instead of 0), which lists the generated CTree file.
@@ -62,8 +61,7 @@ class CompileStratego
         } else {
           // Remove the trailing ' /'.
           val pathStr = trimmedLine.substring(0, length - 2)
-          val path = pathSrv.resolveLocal(pathStr)
-          path
+          JavaFSPath(pathStr)
         }
       }
 }

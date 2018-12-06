@@ -1,31 +1,28 @@
 package mb.spoofax.runtime.eclipse.pipeline;
 
+import com.google.inject.Inject;
 import java.util.HashSet;
-
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceDelta;
-import org.eclipse.core.resources.IResourceDeltaVisitor;
+import mb.fs.java.JavaFSPath;
+import mb.pie.api.ResourceKey;
+import mb.pie.api.fs.ResourceKt;
+import mb.spoofax.runtime.eclipse.util.FileUtils;
+import mb.spoofax.runtime.eclipse.util.Nullable;
+import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.CoreException;
 
-import com.google.inject.Inject;
-
-import mb.pie.vfs.path.PPath;
-import mb.spoofax.runtime.eclipse.util.Nullable;
-import mb.spoofax.runtime.eclipse.vfs.EclipsePathSrv;
-
 public class PipelinePathChanges {
-    private final EclipsePathSrv pathSrv;
+    private final FileUtils fileUtils;
 
 
-    @Inject public PipelinePathChanges(EclipsePathSrv pathSrv) {
-        this.pathSrv = pathSrv;
+    @Inject public PipelinePathChanges(FileUtils fileUtils) {
+        this.fileUtils = fileUtils;
     }
 
 
-    public HashSet<PPath> changedPaths(@Nullable IResourceDelta delta) throws CoreException {
-        final HashSet<PPath> changedPaths = new HashSet<>();
+    public HashSet<ResourceKey> changedPaths(@Nullable IResourceDelta delta) throws CoreException {
+        final HashSet<ResourceKey> changedResources = new HashSet<>();
         if(delta == null) {
-            return changedPaths;
+            return changedResources;
         }
         delta.accept(new IResourceDeltaVisitor() {
             public boolean visit(IResourceDelta innerDelta) throws CoreException {
@@ -36,8 +33,9 @@ public class PipelinePathChanges {
                     case IResourceDelta.CHANGED: {
                         final IResource resource = innerDelta.getResource();
                         if(!(resource.getType() != IResource.FILE && kind == IResourceDelta.CHANGED)) {
-                            final PPath path = pathSrv.resolve(resource);
-                            changedPaths.add(path);
+                            final JavaFSPath path = fileUtils.toPath(resource);
+                            final ResourceKey resourceKey = ResourceKt.toResourceKey(path);
+                            changedResources.add(resourceKey);
                         }
                         break;
                     }
@@ -50,6 +48,6 @@ public class PipelinePathChanges {
                 return true;
             }
         });
-        return changedPaths;
+        return changedResources;
     }
 }

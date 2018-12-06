@@ -1,6 +1,6 @@
 language: java
 install: true
-script: mvn -B -V -U --settings .travis.settings.xml clean verify
+script: mvn -B -V -U --settings .travis.settings.xml clean install && mvn -f pom-eclipse.xml -B -V -U --settings .travis.settings.xml clean verify
 deploy:
   - provider: script
     script: mvn -B -V -nsu --settings .travis.settings.xml -DskipTests -Dmaven.test.skip=true -P release deploy

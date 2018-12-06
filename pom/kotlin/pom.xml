@@ -10,7 +10,7 @@
   <parent>
     <groupId>org.metaborg</groupId>
     <artifactId>spoofax.parent.java</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
     <relativePath>../java</relativePath>
   </parent>
 
@@ -48,6 +48,9 @@
             <apiVersion>${kotlin.api.version}</apiVersion>
             <jvmTarget>${java.lang.version}</jvmTarget>
             <experimentalCoroutines>enable</experimentalCoroutines>
+            <args>
+              <arg>-Xjvm-default=compatibility</arg>
+            </args>
           </configuration>
           <executions>
             <execution>

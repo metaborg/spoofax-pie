@@ -1,9 +1,9 @@
 package mb.spoofax.pie.benchmark.state.exec;
 
+import mb.fs.java.JavaFSPath;
 import mb.pie.api.ExecException;
 import mb.pie.api.Task;
 import mb.pie.api.exec.*;
-import mb.pie.vfs.path.PPath;
 import mb.spoofax.pie.benchmark.state.*;
 import mb.spoofax.pie.generated.processDocumentWithText;
 import mb.spoofax.pie.processing.DocumentResult;
@@ -14,14 +14,13 @@ import org.openjdk.jmh.infra.Blackhole;
 import java.io.Serializable;
 import java.util.HashMap;
 
-
 @State(Scope.Benchmark)
 public class TDState {
     private SpoofaxPieState spoofaxPieState;
     private WorkspaceState workspaceState;
     private TopDownExecutor executor;
-    private Task<PPath, ? extends Serializable> processWorkspace;
-    private HashMap<PPath, Task<? extends processDocumentWithText.Input, ? extends DocumentResult>> editorTasks = new HashMap<>();
+    private Task<JavaFSPath, ? extends Serializable> processWorkspace;
+    private HashMap<JavaFSPath, Task<? extends processDocumentWithText.Input, ? extends DocumentResult>> editorTasks = new HashMap<>();
 
 
     public void setup(SpoofaxPieState spoofaxPieState, WorkspaceState workspaceState, InfraState infraState) {
@@ -39,7 +38,7 @@ public class TDState {
     /**
      * Adds an editor, or updates an exiting editor, and executes an editor update.
      */
-    public void addOrUpdateEditor(String text, PPath file, PPath project, Blackhole blackhole) {
+    public void addOrUpdateEditor(String text, JavaFSPath file, JavaFSPath project, Blackhole blackhole) {
         final Task<? extends processDocumentWithText.Input, ? extends DocumentResult> task =
             spoofaxPieState.spoofaxPipeline.documentWithText(file, project, workspaceState.root, text);
         this.editorTasks.put(file, task);
@@ -54,7 +53,7 @@ public class TDState {
     /**
      * Removes an open editor.
      */
-    public void removeEditor(PPath file) {
+    public void removeEditor(JavaFSPath file) {
         this.editorTasks.remove(file);
     }
 

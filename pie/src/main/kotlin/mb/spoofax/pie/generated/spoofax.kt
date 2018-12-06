@@ -5,25 +5,26 @@ package mb.spoofax.pie.generated
 import com.google.inject.Binder
 import com.google.inject.Inject
 import com.google.inject.multibindings.MapBinder
+import mb.fs.api.node.match.*
+import mb.fs.api.node.walk.*
+import mb.fs.api.path.FSPath
+import mb.fs.api.path.match.*
+import mb.fs.java.JavaFSPath
 import mb.pie.api.*
-import mb.pie.lang.runtime.path.*
-import mb.pie.lang.runtime.util.*
+import mb.pie.lang.runtime.*
 import mb.pie.taskdefs.guice.TaskDefsModule
-import mb.pie.vfs.path.PPath
-import mb.pie.vfs.path.PPaths
 
 class processWorkspace @Inject constructor(
-  private val listContents: ListContents,
   private val _processContainer: processContainer
-) : TaskDef<PPath, mb.spoofax.pie.processing.WorkspaceResult> {
+) : TaskDef<JavaFSPath, mb.spoofax.pie.processing.WorkspaceResult> {
   companion object {
     const val id = "processWorkspace"
   }
 
   override val id = Companion.id
-  override fun key(input: PPath): Key = input
-  override fun ExecContext.exec(input: PPath): mb.spoofax.pie.processing.WorkspaceResult = run {
-    val containerResults = require(listContents, ListContents.Input(input, PPaths.regexPathMatcher("^[^.]((?!src-gen).)*\$"))).map { container -> require(_processContainer, processContainer.Input(container, input)) }.toCollection(ArrayList<mb.spoofax.pie.processing.ContainerResult>())
+  override fun key(input: JavaFSPath): Key = input
+  override fun ExecContext.exec(input: JavaFSPath): mb.spoofax.pie.processing.WorkspaceResult = run {
+    val containerResults = list(input, PathNodeMatcher(RegexPathMatcher("^[^.]((?!src-gen).)*\$"))).map { container -> require(_processContainer, processContainer.Input(container, input)) }.toCollection(ArrayList<mb.spoofax.pie.processing.ContainerResult>())
     mb.spoofax.pie.processing.createWorkspaceResult(input, containerResults)
   }
 }
@@ -31,7 +32,6 @@ class processWorkspace @Inject constructor(
 class processContainer @Inject constructor(
   private val _mb_spoofax_pie_processing_LegacyExtensions: mb.spoofax.pie.processing.LegacyExtensions,
   private val _legacyProcessDocument: legacyProcessDocument,
-  private val walkContents: WalkContents,
   private val _mb_spoofax_pie_processing_LangSpecExtensions: mb.spoofax.pie.processing.LangSpecExtensions,
   private val _processDocument: processDocument
 ) : TaskDef<processContainer.Input, mb.spoofax.pie.processing.ContainerResult> {
@@ -39,14 +39,14 @@ class processContainer @Inject constructor(
     const val id = "processContainer"
   }
 
-  data class Input(val container: PPath, val root: PPath) : Tuple2<PPath, PPath> {
-    constructor(tuple: Tuple2<PPath, PPath>) : this(tuple.component1(), tuple.component2())
+  data class Input(val container: JavaFSPath, val root: JavaFSPath) : Tuple2<JavaFSPath, JavaFSPath> {
+    constructor(tuple: Tuple2<JavaFSPath, JavaFSPath>) : this(tuple.component1(), tuple.component2())
   }
 
   override val id = Companion.id
   override fun key(input: processContainer.Input): Key = input.container
   override fun ExecContext.exec(input: processContainer.Input): mb.spoofax.pie.processing.ContainerResult = run {
-    val langSpecResults = require(walkContents, WalkContents.Input(input.container, PPaths.extensionsPathWalker(require(_mb_spoofax_pie_processing_LangSpecExtensions, input.root)))).map { document ->
+    val langSpecResults = walk(input.container, PathNodeWalker(NoHiddenPathMatcher.instance), PathNodeMatcher(ExtensionsPathMatcher(require(_mb_spoofax_pie_processing_LangSpecExtensions, input.root)))).map { document ->
       run {
         if(!mb.spoofax.pie.processing.shouldProcessDocument(document)) run {
           mb.spoofax.pie.processing.emptyDocumentResult(document)
@@ -55,7 +55,7 @@ class processContainer @Inject constructor(
         }
       }
     }.toCollection(ArrayList<mb.spoofax.pie.processing.DocumentResult>());
-    val legacyResults = require(walkContents, WalkContents.Input(input.container, PPaths.extensionsPathWalker(require(_mb_spoofax_pie_processing_LegacyExtensions, None.instance)))).map { document ->
+    val legacyResults = walk(input.container, PathNodeWalker(NoHiddenPathMatcher.instance), PathNodeMatcher(ExtensionsPathMatcher(require(_mb_spoofax_pie_processing_LegacyExtensions, None.instance)))).map { document ->
       run {
         if(!mb.spoofax.pie.processing.shouldProcessDocument(document)) run {
           mb.spoofax.pie.processing.emptyDocumentResult(document)
@@ -72,22 +72,21 @@ class processDocumentWithText @Inject constructor(
   private val _legacyProcessTextBuffer: legacyProcessTextBuffer,
   private val _mb_spoofax_pie_processing_IsLegacyDocument: mb.spoofax.pie.processing.IsLegacyDocument,
   private val _processTextBuffer: processTextBuffer,
-  private val _mb_spoofax_pie_processing_IsLangSpecDocument: mb.spoofax.pie.processing.IsLangSpecDocument,
-  private val exists: Exists
+  private val _mb_spoofax_pie_processing_IsLangSpecDocument: mb.spoofax.pie.processing.IsLangSpecDocument
 ) : TaskDef<processDocumentWithText.Input, mb.spoofax.pie.processing.DocumentResult> {
   companion object {
     const val id = "processDocumentWithText"
   }
 
-  data class Input(val document: PPath, val container: PPath, val root: PPath, val text: String) : Tuple4<PPath, PPath, PPath, String> {
-    constructor(tuple: Tuple4<PPath, PPath, PPath, String>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
+  data class Input(val document: JavaFSPath, val container: JavaFSPath, val root: JavaFSPath, val text: String) : Tuple4<JavaFSPath, JavaFSPath, JavaFSPath, String> {
+    constructor(tuple: Tuple4<JavaFSPath, JavaFSPath, JavaFSPath, String>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
   }
 
   override val id = Companion.id
   override fun key(input: processDocumentWithText.Input): Key = input.document
   override fun ExecContext.exec(input: processDocumentWithText.Input): mb.spoofax.pie.processing.DocumentResult = run {
 
-    if(!require(exists, input.document) || !mb.spoofax.pie.processing.shouldProcessDocument(input.document)) run {
+    if(!exists(input.document) || !mb.spoofax.pie.processing.shouldProcessDocument(input.document)) run {
       mb.spoofax.pie.processing.emptyDocumentResult(input.document)
     } else run {
       if(require(_mb_spoofax_pie_processing_IsLangSpecDocument, mb.spoofax.pie.processing.IsLangSpecDocument.Input(input.document, input.root))) run {
@@ -104,21 +103,20 @@ class processDocumentWithText @Inject constructor(
 }
 
 class processDocument @Inject constructor(
-  private val _processTextBuffer: processTextBuffer,
-  private val read: Read
+  private val _processTextBuffer: processTextBuffer
 ) : TaskDef<processDocument.Input, mb.spoofax.pie.processing.DocumentResult> {
   companion object {
     const val id = "processDocument"
   }
 
-  data class Input(val document: PPath, val container: PPath, val root: PPath) : Tuple3<PPath, PPath, PPath> {
-    constructor(tuple: Tuple3<PPath, PPath, PPath>) : this(tuple.component1(), tuple.component2(), tuple.component3())
+  data class Input(val document: JavaFSPath, val container: JavaFSPath, val root: JavaFSPath) : Tuple3<JavaFSPath, JavaFSPath, JavaFSPath> {
+    constructor(tuple: Tuple3<JavaFSPath, JavaFSPath, JavaFSPath>) : this(tuple.component1(), tuple.component2(), tuple.component3())
   }
 
   override val id = Companion.id
   override fun key(input: processDocument.Input): Key = input.document
   override fun ExecContext.exec(input: processDocument.Input): mb.spoofax.pie.processing.DocumentResult = run {
-    val text = require(read, input.document)!!
+    val text = readToString(input.document)!!
     require(_processTextBuffer, processTextBuffer.Input(input.document, input.container, input.root, text))
   }
 }
@@ -133,8 +131,8 @@ class processTextBuffer @Inject constructor(
     const val id = "processTextBuffer"
   }
 
-  data class Input(val document: PPath, val container: PPath, val root: PPath, val text: String) : Tuple4<PPath, PPath, PPath, String> {
-    constructor(tuple: Tuple4<PPath, PPath, PPath, String>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
+  data class Input(val document: JavaFSPath, val container: JavaFSPath, val root: JavaFSPath, val text: String) : Tuple4<JavaFSPath, JavaFSPath, JavaFSPath, String> {
+    constructor(tuple: Tuple4<JavaFSPath, JavaFSPath, JavaFSPath, String>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
   }
 
   override val id = Companion.id
@@ -156,8 +154,8 @@ class parse @Inject constructor(
     const val id = "parse"
   }
 
-  data class Input(val document: PPath, val langId: mb.spoofax.runtime.cfg.LangId, val root: PPath, val text: String) : Tuple4<PPath, mb.spoofax.runtime.cfg.LangId, PPath, String> {
-    constructor(tuple: Tuple4<PPath, mb.spoofax.runtime.cfg.LangId, PPath, String>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
+  data class Input(val document: JavaFSPath, val langId: mb.spoofax.runtime.cfg.LangId, val root: JavaFSPath, val text: String) : Tuple4<JavaFSPath, mb.spoofax.runtime.cfg.LangId, JavaFSPath, String> {
+    constructor(tuple: Tuple4<JavaFSPath, mb.spoofax.runtime.cfg.LangId, JavaFSPath, String>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
   }
 
   data class Output(val _1: org.spoofax.interpreter.terms.IStrategoTerm?, val _2: ArrayList<mb.spoofax.api.parse.Token>?, val _3: ArrayList<mb.spoofax.api.message.Message>) : Tuple3<org.spoofax.interpreter.terms.IStrategoTerm?, ArrayList<mb.spoofax.api.parse.Token>?, ArrayList<mb.spoofax.api.message.Message>> {
@@ -188,8 +186,8 @@ class style @Inject constructor(
     const val id = "style"
   }
 
-  data class Input(val langId: mb.spoofax.runtime.cfg.LangId, val root: PPath, val tokens: ArrayList<mb.spoofax.api.parse.Token>) : Tuple3<mb.spoofax.runtime.cfg.LangId, PPath, ArrayList<mb.spoofax.api.parse.Token>> {
-    constructor(tuple: Tuple3<mb.spoofax.runtime.cfg.LangId, PPath, ArrayList<mb.spoofax.api.parse.Token>>) : this(tuple.component1(), tuple.component2(), tuple.component3())
+  data class Input(val langId: mb.spoofax.runtime.cfg.LangId, val root: JavaFSPath, val tokens: ArrayList<mb.spoofax.api.parse.Token>) : Tuple3<mb.spoofax.runtime.cfg.LangId, JavaFSPath, ArrayList<mb.spoofax.api.parse.Token>> {
+    constructor(tuple: Tuple3<mb.spoofax.runtime.cfg.LangId, JavaFSPath, ArrayList<mb.spoofax.api.parse.Token>>) : this(tuple.component1(), tuple.component2(), tuple.component3())
   }
 
   override val id = Companion.id
@@ -210,8 +208,8 @@ class analyze @Inject constructor(
     const val id = "analyze"
   }
 
-  data class Input(val document: PPath, val langId: mb.spoofax.runtime.cfg.LangId, val container: PPath, val root: PPath, val ast: org.spoofax.interpreter.terms.IStrategoTerm) : Tuple5<PPath, mb.spoofax.runtime.cfg.LangId, PPath, PPath, org.spoofax.interpreter.terms.IStrategoTerm> {
-    constructor(tuple: Tuple5<PPath, mb.spoofax.runtime.cfg.LangId, PPath, PPath, org.spoofax.interpreter.terms.IStrategoTerm>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4(), tuple.component5())
+  data class Input(val document: JavaFSPath, val langId: mb.spoofax.runtime.cfg.LangId, val container: JavaFSPath, val root: JavaFSPath, val ast: org.spoofax.interpreter.terms.IStrategoTerm) : Tuple5<JavaFSPath, mb.spoofax.runtime.cfg.LangId, JavaFSPath, JavaFSPath, org.spoofax.interpreter.terms.IStrategoTerm> {
+    constructor(tuple: Tuple5<JavaFSPath, mb.spoofax.runtime.cfg.LangId, JavaFSPath, JavaFSPath, org.spoofax.interpreter.terms.IStrategoTerm>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4(), tuple.component5())
   }
 
   override val id = Companion.id
@@ -227,21 +225,20 @@ class analyze @Inject constructor(
 }
 
 class legacyProcessDocument @Inject constructor(
-  private val _legacyProcessTextBuffer: legacyProcessTextBuffer,
-  private val read: Read
+  private val _legacyProcessTextBuffer: legacyProcessTextBuffer
 ) : TaskDef<legacyProcessDocument.Input, mb.spoofax.pie.processing.DocumentResult> {
   companion object {
     const val id = "legacyProcessDocument"
   }
 
-  data class Input(val document: PPath, val container: PPath, val root: PPath) : Tuple3<PPath, PPath, PPath> {
-    constructor(tuple: Tuple3<PPath, PPath, PPath>) : this(tuple.component1(), tuple.component2(), tuple.component3())
+  data class Input(val document: JavaFSPath, val container: JavaFSPath, val root: JavaFSPath) : Tuple3<JavaFSPath, JavaFSPath, JavaFSPath> {
+    constructor(tuple: Tuple3<JavaFSPath, JavaFSPath, JavaFSPath>) : this(tuple.component1(), tuple.component2(), tuple.component3())
   }
 
   override val id = Companion.id
   override fun key(input: legacyProcessDocument.Input): Key = input.document
   override fun ExecContext.exec(input: legacyProcessDocument.Input): mb.spoofax.pie.processing.DocumentResult = run {
-    val text = require(read, input.document)!!
+    val text = readToString(input.document)!!
     require(_legacyProcessTextBuffer, legacyProcessTextBuffer.Input(input.document, input.container, input.root, text))
   }
 }
@@ -254,8 +251,8 @@ class legacyProcessTextBuffer @Inject constructor(
     const val id = "legacyProcessTextBuffer"
   }
 
-  data class Input(val document: PPath, val container: PPath, val root: PPath, val text: String) : Tuple4<PPath, PPath, PPath, String> {
-    constructor(tuple: Tuple4<PPath, PPath, PPath, String>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
+  data class Input(val document: JavaFSPath, val container: JavaFSPath, val root: JavaFSPath, val text: String) : Tuple4<JavaFSPath, JavaFSPath, JavaFSPath, String> {
+    constructor(tuple: Tuple4<JavaFSPath, JavaFSPath, JavaFSPath, String>) : this(tuple.component1(), tuple.component2(), tuple.component3(), tuple.component4())
   }
 
   override val id = Companion.id

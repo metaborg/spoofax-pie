@@ -1,6 +1,6 @@
 package mb.spoofax.runtime.term;
 
-import mb.pie.vfs.path.PPath;
+import mb.fs.java.JavaFSPath;
 import mb.spoofax.api.region.Region;
 import mb.spoofax.runtime.jsglr.RegionFactory;
 import mb.spoofax.runtime.jsglr.SourcePathAttachment;
@@ -24,7 +24,7 @@ public class TermOrigin {
         return OriginAttachment.getOrigin(term);
     }
 
-    public static @Nullable PPath sourcePath(IStrategoTerm term) {
+    public static @Nullable JavaFSPath sourcePath(IStrategoTerm term) {
         return SourcePathAttachment.getPathForTerm(term);
     }
 

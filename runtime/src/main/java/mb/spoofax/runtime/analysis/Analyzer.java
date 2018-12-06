@@ -1,6 +1,7 @@
 package mb.spoofax.runtime.analysis;
 
-import mb.pie.vfs.path.PPath;
+import mb.fs.api.path.FSPath;
+import mb.fs.java.JavaFSPath;
 import mb.spoofax.api.SpoofaxEx;
 import mb.spoofax.api.message.*;
 import mb.spoofax.runtime.nabl.ScopeGraphPrimitiveLibrary;
@@ -17,11 +18,11 @@ import java.util.*;
 public class Analyzer implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    public final PPath strategoCtree;
+    public final JavaFSPath strategoCtree;
     public final String strategyName;
 
 
-    public Analyzer(PPath strategoCtree, String strategyName) {
+    public Analyzer(JavaFSPath strategoCtree, String strategyName) {
         this.strategoCtree = strategoCtree;
         this.strategyName = strategyName;
     }
@@ -39,9 +40,9 @@ public class Analyzer implements Serializable {
         private static final long serialVersionUID = 1L;
 
         public final IStrategoTerm analysis;
-        public final PPath source;
+        public final FSPath source;
 
-        public ContainerOutput(IStrategoTerm analysis, PPath source) {
+        public ContainerOutput(IStrategoTerm analysis, FSPath source) {
             this.analysis = analysis;
             this.source = source;
         }
@@ -65,7 +66,7 @@ public class Analyzer implements Serializable {
         }
     }
 
-    public ContainerOutput analyzeContainer(PPath source, StrategoRuntime runtime) throws SpoofaxEx {
+    public ContainerOutput analyzeContainer(FSPath source, StrategoRuntime runtime) throws SpoofaxEx {
         final IOAgent ioAgent = new IOAgent();
         final ITermFactory termFactory = runtime.termFactory();
         final IStrategoTerm containerTerm = termFactory.makeString(source.toString());
@@ -85,9 +86,9 @@ public class Analyzer implements Serializable {
         public final IStrategoTerm ast;
         public final IStrategoTerm analysis;
         public final ArrayList<Message> messages;
-        public final PPath source;
+        public final FSPath source;
 
-        public DocumentOutput(IStrategoTerm ast, IStrategoTerm analysis, ArrayList<Message> messages, PPath source) {
+        public DocumentOutput(IStrategoTerm ast, IStrategoTerm analysis, ArrayList<Message> messages, FSPath source) {
             this.ast = ast;
             this.analysis = analysis;
             this.messages = messages;
@@ -117,7 +118,7 @@ public class Analyzer implements Serializable {
         }
     }
 
-    public DocumentOutput analyzeDocument(IStrategoTerm ast, PPath source, ContainerOutput containerOutput, StrategoRuntime runtime)
+    public DocumentOutput analyzeDocument(IStrategoTerm ast, FSPath source, ContainerOutput containerOutput, StrategoRuntime runtime)
         throws SpoofaxEx {
         final IOAgent ioAgent = new IOAgent();
         final ITermFactory termFactory = runtime.termFactory();
@@ -172,7 +173,7 @@ public class Analyzer implements Serializable {
         final MessageCollection messages = new MessageCollection();
         for(DocumentOutput documentOutput : documentOutputs) {
             documentAnalysisTerms.add(documentOutput.analysis);
-            messages.addDocumentMessages(documentOutput.source, documentOutput.messages);
+            messages.addDocumentMessages(documentOutput.source.toString(), documentOutput.messages);
         }
         final IStrategoList documentAnalysisList = termFactory.makeList(documentAnalysisTerms);
         final IStrategoTerm action = build(termFactory, "AnalyzeFinal", containerTerm, containerOutput.analysis, documentAnalysisList);

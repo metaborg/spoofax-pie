@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
+import mb.fs.java.JavaFSPath;
 import mb.log.api.Logger;
 import mb.pie.api.*;
 import mb.pie.api.exec.BottomUpExecutor;
@@ -15,7 +16,6 @@ import mb.pie.runtime.PieBuilderImpl;
 import mb.pie.store.lmdb.LMDBStoreKt;
 import mb.pie.taskdefs.guice.GuiceTaskDefs;
 import mb.pie.taskdefs.guice.GuiceTaskDefsKt;
-import mb.pie.vfs.path.PPath;
 import mb.spoofax.pie.LogLoggerKt;
 import mb.spoofax.pie.SpoofaxPipeline;
 import mb.spoofax.pie.generated.processContainer;
@@ -23,8 +23,8 @@ import mb.spoofax.pie.generated.processDocumentWithText;
 import mb.spoofax.pie.processing.ContainerResult;
 import mb.spoofax.pie.processing.DocumentResult;
 import mb.spoofax.runtime.eclipse.editor.SpoofaxEditor;
+import mb.spoofax.runtime.eclipse.util.FileUtils;
 import mb.spoofax.runtime.eclipse.util.Nullable;
-import mb.spoofax.runtime.eclipse.vfs.EclipsePathSrv;
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -35,35 +35,33 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
     private final SpoofaxPipeline pipeline;
 
     private final Logger logger;
-    private final EclipsePathSrv pathSrv;
+    private final FileUtils fileUtils;
     private final WorkspaceUpdateFactory workspaceUpdateFactory;
 
-    private final IWorkspaceRoot eclipseRoot;
-    private final PPath root;
+    private final JavaFSPath root;
     private final Pie pie;
     private final BottomUpExecutor executor;
 
-    private final HashMap<PPath, TaskKey> projectKeys = new HashMap<>();
+    private final HashMap<JavaFSPath, TaskKey> projectKeys = new HashMap<>();
     private final HashMap<SpoofaxEditor, TaskKey> editorKeys = new HashMap<>();
 
 
     @Inject public BottomUpPipelineAdapter(PipelineObservers observers, PipelinePathChanges pathChanges, Logger logger,
-        EclipsePathSrv pathSrv, SpoofaxPipeline pipeline, GuiceTaskDefs taskDefs,
+        FileUtils fileUtils, SpoofaxPipeline pipeline, GuiceTaskDefs taskDefs,
         WorkspaceUpdateFactory workspaceUpdateFactory) {
         this.observers = observers;
         this.pathChanges = pathChanges;
         this.pipeline = pipeline;
 
         this.logger = logger.forContext(getClass());
-        this.pathSrv = pathSrv;
+        this.fileUtils = fileUtils;
         this.workspaceUpdateFactory = workspaceUpdateFactory;
 
-        this.eclipseRoot = ResourcesPlugin.getWorkspace().getRoot();
-        this.root = pathSrv.resolve(eclipseRoot);
+        this.root = fileUtils.workspaceRootPath();
         final PieBuilder pieBuilder = new PieBuilderImpl();
         LogLoggerKt.withMbLogger(pieBuilder, logger);
         GuiceTaskDefsKt.withGuiceTaskDefs(pieBuilder, taskDefs);
-        final File lmdbStoreDir = pathSrv.localPath(this.root.resolve(".pie"));
+        final File lmdbStoreDir = this.root.appendSegment(".pie").getJavaPath().toFile();
         if(lmdbStoreDir == null) {
             throw new RuntimeException("Could not get local filesystem path to LMDB store location " + lmdbStoreDir
                 + "; it does not reside on the local filesystem");
@@ -75,7 +73,7 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
 
 
     @Override public void addProject(IProject project) {
-        final PPath mbProject = pathSrv.resolve(project);
+        final JavaFSPath mbProject = fileUtils.toPath(project);
         if(mbProject == null) {
             logger.error("Failed to set pipeline observer; cannot resolve Eclipse project {} to a path", project);
             return;
@@ -93,7 +91,7 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
 
     @Override public void buildProject(IProject project, int buildKind, @Nullable IResourceDelta delta,
         @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException, CoreException {
-        final PPath mbProject = pathSrv.resolve(project);
+        final JavaFSPath mbProject = fileUtils.toPath(project);
         if(mbProject == null) {
             logger.error("Failed to build project; cannot resolve Eclipse project {} to a path", project);
             return;
@@ -109,14 +107,14 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
             logger.debug("Done building project {} from scratch", project);
         } else {
             logger.debug("Building project {} incrementally...", project);
-            final HashSet<PPath> changedPaths = pathChanges.changedPaths(delta);
+            final HashSet<ResourceKey> changedPaths = pathChanges.changedPaths(delta);
             executor.requireBottomUp(changedPaths, cancelled);
             logger.debug("Done building project {} incrementally", project);
         }
     }
 
     @Override public void removeProject(IProject project) {
-        final PPath mbProject = pathSrv.resolve(project);
+        final JavaFSPath mbProject = fileUtils.toPath(project);
         if(mbProject == null) {
             logger.error("Failed to remove pipeline observer; cannot resolve Eclipse project {} to a path", project);
             return;
@@ -132,12 +130,12 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
 
 
     @Override public void addEditor(SpoofaxEditor editor, String text, IFile file, IProject project) {
-        final PPath mbFile = pathSrv.resolve(file);
+        final JavaFSPath mbFile = fileUtils.toPath(file);
         if(mbFile == null) {
             logger.error("Failed to set editor pipeline observer; cannot resolve Eclipse file {} to a path", file);
             return;
         }
-        final PPath mbProject = pathSrv.resolve(project);
+        final JavaFSPath mbProject = fileUtils.toPath(project);
         if(mbProject == null) {
             logger.error("Failed to set editor pipeline observer; cannot resolve Eclipse project {} to a path",
                 project);
@@ -156,12 +154,12 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
 
     @Override public void updateEditor(SpoofaxEditor editor, String text, IFile file, IProject project,
         @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
-        final PPath mbFile = pathSrv.resolve(file);
+        final JavaFSPath mbFile = fileUtils.toPath(file);
         if(mbFile == null) {
             logger.error("Failed to set editor pipeline observer; cannot resolve Eclipse file {} to a path", file);
             return;
         }
-        final PPath mbProject = pathSrv.resolve(project);
+        final JavaFSPath mbProject = fileUtils.toPath(project);
         if(mbProject == null) {
             logger.error("Failed to set editor pipeline observer; cannot resolve Eclipse project {} to a path",
                 project);
@@ -187,11 +185,12 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
 
     @Override public void removeEditor(SpoofaxEditor editor) {
         final TaskKey key = editorKeys.get(editor);
-        if(key == null) {
+        if(key != null) {
+            logger.debug("Removing pipeline observer for editor {}", editor);
+            executor.removeObserver(key);
+        } else {
             logger.error("Failed to remove pipeline observer; no task key for editor {}", editor);
         }
-        logger.debug("Removing pipeline observer for editor {}", editor);
-        executor.removeObserver(key);
     }
 
 
@@ -204,21 +203,21 @@ public class BottomUpPipelineAdapter implements PipelineAdapter {
     }
 
 
-    private Task<processContainer.Input, ContainerResult> containerTask(PPath container) {
+    private Task<processContainer.Input, ContainerResult> containerTask(JavaFSPath container) {
         return pipeline.container(container, root);
     }
 
-    @SuppressWarnings("unchecked") private Function1<Serializable, Unit> containerObs(PPath container) {
+    @SuppressWarnings("unchecked") private Function1<Serializable, Unit> containerObs(JavaFSPath container) {
         return (Function1<Serializable, Unit>) observers.container(container);
     }
 
-    private Task<processDocumentWithText.Input, DocumentResult> documentWithTextTask(String text, PPath document,
-        PPath container) {
+    private Task<processDocumentWithText.Input, DocumentResult> documentWithTextTask(String text, JavaFSPath document,
+        JavaFSPath container) {
         return pipeline.documentWithText(document, container, root, text);
     }
 
     @SuppressWarnings("unchecked") private Function1<Serializable, Unit> documentWithTextObs(SpoofaxEditor editor,
-        String text, PPath document, PPath container) {
+        String text, JavaFSPath document, JavaFSPath container) {
         return (Function1<Serializable, Unit>) observers.editor(editor, text, document, container);
     }
 }

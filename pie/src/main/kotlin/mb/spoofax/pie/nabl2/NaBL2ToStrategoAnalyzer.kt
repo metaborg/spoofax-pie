@@ -1,10 +1,10 @@
 package mb.spoofax.pie.nabl2
 
 import com.google.inject.Inject
+import mb.fs.java.JavaFSPath
 import mb.log.api.Logger
 import mb.pie.api.*
-import mb.pie.api.stamp.FileStampers
-import mb.pie.vfs.path.PPath
+import mb.pie.api.fs.stamp.FileSystemStampers
 import mb.spoofax.pie.config.ParseWorkspaceConfig
 import mb.spoofax.pie.config.requireConfigValue
 import mb.spoofax.pie.legacy.LegacyLoadProject
@@ -25,8 +25,8 @@ class NaBL2ToStrategoAnalyzer
     const val id = "nabl2.ToStrategoAnalyzer"
   }
 
-  data class Input(val langId: LangId, val root: PPath) : Serializable
-  data class LangSpecConfigInfo(val dir: PPath, val files: ArrayList<PPath>) : Serializable
+  data class Input(val langId: LangId, val root: JavaFSPath) : Serializable
+  data class LangSpecConfigInfo(val dir: JavaFSPath, val files: ArrayList<JavaFSPath>) : Serializable
 
   override val id = Companion.id
   override fun ExecContext.exec(input: Input): None {
@@ -42,7 +42,7 @@ class NaBL2ToStrategoAnalyzer
     } ?: throw ExecException("Could not get language specification configuration for language with identifier $langId")
 
     val langSpecProject = require(legacyLoadProject, langSpecDir).v
-    processAll(files, langSpecProject, true, CompileGoal(), FileStampers.hash, FileStampers.modified, log)
+    processAll(files.map { it.toNode() }, langSpecProject, true, CompileGoal(), FileSystemStampers.hash, FileSystemStampers.modified, log)
 
     return None.instance
   }
