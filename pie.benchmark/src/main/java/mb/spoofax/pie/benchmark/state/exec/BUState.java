@@ -22,13 +22,17 @@ import java.util.stream.Collectors;
 public class BUState {
     private SpoofaxPieState spoofaxPieState;
     private WorkspaceState workspaceState;
+    private boolean observability;
+    private Pie pie;
     private BottomUpExecutor executor;
     private HashMap<JavaFSPath, TaskKey> editorKeys = new HashMap<>();
 
 
-    public void setup(SpoofaxPieState spoofaxPieState, WorkspaceState workspaceState, InfraState infraState) {
+    public void setup(SpoofaxPieState spoofaxPieState, WorkspaceState workspaceState, InfraState infraState, boolean observability) {
         this.spoofaxPieState = spoofaxPieState;
         this.workspaceState = workspaceState;
+        this.observability = observability;
+        this.pie = infraState.pie;
         this.executor = infraState.pie.getBottomUpExecutor();
     }
 
@@ -63,6 +67,9 @@ public class BUState {
     public void removeProject(JavaFSPath project) {
         final Task<processContainer.Input, ContainerResult> task = spoofaxPieState.spoofaxPipeline.container(project, workspaceState.root);
         final TaskKey key = task.key();
+        if(observability) {
+            pie.dropOutput(key);
+        }
         executor.removeObserver(key);
     }
 
@@ -95,6 +102,9 @@ public class BUState {
         final TaskKey key = editorKeys.get(file);
         if(key != null) {
             executor.removeObserver(key);
+            if(observability) {
+                pie.dropOutput(key);
+            }
         }
     }
 

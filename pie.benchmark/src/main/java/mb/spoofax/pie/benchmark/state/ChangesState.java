@@ -49,27 +49,29 @@ public class ChangesState {
                 return new ChangeMaker() {
                     @Override protected void apply() {
                         // Initial execution.
+                        // Bottom-up: add and execute project tasks.
                         final JavaFSPath calcProject = root.appendSegment("lang.calc");
-                        addProject(calcProject, blackhole, "initial lang.calc");
+                        buAddProject(calcProject, blackhole, "initial lang.calc");
                         final JavaFSPath tigerProject = root.appendSegment("lang.tiger");
-                        addProject(tigerProject, blackhole, "initial lang.tiger");
+                        buAddProject(tigerProject, blackhole, "initial lang.tiger");
                         final JavaFSPath mjProject = root.appendSegment("lang.minijava");
-                        addProject(mjProject, blackhole, "initial lang.minijava");
-                        execInitial(blackhole, "initial");
+                        buAddProject(mjProject, blackhole, "initial lang.minijava");
+                        // Top-down: execute root workspace task.
+                        tdExecInitial(blackhole, "initial");
 
                         // Example program.
                         {
                             // Open editor.
                             final JavaFSPath programFile = calcProject.appendSegment("example/basic/gt.calc");
                             String programText = read(programFile);
-                            execEditor(programText, programFile, calcProject, blackhole, "editor open example/basic/gt.calc");
+                            addOrUpdateEditor(programText, programFile, calcProject, blackhole, "editor open example/basic/gt.calc");
                             // Change editor text.
                             programText = "4 > 5";
-                            execEditor(programText, programFile, calcProject, blackhole, "editor change 1 example/basic/gt.calc");
+                            addOrUpdateEditor(programText, programFile, calcProject, blackhole, "editor change 1 example/basic/gt.calc");
                             programText = "4 > ";
-                            execEditor(programText, programFile, calcProject, blackhole, "editor change 2 example/basic/gt.calc");
+                            addOrUpdateEditor(programText, programFile, calcProject, blackhole, "editor change 2 example/basic/gt.calc");
                             programText = "4 > 2;";
-                            execEditor(programText, programFile, calcProject, blackhole, "editor change 3 example/basic/gt.calc");
+                            addOrUpdateEditor(programText, programFile, calcProject, blackhole, "editor change 3 example/basic/gt.calc");
                             // Save file.
                             write(programFile, programText);
                             execPathChanges(programFile, blackhole, "file change example/basic/gt.calc");
@@ -80,10 +82,10 @@ public class ChangesState {
                             // Open editor.
                             final JavaFSPath programFile = calcProject.appendSegment("example/basic/lt.calc");
                             String programText = "";
-                            execEditor(programText, programFile, calcProject, blackhole, "editor open new example/basic/lt.calc");
+                            addOrUpdateEditor(programText, programFile, calcProject, blackhole, "editor open new example/basic/lt.calc");
                             // Change editor text.
                             programText = "0 < 1;";
-                            execEditor(programText, programFile, calcProject, blackhole, "editor change new example/basic/lt.calc");
+                            addOrUpdateEditor(programText, programFile, calcProject, blackhole, "editor change new example/basic/lt.calc");
                             // Save file.
                             write(programFile, programText);
                             execPathChanges(programFile, blackhole, "file create example/basic/lt.calc");
@@ -93,20 +95,20 @@ public class ChangesState {
                         {
                             final JavaFSPath programFile1 = tigerProject.appendSegment("example/appel/test01.tig");
                             String programText1 = read(programFile1);
-                            execEditor(programText1, programFile1, tigerProject, blackhole, "editor open example/appel/test01.tig");
+                            addOrUpdateEditor(programText1, programFile1, tigerProject, blackhole, "editor open example/appel/test01.tig");
                             final JavaFSPath programFile2 = tigerProject.appendSegment("example/appel/test02.tig");
                             String programText2 = read(programFile2);
-                            execEditor(programText2, programFile2, tigerProject, blackhole, "editor open example/appel/test02.tig");
+                            addOrUpdateEditor(programText2, programFile2, tigerProject, blackhole, "editor open example/appel/test02.tig");
                             final JavaFSPath programFile3 = tigerProject.appendSegment("example/appel/test03.tig");
                             String programText3 = read(programFile3);
-                            execEditor(programText3, programFile3, tigerProject, blackhole, "editor open example/appel/test03.tig");
+                            addOrUpdateEditor(programText3, programFile3, tigerProject, blackhole, "editor open example/appel/test03.tig");
 
                             programText1 = programText1.replace("arrtype [10]", "arrtype [20]");
-                            execEditor(programText1, programFile1, tigerProject, blackhole, "editor change example/appel/test01.tig");
+                            addOrUpdateEditor(programText1, programFile1, tigerProject, blackhole, "editor change example/appel/test01.tig");
                             programText2 = programText2.replace("arrtype [10]", "arrtype [20]");
-                            execEditor(programText2, programFile2, tigerProject, blackhole, "editor change example/appel/test02.tig");
+                            addOrUpdateEditor(programText2, programFile2, tigerProject, blackhole, "editor change example/appel/test02.tig");
                             programText3 = programText3.replace("Somebody", "Everyone");
-                            execEditor(programText3, programFile3, tigerProject, blackhole, "editor change example/appel/test03.tig");
+                            addOrUpdateEditor(programText3, programFile3, tigerProject, blackhole, "editor change example/appel/test03.tig");
 
                             write(programFile1, programText1);
                             write(programFile2, programText2);
@@ -120,14 +122,14 @@ public class ChangesState {
                             // Open editor.
                             final JavaFSPath stylingFile = calcProject.appendSegment("style/style.esv");
                             String stylingText = read(stylingFile);
-                            execEditor(stylingText, stylingFile, calcProject, blackhole, "editor open style/style.esv");
+                            addOrUpdateEditor(stylingText, stylingFile, calcProject, blackhole, "editor open style/style.esv");
                             // Change editor text.
                             stylingText = stylingText.replace("keyword    : 127 0 85 bold", "keyword    : ");
-                            execEditor(stylingText, stylingFile, calcProject, blackhole, "editor change 1 style/style.esv");
+                            addOrUpdateEditor(stylingText, stylingFile, calcProject, blackhole, "editor change 1 style/style.esv");
                             stylingText = stylingText.replace("keyword    : ", "keyword    : 255 0 0");
-                            execEditor(stylingText, stylingFile, calcProject, blackhole, "editor change 2 style/style.esv");
+                            addOrUpdateEditor(stylingText, stylingFile, calcProject, blackhole, "editor change 2 style/style.esv");
                             stylingText = stylingText.replace("keyword    : 255 0 0", "keyword    : 255 0 0 0 255 0");
-                            execEditor(stylingText, stylingFile, calcProject, blackhole, "editor change 3 style/style.esv");
+                            addOrUpdateEditor(stylingText, stylingFile, calcProject, blackhole, "editor change 3 style/style.esv");
                             // Save file.
                             write(stylingFile, stylingText);
                             execPathChanges(stylingFile, blackhole, "file change style/style.esv");
@@ -138,7 +140,7 @@ public class ChangesState {
                             // Open syntax styling editor.
                             final JavaFSPath stylingFile = tigerProject.appendSegment("style/style.esv");
                             String stylingText = "";
-                            execEditor(stylingText, stylingFile, tigerProject, blackhole, "editor open new style/style.esv");
+                            addOrUpdateEditor(stylingText, stylingFile, tigerProject, blackhole, "editor open new style/style.esv");
                             // Change syntax styling text.
                             stylingText = "module style\n" +
                                 "\n" +
@@ -152,7 +154,7 @@ public class ChangesState {
                                 "  layout     : 63 127 95 italic\n" +
                                 "  default    : 0 0 0\n" +
                                 "  unknown    : 0 0 0\n";
-                            execEditor(stylingText, stylingFile, tigerProject, blackhole, "editor change new style/style.esv");
+                            addOrUpdateEditor(stylingText, stylingFile, tigerProject, blackhole, "editor change new style/style.esv");
                             // Write new file.
                             write(stylingFile, stylingText);
                             execPathChanges(stylingFile, blackhole, "file create style/style.esv");
@@ -163,16 +165,16 @@ public class ChangesState {
                             // Calc
                             final JavaFSPath calcStylingFile = calcProject.appendSegment("style/style.esv");
                             String calcStylingText = read(calcStylingFile);
-                            execEditor(calcStylingText, calcStylingFile, calcProject, blackhole, "editor open lang.calc/style/style.esv");
+                            addOrUpdateEditor(calcStylingText, calcStylingFile, calcProject, blackhole, "editor open lang.calc/style/style.esv");
                             calcStylingText = calcStylingText.replace("number     : 0 127 0", "number     : 0 127 127");
-                            execEditor(calcStylingText, calcStylingFile, calcProject, blackhole, "editor change lang.calc/style/style.esv");
+                            addOrUpdateEditor(calcStylingText, calcStylingFile, calcProject, blackhole, "editor change lang.calc/style/style.esv");
                             write(calcStylingFile, calcStylingText);
                             // Tiger
                             final JavaFSPath tigStylingFile = tigerProject.appendSegment("style/style.esv");
                             String tigStylingText = read(tigStylingFile);
-                            execEditor(tigStylingText, tigStylingFile, tigerProject, blackhole, "editor open lang.tiger/style/style.esv");
+                            addOrUpdateEditor(tigStylingText, tigStylingFile, tigerProject, blackhole, "editor open lang.tiger/style/style.esv");
                             tigStylingText = tigStylingText.replace("number     : 0 127 0", "number     : 0 127 127");
-                            execEditor(tigStylingText, tigStylingFile, tigerProject, blackhole, "editor change lang.tiger/style/style.esv");
+                            addOrUpdateEditor(tigStylingText, tigStylingFile, tigerProject, blackhole, "editor change lang.tiger/style/style.esv");
                             write(tigStylingFile, tigStylingText);
                             // Exec changes
                             execPathChanges(blackhole, "file change {lang.calc,lang.tiger}/style/style.esv", calcStylingFile,
@@ -183,7 +185,7 @@ public class ChangesState {
                         {
                             final JavaFSPath langSpecFile = mjProject.appendSegment("langspec.cfg");
                             String langSpecText = "";
-                            execEditor(langSpecText, langSpecFile, mjProject, blackhole, "editor open new lang.minijava/langspec.cfg");
+                            addOrUpdateEditor(langSpecText, langSpecFile, mjProject, blackhole, "editor open new lang.minijava/langspec.cfg");
                             langSpecText = "langspec {\n" +
                                 "  identification {\n" +
                                 "    id: \"org.metaborg:minijava.lang\"\n" +
@@ -231,7 +233,7 @@ public class ChangesState {
                                 "    root scope per file: true\n" +
                                 "  }\n" +
                                 "}\n";
-                            execEditor(langSpecText, langSpecFile, mjProject, blackhole, "editor change new lang.minijava/langspec.cfg");
+                            addOrUpdateEditor(langSpecText, langSpecFile, mjProject, blackhole, "editor change new lang.minijava/langspec.cfg");
                             write(langSpecFile, langSpecText);
                             execPathChanges(langSpecFile, blackhole, "file create lang.minijava/langspec.cfg");
                         }
@@ -242,15 +244,15 @@ public class ChangesState {
                             final JavaFSPath syntaxFile = calcProject.appendSegment("syntax/CalcLexical.sdf3");
                             String syntaxText = read(syntaxFile);
                             final String originalSyntaxText = syntaxText;
-                            execEditor(syntaxText, syntaxFile, calcProject, blackhole, "editor open syntax/CalcLexical.sdf3");
+                            addOrUpdateEditor(syntaxText, syntaxFile, calcProject, blackhole, "editor open syntax/CalcLexical.sdf3");
                             // Change editor text.
                             syntaxText = syntaxText.replace("INT      = \"-\"? [0-9]+", "INT      = \"-\"? [8-9]+");
-                            execEditor(syntaxText, syntaxFile, calcProject, blackhole, "editor change small syntax/CalcLexical.sdf3");
+                            addOrUpdateEditor(syntaxText, syntaxFile, calcProject, blackhole, "editor change small syntax/CalcLexical.sdf3");
                             // Save file.
                             write(syntaxFile, syntaxText);
                             execPathChanges(syntaxFile, blackhole, "file change small syntax/CalcLexical.sdf3");
                             // Change back and save.
-                            execEditor(originalSyntaxText, syntaxFile, calcProject, blackhole,
+                            addOrUpdateEditor(originalSyntaxText, syntaxFile, calcProject, blackhole,
                                 "editor change small undo syntax/CalcLexical.sdf3");
                             write(syntaxFile, originalSyntaxText);
                             execPathChanges(syntaxFile, blackhole, "file change small undo syntax/CalcLexical.sdf3");
@@ -262,15 +264,15 @@ public class ChangesState {
                             final JavaFSPath syntaxFile = calcProject.appendSegment("syntax/Calc.sdf3");
                             String syntaxText = read(syntaxFile);
                             final String originalSyntaxText = syntaxText;
-                            execEditor(syntaxText, syntaxFile, calcProject, blackhole, "editor open cascading syntax/Calc.sdf3");
+                            addOrUpdateEditor(syntaxText, syntaxFile, calcProject, blackhole, "editor open cascading syntax/Calc.sdf3");
                             // Change editor text.
                             syntaxText = syntaxText.replace("Exp.Num = NUM", "Exp.Num = ID");
-                            execEditor(syntaxText, syntaxFile, calcProject, blackhole, "editor change cascading syntax/Calc.sdf3");
+                            addOrUpdateEditor(syntaxText, syntaxFile, calcProject, blackhole, "editor change cascading syntax/Calc.sdf3");
                             // Save file.
                             write(syntaxFile, syntaxText);
                             execPathChanges(syntaxFile, blackhole, "file change cascading syntax/Calc.sdf3");
                             // Change back and save.
-                            execEditor(originalSyntaxText, syntaxFile, calcProject, blackhole,
+                            addOrUpdateEditor(originalSyntaxText, syntaxFile, calcProject, blackhole,
                                 "editor change cascading undo syntax/Calc.sdf3");
                             write(syntaxFile, originalSyntaxText);
                             execPathChanges(syntaxFile, blackhole, "file change cascading undo syntax/Calc.sdf3");
@@ -283,20 +285,20 @@ public class ChangesState {
 
                             // Remove main class rule from minijava.sdf3
                             String syntaxText = read(syntaxFile);
-                            execEditor(syntaxText, syntaxFile, mjProject, blackhole, "editor open refactor syntax/minijava.sdf3");
+                            addOrUpdateEditor(syntaxText, syntaxFile, mjProject, blackhole, "editor open refactor syntax/minijava.sdf3");
                             syntaxText = syntaxText.replace(
                                 "MainClass.MainClass = <class <ID> { public static void main (String[] <ID>) { <Statement> } }>",
                                 ""
                             );
-                            execEditor(syntaxText, syntaxFile, mjProject, blackhole, "editor change 1 refactor syntax/minijava.sdf3");
+                            addOrUpdateEditor(syntaxText, syntaxFile, mjProject, blackhole, "editor change 1 refactor syntax/minijava.sdf3");
                             // Add import from minijava.sdf3 to mainclass.sdf3
                             syntaxText = syntaxText.replace("classes", "classes mainclass");
-                            execEditor(syntaxText, syntaxFile, mjProject, blackhole, "editor change 2 refactor syntax/minijava.sdf3");
+                            addOrUpdateEditor(syntaxText, syntaxFile, mjProject, blackhole, "editor change 2 refactor syntax/minijava.sdf3");
                             write(syntaxFile, syntaxText);
 
                             // Add to mainclass.sdf3
                             String mainclassSyntaxText = read(mainclassSyntaxFile);
-                            execEditor(mainclassSyntaxText, mainclassSyntaxFile, mjProject, blackhole,
+                            addOrUpdateEditor(mainclassSyntaxText, mainclassSyntaxFile, mjProject, blackhole,
                                 "editor open new refactor syntax/mainclass.sdf3");
                             mainclassSyntaxText = "module mainclass\n" +
                                 "\n" +
@@ -312,7 +314,7 @@ public class ChangesState {
                                 "\n" +
                                 "  keyword -/- [A-Za-z]\n" +
                                 "  tokenize : \"[()\"\n";
-                            execEditor(mainclassSyntaxText, mainclassSyntaxFile, mjProject, blackhole,
+                            addOrUpdateEditor(mainclassSyntaxText, mainclassSyntaxFile, mjProject, blackhole,
                                 "editor change new refactor syntax/mainclass.sdf3");
                             write(mainclassSyntaxFile, mainclassSyntaxText);
 
@@ -326,15 +328,15 @@ public class ChangesState {
                             final JavaFSPath natsFile = calcProject.appendSegment("nats/calc.nabl2");
                             String natsText = read(natsFile);
                             final String originalNatsText = natsText;
-                            execEditor(natsText, natsFile, calcProject, blackhole, "editor open nats/calc.nabl2");
+                            addOrUpdateEditor(natsText, natsFile, calcProject, blackhole, "editor open nats/calc.nabl2");
                             // Change editor text.
                             natsText = natsText.replace("{x} <- s_nxt", "{x} <- s");
-                            execEditor(natsText, natsFile, calcProject, blackhole, "editor change nats/calc.nabl2");
+                            addOrUpdateEditor(natsText, natsFile, calcProject, blackhole, "editor change nats/calc.nabl2");
                             // Save file.
                             write(natsFile, natsText);
                             execPathChanges(natsFile, blackhole, "write file nats/calc.nabl2");
                             // Change back and save.
-                            execEditor(originalNatsText, natsFile, calcProject, blackhole, "editor change undo nats/calc.nabl2");
+                            addOrUpdateEditor(originalNatsText, natsFile, calcProject, blackhole, "editor change undo nats/calc.nabl2");
                             write(natsFile, originalNatsText);
                             execPathChanges(natsFile, blackhole, "file change undo nats/calc.nabl2");
                         }
@@ -344,26 +346,26 @@ public class ChangesState {
                             // Remove statement rule in variables.nabl2
                             final JavaFSPath varFile = tigerProject.appendSegment("nats/variables.nabl2");
                             String varText = read(varFile);
-                            execEditor(varText, varFile, tigerProject, blackhole, "editor open refactor nats/variables.nabl2");
+                            addOrUpdateEditor(varText, varFile, tigerProject, blackhole, "editor open refactor nats/variables.nabl2");
                             varText = varText.replace(
                                 "[[ Assign(e1, e2) ^ (s) : UNIT() ]] := [[ e1 ^ (s) : ty1 ]], [[ e2 ^ (s) : ty2 ]], ty2 <? ty1 | error $[type mismatch got [ty2] where [ty1] expected] @ e2.",
                                 "");
-                            execEditor(varText, varFile, tigerProject, blackhole, "editor change 1 refactor nats/variables.nabl2");
+                            addOrUpdateEditor(varText, varFile, tigerProject, blackhole, "editor change 1 refactor nats/variables.nabl2");
                             // Add import from variables.nabl2 to statement
                             varText = varText.replace("imports base", "imports base\nimports statement");
-                            execEditor(varText, varFile, tigerProject, blackhole, "editor change 2 refactor nats/variables.nabl2");
+                            addOrUpdateEditor(varText, varFile, tigerProject, blackhole, "editor change 2 refactor nats/variables.nabl2");
                             write(varFile, varText);
 
                             // Add to statement.nabl2
                             final JavaFSPath statFile = tigerProject.appendSegment("nats/statement.nabl2");
                             String statText = read(statFile);
-                            execEditor(statText, statFile, tigerProject, blackhole, "editor open new refactor nats/statement.nabl2");
+                            addOrUpdateEditor(statText, statFile, tigerProject, blackhole, "editor open new refactor nats/statement.nabl2");
                             statText = "module statement\n" +
                                 "\n" +
                                 "rules // statements\n" +
                                 "\n" +
                                 "  [[ Assign(e1, e2) ^ (s) : UNIT() ]] := [[ e1 ^ (s) : ty1 ]], [[ e2 ^ (s) : ty2 ]], ty2 <? ty1 | error $[type mismatch got [ty2] where [ty1] expected] @ e2.\n";
-                            execEditor(statText, statFile, tigerProject, blackhole, "editor change new refactor nats/statement.nabl2");
+                            addOrUpdateEditor(statText, statFile, tigerProject, blackhole, "editor change new refactor nats/statement.nabl2");
                             write(statFile, statText);
 
                             // Exec changes

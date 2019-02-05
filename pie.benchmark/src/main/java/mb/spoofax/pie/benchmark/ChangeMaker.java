@@ -58,16 +58,7 @@ public abstract class ChangeMaker {
     }
 
 
-    protected void addProject(JavaFSPath project, Blackhole blackhole, String name) {
-        if(buState != null) {
-            gc();
-            final mb.spoofax.pie.benchmark.Timer timer = startStats();
-            buState.addProject(project, blackhole);
-            endStats(timer, name);
-        }
-    }
-
-    protected void execInitial(Blackhole blackhole, String name) {
+    protected void tdExecInitial(Blackhole blackhole, String name) {
         if(tdState != null) {
             gc();
             final mb.spoofax.pie.benchmark.Timer timer = startStats();
@@ -76,7 +67,27 @@ public abstract class ChangeMaker {
         }
     }
 
-    protected void execEditor(String text, JavaFSPath file, JavaFSPath project, Blackhole blackhole, String name) {
+
+    protected void buAddProject(JavaFSPath project, Blackhole blackhole, String name) {
+        if(buState != null) {
+            gc();
+            final mb.spoofax.pie.benchmark.Timer timer = startStats();
+            buState.addProject(project, blackhole);
+            endStats(timer, name);
+        }
+    }
+
+    protected void buRemoveProject(JavaFSPath project, String name) {
+        if(buState != null) {
+            gc();
+            final mb.spoofax.pie.benchmark.Timer timer = startStats();
+            buState.removeProject(project);
+            endStats(timer, name);
+        }
+    }
+
+
+    protected void addOrUpdateEditor(String text, JavaFSPath file, JavaFSPath project, Blackhole blackhole, String name) {
         gc();
         final mb.spoofax.pie.benchmark.Timer timer = startStats();
         if(tdState != null) {
@@ -86,6 +97,16 @@ public abstract class ChangeMaker {
         }
         endStats(timer, name);
     }
+
+    protected void buCloseEditor(JavaFSPath file, String name) {
+        if(buState != null) {
+            gc();
+            final mb.spoofax.pie.benchmark.Timer timer = startStats();
+            buState.removeEditor(file);
+            endStats(timer, name);
+        }
+    }
+
 
     protected void execPathChanges(JavaFSPath pathChange, Blackhole blackhole, String name) {
         final HashSet<JavaFSPath> pathChanges = new HashSet<>();
@@ -122,13 +143,17 @@ public abstract class ChangeMaker {
             Stats.INSTANCE.getFileReqs(), Stats.INSTANCE.getFileGens(), Stats.INSTANCE.getCallReqs());
     }
 
+
     private static void gc() {
+        System.out.println("Garbage collection...");
         Object obj = new Object();
         final WeakReference ref = new WeakReference<>(obj);
         //noinspection AssignmentToNull,UnusedAssignment
         obj = null;
         do {
+            System.out.println("System.gc()");
             System.gc();
         } while(ref.get() != null);
+        System.out.println("...garbage collection done");
     }
 }

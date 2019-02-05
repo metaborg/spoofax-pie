@@ -13,15 +13,15 @@ import java.util.concurrent.TimeUnit;
 @BenchmarkMode(Mode.SingleShotTime)
 @OutputTimeUnit(TimeUnit.SECONDS)
 @State(Scope.Benchmark)
-public class BUChangesBench {
-    @Param("bottomup.csv") private String bottomUpResultsFilePath;
+public class BUOChangesBench {
+    @Param("bottomup_observability.csv") private String bottomUpObservabilityResultsFilePath;
 
     @Setup(Level.Trial)
     public void setupTrial(SpoofaxPieState spoofaxPie, WorkspaceState workspace, InfraState infra, ChangesState changes, BUState exec) {
         workspace.setup(spoofaxPie);
         infra.setup(spoofaxPie, workspace);
         changes.setup(workspace);
-        exec.setup(spoofaxPie, workspace, infra, false);
+        exec.setup(spoofaxPie, workspace, infra, true);
 
         this.spoofaxPie = spoofaxPie;
         this.workspace = workspace;
@@ -37,11 +37,11 @@ public class BUChangesBench {
     private BUState exec;
 
     @Setup(Level.Invocation) public void setupInvocation() {
-        Timer.logFile = new File(bottomUpResultsFilePath);
+        Timer.logFile = new File(bottomUpObservabilityResultsFilePath);
         Timer.clearFile();
         infra.reset();
         changes.reset(workspace);
-        exec.setup(spoofaxPie, workspace, infra, false);
+        exec.setup(spoofaxPie, workspace, infra, true);
         exec.reset();
     }
 
