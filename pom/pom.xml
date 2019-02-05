@@ -26,7 +26,7 @@
     <!-- Metaborg FileSystem -->
     <mb.fs.version>${pie.version}</mb.fs.version>
     <!-- PIE -->
-    <pie.version>0.3.0-SNAPSHOT</pie.version>
+    <pie.version>0.4.0-SNAPSHOT</pie.version>
     <!-- Spoofax legacy (Spoofax Core/Metaborg) -->
     <spoofax.legacy.version>2.6.0-SNAPSHOT</spoofax.legacy.version>
     <!-- Guice -->
