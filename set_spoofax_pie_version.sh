@@ -8,7 +8,7 @@ OLD_ECLIPSE_VERSION=$3
 NEW_ECLIPSE_VERSION=$4
 
 mvn -f pom/pom.xml versions:set -DnewVersion=$NEW_MAVEN_VERSION -DgenerateBackupPoms=false
-mvn -f pom/pom-eclipse.xml versions:set -DnewVersion=$NEW_MAVEN_VERSION -DgenerateBackupPoms=false
+mvn -f pom-eclipse.xml versions:set -DnewVersion=$NEW_MAVEN_VERSION -DgenerateBackupPoms=false
 
 perl -pi -e "s/$OLD_MAVEN_VERSION/$NEW_MAVEN_VERSION/g" pie.eclipse/pom.xml
 perl -pi -e "s/$OLD_ECLIPSE_VERSION/$NEW_ECLIPSE_VERSION/g" pie.eclipse/META-INF/MANIFEST.MF
