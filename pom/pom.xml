@@ -28,7 +28,7 @@
     <!-- PIE -->
     <pie.version>0.4.0-SNAPSHOT</pie.version>
     <!-- Spoofax legacy (Spoofax Core/Metaborg) -->
-    <spoofax.legacy.version>2.6.0-SNAPSHOT</spoofax.legacy.version>
+    <spoofax.legacy.version>2.5.1</spoofax.legacy.version>
     <!-- Guice -->
     <guice.version>4.1.0</guice.version>
     <!-- JUnit -->
