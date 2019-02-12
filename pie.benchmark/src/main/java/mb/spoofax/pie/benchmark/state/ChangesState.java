@@ -41,23 +41,95 @@ public class ChangesState {
     }
 
 
-    @Param({"medium"}) public ChangesKind changesKind;
+    @Param({"."}) public String changesCsvDir;
+
+    @Param({"spoofax_pie_test_workspace_languages"}) public ChangesKind changesKind;
 
     @SuppressWarnings("unused") public enum ChangesKind {
-        medium {
+        spoofax_pie_test_workspace_languages {
             @Override public ChangeMaker createChangeMaker(JavaFSPath root, Blackhole blackhole) {
                 return new ChangeMaker() {
                     @Override protected void apply() {
-                        // Initial execution.
-                        // Bottom-up: add and execute project tasks.
+                        // Initial execution: add and execute project tasks.
+                        final JavaFSPath calcProject = root.appendSegment("calc");
+                        addOrUpdateProject(calcProject, blackhole, "add project 'calc'");
+                        final JavaFSPath tigerProject = root.appendSegment("tiger");
+                        addOrUpdateProject(tigerProject, blackhole, "add project 'tiger'");
+                        final JavaFSPath charsProject = root.appendSegment("chars");
+                        addOrUpdateProject(charsProject, blackhole, "add project 'chars'");
+
+                        // Example program.
+                        {
+                            // Open editor.
+                            final JavaFSPath programFile = calcProject.appendSegment("example/basic/gt.calc");
+                            String programText = read(programFile);
+                            addOrUpdateEditor(programText, programFile, calcProject, blackhole, "editor open calc/example/basic/gt.calc");
+                            // Change editor text.
+                            programText = "4 > 5";
+                            addOrUpdateEditor(programText, programFile, calcProject, blackhole, "editor change 1 calc/example/basic/gt.calc");
+                            programText = "4 > ";
+                            addOrUpdateEditor(programText, programFile, calcProject, blackhole, "editor change 2 calc/example/basic/gt.calc");
+                            programText = "4 > 2;";
+                            addOrUpdateEditor(programText, programFile, calcProject, blackhole, "editor change 3 calc/example/basic/gt.calc");
+                            // Save file.
+                            write(programFile, programText);
+                            execResourceChanges(programFile, blackhole, "file change calc/example/basic/gt.calc");
+                        }
+
+                        // Add new example program.
+                        {
+                            // Open editor.
+                            final JavaFSPath programFile = calcProject.appendSegment("example/basic/lt.calc");
+                            String programText = "";
+                            addOrUpdateEditor(programText, programFile, calcProject, blackhole, "editor open new calc/example/basic/lt.calc");
+                            // Change editor text.
+                            programText = "0 < 1;";
+                            addOrUpdateEditor(programText, programFile, calcProject, blackhole, "editor change new calc/example/basic/lt.calc");
+                            // Save file.
+                            write(programFile, programText);
+                            execResourceChanges(programFile, blackhole, "file create calc/example/basic/lt.calc");
+                        }
+
+                        // Edit multiple example programs.
+                        {
+                            final JavaFSPath programFile1 = tigerProject.appendSegment("example/appel/test01.tig");
+                            String programText1 = read(programFile1);
+                            addOrUpdateEditor(programText1, programFile1, tigerProject, blackhole, "editor open tiger/example/appel/test01.tig");
+                            final JavaFSPath programFile2 = tigerProject.appendSegment("example/appel/test02.tig");
+                            String programText2 = read(programFile2);
+                            addOrUpdateEditor(programText2, programFile2, tigerProject, blackhole, "editor open tiger/example/appel/test02.tig");
+                            final JavaFSPath programFile3 = tigerProject.appendSegment("example/appel/test03.tig");
+                            String programText3 = read(programFile3);
+                            addOrUpdateEditor(programText3, programFile3, tigerProject, blackhole, "editor open tiger/example/appel/test03.tig");
+
+                            programText1 = programText1.replace("arrtype [10]", "arrtype [20]");
+                            addOrUpdateEditor(programText1, programFile1, tigerProject, blackhole, "editor change tiger/example/appel/test01.tig");
+                            programText2 = programText2.replace("arrtype [10]", "arrtype [20]");
+                            addOrUpdateEditor(programText2, programFile2, tigerProject, blackhole, "editor change tiger/example/appel/test02.tig");
+                            programText3 = programText3.replace("Somebody", "Everyone");
+                            addOrUpdateEditor(programText3, programFile3, tigerProject, blackhole, "editor change tiger/example/appel/test03.tig");
+
+                            write(programFile1, programText1);
+                            write(programFile2, programText2);
+                            write(programFile3, programText3);
+                            execResourceChanges(blackhole, "file change tiger/example/appel/{test01.tig,test02.tig,test03.tig}", programFile1,
+                                programFile2, programFile3);
+                        }
+                    }
+                };
+            }
+        },
+        spoofax_pie_experiment_medium {
+            @Override public ChangeMaker createChangeMaker(JavaFSPath root, Blackhole blackhole) {
+                return new ChangeMaker() {
+                    @Override protected void apply() {
+                        // Initial execution: add and execute project tasks.
                         final JavaFSPath calcProject = root.appendSegment("lang.calc");
-                        buAddProject(calcProject, blackhole, "initial lang.calc");
+                        addOrUpdateProject(calcProject, blackhole, "initial lang.calc");
                         final JavaFSPath tigerProject = root.appendSegment("lang.tiger");
-                        buAddProject(tigerProject, blackhole, "initial lang.tiger");
+                        addOrUpdateProject(tigerProject, blackhole, "initial lang.tiger");
                         final JavaFSPath mjProject = root.appendSegment("lang.minijava");
-                        buAddProject(mjProject, blackhole, "initial lang.minijava");
-                        // Top-down: execute root workspace task.
-                        tdExecInitial(blackhole, "initial");
+                        addOrUpdateProject(mjProject, blackhole, "initial lang.minijava");
 
                         // Example program.
                         {
@@ -74,7 +146,7 @@ public class ChangesState {
                             addOrUpdateEditor(programText, programFile, calcProject, blackhole, "editor change 3 example/basic/gt.calc");
                             // Save file.
                             write(programFile, programText);
-                            execPathChanges(programFile, blackhole, "file change example/basic/gt.calc");
+                            execResourceChanges(programFile, blackhole, "file change example/basic/gt.calc");
                         }
 
                         // Add new example program.
@@ -88,7 +160,7 @@ public class ChangesState {
                             addOrUpdateEditor(programText, programFile, calcProject, blackhole, "editor change new example/basic/lt.calc");
                             // Save file.
                             write(programFile, programText);
-                            execPathChanges(programFile, blackhole, "file create example/basic/lt.calc");
+                            execResourceChanges(programFile, blackhole, "file create example/basic/lt.calc");
                         }
 
                         // Edit multiple example programs.
@@ -113,7 +185,7 @@ public class ChangesState {
                             write(programFile1, programText1);
                             write(programFile2, programText2);
                             write(programFile3, programText3);
-                            execPathChanges(blackhole, "file change example/appel/{test01.tig,test02.tig,test03.tig}", programFile1,
+                            execResourceChanges(blackhole, "file change example/appel/{test01.tig,test02.tig,test03.tig}", programFile1,
                                 programFile2, programFile3);
                         }
 
@@ -132,7 +204,7 @@ public class ChangesState {
                             addOrUpdateEditor(stylingText, stylingFile, calcProject, blackhole, "editor change 3 style/style.esv");
                             // Save file.
                             write(stylingFile, stylingText);
-                            execPathChanges(stylingFile, blackhole, "file change style/style.esv");
+                            execResourceChanges(stylingFile, blackhole, "file change style/style.esv");
                         }
 
                         // Add styling specification.
@@ -157,7 +229,7 @@ public class ChangesState {
                             addOrUpdateEditor(stylingText, stylingFile, tigerProject, blackhole, "editor change new style/style.esv");
                             // Write new file.
                             write(stylingFile, stylingText);
-                            execPathChanges(stylingFile, blackhole, "file create style/style.esv");
+                            execResourceChanges(stylingFile, blackhole, "file create style/style.esv");
                         }
 
                         // Edit multiple styling specifications.
@@ -177,7 +249,7 @@ public class ChangesState {
                             addOrUpdateEditor(tigStylingText, tigStylingFile, tigerProject, blackhole, "editor change lang.tiger/style/style.esv");
                             write(tigStylingFile, tigStylingText);
                             // Exec changes
-                            execPathChanges(blackhole, "file change {lang.calc,lang.tiger}/style/style.esv", calcStylingFile,
+                            execResourceChanges(blackhole, "file change {lang.calc,lang.tiger}/style/style.esv", calcStylingFile,
                                 tigStylingFile);
                         }
 
@@ -235,7 +307,7 @@ public class ChangesState {
                                 "}\n";
                             addOrUpdateEditor(langSpecText, langSpecFile, mjProject, blackhole, "editor change new lang.minijava/langspec.cfg");
                             write(langSpecFile, langSpecText);
-                            execPathChanges(langSpecFile, blackhole, "file create lang.minijava/langspec.cfg");
+                            execResourceChanges(langSpecFile, blackhole, "file create lang.minijava/langspec.cfg");
                         }
 
                         // Syntax specification: small/local change.
@@ -250,12 +322,12 @@ public class ChangesState {
                             addOrUpdateEditor(syntaxText, syntaxFile, calcProject, blackhole, "editor change small syntax/CalcLexical.sdf3");
                             // Save file.
                             write(syntaxFile, syntaxText);
-                            execPathChanges(syntaxFile, blackhole, "file change small syntax/CalcLexical.sdf3");
+                            execResourceChanges(syntaxFile, blackhole, "file change small syntax/CalcLexical.sdf3");
                             // Change back and save.
                             addOrUpdateEditor(originalSyntaxText, syntaxFile, calcProject, blackhole,
                                 "editor change small undo syntax/CalcLexical.sdf3");
                             write(syntaxFile, originalSyntaxText);
-                            execPathChanges(syntaxFile, blackhole, "file change small undo syntax/CalcLexical.sdf3");
+                            execResourceChanges(syntaxFile, blackhole, "file change small undo syntax/CalcLexical.sdf3");
                         }
 
                         // Syntax specification: cascading change.
@@ -270,12 +342,12 @@ public class ChangesState {
                             addOrUpdateEditor(syntaxText, syntaxFile, calcProject, blackhole, "editor change cascading syntax/Calc.sdf3");
                             // Save file.
                             write(syntaxFile, syntaxText);
-                            execPathChanges(syntaxFile, blackhole, "file change cascading syntax/Calc.sdf3");
+                            execResourceChanges(syntaxFile, blackhole, "file change cascading syntax/Calc.sdf3");
                             // Change back and save.
                             addOrUpdateEditor(originalSyntaxText, syntaxFile, calcProject, blackhole,
                                 "editor change cascading undo syntax/Calc.sdf3");
                             write(syntaxFile, originalSyntaxText);
-                            execPathChanges(syntaxFile, blackhole, "file change cascading undo syntax/Calc.sdf3");
+                            execResourceChanges(syntaxFile, blackhole, "file change cascading undo syntax/Calc.sdf3");
                         }
 
                         // Refactor syntax specification: move into new file.
@@ -319,7 +391,7 @@ public class ChangesState {
                             write(mainclassSyntaxFile, mainclassSyntaxText);
 
                             // Exec changes
-                            execPathChanges(syntaxFile, blackhole, "file change/create refactor syntax/{minijava,mainclass}.sdf3");
+                            execResourceChanges(syntaxFile, blackhole, "file change/create refactor syntax/{minijava,mainclass}.sdf3");
                         }
 
                         // Names and types specification.
@@ -334,11 +406,11 @@ public class ChangesState {
                             addOrUpdateEditor(natsText, natsFile, calcProject, blackhole, "editor change nats/calc.nabl2");
                             // Save file.
                             write(natsFile, natsText);
-                            execPathChanges(natsFile, blackhole, "write file nats/calc.nabl2");
+                            execResourceChanges(natsFile, blackhole, "write file nats/calc.nabl2");
                             // Change back and save.
                             addOrUpdateEditor(originalNatsText, natsFile, calcProject, blackhole, "editor change undo nats/calc.nabl2");
                             write(natsFile, originalNatsText);
-                            execPathChanges(natsFile, blackhole, "file change undo nats/calc.nabl2");
+                            execResourceChanges(natsFile, blackhole, "file change undo nats/calc.nabl2");
                         }
 
                         // Refactor name and type specification: move into new file.
@@ -369,12 +441,12 @@ public class ChangesState {
                             write(statFile, statText);
 
                             // Exec changes
-                            execPathChanges(blackhole, "file change/create refactor nats/{variables,statement}.nabl2", varFile, statFile);
+                            execResourceChanges(blackhole, "file change/create refactor nats/{variables,statement}.nabl2", varFile, statFile);
                         }
 
                         // Extrema change: noop
-                        execPathChanges(blackhole, "noop 1");
-                        execPathChanges(blackhole, "noop 2");
+                        execResourceChanges(blackhole, "noop 1");
+                        execResourceChanges(blackhole, "noop 2");
 
                         // Extrema change: everything
                         try {
@@ -386,7 +458,7 @@ public class ChangesState {
                                 write(node, text);
                                 changedPaths.add(node.getPath());
                             });
-                            execPathChanges(changedPaths, blackhole, "all files changed");
+                            execResourceChanges(changedPaths, blackhole, "all files changed");
                         } catch(IOException e) {
                             e.printStackTrace();
                         }

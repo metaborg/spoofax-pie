@@ -43,9 +43,9 @@ public class BUState {
 
 
     /**
-     * Adds a project, or updates a project, by setting the observer and then executing a project update in a top-down manner.
+     * Adds or updates a project, and executes a project update.
      */
-    public void addProject(JavaFSPath project, Blackhole blackhole) {
+    public void addOrUpdateProject(JavaFSPath project, Blackhole blackhole) {
         final Task<processContainer.Input, ContainerResult> task = spoofaxPieState.spoofaxPipeline.container(project, workspaceState.root);
         final TaskKey key = task.key();
 
@@ -62,7 +62,7 @@ public class BUState {
     }
 
     /**
-     * Removes a project, removing the observer for that project.
+     * Removes a project.
      */
     public void removeProject(JavaFSPath project) {
         final Task<processContainer.Input, ContainerResult> task = spoofaxPieState.spoofaxPipeline.container(project, workspaceState.root);
@@ -75,7 +75,7 @@ public class BUState {
 
 
     /**
-     * Adds an editor, or updates an existing editor, by setting the observer and then executing an editor update in a top-down manner.
+     * Adds or updates an editor, and executes an editor update.
      */
     public void addOrUpdateEditor(String text, JavaFSPath file, JavaFSPath project, Blackhole blackhole) {
         final Task<processDocumentWithText.Input, DocumentResult> task =
@@ -96,7 +96,7 @@ public class BUState {
     }
 
     /**
-     * Removes an open editor, removing the observer for that editor.
+     * Removes an editor.
      */
     public void removeEditor(JavaFSPath file) {
         final TaskKey key = editorKeys.get(file);
@@ -112,7 +112,7 @@ public class BUState {
     /**
      * Executes the pipeline in a bottom-up way, with given changed paths.
      */
-    public void execPathChanges(Set<JavaFSPath> changedPaths) {
+    public void execResourceChanges(Set<JavaFSPath> changedPaths) {
         final HashSet<ResourceKey> changedResources =
             changedPaths.stream().map(ResourceKt::toResourceKey).collect(Collectors.toCollection(HashSet::new));
         try {

@@ -58,32 +58,26 @@ public abstract class ChangeMaker {
     }
 
 
-    protected void tdExecInitial(Blackhole blackhole, String name) {
+    protected void addOrUpdateProject(JavaFSPath project, Blackhole blackhole, String name) {
+        gc();
+        final mb.spoofax.pie.benchmark.Timer timer = startStats();
         if(tdState != null) {
-            gc();
-            final mb.spoofax.pie.benchmark.Timer timer = startStats();
-            tdState.execAll(blackhole);
-            endStats(timer, name);
+            tdState.addOrUpdateProject(project, blackhole);
+        } else if(buState != null) {
+            buState.addOrUpdateProject(project, blackhole);
         }
+        endStats(timer, name);
     }
 
-
-    protected void buAddProject(JavaFSPath project, Blackhole blackhole, String name) {
-        if(buState != null) {
-            gc();
-            final mb.spoofax.pie.benchmark.Timer timer = startStats();
-            buState.addProject(project, blackhole);
-            endStats(timer, name);
-        }
-    }
-
-    protected void buRemoveProject(JavaFSPath project, String name) {
-        if(buState != null) {
-            gc();
-            final mb.spoofax.pie.benchmark.Timer timer = startStats();
+    protected void remoteProject(JavaFSPath project, String name) {
+        gc();
+        final mb.spoofax.pie.benchmark.Timer timer = startStats();
+        if(tdState != null) {
+            tdState.removeProject(project);
+        } else if(buState != null) {
             buState.removeProject(project);
-            endStats(timer, name);
         }
+        endStats(timer, name);
     }
 
 
@@ -98,35 +92,37 @@ public abstract class ChangeMaker {
         endStats(timer, name);
     }
 
-    protected void buCloseEditor(JavaFSPath file, String name) {
-        if(buState != null) {
-            gc();
-            final mb.spoofax.pie.benchmark.Timer timer = startStats();
+    protected void removeEditor(JavaFSPath file, String name) {
+        gc();
+        final mb.spoofax.pie.benchmark.Timer timer = startStats();
+        if(tdState != null) {
+            tdState.removeEditor(file);
+        } else if(buState != null) {
             buState.removeEditor(file);
-            endStats(timer, name);
         }
+        endStats(timer, name);
     }
 
 
-    protected void execPathChanges(JavaFSPath pathChange, Blackhole blackhole, String name) {
+    protected void execResourceChanges(JavaFSPath pathChange, Blackhole blackhole, String name) {
         final HashSet<JavaFSPath> pathChanges = new HashSet<>();
         pathChanges.add(pathChange);
-        execPathChanges(pathChanges, blackhole, name);
+        execResourceChanges(pathChanges, blackhole, name);
     }
 
-    protected void execPathChanges(Blackhole blackhole, String name, JavaFSPath... pathChanges) {
+    protected void execResourceChanges(Blackhole blackhole, String name, JavaFSPath... pathChanges) {
         final HashSet<JavaFSPath> pathChangesSet = new HashSet<>();
         Collections.addAll(pathChangesSet, pathChanges);
-        execPathChanges(pathChangesSet, blackhole, name);
+        execResourceChanges(pathChangesSet, blackhole, name);
     }
 
-    protected void execPathChanges(Set<JavaFSPath> pathChanges, Blackhole blackhole, String name) {
+    protected void execResourceChanges(Set<JavaFSPath> pathChanges, Blackhole blackhole, String name) {
         gc();
         final mb.spoofax.pie.benchmark.Timer timer = startStats();
         if(tdState != null) {
             tdState.execAll(blackhole);
         } else if(buState != null) {
-            buState.execPathChanges(pathChanges);
+            buState.execResourceChanges(pathChanges);
         }
         endStats(timer, name);
     }
@@ -145,15 +141,12 @@ public abstract class ChangeMaker {
 
 
     private static void gc() {
-        System.out.println("Garbage collection...");
         Object obj = new Object();
         final WeakReference ref = new WeakReference<>(obj);
         //noinspection AssignmentToNull,UnusedAssignment
         obj = null;
         do {
-            System.out.println("System.gc()");
             System.gc();
         } while(ref.get() != null);
-        System.out.println("...garbage collection done");
     }
 }

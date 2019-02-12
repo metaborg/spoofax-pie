@@ -30,6 +30,10 @@ public class SpoofaxPieState {
 
     public SpoofaxPieState() {
         try {
+            // Sets the 'java.awt.headless' and 'apple.awt.UIElement' properties to true, to prevent an application icon from appearing on some platforms.
+            System.setProperty("java.awt.headless", "true");
+            System.setProperty("apple.awt.UIElement", "true");
+
             spoofaxCoreFacade = new Spoofax(new SpoofaxCoreModule(), new SpoofaxExtensionModule());
             spoofaxCoreMetaFacade = new SpoofaxMeta(spoofaxCoreFacade);
             StaticSpoofaxCoreFacade.init(spoofaxCoreMetaFacade);
