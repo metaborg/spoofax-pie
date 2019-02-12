@@ -41,8 +41,6 @@ public class ChangesState {
     }
 
 
-    @Param({"."}) public String changesCsvDir;
-
     @Param({"spoofax_pie_test_workspace_languages"}) public ChangesKind changesKind;
 
     @SuppressWarnings("unused") public enum ChangesKind {
