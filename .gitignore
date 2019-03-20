@@ -1,3 +1,5 @@
+/org.metaborg.lang.tiger.interpreter
+
 # Java
 *.class
 *.jar

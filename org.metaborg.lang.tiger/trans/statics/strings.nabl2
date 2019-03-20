@@ -1,0 +1,10 @@
+module statics/strings
+
+imports signatures/-
+imports statics/nabl-lib
+imports statics/base
+
+rules // literals    
+
+  [[ String(str) ^ (s) : STRING() ]].
+  
