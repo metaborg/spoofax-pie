@@ -35,7 +35,7 @@ public class MessageCollection implements Serializable {
     }
 
 
-    public boolean containsSeverity(Severity severity) {
+    public boolean containsSeverity(MessageSeverity severity) {
         if(MessageUtil.containsSeverity(globalMessages, severity)) {
             return true;
         }
@@ -53,15 +53,15 @@ public class MessageCollection implements Serializable {
     }
 
     public boolean containsError() {
-        return containsSeverity(Severity.Error);
+        return containsSeverity(MessageSeverity.Error);
     }
 
     public boolean containsWarning() {
-        return containsSeverity(Severity.Warn);
+        return containsSeverity(MessageSeverity.Warn);
     }
 
 
-    public boolean containsSeverityOrHigher(Severity severity) {
+    public boolean containsSeverityOrHigher(MessageSeverity severity) {
         if(MessageUtil.containsSeverityOrHigher(globalMessages, severity)) {
             return true;
         }
@@ -79,7 +79,7 @@ public class MessageCollection implements Serializable {
     }
 
     public boolean containsWarningOrHigher() {
-        return containsSeverityOrHigher(Severity.Warn);
+        return containsSeverityOrHigher(MessageSeverity.Warn);
     }
 
 

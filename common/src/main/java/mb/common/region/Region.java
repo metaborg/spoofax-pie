@@ -13,6 +13,7 @@ public class Region implements Serializable {
      * Inclusive starting offset, the number of characters from the beginning of the source text with interval [0,#chars).
      */
     public final int startOffset;
+
     /**
      * Inclusive ending offset, the number of characters from the beginning of the source text with interval [0,#chars).
      */

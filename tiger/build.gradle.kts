@@ -1,8 +1,11 @@
 plugins {
   id("org.metaborg.gradle.config.java-library")
+  id("org.metaborg.gradle.config.junit-testing")
 }
 
 dependencies {
+  api(project(":common"))
+  api(project(":jsglr1.common"))
   compileOnly("org.checkerframework:checker-qual-android:2.6.0") // Use android version: annotation retention policy is class instead of runtime.
 }
 
@@ -12,22 +15,20 @@ repositories {
   maven("https://sugar-lang.github.io/mvnrepository/")
   maven("http://nexus.usethesource.io/content/repositories/public/")
 }
-val tigerResources = configurations.create("tigerResources")
-dependencies {
-  tigerResources(project(":org.metaborg.lang.tiger", Dependency.DEFAULT_CONFIGURATION)) {
-    artifact {
-      name = this@tigerResources.name
-      type = "spoofax-language"
-      extension = "spoofax-language"
-    }
-  }
+val tigerDependency = dependencies.project(":org.metaborg.lang.tiger", Dependency.DEFAULT_CONFIGURATION)
+tigerDependency.artifact {
+  name = tigerDependency.name
+  type = "spoofax-language"
+  extension = "spoofax-language"
 }
+val tigerResources = configurations.create("tigerResources") {
+  isTransitive = false
+}
+tigerResources.dependencies.add(tigerDependency)
 val copyTigerResourcesTask = tasks.register<Sync>("copyTigerResources") {
   dependsOn(tigerResources)
-  from({ // Closure inside to defer evaluation until task execution time.
-    tigerResources.map { zipTree(it) }
-  }) // TODO: only copy relevant resources, and not transitive ones.
+  from({ tigerResources.map { zipTree(it) } }) // Closure inside `from` to defer evaluation until task execution time.
   into("src/main/resources")
+  include("target/metaborg/editor.esv.af", "target/metaborg/sdf.tbl")
 }
 tasks.getByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME).dependsOn(copyTigerResourcesTask)
-

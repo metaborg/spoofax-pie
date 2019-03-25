@@ -17,15 +17,11 @@ pluginManagement {
   }
 }
 
-fun includeProject(path: String, id: String = "spoofax.${path.replace('/', '.')}") {
-  include(id)
-  project(":$id").projectDir = file(path)
-}
-
 include("common") // common low-level utility (e.g., messages) [try to copy from spoofax.api of prototype1]
 
-include("jsglr2.pie") // parsing with JSGLR2 + pie functions (this should be moved to JSGLR2 in the future)
-include("esv.pie") // syntax-based styling with ESV [try to copy from prototype1] + pie functions (this should be moved to ESV in the future)
+include("jsglr1.common") // parsing with JSGLR1
+include("jsglr2.common") // parsing with JSGLR2 + pie functions (this should be moved to JSGLR2 in the future)
+include("esv.common") // syntax-based styling with ESV [try to copy from prototype1] + pie functions (this should be moved to ESV in the future)
 
 include("spoofax.core") // interfaces, utility, pipelines, etc. for gluing.
 include("spoofax.cmd") // adapting spoofax to command-line.
