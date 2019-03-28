@@ -6,6 +6,7 @@ plugins {
 dependencies {
   api(project(":common"))
   api(project(":jsglr1.common"))
+  api(project(":esv.common"))
   compileOnly("org.checkerframework:checker-qual-android:2.6.0") // Use android version: annotation retention policy is class instead of runtime.
 }
 

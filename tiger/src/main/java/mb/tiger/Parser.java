@@ -4,13 +4,13 @@ import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.jsglr1.common.JSGLR1Parser;
 
 public class Parser {
-    private final JSGLR1Parser internalParser;
+    private final JSGLR1Parser parser;
 
     public Parser(ParseTable parseTable) {
-        this.internalParser = new JSGLR1Parser(parseTable.internalParseTable);
+        this.parser = new JSGLR1Parser(parseTable.parseTable);
     }
 
     public JSGLR1ParseOutput parse(String text, String startSymbol) throws InterruptedException {
-        return internalParser.parse(text, startSymbol);
+        return parser.parse(text, startSymbol);
     }
 }

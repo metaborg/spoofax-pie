@@ -6,18 +6,24 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 
-public class ParseTable {
-    final JSGLR1ParseTable internalParseTable;
+public class ParseTable implements Serializable {
+    final JSGLR1ParseTable parseTable;
 
-    public ParseTable() throws JSGLR1ParseTableException, IOException {
+    private ParseTable(JSGLR1ParseTable parseTable) {
+        this.parseTable = parseTable;
+    }
+
+    public static ParseTable fromClassLoaderResources() throws JSGLR1ParseTableException, IOException {
         final String resource = "target/metaborg/sdf.tbl";
-        try(final @Nullable InputStream inputStream = getClass().getClassLoader().getResourceAsStream(resource)) {
+        try(final @Nullable InputStream inputStream = ParseTable.class.getClassLoader().getResourceAsStream(resource)) {
             if(inputStream == null) {
                 throw new RuntimeException(
                     "Cannot create parse table; cannot find resource '" + resource + "' in classloader resources");
             }
-            this.internalParseTable = new JSGLR1ParseTable(inputStream);
+            final JSGLR1ParseTable parseTable = JSGLR1ParseTable.fromStream(inputStream);
+            return new ParseTable(parseTable);
         }
     }
 }

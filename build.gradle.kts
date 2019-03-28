@@ -7,6 +7,7 @@ subprojects {
   metaborg {
     configureSubProject()
   }
+  extra["spoofaxVersion"] = "2.5.1"
 }
 
 gitonium {

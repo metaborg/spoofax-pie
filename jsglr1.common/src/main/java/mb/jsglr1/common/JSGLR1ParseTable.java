@@ -15,14 +15,23 @@ import java.io.Serializable;
 public class JSGLR1ParseTable implements Serializable {
     final ParseTable internalParseTable;
 
-    public JSGLR1ParseTable(InputStream parseTableStream) throws JSGLR1ParseTableException {
+    private JSGLR1ParseTable(ParseTable parseTable) {
+        this.internalParseTable = parseTable;
+    }
+
+    public static JSGLR1ParseTable fromStream(InputStream parseTableStream) throws JSGLR1ParseTableException {
         final ITermFactory termFactory = new ImploderOriginTermFactory(new TermFactory());
         final TermReader reader = new TermReader(termFactory);
         try {
             final IStrategoTerm parseTableTerm = reader.parseFromStream(parseTableStream);
-            this.internalParseTable = new ParseTable(parseTableTerm, termFactory);
+            final ParseTable parseTable = new ParseTable(parseTableTerm, termFactory);
+            return new JSGLR1ParseTable(parseTable);
         } catch(IOException | InvalidParseTableException e) {
-            throw new JSGLR1ParseTableException("Loading parse table failed unexpectedly", e);
+            throw new JSGLR1ParseTableException("Loading parse table from stream failed unexpectedly", e);
         }
+    }
+
+    public static JSGLR1ParseTable fromParseTable(ParseTable parseTable) {
+        return new JSGLR1ParseTable(parseTable);
     }
 }
