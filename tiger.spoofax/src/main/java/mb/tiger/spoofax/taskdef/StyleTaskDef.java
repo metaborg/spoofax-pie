@@ -1,4 +1,4 @@
-package mb.tiger.spoofax.pie;
+package mb.tiger.spoofax.taskdef;
 
 import mb.common.style.Styling;
 import mb.fs.api.path.FSPath;
@@ -7,6 +7,7 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
 import mb.pie.api.TaskDef;
 import mb.tiger.TigerStyler;
+import mb.tiger.spoofax.taskdef.ParseTaskDef;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;

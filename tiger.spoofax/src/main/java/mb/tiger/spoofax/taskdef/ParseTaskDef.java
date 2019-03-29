@@ -1,4 +1,4 @@
-package mb.tiger.spoofax.pie;
+package mb.tiger.spoofax.taskdef;
 
 import mb.fs.api.node.FSNode;
 import mb.fs.api.path.FSPath;
@@ -13,7 +13,7 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-public class ParseTaskDef implements TaskDef<FSPath, @Nullable JSGLR1ParseOutput> {
+class ParseTaskDef implements TaskDef<FSPath, @Nullable JSGLR1ParseOutput> {
     private final ResourceService resourceService;
     private final TigerParser parser;
 

@@ -2,13 +2,28 @@ package mb.tiger.spoofax;
 
 import dagger.Module;
 import dagger.Provides;
-import mb.pie.api.exec.TopDownExecutor;
-import mb.spoofax.core.language.AstService;
-import mb.tiger.spoofax.pie.ParseTaskDef;
+import mb.jsglr1.common.JSGLR1ParseTableException;
+import mb.tiger.TigerParseTable;
+import mb.tiger.TigerParser;
+import mb.tiger.TigerStyler;
+import mb.tiger.TigerStylingRules;
+
+import java.io.IOException;
 
 @Module
 public class TigerModule {
-    @Provides static AstService provideAstService(TopDownExecutor topDownExecutor, ParseTaskDef parseTaskDef) {
-        return new TigerAstService(topDownExecutor, parseTaskDef);
+    private final TigerParseTable parseTable = TigerParseTable.fromClassLoaderResources();
+    private final TigerParser parser = new TigerParser(parseTable);
+    private final TigerStylingRules stylingRules = TigerStylingRules.fromClassLoaderResources();
+    private final TigerStyler styler = new TigerStyler(stylingRules);
+
+    public TigerModule() throws IOException, JSGLR1ParseTableException {}
+
+    @Provides TigerParser provideParser() {
+        return parser;
+    }
+
+    @Provides TigerStyler styler() {
+        return styler;
     }
 }

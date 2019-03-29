@@ -10,6 +10,7 @@ val pieVersion = extra["pieVersion"] as String
 dependencies {
   api(project(":common"))
   api("org.metaborg:org.spoofax.terms:$spoofaxVersion")
+  api("org.metaborg:pie.api:$pieVersion")
   api("org.metaborg:fs.api:$pieVersion")
   api("com.google.dagger:dagger:2.21")
   annotationProcessor("com.google.dagger:dagger-compiler:2.21")
