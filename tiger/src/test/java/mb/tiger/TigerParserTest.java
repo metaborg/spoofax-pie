@@ -10,11 +10,11 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ParserTest {
-    private final Parser parser = new Parser(ParseTable.fromClassLoaderResources());
+class TigerParserTest {
+    private final TigerParser parser = new TigerParser(TigerParseTable.fromClassLoaderResources());
     private final ITermFactory termFactory = new TermFactory();
 
-    ParserTest() throws IOException, JSGLR1ParseTableException {}
+    TigerParserTest() throws IOException, JSGLR1ParseTableException {}
 
     @Test void parse() throws InterruptedException {
         final JSGLR1ParseOutput output = parser.parse("1", "Module");

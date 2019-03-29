@@ -4,10 +4,10 @@ import mb.common.style.Styling;
 import mb.common.token.Token;
 import mb.esv.common.ESVStyler;
 
-public class Styler {
+public class TigerStyler {
     private final ESVStyler styler;
 
-    public Styler(StylingRules stylingRules) {
+    public TigerStyler(TigerStylingRules stylingRules) {
         this.styler = new ESVStyler(stylingRules.stylingRules);
     }
 

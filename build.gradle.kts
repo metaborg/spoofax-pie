@@ -8,6 +8,7 @@ subprojects {
     configureSubProject()
   }
   extra["spoofaxVersion"] = "2.5.1"
+  extra["pieVersion"] = "0.4.2"
 }
 
 gitonium {

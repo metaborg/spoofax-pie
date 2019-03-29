@@ -16,11 +16,11 @@ import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class StylerTest {
-    private final Parser parser = new Parser(ParseTable.fromClassLoaderResources());
-    private final Styler styler = new Styler(StylingRules.fromClassLoaderResources());
+class TigerStylerTest {
+    private final TigerParser parser = new TigerParser(TigerParseTable.fromClassLoaderResources());
+    private final TigerStyler styler = new TigerStyler(TigerStylingRules.fromClassLoaderResources());
 
-    StylerTest() throws IOException, JSGLR1ParseTableException {}
+    TigerStylerTest() throws IOException, JSGLR1ParseTableException {}
 
     @Test void style() throws InterruptedException {
         final JSGLR1ParseOutput parseOutput = parser.parse("1 + 21", "Module");
