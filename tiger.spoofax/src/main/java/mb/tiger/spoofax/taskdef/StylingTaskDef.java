@@ -7,16 +7,15 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
 import mb.pie.api.TaskDef;
 import mb.tiger.TigerStyler;
-import mb.tiger.spoofax.taskdef.ParseTaskDef;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 
-public class StyleTaskDef implements TaskDef<FSPath, @Nullable Styling> {
+public class StylingTaskDef implements TaskDef<FSPath, @Nullable Styling> {
     private final ParseTaskDef parseTaskDef;
     private final TigerStyler styler;
 
-    @Inject public StyleTaskDef(ParseTaskDef parseTaskDef, TigerStyler styler) {
+    @Inject public StylingTaskDef(ParseTaskDef parseTaskDef, TigerStyler styler) {
         this.parseTaskDef = parseTaskDef;
         this.styler = styler;
     }

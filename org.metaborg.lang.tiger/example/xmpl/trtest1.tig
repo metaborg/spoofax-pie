@@ -1,0 +1,6 @@
+let function f() : int =
+    let var x : int := 1
+     in x + 1
+    end
+in f()
+end

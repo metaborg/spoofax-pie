@@ -10,6 +10,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import java.util.ArrayList;
 
+@LanguageScope
 public interface LanguageComponent {
     TaskDef<FSPath, @Nullable MessageCollection> messagesTaskDef();
 

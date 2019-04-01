@@ -1,0 +1,10 @@
+let
+  var sum : int := 0
+  var n : int := 5
+ in 
+   while n > 0 do (
+     sum := sum + n;
+     n := n - 1
+   );
+   sum
+end

@@ -1,0 +1,64 @@
+//https://github.com/smarr/are-we-fast-yet/blob/master/benchmarks/Java/src/Queens.java
+for i := 0 to 30
+do
+  (
+  timeGo();
+  let
+    type intArray = array of int
+  in
+    let
+      function queens():int =
+        let
+          var freeRows : intArray := intArray[ 8] of  1
+          var freeMaxs : intArray := intArray[16] of  1
+          var freeMins : intArray := intArray[16] of  1
+          var queenRows: intArray := intArray[ 8] of -1
+          
+          function getRowColumn(r: int, c: int): int =
+            (freeRows[r] + freeMaxs[c+r] + freeMins[c-r+7]) = 3
+          
+          function setRowColumn(r: int, c: int, v: int) =
+            (
+             freeRows[r        ] := v;
+             freeMaxs[c + r    ] := v;
+             freeMins[c - r + 7] := v
+            )
+          
+          function placeQueen(c: int):int =
+            let
+              var placed : int := 0
+            in
+              for r := 0 to 7
+              do ( 
+                if getRowColumn(r, c) = 1
+                then (
+                  queenRows[r] := c;
+                  setRowColumn(r, c, 0);
+                  if c = 7
+                  then (
+                    placed := 1;
+                    break
+                  );
+                  
+                  if placeQueen(c + 1) = 1
+                  then (
+                    placed := 1;
+                    break
+                  );
+                  setRowColumn(r, c, 1);
+                  flush()
+                )
+              );
+              placed
+                  
+            end
+              
+        in
+          placeQueen(0)
+        end
+     in
+      queens()
+     end
+  end;
+  timeStop()
+)

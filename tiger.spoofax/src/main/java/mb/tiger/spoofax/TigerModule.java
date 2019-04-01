@@ -3,6 +3,7 @@ package mb.tiger.spoofax;
 import dagger.Module;
 import dagger.Provides;
 import mb.jsglr1.common.JSGLR1ParseTableException;
+import mb.spoofax.core.language.LanguageScope;
 import mb.tiger.TigerParseTable;
 import mb.tiger.TigerParser;
 import mb.tiger.TigerStyler;
@@ -12,18 +13,25 @@ import java.io.IOException;
 
 @Module
 public class TigerModule {
-    private final TigerParseTable parseTable = TigerParseTable.fromClassLoaderResources();
-    private final TigerParser parser = new TigerParser(parseTable);
-    private final TigerStylingRules stylingRules = TigerStylingRules.fromClassLoaderResources();
-    private final TigerStyler styler = new TigerStyler(stylingRules);
+    private final TigerParser parser;
+    private final TigerStyler styler;
 
-    public TigerModule() throws IOException, JSGLR1ParseTableException {}
+    private TigerModule(TigerParseTable parseTable, TigerStylingRules stylingRules) {
+        this.parser = new TigerParser(parseTable);
+        this.styler = new TigerStyler(stylingRules);
+    }
 
-    @Provides TigerParser provideParser() {
+    public static TigerModule fromClassLoaderResources() throws JSGLR1ParseTableException, IOException {
+        final TigerParseTable parseTable = TigerParseTable.fromClassLoaderResources();
+        final TigerStylingRules stylingRules = TigerStylingRules.fromClassLoaderResources();
+        return new TigerModule(parseTable, stylingRules);
+    }
+
+    @LanguageScope @Provides TigerParser provideParser() {
         return parser;
     }
 
-    @Provides TigerStyler styler() {
+    @LanguageScope @Provides TigerStyler styler() {
         return styler;
     }
 }
