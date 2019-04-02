@@ -13,5 +13,6 @@ dependencies {
   implementation(project(":tiger.spoofax"))
   implementation(project(":spoofax.cmd"))
   implementation("org.metaborg:pie.runtime:$pieVersion")
+  implementation("org.metaborg:pie.dagger:$pieVersion")
   compileOnly("org.checkerframework:checker-qual-android:2.6.0") // Use android version: annotation retention policy is class instead of runtime.
 }

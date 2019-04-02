@@ -12,6 +12,7 @@ dependencies {
   api(project(":tiger"))
   api(project(":spoofax.core"))
   api("org.metaborg:pie.api:$pieVersion")
+  api("org.metaborg:pie.dagger:$pieVersion")
   api("com.google.dagger:dagger:$daggerVersion")
   annotationProcessor("com.google.dagger:dagger-compiler:$daggerVersion")
   compileOnly("org.checkerframework:checker-qual-android:2.6.0") // Use android version: annotation retention policy is class instead of runtime.

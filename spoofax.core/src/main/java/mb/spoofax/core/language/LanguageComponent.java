@@ -12,11 +12,11 @@ import java.util.ArrayList;
 
 @LanguageScope
 public interface LanguageComponent {
-    TaskDef<FSPath, @Nullable MessageCollection> messagesTaskDef();
+    TaskDef<FSPath, @Nullable MessageCollection> getMessagesTaskDef();
 
-    TaskDef<FSPath, @Nullable IStrategoTerm> astTaskDef();
+    TaskDef<FSPath, @Nullable IStrategoTerm> getAstTaskDef();
 
-    TaskDef<FSPath, @Nullable ArrayList<Token>> tokenizerTaskDef();
+    TaskDef<FSPath, @Nullable ArrayList<Token>> getTokenizerTaskDef();
 
-    TaskDef<FSPath, @Nullable Styling> stylingTaskDef();
+    TaskDef<FSPath, @Nullable Styling> getStylingTaskDef();
 }

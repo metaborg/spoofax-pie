@@ -4,8 +4,6 @@ import dagger.Module;
 import dagger.Provides;
 import mb.fs.api.FileSystem;
 
-import javax.inject.Singleton;
-
 @Module
 public class FileSystemResourceServiceModule {
     private final FileSystem fileSystem;

@@ -2,12 +2,10 @@ package mb.tiger.cmd;
 
 import mb.fs.java.JavaFileSystem;
 import mb.jsglr1.common.JSGLR1ParseTableException;
-import mb.pie.api.Pie;
-import mb.pie.runtime.PieBuilderImpl;
-import mb.pie.runtime.logger.StreamLogger;
-import mb.pie.runtime.taskdefs.MapTaskDefs;
+import mb.pie.dagger.DaggerPieComponent;
+import mb.pie.dagger.DaggerResourceSystemsComponent;
+import mb.pie.dagger.PieComponent;
 import mb.spoofax.cmd.SpoofaxCmd;
-import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.platform.DaggerPlatformComponent;
 import mb.spoofax.core.platform.FileSystemResourceServiceModule;
 import mb.spoofax.core.platform.PlatformComponent;
@@ -28,17 +26,12 @@ public class Main {
             .platformComponent(platformComponent)
             .tigerModule(TigerModule.fromClassLoaderResources())
             .build();
-        // TODO: extract this into module?
-        final MapTaskDefs taskDefs = new MapTaskDefs();
-        taskDefs.add(tigerComponent.messagesTaskDef());
-        taskDefs.add(tigerComponent.astTaskDef());
-        taskDefs.add(tigerComponent.tokenizerTaskDef());
-        taskDefs.add(tigerComponent.stylingTaskDef());
-        final Pie pie = new PieBuilderImpl()
-            .withTaskDefs(taskDefs)
-            .withLogger(StreamLogger.verbose())
+        final PieComponent pieComponent = DaggerPieComponent
+            .builder()
+            .taskDefsComponent(tigerComponent)
+            .resourceSystemsComponent(DaggerResourceSystemsComponent.create())
             .build();
-        final SpoofaxCmd cmd = new SpoofaxCmd(tigerComponent, pie);
+        final SpoofaxCmd cmd = new SpoofaxCmd(tigerComponent, pieComponent.getPie());
         cmd.run(args);
     }
 }

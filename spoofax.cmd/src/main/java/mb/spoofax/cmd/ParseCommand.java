@@ -32,12 +32,12 @@ public class ParseCommand implements Callable<Void> {
     @Override public Void call() throws Exception {
         final FSPath file = new JavaFSPath(fileToParse);
         final TopDownSession session = pie.getTopDownExecutor().newSession();
-        final @Nullable IStrategoTerm ast = session.requireInitial(languageComponent.astTaskDef().createTask(file));
+        final @Nullable IStrategoTerm ast = session.requireInitial(languageComponent.getAstTaskDef().createTask(file));
         if(ast != null) {
             System.out.println(ast.toString());
         }
         final @Nullable MessageCollection messages =
-            session.requireInitial(languageComponent.messagesTaskDef().createTask(file));
+            session.requireInitial(languageComponent.getMessagesTaskDef().createTask(file));
         if(messages != null) {
             System.out.println(messages);
         }
