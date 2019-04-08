@@ -4,10 +4,13 @@ plugins {
 }
 
 dependencies {
+  api(platform(project(":depconstraints")))
+
   api(project(":common"))
   api(project(":jsglr1.common"))
   api(project(":esv.common"))
-  compileOnly("org.checkerframework:checker-qual-android:2.6.0") // Use android version: annotation retention policy is class instead of runtime.
+
+  compileOnly("org.checkerframework:checker-qual-android")
 }
 
 // Copy files from org.metaborg.lang.tiger into src/main/resources.

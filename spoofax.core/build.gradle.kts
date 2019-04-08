@@ -4,16 +4,17 @@ plugins {
   id("net.ltgt.apt-idea")
 }
 
-val daggerVersion = extra["daggerVersion"] as String
-val spoofaxVersion = extra["spoofaxVersion"] as String
-val pieVersion = extra["pieVersion"] as String
-
 dependencies {
+  api(platform(project(":depconstraints")))
+  annotationProcessor(platform(project(":depconstraints")))
+
   api(project(":common"))
-  api("org.metaborg:org.spoofax.terms:$spoofaxVersion")
-  api("org.metaborg:pie.api:$pieVersion")
-  api("org.metaborg:fs.api:$pieVersion")
-  api("com.google.dagger:dagger:$daggerVersion")
-  annotationProcessor("com.google.dagger:dagger-compiler:$daggerVersion")
-  compileOnly("org.checkerframework:checker-qual-android:2.6.0") // Use android version: annotation retention policy is class instead of runtime.
+  api("org.metaborg:org.spoofax.terms")
+  api("org.metaborg:pie.api")
+  api("org.metaborg:pie.dagger")
+  api("com.google.dagger:dagger")
+
+  compileOnly("org.checkerframework:checker-qual-android")
+
+  annotationProcessor("com.google.dagger:dagger-compiler")
 }

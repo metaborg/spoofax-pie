@@ -17,6 +17,8 @@ pluginManagement {
   }
 }
 
+include("depconstraints")
+
 include("common") // common low-level utility (e.g., messages) [try to copy from spoofax.api of prototype1]
 
 include("jsglr1.common") // parsing with JSGLR1

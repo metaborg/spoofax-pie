@@ -5,14 +5,15 @@ plugins {
 application {
   mainClassName = "mb.tiger.cmd.Main"
 }
-
-val spoofaxVersion = extra["spoofaxVersion"] as String
-val pieVersion = extra["pieVersion"] as String
+tasks.getByName<JavaExec>("run").args = listOf("parse", "../org.metaborg.lang.tiger/example/xmpl2/matrix_with_errors.tig")
 
 dependencies {
+  implementation(platform(project(":depconstraints")))
+
   implementation(project(":tiger.spoofax"))
   implementation(project(":spoofax.cmd"))
-  implementation("org.metaborg:pie.runtime:$pieVersion")
-  implementation("org.metaborg:pie.dagger:$pieVersion")
-  compileOnly("org.checkerframework:checker-qual-android:2.6.0") // Use android version: annotation retention policy is class instead of runtime.
+  implementation("org.metaborg:pie.runtime")
+  implementation("org.metaborg:pie.dagger")
+
+  compileOnly("org.checkerframework:checker-qual-android")
 }
