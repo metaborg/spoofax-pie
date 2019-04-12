@@ -9,13 +9,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class JSGLR1ParseOutput implements Serializable {
+public class JSGLR1ParseResult implements Serializable {
     public final boolean recovered;
     public final @Nullable IStrategoTerm ast;
     public final @Nullable ArrayList<Token> tokens;
     public final ArrayList<Message> messages;
 
-    public JSGLR1ParseOutput(boolean recovered, @Nullable IStrategoTerm ast, @Nullable ArrayList<Token> tokens, ArrayList<Message> messages) {
+    public JSGLR1ParseResult(boolean recovered, @Nullable IStrategoTerm ast, @Nullable ArrayList<Token> tokens, ArrayList<Message> messages) {
         this.recovered = recovered;
         this.ast = ast;
         this.tokens = tokens;
@@ -25,7 +25,7 @@ public class JSGLR1ParseOutput implements Serializable {
     @Override public boolean equals(Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
-        final JSGLR1ParseOutput that = (JSGLR1ParseOutput) o;
+        final JSGLR1ParseResult that = (JSGLR1ParseResult) o;
         if(recovered != that.recovered) return false;
         if(!Objects.equals(ast, that.ast)) return false;
         if(!Objects.equals(tokens, that.tokens)) return false;
@@ -41,7 +41,7 @@ public class JSGLR1ParseOutput implements Serializable {
     }
 
     @Override public String toString() {
-        return "ParseOutput{" +
+        return "JSGLR1ParseResult{" +
             "recovered=" + recovered +
             ", ast=" + ast +
             ", tokens=" + tokens +

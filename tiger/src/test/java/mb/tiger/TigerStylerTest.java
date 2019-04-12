@@ -7,7 +7,7 @@ import mb.common.style.TokenStyle;
 import mb.common.token.LayoutTokenKind;
 import mb.common.token.NumberTokenKind;
 import mb.common.token.OperatorTokenKind;
-import mb.jsglr1.common.JSGLR1ParseOutput;
+import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.jsglr1.common.JSGLR1ParseTableException;
 import org.junit.jupiter.api.Test;
 
@@ -23,7 +23,7 @@ class TigerStylerTest {
     TigerStylerTest() throws IOException, JSGLR1ParseTableException {}
 
     @Test void style() throws InterruptedException {
-        final JSGLR1ParseOutput parseOutput = parser.parse("1 + 21", "Module");
+        final JSGLR1ParseResult parseOutput = parser.parse("1 + 21", "Module");
         assertFalse(parseOutput.recovered);
         assertNotNull(parseOutput.ast);
         assertNotNull(parseOutput.tokens);

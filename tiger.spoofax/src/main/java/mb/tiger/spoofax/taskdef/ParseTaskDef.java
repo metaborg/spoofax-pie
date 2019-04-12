@@ -1,24 +1,23 @@
 package mb.tiger.spoofax.taskdef;
 
-import mb.fs.api.node.FSNode;
-import mb.fs.api.path.FSPath;
-import mb.jsglr1.common.JSGLR1ParseOutput;
+import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
-import mb.spoofax.core.platform.ResourceService;
+import mb.resource.ReadableResource;
+import mb.resource.ResourceKey;
+import mb.resource.ResourceService;
 import mb.tiger.TigerParser;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-class ParseTaskDef implements TaskDef<FSPath, @Nullable JSGLR1ParseOutput> {
-    private final ResourceService resourceService;
+class ParseTaskDef implements TaskDef<ResourceKey, JSGLR1ParseResult> {
+    private final ResourceService resourceRegistry;
     private final TigerParser parser;
 
-    @Inject public ParseTaskDef(ResourceService resourceService, TigerParser parser) {
-        this.resourceService = resourceService;
+    @Inject public ParseTaskDef(ResourceService resourceRegistry, TigerParser parser) {
+        this.resourceRegistry = resourceRegistry;
         this.parser = parser;
     }
 
@@ -27,13 +26,10 @@ class ParseTaskDef implements TaskDef<FSPath, @Nullable JSGLR1ParseOutput> {
     }
 
     @Override
-    public @Nullable JSGLR1ParseOutput exec(ExecContext context, FSPath path) throws IOException, InterruptedException {
-        context.require(path);
-        final FSNode node = resourceService.getNode(path);
-        if(!node.isFile()) {
-            return null;
-        }
-        final String text = new String(node.readAllBytes(), StandardCharsets.UTF_8);
+    public JSGLR1ParseResult exec(ExecContext context, ResourceKey key) throws IOException, InterruptedException {
+        final ReadableResource resource = resourceRegistry.getReadableResource(key);
+        context.require(resource);
+        final String text = resource.readString(StandardCharsets.UTF_8);
         return parser.parse(text, "Module");
     }
 }

@@ -1,17 +1,14 @@
 package mb.tiger.spoofax.taskdef;
 
-import mb.fs.api.path.FSPath;
-import mb.jsglr1.common.JSGLR1ParseOutput;
+import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
-import mb.tiger.spoofax.taskdef.ParseTaskDef;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spoofax.interpreter.terms.IStrategoTerm;
+import mb.resource.ResourceKey;
+import mb.spoofax.core.language.AstResult;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
-public class AstTaskDef implements TaskDef<FSPath, @Nullable IStrategoTerm> {
+public class AstTaskDef implements TaskDef<ResourceKey, AstResult> {
     private final ParseTaskDef parseTaskDef;
 
     @Inject public AstTaskDef(ParseTaskDef parseTaskDef) {
@@ -22,11 +19,8 @@ public class AstTaskDef implements TaskDef<FSPath, @Nullable IStrategoTerm> {
         return getClass().getName();
     }
 
-    @Override public @Nullable IStrategoTerm exec(ExecContext context, FSPath path) throws Exception {
-        final @Nullable JSGLR1ParseOutput parseOutput = context.require(parseTaskDef, path);
-        if(parseOutput == null) {
-            return null;
-        }
-        return parseOutput.ast;
+    @Override public AstResult exec(ExecContext context, ResourceKey key) throws Exception {
+        final JSGLR1ParseResult parseOutput = context.require(parseTaskDef, key);
+        return new AstResult(parseOutput.ast, parseOutput.recovered);
     }
 }

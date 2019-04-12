@@ -1,10 +1,15 @@
 package mb.spoofax.core.platform;
 
 import dagger.Component;
+import mb.pie.api.TaskDef;
+import mb.resource.ResourceService;
 
-import javax.inject.Singleton;
+import javax.inject.Named;
+import java.util.Set;
 
-@Singleton @Component(modules = FileSystemResourceServiceModule.class)
+@PlatformScope @Component(modules = {PlatformModule.class}, dependencies = {ResourceRegistryComponent.class})
 public interface PlatformComponent {
-    ResourceService resourceService();
+    ResourceService getResourceService();
+
+    @Named("platform") Set<TaskDef<?, ?>> getTaskDefs();
 }

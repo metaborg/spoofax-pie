@@ -15,6 +15,7 @@ import mb.tiger.spoofax.taskdef.MessagesTaskDef;
 import mb.tiger.spoofax.taskdef.StylingTaskDef;
 import mb.tiger.spoofax.taskdef.TokenizerTaskDef;
 
+import javax.inject.Named;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
@@ -38,15 +39,15 @@ public class TigerModule {
         return new TigerModule(parseTable, stylingRules);
     }
 
-    @LanguageScope @Provides TigerParser provideParser() {
+    @Provides @LanguageScope TigerParser provideParser() {
         return parser;
     }
 
-    @LanguageScope @Provides TigerStyler provideStyler() {
+    @Provides @LanguageScope TigerStyler provideStyler() {
         return styler;
     }
 
-    @LanguageScope @Provides @ElementsIntoSet Set<TaskDef<?, ?>> provideTaskDefs(
+    @Provides @LanguageScope @Named("language") @ElementsIntoSet static Set<TaskDef<?, ?>> provideTaskDefs(
         MessagesTaskDef messagesTaskDef,
         AstTaskDef astTaskDef,
         TokenizerTaskDef tokenizerTaskDef,

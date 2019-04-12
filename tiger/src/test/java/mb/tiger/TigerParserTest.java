@@ -1,6 +1,6 @@
 package mb.tiger;
 
-import mb.jsglr1.common.JSGLR1ParseOutput;
+import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.jsglr1.common.JSGLR1ParseTableException;
 import org.junit.jupiter.api.Test;
 import org.spoofax.interpreter.terms.ITermFactory;
@@ -17,7 +17,7 @@ class TigerParserTest {
     TigerParserTest() throws IOException, JSGLR1ParseTableException {}
 
     @Test void parse() throws InterruptedException {
-        final JSGLR1ParseOutput output = parser.parse("1", "Module");
+        final JSGLR1ParseResult output = parser.parse("1", "Module");
         assertFalse(output.recovered);
         assertNotNull(output.ast);
         assertNotNull(output.tokens);

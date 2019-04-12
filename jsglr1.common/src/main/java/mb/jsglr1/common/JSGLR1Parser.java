@@ -41,7 +41,7 @@ public class JSGLR1Parser {
         disambiguator.setHeuristicFilters(false);
     }
 
-    public JSGLR1ParseOutput parse(String text, String startSymbol) throws InterruptedException {
+    public JSGLR1ParseResult parse(String text, String startSymbol) throws InterruptedException {
         try {
             final SGLRParseResult result = parser.parse(text, null, startSymbol);
             if(result.output == null) {
@@ -56,12 +56,12 @@ public class JSGLR1Parser {
             errorUtil.gatherNonFatalErrors(ast);
             final ArrayList<Message> messages = errorUtil.messages();
             final boolean recovered = MessageUtil.containsError(messages);
-            return new JSGLR1ParseOutput(recovered, ast, tokenStream, messages);
+            return new JSGLR1ParseResult(recovered, ast, tokenStream, messages);
         } catch(SGLRException e) {
             final ErrorUtil errorUtil = new ErrorUtil(true, true, parser.getCollectedErrors());
             errorUtil.processFatalException(new NullTokenizer(text, null), e);
             final ArrayList<Message> messages = errorUtil.messages();
-            return new JSGLR1ParseOutput(false, null, null, messages);
+            return new JSGLR1ParseResult(false, null, null, messages);
         }
     }
 }

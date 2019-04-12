@@ -1,6 +1,6 @@
 package mb.tiger;
 
-import mb.jsglr1.common.JSGLR1ParseOutput;
+import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.jsglr1.common.JSGLR1Parser;
 
 public class TigerParser {
@@ -10,7 +10,7 @@ public class TigerParser {
         this.parser = new JSGLR1Parser(parseTable.parseTable);
     }
 
-    public JSGLR1ParseOutput parse(String text, String startSymbol) throws InterruptedException {
+    public JSGLR1ParseResult parse(String text, String startSymbol) throws InterruptedException {
         return parser.parse(text, startSymbol);
     }
 }

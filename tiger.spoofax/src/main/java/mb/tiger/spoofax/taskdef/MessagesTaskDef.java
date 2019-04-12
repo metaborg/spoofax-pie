@@ -1,16 +1,15 @@
 package mb.tiger.spoofax.taskdef;
 
 import mb.common.message.MessageCollection;
-import mb.fs.api.path.FSPath;
-import mb.jsglr1.common.JSGLR1ParseOutput;
+import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
-import mb.tiger.spoofax.taskdef.ParseTaskDef;
+import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 
-public class MessagesTaskDef implements TaskDef<FSPath, @Nullable MessageCollection> {
+public class MessagesTaskDef implements TaskDef<ResourceKey, MessageCollection> {
     private final ParseTaskDef parseTaskDef;
 
     @Inject public MessagesTaskDef(ParseTaskDef parseTaskDef) {
@@ -21,13 +20,10 @@ public class MessagesTaskDef implements TaskDef<FSPath, @Nullable MessageCollect
         return getClass().getName();
     }
 
-    @Override public @Nullable MessageCollection exec(ExecContext context, FSPath path) throws Exception {
-        final @Nullable JSGLR1ParseOutput parseOutput = context.require(parseTaskDef, path);
-        if(parseOutput == null) {
-            return null;
-        }
+    @Override public @Nullable MessageCollection exec(ExecContext context, ResourceKey key) throws Exception {
+        final JSGLR1ParseResult parseOutput = context.require(parseTaskDef, key);
         final MessageCollection messageCollection = new MessageCollection();
-        messageCollection.addDocumentMessages(path.toString(), parseOutput.messages);
+        messageCollection.addDocumentMessages(key.toString(), parseOutput.messages);
         return messageCollection;
     }
 }
