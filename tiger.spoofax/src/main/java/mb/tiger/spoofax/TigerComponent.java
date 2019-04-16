@@ -1,12 +1,9 @@
 package mb.tiger.spoofax;
 
 import dagger.Component;
-import mb.resource.ReadableResource;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.platform.PlatformComponent;
-
-import java.io.Serializable;
 
 /**
  * A {@link LanguageComponent} that contributes Tiger task definitions. All objects are provided by a

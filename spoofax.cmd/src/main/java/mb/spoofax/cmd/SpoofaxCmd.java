@@ -1,8 +1,7 @@
 package mb.spoofax.cmd;
 
-import mb.pie.api.Pie;
 import mb.resource.string.StringResourceRegistry;
-import mb.spoofax.core.language.LanguageInstance;
+import mb.spoofax.core.language.LanguageComponent;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.RunAll;
@@ -13,25 +12,21 @@ import java.util.concurrent.Callable;
 @Command
 public class SpoofaxCmd implements Callable<Void> {
     private final StringResourceRegistry stringResourceRegistry;
-    private final LanguageInstance languageInstance;
-    private final Pie pie;
 
     @Inject
-    public SpoofaxCmd(StringResourceRegistry stringResourceRegistry, LanguageInstance languageInstance, Pie pie) {
+    public SpoofaxCmd(StringResourceRegistry stringResourceRegistry) {
         this.stringResourceRegistry = stringResourceRegistry;
-        this.languageInstance = languageInstance;
-        this.pie = pie;
     }
 
-    public void run(String[] args) {
+    public void run(String[] args, LanguageComponent languageComponent) {
         CommandLine commandLine = new CommandLine(this);
-        commandLine.addSubcommand("parse", new ParseFileCommand(languageInstance, pie));
+        commandLine.addSubcommand("parse", new ParseFileCommand(languageComponent));
         commandLine.addSubcommand("parse-string",
-            new ParseStringCommand(stringResourceRegistry, languageInstance, pie));
+            new ParseStringCommand(stringResourceRegistry, languageComponent));
         commandLine.parseWithHandler(new RunAll(), args);
     }
 
-    @Override public Void call() throws Exception {
+    @Override public Void call() {
         return null;
     }
 }

@@ -6,9 +6,11 @@ import dagger.multibindings.IntoSet;
 import mb.resource.ResourceRegistry;
 import mb.resource.fs.FSRegistry;
 
+import javax.inject.Singleton;
+
 @Module
-public class ResourceRegistryModule {
-    @Provides @ResourceRegistryScope @IntoSet static ResourceRegistry provideFSRegistry() {
+public class FSRegistryModule {
+    @Provides @Singleton @IntoSet static ResourceRegistry provideFSRegistry() {
         return new FSRegistry();
     }
 }

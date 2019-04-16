@@ -1,15 +1,20 @@
 package mb.spoofax.core.platform;
 
 import dagger.Component;
-import mb.pie.api.TaskDef;
+import mb.pie.api.Pie;
+import mb.pie.dagger.PieModule;
 import mb.resource.ResourceService;
 
-import javax.inject.Named;
-import java.util.Set;
+import javax.inject.Singleton;
 
-@PlatformScope @Component(modules = {PlatformModule.class}, dependencies = {ResourceRegistryComponent.class})
+@Singleton
+@Component(modules = {
+    FSRegistryModule.class,
+    ResourceServiceModule.class,
+    PieModule.class
+})
 public interface PlatformComponent {
     ResourceService getResourceService();
 
-    @Named("platform") Set<TaskDef<?, ?>> getTaskDefs();
+    Pie getPie();
 }
