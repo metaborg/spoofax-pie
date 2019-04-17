@@ -9,9 +9,11 @@ dependencies {
   annotationProcessor(platform(project(":depconstraints")))
 
   api(project(":common"))
-  api("org.metaborg:org.spoofax.terms")
+  api("org.metaborg:log.api")
+  api("org.metaborg:resource")
   api("org.metaborg:pie.api")
   api("org.metaborg:pie.dagger")
+  api("org.metaborg:org.spoofax.terms")
   api("com.google.dagger:dagger")
 
   compileOnly("org.checkerframework:checker-qual-android")

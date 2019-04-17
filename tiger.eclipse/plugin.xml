@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+  <extension point="org.eclipse.ui.editors">
+    <editor
+      name="Tiger editor"
+      extensions="tig"
+      class="mb.tiger.eclipse.TigerEditor"
+      id="mb.tiger.eclipse.TigerEditor"
+    />
+  </extension>
+  <extension point="org.eclipse.ui.editors.documentProviders">
+    <provider
+      extensions="tig"
+      class="mb.tiger.eclipse.TigerDocumentProvider"
+      id="mb.tiger.eclipse.TigerDocumentProvider"
+    />
+  </extension>
+</plugin>

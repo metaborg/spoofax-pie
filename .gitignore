@@ -1,4 +1,5 @@
 /org.metaborg.lang.tiger.interpreter
+/Eclipse.app
 
 # Java
 *.class

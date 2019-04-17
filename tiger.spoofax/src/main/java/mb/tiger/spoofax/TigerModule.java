@@ -8,7 +8,7 @@ import mb.pie.api.Pie;
 import mb.pie.api.PieSession;
 import mb.pie.api.TaskDef;
 import mb.pie.api.TaskDefs;
-import mb.pie.runtime.taskdefs.MapTaskDefs;
+import mb.pie.api.MapTaskDefs;
 import mb.spoofax.core.language.LanguageScope;
 import mb.tiger.TigerParseTable;
 import mb.tiger.TigerParser;

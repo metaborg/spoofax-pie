@@ -19,18 +19,19 @@ pluginManagement {
 
 include("depconstraints")
 
-include("common") // common low-level utility (e.g., messages) [try to copy from spoofax.api of prototype1]
+include("common")
 
-include("jsglr1.common") // parsing with JSGLR1
-include("jsglr2.common") // parsing with JSGLR2 + pie functions (this should be moved to JSGLR2 in the future)
-include("esv.common") // syntax-based styling with ESV [try to copy from prototype1] + pie functions (this should be moved to ESV in the future)
+include("jsglr1.common")
+include("jsglr2.common")
+include("esv.common")
 
-include("spoofax.core") // interfaces, utility, pipelines, etc. for gluing.
-include("spoofax.cmd") // adapting spoofax to command-line.
-include("spoofax.eclipse") // adapting spoofax to Eclipse plugins.
+include("spoofax.core")
+include("spoofax.cmd")
+include("spoofax.eclipse")
+include("spoofax.eclipse.externaldeps")
 
-include("tiger") // raw implementation of tigers's several parts: parser and syntax-based styler.
-include("tiger.spoofax") // binding to spoofax interfaces.
-include("tiger.cmd") // glue tiger.spoofax to spoofax.cmd, and provide and executable JAR.
-include("tiger.eclipse") // glue Tiger.spoofax to spoofax.eclipse, and provide an Eclipse plugin.
-include("org.metaborg.lang.tiger") // tiger in Spoofax Core, used to copy built artifacts.
+include("tiger")
+include("tiger.spoofax")
+include("tiger.cmd")
+include("tiger.eclipse")
+include("org.metaborg.lang.tiger")

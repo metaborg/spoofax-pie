@@ -1,9 +1,12 @@
 package mb.tiger.cmd;
 
 import mb.jsglr1.common.JSGLR1ParseTableException;
+import mb.pie.dagger.PieModule;
+import mb.pie.runtime.PieBuilderImpl;
 import mb.spoofax.cmd.DaggerSpoofaxCmdComponent;
 import mb.spoofax.cmd.SpoofaxCmd;
 import mb.spoofax.cmd.SpoofaxCmdComponent;
+import mb.spoofax.cmd.StringRegistryModule;
 import mb.tiger.spoofax.DaggerTigerComponent;
 import mb.tiger.spoofax.TigerComponent;
 import mb.tiger.spoofax.TigerModule;
@@ -12,7 +15,11 @@ import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) throws IOException, JSGLR1ParseTableException {
-        final SpoofaxCmdComponent platformComponent = DaggerSpoofaxCmdComponent.create();
+        final SpoofaxCmdComponent platformComponent = DaggerSpoofaxCmdComponent
+            .builder()
+            .pieModule(new PieModule(PieBuilderImpl::new))
+            .stringRegistryModule(new StringRegistryModule())
+            .build();
         final TigerComponent tigerComponent = DaggerTigerComponent
             .builder()
             .platformComponent(platformComponent)
