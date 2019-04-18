@@ -2,6 +2,8 @@ plugins {
   `java-platform`
 }
 
+val logVersion = "0.2.1"
+val resourceVersion = "0.2.0"
 val pieVersion = "0.5.0"
 val spoofaxCoreVersion = "2.5.1"
 val daggerVersion = "2.21"
@@ -9,9 +11,11 @@ val daggerVersion = "2.21"
 dependencies {
   constraints {
     // Main
-    api("org.metaborg:log.api:0.2.1")
+    api("org.metaborg:log.api:$logVersion")
+    api("org.metaborg:log.backend.noop:$logVersion")
+    api("org.metaborg:log.backend.logback:$logVersion")
 
-    api("org.metaborg:resource:0.2.0")
+    api("org.metaborg:resource:$resourceVersion")
 
     api("org.metaborg:pie.api:$pieVersion")
     api("org.metaborg:pie.runtime:$pieVersion")
@@ -23,7 +27,7 @@ dependencies {
     api("com.google.dagger:dagger:$daggerVersion")
     api("com.google.dagger:dagger-compiler:$daggerVersion")
     api("javax.inject:javax.inject:1")
-    
+
     api("org.checkerframework:checker-qual-android:2.6.0") // Use android version: annotation retention policy is class instead of runtime.
 
     // Test

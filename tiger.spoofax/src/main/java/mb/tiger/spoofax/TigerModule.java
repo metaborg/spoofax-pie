@@ -4,11 +4,11 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
 import mb.jsglr1.common.JSGLR1ParseTableException;
+import mb.pie.api.MapTaskDefs;
 import mb.pie.api.Pie;
 import mb.pie.api.PieSession;
 import mb.pie.api.TaskDef;
 import mb.pie.api.TaskDefs;
-import mb.pie.api.MapTaskDefs;
 import mb.spoofax.core.language.LanguageScope;
 import mb.tiger.TigerParseTable;
 import mb.tiger.TigerParser;
@@ -16,6 +16,7 @@ import mb.tiger.TigerStyler;
 import mb.tiger.TigerStylingRules;
 import mb.tiger.spoofax.taskdef.AstTaskDef;
 import mb.tiger.spoofax.taskdef.MessagesTaskDef;
+import mb.tiger.spoofax.taskdef.ParseTaskDef;
 import mb.tiger.spoofax.taskdef.StylingTaskDef;
 import mb.tiger.spoofax.taskdef.TokenizerTaskDef;
 
@@ -53,12 +54,14 @@ public class TigerModule {
     }
 
     @Provides @LanguageScope @Named("language") @ElementsIntoSet static Set<TaskDef<?, ?>> provideTaskDefsSet(
+        ParseTaskDef parseTaskDef,
         MessagesTaskDef messagesTaskDef,
         AstTaskDef astTaskDef,
         TokenizerTaskDef tokenizerTaskDef,
         StylingTaskDef stylingTaskDef
     ) {
         final HashSet<TaskDef<?, ?>> taskDefs = new HashSet<>();
+        taskDefs.add(parseTaskDef);
         taskDefs.add(messagesTaskDef);
         taskDefs.add(astTaskDef);
         taskDefs.add(tokenizerTaskDef);
@@ -72,7 +75,8 @@ public class TigerModule {
         return new MapTaskDefs(taskDefs);
     }
 
+    // Unscoped: new session every call.
     @Provides PieSession providePieSession(Pie pie, @Named("language") TaskDefs languageTaskDefs) {
-        return pie.newSession(languageTaskDefs); // Unscoped: new session every call.
+        return pie.newSession(languageTaskDefs);
     }
 }

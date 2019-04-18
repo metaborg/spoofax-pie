@@ -10,7 +10,7 @@ import javax.inject.Singleton;
 
 @Singleton
 @Component(modules = {
-    LoggerFactory.class,
+    LoggerFactoryModule.class,
     FSRegistryModule.class,
     ResourceServiceModule.class,
     PieModule.class

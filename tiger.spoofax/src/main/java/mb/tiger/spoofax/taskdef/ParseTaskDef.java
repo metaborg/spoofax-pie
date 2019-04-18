@@ -12,7 +12,7 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-class ParseTaskDef implements TaskDef<ResourceKey, JSGLR1ParseResult> {
+public class ParseTaskDef implements TaskDef<ResourceKey, JSGLR1ParseResult> {
     private final ResourceService resourceRegistry;
     private final TigerParser parser;
 
