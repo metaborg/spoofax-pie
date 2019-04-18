@@ -4,7 +4,9 @@ plugins {
 }
 
 bundle {
+  bundleApiProject(":spoofax.eclipse.externaldeps")
   bundleApiProject(":spoofax.eclipse")
+  bundleApiProject(":tiger.eclipse.externaldeps")
 }
 
 dependencies {

@@ -1,4 +1,4 @@
-package mb.spoofax.eclipse;
+package mb.spoofax.eclipse.editor;
 
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 

@@ -1,6 +1,6 @@
-package mb.spoofax.eclipse;
+package mb.spoofax.eclipse.editor;
 
-import mb.spoofax.eclipse.util.StyleUtils;
+import mb.spoofax.eclipse.util.StyleUtil;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.jface.text.IRegion;
@@ -18,7 +18,7 @@ public class PresentationMerger implements ITextPresentationListener {
     public void set(TextPresentation presentation) {
         sourcePresentation = presentation;
         // Make a deep copy of style ranges to prevent sharing with other ITextPresentationListeners.
-        styleRanges = StyleUtils.deepCopies(presentation);
+        styleRanges = StyleUtil.deepCopies(presentation);
     }
 
     public void invalidate() {

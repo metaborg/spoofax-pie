@@ -1,7 +1,10 @@
-package mb.spoofax.eclipse;
+package mb.spoofax.eclipse.editor;
 
 import mb.log.api.Logger;
-import mb.spoofax.eclipse.util.FileUtils;
+import mb.spoofax.core.language.LanguageComponent;
+import mb.spoofax.eclipse.SpoofaxEclipseComponent;
+import mb.spoofax.eclipse.SpoofaxPlugin;
+import mb.spoofax.eclipse.util.FileUtil;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -23,7 +26,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 
-public class SpoofaxEditor extends TextEditor {
+public abstract class SpoofaxEditor extends TextEditor {
     private final class DocumentListener implements IDocumentListener {
         @Override public void documentAboutToBeChanged(@NonNull DocumentEvent event) {
             // Don't care about this event.
@@ -39,7 +42,8 @@ public class SpoofaxEditor extends TextEditor {
 
     private @MonotonicNonNull IJobManager jobManager = null;
     private @MonotonicNonNull Logger logger = null;
-    private @MonotonicNonNull FileUtils fileUtils = null;
+    private @MonotonicNonNull FileUtil fileUtil = null;
+    private @MonotonicNonNull LanguageComponent languageComponent = null;
 //    private PipelineAdapter pipelineAdapter;
 
     private @Nullable IEditorInput input = null;
@@ -53,22 +57,49 @@ public class SpoofaxEditor extends TextEditor {
     private @Nullable IProject project;
 
 
+    public String getText() {
+        if(document == null) {
+            throw new RuntimeException("Cannot get text of editor; editor has not been initialized");
+        }
+        return document.get();
+    }
+
+    public String getInputName() {
+        if(inputName == null) {
+            throw new RuntimeException("Cannot get name of input of editor; editor has not been initialized");
+        }
+        return inputName;
+    }
+
+    public ISourceViewer sourceViewer() {
+        if(sourceViewer == null) {
+            throw new RuntimeException("Cannot get source viewer of editor; editor has not been initialized");
+        }
+        return sourceViewer;
+    }
+
     public void setStyleAsync(TextPresentation textPresentation, @Nullable String text, @Nullable IProgressMonitor monitor) {
         presentationMerger.set(textPresentation);
         // Update textPresentation on the main thread, required by Eclipse.
-        Display.getDefault().asyncExec(new Runnable() {
-            public void run() {
-                if(monitor != null && monitor.isCanceled()) {
-                    return;
-                }
-                // Also cancel if text presentation is not valid for current text any more.
-                if(document == null || sourceViewer == null || (text != null && !document.get().equals(text))) {
-                    return;
-                }
-                sourceViewer.changeTextPresentation(textPresentation, true);
+        Display.getDefault().asyncExec(() -> {
+            // Cancel if monitor is cancelled.
+            if(monitor != null && monitor.isCanceled()) {
+                return;
             }
+            // Cancel if editor has been closed.
+            if(document == null || sourceViewer == null) {
+                return;
+            }
+            // Cancel if text presentation is not valid for current text any more.
+            if(text != null && !document.get().equals(text)) {
+                return;
+            }
+            sourceViewer.changeTextPresentation(textPresentation, true);
         });
     }
+
+
+    protected abstract LanguageComponent getLanguageComponent();
 
 
     @Override protected void initializeEditor() {
@@ -76,12 +107,11 @@ public class SpoofaxEditor extends TextEditor {
 
         this.jobManager = Job.getJobManager();
 
-        final SpoofaxFacade spoofaxFacade = SpoofaxPlugin.spoofaxFacade();
-        final Injector injector = spoofaxFacade.injector;
-
-        this.logger = injector.getInstance(Logger.class);
-        this.fileUtils = injector.getInstance(FileUtils.class);
-        this.pipelineAdapter = injector.getInstance(PipelineAdapter.class);
+        final SpoofaxEclipseComponent component = SpoofaxPlugin.getComponent();
+        this.logger = component.getLoggerFactory().create(getClass());
+        this.fileUtil = component.getFileUtils();
+//        this.pipelineAdapter = injector.getInstance(PipelineAdapter.class);
+        this.languageComponent = getLanguageComponent();
 
         setDocumentProvider(new SpoofaxDocumentProvider());
         setSourceViewerConfiguration(new SourceViewerConfiguration());
@@ -92,7 +122,7 @@ public class SpoofaxEditor extends TextEditor {
         input = getEditorInput();
         document = getDocumentProvider().getDocument(input);
 
-        final @Nullable IFile inputFile = fileUtils.toFile(input);
+        final @Nullable IFile inputFile = fileUtil.toFile(input);
         if(inputFile != null) {
             this.inputName = inputFile.toString();
             this.file = inputFile;
@@ -114,7 +144,7 @@ public class SpoofaxEditor extends TextEditor {
         ((ITextViewerExtension4) sourceViewer).addTextPresentationListener(presentationMerger);
 
         if(file != null && project == null) {
-            pipelineAdapter.addEditor(this, document.get(), file, project);
+//            pipelineAdapter.addEditor(this, document.get(), file, project);
         }
 
         scheduleJob(true);
@@ -129,7 +159,7 @@ public class SpoofaxEditor extends TextEditor {
             document.removeDocumentListener(documentListener);
         }
 
-        pipelineAdapter.removeEditor(this);
+//        pipelineAdapter.removeEditor(this);
 
         input = null;
         document = null;
@@ -144,7 +174,7 @@ public class SpoofaxEditor extends TextEditor {
         if(file == null || project == null) {
             return;
         }
-        final Job job = new EditorUpdateJob(logger, pipelineAdapter, this, document.get(), file, project, input);
+        final Job job = new EditorUpdateJob(logger, this, document.get(), file, project, input);
         job.schedule(initialUpdate ? 0 : 300);
     }
 

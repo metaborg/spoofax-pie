@@ -19,16 +19,14 @@ import javax.inject.Inject;
 import java.net.URI;
 import java.util.Arrays;
 
-public class FileUtils {
+public class FileUtil {
     private final Logger logger;
     private final IWorkspaceRoot root;
 
-
-    @Inject public FileUtils(LoggerFactory loggerFactory) {
+    @Inject public FileUtil(LoggerFactory loggerFactory) {
         this.logger = loggerFactory.create(getClass());
         this.root = ResourcesPlugin.getWorkspace().getRoot();
     }
-
 
     public @Nullable IFile toFile(IPath path) {
         return root.getFileForLocation(path);

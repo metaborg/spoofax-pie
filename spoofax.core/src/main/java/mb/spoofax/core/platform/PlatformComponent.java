@@ -16,7 +16,7 @@ import javax.inject.Singleton;
     PieModule.class
 })
 public interface PlatformComponent {
-    LoggerFactory loggerFactory();
+    LoggerFactory getLoggerFactory();
 
     ResourceService getResourceService();
 
