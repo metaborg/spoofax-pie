@@ -11,4 +11,7 @@ public interface LanguageInstance {
     Task<MessageCollection> createMessagesTask(ResourceKey resourceKey);
 
     Task<Styling> createStylingTask(ResourceKey resourceKey);
+
+
+    String getDisplayName();
 }

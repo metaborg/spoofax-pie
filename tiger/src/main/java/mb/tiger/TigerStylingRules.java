@@ -15,7 +15,7 @@ public class TigerStylingRules implements Serializable {
     }
 
     public static TigerStylingRules fromClassLoaderResources() throws IOException {
-        final String resource = "target/metaborg/editor.esv.af";
+        final String resource = "mb/tiger/editor.esv.af";
         try(final @Nullable InputStream inputStream = TigerParseTable.class.getClassLoader().getResourceAsStream(resource)) {
             if(inputStream == null) {
                 throw new RuntimeException(

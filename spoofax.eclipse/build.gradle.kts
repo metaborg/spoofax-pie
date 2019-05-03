@@ -6,29 +6,33 @@ plugins {
 }
 
 bundle {
-  bundleApiTargetPlatform("org.eclipse.core.runtime")
-  bundleApiTargetPlatform("org.eclipse.core.expressions")
-  bundleApiTargetPlatform("org.eclipse.core.resources")
-  bundleApiTargetPlatform("org.eclipse.core.filesystem")
-  bundleApiTargetPlatform("org.eclipse.ui")
-  bundleApiTargetPlatform("org.eclipse.ui.views")
-  bundleApiTargetPlatform("org.eclipse.ui.editors")
-  bundleApiTargetPlatform("org.eclipse.ui.console")
-  bundleApiTargetPlatform("org.eclipse.ui.workbench")
-  bundleApiTargetPlatform("org.eclipse.ui.workbench.texteditor")
-  bundleApiTargetPlatform("org.eclipse.ui.ide")
-  bundleApiTargetPlatform("org.eclipse.jface.text")
-  bundleApiTargetPlatform("org.eclipse.swt")
-  bundleApiTargetPlatform("com.ibm.icu")
+  requireTargetPlatform("javax.inject")
+  requireTargetPlatform("org.eclipse.core.runtime")
+  requireTargetPlatform("org.eclipse.core.expressions")
+  requireTargetPlatform("org.eclipse.core.resources")
+  requireTargetPlatform("org.eclipse.core.filesystem")
+  requireTargetPlatform("org.eclipse.ui")
+  requireTargetPlatform("org.eclipse.ui.views")
+  requireTargetPlatform("org.eclipse.ui.editors")
+  requireTargetPlatform("org.eclipse.ui.console")
+  requireTargetPlatform("org.eclipse.ui.workbench")
+  requireTargetPlatform("org.eclipse.ui.workbench.texteditor")
+  requireTargetPlatform("org.eclipse.ui.ide")
+  requireTargetPlatform("org.eclipse.jface.text")
+  requireTargetPlatform("org.eclipse.swt")
+  requireTargetPlatform("com.ibm.icu")
 
-  bundleApiProvidedProject(":spoofax.eclipse.externaldeps")
+  requireEmbeddingBundle(":spoofax.eclipse.externaldeps")
 }
 
 dependencies {
+  // Dependency constraints.
   api(platform(project(":depconstraints")))
   annotationProcessor(platform(project(":depconstraints")))
 
+  // Compile-time annotations.
   compileOnly("org.checkerframework:checker-qual-android")
 
+  // Annotation processors.
   annotationProcessor("com.google.dagger:dagger-compiler")
 }

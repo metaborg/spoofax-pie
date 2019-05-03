@@ -3,8 +3,8 @@ plugins {
 }
 
 val logVersion = "0.2.1"
-val resourceVersion = "0.2.0"
-val pieVersion = "0.5.0"
+val resourceVersion = "0.3.0"
+val pieVersion = "0.5.1"
 val spoofaxCoreVersion = "2.5.1"
 val daggerVersion = "2.21"
 

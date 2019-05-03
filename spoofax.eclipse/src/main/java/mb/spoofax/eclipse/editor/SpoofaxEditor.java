@@ -1,9 +1,11 @@
 package mb.spoofax.eclipse.editor;
 
 import mb.log.api.Logger;
+import mb.log.api.LoggerFactory;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.eclipse.SpoofaxEclipseComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
+import mb.spoofax.eclipse.pie.PieRunner;
 import mb.spoofax.eclipse.util.FileUtil;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -40,15 +42,22 @@ public abstract class SpoofaxEditor extends TextEditor {
 
     private final PresentationMerger presentationMerger = new PresentationMerger();
 
-    private @MonotonicNonNull IJobManager jobManager = null;
-    private @MonotonicNonNull Logger logger = null;
-    private @MonotonicNonNull FileUtil fileUtil = null;
-    private @MonotonicNonNull LanguageComponent languageComponent = null;
-//    private PipelineAdapter pipelineAdapter;
+    /*
+    Do not initialize any of the following fields to null, as TextEditor's constructor will call 'initializeEditor' to
+    initialize several fields, which will then be set back to null when initialized here.
+    */
 
-    private @Nullable IEditorInput input = null;
-    private @Nullable String inputName = null;
-    private @Nullable IDocument document = null;
+    private @MonotonicNonNull IJobManager jobManager;
+    private @MonotonicNonNull LoggerFactory loggerFactory;
+    private @MonotonicNonNull Logger logger;
+    private @MonotonicNonNull FileUtil fileUtil;
+    private @MonotonicNonNull PieRunner pieRunner;
+
+    private @MonotonicNonNull LanguageComponent languageComponent;
+
+    private @Nullable IEditorInput input;
+    private @Nullable String inputName;
+    private @Nullable IDocument document;
 
     private @Nullable DocumentListener documentListener;
     private @Nullable ISourceViewer sourceViewer;
@@ -108,9 +117,11 @@ public abstract class SpoofaxEditor extends TextEditor {
         this.jobManager = Job.getJobManager();
 
         final SpoofaxEclipseComponent component = SpoofaxPlugin.getComponent();
-        this.logger = component.getLoggerFactory().create(getClass());
+        this.loggerFactory = component.getLoggerFactory();
+        this.logger = loggerFactory.create(getClass());
         this.fileUtil = component.getFileUtils();
-//        this.pipelineAdapter = injector.getInstance(PipelineAdapter.class);
+        this.pieRunner = component.getPieRunner();
+
         this.languageComponent = getLanguageComponent();
 
         setDocumentProvider(new SpoofaxDocumentProvider());
@@ -143,10 +154,6 @@ public abstract class SpoofaxEditor extends TextEditor {
 
         ((ITextViewerExtension4) sourceViewer).addTextPresentationListener(presentationMerger);
 
-        if(file != null && project == null) {
-//            pipelineAdapter.addEditor(this, document.get(), file, project);
-        }
-
         scheduleJob(true);
 
         return sourceViewer;
@@ -159,7 +166,12 @@ public abstract class SpoofaxEditor extends TextEditor {
             document.removeDocumentListener(documentListener);
         }
 
-//        pipelineAdapter.removeEditor(this);
+        if(file != null) {
+            pieRunner.removeEditor(languageComponent, file);
+        } else {
+            logger.error("Cannot remove editor '{}' from PieRunner, as input '{}' was not resolved to a file", this,
+                input);
+        }
 
         input = null;
         document = null;
@@ -171,10 +183,11 @@ public abstract class SpoofaxEditor extends TextEditor {
 
     private void scheduleJob(boolean initialUpdate) {
         cancelJobs(input);
-        if(file == null || project == null) {
-            return;
+        if(file == null) {
+            logger.error("Cannot schedule editor update job for editor '{}', as input '{}' was not resolved to a file",
+                this, input);
         }
-        final Job job = new EditorUpdateJob(logger, this, document.get(), file, project, input);
+        final Job job = new EditorUpdateJob(loggerFactory, pieRunner, languageComponent, file, document.get(), this);
         job.schedule(initialUpdate ? 0 : 300);
     }
 

@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Activator: mb.spoofax.eclipse.SpoofaxPlugin
-Export-Package: mb.spoofax.eclipse
+Export-Package: mb.spoofax.eclipse, mb.spoofax.eclipse.editor, mb.spoofax.eclipse.pie, mb.spoofax.eclipse.util
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy

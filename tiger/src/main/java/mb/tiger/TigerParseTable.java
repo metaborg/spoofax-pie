@@ -16,7 +16,7 @@ public class TigerParseTable implements Serializable {
     }
 
     public static TigerParseTable fromClassLoaderResources() throws JSGLR1ParseTableException, IOException {
-        final String resource = "target/metaborg/sdf.tbl";
+        final String resource = "mb/tiger/sdf.tbl";
         try(final @Nullable InputStream inputStream = TigerParseTable.class.getClassLoader().getResourceAsStream(resource)) {
             if(inputStream == null) {
                 throw new RuntimeException(

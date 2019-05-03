@@ -17,12 +17,14 @@ public class TigerInstance implements LanguageInstance {
     private final MessagesTaskDef messagesTaskDef;
     private final StylingTaskDef stylingTaskDef;
 
+
     @Inject
     public TigerInstance(AstTaskDef astTaskDef, MessagesTaskDef messagesTaskDef, StylingTaskDef stylingTaskDef) {
         this.astTaskDef = astTaskDef;
         this.messagesTaskDef = messagesTaskDef;
         this.stylingTaskDef = stylingTaskDef;
     }
+
 
     @Override public Task<AstResult> createAstTask(ResourceKey resourceKey) {
         return astTaskDef.createTask(resourceKey);
@@ -34,5 +36,10 @@ public class TigerInstance implements LanguageInstance {
 
     @Override public Task<Styling> createStylingTask(ResourceKey resourceKey) {
         return stylingTaskDef.createTask(resourceKey);
+    }
+
+
+    @Override public String getDisplayName() {
+        return "Tiger";
     }
 }
