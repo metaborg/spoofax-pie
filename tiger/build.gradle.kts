@@ -46,13 +46,17 @@ val copyTigerResourcesTask = tasks.register<Sync>("copyTigerResources") {
 }
 tasks.getByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME).dependsOn(copyTigerResourcesTask)
 
-// Set resources output directory to Java classes output directory, such that resources are picked up by project
-// dependencies which put the Java classes output directory on the classpath.
-sourceSets {
-  main {
-    output.setResourcesDir(java.outputDir)
-  }
+// Copy resources into classes directory, to make them accessible as class resources at runtime.
+val mainSourceSet: SourceSet = sourceSets.main.get()
+val copyResourcesTask = tasks.create<Copy>("copyResources") {
+  from(mainSourceSet.resources.sourceDirectories)
+  into(mainSourceSet.java.outputDir)
 }
-// Also make compileJava depend on processResources, to ensure that the resources end up in the Java classes output
-// directory when compileJava is executed.
-tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
+tasks.getByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME).dependsOn(copyResourcesTask)
+// Same for test resources.
+val testSourceSet: SourceSet = sourceSets.test.get()
+val copyTestResourcesTask = tasks.create<Copy>("copyTestResources") {
+  from(testSourceSet.resources.sourceDirectories)
+  into(testSourceSet.java.outputDir)
+}
+tasks.getByName(JavaPlugin.PROCESS_TEST_RESOURCES_TASK_NAME).dependsOn(copyTestResourcesTask)
