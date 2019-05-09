@@ -47,45 +47,23 @@ public abstract class SpoofaxEditor extends TextEditor {
     initialize several fields, which will then be set back to null when initialized here.
     */
 
-    private @MonotonicNonNull IJobManager jobManager;
-    private @MonotonicNonNull LoggerFactory loggerFactory;
-    private @MonotonicNonNull Logger logger;
-    private @MonotonicNonNull FileUtil fileUtil;
-    private @MonotonicNonNull PieRunner pieRunner;
+    // Set in initializeEditor, never null after that.
+    @SuppressWarnings("NullableProblems") private @MonotonicNonNull IJobManager jobManager;
+    @SuppressWarnings("NullableProblems") private @MonotonicNonNull LoggerFactory loggerFactory;
+    @SuppressWarnings("NullableProblems") private @MonotonicNonNull Logger logger;
+    @SuppressWarnings("NullableProblems") private @MonotonicNonNull FileUtil fileUtil;
+    @SuppressWarnings("NullableProblems") private @MonotonicNonNull PieRunner pieRunner;
 
-    private @MonotonicNonNull LanguageComponent languageComponent;
-
+    // Set in createSourceViewer, unset in dispose, may never be null otherwise.
     private @Nullable IEditorInput input;
     private @Nullable String inputName;
     private @Nullable IDocument document;
-
     private @Nullable DocumentListener documentListener;
     private @Nullable ISourceViewer sourceViewer;
 
+    // Set in createSourceViewer, but may be null if there is no associated file for the editor input.
     private @Nullable IFile file;
-    private @Nullable IProject project;
 
-
-    public String getText() {
-        if(document == null) {
-            throw new RuntimeException("Cannot get text of editor; editor has not been initialized");
-        }
-        return document.get();
-    }
-
-    public String getInputName() {
-        if(inputName == null) {
-            throw new RuntimeException("Cannot get name of input of editor; editor has not been initialized");
-        }
-        return inputName;
-    }
-
-    public ISourceViewer sourceViewer() {
-        if(sourceViewer == null) {
-            throw new RuntimeException("Cannot get source viewer of editor; editor has not been initialized");
-        }
-        return sourceViewer;
-    }
 
     public void setStyleAsync(TextPresentation textPresentation, @Nullable String text, @Nullable IProgressMonitor monitor) {
         presentationMerger.set(textPresentation);
@@ -122,8 +100,6 @@ public abstract class SpoofaxEditor extends TextEditor {
         this.fileUtil = component.getFileUtils();
         this.pieRunner = component.getPieRunner();
 
-        this.languageComponent = getLanguageComponent();
-
         setDocumentProvider(new SpoofaxDocumentProvider());
         setSourceViewerConfiguration(new SourceViewerConfiguration());
     }
@@ -137,11 +113,9 @@ public abstract class SpoofaxEditor extends TextEditor {
         if(inputFile != null) {
             this.inputName = inputFile.toString();
             this.file = inputFile;
-            this.project = inputFile.getProject();
         } else {
             this.inputName = input.getName();
             this.file = null;
-            this.project = null;
             logger.warn("File for editor on {} is null, cannot update the editor", input);
         }
 
@@ -160,14 +134,16 @@ public abstract class SpoofaxEditor extends TextEditor {
     }
 
     @Override public void dispose() {
-        cancelJobs(input);
+        if(input != null) {
+            cancelJobs(input);
+        }
 
         if(documentListener != null) {
             document.removeDocumentListener(documentListener);
         }
 
         if(file != null) {
-            pieRunner.removeEditor(languageComponent, file);
+            pieRunner.removeEditor(getLanguageComponent(), file);
         } else {
             logger.error("Cannot remove editor '{}' from PieRunner, as input '{}' was not resolved to a file", this,
                 input);
@@ -187,7 +163,8 @@ public abstract class SpoofaxEditor extends TextEditor {
             logger.error("Cannot schedule editor update job for editor '{}', as input '{}' was not resolved to a file",
                 this, input);
         }
-        final Job job = new EditorUpdateJob(loggerFactory, pieRunner, languageComponent, file, document.get(), this);
+        final Job job = new EditorUpdateJob(loggerFactory, pieRunner, getLanguageComponent(), file, document, this);
+        job.setRule(file);
         job.schedule(initialUpdate ? 0 : 300);
     }
 

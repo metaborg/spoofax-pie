@@ -9,14 +9,14 @@ import mb.resource.string.StringResourceRegistry;
 import javax.inject.Singleton;
 
 @Module
-public class StringRegistryModule {
+public class StringResourceRegistryModule {
     private final StringResourceRegistry registry = new StringResourceRegistry();
 
-    @Provides @Singleton StringResourceRegistry provideStringResourceRegistry() {
+    @Provides @Singleton StringResourceRegistry provide() {
         return registry;
     }
 
-    @Provides @Singleton @IntoSet ResourceRegistry provideStringResourceRegistryIntoSet() {
+    @Provides @Singleton @IntoSet ResourceRegistry provideIntoSet() {
         return registry;
     }
 }

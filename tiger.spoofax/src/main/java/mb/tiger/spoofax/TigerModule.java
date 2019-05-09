@@ -11,7 +11,6 @@ import mb.pie.api.TaskDef;
 import mb.pie.api.TaskDefs;
 import mb.spoofax.core.language.LanguageScope;
 import mb.tiger.TigerParseTable;
-import mb.tiger.TigerParser;
 import mb.tiger.TigerStyler;
 import mb.tiger.TigerStylingRules;
 import mb.tiger.spoofax.taskdef.AstTaskDef;
@@ -30,11 +29,11 @@ import java.util.Set;
  */
 @Module
 public class TigerModule {
-    private final TigerParser parser;
+    private final TigerParseTable parseTable;
     private final TigerStyler styler;
 
     private TigerModule(TigerParseTable parseTable, TigerStylingRules stylingRules) {
-        this.parser = new TigerParser(parseTable);
+        this.parseTable = parseTable;
         this.styler = new TigerStyler(stylingRules);
     }
 
@@ -45,8 +44,8 @@ public class TigerModule {
     }
 
 
-    @Provides @LanguageScope TigerParser provideParser() {
-        return parser;
+    @Provides @LanguageScope TigerParseTable provideParseTable() {
+        return parseTable;
     }
 
     @Provides @LanguageScope TigerStyler provideStyler() {

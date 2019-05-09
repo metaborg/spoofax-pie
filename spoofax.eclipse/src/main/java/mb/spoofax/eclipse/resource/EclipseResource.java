@@ -35,7 +35,7 @@ public class EclipseResource implements Resource, ReadableResource {
         if(stamp == IResource.NULL_STAMP) {
             return Instant.MIN;
         }
-        return Instant.ofEpochMilli(resource.getModificationStamp());
+        return Instant.ofEpochMilli(stamp);
     }
 
     private IFileStore getStore() throws IOException {

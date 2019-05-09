@@ -9,6 +9,7 @@ import mb.spoofax.core.language.LanguageInstance;
 import mb.tiger.spoofax.taskdef.AstTaskDef;
 import mb.tiger.spoofax.taskdef.MessagesTaskDef;
 import mb.tiger.spoofax.taskdef.StylingTaskDef;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 
@@ -34,7 +35,7 @@ public class TigerInstance implements LanguageInstance {
         return messagesTaskDef.createTask(resourceKey);
     }
 
-    @Override public Task<Styling> createStylingTask(ResourceKey resourceKey) {
+    @Override public Task<@Nullable Styling> createStylingTask(ResourceKey resourceKey) {
         return stylingTaskDef.createTask(resourceKey);
     }
 

@@ -7,10 +7,10 @@ import org.eclipse.core.runtime.IPath;
 import java.io.Serializable;
 
 public class EclipseResourceKey implements ResourceKey {
-    private final String id;
+    final String portablePathString;
 
     public EclipseResourceKey(String portablePathString) {
-        this.id = portablePathString;
+        this.portablePathString = portablePathString;
     }
 
     public EclipseResourceKey(IPath path) {
@@ -26,21 +26,21 @@ public class EclipseResourceKey implements ResourceKey {
     }
 
     @Override public Serializable id() {
-        return id;
+        return portablePathString;
     }
 
     @Override public boolean equals(Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         final EclipseResourceKey that = (EclipseResourceKey) o;
-        return id.equals(that.id);
+        return portablePathString.equals(that.portablePathString);
     }
 
     @Override public int hashCode() {
-        return id.hashCode();
+        return portablePathString.hashCode();
     }
 
     @Override public String toString() {
-        return "#eclipse:" + id;
+        return "#eclipse:" + portablePathString;
     }
 }

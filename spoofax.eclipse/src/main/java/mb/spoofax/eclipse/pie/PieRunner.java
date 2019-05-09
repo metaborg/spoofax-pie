@@ -15,10 +15,13 @@ import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.eclipse.resource.EclipseResourceKey;
+import mb.spoofax.eclipse.resource.EclipseResourceRegistry;
 import mb.spoofax.eclipse.util.StyleUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentExtension4;
 import org.eclipse.jface.text.TextPresentation;
 
 import javax.inject.Inject;
@@ -27,36 +30,43 @@ import java.util.HashSet;
 public class PieRunner {
     private final Logger logger;
     private final Pie pie;
+    private final EclipseResourceRegistry eclipseResourceRegistry;
     private final StyleUtil styleUtil;
 
 
-    @Inject public PieRunner(LoggerFactory loggerFactory, Pie pie, StyleUtil styleUtil) {
+    @Inject
+    public PieRunner(LoggerFactory loggerFactory, Pie pie, EclipseResourceRegistry eclipseResourceRegistry, StyleUtil styleUtil) {
         this.logger = loggerFactory.create(getClass());
         this.pie = pie;
+        this.eclipseResourceRegistry = eclipseResourceRegistry;
         this.styleUtil = styleUtil;
     }
 
 
-    public void addOrUpdateEditor(
+    public <D extends IDocument & IDocumentExtension4> void addOrUpdateEditor(
         LanguageComponent languageComponent,
         IFile file,
-        String text,
+        D document,
         SpoofaxEditor editor,
         @Nullable IProgressMonitor monitor
-    ) {
+    ) throws ExecException, InterruptedException {
+        final EclipseResourceKey resourceKey = new EclipseResourceKey(file);
+        eclipseResourceRegistry.addDocumentOverride(resourceKey, document);
+
         try(final PieSession session = languageComponent.newPieSession()) {
             final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
-            final Cancelled cancelled = monitorCancelled(monitor);
-            final EclipseResourceKey resourceKey = new EclipseResourceKey(file);
 
             // Set observer for styling task, and execute it if it has not been executed yet.
-            final Task<Styling> stylingTask = languageInstance.createStylingTask(resourceKey);
+            final Task<@Nullable Styling> stylingTask = languageInstance.createStylingTask(resourceKey);
+            final String text = document.get();
             pie.setObserver(stylingTask, (styling) -> {
-                final TextPresentation textPresentation = styleUtil.createTextPresentation(styling, text.length());
-                editor.setStyleAsync(textPresentation, text, monitor);
+                if(styling != null) {
+                    final TextPresentation textPresentation = styleUtil.createTextPresentation(styling, text.length());
+                    editor.setStyleAsync(textPresentation, text, monitor);
+                }
             });
             if(!pie.hasBeenExecuted(stylingTask)) {
-                session.requireTopDown(stylingTask, cancelled);
+                session.requireTopDown(stylingTask, monitorCancelled(monitor));
             }
 
             // Set observer for messages task, and execute it if it has not been executed yet.
@@ -65,17 +75,13 @@ public class PieRunner {
                 // TODO: process messages
             });
             if(!pie.hasBeenExecuted(messagesTask)) {
-                session.requireTopDown(messagesTask, cancelled);
+                session.requireTopDown(messagesTask, monitorCancelled(monitor));
             }
 
             // Execute bottom-up build for changed file.
             final HashSet<ResourceKey> changedResources = new HashSet<>();
             changedResources.add(new EclipseResourceKey(file));
             session.requireBottomUp(changedResources);
-        } catch(InterruptedException e) {
-            logger.trace("Bottom-up build for adding or updating editor of file '{}' has been interrupted", e, file);
-        } catch(ExecException e) {
-            logger.trace("Bottom-up build for adding or updating editor of file '{}' failed unexpectedly", e, file);
         }
     }
 
@@ -83,8 +89,11 @@ public class PieRunner {
         LanguageComponent languageComponent,
         IFile file
     ) {
-        final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
         final EclipseResourceKey resourceKey = new EclipseResourceKey(file);
+        eclipseResourceRegistry.removeDocumentOverride(resourceKey);
+
+        final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
+
         pie.removeObserver(languageInstance.createStylingTask(resourceKey));
         pie.removeObserver(languageInstance.createMessagesTask(resourceKey));
     }
