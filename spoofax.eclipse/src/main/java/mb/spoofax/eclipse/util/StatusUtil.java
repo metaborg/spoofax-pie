@@ -11,7 +11,7 @@ import org.eclipse.core.runtime.Status;
  */
 public final class StatusUtil {
     public static IStatus status(int severity, int code, String message, @Nullable Throwable t) {
-        return new Status(severity, SpoofaxPlugin.pluginId, code, message, t);
+        return new Status(severity, SpoofaxPlugin.id, code, message, t);
     }
 
     public static IStatus status(int severity, int code, String message) {

@@ -1,6 +1,7 @@
 package mb.tiger.spoofax.taskdef;
 
 import mb.common.message.MessageCollection;
+import mb.common.message.MessageCollectionBuilder;
 import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
@@ -20,10 +21,10 @@ public class MessagesTaskDef implements TaskDef<ResourceKey, MessageCollection> 
         return getClass().getName();
     }
 
-    @Override public @Nullable MessageCollection exec(ExecContext context, ResourceKey key) throws Exception {
+    @Override public MessageCollection exec(ExecContext context, ResourceKey key) throws Exception {
         final JSGLR1ParseResult parseOutput = context.require(parseTaskDef, key);
-        final MessageCollection messageCollection = new MessageCollection();
-        messageCollection.addDocumentMessages(key.toString(), parseOutput.messages);
-        return messageCollection;
+        final MessageCollectionBuilder builder = new MessageCollectionBuilder();
+        builder.addMessages(parseOutput.messages);
+        return builder.build();
     }
 }

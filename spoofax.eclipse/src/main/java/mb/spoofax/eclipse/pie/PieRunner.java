@@ -1,5 +1,6 @@
 package mb.spoofax.eclipse.pie;
 
+import mb.common.message.Message;
 import mb.common.message.MessageCollection;
 import mb.common.style.Styling;
 import mb.log.api.Logger;
@@ -16,9 +17,11 @@ import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.eclipse.resource.EclipseResourceKey;
 import mb.spoofax.eclipse.resource.EclipseResourceRegistry;
+import mb.spoofax.eclipse.util.MarkerUtils;
 import mb.spoofax.eclipse.util.StyleUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension4;
@@ -72,7 +75,14 @@ public class PieRunner {
             // Set observer for messages task, and execute it if it has not been executed yet.
             final Task<MessageCollection> messagesTask = languageInstance.createMessagesTask(resourceKey);
             pie.setObserver(messagesTask, (messages) -> {
-                // TODO: process messages
+                try {
+                    MarkerUtils.clearAll(file);
+                    for(Message message : messages.getMessages()) {
+                        MarkerUtils.createMarker(file, message);
+                    }
+                } catch(CoreException e) {
+                    throw new RuntimeException("Clearing or setting markers failed unexpectedly", e);
+                }
             });
             if(!pie.hasBeenExecuted(messagesTask)) {
                 session.requireTopDown(messagesTask, monitorCancelled(monitor));
