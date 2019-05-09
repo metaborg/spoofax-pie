@@ -20,7 +20,7 @@ public class Main {
         final SpoofaxCmdComponent platformComponent = DaggerSpoofaxCmdComponent
             .builder()
             .loggerFactoryModule(new LoggerFactoryModule(new NoopLoggerFactory()))
-            .stringRegistryModule(new StringResourceRegistryModule())
+            .stringResourceRegistryModule(new StringResourceRegistryModule())
             .pieModule(new PieModule(PieBuilderImpl::new))
             .build();
         final TigerComponent tigerComponent = DaggerTigerComponent
