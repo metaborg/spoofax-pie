@@ -1,6 +1,6 @@
 package mb.tiger.spoofax;
 
-import mb.common.message.MessageCollection;
+import mb.common.message.Messages;
 import mb.common.style.Styling;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
@@ -31,7 +31,7 @@ public class TigerInstance implements LanguageInstance {
         return astTaskDef.createTask(resourceKey);
     }
 
-    @Override public Task<MessageCollection> createMessagesTask(ResourceKey resourceKey) {
+    @Override public Task<Messages> createMessagesTask(ResourceKey resourceKey) {
         return messagesTaskDef.createTask(resourceKey);
     }
 

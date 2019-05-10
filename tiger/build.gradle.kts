@@ -9,6 +9,7 @@ dependencies {
   api(project(":common"))
   api(project(":jsglr1.common"))
   api(project(":esv.common"))
+  api(project(":stratego.common"))
 
   compileOnly("org.checkerframework:checker-qual-android")
 }
@@ -35,14 +36,14 @@ val unpackResourcesTask = tasks.register<Sync>("unpackResources") {
   dependsOn(tigerResources)
   from({ tigerResources.map { project.zipTree(it) } })  /* Closure inside `from` to defer evaluation until task execution time */
   into("$buildDir/unpacked")
-  include("target/metaborg/editor.esv.af", "target/metaborg/sdf.tbl")
+  include("target/metaborg/editor.esv.af", "target/metaborg/sdf.tbl", "target/metaborg/stratego.jar", "target/metaborg/stratego-javastrat.jar")
 }
 // Copy resources into 'src/main/resources/mb/tiger', so the resources finally end up in the 'mb.tiger' package in the resulting JAR.
 val copyTigerResourcesTask = tasks.register<Sync>("copyTigerResources") {
   dependsOn(unpackResourcesTask)
   from("$buildDir/unpacked/target/metaborg")
   into("src/main/resources/mb/tiger")
-  include("editor.esv.af", "sdf.tbl")
+  include("editor.esv.af", "sdf.tbl", "stratego.jar", "stratego-javastrat.jar")
 }
 tasks.getByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME).dependsOn(copyTigerResourcesTask)
 

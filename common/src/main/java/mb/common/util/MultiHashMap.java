@@ -1,12 +1,29 @@
 package mb.common.util;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 public class MultiHashMap<K, V> implements Serializable {
-    private final HashMap<K, ArrayList<V>> map = new HashMap<>();
+    private final HashMap<K, ArrayList<V>> map;
+
+
+    public MultiHashMap() {
+        this.map = new HashMap<>();
+    }
+
+    public MultiHashMap(MultiHashMap<K, V> map) {
+        this.map = new HashMap<>(map.map);
+    }
+
+    public MultiHashMap(Map<? extends K, ArrayList<V>> map) {
+        this.map = new HashMap<>(map);
+    }
 
 
     public ArrayList<V> get(K key) {

@@ -10,7 +10,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 public class SpoofaxPlugin extends AbstractUIPlugin {
-    public static final String pluginId = "spoofax.eclipse";
+    public static final String id = "spoofax.eclipse";
 
     private static @Nullable SpoofaxEclipseComponent component;
 

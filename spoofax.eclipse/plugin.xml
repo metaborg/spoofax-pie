@@ -1,4 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+  <!-- Markers -->
+  <extension
+    point="org.eclipse.core.resources.markers"
+    id="spoofax.eclipse.marker"
+  >
+    <super type="org.eclipse.core.resources.textmarker"/>
+    <super type="org.eclipse.core.resources.problemmarker"/>
+    <persistent value="true"/>
+  </extension>
+  <extension
+    point="org.eclipse.core.resources.markers"
+    id="spoofax.eclipse.marker.info"
+    name="Spoofax info marker"
+  >
+    <super type="spoofax.eclipse.marker"/>
+    <persistent value="true"/>
+  </extension>
+  <extension
+    point="org.eclipse.core.resources.markers"
+    id="spoofax.eclipse.marker.warning"
+    name="Spoofax warning marker"
+  >
+    <super type="spoofax.eclipse.marker"/>
+    <persistent value="true"/>
+  </extension>
+  <extension
+    point="org.eclipse.core.resources.markers"
+    id="spoofax.eclipse.marker.error"
+    name="Spoofax error marker"
+  >
+    <super type="spoofax.eclipse.marker"/>
+    <persistent value="true"/>
+  </extension>
+  <extension point="org.eclipse.ui.editors.annotationTypes">
+    <type
+      markerType="spoofax.eclipse.marker.info"
+      super="org.eclipse.ui.workbench.texteditor.info"
+      markerSeverity="0"
+      name="Spoofax info annotation"
+    />
+    <type
+      markerType="spoofax.eclipse.marker.warning"
+      super="org.eclipse.ui.workbench.texteditor.warning"
+      markerSeverity="1"
+      name="Spoofax warning annotation"
+    />
+    <type
+      markerType="spoofax.eclipse.marker.error"
+      super="org.eclipse.ui.workbench.texteditor.error"
+      markerSeverity="2"
+      name="Spoofax error annotation"
+    />
+  </extension>
 </plugin>

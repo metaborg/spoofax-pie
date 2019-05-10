@@ -2,15 +2,24 @@ package mb.jsglr1.common;
 
 import mb.common.message.Message;
 import mb.common.message.MessageSeverity;
+import mb.common.message.Messages;
+import mb.common.message.MessagesBuilder;
 import mb.common.region.Region;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.jsglr.client.*;
-import org.spoofax.jsglr.client.imploder.*;
+import org.spoofax.jsglr.client.MultiBadTokenException;
+import org.spoofax.jsglr.client.ParseTimeoutException;
+import org.spoofax.jsglr.client.RegionRecovery;
+import org.spoofax.jsglr.client.imploder.AbstractTokenizer;
+import org.spoofax.jsglr.client.imploder.IToken;
+import org.spoofax.jsglr.client.imploder.ITokens;
+import org.spoofax.jsglr.client.imploder.Token;
 import org.spoofax.jsglr.shared.BadTokenException;
 import org.spoofax.jsglr.shared.TokenExpectedException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 import static org.spoofax.jsglr.client.imploder.AbstractTokenizer.findLeftMostTokenOnSameLine;
 import static org.spoofax.jsglr.client.imploder.AbstractTokenizer.findRightMostTokenOnSameLine;
@@ -25,7 +34,7 @@ class ErrorUtil {
     private final boolean recoveryFailed;
     private final Set<BadTokenException> parseErrors;
 
-    private final ArrayList<Message> messages = new ArrayList<>();
+    private final MessagesBuilder messagesBuilder = new MessagesBuilder();
 
 
     ErrorUtil(boolean recoveryEnabled, boolean recoveryFailed, Set<BadTokenException> parseErrors) {
@@ -35,8 +44,8 @@ class ErrorUtil {
     }
 
 
-    ArrayList<Message> messages() {
-        return messages;
+    Messages messages() {
+        return messagesBuilder.build();
     }
 
 
@@ -190,7 +199,7 @@ class ErrorUtil {
     private void createErrorAtFirstLine(String text) {
         final String errorText = text + getErrorExplanation();
         final Message message = new Message(errorText, MessageSeverity.Error);
-        messages.add(message);
+        messagesBuilder.addMessage(message);
     }
 
     private void reportErrorAtTokens(IToken left, IToken right, String text) {
@@ -200,7 +209,7 @@ class ErrorUtil {
 
     private void reportErrorAtRegion(Region region, String text) {
         final Message message = new Message(text, MessageSeverity.Error, region);
-        messages.add(message);
+        messagesBuilder.addMessage(message);
     }
 
     private void reportWarningAtTokens(IToken left, IToken right, String text) {
@@ -209,7 +218,7 @@ class ErrorUtil {
 
     private void reportWarningAtRegion(Region region, String text) {
         final Message message = new Message(text, MessageSeverity.Warn, region);
-        messages.add(message);
+        messagesBuilder.addMessage(message);
     }
 
 
