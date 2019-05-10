@@ -3,9 +3,9 @@ plugins {
   `maven-publish`
 }
 
-val logVersion = "0.2.1"
-val resourceVersion = "0.3.0"
-val pieVersion = "0.5.1"
+val logVersion = "0.2.2"
+val resourceVersion = "0.3.1"
+val pieVersion = "0.5.3"
 val spoofaxCoreVersion = "2.6.0-SNAPSHOT"
 val daggerVersion = "2.21"
 
@@ -24,6 +24,8 @@ dependencies {
 
     api("org.metaborg:org.spoofax.terms:$spoofaxCoreVersion")
     api("org.metaborg:org.spoofax.jsglr:$spoofaxCoreVersion")
+    api("org.metaborg:org.spoofax.interpreter.core:$spoofaxCoreVersion")
+    api("org.metaborg:org.strategoxt.strj:$spoofaxCoreVersion")
 
     api("com.google.dagger:dagger:$daggerVersion")
     api("com.google.dagger:dagger-compiler:$daggerVersion")
