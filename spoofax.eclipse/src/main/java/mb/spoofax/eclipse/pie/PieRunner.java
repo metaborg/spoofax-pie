@@ -1,10 +1,7 @@
 package mb.spoofax.eclipse.pie;
 
-import mb.common.message.Message;
-import mb.common.message.MessageCollection;
+import mb.common.message.Messages;
 import mb.common.style.Styling;
-import mb.log.api.Logger;
-import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecException;
 import mb.pie.api.Pie;
 import mb.pie.api.PieSession;
@@ -17,32 +14,31 @@ import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.eclipse.resource.EclipseResourceKey;
 import mb.spoofax.eclipse.resource.EclipseResourceRegistry;
-import mb.spoofax.eclipse.util.MarkerUtils;
-import mb.spoofax.eclipse.util.StyleUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension4;
-import org.eclipse.jface.text.TextPresentation;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import java.util.HashSet;
 
 public class PieRunner {
-    private final Logger logger;
     private final Pie pie;
     private final EclipseResourceRegistry eclipseResourceRegistry;
-    private final StyleUtil styleUtil;
+    private final Provider<WorkspaceUpdate> workspaceUpdateProvider;
 
 
     @Inject
-    public PieRunner(LoggerFactory loggerFactory, Pie pie, EclipseResourceRegistry eclipseResourceRegistry, StyleUtil styleUtil) {
-        this.logger = loggerFactory.create(getClass());
+    public PieRunner(
+        Pie pie,
+        EclipseResourceRegistry eclipseResourceRegistry,
+        Provider<WorkspaceUpdate> workspaceUpdateProvider
+    ) {
         this.pie = pie;
         this.eclipseResourceRegistry = eclipseResourceRegistry;
-        this.styleUtil = styleUtil;
+        this.workspaceUpdateProvider = workspaceUpdateProvider;
     }
 
 
@@ -55,6 +51,7 @@ public class PieRunner {
     ) throws ExecException, InterruptedException {
         final EclipseResourceKey resourceKey = new EclipseResourceKey(file);
         eclipseResourceRegistry.addDocumentOverride(resourceKey, document);
+        final WorkspaceUpdate workspaceUpdate = workspaceUpdateProvider.get();
 
         try(final PieSession session = languageComponent.newPieSession()) {
             final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
@@ -64,8 +61,9 @@ public class PieRunner {
             final String text = document.get();
             pie.setObserver(stylingTask, (styling) -> {
                 if(styling != null) {
-                    final TextPresentation textPresentation = styleUtil.createTextPresentation(styling, text.length());
-                    editor.setStyleAsync(textPresentation, text, monitor);
+                    workspaceUpdate.updateStyle(editor, text, styling);
+                } else {
+                    workspaceUpdate.removeStyle(editor, text.length());
                 }
             });
             if(!pie.hasBeenExecuted(stylingTask)) {
@@ -73,16 +71,9 @@ public class PieRunner {
             }
 
             // Set observer for messages task, and execute it if it has not been executed yet.
-            final Task<MessageCollection> messagesTask = languageInstance.createMessagesTask(resourceKey);
+            final Task<Messages> messagesTask = languageInstance.createMessagesTask(resourceKey);
             pie.setObserver(messagesTask, (messages) -> {
-                try {
-                    MarkerUtils.clearAll(file);
-                    for(Message message : messages.getMessages()) {
-                        MarkerUtils.createMarker(file, message);
-                    }
-                } catch(CoreException e) {
-                    throw new RuntimeException("Clearing or setting markers failed unexpectedly", e);
-                }
+                workspaceUpdate.replaceMessages(file, messages);
             });
             if(!pie.hasBeenExecuted(messagesTask)) {
                 session.requireTopDown(messagesTask, monitorCancelled(monitor));
@@ -93,6 +84,8 @@ public class PieRunner {
             changedResources.add(new EclipseResourceKey(file));
             session.requireBottomUp(changedResources);
         }
+
+        workspaceUpdate.update(null, monitor);
     }
 
     public void removeEditor(

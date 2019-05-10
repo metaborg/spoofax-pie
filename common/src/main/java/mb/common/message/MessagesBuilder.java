@@ -3,7 +3,7 @@ package mb.common.message;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class MessageCollectionBuilder {
+public class MessagesBuilder {
     private final ArrayList<Message> messages = new ArrayList<>();
 
 
@@ -15,8 +15,17 @@ public class MessageCollectionBuilder {
         this.messages.addAll(messages);
     }
 
+    public void addMessages(Messages messages) {
+        this.messages.addAll(messages.messages);
+    }
 
-    public MessageCollection build() {
-        return new MessageCollection(messages);
+
+    public void clearAll() {
+        this.messages.clear();
+    }
+
+
+    public Messages build() {
+        return new Messages(new ArrayList<>(messages));
     }
 }

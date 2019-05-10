@@ -1,6 +1,7 @@
 package mb.jsglr1.common;
 
 import mb.common.message.Message;
+import mb.common.message.Messages;
 import mb.common.token.Token;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -13,9 +14,9 @@ public class JSGLR1ParseResult implements Serializable {
     public final boolean recovered;
     public final @Nullable IStrategoTerm ast;
     public final @Nullable ArrayList<Token> tokens;
-    public final ArrayList<Message> messages;
+    public final Messages messages;
 
-    public JSGLR1ParseResult(boolean recovered, @Nullable IStrategoTerm ast, @Nullable ArrayList<Token> tokens, ArrayList<Message> messages) {
+    public JSGLR1ParseResult(boolean recovered, @Nullable IStrategoTerm ast, @Nullable ArrayList<Token> tokens, Messages messages) {
         this.recovered = recovered;
         this.ast = ast;
         this.tokens = tokens;

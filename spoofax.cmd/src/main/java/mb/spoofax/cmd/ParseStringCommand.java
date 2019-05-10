@@ -1,6 +1,6 @@
 package mb.spoofax.cmd;
 
-import mb.common.message.MessageCollection;
+import mb.common.message.Messages;
 import mb.pie.api.None;
 import mb.pie.api.PieSession;
 import mb.resource.string.StringResource;
@@ -37,7 +37,7 @@ public class ParseStringCommand implements Callable<None> {
             if(astResult.ast != null) {
                 System.out.println(astResult.ast.toString());
             }
-            final MessageCollection messages =
+            final Messages messages =
                 session.requireTopDown(languageInstance.createMessagesTask(stringResource.key));
             System.out.println(messages);
             return None.instance;

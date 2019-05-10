@@ -1,7 +1,6 @@
 package mb.jsglr1.common;
 
-import mb.common.message.Message;
-import mb.common.message.MessageUtil;
+import mb.common.message.Messages;
 import mb.common.token.Token;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -54,13 +53,13 @@ public class JSGLR1Parser {
             final ArrayList<Token> tokenStream = TokenUtil.extract(ast);
             final ErrorUtil errorUtil = new ErrorUtil(true, false, parser.getCollectedErrors());
             errorUtil.gatherNonFatalErrors(ast);
-            final ArrayList<Message> messages = errorUtil.messages();
-            final boolean recovered = MessageUtil.containsError(messages);
+            final Messages messages = errorUtil.messages();
+            final boolean recovered = messages.containsError();
             return new JSGLR1ParseResult(recovered, ast, tokenStream, messages);
         } catch(SGLRException e) {
             final ErrorUtil errorUtil = new ErrorUtil(true, true, parser.getCollectedErrors());
             errorUtil.processFatalException(new NullTokenizer(text, null), e);
-            final ArrayList<Message> messages = errorUtil.messages();
+            final Messages messages = errorUtil.messages();
             return new JSGLR1ParseResult(false, null, null, messages);
         }
     }

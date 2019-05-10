@@ -11,7 +11,7 @@ import org.eclipse.core.runtime.CoreException;
 /**
  * Utility functions for creating and removing {@link IMarker} instances.
  */
-public final class MarkerUtils {
+public final class MarkerUtil {
     private static final String id = SpoofaxPlugin.id + ".marker";
     private static final String errorPostfix = ".error";
     private static final String warningPostfix = ".warning";
