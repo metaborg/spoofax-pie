@@ -5,22 +5,20 @@ import java.util.Objects;
 
 
 public final class SyntaxColoringInfo implements ISyntaxColoringInfo {
-
-    private final List<IToken> tokens;
+    final List<IToken> tokens;
 
     public SyntaxColoringInfo(List<IToken> tokens) {
         this.tokens = tokens;
     }
 
-    @Override
-    public List<IToken> getTokens() {
+    @Override public List<IToken> getTokens() {
         return tokens;
     }
 
-    public boolean equals(Object other) {
-        if (this == other) return true;
-        return other instanceof  SyntaxColoringInfo
-            && equals((SyntaxColoringInfo)other);
+    @Override public boolean equals(Object other) {
+        if(this == other) return true;
+        return other instanceof SyntaxColoringInfo
+            && equals((SyntaxColoringInfo) other);
     }
 
     public boolean equals(SyntaxColoringInfo other) {
@@ -28,8 +26,7 @@ public final class SyntaxColoringInfo implements ISyntaxColoringInfo {
             && this.tokens.equals(other.tokens);
     }
 
-    public int hashCode() {
+    @Override public int hashCode() {
         return Objects.hash(this.tokens);
     }
-
 }

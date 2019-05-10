@@ -2,12 +2,10 @@ package mb.spoofax.intellij.editor;
 
 import javax.annotation.Nullable;
 
-
 /**
  * Colors (part of) a document.
  */
 public interface ISyntaxColoringService {
-
     /**
      * Configures the service.
      */

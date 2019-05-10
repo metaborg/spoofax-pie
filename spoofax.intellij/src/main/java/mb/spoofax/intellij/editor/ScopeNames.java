@@ -33,7 +33,7 @@ public final class ScopeNames {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.scopes);
+        return Arrays.hashCode(scopes);
     }
 
     @Override

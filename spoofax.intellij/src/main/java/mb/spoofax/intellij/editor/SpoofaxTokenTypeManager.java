@@ -9,13 +9,11 @@ import java.util.HashMap;
 
 
 public class SpoofaxTokenTypeManager {
-
     private final HashMap<String, SpoofaxTokenType> scopedElementTypes = new HashMap<>();
 
     private final Language language;
 
-    @Inject
-    public SpoofaxTokenTypeManager(Language language) {
+    @Inject public SpoofaxTokenTypeManager(Language language) {
         this.language = language;
     }
 
@@ -23,28 +21,28 @@ public class SpoofaxTokenTypeManager {
 
     public TokenSet getWhitespaceTokens() {
         return TokenSet.create(
-                getTokenType("text.whitespace")
+            getTokenType("text.whitespace")
         );
     }
 
     public TokenSet getCommentTokens() {
         return TokenSet.create(
-                getTokenType("comment.block"),
-                getTokenType("comment.line"),
-                getTokenType("comment")
+            getTokenType("comment.block"),
+            getTokenType("comment.line"),
+            getTokenType("comment")
         );
     }
 
     public TokenSet getStringLiteralTokens() {
         return TokenSet.create(
-                getTokenType("string.quoted.single"),
-                getTokenType("string.quoted.double"),
-                getTokenType("string.quoted.triple"),
-                getTokenType("string.quoted"),
-                getTokenType("string.unquoted"),
-                getTokenType("string.interpolated"),
-                getTokenType("string.regexp"),
-                getTokenType("string")
+            getTokenType("string.quoted.single"),
+            getTokenType("string.quoted.double"),
+            getTokenType("string.quoted.triple"),
+            getTokenType("string.quoted"),
+            getTokenType("string.unquoted"),
+            getTokenType("string.interpolated"),
+            getTokenType("string.regexp"),
+            getTokenType("string")
         );
     }
 
@@ -52,5 +50,4 @@ public class SpoofaxTokenTypeManager {
         scope = scope != null ? scope : getDefaultScope();
         return this.scopedElementTypes.computeIfAbsent(scope, s -> new SpoofaxTokenType(s, this.language));
     }
-
 }

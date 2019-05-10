@@ -5,7 +5,6 @@ import com.intellij.psi.tree.IElementType;
 
 
 public final class SpoofaxTokenType extends IElementType {
-
     private final String scope;
 
     public SpoofaxTokenType(String scope, Language language) {
@@ -16,5 +15,4 @@ public final class SpoofaxTokenType extends IElementType {
     public String getScope() {
         return scope;
     }
-
 }

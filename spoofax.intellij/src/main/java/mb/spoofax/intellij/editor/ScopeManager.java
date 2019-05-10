@@ -10,9 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-
 public final class ScopeManager {
-
     public final TextAttributesKey[] EMPTY_KEYS = new TextAttributesKey[0];
     public final String DEFAULT_SCOPE = "text";
     private final TextAttributesKey BAD_CHARACTER = TextAttributesKey.createTextAttributesKey("AESI_BAD_CHARACTER", HighlighterColors.BAD_CHARACTER);

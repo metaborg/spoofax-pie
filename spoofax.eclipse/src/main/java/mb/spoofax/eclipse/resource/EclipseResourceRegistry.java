@@ -1,7 +1,6 @@
 package mb.spoofax.eclipse.resource;
 
 import mb.resource.Resource;
-import mb.resource.ResourceKey;
 import mb.resource.ResourceRegistry;
 import mb.resource.ResourceRuntimeException;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -70,14 +69,5 @@ public class EclipseResourceRegistry implements ResourceRegistry {
         } else {
             return getResource(portablePathString);
         }
-    }
-
-    @Override public Resource getResource(ResourceKey key) {
-        final Serializable qualifier = key.qualifier();
-        if(!EclipseResourceRegistry.qualifier.equals(qualifier)) {
-            throw new ResourceRuntimeException(
-                "Cannot get Eclipse resource with key '" + key + "'; its qualifier '" + qualifier + "' is not 'eclipse'");
-        }
-        return getResource(key.id());
     }
 }
