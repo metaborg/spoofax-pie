@@ -1,6 +1,7 @@
 plugins {
   id("org.metaborg.gradle.config.java-library")
   id("org.metaborg.gradle.config.junit-testing")
+  id("de.set.ecj") version "1.4.1" // Use ECJ to speed up compilation of Stratego's generated Java files.
 }
 
 dependencies {
@@ -10,8 +11,10 @@ dependencies {
   api(project(":jsglr1.common"))
   api(project(":esv.common"))
   api(project(":stratego.common"))
+  implementation("org.metaborg:strategoxt-min-jar")
 
   compileOnly("org.checkerframework:checker-qual-android")
+  testCompileOnly("org.checkerframework:checker-qual-android")
 }
 
 // Copy files from org.metaborg.lang.tiger into src/main/resources.

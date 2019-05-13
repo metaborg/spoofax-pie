@@ -15,7 +15,7 @@ public class TigerStrategoRuntimeBuilder extends StrategoRuntimeBuilder {
         }
 
         final String javastratJarResource = "mb/tiger/stratego-javastrat.jar";
-        final @Nullable URL javastratJar = TigerStrategoRuntimeBuilder.class.getClassLoader().getResource(jarResource);
+        final @Nullable URL javastratJar = TigerStrategoRuntimeBuilder.class.getClassLoader().getResource(javastratJarResource);
         if(javastratJar == null) {
             throw new RuntimeException(
                 "Cannot create Tiger Stratego runtime; cannot find resource '" + javastratJarResource + "' in classloader resources");
@@ -24,6 +24,7 @@ public class TigerStrategoRuntimeBuilder extends StrategoRuntimeBuilder {
         final TigerStrategoRuntimeBuilder builder = new TigerStrategoRuntimeBuilder();
         builder.addJar(jar);
         builder.addJar(javastratJar);
+        builder.withJarParentClassLoader(TigerStrategoRuntimeBuilder.class.getClassLoader());
         return builder;
     }
 }

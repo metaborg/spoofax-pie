@@ -27,6 +27,8 @@ dependencies {
     api("org.metaborg:org.spoofax.interpreter.core:$spoofaxCoreVersion")
     api("org.metaborg:org.strategoxt.strj:$spoofaxCoreVersion")
 
+    runtime("org.metaborg:strategoxt-min-jar:$spoofaxCoreVersion")
+
     api("com.google.dagger:dagger:$daggerVersion")
     api("com.google.dagger:dagger-compiler:$daggerVersion")
     api("javax.inject:javax.inject:1")
