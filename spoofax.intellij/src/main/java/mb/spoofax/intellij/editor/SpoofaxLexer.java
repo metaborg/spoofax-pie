@@ -13,6 +13,10 @@ import mb.resource.ReadableResource;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
 import mb.spoofax.core.language.LanguageComponent;
+import mb.spoofax.intellij.Offset;
+import mb.spoofax.intellij.ScopeNames;
+import mb.spoofax.intellij.Span;
+import mb.spoofax.intellij.psi.SpoofaxTokenTypeManager;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;

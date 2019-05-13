@@ -7,7 +7,12 @@ import mb.spoofax.intellij.resource.IntellijResourceRegistry;
 import mb.tiger.intellij.TigerPlugin;
 
 public class TigerSyntaxHighlighterFactory extends SpoofaxSyntaxHighlighterFactory {
-    public TigerSyntaxHighlighterFactory(IntellijResourceRegistry resourceRegistry, SpoofaxLexer.Factory lexerBuilder, SpoofaxSyntaxHighlighter.Factory highlighterBuilder) {
-        super(TigerPlugin.getComponent(), resourceRegistry, lexerBuilder, highlighterBuilder);
+    public TigerSyntaxHighlighterFactory() {
+        super(
+            TigerPlugin.getComponent(),
+            TigerPlugin.getComponent().getResourceRegistry(),
+            TigerPlugin.getComponent().getLexerFactory(),
+            TigerPlugin.getComponent().getHighlighterFactory()
+        );
     }
 }

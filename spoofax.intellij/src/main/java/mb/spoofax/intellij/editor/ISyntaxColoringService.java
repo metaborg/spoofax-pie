@@ -1,5 +1,8 @@
 package mb.spoofax.intellij.editor;
 
+import mb.spoofax.intellij.ICancellationToken;
+import mb.spoofax.intellij.Span;
+
 import javax.annotation.Nullable;
 
 /**

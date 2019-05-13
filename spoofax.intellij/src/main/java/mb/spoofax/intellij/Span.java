@@ -1,9 +1,6 @@
-package mb.spoofax.intellij.editor;
-
-import org.jetbrains.annotations.NotNull;
+package mb.spoofax.intellij;
 
 import java.io.Serializable;
-import java.util.Iterator;
 import java.util.Objects;
 
 

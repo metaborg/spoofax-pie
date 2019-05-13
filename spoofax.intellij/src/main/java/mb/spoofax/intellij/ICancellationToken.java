@@ -1,4 +1,4 @@
-package mb.spoofax.intellij.editor;
+package mb.spoofax.intellij;
 
 public interface ICancellationToken {
     boolean isCancelled();

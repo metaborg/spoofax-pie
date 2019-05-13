@@ -1,4 +1,4 @@
-package mb.spoofax.intellij.editor;
+package mb.spoofax.intellij.psi;
 
 import com.intellij.lang.Language;
 import com.intellij.psi.tree.IElementType;

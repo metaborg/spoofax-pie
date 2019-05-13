@@ -5,12 +5,19 @@ import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
 import com.intellij.openapi.editor.HighlighterColors;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import javafx.util.Pair;
+import mb.spoofax.core.language.LanguageScope;
+import mb.spoofax.intellij.ScopeNames;
 
-import java.util.ArrayList;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.List;
-import java.util.Optional;
 
+@LanguageScope
 public final class ScopeManager {
+
+    @Inject
+    public ScopeManager() {}
+
     public final TextAttributesKey[] EMPTY_KEYS = new TextAttributesKey[0];
     public final String DEFAULT_SCOPE = "text";
     private final TextAttributesKey BAD_CHARACTER = TextAttributesKey.createTextAttributesKey("AESI_BAD_CHARACTER", HighlighterColors.BAD_CHARACTER);

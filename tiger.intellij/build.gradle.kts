@@ -7,6 +7,7 @@ dependencies {
   implementation(platform(project(":depconstraints")))
   annotationProcessor(platform(project(":depconstraints")))
 
+    implementation(project(":spoofax.core"))
   implementation(project(":spoofax.intellij"))
   implementation(project(":tiger.spoofax"))
 

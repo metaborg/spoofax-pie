@@ -1,4 +1,4 @@
-package mb.spoofax.intellij.editor;
+package mb.spoofax.intellij;
 
 import org.jetbrains.annotations.NotNull;
 

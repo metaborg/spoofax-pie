@@ -5,6 +5,7 @@ import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.PsiFile;
+import groovy.lang.Singleton;
 import mb.resource.Resource;
 import mb.resource.ResourceRegistry;
 import mb.resource.ResourceRuntimeException;
@@ -12,7 +13,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
 
-public class IntellijResourceRegistry implements ResourceRegistry {
+public final class IntellijResourceRegistry implements ResourceRegistry {
     protected static final String qualifier = "eclipse-resource";
 
 

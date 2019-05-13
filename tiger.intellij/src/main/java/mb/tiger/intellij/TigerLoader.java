@@ -7,7 +7,7 @@ public class TigerLoader implements ApplicationLoadListener {
     @Override public void beforeApplicationLoaded(Application application, String configPath) {
         try {
             TigerPlugin.init();
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException("Failed to initializer Tiger plugin", e);
         }
     }
