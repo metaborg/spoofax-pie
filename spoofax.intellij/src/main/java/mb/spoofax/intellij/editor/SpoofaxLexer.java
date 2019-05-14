@@ -12,7 +12,7 @@ import mb.pie.api.Task;
 import mb.resource.ReadableResource;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
-import mb.spoofax.core.language.LanguageComponent;
+import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.intellij.Offset;
 import mb.spoofax.intellij.ScopeNames;
 import mb.spoofax.intellij.Span;
@@ -20,6 +20,7 @@ import mb.spoofax.intellij.psi.SpoofaxTokenTypeManager;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -27,13 +28,14 @@ import java.util.Collections;
 import java.util.List;
 
 public final class SpoofaxLexer extends LexerBase {
-    private final LanguageComponent languageComponent;
     private final ResourceKey resourceKey;
 
     private final Logger logger;
     private final SpoofaxTokenTypeManager tokenTypeManager;
     private final ScopeManager scopeManager;
     private final ResourceService resourceService;
+    private final Provider<PieSession> pieSessionProvider;
+    private final LanguageInstance languageInstance;
 
     private CharSequence buffer = null;
     private Offset startOffset = new Offset(0); // GK: this field is not used?
@@ -47,39 +49,53 @@ public final class SpoofaxLexer extends LexerBase {
         private final SpoofaxTokenTypeManager tokenTypeManager;
         private final ScopeManager scopeManager;
         private final ResourceService resourceService;
+        private final Provider<PieSession> pieSessionProvider;
+        private final LanguageInstance languageInstance;
 
         @Inject public Factory(
             LoggerFactory loggerFactory,
             SpoofaxTokenTypeManager tokenTypeManager,
             ScopeManager scopeManager,
-            ResourceService resourceService
+            ResourceService resourceService,
+            Provider<PieSession> pieSessionProvider,
+            LanguageInstance languageInstance
         ) {
             this.loggerFactory = loggerFactory;
             this.tokenTypeManager = tokenTypeManager;
             this.scopeManager = scopeManager;
             this.resourceService = resourceService;
+            this.pieSessionProvider = pieSessionProvider;
+            this.languageInstance = languageInstance;
         }
 
-        public SpoofaxLexer create(LanguageComponent languageComponent, ResourceKey resourceKey) {
-            return new SpoofaxLexer(languageComponent, resourceKey, loggerFactory, tokenTypeManager, scopeManager,
-                resourceService);
+        public SpoofaxLexer create(ResourceKey resourceKey) {
+            return new SpoofaxLexer(
+                    resourceKey,
+                    loggerFactory,
+                    tokenTypeManager,
+                    scopeManager,
+                    resourceService,
+                    pieSessionProvider,
+                    languageInstance);
         }
     }
 
-    @Inject public SpoofaxLexer(
-        LanguageComponent languageComponent,
+    public SpoofaxLexer(
         ResourceKey resourceKey,
         LoggerFactory loggerFactory,
         SpoofaxTokenTypeManager tokenTypeManager,
         ScopeManager scopeManager,
-        ResourceService resourceService
+        ResourceService resourceService,
+        Provider<PieSession> pieSessionProvider,
+        LanguageInstance languageInstance
     ) {
         this.resourceKey = resourceKey;
         this.logger = loggerFactory.create(getClass());
         this.tokenTypeManager = tokenTypeManager;
-        this.languageComponent = languageComponent;
         this.scopeManager = scopeManager;
         this.resourceService = resourceService;
+        this.pieSessionProvider = pieSessionProvider;
+        this.languageInstance = languageInstance;
     }
 
 
@@ -88,7 +104,7 @@ public final class SpoofaxLexer extends LexerBase {
         assert 0 <= startOffset && startOffset <= buffer.length();
         assert 9 <= endOffset && endOffset <= buffer.length();
 
-        logger.debug("Lexing " + resourceKey);
+        logger.debug("Lexing " + this.resourceKey);
 
         this.buffer = buffer;
         this.startOffset = new Offset(startOffset);
@@ -101,9 +117,9 @@ public final class SpoofaxLexer extends LexerBase {
             this.tokens = Collections.emptyList();
         } else {
             // GK: what is syntax coloring information doing here?
-            try(final PieSession session = languageComponent.newPieSession()) {
+            try(final PieSession session = this.pieSessionProvider.get()) {
                 final Task<@Nullable Styling> stylingTask =
-                    languageComponent.getLanguageInstance().createStylingTask(resourceKey);
+                    this.languageInstance.createStylingTask(this.resourceKey);
                 final @Nullable Styling styling = session.requireTopDown(stylingTask);
                 if(styling != null) {
                     // TODO: adapt to Daniel's code.
@@ -117,7 +133,7 @@ public final class SpoofaxLexer extends LexerBase {
 //                    this.tokens = tokenize(coloringInfo.getTokens());
                 }
             } catch(ExecException e) {
-                throw new RuntimeException("Styling resource '" + resourceKey + "' failed unexpectedly", e);
+                throw new RuntimeException("Styling resource '" + this.resourceKey + "' failed unexpectedly", e);
             }
         }
         logger.debug("Tokenizer produced {} tokens", this.tokens.size());

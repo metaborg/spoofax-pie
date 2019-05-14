@@ -6,6 +6,7 @@ import mb.spoofax.core.platform.FSRegistryModule;
 import mb.spoofax.core.platform.LoggerFactoryModule;
 import mb.spoofax.core.platform.PlatformComponent;
 import mb.spoofax.core.platform.ResourceServiceModule;
+import mb.spoofax.intellij.resource.IntellijResourceRegistry;
 import mb.spoofax.intellij.resource.IntellijResourceRegistryModule;
 
 import javax.inject.Singleton;
@@ -19,5 +20,5 @@ import javax.inject.Singleton;
     PieModule.class
 })
 public interface SpoofaxIntellijComponent extends PlatformComponent {
-
+    IntellijResourceRegistry getResourceRegistry();
 }

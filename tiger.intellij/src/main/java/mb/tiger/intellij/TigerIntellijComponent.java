@@ -24,7 +24,7 @@ public interface TigerIntellijComponent extends TigerComponent {
     IFileElementType getFileElementType();
     SpoofaxTokenTypeManager getTokenTypeManager();
 
-    IntellijResourceRegistry getResourceRegistry();
+
     SpoofaxLexer.Factory getLexerFactory();
     SpoofaxSyntaxHighlighter.Factory getHighlighterFactory();
 }

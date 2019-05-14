@@ -6,7 +6,10 @@ import com.intellij.psi.tree.IFileElementType;
 import dagger.Module;
 import dagger.Provides;
 import mb.spoofax.core.language.LanguageScope;
+import mb.spoofax.intellij.editor.SpoofaxLexer;
+import mb.spoofax.intellij.psi.SpoofaxAstBuilder;
 import mb.spoofax.intellij.psi.SpoofaxFileElementType;
+import mb.spoofax.intellij.resource.IntellijResourceRegistry;
 
 
 @Module
@@ -20,4 +23,9 @@ public class TigerIntellijModule {
 
     @Provides @LanguageScope
     IFileElementType provideFileElementType(SpoofaxFileElementType fileElementType) { return fileElementType; }
+
+    @Provides @LanguageScope
+    SpoofaxFileElementType provideSpoofaxFileElementType(Language language, SpoofaxLexer.Factory lexerFactory, IntellijResourceRegistry resourceRegistry, SpoofaxAstBuilder.Factory astBuilderFactory) {
+        return new SpoofaxFileElementType(language, lexerFactory, resourceRegistry, astBuilderFactory, TigerPlugin.getComponent());
+    }
 }

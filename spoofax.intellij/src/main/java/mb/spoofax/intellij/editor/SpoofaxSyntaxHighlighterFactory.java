@@ -11,18 +11,15 @@ import mb.spoofax.intellij.resource.IntellijResourceRegistry;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class SpoofaxSyntaxHighlighterFactory extends SyntaxHighlighterFactory {
-    private final LanguageComponent languageComponent;
     private final IntellijResourceRegistry resourceRegistry;
     private final SpoofaxLexer.Factory lexerFactory;
     private final SpoofaxSyntaxHighlighter.Factory highlighterFactory;
 
     public SpoofaxSyntaxHighlighterFactory(
-        LanguageComponent languageComponent,
         IntellijResourceRegistry resourceRegistry,
         SpoofaxLexer.Factory lexerBuilder,
         SpoofaxSyntaxHighlighter.Factory highlighterBuilder
     ) {
-        this.languageComponent = languageComponent;
         this.resourceRegistry = resourceRegistry;
         this.lexerFactory = lexerBuilder;
         this.highlighterFactory = highlighterBuilder;
@@ -34,7 +31,7 @@ public abstract class SpoofaxSyntaxHighlighterFactory extends SyntaxHighlighterF
             throw new RuntimeException("Cannot get syntax highlighter; file is null");
         }
         final Resource resource = resourceRegistry.getResource(file);
-        final Lexer lexer = lexerFactory.create(languageComponent, resource.getKey());
+        final Lexer lexer = lexerFactory.create(resource.getKey());
         return highlighterFactory.create(lexer);
     }
 }

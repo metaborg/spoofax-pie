@@ -20,22 +20,20 @@ public class SpoofaxFileElementType extends IFileElementType {
     private final SpoofaxLexer.Factory lexerFactory;
     private final IntellijResourceRegistry resourceRegistry;
     private final SpoofaxAstBuilder.Factory astBuilderFactory;
-    private final LanguageComponent languageComponent;
 
     @Inject
-    public SpoofaxFileElementType(Language language, SpoofaxLexer.Factory lexerFactory, IntellijResourceRegistry resourceRegistry, SpoofaxAstBuilder.Factory astBuilderFactory, LanguageComponent languageComponent) {
+    public SpoofaxFileElementType(Language language, SpoofaxLexer.Factory lexerFactory, IntellijResourceRegistry resourceRegistry, SpoofaxAstBuilder.Factory astBuilderFactory) {
         super(language);
 
         this.lexerFactory = lexerFactory;
         this.resourceRegistry = resourceRegistry;
         this.astBuilderFactory = astBuilderFactory;
-        this.languageComponent = languageComponent;
     }
 
     @Override
     protected ASTNode doParseContents(ASTNode chameleon, PsiElement psi) {
         IntellijResource resource = this.resourceRegistry.getResource(psi.getContainingFile());
-        SpoofaxLexer lexer = this.lexerFactory.create(this.languageComponent, resource.getKey());
+        SpoofaxLexer lexer = this.lexerFactory.create(resource.getKey());
         PsiBuilder builder = PsiBuilderFactory.getInstance().createBuilder(psi.getProject(), chameleon, lexer, getLanguage(), chameleon.getChars());
         SpoofaxAstBuilder astBuilder = this.astBuilderFactory.create();
         ASTNode tree = astBuilder.build(this, builder);
