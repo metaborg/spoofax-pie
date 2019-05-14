@@ -12,5 +12,5 @@ import mb.spoofax.core.platform.PlatformComponent;
  */
 @LanguageScope @Component(modules = TigerModule.class, dependencies = PlatformComponent.class)
 public interface TigerComponent extends LanguageComponent {
-    @Override TigerInstance getLanguageInstance();
+//    @Override TigerInstance getLanguageInstance();
 }

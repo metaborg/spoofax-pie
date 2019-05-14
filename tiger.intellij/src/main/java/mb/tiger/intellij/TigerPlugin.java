@@ -19,7 +19,7 @@ public class TigerPlugin {
     public static void init() throws Exception {
         component = DaggerTigerIntellijComponent
             .builder()
-            .platformComponent(SpoofaxPlugin.getComponent())
+            .spoofaxIntellijComponent(SpoofaxPlugin.getComponent())
             .tigerModule(TigerModule.fromClassLoaderResources())
             .tigerIntellijModule(new TigerIntellijModule())
             .build();

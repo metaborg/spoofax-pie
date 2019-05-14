@@ -24,8 +24,4 @@ public class TigerIntellijModule {
     @Provides @LanguageScope
     IFileElementType provideFileElementType(SpoofaxFileElementType fileElementType) { return fileElementType; }
 
-    @Provides @LanguageScope
-    SpoofaxFileElementType provideSpoofaxFileElementType(Language language, SpoofaxLexer.Factory lexerFactory, IntellijResourceRegistry resourceRegistry, SpoofaxAstBuilder.Factory astBuilderFactory) {
-        return new SpoofaxFileElementType(language, lexerFactory, resourceRegistry, astBuilderFactory, TigerPlugin.getComponent());
-    }
 }
