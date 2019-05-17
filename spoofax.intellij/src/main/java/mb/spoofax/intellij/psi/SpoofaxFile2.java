@@ -12,7 +12,7 @@ public final class SpoofaxFile2 extends PsiFileBase {
 
     private final LanguageFileType fileType;
 
-    protected SpoofaxFile2(FileViewProvider viewProvider, LanguageFileType fileType) {
+    public SpoofaxFile2(FileViewProvider viewProvider, LanguageFileType fileType) {
         super(viewProvider, fileType.getLanguage());
         this.fileType = fileType;
     }

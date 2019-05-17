@@ -1,6 +1,10 @@
 package mb.common.token;
 
+// DP: Final?
 public class UnknownTokenKind implements TokenType {
+
+    // DP: Shouldn't this be a singleton instance?
+
     @Override public void accept(TokenKindVisitor visitor, Token token) {
         visitor.unknown(token);
     }

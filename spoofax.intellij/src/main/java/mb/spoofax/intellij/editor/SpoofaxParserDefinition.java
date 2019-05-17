@@ -9,8 +9,11 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.tree.IFileElementType;
 import com.intellij.psi.tree.TokenSet;
+import mb.spoofax.intellij.psi.SpoofaxElementType;
+import mb.spoofax.intellij.psi.SpoofaxFile2;
 import mb.spoofax.intellij.psi.SpoofaxTokenTypeManager;
 
 import javax.inject.Inject;
@@ -68,19 +71,15 @@ public class SpoofaxParserDefinition implements ParserDefinition {
 
     @Override
     public PsiFile createFile(FileViewProvider viewProvider) {
-        // TODO: fix code
-//        return new SpoofaxFile2(viewProvider, this.fileType);
-        throw new UnsupportedOperationException();
+        return new SpoofaxFile2(viewProvider, this.fileType);
     }
 
     @Override
     public PsiElement createElement(ASTNode node) {
-        // TODO: fix code
-//        IElementType elementType = node.getElementType();
-//        if(!(elementType instanceof SpoofaxElementType))
-//            throw new UnsupportedOperationException("Unexpected element type: " + elementType);
-//        SpoofaxElementType spoofaxElementType = (SpoofaxElementType) elementType;
-//        return spoofaxElementType.createElement(node);
-        throw new UnsupportedOperationException();
+        IElementType elementType = node.getElementType();
+        if(!(elementType instanceof SpoofaxElementType))
+            throw new UnsupportedOperationException("Unexpected element type: " + elementType);
+        SpoofaxElementType spoofaxElementType = (SpoofaxElementType) elementType;
+        return spoofaxElementType.createElement(node);
     }
 }

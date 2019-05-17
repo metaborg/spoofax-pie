@@ -7,10 +7,13 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import java.io.Serializable;
 
 public interface Token extends Serializable {
+    // DP: getRegion() because of JavaBeans and Kotlin
     Region region();
 
+    // DP: getType() idem.
     TokenType type();
 
+    // DP: getAssociatedTerm()
     @Nullable IStrategoTerm associatedTerm();
 
     default String textPart(String fullText) {

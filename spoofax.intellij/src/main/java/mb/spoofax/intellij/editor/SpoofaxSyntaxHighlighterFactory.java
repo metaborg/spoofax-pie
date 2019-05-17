@@ -10,12 +10,15 @@ import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.intellij.resource.IntellijResourceRegistry;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * IntelliJ requires its own factory implementation for {@link SpoofaxSyntaxHighlighter}.
+ */
 public abstract class SpoofaxSyntaxHighlighterFactory extends SyntaxHighlighterFactory {
     private final IntellijResourceRegistry resourceRegistry;
     private final SpoofaxLexer.Factory lexerFactory;
     private final SpoofaxSyntaxHighlighter.Factory highlighterFactory;
 
-    public SpoofaxSyntaxHighlighterFactory(
+    protected SpoofaxSyntaxHighlighterFactory(
         IntellijResourceRegistry resourceRegistry,
         SpoofaxLexer.Factory lexerBuilder,
         SpoofaxSyntaxHighlighter.Factory highlighterBuilder
@@ -27,7 +30,7 @@ public abstract class SpoofaxSyntaxHighlighterFactory extends SyntaxHighlighterF
 
     @Override
     public SyntaxHighlighter getSyntaxHighlighter(@Nullable Project project, @Nullable VirtualFile file) {
-        if(file == null) {
+        if (file == null) {
             throw new RuntimeException("Cannot get syntax highlighter; file is null");
         }
         final Resource resource = resourceRegistry.getResource(file);
