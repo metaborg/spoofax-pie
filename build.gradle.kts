@@ -12,6 +12,13 @@ subprojects {
   }
 }
 
+allprojects {
+  repositories {
+    // Required by NaBL2/Statix solver.
+    maven("http://nexus.usethesource.io/content/repositories/public/")
+  }
+}
+
 gitonium {
   // Disable snapshot dependency checks for releases, until we depend on a stable version of MetaBorg artifacts.
   checkSnapshotDependenciesInRelease = false

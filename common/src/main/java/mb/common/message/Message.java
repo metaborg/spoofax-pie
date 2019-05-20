@@ -10,24 +10,24 @@ public class Message implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public final String text;
-    public final MessageSeverity severity;
+    public final Severity severity;
     public final @Nullable Region region;
     public final @Nullable Throwable exception;
 
 
-    public Message(String text, MessageSeverity severity, @Nullable Region region, @Nullable Throwable exception) {
+    public Message(String text, @Nullable Throwable exception, Severity severity, @Nullable Region region) {
         this.text = text;
+        this.exception = exception;
         this.severity = severity;
         this.region = region;
-        this.exception = exception;
     }
 
-    public Message(String text, MessageSeverity severity, @Nullable Region region) {
-        this(text, severity, region, null);
+    public Message(String text, Severity severity, @Nullable Region region) {
+        this(text, null, severity, region);
     }
 
-    public Message(String text, MessageSeverity severity) {
-        this(text, severity, null, null);
+    public Message(String text, Severity severity) {
+        this(text, null, severity, null);
     }
 
 

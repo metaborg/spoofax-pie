@@ -2,7 +2,9 @@ package mb.jsglr1.common;
 
 import mb.common.message.Messages;
 import mb.common.token.Token;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import mb.jsglr.common.ResourceKeyAttachment;
+import mb.jsglr.common.TokenUtil;
+import mb.resource.ResourceKey;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.jsglr.client.Disambiguator;
@@ -40,7 +42,7 @@ public class JSGLR1Parser {
         disambiguator.setHeuristicFilters(false);
     }
 
-    public JSGLR1ParseResult parse(String text, String startSymbol) throws InterruptedException {
+    public JSGLR1ParseResult parse(String text, String startSymbol, ResourceKey resourceKey) throws InterruptedException {
         try {
             final SGLRParseResult result = parser.parse(text, null, startSymbol);
             if(result.output == null) {
@@ -49,17 +51,18 @@ public class JSGLR1Parser {
             if(!(result.output instanceof IStrategoTerm)) {
                 throw new RuntimeException("BUG: parser returned an output that is not an instance of IStrategoTerm");
             }
-            final @Nullable IStrategoTerm ast = (IStrategoTerm) result.output;
+            final IStrategoTerm ast = (IStrategoTerm) result.output;
+            ResourceKeyAttachment.setResourceKey(ast, resourceKey);
             final ArrayList<Token> tokenStream = TokenUtil.extract(ast);
-            final ErrorUtil errorUtil = new ErrorUtil(true, false, parser.getCollectedErrors());
-            errorUtil.gatherNonFatalErrors(ast);
-            final Messages messages = errorUtil.messages();
+            final MessagesUtil messagesUtil = new MessagesUtil(true, false, parser.getCollectedErrors());
+            messagesUtil.gatherNonFatalErrors(ast);
+            final Messages messages = messagesUtil.getMessages();
             final boolean recovered = messages.containsError();
             return new JSGLR1ParseResult(recovered, ast, tokenStream, messages);
         } catch(SGLRException e) {
-            final ErrorUtil errorUtil = new ErrorUtil(true, true, parser.getCollectedErrors());
-            errorUtil.processFatalException(new NullTokenizer(text, null), e);
-            final Messages messages = errorUtil.messages();
+            final MessagesUtil messagesUtil = new MessagesUtil(true, true, parser.getCollectedErrors());
+            messagesUtil.processFatalException(new NullTokenizer(text, null), e);
+            final Messages messages = messagesUtil.getMessages();
             return new JSGLR1ParseResult(false, null, null, messages);
         }
     }

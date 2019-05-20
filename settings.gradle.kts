@@ -21,6 +21,7 @@ include("depconstraints")
 
 include("common")
 
+include("jsglr.common")
 include("jsglr1.common")
 include("jsglr2.common")
 include("esv.common")

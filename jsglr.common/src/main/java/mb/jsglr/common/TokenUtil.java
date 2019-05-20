@@ -1,4 +1,4 @@
-package mb.jsglr1.common;
+package mb.jsglr.common;
 
 import mb.common.region.Region;
 import mb.common.token.Token;
@@ -8,8 +8,8 @@ import org.spoofax.jsglr.client.imploder.*;
 
 import java.util.ArrayList;
 
-class TokenUtil {
-    static ArrayList<Token> extract(IStrategoTerm ast) {
+public class TokenUtil {
+    public static ArrayList<Token> extract(IStrategoTerm ast) {
         final ImploderAttachment rootImploderAttachment = ImploderAttachment.get(ast);
         final ITokens tokens = rootImploderAttachment.getLeftToken().getTokenizer();
         final int tokenCount = tokens.getTokenCount();

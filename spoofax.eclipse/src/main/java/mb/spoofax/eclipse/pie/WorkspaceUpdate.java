@@ -1,7 +1,7 @@
 package mb.spoofax.eclipse.pie;
 
 import mb.common.message.KeyedMessages;
-import mb.common.message.KeyedMessagesBuilder;
+import mb.common.message.MessagesBuilder;
 import mb.common.message.Message;
 import mb.common.message.Messages;
 import mb.common.style.Color;
@@ -37,7 +37,7 @@ public class WorkspaceUpdate {
 
     private final ArrayList<IResource> clear = new ArrayList<>();
     private final ArrayList<IResource> clearRecursively = new ArrayList<>();
-    private final KeyedMessagesBuilder<IResource> keyedMessagesBuilder = new KeyedMessagesBuilder<>();
+    private final MessagesBuilder<IResource> keyedMessagesBuilder = new MessagesBuilder<>();
     private final ArrayList<StyleUpdate> styleUpdates = new ArrayList<>();
 
 

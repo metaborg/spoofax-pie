@@ -1,10 +1,11 @@
 package mb.jsglr1.common;
 
 import mb.common.message.Message;
-import mb.common.message.MessageSeverity;
+import mb.common.message.Severity;
 import mb.common.message.Messages;
 import mb.common.message.MessagesBuilder;
 import mb.common.region.Region;
+import mb.jsglr.common.RegionUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.MultiBadTokenException;
@@ -25,7 +26,7 @@ import static org.spoofax.jsglr.client.imploder.AbstractTokenizer.findLeftMostTo
 import static org.spoofax.jsglr.client.imploder.AbstractTokenizer.findRightMostTokenOnSameLine;
 import static org.spoofax.jsglr.client.imploder.ImploderAttachment.getTokenizer;
 
-class ErrorUtil {
+class MessagesUtil {
     private static final int LARGE_REGION_SIZE = 8;
     private static final String LARGE_REGION_START =
         "Region could not be parsed because of subsequent syntax error(s) indicated below";
@@ -37,14 +38,14 @@ class ErrorUtil {
     private final MessagesBuilder messagesBuilder = new MessagesBuilder();
 
 
-    ErrorUtil(boolean recoveryEnabled, boolean recoveryFailed, Set<BadTokenException> parseErrors) {
+    MessagesUtil(boolean recoveryEnabled, boolean recoveryFailed, Set<BadTokenException> parseErrors) {
         this.recoveryEnabled = recoveryEnabled;
         this.recoveryFailed = recoveryFailed;
         this.parseErrors = parseErrors;
     }
 
 
-    Messages messages() {
+    Messages getMessages() {
         return messagesBuilder.build();
     }
 
@@ -198,7 +199,7 @@ class ErrorUtil {
 
     private void createErrorAtFirstLine(String text) {
         final String errorText = text + getErrorExplanation();
-        final Message message = new Message(errorText, MessageSeverity.Error);
+        final Message message = new Message(errorText, Severity.Error);
         messagesBuilder.addMessage(message);
     }
 
@@ -208,7 +209,7 @@ class ErrorUtil {
     }
 
     private void reportErrorAtRegion(Region region, String text) {
-        final Message message = new Message(text, MessageSeverity.Error, region);
+        final Message message = new Message(text, Severity.Error, region);
         messagesBuilder.addMessage(message);
     }
 
@@ -217,7 +218,7 @@ class ErrorUtil {
     }
 
     private void reportWarningAtRegion(Region region, String text) {
-        final Message message = new Message(text, MessageSeverity.Warn, region);
+        final Message message = new Message(text, Severity.Warning, region);
         messagesBuilder.addMessage(message);
     }
 

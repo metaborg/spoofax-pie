@@ -49,7 +49,7 @@ public final class MarkerUtil {
         switch(message.severity) {
             case Error:
                 return IMarker.SEVERITY_ERROR;
-            case Warn:
+            case Warning:
                 return IMarker.SEVERITY_WARNING;
             case Info:
                 return IMarker.SEVERITY_INFO;

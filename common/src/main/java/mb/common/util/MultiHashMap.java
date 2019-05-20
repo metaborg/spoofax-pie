@@ -1,5 +1,7 @@
 package mb.common.util;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -64,11 +66,11 @@ public class MultiHashMap<K, V> implements Serializable {
     }
 
 
-    public void add(K key, V value) {
+    public void add(@Nullable K key, V value) {
         map.computeIfAbsent(key, k -> new ArrayList<>()).add(value);
     }
 
-    public void addAll(K key, Collection<? extends V> values) {
+    public void addAll(@Nullable K key, Collection<? extends V> values) {
         map.computeIfAbsent(key, k -> new ArrayList<>()).addAll(values);
     }
 
@@ -84,9 +86,23 @@ public class MultiHashMap<K, V> implements Serializable {
         addAll(mapping.map);
     }
 
-    public void replaceAll(K key, ArrayList<V> values) {
+
+    public void replaceAll(@Nullable K key, ArrayList<V> values) {
         map.put(key, values);
     }
+
+    public void replaceAll(Map<? extends K, ArrayList<V>> mapping) {
+        for(Entry<? extends K, ArrayList<V>> entry : mapping.entrySet()) {
+            final K key = entry.getKey();
+            final ArrayList<V> values = entry.getValue();
+            replaceAll(key, values);
+        }
+    }
+
+    public void replaceAll(MultiHashMap<K, V> mapping) {
+        replaceAll(mapping.map);
+    }
+
 
     public void removeAll(K key) {
         map.remove(key);
