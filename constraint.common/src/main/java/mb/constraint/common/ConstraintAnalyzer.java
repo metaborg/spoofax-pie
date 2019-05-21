@@ -1,6 +1,5 @@
 package mb.constraint.common;
 
-import com.google.common.collect.ImmutableList;
 import mb.common.message.Messages;
 import mb.common.message.MessagesBuilder;
 import mb.common.message.Severity;
@@ -17,149 +16,176 @@ import org.spoofax.interpreter.terms.ITermFactory;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 public class ConstraintAnalyzer {
-    private final Logger logger;
+    public static class Result {
+        public final @Nullable IStrategoTerm ast;
+        public final @Nullable IStrategoTerm analysis;
 
-    private final HashMap<ResourceKey, Result> resultCache = new HashMap<>();
+        public Result(@Nullable IStrategoTerm ast, @Nullable IStrategoTerm analysis) {
+            this.ast = ast;
+            this.analysis = analysis;
+        }
 
-
-    @Inject public ConstraintAnalyzer(Logger logger) {
-        this.logger = logger;
+        public Result() {
+            this.ast = null;
+            this.analysis = null;
+        }
     }
-
 
     public static class SingleFileResult {
         public final @Nullable IStrategoTerm ast;
         public final @Nullable IStrategoTerm analysis;
         public final Messages messages;
-    }
 
-    public SingleFileResult analyze(ResourceKey resource, StrategoRuntime strategoRuntime) {
-
-    }
-
-    public static class Result {
-        public final @Nullable IStrategoTerm ast;
-        public final @Nullable IStrategoTerm analysis;
+        public SingleFileResult(@Nullable IStrategoTerm ast, @Nullable IStrategoTerm analysis, Messages messages) {
+            this.ast = ast;
+            this.analysis = analysis;
+            this.messages = messages;
+        }
     }
 
     public static class MultiFileResult {
         public final HashMap<ResourceKey, Result> results;
         public final Messages messages;
+
+        public MultiFileResult(HashMap<ResourceKey, Result> results, Messages messages) {
+            this.results = results;
+            this.messages = messages;
+        }
     }
 
-    public MultiFileResult analyze(HashSet<ResourceKey> resources, StrategoRuntime strategoRuntime) {
 
+    private final Logger logger;
+    private final ITermFactory termFactory;
+
+    private final ResultCache resultCache = new ResultCache();
+
+
+    @Inject public ConstraintAnalyzer(Logger logger, ITermFactory termFactory) {
+        this.logger = logger;
+        this.termFactory = termFactory;
     }
 
 
-    public void doAnalyze(
-        ResourceKey root,
-        ArrayList<ResourceKey> resources,
+    public SingleFileResult analyze(ResourceKey resource, IStrategoTerm ast, StrategoRuntime strategoRuntime, String strategyId)
+        throws ConstraintAnalyzerException {
+        final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>(1);
+        asts.put(resource, ast);
+        final MultiFileResult multiFileResult = doAnalyze(null, asts, strategoRuntime, false, strategyId);
+        final @Nullable Result result = multiFileResult.results.get(resource);
+        if(result == null) {
+            throw new ConstraintAnalyzerException("No analysis result found");
+        }
+        return new SingleFileResult(result.ast, result.analysis, multiFileResult.messages);
+    }
+
+    public MultiFileResult analyze(ResourceKey root, HashMap<ResourceKey, IStrategoTerm> asts, StrategoRuntime strategoRuntime, String strategyId)
+        throws ConstraintAnalyzerException {
+        return doAnalyze(root, asts, strategoRuntime, true, strategyId);
+    }
+
+    private MultiFileResult doAnalyze(
+        @Nullable ResourceKey root,
+        HashMap<ResourceKey, IStrategoTerm> asts,
         StrategoRuntime strategoRuntime,
         boolean multifile,
-        String strategy
+        String strategyId
     ) throws ConstraintAnalyzerException {
-        // TODO: calculate which resources were removed w.r.t. last invocation.
         final HashSet<ResourceKey> removed = new HashSet<>();
-
-        // TODO: request the AST for other resources, and put them in addedOrChanged.
-        final HashMap<ResourceKey, IStrategoTerm> addedOrChanged = new HashMap<>();
+        final HashMap<ResourceKey, IStrategoTerm> addedOrChangedAsts = new HashMap<>();
 
         final ITermFactory termFactory = strategoRuntime.getTermFactory();
 
-        /*******************************************************************
-         * 1. Compute changeset, and remove invalidated units from context *
-         *******************************************************************/
+        /// 1. Compute changeset, and remove invalidated units from context.
 
         final ArrayList<IStrategoTerm> changes = new ArrayList<>();
         final HashMap<ResourceKey, Expect> expects = new HashMap<>();
 
         // Root analysis.
         final @Nullable IStrategoTerm rootChange;
-        if(multifile) {
-            final IStrategoTerm ast = termFactory.makeTuple();
+        if(multifile && root != null) {
+            final IStrategoTerm ast = tuple();
             final IStrategoTerm change;
             final Expect expect;
             if(resultCache.containsKey(root)) {
                 final Result cachedResult = resultCache.get(root);
-                change = build("Cached", cachedResult.analysis);
+                change = appl("Cached", cachedResult.analysis);
                 expect = new Update(root);
                 resultCache.remove(root);
             } else {
-                change = build("Added", ast);
+                change = appl("Added", ast);
                 expect = new Project(root);
             }
             expects.put(root, expect);
-            rootChange = termFactory.makeTuple(termFactory.makeString(root), change);
+            rootChange = tuple(blob(root), change);
         } else {
             rootChange = null;
         }
 
         // Removed resources.
-        for(ResourceKey resourceKey : removed) {
-            if(resultCache.containsKey(resourceKey)) {
-                final Cache cache = resultCache.get(resourceKey);
-                changes.add(termFactory.makeTuple(termFactory.makeString(resourceKey.toString()),
-                    build("Removed", cache.analysis)));
-                resultCache.remove(resourceKey);
+        for(ResourceKey resource : removed) {
+            if(resultCache.containsKey(resource)) {
+                final Result cachedResult = resultCache.get(resource);
+                changes.add(tuple(blob(resource), appl("Removed", cachedResult.analysis)));
+                resultCache.remove(resource);
             }
         }
 
         // Added and changed resources.
-        for(Map.Entry<ResourceKey, IStrategoTerm> entry : addedOrChanged.entrySet()) {
-            final ResourceKey resourceKey = entry.getKey();
+        for(Map.Entry<ResourceKey, IStrategoTerm> entry : addedOrChangedAsts.entrySet()) {
+            final ResourceKey resource = entry.getKey();
             final IStrategoTerm ast = entry.getValue();
             final IStrategoTerm change;
-            if(resultCache.containsKey(resourceKey)) {
-                final IStrategoTerm analysisTerm = resultCache.get(resourceKey);
-                change = build("Changed", ast, analysisTerm);
-                resultCache.remove(resourceKey);
+            if(resultCache.containsKey(resource)) {
+                final Result cachedResult = resultCache.get(resource);
+                change = appl("Changed", ast, cachedResult.analysis);
+                resultCache.remove(resource);
             } else {
-                change = build("Added", ast);
+                change = appl("Added", ast);
             }
-            expects.put(resourceKey, new Full(resourceKey, ast));
-            changes.add(termFactory.makeTuple(termFactory.makeString(resourceKey.toString()), change));
+            expects.put(resource, new Full(resource));
+            changes.add(tuple(blob(resource), change));
         }
 
         // Cached files.
         if(multifile) {
-            for(Map.Entry<ResourceKey, IStrategoTerm> entry : resultCache.entrySet()) {
-                final ResourceKey resourceKey = entry.getKey();
-                final IStrategoTerm analysisTerm = entry.getValue();
-                if(!addedOrChanged.containsKey(resourceKey)) {
-                    final IStrategoTerm change = build("Cached", analysisTerm);
-                    expects.put(resourceKey, new Update(resourceKey));
-                    changes.add(termFactory.makeTuple(termFactory.makeString(resourceKey.toString()), change));
+            for(Map.Entry<ResourceKey, Result> entry : resultCache.entrySet()) {
+                final ResourceKey resource = entry.getKey();
+                final Result cachedResult = entry.getValue();
+                if(!addedOrChangedAsts.containsKey(resource)) {
+                    final IStrategoTerm change = appl("Cached", cachedResult.analysis);
+                    expects.put(resource, new Update(resource));
+                    changes.add(tuple(blob(resource), change));
                 }
             }
         }
 
-        /***************************************
-         * 2. Call analysis, and parse results *
-         ***************************************/
+        /// 2. Call analysis, and list results.
 
-        final Map<String, IStrategoTerm> results = new HashMap<>();
+        final Map<ResourceKey, IStrategoTerm> resultTerms = new HashMap<>();
         final IStrategoTerm action;
         if(multifile) {
-            action = build("AnalyzeMulti", rootChange, termFactory.makeList(changes));
+            action = appl("AnalyzeMulti", rootChange, termFactory.makeList(changes));
         } else {
-            action = build("AnalyzeSingle", termFactory.makeList(changes));
+            action = appl("AnalyzeSingle", termFactory.makeList(changes));
         }
 
         final @Nullable IStrategoTerm allResultsTerm;
         try {
-            allResultsTerm = strategoRuntime.invoke(strategy, action, new IOAgent());
+            allResultsTerm = strategoRuntime.invoke(strategyId, action, new IOAgent());
         } catch(StrategoException e) {
             throw new ConstraintAnalyzerException(e);
         }
         if(allResultsTerm == null) {
-            throw new ConstraintAnalyzerException("Constraint analysis strategy '" + strategy + "' failed");
+            throw new ConstraintAnalyzerException("Constraint analysis strategy '" + strategyId + "' failed");
         }
 
         final @Nullable List<IStrategoTerm> allResultTerms = match(allResultsTerm, "AnalysisResult", 1);
@@ -177,71 +203,100 @@ public class ConstraintAnalyzer {
             }
             final IStrategoTerm resourceTerm = entry.getSubterm(0);
             final IStrategoTerm resultTerm = entry.getSubterm(1);
-            if(!Tools.isTermString(resourceTerm)) {
+            if(!(resourceTerm instanceof StrategoResourceKey)) {
                 throw new ConstraintAnalyzerException(
-                    "Expected resource string as first component, got " + resourceTerm);
+                    "Expected StrategoResourceKey as first component, got " + resourceTerm);
             }
-            final String resource = Tools.asJavaString(resourceTerm);
-            results.put(resource, resultTerm);
+            final ResourceKey resource = ((StrategoResourceKey) resourceTerm).value;
+            resultTerms.put(resource, resultTerm);
         }
 
-        /*******************************
-         * 3. Process analysis results *
-         *******************************/
-
-        // call expects with result
-        for(Map.Entry<String, IStrategoTerm> entry : results.entrySet()) {
-            final String resource = entry.getKey();
-            final IStrategoTerm result = entry.getValue();
-            if(expects.containsKey(resource)) {
-                expects.get(resource).processResultTerm(result);
-            } else {
-                logger.warn("Got result for invalid file.");
-            }
-        }
-
-        // check coverage
-        for(Map.Entry<ResourceKey, IStrategoTerm> entry : addedOrChanged.entrySet()) {
-            final ResourceKey resource = entry.getKey();
-            if(!results.containsKey(resource)) {
-                expects.get(resource).addFailMessage("Missing analysis result");
-            }
-        }
-
-        /**************************************
-         * 4. Globally collect error messages *
-         **************************************/
+        /// 3. Process analysis results and collect messages.
 
         final MessagesBuilder messagesBuilder = new MessagesBuilder();
-        for(Map.Entry<String, Expect> entry : expects.entrySet()) {
-            final Expect expect = entry.getValue();
-            messagesBuilder.addMessages(expect.messagesBuilder);
-            messages.putAll(expect.messages);
+
+        // Process result terms, updating the result cache.
+        for(Map.Entry<ResourceKey, IStrategoTerm> entry : resultTerms.entrySet()) {
+            final ResourceKey resource = entry.getKey();
+            final IStrategoTerm resultTerm = entry.getValue();
+            if(expects.containsKey(resource)) {
+                expects.get(resource).processResultTerm(resultTerm, messagesBuilder);
+            } else {
+                logger.warn("Got result for an invalid resource");
+            }
         }
+
+        // Check if all input resources have been covered.
+        for(Map.Entry<ResourceKey, IStrategoTerm> entry : addedOrChangedAsts.entrySet()) {
+            final ResourceKey resource = entry.getKey();
+            if(!resultTerms.containsKey(resource)) {
+                expects.get(resource).addFailMessage("Missing analysis result", messagesBuilder);
+            }
+        }
+
+        /// 4. Build and return result object.
+
+        final HashMap<ResourceKey, Result> results = new HashMap<>(asts.size());
+        for(ResourceKey resource : addedOrChangedAsts.keySet()) {
+            final @Nullable Result result = resultCache.get(resource);
+            if(result != null) {
+                results.put(resource, result);
+            } else {
+                results.put(resource, new Result());
+            }
+        }
+        return new MultiFileResult(results, messagesBuilder.build());
     }
 
 
-    static class Cache {
-        final IStrategoTerm ast;
-        final IStrategoTerm analysis;
+    static class ResultCache {
+        final HashMap<ResourceKey, Result> map = new HashMap<>();
 
-        Cache(IStrategoTerm ast, IStrategoTerm analysis) {
-            this.ast = ast;
-            this.analysis = analysis;
+        boolean containsKey(ResourceKey resource) {
+            return map.containsKey(resource);
         }
 
-        Cache(Cache cache, IStrategoTerm analysis) {
-            this.ast = cache.ast;
-            this.analysis = analysis;
+        @Nullable Result get(ResourceKey resource) {
+            return map.get(resource);
+        }
+
+        Set<Entry<ResourceKey, Result>> entrySet() {
+            return map.entrySet();
+        }
+
+        void update(ResourceKey resource, IStrategoTerm ast, IStrategoTerm analysis) {
+            map.put(resource, new Result(ast, analysis));
+        }
+
+        void updateAst(ResourceKey resource, IStrategoTerm ast) {
+            final @Nullable Result result = map.get(resource);
+            if(result == null) {
+                map.put(resource, new Result(ast, null));
+            } else {
+                map.put(resource, new Result(ast, result.analysis));
+            }
+        }
+
+        void updateAnalysis(ResourceKey resource, IStrategoTerm analysis) {
+            final @Nullable Result result = map.get(resource);
+            if(result == null) {
+                map.put(resource, new Result(null, analysis));
+            } else {
+                map.put(resource, new Result(result.ast, analysis));
+            }
+        }
+
+        void remove(ResourceKey resource) {
+            map.remove(resource);
         }
     }
 
 
     abstract class Expect {
-        final ResourceKey resourceKey;
+        final ResourceKey resource;
 
-        Expect(ResourceKey resourceKey) {
-            this.resourceKey = resourceKey;
+        Expect(ResourceKey resource) {
+            this.resource = resource;
         }
 
         void addResultMessages(IStrategoTerm errors, IStrategoTerm warnings, IStrategoTerm notes, MessagesBuilder messagesBuilder) {
@@ -251,14 +306,10 @@ public class ConstraintAnalyzer {
         }
 
         void addFailMessage(String text, MessagesBuilder messagesBuilder) {
-            messagesBuilder.addMessage(text, Severity.Error, resourceKey);
+            messagesBuilder.addMessage(text, Severity.Error, resource);
         }
 
-        /**
-         * Process given {@code resultTerm}, adding messages to given {@code messagesBuilder}, returning the analyzed
-         * AST, or null if none.
-         */
-        abstract @Nullable IStrategoTerm processResultTerm(IStrategoTerm resultTerm, MessagesBuilder messagesBuilder);
+        abstract void processResultTerm(IStrategoTerm resultTerm, MessagesBuilder messagesBuilder);
     }
 
     class Full extends Expect {
@@ -266,22 +317,19 @@ public class ConstraintAnalyzer {
             super(resourceKey);
         }
 
-        @Override
-        public @Nullable IStrategoTerm processResultTerm(IStrategoTerm resultTerm, MessagesBuilder messagesBuilder) {
+        @Override public void processResultTerm(IStrategoTerm resultTerm, MessagesBuilder messagesBuilder) {
             final @Nullable List<IStrategoTerm> results;
             if((results = match(resultTerm, "Full", 5)) != null) {
                 final IStrategoTerm ast = results.get(0);
-                final IStrategoTerm analysisTerm = results.get(1);
+                final IStrategoTerm analysis = results.get(1);
                 addResultMessages(results.get(2), results.get(3), results.get(4), messagesBuilder);
-                resultCache.put(resourceKey, analysisTerm);
-                return ast;
+                resultCache.update(resource, ast, analysis);
             } else if(match(resultTerm, "Failed", 0) != null) {
                 addFailMessage("Analysis failed", messagesBuilder);
-                resultCache.remove(resourceKey);
+                resultCache.remove(resource);
             } else {
                 addFailMessage("Analysis returned incorrect result", messagesBuilder);
             }
-            return null;
         }
     }
 
@@ -290,20 +338,18 @@ public class ConstraintAnalyzer {
             super(resourceKey);
         }
 
-        @Override
-        public @Nullable IStrategoTerm processResultTerm(IStrategoTerm resultTerm, MessagesBuilder messagesBuilder) {
+        @Override public void processResultTerm(IStrategoTerm resultTerm, MessagesBuilder messagesBuilder) {
             final @Nullable List<IStrategoTerm> results;
             if((results = match(resultTerm, "Update", 4)) != null) {
-                final IStrategoTerm analysisTerm = results.get(0);
+                final IStrategoTerm analysis = results.get(0);
                 addResultMessages(results.get(1), results.get(2), results.get(3), messagesBuilder);
-                resultCache.put(resourceKey, analysisTerm);
+                resultCache.updateAnalysis(resource, analysis);
             } else if(match(resultTerm, "Failed", 0) != null) {
                 addFailMessage("Analysis failed", messagesBuilder);
-                resultCache.remove(resourceKey);
+                resultCache.remove(resource);
             } else {
                 addFailMessage("Analysis returned incorrect result", messagesBuilder);
             }
-            return null; // TODO: always returns null?
         }
     }
 
@@ -312,31 +358,38 @@ public class ConstraintAnalyzer {
             super(resourceKey);
         }
 
-        @Override public IStrategoTerm processResultTerm(IStrategoTerm resultTerm, MessagesBuilder messagesBuilder) {
+        @Override public void processResultTerm(IStrategoTerm resultTerm, MessagesBuilder messagesBuilder) {
             final @Nullable List<IStrategoTerm> results;
             if((results = match(resultTerm, "Full", 5)) != null) {
-                final IStrategoTerm analysisTerm = results.get(1);
+                final IStrategoTerm analysis = results.get(1);
                 addResultMessages(results.get(2), results.get(3), results.get(4), messagesBuilder);
-                resultCache.put(resourceKey, analysisTerm);
+                resultCache.updateAnalysis(resource, analysis);
             } else if(match(resultTerm, "Failed", 0) != null) {
                 addFailMessage("Analysis failed", messagesBuilder);
-                resultCache.remove(resourceKey);
+                resultCache.remove(resource);
             } else {
                 addFailMessage("Analysis returned incorrect result", messagesBuilder);
             }
-            return null; // TODO: always returns null?
         }
     }
 
 
-    protected IStrategoTerm build(String op, IStrategoTerm... subterms) {
+    private IStrategoTerm appl(String op, IStrategoTerm... subterms) {
         return termFactory.makeAppl(termFactory.makeConstructor(op, subterms.length), subterms);
     }
 
-    protected @Nullable List<IStrategoTerm> match(@Nullable IStrategoTerm term, String op, int n) {
+    private IStrategoTerm tuple(IStrategoTerm... subterms) {
+        return termFactory.makeTuple(subterms);
+    }
+
+    private StrategoResourceKey blob(ResourceKey resource) {
+        return new StrategoResourceKey(resource);
+    }
+
+    private @Nullable List<IStrategoTerm> match(@Nullable IStrategoTerm term, String op, int n) {
         if(term == null || !Tools.isTermAppl(term) || !Tools.hasConstructor((IStrategoAppl) term, op, n)) {
             return null;
         }
-        return ImmutableList.copyOf(term.getAllSubterms());
+        return Arrays.asList(term.getAllSubterms());
     }
 }
