@@ -15,8 +15,8 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TigerStrategoRuntimeBuilderTest {
-    private final StrategoRuntime runtime = TigerStrategoRuntimeBuilder.fromClassLoaderResources().build();
     private final TigerParser parser = new TigerParser(TigerParseTable.fromClassLoaderResources());
+    private final StrategoRuntime runtime = TigerStrategoRuntimeBuilder.fromClassLoaderResources().build();
 
     TigerStrategoRuntimeBuilderTest() throws StrategoException, IOException, JSGLR1ParseTableException {}
 

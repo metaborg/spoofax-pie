@@ -5,6 +5,7 @@ import mb.common.token.Token;
 import mb.jsglr.common.ResourceKeyAttachment;
 import mb.jsglr.common.TokenUtil;
 import mb.resource.ResourceKey;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.jsglr.client.Disambiguator;
@@ -42,7 +43,11 @@ public class JSGLR1Parser {
         disambiguator.setHeuristicFilters(false);
     }
 
-    public JSGLR1ParseResult parse(String text, String startSymbol, ResourceKey resourceKey) throws InterruptedException {
+    public JSGLR1ParseResult parse(String text, String startSymbol) throws InterruptedException {
+        return parse(text, startSymbol, null);
+    }
+
+    public JSGLR1ParseResult parse(String text, String startSymbol, @Nullable ResourceKey resource) throws InterruptedException {
         try {
             final SGLRParseResult result = parser.parse(text, null, startSymbol);
             if(result.output == null) {
@@ -52,7 +57,9 @@ public class JSGLR1Parser {
                 throw new RuntimeException("BUG: parser returned an output that is not an instance of IStrategoTerm");
             }
             final IStrategoTerm ast = (IStrategoTerm) result.output;
-            ResourceKeyAttachment.setResourceKey(ast, resourceKey);
+            if(resource != null) {
+                ResourceKeyAttachment.setResourceKey(ast, resource);
+            }
             final ArrayList<Token> tokenStream = TokenUtil.extract(ast);
             final MessagesUtil messagesUtil = new MessagesUtil(true, false, parser.getCollectedErrors());
             messagesUtil.gatherNonFatalErrors(ast);

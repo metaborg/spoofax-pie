@@ -24,6 +24,6 @@ class TigerParserTest {
         assertEquals(output.ast, termFactory.makeAppl(termFactory.makeConstructor("Mod", 1),
             termFactory.makeAppl(termFactory.makeConstructor("Int", 1), termFactory.makeString("1"))));
         assertNotNull(output.tokens);
-        assertTrue(output.messages.getMessages().isEmpty());
+        assertTrue(output.messages.isEmpty());
     }
 }

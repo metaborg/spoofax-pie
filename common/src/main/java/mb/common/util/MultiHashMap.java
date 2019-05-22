@@ -28,8 +28,64 @@ public class MultiHashMap<K, V> implements Serializable {
     }
 
 
+    public int size() {
+        return map.size();
+    }
+
+    public boolean isEmpty() {
+        return map.isEmpty();
+    }
+
     public ArrayList<V> get(K key) {
         return map.computeIfAbsent(key, k -> new ArrayList<>());
+    }
+
+    public boolean containsKey(K key) {
+        return map.containsKey(key);
+    }
+
+    public void put(@Nullable K key, V value) {
+        map.computeIfAbsent(key, k -> new ArrayList<>()).add(value);
+    }
+
+    public void putAll(@Nullable K key, Collection<? extends V> values) {
+        map.computeIfAbsent(key, k -> new ArrayList<>()).addAll(values);
+    }
+
+    public void putAll(Map<? extends K, ? extends Collection<? extends V>> mapping) {
+        for(Entry<? extends K, ? extends Collection<? extends V>> entry : mapping.entrySet()) {
+            final K key = entry.getKey();
+            final Collection<? extends V> values = entry.getValue();
+            putAll(key, values);
+        }
+    }
+
+    public void putAll(MultiHashMap<K, V> mapping) {
+        putAll(mapping.map);
+    }
+
+    public void replaceAll(@Nullable K key, ArrayList<V> values) {
+        map.put(key, values);
+    }
+
+    public void replaceAll(Map<? extends K, ArrayList<V>> mapping) {
+        for(Entry<? extends K, ArrayList<V>> entry : mapping.entrySet()) {
+            final K key = entry.getKey();
+            final ArrayList<V> values = entry.getValue();
+            replaceAll(key, values);
+        }
+    }
+
+    public void replaceAll(MultiHashMap<K, V> mapping) {
+        replaceAll(mapping.map);
+    }
+
+    public void removeAll(K key) {
+        map.remove(key);
+    }
+
+    public void clear() {
+        map.clear();
     }
 
     public Set<K> keySet() {
@@ -44,7 +100,8 @@ public class MultiHashMap<K, V> implements Serializable {
         return map.entrySet();
     }
 
-    public HashMap<K, ArrayList<V>> getAll() {
+
+    public HashMap<K, ArrayList<V>> getInnerMap() {
         return map;
     }
 
@@ -63,52 +120,5 @@ public class MultiHashMap<K, V> implements Serializable {
                 action.accept(key, value);
             }
         }
-    }
-
-
-    public void add(@Nullable K key, V value) {
-        map.computeIfAbsent(key, k -> new ArrayList<>()).add(value);
-    }
-
-    public void addAll(@Nullable K key, Collection<? extends V> values) {
-        map.computeIfAbsent(key, k -> new ArrayList<>()).addAll(values);
-    }
-
-    public void addAll(Map<? extends K, ? extends Collection<? extends V>> mapping) {
-        for(Entry<? extends K, ? extends Collection<? extends V>> entry : mapping.entrySet()) {
-            final K key = entry.getKey();
-            final Collection<? extends V> values = entry.getValue();
-            addAll(key, values);
-        }
-    }
-
-    public void addAll(MultiHashMap<K, V> mapping) {
-        addAll(mapping.map);
-    }
-
-
-    public void replaceAll(@Nullable K key, ArrayList<V> values) {
-        map.put(key, values);
-    }
-
-    public void replaceAll(Map<? extends K, ArrayList<V>> mapping) {
-        for(Entry<? extends K, ArrayList<V>> entry : mapping.entrySet()) {
-            final K key = entry.getKey();
-            final ArrayList<V> values = entry.getValue();
-            replaceAll(key, values);
-        }
-    }
-
-    public void replaceAll(MultiHashMap<K, V> mapping) {
-        replaceAll(mapping.map);
-    }
-
-
-    public void removeAll(K key) {
-        map.remove(key);
-    }
-
-    public void clear() {
-        map.clear();
     }
 }

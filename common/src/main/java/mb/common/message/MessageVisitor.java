@@ -5,9 +5,9 @@ import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface MessageVisitor {
-    boolean regionOrigin(String text, @Nullable Throwable exception, Severity severity, ResourceKey key, Region region);
+    boolean regionOrigin(String text, @Nullable Throwable exception, Severity severity, ResourceKey resource, Region region);
 
-    boolean resourceOrigin(String text, @Nullable Throwable exception, Severity severity, ResourceKey key);
+    boolean resourceOrigin(String text, @Nullable Throwable exception, Severity severity, ResourceKey resource);
 
     boolean noOrigin(String text, @Nullable Throwable exception, Severity severity);
 }

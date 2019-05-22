@@ -1,9 +1,7 @@
 package mb.spoofax.eclipse.pie;
 
-import mb.common.message.KeyedMessages;
-import mb.common.message.MessagesBuilder;
-import mb.common.message.Message;
 import mb.common.message.Messages;
+import mb.common.message.MessagesBuilder;
 import mb.common.style.Color;
 import mb.common.style.Styling;
 import mb.log.api.Logger;
@@ -27,7 +25,6 @@ import org.eclipse.jface.text.TextPresentation;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
-import java.util.Map.Entry;
 
 public class WorkspaceUpdate {
     public static final LockRule lock = new LockRule("Workspace update lock");
@@ -37,7 +34,7 @@ public class WorkspaceUpdate {
 
     private final ArrayList<IResource> clear = new ArrayList<>();
     private final ArrayList<IResource> clearRecursively = new ArrayList<>();
-    private final MessagesBuilder<IResource> keyedMessagesBuilder = new MessagesBuilder<>();
+    private final MessagesBuilder messagesBuilder = new MessagesBuilder();
     private final ArrayList<StyleUpdate> styleUpdates = new ArrayList<>();
 
 
@@ -56,13 +53,12 @@ public class WorkspaceUpdate {
     }
 
 
-    public void addMessages(IResource resource, Messages messages) {
-        keyedMessagesBuilder.addMessages(resource, messages);
+    public void addMessages(Messages messages) {
+        messagesBuilder.addMessages(messages);
     }
 
-    public void replaceMessages(IResource resource, Messages messages) {
-        clear.add(resource);
-        keyedMessagesBuilder.replaceMessages(resource, messages);
+    public void replaceMessages(Messages messages) {
+        messagesBuilder.replaceMessages(messages);
     }
 
 
@@ -96,32 +92,24 @@ public class WorkspaceUpdate {
                     return StatusUtil.cancel();
                 }
 
-                final KeyedMessages<IResource> keyedMessages = keyedMessagesBuilder.build();
+                final Messages messages = messagesBuilder.build();
 
                 try {
-                    final ICoreRunnable parseMarkerUpdater = new IWorkspaceRunnable() {
-                        @Override public void run(@Nullable IProgressMonitor workspaceMonitor) throws CoreException {
-                            for(IResource resource : clearRecursively) {
-                                if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return;
-                                logger.trace("Clearing messages for {}, recursively", resource);
-                                MarkerUtil.clearAllRec(resource);
-                            }
-                            for(IResource resource : clear) {
-                                if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return;
-                                logger.trace("Clearing messages for {}", resource);
-                                MarkerUtil.clearAll(resource);
-                            }
-                            for(Entry<IResource, ArrayList<Message>> entry : keyedMessages.messages().entrySet()) {
-                                if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return;
-                                final IResource resource = entry.getKey();
-                                logger.trace("Updating messages for {}", resource);
-                                for(Message message : entry.getValue()) {
-                                    if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return;
-                                    logger.trace("Adding message {} for {}", message, resource);
-                                    MarkerUtil.createMarker(resource, message);
-                                }
-                            }
+                    final ICoreRunnable parseMarkerUpdater = (IWorkspaceRunnable) workspaceMonitor -> {
+                        for(IResource resource : clearRecursively) {
+                            if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return;
+                            MarkerUtil.clearAllRec(resource);
                         }
+                        for(IResource resource : clear) {
+                            if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return;
+                            MarkerUtil.clearAll(resource);
+                        }
+                        messages.accept((text, exception, severity, resource, region) -> {
+                            if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return false;
+                            // TODO: resolve ResourceKey to IResource
+                            MarkerUtil.createMarker(text, severity, resource, region);
+                            return true;
+                        });
                     };
                     ResourcesPlugin.getWorkspace().run(parseMarkerUpdater, rule, IWorkspace.AVOID_UPDATE, monitor);
                 } catch(CoreException e) {
@@ -133,7 +121,6 @@ public class WorkspaceUpdate {
                         return StatusUtil.cancel();
                     }
                     final SpoofaxEditor editor = styleUpdate.editor;
-                    logger.trace("Updating syntax styling for {}", editor);
                     editor.setStyleAsync(styleUpdate.textPresentation, styleUpdate.text, monitor);
                 }
 

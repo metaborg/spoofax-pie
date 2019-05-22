@@ -19,11 +19,11 @@ import javax.inject.Inject;
 import java.net.URI;
 import java.util.Arrays;
 
-public class FileUtil {
+public class ResourceUtil {
     private final Logger logger;
     private final IWorkspaceRoot root;
 
-    @Inject public FileUtil(LoggerFactory loggerFactory) {
+    @Inject public ResourceUtil(LoggerFactory loggerFactory) {
         this.logger = loggerFactory.create(getClass());
         this.root = ResourcesPlugin.getWorkspace().getRoot();
     }

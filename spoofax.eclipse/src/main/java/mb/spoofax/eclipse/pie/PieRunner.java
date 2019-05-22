@@ -73,7 +73,8 @@ public class PieRunner {
             // Set observer for messages task, and execute it if it has not been executed yet.
             final Task<Messages> messagesTask = languageInstance.createMessagesTask(resourceKey);
             pie.setObserver(messagesTask, (messages) -> {
-                workspaceUpdate.replaceMessages(file, messages);
+                workspaceUpdate.clearMessages(file);
+                workspaceUpdate.replaceMessages(messages);
             });
             if(!pie.hasBeenExecuted(messagesTask)) {
                 session.requireTopDown(messagesTask, monitorCancelled(monitor));

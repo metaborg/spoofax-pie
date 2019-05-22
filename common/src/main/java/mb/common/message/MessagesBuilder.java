@@ -13,53 +13,53 @@ public class MessagesBuilder {
 
 
     public void addMessage(String text, @Nullable Throwable exception, Severity severity, @Nullable ResourceKey resourceKey, @Nullable Region region) {
-        messages.add(resourceKey, new Message(text, exception, severity, region));
+        messages.put(resourceKey, new Message(text, exception, severity, region));
     }
 
     public void addMessage(String text, Severity severity, @Nullable ResourceKey resourceKey, @Nullable Region region) {
-        messages.add(resourceKey, new Message(text, severity, region));
+        messages.put(resourceKey, new Message(text, severity, region));
     }
 
     public void addMessage(String text, @Nullable Throwable exception, Severity severity, @Nullable ResourceKey resourceKey) {
-        messages.add(resourceKey, new Message(text, exception, severity, null));
+        messages.put(resourceKey, new Message(text, exception, severity, null));
     }
 
     public void addMessage(String text, Severity severity, @Nullable ResourceKey resourceKey) {
-        messages.add(resourceKey, new Message(text, severity));
+        messages.put(resourceKey, new Message(text, severity));
     }
 
     public void addMessage(String text, @Nullable Throwable exception, Severity severity) {
-        messages.add(null, new Message(text, exception, severity, null));
+        messages.put(null, new Message(text, exception, severity, null));
     }
 
     public void addMessage(String text, Severity severity) {
-        messages.add(null, new Message(text, severity));
+        messages.put(null, new Message(text, severity));
     }
 
 
     public void addMessage(Message message) {
-        this.messages.add(null, message);
+        this.messages.put(null, message);
     }
 
     public void addMessages(Collection<? extends Message> messages) {
-        this.messages.addAll(null, messages);
+        this.messages.putAll(null, messages);
     }
 
 
     public void addMessage(ResourceKey resourceKey, Message message) {
-        this.messages.add(resourceKey, message);
+        this.messages.put(resourceKey, message);
     }
 
     public void addMessages(ResourceKey resourceKey, Collection<? extends Message> messages) {
-        this.messages.addAll(resourceKey, messages);
+        this.messages.putAll(resourceKey, messages);
     }
 
     public void addMessages(MultiHashMap<ResourceKey, Message> messages) {
-        this.messages.addAll(messages);
+        this.messages.putAll(messages);
     }
 
     public void addMessages(Messages messages) {
-        this.messages.addAll(messages.messages);
+        this.messages.putAll(messages.messages);
     }
 
 

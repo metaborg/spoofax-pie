@@ -11,9 +11,11 @@ dependencies {
   api(project(":jsglr1.common"))
   api(project(":esv.common"))
   api(project(":stratego.common"))
+  api(project(":constraint.common"))
   implementation("org.metaborg:strategoxt-min-jar")
 
   compileOnly("org.checkerframework:checker-qual-android")
+
   testCompileOnly("org.checkerframework:checker-qual-android")
 }
 

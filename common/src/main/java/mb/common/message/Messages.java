@@ -18,16 +18,24 @@ public class Messages implements Serializable {
     }
 
 
+    public int size() {
+        return messages.size();
+    }
+
+    public boolean isEmpty() {
+        return messages.isEmpty();
+    }
+
     public void accept(MessageVisitor visitor) {
         for(Entry<@Nullable ResourceKey, ArrayList<Message>> entry : messages.entrySet()) {
-            final @Nullable ResourceKey resourceKey = entry.getKey();
+            final @Nullable ResourceKey resource = entry.getKey();
             for(Message msg : entry.getValue()) {
-                if(resourceKey == null) {
+                if(resource == null) {
                     if(!visitor.noOrigin(msg.text, msg.exception, msg.severity)) return;
                 } else if(msg.region == null) {
-                    if(!visitor.resourceOrigin(msg.text, msg.exception, msg.severity, resourceKey)) return;
+                    if(!visitor.resourceOrigin(msg.text, msg.exception, msg.severity, resource)) return;
                 } else {
-                    if(!visitor.regionOrigin(msg.text, msg.exception, msg.severity, msg.region, resourceKey)) return;
+                    if(!visitor.regionOrigin(msg.text, msg.exception, msg.severity, resource, msg.region)) return;
                 }
             }
         }
@@ -35,9 +43,9 @@ public class Messages implements Serializable {
 
     public void accept(GenericMessageVisitor visitor) {
         for(Entry<@Nullable ResourceKey, ArrayList<Message>> entry : messages.entrySet()) {
-            final @Nullable ResourceKey resourceKey = entry.getKey();
+            final @Nullable ResourceKey resource = entry.getKey();
             for(Message msg : entry.getValue()) {
-                if(!visitor.message(msg.text, msg.exception, msg.severity, msg.region, resourceKey)) return;
+                if(!visitor.message(msg.text, msg.exception, msg.severity, resource, msg.region)) return;
             }
         }
     }
