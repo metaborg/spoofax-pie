@@ -3,6 +3,9 @@ package mb.spoofax.eclipse.resource;
 import mb.resource.ReadableResource;
 import mb.resource.Resource;
 import mb.resource.ResourceKey;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension4;
 
@@ -12,14 +15,16 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
-public class EclipseDocumentResource<D extends IDocument & IDocumentExtension4> implements Resource, ReadableResource {
+public class EclipseDocumentEclipseResource<D extends IDocument & IDocumentExtension4> implements Resource, ReadableResource, WrapsEclipseResource {
     private final String portablePathString;
     private final D document;
+    private final @Nullable IFile file;
 
 
-    public EclipseDocumentResource(String portablePathString, D document) {
+    public EclipseDocumentEclipseResource(String portablePathString, D document, @Nullable IFile file) {
         this.portablePathString = portablePathString;
         this.document = document;
+        this.file = file;
     }
 
 
@@ -61,10 +66,15 @@ public class EclipseDocumentResource<D extends IDocument & IDocumentExtension4> 
     }
 
 
+    @Override public @Nullable IResource getWrappedEclipseResource() {
+        return file;
+    }
+
+
     @Override public boolean equals(Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
-        final EclipseDocumentResource that = (EclipseDocumentResource) o;
+        final EclipseDocumentEclipseResource that = (EclipseDocumentEclipseResource) o;
         return portablePathString.equals(that.portablePathString);
     }
 

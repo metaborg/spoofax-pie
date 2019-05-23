@@ -50,7 +50,7 @@ public class PieRunner {
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException {
         final EclipseResourceKey resourceKey = new EclipseResourceKey(file);
-        eclipseResourceRegistry.addDocumentOverride(resourceKey, document);
+        eclipseResourceRegistry.addDocumentOverride(resourceKey, document, file);
         final WorkspaceUpdate workspaceUpdate = workspaceUpdateProvider.get();
 
         try(final PieSession session = languageComponent.newPieSession()) {

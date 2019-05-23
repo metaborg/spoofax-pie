@@ -6,10 +6,13 @@ import mb.common.style.Color;
 import mb.common.style.Styling;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
+import mb.resource.Resource;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
+import mb.spoofax.eclipse.resource.EclipseResourceRegistry;
 import mb.spoofax.eclipse.util.MarkerUtil;
 import mb.spoofax.eclipse.util.StatusUtil;
 import mb.spoofax.eclipse.util.StyleUtil;
+import mb.spoofax.eclipse.util.UncheckedCoreException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
@@ -30,6 +33,7 @@ public class WorkspaceUpdate {
     public static final LockRule lock = new LockRule("Workspace update lock");
 
     private final Logger logger;
+    private final EclipseResourceRegistry resourceRegistry;
     private final StyleUtil styleUtil;
 
     private final ArrayList<IResource> clear = new ArrayList<>();
@@ -38,8 +42,10 @@ public class WorkspaceUpdate {
     private final ArrayList<StyleUpdate> styleUpdates = new ArrayList<>();
 
 
-    @Inject public WorkspaceUpdate(LoggerFactory loggerFactory, StyleUtil styleUtil) {
+    @Inject
+    public WorkspaceUpdate(LoggerFactory loggerFactory, EclipseResourceRegistry resourceRegistry, StyleUtil styleUtil) {
         this.logger = loggerFactory.create(getClass());
+        this.resourceRegistry = resourceRegistry;
         this.styleUtil = styleUtil;
     }
 
@@ -95,21 +101,43 @@ public class WorkspaceUpdate {
                 final Messages messages = messagesBuilder.build();
 
                 try {
-                    final ICoreRunnable parseMarkerUpdater = (IWorkspaceRunnable) workspaceMonitor -> {
-                        for(IResource resource : clearRecursively) {
-                            if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return;
-                            MarkerUtil.clearAllRec(resource);
+                    final ICoreRunnable parseMarkerUpdater = new IWorkspaceRunnable() {
+                        @Override public void run(@Nullable IProgressMonitor workspaceMonitor) throws CoreException {
+                            for(IResource resource : clearRecursively) {
+                                if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return;
+                                MarkerUtil.clearAllRec(resource);
+                            }
+                            for(IResource resource : clear) {
+                                if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return;
+                                MarkerUtil.clearAll(resource);
+                            }
+                            try {
+                                messages.accept((text, exception, severity, resourceKey, region) -> {
+                                    if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return false;
+                                    try {
+                                        if(resourceKey == null) {
+                                            logger.warn(
+                                                "Cannot create marker with text '" + text + "'; it has no corresponding resource");
+                                            return true;
+                                        }
+                                        final Resource resource = resourceRegistry.getResource(resourceKey);
+                                        final @Nullable IResource eclipseResource =
+                                            resourceRegistry.getWrappedEclipseResource(resource);
+                                        if(eclipseResource == null) {
+                                            logger.warn(
+                                                "Cannot create marker with text '" + text + "' onto resource '" + resource + "'; it does not have a corresponding Eclipse resource");
+                                            return true;
+                                        }
+                                        MarkerUtil.createMarker(text, severity, eclipseResource, region);
+                                    } catch(CoreException e) {
+                                        throw new UncheckedCoreException(e);
+                                    }
+                                    return true;
+                                });
+                            } catch(UncheckedCoreException e) {
+                                throw e.getCause();
+                            }
                         }
-                        for(IResource resource : clear) {
-                            if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return;
-                            MarkerUtil.clearAll(resource);
-                        }
-                        messages.accept((text, exception, severity, resource, region) -> {
-                            if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return false;
-                            // TODO: resolve ResourceKey to IResource
-                            MarkerUtil.createMarker(text, severity, resource, region);
-                            return true;
-                        });
                     };
                     ResourcesPlugin.getWorkspace().run(parseMarkerUpdater, rule, IWorkspace.AVOID_UPDATE, monitor);
                 } catch(CoreException e) {

@@ -7,17 +7,16 @@ import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
 
-public class EclipseResource implements Resource, ReadableResource {
+public class EclipseEclipseResource implements Resource, ReadableResource, WrapsEclipseResource {
     private final IResource resource;
 
 
-    public EclipseResource(IResource resource) {
+    public EclipseEclipseResource(IResource resource) {
         this.resource = resource;
     }
 
@@ -64,10 +63,15 @@ public class EclipseResource implements Resource, ReadableResource {
     }
 
 
+    @Override public IResource getWrappedEclipseResource() {
+        return resource;
+    }
+
+
     @Override public boolean equals(Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
-        final EclipseResource that = (EclipseResource) o;
+        final EclipseEclipseResource that = (EclipseEclipseResource) o;
         return resource.equals(that.resource);
     }
 

@@ -6,7 +6,7 @@ import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.eclipse.SpoofaxEclipseComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.pie.PieRunner;
-import mb.spoofax.eclipse.util.ResourceUtil;
+import mb.spoofax.eclipse.util.FileUtil;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -50,7 +50,7 @@ public abstract class SpoofaxEditor extends TextEditor {
     @SuppressWarnings("NullableProblems") private @MonotonicNonNull IJobManager jobManager;
     @SuppressWarnings("NullableProblems") private @MonotonicNonNull LoggerFactory loggerFactory;
     @SuppressWarnings("NullableProblems") private @MonotonicNonNull Logger logger;
-    @SuppressWarnings("NullableProblems") private @MonotonicNonNull ResourceUtil resourceUtil;
+    @SuppressWarnings("NullableProblems") private @MonotonicNonNull FileUtil fileUtil;
     @SuppressWarnings("NullableProblems") private @MonotonicNonNull PieRunner pieRunner;
 
     // Set in createSourceViewer, unset in dispose, may never be null otherwise.
@@ -96,7 +96,7 @@ public abstract class SpoofaxEditor extends TextEditor {
         final SpoofaxEclipseComponent component = SpoofaxPlugin.getComponent();
         this.loggerFactory = component.getLoggerFactory();
         this.logger = loggerFactory.create(getClass());
-        this.resourceUtil = component.getFileUtils();
+        this.fileUtil = component.getFileUtils();
         this.pieRunner = component.getPieRunner();
 
         setDocumentProvider(new SpoofaxDocumentProvider());
@@ -108,7 +108,7 @@ public abstract class SpoofaxEditor extends TextEditor {
         input = getEditorInput();
         document = getDocumentProvider().getDocument(input);
 
-        final @Nullable IFile inputFile = resourceUtil.toFile(input);
+        final @Nullable IFile inputFile = fileUtil.toFile(input);
         if(inputFile != null) {
             this.inputName = inputFile.toString();
             this.file = inputFile;
