@@ -65,12 +65,14 @@ public class ConstraintAnalyzer {
     private final StrategoRuntime strategoRuntime;
     private final ITermFactory termFactory;
     private final String strategyId;
+    private final boolean multifile;
 
 
-    @Inject public ConstraintAnalyzer(StrategoRuntime strategoRuntime, String strategyId) {
+    @Inject public ConstraintAnalyzer(StrategoRuntime strategoRuntime, String strategyId, boolean multifile) {
         this.strategoRuntime = strategoRuntime;
         this.termFactory = strategoRuntime.getTermFactory();
         this.strategyId = strategyId;
+        this.multifile = multifile;
     }
 
 
@@ -86,7 +88,7 @@ public class ConstraintAnalyzer {
         return new SingleFileResult(result.ast, result.analysis, multiFileResult.messages);
     }
 
-    public MultiFileResult analyze(ResourceKey root, HashMap<ResourceKey, IStrategoTerm> asts, ConstraintAnalyzerContext context)
+    public MultiFileResult analyze(@Nullable ResourceKey root, HashMap<ResourceKey, IStrategoTerm> asts, ConstraintAnalyzerContext context)
         throws ConstraintAnalyzerException {
         return doAnalyze(root, asts, context);
     }
@@ -114,7 +116,7 @@ public class ConstraintAnalyzer {
 
         // Root analysis.
         final @Nullable IStrategoTerm rootChange;
-        if(root != null) {
+        if(multifile && root != null) {
             context.registerResource(root);
             final IStrategoTerm ast = mkTuple();
             final IStrategoTerm change;
@@ -162,7 +164,7 @@ public class ConstraintAnalyzer {
         }
 
         // Cached resources.
-        if(root != null) {
+        if(multifile) {
             for(Map.Entry<ResourceKey, Result> entry : context.getResultEntries()) {
                 final ResourceKey resource = entry.getKey();
                 context.registerResource(resource);
@@ -179,7 +181,7 @@ public class ConstraintAnalyzer {
 
         final Map<ResourceKey, IStrategoTerm> resultTerms = new HashMap<>();
         final IStrategoTerm action;
-        if(root != null) {
+        if(multifile) {
             action = mkAppl("AnalyzeMulti", rootChange, termFactory.makeList(changeTerms));
         } else {
             action = mkAppl("AnalyzeSingle", termFactory.makeList(changeTerms));
@@ -269,9 +271,10 @@ public class ConstraintAnalyzer {
         }
 
         void addResultMessages(IStrategoTerm errors, IStrategoTerm warnings, IStrategoTerm notes, MessagesBuilder messagesBuilder) {
-            MessageUtil.addMessagesFromTerm(messagesBuilder, errors, Severity.Error);
-            MessageUtil.addMessagesFromTerm(messagesBuilder, warnings, Severity.Warning);
-            MessageUtil.addMessagesFromTerm(messagesBuilder, notes, Severity.Info);
+            final @Nullable ResourceKey resourceOverride = multifile ? null : resource;
+            MessageUtil.addMessagesFromTerm(messagesBuilder, errors, Severity.Error, resourceOverride);
+            MessageUtil.addMessagesFromTerm(messagesBuilder, warnings, Severity.Warning, resourceOverride);
+            MessageUtil.addMessagesFromTerm(messagesBuilder, notes, Severity.Info, resourceOverride);
         }
 
         void addFailMessage(String text, MessagesBuilder messagesBuilder) {
@@ -359,7 +362,7 @@ public class ConstraintAnalyzer {
     }
 
 
-    private @Nullable List<IStrategoTerm> match(@Nullable IStrategoTerm term, String op, int n) {
+    private static @Nullable List<IStrategoTerm> match(@Nullable IStrategoTerm term, String op, int n) {
         if(term == null || !Tools.isTermAppl(term) || !Tools.hasConstructor((IStrategoAppl) term, op, n)) {
             return null;
         }

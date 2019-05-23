@@ -5,6 +5,6 @@ import mb.stratego.common.StrategoRuntime;
 
 public class TigerConstraintAnalyzer extends ConstraintAnalyzer {
     public TigerConstraintAnalyzer(StrategoRuntime strategoRuntime) {
-        super(strategoRuntime, "editor-analyze");
+        super(strategoRuntime, "editor-analyze", false);
     }
 }

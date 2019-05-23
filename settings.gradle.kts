@@ -27,6 +27,8 @@ include("jsglr2.common")
 include("esv.common")
 include("stratego.common")
 include("constraint.common")
+include("nabl2.common")
+include("statix.common")
 
 include("spoofax.core")
 include("spoofax.cmd")
