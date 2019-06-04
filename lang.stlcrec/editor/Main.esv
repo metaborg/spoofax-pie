@@ -1,0 +1,13 @@
+module Main
+
+imports
+
+  Syntax
+  statix/References
+  Analysis
+
+language
+
+  extensions : stlcrec
+
+  provider : target/metaborg/stratego.ctree

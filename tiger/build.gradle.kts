@@ -1,7 +1,7 @@
 plugins {
   id("org.metaborg.gradle.config.java-library")
   id("org.metaborg.gradle.config.junit-testing")
-  id("de.set.ecj") version "1.4.1" // Use ECJ to speed up compilation of Stratego's generated Java files.
+  id("de.set.ecj") // Use ECJ to speed up compilation of Stratego's generated Java files.
 }
 
 dependencies {
@@ -12,7 +12,7 @@ dependencies {
   api(project(":esv.common"))
   api(project(":stratego.common"))
   api(project(":constraint.common"))
-  
+
   implementation(project(":nabl2.common"))
   implementation("org.metaborg:strategoxt-min-jar")
 

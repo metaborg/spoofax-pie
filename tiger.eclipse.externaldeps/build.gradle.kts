@@ -1,6 +1,6 @@
 plugins {
   id("org.metaborg.gradle.config.java-library")
-  id("biz.aQute.bnd.builder") version "4.1.0"
+  id("biz.aQute.bnd.builder")
   id("org.metaborg.coronium.embedding")
 }
 

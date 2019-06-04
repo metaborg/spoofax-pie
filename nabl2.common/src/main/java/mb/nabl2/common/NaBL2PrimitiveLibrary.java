@@ -1,6 +1,10 @@
 package mb.nabl2.common;
 
 import mb.nabl2.spoofax.primitives.*;
+import mb.nabl2.terms.stratego.primitives.SG_erase_ast_indices;
+import mb.nabl2.terms.stratego.primitives.SG_get_ast_index;
+import mb.nabl2.terms.stratego.primitives.SG_index_ast;
+import mb.nabl2.terms.stratego.primitives.SG_set_ast_index;
 import org.spoofax.interpreter.library.AbstractStrategoOperatorRegistry;
 
 public class NaBL2PrimitiveLibrary extends AbstractStrategoOperatorRegistry {

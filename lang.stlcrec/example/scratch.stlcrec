@@ -1,0 +1,6 @@
+  type point = {x : num, y : num} in 
+  let  mkpoint = fun(x : num) { {x = x, y = x} } in
+  type color = num in
+  type colorpoint = point with {c : color} in
+  let  addColor = fun(c : num) { fun(p : colorpoint) { (p with {c = c}) : colorpoint } } in
+    (addColor 6 (mkpoint 4 with {c = 5})) : colorpoint
