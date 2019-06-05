@@ -43,8 +43,8 @@ public final class StyleUtil {
     public ArrayList<TokenStyle> validateStyling(Styling styling, int length) {
         int offset = -1;
         final ArrayList<TokenStyle> validated = new ArrayList<>();
-        for(TokenStyle tokenStyle : styling.stylePerToken()) {
-            final mb.common.region.Region region = tokenStyle.token().region();
+        for(TokenStyle tokenStyle : styling.getStylePerToken()) {
+            final mb.common.region.Region region = tokenStyle.getToken().getRegion();
             if(offset >= region.startOffset) {
                 logger.warn("Skipping invalid {}, starting offset is greater than offset in previous regions",
                     tokenStyle);
@@ -90,28 +90,28 @@ public final class StyleUtil {
     }
 
     public StyleRange createStyleRange(TokenStyle tokenStyle) {
-        final Style style = tokenStyle.style();
-        final mb.common.region.Region region = tokenStyle.token().region();
+        final Style style = tokenStyle.getStyle();
+        final mb.common.region.Region region = tokenStyle.getToken().getRegion();
 
         final StyleRange styleRange = new StyleRange();
-        final mb.common.style.@Nullable Color foreground = style.color();
+        final mb.common.style.@Nullable Color foreground = style.getColor();
         if(foreground != null) {
             styleRange.foreground = createColor(foreground);
         }
-        final mb.common.style.@Nullable Color background = style.backgroundColor();
+        final mb.common.style.@Nullable Color background = style.getBackgroundColor();
         if(background != null) {
             styleRange.background = createColor(background);
         }
-        if(style.bold()) {
+        if(style.getIsBold()) {
             styleRange.fontStyle |= SWT.BOLD;
         }
-        if(style.italic()) {
+        if(style.getIsItalic()) {
             styleRange.fontStyle |= SWT.ITALIC;
         }
-        if(style.underscore()) {
+        if(style.getIsUnderscore()) {
             styleRange.underline = true;
         }
-        if(style.strikeout()) {
+        if(style.getIsStrikeout()) {
             styleRange.strikeout = true;
         }
 
@@ -122,7 +122,7 @@ public final class StyleUtil {
     }
 
     private Color createColor(mb.common.style.Color color) {
-        final RGB rgb = new RGB(color.red(), color.green(), color.blue());
+        final RGB rgb = new RGB(color.getRed(), color.getGreen(), color.getBlue());
         return colorShare.getColor(rgb);
     }
 

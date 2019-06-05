@@ -1,0 +1,26 @@
+<idea-plugin>
+  <id>tiger</id>
+  <name>Tiger</name>
+  <vendor email="intellij@metaborg.org" url="http://www.spoofax.org/">Spoofax</vendor>
+  <description><![CDATA[Many many changes and just as many bug fixes.]]></description>
+
+  <extensions defaultExtensionNs="com.intellij">
+    <ApplicationLoadListener
+      implementation="mb.tiger.intellij.TigerLoader"
+    />
+    <fileTypeFactory
+      implementation="mb.tiger.intellij.TigerFileTypeFactory"
+    />
+    <lang.syntaxHighlighterFactory
+      language="Tiger"
+      implementationClass="mb.tiger.intellij.syntaxcoloring.TigerSyntaxHighlighterFactory"
+    />
+    <lang.parserDefinition
+      language="Tiger"
+      implementationClass="mb.tiger.intellij.syntaxcoloring.TigerParserDefinition"
+    />
+  </extensions>
+
+  <actions>
+  </actions>
+</idea-plugin>

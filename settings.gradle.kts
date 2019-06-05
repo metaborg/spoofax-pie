@@ -29,12 +29,14 @@ include("statix.common")
 
 include("spoofax.core")
 include("spoofax.cmd")
+include("spoofax.intellij")
 include("spoofax.eclipse")
 include("spoofax.eclipse.externaldeps")
 
 include("tiger")
 include("tiger.spoofax")
 include("tiger.cmd")
+include("tiger.intellij")
 include("tiger.eclipse")
 include("tiger.eclipse.externaldeps")
 

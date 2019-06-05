@@ -5,5 +5,5 @@ import java.util.ArrayList;
 import java.util.List;
 
 public interface Styling extends Serializable {
-    ArrayList<TokenStyle> stylePerToken();
+    ArrayList<TokenStyle> getStylePerToken();
 }

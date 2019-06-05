@@ -5,15 +5,15 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.io.Serializable;
 
 public interface Style extends Serializable {
-    @Nullable Color color();
+    @Nullable Color getColor();
 
-    @Nullable Color backgroundColor();
+    @Nullable Color getBackgroundColor();
 
-    boolean bold();
+    boolean getIsBold();
 
-    boolean italic();
+    boolean getIsItalic();
 
-    boolean underscore();
+    boolean getIsUnderscore();
 
-    boolean strikeout();
+    boolean getIsStrikeout();
 }

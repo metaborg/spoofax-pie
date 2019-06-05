@@ -6,5 +6,6 @@ import mb.pie.api.PieSession;
 public interface LanguageComponent {
     LanguageInstance getLanguageInstance();
 
+    // TODO: Replace by Provider<PieSession>.get() or PieSessionManager.createSession()
     PieSession newPieSession();
 }

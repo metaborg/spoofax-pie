@@ -5,7 +5,7 @@ import mb.common.token.Token;
 import java.io.Serializable;
 
 public interface TokenStyle extends Serializable {
-    Token token();
+    Token getToken();
 
-    Style style();
+    Style getStyle();
 }

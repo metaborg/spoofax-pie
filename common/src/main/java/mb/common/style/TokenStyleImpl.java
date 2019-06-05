@@ -13,11 +13,11 @@ public class TokenStyleImpl implements TokenStyle {
     }
 
 
-    @Override public Token token() {
+    @Override public Token getToken() {
         return token;
     }
 
-    @Override public Style style() {
+    @Override public Style getStyle() {
         return style;
     }
 

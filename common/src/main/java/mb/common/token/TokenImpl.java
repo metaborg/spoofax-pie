@@ -17,15 +17,15 @@ public class TokenImpl implements Token {
         this.associatedTerm = associatedTerm;
     }
 
-    @Override public Region region() {
+    @Override public Region getRegion() {
         return region;
     }
 
-    @Override public TokenType type() {
+    @Override public TokenType getType() {
         return type;
     }
 
-    @Override public @Nullable IStrategoTerm associatedTerm() {
+    @Override public @Nullable IStrategoTerm getAssociatedTerm() {
         return associatedTerm;
     }
 

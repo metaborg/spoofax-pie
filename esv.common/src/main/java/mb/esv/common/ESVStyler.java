@@ -36,7 +36,7 @@ public class ESVStyler {
 
 
     private @Nullable Style tokenStyle(Token token) {
-        final @Nullable IStrategoTerm term = token.associatedTerm();
+        final @Nullable IStrategoTerm term = token.getAssociatedTerm();
         if(term != null) {
             final @Nullable Style style = termStyle(term);
             if(style != null) {
@@ -44,7 +44,7 @@ public class ESVStyler {
             }
         }
 
-        return rules.tokenTypeStyle(token.type());
+        return rules.tokenTypeStyle(token.getType());
     }
 
     private @Nullable Style termStyle(IStrategoTerm term) {

@@ -24,27 +24,27 @@ public class StyleImpl implements Style {
     }
 
 
-    @Override public Color color() {
+    @Override public @Nullable Color getColor() {
         return color;
     }
 
-    @Override public Color backgroundColor() {
+    @Override public @Nullable Color getBackgroundColor() {
         return backgroundColor;
     }
 
-    @Override public boolean bold() {
+    @Override public boolean getIsBold() {
         return bold;
     }
 
-    @Override public boolean italic() {
+    @Override public boolean getIsItalic() {
         return italic;
     }
 
-    @Override public boolean underscore() {
+    @Override public boolean getIsUnderscore() {
         return underscore;
     }
 
-    @Override public boolean strikeout() {
+    @Override public boolean getIsStrikeout() {
         return strikeout;
     }
 

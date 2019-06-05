@@ -7,14 +7,14 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import java.io.Serializable;
 
 public interface Token extends Serializable {
-    Region region();
+    Region getRegion();
 
-    TokenType type();
+    TokenType getType();
 
-    @Nullable IStrategoTerm associatedTerm();
+    @Nullable IStrategoTerm getAssociatedTerm();
 
     default String textPart(String fullText) {
-        final Region region = region();
+        final Region region = getRegion();
         return fullText.substring(region.startOffset, region.endOffset + 1);
     }
 }

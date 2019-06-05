@@ -21,19 +21,19 @@ public class Color implements Serializable {
     }
 
 
-    public int alpha() {
+    public int getAlpha() {
         return (argb >> 24) & 0xFF;
     }
 
-    public int red() {
+    public int getRed() {
         return (argb >> 16) & 0xFF;
     }
 
-    public int green() {
+    public int getGreen() {
         return (argb >> 8) & 0xFF;
     }
 
-    public int blue() {
+    public int getBlue() {
         return (argb >> 0) & 0xFF;
     }
 
@@ -50,6 +50,6 @@ public class Color implements Serializable {
     }
 
     @Override public String toString() {
-        return "Color(" + alpha() + ", " + red() + ", " + green() + ", " + blue() + ")";
+        return "Color(" + getAlpha() + ", " + getRed() + ", " + getGreen() + ", " + getBlue() + ")";
     }
 }

@@ -11,7 +11,7 @@ public class StylingImpl implements Styling {
     }
 
 
-    @Override public ArrayList<TokenStyle> stylePerToken() {
+    @Override public ArrayList<TokenStyle> getStylePerToken() {
         return stylePerToken;
     }
 
