@@ -12,7 +12,7 @@ dependencies {
   api(project(":stratego.common"))
   api(project(":constraint.common"))
 
-  implementation(project(":nabl2.common"))
+  implementation(project(":statix.common"))
   implementation("org.metaborg:strategoxt-min-jar")
 
   compileOnly("org.checkerframework:checker-qual-android")
@@ -24,7 +24,7 @@ dependencies {
 run {
   // Create dependency to spoofax-language artifact.
   val dependency = run {
-    val dep = dependencies.project(":org.metaborg.lang.tiger", Dependency.DEFAULT_CONFIGURATION)
+    val dep = dependencies.project(":lang.stlcrec", Dependency.DEFAULT_CONFIGURATION)
     dep.isTransitive = false // Don't care about transitive dependencies, just want the Tiger spoofax-language artifact.
     dep.artifact {
       name = dep.name
@@ -42,14 +42,14 @@ run {
     dependsOn(configuration)
     from({ configuration.map { project.zipTree(it) } })  /* Closure inside `from` to defer evaluation until task execution time */
     into("$buildDir/unpacked")
-    include("target/metaborg/editor.esv.af", "target/metaborg/sdf.tbl", "target/metaborg/stratego.jar", "target/metaborg/stratego-javastrat.jar")
+    include("target/metaborg/editor.esv.af", "target/metaborg/sdf.tbl", "target/metaborg/stratego.ctree")
   }
   // Copy resources into `mainSourceSet.java.outputDir` and `testSourceSet.java.outputDir`, so the resources finally end up in the 'mb.tiger' package in the resulting JAR.
   val copySpec = copySpec {
     from("$buildDir/unpacked/target/metaborg")
-    include("editor.esv.af", "sdf.tbl", "stratego.jar", "stratego-javastrat.jar")
+    include("editor.esv.af", "sdf.tbl", "stratego.ctree")
   }
-  val destPackage = "mb/tiger"
+  val destPackage = "mb/stlcrec"
   val syncMainTask = tasks.register<Sync>("syncMainResources") {
     dependsOn(unpackTask)
     with(copySpec)
