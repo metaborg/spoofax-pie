@@ -2,8 +2,6 @@ package mb.spoofax.intellij.resource;
 
 import mb.resource.ResourceKey;
 
-import java.io.Serializable;
-
 public class IntellijResourceKey implements ResourceKey {
     final String url;
 
@@ -13,11 +11,15 @@ public class IntellijResourceKey implements ResourceKey {
     }
 
 
-    @Override public Serializable qualifier() {
+    @Override public String getQualifier() {
         return IntellijResourceRegistry.qualifier;
     }
 
-    @Override public Serializable id() {
+    @Override public String getId() {
+        return url;
+    }
+
+    @Override public String getIdStringRepresentation() {
         return url;
     }
 
@@ -34,6 +36,6 @@ public class IntellijResourceKey implements ResourceKey {
     }
 
     @Override public String toString() {
-        return "#intellij:" + url;
+        return ResourceKey.toStringRepresentation(this);
     }
 }

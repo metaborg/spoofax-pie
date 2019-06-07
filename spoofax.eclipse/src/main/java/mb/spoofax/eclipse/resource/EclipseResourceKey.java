@@ -9,6 +9,7 @@ import java.io.Serializable;
 public class EclipseResourceKey implements ResourceKey {
     final String portablePathString;
 
+
     public EclipseResourceKey(String portablePathString) {
         this.portablePathString = portablePathString;
     }
@@ -21,13 +22,19 @@ public class EclipseResourceKey implements ResourceKey {
         this(resource.getFullPath().toPortableString());
     }
 
-    @Override public Serializable qualifier() {
+
+    @Override public String getQualifier() {
         return EclipseResourceRegistry.qualifier;
     }
 
-    @Override public Serializable id() {
+    @Override public String getId() {
         return portablePathString;
     }
+
+    @Override public String getIdStringRepresentation() {
+        return portablePathString;
+    }
+
 
     @Override public boolean equals(Object o) {
         if(this == o) return true;
@@ -41,6 +48,6 @@ public class EclipseResourceKey implements ResourceKey {
     }
 
     @Override public String toString() {
-        return "#eclipse:" + portablePathString;
+        return ResourceKey.toStringRepresentation(this);
     }
 }

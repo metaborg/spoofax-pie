@@ -7,6 +7,7 @@ dependencies {
 
   api(project(":common"))
 
+  api("org.metaborg:log.api")
   api("org.metaborg:resource")
 
   api("org.metaborg:org.spoofax.terms")

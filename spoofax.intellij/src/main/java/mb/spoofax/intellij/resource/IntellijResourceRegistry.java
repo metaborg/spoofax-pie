@@ -20,15 +20,6 @@ public final class IntellijResourceRegistry implements ResourceRegistry {
         return new IntellijResource(virtualFile);
     }
 
-    public IntellijResource getResource(String url) {
-        final @Nullable VirtualFile file = VirtualFileManager.getInstance().findFileByUrl(url);
-        if(file == null) {
-            throw new ResourceRuntimeException(
-                "Cannot get IntelliJ resource for URL '" + url + "'; no file was found");
-        }
-        return getResource(file);
-    }
-
     public IntellijResource getResource(Document document) {
         final @Nullable VirtualFile file = FileDocumentManager.getInstance().getFile(document);
         if(file == null) {
@@ -48,7 +39,7 @@ public final class IntellijResourceRegistry implements ResourceRegistry {
     }
 
 
-    @Override public Serializable qualifier() {
+    @Override public String qualifier() {
         return qualifier;
     }
 
@@ -59,5 +50,14 @@ public final class IntellijResourceRegistry implements ResourceRegistry {
         }
         final String url = (String) id;
         return getResource(url);
+    }
+
+    @Override public IntellijResource getResource(String id) {
+        final @Nullable VirtualFile file = VirtualFileManager.getInstance().findFileByUrl(id);
+        if(file == null) {
+            throw new ResourceRuntimeException(
+                "Cannot get IntelliJ resource for URL '" + id + "'; no file was found");
+        }
+        return getResource(file);
     }
 }

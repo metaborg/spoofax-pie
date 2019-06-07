@@ -55,7 +55,7 @@ public class EclipseResourceRegistry implements ResourceRegistry {
     }
 
 
-    @Override public Serializable qualifier() {
+    @Override public String qualifier() {
         return qualifier;
     }
 
@@ -73,10 +73,10 @@ public class EclipseResourceRegistry implements ResourceRegistry {
         }
     }
 
-
-    private EclipseEclipseResource getResource(String portablePathString) {
-        return getResource(Path.fromPortableString(portablePathString));
+    @Override public EclipseEclipseResource getResource(String id) {
+        return getResource(Path.fromPortableString(id));
     }
+
 
     private EclipseEclipseResource getResource(IPath path) {
         final @Nullable IResource resource = root.findMember(path);

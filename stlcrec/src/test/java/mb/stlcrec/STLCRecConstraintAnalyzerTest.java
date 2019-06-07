@@ -10,7 +10,6 @@ import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.jsglr1.common.JSGLR1ParseTableException;
 import mb.resource.DefaultResourceKey;
 import mb.resource.ResourceKey;
-import mb.statix.common.StatixPrimitiveLibrary;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -26,14 +25,13 @@ import static org.junit.jupiter.api.Assertions.*;
 @Disabled("Statix does not work outside of Spoofax Core yet")
 class STLCRecConstraintAnalyzerTest {
     private final STLCRecParser parser = new STLCRecParser(STLCRecParseTable.fromClassLoaderResources());
-    private final StrategoRuntime runtime =
-        STLCRecStrategoRuntimeBuilder.fromClassLoaderResources().addLibrary(new StatixPrimitiveLibrary()).build();
+    private final StrategoRuntime runtime = STLCRecStatixStrategoRuntimeBuilder.fromClassLoaderResources().build();
     private final STLCRecConstraintAnalyzer analyzer = new STLCRecConstraintAnalyzer(runtime);
 
     STLCRecConstraintAnalyzerTest() throws IOException, JSGLR1ParseTableException, StrategoException {}
 
     @Test void analyzeSingleErrors() throws InterruptedException, ConstraintAnalyzerException {
-        final ResourceKey resource = new DefaultResourceKey(0, 0);
+        final ResourceKey resource = new DefaultResourceKey("0", "0");
         final JSGLR1ParseResult parsed = parser.parse("1 + nil", "Start", resource);
         assertNotNull(parsed.ast);
         final SingleFileResult result = analyzer.analyze(resource, parsed.ast, new ConstraintAnalyzerContext());
@@ -43,7 +41,7 @@ class STLCRecConstraintAnalyzerTest {
     }
 
     @Test void analyzeSingleSuccess() throws InterruptedException, ConstraintAnalyzerException {
-        final ResourceKey resource = new DefaultResourceKey(0, 0);
+        final ResourceKey resource = new DefaultResourceKey("0", "0");
         final JSGLR1ParseResult parsed = parser.parse("1 + 2", "Start", resource);
         assertNotNull(parsed.ast);
         final SingleFileResult result = analyzer.analyze(resource, parsed.ast, new ConstraintAnalyzerContext());
@@ -53,13 +51,13 @@ class STLCRecConstraintAnalyzerTest {
     }
 
     @Test void analyzeMultipleErrors() throws InterruptedException, ConstraintAnalyzerException {
-        final ResourceKey resource1 = new DefaultResourceKey(0, 1);
+        final ResourceKey resource1 = new DefaultResourceKey("0", "1");
         final JSGLR1ParseResult parsed1 = parser.parse("1 + 1", "Start", resource1);
         assertNotNull(parsed1.ast);
-        final ResourceKey resource2 = new DefaultResourceKey(0, 2);
+        final ResourceKey resource2 = new DefaultResourceKey("0", "2");
         final JSGLR1ParseResult parsed2 = parser.parse("1 + 2", "Start", resource2);
         assertNotNull(parsed2.ast);
-        final ResourceKey resource3 = new DefaultResourceKey(0, 3);
+        final ResourceKey resource3 = new DefaultResourceKey("0", "3");
         final JSGLR1ParseResult parsed3 = parser.parse("1 + nil", "Start", resource3);
         assertNotNull(parsed3.ast);
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
@@ -93,13 +91,13 @@ class STLCRecConstraintAnalyzerTest {
     }
 
     @Test void analyzeMultipleSuccess() throws InterruptedException, ConstraintAnalyzerException {
-        final ResourceKey resource1 = new DefaultResourceKey(0, 1);
+        final ResourceKey resource1 = new DefaultResourceKey("0", "1");
         final JSGLR1ParseResult parsed1 = parser.parse("1 + 1", "Start", resource1);
         assertNotNull(parsed1.ast);
-        final ResourceKey resource2 = new DefaultResourceKey(0, 2);
+        final ResourceKey resource2 = new DefaultResourceKey("0", "2");
         final JSGLR1ParseResult parsed2 = parser.parse("1 + 2", "Start", resource2);
         assertNotNull(parsed2.ast);
-        final ResourceKey resource3 = new DefaultResourceKey(0, 3);
+        final ResourceKey resource3 = new DefaultResourceKey("0", "3");
         final JSGLR1ParseResult parsed3 = parser.parse("1 + 3", "Start", resource3);
         assertNotNull(parsed3.ast);
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();

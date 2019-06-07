@@ -29,7 +29,7 @@ public class ParseStringCommand implements Callable<None> {
     @Override public None call() throws Exception {
         final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
 
-        final StringResource stringResource = new StringResource(stringToParse, 0);
+        final StringResource stringResource = new StringResource(stringToParse, "0");
         stringResourceRegistry.addResource(stringResource);
 
         try(final PieSession session = languageComponent.newPieSession()) {

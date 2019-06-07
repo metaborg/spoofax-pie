@@ -31,7 +31,7 @@ class TigerConstraintAnalyzerTest {
     TigerConstraintAnalyzerTest() throws IOException, JSGLR1ParseTableException, StrategoException {}
 
     @Test void analyzeSingleErrors() throws InterruptedException, ConstraintAnalyzerException {
-        final ResourceKey resource = new DefaultResourceKey(0, 0);
+        final ResourceKey resource = new DefaultResourceKey("0", "0");
         final JSGLR1ParseResult parsed = parser.parse("1 + nil", "Module", resource);
         assertNotNull(parsed.ast);
         final SingleFileResult result = analyzer.analyze(resource, parsed.ast, new ConstraintAnalyzerContext());
@@ -41,7 +41,7 @@ class TigerConstraintAnalyzerTest {
     }
 
     @Test void analyzeSingleSuccess() throws InterruptedException, ConstraintAnalyzerException {
-        final ResourceKey resource = new DefaultResourceKey(0, 0);
+        final ResourceKey resource = new DefaultResourceKey("0", "0");
         final JSGLR1ParseResult parsed = parser.parse("1 + 2", "Module", resource);
         assertNotNull(parsed.ast);
         final SingleFileResult result = analyzer.analyze(resource, parsed.ast, new ConstraintAnalyzerContext());
@@ -51,13 +51,13 @@ class TigerConstraintAnalyzerTest {
     }
 
     @Test void analyzeMultipleErrors() throws InterruptedException, ConstraintAnalyzerException {
-        final ResourceKey resource1 = new DefaultResourceKey(0, 1);
+        final ResourceKey resource1 = new DefaultResourceKey("0", "1");
         final JSGLR1ParseResult parsed1 = parser.parse("1 + 1", "Module", resource1);
         assertNotNull(parsed1.ast);
-        final ResourceKey resource2 = new DefaultResourceKey(0, 2);
+        final ResourceKey resource2 = new DefaultResourceKey("0", "2");
         final JSGLR1ParseResult parsed2 = parser.parse("1 + 2", "Module", resource2);
         assertNotNull(parsed2.ast);
-        final ResourceKey resource3 = new DefaultResourceKey(0, 3);
+        final ResourceKey resource3 = new DefaultResourceKey("0", "3");
         final JSGLR1ParseResult parsed3 = parser.parse("1 + nil", "Module", resource3);
         assertNotNull(parsed3.ast);
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
@@ -91,13 +91,13 @@ class TigerConstraintAnalyzerTest {
     }
 
     @Test void analyzeMultipleSuccess() throws InterruptedException, ConstraintAnalyzerException {
-        final ResourceKey resource1 = new DefaultResourceKey(0, 1);
+        final ResourceKey resource1 = new DefaultResourceKey("0", "1");
         final JSGLR1ParseResult parsed1 = parser.parse("1 + 1", "Module", resource1);
         assertNotNull(parsed1.ast);
-        final ResourceKey resource2 = new DefaultResourceKey(0, 2);
+        final ResourceKey resource2 = new DefaultResourceKey("0", "2");
         final JSGLR1ParseResult parsed2 = parser.parse("1 + 2", "Module", resource2);
         assertNotNull(parsed2.ast);
-        final ResourceKey resource3 = new DefaultResourceKey(0, 3);
+        final ResourceKey resource3 = new DefaultResourceKey("0", "3");
         final JSGLR1ParseResult parsed3 = parser.parse("1 + 3", "Module", resource3);
         assertNotNull(parsed3.ast);
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
