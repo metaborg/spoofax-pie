@@ -46,20 +46,20 @@ run {
   }
   // Copy resources into `mainSourceSet.java.outputDir` and `testSourceSet.java.outputDir`, so the resources finally end up in the 'mb.tiger' package in the resulting JAR.
   val copySpec = copySpec {
-    from("$buildDir/unpacked/target/metaborg")
-    include("editor.esv.af", "sdf.tbl", "stratego.jar", "stratego-javastrat.jar")
+    from("$buildDir/unpacked/")
+    include("target/metaborg/editor.esv.af", "target/metaborg/sdf.tbl", "target/metaborg/stratego.jar", "target/metaborg/stratego-javastrat.jar")
   }
   val destPackage = "mb/tiger"
-  val syncMainTask = tasks.register<Sync>("syncMainResources") {
+  val copyMainTask = tasks.register<Copy>("copyMainResources") {
     dependsOn(unpackTask)
     with(copySpec)
     into(sourceSets.main.get().java.outputDir.resolve(destPackage))
   }
-  tasks.getByName(JavaPlugin.CLASSES_TASK_NAME).dependsOn(syncMainTask)
-  val syncTestTask = tasks.register<Sync>("syncTestResources") {
+  tasks.getByName(JavaPlugin.CLASSES_TASK_NAME).dependsOn(copyMainTask)
+  val copyTestTask = tasks.register<Copy>("copyTestResources") {
     dependsOn(unpackTask)
     with(copySpec)
     into(sourceSets.test.get().java.outputDir.resolve(destPackage))
   }
-  tasks.getByName(JavaPlugin.TEST_CLASSES_TASK_NAME).dependsOn(syncTestTask)
+  tasks.getByName(JavaPlugin.TEST_CLASSES_TASK_NAME).dependsOn(copyTestTask)
 }

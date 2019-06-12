@@ -15,8 +15,9 @@ public class TigerStylingRules implements Serializable {
     }
 
     public static TigerStylingRules fromClassLoaderResources() throws IOException {
-        final String resource = "mb/tiger/editor.esv.af";
-        try(final @Nullable InputStream inputStream = TigerParseTable.class.getClassLoader().getResourceAsStream(resource)) {
+        final String resource = "mb/tiger/target/metaborg/editor.esv.af";
+        try(final @Nullable InputStream inputStream = TigerParseTable.class.getClassLoader().getResourceAsStream(
+            resource)) {
             if(inputStream == null) {
                 throw new RuntimeException(
                     "Cannot create styling rules; cannot find resource '" + resource + "' in classloader resources");
