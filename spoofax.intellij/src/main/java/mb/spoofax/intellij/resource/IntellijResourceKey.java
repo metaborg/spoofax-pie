@@ -1,9 +1,10 @@
 package mb.spoofax.intellij.resource;
 
 import mb.resource.ResourceKey;
+import mb.resource.ResourceKeyConverter;
 
 public class IntellijResourceKey implements ResourceKey {
-    final String url;
+    private final String url;
 
 
     public IntellijResourceKey(String url) {
@@ -16,10 +17,6 @@ public class IntellijResourceKey implements ResourceKey {
     }
 
     @Override public String getId() {
-        return url;
-    }
-
-    @Override public String getIdStringRepresentation() {
         return url;
     }
 
@@ -36,6 +33,6 @@ public class IntellijResourceKey implements ResourceKey {
     }
 
     @Override public String toString() {
-        return ResourceKey.toStringRepresentation(this);
+        return ResourceKeyConverter.toString(getQualifier(), url);
     }
 }

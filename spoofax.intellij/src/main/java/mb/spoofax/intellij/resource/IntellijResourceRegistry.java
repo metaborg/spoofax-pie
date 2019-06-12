@@ -39,10 +39,6 @@ public final class IntellijResourceRegistry implements ResourceRegistry {
     }
 
 
-    @Override public String qualifier() {
-        return qualifier;
-    }
-
     @Override public Resource getResource(Serializable id) {
         if(!(id instanceof String)) {
             throw new ResourceRuntimeException(
@@ -52,12 +48,24 @@ public final class IntellijResourceRegistry implements ResourceRegistry {
         return getResource(url);
     }
 
-    @Override public IntellijResource getResource(String id) {
-        final @Nullable VirtualFile file = VirtualFileManager.getInstance().findFileByUrl(id);
+    @Override public IntellijResource getResource(String idStr) {
+        final @Nullable VirtualFile file = VirtualFileManager.getInstance().findFileByUrl(idStr);
         if(file == null) {
             throw new ResourceRuntimeException(
-                "Cannot get IntelliJ resource for URL '" + id + "'; no file was found");
+                "Cannot get IntelliJ resource for URL '" + idStr + "'; no file was found");
         }
         return getResource(file);
+    }
+
+    @Override public String qualifier() {
+        return qualifier;
+    }
+
+    @Override public String toStringRepresentation(Serializable id) {
+        if(!(id instanceof String)) {
+            throw new ResourceRuntimeException(
+                "Cannot convert identifier '" + id + "' to its string representation; it is not of type String");
+        }
+        return (String) id;
     }
 }

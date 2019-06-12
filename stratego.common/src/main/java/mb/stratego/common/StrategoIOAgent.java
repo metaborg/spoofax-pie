@@ -41,6 +41,7 @@ public class StrategoIOAgent extends IOAgent {
                 inputStream.close();
             if(outputStream != null)
                 outputStream.close();
+            resource.close();
         }
     }
 
@@ -87,6 +88,10 @@ public class StrategoIOAgent extends IOAgent {
         this(resourceService, initialDir, initialDir, stdout, stderr);
     }
 
+    public StrategoIOAgent(LoggerFactory loggerFactory, ResourceService resourceService, HierarchicalResource workingDir, HierarchicalResource definitionDir) {
+        this(resourceService, workingDir, definitionDir, defaultStdout(loggerFactory), defaultStderr(loggerFactory));
+    }
+
     public StrategoIOAgent(LoggerFactory loggerFactory, ResourceService resourceService, HierarchicalResource workingDir, HierarchicalResource definitionDir, OutputStream stdout) {
         this(resourceService, workingDir, definitionDir, stdout, defaultStderr(loggerFactory));
     }
@@ -110,7 +115,7 @@ public class StrategoIOAgent extends IOAgent {
 
 
     @Override public String getWorkingDir() {
-        return workingDir.getKey().toString(); // TODO: resource/key string conversions.
+        return resourceService.toStringRepresentation(workingDir.getKey());
     }
 
     public HierarchicalResource getWorkingDirResource() {
@@ -121,7 +126,7 @@ public class StrategoIOAgent extends IOAgent {
         if(!acceptDirChanges)
             return;
 
-        workingDir = workingDir.appendOrReplaceWithPath(newWorkingDir);
+        workingDir = resourceService.appendOrReplaceWith(workingDir, newWorkingDir);
     }
 
     public void setAbsoluteWorkingDir(HierarchicalResource dir) {
@@ -130,7 +135,7 @@ public class StrategoIOAgent extends IOAgent {
 
 
     @Override public String getDefinitionDir() {
-        return definitionDir.getKey().toString(); // TODO: resource/key string conversions.
+        return resourceService.toStringRepresentation(definitionDir.getKey());
     }
 
     public HierarchicalResource getDefinitionDirResource() {
@@ -141,7 +146,7 @@ public class StrategoIOAgent extends IOAgent {
         if(!acceptDirChanges)
             return;
 
-        definitionDir = definitionDir.appendOrReplaceWithPath(newDefinitionDir);
+        definitionDir = resourceService.appendOrReplaceWith(definitionDir, newDefinitionDir);
     }
 
     public void setAbsoluteDefinitionDir(HierarchicalResource dir) {
@@ -150,7 +155,7 @@ public class StrategoIOAgent extends IOAgent {
 
 
     @Override public String getTempDir() {
-        return tempDir.getKey().toString(); // TODO: resource/key string conversions.
+        return resourceService.toStringRepresentation(tempDir.getKey());
     }
 
     public HierarchicalResource getTempDirResource() {
@@ -240,7 +245,7 @@ public class StrategoIOAgent extends IOAgent {
         boolean writeMode = appendMode || mode.indexOf('w') >= 0;
         boolean clearFile = false;
 
-        final HierarchicalResource resource = workingDir.appendOrReplaceWithPath(fn);
+        final HierarchicalResource resource = resourceService.appendOrReplaceWith(workingDir, fn);
 
         if(writeMode) {
             if(!resource.exists()) {
@@ -300,7 +305,7 @@ public class StrategoIOAgent extends IOAgent {
     }
 
     @Override public String[] readdir(@NonNull String dn) {
-        final HierarchicalResource resource = workingDir.appendOrReplaceWithPath(dn);
+        final HierarchicalResource resource = resourceService.appendOrReplaceWith(workingDir, dn);
         try {
             if(!resource.exists() || !resource.isDirectory()) {
                 return new String[0];
@@ -323,7 +328,7 @@ public class StrategoIOAgent extends IOAgent {
     @Override
     public InputStream openInputStream(@NonNull String fn, boolean isDefinitionFile) {
         final HierarchicalResource dir = isDefinitionFile ? definitionDir : workingDir;
-        final HierarchicalResource file = dir.appendOrReplaceWithPath(fn);
+        final HierarchicalResource file = resourceService.appendOrReplaceWith(dir, fn);
         try {
             return file.newInputStream();
         } catch(IOException e) {
@@ -333,7 +338,7 @@ public class StrategoIOAgent extends IOAgent {
 
 
     @Override public OutputStream openFileOutputStream(@NonNull String fn) {
-        final HierarchicalResource file = workingDir.appendOrReplaceWithPath(fn);
+        final HierarchicalResource file = resourceService.appendOrReplaceWith(workingDir, fn);
         try {
             return file.newOutputStream();
         } catch(IOException e) {
@@ -342,19 +347,7 @@ public class StrategoIOAgent extends IOAgent {
     }
 
     @Override public File openFile(@NonNull String fn) {
-        throw new UnsupportedOperationException("StrategoIOAgent#openFile has not been implemented yet");
-//        final HierarchicalResource resource = workingDir.appendOrReplaceWithPath(fn);
-//        File localResource = resourceService.localPath(resource);
-//        if(localResource == null) {
-//            final File localWorkingDir = resourceService.localPath(workingDir);
-//            if(localWorkingDir == null) {
-//                // Local working directory does not reside on the local file system, just return a File.
-//                return new File(fn);
-//            }
-//            // Could not get a local File using the FileObject interface, fall back to composing Files.
-//            return new File(getAbsolutePath(localWorkingDir.getPath(), fn));
-//        }
-//        return localResource;
+        return new File(fn);
     }
 
     @Override public String createTempFile(String prefix) throws IOException {
@@ -366,7 +359,7 @@ public class StrategoIOAgent extends IOAgent {
     }
 
     @Override public boolean mkdir(@NonNull String fn) {
-        final HierarchicalResource resource = workingDir.appendOrReplaceWithPath(fn);
+        final HierarchicalResource resource = resourceService.appendOrReplaceWith(workingDir, fn);
         try {
             final boolean created = !resource.exists();
             resource.createDirectory();
@@ -377,7 +370,7 @@ public class StrategoIOAgent extends IOAgent {
     }
 
     @Override @Deprecated public boolean mkDirs(@NonNull String dn) {
-        final HierarchicalResource resource = workingDir.appendOrReplaceWithPath(dn);
+        final HierarchicalResource resource = resourceService.appendOrReplaceWith(workingDir, dn);
         try {
             final boolean created = !resource.exists();
             resource.createDirectory(true);
@@ -388,7 +381,7 @@ public class StrategoIOAgent extends IOAgent {
     }
 
     @Override public boolean rmdir(@NonNull String dn) {
-        final HierarchicalResource resource = workingDir.appendOrReplaceWithPath(dn);
+        final HierarchicalResource resource = resourceService.appendOrReplaceWith(workingDir, dn);
         try {
             resource.delete(true);
             return true;
@@ -398,7 +391,7 @@ public class StrategoIOAgent extends IOAgent {
     }
 
     @Override public boolean exists(@NonNull String fn) {
-        final HierarchicalResource resource = workingDir.appendOrReplaceWithPath(fn);
+        final HierarchicalResource resource = resourceService.appendOrReplaceWith(workingDir, fn);
         try {
             return resource.exists();
         } catch(IOException e) {
@@ -407,7 +400,7 @@ public class StrategoIOAgent extends IOAgent {
     }
 
     @Override public boolean readable(@NonNull String fn) {
-        final HierarchicalResource resource = workingDir.appendOrReplaceWithPath(fn);
+        final HierarchicalResource resource = resourceService.appendOrReplaceWith(workingDir, fn);
         try {
             return resource.isReadable();
         } catch(IOException e) {
@@ -416,7 +409,7 @@ public class StrategoIOAgent extends IOAgent {
     }
 
     @Override public boolean writable(@NonNull String fn) {
-        final HierarchicalResource resource = workingDir.appendOrReplaceWithPath(fn);
+        final HierarchicalResource resource = resourceService.appendOrReplaceWith(workingDir, fn);
         try {
             return resource.isWritable();
         } catch(IOException e) {
@@ -425,7 +418,7 @@ public class StrategoIOAgent extends IOAgent {
     }
 
     @Override public boolean isDirectory(@NonNull String dn) {
-        final HierarchicalResource resource = workingDir.appendOrReplaceWithPath(dn);
+        final HierarchicalResource resource = resourceService.appendOrReplaceWith(workingDir, dn);
         try {
             final HierarchicalResourceType type = resource.getType();
             return type == HierarchicalResourceType.Directory;

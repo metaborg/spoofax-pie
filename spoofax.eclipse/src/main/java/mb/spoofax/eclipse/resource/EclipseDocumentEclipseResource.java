@@ -10,6 +10,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension4;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -27,6 +28,9 @@ public class EclipseDocumentEclipseResource<D extends IDocument & IDocumentExten
         this.file = file;
     }
 
+    @Override public void close() throws IOException {
+        // Nothing to close.
+    }
 
     @Override public boolean exists() {
         return true;

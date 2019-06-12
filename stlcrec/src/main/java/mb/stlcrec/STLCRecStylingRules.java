@@ -15,7 +15,7 @@ public class STLCRecStylingRules implements Serializable {
     }
 
     public static STLCRecStylingRules fromClassLoaderResources() throws IOException {
-        final String resource = "mb/stlcrec/editor.esv.af";
+        final String resource = "mb/stlcrec/target/metaborg/editor.esv.af";
         try(final @Nullable InputStream inputStream = STLCRecParseTable.class.getClassLoader().getResourceAsStream(
             resource)) {
             if(inputStream == null) {

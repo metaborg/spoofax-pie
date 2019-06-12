@@ -55,10 +55,6 @@ public class EclipseResourceRegistry implements ResourceRegistry {
     }
 
 
-    @Override public String qualifier() {
-        return qualifier;
-    }
-
     @Override public Resource getResource(Serializable id) {
         if(!(id instanceof String)) {
             throw new ResourceRuntimeException(
@@ -73,8 +69,20 @@ public class EclipseResourceRegistry implements ResourceRegistry {
         }
     }
 
-    @Override public EclipseEclipseResource getResource(String id) {
-        return getResource(Path.fromPortableString(id));
+    @Override public EclipseEclipseResource getResource(String idStr) {
+        return getResource(Path.fromPortableString(idStr));
+    }
+
+    @Override public String qualifier() {
+        return qualifier;
+    }
+
+    @Override public String toStringRepresentation(Serializable id) {
+        if(!(id instanceof String)) {
+            throw new ResourceRuntimeException(
+                "Cannot convert identifier '" + id + "' to its string representation; it is not of type String");
+        }
+        return (String) id;
     }
 
 

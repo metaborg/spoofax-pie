@@ -11,5 +11,7 @@ dependencies {
 
   api("org.metaborg:log.api")
 
+  implementation("org.metaborg:nabl2.terms")
+
   compileOnly("org.checkerframework:checker-qual-android")
 }

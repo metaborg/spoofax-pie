@@ -29,8 +29,7 @@ public class ParseStringCommand implements Callable<None> {
     @Override public None call() throws Exception {
         final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
 
-        final StringResource stringResource = new StringResource(stringToParse, "0");
-        stringResourceRegistry.addResource(stringResource);
+        final StringResource stringResource = stringResourceRegistry.createResource(stringToParse, "0");
 
         try(final PieSession session = languageComponent.newPieSession()) {
             final AstResult astResult = session.requireTopDown(languageInstance.createAstTask(stringResource.key));

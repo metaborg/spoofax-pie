@@ -12,7 +12,9 @@ dependencies {
   api(project(":stratego.common"))
   api(project(":constraint.common"))
 
+  implementation(project(":nabl2.common"))
   implementation(project(":statix.common"))
+  implementation("org.metaborg:log.backend.noop")
   implementation("org.metaborg:strategoxt-min-jar")
 
   compileOnly("org.checkerframework:checker-qual-android")
@@ -42,24 +44,24 @@ run {
     dependsOn(configuration)
     from({ configuration.map { project.zipTree(it) } })  /* Closure inside `from` to defer evaluation until task execution time */
     into("$buildDir/unpacked")
-    include("target/metaborg/editor.esv.af", "target/metaborg/sdf.tbl", "target/metaborg/stratego.ctree")
+    include("target/metaborg/editor.esv.af", "target/metaborg/sdf.tbl", "target/metaborg/stratego.ctree", "src-gen/statix/statics.spec.aterm")
   }
   // Copy resources into `mainSourceSet.java.outputDir` and `testSourceSet.java.outputDir`, so the resources finally end up in the 'mb.tiger' package in the resulting JAR.
   val copySpec = copySpec {
-    from("$buildDir/unpacked/target/metaborg")
-    include("editor.esv.af", "sdf.tbl", "stratego.ctree")
+    from("$buildDir/unpacked/")
+    include("target/metaborg/editor.esv.af", "target/metaborg/sdf.tbl", "target/metaborg/stratego.ctree", "src-gen/statix/statics.spec.aterm")
   }
   val destPackage = "mb/stlcrec"
-  val syncMainTask = tasks.register<Sync>("syncMainResources") {
+  val copyMainTask = tasks.register<Copy>("copyMainResources") {
     dependsOn(unpackTask)
     with(copySpec)
     into(sourceSets.main.get().java.outputDir.resolve(destPackage))
   }
-  tasks.getByName(JavaPlugin.CLASSES_TASK_NAME).dependsOn(syncMainTask)
-  val syncTestTask = tasks.register<Sync>("syncTestResources") {
+  tasks.getByName(JavaPlugin.CLASSES_TASK_NAME).dependsOn(copyMainTask)
+  val copyTestTask = tasks.register<Copy>("copyTestResources") {
     dependsOn(unpackTask)
     with(copySpec)
     into(sourceSets.test.get().java.outputDir.resolve(destPackage))
   }
-  tasks.getByName(JavaPlugin.TEST_CLASSES_TASK_NAME).dependsOn(syncTestTask)
+  tasks.getByName(JavaPlugin.TEST_CLASSES_TASK_NAME).dependsOn(copyTestTask)
 }

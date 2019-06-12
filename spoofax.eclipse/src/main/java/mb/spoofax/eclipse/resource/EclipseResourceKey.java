@@ -1,10 +1,9 @@
 package mb.spoofax.eclipse.resource;
 
 import mb.resource.ResourceKey;
+import mb.resource.ResourceKeyConverter;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
-
-import java.io.Serializable;
 
 public class EclipseResourceKey implements ResourceKey {
     final String portablePathString;
@@ -31,10 +30,6 @@ public class EclipseResourceKey implements ResourceKey {
         return portablePathString;
     }
 
-    @Override public String getIdStringRepresentation() {
-        return portablePathString;
-    }
-
 
     @Override public boolean equals(Object o) {
         if(this == o) return true;
@@ -48,6 +43,6 @@ public class EclipseResourceKey implements ResourceKey {
     }
 
     @Override public String toString() {
-        return ResourceKey.toStringRepresentation(this);
+        return ResourceKeyConverter.toString(getQualifier(), portablePathString);
     }
 }

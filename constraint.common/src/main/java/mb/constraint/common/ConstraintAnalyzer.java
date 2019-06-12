@@ -3,6 +3,9 @@ package mb.constraint.common;
 import mb.common.message.Messages;
 import mb.common.message.MessagesBuilder;
 import mb.common.message.Severity;
+import mb.nabl2.terms.stratego.StrategoTermIndices;
+import mb.nabl2.terms.stratego.TermIndex;
+import mb.nabl2.terms.stratego.TermOrigin;
 import mb.resource.ResourceKey;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
@@ -76,11 +79,11 @@ public class ConstraintAnalyzer {
     }
 
 
-    public SingleFileResult analyze(ResourceKey resource, IStrategoTerm ast, ConstraintAnalyzerContext context)
+    public SingleFileResult analyze(ResourceKey resource, IStrategoTerm ast, ConstraintAnalyzerContext context, IOAgent strategoIOAgent)
         throws ConstraintAnalyzerException {
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>(1);
         asts.put(resource, ast);
-        final MultiFileResult multiFileResult = doAnalyze(null, asts, context);
+        final MultiFileResult multiFileResult = doAnalyze(null, asts, context, strategoIOAgent);
         final @Nullable Result result = multiFileResult.results.get(resource);
         if(result == null) {
             throw new RuntimeException("BUG: no analysis result was found for resource '" + resource + "'");
@@ -88,15 +91,16 @@ public class ConstraintAnalyzer {
         return new SingleFileResult(result.ast, result.analysis, multiFileResult.messages);
     }
 
-    public MultiFileResult analyze(@Nullable ResourceKey root, HashMap<ResourceKey, IStrategoTerm> asts, ConstraintAnalyzerContext context)
+    public MultiFileResult analyze(@Nullable ResourceKey root, HashMap<ResourceKey, IStrategoTerm> asts, ConstraintAnalyzerContext context, IOAgent strategoIOAgent)
         throws ConstraintAnalyzerException {
-        return doAnalyze(root, asts, context);
+        return doAnalyze(root, asts, context, strategoIOAgent);
     }
 
     private MultiFileResult doAnalyze(
         @Nullable ResourceKey root,
         HashMap<ResourceKey, IStrategoTerm> asts,
-        ConstraintAnalyzerContext context
+        ConstraintAnalyzerContext context,
+        IOAgent strategoIOAgent
     ) throws ConstraintAnalyzerException {
         /// 1. Compute changeset from given asts and cache.
 
@@ -118,7 +122,7 @@ public class ConstraintAnalyzer {
         final @Nullable IStrategoTerm rootChange;
         if(multifile && root != null) {
             context.registerResource(root);
-            final IStrategoTerm ast = mkTuple();
+            final IStrategoTerm ast = mkProjectTerm(root);
             final IStrategoTerm change;
             final Expect expect;
             final @Nullable Result cachedResult = context.getResult(root);
@@ -181,7 +185,7 @@ public class ConstraintAnalyzer {
 
         final Map<ResourceKey, IStrategoTerm> resultTerms = new HashMap<>();
         final IStrategoTerm action;
-        if(multifile) {
+        if(multifile && root != null) {
             action = mkAppl("AnalyzeMulti", rootChange, termFactory.makeList(changeTerms));
         } else {
             action = mkAppl("AnalyzeSingle", termFactory.makeList(changeTerms));
@@ -189,7 +193,7 @@ public class ConstraintAnalyzer {
 
         final @Nullable IStrategoTerm allResultsTerm;
         try {
-            allResultsTerm = strategoRuntime.invoke(strategyId, action, new IOAgent());
+            allResultsTerm = strategoRuntime.invoke(strategyId, action, strategoIOAgent);
         } catch(StrategoException e) {
             throw new ConstraintAnalyzerException(e);
         }
@@ -359,6 +363,14 @@ public class ConstraintAnalyzer {
 
     private IStrategoString mkString(Object obj) {
         return termFactory.makeString(obj.toString());
+    }
+
+    private IStrategoTerm mkProjectTerm(ResourceKey resource) {
+        final String resourceStr = resource.toString(); // TODO: must use ResourceService to turn this into a string.
+        IStrategoTerm ast = termFactory.makeTuple();
+        ast = StrategoTermIndices.put(TermIndex.of(resourceStr, 0), ast, termFactory);
+        TermOrigin.of(resourceStr).put(ast);
+        return ast;
     }
 
 

@@ -17,6 +17,9 @@ public class IntellijResource implements Resource, ReadableResource {
         this.file = file;
     }
 
+    @Override public void close() throws IOException {
+        // Nothing to close.
+    }
 
     @Override public boolean exists() {
         return file.exists();

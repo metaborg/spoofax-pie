@@ -15,6 +15,7 @@ import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
+import org.spoofax.interpreter.library.IOAgent;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import java.io.IOException;
@@ -23,6 +24,8 @@ import java.util.HashMap;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TigerConstraintAnalyzerTest {
+    private static final String qualifier = "test";
+
     private final TigerParser parser = new TigerParser(TigerParseTable.fromClassLoaderResources());
     private final StrategoRuntime runtime =
         TigerStrategoRuntimeBuilder.fromClassLoaderResources().addLibrary(new NaBL2PrimitiveLibrary()).build();
@@ -31,40 +34,42 @@ class TigerConstraintAnalyzerTest {
     TigerConstraintAnalyzerTest() throws IOException, JSGLR1ParseTableException, StrategoException {}
 
     @Test void analyzeSingleErrors() throws InterruptedException, ConstraintAnalyzerException {
-        final ResourceKey resource = new DefaultResourceKey("0", "0");
+        final ResourceKey resource = new DefaultResourceKey(qualifier, "a.tig");
         final JSGLR1ParseResult parsed = parser.parse("1 + nil", "Module", resource);
         assertNotNull(parsed.ast);
-        final SingleFileResult result = analyzer.analyze(resource, parsed.ast, new ConstraintAnalyzerContext());
+        final SingleFileResult result =
+            analyzer.analyze(resource, parsed.ast, new ConstraintAnalyzerContext(), new IOAgent());
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
         assertTrue(result.messages.containsError());
     }
 
     @Test void analyzeSingleSuccess() throws InterruptedException, ConstraintAnalyzerException {
-        final ResourceKey resource = new DefaultResourceKey("0", "0");
+        final ResourceKey resource = new DefaultResourceKey(qualifier, "a.tig");
         final JSGLR1ParseResult parsed = parser.parse("1 + 2", "Module", resource);
         assertNotNull(parsed.ast);
-        final SingleFileResult result = analyzer.analyze(resource, parsed.ast, new ConstraintAnalyzerContext());
+        final SingleFileResult result =
+            analyzer.analyze(resource, parsed.ast, new ConstraintAnalyzerContext(), new IOAgent());
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
         assertTrue(result.messages.isEmpty());
     }
 
     @Test void analyzeMultipleErrors() throws InterruptedException, ConstraintAnalyzerException {
-        final ResourceKey resource1 = new DefaultResourceKey("0", "1");
+        final ResourceKey resource1 = new DefaultResourceKey(qualifier, "a.tig");
         final JSGLR1ParseResult parsed1 = parser.parse("1 + 1", "Module", resource1);
         assertNotNull(parsed1.ast);
-        final ResourceKey resource2 = new DefaultResourceKey("0", "2");
+        final ResourceKey resource2 = new DefaultResourceKey(qualifier, "b.tig");
         final JSGLR1ParseResult parsed2 = parser.parse("1 + 2", "Module", resource2);
         assertNotNull(parsed2.ast);
-        final ResourceKey resource3 = new DefaultResourceKey("0", "3");
+        final ResourceKey resource3 = new DefaultResourceKey(qualifier, "c.tig");
         final JSGLR1ParseResult parsed3 = parser.parse("1 + nil", "Module", resource3);
         assertNotNull(parsed3.ast);
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
         asts.put(resource1, parsed1.ast);
         asts.put(resource2, parsed2.ast);
         asts.put(resource3, parsed3.ast);
-        final MultiFileResult result = analyzer.analyze(null, asts, new ConstraintAnalyzerContext());
+        final MultiFileResult result = analyzer.analyze(null, asts, new ConstraintAnalyzerContext(), new IOAgent());
         final ConstraintAnalyzer.@Nullable Result result1 = result.results.get(resource1);
         assertNotNull(result1);
         assertNotNull(result1.ast);
@@ -91,20 +96,20 @@ class TigerConstraintAnalyzerTest {
     }
 
     @Test void analyzeMultipleSuccess() throws InterruptedException, ConstraintAnalyzerException {
-        final ResourceKey resource1 = new DefaultResourceKey("0", "1");
+        final ResourceKey resource1 = new DefaultResourceKey(qualifier, "a.tig");
         final JSGLR1ParseResult parsed1 = parser.parse("1 + 1", "Module", resource1);
         assertNotNull(parsed1.ast);
-        final ResourceKey resource2 = new DefaultResourceKey("0", "2");
+        final ResourceKey resource2 = new DefaultResourceKey(qualifier, "b.tig");
         final JSGLR1ParseResult parsed2 = parser.parse("1 + 2", "Module", resource2);
         assertNotNull(parsed2.ast);
-        final ResourceKey resource3 = new DefaultResourceKey("0", "3");
+        final ResourceKey resource3 = new DefaultResourceKey(qualifier, "c.tig");
         final JSGLR1ParseResult parsed3 = parser.parse("1 + 3", "Module", resource3);
         assertNotNull(parsed3.ast);
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
         asts.put(resource1, parsed1.ast);
         asts.put(resource2, parsed2.ast);
         asts.put(resource3, parsed3.ast);
-        final MultiFileResult result = analyzer.analyze(null, asts, new ConstraintAnalyzerContext());
+        final MultiFileResult result = analyzer.analyze(null, asts, new ConstraintAnalyzerContext(), new IOAgent());
         final ConstraintAnalyzer.@Nullable Result result1 = result.results.get(resource1);
         assertNotNull(result1);
         assertNotNull(result1.ast);

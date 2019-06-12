@@ -8,7 +8,7 @@ import java.net.URL;
 
 public class STLCRecStrategoRuntimeBuilder {
     public static StrategoRuntimeBuilder fromClassLoaderResources() {
-        final String ctreeResource = "mb/stlcrec/stratego.ctree";
+        final String ctreeResource = "mb/stlcrec/target/metaborg/stratego.ctree";
         final @Nullable URL ctree = STLCRecStrategoRuntimeBuilder.class.getClassLoader().getResource(ctreeResource);
         if(ctree == null) {
             throw new RuntimeException(

@@ -16,7 +16,7 @@ public class STLCRecParseTable implements Serializable {
     }
 
     public static STLCRecParseTable fromClassLoaderResources() throws JSGLR1ParseTableException, IOException {
-        final String resource = "mb/stlcrec/sdf.tbl";
+        final String resource = "mb/stlcrec/target/metaborg/sdf.tbl";
         try(final @Nullable InputStream inputStream = STLCRecParseTable.class.getClassLoader().getResourceAsStream(
             resource)) {
             if(inputStream == null) {

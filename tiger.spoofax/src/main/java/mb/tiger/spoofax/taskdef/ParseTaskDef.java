@@ -29,7 +29,7 @@ public class ParseTaskDef implements TaskDef<ResourceKey, JSGLR1ParseResult> {
     @Override
     public JSGLR1ParseResult exec(ExecContext context, ResourceKey key) throws IOException, InterruptedException {
         final TigerParser parser = new TigerParser(parseTable);
-        final ReadableResource resource = resourceRegistry.getReadableResource(key);
+        final ReadableResource resource = resourceRegistry.getResource(key);
         context.require(resource);
         final String text = resource.readString(StandardCharsets.UTF_8);
         return parser.parse(text, "Module");

@@ -20,6 +20,9 @@ public class EclipseEclipseResource implements Resource, ReadableResource, Wraps
         this.resource = resource;
     }
 
+    @Override public void close() throws IOException {
+        // Nothing to close.
+    }
 
     @Override public boolean exists() {
         return resource.exists();

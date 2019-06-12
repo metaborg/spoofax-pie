@@ -154,7 +154,7 @@ public final class SpoofaxLexer extends LexerBase {
      * @return The default tokens for the resource.
      */
     private List<mb.common.token.Token> getDefaultTokens(ResourceKey resourceKey) {
-        final ReadableResource resource = this.resourceService.getReadableResource(resourceKey);
+        final ReadableResource resource = this.resourceService.getResource(resourceKey);
         try {
             int length = (int) resource.getSize();
             return Lists.newArrayList(

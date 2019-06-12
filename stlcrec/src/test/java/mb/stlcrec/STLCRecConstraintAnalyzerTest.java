@@ -8,9 +8,16 @@ import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.constraint.common.ConstraintAnalyzerException;
 import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.jsglr1.common.JSGLR1ParseTableException;
+import mb.log.api.LoggerFactory;
+import mb.log.noop.NoopLoggerFactory;
 import mb.resource.DefaultResourceKey;
+import mb.resource.DefaultResourceService;
 import mb.resource.ResourceKey;
+import mb.resource.ResourceService;
+import mb.resource.fs.FSRegistry;
+import mb.resource.url.URLResourceRegistry;
 import mb.stratego.common.StrategoException;
+import mb.stratego.common.StrategoIOAgent;
 import mb.stratego.common.StrategoRuntime;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Disabled;
@@ -22,8 +29,12 @@ import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled("Statix does not work outside of Spoofax Core yet")
 class STLCRecConstraintAnalyzerTest {
+    private static final String qualifier = "test";
+
+    private final LoggerFactory loggerFactory = new NoopLoggerFactory();
+    private final ResourceService resourceService =
+        new DefaultResourceService(new FSRegistry(), new URLResourceRegistry());
     private final STLCRecParser parser = new STLCRecParser(STLCRecParseTable.fromClassLoaderResources());
     private final StrategoRuntime runtime = STLCRecStatixStrategoRuntimeBuilder.fromClassLoaderResources().build();
     private final STLCRecConstraintAnalyzer analyzer = new STLCRecConstraintAnalyzer(runtime);
@@ -31,40 +42,44 @@ class STLCRecConstraintAnalyzerTest {
     STLCRecConstraintAnalyzerTest() throws IOException, JSGLR1ParseTableException, StrategoException {}
 
     @Test void analyzeSingleErrors() throws InterruptedException, ConstraintAnalyzerException {
-        final ResourceKey resource = new DefaultResourceKey("0", "0");
+        final ResourceKey resource = new DefaultResourceKey(qualifier, "a.stlcrec");
         final JSGLR1ParseResult parsed = parser.parse("1 + nil", "Start", resource);
         assertNotNull(parsed.ast);
-        final SingleFileResult result = analyzer.analyze(resource, parsed.ast, new ConstraintAnalyzerContext());
+        final SingleFileResult result = analyzer.analyze(resource, parsed.ast, new ConstraintAnalyzerContext(),
+            new StrategoIOAgent(loggerFactory, resourceService));
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
         assertTrue(result.messages.containsError());
     }
 
     @Test void analyzeSingleSuccess() throws InterruptedException, ConstraintAnalyzerException {
-        final ResourceKey resource = new DefaultResourceKey("0", "0");
+        final ResourceKey resource = new DefaultResourceKey(qualifier, "b.stlcrec");
         final JSGLR1ParseResult parsed = parser.parse("1 + 2", "Start", resource);
         assertNotNull(parsed.ast);
-        final SingleFileResult result = analyzer.analyze(resource, parsed.ast, new ConstraintAnalyzerContext());
+        final SingleFileResult result = analyzer.analyze(resource, parsed.ast, new ConstraintAnalyzerContext(),
+            new StrategoIOAgent(loggerFactory, resourceService));
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
         assertTrue(result.messages.isEmpty());
     }
 
+    @Disabled("Multiple resource test in non-multifile language with Statix does not seem to work")
     @Test void analyzeMultipleErrors() throws InterruptedException, ConstraintAnalyzerException {
-        final ResourceKey resource1 = new DefaultResourceKey("0", "1");
+        final ResourceKey resource1 = new DefaultResourceKey(qualifier, "a.stlcrec");
         final JSGLR1ParseResult parsed1 = parser.parse("1 + 1", "Start", resource1);
         assertNotNull(parsed1.ast);
-        final ResourceKey resource2 = new DefaultResourceKey("0", "2");
+        final ResourceKey resource2 = new DefaultResourceKey(qualifier, "b.stlcrec");
         final JSGLR1ParseResult parsed2 = parser.parse("1 + 2", "Start", resource2);
         assertNotNull(parsed2.ast);
-        final ResourceKey resource3 = new DefaultResourceKey("0", "3");
+        final ResourceKey resource3 = new DefaultResourceKey(qualifier, "c.stlcrec");
         final JSGLR1ParseResult parsed3 = parser.parse("1 + nil", "Start", resource3);
         assertNotNull(parsed3.ast);
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
         asts.put(resource1, parsed1.ast);
         asts.put(resource2, parsed2.ast);
         asts.put(resource3, parsed3.ast);
-        final MultiFileResult result = analyzer.analyze(null, asts, new ConstraintAnalyzerContext());
+        final MultiFileResult result = analyzer.analyze(null, asts, new ConstraintAnalyzerContext(),
+            new StrategoIOAgent(loggerFactory, resourceService));
         final ConstraintAnalyzer.@Nullable Result result1 = result.results.get(resource1);
         assertNotNull(result1);
         assertNotNull(result1.ast);
@@ -90,21 +105,24 @@ class STLCRecConstraintAnalyzerTest {
         assertTrue(foundCorrectMessage[0]);
     }
 
+    @Disabled("Multiple resource test in non-multifile language with Statix does not seem to work")
     @Test void analyzeMultipleSuccess() throws InterruptedException, ConstraintAnalyzerException {
-        final ResourceKey resource1 = new DefaultResourceKey("0", "1");
+        final ResourceKey root = new DefaultResourceKey(qualifier, "0");
+        final ResourceKey resource1 = new DefaultResourceKey(qualifier, "a.stlcrec");
         final JSGLR1ParseResult parsed1 = parser.parse("1 + 1", "Start", resource1);
         assertNotNull(parsed1.ast);
-        final ResourceKey resource2 = new DefaultResourceKey("0", "2");
+        final ResourceKey resource2 = new DefaultResourceKey(qualifier, "b.stlcrec");
         final JSGLR1ParseResult parsed2 = parser.parse("1 + 2", "Start", resource2);
         assertNotNull(parsed2.ast);
-        final ResourceKey resource3 = new DefaultResourceKey("0", "3");
+        final ResourceKey resource3 = new DefaultResourceKey(qualifier, "c.stlcrec");
         final JSGLR1ParseResult parsed3 = parser.parse("1 + 3", "Start", resource3);
         assertNotNull(parsed3.ast);
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
         asts.put(resource1, parsed1.ast);
         asts.put(resource2, parsed2.ast);
         asts.put(resource3, parsed3.ast);
-        final MultiFileResult result = analyzer.analyze(null, asts, new ConstraintAnalyzerContext());
+        final MultiFileResult result = analyzer.analyze(root, asts, new ConstraintAnalyzerContext(),
+            new StrategoIOAgent(loggerFactory, resourceService));
         final ConstraintAnalyzer.@Nullable Result result1 = result.results.get(resource1);
         assertNotNull(result1);
         assertNotNull(result1.ast);
