@@ -9,13 +9,7 @@ import javax.inject.Singleton;
 
 @Module
 public class EclipseResourceRegistryModule {
-    private final EclipseResourceRegistry registry = new EclipseResourceRegistry();
-
-    @Provides @Singleton EclipseResourceRegistry provide() {
-        return registry;
-    }
-
-    @Provides @Singleton @IntoSet ResourceRegistry provideIntoSet() {
+    @Provides @Singleton @IntoSet ResourceRegistry provideIntoSet(EclipseResourceRegistry registry) {
         return registry;
     }
 }

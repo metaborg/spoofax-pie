@@ -12,11 +12,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
 
-public class EclipseEclipseResource implements Resource, ReadableResource, WrapsEclipseResource {
+public class EclipseResource implements Resource, ReadableResource, WrapsEclipseResource {
     private final IResource resource;
 
 
-    public EclipseEclipseResource(IResource resource) {
+    public EclipseResource(IResource resource) {
         this.resource = resource;
     }
 
@@ -74,7 +74,7 @@ public class EclipseEclipseResource implements Resource, ReadableResource, Wraps
     @Override public boolean equals(Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
-        final EclipseEclipseResource that = (EclipseEclipseResource) o;
+        final EclipseResource that = (EclipseResource) o;
         return resource.equals(that.resource);
     }
 

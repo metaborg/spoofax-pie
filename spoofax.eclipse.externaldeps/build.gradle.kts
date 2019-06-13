@@ -12,7 +12,6 @@ dependencies {
   api(project(":spoofax.core"))
 
   api("org.metaborg:log.api")
-  api("org.metaborg:log.backend.noop")
   api("org.metaborg:resource")
   api("org.metaborg:pie.api")
   api("org.metaborg:pie.runtime")

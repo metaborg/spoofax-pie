@@ -98,6 +98,8 @@ public class WorkspaceUpdate {
                     return StatusUtil.cancel();
                 }
 
+                logger.trace("Running workspace update job");
+
                 final Messages messages = messagesBuilder.build();
 
                 try {
@@ -141,7 +143,9 @@ public class WorkspaceUpdate {
                     };
                     ResourcesPlugin.getWorkspace().run(parseMarkerUpdater, rule, IWorkspace.AVOID_UPDATE, monitor);
                 } catch(CoreException e) {
-                    return StatusUtil.error(e);
+                    final String message = "Running marker update failed unexpectedly";
+                    logger.error(message, e);
+                    return StatusUtil.error(message, e);
                 }
 
                 for(StyleUpdate styleUpdate : styleUpdates) {

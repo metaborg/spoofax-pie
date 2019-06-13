@@ -42,7 +42,7 @@ public class EditorUpdateJob extends Job {
     }
 
     @Override protected IStatus run(@NonNull IProgressMonitor monitor) {
-        logger.debug("Running {} editor update job for {}", languageDisplayName, file);
+        logger.trace("Running {} editor update job for {}", languageDisplayName, file);
         try {
             return update(monitor);
         } catch(@SuppressWarnings("unused") InterruptedException e) {

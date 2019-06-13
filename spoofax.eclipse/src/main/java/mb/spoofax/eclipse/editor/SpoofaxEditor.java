@@ -170,7 +170,7 @@ public abstract class SpoofaxEditor extends TextEditor {
     private void cancelJobs(IEditorInput specificInput) {
         final Job[] existingJobs = jobManager.find(specificInput);
         if(existingJobs.length > 0) {
-            logger.trace("Cancelling editor update jobs for {}", specificInput);
+            logger.trace("Cancelling editor update jobs for '{}'", specificInput);
             for(Job job : existingJobs) {
                 job.cancel();
             }

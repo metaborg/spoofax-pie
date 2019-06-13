@@ -2,6 +2,8 @@ package mb.spoofax.eclipse.pie;
 
 import mb.common.message.Messages;
 import mb.common.style.Styling;
+import mb.log.api.Logger;
+import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecException;
 import mb.pie.api.Pie;
 import mb.pie.api.PieSession;
@@ -25,6 +27,7 @@ import javax.inject.Provider;
 import java.util.HashSet;
 
 public class PieRunner {
+    private final Logger logger;
     private final Pie pie;
     private final EclipseResourceRegistry eclipseResourceRegistry;
     private final Provider<WorkspaceUpdate> workspaceUpdateProvider;
@@ -32,10 +35,12 @@ public class PieRunner {
 
     @Inject
     public PieRunner(
+        LoggerFactory loggerFactory,
         Pie pie,
         EclipseResourceRegistry eclipseResourceRegistry,
         Provider<WorkspaceUpdate> workspaceUpdateProvider
     ) {
+        this.logger = loggerFactory.create(getClass());
         this.pie = pie;
         this.eclipseResourceRegistry = eclipseResourceRegistry;
         this.workspaceUpdateProvider = workspaceUpdateProvider;
@@ -49,6 +54,8 @@ public class PieRunner {
         SpoofaxEditor editor,
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException {
+        logger.trace("Adding or updating editor for file '{}'", file);
+
         final EclipseResourceKey resourceKey = new EclipseResourceKey(file);
         eclipseResourceRegistry.addDocumentOverride(resourceKey, document, file);
         final WorkspaceUpdate workspaceUpdate = workspaceUpdateProvider.get();
@@ -67,6 +74,7 @@ public class PieRunner {
                 }
             });
             if(!pie.hasBeenExecuted(stylingTask)) {
+                logger.trace("Top-down execution of '{}'", stylingTask);
                 session.requireTopDown(stylingTask, monitorCancelled(monitor));
             }
 
@@ -77,12 +85,14 @@ public class PieRunner {
                 workspaceUpdate.replaceMessages(messages);
             });
             if(!pie.hasBeenExecuted(messagesTask)) {
+                logger.trace("Top-down execution of '{}'", messagesTask);
                 session.requireTopDown(messagesTask, monitorCancelled(monitor));
             }
 
             // Execute bottom-up build for changed file.
             final HashSet<ResourceKey> changedResources = new HashSet<>();
             changedResources.add(new EclipseResourceKey(file));
+            logger.trace("Bottom-up execution for changed resources '{}'", changedResources);
             session.requireBottomUp(changedResources);
         }
 
@@ -93,6 +103,8 @@ public class PieRunner {
         LanguageComponent languageComponent,
         IFile file
     ) {
+        logger.trace("Removing editor for file '{}'", file);
+
         final EclipseResourceKey resourceKey = new EclipseResourceKey(file);
         eclipseResourceRegistry.removeDocumentOverride(resourceKey);
 

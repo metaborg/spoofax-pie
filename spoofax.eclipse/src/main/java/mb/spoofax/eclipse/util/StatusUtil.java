@@ -45,13 +45,13 @@ public final class StatusUtil {
         return status(IStatus.INFO, IStatus.ERROR, message);
     }
 
+    public static IStatus info(String message, Throwable t) {
+        return status(IStatus.INFO, IStatus.ERROR, message, t);
+    }
+
 
     public static IStatus warn(String message) {
         return status(IStatus.WARNING, IStatus.ERROR, message);
-    }
-
-    public static IStatus warn(Throwable t) {
-        return status(IStatus.WARNING, IStatus.ERROR, "", t);
     }
 
     public static IStatus warn(String message, Throwable t) {
@@ -67,10 +67,6 @@ public final class StatusUtil {
         return status(IStatus.OK, IStatus.ERROR, message);
     }
 
-    public static IStatus silentError(Throwable t) {
-        return status(IStatus.OK, IStatus.ERROR, "", t);
-    }
-
     public static IStatus silentError(String message, Throwable t) {
         return status(IStatus.OK, IStatus.ERROR, message, t);
     }
@@ -84,10 +80,6 @@ public final class StatusUtil {
         return status(IStatus.ERROR, IStatus.ERROR, message);
     }
 
-    public static IStatus error(Throwable t) {
-        return status(IStatus.ERROR, IStatus.ERROR, "", t);
-    }
-
     public static IStatus error(String message, Throwable t) {
         return status(IStatus.ERROR, IStatus.ERROR, message, t);
     }
@@ -99,10 +91,6 @@ public final class StatusUtil {
 
     public static IStatus buildFailure(String message) {
         return status(IStatus.ERROR, IResourceStatus.BUILD_FAILED, message);
-    }
-
-    public static IStatus buildFailure(Throwable t) {
-        return status(IStatus.ERROR, IResourceStatus.BUILD_FAILED, "", t);
     }
 
     public static IStatus buildFailure(String message, Throwable t) {
