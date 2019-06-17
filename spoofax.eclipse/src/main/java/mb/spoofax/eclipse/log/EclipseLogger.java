@@ -51,18 +51,19 @@ public class EclipseLogger implements Logger, AutoCloseable {
     private String encodeConsoleMessage(String msg, Level level) {
         return dateFormat.format(new Date()) +
             " | " +
-            padOrTruncate(Thread.currentThread().getName(), 12) +
+            rightPad(level.toString().toUpperCase(), 5) +
             " | " +
-            padOrTruncate(level.toString().toUpperCase(), 5) +
+            rightPad(Thread.currentThread().getName(), 12) +
             " | " +
-            padOrTruncate(name, 40) +
+            rightPad(name, 40) +
             " | " +
             msg;
     }
 
-    private String padOrTruncate(String str, int length) {
-        if(str.length() > length) {
-            return str.substring(0, length);
+    private String rightPad(String str, int length) {
+        final int strLength = str.length();
+        if(strLength > length) {
+            return str.substring(strLength - length, strLength);
         }
         return StringUtils.rightPad(str, length);
     }

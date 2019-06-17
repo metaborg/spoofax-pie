@@ -1,9 +1,9 @@
 package mb.jsglr1.common;
 
 import mb.common.message.Message;
-import mb.common.message.Severity;
 import mb.common.message.Messages;
 import mb.common.message.MessagesBuilder;
+import mb.common.message.Severity;
 import mb.common.region.Region;
 import mb.jsglr.common.RegionUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -199,8 +199,7 @@ class MessagesUtil {
 
     private void createErrorAtFirstLine(String text) {
         final String errorText = text + getErrorExplanation();
-        final Message message = new Message(errorText, Severity.Error);
-        messagesBuilder.addMessage(message);
+        messagesBuilder.addMessage(errorText, Severity.Error);
     }
 
     private void reportErrorAtTokens(IToken left, IToken right, String text) {

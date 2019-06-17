@@ -1,6 +1,8 @@
 package mb.tiger.spoofax.taskdef;
 
 import mb.jsglr1.common.JSGLR1ParseResult;
+import mb.log.api.Logger;
+import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.ReadableResource;
@@ -14,11 +16,14 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 public class ParseTaskDef implements TaskDef<ResourceKey, JSGLR1ParseResult> {
-    private final ResourceService resourceRegistry;
+    private final Logger logger;
+    private final ResourceService resourceService;
     private final TigerParseTable parseTable;
 
-    @Inject public ParseTaskDef(ResourceService resourceRegistry, TigerParseTable parseTable) {
-        this.resourceRegistry = resourceRegistry;
+    @Inject
+    public ParseTaskDef(LoggerFactory loggerFactory, ResourceService resourceService, TigerParseTable parseTable) {
+        this.logger = loggerFactory.create(getClass());
+        this.resourceService = resourceService;
         this.parseTable = parseTable;
     }
 
@@ -29,9 +34,10 @@ public class ParseTaskDef implements TaskDef<ResourceKey, JSGLR1ParseResult> {
     @Override
     public JSGLR1ParseResult exec(ExecContext context, ResourceKey key) throws IOException, InterruptedException {
         final TigerParser parser = new TigerParser(parseTable);
-        final ReadableResource resource = resourceRegistry.getResource(key);
+        final ReadableResource resource = resourceService.getResource(key);
         context.require(resource);
         final String text = resource.readString(StandardCharsets.UTF_8);
+        logger.trace("Parsing text:\n{}", text);
         return parser.parse(text, "Module");
     }
 }

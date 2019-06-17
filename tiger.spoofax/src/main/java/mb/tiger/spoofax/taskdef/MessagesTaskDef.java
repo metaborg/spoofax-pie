@@ -1,6 +1,7 @@
 package mb.tiger.spoofax.taskdef;
 
-import mb.common.message.Messages;
+import mb.common.message.KeyedMessages;
+import mb.common.message.KeyedMessagesBuilder;
 import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
@@ -8,7 +9,7 @@ import mb.resource.ResourceKey;
 
 import javax.inject.Inject;
 
-public class MessagesTaskDef implements TaskDef<ResourceKey, Messages> {
+public class MessagesTaskDef implements TaskDef<ResourceKey, KeyedMessages> {
     private final ParseTaskDef parseTaskDef;
 
     @Inject public MessagesTaskDef(ParseTaskDef parseTaskDef) {
@@ -19,8 +20,10 @@ public class MessagesTaskDef implements TaskDef<ResourceKey, Messages> {
         return getClass().getName();
     }
 
-    @Override public Messages exec(ExecContext context, ResourceKey key) throws Exception {
+    @Override public KeyedMessages exec(ExecContext context, ResourceKey key) throws Exception {
         final JSGLR1ParseResult parseOutput = context.require(parseTaskDef, key);
-        return parseOutput.messages;
+        final KeyedMessagesBuilder builder = new KeyedMessagesBuilder();
+        builder.addMessages(key, parseOutput.messages);
+        return builder.build();
     }
 }

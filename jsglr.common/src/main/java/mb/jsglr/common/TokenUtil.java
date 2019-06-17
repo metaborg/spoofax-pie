@@ -17,7 +17,7 @@ public class TokenUtil {
         int offset = -1;
         for(int i = 0; i < tokenCount; ++i) {
             final IToken jsglrToken = tokens.getTokenAt(i);
-            if(tokens.isAmbigous() && jsglrToken.getStartOffset() < offset) {
+            if(tokens.isAmbiguous() && jsglrToken.getStartOffset() < offset) {
                 // In case of ambiguities, tokens inside the ambiguity are duplicated, ignore.
                 continue;
             }

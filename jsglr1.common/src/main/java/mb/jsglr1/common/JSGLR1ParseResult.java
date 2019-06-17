@@ -1,6 +1,5 @@
 package mb.jsglr1.common;
 
-import mb.common.message.Message;
 import mb.common.message.Messages;
 import mb.common.token.Token;
 import org.checkerframework.checker.nullness.qual.Nullable;

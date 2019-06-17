@@ -16,9 +16,11 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension4;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Singleton
 public class EclipseResourceRegistry implements ResourceRegistry {
     static final String qualifier = "eclipse-resource";
     static final IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
@@ -72,17 +74,16 @@ public class EclipseResourceRegistry implements ResourceRegistry {
             throw new ResourceRuntimeException(
                 "Cannot get Eclipse resource with ID '" + id + "'; the ID is not of type String");
         }
-        final String portablePathString = (String) id;
+        return getResource((String)id);
+    }
+
+    @Override public Resource getResource(String portablePathString) {
         final @Nullable DocumentOverride override = documentOverrides.get(portablePathString);
         if(override != null) {
             return getResource(portablePathString, (IDocument & IDocumentExtension4) override.document, override.file);
         } else {
-            return getResource(portablePathString);
+            return getResource(Path.fromPortableString(portablePathString));
         }
-    }
-
-    @Override public EclipseResource getResource(String idStr) {
-        return getResource(Path.fromPortableString(idStr));
     }
 
     @Override public String qualifier() {

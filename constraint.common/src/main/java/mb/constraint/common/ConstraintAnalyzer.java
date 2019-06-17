@@ -1,7 +1,7 @@
 package mb.constraint.common;
 
-import mb.common.message.Messages;
-import mb.common.message.MessagesBuilder;
+import mb.common.message.KeyedMessages;
+import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
 import mb.nabl2.terms.stratego.StrategoTermIndices;
 import mb.nabl2.terms.stratego.TermIndex;
@@ -45,9 +45,9 @@ public class ConstraintAnalyzer {
     public static class SingleFileResult {
         public final @Nullable IStrategoTerm ast;
         public final @Nullable IStrategoTerm analysis;
-        public final Messages messages;
+        public final KeyedMessages messages;
 
-        public SingleFileResult(@Nullable IStrategoTerm ast, @Nullable IStrategoTerm analysis, Messages messages) {
+        public SingleFileResult(@Nullable IStrategoTerm ast, @Nullable IStrategoTerm analysis, KeyedMessages messages) {
             this.ast = ast;
             this.analysis = analysis;
             this.messages = messages;
@@ -56,9 +56,9 @@ public class ConstraintAnalyzer {
 
     public static class MultiFileResult {
         public final HashMap<ResourceKey, Result> results;
-        public final Messages messages;
+        public final KeyedMessages messages;
 
-        public MultiFileResult(HashMap<ResourceKey, Result> results, Messages messages) {
+        public MultiFileResult(HashMap<ResourceKey, Result> results, KeyedMessages messages) {
             this.results = results;
             this.messages = messages;
         }
@@ -230,7 +230,7 @@ public class ConstraintAnalyzer {
 
         /// 4. Process analysis results and collect messages.
 
-        final MessagesBuilder messagesBuilder = new MessagesBuilder();
+        final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
 
         // Process result terms, updating the result cache.
         for(Map.Entry<ResourceKey, IStrategoTerm> entry : resultTerms.entrySet()) {
@@ -274,18 +274,18 @@ public class ConstraintAnalyzer {
             this.resource = resource;
         }
 
-        void addResultMessages(IStrategoTerm errors, IStrategoTerm warnings, IStrategoTerm notes, MessagesBuilder messagesBuilder) {
+        void addResultMessages(IStrategoTerm errors, IStrategoTerm warnings, IStrategoTerm notes, KeyedMessagesBuilder messagesBuilder) {
             final @Nullable ResourceKey resourceOverride = multifile ? null : resource;
             MessageUtil.addMessagesFromTerm(messagesBuilder, errors, Severity.Error, resourceOverride);
             MessageUtil.addMessagesFromTerm(messagesBuilder, warnings, Severity.Warning, resourceOverride);
             MessageUtil.addMessagesFromTerm(messagesBuilder, notes, Severity.Info, resourceOverride);
         }
 
-        void addFailMessage(String text, MessagesBuilder messagesBuilder) {
+        void addFailMessage(String text, KeyedMessagesBuilder messagesBuilder) {
             messagesBuilder.addMessage(text, Severity.Error, resource);
         }
 
-        abstract void processResultTerm(IStrategoTerm resultTerm, ConstraintAnalyzerContext context, MessagesBuilder messagesBuilder);
+        abstract void processResultTerm(IStrategoTerm resultTerm, ConstraintAnalyzerContext context, KeyedMessagesBuilder messagesBuilder);
     }
 
     class Full extends Expect {
@@ -294,7 +294,7 @@ public class ConstraintAnalyzer {
         }
 
         @Override
-        public void processResultTerm(IStrategoTerm resultTerm, ConstraintAnalyzerContext context, MessagesBuilder messagesBuilder) {
+        public void processResultTerm(IStrategoTerm resultTerm, ConstraintAnalyzerContext context, KeyedMessagesBuilder messagesBuilder) {
             final @Nullable List<IStrategoTerm> results;
             if((results = match(resultTerm, "Full", 5)) != null) {
                 final IStrategoTerm ast = results.get(0);
@@ -316,7 +316,7 @@ public class ConstraintAnalyzer {
         }
 
         @Override
-        public void processResultTerm(IStrategoTerm resultTerm, ConstraintAnalyzerContext context, MessagesBuilder messagesBuilder) {
+        public void processResultTerm(IStrategoTerm resultTerm, ConstraintAnalyzerContext context, KeyedMessagesBuilder messagesBuilder) {
             final @Nullable List<IStrategoTerm> results;
             if((results = match(resultTerm, "Update", 4)) != null) {
                 final IStrategoTerm analysis = results.get(0);
@@ -337,7 +337,7 @@ public class ConstraintAnalyzer {
         }
 
         @Override
-        public void processResultTerm(IStrategoTerm resultTerm, ConstraintAnalyzerContext context, MessagesBuilder messagesBuilder) {
+        public void processResultTerm(IStrategoTerm resultTerm, ConstraintAnalyzerContext context, KeyedMessagesBuilder messagesBuilder) {
             final @Nullable List<IStrategoTerm> results;
             if((results = match(resultTerm, "Full", 5)) != null) {
                 final IStrategoTerm analysis = results.get(1);

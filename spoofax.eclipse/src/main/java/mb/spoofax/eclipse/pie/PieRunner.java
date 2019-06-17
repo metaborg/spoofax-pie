@@ -1,6 +1,6 @@
 package mb.spoofax.eclipse.pie;
 
-import mb.common.message.Messages;
+import mb.common.message.KeyedMessages;
 import mb.common.style.Styling;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
@@ -79,7 +79,7 @@ public class PieRunner {
             }
 
             // Set observer for messages task, and execute it if it has not been executed yet.
-            final Task<Messages> messagesTask = languageInstance.createMessagesTask(resourceKey);
+            final Task<KeyedMessages> messagesTask = languageInstance.createMessagesTask(resourceKey);
             pie.setObserver(messagesTask, (messages) -> {
                 workspaceUpdate.clearMessages(file);
                 workspaceUpdate.replaceMessages(messages);

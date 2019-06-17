@@ -30,7 +30,7 @@ public final class MarkerUtil {
             marker.setAttribute(IMarker.LINE_NUMBER, 1);
         }
         marker.setAttribute(IMarker.MESSAGE, text);
-        marker.setAttribute(IMarker.SEVERITY, severity);
+        marker.setAttribute(IMarker.SEVERITY, eclipseSeverity);
         marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
         return marker;
     }

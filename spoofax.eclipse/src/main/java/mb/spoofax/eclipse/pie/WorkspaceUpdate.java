@@ -1,7 +1,7 @@
 package mb.spoofax.eclipse.pie;
 
-import mb.common.message.Messages;
-import mb.common.message.MessagesBuilder;
+import mb.common.message.KeyedMessages;
+import mb.common.message.KeyedMessagesBuilder;
 import mb.common.style.Color;
 import mb.common.style.Styling;
 import mb.log.api.Logger;
@@ -38,7 +38,7 @@ public class WorkspaceUpdate {
 
     private final ArrayList<IResource> clear = new ArrayList<>();
     private final ArrayList<IResource> clearRecursively = new ArrayList<>();
-    private final MessagesBuilder messagesBuilder = new MessagesBuilder();
+    private final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
     private final ArrayList<StyleUpdate> styleUpdates = new ArrayList<>();
 
 
@@ -59,11 +59,11 @@ public class WorkspaceUpdate {
     }
 
 
-    public void addMessages(Messages messages) {
+    public void addMessages(KeyedMessages messages) {
         messagesBuilder.addMessages(messages);
     }
 
-    public void replaceMessages(Messages messages) {
+    public void replaceMessages(KeyedMessages messages) {
         messagesBuilder.replaceMessages(messages);
     }
 
@@ -100,7 +100,7 @@ public class WorkspaceUpdate {
 
                 logger.trace("Running workspace update job");
 
-                final Messages messages = messagesBuilder.build();
+                final KeyedMessages messages = messagesBuilder.build();
 
                 try {
                     final ICoreRunnable parseMarkerUpdater = new IWorkspaceRunnable() {
@@ -122,7 +122,7 @@ public class WorkspaceUpdate {
                                                 "Cannot create marker with text '" + text + "'; it has no corresponding resource");
                                             return true;
                                         }
-                                        final Resource resource = resourceRegistry.getResource(resourceKey);
+                                        final Resource resource = resourceRegistry.getResource(resourceKey.getId());
                                         final @Nullable IResource eclipseResource =
                                             resourceRegistry.getWrappedEclipseResource(resource);
                                         if(eclipseResource == null) {

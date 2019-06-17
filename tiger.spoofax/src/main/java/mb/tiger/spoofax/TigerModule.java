@@ -33,11 +33,12 @@ public class TigerModule {
     private final TigerParseTable parseTable;
     private final TigerStyler styler;
 
-    private
-    TigerModule(TigerParseTable parseTable, TigerStylingRules stylingRules) {
+
+    private TigerModule(TigerParseTable parseTable, TigerStylingRules stylingRules) {
         this.parseTable = parseTable;
         this.styler = new TigerStyler(stylingRules);
     }
+
 
     public static TigerModule fromClassLoaderResources() throws JSGLR1ParseTableException, IOException {
         final TigerParseTable parseTable = TigerParseTable.fromClassLoaderResources();
@@ -45,17 +46,22 @@ public class TigerModule {
         return new TigerModule(parseTable, stylingRules);
     }
 
-    @Provides @LanguageScope LanguageInstance provideLanguageInstance(TigerInstance tigerInstance) { return tigerInstance; }
 
-    @Provides @LanguageScope TigerParseTable provideParseTable() {
+    @Provides @LanguageScope
+    LanguageInstance provideLanguageInstance(TigerInstance tigerInstance) { return tigerInstance; }
+
+    @Provides @LanguageScope
+    TigerParseTable provideParseTable() {
         return parseTable;
     }
 
-    @Provides @LanguageScope TigerStyler provideStyler() {
+    @Provides @LanguageScope
+    TigerStyler provideStyler() {
         return styler;
     }
 
-    @Provides @LanguageScope @Named("language") @ElementsIntoSet static Set<TaskDef<?, ?>> provideTaskDefsSet(
+    @Provides @LanguageScope @Named("language") @ElementsIntoSet
+    static Set<TaskDef<?, ?>> provideTaskDefsSet(
         ParseTaskDef parseTaskDef,
         MessagesTaskDef messagesTaskDef,
         AstTaskDef astTaskDef,
@@ -71,14 +77,14 @@ public class TigerModule {
         return taskDefs;
     }
 
-    @Provides @LanguageScope @Named("language") TaskDefs provideTaskDefs(
-        @Named("language") Set<TaskDef<?, ?>> taskDefs
-    ) {
+    @Provides @LanguageScope @Named("language")
+    TaskDefs provideTaskDefs(@Named("language") Set<TaskDef<?, ?>> taskDefs) {
         return new MapTaskDefs(taskDefs);
     }
 
-    // Unscoped: new session every call.
-    @Provides PieSession providePieSession(Pie pie, @Named("language") TaskDefs languageTaskDefs) {
+
+    @Provides /* Unscoped: new session every call. */
+    PieSession providePieSession(Pie pie, @Named("language") TaskDefs languageTaskDefs) {
         return pie.newSession(languageTaskDefs);
     }
 }

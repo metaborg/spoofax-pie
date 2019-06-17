@@ -1,6 +1,6 @@
 package mb.constraint.common;
 
-import mb.common.message.MessagesBuilder;
+import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
 import mb.common.region.Region;
 import mb.jsglr.common.TermTracer;
@@ -16,17 +16,17 @@ import org.spoofax.terms.TermVisitor;
 import org.strategoxt.HybridInterpreter;
 
 class MessageUtil {
-    static void addAnalysisFailedMessage(MessagesBuilder messagesBuilder, HybridInterpreter interpreter) {
+    static void addAnalysisFailedMessage(KeyedMessagesBuilder messagesBuilder, HybridInterpreter interpreter) {
         final StackTracer stackTracer = interpreter.getContext().getStackTracer();
         final String text = "Analysis failed\nStratego stack trace:\n" + stackTracer.getTraceString();
         messagesBuilder.addMessage(text, Severity.Error);
     }
 
-    static void addMessagesFromTerm(MessagesBuilder messagesBuilder, IStrategoTerm messagesTerm, Severity severity) {
+    static void addMessagesFromTerm(KeyedMessagesBuilder messagesBuilder, IStrategoTerm messagesTerm, Severity severity) {
         addMessagesFromTerm(messagesBuilder, messagesTerm, severity, null);
     }
 
-    static void addMessagesFromTerm(MessagesBuilder messagesBuilder, IStrategoTerm messagesTerm, Severity severity, @Nullable ResourceKey resourceOverride) {
+    static void addMessagesFromTerm(KeyedMessagesBuilder messagesBuilder, IStrategoTerm messagesTerm, Severity severity, @Nullable ResourceKey resourceOverride) {
         for(IStrategoTerm term : messagesTerm) {
             final IStrategoTerm node;
             final String text;
@@ -49,11 +49,11 @@ class MessageUtil {
         }
     }
 
-    static void addAmbiguityWarnings(MessagesBuilder messagesBuilder, IStrategoTerm ast) {
+    static void addAmbiguityWarnings(KeyedMessagesBuilder messagesBuilder, IStrategoTerm ast) {
         addAmbiguityWarnings(messagesBuilder, ast, null);
     }
 
-    static void addAmbiguityWarnings(MessagesBuilder messagesBuilder, IStrategoTerm ast, @Nullable ResourceKey resourceOverride) {
+    static void addAmbiguityWarnings(KeyedMessagesBuilder messagesBuilder, IStrategoTerm ast, @Nullable ResourceKey resourceOverride) {
         final TermVisitor termVisitor = new TermVisitor() {
             private @Nullable IStrategoTerm ambStart;
 
