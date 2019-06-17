@@ -14,10 +14,11 @@ dependencies {
 
   implementation(project(":nabl2.common"))
   implementation(project(":statix.common"))
-  implementation("org.metaborg:log.backend.noop")
   implementation("org.metaborg:strategoxt-min-jar")
 
   compileOnly("org.checkerframework:checker-qual-android")
+
+  testImplementation("org.metaborg:log.backend.noop")
 
   testCompileOnly("org.checkerframework:checker-qual-android")
 }

@@ -33,11 +33,17 @@ val exports = listOf(
   // Do not export compile-time annotation packages.
   "!org.checkerframework.*",
   "!org.codehaus.mojo.animal_sniffer.*",
+  // Allow split package for 'mb.nabl'.
+  "mb.nabl2.*;-split-package:=merge-first",
   // Export what is left, using a mandatory provider to prevent accidental imports via 'Import-Package'.
   "*;provider=tiger;mandatory:=provider"
 )
 tasks {
   "jar"(Jar::class) {
+    this.withConvention(aQute.bnd.gradle.BundleTaskConvention::class) {
+      // Let BND use the runtime classpath, since this bundle is used for bundling runtime dependencies.
+      setClasspath(sourceSet.runtimeClasspath)
+    }
     manifest {
       attributes(
         Pair("Bundle-Vendor", project.group),

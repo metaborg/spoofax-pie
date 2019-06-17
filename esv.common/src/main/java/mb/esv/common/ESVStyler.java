@@ -1,11 +1,14 @@
 package mb.esv.common;
 
+import mb.common.region.Region;
 import mb.common.style.Style;
 import mb.common.style.Styling;
 import mb.common.style.StylingImpl;
 import mb.common.style.TokenStyle;
 import mb.common.style.TokenStyleImpl;
 import mb.common.token.Token;
+import mb.log.api.Logger;
+import mb.log.api.LoggerFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -16,10 +19,12 @@ import java.util.ArrayList;
 
 public class ESVStyler {
     private final ESVStylingRules rules;
+    private final Logger logger;
 
 
-    public ESVStyler(ESVStylingRules rules) {
+    public ESVStyler(ESVStylingRules rules, LoggerFactory loggerFactory) {
         this.rules = rules;
+        this.logger = loggerFactory.create(getClass());
     }
 
 
@@ -31,7 +36,25 @@ public class ESVStyler {
                 tokenStyles.add(new TokenStyleImpl(token, style));
             }
         }
-        return new StylingImpl(tokenStyles);
+        int offset = -1;
+        final ArrayList<TokenStyle> validated = new ArrayList<>();
+        for(TokenStyle tokenStyle : tokenStyles) {
+            final Region region = tokenStyle.getToken().getRegion();
+            if(offset >= region.startOffset) {
+                logger.warn("Invalid {}, starting offset is greater than offset in previous regions, "
+                    + "token style will be skipped", tokenStyle);
+            } else if(offset >= region.endOffset) {
+                logger.warn("Invalid {}, ending offset is greater than offset in previous regions, "
+                    + "token style will be skipped", tokenStyle);
+            } else if(region.startOffset > region.endOffset) {
+                logger.warn("Invalid {}, starting offset is greater than ending offset, "
+                    + "token style will be skipped", tokenStyle);
+            } else {
+                validated.add(tokenStyle);
+                offset = region.endOffset;
+            }
+        }
+        return new StylingImpl(validated);
     }
 
 

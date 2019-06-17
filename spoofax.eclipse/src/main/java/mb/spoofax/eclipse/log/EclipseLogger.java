@@ -53,9 +53,9 @@ public class EclipseLogger implements Logger, AutoCloseable {
             " | " +
             rightPad(level.toString().toUpperCase(), 5) +
             " | " +
-            rightPad(Thread.currentThread().getName(), 12) +
+            rightPad(Thread.currentThread().getName(), 50) +
             " | " +
-            rightPad(name, 40) +
+            rightPad(name, 50) +
             " | " +
             msg;
     }

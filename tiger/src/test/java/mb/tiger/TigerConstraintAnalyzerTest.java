@@ -8,11 +8,11 @@ import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.constraint.common.ConstraintAnalyzerException;
 import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.jsglr1.common.JSGLR1ParseTableException;
-import mb.nabl2.common.NaBL2PrimitiveLibrary;
 import mb.resource.DefaultResourceKey;
 import mb.resource.ResourceKey;
-import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
+import mb.stratego.common.StrategoRuntimeBuilder;
+import mb.stratego.common.StrategoRuntimeBuilderException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
 import org.spoofax.interpreter.library.IOAgent;
@@ -27,11 +27,13 @@ class TigerConstraintAnalyzerTest {
     private static final String qualifier = "test";
 
     private final TigerParser parser = new TigerParser(TigerParseTable.fromClassLoaderResources());
-    private final StrategoRuntime runtime =
-        TigerStrategoRuntimeBuilder.fromClassLoaderResources().addLibrary(new NaBL2PrimitiveLibrary()).build();
-    private final TigerConstraintAnalyzer analyzer = new TigerConstraintAnalyzer(runtime);
+    private final StrategoRuntimeBuilder strategoRuntimeBuilder =
+        TigerStrategoRuntimeBuilder.fromClassLoaderResources();
+    private final StrategoRuntime strategoRuntime =
+        TigerNaBL2StrategoRuntimeBuilder.create(strategoRuntimeBuilder).build();
+    private final TigerConstraintAnalyzer analyzer = new TigerConstraintAnalyzer(strategoRuntime);
 
-    TigerConstraintAnalyzerTest() throws IOException, JSGLR1ParseTableException, StrategoException {}
+    TigerConstraintAnalyzerTest() throws IOException, JSGLR1ParseTableException, StrategoRuntimeBuilderException {}
 
     @Test void analyzeSingleErrors() throws InterruptedException, ConstraintAnalyzerException {
         final ResourceKey resource = new DefaultResourceKey(qualifier, "a.tig");
@@ -70,22 +72,22 @@ class TigerConstraintAnalyzerTest {
         asts.put(resource2, parsed2.ast);
         asts.put(resource3, parsed3.ast);
         final MultiFileResult result = analyzer.analyze(null, asts, new ConstraintAnalyzerContext(), new IOAgent());
-        final ConstraintAnalyzer.@Nullable Result result1 = result.results.get(resource1);
+        final ConstraintAnalyzer.@Nullable Result result1 = result.getResult(resource1);
         assertNotNull(result1);
         assertNotNull(result1.ast);
         assertNotNull(result1.analysis);
-        final ConstraintAnalyzer.@Nullable Result result2 = result.results.get(resource2);
+        final ConstraintAnalyzer.@Nullable Result result2 = result.getResult(resource2);
         assertNotNull(result2);
         assertNotNull(result2.ast);
         assertNotNull(result2.analysis);
-        final ConstraintAnalyzer.@Nullable Result result3 = result.results.get(resource3);
+        final ConstraintAnalyzer.@Nullable Result result3 = result.getResult(resource3);
         assertNotNull(result3);
         assertNotNull(result3.ast);
         assertNotNull(result3.analysis);
-        assertEquals(1, result.messages.size());
-        assertTrue(result.messages.containsError());
+        assertEquals(1, result.keyedMessages.size());
+        assertTrue(result.keyedMessages.containsError());
         final boolean[] foundCorrectMessage = {false};
-        result.messages.accept((text, exception, severity, resource, region) -> {
+        result.keyedMessages.accept((text, exception, severity, resource, region) -> {
             if(resource3.equals(resource) && severity.equals(Severity.Error)) {
                 foundCorrectMessage[0] = true;
                 return false;
@@ -110,18 +112,18 @@ class TigerConstraintAnalyzerTest {
         asts.put(resource2, parsed2.ast);
         asts.put(resource3, parsed3.ast);
         final MultiFileResult result = analyzer.analyze(null, asts, new ConstraintAnalyzerContext(), new IOAgent());
-        final ConstraintAnalyzer.@Nullable Result result1 = result.results.get(resource1);
+        final ConstraintAnalyzer.@Nullable Result result1 = result.getResult(resource1);
         assertNotNull(result1);
         assertNotNull(result1.ast);
         assertNotNull(result1.analysis);
-        final ConstraintAnalyzer.@Nullable Result result2 = result.results.get(resource2);
+        final ConstraintAnalyzer.@Nullable Result result2 = result.getResult(resource2);
         assertNotNull(result2);
         assertNotNull(result2.ast);
         assertNotNull(result2.analysis);
-        final ConstraintAnalyzer.@Nullable Result result3 = result.results.get(resource3);
+        final ConstraintAnalyzer.@Nullable Result result3 = result.getResult(resource3);
         assertNotNull(result3);
         assertNotNull(result3.ast);
         assertNotNull(result3.analysis);
-        assertTrue(result.messages.isEmpty());
+        assertTrue(result.keyedMessages.isEmpty());
     }
 }

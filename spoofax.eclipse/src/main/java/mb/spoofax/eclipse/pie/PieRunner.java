@@ -10,7 +10,6 @@ import mb.pie.api.PieSession;
 import mb.pie.api.Task;
 import mb.pie.api.exec.Cancelled;
 import mb.pie.api.exec.NullCancelled;
-import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
@@ -24,7 +23,6 @@ import org.eclipse.jface.text.IDocumentExtension4;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import java.util.HashSet;
 
 public class PieRunner {
     private final Logger logger;
@@ -63,40 +61,24 @@ public class PieRunner {
         try(final PieSession session = languageComponent.newPieSession()) {
             final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
 
-            // Set observer for styling task, and execute it if it has not been executed yet.
-            final Task<@Nullable Styling> stylingTask = languageInstance.createStylingTask(resourceKey);
+            final Task<@Nullable Styling> styleTask = languageInstance.createStyleTask(resourceKey);
             final String text = document.get();
-            pie.setObserver(stylingTask, (styling) -> {
-                if(styling != null) {
-                    workspaceUpdate.updateStyle(editor, text, styling);
-                } else {
-                    workspaceUpdate.removeStyle(editor, text.length());
-                }
-            });
-            if(!pie.hasBeenExecuted(stylingTask)) {
-                logger.trace("Top-down execution of '{}'", stylingTask);
-                session.requireTopDown(stylingTask, monitorCancelled(monitor));
+            logger.trace("Top-down execution of '{}'", styleTask);
+            final @Nullable Styling styling = session.requireTopDown(styleTask, monitorCancelled(monitor));
+            if(styling != null) {
+                workspaceUpdate.updateStyle(editor, text, styling);
+            } else {
+                workspaceUpdate.removeStyle(editor, text.length());
             }
 
-            // Set observer for messages task, and execute it if it has not been executed yet.
-            final Task<KeyedMessages> messagesTask = languageInstance.createMessagesTask(resourceKey);
-            pie.setObserver(messagesTask, (messages) -> {
-                workspaceUpdate.clearMessages(file);
-                workspaceUpdate.replaceMessages(messages);
-            });
-            if(!pie.hasBeenExecuted(messagesTask)) {
-                logger.trace("Top-down execution of '{}'", messagesTask);
-                session.requireTopDown(messagesTask, monitorCancelled(monitor));
-            }
-
-            // Execute bottom-up build for changed file.
-            final HashSet<ResourceKey> changedResources = new HashSet<>();
-            changedResources.add(new EclipseResourceKey(file));
-            logger.trace("Bottom-up execution for changed resources '{}'", changedResources);
-            session.requireBottomUp(changedResources);
+            final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(resourceKey);
+            logger.trace("Top-down execution of '{}'", checkTask);
+            final KeyedMessages messages = session.requireTopDown(checkTask, monitorCancelled(monitor));
+            workspaceUpdate.clearMessages(file);
+            workspaceUpdate.replaceMessages(messages);
         }
 
-        workspaceUpdate.update(null, monitor);
+        workspaceUpdate.update(file, monitor);
     }
 
     public void removeEditor(
@@ -110,8 +92,8 @@ public class PieRunner {
 
         final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
 
-        pie.removeObserver(languageInstance.createStylingTask(resourceKey));
-        pie.removeObserver(languageInstance.createMessagesTask(resourceKey));
+        pie.removeObserver(languageInstance.createStyleTask(resourceKey));
+        pie.removeObserver(languageInstance.createCheckTask(resourceKey));
     }
 
 

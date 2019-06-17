@@ -78,7 +78,7 @@ public class StrategoRuntimeBuilder {
     }
 
 
-    public StrategoRuntime build() throws StrategoException {
+    public StrategoRuntime build() throws StrategoRuntimeBuilderException {
         final HybridInterpreter hybridInterpreter = new HybridInterpreter(termFactory);
         for(String component : components) {
             hybridInterpreter.getCompiledContext().registerComponent(component);
@@ -93,7 +93,7 @@ public class StrategoRuntimeBuilder {
                 // Load buffers the input stream, and closes the buffered stream, which closes our stream.
                 hybridInterpreter.load(resource.newInputStream());
             } catch(IOException | InterpreterException e) {
-                throw new StrategoException(
+                throw new StrategoRuntimeBuilderException(
                     "Loading Stratego ctree from resource '" + resource + "' failed unexpectedly", e);
             }
         }
@@ -103,7 +103,8 @@ public class StrategoRuntimeBuilder {
             try {
                 hybridInterpreter.loadJars(jarParentClassLoader, classpath);
             } catch(IOException | IncompatibleJarException e) {
-                throw new StrategoException("Loading Stratego JAR from resources '" + jars + "' failed unexpectedly",
+                throw new StrategoRuntimeBuilderException(
+                    "Loading Stratego JAR from resources '" + jars + "' failed unexpectedly",
                     e);
             }
         }

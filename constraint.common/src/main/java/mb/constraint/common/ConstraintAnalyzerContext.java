@@ -27,15 +27,15 @@ public class ConstraintAnalyzerContext {
     }
 
     void updateResult(ResourceKey resource, IStrategoTerm ast, IStrategoTerm analysis) {
-        results.put(resource, new Result(ast, analysis));
+        results.put(resource, new Result(resource, ast, analysis));
     }
 
     void updateResult(ResourceKey resource, IStrategoTerm analysis) {
         final @Nullable Result result = results.get(resource);
         if(result == null) {
-            results.put(resource, new Result(null, analysis));
+            results.put(resource, new Result(resource, null, analysis));
         } else {
-            results.put(resource, new Result(result.ast, analysis));
+            results.put(resource, new Result(resource, result.ast, analysis));
         }
     }
 

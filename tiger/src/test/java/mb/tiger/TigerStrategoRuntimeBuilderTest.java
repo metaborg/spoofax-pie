@@ -4,6 +4,7 @@ import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.jsglr1.common.JSGLR1ParseTableException;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
+import mb.stratego.common.StrategoRuntimeBuilderException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
 import org.spoofax.interpreter.library.IOAgent;
@@ -18,7 +19,7 @@ class TigerStrategoRuntimeBuilderTest {
     private final TigerParser parser = new TigerParser(TigerParseTable.fromClassLoaderResources());
     private final StrategoRuntime runtime = TigerStrategoRuntimeBuilder.fromClassLoaderResources().build();
 
-    TigerStrategoRuntimeBuilderTest() throws StrategoException, IOException, JSGLR1ParseTableException {}
+    TigerStrategoRuntimeBuilderTest() throws StrategoRuntimeBuilderException, IOException, JSGLR1ParseTableException {}
 
     @Test void parseUnparse() throws InterruptedException, StrategoException {
         final String str = "1 + 2";

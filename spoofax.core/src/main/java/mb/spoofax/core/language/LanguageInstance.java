@@ -11,13 +11,13 @@ import java.util.ArrayList;
 
 
 public interface LanguageInstance {
-    Task<AstResult> createAstTask(ResourceKey resourceKey);
+    Task<AstResult> createGetAstTask(ResourceKey resourceKey);
 
-    Task<KeyedMessages> createMessagesTask(ResourceKey resourceKey);
+    Task<KeyedMessages> createCheckTask(ResourceKey resourceKey);
 
-    Task<@Nullable Styling> createStylingTask(ResourceKey resourceKey);
+    Task<@Nullable Styling> createStyleTask(ResourceKey resourceKey);
 
-    Task<@Nullable ArrayList<Token>> createTokenizerTask(ResourceKey resourceKey);
+    Task<@Nullable ArrayList<Token>> createTokenizeTask(ResourceKey resourceKey);
 
     String getDisplayName();
 }

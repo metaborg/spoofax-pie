@@ -9,6 +9,7 @@ import mb.common.token.NumberTokenKind;
 import mb.common.token.OperatorTokenKind;
 import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.jsglr1.common.JSGLR1ParseTableException;
+import mb.log.noop.NoopLoggerFactory;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -18,7 +19,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class STLCRecStylerTest {
     private final STLCRecParser parser = new STLCRecParser(STLCRecParseTable.fromClassLoaderResources());
-    private final STLCRecStyler styler = new STLCRecStyler(STLCRecStylingRules.fromClassLoaderResources());
+    private final STLCRecStyler styler =
+        new STLCRecStyler(STLCRecStylingRules.fromClassLoaderResources(), new NoopLoggerFactory());
 
     STLCRecStylerTest() throws IOException, JSGLR1ParseTableException {}
 

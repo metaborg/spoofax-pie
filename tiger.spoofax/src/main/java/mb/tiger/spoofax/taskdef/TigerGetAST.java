@@ -8,11 +8,11 @@ import mb.spoofax.core.language.AstResult;
 
 import javax.inject.Inject;
 
-public class AstTaskDef implements TaskDef<ResourceKey, AstResult> {
-    private final ParseTaskDef parseTaskDef;
+public class TigerGetAST implements TaskDef<ResourceKey, AstResult> {
+    private final TigerParse parse;
 
-    @Inject public AstTaskDef(ParseTaskDef parseTaskDef) {
-        this.parseTaskDef = parseTaskDef;
+    @Inject public TigerGetAST(TigerParse parse) {
+        this.parse = parse;
     }
 
     @Override public String getId() {
@@ -20,7 +20,7 @@ public class AstTaskDef implements TaskDef<ResourceKey, AstResult> {
     }
 
     @Override public AstResult exec(ExecContext context, ResourceKey key) throws Exception {
-        final JSGLR1ParseResult parseOutput = context.require(parseTaskDef, key);
+        final JSGLR1ParseResult parseOutput = context.require(parse, key);
         return new AstResult(parseOutput.ast, parseOutput.recovered);
     }
 }

@@ -2,6 +2,7 @@ package mb.constraint.common;
 
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
+import mb.common.message.Messages;
 import mb.common.message.Severity;
 import mb.nabl2.terms.stratego.StrategoTermIndices;
 import mb.nabl2.terms.stratego.TermIndex;
@@ -18,6 +19,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 
 import javax.inject.Inject;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,40 +29,48 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 public class ConstraintAnalyzer {
-    public static class Result {
+    public static class Result implements Serializable {
+        public final ResourceKey resource;
         public final @Nullable IStrategoTerm ast;
         public final @Nullable IStrategoTerm analysis;
 
-        public Result(@Nullable IStrategoTerm ast, @Nullable IStrategoTerm analysis) {
+        public Result(ResourceKey resource, @Nullable IStrategoTerm ast, @Nullable IStrategoTerm analysis) {
+            this.resource = resource;
             this.ast = ast;
             this.analysis = analysis;
         }
 
-        public Result() {
+        public Result(ResourceKey resource) {
+            this.resource = resource;
             this.ast = null;
             this.analysis = null;
         }
     }
 
-    public static class SingleFileResult {
+    public static class SingleFileResult implements Serializable {
         public final @Nullable IStrategoTerm ast;
         public final @Nullable IStrategoTerm analysis;
-        public final KeyedMessages messages;
+        public final Messages messages;
 
-        public SingleFileResult(@Nullable IStrategoTerm ast, @Nullable IStrategoTerm analysis, KeyedMessages messages) {
+        public SingleFileResult(@Nullable IStrategoTerm ast, @Nullable IStrategoTerm analysis, Messages messages) {
             this.ast = ast;
             this.analysis = analysis;
             this.messages = messages;
         }
     }
 
-    public static class MultiFileResult {
-        public final HashMap<ResourceKey, Result> results;
-        public final KeyedMessages messages;
+    public static class MultiFileResult implements Serializable {
+        public final ArrayList<Result> results;
+        public final KeyedMessages keyedMessages;
 
-        public MultiFileResult(HashMap<ResourceKey, Result> results, KeyedMessages messages) {
+        public MultiFileResult(ArrayList<Result> results, KeyedMessages keyedMessages) {
             this.results = results;
-            this.messages = messages;
+            this.keyedMessages = keyedMessages;
+        }
+
+        public @Nullable Result getResult(ResourceKey resource) {
+            // OPTO: linear search to lookup. Cannot use HashMap because it does not serialize properly.
+            return results.stream().filter((r) -> r.resource.equals(resource)).findFirst().orElse(null);
         }
     }
 
@@ -84,11 +94,13 @@ public class ConstraintAnalyzer {
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>(1);
         asts.put(resource, ast);
         final MultiFileResult multiFileResult = doAnalyze(null, asts, context, strategoIOAgent);
-        final @Nullable Result result = multiFileResult.results.get(resource);
-        if(result == null) {
-            throw new RuntimeException("BUG: no analysis result was found for resource '" + resource + "'");
+        final @Nullable Result result;
+        try {
+            result = multiFileResult.results.get(0);
+        } catch(IndexOutOfBoundsException e) {
+            throw new RuntimeException("BUG: no analysis result was found for resource '" + resource + "'", e);
         }
-        return new SingleFileResult(result.ast, result.analysis, multiFileResult.messages);
+        return new SingleFileResult(result.ast, result.analysis, multiFileResult.keyedMessages.asMessages());
     }
 
     public MultiFileResult analyze(@Nullable ResourceKey root, HashMap<ResourceKey, IStrategoTerm> asts, ConstraintAnalyzerContext context, IOAgent strategoIOAgent)
@@ -254,13 +266,13 @@ public class ConstraintAnalyzer {
 
         /// 5. Build and return result object.
 
-        final HashMap<ResourceKey, Result> results = new HashMap<>(asts.size());
+        final ArrayList<Result> results = new ArrayList<>(asts.size());
         for(ResourceKey resource : addedOrChangedAsts.keySet()) {
             final @Nullable Result result = context.getResult(resource);
             if(result != null) {
-                results.put(resource, result);
+                results.add(result);
             } else {
-                results.put(resource, new Result());
+                results.add(new Result(resource));
             }
         }
         return new MultiFileResult(results, messagesBuilder.build());

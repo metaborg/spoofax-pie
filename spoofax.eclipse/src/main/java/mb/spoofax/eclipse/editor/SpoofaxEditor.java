@@ -42,7 +42,7 @@ public abstract class SpoofaxEditor extends TextEditor {
     private final PresentationMerger presentationMerger = new PresentationMerger();
 
     /*
-    Do not initialize any of the following fields to null, as TextEditor's constructor will call 'initializeEditor' to
+    Do NOT initialize any of the following fields to null, as TextEditor's constructor will call 'initializeEditor' to
     initialize several fields, which will then be set back to null when initialized here.
     */
 
@@ -55,7 +55,6 @@ public abstract class SpoofaxEditor extends TextEditor {
 
     // Set in createSourceViewer, unset in dispose, may never be null otherwise.
     private @Nullable IEditorInput input;
-    private @Nullable String inputName;
     private @Nullable IDocument document;
     private @Nullable DocumentListener documentListener;
     private @Nullable ISourceViewer sourceViewer;
@@ -64,7 +63,7 @@ public abstract class SpoofaxEditor extends TextEditor {
     private @Nullable IFile file;
 
 
-    public void setStyleAsync(TextPresentation textPresentation, @Nullable String text, @Nullable IProgressMonitor monitor) {
+    public void setStyleAsync(TextPresentation textPresentation, @Nullable String text, int textLength, @Nullable IProgressMonitor monitor) {
         presentationMerger.set(textPresentation);
         // Update textPresentation on the main thread, required by Eclipse.
         Display.getDefault().asyncExec(() -> {
@@ -76,11 +75,20 @@ public abstract class SpoofaxEditor extends TextEditor {
             if(document == null || sourceViewer == null) {
                 return;
             }
-            // Cancel if text presentation is not valid for current text any more.
-            if(text != null && !document.get().equals(text)) {
+            // Cancel if editor has no text.
+            final String currentText = document.get();
+            if(currentText == null) {
                 return;
             }
-            sourceViewer.changeTextPresentation(textPresentation, true);
+            // Cancel if the text the presentation was made for is different than the current text.
+            if(textLength != currentText.length() || (text != null && !text.equals(currentText))) {
+                return;
+            }
+            try {
+                sourceViewer.changeTextPresentation(textPresentation, true);
+            } catch(IllegalArgumentException e) {
+                logger.error("Changing text presentation asynchronously failed unexpectedly", e);
+            }
         });
     }
 
@@ -110,10 +118,8 @@ public abstract class SpoofaxEditor extends TextEditor {
 
         final @Nullable IFile inputFile = fileUtil.toFile(input);
         if(inputFile != null) {
-            this.inputName = inputFile.toString();
             this.file = inputFile;
         } else {
-            this.inputName = input.getName();
             this.file = null;
             logger.warn("File for editor on {} is null, cannot update the editor", input);
         }

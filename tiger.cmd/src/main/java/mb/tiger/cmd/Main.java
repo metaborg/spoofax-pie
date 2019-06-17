@@ -9,6 +9,7 @@ import mb.spoofax.cmd.SpoofaxCmd;
 import mb.spoofax.cmd.SpoofaxCmdComponent;
 import mb.spoofax.cmd.StringResourceRegistryModule;
 import mb.spoofax.core.platform.LoggerFactoryModule;
+import mb.stratego.common.StrategoRuntimeBuilderException;
 import mb.tiger.spoofax.DaggerTigerComponent;
 import mb.tiger.spoofax.TigerComponent;
 import mb.tiger.spoofax.TigerModule;
@@ -16,7 +17,7 @@ import mb.tiger.spoofax.TigerModule;
 import java.io.IOException;
 
 public class Main {
-    public static void main(String[] args) throws IOException, JSGLR1ParseTableException {
+    public static void main(String[] args) throws IOException, JSGLR1ParseTableException, StrategoRuntimeBuilderException {
         final SpoofaxCmdComponent platformComponent = DaggerSpoofaxCmdComponent
             .builder()
             .loggerFactoryModule(new LoggerFactoryModule(new NoopLoggerFactory()))

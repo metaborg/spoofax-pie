@@ -4,6 +4,7 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
 import mb.jsglr1.common.JSGLR1ParseTableException;
+import mb.log.api.LoggerFactory;
 import mb.pie.api.MapTaskDefs;
 import mb.pie.api.Pie;
 import mb.pie.api.PieSession;
@@ -11,14 +12,20 @@ import mb.pie.api.TaskDef;
 import mb.pie.api.TaskDefs;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.LanguageScope;
+import mb.stratego.common.StrategoRuntimeBuilder;
+import mb.stratego.common.StrategoRuntimeBuilderException;
+import mb.tiger.TigerConstraintAnalyzer;
+import mb.tiger.TigerNaBL2StrategoRuntimeBuilder;
 import mb.tiger.TigerParseTable;
+import mb.tiger.TigerStrategoRuntimeBuilder;
 import mb.tiger.TigerStyler;
 import mb.tiger.TigerStylingRules;
-import mb.tiger.spoofax.taskdef.AstTaskDef;
-import mb.tiger.spoofax.taskdef.MessagesTaskDef;
-import mb.tiger.spoofax.taskdef.ParseTaskDef;
-import mb.tiger.spoofax.taskdef.StylingTaskDef;
-import mb.tiger.spoofax.taskdef.TokenizerTaskDef;
+import mb.tiger.spoofax.taskdef.TigerAnalyze;
+import mb.tiger.spoofax.taskdef.TigerCheck;
+import mb.tiger.spoofax.taskdef.TigerGetAST;
+import mb.tiger.spoofax.taskdef.TigerParse;
+import mb.tiger.spoofax.taskdef.TigerStyle;
+import mb.tiger.spoofax.taskdef.TigerTokenize;
 
 import javax.inject.Named;
 import java.io.IOException;
@@ -31,24 +38,35 @@ import java.util.Set;
 @Module
 public class TigerModule {
     private final TigerParseTable parseTable;
-    private final TigerStyler styler;
+    private final TigerStylingRules stylingRules;
+    private final StrategoRuntimeBuilder strategoRuntimeBuilder;
+    private final TigerConstraintAnalyzer constraintAnalyzer;
 
-
-    private TigerModule(TigerParseTable parseTable, TigerStylingRules stylingRules) {
+    private TigerModule(
+        TigerParseTable parseTable,
+        TigerStylingRules stylingRules,
+        StrategoRuntimeBuilder strategoRuntimeBuilder,
+        TigerConstraintAnalyzer constraintAnalyzer
+    ) {
         this.parseTable = parseTable;
-        this.styler = new TigerStyler(stylingRules);
+        this.stylingRules = stylingRules;
+        this.strategoRuntimeBuilder = strategoRuntimeBuilder;
+        this.constraintAnalyzer = constraintAnalyzer;
     }
 
-
-    public static TigerModule fromClassLoaderResources() throws JSGLR1ParseTableException, IOException {
+    public static TigerModule fromClassLoaderResources() throws JSGLR1ParseTableException, IOException, StrategoRuntimeBuilderException {
         final TigerParseTable parseTable = TigerParseTable.fromClassLoaderResources();
         final TigerStylingRules stylingRules = TigerStylingRules.fromClassLoaderResources();
-        return new TigerModule(parseTable, stylingRules);
+        final StrategoRuntimeBuilder strategoRuntimeBuilder = TigerStrategoRuntimeBuilder.fromClassLoaderResources();
+        final TigerConstraintAnalyzer constraintAnalyzer =
+            new TigerConstraintAnalyzer(TigerNaBL2StrategoRuntimeBuilder.create(strategoRuntimeBuilder).build());
+        return new TigerModule(parseTable, stylingRules, strategoRuntimeBuilder, constraintAnalyzer);
     }
 
 
     @Provides @LanguageScope
     LanguageInstance provideLanguageInstance(TigerInstance tigerInstance) { return tigerInstance; }
+
 
     @Provides @LanguageScope
     TigerParseTable provideParseTable() {
@@ -56,24 +74,37 @@ public class TigerModule {
     }
 
     @Provides @LanguageScope
-    TigerStyler provideStyler() {
-        return styler;
+    TigerStyler provideStyler(LoggerFactory loggerFactory) {
+        return new TigerStyler(stylingRules, loggerFactory);
     }
+
+    @Provides @LanguageScope
+    StrategoRuntimeBuilder provideStrategoRuntimeBuilder() {
+        return strategoRuntimeBuilder;
+    }
+
+    @Provides @LanguageScope
+    TigerConstraintAnalyzer provideConstraintAnalyzer() {
+        return constraintAnalyzer;
+    }
+
 
     @Provides @LanguageScope @Named("language") @ElementsIntoSet
     static Set<TaskDef<?, ?>> provideTaskDefsSet(
-        ParseTaskDef parseTaskDef,
-        MessagesTaskDef messagesTaskDef,
-        AstTaskDef astTaskDef,
-        TokenizerTaskDef tokenizerTaskDef,
-        StylingTaskDef stylingTaskDef
+        TigerParse parse,
+        TigerTokenize tokenize,
+        TigerGetAST getAst,
+        TigerStyle style,
+        TigerAnalyze analyze,
+        TigerCheck check
     ) {
         final HashSet<TaskDef<?, ?>> taskDefs = new HashSet<>();
-        taskDefs.add(parseTaskDef);
-        taskDefs.add(messagesTaskDef);
-        taskDefs.add(astTaskDef);
-        taskDefs.add(tokenizerTaskDef);
-        taskDefs.add(stylingTaskDef);
+        taskDefs.add(parse);
+        taskDefs.add(tokenize);
+        taskDefs.add(getAst);
+        taskDefs.add(style);
+        taskDefs.add(analyze);
+        taskDefs.add(check);
         return taskDefs;
     }
 

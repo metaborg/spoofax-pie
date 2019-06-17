@@ -134,7 +134,7 @@ public final class SpoofaxLexer extends LexerBase {
             // GK: what is syntax coloring information doing here?
             try(final PieSession session = this.pieSessionProvider.get()) {
                 final Task<@Nullable ArrayList<mb.common.token.Token>> tokenizerTask =
-                    this.languageInstance.createTokenizerTask(this.resourceKey);
+                    this.languageInstance.createTokenizeTask(this.resourceKey);
                 @Nullable List<mb.common.token.Token> resourceTokens = session.requireTopDown(tokenizerTask);
                 if(resourceTokens == null)
                     resourceTokens = getDefaultTokens(this.resourceKey);

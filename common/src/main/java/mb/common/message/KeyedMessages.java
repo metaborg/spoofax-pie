@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public class KeyedMessages implements Serializable {
     final MultiHashMap<@Nullable ResourceKey, Message> messages;
@@ -102,6 +103,12 @@ public class KeyedMessages implements Serializable {
 
     public boolean containsTraceOrHigher() {
         return containsSeverityOrHigher(Severity.Trace);
+    }
+
+
+    public Messages asMessages() {
+        return new Messages(
+            messages.values().stream().flatMap(Collection::stream).collect(Collectors.toCollection(ArrayList::new)));
     }
 
 

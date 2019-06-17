@@ -9,6 +9,7 @@ import mb.common.token.NumberTokenKind;
 import mb.common.token.OperatorTokenKind;
 import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.jsglr1.common.JSGLR1ParseTableException;
+import mb.log.noop.NoopLoggerFactory;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -18,7 +19,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TigerStylerTest {
     private final TigerParser parser = new TigerParser(TigerParseTable.fromClassLoaderResources());
-    private final TigerStyler styler = new TigerStyler(TigerStylingRules.fromClassLoaderResources());
+    private final TigerStyler styler =
+        new TigerStyler(TigerStylingRules.fromClassLoaderResources(), new NoopLoggerFactory());
 
     TigerStylerTest() throws IOException, JSGLR1ParseTableException {}
 

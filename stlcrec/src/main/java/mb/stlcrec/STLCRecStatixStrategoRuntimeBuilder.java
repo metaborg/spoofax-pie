@@ -8,8 +8,7 @@ import mb.stratego.common.StrategoRuntimeBuilder;
 import java.net.URL;
 
 public class STLCRecStatixStrategoRuntimeBuilder {
-    public static StrategoRuntimeBuilder fromClassLoaderResources() {
-        final StrategoRuntimeBuilder builder = STLCRecStrategoRuntimeBuilder.fromClassLoaderResources();
+    public static StrategoRuntimeBuilder fromClassLoaderResources(StrategoRuntimeBuilder builder) {
         final URL locationURL = STLCRecStrategoRuntimeBuilder.class.getProtectionDomain().getCodeSource().getLocation();
         final URLPath path = new URLPath(locationURL);
         final URLPath correctedPath = path.appendRelativePath("mb/stlcrec");

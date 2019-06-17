@@ -2,8 +2,6 @@ package mb.tiger.spoofax.taskdef;
 
 import mb.common.style.Styling;
 import mb.jsglr1.common.JSGLR1ParseResult;
-import mb.log.api.Logger;
-import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
 import mb.pie.api.TaskDef;
@@ -13,14 +11,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 
-public class StylingTaskDef implements TaskDef<ResourceKey, @Nullable Styling> {
-    private final Logger logger;
-    private final ParseTaskDef parseTaskDef;
+public class TigerStyle implements TaskDef<ResourceKey, @Nullable Styling> {
+    private final TigerParse parse;
     private final TigerStyler styler;
 
-    @Inject public StylingTaskDef(LoggerFactory loggerFactory, ParseTaskDef parseTaskDef, TigerStyler styler) {
-        this.logger = loggerFactory.create(getClass());
-        this.parseTaskDef = parseTaskDef;
+    @Inject public TigerStyle(TigerParse parse, TigerStyler styler) {
+        this.parse = parse;
         this.styler = styler;
     }
 
@@ -30,11 +26,10 @@ public class StylingTaskDef implements TaskDef<ResourceKey, @Nullable Styling> {
 
     @Override
     public @Nullable Styling exec(ExecContext context, ResourceKey key) throws ExecException, InterruptedException {
-        final JSGLR1ParseResult parseOutput = context.require(parseTaskDef, key);
+        final JSGLR1ParseResult parseOutput = context.require(parse, key);
         if(parseOutput.tokens == null) {
             return null;
         }
-        logger.trace("Styling tokens:\n{}", parseOutput.tokens);
         return styler.style(parseOutput.tokens);
     }
 }
