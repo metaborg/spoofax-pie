@@ -2,12 +2,13 @@ plugins {
   id("org.metaborg.gradle.config.root-project") version "0.3.8"
   id("org.metaborg.gitonium") version "0.1.2"
 
-  id("org.metaborg.coronium.bundle") version "0.1.2" apply false // Only apply in subprojects
-  id("org.metaborg.spoofax.gradle.langspec") version "develop-SNAPSHOT" apply false // Only apply in subprojects
-  id("net.ltgt.apt") version "0.21" apply false // Only apply in subprojects
-  id("net.ltgt.apt-idea") version "0.21" apply false // Only apply in subprojects
-  id("de.set.ecj") version "1.4.1" apply false // Only apply in subprojects
-  id("biz.aQute.bnd.builder") version "4.1.0" apply false // Only apply in subprojects
+  // Set versions for plugins to use, only applying them in subprojects (apply false here).
+  id("org.metaborg.coronium.bundle") version "develop-SNAPSHOT" apply false
+  id("org.metaborg.spoofax.gradle.langspec") version "develop-SNAPSHOT" apply false
+  id("net.ltgt.apt") version "0.21" apply false
+  id("net.ltgt.apt-idea") version "0.21" apply false
+  id("de.set.ecj") version "1.4.1" apply false
+  id("biz.aQute.bnd.builder") version "4.1.0" apply false
 }
 
 subprojects {
