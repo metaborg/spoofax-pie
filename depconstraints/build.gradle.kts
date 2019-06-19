@@ -3,9 +3,9 @@ plugins {
   `maven-publish`
 }
 
-val logVersion = "0.2.2"
-val resourceVersion = "0.3.1"
-val pieVersion = "0.5.3"
+val logVersion = "develop-SNAPSHOT"
+val resourceVersion = "develop-SNAPSHOT"
+val pieVersion = "develop-SNAPSHOT"
 val spoofaxCoreVersion = "2.6.0-SNAPSHOT"
 val daggerVersion = "2.21"
 
