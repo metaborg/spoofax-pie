@@ -9,7 +9,9 @@ dependencies {
 
   implementation(project(":spoofax.core"))
   implementation(project(":spoofax.intellij"))
-  implementation(project(":tiger.spoofax"))
+  implementation(project(":tiger.spoofax")) {
+      exclude(group = "org.slf4j")
+  }
 
   implementation("com.google.dagger:dagger")
 

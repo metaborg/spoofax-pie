@@ -4,6 +4,7 @@ import mb.log.noop.NoopLoggerFactory;
 import mb.pie.dagger.PieModule;
 import mb.pie.runtime.PieBuilderImpl;
 import mb.spoofax.core.platform.LoggerFactoryModule;
+import mb.spoofax.intellij.log.IntellijLoggerFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class SpoofaxPlugin {
@@ -19,7 +20,7 @@ public class SpoofaxPlugin {
     public static void init() {
         component = DaggerSpoofaxIntellijComponent
             .builder()
-            .loggerFactoryModule(new LoggerFactoryModule(new NoopLoggerFactory()))
+            .loggerFactoryModule(new LoggerFactoryModule(new IntellijLoggerFactory()))
             .pieModule(new PieModule(PieBuilderImpl::new))
             .build();
     }

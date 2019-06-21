@@ -17,4 +17,10 @@ public final class SpoofaxFile2 extends PsiFileBase {
     @NotNull @Override public FileType getFileType() {
         return this.fileType;
     }
+
+    @Override
+    public String toString() {
+        return this.getOriginalFile().getVirtualFile().getPresentableName();
+    }
+
 }

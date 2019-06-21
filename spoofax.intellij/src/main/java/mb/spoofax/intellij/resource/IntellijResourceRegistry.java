@@ -13,7 +13,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.io.Serializable;
 
 public final class IntellijResourceRegistry implements ResourceRegistry {
-    static final String qualifier = "eclipse-resource";
+    static final String qualifier = "intellij-resource";
 
 
     public IntellijResource getResource(VirtualFile virtualFile) {
@@ -30,10 +30,10 @@ public final class IntellijResourceRegistry implements ResourceRegistry {
     }
 
     public IntellijResource getResource(PsiFile psiFile) {
-        final @Nullable VirtualFile file = psiFile.getVirtualFile();
-        if(file == null) {
+        final @Nullable VirtualFile file = psiFile.getOriginalFile().getVirtualFile();
+        if (file == null) {
             throw new ResourceRuntimeException(
-                "Cannot get IntelliJ resource for Psi file '" + psiFile + "'; the file exists only in memory");
+                "Cannot get IntelliJ resource for Psi file '" + psiFile.getName() + "'; the file exists only in memory");
         }
         return getResource(file);
     }
