@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
 import com.intellij.openapi.editor.HighlighterColors;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
-import javafx.util.Pair;
 import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.intellij.ScopeNames;
 
@@ -37,7 +36,7 @@ public final class ScopeManager {
     /**
      * Map from scope prefixes to their styles.
      */
-    private final List<Pair<String, TextAttributesKey[]>> styleScopes = Lists.newArrayList(
+    private final List<StyleScope> styleScopes = Lists.newArrayList(
         // Put more specific scopes (longer prefixes) before more general scopes (shorter prefixes).
         // See https://manual.macromates.com/en/language_grammars for details about these scopes.
         // @formatter:off
@@ -122,7 +121,7 @@ public final class ScopeManager {
      */
     public String getSimplifiedScope(ScopeNames scopes) {
         return this.styleScopes.stream()
-            .map(Pair::getKey)
+            .map(p -> p.scope)
             .filter(scopes::contains)
             .findFirst()
             .orElse(DEFAULT_SCOPE);
@@ -136,8 +135,8 @@ public final class ScopeManager {
      */
     public TextAttributesKey[] getTokenHighlights(String scope) {
         return this.styleScopes.stream()
-            .filter(p -> scope.startsWith(p.getKey()))
-            .map(Pair::getValue)
+            .filter(p -> scope.startsWith(p.scope))
+            .map(p -> p.styles)
             .findFirst()
             .orElse(EMPTY_KEYS);
     }
@@ -149,10 +148,8 @@ public final class ScopeManager {
      * @param style  The scope style.
      * @return The created pair.
      */
-    private Pair<String, TextAttributesKey[]> createScopeStyle(String prefix, TextAttributesKey style) {
-        //noinspection unchecked
-        return new Pair(prefix,
-            new TextAttributesKey[]{TextAttributesKey.createTextAttributesKey(createScopeID(prefix), style)});
+    private StyleScope createScopeStyle(String prefix, TextAttributesKey style) {
+        return new StyleScope(prefix, TextAttributesKey.createTextAttributesKey(createScopeID(prefix), style));
     }
 
     /**
