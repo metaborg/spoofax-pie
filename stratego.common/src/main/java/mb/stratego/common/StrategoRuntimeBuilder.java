@@ -9,6 +9,7 @@ import org.spoofax.jsglr.client.imploder.ImploderOriginTermFactory;
 import org.spoofax.terms.TermFactory;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.IncompatibleJarException;
+import org.strategoxt.lang.InteropRegisterer;
 
 import java.io.IOException;
 import java.net.URL;
@@ -20,6 +21,8 @@ public class StrategoRuntimeBuilder {
     private final ArrayList<IOperatorRegistry> libraries = new ArrayList<>();
     private final ArrayList<ReadableResource> ctrees = new ArrayList<>();
     private final ArrayList<URL> jars = new ArrayList<>();
+    private final ArrayList<InteropRegisterer> interopRegisterers = new ArrayList<>();
+    private final ArrayList<String> interopRegisterersByReflection = new ArrayList<>();
     private @Nullable ClassLoader jarParentClassLoader;
 
 
@@ -72,6 +75,16 @@ public class StrategoRuntimeBuilder {
         return this;
     }
 
+    public StrategoRuntimeBuilder addInteropRegisterer(InteropRegisterer interopRegisterer) {
+        this.interopRegisterers.add(interopRegisterer);
+        return this;
+    }
+
+    public StrategoRuntimeBuilder addInteropRegistererByReflection(String className) {
+        this.interopRegisterersByReflection.add(className);
+        return this;
+    }
+
     public StrategoRuntimeBuilder withJarParentClassLoader(ClassLoader jarParentClassLoader) {
         this.jarParentClassLoader = jarParentClassLoader;
         return this;
@@ -105,6 +118,22 @@ public class StrategoRuntimeBuilder {
             } catch(IOException | IncompatibleJarException e) {
                 throw new StrategoRuntimeBuilderException(
                     "Loading Stratego JAR from resources '" + jars + "' failed unexpectedly",
+                    e);
+            }
+        }
+
+        for(InteropRegisterer interopRegisterer : interopRegisterers) {
+            hybridInterpreter.registerClass(interopRegisterer, jarParentClassLoader);
+        }
+
+        for(String interopRegistererClassName : interopRegisterersByReflection) {
+            try {
+                final Class<?> interopRegistererClass = Class.forName(interopRegistererClassName);
+                final InteropRegisterer interopRegisterer = (InteropRegisterer) interopRegistererClass.newInstance();
+                hybridInterpreter.registerClass(interopRegisterer, jarParentClassLoader);
+            } catch(IllegalAccessException | InstantiationException | ClassNotFoundException e) {
+                throw new StrategoRuntimeBuilderException(
+                    "Loading InteropRegisterer '" + interopRegistererClassName + "' by reflection failed unexpectedly",
                     e);
             }
         }

@@ -22,12 +22,25 @@ dependencies {
   testCompileOnly("org.checkerframework:checker-qual-android")
 }
 
-// Copy select files from the language into the resulting JAR file
-run {
-  // Create dependency to spoofax-language artifact.
+fun copySpoofaxLanguageResources(
+  projectPath: String,
+  destinationPackage: String,
+  includeStrategoClasses: Boolean,
+  includeStrategoJavastratClasses: Boolean,
+  vararg resources: String
+) {
+  val allResources = resources.toMutableList()
+  if(includeStrategoClasses) {
+    allResources.add("target/metaborg/stratego.jar")
+  }
+  if(includeStrategoJavastratClasses) {
+    allResources.add("target/metaborg/stratego-javastrat.jar")
+  }
+
+  // Create dependency to the '.spoofax-language' artifact.
   val dependency = run {
-    val dep = dependencies.project(":org.metaborg.lang.tiger", Dependency.DEFAULT_CONFIGURATION)
-    dep.isTransitive = false // Don't care about transitive dependencies, just want the Tiger spoofax-language artifact.
+    val dep = dependencies.project(projectPath, Dependency.DEFAULT_CONFIGURATION)
+    dep.isTransitive = false // Don't care about transitive dependencies, just want the '.spoofax-language' artifact.
     dep.artifact {
       name = dep.name
       type = "spoofax-language"
@@ -35,33 +48,60 @@ run {
     }
     dep
   }
-  // Create 'resources' configuration that contains the dependency.
-  val configuration = configurations.create("resources") {
+  // Create 'spoofaxLanguage' configuration that contains the dependency.
+  val configuration = configurations.create("spoofaxLanguage") {
     dependencies.add(dependency)
   }
-  // First unpack Tiger language resources, because we cannot copy from a subdirectory in a ziptree.
-  val unpackTask = tasks.register<Sync>("unpackResources") {
+  // Unpack the '.spoofax-language' archive.
+  val unpackSpoofaxLanguageDir = "$buildDir/unpackedSpoofaxLanguage/"
+  val unpackSpoofaxLanguageTask = tasks.register<Sync>("unpackSpoofaxLanguage") {
     dependsOn(configuration)
     from({ configuration.map { project.zipTree(it) } })  /* Closure inside `from` to defer evaluation until task execution time */
-    into("$buildDir/unpacked")
-    include("target/metaborg/editor.esv.af", "target/metaborg/sdf.tbl", "target/metaborg/stratego.jar", "target/metaborg/stratego-javastrat.jar")
+    into(unpackSpoofaxLanguageDir)
+    include(allResources)
   }
-  // Copy resources into `mainSourceSet.java.outputDir` and `testSourceSet.java.outputDir`, so the resources finally end up in the 'mb.tiger' package in the resulting JAR.
-  val copySpec = copySpec {
-    from("$buildDir/unpacked/")
-    include("target/metaborg/editor.esv.af", "target/metaborg/sdf.tbl", "target/metaborg/stratego.jar", "target/metaborg/stratego-javastrat.jar")
+  // Copy resources into `mainSourceSet.java.outputDir` and `testSourceSet.java.outputDir`, so they end up in the target package.
+  val resourcesCopySpec = copySpec {
+    from(unpackSpoofaxLanguageDir)
+    include(*resources)
   }
-  val destPackage = "mb/tiger"
+  val strategoCopySpec = copySpec {
+    from(project.zipTree("$unpackSpoofaxLanguageDir/target/metaborg/stratego.jar"))
+    exclude("META-INF")
+  }
+  val strategoJavastratCopySpec = copySpec {
+    from(project.zipTree("$unpackSpoofaxLanguageDir/target/metaborg/stratego-javastrat.jar"))
+    exclude("META-INF")
+  }
   val copyMainTask = tasks.register<Copy>("copyMainResources") {
-    dependsOn(unpackTask)
-    with(copySpec)
-    into(sourceSets.main.get().java.outputDir.resolve(destPackage))
+    dependsOn(unpackSpoofaxLanguageTask)
+    into(sourceSets.main.get().java.outputDir)
+    into(destinationPackage) { with(resourcesCopySpec) }
+    if(includeStrategoClasses) {
+      into(".") { with(strategoCopySpec) }
+    }
+    if(includeStrategoJavastratClasses) {
+      into(".") { with(strategoJavastratCopySpec) }
+    }
   }
   tasks.getByName(JavaPlugin.CLASSES_TASK_NAME).dependsOn(copyMainTask)
   val copyTestTask = tasks.register<Copy>("copyTestResources") {
-    dependsOn(unpackTask)
-    with(copySpec)
-    into(sourceSets.test.get().java.outputDir.resolve(destPackage))
+    dependsOn(unpackSpoofaxLanguageTask)
+    into(sourceSets.test.get().java.outputDir)
+    into(destinationPackage) { with(resourcesCopySpec) }
+    if(includeStrategoClasses) {
+      into(".") { with(strategoCopySpec) }
+    }
+    if(includeStrategoJavastratClasses) {
+      into(".") { with(strategoJavastratCopySpec) }
+    }
   }
   tasks.getByName(JavaPlugin.TEST_CLASSES_TASK_NAME).dependsOn(copyTestTask)
 }
+copySpoofaxLanguageResources(
+  ":org.metaborg.lang.tiger",
+  "mb/tiger",
+  true,
+  true,
+  "target/metaborg/editor.esv.af", "target/metaborg/sdf.tbl"
+)

@@ -92,8 +92,8 @@ public class PieRunner {
 
         final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
 
-        pie.removeObserver(languageInstance.createStyleTask(resourceKey));
-        pie.removeObserver(languageInstance.createCheckTask(resourceKey));
+        pie.removeCallback(languageInstance.createStyleTask(resourceKey));
+        pie.removeCallback(languageInstance.createCheckTask(resourceKey));
     }
 
 
