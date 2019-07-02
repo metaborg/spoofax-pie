@@ -66,7 +66,7 @@ public class EclipseDocumentEclipseResource<D extends IDocument & IDocumentExten
 
 
     @Override public ResourceKey getKey() {
-        return new EclipseResourceKey(portablePathString);
+        return new EclipseResourcePath(portablePathString);
     }
 
 

@@ -23,7 +23,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Singleton
 public class EclipseResourceRegistry implements ResourceRegistry {
     static final String qualifier = "eclipse-resource";
-    static final IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+
+    private static final IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 
     private static class DocumentOverride {
         final IDocument document;
@@ -44,14 +45,14 @@ public class EclipseResourceRegistry implements ResourceRegistry {
     }
 
 
-    public <D extends IDocument & IDocumentExtension4> void addDocumentOverride(EclipseResourceKey key, D document, @Nullable IFile file) {
-        logger.trace("Overriding resource '{}' with document '{}'", key.portablePathString, document);
-        documentOverrides.put(key.portablePathString, new DocumentOverride(document, file));
+    public <D extends IDocument & IDocumentExtension4> void addDocumentOverride(EclipseResourcePath key, D document, @Nullable IFile file) {
+        logger.trace("Overriding resource '{}' with document '{}'", key.pathString, document);
+        documentOverrides.put(key.pathString, new DocumentOverride(document, file));
     }
 
-    public void removeDocumentOverride(EclipseResourceKey key) {
-        logger.trace("Removing document override for resource '{}'", key.portablePathString);
-        documentOverrides.remove(key.portablePathString);
+    public void removeDocumentOverride(EclipseResourcePath key) {
+        logger.trace("Removing document override for resource '{}'", key.pathString);
+        documentOverrides.remove(key.pathString);
     }
 
     public void clearDocumentOverrides() {
