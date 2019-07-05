@@ -15,7 +15,7 @@ public class TigerAddNatureHandler extends AbstractHandler {
         final @Nullable IProject project = AbstractHandlerUtils.toProject(event);
         if(project == null) return null;
         try {
-            NatureUtils.addTo(TigerNature.id, project, null);
+            NatureUtils.addTo(TigerProjectNature.id, project, null);
         } catch(CoreException e) {
             throw new ExecutionException("Adding Tiger nature failed unexpectedly", e);
         }

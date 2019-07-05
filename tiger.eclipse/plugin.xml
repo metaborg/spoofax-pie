@@ -41,7 +41,7 @@
              id="nature"
   >
     <runtime>
-      <run class="mb.tiger.eclipse.TigerNature"/>
+      <run class="mb.tiger.eclipse.TigerProjectNature"/>
     </runtime>
     <builder id="tiger.eclipse.builder"/>
   </extension>
