@@ -54,4 +54,36 @@
       name="Spoofax error annotation"
     />
   </extension>
+
+  <!-- Property Testers -->
+  <extension
+    point="org.eclipse.core.expressions.propertyTesters"
+  >
+    <propertyTester
+      class="mb.spoofax.eclipse.expressions.SpoofaxPropertyTester"
+      id="spoofax.eclipse.propertyTester"
+      namespace="spoofax.eclipse.property"
+      properties="hasNature, isOpen"
+      type="java.lang.Object"
+    />
+  </extension>
+
+  <!-- Reusable command expressions -->
+  <extension point="org.eclipse.core.expressions.definitions">
+    <definition id="spoofax.eclipse.expression.isProject">
+      <iterate ifEmpty="false" operator="and">
+        <and>
+          <or>
+            <instanceof value="org.eclipse.core.resources.IProject"/>
+            <!-- Test for project nature as well, in the Package explorer, Java projects of class JavaProject, which implements IProjectNature -->
+            <instanceof value="org.eclipse.core.resources.IProjectNature"/>
+          </or>
+          <test
+            forcePluginActivation="true"
+            property="spoofax.eclipse.property.isOpen"
+          />
+        </and>
+      </iterate>
+    </definition>
+  </extension>
 </plugin>

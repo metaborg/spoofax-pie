@@ -1,19 +1,117 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+  <!-- Editor -->
   <extension point="org.eclipse.ui.editors">
     <editor
       name="Tiger editor"
       extensions="tig"
       class="mb.tiger.eclipse.TigerEditor"
-      id="mb.tiger.eclipse.TigerEditor"
+      id="tiger.eclipse.editor"
     />
   </extension>
+
+  <!-- Document provider -->
   <extension point="org.eclipse.ui.editors.documentProviders">
     <provider
       extensions="tig"
       class="mb.tiger.eclipse.TigerDocumentProvider"
-      id="mb.tiger.eclipse.TigerDocumentProvider"
+      id="tiger.eclipse.documentprovider"
     />
+  </extension>
+
+  <!-- Builder -->
+  <extension point="org.eclipse.core.resources.builders"
+             name="Tiger builder"
+             id="builder"
+  >
+    <builder
+      hasNature="true"
+      isConfigurable="false"
+      callOnEmptyDelta="false"
+      supportsConfigurations="false"
+    >
+      <run class="mb.tiger.eclipse.TigerProjectBuilder"/>
+    </builder>
+  </extension>
+
+  <!-- Nature -->
+  <extension point="org.eclipse.core.resources.natures"
+             name="Tiger nature"
+             id="nature"
+  >
+    <runtime>
+      <run class="mb.tiger.eclipse.TigerNature"/>
+    </runtime>
+    <builder id="tiger.eclipse.builder"/>
+  </extension>
+  <!-- Add/Remove Nature commands -->
+  <extension point="org.eclipse.ui.commands">
+    <command id="tiger.eclipse.nature.add" name="Add Tiger nature"/>
+    <command id="tiger.eclipse.nature.remove" name="Remove Tiger nature"/>
+  </extension>
+  <extension point="org.eclipse.ui.handlers">
+    <handler
+      commandId="tiger.eclipse.nature.add"
+      class="mb.tiger.eclipse.TigerAddNatureHandler"
+    />
+    <handler
+      commandId="tiger.eclipse.nature.remove"
+      class="mb.tiger.eclipse.TigerRemoveNatureHandler"
+    />
+  </extension>
+  <!-- Reusable command expression -->
+  <extension point="org.eclipse.core.expressions.definitions">
+    <definition id="tiger.eclipse.expression.hasNature">
+      <iterate operator="and" ifEmpty="false">
+        <test
+          forcePluginActivation="true"
+          property="spoofax.eclipse.property.hasNature"
+          value="tiger.eclipse.nature"
+        />
+      </iterate>
+    </definition>
+  </extension>
+
+  <!-- Project context menu -->
+  <extension point="org.eclipse.ui.menus">
+    <!-- Package Explorer -->
+    <menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=additions">
+      <menu id="tiger.eclipse.menu.project" label="Tiger">
+        <visibleWhen>
+          <and>
+            <count value="1"/>
+            <reference definitionId="spoofax.eclipse.expression.isProject"/>
+          </and>
+        </visibleWhen>
+      </menu>
+    </menuContribution>
+    <!-- Project Explorer -->
+    <menuContribution locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
+      <menu id="tiger.eclipse.menu.project" label="Tiger">
+        <visibleWhen>
+          <and>
+            <count value="1"/>
+            <reference definitionId="spoofax.eclipse.expression.isProject"/>
+          </and>
+        </visibleWhen>
+      </menu>
+    </menuContribution>
+
+    <!-- Commands -->
+    <menuContribution locationURI="popup:tiger.eclipse.menu.project?after=additions">
+      <command commandId="tiger.eclipse.nature.add">
+        <visibleWhen>
+          <not>
+            <reference definitionId="tiger.eclipse.expression.hasNature"/>
+          </not>
+        </visibleWhen>
+      </command>
+      <command commandId="tiger.eclipse.nature.remove">
+        <visibleWhen>
+          <reference definitionId="tiger.eclipse.expression.hasNature"/>
+        </visibleWhen>
+      </command>
+    </menuContribution>
   </extension>
 </plugin>

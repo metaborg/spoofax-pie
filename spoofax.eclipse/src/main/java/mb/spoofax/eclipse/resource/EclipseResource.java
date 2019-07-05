@@ -45,28 +45,28 @@ public class EclipseResource implements HierarchicalResource, WrapsEclipseResour
         this.container = null;
     }
 
-    EclipseResource(EclipseResourcePath path) {
+    public EclipseResource(EclipseResourcePath path) {
         this.path = path;
         this.resource = null;
         this.file = null;
         this.container = null;
     }
 
-    EclipseResource(IResource resource) {
+    public EclipseResource(IResource resource) {
         this.path = new EclipseResourcePath(resource);
         this.resource = resource;
         this.file = null;
         this.container = null;
     }
 
-    EclipseResource(IFile file) {
+    public EclipseResource(IFile file) {
         this.path = new EclipseResourcePath(file);
         this.resource = file;
         this.file = file;
         this.container = null;
     }
 
-    EclipseResource(IContainer container) {
+    public EclipseResource(IContainer container) {
         this.path = new EclipseResourcePath(container);
         this.resource = container;
         this.file = null;
@@ -236,14 +236,45 @@ public class EclipseResource implements HierarchicalResource, WrapsEclipseResour
     }
 
     @Override public Stream<? extends EclipseResource> walk() throws IOException {
-        // TODO: implement walk.
-        throw new UnsupportedOperationException();
+        final Stream.Builder<EclipseResource> builder = Stream.builder();
+        try {
+            recursiveMembers(getContainer(), builder, null, null, null);
+        } catch(CoreException e) {
+            throw new IOException("Walking resources in '" + path + "' failed unexpectedly", e);
+        }
+        return builder.build();
     }
 
     @Override
     public Stream<? extends EclipseResource> walk(ResourceWalker walker, ResourceMatcher matcher, @Nullable HierarchicalResourceAccess access) throws IOException {
-        // TODO: implement walk.
-        throw new UnsupportedOperationException();
+        final Stream.Builder<EclipseResource> builder = Stream.builder();
+        try {
+            recursiveMembers(getContainer(), builder, walker, matcher, access);
+        } catch(CoreException e) {
+            throw new IOException(
+                "Walking resources in '" + path + "' with walker '" + walker + "' and matcher '" + matcher + "' failed unexpectedly",
+                e);
+        }
+        return builder.build();
+    }
+
+    private void recursiveMembers(IContainer container, Stream.Builder<EclipseResource> builder, @Nullable ResourceWalker walker, @Nullable ResourceMatcher matcher, @Nullable HierarchicalResourceAccess access) throws CoreException, IOException {
+        final IResource[] members = container.members();
+        for(IResource member : members) {
+            final EclipseResource resource = new EclipseResource(member);
+            if(access != null) {
+                access.read(resource);
+            }
+            if(matcher == null || matcher.matches(resource, this)) {
+                builder.accept(resource);
+            }
+            if(member instanceof IContainer) {
+                if(walker == null || walker.traverse(resource, this)) {
+                    // OPTO: non-recursive implementation.
+                    recursiveMembers((IContainer) member, builder, walker, matcher, access);
+                }
+            }
+        }
     }
 
 

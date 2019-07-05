@@ -10,6 +10,8 @@ import mb.pie.api.PieSession;
 import mb.pie.api.Task;
 import mb.pie.api.exec.Cancelled;
 import mb.pie.api.exec.NullCancelled;
+import mb.pie.runtime.exec.Stats;
+import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
@@ -23,6 +25,7 @@ import org.eclipse.jface.text.IDocumentExtension4;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import java.util.Set;
 
 public class PieRunner {
     private final Logger logger;
@@ -64,7 +67,9 @@ public class PieRunner {
             final Task<@Nullable Styling> styleTask = languageInstance.createStyleTask(resourceKey);
             final String text = document.get();
             logger.trace("Require top-down '{}'", styleTask);
+            Stats.reset();
             final @Nullable Styling styling = session.requireTopDown(styleTask, monitorCancelled(monitor));
+            logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
             if(styling != null) {
                 workspaceUpdate.updateStyle(editor, text, styling);
             } else {
@@ -76,7 +81,9 @@ public class PieRunner {
 
             final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(resourceKey);
             logger.trace("Require top-down '{}'", checkTask);
+            Stats.reset();
             final KeyedMessages messages = session.requireTopDown(checkTask, monitorCancelled(monitor));
+            logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
             workspaceUpdate.clearMessages(file);
             workspaceUpdate.replaceMessages(messages);
         }
@@ -105,8 +112,19 @@ public class PieRunner {
     }
 
 
-    public void filesChanged() {
+    public void incrementalBuild(
+        LanguageComponent languageComponent,
+        Set<ResourceKey> changedResources,
+        @Nullable IProgressMonitor monitor
+    ) throws ExecException, InterruptedException {
+        logger.trace("Running build");
 
+        try(final PieSession session = languageComponent.newPieSession()) {
+            logger.trace("Require bottom-up '{}'", changedResources);
+            Stats.reset();
+            session.requireBottomUp(changedResources, monitorCancelled(monitor));
+            logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
+        }
     }
 
 
