@@ -13,7 +13,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-public class BuilderUtils {
+public class BuilderUtil {
     /**
      * Returns if project contains builder with given identifier.
      *

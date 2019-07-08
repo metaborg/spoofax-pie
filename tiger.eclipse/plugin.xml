@@ -11,7 +11,7 @@
     />
   </extension>
 
-  <!-- Document provider -->
+  <!-- Document Provider -->
   <extension point="org.eclipse.ui.editors.documentProviders">
     <provider
       extensions="tig"
@@ -21,9 +21,10 @@
   </extension>
 
   <!-- Builder -->
-  <extension point="org.eclipse.core.resources.builders"
-             name="Tiger builder"
-             id="builder"
+  <extension
+    point="org.eclipse.core.resources.builders"
+    name="Tiger builder"
+    id="builder"
   >
     <builder
       hasNature="true"
@@ -36,9 +37,10 @@
   </extension>
 
   <!-- Nature -->
-  <extension point="org.eclipse.core.resources.natures"
-             name="Tiger nature"
-             id="nature"
+  <extension
+    point="org.eclipse.core.resources.natures"
+    name="Tiger nature"
+    id="nature"
   >
     <runtime>
       <run class="mb.tiger.eclipse.TigerProjectNature"/>
@@ -60,58 +62,17 @@
       class="mb.tiger.eclipse.TigerRemoveNatureHandler"
     />
   </extension>
-  <!-- Reusable command expression -->
-  <extension point="org.eclipse.core.expressions.definitions">
-    <definition id="tiger.eclipse.expression.hasNature">
-      <iterate operator="and" ifEmpty="false">
-        <test
-          forcePluginActivation="true"
-          property="spoofax.eclipse.property.hasNature"
-          value="tiger.eclipse.nature"
-        />
-      </iterate>
-    </definition>
-  </extension>
 
-  <!-- Project context menu -->
+
+  <!-- Context menu -->
   <extension point="org.eclipse.ui.menus">
-    <!-- Package Explorer -->
-    <menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=additions">
-      <menu id="tiger.eclipse.menu.project" label="Tiger">
-        <visibleWhen>
-          <and>
-            <count value="1"/>
-            <reference definitionId="spoofax.eclipse.expression.isProject"/>
-          </and>
-        </visibleWhen>
-      </menu>
-    </menuContribution>
     <!-- Project Explorer -->
     <menuContribution locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
-      <menu id="tiger.eclipse.menu.project" label="Tiger">
-        <visibleWhen>
-          <and>
-            <count value="1"/>
-            <reference definitionId="spoofax.eclipse.expression.isProject"/>
-          </and>
-        </visibleWhen>
-      </menu>
+      <dynamic id="tiger.eclipse.menu.context" class="mb.tiger.eclipse.TigerContextMenu"/>
     </menuContribution>
-
-    <!-- Commands -->
-    <menuContribution locationURI="popup:tiger.eclipse.menu.project?after=additions">
-      <command commandId="tiger.eclipse.nature.add">
-        <visibleWhen>
-          <not>
-            <reference definitionId="tiger.eclipse.expression.hasNature"/>
-          </not>
-        </visibleWhen>
-      </command>
-      <command commandId="tiger.eclipse.nature.remove">
-        <visibleWhen>
-          <reference definitionId="tiger.eclipse.expression.hasNature"/>
-        </visibleWhen>
-      </command>
+    <!-- Package Explorer -->
+    <menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=additions">
+      <dynamic id="tiger.eclipse.menu.context" class="mb.tiger.eclipse.TigerContextMenu"/>
     </menuContribution>
   </extension>
 </plugin>

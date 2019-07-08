@@ -7,7 +7,7 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-public class NatureUtils {
+public class NatureUtil {
     /**
      * Checks if nature exists in given project.
      *

@@ -13,7 +13,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 /**
  * Utility functions for {@link AbstractHandler}.
  */
-public final class AbstractHandlerUtils {
+public final class AbstractHandlerUtil {
     /**
      * Converts selection in given execution event into a structured selection.
      *
@@ -25,7 +25,7 @@ public final class AbstractHandlerUtils {
         if(selection == null) {
             return null;
         }
-        return SelectionUtils.toStructured(selection);
+        return SelectionUtil.toStructured(selection);
     }
 
 
@@ -40,7 +40,7 @@ public final class AbstractHandlerUtils {
         if(selection == null) {
             return null;
         }
-        return SelectionUtils.toResources(selection);
+        return SelectionUtil.toResources(selection);
     }
 
     /**
@@ -54,7 +54,7 @@ public final class AbstractHandlerUtils {
         if(selection == null) {
             return null;
         }
-        return SelectionUtils.toFiles(selection);
+        return SelectionUtil.toFiles(selection);
     }
 
     /**
@@ -68,6 +68,6 @@ public final class AbstractHandlerUtils {
         if(selection == null) {
             return null;
         }
-        return SelectionUtils.toProject(selection);
+        return SelectionUtil.toProject(selection);
     }
 }

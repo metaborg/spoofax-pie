@@ -8,6 +8,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.PlatformUI;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -15,7 +16,17 @@ import java.util.Iterator;
 /**
  * Utility functions for selections.
  */
-public class SelectionUtils {
+public class SelectionUtil {
+    /**
+     * Returns the selection of the active part of the active workbench window.
+     *
+     * @return Active selection, or null if there is no active selection.
+     */
+    public static @Nullable ISelection getActiveSelection() {
+        return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().getActivePart().getSite().getSelectionProvider().getSelection();
+    }
+
+
     /**
      * Converts given selection into a structured selection.
      *
@@ -157,7 +168,7 @@ public class SelectionUtils {
      * @param selection Structured selection to search.
      * @return Selected projects
      */
-    public static Iterable<IProject> toProjects(IStructuredSelection selection) {
+    public static ArrayList<IProject> toProjects(IStructuredSelection selection) {
         final ArrayList<IProject> projects = new ArrayList<>();
         for(Iterator<?> iterator = selection.iterator(); iterator.hasNext(); ) {
             final Object selected = iterator.next();
