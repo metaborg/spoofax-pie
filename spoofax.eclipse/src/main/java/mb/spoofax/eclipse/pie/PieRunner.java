@@ -68,21 +68,18 @@ public class PieRunner {
             final String text = document.get();
             logger.trace("Require top-down '{}'", styleTask);
             Stats.reset();
-            final @Nullable Styling styling = session.requireTopDown(styleTask, monitorCancelled(monitor));
+            final @Nullable Styling styling = session.require(styleTask, monitorCancelled(monitor));
             logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
             if(styling != null) {
                 workspaceUpdate.updateStyle(editor, text, styling);
             } else {
                 workspaceUpdate.removeStyle(editor, text.length());
-
             }
-            logger.trace("Unobserve '{}'", styleTask);
-            session.setUnobserved(styleTask); // OPTO: observing and then immediately unobserving is not efficient.
 
             final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(resourceKey);
             logger.trace("Require top-down '{}'", checkTask);
             Stats.reset();
-            final KeyedMessages messages = session.requireTopDown(checkTask, monitorCancelled(monitor));
+            final KeyedMessages messages = session.require(checkTask, monitorCancelled(monitor));
             logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
             workspaceUpdate.clearMessages(file);
             workspaceUpdate.replaceMessages(messages);
@@ -107,7 +104,7 @@ public class PieRunner {
         pie.removeCallback(checkTask);
         try(final PieSession session = languageComponent.newPieSession()) {
             logger.trace("Unobserve '{}'", checkTask);
-            session.setUnobserved(checkTask);
+            session.unobserve(checkTask);
         }
     }
 
@@ -122,9 +119,63 @@ public class PieRunner {
         try(final PieSession session = languageComponent.newPieSession()) {
             logger.trace("Require bottom-up '{}'", changedResources);
             Stats.reset();
-            session.requireBottomUp(changedResources, monitorCancelled(monitor));
+            session.updateAffectedBy(changedResources, monitorCancelled(monitor));
             logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
         }
+    }
+
+
+    public boolean isCheckObserved(
+        LanguageInstance languageInstance,
+        IFile file
+    ) {
+        final EclipseResourcePath resourceKey = new EclipseResourcePath(file);
+        final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(resourceKey);
+        return pie.isObserved(checkTask);
+    }
+
+    public void observeCheckTasks(
+        LanguageComponent languageComponent,
+        Iterable<IFile> files,
+        @Nullable IProgressMonitor monitor
+    ) throws ExecException, InterruptedException {
+        final WorkspaceUpdate workspaceUpdate = workspaceUpdateProvider.get();
+        try(final PieSession session = languageComponent.newPieSession()) {
+            final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
+            for(IFile file : files) {
+                final EclipseResourcePath resourceKey = new EclipseResourcePath(file);
+                final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(resourceKey);
+                if(!pie.isObserved(checkTask)) {
+                    logger.trace("Require top-down '{}'", checkTask);
+                    Stats.reset();
+                    final KeyedMessages messages = session.requireAndObserve(checkTask, monitorCancelled(monitor));
+                    logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
+                    workspaceUpdate.clearMessages(file);
+                    workspaceUpdate.replaceMessages(messages);
+                }
+            }
+        }
+        workspaceUpdate.update(null, monitor);
+    }
+
+    public void unobserveCheckTasks(
+        LanguageComponent languageComponent,
+        Iterable<IFile> files,
+        @Nullable IProgressMonitor monitor
+    ) {
+        final WorkspaceUpdate workspaceUpdate = workspaceUpdateProvider.get();
+        try(final PieSession session = languageComponent.newPieSession()) {
+            final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
+            for(IFile file : files) {
+                final EclipseResourcePath resourceKey = new EclipseResourcePath(file);
+                final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(resourceKey);
+                if(pie.isObserved(checkTask)) {
+                    session.unobserve(checkTask);
+                    workspaceUpdate.clearMessages(file);
+                }
+            }
+        }
+        workspaceUpdate.update(null, monitor);
     }
 
 

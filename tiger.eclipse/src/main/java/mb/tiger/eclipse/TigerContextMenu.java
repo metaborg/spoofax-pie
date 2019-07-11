@@ -8,7 +8,9 @@ public class TigerContextMenu extends ContextMenu {
             TigerPlugin.getComponent(),
             TigerProjectNature.id,
             "tiger.eclipse.nature.add",
-            "tiger.eclipse.nature.remove"
+            "tiger.eclipse.nature.remove",
+            "tiger.eclipse.observe",
+            "tiger.eclipse.unobserve"
         );
     }
 }

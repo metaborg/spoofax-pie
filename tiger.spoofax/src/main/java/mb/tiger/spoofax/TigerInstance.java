@@ -15,8 +15,17 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class TigerInstance implements LanguageInstance {
+    private final static HashSet<String> extensions = new HashSet<>();
+
+    static {
+        extensions.add("tig");
+    }
+
+
     private final TigerGetAST getAst;
     private final TigerCheck check;
     private final TigerStyle style;
@@ -36,6 +45,15 @@ public class TigerInstance implements LanguageInstance {
     }
 
 
+    @Override public String getDisplayName() {
+        return "Tiger";
+    }
+
+    @Override public HashSet<String> getFileExtensions() {
+        return extensions;
+    }
+
+
     @Override public Task<AstResult> createGetAstTask(ResourceKey resourceKey) {
         return getAst.createTask(resourceKey);
     }
@@ -50,10 +68,5 @@ public class TigerInstance implements LanguageInstance {
 
     @Override public Task<@Nullable ArrayList<Token>> createTokenizeTask(ResourceKey resourceKey) {
         return tokenize.createTask(resourceKey);
-    }
-
-
-    @Override public String getDisplayName() {
-        return "Tiger";
     }
 }

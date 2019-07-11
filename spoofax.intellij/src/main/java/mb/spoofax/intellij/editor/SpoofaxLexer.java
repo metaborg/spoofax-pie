@@ -135,7 +135,7 @@ public final class SpoofaxLexer extends LexerBase {
             try(final PieSession session = this.pieSessionProvider.get()) {
                 final Task<@Nullable ArrayList<mb.common.token.Token>> tokenizerTask =
                     this.languageInstance.createTokenizeTask(this.resourceKey);
-                @Nullable List<mb.common.token.Token> resourceTokens = session.requireTopDown(tokenizerTask);
+                @Nullable List<mb.common.token.Token> resourceTokens = session.require(tokenizerTask);
                 if(resourceTokens == null)
                     resourceTokens = getDefaultTokens(this.resourceKey);
                 logger.debug("Tokenizer task returned {} tokens", resourceTokens.size());

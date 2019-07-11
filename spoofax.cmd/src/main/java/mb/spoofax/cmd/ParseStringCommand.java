@@ -32,12 +32,12 @@ public class ParseStringCommand implements Callable<None> {
         final StringResource stringResource = stringResourceRegistry.createResource(stringToParse, "0");
 
         try(final PieSession session = languageComponent.newPieSession()) {
-            final AstResult astResult = session.requireTopDown(languageInstance.createGetAstTask(stringResource.key));
+            final AstResult astResult = session.require(languageInstance.createGetAstTask(stringResource.key));
             if(astResult.ast != null) {
                 System.out.println(astResult.ast.toString());
             }
             final KeyedMessages messages =
-                session.requireTopDown(languageInstance.createCheckTask(stringResource.key));
+                session.require(languageInstance.createCheckTask(stringResource.key));
             System.out.println(messages);
             return None.instance;
         }

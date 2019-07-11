@@ -61,7 +61,7 @@ public class SelectionUtil {
      * @param selection Structured selection to search.
      * @return Selected resources
      */
-    public static Iterable<IResource> toResources(IStructuredSelection selection) {
+    public static ArrayList<IResource> toResources(IStructuredSelection selection) {
         final ArrayList<IResource> resources = new ArrayList<>();
         for(Iterator<?> iterator = selection.iterator(); iterator.hasNext(); ) {
             final Object selected = iterator.next();
@@ -116,7 +116,7 @@ public class SelectionUtil {
      * @param selection Structured selection to search.
      * @return Selected files
      */
-    public static Iterable<IFile> toFiles(IStructuredSelection selection) {
+    public static ArrayList<IFile> toFiles(IStructuredSelection selection) {
         final ArrayList<IFile> files = new ArrayList<>();
         for(Iterator<?> iterator = selection.iterator(); iterator.hasNext(); ) {
             final Object selected = iterator.next();

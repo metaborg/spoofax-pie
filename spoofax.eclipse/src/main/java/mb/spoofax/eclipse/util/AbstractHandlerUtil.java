@@ -10,6 +10,8 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.handlers.HandlerUtil;
 
+import java.util.ArrayList;
+
 /**
  * Utility functions for {@link AbstractHandler}.
  */
@@ -35,10 +37,10 @@ public final class AbstractHandlerUtil {
      * @param event Execution event.
      * @return Selected resources, or null if no structured selection could be found.
      */
-    public static @Nullable Iterable<IResource> toResources(ExecutionEvent event) {
+    public static ArrayList<IResource> toResources(ExecutionEvent event) {
         final @Nullable IStructuredSelection selection = toStructured(event);
         if(selection == null) {
-            return null;
+            return new ArrayList<>();
         }
         return SelectionUtil.toResources(selection);
     }
@@ -49,10 +51,10 @@ public final class AbstractHandlerUtil {
      * @param event Execution event.
      * @return Selected files, or null if no structed selection could be found.
      */
-    public static Iterable<IFile> toFiles(ExecutionEvent event) {
+    public static ArrayList<IFile> toFiles(ExecutionEvent event) {
         final @Nullable IStructuredSelection selection = toStructured(event);
         if(selection == null) {
-            return null;
+            return new ArrayList<>();
         }
         return SelectionUtil.toFiles(selection);
     }

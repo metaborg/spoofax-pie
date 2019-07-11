@@ -8,9 +8,14 @@ import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
-
+import java.util.Set;
 
 public interface LanguageInstance {
+    String getDisplayName();
+
+    Set<String> getFileExtensions();
+
+
     Task<AstResult> createGetAstTask(ResourceKey resourceKey);
 
     Task<KeyedMessages> createCheckTask(ResourceKey resourceKey);
@@ -18,6 +23,4 @@ public interface LanguageInstance {
     Task<@Nullable Styling> createStyleTask(ResourceKey resourceKey);
 
     Task<@Nullable ArrayList<Token>> createTokenizeTask(ResourceKey resourceKey);
-
-    String getDisplayName();
 }

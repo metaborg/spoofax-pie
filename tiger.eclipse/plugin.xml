@@ -47,7 +47,24 @@
     </runtime>
     <builder id="tiger.eclipse.builder"/>
   </extension>
-  <!-- Add/Remove Nature commands -->
+
+
+  <!-- Menus -->
+  <!-- Context menu -->
+  <extension point="org.eclipse.ui.menus">
+    <!-- Project Explorer -->
+    <menuContribution locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
+      <dynamic id="tiger.eclipse.menu.context" class="mb.tiger.eclipse.TigerContextMenu"/>
+    </menuContribution>
+    <!-- Package Explorer -->
+    <menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=additions">
+      <dynamic id="tiger.eclipse.menu.context" class="mb.tiger.eclipse.TigerContextMenu"/>
+    </menuContribution>
+  </extension>
+
+
+  <!-- Commands and Handlers -->
+  <!-- Add/Remove Nature -->
   <extension point="org.eclipse.ui.commands">
     <command id="tiger.eclipse.nature.add" name="Add Tiger nature"/>
     <command id="tiger.eclipse.nature.remove" name="Remove Tiger nature"/>
@@ -62,17 +79,19 @@
       class="mb.tiger.eclipse.TigerRemoveNatureHandler"
     />
   </extension>
-
-
-  <!-- Context menu -->
-  <extension point="org.eclipse.ui.menus">
-    <!-- Project Explorer -->
-    <menuContribution locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
-      <dynamic id="tiger.eclipse.menu.context" class="mb.tiger.eclipse.TigerContextMenu"/>
-    </menuContribution>
-    <!-- Package Explorer -->
-    <menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=additions">
-      <dynamic id="tiger.eclipse.menu.context" class="mb.tiger.eclipse.TigerContextMenu"/>
-    </menuContribution>
+  <!-- Observe/Unobserve -->
+  <extension point="org.eclipse.ui.commands">
+    <command id="tiger.eclipse.observe" name="Observe file(s)"/>
+    <command id="tiger.eclipse.unobserve" name="Unobserve file(s)"/>
+  </extension>
+  <extension point="org.eclipse.ui.handlers">
+    <handler
+      commandId="tiger.eclipse.observe"
+      class="mb.tiger.eclipse.TigerObserveHandler"
+    />
+    <handler
+      commandId="tiger.eclipse.unobserve"
+      class="mb.tiger.eclipse.TigerUnobserveHandler"
+    />
   </extension>
 </plugin>

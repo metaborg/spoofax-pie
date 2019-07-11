@@ -28,11 +28,11 @@ public class ParseFileCommand implements Callable<None> {
         final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
         final FSPath filePath = new FSPath(this.filePath);
         try(final PieSession session = languageComponent.newPieSession()) {
-            final AstResult astResult = session.requireTopDown(languageInstance.createGetAstTask(filePath));
+            final AstResult astResult = session.require(languageInstance.createGetAstTask(filePath));
             if(astResult.ast != null) {
                 System.out.println(astResult.ast.toString());
             }
-            final KeyedMessages messages = session.requireTopDown(languageInstance.createCheckTask(filePath));
+            final KeyedMessages messages = session.require(languageInstance.createCheckTask(filePath));
             System.out.println(messages);
             return None.instance;
         }
