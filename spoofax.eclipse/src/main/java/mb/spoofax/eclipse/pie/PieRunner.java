@@ -25,13 +25,17 @@ import org.eclipse.jface.text.IDocumentExtension4;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import javax.inject.Singleton;
 import java.util.Set;
 
+@Singleton
 public class PieRunner {
     private final Logger logger;
     private final Pie pie;
     private final EclipseResourceRegistry eclipseResourceRegistry;
     private final Provider<WorkspaceUpdate> workspaceUpdateProvider;
+
+    private @Nullable WorkspaceUpdate bottomUpWorkspaceUpdate = null;
 
 
     @Inject
@@ -66,7 +70,7 @@ public class PieRunner {
 
             final Task<@Nullable Styling> styleTask = languageInstance.createStyleTask(resourceKey);
             final String text = document.get();
-            logger.trace("Require top-down '{}'", styleTask);
+            logger.trace("Require top-down (without observing) '{}'", styleTask);
             Stats.reset();
             final @Nullable Styling styling = session.requireWithoutObserving(styleTask, monitorCancelled(monitor));
             logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
@@ -77,35 +81,21 @@ public class PieRunner {
             }
 
             final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(resourceKey);
-            logger.trace("Require top-down '{}'", checkTask);
+            logger.trace("Require top-down (without observing) '{}'", checkTask);
             Stats.reset();
             final KeyedMessages messages = session.requireWithoutObserving(checkTask, monitorCancelled(monitor));
             logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
-            workspaceUpdate.clearMessages(file);
+            workspaceUpdate.clearMessages(resourceKey);
             workspaceUpdate.replaceMessages(messages);
         }
 
         workspaceUpdate.update(file, monitor);
     }
 
-    public void removeEditor(
-        LanguageComponent languageComponent,
-        IFile file
-    ) {
+    public void removeEditor(IFile file) {
         logger.trace("Removing editor for file '{}'", file);
-
         final EclipseResourcePath resourceKey = new EclipseResourcePath(file);
         eclipseResourceRegistry.removeDocumentOverride(resourceKey);
-
-        final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
-
-        pie.removeCallback(languageInstance.createStyleTask(resourceKey));
-        final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(resourceKey);
-        pie.removeCallback(checkTask);
-        try(final PieSession session = languageComponent.newPieSession()) {
-            logger.trace("Unobserve '{}'", checkTask);
-            session.unobserve(checkTask);
-        }
     }
 
 
@@ -115,13 +105,16 @@ public class PieRunner {
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException {
         logger.trace("Running build");
-
+        bottomUpWorkspaceUpdate = workspaceUpdateProvider.get();
         try(final PieSession session = languageComponent.newPieSession()) {
             logger.trace("Require bottom-up '{}'", changedResources);
             Stats.reset();
             session.updateAffectedBy(changedResources, monitorCancelled(monitor));
             logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
         }
+        //noinspection ConstantConditions
+        bottomUpWorkspaceUpdate.update(null, monitor);
+        bottomUpWorkspaceUpdate = null;
     }
 
 
@@ -145,12 +138,16 @@ public class PieRunner {
             for(IFile file : files) {
                 final EclipseResourcePath resourceKey = new EclipseResourcePath(file);
                 final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(resourceKey);
+                pie.setCallback(checkTask, (messages) -> {
+                    if(bottomUpWorkspaceUpdate != null) {
+                        bottomUpWorkspaceUpdate.replaceMessages(messages);
+                    }
+                });
                 if(!pie.isObserved(checkTask)) {
                     logger.trace("Require top-down '{}'", checkTask);
                     Stats.reset();
                     final KeyedMessages messages = session.require(checkTask, monitorCancelled(monitor));
                     logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
-                    workspaceUpdate.clearMessages(file);
                     workspaceUpdate.replaceMessages(messages);
                 }
             }
@@ -169,9 +166,11 @@ public class PieRunner {
             for(IFile file : files) {
                 final EclipseResourcePath resourceKey = new EclipseResourcePath(file);
                 final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(resourceKey);
+                // BUG: this also clears messages for open editors, which it shouldn't do.
+                workspaceUpdate.clearMessages(resourceKey);
                 if(pie.isObserved(checkTask)) {
+                    logger.trace("Unobserving '{}'", checkTask);
                     session.unobserve(checkTask);
-                    workspaceUpdate.clearMessages(file);
                 }
             }
         }

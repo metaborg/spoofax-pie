@@ -7,12 +7,15 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.HashMap;
 
+@Singleton
 public class ColorShare implements ISharedTextColors {
     private HashMap<RGB, Color> colors = new HashMap<>();
 
-    @Inject public ColorShare() {}
+    @Inject public ColorShare() {
+    }
 
     @Override public Color getColor(@NonNull RGB rgb) {
         Color color = colors.get(rgb);

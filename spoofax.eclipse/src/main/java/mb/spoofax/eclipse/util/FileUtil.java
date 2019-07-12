@@ -9,16 +9,14 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IPathEditorInput;
-import org.eclipse.ui.IStorageEditorInput;
-import org.eclipse.ui.IURIEditorInput;
+import org.eclipse.ui.*;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.net.URI;
 import java.util.Arrays;
 
+@Singleton
 public class FileUtil {
     private final Logger logger;
     private final IWorkspaceRoot root;

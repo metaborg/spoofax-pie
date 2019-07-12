@@ -15,12 +15,14 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
  * Utility functions for creating Eclipse text styles.
  */
+@Singleton
 public final class StyleUtil {
     private final ColorShare colorShare;
     private final Logger logger;

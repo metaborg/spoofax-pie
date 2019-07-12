@@ -148,7 +148,7 @@ public abstract class SpoofaxEditor extends TextEditor {
         }
 
         if(file != null) {
-            pieRunner.removeEditor(getLanguageComponent(), file);
+            pieRunner.removeEditor(file);
         } else {
             logger.error("Cannot remove editor '{}' from PieRunner, as input '{}' was not resolved to a file", this,
                 input);

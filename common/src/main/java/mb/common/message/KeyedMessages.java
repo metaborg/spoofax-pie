@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class KeyedMessages implements Serializable {
@@ -49,6 +50,10 @@ public class KeyedMessages implements Serializable {
                 if(!visitor.message(msg.text, msg.exception, msg.severity, resource, msg.region)) return;
             }
         }
+    }
+
+    public Set<@Nullable ResourceKey> getResources() {
+        return messages.keySet();
     }
 
 
