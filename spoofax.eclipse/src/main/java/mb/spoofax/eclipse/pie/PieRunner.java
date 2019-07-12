@@ -68,7 +68,7 @@ public class PieRunner {
             final String text = document.get();
             logger.trace("Require top-down '{}'", styleTask);
             Stats.reset();
-            final @Nullable Styling styling = session.require(styleTask, monitorCancelled(monitor));
+            final @Nullable Styling styling = session.requireWithoutObserving(styleTask, monitorCancelled(monitor));
             logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
             if(styling != null) {
                 workspaceUpdate.updateStyle(editor, text, styling);
@@ -79,7 +79,7 @@ public class PieRunner {
             final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(resourceKey);
             logger.trace("Require top-down '{}'", checkTask);
             Stats.reset();
-            final KeyedMessages messages = session.require(checkTask, monitorCancelled(monitor));
+            final KeyedMessages messages = session.requireWithoutObserving(checkTask, monitorCancelled(monitor));
             logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
             workspaceUpdate.clearMessages(file);
             workspaceUpdate.replaceMessages(messages);
@@ -148,7 +148,7 @@ public class PieRunner {
                 if(!pie.isObserved(checkTask)) {
                     logger.trace("Require top-down '{}'", checkTask);
                     Stats.reset();
-                    final KeyedMessages messages = session.requireAndObserve(checkTask, monitorCancelled(monitor));
+                    final KeyedMessages messages = session.require(checkTask, monitorCancelled(monitor));
                     logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
                     workspaceUpdate.clearMessages(file);
                     workspaceUpdate.replaceMessages(messages);
