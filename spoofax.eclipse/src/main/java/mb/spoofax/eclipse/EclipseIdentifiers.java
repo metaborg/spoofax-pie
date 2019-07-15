@@ -14,4 +14,13 @@ public interface EclipseIdentifiers {
     String getObserveCommand();
 
     String getUnobserveCommand();
+
+
+    String baseMarker();
+
+    String infoMarker();
+
+    String warningMarker();
+
+    String errorMarker();
 }

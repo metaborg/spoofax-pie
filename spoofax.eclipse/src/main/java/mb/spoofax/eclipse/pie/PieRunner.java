@@ -12,8 +12,8 @@ import mb.pie.api.exec.Cancelled;
 import mb.pie.api.exec.NullCancelled;
 import mb.pie.runtime.exec.Stats;
 import mb.resource.ResourceKey;
-import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.language.LanguageInstance;
+import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
 import mb.spoofax.eclipse.resource.EclipseResourceRegistry;
@@ -24,7 +24,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension4;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.util.Set;
 
@@ -33,7 +32,7 @@ public class PieRunner {
     private final Logger logger;
     private final Pie pie;
     private final EclipseResourceRegistry eclipseResourceRegistry;
-    private final Provider<WorkspaceUpdate> workspaceUpdateProvider;
+    private final WorkspaceUpdate.Factory workspaceUpdateFactory;
 
     private @Nullable WorkspaceUpdate bottomUpWorkspaceUpdate = null;
 
@@ -43,17 +42,17 @@ public class PieRunner {
         LoggerFactory loggerFactory,
         Pie pie,
         EclipseResourceRegistry eclipseResourceRegistry,
-        Provider<WorkspaceUpdate> workspaceUpdateProvider
+        WorkspaceUpdate.Factory workspaceUpdateFactory
     ) {
         this.logger = loggerFactory.create(getClass());
         this.pie = pie;
         this.eclipseResourceRegistry = eclipseResourceRegistry;
-        this.workspaceUpdateProvider = workspaceUpdateProvider;
+        this.workspaceUpdateFactory = workspaceUpdateFactory;
     }
 
 
     public <D extends IDocument & IDocumentExtension4> void addOrUpdateEditor(
-        LanguageComponent languageComponent,
+        EclipseLanguageComponent languageComponent,
         IFile file,
         D document,
         SpoofaxEditor editor,
@@ -63,7 +62,7 @@ public class PieRunner {
 
         final EclipseResourcePath resourceKey = new EclipseResourcePath(file);
         eclipseResourceRegistry.addDocumentOverride(resourceKey, document, file);
-        final WorkspaceUpdate workspaceUpdate = workspaceUpdateProvider.get();
+        final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
 
         try(final PieSession session = languageComponent.newPieSession()) {
             final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
@@ -74,6 +73,7 @@ public class PieRunner {
             Stats.reset();
             final @Nullable Styling styling = session.requireWithoutObserving(styleTask, monitorCancelled(monitor));
             logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
+            //noinspection ConstantConditions (styling can really be null)
             if(styling != null) {
                 workspaceUpdate.updateStyle(editor, text, styling);
             } else {
@@ -100,39 +100,38 @@ public class PieRunner {
 
 
     public void incrementalBuild(
-        LanguageComponent languageComponent,
+        EclipseLanguageComponent languageComponent,
         Set<ResourceKey> changedResources,
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException {
         logger.trace("Running build");
-        bottomUpWorkspaceUpdate = workspaceUpdateProvider.get();
+        bottomUpWorkspaceUpdate = workspaceUpdateFactory.create(languageComponent);
         try(final PieSession session = languageComponent.newPieSession()) {
             logger.trace("Require bottom-up '{}'", changedResources);
             Stats.reset();
             session.updateAffectedBy(changedResources, monitorCancelled(monitor));
             logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
         }
-        //noinspection ConstantConditions
         bottomUpWorkspaceUpdate.update(null, monitor);
         bottomUpWorkspaceUpdate = null;
     }
 
 
     public boolean isCheckObserved(
-        LanguageInstance languageInstance,
+        EclipseLanguageComponent languageComponent,
         IFile file
     ) {
         final EclipseResourcePath resourceKey = new EclipseResourcePath(file);
-        final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(resourceKey);
+        final Task<KeyedMessages> checkTask = languageComponent.getLanguageInstance().createCheckTask(resourceKey);
         return pie.isObserved(checkTask);
     }
 
     public void observeCheckTasks(
-        LanguageComponent languageComponent,
+        EclipseLanguageComponent languageComponent,
         Iterable<IFile> files,
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException {
-        final WorkspaceUpdate workspaceUpdate = workspaceUpdateProvider.get();
+        final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
         try(final PieSession session = languageComponent.newPieSession()) {
             final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
             for(IFile file : files) {
@@ -156,11 +155,11 @@ public class PieRunner {
     }
 
     public void unobserveCheckTasks(
-        LanguageComponent languageComponent,
+        EclipseLanguageComponent languageComponent,
         Iterable<IFile> files,
         @Nullable IProgressMonitor monitor
     ) {
-        final WorkspaceUpdate workspaceUpdate = workspaceUpdateProvider.get();
+        final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
         try(final PieSession session = languageComponent.newPieSession()) {
             final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
             for(IFile file : files) {

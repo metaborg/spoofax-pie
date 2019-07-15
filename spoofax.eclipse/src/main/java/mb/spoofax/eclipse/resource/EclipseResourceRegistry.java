@@ -45,7 +45,7 @@ public class EclipseResourceRegistry implements ResourceRegistry {
     }
 
 
-    public <D extends IDocument & IDocumentExtension4> void addDocumentOverride(EclipseResourcePath key, D document, @Nullable IFile file) {
+    public <D extends IDocument & IDocumentExtension4> void addDocumentOverride(EclipseResourcePath key, D document, IFile file) {
         logger.trace("Overriding resource '{}' with document '{}'", key.pathString, document);
         documentOverrides.put(key.pathString, new DocumentOverride(document, file));
     }
@@ -58,15 +58,6 @@ public class EclipseResourceRegistry implements ResourceRegistry {
     public void clearDocumentOverrides() {
         logger.trace("Clearing all document overrides");
         documentOverrides.clear();
-    }
-
-
-    public @Nullable IResource getWrappedEclipseResource(Resource resource) {
-        if(!(resource instanceof WrapsEclipseResource)) {
-            throw new ResourceRuntimeException(
-                "Cannot get wrapped Eclipse resource from resource '" + resource + "'; the resource does not wrap an Eclipse resource");
-        }
-        return ((WrapsEclipseResource) resource).getWrappedEclipseResource();
     }
 
 

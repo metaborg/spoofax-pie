@@ -3,7 +3,7 @@ package mb.spoofax.eclipse.build;
 import mb.log.api.Logger;
 import mb.pie.api.ExecException;
 import mb.resource.ResourceKey;
-import mb.spoofax.core.language.LanguageComponent;
+import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.pie.PieRunner;
 import mb.spoofax.eclipse.resource.EclipseResource;
@@ -22,11 +22,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public abstract class SpoofaxProjectBuilder extends IncrementalProjectBuilder {
-    private final LanguageComponent languageComponent;
+    private final EclipseLanguageComponent languageComponent;
     private final Logger logger;
     private final PieRunner pieRunner;
 
-    public SpoofaxProjectBuilder(LanguageComponent languageComponent) {
+    public SpoofaxProjectBuilder(EclipseLanguageComponent languageComponent) {
         this.languageComponent = languageComponent;
         this.logger = SpoofaxPlugin.getComponent().getLoggerFactory().create(getClass());
         this.pieRunner = SpoofaxPlugin.getComponent().getPieRunner();

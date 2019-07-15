@@ -28,4 +28,21 @@ class TigerEclipseIdentifiers implements EclipseIdentifiers {
     @Override public String getUnobserveCommand() {
         return "tiger.eclipse.unobserve";
     }
+
+
+    @Override public String baseMarker() {
+        return "tiger.eclipse.marker";
+    }
+
+    @Override public String infoMarker() {
+        return "tiger.eclipse.marker.info";
+    }
+
+    @Override public String warningMarker() {
+        return "tiger.eclipse.marker.warning";
+    }
+
+    @Override public String errorMarker() {
+        return "tiger.eclipse.marker.error";
+    }
 }

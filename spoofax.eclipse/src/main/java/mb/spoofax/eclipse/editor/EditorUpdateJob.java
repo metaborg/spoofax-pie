@@ -3,7 +3,7 @@ package mb.spoofax.eclipse.editor;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecException;
-import mb.spoofax.core.language.LanguageComponent;
+import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.pie.PieRunner;
 import mb.spoofax.eclipse.util.StatusUtil;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -17,7 +17,7 @@ import org.eclipse.jface.text.IDocumentExtension4;
 public class EditorUpdateJob extends Job {
     private final Logger logger;
     private final PieRunner pieRunner;
-    private final LanguageComponent languageComponent;
+    private final EclipseLanguageComponent languageComponent;
     private final String languageDisplayName;
     private final IFile file;
     private final IDocument document;
@@ -26,7 +26,7 @@ public class EditorUpdateJob extends Job {
     public EditorUpdateJob(
         LoggerFactory loggerFactory,
         PieRunner pieRunner,
-        LanguageComponent languageComponent,
+        EclipseLanguageComponent languageComponent,
         IFile file,
         IDocument document,
         SpoofaxEditor editor

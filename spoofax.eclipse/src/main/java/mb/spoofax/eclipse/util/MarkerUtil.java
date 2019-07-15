@@ -2,7 +2,7 @@ package mb.spoofax.eclipse.util;
 
 import mb.common.message.Severity;
 import mb.common.region.Region;
-import mb.spoofax.eclipse.SpoofaxPlugin;
+import mb.spoofax.eclipse.EclipseIdentifiers;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -12,15 +12,15 @@ import org.eclipse.core.runtime.CoreException;
  * Utility functions for creating and removing {@link IMarker} instances.
  */
 public final class MarkerUtil {
-    private static final String id = SpoofaxPlugin.id + ".marker";
-    private static final String errorPostfix = ".error";
-    private static final String warningPostfix = ".warning";
-    private static final String infoPostfix = ".info";
-
-
-    public static IMarker createMarker(String text, Severity severity, IResource resource, @Nullable Region region) throws CoreException {
+    public static IMarker createMarker(
+        EclipseIdentifiers eclipseIdentifiers,
+        String text,
+        Severity severity,
+        IResource resource,
+        @Nullable Region region
+    ) throws CoreException {
         final int eclipseSeverity = severity(severity);
-        final String markerId = id(eclipseSeverity);
+        final String markerId = id(eclipseIdentifiers, eclipseSeverity);
         final IMarker marker = resource.createMarker(markerId);
         if(region != null) {
             marker.setAttribute(IMarker.CHAR_START, region.startOffset);
@@ -35,34 +35,38 @@ public final class MarkerUtil {
         return marker;
     }
 
-    public static void clearAll(IResource resource) throws CoreException {
-        resource.deleteMarkers(id, true, IResource.DEPTH_ZERO);
+    public static void clearAll(EclipseIdentifiers eclipseIdentifiers, IResource resource) throws CoreException {
+        resource.deleteMarkers(eclipseIdentifiers.baseMarker(), true, IResource.DEPTH_ZERO);
     }
 
-    public static void clearAllRec(IResource resource) throws CoreException {
-        resource.deleteMarkers(id, true, IResource.DEPTH_INFINITE);
+    public static void clearAllRec(EclipseIdentifiers eclipseIdentifiers, IResource resource) throws CoreException {
+        resource.deleteMarkers(eclipseIdentifiers.baseMarker(), true, IResource.DEPTH_INFINITE);
     }
 
 
-    public static int severity(Severity severity) {
+    private static int severity(Severity severity) {
         switch(severity) {
-            case Error:
-                return IMarker.SEVERITY_ERROR;
+            case Info:
+                return IMarker.SEVERITY_INFO;
             case Warning:
                 return IMarker.SEVERITY_WARNING;
+            case Error:
+                return IMarker.SEVERITY_ERROR;
             default:
                 return IMarker.SEVERITY_INFO;
         }
     }
 
-    public static String id(int severity) {
+    private static String id(EclipseIdentifiers eclipseIdentifiers, int severity) {
         switch(severity) {
-            case IMarker.SEVERITY_ERROR:
-                return id + errorPostfix;
+            case IMarker.SEVERITY_INFO:
+                return eclipseIdentifiers.infoMarker();
             case IMarker.SEVERITY_WARNING:
-                return id + warningPostfix;
+                return eclipseIdentifiers.warningMarker();
+            case IMarker.SEVERITY_ERROR:
+                return eclipseIdentifiers.errorMarker();
             default:
-                return id + infoPostfix;
+                return eclipseIdentifiers.baseMarker();
         }
     }
 }

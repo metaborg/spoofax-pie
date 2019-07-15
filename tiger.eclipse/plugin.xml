@@ -11,6 +11,71 @@
     />
   </extension>
 
+
+  <!-- Markers -->
+  <extension
+    point="org.eclipse.core.resources.markers"
+    id="tiger.eclipse.marker"
+  >
+    <super type="org.eclipse.core.resources.textmarker"/>
+    <super type="org.eclipse.core.resources.problemmarker"/>
+    <persistent value="true"/>
+  </extension>
+  <!-- Info -->
+  <extension
+    point="org.eclipse.core.resources.markers"
+    id="tiger.eclipse.marker.info"
+    name="Tiger info marker"
+  >
+    <super type="tiger.eclipse.marker"/>
+    <persistent value="true"/>
+  </extension>
+  <!-- Warning -->
+  <extension
+    point="org.eclipse.core.resources.markers"
+    id="tiger.eclipse.marker.warning"
+    name="Tiger warning marker"
+  >
+    <super type="tiger.eclipse.marker"/>
+    <persistent value="true"/>
+  </extension>
+  <!-- Error -->
+  <extension
+    point="org.eclipse.core.resources.markers"
+    id="tiger.eclipse.marker.error"
+    name="Tiger error marker"
+  >
+    <super type="tiger.eclipse.marker"/>
+    <persistent value="true"/>
+  </extension>
+
+
+  <!-- Annotations -->
+  <extension point="org.eclipse.ui.editors.annotationTypes">
+    <!-- Info -->
+    <type
+      markerType="tiger.eclipse.marker.info"
+      super="org.eclipse.ui.workbench.texteditor.info"
+      markerSeverity="0"
+      name="Tiger info annotation"
+    />
+    <!-- Warning -->
+    <type
+      markerType="tiger.eclipse.marker.warning"
+      super="org.eclipse.ui.workbench.texteditor.warning"
+      markerSeverity="1"
+      name="Tiger warning annotation"
+    />
+    <!-- Error -->
+    <type
+      markerType="tiger.eclipse.marker.error"
+      super="org.eclipse.ui.workbench.texteditor.error"
+      markerSeverity="2"
+      name="Tiger error annotation"
+    />
+  </extension>
+
+
   <!-- Document Provider -->
   <extension point="org.eclipse.ui.editors.documentProviders">
     <provider
@@ -19,6 +84,7 @@
       id="tiger.eclipse.documentprovider"
     />
   </extension>
+
 
   <!-- Builder -->
   <extension
@@ -35,6 +101,7 @@
       <run class="mb.tiger.eclipse.TigerProjectBuilder"/>
     </builder>
   </extension>
+
 
   <!-- Nature -->
   <extension

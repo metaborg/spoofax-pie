@@ -8,6 +8,7 @@ import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
+import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.eclipse.resource.WrapsEclipseResource;
 import mb.spoofax.eclipse.util.MarkerUtil;
@@ -25,14 +26,34 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jface.text.TextPresentation;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.ArrayList;
 
 public class WorkspaceUpdate {
-    public static final LockRule lock = new LockRule("Workspace update lock");
+    @Singleton
+    public static class Factory {
+        private final LoggerFactory loggerFactory;
+        private final ResourceService resourceService;
+        private final StyleUtil styleUtil;
+
+        @Inject
+        public Factory(LoggerFactory loggerFactory, ResourceService resourceService, StyleUtil styleUtil) {
+            this.loggerFactory = loggerFactory;
+            this.resourceService = resourceService;
+            this.styleUtil = styleUtil;
+        }
+
+        public WorkspaceUpdate create(EclipseLanguageComponent languageComponent) {
+            return new WorkspaceUpdate(loggerFactory, resourceService, styleUtil, languageComponent);
+        }
+    }
+
 
     private final Logger logger;
     private final ResourceService resourceService;
     private final StyleUtil styleUtil;
+
+    private final EclipseLanguageComponent languageComponent;
 
     private final ArrayList<ResourceKey> clear = new ArrayList<>();
     private final ArrayList<ResourceKey> clearRecursively = new ArrayList<>();
@@ -40,11 +61,11 @@ public class WorkspaceUpdate {
     private final ArrayList<StyleUpdate> styleUpdates = new ArrayList<>();
 
 
-    @Inject
-    public WorkspaceUpdate(LoggerFactory loggerFactory, ResourceService resourceService, StyleUtil styleUtil) {
+    public WorkspaceUpdate(LoggerFactory loggerFactory, ResourceService resourceService, StyleUtil styleUtil, EclipseLanguageComponent languageComponent) {
         this.logger = loggerFactory.create(getClass());
         this.resourceService = resourceService;
         this.styleUtil = styleUtil;
+        this.languageComponent = languageComponent;
     }
 
 
@@ -105,71 +126,41 @@ public class WorkspaceUpdate {
 
 
     public void update(@Nullable ISchedulingRule rule, @Nullable IProgressMonitor monitor) {
-        if(monitor != null && monitor.isCanceled()) {
-            return;
-        }
+        if(monitor != null && monitor.isCanceled()) return;
+
         final KeyedMessages messages = messagesBuilder.build();
-        try {
-            final ICoreRunnable makerUpdate = (IWorkspaceRunnable) workspaceMonitor -> {
-                for(ResourceKey resourceKey : clearRecursively) {
-                    if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return;
-                    try {
-                        final WrapsEclipseResource wrapsEclipseResource = resourceService.getResource(resourceKey);
-                        final @Nullable IResource resource = wrapsEclipseResource.getWrappedEclipseResource();
-                        if(resource != null) {
-                            MarkerUtil.clearAllRec(resource);
-                        } else {
-                            throw new RuntimeException("Cannot recursively clear markers for resource with key '" + resourceKey + "', resource '" + wrapsEclipseResource + "' was found but it does not have a corresponding Eclipse resource");
-                        }
-                    } catch(ClassCastException e) {
-                        throw new RuntimeException("Cannot recursively clear markers for resource with key '" + resourceKey + "', it is not an Eclipse resource", e);
-                    }
-                }
-                for(ResourceKey resourceKey : clear) {
-                    if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return;
-                    try {
-                        final WrapsEclipseResource wrapsEclipseResource = resourceService.getResource(resourceKey);
-                        final @Nullable IResource resource = wrapsEclipseResource.getWrappedEclipseResource();
-                        if(resource != null) {
-                            MarkerUtil.clearAll(resource);
-                        } else {
-                            throw new RuntimeException("Cannot clear markers for resource with key '" + resourceKey + "', resource '" + wrapsEclipseResource + "' was found but it does not have a corresponding Eclipse resource");
-                        }
-                    } catch(ClassCastException e) {
-                        throw new RuntimeException("Cannot clear markers for resource with key '" + resourceKey + "', it is not an Eclipse resource", e);
-                    }
-                }
 
-                try {
-                    messages.accept((text, exception, severity, resourceKey, region) -> {
-                        if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return false;
-                        try {
-                            if(resourceKey == null) {
-                                logger.warn(
-                                    "Cannot create marker with text '" + text + "'; it has no corresponding resource");
-                                return true;
-                            }
-
-                            try {
-                                final WrapsEclipseResource wrapsEclipseResource = resourceService.getResource(resourceKey);
-                                final @Nullable IResource resource = wrapsEclipseResource.getWrappedEclipseResource();
-                                if(resource != null) {
-                                    MarkerUtil.createMarker(text, severity, resource, region);
-                                } else {
-                                    throw new RuntimeException("Cannot set markers for resource with key '" + resourceKey + "', resource '" + wrapsEclipseResource + "' was found but it does not have a corresponding Eclipse resource");
-                                }
-                            } catch(ClassCastException e) {
-                                throw new RuntimeException("Cannot set markers for resource with key '" + resourceKey + "', it is not an Eclipse resource", e);
-                            }
-                        } catch(CoreException e) {
-                            throw new UncheckedCoreException(e);
-                        }
+        final ICoreRunnable makerUpdate = (IWorkspaceRunnable) workspaceMonitor -> {
+            for(ResourceKey resourceKey : clearRecursively) {
+                if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return;
+                final IResource resource = getEclipseResource(resourceKey);
+                MarkerUtil.clearAllRec(languageComponent.getEclipseIdentifiers(), resource);
+            }
+            for(ResourceKey resourceKey : clear) {
+                if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return;
+                final IResource resource = getEclipseResource(resourceKey);
+                MarkerUtil.clearAll(languageComponent.getEclipseIdentifiers(), resource);
+            }
+            try {
+                messages.accept((text, exception, severity, resourceKey, region) -> {
+                    if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return false;
+                    if(resourceKey == null) {
+                        logger.warn("Cannot create marker with text '" + text + "'; it has no corresponding resource");
                         return true;
-                    });
-                } catch(UncheckedCoreException e) {
-                    throw e.getCause();
-                }
-            };
+                    }
+                    final IResource resource = getEclipseResource(resourceKey);
+                    try {
+                        MarkerUtil.createMarker(languageComponent.getEclipseIdentifiers(), text, severity, resource, region);
+                    } catch(CoreException e) {
+                        throw new UncheckedCoreException(e);
+                    }
+                    return true;
+                });
+            } catch(UncheckedCoreException e) {
+                throw e.getCause();
+            }
+        };
+        try {
             ResourcesPlugin.getWorkspace().run(makerUpdate, rule, IWorkspace.AVOID_UPDATE, monitor);
         } catch(CoreException e) {
             logger.error("Running marker update failed unexpectedly", e);
@@ -177,11 +168,22 @@ public class WorkspaceUpdate {
         }
 
         for(StyleUpdate styleUpdate : styleUpdates) {
-            if(monitor != null && monitor.isCanceled()) {
-                return;
-            }
+            if(monitor != null && monitor.isCanceled()) return;
             final SpoofaxEditor editor = styleUpdate.editor;
             editor.setStyleAsync(styleUpdate.textPresentation, styleUpdate.text, styleUpdate.textLength, monitor);
+        }
+    }
+
+    private IResource getEclipseResource(ResourceKey resourceKey) {
+        try {
+            final WrapsEclipseResource wrapsEclipseResource = resourceService.getResource(resourceKey);
+            final @Nullable IResource resource = wrapsEclipseResource.getWrappedEclipseResource();
+            if(resource == null) {
+                throw new RuntimeException("Cannot get Eclipse resource for '" + resourceKey + "', resource '" + wrapsEclipseResource + "' was found but it does not have a corresponding Eclipse resource");
+            }
+            return resource;
+        } catch(ClassCastException e) {
+            throw new RuntimeException("Cannot get Eclipse resource for '" + resourceKey + "', it is not an Eclipse resource", e);
         }
     }
 }

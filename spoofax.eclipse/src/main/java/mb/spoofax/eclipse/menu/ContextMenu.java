@@ -89,7 +89,7 @@ public abstract class ContextMenu extends CompoundContributionItem implements IW
             for(IFile file : files) {
                 final @Nullable String fileExtension = file.getFileExtension();
                 if(fileExtension == null || !languageInstance.getFileExtensions().contains(fileExtension)) continue;
-                if(pieRunner.isCheckObserved(languageInstance, file)) {
+                if(pieRunner.isCheckObserved(languageComponent, file)) {
                     unobserveFiles.add(file);
                 } else {
                     observeFiles.add(file);
