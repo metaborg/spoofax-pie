@@ -1,8 +1,6 @@
 package mb.tiger.eclipse;
 
 import mb.spoofax.eclipse.SpoofaxPlugin;
-import mb.tiger.spoofax.DaggerTigerComponent;
-import mb.tiger.spoofax.TigerComponent;
 import mb.tiger.spoofax.TigerModule;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -12,9 +10,9 @@ import org.osgi.framework.BundleContext;
 public class TigerPlugin extends AbstractUIPlugin {
     public static final String pluginId = "tiger.eclipse";
 
-    private static @Nullable TigerComponent component;
+    private static @Nullable TigerEclipseComponent component;
 
-    public static TigerComponent getComponent() {
+    public static TigerEclipseComponent getComponent() {
         if(component == null) {
             throw new RuntimeException(
                 "Cannot access TigerComponent; TigerPlugin has not been started yet, or has been stopped");
@@ -24,10 +22,11 @@ public class TigerPlugin extends AbstractUIPlugin {
 
     @Override public void start(@NonNull BundleContext context) throws Exception {
         super.start(context);
-        component = DaggerTigerComponent
+        component = DaggerTigerEclipseComponent
             .builder()
             .platformComponent(SpoofaxPlugin.getComponent())
             .tigerModule(TigerModule.fromClassLoaderResources())
+            .tigerEclipseModule(new TigerEclipseModule())
             .build();
     }
 

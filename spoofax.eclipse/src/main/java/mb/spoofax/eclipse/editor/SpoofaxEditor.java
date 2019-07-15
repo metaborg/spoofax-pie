@@ -2,7 +2,7 @@ package mb.spoofax.eclipse.editor;
 
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
-import mb.spoofax.core.language.LanguageComponent;
+import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.SpoofaxEclipseComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.pie.PieRunner;
@@ -14,11 +14,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.text.DocumentEvent;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentListener;
-import org.eclipse.jface.text.ITextViewerExtension4;
-import org.eclipse.jface.text.TextPresentation;
+import org.eclipse.jface.text.*;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.swt.widgets.Composite;
@@ -41,6 +37,8 @@ public abstract class SpoofaxEditor extends TextEditor {
 
     private final PresentationMerger presentationMerger = new PresentationMerger();
 
+    private final EclipseLanguageComponent languageComponent;
+
     /*
     Do NOT initialize any of the following fields to null, as TextEditor's constructor will call 'initializeEditor' to
     initialize several fields, which will then be set back to null when initialized here.
@@ -61,6 +59,11 @@ public abstract class SpoofaxEditor extends TextEditor {
 
     // Set in createSourceViewer, but may be null if there is no associated file for the editor input.
     private @Nullable IFile file;
+
+
+    protected SpoofaxEditor(EclipseLanguageComponent languageComponent) {
+        this.languageComponent = languageComponent;
+    }
 
 
     public void setStyleAsync(TextPresentation textPresentation, @Nullable String text, int textLength, @Nullable IProgressMonitor monitor) {
@@ -93,7 +96,7 @@ public abstract class SpoofaxEditor extends TextEditor {
     }
 
 
-    protected abstract LanguageComponent getLanguageComponent();
+//    protected abstract LanguageComponent getLanguageComponent();
 
 
     @Override protected void initializeEditor() {
@@ -168,7 +171,7 @@ public abstract class SpoofaxEditor extends TextEditor {
             logger.error("Cannot schedule editor update job for editor '{}', as input '{}' was not resolved to a file",
                 this, input);
         }
-        final Job job = new EditorUpdateJob(loggerFactory, pieRunner, getLanguageComponent(), file, document, this);
+        final Job job = new EditorUpdateJob(loggerFactory, pieRunner, languageComponent, file, document, this);
         job.setRule(file);
         job.schedule(initialUpdate ? 0 : 300);
     }

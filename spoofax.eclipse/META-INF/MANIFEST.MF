@@ -3,8 +3,8 @@ Bundle-ManifestVersion: 2
 Bundle-Activator: mb.spoofax.eclipse.SpoofaxPlugin
 Export-Package: mb.spoofax.eclipse,
   mb.spoofax.eclipse.build,
+  mb.spoofax.eclipse.command,
   mb.spoofax.eclipse.editor,
-  mb.spoofax.eclipse.expressions,
   mb.spoofax.eclipse.log,
   mb.spoofax.eclipse.menu,
   mb.spoofax.eclipse.nature,

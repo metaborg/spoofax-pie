@@ -1,7 +1,8 @@
 package mb.spoofax.eclipse.menu;
 
-import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.language.LanguageInstance;
+import mb.spoofax.eclipse.EclipseIdentifiers;
+import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.pie.PieRunner;
 import mb.spoofax.eclipse.util.SelectionUtil;
@@ -27,32 +28,15 @@ import java.util.ArrayList;
 public abstract class ContextMenu extends CompoundContributionItem implements IWorkbenchContribution {
     private final PieRunner pieRunner;
 
-    private final LanguageComponent languageComponent;
-    private final String natureId;
-    private final String addNatureCommandId;
-    private final String removeNatureCommandId;
-    private final String observeCommandId;
-    private final String unobserveCommandId;
+    private final EclipseLanguageComponent languageComponent;
 
     private @MonotonicNonNull IServiceLocator serviceLocator;
 
 
-    public ContextMenu(
-        LanguageComponent languageComponent,
-        String natureId,
-        String addNatureCommandId,
-        String removeNatureCommandId,
-        String observeCommandId,
-        String unobserveCommandId
-    ) {
+    public ContextMenu(EclipseLanguageComponent languageComponent) {
         this.pieRunner = SpoofaxPlugin.getComponent().getPieRunner();
 
         this.languageComponent = languageComponent;
-        this.natureId = natureId;
-        this.addNatureCommandId = addNatureCommandId;
-        this.removeNatureCommandId = removeNatureCommandId;
-        this.observeCommandId = observeCommandId;
-        this.unobserveCommandId = unobserveCommandId;
     }
 
     @Override public void initialize(@NonNull IServiceLocator serviceLocator) {
@@ -68,6 +52,7 @@ public abstract class ContextMenu extends CompoundContributionItem implements IW
         final IStructuredSelection selection = (IStructuredSelection) simpleSelection;
 
         final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
+        final EclipseIdentifiers identifiers = languageComponent.getEclipseIdentifiers();
         final MenuManager langMenu = new MenuManager(languageInstance.getDisplayName());
 
         final ArrayList<IProject> projects = SelectionUtil.toProjects(selection);
@@ -76,7 +61,7 @@ public abstract class ContextMenu extends CompoundContributionItem implements IW
             boolean removeNature = false;
             for(IProject project : projects) {
                 try {
-                    if(!project.hasNature(natureId)) {
+                    if(!project.hasNature(identifiers.getNature())) {
                         addNature = true;
                     } else {
                         removeNature = true;
@@ -87,12 +72,12 @@ public abstract class ContextMenu extends CompoundContributionItem implements IW
             }
             if(addNature) {
                 langMenu.add(new CommandContributionItem(
-                    new CommandContributionItemParameter(serviceLocator, null, addNatureCommandId,
+                    new CommandContributionItemParameter(serviceLocator, null, identifiers.getAddNatureCommand(),
                         CommandContributionItem.STYLE_PUSH)));
             }
             if(removeNature) {
                 langMenu.add(new CommandContributionItem(
-                    new CommandContributionItemParameter(serviceLocator, null, removeNatureCommandId,
+                    new CommandContributionItemParameter(serviceLocator, null, identifiers.getRemoveAddNatureCommand(),
                         CommandContributionItem.STYLE_PUSH)));
             }
         }
@@ -115,12 +100,12 @@ public abstract class ContextMenu extends CompoundContributionItem implements IW
             }
             if(!observeFiles.isEmpty()) {
                 langMenu.add(new CommandContributionItem(
-                    new CommandContributionItemParameter(serviceLocator, null, observeCommandId,
+                    new CommandContributionItemParameter(serviceLocator, null, identifiers.getObserveCommand(),
                         CommandContributionItem.STYLE_PUSH)));
             }
             if(!unobserveFiles.isEmpty()) {
                 langMenu.add(new CommandContributionItem(
-                    new CommandContributionItemParameter(serviceLocator, null, unobserveCommandId,
+                    new CommandContributionItemParameter(serviceLocator, null, identifiers.getUnobserveCommand(),
                         CommandContributionItem.STYLE_PUSH)));
             }
         }

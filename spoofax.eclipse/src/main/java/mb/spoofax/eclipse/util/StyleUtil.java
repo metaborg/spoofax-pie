@@ -27,11 +27,13 @@ public final class StyleUtil {
     private final ColorShare colorShare;
     private final Logger logger;
 
+
     @Inject public StyleUtil(ColorShare colorShare, LoggerFactory loggerFactory) {
         this.colorShare = colorShare;
         this.logger = loggerFactory.create(getClass());
     }
 
+    
     public TextPresentation createTextPresentation(mb.common.style.Color color, int length) {
         final TextPresentation presentation = new TextPresentation();
         final StyleRange styleRange = new StyleRange();

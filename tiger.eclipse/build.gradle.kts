@@ -15,7 +15,11 @@ bundle {
 dependencies {
   // Dependency constraints.
   api(platform(project(":depconstraints")))
+  annotationProcessor(platform(project(":depconstraints")))
 
   // Compile-time annotations.
   compileOnly("org.checkerframework:checker-qual-android")
+
+  // Annotation processors.
+  annotationProcessor("com.google.dagger:dagger-compiler")
 }

@@ -1,5 +1,7 @@
 package mb.spoofax.eclipse.nature;
 
+import mb.spoofax.eclipse.EclipseLanguageComponent;
+import mb.spoofax.eclipse.util.BuilderUtil;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.eclipse.core.resources.IProject;
@@ -7,12 +9,23 @@ import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
 
 public abstract class SpoofaxProjectNature implements IProjectNature {
+    private final EclipseLanguageComponent languageComponent;
+
     @SuppressWarnings("ConstantConditions") private @MonotonicNonNull IProject project = null;
 
 
-    @Override public abstract void configure() throws CoreException;
+    protected SpoofaxProjectNature(EclipseLanguageComponent languageComponent) {
+        this.languageComponent = languageComponent;
+    }
 
-    @Override public abstract void deconfigure() throws CoreException;
+
+    @Override public void configure() throws CoreException {
+        BuilderUtil.append(languageComponent.getEclipseIdentifiers().getNature(), getProject(), null);
+    }
+
+    @Override public void deconfigure() throws CoreException {
+        BuilderUtil.removeFrom(languageComponent.getEclipseIdentifiers().getNature(), getProject(), null);
+    }
 
 
     @Override public IProject getProject() {
