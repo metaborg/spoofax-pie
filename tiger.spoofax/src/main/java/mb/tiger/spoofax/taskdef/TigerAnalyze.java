@@ -5,7 +5,6 @@ import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.constraint.common.ConstraintAnalyzerException;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecContext;
-import mb.pie.api.ExecException;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
@@ -35,7 +34,7 @@ public class TigerAnalyze implements TaskDef<ResourceKey, @Nullable SingleFileRe
     }
 
     @Override
-    public @Nullable SingleFileResult exec(ExecContext context, ResourceKey key) throws ExecException, InterruptedException {
+    public @Nullable SingleFileResult exec(ExecContext context, ResourceKey key) throws Exception {
         final AstResult result = context.require(getAst, key);
         if(result.ast == null) {
             return null;
@@ -44,7 +43,7 @@ public class TigerAnalyze implements TaskDef<ResourceKey, @Nullable SingleFileRe
             return constraintAnalyzer.analyze(key, result.ast, new ConstraintAnalyzerContext(),
                 new StrategoIOAgent(loggerFactory, resourceService));
         } catch(ConstraintAnalyzerException e) {
-            throw new ExecException("Constraint analysis failed unexpectedly", e);
+            throw new RuntimeException("Constraint analysis failed unexpectedly", e);
         }
     }
 }

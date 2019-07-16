@@ -5,27 +5,14 @@ import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
 import mb.jsglr1.common.JSGLR1ParseTableException;
 import mb.log.api.LoggerFactory;
-import mb.pie.api.MapTaskDefs;
-import mb.pie.api.Pie;
-import mb.pie.api.PieSession;
-import mb.pie.api.TaskDef;
-import mb.pie.api.TaskDefs;
+import mb.pie.api.*;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.LanguageScope;
+import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
 import mb.stratego.common.StrategoRuntimeBuilderException;
-import mb.tiger.TigerConstraintAnalyzer;
-import mb.tiger.TigerNaBL2StrategoRuntimeBuilder;
-import mb.tiger.TigerParseTable;
-import mb.tiger.TigerStrategoRuntimeBuilder;
-import mb.tiger.TigerStyler;
-import mb.tiger.TigerStylingRules;
-import mb.tiger.spoofax.taskdef.TigerAnalyze;
-import mb.tiger.spoofax.taskdef.TigerCheck;
-import mb.tiger.spoofax.taskdef.TigerGetAST;
-import mb.tiger.spoofax.taskdef.TigerParse;
-import mb.tiger.spoofax.taskdef.TigerStyle;
-import mb.tiger.spoofax.taskdef.TigerTokenize;
+import mb.tiger.*;
+import mb.tiger.spoofax.taskdef.*;
 
 import javax.inject.Named;
 import java.io.IOException;
@@ -40,32 +27,37 @@ public class TigerModule {
     private final TigerParseTable parseTable;
     private final TigerStylingRules stylingRules;
     private final StrategoRuntimeBuilder strategoRuntimeBuilder;
+    private final StrategoRuntime prototypeStrategoRuntime;
     private final TigerConstraintAnalyzer constraintAnalyzer;
 
     private TigerModule(
         TigerParseTable parseTable,
         TigerStylingRules stylingRules,
         StrategoRuntimeBuilder strategoRuntimeBuilder,
+        StrategoRuntime prototypeStrategoRuntime,
         TigerConstraintAnalyzer constraintAnalyzer
     ) {
         this.parseTable = parseTable;
         this.stylingRules = stylingRules;
         this.strategoRuntimeBuilder = strategoRuntimeBuilder;
+        this.prototypeStrategoRuntime = prototypeStrategoRuntime;
         this.constraintAnalyzer = constraintAnalyzer;
     }
 
     public static TigerModule fromClassLoaderResources() throws JSGLR1ParseTableException, IOException, StrategoRuntimeBuilderException {
         final TigerParseTable parseTable = TigerParseTable.fromClassLoaderResources();
         final TigerStylingRules stylingRules = TigerStylingRules.fromClassLoaderResources();
-        final StrategoRuntimeBuilder strategoRuntimeBuilder = TigerStrategoRuntimeBuilder.fromClassLoaderResources();
-        final TigerConstraintAnalyzer constraintAnalyzer =
-            new TigerConstraintAnalyzer(TigerNaBL2StrategoRuntimeBuilder.create(strategoRuntimeBuilder).build());
-        return new TigerModule(parseTable, stylingRules, strategoRuntimeBuilder, constraintAnalyzer);
+        final StrategoRuntimeBuilder strategoRuntimeBuilder = TigerNaBL2StrategoRuntimeBuilder.create(TigerStrategoRuntimeBuilder.create());
+        final StrategoRuntime prototypeStrategoRuntime = strategoRuntimeBuilder.build();
+        final TigerConstraintAnalyzer constraintAnalyzer = new TigerConstraintAnalyzer(strategoRuntimeBuilder.buildFromPrototype(prototypeStrategoRuntime));
+        return new TigerModule(parseTable, stylingRules, strategoRuntimeBuilder, prototypeStrategoRuntime, constraintAnalyzer);
     }
 
 
     @Provides @LanguageScope
-    LanguageInstance provideLanguageInstance(TigerInstance tigerInstance) { return tigerInstance; }
+    LanguageInstance provideLanguageInstance(TigerInstance tigerInstance) {
+        return tigerInstance;
+    }
 
 
     @Provides @LanguageScope
@@ -81,6 +73,11 @@ public class TigerModule {
     @Provides @LanguageScope
     StrategoRuntimeBuilder provideStrategoRuntimeBuilder() {
         return strategoRuntimeBuilder;
+    }
+
+    @Provides @LanguageScope
+    StrategoRuntime providePrototypeStrategoRuntime() {
+        return prototypeStrategoRuntime;
     }
 
     @Provides @LanguageScope

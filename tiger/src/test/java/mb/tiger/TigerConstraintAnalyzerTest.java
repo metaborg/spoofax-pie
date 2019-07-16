@@ -28,7 +28,7 @@ class TigerConstraintAnalyzerTest {
 
     private final TigerParser parser = new TigerParser(TigerParseTable.fromClassLoaderResources());
     private final StrategoRuntimeBuilder strategoRuntimeBuilder =
-        TigerStrategoRuntimeBuilder.fromClassLoaderResources();
+        TigerStrategoRuntimeBuilder.create();
     private final StrategoRuntime strategoRuntime =
         TigerNaBL2StrategoRuntimeBuilder.create(strategoRuntimeBuilder).build();
     private final TigerConstraintAnalyzer analyzer = new TigerConstraintAnalyzer(strategoRuntime);

@@ -1,5 +1,6 @@
 package mb.spoofax.eclipse.command;
 
+import mb.common.util.SetView;
 import mb.pie.api.ExecException;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
@@ -13,7 +14,6 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 public class ObserveHandler extends AbstractHandler {
     private final PieRunner pieRunner;
@@ -30,7 +30,7 @@ public class ObserveHandler extends AbstractHandler {
 
     @Override public @Nullable Object execute(@NonNull ExecutionEvent event) throws ExecutionException {
         final ArrayList<IFile> files = AbstractHandlerUtil.toFiles(event);
-        final Set<String> extensions = languageComponent.getLanguageInstance().getFileExtensions();
+        final SetView<String> extensions = languageComponent.getLanguageInstance().getFileExtensions();
         files.removeIf((f) -> !extensions.contains(f.getFileExtension()));
         if(files.isEmpty()) return null;
         try {

@@ -143,4 +143,22 @@ public class StrategoRuntimeBuilder {
 
         return new StrategoRuntime(hybridInterpreter);
     }
+
+    public StrategoRuntime buildFromPrototype(StrategoRuntime prototype) throws StrategoRuntimeBuilderException {
+        final HybridInterpreter hybridInterpreter = new HybridInterpreter(prototype.hybridInterpreter);
+
+        hybridInterpreter.getCompiledContext().getExceptionHandler().setEnabled(false);
+
+        // Add primitive libraries again, to make sure that our libraries override any default ones.
+        for(IOperatorRegistry library : libraries) {
+            hybridInterpreter.getCompiledContext().addOperatorRegistry(library);
+        }
+
+        hybridInterpreter.getContext().setFactory(termFactory);
+        hybridInterpreter.getCompiledContext().setFactory(termFactory);
+
+        hybridInterpreter.init();
+
+        return new StrategoRuntime(hybridInterpreter);
+    }
 }

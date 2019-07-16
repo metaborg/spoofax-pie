@@ -15,7 +15,7 @@ import org.spoofax.interpreter.terms.ITermFactory;
 import org.strategoxt.HybridInterpreter;
 
 public class StrategoRuntime {
-    private final HybridInterpreter hybridInterpreter;
+    final HybridInterpreter hybridInterpreter;
 
 
     public StrategoRuntime(HybridInterpreter hybridInterpreter) {
