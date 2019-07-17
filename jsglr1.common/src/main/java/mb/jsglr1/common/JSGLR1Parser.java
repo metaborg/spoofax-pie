@@ -60,7 +60,7 @@ public class JSGLR1Parser {
             if(resource != null) {
                 ResourceKeyAttachment.setResourceKey(ast, resource);
             }
-            final ArrayList<Token> tokenStream = TokenUtil.extract(ast);
+            final ArrayList<Token<IStrategoTerm>> tokenStream = TokenUtil.extract(ast);
             final MessagesUtil messagesUtil = new MessagesUtil(true, false, parser.getCollectedErrors());
             messagesUtil.gatherNonFatalErrors(ast);
             final Messages messages = messagesUtil.getMessages();

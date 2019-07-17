@@ -2,18 +2,22 @@ package mb.jsglr.common;
 
 import mb.common.region.Region;
 import mb.common.token.Token;
-import mb.common.token.*;
+import mb.common.token.TokenConstants;
+import mb.common.token.TokenImpl;
+import mb.common.token.TokenType;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.jsglr.client.imploder.*;
+import org.spoofax.jsglr.client.imploder.IToken;
+import org.spoofax.jsglr.client.imploder.ITokens;
+import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 
 import java.util.ArrayList;
 
 public class TokenUtil {
-    public static ArrayList<Token> extract(IStrategoTerm ast) {
+    public static ArrayList<Token<IStrategoTerm>> extract(IStrategoTerm ast) {
         final ImploderAttachment rootImploderAttachment = ImploderAttachment.get(ast);
         final ITokens tokens = rootImploderAttachment.getLeftToken().getTokenizer();
         final int tokenCount = tokens.getTokenCount();
-        final ArrayList<Token> tokenStream = new ArrayList<>(tokenCount);
+        final ArrayList<Token<IStrategoTerm>> tokenStream = new ArrayList<>(tokenCount);
         int offset = -1;
         for(int i = 0; i < tokenCount; ++i) {
             final IToken jsglrToken = tokens.getTokenAt(i);
@@ -36,10 +40,10 @@ public class TokenUtil {
         return tokenStream;
     }
 
-    private static Token convertToken(IToken token) {
+    private static Token<IStrategoTerm> convertToken(IToken token) {
         final Region region = RegionUtil.fromToken(token);
         final TokenType tokenType = convertTokenKind(token.getKind());
-        return new TokenImpl(region, tokenType, (IStrategoTerm) token.getAstNode());
+        return new TokenImpl<>(region, tokenType, (IStrategoTerm) token.getAstNode());
     }
 
     private static TokenType convertTokenKind(int kind) {

@@ -1,44 +1,51 @@
 package mb.spoofax.core.language.transform;
 
 import mb.common.region.Region;
-import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;
 
-public class OpenEditorFeedback implements TransformFeedback {
-    private final ResourceKey file;
+public class OpenTextEditorFeedback implements TransformFeedback {
+    private final String text;
     private final @Nullable Region region;
 
-    public OpenEditorFeedback(ResourceKey file, @Nullable Region region) {
-        this.file = file;
+
+    public OpenTextEditorFeedback(String text, @Nullable Region region) {
+        this.text = text;
         this.region = region;
     }
 
-    public ResourceKey getFile() {
-        return file;
+    public OpenTextEditorFeedback(String text) {
+        this(text, null);
+    }
+
+
+    public String getText() {
+        return text;
     }
 
     public @Nullable Region getRegion() {
         return region;
     }
 
+
     @Override public void accept(TransformFeedbackVisitor visitor) {
-        visitor.openEditor(file, region);
+        visitor.openEditor(text, region);
     }
+
 
     @Override public boolean equals(Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
-        final OpenEditorFeedback that = (OpenEditorFeedback) o;
-        return file.equals(that.file) && Objects.equals(region, that.region);
+        final OpenTextEditorFeedback that = (OpenTextEditorFeedback) o;
+        return text.equals(that.text) && Objects.equals(region, that.region);
     }
 
     @Override public int hashCode() {
-        return Objects.hash(file, region);
+        return Objects.hash(text, region);
     }
 
     @Override public String toString() {
-        return file.toString() + (region != null ? "@" + region.toString() : "");
+        return text + (region != null ? "@" + region.toString() : "");
     }
 }

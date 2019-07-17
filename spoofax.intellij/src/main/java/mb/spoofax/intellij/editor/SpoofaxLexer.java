@@ -4,15 +4,7 @@ import com.google.common.collect.Lists;
 import com.intellij.lexer.LexerBase;
 import com.intellij.psi.tree.IElementType;
 import mb.common.region.Region;
-import mb.common.token.IdentifierTokenKind;
-import mb.common.token.KeywordTokenKind;
-import mb.common.token.LayoutTokenKind;
-import mb.common.token.NumberTokenKind;
-import mb.common.token.OperatorTokenKind;
-import mb.common.token.StringTokenKind;
-import mb.common.token.TokenImpl;
-import mb.common.token.TokenType;
-import mb.common.token.UnknownTokenKind;
+import mb.common.token.*;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecException;
@@ -133,9 +125,9 @@ public final class SpoofaxLexer extends LexerBase {
         } else {
             // GK: what is syntax coloring information doing here?
             try(final PieSession session = this.pieSessionProvider.get()) {
-                final Task<@Nullable ArrayList<mb.common.token.Token>> tokenizerTask =
+                final Task<@Nullable ArrayList<? extends mb.common.token.Token<?>>> tokenizerTask =
                     this.languageInstance.createTokenizeTask(this.resourceKey);
-                @Nullable List<mb.common.token.Token> resourceTokens = session.require(tokenizerTask);
+                @Nullable List<? extends mb.common.token.Token> resourceTokens = session.require(tokenizerTask);
                 if(resourceTokens == null)
                     resourceTokens = getDefaultTokens(this.resourceKey);
                 logger.debug("Tokenizer task returned {} tokens", resourceTokens.size());
@@ -171,11 +163,11 @@ public final class SpoofaxLexer extends LexerBase {
      * @param tokens The list of tokens to tokenize.
      * @return The list of IntelliJ tokens that represents the input tokens for IntelliJ.
      */
-    private List<SpoofaxIntellijToken> tokenize(List<mb.common.token.Token> tokens) {
+    private List<SpoofaxIntellijToken> tokenize(List<? extends mb.common.token.Token> tokens) {
         List<SpoofaxIntellijToken> newTokens = new ArrayList<>();
         int offset = 0;
 
-        for(mb.common.token.Token token : tokens) {
+        for(mb.common.token.Token<?> token : tokens) {
             int tokenStart = token.getRegion().startOffset;
             int tokenEnd = token.getRegion().endOffset + 1;        // End offsets are exclusive.
 
@@ -232,7 +224,7 @@ public final class SpoofaxLexer extends LexerBase {
      * @return The new end offset.
      */
     // Apparently this means @Nullable mb.common.token.Token in Java :/
-    private int addTokenElement(List<SpoofaxIntellijToken> tokenList, mb.common.token.@Nullable Token token, int startOffset, int endOffset) {
+    private int addTokenElement(List<SpoofaxIntellijToken> tokenList, mb.common.token.@Nullable Token<?> token, int startOffset, int endOffset) {
         IElementType tokenType = getTokenType(token);
         tokenList.add(new SpoofaxIntellijToken(startOffset, endOffset, tokenType));
         return endOffset;
@@ -244,7 +236,7 @@ public final class SpoofaxLexer extends LexerBase {
      * @param token The Spoofax token.
      * @return The corresponding token type.
      */
-    private IElementType getTokenType(mb.common.token.@Nullable Token token) {
+    private IElementType getTokenType(mb.common.token.@Nullable Token<?> token) {
         final String simplfiedScopeName;
         if(token != null) {
             final ScopeNames scopeNames = getScopeNamesFromType(token.getType());

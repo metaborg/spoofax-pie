@@ -12,10 +12,15 @@ import java.util.Objects;
 public class JSGLR1ParseResult implements Serializable {
     public final boolean recovered;
     public final @Nullable IStrategoTerm ast;
-    public final @Nullable ArrayList<Token> tokens;
+    public final @Nullable ArrayList<? extends Token<IStrategoTerm>> tokens;
     public final Messages messages;
 
-    public JSGLR1ParseResult(boolean recovered, @Nullable IStrategoTerm ast, @Nullable ArrayList<Token> tokens, Messages messages) {
+    public JSGLR1ParseResult(
+        boolean recovered,
+        @Nullable IStrategoTerm ast,
+        @Nullable ArrayList<? extends Token<IStrategoTerm>> tokens,
+        Messages messages
+    ) {
         this.recovered = recovered;
         this.ast = ast;
         this.tokens = tokens;

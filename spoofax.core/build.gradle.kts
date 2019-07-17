@@ -13,7 +13,6 @@ dependencies {
   api("org.metaborg:resource")
   api("org.metaborg:pie.api")
   api("org.metaborg:pie.dagger")
-  api("org.metaborg:org.spoofax.terms")
   api("com.google.dagger:dagger")
 
   compileOnly("org.checkerframework:checker-qual-android")

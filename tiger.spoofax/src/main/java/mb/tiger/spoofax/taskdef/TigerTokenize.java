@@ -10,7 +10,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import javax.inject.Inject;
 import java.util.ArrayList;
 
-public class TigerTokenize implements TaskDef<ResourceKey, @Nullable ArrayList<Token>> {
+public class TigerTokenize implements TaskDef<ResourceKey, @Nullable ArrayList<? extends Token<?>>> {
     private final TigerParse parse;
 
     @Inject public TigerTokenize(TigerParse parse) {
@@ -21,7 +21,8 @@ public class TigerTokenize implements TaskDef<ResourceKey, @Nullable ArrayList<T
         return getClass().getName();
     }
 
-    @Override public @Nullable ArrayList<Token> exec(ExecContext context, ResourceKey key) throws Exception {
+    @Override
+    public @Nullable ArrayList<? extends Token<?>> exec(ExecContext context, ResourceKey key) throws Exception {
         final @Nullable JSGLR1ParseResult parseOutput = context.require(parse, key);
         return parseOutput.tokens;
     }

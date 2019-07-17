@@ -1,11 +1,7 @@
 package mb.esv.common;
 
 import mb.common.region.Region;
-import mb.common.style.Style;
-import mb.common.style.Styling;
-import mb.common.style.StylingImpl;
-import mb.common.style.TokenStyle;
-import mb.common.style.TokenStyleImpl;
+import mb.common.style.*;
 import mb.common.token.Token;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
@@ -28,9 +24,9 @@ public class ESVStyler {
     }
 
 
-    public Styling style(Iterable<Token> tokens) {
+    public Styling style(Iterable<? extends Token<IStrategoTerm>> tokens) {
         final ArrayList<TokenStyle> tokenStyles = new ArrayList<>();
-        for(Token token : tokens) {
+        for(Token<IStrategoTerm> token : tokens) {
             final @Nullable Style style = tokenStyle(token);
             if(style != null) {
                 tokenStyles.add(new TokenStyleImpl(token, style));
@@ -58,8 +54,8 @@ public class ESVStyler {
     }
 
 
-    private @Nullable Style tokenStyle(Token token) {
-        final @Nullable IStrategoTerm term = token.getAssociatedTerm();
+    private @Nullable Style tokenStyle(Token<IStrategoTerm> token) {
+        final @Nullable IStrategoTerm term = token.getFragment();
         if(term != null) {
             final @Nullable Style style = termStyle(term);
             if(style != null) {

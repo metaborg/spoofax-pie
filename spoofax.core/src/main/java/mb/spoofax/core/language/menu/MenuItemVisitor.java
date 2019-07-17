@@ -6,7 +6,7 @@ import mb.spoofax.core.language.transform.TransformRequest;
 public interface MenuItemVisitor {
     void menu(String displayName, ListView<MenuItem> items);
 
-    void transformAction(TransformRequest transformRequest);
+    void transformAction(String displayName, TransformRequest transformRequest);
 
     void separator();
 }

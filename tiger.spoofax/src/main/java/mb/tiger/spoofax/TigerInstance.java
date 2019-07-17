@@ -8,40 +8,47 @@ import mb.common.util.ListView;
 import mb.common.util.SetView;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
-import mb.spoofax.core.language.AstResult;
 import mb.spoofax.core.language.LanguageInstance;
+import mb.spoofax.core.language.menu.Menu;
 import mb.spoofax.core.language.menu.MenuItem;
+import mb.spoofax.core.language.menu.TransformAction;
 import mb.spoofax.core.language.shortcut.Shortcut;
 import mb.spoofax.core.language.transform.TransformDef;
+import mb.spoofax.core.language.transform.TransformExecutionType;
+import mb.spoofax.core.language.transform.TransformRequest;
 import mb.tiger.spoofax.taskdef.TigerCheck;
-import mb.tiger.spoofax.taskdef.TigerGetAST;
 import mb.tiger.spoofax.taskdef.TigerStyle;
 import mb.tiger.spoofax.taskdef.TigerTokenize;
+import mb.tiger.spoofax.taskdef.transform.TigerParsedAst;
+import mb.tiger.spoofax.taskdef.transform.TigerPrettyPrint;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
-import java.util.Collections;
 
 public class TigerInstance implements LanguageInstance {
     private final static SetView<String> extensions = SetView.of("tig");
 
-    private final TigerGetAST getAst;
     private final TigerCheck check;
     private final TigerStyle style;
     private final TigerTokenize tokenize;
+    private final TigerParsedAst astTransform;
+    private final TigerPrettyPrint prettyPrintTransform;
 
 
     @Inject public TigerInstance(
-        TigerGetAST getAst,
         TigerCheck check,
         TigerTokenize tokenize,
-        TigerStyle style
+        TigerStyle style,
+        TigerParsedAst astTransform,
+        TigerPrettyPrint prettyPrintTransform
     ) {
-        this.getAst = getAst;
         this.check = check;
         this.tokenize = tokenize;
         this.style = style;
+        this.astTransform = astTransform;
+        this.prettyPrintTransform = prettyPrintTransform;
     }
 
 
@@ -54,44 +61,66 @@ public class TigerInstance implements LanguageInstance {
     }
 
 
-    @Override public Task<AstResult> createGetAstTask(ResourceKey resourceKey) {
-        return getAst.createTask(resourceKey);
-    }
-
-    @Override public Task<KeyedMessages> createCheckTask(ResourceKey resourceKey) {
-        return check.createTask(resourceKey);
+    @Override public Task<@Nullable ArrayList<? extends Token<?>>> createTokenizeTask(ResourceKey resourceKey) {
+        return tokenize.createTask(resourceKey);
     }
 
     @Override public Task<@Nullable Styling> createStyleTask(ResourceKey resourceKey) {
         return style.createTask(resourceKey);
     }
 
-    @Override public Task<@Nullable ArrayList<Token>> createTokenizeTask(ResourceKey resourceKey) {
-        return tokenize.createTask(resourceKey);
+    @Override public Task<KeyedMessages> createCheckTask(ResourceKey resourceKey) {
+        return check.createTask(resourceKey);
     }
 
 
     @Override public CollectionView<TransformDef> getTransformDefs() {
-        return new CollectionView<>(Collections.emptyList());
+        return CollectionView.of(astTransform, prettyPrintTransform);
     }
 
     @Override public CollectionView<TransformDef> getAutoTransformDefs() {
-        return new CollectionView<>(Collections.emptyList());
+        return CollectionView.of();
     }
 
-    @Override public ListView<MenuItem> getMainMenus() {
-        return new ListView<>(Collections.emptyList());
+
+    @Override public ListView<MenuItem> getMainMenuItems() {
+        return ListView.of(
+            new Menu("Syntax", ListView.of(
+                onceTransformAction(astTransform), contTransformAction(astTransform),
+                onceTransformAction(prettyPrintTransform), contTransformAction(prettyPrintTransform)
+            )),
+            new Menu("Static Semantics", ListView.of(
+
+            )),
+            new Menu("Transformations", ListView.of(
+
+            ))
+        );
     }
 
-    @Override public ListView<MenuItem> getResourceContextMenus() {
-        return new ListView<>(Collections.emptyList());
+    @Override public ListView<MenuItem> getResourceContextMenuItems() {
+        return getMainMenuItems();
     }
 
-    @Override public ListView<MenuItem> getEditorContextMenus() {
-        return new ListView<>(Collections.emptyList());
+    @Override public ListView<MenuItem> getEditorContextMenuItems() {
+        return getMainMenuItems();
     }
+
 
     @Override public CollectionView<Shortcut> getShortcuts() {
-        return new CollectionView<>(Collections.emptyList());
+        return CollectionView.of();
+    }
+
+
+    private static TransformAction transformAction(TransformDef transformDef, TransformExecutionType executionType, String suffix) {
+        return new TransformAction(new TransformRequest(transformDef, executionType), transformDef.getDisplayName() + suffix);
+    }
+
+    private static TransformAction onceTransformAction(TransformDef transformDef) {
+        return transformAction(transformDef, TransformExecutionType.OneShot, " (once)");
+    }
+
+    private static TransformAction contTransformAction(TransformDef transformDef) {
+        return transformAction(transformDef, TransformExecutionType.Continuous, " (continuous)");
     }
 }

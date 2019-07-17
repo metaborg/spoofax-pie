@@ -11,4 +11,6 @@ public interface TransformFeedbackVisitor {
     void messages(Messages messages);
 
     void openEditor(ResourceKey file, @Nullable Region region);
+
+    void openEditor(String text, @Nullable Region region);
 }

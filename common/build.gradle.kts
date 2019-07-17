@@ -6,7 +6,6 @@ dependencies {
   api(platform(project(":depconstraints")))
 
   api("org.metaborg:resource")
-  api("org.metaborg:org.spoofax.terms")
 
   compileOnly("org.checkerframework:checker-qual-android")
 }

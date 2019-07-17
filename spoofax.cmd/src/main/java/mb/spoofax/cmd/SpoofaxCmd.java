@@ -20,9 +20,6 @@ public class SpoofaxCmd implements Callable<Void> {
 
     public void run(String[] args, LanguageComponent languageComponent) {
         CommandLine commandLine = new CommandLine(this);
-        commandLine.addSubcommand("parse", new ParseFileCommand(languageComponent));
-        commandLine.addSubcommand("parse-string",
-            new ParseStringCommand(stringResourceRegistry, languageComponent));
         commandLine.parseWithHandler(new RunAll(), args);
     }
 

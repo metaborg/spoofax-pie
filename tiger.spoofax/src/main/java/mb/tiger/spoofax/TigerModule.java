@@ -13,6 +13,8 @@ import mb.stratego.common.StrategoRuntimeBuilder;
 import mb.stratego.common.StrategoRuntimeBuilderException;
 import mb.tiger.*;
 import mb.tiger.spoofax.taskdef.*;
+import mb.tiger.spoofax.taskdef.transform.TigerParsedAst;
+import mb.tiger.spoofax.taskdef.transform.TigerPrettyPrint;
 
 import javax.inject.Named;
 import java.io.IOException;
@@ -89,19 +91,26 @@ public class TigerModule {
     @Provides @LanguageScope @Named("language") @ElementsIntoSet
     static Set<TaskDef<?, ?>> provideTaskDefsSet(
         TigerParse parse,
-        TigerTokenize tokenize,
-        TigerGetAST getAst,
-        TigerStyle style,
         TigerAnalyze analyze,
-        TigerCheck check
+
+        TigerTokenize tokenize,
+        TigerStyle style,
+        TigerCheck check,
+
+        TigerParsedAst parsedAst,
+        TigerPrettyPrint prettyPrint
     ) {
         final HashSet<TaskDef<?, ?>> taskDefs = new HashSet<>();
         taskDefs.add(parse);
-        taskDefs.add(tokenize);
-        taskDefs.add(getAst);
-        taskDefs.add(style);
         taskDefs.add(analyze);
+
+        taskDefs.add(tokenize);
+        taskDefs.add(style);
         taskDefs.add(check);
+
+        taskDefs.add(parsedAst);
+        taskDefs.add(prettyPrint);
+
         return taskDefs;
     }
 

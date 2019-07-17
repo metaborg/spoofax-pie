@@ -2,19 +2,18 @@ package mb.common.token;
 
 import mb.common.region.Region;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import java.util.Objects;
 
-public class TokenImpl implements Token {
+public class TokenImpl<F> implements Token<F> {
     private final Region region;
     private final TokenType type;
-    private final @Nullable IStrategoTerm associatedTerm;
+    private final @Nullable F fragment;
 
-    public TokenImpl(Region region, TokenType type, @Nullable IStrategoTerm associatedTerm) {
+    public TokenImpl(Region region, TokenType type, @Nullable F fragment) {
         this.region = region;
         this.type = type;
-        this.associatedTerm = associatedTerm;
+        this.fragment = fragment;
     }
 
     @Override public Region getRegion() {
@@ -25,8 +24,8 @@ public class TokenImpl implements Token {
         return type;
     }
 
-    @Override public @Nullable IStrategoTerm getAssociatedTerm() {
-        return associatedTerm;
+    @Override public @Nullable F getFragment() {
+        return fragment;
     }
 
     @Override public boolean equals(Object o) {
@@ -35,13 +34,13 @@ public class TokenImpl implements Token {
         final TokenImpl token = (TokenImpl) o;
         if(!region.equals(token.region)) return false;
         if(!type.equals(token.type)) return false;
-        return Objects.equals(associatedTerm, token.associatedTerm);
+        return Objects.equals(fragment, token.fragment);
     }
 
     @Override public int hashCode() {
         int result = region.hashCode();
         result = 31 * result + type.hashCode();
-        result = 31 * result + (associatedTerm != null ? associatedTerm.hashCode() : 0);
+        result = 31 * result + (fragment != null ? fragment.hashCode() : 0);
         return result;
     }
 

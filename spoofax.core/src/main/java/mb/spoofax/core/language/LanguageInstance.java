@@ -22,13 +22,11 @@ public interface LanguageInstance {
     SetView<String> getFileExtensions();
 
 
-    Task<AstResult> createGetAstTask(ResourceKey resourceKey);
-
-    Task<KeyedMessages> createCheckTask(ResourceKey resourceKey);
+    Task<@Nullable ArrayList<? extends Token<?>>> createTokenizeTask(ResourceKey resourceKey);
 
     Task<@Nullable Styling> createStyleTask(ResourceKey resourceKey);
 
-    Task<@Nullable ArrayList<Token>> createTokenizeTask(ResourceKey resourceKey);
+    Task<KeyedMessages> createCheckTask(ResourceKey resourceKey);
 
 
     CollectionView<TransformDef> getTransformDefs();
@@ -36,11 +34,11 @@ public interface LanguageInstance {
     CollectionView<TransformDef> getAutoTransformDefs();
 
 
-    ListView<MenuItem> getMainMenus();
+    ListView<MenuItem> getMainMenuItems();
 
-    ListView<MenuItem> getResourceContextMenus();
+    ListView<MenuItem> getResourceContextMenuItems();
 
-    ListView<MenuItem> getEditorContextMenus();
+    ListView<MenuItem> getEditorContextMenuItems();
 
 
     CollectionView<Shortcut> getShortcuts();
