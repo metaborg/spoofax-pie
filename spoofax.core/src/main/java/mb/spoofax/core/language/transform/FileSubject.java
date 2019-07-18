@@ -1,20 +1,21 @@
 package mb.spoofax.core.language.transform;
 
 import mb.resource.ResourceKey;
+import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;
 
 public class FileSubject implements TransformSubject {
-    protected final ResourceKey file;
+    protected final ResourcePath file;
 
 
-    public FileSubject(ResourceKey file) {
+    public FileSubject(ResourcePath file) {
         this.file = file;
     }
 
 
-    public ResourceKey getFile() {
+    public ResourcePath getFile() {
         return file;
     }
 

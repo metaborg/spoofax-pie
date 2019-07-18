@@ -13,8 +13,7 @@ import mb.stratego.common.StrategoRuntimeBuilder;
 import mb.stratego.common.StrategoRuntimeBuilderException;
 import mb.tiger.*;
 import mb.tiger.spoofax.taskdef.*;
-import mb.tiger.spoofax.taskdef.transform.TigerParsedAst;
-import mb.tiger.spoofax.taskdef.transform.TigerPrettyPrint;
+import mb.tiger.spoofax.taskdef.transform.*;
 
 import javax.inject.Named;
 import java.io.IOException;
@@ -97,10 +96,14 @@ public class TigerModule {
         TigerStyle style,
         TigerCheck check,
 
-        TigerParsedAst parsedAst,
-        TigerPrettyPrint prettyPrint
+        TigerShowParsedAst showParsedAst,
+        TigerShowPrettyPrintedText showPrettyPrintedText,
+        TigerShowAnalyzedAst showAnalyzedAst,
+        TigerShowScopeGraph showScopeGraph,
+        TigerShowDesugaredAst showDesugaredAst
     ) {
         final HashSet<TaskDef<?, ?>> taskDefs = new HashSet<>();
+
         taskDefs.add(parse);
         taskDefs.add(analyze);
 
@@ -108,8 +111,11 @@ public class TigerModule {
         taskDefs.add(style);
         taskDefs.add(check);
 
-        taskDefs.add(parsedAst);
-        taskDefs.add(prettyPrint);
+        taskDefs.add(showParsedAst);
+        taskDefs.add(showPrettyPrintedText);
+        taskDefs.add(showAnalyzedAst);
+        taskDefs.add(showScopeGraph);
+        taskDefs.add(showDesugaredAst);
 
         return taskDefs;
     }

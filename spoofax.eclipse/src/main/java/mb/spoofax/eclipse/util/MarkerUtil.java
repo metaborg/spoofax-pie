@@ -23,9 +23,8 @@ public final class MarkerUtil {
         final String markerId = id(eclipseIdentifiers, eclipseSeverity);
         final IMarker marker = resource.createMarker(markerId);
         if(region != null) {
-            marker.setAttribute(IMarker.CHAR_START, region.startOffset);
-            // CHAR_END is exclusive, while region is inclusive: add 1
-            marker.setAttribute(IMarker.CHAR_END, region.endOffset + 1);
+            marker.setAttribute(IMarker.CHAR_START, region.getStartOffset());
+            marker.setAttribute(IMarker.CHAR_END, region.getEndOffset());
         } else {
             marker.setAttribute(IMarker.LINE_NUMBER, 1);
         }

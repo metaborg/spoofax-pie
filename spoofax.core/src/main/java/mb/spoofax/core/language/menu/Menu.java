@@ -12,6 +12,11 @@ public class Menu implements MenuItem {
         this.items = items;
     }
 
+    public Menu(String displayName, MenuItem... items) {
+        this.displayName = displayName;
+        this.items = ListView.of(items);
+    }
+
 
     public ListView<MenuItem> getItems() {
         return items;

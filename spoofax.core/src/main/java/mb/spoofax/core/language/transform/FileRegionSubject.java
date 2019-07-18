@@ -1,7 +1,7 @@
 package mb.spoofax.core.language.transform;
 
 import mb.common.region.Region;
-import mb.resource.ResourceKey;
+import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;
@@ -10,17 +10,17 @@ public class FileRegionSubject extends FileSubject implements RegionSubject {
     private final Region region;
 
 
-    public FileRegionSubject(ResourceKey resourceKey, Region region) {
+    public FileRegionSubject(ResourcePath resourceKey, Region region) {
         super(resourceKey);
         this.region = region;
     }
 
 
-    public ResourceKey getFile() {
+    @Override public ResourcePath getFile() {
         return file;
     }
 
-    public Region getRegion() {
+    @Override public Region getRegion() {
         return region;
     }
 

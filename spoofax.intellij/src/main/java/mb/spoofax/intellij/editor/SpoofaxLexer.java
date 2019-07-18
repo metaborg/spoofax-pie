@@ -168,8 +168,8 @@ public final class SpoofaxLexer extends LexerBase {
         int offset = 0;
 
         for(mb.common.token.Token<?> token : tokens) {
-            int tokenStart = token.getRegion().startOffset;
-            int tokenEnd = token.getRegion().endOffset + 1;        // End offsets are exclusive.
+            int tokenStart = token.getRegion().getStartOffset();
+            int tokenEnd = token.getRegion().getEndOffset();
 
             // We assume that tokens are non-empty. When we encounter
             // a token with an end at or before its start,

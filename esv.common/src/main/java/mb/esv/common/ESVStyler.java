@@ -36,18 +36,18 @@ public class ESVStyler {
         final ArrayList<TokenStyle> validated = new ArrayList<>();
         for(TokenStyle tokenStyle : tokenStyles) {
             final Region region = tokenStyle.getToken().getRegion();
-            if(offset >= region.startOffset) {
+            if(offset >= region.getStartOffset()) {
                 logger.warn("Invalid {}, starting offset is greater than offset in previous regions, "
                     + "token style will be skipped", tokenStyle);
-            } else if(offset >= region.endOffset) {
+            } else if(offset >= region.getEndOffsetInclusive()) {
                 logger.warn("Invalid {}, ending offset is greater than offset in previous regions, "
                     + "token style will be skipped", tokenStyle);
-            } else if(region.startOffset > region.endOffset) {
+            } else if(region.getStartOffset() > region.getEndOffsetInclusive()) {
                 logger.warn("Invalid {}, starting offset is greater than ending offset, "
                     + "token style will be skipped", tokenStyle);
             } else {
                 validated.add(tokenStyle);
-                offset = region.endOffset;
+                offset = region.getEndOffsetInclusive();
             }
         }
         return new StylingImpl(validated);

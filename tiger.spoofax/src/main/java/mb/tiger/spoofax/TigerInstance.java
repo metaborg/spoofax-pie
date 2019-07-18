@@ -19,10 +19,8 @@ import mb.spoofax.core.language.transform.TransformRequest;
 import mb.tiger.spoofax.taskdef.TigerCheck;
 import mb.tiger.spoofax.taskdef.TigerStyle;
 import mb.tiger.spoofax.taskdef.TigerTokenize;
-import mb.tiger.spoofax.taskdef.transform.TigerParsedAst;
-import mb.tiger.spoofax.taskdef.transform.TigerPrettyPrint;
+import mb.tiger.spoofax.taskdef.transform.*;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -33,22 +31,33 @@ public class TigerInstance implements LanguageInstance {
     private final TigerCheck check;
     private final TigerStyle style;
     private final TigerTokenize tokenize;
-    private final TigerParsedAst astTransform;
-    private final TigerPrettyPrint prettyPrintTransform;
+    private final TigerShowParsedAst showParsedAst;
+    private final TigerShowPrettyPrintedText showPrettyPrintedText;
+    private final TigerShowAnalyzedAst showAnalyzedAst;
+    private final TigerShowScopeGraph showScopeGraph;
+    private final TigerShowDesugaredAst showDesugaredAst;
 
 
     @Inject public TigerInstance(
         TigerCheck check,
         TigerTokenize tokenize,
         TigerStyle style,
-        TigerParsedAst astTransform,
-        TigerPrettyPrint prettyPrintTransform
+
+        TigerShowParsedAst showParsedAst,
+        TigerShowPrettyPrintedText showPrettyPrintedText,
+        TigerShowAnalyzedAst showAnalyzedAst,
+        TigerShowScopeGraph showScopeGraph,
+        TigerShowDesugaredAst showDesugaredAst
     ) {
         this.check = check;
         this.tokenize = tokenize;
         this.style = style;
-        this.astTransform = astTransform;
-        this.prettyPrintTransform = prettyPrintTransform;
+
+        this.showParsedAst = showParsedAst;
+        this.showPrettyPrintedText = showPrettyPrintedText;
+        this.showAnalyzedAst = showAnalyzedAst;
+        this.showScopeGraph = showScopeGraph;
+        this.showDesugaredAst = showDesugaredAst;
     }
 
 
@@ -75,7 +84,7 @@ public class TigerInstance implements LanguageInstance {
 
 
     @Override public CollectionView<TransformDef> getTransformDefs() {
-        return CollectionView.of(astTransform, prettyPrintTransform);
+        return CollectionView.of(showParsedAst, showPrettyPrintedText);
     }
 
     @Override public CollectionView<TransformDef> getAutoTransformDefs() {
@@ -85,16 +94,19 @@ public class TigerInstance implements LanguageInstance {
 
     @Override public ListView<MenuItem> getMainMenuItems() {
         return ListView.of(
-            new Menu("Syntax", ListView.of(
-                onceTransformAction(astTransform), contTransformAction(astTransform),
-                onceTransformAction(prettyPrintTransform), contTransformAction(prettyPrintTransform)
-            )),
-            new Menu("Static Semantics", ListView.of(
-
-            )),
-            new Menu("Transformations", ListView.of(
-
-            ))
+            new Menu("Debug",
+                new Menu("Syntax",
+                    onceTransformAction(showParsedAst), contTransformAction(showParsedAst),
+                    onceTransformAction(showPrettyPrintedText), contTransformAction(showPrettyPrintedText)
+                ),
+                new Menu("Static Semantics",
+                    onceTransformAction(showAnalyzedAst), contTransformAction(showAnalyzedAst),
+                    onceTransformAction(showScopeGraph), contTransformAction(showScopeGraph)
+                ),
+                new Menu("Transformations",
+                    onceTransformAction(showDesugaredAst), contTransformAction(showDesugaredAst)
+                )
+            )
         );
     }
 

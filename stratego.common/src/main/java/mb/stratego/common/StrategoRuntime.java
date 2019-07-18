@@ -2,14 +2,9 @@ package mb.stratego.common;
 
 import mb.common.util.StringFormatter;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spoofax.interpreter.core.InterpreterErrorExit;
-import org.spoofax.interpreter.core.InterpreterException;
-import org.spoofax.interpreter.core.InterpreterExit;
-import org.spoofax.interpreter.core.Tools;
-import org.spoofax.interpreter.core.UndefinedStrategyException;
+import org.spoofax.interpreter.core.*;
 import org.spoofax.interpreter.library.IOAgent;
 import org.spoofax.interpreter.terms.IStrategoList;
-import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.strategoxt.HybridInterpreter;
@@ -27,8 +22,7 @@ public class StrategoRuntime {
         return invoke(strategy, input, ioAgent, null);
     }
 
-    public @Nullable IStrategoTerm invoke(String strategy, IStrategoTerm input, IOAgent ioAgent,
-        @Nullable Object contextObject) throws StrategoException {
+    public @Nullable IStrategoTerm invoke(String strategy, IStrategoTerm input, IOAgent ioAgent, @Nullable Object contextObject) throws StrategoException {
         hybridInterpreter.setCurrent(input);
         hybridInterpreter.setIOAgent(ioAgent);
         hybridInterpreter.getContext().setContextObject(contextObject);
@@ -73,36 +67,24 @@ public class StrategoRuntime {
             final @Nullable IStrategoTerm term = e.getTerm();
             final String innerTrace = e.getTrace() != null ? traceToString(e.getTrace()) : trace;
             if(term != null) {
-                final String termString;
-                final @Nullable IStrategoString ppTerm = StrategoUtil.prettyPrintTerm(term);
-                if(ppTerm != null) {
-                    termString = ppTerm.stringValue();
-                } else {
-                    termString = term.toString();
-                }
-                message = StringFormatter.format("Invoking Stratego strategy {} failed at term:\n\t{}\n{}\n{}",
-                    strategy, termString, innerTrace, e.getMessage());
+                final String str = StrategoUtil.toString(term);
+                message = StringFormatter.format("Invoking Stratego strategy {} failed at term:\n\t{}\n{}\n{}", strategy, str, innerTrace, e.getMessage());
             } else {
-                message = StringFormatter.format("Invoking Stratego strategy {} failed.\n{}\n{}", strategy, innerTrace,
-                    e.getMessage());
+                message = StringFormatter.format("Invoking Stratego strategy {} failed.\n{}\n{}", strategy, innerTrace, e.getMessage());
             }
             return new ExceptionData(message, e);
         } catch(InterpreterExit e) {
-            final String message = StringFormatter.format(
-                "Invoking Stratego strategy {} failed with exit code {}\n{}\n{}", strategy, e.getValue(), trace, e);
+            final String message = StringFormatter.format("Invoking Stratego strategy {} failed with exit code {}\n{}\n{}", strategy, e.getValue(), trace, e);
             return new ExceptionData(message, e);
         } catch(UndefinedStrategyException e) {
-            final String message = StringFormatter
-                .format("Invoking Stratego strategy {} failed, strategy is undefined\n{}\n{}", strategy, trace, e);
+            final String message = StringFormatter.format("Invoking Stratego strategy {} failed, strategy is undefined\n{}\n{}", strategy, trace, e);
             return new ExceptionData(message, e);
         } catch(InterpreterException e) {
             final Throwable cause = e.getCause();
             if(cause instanceof InterpreterException) {
                 return handleException((InterpreterException) cause, strategy);
             } else {
-                final String message =
-                    StringFormatter.format("Invoking Stratego strategy {} failed unexpectedly\n{}\n{}", strategy,
-                        trace, e);
+                final String message = StringFormatter.format("Invoking Stratego strategy {} failed unexpectedly\n{}\n{}", strategy, trace, e);
                 return new ExceptionData(message, null);
             }
         }

@@ -5,17 +5,21 @@ import java.util.Objects;
 public class ErrorFeedback implements TransformFeedback {
     private final Throwable error;
 
+
     public ErrorFeedback(Throwable error) {
         this.error = error;
     }
+
 
     public Throwable getError() {
         return error;
     }
 
+
     @Override public void accept(TransformFeedbackVisitor visitor) {
         visitor.error(error);
     }
+
 
     @Override public boolean equals(Object o) {
         if(this == o) return true;

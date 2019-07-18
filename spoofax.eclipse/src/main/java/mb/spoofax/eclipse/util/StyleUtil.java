@@ -49,21 +49,21 @@ public final class StyleUtil {
         final ArrayList<TokenStyle> validated = new ArrayList<>();
         for(TokenStyle tokenStyle : styling.getStylePerToken()) {
             final mb.common.region.Region region = tokenStyle.getToken().getRegion();
-            if(offset >= region.startOffset) {
+            if(offset >= region.getStartOffset()) {
                 logger.warn("Skipping invalid {}, starting offset is greater than offset in previous regions",
                     tokenStyle);
-            } else if(offset >= region.endOffset) {
+            } else if(offset >= region.getEndOffsetInclusive()) {
                 logger.warn("Skipping invalid {}, ending offset is greater than offset in previous regions",
                     tokenStyle);
-            } else if(region.startOffset > region.endOffset) {
+            } else if(region.getStartOffset() > region.getEndOffsetInclusive()) {
                 logger.warn("Skipping invalid {}, starting offset is greater than ending offset", tokenStyle);
-            } else if(region.startOffset > length) {
+            } else if(region.getStartOffset() > length) {
                 logger.warn("Skipping invalid {}, starting offset is greater than text length", tokenStyle);
-            } else if(region.endOffset >= length) {
+            } else if(region.getEndOffsetInclusive() >= length) {
                 logger.warn("Skipping invalid {}, ending offset is greater than text length", tokenStyle);
             } else {
                 validated.add(tokenStyle);
-                offset = region.endOffset;
+                offset = region.getEndOffsetInclusive();
             }
         }
         return validated;
@@ -119,7 +119,7 @@ public final class StyleUtil {
             styleRange.strikeout = true;
         }
 
-        styleRange.start = region.startOffset;
+        styleRange.start = region.getStartOffset();
         styleRange.length = region.length();
 
         return styleRange;

@@ -1,20 +1,20 @@
 package mb.spoofax.core.language.transform;
 
-import mb.resource.ResourceKey;
+import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;
 
 public class ProjectSubject implements TransformSubject {
-    private final ResourceKey project;
+    private final ResourcePath project;
 
 
-    public ProjectSubject(ResourceKey project) {
+    public ProjectSubject(ResourcePath project) {
         this.project = project;
     }
 
 
-    public ResourceKey getProject() {
+    public ResourcePath getProject() {
         return project;
     }
 

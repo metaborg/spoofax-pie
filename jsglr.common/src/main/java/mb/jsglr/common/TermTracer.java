@@ -2,16 +2,13 @@ package mb.jsglr.common;
 
 import mb.common.region.Region;
 import mb.resource.ResourceKey;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.imploder.IToken;
 import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 import org.spoofax.terms.attachments.OriginAttachment;
-import org.spoofax.terms.visitor.AStrategoTermVisitor;
-import org.spoofax.terms.visitor.StrategoTermVisitee;
 
-import java.util.ArrayList;
+import java.util.Stack;
 
 public class TermTracer {
     /**
@@ -22,11 +19,20 @@ public class TermTracer {
     }
 
     /**
+     * Gets the originating term of given term, or the term itself if it cannot be found.
+     */
+    public static IStrategoTerm tryGetOrigin(IStrategoTerm term) {
+        return OriginAttachment.tryGetOrigin(term);
+    }
+
+
+    /**
      * Gets the source code region given term originated from, or null if it cannot be found.
      */
-    public static @Nullable Region getRegion(IStrategoTerm originatingTerm) {
-        final IToken left = ImploderAttachment.getLeftToken(originatingTerm);
-        final IToken right = ImploderAttachment.getRightToken(originatingTerm);
+    public static @Nullable Region getRegion(IStrategoTerm term) {
+        term = OriginAttachment.tryGetOrigin(term);
+        final IToken left = ImploderAttachment.getLeftToken(term);
+        final IToken right = ImploderAttachment.getRightToken(term);
         if(left == null || right == null) {
             return null;
         }
@@ -40,45 +46,33 @@ public class TermTracer {
         return ResourceKeyAttachment.getResourceKey(originatingTerm);
     }
 
-    /**
-     * Gets the term and its ancestors containing {@code region}, inside {@code term}. The returned list is ordered by
-     * terms from the innermost (leaf) term to the outermost (root) term.
-     */
-    public static ArrayList<IStrategoTerm> getTermAndAncestorsContainingRegion(IStrategoTerm term, Region region) {
-        final ArrayList<IStrategoTerm> found = new ArrayList<>();
-        StrategoTermVisitee.bottomup(new AStrategoTermVisitor() {
-            @Override public boolean visit(@NonNull IStrategoTerm term) {
-                final @Nullable Region termRegion = getRegion(term);
-                if(termRegion != null && termRegion.contains(region)) {
-                    found.add(term);
-                    return false; // TODO: bottom-up traversal ignores return value.
-                }
-                return true; // TODO: bottom-up traversal ignores return value.
-            }
-        }, term);
-        return found;
-    }
 
     /**
-     * Gets the term and its descendants that are contained in {@code region}, inside {@code term}. The returned list is
-     * ordered by terms from the outermost (root) to the innermost (leaf) term.
+     * Gets the smallest term from the {@code ast} that encompasses given {@code region}.
+     *
+     * @param ast    AST to select a term from.
+     * @param region Selection region.
+     * @return Smallest term that encompasses given region, or the entire AST if no terms have region information.
      */
-    public static ArrayList<IStrategoTerm> termAndDescendantsContainedInRegion(IStrategoTerm term, Region region) {
-        final ArrayList<IStrategoTerm> parsed = new ArrayList<>();
-        StrategoTermVisitee.topdown(new AStrategoTermVisitor() {
-            @Override public boolean visit(@NonNull IStrategoTerm term) {
-                if(term.isList() && term.getSubtermCount() == 1) {
-                    return true; // Do not return singleton lists, but continue topdown traversal into their singleton element.
+    public static IStrategoTerm getSmallestTermEncompassingRegion(IStrategoTerm ast, Region region) {
+        IStrategoTerm minimalTerm = ast;
+        int minimalLength = Integer.MAX_VALUE;
+        final Stack<IStrategoTerm> stack = new Stack<IStrategoTerm>();
+        stack.push(ast);
+        while(!stack.empty()) {
+            final IStrategoTerm term = stack.pop();
+            final @Nullable Region termRegion = getRegion(term);
+            if(termRegion != null) {
+                final int length = termRegion.length();
+                if(termRegion.contains(region) && length < minimalLength) {
+                    minimalTerm = term;
+                    minimalLength = length;
                 }
-                final @Nullable Region termRegion = getRegion(term);
-                if(termRegion != null && region.contains(termRegion)) {
-                    parsed.add(term);
-                    return false; // Do not traverse further down the tree to prevent children terms from being added.
-                    // TODO: shouldn't they be added?
-                }
-                return true;
             }
-        }, term);
-        return parsed;
+            for(int i = term.getSubtermCount() - 1; i >= 0; --i) {
+                stack.push(term.getSubterm(i));
+            }
+        }
+        return minimalTerm;
     }
 }

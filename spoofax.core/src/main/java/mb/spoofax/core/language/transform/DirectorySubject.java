@@ -1,20 +1,20 @@
 package mb.spoofax.core.language.transform;
 
-import mb.resource.ResourceKey;
+import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;
 
 public class DirectorySubject implements TransformSubject {
-    private final ResourceKey directory;
+    private final ResourcePath directory;
 
 
-    public DirectorySubject(ResourceKey directory) {
+    public DirectorySubject(ResourcePath directory) {
         this.directory = directory;
     }
 
 
-    public ResourceKey getDirectory() {
+    public ResourcePath getDirectory() {
         return directory;
     }
 
