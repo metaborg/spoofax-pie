@@ -1,7 +1,7 @@
 package mb.spoofax.eclipse.util;
 
-import mb.common.util.ArrayUtils;
-import mb.common.util.Ints;
+import mb.common.util.ArrayUtil;
+import mb.common.util.IntUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
@@ -92,7 +92,7 @@ public class BuilderUtil {
         final IProjectDescription projectDesc = project.getDescription();
         final ICommand[] builders = projectDesc.getBuildSpec();
         final int[] indexes = indexes(beforeId, builders);
-        final int index = Ints.min(indexes);
+        final int index = IntUtil.min(indexes);
         addTo(id, project, index, projectDesc, builders, monitor, triggers);
     }
 
@@ -116,7 +116,7 @@ public class BuilderUtil {
         final IProjectDescription projectDesc = project.getDescription();
         final ICommand[] builders = projectDesc.getBuildSpec();
         final int[] indexes = indexes(afterId, builders);
-        final int index = Ints.max(indexes);
+        final int index = IntUtil.max(indexes);
         addTo(id, project, index + 1, projectDesc, builders, monitor, triggers);
     }
 
@@ -132,15 +132,15 @@ public class BuilderUtil {
                             + "Set isConfigurable=\"true\" for that builder in plugin.xml"));
                 }
                 newBuilder.setBuilding(IncrementalProjectBuilder.AUTO_BUILD,
-                    ArrayUtils.contains(triggers, IncrementalProjectBuilder.AUTO_BUILD));
+                    ArrayUtil.contains(triggers, IncrementalProjectBuilder.AUTO_BUILD));
                 newBuilder.setBuilding(IncrementalProjectBuilder.INCREMENTAL_BUILD,
-                    ArrayUtils.contains(triggers, IncrementalProjectBuilder.INCREMENTAL_BUILD));
+                    ArrayUtil.contains(triggers, IncrementalProjectBuilder.INCREMENTAL_BUILD));
                 newBuilder.setBuilding(IncrementalProjectBuilder.FULL_BUILD,
-                    ArrayUtils.contains(triggers, IncrementalProjectBuilder.FULL_BUILD));
+                    ArrayUtil.contains(triggers, IncrementalProjectBuilder.FULL_BUILD));
                 newBuilder.setBuilding(IncrementalProjectBuilder.CLEAN_BUILD,
-                    ArrayUtils.contains(triggers, IncrementalProjectBuilder.CLEAN_BUILD));
+                    ArrayUtil.contains(triggers, IncrementalProjectBuilder.CLEAN_BUILD));
             }
-            final ICommand[] newBuilders = ArrayUtils.insert(index, builders, newBuilder);
+            final ICommand[] newBuilders = ArrayUtil.insert(index, builders, newBuilder);
             projectDesc.setBuildSpec(newBuilders);
             project.setDescription(projectDesc, monitor);
         }
@@ -161,7 +161,7 @@ public class BuilderUtil {
         final IProjectDescription projectDesc = project.getDescription();
         final ICommand[] builders = projectDesc.getBuildSpec();
         final int[] builderIndexes = indexes(id, builders);
-        final ICommand[] newBuilders = ArrayUtils.removeAll(builders, builderIndexes);
+        final ICommand[] newBuilders = ArrayUtil.removeAll(builders, builderIndexes);
         projectDesc.setBuildSpec(newBuilders);
         project.setDescription(projectDesc, monitor);
     }
@@ -206,7 +206,7 @@ public class BuilderUtil {
                 indexes.add(i);
             }
         }
-        return Ints.toArray(indexes);
+        return IntUtil.toArray(indexes);
     }
 
     private static boolean contains(String id, ICommand[] builders) {

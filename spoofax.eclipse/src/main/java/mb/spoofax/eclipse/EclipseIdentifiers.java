@@ -15,6 +15,8 @@ public interface EclipseIdentifiers {
 
     String getUnobserveCommand();
 
+    String getTransformCommand();
+
 
     String baseMarker();
 

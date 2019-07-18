@@ -29,6 +29,10 @@ class TigerEclipseIdentifiers implements EclipseIdentifiers {
         return "tiger.eclipse.unobserve";
     }
 
+    @Override public String getTransformCommand() {
+        return "tiger.eclipse.transform";
+    }
+
 
     @Override public String baseMarker() {
         return "tiger.eclipse.marker";

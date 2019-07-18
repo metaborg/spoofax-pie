@@ -1,6 +1,8 @@
 package mb.spoofax.core.language.transform;
 
-public enum TransformSubjectType {
+import java.io.Serializable;
+
+public enum TransformSubjectType implements Serializable {
     None,
     Project,
     Directory,

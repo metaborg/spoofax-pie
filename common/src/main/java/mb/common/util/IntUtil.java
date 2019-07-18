@@ -19,7 +19,7 @@ import static mb.common.util.Preconditions.checkArgument;
 import static mb.common.util.Preconditions.checkNotNull;
 
 // Selectively copied from https://github.com/google/guava/blob/master/guava/src/com/google/common/primitives/Ints.java.
-public class Ints {
+public class IntUtil {
     /**
      * Returns the least value present in {@code array}.
      *

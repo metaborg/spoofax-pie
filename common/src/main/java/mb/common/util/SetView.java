@@ -8,6 +8,12 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * A wrapper around a {@link Set set} with read-only operations. Only {@link Serializable serializable} when the wrapped
+ * set is.
+ *
+ * @param <E> The type of elements in this collection.
+ */
 public class SetView<E> extends BaseCollectionView<E, Set<? extends E>> implements Iterable<E>, Serializable {
     public SetView(Set<? extends E> collection) {
         super(collection);

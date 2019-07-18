@@ -1,6 +1,8 @@
 package mb.spoofax.core.language.transform;
 
-public enum TransformExecutionType {
+import java.io.Serializable;
+
+public enum TransformExecutionType implements Serializable {
     OneShot,
     Continuous
 }

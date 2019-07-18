@@ -22,7 +22,7 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 
 // Selectively copied from https://github.com/apache/commons-lang/blob/master/src/main/java/org/apache/commons/lang3/ArrayUtils.java.
-public class ArrayUtils {
+public class ArrayUtil {
     /**
      * The index value when an element is not found in a list or array: {@code -1}. This value is returned by methods in
      * this class and can also be used in comparisons with values returned by various method from {@link

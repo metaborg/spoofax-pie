@@ -1,10 +1,7 @@
 package mb.spoofax.eclipse.util;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectNature;
-import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -142,6 +139,62 @@ public class SelectionUtil {
             // COMPAT: DO NOT REMOVE CAST, it is required for older versions of Eclipse.
             @SuppressWarnings("RedundantCast") final IFile file = (IFile) adaptable.getAdapter(IFile.class);
             return file;
+        } else {
+            return null;
+        }
+    }
+
+
+    /**
+     * Attempts to retrieve a single container from given selection.
+     *
+     * @param selection Structured selection to search.
+     * @return Selected container, or null if it could not be retrieved.
+     */
+    public static @Nullable IContainer toContainer(IStructuredSelection selection) {
+        final @Nullable Object selected = selection.getFirstElement();
+        if(selected == null) {
+            return null;
+        }
+        return elementToContainer(selected);
+    }
+
+    /**
+     * Retrieves all containers from given selection.
+     *
+     * @param selection Structured selection to search.
+     * @return Selected containers.
+     */
+    public static ArrayList<IContainer> toContainers(IStructuredSelection selection) {
+        final ArrayList<IContainer> containers = new ArrayList<>();
+        for(Iterator<?> iterator = selection.iterator(); iterator.hasNext(); ) {
+            final Object selected = iterator.next();
+            final @Nullable IContainer container = elementToContainer(selected);
+            if(container != null) {
+                containers.add(container);
+            }
+        }
+        return containers;
+    }
+
+    /**
+     * Attempts to convert given selection element to a container.
+     *
+     * @param selected Selected element to convert.
+     * @return Container converted from selected element, or null if no container could be converted.
+     */
+    public static @Nullable IContainer elementToContainer(Object selected) {
+        if(selected instanceof IProjectNature) {
+            // Test for project nature as well. In the Package explorer, Java projects are of class JavaProject, which implement IProjectNature.
+            final IProjectNature nature = (IProjectNature) selected;
+            return nature.getProject();
+        } else if(selected instanceof IContainer) {
+            return (IContainer) selected;
+        } else if(selected instanceof IAdaptable) {
+            final IAdaptable adaptable = (IAdaptable) selected;
+            // COMPAT: DO NOT REMOVE CAST, it is required for older versions of Eclipse.
+            @SuppressWarnings("RedundantCast") final IContainer container = (IContainer) adaptable.getAdapter(IContainer.class);
+            return container;
         } else {
             return null;
         }

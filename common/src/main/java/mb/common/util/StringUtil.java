@@ -17,7 +17,7 @@
 package mb.common.util;
 
 // Selectively copied from https://github.com/apache/commons-lang/blob/master/src/main/java/org/apache/commons/lang3/StringUtils.java.
-public class StringUtils {
+public class StringUtil {
     public static final String SPACE = " ";
     public static final String EMPTY = "";
     private static final int PAD_LIMIT = 8192;

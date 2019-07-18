@@ -1,6 +1,6 @@
 package mb.spoofax.eclipse.util;
 
-import mb.common.util.ArrayUtils;
+import mb.common.util.ArrayUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -33,7 +33,7 @@ public class NatureUtil {
         final IProjectDescription description = project.getDescription();
         final String[] natures = description.getNatureIds();
         if(natureIndex(id, natures) == -1) {
-            final String[] newNatures = ArrayUtils.add(natures, id);
+            final String[] newNatures = ArrayUtil.add(natures, id);
             description.setNatureIds(newNatures);
             project.setDescription(description, monitor);
         }
@@ -54,7 +54,7 @@ public class NatureUtil {
         final String[] natures = description.getNatureIds();
         final int natureIndex = natureIndex(id, natures);
         if(natureIndex != -1) {
-            final String[] newNatures = ArrayUtils.remove(natures, natureIndex);
+            final String[] newNatures = ArrayUtil.remove(natures, natureIndex);
             description.setNatureIds(newNatures);
             project.setDescription(description, monitor);
         }

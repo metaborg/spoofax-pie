@@ -1,7 +1,7 @@
 package mb.spoofax.eclipse.log;
 
 import mb.common.util.StringFormatter;
-import mb.common.util.StringUtils;
+import mb.common.util.StringUtil;
 import mb.log.api.Level;
 import mb.log.api.Logger;
 import mb.spoofax.eclipse.util.StatusUtil;
@@ -65,7 +65,7 @@ public class EclipseLogger implements Logger, AutoCloseable {
         if(strLength > length) {
             return str.substring(strLength - length, strLength);
         }
-        return StringUtils.rightPad(str, length);
+        return StringUtil.rightPad(str, length);
     }
 
     private void consoleLog(String msg, Level level) {

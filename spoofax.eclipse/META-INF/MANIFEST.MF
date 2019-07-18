@@ -10,6 +10,7 @@ Export-Package: mb.spoofax.eclipse,
   mb.spoofax.eclipse.nature,
   mb.spoofax.eclipse.pie,
   mb.spoofax.eclipse.resource,
+  mb.spoofax.eclipse.transform,
   mb.spoofax.eclipse.util
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy

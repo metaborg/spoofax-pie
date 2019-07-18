@@ -6,6 +6,12 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.function.Consumer;
 
+/**
+ * A wrapper around a {@link List list} with read-only operations. Only {@link Serializable serializable} when the
+ * wrapped list is.
+ *
+ * @param <E> The type of elements in this list.
+ */
 public class ListView<E> extends BaseCollectionView<E, List<? extends E>> implements Iterable<E>, Serializable {
     public ListView(List<? extends E> collection) {
         super(collection);

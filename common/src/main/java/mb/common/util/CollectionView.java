@@ -2,11 +2,18 @@ package mb.common.util;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 
+/**
+ * A wrapper around a {@link Collection collection} with read-only operations. Only {@link Serializable serializable}
+ * when the wrapped collection is.
+ *
+ * @param <E> The type of elements in this collection.
+ */
 public class CollectionView<E> extends BaseCollectionView<E, Collection<E>> {
     public CollectionView(Collection<E> collection) {
         super(collection);

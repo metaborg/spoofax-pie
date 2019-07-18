@@ -28,6 +28,10 @@ public class Menu implements MenuItem {
     }
 
     @Override public void accept(MenuItemVisitor visitor) {
-        visitor.menu(displayName, items);
+        visitor.menuPush(displayName, items);
+        for(MenuItem item : items) {
+            item.accept(visitor);
+        }
+        visitor.menuPop();
     }
 }
