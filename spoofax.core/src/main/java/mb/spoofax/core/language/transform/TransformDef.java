@@ -1,8 +1,7 @@
 package mb.spoofax.core.language.transform;
 
+import mb.common.util.EnumSetView;
 import mb.pie.api.Task;
-
-import java.util.EnumSet;
 
 public interface TransformDef {
     String getId();
@@ -10,9 +9,9 @@ public interface TransformDef {
     String getDisplayName();
 
 
-    EnumSet<TransformExecutionType> getSupportedExecutionTypes();
+    EnumSetView<TransformExecutionType> getSupportedExecutionTypes();
 
-    EnumSet<TransformSubjectType> getSupportedSubjectTypes();
+    EnumSetView<TransformSubjectType> getSupportedSubjectTypes();
 
 
     Task<TransformOutput> createTask(TransformInput input);

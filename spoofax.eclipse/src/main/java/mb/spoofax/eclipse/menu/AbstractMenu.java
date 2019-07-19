@@ -5,6 +5,7 @@ import mb.common.util.SerializationUtil;
 import mb.spoofax.core.language.transform.TransformInput;
 import mb.spoofax.core.language.transform.TransformRequest;
 import mb.spoofax.eclipse.transform.TransformData;
+import mb.spoofax.eclipse.transform.TransformHandler;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -15,6 +16,7 @@ import org.eclipse.ui.menus.IWorkbenchContribution;
 import org.eclipse.ui.services.IServiceLocator;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,7 +52,9 @@ abstract class AbstractMenu extends CompoundContributionItem implements IWorkben
     protected CommandContributionItem transformCommand(String commandId, TransformRequest transformRequest, ListView<TransformInput> inputs, String displayName) {
         final TransformData data = new TransformData(transformRequest.transformDef.getId(), transformRequest.executionType, inputs);
         final Map<String, String> parameters = new HashMap<>();
-        parameters.put("input", new String(SerializationUtil.serialize(data), StandardCharsets.UTF_8));
+        final byte[] serialized = SerializationUtil.serialize(data);
+        final byte[] encoded = Base64.getEncoder().encode(serialized);
+        parameters.put(TransformHandler.dataParameterId, new String(encoded, StandardCharsets.UTF_8));
         return command(commandId, displayName, parameters);
     }
 }

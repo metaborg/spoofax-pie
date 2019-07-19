@@ -84,7 +84,13 @@ public class TigerInstance implements LanguageInstance {
 
 
     @Override public CollectionView<TransformDef> getTransformDefs() {
-        return CollectionView.of(showParsedAst, showPrettyPrintedText);
+        return CollectionView.of(
+            showParsedAst,
+            showPrettyPrintedText,
+            showAnalyzedAst,
+            showScopeGraph,
+            showDesugaredAst
+        );
     }
 
     @Override public CollectionView<TransformDef> getAutoTransformDefs() {
@@ -93,29 +99,43 @@ public class TigerInstance implements LanguageInstance {
 
 
     @Override public ListView<MenuItem> getMainMenuItems() {
+        return getEditorContextMenuItems();
+    }
+
+    @Override public ListView<MenuItem> getResourceContextMenuItems() {
         return ListView.of(
             new Menu("Debug",
                 new Menu("Syntax",
-                    onceTransformAction(showParsedAst), contTransformAction(showParsedAst),
-                    onceTransformAction(showPrettyPrintedText), contTransformAction(showPrettyPrintedText)
+                    onceTransformAction(showParsedAst),
+                    onceTransformAction(showPrettyPrintedText)
                 ),
                 new Menu("Static Semantics",
-                    onceTransformAction(showAnalyzedAst), contTransformAction(showAnalyzedAst),
-                    onceTransformAction(showScopeGraph), contTransformAction(showScopeGraph)
+                    onceTransformAction(showAnalyzedAst),
+                    onceTransformAction(showScopeGraph)
                 ),
                 new Menu("Transformations",
-                    onceTransformAction(showDesugaredAst), contTransformAction(showDesugaredAst)
+                    onceTransformAction(showDesugaredAst)
                 )
             )
         );
     }
 
-    @Override public ListView<MenuItem> getResourceContextMenuItems() {
-        return getMainMenuItems();
-    }
-
     @Override public ListView<MenuItem> getEditorContextMenuItems() {
-        return getMainMenuItems();
+        return ListView.of(
+            new Menu("Debug",
+                new Menu("Syntax",
+                    onceTransformAction(showParsedAst), contEditorTransformAction(showParsedAst),
+                    onceTransformAction(showPrettyPrintedText), contEditorTransformAction(showPrettyPrintedText)
+                ),
+                new Menu("Static Semantics",
+                    onceTransformAction(showAnalyzedAst), contEditorTransformAction(showAnalyzedAst),
+                    onceTransformAction(showScopeGraph), contEditorTransformAction(showScopeGraph)
+                ),
+                new Menu("Transformations",
+                    onceTransformAction(showDesugaredAst), contEditorTransformAction(showDesugaredAst)
+                )
+            )
+        );
     }
 
 
@@ -128,11 +148,15 @@ public class TigerInstance implements LanguageInstance {
         return new TransformAction(new TransformRequest(transformDef, executionType), transformDef.getDisplayName() + suffix);
     }
 
-    private static TransformAction onceTransformAction(TransformDef transformDef) {
-        return transformAction(transformDef, TransformExecutionType.OneShot, " (once)");
+    private static TransformAction transformAction(TransformDef transformDef, TransformExecutionType executionType) {
+        return transformAction(transformDef, executionType, "");
     }
 
-    private static TransformAction contTransformAction(TransformDef transformDef) {
-        return transformAction(transformDef, TransformExecutionType.Continuous, " (continuous)");
+    private static TransformAction onceTransformAction(TransformDef transformDef) {
+        return transformAction(transformDef, TransformExecutionType.OneShot, "");
+    }
+
+    private static TransformAction contEditorTransformAction(TransformDef transformDef) {
+        return transformAction(transformDef, TransformExecutionType.ContinuousOnEditor, " (continuous)");
     }
 }

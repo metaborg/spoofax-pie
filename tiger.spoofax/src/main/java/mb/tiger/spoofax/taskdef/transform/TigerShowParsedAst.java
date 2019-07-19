@@ -1,6 +1,7 @@
 package mb.tiger.spoofax.taskdef.transform;
 
 import mb.common.region.Region;
+import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.jsglr.common.TermTracer;
 import mb.jsglr1.common.JSGLR1ParseResult;
@@ -14,7 +15,6 @@ import mb.tiger.spoofax.taskdef.TigerParse;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
-import java.util.EnumSet;
 
 public class TigerShowParsedAst implements TaskDef<TransformInput, TransformOutput>, TransformDef {
     private final TigerParse parse;
@@ -49,7 +49,7 @@ public class TigerShowParsedAst implements TaskDef<TransformInput, TransformOutp
         }
 
         final String formatted = StrategoUtil.toString(term);
-        return new TransformOutput(ListView.of(new OpenTextEditorFeedback(formatted)));
+        return new TransformOutput(ListView.of(new OpenTextEditorFeedback(formatted, "Parsed AST for '" + file + "'")));
     }
 
     @Override public Task<TransformOutput> createTask(TransformInput input) {
@@ -61,11 +61,11 @@ public class TigerShowParsedAst implements TaskDef<TransformInput, TransformOutp
         return "Show parsed AST";
     }
 
-    @Override public EnumSet<TransformExecutionType> getSupportedExecutionTypes() {
-        return EnumSet.of(TransformExecutionType.OneShot, TransformExecutionType.Continuous);
+    @Override public EnumSetView<TransformExecutionType> getSupportedExecutionTypes() {
+        return EnumSetView.of(TransformExecutionType.OneShot, TransformExecutionType.ContinuousOnEditor);
     }
 
-    @Override public EnumSet<TransformSubjectType> getSupportedSubjectTypes() {
-        return EnumSet.of(TransformSubjectType.File, TransformSubjectType.FileRegion);
+    @Override public EnumSetView<TransformSubjectType> getSupportedSubjectTypes() {
+        return EnumSetView.of(TransformSubjectType.File, TransformSubjectType.FileRegion);
     }
 }

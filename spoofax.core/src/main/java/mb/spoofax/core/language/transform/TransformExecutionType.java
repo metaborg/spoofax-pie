@@ -4,5 +4,6 @@ import java.io.Serializable;
 
 public enum TransformExecutionType implements Serializable {
     OneShot,
-    Continuous
+    ContinuousOnResource,
+    ContinuousOnEditor
 }

@@ -164,7 +164,7 @@
   <!-- Transform -->
   <extension point="org.eclipse.ui.commands">
     <command id="tiger.eclipse.transform" name="Transform">
-      <commandParameter id="input" name="Input" optional="false"/>
+      <commandParameter id="data" name="Data" optional="false"/>
     </command>
   </extension>
   <extension point="org.eclipse.ui.handlers">

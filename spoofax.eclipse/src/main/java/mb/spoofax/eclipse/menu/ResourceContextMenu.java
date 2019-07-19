@@ -1,5 +1,6 @@
 package mb.spoofax.eclipse.menu;
 
+import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.menu.MenuItem;
@@ -131,7 +132,7 @@ public abstract class ResourceContextMenu extends AbstractMenu {
                 }
 
                 @Override public void transformAction(String displayName, TransformRequest transformRequest) {
-                    final EnumSet<TransformSubjectType> supportedTypes = transformRequest.transformDef.getSupportedSubjectTypes();
+                    final EnumSetView<TransformSubjectType> supportedTypes = transformRequest.transformDef.getSupportedSubjectTypes();
                     final ListView<TransformInput> inputs;
                     if(hasProjects && supportedTypes.contains(TransformSubjectType.Project)) {
                         inputs = new ListView<>(projects.stream()

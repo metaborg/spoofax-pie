@@ -1,5 +1,6 @@
 package mb.tiger.spoofax.taskdef.transform;
 
+import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.constraint.common.ConstraintAnalyzer;
 import mb.jsglr1.common.JSGLR1ParseResult;
@@ -18,7 +19,6 @@ import org.spoofax.interpreter.library.IOAgent;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
-import java.util.EnumSet;
 
 public class TigerShowScopeGraph implements TaskDef<TransformInput, TransformOutput>, TransformDef {
     private final TigerParse parse;
@@ -60,7 +60,7 @@ public class TigerShowScopeGraph implements TaskDef<TransformInput, TransformOut
         }
 
         final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.buildFromPrototype(prototypeStrategoRuntime);
-        final String strategyId = "pp-Tiger-string";
+        final String strategyId = "editor-show-analysis-term";
         final IStrategoTerm term = StrategoUtil.createLegacyBuilderInputTerm(strategoRuntime.getTermFactory(), analysisResult.ast, file);
         final @Nullable IStrategoTerm result = strategoRuntime.invoke(strategyId, term, new IOAgent());
         if(result == null) {
@@ -68,7 +68,7 @@ public class TigerShowScopeGraph implements TaskDef<TransformInput, TransformOut
         }
 
         final String formatted = StrategoUtil.toString(result);
-        return new TransformOutput(ListView.of(new OpenTextEditorFeedback(formatted)));
+        return new TransformOutput(ListView.of(new OpenTextEditorFeedback(formatted, "Scope graph for '" + file + "'")));
     }
 
     @Override public Task<TransformOutput> createTask(TransformInput input) {
@@ -80,11 +80,11 @@ public class TigerShowScopeGraph implements TaskDef<TransformInput, TransformOut
         return "Show scope graph";
     }
 
-    @Override public EnumSet<TransformExecutionType> getSupportedExecutionTypes() {
-        return EnumSet.of(TransformExecutionType.OneShot, TransformExecutionType.Continuous);
+    @Override public EnumSetView<TransformExecutionType> getSupportedExecutionTypes() {
+        return EnumSetView.of(TransformExecutionType.OneShot, TransformExecutionType.ContinuousOnEditor);
     }
 
-    @Override public EnumSet<TransformSubjectType> getSupportedSubjectTypes() {
-        return EnumSet.of(TransformSubjectType.File);
+    @Override public EnumSetView<TransformSubjectType> getSupportedSubjectTypes() {
+        return EnumSetView.of(TransformSubjectType.File);
     }
 }

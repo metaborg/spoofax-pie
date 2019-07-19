@@ -7,21 +7,27 @@ import java.util.Objects;
 
 public class OpenTextEditorFeedback implements TransformFeedback {
     private final String text;
+    private final String name;
     private final @Nullable Region region;
 
 
-    public OpenTextEditorFeedback(String text, @Nullable Region region) {
+    public OpenTextEditorFeedback(String text, String name, @Nullable Region region) {
         this.text = text;
+        this.name = name;
         this.region = region;
     }
 
-    public OpenTextEditorFeedback(String text) {
-        this(text, null);
+    public OpenTextEditorFeedback(String text, String name) {
+        this(text, name, null);
     }
 
 
     public String getText() {
         return text;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public @Nullable Region getRegion() {
@@ -30,7 +36,7 @@ public class OpenTextEditorFeedback implements TransformFeedback {
 
 
     @Override public void accept(TransformFeedbackVisitor visitor) {
-        visitor.openEditor(text, region);
+        visitor.openEditor(text, name, region);
     }
 
 
