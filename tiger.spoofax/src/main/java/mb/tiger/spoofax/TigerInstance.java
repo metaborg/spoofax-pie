@@ -19,7 +19,10 @@ import mb.spoofax.core.language.transform.TransformRequest;
 import mb.tiger.spoofax.taskdef.TigerCheck;
 import mb.tiger.spoofax.taskdef.TigerStyle;
 import mb.tiger.spoofax.taskdef.TigerTokenize;
-import mb.tiger.spoofax.taskdef.transform.*;
+import mb.tiger.spoofax.taskdef.transform.TigerShowAnalyzedAst;
+import mb.tiger.spoofax.taskdef.transform.TigerShowDesugaredAst;
+import mb.tiger.spoofax.taskdef.transform.TigerShowParsedAst;
+import mb.tiger.spoofax.taskdef.transform.TigerShowPrettyPrintedText;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
@@ -34,7 +37,6 @@ public class TigerInstance implements LanguageInstance {
     private final TigerShowParsedAst showParsedAst;
     private final TigerShowPrettyPrintedText showPrettyPrintedText;
     private final TigerShowAnalyzedAst showAnalyzedAst;
-    private final TigerShowScopeGraph showScopeGraph;
     private final TigerShowDesugaredAst showDesugaredAst;
 
 
@@ -46,7 +48,6 @@ public class TigerInstance implements LanguageInstance {
         TigerShowParsedAst showParsedAst,
         TigerShowPrettyPrintedText showPrettyPrintedText,
         TigerShowAnalyzedAst showAnalyzedAst,
-        TigerShowScopeGraph showScopeGraph,
         TigerShowDesugaredAst showDesugaredAst
     ) {
         this.check = check;
@@ -56,7 +57,6 @@ public class TigerInstance implements LanguageInstance {
         this.showParsedAst = showParsedAst;
         this.showPrettyPrintedText = showPrettyPrintedText;
         this.showAnalyzedAst = showAnalyzedAst;
-        this.showScopeGraph = showScopeGraph;
         this.showDesugaredAst = showDesugaredAst;
     }
 
@@ -88,7 +88,6 @@ public class TigerInstance implements LanguageInstance {
             showParsedAst,
             showPrettyPrintedText,
             showAnalyzedAst,
-            showScopeGraph,
             showDesugaredAst
         );
     }
@@ -110,8 +109,7 @@ public class TigerInstance implements LanguageInstance {
                     onceTransformAction(showPrettyPrintedText)
                 ),
                 new Menu("Static Semantics",
-                    onceTransformAction(showAnalyzedAst),
-                    onceTransformAction(showScopeGraph)
+                    onceTransformAction(showAnalyzedAst)
                 ),
                 new Menu("Transformations",
                     onceTransformAction(showDesugaredAst)
@@ -128,8 +126,7 @@ public class TigerInstance implements LanguageInstance {
                     onceTransformAction(showPrettyPrintedText), contEditorTransformAction(showPrettyPrintedText)
                 ),
                 new Menu("Static Semantics",
-                    onceTransformAction(showAnalyzedAst), contEditorTransformAction(showAnalyzedAst),
-                    onceTransformAction(showScopeGraph), contEditorTransformAction(showScopeGraph)
+                    onceTransformAction(showAnalyzedAst), contEditorTransformAction(showAnalyzedAst)
                 ),
                 new Menu("Transformations",
                     onceTransformAction(showDesugaredAst), contEditorTransformAction(showDesugaredAst)
