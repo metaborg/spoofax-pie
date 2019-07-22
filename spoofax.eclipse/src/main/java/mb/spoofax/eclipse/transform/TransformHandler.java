@@ -27,7 +27,6 @@ import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import java.util.Base64;
 import java.util.HashMap;
 
 public class TransformHandler extends AbstractHandler {
@@ -58,8 +57,7 @@ public class TransformHandler extends AbstractHandler {
         if(dataStr == null) {
             throw new ExecutionException("Cannot execute transform, no argument for '" + dataParameterId + "' parameter was set");
         }
-        final byte[] decoded = Base64.getDecoder().decode(dataStr);
-        final TransformData data = SerializationUtil.deserialize(decoded, TransformHandler.class.getClassLoader());
+        final TransformData data = SerializationUtil.deserialize(dataStr, TransformHandler.class.getClassLoader());
         final @Nullable TransformDef def = transformDefsPerId.get(data.transformId);
         if(def == null) {
             throw new ExecutionException("Cannot execute transform with ID '" + data.transformId + "', transform with that ID was not found in language '" + languageComponent.getLanguageInstance().getDisplayName() + "'");

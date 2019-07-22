@@ -4,10 +4,10 @@ import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.menu.MenuItem;
-import mb.spoofax.core.language.menu.MenuItemVisitor;
 import mb.spoofax.core.language.transform.*;
 import mb.spoofax.eclipse.EclipseIdentifiers;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
+import mb.spoofax.eclipse.SpoofaxEclipseComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.pie.PieRunner;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
@@ -24,19 +24,19 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.Iterator;
-import java.util.Stack;
 import java.util.stream.Collectors;
 
-public abstract class ResourceContextMenu extends AbstractMenu {
+public abstract class ResourceContextMenu extends MenuShared {
     private final PieRunner pieRunner;
 
     private final EclipseLanguageComponent languageComponent;
 
 
     public ResourceContextMenu(EclipseLanguageComponent languageComponent) {
-        this.pieRunner = SpoofaxPlugin.getComponent().getPieRunner();
+        final SpoofaxEclipseComponent component = SpoofaxPlugin.getComponent();
+
+        this.pieRunner = component.getPieRunner();
 
         this.languageComponent = languageComponent;
     }
@@ -116,22 +116,10 @@ public abstract class ResourceContextMenu extends AbstractMenu {
 
         // Transformations.
         final String transformCommandId = identifiers.getTransformCommand();
-        final ListView<MenuItem> menuItems = languageInstance.getResourceContextMenuItems();
-        final Stack<MenuManager> menuStack = new Stack<>();
-        menuStack.push(langMenu);
-        for(MenuItem menuItem : menuItems) {
-            menuItem.accept(new MenuItemVisitor() {
-                @Override public void menuPush(String displayName, ListView<MenuItem> items) {
-                    final MenuManager menuManager = new MenuManager(displayName);
-                    menuStack.peek().add(menuManager);
-                    menuStack.push(menuManager);
-                }
-
-                @Override public void menuPop() {
-                    menuStack.pop();
-                }
-
-                @Override public void transformAction(String displayName, TransformRequest transformRequest) {
+        for(MenuItem menuItem : languageInstance.getResourceContextMenuItems()) {
+            menuItem.accept(new EclipseMenuItemVisitor(langMenu) {
+                @Override
+                protected void transformAction(MenuManager menu, String displayName, TransformRequest transformRequest) {
                     final EnumSetView<TransformSubjectType> supportedTypes = transformRequest.transformDef.getSupportedSubjectTypes();
                     final ListView<TransformInput> inputs;
                     if(hasProjects && supportedTypes.contains(TransformSubjectType.Project)) {
@@ -151,11 +139,7 @@ public abstract class ResourceContextMenu extends AbstractMenu {
                     } else {
                         return;
                     }
-                    menuStack.peek().add(transformCommand(transformCommandId, transformRequest, inputs, displayName));
-                }
-
-                @Override public void separator() {
-                    menuStack.peek().add(new Separator());
+                    menu.add(transformCommand(transformCommandId, transformRequest, inputs, displayName));
                 }
             });
         }

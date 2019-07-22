@@ -1,26 +1,31 @@
 package mb.spoofax.eclipse.menu;
 
+import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.common.util.SerializationUtil;
-import mb.spoofax.core.language.transform.TransformInput;
-import mb.spoofax.core.language.transform.TransformRequest;
+import mb.spoofax.core.language.menu.MenuItem;
+import mb.spoofax.core.language.menu.MenuItemVisitor;
+import mb.spoofax.core.language.transform.*;
+import mb.spoofax.eclipse.resource.EclipseResourcePath;
 import mb.spoofax.eclipse.transform.TransformData;
 import mb.spoofax.eclipse.transform.TransformHandler;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.ui.actions.CompoundContributionItem;
 import org.eclipse.ui.menus.CommandContributionItem;
 import org.eclipse.ui.menus.CommandContributionItemParameter;
 import org.eclipse.ui.menus.IWorkbenchContribution;
 import org.eclipse.ui.services.IServiceLocator;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
+import java.util.stream.Collectors;
 
-abstract class AbstractMenu extends CompoundContributionItem implements IWorkbenchContribution {
+abstract class MenuShared extends CompoundContributionItem implements IWorkbenchContribution {
     protected @MonotonicNonNull IServiceLocator serviceLocator;
 
 
@@ -52,9 +57,8 @@ abstract class AbstractMenu extends CompoundContributionItem implements IWorkben
     protected CommandContributionItem transformCommand(String commandId, TransformRequest transformRequest, ListView<TransformInput> inputs, String displayName) {
         final TransformData data = new TransformData(transformRequest.transformDef.getId(), transformRequest.executionType, inputs);
         final Map<String, String> parameters = new HashMap<>();
-        final byte[] serialized = SerializationUtil.serialize(data);
-        final byte[] encoded = Base64.getEncoder().encode(serialized);
-        parameters.put(TransformHandler.dataParameterId, new String(encoded, StandardCharsets.UTF_8));
+        final String serialized = SerializationUtil.serializeToString(data);
+        parameters.put(TransformHandler.dataParameterId, serialized);
         return command(commandId, displayName, parameters);
     }
 }

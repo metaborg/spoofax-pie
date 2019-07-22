@@ -14,18 +14,22 @@ public class Region implements Serializable {
     private final int endOffsetExclusive;
 
 
-    /**
-     * @param startOffsetInclusive The zero-based inclusive start offset.
-     * @param endOffsetInclusive   The zero-based inclusive end offset.
-     */
-    public Region(int startOffsetInclusive, int endOffsetInclusive) {
-        if(startOffsetInclusive < 0)
-            throw new IllegalArgumentException("The start offset " + startOffsetInclusive + " must be positive or zero.");
-        if(endOffsetInclusive < (startOffsetInclusive - 1))
-            throw new IllegalArgumentException("The end offset " + endOffsetInclusive + " must be after the start offset " + startOffsetInclusive + ".");
+    private Region(int startOffset, int endOffset) {
+        if(startOffset < 0)
+            throw new IllegalArgumentException("The start offset " + startOffset + " must be positive or zero");
+        if(endOffset < startOffset)
+            throw new IllegalArgumentException("The end offset " + endOffset + " must be after the start offset " + startOffset);
 
-        this.startOffsetInclusive = startOffsetInclusive;
-        this.endOffsetExclusive = endOffsetInclusive + 1;
+        this.startOffsetInclusive = startOffset;
+        this.endOffsetExclusive = endOffset;
+    }
+
+    public static Region fromOffsets(int startOffset, int endOffset) {
+        return new Region(startOffset, endOffset);
+    }
+
+    public static Region fromOffsetLength(int startOffset, int length) {
+        return new Region(startOffset, startOffset + length);
     }
 
 

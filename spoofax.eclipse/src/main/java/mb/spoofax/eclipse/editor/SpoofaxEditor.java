@@ -1,5 +1,6 @@
 package mb.spoofax.eclipse.editor;
 
+import mb.common.region.Region;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
@@ -17,6 +18,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.text.*;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
@@ -62,7 +64,26 @@ public abstract class SpoofaxEditor extends TextEditor {
 
 
     protected SpoofaxEditor(EclipseLanguageComponent languageComponent) {
+        super();
         this.languageComponent = languageComponent;
+    }
+
+
+    public EclipseLanguageComponent getLanguageComponent() {
+        return languageComponent;
+    }
+
+    public @Nullable IFile getFile() {
+        return file;
+    }
+
+    public @Nullable Region getSelectedRegion() {
+        final @Nullable ISelection selection = doGetSelection();
+        if(selection instanceof ITextSelection) {
+            final ITextSelection s = (ITextSelection) selection;
+            return Region.fromOffsetLength(s.getOffset(), s.getLength());
+        }
+        return null;
     }
 
 
@@ -96,9 +117,6 @@ public abstract class SpoofaxEditor extends TextEditor {
     }
 
 
-//    protected abstract LanguageComponent getLanguageComponent();
-
-
     @Override protected void initializeEditor() {
         super.initializeEditor();
 
@@ -112,6 +130,7 @@ public abstract class SpoofaxEditor extends TextEditor {
 
         setDocumentProvider(new SpoofaxDocumentProvider());
         setSourceViewerConfiguration(new SourceViewerConfiguration());
+        setEditorContextMenuId("#SpoofaxEditorContext");
     }
 
     @Override

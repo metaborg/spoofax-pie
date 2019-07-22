@@ -2,10 +2,8 @@ package mb.spoofax.eclipse.menu;
 
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import org.eclipse.jface.action.IContributionItem;
-import org.eclipse.ui.menus.CommandContributionItem;
-import org.eclipse.ui.menus.CommandContributionItemParameter;
 
-public class MainMenu extends AbstractMenu {
+public class MainMenu extends MenuShared {
     private final EclipseLanguageComponent languageComponent;
 
 

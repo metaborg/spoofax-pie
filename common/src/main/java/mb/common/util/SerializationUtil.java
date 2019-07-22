@@ -17,6 +17,8 @@
 package mb.common.util;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 // Copied from https://github.com/apache/commons-lang/blob/master/src/main/java/org/apache/commons/lang3/SerializationUtils.java
 public class SerializationUtil {
@@ -43,8 +45,7 @@ public class SerializationUtil {
     }
 
     /**
-     * <p>Serializes an {@code Object} to a byte array for
-     * storage/serialization.</p>
+     * Serializes an {@code Object} to a byte array for storage/serialization.
      *
      * @param obj the object to serialize to bytes
      * @return a byte[] with the converted Serializable
@@ -54,6 +55,17 @@ public class SerializationUtil {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream(512);
         serialize(obj, baos);
         return baos.toByteArray();
+    }
+
+    /**
+     * Serializes an {@code Object} to a string for storage/serialization.
+     *
+     * @param obj the object to serialize to bytes
+     * @return a String with the converted Serializable
+     * @throws SerializationException (runtime) if the serialization fails
+     */
+    public static String serializeToString(final Serializable obj) {
+        return new String(Base64.getEncoder().encode(serialize(obj)), StandardCharsets.ISO_8859_1);
     }
 
 
@@ -110,6 +122,27 @@ public class SerializationUtil {
      */
     public static <T> T deserialize(final byte[] objectData, final ClassLoader classLoader) {
         return SerializationUtil.deserialize(new ByteArrayInputStream(objectData), classLoader);
+    }
+
+    /**
+     * <p>
+     * Deserializes a single {@code Object} from a String that was serialized with {@link
+     * #serializeToString(Serializable)}.
+     * </p>
+     *
+     * <p>
+     * If the call site incorrectly types the return value, a {@link ClassCastException} is thrown from the call site.
+     * Without Generics in this declaration, the call site must type cast and can cause the same ClassCastException.
+     * Note that in both cases, the ClassCastException is in the call site, not in this method.
+     * </p>
+     *
+     * @param <T> the object type to be deserialized
+     * @return the deserialized object
+     * @throws IllegalArgumentException if {@code objectData} is {@code null}
+     * @throws SerializationException   (runtime) if the serialization fails
+     */
+    public static <T> T deserialize(final String objectData, final ClassLoader classLoader) {
+        return SerializationUtil.deserialize(new ByteArrayInputStream(Base64.getDecoder().decode(objectData)), classLoader);
     }
 }
 
