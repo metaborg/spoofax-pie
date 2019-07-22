@@ -40,10 +40,9 @@ public class TigerShowPrettyPrintedText implements TaskDef<TransformInput, Trans
     }
 
     @Override public TransformOutput exec(ExecContext context, TransformInput input) throws Exception {
-        if(!(input.subject instanceof FileSubject)) {
-            throw new RuntimeException("Cannot show pretty-printed text, subject '" + input.subject + "' is not a file subject");
-        }
-        final ResourcePath file = ((FileSubject) input.subject).getFile();
+        final TransformSubject subject = input.subject;
+        final ResourcePath file = TransformSubjects.getFile(subject)
+            .orElseThrow(() -> new RuntimeException("Cannot show pretty-printed text, subject '" + subject + "' is not a file subject"));
 
         final JSGLR1ParseResult parseOutput = context.require(parse, file);
         if(parseOutput.ast == null) {
@@ -58,7 +57,7 @@ public class TigerShowPrettyPrintedText implements TaskDef<TransformInput, Trans
         }
 
         final String formatted = StrategoUtil.toString(result);
-        return new TransformOutput(ListView.of(new OpenTextEditorFeedback(formatted, "Pretty-printed text for '" + file + "'")));
+        return new TransformOutput(ListView.of(TransformFeedbacks.openEditorWithText(formatted, "Pretty-printed text for '" + file + "'", null)));
     }
 
     @Override public Task<TransformOutput> createTask(TransformInput input) {

@@ -1,15 +1,16 @@
 package mb.spoofax.eclipse.transform;
 
-import mb.common.message.Messages;
-import mb.common.region.Region;
 import mb.common.util.MapView;
 import mb.common.util.SerializationUtil;
+import mb.log.api.Logger;
 import mb.pie.api.ExecException;
 import mb.pie.api.PieSession;
-import mb.resource.ResourceKey;
+import mb.pie.api.Task;
+import mb.pie.runtime.exec.Stats;
 import mb.resource.ResourceService;
 import mb.spoofax.core.language.transform.*;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
+import mb.spoofax.eclipse.SpoofaxEclipseComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.editor.TextEditorInput;
 import mb.spoofax.eclipse.resource.WrapsEclipseResource;
@@ -28,12 +29,14 @@ import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import java.util.HashMap;
+import java.util.Optional;
 
 public class TransformHandler extends AbstractHandler {
     public final static String dataParameterId = "data";
 
     private final EclipseLanguageComponent languageComponent;
 
+    private final Logger logger;
     private final ResourceService resourceService;
 
     private final MapView<String, TransformDef> transformDefsPerId;
@@ -42,7 +45,9 @@ public class TransformHandler extends AbstractHandler {
     public TransformHandler(EclipseLanguageComponent languageComponent) {
         this.languageComponent = languageComponent;
 
-        this.resourceService = SpoofaxPlugin.getComponent().getResourceService();
+        final SpoofaxEclipseComponent component = SpoofaxPlugin.getComponent();
+        this.logger = component.getLoggerFactory().create(getClass());
+        this.resourceService = component.getResourceService();
 
         final HashMap<String, TransformDef> transformDefsPerId = new HashMap<>();
         for(TransformDef transformDef : languageComponent.getLanguageInstance().getTransformDefs()) {
@@ -66,20 +71,32 @@ public class TransformHandler extends AbstractHandler {
             switch(data.executionType) {
                 case OneShot:
                     for(TransformInput input : data.inputs) {
-                        final TransformOutput output = session.requireWithoutObserving(def.createTask(input));
+                        final Task<TransformOutput> task = def.createTask(input);
+                        logger.trace("Require top-down (without observing) '{}'", task);
+                        Stats.reset();
+                        final TransformOutput output = session.requireWithoutObserving(task);
+                        logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
                         processOutput(output);
                     }
                     break;
                 case ContinuousOnResource:
                     for(TransformInput input : data.inputs) {
-                        final TransformOutput output = session.require(def.createTask(input));
+                        final Task<TransformOutput> task = def.createTask(input);
+                        logger.trace("Require top-down '{}'", task);
+                        Stats.reset();
+                        final TransformOutput output = session.require(task);
+                        logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
                         processOutput(output);
                     }
                     break;
                 case ContinuousOnEditor:
                     for(TransformInput input : data.inputs) {
                         // TODO: continuous transform on editor requires special support.
-                        final TransformOutput output = session.requireWithoutObserving(def.createTask(input));
+                        final Task<TransformOutput> task = def.createTask(input);
+                        logger.trace("Require top-down (without observing) '{}'", task);
+                        Stats.reset();
+                        final TransformOutput output = session.requireWithoutObserving(task);
+                        logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
                         processOutput(output);
                     }
                     break;
@@ -97,12 +114,12 @@ public class TransformHandler extends AbstractHandler {
     }
 
     private void processFeedback(TransformFeedback feedback) {
-        feedback.accept(new TransformFeedbackVisitor() {
-            @Override public void messages(Messages messages) {
-                // TODO: process messages.
-            }
-
-            @Override public void openEditor(ResourceKey file, @Nullable Region region) {
+        TransformFeedbacks.caseOf(feedback)
+            .messages((messages) -> {
+                // TODO: process messages
+                return Optional.empty();
+            })
+            .openEditorForFile((file, region) -> {
                 final @Nullable WrapsEclipseResource resource;
                 try {
                     resource = resourceService.getResource(file);
@@ -124,9 +141,9 @@ public class TransformHandler extends AbstractHandler {
                 } catch(PartInitException e) {
                     throw new RuntimeException("Cannot open editor for file '" + file + "', opening editor failed unexpectedly", e);
                 }
-            }
-
-            @Override public void openEditor(String text, String name, @Nullable Region region) {
+                return Optional.empty();
+            })
+            .openEditorWithText((text, name, region) -> {
                 try {
                     final IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
                     final TextEditorInput editorInput = new TextEditorInput(text, name);
@@ -138,7 +155,7 @@ public class TransformHandler extends AbstractHandler {
                 } catch(PartInitException e) {
                     throw new RuntimeException("Cannot open editor (for text) with name '" + name + "', opening editor failed unexpectedly", e);
                 }
-            }
-        });
+                return Optional.empty();
+            });
     }
 }

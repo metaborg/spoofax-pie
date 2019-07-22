@@ -8,6 +8,7 @@ val resourceVersion = "develop-SNAPSHOT"
 val pieVersion = "develop-SNAPSHOT"
 val spoofaxCoreVersion = "2.6.0-SNAPSHOT"
 val daggerVersion = "2.21"
+val derive4jVersion = "1.1.1"
 
 dependencies {
   constraints {
@@ -33,6 +34,8 @@ dependencies {
 
     api("com.google.dagger:dagger:$daggerVersion")
     api("com.google.dagger:dagger-compiler:$daggerVersion")
+    api("org.derive4j:derive4j:$derive4jVersion")
+    api("org.derive4j:derive4j-annotation:$derive4jVersion")
     api("javax.inject:javax.inject:1")
 
     api("org.checkerframework:checker-qual-android:2.6.0") // Use android version: annotation retention policy is class instead of runtime.

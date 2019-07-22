@@ -1,6 +1,8 @@
 package mb.spoofax.eclipse.editor;
 
 import mb.common.region.Region;
+import mb.common.region.Selection;
+import mb.common.region.Selections;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
@@ -24,6 +26,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
+
+import java.util.Optional;
 
 public abstract class SpoofaxEditor extends TextEditor {
     private final class DocumentListener implements IDocumentListener {
@@ -73,17 +77,21 @@ public abstract class SpoofaxEditor extends TextEditor {
         return languageComponent;
     }
 
-    public @Nullable IFile getFile() {
-        return file;
+    public Optional<IFile> getFile() {
+        return Optional.ofNullable(file);
     }
 
-    public @Nullable Region getSelectedRegion() {
+    public Selection getSelection() {
         final @Nullable ISelection selection = doGetSelection();
         if(selection instanceof ITextSelection) {
             final ITextSelection s = (ITextSelection) selection;
-            return Region.fromOffsetLength(s.getOffset(), s.getLength());
+            final int length = s.getLength();
+            if(length == 0) {
+                return Selections.offset(s.getOffset());
+            }
+            return Selections.region(Region.fromOffsetLength(s.getOffset(), length));
         }
-        return null;
+        return Selections.none();
     }
 
 

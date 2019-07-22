@@ -150,7 +150,7 @@ public final class SpoofaxLexer extends LexerBase {
         try {
             int length = (int) resource.getSize();
             return Lists.newArrayList(
-                new TokenImpl(new Region(0, length), new UnknownTokenKind(), null)
+                new TokenImpl<>(Region.fromOffsetLength(0, length), new UnknownTokenKind(), null)
             );
         } catch(IOException e) {
             throw new RuntimeException(e);

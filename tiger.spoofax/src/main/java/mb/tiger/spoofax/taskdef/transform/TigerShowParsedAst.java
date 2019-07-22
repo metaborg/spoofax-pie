@@ -1,6 +1,5 @@
 package mb.tiger.spoofax.taskdef.transform;
 
-import mb.common.region.Region;
 import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.jsglr.common.TermTracer;
@@ -30,26 +29,21 @@ public class TigerShowParsedAst implements TaskDef<TransformInput, TransformOutp
     }
 
     @Override public TransformOutput exec(ExecContext context, TransformInput input) throws Exception {
-        if(!(input.subject instanceof FileSubject)) {
-            throw new RuntimeException("Cannot show parsed AST, subject '" + input.subject + "' is not a file subject");
-        }
-        final ResourcePath file = ((FileSubject) input.subject).getFile();
+        final TransformSubject subject = input.subject;
+        final ResourcePath file = TransformSubjects.getFile(subject)
+            .orElseThrow(() -> new RuntimeException("Cannot show parsed AST, subject '" + subject + "' is not a file subject"));
 
         final JSGLR1ParseResult parseOutput = context.require(parse, file);
         if(parseOutput.ast == null) {
-            throw new RuntimeException("Cannot show parsed AST, parsed AST for '" + input.subject + "' is null");
+            throw new RuntimeException("Cannot show parsed AST, parsed AST for '" + file + "' is null");
         }
 
-        final IStrategoTerm term;
-        if(input.subject instanceof RegionSubject) {
-            final Region region = ((RegionSubject) input.subject).getRegion();
-            term = TermTracer.getSmallestTermEncompassingRegion(parseOutput.ast, region);
-        } else {
-            term = parseOutput.ast;
-        }
+        final IStrategoTerm term = TransformSubjects.caseOf(subject)
+            .fileRegion((f, r) -> TermTracer.getSmallestTermEncompassingRegion(parseOutput.ast, r))
+            .otherwise_(parseOutput.ast);
 
         final String formatted = StrategoUtil.toString(term);
-        return new TransformOutput(ListView.of(new OpenTextEditorFeedback(formatted, "Parsed AST for '" + file + "'")));
+        return new TransformOutput(ListView.of(TransformFeedbacks.openEditorWithText(formatted, "Parsed AST for '" + file + "'", null)));
     }
 
     @Override public Task<TransformOutput> createTask(TransformInput input) {

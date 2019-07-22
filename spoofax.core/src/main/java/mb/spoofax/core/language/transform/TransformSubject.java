@@ -1,15 +1,33 @@
 package mb.spoofax.core.language.transform;
 
+import mb.common.region.Region;
+import mb.common.util.ADT;
+import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
 
-public interface TransformSubject extends Serializable {
-    void accept(TransformSubjectVisitor visitor);
+@ADT
+public abstract class TransformSubject implements Serializable {
+    interface Cases<R> {
+        R project(ResourcePath project);
 
-    @Override boolean equals(@Nullable Object obj);
+        R directory(ResourcePath directory);
 
-    @Override int hashCode();
+        R file(ResourcePath file);
 
-    @Override String toString();
+        R fileRegion(ResourcePath file, Region region);
+
+        R fileOffset(ResourcePath file, int offset);
+
+        R none();
+    }
+
+    public abstract <R> R match(Cases<R> cases);
+
+    @Override public abstract int hashCode();
+
+    @Override public abstract boolean equals(@Nullable Object obj);
+
+    @Override public abstract String toString();
 }

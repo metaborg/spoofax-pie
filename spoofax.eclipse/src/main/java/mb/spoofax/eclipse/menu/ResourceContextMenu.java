@@ -4,7 +4,10 @@ import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.menu.MenuItem;
-import mb.spoofax.core.language.transform.*;
+import mb.spoofax.core.language.transform.TransformInput;
+import mb.spoofax.core.language.transform.TransformRequest;
+import mb.spoofax.core.language.transform.TransformSubjectType;
+import mb.spoofax.core.language.transform.TransformSubjects;
 import mb.spoofax.eclipse.EclipseIdentifiers;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.SpoofaxEclipseComponent;
@@ -25,7 +28,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.stream.Collectors;
 
 public abstract class ResourceContextMenu extends MenuShared {
     private final PieRunner pieRunner;
@@ -123,19 +125,13 @@ public abstract class ResourceContextMenu extends MenuShared {
                     final EnumSetView<TransformSubjectType> supportedTypes = transformRequest.transformDef.getSupportedSubjectTypes();
                     final ListView<TransformInput> inputs;
                     if(hasProjects && supportedTypes.contains(TransformSubjectType.Project)) {
-                        inputs = new ListView<>(projects.stream()
-                            .map((p) -> new TransformInput(new ProjectSubject(new EclipseResourcePath(p))))
-                            .collect(Collectors.toList()));
+                        inputs = transformInputs(projects.stream().map(EclipseResourcePath::new).map(TransformSubjects::project));
                     } else if(hasContainers && supportedTypes.contains(TransformSubjectType.Directory)) {
-                        inputs = new ListView<>(containers.stream()
-                            .map((p) -> new TransformInput(new DirectorySubject(new EclipseResourcePath(p))))
-                            .collect(Collectors.toList()));
+                        inputs = transformInputs(containers.stream().map(EclipseResourcePath::new).map(TransformSubjects::directory));
                     } else if(hasFiles && supportedTypes.contains(TransformSubjectType.File)) {
-                        inputs = new ListView<>(files.stream()
-                            .map((p) -> new TransformInput(new FileSubject(new EclipseResourcePath(p))))
-                            .collect(Collectors.toList()));
+                        inputs = transformInputs(files.stream().map(EclipseResourcePath::new).map(TransformSubjects::file));
                     } else if(supportedTypes.contains(TransformSubjectType.None)) {
-                        inputs = ListView.of(new TransformInput(new NoneSubject()));
+                        inputs = transformInput(TransformSubjects.none());
                     } else {
                         return;
                     }

@@ -1,15 +1,28 @@
 package mb.spoofax.core.language.transform;
 
+import mb.common.message.Messages;
+import mb.common.region.Region;
+import mb.common.util.ADT;
+import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
 
-public interface TransformFeedback extends Serializable {
-    void accept(TransformFeedbackVisitor visitor);
+@ADT
+public abstract class TransformFeedback implements Serializable {
+    interface Cases<R> {
+        R messages(Messages messages);
 
-    @Override boolean equals(@Nullable Object obj);
+        R openEditorForFile(ResourceKey file, @Nullable Region region);
 
-    @Override int hashCode();
+        R openEditorWithText(String text, String name, @Nullable Region region);
+    }
 
-    @Override String toString();
+    public abstract <R> R match(Cases<R> cases);
+
+    @Override public abstract int hashCode();
+
+    @Override public abstract boolean equals(@Nullable Object obj);
+
+    @Override public abstract String toString();
 }

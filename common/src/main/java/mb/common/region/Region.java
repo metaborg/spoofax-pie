@@ -10,8 +10,8 @@ import java.util.Objects;
  * number of characters from the beginning of the source text, with interval [0,#chars).
  */
 public class Region implements Serializable {
-    private final int startOffsetInclusive;
-    private final int endOffsetExclusive;
+    private final int startOffset;
+    private final int endOffset;
 
 
     private Region(int startOffset, int endOffset) {
@@ -20,8 +20,8 @@ public class Region implements Serializable {
         if(endOffset < startOffset)
             throw new IllegalArgumentException("The end offset " + endOffset + " must be after the start offset " + startOffset);
 
-        this.startOffsetInclusive = startOffset;
-        this.endOffsetExclusive = endOffset;
+        this.startOffset = startOffset;
+        this.endOffset = endOffset;
     }
 
     public static Region fromOffsets(int startOffset, int endOffset) {
@@ -37,14 +37,14 @@ public class Region implements Serializable {
      * @return Inclusive starting offset with interval [0,#chars).
      */
     public int getStartOffset() {
-        return startOffsetInclusive;
+        return startOffset;
     }
 
     /**
      * @return Exclusive ending offset with interval [0,#chars].
      */
     public int getEndOffset() {
-        return endOffsetExclusive;
+        return endOffset;
     }
 
     /**
@@ -52,7 +52,7 @@ public class Region implements Serializable {
      * @deprecated Use {#getEndOffset()}, which is exclusive, instead.
      */
     @Deprecated public int getEndOffsetInclusive() {
-        return endOffsetExclusive - 1;
+        return endOffset - 1;
     }
 
 
@@ -80,15 +80,15 @@ public class Region implements Serializable {
         if(this == obj) return true;
         if(obj == null || getClass() != obj.getClass()) return false;
         final Region other = (Region) obj;
-        return startOffsetInclusive == other.startOffsetInclusive &&
-            endOffsetExclusive == other.endOffsetExclusive;
+        return startOffset == other.startOffset &&
+            endOffset == other.endOffset;
     }
 
     @Override public int hashCode() {
-        return Objects.hash(startOffsetInclusive, endOffsetExclusive);
+        return Objects.hash(startOffset, endOffset);
     }
 
     @Override public String toString() {
-        return startOffsetInclusive + "-" + endOffsetExclusive;
+        return startOffset + "-" + endOffset;
     }
 }
