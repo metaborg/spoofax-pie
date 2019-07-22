@@ -37,7 +37,6 @@ public abstract class ResourceContextMenu extends MenuShared {
 
     public ResourceContextMenu(EclipseLanguageComponent languageComponent) {
         final SpoofaxEclipseComponent component = SpoofaxPlugin.getComponent();
-
         this.pieRunner = component.getPieRunner();
 
         this.languageComponent = languageComponent;

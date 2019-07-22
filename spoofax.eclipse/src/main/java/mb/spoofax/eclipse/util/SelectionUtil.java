@@ -86,7 +86,9 @@ public class SelectionUtil {
             return (IResource) selected;
         } else if(selected instanceof IAdaptable) {
             final IAdaptable adaptable = (IAdaptable) selected;
-            return (IResource) adaptable.getAdapter(IResource.class);
+            // COMPAT: DO NOT REMOVE CAST, it is required for older versions of Eclipse.
+            @SuppressWarnings("RedundantCast") final IResource resource = (IResource) adaptable.getAdapter(IResource.class);
+            return resource;
         } else {
             return null;
         }

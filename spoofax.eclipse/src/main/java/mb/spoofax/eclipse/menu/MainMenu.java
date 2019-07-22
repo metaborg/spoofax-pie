@@ -1,18 +1,17 @@
 package mb.spoofax.eclipse.menu;
 
+import mb.common.util.ListView;
+import mb.spoofax.core.language.LanguageInstance;
+import mb.spoofax.core.language.menu.MenuItem;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
-import org.eclipse.jface.action.IContributionItem;
 
-public class MainMenu extends MenuShared {
-    private final EclipseLanguageComponent languageComponent;
-
-
+public class MainMenu extends EditorContextMenu /* Same as editor context menu for now */ {
     public MainMenu(EclipseLanguageComponent languageComponent) {
-        this.languageComponent = languageComponent;
+        super(languageComponent);
     }
 
 
-    @Override protected IContributionItem[] getContributionItems() {
-        return new IContributionItem[0];
+    @Override protected ListView<MenuItem> getMenuItems(LanguageInstance languageInstance) {
+        return languageInstance.getMainMenuItems();
     }
 }

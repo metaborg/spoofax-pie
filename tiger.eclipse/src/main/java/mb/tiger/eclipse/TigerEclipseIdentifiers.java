@@ -1,12 +1,17 @@
 package mb.tiger.eclipse;
 
+import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.eclipse.EclipseIdentifiers;
 
-class TigerEclipseIdentifiers implements EclipseIdentifiers {
+@LanguageScope
+public class TigerEclipseIdentifiers implements EclipseIdentifiers {
+    @Override public String getContext() {
+        return "tiger.eclipse.context";
+    }
+
     @Override public String getNature() {
         return TigerProjectNature.id;
     }
-
 
     @Override public String getBuilder() {
         return TigerProjectBuilder.id;

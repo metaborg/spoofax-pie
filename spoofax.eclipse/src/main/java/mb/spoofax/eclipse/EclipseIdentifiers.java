@@ -1,8 +1,9 @@
 package mb.spoofax.eclipse;
 
 public interface EclipseIdentifiers {
-    String getNature();
+    String getContext();
 
+    String getNature();
 
     String getBuilder();
 

@@ -51,7 +51,7 @@ public class EditorContextMenu extends MenuShared {
         final MenuManager langMenu = new MenuManager(languageInstance.getDisplayName());
 
         final String transformCommandId = identifiers.getTransformCommand();
-        for(MenuItem menuItem : languageInstance.getResourceContextMenuItems()) {
+        for(MenuItem menuItem : getMenuItems(languageInstance)) {
             menuItem.accept(new EclipseMenuItemVisitor(langMenu) {
                 @Override @SuppressWarnings("OptionalGetWithoutIsPresent")
                 protected void transformAction(MenuManager menu, String displayName, TransformRequest transformRequest) {
@@ -76,5 +76,7 @@ public class EditorContextMenu extends MenuShared {
         return new IContributionItem[]{langMenu};
     }
 
-
+    protected ListView<MenuItem> getMenuItems(LanguageInstance languageInstance) {
+        return languageInstance.getEditorContextMenuItems();
+    }
 }

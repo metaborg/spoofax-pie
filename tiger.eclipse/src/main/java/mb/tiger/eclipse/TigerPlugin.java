@@ -28,6 +28,7 @@ public class TigerPlugin extends AbstractUIPlugin {
             .tigerModule(TigerModule.fromClassLoaderResources())
             .tigerEclipseModule(new TigerEclipseModule())
             .build();
+        component.getEditorRegistry().register();
     }
 
     @Override public void stop(@NonNull BundleContext context) throws Exception {

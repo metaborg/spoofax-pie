@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+  <!-- Context -->
+  <extension point="org.eclipse.ui.contexts">
+    <context
+      id="tiger.eclipse.context"
+      parentId="org.eclipse.ui.textEditorScope"
+      name="Editing Tiger files"
+      description="Editing Tiger files"
+    />
+  </extension>
+
+
   <!-- Editor -->
   <extension point="org.eclipse.ui.editors">
     <editor
@@ -13,6 +24,7 @@
 
 
   <!-- Markers -->
+  <!-- Base -->
   <extension
     point="org.eclipse.core.resources.markers"
     id="tiger.eclipse.marker"
@@ -130,6 +142,18 @@
     <!-- Editor -->
     <menuContribution locationURI="popup:#SpoofaxEditorContext?after=additions">
       <dynamic id="tiger.eclipse.menu.editor.context" class="mb.tiger.eclipse.TigerEditorContextMenu"/>
+    </menuContribution>
+    <!-- Main -->
+    <menuContribution locationURI="menu:org.eclipse.ui.main.menu">
+      <dynamic id="tiger.eclipse.menu.editor.context" class="mb.tiger.eclipse.TigerMainMenu">
+        <visibleWhen>
+          <with variable="activeContexts">
+            <iterate ifEmpty="false" operator="or">
+              <equals value="tiger.eclipse.context"/>
+            </iterate>
+          </with>
+        </visibleWhen>
+      </dynamic>
     </menuContribution>
   </extension>
 
