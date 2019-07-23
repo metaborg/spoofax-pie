@@ -3,8 +3,8 @@ package mb.esv.common;
 import mb.common.style.Color;
 import mb.common.style.Style;
 import mb.common.style.StyleImpl;
-import mb.common.token.TokenConstants;
 import mb.common.token.TokenType;
+import mb.common.token.TokenTypes;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoConstructor;
@@ -84,6 +84,7 @@ class StylingRulesFromESV {
             } else {
                 //logger.error("Unhandled node " + nodeCons + " in style rule " + styleRule);
                 // TODO: error tracing
+                //noinspection UnnecessaryContinue
                 continue;
             }
         }
@@ -139,19 +140,19 @@ class StylingRulesFromESV {
     private static TokenType tokenType(String str) {
         switch(str) {
             case "TK_IDENTIFIER":
-                return TokenConstants.identifierType;
+                return TokenTypes.identifier();
             case "TK_STRING":
-                return TokenConstants.stringType;
+                return TokenTypes.string();
             case "TK_NUMBER":
-                return TokenConstants.numberType;
+                return TokenTypes.number();
             case "TK_KEYWORD":
-                return TokenConstants.keywordType;
+                return TokenTypes.keyword();
             case "TK_OPERATOR":
-                return TokenConstants.operatorType;
+                return TokenTypes.operator();
             case "TK_LAYOUT":
-                return TokenConstants.layoutType;
+                return TokenTypes.layout();
             default:
-                return TokenConstants.unknownType;
+                return TokenTypes.unknown();
         }
     }
 

@@ -6,9 +6,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.io.Serializable;
 
 public interface Token<F> extends Serializable {
-    Region getRegion();
-
     TokenType getType();
+
+    Region getRegion();
 
     @Nullable F getFragment();
 }

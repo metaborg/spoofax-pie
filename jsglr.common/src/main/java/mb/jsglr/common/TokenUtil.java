@@ -2,9 +2,9 @@ package mb.jsglr.common;
 
 import mb.common.region.Region;
 import mb.common.token.Token;
-import mb.common.token.TokenConstants;
 import mb.common.token.TokenImpl;
 import mb.common.token.TokenType;
+import mb.common.token.TokenTypes;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.imploder.IToken;
 import org.spoofax.jsglr.client.imploder.ITokens;
@@ -34,34 +34,35 @@ public class TokenUtil {
                 continue;
             }
             offset = jsglrToken.getEndOffset();
-            final Token token = convertToken(jsglrToken);
+            final Token<IStrategoTerm> token = convertToken(jsglrToken);
             tokenStream.add(token);
         }
         return tokenStream;
     }
 
     private static Token<IStrategoTerm> convertToken(IToken token) {
-        final Region region = RegionUtil.fromToken(token);
         final TokenType tokenType = convertTokenKind(token.getKind());
-        return new TokenImpl<>(region, tokenType, (IStrategoTerm) token.getAstNode());
+        final Region region = RegionUtil.fromToken(token);
+        final IStrategoTerm fragment = (IStrategoTerm) token.getAstNode();
+        return new TokenImpl<>(tokenType, region, fragment);
     }
 
     private static TokenType convertTokenKind(int kind) {
         switch(kind) {
             case IToken.TK_IDENTIFIER:
-                return TokenConstants.identifierType;
+                return TokenTypes.identifier();
             case IToken.TK_STRING:
-                return TokenConstants.stringType;
+                return TokenTypes.string();
             case IToken.TK_NUMBER:
-                return TokenConstants.numberType;
+                return TokenTypes.number();
             case IToken.TK_KEYWORD:
-                return TokenConstants.keywordType;
+                return TokenTypes.keyword();
             case IToken.TK_OPERATOR:
-                return TokenConstants.operatorType;
+                return TokenTypes.operator();
             case IToken.TK_LAYOUT:
-                return TokenConstants.layoutType;
+                return TokenTypes.layout();
             default:
-                return TokenConstants.unknownType;
+                return TokenTypes.unknown();
         }
     }
 }
