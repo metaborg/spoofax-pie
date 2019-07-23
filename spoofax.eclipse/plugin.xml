@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+  <!-- Register TextDocumentProvider as the default provider for TextEditorInputs -->
+  <extension point="org.eclipse.ui.editors.documentProviders">
+    <provider
+      inputTypes="mb.spoofax.eclipse.editor.TextEditorInput"
+      class="mb.spoofax.eclipse.editor.TextDocumentProvider"
+      id="spoofax.eclipse.TextDocumentProvider">
+    </provider>
+  </extension>
 </plugin>

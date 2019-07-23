@@ -4,6 +4,7 @@ import mb.common.region.Region;
 import mb.common.style.Color;
 import mb.common.style.Styling;
 import mb.common.style.TokenStyle;
+import mb.common.token.TokenTypes;
 import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.jsglr1.common.JSGLR1ParseTableException;
 import mb.log.noop.NoopLoggerFactory;
@@ -19,7 +20,8 @@ class TigerStylerTest {
     private final TigerStyler styler =
         new TigerStyler(TigerStylingRules.fromClassLoaderResources(), new NoopLoggerFactory());
 
-    TigerStylerTest() throws IOException, JSGLR1ParseTableException {}
+    TigerStylerTest() throws IOException, JSGLR1ParseTableException {
+    }
 
     @Test void style() throws InterruptedException {
         final JSGLR1ParseResult parseOutput = parser.parse("1 + 21", "Module");
@@ -32,7 +34,7 @@ class TigerStylerTest {
         assertEquals(5, stylePerToken.size());
 
         final TokenStyle ts0 = stylePerToken.get(0);
-        assertEquals(new NumberTokenKind(), ts0.getToken().getType());
+        assertEquals(TokenTypes.number(), ts0.getToken().getType());
         assertEquals(Region.fromOffsets(0, 1), ts0.getToken().getRegion());
         final Color numberColor = new Color(255, 0, 128, 0);
         assertEquals(numberColor, ts0.getStyle().getColor());
@@ -43,7 +45,7 @@ class TigerStylerTest {
         assertFalse(ts0.getStyle().getIsUnderscore());
 
         final TokenStyle ts1 = stylePerToken.get(1);
-        assertEquals(new LayoutTokenKind(), ts1.getToken().getType());
+        assertEquals(TokenTypes.layout(), ts1.getToken().getType());
         assertEquals(Region.fromOffsets(1, 2), ts1.getToken().getRegion());
         final Color layoutColor = new Color(255, 63, 127, 95);
         assertEquals(layoutColor, ts1.getStyle().getColor());
@@ -54,7 +56,7 @@ class TigerStylerTest {
         assertFalse(ts1.getStyle().getIsUnderscore());
 
         final TokenStyle ts2 = stylePerToken.get(2);
-        assertEquals(new OperatorTokenKind(), ts2.getToken().getType());
+        assertEquals(TokenTypes.operator(), ts2.getToken().getType());
         assertEquals(Region.fromOffsets(2, 3), ts2.getToken().getRegion());
         final Color operatorColor = new Color(255, 0, 0, 128);
         assertEquals(operatorColor, ts2.getStyle().getColor());
@@ -65,7 +67,7 @@ class TigerStylerTest {
         assertFalse(ts2.getStyle().getIsUnderscore());
 
         final TokenStyle ts3 = stylePerToken.get(3);
-        assertEquals(new LayoutTokenKind(), ts3.getToken().getType());
+        assertEquals(TokenTypes.layout(), ts3.getToken().getType());
         assertEquals(Region.fromOffsets(3, 4), ts3.getToken().getRegion());
         assertEquals(layoutColor, ts3.getStyle().getColor());
         assertNull(ts3.getStyle().getBackgroundColor());
@@ -75,7 +77,7 @@ class TigerStylerTest {
         assertFalse(ts3.getStyle().getIsUnderscore());
 
         final TokenStyle ts4 = stylePerToken.get(4);
-        assertEquals(new NumberTokenKind(), ts4.getToken().getType());
+        assertEquals(TokenTypes.number(), ts4.getToken().getType());
         assertEquals(Region.fromOffsets(4, 6), ts4.getToken().getRegion());
         assertEquals(numberColor, ts4.getStyle().getColor());
         assertNull(ts4.getStyle().getBackgroundColor());

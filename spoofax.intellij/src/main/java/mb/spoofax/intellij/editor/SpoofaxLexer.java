@@ -4,7 +4,9 @@ import com.google.common.collect.Lists;
 import com.intellij.lexer.LexerBase;
 import com.intellij.psi.tree.IElementType;
 import mb.common.region.Region;
-import mb.common.token.*;
+import mb.common.token.TokenImpl;
+import mb.common.token.TokenType;
+import mb.common.token.TokenTypes;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecException;
@@ -150,7 +152,7 @@ public final class SpoofaxLexer extends LexerBase {
         try {
             int length = (int) resource.getSize();
             return Lists.newArrayList(
-                new TokenImpl<>(Region.fromOffsetLength(0, length), new UnknownTokenKind(), null)
+                new TokenImpl<>(TokenTypes.unknown(), Region.fromOffsetLength(0, length), null)
             );
         } catch(IOException e) {
             throw new RuntimeException(e);
@@ -257,15 +259,20 @@ public final class SpoofaxLexer extends LexerBase {
      * @return The associated scope name.
      */
     private ScopeNames getScopeNamesFromType(@Nullable TokenType tokenType) {
-        // @formatter:off
-        if (tokenType instanceof IdentifierTokenKind) return new ScopeNames("entity");
-        if (tokenType instanceof KeywordTokenKind)    return new ScopeNames("keyword");
-        if (tokenType instanceof LayoutTokenKind)     return new ScopeNames("comment");
-        if (tokenType instanceof NumberTokenKind)     return new ScopeNames("constant.numeric");
-        if (tokenType instanceof OperatorTokenKind)   return new ScopeNames("keyword.operator");
-        if (tokenType instanceof StringTokenKind)     return new ScopeNames("string");
-        // @formatter:on
-        return new ScopeNames(scopeManager.DEFAULT_SCOPE);
+        final String scope;
+        if(tokenType == null) {
+            scope = scopeManager.DEFAULT_SCOPE;
+        } else {
+            scope = TokenTypes.caseOf(tokenType)
+                .identifier_("entity")
+                .string_("string")
+                .number_("constant.numeric")
+                .keyword_("keyword")
+                .operator_("keyword.operator")
+                .layout_("comment")
+                .unknown_(scopeManager.DEFAULT_SCOPE);
+        }
+        return new ScopeNames(scope);
     }
 
     @Override

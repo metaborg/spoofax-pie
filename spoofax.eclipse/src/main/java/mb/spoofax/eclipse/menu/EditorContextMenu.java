@@ -1,5 +1,6 @@
 package mb.spoofax.eclipse.menu;
 
+import mb.common.region.Region;
 import mb.common.region.Selection;
 import mb.common.region.Selections;
 import mb.common.util.EnumSetView;
@@ -20,6 +21,8 @@ import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
+
+import java.util.Optional;
 
 public class EditorContextMenu extends MenuShared {
     private final EclipseLanguageComponent languageComponent;
@@ -53,14 +56,16 @@ public class EditorContextMenu extends MenuShared {
         final String transformCommandId = identifiers.getTransformCommand();
         for(MenuItem menuItem : getMenuItems(languageInstance)) {
             menuItem.accept(new EclipseMenuItemVisitor(langMenu) {
-                @Override @SuppressWarnings("OptionalGetWithoutIsPresent")
+                @Override
                 protected void transformAction(MenuManager menu, String displayName, TransformRequest transformRequest) {
                     final EnumSetView<TransformSubjectType> supportedTypes = transformRequest.transformDef.getSupportedSubjectTypes();
                     final ListView<TransformInput> inputs;
-                    if(file != null && selection.isRegion() && supportedTypes.contains(TransformSubjectType.FileRegion)) {
-                        inputs = transformInput(TransformSubjects.fileRegion(file, Selections.getRegion(selection).get()));
-                    } else if(file != null && selection.isOffset() && supportedTypes.contains(TransformSubjectType.FileOffset)) {
-                        inputs = transformInput(TransformSubjects.fileOffset(file, Selections.getOffset(selection).get()));
+                    final Optional<Region> region = Selections.getRegion(selection);
+                    final Optional<Integer> offset = Selections.getOffset(selection);
+                    if(file != null && region.isPresent() && supportedTypes.contains(TransformSubjectType.FileRegion)) {
+                        inputs = transformInput(TransformSubjects.fileRegion(file, region.get()));
+                    } else if(file != null && offset.isPresent() && supportedTypes.contains(TransformSubjectType.FileOffset)) {
+                        inputs = transformInput(TransformSubjects.fileOffset(file, offset.get()));
                     } else if(file != null && supportedTypes.contains(TransformSubjectType.File)) {
                         inputs = transformInput(TransformSubjects.file(file));
                     } else if(supportedTypes.contains(TransformSubjectType.None)) {

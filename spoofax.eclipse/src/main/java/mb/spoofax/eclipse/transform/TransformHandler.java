@@ -12,6 +12,7 @@ import mb.spoofax.core.language.transform.*;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.SpoofaxEclipseComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
+import mb.spoofax.eclipse.editor.TextDocumentProvider;
 import mb.spoofax.eclipse.editor.TextEditorInput;
 import mb.spoofax.eclipse.resource.WrapsEclipseResource;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -146,7 +147,7 @@ public class TransformHandler extends AbstractHandler {
             .openEditorWithText((text, name, region) -> {
                 try {
                     final IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-                    final TextEditorInput editorInput = new TextEditorInput(text, name);
+                    final TextEditorInput editorInput = TextDocumentProvider.createTextEditorInput(name, text);
                     final IEditorPart editor = IDE.openEditor(page, editorInput, EditorsUI.DEFAULT_TEXT_EDITOR_ID);
                     if(region != null && editor instanceof ITextEditor) {
                         final ITextEditor textEditor = (ITextEditor) editor;

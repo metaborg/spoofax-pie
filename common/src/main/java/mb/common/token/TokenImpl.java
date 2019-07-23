@@ -10,7 +10,7 @@ public class TokenImpl<F> implements Token<F> {
     private final Region region;
     private final @Nullable F fragment;
 
-    public TokenImpl(TokenType type, Region region, F fragment) {
+    public TokenImpl(TokenType type, Region region, @Nullable F fragment) {
         this.type = type;
         this.region = region;
         this.fragment = fragment;

@@ -10,7 +10,7 @@ import java.io.Serializable;
 
 @ADT
 public abstract class TransformFeedback implements Serializable {
-    interface Cases<R> {
+    public interface Cases<R> {
         R messages(Messages messages);
 
         R openEditorForFile(ResourceKey file, @Nullable Region region);
