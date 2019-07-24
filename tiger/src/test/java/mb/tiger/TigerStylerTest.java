@@ -20,16 +20,17 @@ class TigerStylerTest {
     private final TigerStyler styler =
         new TigerStyler(TigerStylingRules.fromClassLoaderResources(), new NoopLoggerFactory());
 
-    TigerStylerTest() throws IOException, JSGLR1ParseTableException {
-    }
+    TigerStylerTest() throws IOException, JSGLR1ParseTableException {}
 
     @Test void style() throws InterruptedException {
         final JSGLR1ParseResult parseOutput = parser.parse("1 + 21", "Module");
-        assertFalse(parseOutput.recovered);
-        assertNotNull(parseOutput.ast);
-        assertNotNull(parseOutput.tokens);
+        assertTrue(parseOutput.hasSucceeded());
+        assertFalse(parseOutput.hasRecovered());
+        assertFalse(parseOutput.hasFailed());
+        assertTrue(parseOutput.getAst().isPresent());
+        assertTrue(parseOutput.getTokens().isPresent());
 
-        final Styling styling = styler.style(parseOutput.tokens);
+        final Styling styling = styler.style(parseOutput.getTokens().get());
         final ArrayList<TokenStyle> stylePerToken = styling.getStylePerToken();
         assertEquals(5, stylePerToken.size());
 

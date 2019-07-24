@@ -12,8 +12,10 @@ import mb.resource.ResourceService;
 import mb.stratego.common.StrategoIOAgent;
 import mb.tiger.TigerConstraintAnalyzer;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
+import java.util.Optional;
 
 public class TigerAnalyze implements TaskDef<ResourceKey, @Nullable SingleFileResult> {
     private final TigerParse parse;
@@ -35,13 +37,14 @@ public class TigerAnalyze implements TaskDef<ResourceKey, @Nullable SingleFileRe
 
     @Override
     public @Nullable SingleFileResult exec(ExecContext context, ResourceKey key) throws Exception {
-        final JSGLR1ParseResult parseOutput = context.require(parse, key);
-        if(parseOutput.ast == null) {
+        final JSGLR1ParseResult parseResult = context.require(parse, key);
+        final Optional<IStrategoTerm> ast = parseResult.getAst();
+        if(!ast.isPresent()) {
             return null;
         }
+
         try {
-            return constraintAnalyzer.analyze(key, parseOutput.ast, new ConstraintAnalyzerContext(),
-                new StrategoIOAgent(loggerFactory, resourceService));
+            return constraintAnalyzer.analyze(key, ast.get(), new ConstraintAnalyzerContext(), new StrategoIOAgent(loggerFactory, resourceService));
         } catch(ConstraintAnalyzerException e) {
             throw new RuntimeException("Constraint analysis failed unexpectedly", e);
         }

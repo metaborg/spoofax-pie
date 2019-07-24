@@ -17,13 +17,14 @@ class TigerParserTest {
     TigerParserTest() throws IOException, JSGLR1ParseTableException {}
 
     @Test void parse() throws InterruptedException {
-        final JSGLR1ParseResult output = parser.parse("1", "Module");
-        assertFalse(output.recovered);
-        assertNotNull(output.ast);
-        assertNotNull(output.tokens);
-        assertEquals(output.ast, termFactory.makeAppl(termFactory.makeConstructor("Mod", 1),
+        final JSGLR1ParseResult result = parser.parse("1", "Module");
+        assertTrue(result.hasSucceeded());
+        assertFalse(result.hasRecovered());
+        assertFalse(result.hasFailed());
+        assertTrue(result.getAst().isPresent());
+        assertTrue(result.getTokens().isPresent());
+        assertEquals(result.getAst().get(), termFactory.makeAppl(termFactory.makeConstructor("Mod", 1),
             termFactory.makeAppl(termFactory.makeConstructor("Int", 1), termFactory.makeString("1"))));
-        assertNotNull(output.tokens);
-        assertTrue(output.messages.isEmpty());
+        assertTrue(result.getMessages().isEmpty());
     }
 }

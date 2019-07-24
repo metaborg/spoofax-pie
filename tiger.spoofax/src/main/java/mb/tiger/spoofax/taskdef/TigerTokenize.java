@@ -23,7 +23,7 @@ public class TigerTokenize implements TaskDef<ResourceKey, @Nullable ArrayList<?
 
     @Override
     public @Nullable ArrayList<? extends Token<?>> exec(ExecContext context, ResourceKey key) throws Exception {
-        final @Nullable JSGLR1ParseResult parseOutput = context.require(parse, key);
-        return parseOutput.tokens;
+        final @Nullable JSGLR1ParseResult parseResult = context.require(parse, key);
+        return parseResult.getTokens().orElse(null);
     }
 }

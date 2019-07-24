@@ -17,13 +17,12 @@ class STLCRecParserTest {
     STLCRecParserTest() throws IOException, JSGLR1ParseTableException {}
 
     @Test void parse() throws InterruptedException {
-        final JSGLR1ParseResult output = parser.parse("1", "Start");
-        assertFalse(output.recovered);
-        assertNotNull(output.ast);
-        assertNotNull(output.tokens);
-        assertEquals(output.ast,
-            termFactory.makeAppl(termFactory.makeConstructor("Num", 1), termFactory.makeString("1")));
-        assertNotNull(output.tokens);
-        assertTrue(output.messages.isEmpty());
+        final JSGLR1ParseResult result = parser.parse("1", "Start");
+        assertFalse(result.hasFailed());
+        assertFalse(result.hasRecovered());
+        assertTrue(result.getAst().isPresent());
+        assertTrue(result.getTokens().isPresent());
+        assertEquals(result.getAst().get(), termFactory.makeAppl(termFactory.makeConstructor("Num", 1), termFactory.makeString("1")));
+        assertTrue(result.getMessages().isEmpty());
     }
 }

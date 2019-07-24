@@ -4,7 +4,6 @@ import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.constraint.common.ConstraintAnalyzer;
 import mb.jsglr.common.TermTracer;
-import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
@@ -38,11 +37,6 @@ public class TigerShowAnalyzedAst implements TaskDef<TransformInput, TransformOu
         final TransformSubject subject = input.subject;
         final ResourcePath file = TransformSubjects.getFile(subject)
             .orElseThrow(() -> new RuntimeException("Cannot show analyzed AST, subject '" + subject + "' is not a file subject"));
-
-        final JSGLR1ParseResult parseResult = context.require(parse, file);
-        if(parseResult.ast == null) {
-            throw new RuntimeException("Cannot show analyzed AST, parsed AST for '" + input.subject + "' is null");
-        }
 
         final ConstraintAnalyzer.@Nullable SingleFileResult analysisResult = context.require(analyze, file);
         if(analysisResult == null) {

@@ -26,11 +26,11 @@ public class TigerCheck implements TaskDef<ResourceKey, KeyedMessages> {
 
     @Override public KeyedMessages exec(ExecContext context, ResourceKey key) throws Exception {
         final KeyedMessagesBuilder builder = new KeyedMessagesBuilder();
-        final JSGLR1ParseResult parseOutput = context.require(parse, key);
-        builder.addMessages(key, parseOutput.messages);
-        final @Nullable SingleFileResult analysisOutput = context.require(analyze, key);
-        if(analysisOutput != null) {
-            builder.addMessages(key, analysisOutput.messages);
+        final JSGLR1ParseResult parseResult = context.require(parse, key);
+        builder.addMessages(key, parseResult.getMessages());
+        final @Nullable SingleFileResult analysisResult = context.require(analyze, key);
+        if(analysisResult != null) {
+            builder.addMessages(key, analysisResult.messages);
         }
         return builder.build();
     }

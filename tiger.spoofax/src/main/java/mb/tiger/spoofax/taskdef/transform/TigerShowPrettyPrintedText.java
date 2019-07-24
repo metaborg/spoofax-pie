@@ -44,14 +44,13 @@ public class TigerShowPrettyPrintedText implements TaskDef<TransformInput, Trans
         final ResourcePath file = TransformSubjects.getFile(subject)
             .orElseThrow(() -> new RuntimeException("Cannot show pretty-printed text, subject '" + subject + "' is not a file subject"));
 
-        final JSGLR1ParseResult parseOutput = context.require(parse, file);
-        if(parseOutput.ast == null) {
-            throw new RuntimeException("Cannot show pretty-printed text, parsed AST for '" + input.subject + "' is null");
-        }
+        final JSGLR1ParseResult parseResult = context.require(parse, file);
+        final IStrategoTerm ast = parseResult.getAst()
+            .orElseThrow(() -> new RuntimeException("Cannot show pretty-printed text, parsed AST for '" + input.subject + "' is null"));
 
         final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.buildFromPrototype(prototypeStrategoRuntime);
         final String strategyId = "pp-Tiger-string";
-        final @Nullable IStrategoTerm result = strategoRuntime.invoke(strategyId, parseOutput.ast, new IOAgent());
+        final @Nullable IStrategoTerm result = strategoRuntime.invoke(strategyId, ast, new IOAgent());
         if(result == null) {
             throw new RuntimeException("Cannot show pretty-printed text, executing Stratego strategy '" + strategyId + "' failed");
         }

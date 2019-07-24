@@ -65,12 +65,16 @@ public class JSGLR1Parser {
             messagesUtil.gatherNonFatalErrors(ast);
             final Messages messages = messagesUtil.getMessages();
             final boolean recovered = messages.containsError();
-            return new JSGLR1ParseResult(recovered, ast, tokenStream, messages);
+            if(recovered) {
+                return JSGLR1ParseResults.recovered(ast, tokenStream, messages);
+            } else {
+                return JSGLR1ParseResults.success(ast, tokenStream, messages);
+            }
         } catch(SGLRException e) {
             final MessagesUtil messagesUtil = new MessagesUtil(true, true, parser.getCollectedErrors());
             messagesUtil.processFatalException(new NullTokenizer(text, null), e);
             final Messages messages = messagesUtil.getMessages();
-            return new JSGLR1ParseResult(false, null, null, messages);
+            return JSGLR1ParseResults.failed(messages);
         }
     }
 }

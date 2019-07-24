@@ -24,8 +24,8 @@ class TigerStrategoRuntimeBuilderTest {
     @Test void parseUnparse() throws InterruptedException, StrategoException {
         final String str = "1 + 2";
         final JSGLR1ParseResult parsed = parser.parse(str, "Module");
-        assertNotNull(parsed.ast);
-        final @Nullable IStrategoTerm unparsedTerm = runtime.invoke("pp-Tiger-string", parsed.ast, new IOAgent());
+        assertTrue(parsed.getAst().isPresent());
+        final @Nullable IStrategoTerm unparsedTerm = runtime.invoke("pp-Tiger-string", parsed.getAst().get(), new IOAgent());
         assertNotNull(unparsedTerm);
         final IStrategoString unparsedStringTerm = (IStrategoString) unparsedTerm;
         final String unparsed = unparsedStringTerm.stringValue();

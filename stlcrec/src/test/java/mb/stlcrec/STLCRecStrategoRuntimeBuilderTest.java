@@ -24,8 +24,8 @@ class STLCRecStrategoRuntimeBuilderTest {
     @Test void parseUnparse() throws InterruptedException, StrategoException {
         final String str = "1 + 2";
         final JSGLR1ParseResult parsed = parser.parse(str, "Start");
-        assertNotNull(parsed.ast);
-        final @Nullable IStrategoTerm unparsedTerm = runtime.invoke("pp-STLCrec-string", parsed.ast, new IOAgent());
+        assertTrue(parsed.getAst().isPresent());
+        final @Nullable IStrategoTerm unparsedTerm = runtime.invoke("pp-STLCrec-string", parsed.getAst().get(), new IOAgent());
         assertNotNull(unparsedTerm);
         final IStrategoString unparsedStringTerm = (IStrategoString) unparsedTerm;
         final String unparsed = unparsedStringTerm.stringValue();

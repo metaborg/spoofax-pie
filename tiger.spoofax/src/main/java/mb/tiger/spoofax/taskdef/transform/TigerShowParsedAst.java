@@ -33,14 +33,13 @@ public class TigerShowParsedAst implements TaskDef<TransformInput, TransformOutp
         final ResourcePath file = TransformSubjects.getFile(subject)
             .orElseThrow(() -> new RuntimeException("Cannot show parsed AST, subject '" + subject + "' is not a file subject"));
 
-        final JSGLR1ParseResult parseOutput = context.require(parse, file);
-        if(parseOutput.ast == null) {
-            throw new RuntimeException("Cannot show parsed AST, parsed AST for '" + file + "' is null");
-        }
+        final JSGLR1ParseResult parseResult = context.require(parse, file);
+        final IStrategoTerm ast = parseResult.getAst()
+            .orElseThrow(() -> new RuntimeException("Cannot show parsed AST, parsed AST for '" + file + "' is null"));
 
         final IStrategoTerm term = TransformSubjects.caseOf(subject)
-            .fileRegion((f, r) -> TermTracer.getSmallestTermEncompassingRegion(parseOutput.ast, r))
-            .otherwise_(parseOutput.ast);
+            .fileRegion((f, r) -> TermTracer.getSmallestTermEncompassingRegion(ast, r))
+            .otherwise_(ast);
 
         final String formatted = StrategoUtil.toString(term);
         return new TransformOutput(ListView.of(TransformFeedbacks.openEditorWithText(formatted, "Parsed AST for '" + file + "'", null)));

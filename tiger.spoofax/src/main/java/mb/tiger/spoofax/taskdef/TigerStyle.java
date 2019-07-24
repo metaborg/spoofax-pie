@@ -26,10 +26,7 @@ public class TigerStyle implements TaskDef<ResourceKey, @Nullable Styling> {
 
     @Override
     public @Nullable Styling exec(ExecContext context, ResourceKey key) throws ExecException, InterruptedException {
-        final JSGLR1ParseResult parseOutput = context.require(parse, key);
-        if(parseOutput.tokens == null) {
-            return null;
-        }
-        return styler.style(parseOutput.tokens);
+        final JSGLR1ParseResult parseResult = context.require(parse, key);
+        return parseResult.getTokens().map(styler::style).orElse(null);
     }
 }

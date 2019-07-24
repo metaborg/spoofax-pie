@@ -46,13 +46,12 @@ public class TigerShowDesugaredAst implements TaskDef<TransformInput, TransformO
             .orElseThrow(() -> new RuntimeException("Cannot show desugared AST, subject '" + subject + "' is not a file subject"));
 
         final JSGLR1ParseResult parseResult = context.require(parse, file);
-        if(parseResult.ast == null) {
-            throw new RuntimeException("Cannot show desugared AST, parsed AST for '" + input.subject + "' is null");
-        }
+        final IStrategoTerm ast = parseResult.getAst()
+            .orElseThrow(() -> new RuntimeException("Cannot show desugared AST, parsed AST for '" + input.subject + "' is null"));
 
         final IStrategoTerm term = TransformSubjects.caseOf(subject)
-            .fileRegion((f, r) -> TermTracer.getSmallestTermEncompassingRegion(parseResult.ast, r))
-            .otherwise_(parseResult.ast);
+            .fileRegion((f, r) -> TermTracer.getSmallestTermEncompassingRegion(ast, r))
+            .otherwise_(ast);
 
         final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.buildFromPrototype(prototypeStrategoRuntime);
         final String strategyId = "desugar-all";

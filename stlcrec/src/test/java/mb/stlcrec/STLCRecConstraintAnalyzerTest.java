@@ -48,8 +48,8 @@ class STLCRecConstraintAnalyzerTest {
     @Test void analyzeSingleErrors() throws InterruptedException, ConstraintAnalyzerException {
         final ResourceKey resource = new DefaultResourceKey(qualifier, "a.stlcrec");
         final JSGLR1ParseResult parsed = parser.parse("1 + nil", "Start", resource);
-        assertNotNull(parsed.ast);
-        final SingleFileResult result = analyzer.analyze(resource, parsed.ast, new ConstraintAnalyzerContext(),
+        assertTrue(parsed.getAst().isPresent());
+        final SingleFileResult result = analyzer.analyze(resource, parsed.getAst().get(), new ConstraintAnalyzerContext(),
             new StrategoIOAgent(loggerFactory, resourceService));
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
@@ -59,8 +59,8 @@ class STLCRecConstraintAnalyzerTest {
     @Test void analyzeSingleSuccess() throws InterruptedException, ConstraintAnalyzerException {
         final ResourceKey resource = new DefaultResourceKey(qualifier, "b.stlcrec");
         final JSGLR1ParseResult parsed = parser.parse("1 + 2", "Start", resource);
-        assertNotNull(parsed.ast);
-        final SingleFileResult result = analyzer.analyze(resource, parsed.ast, new ConstraintAnalyzerContext(),
+        assertTrue(parsed.getAst().isPresent());
+        final SingleFileResult result = analyzer.analyze(resource, parsed.getAst().get(), new ConstraintAnalyzerContext(),
             new StrategoIOAgent(loggerFactory, resourceService));
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
@@ -71,17 +71,17 @@ class STLCRecConstraintAnalyzerTest {
     @Test void analyzeMultipleErrors() throws InterruptedException, ConstraintAnalyzerException {
         final ResourceKey resource1 = new DefaultResourceKey(qualifier, "a.stlcrec");
         final JSGLR1ParseResult parsed1 = parser.parse("1 + 1", "Start", resource1);
-        assertNotNull(parsed1.ast);
+        assertTrue(parsed1.getAst().isPresent());
         final ResourceKey resource2 = new DefaultResourceKey(qualifier, "b.stlcrec");
         final JSGLR1ParseResult parsed2 = parser.parse("1 + 2", "Start", resource2);
-        assertNotNull(parsed2.ast);
+        assertTrue(parsed2.getAst().isPresent());
         final ResourceKey resource3 = new DefaultResourceKey(qualifier, "c.stlcrec");
         final JSGLR1ParseResult parsed3 = parser.parse("1 + nil", "Start", resource3);
-        assertNotNull(parsed3.ast);
+        assertTrue(parsed3.getAst().isPresent());
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
-        asts.put(resource1, parsed1.ast);
-        asts.put(resource2, parsed2.ast);
-        asts.put(resource3, parsed3.ast);
+        asts.put(resource1, parsed1.getAst().get());
+        asts.put(resource2, parsed2.getAst().get());
+        asts.put(resource3, parsed3.getAst().get());
         final MultiFileResult result = analyzer.analyze(null, asts, new ConstraintAnalyzerContext(),
             new StrategoIOAgent(loggerFactory, resourceService));
         final ConstraintAnalyzer.@Nullable Result result1 = result.getResult(resource1);
@@ -114,17 +114,17 @@ class STLCRecConstraintAnalyzerTest {
         final ResourceKey root = new DefaultResourceKey(qualifier, "0");
         final ResourceKey resource1 = new DefaultResourceKey(qualifier, "a.stlcrec");
         final JSGLR1ParseResult parsed1 = parser.parse("1 + 1", "Start", resource1);
-        assertNotNull(parsed1.ast);
+        assertTrue(parsed1.getAst().isPresent());
         final ResourceKey resource2 = new DefaultResourceKey(qualifier, "b.stlcrec");
         final JSGLR1ParseResult parsed2 = parser.parse("1 + 2", "Start", resource2);
-        assertNotNull(parsed2.ast);
+        assertTrue(parsed2.getAst().isPresent());
         final ResourceKey resource3 = new DefaultResourceKey(qualifier, "c.stlcrec");
         final JSGLR1ParseResult parsed3 = parser.parse("1 + 3", "Start", resource3);
-        assertNotNull(parsed3.ast);
+        assertTrue(parsed3.getAst().isPresent());
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
-        asts.put(resource1, parsed1.ast);
-        asts.put(resource2, parsed2.ast);
-        asts.put(resource3, parsed3.ast);
+        asts.put(resource1, parsed1.getAst().get());
+        asts.put(resource2, parsed2.getAst().get());
+        asts.put(resource3, parsed3.getAst().get());
         final MultiFileResult result = analyzer.analyze(root, asts, new ConstraintAnalyzerContext(),
             new StrategoIOAgent(loggerFactory, resourceService));
         final ConstraintAnalyzer.@Nullable Result result1 = result.getResult(resource1);

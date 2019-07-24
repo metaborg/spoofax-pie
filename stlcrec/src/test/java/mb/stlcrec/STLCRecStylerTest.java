@@ -24,11 +24,13 @@ class STLCRecStylerTest {
 
     @Test void style() throws InterruptedException {
         final JSGLR1ParseResult parseOutput = parser.parse("1 + 21", "Start");
-        assertFalse(parseOutput.recovered);
-        assertNotNull(parseOutput.ast);
-        assertNotNull(parseOutput.tokens);
+        assertTrue(parseOutput.hasSucceeded());
+        assertFalse(parseOutput.hasRecovered());
+        assertFalse(parseOutput.hasFailed());
+        assertTrue(parseOutput.getAst().isPresent());
+        assertTrue(parseOutput.getTokens().isPresent());
 
-        final Styling styling = styler.style(parseOutput.tokens);
+        final Styling styling = styler.style(parseOutput.getTokens().get());
         final ArrayList<TokenStyle> stylePerToken = styling.getStylePerToken();
         assertEquals(5, stylePerToken.size());
 
