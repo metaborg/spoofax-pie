@@ -93,11 +93,11 @@ public class EclipseResourceRegistry implements ResourceRegistry {
 
     private EclipseResource getResource(IPath path) {
         final @Nullable IResource resource = root.findMember(path);
-        if(resource == null) {
-            throw new ResourceRuntimeException(
-                "Cannot get Eclipse resource for path '" + path + "'; no resource was found");
+        if(resource != null) {
+            return new EclipseResource(resource);
+        } else {
+            return new EclipseResource(new EclipseResourcePath(path));
         }
-        return new EclipseResource(resource);
     }
 
     private <D extends IDocument & IDocumentExtension4> EclipseDocumentEclipseResource<D> getResource(String portablePathString, D document, @Nullable IFile file) {

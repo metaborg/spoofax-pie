@@ -6,7 +6,8 @@ imports
   pp
   outline
   analysis
-  desugar 
+  desugar
+  trans/test
 
 
   nabl2/runtime/analysis/debug

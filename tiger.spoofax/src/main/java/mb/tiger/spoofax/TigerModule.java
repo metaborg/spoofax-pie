@@ -13,10 +13,7 @@ import mb.stratego.common.StrategoRuntimeBuilder;
 import mb.stratego.common.StrategoRuntimeBuilderException;
 import mb.tiger.*;
 import mb.tiger.spoofax.taskdef.*;
-import mb.tiger.spoofax.taskdef.transform.TigerShowAnalyzedAst;
-import mb.tiger.spoofax.taskdef.transform.TigerShowDesugaredAst;
-import mb.tiger.spoofax.taskdef.transform.TigerShowParsedAst;
-import mb.tiger.spoofax.taskdef.transform.TigerShowPrettyPrintedText;
+import mb.tiger.spoofax.taskdef.transform.*;
 
 import javax.inject.Named;
 import java.io.IOException;
@@ -92,6 +89,9 @@ public class TigerModule {
         TigerParse parse,
         TigerAnalyze analyze,
 
+        TigerListLiteralVals listLiteralVals,
+        TigerListDefNames listDefNames,
+
         TigerTokenize tokenize,
         TigerStyle style,
         TigerCheck check,
@@ -99,12 +99,17 @@ public class TigerModule {
         TigerShowParsedAst showParsedAst,
         TigerShowPrettyPrintedText showPrettyPrintedText,
         TigerShowAnalyzedAst showAnalyzedAst,
-        TigerShowDesugaredAst showDesugaredAst
+        TigerShowDesugaredAst showDesugaredAst,
+        TigerCompileFile compileFile,
+        TigerCompileDirectory compileDirectory
     ) {
         final HashSet<TaskDef<?, ?>> taskDefs = new HashSet<>();
 
         taskDefs.add(parse);
         taskDefs.add(analyze);
+
+        taskDefs.add(listLiteralVals);
+        taskDefs.add(listDefNames);
 
         taskDefs.add(tokenize);
         taskDefs.add(style);
@@ -114,6 +119,8 @@ public class TigerModule {
         taskDefs.add(showPrettyPrintedText);
         taskDefs.add(showAnalyzedAst);
         taskDefs.add(showDesugaredAst);
+        taskDefs.add(compileFile);
+        taskDefs.add(compileDirectory);
 
         return taskDefs;
     }

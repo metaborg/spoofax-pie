@@ -11,11 +11,18 @@ import org.strategoxt.stratego_aterm.pp_aterm_box_0_0;
 import org.strategoxt.stratego_gpp.box2text_string_0_1;
 
 public class StrategoUtil {
+    private static final int ppWidthDefault = 120;
+
+
     public static String toString(IStrategoTerm term) {
+        return toString(term, ppWidthDefault);
+    }
+
+    public static String toString(IStrategoTerm term, int ppWidth) {
         if(term instanceof IStrategoString) {
             return ((IStrategoString) term).stringValue();
         } else {
-            final @Nullable IStrategoString pp = prettyPrintTerm(term);
+            final @Nullable IStrategoString pp = prettyPrintTerm(term, ppWidth);
             if(pp != null) {
                 return pp.stringValue();
             } else {
@@ -25,14 +32,14 @@ public class StrategoUtil {
     }
 
     private static @Nullable IStrategoString prettyPrintTerm(IStrategoTerm term) {
-        return prettyPrintTerm(term, 120);
+        return prettyPrintTerm(term, ppWidthDefault);
     }
 
-    private static @Nullable IStrategoString prettyPrintTerm(IStrategoTerm term, int maxWidth) {
+    private static @Nullable IStrategoString prettyPrintTerm(IStrategoTerm term, int ppWidth) {
         final Context context = org.strategoxt.stratego_aterm.Main.init();
         term = aterm_escape_strings_0_0.instance.invoke(context, term);
         term = pp_aterm_box_0_0.instance.invoke(context, term);
-        term = box2text_string_0_1.instance.invoke(context, term, context.getFactory().makeInt(maxWidth));
+        term = box2text_string_0_1.instance.invoke(context, term, context.getFactory().makeInt(ppWidth));
         return (IStrategoString) term;
     }
 

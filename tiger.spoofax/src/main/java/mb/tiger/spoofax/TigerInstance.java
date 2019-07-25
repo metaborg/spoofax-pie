@@ -19,10 +19,7 @@ import mb.spoofax.core.language.transform.TransformRequest;
 import mb.tiger.spoofax.taskdef.TigerCheck;
 import mb.tiger.spoofax.taskdef.TigerStyle;
 import mb.tiger.spoofax.taskdef.TigerTokenize;
-import mb.tiger.spoofax.taskdef.transform.TigerShowAnalyzedAst;
-import mb.tiger.spoofax.taskdef.transform.TigerShowDesugaredAst;
-import mb.tiger.spoofax.taskdef.transform.TigerShowParsedAst;
-import mb.tiger.spoofax.taskdef.transform.TigerShowPrettyPrintedText;
+import mb.tiger.spoofax.taskdef.transform.*;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
@@ -38,6 +35,8 @@ public class TigerInstance implements LanguageInstance {
     private final TigerShowPrettyPrintedText showPrettyPrintedText;
     private final TigerShowAnalyzedAst showAnalyzedAst;
     private final TigerShowDesugaredAst showDesugaredAst;
+    private final TigerCompileFile compileFile;
+    private final TigerCompileDirectory compileDirectory;
 
 
     @Inject public TigerInstance(
@@ -48,7 +47,9 @@ public class TigerInstance implements LanguageInstance {
         TigerShowParsedAst showParsedAst,
         TigerShowPrettyPrintedText showPrettyPrintedText,
         TigerShowAnalyzedAst showAnalyzedAst,
-        TigerShowDesugaredAst showDesugaredAst
+        TigerShowDesugaredAst showDesugaredAst,
+        TigerCompileFile compileFile,
+        TigerCompileDirectory compileDirectory
     ) {
         this.check = check;
         this.tokenize = tokenize;
@@ -58,6 +59,8 @@ public class TigerInstance implements LanguageInstance {
         this.showPrettyPrintedText = showPrettyPrintedText;
         this.showAnalyzedAst = showAnalyzedAst;
         this.showDesugaredAst = showDesugaredAst;
+        this.compileFile = compileFile;
+        this.compileDirectory = compileDirectory;
     }
 
 
@@ -88,12 +91,17 @@ public class TigerInstance implements LanguageInstance {
             showParsedAst,
             showPrettyPrintedText,
             showAnalyzedAst,
-            showDesugaredAst
+            showDesugaredAst,
+            compileFile,
+            compileDirectory
         );
     }
 
     @Override public CollectionView<TransformDef> getAutoTransformDefs() {
-        return CollectionView.of();
+        return CollectionView.of(
+            compileFile,
+            compileDirectory
+        );
     }
 
 
@@ -103,6 +111,7 @@ public class TigerInstance implements LanguageInstance {
 
     @Override public ListView<MenuItem> getResourceContextMenuItems() {
         return ListView.of(
+            new Menu("Compile", onceTransformAction(compileFile), onceTransformAction(compileDirectory)),
             new Menu("Debug",
                 new Menu("Syntax",
                     onceTransformAction(showParsedAst),
@@ -120,6 +129,7 @@ public class TigerInstance implements LanguageInstance {
 
     @Override public ListView<MenuItem> getEditorContextMenuItems() {
         return ListView.of(
+            new Menu("Compile", onceTransformAction(compileFile)),
             new Menu("Debug",
                 new Menu("Syntax",
                     onceTransformAction(showParsedAst), contEditorTransformAction(showParsedAst),

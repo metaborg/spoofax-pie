@@ -9,6 +9,6 @@ import mb.tiger.spoofax.TigerModule;
 
 @LanguageScope
 @Component(modules = {TigerModule.class, TigerEclipseModule.class}, dependencies = PlatformComponent.class)
-public interface TigerEclipseComponent extends TigerComponent, EclipseLanguageComponent {
+public interface TigerEclipseComponent extends EclipseLanguageComponent, TigerComponent {
     TigerEditorRegistry getEditorRegistry();
 }

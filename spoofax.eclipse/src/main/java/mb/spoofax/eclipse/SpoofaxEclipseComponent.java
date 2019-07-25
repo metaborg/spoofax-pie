@@ -20,7 +20,8 @@ import javax.inject.Singleton;
     FSRegistryModule.class,
     EclipseResourceRegistryModule.class,
     ResourceServiceModule.class,
-    PieModule.class
+    PieModule.class,
+    SpoofaxEclipseModule.class
 })
 public interface SpoofaxEclipseComponent extends PlatformComponent {
     PieRunner getPieRunner();
