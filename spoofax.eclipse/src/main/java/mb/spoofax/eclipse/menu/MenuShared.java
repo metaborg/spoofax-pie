@@ -50,15 +50,6 @@ abstract class MenuShared extends CompoundContributionItem implements IWorkbench
     }
 
 
-    protected ListView<TransformInput> transformInput(TransformSubject subject) {
-        return ListView.of(new TransformInput(subject));
-    }
-
-    protected ListView<TransformInput> transformInputs(Stream<TransformSubject> subjects) {
-        return new ListView<>(subjects.map(TransformInput::new).collect(Collectors.toList()));
-    }
-
-
     protected CommandContributionItem transformCommand(String commandId, TransformRequest transformRequest, ListView<TransformInput> inputs, String displayName) {
         final TransformData data = new TransformData(transformRequest.transformDef.getId(), transformRequest.executionType, inputs);
         final Map<String, String> parameters = new HashMap<>();

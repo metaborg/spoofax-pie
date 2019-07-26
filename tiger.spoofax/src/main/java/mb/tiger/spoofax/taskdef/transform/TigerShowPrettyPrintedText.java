@@ -69,7 +69,7 @@ public class TigerShowPrettyPrintedText implements TaskDef<TransformInput, Trans
     }
 
     @Override public EnumSetView<TransformExecutionType> getSupportedExecutionTypes() {
-        return EnumSetView.of(TransformExecutionType.OneShot, TransformExecutionType.ContinuousOnEditor);
+        return EnumSetView.of(TransformExecutionType.ManualOnce, TransformExecutionType.ManualContinuous);
     }
 
     @Override public EnumSetView<TransformSubjectType> getSupportedSubjectTypes() {

@@ -160,10 +160,10 @@ public class TigerInstance implements LanguageInstance {
     }
 
     private static TransformAction onceTransformAction(TransformDef transformDef) {
-        return transformAction(transformDef, TransformExecutionType.OneShot, "");
+        return transformAction(transformDef, TransformExecutionType.ManualOnce, "");
     }
 
     private static TransformAction contEditorTransformAction(TransformDef transformDef) {
-        return transformAction(transformDef, TransformExecutionType.ContinuousOnEditor, " (continuous)");
+        return transformAction(transformDef, TransformExecutionType.ManualContinuous, " (continuous)");
     }
 }

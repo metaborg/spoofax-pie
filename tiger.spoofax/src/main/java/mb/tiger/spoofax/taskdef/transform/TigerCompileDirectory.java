@@ -93,7 +93,7 @@ public class TigerCompileDirectory implements TaskDef<TransformInput, TransformO
     }
 
     @Override public EnumSetView<TransformExecutionType> getSupportedExecutionTypes() {
-        return EnumSetView.of(TransformExecutionType.OneShot, TransformExecutionType.ContinuousOnResource);
+        return EnumSetView.of(TransformExecutionType.ManualOnce, TransformExecutionType.AutomaticContinuous);
     }
 
     @Override public EnumSetView<TransformSubjectType> getSupportedSubjectTypes() {

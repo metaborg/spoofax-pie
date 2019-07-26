@@ -57,7 +57,7 @@ public class TigerCompileFile implements TaskDef<TransformInput, TransformOutput
     }
 
     @Override public EnumSetView<TransformExecutionType> getSupportedExecutionTypes() {
-        return EnumSetView.of(TransformExecutionType.OneShot, TransformExecutionType.ContinuousOnResource, TransformExecutionType.ContinuousOnEditor);
+        return EnumSetView.of(TransformExecutionType.ManualOnce, TransformExecutionType.AutomaticContinuous, TransformExecutionType.ManualContinuous);
     }
 
     @Override public EnumSetView<TransformSubjectType> getSupportedSubjectTypes() {

@@ -4,6 +4,7 @@ import mb.common.message.KeyedMessages;
 import mb.common.style.Styling;
 import mb.common.util.CollectionView;
 import mb.common.util.EnumSetView;
+import mb.common.util.ListView;
 import mb.common.util.SetView;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
@@ -12,23 +13,32 @@ import mb.pie.api.exec.Cancelled;
 import mb.pie.api.exec.NullCancelled;
 import mb.pie.runtime.exec.Stats;
 import mb.resource.ResourceKey;
+import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageInstance;
-import mb.spoofax.core.language.transform.TransformDef;
-import mb.spoofax.core.language.transform.TransformInput;
-import mb.spoofax.core.language.transform.TransformSubjectType;
-import mb.spoofax.core.language.transform.TransformSubjects;
+import mb.spoofax.core.language.transform.*;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
+import mb.spoofax.eclipse.editor.TextDocumentProvider;
+import mb.spoofax.eclipse.editor.TextEditorInput;
 import mb.spoofax.eclipse.resource.EclipseResource;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
 import mb.spoofax.eclipse.resource.EclipseResourceRegistry;
+import mb.spoofax.eclipse.resource.WrapsEclipseResource;
+import mb.spoofax.eclipse.transform.TransformUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension4;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.editors.text.EditorsUI;
+import org.eclipse.ui.ide.IDE;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -41,6 +51,7 @@ import java.util.Set;
 @Singleton
 public class PieRunner {
     private final Logger logger;
+    private final ResourceService resourceService;
     private final Pie pie;
     private final EclipseResourceRegistry eclipseResourceRegistry;
     private final WorkspaceUpdate.Factory workspaceUpdateFactory;
@@ -51,11 +62,12 @@ public class PieRunner {
     @Inject
     public PieRunner(
         LoggerFactory loggerFactory,
-        Pie pie,
+        ResourceService resourceService, Pie pie,
         EclipseResourceRegistry eclipseResourceRegistry,
         WorkspaceUpdate.Factory workspaceUpdateFactory
     ) {
         this.logger = loggerFactory.create(getClass());
+        this.resourceService = resourceService;
         this.pie = pie;
         this.eclipseResourceRegistry = eclipseResourceRegistry;
         this.workspaceUpdateFactory = workspaceUpdateFactory;
@@ -250,6 +262,82 @@ public class PieRunner {
     }
 
 
+    // Requiring transforms
+
+    public void requireTransform(
+        EclipseLanguageComponent languageComponent,
+        TransformDef def,
+        TransformExecutionType executionType,
+        ListView<TransformInput> inputs,
+        PieSession session,
+        @Nullable IProgressMonitor monitor
+    ) throws ExecException, InterruptedException {
+        switch(executionType) {
+            case ManualOnce:
+            case ManualContinuous:
+                for(TransformInput input : inputs) {
+                    final TransformOutput output = requireWithoutObserving(def.createTask(input), session, monitor);
+                    processOutput(output);
+                }
+                break;
+            case AutomaticContinuous:
+                for(TransformInput input : inputs) {
+                    require(def.createTask(input), session, monitor);
+                    // Feedback for AutomaticContinuous is ignored.
+                }
+                break;
+        }
+    }
+
+    private void processOutput(TransformOutput output) {
+        for(TransformFeedback feedback : output.feedback) {
+            processFeedback(feedback);
+        }
+    }
+
+    private @Nullable IEditorPart processFeedback(TransformFeedback feedback) {
+        return TransformFeedbacks.caseOf(feedback)
+            .openEditorForFile((file, region) -> {
+                final @Nullable WrapsEclipseResource resource;
+                try {
+                    resource = resourceService.getResource(file);
+                    final @Nullable IResource eclipseResource = resource.getWrappedEclipseResource();
+                    if(eclipseResource == null) {
+                        throw new RuntimeException("Cannot open editor for file '" + file + "', it has no corresponding Eclipse resource");
+                    }
+                    if(!(eclipseResource instanceof IFile)) {
+                        throw new RuntimeException("Cannot open editor for Eclipse resource '" + eclipseResource + "', it is not a file");
+                    }
+                    final IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+                    final IEditorPart editor = IDE.openEditor(page, (IFile) eclipseResource);
+                    if(region != null && editor instanceof ITextEditor) {
+                        final ITextEditor textEditor = (ITextEditor) editor;
+                        textEditor.selectAndReveal(region.getStartOffset(), region.length());
+                    }
+                    return editor;
+                } catch(ClassCastException e) {
+                    throw new RuntimeException("Cannot open editor for file '" + file + "', corresponding resource does not implement WrapsEclipseResource", e);
+                } catch(PartInitException e) {
+                    throw new RuntimeException("Cannot open editor for file '" + file + "', opening editor failed unexpectedly", e);
+                }
+            })
+            .openEditorWithText((text, name, region) -> {
+                try {
+                    final IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+                    final TextEditorInput editorInput = TextDocumentProvider.createTextEditorInput(name, text);
+                    final IEditorPart editor = IDE.openEditor(page, editorInput, EditorsUI.DEFAULT_TEXT_EDITOR_ID);
+                    if(region != null && editor instanceof ITextEditor) {
+                        final ITextEditor textEditor = (ITextEditor) editor;
+                        textEditor.selectAndReveal(region.getStartOffset(), region.length());
+                    }
+                    return editor;
+                } catch(PartInitException e) {
+                    throw new RuntimeException("Cannot open editor (for text) with name '" + name + "', opening editor failed unexpectedly", e);
+                }
+            });
+    }
+
+
     // Standard PIE operations with trace logging.
 
     public <T extends Serializable> T requireWithoutObserving(Task<T> task, PieSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
@@ -425,9 +513,10 @@ public class PieRunner {
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException, IOException {
         final AutoTransformDefs autoTransformDefs = new AutoTransformDefs(languageComponent); // OPTO: calculate once per language component
+        final TransformExecutionType executionType = TransformExecutionType.AutomaticContinuous;
         for(TransformDef def : autoTransformDefs.project) {
             for(ResourcePath newProject : resourceChanges.newProjects) {
-                require(def.createTask(new TransformInput(TransformSubjects.project(newProject))), session, monitor);
+                requireTransform(languageComponent, def, executionType, TransformUtil.input(TransformSubjects.project(newProject)), session, monitor);
             }
             for(ResourcePath removedProject : resourceChanges.removedProjects) {
                 unobserve(def.createTask(new TransformInput(TransformSubjects.project(removedProject))), pie, session);
@@ -435,7 +524,7 @@ public class PieRunner {
         }
         for(TransformDef def : autoTransformDefs.directory) {
             for(ResourcePath newDirectory : resourceChanges.newDirectories) {
-                require(def.createTask(new TransformInput(TransformSubjects.directory(newDirectory))), session, monitor);
+                requireTransform(languageComponent, def, executionType, TransformUtil.input(TransformSubjects.directory(newDirectory)), session, monitor);
             }
             for(ResourcePath removedDirectory : resourceChanges.removedDirectories) {
                 unobserve(def.createTask(new TransformInput(TransformSubjects.directory(removedDirectory))), pie, session);
@@ -443,7 +532,7 @@ public class PieRunner {
         }
         for(TransformDef def : autoTransformDefs.file) {
             for(ResourcePath newFile : resourceChanges.newFiles) {
-                require(def.createTask(new TransformInput(TransformSubjects.file(newFile))), session, monitor);
+                requireTransform(languageComponent, def, executionType, TransformUtil.input(TransformSubjects.file(newFile)), session, monitor);
             }
             for(ResourcePath removedFile : resourceChanges.removedFiles) {
                 unobserve(def.createTask(new TransformInput(TransformSubjects.file(removedFile))), pie, session);

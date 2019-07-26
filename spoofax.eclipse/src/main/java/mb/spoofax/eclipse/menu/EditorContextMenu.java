@@ -16,6 +16,7 @@ import mb.spoofax.eclipse.EclipseIdentifiers;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
+import mb.spoofax.eclipse.transform.TransformUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.MenuManager;
@@ -63,13 +64,13 @@ public class EditorContextMenu extends MenuShared {
                     final Optional<Region> region = Selections.getRegion(selection);
                     final Optional<Integer> offset = Selections.getOffset(selection);
                     if(file != null && region.isPresent() && supportedTypes.contains(TransformSubjectType.FileRegion)) {
-                        inputs = transformInput(TransformSubjects.fileRegion(file, region.get()));
+                        inputs = TransformUtil.input(TransformSubjects.fileRegion(file, region.get()));
                     } else if(file != null && offset.isPresent() && supportedTypes.contains(TransformSubjectType.FileOffset)) {
-                        inputs = transformInput(TransformSubjects.fileOffset(file, offset.get()));
+                        inputs = TransformUtil.input(TransformSubjects.fileOffset(file, offset.get()));
                     } else if(file != null && supportedTypes.contains(TransformSubjectType.File)) {
-                        inputs = transformInput(TransformSubjects.file(file));
+                        inputs = TransformUtil.input(TransformSubjects.file(file));
                     } else if(supportedTypes.contains(TransformSubjectType.None)) {
-                        inputs = transformInput(TransformSubjects.none());
+                        inputs = TransformUtil.input(TransformSubjects.none());
                     } else {
                         return;
                     }

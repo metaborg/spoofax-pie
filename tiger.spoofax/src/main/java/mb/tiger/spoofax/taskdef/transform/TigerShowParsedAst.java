@@ -55,7 +55,7 @@ public class TigerShowParsedAst implements TaskDef<TransformInput, TransformOutp
     }
 
     @Override public EnumSetView<TransformExecutionType> getSupportedExecutionTypes() {
-        return EnumSetView.of(TransformExecutionType.OneShot, TransformExecutionType.ContinuousOnEditor);
+        return EnumSetView.of(TransformExecutionType.ManualOnce, TransformExecutionType.ManualContinuous);
     }
 
     @Override public EnumSetView<TransformSubjectType> getSupportedSubjectTypes() {

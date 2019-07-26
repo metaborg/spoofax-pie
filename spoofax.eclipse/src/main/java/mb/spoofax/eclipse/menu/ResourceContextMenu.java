@@ -14,6 +14,7 @@ import mb.spoofax.eclipse.SpoofaxEclipseComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.pie.PieRunner;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
+import mb.spoofax.eclipse.transform.TransformUtil;
 import mb.spoofax.eclipse.util.SelectionUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IContainer;
@@ -124,13 +125,13 @@ public abstract class ResourceContextMenu extends MenuShared {
                     final EnumSetView<TransformSubjectType> supportedTypes = transformRequest.transformDef.getSupportedSubjectTypes();
                     final ListView<TransformInput> inputs;
                     if(hasProjects && supportedTypes.contains(TransformSubjectType.Project)) {
-                        inputs = transformInputs(projects.stream().map(EclipseResourcePath::new).map(TransformSubjects::project));
+                        inputs = TransformUtil.inputs(projects.stream().map(EclipseResourcePath::new).map(TransformSubjects::project));
                     } else if(hasContainers && supportedTypes.contains(TransformSubjectType.Directory)) {
-                        inputs = transformInputs(containers.stream().map(EclipseResourcePath::new).map(TransformSubjects::directory));
+                        inputs = TransformUtil.inputs(containers.stream().map(EclipseResourcePath::new).map(TransformSubjects::directory));
                     } else if(hasFiles && supportedTypes.contains(TransformSubjectType.File)) {
-                        inputs = transformInputs(files.stream().map(EclipseResourcePath::new).map(TransformSubjects::file));
+                        inputs = TransformUtil.inputs(files.stream().map(EclipseResourcePath::new).map(TransformSubjects::file));
                     } else if(supportedTypes.contains(TransformSubjectType.None)) {
-                        inputs = transformInput(TransformSubjects.none());
+                        inputs = TransformUtil.input(TransformSubjects.none());
                     } else {
                         return;
                     }
