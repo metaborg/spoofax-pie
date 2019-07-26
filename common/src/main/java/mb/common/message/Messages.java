@@ -1,14 +1,38 @@
 package mb.common.message;
 
+import mb.common.util.ListView;
+
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Messages implements Serializable {
-    final ArrayList<Message> messages;
+    final ListView<Message> messages;
 
 
-    public Messages(ArrayList<Message> messages) {
+    public Messages(ListView<Message> messages) {
         this.messages = messages;
+    }
+
+    public static Messages of() {
+        return new Messages(ListView.of());
+    }
+
+    public static Messages of(Message message) {
+        final ArrayList<Message> list = new ArrayList<>();
+        list.add(message);
+        return new Messages(new ListView<>(list));
+    }
+
+    public static Messages of(Message... messages) {
+        final ArrayList<Message> list = new ArrayList<>();
+        Collections.addAll(list, messages);
+        return new Messages(new ListView<>(list));
+    }
+
+    public static Messages copyOf(List<Message> messages) {
+        return new Messages(new ListView<>(new ArrayList<>(messages)));
     }
 
 

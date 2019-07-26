@@ -33,6 +33,10 @@ public class ListView<E> extends BaseCollectionView<E, List<? extends E>> implem
         return new ListView<>(list);
     }
 
+    public static <E> ListView<E> copyOf(List<? extends E> list) {
+        return new ListView<>(new ArrayList<>(list));
+    }
+
 
     public E get(int index) {
         return collection.get(index);

@@ -1,6 +1,10 @@
 package mb.tiger.spoofax.taskdef;
 
+import mb.common.message.Message;
+import mb.common.message.Messages;
+import mb.common.message.Severity;
 import mb.jsglr1.common.JSGLR1ParseResult;
+import mb.jsglr1.common.JSGLR1ParseResults;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.ReadableResource;
@@ -29,10 +33,17 @@ public class TigerParse implements TaskDef<ResourceKey, JSGLR1ParseResult> {
 
     @Override
     public JSGLR1ParseResult exec(ExecContext context, ResourceKey key) throws IOException, InterruptedException {
-        final TigerParser parser = new TigerParser(parseTable);
         final ReadableResource resource = resourceService.getResource(key);
         context.require(resource);
-        final String text = resource.readString(StandardCharsets.UTF_8);
-        return parser.parse(text, "Module");
+        if(!resource.exists()) {
+            return JSGLR1ParseResults.failed(Messages.of(new Message("Cannot parse file '" + key + "', it does not exist", Severity.Error)));
+        }
+        try {
+            final String text = resource.readString(StandardCharsets.UTF_8);
+            final TigerParser parser = new TigerParser(parseTable);
+            return parser.parse(text, "Module");
+        } catch(IOException e) {
+            return JSGLR1ParseResults.failed(Messages.of(new Message("Cannot parse file '" + key + "', reading contents failed unexpectedly", e)));
+        }
     }
 }

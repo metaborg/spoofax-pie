@@ -1,5 +1,6 @@
 package mb.common.message;
 
+import mb.common.util.ListView;
 import mb.common.util.MultiHashMap;
 import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -112,8 +113,8 @@ public class KeyedMessages implements Serializable {
 
 
     public Messages asMessages() {
-        return new Messages(
-            messages.values().stream().flatMap(Collection::stream).collect(Collectors.toCollection(ArrayList::new)));
+        final ArrayList<Message> list = messages.values().stream().flatMap(Collection::stream).collect(Collectors.toCollection(ArrayList::new));
+        return new Messages(new ListView<>(list));
     }
 
 

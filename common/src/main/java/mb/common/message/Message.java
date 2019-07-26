@@ -26,8 +26,16 @@ public class Message implements Serializable {
         this(text, null, severity, region);
     }
 
+    public Message(String text, Throwable exception, Severity severity) {
+        this(text, exception, severity, null);
+    }
+
     public Message(String text, Severity severity) {
         this(text, null, severity, null);
+    }
+
+    public Message(String text, Throwable exception) {
+        this(text, exception, Severity.Error, null);
     }
 
 

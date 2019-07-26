@@ -56,7 +56,7 @@ public abstract class SpoofaxProjectBuilder extends IncrementalProjectBuilder {
         pieRunner.fullBuild(languageComponent, eclipseProject, monitor);
     }
 
-    private void incrBuild(IProject eclipseProject, IResourceDelta delta, @Nullable IProgressMonitor monitor) throws CoreException, ExecException, InterruptedException {
+    private void incrBuild(IProject eclipseProject, IResourceDelta delta, @Nullable IProgressMonitor monitor) throws CoreException, ExecException, InterruptedException, IOException {
         pieRunner.incrementalBuild(languageComponent, eclipseProject, delta, monitor);
     }
 

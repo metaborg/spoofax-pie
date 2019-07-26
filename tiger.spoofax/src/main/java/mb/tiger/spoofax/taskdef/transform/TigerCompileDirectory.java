@@ -13,6 +13,7 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.AllResourceMatcher;
 import mb.resource.hierarchical.match.FileResourceMatcher;
 import mb.resource.hierarchical.match.PathResourceMatcher;
+import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.match.path.ExtensionsPathMatcher;
 import mb.spoofax.core.language.transform.*;
 import mb.tiger.spoofax.taskdef.TigerListDefNames;
@@ -39,13 +40,14 @@ public class TigerCompileDirectory implements TaskDef<TransformInput, TransformO
         final TransformSubject subject = input.subject;
         final ResourcePath directoryPath = TransformSubjects.getDirectory(subject)
             .orElseThrow(() -> new RuntimeException("Cannot compile, subject '" + subject + "' is not a directory subject"));
-        final HierarchicalResource directory = context.require(directoryPath, ResourceStampers.modifiedDir());
+        final ResourceMatcher matcher = new AllResourceMatcher(new FileResourceMatcher(), new PathResourceMatcher(new ExtensionsPathMatcher("tig")));
+        final HierarchicalResource directory = context.require(directoryPath, ResourceStampers.modifiedDir(matcher));
 
         final StringBuffer sb = new StringBuffer();
         sb.append("[\n  ");
         try {
             final AtomicBoolean first = new AtomicBoolean(true);
-            directory.list(new AllResourceMatcher(new FileResourceMatcher(), new PathResourceMatcher(new ExtensionsPathMatcher("tig")))).forEach((f) -> {
+            directory.list(matcher).forEach((f) -> {
                 try {
                     if(!first.get()) {
                         sb.append(", ");

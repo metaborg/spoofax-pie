@@ -1,6 +1,8 @@
 package mb.common.message;
 
 import mb.common.region.Region;
+import mb.common.util.IterableUtil;
+import mb.common.util.ListView;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
@@ -36,7 +38,7 @@ public class MessagesBuilder {
     }
 
     public void addMessages(Messages messages) {
-        this.messages.addAll(messages.messages);
+        IterableUtil.addAll(this.messages, messages.messages);
     }
 
 
@@ -47,7 +49,7 @@ public class MessagesBuilder {
 
     public void replaceMessages(Messages messages) {
         this.messages.clear();
-        this.messages.addAll(messages.messages);
+        IterableUtil.addAll(this.messages, messages.messages);
     }
 
 
@@ -57,6 +59,6 @@ public class MessagesBuilder {
 
 
     public Messages build() {
-        return new Messages(new ArrayList<>(this.messages));
+        return new Messages(ListView.copyOf(messages));
     }
 }

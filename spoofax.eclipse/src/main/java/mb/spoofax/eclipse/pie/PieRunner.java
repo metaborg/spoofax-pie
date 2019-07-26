@@ -126,7 +126,7 @@ public class PieRunner {
 
         try(final PieSession session = languageComponent.newPieSession()) {
             updateAffectedBy(resourceChanges.changed, session, monitor);
-            observeAutoTransforms(languageComponent, resourceChanges, session, monitor);
+            observeUnobserveAutoTransforms(languageComponent, resourceChanges, session, monitor);
         }
     }
 
@@ -135,7 +135,7 @@ public class PieRunner {
         IProject project,
         IResourceDelta delta,
         @Nullable IProgressMonitor monitor
-    ) throws ExecException, InterruptedException, CoreException {
+    ) throws ExecException, InterruptedException, CoreException, IOException {
         logger.trace("Running incremental build for project '{}'", project);
 
         final ResourceChanges resourceChanges = new ResourceChanges(delta, languageComponent.getLanguageInstance().getFileExtensions());
@@ -143,7 +143,7 @@ public class PieRunner {
         bottomUpWorkspaceUpdate = workspaceUpdateFactory.create(languageComponent);
         try(final PieSession session = languageComponent.newPieSession()) {
             updateAffectedBy(resourceChanges.changed, session, monitor);
-            observeAutoTransforms(languageComponent, resourceChanges, session, monitor);
+            observeUnobserveAutoTransforms(languageComponent, resourceChanges, session, monitor);
         }
         bottomUpWorkspaceUpdate.update(null, monitor);
         bottomUpWorkspaceUpdate = null;
@@ -176,8 +176,7 @@ public class PieRunner {
                     unobserve(def.createTask(new TransformInput(TransformSubjects.file(file))), pie, session);
                 }
             }
-            // Delete unobserved tasks (garbage collection).
-            session.deleteUnobservedTasks((t) -> true, (t, r) -> true);
+            deleteUnobservedTasks(session);
         }
     }
 
@@ -190,7 +189,7 @@ public class PieRunner {
     ) throws IOException, CoreException, ExecException, InterruptedException {
         final ResourceChanges resourceChanges = new ResourceChanges(languageComponent.getEclipseIdentifiers().getNature(), languageComponent.getLanguageInstance().getFileExtensions());
         try(final PieSession session = languageComponent.newPieSession()) {
-            observeAutoTransforms(languageComponent, resourceChanges, session, monitor);
+            observeUnobserveAutoTransforms(languageComponent, resourceChanges, session, monitor);
         }
     }
 
@@ -283,6 +282,11 @@ public class PieRunner {
         session.unobserve(key);
     }
 
+    public void deleteUnobservedTasks(PieSession session) throws IOException {
+        logger.trace("Deleting unobserved tasks");
+        session.deleteUnobservedTasks((t) -> true, (t, r) -> true);
+    }
+
 
     // Helper/utility classes and methods.
 
@@ -296,43 +300,65 @@ public class PieRunner {
 
 
     private static class ResourceChanges {
-        public final HashSet<ResourcePath> changed = new HashSet<>();
-        public final ArrayList<ResourcePath> newProjects = new ArrayList<>();
-        public final ArrayList<ResourcePath> newDirectories = new ArrayList<>();
-        public final ArrayList<ResourcePath> newFiles = new ArrayList<>();
+        final HashSet<ResourcePath> changed = new HashSet<>();
+        final ArrayList<ResourcePath> newProjects = new ArrayList<>();
+        final ArrayList<ResourcePath> newDirectories = new ArrayList<>();
+        final ArrayList<ResourcePath> newFiles = new ArrayList<>();
+        final ArrayList<ResourcePath> removedProjects = new ArrayList<>();
+        final ArrayList<ResourcePath> removedDirectories = new ArrayList<>();
+        final ArrayList<ResourcePath> removedFiles = new ArrayList<>();
 
-        public ResourceChanges(EclipseResource project, SetView<String> extensions) throws IOException {
+        boolean hasRemovedResources() {
+            return !(removedProjects.isEmpty() && removedDirectories.isEmpty() && removedFiles.isEmpty());
+        }
+
+        ResourceChanges(EclipseResource project, SetView<String> extensions) throws IOException {
             walkProject(project, extensions);
         }
 
-        public ResourceChanges(IResourceDelta delta, SetView<String> extensions) throws CoreException {
+        ResourceChanges(IResourceDelta delta, SetView<String> extensions) throws CoreException {
             delta.accept((d) -> {
+                final int kind = d.getKind();
+                final boolean added = kind == IResourceDelta.ADDED;
+                final boolean removed = kind == IResourceDelta.REMOVED;
                 final IResource resource = d.getResource();
                 final EclipseResourcePath path = new EclipseResourcePath(resource);
-                changed.add(path); // Also mark non-language resources as changed, since tasks may require/provide non-language resources.
-                if(d.getKind() == IResourceDelta.ADDED) {
-                    switch(resource.getType()) {
-                        case IResource.PROJECT:
+                // Do not mark removed resources as changed, as tasks for removed resources should be unobserved instead of being executed.
+                if(!removed) {
+                    // Mark all resources as changed, since tasks may require/provide non-language resources.
+                    changed.add(path);
+                }
+                switch(resource.getType()) {
+                    case IResource.PROJECT:
+                        if(added) {
                             newProjects.add(path);
-                            break;
-                        case IResource.FOLDER:
+                        } else if(removed) {
+                            removedProjects.add(path);
+                        }
+                        break;
+                    case IResource.FOLDER:
+                        if(added) {
                             newDirectories.add(path);
-                            break;
-                        case IResource.FILE:
-                            final @Nullable String extension = path.getLeafExtension();
-                            if(extension != null) {
-                                if(extensions.contains(extension)) {
-                                    newFiles.add(path);
-                                }
+                        } else if(removed) {
+                            removedDirectories.add(path);
+                        }
+                        break;
+                    case IResource.FILE:
+                        final @Nullable String extension = path.getLeafExtension();
+                        if(extension != null && extensions.contains(extension)) {
+                            if(added) {
+                                newFiles.add(path);
+                            } else if(removed) {
+                                removedFiles.add(path);
                             }
-                            break;
-                    }
+                        }
+                        break;
                 }
                 return true;
             });
         }
 
-        public ResourceChanges(String projectNatureId, SetView<String> extensions) throws IOException, CoreException {
+        ResourceChanges(String projectNatureId, SetView<String> extensions) throws IOException, CoreException {
             for(IProject eclipseProject : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
                 if(!eclipseProject.hasNature(projectNatureId)) continue;
                 final EclipseResource project = new EclipseResource(eclipseProject);
@@ -366,11 +392,11 @@ public class PieRunner {
 
 
     private static class AutoTransformDefs {
-        public final CollectionView<TransformDef> project;
-        public final CollectionView<TransformDef> directory;
-        public final CollectionView<TransformDef> file;
+        final CollectionView<TransformDef> project;
+        final CollectionView<TransformDef> directory;
+        final CollectionView<TransformDef> file;
 
-        public AutoTransformDefs(EclipseLanguageComponent languageComponent) {
+        AutoTransformDefs(EclipseLanguageComponent languageComponent) {
             final ArrayList<TransformDef> project = new ArrayList<>();
             final ArrayList<TransformDef> directory = new ArrayList<>();
             final ArrayList<TransformDef> file = new ArrayList<>();
@@ -392,27 +418,39 @@ public class PieRunner {
         }
     }
 
-    private void observeAutoTransforms(
+    private void observeUnobserveAutoTransforms(
         EclipseLanguageComponent languageComponent,
         ResourceChanges resourceChanges,
         PieSession session,
         @Nullable IProgressMonitor monitor
-    ) throws ExecException, InterruptedException {
+    ) throws ExecException, InterruptedException, IOException {
         final AutoTransformDefs autoTransformDefs = new AutoTransformDefs(languageComponent); // OPTO: calculate once per language component
-        for(ResourcePath project : resourceChanges.newProjects) {
-            for(TransformDef def : autoTransformDefs.project) {
-                require(def.createTask(new TransformInput(TransformSubjects.project(project))), session, monitor);
+        for(TransformDef def : autoTransformDefs.project) {
+            for(ResourcePath newProject : resourceChanges.newProjects) {
+                require(def.createTask(new TransformInput(TransformSubjects.project(newProject))), session, monitor);
+            }
+            for(ResourcePath removedProject : resourceChanges.removedProjects) {
+                unobserve(def.createTask(new TransformInput(TransformSubjects.project(removedProject))), pie, session);
             }
         }
-        for(ResourcePath directory : resourceChanges.newDirectories) {
-            for(TransformDef def : autoTransformDefs.directory) {
-                require(def.createTask(new TransformInput(TransformSubjects.directory(directory))), session, monitor);
+        for(TransformDef def : autoTransformDefs.directory) {
+            for(ResourcePath newDirectory : resourceChanges.newDirectories) {
+                require(def.createTask(new TransformInput(TransformSubjects.directory(newDirectory))), session, monitor);
+            }
+            for(ResourcePath removedDirectory : resourceChanges.removedDirectories) {
+                unobserve(def.createTask(new TransformInput(TransformSubjects.directory(removedDirectory))), pie, session);
             }
         }
-        for(ResourcePath file : resourceChanges.newFiles) {
-            for(TransformDef def : autoTransformDefs.file) {
-                require(def.createTask(new TransformInput(TransformSubjects.file(file))), session, monitor);
+        for(TransformDef def : autoTransformDefs.file) {
+            for(ResourcePath newFile : resourceChanges.newFiles) {
+                require(def.createTask(new TransformInput(TransformSubjects.file(newFile))), session, monitor);
             }
+            for(ResourcePath removedFile : resourceChanges.removedFiles) {
+                unobserve(def.createTask(new TransformInput(TransformSubjects.file(removedFile))), pie, session);
+            }
+        }
+        if(resourceChanges.hasRemovedResources()) {
+            deleteUnobservedTasks(session);
         }
     }
 }

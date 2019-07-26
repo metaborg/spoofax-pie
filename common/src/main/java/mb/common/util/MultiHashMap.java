@@ -3,12 +3,8 @@ package mb.common.util;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.function.BiConsumer;
 
 public class MultiHashMap<K, V> implements Serializable {
@@ -50,6 +46,11 @@ public class MultiHashMap<K, V> implements Serializable {
 
     public void putAll(@Nullable K key, Collection<? extends V> values) {
         map.computeIfAbsent(key, k -> new ArrayList<>()).addAll(values);
+    }
+
+    public void putAll(@Nullable K key, Iterable<? extends V> values) {
+        final ArrayList<V> list = map.computeIfAbsent(key, k -> new ArrayList<>());
+        IterableUtil.addAll(list, values);
     }
 
     public void putAll(Map<? extends K, ? extends Collection<? extends V>> mapping) {

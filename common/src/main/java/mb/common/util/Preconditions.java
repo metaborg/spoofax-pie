@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2007 The Guava Authors
+ * Modifications copyright (C) 2019 Delft University of Technology
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -15,6 +16,7 @@ package mb.common.util;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+// Selectively copied from https://github.com/google/guava/blob/master/guava/src/com/google/common/base/Preconditions.java
 public class Preconditions {
     /**
      * Ensures the truth of an expression involving one or more parameters to the calling method.
