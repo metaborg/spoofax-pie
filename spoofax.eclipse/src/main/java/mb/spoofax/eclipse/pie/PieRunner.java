@@ -19,8 +19,7 @@ import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.transform.*;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
-import mb.spoofax.eclipse.editor.TextDocumentProvider;
-import mb.spoofax.eclipse.editor.TextEditorInput;
+import mb.spoofax.eclipse.editor.NamedEditorInput;
 import mb.spoofax.eclipse.resource.*;
 import mb.spoofax.eclipse.transform.TransformUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -36,6 +35,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.ide.IDE;
+import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import javax.inject.Inject;
@@ -335,7 +335,7 @@ public class PieRunner {
                 return Optional.empty(); // Return value is required.
             })
             .openEditorWithText((text, name, region) -> {
-                final TextEditorInput editorInput = TextDocumentProvider.createTextEditorInput(name, text);
+                final NamedEditorInput editorInput = new NamedEditorInput(name);
 
                 // Execute in UI thread because getActiveWorkbenchWindow is only available in the UI thread.
                 Display.getDefault().asyncExec(() -> {
@@ -344,10 +344,23 @@ public class PieRunner {
                         final IEditorPart editor = IDE.openEditor(page, editorInput, EditorsUI.DEFAULT_TEXT_EDITOR_ID, activate);
                         if(editor instanceof ITextEditor) {
                             final ITextEditor textEditor = (ITextEditor) editor;
-                            textEditor.getDocumentProvider().getDocument(editorInput);
+                            final @Nullable IDocumentProvider documentProvider = textEditor.getDocumentProvider();
+                            if(documentProvider == null) {
+                                logger.error("Cannot update text of editor with name '" + name + "', getDocumentProvider returns null");
+                                return;
+                            }
+                            final @Nullable IDocument document = documentProvider.getDocument(editorInput);
+                            if(document == null) {
+                                logger.error("Cannot update text of editor with name '" + name + "', getDocument returns null");
+                                return;
+                            }
+                            document.set(text);
+                            
                             if(region != null) {
                                 textEditor.selectAndReveal(region.getStartOffset(), region.length());
                             }
+                        } else {
+                            logger.error("Cannot update text of editor with name '" + name + "', it does not implement ITextEditor");
                         }
                     } catch(PartInitException e) {
                         throw new RuntimeException("Cannot open editor (for text) with name '" + name + "', opening editor failed unexpectedly", e);
