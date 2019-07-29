@@ -4,12 +4,12 @@ import mb.common.util.ListView;
 import mb.common.util.SerializationUtil;
 import mb.spoofax.core.language.transform.TransformInput;
 import mb.spoofax.core.language.transform.TransformRequest;
-import mb.spoofax.core.language.transform.TransformSubject;
 import mb.spoofax.eclipse.transform.TransformData;
 import mb.spoofax.eclipse.transform.TransformHandler;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.ui.actions.CompoundContributionItem;
 import org.eclipse.ui.menus.CommandContributionItem;
 import org.eclipse.ui.menus.CommandContributionItemParameter;
@@ -18,8 +18,6 @@ import org.eclipse.ui.services.IServiceLocator;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 abstract class MenuShared extends CompoundContributionItem implements IWorkbenchContribution {
     protected @MonotonicNonNull IServiceLocator serviceLocator;

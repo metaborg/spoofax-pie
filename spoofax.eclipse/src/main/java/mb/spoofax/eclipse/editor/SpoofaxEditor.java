@@ -9,7 +9,8 @@ import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.SpoofaxEclipseComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.pie.PieRunner;
-import mb.spoofax.eclipse.util.FileUtil;
+import mb.spoofax.eclipse.resource.EclipseDocumentResource;
+import mb.spoofax.eclipse.util.EditorInputUtil;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -25,9 +26,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.editors.text.TextEditor;
+import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 
-import java.util.Optional;
+import java.util.Objects;
 
 public abstract class SpoofaxEditor extends TextEditor {
     private final class DocumentListener implements IDocumentListener {
@@ -54,17 +56,16 @@ public abstract class SpoofaxEditor extends TextEditor {
     @SuppressWarnings("NullableProblems") private @MonotonicNonNull IJobManager jobManager;
     @SuppressWarnings("NullableProblems") private @MonotonicNonNull LoggerFactory loggerFactory;
     @SuppressWarnings("NullableProblems") private @MonotonicNonNull Logger logger;
-    @SuppressWarnings("NullableProblems") private @MonotonicNonNull FileUtil fileUtil;
     @SuppressWarnings("NullableProblems") private @MonotonicNonNull PieRunner pieRunner;
 
     // Set in createSourceViewer, unset in dispose, may never be null otherwise.
     private @Nullable IEditorInput input;
-    private @Nullable IDocument document;
-    private @Nullable DocumentListener documentListener;
     private @Nullable ISourceViewer sourceViewer;
 
-    // Set in createSourceViewer, but may be null if there is no associated file for the editor input.
-    private @Nullable IFile file;
+    // Set in createSourceViewer, if unset in dispose, may never be null if documentProvider returns a null document.
+    private @Nullable IDocument document;
+    private @Nullable DocumentListener documentListener;
+    private @Nullable EclipseDocumentResource resource;
 
 
     protected SpoofaxEditor(EclipseLanguageComponent languageComponent) {
@@ -77,8 +78,8 @@ public abstract class SpoofaxEditor extends TextEditor {
         return languageComponent;
     }
 
-    public Optional<IFile> getFile() {
-        return Optional.ofNullable(file);
+    public @Nullable EclipseDocumentResource getResource() {
+        return resource;
     }
 
     public Selection getSelection() {
@@ -133,80 +134,84 @@ public abstract class SpoofaxEditor extends TextEditor {
         final SpoofaxEclipseComponent component = SpoofaxPlugin.getComponent();
         this.loggerFactory = component.getLoggerFactory();
         this.logger = loggerFactory.create(getClass());
-        this.fileUtil = component.getFileUtils();
         this.pieRunner = component.getPieRunner();
 
         setDocumentProvider(new SpoofaxDocumentProvider());
-        setSourceViewerConfiguration(new SourceViewerConfiguration());
+        setSourceViewerConfiguration(new SpoofaxSourceViewerConfiguration());
         setEditorContextMenuId("#SpoofaxEditorContext");
     }
 
     @Override
     protected ISourceViewer createSourceViewer(@NonNull Composite parent, @NonNull IVerticalRuler ruler, int styles) {
         input = getEditorInput();
-        document = getDocumentProvider().getDocument(input);
+        Objects.requireNonNull(input); // Hint to editor that input cannot be null.
 
-        final @Nullable IFile inputFile = fileUtil.toFile(input);
-        if(inputFile != null) {
-            this.file = inputFile;
+        final IDocumentProvider documentProvider = getDocumentProvider();
+        document = documentProvider.getDocument(input);
+        if(document != null) {
+            documentListener = new DocumentListener();
+            document.addDocumentListener(documentListener);
+
+            final @Nullable IFile file = EditorInputUtil.getFile(input);
+            if(file != null) {
+                resource = new EclipseDocumentResource(document, file);
+            } else {
+                resource = new EclipseDocumentResource(document, input.getName());
+            }
         } else {
-            this.file = null;
-            logger.warn("File for editor on {} is null, cannot update the editor", input);
+            logger.error("Editor cannot be initialized, document provider '{}' returned null for editor input '{}'", documentProvider, input);
+            resource = null;
+            documentListener = null;
         }
 
-        documentListener = new DocumentListener();
-        document.addDocumentListener(documentListener);
-
         sourceViewer = super.createSourceViewer(parent, ruler, styles);
+        Objects.requireNonNull(sourceViewer); // Hint to editor that sourceViewer cannot be null.
         final SourceViewerDecorationSupport decorationSupport = getSourceViewerDecorationSupport(sourceViewer);
         configureSourceViewerDecorationSupport(decorationSupport);
 
         ((ITextViewerExtension4) sourceViewer).addTextPresentationListener(presentationMerger);
 
-        scheduleJob(true);
+        if(document != null) {
+            scheduleJob(true);
+        }
 
         return sourceViewer;
     }
 
     @Override public void dispose() {
-        if(input != null) {
-            cancelJobs(input);
-        }
+        cancelJobs();
 
-        if(documentListener != null) {
+        if(document != null && documentListener != null) {
             document.removeDocumentListener(documentListener);
         }
 
-        if(file != null) {
-            pieRunner.removeEditor(file);
-        } else {
-            logger.error("Cannot remove editor '{}' from PieRunner, as input '{}' was not resolved to a file", this,
-                input);
+        if(resource != null) {
+            pieRunner.removeEditor(resource);
         }
 
         input = null;
+        sourceViewer = null;
+
         document = null;
         documentListener = null;
+        resource = null;
 
         super.dispose();
     }
 
 
     private void scheduleJob(boolean initialUpdate) {
-        cancelJobs(input);
-        if(file == null) {
-            logger.error("Cannot schedule editor update job for editor '{}', as input '{}' was not resolved to a file",
-                this, input);
-        }
-        final Job job = new EditorUpdateJob(loggerFactory, pieRunner, languageComponent, file, document, this);
-        job.setRule(file);
+        if(resource == null) return;
+        cancelJobs();
+        final Job job = new EditorUpdateJob(loggerFactory, pieRunner, languageComponent, resource, this);
+        job.setRule(resource.getWrappedEclipseResource()); // May return null, but null is a valid scheduling rule.
         job.schedule(initialUpdate ? 0 : 300);
     }
 
-    private void cancelJobs(IEditorInput specificInput) {
-        final Job[] existingJobs = jobManager.find(specificInput);
+    private void cancelJobs() {
+        final Job[] existingJobs = jobManager.find(this);
         if(existingJobs.length > 0) {
-            logger.trace("Cancelling editor update jobs for '{}'", specificInput);
+            logger.trace("Cancelling editor update jobs for '{}'", this);
             for(Job job : existingJobs) {
                 job.cancel();
             }

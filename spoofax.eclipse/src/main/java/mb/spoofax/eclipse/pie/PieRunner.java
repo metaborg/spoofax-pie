@@ -21,10 +21,7 @@ import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.eclipse.editor.TextDocumentProvider;
 import mb.spoofax.eclipse.editor.TextEditorInput;
-import mb.spoofax.eclipse.resource.EclipseResource;
-import mb.spoofax.eclipse.resource.EclipseResourcePath;
-import mb.spoofax.eclipse.resource.EclipseResourceRegistry;
-import mb.spoofax.eclipse.resource.WrapsEclipseResource;
+import mb.spoofax.eclipse.resource.*;
 import mb.spoofax.eclipse.transform.TransformUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.*;
@@ -53,7 +50,7 @@ public class PieRunner {
     private final Logger logger;
     private final ResourceService resourceService;
     private final Pie pie;
-    private final EclipseResourceRegistry eclipseResourceRegistry;
+    private final EclipseDocumentResourceRegistry eclipseDocumentResourceRegistry;
     private final WorkspaceUpdate.Factory workspaceUpdateFactory;
 
     private @Nullable WorkspaceUpdate bottomUpWorkspaceUpdate = null;
@@ -62,14 +59,15 @@ public class PieRunner {
     @Inject
     public PieRunner(
         LoggerFactory loggerFactory,
-        ResourceService resourceService, Pie pie,
-        EclipseResourceRegistry eclipseResourceRegistry,
+        ResourceService resourceService,
+        Pie pie,
+        EclipseDocumentResourceRegistry eclipseDocumentResourceRegistry,
         WorkspaceUpdate.Factory workspaceUpdateFactory
     ) {
         this.logger = loggerFactory.create(getClass());
         this.resourceService = resourceService;
         this.pie = pie;
-        this.eclipseResourceRegistry = eclipseResourceRegistry;
+        this.eclipseDocumentResourceRegistry = eclipseDocumentResourceRegistry;
         this.workspaceUpdateFactory = workspaceUpdateFactory;
     }
 
@@ -78,27 +76,27 @@ public class PieRunner {
 
     public <D extends IDocument & IDocumentExtension4> void addOrUpdateEditor(
         EclipseLanguageComponent languageComponent,
-        IFile file,
-        D document,
+        EclipseDocumentResource resource,
         SpoofaxEditor editor,
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException {
-        logger.trace("Adding or updating editor for file '{}'", file);
+        logger.trace("Adding or updating editor for '{}'", resource);
 
-        final EclipseResourcePath resourceKey = new EclipseResourcePath(file);
-        eclipseResourceRegistry.addDocumentOverride(resourceKey, document, file);
+        eclipseDocumentResourceRegistry.putDocumentResource(resource);
+        final EclipseDocumentKey key = resource.getKey();
+
         final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
 
         try(final PieSession session = languageComponent.newPieSession()) {
             // First run a bottom-up build, to ensure that tasks affected by changed file are brought up-to-date.
-            final HashSet<EclipseResourcePath> changedResources = new HashSet<>();
-            changedResources.add(resourceKey);
+            final HashSet<ResourceKey> changedResources = new HashSet<>();
+            changedResources.add(key);
             updateAffectedBy(changedResources, session, monitor);
 
             final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
 
-            final Task<@Nullable Styling> styleTask = languageInstance.createStyleTask(resourceKey);
-            final String text = document.get();
+            final Task<@Nullable Styling> styleTask = languageInstance.createStyleTask(key);
+            final String text = resource.getDocument().get();
             final @Nullable Styling styling = requireWithoutObserving(styleTask, session, monitor);
             //noinspection ConstantConditions (styling can really be null)
             if(styling != null) {
@@ -107,19 +105,18 @@ public class PieRunner {
                 workspaceUpdate.removeStyle(editor, text.length());
             }
 
-            final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(resourceKey);
+            final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(key);
             final KeyedMessages messages = requireWithoutObserving(checkTask, session, monitor);
-            workspaceUpdate.clearMessages(resourceKey);
+            workspaceUpdate.clearMessages(key);
             workspaceUpdate.replaceMessages(messages);
         }
 
-        workspaceUpdate.update(file, monitor);
+        workspaceUpdate.update(resource.getWrappedEclipseResource(), monitor);
     }
 
-    public void removeEditor(IFile file) {
-        logger.trace("Removing editor for file '{}'", file);
-        final EclipseResourcePath resourceKey = new EclipseResourcePath(file);
-        eclipseResourceRegistry.removeDocumentOverride(resourceKey);
+    public void removeEditor(EclipseDocumentResource resource) {
+        logger.trace("Removing editor for '{}'", resource);
+        eclipseDocumentResourceRegistry.removeDocumentResource(resource);
     }
 
 

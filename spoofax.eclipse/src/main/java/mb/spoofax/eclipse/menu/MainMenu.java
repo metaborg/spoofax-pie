@@ -14,4 +14,8 @@ public class MainMenu extends EditorContextMenu /* Same as editor context menu f
     @Override protected ListView<MenuItem> getMenuItems(LanguageInstance languageInstance) {
         return languageInstance.getMainMenuItems();
     }
+
+    @Override protected boolean addLangMenu() {
+        return false;
+    }
 }

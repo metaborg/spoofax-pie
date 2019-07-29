@@ -145,7 +145,8 @@
     </menuContribution>
     <!-- Main -->
     <menuContribution locationURI="menu:org.eclipse.ui.main.menu">
-      <dynamic id="tiger.eclipse.menu.editor.context" class="mb.tiger.eclipse.TigerMainMenu">
+      <menu id="tiger.eclipse.menu.main" label="Tiger">
+        <dynamic id="tiger.eclipse.menu.main.dynamic" class="mb.tiger.eclipse.TigerMainMenu"/>
         <visibleWhen>
           <with variable="activeContexts">
             <iterate ifEmpty="false" operator="or">
@@ -153,7 +154,7 @@
             </iterate>
           </with>
         </visibleWhen>
-      </dynamic>
+      </menu>
     </menuContribution>
   </extension>
 

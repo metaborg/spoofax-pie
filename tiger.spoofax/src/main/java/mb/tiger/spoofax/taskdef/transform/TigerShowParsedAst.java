@@ -7,7 +7,7 @@ import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
-import mb.resource.hierarchical.ResourcePath;
+import mb.resource.ResourceKey;
 import mb.spoofax.core.language.transform.*;
 import mb.stratego.common.StrategoUtil;
 import mb.tiger.spoofax.taskdef.TigerParse;
@@ -30,19 +30,19 @@ public class TigerShowParsedAst implements TaskDef<TransformInput, TransformOutp
 
     @Override public TransformOutput exec(ExecContext context, TransformInput input) throws Exception {
         final TransformSubject subject = input.subject;
-        final ResourcePath file = TransformSubjects.getFile(subject)
-            .orElseThrow(() -> new RuntimeException("Cannot show parsed AST, subject '" + subject + "' is not a file subject"));
+        final ResourceKey readable = TransformSubjects.getReadable(subject)
+            .orElseThrow(() -> new RuntimeException("Cannot show parsed AST, subject '" + subject + "' is not a readable subject"));
 
-        final JSGLR1ParseResult parseResult = context.require(parse, file);
+        final JSGLR1ParseResult parseResult = context.require(parse, readable);
         final IStrategoTerm ast = parseResult.getAst()
-            .orElseThrow(() -> new RuntimeException("Cannot show parsed AST, parsed AST for '" + file + "' is null"));
+            .orElseThrow(() -> new RuntimeException("Cannot show parsed AST, parsed AST for '" + readable + "' is null"));
 
         final IStrategoTerm term = TransformSubjects.caseOf(subject)
-            .fileRegion((f, r) -> TermTracer.getSmallestTermEncompassingRegion(ast, r))
+            .readableWithRegion((f, r) -> TermTracer.getSmallestTermEncompassingRegion(ast, r))
             .otherwise_(ast);
 
         final String formatted = StrategoUtil.toString(term);
-        return new TransformOutput(ListView.of(TransformFeedbacks.openEditorWithText(formatted, "Parsed AST for '" + file + "'", null)));
+        return new TransformOutput(ListView.of(TransformFeedbacks.openEditorWithText(formatted, "Parsed AST for '" + readable + "'", null)));
     }
 
     @Override public Task<TransformOutput> createTask(TransformInput input) {
@@ -59,6 +59,6 @@ public class TigerShowParsedAst implements TaskDef<TransformInput, TransformOutp
     }
 
     @Override public EnumSetView<TransformSubjectType> getSupportedSubjectTypes() {
-        return EnumSetView.of(TransformSubjectType.File, TransformSubjectType.FileRegion);
+        return EnumSetView.of(TransformSubjectType.Readable, TransformSubjectType.ReadableWithRegion);
     }
 }

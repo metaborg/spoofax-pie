@@ -7,7 +7,7 @@ import mb.jsglr.common.TermTracer;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
-import mb.resource.hierarchical.ResourcePath;
+import mb.resource.ResourceKey;
 import mb.spoofax.core.language.transform.*;
 import mb.stratego.common.StrategoUtil;
 import mb.tiger.spoofax.taskdef.TigerAnalyze;
@@ -35,10 +35,10 @@ public class TigerShowAnalyzedAst implements TaskDef<TransformInput, TransformOu
 
     @Override public TransformOutput exec(ExecContext context, TransformInput input) throws Exception {
         final TransformSubject subject = input.subject;
-        final ResourcePath file = TransformSubjects.getFile(subject)
-            .orElseThrow(() -> new RuntimeException("Cannot show analyzed AST, subject '" + subject + "' is not a file subject"));
+        final ResourceKey readable = TransformSubjects.getReadable(subject)
+            .orElseThrow(() -> new RuntimeException("Cannot show analyzed AST, subject '" + subject + "' is not a readable subject"));
 
-        final ConstraintAnalyzer.@Nullable SingleFileResult analysisResult = context.require(analyze, file);
+        final ConstraintAnalyzer.@Nullable SingleFileResult analysisResult = context.require(analyze, readable);
         if(analysisResult == null) {
             throw new RuntimeException("Cannot show analyzed AST, analysis result for '" + input.subject + "' is null");
         }
@@ -47,11 +47,11 @@ public class TigerShowAnalyzedAst implements TaskDef<TransformInput, TransformOu
         }
 
         final IStrategoTerm term = TransformSubjects.caseOf(subject)
-            .fileRegion((f, r) -> TermTracer.getSmallestTermEncompassingRegion(analysisResult.ast, r))
+            .readableWithRegion((f, r) -> TermTracer.getSmallestTermEncompassingRegion(analysisResult.ast, r))
             .otherwise_(analysisResult.ast);
 
         final String formatted = StrategoUtil.toString(term);
-        return new TransformOutput(ListView.of(TransformFeedbacks.openEditorWithText(formatted, "Analyzed AST for '" + file + "'", null)));
+        return new TransformOutput(ListView.of(TransformFeedbacks.openEditorWithText(formatted, "Analyzed AST for '" + readable + "'", null)));
     }
 
     @Override public Task<TransformOutput> createTask(TransformInput input) {
@@ -68,6 +68,6 @@ public class TigerShowAnalyzedAst implements TaskDef<TransformInput, TransformOu
     }
 
     @Override public EnumSetView<TransformSubjectType> getSupportedSubjectTypes() {
-        return EnumSetView.of(TransformSubjectType.File, TransformSubjectType.FileRegion);
+        return EnumSetView.of(TransformSubjectType.Readable, TransformSubjectType.ReadableWithRegion);
     }
 }

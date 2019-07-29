@@ -6,7 +6,7 @@ import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
-import mb.resource.hierarchical.ResourcePath;
+import mb.resource.ResourceKey;
 import mb.spoofax.core.language.transform.*;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
@@ -41,10 +41,10 @@ public class TigerShowPrettyPrintedText implements TaskDef<TransformInput, Trans
 
     @Override public TransformOutput exec(ExecContext context, TransformInput input) throws Exception {
         final TransformSubject subject = input.subject;
-        final ResourcePath file = TransformSubjects.getFile(subject)
-            .orElseThrow(() -> new RuntimeException("Cannot show pretty-printed text, subject '" + subject + "' is not a file subject"));
+        final ResourceKey readable = TransformSubjects.getReadable(subject)
+            .orElseThrow(() -> new RuntimeException("Cannot show pretty-printed text, subject '" + subject + "' is not a readable subject"));
 
-        final JSGLR1ParseResult parseResult = context.require(parse, file);
+        final JSGLR1ParseResult parseResult = context.require(parse, readable);
         final IStrategoTerm ast = parseResult.getAst()
             .orElseThrow(() -> new RuntimeException("Cannot show pretty-printed text, parsed AST for '" + input.subject + "' is null"));
 
@@ -56,7 +56,7 @@ public class TigerShowPrettyPrintedText implements TaskDef<TransformInput, Trans
         }
 
         final String formatted = StrategoUtil.toString(result);
-        return new TransformOutput(ListView.of(TransformFeedbacks.openEditorWithText(formatted, "Pretty-printed text for '" + file + "'", null)));
+        return new TransformOutput(ListView.of(TransformFeedbacks.openEditorWithText(formatted, "Pretty-printed text for '" + readable + "'", null)));
     }
 
     @Override public Task<TransformOutput> createTask(TransformInput input) {
@@ -73,6 +73,6 @@ public class TigerShowPrettyPrintedText implements TaskDef<TransformInput, Trans
     }
 
     @Override public EnumSetView<TransformSubjectType> getSupportedSubjectTypes() {
-        return EnumSetView.of(TransformSubjectType.File);
+        return EnumSetView.of(TransformSubjectType.Readable);
     }
 }

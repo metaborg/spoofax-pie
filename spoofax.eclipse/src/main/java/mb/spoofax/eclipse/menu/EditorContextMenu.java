@@ -5,6 +5,8 @@ import mb.common.region.Selection;
 import mb.common.region.Selections;
 import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
+import mb.log.api.Logger;
+import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.menu.MenuItem;
@@ -14,11 +16,15 @@ import mb.spoofax.core.language.transform.TransformSubjectType;
 import mb.spoofax.core.language.transform.TransformSubjects;
 import mb.spoofax.eclipse.EclipseIdentifiers;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
+import mb.spoofax.eclipse.SpoofaxEclipseComponent;
+import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
-import mb.spoofax.eclipse.resource.EclipseResourcePath;
+import mb.spoofax.eclipse.resource.EclipseDocumentResource;
+import mb.spoofax.eclipse.resource.EclipseResource;
 import mb.spoofax.eclipse.transform.TransformUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
@@ -26,10 +32,13 @@ import org.eclipse.ui.PlatformUI;
 import java.util.Optional;
 
 public class EditorContextMenu extends MenuShared {
+    private final Logger logger;
     private final EclipseLanguageComponent languageComponent;
 
 
     public EditorContextMenu(EclipseLanguageComponent languageComponent) {
+        final SpoofaxEclipseComponent component = SpoofaxPlugin.getComponent();
+        this.logger = component.getLoggerFactory().create(getClass());
         this.languageComponent = languageComponent;
     }
 
@@ -47,8 +56,28 @@ public class EditorContextMenu extends MenuShared {
             // Context menu for a Spoofax editor of a different language.
             return new IContributionItem[0];
         }
-        final @Nullable ResourcePath file = editor.getFile().map(EclipseResourcePath::new).orElse(null);
+        final @Nullable EclipseDocumentResource documentResource = editor.getResource();
+        final @Nullable ResourceKey documentKey;
+        final @Nullable ResourcePath filePath;
+        if(documentResource != null) {
+            documentKey = documentResource.getKey();
+            final @Nullable EclipseResource file = documentResource.getFile();
+            if(file != null) {
+                filePath = file.getPath();
+            } else {
+                filePath = null;
+            }
+        } else {
+            documentKey = null;
+            filePath = null;
+        }
         final Selection selection = editor.getSelection();
+
+        logger.trace("Editor: {}", editor);
+        logger.trace("Document resource: {}", documentResource);
+        logger.trace("Document key: {}", documentKey);
+        logger.trace("File path: {}", filePath);
+        logger.trace("Selection: {}", selection);
 
         final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
         final EclipseIdentifiers identifiers = languageComponent.getEclipseIdentifiers();
@@ -58,17 +87,23 @@ public class EditorContextMenu extends MenuShared {
         for(MenuItem menuItem : getMenuItems(languageInstance)) {
             menuItem.accept(new EclipseMenuItemVisitor(langMenu) {
                 @Override
-                protected void transformAction(MenuManager menu, String displayName, TransformRequest transformRequest) {
+                protected void transformAction(IContributionManager menu, String displayName, TransformRequest transformRequest) {
                     final EnumSetView<TransformSubjectType> supportedTypes = transformRequest.transformDef.getSupportedSubjectTypes();
                     final ListView<TransformInput> inputs;
                     final Optional<Region> region = Selections.getRegion(selection);
                     final Optional<Integer> offset = Selections.getOffset(selection);
-                    if(file != null && region.isPresent() && supportedTypes.contains(TransformSubjectType.FileRegion)) {
-                        inputs = TransformUtil.input(TransformSubjects.fileRegion(file, region.get()));
-                    } else if(file != null && offset.isPresent() && supportedTypes.contains(TransformSubjectType.FileOffset)) {
-                        inputs = TransformUtil.input(TransformSubjects.fileOffset(file, offset.get()));
-                    } else if(file != null && supportedTypes.contains(TransformSubjectType.File)) {
-                        inputs = TransformUtil.input(TransformSubjects.file(file));
+                    if(filePath != null && region.isPresent() && supportedTypes.contains(TransformSubjectType.FileWithRegion)) {
+                        inputs = TransformUtil.input(TransformSubjects.fileWithRegion(filePath, region.get()));
+                    } else if(filePath != null && offset.isPresent() && supportedTypes.contains(TransformSubjectType.FileWithOffset)) {
+                        inputs = TransformUtil.input(TransformSubjects.fileWithOffset(filePath, offset.get()));
+                    } else if(filePath != null && supportedTypes.contains(TransformSubjectType.File)) {
+                        inputs = TransformUtil.input(TransformSubjects.file(filePath));
+                    } else if(documentKey != null && region.isPresent() && supportedTypes.contains(TransformSubjectType.ReadableWithRegion)) {
+                        inputs = TransformUtil.input(TransformSubjects.readableWithRegion(documentKey, region.get()));
+                    } else if(documentKey != null && offset.isPresent() && supportedTypes.contains(TransformSubjectType.ReadableWithOffset)) {
+                        inputs = TransformUtil.input(TransformSubjects.readableWithOffset(documentKey, offset.get()));
+                    } else if(documentKey != null && supportedTypes.contains(TransformSubjectType.Readable)) {
+                        inputs = TransformUtil.input(TransformSubjects.readable(documentKey));
                     } else if(supportedTypes.contains(TransformSubjectType.None)) {
                         inputs = TransformUtil.input(TransformSubjects.none());
                     } else {
@@ -79,10 +114,18 @@ public class EditorContextMenu extends MenuShared {
             });
         }
 
-        return new IContributionItem[]{langMenu};
+        if(addLangMenu()) {
+            return new IContributionItem[]{langMenu};
+        } else {
+            return langMenu.getItems();
+        }
     }
 
     protected ListView<MenuItem> getMenuItems(LanguageInstance languageInstance) {
         return languageInstance.getEditorContextMenuItems();
+    }
+
+    protected boolean addLangMenu() {
+        return true;
     }
 }

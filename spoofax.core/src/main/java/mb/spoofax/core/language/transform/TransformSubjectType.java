@@ -6,7 +6,10 @@ public enum TransformSubjectType implements Serializable {
     Project,
     Directory,
     File,
-    FileRegion,
-    FileOffset,
+    FileWithRegion,
+    FileWithOffset,
+    Readable,
+    ReadableWithRegion,
+    ReadableWithOffset,
     None
 }

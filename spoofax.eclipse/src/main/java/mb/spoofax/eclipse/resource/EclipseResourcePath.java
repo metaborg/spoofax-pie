@@ -25,9 +25,9 @@ public class EclipseResourcePath implements ResourcePath {
         this.path = path;
     }
 
-    public EclipseResourcePath(String pathString) {
-        this.pathString = pathString;
-        this.path = Path.fromPortableString(pathString);
+    public EclipseResourcePath(String portablePathString) {
+        this.pathString = portablePathString;
+        this.path = Path.fromPortableString(portablePathString);
     }
 
     public EclipseResourcePath(IResource resource) {

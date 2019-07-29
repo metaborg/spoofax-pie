@@ -2,6 +2,7 @@ package mb.spoofax.core.language.transform;
 
 import mb.common.region.Region;
 import mb.common.util.ADT;
+import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -16,9 +17,15 @@ public abstract class TransformSubject implements Serializable {
 
         R file(ResourcePath file);
 
-        R fileRegion(ResourcePath file, Region region);
+        R fileWithRegion(ResourcePath file, Region region);
 
-        R fileOffset(ResourcePath file, int offset);
+        R fileWithOffset(ResourcePath file, int offset);
+
+        R readable(ResourceKey readable);
+
+        R readableWithRegion(ResourceKey readable, Region region);
+
+        R readableWithOffset(ResourceKey readable, int offset);
 
         R none();
     }

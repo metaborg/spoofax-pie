@@ -22,6 +22,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ISelection;
@@ -121,7 +122,7 @@ public abstract class ResourceContextMenu extends MenuShared {
         for(MenuItem menuItem : languageInstance.getResourceContextMenuItems()) {
             menuItem.accept(new EclipseMenuItemVisitor(langMenu) {
                 @Override
-                protected void transformAction(MenuManager menu, String displayName, TransformRequest transformRequest) {
+                protected void transformAction(IContributionManager menu, String displayName, TransformRequest transformRequest) {
                     final EnumSetView<TransformSubjectType> supportedTypes = transformRequest.transformDef.getSupportedSubjectTypes();
                     final ListView<TransformInput> inputs;
                     if(hasProjects && supportedTypes.contains(TransformSubjectType.Project)) {
@@ -130,6 +131,8 @@ public abstract class ResourceContextMenu extends MenuShared {
                         inputs = TransformUtil.inputs(containers.stream().map(EclipseResourcePath::new).map(TransformSubjects::directory));
                     } else if(hasFiles && supportedTypes.contains(TransformSubjectType.File)) {
                         inputs = TransformUtil.inputs(files.stream().map(EclipseResourcePath::new).map(TransformSubjects::file));
+                    } else if(hasFiles && supportedTypes.contains(TransformSubjectType.Readable)) {
+                        inputs = TransformUtil.inputs(files.stream().map(EclipseResourcePath::new).map(TransformSubjects::readable));
                     } else if(supportedTypes.contains(TransformSubjectType.None)) {
                         inputs = TransformUtil.input(TransformSubjects.none());
                     } else {

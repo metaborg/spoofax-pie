@@ -7,7 +7,7 @@ import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
-import mb.resource.hierarchical.ResourcePath;
+import mb.resource.ResourceKey;
 import mb.spoofax.core.language.transform.*;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
@@ -42,15 +42,15 @@ public class TigerShowDesugaredAst implements TaskDef<TransformInput, TransformO
 
     @Override public TransformOutput exec(ExecContext context, TransformInput input) throws Exception {
         final TransformSubject subject = input.subject;
-        final ResourcePath file = TransformSubjects.getFile(subject)
-            .orElseThrow(() -> new RuntimeException("Cannot show desugared AST, subject '" + subject + "' is not a file subject"));
+        final ResourceKey readable = TransformSubjects.getReadable(subject)
+            .orElseThrow(() -> new RuntimeException("Cannot show desugared AST, subject '" + subject + "' is not a readable subject"));
 
-        final JSGLR1ParseResult parseResult = context.require(parse, file);
+        final JSGLR1ParseResult parseResult = context.require(parse, readable);
         final IStrategoTerm ast = parseResult.getAst()
             .orElseThrow(() -> new RuntimeException("Cannot show desugared AST, parsed AST for '" + input.subject + "' is null"));
 
         final IStrategoTerm term = TransformSubjects.caseOf(subject)
-            .fileRegion((f, r) -> TermTracer.getSmallestTermEncompassingRegion(ast, r))
+            .readableWithRegion((f, r) -> TermTracer.getSmallestTermEncompassingRegion(ast, r))
             .otherwise_(ast);
 
         final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.buildFromPrototype(prototypeStrategoRuntime);
@@ -61,7 +61,7 @@ public class TigerShowDesugaredAst implements TaskDef<TransformInput, TransformO
         }
 
         final String formatted = StrategoUtil.toString(result);
-        return new TransformOutput(ListView.of(TransformFeedbacks.openEditorWithText(formatted, "Desugared AST for '" + file + "'", null)));
+        return new TransformOutput(ListView.of(TransformFeedbacks.openEditorWithText(formatted, "Desugared AST for '" + readable + "'", null)));
     }
 
     @Override public Task<TransformOutput> createTask(TransformInput input) {
@@ -78,6 +78,6 @@ public class TigerShowDesugaredAst implements TaskDef<TransformInput, TransformO
     }
 
     @Override public EnumSetView<TransformSubjectType> getSupportedSubjectTypes() {
-        return EnumSetView.of(TransformSubjectType.File, TransformSubjectType.FileRegion);
+        return EnumSetView.of(TransformSubjectType.Readable, TransformSubjectType.ReadableWithRegion);
     }
 }

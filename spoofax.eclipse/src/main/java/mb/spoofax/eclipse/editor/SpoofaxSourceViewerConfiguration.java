@@ -9,7 +9,7 @@ import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
 
-public class SourceViewerConfiguration extends TextSourceViewerConfiguration {
+public class SpoofaxSourceViewerConfiguration extends TextSourceViewerConfiguration {
     @Override public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType) {
         return new DefaultTextHover(sourceViewer);
     }
