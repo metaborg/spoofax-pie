@@ -38,7 +38,7 @@ public class TigerShowParsedAst implements TaskDef<TransformInput, TransformOutp
             .orElseThrow(() -> new RuntimeException("Cannot show parsed AST, parsed AST for '" + readable + "' is null"));
 
         final IStrategoTerm term = TransformSubjects.caseOf(subject)
-            .readableWithRegion((f, r) -> TermTracer.getSmallestTermEncompassingRegion(ast, r))
+            .editorWithRegion((f, r) -> TermTracer.getSmallestTermEncompassingRegion(ast, r))
             .otherwise_(ast);
 
         final String formatted = StrategoUtil.toString(term);
@@ -59,6 +59,6 @@ public class TigerShowParsedAst implements TaskDef<TransformInput, TransformOutp
     }
 
     @Override public EnumSetView<TransformSubjectType> getSupportedSubjectTypes() {
-        return EnumSetView.of(TransformSubjectType.Readable, TransformSubjectType.ReadableWithRegion);
+        return EnumSetView.of(TransformSubjectType.Editor, TransformSubjectType.EditorWithRegion);
     }
 }

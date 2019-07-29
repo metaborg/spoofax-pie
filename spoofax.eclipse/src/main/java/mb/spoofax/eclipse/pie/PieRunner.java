@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension4;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
@@ -43,6 +44,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @Singleton
@@ -271,10 +273,17 @@ public class PieRunner {
     ) throws ExecException, InterruptedException {
         switch(executionType) {
             case ManualOnce:
-            case ManualContinuous:
                 for(TransformInput input : inputs) {
                     final TransformOutput output = requireWithoutObserving(def.createTask(input), session, monitor);
-                    processOutput(output);
+                    processOutput(output, true);
+                }
+                break;
+            case ManualContinuous:
+                for(TransformInput input : inputs) {
+                    final Task<TransformOutput> task = def.createTask(input);
+                    final TransformOutput output = require(task, session, monitor);
+                    processOutput(output, true);
+                    pie.setCallback(task, (o) -> processOutput(o, false));
                 }
                 break;
             case AutomaticContinuous:
@@ -286,51 +295,66 @@ public class PieRunner {
         }
     }
 
-    private void processOutput(TransformOutput output) {
+    private void processOutput(TransformOutput output, boolean activate) {
         for(TransformFeedback feedback : output.feedback) {
-            processFeedback(feedback);
+            processFeedback(feedback, activate);
         }
     }
 
-    private @Nullable IEditorPart processFeedback(TransformFeedback feedback) {
-        return TransformFeedbacks.caseOf(feedback)
+    private void processFeedback(TransformFeedback feedback, boolean activate) {
+        TransformFeedbacks.caseOf(feedback)
             .openEditorForFile((file, region) -> {
-                final @Nullable WrapsEclipseResource resource;
+                final @Nullable IResource eclipseResource;
                 try {
-                    resource = resourceService.getResource(file);
-                    final @Nullable IResource eclipseResource = resource.getWrappedEclipseResource();
+                    final @Nullable WrapsEclipseResource resource = resourceService.getResource(file);
+                    eclipseResource = resource.getWrappedEclipseResource();
                     if(eclipseResource == null) {
                         throw new RuntimeException("Cannot open editor for file '" + file + "', it has no corresponding Eclipse resource");
                     }
                     if(!(eclipseResource instanceof IFile)) {
                         throw new RuntimeException("Cannot open editor for Eclipse resource '" + eclipseResource + "', it is not a file");
                     }
-                    final IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-                    final IEditorPart editor = IDE.openEditor(page, (IFile) eclipseResource);
-                    if(region != null && editor instanceof ITextEditor) {
-                        final ITextEditor textEditor = (ITextEditor) editor;
-                        textEditor.selectAndReveal(region.getStartOffset(), region.length());
-                    }
-                    return editor;
                 } catch(ClassCastException e) {
                     throw new RuntimeException("Cannot open editor for file '" + file + "', corresponding resource does not implement WrapsEclipseResource", e);
-                } catch(PartInitException e) {
-                    throw new RuntimeException("Cannot open editor for file '" + file + "', opening editor failed unexpectedly", e);
                 }
+
+                // Execute in UI thread because getActiveWorkbenchWindow is only available in the UI thread.
+                Display.getDefault().asyncExec(() -> {
+                    final IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+                    try {
+                        final IEditorPart editor = IDE.openEditor(page, (IFile) eclipseResource, activate);
+                        if(region != null && editor instanceof ITextEditor) {
+                            final ITextEditor textEditor = (ITextEditor) editor;
+                            textEditor.selectAndReveal(region.getStartOffset(), region.length());
+                        }
+                    } catch(PartInitException e) {
+                        throw new RuntimeException("Cannot open editor for file '" + file + "', opening editor failed unexpectedly", e);
+                    }
+                });
+
+                return Optional.empty(); // Return value is required.
             })
             .openEditorWithText((text, name, region) -> {
-                try {
-                    final IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-                    final TextEditorInput editorInput = TextDocumentProvider.createTextEditorInput(name, text);
-                    final IEditorPart editor = IDE.openEditor(page, editorInput, EditorsUI.DEFAULT_TEXT_EDITOR_ID);
-                    if(region != null && editor instanceof ITextEditor) {
-                        final ITextEditor textEditor = (ITextEditor) editor;
-                        textEditor.selectAndReveal(region.getStartOffset(), region.length());
+                final TextEditorInput editorInput = TextDocumentProvider.createTextEditorInput(name, text);
+
+                // Execute in UI thread because getActiveWorkbenchWindow is only available in the UI thread.
+                Display.getDefault().asyncExec(() -> {
+                    try {
+                        final IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+                        final IEditorPart editor = IDE.openEditor(page, editorInput, EditorsUI.DEFAULT_TEXT_EDITOR_ID, activate);
+                        if(editor instanceof ITextEditor) {
+                            final ITextEditor textEditor = (ITextEditor) editor;
+                            textEditor.getDocumentProvider().getDocument(editorInput);
+                            if(region != null) {
+                                textEditor.selectAndReveal(region.getStartOffset(), region.length());
+                            }
+                        }
+                    } catch(PartInitException e) {
+                        throw new RuntimeException("Cannot open editor (for text) with name '" + name + "', opening editor failed unexpectedly", e);
                     }
-                    return editor;
-                } catch(PartInitException e) {
-                    throw new RuntimeException("Cannot open editor (for text) with name '" + name + "', opening editor failed unexpectedly", e);
-                }
+                });
+
+                return Optional.empty(); // Return value is required.
             });
     }
 

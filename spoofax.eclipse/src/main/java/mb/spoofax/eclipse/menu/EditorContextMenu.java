@@ -10,10 +10,7 @@ import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.menu.MenuItem;
-import mb.spoofax.core.language.transform.TransformInput;
-import mb.spoofax.core.language.transform.TransformRequest;
-import mb.spoofax.core.language.transform.TransformSubjectType;
-import mb.spoofax.core.language.transform.TransformSubjects;
+import mb.spoofax.core.language.transform.*;
 import mb.spoofax.eclipse.EclipseIdentifiers;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.SpoofaxEclipseComponent;
@@ -30,6 +27,9 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 
 import java.util.Optional;
+
+import static mb.spoofax.core.language.transform.TransformExecutionType.ManualContinuous;
+import static mb.spoofax.core.language.transform.TransformExecutionType.ManualOnce;
 
 public class EditorContextMenu extends MenuShared {
     private final Logger logger;
@@ -89,24 +89,47 @@ public class EditorContextMenu extends MenuShared {
                 @Override
                 protected void transformAction(IContributionManager menu, String displayName, TransformRequest transformRequest) {
                     final EnumSetView<TransformSubjectType> supportedTypes = transformRequest.transformDef.getSupportedSubjectTypes();
+                    final TransformExecutionType executionType = transformRequest.executionType;
                     final ListView<TransformInput> inputs;
                     final Optional<Region> region = Selections.getRegion(selection);
                     final Optional<Integer> offset = Selections.getOffset(selection);
-                    if(filePath != null && region.isPresent() && supportedTypes.contains(TransformSubjectType.FileWithRegion)) {
-                        inputs = TransformUtil.input(TransformSubjects.fileWithRegion(filePath, region.get()));
-                    } else if(filePath != null && offset.isPresent() && supportedTypes.contains(TransformSubjectType.FileWithOffset)) {
-                        inputs = TransformUtil.input(TransformSubjects.fileWithOffset(filePath, offset.get()));
-                    } else if(filePath != null && supportedTypes.contains(TransformSubjectType.File)) {
-                        inputs = TransformUtil.input(TransformSubjects.file(filePath));
-                    } else if(documentKey != null && region.isPresent() && supportedTypes.contains(TransformSubjectType.ReadableWithRegion)) {
-                        inputs = TransformUtil.input(TransformSubjects.readableWithRegion(documentKey, region.get()));
-                    } else if(documentKey != null && offset.isPresent() && supportedTypes.contains(TransformSubjectType.ReadableWithOffset)) {
-                        inputs = TransformUtil.input(TransformSubjects.readableWithOffset(documentKey, offset.get()));
-                    } else if(documentKey != null && supportedTypes.contains(TransformSubjectType.Readable)) {
-                        inputs = TransformUtil.input(TransformSubjects.readable(documentKey));
-                    } else if(supportedTypes.contains(TransformSubjectType.None)) {
-                        inputs = TransformUtil.input(TransformSubjects.none());
+                    if(executionType == ManualContinuous) {
+                        // Manual continuous execution is only supported for transforms that accept editor (document)
+                        // resources, which are represented as Readable resources. Only consider these here.
+                        if(documentKey != null && region.isPresent() && supportedTypes.contains(TransformSubjectType.EditorWithRegion)) {
+                            inputs = TransformUtil.input(TransformSubjects.editorWithRegion(documentKey, region.get()));
+                        } else if(documentKey != null && offset.isPresent() && supportedTypes.contains(TransformSubjectType.EditorWithOffset)) {
+                            inputs = TransformUtil.input(TransformSubjects.editorWithOffset(documentKey, offset.get()));
+                        } else if(documentKey != null && supportedTypes.contains(TransformSubjectType.Editor)) {
+                            inputs = TransformUtil.input(TransformSubjects.editor(documentKey));
+                        } else {
+                            return;
+                        }
+                    } else if(executionType == ManualOnce) {
+                        // Prefer files.
+                        if(filePath != null && region.isPresent() && supportedTypes.contains(TransformSubjectType.FileWithRegion)) {
+                            inputs = TransformUtil.input(TransformSubjects.fileWithRegion(filePath, region.get()));
+                        } else if(filePath != null && offset.isPresent() && supportedTypes.contains(TransformSubjectType.FileWithOffset)) {
+                            inputs = TransformUtil.input(TransformSubjects.fileWithOffset(filePath, offset.get()));
+                        } else if(filePath != null && supportedTypes.contains(TransformSubjectType.File)) {
+                            inputs = TransformUtil.input(TransformSubjects.file(filePath));
+                        }
+                        // Then readable resources.
+                        else if(documentKey != null && region.isPresent() && supportedTypes.contains(TransformSubjectType.EditorWithRegion)) {
+                            inputs = TransformUtil.input(TransformSubjects.editorWithRegion(documentKey, region.get()));
+                        } else if(documentKey != null && offset.isPresent() && supportedTypes.contains(TransformSubjectType.EditorWithOffset)) {
+                            inputs = TransformUtil.input(TransformSubjects.editorWithOffset(documentKey, offset.get()));
+                        } else if(documentKey != null && supportedTypes.contains(TransformSubjectType.Editor)) {
+                            inputs = TransformUtil.input(TransformSubjects.editor(documentKey));
+                        }
+                        // Last resort: none subject.
+                        else if(supportedTypes.contains(TransformSubjectType.None)) {
+                            inputs = TransformUtil.input(TransformSubjects.none());
+                        } else {
+                            return;
+                        }
                     } else {
+                        // Other execution types are not supported.
                         return;
                     }
                     menu.add(transformCommand(transformCommandId, transformRequest, inputs, displayName));

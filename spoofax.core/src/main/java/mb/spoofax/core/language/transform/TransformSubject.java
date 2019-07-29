@@ -21,11 +21,11 @@ public abstract class TransformSubject implements Serializable {
 
         R fileWithOffset(ResourcePath file, int offset);
 
-        R readable(ResourceKey readable);
+        R editor(ResourceKey readable);
 
-        R readableWithRegion(ResourceKey readable, Region region);
+        R editorWithRegion(ResourceKey readable, Region region);
 
-        R readableWithOffset(ResourceKey readable, int offset);
+        R editorWithOffset(ResourceKey readable, int offset);
 
         R none();
     }

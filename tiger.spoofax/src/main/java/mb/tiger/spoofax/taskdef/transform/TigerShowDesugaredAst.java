@@ -50,7 +50,7 @@ public class TigerShowDesugaredAst implements TaskDef<TransformInput, TransformO
             .orElseThrow(() -> new RuntimeException("Cannot show desugared AST, parsed AST for '" + input.subject + "' is null"));
 
         final IStrategoTerm term = TransformSubjects.caseOf(subject)
-            .readableWithRegion((f, r) -> TermTracer.getSmallestTermEncompassingRegion(ast, r))
+            .editorWithRegion((f, r) -> TermTracer.getSmallestTermEncompassingRegion(ast, r))
             .otherwise_(ast);
 
         final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.buildFromPrototype(prototypeStrategoRuntime);
@@ -78,6 +78,6 @@ public class TigerShowDesugaredAst implements TaskDef<TransformInput, TransformO
     }
 
     @Override public EnumSetView<TransformSubjectType> getSupportedSubjectTypes() {
-        return EnumSetView.of(TransformSubjectType.Readable, TransformSubjectType.ReadableWithRegion);
+        return EnumSetView.of(TransformSubjectType.Editor, TransformSubjectType.EditorWithRegion);
     }
 }

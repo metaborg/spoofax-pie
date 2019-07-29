@@ -47,7 +47,7 @@ public class TigerShowAnalyzedAst implements TaskDef<TransformInput, TransformOu
         }
 
         final IStrategoTerm term = TransformSubjects.caseOf(subject)
-            .readableWithRegion((f, r) -> TermTracer.getSmallestTermEncompassingRegion(analysisResult.ast, r))
+            .editorWithRegion((f, r) -> TermTracer.getSmallestTermEncompassingRegion(analysisResult.ast, r))
             .otherwise_(analysisResult.ast);
 
         final String formatted = StrategoUtil.toString(term);
@@ -68,6 +68,6 @@ public class TigerShowAnalyzedAst implements TaskDef<TransformInput, TransformOu
     }
 
     @Override public EnumSetView<TransformSubjectType> getSupportedSubjectTypes() {
-        return EnumSetView.of(TransformSubjectType.Readable, TransformSubjectType.ReadableWithRegion);
+        return EnumSetView.of(TransformSubjectType.Editor, TransformSubjectType.EditorWithRegion);
     }
 }

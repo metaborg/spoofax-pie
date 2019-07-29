@@ -8,8 +8,8 @@ public enum TransformSubjectType implements Serializable {
     File,
     FileWithRegion,
     FileWithOffset,
-    Readable,
-    ReadableWithRegion,
-    ReadableWithOffset,
+    Editor,
+    EditorWithRegion,
+    EditorWithOffset,
     None
 }
