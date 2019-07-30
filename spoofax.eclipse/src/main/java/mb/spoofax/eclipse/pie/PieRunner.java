@@ -18,8 +18,9 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.transform.*;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
-import mb.spoofax.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.eclipse.editor.NamedEditorInput;
+import mb.spoofax.eclipse.editor.PartClosedCallback;
+import mb.spoofax.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.eclipse.resource.*;
 import mb.spoofax.eclipse.transform.TransformUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -29,10 +30,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension4;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.*;
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -46,6 +44,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 @Singleton
 public class PieRunner {
@@ -54,6 +53,7 @@ public class PieRunner {
     private final Pie pie;
     private final EclipseDocumentResourceRegistry eclipseDocumentResourceRegistry;
     private final WorkspaceUpdate.Factory workspaceUpdateFactory;
+    private final PartClosedCallback partClosedCallback;
 
     private @Nullable WorkspaceUpdate bottomUpWorkspaceUpdate = null;
 
@@ -64,13 +64,15 @@ public class PieRunner {
         ResourceService resourceService,
         Pie pie,
         EclipseDocumentResourceRegistry eclipseDocumentResourceRegistry,
-        WorkspaceUpdate.Factory workspaceUpdateFactory
-    ) {
+
+        WorkspaceUpdate.Factory workspaceUpdateFactory,
+        PartClosedCallback partClosedCallback) {
         this.logger = loggerFactory.create(getClass());
         this.resourceService = resourceService;
         this.pie = pie;
         this.eclipseDocumentResourceRegistry = eclipseDocumentResourceRegistry;
         this.workspaceUpdateFactory = workspaceUpdateFactory;
+        this.partClosedCallback = partClosedCallback;
     }
 
 
@@ -175,19 +177,19 @@ public class PieRunner {
         try(final PieSession session = languageComponent.newPieSession()) {
             // Unobserve auto transforms.
             for(TransformDef def : autoTransformDefs.project) {
-                unobserve(def.createTask(new TransformInput(TransformSubjects.project(project.getKey()))), pie, session);
+                unobserve(def.createTask(new TransformInput(TransformSubjects.project(project.getKey()))), pie, session, monitor);
             }
             for(ResourcePath directory : resourceChanges.newDirectories) {
                 for(TransformDef def : autoTransformDefs.directory) {
-                    unobserve(def.createTask(new TransformInput(TransformSubjects.directory(directory))), pie, session);
+                    unobserve(def.createTask(new TransformInput(TransformSubjects.directory(directory))), pie, session, monitor);
                 }
             }
             for(ResourcePath file : resourceChanges.newFiles) {
                 for(TransformDef def : autoTransformDefs.file) {
-                    unobserve(def.createTask(new TransformInput(TransformSubjects.file(file))), pie, session);
+                    unobserve(def.createTask(new TransformInput(TransformSubjects.file(file))), pie, session, monitor);
                 }
             }
-            deleteUnobservedTasks(session);
+            deleteUnobservedTasks(session, monitor);
         }
     }
 
@@ -254,7 +256,7 @@ public class PieRunner {
                 final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(resourceKey);
                 // BUG: this also clears messages for open editors, which it shouldn't do.
                 workspaceUpdate.clearMessages(resourceKey);
-                unobserve(checkTask, pie, session);
+                unobserve(checkTask, pie, session, monitor);
             }
         }
         workspaceUpdate.update(null, monitor);
@@ -275,33 +277,41 @@ public class PieRunner {
             case ManualOnce:
                 for(TransformInput input : inputs) {
                     final TransformOutput output = requireWithoutObserving(def.createTask(input), session, monitor);
-                    processOutput(output, true);
+                    processOutput(output, true, null);
                 }
                 break;
             case ManualContinuous:
                 for(TransformInput input : inputs) {
                     final Task<TransformOutput> task = def.createTask(input);
                     final TransformOutput output = require(task, session, monitor);
-                    processOutput(output, true);
-                    pie.setCallback(task, (o) -> processOutput(o, false));
+                    processOutput(output, true, (p) -> {
+                        // POTI: this opens a new PIE session, which may be used concurrently with other sessions, which
+                        // may not be (thread-)safe.
+                        try(final PieSession newSession = languageComponent.newPieSession()) {
+                            unobserve(task, pie, newSession, monitor);
+                        }
+                        pie.removeCallback(task);
+                    });
+                    pie.setCallback(task, (o) -> processOutput(o, false, null));
                 }
                 break;
             case AutomaticContinuous:
                 for(TransformInput input : inputs) {
                     require(def.createTask(input), session, monitor);
-                    // Feedback for AutomaticContinuous is ignored.
+                    // Feedback for AutomaticContinuous is ignored intentionally: do not want to suddenly open new
+                    // editors when a resource is saved.
                 }
                 break;
         }
     }
 
-    private void processOutput(TransformOutput output, boolean activate) {
+    private void processOutput(TransformOutput output, boolean activate, @Nullable Consumer<IWorkbenchPart> closedCallback) {
         for(TransformFeedback feedback : output.feedback) {
-            processFeedback(feedback, activate);
+            processFeedback(feedback, activate, closedCallback);
         }
     }
 
-    private void processFeedback(TransformFeedback feedback, boolean activate) {
+    private void processFeedback(TransformFeedback feedback, boolean activate, @Nullable Consumer<IWorkbenchPart> closedCallback) {
         TransformFeedbacks.caseOf(feedback)
             .openEditorForFile((file, region) -> {
                 final @Nullable IResource eclipseResource;
@@ -323,6 +333,10 @@ public class PieRunner {
                     final IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
                     try {
                         final IEditorPart editor = IDE.openEditor(page, (IFile) eclipseResource, activate);
+                        if(closedCallback != null) {
+                            partClosedCallback.addCallback(editor, closedCallback);
+                        }
+                        //noinspection ConstantConditions (region can really be null)
                         if(region != null && editor instanceof ITextEditor) {
                             final ITextEditor textEditor = (ITextEditor) editor;
                             textEditor.selectAndReveal(region.getStartOffset(), region.length());
@@ -342,6 +356,9 @@ public class PieRunner {
                     try {
                         final IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
                         final IEditorPart editor = IDE.openEditor(page, editorInput, EditorsUI.DEFAULT_TEXT_EDITOR_ID, activate);
+                        if(closedCallback != null) {
+                            partClosedCallback.addCallback(editor, closedCallback);
+                        }
                         if(editor instanceof ITextEditor) {
                             final ITextEditor textEditor = (ITextEditor) editor;
                             final @Nullable IDocumentProvider documentProvider = textEditor.getDocumentProvider();
@@ -355,7 +372,7 @@ public class PieRunner {
                                 return;
                             }
                             document.set(text);
-                            
+                            //noinspection ConstantConditions (region can really be null)
                             if(region != null) {
                                 textEditor.selectAndReveal(region.getStartOffset(), region.length());
                             }
@@ -374,7 +391,7 @@ public class PieRunner {
 
     // Standard PIE operations with trace logging.
 
-    public <T extends Serializable> T requireWithoutObserving(Task<T> task, PieSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
+    private <T extends Serializable> T requireWithoutObserving(Task<T> task, PieSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
         logger.trace("Require (without observing) '{}'", task);
         Stats.reset();
         final T result = session.requireWithoutObserving(task, monitorCancelled(monitor));
@@ -382,7 +399,7 @@ public class PieRunner {
         return result;
     }
 
-    public <T extends Serializable> T require(Task<T> task, PieSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
+    private <T extends Serializable> T require(Task<T> task, PieSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
         logger.trace("Require '{}'", task);
         Stats.reset();
         final T result = session.require(task, monitorCancelled(monitor));
@@ -390,21 +407,21 @@ public class PieRunner {
         return result;
     }
 
-    public void updateAffectedBy(Set<? extends ResourceKey> changedResources, PieSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
+    private void updateAffectedBy(Set<? extends ResourceKey> changedResources, PieSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
         logger.trace("Update affected by '{}'", changedResources);
         Stats.reset();
         session.updateAffectedBy(changedResources, monitorCancelled(monitor));
         logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
     }
 
-    public void unobserve(Task<?> task, Pie pie, PieSession session) {
+    private void unobserve(Task<?> task, Pie pie, PieSession session, @Nullable IProgressMonitor _monitor) {
         final TaskKey key = task.key();
         if(!pie.isObserved(key)) return;
         logger.trace("Unobserving '{}'", key);
         session.unobserve(key);
     }
 
-    public void deleteUnobservedTasks(PieSession session) throws IOException {
+    private void deleteUnobservedTasks(PieSession session, @Nullable IProgressMonitor _monitor) throws IOException {
         logger.trace("Deleting unobserved tasks");
         session.deleteUnobservedTasks((t) -> true, (t, r) -> true);
     }
@@ -445,7 +462,8 @@ public class PieRunner {
                 final boolean removed = kind == IResourceDelta.REMOVED;
                 final IResource resource = d.getResource();
                 final EclipseResourcePath path = new EclipseResourcePath(resource);
-                // Do not mark removed resources as changed, as tasks for removed resources should be unobserved instead of being executed.
+                // Do not mark removed resources as changed, as tasks for removed resources should be unobserved instead
+                // of being executed. POTI: what about tasks that want to be executed on removed resources?
                 if(!removed) {
                     // Mark all resources as changed, since tasks may require/provide non-language resources.
                     changed.add(path);
@@ -553,7 +571,7 @@ public class PieRunner {
                 requireTransform(languageComponent, def, executionType, TransformUtil.input(TransformSubjects.project(newProject)), session, monitor);
             }
             for(ResourcePath removedProject : resourceChanges.removedProjects) {
-                unobserve(def.createTask(new TransformInput(TransformSubjects.project(removedProject))), pie, session);
+                unobserve(def.createTask(new TransformInput(TransformSubjects.project(removedProject))), pie, session, monitor);
             }
         }
         for(TransformDef def : autoTransformDefs.directory) {
@@ -561,7 +579,7 @@ public class PieRunner {
                 requireTransform(languageComponent, def, executionType, TransformUtil.input(TransformSubjects.directory(newDirectory)), session, monitor);
             }
             for(ResourcePath removedDirectory : resourceChanges.removedDirectories) {
-                unobserve(def.createTask(new TransformInput(TransformSubjects.directory(removedDirectory))), pie, session);
+                unobserve(def.createTask(new TransformInput(TransformSubjects.directory(removedDirectory))), pie, session, monitor);
             }
         }
         for(TransformDef def : autoTransformDefs.file) {
@@ -569,11 +587,11 @@ public class PieRunner {
                 requireTransform(languageComponent, def, executionType, TransformUtil.input(TransformSubjects.file(newFile)), session, monitor);
             }
             for(ResourcePath removedFile : resourceChanges.removedFiles) {
-                unobserve(def.createTask(new TransformInput(TransformSubjects.file(removedFile))), pie, session);
+                unobserve(def.createTask(new TransformInput(TransformSubjects.file(removedFile))), pie, session, monitor);
             }
         }
         if(resourceChanges.hasRemovedResources()) {
-            deleteUnobservedTasks(session);
+            deleteUnobservedTasks(session, monitor);
         }
     }
 }

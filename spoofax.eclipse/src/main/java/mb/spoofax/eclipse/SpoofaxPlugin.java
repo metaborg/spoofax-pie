@@ -41,6 +41,8 @@ public class SpoofaxPlugin extends AbstractUIPlugin {
             .loggerFactoryModule(new LoggerFactoryModule(new EclipseLoggerFactory()))
             .pieModule(new PieModule(PieBuilderImpl::new))
             .build();
+
+        component.partClosedCallback().register();
     }
 
     @Override public void stop(@NonNull BundleContext context) throws Exception {

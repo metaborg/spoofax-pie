@@ -6,6 +6,7 @@ import mb.spoofax.core.platform.FSRegistryModule;
 import mb.spoofax.core.platform.LoggerFactoryModule;
 import mb.spoofax.core.platform.PlatformComponent;
 import mb.spoofax.core.platform.ResourceServiceModule;
+import mb.spoofax.eclipse.editor.PartClosedCallback;
 import mb.spoofax.eclipse.pie.PieRunner;
 import mb.spoofax.eclipse.resource.EclipseResourceRegistryModule;
 import mb.spoofax.eclipse.util.ColorShare;
@@ -28,4 +29,6 @@ public interface SpoofaxEclipseComponent extends PlatformComponent {
     ColorShare getColorShare();
 
     StyleUtil getStyleUtils();
+
+    PartClosedCallback partClosedCallback();
 }

@@ -5,7 +5,6 @@ import mb.common.region.Selection;
 import mb.common.region.Selections;
 import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
-import mb.log.api.Logger;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageInstance;
@@ -32,13 +31,11 @@ import static mb.spoofax.core.language.transform.TransformExecutionType.ManualCo
 import static mb.spoofax.core.language.transform.TransformExecutionType.ManualOnce;
 
 public class EditorContextMenu extends MenuShared {
-    private final Logger logger;
     private final EclipseLanguageComponent languageComponent;
 
 
     public EditorContextMenu(EclipseLanguageComponent languageComponent) {
         final SpoofaxEclipseComponent component = SpoofaxPlugin.getComponent();
-        this.logger = component.getLoggerFactory().create(getClass());
         this.languageComponent = languageComponent;
     }
 
@@ -72,12 +69,6 @@ public class EditorContextMenu extends MenuShared {
             filePath = null;
         }
         final Selection selection = editor.getSelection();
-
-        logger.trace("Editor: {}", editor);
-        logger.trace("Document resource: {}", documentResource);
-        logger.trace("Document key: {}", documentKey);
-        logger.trace("File path: {}", filePath);
-        logger.trace("Selection: {}", selection);
 
         final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
         final EclipseIdentifiers identifiers = languageComponent.getEclipseIdentifiers();
