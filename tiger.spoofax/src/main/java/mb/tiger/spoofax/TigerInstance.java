@@ -36,6 +36,7 @@ public class TigerInstance implements LanguageInstance {
     private final TigerShowAnalyzedAst showAnalyzedAst;
     private final TigerShowDesugaredAst showDesugaredAst;
     private final TigerCompileFile compileFile;
+    private final TigerAltCompileFile altCompileFile;
     private final TigerCompileDirectory compileDirectory;
 
 
@@ -49,6 +50,7 @@ public class TigerInstance implements LanguageInstance {
         TigerShowAnalyzedAst showAnalyzedAst,
         TigerShowDesugaredAst showDesugaredAst,
         TigerCompileFile compileFile,
+        TigerAltCompileFile altCompileFile,
         TigerCompileDirectory compileDirectory
     ) {
         this.check = check;
@@ -60,6 +62,7 @@ public class TigerInstance implements LanguageInstance {
         this.showAnalyzedAst = showAnalyzedAst;
         this.showDesugaredAst = showDesugaredAst;
         this.compileFile = compileFile;
+        this.altCompileFile = altCompileFile;
         this.compileDirectory = compileDirectory;
     }
 
@@ -93,6 +96,7 @@ public class TigerInstance implements LanguageInstance {
             showAnalyzedAst,
             showDesugaredAst,
             compileFile,
+            altCompileFile,
             compileDirectory
         );
     }
@@ -111,17 +115,22 @@ public class TigerInstance implements LanguageInstance {
 
     @Override public ListView<MenuItem> getResourceContextMenuItems() {
         return ListView.of(
-            new Menu("Compile", onceTransformAction(compileFile), onceTransformAction(compileDirectory)),
+            new Menu("Compile",
+                manualOnceTransformAction(compileFile),
+                manualOnceTransformAction(compileDirectory),
+                manualOnceTransformAction(altCompileFile),
+                manualContinuousTransformAction(altCompileFile)
+            ),
             new Menu("Debug",
                 new Menu("Syntax",
-                    onceTransformAction(showParsedAst),
-                    onceTransformAction(showPrettyPrintedText)
+                    manualOnceTransformAction(showParsedAst),
+                    manualOnceTransformAction(showPrettyPrintedText)
                 ),
                 new Menu("Static Semantics",
-                    onceTransformAction(showAnalyzedAst)
+                    manualOnceTransformAction(showAnalyzedAst)
                 ),
                 new Menu("Transformations",
-                    onceTransformAction(showDesugaredAst)
+                    manualOnceTransformAction(showDesugaredAst)
                 )
             )
         );
@@ -129,17 +138,21 @@ public class TigerInstance implements LanguageInstance {
 
     @Override public ListView<MenuItem> getEditorContextMenuItems() {
         return ListView.of(
-            new Menu("Compile", onceTransformAction(compileFile)),
+            new Menu("Compile",
+                manualOnceTransformAction(compileFile),
+                manualOnceTransformAction(altCompileFile),
+                manualContinuousTransformAction(altCompileFile)
+            ),
             new Menu("Debug",
                 new Menu("Syntax",
-                    onceTransformAction(showParsedAst), contEditorTransformAction(showParsedAst),
-                    onceTransformAction(showPrettyPrintedText), contEditorTransformAction(showPrettyPrintedText)
+                    manualOnceTransformAction(showParsedAst), manualContinuousTransformAction(showParsedAst),
+                    manualOnceTransformAction(showPrettyPrintedText), manualContinuousTransformAction(showPrettyPrintedText)
                 ),
                 new Menu("Static Semantics",
-                    onceTransformAction(showAnalyzedAst), contEditorTransformAction(showAnalyzedAst)
+                    manualOnceTransformAction(showAnalyzedAst), manualContinuousTransformAction(showAnalyzedAst)
                 ),
                 new Menu("Transformations",
-                    onceTransformAction(showDesugaredAst), contEditorTransformAction(showDesugaredAst)
+                    manualOnceTransformAction(showDesugaredAst), manualContinuousTransformAction(showDesugaredAst)
                 )
             )
         );
@@ -159,11 +172,11 @@ public class TigerInstance implements LanguageInstance {
         return transformAction(transformDef, executionType, "");
     }
 
-    private static TransformAction onceTransformAction(TransformDef transformDef) {
+    private static TransformAction manualOnceTransformAction(TransformDef transformDef) {
         return transformAction(transformDef, TransformExecutionType.ManualOnce, "");
     }
 
-    private static TransformAction contEditorTransformAction(TransformDef transformDef) {
+    private static TransformAction manualContinuousTransformAction(TransformDef transformDef) {
         return transformAction(transformDef, TransformExecutionType.ManualContinuous, " (continuous)");
     }
 }

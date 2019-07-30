@@ -89,7 +89,7 @@ public class TigerCompileDirectory implements TaskDef<TransformInput, TransformO
 
 
     @Override public String getDisplayName() {
-        return "Compile Tiger directory";
+        return "'Compile' directory (list definition names)";
     }
 
     @Override public EnumSetView<TransformExecutionType> getSupportedExecutionTypes() {

@@ -10,18 +10,18 @@ import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.transform.*;
-import mb.tiger.spoofax.taskdef.TigerListLiteralVals;
+import mb.tiger.spoofax.taskdef.TigerListDefNames;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import java.nio.charset.StandardCharsets;
 
-public class TigerCompileFile implements TaskDef<TransformInput, TransformOutput>, TransformDef {
-    private final TigerListLiteralVals listLiteralVals;
+public class TigerAltCompileFile implements TaskDef<TransformInput, TransformOutput>, TransformDef {
+    private final TigerListDefNames listDefNames;
     private final ResourceService resourceService;
 
-    @Inject public TigerCompileFile(TigerListLiteralVals listLiteralVals, ResourceService resourceService) {
-        this.listLiteralVals = listLiteralVals;
+    @Inject public TigerAltCompileFile(TigerListDefNames listDefNames, ResourceService resourceService) {
+        this.listDefNames = listDefNames;
         this.resourceService = resourceService;
     }
 
@@ -34,16 +34,18 @@ public class TigerCompileFile implements TaskDef<TransformInput, TransformOutput
         final ResourcePath file = TransformSubjects.getFile(subject)
             .orElseThrow(() -> new RuntimeException("Cannot compile, subject '" + subject + "' is not a file subject"));
 
-        final @Nullable String literalsStr = context.require(listLiteralVals, file);
-        if(literalsStr == null) {
+        final @Nullable String defNamesStr = context.require(listDefNames, file);
+        //noinspection ConstantConditions (defNamesStr can really be null)
+        if(defNamesStr == null) {
             return new TransformOutput(ListView.of());
         }
 
-        final ResourcePath generatedPath = file.replaceLeafExtension("literals.aterm");
+        final ResourcePath generatedPath = file.replaceLeafExtension("defnames.aterm");
         final HierarchicalResource generatedResource = resourceService.getResource(generatedPath);
-        generatedResource.writeBytes(literalsStr.getBytes(StandardCharsets.UTF_8));
+        generatedResource.writeBytes(defNamesStr.getBytes(StandardCharsets.UTF_8));
         context.provide(generatedResource, ResourceStampers.hashFile());
 
+        //noinspection ConstantConditions (region may be null)
         return new TransformOutput(ListView.of(TransformFeedbacks.openEditorForFile(generatedPath, null)));
     }
 
@@ -53,7 +55,7 @@ public class TigerCompileFile implements TaskDef<TransformInput, TransformOutput
 
 
     @Override public String getDisplayName() {
-        return "'Compile' file (list literals)";
+        return "'Alternative compile' file (list definition names)";
     }
 
     @Override public EnumSetView<TransformExecutionType> getSupportedExecutionTypes() {

@@ -101,6 +101,7 @@ public class TigerModule {
         TigerShowAnalyzedAst showAnalyzedAst,
         TigerShowDesugaredAst showDesugaredAst,
         TigerCompileFile compileFile,
+        TigerAltCompileFile altCompileFile,
         TigerCompileDirectory compileDirectory
     ) {
         final HashSet<TaskDef<?, ?>> taskDefs = new HashSet<>();
@@ -120,6 +121,7 @@ public class TigerModule {
         taskDefs.add(showAnalyzedAst);
         taskDefs.add(showDesugaredAst);
         taskDefs.add(compileFile);
+        taskDefs.add(altCompileFile);
         taskDefs.add(compileDirectory);
 
         return taskDefs;

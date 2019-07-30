@@ -4,7 +4,10 @@ import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.menu.MenuItem;
-import mb.spoofax.core.language.transform.*;
+import mb.spoofax.core.language.transform.TransformInput;
+import mb.spoofax.core.language.transform.TransformRequest;
+import mb.spoofax.core.language.transform.TransformSubjectType;
+import mb.spoofax.core.language.transform.TransformSubjects;
 import mb.spoofax.eclipse.EclipseIdentifiers;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.SpoofaxEclipseComponent;
@@ -27,8 +30,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-
-import static mb.spoofax.core.language.transform.TransformExecutionType.ManualOnce;
 
 public abstract class ResourceContextMenu extends MenuShared {
     private final PieRunner pieRunner;
@@ -123,25 +124,18 @@ public abstract class ResourceContextMenu extends MenuShared {
                 @Override
                 protected void transformAction(IContributionManager menu, String displayName, TransformRequest transformRequest) {
                     final EnumSetView<TransformSubjectType> supportedTypes = transformRequest.transformDef.getSupportedSubjectTypes();
-                    final TransformExecutionType executionType = transformRequest.executionType;
                     final ListView<TransformInput> inputs;
-                    if(executionType == ManualOnce) {
-                        // Only manual one-shot transforms are supported.
-                        if(hasProjects && supportedTypes.contains(TransformSubjectType.Project)) {
-                            inputs = TransformUtil.inputs(projects.stream().map(EclipseResourcePath::new).map(TransformSubjects::project));
-                        } else if(hasContainers && supportedTypes.contains(TransformSubjectType.Directory)) {
-                            inputs = TransformUtil.inputs(containers.stream().map(EclipseResourcePath::new).map(TransformSubjects::directory));
-                        } else if(hasFiles && supportedTypes.contains(TransformSubjectType.File)) {
-                            inputs = TransformUtil.inputs(files.stream().map(EclipseResourcePath::new).map(TransformSubjects::file));
-                        } else if(hasFiles && supportedTypes.contains(TransformSubjectType.Editor)) {
-                            inputs = TransformUtil.inputs(files.stream().map(EclipseResourcePath::new).map(TransformSubjects::editor));
-                        } else if(supportedTypes.contains(TransformSubjectType.None)) {
-                            inputs = TransformUtil.input(TransformSubjects.none());
-                        } else {
-                            return;
-                        }
+                    if(hasProjects && supportedTypes.contains(TransformSubjectType.Project)) {
+                        inputs = TransformUtil.inputs(projects.stream().map(EclipseResourcePath::new).map(TransformSubjects::project));
+                    } else if(hasContainers && supportedTypes.contains(TransformSubjectType.Directory)) {
+                        inputs = TransformUtil.inputs(containers.stream().map(EclipseResourcePath::new).map(TransformSubjects::directory));
+                    } else if(hasFiles && supportedTypes.contains(TransformSubjectType.File)) {
+                        inputs = TransformUtil.inputs(files.stream().map(EclipseResourcePath::new).map(TransformSubjects::file));
+                    } else if(hasFiles && supportedTypes.contains(TransformSubjectType.Editor)) {
+                        inputs = TransformUtil.inputs(files.stream().map(EclipseResourcePath::new).map(TransformSubjects::editor));
+                    } else if(supportedTypes.contains(TransformSubjectType.None)) {
+                        inputs = TransformUtil.input(TransformSubjects.none());
                     } else {
-                        // Other execution types are not supported.
                         return;
                     }
                     menu.add(transformCommand(transformCommandId, transformRequest, inputs, displayName));

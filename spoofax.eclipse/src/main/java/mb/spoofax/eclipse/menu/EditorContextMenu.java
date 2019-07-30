@@ -85,15 +85,24 @@ public class EditorContextMenu extends MenuShared {
                     final Optional<Region> region = Selections.getRegion(selection);
                     final Optional<Integer> offset = Selections.getOffset(selection);
                     if(executionType == ManualContinuous) {
-                        // Manual continuous execution is only supported for transforms that accept editor (document)
-                        // resources, which are represented as Readable resources. Only consider these here.
+                        // Prefer editors.
                         if(documentKey != null && region.isPresent() && supportedTypes.contains(TransformSubjectType.EditorWithRegion)) {
                             inputs = TransformUtil.input(TransformSubjects.editorWithRegion(documentKey, region.get()));
                         } else if(documentKey != null && offset.isPresent() && supportedTypes.contains(TransformSubjectType.EditorWithOffset)) {
                             inputs = TransformUtil.input(TransformSubjects.editorWithOffset(documentKey, offset.get()));
                         } else if(documentKey != null && supportedTypes.contains(TransformSubjectType.Editor)) {
                             inputs = TransformUtil.input(TransformSubjects.editor(documentKey));
-                        } else {
+                        }
+                        // Then files.
+                        else if(filePath != null && region.isPresent() && supportedTypes.contains(TransformSubjectType.FileWithRegion)) {
+                            inputs = TransformUtil.input(TransformSubjects.fileWithRegion(filePath, region.get()));
+                        } else if(filePath != null && offset.isPresent() && supportedTypes.contains(TransformSubjectType.FileWithOffset)) {
+                            inputs = TransformUtil.input(TransformSubjects.fileWithOffset(filePath, offset.get()));
+                        } else if(filePath != null && supportedTypes.contains(TransformSubjectType.File)) {
+                            inputs = TransformUtil.input(TransformSubjects.file(filePath));
+                        }
+                        // None subject is not supported.
+                        else {
                             return;
                         }
                     } else if(executionType == ManualOnce) {
@@ -105,7 +114,7 @@ public class EditorContextMenu extends MenuShared {
                         } else if(filePath != null && supportedTypes.contains(TransformSubjectType.File)) {
                             inputs = TransformUtil.input(TransformSubjects.file(filePath));
                         }
-                        // Then readable resources.
+                        // Then editors.
                         else if(documentKey != null && region.isPresent() && supportedTypes.contains(TransformSubjectType.EditorWithRegion)) {
                             inputs = TransformUtil.input(TransformSubjects.editorWithRegion(documentKey, region.get()));
                         } else if(documentKey != null && offset.isPresent() && supportedTypes.contains(TransformSubjectType.EditorWithOffset)) {
