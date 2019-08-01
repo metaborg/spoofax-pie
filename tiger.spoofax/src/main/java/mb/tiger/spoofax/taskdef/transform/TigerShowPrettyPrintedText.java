@@ -40,7 +40,7 @@ public class TigerShowPrettyPrintedText implements TaskDef<TransformInput, Trans
     }
 
     @Override public TransformOutput exec(ExecContext context, TransformInput input) throws Exception {
-        final TransformSubject subject = input.subject;
+        final TransformContext subject = input.subject;
         final ResourceKey readable = TransformSubjects.getReadable(subject)
             .orElseThrow(() -> new RuntimeException("Cannot show pretty-printed text, subject '" + subject + "' is not a readable subject"));
 
@@ -72,7 +72,7 @@ public class TigerShowPrettyPrintedText implements TaskDef<TransformInput, Trans
         return EnumSetView.of(TransformExecutionType.ManualOnce, TransformExecutionType.ManualContinuous);
     }
 
-    @Override public EnumSetView<TransformSubjectType> getSupportedSubjectTypes() {
-        return EnumSetView.of(TransformSubjectType.Editor);
+    @Override public EnumSetView<TransformContextType> getSupportedSubjectTypes() {
+        return EnumSetView.of(TransformContextType.Editor);
     }
 }

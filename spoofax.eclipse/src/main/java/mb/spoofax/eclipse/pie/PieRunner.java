@@ -541,14 +541,14 @@ public class PieRunner {
             final ArrayList<TransformDef> directory = new ArrayList<>();
             final ArrayList<TransformDef> file = new ArrayList<>();
             for(TransformDef def : languageComponent.getLanguageInstance().getAutoTransformDefs()) {
-                final EnumSetView<TransformSubjectType> supported = def.getSupportedSubjectTypes();
-                if(supported.contains(TransformSubjectType.Project)) {
+                final EnumSetView<TransformContextType> supported = def.getSupportedSubjectTypes();
+                if(supported.contains(TransformContextType.Project)) {
                     project.add(def);
                 }
-                if(supported.contains(TransformSubjectType.Directory)) {
+                if(supported.contains(TransformContextType.Directory)) {
                     directory.add(def);
                 }
-                if(supported.contains(TransformSubjectType.File)) {
+                if(supported.contains(TransformContextType.File)) {
                     file.add(def);
                 }
             }

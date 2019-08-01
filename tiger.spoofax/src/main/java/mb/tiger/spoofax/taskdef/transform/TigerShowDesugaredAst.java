@@ -41,7 +41,7 @@ public class TigerShowDesugaredAst implements TaskDef<TransformInput, TransformO
     }
 
     @Override public TransformOutput exec(ExecContext context, TransformInput input) throws Exception {
-        final TransformSubject subject = input.subject;
+        final TransformContext subject = input.subject;
         final ResourceKey readable = TransformSubjects.getReadable(subject)
             .orElseThrow(() -> new RuntimeException("Cannot show desugared AST, subject '" + subject + "' is not a readable subject"));
 
@@ -77,7 +77,7 @@ public class TigerShowDesugaredAst implements TaskDef<TransformInput, TransformO
         return EnumSetView.of(TransformExecutionType.ManualOnce, TransformExecutionType.ManualContinuous);
     }
 
-    @Override public EnumSetView<TransformSubjectType> getSupportedSubjectTypes() {
-        return EnumSetView.of(TransformSubjectType.Editor, TransformSubjectType.EditorWithRegion);
+    @Override public EnumSetView<TransformContextType> getSupportedContextTypes() {
+        return EnumSetView.of(TransformContextType.Editor, TransformContextType.EditorWithRegion);
     }
 }

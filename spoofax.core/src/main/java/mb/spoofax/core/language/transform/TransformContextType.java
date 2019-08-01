@@ -2,7 +2,7 @@ package mb.spoofax.core.language.transform;
 
 import java.io.Serializable;
 
-public enum TransformSubjectType implements Serializable {
+public enum TransformContextType implements Serializable {
     Project,
     Directory,
     File,

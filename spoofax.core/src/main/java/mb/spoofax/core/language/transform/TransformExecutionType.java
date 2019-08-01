@@ -11,7 +11,8 @@ public enum TransformExecutionType implements Serializable {
     /**
      * Manually require and observe transform, and unobserve it whenever an editor opened through feedback ({@link
      * TransformFeedback.Cases#openEditorForFile}, {@link TransformFeedback.Cases#openEditorWithText}) is closed. Can
-     * only be executed in editor context. Feedback is handled normally, but only open editor feedback is supported.
+     * only be executed in file or editor context. Feedback is handled normally, but only open editor feedback is
+     * supported.
      */
     ManualContinuous,
     /**

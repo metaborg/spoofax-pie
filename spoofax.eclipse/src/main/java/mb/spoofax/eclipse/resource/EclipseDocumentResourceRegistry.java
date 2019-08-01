@@ -2,12 +2,9 @@ package mb.spoofax.eclipse.resource;
 
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
-import mb.resource.Resource;
 import mb.resource.ResourceRegistry;
 import mb.resource.ResourceRuntimeException;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentExtension4;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -27,7 +24,7 @@ public class EclipseDocumentResourceRegistry implements ResourceRegistry {
     }
 
 
-    public <D extends IDocument & IDocumentExtension4> void putDocumentResource(EclipseDocumentResource resource) {
+    public void putDocumentResource(EclipseDocumentResource resource) {
         logger.trace("Putting document resource '{}'", resource);
         resources.put(resource.getKey().getId(), resource);
     }
@@ -38,7 +35,12 @@ public class EclipseDocumentResourceRegistry implements ResourceRegistry {
     }
 
 
-    @Override public Resource getResource(Serializable id) {
+    @Override public String qualifier() {
+        return qualifier;
+    }
+
+
+    @Override public EclipseDocumentResource getResource(Serializable id) {
         if(!(id instanceof String)) {
             throw new ResourceRuntimeException(
                 "Cannot get Eclipse document resource with ID '" + id + "'; the ID is not of type String");
@@ -46,17 +48,18 @@ public class EclipseDocumentResourceRegistry implements ResourceRegistry {
         return getResource((String) id);
     }
 
-    @Override public Resource getResource(String id) {
+
+    @Override public EclipseDocumentKey getResourceKey(String id) {
+        return new EclipseDocumentKey(id);
+    }
+
+    @Override public EclipseDocumentResource getResource(String id) {
         final @Nullable EclipseDocumentResource resource = resources.get(id);
         if(resource != null) {
             return resource;
         } else {
             throw new ResourceRuntimeException("Cannot get Eclipse document resource with ID '" + id + "', it does not exist");
         }
-    }
-
-    @Override public String qualifier() {
-        return qualifier;
     }
 
     @Override public String toStringRepresentation(Serializable id) {

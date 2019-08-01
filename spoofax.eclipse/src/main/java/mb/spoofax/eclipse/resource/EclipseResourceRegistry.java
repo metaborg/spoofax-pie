@@ -12,7 +12,14 @@ import java.io.Serializable;
 public class EclipseResourceRegistry implements ResourceRegistry {
     static final String qualifier = "eclipse-resource";
 
+
     @Inject public EclipseResourceRegistry() { }
+
+
+    @Override public String qualifier() {
+        return qualifier;
+    }
+
 
     @Override public Resource getResource(Serializable id) {
         if(!(id instanceof String)) {
@@ -22,12 +29,13 @@ public class EclipseResourceRegistry implements ResourceRegistry {
         return getResource((String) id);
     }
 
-    @Override public Resource getResource(String portablePathString) {
-        return new EclipseResource(new EclipseResourcePath(portablePathString));
+
+    @Override public EclipseResourcePath getResourceKey(String portablePathString) {
+        return new EclipseResourcePath(portablePathString);
     }
 
-    @Override public String qualifier() {
-        return qualifier;
+    @Override public EclipseResource getResource(String portablePathString) {
+        return new EclipseResource(new EclipseResourcePath(portablePathString));
     }
 
     @Override public String toStringRepresentation(Serializable id) {

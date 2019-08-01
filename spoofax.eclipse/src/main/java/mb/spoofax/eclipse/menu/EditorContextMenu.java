@@ -79,26 +79,26 @@ public class EditorContextMenu extends MenuShared {
             menuItem.accept(new EclipseMenuItemVisitor(langMenu) {
                 @Override
                 protected void transformAction(IContributionManager menu, String displayName, TransformRequest transformRequest) {
-                    final EnumSetView<TransformSubjectType> supportedTypes = transformRequest.transformDef.getSupportedSubjectTypes();
+                    final EnumSetView<TransformContextType> supportedTypes = transformRequest.transformDef.getSupportedSubjectTypes();
                     final TransformExecutionType executionType = transformRequest.executionType;
                     final ListView<TransformInput> inputs;
                     final Optional<Region> region = Selections.getRegion(selection);
                     final Optional<Integer> offset = Selections.getOffset(selection);
                     if(executionType == ManualContinuous) {
                         // Prefer editors.
-                        if(documentKey != null && region.isPresent() && supportedTypes.contains(TransformSubjectType.EditorWithRegion)) {
+                        if(documentKey != null && region.isPresent() && supportedTypes.contains(TransformContextType.EditorWithRegion)) {
                             inputs = TransformUtil.input(TransformSubjects.editorWithRegion(documentKey, region.get()));
-                        } else if(documentKey != null && offset.isPresent() && supportedTypes.contains(TransformSubjectType.EditorWithOffset)) {
+                        } else if(documentKey != null && offset.isPresent() && supportedTypes.contains(TransformContextType.EditorWithOffset)) {
                             inputs = TransformUtil.input(TransformSubjects.editorWithOffset(documentKey, offset.get()));
-                        } else if(documentKey != null && supportedTypes.contains(TransformSubjectType.Editor)) {
+                        } else if(documentKey != null && supportedTypes.contains(TransformContextType.Editor)) {
                             inputs = TransformUtil.input(TransformSubjects.editor(documentKey));
                         }
                         // Then files.
-                        else if(filePath != null && region.isPresent() && supportedTypes.contains(TransformSubjectType.FileWithRegion)) {
+                        else if(filePath != null && region.isPresent() && supportedTypes.contains(TransformContextType.FileWithRegion)) {
                             inputs = TransformUtil.input(TransformSubjects.fileWithRegion(filePath, region.get()));
-                        } else if(filePath != null && offset.isPresent() && supportedTypes.contains(TransformSubjectType.FileWithOffset)) {
+                        } else if(filePath != null && offset.isPresent() && supportedTypes.contains(TransformContextType.FileWithOffset)) {
                             inputs = TransformUtil.input(TransformSubjects.fileWithOffset(filePath, offset.get()));
-                        } else if(filePath != null && supportedTypes.contains(TransformSubjectType.File)) {
+                        } else if(filePath != null && supportedTypes.contains(TransformContextType.File)) {
                             inputs = TransformUtil.input(TransformSubjects.file(filePath));
                         }
                         // None subject is not supported.
@@ -107,23 +107,23 @@ public class EditorContextMenu extends MenuShared {
                         }
                     } else if(executionType == ManualOnce) {
                         // Prefer files.
-                        if(filePath != null && region.isPresent() && supportedTypes.contains(TransformSubjectType.FileWithRegion)) {
+                        if(filePath != null && region.isPresent() && supportedTypes.contains(TransformContextType.FileWithRegion)) {
                             inputs = TransformUtil.input(TransformSubjects.fileWithRegion(filePath, region.get()));
-                        } else if(filePath != null && offset.isPresent() && supportedTypes.contains(TransformSubjectType.FileWithOffset)) {
+                        } else if(filePath != null && offset.isPresent() && supportedTypes.contains(TransformContextType.FileWithOffset)) {
                             inputs = TransformUtil.input(TransformSubjects.fileWithOffset(filePath, offset.get()));
-                        } else if(filePath != null && supportedTypes.contains(TransformSubjectType.File)) {
+                        } else if(filePath != null && supportedTypes.contains(TransformContextType.File)) {
                             inputs = TransformUtil.input(TransformSubjects.file(filePath));
                         }
                         // Then editors.
-                        else if(documentKey != null && region.isPresent() && supportedTypes.contains(TransformSubjectType.EditorWithRegion)) {
+                        else if(documentKey != null && region.isPresent() && supportedTypes.contains(TransformContextType.EditorWithRegion)) {
                             inputs = TransformUtil.input(TransformSubjects.editorWithRegion(documentKey, region.get()));
-                        } else if(documentKey != null && offset.isPresent() && supportedTypes.contains(TransformSubjectType.EditorWithOffset)) {
+                        } else if(documentKey != null && offset.isPresent() && supportedTypes.contains(TransformContextType.EditorWithOffset)) {
                             inputs = TransformUtil.input(TransformSubjects.editorWithOffset(documentKey, offset.get()));
-                        } else if(documentKey != null && supportedTypes.contains(TransformSubjectType.Editor)) {
+                        } else if(documentKey != null && supportedTypes.contains(TransformContextType.Editor)) {
                             inputs = TransformUtil.input(TransformSubjects.editor(documentKey));
                         }
                         // Last resort: none subject.
-                        else if(supportedTypes.contains(TransformSubjectType.None)) {
+                        else if(supportedTypes.contains(TransformContextType.None)) {
                             inputs = TransformUtil.input(TransformSubjects.none());
                         } else {
                             return;

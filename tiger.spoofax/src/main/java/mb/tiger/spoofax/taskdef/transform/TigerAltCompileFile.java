@@ -30,7 +30,7 @@ public class TigerAltCompileFile implements TaskDef<TransformInput, TransformOut
     }
 
     @Override public TransformOutput exec(ExecContext context, TransformInput input) throws Exception {
-        final TransformSubject subject = input.subject;
+        final TransformContext subject = input.subject;
         final ResourcePath file = TransformSubjects.getFile(subject)
             .orElseThrow(() -> new RuntimeException("Cannot compile, subject '" + subject + "' is not a file subject"));
 
@@ -62,7 +62,7 @@ public class TigerAltCompileFile implements TaskDef<TransformInput, TransformOut
         return EnumSetView.of(TransformExecutionType.ManualOnce, TransformExecutionType.AutomaticContinuous, TransformExecutionType.ManualContinuous);
     }
 
-    @Override public EnumSetView<TransformSubjectType> getSupportedSubjectTypes() {
-        return EnumSetView.of(TransformSubjectType.File);
+    @Override public EnumSetView<TransformContextType> getSupportedSubjectTypes() {
+        return EnumSetView.of(TransformContextType.File);
     }
 }

@@ -9,7 +9,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.io.Serializable;
 
 @ADT
-public abstract class TransformSubject implements Serializable {
+public abstract class TransformContext implements Serializable {
     interface Cases<R> {
         R project(ResourcePath project);
 

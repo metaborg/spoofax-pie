@@ -37,7 +37,7 @@ public class TigerCompileDirectory implements TaskDef<TransformInput, TransformO
     }
 
     @Override public TransformOutput exec(ExecContext context, TransformInput input) throws Exception {
-        final TransformSubject subject = input.subject;
+        final TransformContext subject = input.subject;
         final ResourcePath directoryPath = TransformSubjects.getDirectory(subject)
             .orElseThrow(() -> new RuntimeException("Cannot compile, subject '" + subject + "' is not a directory subject"));
         final ResourceMatcher matcher = new AllResourceMatcher(new FileResourceMatcher(), new PathResourceMatcher(new ExtensionsPathMatcher("tig")));
@@ -96,7 +96,7 @@ public class TigerCompileDirectory implements TaskDef<TransformInput, TransformO
         return EnumSetView.of(TransformExecutionType.ManualOnce, TransformExecutionType.AutomaticContinuous);
     }
 
-    @Override public EnumSetView<TransformSubjectType> getSupportedSubjectTypes() {
-        return EnumSetView.of(TransformSubjectType.Directory);
+    @Override public EnumSetView<TransformContextType> getSupportedSubjectTypes() {
+        return EnumSetView.of(TransformContextType.Directory);
     }
 }

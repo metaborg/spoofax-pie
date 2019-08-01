@@ -34,7 +34,7 @@ public class TigerShowAnalyzedAst implements TaskDef<TransformInput, TransformOu
     }
 
     @Override public TransformOutput exec(ExecContext context, TransformInput input) throws Exception {
-        final TransformSubject subject = input.subject;
+        final TransformContext subject = input.subject;
         final ResourceKey readable = TransformSubjects.getReadable(subject)
             .orElseThrow(() -> new RuntimeException("Cannot show analyzed AST, subject '" + subject + "' is not a readable subject"));
 
@@ -67,7 +67,7 @@ public class TigerShowAnalyzedAst implements TaskDef<TransformInput, TransformOu
         return EnumSetView.of(TransformExecutionType.ManualOnce, TransformExecutionType.ManualContinuous);
     }
 
-    @Override public EnumSetView<TransformSubjectType> getSupportedSubjectTypes() {
-        return EnumSetView.of(TransformSubjectType.Editor, TransformSubjectType.EditorWithRegion);
+    @Override public EnumSetView<TransformContextType> getSupportedSubjectTypes() {
+        return EnumSetView.of(TransformContextType.Editor, TransformContextType.EditorWithRegion);
     }
 }

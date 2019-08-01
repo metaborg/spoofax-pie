@@ -29,9 +29,9 @@ public interface LanguageInstance {
     Task<KeyedMessages> createCheckTask(ResourceKey resourceKey);
 
 
-    CollectionView<TransformDef> getTransformDefs();
+    CollectionView<TransformDef<?>> getTransformDefs();
 
-    CollectionView<TransformDef> getAutoTransformDefs();
+    CollectionView<TransformDef<?>> getAutoTransformDefs();
 
 
     ListView<MenuItem> getMainMenuItems();
