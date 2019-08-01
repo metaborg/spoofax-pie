@@ -391,7 +391,7 @@ public class PieRunner {
 
     // Standard PIE operations with trace logging.
 
-    private <T extends Serializable> T requireWithoutObserving(Task<T> task, PieSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
+    public <T extends Serializable> T requireWithoutObserving(Task<T> task, PieSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
         logger.trace("Require (without observing) '{}'", task);
         Stats.reset();
         final T result = session.requireWithoutObserving(task, monitorCancelled(monitor));
@@ -399,7 +399,7 @@ public class PieRunner {
         return result;
     }
 
-    private <T extends Serializable> T require(Task<T> task, PieSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
+    public <T extends Serializable> T require(Task<T> task, PieSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
         logger.trace("Require '{}'", task);
         Stats.reset();
         final T result = session.require(task, monitorCancelled(monitor));
@@ -407,21 +407,21 @@ public class PieRunner {
         return result;
     }
 
-    private void updateAffectedBy(Set<? extends ResourceKey> changedResources, PieSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
+    public void updateAffectedBy(Set<? extends ResourceKey> changedResources, PieSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
         logger.trace("Update affected by '{}'", changedResources);
         Stats.reset();
         session.updateAffectedBy(changedResources, monitorCancelled(monitor));
         logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
     }
 
-    private void unobserve(Task<?> task, Pie pie, PieSession session, @Nullable IProgressMonitor _monitor) {
+    public void unobserve(Task<?> task, Pie pie, PieSession session, @Nullable IProgressMonitor _monitor) {
         final TaskKey key = task.key();
         if(!pie.isObserved(key)) return;
         logger.trace("Unobserving '{}'", key);
         session.unobserve(key);
     }
 
-    private void deleteUnobservedTasks(PieSession session, @Nullable IProgressMonitor _monitor) throws IOException {
+    public void deleteUnobservedTasks(PieSession session, @Nullable IProgressMonitor _monitor) throws IOException {
         logger.trace("Deleting unobserved tasks");
         session.deleteUnobservedTasks((t) -> true, (t, r) -> true);
     }

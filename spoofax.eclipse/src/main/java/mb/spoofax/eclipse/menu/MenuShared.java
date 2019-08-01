@@ -9,7 +9,6 @@ import mb.spoofax.eclipse.transform.TransformHandler;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.ui.actions.CompoundContributionItem;
 import org.eclipse.ui.menus.CommandContributionItem;
 import org.eclipse.ui.menus.CommandContributionItemParameter;
@@ -20,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 abstract class MenuShared extends CompoundContributionItem implements IWorkbenchContribution {
-    protected @MonotonicNonNull IServiceLocator serviceLocator;
+    @SuppressWarnings("NullableProblems") private @MonotonicNonNull IServiceLocator serviceLocator;
 
 
     @Override public void initialize(@NonNull IServiceLocator serviceLocator) {

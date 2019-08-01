@@ -129,21 +129,20 @@
 
 
   <!-- Menus -->
-  <!-- Context menus -->
   <extension point="org.eclipse.ui.menus">
-    <!-- Project Explorer -->
+    <!-- Project Explorer context menu -->
     <menuContribution locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
       <dynamic id="tiger.eclipse.menu.resource.context" class="mb.tiger.eclipse.TigerResourceContextMenu"/>
     </menuContribution>
-    <!-- Package Explorer -->
+    <!-- Package Explorer context menu -->
     <menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=additions">
       <dynamic id="tiger.eclipse.menu.resource.context" class="mb.tiger.eclipse.TigerResourceContextMenu"/>
     </menuContribution>
-    <!-- Editor -->
+    <!-- Editor context menu -->
     <menuContribution locationURI="popup:#SpoofaxEditorContext?after=additions">
       <dynamic id="tiger.eclipse.menu.editor.context" class="mb.tiger.eclipse.TigerEditorContextMenu"/>
     </menuContribution>
-    <!-- Main -->
+    <!-- Main menu -->
     <menuContribution locationURI="menu:org.eclipse.ui.main.menu">
       <menu id="tiger.eclipse.menu.main" label="Tiger">
         <dynamic id="tiger.eclipse.menu.main.dynamic" class="mb.tiger.eclipse.TigerMainMenu"/>
