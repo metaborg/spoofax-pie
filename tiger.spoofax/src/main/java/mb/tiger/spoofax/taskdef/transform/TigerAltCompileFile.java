@@ -41,7 +41,7 @@ public class TigerAltCompileFile implements TaskDef<TransformInput, TransformOut
         }
 
         final ResourcePath generatedPath = file.replaceLeafExtension("defnames.aterm");
-        final HierarchicalResource generatedResource = resourceService.getResource(generatedPath);
+        final HierarchicalResource generatedResource = resourceService.getHierarchicalResource(generatedPath);
         generatedResource.writeBytes(defNamesStr.getBytes(StandardCharsets.UTF_8));
         context.provide(generatedResource, ResourceStampers.hashFile());
 
@@ -62,7 +62,7 @@ public class TigerAltCompileFile implements TaskDef<TransformInput, TransformOut
         return EnumSetView.of(TransformExecutionType.ManualOnce, TransformExecutionType.AutomaticContinuous, TransformExecutionType.ManualContinuous);
     }
 
-    @Override public EnumSetView<TransformContextType> getSupportedSubjectTypes() {
+    @Override public EnumSetView<TransformContextType> getSupportedContextTypes() {
         return EnumSetView.of(TransformContextType.File);
     }
 }

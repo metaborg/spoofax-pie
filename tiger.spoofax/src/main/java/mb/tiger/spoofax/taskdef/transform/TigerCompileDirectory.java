@@ -76,7 +76,7 @@ public class TigerCompileDirectory implements TaskDef<TransformInput, TransformO
         sb.append(']');
 
         final ResourcePath generatedPath = directoryPath.appendSegment("_defnames.aterm");
-        final HierarchicalResource generatedResource = resourceService.getResource(generatedPath);
+        final HierarchicalResource generatedResource = resourceService.getHierarchicalResource(generatedPath);
         generatedResource.writeBytes(sb.toString().getBytes(StandardCharsets.UTF_8));
         context.provide(generatedResource, ResourceStampers.hashFile());
 
@@ -96,7 +96,7 @@ public class TigerCompileDirectory implements TaskDef<TransformInput, TransformO
         return EnumSetView.of(TransformExecutionType.ManualOnce, TransformExecutionType.AutomaticContinuous);
     }
 
-    @Override public EnumSetView<TransformContextType> getSupportedSubjectTypes() {
+    @Override public EnumSetView<TransformContextType> getSupportedContextTypes() {
         return EnumSetView.of(TransformContextType.Directory);
     }
 }

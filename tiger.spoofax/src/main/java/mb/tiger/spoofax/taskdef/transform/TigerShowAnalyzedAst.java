@@ -1,5 +1,6 @@
 package mb.tiger.spoofax.taskdef.transform;
 
+import mb.common.region.Region;
 import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.constraint.common.ConstraintAnalyzer;
@@ -9,6 +10,8 @@ import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.transform.*;
+import mb.spoofax.core.language.transform.param.ParamDef;
+import mb.spoofax.core.language.transform.param.RawArgs;
 import mb.stratego.common.StrategoUtil;
 import mb.tiger.spoofax.taskdef.TigerAnalyze;
 import mb.tiger.spoofax.taskdef.TigerParse;
@@ -17,7 +20,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 
-public class TigerShowAnalyzedAst implements TaskDef<TransformInput, TransformOutput>, TransformDef {
+public class TigerShowAnalyzedAst implements TaskDef<TransformInput<TigerShowArgs>, TransformOutput>, TransformDef<TigerShowArgs> {
     private final TigerParse parse;
     private final TigerAnalyze analyze;
 
@@ -33,28 +36,31 @@ public class TigerShowAnalyzedAst implements TaskDef<TransformInput, TransformOu
         return getClass().getName();
     }
 
-    @Override public TransformOutput exec(ExecContext context, TransformInput input) throws Exception {
-        final TransformContext subject = input.subject;
-        final ResourceKey readable = TransformSubjects.getReadable(subject)
-            .orElseThrow(() -> new RuntimeException("Cannot show analyzed AST, subject '" + subject + "' is not a readable subject"));
+    @Override public TransformOutput exec(ExecContext context, TransformInput<TigerShowArgs> input) throws Exception {
+        final ResourceKey key = input.arguments.key;
+        final @Nullable Region region = input.arguments.region;
 
-        final ConstraintAnalyzer.@Nullable SingleFileResult analysisResult = context.require(analyze, readable);
+        final ConstraintAnalyzer.@Nullable SingleFileResult analysisResult = context.require(analyze, key);
+        // noinspection ConstantConditions (analysisResult can really be null).
         if(analysisResult == null) {
-            throw new RuntimeException("Cannot show analyzed AST, analysis result for '" + input.subject + "' is null");
+            throw new RuntimeException("Cannot show analyzed AST, analysis result for '" + key + "' is null");
         }
         if(analysisResult.ast == null) {
-            throw new RuntimeException("Cannot show analyzed AST, analyzed AST for '" + input.subject + "' is null");
+            throw new RuntimeException("Cannot show analyzed AST, analyzed AST for '" + key + "' is null");
         }
 
-        final IStrategoTerm term = TransformSubjects.caseOf(subject)
-            .editorWithRegion((f, r) -> TermTracer.getSmallestTermEncompassingRegion(analysisResult.ast, r))
-            .otherwise_(analysisResult.ast);
+        final IStrategoTerm term;
+        if(region != null) {
+            term = TermTracer.getSmallestTermEncompassingRegion(analysisResult.ast, region);
+        } else {
+            term = analysisResult.ast;
+        }
 
         final String formatted = StrategoUtil.toString(term);
-        return new TransformOutput(ListView.of(TransformFeedbacks.openEditorWithText(formatted, "Analyzed AST for '" + readable + "'", null)));
+        return new TransformOutput(ListView.of(TransformFeedbacks.openEditorWithText(formatted, "Analyzed AST for '" + key + "'", null)));
     }
 
-    @Override public Task<TransformOutput> createTask(TransformInput input) {
+    @Override public Task<TransformOutput> createTask(TransformInput<TigerShowArgs> input) {
         return TaskDef.super.createTask(input);
     }
 
@@ -67,7 +73,15 @@ public class TigerShowAnalyzedAst implements TaskDef<TransformInput, TransformOu
         return EnumSetView.of(TransformExecutionType.ManualOnce, TransformExecutionType.ManualContinuous);
     }
 
-    @Override public EnumSetView<TransformContextType> getSupportedSubjectTypes() {
+    @Override public EnumSetView<TransformContextType> getSupportedContextTypes() {
         return EnumSetView.of(TransformContextType.Editor, TransformContextType.EditorWithRegion);
+    }
+
+    @Override public ParamDef getParamDef() {
+        return TigerShowArgs.getParamDef();
+    }
+
+    @Override public TigerShowArgs fromRawArgs(RawArgs rawArgs) {
+        return TigerShowArgs.fromRawArgs(rawArgs);
     }
 }

@@ -4,8 +4,10 @@ import mb.common.util.ADT;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @ADT
-public abstract class ArgSource {
+public abstract class ArgProvider {
     interface Cases<R> {
+        R value(Object arg);
+
         R context();
 
         // TODO: configuration files

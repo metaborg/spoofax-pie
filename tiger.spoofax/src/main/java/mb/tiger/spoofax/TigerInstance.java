@@ -89,8 +89,8 @@ public class TigerInstance implements LanguageInstance {
     }
 
 
-    @Override public CollectionView<TransformDef> getTransformDefs() {
-        return CollectionView.of(
+    @Override public CollectionView<TransformDef<?>> getTransformDefs() {
+        return CollectionView.<TransformDef<?>>of(
             showParsedAst,
             showPrettyPrintedText,
             showAnalyzedAst,
@@ -101,8 +101,8 @@ public class TigerInstance implements LanguageInstance {
         );
     }
 
-    @Override public CollectionView<TransformDef> getAutoTransformDefs() {
-        return CollectionView.of(
+    @Override public CollectionView<TransformDef<?>> getAutoTransformDefs() {
+        return CollectionView.<TransformDef<?>>of(
             compileFile,
             compileDirectory
         );
@@ -164,19 +164,19 @@ public class TigerInstance implements LanguageInstance {
     }
 
 
-    private static TransformAction transformAction(TransformDef transformDef, TransformExecutionType executionType, String suffix) {
+    private static TransformAction transformAction(TransformDef<?> transformDef, TransformExecutionType executionType, String suffix) {
         return new TransformAction(new TransformRequest(transformDef, executionType), transformDef.getDisplayName() + suffix);
     }
 
-    private static TransformAction transformAction(TransformDef transformDef, TransformExecutionType executionType) {
+    private static TransformAction transformAction(TransformDef<?> transformDef, TransformExecutionType executionType) {
         return transformAction(transformDef, executionType, "");
     }
 
-    private static TransformAction manualOnceTransformAction(TransformDef transformDef) {
+    private static TransformAction manualOnceTransformAction(TransformDef<?> transformDef) {
         return transformAction(transformDef, TransformExecutionType.ManualOnce, "");
     }
 
-    private static TransformAction manualContinuousTransformAction(TransformDef transformDef) {
+    private static TransformAction manualContinuousTransformAction(TransformDef<?> transformDef) {
         return transformAction(transformDef, TransformExecutionType.ManualContinuous, " (continuous)");
     }
 }

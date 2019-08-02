@@ -177,7 +177,7 @@ public class PieRunner {
         try(final PieSession session = languageComponent.newPieSession()) {
             // Unobserve auto transforms.
             for(TransformDef def : autoTransformDefs.project) {
-                unobserve(def.createTask(new TransformInput(TransformSubjects.project(project.getKey()))), pie, session, monitor);
+                unobserve(def.createTask(new TransformInput(TransformContexts.project(project.getKey()))), pie, session, monitor);
             }
             for(ResourcePath directory : resourceChanges.newDirectories) {
                 for(TransformDef def : autoTransformDefs.directory) {

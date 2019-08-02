@@ -33,7 +33,7 @@ public class TigerParse implements TaskDef<ResourceKey, JSGLR1ParseResult> {
 
     @Override
     public JSGLR1ParseResult exec(ExecContext context, ResourceKey key) throws IOException, InterruptedException {
-        final ReadableResource resource = resourceService.getResource(key);
+        final ReadableResource resource = resourceService.getReadableResource(key);
         context.require(resource);
         if(!resource.exists()) {
             return JSGLR1ParseResults.failed(Messages.of(new Message("Cannot parse file '" + key + "', it does not exist", Severity.Error)));

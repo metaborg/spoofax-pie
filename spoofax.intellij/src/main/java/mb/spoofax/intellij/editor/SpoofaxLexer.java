@@ -13,6 +13,7 @@ import mb.pie.api.ExecException;
 import mb.pie.api.PieSession;
 import mb.pie.api.Task;
 import mb.resource.ReadableResource;
+import mb.resource.Resource;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
 import mb.spoofax.core.language.LanguageInstance;
@@ -148,7 +149,7 @@ public final class SpoofaxLexer extends LexerBase {
      * @return The default tokens for the resource.
      */
     private List<mb.common.token.Token> getDefaultTokens(ResourceKey resourceKey) {
-        final ReadableResource resource = this.resourceService.getResource(resourceKey);
+        final ReadableResource resource = this.resourceService.getReadableResource(resourceKey);
         try {
             int length = (int) resource.getSize();
             return Lists.newArrayList(
