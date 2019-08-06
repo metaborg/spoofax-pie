@@ -1,5 +1,6 @@
 package mb.tiger.spoofax.taskdef.transform;
 
+import mb.common.util.CollectionView;
 import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
@@ -16,32 +17,63 @@ import mb.resource.hierarchical.match.PathResourceMatcher;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.match.path.ExtensionsPathMatcher;
 import mb.spoofax.core.language.transform.*;
+import mb.spoofax.core.language.transform.param.ArgProviders;
+import mb.spoofax.core.language.transform.param.ParamDef;
+import mb.spoofax.core.language.transform.param.Params;
+import mb.spoofax.core.language.transform.param.RawArgs;
 import mb.tiger.spoofax.taskdef.TigerListDefNames;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class TigerCompileDirectory implements TaskDef<TransformInput, TransformOutput>, TransformDef {
+public class TigerCompileDirectory implements TaskDef<TransformInput<TigerCompileDirectory.Args>, TransformOutput>, TransformDef<TigerCompileDirectory.Args> {
+    public static class Args implements Serializable {
+        final ResourcePath dir;
+
+        public Args(ResourcePath dir) {
+            this.dir = dir;
+        }
+
+        @Override public boolean equals(@Nullable Object obj) {
+            if(this == obj) return true;
+            if(obj == null || getClass() != obj.getClass()) return false;
+            final Args other = (Args) obj;
+            return dir.equals(other.dir);
+        }
+
+        @Override public int hashCode() {
+            return Objects.hash(dir);
+        }
+
+        @Override public String toString() {
+            return dir.toString();
+        }
+    }
+
+
     private final TigerListDefNames listDefNames;
     private final ResourceService resourceService;
+
 
     @Inject public TigerCompileDirectory(TigerListDefNames listDefNames, ResourceService resourceService) {
         this.listDefNames = listDefNames;
         this.resourceService = resourceService;
     }
 
+
     @Override public String getId() {
         return getClass().getName();
     }
 
-    @Override public TransformOutput exec(ExecContext context, TransformInput input) throws Exception {
-        final TransformContext subject = input.subject;
-        final ResourcePath directoryPath = TransformSubjects.getDirectory(subject)
-            .orElseThrow(() -> new RuntimeException("Cannot compile, subject '" + subject + "' is not a directory subject"));
+    @Override public TransformOutput exec(ExecContext context, TransformInput<Args> input) throws Exception {
+        final ResourcePath dir = input.arguments.dir;
+
         final ResourceMatcher matcher = new AllResourceMatcher(new FileResourceMatcher(), new PathResourceMatcher(new ExtensionsPathMatcher("tig")));
-        final HierarchicalResource directory = context.require(directoryPath, ResourceStampers.modifiedDir(matcher));
+        final HierarchicalResource directory = context.require(dir, ResourceStampers.modifiedDir(matcher));
 
         final StringBuffer sb = new StringBuffer();
         sb.append("[\n  ");
@@ -53,6 +85,7 @@ public class TigerCompileDirectory implements TaskDef<TransformInput, TransformO
                         sb.append(", ");
                     }
                     final @Nullable String defNames = context.require(listDefNames, f.getKey());
+                    //noinspection ConstantConditions (defNames can really be null)
                     if(defNames != null) {
                         sb.append(defNames);
                     } else {
@@ -75,7 +108,7 @@ public class TigerCompileDirectory implements TaskDef<TransformInput, TransformO
         }
         sb.append(']');
 
-        final ResourcePath generatedPath = directoryPath.appendSegment("_defnames.aterm");
+        final ResourcePath generatedPath = dir.appendSegment("_defnames.aterm");
         final HierarchicalResource generatedResource = resourceService.getHierarchicalResource(generatedPath);
         generatedResource.writeBytes(sb.toString().getBytes(StandardCharsets.UTF_8));
         context.provide(generatedResource, ResourceStampers.hashFile());
@@ -83,7 +116,7 @@ public class TigerCompileDirectory implements TaskDef<TransformInput, TransformO
         return new TransformOutput(ListView.of(TransformFeedbacks.openEditorForFile(generatedPath, null)));
     }
 
-    @Override public Task<TransformOutput> createTask(TransformInput input) {
+    @Override public Task<TransformOutput> createTask(TransformInput<Args> input) {
         return TaskDef.super.createTask(input);
     }
 
@@ -98,5 +131,17 @@ public class TigerCompileDirectory implements TaskDef<TransformInput, TransformO
 
     @Override public EnumSetView<TransformContextType> getSupportedContextTypes() {
         return EnumSetView.of(TransformContextType.Directory);
+    }
+
+    @Override public ParamDef getParamDef() {
+        return new ParamDef(CollectionView.of(Params.positional(0, ResourcePath.class, true, ListView.of(ArgProviders.context()))));
+    }
+
+    @Override public Args fromRawArgs(RawArgs rawArgs) {
+        final @Nullable ResourcePath dir = rawArgs.getPositional(0);
+        if(dir == null) {
+            throw new RuntimeException("Could not create arguments from raw arguments '" + rawArgs + "', it has no positional argument at index 0");
+        }
+        return new TigerCompileDirectory.Args(dir);
     }
 }

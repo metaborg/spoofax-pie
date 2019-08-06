@@ -1,6 +1,5 @@
 package mb.tiger.spoofax.taskdef.transform;
 
-import mb.common.region.Region;
 import mb.common.util.CollectionView;
 import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
@@ -8,7 +7,6 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
-import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
@@ -23,6 +21,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 public class TigerCompileFile implements TaskDef<TransformInput<TigerCompileFile.Args>, TransformOutput>, TransformDef<TigerCompileFile.Args> {
     public static class Args implements Serializable {
@@ -31,7 +30,23 @@ public class TigerCompileFile implements TaskDef<TransformInput<TigerCompileFile
         public Args(ResourcePath file) {
             this.file = file;
         }
+
+        @Override public boolean equals(@Nullable Object obj) {
+            if(this == obj) return true;
+            if(obj == null || getClass() != obj.getClass()) return false;
+            final Args other = (Args) obj;
+            return file.equals(other.file);
+        }
+
+        @Override public int hashCode() {
+            return Objects.hash(file);
+        }
+
+        @Override public String toString() {
+            return file.toString();
+        }
     }
+
 
     private final TigerListLiteralVals listLiteralVals;
     private final ResourceService resourceService;
@@ -51,6 +66,7 @@ public class TigerCompileFile implements TaskDef<TransformInput<TigerCompileFile
         final ResourcePath file = input.arguments.file;
 
         final @Nullable String literalsStr = context.require(listLiteralVals, file);
+        //noinspection ConstantConditions (literalsStr can really be null)
         if(literalsStr == null) {
             return new TransformOutput(ListView.of());
         }

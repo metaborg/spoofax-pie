@@ -10,6 +10,7 @@ import mb.spoofax.eclipse.editor.PartClosedCallback;
 import mb.spoofax.eclipse.pie.PieRunner;
 import mb.spoofax.eclipse.resource.EclipseResourceRegistryModule;
 import mb.spoofax.eclipse.util.ColorShare;
+import mb.spoofax.eclipse.util.ResourceUtil;
 import mb.spoofax.eclipse.util.StyleUtil;
 
 import javax.inject.Singleton;
@@ -25,6 +26,8 @@ import javax.inject.Singleton;
 })
 public interface SpoofaxEclipseComponent extends PlatformComponent {
     PieRunner getPieRunner();
+
+    ResourceUtil getResourceUtil();
 
     ColorShare getColorShare();
 

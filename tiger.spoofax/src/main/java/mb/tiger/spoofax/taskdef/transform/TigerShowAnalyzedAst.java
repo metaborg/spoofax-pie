@@ -14,20 +14,17 @@ import mb.spoofax.core.language.transform.param.ParamDef;
 import mb.spoofax.core.language.transform.param.RawArgs;
 import mb.stratego.common.StrategoUtil;
 import mb.tiger.spoofax.taskdef.TigerAnalyze;
-import mb.tiger.spoofax.taskdef.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 
 public class TigerShowAnalyzedAst implements TaskDef<TransformInput<TigerShowArgs>, TransformOutput>, TransformDef<TigerShowArgs> {
-    private final TigerParse parse;
     private final TigerAnalyze analyze;
 
 
     @Inject
-    public TigerShowAnalyzedAst(TigerParse parse, TigerAnalyze analyze) {
-        this.parse = parse;
+    public TigerShowAnalyzedAst(TigerAnalyze analyze) {
         this.analyze = analyze;
     }
 

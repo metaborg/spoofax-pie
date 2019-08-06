@@ -118,7 +118,7 @@ public class RawArgsBuilder {
                     .fileWithOffset((p, o) -> p)
                     .otherwiseEmpty();
                 if(path.isPresent()) {
-                    return path;
+                    return path.get();
                 }
             }
             if(ResourceKey.class.isAssignableFrom(type)) {

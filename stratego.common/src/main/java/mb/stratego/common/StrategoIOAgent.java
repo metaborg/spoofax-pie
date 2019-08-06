@@ -127,7 +127,7 @@ public class StrategoIOAgent extends IOAgent {
         if(!acceptDirChanges)
             return;
 
-        workingDir = appendOrReplaceWith(workingDir, newWorkingDir);
+        workingDir = resourceService.appendOrReplaceWithHierarchical(workingDir, newWorkingDir);
     }
 
     public void setAbsoluteWorkingDir(HierarchicalResource dir) {
@@ -147,7 +147,7 @@ public class StrategoIOAgent extends IOAgent {
         if(!acceptDirChanges)
             return;
 
-        definitionDir = appendOrReplaceWith(workingDir, newDefinitionDir);
+        definitionDir = resourceService.appendOrReplaceWithHierarchical(definitionDir, newDefinitionDir);
     }
 
     public void setAbsoluteDefinitionDir(HierarchicalResource dir) {
@@ -246,7 +246,7 @@ public class StrategoIOAgent extends IOAgent {
         boolean writeMode = appendMode || mode.indexOf('w') >= 0;
         boolean clearFile = false;
 
-        final HierarchicalResource resource = appendOrReplaceWith(workingDir, fn);
+        final HierarchicalResource resource = resourceService.appendOrReplaceWithHierarchical(workingDir, fn);
 
         if(writeMode) {
             if(!resource.exists()) {
@@ -306,7 +306,7 @@ public class StrategoIOAgent extends IOAgent {
     }
 
     @Override public String[] readdir(@NonNull String dn) {
-        final HierarchicalResource resource = appendOrReplaceWith(workingDir, dn);
+        final HierarchicalResource resource = resourceService.appendOrReplaceWithHierarchical(workingDir, dn);
         try {
             if(!resource.exists() || !resource.isDirectory()) {
                 return new String[0];
@@ -329,7 +329,7 @@ public class StrategoIOAgent extends IOAgent {
     @Override
     public InputStream openInputStream(@NonNull String fn, boolean isDefinitionFile) {
         final HierarchicalResource dir = isDefinitionFile ? definitionDir : workingDir;
-        final HierarchicalResource file = appendOrReplaceWith(dir, fn);
+        final HierarchicalResource file = resourceService.appendOrReplaceWithHierarchical(dir, fn);
         try {
             return file.newInputStream();
         } catch(IOException e) {
@@ -339,7 +339,7 @@ public class StrategoIOAgent extends IOAgent {
 
 
     @Override public OutputStream openFileOutputStream(@NonNull String fn) {
-        final HierarchicalResource file = appendOrReplaceWith(workingDir, fn);
+        final HierarchicalResource file = resourceService.appendOrReplaceWithHierarchical(workingDir, fn);
         try {
             return file.newOutputStream();
         } catch(IOException e) {
@@ -360,7 +360,7 @@ public class StrategoIOAgent extends IOAgent {
     }
 
     @Override public boolean mkdir(@NonNull String fn) {
-        final HierarchicalResource resource = appendOrReplaceWith(workingDir, fn);
+        final HierarchicalResource resource = resourceService.appendOrReplaceWithHierarchical(workingDir, fn);
         try {
             final boolean created = !resource.exists();
             resource.createDirectory();
@@ -371,7 +371,7 @@ public class StrategoIOAgent extends IOAgent {
     }
 
     @Override @Deprecated public boolean mkDirs(@NonNull String dn) {
-        final HierarchicalResource resource = appendOrReplaceWith(workingDir, dn);
+        final HierarchicalResource resource = resourceService.appendOrReplaceWithHierarchical(workingDir, dn);
         try {
             final boolean created = !resource.exists();
             resource.createDirectory(true);
@@ -382,7 +382,7 @@ public class StrategoIOAgent extends IOAgent {
     }
 
     @Override public boolean rmdir(@NonNull String dn) {
-        final HierarchicalResource resource = appendOrReplaceWith(workingDir, dn);
+        final HierarchicalResource resource = resourceService.appendOrReplaceWithHierarchical(workingDir, dn);
         try {
             resource.delete(true);
             return true;
@@ -392,7 +392,7 @@ public class StrategoIOAgent extends IOAgent {
     }
 
     @Override public boolean exists(@NonNull String fn) {
-        final HierarchicalResource resource = appendOrReplaceWith(workingDir, fn);
+        final HierarchicalResource resource = resourceService.appendOrReplaceWithHierarchical(workingDir, fn);
         try {
             return resource.exists();
         } catch(IOException e) {
@@ -401,7 +401,7 @@ public class StrategoIOAgent extends IOAgent {
     }
 
     @Override public boolean readable(@NonNull String fn) {
-        final HierarchicalResource resource = appendOrReplaceWith(workingDir, fn);
+        final HierarchicalResource resource = resourceService.appendOrReplaceWithHierarchical(workingDir, fn);
         try {
             return resource.isReadable();
         } catch(IOException e) {
@@ -410,7 +410,7 @@ public class StrategoIOAgent extends IOAgent {
     }
 
     @Override public boolean writable(@NonNull String fn) {
-        final HierarchicalResource resource = appendOrReplaceWith(workingDir, fn);
+        final HierarchicalResource resource = resourceService.appendOrReplaceWithHierarchical(workingDir, fn);
         try {
             return resource.isWritable();
         } catch(IOException e) {
@@ -419,21 +419,12 @@ public class StrategoIOAgent extends IOAgent {
     }
 
     @Override public boolean isDirectory(@NonNull String dn) {
-        final HierarchicalResource resource = appendOrReplaceWith(workingDir, dn);
+        final HierarchicalResource resource = resourceService.appendOrReplaceWithHierarchical(workingDir, dn);
         try {
             final HierarchicalResourceType type = resource.getType();
             return type == HierarchicalResourceType.Directory;
         } catch(IOException e) {
             throw new RuntimeException("Could not check if resource " + resource + " is a directory", e);
         }
-    }
-
-
-    private HierarchicalResource appendOrReplaceWith(HierarchicalResource dir, String str) {
-        final Resource resource = resourceService.appendOrReplaceWith(dir, str);
-        if(!(resource instanceof HierarchicalResource)) {
-            throw new RuntimeException("Cannot append or replace with to '" + resource + "', is not a hierarchical resource");
-        }
-        return (HierarchicalResource) resource;
     }
 }

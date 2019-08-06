@@ -52,7 +52,7 @@ public class TransformHandler extends AbstractHandler {
         }
         try {
             try(final PieSession session = languageComponent.newPieSession()) {
-                pieRunner.requireTransform(languageComponent, def, data.executionType, data.inputs, session, null);
+                pieRunner.requireTransform(languageComponent, def, data.executionType, data.contexts, session, null);
             }
         } catch(ExecException e) {
             throw new ExecutionException("Cannot execute transform '" + def + "', execution failed unexpectedly", e);

@@ -1,6 +1,7 @@
 package mb.spoofax.eclipse.resource;
 
 import mb.resource.Resource;
+import mb.resource.ResourceKey;
 import mb.resource.ResourceRegistry;
 import mb.resource.ResourceRuntimeException;
 
@@ -30,13 +31,14 @@ public class EclipseResourceRegistry implements ResourceRegistry {
     }
 
 
-    @Override public EclipseResourcePath getResourceKey(String portablePathString) {
-        return new EclipseResourcePath(portablePathString);
+    @Override public ResourceKey getResourceKey(String idStr) {
+        return new EclipseResourcePath(idStr);
     }
 
-    @Override public EclipseResource getResource(String portablePathString) {
-        return new EclipseResource(new EclipseResourcePath(portablePathString));
+    @Override public Resource getResource(String idStr) {
+        return new EclipseResource(new EclipseResourcePath(idStr));
     }
+
 
     @Override public String toStringRepresentation(Serializable id) {
         if(!(id instanceof String)) {

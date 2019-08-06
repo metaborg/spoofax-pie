@@ -2,6 +2,8 @@ package mb.spoofax.eclipse.resource;
 
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
+import mb.resource.Resource;
+import mb.resource.ResourceKey;
 import mb.resource.ResourceRegistry;
 import mb.resource.ResourceRuntimeException;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -40,7 +42,7 @@ public class EclipseDocumentResourceRegistry implements ResourceRegistry {
     }
 
 
-    @Override public EclipseDocumentResource getResource(Serializable id) {
+    @Override public Resource getResource(Serializable id) {
         if(!(id instanceof String)) {
             throw new ResourceRuntimeException(
                 "Cannot get Eclipse document resource with ID '" + id + "'; the ID is not of type String");
@@ -49,11 +51,11 @@ public class EclipseDocumentResourceRegistry implements ResourceRegistry {
     }
 
 
-    @Override public EclipseDocumentKey getResourceKey(String id) {
-        return new EclipseDocumentKey(id);
+    @Override public ResourceKey getResourceKey(String idStr) {
+        return new EclipseDocumentKey(idStr);
     }
 
-    @Override public EclipseDocumentResource getResource(String id) {
+    @Override public Resource getResource(String id) {
         final @Nullable EclipseDocumentResource resource = resources.get(id);
         if(resource != null) {
             return resource;

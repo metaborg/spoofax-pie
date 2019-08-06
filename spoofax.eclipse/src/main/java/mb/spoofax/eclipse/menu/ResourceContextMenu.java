@@ -4,10 +4,7 @@ import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.menu.MenuItem;
-import mb.spoofax.core.language.transform.TransformContexts;
-import mb.spoofax.core.language.transform.TransformInput;
-import mb.spoofax.core.language.transform.TransformRequest;
-import mb.spoofax.core.language.transform.TransformContextType;
+import mb.spoofax.core.language.transform.*;
 import mb.spoofax.eclipse.EclipseIdentifiers;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.SpoofaxEclipseComponent;
@@ -123,22 +120,22 @@ public abstract class ResourceContextMenu extends MenuShared {
             menuItem.accept(new EclipseMenuItemVisitor(langMenu) {
                 @Override
                 protected void transformAction(IContributionManager menu, String displayName, TransformRequest transformRequest) {
-                    final EnumSetView<TransformContextType> supportedTypes = transformRequest.transformDef.getSupportedSubjectTypes();
-                    final ListView<TransformInput> inputs;
+                    final EnumSetView<TransformContextType> supportedTypes = transformRequest.transformDef.getSupportedContextTypes();
+                    final ListView<TransformContext> contexts;
                     if(hasProjects && supportedTypes.contains(TransformContextType.Project)) {
-                        inputs = TransformUtil.inputs(projects.stream().map(EclipseResourcePath::new).map(TransformContexts::project));
+                        contexts = TransformUtil.contexts(projects.stream().map(EclipseResourcePath::new).map(TransformContexts::project));
                     } else if(hasContainers && supportedTypes.contains(TransformContextType.Directory)) {
-                        inputs = TransformUtil.inputs(containers.stream().map(EclipseResourcePath::new).map(TransformContexts::directory));
+                        contexts = TransformUtil.contexts(containers.stream().map(EclipseResourcePath::new).map(TransformContexts::directory));
                     } else if(hasFiles && supportedTypes.contains(TransformContextType.File)) {
-                        inputs = TransformUtil.inputs(files.stream().map(EclipseResourcePath::new).map(TransformContexts::file));
+                        contexts = TransformUtil.contexts(files.stream().map(EclipseResourcePath::new).map(TransformContexts::file));
                     } else if(hasFiles && supportedTypes.contains(TransformContextType.Editor)) {
-                        inputs = TransformUtil.inputs(files.stream().map(EclipseResourcePath::new).map(TransformContexts::editor));
+                        contexts = TransformUtil.contexts(files.stream().map(EclipseResourcePath::new).map(TransformContexts::editor));
                     } else if(supportedTypes.contains(TransformContextType.None)) {
-                        inputs = TransformUtil.input(TransformContexts.none());
+                        contexts = TransformUtil.context(TransformContexts.none());
                     } else {
                         return;
                     }
-                    menu.add(transformCommand(transformCommandId, transformRequest, inputs, displayName));
+                    menu.add(transformCommand(transformCommandId, transformRequest, contexts, displayName));
                 }
             });
         }

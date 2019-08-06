@@ -7,11 +7,10 @@ import mb.common.style.Styling;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.resource.ResourceKey;
-import mb.resource.ResourceService;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
-import mb.spoofax.eclipse.resource.WrapsEclipseResource;
 import mb.spoofax.eclipse.util.MarkerUtil;
+import mb.spoofax.eclipse.util.ResourceUtil;
 import mb.spoofax.eclipse.util.StyleUtil;
 import mb.spoofax.eclipse.util.UncheckedCoreException;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -33,24 +32,24 @@ public class WorkspaceUpdate {
     @Singleton
     public static class Factory {
         private final LoggerFactory loggerFactory;
-        private final ResourceService resourceService;
+        private final ResourceUtil resourceUtil;
         private final StyleUtil styleUtil;
 
         @Inject
-        public Factory(LoggerFactory loggerFactory, ResourceService resourceService, StyleUtil styleUtil) {
+        public Factory(LoggerFactory loggerFactory, ResourceUtil resourceUtil, StyleUtil styleUtil) {
             this.loggerFactory = loggerFactory;
-            this.resourceService = resourceService;
+            this.resourceUtil = resourceUtil;
             this.styleUtil = styleUtil;
         }
 
         public WorkspaceUpdate create(EclipseLanguageComponent languageComponent) {
-            return new WorkspaceUpdate(loggerFactory, resourceService, styleUtil, languageComponent);
+            return new WorkspaceUpdate(loggerFactory, resourceUtil, styleUtil, languageComponent);
         }
     }
 
 
     private final Logger logger;
-    private final ResourceService resourceService;
+    private final ResourceUtil resourceUtil;
     private final StyleUtil styleUtil;
 
     private final EclipseLanguageComponent languageComponent;
@@ -61,9 +60,9 @@ public class WorkspaceUpdate {
     private final ArrayList<StyleUpdate> styleUpdates = new ArrayList<>();
 
 
-    public WorkspaceUpdate(LoggerFactory loggerFactory, ResourceService resourceService, StyleUtil styleUtil, EclipseLanguageComponent languageComponent) {
+    public WorkspaceUpdate(LoggerFactory loggerFactory, ResourceUtil resourceService, StyleUtil styleUtil, EclipseLanguageComponent languageComponent) {
         this.logger = loggerFactory.create(getClass());
-        this.resourceService = resourceService;
+        this.resourceUtil = resourceService;
         this.styleUtil = styleUtil;
         this.languageComponent = languageComponent;
     }
@@ -133,12 +132,12 @@ public class WorkspaceUpdate {
         final ICoreRunnable makerUpdate = (IWorkspaceRunnable) workspaceMonitor -> {
             for(ResourceKey resourceKey : clearRecursively) {
                 if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return;
-                final IResource resource = getEclipseResource(resourceKey);
+                final IResource resource = resourceUtil.getEclipseResource(resourceKey);
                 MarkerUtil.clearAllRec(languageComponent.getEclipseIdentifiers(), resource);
             }
             for(ResourceKey resourceKey : clear) {
                 if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return;
-                final IResource resource = getEclipseResource(resourceKey);
+                final IResource resource = resourceUtil.getEclipseResource(resourceKey);
                 MarkerUtil.clearAll(languageComponent.getEclipseIdentifiers(), resource);
             }
             try {
@@ -148,7 +147,7 @@ public class WorkspaceUpdate {
                         logger.warn("Cannot create marker with text '" + text + "'; it has no corresponding resource");
                         return true;
                     }
-                    final IResource resource = getEclipseResource(resourceKey);
+                    final IResource resource = resourceUtil.getEclipseResource(resourceKey);
                     try {
                         MarkerUtil.createMarker(languageComponent.getEclipseIdentifiers(), text, severity, resource, region);
                     } catch(CoreException e) {
@@ -171,19 +170,6 @@ public class WorkspaceUpdate {
             if(monitor != null && monitor.isCanceled()) return;
             final SpoofaxEditor editor = styleUpdate.editor;
             editor.setStyleAsync(styleUpdate.textPresentation, styleUpdate.text, styleUpdate.textLength, monitor);
-        }
-    }
-
-    private IResource getEclipseResource(ResourceKey resourceKey) {
-        try {
-            final WrapsEclipseResource wrapsEclipseResource = resourceService.getResource(resourceKey);
-            final @Nullable IResource resource = wrapsEclipseResource.getWrappedEclipseResource();
-            if(resource == null) {
-                throw new RuntimeException("Cannot get Eclipse resource for '" + resourceKey + "', resource '" + wrapsEclipseResource + "' was found but it does not have a corresponding Eclipse resource");
-            }
-            return resource;
-        } catch(ClassCastException e) {
-            throw new RuntimeException("Cannot get Eclipse resource for '" + resourceKey + "', it is not an Eclipse resource", e);
         }
     }
 }

@@ -2,7 +2,7 @@ package mb.spoofax.eclipse.menu;
 
 import mb.common.util.ListView;
 import mb.common.util.SerializationUtil;
-import mb.spoofax.core.language.transform.TransformInput;
+import mb.spoofax.core.language.transform.TransformContext;
 import mb.spoofax.core.language.transform.TransformRequest;
 import mb.spoofax.eclipse.transform.TransformData;
 import mb.spoofax.eclipse.transform.TransformHandler;
@@ -47,8 +47,8 @@ abstract class MenuShared extends CompoundContributionItem implements IWorkbench
     }
 
 
-    protected CommandContributionItem transformCommand(String commandId, TransformRequest transformRequest, ListView<TransformInput> inputs, String displayName) {
-        final TransformData data = new TransformData(transformRequest.transformDef.getId(), transformRequest.executionType, inputs);
+    protected CommandContributionItem transformCommand(String commandId, TransformRequest transformRequest, ListView<TransformContext> contexts, String displayName) {
+        final TransformData data = new TransformData(transformRequest.transformDef.getId(), transformRequest.executionType, contexts);
         final Map<String, String> parameters = new HashMap<>();
         final String serialized = SerializationUtil.serializeToString(data);
         parameters.put(TransformHandler.dataParameterId, serialized);

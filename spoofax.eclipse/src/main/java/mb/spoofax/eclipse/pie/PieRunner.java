@@ -13,7 +13,6 @@ import mb.pie.api.exec.Cancelled;
 import mb.pie.api.exec.NullCancelled;
 import mb.pie.runtime.exec.Stats;
 import mb.resource.ResourceKey;
-import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.transform.*;
@@ -23,6 +22,7 @@ import mb.spoofax.eclipse.editor.PartClosedCallback;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.eclipse.resource.*;
 import mb.spoofax.eclipse.transform.TransformUtil;
+import mb.spoofax.eclipse.util.ResourceUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.CoreException;
@@ -49,10 +49,11 @@ import java.util.function.Consumer;
 @Singleton
 public class PieRunner {
     private final Logger logger;
-    private final ResourceService resourceService;
+    //    private final ResourceService resourceService;
     private final Pie pie;
     private final EclipseDocumentResourceRegistry eclipseDocumentResourceRegistry;
     private final WorkspaceUpdate.Factory workspaceUpdateFactory;
+    private final ResourceUtil resourceUtil;
     private final PartClosedCallback partClosedCallback;
 
     private @Nullable WorkspaceUpdate bottomUpWorkspaceUpdate = null;
@@ -61,14 +62,16 @@ public class PieRunner {
     @Inject
     public PieRunner(
         LoggerFactory loggerFactory,
-        ResourceService resourceService,
+//        ResourceService resourceService,
         Pie pie,
         EclipseDocumentResourceRegistry eclipseDocumentResourceRegistry,
-
         WorkspaceUpdate.Factory workspaceUpdateFactory,
-        PartClosedCallback partClosedCallback) {
+        ResourceUtil resourceUtil,
+        PartClosedCallback partClosedCallback
+    ) {
         this.logger = loggerFactory.create(getClass());
-        this.resourceService = resourceService;
+        this.resourceUtil = resourceUtil;
+//        this.resourceService = resourceService;
         this.pie = pie;
         this.eclipseDocumentResourceRegistry = eclipseDocumentResourceRegistry;
         this.workspaceUpdateFactory = workspaceUpdateFactory;
@@ -181,12 +184,12 @@ public class PieRunner {
             }
             for(ResourcePath directory : resourceChanges.newDirectories) {
                 for(TransformDef def : autoTransformDefs.directory) {
-                    unobserve(def.createTask(new TransformInput(TransformSubjects.directory(directory))), pie, session, monitor);
+                    unobserve(def.createTask(new TransformInput(TransformContexts.directory(directory))), pie, session, monitor);
                 }
             }
             for(ResourcePath file : resourceChanges.newFiles) {
                 for(TransformDef def : autoTransformDefs.file) {
-                    unobserve(def.createTask(new TransformInput(TransformSubjects.file(file))), pie, session, monitor);
+                    unobserve(def.createTask(new TransformInput(TransformContexts.file(file))), pie, session, monitor);
                 }
             }
             deleteUnobservedTasks(session, monitor);
@@ -267,22 +270,23 @@ public class PieRunner {
 
     public void requireTransform(
         EclipseLanguageComponent languageComponent,
-        TransformDef def,
+        TransformDef<?> def,
         TransformExecutionType executionType,
-        ListView<TransformInput> inputs,
+        ListView<TransformContext> contexts,
         PieSession session,
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException {
         switch(executionType) {
             case ManualOnce:
-                for(TransformInput input : inputs) {
-                    final TransformOutput output = requireWithoutObserving(def.createTask(input), session, monitor);
+                for(TransformContext context : contexts) {
+                    final Task<TransformOutput> task = TransformUtil.createTask(def, context);
+                    final TransformOutput output = requireWithoutObserving(task, session, monitor);
                     processOutput(output, true, null);
                 }
                 break;
             case ManualContinuous:
-                for(TransformInput input : inputs) {
-                    final Task<TransformOutput> task = def.createTask(input);
+                for(TransformContext context : contexts) {
+                    final Task<TransformOutput> task = TransformUtil.createTask(def, context);
                     final TransformOutput output = require(task, session, monitor);
                     processOutput(output, true, (p) -> {
                         // POTI: this opens a new PIE session, which may be used concurrently with other sessions, which
@@ -296,8 +300,9 @@ public class PieRunner {
                 }
                 break;
             case AutomaticContinuous:
-                for(TransformInput input : inputs) {
-                    require(def.createTask(input), session, monitor);
+                for(TransformContext context : contexts) {
+                    final Task<TransformOutput> task = TransformUtil.createTask(def, context);
+                    require(task, session, monitor);
                     // Feedback for AutomaticContinuous is ignored intentionally: do not want to suddenly open new
                     // editors when a resource is saved.
                 }
@@ -314,25 +319,12 @@ public class PieRunner {
     private void processFeedback(TransformFeedback feedback, boolean activate, @Nullable Consumer<IWorkbenchPart> closedCallback) {
         TransformFeedbacks.caseOf(feedback)
             .openEditorForFile((file, region) -> {
-                final @Nullable IResource eclipseResource;
-                try {
-                    final @Nullable WrapsEclipseResource resource = resourceService.getResource(file);
-                    eclipseResource = resource.getWrappedEclipseResource();
-                    if(eclipseResource == null) {
-                        throw new RuntimeException("Cannot open editor for file '" + file + "', it has no corresponding Eclipse resource");
-                    }
-                    if(!(eclipseResource instanceof IFile)) {
-                        throw new RuntimeException("Cannot open editor for Eclipse resource '" + eclipseResource + "', it is not a file");
-                    }
-                } catch(ClassCastException e) {
-                    throw new RuntimeException("Cannot open editor for file '" + file + "', corresponding resource does not implement WrapsEclipseResource", e);
-                }
-
+                final IFile eclipseFile = resourceUtil.getEclipseFile(file);
                 // Execute in UI thread because getActiveWorkbenchWindow is only available in the UI thread.
                 Display.getDefault().asyncExec(() -> {
                     final IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
                     try {
-                        final IEditorPart editor = IDE.openEditor(page, (IFile) eclipseResource, activate);
+                        final IEditorPart editor = IDE.openEditor(page, eclipseFile, activate);
                         if(closedCallback != null) {
                             partClosedCallback.addCallback(editor, closedCallback);
                         }
@@ -541,7 +533,7 @@ public class PieRunner {
             final ArrayList<TransformDef> directory = new ArrayList<>();
             final ArrayList<TransformDef> file = new ArrayList<>();
             for(TransformDef def : languageComponent.getLanguageInstance().getAutoTransformDefs()) {
-                final EnumSetView<TransformContextType> supported = def.getSupportedSubjectTypes();
+                final EnumSetView<TransformContextType> supported = def.getSupportedContextTypes();
                 if(supported.contains(TransformContextType.Project)) {
                     project.add(def);
                 }
@@ -566,28 +558,31 @@ public class PieRunner {
     ) throws ExecException, InterruptedException, IOException {
         final AutoTransformDefs autoTransformDefs = new AutoTransformDefs(languageComponent); // OPTO: calculate once per language component
         final TransformExecutionType executionType = TransformExecutionType.AutomaticContinuous;
-        for(TransformDef def : autoTransformDefs.project) {
+        for(TransformDef<?> def : autoTransformDefs.project) {
             for(ResourcePath newProject : resourceChanges.newProjects) {
-                requireTransform(languageComponent, def, executionType, TransformUtil.input(TransformSubjects.project(newProject)), session, monitor);
+                requireTransform(languageComponent, def, executionType, TransformUtil.context(TransformContexts.project(newProject)), session, monitor);
             }
             for(ResourcePath removedProject : resourceChanges.removedProjects) {
-                unobserve(def.createTask(new TransformInput(TransformSubjects.project(removedProject))), pie, session, monitor);
+                final Task<TransformOutput> task = TransformUtil.createTask(def, TransformContexts.project(removedProject));
+                unobserve(task, pie, session, monitor);
             }
         }
-        for(TransformDef def : autoTransformDefs.directory) {
+        for(TransformDef<?> def : autoTransformDefs.directory) {
             for(ResourcePath newDirectory : resourceChanges.newDirectories) {
-                requireTransform(languageComponent, def, executionType, TransformUtil.input(TransformSubjects.directory(newDirectory)), session, monitor);
+                requireTransform(languageComponent, def, executionType, TransformUtil.context(TransformContexts.directory(newDirectory)), session, monitor);
             }
             for(ResourcePath removedDirectory : resourceChanges.removedDirectories) {
-                unobserve(def.createTask(new TransformInput(TransformSubjects.directory(removedDirectory))), pie, session, monitor);
+                final Task<TransformOutput> task = TransformUtil.createTask(def, TransformContexts.directory(removedDirectory));
+                unobserve(task, pie, session, monitor);
             }
         }
-        for(TransformDef def : autoTransformDefs.file) {
+        for(TransformDef<?> def : autoTransformDefs.file) {
             for(ResourcePath newFile : resourceChanges.newFiles) {
-                requireTransform(languageComponent, def, executionType, TransformUtil.input(TransformSubjects.file(newFile)), session, monitor);
+                requireTransform(languageComponent, def, executionType, TransformUtil.context(TransformContexts.file(newFile)), session, monitor);
             }
             for(ResourcePath removedFile : resourceChanges.removedFiles) {
-                unobserve(def.createTask(new TransformInput(TransformSubjects.file(removedFile))), pie, session, monitor);
+                final Task<TransformOutput> task = TransformUtil.createTask(def, TransformContexts.file(removedFile));
+                unobserve(task, pie, session, monitor);
             }
         }
         if(resourceChanges.hasRemovedResources()) {

@@ -1,8 +1,8 @@
 package mb.spoofax.eclipse.transform;
 
 import mb.common.util.ListView;
+import mb.spoofax.core.language.transform.TransformContext;
 import mb.spoofax.core.language.transform.TransformExecutionType;
-import mb.spoofax.core.language.transform.TransformInput;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -10,12 +10,12 @@ import java.util.Objects;
 public class TransformData implements Serializable {
     public final String transformId;
     public final TransformExecutionType executionType;
-    public final ListView<TransformInput> inputs;
+    public final ListView<TransformContext> contexts;
 
-    public TransformData(String transformId, TransformExecutionType executionType, ListView<TransformInput> inputs) {
+    public TransformData(String transformId, TransformExecutionType executionType, ListView<TransformContext> contexts) {
         this.transformId = transformId;
         this.executionType = executionType;
-        this.inputs = inputs;
+        this.contexts = contexts;
     }
 
     @Override public boolean equals(Object o) {
@@ -24,18 +24,18 @@ public class TransformData implements Serializable {
         final TransformData that = (TransformData) o;
         return transformId.equals(that.transformId) &&
             executionType == that.executionType &&
-            inputs.equals(that.inputs);
+            contexts.equals(that.contexts);
     }
 
     @Override public int hashCode() {
-        return Objects.hash(transformId, executionType, inputs);
+        return Objects.hash(transformId, executionType, contexts);
     }
 
     @Override public String toString() {
         return "TransformData(" +
             "transformId='" + transformId + '\'' +
             ", executionType=" + executionType +
-            ", inputs=" + inputs +
+            ", contexts=" + contexts +
             ')';
     }
 }
