@@ -13,7 +13,7 @@ import mb.stratego.common.StrategoRuntimeBuilder;
 import mb.stratego.common.StrategoRuntimeBuilderException;
 import mb.tiger.*;
 import mb.tiger.spoofax.taskdef.*;
-import mb.tiger.spoofax.taskdef.transform.*;
+import mb.tiger.spoofax.taskdef.command.*;
 
 import javax.inject.Named;
 import java.io.IOException;

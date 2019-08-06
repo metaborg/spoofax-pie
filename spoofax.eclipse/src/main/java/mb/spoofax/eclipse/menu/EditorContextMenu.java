@@ -9,7 +9,7 @@ import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.menu.MenuItem;
-import mb.spoofax.core.language.transform.*;
+import mb.spoofax.core.language.command.*;
 import mb.spoofax.eclipse.EclipseIdentifiers;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.SpoofaxEclipseComponent;
@@ -17,7 +17,7 @@ import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.eclipse.resource.EclipseDocumentResource;
 import mb.spoofax.eclipse.resource.EclipseResource;
-import mb.spoofax.eclipse.transform.TransformUtil;
+import mb.spoofax.eclipse.command.CommandUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IContributionManager;
@@ -27,8 +27,8 @@ import org.eclipse.ui.PlatformUI;
 
 import java.util.Optional;
 
-import static mb.spoofax.core.language.transform.TransformExecutionType.ManualContinuous;
-import static mb.spoofax.core.language.transform.TransformExecutionType.ManualOnce;
+import static mb.spoofax.core.language.command.CommandExecutionType.ManualContinuous;
+import static mb.spoofax.core.language.command.CommandExecutionType.ManualOnce;
 
 public class EditorContextMenu extends MenuShared {
     private final EclipseLanguageComponent languageComponent;
@@ -78,28 +78,28 @@ public class EditorContextMenu extends MenuShared {
         for(MenuItem menuItem : getMenuItems(languageInstance)) {
             menuItem.accept(new EclipseMenuItemVisitor(langMenu) {
                 @Override
-                protected void transformAction(IContributionManager menu, String displayName, TransformRequest transformRequest) {
-                    final EnumSetView<TransformContextType> supportedTypes = transformRequest.transformDef.getSupportedContextTypes();
-                    final TransformExecutionType executionType = transformRequest.executionType;
-                    final ListView<TransformContext> contexts;
+                protected void transformAction(IContributionManager menu, String displayName, CommandRequest commandRequest) {
+                    final EnumSetView<CommandContextType> supportedTypes = commandRequest.def.getSupportedContextTypes();
+                    final CommandExecutionType executionType = commandRequest.executionType;
+                    final ListView<CommandContext> contexts;
                     final Optional<Region> region = Selections.getRegion(selection);
                     final Optional<Integer> offset = Selections.getOffset(selection);
                     if(executionType == ManualContinuous) {
                         // Prefer editors.
-                        if(documentKey != null && region.isPresent() && supportedTypes.contains(TransformContextType.EditorWithRegion)) {
-                            contexts = TransformUtil.context(TransformContexts.editorWithRegion(documentKey, region.get()));
-                        } else if(documentKey != null && offset.isPresent() && supportedTypes.contains(TransformContextType.EditorWithOffset)) {
-                            contexts = TransformUtil.context(TransformContexts.editorWithOffset(documentKey, offset.get()));
-                        } else if(documentKey != null && supportedTypes.contains(TransformContextType.Editor)) {
-                            contexts = TransformUtil.context(TransformContexts.editor(documentKey));
+                        if(documentKey != null && region.isPresent() && supportedTypes.contains(CommandContextType.EditorWithRegion)) {
+                            contexts = CommandUtil.context(CommandContexts.editorWithRegion(documentKey, region.get()));
+                        } else if(documentKey != null && offset.isPresent() && supportedTypes.contains(CommandContextType.EditorWithOffset)) {
+                            contexts = CommandUtil.context(CommandContexts.editorWithOffset(documentKey, offset.get()));
+                        } else if(documentKey != null && supportedTypes.contains(CommandContextType.Editor)) {
+                            contexts = CommandUtil.context(CommandContexts.editor(documentKey));
                         }
                         // Then files.
-                        else if(filePath != null && region.isPresent() && supportedTypes.contains(TransformContextType.FileWithRegion)) {
-                            contexts = TransformUtil.context(TransformContexts.fileWithRegion(filePath, region.get()));
-                        } else if(filePath != null && offset.isPresent() && supportedTypes.contains(TransformContextType.FileWithOffset)) {
-                            contexts = TransformUtil.context(TransformContexts.fileWithOffset(filePath, offset.get()));
-                        } else if(filePath != null && supportedTypes.contains(TransformContextType.File)) {
-                            contexts = TransformUtil.context(TransformContexts.file(filePath));
+                        else if(filePath != null && region.isPresent() && supportedTypes.contains(CommandContextType.FileWithRegion)) {
+                            contexts = CommandUtil.context(CommandContexts.fileWithRegion(filePath, region.get()));
+                        } else if(filePath != null && offset.isPresent() && supportedTypes.contains(CommandContextType.FileWithOffset)) {
+                            contexts = CommandUtil.context(CommandContexts.fileWithOffset(filePath, offset.get()));
+                        } else if(filePath != null && supportedTypes.contains(CommandContextType.File)) {
+                            contexts = CommandUtil.context(CommandContexts.file(filePath));
                         }
                         // None subject is not supported.
                         else {
@@ -107,24 +107,24 @@ public class EditorContextMenu extends MenuShared {
                         }
                     } else if(executionType == ManualOnce) {
                         // Prefer files.
-                        if(filePath != null && region.isPresent() && supportedTypes.contains(TransformContextType.FileWithRegion)) {
-                            contexts = TransformUtil.context(TransformContexts.fileWithRegion(filePath, region.get()));
-                        } else if(filePath != null && offset.isPresent() && supportedTypes.contains(TransformContextType.FileWithOffset)) {
-                            contexts = TransformUtil.context(TransformContexts.fileWithOffset(filePath, offset.get()));
-                        } else if(filePath != null && supportedTypes.contains(TransformContextType.File)) {
-                            contexts = TransformUtil.context(TransformContexts.file(filePath));
+                        if(filePath != null && region.isPresent() && supportedTypes.contains(CommandContextType.FileWithRegion)) {
+                            contexts = CommandUtil.context(CommandContexts.fileWithRegion(filePath, region.get()));
+                        } else if(filePath != null && offset.isPresent() && supportedTypes.contains(CommandContextType.FileWithOffset)) {
+                            contexts = CommandUtil.context(CommandContexts.fileWithOffset(filePath, offset.get()));
+                        } else if(filePath != null && supportedTypes.contains(CommandContextType.File)) {
+                            contexts = CommandUtil.context(CommandContexts.file(filePath));
                         }
                         // Then editors.
-                        else if(documentKey != null && region.isPresent() && supportedTypes.contains(TransformContextType.EditorWithRegion)) {
-                            contexts = TransformUtil.context(TransformContexts.editorWithRegion(documentKey, region.get()));
-                        } else if(documentKey != null && offset.isPresent() && supportedTypes.contains(TransformContextType.EditorWithOffset)) {
-                            contexts = TransformUtil.context(TransformContexts.editorWithOffset(documentKey, offset.get()));
-                        } else if(documentKey != null && supportedTypes.contains(TransformContextType.Editor)) {
-                            contexts = TransformUtil.context(TransformContexts.editor(documentKey));
+                        else if(documentKey != null && region.isPresent() && supportedTypes.contains(CommandContextType.EditorWithRegion)) {
+                            contexts = CommandUtil.context(CommandContexts.editorWithRegion(documentKey, region.get()));
+                        } else if(documentKey != null && offset.isPresent() && supportedTypes.contains(CommandContextType.EditorWithOffset)) {
+                            contexts = CommandUtil.context(CommandContexts.editorWithOffset(documentKey, offset.get()));
+                        } else if(documentKey != null && supportedTypes.contains(CommandContextType.Editor)) {
+                            contexts = CommandUtil.context(CommandContexts.editor(documentKey));
                         }
                         // Last resort: none subject.
-                        else if(supportedTypes.contains(TransformContextType.None)) {
-                            contexts = TransformUtil.context(TransformContexts.none());
+                        else if(supportedTypes.contains(CommandContextType.None)) {
+                            contexts = CommandUtil.context(CommandContexts.none());
                         } else {
                             return;
                         }
@@ -132,7 +132,7 @@ public class EditorContextMenu extends MenuShared {
                         // Other execution types are not supported.
                         return;
                     }
-                    menu.add(transformCommand(transformCommandId, transformRequest, contexts, displayName));
+                    menu.add(createCommand(transformCommandId, commandRequest, contexts, displayName));
                 }
             });
         }

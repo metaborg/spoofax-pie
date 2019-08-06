@@ -1,6 +1,6 @@
 package mb.tiger.eclipse;
 
-import mb.spoofax.eclipse.command.RemoveNatureHandler;
+import mb.spoofax.eclipse.nature.RemoveNatureHandler;
 
 public class TigerRemoveNatureHandler extends RemoveNatureHandler {
     public TigerRemoveNatureHandler() {

@@ -10,11 +10,10 @@ import mb.pie.api.Task;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.menu.MenuItem;
 import mb.spoofax.core.language.shortcut.Shortcut;
-import mb.spoofax.core.language.transform.TransformDef;
+import mb.spoofax.core.language.command.CommandDef;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 public interface LanguageInstance {
     String getDisplayName();
@@ -29,9 +28,9 @@ public interface LanguageInstance {
     Task<KeyedMessages> createCheckTask(ResourceKey resourceKey);
 
 
-    CollectionView<TransformDef<?>> getTransformDefs();
+    CollectionView<CommandDef<?>> getCommands();
 
-    CollectionView<TransformDef<?>> getAutoTransformDefs();
+    CollectionView<CommandDef<?>> getAutoCommands();
 
 
     ListView<MenuItem> getMainMenuItems();

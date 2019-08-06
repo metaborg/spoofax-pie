@@ -2,10 +2,10 @@ package mb.spoofax.eclipse.menu;
 
 import mb.common.util.ListView;
 import mb.common.util.SerializationUtil;
-import mb.spoofax.core.language.transform.TransformContext;
-import mb.spoofax.core.language.transform.TransformRequest;
-import mb.spoofax.eclipse.transform.TransformData;
-import mb.spoofax.eclipse.transform.TransformHandler;
+import mb.spoofax.core.language.command.CommandContext;
+import mb.spoofax.core.language.command.CommandRequest;
+import mb.spoofax.eclipse.command.CommandData;
+import mb.spoofax.eclipse.command.CommandHandler;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -27,31 +27,31 @@ abstract class MenuShared extends CompoundContributionItem implements IWorkbench
     }
 
 
-    protected CommandContributionItem command(String commandId, @Nullable String label, @Nullable Map<String, String> parameters, int style) {
+    protected CommandContributionItem createCommand(String commandId, @Nullable String label, @Nullable Map<String, String> parameters, int style) {
         final CommandContributionItemParameter p = new CommandContributionItemParameter(serviceLocator, null, commandId, style);
         p.label = label;
         p.parameters = parameters;
         return new CommandContributionItem(p);
     }
 
-    protected CommandContributionItem command(String commandId, @Nullable String label, @Nullable Map<String, String> parameters) {
-        return command(commandId, label, parameters, CommandContributionItem.STYLE_PUSH);
+    protected CommandContributionItem createCommand(String commandId, @Nullable String label, @Nullable Map<String, String> parameters) {
+        return createCommand(commandId, label, parameters, CommandContributionItem.STYLE_PUSH);
     }
 
-    protected CommandContributionItem command(String commandId, @Nullable String label) {
-        return command(commandId, label, null);
+    protected CommandContributionItem createCommand(String commandId, @Nullable String label) {
+        return createCommand(commandId, label, null);
     }
 
-    protected CommandContributionItem command(String commandId) {
-        return command(commandId, null);
+    protected CommandContributionItem createCommand(String commandId) {
+        return createCommand(commandId, null);
     }
 
 
-    protected CommandContributionItem transformCommand(String commandId, TransformRequest transformRequest, ListView<TransformContext> contexts, String displayName) {
-        final TransformData data = new TransformData(transformRequest.transformDef.getId(), transformRequest.executionType, contexts);
+    protected CommandContributionItem createCommand(String commandId, CommandRequest commandRequest, ListView<CommandContext> contexts, String displayName) {
+        final CommandData data = new CommandData(commandRequest.def.getId(), commandRequest.executionType, contexts);
         final Map<String, String> parameters = new HashMap<>();
         final String serialized = SerializationUtil.serializeToString(data);
-        parameters.put(TransformHandler.dataParameterId, serialized);
-        return command(commandId, displayName, parameters);
+        parameters.put(CommandHandler.dataParameterId, serialized);
+        return createCommand(commandId, displayName, parameters);
     }
 }

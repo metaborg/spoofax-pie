@@ -15,13 +15,13 @@ import mb.pie.runtime.exec.Stats;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageInstance;
-import mb.spoofax.core.language.transform.*;
+import mb.spoofax.core.language.command.*;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
+import mb.spoofax.eclipse.command.CommandUtil;
 import mb.spoofax.eclipse.editor.NamedEditorInput;
 import mb.spoofax.eclipse.editor.PartClosedCallback;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.eclipse.resource.*;
-import mb.spoofax.eclipse.transform.TransformUtil;
 import mb.spoofax.eclipse.util.ResourceUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.*;
@@ -176,20 +176,20 @@ public class PieRunner {
         final EclipseResource project = new EclipseResource(eclipseProject);
         final ResourceChanges resourceChanges = new ResourceChanges(project, languageComponent.getLanguageInstance().getFileExtensions());
         resourceChanges.newProjects.add(project.getKey());
-        final AutoTransformDefs autoTransformDefs = new AutoTransformDefs(languageComponent); // OPTO: calculate once per language component
+        final AutoCommandDefs autoCommandDefs = new AutoCommandDefs(languageComponent); // OPTO: calculate once per language component
         try(final PieSession session = languageComponent.newPieSession()) {
             // Unobserve auto transforms.
-            for(TransformDef def : autoTransformDefs.project) {
-                unobserve(def.createTask(new TransformInput(TransformContexts.project(project.getKey()))), pie, session, monitor);
+            for(CommandDef def : autoCommandDefs.project) {
+                unobserve(def.createTask(new CommandInput(CommandContexts.project(project.getKey()))), pie, session, monitor);
             }
             for(ResourcePath directory : resourceChanges.newDirectories) {
-                for(TransformDef def : autoTransformDefs.directory) {
-                    unobserve(def.createTask(new TransformInput(TransformContexts.directory(directory))), pie, session, monitor);
+                for(CommandDef def : autoCommandDefs.directory) {
+                    unobserve(def.createTask(new CommandInput(CommandContexts.directory(directory))), pie, session, monitor);
                 }
             }
             for(ResourcePath file : resourceChanges.newFiles) {
-                for(TransformDef def : autoTransformDefs.file) {
-                    unobserve(def.createTask(new TransformInput(TransformContexts.file(file))), pie, session, monitor);
+                for(CommandDef def : autoCommandDefs.file) {
+                    unobserve(def.createTask(new CommandInput(CommandContexts.file(file))), pie, session, monitor);
                 }
             }
             deleteUnobservedTasks(session, monitor);
@@ -266,28 +266,28 @@ public class PieRunner {
     }
 
 
-    // Requiring transforms
+    // Requiring commands
 
-    public void requireTransform(
+    public void requireCommand(
         EclipseLanguageComponent languageComponent,
-        TransformDef<?> def,
-        TransformExecutionType executionType,
-        ListView<TransformContext> contexts,
+        CommandDef<?> def,
+        CommandExecutionType executionType,
+        ListView<CommandContext> contexts,
         PieSession session,
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException {
         switch(executionType) {
             case ManualOnce:
-                for(TransformContext context : contexts) {
-                    final Task<TransformOutput> task = TransformUtil.createTask(def, context);
-                    final TransformOutput output = requireWithoutObserving(task, session, monitor);
+                for(CommandContext context : contexts) {
+                    final Task<CommandOutput> task = CommandUtil.createTask(def, context);
+                    final CommandOutput output = requireWithoutObserving(task, session, monitor);
                     processOutput(output, true, null);
                 }
                 break;
             case ManualContinuous:
-                for(TransformContext context : contexts) {
-                    final Task<TransformOutput> task = TransformUtil.createTask(def, context);
-                    final TransformOutput output = require(task, session, monitor);
+                for(CommandContext context : contexts) {
+                    final Task<CommandOutput> task = CommandUtil.createTask(def, context);
+                    final CommandOutput output = require(task, session, monitor);
                     processOutput(output, true, (p) -> {
                         // POTI: this opens a new PIE session, which may be used concurrently with other sessions, which
                         // may not be (thread-)safe.
@@ -300,8 +300,8 @@ public class PieRunner {
                 }
                 break;
             case AutomaticContinuous:
-                for(TransformContext context : contexts) {
-                    final Task<TransformOutput> task = TransformUtil.createTask(def, context);
+                for(CommandContext context : contexts) {
+                    final Task<CommandOutput> task = CommandUtil.createTask(def, context);
                     require(task, session, monitor);
                     // Feedback for AutomaticContinuous is ignored intentionally: do not want to suddenly open new
                     // editors when a resource is saved.
@@ -310,14 +310,14 @@ public class PieRunner {
         }
     }
 
-    private void processOutput(TransformOutput output, boolean activate, @Nullable Consumer<IWorkbenchPart> closedCallback) {
-        for(TransformFeedback feedback : output.feedback) {
+    private void processOutput(CommandOutput output, boolean activate, @Nullable Consumer<IWorkbenchPart> closedCallback) {
+        for(CommandFeedback feedback : output.feedback) {
             processFeedback(feedback, activate, closedCallback);
         }
     }
 
-    private void processFeedback(TransformFeedback feedback, boolean activate, @Nullable Consumer<IWorkbenchPart> closedCallback) {
-        TransformFeedbacks.caseOf(feedback)
+    private void processFeedback(CommandFeedback feedback, boolean activate, @Nullable Consumer<IWorkbenchPart> closedCallback) {
+        CommandFeedbacks.caseOf(feedback)
             .openEditorForFile((file, region) -> {
                 final IFile eclipseFile = resourceUtil.getEclipseFile(file);
                 // Execute in UI thread because getActiveWorkbenchWindow is only available in the UI thread.
@@ -523,24 +523,24 @@ public class PieRunner {
     }
 
 
-    private static class AutoTransformDefs {
-        final CollectionView<TransformDef> project;
-        final CollectionView<TransformDef> directory;
-        final CollectionView<TransformDef> file;
+    private static class AutoCommandDefs {
+        final CollectionView<CommandDef> project;
+        final CollectionView<CommandDef> directory;
+        final CollectionView<CommandDef> file;
 
-        AutoTransformDefs(EclipseLanguageComponent languageComponent) {
-            final ArrayList<TransformDef> project = new ArrayList<>();
-            final ArrayList<TransformDef> directory = new ArrayList<>();
-            final ArrayList<TransformDef> file = new ArrayList<>();
-            for(TransformDef def : languageComponent.getLanguageInstance().getAutoTransformDefs()) {
-                final EnumSetView<TransformContextType> supported = def.getSupportedContextTypes();
-                if(supported.contains(TransformContextType.Project)) {
+        AutoCommandDefs(EclipseLanguageComponent languageComponent) {
+            final ArrayList<CommandDef> project = new ArrayList<>();
+            final ArrayList<CommandDef> directory = new ArrayList<>();
+            final ArrayList<CommandDef> file = new ArrayList<>();
+            for(CommandDef<?> def : languageComponent.getLanguageInstance().getAutoCommands()) {
+                final EnumSetView<CommandContextType> supported = def.getSupportedContextTypes();
+                if(supported.contains(CommandContextType.Project)) {
                     project.add(def);
                 }
-                if(supported.contains(TransformContextType.Directory)) {
+                if(supported.contains(CommandContextType.Directory)) {
                     directory.add(def);
                 }
-                if(supported.contains(TransformContextType.File)) {
+                if(supported.contains(CommandContextType.File)) {
                     file.add(def);
                 }
             }
@@ -556,32 +556,32 @@ public class PieRunner {
         PieSession session,
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException, IOException {
-        final AutoTransformDefs autoTransformDefs = new AutoTransformDefs(languageComponent); // OPTO: calculate once per language component
-        final TransformExecutionType executionType = TransformExecutionType.AutomaticContinuous;
-        for(TransformDef<?> def : autoTransformDefs.project) {
+        final AutoCommandDefs autoCommandDefs = new AutoCommandDefs(languageComponent); // OPTO: calculate once per language component
+        final CommandExecutionType executionType = CommandExecutionType.AutomaticContinuous;
+        for(CommandDef<?> def : autoCommandDefs.project) {
             for(ResourcePath newProject : resourceChanges.newProjects) {
-                requireTransform(languageComponent, def, executionType, TransformUtil.context(TransformContexts.project(newProject)), session, monitor);
+                requireCommand(languageComponent, def, executionType, CommandUtil.context(CommandContexts.project(newProject)), session, monitor);
             }
             for(ResourcePath removedProject : resourceChanges.removedProjects) {
-                final Task<TransformOutput> task = TransformUtil.createTask(def, TransformContexts.project(removedProject));
+                final Task<CommandOutput> task = CommandUtil.createTask(def, CommandContexts.project(removedProject));
                 unobserve(task, pie, session, monitor);
             }
         }
-        for(TransformDef<?> def : autoTransformDefs.directory) {
+        for(CommandDef<?> def : autoCommandDefs.directory) {
             for(ResourcePath newDirectory : resourceChanges.newDirectories) {
-                requireTransform(languageComponent, def, executionType, TransformUtil.context(TransformContexts.directory(newDirectory)), session, monitor);
+                requireCommand(languageComponent, def, executionType, CommandUtil.context(CommandContexts.directory(newDirectory)), session, monitor);
             }
             for(ResourcePath removedDirectory : resourceChanges.removedDirectories) {
-                final Task<TransformOutput> task = TransformUtil.createTask(def, TransformContexts.directory(removedDirectory));
+                final Task<CommandOutput> task = CommandUtil.createTask(def, CommandContexts.directory(removedDirectory));
                 unobserve(task, pie, session, monitor);
             }
         }
-        for(TransformDef<?> def : autoTransformDefs.file) {
+        for(CommandDef<?> def : autoCommandDefs.file) {
             for(ResourcePath newFile : resourceChanges.newFiles) {
-                requireTransform(languageComponent, def, executionType, TransformUtil.context(TransformContexts.file(newFile)), session, monitor);
+                requireCommand(languageComponent, def, executionType, CommandUtil.context(CommandContexts.file(newFile)), session, monitor);
             }
             for(ResourcePath removedFile : resourceChanges.removedFiles) {
-                final Task<TransformOutput> task = TransformUtil.createTask(def, TransformContexts.file(removedFile));
+                final Task<CommandOutput> task = CommandUtil.createTask(def, CommandContexts.file(removedFile));
                 unobserve(task, pie, session, monitor);
             }
         }

@@ -35,7 +35,7 @@ public class TigerEclipseIdentifiers implements EclipseIdentifiers {
     }
 
     @Override public String getTransformCommand() {
-        return "tiger.eclipse.transform";
+        return "tiger.eclipse.command";
     }
 
 

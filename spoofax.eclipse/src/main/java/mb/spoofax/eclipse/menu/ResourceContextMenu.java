@@ -3,15 +3,18 @@ package mb.spoofax.eclipse.menu;
 import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.spoofax.core.language.LanguageInstance;
+import mb.spoofax.core.language.command.CommandContext;
+import mb.spoofax.core.language.command.CommandContextType;
+import mb.spoofax.core.language.command.CommandContexts;
+import mb.spoofax.core.language.command.CommandRequest;
 import mb.spoofax.core.language.menu.MenuItem;
-import mb.spoofax.core.language.transform.*;
 import mb.spoofax.eclipse.EclipseIdentifiers;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.SpoofaxEclipseComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
+import mb.spoofax.eclipse.command.CommandUtil;
 import mb.spoofax.eclipse.pie.PieRunner;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
-import mb.spoofax.eclipse.transform.TransformUtil;
 import mb.spoofax.eclipse.util.SelectionUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IContainer;
@@ -85,10 +88,10 @@ public abstract class ResourceContextMenu extends MenuShared {
                 }
             }
             if(addNature) {
-                langMenu.add(command(identifiers.getAddNatureCommand()));
+                langMenu.add(createCommand(identifiers.getAddNatureCommand()));
             }
             if(removeNature) {
-                langMenu.add(command(identifiers.getRemoveAddNatureCommand()));
+                langMenu.add(createCommand(identifiers.getRemoveAddNatureCommand()));
             }
         }
 
@@ -107,10 +110,10 @@ public abstract class ResourceContextMenu extends MenuShared {
                 langMenu.add(new Separator());
             }
             if(!observeFiles.isEmpty()) {
-                langMenu.add(command(identifiers.getObserveCommand()));
+                langMenu.add(createCommand(identifiers.getObserveCommand()));
             }
             if(!unobserveFiles.isEmpty()) {
-                langMenu.add(command(identifiers.getUnobserveCommand()));
+                langMenu.add(createCommand(identifiers.getUnobserveCommand()));
             }
         }
 
@@ -119,23 +122,23 @@ public abstract class ResourceContextMenu extends MenuShared {
         for(MenuItem menuItem : languageInstance.getResourceContextMenuItems()) {
             menuItem.accept(new EclipseMenuItemVisitor(langMenu) {
                 @Override
-                protected void transformAction(IContributionManager menu, String displayName, TransformRequest transformRequest) {
-                    final EnumSetView<TransformContextType> supportedTypes = transformRequest.transformDef.getSupportedContextTypes();
-                    final ListView<TransformContext> contexts;
-                    if(hasProjects && supportedTypes.contains(TransformContextType.Project)) {
-                        contexts = TransformUtil.contexts(projects.stream().map(EclipseResourcePath::new).map(TransformContexts::project));
-                    } else if(hasContainers && supportedTypes.contains(TransformContextType.Directory)) {
-                        contexts = TransformUtil.contexts(containers.stream().map(EclipseResourcePath::new).map(TransformContexts::directory));
-                    } else if(hasFiles && supportedTypes.contains(TransformContextType.File)) {
-                        contexts = TransformUtil.contexts(files.stream().map(EclipseResourcePath::new).map(TransformContexts::file));
-                    } else if(hasFiles && supportedTypes.contains(TransformContextType.Editor)) {
-                        contexts = TransformUtil.contexts(files.stream().map(EclipseResourcePath::new).map(TransformContexts::editor));
-                    } else if(supportedTypes.contains(TransformContextType.None)) {
-                        contexts = TransformUtil.context(TransformContexts.none());
+                protected void transformAction(IContributionManager menu, String displayName, CommandRequest commandRequest) {
+                    final EnumSetView<CommandContextType> supportedTypes = commandRequest.def.getSupportedContextTypes();
+                    final ListView<CommandContext> contexts;
+                    if(hasProjects && supportedTypes.contains(CommandContextType.Project)) {
+                        contexts = CommandUtil.contexts(projects.stream().map(EclipseResourcePath::new).map(CommandContexts::project));
+                    } else if(hasContainers && supportedTypes.contains(CommandContextType.Directory)) {
+                        contexts = CommandUtil.contexts(containers.stream().map(EclipseResourcePath::new).map(CommandContexts::directory));
+                    } else if(hasFiles && supportedTypes.contains(CommandContextType.File)) {
+                        contexts = CommandUtil.contexts(files.stream().map(EclipseResourcePath::new).map(CommandContexts::file));
+                    } else if(hasFiles && supportedTypes.contains(CommandContextType.Editor)) {
+                        contexts = CommandUtil.contexts(files.stream().map(EclipseResourcePath::new).map(CommandContexts::editor));
+                    } else if(supportedTypes.contains(CommandContextType.None)) {
+                        contexts = CommandUtil.context(CommandContexts.none());
                     } else {
                         return;
                     }
-                    menu.add(transformCommand(transformCommandId, transformRequest, contexts, displayName));
+                    menu.add(createCommand(transformCommandId, commandRequest, contexts, displayName));
                 }
             });
         }

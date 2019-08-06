@@ -11,15 +11,15 @@ import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.menu.Menu;
 import mb.spoofax.core.language.menu.MenuItem;
-import mb.spoofax.core.language.menu.TransformAction;
+import mb.spoofax.core.language.menu.CommandAction;
 import mb.spoofax.core.language.shortcut.Shortcut;
-import mb.spoofax.core.language.transform.TransformDef;
-import mb.spoofax.core.language.transform.TransformExecutionType;
-import mb.spoofax.core.language.transform.TransformRequest;
+import mb.spoofax.core.language.command.CommandDef;
+import mb.spoofax.core.language.command.CommandExecutionType;
+import mb.spoofax.core.language.command.CommandRequest;
 import mb.tiger.spoofax.taskdef.TigerCheck;
 import mb.tiger.spoofax.taskdef.TigerStyle;
 import mb.tiger.spoofax.taskdef.TigerTokenize;
-import mb.tiger.spoofax.taskdef.transform.*;
+import mb.tiger.spoofax.taskdef.command.*;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
@@ -89,8 +89,8 @@ public class TigerInstance implements LanguageInstance {
     }
 
 
-    @Override public CollectionView<TransformDef<?>> getTransformDefs() {
-        return CollectionView.<TransformDef<?>>of(
+    @Override public CollectionView<CommandDef<?>> getCommands() {
+        return CollectionView.<CommandDef<?>>of(
             showParsedAst,
             showPrettyPrintedText,
             showAnalyzedAst,
@@ -101,8 +101,8 @@ public class TigerInstance implements LanguageInstance {
         );
     }
 
-    @Override public CollectionView<TransformDef<?>> getAutoTransformDefs() {
-        return CollectionView.<TransformDef<?>>of(
+    @Override public CollectionView<CommandDef<?>> getAutoCommands() {
+        return CollectionView.<CommandDef<?>>of(
             compileFile,
             compileDirectory
         );
@@ -164,19 +164,19 @@ public class TigerInstance implements LanguageInstance {
     }
 
 
-    private static TransformAction transformAction(TransformDef<?> transformDef, TransformExecutionType executionType, String suffix) {
-        return new TransformAction(new TransformRequest(transformDef, executionType), transformDef.getDisplayName() + suffix);
+    private static CommandAction transformAction(CommandDef<?> commandDef, CommandExecutionType executionType, String suffix) {
+        return new CommandAction(new CommandRequest(commandDef, executionType), commandDef.getDisplayName() + suffix);
     }
 
-    private static TransformAction transformAction(TransformDef<?> transformDef, TransformExecutionType executionType) {
-        return transformAction(transformDef, executionType, "");
+    private static CommandAction transformAction(CommandDef<?> commandDef, CommandExecutionType executionType) {
+        return transformAction(commandDef, executionType, "");
     }
 
-    private static TransformAction manualOnceTransformAction(TransformDef<?> transformDef) {
-        return transformAction(transformDef, TransformExecutionType.ManualOnce, "");
+    private static CommandAction manualOnceTransformAction(CommandDef<?> commandDef) {
+        return transformAction(commandDef, CommandExecutionType.ManualOnce, "");
     }
 
-    private static TransformAction manualContinuousTransformAction(TransformDef<?> transformDef) {
-        return transformAction(transformDef, TransformExecutionType.ManualContinuous, " (continuous)");
+    private static CommandAction manualContinuousTransformAction(CommandDef<?> commandDef) {
+        return transformAction(commandDef, CommandExecutionType.ManualContinuous, " (continuous)");
     }
 }
