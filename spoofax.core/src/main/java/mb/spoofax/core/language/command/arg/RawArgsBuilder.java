@@ -8,15 +8,17 @@ import mb.spoofax.core.language.command.CommandContext;
 import mb.spoofax.core.language.command.CommandContexts;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 public class RawArgsBuilder {
     private final ParamDef paramDef;
-    private final HashMap<Class<?>, ArgConverter<?>> converters = new HashMap<>();
-    private final HashMap<String, Object> optionArgs = new HashMap<>();
-    private final ArrayList<Object> positionalArgs = new ArrayList<>();
+    private final HashMap<Class<? extends Serializable>, ArgConverter<?>> converters = new HashMap<>();
+    private final HashMap<String, Serializable> optionArgs = new HashMap<>();
+    private final ArrayList<Serializable> positionalArgs = new ArrayList<>();
 
 
     public RawArgsBuilder(ParamDef paramDef) {
@@ -25,29 +27,38 @@ public class RawArgsBuilder {
     }
 
 
-    public void setConverter(Class<?> type, ArgConverter<?> converter) {
+    public void setConverter(Class<? extends Serializable> type, ArgConverter<?> converter) {
         converters.put(type, converter);
     }
 
-    public void setOptionArg(String name, Object arg) {
+    public void setOptionArg(String name, Serializable arg) {
         optionArgs.put(name, arg);
     }
 
-    public void addPositionalArg(Object arg) {
+    public void addPositionalArg(Serializable arg) {
         positionalArgs.add(arg);
+    }
+
+    public void setAndAddArgsFrom(RawArgsCollection collection) {
+        for(Map.Entry<? extends String, ? extends Serializable> optionArg : collection.optionArgs.entrySet()) {
+            setOptionArg(optionArg.getKey(), optionArg.getValue());
+        }
+        for(Serializable positionalArg : collection.positionalArgs) {
+            addPositionalArg(positionalArg);
+        }
     }
 
 
     public RawArgs build(CommandContext context) {
-        final HashMap<String, Object> finalOptionArgs = new HashMap<>();
-        final HashMap<Integer, Object> finalPositionalArgs = new HashMap<>();
+        final HashMap<String, Serializable> finalOptionArgs = new HashMap<>();
+        final HashMap<Integer, Serializable> finalPositionalArgs = new HashMap<>();
         // TODO: use a list for positional arguments instead, but that requires looping over positionalArgs instead, and
         // then requires finding the matching positional parameters.
 
         for(Param param : paramDef.params) {
             Params.caseOf(param)
                 .option((name, type, required, providers) -> {
-                    @Nullable Object arg = optionArgs.get(name);
+                    @Nullable Serializable arg = optionArgs.get(name);
                     if(arg == null && !providers.isEmpty()) {
                         arg = argFromProviders(type, providers, context);
                     }
@@ -64,7 +75,7 @@ public class RawArgsBuilder {
                     return Optional.empty();
                 })
                 .positional((index, type, required, providers) -> {
-                    @Nullable Object arg;
+                    @Nullable Serializable arg;
                     if(index < positionalArgs.size()) {
                         arg = positionalArgs.get(index);
                     } else {
@@ -90,9 +101,9 @@ public class RawArgsBuilder {
     }
 
 
-    private @Nullable Object argFromProviders(Class<?> type, ListView<ArgProvider> providers, CommandContext context) {
+    private @Nullable Serializable argFromProviders(Class<? extends Serializable> type, ListView<ArgProvider> providers, CommandContext context) {
         for(ArgProvider provider : providers) {
-            @SuppressWarnings("ConstantConditions") final @Nullable Object arg = ArgProviders.caseOf(provider)
+            @SuppressWarnings("ConstantConditions") final @Nullable Serializable arg = ArgProviders.caseOf(provider)
                 .value((o) -> o)
                 .context_(argFromContext(type, context));
             // noinspection ConstantConditions (arg can really be null)
@@ -101,7 +112,7 @@ public class RawArgsBuilder {
         return null;
     }
 
-    private @Nullable Object argFromContext(Class<?> type, CommandContext context) {
+    private @Nullable Serializable argFromContext(Class<? extends Serializable> type, CommandContext context) {
         if(CommandContext.class.isAssignableFrom(type)) {
             return context;
         } else if(Region.class.isAssignableFrom(type)) {
@@ -129,7 +140,7 @@ public class RawArgsBuilder {
     }
 
 
-    private Object convert(String argStr, Class<?> type) {
+    private Serializable convert(String argStr, Class<? extends Serializable> type) {
         final @Nullable ArgConverter<?> converter = converters.get(type);
         if(converter == null) {
             throw new RuntimeException("Cannot convert argument '" + argStr + "' to an object of type '" + type + "', no type converter was found for that type");

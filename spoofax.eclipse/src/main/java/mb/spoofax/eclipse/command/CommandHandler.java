@@ -5,6 +5,7 @@ import mb.common.util.SerializationUtil;
 import mb.pie.api.ExecException;
 import mb.pie.api.PieSession;
 import mb.spoofax.core.language.command.CommandDef;
+import mb.spoofax.core.language.command.CommandRequest;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.SpoofaxEclipseComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
@@ -33,7 +34,7 @@ public class CommandHandler extends AbstractHandler {
         this.pieRunner = component.getPieRunner();
 
         final HashMap<String, CommandDef> transformDefsPerId = new HashMap<>();
-        for(CommandDef commandDef : languageComponent.getLanguageInstance().getCommands()) {
+        for(CommandDef commandDef : languageComponent.getLanguageInstance().getCommandDefs()) {
             transformDefsPerId.put(commandDef.getId(), commandDef);
         }
         this.commandDefsPerId = new MapView<>(transformDefsPerId);
@@ -50,12 +51,13 @@ public class CommandHandler extends AbstractHandler {
         if(def == null) {
             throw new ExecutionException("Cannot execute command with ID '" + data.commandId + "', command with that ID was not found in language '" + languageComponent.getLanguageInstance().getDisplayName() + "'");
         }
+        final CommandRequest<?> request = data.toCommandRequest(def);
         try {
             try(final PieSession session = languageComponent.newPieSession()) {
-                pieRunner.requireCommand(languageComponent, def, data.executionType, data.contexts, session, null);
+                pieRunner.requireCommand(languageComponent, request, data.contexts, session, null);
             }
         } catch(ExecException e) {
-            throw new ExecutionException("Cannot execute command '" + def + "', execution failed unexpectedly", e);
+            throw new ExecutionException("Cannot execute command request '" + request + "', execution failed unexpectedly", e);
         } catch(InterruptedException e) {
             // Ignore
         }

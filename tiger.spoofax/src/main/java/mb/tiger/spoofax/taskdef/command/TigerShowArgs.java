@@ -25,11 +25,8 @@ public class TigerShowArgs implements Serializable {
 
 
     public static TigerShowArgs fromRawArgs(RawArgs rawArgs) {
-        final @Nullable ResourceKey key = rawArgs.getPositional(0);
-        if(key == null) {
-            throw new RuntimeException("Could not create arguments from raw arguments '" + rawArgs + "', it has no positional argument at index 0");
-        }
-        final @Nullable Region region = rawArgs.getOption("region");
+        final ResourceKey key = rawArgs.getPositionalOrThrow(0);
+        final @Nullable Region region = rawArgs.getOptionOrNull("region");
         return new TigerShowArgs(key, region);
     }
 

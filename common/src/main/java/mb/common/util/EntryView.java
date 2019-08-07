@@ -3,6 +3,7 @@ package mb.common.util;
 import java.util.Map;
 import java.util.Objects;
 
+@SuppressWarnings("unused")
 public class EntryView<K, V> {
     private final K key;
     private final V value;

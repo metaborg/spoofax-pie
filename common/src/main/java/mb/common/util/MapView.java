@@ -16,12 +16,13 @@ import java.util.stream.StreamSupport;
  * @param <K> The type of keys in this collection.
  * @param <V> The type of values in this collection.
  */
+@SuppressWarnings("unused")
 public class MapView<K, V> implements Iterable<Map.Entry<K, V>>, Serializable {
     private final Map<K, V> collection;
 
     private transient @MonotonicNonNull @Nullable SetView<K> keySet = null;
-    private transient @MonotonicNonNull @Nullable SetView<Map.Entry<K, V>> entrySet = null;
     private transient @MonotonicNonNull @Nullable CollectionView<V> values = null;
+    private transient @MonotonicNonNull @Nullable SetView<Map.Entry<K, V>> entrySet = null;
 
 
     public MapView(Map<K, V> map) {
@@ -38,12 +39,31 @@ public class MapView<K, V> implements Iterable<Map.Entry<K, V>>, Serializable {
         return new MapView<>(map);
     }
 
-    @SafeVarargs public static <K, V> MapView<K, V> of(Map.Entry<K, V>... entries) {
+    public static <K, V> MapView<K, V> of(K key1, V value1, K key2, V value2) {
         final HashMap<K, V> map = new HashMap<>();
-        for(Map.Entry<K, V> entry : entries) {
+        map.put(key1, value1);
+        map.put(key2, value2);
+        return new MapView<>(map);
+    }
+
+    public static <K, V> MapView<K, V> of(K key1, V value1, K key2, V value2, K key3, V value3) {
+        final HashMap<K, V> map = new HashMap<>();
+        map.put(key1, value1);
+        map.put(key2, value2);
+        map.put(key3, value3);
+        return new MapView<>(map);
+    }
+
+    @SafeVarargs public static <K, V> MapView<K, V> of(Map.Entry<? extends K, ? extends V>... entries) {
+        final HashMap<K, V> map = new HashMap<>();
+        for(Map.Entry<? extends K, ? extends V> entry : entries) {
             map.put(entry.getKey(), entry.getValue());
         }
         return new MapView<>(map);
+    }
+
+    public static <K, V> MapView<K, V> copyOf(Map<? extends K, ? extends V> map) {
+        return new MapView<>(new HashMap<>(map));
     }
 
 
@@ -74,14 +94,6 @@ public class MapView<K, V> implements Iterable<Map.Entry<K, V>>, Serializable {
         return keySet;
     }
 
-    // TODO: should return EntryView's
-    public SetView<Map.Entry<K, V>> entrySet() {
-        if(entrySet == null) {
-            entrySet = new SetView<>(collection.entrySet());
-        }
-        return entrySet;
-    }
-
     public CollectionView<V> values() {
         if(values == null) {
             values = new CollectionView<>(collection.values());
@@ -89,28 +101,32 @@ public class MapView<K, V> implements Iterable<Map.Entry<K, V>>, Serializable {
         return values;
     }
 
-    public V getOrDefault(K key, V defaultValue) {
-        return collection.getOrDefault(key, defaultValue);
+    public SetView<Map.Entry<K, V>> entrySet() {
+        // TODO: should return EntryViews.
+        if(entrySet == null) {
+            entrySet = new SetView<>(collection.entrySet());
+        }
+        return entrySet;
     }
 
     public void forEach(BiConsumer<? super K, ? super V> action) {
         collection.forEach(action);
     }
 
-    // TODO: should return EntryView's
     public Stream<Map.Entry<K, V>> stream() {
+        // TODO: should return EntryViews.
         return StreamSupport.stream(spliterator(), false);
     }
 
-    // TODO: should return EntryView's
     public Stream<Map.Entry<K, V>> parallelStream() {
+        // TODO: should return EntryViews.
         return StreamSupport.stream(spliterator(), true);
     }
 
-    // TODO: should return EntryView's
     @Override public Iterator<Map.Entry<K, V>> iterator() {
+        // TODO: should return iterators over EntryViews.
         return new Iterator<Map.Entry<K, V>>() {
-            private final Iterator<? extends Map.Entry<K, V>> i = collection.entrySet().iterator();
+            private final Iterator<Map.Entry<K, V>> i = collection.entrySet().iterator();
 
 
             public boolean hasNext() {

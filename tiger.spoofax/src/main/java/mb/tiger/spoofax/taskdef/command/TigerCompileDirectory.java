@@ -70,7 +70,7 @@ public class TigerCompileDirectory implements TaskDef<CommandInput<TigerCompileD
     }
 
     @Override public CommandOutput exec(ExecContext context, CommandInput<Args> input) throws Exception {
-        final ResourcePath dir = input.arguments.dir;
+        final ResourcePath dir = input.args.dir;
 
         final ResourceMatcher matcher = new AllResourceMatcher(new FileResourceMatcher(), new PathResourceMatcher(new ExtensionsPathMatcher("tig")));
         final HierarchicalResource directory = context.require(dir, ResourceStampers.modifiedDir(matcher));
@@ -138,10 +138,7 @@ public class TigerCompileDirectory implements TaskDef<CommandInput<TigerCompileD
     }
 
     @Override public Args fromRawArgs(RawArgs rawArgs) {
-        final @Nullable ResourcePath dir = rawArgs.getPositional(0);
-        if(dir == null) {
-            throw new RuntimeException("Could not create arguments from raw arguments '" + rawArgs + "', it has no positional argument at index 0");
-        }
+        final ResourcePath dir = rawArgs.getPositionalOrThrow(0);
         return new TigerCompileDirectory.Args(dir);
     }
 }

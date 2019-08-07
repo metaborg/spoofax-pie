@@ -7,7 +7,6 @@ public class CommandAction implements MenuItem {
     private final CommandRequest commandRequest;
     private final @Nullable String displayName;
 
-
     public CommandAction(CommandRequest commandRequest, @Nullable String displayName) {
         this.commandRequest = commandRequest;
         this.displayName = displayName;
@@ -16,7 +15,6 @@ public class CommandAction implements MenuItem {
     public CommandAction(CommandRequest commandRequest) {
         this(commandRequest, null);
     }
-
 
     public CommandRequest getCommandRequest() {
         return commandRequest;

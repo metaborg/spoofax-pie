@@ -14,6 +14,7 @@ import java.util.Set;
  *
  * @param <E> The type of elements in this collection.
  */
+@SuppressWarnings("unused")
 public class EnumSetView<E extends Enum<E>> extends BaseCollectionView<E, EnumSet<? extends E>> implements Iterable<E>, Serializable {
     public EnumSetView(EnumSet<? extends E> collection) {
         super(collection);
@@ -29,6 +30,10 @@ public class EnumSetView<E extends Enum<E>> extends BaseCollectionView<E, EnumSe
 
     @SafeVarargs public static <E extends Enum<E>> EnumSetView<E> of(E element, E... elements) {
         return new EnumSetView<>(EnumSet.of(element, elements));
+    }
+
+    public static <E extends Enum<E>> EnumSetView<E> copyOf(EnumSet<E> enumSet) {
+        return new EnumSetView<>(EnumSet.copyOf(enumSet));
     }
 
 

@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.BiConsumer;
 
+@SuppressWarnings("unused")
 public class MultiHashMap<K, V> implements Serializable {
     private final HashMap<K, ArrayList<V>> map;
 

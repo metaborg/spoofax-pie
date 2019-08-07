@@ -5,17 +5,20 @@ import mb.common.style.Styling;
 import mb.common.token.Token;
 import mb.common.util.CollectionView;
 import mb.common.util.ListView;
+import mb.common.util.MapView;
 import mb.common.util.SetView;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageInstance;
-import mb.spoofax.core.language.menu.Menu;
-import mb.spoofax.core.language.menu.MenuItem;
-import mb.spoofax.core.language.menu.CommandAction;
-import mb.spoofax.core.language.shortcut.Shortcut;
+import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandExecutionType;
 import mb.spoofax.core.language.command.CommandRequest;
+import mb.spoofax.core.language.command.arg.RawArgsCollection;
+import mb.spoofax.core.language.menu.CommandAction;
+import mb.spoofax.core.language.menu.Menu;
+import mb.spoofax.core.language.menu.MenuItem;
+import mb.spoofax.core.language.shortcut.Shortcut;
 import mb.tiger.spoofax.taskdef.TigerCheck;
 import mb.tiger.spoofax.taskdef.TigerStyle;
 import mb.tiger.spoofax.taskdef.TigerTokenize;
@@ -23,6 +26,7 @@ import mb.tiger.spoofax.taskdef.command.*;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
+import java.io.Serializable;
 import java.util.ArrayList;
 
 public class TigerInstance implements LanguageInstance {
@@ -89,7 +93,7 @@ public class TigerInstance implements LanguageInstance {
     }
 
 
-    @Override public CollectionView<CommandDef<?>> getCommands() {
+    @Override public CollectionView<CommandDef<?>> getCommandDefs() {
         return CollectionView.<CommandDef<?>>of(
             showParsedAst,
             showPrettyPrintedText,
@@ -101,10 +105,10 @@ public class TigerInstance implements LanguageInstance {
         );
     }
 
-    @Override public CollectionView<CommandDef<?>> getAutoCommands() {
-        return CollectionView.<CommandDef<?>>of(
-            compileFile,
-            compileDirectory
+    @Override public CollectionView<AutoCommandRequest<?>> getAutoCommandRequests() {
+        return CollectionView.of(
+            new AutoCommandRequest<Serializable>(compileFile),
+            new AutoCommandRequest<Serializable>(compileDirectory)
         );
     }
 
@@ -116,21 +120,27 @@ public class TigerInstance implements LanguageInstance {
     @Override public ListView<MenuItem> getResourceContextMenuItems() {
         return ListView.of(
             new Menu("Compile",
-                manualOnceTransformAction(compileFile),
-                manualOnceTransformAction(compileDirectory),
-                manualOnceTransformAction(altCompileFile),
-                manualContinuousTransformAction(altCompileFile)
+                onceCommandAction(compileFile),
+                onceCommandAction(compileDirectory),
+                onceCommandAction(altCompileFile, "- default"),
+                onceCommandAction(altCompileFile, "- list literal values instead", new RawArgsCollection(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))),
+                onceCommandAction(altCompileFile, "- base64 encode", new RawArgsCollection(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))),
+                onceCommandAction(altCompileFile, "- list literal values instead + base64 encode", new RawArgsCollection(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt"))),
+                contCommandAction(altCompileFile, "- default"),
+                contCommandAction(altCompileFile, "- list literal values instead", new RawArgsCollection(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))),
+                contCommandAction(altCompileFile, "- base64 encode", new RawArgsCollection(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))),
+                contCommandAction(altCompileFile, "- list literal values instead + base64 encode", new RawArgsCollection(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt")))
             ),
             new Menu("Debug",
                 new Menu("Syntax",
-                    manualOnceTransformAction(showParsedAst),
-                    manualOnceTransformAction(showPrettyPrintedText)
+                    onceCommandAction(showParsedAst),
+                    onceCommandAction(showPrettyPrintedText)
                 ),
                 new Menu("Static Semantics",
-                    manualOnceTransformAction(showAnalyzedAst)
+                    onceCommandAction(showAnalyzedAst)
                 ),
                 new Menu("Transformations",
-                    manualOnceTransformAction(showDesugaredAst)
+                    onceCommandAction(showDesugaredAst)
                 )
             )
         );
@@ -139,20 +149,26 @@ public class TigerInstance implements LanguageInstance {
     @Override public ListView<MenuItem> getEditorContextMenuItems() {
         return ListView.of(
             new Menu("Compile",
-                manualOnceTransformAction(compileFile),
-                manualOnceTransformAction(altCompileFile),
-                manualContinuousTransformAction(altCompileFile)
+                onceCommandAction(compileFile),
+                onceCommandAction(altCompileFile, "- default"),
+                onceCommandAction(altCompileFile, "- list literal values instead", new RawArgsCollection(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))),
+                onceCommandAction(altCompileFile, "- base64 encode", new RawArgsCollection(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))),
+                onceCommandAction(altCompileFile, "- list literal values instead + base64 encode", new RawArgsCollection(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt"))),
+                contCommandAction(altCompileFile, "- default"),
+                contCommandAction(altCompileFile, "- list literal values instead", new RawArgsCollection(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))),
+                contCommandAction(altCompileFile, "- base64 encode", new RawArgsCollection(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))),
+                contCommandAction(altCompileFile, "- list literal values instead + base64 encode", new RawArgsCollection(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt")))
             ),
             new Menu("Debug",
                 new Menu("Syntax",
-                    manualOnceTransformAction(showParsedAst), manualContinuousTransformAction(showParsedAst),
-                    manualOnceTransformAction(showPrettyPrintedText), manualContinuousTransformAction(showPrettyPrintedText)
+                    onceCommandAction(showParsedAst), contCommandAction(showParsedAst),
+                    onceCommandAction(showPrettyPrintedText), contCommandAction(showPrettyPrintedText)
                 ),
                 new Menu("Static Semantics",
-                    manualOnceTransformAction(showAnalyzedAst), manualContinuousTransformAction(showAnalyzedAst)
+                    onceCommandAction(showAnalyzedAst), contCommandAction(showAnalyzedAst)
                 ),
                 new Menu("Transformations",
-                    manualOnceTransformAction(showDesugaredAst), manualContinuousTransformAction(showDesugaredAst)
+                    onceCommandAction(showDesugaredAst), contCommandAction(showDesugaredAst)
                 )
             )
         );
@@ -164,19 +180,45 @@ public class TigerInstance implements LanguageInstance {
     }
 
 
-    private static CommandAction transformAction(CommandDef<?> commandDef, CommandExecutionType executionType, String suffix) {
-        return new CommandAction(new CommandRequest(commandDef, executionType), commandDef.getDisplayName() + suffix);
+    private static CommandAction commandAction(CommandDef<?> commandDef, CommandExecutionType executionType, String displayName, RawArgsCollection initialArgs) {
+        return new CommandAction(new CommandRequest<>(commandDef, executionType, initialArgs), displayName);
     }
 
-    private static CommandAction transformAction(CommandDef<?> commandDef, CommandExecutionType executionType) {
-        return transformAction(commandDef, executionType, "");
+    private static CommandAction commandAction(CommandDef<?> commandDef, CommandExecutionType executionType, String displayName) {
+        return new CommandAction(new CommandRequest<>(commandDef, executionType), displayName);
     }
 
-    private static CommandAction manualOnceTransformAction(CommandDef<?> commandDef) {
-        return transformAction(commandDef, CommandExecutionType.ManualOnce, "");
+    private static CommandAction commandAction(CommandDef<?> commandDef, CommandExecutionType executionType, RawArgsCollection initialArgs) {
+        return new CommandAction(new CommandRequest<>(commandDef, executionType, initialArgs), commandDef.getDisplayName());
     }
 
-    private static CommandAction manualContinuousTransformAction(CommandDef<?> commandDef) {
-        return transformAction(commandDef, CommandExecutionType.ManualContinuous, " (continuous)");
+    private static CommandAction commandAction(CommandDef<?> commandDef, CommandExecutionType executionType) {
+        return new CommandAction(new CommandRequest<>(commandDef, executionType), commandDef.getDisplayName());
+    }
+
+
+    private static CommandAction onceCommandAction(CommandDef<?> commandDef, String suffix, RawArgsCollection initialArgs) {
+        return commandAction(commandDef, CommandExecutionType.ManualOnce, commandDef.getDisplayName() + " " + suffix, initialArgs);
+    }
+
+    private static CommandAction onceCommandAction(CommandDef<?> commandDef, String suffix) {
+        return commandAction(commandDef, CommandExecutionType.ManualOnce, commandDef.getDisplayName() + " " + suffix);
+    }
+
+    private static CommandAction onceCommandAction(CommandDef<?> commandDef) {
+        return commandAction(commandDef, CommandExecutionType.ManualOnce);
+    }
+
+
+    private static CommandAction contCommandAction(CommandDef<?> commandDef, String suffix, RawArgsCollection initialArgs) {
+        return commandAction(commandDef, CommandExecutionType.ManualContinuous, commandDef.getDisplayName() + " " + suffix + " (continuous)", initialArgs);
+    }
+
+    private static CommandAction contCommandAction(CommandDef<?> commandDef, String suffix) {
+        return commandAction(commandDef, CommandExecutionType.ManualContinuous, commandDef.getDisplayName() + " " + suffix + " (continuous)");
+    }
+
+    private static CommandAction contCommandAction(CommandDef<?> commandDef) {
+        return commandAction(commandDef, CommandExecutionType.ManualContinuous, commandDef.getDisplayName() + " (continuous)");
     }
 }

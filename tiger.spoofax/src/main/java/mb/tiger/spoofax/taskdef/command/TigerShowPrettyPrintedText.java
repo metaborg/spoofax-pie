@@ -44,8 +44,8 @@ public class TigerShowPrettyPrintedText implements TaskDef<CommandInput<TigerSho
     }
 
     @Override public CommandOutput exec(ExecContext context, CommandInput<TigerShowArgs> input) throws Exception {
-        final ResourceKey key = input.arguments.key;
-        final @Nullable Region region = input.arguments.region;
+        final ResourceKey key = input.args.key;
+        final @Nullable Region region = input.args.region;
 
         final JSGLR1ParseResult parseResult = context.require(parse, key);
         final IStrategoTerm ast = parseResult.getAst()

@@ -176,20 +176,23 @@ public class PieRunner {
         final EclipseResource project = new EclipseResource(eclipseProject);
         final ResourceChanges resourceChanges = new ResourceChanges(project, languageComponent.getLanguageInstance().getFileExtensions());
         resourceChanges.newProjects.add(project.getKey());
-        final AutoCommandDefs autoCommandDefs = new AutoCommandDefs(languageComponent); // OPTO: calculate once per language component
+        final AutoCommandRequests autoCommandRequests = new AutoCommandRequests(languageComponent); // OPTO: calculate once per language component
         try(final PieSession session = languageComponent.newPieSession()) {
             // Unobserve auto transforms.
-            for(CommandDef def : autoCommandDefs.project) {
-                unobserve(def.createTask(new CommandInput(CommandContexts.project(project.getKey()))), pie, session, monitor);
+            for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.project) {
+                final Task<CommandOutput> task = CommandUtil.createTask(autoCommandRequest.toCommandRequest(), CommandContexts.project(project.getKey()));
+                unobserve(task, pie, session, monitor);
             }
             for(ResourcePath directory : resourceChanges.newDirectories) {
-                for(CommandDef def : autoCommandDefs.directory) {
-                    unobserve(def.createTask(new CommandInput(CommandContexts.directory(directory))), pie, session, monitor);
+                for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.directory) {
+                    final Task<CommandOutput> task = CommandUtil.createTask(autoCommandRequest.toCommandRequest(), CommandContexts.directory(directory));
+                    unobserve(task, pie, session, monitor);
                 }
             }
             for(ResourcePath file : resourceChanges.newFiles) {
-                for(CommandDef def : autoCommandDefs.file) {
-                    unobserve(def.createTask(new CommandInput(CommandContexts.file(file))), pie, session, monitor);
+                for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.file) {
+                    final Task<CommandOutput> task = CommandUtil.createTask(autoCommandRequest.toCommandRequest(), CommandContexts.file(file));
+                    unobserve(task, pie, session, monitor);
                 }
             }
             deleteUnobservedTasks(session, monitor);
@@ -270,23 +273,22 @@ public class PieRunner {
 
     public void requireCommand(
         EclipseLanguageComponent languageComponent,
-        CommandDef<?> def,
-        CommandExecutionType executionType,
+        CommandRequest<?> commandRequest,
         ListView<CommandContext> contexts,
         PieSession session,
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException {
-        switch(executionType) {
+        switch(commandRequest.executionType) {
             case ManualOnce:
                 for(CommandContext context : contexts) {
-                    final Task<CommandOutput> task = CommandUtil.createTask(def, context);
+                    final Task<CommandOutput> task = CommandUtil.createTask(commandRequest, context);
                     final CommandOutput output = requireWithoutObserving(task, session, monitor);
                     processOutput(output, true, null);
                 }
                 break;
             case ManualContinuous:
                 for(CommandContext context : contexts) {
-                    final Task<CommandOutput> task = CommandUtil.createTask(def, context);
+                    final Task<CommandOutput> task = CommandUtil.createTask(commandRequest, context);
                     final CommandOutput output = require(task, session, monitor);
                     processOutput(output, true, (p) -> {
                         // POTI: this opens a new PIE session, which may be used concurrently with other sessions, which
@@ -301,7 +303,7 @@ public class PieRunner {
                 break;
             case AutomaticContinuous:
                 for(CommandContext context : contexts) {
-                    final Task<CommandOutput> task = CommandUtil.createTask(def, context);
+                    final Task<CommandOutput> task = CommandUtil.createTask(commandRequest, context);
                     require(task, session, monitor);
                     // Feedback for AutomaticContinuous is ignored intentionally: do not want to suddenly open new
                     // editors when a resource is saved.
@@ -523,25 +525,25 @@ public class PieRunner {
     }
 
 
-    private static class AutoCommandDefs {
-        final CollectionView<CommandDef> project;
-        final CollectionView<CommandDef> directory;
-        final CollectionView<CommandDef> file;
+    private static class AutoCommandRequests {
+        final CollectionView<AutoCommandRequest<?>> project;
+        final CollectionView<AutoCommandRequest<?>> directory;
+        final CollectionView<AutoCommandRequest<?>> file;
 
-        AutoCommandDefs(EclipseLanguageComponent languageComponent) {
-            final ArrayList<CommandDef> project = new ArrayList<>();
-            final ArrayList<CommandDef> directory = new ArrayList<>();
-            final ArrayList<CommandDef> file = new ArrayList<>();
-            for(CommandDef<?> def : languageComponent.getLanguageInstance().getAutoCommands()) {
-                final EnumSetView<CommandContextType> supported = def.getSupportedContextTypes();
+        AutoCommandRequests(EclipseLanguageComponent languageComponent) {
+            final ArrayList<AutoCommandRequest<?>> project = new ArrayList<>();
+            final ArrayList<AutoCommandRequest<?>> directory = new ArrayList<>();
+            final ArrayList<AutoCommandRequest<?>> file = new ArrayList<>();
+            for(AutoCommandRequest<?> request : languageComponent.getLanguageInstance().getAutoCommandRequests()) {
+                final EnumSetView<CommandContextType> supported = request.def.getSupportedContextTypes();
                 if(supported.contains(CommandContextType.Project)) {
-                    project.add(def);
+                    project.add(request);
                 }
                 if(supported.contains(CommandContextType.Directory)) {
-                    directory.add(def);
+                    directory.add(request);
                 }
                 if(supported.contains(CommandContextType.File)) {
-                    file.add(def);
+                    file.add(request);
                 }
             }
             this.project = new CollectionView<>(project);
@@ -556,32 +558,34 @@ public class PieRunner {
         PieSession session,
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException, IOException {
-        final AutoCommandDefs autoCommandDefs = new AutoCommandDefs(languageComponent); // OPTO: calculate once per language component
-        final CommandExecutionType executionType = CommandExecutionType.AutomaticContinuous;
-        for(CommandDef<?> def : autoCommandDefs.project) {
+        final AutoCommandRequests autoCommandRequests = new AutoCommandRequests(languageComponent); // OPTO: calculate once per language component
+        for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.project) {
+            final CommandRequest<?> request = autoCommandRequest.toCommandRequest();
             for(ResourcePath newProject : resourceChanges.newProjects) {
-                requireCommand(languageComponent, def, executionType, CommandUtil.context(CommandContexts.project(newProject)), session, monitor);
+                requireCommand(languageComponent, request, CommandUtil.context(CommandContexts.project(newProject)), session, monitor);
             }
             for(ResourcePath removedProject : resourceChanges.removedProjects) {
-                final Task<CommandOutput> task = CommandUtil.createTask(def, CommandContexts.project(removedProject));
+                final Task<CommandOutput> task = CommandUtil.createTask(request, CommandContexts.project(removedProject));
                 unobserve(task, pie, session, monitor);
             }
         }
-        for(CommandDef<?> def : autoCommandDefs.directory) {
+        for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.directory) {
+            final CommandRequest<?> request = autoCommandRequest.toCommandRequest();
             for(ResourcePath newDirectory : resourceChanges.newDirectories) {
-                requireCommand(languageComponent, def, executionType, CommandUtil.context(CommandContexts.directory(newDirectory)), session, monitor);
+                requireCommand(languageComponent, request, CommandUtil.context(CommandContexts.directory(newDirectory)), session, monitor);
             }
             for(ResourcePath removedDirectory : resourceChanges.removedDirectories) {
-                final Task<CommandOutput> task = CommandUtil.createTask(def, CommandContexts.directory(removedDirectory));
+                final Task<CommandOutput> task = CommandUtil.createTask(request, CommandContexts.directory(removedDirectory));
                 unobserve(task, pie, session, monitor);
             }
         }
-        for(CommandDef<?> def : autoCommandDefs.file) {
+        for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.file) {
+            final CommandRequest<?> request = autoCommandRequest.toCommandRequest();
             for(ResourcePath newFile : resourceChanges.newFiles) {
-                requireCommand(languageComponent, def, executionType, CommandUtil.context(CommandContexts.file(newFile)), session, monitor);
+                requireCommand(languageComponent, request, CommandUtil.context(CommandContexts.file(newFile)), session, monitor);
             }
             for(ResourcePath removedFile : resourceChanges.removedFiles) {
-                final Task<CommandOutput> task = CommandUtil.createTask(def, CommandContexts.file(removedFile));
+                final Task<CommandOutput> task = CommandUtil.createTask(request, CommandContexts.file(removedFile));
                 unobserve(task, pie, session, monitor);
             }
         }

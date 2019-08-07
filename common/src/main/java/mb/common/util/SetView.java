@@ -14,6 +14,7 @@ import java.util.Set;
  *
  * @param <E> The type of elements in this collection.
  */
+@SuppressWarnings("unused")
 public class SetView<E> extends BaseCollectionView<E, Set<? extends E>> implements Iterable<E>, Serializable {
     public SetView(Set<? extends E> collection) {
         super(collection);
@@ -33,6 +34,10 @@ public class SetView<E> extends BaseCollectionView<E, Set<? extends E>> implemen
         final HashSet<E> set = new HashSet<>();
         Collections.addAll(set, elements);
         return new SetView<>(set);
+    }
+
+    public static <E> SetView<E> copyOf(Set<? extends E> set) {
+        return new SetView<>(new HashSet<>(set));
     }
 
 

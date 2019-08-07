@@ -63,7 +63,7 @@ public class TigerCompileFile implements TaskDef<CommandInput<TigerCompileFile.A
     }
 
     @Override public CommandOutput exec(ExecContext context, CommandInput<Args> input) throws Exception {
-        final ResourcePath file = input.arguments.file;
+        final ResourcePath file = input.args.file;
 
         final @Nullable String literalsStr = context.require(listLiteralVals, file);
         //noinspection ConstantConditions (literalsStr can really be null)
@@ -101,10 +101,7 @@ public class TigerCompileFile implements TaskDef<CommandInput<TigerCompileFile.A
     }
 
     @Override public Args fromRawArgs(RawArgs rawArgs) {
-        final @Nullable ResourcePath file = rawArgs.getPositional(0);
-        if(file == null) {
-            throw new RuntimeException("Could not create arguments from raw arguments '" + rawArgs + "', it has no positional argument at index 0");
-        }
+        final ResourcePath file = rawArgs.getPositionalOrThrow(0);
         return new Args(file);
     }
 }

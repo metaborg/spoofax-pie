@@ -2,10 +2,7 @@ package mb.spoofax.eclipse.command;
 
 import mb.common.util.ListView;
 import mb.pie.api.Task;
-import mb.spoofax.core.language.command.CommandContext;
-import mb.spoofax.core.language.command.CommandDef;
-import mb.spoofax.core.language.command.CommandInput;
-import mb.spoofax.core.language.command.CommandOutput;
+import mb.spoofax.core.language.command.*;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.command.arg.RawArgsBuilder;
 
@@ -22,8 +19,12 @@ public class CommandUtil {
         return new ListView<>(contexts.collect(Collectors.toList()));
     }
 
-    public static <A extends Serializable> Task<CommandOutput> createTask(CommandDef<A> def, CommandContext context) {
+    public static <A extends Serializable> Task<CommandOutput> createTask(CommandRequest<A> commandRequest, CommandContext context) {
+        final CommandDef<A> def = commandRequest.def;
         final RawArgsBuilder builder = new RawArgsBuilder(def.getParamDef());
+        if(commandRequest.initialArgs != null) {
+            builder.setAndAddArgsFrom(commandRequest.initialArgs);
+        }
         final RawArgs rawArgs = builder.build(context);
         final A args = def.fromRawArgs(rawArgs);
         final CommandInput<A> input = new CommandInput<>(args);

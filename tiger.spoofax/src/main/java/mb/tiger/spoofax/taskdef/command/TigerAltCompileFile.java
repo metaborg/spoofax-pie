@@ -16,30 +16,41 @@ import mb.spoofax.core.language.command.arg.ParamDef;
 import mb.spoofax.core.language.command.arg.Params;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.tiger.spoofax.taskdef.TigerListDefNames;
+import mb.tiger.spoofax.taskdef.TigerListLiteralVals;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Objects;
 
 public class TigerAltCompileFile implements TaskDef<CommandInput<TigerAltCompileFile.Args>, CommandOutput>, CommandDef<TigerAltCompileFile.Args> {
     public static class Args implements Serializable {
         final ResourcePath file;
+        final boolean listDefNames;
+        final boolean base64Encode;
+        final String compiledFileNameSuffix;
 
-        public Args(ResourcePath file) {
+        public Args(ResourcePath file, boolean listDefNames, boolean base64Encode, String compiledFileNameSuffix) {
             this.file = file;
+            this.listDefNames = listDefNames;
+            this.base64Encode = base64Encode;
+            this.compiledFileNameSuffix = compiledFileNameSuffix;
         }
 
         @Override public boolean equals(@Nullable Object obj) {
             if(this == obj) return true;
             if(obj == null || getClass() != obj.getClass()) return false;
             final Args other = (Args) obj;
-            return file.equals(other.file);
+            return listDefNames == other.listDefNames &&
+                base64Encode == other.base64Encode &&
+                file.equals(other.file) &&
+                compiledFileNameSuffix.equals(other.compiledFileNameSuffix);
         }
 
         @Override public int hashCode() {
-            return Objects.hash(file);
+            return Objects.hash(file, listDefNames, base64Encode, compiledFileNameSuffix);
         }
 
         @Override public String toString() {
@@ -49,11 +60,14 @@ public class TigerAltCompileFile implements TaskDef<CommandInput<TigerAltCompile
 
 
     private final TigerListDefNames listDefNames;
+    private final TigerListLiteralVals listLiteralVals;
     private final ResourceService resourceService;
 
 
-    @Inject public TigerAltCompileFile(TigerListDefNames listDefNames, ResourceService resourceService) {
+    @Inject
+    public TigerAltCompileFile(TigerListDefNames listDefNames, TigerListLiteralVals listLiteralVals, ResourceService resourceService) {
         this.listDefNames = listDefNames;
+        this.listLiteralVals = listLiteralVals;
         this.resourceService = resourceService;
     }
 
@@ -63,21 +77,36 @@ public class TigerAltCompileFile implements TaskDef<CommandInput<TigerAltCompile
     }
 
     @Override public CommandOutput exec(ExecContext context, CommandInput<Args> input) throws Exception {
-        final ResourcePath file = input.arguments.file;
+        final Args args = input.args;
+        final ResourcePath file = input.args.file;
 
-        final @Nullable String defNamesStr = context.require(listDefNames, file);
-        //noinspection ConstantConditions (defNamesStr can really be null)
-        if(defNamesStr == null) {
+        @Nullable String str;
+        if(args.listDefNames) {
+            str = context.require(listDefNames, file);
+        } else {
+            str = context.require(listLiteralVals, file);
+        }
+
+        //noinspection ConstantConditions (str can really be null)
+        if(str == null) {
             return new CommandOutput(ListView.of());
         }
 
-        final ResourcePath generatedPath = file.replaceLeafExtension("defnames.aterm");
+        if(args.base64Encode) {
+            str = Base64.getEncoder().encodeToString(str.getBytes(StandardCharsets.UTF_8));
+        }
+
+        final ResourcePath generatedPath = file.replaceLeafExtension(args.compiledFileNameSuffix);
         final HierarchicalResource generatedResource = resourceService.getHierarchicalResource(generatedPath);
-        generatedResource.writeBytes(defNamesStr.getBytes(StandardCharsets.UTF_8));
+        generatedResource.writeBytes(str.getBytes(StandardCharsets.UTF_8));
         context.provide(generatedResource, ResourceStampers.hashFile());
 
         //noinspection ConstantConditions (region may be null)
         return new CommandOutput(ListView.of(CommandFeedbacks.openEditorForFile(generatedPath, null)));
+    }
+
+    @Override public Serializable key(CommandInput<Args> input) {
+        return input.args.file; // Task is keyed by file only.
     }
 
     @Override public Task<CommandOutput> createTask(CommandInput<Args> input) {
@@ -86,7 +115,7 @@ public class TigerAltCompileFile implements TaskDef<CommandInput<TigerAltCompile
 
 
     @Override public String getDisplayName() {
-        return "'Alternative compile' file (list definition names)";
+        return "'Alternative compile' file";
     }
 
     @Override public EnumSetView<CommandExecutionType> getSupportedExecutionTypes() {
@@ -98,14 +127,19 @@ public class TigerAltCompileFile implements TaskDef<CommandInput<TigerAltCompile
     }
 
     @Override public ParamDef getParamDef() {
-        return new ParamDef(CollectionView.of(Params.positional(0, ResourcePath.class, true, ListView.of(ArgProviders.context()))));
+        return new ParamDef(CollectionView.of(
+            Params.positional(0, ResourcePath.class, true, ListView.of(ArgProviders.context())),
+            Params.option("listDefNames", boolean.class, false, ListView.of(ArgProviders.value(true))),
+            Params.option("base64Encode", boolean.class, false, ListView.of(ArgProviders.value(false))),
+            Params.option("compiledFileNameSuffix", String.class, true, ListView.of(ArgProviders.value(("defnames.aterm"))))
+        ));
     }
 
     @Override public Args fromRawArgs(RawArgs rawArgs) {
-        final @Nullable ResourcePath file = rawArgs.getPositional(0);
-        if(file == null) {
-            throw new RuntimeException("Could not create arguments from raw arguments '" + rawArgs + "', it has no positional argument at index 0");
-        }
-        return new TigerAltCompileFile.Args(file);
+        final ResourcePath file = rawArgs.getPositionalOrThrow(0);
+        final boolean listDefNames = rawArgs.getOptionOrTrue("listDefNames");
+        final boolean base64Encode = rawArgs.getOptionOrFalse("base64Encode");
+        final String compiledFileName = rawArgs.getOptionOrThrow("compiledFileNameSuffix");
+        return new TigerAltCompileFile.Args(file, listDefNames, base64Encode, compiledFileName);
     }
 }

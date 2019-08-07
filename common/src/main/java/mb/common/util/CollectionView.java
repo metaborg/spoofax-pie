@@ -14,8 +14,9 @@ import java.util.Objects;
  *
  * @param <E> The type of elements in this collection.
  */
-public class CollectionView<E> extends BaseCollectionView<E, Collection<E>> {
-    public CollectionView(Collection<E> collection) {
+@SuppressWarnings("unused")
+public class CollectionView<E> extends BaseCollectionView<E, Collection<? extends E>> {
+    public CollectionView(Collection<? extends E> collection) {
         super(collection);
     }
 
@@ -33,6 +34,10 @@ public class CollectionView<E> extends BaseCollectionView<E, Collection<E>> {
         final ArrayList<E> collection = new ArrayList<>();
         Collections.addAll(collection, elements);
         return new CollectionView<>(collection);
+    }
+
+    public static <E> CollectionView<E> copyOf(Collection<? extends E> collection) {
+        return new CollectionView<>(new ArrayList<>(collection));
     }
 
 

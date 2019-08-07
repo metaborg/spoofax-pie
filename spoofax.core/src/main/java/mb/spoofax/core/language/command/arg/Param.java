@@ -4,12 +4,14 @@ import mb.common.util.ADT;
 import mb.common.util.ListView;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.io.Serializable;
+
 @ADT
 public abstract class Param {
     interface Cases<R> {
-        R option(String name, Class<?> type, boolean required, ListView<ArgProvider> providers);
+        R option(String name, Class<? extends Serializable> type, boolean required, ListView<ArgProvider> providers);
 
-        R positional(int index, Class<?> type, boolean required, ListView<ArgProvider> providers);
+        R positional(int index, Class<? extends Serializable> type, boolean required, ListView<ArgProvider> providers);
     }
 
     public abstract <R> R match(Cases<R> cases);

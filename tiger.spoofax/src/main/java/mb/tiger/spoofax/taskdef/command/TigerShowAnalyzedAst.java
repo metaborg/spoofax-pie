@@ -34,8 +34,8 @@ public class TigerShowAnalyzedAst implements TaskDef<CommandInput<TigerShowArgs>
     }
 
     @Override public CommandOutput exec(ExecContext context, CommandInput<TigerShowArgs> input) throws Exception {
-        final ResourceKey key = input.arguments.key;
-        final @Nullable Region region = input.arguments.region;
+        final ResourceKey key = input.args.key;
+        final @Nullable Region region = input.args.region;
 
         final ConstraintAnalyzer.@Nullable SingleFileResult analysisResult = context.require(analyze, key);
         // noinspection ConstantConditions (analysisResult can really be null).

@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+@SuppressWarnings("unused")
 public class BaseCollectionView<E, C extends Collection<? extends E>> implements Iterable<E>, Serializable {
     protected final C collection;
 
