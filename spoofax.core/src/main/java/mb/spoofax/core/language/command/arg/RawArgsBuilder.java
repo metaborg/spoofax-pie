@@ -16,18 +16,20 @@ import java.util.Optional;
 
 public class RawArgsBuilder {
     private final ParamDef paramDef;
+    private final DefaultArgConverters defaultArgConverters;
+
     private final HashMap<Class<? extends Serializable>, ArgConverter<?>> converters = new HashMap<>();
     private final HashMap<String, Serializable> args = new HashMap<>();
 
 
-    public RawArgsBuilder(ParamDef paramDef) {
+    public RawArgsBuilder(ParamDef paramDef, DefaultArgConverters defaultArgConverters) {
         this.paramDef = paramDef;
-        // TODO: add default argument converters.
+        this.defaultArgConverters = defaultArgConverters;
     }
 
 
-    public void setArg(String name, Serializable arg) {
-        args.put(name, arg);
+    public void setArg(String paramId, Serializable arg) {
+        args.put(paramId, arg);
     }
 
     public void setArgsFrom(RawArgs args) {
@@ -108,9 +110,12 @@ public class RawArgsBuilder {
 
 
     private Serializable convert(String argStr, Class<? extends Serializable> type) {
-        final @Nullable ArgConverter<?> converter = converters.get(type);
+        @Nullable ArgConverter<?> converter = converters.get(type);
         if(converter == null) {
-            throw new RuntimeException("Cannot convert argument '" + argStr + "' to an object of type '" + type + "', no type converter was found for that type");
+            converter = defaultArgConverters.allConverters.get(type);
+            if(converter == null) {
+                throw new RuntimeException("Cannot convert argument '" + argStr + "' to an object of type '" + type + "', no type converter was found for that type");
+            }
         }
         try {
             return converter.convert(argStr);

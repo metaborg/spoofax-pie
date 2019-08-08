@@ -29,12 +29,12 @@ public class Param {
         return new Param(id, type, required, ListView.of());
     }
 
-    public static Param of(String id, Class<? extends Serializable> type, boolean required, ListView<ArgProvider> providers) {
-        return new Param(id, type, required, providers);
-    }
-
     public static Param of(String id, Class<? extends Serializable> type, boolean required, ArgProvider provider) {
         return new Param(id, type, required, ListView.of(provider));
+    }
+
+    public static Param of(String id, Class<? extends Serializable> type, boolean required, ListView<ArgProvider> providers) {
+        return new Param(id, type, required, providers);
     }
 
     public static Param of(String id, Class<? extends Serializable> type, boolean required, ArgProvider... providers) {

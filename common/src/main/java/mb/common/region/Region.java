@@ -32,6 +32,20 @@ public class Region implements Serializable {
         return new Region(startOffset, startOffset + length);
     }
 
+    public static Region fromString(String regionStr) throws IllegalArgumentException {
+        final int dashIndex = regionStr.indexOf('-');
+        if(dashIndex < 0) {
+            final int offset = Integer.parseInt(regionStr);
+            return Region.fromOffsets(offset, offset);
+        } else {
+            final String start = regionStr.substring(0, dashIndex);
+            final int startOffset = Integer.parseInt(start);
+            final String end = regionStr.substring(dashIndex);
+            final int endOffset = Integer.parseInt(end);
+            return Region.fromOffsets(startOffset, endOffset);
+        }
+    }
+
 
     /**
      * @return Inclusive starting offset with interval [0,#chars).

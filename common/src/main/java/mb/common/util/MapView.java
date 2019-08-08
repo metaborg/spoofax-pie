@@ -6,6 +6,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -60,6 +61,10 @@ public class MapView<K, V> implements Iterable<Map.Entry<K, V>>, Serializable {
             map.put(entry.getKey(), entry.getValue());
         }
         return new MapView<>(map);
+    }
+
+    public static <K, V> MapView<K, V> of(Supplier<Map<K, V>> mapSupplier) {
+        return new MapView<>(mapSupplier.get());
     }
 
     public static <K, V> MapView<K, V> copyOf(Map<? extends K, ? extends V> map) {

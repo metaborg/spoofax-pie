@@ -8,7 +8,7 @@ dependencies {
 
   api("com.google.dagger:dagger")
   implementation(project(":spoofax.core"))
-  implementation("info.picocli:picocli:3.9.5")
+  implementation("info.picocli:picocli:4.0.1")
 
   compileOnly("org.checkerframework:checker-qual-android")
 

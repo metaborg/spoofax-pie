@@ -10,6 +10,7 @@ import mb.common.util.SetView;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageInstance;
+import mb.spoofax.core.language.cli.CliCommandBinding;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandExecutionType;
@@ -18,7 +19,7 @@ import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.menu.CommandAction;
 import mb.spoofax.core.language.menu.Menu;
 import mb.spoofax.core.language.menu.MenuItem;
-import mb.spoofax.core.language.shortcut.Shortcut;
+import mb.spoofax.core.language.shortcut.ShortcutBinding;
 import mb.tiger.spoofax.taskdef.TigerCheck;
 import mb.tiger.spoofax.taskdef.TigerStyle;
 import mb.tiger.spoofax.taskdef.TigerTokenize;
@@ -113,6 +114,13 @@ public class TigerInstance implements LanguageInstance {
     }
 
 
+    @Override public CollectionView<CliCommandBinding> getCliCommandBindings() {
+        return CollectionView.of(
+            showParsedAst.getCliCommandBinding()
+        );
+    }
+
+
     @Override public ListView<MenuItem> getMainMenuItems() {
         return getEditorContextMenuItems();
     }
@@ -175,7 +183,7 @@ public class TigerInstance implements LanguageInstance {
     }
 
 
-    @Override public CollectionView<Shortcut> getShortcuts() {
+    @Override public CollectionView<ShortcutBinding> getShortcutBindings() {
         return CollectionView.of();
     }
 

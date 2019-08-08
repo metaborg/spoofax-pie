@@ -16,6 +16,9 @@ import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.command.*;
+import mb.spoofax.core.language.command.arg.DefaultArgConverters;
+import mb.spoofax.core.language.command.arg.RawArgs;
+import mb.spoofax.core.language.command.arg.RawArgsBuilder;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.command.CommandUtil;
 import mb.spoofax.eclipse.editor.NamedEditorInput;
@@ -49,8 +52,8 @@ import java.util.function.Consumer;
 @Singleton
 public class PieRunner {
     private final Logger logger;
-    //    private final ResourceService resourceService;
     private final Pie pie;
+    private final DefaultArgConverters defaultArgConverters;
     private final EclipseDocumentResourceRegistry eclipseDocumentResourceRegistry;
     private final WorkspaceUpdate.Factory workspaceUpdateFactory;
     private final ResourceUtil resourceUtil;
@@ -62,16 +65,16 @@ public class PieRunner {
     @Inject
     public PieRunner(
         LoggerFactory loggerFactory,
-//        ResourceService resourceService,
         Pie pie,
+        DefaultArgConverters defaultArgConverters,
         EclipseDocumentResourceRegistry eclipseDocumentResourceRegistry,
         WorkspaceUpdate.Factory workspaceUpdateFactory,
         ResourceUtil resourceUtil,
         PartClosedCallback partClosedCallback
     ) {
         this.logger = loggerFactory.create(getClass());
+        this.defaultArgConverters = defaultArgConverters;
         this.resourceUtil = resourceUtil;
-//        this.resourceService = resourceService;
         this.pie = pie;
         this.eclipseDocumentResourceRegistry = eclipseDocumentResourceRegistry;
         this.workspaceUpdateFactory = workspaceUpdateFactory;
@@ -180,18 +183,18 @@ public class PieRunner {
         try(final PieSession session = languageComponent.newPieSession()) {
             // Unobserve auto transforms.
             for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.project) {
-                final Task<CommandOutput> task = CommandUtil.createTask(autoCommandRequest.toCommandRequest(), CommandContexts.project(project.getKey()));
+                final Task<CommandOutput> task = createCommandTask(autoCommandRequest.toCommandRequest(), CommandContexts.project(project.getKey()));
                 unobserve(task, pie, session, monitor);
             }
             for(ResourcePath directory : resourceChanges.newDirectories) {
                 for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.directory) {
-                    final Task<CommandOutput> task = CommandUtil.createTask(autoCommandRequest.toCommandRequest(), CommandContexts.directory(directory));
+                    final Task<CommandOutput> task = createCommandTask(autoCommandRequest.toCommandRequest(), CommandContexts.directory(directory));
                     unobserve(task, pie, session, monitor);
                 }
             }
             for(ResourcePath file : resourceChanges.newFiles) {
                 for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.file) {
-                    final Task<CommandOutput> task = CommandUtil.createTask(autoCommandRequest.toCommandRequest(), CommandContexts.file(file));
+                    final Task<CommandOutput> task = createCommandTask(autoCommandRequest.toCommandRequest(), CommandContexts.file(file));
                     unobserve(task, pie, session, monitor);
                 }
             }
@@ -271,6 +274,18 @@ public class PieRunner {
 
     // Requiring commands
 
+    public <A extends Serializable> Task<CommandOutput> createCommandTask(CommandRequest<A> commandRequest, CommandContext context) {
+        final CommandDef<A> def = commandRequest.def;
+        final RawArgsBuilder builder = new RawArgsBuilder(def.getParamDef(), defaultArgConverters);
+        if(commandRequest.initialArgs != null) {
+            builder.setArgsFrom(commandRequest.initialArgs);
+        }
+        final RawArgs rawArgs = builder.build(context);
+        final A args = def.fromRawArgs(rawArgs);
+        final CommandInput<A> input = new CommandInput<>(args);
+        return def.createTask(input);
+    }
+
     public void requireCommand(
         EclipseLanguageComponent languageComponent,
         CommandRequest<?> commandRequest,
@@ -281,14 +296,14 @@ public class PieRunner {
         switch(commandRequest.executionType) {
             case ManualOnce:
                 for(CommandContext context : contexts) {
-                    final Task<CommandOutput> task = CommandUtil.createTask(commandRequest, context);
+                    final Task<CommandOutput> task = createCommandTask(commandRequest, context);
                     final CommandOutput output = requireWithoutObserving(task, session, monitor);
                     processOutput(output, true, null);
                 }
                 break;
             case ManualContinuous:
                 for(CommandContext context : contexts) {
-                    final Task<CommandOutput> task = CommandUtil.createTask(commandRequest, context);
+                    final Task<CommandOutput> task = createCommandTask(commandRequest, context);
                     final CommandOutput output = require(task, session, monitor);
                     processOutput(output, true, (p) -> {
                         // POTI: this opens a new PIE session, which may be used concurrently with other sessions, which
@@ -303,7 +318,7 @@ public class PieRunner {
                 break;
             case AutomaticContinuous:
                 for(CommandContext context : contexts) {
-                    final Task<CommandOutput> task = CommandUtil.createTask(commandRequest, context);
+                    final Task<CommandOutput> task = createCommandTask(commandRequest, context);
                     require(task, session, monitor);
                     // Feedback for AutomaticContinuous is ignored intentionally: do not want to suddenly open new
                     // editors when a resource is saved.
@@ -565,7 +580,7 @@ public class PieRunner {
                 requireCommand(languageComponent, request, CommandUtil.context(CommandContexts.project(newProject)), session, monitor);
             }
             for(ResourcePath removedProject : resourceChanges.removedProjects) {
-                final Task<CommandOutput> task = CommandUtil.createTask(request, CommandContexts.project(removedProject));
+                final Task<CommandOutput> task = createCommandTask(request, CommandContexts.project(removedProject));
                 unobserve(task, pie, session, monitor);
             }
         }
@@ -575,7 +590,7 @@ public class PieRunner {
                 requireCommand(languageComponent, request, CommandUtil.context(CommandContexts.directory(newDirectory)), session, monitor);
             }
             for(ResourcePath removedDirectory : resourceChanges.removedDirectories) {
-                final Task<CommandOutput> task = CommandUtil.createTask(request, CommandContexts.directory(removedDirectory));
+                final Task<CommandOutput> task = createCommandTask(request, CommandContexts.directory(removedDirectory));
                 unobserve(task, pie, session, monitor);
             }
         }
@@ -585,7 +600,7 @@ public class PieRunner {
                 requireCommand(languageComponent, request, CommandUtil.context(CommandContexts.file(newFile)), session, monitor);
             }
             for(ResourcePath removedFile : resourceChanges.removedFiles) {
-                final Task<CommandOutput> task = CommandUtil.createTask(request, CommandContexts.file(removedFile));
+                final Task<CommandOutput> task = createCommandTask(request, CommandContexts.file(removedFile));
                 unobserve(task, pie, session, monitor);
             }
         }

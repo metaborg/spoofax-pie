@@ -18,16 +18,4 @@ public class CommandUtil {
     public static ListView<CommandContext> contexts(Stream<CommandContext> contexts) {
         return new ListView<>(contexts.collect(Collectors.toList()));
     }
-
-    public static <A extends Serializable> Task<CommandOutput> createTask(CommandRequest<A> commandRequest, CommandContext context) {
-        final CommandDef<A> def = commandRequest.def;
-        final RawArgsBuilder builder = new RawArgsBuilder(def.getParamDef());
-        if(commandRequest.initialArgs != null) {
-            builder.setArgsFrom(commandRequest.initialArgs);
-        }
-        final RawArgs rawArgs = builder.build(context);
-        final A args = def.fromRawArgs(rawArgs);
-        final CommandInput<A> input = new CommandInput<>(args);
-        return def.createTask(input);
-    }
 }

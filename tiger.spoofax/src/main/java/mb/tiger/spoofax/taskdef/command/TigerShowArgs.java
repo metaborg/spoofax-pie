@@ -1,7 +1,10 @@
 package mb.tiger.spoofax.taskdef.command;
 
 import mb.common.region.Region;
+import mb.common.util.ListView;
 import mb.resource.ResourceKey;
+import mb.spoofax.core.language.cli.CliParamDef;
+import mb.spoofax.core.language.cli.CliParams;
 import mb.spoofax.core.language.command.arg.ArgProviders;
 import mb.spoofax.core.language.command.arg.Param;
 import mb.spoofax.core.language.command.arg.ParamDef;
@@ -32,6 +35,13 @@ public class TigerShowArgs implements Serializable {
         return new ParamDef(
             Param.of("resource", ResourceKey.class, true, ArgProviders.context()),
             Param.of("region", Region.class, false, ArgProviders.context())
+        );
+    }
+
+    public static CliParamDef getCliParamDef(String operationName) {
+        return new CliParamDef(
+            CliParams.positional("resource", 0, "resource", "Source file to " + operationName),
+            CliParams.option("region", ListView.of("-r", "--region"), "region", "Region in source file to " + operationName)
         );
     }
 
