@@ -11,7 +11,6 @@ import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.cli.CliCommand;
 import mb.spoofax.core.language.cli.CliCommandItem;
-import mb.spoofax.core.language.cli.CliCommandList;
 import mb.spoofax.core.language.command.*;
 import mb.spoofax.core.language.command.arg.ParamDef;
 import mb.spoofax.core.language.command.arg.RawArgs;
@@ -51,7 +50,7 @@ public class TigerShowParsedAst implements TaskDef<CommandInput<TigerShowArgs>, 
         }
 
         final String formatted = StrategoUtil.toString(term);
-        return new CommandOutput(ListView.of(CommandFeedbacks.openEditorWithText(formatted, "Parsed AST for '" + key + "'", null)));
+        return new CommandOutput(ListView.of(CommandFeedbacks.showText(formatted, "Parsed AST for '" + key + "'", null)));
     }
 
     @Override public Task<CommandOutput> createTask(CommandInput<TigerShowArgs> input) {
@@ -68,7 +67,7 @@ public class TigerShowParsedAst implements TaskDef<CommandInput<TigerShowArgs>, 
     }
 
     @Override public EnumSetView<CommandContextType> getSupportedContextTypes() {
-        return EnumSetView.of(CommandContextType.Editor, CommandContextType.EditorWithRegion);
+        return EnumSetView.of(CommandContextType.TextResource, CommandContextType.TextResourceWithRegion);
     }
 
     @Override public ParamDef getParamDef() {
@@ -80,9 +79,6 @@ public class TigerShowParsedAst implements TaskDef<CommandInput<TigerShowArgs>, 
     }
 
     public CliCommandItem getCliCommandItem() {
-        return CliCommandList.of("parse", "Parse Tiger files or text",
-            CliCommand.of(this, "file", TigerShowArgs.getCliParamDef("file", "parse"), "Parses given file and shows its AST and parser messages"),
-            CliCommand.of(this, "text", TigerShowArgs.getCliParamDef("text", "parse"), "Parses given text and shows its AST and parser messages")
-        );
+        return CliCommand.of(this, "file", TigerShowArgs.getCliParamDef("file", "parse"), "Parses given Tiger file and shows its AST");
     }
 }

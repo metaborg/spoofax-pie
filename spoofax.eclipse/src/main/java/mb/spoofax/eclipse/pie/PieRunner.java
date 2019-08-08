@@ -335,7 +335,7 @@ public class PieRunner {
 
     private void processFeedback(CommandFeedback feedback, boolean activate, @Nullable Consumer<IWorkbenchPart> closedCallback) {
         CommandFeedbacks.caseOf(feedback)
-            .openEditorForFile((file, region) -> {
+            .showFile((file, region) -> {
                 final IFile eclipseFile = resourceUtil.getEclipseFile(file);
                 // Execute in UI thread because getActiveWorkbenchWindow is only available in the UI thread.
                 Display.getDefault().asyncExec(() -> {
@@ -357,7 +357,7 @@ public class PieRunner {
 
                 return Optional.empty(); // Return value is required.
             })
-            .openEditorWithText((text, name, region) -> {
+            .showText((text, name, region) -> {
                 final NamedEditorInput editorInput = new NamedEditorInput(name);
 
                 // Execute in UI thread because getActiveWorkbenchWindow is only available in the UI thread.

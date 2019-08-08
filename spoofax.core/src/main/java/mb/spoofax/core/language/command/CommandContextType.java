@@ -8,8 +8,8 @@ public enum CommandContextType implements Serializable {
     File,
     FileWithRegion,
     FileWithOffset,
-    Editor,
-    EditorWithRegion,
-    EditorWithOffset,
+    TextResource,
+    TextResourceWithRegion,
+    TextResourceWithOffset,
     None
 }

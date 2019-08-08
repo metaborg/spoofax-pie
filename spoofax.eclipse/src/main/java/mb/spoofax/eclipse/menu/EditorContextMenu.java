@@ -86,12 +86,12 @@ public class EditorContextMenu extends MenuShared {
                     final Optional<Integer> offset = Selections.getOffset(selection);
                     if(executionType == ManualContinuous) {
                         // Prefer editors.
-                        if(documentKey != null && region.isPresent() && supportedTypes.contains(CommandContextType.EditorWithRegion)) {
-                            contexts = CommandUtil.context(CommandContexts.editorWithRegion(documentKey, region.get()));
-                        } else if(documentKey != null && offset.isPresent() && supportedTypes.contains(CommandContextType.EditorWithOffset)) {
-                            contexts = CommandUtil.context(CommandContexts.editorWithOffset(documentKey, offset.get()));
-                        } else if(documentKey != null && supportedTypes.contains(CommandContextType.Editor)) {
-                            contexts = CommandUtil.context(CommandContexts.editor(documentKey));
+                        if(documentKey != null && region.isPresent() && supportedTypes.contains(CommandContextType.TextResourceWithRegion)) {
+                            contexts = CommandUtil.context(CommandContexts.textResourceWithRegion(documentKey, region.get()));
+                        } else if(documentKey != null && offset.isPresent() && supportedTypes.contains(CommandContextType.TextResourceWithOffset)) {
+                            contexts = CommandUtil.context(CommandContexts.textResourceWithOffset(documentKey, offset.get()));
+                        } else if(documentKey != null && supportedTypes.contains(CommandContextType.TextResource)) {
+                            contexts = CommandUtil.context(CommandContexts.textResource(documentKey));
                         }
                         // Then files.
                         else if(filePath != null && region.isPresent() && supportedTypes.contains(CommandContextType.FileWithRegion)) {
@@ -115,12 +115,12 @@ public class EditorContextMenu extends MenuShared {
                             contexts = CommandUtil.context(CommandContexts.file(filePath));
                         }
                         // Then editors.
-                        else if(documentKey != null && region.isPresent() && supportedTypes.contains(CommandContextType.EditorWithRegion)) {
-                            contexts = CommandUtil.context(CommandContexts.editorWithRegion(documentKey, region.get()));
-                        } else if(documentKey != null && offset.isPresent() && supportedTypes.contains(CommandContextType.EditorWithOffset)) {
-                            contexts = CommandUtil.context(CommandContexts.editorWithOffset(documentKey, offset.get()));
-                        } else if(documentKey != null && supportedTypes.contains(CommandContextType.Editor)) {
-                            contexts = CommandUtil.context(CommandContexts.editor(documentKey));
+                        else if(documentKey != null && region.isPresent() && supportedTypes.contains(CommandContextType.TextResourceWithRegion)) {
+                            contexts = CommandUtil.context(CommandContexts.textResourceWithRegion(documentKey, region.get()));
+                        } else if(documentKey != null && offset.isPresent() && supportedTypes.contains(CommandContextType.TextResourceWithOffset)) {
+                            contexts = CommandUtil.context(CommandContexts.textResourceWithOffset(documentKey, offset.get()));
+                        } else if(documentKey != null && supportedTypes.contains(CommandContextType.TextResource)) {
+                            contexts = CommandUtil.context(CommandContexts.textResource(documentKey));
                         }
                         // Last resort: none subject.
                         else if(supportedTypes.contains(CommandContextType.None)) {

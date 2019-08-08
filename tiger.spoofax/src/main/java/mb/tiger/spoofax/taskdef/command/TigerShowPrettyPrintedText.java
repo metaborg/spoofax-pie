@@ -66,7 +66,7 @@ public class TigerShowPrettyPrintedText implements TaskDef<CommandInput<TigerSho
         }
 
         final String formatted = StrategoUtil.toString(result);
-        return new CommandOutput(ListView.of(CommandFeedbacks.openEditorWithText(formatted, "Pretty-printed text for '" + key + "'", null)));
+        return new CommandOutput(ListView.of(CommandFeedbacks.showText(formatted, "Pretty-printed text for '" + key + "'", null)));
     }
 
     @Override public Task<CommandOutput> createTask(CommandInput<TigerShowArgs> input) {
@@ -83,7 +83,7 @@ public class TigerShowPrettyPrintedText implements TaskDef<CommandInput<TigerSho
     }
 
     @Override public EnumSetView<CommandContextType> getSupportedContextTypes() {
-        return EnumSetView.of(CommandContextType.Editor, CommandContextType.EditorWithRegion);
+        return EnumSetView.of(CommandContextType.TextResource, CommandContextType.TextResourceWithRegion);
     }
 
     @Override public ParamDef getParamDef() {

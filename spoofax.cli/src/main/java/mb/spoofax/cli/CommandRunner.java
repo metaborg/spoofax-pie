@@ -40,11 +40,11 @@ class CommandRunner<A extends Serializable> implements Callable {
         final CommandOutput output = pieSession.requireWithoutObserving(task);
         for(CommandFeedback feedback : output.feedback) {
             CommandFeedbacks.caseOf(feedback)
-                .openEditorForFile((file, region) -> {
+                .showFile((file, region) -> {
                     System.out.println(file);
                     return Optional.empty();
                 })
-                .openEditorWithText((text, name, region) -> {
+                .showText((text, name, region) -> {
                     System.out.println(text);
                     return Optional.empty();
                 });

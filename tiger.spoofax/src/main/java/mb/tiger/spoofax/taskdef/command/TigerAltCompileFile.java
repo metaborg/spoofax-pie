@@ -101,7 +101,7 @@ public class TigerAltCompileFile implements TaskDef<CommandInput<TigerAltCompile
         context.provide(generatedResource, ResourceStampers.hashFile());
 
         //noinspection ConstantConditions (region may be null)
-        return new CommandOutput(ListView.of(CommandFeedbacks.openEditorForFile(generatedPath, null)));
+        return new CommandOutput(ListView.of(CommandFeedbacks.showFile(generatedPath, null)));
     }
 
     @Override public Serializable key(CommandInput<Args> input) {

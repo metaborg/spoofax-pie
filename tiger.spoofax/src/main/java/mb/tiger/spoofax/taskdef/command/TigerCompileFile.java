@@ -75,7 +75,7 @@ public class TigerCompileFile implements TaskDef<CommandInput<TigerCompileFile.A
         generatedResource.writeBytes(literalsStr.getBytes(StandardCharsets.UTF_8));
         context.provide(generatedResource, ResourceStampers.hashFile());
 
-        return new CommandOutput(ListView.of(CommandFeedbacks.openEditorForFile(generatedPath, null)));
+        return new CommandOutput(ListView.of(CommandFeedbacks.showFile(generatedPath, null)));
     }
 
     @Override public Task<CommandOutput> createTask(CommandInput<Args> input) {

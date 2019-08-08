@@ -10,9 +10,9 @@ import java.io.Serializable;
 @ADT
 public abstract class CommandFeedback implements Serializable {
     public interface Cases<R> {
-        R openEditorForFile(ResourceKey file, @Nullable Region region);
+        R showFile(ResourceKey file, @Nullable Region region);
 
-        R openEditorWithText(String text, String name, @Nullable Region region);
+        R showText(String text, String name, @Nullable Region region);
     }
 
     public abstract <R> R match(Cases<R> cases);

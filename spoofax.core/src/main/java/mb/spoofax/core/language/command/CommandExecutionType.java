@@ -10,7 +10,7 @@ public enum CommandExecutionType implements Serializable {
     ManualOnce,
     /**
      * Manually require and observe command, and unobserve it whenever an editor opened through feedback ({@link
-     * CommandFeedback.Cases#openEditorForFile}, {@link CommandFeedback.Cases#openEditorWithText}) is closed. Can only
+     * CommandFeedback.Cases#showFile}, {@link CommandFeedback.Cases#showText}) is closed. Can only
      * be executed in file or editor context. Feedback is handled normally, but only open editor feedback is supported.
      */
     ManualContinuous,

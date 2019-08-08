@@ -21,11 +21,11 @@ public abstract class CommandContext implements Serializable {
 
         R fileWithOffset(ResourcePath file, int offset);
 
-        R editor(ResourceKey readable);
+        R textResource(ResourceKey readable);
 
-        R editorWithRegion(ResourceKey readable, Region region);
+        R textResourceWithRegion(ResourceKey readable, Region region);
 
-        R editorWithOffset(ResourceKey readable, int offset);
+        R textResourceWithOffset(ResourceKey readable, int offset);
 
         R none();
     }

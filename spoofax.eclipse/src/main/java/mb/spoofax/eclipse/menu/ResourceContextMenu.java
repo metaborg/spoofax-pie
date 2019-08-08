@@ -131,8 +131,8 @@ public abstract class ResourceContextMenu extends MenuShared {
                         contexts = CommandUtil.contexts(containers.stream().map(EclipseResourcePath::new).map(CommandContexts::directory));
                     } else if(hasFiles && supportedTypes.contains(CommandContextType.File)) {
                         contexts = CommandUtil.contexts(files.stream().map(EclipseResourcePath::new).map(CommandContexts::file));
-                    } else if(hasFiles && supportedTypes.contains(CommandContextType.Editor)) {
-                        contexts = CommandUtil.contexts(files.stream().map(EclipseResourcePath::new).map(CommandContexts::editor));
+                    } else if(hasFiles && supportedTypes.contains(CommandContextType.TextResource)) {
+                        contexts = CommandUtil.contexts(files.stream().map(EclipseResourcePath::new).map(CommandContexts::textResource));
                     } else if(supportedTypes.contains(CommandContextType.None)) {
                         contexts = CommandUtil.context(CommandContexts.none());
                     } else {
