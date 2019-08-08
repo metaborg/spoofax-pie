@@ -1,12 +1,10 @@
 package mb.tiger.spoofax.taskdef.command;
 
 import mb.common.region.Region;
-import mb.common.util.CollectionView;
-import mb.common.util.ListView;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.command.arg.ArgProviders;
+import mb.spoofax.core.language.command.arg.Param;
 import mb.spoofax.core.language.command.arg.ParamDef;
-import mb.spoofax.core.language.command.arg.Params;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -25,16 +23,16 @@ public class TigerShowArgs implements Serializable {
 
 
     public static TigerShowArgs fromRawArgs(RawArgs rawArgs) {
-        final ResourceKey key = rawArgs.getPositionalOrThrow(0);
-        final @Nullable Region region = rawArgs.getOptionOrNull("region");
-        return new TigerShowArgs(key, region);
+        final ResourceKey resource = rawArgs.getOrThrow("resource");
+        final @Nullable Region region = rawArgs.getOrNull("region");
+        return new TigerShowArgs(resource, region);
     }
 
     public static ParamDef getParamDef() {
-        return new ParamDef(CollectionView.of(
-            Params.positional(0, ResourceKey.class, true, ListView.of(ArgProviders.context())),
-            Params.option("region", Region.class, false, ListView.of(ArgProviders.context()))
-        ));
+        return new ParamDef(
+            Param.of("resource", ResourceKey.class, true, ArgProviders.context()),
+            Param.of("region", Region.class, false, ArgProviders.context())
+        );
     }
 
 

@@ -1,6 +1,5 @@
 package mb.tiger.spoofax.taskdef.command;
 
-import mb.common.util.CollectionView;
 import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
@@ -12,8 +11,8 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.command.*;
 import mb.spoofax.core.language.command.arg.ArgProviders;
+import mb.spoofax.core.language.command.arg.Param;
 import mb.spoofax.core.language.command.arg.ParamDef;
-import mb.spoofax.core.language.command.arg.Params;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.tiger.spoofax.taskdef.TigerListDefNames;
 import mb.tiger.spoofax.taskdef.TigerListLiteralVals;
@@ -127,19 +126,19 @@ public class TigerAltCompileFile implements TaskDef<CommandInput<TigerAltCompile
     }
 
     @Override public ParamDef getParamDef() {
-        return new ParamDef(CollectionView.of(
-            Params.positional(0, ResourcePath.class, true, ListView.of(ArgProviders.context())),
-            Params.option("listDefNames", boolean.class, false, ListView.of(ArgProviders.value(true))),
-            Params.option("base64Encode", boolean.class, false, ListView.of(ArgProviders.value(false))),
-            Params.option("compiledFileNameSuffix", String.class, true, ListView.of(ArgProviders.value(("defnames.aterm"))))
-        ));
+        return new ParamDef(
+            Param.of("file", ResourcePath.class, true, ListView.of(ArgProviders.context())),
+            Param.of("listDefNames", boolean.class, false, ArgProviders.value(true)),
+            Param.of("base64Encode", boolean.class, false, ArgProviders.value(false)),
+            Param.of("compiledFileNameSuffix", String.class, true, ArgProviders.value("defnames.aterm"))
+        );
     }
 
     @Override public Args fromRawArgs(RawArgs rawArgs) {
-        final ResourcePath file = rawArgs.getPositionalOrThrow(0);
-        final boolean listDefNames = rawArgs.getOptionOrTrue("listDefNames");
-        final boolean base64Encode = rawArgs.getOptionOrFalse("base64Encode");
-        final String compiledFileName = rawArgs.getOptionOrThrow("compiledFileNameSuffix");
+        final ResourcePath file = rawArgs.getOrThrow("file");
+        final boolean listDefNames = rawArgs.getOrTrue("listDefNames");
+        final boolean base64Encode = rawArgs.getOrFalse("base64Encode");
+        final String compiledFileName = rawArgs.getOrThrow("compiledFileNameSuffix");
         return new TigerAltCompileFile.Args(file, listDefNames, base64Encode, compiledFileName);
     }
 }

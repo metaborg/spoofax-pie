@@ -23,7 +23,7 @@ public class CommandUtil {
         final CommandDef<A> def = commandRequest.def;
         final RawArgsBuilder builder = new RawArgsBuilder(def.getParamDef());
         if(commandRequest.initialArgs != null) {
-            builder.setAndAddArgsFrom(commandRequest.initialArgs);
+            builder.setArgsFrom(commandRequest.initialArgs);
         }
         final RawArgs rawArgs = builder.build(context);
         final A args = def.fromRawArgs(rawArgs);

@@ -1,15 +1,15 @@
 package mb.spoofax.core.language.command;
 
-import mb.spoofax.core.language.command.arg.RawArgsCollection;
+import mb.spoofax.core.language.command.arg.RawArgs;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
 
 public class AutoCommandRequest<A extends Serializable> {
     public final CommandDef<? extends A> def;
-    public final @Nullable RawArgsCollection initialArgs;
+    public final @Nullable RawArgs initialArgs;
 
-    public AutoCommandRequest(CommandDef<? extends A> def, @Nullable RawArgsCollection initialArgs) {
+    public AutoCommandRequest(CommandDef<? extends A> def, @Nullable RawArgs initialArgs) {
         this.def = def;
         this.initialArgs = initialArgs;
     }

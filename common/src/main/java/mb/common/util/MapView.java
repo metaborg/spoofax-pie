@@ -18,7 +18,7 @@ import java.util.stream.StreamSupport;
  */
 @SuppressWarnings("unused")
 public class MapView<K, V> implements Iterable<Map.Entry<K, V>>, Serializable {
-    private final Map<K, V> collection;
+    private final Map<K, V> map;
 
     private transient @MonotonicNonNull @Nullable SetView<K> keySet = null;
     private transient @MonotonicNonNull @Nullable CollectionView<V> values = null;
@@ -26,7 +26,7 @@ public class MapView<K, V> implements Iterable<Map.Entry<K, V>>, Serializable {
 
 
     public MapView(Map<K, V> map) {
-        this.collection = map;
+        this.map = map;
     }
 
     public static <K, V> MapView<K, V> of() {
@@ -68,35 +68,35 @@ public class MapView<K, V> implements Iterable<Map.Entry<K, V>>, Serializable {
 
 
     public int size() {
-        return collection.size();
+        return map.size();
     }
 
     public boolean isEmpty() {
-        return collection.isEmpty();
+        return map.isEmpty();
     }
 
     public boolean containsKey(K key) {
-        return collection.containsKey(key);
+        return map.containsKey(key);
     }
 
     public boolean containsValue(V value) {
-        return collection.containsValue(value);
+        return map.containsValue(value);
     }
 
     public @Nullable V get(K key) {
-        return collection.get(key);
+        return map.get(key);
     }
 
     public SetView<K> keySet() {
         if(keySet == null) {
-            keySet = new SetView<>(collection.keySet());
+            keySet = new SetView<>(map.keySet());
         }
         return keySet;
     }
 
     public CollectionView<V> values() {
         if(values == null) {
-            values = new CollectionView<>(collection.values());
+            values = new CollectionView<>(map.values());
         }
         return values;
     }
@@ -104,13 +104,17 @@ public class MapView<K, V> implements Iterable<Map.Entry<K, V>>, Serializable {
     public SetView<Map.Entry<K, V>> entrySet() {
         // TODO: should return EntryViews.
         if(entrySet == null) {
-            entrySet = new SetView<>(collection.entrySet());
+            entrySet = new SetView<>(map.entrySet());
         }
         return entrySet;
     }
 
+    public V getOrDefault(K key, V defaultValue) {
+        return map.getOrDefault(key, defaultValue);
+    }
+
     public void forEach(BiConsumer<? super K, ? super V> action) {
-        collection.forEach(action);
+        map.forEach(action);
     }
 
     public Stream<Map.Entry<K, V>> stream() {
@@ -126,8 +130,7 @@ public class MapView<K, V> implements Iterable<Map.Entry<K, V>>, Serializable {
     @Override public Iterator<Map.Entry<K, V>> iterator() {
         // TODO: should return iterators over EntryViews.
         return new Iterator<Map.Entry<K, V>>() {
-            private final Iterator<Map.Entry<K, V>> i = collection.entrySet().iterator();
-
+            private final Iterator<Map.Entry<K, V>> i = map.entrySet().iterator();
 
             public boolean hasNext() {
                 return i.hasNext();
@@ -145,7 +148,7 @@ public class MapView<K, V> implements Iterable<Map.Entry<K, V>>, Serializable {
 
 
     public Map<K, V> asUnmodifiable() {
-        return Collections.unmodifiableMap(collection);
+        return Collections.unmodifiableMap(map);
     }
 
 
@@ -153,14 +156,14 @@ public class MapView<K, V> implements Iterable<Map.Entry<K, V>>, Serializable {
         if(this == obj) return true;
         if(obj == null || getClass() != obj.getClass()) return false;
         final MapView<?, ?> other = (MapView<?, ?>) obj;
-        return collection.equals(other.collection);
+        return map.equals(other.map);
     }
 
     @Override public int hashCode() {
-        return Objects.hash(collection);
+        return Objects.hash(map);
     }
 
     @Override public String toString() {
-        return collection.toString();
+        return map.toString();
     }
 }

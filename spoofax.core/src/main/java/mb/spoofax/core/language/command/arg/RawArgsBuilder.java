@@ -2,6 +2,7 @@ package mb.spoofax.core.language.command.arg;
 
 import mb.common.region.Region;
 import mb.common.util.ListView;
+import mb.common.util.MapView;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.command.CommandContext;
@@ -9,7 +10,6 @@ import mb.spoofax.core.language.command.CommandContexts;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -17,8 +17,7 @@ import java.util.Optional;
 public class RawArgsBuilder {
     private final ParamDef paramDef;
     private final HashMap<Class<? extends Serializable>, ArgConverter<?>> converters = new HashMap<>();
-    private final HashMap<String, Serializable> optionArgs = new HashMap<>();
-    private final ArrayList<Serializable> positionalArgs = new ArrayList<>();
+    private final HashMap<String, Serializable> args = new HashMap<>();
 
 
     public RawArgsBuilder(ParamDef paramDef) {
@@ -27,77 +26,45 @@ public class RawArgsBuilder {
     }
 
 
+    public void setArg(String name, Serializable arg) {
+        args.put(name, arg);
+    }
+
+    public void setArgsFrom(RawArgs args) {
+        for(Map.Entry<String, Serializable> optionArg : args.args) {
+            this.args.put(optionArg.getKey(), optionArg.getValue());
+        }
+    }
+
     public void setConverter(Class<? extends Serializable> type, ArgConverter<?> converter) {
         converters.put(type, converter);
     }
 
-    public void setOptionArg(String name, Serializable arg) {
-        optionArgs.put(name, arg);
-    }
-
-    public void addPositionalArg(Serializable arg) {
-        positionalArgs.add(arg);
-    }
-
-    public void setAndAddArgsFrom(RawArgsCollection collection) {
-        for(Map.Entry<? extends String, ? extends Serializable> optionArg : collection.optionArgs.entrySet()) {
-            setOptionArg(optionArg.getKey(), optionArg.getValue());
-        }
-        for(Serializable positionalArg : collection.positionalArgs) {
-            addPositionalArg(positionalArg);
-        }
-    }
-
 
     public RawArgs build(CommandContext context) {
-        final HashMap<String, Serializable> finalOptionArgs = new HashMap<>();
-        final HashMap<Integer, Serializable> finalPositionalArgs = new HashMap<>();
-        // TODO: use a list for positional arguments instead, but that requires looping over positionalArgs instead, and
-        // then requires finding the matching positional parameters.
+        final HashMap<String, Serializable> convertedArgs = new HashMap<>();
+        for(Param param : paramDef.params.values()) {
+            final String id = param.getId();
+            final Class<? extends Serializable> type = param.getType();
+            final boolean isRequired = param.isRequired();
+            final ListView<ArgProvider> providers = param.getProviders();
 
-        for(Param param : paramDef.params) {
-            Params.caseOf(param)
-                .option((name, type, required, providers) -> {
-                    @Nullable Serializable arg = optionArgs.get(name);
-                    if(arg == null && !providers.isEmpty()) {
-                        arg = argFromProviders(type, providers, context);
-                    }
-                    final boolean argSet = arg != null;
-                    if(!argSet && required) {
-                        throw new RuntimeException("Option parameter '" + name + "' of type '" + type + "' is required, but no argument was set, and no argument could be retrieved from providers '" + providers + "'");
-                    }
-                    if(argSet) {
-                        if(String.class.equals(arg.getClass()) && !String.class.isAssignableFrom(type)) {
-                            arg = convert((String) arg, type);
-                        }
-                        finalOptionArgs.put(name, arg);
-                    }
-                    return Optional.empty();
-                })
-                .positional((index, type, required, providers) -> {
-                    @Nullable Serializable arg;
-                    if(index < positionalArgs.size()) {
-                        arg = positionalArgs.get(index);
-                    } else {
-                        arg = null;
-                    }
-                    if(arg == null && !providers.isEmpty()) {
-                        arg = argFromProviders(type, providers, context);
-                    }
-                    final boolean argSet = arg != null;
-                    if(!argSet && required) {
-                        throw new RuntimeException("Positional parameter at index '" + index + "' of type '" + type + "' is required, but no argument was set, and no argument could be retrieved from providers '" + providers + "'");
-                    }
-                    if(argSet) {
-                        if(String.class.equals(arg.getClass()) && !String.class.isAssignableFrom(type)) {
-                            arg = convert((String) arg, type);
-                        }
-                        finalPositionalArgs.put(index, arg);
-                    }
-                    return Optional.empty();
-                });
+            @Nullable Serializable arg = args.get(id);
+            if(arg == null && !providers.isEmpty()) {
+                arg = argFromProviders(type, providers, context);
+            }
+            final boolean argSet = arg != null;
+            if(!argSet && isRequired) {
+                throw new RuntimeException("Parameter '" + id + "' of type '" + type + "' is required, but no argument was set, and no argument could be retrieved from providers '" + providers + "'");
+            }
+            if(argSet) {
+                if(String.class.equals(arg.getClass()) && !String.class.isAssignableFrom(type)) {
+                    arg = convert((String) arg, type);
+                }
+                convertedArgs.put(id, arg);
+            }
         }
-        return new DefaultRawArgs(finalOptionArgs, finalPositionalArgs);
+        return new RawArgs(new MapView<>(convertedArgs));
     }
 
 

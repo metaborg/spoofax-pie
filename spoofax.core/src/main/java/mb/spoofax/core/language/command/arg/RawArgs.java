@@ -1,37 +1,60 @@
 package mb.spoofax.core.language.command.arg;
 
+import mb.common.util.MapView;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.Optional;
 
-public interface RawArgs extends Serializable {
-    <T extends Serializable> Optional<T> getOption(String name);
+public class RawArgs implements Serializable {
+    final MapView<String, Serializable> args;
 
-    default <T extends Serializable> @Nullable T getOptionOrNull(String name) {
-        return this.<T>getOption(name).orElse(null);
-    }
 
-    default <T extends Serializable> T getOptionOrThrow(String name) {
-        return this.<T>getOption(name).orElseThrow(() -> new RuntimeException("No option argument named '" + name + "'"));
-    }
-
-    default boolean getOptionOrFalse(String name) {
-        return this.<Boolean>getOption(name).orElse(false);
-    }
-
-    default boolean getOptionOrTrue(String name) {
-        return this.<Boolean>getOption(name).orElse(true);
+    public RawArgs(MapView<String, Serializable> args) {
+        this.args = args;
     }
 
 
-    <T extends Serializable> Optional<T> getPositional(int index);
-
-    default <T extends Serializable> @Nullable T getPositionalOrNull(int index) {
-        return this.<T>getPositional(index).orElse(null);
+    public <T extends Serializable> Optional<T> get(String id) {
+        final @Nullable Serializable obj = args.get(id);
+        if(obj == null) {
+            return Optional.empty();
+        } else {
+            @SuppressWarnings("unchecked") final T arg = (T) obj;
+            return Optional.of(arg);
+        }
     }
 
-    default <T extends Serializable> T getPositionalOrThrow(int index) {
-        return this.<T>getPositional(index).orElseThrow(() -> new RuntimeException("No positional argument at index '" + index + "'"));
+    public <T extends Serializable> @Nullable T getOrNull(String id) {
+        return this.<T>get(id).orElse(null);
+    }
+
+    public <T extends Serializable> T getOrThrow(String id) {
+        return this.<T>get(id).orElseThrow(() -> new RuntimeException("No argument with ID '" + id + "'"));
+    }
+
+    public boolean getOrFalse(String id) {
+        return this.<Boolean>get(id).orElse(false);
+    }
+
+    public boolean getOrTrue(String id) {
+        return this.<Boolean>get(id).orElse(true);
+    }
+
+
+    @Override public boolean equals(@Nullable Object obj) {
+        if(this == obj) return true;
+        if(obj == null || getClass() != obj.getClass()) return false;
+        final RawArgs other = (RawArgs) obj;
+        return args.equals(other.args);
+    }
+
+    @Override public int hashCode() {
+        return Objects.hash(args);
+    }
+
+    @Override public String toString() {
+        return args.toString();
     }
 }

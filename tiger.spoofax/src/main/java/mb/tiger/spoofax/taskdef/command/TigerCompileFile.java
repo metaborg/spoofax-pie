@@ -1,6 +1,5 @@
 package mb.tiger.spoofax.taskdef.command;
 
-import mb.common.util.CollectionView;
 import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
@@ -12,8 +11,8 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.command.*;
 import mb.spoofax.core.language.command.arg.ArgProviders;
+import mb.spoofax.core.language.command.arg.Param;
 import mb.spoofax.core.language.command.arg.ParamDef;
-import mb.spoofax.core.language.command.arg.Params;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.tiger.spoofax.taskdef.TigerListLiteralVals;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -97,11 +96,11 @@ public class TigerCompileFile implements TaskDef<CommandInput<TigerCompileFile.A
     }
 
     @Override public ParamDef getParamDef() {
-        return new ParamDef(CollectionView.of(Params.positional(0, ResourcePath.class, true, ListView.of(ArgProviders.context()))));
+        return new ParamDef(Param.of("file", ResourcePath.class, true, ListView.of(ArgProviders.context())));
     }
 
     @Override public Args fromRawArgs(RawArgs rawArgs) {
-        final ResourcePath file = rawArgs.getPositionalOrThrow(0);
+        final ResourcePath file = rawArgs.getOrThrow("file");
         return new Args(file);
     }
 }

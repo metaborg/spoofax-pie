@@ -5,7 +5,7 @@ import mb.spoofax.core.language.command.CommandContext;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandExecutionType;
 import mb.spoofax.core.language.command.CommandRequest;
-import mb.spoofax.core.language.command.arg.RawArgsCollection;
+import mb.spoofax.core.language.command.arg.RawArgs;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
@@ -14,10 +14,10 @@ import java.util.Objects;
 public class CommandData implements Serializable {
     public final String commandId;
     public final CommandExecutionType executionType;
-    public final @Nullable RawArgsCollection initialArgs;
+    public final @Nullable RawArgs initialArgs;
     public final ListView<CommandContext> contexts;
 
-    public CommandData(String commandId, CommandExecutionType executionType, @Nullable RawArgsCollection initialArgs, ListView<CommandContext> contexts) {
+    public CommandData(String commandId, CommandExecutionType executionType, @Nullable RawArgs initialArgs, ListView<CommandContext> contexts) {
         this.commandId = commandId;
         this.executionType = executionType;
         this.initialArgs = initialArgs;

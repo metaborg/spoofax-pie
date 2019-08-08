@@ -14,7 +14,7 @@ import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandExecutionType;
 import mb.spoofax.core.language.command.CommandRequest;
-import mb.spoofax.core.language.command.arg.RawArgsCollection;
+import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.menu.CommandAction;
 import mb.spoofax.core.language.menu.Menu;
 import mb.spoofax.core.language.menu.MenuItem;
@@ -123,13 +123,13 @@ public class TigerInstance implements LanguageInstance {
                 onceCommandAction(compileFile),
                 onceCommandAction(compileDirectory),
                 onceCommandAction(altCompileFile, "- default"),
-                onceCommandAction(altCompileFile, "- list literal values instead", new RawArgsCollection(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))),
-                onceCommandAction(altCompileFile, "- base64 encode", new RawArgsCollection(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))),
-                onceCommandAction(altCompileFile, "- list literal values instead + base64 encode", new RawArgsCollection(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt"))),
+                onceCommandAction(altCompileFile, "- list literal values instead", new RawArgs(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))),
+                onceCommandAction(altCompileFile, "- base64 encode", new RawArgs(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))),
+                onceCommandAction(altCompileFile, "- list literal values instead + base64 encode", new RawArgs(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt"))),
                 contCommandAction(altCompileFile, "- default"),
-                contCommandAction(altCompileFile, "- list literal values instead", new RawArgsCollection(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))),
-                contCommandAction(altCompileFile, "- base64 encode", new RawArgsCollection(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))),
-                contCommandAction(altCompileFile, "- list literal values instead + base64 encode", new RawArgsCollection(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt")))
+                contCommandAction(altCompileFile, "- list literal values instead", new RawArgs(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))),
+                contCommandAction(altCompileFile, "- base64 encode", new RawArgs(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))),
+                contCommandAction(altCompileFile, "- list literal values instead + base64 encode", new RawArgs(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt")))
             ),
             new Menu("Debug",
                 new Menu("Syntax",
@@ -151,13 +151,13 @@ public class TigerInstance implements LanguageInstance {
             new Menu("Compile",
                 onceCommandAction(compileFile),
                 onceCommandAction(altCompileFile, "- default"),
-                onceCommandAction(altCompileFile, "- list literal values instead", new RawArgsCollection(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))),
-                onceCommandAction(altCompileFile, "- base64 encode", new RawArgsCollection(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))),
-                onceCommandAction(altCompileFile, "- list literal values instead + base64 encode", new RawArgsCollection(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt"))),
+                onceCommandAction(altCompileFile, "- list literal values instead", new RawArgs(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))),
+                onceCommandAction(altCompileFile, "- base64 encode", new RawArgs(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))),
+                onceCommandAction(altCompileFile, "- list literal values instead + base64 encode", new RawArgs(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt"))),
                 contCommandAction(altCompileFile, "- default"),
-                contCommandAction(altCompileFile, "- list literal values instead", new RawArgsCollection(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))),
-                contCommandAction(altCompileFile, "- base64 encode", new RawArgsCollection(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))),
-                contCommandAction(altCompileFile, "- list literal values instead + base64 encode", new RawArgsCollection(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt")))
+                contCommandAction(altCompileFile, "- list literal values instead", new RawArgs(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))),
+                contCommandAction(altCompileFile, "- base64 encode", new RawArgs(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))),
+                contCommandAction(altCompileFile, "- list literal values instead + base64 encode", new RawArgs(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt")))
             ),
             new Menu("Debug",
                 new Menu("Syntax",
@@ -180,7 +180,7 @@ public class TigerInstance implements LanguageInstance {
     }
 
 
-    private static CommandAction commandAction(CommandDef<?> commandDef, CommandExecutionType executionType, String displayName, RawArgsCollection initialArgs) {
+    private static CommandAction commandAction(CommandDef<?> commandDef, CommandExecutionType executionType, String displayName, RawArgs initialArgs) {
         return new CommandAction(new CommandRequest<>(commandDef, executionType, initialArgs), displayName);
     }
 
@@ -188,7 +188,7 @@ public class TigerInstance implements LanguageInstance {
         return new CommandAction(new CommandRequest<>(commandDef, executionType), displayName);
     }
 
-    private static CommandAction commandAction(CommandDef<?> commandDef, CommandExecutionType executionType, RawArgsCollection initialArgs) {
+    private static CommandAction commandAction(CommandDef<?> commandDef, CommandExecutionType executionType, RawArgs initialArgs) {
         return new CommandAction(new CommandRequest<>(commandDef, executionType, initialArgs), commandDef.getDisplayName());
     }
 
@@ -197,7 +197,7 @@ public class TigerInstance implements LanguageInstance {
     }
 
 
-    private static CommandAction onceCommandAction(CommandDef<?> commandDef, String suffix, RawArgsCollection initialArgs) {
+    private static CommandAction onceCommandAction(CommandDef<?> commandDef, String suffix, RawArgs initialArgs) {
         return commandAction(commandDef, CommandExecutionType.ManualOnce, commandDef.getDisplayName() + " " + suffix, initialArgs);
     }
 
@@ -210,7 +210,7 @@ public class TigerInstance implements LanguageInstance {
     }
 
 
-    private static CommandAction contCommandAction(CommandDef<?> commandDef, String suffix, RawArgsCollection initialArgs) {
+    private static CommandAction contCommandAction(CommandDef<?> commandDef, String suffix, RawArgs initialArgs) {
         return commandAction(commandDef, CommandExecutionType.ManualContinuous, commandDef.getDisplayName() + " " + suffix + " (continuous)", initialArgs);
     }
 
