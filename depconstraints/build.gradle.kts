@@ -16,6 +16,7 @@ dependencies {
     api("org.metaborg:log.api:$logVersion")
     api("org.metaborg:log.backend.noop:$logVersion")
     api("org.metaborg:log.backend.logback:$logVersion")
+    api("org.metaborg:log.backend.slf4j:$logVersion")
 
     api("org.metaborg:resource:$resourceVersion")
 
