@@ -8,7 +8,7 @@ public interface MenuItemVisitor {
 
     void menuPop();
 
-    void command(String displayName, CommandRequest commandRequest);
+    void command(String displayName, CommandRequest<?> commandRequest);
 
     void separator();
 }

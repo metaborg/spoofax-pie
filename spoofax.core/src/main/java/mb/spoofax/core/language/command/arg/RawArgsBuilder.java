@@ -1,12 +1,13 @@
 package mb.spoofax.core.language.command.arg;
 
 import mb.common.region.Region;
+import mb.common.region.Selection;
 import mb.common.util.ListView;
 import mb.common.util.MapView;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.command.CommandContext;
-import mb.spoofax.core.language.command.CommandContexts;
+import mb.spoofax.core.language.command.ResourcePathWithKind;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
@@ -85,24 +86,18 @@ public class RawArgsBuilder {
         if(CommandContext.class.isAssignableFrom(type)) {
             return context;
         } else if(Region.class.isAssignableFrom(type)) {
-            return CommandContexts.getRegion(context).orElse(null);
+            return context.getSelection().flatMap(Selection::getRegion).orElse(null);
         } else if(Integer.class.isAssignableFrom(type)) {
-            return CommandContexts.getOffset(context).orElse(null);
+            return context.getSelection().flatMap(Selection::getOffset).orElse(null);
         } else {
             if(ResourcePath.class.isAssignableFrom(type)) {
-                final Optional<ResourcePath> path = CommandContexts.caseOf(context)
-                    .project((p) -> p)
-                    .directory((p) -> p)
-                    .file((p) -> p)
-                    .fileWithRegion((p, r) -> p)
-                    .fileWithOffset((p, o) -> p)
-                    .otherwiseEmpty();
+                final Optional<ResourcePath> path = context.getResourcePathWithKind().map(ResourcePathWithKind::getPath);
                 if(path.isPresent()) {
                     return path.get();
                 }
             }
             if(ResourceKey.class.isAssignableFrom(type)) {
-                return CommandContexts.getReadable(context).orElse(null);
+                return context.getResourceKey().orElse(null);
             }
             return null;
         }

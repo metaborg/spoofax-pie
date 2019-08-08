@@ -5,7 +5,6 @@ import mb.common.util.ListView;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.command.CommandContext;
 import mb.spoofax.core.language.command.CommandContextType;
-import mb.spoofax.core.language.command.CommandContexts;
 import mb.spoofax.core.language.command.CommandRequest;
 import mb.spoofax.core.language.menu.MenuItem;
 import mb.spoofax.eclipse.EclipseIdentifiers;
@@ -122,7 +121,7 @@ public abstract class ResourceContextMenu extends MenuShared {
         for(MenuItem menuItem : languageInstance.getResourceContextMenuItems()) {
             menuItem.accept(new EclipseMenuItemVisitor(langMenu) {
                 @Override
-                protected void transformAction(IContributionManager menu, String displayName, CommandRequest commandRequest) {
+                protected void transformAction(IContributionManager menu, String displayName, CommandRequest<?> commandRequest) {
                     final EnumSetView<CommandContextType> supportedTypes = commandRequest.def.getSupportedContextTypes();
                     final ListView<CommandContext> contexts;
                     if(hasProjects && supportedTypes.contains(CommandContextType.Project)) {

@@ -34,7 +34,7 @@ class CommandRunner<A extends Serializable> implements Callable {
     }
 
     @Override public @Nullable Object call() throws Exception {
-        final RawArgs rawArgs = rawArgsBuilder.build(CommandContexts.none());
+        final RawArgs rawArgs = rawArgsBuilder.build(new CommandContext());
         final A args = commandDef.fromRawArgs(rawArgs);
         final Task<CommandOutput> task = commandDef.createTask(new CommandInput<>(args));
         final CommandOutput output = pieSession.requireWithoutObserving(task);

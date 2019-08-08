@@ -6,10 +6,8 @@ public enum CommandContextType implements Serializable {
     Project,
     Directory,
     File,
-    FileWithRegion,
-    FileWithOffset,
-    TextResource,
-    TextResourceWithRegion,
-    TextResourceWithOffset,
+    Resource,
+    Region,
+    Offset,
     None
 }

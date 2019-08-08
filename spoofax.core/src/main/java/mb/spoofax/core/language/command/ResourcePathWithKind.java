@@ -1,27 +1,25 @@
-package mb.common.region;
+package mb.spoofax.core.language.command;
 
 import mb.common.util.ADT;
+import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
-import java.util.Optional;
 
 @ADT
-public abstract class Selection implements Serializable {
+public abstract class ResourcePathWithKind implements Serializable {
     interface Cases<R> {
-        R region(Region region);
+        R project(ResourcePath path);
 
-        R offset(int offset);
+        R directory(ResourcePath path);
+
+        R file(ResourcePath path);
     }
 
     public abstract <R> R match(Cases<R> cases);
 
-    public Optional<Region> getRegion() {
-        return Selections.getRegion(this);
-    }
-
-    public Optional<Integer> getOffset() {
-        return Selections.getOffset(this);
+    public ResourcePath getPath() {
+        return ResourcePathWithKinds.getPath(this);
     }
 
     @Override public abstract int hashCode();
