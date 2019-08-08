@@ -9,7 +9,9 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
-import mb.spoofax.core.language.cli.CliCommandBinding;
+import mb.spoofax.core.language.cli.CliCommand;
+import mb.spoofax.core.language.cli.CliCommandItem;
+import mb.spoofax.core.language.cli.CliCommandList;
 import mb.spoofax.core.language.command.*;
 import mb.spoofax.core.language.command.arg.ParamDef;
 import mb.spoofax.core.language.command.arg.RawArgs;
@@ -77,7 +79,10 @@ public class TigerShowParsedAst implements TaskDef<CommandInput<TigerShowArgs>, 
         return TigerShowArgs.fromRawArgs(rawArgs);
     }
 
-    public CliCommandBinding getCliCommandBinding() {
-        return CliCommandBinding.of(this, "parse-file", TigerShowArgs.getCliParamDef("parse"), "Parses given file and shows its AST and parser messages");
+    public CliCommandItem getCliCommandItem() {
+        return CliCommandList.of("parse", "Parse Tiger files or text",
+            CliCommand.of(this, "file", TigerShowArgs.getCliParamDef("file", "parse"), "Parses given file and shows its AST and parser messages"),
+            CliCommand.of(this, "text", TigerShowArgs.getCliParamDef("text", "parse"), "Parses given text and shows its AST and parser messages")
+        );
     }
 }

@@ -30,6 +30,7 @@ public class Main {
             .tigerModule(TigerModule.fromClassLoaderResources())
             .build();
         final SpoofaxCli cmd = platformComponent.getSpoofaxCmd();
-        cmd.run(args, tigerComponent);
+        final int status = cmd.run(args, tigerComponent);
+        System.exit(status);
     }
 }

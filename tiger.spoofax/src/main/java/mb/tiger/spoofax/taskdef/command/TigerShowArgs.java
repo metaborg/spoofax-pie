@@ -38,10 +38,10 @@ public class TigerShowArgs implements Serializable {
         );
     }
 
-    public static CliParamDef getCliParamDef(String operationName) {
+    public static CliParamDef getCliParamDef(String resourceName, String operationName) {
         return new CliParamDef(
-            CliParams.positional("resource", 0, "resource", "Source file to " + operationName),
-            CliParams.option("region", ListView.of("-r", "--region"), "region", "Region in source file to " + operationName)
+            CliParams.positional("resource", 0, resourceName.toUpperCase(), "Source " + resourceName + " to " + operationName),
+            CliParams.option("region", ListView.of("-r", "--region"), "region", "Region in source " + resourceName + " to " + operationName)
         );
     }
 

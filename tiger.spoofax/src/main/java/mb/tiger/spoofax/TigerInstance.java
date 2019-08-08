@@ -10,7 +10,8 @@ import mb.common.util.SetView;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageInstance;
-import mb.spoofax.core.language.cli.CliCommandBinding;
+import mb.spoofax.core.language.cli.CliCommandItem;
+import mb.spoofax.core.language.cli.CliCommandList;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandExecutionType;
@@ -19,7 +20,6 @@ import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.menu.CommandAction;
 import mb.spoofax.core.language.menu.Menu;
 import mb.spoofax.core.language.menu.MenuItem;
-import mb.spoofax.core.language.shortcut.ShortcutBinding;
 import mb.tiger.spoofax.taskdef.TigerCheck;
 import mb.tiger.spoofax.taskdef.TigerStyle;
 import mb.tiger.spoofax.taskdef.TigerTokenize;
@@ -114,9 +114,9 @@ public class TigerInstance implements LanguageInstance {
     }
 
 
-    @Override public CollectionView<CliCommandBinding> getCliCommandBindings() {
-        return CollectionView.of(
-            showParsedAst.getCliCommandBinding()
+    @Override public CliCommandItem getRootCliCommandItem() {
+        return CliCommandList.of("tiger", "Tiger language command-line interface",
+            showParsedAst.getCliCommandItem()
         );
     }
 
@@ -180,11 +180,6 @@ public class TigerInstance implements LanguageInstance {
                 )
             )
         );
-    }
-
-
-    @Override public CollectionView<ShortcutBinding> getShortcutBindings() {
-        return CollectionView.of();
     }
 
 

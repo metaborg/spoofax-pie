@@ -5,27 +5,26 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;
 
-public class CliCommandBinding {
+public class CliCommand implements CliCommandItem {
     private final CommandDef<?> def;
     private final String name;
     private final CliParamDef paramDef;
     private final @Nullable String description;
 
 
-    public CliCommandBinding(CommandDef<?> def, String name, CliParamDef paramDef, @Nullable String description) {
+    public CliCommand(CommandDef<?> def, String name, CliParamDef paramDef, @Nullable String description) {
         this.def = def;
         this.name = name;
-        this.description = description;
         this.paramDef = paramDef;
+        this.description = description;
     }
 
-
-    public static CliCommandBinding of(CommandDef<?> def, String name, CliParamDef paramDef) {
-        return new CliCommandBinding(def, name, paramDef, null);
+    public static CliCommand of(CommandDef<?> def, String name, CliParamDef paramDef) {
+        return new CliCommand(def, name, paramDef, null);
     }
 
-    public static CliCommandBinding of(CommandDef<?> def, String name, CliParamDef paramDef, @Nullable String description) {
-        return new CliCommandBinding(def, name, paramDef, description);
+    public static CliCommand of(CommandDef<?> def, String name, CliParamDef paramDef, @Nullable String description) {
+        return new CliCommand(def, name, paramDef, description);
     }
 
 
@@ -33,23 +32,28 @@ public class CliCommandBinding {
         return def;
     }
 
-    public String getName() {
+    @Override public String getName() {
         return name;
-    }
-
-    public @Nullable String getDescription() {
-        return description;
     }
 
     public CliParamDef getParamDef() {
         return paramDef;
     }
 
+    @Override public @Nullable String getDescription() {
+        return description;
+    }
+
+
+    @Override public void accept(CliCommandItemVisitor visitor) {
+        visitor.command(def, name, paramDef, description);
+    }
+
 
     @Override public boolean equals(@Nullable Object obj) {
         if(this == obj) return true;
         if(obj == null || getClass() != obj.getClass()) return false;
-        final CliCommandBinding other = (CliCommandBinding) obj;
+        final CliCommand other = (CliCommand) obj;
         return def.equals(other.def) &&
             name.equals(other.name) &&
             paramDef.equals(other.paramDef) &&
