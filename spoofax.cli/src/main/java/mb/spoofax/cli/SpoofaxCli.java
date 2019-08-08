@@ -1,4 +1,4 @@
-package mb.spoofax.cmd;
+package mb.spoofax.cli;
 
 import mb.resource.string.StringResourceRegistry;
 import mb.spoofax.core.language.LanguageComponent;
@@ -10,11 +10,11 @@ import javax.inject.Inject;
 import java.util.concurrent.Callable;
 
 @Command
-public class SpoofaxCmd implements Callable<Void> {
+public class SpoofaxCli implements Callable<Void> {
     private final StringResourceRegistry stringResourceRegistry;
 
     @Inject
-    public SpoofaxCmd(StringResourceRegistry stringResourceRegistry) {
+    public SpoofaxCli(StringResourceRegistry stringResourceRegistry) {
         this.stringResourceRegistry = stringResourceRegistry;
     }
 

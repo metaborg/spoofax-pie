@@ -14,7 +14,7 @@ dependencies {
   implementation(platform(project(":depconstraints")))
 
   implementation(project(":tiger.spoofax"))
-  implementation(project(":spoofax.cmd"))
+  implementation(project(":spoofax.cli"))
   implementation("org.metaborg:log.backend.noop")
   implementation("org.metaborg:pie.runtime")
   implementation("org.metaborg:pie.dagger")

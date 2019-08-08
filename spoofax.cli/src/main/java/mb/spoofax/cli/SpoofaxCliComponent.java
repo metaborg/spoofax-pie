@@ -1,4 +1,4 @@
-package mb.spoofax.cmd;
+package mb.spoofax.cli;
 
 import dagger.Component;
 import mb.pie.dagger.PieModule;
@@ -17,8 +17,8 @@ import javax.inject.Singleton;
     ResourceServiceModule.class,
     PieModule.class
 })
-public interface SpoofaxCmdComponent extends PlatformComponent {
+public interface SpoofaxCliComponent extends PlatformComponent {
     StringResourceRegistry getStringResourceRegistry();
 
-    SpoofaxCmd getSpoofaxCmd();
+    SpoofaxCli getSpoofaxCmd();
 }

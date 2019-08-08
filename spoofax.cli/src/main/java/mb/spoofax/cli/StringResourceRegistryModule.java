@@ -1,4 +1,4 @@
-package mb.spoofax.cmd;
+package mb.spoofax.cli;
 
 import dagger.Module;
 import dagger.Provides;
