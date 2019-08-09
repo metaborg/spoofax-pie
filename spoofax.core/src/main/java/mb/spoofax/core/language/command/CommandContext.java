@@ -1,7 +1,11 @@
 package mb.spoofax.core.language.command;
 
+import mb.common.region.Region;
 import mb.common.region.Selection;
+import mb.common.region.Selections;
+import mb.common.util.EnumSetView;
 import mb.resource.ResourceKey;
+import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
@@ -50,6 +54,46 @@ public class CommandContext implements Serializable {
         this.selection = selection;
     }
 
+    public static CommandContext ofProject(ResourcePath project) {
+        return new CommandContext(ResourcePathWithKinds.project(project));
+    }
+
+    public static CommandContext ofDirectory(ResourcePath directory) {
+        return new CommandContext(ResourcePathWithKinds.directory(directory));
+    }
+
+    public static CommandContext ofFile(ResourcePath file) {
+        return new CommandContext(ResourcePathWithKinds.file(file));
+    }
+
+    public static CommandContext ofFile(ResourcePath file, Selection selection) {
+        return new CommandContext(ResourcePathWithKinds.file(file), selection);
+    }
+
+    public static CommandContext ofFile(ResourcePath file, Region region) {
+        return new CommandContext(ResourcePathWithKinds.file(file), Selections.region(region));
+    }
+
+    public static CommandContext ofFile(ResourcePath file, int offset) {
+        return new CommandContext(ResourcePathWithKinds.file(file), Selections.offset(offset));
+    }
+
+    public static CommandContext ofResource(ResourceKey resource) {
+        return new CommandContext(resource);
+    }
+
+    public static CommandContext ofResource(ResourceKey resource, Selection selection) {
+        return new CommandContext(resource, selection);
+    }
+
+    public static CommandContext ofResource(ResourceKey resource, Region region) {
+        return new CommandContext(resource, Selections.region(region));
+    }
+
+    public static CommandContext ofResource(ResourceKey resource, int offset) {
+        return new CommandContext(resource, Selections.offset(offset));
+    }
+
 
     public Optional<ResourcePathWithKind> getResourcePathWithKind() {
         return Optional.ofNullable(resourcePath);
@@ -61,6 +105,42 @@ public class CommandContext implements Serializable {
 
     public Optional<Selection> getSelection() {
         return Optional.ofNullable(selection);
+    }
+
+
+    public boolean isSupportedBy(EnumSetView<CommandContextType> types) {
+        if(types.contains(CommandContextType.Project)) {
+            if(resourcePath == null) return false;
+            return resourcePath.caseOf()
+                .project_(true)
+                .directory_(false)
+                .file_(false);
+        } else if(types.contains(CommandContextType.Directory)) {
+            if(resourcePath == null) return false;
+            return resourcePath.caseOf()
+                .project_(false)
+                .directory_(true)
+                .file_(false);
+        } else if(types.contains(CommandContextType.File)) {
+            if(resourcePath == null) return false;
+            return resourcePath.caseOf()
+                .project_(false)
+                .directory_(false)
+                .file_(true);
+        } else if(types.contains(CommandContextType.Resource) && resourceKey == null) {
+            return false;
+        } else if(types.contains(CommandContextType.Region)) {
+            if(selection == null) return false;
+            return selection.caseOf()
+                .region_(true)
+                .offset_(false);
+        } else if(types.contains(CommandContextType.Offset)) {
+            if(selection == null) return false;
+            return selection.caseOf()
+                .region_(false)
+                .offset_(true);
+        }
+        return true;
     }
 
 

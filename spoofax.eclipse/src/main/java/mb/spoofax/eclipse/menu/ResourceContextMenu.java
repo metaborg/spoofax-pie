@@ -11,7 +11,6 @@ import mb.spoofax.eclipse.EclipseIdentifiers;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.SpoofaxEclipseComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
-import mb.spoofax.eclipse.command.CommandUtil;
 import mb.spoofax.eclipse.pie.PieRunner;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
 import mb.spoofax.eclipse.util.SelectionUtil;
@@ -29,6 +28,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.stream.Collectors;
 
 public abstract class ResourceContextMenu extends MenuShared {
     private final PieRunner pieRunner;
@@ -56,26 +56,30 @@ public abstract class ResourceContextMenu extends MenuShared {
         final MenuManager langMenu = new MenuManager(languageInstance.getDisplayName());
 
         // Selections.
-        final ArrayList<IProject> projects = SelectionUtil.toProjects(selection);
-        final boolean hasProjects = !projects.isEmpty();
-        final ArrayList<IContainer> containers = SelectionUtil.toContainers(selection);
-        final boolean hasContainers = !containers.isEmpty();
-        final ArrayList<IFile> files = SelectionUtil.toFiles(selection);
-        // Remove non-language files.
-        for(Iterator<IFile> it = files.iterator(); it.hasNext(); ) {
+        // OPTO: prevent allocating ArrayLists of unused Eclipse resource objects.
+        final ArrayList<IProject> eclipseProjects = SelectionUtil.toProjects(selection);
+        final ArrayList<CommandContext> projectContexts = eclipseProjects.stream().map(EclipseResourcePath::new).map(CommandContext::new).collect(Collectors.toCollection(ArrayList::new));
+        final boolean hasProjects = !projectContexts.isEmpty();
+        final ArrayList<IContainer> eclipseContainers = SelectionUtil.toContainers(selection);
+        final ArrayList<CommandContext> directoryContexts = eclipseContainers.stream().map(EclipseResourcePath::new).map(CommandContext::new).collect(Collectors.toCollection(ArrayList::new));
+        final boolean hasDirectories = !directoryContexts.isEmpty();
+        final ArrayList<IFile> eclipseLangFiles = SelectionUtil.toFiles(selection);
+        for(Iterator<IFile> it = eclipseLangFiles.iterator(); it.hasNext(); ) {
             final IFile file = it.next();
             final @Nullable String fileExtension = file.getFileExtension();
             if(fileExtension == null || !languageInstance.getFileExtensions().contains(fileExtension)) {
-                it.remove();
+                it.remove(); // Remove non-language files.
             }
         }
-        final boolean hasFiles = !files.isEmpty();
+        final ArrayList<EclipseResourcePath> langFiles = eclipseLangFiles.stream().map(EclipseResourcePath::new).collect(Collectors.toCollection(ArrayList::new));
+        final ArrayList<CommandContext> langFileContexts = langFiles.stream().map(CommandContext::new).collect(Collectors.toCollection(ArrayList::new));
+        final boolean hasFiles = !langFiles.isEmpty();
 
         // Add/remove nature.
         if(hasProjects) {
             boolean addNature = false;
             boolean removeNature = false;
-            for(IProject project : projects) {
+            for(IProject project : eclipseProjects) {
                 try {
                     if(!project.hasNature(identifiers.getNature())) {
                         addNature = true;
@@ -96,23 +100,23 @@ public abstract class ResourceContextMenu extends MenuShared {
 
         // Observe/unobserve check tasks.
         if(hasFiles) {
-            final ArrayList<IFile> observeFiles = new ArrayList<>();
-            final ArrayList<IFile> unobserveFiles = new ArrayList<>();
-            for(IFile file : files) {
-                if(pieRunner.isCheckObserved(languageComponent, file)) {
-                    unobserveFiles.add(file);
+            boolean showObserve = false;
+            boolean showUnobserve = false;
+            for(EclipseResourcePath file : langFiles) {
+                if(!pieRunner.isCheckObserved(languageComponent, file)) {
+                    showObserve = true;
                 } else {
-                    observeFiles.add(file);
+                    showUnobserve = true;
                 }
             }
-            if(!observeFiles.isEmpty() || !unobserveFiles.isEmpty()) {
+            if(showObserve || showUnobserve) {
                 langMenu.add(new Separator());
-            }
-            if(!observeFiles.isEmpty()) {
-                langMenu.add(createCommand(identifiers.getObserveCommand()));
-            }
-            if(!unobserveFiles.isEmpty()) {
-                langMenu.add(createCommand(identifiers.getUnobserveCommand()));
+                if(showObserve) {
+                    langMenu.add(createCommand(identifiers.getObserveCommand()));
+                }
+                if(showUnobserve) {
+                    langMenu.add(createCommand(identifiers.getUnobserveCommand()));
+                }
             }
         }
 
@@ -122,22 +126,18 @@ public abstract class ResourceContextMenu extends MenuShared {
             menuItem.accept(new EclipseMenuItemVisitor(langMenu) {
                 @Override
                 protected void transformAction(IContributionManager menu, String displayName, CommandRequest<?> commandRequest) {
-                    final EnumSetView<CommandContextType> supportedTypes = commandRequest.def.getSupportedContextTypes();
-                    final ListView<CommandContext> contexts;
-                    if(hasProjects && supportedTypes.contains(CommandContextType.Project)) {
-                        contexts = CommandUtil.contexts(projects.stream().map(EclipseResourcePath::new).map(CommandContexts::project));
-                    } else if(hasContainers && supportedTypes.contains(CommandContextType.Directory)) {
-                        contexts = CommandUtil.contexts(containers.stream().map(EclipseResourcePath::new).map(CommandContexts::directory));
-                    } else if(hasFiles && supportedTypes.contains(CommandContextType.File)) {
-                        contexts = CommandUtil.contexts(files.stream().map(EclipseResourcePath::new).map(CommandContexts::file));
-                    } else if(hasFiles && supportedTypes.contains(CommandContextType.TextResource)) {
-                        contexts = CommandUtil.contexts(files.stream().map(EclipseResourcePath::new).map(CommandContexts::textResource));
-                    } else if(supportedTypes.contains(CommandContextType.None)) {
-                        contexts = CommandUtil.context(CommandContexts.none());
+                    final EnumSetView<CommandContextType> requiredContexts = commandRequest.def.getRequiredContextTypes();
+                    final ArrayList<CommandContext> contexts;
+                    if(hasProjects && requiredContexts.contains(CommandContextType.Project)) {
+                        contexts = projectContexts;
+                    } else if(hasDirectories && requiredContexts.contains(CommandContextType.Directory)) {
+                        contexts = directoryContexts;
+                    } else if(hasFiles && requiredContexts.contains(CommandContextType.File) || requiredContexts.contains(CommandContextType.Resource)) {
+                        contexts = langFileContexts;
                     } else {
                         return;
                     }
-                    menu.add(createCommand(transformCommandId, commandRequest, contexts, displayName));
+                    menu.add(createCommand(transformCommandId, commandRequest, new ListView<>(contexts), displayName));
                 }
             });
         }

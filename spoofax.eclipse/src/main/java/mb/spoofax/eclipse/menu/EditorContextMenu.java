@@ -1,15 +1,15 @@
 package mb.spoofax.eclipse.menu;
 
-import mb.common.region.Region;
 import mb.common.region.Selection;
-import mb.common.region.Selections;
-import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageInstance;
+import mb.spoofax.core.language.command.CommandContext;
+import mb.spoofax.core.language.command.CommandExecutionType;
+import mb.spoofax.core.language.command.CommandRequest;
+import mb.spoofax.core.language.command.ResourcePathWithKinds;
 import mb.spoofax.core.language.menu.MenuItem;
-import mb.spoofax.core.language.command.*;
 import mb.spoofax.eclipse.EclipseIdentifiers;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.SpoofaxEclipseComponent;
@@ -17,7 +17,6 @@ import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.eclipse.resource.EclipseDocumentResource;
 import mb.spoofax.eclipse.resource.EclipseResource;
-import mb.spoofax.eclipse.command.CommandUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IContributionManager;
@@ -26,9 +25,6 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 
 import java.util.Optional;
-
-import static mb.spoofax.core.language.command.CommandExecutionType.ManualContinuous;
-import static mb.spoofax.core.language.command.CommandExecutionType.ManualOnce;
 
 public class EditorContextMenu extends MenuShared {
     private final EclipseLanguageComponent languageComponent;
@@ -68,7 +64,8 @@ public class EditorContextMenu extends MenuShared {
             documentKey = null;
             filePath = null;
         }
-        final Selection selection = editor.getSelection();
+        final Optional<Selection> selection = editor.getSelection();
+        final CommandContext context = new CommandContext(filePath != null ? ResourcePathWithKinds.file(filePath) : null, documentKey, selection.orElse(null));
 
         final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
         final EclipseIdentifiers identifiers = languageComponent.getEclipseIdentifiers();
@@ -78,61 +75,14 @@ public class EditorContextMenu extends MenuShared {
         for(MenuItem menuItem : getMenuItems(languageInstance)) {
             menuItem.accept(new EclipseMenuItemVisitor(langMenu) {
                 @Override
-                protected void transformAction(IContributionManager menu, String displayName, CommandRequest commandRequest) {
-                    final EnumSetView<CommandContextType> supportedTypes = commandRequest.def.getSupportedContextTypes();
-                    final CommandExecutionType executionType = commandRequest.executionType;
-                    final ListView<CommandContext> contexts;
-                    final Optional<Region> region = Selections.getRegion(selection);
-                    final Optional<Integer> offset = Selections.getOffset(selection);
-                    if(executionType == ManualContinuous) {
-                        // Prefer editors.
-                        if(documentKey != null && region.isPresent() && supportedTypes.contains(CommandContextType.TextResourceWithRegion)) {
-                            contexts = CommandUtil.context(CommandContexts.textResourceWithRegion(documentKey, region.get()));
-                        } else if(documentKey != null && offset.isPresent() && supportedTypes.contains(CommandContextType.TextResourceWithOffset)) {
-                            contexts = CommandUtil.context(CommandContexts.textResourceWithOffset(documentKey, offset.get()));
-                        } else if(documentKey != null && supportedTypes.contains(CommandContextType.TextResource)) {
-                            contexts = CommandUtil.context(CommandContexts.textResource(documentKey));
-                        }
-                        // Then files.
-                        else if(filePath != null && region.isPresent() && supportedTypes.contains(CommandContextType.FileWithRegion)) {
-                            contexts = CommandUtil.context(CommandContexts.fileWithRegion(filePath, region.get()));
-                        } else if(filePath != null && offset.isPresent() && supportedTypes.contains(CommandContextType.FileWithOffset)) {
-                            contexts = CommandUtil.context(CommandContexts.fileWithOffset(filePath, offset.get()));
-                        } else if(filePath != null && supportedTypes.contains(CommandContextType.File)) {
-                            contexts = CommandUtil.context(CommandContexts.file(filePath));
-                        }
-                        // None subject is not supported.
-                        else {
-                            return;
-                        }
-                    } else if(executionType == ManualOnce) {
-                        // Prefer files.
-                        if(filePath != null && region.isPresent() && supportedTypes.contains(CommandContextType.FileWithRegion)) {
-                            contexts = CommandUtil.context(CommandContexts.fileWithRegion(filePath, region.get()));
-                        } else if(filePath != null && offset.isPresent() && supportedTypes.contains(CommandContextType.FileWithOffset)) {
-                            contexts = CommandUtil.context(CommandContexts.fileWithOffset(filePath, offset.get()));
-                        } else if(filePath != null && supportedTypes.contains(CommandContextType.File)) {
-                            contexts = CommandUtil.context(CommandContexts.file(filePath));
-                        }
-                        // Then editors.
-                        else if(documentKey != null && region.isPresent() && supportedTypes.contains(CommandContextType.TextResourceWithRegion)) {
-                            contexts = CommandUtil.context(CommandContexts.textResourceWithRegion(documentKey, region.get()));
-                        } else if(documentKey != null && offset.isPresent() && supportedTypes.contains(CommandContextType.TextResourceWithOffset)) {
-                            contexts = CommandUtil.context(CommandContexts.textResourceWithOffset(documentKey, offset.get()));
-                        } else if(documentKey != null && supportedTypes.contains(CommandContextType.TextResource)) {
-                            contexts = CommandUtil.context(CommandContexts.textResource(documentKey));
-                        }
-                        // Last resort: none subject.
-                        else if(supportedTypes.contains(CommandContextType.None)) {
-                            contexts = CommandUtil.context(CommandContexts.none());
-                        } else {
-                            return;
-                        }
-                    } else {
-                        // Other execution types are not supported.
-                        return;
+                protected void transformAction(IContributionManager menu, String displayName, CommandRequest<?> commandRequest) {
+                    if(commandRequest.executionType == CommandExecutionType.AutomaticContinuous) {
+                        return; // Automatic continuous execution is not supported when manually invoking commands.
                     }
-                    menu.add(createCommand(transformCommandId, commandRequest, contexts, displayName));
+                    if(!context.isSupportedBy(commandRequest.def.getRequiredContextTypes())) {
+                        return; // Context is not supported by command.
+                    }
+                    menu.add(createCommand(transformCommandId, commandRequest, context, displayName));
                 }
             });
         }

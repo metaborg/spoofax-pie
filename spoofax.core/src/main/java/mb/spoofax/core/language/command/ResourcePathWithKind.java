@@ -22,6 +22,10 @@ public abstract class ResourcePathWithKind implements Serializable {
         return ResourcePathWithKinds.getPath(this);
     }
 
+    public ResourcePathWithKinds.CaseOfMatchers.TotalMatcher_Project caseOf() {
+        return ResourcePathWithKinds.caseOf(this);
+    }
+
     @Override public abstract int hashCode();
 
     @Override public abstract boolean equals(@Nullable Object obj);

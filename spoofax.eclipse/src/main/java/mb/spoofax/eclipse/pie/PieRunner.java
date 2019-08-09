@@ -183,18 +183,18 @@ public class PieRunner {
         try(final PieSession session = languageComponent.newPieSession()) {
             // Unobserve auto transforms.
             for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.project) {
-                final Task<CommandOutput> task = createCommandTask(autoCommandRequest.toCommandRequest(), CommandContexts.project(project.getKey()));
+                final Task<CommandOutput> task = createCommandTask(autoCommandRequest.toCommandRequest(), CommandContext.ofProject(project.getKey()));
                 unobserve(task, pie, session, monitor);
             }
             for(ResourcePath directory : resourceChanges.newDirectories) {
                 for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.directory) {
-                    final Task<CommandOutput> task = createCommandTask(autoCommandRequest.toCommandRequest(), CommandContexts.directory(directory));
+                    final Task<CommandOutput> task = createCommandTask(autoCommandRequest.toCommandRequest(), CommandContext.ofDirectory(directory));
                     unobserve(task, pie, session, monitor);
                 }
             }
             for(ResourcePath file : resourceChanges.newFiles) {
                 for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.file) {
-                    final Task<CommandOutput> task = createCommandTask(autoCommandRequest.toCommandRequest(), CommandContexts.file(file));
+                    final Task<CommandOutput> task = createCommandTask(autoCommandRequest.toCommandRequest(), CommandContext.ofFile(file));
                     unobserve(task, pie, session, monitor);
                 }
             }
@@ -220,10 +220,9 @@ public class PieRunner {
 
     public boolean isCheckObserved(
         EclipseLanguageComponent languageComponent,
-        IFile file
+        EclipseResourcePath file
     ) {
-        final EclipseResourcePath resourceKey = new EclipseResourcePath(file);
-        final Task<KeyedMessages> checkTask = languageComponent.getLanguageInstance().createCheckTask(resourceKey);
+        final Task<KeyedMessages> checkTask = languageComponent.getLanguageInstance().createCheckTask(file);
         return pie.isObserved(checkTask);
     }
 
@@ -550,7 +549,7 @@ public class PieRunner {
             final ArrayList<AutoCommandRequest<?>> directory = new ArrayList<>();
             final ArrayList<AutoCommandRequest<?>> file = new ArrayList<>();
             for(AutoCommandRequest<?> request : languageComponent.getLanguageInstance().getAutoCommandRequests()) {
-                final EnumSetView<CommandContextType> supported = request.def.getSupportedContextTypes();
+                final EnumSetView<CommandContextType> supported = request.def.getRequiredContextTypes();
                 if(supported.contains(CommandContextType.Project)) {
                     project.add(request);
                 }
@@ -577,30 +576,30 @@ public class PieRunner {
         for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.project) {
             final CommandRequest<?> request = autoCommandRequest.toCommandRequest();
             for(ResourcePath newProject : resourceChanges.newProjects) {
-                requireCommand(languageComponent, request, CommandUtil.context(CommandContexts.project(newProject)), session, monitor);
+                requireCommand(languageComponent, request, CommandUtil.context(CommandContext.ofProject(newProject)), session, monitor);
             }
             for(ResourcePath removedProject : resourceChanges.removedProjects) {
-                final Task<CommandOutput> task = createCommandTask(request, CommandContexts.project(removedProject));
+                final Task<CommandOutput> task = createCommandTask(request, CommandContext.ofProject(removedProject));
                 unobserve(task, pie, session, monitor);
             }
         }
         for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.directory) {
             final CommandRequest<?> request = autoCommandRequest.toCommandRequest();
             for(ResourcePath newDirectory : resourceChanges.newDirectories) {
-                requireCommand(languageComponent, request, CommandUtil.context(CommandContexts.directory(newDirectory)), session, monitor);
+                requireCommand(languageComponent, request, CommandUtil.context(CommandContext.ofDirectory(newDirectory)), session, monitor);
             }
             for(ResourcePath removedDirectory : resourceChanges.removedDirectories) {
-                final Task<CommandOutput> task = createCommandTask(request, CommandContexts.directory(removedDirectory));
+                final Task<CommandOutput> task = createCommandTask(request, CommandContext.ofDirectory(removedDirectory));
                 unobserve(task, pie, session, monitor);
             }
         }
         for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.file) {
             final CommandRequest<?> request = autoCommandRequest.toCommandRequest();
             for(ResourcePath newFile : resourceChanges.newFiles) {
-                requireCommand(languageComponent, request, CommandUtil.context(CommandContexts.file(newFile)), session, monitor);
+                requireCommand(languageComponent, request, CommandUtil.context(CommandContext.ofFile(newFile)), session, monitor);
             }
             for(ResourcePath removedFile : resourceChanges.removedFiles) {
-                final Task<CommandOutput> task = createCommandTask(request, CommandContexts.file(removedFile));
+                final Task<CommandOutput> task = createCommandTask(request, CommandContext.ofFile(removedFile));
                 unobserve(task, pie, session, monitor);
             }
         }

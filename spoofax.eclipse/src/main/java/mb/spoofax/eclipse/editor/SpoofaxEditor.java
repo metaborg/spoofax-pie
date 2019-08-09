@@ -30,6 +30,7 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public abstract class SpoofaxEditor extends TextEditor {
     private final class DocumentListener implements IDocumentListener {
@@ -82,17 +83,17 @@ public abstract class SpoofaxEditor extends TextEditor {
         return resource;
     }
 
-    public Selection getSelection() {
+    public Optional<Selection> getSelection() {
         final @Nullable ISelection selection = doGetSelection();
         if(selection instanceof ITextSelection) {
             final ITextSelection s = (ITextSelection) selection;
             final int length = s.getLength();
             if(length == 0) {
-                return Selections.offset(s.getOffset());
+                return Optional.of(Selections.offset(s.getOffset()));
             }
-            return Selections.region(Region.fromOffsetLength(s.getOffset(), length));
+            return Optional.of(Selections.region(Region.fromOffsetLength(s.getOffset(), length)));
         }
-        return Selections.none();
+        return Optional.empty();
     }
 
 

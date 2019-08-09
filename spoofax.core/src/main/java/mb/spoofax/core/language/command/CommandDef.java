@@ -15,7 +15,7 @@ public interface CommandDef<A extends Serializable> {
 
     EnumSetView<CommandExecutionType> getSupportedExecutionTypes();
 
-    EnumSetView<CommandContextType> getSupportedContextTypes();
+    EnumSetView<CommandContextType> getRequiredContextTypes();
 
 
     ParamDef getParamDef();

@@ -66,8 +66,8 @@ public class TigerShowParsedAst implements TaskDef<CommandInput<TigerShowArgs>, 
         return EnumSetView.of(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous);
     }
 
-    @Override public EnumSetView<CommandContextType> getSupportedContextTypes() {
-        return EnumSetView.of(CommandContextType.TextResource, CommandContextType.TextResourceWithRegion);
+    @Override public EnumSetView<CommandContextType> getRequiredContextTypes() {
+        return EnumSetView.of(CommandContextType.Resource);
     }
 
     @Override public ParamDef getParamDef() {
@@ -79,6 +79,6 @@ public class TigerShowParsedAst implements TaskDef<CommandInput<TigerShowArgs>, 
     }
 
     public CliCommandItem getCliCommandItem() {
-        return CliCommand.of(this, "file", TigerShowArgs.getCliParamDef("file", "parse"), "Parses given Tiger file and shows its AST");
+        return CliCommand.of(this, "parse", TigerShowArgs.getCliParamDef("file", "parse"), "Parses given Tiger file and shows its AST");
     }
 }

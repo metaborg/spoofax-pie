@@ -121,7 +121,7 @@ public class TigerAltCompileFile implements TaskDef<CommandInput<TigerAltCompile
         return EnumSetView.of(CommandExecutionType.ManualOnce, CommandExecutionType.AutomaticContinuous, CommandExecutionType.ManualContinuous);
     }
 
-    @Override public EnumSetView<CommandContextType> getSupportedContextTypes() {
+    @Override public EnumSetView<CommandContextType> getRequiredContextTypes() {
         return EnumSetView.of(CommandContextType.File);
     }
 

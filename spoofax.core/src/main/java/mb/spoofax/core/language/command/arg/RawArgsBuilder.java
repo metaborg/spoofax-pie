@@ -90,14 +90,16 @@ public class RawArgsBuilder {
         } else if(Integer.class.isAssignableFrom(type)) {
             return context.getSelection().flatMap(Selection::getOffset).orElse(null);
         } else {
-            if(ResourcePath.class.isAssignableFrom(type)) {
+            if(ResourceKey.class.isAssignableFrom(type)) {
+                final Optional<ResourceKey> key = context.getResourceKey();
+                if(key.isPresent()) {
+                    return key.get();
+                }
+            } else if(ResourcePath.class.isAssignableFrom(type)) {
                 final Optional<ResourcePath> path = context.getResourcePathWithKind().map(ResourcePathWithKind::getPath);
                 if(path.isPresent()) {
                     return path.get();
                 }
-            }
-            if(ResourceKey.class.isAssignableFrom(type)) {
-                return context.getResourceKey().orElse(null);
             }
             return null;
         }

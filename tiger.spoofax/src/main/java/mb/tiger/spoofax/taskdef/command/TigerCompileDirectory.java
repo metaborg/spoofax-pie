@@ -128,7 +128,7 @@ public class TigerCompileDirectory implements TaskDef<CommandInput<TigerCompileD
         return EnumSetView.of(CommandExecutionType.ManualOnce, CommandExecutionType.AutomaticContinuous);
     }
 
-    @Override public EnumSetView<CommandContextType> getSupportedContextTypes() {
+    @Override public EnumSetView<CommandContextType> getRequiredContextTypes() {
         return EnumSetView.of(CommandContextType.Directory);
     }
 

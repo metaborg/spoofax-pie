@@ -91,7 +91,7 @@ public class TigerCompileFile implements TaskDef<CommandInput<TigerCompileFile.A
         return EnumSetView.of(CommandExecutionType.ManualOnce, CommandExecutionType.AutomaticContinuous, CommandExecutionType.ManualContinuous);
     }
 
-    @Override public EnumSetView<CommandContextType> getSupportedContextTypes() {
+    @Override public EnumSetView<CommandContextType> getRequiredContextTypes() {
         return EnumSetView.of(CommandContextType.File);
     }
 

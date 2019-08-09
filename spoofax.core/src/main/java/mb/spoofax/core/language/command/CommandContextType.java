@@ -8,6 +8,5 @@ public enum CommandContextType implements Serializable {
     File,
     Resource,
     Region,
-    Offset,
-    None
+    Offset
 }

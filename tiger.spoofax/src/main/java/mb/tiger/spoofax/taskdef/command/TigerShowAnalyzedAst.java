@@ -70,8 +70,8 @@ public class TigerShowAnalyzedAst implements TaskDef<CommandInput<TigerShowArgs>
         return EnumSetView.of(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous);
     }
 
-    @Override public EnumSetView<CommandContextType> getSupportedContextTypes() {
-        return EnumSetView.of(CommandContextType.TextResource, CommandContextType.TextResourceWithRegion);
+    @Override public EnumSetView<CommandContextType> getRequiredContextTypes() {
+        return EnumSetView.of(CommandContextType.Resource);
     }
 
     @Override public ParamDef getParamDef() {

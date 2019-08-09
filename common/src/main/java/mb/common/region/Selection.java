@@ -24,6 +24,10 @@ public abstract class Selection implements Serializable {
         return Selections.getOffset(this);
     }
 
+    public Selections.CaseOfMatchers.TotalMatcher_Region caseOf() {
+        return Selections.caseOf(this);
+    }
+
     @Override public abstract int hashCode();
 
     @Override public abstract boolean equals(@Nullable Object obj);
