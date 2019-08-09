@@ -9,9 +9,13 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
+import mb.spoofax.core.language.cli.CliCommand;
+import mb.spoofax.core.language.cli.CliCommandItem;
+import mb.spoofax.core.language.cli.CliCommandList;
 import mb.spoofax.core.language.command.*;
 import mb.spoofax.core.language.command.arg.ParamDef;
 import mb.spoofax.core.language.command.arg.RawArgs;
+import mb.spoofax.core.language.command.arg.TextToResourceKeyArgConverter;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
 import mb.stratego.common.StrategoUtil;
@@ -26,16 +30,19 @@ public class TigerShowPrettyPrintedText implements TaskDef<CommandInput<TigerSho
     private final TigerParse parse;
     private final StrategoRuntimeBuilder strategoRuntimeBuilder;
     private final StrategoRuntime prototypeStrategoRuntime;
+    private final TextToResourceKeyArgConverter textToResourceKeyArgConverter;
 
 
     @Inject public TigerShowPrettyPrintedText(
         TigerParse parse,
         StrategoRuntimeBuilder strategoRuntimeBuilder,
-        StrategoRuntime prototypeStrategoRuntime
+        StrategoRuntime prototypeStrategoRuntime,
+        TextToResourceKeyArgConverter textToResourceKeyArgConverter
     ) {
         this.parse = parse;
         this.strategoRuntimeBuilder = strategoRuntimeBuilder;
         this.prototypeStrategoRuntime = prototypeStrategoRuntime;
+        this.textToResourceKeyArgConverter = textToResourceKeyArgConverter;
     }
 
 
@@ -92,5 +99,13 @@ public class TigerShowPrettyPrintedText implements TaskDef<CommandInput<TigerSho
 
     @Override public TigerShowArgs fromRawArgs(RawArgs rawArgs) {
         return TigerShowArgs.fromRawArgs(rawArgs);
+    }
+
+    public CliCommandItem getCliCommandItem() {
+        final String operation = "reformat";
+        return CliCommandList.of(operation, "Reformats Tiger sources",
+            CliCommand.of(this, "file", TigerShowArgs.getFileCliParamDef(operation), "Reformats given Tiger file"),
+            CliCommand.of(this, "text", TigerShowArgs.getTextCliParamDef(operation, textToResourceKeyArgConverter), "Reformats given Tiger text")
+        );
     }
 }

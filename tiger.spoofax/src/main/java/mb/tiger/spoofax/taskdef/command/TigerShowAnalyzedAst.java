@@ -9,9 +9,13 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
+import mb.spoofax.core.language.cli.CliCommand;
+import mb.spoofax.core.language.cli.CliCommandItem;
+import mb.spoofax.core.language.cli.CliCommandList;
 import mb.spoofax.core.language.command.*;
 import mb.spoofax.core.language.command.arg.ParamDef;
 import mb.spoofax.core.language.command.arg.RawArgs;
+import mb.spoofax.core.language.command.arg.TextToResourceKeyArgConverter;
 import mb.stratego.common.StrategoUtil;
 import mb.tiger.spoofax.taskdef.TigerAnalyze;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -21,11 +25,13 @@ import javax.inject.Inject;
 
 public class TigerShowAnalyzedAst implements TaskDef<CommandInput<TigerShowArgs>, CommandOutput>, CommandDef<TigerShowArgs> {
     private final TigerAnalyze analyze;
+    private final TextToResourceKeyArgConverter textToResourceKeyArgConverter;
 
 
     @Inject
-    public TigerShowAnalyzedAst(TigerAnalyze analyze) {
+    public TigerShowAnalyzedAst(TigerAnalyze analyze, TextToResourceKeyArgConverter textToResourceKeyArgConverter) {
         this.analyze = analyze;
+        this.textToResourceKeyArgConverter = textToResourceKeyArgConverter;
     }
 
 
@@ -80,5 +86,13 @@ public class TigerShowAnalyzedAst implements TaskDef<CommandInput<TigerShowArgs>
 
     @Override public TigerShowArgs fromRawArgs(RawArgs rawArgs) {
         return TigerShowArgs.fromRawArgs(rawArgs);
+    }
+
+    public CliCommandItem getCliCommandItem() {
+        final String operation = "analyze";
+        return CliCommandList.of(operation, "Analyzes Tiger sources and shows the analyzed AST",
+            CliCommand.of(this, "file", TigerShowArgs.getFileCliParamDef(operation), "Analyzes given Tiger file and shows the analyzed AST"),
+            CliCommand.of(this, "text", TigerShowArgs.getTextCliParamDef(operation, textToResourceKeyArgConverter), "Analyzes given Tiger text and shows the analyzed AST")
+        );
     }
 }

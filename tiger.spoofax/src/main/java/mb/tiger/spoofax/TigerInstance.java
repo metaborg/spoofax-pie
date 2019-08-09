@@ -116,7 +116,10 @@ public class TigerInstance implements LanguageInstance {
 
     @Override public CliCommandItem getRootCliCommandItem() {
         return CliCommandList.of("tiger", "Tiger language command-line interface",
-            showParsedAst.getCliCommandItem()
+            showParsedAst.getCliCommandItem(),
+            showPrettyPrintedText.getCliCommandItem(),
+            showAnalyzedAst.getCliCommandItem(),
+            showDesugaredAst.getCliCommandItem()
         );
     }
 

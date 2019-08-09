@@ -83,9 +83,10 @@ public class TigerShowParsedAst implements TaskDef<CommandInput<TigerShowArgs>, 
     }
 
     public CliCommandItem getCliCommandItem() {
-        return CliCommandList.of("parse", "Parses Tiger sources and shows its AST",
-            CliCommand.of(this, "file", TigerShowArgs.getFileCliParamDef("parse"), "Parses given Tiger file and shows its AST"),
-            CliCommand.of(this, "text", TigerShowArgs.getTextCliParamDef("parse", textToResourceKeyArgConverter), "Parses given Tiger text and shows its AST")
+        final String operation = "parse";
+        return CliCommandList.of(operation, "Parses Tiger sources and shows the parsed AST",
+            CliCommand.of(this, "file", TigerShowArgs.getFileCliParamDef(operation), "Parses given Tiger file and shows the parsed AST"),
+            CliCommand.of(this, "text", TigerShowArgs.getTextCliParamDef(operation, textToResourceKeyArgConverter), "Parses given Tiger text and shows the parsed AST")
         );
     }
 }
