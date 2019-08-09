@@ -1,39 +1,27 @@
 package mb.spoofax.core.language.cli;
 
-import mb.common.util.MapView;
-
-import java.util.HashMap;
+import mb.common.util.ListView;
 
 public class CliParamDef {
-    public final MapView<String, CliParam> params;
+    public final ListView<CliParam> params;
 
-    public CliParamDef(MapView<String, CliParam> params) {
+    public CliParamDef(ListView<CliParam> params) {
         this.params = params;
     }
 
     public CliParamDef(Iterable<CliParam> params) {
-        final HashMap<String, CliParam> paramsMap = new HashMap<>();
-        for(CliParam param : params) {
-            paramsMap.put(param.getParamId(), param);
-        }
-        this.params = new MapView<>(paramsMap);
+        this.params = ListView.of(params);
     }
 
     public CliParamDef(CliParam... params) {
-        final HashMap<String, CliParam> paramsMap = new HashMap<>();
-        for(CliParam param : params) {
-            paramsMap.put(param.getParamId(), param);
-        }
-        this.params = new MapView<>(paramsMap);
+        this.params = ListView.of(params);
     }
 
     public CliParamDef(CliParam param) {
-        final HashMap<String, CliParam> paramsMap = new HashMap<>();
-        paramsMap.put(param.getParamId(), param);
-        this.params = new MapView<>(paramsMap);
+        this.params = ListView.of(param);
     }
 
     public CliParamDef() {
-        this.params = MapView.of();
+        this.params = ListView.of();
     }
 }

@@ -34,6 +34,12 @@ public class ListView<E> extends BaseCollectionView<E, List<? extends E>> implem
         return new ListView<>(list);
     }
 
+    public static <E> ListView<E> of(Iterable<? extends E> elements) {
+        final ArrayList<E> list = new ArrayList<>();
+        IterableUtil.addAll(list, elements);
+        return new ListView<>(list);
+    }
+
     public static <E> ListView<E> copyOf(List<? extends E> list) {
         return new ListView<>(new ArrayList<>(list));
     }

@@ -66,15 +66,13 @@ public class SpoofaxCli {
                     commandSpec.mixinStandardHelpOptions(true);
                     commandSpec.name(commandName);
                     final ParamDef paramDef = def.getParamDef();
-                    for(Map.Entry<String, CliParam> entry : cliParamDef.params.entrySet()) {
-                        final String paramId = entry.getKey();
-                        final CliParam cliParam = entry.getValue();
-                        final @Nullable Param param = paramDef.params.get(paramId);
-                        if(param == null) {
-                            throw new RuntimeException("Could not create command '" + commandName + "', no parameter was found for ID '" + paramId + "'");
-                        }
+                    for(CliParam cliParam : cliParamDef.params) {
                         commandSpec.add(CliParams.caseOf(cliParam)
-                            .option((_paramId, names, label, description) -> {
+                            .option((paramId, names, label, description) -> {
+                                final @Nullable Param param = paramDef.params.get(paramId);
+                                if(param == null) {
+                                    throw new RuntimeException("Could not create command '" + commandName + "', no parameter was found for ID '" + paramId + "'");
+                                }
                                 final OptionSpec.Builder builder = OptionSpec.builder(names.toArray(new String[0]));
                                 builder.type(param.getType());
                                 builder.required(param.isRequired());
@@ -96,7 +94,11 @@ public class SpoofaxCli {
                                 });
                                 return (ArgSpec) builder.build();
                             })
-                            .positional((_paramId, index, label, description) -> {
+                            .positional((paramId, index, label, description) -> {
+                                final @Nullable Param param = paramDef.params.get(paramId);
+                                if(param == null) {
+                                    throw new RuntimeException("Could not create command '" + commandName + "', no parameter was found for ID '" + paramId + "'");
+                                }
                                 final PositionalParamSpec.Builder builder = PositionalParamSpec.builder();
                                 builder.index(Integer.toString(index));
                                 builder.type(param.getType());

@@ -16,6 +16,10 @@ public abstract class CliParam {
     public abstract <R> R match(Cases<R> cases);
 
 
+    public CliParams.CaseOfMatchers.TotalMatcher_Option caseOf() {
+        return CliParams.caseOf(this);
+    }
+
     public String getParamId() {
         return CliParams.getParamId(this);
     }
