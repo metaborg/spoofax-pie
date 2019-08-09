@@ -16,7 +16,7 @@ import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.command.*;
-import mb.spoofax.core.language.command.arg.DefaultArgConverters;
+import mb.spoofax.core.language.command.arg.ArgConverters;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.command.arg.RawArgsBuilder;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
@@ -53,7 +53,7 @@ import java.util.function.Consumer;
 public class PieRunner {
     private final Logger logger;
     private final Pie pie;
-    private final DefaultArgConverters defaultArgConverters;
+    private final ArgConverters argConverters;
     private final EclipseDocumentResourceRegistry eclipseDocumentResourceRegistry;
     private final WorkspaceUpdate.Factory workspaceUpdateFactory;
     private final ResourceUtil resourceUtil;
@@ -66,14 +66,14 @@ public class PieRunner {
     public PieRunner(
         LoggerFactory loggerFactory,
         Pie pie,
-        DefaultArgConverters defaultArgConverters,
+        ArgConverters argConverters,
         EclipseDocumentResourceRegistry eclipseDocumentResourceRegistry,
         WorkspaceUpdate.Factory workspaceUpdateFactory,
         ResourceUtil resourceUtil,
         PartClosedCallback partClosedCallback
     ) {
         this.logger = loggerFactory.create(getClass());
-        this.defaultArgConverters = defaultArgConverters;
+        this.argConverters = argConverters;
         this.resourceUtil = resourceUtil;
         this.pie = pie;
         this.eclipseDocumentResourceRegistry = eclipseDocumentResourceRegistry;
@@ -275,7 +275,7 @@ public class PieRunner {
 
     public <A extends Serializable> Task<CommandOutput> createCommandTask(CommandRequest<A> commandRequest, CommandContext context) {
         final CommandDef<A> def = commandRequest.def;
-        final RawArgsBuilder builder = new RawArgsBuilder(def.getParamDef(), defaultArgConverters);
+        final RawArgsBuilder builder = new RawArgsBuilder(def.getParamDef(), argConverters);
         if(commandRequest.initialArgs != null) {
             builder.setArgsFrom(commandRequest.initialArgs);
         }

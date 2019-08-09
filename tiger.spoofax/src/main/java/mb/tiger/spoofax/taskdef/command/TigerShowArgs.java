@@ -5,10 +5,7 @@ import mb.common.util.ListView;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.cli.CliParamDef;
 import mb.spoofax.core.language.cli.CliParams;
-import mb.spoofax.core.language.command.arg.ArgProviders;
-import mb.spoofax.core.language.command.arg.Param;
-import mb.spoofax.core.language.command.arg.ParamDef;
-import mb.spoofax.core.language.command.arg.RawArgs;
+import mb.spoofax.core.language.command.arg.*;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
@@ -38,10 +35,17 @@ public class TigerShowArgs implements Serializable {
         );
     }
 
-    public static CliParamDef getCliParamDef(String resourceName, String operationName) {
+    public static CliParamDef getFileCliParamDef(String operationName) {
         return new CliParamDef(
-            CliParams.positional("resource", 0, resourceName.toUpperCase(), "Source " + resourceName + " to " + operationName),
-            CliParams.option("region", ListView.of("-r", "--region"), "region", "Region in source " + resourceName + " to " + operationName)
+            CliParams.positional("resource", 0, "FILE", "Source file to " + operationName, null),
+            CliParams.option("region", ListView.of("-r", "--region"), "region", "Region in source file to " + operationName, null)
+        );
+    }
+
+    public static CliParamDef getTextCliParamDef(String operationName, TextToResourceKeyArgConverter converter) {
+        return new CliParamDef(
+            CliParams.positional("resource", 0, "TEXT", "Text to " + operationName, converter),
+            CliParams.option("region", ListView.of("-r", "--region"), "region", "Region in source text to " + operationName, null)
         );
     }
 

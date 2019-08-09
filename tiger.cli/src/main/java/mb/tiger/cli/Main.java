@@ -7,7 +7,6 @@ import mb.pie.runtime.PieBuilderImpl;
 import mb.spoofax.cli.DaggerSpoofaxCliComponent;
 import mb.spoofax.cli.SpoofaxCli;
 import mb.spoofax.cli.SpoofaxCliComponent;
-import mb.spoofax.cli.StringResourceRegistryModule;
 import mb.spoofax.core.platform.LoggerFactoryModule;
 import mb.stratego.common.StrategoRuntimeBuilderException;
 import mb.tiger.spoofax.DaggerTigerComponent;
@@ -21,7 +20,6 @@ public class Main {
         final SpoofaxCliComponent platformComponent = DaggerSpoofaxCliComponent
             .builder()
             .loggerFactoryModule(new LoggerFactoryModule(new SLF4JLoggerFactory()))
-            .stringResourceRegistryModule(new StringResourceRegistryModule())
             .pieModule(new PieModule(PieBuilderImpl::new))
             .build();
         final TigerComponent tigerComponent = DaggerTigerComponent

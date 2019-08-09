@@ -2,14 +2,15 @@ package mb.spoofax.core.language.cli;
 
 import mb.common.util.ADT;
 import mb.common.util.ListView;
+import mb.spoofax.core.language.command.arg.ArgConverter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @ADT
 public abstract class CliParam {
     interface Cases<R> {
-        R option(String paramId, ListView<String> names, @Nullable String label, @Nullable String description);
+        R option(String paramId, ListView<String> names, @Nullable String label, @Nullable String description, @Nullable ArgConverter<?> converter);
 
-        R positional(String paramId, int index, @Nullable String label, @Nullable String description);
+        R positional(String paramId, int index, @Nullable String label, @Nullable String description, @Nullable ArgConverter<?> converter);
     }
 
 
@@ -30,6 +31,10 @@ public abstract class CliParam {
 
     public @Nullable String getDescription() {
         return CliParams.getDescription(this);
+    }
+
+    public @Nullable ArgConverter<?>  getConverter() {
+        return CliParams.getConverter(this);
     }
 
 

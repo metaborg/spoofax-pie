@@ -3,7 +3,7 @@ package mb.spoofax.cli;
 import mb.pie.api.PieSession;
 import mb.pie.api.Task;
 import mb.spoofax.core.language.command.*;
-import mb.spoofax.core.language.command.arg.DefaultArgConverters;
+import mb.spoofax.core.language.command.arg.ArgConverters;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.command.arg.RawArgsBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -17,10 +17,10 @@ class CommandRunner<A extends Serializable> implements Callable {
     private final CommandDef<A> commandDef;
     private final RawArgsBuilder rawArgsBuilder;
 
-    CommandRunner(PieSession pieSession, CommandDef<A> commandDef, DefaultArgConverters defaultArgConverters) {
+    CommandRunner(PieSession pieSession, CommandDef<A> commandDef, ArgConverters argConverters) {
         this.pieSession = pieSession;
         this.commandDef = commandDef;
-        this.rawArgsBuilder = new RawArgsBuilder(commandDef.getParamDef(), defaultArgConverters);
+        this.rawArgsBuilder = new RawArgsBuilder(commandDef.getParamDef(), argConverters);
     }
 
     void set(String paramId, @Nullable Object value) throws IllegalArgumentException {

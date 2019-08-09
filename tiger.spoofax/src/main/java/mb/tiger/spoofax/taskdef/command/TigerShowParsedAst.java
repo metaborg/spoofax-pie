@@ -11,9 +11,11 @@ import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.cli.CliCommand;
 import mb.spoofax.core.language.cli.CliCommandItem;
+import mb.spoofax.core.language.cli.CliCommandList;
 import mb.spoofax.core.language.command.*;
 import mb.spoofax.core.language.command.arg.ParamDef;
 import mb.spoofax.core.language.command.arg.RawArgs;
+import mb.spoofax.core.language.command.arg.TextToResourceKeyArgConverter;
 import mb.stratego.common.StrategoUtil;
 import mb.tiger.spoofax.taskdef.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -23,10 +25,12 @@ import javax.inject.Inject;
 
 public class TigerShowParsedAst implements TaskDef<CommandInput<TigerShowArgs>, CommandOutput>, CommandDef<TigerShowArgs> {
     private final TigerParse parse;
+    private final TextToResourceKeyArgConverter textToResourceKeyArgConverter;
 
 
-    @Inject public TigerShowParsedAst(TigerParse parse) {
+    @Inject public TigerShowParsedAst(TigerParse parse, TextToResourceKeyArgConverter textToResourceKeyArgConverter) {
         this.parse = parse;
+        this.textToResourceKeyArgConverter = textToResourceKeyArgConverter;
     }
 
 
@@ -79,6 +83,9 @@ public class TigerShowParsedAst implements TaskDef<CommandInput<TigerShowArgs>, 
     }
 
     public CliCommandItem getCliCommandItem() {
-        return CliCommand.of(this, "parse", TigerShowArgs.getCliParamDef("file", "parse"), "Parses given Tiger file and shows its AST");
+        return CliCommandList.of("parse", "Parses Tiger sources and shows its AST",
+            CliCommand.of(this, "file", TigerShowArgs.getFileCliParamDef("parse"), "Parses given Tiger file and shows its AST"),
+            CliCommand.of(this, "text", TigerShowArgs.getTextCliParamDef("parse", textToResourceKeyArgConverter), "Parses given Tiger text and shows its AST")
+        );
     }
 }

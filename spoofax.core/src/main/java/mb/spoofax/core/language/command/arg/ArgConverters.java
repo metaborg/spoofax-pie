@@ -13,11 +13,11 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 @Singleton
-public class DefaultArgConverters {
+public class ArgConverters {
     private final ResourceService resourceService;
 
 
-    @Inject public DefaultArgConverters(ResourceService resourceService) {
+    @Inject public ArgConverters(ResourceService resourceService) {
         this.resourceService = resourceService;
     }
 

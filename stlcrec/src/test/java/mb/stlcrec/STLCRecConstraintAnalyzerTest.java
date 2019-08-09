@@ -14,7 +14,7 @@ import mb.resource.DefaultResourceKey;
 import mb.resource.DefaultResourceService;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
-import mb.resource.fs.FSRegistry;
+import mb.resource.fs.FSResourceRegistry;
 import mb.resource.url.URLResourceRegistry;
 import mb.stratego.common.StrategoIOAgent;
 import mb.stratego.common.StrategoRuntime;
@@ -35,7 +35,7 @@ class STLCRecConstraintAnalyzerTest {
 
     private final LoggerFactory loggerFactory = new NoopLoggerFactory();
     private final ResourceService resourceService =
-        new DefaultResourceService(new FSRegistry(), new URLResourceRegistry());
+        new DefaultResourceService(new FSResourceRegistry(), new URLResourceRegistry());
     private final STLCRecParser parser = new STLCRecParser(STLCRecParseTable.fromClassLoaderResources());
     private final StrategoRuntimeBuilder strategoRuntimeBuilder =
         STLCRecStrategoRuntimeBuilder.fromClassLoaderResources();

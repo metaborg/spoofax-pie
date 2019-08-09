@@ -17,15 +17,15 @@ import java.util.Optional;
 
 public class RawArgsBuilder {
     private final ParamDef paramDef;
-    private final DefaultArgConverters defaultArgConverters;
+    private final ArgConverters argConverters;
 
     private final HashMap<Class<? extends Serializable>, ArgConverter<?>> converters = new HashMap<>();
     private final HashMap<String, Serializable> args = new HashMap<>();
 
 
-    public RawArgsBuilder(ParamDef paramDef, DefaultArgConverters defaultArgConverters) {
+    public RawArgsBuilder(ParamDef paramDef, ArgConverters argConverters) {
         this.paramDef = paramDef;
-        this.defaultArgConverters = defaultArgConverters;
+        this.argConverters = argConverters;
     }
 
 
@@ -50,6 +50,7 @@ public class RawArgsBuilder {
             final String id = param.getId();
             final Class<? extends Serializable> type = param.getType();
             final boolean isRequired = param.isRequired();
+            final @Nullable ArgConverter<?> converter = param.getConverter();
             final ListView<ArgProvider> providers = param.getProviders();
 
             @Nullable Serializable arg = args.get(id);
@@ -62,7 +63,7 @@ public class RawArgsBuilder {
             }
             if(argSet) {
                 if(String.class.equals(arg.getClass()) && !String.class.isAssignableFrom(type)) {
-                    arg = convert((String) arg, type);
+                    arg = convert((String) arg, type, converter);
                 }
                 convertedArgs.put(id, arg);
             }
@@ -106,10 +107,10 @@ public class RawArgsBuilder {
     }
 
 
-    private Serializable convert(String argStr, Class<? extends Serializable> type) {
-        @Nullable ArgConverter<?> converter = converters.get(type);
+    private Serializable convert(String argStr, Class<? extends Serializable> type, @Nullable ArgConverter<?> customConverter) {
+        @Nullable ArgConverter<?> converter = customConverter != null ? customConverter : converters.get(type);
         if(converter == null) {
-            converter = defaultArgConverters.allConverters.get(type);
+            converter = argConverters.allConverters.get(type);
             if(converter == null) {
                 throw new RuntimeException("Cannot convert argument '" + argStr + "' to an object of type '" + type + "', no type converter was found for that type");
             }

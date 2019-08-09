@@ -6,10 +6,9 @@ import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.cli.CliCommandItemVisitor;
 import mb.spoofax.core.language.cli.CliParam;
 import mb.spoofax.core.language.cli.CliParamDef;
-import mb.spoofax.core.language.cli.CliParams;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.arg.ArgConverter;
-import mb.spoofax.core.language.command.arg.DefaultArgConverters;
+import mb.spoofax.core.language.command.arg.ArgConverters;
 import mb.spoofax.core.language.command.arg.Param;
 import mb.spoofax.core.language.command.arg.ParamDef;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -18,15 +17,14 @@ import picocli.CommandLine.Model.*;
 
 import javax.inject.Inject;
 import java.io.Serializable;
-import java.util.Map;
 import java.util.Stack;
 
 public class SpoofaxCli {
-    private final DefaultArgConverters defaultArgConverters;
+    private final ArgConverters argConverters;
 
     @Inject
-    public SpoofaxCli(DefaultArgConverters defaultArgConverters) {
-        this.defaultArgConverters = defaultArgConverters;
+    public SpoofaxCli(ArgConverters argConverters) {
+        this.argConverters = argConverters;
     }
 
     public int run(String[] args, LanguageComponent languageComponent) {
@@ -61,14 +59,14 @@ public class SpoofaxCli {
 
                 @Override
                 public void command(CommandDef<?> def, String commandName, CliParamDef cliParamDef, @Nullable String commandDescription) {
-                    final CommandRunner<?> commandRunner = new CommandRunner<>(pieSession, def, defaultArgConverters);
+                    final CommandRunner<?> commandRunner = new CommandRunner<>(pieSession, def, argConverters);
                     final CommandSpec commandSpec = CommandSpec.wrapWithoutInspection(commandRunner);
                     commandSpec.mixinStandardHelpOptions(true);
                     commandSpec.name(commandName);
                     final ParamDef paramDef = def.getParamDef();
                     for(CliParam cliParam : cliParamDef.params) {
-                        commandSpec.add(CliParams.caseOf(cliParam)
-                            .option((paramId, names, label, description) -> {
+                        commandSpec.add(cliParam.caseOf()
+                            .option((paramId, names, label, description, converter) -> {
                                 final @Nullable Param param = paramDef.params.get(paramId);
                                 if(param == null) {
                                     throw new RuntimeException("Could not create command '" + commandName + "', no parameter was found for ID '" + paramId + "'");
@@ -85,6 +83,10 @@ public class SpoofaxCli {
                                 if(description != null) {
                                     builder.description(description);
                                 }
+                                // noinspection ConstantConditions (converter can really be null)
+                                if(converter != null) {
+                                    builder.converters(new TypeConverter<>(converter));
+                                }
                                 builder.setter(new ISetter() {
                                     @Override
                                     public <T> @Nullable T set(@Nullable T value) throws IllegalArgumentException {
@@ -94,7 +96,7 @@ public class SpoofaxCli {
                                 });
                                 return (ArgSpec) builder.build();
                             })
-                            .positional((paramId, index, label, description) -> {
+                            .positional((paramId, index, label, description, converter) -> {
                                 final @Nullable Param param = paramDef.params.get(paramId);
                                 if(param == null) {
                                     throw new RuntimeException("Could not create command '" + commandName + "', no parameter was found for ID '" + paramId + "'");
@@ -111,6 +113,10 @@ public class SpoofaxCli {
                                 // noinspection ConstantConditions (label can really be null)
                                 if(description != null) {
                                     builder.description(description);
+                                }
+                                // noinspection ConstantConditions (converter can really be null)
+                                if(converter != null) {
+                                    builder.converters(new TypeConverter<>(converter));
                                 }
                                 builder.setter(new ISetter() {
                                     @Override
@@ -133,7 +139,7 @@ public class SpoofaxCli {
                 }
             });
             final CommandLine commandLine = new CommandLine(rootCommandSpec[0]);
-            for(ArgConverter<?> converter : defaultArgConverters.allConverters.values()) {
+            for(ArgConverter<?> converter : argConverters.allConverters.values()) {
                 registerConverter(commandLine, new TypeConverter<>(converter));
             }
             return commandLine.execute(args);
