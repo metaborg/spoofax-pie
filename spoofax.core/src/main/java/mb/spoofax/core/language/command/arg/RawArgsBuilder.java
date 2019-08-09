@@ -83,19 +83,19 @@ public class RawArgsBuilder {
     }
 
     private @Nullable Serializable argFromContext(Class<? extends Serializable> type, CommandContext context) {
-        if(CommandContext.class.isAssignableFrom(type)) {
+        if(type.isAssignableFrom(CommandContext.class)) {
             return context;
-        } else if(Region.class.isAssignableFrom(type)) {
+        } else if(type.isAssignableFrom(Region.class)) {
             return context.getSelection().flatMap(Selection::getRegion).orElse(null);
-        } else if(Integer.class.isAssignableFrom(type)) {
+        } else if(type.isAssignableFrom(Integer.class)) {
             return context.getSelection().flatMap(Selection::getOffset).orElse(null);
         } else {
-            if(ResourceKey.class.isAssignableFrom(type)) {
+            if(type.isAssignableFrom(ResourceKey.class)) {
                 final Optional<ResourceKey> key = context.getResourceKey();
                 if(key.isPresent()) {
                     return key.get();
                 }
-            } else if(ResourcePath.class.isAssignableFrom(type)) {
+            } else if(type.isAssignableFrom(ResourcePath.class)) {
                 final Optional<ResourcePath> path = context.getResourcePathWithKind().map(ResourcePathWithKind::getPath);
                 if(path.isPresent()) {
                     return path.get();
