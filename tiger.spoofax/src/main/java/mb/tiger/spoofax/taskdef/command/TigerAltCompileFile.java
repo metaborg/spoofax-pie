@@ -9,6 +9,10 @@ import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.core.language.cli.CliCommand;
+import mb.spoofax.core.language.cli.CliCommandItem;
+import mb.spoofax.core.language.cli.CliParamDef;
+import mb.spoofax.core.language.cli.CliParams;
 import mb.spoofax.core.language.command.*;
 import mb.spoofax.core.language.command.arg.ArgProviders;
 import mb.spoofax.core.language.command.arg.Param;
@@ -140,5 +144,16 @@ public class TigerAltCompileFile implements TaskDef<CommandInput<TigerAltCompile
         final boolean base64Encode = rawArgs.getOrFalse("base64Encode");
         final String compiledFileName = rawArgs.getOrThrow("compiledFileNameSuffix");
         return new TigerAltCompileFile.Args(file, listDefNames, base64Encode, compiledFileName);
+    }
+
+    public CliCommandItem getCliCommandItem() {
+        return CliCommand.of(this, "compile-file-alt", new CliParamDef(
+                CliParams.positional("file", 0, "FILE", "File to compile", null),
+                CliParams.option("listDefNames", ListView.of("-l", "--no-defnames"), true, "", "Whether to list definition names intead of literal values", null),
+                CliParams.option("base64Encode", ListView.of("-b", "--base64"), false, "", "Whether to Base64 encode the result", null),
+                CliParams.option("compiledFileNameSuffix", ListView.of("-s", "--suffix"), false, "SUFFIX", "Suffix to append to the compiled file name", null)
+            ),
+            "Compiles given Tiger file in an alternative way and shows the compiled file"
+        );
     }
 }

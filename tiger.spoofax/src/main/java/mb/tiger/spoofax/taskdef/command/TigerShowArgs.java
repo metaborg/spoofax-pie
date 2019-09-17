@@ -38,14 +38,14 @@ public class TigerShowArgs implements Serializable {
     public static CliParamDef getFileCliParamDef(String operationName) {
         return new CliParamDef(
             CliParams.positional("resource", 0, "FILE", "Source file to " + operationName, null),
-            CliParams.option("region", ListView.of("-r", "--region"), "region", "Region in source file to " + operationName, null)
+            CliParams.option("region", ListView.of("-r", "--region"), false, "region", "Region in source file to " + operationName, null)
         );
     }
 
     public static CliParamDef getTextCliParamDef(String operationName, TextToResourceKeyArgConverter converter) {
         return new CliParamDef(
             CliParams.positional("resource", 0, "TEXT", "Text to " + operationName, converter),
-            CliParams.option("region", ListView.of("-r", "--region"), "region", "Region in source text to " + operationName, null)
+            CliParams.option("region", ListView.of("-r", "--region"), false, "region", "Region in source text to " + operationName, null)
         );
     }
 

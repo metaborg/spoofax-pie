@@ -1,16 +1,15 @@
 package mb.spoofax.cli;
 
 import mb.pie.api.PieSession;
+import mb.resource.ResourceService;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.cli.CliCommandItemVisitor;
 import mb.spoofax.core.language.cli.CliParam;
 import mb.spoofax.core.language.cli.CliParamDef;
+import mb.spoofax.core.language.command.CommandContext;
 import mb.spoofax.core.language.command.CommandDef;
-import mb.spoofax.core.language.command.arg.ArgConverter;
-import mb.spoofax.core.language.command.arg.ArgConverters;
-import mb.spoofax.core.language.command.arg.Param;
-import mb.spoofax.core.language.command.arg.ParamDef;
+import mb.spoofax.core.language.command.arg.*;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import picocli.CommandLine;
 import picocli.CommandLine.Model.*;
@@ -20,10 +19,12 @@ import java.io.Serializable;
 import java.util.Stack;
 
 public class SpoofaxCli {
+    private final ResourceService resourceService;
     private final ArgConverters argConverters;
 
     @Inject
-    public SpoofaxCli(ArgConverters argConverters) {
+    public SpoofaxCli(ResourceService resourceService, ArgConverters argConverters) {
+        this.resourceService = resourceService;
         this.argConverters = argConverters;
     }
 
@@ -59,14 +60,14 @@ public class SpoofaxCli {
 
                 @Override
                 public void command(CommandDef<?> def, String commandName, CliParamDef cliParamDef, @Nullable String commandDescription) {
-                    final CommandRunner<?> commandRunner = new CommandRunner<>(pieSession, def, argConverters);
+                    final CommandRunner<?> commandRunner = new CommandRunner<>(resourceService, pieSession, def, argConverters);
                     final CommandSpec commandSpec = CommandSpec.wrapWithoutInspection(commandRunner);
                     commandSpec.mixinStandardHelpOptions(true);
                     commandSpec.name(commandName);
                     final ParamDef paramDef = def.getParamDef();
                     for(CliParam cliParam : cliParamDef.params) {
                         commandSpec.add(cliParam.caseOf()
-                            .option((paramId, names, label, description, converter) -> {
+                            .option((paramId, names, negatable, label, description, converter) -> {
                                 final @Nullable Param param = paramDef.params.get(paramId);
                                 if(param == null) {
                                     throw new RuntimeException("Could not create command '" + commandName + "', no parameter was found for ID '" + paramId + "'");
@@ -74,7 +75,12 @@ public class SpoofaxCli {
                                 final OptionSpec.Builder builder = OptionSpec.builder(names.toArray(new String[0]));
                                 builder.type(param.getType());
                                 builder.required(param.isRequired());
-                                // TODO: providers/default values
+                                builder.negatable(negatable);
+                                final @Nullable Serializable provided = RawArgFromProviders.get(param, new CommandContext());
+                                if(provided != null) {
+                                    builder.defaultValue(provided.toString());
+                                    builder.showDefaultValue(CommandLine.Help.Visibility.ALWAYS);
+                                }
                                 // noinspection ConstantConditions (label can really be null)
                                 if(label != null) {
                                     builder.paramLabel(label);
@@ -105,7 +111,11 @@ public class SpoofaxCli {
                                 builder.index(Integer.toString(index));
                                 builder.type(param.getType());
                                 builder.required(param.isRequired());
-                                // TODO: providers/default values
+                                final @Nullable Serializable provided = RawArgFromProviders.get(param, new CommandContext());
+                                if(provided != null) {
+                                    builder.defaultValue(provided.toString());
+                                    builder.showDefaultValue(CommandLine.Help.Visibility.ALWAYS);
+                                }
                                 // noinspection ConstantConditions (label can really be null)
                                 if(label != null) {
                                     builder.paramLabel(label);

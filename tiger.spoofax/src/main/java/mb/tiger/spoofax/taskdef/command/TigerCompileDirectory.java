@@ -15,6 +15,10 @@ import mb.resource.hierarchical.match.FileResourceMatcher;
 import mb.resource.hierarchical.match.PathResourceMatcher;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.match.path.ExtensionsPathMatcher;
+import mb.spoofax.core.language.cli.CliCommand;
+import mb.spoofax.core.language.cli.CliCommandItem;
+import mb.spoofax.core.language.cli.CliParamDef;
+import mb.spoofax.core.language.cli.CliParams;
 import mb.spoofax.core.language.command.*;
 import mb.spoofax.core.language.command.arg.ArgProviders;
 import mb.spoofax.core.language.command.arg.Param;
@@ -139,5 +143,13 @@ public class TigerCompileDirectory implements TaskDef<CommandInput<TigerCompileD
     @Override public Args fromRawArgs(RawArgs rawArgs) {
         final ResourcePath dir = rawArgs.getOrThrow("dir");
         return new TigerCompileDirectory.Args(dir);
+    }
+
+    public CliCommandItem getCliCommandItem() {
+        return CliCommand.of(this, "compile-dir", new CliParamDef(
+                CliParams.positional("dir", 0, "DIR", "Directory to compile", null)
+            ),
+            "Compiles Tiger files in given directory and shows the compiled file"
+        );
     }
 }

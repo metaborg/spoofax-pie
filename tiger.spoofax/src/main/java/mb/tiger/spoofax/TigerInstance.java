@@ -119,7 +119,10 @@ public class TigerInstance implements LanguageInstance {
             showParsedAst.getCliCommandItem(),
             showPrettyPrintedText.getCliCommandItem(),
             showAnalyzedAst.getCliCommandItem(),
-            showDesugaredAst.getCliCommandItem()
+            showDesugaredAst.getCliCommandItem(),
+            compileFile.getCliCommandItem(),
+            altCompileFile.getCliCommandItem(),
+            compileDirectory.getCliCommandItem()
         );
     }
 

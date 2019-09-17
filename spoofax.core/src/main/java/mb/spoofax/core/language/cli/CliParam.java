@@ -8,7 +8,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @ADT
 public abstract class CliParam {
     interface Cases<R> {
-        R option(String paramId, ListView<String> names, @Nullable String label, @Nullable String description, @Nullable ArgConverter<?> converter);
+        R option(String paramId, ListView<String> names, boolean negatable, @Nullable String label, @Nullable String description, @Nullable ArgConverter<?> converter);
 
         R positional(String paramId, int index, @Nullable String label, @Nullable String description, @Nullable ArgConverter<?> converter);
     }

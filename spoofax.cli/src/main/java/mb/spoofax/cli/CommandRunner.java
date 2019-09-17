@@ -2,22 +2,29 @@ package mb.spoofax.cli;
 
 import mb.pie.api.PieSession;
 import mb.pie.api.Task;
+import mb.resource.ReadableResource;
+import mb.resource.ResourceRuntimeException;
+import mb.resource.ResourceService;
 import mb.spoofax.core.language.command.*;
 import mb.spoofax.core.language.command.arg.ArgConverters;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.command.arg.RawArgsBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
 class CommandRunner<A extends Serializable> implements Callable {
+    private final ResourceService resourceService;
     private final PieSession pieSession;
     private final CommandDef<A> commandDef;
     private final RawArgsBuilder rawArgsBuilder;
 
-    CommandRunner(PieSession pieSession, CommandDef<A> commandDef, ArgConverters argConverters) {
+    CommandRunner(ResourceService resourceService, PieSession pieSession, CommandDef<A> commandDef, ArgConverters argConverters) {
+        this.resourceService = resourceService;
         this.pieSession = pieSession;
         this.commandDef = commandDef;
         this.rawArgsBuilder = new RawArgsBuilder(commandDef.getParamDef(), argConverters);
@@ -41,7 +48,19 @@ class CommandRunner<A extends Serializable> implements Callable {
         for(CommandFeedback feedback : output.feedback) {
             CommandFeedbacks.caseOf(feedback)
                 .showFile((file, region) -> {
-                    System.out.println(file);
+                    System.out.println(file + ":");
+                    System.out.println();
+                    try {
+                        final ReadableResource resource = resourceService.getReadableResource(file);
+                        try {
+                            final String text = resource.readString(StandardCharsets.UTF_8);
+                            System.out.println(text);
+                        } catch(IOException e) {
+                            e.printStackTrace();
+                        }
+                    } catch(ResourceRuntimeException e) {
+                        e.printStackTrace();
+                    }
                     return Optional.empty();
                 })
                 .showText((text, name, region) -> {

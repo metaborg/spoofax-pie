@@ -9,6 +9,7 @@ import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.core.language.cli.*;
 import mb.spoofax.core.language.command.*;
 import mb.spoofax.core.language.command.arg.ArgProviders;
 import mb.spoofax.core.language.command.arg.Param;
@@ -102,5 +103,13 @@ public class TigerCompileFile implements TaskDef<CommandInput<TigerCompileFile.A
     @Override public Args fromRawArgs(RawArgs rawArgs) {
         final ResourcePath file = rawArgs.getOrThrow("file");
         return new Args(file);
+    }
+
+    public CliCommandItem getCliCommandItem() {
+        return CliCommand.of(this, "compile-file", new CliParamDef(
+                CliParams.positional("file", 0, "FILE", "File to compile", null)
+            ),
+            "Compiles given Tiger file and shows the compiled file"
+        );
     }
 }

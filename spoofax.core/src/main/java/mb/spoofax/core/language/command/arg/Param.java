@@ -1,6 +1,7 @@
 package mb.spoofax.core.language.command.arg;
 
 import mb.common.util.ListView;
+import mb.spoofax.core.language.command.CommandContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
