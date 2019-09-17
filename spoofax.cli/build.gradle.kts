@@ -8,9 +8,14 @@ dependencies {
 
   api("com.google.dagger:dagger")
   implementation(project(":spoofax.core"))
-  implementation("info.picocli:picocli:4.0.1")
+  implementation("info.picocli:picocli:4.0.4")
 
   compileOnly("org.checkerframework:checker-qual-android")
 
   annotationProcessor("com.google.dagger:dagger-compiler")
+  annotationProcessor("info.picocli:picocli-codegen:4.0.4")
+}
+
+tasks.compileJava {
+  options.compilerArgs.add("-Aproject=${project.group}/${project.name}")
 }
