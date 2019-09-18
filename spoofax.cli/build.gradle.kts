@@ -1,5 +1,7 @@
 plugins {
   id("org.metaborg.gradle.config.java-library")
+  id("net.ltgt.apt")
+  id("net.ltgt.apt-idea")
 }
 
 dependencies {
@@ -8,12 +10,12 @@ dependencies {
 
   api("com.google.dagger:dagger")
   implementation(project(":spoofax.core"))
-  implementation("info.picocli:picocli:4.0.4")
+  api("info.picocli:picocli")
 
   compileOnly("org.checkerframework:checker-qual-android")
 
   annotationProcessor("com.google.dagger:dagger-compiler")
-  annotationProcessor("info.picocli:picocli-codegen:4.0.4")
+  annotationProcessor("info.picocli:picocli-codegen")
 }
 
 tasks.compileJava {

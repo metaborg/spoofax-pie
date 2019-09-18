@@ -7,6 +7,7 @@ val logVersion = "develop-SNAPSHOT"
 val resourceVersion = "develop-SNAPSHOT"
 val pieVersion = "develop-SNAPSHOT"
 val spoofaxCoreVersion = "2.6.0-SNAPSHOT"
+val picocliVersion = "4.0.4"
 val daggerVersion = "2.21"
 val derive4jVersion = "1.1.1"
 
@@ -32,6 +33,9 @@ dependencies {
     api("org.metaborg:nabl2.solver:$spoofaxCoreVersion")
     api("org.metaborg:nabl2.terms:$spoofaxCoreVersion")
     api("org.metaborg:statix.solver:$spoofaxCoreVersion")
+
+    api("info.picocli:picocli:$picocliVersion")
+    api("info.picocli:picocli-codegen:$picocliVersion")
 
     api("com.google.dagger:dagger:$daggerVersion")
     api("com.google.dagger:dagger-compiler:$daggerVersion")

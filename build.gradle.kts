@@ -9,6 +9,7 @@ plugins {
   id("net.ltgt.apt-idea") version "0.21" apply false
   id("de.set.ecj") version "1.4.1" apply false
   id("biz.aQute.bnd.builder") version "4.1.0" apply false
+  id("com.palantir.graal") version "0.4.0" apply false
 }
 
 subprojects {
