@@ -4,9 +4,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.lang.Language;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilderFactory;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
 import com.intellij.psi.tree.IFileElementType;
 import mb.resource.Resource;
 import mb.spoofax.core.language.LanguageScope;
@@ -36,8 +34,7 @@ public class SpoofaxFileElementType extends IFileElementType {
     }
 
     @Override protected ASTNode doParseContents(ASTNode chameleon, PsiElement psi) {
-        PsiFile containingFile = psi.getContainingFile();
-        Resource resource = this.resourceRegistry.getResource(containingFile);
+        Resource resource = this.resourceRegistry.getResource(psi.getContainingFile());
         SpoofaxLexer lexer = this.lexerFactory.create(resource.getKey());
         PsiBuilder builder =
             PsiBuilderFactory.getInstance().createBuilder(psi.getProject(), chameleon, lexer, getLanguage(),
