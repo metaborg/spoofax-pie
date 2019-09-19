@@ -39,7 +39,7 @@ public class TigerParse implements TaskDef<ResourceKey, JSGLR1ParseResult> {
             return JSGLR1ParseResults.failed(Messages.of(new Message("Cannot parse file '" + key + "', it does not exist", Severity.Error)));
         }
         try {
-            final String text = resource.readString(StandardCharsets.UTF_8);
+            final String text = resource.readString();
             final TigerParser parser = new TigerParser(parseTable);
             return parser.parse(text, "Module");
         } catch(IOException e) {

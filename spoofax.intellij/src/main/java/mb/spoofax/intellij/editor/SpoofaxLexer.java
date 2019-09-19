@@ -13,7 +13,6 @@ import mb.pie.api.ExecException;
 import mb.pie.api.PieSession;
 import mb.pie.api.Task;
 import mb.resource.ReadableResource;
-import mb.resource.Resource;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
 import mb.spoofax.core.language.LanguageInstance;
@@ -28,10 +27,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+
 /**
  * Lexer for Spoofax languages in IntelliJ.
  */
 public final class SpoofaxLexer extends LexerBase {
+
     private final ResourceKey resourceKey;
 
     private final Logger logger;
@@ -52,6 +53,7 @@ public final class SpoofaxLexer extends LexerBase {
      * Factory class.
      */
     public static class Factory {
+
         private final LoggerFactory loggerFactory;
         private final SpoofaxTokenTypeManager tokenTypeManager;
         private final ScopeManager scopeManager;
@@ -59,13 +61,14 @@ public final class SpoofaxLexer extends LexerBase {
         private final Provider<PieSession> pieSessionProvider;
         private final LanguageInstance languageInstance;
 
-        @Inject public Factory(
-            LoggerFactory loggerFactory,
-            SpoofaxTokenTypeManager tokenTypeManager,
-            ScopeManager scopeManager,
-            ResourceService resourceService,
-            Provider<PieSession> pieSessionProvider,
-            LanguageInstance languageInstance
+        @Inject
+        public Factory(
+                LoggerFactory loggerFactory,
+                SpoofaxTokenTypeManager tokenTypeManager,
+                ScopeManager scopeManager,
+                ResourceService resourceService,
+                Provider<PieSession> pieSessionProvider,
+                LanguageInstance languageInstance
         ) {
             this.loggerFactory = loggerFactory;
             this.tokenTypeManager = tokenTypeManager;
@@ -77,14 +80,15 @@ public final class SpoofaxLexer extends LexerBase {
 
         public SpoofaxLexer create(ResourceKey resourceKey) {
             return new SpoofaxLexer(
-                resourceKey,
-                loggerFactory,
-                tokenTypeManager,
-                scopeManager,
-                resourceService,
-                pieSessionProvider,
-                languageInstance);
+                    resourceKey,
+                    loggerFactory,
+                    tokenTypeManager,
+                    scopeManager,
+                    resourceService,
+                    pieSessionProvider,
+                    languageInstance);
         }
+
     }
 
 
@@ -92,13 +96,13 @@ public final class SpoofaxLexer extends LexerBase {
      * Initializes a new instance of the {@link SpoofaxLexer} class.
      */
     private SpoofaxLexer(
-        ResourceKey resourceKey,
-        LoggerFactory loggerFactory,
-        SpoofaxTokenTypeManager tokenTypeManager,
-        ScopeManager scopeManager,
-        ResourceService resourceService,
-        Provider<PieSession> pieSessionProvider,
-        LanguageInstance languageInstance
+            ResourceKey resourceKey,
+            LoggerFactory loggerFactory,
+            SpoofaxTokenTypeManager tokenTypeManager,
+            ScopeManager scopeManager,
+            ResourceService resourceService,
+            Provider<PieSession> pieSessionProvider,
+            LanguageInstance languageInstance
     ) {
         this.resourceKey = resourceKey;
         this.logger = loggerFactory.create(getClass());
@@ -110,7 +114,8 @@ public final class SpoofaxLexer extends LexerBase {
     }
 
 
-    @Override public void start(CharSequence buffer, int startOffset, int endOffset, int initialState) {
+    @Override
+    public void start(CharSequence buffer, int startOffset, int endOffset, int initialState) {
         assert initialState == 0;
         assert 0 <= startOffset && startOffset <= buffer.length() : "Start offset " + endOffset + " out of range 0-" + buffer.length();
         assert 0 <= endOffset && endOffset <= buffer.length() : "End offset " + endOffset + " out of range 0-" + buffer.length();
@@ -122,20 +127,20 @@ public final class SpoofaxLexer extends LexerBase {
         this.endOffset = endOffset;
         this.tokenIndex = 0;
 
-        if(buffer.length() == 0) {
+        if (buffer.length() == 0) {
             logger.debug("Buffer is empty.");
             this.tokens = Collections.emptyList();
         } else {
             // GK: what is syntax coloring information doing here?
-            try(final PieSession session = this.pieSessionProvider.get()) {
+            try (final PieSession session = this.pieSessionProvider.get()) {
                 final Task<@Nullable ArrayList<? extends mb.common.token.Token<?>>> tokenizerTask =
-                    this.languageInstance.createTokenizeTask(this.resourceKey);
+                        this.languageInstance.createTokenizeTask(this.resourceKey);
                 @Nullable List<? extends mb.common.token.Token> resourceTokens = session.require(tokenizerTask);
-                if(resourceTokens == null)
+                if (resourceTokens == null)
                     resourceTokens = getDefaultTokens(this.resourceKey);
                 logger.debug("Tokenizer task returned {} tokens", resourceTokens.size());
                 this.tokens = tokenize(resourceTokens);
-            } catch(ExecException e) {
+            } catch (ExecException e) {
                 throw new RuntimeException("Styling resource '" + this.resourceKey + "' failed unexpectedly", e);
             }
         }
@@ -151,11 +156,11 @@ public final class SpoofaxLexer extends LexerBase {
     private List<mb.common.token.Token> getDefaultTokens(ResourceKey resourceKey) {
         final ReadableResource resource = this.resourceService.getReadableResource(resourceKey);
         try {
-            int length = (int) resource.getSize();
+            int length = (int)resource.getSize();
             return Lists.newArrayList(
-                new TokenImpl<>(TokenTypes.unknown(), Region.fromOffsetLength(0, length), null)
+                    new TokenImpl<>(TokenTypes.unknown(), Region.fromOffsetLength(0, length), null)
             );
-        } catch(IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -170,14 +175,14 @@ public final class SpoofaxLexer extends LexerBase {
         List<SpoofaxIntellijToken> newTokens = new ArrayList<>();
         int offset = 0;
 
-        for(mb.common.token.Token<?> token : tokens) {
+        for (mb.common.token.Token<?> token : tokens) {
             int tokenStart = token.getRegion().getStartOffset();
             int tokenEnd = token.getRegion().getEndOffset();
 
             // We assume that tokens are non-empty. When we encounter
             // a token with an end at or before its start,
             // it gets ignored.
-            if(tokenEnd <= tokenStart) continue;
+            if (tokenEnd <= tokenStart) continue;
 
             // We assume the list of tokens is ordered by value.
             // When we encounter a token that's before the current
@@ -185,12 +190,12 @@ public final class SpoofaxLexer extends LexerBase {
             // We assume that no tokens overlap. When we encounter a
             // token that starts before the previous token ends,
             // it gets ignored.
-            if(tokenStart < offset) continue;
+            if (tokenStart < offset) continue;
 
             // We assume that tokens cover all characters. When we
             // encounter a stretch of characters not covered by a
             // token, we assign it our own dummy token/element.
-            if(offset < tokenStart) {
+            if (offset < tokenStart) {
                 // Add dummy element.
                 offset = addTokenElement(newTokens, null, offset, tokenStart);
             }
@@ -202,13 +207,13 @@ public final class SpoofaxLexer extends LexerBase {
 
             // When we've seen tokens up to the end of the highlighted range
             // we bail out.
-            if(offset >= this.endOffset)
+            if (offset >= this.endOffset)
                 break;
         }
 
         // When there is a gap between the last token and the end of the highlighted range
         // we insert our own dummy token/element.
-        if(offset < this.endOffset) {
+        if (offset < this.endOffset) {
             offset = addTokenElement(newTokens, null, offset, this.endOffset);
         }
 
@@ -241,7 +246,7 @@ public final class SpoofaxLexer extends LexerBase {
      */
     private IElementType getTokenType(mb.common.token.@Nullable Token<?> token) {
         final String simplfiedScopeName;
-        if(token != null) {
+        if (token != null) {
             final ScopeNames scopeNames = getScopeNamesFromType(token.getType());
             simplfiedScopeName = this.scopeManager.getSimplifiedScope(scopeNames);
         } else {
@@ -261,17 +266,17 @@ public final class SpoofaxLexer extends LexerBase {
      */
     private ScopeNames getScopeNamesFromType(@Nullable TokenType tokenType) {
         final String scope;
-        if(tokenType == null) {
+        if (tokenType == null) {
             scope = scopeManager.DEFAULT_SCOPE;
         } else {
             scope = TokenTypes.caseOf(tokenType)
-                .identifier_("entity")
-                .string_("string")
-                .number_("constant.numeric")
-                .keyword_("keyword")
-                .operator_("keyword.operator")
-                .layout_("comment")
-                .unknown_(scopeManager.DEFAULT_SCOPE);
+                    .identifier_("entity")
+                    .string_("string")
+                    .number_("constant.numeric")
+                    .keyword_("keyword")
+                    .operator_("keyword.operator")
+                    .layout_("comment")
+                    .unknown_(scopeManager.DEFAULT_SCOPE);
         }
         return new ScopeNames(scope);
     }
@@ -281,11 +286,10 @@ public final class SpoofaxLexer extends LexerBase {
         return 0;
     }
 
-
     @Override
     public @Nullable IElementType getTokenType() {
-        if(0 <= this.tokenIndex && this.tokenIndex < this.tokens.size())
-            return this.tokens.get(tokenIndex).tokenType;
+        if (0 <= this.tokenIndex && this.tokenIndex < this.tokens.size())
+            return this.tokens.get(tokenIndex).getTokenType();
         else
             return null;
     }
@@ -293,13 +297,13 @@ public final class SpoofaxLexer extends LexerBase {
     @Override
     public int getTokenStart() {
         assert 0 <= this.tokenIndex && this.tokenIndex < this.tokens.size() : "Expected index 0 <= $tokenIndex < ${tokens.size}.";
-        return this.tokens.get(this.tokenIndex).startOffset;
+        return this.tokens.get(this.tokenIndex).getStartOffset();
     }
 
     @Override
     public int getTokenEnd() {
         assert 0 <= this.tokenIndex && this.tokenIndex < this.tokens.size() : "Expected index 0 <= $tokenIndex < ${tokens.size}.";
-        return this.tokens.get(this.tokenIndex).endOffset;
+        return this.tokens.get(this.tokenIndex).getEndOffset();
     }
 
     @Override
@@ -307,6 +311,10 @@ public final class SpoofaxLexer extends LexerBase {
         this.tokenIndex++;
     }
 
+    /**
+     * Gets the offset of the start of the buffer.
+     * @return The offset of the start of the buffer.
+     */
     public int getBufferStart() {
         return this.startOffset;
     }
@@ -322,27 +330,52 @@ public final class SpoofaxLexer extends LexerBase {
         return this.endOffset;
     }
 
-    private static class SpoofaxIntellijToken {
+    /**
+     * Represents a Spoofax token for IntelliJ.
+     */
+    private static final class SpoofaxIntellijToken {
+
         private final int startOffset;
         private final int endOffset;
-        private IElementType tokenType;
+        private final IElementType tokenType;
 
-        public SpoofaxIntellijToken(int startOffset, int endOffset, IElementType tokenType) {
+        /**
+         * Initializes a new instance of the {@link SpoofaxIntellijToken} class.
+         *
+         * @param startOffset The zero-based start offset of the token.
+         * @param endOffset The zero-based end offset of the token.
+         * @param tokenType The element type of the token.
+         */
+        /* package private */ SpoofaxIntellijToken(int startOffset, int endOffset, IElementType tokenType) {
             this.startOffset = startOffset;
             this.endOffset = endOffset;
             this.tokenType = tokenType;
         }
 
-        public int getStartOffset() {
+        /**
+         * Gets the start offset of the token.
+         * @return The zero-based start offset of the token.
+         */
+        /* package private */ int getStartOffset() {
             return startOffset;
         }
 
-        public int getEndOffset() {
+        /**
+         * Gets the end offset of the token.
+         * @return The zero-based end offset of the token.
+         */
+        /* package private */ int getEndOffset() {
             return endOffset;
         }
 
-        public IElementType getTokenType() {
+        /**
+         * Gets the element type of the token.
+         * @return The token's element type.
+         */
+        /* package private */ IElementType getTokenType() {
             return tokenType;
         }
+
     }
+
 }

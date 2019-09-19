@@ -1,20 +1,61 @@
 package mb.spoofax.intellij.resource;
 
+import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import mb.resource.ReadableResource;
 import mb.resource.Resource;
 import mb.resource.ResourceKey;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
-public class IntellijResource implements Resource, ReadableResource {
+
+/**
+ * An IntelliJ resource.
+ */
+public final class IntellijResource implements Resource, ReadableResource {
+
+    private static final Charset TEXT_CHARSET = StandardCharsets.UTF_16BE;
+    private static final Charset BINARY_CHARSET = StandardCharsets.UTF_8;
+
     private final VirtualFile file;
 
-
-    public IntellijResource(VirtualFile file) {
+    /**
+     * Initializes a new instance of the {@link IntellijResource} class.
+     *
+     * @param file The IntelliJ virtual file representing the resource.
+     */
+    /* package private */ IntellijResource(VirtualFile file) {
         this.file = file;
+    }
+
+    /**
+     * Gets the document associated with this resource.
+     *
+     * @return The associated document; or null when the file has no associated text document
+     * (e.g., it is a directory, binary file, or too large).
+     */
+    @Nullable public Document getDocument() {
+        return FileDocumentManager.getInstance().getDocument(this.file);
+    }
+
+    /**
+     * Gets the text of the document associated with this resource.
+     *
+     * @return The text of the associated document; or null when the file has no associated text document
+     * (e.g., it is a directory, binary file, or too large).
+     */
+    @Nullable public String getDocumentText() {
+        @Nullable Document document = getDocument();
+        if (document == null) return null;
+        return ReadAction.compute(document::getText);
     }
 
     @Override public void close() throws IOException {
@@ -22,7 +63,7 @@ public class IntellijResource implements Resource, ReadableResource {
     }
 
     @Override public boolean exists() {
-        return file.exists();
+        return this.file.exists();
     }
 
     @Override public boolean isReadable() {
@@ -30,35 +71,71 @@ public class IntellijResource implements Resource, ReadableResource {
     }
 
     @Override public Instant getLastModifiedTime() {
-        return Instant.ofEpochMilli(file.getTimeStamp());
+        @Nullable Document document = getDocument();
+        if (document != null) {  // Happy path
+            return Instant.ofEpochMilli(document.getModificationStamp());
+        } else { // Unhappy path
+            return Instant.ofEpochMilli(this.file.getTimeStamp());
+        }
     }
 
     @Override public long getSize() {
-        return file.getLength();
+        @Nullable Document document = getDocument();
+        if (document != null) { // Happy path
+            // NOTE: We represent the IntelliJ text as UTF-16 (TEXT_CHARSET)
+            return document.getTextLength() * 2;
+        } else { // Unhappy path
+            return this.file.getLength();
+        }
+    }
+
+    @Override
+    public Charset getCharset() {
+        @Nullable Document document = getDocument();
+        if (document != null) { // Happy path
+            // NOTE: UTF-16 Big Endian (without BOM) is the closest we can get to Java's internal representation.
+            return TEXT_CHARSET;
+        } else { // Unhappy path
+            return BINARY_CHARSET;
+        }
     }
 
     @Override public InputStream newInputStream() throws IOException {
-        return file.getInputStream();
+        @Nullable String text = getDocumentText();
+        if (text != null) {
+            return new ByteArrayInputStream(text.getBytes(TEXT_CHARSET));
+        } else {
+            // NOTE: This will not return the latest changes for a textual file
+            return this.file.getInputStream();
+        }
     }
 
+    @Override
+    public String readString(Charset fromBytesCharset) throws IOException {
+        @Nullable String text = getDocumentText();
+        if (text != null) { // Happy path
+            return text;
+        } else { // Unhappy path
+            return new String(readBytes(), fromBytesCharset);
+        }
+    }
 
     @Override public ResourceKey getKey() {
-        return new IntellijResourceKey(file.getUrl());
+        return new IntellijResourceKey(this.file.getUrl());
     }
 
-
     @Override public boolean equals(Object o) {
-        if(this == o) return true;
-        if(o == null || getClass() != o.getClass()) return false;
-        final IntellijResource that = (IntellijResource) o;
-        return file.equals(that.file);
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final IntellijResource that = (IntellijResource)o;
+        return this.file.equals(that.file);
     }
 
     @Override public int hashCode() {
-        return file.hashCode();
+        return this.file.hashCode();
     }
 
     @Override public String toString() {
-        return file.getUrl();
+        return this.file.getUrl();
     }
 }
