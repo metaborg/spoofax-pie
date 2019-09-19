@@ -53,7 +53,7 @@ class CommandRunner<A extends Serializable> implements Callable {
                     try {
                         final ReadableResource resource = resourceService.getReadableResource(file);
                         try {
-                            final String text = resource.readString(StandardCharsets.UTF_8);
+                            final String text = resource.readString();
                             System.out.println(text);
                         } catch(IOException e) {
                             e.printStackTrace();
