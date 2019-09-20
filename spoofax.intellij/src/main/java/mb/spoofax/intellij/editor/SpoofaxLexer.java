@@ -7,6 +7,7 @@ import mb.common.region.Region;
 import mb.common.token.TokenImpl;
 import mb.common.token.TokenType;
 import mb.common.token.TokenTypes;
+import mb.common.util.IntUtil;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecException;
@@ -117,10 +118,16 @@ public final class SpoofaxLexer extends LexerBase {
     @Override
     public void start(CharSequence buffer, int startOffset, int endOffset, int initialState) {
         assert initialState == 0;
-        assert 0 <= startOffset && startOffset <= buffer.length() : "Start offset " + endOffset + " out of range 0-" + buffer.length();
-        assert 0 <= endOffset && endOffset <= buffer.length() : "End offset " + endOffset + " out of range 0-" + buffer.length();
+        if (startOffset < 0 || startOffset > buffer.length()) {
+            logger.warn("Start offset {}} out of range {}-{}", startOffset, 0, buffer.length());
+            startOffset = IntUtil.clamp(startOffset, 0, buffer.length());
+        }
+        if (endOffset < startOffset || endOffset > buffer.length()) {
+            logger.warn("End offset {} out of range {}-{}", endOffset, startOffset, buffer.length());
+            endOffset = IntUtil.clamp(endOffset, startOffset, buffer.length());;
+        }
 
-        logger.debug("Lexing " + this.resourceKey);
+        logger.debug("Lexing {}", this.resourceKey);
 
         this.buffer = buffer;
         this.startOffset = startOffset;
@@ -128,7 +135,7 @@ public final class SpoofaxLexer extends LexerBase {
         this.tokenIndex = 0;
 
         if (buffer.length() == 0) {
-            logger.debug("Buffer is empty.");
+            logger.debug("Buffer is empty");
             this.tokens = Collections.emptyList();
         } else {
             // GK: what is syntax coloring information doing here?
@@ -136,9 +143,12 @@ public final class SpoofaxLexer extends LexerBase {
                 final Task<@Nullable ArrayList<? extends mb.common.token.Token<?>>> tokenizerTask =
                         this.languageInstance.createTokenizeTask(this.resourceKey);
                 @Nullable List<? extends mb.common.token.Token> resourceTokens = session.require(tokenizerTask);
-                if (resourceTokens == null)
+                if (resourceTokens == null) {
+                    logger.debug("Tokenizer task returned no tokens");
                     resourceTokens = getDefaultTokens(this.resourceKey);
-                logger.debug("Tokenizer task returned {} tokens", resourceTokens.size());
+                } else {
+                    logger.debug("Tokenizer task returned {} tokens", resourceTokens.size());
+                }
                 this.tokens = tokenize(resourceTokens);
             } catch (ExecException e) {
                 throw new RuntimeException("Styling resource '" + this.resourceKey + "' failed unexpectedly", e);
@@ -296,13 +306,13 @@ public final class SpoofaxLexer extends LexerBase {
 
     @Override
     public int getTokenStart() {
-        assert 0 <= this.tokenIndex && this.tokenIndex < this.tokens.size() : "Expected index 0 <= $tokenIndex < ${tokens.size}.";
+        assert 0 <= this.tokenIndex && this.tokenIndex < this.tokens.size() : "Expected index 0 <= " + tokenIndex + " < " + tokens.size();
         return this.tokens.get(this.tokenIndex).getStartOffset();
     }
 
     @Override
     public int getTokenEnd() {
-        assert 0 <= this.tokenIndex && this.tokenIndex < this.tokens.size() : "Expected index 0 <= $tokenIndex < ${tokens.size}.";
+        assert 0 <= this.tokenIndex && this.tokenIndex < this.tokens.size() : "Expected index 0 <= " + tokenIndex + " < " + tokens.size();
         return this.tokens.get(this.tokenIndex).getEndOffset();
     }
 

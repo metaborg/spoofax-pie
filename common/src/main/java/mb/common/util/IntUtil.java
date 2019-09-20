@@ -58,6 +58,19 @@ public class IntUtil {
     }
 
     /**
+     * Clamps a value within a closed range.
+     *
+     * @param value The integer value.
+     * @param min The minimum value, inclusive.
+     * @param max The maximum value, inclusive.
+     * @return The clamped value, which is between min and max.
+     */
+    public static int clamp(int value, int min, int max) {
+        if (min > max) throw new IllegalArgumentException("max (" + max + ") must be greater than or equal to min (" + min + ").");
+        return Math.min(Math.max(value, min), max);
+    }
+
+    /**
      * Returns an array containing each value of {@code collection}, converted to a {@code int} value in the manner of
      * {@link Number#intValue}.
      *

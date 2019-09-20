@@ -22,9 +22,6 @@ import java.time.Instant;
  */
 public final class IntellijResource implements Resource, ReadableResource {
 
-    private static final Charset TEXT_CHARSET = StandardCharsets.UTF_16BE;
-    private static final Charset BINARY_CHARSET = StandardCharsets.UTF_8;
-
     private final VirtualFile file;
 
     /**
@@ -89,21 +86,10 @@ public final class IntellijResource implements Resource, ReadableResource {
         }
     }
 
-    @Override
-    public Charset getCharset() {
-        @Nullable Document document = getDocument();
-        if (document != null) { // Happy path
-            // NOTE: UTF-16 Big Endian (without BOM) is the closest we can get to Java's internal representation.
-            return TEXT_CHARSET;
-        } else { // Unhappy path
-            return BINARY_CHARSET;
-        }
-    }
-
     @Override public InputStream newInputStream() throws IOException {
         @Nullable String text = getDocumentText();
         if (text != null) {
-            return new ByteArrayInputStream(text.getBytes(TEXT_CHARSET));
+            return new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_16BE));
         } else {
             // NOTE: This will not return the latest changes for a textual file
             return this.file.getInputStream();
@@ -111,12 +97,13 @@ public final class IntellijResource implements Resource, ReadableResource {
     }
 
     @Override
-    public String readString(Charset fromBytesCharset) throws IOException {
+    public String readString(Charset fromCharset) throws IOException {
         @Nullable String text = getDocumentText();
         if (text != null) { // Happy path
+            // Ignore the character set, we do not need to decode from bytes.
             return text;
         } else { // Unhappy path
-            return new String(readBytes(), fromBytesCharset);
+            return new String(readBytes(), fromCharset);
         }
     }
 

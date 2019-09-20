@@ -73,7 +73,8 @@ public class EclipseDocumentResource implements Resource, ReadableResource, Wrap
         return document.get().getBytes(StandardCharsets.UTF_8);
     }
 
-    @Override public String readString(Charset fromBytesCharset) {
+    @Override public String readString(Charset fromCharset) {
+        // Ignore the character set, we do not need to decode from bytes.
         return document.get();
     }
 
