@@ -10,6 +10,7 @@ val spoofaxCoreVersion = "2.6.0-SNAPSHOT"
 val picocliVersion = "4.0.4"
 val daggerVersion = "2.21"
 val derive4jVersion = "1.1.1"
+val immutablesVersion = "2.8.0"
 
 dependencies {
   constraints {
@@ -41,6 +42,7 @@ dependencies {
     api("com.google.dagger:dagger-compiler:$daggerVersion")
     api("org.derive4j:derive4j:$derive4jVersion")
     api("org.derive4j:derive4j-annotation:$derive4jVersion")
+    api("org.immutables:value:$immutablesVersion")
     api("javax.inject:javax.inject:1")
 
     api("org.checkerframework:checker-qual-android:2.6.0") // Use android version: annotation retention policy is class instead of runtime.

@@ -32,6 +32,7 @@ include("spoofax.cli")
 include("spoofax.intellij")
 include("spoofax.eclipse")
 include("spoofax.eclipse.externaldeps")
+include("spoofax.generator")
 
 include("org.metaborg.lang.tiger")
 include("tiger")
