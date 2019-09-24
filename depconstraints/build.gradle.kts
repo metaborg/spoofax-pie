@@ -43,6 +43,7 @@ dependencies {
     api("org.derive4j:derive4j:$derive4jVersion")
     api("org.derive4j:derive4j-annotation:$derive4jVersion")
     api("org.immutables:value:$immutablesVersion")
+    api("org.immutables:value-annotations:$immutablesVersion")
     api("javax.inject:javax.inject:1")
 
     api("org.checkerframework:checker-qual-android:2.6.0") // Use android version: annotation retention policy is class instead of runtime.
