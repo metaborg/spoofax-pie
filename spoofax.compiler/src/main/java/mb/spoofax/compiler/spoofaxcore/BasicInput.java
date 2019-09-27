@@ -1,7 +1,7 @@
-package mb.spoofax.generator.spoofaxcore;
+package mb.spoofax.compiler.spoofaxcore;
 
-import mb.spoofax.generator.util.BuilderBase;
-import mb.spoofax.generator.util.Conversion;
+import mb.spoofax.compiler.util.BuilderBase;
+import mb.spoofax.compiler.util.Conversion;
 import org.immutables.value.Value;
 
 import java.util.Properties;

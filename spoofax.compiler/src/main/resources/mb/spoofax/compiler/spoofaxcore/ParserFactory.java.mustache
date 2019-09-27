@@ -1,0 +1,13 @@
+package {{packageId}};
+
+public class {{genParserFactoryClass}} {
+    private final {{genTableClass}} parseTable;
+
+    public {{genParserFactoryClass}}({{genTableClass}} parseTable) {
+        this.parseTable = parseTable;
+    }
+
+    {{genParserClass}} create() {
+        return new {{genParserClass}}(parseTable);
+    }
+}

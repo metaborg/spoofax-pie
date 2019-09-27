@@ -1,4 +1,4 @@
-package mb.spoofax.generator.util;
+package mb.spoofax.compiler.util;
 
 public class Conversion {
     public static String packageIdToPath(String packageId) {

@@ -1,4 +1,4 @@
-package mb.spoofax.generator.util;
+package mb.spoofax.compiler.util;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
