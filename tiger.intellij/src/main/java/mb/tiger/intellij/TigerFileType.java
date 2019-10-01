@@ -26,6 +26,6 @@ public class TigerFileType extends LanguageFileType {
     }
 
     @Override public @Nullable Icon getIcon() {
-        return null;
+        return TigerIntellijIcons.getFileIcon();
     }
 }

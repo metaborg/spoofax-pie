@@ -17,6 +17,7 @@
     <editor
       name="Tiger editor"
       extensions="tig"
+      icon="./META-INF/fileIcon.png"
       class="mb.tiger.eclipse.TigerEditor"
       id="tiger.eclipse.editor"
     />
