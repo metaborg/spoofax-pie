@@ -8,7 +8,7 @@ val resourceVersion = "develop-SNAPSHOT"
 val pieVersion = "develop-SNAPSHOT"
 val spoofaxCoreVersion = "2.6.0-SNAPSHOT"
 val picocliVersion = "4.0.4"
-val daggerVersion = "2.21"
+val daggerVersion = "2.24"
 val derive4jVersion = "1.1.1"
 val immutablesVersion = "2.8.0"
 
