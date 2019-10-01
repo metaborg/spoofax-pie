@@ -8,7 +8,7 @@ import java.util.Properties;
 
 @Value.Style(visibility = Value.Style.ImplementationVisibility.PACKAGE, overshadowImplementation = true)
 @Value.Immutable
-public interface BasicInput {
+public interface Coordinates {
     String groupId();
 
     String id();
@@ -31,7 +31,7 @@ public interface BasicInput {
         properties.setProperty("classSuffix", classSuffix());
     }
 
-    class Builder extends ImmutableBasicInput.Builder implements BuilderBase {
+    class Builder extends ImmutableCoordinates.Builder implements BuilderBase {
         public Builder withPersistentProperties(Properties properties) {
             with(properties, "classSuffix", this::classSuffix);
             return this;

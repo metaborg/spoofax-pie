@@ -19,6 +19,8 @@ dependencies {
 
   annotationProcessor("org.immutables:value")
   annotationProcessor("org.derive4j:derive4j")
+
+  testImplementation("com.google.jimfs:jimfs:1.1")
 }
 
 tasks.test {

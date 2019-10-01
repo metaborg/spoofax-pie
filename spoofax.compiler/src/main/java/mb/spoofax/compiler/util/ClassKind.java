@@ -1,4 +1,4 @@
-package mb.spoofax.compiler.spoofaxcore;
+package mb.spoofax.compiler.util;
 
 public enum ClassKind {
     /**

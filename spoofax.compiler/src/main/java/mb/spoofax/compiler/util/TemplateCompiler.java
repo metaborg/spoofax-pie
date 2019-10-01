@@ -9,10 +9,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
-public class MustacheUtil {
-    public final static Mustache.Compiler compiler = Mustache.compiler().escapeHTML(false); // Compiler is thread-safe, so static is fine.
+public class TemplateCompiler {
+    private final static Mustache.Compiler compiler = Mustache.compiler().escapeHTML(false); // Compiler is thread-safe, so static is fine.
 
-    public static Template compile(Class<?> clazz, String resource) {
+    private final Class<?> clazz;
+
+    public TemplateCompiler(Class<?> clazz) {
+        this.clazz = clazz;
+    }
+
+    public Template compile(String resource) {
         try {
             try(final @Nullable InputStream inputStream = clazz.getResourceAsStream(resource)) {
                 if(inputStream == null) {
