@@ -3,6 +3,8 @@ package mb.spoofax.compiler.spoofaxcore;
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
 import mb.resource.fs.FSResource;
+import mb.resource.hierarchical.HierarchicalResource;
+import mb.spoofax.compiler.util.ResourceDeps;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -10,9 +12,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.util.Properties;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-class CompilerTest {
+class ParserCompilerTest {
     @Test
     void testPersistentProperties() {
         final Properties persistentProperties = new Properties();
@@ -51,7 +53,7 @@ class CompilerTest {
     }
 
     @Test
-    void testParserCompiler() throws IOException {
+    void testCompiler() throws IOException {
         final Coordinates coordinates = Coordinates.builder()
             .groupId("org.metaborg")
             .id("tiger")
@@ -65,6 +67,17 @@ class CompilerTest {
 
         final FileSystem fileSystem = Jimfs.newFileSystem(Configuration.unix());
         final FSResource baseDir = new FSResource(fileSystem.getPath("src/main/java"));
-        compiler.compile(parserInput, baseDir, StandardCharsets.UTF_8);
+        final ResourceDeps resourceDeps = compiler.compile(parserInput, baseDir, StandardCharsets.UTF_8);
+        final HierarchicalResource packageDir = compiler.getPackageDir(parserInput, baseDir);
+        assertTrue(packageDir.exists());
+        final HierarchicalResource parseTableFile = compiler.getParseTableFile(packageDir);
+        assertTrue(parseTableFile.exists());
+        assertTrue(resourceDeps.providedResources().contains(parseTableFile));
+        final HierarchicalResource parserFile = compiler.getParserFile(packageDir);
+        assertTrue(parserFile.exists());
+        assertTrue(resourceDeps.providedResources().contains(parserFile));
+        final HierarchicalResource parserFactoryFile = compiler.getParserFactoryFile(packageDir);
+        assertTrue(parserFactoryFile.exists());
+        assertTrue(resourceDeps.providedResources().contains(parserFactoryFile));
     }
 }

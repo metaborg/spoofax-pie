@@ -2,10 +2,7 @@ package mb.spoofax.compiler.spoofaxcore;
 
 import com.samskivert.mustache.Template;
 import mb.resource.hierarchical.HierarchicalResource;
-import mb.spoofax.compiler.util.BuilderBase;
-import mb.spoofax.compiler.util.ClassKind;
-import mb.spoofax.compiler.util.ResourceWriter;
-import mb.spoofax.compiler.util.TemplateCompiler;
+import mb.spoofax.compiler.util.*;
 import org.immutables.value.Value;
 
 import java.io.IOException;
@@ -100,21 +97,42 @@ public class Parser {
         }
 
 
-        public void compile(Input input, HierarchicalResource baseDir, Charset charset) throws IOException {
-            final HierarchicalResource pkgDir = baseDir.appendRelativePath(input.coordinates().packagePath());
+        public ResourceDeps compile(Input input, HierarchicalResource baseDir, Charset charset) throws IOException {
+            final HierarchicalResource pkgDir = getPackageDir(input, baseDir);
             pkgDir.createDirectory(true);
-            try(final ResourceWriter writer = new ResourceWriter(pkgDir.appendSegment("ParseTable.java"), charset)) {
+            final HierarchicalResource parseTable = getParseTableFile(pkgDir);
+            try(final ResourceWriter writer = new ResourceWriter(parseTable, charset)) {
                 parseTableTemplate.execute(input, input.coordinates(), writer);
                 writer.flush();
             }
-            try(final ResourceWriter writer = new ResourceWriter(pkgDir.appendSegment("Parser.java"), charset)) {
+            final HierarchicalResource parser = getParserFile(pkgDir);
+            try(final ResourceWriter writer = new ResourceWriter(parser, charset)) {
                 parserTemplate.execute(input, input.coordinates(), writer);
                 writer.flush();
             }
-            try(final ResourceWriter writer = new ResourceWriter(pkgDir.appendSegment("ParserFactory.java"), charset)) {
+            final HierarchicalResource parserFactory = getParserFactoryFile(pkgDir);
+            try(final ResourceWriter writer = new ResourceWriter(parserFactory, charset)) {
                 parserFactoryTemplate.execute(input, input.coordinates(), writer);
                 writer.flush();
             }
+            return ImmutableResourceDeps.builder().addProvidedResources(parseTable, parser, parserFactory).build();
+        }
+
+
+        public HierarchicalResource getPackageDir(Input input, HierarchicalResource baseDir) {
+            return baseDir.appendRelativePath(input.coordinates().packagePath());
+        }
+
+        public HierarchicalResource getParseTableFile(HierarchicalResource packageDir) {
+            return packageDir.appendSegment("ParseTable.java");
+        }
+
+        public HierarchicalResource getParserFile(HierarchicalResource packageDir) {
+            return packageDir.appendSegment("Parser.java");
+        }
+
+        public HierarchicalResource getParserFactoryFile(HierarchicalResource packageDir) {
+            return packageDir.appendSegment("ParserFactory.java");
         }
     }
 
