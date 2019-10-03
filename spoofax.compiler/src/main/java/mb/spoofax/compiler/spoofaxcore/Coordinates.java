@@ -9,6 +9,18 @@ import java.util.Properties;
 @Value.Style(visibility = Value.Style.ImplementationVisibility.PACKAGE, overshadowImplementation = true)
 @Value.Immutable
 public interface Coordinates {
+    class Builder extends ImmutableCoordinates.Builder implements BuilderBase {
+        public Builder withPersistentProperties(Properties properties) {
+            with(properties, "classSuffix", this::classSuffix);
+            return this;
+        }
+    }
+
+    static Builder builder() {
+        return new Builder();
+    }
+
+
     String groupId();
 
     String id();
@@ -29,16 +41,5 @@ public interface Coordinates {
 
     default void savePersistentProperties(Properties properties) {
         properties.setProperty("classSuffix", classSuffix());
-    }
-
-    class Builder extends ImmutableCoordinates.Builder implements BuilderBase {
-        public Builder withPersistentProperties(Properties properties) {
-            with(properties, "classSuffix", this::classSuffix);
-            return this;
-        }
-    }
-
-    static Builder builder() {
-        return new Builder();
     }
 }

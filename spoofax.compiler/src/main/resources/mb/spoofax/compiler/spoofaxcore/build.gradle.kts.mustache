@@ -1,27 +1,12 @@
-import mb.spoofax.gradle.util.toSpoofaxDependency
-
 plugins {
   id("org.metaborg.gradle.config.java-library")
   id("org.metaborg.gradle.config.junit-testing")
 }
 
 dependencies {
-  api(platform(project(":depconstraints")))
-
-  api(project(":common"))
-  api(project(":jsglr1.common"))
-  api(project(":esv.common"))
-  api(project(":stratego.common"))
-  api(project(":constraint.common"))
-
-  implementation(project(":nabl2.common"))
-  implementation("org.metaborg:strategoxt-min-jar")
-
-  compileOnly("org.checkerframework:checker-qual-android")
-
-  testImplementation("org.metaborg:log.backend.noop")
-
-  testCompileOnly("org.checkerframework:checker-qual-android")
+  api("org.metaborg:common:{{dependencyVersions.spoofaxPie}}")
+  api("org.metaborg:jsglr1.common:{{dependencyVersions.spoofaxPie}}")
+  compileOnly("org.checkerframework:checker-qual-android:{{dependencyVersions.checkerFramework}}")
 }
 
 fun createProjectDependency(projectPath: String): ProjectDependency {
@@ -33,7 +18,7 @@ fun createModuleDependency(notation: String): ModuleDependency {
 }
 
 fun copySpoofaxLanguageResources(
-  dependency: ModuleDependency,
+  projectPath: String,
   destinationPackage: String,
   includeStrategoClasses: Boolean,
   includeStrategoJavastratClasses: Boolean,
@@ -47,13 +32,16 @@ fun copySpoofaxLanguageResources(
     allResources.add("target/metaborg/stratego-javastrat.jar")
   }
 
-  // Configure dependency.
-  dependency.targetConfiguration = Dependency.DEFAULT_CONFIGURATION
-  dependency.isTransitive = false // Don't care about transitive dependencies, just want the '.spoofax-language' artifact.
-  dependency.artifact {
-    name = dependency.name
-    type = "spoofax-language"
-    extension = "spoofax-language"
+  // Create dependency to the '.spoofax-language' artifact.
+  val dependency = run {
+    val dep = dependencies.project(projectPath, Dependency.DEFAULT_CONFIGURATION)
+    dep.isTransitive = false // Don't care about transitive dependencies, just want the '.spoofax-language' artifact.
+    dep.artifact {
+      name = dep.name
+      type = "spoofax-language"
+      extension = "spoofax-language"
+    }
+    dep
   }
   // Create 'spoofaxLanguage' configuration that contains the dependency.
   val configuration = configurations.create("spoofaxLanguage") {
@@ -106,9 +94,9 @@ fun copySpoofaxLanguageResources(
   tasks.getByName(JavaPlugin.TEST_CLASSES_TASK_NAME).dependsOn(copyTestTask)
 }
 copySpoofaxLanguageResources(
-  createProjectDependency(":org.metaborg.lang.tiger"),
-  "mb/tiger",
-  true,
-  true,
-  "target/metaborg/editor.esv.af", "target/metaborg/sdf.tbl"
+  {{dependencyCode}},
+  {{coordinates.packagePath}},
+  {{includeStrategoClasses}},
+  {{includeStrategoJavastratClasses}},
+  {{#resourceCodes}}{{this}},{{/resourceCodes}}
 )
