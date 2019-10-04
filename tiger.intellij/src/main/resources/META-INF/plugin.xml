@@ -19,8 +19,32 @@
       language="Tiger"
       implementationClass="mb.tiger.intellij.syntaxcoloring.TigerParserDefinition"
     />
+    <editorTabTitleProvider implementation="mb.spoofax.intellij.editor.SpoofaxEditorTabTitleProvider"/>
   </extensions>
 
   <actions>
+    <!-- Spoofax Main -->
+    <group id="spoofax.intellij.menu.main" text="Spoofax" popup="true">
+      <add-to-group group-id="MainMenu" anchor="after" relative-to-action="WindowMenu"/>
+      <group id="spoofax.intelij.menu.main.debug" text="Debug" popup="true">
+        <group id="spoofax.intellij.menu.main.debug.pie" text="PIE" popup="true">
+          <action id="spoofax.intellij.pie.dropstore"
+                  class="mb.spoofax.intellij.pie.DropStoreAction" text="Drop Store"
+                  description="Drops the PIE store.">
+          </action>
+        </group>
+      </group>
+    </group>
+    <!-- Language Main -->
+<!--    <group id="tiger.intellij.menu.main" text="Tiger" popup="true">-->
+<!--      <add-to-group group-id="MainMenu" anchor="after" relative-to-action="spoofax.intellij.menu.main"/>-->
+<!--      &lt;!&ndash; Dynamic &ndash;&gt;-->
+<!--    </group>-->
   </actions>
+
+  <application-components>
+    <component>
+      <implementation-class>mb.tiger.intellij.menu.TigerMainMenuComponent</implementation-class>
+    </component>
+  </application-components>
 </idea-plugin>

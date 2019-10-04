@@ -54,7 +54,7 @@ public class TigerShowParsedAst implements TaskDef<CommandInput<TigerShowArgs>, 
         }
 
         final String formatted = StrategoUtil.toString(term);
-        return new CommandOutput(ListView.of(CommandFeedbacks.showText(formatted, "Parsed AST for '" + key + "'", null)));
+        return new CommandOutput(ListView.of(CommandFeedbacks.showText(formatted, key + " (Parsed AST)", null)));
     }
 
     @Override public Task<CommandOutput> createTask(CommandInput<TigerShowArgs> input) {
@@ -64,6 +64,11 @@ public class TigerShowParsedAst implements TaskDef<CommandInput<TigerShowArgs>, 
 
     @Override public String getDisplayName() {
         return "Show parsed AST";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Shows the parsed Abstract Syntax Tree of the program.";
     }
 
     @Override public EnumSetView<CommandExecutionType> getSupportedExecutionTypes() {

@@ -10,15 +10,20 @@ import mb.resource.hierarchical.walk.ResourceWalker;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
+import org.eclipse.core.internal.resources.ResourceException;
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
 import java.io.*;
+import java.nio.file.FileAlreadyExistsException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Stream;
+
+import static org.eclipse.core.resources.IResourceStatus.RESOURCE_EXISTS;
+
 
 public class EclipseResource implements HierarchicalResource, WrapsEclipseResource {
     private final EclipseResourcePath path;
@@ -96,7 +101,7 @@ public class EclipseResource implements HierarchicalResource, WrapsEclipseResour
         return getFileStore().fetchInfo().getLength();
     }
 
-    @Override public InputStream newInputStream() throws IOException {
+    @Override public InputStream openRead() throws IOException {
         try {
             return getFileStore().openInputStream(EFS.NONE, null);
         } catch(CoreException e) {
@@ -113,15 +118,15 @@ public class EclipseResource implements HierarchicalResource, WrapsEclipseResour
         return !resourceAttributes.isReadOnly();
     }
 
-    @Override public void setLastModifiedTime(Instant time) throws IOException {
+    @Override public void setLastModifiedTime(Instant moment) throws IOException {
         try {
-            getResource().revertModificationStamp(time.toEpochMilli());
+            getResource().revertModificationStamp(moment.toEpochMilli());
         } catch(CoreException e) {
             throw new IOException("Setting last modified time for resource '" + resource + "' failed unexpectedly", e);
         }
     }
 
-    @Override public OutputStream newOutputStream() throws IOException {
+    @Override public OutputStream openWrite() throws IOException {
         try {
             return getFileStore().openOutputStream(EFS.NONE, null);
         } catch(CoreException e) {
@@ -129,7 +134,6 @@ public class EclipseResource implements HierarchicalResource, WrapsEclipseResour
                 e);
         }
     }
-
 
     @Override public @Nullable EclipseResource getParent() {
         final @Nullable EclipseResourcePath newPath = path.getParent();
@@ -305,6 +309,10 @@ public class EclipseResource implements HierarchicalResource, WrapsEclipseResour
         try {
             getFile().create(new ByteArrayInputStream(new byte[0]), true, null);
         } catch(CoreException e) {
+            switch (e.getStatus().getCode()) {
+                case RESOURCE_EXISTS:
+                    throw new FileAlreadyExistsException("The resource already exists: " + path);
+            }
             throw new IOException("Creating file '" + path + "' failed unexpectedly", e);
         }
     }
@@ -317,6 +325,11 @@ public class EclipseResource implements HierarchicalResource, WrapsEclipseResour
             createParents();
         }
         createDirectory(getContainer());
+    }
+
+    @Override
+    public void ensureExists() throws IOException {
+
     }
 
     @Override public void createParents() throws IOException {
@@ -345,7 +358,7 @@ public class EclipseResource implements HierarchicalResource, WrapsEclipseResour
     }
 
 
-    @Override public void delete(boolean deleteContents) throws IOException {
+    @Override public void delete(boolean deleteRecursively) throws IOException {
         try {
             getResource().delete(true, null);
         } catch(CoreException e) {

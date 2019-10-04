@@ -1,32 +1,45 @@
 package mb.spoofax.eclipse.pie;
 
-import mb.pie.api.exec.Cancel;
-import mb.pie.api.exec.Cancelled;
+import mb.pie.api.exec.CancelToken;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 
-public class MonitorCancelToken implements Cancelled, Cancel {
-    public SubMonitor monitor;
 
-    public MonitorCancelToken(IProgressMonitor monitor) {
+/**
+ * A cancellation token wrapping an Eclipse {@link IProgressMonitor}.
+ */
+public final class MonitorCancelToken implements CancelToken {
+
+    private final SubMonitor monitor;
+
+    /**
+     * Initializes a new instance of the {@link MonitorCancelToken} class.
+     *
+     * @param monitor The progress monitor to monitor; or {@code null}.
+     */
+    public MonitorCancelToken(@Nullable IProgressMonitor monitor) {
         this.monitor = SubMonitor.convert(monitor);
     }
 
+    /**
+     * Initializes a new instance of the {@link MonitorCancelToken} class.
+     *
+     * @param monitor The sub monitor to monitor.
+     */
     public MonitorCancelToken(SubMonitor monitor) {
         this.monitor = monitor;
     }
 
-    @Override public void requestCancel() {
-        monitor.setCanceled(true);
+    @Override
+    public boolean isCanceled() {
+        return this.monitor.isCanceled();
     }
 
-    @Override public boolean isCancelled() {
-        return monitor.isCanceled();
-    }
-
-    @Override public void throwIfCancelled() throws InterruptedException {
-        if(monitor.isCanceled()) {
-            throw new InterruptedException();
-        }
-    }
+    /**
+     * Gets the progress monitor from this token.
+     *
+     * @return The progress monitor.
+     */
+    public SubMonitor getMonitor() { return this.monitor; }
 }

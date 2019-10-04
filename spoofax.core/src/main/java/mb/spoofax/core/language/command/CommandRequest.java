@@ -6,6 +6,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.io.Serializable;
 
 public class CommandRequest<A extends Serializable> {
+
     public final CommandDef<A> def;
     public final CommandExecutionType executionType;
     public final @Nullable RawArgs initialArgs;
@@ -19,4 +20,10 @@ public class CommandRequest<A extends Serializable> {
     public CommandRequest(CommandDef<A> def, CommandExecutionType executionType) {
         this(def, executionType, null);
     }
+
+    @Override
+    public String toString() {
+        return super.toString();
+    }
+
 }

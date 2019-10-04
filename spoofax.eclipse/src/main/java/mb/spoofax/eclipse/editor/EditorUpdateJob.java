@@ -4,6 +4,7 @@ import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecException;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
+import mb.spoofax.eclipse.pie.MonitorCancelToken;
 import mb.spoofax.eclipse.pie.PieRunner;
 import mb.spoofax.eclipse.resource.EclipseDocumentResource;
 import mb.spoofax.eclipse.util.StatusUtil;
@@ -57,7 +58,7 @@ public class EditorUpdateJob extends Job {
     }
 
     private IStatus update(IProgressMonitor monitor) throws ExecException, InterruptedException {
-        pieRunner.addOrUpdateEditor(languageComponent, resource, editor, monitor);
+        pieRunner.addOrUpdateEditor(languageComponent, resource, editor, new MonitorCancelToken(monitor));
         return StatusUtil.success();
     }
 }

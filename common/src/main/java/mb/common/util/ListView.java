@@ -13,7 +13,7 @@ import java.util.function.Consumer;
  * @param <E> The type of elements in this list.
  */
 @SuppressWarnings("unused")
-public class ListView<E> extends BaseCollectionView<E, List<? extends E>> implements Iterable<E>, Serializable {
+public final class ListView<E> extends BaseCollectionView<E, List<? extends E>> implements Iterable<E>, Serializable {
     public ListView(List<? extends E> collection) {
         super(collection);
     }

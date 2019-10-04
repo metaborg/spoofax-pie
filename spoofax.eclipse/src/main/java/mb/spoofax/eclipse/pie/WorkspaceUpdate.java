@@ -6,6 +6,7 @@ import mb.common.style.Color;
 import mb.common.style.Styling;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
+import mb.pie.api.exec.CancelToken;
 import mb.resource.ResourceKey;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
@@ -20,7 +21,6 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ICoreRunnable;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jface.text.TextPresentation;
 
@@ -124,8 +124,8 @@ public class WorkspaceUpdate {
     }
 
 
-    public void update(@Nullable ISchedulingRule rule, @Nullable IProgressMonitor monitor) {
-        if(monitor != null && monitor.isCanceled()) return;
+    public void update(@Nullable ISchedulingRule rule, MonitorCancelToken cancelToken) {
+        if(cancelToken.isCanceled()) return;
 
         final KeyedMessages messages = messagesBuilder.build();
 
@@ -160,16 +160,16 @@ public class WorkspaceUpdate {
             }
         };
         try {
-            ResourcesPlugin.getWorkspace().run(makerUpdate, rule, IWorkspace.AVOID_UPDATE, monitor);
+            ResourcesPlugin.getWorkspace().run(makerUpdate, rule, IWorkspace.AVOID_UPDATE, cancelToken.getMonitor());
         } catch(CoreException e) {
             logger.error("Running marker update failed unexpectedly", e);
             return;
         }
 
         for(StyleUpdate styleUpdate : styleUpdates) {
-            if(monitor != null && monitor.isCanceled()) return;
+            if(cancelToken.isCanceled()) return;
             final SpoofaxEditor editor = styleUpdate.editor;
-            editor.setStyleAsync(styleUpdate.textPresentation, styleUpdate.text, styleUpdate.textLength, monitor);
+            editor.setStyleAsync(styleUpdate.textPresentation, styleUpdate.text, styleUpdate.textLength, cancelToken.getMonitor());
         }
     }
 }

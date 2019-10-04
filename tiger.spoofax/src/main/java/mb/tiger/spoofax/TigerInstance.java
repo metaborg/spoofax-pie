@@ -133,7 +133,7 @@ public class TigerInstance implements LanguageInstance {
 
     @Override public ListView<MenuItem> getResourceContextMenuItems() {
         return ListView.of(
-            new Menu("Compile",
+            new Menu("Compile", "Compile commands.",
                 onceCommandAction(compileFile),
                 onceCommandAction(compileDirectory),
                 onceCommandAction(altCompileFile, "- default"),
@@ -145,15 +145,15 @@ public class TigerInstance implements LanguageInstance {
                 contCommandAction(altCompileFile, "- base64 encode", new RawArgs(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))),
                 contCommandAction(altCompileFile, "- list literal values instead + base64 encode", new RawArgs(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt")))
             ),
-            new Menu("Debug",
-                new Menu("Syntax",
+            new Menu("Debug", "Debug commands.",
+                new Menu("Syntax", "Syntactic commands.",
                     onceCommandAction(showParsedAst),
                     onceCommandAction(showPrettyPrintedText)
                 ),
-                new Menu("Static Semantics",
+                new Menu("Static Semantics", "Static semantic commands.",
                     onceCommandAction(showAnalyzedAst)
                 ),
-                new Menu("Transformations",
+                new Menu("Transformations", "Transformation commands.",
                     onceCommandAction(showDesugaredAst)
                 )
             )
@@ -162,7 +162,7 @@ public class TigerInstance implements LanguageInstance {
 
     @Override public ListView<MenuItem> getEditorContextMenuItems() {
         return ListView.of(
-            new Menu("Compile",
+            new Menu("Compile", "Compile commands.",
                 onceCommandAction(compileFile),
                 onceCommandAction(altCompileFile, "- default"),
                 onceCommandAction(altCompileFile, "- list literal values instead", new RawArgs(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))),
@@ -173,15 +173,15 @@ public class TigerInstance implements LanguageInstance {
                 contCommandAction(altCompileFile, "- base64 encode", new RawArgs(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))),
                 contCommandAction(altCompileFile, "- list literal values instead + base64 encode", new RawArgs(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt")))
             ),
-            new Menu("Debug",
-                new Menu("Syntax",
+            new Menu("Debug", "Debug commands.",
+                new Menu("Syntax", "Syntactic commands.",
                     onceCommandAction(showParsedAst), contCommandAction(showParsedAst),
                     onceCommandAction(showPrettyPrintedText), contCommandAction(showPrettyPrintedText)
                 ),
-                new Menu("Static Semantics",
+                new Menu("Static Semantics","Static semantic commands.",
                     onceCommandAction(showAnalyzedAst), contCommandAction(showAnalyzedAst)
                 ),
-                new Menu("Transformations",
+                new Menu("Transformations","Transformation commands.",
                     onceCommandAction(showDesugaredAst), contCommandAction(showDesugaredAst)
                 )
             )

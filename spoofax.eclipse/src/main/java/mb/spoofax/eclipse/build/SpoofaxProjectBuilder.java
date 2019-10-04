@@ -4,6 +4,7 @@ import mb.log.api.Logger;
 import mb.pie.api.ExecException;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
+import mb.spoofax.eclipse.pie.MonitorCancelToken;
 import mb.spoofax.eclipse.pie.PieRunner;
 import mb.spoofax.eclipse.util.StatusUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -53,11 +54,11 @@ public abstract class SpoofaxProjectBuilder extends IncrementalProjectBuilder {
     }
 
     private void fullBuild(IProject eclipseProject, @Nullable IProgressMonitor monitor) throws IOException, ExecException, InterruptedException {
-        pieRunner.fullBuild(languageComponent, eclipseProject, monitor);
+        pieRunner.fullBuild(languageComponent, eclipseProject, new MonitorCancelToken(monitor));
     }
 
     private void incrBuild(IProject eclipseProject, IResourceDelta delta, @Nullable IProgressMonitor monitor) throws CoreException, ExecException, InterruptedException, IOException {
-        pieRunner.incrementalBuild(languageComponent, eclipseProject, delta, monitor);
+        pieRunner.incrementalBuild(languageComponent, eclipseProject, delta, new MonitorCancelToken(monitor));
     }
 
     private void cancel(@Nullable IProgressMonitor monitor) {
@@ -70,7 +71,7 @@ public abstract class SpoofaxProjectBuilder extends IncrementalProjectBuilder {
     protected void clean(@Nullable IProgressMonitor monitor) throws CoreException {
         final IProject project = getProject();
         try {
-            pieRunner.clean(languageComponent, project, monitor);
+            pieRunner.clean(languageComponent, project, new MonitorCancelToken(monitor));
         } catch(IOException e) {
             cancel(monitor);
             final String message = "Cleaning project '" + project + "' failed unexpectedly";

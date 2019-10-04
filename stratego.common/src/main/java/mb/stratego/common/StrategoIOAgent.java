@@ -5,7 +5,6 @@ import mb.log.api.Level;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.log.api.LoggingOutputStream;
-import mb.resource.Resource;
 import mb.resource.ResourceService;
 import mb.resource.WritableResource;
 import mb.resource.fs.FSResource;
@@ -195,7 +194,7 @@ public class StrategoIOAgent extends IOAgent {
             if(handle.outputStream == null) {
                 assert handle.writer == null;
                 try {
-                    handle.outputStream = handle.resource.newOutputStream();
+                    handle.outputStream = handle.resource.openWriteOrCreate();
                 } catch(IOException e) {
                     throw new RuntimeException("Could not get output stream for resource " + handle.resource, e);
                 }
@@ -273,7 +272,7 @@ public class StrategoIOAgent extends IOAgent {
         final ResourceHandle handle = openFiles.get(fd);
         if(handle.inputStream == null) {
             try {
-                handle.inputStream = handle.resource.newInputStream();
+                handle.inputStream = handle.resource.openRead();
             } catch(IOException e) {
                 throw new RuntimeException("Could not get input stream for resource " + handle.resource, e);
             }
@@ -331,7 +330,7 @@ public class StrategoIOAgent extends IOAgent {
         final HierarchicalResource dir = isDefinitionFile ? definitionDir : workingDir;
         final HierarchicalResource file = resourceService.appendOrReplaceWithHierarchical(dir, fn);
         try {
-            return file.newInputStream();
+            return file.openRead();
         } catch(IOException e) {
             throw new RuntimeException("Could not get input stream for resource " + file, e);
         }
@@ -341,7 +340,7 @@ public class StrategoIOAgent extends IOAgent {
     @Override public OutputStream openFileOutputStream(@NonNull String fn) {
         final HierarchicalResource file = resourceService.appendOrReplaceWithHierarchical(workingDir, fn);
         try {
-            return file.newOutputStream();
+            return file.openWriteOrCreate();
         } catch(IOException e) {
             throw new RuntimeException("Could not get output stream for resource " + file, e);
         }

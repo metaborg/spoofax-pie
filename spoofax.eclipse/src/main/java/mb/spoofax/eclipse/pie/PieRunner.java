@@ -9,8 +9,7 @@ import mb.common.util.SetView;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.*;
-import mb.pie.api.exec.Cancelled;
-import mb.pie.api.exec.NullCancelled;
+import mb.pie.api.exec.CancelToken;
 import mb.pie.runtime.exec.Stats;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
@@ -29,7 +28,6 @@ import mb.spoofax.eclipse.util.ResourceUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension4;
 import org.eclipse.swt.widgets.Display;
@@ -88,7 +86,7 @@ public class PieRunner {
         EclipseLanguageComponent languageComponent,
         EclipseDocumentResource resource,
         SpoofaxEditor editor,
-        @Nullable IProgressMonitor monitor
+        MonitorCancelToken cancelToken
     ) throws ExecException, InterruptedException {
         logger.trace("Adding or updating editor for '{}'", resource);
 
@@ -101,13 +99,13 @@ public class PieRunner {
             // First run a bottom-up build, to ensure that tasks affected by changed file are brought up-to-date.
             final HashSet<ResourceKey> changedResources = new HashSet<>();
             changedResources.add(key);
-            updateAffectedBy(changedResources, session, monitor);
+            updateAffectedBy(changedResources, session, cancelToken);
 
             final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
 
             final Task<@Nullable Styling> styleTask = languageInstance.createStyleTask(key);
             final String text = resource.getDocument().get();
-            final @Nullable Styling styling = requireWithoutObserving(styleTask, session, monitor);
+            final @Nullable Styling styling = requireWithoutObserving(styleTask, session, cancelToken);
             //noinspection ConstantConditions (styling can really be null)
             if(styling != null) {
                 workspaceUpdate.updateStyle(editor, text, styling);
@@ -116,12 +114,12 @@ public class PieRunner {
             }
 
             final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(key);
-            final KeyedMessages messages = requireWithoutObserving(checkTask, session, monitor);
+            final KeyedMessages messages = requireWithoutObserving(checkTask, session, cancelToken);
             workspaceUpdate.clearMessages(key);
             workspaceUpdate.replaceMessages(messages);
         }
 
-        workspaceUpdate.update(resource.getWrappedEclipseResource(), monitor);
+        workspaceUpdate.update(resource.getWrappedEclipseResource(), cancelToken);
     }
 
     public void removeEditor(EclipseDocumentResource resource) {
@@ -135,7 +133,7 @@ public class PieRunner {
     public void fullBuild(
         EclipseLanguageComponent languageComponent,
         IProject eclipseProject,
-        @Nullable IProgressMonitor monitor
+        CancelToken cancelToken
     ) throws IOException, ExecException, InterruptedException {
         logger.trace("Running full build for project '{}'", eclipseProject);
 
@@ -144,8 +142,8 @@ public class PieRunner {
         resourceChanges.newProjects.add(project.getKey());
 
         try(final PieSession session = languageComponent.newPieSession()) {
-            updateAffectedBy(resourceChanges.changed, session, monitor);
-            observeUnobserveAutoTransforms(languageComponent, resourceChanges, session, monitor);
+            updateAffectedBy(resourceChanges.changed, session, cancelToken);
+            observeUnobserveAutoTransforms(languageComponent, resourceChanges, session, cancelToken);
         }
     }
 
@@ -153,7 +151,7 @@ public class PieRunner {
         EclipseLanguageComponent languageComponent,
         IProject project,
         IResourceDelta delta,
-        @Nullable IProgressMonitor monitor
+        MonitorCancelToken cancelToken
     ) throws ExecException, InterruptedException, CoreException, IOException {
         logger.trace("Running incremental build for project '{}'", project);
 
@@ -161,10 +159,10 @@ public class PieRunner {
 
         bottomUpWorkspaceUpdate = workspaceUpdateFactory.create(languageComponent);
         try(final PieSession session = languageComponent.newPieSession()) {
-            updateAffectedBy(resourceChanges.changed, session, monitor);
-            observeUnobserveAutoTransforms(languageComponent, resourceChanges, session, monitor);
+            updateAffectedBy(resourceChanges.changed, session, cancelToken);
+            observeUnobserveAutoTransforms(languageComponent, resourceChanges, session, cancelToken);
         }
-        bottomUpWorkspaceUpdate.update(null, monitor);
+        bottomUpWorkspaceUpdate.update(null, cancelToken);
         bottomUpWorkspaceUpdate = null;
     }
 
@@ -174,7 +172,7 @@ public class PieRunner {
     public void clean(
         EclipseLanguageComponent languageComponent,
         IProject eclipseProject,
-        @Nullable IProgressMonitor monitor
+        CancelToken cancelToken
     ) throws IOException {
         final EclipseResource project = new EclipseResource(eclipseProject);
         final ResourceChanges resourceChanges = new ResourceChanges(project, languageComponent.getLanguageInstance().getFileExtensions());
@@ -184,21 +182,21 @@ public class PieRunner {
             // Unobserve auto transforms.
             for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.project) {
                 final Task<CommandOutput> task = createCommandTask(autoCommandRequest.toCommandRequest(), CommandContext.ofProject(project.getKey()));
-                unobserve(task, pie, session, monitor);
+                unobserve(task, pie, session, cancelToken);
             }
             for(ResourcePath directory : resourceChanges.newDirectories) {
                 for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.directory) {
                     final Task<CommandOutput> task = createCommandTask(autoCommandRequest.toCommandRequest(), CommandContext.ofDirectory(directory));
-                    unobserve(task, pie, session, monitor);
+                    unobserve(task, pie, session, cancelToken);
                 }
             }
             for(ResourcePath file : resourceChanges.newFiles) {
                 for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.file) {
                     final Task<CommandOutput> task = createCommandTask(autoCommandRequest.toCommandRequest(), CommandContext.ofFile(file));
-                    unobserve(task, pie, session, monitor);
+                    unobserve(task, pie, session, cancelToken);
                 }
             }
-            deleteUnobservedTasks(session, monitor);
+            deleteUnobservedTasks(session, cancelToken);
         }
     }
 
@@ -207,11 +205,11 @@ public class PieRunner {
 
     public void startup(
         EclipseLanguageComponent languageComponent,
-        @Nullable IProgressMonitor monitor
+        CancelToken cancelToken
     ) throws IOException, CoreException, ExecException, InterruptedException {
         final ResourceChanges resourceChanges = new ResourceChanges(languageComponent.getEclipseIdentifiers().getNature(), languageComponent.getLanguageInstance().getFileExtensions());
         try(final PieSession session = languageComponent.newPieSession()) {
-            observeUnobserveAutoTransforms(languageComponent, resourceChanges, session, monitor);
+            observeUnobserveAutoTransforms(languageComponent, resourceChanges, session, cancelToken);
         }
     }
 
@@ -229,7 +227,7 @@ public class PieRunner {
     public void observeCheckTasks(
         EclipseLanguageComponent languageComponent,
         Iterable<IFile> files,
-        @Nullable IProgressMonitor monitor
+        MonitorCancelToken cancelToken
     ) throws ExecException, InterruptedException {
         final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
         try(final PieSession session = languageComponent.newPieSession()) {
@@ -243,18 +241,18 @@ public class PieRunner {
                     }
                 });
                 if(!pie.isObserved(checkTask)) {
-                    final KeyedMessages messages = require(checkTask, session, monitor);
+                    final KeyedMessages messages = require(checkTask, session, cancelToken);
                     workspaceUpdate.replaceMessages(messages);
                 }
             }
         }
-        workspaceUpdate.update(null, monitor);
+        workspaceUpdate.update(null, cancelToken);
     }
 
     public void unobserveCheckTasks(
         EclipseLanguageComponent languageComponent,
         Iterable<IFile> files,
-        @Nullable IProgressMonitor monitor
+        MonitorCancelToken cancelToken
     ) {
         final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
         try(final PieSession session = languageComponent.newPieSession()) {
@@ -264,10 +262,10 @@ public class PieRunner {
                 final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(resourceKey);
                 // BUG: this also clears messages for open editors, which it shouldn't do.
                 workspaceUpdate.clearMessages(resourceKey);
-                unobserve(checkTask, pie, session, monitor);
+                unobserve(checkTask, pie, session, cancelToken);
             }
         }
-        workspaceUpdate.update(null, monitor);
+        workspaceUpdate.update(null, cancelToken);
     }
 
 
@@ -290,25 +288,25 @@ public class PieRunner {
         CommandRequest<?> commandRequest,
         ListView<CommandContext> contexts,
         PieSession session,
-        @Nullable IProgressMonitor monitor
+        CancelToken cancelToken
     ) throws ExecException, InterruptedException {
         switch(commandRequest.executionType) {
             case ManualOnce:
                 for(CommandContext context : contexts) {
                     final Task<CommandOutput> task = createCommandTask(commandRequest, context);
-                    final CommandOutput output = requireWithoutObserving(task, session, monitor);
+                    final CommandOutput output = requireWithoutObserving(task, session, cancelToken);
                     processOutput(output, true, null);
                 }
                 break;
             case ManualContinuous:
                 for(CommandContext context : contexts) {
                     final Task<CommandOutput> task = createCommandTask(commandRequest, context);
-                    final CommandOutput output = require(task, session, monitor);
+                    final CommandOutput output = require(task, session, cancelToken);
                     processOutput(output, true, (p) -> {
                         // POTI: this opens a new PIE session, which may be used concurrently with other sessions, which
                         // may not be (thread-)safe.
                         try(final PieSession newSession = languageComponent.newPieSession()) {
-                            unobserve(task, pie, newSession, monitor);
+                            unobserve(task, pie, newSession, cancelToken);
                         }
                         pie.removeCallback(task);
                     });
@@ -318,7 +316,7 @@ public class PieRunner {
             case AutomaticContinuous:
                 for(CommandContext context : contexts) {
                     final Task<CommandOutput> task = createCommandTask(commandRequest, context);
-                    require(task, session, monitor);
+                    require(task, session, cancelToken);
                     // Feedback for AutomaticContinuous is ignored intentionally: do not want to suddenly open new
                     // editors when a resource is saved.
                 }
@@ -399,52 +397,43 @@ public class PieRunner {
 
     // Standard PIE operations with trace logging.
 
-    public <T extends Serializable> T requireWithoutObserving(Task<T> task, PieSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
+    public <T extends Serializable> T requireWithoutObserving(Task<T> task, PieSession session, CancelToken cancelToken) throws ExecException, InterruptedException {
         logger.trace("Require (without observing) '{}'", task);
         Stats.reset();
-        final T result = session.requireWithoutObserving(task, monitorCancelled(monitor));
+        final T result = session.requireWithoutObserving(task, cancelToken);
         logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
         return result;
     }
 
-    public <T extends Serializable> T require(Task<T> task, PieSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
+    public <T extends Serializable> T require(Task<T> task, PieSession session, CancelToken cancelToken) throws ExecException, InterruptedException {
         logger.trace("Require '{}'", task);
         Stats.reset();
-        final T result = session.require(task, monitorCancelled(monitor));
+        final T result = session.require(task, cancelToken);
         logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
         return result;
     }
 
-    public void updateAffectedBy(Set<? extends ResourceKey> changedResources, PieSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
+    public void updateAffectedBy(Set<? extends ResourceKey> changedResources, PieSession session, CancelToken cancelToken) throws ExecException, InterruptedException {
         logger.trace("Update affected by '{}'", changedResources);
         Stats.reset();
-        session.updateAffectedBy(changedResources, monitorCancelled(monitor));
+        session.updateAffectedBy(changedResources, cancelToken);
         logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
     }
 
-    public void unobserve(Task<?> task, Pie pie, PieSession session, @Nullable IProgressMonitor _monitor) {
+    public void unobserve(Task<?> task, Pie pie, PieSession session, CancelToken _cancelToken) {
         final TaskKey key = task.key();
         if(!pie.isObserved(key)) return;
         logger.trace("Unobserving '{}'", key);
         session.unobserve(key);
     }
 
-    public void deleteUnobservedTasks(PieSession session, @Nullable IProgressMonitor _monitor) throws IOException {
+    public void deleteUnobservedTasks(PieSession session, CancelToken _cancelToken) throws IOException {
         logger.trace("Deleting unobserved tasks");
         session.deleteUnobservedTasks((t) -> true, (t, r) -> true);
     }
 
 
     // Helper/utility classes and methods.
-
-    private static Cancelled monitorCancelled(@Nullable IProgressMonitor monitor) {
-        if(monitor != null) {
-            return new MonitorCancelToken(monitor);
-        } else {
-            return new NullCancelled();
-        }
-    }
-
 
     private static class ResourceChanges {
         final HashSet<ResourcePath> changed = new HashSet<>();
@@ -570,41 +559,41 @@ public class PieRunner {
         EclipseLanguageComponent languageComponent,
         ResourceChanges resourceChanges,
         PieSession session,
-        @Nullable IProgressMonitor monitor
+        CancelToken cancelToken
     ) throws ExecException, InterruptedException, IOException {
         final AutoCommandRequests autoCommandRequests = new AutoCommandRequests(languageComponent); // OPTO: calculate once per language component
         for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.project) {
             final CommandRequest<?> request = autoCommandRequest.toCommandRequest();
             for(ResourcePath newProject : resourceChanges.newProjects) {
-                requireCommand(languageComponent, request, CommandUtil.context(CommandContext.ofProject(newProject)), session, monitor);
+                requireCommand(languageComponent, request, CommandUtil.context(CommandContext.ofProject(newProject)), session, cancelToken);
             }
             for(ResourcePath removedProject : resourceChanges.removedProjects) {
                 final Task<CommandOutput> task = createCommandTask(request, CommandContext.ofProject(removedProject));
-                unobserve(task, pie, session, monitor);
+                unobserve(task, pie, session, cancelToken);
             }
         }
         for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.directory) {
             final CommandRequest<?> request = autoCommandRequest.toCommandRequest();
             for(ResourcePath newDirectory : resourceChanges.newDirectories) {
-                requireCommand(languageComponent, request, CommandUtil.context(CommandContext.ofDirectory(newDirectory)), session, monitor);
+                requireCommand(languageComponent, request, CommandUtil.context(CommandContext.ofDirectory(newDirectory)), session, cancelToken);
             }
             for(ResourcePath removedDirectory : resourceChanges.removedDirectories) {
                 final Task<CommandOutput> task = createCommandTask(request, CommandContext.ofDirectory(removedDirectory));
-                unobserve(task, pie, session, monitor);
+                unobserve(task, pie, session, cancelToken);
             }
         }
         for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.file) {
             final CommandRequest<?> request = autoCommandRequest.toCommandRequest();
             for(ResourcePath newFile : resourceChanges.newFiles) {
-                requireCommand(languageComponent, request, CommandUtil.context(CommandContext.ofFile(newFile)), session, monitor);
+                requireCommand(languageComponent, request, CommandUtil.context(CommandContext.ofFile(newFile)), session, cancelToken);
             }
             for(ResourcePath removedFile : resourceChanges.removedFiles) {
                 final Task<CommandOutput> task = createCommandTask(request, CommandContext.ofFile(removedFile));
-                unobserve(task, pie, session, monitor);
+                unobserve(task, pie, session, cancelToken);
             }
         }
         if(resourceChanges.hasRemovedResources()) {
-            deleteUnobservedTasks(session, monitor);
+            deleteUnobservedTasks(session, cancelToken);
         }
     }
 }

@@ -2,6 +2,7 @@ package mb.tiger.eclipse;
 
 import mb.pie.api.ExecException;
 import mb.spoofax.eclipse.SpoofaxPlugin;
+import mb.spoofax.eclipse.pie.MonitorCancelToken;
 import mb.spoofax.eclipse.util.StatusUtil;
 import mb.tiger.spoofax.TigerModule;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -42,7 +43,7 @@ public class TigerPlugin extends AbstractUIPlugin {
         new WorkspaceJob("Tiger startup") {
             @Override public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
                 try {
-                    SpoofaxPlugin.getComponent().getPieRunner().startup(component, monitor);
+                    SpoofaxPlugin.getComponent().getPieRunner().startup(component, new MonitorCancelToken(monitor));
                 } catch(IOException | ExecException | InterruptedException e) {
                     throw new CoreException(StatusUtil.error("Tiger startup job failed unexpectedly", e));
                 }

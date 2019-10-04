@@ -128,6 +128,11 @@ public class TigerCompileDirectory implements TaskDef<CommandInput<TigerCompileD
         return "'Compile' directory (list definition names)";
     }
 
+    @Override
+    public String getDescription() {
+        return "";
+    }
+
     @Override public EnumSetView<CommandExecutionType> getSupportedExecutionTypes() {
         return EnumSetView.of(CommandExecutionType.ManualOnce, CommandExecutionType.AutomaticContinuous);
     }

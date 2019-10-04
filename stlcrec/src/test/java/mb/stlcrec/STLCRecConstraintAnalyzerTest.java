@@ -10,7 +10,7 @@ import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.jsglr1.common.JSGLR1ParseTableException;
 import mb.log.api.LoggerFactory;
 import mb.log.noop.NoopLoggerFactory;
-import mb.resource.DefaultResourceKey;
+import mb.resource.SimpleResourceKey;
 import mb.resource.DefaultResourceService;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
@@ -46,7 +46,7 @@ class STLCRecConstraintAnalyzerTest {
     STLCRecConstraintAnalyzerTest() throws IOException, JSGLR1ParseTableException, StrategoRuntimeBuilderException {}
 
     @Test void analyzeSingleErrors() throws InterruptedException, ConstraintAnalyzerException {
-        final ResourceKey resource = new DefaultResourceKey(qualifier, "a.stlcrec");
+        final ResourceKey resource = new SimpleResourceKey(qualifier, "a.stlcrec");
         final JSGLR1ParseResult parsed = parser.parse("1 + nil", "Start", resource);
         assertTrue(parsed.getAst().isPresent());
         final SingleFileResult result = analyzer.analyze(resource, parsed.getAst().get(), new ConstraintAnalyzerContext(),
@@ -57,7 +57,7 @@ class STLCRecConstraintAnalyzerTest {
     }
 
     @Test void analyzeSingleSuccess() throws InterruptedException, ConstraintAnalyzerException {
-        final ResourceKey resource = new DefaultResourceKey(qualifier, "b.stlcrec");
+        final ResourceKey resource = new SimpleResourceKey(qualifier, "b.stlcrec");
         final JSGLR1ParseResult parsed = parser.parse("1 + 2", "Start", resource);
         assertTrue(parsed.getAst().isPresent());
         final SingleFileResult result = analyzer.analyze(resource, parsed.getAst().get(), new ConstraintAnalyzerContext(),
@@ -69,13 +69,13 @@ class STLCRecConstraintAnalyzerTest {
 
     @Disabled("Multiple resource test in non-multifile language with Statix does not seem to work")
     @Test void analyzeMultipleErrors() throws InterruptedException, ConstraintAnalyzerException {
-        final ResourceKey resource1 = new DefaultResourceKey(qualifier, "a.stlcrec");
+        final ResourceKey resource1 = new SimpleResourceKey(qualifier, "a.stlcrec");
         final JSGLR1ParseResult parsed1 = parser.parse("1 + 1", "Start", resource1);
         assertTrue(parsed1.getAst().isPresent());
-        final ResourceKey resource2 = new DefaultResourceKey(qualifier, "b.stlcrec");
+        final ResourceKey resource2 = new SimpleResourceKey(qualifier, "b.stlcrec");
         final JSGLR1ParseResult parsed2 = parser.parse("1 + 2", "Start", resource2);
         assertTrue(parsed2.getAst().isPresent());
-        final ResourceKey resource3 = new DefaultResourceKey(qualifier, "c.stlcrec");
+        final ResourceKey resource3 = new SimpleResourceKey(qualifier, "c.stlcrec");
         final JSGLR1ParseResult parsed3 = parser.parse("1 + nil", "Start", resource3);
         assertTrue(parsed3.getAst().isPresent());
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
@@ -111,14 +111,14 @@ class STLCRecConstraintAnalyzerTest {
 
     @Disabled("Multiple resource test in non-multifile language with Statix does not seem to work")
     @Test void analyzeMultipleSuccess() throws InterruptedException, ConstraintAnalyzerException {
-        final ResourceKey root = new DefaultResourceKey(qualifier, "0");
-        final ResourceKey resource1 = new DefaultResourceKey(qualifier, "a.stlcrec");
+        final ResourceKey root = new SimpleResourceKey(qualifier, "0");
+        final ResourceKey resource1 = new SimpleResourceKey(qualifier, "a.stlcrec");
         final JSGLR1ParseResult parsed1 = parser.parse("1 + 1", "Start", resource1);
         assertTrue(parsed1.getAst().isPresent());
-        final ResourceKey resource2 = new DefaultResourceKey(qualifier, "b.stlcrec");
+        final ResourceKey resource2 = new SimpleResourceKey(qualifier, "b.stlcrec");
         final JSGLR1ParseResult parsed2 = parser.parse("1 + 2", "Start", resource2);
         assertTrue(parsed2.getAst().isPresent());
-        final ResourceKey resource3 = new DefaultResourceKey(qualifier, "c.stlcrec");
+        final ResourceKey resource3 = new SimpleResourceKey(qualifier, "c.stlcrec");
         final JSGLR1ParseResult parsed3 = parser.parse("1 + 3", "Start", resource3);
         assertTrue(parsed3.getAst().isPresent());
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();

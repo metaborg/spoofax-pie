@@ -121,6 +121,11 @@ public class TigerAltCompileFile implements TaskDef<CommandInput<TigerAltCompile
         return "'Alternative compile' file";
     }
 
+    @Override
+    public String getDescription() {
+        return "";
+    }
+
     @Override public EnumSetView<CommandExecutionType> getSupportedExecutionTypes() {
         return EnumSetView.of(CommandExecutionType.ManualOnce, CommandExecutionType.AutomaticContinuous, CommandExecutionType.ManualContinuous);
     }
