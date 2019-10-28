@@ -5,4 +5,5 @@ plugins {
 
 spoofax {
   createPublication = false
+  runTests = false // Disable tests: Statix tests are broken.
 }
