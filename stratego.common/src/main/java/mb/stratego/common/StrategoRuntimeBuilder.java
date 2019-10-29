@@ -104,7 +104,7 @@ public class StrategoRuntimeBuilder {
         for(ReadableResource resource : ctrees) {
             try {
                 // Load buffers the input stream, and closes the buffered stream, which closes our stream.
-                hybridInterpreter.load(resource.newInputStream());
+                hybridInterpreter.load(resource.openRead());
             } catch(IOException | InterpreterException e) {
                 throw new StrategoRuntimeBuilderException(
                     "Loading Stratego ctree from resource '" + resource + "' failed unexpectedly", e);

@@ -86,7 +86,8 @@ public final class IntellijResource implements Resource, ReadableResource {
         }
     }
 
-    @Override public InputStream newInputStream() throws IOException {
+    @Override
+    public InputStream openRead() throws IOException {
         @Nullable String text = getDocumentText();
         if (text != null) {
             return new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_16BE));

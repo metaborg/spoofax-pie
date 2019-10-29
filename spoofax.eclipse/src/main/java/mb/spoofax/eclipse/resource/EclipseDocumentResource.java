@@ -65,7 +65,7 @@ public class EclipseDocumentResource implements Resource, ReadableResource, Wrap
         return document.getLength() * 2; // Java Strings are UTF-16: 2 bytes per character.
     }
 
-    @Override public InputStream newInputStream() {
+    @Override public InputStream openRead() {
         return new ByteArrayInputStream(document.get().getBytes(StandardCharsets.UTF_8));
     }
 

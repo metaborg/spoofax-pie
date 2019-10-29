@@ -15,7 +15,7 @@ public class TextToResourceKeyArgConverter implements ArgConverter<ResourceKey> 
     }
 
     @Override public ResourceKey convert(String argStr) throws Exception {
-        return textResourceRegistry.createResourceWithRandomUUID(argStr).key;
+        return textResourceRegistry.createResource(argStr).key;
     }
 
     @Override public Class<ResourceKey> getOutputClass() {
