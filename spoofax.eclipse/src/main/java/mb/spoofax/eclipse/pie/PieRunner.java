@@ -9,8 +9,8 @@ import mb.common.util.SetView;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.*;
-import mb.pie.api.exec.Cancelled;
-import mb.pie.api.exec.NullCancelled;
+import mb.pie.api.exec.CancelToken;
+import mb.pie.api.exec.NullCancelableToken;
 import mb.pie.runtime.exec.Stats;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
@@ -437,11 +437,11 @@ public class PieRunner {
 
     // Helper/utility classes and methods.
 
-    private static Cancelled monitorCancelled(@Nullable IProgressMonitor monitor) {
+    private static CancelToken monitorCancelled(@Nullable IProgressMonitor monitor) {
         if(monitor != null) {
-            return new MonitorCancelToken(monitor);
+            return new MonitorCancelableToken(monitor);
         } else {
-            return new NullCancelled();
+            return NullCancelableToken.instance;
         }
     }
 
