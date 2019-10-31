@@ -21,6 +21,7 @@ dependencies {
   annotationProcessor("org.derive4j:derive4j")
 
   testImplementation("com.google.jimfs:jimfs:1.1")
+  testImplementation("org.junit.jupiter:junit-jupiter-params:${metaborg.junitVersion}")
 }
 
 tasks.test {

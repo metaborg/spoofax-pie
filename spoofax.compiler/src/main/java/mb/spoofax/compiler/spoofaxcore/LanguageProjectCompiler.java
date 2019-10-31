@@ -26,14 +26,14 @@ public class LanguageProjectCompiler {
         );
     }
 
-    public ResourceDeps compile(LanguageProjectInput input, HierarchicalResource baseDir, Charset charset) throws IOException {
+    public ResourceDeps compile(LanguageProjectCompilerInput input, HierarchicalResource baseDir, Charset charset) throws IOException {
         baseDir.createDirectory(true);
         final HierarchicalResource buildGradleKts = getBuildGradleKtsFile(baseDir);
         try(final ResourceWriter writer = new ResourceWriter(buildGradleKts, charset)) {
             final HashMap<String, Object> map = new HashMap<>();
-            final String dependencyCode = input.spoofaxCoreDependency().caseOf()
+            final String dependencyCode = input.languageSpecificationDependency().caseOf()
                 .project((projectPath) -> "createProjectDependency(" + projectPath + ")")
-                .module((notation) -> "createModuleDependency(" + notation + ")");
+                .module((coordinate) -> "createModuleDependency(" + coordinate.gradleNotation() + ")");
             map.put("dependencyCode", dependencyCode);
             final ArrayList<String> resourceCodes = new ArrayList<>();
             resourceCodes.add("\"target/metaborg/sdf.tbl\"");

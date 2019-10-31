@@ -4,9 +4,9 @@ plugins {
 }
 
 dependencies {
-  api("org.metaborg:common:{{dependencyVersions.spoofaxPie}}")
-  api("org.metaborg:jsglr1.common:{{dependencyVersions.spoofaxPie}}")
-  compileOnly("org.checkerframework:checker-qual-android:{{dependencyVersions.checkerFramework}}")
+  api({{shared.commonDep.toGradleDependency}})
+  api({{shared.jsglr1CommonDep.toGradleDependency}})
+  compileOnly({{shared.checkerFrameworkQualifiersDep.toGradleDependency}})
 }
 
 fun createProjectDependency(projectPath: String): ProjectDependency {
@@ -95,8 +95,8 @@ fun copySpoofaxLanguageResources(
 }
 copySpoofaxLanguageResources(
   {{dependencyCode}},
-  {{coordinates.packagePath}},
+  {{project.packagePath}},
   {{includeStrategoClasses}},
-  {{includeStrategoJavastratClasses}},
+  {{includeStrategoJavaStrategyClasses}},
   {{#resourceCodes}}{{this}},{{/resourceCodes}}
 )

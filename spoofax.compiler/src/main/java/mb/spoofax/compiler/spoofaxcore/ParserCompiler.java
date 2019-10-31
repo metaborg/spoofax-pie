@@ -31,41 +31,50 @@ public class ParserCompiler {
     }
 
 
-    public ResourceDeps compile(ParserInput input, HierarchicalResource baseDir, Charset charset) throws IOException {
-        final HierarchicalResource pkgDir = getPackageDir(input, baseDir);
-        pkgDir.createDirectory(true);
-        final HierarchicalResource parseTable = getParseTableFile(pkgDir);
+    public ResourceDeps compile(ParserCompilerInput input, HierarchicalResource langDir, Charset charset) throws IOException {
+        final ImmutableResourceDeps.Builder deps = ImmutableResourceDeps.builder();
+        if(input.classKind().isManualOnly()) return deps.build(); // Nothing to generate: return.
+
+        final HierarchicalResource langPkgDir = getPackageDir(input, langDir);
+        langPkgDir.createDirectory(true);
+
+        final HierarchicalResource parseTable = getGenParseTableFile(input, langPkgDir);
         try(final ResourceWriter writer = new ResourceWriter(parseTable, charset)) {
-            parseTableTemplate.execute(input, input.coordinates(), writer);
+            parseTableTemplate.execute(input, writer);
             writer.flush();
         }
-        final HierarchicalResource parser = getParserFile(pkgDir);
+
+        final HierarchicalResource parser = getParserFile(input, langPkgDir);
         try(final ResourceWriter writer = new ResourceWriter(parser, charset)) {
-            parserTemplate.execute(input, input.coordinates(), writer);
+            parserTemplate.execute(input, writer);
             writer.flush();
         }
-        final HierarchicalResource parserFactory = getParserFactoryFile(pkgDir);
+
+        final HierarchicalResource parserFactory = getParserFactoryFile(input, langPkgDir);
         try(final ResourceWriter writer = new ResourceWriter(parserFactory, charset)) {
-            parserFactoryTemplate.execute(input, input.coordinates(), writer);
+            parserFactoryTemplate.execute(input, writer);
             writer.flush();
         }
-        return ImmutableResourceDeps.builder().addProvidedResources(parseTable, parser, parserFactory).build();
+
+        // TODO: generate parse task in .spoofax project
+
+        return deps.addProvidedResources(parseTable, parser, parserFactory).build();
     }
 
 
-    public HierarchicalResource getPackageDir(ParserInput input, HierarchicalResource baseDir) {
-        return baseDir.appendRelativePath(input.coordinates().packagePath());
+    public HierarchicalResource getPackageDir(ParserCompilerInput input, HierarchicalResource baseDir) {
+        return baseDir.appendRelativePath(input.languageProject().packagePath());
     }
 
-    public HierarchicalResource getParseTableFile(HierarchicalResource packageDir) {
-        return packageDir.appendSegment("ParseTable.java");
+    public HierarchicalResource getGenParseTableFile(ParserCompilerInput input, HierarchicalResource packageDir) {
+        return packageDir.appendSegment(input.genTablePath());
     }
 
-    public HierarchicalResource getParserFile(HierarchicalResource packageDir) {
-        return packageDir.appendSegment("Parser.java");
+    public HierarchicalResource getParserFile(ParserCompilerInput input, HierarchicalResource packageDir) {
+        return packageDir.appendSegment(input.genParserPath());
     }
 
-    public HierarchicalResource getParserFactoryFile(HierarchicalResource packageDir) {
-        return packageDir.appendSegment("ParserFactory.java");
+    public HierarchicalResource getParserFactoryFile(ParserCompilerInput input, HierarchicalResource packageDir) {
+        return packageDir.appendSegment(input.genParserFactoryPath());
     }
 }
