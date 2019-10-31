@@ -9,10 +9,10 @@ import java.nio.charset.StandardCharsets;
 
 public class ResourceWriter extends OutputStreamWriter {
     public ResourceWriter(WritableResource resource, Charset charset) throws IOException {
-        super(resource.openWriteOrCreate(), charset);
+        super(resource.openWrite(), charset);
     }
 
     public ResourceWriter(WritableResource resource) throws IOException {
-        super(resource.openWriteOrCreate(), StandardCharsets.UTF_8);
+        super(resource.openWrite(), StandardCharsets.UTF_8);
     }
 }
