@@ -127,10 +127,37 @@ public class EclipseResource implements HierarchicalResource, WrapsEclipseResour
 
     @Override public OutputStream openWrite() throws IOException {
         try {
+            return getFileStore().openOutputStream(EFS.OVERWRITE, null);
+        } catch(CoreException e) {
+            throw new IOException("Creating a new output stream for resource '" + resource + "' failed unexpectedly",
+                e);
+        }
+    }
+
+    @Override public OutputStream openWriteAppend() throws IOException {
+        try {
+            return getFileStore().openOutputStream(EFS.APPEND, null);
+        } catch(CoreException e) {
+            throw new IOException("Creating a new output stream for resource '" + resource + "' failed unexpectedly",
+                e);
+        }
+    }
+
+    @Override public OutputStream openWriteExisting() throws IOException {
+        try {
+            return getFileStore().openOutputStream(EFS.OVERWRITE, null);
+        } catch(CoreException e) {
+            throw new IOException("Creating a new output stream for resource '" + resource + "' failed unexpectedly",
+                e);
+        }
+    }
+
+    @Override public OutputStream openWriteNew() throws IOException {
+        try {
             return getFileStore().openOutputStream(EFS.NONE, null);
         } catch(CoreException e) {
             throw new IOException("Creating a new output stream for resource '" + resource + "' failed unexpectedly",
-                    e);
+                e);
         }
     }
 
@@ -309,7 +336,7 @@ public class EclipseResource implements HierarchicalResource, WrapsEclipseResour
         try {
             getFile().create(new ByteArrayInputStream(new byte[0]), true, null);
         } catch(CoreException e) {
-            if (e.getStatus().getCode() == RESOURCE_EXISTS) {
+            if(e.getStatus().getCode() == RESOURCE_EXISTS) {
                 throw new FileAlreadyExistsException("The resource already exists: " + path);
             } else {
                 throw new IOException("Creating file '" + path + "' failed unexpectedly", e);
@@ -325,11 +352,6 @@ public class EclipseResource implements HierarchicalResource, WrapsEclipseResour
             createParents();
         }
         createDirectory(getContainer());
-    }
-
-    @Override
-    public void ensureExists() throws IOException {
-
     }
 
     @Override public void createParents() throws IOException {
@@ -356,7 +378,6 @@ public class EclipseResource implements HierarchicalResource, WrapsEclipseResour
         }
         throw new IOException("Cannot create directory '" + container + "', it is not an IFolder nor an IProject");
     }
-
 
 
     @Override public void delete(boolean deleteContents) throws IOException {

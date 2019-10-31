@@ -5,7 +5,6 @@ import mb.log.api.Level;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.log.api.LoggingOutputStream;
-import mb.resource.Resource;
 import mb.resource.ResourceService;
 import mb.resource.WritableResource;
 import mb.resource.fs.FSResource;
@@ -195,7 +194,7 @@ public class StrategoIOAgent extends IOAgent {
             if(handle.outputStream == null) {
                 assert handle.writer == null;
                 try {
-                    handle.outputStream = handle.resource.openWriteOrCreate();
+                    handle.outputStream = handle.resource.openWrite();
                 } catch(IOException e) {
                     throw new RuntimeException("Could not get output stream for resource " + handle.resource, e);
                 }
@@ -341,7 +340,7 @@ public class StrategoIOAgent extends IOAgent {
     @Override public OutputStream openFileOutputStream(@NonNull String fn) {
         final HierarchicalResource file = resourceService.appendOrReplaceWithHierarchical(workingDir, fn);
         try {
-            return file.openWriteOrCreate();
+            return file.openWrite();
         } catch(IOException e) {
             throw new RuntimeException("Could not get output stream for resource " + file, e);
         }
