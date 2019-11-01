@@ -6,7 +6,7 @@ import org.immutables.value.Value;
 import java.util.List;
 
 @Value.Immutable
-public interface ResourceDeps {
+public interface ResourceDependencies {
     List<HierarchicalResource> requiredResources();
 
     List<HierarchicalResource> providedResources();

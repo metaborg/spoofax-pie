@@ -1,9 +1,10 @@
 package mb.spoofax.compiler.spoofaxcore;
 
 import com.samskivert.mustache.Template;
+import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
-import mb.spoofax.compiler.util.ImmutableResourceDeps;
-import mb.spoofax.compiler.util.ResourceDeps;
+import mb.spoofax.compiler.util.ImmutableResourceDependencies;
+import mb.spoofax.compiler.util.ResourceDependencies;
 import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.TemplateCompiler;
 
@@ -13,23 +14,27 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class LanguageProjectCompiler {
+    private final ResourceService resourceService;
     private final Template buildGradleTemplate;
 
-    private LanguageProjectCompiler(Template buildGradleTemplate) {
+    private LanguageProjectCompiler(ResourceService resourceService, Template buildGradleTemplate) {
+        this.resourceService = resourceService;
         this.buildGradleTemplate = buildGradleTemplate;
     }
 
-    public static LanguageProjectCompiler fromClassLoaderResources() {
+    public static LanguageProjectCompiler fromClassLoaderResources(ResourceService resourceService) {
         final TemplateCompiler templateCompiler = new TemplateCompiler(LanguageProjectCompiler.class);
         return new LanguageProjectCompiler(
-            templateCompiler.compile("build.gradle.kts.mustache")
+            resourceService, templateCompiler.compile("build.gradle.kts.mustache")
         );
     }
 
-    public ResourceDeps compile(LanguageProjectCompilerInput input, HierarchicalResource baseDir, Charset charset) throws IOException {
-        baseDir.createDirectory(true);
-        final HierarchicalResource buildGradleKts = getBuildGradleKtsFile(baseDir);
-        try(final ResourceWriter writer = new ResourceWriter(buildGradleKts, charset)) {
+    public ResourceDependencies compile(LanguageProjectCompilerInput input, Charset charset) throws IOException {
+        final HierarchicalResource baseDirectory = resourceService.getHierarchicalResource(input.project().directory());
+        baseDirectory.ensureDirectoryExists();
+
+        final HierarchicalResource buildGradleKtsFile = getBuildGradleKtsFile(input);
+        try(final ResourceWriter writer = new ResourceWriter(buildGradleKtsFile, charset)) {
             final HashMap<String, Object> map = new HashMap<>();
             final String dependencyCode = input.languageSpecificationDependency().caseOf()
                 .project((projectPath) -> "createProjectDependency(" + projectPath + ")")
@@ -41,11 +46,13 @@ public class LanguageProjectCompiler {
             buildGradleTemplate.execute(input, map, writer);
             writer.flush();
         }
-        return ImmutableResourceDeps.builder().addProvidedResources(buildGradleKts).build();
+        return ImmutableResourceDependencies.builder().addProvidedResources(buildGradleKtsFile).build();
     }
 
 
-    public HierarchicalResource getBuildGradleKtsFile(HierarchicalResource baseDir) {
-        return baseDir.appendRelativePath("build.gradle.kts");
+    // TODO: remove following methods, as they are leaking the internal workings of this compiler.
+
+    public HierarchicalResource getBuildGradleKtsFile(LanguageProjectCompilerInput input) {
+        return resourceService.getHierarchicalResource(input.project().directory().appendRelativePath("build.gradle.kts"));
     }
 }

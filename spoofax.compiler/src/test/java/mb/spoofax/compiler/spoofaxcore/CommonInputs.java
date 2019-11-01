@@ -1,14 +1,17 @@
 package mb.spoofax.compiler.spoofaxcore;
 
+import mb.resource.hierarchical.ResourcePath;
+
 public class CommonInputs {
-    public static Shared.Builder tigerSharedBuilder() {
+    public static Shared.Builder tigerSharedBuilder(ResourcePath baseDirectory) {
         return Shared.builder()
             .name("Tiger")
-            .defaultPackageId("mb.tiger");
+            .basePackageId("mb.tiger")
+            .baseDirectory(baseDirectory);
     }
 
-    public static Shared tigerShared() {
-        return tigerSharedBuilder().build();
+    public static Shared tigerShared(ResourcePath baseDirectory) {
+        return tigerSharedBuilder(baseDirectory).build();
     }
 
 

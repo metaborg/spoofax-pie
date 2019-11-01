@@ -16,9 +16,11 @@ public interface LanguageProjectCompilerInput {
 
     @Value.Default default JavaProject project() {
         final Shared shared = shared();
+        final String artifactId = shared.defaultArtifactId();
         return JavaProject.builder()
-            .coordinate(shared.defaultGroupId(), shared.defaultArtifactId(), shared.defaultVersion())
-            .packageId(shared.defaultPackageId())
+            .coordinate(shared.defaultGroupId(), artifactId, shared.defaultVersion())
+            .packageId(shared.basePackageId())
+            .directory(shared.baseDirectory().appendSegment(artifactId))
             .build();
     }
 

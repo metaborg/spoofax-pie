@@ -1,5 +1,6 @@
 package mb.spoofax.compiler.spoofaxcore;
 
+import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.BuilderBase;
 import mb.spoofax.compiler.util.Conversion;
 import org.immutables.value.Value;
@@ -21,4 +22,6 @@ public interface JavaProject {
     @Value.Derived default String packagePath() {
         return Conversion.packageIdToPath(packageId());
     }
+
+    ResourcePath directory();
 }

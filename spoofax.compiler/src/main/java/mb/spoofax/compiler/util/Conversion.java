@@ -23,7 +23,7 @@ public class Conversion {
 
     public static String nameToJavaPackageId(String name) {
         // Replace ' ' by '.'.
-        final char[] input = name.replace(' ', '.').toCharArray();
+        final char[] input = name.toLowerCase().replace(' ', '.').toCharArray();
         final StringBuilder output = new StringBuilder();
         int i = 0;
         // Copy 1 character that a letter, '.', or '_', removing invalid characters from the start.

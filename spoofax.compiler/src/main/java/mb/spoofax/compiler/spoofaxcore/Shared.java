@@ -1,5 +1,6 @@
 package mb.spoofax.compiler.spoofaxcore;
 
+import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.BuilderBase;
 import mb.spoofax.compiler.util.Conversion;
 import org.immutables.value.Value;
@@ -15,7 +16,7 @@ public interface Shared {
             with(properties, "defaultGroupId", this::defaultGroupId);
             with(properties, "defaultArtifactId", this::defaultArtifactId);
             with(properties, "defaultVersion", this::defaultVersion);
-            with(properties, "defaultPackageId", this::defaultPackageId);
+            with(properties, "basePackageId", this::basePackageId);
             with(properties, "spoofaxPieVersion", this::spoofaxPieVersion);
             return this;
         }
@@ -44,9 +45,12 @@ public interface Shared {
         return "0.1.0";
     }
 
-    @Value.Default default String defaultPackageId() {
+    @Value.Default default String basePackageId() {
         return Conversion.nameToJavaPackageId(name());
     }
+
+
+    ResourcePath baseDirectory();
 
 
     @Value.Default default String spoofaxPieVersion() {
@@ -71,7 +75,7 @@ public interface Shared {
         properties.setProperty("defaultGroupId", defaultGroupId());
         properties.setProperty("defaultArtifactId", defaultArtifactId());
         properties.setProperty("defaultVersion", defaultVersion());
-        properties.setProperty("defaultPackageId", defaultPackageId());
+        properties.setProperty("defaultPackageId", basePackageId());
         properties.setProperty("spoofaxPieVersion", spoofaxPieVersion());
     }
 
