@@ -25,7 +25,7 @@ public abstract class JavaDependency implements Serializable {
     public String toGradleDependency() {
         return caseOf()
             .project((projectPath) -> "project(\"" + projectPath + "\")")
-            .module(Coordinate::gradleNotation);
+            .module((coordinate) -> "\"" + coordinate.gradleNotation() + "\"");
     }
 
 

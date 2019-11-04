@@ -5,11 +5,11 @@ import mb.spoofax.compiler.util.BuilderBase;
 import mb.spoofax.compiler.util.Conversion;
 import org.immutables.value.Value;
 
+import java.io.Serializable;
 import java.util.Properties;
 
-@Value.Style(visibility = Value.Style.ImplementationVisibility.PACKAGE, overshadowImplementation = true)
-@Value.Immutable
-public interface Shared {
+@Value.Immutable @ImmutablesStyle
+public interface Shared extends Serializable {
     class Builder extends ImmutableShared.Builder implements BuilderBase {
         public Builder withPersistentProperties(Properties properties) {
             with(properties, "classSuffix", this::classSuffix);
@@ -83,6 +83,5 @@ public interface Shared {
         // TODO: validate that classSuffix is a valid Java identifier
         // TODO: validate that defaultArtifactId is a valid Java package identifier
         // TODO: validate that defaultPackageId is a valid Java package identifier
-
     }
 }

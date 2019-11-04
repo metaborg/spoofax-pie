@@ -3,14 +3,20 @@ package mb.spoofax.compiler.spoofaxcore;
 import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
-import mb.spoofax.compiler.util.ImmutableResourceDependencies;
-import mb.spoofax.compiler.util.ResourceDependencies;
+import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.util.BuilderBase;
+import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.TemplateCompiler;
+import org.immutables.value.Value;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.charset.Charset;
+import java.util.Optional;
+import java.util.Properties;
 
+@Value.Enclosing @ImmutablesStyle
 public class ParserCompiler {
     private final ResourceService resourceService;
     private final Template parseTableTemplate;
@@ -35,56 +41,143 @@ public class ParserCompiler {
     }
 
 
-    public ResourceDependencies compile(ParserCompilerInput input, Charset charset) throws IOException {
-        final ImmutableResourceDependencies.Builder deps = ImmutableResourceDependencies.builder();
-        if(input.classKind().isManualOnly()) return deps.build(); // Nothing to generate: return.
+    public Output compile(Input input, Charset charset) throws IOException {
+        final Output output = Output.builder().withDefaultsBasedOnInput(input).build();
+        if(input.classKind().isManualOnly()) return output; // Nothing to generate: return.
 
-        final HierarchicalResource packageDirectory = getPackageDirectory(input);
+        final HierarchicalResource packageDirectory = resourceService.getHierarchicalResource(output.packageDirectory());
         packageDirectory.ensureDirectoryExists();
 
-        final HierarchicalResource parseTableFile = getGenParseTableFile(input);
+        final HierarchicalResource parseTableFile = resourceService.getHierarchicalResource(output.genParseTableFile());
         try(final ResourceWriter writer = new ResourceWriter(parseTableFile, charset)) {
             parseTableTemplate.execute(input, writer);
             writer.flush();
         }
 
-        final HierarchicalResource parserFile = getParserFile(input);
+        final HierarchicalResource parserFile = resourceService.getHierarchicalResource(output.genParserFile());
         try(final ResourceWriter writer = new ResourceWriter(parserFile, charset)) {
             parserTemplate.execute(input, writer);
             writer.flush();
         }
 
-        final HierarchicalResource parserFactoryFile = getParserFactoryFile(input);
+        final HierarchicalResource parserFactoryFile = resourceService.getHierarchicalResource(output.genParserFactoryFile());
         try(final ResourceWriter writer = new ResourceWriter(parserFactoryFile, charset)) {
             parserFactoryTemplate.execute(input, writer);
             writer.flush();
         }
 
-        // TODO: generate parse task in .spoofax project
-
-        return deps.addProvidedResources(parseTableFile, parserFile, parserFactoryFile).build();
+        return output;
     }
 
 
-    // TODO: remove following methods, as they are leaking the internal workings of this compiler.
+    @Value.Immutable
+    public interface Input extends Serializable {
+        class Builder extends ParserCompilerData.Input.Builder implements BuilderBase {
+            public Builder withPersistentProperties(Properties properties) {
+                with(properties, "genTableClass", this::genTableClass);
+                with(properties, "genParserClass", this::genParserClass);
+                with(properties, "genParserFactoryClass", this::genParserFactoryClass);
+                return this;
+            }
+        }
 
-    public HierarchicalResource getJavaSourceDirectory(ParserCompilerInput input) {
-        return resourceService.getHierarchicalResource(input.languageProject().directory().appendRelativePath("src/main/java"));
+        static Builder builder() {
+            return new Builder();
+        }
+
+
+        Shared shared();
+
+        JavaProject languageProject();
+
+
+        @Value.Default default ClassKind classKind() {
+            return ClassKind.Generated;
+        }
+
+        Optional<String> manualParserClass();
+
+        Optional<String> manualParserFactoryClass();
+
+
+        @Value.Default default String genTableClass() {
+            return shared().classSuffix() + "ParseTable";
+        }
+
+        @Value.Derived default String genTablePath() {
+            return genTableClass() + ".java";
+        }
+
+        @Value.Default default String genTableResourcePath() {
+            return languageProject().packagePath() + "/target/metaborg/sdf.tbl";
+        }
+
+        @Value.Default default String genParserClass() {
+            return shared().classSuffix() + "Parser";
+        }
+
+        @Value.Derived default String genParserPath() {
+            return genParserClass() + ".java";
+        }
+
+        @Value.Default default String genParserFactoryClass() {
+            return shared().classSuffix() + "ParserFactory";
+        }
+
+        @Value.Derived default String genParserFactoryPath() {
+            return genParserFactoryClass() + ".java";
+        }
+
+
+        default void savePersistentProperties(Properties properties) {
+            shared().savePersistentProperties(properties);
+            properties.setProperty("genTableClass", genTableClass());
+            properties.setProperty("genParserClass", genParserClass());
+            properties.setProperty("genParserFactoryClass", genParserFactoryClass());
+        }
+
+        @Value.Check default void check() {
+            final ClassKind kind = classKind();
+            final boolean manual = kind.isManual();
+            if(!manual) return;
+            if(!manualParserClass().isPresent()) {
+                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualParserClass' has not been set");
+            }
+            if(!manualParserFactoryClass().isPresent()) {
+                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualParserFactoryClass' has not been set");
+            }
+        }
     }
 
-    public HierarchicalResource getPackageDirectory(ParserCompilerInput input) {
-        return getJavaSourceDirectory(input).appendRelativePath(input.languageProject().packagePath());
-    }
+    @Value.Immutable
+    public interface Output extends Serializable {
+        class Builder extends ParserCompilerData.Output.Builder {
+            public Builder withDefaultsBasedOnInput(Input input) {
+                final ResourcePath javaSourceDirectory = input.languageProject().directory().appendRelativePath("src/main/java");
+                final ResourcePath packageDirectory = javaSourceDirectory.appendRelativePath(input.languageProject().packagePath());
+                return this
+                    .javaSourceDirectory(javaSourceDirectory)
+                    .packageDirectory(packageDirectory)
+                    .genParseTableFile(packageDirectory.appendRelativePath(input.genTablePath()))
+                    .genParserFile(packageDirectory.appendRelativePath(input.genParserPath()))
+                    .genParserFactoryFile(packageDirectory.appendRelativePath(input.genParserFactoryPath()))
+                    ;
+            }
+        }
 
-    public HierarchicalResource getGenParseTableFile(ParserCompilerInput input) {
-        return getPackageDirectory(input).appendSegment(input.genTablePath());
-    }
+        static Builder builder() {
+            return new Builder();
+        }
 
-    public HierarchicalResource getParserFile(ParserCompilerInput input) {
-        return getPackageDirectory(input).appendSegment(input.genParserPath());
-    }
 
-    public HierarchicalResource getParserFactoryFile(ParserCompilerInput input) {
-        return getPackageDirectory(input).appendSegment(input.genParserFactoryPath());
+        ResourcePath javaSourceDirectory();
+
+        ResourcePath packageDirectory();
+
+        ResourcePath genParseTableFile();
+
+        ResourcePath genParserFile();
+
+        ResourcePath genParserFactoryFile();
     }
 }

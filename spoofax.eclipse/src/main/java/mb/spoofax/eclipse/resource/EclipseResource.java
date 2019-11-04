@@ -291,7 +291,7 @@ public class EclipseResource implements HierarchicalResource, WrapsEclipseResour
             if(member instanceof IContainer) {
                 if(walker == null || walker.traverse(resource, this)) {
                     // OPTO: non-recursive implementation.
-                    recursiveMembers((IContainer) member, builder, walker, matcher, access);
+                    recursiveMembers((IContainer)member, builder, walker, matcher, access);
                 }
             }
         }
@@ -302,7 +302,7 @@ public class EclipseResource implements HierarchicalResource, WrapsEclipseResour
         if(!(other instanceof EclipseResource)) {
             throw new ResourceRuntimeException("Cannot copy to '" + other + "', it is not an EclipseResource");
         }
-        copyTo((EclipseResource) other);
+        copyTo((EclipseResource)other);
     }
 
     public void copyTo(EclipseResource other) throws IOException {
@@ -313,11 +313,22 @@ public class EclipseResource implements HierarchicalResource, WrapsEclipseResour
         }
     }
 
+    @Override public void copyRecursivelyTo(HierarchicalResource other) throws IOException {
+        if(!(other instanceof EclipseResource)) {
+            throw new ResourceRuntimeException("Cannot copy to '" + other + "', it is not an EclipseResource");
+        }
+        copyRecursivelyTo((EclipseResource)other);
+    }
+
+    public void copyRecursivelyTo(EclipseResource other) throws IOException {
+        copyTo(other);
+    }
+
     @Override public void moveTo(HierarchicalResource other) throws IOException {
         if(!(other instanceof EclipseResource)) {
             throw new ResourceRuntimeException("Cannot move to '" + other + "', it is not an EclipseResource");
         }
-        moveTo((EclipseResource) other);
+        moveTo((EclipseResource)other);
     }
 
     public void moveTo(EclipseResource other) throws IOException {
@@ -365,11 +376,11 @@ public class EclipseResource implements HierarchicalResource, WrapsEclipseResour
     private void createDirectory(IContainer container) throws IOException {
         try {
             if(container instanceof IFolder) {
-                final IFolder folder = (IFolder) container;
+                final IFolder folder = (IFolder)container;
                 folder.create(true, true, null);
                 return;
             } else if(container instanceof IProject) {
-                final IProject project = (IProject) container;
+                final IProject project = (IProject)container;
                 project.create(null);
                 return;
             }
@@ -411,7 +422,7 @@ public class EclipseResource implements HierarchicalResource, WrapsEclipseResour
             return file;
         }
         if(resource != null && resource instanceof IFile) {
-            file = (IFile) resource;
+            file = (IFile)resource;
             return file;
         }
         file = getWorkspaceRoot().getFile(path.path);
@@ -423,7 +434,7 @@ public class EclipseResource implements HierarchicalResource, WrapsEclipseResour
             return container;
         }
         if(resource != null && resource instanceof IContainer) {
-            container = (IContainer) resource;
+            container = (IContainer)resource;
             return container;
         }
         container = getWorkspaceRoot().getFolder(path.path);
@@ -447,7 +458,7 @@ public class EclipseResource implements HierarchicalResource, WrapsEclipseResour
     @Override public boolean equals(Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
-        final EclipseResource that = (EclipseResource) o;
+        final EclipseResource that = (EclipseResource)o;
         return path.equals(that.path);
     }
 

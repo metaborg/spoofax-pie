@@ -1,6 +1,7 @@
 plugins {
-  id("org.metaborg.gradle.config.java-library")
-  id("org.metaborg.gradle.config.junit-testing")
+  id("org.metaborg.gradle.config.sub-project") version "0.3.9"
+  id("org.metaborg.gradle.config.java-library") version "0.3.9"
+  id("org.metaborg.gradle.config.junit-testing") version "0.3.9"
 }
 
 dependencies {
@@ -18,7 +19,7 @@ fun createModuleDependency(notation: String): ModuleDependency {
 }
 
 fun copySpoofaxLanguageResources(
-  projectPath: String,
+  dependency: ModuleDependency,
   destinationPackage: String,
   includeStrategoClasses: Boolean,
   includeStrategoJavastratClasses: Boolean,
@@ -32,16 +33,13 @@ fun copySpoofaxLanguageResources(
     allResources.add("target/metaborg/stratego-javastrat.jar")
   }
 
-  // Create dependency to the '.spoofax-language' artifact.
-  val dependency = run {
-    val dep = dependencies.project(projectPath, Dependency.DEFAULT_CONFIGURATION)
-    dep.isTransitive = false // Don't care about transitive dependencies, just want the '.spoofax-language' artifact.
-    dep.artifact {
-      name = dep.name
-      type = "spoofax-language"
-      extension = "spoofax-language"
-    }
-    dep
+  // Configure dependency.
+  dependency.targetConfiguration = Dependency.DEFAULT_CONFIGURATION
+  dependency.isTransitive = false // Don't care about transitive dependencies, just want the '.spoofax-language' artifact.
+  dependency.artifact {
+    name = dependency.name
+    type = "spoofax-language"
+    extension = "spoofax-language"
   }
   // Create 'spoofaxLanguage' configuration that contains the dependency.
   val configuration = configurations.create("spoofaxLanguage") {
@@ -95,8 +93,8 @@ fun copySpoofaxLanguageResources(
 }
 copySpoofaxLanguageResources(
   {{dependencyCode}},
-  {{project.packagePath}},
+  "{{project.packagePath}}",
   {{includeStrategoClasses}},
-  {{includeStrategoJavaStrategyClasses}},
-  {{#resourceCodes}}{{this}},{{/resourceCodes}}
+  {{includeStrategoJavaStrategyClasses}}{{#resourceCodes}},
+  {{this}}{{/resourceCodes}}
 )

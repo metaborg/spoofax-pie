@@ -2,9 +2,10 @@ package mb.spoofax.compiler.spoofaxcore;
 
 import org.immutables.value.Value;
 
-@Value.Immutable
-@Value.Style(visibility = Value.Style.ImplementationVisibility.PACKAGE, overshadowImplementation = true)
-public abstract class Coordinate {
+import java.io.Serializable;
+
+@Value.Immutable @ImmutablesStyle
+public abstract class Coordinate implements Serializable {
     public static Coordinate of(String groupId, String artifactId, String version) {
         return ImmutableCoordinate.of(groupId, artifactId, version);
     }
@@ -19,8 +20,8 @@ public abstract class Coordinate {
             throw new IllegalArgumentException("Input '" + notation + "' is not a valid Gradle dependency notation with 3 elements");
         }
         final String groupId = notation.substring(0, firstIdx);
-        final String artifactId = notation.substring(firstIdx, lastIdx);
-        final String version = notation.substring(lastIdx);
+        final String artifactId = notation.substring(firstIdx + 1, lastIdx);
+        final String version = notation.substring(lastIdx + 1);
         return Coordinate.of(groupId, artifactId, version);
     }
 

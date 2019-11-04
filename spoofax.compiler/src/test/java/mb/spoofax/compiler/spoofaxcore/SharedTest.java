@@ -11,10 +11,9 @@ import java.util.Properties;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SharedTest {
-    @Test
-    void testPersistentProperties() {
+    @Test void testPersistentProperties() {
         final FileSystem fileSystem = Jimfs.newFileSystem(Configuration.unix());
-        final FSPath baseDirectory = new FSPath(fileSystem.getPath("tiger"));
+        final FSPath baseDirectory = new FSPath(fileSystem.getPath("repo"));
 
         final Properties persistentProperties = new Properties();
 

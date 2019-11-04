@@ -1,14 +1,14 @@
 package mb.spoofax.compiler.spoofaxcore;
 
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.BuilderBase;
 import mb.spoofax.compiler.util.Conversion;
 import org.immutables.value.Value;
 
-@Value.Immutable
-@Value.Style(deepImmutablesDetection = true, visibility = Value.Style.ImplementationVisibility.PACKAGE, overshadowImplementation = true)
-public interface JavaProject {
-    class Builder extends ImmutableJavaProject.Builder implements BuilderBase {}
+import java.io.Serializable;
+
+@Value.Immutable @ImmutablesStyle
+public interface JavaProject extends Serializable {
+    class Builder extends ImmutableJavaProject.Builder {}
 
     static Builder builder() {
         return new Builder();
