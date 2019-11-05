@@ -5,8 +5,13 @@ plugins {
 }
 
 dependencies {
+{{#shared.testClasspathOverride}}
+  api(files("{{shared.testClasspathOverride}}".split(';')))
+{{/shared.testClasspathOverride}}
+{{^shared.testClasspathOverride}}
   api({{shared.commonDep.toGradleDependency}})
   api({{shared.jsglr1CommonDep.toGradleDependency}})
+{{/shared.testClasspathOverride}}
   compileOnly({{shared.checkerFrameworkQualifiersDep.toGradleDependency}})
 }
 

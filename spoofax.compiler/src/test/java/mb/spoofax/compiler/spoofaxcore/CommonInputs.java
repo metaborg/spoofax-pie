@@ -2,12 +2,15 @@ package mb.spoofax.compiler.spoofaxcore;
 
 import mb.resource.hierarchical.ResourcePath;
 
+import java.util.Optional;
+
 class CommonInputs {
     static Shared.Builder tigerSharedBuilder(ResourcePath baseDirectory) {
         return Shared.builder()
             .name("Tiger")
             .basePackageId("mb.tiger")
-            .baseDirectory(baseDirectory);
+            .baseDirectory(baseDirectory)
+            .testClasspathOverride(Optional.ofNullable(System.getProperty("testClasspathOverride")));
     }
 
     static Shared tigerShared(ResourcePath baseDirectory) {

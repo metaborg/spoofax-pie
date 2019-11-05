@@ -19,10 +19,9 @@ import java.nio.file.Path;
 class AllCompilerTest {
     @Test void testCompilerDefault(@TempDir Path temporaryDirectoryPath) throws IOException {
         final ResourceService resourceService = new DefaultResourceService(new FSResourceRegistry());
-        final FSPath baseDirectoryPath = new FSPath(temporaryDirectoryPath);
-        final FSResource baseDirectory = new FSResource(baseDirectoryPath);
+        final FSPath baseDirectory = new FSPath(temporaryDirectoryPath);
 
-        final Shared shared = CommonInputs.tigerShared(baseDirectoryPath);
+        final Shared shared = CommonInputs.tigerShared(baseDirectory);
         final LanguageProjectCompiler.Input languageProjectCompilerInput = CommonInputs.tigerLanguageProjectCompilerInput(shared);
         final ParserCompiler.Input parserCompilerInput = CommonInputs.tigerParserCompilerInput(shared, languageProjectCompilerInput.project());
         final AllCompiler.Input input = AllCompiler.Input.builder()
@@ -35,12 +34,16 @@ class AllCompilerTest {
         final AllCompiler.Output output = compiler.compile(input, charset);
         final File languageProjectDirectory = ((FSResource)resourceService.getHierarchicalResource(output.languageProject().baseDirectory())).getJavaPath().toFile();
 
-//        try(
-//            final ProjectConnection connection = GradleConnector.newConnector()
-//                .forProjectDirectory(languageProjectDirectory)
-//                .connect()
-//        ) {
-//            connection.newBuild().forTasks("build").run();
-//        }
+        try(
+            final ProjectConnection connection = GradleConnector.newConnector()
+                .forProjectDirectory(languageProjectDirectory)
+                .connect()
+        ) {
+            connection.newBuild()
+                .forTasks("build")
+                .addArguments("--quiet") // Only print important information messages and errors.
+                .setStandardOutput(System.out).setStandardError(System.err) // Redirect standard out and err.
+                .run();
+        }
     }
 }
