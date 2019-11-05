@@ -34,40 +34,55 @@ public final class IntellijResource implements Resource, ReadableResource {
     }
 
     /**
+     * Gets the virtual file associated with this resource.
+     *
+     * @return The virtual file.
+     */
+    public VirtualFile getVirtualFile() {
+        return this.file;
+    }
+
+    /**
      * Gets the document associated with this resource.
      *
-     * @return The associated document; or null when the file has no associated text document
-     * (e.g., it is a directory, binary file, or too large).
+     * @return The associated document; or null when the file has no associated text document (e.g., it is a directory,
+     * binary file, or too large).
      */
-    @Nullable public Document getDocument() {
+    @Nullable
+    public Document getDocument() {
         return FileDocumentManager.getInstance().getDocument(this.file);
     }
 
     /**
      * Gets the text of the document associated with this resource.
      *
-     * @return The text of the associated document; or null when the file has no associated text document
-     * (e.g., it is a directory, binary file, or too large).
+     * @return The text of the associated document; or null when the file has no associated text document (e.g., it is a
+     * directory, binary file, or too large).
      */
-    @Nullable public String getDocumentText() {
+    @Nullable
+    public String getDocumentText() {
         @Nullable Document document = getDocument();
         if (document == null) return null;
         return ReadAction.compute(document::getText);
     }
 
-    @Override public void close() throws IOException {
+    @Override
+    public void close() throws IOException {
         // Nothing to close.
     }
 
-    @Override public boolean exists() {
+    @Override
+    public boolean exists() {
         return this.file.exists();
     }
 
-    @Override public boolean isReadable() {
+    @Override
+    public boolean isReadable() {
         return true;
     }
 
-    @Override public Instant getLastModifiedTime() {
+    @Override
+    public Instant getLastModifiedTime() {
         @Nullable Document document = getDocument();
         if (document != null) {  // Happy path
             return Instant.ofEpochMilli(document.getModificationStamp());
@@ -76,7 +91,8 @@ public final class IntellijResource implements Resource, ReadableResource {
         }
     }
 
-    @Override public long getSize() {
+    @Override
+    public long getSize() {
         @Nullable Document document = getDocument();
         if (document != null) { // Happy path
             // NOTE: We represent the IntelliJ text as UTF-16 (TEXT_CHARSET)
@@ -108,22 +124,27 @@ public final class IntellijResource implements Resource, ReadableResource {
         }
     }
 
-    @Override public ResourceKey getKey() {
+    @Override
+    public ResourceKey getKey() {
         return new IntellijResourceKey(this.file.getUrl());
     }
 
-    @Override public boolean equals(Object o) {
+    @Override
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final IntellijResource that = (IntellijResource)o;
         return this.file.equals(that.file);
     }
 
-    @Override public int hashCode() {
+    @Override
+    public int hashCode() {
         return this.file.hashCode();
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return this.file.getUrl();
     }
+
 }

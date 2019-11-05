@@ -1,5 +1,6 @@
 package mb.spoofax.intellij.resource;
 
+import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -7,6 +8,7 @@ import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.PsiFile;
 import mb.resource.ResourceRegistry;
 import mb.resource.ResourceRuntimeException;
+import mb.spoofax.intellij.menu.ActionUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
@@ -19,6 +21,12 @@ public final class IntellijResourceRegistry implements ResourceRegistry {
         return new IntellijResource(virtualFile);
     }
 
+    /**
+     * Gets a resource from a {@link Document}.
+     *
+     * @param document The document.
+     * @return The resource.
+     */
     public IntellijResource getResource(Document document) {
         final @Nullable VirtualFile file = FileDocumentManager.getInstance().getFile(document);
         if(file == null) {
@@ -28,6 +36,12 @@ public final class IntellijResourceRegistry implements ResourceRegistry {
         return getResource(file);
     }
 
+    /**
+     * Gets a resource from a {@link PsiFile}.
+     *
+     * @param psiFile The PSI file.
+     * @return The resource.
+     */
     public IntellijResource getResource(PsiFile psiFile) {
         final @Nullable VirtualFile file = psiFile.getOriginalFile().getVirtualFile();
         if(file == null) {
@@ -35,6 +49,19 @@ public final class IntellijResourceRegistry implements ResourceRegistry {
                 "Cannot get IntelliJ resource for Psi file '" + psiFile.getName() + "'; the file exists only in memory");
         }
         return getResource(file);
+    }
+
+    /**
+     * Gets a resource from an {@link AnActionEvent}.
+     *
+     * @param e The action event.
+     * @return The resource; or null when it could not be determined.
+     */
+    @Nullable
+    public IntellijResource getResource(AnActionEvent e) {
+        @Nullable PsiFile psiFile = ActionUtils.getPsiFile(e);
+        if (psiFile == null) return null;
+        return getResource(psiFile);
     }
 
 
