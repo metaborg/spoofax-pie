@@ -1,6 +1,8 @@
 package mb.spoofax.eclipse.menu;
 
 import mb.common.util.ListView;
+import mb.spoofax.core.language.menu.CommandAction;
+import mb.spoofax.core.language.menu.Menu;
 import mb.spoofax.core.language.menu.MenuItem;
 import mb.spoofax.core.language.menu.MenuItemVisitor;
 import mb.spoofax.core.language.command.CommandRequest;
@@ -19,25 +21,26 @@ public abstract class EclipseMenuItemVisitor implements MenuItemVisitor {
     }
 
 
-    protected abstract void transformAction(IContributionManager menu, String displayName, CommandRequest<?> commandRequest);
+    protected abstract void transformAction(IContributionManager menu, CommandAction command);
 
-
-    @Override public void menuPush(String displayName, ListView<MenuItem> items) {
-        final MenuManager menuManager = new MenuManager(displayName);
+    @Override
+    public void menu(Menu menu) {
+        final MenuManager menuManager = new MenuManager(menu.getDisplayName());
         menuStack.peek().add(menuManager);
         menuStack.push(menuManager);
-    }
 
-    @Override public void menuPop() {
+        for(MenuItem item : menu.getItems()) {
+            item.accept(this);
+        }
+
         menuStack.pop();
     }
 
-
-    @Override public void command(String displayName, CommandRequest<?> commandRequest) {
-        transformAction(menuStack.peek(), displayName, commandRequest);
+    @Override public void command(CommandAction command) {
+        transformAction(menuStack.peek(), command);
     }
 
-    @Override public void separator() {
-        menuStack.peek().add(new Separator());
+    @Override public void separator(mb.spoofax.core.language.menu.Separator separator) {
+        menuStack.peek().add(new org.eclipse.jface.action.Separator());
     }
 }

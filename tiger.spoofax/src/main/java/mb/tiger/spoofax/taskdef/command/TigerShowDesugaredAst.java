@@ -85,6 +85,10 @@ public class TigerShowDesugaredAst implements TaskDef<CommandInput<TigerShowArgs
         return "Show desugared AST";
     }
 
+    @Override public String getDescription() {
+        return "Shows the desugared Abstract Syntax Tree of the program.";
+    }
+
     @Override public EnumSetView<CommandExecutionType> getSupportedExecutionTypes() {
         return EnumSetView.of(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous);
     }

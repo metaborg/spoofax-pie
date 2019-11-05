@@ -6,6 +6,7 @@ import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.command.CommandContext;
 import mb.spoofax.core.language.command.CommandContextType;
 import mb.spoofax.core.language.command.CommandRequest;
+import mb.spoofax.core.language.menu.CommandAction;
 import mb.spoofax.core.language.menu.MenuItem;
 import mb.spoofax.eclipse.EclipseIdentifiers;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
@@ -125,7 +126,8 @@ public abstract class ResourceContextMenu extends MenuShared {
         for(MenuItem menuItem : languageInstance.getResourceContextMenuItems()) {
             menuItem.accept(new EclipseMenuItemVisitor(langMenu) {
                 @Override
-                protected void transformAction(IContributionManager menu, String displayName, CommandRequest<?> commandRequest) {
+                protected void transformAction(IContributionManager menu, CommandAction command) {
+                    CommandRequest<?> commandRequest = command.getCommandRequest();
                     final EnumSetView<CommandContextType> requiredContexts = commandRequest.def.getRequiredContextTypes();
                     final ArrayList<CommandContext> contexts;
                     if(hasProjects && requiredContexts.contains(CommandContextType.Project)) {
@@ -137,7 +139,7 @@ public abstract class ResourceContextMenu extends MenuShared {
                     } else {
                         return;
                     }
-                    menu.add(createCommand(transformCommandId, commandRequest, new ListView<>(contexts), displayName));
+                    menu.add(createCommand(transformCommandId, commandRequest, new ListView<>(contexts), command.getDisplayName(), command.getDescription()));
                 }
             });
         }
