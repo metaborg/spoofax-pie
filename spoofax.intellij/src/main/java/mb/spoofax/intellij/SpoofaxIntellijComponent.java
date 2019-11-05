@@ -6,6 +6,7 @@ import mb.spoofax.core.platform.ResourceRegistriesModule;
 import mb.spoofax.core.platform.LoggerFactoryModule;
 import mb.spoofax.core.platform.PlatformComponent;
 import mb.spoofax.core.platform.ResourceServiceModule;
+import mb.spoofax.intellij.pie.PieRunner;
 import mb.spoofax.intellij.resource.IntellijResourceRegistry;
 import mb.spoofax.intellij.resource.IntellijResourceRegistryModule;
 
@@ -21,4 +22,5 @@ import javax.inject.Singleton;
 })
 public interface SpoofaxIntellijComponent extends PlatformComponent {
     IntellijResourceRegistry getResourceRegistry();
+    PieRunner getPieRunner();
 }
