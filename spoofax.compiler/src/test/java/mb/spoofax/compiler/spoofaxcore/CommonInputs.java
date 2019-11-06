@@ -1,8 +1,7 @@
 package mb.spoofax.compiler.spoofaxcore;
 
+import mb.common.util.Preconditions;
 import mb.resource.hierarchical.ResourcePath;
-
-import java.util.Optional;
 
 class CommonInputs {
     static Shared.Builder tigerSharedBuilder(ResourcePath baseDirectory) {
@@ -10,7 +9,9 @@ class CommonInputs {
             .name("Tiger")
             .basePackageId("mb.tiger")
             .baseDirectory(baseDirectory)
-            .testClasspathOverride(Optional.ofNullable(System.getProperty("testClasspathOverride")));
+            .resourceDep(JavaDependency.files(Preconditions.checkNotNull(System.getProperty("resource:classpath"))))
+            .commonDep(JavaDependency.files(Preconditions.checkNotNull(System.getProperty("common:classpath"))))
+            .jsglr1CommonDep(JavaDependency.files(Preconditions.checkNotNull(System.getProperty("jsglr1.common:classpath"))));
     }
 
     static Shared tigerShared(ResourcePath baseDirectory) {
@@ -21,7 +22,7 @@ class CommonInputs {
     private static LanguageProjectCompiler.Input.Builder tigerLanguageProjectCompilerInputBuilder(Shared shared) {
         return LanguageProjectCompiler.Input.builder()
             .shared(shared)
-            .languageSpecificationDependency(JavaDependency.module(Coordinate.fromGradleNotation("org.metaborg:org.metaborg.lang.tiger:develop-SNAPSHOT")));
+            .languageSpecificationDependency(JavaDependency.files(Preconditions.checkNotNull(System.getProperty("org.metaborg.lang.tiger:classpath"))));
     }
 
     static LanguageProjectCompiler.Input tigerLanguageProjectCompilerInput(Shared shared) {

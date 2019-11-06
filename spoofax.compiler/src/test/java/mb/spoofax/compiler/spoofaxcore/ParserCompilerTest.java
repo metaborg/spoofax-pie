@@ -69,6 +69,7 @@ class ParserCompilerTest {
     }
 
     @Test void testCompilerDefault() throws IOException {
+        final JavaParser javaParser = new JavaParser();
         final ResourceService resourceService = new DefaultResourceService(new FSResourceRegistry());
         final FileSystem fileSystem = Jimfs.newFileSystem(Configuration.unix());
         final FSPath baseDirectory = new FSPath(fileSystem.getPath("repo"));
@@ -84,20 +85,23 @@ class ParserCompilerTest {
         final HierarchicalResource packageDirectory = resourceService.getHierarchicalResource(output.packageDirectory());
         assertTrue(packageDirectory.exists());
 
-        final HierarchicalResource genParseTableFile = resourceService.getHierarchicalResource(output.genParseTableFile());
-        assertEquals("TigerParseTable.java", genParseTableFile.getLeaf());
-        assertTrue(genParseTableFile.exists());
-        assertTrue(genParseTableFile.readString(charset).contains("class TigerParseTable"));
+        final FileAssertions genParseTableFile = new FileAssertions(resourceService.getHierarchicalResource(output.genParseTableFile()));
+        genParseTableFile.assertName("TigerParseTable.java");
+        genParseTableFile.assertExists();
+        genParseTableFile.assertContains("class TigerParseTable");
+        genParseTableFile.assertJavaParses(javaParser);
 
-        final HierarchicalResource genParserFile = resourceService.getHierarchicalResource(output.genParserFile());
-        assertEquals("TigerParser.java", genParserFile.getLeaf());
-        assertTrue(genParserFile.exists());
-        assertTrue(genParserFile.readString(charset).contains("class TigerParser"));
+        final FileAssertions genParserFile = new FileAssertions(resourceService.getHierarchicalResource(output.genParserFile()));
+        genParserFile.assertName("TigerParser.java");
+        genParserFile.assertExists();
+        genParserFile.assertContains("class TigerParser");
+        genParserFile.assertJavaParses(javaParser);
 
-        final HierarchicalResource genParserFactoryFile = resourceService.getHierarchicalResource(output.genParserFactoryFile());
-        assertEquals("TigerParserFactory.java", genParserFactoryFile.getLeaf());
-        assertTrue(genParserFactoryFile.exists());
-        assertTrue(genParserFactoryFile.readString(charset).contains("class TigerParserFactory"));
+        final FileAssertions genParserFactoryFile = new FileAssertions(resourceService.getHierarchicalResource(output.genParserFactoryFile()));
+        genParserFactoryFile.assertName("TigerParserFactory.java");
+        genParserFactoryFile.assertExists();
+        genParserFactoryFile.assertContains("class TigerParserFactory");
+        genParserFactoryFile.assertJavaParses(javaParser);
     }
 
     @Test void testCompilerManual() throws IOException {

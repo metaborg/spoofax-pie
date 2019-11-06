@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 @Value.Enclosing @ImmutablesStyle
 public class LanguageProjectCompiler {
@@ -53,7 +54,8 @@ public class LanguageProjectCompiler {
             final HashMap<String, Object> map = new HashMap<>();
             final String dependencyCode = input.languageSpecificationDependency().caseOf()
                 .project((projectPath) -> "createProjectDependency(\"" + projectPath + "\")")
-                .module((coordinate) -> "createModuleDependency(\"" + coordinate.gradleNotation() + "\")");
+                .module((coordinate) -> "createModuleDependency(\"" + coordinate.gradleNotation() + "\")")
+                .files((filePaths) -> "createFilesDependency(" + filePaths.stream().map((s) -> "\"" + s + "\"").collect(Collectors.joining(", ")) + ")");
             map.put("dependencyCode", dependencyCode);
             final ArrayList<String> resourceCodes = new ArrayList<>();
             resourceCodes.add("\"target/metaborg/sdf.tbl\"");

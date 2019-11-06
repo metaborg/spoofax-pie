@@ -6,6 +6,7 @@ import org.immutables.value.Value;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.Charset;
+import java.util.Optional;
 
 @Value.Enclosing @ImmutablesStyle
 public class AllCompiler {

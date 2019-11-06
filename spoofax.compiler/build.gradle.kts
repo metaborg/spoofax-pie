@@ -1,3 +1,4 @@
+import mb.spoofax.gradle.util.configureSpoofaxLanguageArtifact
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
@@ -31,14 +32,34 @@ dependencies {
   testImplementation("org.eclipse.jdt:org.eclipse.jdt.core:3.19.0")
   testImplementation("org.gradle:gradle-tooling-api:5.6.4")
   testRuntimeOnly("org.slf4j:slf4j-simple:1.7.10") // SLF4J implementation required for Gradle tooling API.
-  // Additional dependencies which generated projects in tests may require.
-  testRuntimeOnly(project(":jsglr1.common"))
+  testCompileOnly("org.checkerframework:checker-qual-android")
+}
+
+// Additional dependencies which generated projects in tests may inject.
+val testInjections = configurations.create("testInjections")
+dependencies {
+  testInjections("org.metaborg:resource")
+  testInjections(project(":common"))
+  testInjections(project(":jsglr1.common"))
+  testInjections(project(":org.metaborg.lang.tiger", Dependency.DEFAULT_CONFIGURATION).also {
+    it.isTransitive = false
+    configureSpoofaxLanguageArtifact(it)
+  })
 }
 
 tasks.test {
-  // Pass test classpath to tests in the form of a system property, which can be injected into projects that tests
-  // generate to get access to the same classpath that is used in the current Spoofax-PIE build.
-  systemProperty("testClasspathOverride", classpath.files.joinToString(separator = ";"))
+  // Pass classpaths to tests in the form of system properties, which can be injected into projects that tests generate
+  // to get access to the same classpaths that are used in the current Spoofax-PIE build.
+  dependsOn(testInjections)
+  fun injectClasspath(name: String) {
+    systemProperty("$name:classpath", testInjections.resolvedConfiguration.resolvedArtifacts.find { it.name == name }!!.file)
+  }
+  doFirst {
+    injectClasspath("resource")
+    injectClasspath("common")
+    injectClasspath("jsglr1.common")
+    injectClasspath("org.metaborg.lang.tiger")
+  }
   // Show standard out and err in tests, to ensure that failed Gradle builds are properly reported.
   testLogging {
     events(TestLogEvent.STANDARD_OUT, TestLogEvent.STANDARD_ERROR)

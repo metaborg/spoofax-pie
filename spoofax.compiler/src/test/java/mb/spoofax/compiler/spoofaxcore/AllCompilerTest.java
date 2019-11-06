@@ -17,7 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
 class AllCompilerTest {
-    @Test void testCompilerDefault(@TempDir Path temporaryDirectoryPath) throws IOException {
+    @Test void testCompilerDefault(@TempDir Path temporaryDirectoryPath) throws IOException, Throwable {
         final ResourceService resourceService = new DefaultResourceService(new FSResourceRegistry());
         final FSPath baseDirectory = new FSPath(temporaryDirectoryPath);
 

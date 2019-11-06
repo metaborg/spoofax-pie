@@ -1,9 +1,11 @@
 package mb.spoofax.compiler.spoofaxcore;
 
 import mb.common.util.ADT;
+import mb.common.util.ListView;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
+import java.util.stream.Collectors;
 
 @ADT
 public abstract class JavaDependency implements Serializable {
@@ -11,6 +13,8 @@ public abstract class JavaDependency implements Serializable {
         R project(String projectPath);
 
         R module(Coordinate coordinate);
+
+        R files(ListView<String> filePaths);
     }
 
 
@@ -21,11 +25,11 @@ public abstract class JavaDependency implements Serializable {
         return JavaDependencies.caseOf(this);
     }
 
-
     public String toGradleDependency() {
         return caseOf()
             .project((projectPath) -> "project(\"" + projectPath + "\")")
-            .module((coordinate) -> "\"" + coordinate.gradleNotation() + "\"");
+            .module((coordinate) -> "\"" + coordinate.gradleNotation() + "\"")
+            .files((filePaths) -> "files(" + filePaths.stream().map((s) -> "\"" + s + "\"").collect(Collectors.joining(", ")) + ")");
     }
 
 
@@ -35,6 +39,18 @@ public abstract class JavaDependency implements Serializable {
 
     public static JavaDependency module(Coordinate coordinate) {
         return JavaDependencies.module(coordinate);
+    }
+
+    public static JavaDependency module(String gradleNotation) {
+        return JavaDependencies.module(Coordinate.fromGradleNotation(gradleNotation));
+    }
+
+    public static JavaDependency files(ListView<String> filePaths) {
+        return JavaDependencies.files(filePaths);
+    }
+
+    public static JavaDependency files(String... filePaths) {
+        return JavaDependencies.files(ListView.of(filePaths));
     }
 
 

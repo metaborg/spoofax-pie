@@ -6,7 +6,6 @@ import mb.spoofax.compiler.util.Conversion;
 import org.immutables.value.Value;
 
 import java.io.Serializable;
-import java.util.Optional;
 import java.util.Properties;
 
 @Value.Immutable @ImmutablesStyle
@@ -58,6 +57,10 @@ public interface Shared extends Serializable {
         return "develop-SNAPSHOT";
     }
 
+    @Value.Default default JavaDependency resourceDep() {
+        return JavaDependency.module(Coordinate.of("org.metaborg", "resource", spoofaxPieVersion()));
+    }
+
     @Value.Default default JavaDependency commonDep() {
         return JavaDependency.module(Coordinate.of("org.metaborg", "common", spoofaxPieVersion()));
     }
@@ -69,9 +72,6 @@ public interface Shared extends Serializable {
     @Value.Default default JavaDependency checkerFrameworkQualifiersDep() {
         return JavaDependency.module(Coordinate.of("org.checkerframework", "checker-qual-android", "2.6.0"));
     }
-
-
-    Optional<String> testClasspathOverride();
 
 
     default void savePersistentProperties(Properties properties) {
