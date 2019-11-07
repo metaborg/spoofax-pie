@@ -67,7 +67,11 @@ public interface Shared extends Serializable {
 
 
     @Value.Default default JavaDependency resourceDep() {
-        return JavaDependency.module(Coordinate.of("org.metaborg", "resource", spoofaxPieVersion()));
+        return JavaDependency.module(Coordinate.of("org.metaborg", "resource", "develop-SNAPSHOT"));
+    }
+
+    @Value.Default default JavaDependency logApiDep() {
+        return JavaDependency.module(Coordinate.of("org.metaborg", "log.api", "develop-SNAPSHOT"));
     }
 
     @Value.Default default JavaDependency commonDep() {

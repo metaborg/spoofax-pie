@@ -10,6 +10,7 @@ public class CommonInputs {
             .name("Tiger")
             .basePackageId("mb.tiger")
             .baseDirectory(baseDirectory)
+            .logApiDep(fromSystemProperty("log.api:classpath"))
             .resourceDep(fromSystemProperty("resource:classpath"))
             .commonDep(fromSystemProperty("common:classpath"))
             .jsglr1CommonDep(fromSystemProperty("jsglr1.common:classpath"))
@@ -58,5 +59,16 @@ public class CommonInputs {
 
     public static ParserCompiler.Input tigerParserCompilerInput(Shared shared, JavaProject languageProject) {
         return tigerParserCompilerInputBuilder(shared, languageProject).build();
+    }
+
+
+    public static StylerCompiler.Input.Builder tigerStylerCompilerInputBuilder(Shared shared, JavaProject languageProject) {
+        return StylerCompiler.Input.builder()
+            .shared(shared)
+            .languageProject(languageProject);
+    }
+
+    public static StylerCompiler.Input tigerStylerCompilerInput(Shared shared, JavaProject languageProject) {
+        return tigerStylerCompilerInputBuilder(shared, languageProject).build();
     }
 }

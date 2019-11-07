@@ -1,0 +1,27 @@
+package {{languageProject.packageId}};
+
+import mb.esv.common.ESVStylingRules;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
+
+public class {{genStylingRulesClass}} implements Serializable {
+    final ESVStylingRules stylingRules;
+
+    private {{genStylingRulesClass}}(ESVStylingRules stylingRules) {
+        this.stylingRules = stylingRules;
+    }
+
+    public static {{genStylingRulesClass}} fromClassLoaderResources() throws IOException {
+        final String resource = "{{packedESVResourcePath}}";
+        try(final @Nullable InputStream inputStream = {{genStylingRulesClass}}.class.getClassLoader().getResourceAsStream(resource)) {
+            if(inputStream == null) {
+                throw new RuntimeException("Cannot create styling rules; cannot find resource '" + resource + "' in classloader resources");
+            }
+            final ESVStylingRules stylingRules = ESVStylingRules.fromStream(inputStream);
+            return new {{genStylingRulesClass}}(stylingRules);
+        }
+    }
+}

@@ -1,0 +1,15 @@
+package {{languageProject.packageId}};
+
+import mb.log.api.LoggerFactory;
+
+public class {{genStylerFactoryClass}} {
+    private final {{genStylingRulesClass}} stylingRules;
+
+    public {{genStylerFactoryClass}}({{genStylingRulesClass}} stylingRules) {
+        this.stylingRules = stylingRules;
+    }
+
+    {{genStylerClass}} create(LoggerFactory loggerFactory) {
+        return new {{genStylerClass}}(stylingRules, loggerFactory);
+    }
+}

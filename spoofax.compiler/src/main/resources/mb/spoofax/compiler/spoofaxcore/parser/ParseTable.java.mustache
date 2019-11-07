@@ -16,7 +16,7 @@ public class {{genTableClass}} implements Serializable {
     }
 
     public static {{genTableClass}} fromClassLoaderResources() throws JSGLR1ParseTableException, IOException {
-        final String resource = "{{genTableResourcePath}}";
+        final String resource = "{{tableResourcePath}}";
         try(final @Nullable InputStream inputStream = {{genTableClass}}.class.getClassLoader().getResourceAsStream(resource)) {
             if(inputStream == null) {
                 throw new RuntimeException("Cannot create parse table; cannot find resource '" + resource + "' in classloader resources");

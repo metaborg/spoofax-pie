@@ -108,7 +108,7 @@ public class ParserCompiler {
             return genTableClass() + ".java";
         }
 
-        @Value.Default default String genTableResourcePath() {
+        @Value.Default default String tableResourcePath() {
             return languageProject().packagePath() + "/target/metaborg/sdf.tbl";
         }
 

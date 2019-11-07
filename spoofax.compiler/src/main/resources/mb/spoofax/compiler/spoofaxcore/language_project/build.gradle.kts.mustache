@@ -5,6 +5,7 @@ plugins {
 }
 
 dependencies {
+  api({{shared.logApiDep.toGradleDependency}})
   api({{shared.resourceDep.toGradleDependency}})
   api({{shared.commonDep.toGradleDependency}})
   compileOnly({{shared.checkerFrameworkQualifiersDep.toGradleDependency}})

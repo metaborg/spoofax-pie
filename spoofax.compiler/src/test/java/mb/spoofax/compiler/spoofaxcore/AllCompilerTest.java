@@ -25,9 +25,11 @@ class AllCompilerTest {
         final Shared shared = CommonInputs.tigerShared(baseDirectory);
         final LanguageProjectCompiler.Input languageProjectCompilerInput = CommonInputs.tigerLanguageProjectCompilerInput(shared);
         final ParserCompiler.Input parserCompilerInput = CommonInputs.tigerParserCompilerInput(shared, languageProjectCompilerInput.project());
+        final StylerCompiler.Input stylerCompilerInput = CommonInputs.tigerStylerCompilerInput(shared, languageProjectCompilerInput.project());
         final AllCompiler.Input input = AllCompiler.Input.builder()
             .languageProject(languageProjectCompilerInput)
             .parser(parserCompilerInput)
+            .styler(stylerCompilerInput)
             .build();
 
         final AllCompiler compiler = AllCompiler.fromClassLoaderResources(resourceService);
