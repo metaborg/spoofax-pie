@@ -1,4 +1,4 @@
-package mb.spoofax.compiler.spoofaxcore;
+package mb.spoofax.compiler.spoofaxcore.util;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;

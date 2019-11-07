@@ -57,6 +57,15 @@ public interface Shared extends Serializable {
         return "develop-SNAPSHOT";
     }
 
+    @Value.Default default String spoofaxCoreVersion() {
+        return "2.6.0-SNAPSHOT";
+    }
+
+    @Value.Default default String metaborgGradleConfigVersion() {
+        return "0.3.9";
+    }
+
+
     @Value.Default default JavaDependency resourceDep() {
         return JavaDependency.module(Coordinate.of("org.metaborg", "resource", spoofaxPieVersion()));
     }
@@ -65,12 +74,41 @@ public interface Shared extends Serializable {
         return JavaDependency.module(Coordinate.of("org.metaborg", "common", spoofaxPieVersion()));
     }
 
+    @Value.Default default JavaDependency checkerFrameworkQualifiersDep() {
+        return JavaDependency.module(Coordinate.of("org.checkerframework", "checker-qual-android", "2.6.0"));
+    }
+
+
     @Value.Default default JavaDependency jsglr1CommonDep() {
         return JavaDependency.module(Coordinate.of("org.metaborg", "jsglr1.common", spoofaxPieVersion()));
     }
 
-    @Value.Default default JavaDependency checkerFrameworkQualifiersDep() {
-        return JavaDependency.module(Coordinate.of("org.checkerframework", "checker-qual-android", "2.6.0"));
+    @Value.Default default JavaDependency esvCommonDep() {
+        return JavaDependency.module(Coordinate.of("org.metaborg", "esv.common", spoofaxPieVersion()));
+    }
+
+    @Value.Default default JavaDependency strategoCommonDep() {
+        return JavaDependency.module(Coordinate.of("org.metaborg", "stratego.common", spoofaxPieVersion()));
+    }
+
+    @Value.Default default JavaDependency orgStrategoXTStrjDep() {
+        return JavaDependency.module(Coordinate.of("org.metaborg", "org.strategoxt.strj", spoofaxCoreVersion()));
+    }
+
+    @Value.Default default JavaDependency strategoXTMinJarDep() {
+        return JavaDependency.module(Coordinate.of("org.metaborg", "strategoxt-min-jar", spoofaxCoreVersion()));
+    }
+
+    @Value.Default default JavaDependency constraintCommonDep() {
+        return JavaDependency.module(Coordinate.of("org.metaborg", "constraint.common", spoofaxPieVersion()));
+    }
+
+    @Value.Default default JavaDependency nabl2CommonDep() {
+        return JavaDependency.module(Coordinate.of("org.metaborg", "nabl2.common", spoofaxPieVersion()));
+    }
+
+    @Value.Default default JavaDependency statixCommonDep() {
+        return JavaDependency.module(Coordinate.of("org.metaborg", "statix.common", spoofaxPieVersion()));
     }
 
 

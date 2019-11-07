@@ -5,6 +5,7 @@ import mb.resource.ResourceService;
 import mb.resource.fs.FSPath;
 import mb.resource.fs.FSResource;
 import mb.resource.fs.FSResourceRegistry;
+import mb.spoofax.compiler.spoofaxcore.util.CommonInputs;
 import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ProjectConnection;
 import org.junit.jupiter.api.Test;
@@ -34,16 +35,18 @@ class AllCompilerTest {
         final AllCompiler.Output output = compiler.compile(input, charset);
         final File languageProjectDirectory = ((FSResource)resourceService.getHierarchicalResource(output.languageProject().baseDirectory())).getJavaPath().toFile();
 
-        try(
-            final ProjectConnection connection = GradleConnector.newConnector()
-                .forProjectDirectory(languageProjectDirectory)
-                .connect()
+        // noinspection CaughtExceptionImmediatelyRethrown
+        try(final ProjectConnection connection = GradleConnector.newConnector()
+            .forProjectDirectory(languageProjectDirectory)
+            .connect()
         ) {
             connection.newBuild()
                 .forTasks("build")
                 .addArguments("--quiet") // Only print important information messages and errors.
                 .setStandardOutput(System.out).setStandardError(System.err) // Redirect standard out and err.
                 .run();
+        } catch(Throwable e) {
+            throw e; // Place breakpoint here to debug failures.
         }
     }
 }

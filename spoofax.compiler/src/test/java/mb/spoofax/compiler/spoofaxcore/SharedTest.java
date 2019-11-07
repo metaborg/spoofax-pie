@@ -3,6 +3,7 @@ package mb.spoofax.compiler.spoofaxcore;
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
 import mb.resource.fs.FSPath;
+import mb.spoofax.compiler.spoofaxcore.util.CommonInputs;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.FileSystem;

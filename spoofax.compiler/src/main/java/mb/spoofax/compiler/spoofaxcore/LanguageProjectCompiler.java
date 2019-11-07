@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Value.Enclosing @ImmutablesStyle
@@ -31,8 +32,8 @@ public class LanguageProjectCompiler {
         final TemplateCompiler templateCompiler = new TemplateCompiler(LanguageProjectCompiler.class);
         return new LanguageProjectCompiler(
             resourceService,
-            templateCompiler.compile("settings.gradle.kts.mustache"),
-            templateCompiler.compile("build.gradle.kts.mustache")
+            templateCompiler.compile("language_project/settings.gradle.kts.mustache"),
+            templateCompiler.compile("language_project/build.gradle.kts.mustache")
         );
     }
 
@@ -52,19 +53,74 @@ public class LanguageProjectCompiler {
         final HierarchicalResource buildGradleKtsFile = resourceService.getHierarchicalResource(output.buildGradleKtsFile());
         try(final ResourceWriter writer = new ResourceWriter(buildGradleKtsFile, charset)) {
             final HashMap<String, Object> map = new HashMap<>();
-            final String dependencyCode = input.languageSpecificationDependency().caseOf()
+
+            final String languageDependencyCode = input.languageSpecificationDependency().caseOf()
                 .project((projectPath) -> "createProjectDependency(\"" + projectPath + "\")")
                 .module((coordinate) -> "createModuleDependency(\"" + coordinate.gradleNotation() + "\")")
                 .files((filePaths) -> "createFilesDependency(" + filePaths.stream().map((s) -> "\"" + s + "\"").collect(Collectors.joining(", ")) + ")");
-            map.put("dependencyCode", dependencyCode);
+            map.put("languageDependencyCode", languageDependencyCode);
+
+            final ArrayList<String> dependencyCodes = new ArrayList<>();
             final ArrayList<String> resourceCodes = new ArrayList<>();
-            resourceCodes.add("\"target/metaborg/sdf.tbl\"");
+
+            // Parser
+            dependencyCodes.add(apiDependency(input.shared().jsglr1CommonDep()));
+            resourceCodes.add(doubleQuote("target/metaborg/sdf.tbl"));
+
+            // Styler
+            if(input.enableStyler()) {
+                dependencyCodes.add(apiDependency(input.shared().esvCommonDep()));
+                resourceCodes.add(doubleQuote("target/metaborg/editor.esv.af"));
+            }
+
+            // Stratego
+            if(input.enableStrategoTransformations()) {
+                dependencyCodes.add(apiDependency(input.shared().strategoCommonDep()));
+                dependencyCodes.add(apiDependency(input.shared().orgStrategoXTStrjDep()));
+                dependencyCodes.add(implementationDependency(input.shared().strategoXTMinJarDep()));
+                if(input.copyStrategoCTree()) {
+                    resourceCodes.add(doubleQuote("target/metaborg/stratego.ctree"));
+                }
+            }
+
+            // Constraint
+            if(input.enableConstraintAnalysis()) {
+                dependencyCodes.add(apiDependency(input.shared().constraintCommonDep()));
+                // NaBL2 (required by Statix as well)
+                if(input.enableNaBL2ConstraintGeneration() || input.enableStatixConstraintGeneration()) {
+                    dependencyCodes.add(implementationDependency(input.shared().nabl2CommonDep()));
+                }
+                if(input.enableStatixConstraintGeneration()) {
+                    dependencyCodes.add(implementationDependency(input.shared().statixCommonDep()));
+                    resourceCodes.add(doubleQuote("src-gen/statix/statics.spec.aterm"));
+                }
+            }
+
+            // Additional resources
+            input.additionalCopyResources().forEach((resource) -> {
+                resourceCodes.add(doubleQuote(resource));
+            });
+
+            map.put("dependencyCodes", dependencyCodes);
             map.put("resourceCodes", resourceCodes);
+
             buildGradleTemplate.execute(input, map, writer);
             writer.flush();
         }
 
         return output;
+    }
+
+    private static String doubleQuote(String str) {
+        return "\"" + str + "\"";
+    }
+
+    private static String apiDependency(JavaDependency dependency) {
+        return "api(" + dependency.toGradleDependency() + ")";
+    }
+
+    private static String implementationDependency(JavaDependency dependency) {
+        return "implementation(" + dependency.toGradleDependency() + ")";
     }
 
 
@@ -79,6 +135,7 @@ public class LanguageProjectCompiler {
 
         Shared shared();
 
+
         @Value.Default default JavaProject project() {
             final Shared shared = shared();
             final String artifactId = shared.defaultArtifactId();
@@ -89,11 +146,28 @@ public class LanguageProjectCompiler {
                 .build();
         }
 
+
         JavaDependency languageSpecificationDependency();
 
-        @Value.Default default boolean includeStrategoClasses() { return false; }
 
-        @Value.Default default boolean includeStrategoJavaStrategyClasses() { return false; }
+        @Value.Default default boolean enableStyler() { return true; }
+
+        boolean enableStrategoTransformations();
+
+        boolean copyStrategoCTree();
+
+        boolean copyStrategoClasses();
+
+        boolean copyStrategoJavaStrategyClasses();
+
+        boolean enableConstraintAnalysis();
+
+        boolean enableNaBL2ConstraintGeneration();
+
+        boolean enableStatixConstraintGeneration();
+
+
+        List<String> additionalCopyResources();
     }
 
     @Value.Immutable

@@ -36,7 +36,7 @@ fun createFilesDependency(vararg paths: Any?): Dependency {
   return dependencies.create(files(paths))
 }
 
-fun configureModuleDependency(dependency: ModuleDependency):ModuleDependency {
+fun configureModuleDependency(dependency: ModuleDependency): ModuleDependency {
   dependency.targetConfiguration = Dependency.DEFAULT_CONFIGURATION
   dependency.isTransitive = false // Don't care about transitive dependencies, just want the '.spoofax-language' artifact.
   dependency.artifact {

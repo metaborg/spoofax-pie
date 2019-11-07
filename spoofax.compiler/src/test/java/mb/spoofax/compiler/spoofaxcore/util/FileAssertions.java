@@ -1,4 +1,4 @@
-package mb.spoofax.compiler.spoofaxcore;
+package mb.spoofax.compiler.spoofaxcore.util;
 
 import mb.resource.hierarchical.HierarchicalResource;
 import org.checkerframework.checker.nullness.qual.Nullable;

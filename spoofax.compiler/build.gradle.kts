@@ -41,6 +41,12 @@ dependencies {
   testInjections("org.metaborg:resource")
   testInjections(project(":common"))
   testInjections(project(":jsglr1.common"))
+  testInjections(project(":esv.common"))
+  testInjections(project(":stratego.common"))
+  testInjections("org.metaborg:strategoxt-min-jar")
+  testInjections(project(":constraint.common"))
+  testInjections(project(":nabl2.common"))
+  testInjections(project(":statix.common"))
   testInjections(project(":org.metaborg.lang.tiger", Dependency.DEFAULT_CONFIGURATION).also {
     it.isTransitive = false
     configureSpoofaxLanguageArtifact(it)
@@ -51,14 +57,10 @@ tasks.test {
   // Pass classpaths to tests in the form of system properties, which can be injected into projects that tests generate
   // to get access to the same classpaths that are used in the current Spoofax-PIE build.
   dependsOn(testInjections)
-  fun injectClasspath(name: String) {
-    systemProperty("$name:classpath", testInjections.resolvedConfiguration.resolvedArtifacts.find { it.name == name }!!.file)
-  }
-  doFirst {
-    injectClasspath("resource")
-    injectClasspath("common")
-    injectClasspath("jsglr1.common")
-    injectClasspath("org.metaborg.lang.tiger")
+  doFirst { // Wrap in doFirst to properly defer dependency resolution to the task execution phase.
+    testInjections.resolvedConfiguration.resolvedArtifacts.forEach {
+      systemProperty("${it.name}:classpath", it.file);
+    }
   }
   // Show standard out and err in tests, to ensure that failed Gradle builds are properly reported.
   testLogging {

@@ -34,9 +34,9 @@ public class ParserCompiler {
         final TemplateCompiler templateCompiler = new TemplateCompiler(ParserCompiler.class);
         return new ParserCompiler(
             resourceService,
-            templateCompiler.compile("ParseTable.java.mustache"),
-            templateCompiler.compile("Parser.java.mustache"),
-            templateCompiler.compile("ParserFactory.java.mustache")
+            templateCompiler.compile("parser/ParseTable.java.mustache"),
+            templateCompiler.compile("parser/Parser.java.mustache"),
+            templateCompiler.compile("parser/ParserFactory.java.mustache")
         );
     }
 
