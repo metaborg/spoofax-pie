@@ -4,7 +4,6 @@ import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.jsglr1.common.JSGLR1ParseTableException;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
-import mb.stratego.common.StrategoRuntimeBuilderException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
 import org.spoofax.interpreter.library.IOAgent;
@@ -19,7 +18,7 @@ class STLCRecStrategoRuntimeBuilderTest {
     private final STLCRecParser parser = new STLCRecParser(STLCRecParseTable.fromClassLoaderResources());
     private final StrategoRuntime runtime = STLCRecStrategoRuntimeBuilder.fromClassLoaderResources().build();
 
-    STLCRecStrategoRuntimeBuilderTest() throws StrategoRuntimeBuilderException, IOException, JSGLR1ParseTableException {}
+    STLCRecStrategoRuntimeBuilderTest() throws IOException, JSGLR1ParseTableException {}
 
     @Test void parseUnparse() throws InterruptedException, StrategoException {
         final String str = "1 + 2";

@@ -40,6 +40,7 @@ val testInjections = configurations.create("testInjections")
 dependencies {
   testInjections("org.metaborg:resource")
   testInjections("org.metaborg:log.api")
+  testInjections(project(":spoofax.compiler.interfaces"))
   testInjections(project(":common"))
   testInjections(project(":jsglr1.common"))
   testInjections(project(":esv.common"))

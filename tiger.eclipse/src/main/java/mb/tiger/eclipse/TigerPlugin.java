@@ -33,7 +33,7 @@ public class TigerPlugin extends AbstractUIPlugin {
         component = DaggerTigerEclipseComponent
             .builder()
             .platformComponent(SpoofaxPlugin.getComponent())
-            .tigerModule(TigerModule.fromClassLoaderResources())
+            .tigerModule(new TigerModule())
             .tigerEclipseModule(new TigerEclipseModule())
             .build();
 

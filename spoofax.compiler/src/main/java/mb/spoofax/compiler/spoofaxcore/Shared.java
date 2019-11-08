@@ -74,6 +74,10 @@ public interface Shared extends Serializable {
         return JavaDependency.module(Coordinate.of("org.metaborg", "log.api", "develop-SNAPSHOT"));
     }
 
+    @Value.Default default JavaDependency spoofaxCompilerInterfacesDep() {
+        return JavaDependency.module(Coordinate.of("org.metaborg", "spoofax.compiler.interfaces", spoofaxPieVersion()));
+    }
+
     @Value.Default default JavaDependency commonDep() {
         return JavaDependency.module(Coordinate.of("org.metaborg", "common", spoofaxPieVersion()));
     }

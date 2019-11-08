@@ -91,7 +91,10 @@ public class StrategoRuntimeBuilder {
     }
 
 
-    public StrategoRuntime build() throws StrategoRuntimeBuilderException {
+    /**
+     * @throws RuntimeException When building the Stratego runtime fails unexpectedly.
+     */
+    public StrategoRuntime build() {
         final HybridInterpreter hybridInterpreter = new HybridInterpreter(termFactory);
         for(String component : components) {
             hybridInterpreter.getCompiledContext().registerComponent(component);
@@ -106,8 +109,7 @@ public class StrategoRuntimeBuilder {
                 // Load buffers the input stream, and closes the buffered stream, which closes our stream.
                 hybridInterpreter.load(resource.openRead());
             } catch(IOException | InterpreterException e) {
-                throw new StrategoRuntimeBuilderException(
-                    "Loading Stratego ctree from resource '" + resource + "' failed unexpectedly", e);
+                throw new RuntimeException("Loading Stratego CTree from resource '" + resource + "' failed unexpectedly", e);
             }
         }
 
@@ -116,9 +118,7 @@ public class StrategoRuntimeBuilder {
             try {
                 hybridInterpreter.loadJars(jarParentClassLoader, classpath);
             } catch(IOException | IncompatibleJarException e) {
-                throw new StrategoRuntimeBuilderException(
-                    "Loading Stratego JAR from resources '" + jars + "' failed unexpectedly",
-                    e);
+                throw new RuntimeException("Loading Stratego JAR from resources '" + jars + "' failed unexpectedly", e);
             }
         }
 
@@ -129,12 +129,10 @@ public class StrategoRuntimeBuilder {
         for(String interopRegistererClassName : interopRegisterersByReflection) {
             try {
                 final Class<?> interopRegistererClass = Class.forName(interopRegistererClassName);
-                final InteropRegisterer interopRegisterer = (InteropRegisterer) interopRegistererClass.newInstance();
+                final InteropRegisterer interopRegisterer = (InteropRegisterer)interopRegistererClass.newInstance();
                 hybridInterpreter.registerClass(interopRegisterer, jarParentClassLoader);
             } catch(IllegalAccessException | InstantiationException | ClassNotFoundException e) {
-                throw new StrategoRuntimeBuilderException(
-                    "Loading InteropRegisterer '" + interopRegistererClassName + "' by reflection failed unexpectedly",
-                    e);
+                throw new RuntimeException("Loading InteropRegisterer '" + interopRegistererClassName + "' by reflection failed unexpectedly", e);
             }
         }
 
@@ -144,7 +142,7 @@ public class StrategoRuntimeBuilder {
         return new StrategoRuntime(hybridInterpreter);
     }
 
-    public StrategoRuntime buildFromPrototype(StrategoRuntime prototype) throws StrategoRuntimeBuilderException {
+    public StrategoRuntime buildFromPrototype(StrategoRuntime prototype) {
         final HybridInterpreter hybridInterpreter = new HybridInterpreter(prototype.hybridInterpreter);
 
         hybridInterpreter.getCompiledContext().getExceptionHandler().setEnabled(false);

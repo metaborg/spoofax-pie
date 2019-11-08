@@ -31,8 +31,8 @@ public class TermTracer {
      */
     public static @Nullable Region getRegion(IStrategoTerm term) {
         term = OriginAttachment.tryGetOrigin(term);
-        final IToken left = ImploderAttachment.getLeftToken(term);
-        final IToken right = ImploderAttachment.getRightToken(term);
+        final @Nullable IToken left = ImploderAttachment.getLeftToken(term);
+        final @Nullable IToken right = ImploderAttachment.getRightToken(term);
         if(left == null || right == null) {
             return null;
         }

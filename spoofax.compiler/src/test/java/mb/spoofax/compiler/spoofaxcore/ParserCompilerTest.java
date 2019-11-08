@@ -33,7 +33,7 @@ class ParserCompilerTest {
         final Shared shared1 = CommonInputs.tigerShared(baseDirectory);
         final JavaProject languageProject1 = CommonInputs.tigerLanguageProjectCompilerInput(shared1).project();
         final ParserCompiler.Input parserCompilerInput1 = CommonInputs.tigerParserCompilerInput(shared1, languageProject1);
-        assertEquals("TigerParseTable", parserCompilerInput1.genTableClass());
+        assertEquals("TigerParseTable", parserCompilerInput1.genParseTableClass());
         assertEquals("TigerParser", parserCompilerInput1.genParserClass());
         shared1.savePersistentProperties(persistentProperties);
         parserCompilerInput1.savePersistentProperties(persistentProperties);
@@ -47,7 +47,7 @@ class ParserCompilerTest {
             .withPersistentProperties(persistentProperties)
             .build();
         // Should not affect generated class names.
-        assertEquals("TigerParseTable", parserCompilerInput2.genTableClass());
+        assertEquals("TigerParseTable", parserCompilerInput2.genParseTableClass());
         assertEquals("TigerParser", parserCompilerInput2.genParserClass());
     }
 

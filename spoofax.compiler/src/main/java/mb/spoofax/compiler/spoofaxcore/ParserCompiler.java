@@ -74,7 +74,7 @@ public class ParserCompiler {
     public interface Input extends Serializable {
         class Builder extends ParserCompilerData.Input.Builder implements BuilderBase {
             public Builder withPersistentProperties(Properties properties) {
-                with(properties, "genTableClass", this::genTableClass);
+                with(properties, "genParseTableClass", this::genParseTableClass);
                 with(properties, "genParserClass", this::genParserClass);
                 with(properties, "genParserFactoryClass", this::genParserFactoryClass);
                 return this;
@@ -100,12 +100,12 @@ public class ParserCompiler {
         Optional<String> manualParserFactoryClass();
 
 
-        @Value.Default default String genTableClass() {
+        @Value.Default default String genParseTableClass() {
             return shared().classSuffix() + "ParseTable";
         }
 
-        @Value.Derived default String genTablePath() {
-            return genTableClass() + ".java";
+        @Value.Derived default String genParseTablePath() {
+            return genParseTableClass() + ".java";
         }
 
         @Value.Default default String tableResourcePath() {
@@ -131,7 +131,7 @@ public class ParserCompiler {
 
         default void savePersistentProperties(Properties properties) {
             shared().savePersistentProperties(properties);
-            properties.setProperty("genTableClass", genTableClass());
+            properties.setProperty("genParseTableClass", genParseTableClass());
             properties.setProperty("genParserClass", genParserClass());
             properties.setProperty("genParserFactoryClass", genParserFactoryClass());
         }
@@ -158,7 +158,7 @@ public class ParserCompiler {
                 return this
                     .javaSourceDirectory(javaSourceDirectory)
                     .packageDirectory(packageDirectory)
-                    .genParseTableFile(packageDirectory.appendRelativePath(input.genTablePath()))
+                    .genParseTableFile(packageDirectory.appendRelativePath(input.genParseTablePath()))
                     .genParserFile(packageDirectory.appendRelativePath(input.genParserPath()))
                     .genParserFactoryFile(packageDirectory.appendRelativePath(input.genParserFactoryPath()))
                     ;

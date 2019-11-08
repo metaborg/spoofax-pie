@@ -1,13 +1,15 @@
 package {{languageProject.packageId}};
 
-public class {{genParserFactoryClass}} {
-    private final {{genTableClass}} parseTable;
+import mb.spoofax.compiler.interfaces.spoofaxcore.ParserFactory;
 
-    public {{genParserFactoryClass}}({{genTableClass}} parseTable) {
-        this.parseTable = parseTable;
+public class {{genParserFactoryClass}} implements ParserFactory {
+    private final {{genParseTableClass}} parseTable;
+
+    public {{genParserFactoryClass}}() {
+        this.parseTable = {{genParseTableClass}}.fromClassLoaderResources();
     }
 
-    {{genParserClass}} create() {
+    @Override public {{genParserClass}} create() {
         return new {{genParserClass}}(parseTable);
     }
 }

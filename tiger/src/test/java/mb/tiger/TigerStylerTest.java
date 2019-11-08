@@ -6,21 +6,16 @@ import mb.common.style.Styling;
 import mb.common.style.TokenStyle;
 import mb.common.token.TokenTypes;
 import mb.jsglr1.common.JSGLR1ParseResult;
-import mb.jsglr1.common.JSGLR1ParseTableException;
 import mb.log.noop.NoopLoggerFactory;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class TigerStylerTest {
     private final TigerParser parser = new TigerParser(TigerParseTable.fromClassLoaderResources());
-    private final TigerStyler styler =
-        new TigerStyler(TigerStylingRules.fromClassLoaderResources(), new NoopLoggerFactory());
-
-    TigerStylerTest() throws IOException, JSGLR1ParseTableException {}
+    private final TigerStyler styler = new TigerStyler(TigerStylingRules.fromClassLoaderResources(), new NoopLoggerFactory());
 
     @Test void style() throws InterruptedException {
         final JSGLR1ParseResult parseOutput = parser.parse("1 + 21", "Module");

@@ -19,7 +19,6 @@ import mb.resource.url.URLResourceRegistry;
 import mb.stratego.common.StrategoIOAgent;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
-import mb.stratego.common.StrategoRuntimeBuilderException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -43,7 +42,7 @@ class STLCRecConstraintAnalyzerTest {
         STLCRecStatixStrategoRuntimeBuilder.fromClassLoaderResources(strategoRuntimeBuilder).build();
     private final STLCRecConstraintAnalyzer analyzer = new STLCRecConstraintAnalyzer(strategoRuntime);
 
-    STLCRecConstraintAnalyzerTest() throws IOException, JSGLR1ParseTableException, StrategoRuntimeBuilderException {}
+    STLCRecConstraintAnalyzerTest() throws IOException, JSGLR1ParseTableException {}
 
     @Test void analyzeSingleErrors() throws InterruptedException, ConstraintAnalyzerException {
         final ResourceKey resource = new SimpleResourceKey(qualifier, "a.stlcrec");

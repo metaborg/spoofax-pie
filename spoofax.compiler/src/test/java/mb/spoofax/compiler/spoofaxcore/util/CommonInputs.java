@@ -12,6 +12,7 @@ public class CommonInputs {
             .baseDirectory(baseDirectory)
             .logApiDep(fromSystemProperty("log.api:classpath"))
             .resourceDep(fromSystemProperty("resource:classpath"))
+            .spoofaxCompilerInterfacesDep(fromSystemProperty("spoofax.compiler.interfaces:classpath"))
             .commonDep(fromSystemProperty("common:classpath"))
             .jsglr1CommonDep(fromSystemProperty("jsglr1.common:classpath"))
             .esvCommonDep(fromSystemProperty("esv.common:classpath"))

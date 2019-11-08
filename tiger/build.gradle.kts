@@ -8,6 +8,7 @@ plugins {
 dependencies {
   api(platform(project(":depconstraints")))
 
+  api(project(":spoofax.compiler.interfaces"))
   api(project(":common"))
   api(project(":jsglr1.common"))
   api(project(":esv.common"))
