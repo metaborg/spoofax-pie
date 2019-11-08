@@ -4,10 +4,7 @@ import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.BuilderBase;
-import mb.spoofax.compiler.util.ClassKind;
-import mb.spoofax.compiler.util.ResourceWriter;
-import mb.spoofax.compiler.util.TemplateCompiler;
+import mb.spoofax.compiler.util.*;
 import org.immutables.value.Value;
 
 import java.io.IOException;

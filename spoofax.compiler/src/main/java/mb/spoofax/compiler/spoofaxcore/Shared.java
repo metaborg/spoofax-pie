@@ -3,6 +3,8 @@ package mb.spoofax.compiler.spoofaxcore;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.BuilderBase;
 import mb.spoofax.compiler.util.Conversion;
+import mb.spoofax.compiler.util.Coordinate;
+import mb.spoofax.compiler.util.JavaDependency;
 import org.immutables.value.Value;
 
 import java.io.Serializable;

@@ -1,4 +1,4 @@
-package mb.spoofax.compiler.spoofaxcore;
+package mb.spoofax.compiler;
 
 import org.immutables.value.Value;
 
@@ -12,6 +12,5 @@ import java.lang.annotation.Target;
 @Value.Style(
     typeImmutableEnclosing = "*Data",
     deepImmutablesDetection = true,
-    visibility = Value.Style.ImplementationVisibility.PACKAGE,
     overshadowImplementation = true
 ) @interface ImmutableStyle {}

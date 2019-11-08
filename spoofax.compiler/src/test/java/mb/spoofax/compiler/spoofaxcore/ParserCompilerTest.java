@@ -11,6 +11,7 @@ import mb.spoofax.compiler.spoofaxcore.util.CommonInputs;
 import mb.spoofax.compiler.spoofaxcore.util.FileAssertions;
 import mb.spoofax.compiler.spoofaxcore.util.JavaParser;
 import mb.spoofax.compiler.util.ClassKind;
+import mb.spoofax.compiler.util.JavaProject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;

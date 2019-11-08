@@ -8,6 +8,7 @@ import mb.resource.fs.FSPath;
 import mb.resource.fs.FSResourceRegistry;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.spoofax.compiler.spoofaxcore.util.CommonInputs;
+import mb.spoofax.compiler.util.JavaProject;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;

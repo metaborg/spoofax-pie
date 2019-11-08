@@ -3,6 +3,8 @@ package mb.spoofax.compiler.spoofaxcore.util;
 import mb.common.util.Preconditions;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.spoofaxcore.*;
+import mb.spoofax.compiler.util.JavaDependency;
+import mb.spoofax.compiler.util.JavaProject;
 
 public class CommonInputs {
     public static Shared.Builder tigerSharedBuilder(ResourcePath baseDirectory) {

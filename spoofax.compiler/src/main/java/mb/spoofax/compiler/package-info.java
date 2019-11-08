@@ -1,4 +1,5 @@
 @DefaultQualifier(NonNull.class)
+@ImmutableStyle
 package mb.spoofax.compiler;
 
 import org.checkerframework.checker.nullness.qual.NonNull;

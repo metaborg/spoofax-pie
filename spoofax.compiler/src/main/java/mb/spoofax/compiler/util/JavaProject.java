@@ -1,7 +1,6 @@
-package mb.spoofax.compiler.spoofaxcore;
+package mb.spoofax.compiler.util;
 
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.Conversion;
 import org.immutables.value.Value;
 
 import java.io.Serializable;

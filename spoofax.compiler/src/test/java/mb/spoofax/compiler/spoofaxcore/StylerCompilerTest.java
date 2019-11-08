@@ -10,16 +10,13 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.spoofax.compiler.spoofaxcore.util.CommonInputs;
 import mb.spoofax.compiler.spoofaxcore.util.FileAssertions;
 import mb.spoofax.compiler.spoofaxcore.util.JavaParser;
-import mb.spoofax.compiler.util.ClassKind;
+import mb.spoofax.compiler.util.JavaProject;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
-import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.*;
 
