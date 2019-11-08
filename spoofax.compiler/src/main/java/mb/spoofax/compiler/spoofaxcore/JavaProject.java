@@ -6,7 +6,7 @@ import org.immutables.value.Value;
 
 import java.io.Serializable;
 
-@Value.Immutable @ImmutablesStyle
+@Value.Immutable
 public interface JavaProject extends Serializable {
     class Builder extends ImmutableJavaProject.Builder {}
 

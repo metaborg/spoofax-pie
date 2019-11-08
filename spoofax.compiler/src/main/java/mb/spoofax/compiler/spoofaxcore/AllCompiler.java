@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 
-@Value.Enclosing @ImmutablesStyle
+@Value.Enclosing
 public class AllCompiler {
     private final LanguageProjectCompiler languageProjectCompiler;
     private final ParserCompiler parserCompiler;

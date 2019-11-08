@@ -25,7 +25,7 @@ public abstract class JavaDependency implements Serializable {
         return JavaDependencies.caseOf(this);
     }
 
-    public String toGradleDependency() {
+    public String toGradleKotlinDependencyCode() {
         return caseOf()
             .project((projectPath) -> "project(\"" + projectPath + "\")")
             .module((coordinate) -> "\"" + coordinate.gradleNotation() + "\"")

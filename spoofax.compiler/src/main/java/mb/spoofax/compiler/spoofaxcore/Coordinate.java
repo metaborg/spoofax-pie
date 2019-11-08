@@ -4,7 +4,7 @@ import org.immutables.value.Value;
 
 import java.io.Serializable;
 
-@Value.Immutable @ImmutablesStyle
+@Value.Immutable
 public abstract class Coordinate implements Serializable {
     public static Coordinate of(String groupId, String artifactId, String version) {
         return ImmutableCoordinate.of(groupId, artifactId, version);

@@ -8,7 +8,7 @@ import org.immutables.value.Value;
 import java.io.Serializable;
 import java.util.Properties;
 
-@Value.Immutable @ImmutablesStyle
+@Value.Immutable
 public interface Shared extends Serializable {
     class Builder extends ImmutableShared.Builder implements BuilderBase {
         public Builder withPersistentProperties(Properties properties) {

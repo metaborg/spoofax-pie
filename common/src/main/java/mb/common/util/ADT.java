@@ -13,5 +13,4 @@ import static org.derive4j.Make.*;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
 @Data(@Derive(make = {lambdaVisitor, constructors, getters, casesMatching, caseOfMatching}))
-public @interface ADT {
-}
+public @interface ADT {}

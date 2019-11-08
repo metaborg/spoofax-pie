@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Value.Enclosing @ImmutablesStyle
+@Value.Enclosing
 public class LanguageProjectCompiler {
     private final ResourceService resourceService;
     private final Template settingsGradleTemplate;
@@ -116,11 +116,11 @@ public class LanguageProjectCompiler {
     }
 
     private static String apiDependency(JavaDependency dependency) {
-        return "api(" + dependency.toGradleDependency() + ")";
+        return "api(" + dependency.toGradleKotlinDependencyCode() + ")";
     }
 
     private static String implementationDependency(JavaDependency dependency) {
-        return "implementation(" + dependency.toGradleDependency() + ")";
+        return "implementation(" + dependency.toGradleKotlinDependencyCode() + ")";
     }
 
 

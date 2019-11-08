@@ -16,7 +16,7 @@ import java.nio.charset.Charset;
 import java.util.Optional;
 import java.util.Properties;
 
-@Value.Enclosing @ImmutablesStyle
+@Value.Enclosing
 public class ParserCompiler {
     private final ResourceService resourceService;
     private final Template parseTableTemplate;

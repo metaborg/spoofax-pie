@@ -14,5 +14,4 @@ import java.lang.annotation.Target;
     deepImmutablesDetection = true,
     visibility = Value.Style.ImplementationVisibility.PACKAGE,
     overshadowImplementation = true
-)
-public @interface ImmutablesStyle {}
+) @interface ImmutableStyle {}
