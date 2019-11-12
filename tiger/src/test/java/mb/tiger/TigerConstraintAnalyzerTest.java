@@ -23,10 +23,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class TigerConstraintAnalyzerTest {
     private static final String qualifier = "test";
 
-    private final TigerParser parser = new TigerParser(TigerParseTable.fromClassLoaderResources());
-    private final StrategoRuntimeBuilder strategoRuntimeBuilder = TigerStrategoRuntimeBuilder.create();
-    private final StrategoRuntime strategoRuntime = TigerNaBL2StrategoRuntimeBuilder.create(strategoRuntimeBuilder).build();
-    private final TigerConstraintAnalyzer analyzer = new TigerConstraintAnalyzer(strategoRuntime);
+    private final TigerParser parser = new TigerParserFactory().create();
+    private final StrategoRuntimeBuilder strategoRuntimeBuilder = new TigerStrategoRuntimeBuilderFactory().create();
+    private final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.build();
+    private final TigerConstraintAnalyzer analyzer = new TigerConstraintAnalyzerFactory(strategoRuntime).create();
 
     @Test void analyzeSingleErrors() throws InterruptedException, ConstraintAnalyzerException {
         final ResourceKey resource = new SimpleResourceKey(qualifier, "a.tig");

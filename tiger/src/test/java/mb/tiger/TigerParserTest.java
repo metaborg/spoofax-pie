@@ -8,7 +8,7 @@ import org.spoofax.terms.TermFactory;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TigerParserTest {
-    private final TigerParser parser = new TigerParser(TigerParseTable.fromClassLoaderResources());
+    private final TigerParser parser = new TigerParserFactory().create();
     private final ITermFactory termFactory = new TermFactory();
 
     @Test void parse() throws InterruptedException {

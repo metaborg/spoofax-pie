@@ -12,8 +12,8 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TigerStrategoRuntimeBuilderTest {
-    private final TigerParser parser = new TigerParser(TigerParseTable.fromClassLoaderResources());
-    private final StrategoRuntime runtime = TigerStrategoRuntimeBuilder.create().build();
+    private final TigerParser parser = new TigerParserFactory().create();
+    private final StrategoRuntime runtime = new TigerStrategoRuntimeBuilderFactory().create().build();
 
     @Test void parseUnparse() throws InterruptedException, StrategoException {
         final String str = "1 + 2";

@@ -14,8 +14,8 @@ import java.util.ArrayList;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TigerStylerTest {
-    private final TigerParser parser = new TigerParser(TigerParseTable.fromClassLoaderResources());
-    private final TigerStyler styler = new TigerStyler(TigerStylingRules.fromClassLoaderResources(), new NoopLoggerFactory());
+    private final TigerParser parser = new TigerParserFactory().create();
+    private final TigerStyler styler = new TigerStylerFactory(new NoopLoggerFactory()).create();
 
     @Test void style() throws InterruptedException {
         final JSGLR1ParseResult parseOutput = parser.parse("1 + 21", "Module");

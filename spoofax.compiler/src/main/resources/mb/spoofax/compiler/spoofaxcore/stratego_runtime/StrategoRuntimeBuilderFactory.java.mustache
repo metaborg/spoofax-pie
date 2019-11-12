@@ -1,0 +1,18 @@
+package {{languageProject.packageId}};
+
+{{#addNaBL2Primitives}}import mb.nabl2.common.NaBL2PrimitiveLibrary;
+{{/addNaBL2Primitives}}{{#addStatixPrimitives}}import mb.statix.common.StatixPrimitiveLibrary;
+{{/addStatixPrimitives}}import mb.spoofax.compiler.interfaces.spoofaxcore.StrategoRuntimeBuilderFactory;
+import mb.stratego.common.StrategoRuntimeBuilder;
+
+public class {{genStrategoRuntimeBuilderFactoryClass}} implements StrategoRuntimeBuilderFactory {
+    @Override public StrategoRuntimeBuilder create() {
+        final StrategoRuntimeBuilder builder = new StrategoRuntimeBuilder();
+{{#interopRegisterersByReflection}}        builder.addInteropRegistererByReflection({{this}});
+{{/interopRegisterersByReflection}}        builder.withJarParentClassLoader({{genStrategoRuntimeBuilderFactoryClass}}.class.getClassLoader());
+{{#addNaBL2Primitives}}        builder.addLibrary(new NaBL2PrimitiveLibrary());
+{{/addNaBL2Primitives}}{{#addStatixPrimitives}}        builder.addLibrary(new StatixPrimitiveLibrary());
+{{/addStatixPrimitives}}
+        return builder;
+    }
+}
