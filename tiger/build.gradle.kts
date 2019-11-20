@@ -5,6 +5,14 @@ plugins {
   id("org.metaborg.gradle.config.junit-testing")
 }
 
+sourceSets {
+  main {
+    java {
+      srcDir("$buildDir/generated/sources/spoofax/java")
+    }
+  }
+}
+
 dependencies {
   api(platform(project(":depconstraints")))
 

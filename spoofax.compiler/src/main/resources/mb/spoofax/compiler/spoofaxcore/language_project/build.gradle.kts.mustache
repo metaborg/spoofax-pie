@@ -4,6 +4,14 @@ plugins {
   id("org.metaborg.gradle.config.junit-testing") version "{{shared.metaborgGradleConfigVersion}}"
 }
 
+sourceSets {
+  main {
+    java {
+      srcDir("$buildDir/generated/sources/spoofax/java")
+    }
+  }
+}
+
 dependencies {
   api({{shared.logApiDep.toGradleKotlinDependencyCode}})
   api({{shared.resourceDep.toGradleKotlinDependencyCode}})

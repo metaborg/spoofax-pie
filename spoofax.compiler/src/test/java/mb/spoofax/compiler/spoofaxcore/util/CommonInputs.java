@@ -74,4 +74,15 @@ public class CommonInputs {
     public static StylerCompiler.Input tigerStylerCompilerInput(Shared shared, JavaProject languageProject) {
         return tigerStylerCompilerInputBuilder(shared, languageProject).build();
     }
+
+
+    public static StrategoRuntimeBuilderCompiler.Input.Builder strategoRuntimeBuilderCompilerInputBuilder(Shared shared, JavaProject languageProject) {
+        return StrategoRuntimeBuilderCompiler.Input.builder()
+            .shared(shared)
+            .languageProject(languageProject);
+    }
+
+    public static StrategoRuntimeBuilderCompiler.Input strategoRuntimeBuilderCompilerInput(Shared shared, JavaProject languageProject) {
+        return strategoRuntimeBuilderCompilerInputBuilder(shared, languageProject).build();
+    }
 }

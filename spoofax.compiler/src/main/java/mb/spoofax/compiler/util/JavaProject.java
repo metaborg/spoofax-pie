@@ -22,5 +22,34 @@ public interface JavaProject extends Serializable {
         return Conversion.packageIdToPath(packageId());
     }
 
-    ResourcePath directory();
+    ResourcePath baseDirectory();
+
+
+    @Value.Default default ResourcePath sourceDirectory() {
+        return baseDirectory().appendSegment("src");
+    }
+
+    @Value.Default default ResourcePath sourceMainDirectory() {
+        return sourceDirectory().appendSegment("main");
+    }
+
+    @Value.Default default ResourcePath sourceMainJavaDirectory() {
+        return sourceMainDirectory().appendSegment("java");
+    }
+
+    @Value.Default default ResourcePath outputDirectory() {
+        return baseDirectory().appendRelativePath("build");
+    }
+
+    @Value.Default default ResourcePath genSourceDirectory() {
+        return outputDirectory().appendRelativePath("generated/sources");
+    }
+
+    @Value.Default default ResourcePath genSourceSpoofaxDirectory() {
+        return genSourceDirectory().appendSegment("spoofax");
+    }
+
+    @Value.Default default ResourcePath genSourceSpoofaxJavaDirectory() {
+        return genSourceSpoofaxDirectory().appendSegment("java");
+    }
 }

@@ -4,7 +4,11 @@ import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.*;
+import mb.spoofax.compiler.util.BuilderBase;
+import mb.spoofax.compiler.util.ClassKind;
+import mb.spoofax.compiler.util.JavaProject;
+import mb.spoofax.compiler.util.ResourceWriter;
+import mb.spoofax.compiler.util.TemplateCompiler;
 import org.immutables.value.Value;
 
 import java.io.IOException;
@@ -42,8 +46,8 @@ public class ParserCompiler {
         final Output output = Output.builder().withDefaultsBasedOnInput(input).build();
         if(input.classKind().isManualOnly()) return output; // Nothing to generate: return.
 
-        final HierarchicalResource packageDirectory = resourceService.getHierarchicalResource(output.packageDirectory());
-        packageDirectory.ensureDirectoryExists();
+        final HierarchicalResource genSourcesJavaDirectory = resourceService.getHierarchicalResource(output.genSourcesJavaDirectory());
+        genSourcesJavaDirectory.ensureDirectoryExists();
 
         final HierarchicalResource parseTableFile = resourceService.getHierarchicalResource(output.genParseTableFile());
         try(final ResourceWriter writer = new ResourceWriter(parseTableFile, charset)) {
@@ -150,14 +154,12 @@ public class ParserCompiler {
     public interface Output extends Serializable {
         class Builder extends ParserCompilerData.Output.Builder {
             public Builder withDefaultsBasedOnInput(Input input) {
-                final ResourcePath javaSourceDirectory = input.languageProject().directory().appendRelativePath("src/main/java");
-                final ResourcePath packageDirectory = javaSourceDirectory.appendRelativePath(input.languageProject().packagePath());
+                final ResourcePath genSourcesJavaDirectory = input.languageProject().genSourceSpoofaxJavaDirectory().appendRelativePath(input.languageProject().packagePath());
                 return this
-                    .javaSourceDirectory(javaSourceDirectory)
-                    .packageDirectory(packageDirectory)
-                    .genParseTableFile(packageDirectory.appendRelativePath(input.genParseTablePath()))
-                    .genParserFile(packageDirectory.appendRelativePath(input.genParserPath()))
-                    .genParserFactoryFile(packageDirectory.appendRelativePath(input.genParserFactoryPath()))
+                    .genSourcesJavaDirectory(genSourcesJavaDirectory)
+                    .genParseTableFile(genSourcesJavaDirectory.appendRelativePath(input.genParseTablePath()))
+                    .genParserFile(genSourcesJavaDirectory.appendRelativePath(input.genParserPath()))
+                    .genParserFactoryFile(genSourcesJavaDirectory.appendRelativePath(input.genParserFactoryPath()))
                     ;
             }
         }
@@ -167,9 +169,7 @@ public class ParserCompiler {
         }
 
 
-        ResourcePath javaSourceDirectory();
-
-        ResourcePath packageDirectory();
+        ResourcePath genSourcesJavaDirectory();
 
         ResourcePath genParseTableFile();
 

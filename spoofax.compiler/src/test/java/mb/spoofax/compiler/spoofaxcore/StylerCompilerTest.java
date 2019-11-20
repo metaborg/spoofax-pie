@@ -35,8 +35,8 @@ class StylerCompilerTest {
         final Charset charset = StandardCharsets.UTF_8;
         final StylerCompiler.Output output = compiler.compile(input, charset);
 
-        final HierarchicalResource packageDirectory = resourceService.getHierarchicalResource(output.packageDirectory());
-        assertTrue(packageDirectory.exists());
+        final HierarchicalResource genSourcesJavaDirectory = resourceService.getHierarchicalResource(output.genSourcesJavaDirectory());
+        assertTrue(genSourcesJavaDirectory.exists());
 
         final FileAssertions genStylingRulesFile = new FileAssertions(resourceService.getHierarchicalResource(output.genStylingRulesFile()));
         genStylingRulesFile.assertName("TigerStylingRules.java");

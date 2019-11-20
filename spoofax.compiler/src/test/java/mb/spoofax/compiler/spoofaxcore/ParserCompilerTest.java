@@ -86,8 +86,8 @@ class ParserCompilerTest {
         final Charset charset = StandardCharsets.UTF_8;
         final ParserCompiler.Output output = compiler.compile(input, charset);
 
-        final HierarchicalResource packageDirectory = resourceService.getHierarchicalResource(output.packageDirectory());
-        assertTrue(packageDirectory.exists());
+        final HierarchicalResource genSourcesJavaDirectory = resourceService.getHierarchicalResource(output.genSourcesJavaDirectory());
+        assertTrue(genSourcesJavaDirectory.exists());
 
         final FileAssertions genParseTableFile = new FileAssertions(resourceService.getHierarchicalResource(output.genParseTableFile()));
         genParseTableFile.assertName("TigerParseTable.java");
@@ -125,8 +125,8 @@ class ParserCompilerTest {
         final Charset charset = StandardCharsets.UTF_8;
         final ParserCompiler.Output output = compiler.compile(input, charset);
 
-        final HierarchicalResource packageDir = resourceService.getHierarchicalResource(output.packageDirectory());
-        assertFalse(packageDir.exists());
+        final HierarchicalResource genSourcesJavaDirectory = resourceService.getHierarchicalResource(output.genSourcesJavaDirectory());
+        assertFalse(genSourcesJavaDirectory.exists());
 
         final HierarchicalResource genParseTableFile = resourceService.getHierarchicalResource(output.genParseTableFile());
         assertFalse(genParseTableFile.exists());

@@ -12,13 +12,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
 class AllCompilerTest {
-    @Test void testCompilerDefault(@TempDir Path temporaryDirectoryPath) throws IOException, Throwable {
+    @Test void testCompilerDefault(@TempDir Path temporaryDirectoryPath) throws Throwable {
         final ResourceService resourceService = new DefaultResourceService(new FSResourceRegistry());
         final FSPath baseDirectory = new FSPath(temporaryDirectoryPath);
 
@@ -26,10 +25,12 @@ class AllCompilerTest {
         final LanguageProjectCompiler.Input languageProjectCompilerInput = CommonInputs.tigerLanguageProjectCompilerInput(shared);
         final ParserCompiler.Input parserCompilerInput = CommonInputs.tigerParserCompilerInput(shared, languageProjectCompilerInput.project());
         final StylerCompiler.Input stylerCompilerInput = CommonInputs.tigerStylerCompilerInput(shared, languageProjectCompilerInput.project());
+        final StrategoRuntimeBuilderCompiler.Input strategoRuntimeBuilderCompilerInput = CommonInputs.strategoRuntimeBuilderCompilerInput(shared, languageProjectCompilerInput.project());
         final AllCompiler.Input input = AllCompiler.Input.builder()
             .languageProject(languageProjectCompilerInput)
             .parser(parserCompilerInput)
             .styler(stylerCompilerInput)
+            .strategoRuntimeBuilder(strategoRuntimeBuilderCompilerInput)
             .build();
 
         final AllCompiler compiler = AllCompiler.fromClassLoaderResources(resourceService);

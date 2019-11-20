@@ -12,28 +12,33 @@ public class AllCompiler {
     private final LanguageProjectCompiler languageProjectCompiler;
     private final ParserCompiler parserCompiler;
     private final StylerCompiler stylerCompiler;
+    private final StrategoRuntimeBuilderCompiler strategoRuntimeBuilderCompiler;
 
-    public AllCompiler(LanguageProjectCompiler languageProjectCompiler, ParserCompiler parserCompiler, StylerCompiler stylerCompiler) {
+    public AllCompiler(LanguageProjectCompiler languageProjectCompiler, ParserCompiler parserCompiler, StylerCompiler stylerCompiler, StrategoRuntimeBuilderCompiler strategoRuntimeBuilderCompiler) {
         this.languageProjectCompiler = languageProjectCompiler;
         this.parserCompiler = parserCompiler;
         this.stylerCompiler = stylerCompiler;
+        this.strategoRuntimeBuilderCompiler = strategoRuntimeBuilderCompiler;
     }
 
     public static AllCompiler fromClassLoaderResources(ResourceService resourceService) {
         final LanguageProjectCompiler languageProjectCompiler = LanguageProjectCompiler.fromClassLoaderResources(resourceService);
         final ParserCompiler parserCompiler = ParserCompiler.fromClassLoaderResources(resourceService);
         final StylerCompiler stylerCompiler = StylerCompiler.fromClassLoaderResources(resourceService);
-        return new AllCompiler(languageProjectCompiler, parserCompiler, stylerCompiler);
+        final StrategoRuntimeBuilderCompiler strategoRuntimeBuilderCompiler = StrategoRuntimeBuilderCompiler.fromClassLoaderResources(resourceService);
+        return new AllCompiler(languageProjectCompiler, parserCompiler, stylerCompiler, strategoRuntimeBuilderCompiler);
     }
 
     public Output compile(Input input, Charset charset) throws IOException {
         final LanguageProjectCompiler.Output languageProject = languageProjectCompiler.compile(input.languageProject(), charset);
-        final ParserCompiler.Output parser = parserCompiler.compile(input.parser(), charset);
-        final StylerCompiler.Output styler = stylerCompiler.compile(input.styler(), charset);
+        final ParserCompiler.Output parserOutput = parserCompiler.compile(input.parser(), charset);
+        final StylerCompiler.Output stylerOutput = stylerCompiler.compile(input.styler(), charset);
+        final StrategoRuntimeBuilderCompiler.Output strategoRuntimeBuilderOutput = strategoRuntimeBuilderCompiler.compile(input.strategoRuntimeBuilder(), charset);
         return Output.builder()
             .languageProject(languageProject)
-            .parser(parser)
-            .styler(styler)
+            .parser(parserOutput)
+            .styler(stylerOutput)
+            .strategoRuntimeBuilder(strategoRuntimeBuilderOutput)
             .build();
     }
 
@@ -52,6 +57,8 @@ public class AllCompiler {
         ParserCompiler.Input parser();
 
         StylerCompiler.Input styler();
+
+        StrategoRuntimeBuilderCompiler.Input strategoRuntimeBuilder();
     }
 
     @Value.Immutable
@@ -68,5 +75,7 @@ public class AllCompiler {
         ParserCompiler.Output parser();
 
         StylerCompiler.Output styler();
+
+        StrategoRuntimeBuilderCompiler.Output strategoRuntimeBuilder();
     }
 }

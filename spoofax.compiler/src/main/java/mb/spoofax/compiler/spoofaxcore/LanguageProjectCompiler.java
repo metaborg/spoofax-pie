@@ -144,7 +144,7 @@ public class LanguageProjectCompiler {
             return JavaProject.builder()
                 .coordinate(shared.defaultGroupId(), artifactId, shared.defaultVersion())
                 .packageId(shared.basePackageId())
-                .directory(shared.baseDirectory().appendSegment(artifactId))
+                .baseDirectory(shared.baseDirectory().appendSegment(artifactId))
                 .build();
         }
 
@@ -176,11 +176,11 @@ public class LanguageProjectCompiler {
     public interface Output extends Serializable {
         class Builder extends LanguageProjectCompilerData.Output.Builder {
             public Builder withDefaultsBasedOnInput(Input input) {
-                final ResourcePath directory = input.project().directory();
+                final ResourcePath baseDirectory = input.project().baseDirectory();
                 return this
-                    .baseDirectory(directory)
-                    .settingsGradleKtsFile(directory.appendRelativePath("settings.gradle.kts"))
-                    .buildGradleKtsFile(directory.appendRelativePath("build.gradle.kts"))
+                    .baseDirectory(baseDirectory)
+                    .settingsGradleKtsFile(baseDirectory.appendRelativePath("settings.gradle.kts"))
+                    .buildGradleKtsFile(baseDirectory.appendRelativePath("build.gradle.kts"))
                     ;
             }
         }
