@@ -16,26 +16,28 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
-class AllCompilerTest {
+class MainMultiProjectTest {
     @Test void testCompilerDefault(@TempDir Path temporaryDirectoryPath) throws Throwable {
         final ResourceService resourceService = new DefaultResourceService(new FSResourceRegistry());
         final FSPath baseDirectory = new FSPath(temporaryDirectoryPath);
 
         final Shared shared = CommonInputs.tigerShared(baseDirectory);
-        final LanguageProjectCompiler.Input languageProjectCompilerInput = CommonInputs.tigerLanguageProjectCompilerInput(shared);
-        final ParserCompiler.Input parserCompilerInput = CommonInputs.tigerParserCompilerInput(shared, languageProjectCompilerInput.project());
-        final StylerCompiler.Input stylerCompilerInput = CommonInputs.tigerStylerCompilerInput(shared, languageProjectCompilerInput.project());
-        final StrategoRuntimeBuilderCompiler.Input strategoRuntimeBuilderCompilerInput = CommonInputs.strategoRuntimeBuilderCompilerInput(shared, languageProjectCompilerInput.project());
-        final AllCompiler.Input input = AllCompiler.Input.builder()
+        final LanguageProject.Input languageProjectCompilerInput = CommonInputs.tigerLanguageProjectCompilerInput(shared);
+        final Parser.Input parserCompilerInput = CommonInputs.tigerParserCompilerInput(shared, languageProjectCompilerInput.project());
+        final Styler.Input stylerCompilerInput = CommonInputs.tigerStylerCompilerInput(shared, languageProjectCompilerInput.project());
+        final StrategoRuntime.Input strategoRuntimeBuilderCompilerInput = CommonInputs.strategoRuntimeBuilderCompilerInput(shared, languageProjectCompilerInput.project());
+        final ConstraintAnalyzer.Input constraintAnalyzerCompilerInput = CommonInputs.tigerConstraintAnalyzerCompilerInput(shared, languageProjectCompilerInput.project());
+        final MainMultiProject.Input input = MainMultiProject.Input.builder()
             .languageProject(languageProjectCompilerInput)
             .parser(parserCompilerInput)
             .styler(stylerCompilerInput)
             .strategoRuntimeBuilder(strategoRuntimeBuilderCompilerInput)
+            .constraintAnalyzer(constraintAnalyzerCompilerInput)
             .build();
 
-        final AllCompiler compiler = AllCompiler.fromClassLoaderResources(resourceService);
+        final MainMultiProject compiler = MainMultiProject.fromClassLoaderResources(resourceService);
         final Charset charset = StandardCharsets.UTF_8;
-        final AllCompiler.Output output = compiler.compile(input, charset);
+        final MainMultiProject.Output output = compiler.compile(input, charset);
         final File languageProjectDirectory = ((FSResource)resourceService.getHierarchicalResource(output.languageProject().baseDirectory())).getJavaPath().toFile();
 
         // noinspection CaughtExceptionImmediatelyRethrown

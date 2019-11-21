@@ -9,7 +9,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class {{genParserClass}} implements Parser {
     private final JSGLR1Parser parser;
 
-    public {{genParserClass}}({{genParseTableClass}} parseTable) {
+    public {{genParserClass}}({{genTableClass}} parseTable) {
         this.parser = new JSGLR1Parser(parseTable.parseTable);
     }
 

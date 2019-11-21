@@ -18,9 +18,9 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class StylerCompilerTest {
+class ConstraintAnalyzerTest {
     @Test void testCompilerDefault() throws IOException {
         final JavaParser javaParser = new JavaParser();
         final ResourceService resourceService = new DefaultResourceService(new FSResourceRegistry());
@@ -29,31 +29,25 @@ class StylerCompilerTest {
 
         final Shared shared = CommonInputs.tigerShared(baseDirectory);
         final JavaProject languageProject = CommonInputs.tigerLanguageProjectCompilerInput(shared).project();
-        final StylerCompiler.Input input = CommonInputs.tigerStylerCompilerInput(shared, languageProject);
+        final ConstraintAnalyzer.Input input = CommonInputs.tigerConstraintAnalyzerCompilerInput(shared, languageProject);
 
-        final StylerCompiler compiler = StylerCompiler.fromClassLoaderResources(resourceService);
+        final ConstraintAnalyzer compiler = ConstraintAnalyzer.fromClassLoaderResources(resourceService);
         final Charset charset = StandardCharsets.UTF_8;
-        final StylerCompiler.Output output = compiler.compile(input, charset);
+        final ConstraintAnalyzer.Output output = compiler.compile(input, charset);
 
         final HierarchicalResource genSourcesJavaDirectory = resourceService.getHierarchicalResource(output.genSourcesJavaDirectory());
         assertTrue(genSourcesJavaDirectory.exists());
 
-        final FileAssertions genStylingRulesFile = new FileAssertions(resourceService.getHierarchicalResource(output.genStylingRulesFile()));
-        genStylingRulesFile.assertName("TigerStylingRules.java");
-        genStylingRulesFile.assertExists();
-        genStylingRulesFile.assertContains("class TigerStylingRules");
-        genStylingRulesFile.assertJavaParses(javaParser);
+        final FileAssertions genConstraintAnalyzerFile = new FileAssertions(resourceService.getHierarchicalResource(output.genConstraintAnalyzerFile()));
+        genConstraintAnalyzerFile.assertName("TigerConstraintAnalyzer.java");
+        genConstraintAnalyzerFile.assertExists();
+        genConstraintAnalyzerFile.assertContains("class TigerConstraintAnalyzer");
+        genConstraintAnalyzerFile.assertJavaParses(javaParser);
 
-        final FileAssertions genStylerFile = new FileAssertions(resourceService.getHierarchicalResource(output.genStylerFile()));
-        genStylerFile.assertName("TigerStyler.java");
-        genStylerFile.assertExists();
-        genStylerFile.assertContains("class TigerStyler");
-        genStylerFile.assertJavaParses(javaParser);
-
-        final FileAssertions genStylerFactoryFile = new FileAssertions(resourceService.getHierarchicalResource(output.genStylerFactoryFile()));
-        genStylerFactoryFile.assertName("TigerStylerFactory.java");
-        genStylerFactoryFile.assertExists();
-        genStylerFactoryFile.assertContains("class TigerStylerFactory");
-        genStylerFactoryFile.assertJavaParses(javaParser);
+        final FileAssertions genConstraintAnalyzerFactoryFile = new FileAssertions(resourceService.getHierarchicalResource(output.genFactoryFile()));
+        genConstraintAnalyzerFactoryFile.assertName("TigerConstraintAnalyzerFactory.java");
+        genConstraintAnalyzerFactoryFile.assertExists();
+        genConstraintAnalyzerFactoryFile.assertContains("class TigerConstraintAnalyzerFactory");
+        genConstraintAnalyzerFactoryFile.assertJavaParses(javaParser);
     }
 }

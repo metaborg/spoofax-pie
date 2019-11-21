@@ -20,7 +20,7 @@ import java.nio.file.FileSystem;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class StrategoRuntimeBuilderCompilerTest {
+class StrategoRuntimeTest {
     @Test void testCompilerDefault() throws IOException {
         final JavaParser javaParser = new JavaParser();
         final ResourceService resourceService = new DefaultResourceService(new FSResourceRegistry());
@@ -29,16 +29,16 @@ class StrategoRuntimeBuilderCompilerTest {
 
         final Shared shared = CommonInputs.tigerShared(baseDirectory);
         final JavaProject languageProject = CommonInputs.tigerLanguageProjectCompilerInput(shared).project();
-        final StrategoRuntimeBuilderCompiler.Input input = CommonInputs.strategoRuntimeBuilderCompilerInput(shared, languageProject);
+        final StrategoRuntime.Input input = CommonInputs.strategoRuntimeBuilderCompilerInput(shared, languageProject);
 
-        final StrategoRuntimeBuilderCompiler compiler = StrategoRuntimeBuilderCompiler.fromClassLoaderResources(resourceService);
+        final StrategoRuntime compiler = StrategoRuntime.fromClassLoaderResources(resourceService);
         final Charset charset = StandardCharsets.UTF_8;
-        final StrategoRuntimeBuilderCompiler.Output output = compiler.compile(input, charset);
+        final StrategoRuntime.Output output = compiler.compile(input, charset);
 
         final HierarchicalResource packageDirectory = resourceService.getHierarchicalResource(output.genSourcesJavaDirectory());
         assertTrue(packageDirectory.exists());
 
-        final FileAssertions genFactoryFile = new FileAssertions(resourceService.getHierarchicalResource(output.genStrategoRuntimeBuilderFactoryFile()));
+        final FileAssertions genFactoryFile = new FileAssertions(resourceService.getHierarchicalResource(output.genFactoryFile()));
         genFactoryFile.assertName("TigerStrategoRuntimeBuilderFactory.java");
         genFactoryFile.assertExists();
         genFactoryFile.assertContains("class TigerStrategoRuntimeBuilderFactory");

@@ -5,11 +5,11 @@ package {{languageProject.packageId}};
 {{/addStatixPrimitives}}import mb.spoofax.compiler.interfaces.spoofaxcore.StrategoRuntimeBuilderFactory;
 import mb.stratego.common.StrategoRuntimeBuilder;
 
-public class {{genStrategoRuntimeBuilderFactoryClass}} implements StrategoRuntimeBuilderFactory {
+public class {{genFactoryClass}} implements StrategoRuntimeBuilderFactory {
     @Override public StrategoRuntimeBuilder create() {
         final StrategoRuntimeBuilder builder = new StrategoRuntimeBuilder();
 {{#interopRegisterersByReflection}}        builder.addInteropRegistererByReflection({{this}});
-{{/interopRegisterersByReflection}}        builder.withJarParentClassLoader({{genStrategoRuntimeBuilderFactoryClass}}.class.getClassLoader());
+{{/interopRegisterersByReflection}}        builder.withJarParentClassLoader({{genFactoryClass}}.class.getClassLoader());
 {{#addNaBL2Primitives}}        builder.addLibrary(new NaBL2PrimitiveLibrary());
 {{/addNaBL2Primitives}}{{#addStatixPrimitives}}        builder.addLibrary(new StatixPrimitiveLibrary());
 {{/addStatixPrimitives}}

@@ -20,7 +20,7 @@ import java.util.Properties;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class LanguageProjectCompilerTest {
+class LanguageProjectTest {
     @Test void testPersistentProperties() {
         final FileSystem fileSystem = Jimfs.newFileSystem(Configuration.unix());
         final FSPath baseDirectory = new FSPath(fileSystem.getPath("repo"));
@@ -28,7 +28,7 @@ class LanguageProjectCompilerTest {
         final Properties persistentProperties = new Properties();
 
         final Shared shared1 = CommonInputs.tigerShared(baseDirectory);
-        final LanguageProjectCompiler.Input languageProjectInput1 = CommonInputs.tigerLanguageProjectCompilerInput(shared1);
+        final LanguageProject.Input languageProjectInput1 = CommonInputs.tigerLanguageProjectCompilerInput(shared1);
         final JavaProject languageProject1 = languageProjectInput1.project();
         assertEquals(shared1.defaultGroupId(), languageProject1.coordinate().groupId());
         assertEquals(shared1.defaultArtifactId(), languageProject1.coordinate().artifactId());
@@ -40,7 +40,7 @@ class LanguageProjectCompilerTest {
             .name("Tigerr") // Change language name.
             .withPersistentProperties(persistentProperties)
             .build();
-        final LanguageProjectCompiler.Input languageProjectInput2 = CommonInputs.tigerLanguageProjectCompilerInput(shared2);
+        final LanguageProject.Input languageProjectInput2 = CommonInputs.tigerLanguageProjectCompilerInput(shared2);
         final JavaProject languageProject2 = languageProjectInput2.project();
         // Should not affect language project.
         assertEquals(shared2.defaultGroupId(), languageProject2.coordinate().groupId());
@@ -54,11 +54,11 @@ class LanguageProjectCompilerTest {
         final FileSystem fileSystem = Jimfs.newFileSystem(Configuration.unix());
         final FSPath baseDirectory = new FSPath(fileSystem.getPath("repo"));
 
-        final LanguageProjectCompiler.Input input = CommonInputs.tigerLanguageProjectCompilerInput(CommonInputs.tigerShared(baseDirectory));
+        final LanguageProject.Input input = CommonInputs.tigerLanguageProjectCompilerInput(CommonInputs.tigerShared(baseDirectory));
 
-        final LanguageProjectCompiler compiler = LanguageProjectCompiler.fromClassLoaderResources(resourceService);
+        final LanguageProject compiler = LanguageProject.fromClassLoaderResources(resourceService);
         final Charset charset = StandardCharsets.UTF_8;
-        final LanguageProjectCompiler.Output output = compiler.compile(input, charset);
+        final LanguageProject.Output output = compiler.compile(input, charset);
 
         final HierarchicalResource buildGradleKtsFile = resourceService.getHierarchicalResource(output.buildGradleKtsFile());
         assertTrue(buildGradleKtsFile.exists());

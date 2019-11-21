@@ -18,21 +18,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static mb.spoofax.compiler.util.StringUtil.doubleQuote;
+
 @Value.Enclosing
-public class LanguageProjectCompiler {
+public class LanguageProject {
     private final ResourceService resourceService;
     private final Template settingsGradleTemplate;
     private final Template buildGradleTemplate;
 
-    private LanguageProjectCompiler(ResourceService resourceService, Template settingsGradleTemplate, Template buildGradleTemplate) {
+    private LanguageProject(ResourceService resourceService, Template settingsGradleTemplate, Template buildGradleTemplate) {
         this.resourceService = resourceService;
         this.settingsGradleTemplate = settingsGradleTemplate;
         this.buildGradleTemplate = buildGradleTemplate;
     }
 
-    public static LanguageProjectCompiler fromClassLoaderResources(ResourceService resourceService) {
-        final TemplateCompiler templateCompiler = new TemplateCompiler(LanguageProjectCompiler.class);
-        return new LanguageProjectCompiler(
+    public static LanguageProject fromClassLoaderResources(ResourceService resourceService) {
+        final TemplateCompiler templateCompiler = new TemplateCompiler(LanguageProject.class);
+        return new LanguageProject(
             resourceService,
             templateCompiler.compile("language_project/settings.gradle.kts.mustache"),
             templateCompiler.compile("language_project/build.gradle.kts.mustache")
@@ -113,10 +115,6 @@ public class LanguageProjectCompiler {
         return output;
     }
 
-    private static String doubleQuote(String str) {
-        return "\"" + str + "\"";
-    }
-
     private static String apiDependency(JavaDependency dependency) {
         return "api(" + dependency.toGradleKotlinDependencyCode() + ")";
     }
@@ -128,7 +126,7 @@ public class LanguageProjectCompiler {
 
     @Value.Immutable
     public interface Input extends Serializable {
-        class Builder extends LanguageProjectCompilerData.Input.Builder {}
+        class Builder extends LanguageProjectData.Input.Builder {}
 
         static Builder builder() {
             return new Builder();
@@ -174,7 +172,7 @@ public class LanguageProjectCompiler {
 
     @Value.Immutable
     public interface Output extends Serializable {
-        class Builder extends LanguageProjectCompilerData.Output.Builder {
+        class Builder extends LanguageProjectData.Output.Builder {
             public Builder withDefaultsBasedOnInput(Input input) {
                 final ResourcePath baseDirectory = input.project().baseDirectory();
                 return this

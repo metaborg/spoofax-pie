@@ -8,21 +8,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 
-public class {{genParseTableClass}} implements Serializable {
+public class {{genTableClass}} implements Serializable {
     final JSGLR1ParseTable parseTable;
 
-    private {{genParseTableClass}}(JSGLR1ParseTable parseTable) {
+    private {{genTableClass}}(JSGLR1ParseTable parseTable) {
         this.parseTable = parseTable;
     }
 
-    public static {{genParseTableClass}} fromClassLoaderResources() {
+    public static {{genTableClass}} fromClassLoaderResources() {
         final String resource = "{{tableResourcePath}}";
-        try(final @Nullable InputStream inputStream = {{genParseTableClass}}.class.getClassLoader().getResourceAsStream(resource)) {
+        try(final @Nullable InputStream inputStream = {{genTableClass}}.class.getClassLoader().getResourceAsStream(resource)) {
             if(inputStream == null) {
                 throw new RuntimeException("Cannot create parse table; cannot find resource '" + resource + "' in classloader resources");
             }
             final JSGLR1ParseTable parseTable = JSGLR1ParseTable.fromStream(inputStream);
-            return new {{genParseTableClass}}(parseTable);
+            return new {{genTableClass}}(parseTable);
         } catch(JSGLR1ParseTableException | IOException e) {
             throw new RuntimeException("Cannot create parse table; cannot read parse table from resource '" + resource + "' in classloader resources");
         }

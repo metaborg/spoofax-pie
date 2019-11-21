@@ -10,7 +10,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 public class {{genStylerClass}} implements Styler {
     private final ESVStyler styler;
 
-    public {{genStylerClass}}({{genStylingRulesClass}} stylingRules, LoggerFactory loggerFactory) {
+    public {{genStylerClass}}({{genRulesClass}} stylingRules, LoggerFactory loggerFactory) {
         this.styler = new ESVStyler(stylingRules.stylingRules, loggerFactory);
     }
 

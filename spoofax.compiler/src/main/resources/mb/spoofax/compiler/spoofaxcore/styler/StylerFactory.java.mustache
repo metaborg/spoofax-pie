@@ -3,12 +3,12 @@ package {{languageProject.packageId}};
 import mb.log.api.LoggerFactory;
 import mb.spoofax.compiler.interfaces.spoofaxcore.StylerFactory;
 
-public class {{genStylerFactoryClass}} implements StylerFactory {
-    private final {{genStylingRulesClass}} stylingRules;
+public class {{genFactoryClass}} implements StylerFactory {
+    private final {{genRulesClass}} stylingRules;
     private final LoggerFactory loggerFactory;
 
-    public {{genStylerFactoryClass}}(LoggerFactory loggerFactory) {
-        this.stylingRules = {{genStylingRulesClass}}.fromClassLoaderResources();
+    public {{genFactoryClass}}(LoggerFactory loggerFactory) {
+        this.stylingRules = {{genRulesClass}}.fromClassLoaderResources();
         this.loggerFactory = loggerFactory;
     }
 

@@ -18,18 +18,18 @@ import java.util.Optional;
 import java.util.Properties;
 
 @Value.Enclosing
-public class StrategoRuntimeBuilderCompiler {
+public class StrategoRuntime {
     private final ResourceService resourceService;
     private final Template factoryTemplate;
 
-    private StrategoRuntimeBuilderCompiler(ResourceService resourceService, Template factoryTemplate) {
+    private StrategoRuntime(ResourceService resourceService, Template factoryTemplate) {
         this.resourceService = resourceService;
         this.factoryTemplate = factoryTemplate;
     }
 
-    public static StrategoRuntimeBuilderCompiler fromClassLoaderResources(ResourceService resourceService) {
-        final TemplateCompiler templateCompiler = new TemplateCompiler(StrategoRuntimeBuilderCompiler.class);
-        return new StrategoRuntimeBuilderCompiler(
+    public static StrategoRuntime fromClassLoaderResources(ResourceService resourceService) {
+        final TemplateCompiler templateCompiler = new TemplateCompiler(StrategoRuntime.class);
+        return new StrategoRuntime(
             resourceService,
             templateCompiler.compile("stratego_runtime/StrategoRuntimeBuilderFactory.java.mustache")
         );
@@ -43,7 +43,7 @@ public class StrategoRuntimeBuilderCompiler {
         final HierarchicalResource genSourcesJavaDirectory = resourceService.getHierarchicalResource(output.genSourcesJavaDirectory());
         genSourcesJavaDirectory.ensureDirectoryExists();
 
-        final HierarchicalResource factoryFile = resourceService.getHierarchicalResource(output.genStrategoRuntimeBuilderFactoryFile());
+        final HierarchicalResource factoryFile = resourceService.getHierarchicalResource(output.genFactoryFile());
         try(final ResourceWriter writer = new ResourceWriter(factoryFile, charset)) {
             factoryTemplate.execute(input, writer);
             writer.flush();
@@ -55,9 +55,9 @@ public class StrategoRuntimeBuilderCompiler {
 
     @Value.Immutable
     public interface Input extends Serializable {
-        class Builder extends StrategoRuntimeBuilderCompilerData.Input.Builder implements BuilderBase {
+        class Builder extends StrategoRuntimeData.Input.Builder implements BuilderBase {
             public Builder withPersistentProperties(Properties properties) {
-                with(properties, "genStrategoRuntimeBuilderFactoryClass", this::genStrategoRuntimeBuilderFactoryClass);
+                with(properties, "genFactoryClass", this::genFactoryClass);
                 return this;
             }
         }
@@ -79,18 +79,18 @@ public class StrategoRuntimeBuilderCompiler {
         Optional<String> manualStrategoRuntimeBuilderFactoryClass();
 
 
-        @Value.Default default String genStrategoRuntimeBuilderFactoryClass() {
+        @Value.Default default String genFactoryClass() {
             return shared().classSuffix() + "StrategoRuntimeBuilderFactory";
         }
 
-        @Value.Derived default String genStrategoRuntimeBuilderFactoryPath() {
-            return genStrategoRuntimeBuilderFactoryClass() + ".java";
+        @Value.Derived default String genFactoryPath() {
+            return genFactoryClass() + ".java";
         }
 
 
         default void savePersistentProperties(Properties properties) {
             shared().savePersistentProperties(properties);
-            properties.setProperty("genStrategoRuntimeBuilderFactoryClass", genStrategoRuntimeBuilderFactoryClass());
+            properties.setProperty("genStrategoRuntimeBuilderFactoryClass", genFactoryClass());
         }
 
         @Value.Check default void check() {
@@ -98,19 +98,19 @@ public class StrategoRuntimeBuilderCompiler {
             final boolean manual = kind.isManual();
             if(!manual) return;
             if(!manualStrategoRuntimeBuilderFactoryClass().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualStrategoRuntimeBuilderFactoryClass' has not been set");
+                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualFactoryClass' has not been set");
             }
         }
     }
 
     @Value.Immutable
     public interface Output extends Serializable {
-        class Builder extends StrategoRuntimeBuilderCompilerData.Output.Builder {
+        class Builder extends StrategoRuntimeData.Output.Builder {
             public Builder withDefaultsBasedOnInput(Input input) {
                 final ResourcePath genSourcesJavaDirectory = input.languageProject().genSourceSpoofaxJavaDirectory().appendRelativePath(input.languageProject().packagePath());
                 return this
                     .genSourcesJavaDirectory(genSourcesJavaDirectory)
-                    .genStrategoRuntimeBuilderFactoryFile(genSourcesJavaDirectory.appendRelativePath(input.genStrategoRuntimeBuilderFactoryPath()))
+                    .genFactoryFile(genSourcesJavaDirectory.appendRelativePath(input.genFactoryPath()))
                     ;
             }
         }
@@ -122,6 +122,6 @@ public class StrategoRuntimeBuilderCompiler {
 
         ResourcePath genSourcesJavaDirectory();
 
-        ResourcePath genStrategoRuntimeBuilderFactoryFile();
+        ResourcePath genFactoryFile();
     }
 }

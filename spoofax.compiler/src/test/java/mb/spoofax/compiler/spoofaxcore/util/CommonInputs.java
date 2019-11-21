@@ -34,8 +34,8 @@ public class CommonInputs {
     }
 
 
-    public static LanguageProjectCompiler.Input.Builder tigerLanguageProjectCompilerInputBuilder(Shared shared) {
-        return LanguageProjectCompiler.Input.builder()
+    public static LanguageProject.Input.Builder tigerLanguageProjectCompilerInputBuilder(Shared shared) {
+        return LanguageProject.Input.builder()
             .shared(shared)
             .languageSpecificationDependency(JavaDependency.files(Preconditions.checkNotNull(System.getProperty("org.metaborg.lang.tiger:classpath"))))
             .enableStyler(true)
@@ -49,40 +49,51 @@ public class CommonInputs {
             ;
     }
 
-    public static LanguageProjectCompiler.Input tigerLanguageProjectCompilerInput(Shared shared) {
+    public static LanguageProject.Input tigerLanguageProjectCompilerInput(Shared shared) {
         return tigerLanguageProjectCompilerInputBuilder(shared).build();
     }
 
 
-    public static ParserCompiler.Input.Builder tigerParserCompilerInputBuilder(Shared shared, JavaProject languageProject) {
-        return ParserCompiler.Input.builder()
+    public static Parser.Input.Builder tigerParserCompilerInputBuilder(Shared shared, JavaProject languageProject) {
+        return Parser.Input.builder()
             .shared(shared)
             .languageProject(languageProject);
     }
 
-    public static ParserCompiler.Input tigerParserCompilerInput(Shared shared, JavaProject languageProject) {
+    public static Parser.Input tigerParserCompilerInput(Shared shared, JavaProject languageProject) {
         return tigerParserCompilerInputBuilder(shared, languageProject).build();
     }
 
 
-    public static StylerCompiler.Input.Builder tigerStylerCompilerInputBuilder(Shared shared, JavaProject languageProject) {
-        return StylerCompiler.Input.builder()
+    public static Styler.Input.Builder tigerStylerCompilerInputBuilder(Shared shared, JavaProject languageProject) {
+        return Styler.Input.builder()
             .shared(shared)
             .languageProject(languageProject);
     }
 
-    public static StylerCompiler.Input tigerStylerCompilerInput(Shared shared, JavaProject languageProject) {
+    public static Styler.Input tigerStylerCompilerInput(Shared shared, JavaProject languageProject) {
         return tigerStylerCompilerInputBuilder(shared, languageProject).build();
     }
 
 
-    public static StrategoRuntimeBuilderCompiler.Input.Builder strategoRuntimeBuilderCompilerInputBuilder(Shared shared, JavaProject languageProject) {
-        return StrategoRuntimeBuilderCompiler.Input.builder()
+    public static StrategoRuntime.Input.Builder strategoRuntimeBuilderCompilerInputBuilder(Shared shared, JavaProject languageProject) {
+        return StrategoRuntime.Input.builder()
             .shared(shared)
             .languageProject(languageProject);
     }
 
-    public static StrategoRuntimeBuilderCompiler.Input strategoRuntimeBuilderCompilerInput(Shared shared, JavaProject languageProject) {
+    public static StrategoRuntime.Input strategoRuntimeBuilderCompilerInput(Shared shared, JavaProject languageProject) {
         return strategoRuntimeBuilderCompilerInputBuilder(shared, languageProject).build();
+    }
+
+
+    public static ConstraintAnalyzer.Input.Builder tigerConstraintAnalyzerCompilerInputBuilder(Shared shared, JavaProject languageProject) {
+        return ConstraintAnalyzer.Input.builder()
+            .shared(shared)
+            .languageProject(languageProject);
+    }
+
+    public static ConstraintAnalyzer.Input tigerConstraintAnalyzerCompilerInput(Shared shared, JavaProject languageProject) {
+        return tigerConstraintAnalyzerCompilerInputBuilder(shared, languageProject).build();
     }
 }

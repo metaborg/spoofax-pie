@@ -18,22 +18,22 @@ import java.util.Optional;
 import java.util.Properties;
 
 @Value.Enclosing
-public class StylerCompiler {
+public class Styler {
     private final ResourceService resourceService;
-    private final Template stylingRulesTemplate;
+    private final Template rulesTemplate;
     private final Template stylerTemplate;
-    private final Template stylerFactoryTemplate;
+    private final Template factoryTemplate;
 
-    private StylerCompiler(ResourceService resourceService, Template stylingRulesTemplate, Template stylerTemplate, Template stylerFactoryTemplate) {
+    private Styler(ResourceService resourceService, Template rulesTemplate, Template stylerTemplate, Template factoryTemplate) {
         this.resourceService = resourceService;
-        this.stylingRulesTemplate = stylingRulesTemplate;
+        this.rulesTemplate = rulesTemplate;
         this.stylerTemplate = stylerTemplate;
-        this.stylerFactoryTemplate = stylerFactoryTemplate;
+        this.factoryTemplate = factoryTemplate;
     }
 
-    public static StylerCompiler fromClassLoaderResources(ResourceService resourceService) {
-        final TemplateCompiler templateCompiler = new TemplateCompiler(StylerCompiler.class);
-        return new StylerCompiler(
+    public static Styler fromClassLoaderResources(ResourceService resourceService) {
+        final TemplateCompiler templateCompiler = new TemplateCompiler(Styler.class);
+        return new Styler(
             resourceService,
             templateCompiler.compile("styler/StylingRules.java.mustache"),
             templateCompiler.compile("styler/Styler.java.mustache"),
@@ -49,9 +49,9 @@ public class StylerCompiler {
         final HierarchicalResource genSourcesJavaDirectory = resourceService.getHierarchicalResource(output.genSourcesJavaDirectory());
         genSourcesJavaDirectory.ensureDirectoryExists();
 
-        final HierarchicalResource stylingRulesFile = resourceService.getHierarchicalResource(output.genStylingRulesFile());
-        try(final ResourceWriter writer = new ResourceWriter(stylingRulesFile, charset)) {
-            stylingRulesTemplate.execute(input, writer);
+        final HierarchicalResource rulesFile = resourceService.getHierarchicalResource(output.genRulesFile());
+        try(final ResourceWriter writer = new ResourceWriter(rulesFile, charset)) {
+            rulesTemplate.execute(input, writer);
             writer.flush();
         }
 
@@ -61,9 +61,9 @@ public class StylerCompiler {
             writer.flush();
         }
 
-        final HierarchicalResource stylerFactoryFile = resourceService.getHierarchicalResource(output.genStylerFactoryFile());
-        try(final ResourceWriter writer = new ResourceWriter(stylerFactoryFile, charset)) {
-            stylerFactoryTemplate.execute(input, writer);
+        final HierarchicalResource factoryFile = resourceService.getHierarchicalResource(output.genFactoryFile());
+        try(final ResourceWriter writer = new ResourceWriter(factoryFile, charset)) {
+            factoryTemplate.execute(input, writer);
             writer.flush();
         }
 
@@ -73,11 +73,11 @@ public class StylerCompiler {
 
     @Value.Immutable
     public interface Input extends Serializable {
-        class Builder extends StylerCompilerData.Input.Builder implements BuilderBase {
+        class Builder extends StylerData.Input.Builder implements BuilderBase {
             public Builder withPersistentProperties(Properties properties) {
-                with(properties, "genStylingRulesClass", this::genStylingRulesClass);
+                with(properties, "genRulesClass", this::genRulesClass);
                 with(properties, "genStylerClass", this::genStylerClass);
-                with(properties, "genStylerFactoryClass", this::genStylerFactoryClass);
+                with(properties, "genFactoryClass", this::genFactoryClass);
                 return this;
             }
         }
@@ -92,25 +92,25 @@ public class StylerCompiler {
         JavaProject languageProject();
 
 
+        @Value.Default default String packedESVResourcePath() {
+            return languageProject().packagePath() + "/target/metaborg/editor.esv.af";
+        }
+
+
         @Value.Default default ClassKind classKind() {
             return ClassKind.Generated;
         }
 
         Optional<String> manualStylerClass();
 
-        Optional<String> manualStylerFactoryClass();
+        Optional<String> manualFactoryClass();
 
-
-        @Value.Default default String genStylingRulesClass() {
+        @Value.Default default String genRulesClass() {
             return shared().classSuffix() + "StylingRules";
         }
 
-        @Value.Derived default String genStylingRulesPath() {
-            return genStylingRulesClass() + ".java";
-        }
-
-        @Value.Default default String packedESVResourcePath() {
-            return languageProject().packagePath() + "/target/metaborg/editor.esv.af";
+        @Value.Derived default String genRulesPath() {
+            return genRulesClass() + ".java";
         }
 
         @Value.Default default String genStylerClass() {
@@ -121,20 +121,20 @@ public class StylerCompiler {
             return genStylerClass() + ".java";
         }
 
-        @Value.Default default String genStylerFactoryClass() {
+        @Value.Default default String genFactoryClass() {
             return shared().classSuffix() + "StylerFactory";
         }
 
-        @Value.Derived default String genStylerFactoryPath() {
-            return genStylerFactoryClass() + ".java";
+        @Value.Derived default String genFactoryPath() {
+            return genFactoryClass() + ".java";
         }
 
 
         default void savePersistentProperties(Properties properties) {
             shared().savePersistentProperties(properties);
-            properties.setProperty("genStylingRulesClass", genStylingRulesClass());
+            properties.setProperty("genRulesClass", genRulesClass());
             properties.setProperty("genStylerClass", genStylerClass());
-            properties.setProperty("genStylerFactoryClass", genStylerFactoryClass());
+            properties.setProperty("genFactoryClass", genFactoryClass());
         }
 
         @Value.Check default void check() {
@@ -144,22 +144,22 @@ public class StylerCompiler {
             if(!manualStylerClass().isPresent()) {
                 throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualStylerClass' has not been set");
             }
-            if(!manualStylerFactoryClass().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualStylerFactoryClass' has not been set");
+            if(!manualFactoryClass().isPresent()) {
+                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualFactoryClass' has not been set");
             }
         }
     }
 
     @Value.Immutable
     public interface Output extends Serializable {
-        class Builder extends StylerCompilerData.Output.Builder {
+        class Builder extends StylerData.Output.Builder {
             public Builder withDefaultsBasedOnInput(Input input) {
                 final ResourcePath genSourcesJavaDirectory = input.languageProject().genSourceSpoofaxJavaDirectory().appendRelativePath(input.languageProject().packagePath());
                 return this
                     .genSourcesJavaDirectory(genSourcesJavaDirectory)
-                    .genStylingRulesFile(genSourcesJavaDirectory.appendRelativePath(input.genStylingRulesPath()))
+                    .genRulesFile(genSourcesJavaDirectory.appendRelativePath(input.genRulesPath()))
                     .genStylerFile(genSourcesJavaDirectory.appendRelativePath(input.genStylerPath()))
-                    .genStylerFactoryFile(genSourcesJavaDirectory.appendRelativePath(input.genStylerFactoryPath()))
+                    .genFactoryFile(genSourcesJavaDirectory.appendRelativePath(input.genFactoryPath()))
                     ;
             }
         }
@@ -171,10 +171,10 @@ public class StylerCompiler {
 
         ResourcePath genSourcesJavaDirectory();
 
-        ResourcePath genStylingRulesFile();
+        ResourcePath genRulesFile();
 
         ResourcePath genStylerFile();
 
-        ResourcePath genStylerFactoryFile();
+        ResourcePath genFactoryFile();
     }
 }

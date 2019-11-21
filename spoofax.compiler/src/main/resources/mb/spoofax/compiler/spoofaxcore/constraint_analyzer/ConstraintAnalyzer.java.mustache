@@ -1,0 +1,10 @@
+package {{languageProject.packageId}};
+
+import mb.constraint.common.ConstraintAnalyzer;
+import mb.stratego.common.StrategoRuntime;
+
+public class {{genConstraintAnalyzerClass}} extends ConstraintAnalyzer {
+    public {{genConstraintAnalyzerClass}}(StrategoRuntime strategoRuntime) {
+        super(strategoRuntime, {{strategoStrategyCode}}, {{multiFile}});
+    }
+}

@@ -7,21 +7,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 
-public class {{genStylingRulesClass}} implements Serializable {
+public class {{genRulesClass}} implements Serializable {
     final ESVStylingRules stylingRules;
 
-    private {{genStylingRulesClass}}(ESVStylingRules stylingRules) {
+    private {{genRulesClass}}(ESVStylingRules stylingRules) {
         this.stylingRules = stylingRules;
     }
 
-    public static {{genStylingRulesClass}} fromClassLoaderResources() {
+    public static {{genRulesClass}} fromClassLoaderResources() {
         final String resource = "{{packedESVResourcePath}}";
-        try(final @Nullable InputStream inputStream = {{genStylingRulesClass}}.class.getClassLoader().getResourceAsStream(resource)) {
+        try(final @Nullable InputStream inputStream = {{genRulesClass}}.class.getClassLoader().getResourceAsStream(resource)) {
             if(inputStream == null) {
                 throw new RuntimeException("Cannot create styling rules; cannot find resource '" + resource + "' in classloader resources");
             }
             final ESVStylingRules stylingRules = ESVStylingRules.fromStream(inputStream);
-            return new {{genStylingRulesClass}}(stylingRules);
+            return new {{genRulesClass}}(stylingRules);
         } catch(IOException e) {
             throw new RuntimeException("Cannot create styling rules; cannot read styling rules from '" + resource + "' in classloader resources", e);
         }
