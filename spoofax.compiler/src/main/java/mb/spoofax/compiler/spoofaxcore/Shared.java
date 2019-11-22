@@ -64,7 +64,7 @@ public interface Shared extends Serializable {
     }
 
     @Value.Default default String metaborgGradleConfigVersion() {
-        return "0.3.9";
+        return "0.3.10";
     }
 
 

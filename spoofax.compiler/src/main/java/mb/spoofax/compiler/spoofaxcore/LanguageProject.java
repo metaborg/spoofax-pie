@@ -23,12 +23,10 @@ import static mb.spoofax.compiler.util.StringUtil.doubleQuote;
 @Value.Enclosing
 public class LanguageProject {
     private final ResourceService resourceService;
-    private final Template settingsGradleTemplate;
     private final Template buildGradleTemplate;
 
-    private LanguageProject(ResourceService resourceService, Template settingsGradleTemplate, Template buildGradleTemplate) {
+    private LanguageProject(ResourceService resourceService, Template buildGradleTemplate) {
         this.resourceService = resourceService;
-        this.settingsGradleTemplate = settingsGradleTemplate;
         this.buildGradleTemplate = buildGradleTemplate;
     }
 
@@ -36,7 +34,6 @@ public class LanguageProject {
         final TemplateCompiler templateCompiler = new TemplateCompiler(LanguageProject.class);
         return new LanguageProject(
             resourceService,
-            templateCompiler.compile("language_project/settings.gradle.kts.mustache"),
             templateCompiler.compile("language_project/build.gradle.kts.mustache")
         );
     }
@@ -47,12 +44,6 @@ public class LanguageProject {
 
         final HierarchicalResource baseDirectory = resourceService.getHierarchicalResource(output.baseDirectory());
         baseDirectory.ensureDirectoryExists();
-
-        final HierarchicalResource settingsGradleKtsFile = resourceService.getHierarchicalResource(output.settingsGradleKtsFile());
-        try(final ResourceWriter writer = new ResourceWriter(settingsGradleKtsFile, charset)) {
-            settingsGradleTemplate.execute(input, writer);
-            writer.flush();
-        }
 
         final HierarchicalResource buildGradleKtsFile = resourceService.getHierarchicalResource(output.buildGradleKtsFile());
         try(final ResourceWriter writer = new ResourceWriter(buildGradleKtsFile, charset)) {
@@ -101,9 +92,7 @@ public class LanguageProject {
             }
 
             // Additional resources
-            input.additionalCopyResources().forEach((resource) -> {
-                resourceCodes.add(doubleQuote(resource));
-            });
+            input.additionalCopyResources().forEach((resource) -> resourceCodes.add(doubleQuote(resource)));
 
             map.put("dependencyCodes", dependencyCodes);
             map.put("resourceCodes", resourceCodes);
@@ -177,7 +166,6 @@ public class LanguageProject {
                 final ResourcePath baseDirectory = input.project().baseDirectory();
                 return this
                     .baseDirectory(baseDirectory)
-                    .settingsGradleKtsFile(baseDirectory.appendRelativePath("settings.gradle.kts"))
                     .buildGradleKtsFile(baseDirectory.appendRelativePath("build.gradle.kts"))
                     ;
             }
@@ -189,8 +177,6 @@ public class LanguageProject {
 
 
         ResourcePath baseDirectory();
-
-        ResourcePath settingsGradleKtsFile();
 
         ResourcePath buildGradleKtsFile();
     }

@@ -22,27 +22,29 @@ class MainMultiProjectTest {
         final FSPath baseDirectory = new FSPath(temporaryDirectoryPath);
 
         final Shared shared = TigerInputs.shared(baseDirectory);
-        final LanguageProject.Input languageProjectCompilerInput = TigerInputs.languageProject(shared);
-        final Parser.Input parserCompilerInput = TigerInputs.parser(shared, languageProjectCompilerInput.project());
-        final Styler.Input stylerCompilerInput = TigerInputs.styler(shared, languageProjectCompilerInput.project());
-        final StrategoRuntime.Input strategoRuntimeBuilderCompilerInput = TigerInputs.strategoRuntime(shared, languageProjectCompilerInput.project());
-        final ConstraintAnalyzer.Input constraintAnalyzerCompilerInput = TigerInputs.constraintAnalyzer(shared, languageProjectCompilerInput.project());
+        final LanguageProject.Input languageProjectInput = TigerInputs.languageProject(shared);
+        final RootProject.Input rootProjectInput = TigerInputs.rootProject(shared, languageProjectInput.project().coordinate().artifactId());
+        final Parser.Input parserInput = TigerInputs.parser(shared, languageProjectInput.project());
+        final Styler.Input stylerInput = TigerInputs.styler(shared, languageProjectInput.project());
+        final StrategoRuntime.Input strategoRuntimeInput = TigerInputs.strategoRuntime(shared, languageProjectInput.project());
+        final ConstraintAnalyzer.Input constraintAnalyzerInput = TigerInputs.constraintAnalyzer(shared, languageProjectInput.project());
         final MainMultiProject.Input input = MainMultiProject.Input.builder()
-            .languageProject(languageProjectCompilerInput)
-            .parser(parserCompilerInput)
-            .styler(stylerCompilerInput)
-            .strategoRuntimeBuilder(strategoRuntimeBuilderCompilerInput)
-            .constraintAnalyzer(constraintAnalyzerCompilerInput)
+            .languageProject(languageProjectInput)
+            .rootProject(rootProjectInput)
+            .parser(parserInput)
+            .styler(stylerInput)
+            .strategoRuntimeBuilder(strategoRuntimeInput)
+            .constraintAnalyzer(constraintAnalyzerInput)
             .build();
 
         final MainMultiProject compiler = MainMultiProject.fromClassLoaderResources(resourceService);
         final Charset charset = StandardCharsets.UTF_8;
         final MainMultiProject.Output output = compiler.compile(input, charset);
-        final File languageProjectDirectory = ((FSResource)resourceService.getHierarchicalResource(output.languageProject().baseDirectory())).getJavaPath().toFile();
+        final File baseDirectoryFile = ((FSResource)resourceService.getHierarchicalResource(output.rootProject().baseDirectory())).getJavaPath().toFile();
 
         // noinspection CaughtExceptionImmediatelyRethrown
         try(final ProjectConnection connection = GradleConnector.newConnector()
-            .forProjectDirectory(languageProjectDirectory)
+            .forProjectDirectory(baseDirectoryFile)
             .connect()
         ) {
             connection.newBuild()

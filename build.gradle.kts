@@ -1,5 +1,5 @@
 plugins {
-  id("org.metaborg.gradle.config.root-project") version "0.3.9"
+  id("org.metaborg.gradle.config.root-project") version "0.3.10"
   id("org.metaborg.gitonium") version "0.1.2"
 
   // Set versions for plugins to use, only applying them in subprojects (apply false here).

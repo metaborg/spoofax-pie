@@ -10,6 +10,7 @@ import java.nio.charset.Charset;
 @Value.Enclosing
 public class MainMultiProject {
     private final LanguageProject languageProject;
+    private final RootProject rootProject;
     private final Parser parser;
     private final Styler styler;
     private final StrategoRuntime strategoRuntime;
@@ -17,11 +18,13 @@ public class MainMultiProject {
 
     public MainMultiProject(
         LanguageProject languageProject,
+        RootProject rootProject,
         Parser parser,
         Styler styler,
         StrategoRuntime strategoRuntime,
         ConstraintAnalyzer constraintAnalyzer
     ) {
+        this.rootProject = rootProject;
         this.languageProject = languageProject;
         this.parser = parser;
         this.styler = styler;
@@ -31,21 +34,25 @@ public class MainMultiProject {
 
     public static MainMultiProject fromClassLoaderResources(ResourceService resourceService) {
         final LanguageProject languageProject = LanguageProject.fromClassLoaderResources(resourceService);
+        final RootProject rootProject = RootProject.fromClassLoaderResources(resourceService);
         final Parser parser = Parser.fromClassLoaderResources(resourceService);
         final Styler styler = Styler.fromClassLoaderResources(resourceService);
         final StrategoRuntime strategoRuntime = StrategoRuntime.fromClassLoaderResources(resourceService);
         final ConstraintAnalyzer constraintAnalyzer = ConstraintAnalyzer.fromClassLoaderResources(resourceService);
-        return new MainMultiProject(languageProject, parser, styler, strategoRuntime, constraintAnalyzer);
+        return new MainMultiProject(languageProject, rootProject, parser, styler, strategoRuntime, constraintAnalyzer);
     }
 
+
     public Output compile(Input input, Charset charset) throws IOException {
-        final LanguageProject.Output languageProject = this.languageProject.compile(input.languageProject(), charset);
+        final LanguageProject.Output languageProjectOutput = languageProject.compile(input.languageProject(), charset);
+        final RootProject.Output rootProjectOutput = rootProject.compile(input.rootProject(), charset);
         final Parser.Output parserOutput = parser.compile(input.parser(), charset);
         final Styler.Output stylerOutput = styler.compile(input.styler(), charset);
         final StrategoRuntime.Output strategoRuntimeBuilderOutput = strategoRuntime.compile(input.strategoRuntimeBuilder(), charset);
         final ConstraintAnalyzer.Output constraintAnalyzerOutput = constraintAnalyzer.compile(input.constraintAnalyzer(), charset);
         return Output.builder()
-            .languageProject(languageProject)
+            .languageProject(languageProjectOutput)
+            .rootProject(rootProjectOutput)
             .parser(parserOutput)
             .styler(stylerOutput)
             .strategoRuntimeBuilder(strategoRuntimeBuilderOutput)
@@ -64,6 +71,9 @@ public class MainMultiProject {
 
 
         LanguageProject.Input languageProject();
+
+        RootProject.Input rootProject();
+
 
         Parser.Input parser();
 
@@ -84,6 +94,9 @@ public class MainMultiProject {
 
 
         LanguageProject.Output languageProject();
+
+        RootProject.Output rootProject();
+
 
         Parser.Output parser();
 

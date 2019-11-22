@@ -60,9 +60,6 @@ class LanguageProjectTest {
         final Charset charset = StandardCharsets.UTF_8;
         final LanguageProject.Output output = compiler.compile(input, charset);
 
-        final HierarchicalResource settingsGradleKtsFile = resourceService.getHierarchicalResource(output.settingsGradleKtsFile());
-        assertTrue(settingsGradleKtsFile.exists());
-
         final HierarchicalResource buildGradleKtsFile = resourceService.getHierarchicalResource(output.buildGradleKtsFile());
         assertTrue(buildGradleKtsFile.exists());
         assertTrue(buildGradleKtsFile.readString(charset).contains("mb/tiger"));
