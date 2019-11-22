@@ -7,7 +7,7 @@ import mb.resource.ResourceService;
 import mb.resource.fs.FSPath;
 import mb.resource.fs.FSResourceRegistry;
 import mb.resource.hierarchical.HierarchicalResource;
-import mb.spoofax.compiler.spoofaxcore.util.CommonInputs;
+import mb.spoofax.compiler.spoofaxcore.util.TigerInputs;
 import mb.spoofax.compiler.spoofaxcore.util.FileAssertions;
 import mb.spoofax.compiler.spoofaxcore.util.JavaParser;
 import mb.spoofax.compiler.util.JavaProject;
@@ -27,9 +27,9 @@ class ConstraintAnalyzerTest {
         final FileSystem fileSystem = Jimfs.newFileSystem(Configuration.unix());
         final FSPath baseDirectory = new FSPath(fileSystem.getPath("repo"));
 
-        final Shared shared = CommonInputs.tigerShared(baseDirectory);
-        final JavaProject languageProject = CommonInputs.tigerLanguageProjectCompilerInput(shared).project();
-        final ConstraintAnalyzer.Input input = CommonInputs.tigerConstraintAnalyzerCompilerInput(shared, languageProject);
+        final Shared shared = TigerInputs.shared(baseDirectory);
+        final JavaProject languageProject = TigerInputs.languageProject(shared).project();
+        final ConstraintAnalyzer.Input input = TigerInputs.constraintAnalyzer(shared, languageProject);
 
         final ConstraintAnalyzer compiler = ConstraintAnalyzer.fromClassLoaderResources(resourceService);
         final Charset charset = StandardCharsets.UTF_8;

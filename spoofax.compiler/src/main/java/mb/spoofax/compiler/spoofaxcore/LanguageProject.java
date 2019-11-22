@@ -138,7 +138,7 @@ public class LanguageProject {
 
         @Value.Default default JavaProject project() {
             final Shared shared = shared();
-            final String artifactId = shared.defaultArtifactId();
+            final String artifactId = shared.defaultArtifactId() + ".lang";
             return JavaProject.builder()
                 .coordinate(shared.defaultGroupId(), artifactId, shared.defaultVersion())
                 .packageId(shared.basePackageId())

@@ -7,7 +7,7 @@ import mb.resource.ResourceService;
 import mb.resource.fs.FSPath;
 import mb.resource.fs.FSResourceRegistry;
 import mb.resource.hierarchical.HierarchicalResource;
-import mb.spoofax.compiler.spoofaxcore.util.CommonInputs;
+import mb.spoofax.compiler.spoofaxcore.util.TigerInputs;
 import mb.spoofax.compiler.util.JavaProject;
 import org.junit.jupiter.api.Test;
 
@@ -27,24 +27,24 @@ class LanguageProjectTest {
 
         final Properties persistentProperties = new Properties();
 
-        final Shared shared1 = CommonInputs.tigerShared(baseDirectory);
-        final LanguageProject.Input languageProjectInput1 = CommonInputs.tigerLanguageProjectCompilerInput(shared1);
+        final Shared shared1 = TigerInputs.shared(baseDirectory);
+        final LanguageProject.Input languageProjectInput1 = TigerInputs.languageProject(shared1);
         final JavaProject languageProject1 = languageProjectInput1.project();
         assertEquals(shared1.defaultGroupId(), languageProject1.coordinate().groupId());
-        assertEquals(shared1.defaultArtifactId(), languageProject1.coordinate().artifactId());
+        assertEquals(shared1.defaultArtifactId() + ".lang", languageProject1.coordinate().artifactId());
         assertEquals(shared1.defaultVersion(), languageProject1.coordinate().version());
         assertEquals(shared1.basePackageId(), languageProject1.packageId());
         shared1.savePersistentProperties(persistentProperties);
 
-        final Shared shared2 = CommonInputs.tigerSharedBuilder(baseDirectory)
+        final Shared shared2 = TigerInputs.sharedBuilder(baseDirectory)
             .name("Tigerr") // Change language name.
             .withPersistentProperties(persistentProperties)
             .build();
-        final LanguageProject.Input languageProjectInput2 = CommonInputs.tigerLanguageProjectCompilerInput(shared2);
+        final LanguageProject.Input languageProjectInput2 = TigerInputs.languageProject(shared2);
         final JavaProject languageProject2 = languageProjectInput2.project();
         // Should not affect language project.
         assertEquals(shared2.defaultGroupId(), languageProject2.coordinate().groupId());
-        assertEquals(shared2.defaultArtifactId(), languageProject2.coordinate().artifactId());
+        assertEquals(shared2.defaultArtifactId() + ".lang", languageProject2.coordinate().artifactId());
         assertEquals(shared2.defaultVersion(), languageProject2.coordinate().version());
         assertEquals(shared2.basePackageId(), languageProject2.packageId());
     }
@@ -54,11 +54,14 @@ class LanguageProjectTest {
         final FileSystem fileSystem = Jimfs.newFileSystem(Configuration.unix());
         final FSPath baseDirectory = new FSPath(fileSystem.getPath("repo"));
 
-        final LanguageProject.Input input = CommonInputs.tigerLanguageProjectCompilerInput(CommonInputs.tigerShared(baseDirectory));
+        final LanguageProject.Input input = TigerInputs.languageProject(TigerInputs.shared(baseDirectory));
 
         final LanguageProject compiler = LanguageProject.fromClassLoaderResources(resourceService);
         final Charset charset = StandardCharsets.UTF_8;
         final LanguageProject.Output output = compiler.compile(input, charset);
+
+        final HierarchicalResource settingsGradleKtsFile = resourceService.getHierarchicalResource(output.settingsGradleKtsFile());
+        assertTrue(settingsGradleKtsFile.exists());
 
         final HierarchicalResource buildGradleKtsFile = resourceService.getHierarchicalResource(output.buildGradleKtsFile());
         assertTrue(buildGradleKtsFile.exists());

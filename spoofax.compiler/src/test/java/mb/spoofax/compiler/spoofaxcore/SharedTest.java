@@ -3,7 +3,7 @@ package mb.spoofax.compiler.spoofaxcore;
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
 import mb.resource.fs.FSPath;
-import mb.spoofax.compiler.spoofaxcore.util.CommonInputs;
+import mb.spoofax.compiler.spoofaxcore.util.TigerInputs;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.FileSystem;
@@ -18,11 +18,11 @@ class SharedTest {
 
         final Properties persistentProperties = new Properties();
 
-        final Shared shared1 = CommonInputs.tigerShared(baseDirectory);
+        final Shared shared1 = TigerInputs.shared(baseDirectory);
         assertEquals("Tiger", shared1.classSuffix());
         shared1.savePersistentProperties(persistentProperties);
 
-        final Shared shared2 = CommonInputs.tigerSharedBuilder(baseDirectory)
+        final Shared shared2 = TigerInputs.sharedBuilder(baseDirectory)
             .name("Tigerr") // Change language name.
             .withPersistentProperties(persistentProperties)
             .build();

@@ -5,7 +5,7 @@ import mb.resource.ResourceService;
 import mb.resource.fs.FSPath;
 import mb.resource.fs.FSResource;
 import mb.resource.fs.FSResourceRegistry;
-import mb.spoofax.compiler.spoofaxcore.util.CommonInputs;
+import mb.spoofax.compiler.spoofaxcore.util.TigerInputs;
 import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ProjectConnection;
 import org.junit.jupiter.api.Test;
@@ -21,12 +21,12 @@ class MainMultiProjectTest {
         final ResourceService resourceService = new DefaultResourceService(new FSResourceRegistry());
         final FSPath baseDirectory = new FSPath(temporaryDirectoryPath);
 
-        final Shared shared = CommonInputs.tigerShared(baseDirectory);
-        final LanguageProject.Input languageProjectCompilerInput = CommonInputs.tigerLanguageProjectCompilerInput(shared);
-        final Parser.Input parserCompilerInput = CommonInputs.tigerParserCompilerInput(shared, languageProjectCompilerInput.project());
-        final Styler.Input stylerCompilerInput = CommonInputs.tigerStylerCompilerInput(shared, languageProjectCompilerInput.project());
-        final StrategoRuntime.Input strategoRuntimeBuilderCompilerInput = CommonInputs.strategoRuntimeBuilderCompilerInput(shared, languageProjectCompilerInput.project());
-        final ConstraintAnalyzer.Input constraintAnalyzerCompilerInput = CommonInputs.tigerConstraintAnalyzerCompilerInput(shared, languageProjectCompilerInput.project());
+        final Shared shared = TigerInputs.shared(baseDirectory);
+        final LanguageProject.Input languageProjectCompilerInput = TigerInputs.languageProject(shared);
+        final Parser.Input parserCompilerInput = TigerInputs.parser(shared, languageProjectCompilerInput.project());
+        final Styler.Input stylerCompilerInput = TigerInputs.styler(shared, languageProjectCompilerInput.project());
+        final StrategoRuntime.Input strategoRuntimeBuilderCompilerInput = TigerInputs.strategoRuntime(shared, languageProjectCompilerInput.project());
+        final ConstraintAnalyzer.Input constraintAnalyzerCompilerInput = TigerInputs.constraintAnalyzer(shared, languageProjectCompilerInput.project());
         final MainMultiProject.Input input = MainMultiProject.Input.builder()
             .languageProject(languageProjectCompilerInput)
             .parser(parserCompilerInput)

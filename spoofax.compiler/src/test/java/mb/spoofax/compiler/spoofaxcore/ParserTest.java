@@ -7,7 +7,7 @@ import mb.resource.ResourceService;
 import mb.resource.fs.FSPath;
 import mb.resource.fs.FSResourceRegistry;
 import mb.resource.hierarchical.HierarchicalResource;
-import mb.spoofax.compiler.spoofaxcore.util.CommonInputs;
+import mb.spoofax.compiler.spoofaxcore.util.TigerInputs;
 import mb.spoofax.compiler.spoofaxcore.util.FileAssertions;
 import mb.spoofax.compiler.spoofaxcore.util.JavaParser;
 import mb.spoofax.compiler.util.ClassKind;
@@ -31,20 +31,20 @@ class ParserTest {
 
         final Properties persistentProperties = new Properties();
 
-        final Shared shared1 = CommonInputs.tigerShared(baseDirectory);
-        final JavaProject languageProject1 = CommonInputs.tigerLanguageProjectCompilerInput(shared1).project();
-        final Parser.Input parserCompilerInput1 = CommonInputs.tigerParserCompilerInput(shared1, languageProject1);
+        final Shared shared1 = TigerInputs.shared(baseDirectory);
+        final JavaProject languageProject1 = TigerInputs.languageProject(shared1).project();
+        final Parser.Input parserCompilerInput1 = TigerInputs.parser(shared1, languageProject1);
         assertEquals("TigerParseTable", parserCompilerInput1.genTableClass());
         assertEquals("TigerParser", parserCompilerInput1.genParserClass());
         shared1.savePersistentProperties(persistentProperties);
         parserCompilerInput1.savePersistentProperties(persistentProperties);
 
-        final Shared shared2 = CommonInputs.tigerSharedBuilder(baseDirectory)
+        final Shared shared2 = TigerInputs.sharedBuilder(baseDirectory)
             .name("Tigerr") // Change language name.
             .withPersistentProperties(persistentProperties)
             .build();
-        final JavaProject languageProject2 = CommonInputs.tigerLanguageProjectCompilerInput(shared2).project();
-        final Parser.Input parserCompilerInput2 = CommonInputs.tigerParserCompilerInputBuilder(shared2, languageProject2)
+        final JavaProject languageProject2 = TigerInputs.languageProject(shared2).project();
+        final Parser.Input parserCompilerInput2 = TigerInputs.parserBuilder(shared2, languageProject2)
             .withPersistentProperties(persistentProperties)
             .build();
         // Should not affect generated class names.
@@ -57,15 +57,15 @@ class ParserTest {
         final FileSystem fileSystem = Jimfs.newFileSystem(Configuration.unix());
         final FSPath baseDirectory = new FSPath(fileSystem.getPath("repo"));
 
-        final Shared shared = CommonInputs.tigerShared(baseDirectory);
-        final JavaProject languageProject = CommonInputs.tigerLanguageProjectCompilerInput(shared).project();
+        final Shared shared = TigerInputs.shared(baseDirectory);
+        final JavaProject languageProject = TigerInputs.languageProject(shared).project();
         assertThrows(IllegalArgumentException.class, () -> {
-            CommonInputs.tigerParserCompilerInputBuilder(shared, languageProject)
+            TigerInputs.parserBuilder(shared, languageProject)
                 .classKind(classKind)
                 .build(); // Class kind is Manual or Extended, but manual class names were not set: check fails.
         });
 
-        CommonInputs.tigerParserCompilerInputBuilder(shared, languageProject)
+        TigerInputs.parserBuilder(shared, languageProject)
             .classKind(classKind)
             .manualParserClass("MyParser")
             .manualFactoryClass("MyParserFactory")
@@ -78,9 +78,9 @@ class ParserTest {
         final FileSystem fileSystem = Jimfs.newFileSystem(Configuration.unix());
         final FSPath baseDirectory = new FSPath(fileSystem.getPath("repo"));
 
-        final Shared shared = CommonInputs.tigerShared(baseDirectory);
-        final JavaProject languageProject = CommonInputs.tigerLanguageProjectCompilerInput(shared).project();
-        final Parser.Input input = CommonInputs.tigerParserCompilerInput(shared, languageProject);
+        final Shared shared = TigerInputs.shared(baseDirectory);
+        final JavaProject languageProject = TigerInputs.languageProject(shared).project();
+        final Parser.Input input = TigerInputs.parser(shared, languageProject);
 
         final Parser compiler = Parser.fromClassLoaderResources(resourceService);
         final Charset charset = StandardCharsets.UTF_8;
@@ -113,9 +113,9 @@ class ParserTest {
         final FileSystem fileSystem = Jimfs.newFileSystem(Configuration.unix());
         final FSPath baseDirectory = new FSPath(fileSystem.getPath("repo"));
 
-        final Shared shared = CommonInputs.tigerShared(baseDirectory);
-        final JavaProject languageProject = CommonInputs.tigerLanguageProjectCompilerInput(shared).project();
-        final Parser.Input input = CommonInputs.tigerParserCompilerInputBuilder(shared, languageProject)
+        final Shared shared = TigerInputs.shared(baseDirectory);
+        final JavaProject languageProject = TigerInputs.languageProject(shared).project();
+        final Parser.Input input = TigerInputs.parserBuilder(shared, languageProject)
             .classKind(ClassKind.Manual)
             .manualParserClass("MyParser")
             .manualFactoryClass("MyParserFactory")
