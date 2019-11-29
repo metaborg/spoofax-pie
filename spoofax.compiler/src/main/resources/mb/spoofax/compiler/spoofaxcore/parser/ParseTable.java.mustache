@@ -16,7 +16,7 @@ public class {{genTableClass}} implements Serializable {
     }
 
     public static {{genTableClass}} fromClassLoaderResources() {
-        final String resource = "{{tableFile}}";
+        final String resource = "{{tableTargetRelPath}}";
         try(final @Nullable InputStream inputStream = {{genTableClass}}.class.getClassLoader().getResourceAsStream(resource)) {
             if(inputStream == null) {
                 throw new RuntimeException("Cannot create parse table; cannot find resource '" + resource + "' in classloader resources");

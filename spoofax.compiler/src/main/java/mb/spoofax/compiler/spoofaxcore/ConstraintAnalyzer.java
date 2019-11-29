@@ -15,12 +15,9 @@ import org.immutables.value.Value;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.Charset;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
-
-import static mb.spoofax.compiler.util.StringUtil.doubleQuote;
 
 @Value.Enclosing
 public class ConstraintAnalyzer {
@@ -52,21 +49,18 @@ public class ConstraintAnalyzer {
         final LanguageProjectOutput output = LanguageProjectOutput.builder().fromInput(input).build();
         if(input.classKind().isManualOnly()) return output; // Nothing to generate: return.
 
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("strategoStrategyCode", doubleQuote(input.strategoStrategy()));
-
         final HierarchicalResource genSourcesJavaDirectory = resourceService.getHierarchicalResource(output.genDirectory());
         genSourcesJavaDirectory.ensureDirectoryExists();
 
         final HierarchicalResource constraintAnalyzerFile = resourceService.getHierarchicalResource(output.genConstraintAnalyzerFile());
         try(final ResourceWriter writer = new ResourceWriter(constraintAnalyzerFile, charset)) {
-            constraintAnalyzerTemplate.execute(input, map, writer);
+            constraintAnalyzerTemplate.execute(input, writer);
             writer.flush();
         }
 
         final HierarchicalResource factoryFile = resourceService.getHierarchicalResource(output.genFactoryFile());
         try(final ResourceWriter writer = new ResourceWriter(factoryFile, charset)) {
-            factoryTemplate.execute(input, map, writer);
+            factoryTemplate.execute(input, writer);
             writer.flush();
         }
 

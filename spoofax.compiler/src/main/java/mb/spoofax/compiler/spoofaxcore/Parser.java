@@ -15,7 +15,6 @@ import org.immutables.value.Value;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.Charset;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -56,38 +55,26 @@ public class Parser {
         final HierarchicalResource genSourcesJavaDirectory = resourceService.getHierarchicalResource(output.genDirectory());
         genSourcesJavaDirectory.ensureDirectoryExists();
 
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("tableFile", tableTargetRelPath(input.shared().languageProject())); // TODO: move to input?
-
         final HierarchicalResource tableFile = resourceService.getHierarchicalResource(output.genTableFile());
         try(final ResourceWriter writer = new ResourceWriter(tableFile, charset)) {
-            tableTemplate.execute(input, map, writer);
+            tableTemplate.execute(input, writer);
             writer.flush();
         }
 
         final HierarchicalResource parserFile = resourceService.getHierarchicalResource(output.genParserFile());
         try(final ResourceWriter writer = new ResourceWriter(parserFile, charset)) {
-            parserTemplate.execute(input, map, writer);
+            parserTemplate.execute(input, writer);
             writer.flush();
         }
 
         final HierarchicalResource factoryFile = resourceService.getHierarchicalResource(output.genFactoryFile());
         try(final ResourceWriter writer = new ResourceWriter(factoryFile, charset)) {
-            factoryTemplate.execute(input, map, writer);
+            factoryTemplate.execute(input, writer);
             writer.flush();
         }
 
         return output;
     }
-
-    private static String tableSourceRelPath() {
-        return "target/metaborg/sdf.tbl";
-    }
-
-    private static String tableTargetRelPath(GradleProject languageProject) {
-        return languageProject.packagePath() + "/" + tableSourceRelPath();
-    }
-
 
     public AdapterProjectOutput compileAdapterProject(Input input, GradleProject adapterProject) throws IOException {
         return AdapterProjectOutput.builder().build();
@@ -111,6 +98,15 @@ public class Parser {
 
 
         Shared shared();
+
+
+        @Value.Default default String tableSourceRelPath() {
+            return "target/metaborg/sdf.tbl";
+        }
+
+        @Value.Default default String tableTargetRelPath() {
+            return shared().languageProject().packagePath() + "/" + tableSourceRelPath();
+        }
 
 
         @Value.Default default ClassKind classKind() {
@@ -177,7 +173,7 @@ public class Parser {
                 genParserFile(genDirectory.appendRelativePath(input.genParserFileName()));
                 genFactoryFile(genDirectory.appendRelativePath(input.genFactoryFileName()));
                 addDependencies(GradleAddDependency.api(input.shared().jsglr1CommonDep()));
-                addCopyResources(tableSourceRelPath());
+                addCopyResources(input.tableSourceRelPath());
                 return this;
             }
         }

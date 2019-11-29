@@ -15,7 +15,6 @@ import org.immutables.value.Value;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.Charset;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -56,38 +55,26 @@ public class Styler {
         final HierarchicalResource genSourcesJavaDirectory = resourceService.getHierarchicalResource(output.genDirectory());
         genSourcesJavaDirectory.ensureDirectoryExists();
 
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("packedESVFile", packedESVTargetRelPath(input.shared().languageProject())); // TODO: move to input?
-
         final HierarchicalResource rulesFile = resourceService.getHierarchicalResource(output.genRulesFile());
         try(final ResourceWriter writer = new ResourceWriter(rulesFile, charset)) {
-            rulesTemplate.execute(input, map, writer);
+            rulesTemplate.execute(input, writer);
             writer.flush();
         }
 
         final HierarchicalResource stylerFile = resourceService.getHierarchicalResource(output.genStylerFile());
         try(final ResourceWriter writer = new ResourceWriter(stylerFile, charset)) {
-            stylerTemplate.execute(input, map, writer);
+            stylerTemplate.execute(input, writer);
             writer.flush();
         }
 
         final HierarchicalResource factoryFile = resourceService.getHierarchicalResource(output.genFactoryFile());
         try(final ResourceWriter writer = new ResourceWriter(factoryFile, charset)) {
-            factoryTemplate.execute(input, map, writer);
+            factoryTemplate.execute(input, writer);
             writer.flush();
         }
 
         return output;
     }
-
-    private static String packedESVSourceRelPath() {
-        return "target/metaborg/editor.esv.af";
-    }
-
-    private static String packedESVTargetRelPath(GradleProject languageProject) {
-        return languageProject.packagePath() + "/" + packedESVSourceRelPath();
-    }
-
 
     public AdapterProjectOutput compileAdapterProject(Input input, GradleProject adapterProject) throws IOException {
         return AdapterProjectOutput.builder().build();
@@ -111,6 +98,15 @@ public class Styler {
 
 
         Shared shared();
+
+
+        @Value.Default default String packedESVSourceRelPath() {
+            return "target/metaborg/editor.esv.af";
+        }
+
+        @Value.Default default String packedESVTargetRelPath() {
+            return shared().languageProject().packagePath() + "/" + packedESVSourceRelPath();
+        }
 
 
         @Value.Default default ClassKind classKind() {
@@ -177,7 +173,7 @@ public class Styler {
                 genStylerFile(genDirectory.appendRelativePath(input.genStylerFileName()));
                 genFactoryFile(genDirectory.appendRelativePath(input.genFactoryFileName()));
                 addDependencies(GradleAddDependency.api(input.shared().esvCommonDep()));
-                addCopyResources(packedESVSourceRelPath());
+                addCopyResources(input.packedESVSourceRelPath());
                 return this;
             }
         }

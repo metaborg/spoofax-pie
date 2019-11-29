@@ -15,7 +15,7 @@ public class {{genRulesClass}} implements Serializable {
     }
 
     public static {{genRulesClass}} fromClassLoaderResources() {
-        final String resource = "{{packedESVFile}}";
+        final String resource = "{{packedESVTargetRelPath}}";
         try(final @Nullable InputStream inputStream = {{genRulesClass}}.class.getClassLoader().getResourceAsStream(resource)) {
             if(inputStream == null) {
                 throw new RuntimeException("Cannot create styling rules; cannot find resource '" + resource + "' in classloader resources");

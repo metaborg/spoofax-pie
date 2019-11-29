@@ -15,24 +15,27 @@ import java.nio.charset.Charset;
 
 @Value.Enclosing
 public class AdapterProject {
-    private final ResourceService resourceService;
     private final Template buildGradleTemplate;
+    private final ResourceService resourceService;
+    private final Charset charset;
 
-    private AdapterProject(ResourceService resourceService, Template buildGradleTemplate) {
+    private AdapterProject(Template buildGradleTemplate, ResourceService resourceService, Charset charset) {
         this.resourceService = resourceService;
         this.buildGradleTemplate = buildGradleTemplate;
+        this.charset = charset;
     }
 
-    public static AdapterProject fromClassLoaderResources(ResourceService resourceService) {
+    public static AdapterProject fromClassLoaderResources(ResourceService resourceService, Charset charset) {
         final TemplateCompiler templateCompiler = new TemplateCompiler(AdapterProject.class);
         return new AdapterProject(
+            templateCompiler.compile("language_project/build.gradle.kts.mustache"),
             resourceService,
-            templateCompiler.compile("language_project/build.gradle.kts.mustache")
+            charset
         );
     }
 
 
-    public Output compile(Input input, Charset charset) throws IOException {
+    public Output compile(Input input) throws IOException {
         final Output output = Output.builder().withDefaultsBasedOnInput(input).build();
 
         final HierarchicalResource baseDirectory = resourceService.getHierarchicalResource(output.baseDirectory());
@@ -58,24 +61,13 @@ public class AdapterProject {
 
 
         Shared shared();
-
-
-        @Value.Default default GradleProject project() {
-            final Shared shared = shared();
-            final String artifactId = shared.defaultArtifactId() + ".spoofax";
-            return GradleProject.builder()
-                .coordinate(shared.defaultGroupId(), artifactId, shared.defaultVersion())
-                .packageId(shared.basePackageId())
-                .baseDirectory(shared.baseDirectory().appendSegment(artifactId))
-                .build();
-        }
     }
 
     @Value.Immutable
     public interface Output extends Serializable {
         class Builder extends AdapterProjectData.Output.Builder {
             public Builder withDefaultsBasedOnInput(Input input) {
-                final ResourcePath baseDirectory = input.project().baseDirectory();
+                final ResourcePath baseDirectory = input.shared().adapterProject().baseDirectory();
                 return this
                     .baseDirectory(baseDirectory)
                     .buildGradleKtsFile(baseDirectory.appendRelativePath("build.gradle.kts"))

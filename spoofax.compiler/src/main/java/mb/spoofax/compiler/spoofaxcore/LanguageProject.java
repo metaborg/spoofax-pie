@@ -201,7 +201,7 @@ public class LanguageProject {
             return false;
         }
 
-        @Value.Default default Optional<ResourcePath> settingsGradleKtsFile() {
+        @Value.Default @SuppressWarnings("immutables:untype") default Optional<ResourcePath> settingsGradleKtsFile() {
             if(standaloneProject()) {
                 return Optional.of(shared().languageProject().baseDirectory().appendRelativePath("settings.gradle.kts"));
             } else {
