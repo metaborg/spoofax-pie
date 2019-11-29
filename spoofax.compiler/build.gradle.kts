@@ -38,17 +38,20 @@ dependencies {
 // Additional dependencies which generated projects in tests may inject.
 val testInjections = configurations.create("testInjections")
 dependencies {
-  testInjections("org.metaborg:resource")
+  // Metaborg log
   testInjections("org.metaborg:log.api")
-  testInjections(project(":spoofax.compiler.interfaces"))
+  // Metaborg resource
+  testInjections("org.metaborg:resource")
+  // Spoofax-PIE
   testInjections(project(":common"))
   testInjections(project(":jsglr1.common"))
   testInjections(project(":esv.common"))
   testInjections(project(":stratego.common"))
-  testInjections("org.metaborg:strategoxt-min-jar")
   testInjections(project(":constraint.common"))
   testInjections(project(":nabl2.common"))
   testInjections(project(":statix.common"))
+  testInjections(project(":spoofax.compiler.interfaces"))
+  testInjections(project(":spoofax.core"))
   testInjections(project(":org.metaborg.lang.tiger", Dependency.DEFAULT_CONFIGURATION).also {
     it.isTransitive = false
     configureSpoofaxLanguageArtifact(it)

@@ -4,6 +4,7 @@ import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
 import mb.spoofax.compiler.util.GradleProject;
@@ -52,13 +53,20 @@ public class AdapterProject {
 
 
     public Output compile(Input input) throws IOException {
-        final GradleProject adapterProject = input.shared().adapterProject();
+        final Shared shared = input.shared();
+        final GradleProject adapterProject = shared.adapterProject();
 
         final HierarchicalResource baseDirectory = resourceService.getHierarchicalResource(adapterProject.baseDirectory());
         baseDirectory.ensureDirectoryExists();
 
         final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
         dependencies.add(GradleConfiguredDependency.api(input.languageProjectDependency()));
+        dependencies.add(GradleConfiguredDependency.api(shared.spoofaxCoreDep()));
+        dependencies.add(GradleConfiguredDependency.api(shared.pieApiDep()));
+        dependencies.add(GradleConfiguredDependency.api(shared.pieDaggerDep()));
+        dependencies.add(GradleConfiguredDependency.api(shared.daggerDep()));
+        dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
+        dependencies.add(GradleConfiguredDependency.annotationProcessor(shared.daggerCompilerDep()));
 
         final HierarchicalResource buildGradleKtsFile = resourceService.getHierarchicalResource(input.buildGradleKtsFile());
         try(final ResourceWriter writer = new ResourceWriter(buildGradleKtsFile, charset)) {
@@ -97,6 +105,14 @@ public class AdapterProject {
 
         Shared shared();
 
+        Parser.Input parser();
+
+        Optional<Styler.Input> styler();
+
+        Optional<StrategoRuntime.Input> strategoRuntime();
+
+        Optional<ConstraintAnalyzer.Input> constraintAnalyzer();
+
 
         @Value.Default default ResourcePath buildGradleKtsFile() {
             return shared().adapterProject().baseDirectory().appendRelativePath("build.gradle.kts");
@@ -112,6 +128,41 @@ public class AdapterProject {
             } else {
                 return Optional.empty();
             }
+        }
+
+
+        @Value.Default default ClassKind classKind() {
+            return ClassKind.Generated;
+        }
+
+        Optional<String> manualInstanceClass();
+
+        Optional<String> manualModuleClass();
+
+        Optional<String> manualComponentClass();
+
+        @Value.Default default String genInstanceClass() {
+            return shared().classSuffix() + "Instance";
+        }
+
+        @Value.Derived default String genInstanceFileName() {
+            return genInstanceClass() + ".java";
+        }
+
+        @Value.Default default String genModuleClass() {
+            return shared().classSuffix() + "Module";
+        }
+
+        @Value.Derived default String genModuleFileName() {
+            return genModuleClass() + ".java";
+        }
+
+        @Value.Default default String genComponentClass() {
+            return shared().classSuffix() + "StylerFactory";
+        }
+
+        @Value.Derived default String genComponentFileName() {
+            return genComponentClass() + ".java";
         }
 
 

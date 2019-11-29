@@ -102,7 +102,7 @@ public class StrategoRuntime {
             return ClassKind.Generated;
         }
 
-        Optional<String> manualStrategoRuntimeBuilderFactoryClass();
+        Optional<String> manualFactoryClass();
 
         @Value.Default default String genFactoryClass() {
             return shared().classSuffix() + "StrategoRuntimeBuilderFactory";
@@ -110,6 +110,13 @@ public class StrategoRuntime {
 
         @Value.Derived default String genFactoryFileName() {
             return genFactoryClass() + ".java";
+        }
+
+        @Value.Derived default String factoryClass() {
+            if(classKind().isManual() && manualFactoryClass().isPresent()) {
+                return manualFactoryClass().get();
+            }
+            return genFactoryClass();
         }
 
 
@@ -122,7 +129,7 @@ public class StrategoRuntime {
             final ClassKind kind = classKind();
             final boolean manual = kind.isManual();
             if(!manual) return;
-            if(!manualStrategoRuntimeBuilderFactoryClass().isPresent()) {
+            if(!manualFactoryClass().isPresent()) {
                 throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualFactoryClass' has not been set");
             }
         }

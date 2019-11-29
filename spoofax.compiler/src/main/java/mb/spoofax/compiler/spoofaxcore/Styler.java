@@ -113,9 +113,6 @@ public class Styler {
             return ClassKind.Generated;
         }
 
-        Optional<String> manualStylerClass();
-
-        Optional<String> manualFactoryClass();
 
         @Value.Default default String genRulesClass() {
             return shared().classSuffix() + "StylingRules";
@@ -125,6 +122,9 @@ public class Styler {
             return genRulesClass() + ".java";
         }
 
+
+        Optional<String> manualStylerClass();
+
         @Value.Default default String genStylerClass() {
             return shared().classSuffix() + "Styler";
         }
@@ -133,12 +133,29 @@ public class Styler {
             return genStylerClass() + ".java";
         }
 
+        @Value.Derived default String stylerClass() {
+            if(classKind().isManual() && manualStylerClass().isPresent()) {
+                return manualStylerClass().get();
+            }
+            return genStylerClass();
+        }
+
+
+        Optional<String> manualFactoryClass();
+
         @Value.Default default String genFactoryClass() {
             return shared().classSuffix() + "StylerFactory";
         }
 
         @Value.Derived default String genFactoryFileName() {
             return genFactoryClass() + ".java";
+        }
+
+        @Value.Derived default String factoryClass() {
+            if(classKind().isManual() && manualFactoryClass().isPresent()) {
+                return manualFactoryClass().get();
+            }
+            return genFactoryClass();
         }
 
 

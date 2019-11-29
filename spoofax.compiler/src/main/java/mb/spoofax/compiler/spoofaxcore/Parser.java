@@ -113,9 +113,6 @@ public class Parser {
             return ClassKind.Generated;
         }
 
-        Optional<String> manualParserClass();
-
-        Optional<String> manualFactoryClass();
 
         @Value.Default default String genTableClass() {
             return shared().classSuffix() + "ParseTable";
@@ -125,6 +122,9 @@ public class Parser {
             return genTableClass() + ".java";
         }
 
+
+        Optional<String> manualParserClass();
+
         @Value.Default default String genParserClass() {
             return shared().classSuffix() + "Parser";
         }
@@ -133,12 +133,29 @@ public class Parser {
             return genParserClass() + ".java";
         }
 
+        @Value.Derived default String parserClass() {
+            if(classKind().isManual() && manualParserClass().isPresent()) {
+                return manualParserClass().get();
+            }
+            return genParserClass();
+        }
+
+
+        Optional<String> manualFactoryClass();
+
         @Value.Default default String genFactoryClass() {
             return shared().classSuffix() + "ParserFactory";
         }
 
         @Value.Derived default String genFactoryFileName() {
             return genFactoryClass() + ".java";
+        }
+
+        @Value.Derived default String factoryClass() {
+            if(classKind().isManual() && manualFactoryClass().isPresent()) {
+                return manualFactoryClass().get();
+            }
+            return genFactoryClass();
         }
 
 

@@ -103,10 +103,8 @@ public class ConstraintAnalyzer {
             return ClassKind.Generated;
         }
 
+
         Optional<String> manualConstraintAnalyzerClass();
-
-        Optional<String> manualFactoryClass();
-
 
         @Value.Default default String genConstraintAnalyzerClass() {
             return shared().classSuffix() + "ConstraintAnalyzer";
@@ -116,12 +114,28 @@ public class ConstraintAnalyzer {
             return genConstraintAnalyzerClass() + ".java";
         }
 
+        @Value.Derived default String constraintAnalyzerClass() {
+            if(classKind().isManual() && manualConstraintAnalyzerClass().isPresent()) {
+                return manualConstraintAnalyzerClass().get();
+            }
+            return genConstraintAnalyzerPath();
+        }
+
+        Optional<String> manualFactoryClass();
+
         @Value.Default default String genFactoryClass() {
             return shared().classSuffix() + "ConstraintAnalyzerFactory";
         }
 
         @Value.Derived default String genFactoryPath() {
             return genFactoryClass() + ".java";
+        }
+
+        @Value.Derived default String factoryClass() {
+            if(classKind().isManual() && manualFactoryClass().isPresent()) {
+                return manualFactoryClass().get();
+            }
+            return genFactoryClass();
         }
 
 

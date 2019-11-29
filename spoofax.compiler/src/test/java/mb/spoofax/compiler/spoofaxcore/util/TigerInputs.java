@@ -1,6 +1,5 @@
 package mb.spoofax.compiler.spoofaxcore.util;
 
-import mb.common.util.ListView;
 import mb.common.util.Preconditions;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.spoofaxcore.AdapterProject;
@@ -21,9 +20,11 @@ public class TigerInputs {
             .name("Tiger")
             .basePackageId("mb.tiger")
             .baseDirectory(baseDirectory)
+            /// Metaborg log
             .logApiDep(fromSystemProperty("log.api:classpath"))
+            /// Metaborg resource
             .resourceDep(fromSystemProperty("resource:classpath"))
-            .spoofaxCompilerInterfacesDep(fromSystemProperty("spoofax.compiler.interfaces:classpath"))
+            /// Spoofax-PIE
             .commonDep(fromSystemProperty("common:classpath"))
             .jsglr1CommonDep(fromSystemProperty("jsglr1.common:classpath"))
             .esvCommonDep(fromSystemProperty("esv.common:classpath"))
@@ -31,6 +32,8 @@ public class TigerInputs {
             .constraintCommonDep(fromSystemProperty("constraint.common:classpath"))
             .nabl2CommonDep(fromSystemProperty("nabl2.common:classpath"))
             .statixCommonDep(fromSystemProperty("statix.common:classpath"))
+            .spoofaxCompilerInterfacesDep(fromSystemProperty("spoofax.compiler.interfaces:classpath"))
+            .spoofaxCoreDep(fromSystemProperty("spoofax.core:classpath"))
             ;
     }
 
@@ -122,6 +125,10 @@ public class TigerInputs {
     public static AdapterProject.Input.Builder adapterProjectBuilder(Shared shared) {
         return AdapterProject.Input.builder()
             .shared(shared)
+            .parser(parser(shared))
+            .styler(styler(shared))
+            .strategoRuntime(strategoRuntime(shared))
+            .constraintAnalyzer(constraintAnalyzer(shared))
             ;
     }
 

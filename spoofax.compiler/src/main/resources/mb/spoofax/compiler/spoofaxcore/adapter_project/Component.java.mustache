@@ -1,0 +1,11 @@
+package {{shared.adapterProject.packageId}};
+
+import dagger.Component;
+import mb.spoofax.core.language.LanguageComponent;
+import mb.spoofax.core.language.LanguageScope;
+import mb.spoofax.core.platform.PlatformComponent;
+
+@LanguageScope @Component(modules = {{genModuleClass}}.class, dependencies = PlatformComponent.class)
+public interface {{genComponentClass}} extends LanguageComponent {
+    @Override {{genInstanceClass}} getLanguageInstance();
+}
