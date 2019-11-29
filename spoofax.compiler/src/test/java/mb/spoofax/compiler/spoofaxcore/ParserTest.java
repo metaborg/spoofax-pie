@@ -7,11 +7,10 @@ import mb.resource.ResourceService;
 import mb.resource.fs.FSPath;
 import mb.resource.fs.FSResourceRegistry;
 import mb.resource.hierarchical.HierarchicalResource;
-import mb.spoofax.compiler.spoofaxcore.util.TigerInputs;
 import mb.spoofax.compiler.spoofaxcore.util.FileAssertions;
 import mb.spoofax.compiler.spoofaxcore.util.JavaParser;
+import mb.spoofax.compiler.spoofaxcore.util.TigerInputs;
 import mb.spoofax.compiler.util.ClassKind;
-import mb.spoofax.compiler.util.JavaProject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -32,8 +31,7 @@ class ParserTest {
         final Properties persistentProperties = new Properties();
 
         final Shared shared1 = TigerInputs.shared(baseDirectory);
-        final JavaProject languageProject1 = TigerInputs.languageProject(shared1).project();
-        final Parser.Input parserCompilerInput1 = TigerInputs.parser(shared1, languageProject1);
+        final Parser.Input parserCompilerInput1 = TigerInputs.parser(shared1);
         assertEquals("TigerParseTable", parserCompilerInput1.genTableClass());
         assertEquals("TigerParser", parserCompilerInput1.genParserClass());
         shared1.savePersistentProperties(persistentProperties);
@@ -43,8 +41,7 @@ class ParserTest {
             .name("Tigerr") // Change language name.
             .withPersistentProperties(persistentProperties)
             .build();
-        final JavaProject languageProject2 = TigerInputs.languageProject(shared2).project();
-        final Parser.Input parserCompilerInput2 = TigerInputs.parserBuilder(shared2, languageProject2)
+        final Parser.Input parserCompilerInput2 = TigerInputs.parserBuilder(shared2)
             .withPersistentProperties(persistentProperties)
             .build();
         // Should not affect generated class names.
@@ -58,14 +55,13 @@ class ParserTest {
         final FSPath baseDirectory = new FSPath(fileSystem.getPath("repo"));
 
         final Shared shared = TigerInputs.shared(baseDirectory);
-        final JavaProject languageProject = TigerInputs.languageProject(shared).project();
         assertThrows(IllegalArgumentException.class, () -> {
-            TigerInputs.parserBuilder(shared, languageProject)
+            TigerInputs.parserBuilder(shared)
                 .classKind(classKind)
                 .build(); // Class kind is Manual or Extended, but manual class names were not set: check fails.
         });
 
-        TigerInputs.parserBuilder(shared, languageProject)
+        TigerInputs.parserBuilder(shared)
             .classKind(classKind)
             .manualParserClass("MyParser")
             .manualFactoryClass("MyParserFactory")
@@ -79,15 +75,14 @@ class ParserTest {
         final FSPath baseDirectory = new FSPath(fileSystem.getPath("repo"));
 
         final Shared shared = TigerInputs.shared(baseDirectory);
-        final JavaProject languageProject = TigerInputs.languageProject(shared).project();
-        final Parser.Input input = TigerInputs.parser(shared, languageProject);
+        final Parser.Input input = TigerInputs.parser(shared);
 
-        final Parser compiler = Parser.fromClassLoaderResources(resourceService);
         final Charset charset = StandardCharsets.UTF_8;
-        final Parser.Output output = compiler.compile(input, charset);
+        final Parser compiler = Parser.fromClassLoaderResources(resourceService, charset);
+        final Parser.LanguageProjectOutput output = compiler.compileLanguageProject(input);
 
-        final HierarchicalResource genSourcesJavaDirectory = resourceService.getHierarchicalResource(output.genSourcesJavaDirectory());
-        assertTrue(genSourcesJavaDirectory.exists());
+        final HierarchicalResource genDirectory = resourceService.getHierarchicalResource(output.genDirectory());
+        assertTrue(genDirectory.exists());
 
         final FileAssertions genParseTableFile = new FileAssertions(resourceService.getHierarchicalResource(output.genTableFile()));
         genParseTableFile.assertName("TigerParseTable.java");
@@ -114,19 +109,18 @@ class ParserTest {
         final FSPath baseDirectory = new FSPath(fileSystem.getPath("repo"));
 
         final Shared shared = TigerInputs.shared(baseDirectory);
-        final JavaProject languageProject = TigerInputs.languageProject(shared).project();
-        final Parser.Input input = TigerInputs.parserBuilder(shared, languageProject)
+        final Parser.Input input = TigerInputs.parserBuilder(shared)
             .classKind(ClassKind.Manual)
             .manualParserClass("MyParser")
             .manualFactoryClass("MyParserFactory")
             .build();
 
-        final Parser compiler = Parser.fromClassLoaderResources(resourceService);
         final Charset charset = StandardCharsets.UTF_8;
-        final Parser.Output output = compiler.compile(input, charset);
+        final Parser compiler = Parser.fromClassLoaderResources(resourceService, charset);
+        final Parser.LanguageProjectOutput output = compiler.compileLanguageProject(input);
 
-        final HierarchicalResource genSourcesJavaDirectory = resourceService.getHierarchicalResource(output.genSourcesJavaDirectory());
-        assertFalse(genSourcesJavaDirectory.exists());
+        final HierarchicalResource genDirectory = resourceService.getHierarchicalResource(output.genDirectory());
+        assertFalse(genDirectory.exists());
 
         final HierarchicalResource genParseTableFile = resourceService.getHierarchicalResource(output.genTableFile());
         assertFalse(genParseTableFile.exists());

@@ -1,4 +1,4 @@
-package {{languageProject.packageId}};
+package {{shared.languageProject.packageId}};
 
 import mb.jsglr1.common.JSGLR1ParseTable;
 import mb.jsglr1.common.JSGLR1ParseTableException;
@@ -16,7 +16,7 @@ public class {{genTableClass}} implements Serializable {
     }
 
     public static {{genTableClass}} fromClassLoaderResources() {
-        final String resource = "{{tableResourcePath}}";
+        final String resource = "{{tableFile}}";
         try(final @Nullable InputStream inputStream = {{genTableClass}}.class.getClassLoader().getResourceAsStream(resource)) {
             if(inputStream == null) {
                 throw new RuntimeException("Cannot create parse table; cannot find resource '" + resource + "' in classloader resources");

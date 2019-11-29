@@ -4,7 +4,7 @@ import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.JavaProject;
+import mb.spoofax.compiler.util.GradleProject;
 import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import org.immutables.value.Value;
@@ -60,10 +60,10 @@ public class AdapterProject {
         Shared shared();
 
 
-        @Value.Default default JavaProject project() {
+        @Value.Default default GradleProject project() {
             final Shared shared = shared();
             final String artifactId = shared.defaultArtifactId() + ".spoofax";
-            return JavaProject.builder()
+            return GradleProject.builder()
                 .coordinate(shared.defaultGroupId(), artifactId, shared.defaultVersion())
                 .packageId(shared.basePackageId())
                 .baseDirectory(shared.baseDirectory().appendSegment(artifactId))

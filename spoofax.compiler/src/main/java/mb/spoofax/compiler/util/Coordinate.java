@@ -40,13 +40,13 @@ public abstract class Coordinate implements Serializable {
     @Value.Parameter public abstract String version();
 
 
-    @Value.Derived public String gradleNotation() {
+    @Value.Derived public String toGradleNotation() {
         return groupId() + ":" + artifactId() + ":" + version();
     }
 
 
     @Override
     public String toString() {
-        return gradleNotation();
+        return toGradleNotation();
     }
 }

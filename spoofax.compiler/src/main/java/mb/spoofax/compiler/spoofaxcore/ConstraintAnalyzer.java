@@ -6,7 +6,8 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.BuilderBase;
 import mb.spoofax.compiler.util.ClassKind;
-import mb.spoofax.compiler.util.JavaProject;
+import mb.spoofax.compiler.util.GradleAddDependency;
+import mb.spoofax.compiler.util.GradleProject;
 import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import org.immutables.value.Value;
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -22,34 +24,38 @@ import static mb.spoofax.compiler.util.StringUtil.doubleQuote;
 
 @Value.Enclosing
 public class ConstraintAnalyzer {
-    private final ResourceService resourceService;
     private final Template constraintAnalyzerTemplate;
     private final Template factoryTemplate;
+    private final ResourceService resourceService;
+    private final Charset charset;
 
-    private ConstraintAnalyzer(ResourceService resourceService, Template constraintAnalyzerTemplate, Template factoryTemplate) {
+
+    private ConstraintAnalyzer(Template constraintAnalyzerTemplate, Template factoryTemplate, ResourceService resourceService, Charset charset) {
         this.resourceService = resourceService;
         this.constraintAnalyzerTemplate = constraintAnalyzerTemplate;
         this.factoryTemplate = factoryTemplate;
+        this.charset = charset;
     }
 
-    public static ConstraintAnalyzer fromClassLoaderResources(ResourceService resourceService) {
+    public static ConstraintAnalyzer fromClassLoaderResources(ResourceService resourceService, Charset charset) {
         final TemplateCompiler templateCompiler = new TemplateCompiler(ConstraintAnalyzer.class);
         return new ConstraintAnalyzer(
-            resourceService,
             templateCompiler.compile("constraint_analyzer/ConstraintAnalyzer.java.mustache"),
-            templateCompiler.compile("constraint_analyzer/ConstraintAnalyzerFactory.java.mustache")
+            templateCompiler.compile("constraint_analyzer/ConstraintAnalyzerFactory.java.mustache"),
+            resourceService,
+            charset
         );
     }
 
 
-    public Output compile(Input input, Charset charset) throws IOException {
-        final Output output = Output.builder().withDefaultsBasedOnInput(input).build();
+    public LanguageProjectOutput compileLanguageProject(Input input) throws IOException {
+        final LanguageProjectOutput output = LanguageProjectOutput.builder().fromInput(input).build();
         if(input.classKind().isManualOnly()) return output; // Nothing to generate: return.
 
         final HashMap<String, Object> map = new HashMap<>();
         map.put("strategoStrategyCode", doubleQuote(input.strategoStrategy()));
 
-        final HierarchicalResource genSourcesJavaDirectory = resourceService.getHierarchicalResource(output.genSourcesJavaDirectory());
+        final HierarchicalResource genSourcesJavaDirectory = resourceService.getHierarchicalResource(output.genDirectory());
         genSourcesJavaDirectory.ensureDirectoryExists();
 
         final HierarchicalResource constraintAnalyzerFile = resourceService.getHierarchicalResource(output.genConstraintAnalyzerFile());
@@ -60,11 +66,15 @@ public class ConstraintAnalyzer {
 
         final HierarchicalResource factoryFile = resourceService.getHierarchicalResource(output.genFactoryFile());
         try(final ResourceWriter writer = new ResourceWriter(factoryFile, charset)) {
-            factoryTemplate.execute(input, writer);
+            factoryTemplate.execute(input, map, writer);
             writer.flush();
         }
 
         return output;
+    }
+
+    public AdapterProjectOutput compileAdapterProject(Input input, GradleProject languageProject) throws IOException {
+        return AdapterProjectOutput.builder().build();
     }
 
 
@@ -84,8 +94,6 @@ public class ConstraintAnalyzer {
 
 
         Shared shared();
-
-        JavaProject languageProject();
 
 
         @Value.Default default String strategoStrategy() {
@@ -143,15 +151,16 @@ public class ConstraintAnalyzer {
     }
 
     @Value.Immutable
-    public interface Output extends Serializable {
-        class Builder extends ConstraintAnalyzerData.Output.Builder {
-            public Builder withDefaultsBasedOnInput(Input input) {
-                final ResourcePath genSourcesJavaDirectory = input.languageProject().genSourceSpoofaxJavaDirectory().appendRelativePath(input.languageProject().packagePath());
-                return this
-                    .genSourcesJavaDirectory(genSourcesJavaDirectory)
-                    .genConstraintAnalyzerFile(genSourcesJavaDirectory.appendRelativePath(input.genConstraintAnalyzerPath()))
-                    .genFactoryFile(genSourcesJavaDirectory.appendRelativePath(input.genFactoryPath()))
-                    ;
+    public interface LanguageProjectOutput extends Serializable {
+        class Builder extends ConstraintAnalyzerData.LanguageProjectOutput.Builder {
+            public Builder fromInput(Input input) {
+                final GradleProject languageProject = input.shared().languageProject();
+                final ResourcePath genDirectory = languageProject.genSourceSpoofaxJavaDirectory().appendRelativePath(languageProject.packagePath());
+                genDirectory(genDirectory);
+                genConstraintAnalyzerFile(genDirectory.appendRelativePath(input.genConstraintAnalyzerPath()));
+                genFactoryFile(genDirectory.appendRelativePath(input.genFactoryPath()));
+                addDependencies(GradleAddDependency.api(input.shared().constraintCommonDep()));
+                return this;
             }
         }
 
@@ -160,10 +169,26 @@ public class ConstraintAnalyzer {
         }
 
 
-        ResourcePath genSourcesJavaDirectory();
+        ResourcePath genDirectory();
 
         ResourcePath genConstraintAnalyzerFile();
 
         ResourcePath genFactoryFile();
+
+
+        List<GradleAddDependency> dependencies();
+
+        List<String> copyResources();
+    }
+
+    @Value.Immutable
+    public interface AdapterProjectOutput extends Serializable {
+        class Builder extends ConstraintAnalyzerData.AdapterProjectOutput.Builder {
+
+        }
+
+        static Builder builder() {
+            return new Builder();
+        }
     }
 }

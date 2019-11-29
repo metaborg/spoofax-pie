@@ -4,112 +4,172 @@ import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.JavaDependency;
-import mb.spoofax.compiler.util.JavaProject;
+import mb.spoofax.compiler.util.GradleAddDependency;
+import mb.spoofax.compiler.util.GradleDependency;
+import mb.spoofax.compiler.util.GradleProject;
 import mb.spoofax.compiler.util.ResourceWriter;
+import mb.spoofax.compiler.util.StringUtil;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import org.immutables.value.Value;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static mb.spoofax.compiler.util.StringUtil.doubleQuote;
 
 @Value.Enclosing
 public class LanguageProject {
-    private final ResourceService resourceService;
     private final Template buildGradleTemplate;
+    private final Template settingsGradleTemplate;
+    private final ResourceService resourceService;
+    private final Charset charset;
+    private final Parser parserCompiler;
+    private final Styler stylerCompiler;
+    private final StrategoRuntime strategoRuntimeCompiler;
+    private final ConstraintAnalyzer constraintAnalyzerCompiler;
 
-    private LanguageProject(ResourceService resourceService, Template buildGradleTemplate) {
+    private LanguageProject(
+        Template buildGradleTemplate,
+        Template settingsGradleTemplate, ResourceService resourceService,
+        Charset charset,
+        Parser parserCompiler,
+        Styler stylerCompiler,
+        StrategoRuntime strategoRuntimeCompiler,
+        ConstraintAnalyzer constraintAnalyzerCompiler
+    ) {
+        this.settingsGradleTemplate = settingsGradleTemplate;
         this.resourceService = resourceService;
+        this.charset = charset;
         this.buildGradleTemplate = buildGradleTemplate;
+        this.parserCompiler = parserCompiler;
+        this.stylerCompiler = stylerCompiler;
+        this.strategoRuntimeCompiler = strategoRuntimeCompiler;
+        this.constraintAnalyzerCompiler = constraintAnalyzerCompiler;
     }
 
-    public static LanguageProject fromClassLoaderResources(ResourceService resourceService) {
+    public static LanguageProject fromClassLoaderResources(
+        ResourceService resourceService,
+        Charset charset,
+        Parser parserCompiler,
+        Styler stylerCompiler,
+        StrategoRuntime strategoRuntimeCompiler,
+        ConstraintAnalyzer constraintAnalyzerCompiler
+    ) {
         final TemplateCompiler templateCompiler = new TemplateCompiler(LanguageProject.class);
         return new LanguageProject(
+            templateCompiler.compile("language_project/build.gradle.kts.mustache"),
+            templateCompiler.compile("gradle_project/settings.gradle.kts.mustache"),
             resourceService,
-            templateCompiler.compile("language_project/build.gradle.kts.mustache")
+            charset,
+            parserCompiler,
+            stylerCompiler,
+            strategoRuntimeCompiler,
+            constraintAnalyzerCompiler
         );
     }
 
 
-    public Output compile(Input input, Charset charset) throws IOException {
-        final Output output = Output.builder().withDefaultsBasedOnInput(input).build();
+    public Output compile(Input input) throws IOException {
+        final GradleProject languageProject = input.shared().languageProject();
 
-        final HierarchicalResource baseDirectory = resourceService.getHierarchicalResource(output.baseDirectory());
+        final HierarchicalResource baseDirectory = resourceService.getHierarchicalResource(languageProject.baseDirectory());
         baseDirectory.ensureDirectoryExists();
 
-        final HierarchicalResource buildGradleKtsFile = resourceService.getHierarchicalResource(output.buildGradleKtsFile());
+        final Parser.LanguageProjectOutput parserOutput = parserCompiler.compileLanguageProject(input.parser());
+        final ArrayList<GradleAddDependency> dependencies = new ArrayList<>(parserOutput.dependencies());
+        final ArrayList<String> copyResources = new ArrayList<>(parserOutput.copyResources());
+
+        final Optional<Styler.LanguageProjectOutput> stylerOutput;
+        final Optional<StrategoRuntime.LanguageProjectOutput> strategoRuntimeOutput;
+        final Optional<ConstraintAnalyzer.LanguageProjectOutput> constraintAnalyzerOutput;
+        try {
+            stylerOutput = input.styler().map((i) -> {
+                try {
+                    return stylerCompiler.compileLanguageProject(i);
+                } catch(IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            });
+            stylerOutput.ifPresent((o) -> {
+                dependencies.addAll(o.dependencies());
+                copyResources.addAll(o.copyResources());
+            });
+
+            strategoRuntimeOutput = input.strategoRuntime().map((i) -> {
+                try {
+                    return strategoRuntimeCompiler.compileLanguageProject(i);
+                } catch(IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            });
+            strategoRuntimeOutput.ifPresent((o) -> {
+                dependencies.addAll(o.dependencies());
+                copyResources.addAll(o.copyResources());
+            });
+
+            constraintAnalyzerOutput = input.constraintAnalyzer().map((i) -> {
+                try {
+                    return constraintAnalyzerCompiler.compileLanguageProject(i);
+                } catch(IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            });
+            constraintAnalyzerOutput.ifPresent((o) -> {
+                dependencies.addAll(o.dependencies());
+                copyResources.addAll(o.copyResources());
+            });
+        } catch(UncheckedIOException e) {
+            throw e.getCause();
+        }
+
+        final HierarchicalResource buildGradleKtsFile = resourceService.getHierarchicalResource(input.buildGradleKtsFile());
         try(final ResourceWriter writer = new ResourceWriter(buildGradleKtsFile, charset)) {
             final HashMap<String, Object> map = new HashMap<>();
 
             final String languageDependencyCode = input.languageSpecificationDependency().caseOf()
                 .project((projectPath) -> "createProjectDependency(\"" + projectPath + "\")")
-                .module((coordinate) -> "createModuleDependency(\"" + coordinate.gradleNotation() + "\")")
+                .module((coordinate) -> "createModuleDependency(\"" + coordinate.toGradleNotation() + "\")")
                 .files((filePaths) -> "createFilesDependency(" + filePaths.stream().map((s) -> "\"" + s + "\"").collect(Collectors.joining(", ")) + ")");
             map.put("languageDependencyCode", languageDependencyCode);
 
-            final ArrayList<String> dependencyCodes = new ArrayList<>();
-            final ArrayList<String> resourceCodes = new ArrayList<>();
-
-            // Parser
-            dependencyCodes.add(apiDependency(input.shared().jsglr1CommonDep()));
-            resourceCodes.add(doubleQuote("target/metaborg/sdf.tbl"));
-
-            // Styler
-            if(input.enableStyler()) {
-                dependencyCodes.add(apiDependency(input.shared().esvCommonDep()));
-                resourceCodes.add(doubleQuote("target/metaborg/editor.esv.af"));
-            }
-
-            // Stratego
-            if(input.enableStrategoTransformations()) {
-                dependencyCodes.add(apiDependency(input.shared().strategoCommonDep()));
-                dependencyCodes.add(apiDependency(input.shared().orgStrategoXTStrjDep()));
-                dependencyCodes.add(implementationDependency(input.shared().strategoXTMinJarDep()));
-                if(input.copyStrategoCTree()) {
-                    resourceCodes.add(doubleQuote("target/metaborg/stratego.ctree"));
-                }
-            }
-
-            // Constraint
-            if(input.enableConstraintAnalysis()) {
-                dependencyCodes.add(apiDependency(input.shared().constraintCommonDep()));
-                // NaBL2 (required by Statix as well)
-                if(input.enableNaBL2ConstraintGeneration() || input.enableStatixConstraintGeneration()) {
-                    dependencyCodes.add(implementationDependency(input.shared().nabl2CommonDep()));
-                }
-                if(input.enableStatixConstraintGeneration()) {
-                    dependencyCodes.add(implementationDependency(input.shared().statixCommonDep()));
-                    resourceCodes.add(doubleQuote("src-gen/statix/statics.spec.aterm"));
-                }
-            }
-
-            // Additional resources
-            input.additionalCopyResources().forEach((resource) -> resourceCodes.add(doubleQuote(resource)));
-
+            final ArrayList<String> dependencyCodes = dependencies.stream().map(GradleAddDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new));
+            final ArrayList<String> copyResourceCodes = copyResources.stream().map(StringUtil::doubleQuote).collect(Collectors.toCollection(ArrayList::new));
+            input.additionalCopyResources().forEach((resource) -> copyResourceCodes.add(doubleQuote(resource)));
             map.put("dependencyCodes", dependencyCodes);
-            map.put("resourceCodes", resourceCodes);
+            map.put("copyResourceCodes", copyResourceCodes);
 
             buildGradleTemplate.execute(input, map, writer);
             writer.flush();
         }
 
-        return output;
-    }
+        try {
+            input.settingsGradleKtsFile().ifPresent((f) -> {
+                final HierarchicalResource settingsGradleKtsFile = resourceService.getHierarchicalResource(f);
+                try(final ResourceWriter writer = new ResourceWriter(settingsGradleKtsFile, charset)) {
+                    settingsGradleTemplate.execute(input, writer);
+                    writer.flush();
+                } catch(IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            });
+        } catch(UncheckedIOException e) {
+            throw e.getCause();
+        }
 
-    private static String apiDependency(JavaDependency dependency) {
-        return "api(" + dependency.toGradleKotlinDependencyCode() + ")";
-    }
-
-    private static String implementationDependency(JavaDependency dependency) {
-        return "implementation(" + dependency.toGradleKotlinDependencyCode() + ")";
+        return Output.builder()
+            .from(input)
+            .parser(parserOutput)
+            .styler(stylerOutput)
+            .strategoRuntime(strategoRuntimeOutput)
+            .constraintAnalyzer(constraintAnalyzerOutput)
+            .build();
     }
 
 
@@ -124,37 +184,33 @@ public class LanguageProject {
 
         Shared shared();
 
+        Parser.Input parser();
 
-        @Value.Default default JavaProject project() {
-            final Shared shared = shared();
-            final String artifactId = shared.defaultArtifactId() + ".lang";
-            return JavaProject.builder()
-                .coordinate(shared.defaultGroupId(), artifactId, shared.defaultVersion())
-                .packageId(shared.basePackageId())
-                .baseDirectory(shared.baseDirectory().appendSegment(artifactId))
-                .build();
+        Optional<Styler.Input> styler();
+
+        Optional<StrategoRuntime.Input> strategoRuntime();
+
+        Optional<ConstraintAnalyzer.Input> constraintAnalyzer();
+
+
+        @Value.Default default ResourcePath buildGradleKtsFile() {
+            return shared().languageProject().baseDirectory().appendRelativePath("build.gradle.kts");
+        }
+
+        @Value.Default default boolean standaloneProject() {
+            return false;
+        }
+
+        @Value.Default default Optional<ResourcePath> settingsGradleKtsFile() {
+            if(standaloneProject()) {
+                return Optional.of(shared().languageProject().baseDirectory().appendRelativePath("settings.gradle.kts"));
+            } else {
+                return Optional.empty();
+            }
         }
 
 
-        JavaDependency languageSpecificationDependency();
-
-
-        @Value.Default default boolean enableStyler() { return true; }
-
-        boolean enableStrategoTransformations();
-
-        boolean copyStrategoCTree();
-
-        boolean copyStrategoClasses();
-
-        boolean copyStrategoJavaStrategyClasses();
-
-        boolean enableConstraintAnalysis();
-
-        boolean enableNaBL2ConstraintGeneration();
-
-        boolean enableStatixConstraintGeneration();
-
+        GradleDependency languageSpecificationDependency();
 
         List<String> additionalCopyResources();
     }
@@ -162,11 +218,13 @@ public class LanguageProject {
     @Value.Immutable
     public interface Output extends Serializable {
         class Builder extends LanguageProjectData.Output.Builder {
-            public Builder withDefaultsBasedOnInput(Input input) {
-                final ResourcePath baseDirectory = input.project().baseDirectory();
+            public Builder from(Input input) {
+                final GradleProject languageProject = input.shared().languageProject();
+                final ResourcePath baseDirectory = languageProject.baseDirectory();
                 return this
-                    .baseDirectory(baseDirectory)
-                    .buildGradleKtsFile(baseDirectory.appendRelativePath("build.gradle.kts"))
+                    .baseDirectory(languageProject.baseDirectory())
+                    .buildGradleKtsFile(input.buildGradleKtsFile())
+                    .settingsGradleKtsFile(input.settingsGradleKtsFile())
                     ;
             }
         }
@@ -179,5 +237,16 @@ public class LanguageProject {
         ResourcePath baseDirectory();
 
         ResourcePath buildGradleKtsFile();
+
+        Optional<ResourcePath> settingsGradleKtsFile();
+
+
+        Parser.LanguageProjectOutput parser();
+
+        Optional<Styler.LanguageProjectOutput> styler();
+
+        Optional<StrategoRuntime.LanguageProjectOutput> strategoRuntime();
+
+        Optional<ConstraintAnalyzer.LanguageProjectOutput> constraintAnalyzer();
     }
 }

@@ -6,7 +6,8 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.BuilderBase;
 import mb.spoofax.compiler.util.ClassKind;
-import mb.spoofax.compiler.util.JavaProject;
+import mb.spoofax.compiler.util.GradleAddDependency;
+import mb.spoofax.compiler.util.GradleProject;
 import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import org.immutables.value.Value;
@@ -14,60 +15,82 @@ import org.immutables.value.Value;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
 @Value.Enclosing
 public class Parser {
-    private final ResourceService resourceService;
     private final Template tableTemplate;
     private final Template parserTemplate;
     private final Template factoryTemplate;
+    private final ResourceService resourceService;
+    private final Charset charset;
 
-    private Parser(ResourceService resourceService, Template tableTemplate, Template parserTemplate, Template factoryTemplate) {
-        this.resourceService = resourceService;
+
+    private Parser(Template tableTemplate, Template parserTemplate, Template factoryTemplate, ResourceService resourceService, Charset charset) {
         this.tableTemplate = tableTemplate;
         this.parserTemplate = parserTemplate;
         this.factoryTemplate = factoryTemplate;
+        this.resourceService = resourceService;
+        this.charset = charset;
     }
 
-    public static Parser fromClassLoaderResources(ResourceService resourceService) {
+    public static Parser fromClassLoaderResources(ResourceService resourceService, Charset charset) {
         final TemplateCompiler templateCompiler = new TemplateCompiler(Parser.class);
         return new Parser(
-            resourceService,
             templateCompiler.compile("parser/ParseTable.java.mustache"),
             templateCompiler.compile("parser/Parser.java.mustache"),
-            templateCompiler.compile("parser/ParserFactory.java.mustache")
+            templateCompiler.compile("parser/ParserFactory.java.mustache"),
+            resourceService,
+            charset
         );
     }
 
 
-    public Output compile(Input input, Charset charset) throws IOException {
-        final Output output = Output.builder().withDefaultsBasedOnInput(input).build();
+    public LanguageProjectOutput compileLanguageProject(Input input) throws IOException {
+        final LanguageProjectOutput output = LanguageProjectOutput.builder().fromInput(input).build();
         if(input.classKind().isManualOnly()) return output; // Nothing to generate: return.
 
-        final HierarchicalResource genSourcesJavaDirectory = resourceService.getHierarchicalResource(output.genSourcesJavaDirectory());
+        final HierarchicalResource genSourcesJavaDirectory = resourceService.getHierarchicalResource(output.genDirectory());
         genSourcesJavaDirectory.ensureDirectoryExists();
+
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("tableFile", tableTargetRelPath(input.shared().languageProject())); // TODO: move to input?
 
         final HierarchicalResource tableFile = resourceService.getHierarchicalResource(output.genTableFile());
         try(final ResourceWriter writer = new ResourceWriter(tableFile, charset)) {
-            tableTemplate.execute(input, writer);
+            tableTemplate.execute(input, map, writer);
             writer.flush();
         }
 
         final HierarchicalResource parserFile = resourceService.getHierarchicalResource(output.genParserFile());
         try(final ResourceWriter writer = new ResourceWriter(parserFile, charset)) {
-            parserTemplate.execute(input, writer);
+            parserTemplate.execute(input, map, writer);
             writer.flush();
         }
 
         final HierarchicalResource factoryFile = resourceService.getHierarchicalResource(output.genFactoryFile());
         try(final ResourceWriter writer = new ResourceWriter(factoryFile, charset)) {
-            factoryTemplate.execute(input, writer);
+            factoryTemplate.execute(input, map, writer);
             writer.flush();
         }
 
         return output;
+    }
+
+    private static String tableSourceRelPath() {
+        return "target/metaborg/sdf.tbl";
+    }
+
+    private static String tableTargetRelPath(GradleProject languageProject) {
+        return languageProject.packagePath() + "/" + tableSourceRelPath();
+    }
+
+
+    public AdapterProjectOutput compileAdapterProject(Input input, GradleProject adapterProject) throws IOException {
+        return AdapterProjectOutput.builder().build();
     }
 
 
@@ -89,13 +112,6 @@ public class Parser {
 
         Shared shared();
 
-        JavaProject languageProject();
-
-
-        @Value.Default default String tableResourcePath() {
-            return languageProject().packagePath() + "/target/metaborg/sdf.tbl";
-        }
-
 
         @Value.Default default ClassKind classKind() {
             return ClassKind.Generated;
@@ -109,7 +125,7 @@ public class Parser {
             return shared().classSuffix() + "ParseTable";
         }
 
-        @Value.Derived default String genTablePath() {
+        @Value.Derived default String genTableFileName() {
             return genTableClass() + ".java";
         }
 
@@ -117,7 +133,7 @@ public class Parser {
             return shared().classSuffix() + "Parser";
         }
 
-        @Value.Derived default String genParserPath() {
+        @Value.Derived default String genParserFileName() {
             return genParserClass() + ".java";
         }
 
@@ -125,7 +141,7 @@ public class Parser {
             return shared().classSuffix() + "ParserFactory";
         }
 
-        @Value.Derived default String genFactoryPath() {
+        @Value.Derived default String genFactoryFileName() {
             return genFactoryClass() + ".java";
         }
 
@@ -151,16 +167,18 @@ public class Parser {
     }
 
     @Value.Immutable
-    public interface Output extends Serializable {
-        class Builder extends ParserData.Output.Builder {
-            public Builder withDefaultsBasedOnInput(Input input) {
-                final ResourcePath genSourcesJavaDirectory = input.languageProject().genSourceSpoofaxJavaDirectory().appendRelativePath(input.languageProject().packagePath());
-                return this
-                    .genSourcesJavaDirectory(genSourcesJavaDirectory)
-                    .genTableFile(genSourcesJavaDirectory.appendRelativePath(input.genTablePath()))
-                    .genParserFile(genSourcesJavaDirectory.appendRelativePath(input.genParserPath()))
-                    .genFactoryFile(genSourcesJavaDirectory.appendRelativePath(input.genFactoryPath()))
-                    ;
+    public interface LanguageProjectOutput extends Serializable {
+        class Builder extends ParserData.LanguageProjectOutput.Builder {
+            public Builder fromInput(Input input) {
+                final GradleProject languageProject = input.shared().languageProject();
+                final ResourcePath genDirectory = languageProject.genSourceSpoofaxJavaDirectory().appendRelativePath(languageProject.packagePath());
+                genDirectory(genDirectory);
+                genTableFile(genDirectory.appendRelativePath(input.genTableFileName()));
+                genParserFile(genDirectory.appendRelativePath(input.genParserFileName()));
+                genFactoryFile(genDirectory.appendRelativePath(input.genFactoryFileName()));
+                addDependencies(GradleAddDependency.api(input.shared().jsglr1CommonDep()));
+                addCopyResources(tableSourceRelPath());
+                return this;
             }
         }
 
@@ -169,12 +187,28 @@ public class Parser {
         }
 
 
-        ResourcePath genSourcesJavaDirectory();
+        ResourcePath genDirectory();
 
         ResourcePath genTableFile();
 
         ResourcePath genParserFile();
 
         ResourcePath genFactoryFile();
+
+
+        List<GradleAddDependency> dependencies();
+
+        List<String> copyResources();
+    }
+
+    @Value.Immutable
+    public interface AdapterProjectOutput extends Serializable {
+        class Builder extends ParserData.AdapterProjectOutput.Builder {
+
+        }
+
+        static Builder builder() {
+            return new Builder();
+        }
     }
 }

@@ -6,8 +6,8 @@ import org.immutables.value.Value;
 import java.io.Serializable;
 
 @Value.Immutable
-public interface JavaProject extends Serializable {
-    class Builder extends ImmutableJavaProject.Builder {}
+public interface GradleProject extends Serializable {
+    class Builder extends ImmutableGradleProject.Builder {}
 
     static Builder builder() {
         return new Builder();

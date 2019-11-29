@@ -1,9 +1,15 @@
-plugins {
+{{#standaloneProject}}plugins {
+  id("org.metaborg.gradle.config.sub-project") version "{{shared.metaborgGradleConfigVersion}}"
+  id("org.metaborg.gradle.config.java-library") version "{{shared.metaborgGradleConfigVersion}}"
+  id("org.metaborg.gradle.config.junit-testing") version "{{shared.metaborgGradleConfigVersion}}"
+}
+{{/standaloneProject}}
+{{^standaloneProject}}plugins {
   id("org.metaborg.gradle.config.sub-project")
   id("org.metaborg.gradle.config.java-library")
   id("org.metaborg.gradle.config.junit-testing")
 }
-
+{{/standaloneProject}}
 sourceSets {
   main {
     java {
@@ -13,11 +19,11 @@ sourceSets {
 }
 
 dependencies {
-  api({{shared.logApiDep.toGradleKotlinDependencyCode}})
-  api({{shared.resourceDep.toGradleKotlinDependencyCode}})
-  api({{shared.spoofaxCompilerInterfacesDep.toGradleKotlinDependencyCode}})
-  api({{shared.commonDep.toGradleKotlinDependencyCode}})
-  compileOnly({{shared.checkerFrameworkQualifiersDep.toGradleKotlinDependencyCode}})
+  api({{shared.logApiDep.toKotlinCode}})
+  api({{shared.resourceDep.toKotlinCode}})
+  api({{shared.spoofaxCompilerInterfacesDep.toKotlinCode}})
+  api({{shared.commonDep.toKotlinCode}})
+  compileOnly({{shared.checkerFrameworkQualifiersDep.toKotlinCode}})
 
 {{#dependencyCodes}}  {{this}}
   {{/dependencyCodes}}
@@ -113,8 +119,8 @@ fun copySpoofaxLanguageResources(
 }
 copySpoofaxLanguageResources(
   {{languageDependencyCode}},
-  "{{project.packagePath}}",
-  {{copyStrategoClasses}},
-  {{copyStrategoJavaStrategyClasses}}{{#resourceCodes}},
-  {{this}}{{/resourceCodes}}
+  "{{shared.languageProject.packagePath}}",
+  {{#strategoRuntime}}{{copyClasses}}{{/strategoRuntime}}{{^strategoRuntime}}false{{/strategoRuntime}},
+  {{#strategoRuntime}}{{copyJavaStrategyClasses}}{{/strategoRuntime}}{{^strategoRuntime}}false{{/strategoRuntime}}{{#copyResourceCodes}},
+  {{this}}{{/copyResourceCodes}}
 )

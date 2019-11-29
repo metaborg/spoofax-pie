@@ -6,7 +6,8 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.BuilderBase;
 import mb.spoofax.compiler.util.ClassKind;
-import mb.spoofax.compiler.util.JavaProject;
+import mb.spoofax.compiler.util.GradleAddDependency;
+import mb.spoofax.compiler.util.GradleProject;
 import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import org.immutables.value.Value;
@@ -14,33 +15,38 @@ import org.immutables.value.Value;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
 @Value.Enclosing
 public class StrategoRuntime {
-    private final ResourceService resourceService;
     private final Template factoryTemplate;
+    private final ResourceService resourceService;
+    private final Charset charset;
 
-    private StrategoRuntime(ResourceService resourceService, Template factoryTemplate) {
+
+    private StrategoRuntime(Template factoryTemplate, ResourceService resourceService, Charset charset) {
         this.resourceService = resourceService;
         this.factoryTemplate = factoryTemplate;
+        this.charset = charset;
     }
 
-    public static StrategoRuntime fromClassLoaderResources(ResourceService resourceService) {
+    public static StrategoRuntime fromClassLoaderResources(ResourceService resourceService, Charset charset) {
         final TemplateCompiler templateCompiler = new TemplateCompiler(StrategoRuntime.class);
         return new StrategoRuntime(
+            templateCompiler.compile("stratego_runtime/StrategoRuntimeBuilderFactory.java.mustache"),
             resourceService,
-            templateCompiler.compile("stratego_runtime/StrategoRuntimeBuilderFactory.java.mustache")
+            charset
         );
     }
 
 
-    public Output compile(Input input, Charset charset) throws IOException {
-        final Output output = Output.builder().withDefaultsBasedOnInput(input).build();
+    public LanguageProjectOutput compileLanguageProject(Input input) throws IOException {
+        final LanguageProjectOutput output = LanguageProjectOutput.builder().fromInput(input).build();
         if(input.classKind().isManualOnly()) return output; // Nothing to generate: return.
 
-        final HierarchicalResource genSourcesJavaDirectory = resourceService.getHierarchicalResource(output.genSourcesJavaDirectory());
+        final HierarchicalResource genSourcesJavaDirectory = resourceService.getHierarchicalResource(output.genDirectory());
         genSourcesJavaDirectory.ensureDirectoryExists();
 
         final HierarchicalResource factoryFile = resourceService.getHierarchicalResource(output.genFactoryFile());
@@ -50,6 +56,10 @@ public class StrategoRuntime {
         }
 
         return output;
+    }
+
+    public AdapterProjectOutput compileAdapterProject(Input input, GradleProject languageProject) throws IOException {
+        return AdapterProjectOutput.builder().build();
     }
 
 
@@ -69,7 +79,23 @@ public class StrategoRuntime {
 
         Shared shared();
 
-        JavaProject languageProject();
+
+        List<String> interopRegisterersByReflection();
+
+        boolean addNaBL2Primitives();
+
+        boolean addStatixPrimitives();
+
+
+        @Value.Default default boolean copyCTree() {
+            return false;
+        }
+
+        @Value.Default default boolean copyClasses() {
+            return true;
+        }
+
+        boolean copyJavaStrategyClasses();
 
 
         @Value.Default default ClassKind classKind() {
@@ -78,12 +104,11 @@ public class StrategoRuntime {
 
         Optional<String> manualStrategoRuntimeBuilderFactoryClass();
 
-
         @Value.Default default String genFactoryClass() {
             return shared().classSuffix() + "StrategoRuntimeBuilderFactory";
         }
 
-        @Value.Derived default String genFactoryPath() {
+        @Value.Derived default String genFactoryFileName() {
             return genFactoryClass() + ".java";
         }
 
@@ -104,14 +129,30 @@ public class StrategoRuntime {
     }
 
     @Value.Immutable
-    public interface Output extends Serializable {
-        class Builder extends StrategoRuntimeData.Output.Builder {
-            public Builder withDefaultsBasedOnInput(Input input) {
-                final ResourcePath genSourcesJavaDirectory = input.languageProject().genSourceSpoofaxJavaDirectory().appendRelativePath(input.languageProject().packagePath());
-                return this
-                    .genSourcesJavaDirectory(genSourcesJavaDirectory)
-                    .genFactoryFile(genSourcesJavaDirectory.appendRelativePath(input.genFactoryPath()))
-                    ;
+    public interface LanguageProjectOutput extends Serializable {
+        class Builder extends StrategoRuntimeData.LanguageProjectOutput.Builder {
+            public Builder fromInput(Input input) {
+                final GradleProject languageProject = input.shared().languageProject();
+                final ResourcePath genDirectory = languageProject.genSourceSpoofaxJavaDirectory().appendRelativePath(languageProject.packagePath());
+                genDirectory(genDirectory);
+                genFactoryFile(genDirectory.appendRelativePath(input.genFactoryFileName()));
+                addDependencies(
+                    GradleAddDependency.api(input.shared().strategoCommonDep()),
+                    GradleAddDependency.api(input.shared().orgStrategoXTStrjDep()),
+                    GradleAddDependency.implementation(input.shared().strategoXTMinJarDep())
+                );
+                // NaBL2 (required by Statix as well)
+                if(input.addNaBL2Primitives() || input.addStatixPrimitives()) {
+                    addDependencies(GradleAddDependency.implementation(input.shared().nabl2CommonDep()));
+                }
+                if(input.addStatixPrimitives()) {
+                    addDependencies(GradleAddDependency.implementation(input.shared().statixCommonDep()));
+                    addCopyResources("src-gen/statix/statics.spec.aterm");
+                }
+                if(input.copyCTree()) {
+                    addCopyResources("target/metaborg/stratego.ctree");
+                }
+                return this;
             }
         }
 
@@ -120,8 +161,24 @@ public class StrategoRuntime {
         }
 
 
-        ResourcePath genSourcesJavaDirectory();
+        ResourcePath genDirectory();
 
         ResourcePath genFactoryFile();
+
+
+        List<GradleAddDependency> dependencies();
+
+        List<String> copyResources();
+    }
+
+    @Value.Immutable
+    public interface AdapterProjectOutput extends Serializable {
+        class Builder extends StrategoRuntimeData.AdapterProjectOutput.Builder {
+
+        }
+
+        static Builder builder() {
+            return new Builder();
+        }
     }
 }

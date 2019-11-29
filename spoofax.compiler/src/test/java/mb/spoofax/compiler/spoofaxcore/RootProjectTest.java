@@ -18,7 +18,7 @@ import java.nio.file.FileSystem;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RootProjectTest {
-    @Test void testCompiler() throws IOException {
+    @Test void testCompilerDefault() throws IOException {
         final ResourceService resourceService = new DefaultResourceService(new FSResourceRegistry());
         final FileSystem fileSystem = Jimfs.newFileSystem(Configuration.unix());
         final FSPath baseDirectory = new FSPath(fileSystem.getPath("repo"));

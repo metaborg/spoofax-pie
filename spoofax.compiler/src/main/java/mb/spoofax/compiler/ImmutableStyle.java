@@ -11,6 +11,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS) // Class retention for incremental compilation.
 @Value.Style(
     typeImmutableEnclosing = "*Data",
-    deepImmutablesDetection = true,
-    overshadowImplementation = true
+    deepImmutablesDetection = true
 ) @interface ImmutableStyle {}

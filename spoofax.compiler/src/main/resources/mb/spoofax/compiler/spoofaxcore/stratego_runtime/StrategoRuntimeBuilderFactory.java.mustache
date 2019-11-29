@@ -1,4 +1,4 @@
-package {{languageProject.packageId}};
+package {{shared.languageProject.packageId}};
 
 {{#addNaBL2Primitives}}import mb.nabl2.common.NaBL2PrimitiveLibrary;
 {{/addNaBL2Primitives}}{{#addStatixPrimitives}}import mb.statix.common.StatixPrimitiveLibrary;
@@ -8,7 +8,7 @@ import mb.stratego.common.StrategoRuntimeBuilder;
 public class {{genFactoryClass}} implements StrategoRuntimeBuilderFactory {
     @Override public StrategoRuntimeBuilder create() {
         final StrategoRuntimeBuilder builder = new StrategoRuntimeBuilder();
-{{#interopRegisterersByReflection}}        builder.addInteropRegistererByReflection({{this}});
+{{#interopRegisterersByReflection}}        builder.addInteropRegistererByReflection("{{this}}");
 {{/interopRegisterersByReflection}}        builder.withJarParentClassLoader({{genFactoryClass}}.class.getClassLoader());
 {{#addNaBL2Primitives}}        builder.addLibrary(new NaBL2PrimitiveLibrary());
 {{/addNaBL2Primitives}}{{#addStatixPrimitives}}        builder.addLibrary(new StatixPrimitiveLibrary());

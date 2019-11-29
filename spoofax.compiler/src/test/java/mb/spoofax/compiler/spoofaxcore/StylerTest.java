@@ -7,10 +7,9 @@ import mb.resource.ResourceService;
 import mb.resource.fs.FSPath;
 import mb.resource.fs.FSResourceRegistry;
 import mb.resource.hierarchical.HierarchicalResource;
-import mb.spoofax.compiler.spoofaxcore.util.TigerInputs;
 import mb.spoofax.compiler.spoofaxcore.util.FileAssertions;
 import mb.spoofax.compiler.spoofaxcore.util.JavaParser;
-import mb.spoofax.compiler.util.JavaProject;
+import mb.spoofax.compiler.spoofaxcore.util.TigerInputs;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -18,7 +17,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class StylerTest {
     @Test void testCompilerDefault() throws IOException {
@@ -28,15 +27,14 @@ class StylerTest {
         final FSPath baseDirectory = new FSPath(fileSystem.getPath("repo"));
 
         final Shared shared = TigerInputs.shared(baseDirectory);
-        final JavaProject languageProject = TigerInputs.languageProject(shared).project();
-        final Styler.Input input = TigerInputs.styler(shared, languageProject);
+        final Styler.Input input = TigerInputs.styler(shared);
 
-        final Styler compiler = Styler.fromClassLoaderResources(resourceService);
         final Charset charset = StandardCharsets.UTF_8;
-        final Styler.Output output = compiler.compile(input, charset);
+        final Styler compiler = Styler.fromClassLoaderResources(resourceService, charset);
+        final Styler.LanguageProjectOutput output = compiler.compileLanguageProject(input);
 
-        final HierarchicalResource genSourcesJavaDirectory = resourceService.getHierarchicalResource(output.genSourcesJavaDirectory());
-        assertTrue(genSourcesJavaDirectory.exists());
+        final HierarchicalResource genDirectory = resourceService.getHierarchicalResource(output.genDirectory());
+        assertTrue(genDirectory.exists());
 
         final FileAssertions genStylingRulesFile = new FileAssertions(resourceService.getHierarchicalResource(output.genRulesFile()));
         genStylingRulesFile.assertName("TigerStylingRules.java");

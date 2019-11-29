@@ -7,10 +7,9 @@ import mb.resource.ResourceService;
 import mb.resource.fs.FSPath;
 import mb.resource.fs.FSResourceRegistry;
 import mb.resource.hierarchical.HierarchicalResource;
-import mb.spoofax.compiler.spoofaxcore.util.TigerInputs;
 import mb.spoofax.compiler.spoofaxcore.util.FileAssertions;
 import mb.spoofax.compiler.spoofaxcore.util.JavaParser;
-import mb.spoofax.compiler.util.JavaProject;
+import mb.spoofax.compiler.spoofaxcore.util.TigerInputs;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -28,15 +27,14 @@ class ConstraintAnalyzerTest {
         final FSPath baseDirectory = new FSPath(fileSystem.getPath("repo"));
 
         final Shared shared = TigerInputs.shared(baseDirectory);
-        final JavaProject languageProject = TigerInputs.languageProject(shared).project();
-        final ConstraintAnalyzer.Input input = TigerInputs.constraintAnalyzer(shared, languageProject);
+        final ConstraintAnalyzer.Input input = TigerInputs.constraintAnalyzer(shared);
 
-        final ConstraintAnalyzer compiler = ConstraintAnalyzer.fromClassLoaderResources(resourceService);
         final Charset charset = StandardCharsets.UTF_8;
-        final ConstraintAnalyzer.Output output = compiler.compile(input, charset);
+        final ConstraintAnalyzer compiler = ConstraintAnalyzer.fromClassLoaderResources(resourceService, charset);
+        final ConstraintAnalyzer.LanguageProjectOutput output = compiler.compileLanguageProject(input);
 
-        final HierarchicalResource genSourcesJavaDirectory = resourceService.getHierarchicalResource(output.genSourcesJavaDirectory());
-        assertTrue(genSourcesJavaDirectory.exists());
+        final HierarchicalResource genDirectory = resourceService.getHierarchicalResource(output.genDirectory());
+        assertTrue(genDirectory.exists());
 
         final FileAssertions genConstraintAnalyzerFile = new FileAssertions(resourceService.getHierarchicalResource(output.genConstraintAnalyzerFile()));
         genConstraintAnalyzerFile.assertName("TigerConstraintAnalyzer.java");

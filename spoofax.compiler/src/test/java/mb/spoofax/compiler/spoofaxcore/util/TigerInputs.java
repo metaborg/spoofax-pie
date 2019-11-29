@@ -10,10 +10,11 @@ import mb.spoofax.compiler.spoofaxcore.RootProject;
 import mb.spoofax.compiler.spoofaxcore.Shared;
 import mb.spoofax.compiler.spoofaxcore.StrategoRuntime;
 import mb.spoofax.compiler.spoofaxcore.Styler;
-import mb.spoofax.compiler.util.JavaDependency;
-import mb.spoofax.compiler.util.JavaProject;
+import mb.spoofax.compiler.util.GradleDependency;
 
 public class TigerInputs {
+    /// Shared input
+
     public static Shared.Builder sharedBuilder(ResourcePath baseDirectory) {
         return Shared.builder()
             .name("Tiger")
@@ -32,8 +33,8 @@ public class TigerInputs {
             ;
     }
 
-    private static JavaDependency fromSystemProperty(String key) {
-        return JavaDependency.files(Preconditions.checkNotNull(System.getProperty(key)));
+    private static GradleDependency fromSystemProperty(String key) {
+        return GradleDependency.files(Preconditions.checkNotNull(System.getProperty(key)));
     }
 
     public static Shared shared(ResourcePath baseDirectory) {
@@ -41,18 +42,72 @@ public class TigerInputs {
     }
 
 
+    /// Parser compiler input
+
+    public static Parser.Input.Builder parserBuilder(Shared shared) {
+        return Parser.Input.builder()
+            .shared(shared)
+            ;
+    }
+
+    public static Parser.Input parser(Shared shared) {
+        return parserBuilder(shared).build();
+    }
+
+
+    /// Styler compiler input
+
+    public static Styler.Input.Builder stylerBuilder(Shared shared) {
+        return Styler.Input.builder()
+            .shared(shared)
+            ;
+    }
+
+    public static Styler.Input styler(Shared shared) {
+        return stylerBuilder(shared).build();
+    }
+
+
+    /// Stratego runtime builder compiler input
+
+    public static StrategoRuntime.Input.Builder strategoRuntimeBuilder(Shared shared) {
+        return StrategoRuntime.Input.builder()
+            .shared(shared)
+            .addInteropRegisterersByReflection("org.metaborg.lang.tiger.trans.InteropRegisterer", "org.metaborg.lang.tiger.strategies.InteropRegisterer")
+            .addNaBL2Primitives(true)
+            .addStatixPrimitives(false)
+            .copyJavaStrategyClasses(true)
+            ;
+    }
+
+    public static StrategoRuntime.Input strategoRuntime(Shared shared) {
+        return strategoRuntimeBuilder(shared).build();
+    }
+
+
+    /// Constraint analyzer compiler input
+
+    public static ConstraintAnalyzer.Input.Builder constraintAnalyzerBuilder(Shared shared) {
+        return ConstraintAnalyzer.Input.builder()
+            .shared(shared)
+            ;
+    }
+
+    public static ConstraintAnalyzer.Input constraintAnalyzer(Shared shared) {
+        return constraintAnalyzerBuilder(shared).build();
+    }
+
+
+    /// Language project compiler input
+
     public static LanguageProject.Input.Builder languageProjectBuilder(Shared shared) {
         return LanguageProject.Input.builder()
             .shared(shared)
-            .languageSpecificationDependency(JavaDependency.files(Preconditions.checkNotNull(System.getProperty("org.metaborg.lang.tiger:classpath"))))
-            .enableStyler(true)
-            .enableStrategoTransformations(true)
-            .copyStrategoCTree(false)
-            .copyStrategoClasses(true)
-            .copyStrategoJavaStrategyClasses(true)
-            .enableConstraintAnalysis(true)
-            .enableNaBL2ConstraintGeneration(true)
-            .enableStatixConstraintGeneration(false)
+            .parser(parser(shared))
+            .styler(styler(shared))
+            .strategoRuntime(strategoRuntime(shared))
+            .constraintAnalyzer(constraintAnalyzer(shared))
+            .languageSpecificationDependency(GradleDependency.files(Preconditions.checkNotNull(System.getProperty("org.metaborg.lang.tiger:classpath"))))
             ;
     }
 
@@ -60,6 +115,8 @@ public class TigerInputs {
         return languageProjectBuilder(shared).build();
     }
 
+
+    /// Root project compiler input
 
     public static RootProject.Input.Builder rootProjectBuilder(Shared shared, String... includedProjects) {
         return RootProject.Input.builder()
@@ -70,53 +127,5 @@ public class TigerInputs {
 
     public static RootProject.Input rootProject(Shared shared, String... includedProjects) {
         return rootProjectBuilder(shared, includedProjects).build();
-    }
-
-
-    public static Parser.Input.Builder parserBuilder(Shared shared, JavaProject languageProject) {
-        return Parser.Input.builder()
-            .shared(shared)
-            .languageProject(languageProject)
-            ;
-    }
-
-    public static Parser.Input parser(Shared shared, JavaProject languageProject) {
-        return parserBuilder(shared, languageProject).build();
-    }
-
-
-    public static Styler.Input.Builder stylerBuilder(Shared shared, JavaProject languageProject) {
-        return Styler.Input.builder()
-            .shared(shared)
-            .languageProject(languageProject)
-            ;
-    }
-
-    public static Styler.Input styler(Shared shared, JavaProject languageProject) {
-        return stylerBuilder(shared, languageProject).build();
-    }
-
-
-    public static StrategoRuntime.Input.Builder strategoRuntimeBuilder(Shared shared, JavaProject languageProject) {
-        return StrategoRuntime.Input.builder()
-            .shared(shared)
-            .languageProject(languageProject)
-            ;
-    }
-
-    public static StrategoRuntime.Input strategoRuntime(Shared shared, JavaProject languageProject) {
-        return strategoRuntimeBuilder(shared, languageProject).build();
-    }
-
-
-    public static ConstraintAnalyzer.Input.Builder constraintAnalyzerBuilder(Shared shared, JavaProject languageProject) {
-        return ConstraintAnalyzer.Input.builder()
-            .shared(shared)
-            .languageProject(languageProject)
-            ;
-    }
-
-    public static ConstraintAnalyzer.Input constraintAnalyzer(Shared shared, JavaProject languageProject) {
-        return constraintAnalyzerBuilder(shared, languageProject).build();
     }
 }

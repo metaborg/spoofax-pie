@@ -1,4 +1,4 @@
-package {{languageProject.packageId}};
+package {{shared.languageProject.packageId}};
 
 import mb.esv.common.ESVStylingRules;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -15,7 +15,7 @@ public class {{genRulesClass}} implements Serializable {
     }
 
     public static {{genRulesClass}} fromClassLoaderResources() {
-        final String resource = "{{packedESVResourcePath}}";
+        final String resource = "{{packedESVFile}}";
         try(final @Nullable InputStream inputStream = {{genRulesClass}}.class.getClassLoader().getResourceAsStream(resource)) {
             if(inputStream == null) {
                 throw new RuntimeException("Cannot create styling rules; cannot find resource '" + resource + "' in classloader resources");
