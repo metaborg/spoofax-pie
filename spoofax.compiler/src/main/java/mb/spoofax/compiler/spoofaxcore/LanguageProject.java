@@ -4,7 +4,7 @@ import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.GradleAddDependency;
+import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
 import mb.spoofax.compiler.util.GradleProject;
 import mb.spoofax.compiler.util.ResourceWriter;
@@ -21,8 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static mb.spoofax.compiler.util.StringUtil.doubleQuote;
 
 @Value.Enclosing
 public class LanguageProject {
@@ -77,14 +75,24 @@ public class LanguageProject {
 
 
     public Output compile(Input input) throws IOException {
-        final GradleProject languageProject = input.shared().languageProject();
+        final Shared shared = input.shared();
+        final GradleProject languageProject = shared.languageProject();
 
         final HierarchicalResource baseDirectory = resourceService.getHierarchicalResource(languageProject.baseDirectory());
         baseDirectory.ensureDirectoryExists();
 
+        final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
+        dependencies.add(GradleConfiguredDependency.api(shared.logApiDep()));
+        dependencies.add(GradleConfiguredDependency.api(shared.resourceDep()));
+        dependencies.add(GradleConfiguredDependency.api(shared.spoofaxCompilerInterfacesDep()));
+        dependencies.add(GradleConfiguredDependency.api(shared.commonDep()));
+        dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
+
+        final ArrayList<String> copyResources = new ArrayList<>(input.additionalCopyResources());
+
         final Parser.LanguageProjectOutput parserOutput = parserCompiler.compileLanguageProject(input.parser());
-        final ArrayList<GradleAddDependency> dependencies = new ArrayList<>(parserOutput.dependencies());
-        final ArrayList<String> copyResources = new ArrayList<>(parserOutput.copyResources());
+        dependencies.addAll(parserOutput.dependencies());
+        copyResources.addAll(parserOutput.copyResources());
 
         final Optional<Styler.LanguageProjectOutput> stylerOutput;
         final Optional<StrategoRuntime.LanguageProjectOutput> strategoRuntimeOutput;
@@ -132,19 +140,13 @@ public class LanguageProject {
         final HierarchicalResource buildGradleKtsFile = resourceService.getHierarchicalResource(input.buildGradleKtsFile());
         try(final ResourceWriter writer = new ResourceWriter(buildGradleKtsFile, charset)) {
             final HashMap<String, Object> map = new HashMap<>();
-
             final String languageDependencyCode = input.languageSpecificationDependency().caseOf()
                 .project((projectPath) -> "createProjectDependency(\"" + projectPath + "\")")
                 .module((coordinate) -> "createModuleDependency(\"" + coordinate.toGradleNotation() + "\")")
                 .files((filePaths) -> "createFilesDependency(" + filePaths.stream().map((s) -> "\"" + s + "\"").collect(Collectors.joining(", ")) + ")");
             map.put("languageDependencyCode", languageDependencyCode);
-
-            final ArrayList<String> dependencyCodes = dependencies.stream().map(GradleAddDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new));
-            final ArrayList<String> copyResourceCodes = copyResources.stream().map(StringUtil::doubleQuote).collect(Collectors.toCollection(ArrayList::new));
-            input.additionalCopyResources().forEach((resource) -> copyResourceCodes.add(doubleQuote(resource)));
-            map.put("dependencyCodes", dependencyCodes);
-            map.put("copyResourceCodes", copyResourceCodes);
-
+            map.put("dependencyCodes", dependencies.stream().map(GradleConfiguredDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
+            map.put("copyResourceCodes", copyResources.stream().map(StringUtil::doubleQuote).collect(Collectors.toCollection(ArrayList::new)));
             buildGradleTemplate.execute(input, map, writer);
             writer.flush();
         }
@@ -164,7 +166,7 @@ public class LanguageProject {
         }
 
         return Output.builder()
-            .from(input)
+            .fromInput(input)
             .parser(parserOutput)
             .styler(stylerOutput)
             .strategoRuntime(strategoRuntimeOutput)
@@ -212,20 +214,19 @@ public class LanguageProject {
 
         GradleDependency languageSpecificationDependency();
 
+        List<GradleConfiguredDependency> additionalDependencies();
+
         List<String> additionalCopyResources();
     }
 
     @Value.Immutable
     public interface Output extends Serializable {
         class Builder extends LanguageProjectData.Output.Builder {
-            public Builder from(Input input) {
-                final GradleProject languageProject = input.shared().languageProject();
-                final ResourcePath baseDirectory = languageProject.baseDirectory();
-                return this
-                    .baseDirectory(languageProject.baseDirectory())
-                    .buildGradleKtsFile(input.buildGradleKtsFile())
-                    .settingsGradleKtsFile(input.settingsGradleKtsFile())
-                    ;
+            public Builder fromInput(Input input) {
+                baseDirectory(input.shared().languageProject().baseDirectory());
+                buildGradleKtsFile(input.buildGradleKtsFile());
+                settingsGradleKtsFile(input.settingsGradleKtsFile());
+                return this;
             }
         }
 

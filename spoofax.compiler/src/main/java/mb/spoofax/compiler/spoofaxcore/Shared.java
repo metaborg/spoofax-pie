@@ -61,7 +61,7 @@ public interface Shared extends Serializable {
         return GradleProject.builder()
             .coordinate(defaultGroupId(), artifactId, defaultVersion())
             .packageId(basePackageId())
-            .baseDirectory(baseDirectory().appendSegment(artifactId))
+            .baseDirectory(baseDirectory())
             .build();
     }
 

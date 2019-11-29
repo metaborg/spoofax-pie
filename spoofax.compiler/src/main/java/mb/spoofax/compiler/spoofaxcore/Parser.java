@@ -6,7 +6,7 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.BuilderBase;
 import mb.spoofax.compiler.util.ClassKind;
-import mb.spoofax.compiler.util.GradleAddDependency;
+import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleProject;
 import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.TemplateCompiler;
@@ -172,7 +172,7 @@ public class Parser {
                 genTableFile(genDirectory.appendRelativePath(input.genTableFileName()));
                 genParserFile(genDirectory.appendRelativePath(input.genParserFileName()));
                 genFactoryFile(genDirectory.appendRelativePath(input.genFactoryFileName()));
-                addDependencies(GradleAddDependency.api(input.shared().jsglr1CommonDep()));
+                addDependencies(GradleConfiguredDependency.api(input.shared().jsglr1CommonDep()));
                 addCopyResources(input.tableSourceRelPath());
                 return this;
             }
@@ -192,7 +192,7 @@ public class Parser {
         ResourcePath genFactoryFile();
 
 
-        List<GradleAddDependency> dependencies();
+        List<GradleConfiguredDependency> dependencies();
 
         List<String> copyResources();
     }

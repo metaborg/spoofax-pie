@@ -19,12 +19,6 @@ sourceSets {
 }
 
 dependencies {
-  api({{shared.logApiDep.toKotlinCode}})
-  api({{shared.resourceDep.toKotlinCode}})
-  api({{shared.spoofaxCompilerInterfacesDep.toKotlinCode}})
-  api({{shared.commonDep.toKotlinCode}})
-  compileOnly({{shared.checkerFrameworkQualifiersDep.toKotlinCode}})
-
 {{#dependencyCodes}}  {{this}}
   {{/dependencyCodes}}
 }

@@ -6,7 +6,7 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.BuilderBase;
 import mb.spoofax.compiler.util.ClassKind;
-import mb.spoofax.compiler.util.GradleAddDependency;
+import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleProject;
 import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.TemplateCompiler;
@@ -153,7 +153,7 @@ public class ConstraintAnalyzer {
                 genDirectory(genDirectory);
                 genConstraintAnalyzerFile(genDirectory.appendRelativePath(input.genConstraintAnalyzerPath()));
                 genFactoryFile(genDirectory.appendRelativePath(input.genFactoryPath()));
-                addDependencies(GradleAddDependency.api(input.shared().constraintCommonDep()));
+                addDependencies(GradleConfiguredDependency.api(input.shared().constraintCommonDep()));
                 return this;
             }
         }
@@ -170,7 +170,7 @@ public class ConstraintAnalyzer {
         ResourcePath genFactoryFile();
 
 
-        List<GradleAddDependency> dependencies();
+        List<GradleConfiguredDependency> dependencies();
 
         List<String> copyResources();
     }

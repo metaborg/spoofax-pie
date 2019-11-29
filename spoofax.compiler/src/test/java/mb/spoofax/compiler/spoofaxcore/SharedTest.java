@@ -22,23 +22,22 @@ class SharedTest {
         final Shared shared1 = TigerInputs.shared(baseDirectory);
         assertEquals("Tiger", shared1.classSuffix());
         final GradleProject languageProject1 = shared1.languageProject();
-        assertEquals(shared1.defaultGroupId(), languageProject1.coordinate().groupId());
-        assertEquals(shared1.defaultArtifactId() + ".lang", languageProject1.coordinate().artifactId());
-        assertEquals(shared1.defaultVersion(), languageProject1.coordinate().version());
-        assertEquals(shared1.basePackageId() + ".lang", languageProject1.packageId());
+        final GradleProject adapterProject1 = shared1.adapterProject();
         shared1.savePersistentProperties(persistentProperties);
 
+        // Create shared configuration with different language name.
         final Shared shared2 = TigerInputs.sharedBuilder(baseDirectory)
             .name("Tigerr") // Change language name.
             .withPersistentProperties(persistentProperties)
             .build();
+
         // Should not affect class suffix.
-        assertEquals("Tiger", shared2.classSuffix());
-        final GradleProject languageProject2 = shared2.languageProject();
+        assertEquals(shared1.classSuffix(), shared2.classSuffix());
+
         // Should not affect language project.
-        assertEquals(shared2.defaultGroupId(), languageProject2.coordinate().groupId());
-        assertEquals(shared2.defaultArtifactId() + ".lang", languageProject2.coordinate().artifactId());
-        assertEquals(shared2.defaultVersion(), languageProject2.coordinate().version());
-        assertEquals(shared2.basePackageId() + ".lang", languageProject2.packageId());
+        assertEquals(languageProject1.coordinate(), shared2.languageProject().coordinate());
+
+        // Should not affect adapter project.
+        assertEquals(adapterProject1.coordinate(), shared2.adapterProject().coordinate());
     }
 }

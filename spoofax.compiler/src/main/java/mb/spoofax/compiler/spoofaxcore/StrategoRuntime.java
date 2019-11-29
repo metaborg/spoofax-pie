@@ -6,7 +6,7 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.BuilderBase;
 import mb.spoofax.compiler.util.ClassKind;
-import mb.spoofax.compiler.util.GradleAddDependency;
+import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleProject;
 import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.TemplateCompiler;
@@ -137,16 +137,16 @@ public class StrategoRuntime {
                 genDirectory(genDirectory);
                 genFactoryFile(genDirectory.appendRelativePath(input.genFactoryFileName()));
                 addDependencies(
-                    GradleAddDependency.api(input.shared().strategoCommonDep()),
-                    GradleAddDependency.api(input.shared().orgStrategoXTStrjDep()),
-                    GradleAddDependency.implementation(input.shared().strategoXTMinJarDep())
+                    GradleConfiguredDependency.api(input.shared().strategoCommonDep()),
+                    GradleConfiguredDependency.api(input.shared().orgStrategoXTStrjDep()),
+                    GradleConfiguredDependency.implementation(input.shared().strategoXTMinJarDep())
                 );
                 // NaBL2 (required by Statix as well)
                 if(input.addNaBL2Primitives() || input.addStatixPrimitives()) {
-                    addDependencies(GradleAddDependency.implementation(input.shared().nabl2CommonDep()));
+                    addDependencies(GradleConfiguredDependency.implementation(input.shared().nabl2CommonDep()));
                 }
                 if(input.addStatixPrimitives()) {
-                    addDependencies(GradleAddDependency.implementation(input.shared().statixCommonDep()));
+                    addDependencies(GradleConfiguredDependency.implementation(input.shared().statixCommonDep()));
                     addCopyResources("src-gen/statix/statics.spec.aterm");
                 }
                 if(input.copyCTree()) {
@@ -166,7 +166,7 @@ public class StrategoRuntime {
         ResourcePath genFactoryFile();
 
 
-        List<GradleAddDependency> dependencies();
+        List<GradleConfiguredDependency> dependencies();
 
         List<String> copyResources();
     }

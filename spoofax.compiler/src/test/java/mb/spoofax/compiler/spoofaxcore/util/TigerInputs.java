@@ -3,6 +3,7 @@ package mb.spoofax.compiler.spoofaxcore.util;
 import mb.common.util.ListView;
 import mb.common.util.Preconditions;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.spoofaxcore.AdapterProject;
 import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzer;
 import mb.spoofax.compiler.spoofaxcore.LanguageProject;
 import mb.spoofax.compiler.spoofaxcore.Parser;
@@ -116,16 +117,28 @@ public class TigerInputs {
     }
 
 
-    /// Root project compiler input
+    /// Adapter project compiler input
 
-    public static RootProject.Input.Builder rootProjectBuilder(Shared shared, String... includedProjects) {
-        return RootProject.Input.builder()
+    public static AdapterProject.Input.Builder adapterProjectBuilder(Shared shared) {
+        return AdapterProject.Input.builder()
             .shared(shared)
-            .includedProjects(ListView.of(includedProjects))
             ;
     }
 
-    public static RootProject.Input rootProject(Shared shared, String... includedProjects) {
-        return rootProjectBuilder(shared, includedProjects).build();
+    public static AdapterProject.Input adapterProject(Shared shared) {
+        return adapterProjectBuilder(shared).build();
+    }
+
+
+    /// Root project compiler input
+
+    public static RootProject.Input.Builder rootProjectBuilder(Shared shared) {
+        return RootProject.Input.builder()
+            .shared(shared)
+            ;
+    }
+
+    public static RootProject.Input rootProject(Shared shared) {
+        return rootProjectBuilder(shared).build();
     }
 }
