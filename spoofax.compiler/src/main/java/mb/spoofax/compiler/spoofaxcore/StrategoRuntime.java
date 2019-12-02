@@ -2,7 +2,6 @@ package mb.spoofax.compiler.spoofaxcore;
 
 import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
-import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.BuilderBase;
 import mb.spoofax.compiler.util.ClassKind;
@@ -46,11 +45,9 @@ public class StrategoRuntime {
         final LanguageProjectOutput output = LanguageProjectOutput.builder().fromInput(input).build();
         if(input.classKind().isManualOnly()) return output; // Nothing to generate: return.
 
-        final HierarchicalResource genSourcesJavaDirectory = resourceService.getHierarchicalResource(output.genDirectory());
-        genSourcesJavaDirectory.ensureDirectoryExists();
+        resourceService.getHierarchicalResource(input.genDirectory()).ensureDirectoryExists();
 
-        final HierarchicalResource factoryFile = resourceService.getHierarchicalResource(output.genFactoryFile());
-        try(final ResourceWriter writer = new ResourceWriter(factoryFile, charset)) {
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genFactoryFile()), charset)) {
             factoryTemplate.execute(input, writer);
             writer.flush();
         }
@@ -58,7 +55,7 @@ public class StrategoRuntime {
         return output;
     }
 
-    public AdapterProjectOutput compileAdapterProject(Input input, GradleProject languageProject) throws IOException {
+    public AdapterProjectOutput compileAdapterProject(Input input) throws IOException {
         return AdapterProjectOutput.builder().build();
     }
 
@@ -102,7 +99,11 @@ public class StrategoRuntime {
             return ClassKind.Generated;
         }
 
-        Optional<String> manualFactoryClass();
+        @Value.Derived default ResourcePath genDirectory() {
+            final GradleProject languageProject = shared().languageProject();
+            return languageProject.genSourceSpoofaxJavaDirectory().appendRelativePath(languageProject.packagePath());
+        }
+
 
         @Value.Default default String genFactoryClass() {
             return shared().classSuffix() + "StrategoRuntimeBuilderFactory";
@@ -111,6 +112,12 @@ public class StrategoRuntime {
         @Value.Derived default String genFactoryFileName() {
             return genFactoryClass() + ".java";
         }
+
+        @Value.Derived default ResourcePath genFactoryFile() {
+            return genDirectory().appendSegment(genFactoryFileName());
+        }
+
+        Optional<String> manualFactoryClass();
 
         @Value.Derived default String factoryClass() {
             if(classKind().isManual() && manualFactoryClass().isPresent()) {
@@ -139,10 +146,6 @@ public class StrategoRuntime {
     public interface LanguageProjectOutput extends Serializable {
         class Builder extends StrategoRuntimeData.LanguageProjectOutput.Builder {
             public Builder fromInput(Input input) {
-                final GradleProject languageProject = input.shared().languageProject();
-                final ResourcePath genDirectory = languageProject.genSourceSpoofaxJavaDirectory().appendRelativePath(languageProject.packagePath());
-                genDirectory(genDirectory);
-                genFactoryFile(genDirectory.appendRelativePath(input.genFactoryFileName()));
                 addDependencies(
                     GradleConfiguredDependency.api(input.shared().strategoCommonDep()),
                     GradleConfiguredDependency.api(input.shared().orgStrategoXTStrjDep()),
@@ -166,11 +169,6 @@ public class StrategoRuntime {
         static Builder builder() {
             return new Builder();
         }
-
-
-        ResourcePath genDirectory();
-
-        ResourcePath genFactoryFile();
 
 
         List<GradleConfiguredDependency> dependencies();

@@ -33,13 +33,13 @@ class LanguageProjectTest {
         final LanguageProject compiler = LanguageProject.fromClassLoaderResources(resourceService, charset, parserCompiler, stylerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler);
         final LanguageProject.Output output = compiler.compile(input);
 
-        assertTrue(output.settingsGradleKtsFile().isPresent());
-        final FileAssertions settingsGradleKtsFile = new FileAssertions(resourceService.getHierarchicalResource(output.settingsGradleKtsFile().get()));
+        assertTrue(input.settingsGradleKtsFile().isPresent());
+        final FileAssertions settingsGradleKtsFile = new FileAssertions(resourceService.getHierarchicalResource(input.settingsGradleKtsFile().get()));
         settingsGradleKtsFile.assertExists();
         settingsGradleKtsFile.assertName("settings.gradle.kts");
         settingsGradleKtsFile.assertContains("gradlePluginPortal()");
 
-        final FileAssertions buildGradleKtsFile = new FileAssertions(resourceService.getHierarchicalResource(output.buildGradleKtsFile()));
+        final FileAssertions buildGradleKtsFile = new FileAssertions(resourceService.getHierarchicalResource(input.buildGradleKtsFile()));
         buildGradleKtsFile.assertExists();
         buildGradleKtsFile.assertContains("mb/tiger");
 

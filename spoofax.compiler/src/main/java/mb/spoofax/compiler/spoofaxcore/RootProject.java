@@ -2,7 +2,6 @@ package mb.spoofax.compiler.spoofaxcore;
 
 import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
-import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.TemplateCompiler;
@@ -43,23 +42,21 @@ public class RootProject {
 
     public Output compile(Input input) throws IOException {
         final Shared shared = input.shared();
-        final HierarchicalResource baseDirectory = resourceService.getHierarchicalResource(shared.rootProject().baseDirectory());
-        baseDirectory.ensureDirectoryExists();
+
+        resourceService.getHierarchicalResource(shared.rootProject().baseDirectory()).ensureDirectoryExists();
 
         final ArrayList<String> includedProjects = new ArrayList<>(input.additionalIncludedProjects());
         includedProjects.add(shared.languageProject().coordinate().artifactId());
         includedProjects.add(shared.adapterProject().coordinate().artifactId());
 
-        final HierarchicalResource settingsGradleKtsFile = resourceService.getHierarchicalResource(input.settingsGradleKtsFile());
-        try(final ResourceWriter writer = new ResourceWriter(settingsGradleKtsFile, charset)) {
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.settingsGradleKtsFile()), charset)) {
             final HashMap<String, Object> map = new HashMap<>();
             map.put("includedProjects", includedProjects);
             settingsGradleTemplate.execute(input, map, writer);
             writer.flush();
         }
 
-        final HierarchicalResource buildGradleKtsFile = resourceService.getHierarchicalResource(input.buildGradleKtsFile());
-        try(final ResourceWriter writer = new ResourceWriter(buildGradleKtsFile, charset)) {
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.buildGradleKtsFile()), charset)) {
             buildGradleTemplate.execute(input, writer);
             writer.flush();
         }
@@ -96,8 +93,6 @@ public class RootProject {
         class Builder extends RootProjectData.Output.Builder {
             public Builder fromInput(Input input) {
                 baseDirectory(input.shared().rootProject().baseDirectory());
-                buildGradleKtsFile(input.buildGradleKtsFile());
-                settingsGradleKtsFile(input.settingsGradleKtsFile());
                 return this;
             }
         }
@@ -108,9 +103,5 @@ public class RootProject {
 
 
         ResourcePath baseDirectory();
-
-        ResourcePath buildGradleKtsFile();
-
-        ResourcePath settingsGradleKtsFile();
     }
 }

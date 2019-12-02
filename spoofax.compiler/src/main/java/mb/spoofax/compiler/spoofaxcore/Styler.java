@@ -2,7 +2,6 @@ package mb.spoofax.compiler.spoofaxcore;
 
 import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
-import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.BuilderBase;
 import mb.spoofax.compiler.util.ClassKind;
@@ -52,23 +51,19 @@ public class Styler {
         final LanguageProjectOutput output = LanguageProjectOutput.builder().from(input).build();
         if(input.classKind().isManualOnly()) return output; // Nothing to generate: return.
 
-        final HierarchicalResource genSourcesJavaDirectory = resourceService.getHierarchicalResource(output.genDirectory());
-        genSourcesJavaDirectory.ensureDirectoryExists();
+        resourceService.getHierarchicalResource(input.genDirectory()).ensureDirectoryExists();
 
-        final HierarchicalResource rulesFile = resourceService.getHierarchicalResource(output.genRulesFile());
-        try(final ResourceWriter writer = new ResourceWriter(rulesFile, charset)) {
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genRulesFile()), charset)) {
             rulesTemplate.execute(input, writer);
             writer.flush();
         }
 
-        final HierarchicalResource stylerFile = resourceService.getHierarchicalResource(output.genStylerFile());
-        try(final ResourceWriter writer = new ResourceWriter(stylerFile, charset)) {
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genStylerFile()), charset)) {
             stylerTemplate.execute(input, writer);
             writer.flush();
         }
 
-        final HierarchicalResource factoryFile = resourceService.getHierarchicalResource(output.genFactoryFile());
-        try(final ResourceWriter writer = new ResourceWriter(factoryFile, charset)) {
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genFactoryFile()), charset)) {
             factoryTemplate.execute(input, writer);
             writer.flush();
         }
@@ -76,7 +71,7 @@ public class Styler {
         return output;
     }
 
-    public AdapterProjectOutput compileAdapterProject(Input input, GradleProject adapterProject) throws IOException {
+    public AdapterProjectOutput compileAdapterProject(Input input) throws IOException {
         return AdapterProjectOutput.builder().build();
     }
 
@@ -113,6 +108,11 @@ public class Styler {
             return ClassKind.Generated;
         }
 
+        @Value.Derived default ResourcePath genDirectory() {
+            final GradleProject languageProject = shared().languageProject();
+            return languageProject.genSourceSpoofaxJavaDirectory().appendRelativePath(languageProject.packagePath());
+        }
+
 
         @Value.Default default String genRulesClass() {
             return shared().classSuffix() + "StylingRules";
@@ -122,8 +122,10 @@ public class Styler {
             return genRulesClass() + ".java";
         }
 
+        @Value.Derived default ResourcePath genRulesFile() {
+            return genDirectory().appendSegment(genRulesFileName());
+        }
 
-        Optional<String> manualStylerClass();
 
         @Value.Default default String genStylerClass() {
             return shared().classSuffix() + "Styler";
@@ -133,6 +135,12 @@ public class Styler {
             return genStylerClass() + ".java";
         }
 
+        @Value.Derived default ResourcePath genStylerFile() {
+            return genDirectory().appendSegment(genStylerFileName());
+        }
+
+        Optional<String> manualStylerClass();
+
         @Value.Derived default String stylerClass() {
             if(classKind().isManual() && manualStylerClass().isPresent()) {
                 return manualStylerClass().get();
@@ -141,8 +149,6 @@ public class Styler {
         }
 
 
-        Optional<String> manualFactoryClass();
-
         @Value.Default default String genFactoryClass() {
             return shared().classSuffix() + "StylerFactory";
         }
@@ -150,6 +156,12 @@ public class Styler {
         @Value.Derived default String genFactoryFileName() {
             return genFactoryClass() + ".java";
         }
+
+        @Value.Derived default ResourcePath genFactoryFile() {
+            return genDirectory().appendSegment(genFactoryFileName());
+        }
+
+        Optional<String> manualFactoryClass();
 
         @Value.Derived default String factoryClass() {
             if(classKind().isManual() && manualFactoryClass().isPresent()) {
@@ -183,12 +195,6 @@ public class Styler {
     public interface LanguageProjectOutput extends Serializable {
         class Builder extends StylerData.LanguageProjectOutput.Builder {
             public Builder from(Input input) {
-                final GradleProject languageProject = input.shared().languageProject();
-                final ResourcePath genDirectory = languageProject.genSourceSpoofaxJavaDirectory().appendRelativePath(languageProject.packagePath());
-                genDirectory(genDirectory);
-                genRulesFile(genDirectory.appendRelativePath(input.genRulesFileName()));
-                genStylerFile(genDirectory.appendRelativePath(input.genStylerFileName()));
-                genFactoryFile(genDirectory.appendRelativePath(input.genFactoryFileName()));
                 addDependencies(GradleConfiguredDependency.api(input.shared().esvCommonDep()));
                 addCopyResources(input.packedESVSourceRelPath());
                 return this;
@@ -198,15 +204,6 @@ public class Styler {
         static Builder builder() {
             return new Builder();
         }
-
-
-        ResourcePath genDirectory();
-
-        ResourcePath genRulesFile();
-
-        ResourcePath genStylerFile();
-
-        ResourcePath genFactoryFile();
 
 
         List<GradleConfiguredDependency> dependencies();

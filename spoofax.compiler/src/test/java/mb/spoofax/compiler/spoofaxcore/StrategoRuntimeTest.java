@@ -33,10 +33,10 @@ class StrategoRuntimeTest {
         final StrategoRuntime compiler = StrategoRuntime.fromClassLoaderResources(resourceService, charset);
         final StrategoRuntime.LanguageProjectOutput output = compiler.compileLanguageProject(input);
 
-        final HierarchicalResource genDirectory = resourceService.getHierarchicalResource(output.genDirectory());
+        final HierarchicalResource genDirectory = resourceService.getHierarchicalResource(input.genDirectory());
         assertTrue(genDirectory.exists());
 
-        final FileAssertions genFactoryFile = new FileAssertions(resourceService.getHierarchicalResource(output.genFactoryFile()));
+        final FileAssertions genFactoryFile = new FileAssertions(resourceService.getHierarchicalResource(input.genFactoryFile()));
         genFactoryFile.assertName("TigerStrategoRuntimeBuilderFactory.java");
         genFactoryFile.assertExists();
         genFactoryFile.assertContains("class TigerStrategoRuntimeBuilderFactory");

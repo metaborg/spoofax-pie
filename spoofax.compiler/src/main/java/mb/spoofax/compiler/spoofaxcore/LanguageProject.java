@@ -2,11 +2,9 @@ package mb.spoofax.compiler.spoofaxcore;
 
 import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
-import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
-import mb.spoofax.compiler.util.GradleProject;
 import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.StringUtil;
 import mb.spoofax.compiler.util.TemplateCompiler;
@@ -76,10 +74,8 @@ public class LanguageProject {
 
     public Output compile(Input input) throws IOException {
         final Shared shared = input.shared();
-        final GradleProject languageProject = shared.languageProject();
 
-        final HierarchicalResource baseDirectory = resourceService.getHierarchicalResource(languageProject.baseDirectory());
-        baseDirectory.ensureDirectoryExists();
+        resourceService.getHierarchicalResource(shared.languageProject().baseDirectory()).ensureDirectoryExists();
 
         final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
         dependencies.add(GradleConfiguredDependency.api(shared.logApiDep()));
@@ -137,8 +133,7 @@ public class LanguageProject {
             throw e.getCause();
         }
 
-        final HierarchicalResource buildGradleKtsFile = resourceService.getHierarchicalResource(input.buildGradleKtsFile());
-        try(final ResourceWriter writer = new ResourceWriter(buildGradleKtsFile, charset)) {
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.buildGradleKtsFile()), charset)) {
             final HashMap<String, Object> map = new HashMap<>();
             final String languageDependencyCode = input.languageSpecificationDependency().caseOf()
                 .project((projectPath) -> "createProjectDependency(\"" + projectPath + "\")")
@@ -153,8 +148,7 @@ public class LanguageProject {
 
         try {
             input.settingsGradleKtsFile().ifPresent((f) -> {
-                final HierarchicalResource settingsGradleKtsFile = resourceService.getHierarchicalResource(f);
-                try(final ResourceWriter writer = new ResourceWriter(settingsGradleKtsFile, charset)) {
+                try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(f), charset)) {
                     settingsGradleTemplate.execute(input, writer);
                     writer.flush();
                 } catch(IOException e) {
@@ -166,7 +160,6 @@ public class LanguageProject {
         }
 
         return Output.builder()
-            .fromInput(input)
             .parser(parserOutput)
             .styler(stylerOutput)
             .strategoRuntime(strategoRuntimeOutput)
@@ -221,25 +214,11 @@ public class LanguageProject {
 
     @Value.Immutable
     public interface Output extends Serializable {
-        class Builder extends LanguageProjectData.Output.Builder {
-            public Builder fromInput(Input input) {
-                baseDirectory(input.shared().languageProject().baseDirectory());
-                buildGradleKtsFile(input.buildGradleKtsFile());
-                settingsGradleKtsFile(input.settingsGradleKtsFile());
-                return this;
-            }
-        }
+        class Builder extends LanguageProjectData.Output.Builder {}
 
         static Builder builder() {
             return new Builder();
         }
-
-
-        ResourcePath baseDirectory();
-
-        ResourcePath buildGradleKtsFile();
-
-        Optional<ResourcePath> settingsGradleKtsFile();
 
 
         Parser.LanguageProjectOutput parser();

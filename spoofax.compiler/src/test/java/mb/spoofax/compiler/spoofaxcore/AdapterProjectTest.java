@@ -37,12 +37,12 @@ class AdapterProjectTest {
         final AdapterProject.Input input = TigerInputs.adapterProjectBuilder(shared)
             .languageProjectDependency(GradleDependency.project(":" + shared.languageProject().coordinate().artifactId()))
             .build();
-        final AdapterProject compiler = AdapterProject.fromClassLoaderResources(resourceService, charset);
+        final AdapterProject compiler = AdapterProject.fromClassLoaderResources(resourceService, charset, parserCompiler, stylerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler);
         final AdapterProject.Output output = compiler.compile(input);
 
-        assertFalse(output.settingsGradleKtsFile().isPresent());
+        assertFalse(input.settingsGradleKtsFile().isPresent());
 
-        final FileAssertions buildGradleKtsFile = new FileAssertions(resourceService.getHierarchicalResource(output.buildGradleKtsFile()));
+        final FileAssertions buildGradleKtsFile = new FileAssertions(resourceService.getHierarchicalResource(input.buildGradleKtsFile()));
         buildGradleKtsFile.assertExists();
         buildGradleKtsFile.assertContains("org.metaborg.gradle.config.java-library");
 

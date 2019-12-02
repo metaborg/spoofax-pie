@@ -25,12 +25,12 @@ class RootProjectTest {
         final RootProject compiler = RootProject.fromClassLoaderResources(resourceService, charset);
         final RootProject.Output output = compiler.compile(input);
 
-        final FileAssertions settingsGradleKtsFile = new FileAssertions(resourceService.getHierarchicalResource(output.settingsGradleKtsFile()));
+        final FileAssertions settingsGradleKtsFile = new FileAssertions(resourceService.getHierarchicalResource(input.settingsGradleKtsFile()));
         settingsGradleKtsFile.assertExists();
         settingsGradleKtsFile.assertName("settings.gradle.kts");
         settingsGradleKtsFile.assertContains(input.shared().rootProject().coordinate().artifactId());
 
-        final FileAssertions buildGradleKtsFile = new FileAssertions(resourceService.getHierarchicalResource(output.buildGradleKtsFile()));
+        final FileAssertions buildGradleKtsFile = new FileAssertions(resourceService.getHierarchicalResource(input.buildGradleKtsFile()));
         buildGradleKtsFile.assertExists();
         buildGradleKtsFile.assertContains("org.metaborg.gradle.config.root-project");
 

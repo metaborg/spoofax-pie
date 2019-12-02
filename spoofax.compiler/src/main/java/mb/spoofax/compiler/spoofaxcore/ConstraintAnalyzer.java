@@ -2,7 +2,6 @@ package mb.spoofax.compiler.spoofaxcore;
 
 import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
-import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.BuilderBase;
 import mb.spoofax.compiler.util.ClassKind;
@@ -49,17 +48,14 @@ public class ConstraintAnalyzer {
         final LanguageProjectOutput output = LanguageProjectOutput.builder().fromInput(input).build();
         if(input.classKind().isManualOnly()) return output; // Nothing to generate: return.
 
-        final HierarchicalResource genSourcesJavaDirectory = resourceService.getHierarchicalResource(output.genDirectory());
-        genSourcesJavaDirectory.ensureDirectoryExists();
+        resourceService.getHierarchicalResource(input.genDirectory()).ensureDirectoryExists();
 
-        final HierarchicalResource constraintAnalyzerFile = resourceService.getHierarchicalResource(output.genConstraintAnalyzerFile());
-        try(final ResourceWriter writer = new ResourceWriter(constraintAnalyzerFile, charset)) {
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genConstraintAnalyzerFile()), charset)) {
             constraintAnalyzerTemplate.execute(input, writer);
             writer.flush();
         }
 
-        final HierarchicalResource factoryFile = resourceService.getHierarchicalResource(output.genFactoryFile());
-        try(final ResourceWriter writer = new ResourceWriter(factoryFile, charset)) {
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genFactoryFile()), charset)) {
             factoryTemplate.execute(input, writer);
             writer.flush();
         }
@@ -67,7 +63,7 @@ public class ConstraintAnalyzer {
         return output;
     }
 
-    public AdapterProjectOutput compileAdapterProject(Input input, GradleProject languageProject) throws IOException {
+    public AdapterProjectOutput compileAdapterProject(Input input) throws IOException {
         return AdapterProjectOutput.builder().build();
     }
 
@@ -103,33 +99,47 @@ public class ConstraintAnalyzer {
             return ClassKind.Generated;
         }
 
+        @Value.Derived default ResourcePath genDirectory() {
+            final GradleProject languageProject = shared().languageProject();
+            return languageProject.genSourceSpoofaxJavaDirectory().appendRelativePath(languageProject.packagePath());
+        }
 
-        Optional<String> manualConstraintAnalyzerClass();
 
         @Value.Default default String genConstraintAnalyzerClass() {
             return shared().classSuffix() + "ConstraintAnalyzer";
         }
 
-        @Value.Derived default String genConstraintAnalyzerPath() {
+        @Value.Derived default String genConstraintAnalyzerFileName() {
             return genConstraintAnalyzerClass() + ".java";
         }
+
+        @Value.Derived default ResourcePath genConstraintAnalyzerFile() {
+            return genDirectory().appendSegment(genConstraintAnalyzerFileName());
+        }
+
+        Optional<String> manualConstraintAnalyzerClass();
 
         @Value.Derived default String constraintAnalyzerClass() {
             if(classKind().isManual() && manualConstraintAnalyzerClass().isPresent()) {
                 return manualConstraintAnalyzerClass().get();
             }
-            return genConstraintAnalyzerPath();
+            return genConstraintAnalyzerFileName();
         }
 
-        Optional<String> manualFactoryClass();
 
         @Value.Default default String genFactoryClass() {
             return shared().classSuffix() + "ConstraintAnalyzerFactory";
         }
 
-        @Value.Derived default String genFactoryPath() {
+        @Value.Derived default String genFactoryFileName() {
             return genFactoryClass() + ".java";
         }
+
+        @Value.Derived default ResourcePath genFactoryFile() {
+            return genDirectory().appendSegment(genFactoryFileName());
+        }
+
+        Optional<String> manualFactoryClass();
 
         @Value.Derived default String factoryClass() {
             if(classKind().isManual() && manualFactoryClass().isPresent()) {
@@ -162,11 +172,6 @@ public class ConstraintAnalyzer {
     public interface LanguageProjectOutput extends Serializable {
         class Builder extends ConstraintAnalyzerData.LanguageProjectOutput.Builder {
             public Builder fromInput(Input input) {
-                final GradleProject languageProject = input.shared().languageProject();
-                final ResourcePath genDirectory = languageProject.genSourceSpoofaxJavaDirectory().appendRelativePath(languageProject.packagePath());
-                genDirectory(genDirectory);
-                genConstraintAnalyzerFile(genDirectory.appendRelativePath(input.genConstraintAnalyzerPath()));
-                genFactoryFile(genDirectory.appendRelativePath(input.genFactoryPath()));
                 addDependencies(GradleConfiguredDependency.api(input.shared().constraintCommonDep()));
                 return this;
             }
@@ -175,13 +180,6 @@ public class ConstraintAnalyzer {
         static Builder builder() {
             return new Builder();
         }
-
-
-        ResourcePath genDirectory();
-
-        ResourcePath genConstraintAnalyzerFile();
-
-        ResourcePath genFactoryFile();
 
 
         List<GradleConfiguredDependency> dependencies();

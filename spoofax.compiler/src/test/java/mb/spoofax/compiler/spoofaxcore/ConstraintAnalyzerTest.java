@@ -33,16 +33,16 @@ class ConstraintAnalyzerTest {
         final ConstraintAnalyzer compiler = ConstraintAnalyzer.fromClassLoaderResources(resourceService, charset);
         final ConstraintAnalyzer.LanguageProjectOutput output = compiler.compileLanguageProject(input);
 
-        final HierarchicalResource genDirectory = resourceService.getHierarchicalResource(output.genDirectory());
+        final HierarchicalResource genDirectory = resourceService.getHierarchicalResource(input.genDirectory());
         assertTrue(genDirectory.exists());
 
-        final FileAssertions genConstraintAnalyzerFile = new FileAssertions(resourceService.getHierarchicalResource(output.genConstraintAnalyzerFile()));
+        final FileAssertions genConstraintAnalyzerFile = new FileAssertions(resourceService.getHierarchicalResource(input.genConstraintAnalyzerFile()));
         genConstraintAnalyzerFile.assertName("TigerConstraintAnalyzer.java");
         genConstraintAnalyzerFile.assertExists();
         genConstraintAnalyzerFile.assertContains("class TigerConstraintAnalyzer");
         genConstraintAnalyzerFile.assertJavaParses(javaParser);
 
-        final FileAssertions genConstraintAnalyzerFactoryFile = new FileAssertions(resourceService.getHierarchicalResource(output.genFactoryFile()));
+        final FileAssertions genConstraintAnalyzerFactoryFile = new FileAssertions(resourceService.getHierarchicalResource(input.genFactoryFile()));
         genConstraintAnalyzerFactoryFile.assertName("TigerConstraintAnalyzerFactory.java");
         genConstraintAnalyzerFactoryFile.assertExists();
         genConstraintAnalyzerFactoryFile.assertContains("class TigerConstraintAnalyzerFactory");

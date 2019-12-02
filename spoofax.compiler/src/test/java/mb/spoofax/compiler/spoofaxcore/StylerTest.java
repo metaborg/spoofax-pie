@@ -33,22 +33,22 @@ class StylerTest {
         final Styler compiler = Styler.fromClassLoaderResources(resourceService, charset);
         final Styler.LanguageProjectOutput output = compiler.compileLanguageProject(input);
 
-        final HierarchicalResource genDirectory = resourceService.getHierarchicalResource(output.genDirectory());
+        final HierarchicalResource genDirectory = resourceService.getHierarchicalResource(input.genDirectory());
         assertTrue(genDirectory.exists());
 
-        final FileAssertions genStylingRulesFile = new FileAssertions(resourceService.getHierarchicalResource(output.genRulesFile()));
+        final FileAssertions genStylingRulesFile = new FileAssertions(resourceService.getHierarchicalResource(input.genRulesFile()));
         genStylingRulesFile.assertName("TigerStylingRules.java");
         genStylingRulesFile.assertExists();
         genStylingRulesFile.assertContains("class TigerStylingRules");
         genStylingRulesFile.assertJavaParses(javaParser);
 
-        final FileAssertions genStylerFile = new FileAssertions(resourceService.getHierarchicalResource(output.genStylerFile()));
+        final FileAssertions genStylerFile = new FileAssertions(resourceService.getHierarchicalResource(input.genStylerFile()));
         genStylerFile.assertName("TigerStyler.java");
         genStylerFile.assertExists();
         genStylerFile.assertContains("class TigerStyler");
         genStylerFile.assertJavaParses(javaParser);
 
-        final FileAssertions genStylerFactoryFile = new FileAssertions(resourceService.getHierarchicalResource(output.genFactoryFile()));
+        final FileAssertions genStylerFactoryFile = new FileAssertions(resourceService.getHierarchicalResource(input.genFactoryFile()));
         genStylerFactoryFile.assertName("TigerStylerFactory.java");
         genStylerFactoryFile.assertExists();
         genStylerFactoryFile.assertContains("class TigerStylerFactory");

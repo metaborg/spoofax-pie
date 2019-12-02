@@ -340,7 +340,7 @@ public class EclipseResource implements HierarchicalResource, WrapsEclipseResour
     }
 
 
-    @Override public void createFile(boolean createParents) throws IOException {
+    @Override public EclipseResource createFile(boolean createParents) throws IOException {
         if(createParents) {
             createParents();
         }
@@ -353,9 +353,10 @@ public class EclipseResource implements HierarchicalResource, WrapsEclipseResour
                 throw new IOException("Creating file '" + path + "' failed unexpectedly", e);
             }
         }
+        return this;
     }
 
-    @Override public void createDirectory(boolean createParents) throws IOException {
+    @Override public EclipseResource createDirectory(boolean createParents) throws IOException {
         if(path.getSegmentCount() == 0) {
             throw new IOException("Cannot create directory '" + path + "', it is the workspace root");
         }
@@ -363,14 +364,16 @@ public class EclipseResource implements HierarchicalResource, WrapsEclipseResour
             createParents();
         }
         createDirectory(getContainer());
+        return this;
     }
 
-    @Override public void createParents() throws IOException {
+    @Override public EclipseResource createParents() throws IOException {
         IContainer parent = getResource().getParent();
         while(parent != null) {
             createDirectory(parent);
             parent = parent.getParent();
         }
+        return this;
     }
 
     private void createDirectory(IContainer container) throws IOException {

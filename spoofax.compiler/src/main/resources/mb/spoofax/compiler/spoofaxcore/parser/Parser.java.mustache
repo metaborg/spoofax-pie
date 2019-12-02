@@ -1,4 +1,4 @@
-package {{shared.languageProject.packageId}};
+package {{genParserClass.packageId}};
 
 import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.jsglr1.common.JSGLR1Parser;
@@ -6,10 +6,10 @@ import mb.resource.ResourceKey;
 import mb.spoofax.compiler.interfaces.spoofaxcore.Parser;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class {{genParserClass}} implements Parser {
+public class {{genParserClass.id}} implements Parser {
     private final JSGLR1Parser parser;
 
-    public {{genParserClass}}({{genTableClass}} parseTable) {
+    public {{genParserClass.id}}({{genTableClass.id}} parseTable) {
         this.parser = new JSGLR1Parser(parseTable.parseTable);
     }
 

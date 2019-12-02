@@ -2,9 +2,8 @@ package mb.spoofax.compiler.spoofaxcore;
 
 import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
-import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.BuilderBase;
+import mb.spoofax.compiler.util.ClassInfo;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleProject;
@@ -17,7 +16,6 @@ import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Optional;
-import java.util.Properties;
 
 @Value.Enclosing
 public class Parser {
@@ -52,23 +50,19 @@ public class Parser {
         final LanguageProjectOutput output = LanguageProjectOutput.builder().fromInput(input).build();
         if(input.classKind().isManualOnly()) return output; // Nothing to generate: return.
 
-        final HierarchicalResource genSourcesJavaDirectory = resourceService.getHierarchicalResource(output.genDirectory());
-        genSourcesJavaDirectory.ensureDirectoryExists();
+        resourceService.getHierarchicalResource(input.languageProjectGenDirectory()).ensureDirectoryExists();
 
-        final HierarchicalResource tableFile = resourceService.getHierarchicalResource(output.genTableFile());
-        try(final ResourceWriter writer = new ResourceWriter(tableFile, charset)) {
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genTableFile()).createParents(), charset)) {
             tableTemplate.execute(input, writer);
             writer.flush();
         }
 
-        final HierarchicalResource parserFile = resourceService.getHierarchicalResource(output.genParserFile());
-        try(final ResourceWriter writer = new ResourceWriter(parserFile, charset)) {
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.parserFile()).createParents(), charset)) {
             parserTemplate.execute(input, writer);
             writer.flush();
         }
 
-        final HierarchicalResource factoryFile = resourceService.getHierarchicalResource(output.genFactoryFile());
-        try(final ResourceWriter writer = new ResourceWriter(factoryFile, charset)) {
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.factoryFile()).createParents(), charset)) {
             factoryTemplate.execute(input, writer);
             writer.flush();
         }
@@ -76,21 +70,25 @@ public class Parser {
         return output;
     }
 
-    public AdapterProjectOutput compileAdapterProject(Input input, GradleProject adapterProject) throws IOException {
-        return AdapterProjectOutput.builder().build();
+    public AdapterProjectOutput compileAdapterProject(Input input) throws IOException {
+        final AdapterProjectOutput output = AdapterProjectOutput.builder().fromInput(input).build();
+        if(input.classKind().isManualOnly()) return output; // Nothing to generate: return.
+
+        // TODO: parse task
+
+        // TODO: tokenize task
+
+        // TODO: parser service providers
+
+        // TODO: task providers
+
+        return output;
     }
 
 
     @Value.Immutable
     public interface Input extends Serializable {
-        class Builder extends ParserData.Input.Builder implements BuilderBase {
-            public Builder withPersistentProperties(Properties properties) {
-                with(properties, "genTableClass", this::genTableClass);
-                with(properties, "genParserClass", this::genParserClass);
-                with(properties, "genFactoryClass", this::genFactoryClass);
-                return this;
-            }
-        }
+        class Builder extends ParserData.Input.Builder {}
 
         static Builder builder() {
             return new Builder();
@@ -99,6 +97,8 @@ public class Parser {
 
         Shared shared();
 
+
+        /// Parse table source file (to copy from), and destination file
 
         @Value.Default default String tableSourceRelPath() {
             return "target/metaborg/sdf.tbl";
@@ -109,62 +109,116 @@ public class Parser {
         }
 
 
+        /// Kinds of classes (generated/extended/manual)
+
         @Value.Default default ClassKind classKind() {
             return ClassKind.Generated;
         }
 
 
-        @Value.Default default String genTableClass() {
-            return shared().classSuffix() + "ParseTable";
+        /// Language project classes
+
+        @Value.Derived default ResourcePath languageProjectGenDirectory() {
+            return shared().languageProject().genSourceSpoofaxJavaDirectory();
         }
 
-        @Value.Derived default String genTableFileName() {
-            return genTableClass() + ".java";
+
+        @Value.Default default ClassInfo genTableClass() {
+            return ClassInfo.of(shared().languageProject().packageId(), shared().classSuffix() + "ParseTable");
+        }
+
+        default ResourcePath genTableFile() {
+            return genTableClass().file(languageProjectGenDirectory());
         }
 
 
-        Optional<String> manualParserClass();
-
-        @Value.Default default String genParserClass() {
-            return shared().classSuffix() + "Parser";
+        @Value.Default default ClassInfo genParserClass() {
+            return ClassInfo.of(shared().languageProject().packageId(), shared().classSuffix() + "Parser");
         }
 
-        @Value.Derived default String genParserFileName() {
-            return genParserClass() + ".java";
-        }
+        Optional<ClassInfo> manualParserClass();
 
-        @Value.Derived default String parserClass() {
+        default ClassInfo parserClass() {
             if(classKind().isManual() && manualParserClass().isPresent()) {
                 return manualParserClass().get();
             }
             return genParserClass();
         }
 
-
-        Optional<String> manualFactoryClass();
-
-        @Value.Default default String genFactoryClass() {
-            return shared().classSuffix() + "ParserFactory";
+        default ResourcePath parserFile() {
+            return parserClass().file(languageProjectGenDirectory());
         }
 
-        @Value.Derived default String genFactoryFileName() {
-            return genFactoryClass() + ".java";
+
+        @Value.Default default ClassInfo genFactoryClass() {
+            return ClassInfo.of(shared().languageProject().packageId(), shared().classSuffix() + "ParserFactory");
         }
 
-        @Value.Derived default String factoryClass() {
+        Optional<ClassInfo> manualFactoryClass();
+
+        default ClassInfo factoryClass() {
             if(classKind().isManual() && manualFactoryClass().isPresent()) {
                 return manualFactoryClass().get();
             }
             return genFactoryClass();
         }
 
-
-        default void savePersistentProperties(Properties properties) {
-            shared().savePersistentProperties(properties);
-            properties.setProperty("genTableClass", genTableClass());
-            properties.setProperty("genParserClass", genParserClass());
-            properties.setProperty("genFactoryClass", genFactoryClass());
+        default ResourcePath factoryFile() {
+            return factoryClass().file(languageProjectGenDirectory());
         }
+
+
+        /// Adapter project classes
+
+        @Value.Derived default ResourcePath taskdefGenDirectory() {
+            final GradleProject adapterProject = shared().adapterProject();
+            return adapterProject.genSourceSpoofaxJavaDirectory().appendRelativePath(adapterProject.packagePath() + "/taskdef");
+        }
+
+
+        @Value.Default default String genParseTaskDefClass() {
+            return shared().classSuffix() + "Parser";
+        }
+
+        @Value.Derived default String genParseTaskDefFileName() {
+            return genParseTaskDefClass() + ".java";
+        }
+
+        @Value.Derived default ResourcePath genParseTaskDefFile() {
+            return taskdefGenDirectory().appendSegment(genParseTaskDefFileName());
+        }
+
+        Optional<String> manualParseTaskDefClass();
+
+        @Value.Derived default String parseTaskDefClass() {
+            if(classKind().isManual() && manualParseTaskDefClass().isPresent()) {
+                return manualParseTaskDefClass().get();
+            }
+            return genParseTaskDefClass();
+        }
+
+
+        @Value.Default default String genTokenizeTaskDefClass() {
+            return shared().classSuffix() + "Parser";
+        }
+
+        @Value.Derived default String genTokenizeTaskDefFileName() {
+            return genTokenizeTaskDefClass() + ".java";
+        }
+
+        @Value.Derived default ResourcePath genTokenizeTaskDefFile() {
+            return taskdefGenDirectory().appendSegment(genTokenizeTaskDefFileName());
+        }
+
+        Optional<String> manualTokenizeTaskDefClass();
+
+        @Value.Derived default String tokenizeTaskDefClass() {
+            if(classKind().isManual() && manualTokenizeTaskDefClass().isPresent()) {
+                return manualTokenizeTaskDefClass().get();
+            }
+            return genTokenizeTaskDefClass();
+        }
+
 
         @Value.Check default void check() {
             final ClassKind kind = classKind();
@@ -183,12 +237,6 @@ public class Parser {
     public interface LanguageProjectOutput extends Serializable {
         class Builder extends ParserData.LanguageProjectOutput.Builder {
             public Builder fromInput(Input input) {
-                final GradleProject languageProject = input.shared().languageProject();
-                final ResourcePath genDirectory = languageProject.genSourceSpoofaxJavaDirectory().appendRelativePath(languageProject.packagePath());
-                genDirectory(genDirectory);
-                genTableFile(genDirectory.appendRelativePath(input.genTableFileName()));
-                genParserFile(genDirectory.appendRelativePath(input.genParserFileName()));
-                genFactoryFile(genDirectory.appendRelativePath(input.genFactoryFileName()));
                 addDependencies(GradleConfiguredDependency.api(input.shared().jsglr1CommonDep()));
                 addCopyResources(input.tableSourceRelPath());
                 return this;
@@ -200,15 +248,6 @@ public class Parser {
         }
 
 
-        ResourcePath genDirectory();
-
-        ResourcePath genTableFile();
-
-        ResourcePath genParserFile();
-
-        ResourcePath genFactoryFile();
-
-
         List<GradleConfiguredDependency> dependencies();
 
         List<String> copyResources();
@@ -217,11 +256,26 @@ public class Parser {
     @Value.Immutable
     public interface AdapterProjectOutput extends Serializable {
         class Builder extends ParserData.AdapterProjectOutput.Builder {
-
+            public Builder fromInput(Input input) {
+                factoryClass(input.factoryClass());
+                parserClass(input.parserClass());
+                parseTaskClass(input.parseTaskDefClass());
+                tokenizeTaskClass(input.tokenizeTaskDefClass());
+                return this;
+            }
         }
 
         static Builder builder() {
             return new Builder();
         }
+
+
+        ClassInfo factoryClass();
+
+        ClassInfo parserClass();
+
+        String parseTaskClass();
+
+        String tokenizeTaskClass();
     }
 }
