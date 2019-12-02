@@ -1,1 +1,0 @@
-(fun(x : num) { x + 1 } 4) : num
