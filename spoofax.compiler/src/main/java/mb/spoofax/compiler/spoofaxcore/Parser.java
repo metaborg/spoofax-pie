@@ -189,7 +189,7 @@ public class Parser {
 
         /// Adapter project classes
 
-        @Value.Derived default ResourcePath adapterGenDirectory() {
+        default ResourcePath adapterGenDirectory() {
             return shared().adapterProject().genSourceSpoofaxJavaDirectory();
         }
 

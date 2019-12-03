@@ -3,10 +3,9 @@ package mb.spoofax.compiler.spoofaxcore;
 import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.BuilderBase;
+import mb.spoofax.compiler.util.ClassInfo;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
-import mb.spoofax.compiler.util.GradleProject;
 import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import org.immutables.value.Value;
@@ -16,7 +15,6 @@ import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Optional;
-import java.util.Properties;
 
 @Value.Enclosing
 public class StrategoRuntime {
@@ -25,13 +23,20 @@ public class StrategoRuntime {
     private final Charset charset;
 
 
-    private StrategoRuntime(Template factoryTemplate, ResourceService resourceService, Charset charset) {
+    private StrategoRuntime(
+        Template factoryTemplate,
+        ResourceService resourceService,
+        Charset charset
+    ) {
         this.resourceService = resourceService;
         this.factoryTemplate = factoryTemplate;
         this.charset = charset;
     }
 
-    public static StrategoRuntime fromClassLoaderResources(ResourceService resourceService, Charset charset) {
+    public static StrategoRuntime fromClassLoaderResources(
+        ResourceService resourceService,
+        Charset charset
+    ) {
         final TemplateCompiler templateCompiler = new TemplateCompiler(StrategoRuntime.class);
         return new StrategoRuntime(
             templateCompiler.compile("stratego_runtime/StrategoRuntimeBuilderFactory.java.mustache"),
@@ -45,9 +50,10 @@ public class StrategoRuntime {
         final LanguageProjectOutput output = LanguageProjectOutput.builder().fromInput(input).build();
         if(input.classKind().isManualOnly()) return output; // Nothing to generate: return.
 
-        resourceService.getHierarchicalResource(input.genDirectory()).ensureDirectoryExists();
+        final ResourcePath genDirectory = input.languageGenDirectory();
+        resourceService.getHierarchicalResource(genDirectory).ensureDirectoryExists();
 
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genFactoryFile()), charset)) {
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genFactory().file(genDirectory)).createParents(), charset)) {
             factoryTemplate.execute(input, writer);
             writer.flush();
         }
@@ -55,19 +61,10 @@ public class StrategoRuntime {
         return output;
     }
 
-    public AdapterProjectOutput compileAdapterProject(Input input) throws IOException {
-        return AdapterProjectOutput.builder().build();
-    }
-
 
     @Value.Immutable
     public interface Input extends Serializable {
-        class Builder extends StrategoRuntimeData.Input.Builder implements BuilderBase {
-            public Builder withPersistentProperties(Properties properties) {
-                with(properties, "genFactoryClass", this::genFactoryClass);
-                return this;
-            }
-        }
+        class Builder extends StrategoRuntimeData.Input.Builder {}
 
         static Builder builder() {
             return new Builder();
@@ -77,12 +74,16 @@ public class StrategoRuntime {
         Shared shared();
 
 
+        /// Configuration
+
         List<String> interopRegisterersByReflection();
 
         boolean addNaBL2Primitives();
 
         boolean addStatixPrimitives();
 
+
+        /// Whether to copy certain files from the Spoofax 2.x project.
 
         @Value.Default default boolean copyCTree() {
             return false;
@@ -95,49 +96,45 @@ public class StrategoRuntime {
         boolean copyJavaStrategyClasses();
 
 
+        /// Kinds of classes (generated/extended/manual)
+
         @Value.Default default ClassKind classKind() {
             return ClassKind.Generated;
         }
 
-        @Value.Derived default ResourcePath genDirectory() {
-            final GradleProject languageProject = shared().languageProject();
-            return languageProject.genSourceSpoofaxJavaDirectory().appendRelativePath(languageProject.packagePath());
+
+        /// Language project classes
+
+        default ResourcePath languageGenDirectory() {
+            return shared().languageProject().genSourceSpoofaxJavaDirectory();
         }
 
-
-        @Value.Default default String genFactoryClass() {
-            return shared().classSuffix() + "StrategoRuntimeBuilderFactory";
+        default String languageGenPackage() {
+            return shared().languageProject().packageId();
         }
 
-        @Value.Derived default String genFactoryFileName() {
-            return genFactoryClass() + ".java";
+        // Stratego runtime builder factory
+
+        @Value.Default default ClassInfo genFactory() {
+            return ClassInfo.of(languageGenPackage(), shared().classSuffix() + "StrategoRuntimeBuilderFactory");
         }
 
-        @Value.Derived default ResourcePath genFactoryFile() {
-            return genDirectory().appendSegment(genFactoryFileName());
-        }
+        Optional<ClassInfo> manualFactory();
 
-        Optional<String> manualFactoryClass();
-
-        @Value.Derived default String factoryClass() {
-            if(classKind().isManual() && manualFactoryClass().isPresent()) {
-                return manualFactoryClass().get();
+        default ClassInfo factory() {
+            if(classKind().isManual() && manualFactory().isPresent()) {
+                return manualFactory().get();
             }
-            return genFactoryClass();
+            return genFactory();
         }
 
-
-        default void savePersistentProperties(Properties properties) {
-            shared().savePersistentProperties(properties);
-            properties.setProperty("genStrategoRuntimeBuilderFactoryClass", genFactoryClass());
-        }
 
         @Value.Check default void check() {
             final ClassKind kind = classKind();
             final boolean manual = kind.isManual();
             if(!manual) return;
-            if(!manualFactoryClass().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualFactoryClass' has not been set");
+            if(!manualFactory().isPresent()) {
+                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualFactory' has not been set");
             }
         }
     }
@@ -174,16 +171,5 @@ public class StrategoRuntime {
         List<GradleConfiguredDependency> dependencies();
 
         List<String> copyResources();
-    }
-
-    @Value.Immutable
-    public interface AdapterProjectOutput extends Serializable {
-        class Builder extends StrategoRuntimeData.AdapterProjectOutput.Builder {
-
-        }
-
-        static Builder builder() {
-            return new Builder();
-        }
     }
 }

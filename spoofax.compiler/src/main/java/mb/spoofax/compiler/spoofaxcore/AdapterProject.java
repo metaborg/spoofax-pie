@@ -123,19 +123,11 @@ public class AdapterProject {
 
         final Parser.AdapterProjectOutput parserOutput = parserCompiler.compileAdapterProject(input.parser());
         final Optional<Styler.AdapterProjectOutput> stylerOutput;
-        final Optional<StrategoRuntime.AdapterProjectOutput> strategoRuntimeOutput;
         final Optional<ConstraintAnalyzer.AdapterProjectOutput> constraintAnalyzerOutput;
         try {
             stylerOutput = input.styler().map((i) -> {
                 try {
                     return stylerCompiler.compileAdapterProject(i);
-                } catch(IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            });
-            strategoRuntimeOutput = input.strategoRuntime().map((i) -> {
-                try {
-                    return strategoRuntimeCompiler.compileAdapterProject(i);
                 } catch(IOException e) {
                     throw new UncheckedIOException(e);
                 }
@@ -170,7 +162,6 @@ public class AdapterProject {
         return Output.builder()
             .parser(parserOutput)
             .styler(stylerOutput)
-            .strategoRuntime(strategoRuntimeOutput)
             .constraintAnalyzer(constraintAnalyzerOutput)
             .build();
     }
@@ -294,8 +285,6 @@ public class AdapterProject {
         Parser.AdapterProjectOutput parser();
 
         Optional<Styler.AdapterProjectOutput> styler();
-
-        Optional<StrategoRuntime.AdapterProjectOutput> strategoRuntime();
 
         Optional<ConstraintAnalyzer.AdapterProjectOutput> constraintAnalyzer();
     }
