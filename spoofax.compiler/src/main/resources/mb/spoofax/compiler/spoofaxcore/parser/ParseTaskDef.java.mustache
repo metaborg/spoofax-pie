@@ -1,4 +1,4 @@
-package {{shared.adapterProject.packageId}}.taskdef;
+package {{parseTaskDef.packageId}};
 
 import mb.common.message.Message;
 import mb.common.message.Messages;
@@ -10,24 +10,24 @@ import mb.pie.api.TaskDef;
 import mb.resource.ReadableResource;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
-import mb.tiger.TigerParser;
+import {{parser.qualifiedId}};
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.io.IOException;
 
-public class TigerParse implements TaskDef<ResourceKey, JSGLR1ParseResult> {
+public class {{parseTaskDef.id}} implements TaskDef<ResourceKey, JSGLR1ParseResult> {
     private final ResourceService resourceService;
-    private final Provider<TigerParser> parserProvider;
+    private final Provider<{{parser.id}}> parserProvider;
 
     @Inject
-    public TigerParse(ResourceService resourceService, Provider<TigerParser> parserProvider) {
+    public {{parseTaskDef.id}}(ResourceService resourceService, Provider<{{parser.id}}> parserProvider) {
         this.resourceService = resourceService;
         this.parserProvider = parserProvider;
     }
 
     @Override public String getId() {
-        return getClass().getName();
+        return "{{parseTaskDef.qualifiedId}}";
     }
 
     @Override
@@ -39,8 +39,8 @@ public class TigerParse implements TaskDef<ResourceKey, JSGLR1ParseResult> {
         }
         try {
             final String text = resource.readString();
-            final TigerParser parser = parserProvider.get();
-            return parser.parse(text, "Module");
+            final {{parser.id}} parser = parserProvider.get();
+            return parser.parse(text, "{{startSymbol}}");
         } catch(IOException e) {
             return JSGLR1ParseResults.failed(Messages.of(new Message("Cannot parse file '" + key + "', reading contents failed unexpectedly", e)));
         }

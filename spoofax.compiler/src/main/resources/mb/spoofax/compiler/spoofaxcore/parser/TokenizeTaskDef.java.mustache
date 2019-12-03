@@ -1,0 +1,29 @@
+package {{tokenizeTaskDef.packageId}};
+
+import mb.common.token.Token;
+import mb.jsglr1.common.JSGLR1ParseResult;
+import mb.pie.api.ExecContext;
+import mb.pie.api.TaskDef;
+import mb.resource.ResourceKey;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+
+public class {{tokenizeTaskDef.id}} implements TaskDef<ResourceKey, @Nullable ArrayList<? extends Token<?>>> {
+    private final {{parseTaskDef.id}} parse;
+
+    @Inject public {{tokenizeTaskDef.id}}({{parseTaskDef.id}} parse) {
+        this.parse = parse;
+    }
+
+    @Override public String getId() {
+        return getClass().getName();
+    }
+
+    @Override
+    public @Nullable ArrayList<? extends Token<?>> exec(ExecContext context, ResourceKey key) throws Exception {
+        final @Nullable JSGLR1ParseResult parseResult = context.require(parse, key);
+        return parseResult.getTokens().orElse(null);
+    }
+}

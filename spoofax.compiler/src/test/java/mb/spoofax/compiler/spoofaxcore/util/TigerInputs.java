@@ -50,6 +50,7 @@ public class TigerInputs {
 
     public static Parser.Input.Builder parserBuilder(Shared shared) {
         return Parser.Input.builder()
+            .startSymbol("Module")
             .shared(shared)
             ;
     }

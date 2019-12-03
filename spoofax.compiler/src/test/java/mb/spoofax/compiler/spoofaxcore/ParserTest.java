@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
-import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -63,8 +62,10 @@ class ParserTest {
 
         TigerInputs.parserBuilder(shared)
             .classKind(classKind)
-            .manualParserClass("my.package", "MyParser")
-            .manualFactoryClass("my.package", "MyParserFactory")
+            .manualParser("my.lang", "MyParser")
+            .manualFactory("my.lang", "MyParserFactory")
+            .manualParseTaskDef("my.adapter.taskdef", "MyParseTaskDef")
+            .manualTokenizeTaskDef("my.adapter.taskdef", "MyTokenizeTaskDef")
             .build();
     }
 
@@ -81,22 +82,22 @@ class ParserTest {
         final Parser compiler = Parser.fromClassLoaderResources(resourceService, charset);
         final Parser.LanguageProjectOutput output = compiler.compileLanguageProject(input);
 
-        final HierarchicalResource genDirectory = resourceService.getHierarchicalResource(input.languageProjectGenDirectory());
+        final HierarchicalResource genDirectory = resourceService.getHierarchicalResource(input.languageGenDirectory());
         assertTrue(genDirectory.exists());
 
-        final FileAssertions genParseTableFile = new FileAssertions(resourceService.getHierarchicalResource(input.genTableFile()));
+        final FileAssertions genParseTableFile = new FileAssertions(resourceService.getHierarchicalResource(input.genTable().file(input.languageGenDirectory())));
         genParseTableFile.assertName("TigerParseTable.java");
         genParseTableFile.assertExists();
         genParseTableFile.assertContains("class TigerParseTable");
         genParseTableFile.assertJavaParses(javaParser);
 
-        final FileAssertions genParserFile = new FileAssertions(resourceService.getHierarchicalResource(input.parserFile()));
+        final FileAssertions genParserFile = new FileAssertions(resourceService.getHierarchicalResource(input.parser().file(input.languageGenDirectory())));
         genParserFile.assertName("TigerParser.java");
         genParserFile.assertExists();
         genParserFile.assertContains("class TigerParser");
         genParserFile.assertJavaParses(javaParser);
 
-        final FileAssertions genParserFactoryFile = new FileAssertions(resourceService.getHierarchicalResource(input.factoryFile()));
+        final FileAssertions genParserFactoryFile = new FileAssertions(resourceService.getHierarchicalResource(input.factory().file(input.languageGenDirectory())));
         genParserFactoryFile.assertName("TigerParserFactory.java");
         genParserFactoryFile.assertExists();
         genParserFactoryFile.assertContains("class TigerParserFactory");
@@ -111,24 +112,26 @@ class ParserTest {
         final Shared shared = TigerInputs.shared(baseDirectory);
         final Parser.Input input = TigerInputs.parserBuilder(shared)
             .classKind(ClassKind.Manual)
-            .manualParserClass("my.package", "MyParser")
-            .manualFactoryClass("my.package", "MyParserFactory")
+            .manualParser("my.lang", "MyParser")
+            .manualFactory("my.lang", "MyParserFactory")
+            .manualParseTaskDef("my.adapter.taskdef", "MyParseTaskDef")
+            .manualTokenizeTaskDef("my.adapter.taskdef", "MyTokenizeTaskDef")
             .build();
 
         final Charset charset = StandardCharsets.UTF_8;
         final Parser compiler = Parser.fromClassLoaderResources(resourceService, charset);
         final Parser.LanguageProjectOutput output = compiler.compileLanguageProject(input);
 
-        final HierarchicalResource genDirectory = resourceService.getHierarchicalResource(input.languageProjectGenDirectory());
+        final HierarchicalResource genDirectory = resourceService.getHierarchicalResource(input.languageGenDirectory());
         assertFalse(genDirectory.exists());
 
-        final HierarchicalResource genParseTableFile = resourceService.getHierarchicalResource(input.genTableFile());
+        final HierarchicalResource genParseTableFile = resourceService.getHierarchicalResource(input.genTable().file(input.languageGenDirectory()));
         assertFalse(genParseTableFile.exists());
 
-        final HierarchicalResource genParserFile = resourceService.getHierarchicalResource(input.parserFile());
+        final HierarchicalResource genParserFile = resourceService.getHierarchicalResource(input.genParser().file(input.languageGenDirectory()));
         assertFalse(genParserFile.exists());
 
-        final HierarchicalResource genParserFactoryFile = resourceService.getHierarchicalResource(input.factoryFile());
+        final HierarchicalResource genParserFactoryFile = resourceService.getHierarchicalResource(input.genFactory().file(input.languageGenDirectory()));
         assertFalse(genParserFactoryFile.exists());
     }
 }

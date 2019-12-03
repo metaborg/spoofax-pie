@@ -26,7 +26,7 @@ public interface ClassInfo extends Serializable {
 
     @Value.Parameter String id();
 
-    default String qualifiedClassId() {
+    default String qualifiedId() {
         return packageId() + "." + id();
     }
 
