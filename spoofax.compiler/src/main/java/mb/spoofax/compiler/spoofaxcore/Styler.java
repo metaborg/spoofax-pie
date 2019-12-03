@@ -188,7 +188,7 @@ public class Styler {
             return shared().adapterProject().packageId() + ".taskdef";
         }
 
-        // Style
+        // Style task definition
 
         @Value.Default default ClassInfo genStyleTaskDef() {
             return ClassInfo.of(taskDefGenPackage(), shared().classSuffix() + "Style");
@@ -244,9 +244,7 @@ public class Styler {
     public interface AdapterProjectOutput extends Serializable {
         class Builder extends StylerData.AdapterProjectOutput.Builder {
             public AdapterProjectOutput.Builder fromInput(Input input) {
-                factory(input.factory());
-                styler(input.styler());
-                styleTaskDef(input.styleTaskDef());
+                // Do not add style task definition, as it is handled explicitly.
                 return this;
             }
         }
@@ -256,10 +254,8 @@ public class Styler {
         }
 
 
-        ClassInfo factory();
+        List<GradleConfiguredDependency> dependencies();
 
-        ClassInfo styler();
-
-        ClassInfo styleTaskDef();
+        List<ClassInfo> additionalTaskDefs();
     }
 }

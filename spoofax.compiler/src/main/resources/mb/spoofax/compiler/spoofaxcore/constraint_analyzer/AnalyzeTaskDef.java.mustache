@@ -1,0 +1,54 @@
+package {{analyzeTaskDef.packageId}};
+
+import mb.constraint.common.ConstraintAnalyzer.SingleFileResult;
+import mb.constraint.common.ConstraintAnalyzerContext;
+import mb.constraint.common.ConstraintAnalyzerException;
+import mb.jsglr1.common.JSGLR1ParseResult;
+import mb.log.api.LoggerFactory;
+import mb.pie.api.ExecContext;
+import mb.pie.api.TaskDef;
+import mb.resource.ResourceKey;
+import mb.resource.ResourceService;
+import mb.stratego.common.StrategoIOAgent;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+
+import {{parse.parseTaskDef.qualifiedId}};
+import {{constraintAnalyzer.qualifiedId}};
+
+import javax.inject.Inject;
+import java.util.Optional;
+
+public class {{analyzeTaskDef.id}} implements TaskDef<ResourceKey, @Nullable SingleFileResult> {
+    private final {{parse.parseTaskDef.id}} parse;
+    private final {{constraintAnalyzer.id}} constraintAnalyzer;
+    private final LoggerFactory loggerFactory;
+    private final ResourceService resourceService;
+
+    @Inject
+    public {{analyzeTaskDef.id}}({{parse.parseTaskDef.id}} parse, {{constraintAnalyzer.id}} constraintAnalyzer, LoggerFactory loggerFactory, ResourceService resourceService) {
+        this.parse = parse;
+        this.constraintAnalyzer = constraintAnalyzer;
+        this.loggerFactory = loggerFactory;
+        this.resourceService = resourceService;
+    }
+
+    @Override public String getId() {
+        return "{{analyzeTaskDef.qualifiedId}}";
+    }
+
+    @Override
+    public @Nullable SingleFileResult exec(ExecContext context, ResourceKey key) throws Exception {
+        final JSGLR1ParseResult parseResult = context.require(parse, key);
+        final Optional<IStrategoTerm> ast = parseResult.getAst();
+        if(!ast.isPresent()) {
+            return null;
+        }
+
+        try {
+            return constraintAnalyzer.analyze(key, ast.get(), new ConstraintAnalyzerContext(), new StrategoIOAgent(loggerFactory, resourceService));
+        } catch(ConstraintAnalyzerException e) {
+            throw new RuntimeException("Constraint analysis failed unexpectedly", e);
+        }
+    }
+}

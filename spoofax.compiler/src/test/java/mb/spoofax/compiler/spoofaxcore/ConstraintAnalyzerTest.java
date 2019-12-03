@@ -7,6 +7,7 @@ import mb.resource.ResourceService;
 import mb.resource.fs.FSPath;
 import mb.resource.fs.FSResourceRegistry;
 import mb.resource.hierarchical.HierarchicalResource;
+import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.spoofaxcore.util.FileAssertions;
 import mb.spoofax.compiler.spoofaxcore.util.JavaParser;
 import mb.spoofax.compiler.spoofaxcore.util.TigerInputs;
@@ -33,16 +34,17 @@ class ConstraintAnalyzerTest {
         final ConstraintAnalyzer compiler = ConstraintAnalyzer.fromClassLoaderResources(resourceService, charset);
         final ConstraintAnalyzer.LanguageProjectOutput output = compiler.compileLanguageProject(input);
 
-        final HierarchicalResource genDirectory = resourceService.getHierarchicalResource(input.genDirectory());
+        final ResourcePath genPath = input.languageGenDirectory();
+        final HierarchicalResource genDirectory = resourceService.getHierarchicalResource(genPath);
         assertTrue(genDirectory.exists());
 
-        final FileAssertions genConstraintAnalyzerFile = new FileAssertions(resourceService.getHierarchicalResource(input.genConstraintAnalyzerFile()));
+        final FileAssertions genConstraintAnalyzerFile = new FileAssertions(resourceService.getHierarchicalResource(input.genConstraintAnalyzer().file(genPath)));
         genConstraintAnalyzerFile.assertName("TigerConstraintAnalyzer.java");
         genConstraintAnalyzerFile.assertExists();
         genConstraintAnalyzerFile.assertContains("class TigerConstraintAnalyzer");
         genConstraintAnalyzerFile.assertJavaParses(javaParser);
 
-        final FileAssertions genConstraintAnalyzerFactoryFile = new FileAssertions(resourceService.getHierarchicalResource(input.genFactoryFile()));
+        final FileAssertions genConstraintAnalyzerFactoryFile = new FileAssertions(resourceService.getHierarchicalResource(input.genFactory().file(genPath)));
         genConstraintAnalyzerFactoryFile.assertName("TigerConstraintAnalyzerFactory.java");
         genConstraintAnalyzerFactoryFile.assertExists();
         genConstraintAnalyzerFactoryFile.assertContains("class TigerConstraintAnalyzerFactory");

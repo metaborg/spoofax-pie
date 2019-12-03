@@ -62,6 +62,11 @@ public class StrategoRuntime {
     }
 
 
+    public AdapterProjectOutput compileAdapterProject(Input input) throws IOException {
+        return AdapterProjectOutput.builder().build();
+    }
+
+
     @Value.Immutable
     public interface Input extends Serializable {
         class Builder extends StrategoRuntimeData.Input.Builder {}
@@ -171,5 +176,19 @@ public class StrategoRuntime {
         List<GradleConfiguredDependency> dependencies();
 
         List<String> copyResources();
+    }
+
+    @Value.Immutable
+    public interface AdapterProjectOutput extends Serializable {
+        class Builder extends StrategoRuntimeData.AdapterProjectOutput.Builder {}
+
+        static Builder builder() {
+            return new Builder();
+        }
+
+
+        List<GradleConfiguredDependency> dependencies();
+
+        List<ClassInfo> additionalTaskDefs();
     }
 }

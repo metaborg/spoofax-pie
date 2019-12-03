@@ -1,16 +1,18 @@
-package {{shared.languageProject.packageId}};
+package {{genFactory.packageId}};
 
 import mb.spoofax.compiler.interfaces.spoofaxcore.ConstraintAnalyzerFactory;
 import mb.stratego.common.StrategoRuntime;
 
-public class {{genFactoryClass}} implements ConstraintAnalyzerFactory {
+import {{genConstraintAnalyzer.qualifiedId}};
+
+public class {{genFactory.id}} implements ConstraintAnalyzerFactory {
     private final StrategoRuntime strategoRuntime;
 
-    public {{genFactoryClass}}(StrategoRuntime strategoRuntime) {
+    public {{genFactory.id}}(StrategoRuntime strategoRuntime) {
         this.strategoRuntime = strategoRuntime;
     }
 
-    @Override public {{genConstraintAnalyzerClass}} create() {
-        return new {{genConstraintAnalyzerClass}}(strategoRuntime);
+    @Override public {{genConstraintAnalyzer.id}} create() {
+        return new {{genConstraintAnalyzer.id}}(strategoRuntime);
     }
 }

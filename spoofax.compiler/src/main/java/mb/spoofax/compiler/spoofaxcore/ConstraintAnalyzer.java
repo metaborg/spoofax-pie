@@ -3,10 +3,9 @@ package mb.spoofax.compiler.spoofaxcore;
 import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.BuilderBase;
+import mb.spoofax.compiler.util.ClassInfo;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
-import mb.spoofax.compiler.util.GradleProject;
 import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import org.immutables.value.Value;
@@ -16,28 +15,39 @@ import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Optional;
-import java.util.Properties;
 
 @Value.Enclosing
 public class ConstraintAnalyzer {
     private final Template constraintAnalyzerTemplate;
     private final Template factoryTemplate;
+    private final Template analyzeTaskDefTemplate;
     private final ResourceService resourceService;
     private final Charset charset;
 
 
-    private ConstraintAnalyzer(Template constraintAnalyzerTemplate, Template factoryTemplate, ResourceService resourceService, Charset charset) {
+    private ConstraintAnalyzer(
+        Template constraintAnalyzerTemplate,
+        Template factoryTemplate,
+        Template analyzeTaskDefTemplate,
+        ResourceService resourceService,
+        Charset charset
+    ) {
+        this.analyzeTaskDefTemplate = analyzeTaskDefTemplate;
         this.resourceService = resourceService;
         this.constraintAnalyzerTemplate = constraintAnalyzerTemplate;
         this.factoryTemplate = factoryTemplate;
         this.charset = charset;
     }
 
-    public static ConstraintAnalyzer fromClassLoaderResources(ResourceService resourceService, Charset charset) {
+    public static ConstraintAnalyzer fromClassLoaderResources(
+        ResourceService resourceService,
+        Charset charset
+    ) {
         final TemplateCompiler templateCompiler = new TemplateCompiler(ConstraintAnalyzer.class);
         return new ConstraintAnalyzer(
             templateCompiler.compile("constraint_analyzer/ConstraintAnalyzer.java.mustache"),
             templateCompiler.compile("constraint_analyzer/ConstraintAnalyzerFactory.java.mustache"),
+            templateCompiler.compile("constraint_analyzer/AnalyzeTaskDef.java.mustache"),
             resourceService,
             charset
         );
@@ -48,14 +58,15 @@ public class ConstraintAnalyzer {
         final LanguageProjectOutput output = LanguageProjectOutput.builder().fromInput(input).build();
         if(input.classKind().isManualOnly()) return output; // Nothing to generate: return.
 
-        resourceService.getHierarchicalResource(input.genDirectory()).ensureDirectoryExists();
+        final ResourcePath genDirectory = input.languageGenDirectory();
+        resourceService.getHierarchicalResource(genDirectory).ensureDirectoryExists();
 
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genConstraintAnalyzerFile()), charset)) {
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genConstraintAnalyzer().file(genDirectory)).createParents(), charset)) {
             constraintAnalyzerTemplate.execute(input, writer);
             writer.flush();
         }
 
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genFactoryFile()), charset)) {
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genFactory().file(genDirectory)).createParents(), charset)) {
             factoryTemplate.execute(input, writer);
             writer.flush();
         }
@@ -64,19 +75,24 @@ public class ConstraintAnalyzer {
     }
 
     public AdapterProjectOutput compileAdapterProject(Input input) throws IOException {
-        return AdapterProjectOutput.builder().build();
+        final AdapterProjectOutput output = AdapterProjectOutput.builder().fromInput(input).build();
+        if(input.classKind().isManualOnly()) return output; // Nothing to generate: return.
+
+        final ResourcePath genDirectory = input.adapterGenDirectory();
+        resourceService.getHierarchicalResource(genDirectory).ensureDirectoryExists();
+
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genAnalyzeTaskDef().file(genDirectory)).createParents(), charset)) {
+            analyzeTaskDefTemplate.execute(input, writer);
+            writer.flush();
+        }
+
+        return output;
     }
 
 
     @Value.Immutable
     public interface Input extends Serializable {
-        class Builder extends ConstraintAnalyzerData.Input.Builder implements BuilderBase {
-            public Builder withPersistentProperties(Properties properties) {
-                with(properties, "genConstraintAnalyzerClass", this::genConstraintAnalyzerClass);
-                with(properties, "genFactoryClass", this::genFactoryClass);
-                return this;
-            }
-        }
+        class Builder extends ConstraintAnalyzerData.Input.Builder {}
 
         static Builder builder() {
             return new Builder();
@@ -85,6 +101,10 @@ public class ConstraintAnalyzer {
 
         Shared shared();
 
+        Parser.Input parse();
+
+
+        /// Configuration
 
         @Value.Default default String strategoStrategy() {
             return "editor-analyze";
@@ -95,75 +115,92 @@ public class ConstraintAnalyzer {
         }
 
 
+        /// Kinds of classes (generated/extended/manual)
+
         @Value.Default default ClassKind classKind() {
             return ClassKind.Generated;
         }
 
-        @Value.Derived default ResourcePath genDirectory() {
-            final GradleProject languageProject = shared().languageProject();
-            return languageProject.genSourceSpoofaxJavaDirectory().appendRelativePath(languageProject.packagePath());
+
+        /// Language project classes
+
+        @Value.Derived default ResourcePath languageGenDirectory() {
+            return shared().languageProject().genSourceSpoofaxJavaDirectory();
         }
 
-
-        @Value.Default default String genConstraintAnalyzerClass() {
-            return shared().classSuffix() + "ConstraintAnalyzer";
+        default String languageGenPackage() {
+            return shared().languageProject().packageId();
         }
 
-        @Value.Derived default String genConstraintAnalyzerFileName() {
-            return genConstraintAnalyzerClass() + ".java";
+        // Constraint analyzer
+
+        @Value.Default default ClassInfo genConstraintAnalyzer() {
+            return ClassInfo.of(languageGenPackage(), shared().classSuffix() + "ConstraintAnalyzer");
         }
 
-        @Value.Derived default ResourcePath genConstraintAnalyzerFile() {
-            return genDirectory().appendSegment(genConstraintAnalyzerFileName());
-        }
+        Optional<ClassInfo> manualConstraintAnalyzer();
 
-        Optional<String> manualConstraintAnalyzerClass();
-
-        @Value.Derived default String constraintAnalyzerClass() {
-            if(classKind().isManual() && manualConstraintAnalyzerClass().isPresent()) {
-                return manualConstraintAnalyzerClass().get();
+        default ClassInfo constraintAnalyzer() {
+            if(classKind().isManual() && manualConstraintAnalyzer().isPresent()) {
+                return manualConstraintAnalyzer().get();
             }
-            return genConstraintAnalyzerFileName();
+            return genConstraintAnalyzer();
         }
 
+        // Constraint analyzer factory
 
-        @Value.Default default String genFactoryClass() {
-            return shared().classSuffix() + "ConstraintAnalyzerFactory";
+        @Value.Default default ClassInfo genFactory() {
+            return ClassInfo.of(languageGenPackage(), shared().classSuffix() + "ConstraintAnalyzerFactory");
         }
 
-        @Value.Derived default String genFactoryFileName() {
-            return genFactoryClass() + ".java";
-        }
+        Optional<ClassInfo> manualFactory();
 
-        @Value.Derived default ResourcePath genFactoryFile() {
-            return genDirectory().appendSegment(genFactoryFileName());
-        }
-
-        Optional<String> manualFactoryClass();
-
-        @Value.Derived default String factoryClass() {
-            if(classKind().isManual() && manualFactoryClass().isPresent()) {
-                return manualFactoryClass().get();
+        default ClassInfo factory() {
+            if(classKind().isManual() && manualFactory().isPresent()) {
+                return manualFactory().get();
             }
-            return genFactoryClass();
+            return genFactory();
         }
 
 
-        default void savePersistentProperties(Properties properties) {
-            shared().savePersistentProperties(properties);
-            properties.setProperty("genConstraintAnalyzerClass", genConstraintAnalyzerClass());
-            properties.setProperty("genFactoryClass", genFactoryClass());
+        /// Adapter project classes
+
+        @Value.Derived default ResourcePath adapterGenDirectory() {
+            return shared().adapterProject().genSourceSpoofaxJavaDirectory();
         }
+
+        default String taskDefGenPackage() {
+            return shared().adapterProject().packageId() + ".taskdef";
+        }
+
+        // Analyze
+
+        @Value.Default default ClassInfo genAnalyzeTaskDef() {
+            return ClassInfo.of(taskDefGenPackage(), shared().classSuffix() + "Analyze");
+        }
+
+        Optional<ClassInfo> manualAnalyzeTaskDef();
+
+        default ClassInfo analyzeTaskDef() {
+            if(classKind().isManual() && manualAnalyzeTaskDef().isPresent()) {
+                return manualAnalyzeTaskDef().get();
+            }
+            return genAnalyzeTaskDef();
+        }
+
 
         @Value.Check default void check() {
             final ClassKind kind = classKind();
             final boolean manual = kind.isManual();
             if(!manual) return;
-            if(!manualConstraintAnalyzerClass().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualConstraintAnalyzerClass' has not been set");
+            if(!manualConstraintAnalyzer().isPresent()) {
+                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualConstraintAnalyzer' has not been set");
             }
-            if(!manualFactoryClass().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualFactoryClass' has not been set");
+            if(!manualFactory().isPresent()) {
+                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualFactory' has not been set");
+            }
+            if(!manualAnalyzeTaskDef().isPresent()) {
+                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualAnalyzeTaskDef' has not been set");
             }
         }
     }
@@ -190,11 +227,19 @@ public class ConstraintAnalyzer {
     @Value.Immutable
     public interface AdapterProjectOutput extends Serializable {
         class Builder extends ConstraintAnalyzerData.AdapterProjectOutput.Builder {
-
+            public Builder fromInput(Input input) {
+                addAdditionalTaskDefs(input.analyzeTaskDef());
+                return this;
+            }
         }
 
         static Builder builder() {
             return new Builder();
         }
+
+
+        List<GradleConfiguredDependency> dependencies();
+
+        List<ClassInfo> additionalTaskDefs();
     }
 }

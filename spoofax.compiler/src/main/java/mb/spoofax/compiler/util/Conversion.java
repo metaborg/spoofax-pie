@@ -10,6 +10,18 @@ public class Conversion {
     }
 
 
+    public static String classIdToVariableId(String classId) {
+        if(classId.isEmpty()) {
+            throw new IllegalArgumentException("Cannot convert to Java variable identifier; empty string is not a valid class identifier");
+        }
+        final char firstChar = classId.charAt(0);
+        if(Character.isUpperCase(firstChar)) {
+            return Character.toLowerCase(firstChar) + classId.substring(1);
+        }
+        return '_' + classId;
+    }
+
+
     public static String nameToJavaId(String name) {
         final StringBuilder output = new StringBuilder();
         for(int i = 0; i < name.length(); i++) {

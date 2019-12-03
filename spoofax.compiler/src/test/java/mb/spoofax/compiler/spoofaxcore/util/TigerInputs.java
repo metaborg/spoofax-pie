@@ -96,6 +96,7 @@ public class TigerInputs {
     public static ConstraintAnalyzer.Input.Builder constraintAnalyzerBuilder(Shared shared) {
         return ConstraintAnalyzer.Input.builder()
             .shared(shared)
+            .parse(parser(shared))
             ;
     }
 

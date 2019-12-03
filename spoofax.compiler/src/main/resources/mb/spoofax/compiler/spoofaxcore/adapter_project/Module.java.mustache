@@ -4,10 +4,29 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
 import mb.log.api.LoggerFactory;
+import mb.pie.api.MapTaskDefs;
+import mb.pie.api.Pie;
+import mb.pie.api.PieSession;
+import mb.pie.api.TaskDef;
+import mb.pie.api.TaskDefs;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.LanguageScope;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
+
+import {{parser.factory.qualifiedId}};
+import {{parser.parser.qualifiedId}};
+{{#styler}}
+import {{this.factory.qualifiedId}};
+import {{this.styler.qualifiedId}};
+{{/styler}}
+{{#strategoRuntime}}
+import {{this.factory.qualifiedId}};
+{{/strategoRuntime}}
+{{#constraintAnalyzer}}
+import {{this.factory.qualifiedId}};
+import {{this.constraintAnalyzer.qualifiedId}};
+{{/constraintAnalyzer}}
 
 import javax.inject.Named;
 import java.util.HashSet;
@@ -16,35 +35,37 @@ import java.util.Set;
 @Module
 public class {{genModule.id}} {
     @Provides @LanguageScope
-    {{parser.factoryClass}} provideParserFactory() {
-        return new {{parser.factoryClass}}();
+    {{parser.factory.id}} provideParserFactory() {
+        return new {{parser.factory.id}}();
     }
 
     @Provides /* Unscoped: parser has state, so create a new parser every call. */
-    {{parser.parserClass}} provideParser({{parser.factoryClass}} parserFactory) {
+    {{parser.parser.id}} provideParser({{parser.factory.id}} parserFactory) {
         return parserFactory.create();
     }
-
 {{#styler}}
+
+
     @Provides @LanguageScope
-    {{this.factoryClass}} provideStylerFactory(LoggerFactory loggerFactory) {
-        return new {{this.factoryClass}}(loggerFactory);
+    {{this.factory.id}} provideStylerFactory(LoggerFactory loggerFactory) {
+        return new {{this.factory.id}}(loggerFactory);
     }
 
     @Provides @LanguageScope
-    {{this.stylerClass}} provideStyler({{this.factoryClass}} stylerFactory) {
+    {{this.styler.id}} provideStyler({{this.factory.id}} stylerFactory) {
         return stylerFactory.create();
     }
 {{/styler}}
-
 {{#strategoRuntime}}
+
+
     @Provides @LanguageScope
-    {{this.factoryClass}} provideStrategoRuntimeBuilderFactory() {
-        return new {{this.factoryClass}}();
+    {{this.factory.id}} provideStrategoRuntimeBuilderFactory() {
+        return new {{this.factory.id}}();
     }
 
     @Provides @LanguageScope
-    StrategoRuntimeBuilder provideStrategoRuntimeBuilder({{this.factoryClass}} factory) {
+    StrategoRuntimeBuilder provideStrategoRuntimeBuilder({{this.factory.id}} factory) {
         return factory.create();
     }
 
@@ -53,59 +74,35 @@ public class {{genModule.id}} {
         return builder.build();
     }
 {{/strategoRuntime}}
-
 {{#constraintAnalyzer}}
+
+
     @Provides @LanguageScope
-    {{this.factoryClass}} provideConstraintAnalyzerFactory(StrategoRuntime prototypeStrategoRuntime) {
-        return new {{this.factoryClass}}(prototypeStrategoRuntime);
+    {{this.factory.id}} provideConstraintAnalyzerFactory(StrategoRuntime prototypeStrategoRuntime) {
+        return new {{this.factory.id}}(prototypeStrategoRuntime);
     }
 
     @Provides @LanguageScope
-    {{this.constraintAnalyzerClass}} provideConstraintAnalyzer({{this.factoryClass}} factory) {
+    {{this.constraintAnalyzer.id}} provideConstraintAnalyzer({{this.factory.id}} factory) {
         return factory.create();
     }
 {{/constraintAnalyzer}}
 
+
     @Provides @LanguageScope @Named("language") @ElementsIntoSet
     static Set<TaskDef<?, ?>> provideTaskDefsSet(
-        TigerParse parse,
-        TigerAnalyze analyze,
-
-        TigerListLiteralVals listLiteralVals,
-        TigerListDefNames listDefNames,
-
-        TigerTokenize tokenize,
-        TigerStyle style,
-        TigerCheck check,
-
-        TigerShowParsedAst showParsedAst,
-        TigerShowPrettyPrintedText showPrettyPrintedText,
-        TigerShowAnalyzedAst showAnalyzedAst,
-        TigerShowDesugaredAst showDesugaredAst,
-        TigerCompileFile compileFile,
-        TigerAltCompileFile altCompileFile,
-        TigerCompileDirectory compileDirectory
+        {{tokenizeTaskDefNameType.type}} {{tokenizeTaskDefNameType.name}},
+        {{checkTaskDefNameType.type}} {{checkTaskDefNameType.name}},
+        {{styleTaskDefNameType.type}} {{styleTaskDefNameType.name}}{{#additionalTaskDefs}},
+        {{this.type}} {{this.name}}{{/additionalTaskDefs}}
     ) {
         final HashSet<TaskDef<?, ?>> taskDefs = new HashSet<>();
-
-        taskDefs.add(parse);
-        taskDefs.add(analyze);
-
-        taskDefs.add(listLiteralVals);
-        taskDefs.add(listDefNames);
-
-        taskDefs.add(tokenize);
-        taskDefs.add(style);
-        taskDefs.add(check);
-
-        taskDefs.add(showParsedAst);
-        taskDefs.add(showPrettyPrintedText);
-        taskDefs.add(showAnalyzedAst);
-        taskDefs.add(showDesugaredAst);
-        taskDefs.add(compileFile);
-        taskDefs.add(altCompileFile);
-        taskDefs.add(compileDirectory);
-
+        taskDefs.add({{tokenizeTaskDefNameType.name}});
+        taskDefs.add({{checkTaskDefNameType.name}});
+        taskDefs.add({{styleTaskDefNameType.name}});
+{{#additionalTaskDefs}}
+        taskDefs.add({{this.name}});
+{{/additionalTaskDefs}}
         return taskDefs;
     }
 
@@ -116,8 +113,8 @@ public class {{genModule.id}} {
 
 
     @Provides @LanguageScope
-    LanguageInstance provideLanguageInstance({{genInstanceClass}} tigerInstance) {
-        return tigerInstance;
+    LanguageInstance provideLanguageInstance({{genInstance.id}} instance) {
+        return instance;
     }
 
     @Provides /* Unscoped: new session every call. */

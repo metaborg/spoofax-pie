@@ -42,4 +42,9 @@ public interface ClassInfo extends Serializable {
     default ResourcePath file(ResourcePath base) {
         return base.appendRelativePath(qualifiedPath());
     }
+
+
+    default String asVariableId() {
+        return Conversion.classIdToVariableId(id());
+    }
 }

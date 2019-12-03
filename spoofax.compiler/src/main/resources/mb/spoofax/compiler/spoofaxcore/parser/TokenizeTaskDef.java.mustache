@@ -7,6 +7,8 @@ import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import {{parseTaskDef.qualifiedId}};
+
 import javax.inject.Inject;
 import java.util.ArrayList;
 
@@ -18,7 +20,7 @@ public class {{tokenizeTaskDef.id}} implements TaskDef<ResourceKey, @Nullable Ar
     }
 
     @Override public String getId() {
-        return getClass().getName();
+        return "{{tokenizeTaskDef.qualifiedId}}";
     }
 
     @Override

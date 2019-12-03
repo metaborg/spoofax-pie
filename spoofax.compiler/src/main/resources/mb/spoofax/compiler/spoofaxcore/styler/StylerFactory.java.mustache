@@ -3,6 +3,9 @@ package {{genFactory.packageId}};
 import mb.log.api.LoggerFactory;
 import mb.spoofax.compiler.interfaces.spoofaxcore.StylerFactory;
 
+import {{genRules.qualifiedId}};
+import {{genStyler.qualifiedId}};
+
 public class {{genFactory.id}} implements StylerFactory {
     private final {{genRules.id}} stylingRules;
     private final LoggerFactory loggerFactory;

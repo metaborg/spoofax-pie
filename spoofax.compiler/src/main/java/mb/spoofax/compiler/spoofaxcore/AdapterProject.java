@@ -7,9 +7,10 @@ import mb.spoofax.compiler.util.ClassInfo;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
-import mb.spoofax.compiler.util.GradleProject;
+import mb.spoofax.compiler.util.NameType;
 import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.TemplateCompiler;
+import mb.spoofax.compiler.util.UniqueNamer;
 import org.immutables.value.Value;
 
 import java.io.IOException;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 public class AdapterProject {
     private final Template buildGradleTemplate;
     private final Template settingsGradleTemplate;
+    private final Template checkTaskDefTemplate;
     private final Template componentTemplate;
     private final Template moduleTemplate;
     private final Template instanceTemplate;
@@ -39,6 +41,7 @@ public class AdapterProject {
     private AdapterProject(
         Template buildGradleTemplate,
         Template settingsGradleTemplate,
+        Template checkTaskDefTemplate,
         Template componentTemplate,
         Template moduleTemplate,
         Template instanceTemplate,
@@ -53,6 +56,7 @@ public class AdapterProject {
         this.componentTemplate = componentTemplate;
         this.moduleTemplate = moduleTemplate;
         this.instanceTemplate = instanceTemplate;
+        this.checkTaskDefTemplate = checkTaskDefTemplate;
         this.resourceService = resourceService;
         this.buildGradleTemplate = buildGradleTemplate;
         this.charset = charset;
@@ -74,6 +78,7 @@ public class AdapterProject {
         return new AdapterProject(
             templateCompiler.compile("adapter_project/build.gradle.kts.mustache"),
             templateCompiler.compile("gradle_project/settings.gradle.kts.mustache"),
+            templateCompiler.compile("adapter_project/CheckTaskDef.java.mustache"),
             templateCompiler.compile("adapter_project/Component.java.mustache"),
             templateCompiler.compile("adapter_project/Module.java.mustache"),
             templateCompiler.compile("adapter_project/Instance.java.mustache"),
@@ -90,7 +95,7 @@ public class AdapterProject {
     public Output compile(Input input) throws IOException {
         final Shared shared = input.shared();
 
-        resourceService.getHierarchicalResource(input.genDirectory()).ensureDirectoryExists();
+        resourceService.getHierarchicalResource(input.gradleGenDirectory()).ensureDirectoryExists();
 
         final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
         dependencies.add(GradleConfiguredDependency.api(input.languageProjectDependency()));
@@ -123,11 +128,19 @@ public class AdapterProject {
 
         final Parser.AdapterProjectOutput parserOutput = parserCompiler.compileAdapterProject(input.parser());
         final Optional<Styler.AdapterProjectOutput> stylerOutput;
+        final Optional<StrategoRuntime.AdapterProjectOutput> strategoRuntimeOutput;
         final Optional<ConstraintAnalyzer.AdapterProjectOutput> constraintAnalyzerOutput;
         try {
             stylerOutput = input.styler().map((i) -> {
                 try {
                     return stylerCompiler.compileAdapterProject(i);
+                } catch(IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            });
+            strategoRuntimeOutput = input.strategoRuntime().map((i) -> {
+                try {
+                    return strategoRuntimeCompiler.compileAdapterProject(i);
                 } catch(IOException e) {
                     throw new UncheckedIOException(e);
                 }
@@ -143,25 +156,50 @@ public class AdapterProject {
             throw e.getCause();
         }
 
-        // TODO: enable when working
-//        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genComponentFile()), charset)) {
-//            componentTemplate.execute(input, writer);
-//            writer.flush();
-//        }
-//
-//        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genModuleFile()), charset)) {
-//            moduleTemplate.execute(input, writer);
-//            writer.flush();
-//        }
-//
-//        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genInstanceFile()), charset)) {
-//            instanceTemplate.execute(input, writer);
-//            writer.flush();
-//        }
+        final ResourcePath classesGenDirectory = input.classesGenDirectory();
+        resourceService.getHierarchicalResource(classesGenDirectory).ensureDirectoryExists();
+
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.checkTaskDef().file(classesGenDirectory)).createParents(), charset)) {
+            checkTaskDefTemplate.execute(input, writer);
+            writer.flush();
+        }
+
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genComponent().file(classesGenDirectory)).createParents(), charset)) {
+            componentTemplate.execute(input, writer);
+            writer.flush();
+        }
+
+        final UniqueNamer uniqueNamer = new UniqueNamer();
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("tokenizeTaskDefNameType", new NameType(uniqueNamer.makeUnique(input.parser().tokenizeTaskDef().asVariableId()), input.parser().tokenizeTaskDef().qualifiedId()));
+        map.put("checkTaskDefNameType", new NameType(uniqueNamer.makeUnique(input.checkTaskDef().asVariableId()), input.checkTaskDef().qualifiedId()));
+        if(input.styler().isPresent()) {
+            final ClassInfo styleTaskDef = input.styler().get().styleTaskDef();
+            map.put("styleTaskDefNameType", new NameType(uniqueNamer.makeUnique(styleTaskDef.asVariableId()), styleTaskDef.qualifiedId()));
+        } else {
+            map.put("styleTaskDefNameType", new NameType(uniqueNamer.makeUnique("nullStyler"), "mb.spoofax.core.language.taskdef.NullStyler"));
+        }
+        final ArrayList<NameType> additionalTaskDefs = new ArrayList<>();
+        parserOutput.additionalTaskDefs().forEach((ci) -> additionalTaskDefs.add(new NameType(uniqueNamer.makeUnique(ci.asVariableId()), ci.qualifiedId())));
+        stylerOutput.ifPresent(o -> o.additionalTaskDefs().forEach((ci) -> additionalTaskDefs.add(new NameType(uniqueNamer.makeUnique(ci.asVariableId()), ci.qualifiedId()))));
+        strategoRuntimeOutput.ifPresent(o -> o.additionalTaskDefs().forEach((ci) -> additionalTaskDefs.add(new NameType(uniqueNamer.makeUnique(ci.asVariableId()), ci.qualifiedId()))));
+        constraintAnalyzerOutput.ifPresent(o -> o.additionalTaskDefs().forEach((ci) -> additionalTaskDefs.add(new NameType(uniqueNamer.makeUnique(ci.asVariableId()), ci.qualifiedId()))));
+        map.put("additionalTaskDefs", additionalTaskDefs);
+
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genModule().file(classesGenDirectory)).createParents(), charset)) {
+            moduleTemplate.execute(input, map, writer);
+            writer.flush();
+        }
+
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genInstance().file(classesGenDirectory)).createParents(), charset)) {
+            instanceTemplate.execute(input, map, writer);
+            writer.flush();
+        }
 
         return Output.builder()
             .parser(parserOutput)
             .styler(stylerOutput)
+            .strategoRuntime(strategoRuntimeOutput)
             .constraintAnalyzer(constraintAnalyzerOutput)
             .build();
     }
@@ -187,14 +225,21 @@ public class AdapterProject {
         Optional<ConstraintAnalyzer.Input> constraintAnalyzer();
 
 
-        /// Gradle build files and configuration
+        /// Configuration
 
         GradleDependency languageProjectDependency();
 
         List<GradleConfiguredDependency> additionalDependencies();
 
+
+        /// Gradle files
+
+        default ResourcePath gradleGenDirectory() {
+            return shared().adapterProject().baseDirectory();
+        }
+
         @Value.Default default ResourcePath buildGradleKtsFile() {
-            return shared().adapterProject().baseDirectory().appendRelativePath("build.gradle.kts");
+            return gradleGenDirectory().appendRelativePath("build.gradle.kts");
         }
 
         @Value.Default default boolean standaloneProject() {
@@ -203,7 +248,7 @@ public class AdapterProject {
 
         @Value.Default @SuppressWarnings("immutables:untype") default Optional<ResourcePath> settingsGradleKtsFile() {
             if(standaloneProject()) {
-                return Optional.of(shared().adapterProject().baseDirectory().appendRelativePath("settings.gradle.kts"));
+                return Optional.of(gradleGenDirectory().appendRelativePath("settings.gradle.kts"));
             } else {
                 return Optional.empty();
             }
@@ -219,7 +264,7 @@ public class AdapterProject {
 
         /// Adapter project classes
 
-        @Value.Derived default ResourcePath genDirectory() {
+        default ResourcePath classesGenDirectory() {
             return shared().adapterProject().genSourceSpoofaxJavaDirectory();
         }
 
@@ -271,6 +316,47 @@ public class AdapterProject {
             }
             return genInstance();
         }
+
+
+        /// Adapter project task definitions
+
+        default String taskDefGenPackage() {
+            return shared().adapterProject().packageId() + ".taskdef";
+        }
+
+        // Check task definition
+
+        @Value.Default default ClassInfo genCheckTaskDef() {
+            return ClassInfo.of(taskDefGenPackage(), shared().classSuffix() + "Check");
+        }
+
+        Optional<ClassInfo> manualCheckTaskDef();
+
+        default ClassInfo checkTaskDef() {
+            if(classKind().isManual() && manualCheckTaskDef().isPresent()) {
+                return manualCheckTaskDef().get();
+            }
+            return genCheckTaskDef();
+        }
+
+
+        @Value.Check default void check() {
+            final ClassKind kind = classKind();
+            final boolean manual = kind.isManual();
+            if(!manual) return;
+            if(!manualComponent().isPresent()) {
+                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualComponent' has not been set");
+            }
+            if(!manualModule().isPresent()) {
+                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualModule' has not been set");
+            }
+            if(!manualInstance().isPresent()) {
+                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualInstance' has not been set");
+            }
+            if(!manualCheckTaskDef().isPresent()) {
+                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualCheckTaskDef' has not been set");
+            }
+        }
     }
 
     @Value.Immutable
@@ -285,6 +371,8 @@ public class AdapterProject {
         Parser.AdapterProjectOutput parser();
 
         Optional<Styler.AdapterProjectOutput> styler();
+
+        Optional<StrategoRuntime.AdapterProjectOutput> strategoRuntime();
 
         Optional<ConstraintAnalyzer.AdapterProjectOutput> constraintAnalyzer();
     }

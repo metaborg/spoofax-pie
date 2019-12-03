@@ -197,7 +197,7 @@ public class Parser {
             return shared().adapterProject().packageId() + ".taskdef";
         }
 
-        // Parse
+        // Parse task definition
 
         @Value.Default default ClassInfo genParseTaskDef() {
             return ClassInfo.of(taskDefGenPackage(), shared().classSuffix() + "Parse");
@@ -212,7 +212,7 @@ public class Parser {
             return genParseTaskDef();
         }
 
-        // Tokenize
+        // Tokenize task definition
 
         @Value.Default default ClassInfo genTokenizeTaskDef() {
             return ClassInfo.of(taskDefGenPackage(), shared().classSuffix() + "Tokenize");
@@ -271,10 +271,8 @@ public class Parser {
     public interface AdapterProjectOutput extends Serializable {
         class Builder extends ParserData.AdapterProjectOutput.Builder {
             public Builder fromInput(Input input) {
-                factory(input.factory());
-                parser(input.parser());
-                parseTaskDef(input.parseTaskDef());
-                tokenizeTaskDef(input.tokenizeTaskDef());
+                addAdditionalTaskDefs(input.parseTaskDef());
+                // Do not add tokenize task definition, as it is handled explicitly.
                 return this;
             }
         }
@@ -284,12 +282,8 @@ public class Parser {
         }
 
 
-        ClassInfo factory();
+        List<GradleConfiguredDependency> dependencies();
 
-        ClassInfo parser();
-
-        ClassInfo parseTaskDef();
-
-        ClassInfo tokenizeTaskDef();
+        List<ClassInfo> additionalTaskDefs();
     }
 }
