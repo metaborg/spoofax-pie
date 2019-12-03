@@ -3,10 +3,9 @@ package mb.spoofax.compiler.spoofaxcore;
 import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.BuilderBase;
+import mb.spoofax.compiler.util.ClassInfo;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
-import mb.spoofax.compiler.util.GradleProject;
 import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import org.immutables.value.Value;
@@ -16,18 +15,26 @@ import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Optional;
-import java.util.Properties;
 
 @Value.Enclosing
 public class Styler {
     private final Template rulesTemplate;
     private final Template stylerTemplate;
     private final Template factoryTemplate;
+    private final Template styleTaskDefTemplate;
     private final ResourceService resourceService;
     private final Charset charset;
 
 
-    private Styler(Template rulesTemplate, Template stylerTemplate, Template factoryTemplate, ResourceService resourceService, Charset charset) {
+    private Styler(
+        Template rulesTemplate,
+        Template stylerTemplate,
+        Template factoryTemplate,
+        Template styleTaskDefTemplate,
+        ResourceService resourceService,
+        Charset charset
+    ) {
+        this.styleTaskDefTemplate = styleTaskDefTemplate;
         this.resourceService = resourceService;
         this.rulesTemplate = rulesTemplate;
         this.stylerTemplate = stylerTemplate;
@@ -35,12 +42,16 @@ public class Styler {
         this.charset = charset;
     }
 
-    public static Styler fromClassLoaderResources(ResourceService resourceService, Charset charset) {
+    public static Styler fromClassLoaderResources(
+        ResourceService resourceService,
+        Charset charset
+    ) {
         final TemplateCompiler templateCompiler = new TemplateCompiler(Styler.class);
         return new Styler(
             templateCompiler.compile("styler/StylingRules.java.mustache"),
             templateCompiler.compile("styler/Styler.java.mustache"),
             templateCompiler.compile("styler/StylerFactory.java.mustache"),
+            templateCompiler.compile("styler/StyleTaskDef.java.mustache"),
             resourceService,
             charset
         );
@@ -51,19 +62,20 @@ public class Styler {
         final LanguageProjectOutput output = LanguageProjectOutput.builder().from(input).build();
         if(input.classKind().isManualOnly()) return output; // Nothing to generate: return.
 
-        resourceService.getHierarchicalResource(input.genDirectory()).ensureDirectoryExists();
+        final ResourcePath genDirectory = input.languageGenDirectory();
+        resourceService.getHierarchicalResource(genDirectory).ensureDirectoryExists();
 
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genRulesFile()), charset)) {
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genRules().file(genDirectory)).createParents(), charset)) {
             rulesTemplate.execute(input, writer);
             writer.flush();
         }
 
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genStylerFile()), charset)) {
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genStyler().file(genDirectory)).createParents(), charset)) {
             stylerTemplate.execute(input, writer);
             writer.flush();
         }
 
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genFactoryFile()), charset)) {
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genFactory().file(genDirectory)).createParents(), charset)) {
             factoryTemplate.execute(input, writer);
             writer.flush();
         }
@@ -72,20 +84,24 @@ public class Styler {
     }
 
     public AdapterProjectOutput compileAdapterProject(Input input) throws IOException {
-        return AdapterProjectOutput.builder().build();
+        final AdapterProjectOutput output = AdapterProjectOutput.builder().fromInput(input).build();
+        if(input.classKind().isManualOnly()) return output; // Nothing to generate: return.
+
+        final ResourcePath genDirectory = input.adapterGenDirectory();
+        resourceService.getHierarchicalResource(genDirectory).ensureDirectoryExists();
+
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genStyleTaskDef().file(genDirectory)).createParents(), charset)) {
+            styleTaskDefTemplate.execute(input, writer);
+            writer.flush();
+        }
+
+        return output;
     }
 
 
     @Value.Immutable
     public interface Input extends Serializable {
-        class Builder extends StylerData.Input.Builder implements BuilderBase {
-            public Builder withPersistentProperties(Properties properties) {
-                with(properties, "genRulesClass", this::genRulesClass);
-                with(properties, "genStylerClass", this::genStylerClass);
-                with(properties, "genFactoryClass", this::genFactoryClass);
-                return this;
-            }
-        }
+        class Builder extends StylerData.Input.Builder {}
 
         static Builder builder() {
             return new Builder();
@@ -94,6 +110,10 @@ public class Styler {
 
         Shared shared();
 
+        Parser.Input parser();
+
+
+        /// Packed ESV source file (to copy from), and destination file
 
         @Value.Default default String packedESVSourceRelPath() {
             return "target/metaborg/editor.esv.af";
@@ -104,89 +124,98 @@ public class Styler {
         }
 
 
+        /// Kinds of classes (generated/extended/manual)
+
         @Value.Default default ClassKind classKind() {
             return ClassKind.Generated;
         }
 
-        @Value.Derived default ResourcePath genDirectory() {
-            final GradleProject languageProject = shared().languageProject();
-            return languageProject.genSourceSpoofaxJavaDirectory().appendRelativePath(languageProject.packagePath());
+
+        /// Language project classes
+
+        default ResourcePath languageGenDirectory() {
+            return shared().languageProject().genSourceSpoofaxJavaDirectory();
         }
 
-
-        @Value.Default default String genRulesClass() {
-            return shared().classSuffix() + "StylingRules";
+        default String languageGenPackage() {
+            return shared().languageProject().packageId();
         }
 
-        @Value.Derived default String genRulesFileName() {
-            return genRulesClass() + ".java";
+        // Styling rules
+
+        @Value.Default default ClassInfo genRules() {
+            return ClassInfo.of(languageGenPackage(), shared().classSuffix() + "StylingRules");
         }
 
-        @Value.Derived default ResourcePath genRulesFile() {
-            return genDirectory().appendSegment(genRulesFileName());
+        // Styler
+
+        @Value.Default default ClassInfo genStyler() {
+            return ClassInfo.of(languageGenPackage(), shared().classSuffix() + "Styler");
         }
 
+        Optional<ClassInfo> manualStyler();
 
-        @Value.Default default String genStylerClass() {
-            return shared().classSuffix() + "Styler";
-        }
-
-        @Value.Derived default String genStylerFileName() {
-            return genStylerClass() + ".java";
-        }
-
-        @Value.Derived default ResourcePath genStylerFile() {
-            return genDirectory().appendSegment(genStylerFileName());
-        }
-
-        Optional<String> manualStylerClass();
-
-        @Value.Derived default String stylerClass() {
-            if(classKind().isManual() && manualStylerClass().isPresent()) {
-                return manualStylerClass().get();
+        default ClassInfo styler() {
+            if(classKind().isManual() && manualStyler().isPresent()) {
+                return manualStyler().get();
             }
-            return genStylerClass();
+            return genStyler();
         }
 
+        // Styler factory
 
-        @Value.Default default String genFactoryClass() {
-            return shared().classSuffix() + "StylerFactory";
+        @Value.Default default ClassInfo genFactory() {
+            return ClassInfo.of(languageGenPackage(), shared().classSuffix() + "StylerFactory");
         }
 
-        @Value.Derived default String genFactoryFileName() {
-            return genFactoryClass() + ".java";
-        }
+        Optional<ClassInfo> manualFactory();
 
-        @Value.Derived default ResourcePath genFactoryFile() {
-            return genDirectory().appendSegment(genFactoryFileName());
-        }
-
-        Optional<String> manualFactoryClass();
-
-        @Value.Derived default String factoryClass() {
-            if(classKind().isManual() && manualFactoryClass().isPresent()) {
-                return manualFactoryClass().get();
+        default ClassInfo factory() {
+            if(classKind().isManual() && manualFactory().isPresent()) {
+                return manualFactory().get();
             }
-            return genFactoryClass();
+            return genFactory();
         }
 
 
-        default void savePersistentProperties(Properties properties) {
-            shared().savePersistentProperties(properties);
-            properties.setProperty("genRulesClass", genRulesClass());
-            properties.setProperty("genStylerClass", genStylerClass());
-            properties.setProperty("genFactoryClass", genFactoryClass());
+        /// Adapter project classes
+
+        @Value.Derived default ResourcePath adapterGenDirectory() {
+            return shared().adapterProject().genSourceSpoofaxJavaDirectory();
         }
+
+        default String taskDefGenPackage() {
+            return shared().adapterProject().packageId() + ".taskdef";
+        }
+
+        // Style
+
+        @Value.Default default ClassInfo genStyleTaskDef() {
+            return ClassInfo.of(taskDefGenPackage(), shared().classSuffix() + "Style");
+        }
+
+        Optional<ClassInfo> manualStyleTaskDef();
+
+        default ClassInfo styleTaskDef() {
+            if(classKind().isManual() && manualStyleTaskDef().isPresent()) {
+                return manualStyleTaskDef().get();
+            }
+            return genStyleTaskDef();
+        }
+
 
         @Value.Check default void check() {
             final ClassKind kind = classKind();
             final boolean manual = kind.isManual();
             if(!manual) return;
-            if(!manualStylerClass().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualStylerClass' has not been set");
+            if(!manualStyler().isPresent()) {
+                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualStyler' has not been set");
             }
-            if(!manualFactoryClass().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualFactoryClass' has not been set");
+            if(!manualFactory().isPresent()) {
+                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualFactory' has not been set");
+            }
+            if(!manualStyleTaskDef().isPresent()) {
+                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualStyleTaskDef' has not been set");
             }
         }
     }
@@ -214,11 +243,23 @@ public class Styler {
     @Value.Immutable
     public interface AdapterProjectOutput extends Serializable {
         class Builder extends StylerData.AdapterProjectOutput.Builder {
-
+            public AdapterProjectOutput.Builder fromInput(Input input) {
+                factory(input.factory());
+                styler(input.styler());
+                styleTaskDef(input.styleTaskDef());
+                return this;
+            }
         }
 
         static Builder builder() {
             return new Builder();
         }
+
+
+        ClassInfo factory();
+
+        ClassInfo styler();
+
+        ClassInfo styleTaskDef();
     }
 }

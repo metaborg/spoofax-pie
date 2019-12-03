@@ -3,6 +3,7 @@ package mb.spoofax.compiler.spoofaxcore;
 import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.util.ClassInfo;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
@@ -195,6 +196,12 @@ public class AdapterProject {
         Optional<ConstraintAnalyzer.Input> constraintAnalyzer();
 
 
+        /// Gradle build files and configuration
+
+        GradleDependency languageProjectDependency();
+
+        List<GradleConfiguredDependency> additionalDependencies();
+
         @Value.Default default ResourcePath buildGradleKtsFile() {
             return shared().adapterProject().baseDirectory().appendRelativePath("build.gradle.kts");
         }
@@ -212,64 +219,67 @@ public class AdapterProject {
         }
 
 
+        /// Kinds of classes (generated/extended/manual)
+
         @Value.Default default ClassKind classKind() {
             return ClassKind.Generated;
         }
 
+
+        /// Adapter project classes
+
         @Value.Derived default ResourcePath genDirectory() {
-            final GradleProject adapterProject = shared().adapterProject();
-            return adapterProject.genSourceSpoofaxJavaDirectory().appendRelativePath(adapterProject.packagePath());
+            return shared().adapterProject().genSourceSpoofaxJavaDirectory();
         }
 
-
-        Optional<String> manualInstanceClass();
-
-        @Value.Default default String genInstanceClass() {
-            return shared().classSuffix() + "Instance";
+        default String genPackage() {
+            return shared().adapterProject().packageId();
         }
 
-        @Value.Derived default String genInstanceFileName() {
-            return genInstanceClass() + ".java";
+        // Dagger component
+
+        @Value.Default default ClassInfo genComponent() {
+            return ClassInfo.of(genPackage(), shared().classSuffix() + "Component");
         }
 
-        @Value.Derived default ResourcePath genInstanceFile() {
-            return genDirectory().appendSegment(genInstanceFileName());
+        Optional<ClassInfo> manualComponent();
+
+        default ClassInfo component() {
+            if(classKind().isManual() && manualComponent().isPresent()) {
+                return manualComponent().get();
+            }
+            return genComponent();
         }
 
+        // Dagger module
 
-        Optional<String> manualModuleClass();
-
-        @Value.Default default String genModuleClass() {
-            return shared().classSuffix() + "Module";
+        @Value.Default default ClassInfo genModule() {
+            return ClassInfo.of(genPackage(), shared().classSuffix() + "Module");
         }
 
-        @Value.Derived default String genModuleFileName() {
-            return genModuleClass() + ".java";
+        Optional<ClassInfo> manualModule();
+
+        default ClassInfo module() {
+            if(classKind().isManual() && manualModule().isPresent()) {
+                return manualModule().get();
+            }
+            return genModule();
         }
 
-        @Value.Derived default ResourcePath genModuleFile() {
-            return genDirectory().appendSegment(genModuleFileName());
+        // Language instance
+
+        @Value.Default default ClassInfo genInstance() {
+            return ClassInfo.of(genPackage(), shared().classSuffix() + "Instance");
         }
 
+        Optional<ClassInfo> manualInstance();
 
-        Optional<String> manualComponentClass();
-
-        @Value.Default default String genComponentClass() {
-            return shared().classSuffix() + "Component";
+        default ClassInfo instance() {
+            if(classKind().isManual() && manualInstance().isPresent()) {
+                return manualInstance().get();
+            }
+            return genInstance();
         }
-
-        @Value.Derived default String genComponentFileName() {
-            return genComponentClass() + ".java";
-        }
-
-        @Value.Derived default ResourcePath genComponentFile() {
-            return genDirectory().appendSegment(genComponentFileName());
-        }
-
-
-        GradleDependency languageProjectDependency();
-
-        List<GradleConfiguredDependency> additionalDependencies();
     }
 
     @Value.Immutable

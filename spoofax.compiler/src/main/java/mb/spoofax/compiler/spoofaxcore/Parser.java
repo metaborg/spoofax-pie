@@ -63,19 +63,20 @@ public class Parser {
         final LanguageProjectOutput output = LanguageProjectOutput.builder().fromInput(input).build();
         if(input.classKind().isManualOnly()) return output; // Nothing to generate: return.
 
-        resourceService.getHierarchicalResource(input.languageGenDirectory()).ensureDirectoryExists();
+        final ResourcePath genDirectory = input.languageGenDirectory();
+        resourceService.getHierarchicalResource(genDirectory).ensureDirectoryExists();
 
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genTable().file(input.languageGenDirectory())).createParents(), charset)) {
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genTable().file(genDirectory)).createParents(), charset)) {
             tableTemplate.execute(input, writer);
             writer.flush();
         }
 
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genParser().file(input.languageGenDirectory())).createParents(), charset)) {
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genParser().file(genDirectory)).createParents(), charset)) {
             parserTemplate.execute(input, writer);
             writer.flush();
         }
 
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genFactory().file(input.languageGenDirectory())).createParents(), charset)) {
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genFactory().file(genDirectory)).createParents(), charset)) {
             factoryTemplate.execute(input, writer);
             writer.flush();
         }
@@ -87,12 +88,15 @@ public class Parser {
         final AdapterProjectOutput output = AdapterProjectOutput.builder().fromInput(input).build();
         if(input.classKind().isManualOnly()) return output; // Nothing to generate: return.
 
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genParseTaskDef().file(input.adapterGenDirectory())).createParents(), charset)) {
+        final ResourcePath genDirectory = input.adapterGenDirectory();
+        resourceService.getHierarchicalResource(genDirectory).ensureDirectoryExists();
+
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genParseTaskDef().file(genDirectory)).createParents(), charset)) {
             parseTaskDefTemplate.execute(input, writer);
             writer.flush();
         }
 
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genTokenizeTaskDef().file(input.adapterGenDirectory())).createParents(), charset)) {
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genTokenizeTaskDef().file(genDirectory)).createParents(), charset)) {
             tokenizeTaskDefTemplate.execute(input, writer);
             writer.flush();
         }
@@ -138,20 +142,24 @@ public class Parser {
 
         /// Language project classes
 
-        @Value.Derived default ResourcePath languageGenDirectory() {
+        default ResourcePath languageGenDirectory() {
             return shared().languageProject().genSourceSpoofaxJavaDirectory();
         }
 
-        // ParseTable
+        default String languageGenPackage() {
+            return shared().languageProject().packageId();
+        }
+
+        // Parse table
 
         @Value.Default default ClassInfo genTable() {
-            return ClassInfo.of(shared().languageProject().packageId(), shared().classSuffix() + "ParseTable");
+            return ClassInfo.of(languageGenPackage(), shared().classSuffix() + "ParseTable");
         }
 
         // Parser
 
         @Value.Default default ClassInfo genParser() {
-            return ClassInfo.of(shared().languageProject().packageId(), shared().classSuffix() + "Parser");
+            return ClassInfo.of(languageGenPackage(), shared().classSuffix() + "Parser");
         }
 
         Optional<ClassInfo> manualParser();
@@ -163,10 +171,10 @@ public class Parser {
             return genParser();
         }
 
-        // ParserFactory
+        // Parser factory
 
         @Value.Default default ClassInfo genFactory() {
-            return ClassInfo.of(shared().languageProject().packageId(), shared().classSuffix() + "ParserFactory");
+            return ClassInfo.of(languageGenPackage(), shared().classSuffix() + "ParserFactory");
         }
 
         Optional<ClassInfo> manualFactory();
@@ -185,10 +193,14 @@ public class Parser {
             return shared().adapterProject().genSourceSpoofaxJavaDirectory();
         }
 
+        default String taskDefGenPackage() {
+            return shared().adapterProject().packageId() + ".taskdef";
+        }
+
         // Parse
 
         @Value.Default default ClassInfo genParseTaskDef() {
-            return ClassInfo.of(shared().languageProject().packageId(), shared().classSuffix() + "Parse");
+            return ClassInfo.of(taskDefGenPackage(), shared().classSuffix() + "Parse");
         }
 
         Optional<ClassInfo> manualParseTaskDef();
@@ -203,7 +215,7 @@ public class Parser {
         // Tokenize
 
         @Value.Default default ClassInfo genTokenizeTaskDef() {
-            return ClassInfo.of(shared().languageProject().packageId(), shared().classSuffix() + "Tokenize");
+            return ClassInfo.of(taskDefGenPackage(), shared().classSuffix() + "Tokenize");
         }
 
         Optional<ClassInfo> manualTokenizeTaskDef();
@@ -216,23 +228,21 @@ public class Parser {
         }
 
 
-        /// Check function
-
         @Value.Check default void check() {
             final ClassKind kind = classKind();
             final boolean manual = kind.isManual();
             if(!manual) return;
             if(!manualParser().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualParserClass' has not been set");
+                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualParser' has not been set");
             }
             if(!manualFactory().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualFactoryClass' has not been set");
+                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualFactory' has not been set");
             }
             if(!manualParseTaskDef().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualParseTaskDefClass' has not been set");
+                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualParseTaskDef' has not been set");
             }
             if(!manualTokenizeTaskDef().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualTokenizeTaskDefClass' has not been set");
+                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualTokenizeTaskDef' has not been set");
             }
         }
     }
@@ -261,10 +271,10 @@ public class Parser {
     public interface AdapterProjectOutput extends Serializable {
         class Builder extends ParserData.AdapterProjectOutput.Builder {
             public Builder fromInput(Input input) {
-                factoryClass(input.factory());
-                parserClass(input.parser());
-                parseTaskClass(input.parseTaskDef());
-                tokenizeTaskClass(input.tokenizeTaskDef());
+                factory(input.factory());
+                parser(input.parser());
+                parseTaskDef(input.parseTaskDef());
+                tokenizeTaskDef(input.tokenizeTaskDef());
                 return this;
             }
         }
@@ -274,12 +284,12 @@ public class Parser {
         }
 
 
-        ClassInfo factoryClass();
+        ClassInfo factory();
 
-        ClassInfo parserClass();
+        ClassInfo parser();
 
-        ClassInfo parseTaskClass();
+        ClassInfo parseTaskDef();
 
-        ClassInfo tokenizeTaskClass();
+        ClassInfo tokenizeTaskDef();
     }
 }

@@ -1,4 +1,4 @@
-package {{shared.adapterProject.packageId}};
+package {{genModule.packageId}};
 
 import dagger.Module;
 import dagger.Provides;
@@ -14,7 +14,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Module
-public class {{genModuleClass}} {
+public class {{genModule.id}} {
     @Provides @LanguageScope
     {{parser.factoryClass}} provideParserFactory() {
         return new {{parser.factoryClass}}();

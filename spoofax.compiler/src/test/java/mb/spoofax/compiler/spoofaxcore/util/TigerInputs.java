@@ -64,6 +64,7 @@ public class TigerInputs {
 
     public static Styler.Input.Builder stylerBuilder(Shared shared) {
         return Styler.Input.builder()
+            .parser(parser(shared))
             .shared(shared)
             ;
     }
