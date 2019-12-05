@@ -14,21 +14,27 @@ import mb.spoofax.core.language.cli.CliCommandItem;
 import mb.spoofax.core.language.cli.CliCommandList;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
-import mb.spoofax.core.language.command.CommandExecutionType;
-import mb.spoofax.core.language.command.CommandRequest;
 import mb.spoofax.core.language.command.arg.RawArgs;
-import mb.spoofax.core.language.menu.CommandAction;
 import mb.spoofax.core.language.menu.Menu;
 import mb.spoofax.core.language.menu.MenuItem;
 import mb.tiger.spoofax.taskdef.TigerCheck;
 import mb.tiger.spoofax.taskdef.TigerStyle;
 import mb.tiger.spoofax.taskdef.TigerTokenize;
-import mb.tiger.spoofax.taskdef.command.*;
+import mb.tiger.spoofax.taskdef.command.TigerAltCompileFile;
+import mb.tiger.spoofax.taskdef.command.TigerCompileDirectory;
+import mb.tiger.spoofax.taskdef.command.TigerCompileFile;
+import mb.tiger.spoofax.taskdef.command.TigerShowAnalyzedAst;
+import mb.tiger.spoofax.taskdef.command.TigerShowDesugaredAst;
+import mb.tiger.spoofax.taskdef.command.TigerShowParsedAst;
+import mb.tiger.spoofax.taskdef.command.TigerShowPrettyPrintedText;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.ArrayList;
+
+import static mb.spoofax.core.language.menu.CommandAction.ofManualContinuous;
+import static mb.spoofax.core.language.menu.CommandAction.ofManualOnce;
 
 public class TigerInstance implements LanguageInstance {
     private final static SetView<String> extensions = SetView.of("tig");
@@ -134,27 +140,27 @@ public class TigerInstance implements LanguageInstance {
     @Override public ListView<MenuItem> getResourceContextMenuItems() {
         return ListView.of(
             new Menu("Compile",
-                onceCommandAction(compileFile),
-                onceCommandAction(compileDirectory),
-                onceCommandAction(altCompileFile, "- default"),
-                onceCommandAction(altCompileFile, "- list literal values instead", new RawArgs(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))),
-                onceCommandAction(altCompileFile, "- base64 encode", new RawArgs(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))),
-                onceCommandAction(altCompileFile, "- list literal values instead + base64 encode", new RawArgs(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt"))),
-                contCommandAction(altCompileFile, "- default"),
-                contCommandAction(altCompileFile, "- list literal values instead", new RawArgs(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))),
-                contCommandAction(altCompileFile, "- base64 encode", new RawArgs(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))),
-                contCommandAction(altCompileFile, "- list literal values instead + base64 encode", new RawArgs(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt")))
+                ofManualOnce(compileFile),
+                ofManualOnce(compileDirectory),
+                ofManualOnce(altCompileFile, "- default"),
+                ofManualOnce(altCompileFile, "- list literal values instead", new RawArgs(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))),
+                ofManualOnce(altCompileFile, "- base64 encode", new RawArgs(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))),
+                ofManualOnce(altCompileFile, "- list literal values instead + base64 encode", new RawArgs(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt"))),
+                ofManualContinuous(altCompileFile, "- default"),
+                ofManualContinuous(altCompileFile, "- list literal values instead", new RawArgs(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))),
+                ofManualContinuous(altCompileFile, "- base64 encode", new RawArgs(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))),
+                ofManualContinuous(altCompileFile, "- list literal values instead + base64 encode", new RawArgs(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt")))
             ),
             new Menu("Debug",
                 new Menu("Syntax",
-                    onceCommandAction(showParsedAst),
-                    onceCommandAction(showPrettyPrintedText)
+                    ofManualOnce(showParsedAst),
+                    ofManualOnce(showPrettyPrintedText)
                 ),
                 new Menu("Static Semantics",
-                    onceCommandAction(showAnalyzedAst)
+                    ofManualOnce(showAnalyzedAst)
                 ),
                 new Menu("Transformations",
-                    onceCommandAction(showDesugaredAst)
+                    ofManualOnce(showDesugaredAst)
                 )
             )
         );
@@ -163,71 +169,28 @@ public class TigerInstance implements LanguageInstance {
     @Override public ListView<MenuItem> getEditorContextMenuItems() {
         return ListView.of(
             new Menu("Compile",
-                onceCommandAction(compileFile),
-                onceCommandAction(altCompileFile, "- default"),
-                onceCommandAction(altCompileFile, "- list literal values instead", new RawArgs(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))),
-                onceCommandAction(altCompileFile, "- base64 encode", new RawArgs(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))),
-                onceCommandAction(altCompileFile, "- list literal values instead + base64 encode", new RawArgs(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt"))),
-                contCommandAction(altCompileFile, "- default"),
-                contCommandAction(altCompileFile, "- list literal values instead", new RawArgs(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))),
-                contCommandAction(altCompileFile, "- base64 encode", new RawArgs(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))),
-                contCommandAction(altCompileFile, "- list literal values instead + base64 encode", new RawArgs(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt")))
+                ofManualOnce(compileFile),
+                ofManualOnce(altCompileFile, "- default"),
+                ofManualOnce(altCompileFile, "- list literal values instead", new RawArgs(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))),
+                ofManualOnce(altCompileFile, "- base64 encode", new RawArgs(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))),
+                ofManualOnce(altCompileFile, "- list literal values instead + base64 encode", new RawArgs(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt"))),
+                ofManualContinuous(altCompileFile, "- default"),
+                ofManualContinuous(altCompileFile, "- list literal values instead", new RawArgs(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))),
+                ofManualContinuous(altCompileFile, "- base64 encode", new RawArgs(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))),
+                ofManualContinuous(altCompileFile, "- list literal values instead + base64 encode", new RawArgs(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt")))
             ),
             new Menu("Debug",
                 new Menu("Syntax",
-                    onceCommandAction(showParsedAst), contCommandAction(showParsedAst),
-                    onceCommandAction(showPrettyPrintedText), contCommandAction(showPrettyPrintedText)
+                    ofManualOnce(showParsedAst), ofManualContinuous(showParsedAst),
+                    ofManualOnce(showPrettyPrintedText), ofManualContinuous(showPrettyPrintedText)
                 ),
                 new Menu("Static Semantics",
-                    onceCommandAction(showAnalyzedAst), contCommandAction(showAnalyzedAst)
+                    ofManualOnce(showAnalyzedAst), ofManualContinuous(showAnalyzedAst)
                 ),
                 new Menu("Transformations",
-                    onceCommandAction(showDesugaredAst), contCommandAction(showDesugaredAst)
+                    ofManualOnce(showDesugaredAst), ofManualContinuous(showDesugaredAst)
                 )
             )
         );
-    }
-
-
-    private static CommandAction commandAction(CommandDef<?> commandDef, CommandExecutionType executionType, String displayName, RawArgs initialArgs) {
-        return new CommandAction(new CommandRequest<>(commandDef, executionType, initialArgs), displayName);
-    }
-
-    private static CommandAction commandAction(CommandDef<?> commandDef, CommandExecutionType executionType, String displayName) {
-        return new CommandAction(new CommandRequest<>(commandDef, executionType), displayName);
-    }
-
-    private static CommandAction commandAction(CommandDef<?> commandDef, CommandExecutionType executionType, RawArgs initialArgs) {
-        return new CommandAction(new CommandRequest<>(commandDef, executionType, initialArgs), commandDef.getDisplayName());
-    }
-
-    private static CommandAction commandAction(CommandDef<?> commandDef, CommandExecutionType executionType) {
-        return new CommandAction(new CommandRequest<>(commandDef, executionType), commandDef.getDisplayName());
-    }
-
-
-    private static CommandAction onceCommandAction(CommandDef<?> commandDef, String suffix, RawArgs initialArgs) {
-        return commandAction(commandDef, CommandExecutionType.ManualOnce, commandDef.getDisplayName() + " " + suffix, initialArgs);
-    }
-
-    private static CommandAction onceCommandAction(CommandDef<?> commandDef, String suffix) {
-        return commandAction(commandDef, CommandExecutionType.ManualOnce, commandDef.getDisplayName() + " " + suffix);
-    }
-
-    private static CommandAction onceCommandAction(CommandDef<?> commandDef) {
-        return commandAction(commandDef, CommandExecutionType.ManualOnce);
-    }
-
-
-    private static CommandAction contCommandAction(CommandDef<?> commandDef, String suffix, RawArgs initialArgs) {
-        return commandAction(commandDef, CommandExecutionType.ManualContinuous, commandDef.getDisplayName() + " " + suffix + " (continuous)", initialArgs);
-    }
-
-    private static CommandAction contCommandAction(CommandDef<?> commandDef, String suffix) {
-        return commandAction(commandDef, CommandExecutionType.ManualContinuous, commandDef.getDisplayName() + " " + suffix + " (continuous)");
-    }
-
-    private static CommandAction contCommandAction(CommandDef<?> commandDef) {
-        return commandAction(commandDef, CommandExecutionType.ManualContinuous, commandDef.getDisplayName() + " (continuous)");
     }
 }

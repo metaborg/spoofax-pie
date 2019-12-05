@@ -1,15 +1,18 @@
-{{#standaloneProject}}plugins {
+{{#standaloneProject}}
+plugins {
   id("org.metaborg.gradle.config.sub-project") version "{{shared.metaborgGradleConfigVersion}}"
   id("org.metaborg.gradle.config.java-library") version "{{shared.metaborgGradleConfigVersion}}"
   id("org.metaborg.gradle.config.junit-testing") version "{{shared.metaborgGradleConfigVersion}}"
 }
 {{/standaloneProject}}
-{{^standaloneProject}}plugins {
+{{^standaloneProject}}
+plugins {
   id("org.metaborg.gradle.config.sub-project")
   id("org.metaborg.gradle.config.java-library")
   id("org.metaborg.gradle.config.junit-testing")
 }
 {{/standaloneProject}}
+
 sourceSets {
   main {
     java {
@@ -19,8 +22,9 @@ sourceSets {
 }
 
 dependencies {
-{{#dependencyCodes}}  {{this}}
-  {{/dependencyCodes}}
+{{#dependencyCodes}}
+  {{this}}
+{{/dependencyCodes}}
 }
 
 fun createProjectDependency(projectPath: String): ModuleDependency {

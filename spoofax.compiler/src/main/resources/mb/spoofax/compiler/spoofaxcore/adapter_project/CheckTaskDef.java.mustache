@@ -23,7 +23,7 @@ public class {{checkTaskDef.id}} implements TaskDef<ResourceKey, KeyedMessages> 
 {{/constraintAnalyzer}}
 
     @Inject public {{checkTaskDef.id}}(
-      TigerParse parse{{#constraintAnalyzer}},
+      {{parser.parseTaskDef.id}} parse{{#constraintAnalyzer}},
       {{this.analyzeTaskDef.id}} analyze
 {{/constraintAnalyzer}}
     ) {

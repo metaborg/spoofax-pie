@@ -45,7 +45,7 @@ public class TigerAltCompileFile implements TaskDef<CommandInput<TigerAltCompile
         @Override public boolean equals(@Nullable Object obj) {
             if(this == obj) return true;
             if(obj == null || getClass() != obj.getClass()) return false;
-            final Args other = (Args) obj;
+            final Args other = (Args)obj;
             return listDefNames == other.listDefNames &&
                 base64Encode == other.base64Encode &&
                 file.equals(other.file) &&
