@@ -128,14 +128,10 @@ public class ConstraintAnalyzer {
             return shared().languageProject().genSourceSpoofaxJavaDirectory();
         }
 
-        default String languageGenPackage() {
-            return shared().languageProject().packageId();
-        }
-
         // Constraint analyzer
 
         @Value.Default default ClassInfo genConstraintAnalyzer() {
-            return ClassInfo.of(languageGenPackage(), shared().classSuffix() + "ConstraintAnalyzer");
+            return ClassInfo.of(shared().languagePackage(), shared().classSuffix() + "ConstraintAnalyzer");
         }
 
         Optional<ClassInfo> manualConstraintAnalyzer();
@@ -150,7 +146,7 @@ public class ConstraintAnalyzer {
         // Constraint analyzer factory
 
         @Value.Default default ClassInfo genFactory() {
-            return ClassInfo.of(languageGenPackage(), shared().classSuffix() + "ConstraintAnalyzerFactory");
+            return ClassInfo.of(shared().languagePackage(), shared().classSuffix() + "ConstraintAnalyzerFactory");
         }
 
         Optional<ClassInfo> manualFactory();
@@ -169,14 +165,10 @@ public class ConstraintAnalyzer {
             return shared().adapterProject().genSourceSpoofaxJavaDirectory();
         }
 
-        default String taskDefGenPackage() {
-            return shared().adapterProject().packageId() + ".taskdef";
-        }
-
         // Analyze
 
         @Value.Default default ClassInfo genAnalyzeTaskDef() {
-            return ClassInfo.of(taskDefGenPackage(), shared().classSuffix() + "Analyze");
+            return ClassInfo.of(shared().adapterTaskPackage(), shared().classSuffix() + "Analyze");
         }
 
         Optional<ClassInfo> manualAnalyzeTaskDef();

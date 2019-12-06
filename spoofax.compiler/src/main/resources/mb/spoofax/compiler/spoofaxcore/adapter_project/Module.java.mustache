@@ -91,15 +91,15 @@ public class {{genModule.id}} {
 
     @Provides @LanguageScope @Named("language") @ElementsIntoSet
     static Set<TaskDef<?, ?>> provideTaskDefsSet(
-        {{tokenizeTaskDefNameType.type}} {{tokenizeTaskDefNameType.name}},
-        {{checkTaskDefNameType.type}} {{checkTaskDefNameType.name}},
-        {{styleTaskDefNameType.type}} {{styleTaskDefNameType.name}}{{#additionalTaskDefs}},
-        {{this.type}} {{this.name}}{{/additionalTaskDefs}}
+        {{tokenizeTaskDefRef.type.qualifiedId}} {{tokenizeTaskDefRef.name}},
+        {{checkTaskDefRef.type.qualifiedId}} {{checkTaskDefRef.name}},
+        {{styleTaskDefRef.type.qualifiedId}} {{styleTaskDefRef.name}}{{#additionalTaskDefs}},
+        {{this.type.qualifiedId}} {{this.name}}{{/additionalTaskDefs}}
     ) {
         final HashSet<TaskDef<?, ?>> taskDefs = new HashSet<>();
-        taskDefs.add({{tokenizeTaskDefNameType.name}});
-        taskDefs.add({{checkTaskDefNameType.name}});
-        taskDefs.add({{styleTaskDefNameType.name}});
+        taskDefs.add({{tokenizeTaskDefRef.name}});
+        taskDefs.add({{checkTaskDefRef.name}});
+        taskDefs.add({{styleTaskDefRef.name}});
 {{#additionalTaskDefs}}
         taskDefs.add({{this.name}});
 {{/additionalTaskDefs}}

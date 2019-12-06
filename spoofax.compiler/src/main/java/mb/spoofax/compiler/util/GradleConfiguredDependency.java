@@ -29,33 +29,6 @@ public abstract class GradleConfiguredDependency implements Serializable {
         R testAnnotationProcessor(GradleDependency dependency);
     }
 
-
-    public abstract <R> R match(Cases<R> cases);
-
-
-    public GradleDependency getDependency() {
-        return GradleConfiguredDependencies.getDependency(this);
-    }
-
-    public GradleConfiguredDependencies.CaseOfMatchers.TotalMatcher_Api caseOf() {
-        return GradleConfiguredDependencies.caseOf(this);
-    }
-
-    public String toKotlinCode() {
-        return caseOf()
-            .api((dependency) -> "api(" + dependency.toKotlinCode() + ")")
-            .implementation((dependency) -> "implementation(" + dependency.toKotlinCode() + ")")
-            .compileOnly((dependency) -> "compileOnly(" + dependency.toKotlinCode() + ")")
-            .runtimeOnly((dependency) -> "runtimeOnly(" + dependency.toKotlinCode() + ")")
-            .testImplementation((dependency) -> "testImplementation(" + dependency.toKotlinCode() + ")")
-            .testCompileOnly((dependency) -> "testCompileOnly(" + dependency.toKotlinCode() + ")")
-            .testRuntimeOnly((dependency) -> "testRuntimeOnly(" + dependency.toKotlinCode() + ")")
-            .annotationProcessor((dependency) -> "annotationProcessor(" + dependency.toKotlinCode() + ")")
-            .testAnnotationProcessor((dependency) -> "testAnnotationProcessor(" + dependency.toKotlinCode() + ")")
-            ;
-    }
-
-
     public static GradleConfiguredDependency api(GradleDependency dependency) {
         return GradleConfiguredDependencies.api(dependency);
     }
@@ -90,6 +63,31 @@ public abstract class GradleConfiguredDependency implements Serializable {
 
     public static GradleConfiguredDependency testAnnotationProcessor(GradleDependency dependency) {
         return GradleConfiguredDependencies.testAnnotationProcessor(dependency);
+    }
+
+
+    public abstract <R> R match(Cases<R> cases);
+
+    public GradleDependency getDependency() {
+        return GradleConfiguredDependencies.getDependency(this);
+    }
+
+    public GradleConfiguredDependencies.CaseOfMatchers.TotalMatcher_Api caseOf() {
+        return GradleConfiguredDependencies.caseOf(this);
+    }
+
+    public String toKotlinCode() {
+        return caseOf()
+            .api((dependency) -> "api(" + dependency.toKotlinCode() + ")")
+            .implementation((dependency) -> "implementation(" + dependency.toKotlinCode() + ")")
+            .compileOnly((dependency) -> "compileOnly(" + dependency.toKotlinCode() + ")")
+            .runtimeOnly((dependency) -> "runtimeOnly(" + dependency.toKotlinCode() + ")")
+            .testImplementation((dependency) -> "testImplementation(" + dependency.toKotlinCode() + ")")
+            .testCompileOnly((dependency) -> "testCompileOnly(" + dependency.toKotlinCode() + ")")
+            .testRuntimeOnly((dependency) -> "testRuntimeOnly(" + dependency.toKotlinCode() + ")")
+            .annotationProcessor((dependency) -> "annotationProcessor(" + dependency.toKotlinCode() + ")")
+            .testAnnotationProcessor((dependency) -> "testAnnotationProcessor(" + dependency.toKotlinCode() + ")")
+            ;
     }
 
 

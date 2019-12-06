@@ -30,6 +30,10 @@ public interface ClassInfo extends Serializable {
         return packageId() + "." + id();
     }
 
+    default String nullableQualifiedId() {
+        return packageId() + ".@Nullable " + id();
+    }
+
 
     default String fileName() {
         return id() + ".java";

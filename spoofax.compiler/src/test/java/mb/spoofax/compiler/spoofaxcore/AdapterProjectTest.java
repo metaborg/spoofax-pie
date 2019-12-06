@@ -4,8 +4,8 @@ import mb.resource.DefaultResourceService;
 import mb.resource.ResourceService;
 import mb.resource.fs.FSPath;
 import mb.resource.fs.FSResourceRegistry;
+import mb.spoofax.compiler.spoofaxcore.tiger.TigerInputs;
 import mb.spoofax.compiler.spoofaxcore.util.FileAssertions;
-import mb.spoofax.compiler.spoofaxcore.util.TigerInputs;
 import mb.spoofax.compiler.util.GradleDependency;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -37,6 +37,7 @@ class AdapterProjectTest {
         final AdapterProject.Input input = TigerInputs.adapterProjectBuilder(shared)
             .languageProjectDependency(GradleDependency.project(":" + shared.languageProject().coordinate().artifactId()))
             .build();
+        TigerInputs.copyTaskDefsIntoAdapterProject(input, resourceService);
         final AdapterProject compiler = AdapterProject.fromClassLoaderResources(resourceService, charset, parserCompiler, stylerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler);
         final AdapterProject.Output output = compiler.compile(input);
 

@@ -73,6 +73,10 @@ public interface Shared extends Serializable {
             .build();
     }
 
+    @Value.Default default String languagePackage() {
+        return languageProject().packageId();
+    }
+
     @Value.Default default GradleProject adapterProject() {
         final String artifactId = defaultArtifactId() + ".spoofax";
         return GradleProject.builder()
@@ -80,6 +84,18 @@ public interface Shared extends Serializable {
             .packageId(basePackageId() + ".spoofax")
             .baseDirectory(baseDirectory().appendSegment(artifactId))
             .build();
+    }
+
+    @Value.Default default String adapterPackage() {
+        return adapterProject().packageId();
+    }
+
+    @Value.Default default String adapterTaskPackage() {
+        return adapterPackage() + ".task";
+    }
+
+    @Value.Default default String adapterCommandPackage() {
+        return adapterPackage() + ".command";
     }
 
 
@@ -178,8 +194,16 @@ public interface Shared extends Serializable {
         return GradleDependency.module(Coordinate.of("org.metaborg", "common", spoofaxPieVersion()));
     }
 
+    @Value.Default default GradleDependency jsglrCommonDep() {
+        return GradleDependency.module(Coordinate.of("org.metaborg", "jsglr.common", spoofaxPieVersion()));
+    }
+
     @Value.Default default GradleDependency jsglr1CommonDep() {
         return GradleDependency.module(Coordinate.of("org.metaborg", "jsglr1.common", spoofaxPieVersion()));
+    }
+
+    @Value.Default default GradleDependency jsglr2CommonDep() {
+        return GradleDependency.module(Coordinate.of("org.metaborg", "jsglr2.common", spoofaxPieVersion()));
     }
 
     @Value.Default default GradleDependency esvCommonDep() {

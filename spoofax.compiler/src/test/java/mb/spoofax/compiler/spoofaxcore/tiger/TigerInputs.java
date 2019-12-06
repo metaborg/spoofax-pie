@@ -1,7 +1,12 @@
-package mb.spoofax.compiler.spoofaxcore.util;
+package mb.spoofax.compiler.spoofaxcore.tiger;
 
+import mb.common.util.IOUtil;
 import mb.common.util.Preconditions;
+import mb.resource.ResourceService;
+import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.command.ArgProviderRepr;
+import mb.spoofax.compiler.command.CommandDefRepr;
 import mb.spoofax.compiler.spoofaxcore.AdapterProject;
 import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzer;
 import mb.spoofax.compiler.spoofaxcore.LanguageProject;
@@ -10,7 +15,18 @@ import mb.spoofax.compiler.spoofaxcore.RootProject;
 import mb.spoofax.compiler.spoofaxcore.Shared;
 import mb.spoofax.compiler.spoofaxcore.StrategoRuntime;
 import mb.spoofax.compiler.spoofaxcore.Styler;
+import mb.spoofax.compiler.util.ClassInfo;
+import mb.spoofax.compiler.util.Conversion;
 import mb.spoofax.compiler.util.GradleDependency;
+import mb.spoofax.compiler.util.TaskDefRef;
+import mb.spoofax.core.language.command.CommandContextType;
+import mb.spoofax.core.language.command.CommandExecutionType;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.Optional;
 
 public class TigerInputs {
     /// Shared input
@@ -26,7 +42,9 @@ public class TigerInputs {
             .resourceDep(fromSystemProperty("resource:classpath"))
             /// Spoofax-PIE
             .commonDep(fromSystemProperty("common:classpath"))
+            .jsglrCommonDep(fromSystemProperty("jsglr.common:classpath"))
             .jsglr1CommonDep(fromSystemProperty("jsglr1.common:classpath"))
+            .jsglr2CommonDep(fromSystemProperty("jsglr2.common:classpath"))
             .esvCommonDep(fromSystemProperty("esv.common:classpath"))
             .strategoCommonDep(fromSystemProperty("stratego.common:classpath"))
             .constraintCommonDep(fromSystemProperty("constraint.common:classpath"))
@@ -126,17 +144,43 @@ public class TigerInputs {
     /// Adapter project compiler input
 
     public static AdapterProject.Input.Builder adapterProjectBuilder(Shared shared) {
+        final TaskDefRef showParsedAst = TaskDefRef.of("showParsedAst", ClassInfo.of(shared.adapterTaskPackage(), "TigerShowParsedAstTaskDef"));
         return AdapterProject.Input.builder()
             .shared(shared)
             .parser(parser(shared))
             .styler(styler(shared))
             .strategoRuntime(strategoRuntime(shared))
             .constraintAnalyzer(constraintAnalyzer(shared))
+            .addTaskDefs(showParsedAst)
+            .addCommandDefs(CommandDefRepr.builder()
+                .commandDefClass(shared.adapterCommandPackage(), "TigerShowParsedAst")
+                .taskDef(showParsedAst)
+                .argClass(shared.adapterTaskPackage(), "TigerShowParsedAstTaskDef.Args")
+                .displayName("Show parsed AST")
+                .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
+                .addRequiredContextTypes(CommandContextType.Resource)
+                .addParams("resource", ClassInfo.of("mb.resource", "ResourceKey"), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.context()))
+                .addParams("region", ClassInfo.of("mb.common.region", "Region"), false, Optional.empty(), Collections.singletonList(ArgProviderRepr.context()))
+                .build()
+            )
             ;
     }
 
     public static AdapterProject.Input adapterProject(Shared shared) {
         return adapterProjectBuilder(shared).build();
+    }
+
+    public static void copyTaskDefsIntoAdapterProject(AdapterProject.Input input, ResourceService resourceService) throws IOException {
+        final ResourcePath srcMainJavaDirectory = input.shared().adapterProject().sourceMainJavaDirectory();
+        final String taskPackagePath = Conversion.packageIdToPath(input.shared().adapterTaskPackage());
+        final String fileName = "TigerShowParsedAstTaskDef.java";
+        try(final @Nullable InputStream inputStream = TigerInputs.class.getResourceAsStream(fileName)) {
+            if(inputStream == null) {
+                throw new IllegalStateException("Cannot get input stream for resource '" + fileName + "'");
+            }
+            final HierarchicalResource resource = resourceService.getHierarchicalResource(srcMainJavaDirectory.appendRelativePath(taskPackagePath).appendSegment(fileName)).createParents();
+            IOUtil.copy(inputStream, resource.openWrite());
+        }
     }
 
 

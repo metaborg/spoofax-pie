@@ -146,20 +146,16 @@ public class Parser {
             return shared().languageProject().genSourceSpoofaxJavaDirectory();
         }
 
-        default String languageGenPackage() {
-            return shared().languageProject().packageId();
-        }
-
         // Parse table
 
         @Value.Default default ClassInfo genTable() {
-            return ClassInfo.of(languageGenPackage(), shared().classSuffix() + "ParseTable");
+            return ClassInfo.of(shared().languagePackage(), shared().classSuffix() + "ParseTable");
         }
 
         // Parser
 
         @Value.Default default ClassInfo genParser() {
-            return ClassInfo.of(languageGenPackage(), shared().classSuffix() + "Parser");
+            return ClassInfo.of(shared().languagePackage(), shared().classSuffix() + "Parser");
         }
 
         Optional<ClassInfo> manualParser();
@@ -174,7 +170,7 @@ public class Parser {
         // Parser factory
 
         @Value.Default default ClassInfo genFactory() {
-            return ClassInfo.of(languageGenPackage(), shared().classSuffix() + "ParserFactory");
+            return ClassInfo.of(shared().languagePackage(), shared().classSuffix() + "ParserFactory");
         }
 
         Optional<ClassInfo> manualFactory();
@@ -193,14 +189,10 @@ public class Parser {
             return shared().adapterProject().genSourceSpoofaxJavaDirectory();
         }
 
-        default String taskDefGenPackage() {
-            return shared().adapterProject().packageId() + ".taskdef";
-        }
-
         // Parse task definition
 
         @Value.Default default ClassInfo genParseTaskDef() {
-            return ClassInfo.of(taskDefGenPackage(), shared().classSuffix() + "Parse");
+            return ClassInfo.of(shared().adapterTaskPackage(), shared().classSuffix() + "Parse");
         }
 
         Optional<ClassInfo> manualParseTaskDef();
@@ -215,7 +207,7 @@ public class Parser {
         // Tokenize task definition
 
         @Value.Default default ClassInfo genTokenizeTaskDef() {
-            return ClassInfo.of(taskDefGenPackage(), shared().classSuffix() + "Tokenize");
+            return ClassInfo.of(shared().adapterTaskPackage(), shared().classSuffix() + "Tokenize");
         }
 
         Optional<ClassInfo> manualTokenizeTaskDef();
@@ -251,7 +243,10 @@ public class Parser {
     public interface LanguageProjectOutput extends Serializable {
         class Builder extends ParserData.LanguageProjectOutput.Builder {
             public Builder fromInput(Input input) {
-                addDependencies(GradleConfiguredDependency.api(input.shared().jsglr1CommonDep()));
+                addDependencies(
+                    GradleConfiguredDependency.api(input.shared().jsglrCommonDep()),
+                    GradleConfiguredDependency.api(input.shared().jsglr1CommonDep())
+                );
                 addCopyResources(input.tableSourceRelPath());
                 return this;
             }

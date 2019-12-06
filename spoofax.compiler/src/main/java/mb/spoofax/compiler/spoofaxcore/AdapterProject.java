@@ -3,12 +3,13 @@ package mb.spoofax.compiler.spoofaxcore;
 import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.command.CommandDefRepr;
 import mb.spoofax.compiler.util.ClassInfo;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
-import mb.spoofax.compiler.util.NameType;
 import mb.spoofax.compiler.util.ResourceWriter;
+import mb.spoofax.compiler.util.TaskDefRef;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.UniqueNamer;
 import org.immutables.value.Value;
@@ -31,6 +32,7 @@ public class AdapterProject {
     private final Template componentTemplate;
     private final Template moduleTemplate;
     private final Template instanceTemplate;
+    private final Template commandDefTemplate;
     private final ResourceService resourceService;
     private final Charset charset;
     private final Parser parserCompiler;
@@ -45,6 +47,7 @@ public class AdapterProject {
         Template componentTemplate,
         Template moduleTemplate,
         Template instanceTemplate,
+        Template commandDefTemplate,
         ResourceService resourceService,
         Charset charset,
         Parser parserCompiler,
@@ -57,6 +60,7 @@ public class AdapterProject {
         this.moduleTemplate = moduleTemplate;
         this.instanceTemplate = instanceTemplate;
         this.checkTaskDefTemplate = checkTaskDefTemplate;
+        this.commandDefTemplate = commandDefTemplate;
         this.resourceService = resourceService;
         this.buildGradleTemplate = buildGradleTemplate;
         this.charset = charset;
@@ -82,6 +86,7 @@ public class AdapterProject {
             templateCompiler.compile("adapter_project/Component.java.mustache"),
             templateCompiler.compile("adapter_project/Module.java.mustache"),
             templateCompiler.compile("adapter_project/Instance.java.mustache"),
+            templateCompiler.compile("adapter_project/CommandDef.java.mustache"),
             resourceService,
             charset,
             parserCompiler,
@@ -169,31 +174,41 @@ public class AdapterProject {
             writer.flush();
         }
 
-        final UniqueNamer uniqueNamer = new UniqueNamer();
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("tokenizeTaskDefNameType", new NameType(uniqueNamer.makeUnique(input.parser().tokenizeTaskDef().asVariableId()), input.parser().tokenizeTaskDef().qualifiedId()));
-        map.put("checkTaskDefNameType", new NameType(uniqueNamer.makeUnique(input.checkTaskDef().asVariableId()), input.checkTaskDef().qualifiedId()));
-        if(input.styler().isPresent()) {
-            final ClassInfo styleTaskDef = input.styler().get().styleTaskDef();
-            map.put("styleTaskDefNameType", new NameType(uniqueNamer.makeUnique(styleTaskDef.asVariableId()), styleTaskDef.qualifiedId()));
-        } else {
-            map.put("styleTaskDefNameType", new NameType(uniqueNamer.makeUnique("nullStyler"), "mb.spoofax.core.language.taskdef.NullStyler"));
-        }
-        final ArrayList<NameType> additionalTaskDefs = new ArrayList<>();
-        parserOutput.additionalTaskDefs().forEach((ci) -> additionalTaskDefs.add(new NameType(uniqueNamer.makeUnique(ci.asVariableId()), ci.qualifiedId())));
-        stylerOutput.ifPresent(o -> o.additionalTaskDefs().forEach((ci) -> additionalTaskDefs.add(new NameType(uniqueNamer.makeUnique(ci.asVariableId()), ci.qualifiedId()))));
-        strategoRuntimeOutput.ifPresent(o -> o.additionalTaskDefs().forEach((ci) -> additionalTaskDefs.add(new NameType(uniqueNamer.makeUnique(ci.asVariableId()), ci.qualifiedId()))));
-        constraintAnalyzerOutput.ifPresent(o -> o.additionalTaskDefs().forEach((ci) -> additionalTaskDefs.add(new NameType(uniqueNamer.makeUnique(ci.asVariableId()), ci.qualifiedId()))));
-        map.put("additionalTaskDefs", additionalTaskDefs);
+        {
+            final UniqueNamer uniqueNamer = new UniqueNamer();
+            final HashMap<String, Object> map = new HashMap<>();
+            map.put("tokenizeTaskDefRef", TaskDefRef.of(input.parser().tokenizeTaskDef(), uniqueNamer));
+            map.put("checkTaskDefRef", TaskDefRef.of(input.checkTaskDef(), uniqueNamer));
+            if(input.styler().isPresent()) {
+                final ClassInfo styleTaskDef = input.styler().get().styleTaskDef();
+                map.put("styleTaskDefRef", TaskDefRef.of(input.styler().get().styleTaskDef(), uniqueNamer));
+            } else {
+                map.put("styleTaskDefRef", TaskDefRef.of(ClassInfo.of("mb.spoofax.core.language.taskdef", "NullStyler"), uniqueNamer));
+            }
+            final ArrayList<TaskDefRef> additionalTaskDefs = new ArrayList<>();
+            parserOutput.additionalTaskDefs().forEach((ci) -> additionalTaskDefs.add(TaskDefRef.of(ci, uniqueNamer)));
+            stylerOutput.ifPresent(o -> o.additionalTaskDefs().forEach((ci) -> additionalTaskDefs.add(TaskDefRef.of(ci, uniqueNamer))));
+            strategoRuntimeOutput.ifPresent(o -> o.additionalTaskDefs().forEach((ci) -> additionalTaskDefs.add(TaskDefRef.of(ci, uniqueNamer))));
+            constraintAnalyzerOutput.ifPresent(o -> o.additionalTaskDefs().forEach((ci) -> additionalTaskDefs.add(TaskDefRef.of(ci, uniqueNamer))));
+            additionalTaskDefs.addAll(input.taskDefs());
+            map.put("additionalTaskDefs", additionalTaskDefs);
 
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genModule().file(classesGenDirectory)).createParents(), charset)) {
-            moduleTemplate.execute(input, map, writer);
-            writer.flush();
+            try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genModule().file(classesGenDirectory)).createParents(), charset)) {
+                moduleTemplate.execute(input, map, writer);
+                writer.flush();
+            }
+
+            try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genInstance().file(classesGenDirectory)).createParents(), charset)) {
+                instanceTemplate.execute(input, map, writer);
+                writer.flush();
+            }
         }
 
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genInstance().file(classesGenDirectory)).createParents(), charset)) {
-            instanceTemplate.execute(input, map, writer);
-            writer.flush();
+        for(CommandDefRepr commandDef : input.commandDefs()) {
+            try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(commandDef.commandDefClass().file(classesGenDirectory)).createParents(), charset)) {
+                commandDefTemplate.execute(commandDef, writer);
+                writer.flush();
+            }
         }
 
         return Output.builder()
@@ -231,6 +246,10 @@ public class AdapterProject {
 
         List<GradleConfiguredDependency> additionalDependencies();
 
+        List<TaskDefRef> taskDefs();
+
+        List<CommandDefRepr> commandDefs();
+
 
         /// Gradle files
 
@@ -261,21 +280,17 @@ public class AdapterProject {
             return ClassKind.Generated;
         }
 
-
-        /// Adapter project classes
-
         default ResourcePath classesGenDirectory() {
             return shared().adapterProject().genSourceSpoofaxJavaDirectory();
         }
 
-        default String genPackage() {
-            return shared().adapterProject().packageId();
-        }
+
+        /// Adapter project classes
 
         // Dagger component
 
         @Value.Default default ClassInfo genComponent() {
-            return ClassInfo.of(genPackage(), shared().classSuffix() + "Component");
+            return ClassInfo.of(shared().adapterPackage(), shared().classSuffix() + "Component");
         }
 
         Optional<ClassInfo> manualComponent();
@@ -290,7 +305,7 @@ public class AdapterProject {
         // Dagger module
 
         @Value.Default default ClassInfo genModule() {
-            return ClassInfo.of(genPackage(), shared().classSuffix() + "Module");
+            return ClassInfo.of(shared().adapterPackage(), shared().classSuffix() + "Module");
         }
 
         Optional<ClassInfo> manualModule();
@@ -305,7 +320,7 @@ public class AdapterProject {
         // Language instance
 
         @Value.Default default ClassInfo genInstance() {
-            return ClassInfo.of(genPackage(), shared().classSuffix() + "Instance");
+            return ClassInfo.of(shared().adapterPackage(), shared().classSuffix() + "Instance");
         }
 
         Optional<ClassInfo> manualInstance();
@@ -320,14 +335,10 @@ public class AdapterProject {
 
         /// Adapter project task definitions
 
-        default String taskDefGenPackage() {
-            return shared().adapterProject().packageId() + ".taskdef";
-        }
-
         // Check task definition
 
         @Value.Default default ClassInfo genCheckTaskDef() {
-            return ClassInfo.of(taskDefGenPackage(), shared().classSuffix() + "Check");
+            return ClassInfo.of(shared().adapterTaskPackage(), shared().classSuffix() + "Check");
         }
 
         Optional<ClassInfo> manualCheckTaskDef();

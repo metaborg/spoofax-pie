@@ -114,14 +114,10 @@ public class StrategoRuntime {
             return shared().languageProject().genSourceSpoofaxJavaDirectory();
         }
 
-        default String languageGenPackage() {
-            return shared().languageProject().packageId();
-        }
-
         // Stratego runtime builder factory
 
         @Value.Default default ClassInfo genFactory() {
-            return ClassInfo.of(languageGenPackage(), shared().classSuffix() + "StrategoRuntimeBuilderFactory");
+            return ClassInfo.of(shared().languagePackage(), shared().classSuffix() + "StrategoRuntimeBuilderFactory");
         }
 
         Optional<ClassInfo> manualFactory();

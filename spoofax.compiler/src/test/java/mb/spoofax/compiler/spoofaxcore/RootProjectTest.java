@@ -5,7 +5,7 @@ import mb.resource.ResourceService;
 import mb.resource.fs.FSPath;
 import mb.resource.fs.FSResourceRegistry;
 import mb.spoofax.compiler.spoofaxcore.util.FileAssertions;
-import mb.spoofax.compiler.spoofaxcore.util.TigerInputs;
+import mb.spoofax.compiler.spoofaxcore.tiger.TigerInputs;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 

@@ -20,9 +20,6 @@ import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.menu.CommandAction;
 import mb.spoofax.core.language.menu.Menu;
 import mb.spoofax.core.language.menu.MenuItem;
-import mb.tiger.spoofax.taskdef.TigerCheck;
-import mb.tiger.spoofax.taskdef.TigerStyle;
-import mb.tiger.spoofax.taskdef.TigerTokenize;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
@@ -32,22 +29,22 @@ import java.util.ArrayList;
 public class {{genInstance.id}} implements LanguageInstance {
     private final static SetView<String> extensions = SetView.of({{#fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/fileExtensions}});
 
-    private final {{tokenizeTaskDefNameType.type}} {{tokenizeTaskDefNameType.name}};
-    private final {{checkTaskDefNameType.type}} {{checkTaskDefNameType.name}};
-    private final {{styleTaskDefNameType.type}} {{styleTaskDefNameType.name}};
+    private final {{tokenizeTaskDefRef.type.qualifiedId}} {{tokenizeTaskDefRef.name}};
+    private final {{checkTaskDefRef.type.qualifiedId}} {{checkTaskDefRef.name}};
+    private final {{styleTaskDefRef.type.qualifiedId}} {{styleTaskDefRef.name}};
 {{#additionalTaskDefs}}
-    private final {{this.type}} {{this.name}};
+    private final {{this.type.qualifiedId}} {{this.name}};
 {{/additionalTaskDefs}}
 
     @Inject public {{genInstance.id}}(
-        {{tokenizeTaskDefNameType.type}} {{tokenizeTaskDefNameType.name}},
-        {{checkTaskDefNameType.type}} {{checkTaskDefNameType.name}},
-        {{styleTaskDefNameType.type}} {{styleTaskDefNameType.name}}{{#additionalTaskDefs}},
-        {{this.type}} {{this.name}}{{/additionalTaskDefs}}
+        {{tokenizeTaskDefRef.type.qualifiedId}} {{tokenizeTaskDefRef.name}},
+        {{checkTaskDefRef.type.qualifiedId}} {{checkTaskDefRef.name}},
+        {{styleTaskDefRef.type.qualifiedId}} {{styleTaskDefRef.name}}{{#additionalTaskDefs}},
+        {{this.type.qualifiedId}} {{this.name}}{{/additionalTaskDefs}}
     ) {
-        this.{{tokenizeTaskDefNameType.name}} = {{tokenizeTaskDefNameType.name}};
-        this.{{checkTaskDefNameType.name}} = {{checkTaskDefNameType.name}};
-        this.{{styleTaskDefNameType.name}} = {{styleTaskDefNameType.name}};
+        this.{{tokenizeTaskDefRef.name}} = {{tokenizeTaskDefRef.name}};
+        this.{{checkTaskDefRef.name}} = {{checkTaskDefRef.name}};
+        this.{{styleTaskDefRef.name}} = {{styleTaskDefRef.name}};
 {{#additionalTaskDefs}}
         this.{{this.name}} = {{this.name}};
 {{/additionalTaskDefs}}
@@ -64,15 +61,15 @@ public class {{genInstance.id}} implements LanguageInstance {
 
 
     @Override public Task<@Nullable ArrayList<? extends Token<?>>> createTokenizeTask(ResourceKey resourceKey) {
-        return {{tokenizeTaskDefNameType.name}}.createTask(resourceKey);
+        return {{tokenizeTaskDefRef.name}}.createTask(resourceKey);
     }
 
     @Override public Task<KeyedMessages> createCheckTask(ResourceKey resourceKey) {
-        return {{checkTaskDefNameType.name}}.createTask(resourceKey);
+        return {{checkTaskDefRef.name}}.createTask(resourceKey);
     }
 
     @Override public Task<@Nullable Styling> createStyleTask(ResourceKey resourceKey) {
-        return {{styleTaskDefNameType.name}}.createTask(resourceKey);
+        return {{styleTaskDefRef.name}}.createTask(resourceKey);
     }
 
 

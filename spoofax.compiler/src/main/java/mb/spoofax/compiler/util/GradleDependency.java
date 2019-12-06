@@ -17,22 +17,6 @@ public abstract class GradleDependency implements Serializable {
         R files(ListView<String> filePaths);
     }
 
-
-    public abstract <R> R match(Cases<R> cases);
-
-
-    public GradleDependencies.CaseOfMatchers.TotalMatcher_Project caseOf() {
-        return GradleDependencies.caseOf(this);
-    }
-
-    public String toKotlinCode() {
-        return caseOf()
-            .project((projectPath) -> "project(\"" + projectPath + "\")")
-            .module((coordinate) -> "\"" + coordinate.toGradleNotation() + "\"")
-            .files((filePaths) -> "files(" + filePaths.stream().map((s) -> "\"" + s + "\"").collect(Collectors.joining(", ")) + ")");
-    }
-
-
     public static GradleDependency project(String projectPath) {
         return GradleDependencies.project(projectPath);
     }
@@ -51,6 +35,20 @@ public abstract class GradleDependency implements Serializable {
 
     public static GradleDependency files(String... filePaths) {
         return GradleDependencies.files(ListView.of(filePaths));
+    }
+
+
+    public abstract <R> R match(Cases<R> cases);
+
+    public GradleDependencies.CaseOfMatchers.TotalMatcher_Project caseOf() {
+        return GradleDependencies.caseOf(this);
+    }
+
+    public String toKotlinCode() {
+        return caseOf()
+            .project((projectPath) -> "project(\"" + projectPath + "\")")
+            .module((coordinate) -> "\"" + coordinate.toGradleNotation() + "\"")
+            .files((filePaths) -> "files(" + filePaths.stream().map((s) -> "\"" + s + "\"").collect(Collectors.joining(", ")) + ")");
     }
 
 

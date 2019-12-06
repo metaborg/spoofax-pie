@@ -17,6 +17,7 @@ dependencies {
   annotationProcessor(platform(project(":depconstraints")))
 
   api(project(":common"))
+  api(project(":spoofax.core"))
 
   api("com.samskivert:jmustache:1.15")
 
@@ -44,7 +45,9 @@ dependencies {
   testInjections("org.metaborg:resource")
   // Spoofax-PIE
   testInjections(project(":common"))
+  testInjections(project(":jsglr.common"))
   testInjections(project(":jsglr1.common"))
+  testInjections(project(":jsglr2.common"))
   testInjections(project(":esv.common"))
   testInjections(project(":stratego.common"))
   testInjections(project(":constraint.common"))

@@ -137,20 +137,16 @@ public class Styler {
             return shared().languageProject().genSourceSpoofaxJavaDirectory();
         }
 
-        default String languageGenPackage() {
-            return shared().languageProject().packageId();
-        }
-
         // Styling rules
 
         @Value.Default default ClassInfo genRules() {
-            return ClassInfo.of(languageGenPackage(), shared().classSuffix() + "StylingRules");
+            return ClassInfo.of(shared().languagePackage(), shared().classSuffix() + "StylingRules");
         }
 
         // Styler
 
         @Value.Default default ClassInfo genStyler() {
-            return ClassInfo.of(languageGenPackage(), shared().classSuffix() + "Styler");
+            return ClassInfo.of(shared().languagePackage(), shared().classSuffix() + "Styler");
         }
 
         Optional<ClassInfo> manualStyler();
@@ -165,7 +161,7 @@ public class Styler {
         // Styler factory
 
         @Value.Default default ClassInfo genFactory() {
-            return ClassInfo.of(languageGenPackage(), shared().classSuffix() + "StylerFactory");
+            return ClassInfo.of(shared().languagePackage(), shared().classSuffix() + "StylerFactory");
         }
 
         Optional<ClassInfo> manualFactory();
@@ -184,14 +180,10 @@ public class Styler {
             return shared().adapterProject().genSourceSpoofaxJavaDirectory();
         }
 
-        default String taskDefGenPackage() {
-            return shared().adapterProject().packageId() + ".taskdef";
-        }
-
         // Style task definition
 
         @Value.Default default ClassInfo genStyleTaskDef() {
-            return ClassInfo.of(taskDefGenPackage(), shared().classSuffix() + "Style");
+            return ClassInfo.of(shared().adapterTaskPackage(), shared().classSuffix() + "Style");
         }
 
         Optional<ClassInfo> manualStyleTaskDef();
