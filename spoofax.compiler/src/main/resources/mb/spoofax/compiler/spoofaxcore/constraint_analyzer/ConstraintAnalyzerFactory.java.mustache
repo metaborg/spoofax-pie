@@ -3,8 +3,6 @@ package {{genFactory.packageId}};
 import mb.spoofax.compiler.interfaces.spoofaxcore.ConstraintAnalyzerFactory;
 import mb.stratego.common.StrategoRuntime;
 
-import {{genConstraintAnalyzer.qualifiedId}};
-
 public class {{genFactory.id}} implements ConstraintAnalyzerFactory {
     private final StrategoRuntime strategoRuntime;
 
@@ -12,7 +10,7 @@ public class {{genFactory.id}} implements ConstraintAnalyzerFactory {
         this.strategoRuntime = strategoRuntime;
     }
 
-    @Override public {{genConstraintAnalyzer.id}} create() {
-        return new {{genConstraintAnalyzer.id}}(strategoRuntime);
+    @Override public {{genConstraintAnalyzer.qualifiedId}} create() {
+        return new {{genConstraintAnalyzer.qualifiedId}}(strategoRuntime);
     }
 }

@@ -10,23 +10,22 @@ import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
 import mb.stratego.common.StrategoIOAgent;
+import mb.spoofax.core.language.LanguageScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-
-import {{parse.parseTaskDef.qualifiedId}};
-import {{constraintAnalyzer.qualifiedId}};
 
 import javax.inject.Inject;
 import java.util.Optional;
 
+@LanguageScope
 public class {{analyzeTaskDef.id}} implements TaskDef<ResourceKey, @Nullable SingleFileResult> {
-    private final {{parse.parseTaskDef.id}} parse;
-    private final {{constraintAnalyzer.id}} constraintAnalyzer;
+    private final {{parse.parseTaskDef.qualifiedId}} parse;
+    private final {{constraintAnalyzer.qualifiedId}} constraintAnalyzer;
     private final LoggerFactory loggerFactory;
     private final ResourceService resourceService;
 
     @Inject
-    public {{analyzeTaskDef.id}}({{parse.parseTaskDef.id}} parse, {{constraintAnalyzer.id}} constraintAnalyzer, LoggerFactory loggerFactory, ResourceService resourceService) {
+    public {{analyzeTaskDef.id}}({{parse.parseTaskDef.qualifiedId}} parse, {{constraintAnalyzer.qualifiedId}} constraintAnalyzer, LoggerFactory loggerFactory, ResourceService resourceService) {
         this.parse = parse;
         this.constraintAnalyzer = constraintAnalyzer;
         this.loggerFactory = loggerFactory;

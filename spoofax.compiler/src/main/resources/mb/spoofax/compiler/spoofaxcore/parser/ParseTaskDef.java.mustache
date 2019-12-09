@@ -10,19 +10,19 @@ import mb.pie.api.TaskDef;
 import mb.resource.ReadableResource;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
-
-import {{parser.qualifiedId}};
+import mb.spoofax.core.language.LanguageScope;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.io.IOException;
 
+@LanguageScope
 public class {{parseTaskDef.id}} implements TaskDef<ResourceKey, JSGLR1ParseResult> {
     private final ResourceService resourceService;
-    private final Provider<{{parser.id}}> parserProvider;
+    private final Provider<{{parser.qualifiedId}}> parserProvider;
 
     @Inject
-    public {{parseTaskDef.id}}(ResourceService resourceService, Provider<{{parser.id}}> parserProvider) {
+    public {{parseTaskDef.id}}(ResourceService resourceService, Provider<{{parser.qualifiedId}}> parserProvider) {
         this.resourceService = resourceService;
         this.parserProvider = parserProvider;
     }
@@ -40,7 +40,7 @@ public class {{parseTaskDef.id}} implements TaskDef<ResourceKey, JSGLR1ParseResu
         }
         try {
             final String text = resource.readString();
-            final {{parser.id}} parser = parserProvider.get();
+            final {{parser.qualifiedId}} parser = parserProvider.get();
             return parser.parse(text, "{{startSymbol}}");
         } catch(IOException e) {
             return JSGLR1ParseResults.failed(Messages.of(new Message("Cannot parse file '" + key + "', reading contents failed unexpectedly", e)));

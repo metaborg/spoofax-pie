@@ -3,19 +3,16 @@ package {{genFactory.packageId}};
 import mb.log.api.LoggerFactory;
 import mb.spoofax.compiler.interfaces.spoofaxcore.StylerFactory;
 
-import {{genRules.qualifiedId}};
-import {{genStyler.qualifiedId}};
-
 public class {{genFactory.id}} implements StylerFactory {
-    private final {{genRules.id}} stylingRules;
+    private final {{genRules.qualifiedId}} stylingRules;
     private final LoggerFactory loggerFactory;
 
     public {{genFactory.id}}(LoggerFactory loggerFactory) {
-        this.stylingRules = {{genRules.id}}.fromClassLoaderResources();
+        this.stylingRules = {{genRules.qualifiedId}}.fromClassLoaderResources();
         this.loggerFactory = loggerFactory;
     }
 
-    @Override public {{genStyler.id}} create() {
-        return new {{genStyler.id}}(stylingRules, loggerFactory);
+    @Override public {{genStyler.qualifiedId}} create() {
+        return new {{genStyler.qualifiedId}}(stylingRules, loggerFactory);
     }
 }

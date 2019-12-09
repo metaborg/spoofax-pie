@@ -4,6 +4,7 @@ import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.pie.api.Task;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.CommandContextType;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandExecutionType;
@@ -17,6 +18,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 
+@LanguageScope
 public class {{type.id}} implements CommandDef<{{argType.qualifiedId}}> {
     private final {{taskDefInjection.variable}};
 

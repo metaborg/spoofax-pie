@@ -6,6 +6,7 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
+import mb.spoofax.core.language.LanguageScope;
 import mb.stratego.common.StrategoIOAgent;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
@@ -17,6 +18,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import javax.inject.Inject;
 import java.util.Optional;
 
+@LanguageScope
 public class TigerListLiteralVals implements TaskDef<ResourceKey, @Nullable String> {
     private final TigerParse parse;
     private final StrategoRuntimeBuilder strategoRuntimeBuilder;

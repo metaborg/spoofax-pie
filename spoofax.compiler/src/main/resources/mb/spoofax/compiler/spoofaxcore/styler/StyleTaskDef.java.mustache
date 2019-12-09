@@ -6,18 +6,17 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
+import mb.spoofax.core.language.LanguageScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import {{styler.qualifiedId}};
-import {{parser.parseTaskDef.qualifiedId}};
 
 import javax.inject.Inject;
 
+@LanguageScope
 public class {{genStyleTaskDef.id}} implements TaskDef<ResourceKey, @Nullable Styling> {
-    private final {{parser.parseTaskDef.id}} parse;
-    private final {{styler.id}} styler;
+    private final {{parser.parseTaskDef.qualifiedId}} parse;
+    private final {{styler.qualifiedId}} styler;
 
-    @Inject public {{genStyleTaskDef.id}}({{parser.parseTaskDef.id}} parse, {{styler.id}} styler) {
+    @Inject public {{genStyleTaskDef.id}}({{parser.parseTaskDef.qualifiedId}} parse, {{styler.qualifiedId}} styler) {
         this.parse = parse;
         this.styler = styler;
     }

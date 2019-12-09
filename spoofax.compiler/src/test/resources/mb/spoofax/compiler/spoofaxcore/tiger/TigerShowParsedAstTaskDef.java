@@ -5,9 +5,9 @@ import mb.common.util.ListView;
 import mb.jsglr.common.TermTracer;
 import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.pie.api.ExecContext;
-import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
+import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.CommandFeedbacks;
 import mb.spoofax.core.language.command.CommandInput;
 import mb.spoofax.core.language.command.CommandOutput;
@@ -20,6 +20,7 @@ import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.Objects;
 
+@LanguageScope
 public class TigerShowParsedAstTaskDef implements TaskDef<CommandInput<TigerShowParsedAstTaskDef.Args>, CommandOutput> {
     public static class Args implements Serializable {
         public final ResourceKey key;

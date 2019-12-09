@@ -7,6 +7,7 @@ import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.CommandFeedbacks;
 import mb.spoofax.core.language.command.CommandInput;
 import mb.spoofax.core.language.command.CommandOutput;
@@ -18,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Objects;
 
+@LanguageScope
 public class TigerAltCompileFileTaskDef implements TaskDef<CommandInput<TigerAltCompileFileTaskDef.Args>, CommandOutput> {
     public static class Args implements Serializable {
         final ResourcePath file;
