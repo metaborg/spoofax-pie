@@ -74,8 +74,4 @@ public class TigerShowParsedAstTaskDef implements TaskDef<CommandInput<TigerShow
         final String formatted = StrategoUtil.toString(term);
         return new CommandOutput(ListView.of(CommandFeedbacks.showText(formatted, "Parsed AST for '" + key + "'", null)));
     }
-
-    @Override public Task<CommandOutput> createTask(CommandInput<Args> input) {
-        return TaskDef.super.createTask(input);
-    }
 }

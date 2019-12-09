@@ -8,7 +8,8 @@ import mb.spoofax.compiler.command.CommandDefRepr;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
-import mb.spoofax.compiler.util.NamedInjection;
+import mb.spoofax.compiler.util.Named;
+import mb.spoofax.compiler.util.NamedTypeInfo;
 import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TypeInfo;
@@ -186,7 +187,7 @@ public class AdapterProject {
             try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(commandDef.type().file(classesGenDirectory)).createParents(), charset)) {
                 final UniqueNamer uniqueNamer = new UniqueNamer();
                 final HashMap<String, Object> map = new HashMap<>();
-                map.put("taskDefInjection", NamedInjection.of(commandDef.taskDefType(), uniqueNamer));
+                map.put("taskDefInjection", NamedTypeInfo.of(commandDef.taskDefType(), uniqueNamer));
                 commandDefTemplate.execute(commandDef, map, writer);
                 writer.flush();
             }
@@ -212,9 +213,11 @@ public class AdapterProject {
         try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genModule().file(classesGenDirectory)).createParents(), charset)) {
             final UniqueNamer uniqueNamer = new UniqueNamer();
             final HashMap<String, Object> map = new HashMap<>();
-            map.put("providedTaskDefs", allTaskDefs.stream().map((t) -> NamedInjection.of(t, uniqueNamer)).collect(Collectors.toList()));
-            map.put("providedCommandDefs", input.commandDefs().stream().map((c) -> NamedInjection.of(c.type(), uniqueNamer)).collect(Collectors.toList()));
-            map.put("providedAutoCommandDefs", input.autoCommandDefs().stream().map((c) -> NamedInjection.of(c.commandDefType(), uniqueNamer)).collect(Collectors.toList()));
+            map.put("providedTaskDefs", allTaskDefs.stream().map((t) -> NamedTypeInfo.of(t, uniqueNamer)).collect(Collectors.toList()));
+            uniqueNamer.reset();
+            map.put("providedCommandDefs", input.commandDefs().stream().map((c) -> NamedTypeInfo.of(c.type(), uniqueNamer)).collect(Collectors.toList()));
+            uniqueNamer.reset();
+            map.put("providedAutoCommandDefs", input.autoCommandDefs().stream().map((c) -> Named.of(c, c.commandDef().type().asVariableId(), uniqueNamer)).collect(Collectors.toList()));
             moduleTemplate.execute(input, map, writer);
             writer.flush();
         }
@@ -226,18 +229,18 @@ public class AdapterProject {
             final HashMap<String, Object> map = new HashMap<>();
 
             // Create named injections for tasks required in the language instance.
-            final ArrayList<NamedInjection> injectedTaskDefs = new ArrayList<>();
-            final NamedInjection tokenizeInjection = NamedInjection.of(input.parser().tokenizeTaskDef(), uniqueNamer);
+            final ArrayList<NamedTypeInfo> injectedTaskDefs = new ArrayList<>();
+            final NamedTypeInfo tokenizeInjection = NamedTypeInfo.of(input.parser().tokenizeTaskDef(), uniqueNamer);
             map.put("tokenizeInjection", tokenizeInjection);
             injectedTaskDefs.add(tokenizeInjection);
-            final NamedInjection checkInjection = NamedInjection.of(input.checkTaskDef(), uniqueNamer);
+            final NamedTypeInfo checkInjection = NamedTypeInfo.of(input.checkTaskDef(), uniqueNamer);
             injectedTaskDefs.add(checkInjection);
             map.put("checkInjection", checkInjection);
-            final NamedInjection styleInjection;
+            final NamedTypeInfo styleInjection;
             if(input.styler().isPresent()) {
-                styleInjection = NamedInjection.of(input.styler().get().styleTaskDef(), uniqueNamer);
+                styleInjection = NamedTypeInfo.of(input.styler().get().styleTaskDef(), uniqueNamer);
             } else {
-                styleInjection = NamedInjection.of(TypeInfo.of("mb.spoofax.core.language.taskdef", "NullStyler"), uniqueNamer);
+                styleInjection = NamedTypeInfo.of(TypeInfo.of("mb.spoofax.core.language.taskdef", "NullStyler"), uniqueNamer);
             }
             map.put("styleInjection", styleInjection);
             injectedTaskDefs.add(styleInjection);

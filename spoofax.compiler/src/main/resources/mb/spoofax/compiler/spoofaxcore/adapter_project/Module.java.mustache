@@ -3,6 +3,8 @@ package {{genModule.packageId}};
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
+import mb.common.util.MapView;
+import mb.common.util.EntryView;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.MapTaskDefs;
 import mb.pie.api.Pie;
@@ -13,6 +15,7 @@ import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.AutoCommandRequest;
+import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
 
@@ -123,12 +126,12 @@ public class {{genModule.id}} {
     @Provides @LanguageScope @ElementsIntoSet
     static Set<AutoCommandRequest<?>> provideAutoCommandRequestsSet(
 {{#providedAutoCommandDefs}}
-        {{variable}}{{^-last}},{{/-last}}
+        {{value.commandDef.type.qualifiedId}} {{name}}{{^-last}},{{/-last}}
 {{/providedAutoCommandDefs}}
     ) {
         final HashSet<AutoCommandRequest<?>> autoCommandDefs = new HashSet<>();
 {{#providedAutoCommandDefs}}
-        autoCommandDefs.add({{name}});
+        autoCommandDefs.add(new AutoCommandRequest<>({{name}}, new RawArgs(MapView.of({{#value.rawArgs.entrySet}}new EntryView("{{getKey}}", {{getValue}}){{^-last}},{{/-last}}{{/value.rawArgs.entrySet}}))));
 {{/providedAutoCommandDefs}}
         return autoCommandDefs;
     }

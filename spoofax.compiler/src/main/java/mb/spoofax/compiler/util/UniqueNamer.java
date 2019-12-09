@@ -31,4 +31,8 @@ public class UniqueNamer {
             }
         }
     }
+
+    public void reset() {
+        names.clear();
+    }
 }

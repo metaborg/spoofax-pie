@@ -6,6 +6,7 @@ import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.command.ArgProviderRepr;
+import mb.spoofax.compiler.command.AutoCommandDefRepr;
 import mb.spoofax.compiler.command.CommandDefRepr;
 import mb.spoofax.compiler.spoofaxcore.AdapterProject;
 import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzer;
@@ -17,6 +18,7 @@ import mb.spoofax.compiler.spoofaxcore.StrategoRuntime;
 import mb.spoofax.compiler.spoofaxcore.Styler;
 import mb.spoofax.compiler.util.Conversion;
 import mb.spoofax.compiler.util.GradleDependency;
+import mb.spoofax.compiler.util.StringUtil;
 import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.core.language.command.CommandContextType;
 import mb.spoofax.core.language.command.CommandExecutionType;
@@ -143,23 +145,71 @@ public class TigerInputs {
     /// Adapter project compiler input
 
     public static AdapterProject.Input.Builder adapterProjectBuilder(Shared shared) {
-        final TypeInfo showParsedAst = TypeInfo.of(shared.adapterTaskPackage(), "TigerShowParsedAstTaskDef");
+        final TypeInfo showParsedAstTaskDef = TypeInfo.of(shared.adapterTaskPackage(), "TigerShowParsedAstTaskDef");
+        final TypeInfo listDefNamesTaskDef = TypeInfo.of(shared.adapterTaskPackage(), "TigerListDefNames");
+        final TypeInfo listLiteralValsTaskDef = TypeInfo.of(shared.adapterTaskPackage(), "TigerListLiteralVals");
+        final TypeInfo tigerCompileFileTaskDef = TypeInfo.of(shared.adapterTaskPackage(), "TigerCompileFileTaskDef");
+        final TypeInfo tigerAltCompileFileTaskDef = TypeInfo.of(shared.adapterTaskPackage(), "TigerAltCompileFileTaskDef");
+
+        final CommandDefRepr tigerShowParsedAst = CommandDefRepr.builder()
+            .type(shared.adapterCommandPackage(), "TigerShowParsedAst")
+            .taskDefType(showParsedAstTaskDef)
+            .argType(shared.adapterTaskPackage(), "TigerShowParsedAstTaskDef.Args")
+            .displayName("Show parsed AST")
+            .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
+            .addRequiredContextTypes(CommandContextType.Resource)
+            .addParams("resource", TypeInfo.of("mb.resource", "ResourceKey"), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.context()))
+            .addParams("region", TypeInfo.of("mb.common.region", "Region"), false, Optional.empty(), Collections.singletonList(ArgProviderRepr.context()))
+            .build();
+
+        final CommandDefRepr tigerCompileFile = CommandDefRepr.builder()
+            .type(TypeInfo.of(shared.adapterCommandPackage(), "TigerCompileFile"))
+            .taskDefType(tigerCompileFileTaskDef)
+            .argType(shared.adapterTaskPackage(), "TigerCompileFileTaskDef.Args")
+            .displayName("'Compile' file (list literals)")
+            .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous, CommandExecutionType.AutomaticContinuous)
+            .addRequiredContextTypes(CommandContextType.File)
+            .addParams("file", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.context()))
+            .build();
+
+        final CommandDefRepr tigerAltCompileFile = CommandDefRepr.builder()
+            .type(TypeInfo.of(shared.adapterCommandPackage(), "TigerAltCompileFile"))
+            .taskDefType(tigerAltCompileFileTaskDef)
+            .argType(shared.adapterTaskPackage(), "TigerAltCompileFileTaskDef.Args")
+            .displayName("'Alternative compile' file")
+            .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous, CommandExecutionType.AutomaticContinuous)
+            .addRequiredContextTypes(CommandContextType.File)
+            .addParams("file", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.context()))
+            .addParams("listDefNames", TypeInfo.ofBoolean(), false, Optional.empty(), Collections.singletonList(ArgProviderRepr.value("true")))
+            .addParams("base64Encode", TypeInfo.ofBoolean(), false, Optional.empty(), Collections.singletonList(ArgProviderRepr.value("false")))
+            .addParams("compiledFileNameSuffix", TypeInfo.ofString(), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.value(StringUtil.doubleQuote("defnames.aterm"))))
+            .build();
+
         return AdapterProject.Input.builder()
             .shared(shared)
             .parser(parser(shared))
             .styler(styler(shared))
             .strategoRuntime(strategoRuntime(shared))
             .constraintAnalyzer(constraintAnalyzer(shared))
-            .addTaskDefs(showParsedAst)
-            .addCommandDefs(CommandDefRepr.builder()
-                .type(shared.adapterCommandPackage(), "TigerShowParsedAst")
-                .taskDefType(showParsedAst)
-                .argType(shared.adapterTaskPackage(), "TigerShowParsedAstTaskDef.Args")
-                .displayName("Show parsed AST")
-                .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
-                .addRequiredContextTypes(CommandContextType.Resource)
-                .addParams("resource", TypeInfo.of("mb.resource", "ResourceKey"), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.context()))
-                .addParams("region", TypeInfo.of("mb.common.region", "Region"), false, Optional.empty(), Collections.singletonList(ArgProviderRepr.context()))
+            .addTaskDefs(
+                showParsedAstTaskDef,
+                listDefNamesTaskDef,
+                listLiteralValsTaskDef,
+                tigerCompileFileTaskDef,
+                tigerAltCompileFileTaskDef
+            )
+            .addCommandDefs(
+                tigerShowParsedAst,
+                tigerCompileFile,
+                tigerAltCompileFile
+            )
+            .addAutoCommandDefs(AutoCommandDefRepr.builder()
+                .commandDef(tigerCompileFile)
+                .build()
+            )
+            .addAutoCommandDefs(AutoCommandDefRepr.builder()
+                .commandDef(tigerAltCompileFile)
+                .putRawArgs("base64Encode", "true")
                 .build()
             )
             ;
@@ -172,13 +222,20 @@ public class TigerInputs {
     public static void copyTaskDefsIntoAdapterProject(AdapterProject.Input input, ResourceService resourceService) throws IOException {
         final ResourcePath srcMainJavaDirectory = input.shared().adapterProject().sourceMainJavaDirectory();
         final String taskPackagePath = Conversion.packageIdToPath(input.shared().adapterTaskPackage());
-        final String fileName = "TigerShowParsedAstTaskDef.java";
+        final HierarchicalResource taskDirectory = resourceService.getHierarchicalResource(srcMainJavaDirectory.appendRelativePath(taskPackagePath)).ensureDirectoryExists();
+        copyResource("TigerShowParsedAstTaskDef.java", taskDirectory);
+        copyResource("TigerListDefNames.java", taskDirectory);
+        copyResource("TigerListLiteralVals.java", taskDirectory);
+        copyResource("TigerCompileFileTaskDef.java", taskDirectory);
+        copyResource("TigerAltCompileFileTaskDef.java", taskDirectory);
+    }
+
+    private static void copyResource(String fileName, HierarchicalResource targetDirectory) throws IOException {
         try(final @Nullable InputStream inputStream = TigerInputs.class.getResourceAsStream(fileName)) {
             if(inputStream == null) {
                 throw new IllegalStateException("Cannot get input stream for resource '" + fileName + "'");
             }
-            final HierarchicalResource resource = resourceService.getHierarchicalResource(srcMainJavaDirectory.appendRelativePath(taskPackagePath).appendSegment(fileName)).createParents();
-            IOUtil.copy(inputStream, resource.openWrite());
+            IOUtil.copy(inputStream, targetDirectory.appendSegment(fileName).openWrite());
         }
     }
 

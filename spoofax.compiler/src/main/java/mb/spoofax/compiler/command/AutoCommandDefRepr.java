@@ -14,7 +14,7 @@ public interface AutoCommandDefRepr {
     }
 
 
-    TypeInfo commandDefType();
+    CommandDefRepr commandDef();
 
     Map<String, String> rawArgs();
 }

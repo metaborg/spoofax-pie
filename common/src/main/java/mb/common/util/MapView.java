@@ -55,9 +55,9 @@ public class MapView<K, V> implements Iterable<Map.Entry<K, V>>, Serializable {
         return new MapView<>(map);
     }
 
-    @SafeVarargs public static <K, V> MapView<K, V> of(Map.Entry<? extends K, ? extends V>... entries) {
+    @SafeVarargs public static <K, V> MapView<K, V> of(EntryView<? extends K, ? extends V>... entries) {
         final HashMap<K, V> map = new HashMap<>();
-        for(Map.Entry<? extends K, ? extends V> entry : entries) {
+        for(EntryView<? extends K, ? extends V> entry : entries) {
             map.put(entry.getKey(), entry.getValue());
         }
         return new MapView<>(map);
