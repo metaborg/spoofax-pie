@@ -1,6 +1,5 @@
-package {{commandDefClass.packageId}};
+package {{type.packageId}};
 
-import com.google.inject.Inject;
 import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.pie.api.Task;
@@ -16,19 +15,19 @@ import mb.spoofax.core.language.command.arg.ParamDef;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import {{taskDef.type.qualifiedId}};
+import javax.inject.Inject;
 
-public class {{commandDefClass.id}} implements CommandDef<{{argClass.qualifiedId}}> {
-    private final {{taskDef.type.id}} {{taskDef.name}};
+public class {{type.id}} implements CommandDef<{{argType.qualifiedId}}> {
+    private final {{taskDefInjection.variable}};
 
 
-    @Inject public {{commandDefClass.id}}({{taskDef.type.id}} {{taskDef.name}}) {
-        this.{{taskDef.name}} = {{taskDef.name}};
+    @Inject public {{type.id}}({{taskDefInjection.variable}}) {
+        {{taskDefInjection.thisAssign}};
     }
 
 
     @Override public String getId() {
-        return {{taskDef.name}}.getId();
+        return {{taskDefInjection.name}}.getId();
     }
 
     @Override public String getDisplayName() {
@@ -59,7 +58,7 @@ public class {{commandDefClass.id}} implements CommandDef<{{argClass.qualifiedId
         );
     }
 
-    @Override public {{argClass.qualifiedId}} fromRawArgs(RawArgs rawArgs) {
+    @Override public {{argType.qualifiedId}} fromRawArgs(RawArgs rawArgs) {
 {{#params}}
  {{#required}}
         final {{type.qualifiedId}} {{id}} = rawArgs.getOrThrow("{{id}}");
@@ -68,10 +67,10 @@ public class {{commandDefClass.id}} implements CommandDef<{{argClass.qualifiedId
         final {{type.nullableQualifiedId}} {{id}} = rawArgs.getOrNull("{{id}}");
  {{/required}}
 {{/params}}
-        return new {{argClass.qualifiedId}}({{#params}}{{id}}{{^-last}}, {{/-last}}{{/params}});
+        return new {{argType.qualifiedId}}({{#params}}{{id}}{{^-last}}, {{/-last}}{{/params}});
     }
 
-    @Override public Task<CommandOutput> createTask(CommandInput<{{argClass.qualifiedId}}> input) {
-        return {{taskDef.name}}.createTask(input);
+    @Override public Task<CommandOutput> createTask(CommandInput<{{argType.qualifiedId}}> input) {
+        return {{taskDefInjection.name}}.createTask(input);
     }
 }

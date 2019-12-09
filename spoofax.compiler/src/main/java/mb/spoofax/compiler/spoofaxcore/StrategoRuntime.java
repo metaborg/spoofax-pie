@@ -3,7 +3,7 @@ package mb.spoofax.compiler.spoofaxcore;
 import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.ClassInfo;
+import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.ResourceWriter;
@@ -116,13 +116,13 @@ public class StrategoRuntime {
 
         // Stratego runtime builder factory
 
-        @Value.Default default ClassInfo genFactory() {
-            return ClassInfo.of(shared().languagePackage(), shared().classSuffix() + "StrategoRuntimeBuilderFactory");
+        @Value.Default default TypeInfo genFactory() {
+            return TypeInfo.of(shared().languagePackage(), shared().classSuffix() + "StrategoRuntimeBuilderFactory");
         }
 
-        Optional<ClassInfo> manualFactory();
+        Optional<TypeInfo> manualFactory();
 
-        default ClassInfo factory() {
+        default TypeInfo factory() {
             if(classKind().isManual() && manualFactory().isPresent()) {
                 return manualFactory().get();
             }
@@ -185,6 +185,6 @@ public class StrategoRuntime {
 
         List<GradleConfiguredDependency> dependencies();
 
-        List<ClassInfo> additionalTaskDefs();
+        List<TypeInfo> additionalTaskDefs();
     }
 }

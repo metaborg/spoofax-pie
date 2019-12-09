@@ -3,7 +3,7 @@ package mb.spoofax.compiler.spoofaxcore;
 import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.ClassInfo;
+import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.ResourceWriter;
@@ -148,19 +148,19 @@ public class Parser {
 
         // Parse table
 
-        @Value.Default default ClassInfo genTable() {
-            return ClassInfo.of(shared().languagePackage(), shared().classSuffix() + "ParseTable");
+        @Value.Default default TypeInfo genTable() {
+            return TypeInfo.of(shared().languagePackage(), shared().classSuffix() + "ParseTable");
         }
 
         // Parser
 
-        @Value.Default default ClassInfo genParser() {
-            return ClassInfo.of(shared().languagePackage(), shared().classSuffix() + "Parser");
+        @Value.Default default TypeInfo genParser() {
+            return TypeInfo.of(shared().languagePackage(), shared().classSuffix() + "Parser");
         }
 
-        Optional<ClassInfo> manualParser();
+        Optional<TypeInfo> manualParser();
 
-        default ClassInfo parser() {
+        default TypeInfo parser() {
             if(classKind().isManual() && manualParser().isPresent()) {
                 return manualParser().get();
             }
@@ -169,13 +169,13 @@ public class Parser {
 
         // Parser factory
 
-        @Value.Default default ClassInfo genFactory() {
-            return ClassInfo.of(shared().languagePackage(), shared().classSuffix() + "ParserFactory");
+        @Value.Default default TypeInfo genFactory() {
+            return TypeInfo.of(shared().languagePackage(), shared().classSuffix() + "ParserFactory");
         }
 
-        Optional<ClassInfo> manualFactory();
+        Optional<TypeInfo> manualFactory();
 
-        default ClassInfo factory() {
+        default TypeInfo factory() {
             if(classKind().isManual() && manualFactory().isPresent()) {
                 return manualFactory().get();
             }
@@ -191,13 +191,13 @@ public class Parser {
 
         // Parse task definition
 
-        @Value.Default default ClassInfo genParseTaskDef() {
-            return ClassInfo.of(shared().adapterTaskPackage(), shared().classSuffix() + "Parse");
+        @Value.Default default TypeInfo genParseTaskDef() {
+            return TypeInfo.of(shared().adapterTaskPackage(), shared().classSuffix() + "Parse");
         }
 
-        Optional<ClassInfo> manualParseTaskDef();
+        Optional<TypeInfo> manualParseTaskDef();
 
-        default ClassInfo parseTaskDef() {
+        default TypeInfo parseTaskDef() {
             if(classKind().isManual() && manualParseTaskDef().isPresent()) {
                 return manualParseTaskDef().get();
             }
@@ -206,13 +206,13 @@ public class Parser {
 
         // Tokenize task definition
 
-        @Value.Default default ClassInfo genTokenizeTaskDef() {
-            return ClassInfo.of(shared().adapterTaskPackage(), shared().classSuffix() + "Tokenize");
+        @Value.Default default TypeInfo genTokenizeTaskDef() {
+            return TypeInfo.of(shared().adapterTaskPackage(), shared().classSuffix() + "Tokenize");
         }
 
-        Optional<ClassInfo> manualTokenizeTaskDef();
+        Optional<TypeInfo> manualTokenizeTaskDef();
 
-        default ClassInfo tokenizeTaskDef() {
+        default TypeInfo tokenizeTaskDef() {
             if(classKind().isManual() && manualTokenizeTaskDef().isPresent()) {
                 return manualTokenizeTaskDef().get();
             }
@@ -279,6 +279,6 @@ public class Parser {
 
         List<GradleConfiguredDependency> dependencies();
 
-        List<ClassInfo> additionalTaskDefs();
+        List<TypeInfo> additionalTaskDefs();
     }
 }

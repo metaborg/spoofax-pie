@@ -25,29 +25,28 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Set;
 
 public class {{genInstance.id}} implements LanguageInstance {
     private final static SetView<String> extensions = SetView.of({{#fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/fileExtensions}});
 
-    private final {{tokenizeTaskDefRef.type.qualifiedId}} {{tokenizeTaskDefRef.name}};
-    private final {{checkTaskDefRef.type.qualifiedId}} {{checkTaskDefRef.name}};
-    private final {{styleTaskDefRef.type.qualifiedId}} {{styleTaskDefRef.name}};
-{{#additionalTaskDefs}}
-    private final {{this.type.qualifiedId}} {{this.name}};
-{{/additionalTaskDefs}}
+{{#injectedTaskDefs}}
+    private final {{variable}};
+{{/injectedTaskDefs}}
+
+    private final CollectionView<CommandDef<?>> commandDefs;
+
 
     @Inject public {{genInstance.id}}(
-        {{tokenizeTaskDefRef.type.qualifiedId}} {{tokenizeTaskDefRef.name}},
-        {{checkTaskDefRef.type.qualifiedId}} {{checkTaskDefRef.name}},
-        {{styleTaskDefRef.type.qualifiedId}} {{styleTaskDefRef.name}}{{#additionalTaskDefs}},
-        {{this.type.qualifiedId}} {{this.name}}{{/additionalTaskDefs}}
+{{#injectedTaskDefs}}
+        {{variable}},
+{{/injectedTaskDefs}}
+        Set<CommandDef<?>> commandDefs
     ) {
-        this.{{tokenizeTaskDefRef.name}} = {{tokenizeTaskDefRef.name}};
-        this.{{checkTaskDefRef.name}} = {{checkTaskDefRef.name}};
-        this.{{styleTaskDefRef.name}} = {{styleTaskDefRef.name}};
-{{#additionalTaskDefs}}
-        this.{{this.name}} = {{this.name}};
-{{/additionalTaskDefs}}
+{{#injectedTaskDefs}}
+        {{thisAssign}};
+{{/injectedTaskDefs}}
+        this.commandDefs = CollectionView.copyOf(commandDefs);
     }
 
 
@@ -61,20 +60,20 @@ public class {{genInstance.id}} implements LanguageInstance {
 
 
     @Override public Task<@Nullable ArrayList<? extends Token<?>>> createTokenizeTask(ResourceKey resourceKey) {
-        return {{tokenizeTaskDefRef.name}}.createTask(resourceKey);
+        return {{tokenizeInjection.name}}.createTask(resourceKey);
     }
 
     @Override public Task<KeyedMessages> createCheckTask(ResourceKey resourceKey) {
-        return {{checkTaskDefRef.name}}.createTask(resourceKey);
+        return {{checkInjection.name}}.createTask(resourceKey);
     }
 
     @Override public Task<@Nullable Styling> createStyleTask(ResourceKey resourceKey) {
-        return {{styleTaskDefRef.name}}.createTask(resourceKey);
+        return {{styleInjection.name}}.createTask(resourceKey);
     }
 
 
     @Override public CollectionView<CommandDef<?>> getCommandDefs() {
-        return CollectionView.of(); // TODO
+        return commandDefs;
     }
 
     @Override public CollectionView<AutoCommandRequest<?>> getAutoCommandRequests() {

@@ -6,15 +6,15 @@ import org.immutables.value.Value;
 import java.io.Serializable;
 
 @Value.Immutable
-public interface ClassInfo extends Serializable {
-    class Builder extends ImmutableClassInfo.Builder {}
+public interface TypeInfo extends Serializable {
+    class Builder extends ImmutableTypeInfo.Builder {}
 
     static Builder builder() {
         return new Builder();
     }
 
-    static ImmutableClassInfo of(String packageId, String classId) {
-        return ImmutableClassInfo.of(packageId, classId);
+    static ImmutableTypeInfo of(String packageId, String classId) {
+        return ImmutableTypeInfo.of(packageId, classId);
     }
 
 

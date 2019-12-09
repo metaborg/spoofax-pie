@@ -4,13 +4,13 @@ import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.command.CommandDefRepr;
-import mb.spoofax.compiler.util.ClassInfo;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
+import mb.spoofax.compiler.util.NamedInjection;
 import mb.spoofax.compiler.util.ResourceWriter;
-import mb.spoofax.compiler.util.TaskDefRef;
 import mb.spoofax.compiler.util.TemplateCompiler;
+import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.compiler.util.UniqueNamer;
 import org.immutables.value.Value;
 
@@ -102,6 +102,7 @@ public class AdapterProject {
 
         resourceService.getHierarchicalResource(input.gradleGenDirectory()).ensureDirectoryExists();
 
+        // Collect dependencies
         final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
         dependencies.add(GradleConfiguredDependency.api(input.languageProjectDependency()));
         dependencies.add(GradleConfiguredDependency.api(shared.spoofaxCoreDep()));
@@ -111,6 +112,7 @@ public class AdapterProject {
         dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
         dependencies.add(GradleConfiguredDependency.annotationProcessor(shared.daggerCompilerDep()));
 
+        // build.gradle.kts
         try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.buildGradleKtsFile()), charset)) {
             final HashMap<String, Object> map = new HashMap<>();
             map.put("dependencyCodes", dependencies.stream().map(GradleConfiguredDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
@@ -119,6 +121,7 @@ public class AdapterProject {
         }
 
         try {
+            // settings.gradle.kts (if present)
             input.settingsGradleKtsFile().ifPresent((f) -> {
                 try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(f), charset)) {
                     settingsGradleTemplate.execute(input, writer);
@@ -131,6 +134,7 @@ public class AdapterProject {
             throw e.getCause();
         }
 
+        // Run adapter project compilers
         final Parser.AdapterProjectOutput parserOutput = parserCompiler.compileAdapterProject(input.parser());
         final Optional<Styler.AdapterProjectOutput> stylerOutput;
         final Optional<StrategoRuntime.AdapterProjectOutput> strategoRuntimeOutput;
@@ -164,51 +168,83 @@ public class AdapterProject {
         final ResourcePath classesGenDirectory = input.classesGenDirectory();
         resourceService.getHierarchicalResource(classesGenDirectory).ensureDirectoryExists();
 
+        // *CheckTaskDef.java
         try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.checkTaskDef().file(classesGenDirectory)).createParents(), charset)) {
             checkTaskDefTemplate.execute(input, writer);
             writer.flush();
         }
 
+        // *Component.java
         try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genComponent().file(classesGenDirectory)).createParents(), charset)) {
             componentTemplate.execute(input, writer);
             writer.flush();
         }
 
-        {
-            final UniqueNamer uniqueNamer = new UniqueNamer();
-            final HashMap<String, Object> map = new HashMap<>();
-            map.put("tokenizeTaskDefRef", TaskDefRef.of(input.parser().tokenizeTaskDef(), uniqueNamer));
-            map.put("checkTaskDefRef", TaskDefRef.of(input.checkTaskDef(), uniqueNamer));
-            if(input.styler().isPresent()) {
-                final ClassInfo styleTaskDef = input.styler().get().styleTaskDef();
-                map.put("styleTaskDefRef", TaskDefRef.of(input.styler().get().styleTaskDef(), uniqueNamer));
-            } else {
-                map.put("styleTaskDefRef", TaskDefRef.of(ClassInfo.of("mb.spoofax.core.language.taskdef", "NullStyler"), uniqueNamer));
-            }
-            final ArrayList<TaskDefRef> additionalTaskDefs = new ArrayList<>();
-            parserOutput.additionalTaskDefs().forEach((ci) -> additionalTaskDefs.add(TaskDefRef.of(ci, uniqueNamer)));
-            stylerOutput.ifPresent(o -> o.additionalTaskDefs().forEach((ci) -> additionalTaskDefs.add(TaskDefRef.of(ci, uniqueNamer))));
-            strategoRuntimeOutput.ifPresent(o -> o.additionalTaskDefs().forEach((ci) -> additionalTaskDefs.add(TaskDefRef.of(ci, uniqueNamer))));
-            constraintAnalyzerOutput.ifPresent(o -> o.additionalTaskDefs().forEach((ci) -> additionalTaskDefs.add(TaskDefRef.of(ci, uniqueNamer))));
-            additionalTaskDefs.addAll(input.taskDefs());
-            map.put("additionalTaskDefs", additionalTaskDefs);
-
-            try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genModule().file(classesGenDirectory)).createParents(), charset)) {
-                moduleTemplate.execute(input, map, writer);
-                writer.flush();
-            }
-
-            try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genInstance().file(classesGenDirectory)).createParents(), charset)) {
-                instanceTemplate.execute(input, map, writer);
+        // *CommandDef.java
+        for(CommandDefRepr commandDef : input.commandDefs()) {
+            try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(commandDef.type().file(classesGenDirectory)).createParents(), charset)) {
+                final UniqueNamer uniqueNamer = new UniqueNamer();
+                final HashMap<String, Object> map = new HashMap<>();
+                map.put("taskDefInjection", NamedInjection.of(commandDef.taskDefType(), uniqueNamer));
+                commandDefTemplate.execute(commandDef, map, writer);
                 writer.flush();
             }
         }
 
-        for(CommandDefRepr commandDef : input.commandDefs()) {
-            try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(commandDef.commandDefClass().file(classesGenDirectory)).createParents(), charset)) {
-                commandDefTemplate.execute(commandDef, writer);
-                writer.flush();
+        // Collect all task definitions.
+        final ArrayList<TypeInfo> allTaskDefs = new ArrayList<>(input.taskDefs());
+        allTaskDefs.add(input.parser().tokenizeTaskDef());
+        allTaskDefs.addAll(parserOutput.additionalTaskDefs());
+        if(input.styler().isPresent()) {
+            allTaskDefs.add(input.styler().get().styleTaskDef());
+        } else {
+            allTaskDefs.add(TypeInfo.of("mb.spoofax.core.language.taskdef", "NullStyler"));
+        }
+        stylerOutput.ifPresent(o -> {
+            allTaskDefs.addAll(o.additionalTaskDefs());
+        });
+        strategoRuntimeOutput.ifPresent(o -> allTaskDefs.addAll(o.additionalTaskDefs()));
+        constraintAnalyzerOutput.ifPresent(o -> allTaskDefs.addAll(o.additionalTaskDefs()));
+        allTaskDefs.add(input.checkTaskDef());
+
+        // *Module.java
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genModule().file(classesGenDirectory)).createParents(), charset)) {
+            final UniqueNamer uniqueNamer = new UniqueNamer();
+            final HashMap<String, Object> map = new HashMap<>();
+            map.put("providedTaskDefs", allTaskDefs.stream().map((t) -> NamedInjection.of(t, uniqueNamer)).collect(Collectors.toList()));
+            map.put("providedCommandDefs", input.commandDefs().stream().map((c) -> NamedInjection.of(c.type(), uniqueNamer)).collect(Collectors.toList()));
+            moduleTemplate.execute(input, map, writer);
+            writer.flush();
+        }
+
+        // *Instance.java
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genInstance().file(classesGenDirectory)).createParents(), charset)) {
+            final UniqueNamer uniqueNamer = new UniqueNamer();
+            uniqueNamer.reserve("commandDefs");
+            final HashMap<String, Object> map = new HashMap<>();
+            final ArrayList<NamedInjection> injectedTaskDefs = new ArrayList<>();
+
+            final NamedInjection tokenizeInjection = NamedInjection.of(input.parser().tokenizeTaskDef(), uniqueNamer);
+            map.put("tokenizeInjection", tokenizeInjection);
+            injectedTaskDefs.add(tokenizeInjection);
+
+            final NamedInjection checkInjection = NamedInjection.of(input.checkTaskDef(), uniqueNamer);
+            injectedTaskDefs.add(checkInjection);
+            map.put("checkInjection", checkInjection);
+
+            final NamedInjection styleInjection;
+            if(input.styler().isPresent()) {
+                styleInjection = NamedInjection.of(input.styler().get().styleTaskDef(), uniqueNamer);
+            } else {
+                styleInjection = NamedInjection.of(TypeInfo.of("mb.spoofax.core.language.taskdef", "NullStyler"), uniqueNamer);
             }
+            map.put("styleInjection", styleInjection);
+            injectedTaskDefs.add(styleInjection);
+
+            map.put("injectedTaskDefs", injectedTaskDefs);
+
+            instanceTemplate.execute(input, map, writer);
+            writer.flush();
         }
 
         return Output.builder()
@@ -246,7 +282,7 @@ public class AdapterProject {
 
         List<GradleConfiguredDependency> additionalDependencies();
 
-        List<TaskDefRef> taskDefs();
+        List<TypeInfo> taskDefs();
 
         List<CommandDefRepr> commandDefs();
 
@@ -289,13 +325,13 @@ public class AdapterProject {
 
         // Dagger component
 
-        @Value.Default default ClassInfo genComponent() {
-            return ClassInfo.of(shared().adapterPackage(), shared().classSuffix() + "Component");
+        @Value.Default default TypeInfo genComponent() {
+            return TypeInfo.of(shared().adapterPackage(), shared().classSuffix() + "Component");
         }
 
-        Optional<ClassInfo> manualComponent();
+        Optional<TypeInfo> manualComponent();
 
-        default ClassInfo component() {
+        default TypeInfo component() {
             if(classKind().isManual() && manualComponent().isPresent()) {
                 return manualComponent().get();
             }
@@ -304,13 +340,13 @@ public class AdapterProject {
 
         // Dagger module
 
-        @Value.Default default ClassInfo genModule() {
-            return ClassInfo.of(shared().adapterPackage(), shared().classSuffix() + "Module");
+        @Value.Default default TypeInfo genModule() {
+            return TypeInfo.of(shared().adapterPackage(), shared().classSuffix() + "Module");
         }
 
-        Optional<ClassInfo> manualModule();
+        Optional<TypeInfo> manualModule();
 
-        default ClassInfo module() {
+        default TypeInfo module() {
             if(classKind().isManual() && manualModule().isPresent()) {
                 return manualModule().get();
             }
@@ -319,13 +355,13 @@ public class AdapterProject {
 
         // Language instance
 
-        @Value.Default default ClassInfo genInstance() {
-            return ClassInfo.of(shared().adapterPackage(), shared().classSuffix() + "Instance");
+        @Value.Default default TypeInfo genInstance() {
+            return TypeInfo.of(shared().adapterPackage(), shared().classSuffix() + "Instance");
         }
 
-        Optional<ClassInfo> manualInstance();
+        Optional<TypeInfo> manualInstance();
 
-        default ClassInfo instance() {
+        default TypeInfo instance() {
             if(classKind().isManual() && manualInstance().isPresent()) {
                 return manualInstance().get();
             }
@@ -337,13 +373,13 @@ public class AdapterProject {
 
         // Check task definition
 
-        @Value.Default default ClassInfo genCheckTaskDef() {
-            return ClassInfo.of(shared().adapterTaskPackage(), shared().classSuffix() + "Check");
+        @Value.Default default TypeInfo genCheckTaskDef() {
+            return TypeInfo.of(shared().adapterTaskPackage(), shared().classSuffix() + "Check");
         }
 
-        Optional<ClassInfo> manualCheckTaskDef();
+        Optional<TypeInfo> manualCheckTaskDef();
 
-        default ClassInfo checkTaskDef() {
+        default TypeInfo checkTaskDef() {
             if(classKind().isManual() && manualCheckTaskDef().isPresent()) {
                 return manualCheckTaskDef().get();
             }

@@ -1,7 +1,6 @@
 package mb.spoofax.compiler.command;
 
-import mb.spoofax.compiler.util.ClassInfo;
-import mb.spoofax.compiler.util.TaskDefRef;
+import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.core.language.command.CommandContextType;
 import mb.spoofax.core.language.command.CommandExecutionType;
 import org.immutables.value.Value;
@@ -18,11 +17,11 @@ public interface CommandDefRepr {
     }
 
 
-    ClassInfo commandDefClass();
+    TypeInfo type();
 
-    TaskDefRef taskDef();
+    TypeInfo taskDefType();
 
-    ClassInfo argClass();
+    TypeInfo argType();
 
     String displayName();
 

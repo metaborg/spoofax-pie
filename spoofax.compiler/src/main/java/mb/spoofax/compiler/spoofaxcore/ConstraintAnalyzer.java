@@ -3,7 +3,7 @@ package mb.spoofax.compiler.spoofaxcore;
 import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.ClassInfo;
+import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.ResourceWriter;
@@ -130,13 +130,13 @@ public class ConstraintAnalyzer {
 
         // Constraint analyzer
 
-        @Value.Default default ClassInfo genConstraintAnalyzer() {
-            return ClassInfo.of(shared().languagePackage(), shared().classSuffix() + "ConstraintAnalyzer");
+        @Value.Default default TypeInfo genConstraintAnalyzer() {
+            return TypeInfo.of(shared().languagePackage(), shared().classSuffix() + "ConstraintAnalyzer");
         }
 
-        Optional<ClassInfo> manualConstraintAnalyzer();
+        Optional<TypeInfo> manualConstraintAnalyzer();
 
-        default ClassInfo constraintAnalyzer() {
+        default TypeInfo constraintAnalyzer() {
             if(classKind().isManual() && manualConstraintAnalyzer().isPresent()) {
                 return manualConstraintAnalyzer().get();
             }
@@ -145,13 +145,13 @@ public class ConstraintAnalyzer {
 
         // Constraint analyzer factory
 
-        @Value.Default default ClassInfo genFactory() {
-            return ClassInfo.of(shared().languagePackage(), shared().classSuffix() + "ConstraintAnalyzerFactory");
+        @Value.Default default TypeInfo genFactory() {
+            return TypeInfo.of(shared().languagePackage(), shared().classSuffix() + "ConstraintAnalyzerFactory");
         }
 
-        Optional<ClassInfo> manualFactory();
+        Optional<TypeInfo> manualFactory();
 
-        default ClassInfo factory() {
+        default TypeInfo factory() {
             if(classKind().isManual() && manualFactory().isPresent()) {
                 return manualFactory().get();
             }
@@ -167,13 +167,13 @@ public class ConstraintAnalyzer {
 
         // Analyze
 
-        @Value.Default default ClassInfo genAnalyzeTaskDef() {
-            return ClassInfo.of(shared().adapterTaskPackage(), shared().classSuffix() + "Analyze");
+        @Value.Default default TypeInfo genAnalyzeTaskDef() {
+            return TypeInfo.of(shared().adapterTaskPackage(), shared().classSuffix() + "Analyze");
         }
 
-        Optional<ClassInfo> manualAnalyzeTaskDef();
+        Optional<TypeInfo> manualAnalyzeTaskDef();
 
-        default ClassInfo analyzeTaskDef() {
+        default TypeInfo analyzeTaskDef() {
             if(classKind().isManual() && manualAnalyzeTaskDef().isPresent()) {
                 return manualAnalyzeTaskDef().get();
             }
@@ -232,6 +232,6 @@ public class ConstraintAnalyzer {
 
         List<GradleConfiguredDependency> dependencies();
 
-        List<ClassInfo> additionalTaskDefs();
+        List<TypeInfo> additionalTaskDefs();
     }
 }

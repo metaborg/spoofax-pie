@@ -11,22 +11,9 @@ import mb.pie.api.TaskDef;
 import mb.pie.api.TaskDefs;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.LanguageScope;
+import mb.spoofax.core.language.command.CommandDef;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
-
-import {{parser.factory.qualifiedId}};
-import {{parser.parser.qualifiedId}};
-{{#styler}}
-import {{this.factory.qualifiedId}};
-import {{this.styler.qualifiedId}};
-{{/styler}}
-{{#strategoRuntime}}
-import {{this.factory.qualifiedId}};
-{{/strategoRuntime}}
-{{#constraintAnalyzer}}
-import {{this.factory.qualifiedId}};
-import {{this.constraintAnalyzer.qualifiedId}};
-{{/constraintAnalyzer}}
 
 import javax.inject.Named;
 import java.util.HashSet;
@@ -35,24 +22,24 @@ import java.util.Set;
 @Module
 public class {{genModule.id}} {
     @Provides @LanguageScope
-    {{parser.factory.id}} provideParserFactory() {
-        return new {{parser.factory.id}}();
+    {{parser.factory.qualifiedId}} provideParserFactory() {
+        return new {{parser.factory.qualifiedId}}();
     }
 
     @Provides /* Unscoped: parser has state, so create a new parser every call. */
-    {{parser.parser.id}} provideParser({{parser.factory.id}} parserFactory) {
+    {{parser.parser.qualifiedId}} provideParser({{parser.factory.qualifiedId}} parserFactory) {
         return parserFactory.create();
     }
 {{#styler}}
 
 
     @Provides @LanguageScope
-    {{this.factory.id}} provideStylerFactory(LoggerFactory loggerFactory) {
-        return new {{this.factory.id}}(loggerFactory);
+    {{this.factory.qualifiedId}} provideStylerFactory(LoggerFactory loggerFactory) {
+        return new {{this.factory.qualifiedId}}(loggerFactory);
     }
 
     @Provides @LanguageScope
-    {{this.styler.id}} provideStyler({{this.factory.id}} stylerFactory) {
+    {{this.styler.qualifiedId}} provideStyler({{this.factory.qualifiedId}} stylerFactory) {
         return stylerFactory.create();
     }
 {{/styler}}
@@ -60,12 +47,12 @@ public class {{genModule.id}} {
 
 
     @Provides @LanguageScope
-    {{this.factory.id}} provideStrategoRuntimeBuilderFactory() {
-        return new {{this.factory.id}}();
+    {{this.factory.qualifiedId}} provideStrategoRuntimeBuilderFactory() {
+        return new {{this.factory.qualifiedId}}();
     }
 
     @Provides @LanguageScope
-    StrategoRuntimeBuilder provideStrategoRuntimeBuilder({{this.factory.id}} factory) {
+    StrategoRuntimeBuilder provideStrategoRuntimeBuilder({{this.factory.qualifiedId}} factory) {
         return factory.create();
     }
 
@@ -78,12 +65,12 @@ public class {{genModule.id}} {
 
 
     @Provides @LanguageScope
-    {{this.factory.id}} provideConstraintAnalyzerFactory(StrategoRuntime prototypeStrategoRuntime) {
-        return new {{this.factory.id}}(prototypeStrategoRuntime);
+    {{this.factory.qualifiedId}} provideConstraintAnalyzerFactory(StrategoRuntime prototypeStrategoRuntime) {
+        return new {{this.factory.qualifiedId}}(prototypeStrategoRuntime);
     }
 
     @Provides @LanguageScope
-    {{this.constraintAnalyzer.id}} provideConstraintAnalyzer({{this.factory.id}} factory) {
+    {{this.constraintAnalyzer.qualifiedId}} provideConstraintAnalyzer({{this.factory.qualifiedId}} factory) {
         return factory.create();
     }
 {{/constraintAnalyzer}}
@@ -91,18 +78,14 @@ public class {{genModule.id}} {
 
     @Provides @LanguageScope @Named("language") @ElementsIntoSet
     static Set<TaskDef<?, ?>> provideTaskDefsSet(
-        {{tokenizeTaskDefRef.type.qualifiedId}} {{tokenizeTaskDefRef.name}},
-        {{checkTaskDefRef.type.qualifiedId}} {{checkTaskDefRef.name}},
-        {{styleTaskDefRef.type.qualifiedId}} {{styleTaskDefRef.name}}{{#additionalTaskDefs}},
-        {{this.type.qualifiedId}} {{this.name}}{{/additionalTaskDefs}}
+{{#providedTaskDefs}}
+        {{variable}}{{^-last}},{{/-last}}
+{{/providedTaskDefs}}
     ) {
         final HashSet<TaskDef<?, ?>> taskDefs = new HashSet<>();
-        taskDefs.add({{tokenizeTaskDefRef.name}});
-        taskDefs.add({{checkTaskDefRef.name}});
-        taskDefs.add({{styleTaskDefRef.name}});
-{{#additionalTaskDefs}}
-        taskDefs.add({{this.name}});
-{{/additionalTaskDefs}}
+{{#providedTaskDefs}}
+        taskDefs.add({{name}});
+{{/providedTaskDefs}}
         return taskDefs;
     }
 
@@ -120,5 +103,19 @@ public class {{genModule.id}} {
     @Provides /* Unscoped: new session every call. */
     PieSession providePieSession(Pie pie, @Named("language") TaskDefs languageTaskDefs) {
         return pie.newSession(languageTaskDefs);
+    }
+
+
+    @Provides @LanguageScope @ElementsIntoSet
+    static Set<CommandDef<?>> provideCommandDefsSet(
+{{#providedCommandDefs}}
+        {{variable}}{{^-last}},{{/-last}}
+{{/providedCommandDefs}}
+    ) {
+        final HashSet<CommandDef<?>> commandDefs = new HashSet<>();
+{{#providedCommandDefs}}
+        commandDefs.add({{name}});
+{{/providedCommandDefs}}
+        return commandDefs;
     }
 }

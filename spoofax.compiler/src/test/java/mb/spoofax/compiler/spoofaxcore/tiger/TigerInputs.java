@@ -15,10 +15,9 @@ import mb.spoofax.compiler.spoofaxcore.RootProject;
 import mb.spoofax.compiler.spoofaxcore.Shared;
 import mb.spoofax.compiler.spoofaxcore.StrategoRuntime;
 import mb.spoofax.compiler.spoofaxcore.Styler;
-import mb.spoofax.compiler.util.ClassInfo;
 import mb.spoofax.compiler.util.Conversion;
 import mb.spoofax.compiler.util.GradleDependency;
-import mb.spoofax.compiler.util.TaskDefRef;
+import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.core.language.command.CommandContextType;
 import mb.spoofax.core.language.command.CommandExecutionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -144,7 +143,7 @@ public class TigerInputs {
     /// Adapter project compiler input
 
     public static AdapterProject.Input.Builder adapterProjectBuilder(Shared shared) {
-        final TaskDefRef showParsedAst = TaskDefRef.of("showParsedAst", ClassInfo.of(shared.adapterTaskPackage(), "TigerShowParsedAstTaskDef"));
+        final TypeInfo showParsedAst = TypeInfo.of(shared.adapterTaskPackage(), "TigerShowParsedAstTaskDef");
         return AdapterProject.Input.builder()
             .shared(shared)
             .parser(parser(shared))
@@ -153,14 +152,14 @@ public class TigerInputs {
             .constraintAnalyzer(constraintAnalyzer(shared))
             .addTaskDefs(showParsedAst)
             .addCommandDefs(CommandDefRepr.builder()
-                .commandDefClass(shared.adapterCommandPackage(), "TigerShowParsedAst")
-                .taskDef(showParsedAst)
-                .argClass(shared.adapterTaskPackage(), "TigerShowParsedAstTaskDef.Args")
+                .type(shared.adapterCommandPackage(), "TigerShowParsedAst")
+                .taskDefType(showParsedAst)
+                .argType(shared.adapterTaskPackage(), "TigerShowParsedAstTaskDef.Args")
                 .displayName("Show parsed AST")
                 .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
                 .addRequiredContextTypes(CommandContextType.Resource)
-                .addParams("resource", ClassInfo.of("mb.resource", "ResourceKey"), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.context()))
-                .addParams("region", ClassInfo.of("mb.common.region", "Region"), false, Optional.empty(), Collections.singletonList(ArgProviderRepr.context()))
+                .addParams("resource", TypeInfo.of("mb.resource", "ResourceKey"), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.context()))
+                .addParams("region", TypeInfo.of("mb.common.region", "Region"), false, Optional.empty(), Collections.singletonList(ArgProviderRepr.context()))
                 .build()
             )
             ;

@@ -1,7 +1,6 @@
 package mb.spoofax.compiler.command;
 
-import mb.spoofax.compiler.util.ClassInfo;
-import mb.spoofax.core.language.command.arg.ArgProvider;
+import mb.spoofax.compiler.util.TypeInfo;
 import org.immutables.value.Value;
 
 import java.util.List;
@@ -18,13 +17,13 @@ public interface ParamRepr {
 
     @Value.Parameter String id();
 
-    @Value.Parameter ClassInfo type();
+    @Value.Parameter TypeInfo type();
 
     @Value.Parameter @Value.Default default boolean required() {
         return true;
     }
 
-    @Value.Parameter Optional<ClassInfo> converter();
+    @Value.Parameter Optional<TypeInfo> converter();
 
     @Value.Parameter List<ArgProviderRepr> providers();
 }

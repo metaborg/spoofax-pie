@@ -3,7 +3,7 @@ package mb.spoofax.compiler.spoofaxcore;
 import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.ClassInfo;
+import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.ResourceWriter;
@@ -139,19 +139,19 @@ public class Styler {
 
         // Styling rules
 
-        @Value.Default default ClassInfo genRules() {
-            return ClassInfo.of(shared().languagePackage(), shared().classSuffix() + "StylingRules");
+        @Value.Default default TypeInfo genRules() {
+            return TypeInfo.of(shared().languagePackage(), shared().classSuffix() + "StylingRules");
         }
 
         // Styler
 
-        @Value.Default default ClassInfo genStyler() {
-            return ClassInfo.of(shared().languagePackage(), shared().classSuffix() + "Styler");
+        @Value.Default default TypeInfo genStyler() {
+            return TypeInfo.of(shared().languagePackage(), shared().classSuffix() + "Styler");
         }
 
-        Optional<ClassInfo> manualStyler();
+        Optional<TypeInfo> manualStyler();
 
-        default ClassInfo styler() {
+        default TypeInfo styler() {
             if(classKind().isManual() && manualStyler().isPresent()) {
                 return manualStyler().get();
             }
@@ -160,13 +160,13 @@ public class Styler {
 
         // Styler factory
 
-        @Value.Default default ClassInfo genFactory() {
-            return ClassInfo.of(shared().languagePackage(), shared().classSuffix() + "StylerFactory");
+        @Value.Default default TypeInfo genFactory() {
+            return TypeInfo.of(shared().languagePackage(), shared().classSuffix() + "StylerFactory");
         }
 
-        Optional<ClassInfo> manualFactory();
+        Optional<TypeInfo> manualFactory();
 
-        default ClassInfo factory() {
+        default TypeInfo factory() {
             if(classKind().isManual() && manualFactory().isPresent()) {
                 return manualFactory().get();
             }
@@ -182,13 +182,13 @@ public class Styler {
 
         // Style task definition
 
-        @Value.Default default ClassInfo genStyleTaskDef() {
-            return ClassInfo.of(shared().adapterTaskPackage(), shared().classSuffix() + "Style");
+        @Value.Default default TypeInfo genStyleTaskDef() {
+            return TypeInfo.of(shared().adapterTaskPackage(), shared().classSuffix() + "Style");
         }
 
-        Optional<ClassInfo> manualStyleTaskDef();
+        Optional<TypeInfo> manualStyleTaskDef();
 
-        default ClassInfo styleTaskDef() {
+        default TypeInfo styleTaskDef() {
             if(classKind().isManual() && manualStyleTaskDef().isPresent()) {
                 return manualStyleTaskDef().get();
             }
@@ -248,6 +248,6 @@ public class Styler {
 
         List<GradleConfiguredDependency> dependencies();
 
-        List<ClassInfo> additionalTaskDefs();
+        List<TypeInfo> additionalTaskDefs();
     }
 }
