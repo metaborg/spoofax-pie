@@ -12,6 +12,7 @@ import mb.pie.api.TaskDefs;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.CommandDef;
+import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
 
@@ -117,5 +118,18 @@ public class {{genModule.id}} {
         commandDefs.add({{name}});
 {{/providedCommandDefs}}
         return commandDefs;
+    }
+
+    @Provides @LanguageScope @ElementsIntoSet
+    static Set<AutoCommandRequest<?>> provideAutoCommandRequestsSet(
+{{#providedAutoCommandDefs}}
+        {{variable}}{{^-last}},{{/-last}}
+{{/providedAutoCommandDefs}}
+    ) {
+        final HashSet<AutoCommandRequest<?>> autoCommandDefs = new HashSet<>();
+{{#providedAutoCommandDefs}}
+        autoCommandDefs.add({{name}});
+{{/providedAutoCommandDefs}}
+        return autoCommandDefs;
     }
 }

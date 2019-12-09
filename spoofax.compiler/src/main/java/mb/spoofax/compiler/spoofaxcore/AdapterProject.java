@@ -3,6 +3,7 @@ package mb.spoofax.compiler.spoofaxcore;
 import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.command.AutoCommandDefRepr;
 import mb.spoofax.compiler.command.CommandDefRepr;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
@@ -213,6 +214,7 @@ public class AdapterProject {
             final HashMap<String, Object> map = new HashMap<>();
             map.put("providedTaskDefs", allTaskDefs.stream().map((t) -> NamedInjection.of(t, uniqueNamer)).collect(Collectors.toList()));
             map.put("providedCommandDefs", input.commandDefs().stream().map((c) -> NamedInjection.of(c.type(), uniqueNamer)).collect(Collectors.toList()));
+            map.put("providedAutoCommandDefs", input.autoCommandDefs().stream().map((c) -> NamedInjection.of(c.commandDefType(), uniqueNamer)).collect(Collectors.toList()));
             moduleTemplate.execute(input, map, writer);
             writer.flush();
         }
@@ -222,16 +224,15 @@ public class AdapterProject {
             final UniqueNamer uniqueNamer = new UniqueNamer();
             uniqueNamer.reserve("commandDefs");
             final HashMap<String, Object> map = new HashMap<>();
-            final ArrayList<NamedInjection> injectedTaskDefs = new ArrayList<>();
 
+            // Create named injections for tasks required in the language instance.
+            final ArrayList<NamedInjection> injectedTaskDefs = new ArrayList<>();
             final NamedInjection tokenizeInjection = NamedInjection.of(input.parser().tokenizeTaskDef(), uniqueNamer);
             map.put("tokenizeInjection", tokenizeInjection);
             injectedTaskDefs.add(tokenizeInjection);
-
             final NamedInjection checkInjection = NamedInjection.of(input.checkTaskDef(), uniqueNamer);
             injectedTaskDefs.add(checkInjection);
             map.put("checkInjection", checkInjection);
-
             final NamedInjection styleInjection;
             if(input.styler().isPresent()) {
                 styleInjection = NamedInjection.of(input.styler().get().styleTaskDef(), uniqueNamer);
@@ -240,7 +241,6 @@ public class AdapterProject {
             }
             map.put("styleInjection", styleInjection);
             injectedTaskDefs.add(styleInjection);
-
             map.put("injectedTaskDefs", injectedTaskDefs);
 
             instanceTemplate.execute(input, map, writer);
@@ -285,6 +285,8 @@ public class AdapterProject {
         List<TypeInfo> taskDefs();
 
         List<CommandDefRepr> commandDefs();
+
+        List<AutoCommandDefRepr> autoCommandDefs();
 
 
         /// Gradle files

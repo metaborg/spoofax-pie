@@ -35,18 +35,21 @@ public class {{genInstance.id}} implements LanguageInstance {
 {{/injectedTaskDefs}}
 
     private final CollectionView<CommandDef<?>> commandDefs;
+    private final CollectionView<AutoCommandRequest<?>> autoCommandDefs;
 
 
     @Inject public {{genInstance.id}}(
 {{#injectedTaskDefs}}
         {{variable}},
 {{/injectedTaskDefs}}
-        Set<CommandDef<?>> commandDefs
+        Set<CommandDef<?>> commandDefs,
+        Set<AutoCommandRequest<?>> autoCommandDefs
     ) {
 {{#injectedTaskDefs}}
         {{thisAssign}};
 {{/injectedTaskDefs}}
         this.commandDefs = CollectionView.copyOf(commandDefs);
+        this.autoCommandDefs = CollectionView.copyOf(autoCommandDefs);
     }
 
 
@@ -77,7 +80,7 @@ public class {{genInstance.id}} implements LanguageInstance {
     }
 
     @Override public CollectionView<AutoCommandRequest<?>> getAutoCommandRequests() {
-        return CollectionView.of(); // TODO
+        return autoCommandDefs;
     }
 
 
