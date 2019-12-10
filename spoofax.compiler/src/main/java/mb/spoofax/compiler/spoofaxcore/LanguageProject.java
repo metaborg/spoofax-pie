@@ -60,8 +60,8 @@ public class LanguageProject {
     ) {
         final TemplateCompiler templateCompiler = new TemplateCompiler(LanguageProject.class);
         return new LanguageProject(
-            templateCompiler.compile("language_project/build.gradle.kts.mustache"),
-            templateCompiler.compile("gradle_project/settings.gradle.kts.mustache"),
+            templateCompiler.getOrCompile("language_project/build.gradle.kts.mustache"),
+            templateCompiler.getOrCompile("gradle_project/settings.gradle.kts.mustache"),
             resourceService,
             charset,
             parserCompiler,

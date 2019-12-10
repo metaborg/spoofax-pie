@@ -45,9 +45,9 @@ public class ConstraintAnalyzer {
     ) {
         final TemplateCompiler templateCompiler = new TemplateCompiler(ConstraintAnalyzer.class);
         return new ConstraintAnalyzer(
-            templateCompiler.compile("constraint_analyzer/ConstraintAnalyzer.java.mustache"),
-            templateCompiler.compile("constraint_analyzer/ConstraintAnalyzerFactory.java.mustache"),
-            templateCompiler.compile("constraint_analyzer/AnalyzeTaskDef.java.mustache"),
+            templateCompiler.getOrCompile("constraint_analyzer/ConstraintAnalyzer.java.mustache"),
+            templateCompiler.getOrCompile("constraint_analyzer/ConstraintAnalyzerFactory.java.mustache"),
+            templateCompiler.getOrCompile("constraint_analyzer/AnalyzeTaskDef.java.mustache"),
             resourceService,
             charset
         );

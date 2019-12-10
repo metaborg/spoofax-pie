@@ -4,9 +4,10 @@ import com.samskivert.mustache.Mustache;
 import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.cli.CliCommandRepr;
 import mb.spoofax.compiler.command.AutoCommandDefRepr;
-import mb.spoofax.compiler.command.CliCommandRepr;
 import mb.spoofax.compiler.command.CommandDefRepr;
+import mb.spoofax.compiler.menu.MenuItemRepr;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
@@ -84,13 +85,13 @@ public class AdapterProject {
     ) {
         final TemplateCompiler templateCompiler = new TemplateCompiler(AdapterProject.class);
         return new AdapterProject(
-            templateCompiler.compile("adapter_project/build.gradle.kts.mustache"),
-            templateCompiler.compile("gradle_project/settings.gradle.kts.mustache"),
-            templateCompiler.compile("adapter_project/CheckTaskDef.java.mustache"),
-            templateCompiler.compile("adapter_project/Component.java.mustache"),
-            templateCompiler.compile("adapter_project/Module.java.mustache"),
-            templateCompiler.compile("adapter_project/Instance.java.mustache"),
-            templateCompiler.compile("adapter_project/CommandDef.java.mustache"),
+            templateCompiler.getOrCompile("adapter_project/build.gradle.kts.mustache"),
+            templateCompiler.getOrCompile("gradle_project/settings.gradle.kts.mustache"),
+            templateCompiler.getOrCompile("adapter_project/CheckTaskDef.java.mustache"),
+            templateCompiler.getOrCompile("adapter_project/Component.java.mustache"),
+            templateCompiler.getOrCompile("adapter_project/Module.java.mustache"),
+            templateCompiler.getOrCompile("adapter_project/Instance.java.mustache"),
+            templateCompiler.getOrCompile("adapter_project/CommandDef.java.mustache"),
             resourceService,
             charset,
             parserCompiler,
@@ -309,9 +310,17 @@ public class AdapterProject {
 
         List<AutoCommandDefRepr> autoCommandDefs();
 
-        default @Value.Default CliCommandRepr cliCommand() {
+        @Value.Default default CliCommandRepr cliCommand() {
             return CliCommandRepr.builder().name(shared().name()).build();
         }
+
+        @Value.Default default List<MenuItemRepr> mainMenuItems() {
+            return editorContextMenuItems();
+        }
+
+        List<MenuItemRepr> resourceContextMenuItems();
+
+        List<MenuItemRepr> editorContextMenuItems();
 
 
         /// Gradle files

@@ -86,20 +86,32 @@ public class {{genInstance.id}} implements LanguageInstance {
 
     @Override public CliCommand getCliCommand() {
 {{#cliCommand}}
-        return {{>adapter_project/CliCommand.mustache}};
+        return {{>adapter_project/partial/CliCommand.mustache}};
 {{/cliCommand}}
     }
 
 
     @Override public ListView<MenuItem> getMainMenuItems() {
-        return ListView.of(); // TODO
+        return ListView.of(
+{{#mainMenuItems}}
+            {{>adapter_project/partial/MenuItem.mustache}}{{^-last}},{{/-last}}
+{{/mainMenuItems}}
+        );
     }
 
     @Override public ListView<MenuItem> getResourceContextMenuItems() {
-        return ListView.of(); // TODO
+        return ListView.of(
+{{#resourceContextMenuItems}}
+            {{>adapter_project/partial/MenuItem.mustache}}{{^-last}},{{/-last}}
+{{/resourceContextMenuItems}}
+        );
     }
 
     @Override public ListView<MenuItem> getEditorContextMenuItems() {
-        return ListView.of(); // TODO
+        return ListView.of(
+{{#editorContextMenuItems}}
+            {{>adapter_project/partial/MenuItem.mustache}}{{^-last}},{{/-last}}
+{{/editorContextMenuItems}}
+        );
     }
 }

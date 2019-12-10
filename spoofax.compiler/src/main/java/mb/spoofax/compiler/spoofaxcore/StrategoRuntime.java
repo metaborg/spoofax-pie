@@ -39,7 +39,7 @@ public class StrategoRuntime {
     ) {
         final TemplateCompiler templateCompiler = new TemplateCompiler(StrategoRuntime.class);
         return new StrategoRuntime(
-            templateCompiler.compile("stratego_runtime/StrategoRuntimeBuilderFactory.java.mustache"),
+            templateCompiler.getOrCompile("stratego_runtime/StrategoRuntimeBuilderFactory.java.mustache"),
             resourceService,
             charset
         );

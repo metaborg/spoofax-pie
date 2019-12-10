@@ -32,8 +32,8 @@ public class RootProject {
     public static RootProject fromClassLoaderResources(ResourceService resourceService, Charset charset) {
         final TemplateCompiler templateCompiler = new TemplateCompiler(RootProject.class);
         return new RootProject(
-            templateCompiler.compile("root_project/settings.gradle.kts.mustache"),
-            templateCompiler.compile("root_project/build.gradle.kts.mustache"),
+            templateCompiler.getOrCompile("root_project/settings.gradle.kts.mustache"),
+            templateCompiler.getOrCompile("root_project/build.gradle.kts.mustache"),
             resourceService,
             charset
         );

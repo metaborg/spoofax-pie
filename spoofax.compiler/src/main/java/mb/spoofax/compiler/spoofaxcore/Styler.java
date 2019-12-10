@@ -48,10 +48,10 @@ public class Styler {
     ) {
         final TemplateCompiler templateCompiler = new TemplateCompiler(Styler.class);
         return new Styler(
-            templateCompiler.compile("styler/StylingRules.java.mustache"),
-            templateCompiler.compile("styler/Styler.java.mustache"),
-            templateCompiler.compile("styler/StylerFactory.java.mustache"),
-            templateCompiler.compile("styler/StyleTaskDef.java.mustache"),
+            templateCompiler.getOrCompile("styler/StylingRules.java.mustache"),
+            templateCompiler.getOrCompile("styler/Styler.java.mustache"),
+            templateCompiler.getOrCompile("styler/StylerFactory.java.mustache"),
+            templateCompiler.getOrCompile("styler/StyleTaskDef.java.mustache"),
             resourceService,
             charset
         );

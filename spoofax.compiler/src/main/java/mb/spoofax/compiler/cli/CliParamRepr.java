@@ -1,4 +1,4 @@
-package mb.spoofax.compiler.command;
+package mb.spoofax.compiler.cli;
 
 import mb.common.util.ADT;
 import mb.common.util.ListView;

@@ -1,4 +1,4 @@
-package mb.spoofax.compiler.command;
+package mb.spoofax.compiler.cli;
 
 import mb.spoofax.compiler.util.TypeInfo;
 import org.immutables.value.Value;

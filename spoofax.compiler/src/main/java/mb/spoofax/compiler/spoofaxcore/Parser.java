@@ -48,11 +48,11 @@ public class Parser {
     public static Parser fromClassLoaderResources(ResourceService resourceService, Charset charset) {
         final TemplateCompiler templateCompiler = new TemplateCompiler(Parser.class);
         return new Parser(
-            templateCompiler.compile("parser/ParseTable.java.mustache"),
-            templateCompiler.compile("parser/Parser.java.mustache"),
-            templateCompiler.compile("parser/ParserFactory.java.mustache"),
-            templateCompiler.compile("parser/ParseTaskDef.java.mustache"),
-            templateCompiler.compile("parser/TokenizeTaskDef.java.mustache"),
+            templateCompiler.getOrCompile("parser/ParseTable.java.mustache"),
+            templateCompiler.getOrCompile("parser/Parser.java.mustache"),
+            templateCompiler.getOrCompile("parser/ParserFactory.java.mustache"),
+            templateCompiler.getOrCompile("parser/ParseTaskDef.java.mustache"),
+            templateCompiler.getOrCompile("parser/TokenizeTaskDef.java.mustache"),
             resourceService,
             charset
         );

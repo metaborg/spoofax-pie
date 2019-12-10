@@ -6,11 +6,12 @@ import mb.common.util.Preconditions;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.cli.CliCommandRepr;
+import mb.spoofax.compiler.cli.CliParamRepr;
 import mb.spoofax.compiler.command.ArgProviderRepr;
 import mb.spoofax.compiler.command.AutoCommandDefRepr;
-import mb.spoofax.compiler.command.CliCommandRepr;
-import mb.spoofax.compiler.command.CliParamRepr;
 import mb.spoofax.compiler.command.CommandDefRepr;
+import mb.spoofax.compiler.menu.MenuCommandActionRepr;
 import mb.spoofax.compiler.spoofaxcore.AdapterProject;
 import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzer;
 import mb.spoofax.compiler.spoofaxcore.LanguageProject;
@@ -230,6 +231,12 @@ public class TigerInputs {
                         .build()
                 )
                 .build()
+            )
+            .addEditorContextMenuItems(
+                MenuCommandActionRepr.builder()
+                    .commandDefType(tigerShowParsedAst.type())
+                    .executionType(CommandExecutionType.ManualContinuous)
+                    .build()
             )
             ;
     }

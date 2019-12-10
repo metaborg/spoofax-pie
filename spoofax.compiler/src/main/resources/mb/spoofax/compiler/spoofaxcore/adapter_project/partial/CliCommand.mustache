@@ -19,7 +19,7 @@ CliCommand.of(
     ),
     ListView.of(
 {{#subCommands}}
-        {{>adapter_project/CliCommand.mustache}}{{^-last}},{{/-last}}
+        {{>adapter_project/partial/CliCommand.mustache}}{{^-last}},{{/-last}}
 {{/subCommands}}
     )
 )
