@@ -1,12 +1,15 @@
 package mb.spoofax.compiler.spoofaxcore.tiger;
 
 import mb.common.util.IOUtil;
+import mb.common.util.ListView;
 import mb.common.util.Preconditions;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.command.ArgProviderRepr;
 import mb.spoofax.compiler.command.AutoCommandDefRepr;
+import mb.spoofax.compiler.command.CliCommandRepr;
+import mb.spoofax.compiler.command.CliParamRepr;
 import mb.spoofax.compiler.command.CommandDefRepr;
 import mb.spoofax.compiler.spoofaxcore.AdapterProject;
 import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzer;
@@ -210,6 +213,22 @@ public class TigerInputs {
             .addAutoCommandDefs(AutoCommandDefRepr.builder()
                 .commandDef(tigerAltCompileFile.type())
                 .putRawArgs("base64Encode", "true")
+                .build()
+            )
+            .cliCommand(CliCommandRepr.builder()
+                .name("tiger")
+                .description("Tiger language command-line interface")
+                .addSubCommands(
+                    CliCommandRepr.builder()
+                        .name("parse")
+                        .description("Parses Tiger sources and shows the parsed AST")
+                        .commandDefType(tigerShowParsedAst.type())
+                        .addParams(
+                            CliParamRepr.positional("resource", 0, "FILE", "Source file to parse", null),
+                            CliParamRepr.option("region", ListView.of("-r", "--region"), false, null, "Region in source file to parse", null)
+                        )
+                        .build()
+                )
                 .build()
             )
             ;

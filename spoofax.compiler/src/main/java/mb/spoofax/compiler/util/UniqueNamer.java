@@ -7,19 +7,48 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 public class UniqueNamer {
-    private final HashMap<String, AtomicInteger> names = new HashMap<>();
+    private final HashMap<String, AtomicInteger> nameToNextInteger = new HashMap<>();
+    private final HashMap<Object, String> names = new HashMap<>();
 
     public void reserve(String name) {
-        if(!names.containsKey(name)) {
-            names.put(name, new AtomicInteger(0));
+        if(!nameToNextInteger.containsKey(name)) {
+            nameToNextInteger.put(name, new AtomicInteger(0));
         }
     }
 
-    public String makeUnique(String name) {
+    public NamedTypeInfo makeUnique(TypeInfo type) {
+        final String newName = makeUnique(type.asVariableId());
+        names.put(type, newName);
+        return NamedTypeInfo.of(newName, type);
+    }
+
+    public <T> Named<T> makeUnique(T value, String name) {
+        final String newName = makeUnique(name);
+        names.put(value, newName);
+        return Named.of(newName, value);
+    }
+
+    public <T> Named<T> makeUnique(T value, Function<T, String> getName) {
+        final String newName = makeUnique(getName.apply(value));
+        names.put(value, newName);
+        return Named.of(newName, value);
+    }
+
+    public @Nullable String getNameFor(Object value) {
+        return names.get(value);
+    }
+
+    public void reset() {
+        nameToNextInteger.clear();
+        names.clear();
+    }
+
+
+    private String makeUnique(String name) {
         while(true) {
-            final @Nullable AtomicInteger counter = names.get(name);
+            final @Nullable AtomicInteger counter = nameToNextInteger.get(name);
             if(counter == null) {
-                names.put(name, new AtomicInteger(0));
+                nameToNextInteger.put(name, new AtomicInteger(0));
                 return name;
             }
             final int count = counter.incrementAndGet();
@@ -27,28 +56,9 @@ public class UniqueNamer {
                 throw new IllegalStateException("Cannot create unique name from '" + name + "' counter wrapped around");
             }
             final String newName = name + count;
-            if(!names.containsKey(newName)) {
+            if(!nameToNextInteger.containsKey(newName)) {
                 return newName;
             }
         }
-    }
-
-    public NamedTypeInfo getUnique(TypeInfo type) {
-        final String newName = makeUnique(type.asVariableId());
-        return NamedTypeInfo.of(newName, type);
-    }
-
-    public <T> Named<T> getUnique(T value, String name) {
-        final String newName = makeUnique(name);
-        return Named.of(newName, value);
-    }
-
-    public <T> Named<T> getUnique(T value, Function<T, String> getName) {
-        final String newName = makeUnique(getName.apply(value));
-        return Named.of(newName, value);
-    }
-
-    public void reset() {
-        names.clear();
     }
 }

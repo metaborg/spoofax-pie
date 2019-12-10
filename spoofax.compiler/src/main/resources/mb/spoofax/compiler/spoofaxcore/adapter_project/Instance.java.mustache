@@ -11,6 +11,7 @@ import mb.pie.api.Task;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.cli.CliCommand;
+import mb.spoofax.core.language.cli.CliParam;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandExecutionType;
@@ -27,26 +28,26 @@ import java.util.ArrayList;
 import java.util.Set;
 
 public class {{genInstance.id}} implements LanguageInstance {
-    private final static SetView<String> extensions = SetView.of({{#fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/fileExtensions}});
+    private final static SetView<String> fileExtensions = SetView.of({{#fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/fileExtensions}});
 
-{{#injectedTaskDefs}}
+{{#injected}}
     private final {{variable}};
-{{/injectedTaskDefs}}
+{{/injected}}
 
     private final CollectionView<CommandDef<?>> commandDefs;
     private final CollectionView<AutoCommandRequest<?>> autoCommandDefs;
 
 
     @Inject public {{genInstance.id}}(
-{{#injectedTaskDefs}}
+{{#injected}}
         {{variable}},
-{{/injectedTaskDefs}}
+{{/injected}}
         Set<CommandDef<?>> commandDefs,
         Set<AutoCommandRequest<?>> autoCommandDefs
     ) {
-{{#injectedTaskDefs}}
+{{#injected}}
         {{thisAssign}};
-{{/injectedTaskDefs}}
+{{/injected}}
         this.commandDefs = CollectionView.copyOf(commandDefs);
         this.autoCommandDefs = CollectionView.copyOf(autoCommandDefs);
     }
@@ -57,7 +58,7 @@ public class {{genInstance.id}} implements LanguageInstance {
     }
 
     @Override public SetView<String> getFileExtensions() {
-        return extensions;
+        return fileExtensions;
     }
 
 
@@ -84,12 +85,14 @@ public class {{genInstance.id}} implements LanguageInstance {
 
 
     @Override public CliCommand getCliCommand() {
-        return CliCommand.of("{{shared.name}}"); // TODO
+{{#cliCommand}}
+        return {{>adapter_project/CliCommand.mustache}};
+{{/cliCommand}}
     }
 
 
     @Override public ListView<MenuItem> getMainMenuItems() {
-        return getEditorContextMenuItems();
+        return ListView.of(); // TODO
     }
 
     @Override public ListView<MenuItem> getResourceContextMenuItems() {

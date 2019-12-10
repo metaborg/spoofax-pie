@@ -1,7 +1,6 @@
 package mb.spoofax.compiler.command;
 
 import mb.spoofax.compiler.util.TypeInfo;
-import mb.spoofax.core.language.cli.CliParam;
 import org.immutables.value.Value;
 
 import java.util.List;
@@ -22,7 +21,7 @@ public interface CliCommandRepr {
 
     Optional<TypeInfo> commandDefType();
 
-    List<CliParam> params();
+    List<CliParamRepr> params();
 
     List<CliCommandRepr> subCommands();
 }

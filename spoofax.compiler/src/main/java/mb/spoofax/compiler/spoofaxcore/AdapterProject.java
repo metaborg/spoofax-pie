@@ -1,5 +1,6 @@
 package mb.spoofax.compiler.spoofaxcore;
 
+import com.samskivert.mustache.Mustache;
 import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
@@ -14,6 +15,7 @@ import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.compiler.util.UniqueNamer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 
 import java.io.IOException;
@@ -187,7 +189,7 @@ public class AdapterProject {
             try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(commandDef.type().file(classesGenDirectory)).createParents(), charset)) {
                 final UniqueNamer uniqueNamer = new UniqueNamer();
                 final HashMap<String, Object> map = new HashMap<>();
-                map.put("taskDefInjection", uniqueNamer.getUnique(commandDef.taskDefType()));
+                map.put("taskDefInjection", uniqueNamer.makeUnique(commandDef.taskDefType()));
                 commandDefTemplate.execute(commandDef, map, writer);
                 writer.flush();
             }
@@ -202,9 +204,7 @@ public class AdapterProject {
         } else {
             allTaskDefs.add(TypeInfo.of("mb.spoofax.core.language.taskdef", "NullStyler"));
         }
-        stylerOutput.ifPresent(o -> {
-            allTaskDefs.addAll(o.additionalTaskDefs());
-        });
+        stylerOutput.ifPresent(o -> allTaskDefs.addAll(o.additionalTaskDefs()));
         strategoRuntimeOutput.ifPresent(o -> allTaskDefs.addAll(o.additionalTaskDefs()));
         constraintAnalyzerOutput.ifPresent(o -> allTaskDefs.addAll(o.additionalTaskDefs()));
         allTaskDefs.add(input.checkTaskDef());
@@ -213,11 +213,11 @@ public class AdapterProject {
         try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genModule().file(classesGenDirectory)).createParents(), charset)) {
             final UniqueNamer uniqueNamer = new UniqueNamer();
             final HashMap<String, Object> map = new HashMap<>();
-            map.put("providedTaskDefs", allTaskDefs.stream().map(uniqueNamer::getUnique).collect(Collectors.toList()));
+            map.put("providedTaskDefs", allTaskDefs.stream().map(uniqueNamer::makeUnique).collect(Collectors.toList()));
             uniqueNamer.reset(); // New method scope
-            map.put("providedCommandDefs", input.commandDefs().stream().map(CommandDefRepr::type).map(uniqueNamer::getUnique).collect(Collectors.toList()));
+            map.put("providedCommandDefs", input.commandDefs().stream().map(CommandDefRepr::type).map(uniqueNamer::makeUnique).collect(Collectors.toList()));
             uniqueNamer.reset(); // New method scope
-            map.put("providedAutoCommandDefs", input.autoCommandDefs().stream().map((c) -> uniqueNamer.getUnique(c, c.commandDef().asVariableId())).collect(Collectors.toList()));
+            map.put("providedAutoCommandDefs", input.autoCommandDefs().stream().map((c) -> uniqueNamer.makeUnique(c, c.commandDef().asVariableId())).collect(Collectors.toList()));
             moduleTemplate.execute(input, map, writer);
             writer.flush();
         }
@@ -225,29 +225,42 @@ public class AdapterProject {
         // *Instance.java
         try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genInstance().file(classesGenDirectory)).createParents(), charset)) {
             final UniqueNamer uniqueNamer = new UniqueNamer();
+            uniqueNamer.reserve("fileExtensions");
             uniqueNamer.reserve("commandDefs");
+            uniqueNamer.reserve("autoCommandDefs");
             final HashMap<String, Object> map = new HashMap<>();
 
-            // Create named injections for tasks required in the language instance.
-            final ArrayList<NamedTypeInfo> injectedTaskDefs = new ArrayList<>();
-            final NamedTypeInfo tokenizeInjection = uniqueNamer.getUnique(input.parser().tokenizeTaskDef());
+            // Collect all injections.
+            final ArrayList<NamedTypeInfo> injected = new ArrayList<>();
+            map.put("injected", injected);
+
+            // Create injections for tasks required in the language instance.
+            final NamedTypeInfo tokenizeInjection = uniqueNamer.makeUnique(input.parser().tokenizeTaskDef());
             map.put("tokenizeInjection", tokenizeInjection);
-            injectedTaskDefs.add(tokenizeInjection);
-            final NamedTypeInfo checkInjection = uniqueNamer.getUnique(input.checkTaskDef());
-            injectedTaskDefs.add(checkInjection);
+            injected.add(tokenizeInjection);
+            final NamedTypeInfo checkInjection = uniqueNamer.makeUnique(input.checkTaskDef());
+            injected.add(checkInjection);
             map.put("checkInjection", checkInjection);
             final NamedTypeInfo styleInjection;
             if(input.styler().isPresent()) {
-                styleInjection = uniqueNamer.getUnique(input.styler().get().styleTaskDef());
+                styleInjection = uniqueNamer.makeUnique(input.styler().get().styleTaskDef());
             } else {
-                styleInjection = uniqueNamer.getUnique(TypeInfo.of("mb.spoofax.core.language.taskdef", "NullStyler"));
+                styleInjection = uniqueNamer.makeUnique(TypeInfo.of("mb.spoofax.core.language.taskdef", "NullStyler"));
             }
             map.put("styleInjection", styleInjection);
-            injectedTaskDefs.add(styleInjection);
-            map.put("injectedTaskDefs", injectedTaskDefs);
+            injected.add(styleInjection);
 
-            // TODO: map CommandDef TypeInfo -> name, to generate CLI/Menu items.
-
+            // Create injections for all command definitions. TODO: only inject needed command definitions?
+            injected.addAll(input.commandDefs().stream().map(CommandDefRepr::type).map(uniqueNamer::makeUnique).collect(Collectors.toList()));
+            // Provide a lambda that gets the name of the injected command definition from the context.
+            map.put("getInjectedCommandDef", (Mustache.Lambda)(frag, out) -> {
+                final TypeInfo type = (TypeInfo)frag.context();
+                final @Nullable String name = uniqueNamer.getNameFor(type);
+                if(name == null) {
+                    throw new IllegalStateException("Cannot get injected command definition for type '" + type + "'");
+                }
+                out.write(name);
+            });
 
             instanceTemplate.execute(input, map, writer);
             writer.flush();
@@ -287,6 +300,8 @@ public class AdapterProject {
         GradleDependency languageProjectDependency();
 
         List<GradleConfiguredDependency> additionalDependencies();
+
+        List<String> fileExtensions();
 
         List<TypeInfo> taskDefs();
 
