@@ -4,6 +4,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 public class UniqueNamer {
     private final HashMap<String, AtomicInteger> names = new HashMap<>();
@@ -30,6 +31,21 @@ public class UniqueNamer {
                 return newName;
             }
         }
+    }
+
+    public NamedTypeInfo getUnique(TypeInfo type) {
+        final String newName = makeUnique(type.asVariableId());
+        return NamedTypeInfo.of(newName, type);
+    }
+
+    public <T> Named<T> getUnique(T value, String name) {
+        final String newName = makeUnique(name);
+        return Named.of(newName, value);
+    }
+
+    public <T> Named<T> getUnique(T value, Function<T, String> getName) {
+        final String newName = makeUnique(getName.apply(value));
+        return Named.of(newName, value);
     }
 
     public void reset() {

@@ -10,9 +10,12 @@ import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.cli.CliCommand;
-import mb.spoofax.core.language.cli.CliCommandItem;
-import mb.spoofax.core.language.cli.CliCommandList;
-import mb.spoofax.core.language.command.*;
+import mb.spoofax.core.language.command.CommandContextType;
+import mb.spoofax.core.language.command.CommandDef;
+import mb.spoofax.core.language.command.CommandExecutionType;
+import mb.spoofax.core.language.command.CommandFeedbacks;
+import mb.spoofax.core.language.command.CommandInput;
+import mb.spoofax.core.language.command.CommandOutput;
 import mb.spoofax.core.language.command.arg.ParamDef;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.command.arg.TextToResourceKeyArgConverter;
@@ -82,11 +85,11 @@ public class TigerShowParsedAst implements TaskDef<CommandInput<TigerShowArgs>, 
         return TigerShowArgs.fromRawArgs(rawArgs);
     }
 
-    public CliCommandItem getCliCommandItem() {
+    public CliCommand getCliCommand() {
         final String operation = "parse";
-        return CliCommandList.of(operation, "Parses Tiger sources and shows the parsed AST",
-            CliCommand.of(this, "file", TigerShowArgs.getFileCliParamDef(operation), "Parses given Tiger file and shows the parsed AST"),
-            CliCommand.of(this, "text", TigerShowArgs.getTextCliParamDef(operation, textToResourceKeyArgConverter), "Parses given Tiger text and shows the parsed AST")
+        return CliCommand.of(operation, "Parses Tiger sources and shows the parsed AST",
+            CliCommand.of("file", "Parses given Tiger file and shows the parsed AST", this, TigerShowArgs.getFileCliParams(operation)),
+            CliCommand.of("text", "Parses given Tiger text and shows the parsed AST", this, TigerShowArgs.getTextCliParams(operation, textToResourceKeyArgConverter))
         );
     }
 }

@@ -204,11 +204,11 @@ public class TigerInputs {
                 tigerAltCompileFile
             )
             .addAutoCommandDefs(AutoCommandDefRepr.builder()
-                .commandDef(tigerCompileFile)
+                .commandDef(tigerCompileFile.type())
                 .build()
             )
             .addAutoCommandDefs(AutoCommandDefRepr.builder()
-                .commandDef(tigerAltCompileFile)
+                .commandDef(tigerAltCompileFile.type())
                 .putRawArgs("base64Encode", "true")
                 .build()
             )

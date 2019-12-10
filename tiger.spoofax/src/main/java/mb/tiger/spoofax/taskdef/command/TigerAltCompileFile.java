@@ -10,10 +10,13 @@ import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.cli.CliCommand;
-import mb.spoofax.core.language.cli.CliCommandItem;
-import mb.spoofax.core.language.cli.CliParamDef;
 import mb.spoofax.core.language.cli.CliParams;
-import mb.spoofax.core.language.command.*;
+import mb.spoofax.core.language.command.CommandContextType;
+import mb.spoofax.core.language.command.CommandDef;
+import mb.spoofax.core.language.command.CommandExecutionType;
+import mb.spoofax.core.language.command.CommandFeedbacks;
+import mb.spoofax.core.language.command.CommandInput;
+import mb.spoofax.core.language.command.CommandOutput;
 import mb.spoofax.core.language.command.arg.ArgProviders;
 import mb.spoofax.core.language.command.arg.Param;
 import mb.spoofax.core.language.command.arg.ParamDef;
@@ -146,14 +149,12 @@ public class TigerAltCompileFile implements TaskDef<CommandInput<TigerAltCompile
         return new TigerAltCompileFile.Args(file, listDefNames, base64Encode, compiledFileName);
     }
 
-    public CliCommandItem getCliCommandItem() {
-        return CliCommand.of(this, "compile-file-alt", new CliParamDef(
-                CliParams.positional("file", 0, "FILE", "File to compile", null),
-                CliParams.option("listDefNames", ListView.of("-l", "--no-defnames"), true, "", "Whether to list definition names intead of literal values", null),
-                CliParams.option("base64Encode", ListView.of("-b", "--base64"), false, "", "Whether to Base64 encode the result", null),
-                CliParams.option("compiledFileNameSuffix", ListView.of("-s", "--suffix"), false, "SUFFIX", "Suffix to append to the compiled file name", null)
-            ),
-            "Compiles given Tiger file in an alternative way and shows the compiled file"
+    public CliCommand getCliCommandItem() {
+        return CliCommand.of("compile-file-alt", "Compiles given Tiger file in an alternative way and shows the compiled file", this,
+            CliParams.positional("file", 0, "FILE", "File to compile", null),
+            CliParams.option("listDefNames", ListView.of("-l", "--no-defnames"), true, "", "Whether to list definition names intead of literal values", null),
+            CliParams.option("base64Encode", ListView.of("-b", "--base64"), false, "", "Whether to Base64 encode the result", null),
+            CliParams.option("compiledFileNameSuffix", ListView.of("-s", "--suffix"), false, "SUFFIX", "Suffix to append to the compiled file name", null)
         );
     }
 }

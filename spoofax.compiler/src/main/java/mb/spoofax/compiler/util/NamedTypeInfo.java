@@ -10,8 +10,8 @@ public interface NamedTypeInfo {
         return new Builder();
     }
 
-    static ImmutableNamedTypeInfo of(TypeInfo type, UniqueNamer uniqueNamer) {
-        return ImmutableNamedTypeInfo.of(uniqueNamer.makeUnique(type.asVariableId()), type);
+    static ImmutableNamedTypeInfo of(String name, TypeInfo type) {
+        return ImmutableNamedTypeInfo.of(name, type);
     }
 
 

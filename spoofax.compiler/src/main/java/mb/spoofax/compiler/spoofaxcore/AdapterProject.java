@@ -4,11 +4,11 @@ import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.command.AutoCommandDefRepr;
+import mb.spoofax.compiler.command.CliCommandRepr;
 import mb.spoofax.compiler.command.CommandDefRepr;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
-import mb.spoofax.compiler.util.Named;
 import mb.spoofax.compiler.util.NamedTypeInfo;
 import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.TemplateCompiler;
@@ -187,7 +187,7 @@ public class AdapterProject {
             try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(commandDef.type().file(classesGenDirectory)).createParents(), charset)) {
                 final UniqueNamer uniqueNamer = new UniqueNamer();
                 final HashMap<String, Object> map = new HashMap<>();
-                map.put("taskDefInjection", NamedTypeInfo.of(commandDef.taskDefType(), uniqueNamer));
+                map.put("taskDefInjection", uniqueNamer.getUnique(commandDef.taskDefType()));
                 commandDefTemplate.execute(commandDef, map, writer);
                 writer.flush();
             }
@@ -213,11 +213,11 @@ public class AdapterProject {
         try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genModule().file(classesGenDirectory)).createParents(), charset)) {
             final UniqueNamer uniqueNamer = new UniqueNamer();
             final HashMap<String, Object> map = new HashMap<>();
-            map.put("providedTaskDefs", allTaskDefs.stream().map((t) -> NamedTypeInfo.of(t, uniqueNamer)).collect(Collectors.toList()));
-            uniqueNamer.reset();
-            map.put("providedCommandDefs", input.commandDefs().stream().map((c) -> NamedTypeInfo.of(c.type(), uniqueNamer)).collect(Collectors.toList()));
-            uniqueNamer.reset();
-            map.put("providedAutoCommandDefs", input.autoCommandDefs().stream().map((c) -> Named.of(c, c.commandDef().type().asVariableId(), uniqueNamer)).collect(Collectors.toList()));
+            map.put("providedTaskDefs", allTaskDefs.stream().map(uniqueNamer::getUnique).collect(Collectors.toList()));
+            uniqueNamer.reset(); // New method scope
+            map.put("providedCommandDefs", input.commandDefs().stream().map(CommandDefRepr::type).map(uniqueNamer::getUnique).collect(Collectors.toList()));
+            uniqueNamer.reset(); // New method scope
+            map.put("providedAutoCommandDefs", input.autoCommandDefs().stream().map((c) -> uniqueNamer.getUnique(c, c.commandDef().asVariableId())).collect(Collectors.toList()));
             moduleTemplate.execute(input, map, writer);
             writer.flush();
         }
@@ -230,21 +230,24 @@ public class AdapterProject {
 
             // Create named injections for tasks required in the language instance.
             final ArrayList<NamedTypeInfo> injectedTaskDefs = new ArrayList<>();
-            final NamedTypeInfo tokenizeInjection = NamedTypeInfo.of(input.parser().tokenizeTaskDef(), uniqueNamer);
+            final NamedTypeInfo tokenizeInjection = uniqueNamer.getUnique(input.parser().tokenizeTaskDef());
             map.put("tokenizeInjection", tokenizeInjection);
             injectedTaskDefs.add(tokenizeInjection);
-            final NamedTypeInfo checkInjection = NamedTypeInfo.of(input.checkTaskDef(), uniqueNamer);
+            final NamedTypeInfo checkInjection = uniqueNamer.getUnique(input.checkTaskDef());
             injectedTaskDefs.add(checkInjection);
             map.put("checkInjection", checkInjection);
             final NamedTypeInfo styleInjection;
             if(input.styler().isPresent()) {
-                styleInjection = NamedTypeInfo.of(input.styler().get().styleTaskDef(), uniqueNamer);
+                styleInjection = uniqueNamer.getUnique(input.styler().get().styleTaskDef());
             } else {
-                styleInjection = NamedTypeInfo.of(TypeInfo.of("mb.spoofax.core.language.taskdef", "NullStyler"), uniqueNamer);
+                styleInjection = uniqueNamer.getUnique(TypeInfo.of("mb.spoofax.core.language.taskdef", "NullStyler"));
             }
             map.put("styleInjection", styleInjection);
             injectedTaskDefs.add(styleInjection);
             map.put("injectedTaskDefs", injectedTaskDefs);
+
+            // TODO: map CommandDef TypeInfo -> name, to generate CLI/Menu items.
+
 
             instanceTemplate.execute(input, map, writer);
             writer.flush();
@@ -290,6 +293,10 @@ public class AdapterProject {
         List<CommandDefRepr> commandDefs();
 
         List<AutoCommandDefRepr> autoCommandDefs();
+
+        default @Value.Default CliCommandRepr cliCommand() {
+            return CliCommandRepr.builder().name(shared().name()).build();
+        }
 
 
         /// Gradle files

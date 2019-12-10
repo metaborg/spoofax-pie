@@ -8,32 +8,52 @@ import mb.common.util.ListView;
 import mb.common.util.SetView;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
-import mb.pie.api.*;
+import mb.pie.api.ExecException;
+import mb.pie.api.Pie;
+import mb.pie.api.PieSession;
+import mb.pie.api.Task;
+import mb.pie.api.TaskKey;
 import mb.pie.api.exec.CancelToken;
 import mb.pie.api.exec.NullCancelableToken;
 import mb.pie.runtime.exec.Stats;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageInstance;
-import mb.spoofax.core.language.command.*;
+import mb.spoofax.core.language.command.AutoCommandRequest;
+import mb.spoofax.core.language.command.CommandContext;
+import mb.spoofax.core.language.command.CommandContextType;
+import mb.spoofax.core.language.command.CommandFeedback;
+import mb.spoofax.core.language.command.CommandFeedbacks;
+import mb.spoofax.core.language.command.CommandOutput;
+import mb.spoofax.core.language.command.CommandRequest;
 import mb.spoofax.core.language.command.arg.ArgConverters;
-import mb.spoofax.core.language.command.arg.RawArgs;
-import mb.spoofax.core.language.command.arg.RawArgsBuilder;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.command.CommandUtil;
 import mb.spoofax.eclipse.editor.NamedEditorInput;
 import mb.spoofax.eclipse.editor.PartClosedCallback;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
-import mb.spoofax.eclipse.resource.*;
+import mb.spoofax.eclipse.resource.EclipseDocumentKey;
+import mb.spoofax.eclipse.resource.EclipseDocumentResource;
+import mb.spoofax.eclipse.resource.EclipseDocumentResourceRegistry;
+import mb.spoofax.eclipse.resource.EclipseResource;
+import mb.spoofax.eclipse.resource.EclipseResourcePath;
 import mb.spoofax.eclipse.util.ResourceUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.eclipse.core.resources.*;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension4;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.*;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -182,19 +202,19 @@ public class PieRunner {
         final AutoCommandRequests autoCommandRequests = new AutoCommandRequests(languageComponent); // OPTO: calculate once per language component
         try(final PieSession session = languageComponent.newPieSession()) {
             // Unobserve auto transforms.
-            for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.project) {
-                final Task<CommandOutput> task = createCommandTask(autoCommandRequest.toCommandRequest(), CommandContext.ofProject(project.getKey()));
+            for(AutoCommandRequest<?> request : autoCommandRequests.project) {
+                final Task<CommandOutput> task = request.createTask(CommandContext.ofProject(project.getKey()), argConverters);
                 unobserve(task, pie, session, monitor);
             }
             for(ResourcePath directory : resourceChanges.newDirectories) {
-                for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.directory) {
-                    final Task<CommandOutput> task = createCommandTask(autoCommandRequest.toCommandRequest(), CommandContext.ofDirectory(directory));
+                for(AutoCommandRequest<?> request : autoCommandRequests.directory) {
+                    final Task<CommandOutput> task = request.createTask(CommandContext.ofDirectory(directory), argConverters);
                     unobserve(task, pie, session, monitor);
                 }
             }
             for(ResourcePath file : resourceChanges.newFiles) {
-                for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.file) {
-                    final Task<CommandOutput> task = createCommandTask(autoCommandRequest.toCommandRequest(), CommandContext.ofFile(file));
+                for(AutoCommandRequest<?> request : autoCommandRequests.file) {
+                    final Task<CommandOutput> task = request.createTask(CommandContext.ofFile(file), argConverters);
                     unobserve(task, pie, session, monitor);
                 }
             }
@@ -273,36 +293,24 @@ public class PieRunner {
 
     // Requiring commands
 
-    public <A extends Serializable> Task<CommandOutput> createCommandTask(CommandRequest<A> commandRequest, CommandContext context) {
-        final CommandDef<A> def = commandRequest.def;
-        final RawArgsBuilder builder = new RawArgsBuilder(def.getParamDef(), argConverters);
-        if(commandRequest.initialArgs != null) {
-            builder.setArgsFrom(commandRequest.initialArgs);
-        }
-        final RawArgs rawArgs = builder.build(context);
-        final A args = def.fromRawArgs(rawArgs);
-        final CommandInput<A> input = new CommandInput<>(args);
-        return def.createTask(input);
-    }
-
     public void requireCommand(
         EclipseLanguageComponent languageComponent,
-        CommandRequest<?> commandRequest,
+        CommandRequest<?> request,
         ListView<CommandContext> contexts,
         PieSession session,
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException {
-        switch(commandRequest.executionType) {
+        switch(request.executionType) {
             case ManualOnce:
                 for(CommandContext context : contexts) {
-                    final Task<CommandOutput> task = createCommandTask(commandRequest, context);
+                    final Task<CommandOutput> task = request.createTask(context, argConverters);
                     final CommandOutput output = requireWithoutObserving(task, session, monitor);
                     processOutput(output, true, null);
                 }
                 break;
             case ManualContinuous:
                 for(CommandContext context : contexts) {
-                    final Task<CommandOutput> task = createCommandTask(commandRequest, context);
+                    final Task<CommandOutput> task = request.createTask(context, argConverters);
                     final CommandOutput output = require(task, session, monitor);
                     processOutput(output, true, (p) -> {
                         // POTI: this opens a new PIE session, which may be used concurrently with other sessions, which
@@ -317,7 +325,7 @@ public class PieRunner {
                 break;
             case AutomaticContinuous:
                 for(CommandContext context : contexts) {
-                    final Task<CommandOutput> task = createCommandTask(commandRequest, context);
+                    final Task<CommandOutput> task = request.createTask(context, argConverters);
                     require(task, session, monitor);
                     // Feedback for AutomaticContinuous is ignored intentionally: do not want to suddenly open new
                     // editors when a resource is saved.
@@ -346,7 +354,7 @@ public class PieRunner {
                         }
                         //noinspection ConstantConditions (region can really be null)
                         if(region != null && editor instanceof ITextEditor) {
-                            final ITextEditor textEditor = (ITextEditor) editor;
+                            final ITextEditor textEditor = (ITextEditor)editor;
                             textEditor.selectAndReveal(region.getStartOffset(), region.length());
                         }
                     } catch(PartInitException e) {
@@ -368,7 +376,7 @@ public class PieRunner {
                             partClosedCallback.addCallback(editor, closedCallback);
                         }
                         if(editor instanceof ITextEditor) {
-                            final ITextEditor textEditor = (ITextEditor) editor;
+                            final ITextEditor textEditor = (ITextEditor)editor;
                             final @Nullable IDocumentProvider documentProvider = textEditor.getDocumentProvider();
                             if(documentProvider == null) {
                                 logger.error("Cannot update text of editor with name '" + name + "', getDocumentProvider returns null");
@@ -579,7 +587,7 @@ public class PieRunner {
                 requireCommand(languageComponent, request, CommandUtil.context(CommandContext.ofProject(newProject)), session, monitor);
             }
             for(ResourcePath removedProject : resourceChanges.removedProjects) {
-                final Task<CommandOutput> task = createCommandTask(request, CommandContext.ofProject(removedProject));
+                final Task<CommandOutput> task = request.createTask(CommandContext.ofProject(removedProject), argConverters);
                 unobserve(task, pie, session, monitor);
             }
         }
@@ -589,7 +597,7 @@ public class PieRunner {
                 requireCommand(languageComponent, request, CommandUtil.context(CommandContext.ofDirectory(newDirectory)), session, monitor);
             }
             for(ResourcePath removedDirectory : resourceChanges.removedDirectories) {
-                final Task<CommandOutput> task = createCommandTask(request, CommandContext.ofDirectory(removedDirectory));
+                final Task<CommandOutput> task = request.createTask(CommandContext.ofDirectory(removedDirectory), argConverters);
                 unobserve(task, pie, session, monitor);
             }
         }
@@ -599,7 +607,7 @@ public class PieRunner {
                 requireCommand(languageComponent, request, CommandUtil.context(CommandContext.ofFile(newFile)), session, monitor);
             }
             for(ResourcePath removedFile : resourceChanges.removedFiles) {
-                final Task<CommandOutput> task = createCommandTask(request, CommandContext.ofFile(removedFile));
+                final Task<CommandOutput> task = request.createTask(CommandContext.ofFile(removedFile), argConverters);
                 unobserve(task, pie, session, monitor);
             }
         }

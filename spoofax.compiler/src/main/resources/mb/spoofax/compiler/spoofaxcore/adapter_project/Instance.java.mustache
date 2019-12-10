@@ -10,8 +10,7 @@ import mb.common.util.SetView;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageInstance;
-import mb.spoofax.core.language.cli.CliCommandItem;
-import mb.spoofax.core.language.cli.CliCommandList;
+import mb.spoofax.core.language.cli.CliCommand;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandExecutionType;
@@ -84,8 +83,8 @@ public class {{genInstance.id}} implements LanguageInstance {
     }
 
 
-    @Override public CliCommandItem getRootCliCommandItem() {
-        return CliCommandList.of("{{shared.name}}"); // TODO
+    @Override public CliCommand getCliCommand() {
+        return CliCommand.of("{{shared.name}}"); // TODO
     }
 
 

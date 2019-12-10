@@ -126,12 +126,12 @@ public class {{genModule.id}} {
     @Provides @LanguageScope @ElementsIntoSet
     static Set<AutoCommandRequest<?>> provideAutoCommandRequestsSet(
 {{#providedAutoCommandDefs}}
-        {{value.commandDef.type.qualifiedId}} {{name}}{{^-last}},{{/-last}}
+        {{value.commandDef.qualifiedId}} {{name}}{{^-last}},{{/-last}}
 {{/providedAutoCommandDefs}}
     ) {
         final HashSet<AutoCommandRequest<?>> autoCommandDefs = new HashSet<>();
 {{#providedAutoCommandDefs}}
-        autoCommandDefs.add(new AutoCommandRequest<>({{name}}, new RawArgs(MapView.of({{#value.rawArgs.entrySet}}new EntryView("{{getKey}}", {{getValue}}){{^-last}},{{/-last}}{{/value.rawArgs.entrySet}}))));
+        autoCommandDefs.add(new AutoCommandRequest<>({{name}}, new RawArgs(MapView.of({{#value.rawArgs.entrySet}}new EntryView<>("{{getKey}}", {{getValue}}){{^-last}},{{/-last}}{{/value.rawArgs.entrySet}}))));
 {{/providedAutoCommandDefs}}
         return autoCommandDefs;
     }

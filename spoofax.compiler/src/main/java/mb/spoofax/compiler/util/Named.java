@@ -12,8 +12,8 @@ public interface Named<T> extends Serializable {
         return new Builder<T>();
     }
 
-    static <T> ImmutableNamed<T> of(T value, String name, UniqueNamer uniqueNamer) {
-        return ImmutableNamed.of(uniqueNamer.makeUnique(name), value);
+    static <T> ImmutableNamed<T> of(String name, T value) {
+        return ImmutableNamed.of(name, value);
     }
 
 

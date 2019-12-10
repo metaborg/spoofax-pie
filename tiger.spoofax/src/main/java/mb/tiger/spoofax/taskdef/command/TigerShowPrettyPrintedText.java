@@ -10,9 +10,12 @@ import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.cli.CliCommand;
-import mb.spoofax.core.language.cli.CliCommandItem;
-import mb.spoofax.core.language.cli.CliCommandList;
-import mb.spoofax.core.language.command.*;
+import mb.spoofax.core.language.command.CommandContextType;
+import mb.spoofax.core.language.command.CommandDef;
+import mb.spoofax.core.language.command.CommandExecutionType;
+import mb.spoofax.core.language.command.CommandFeedbacks;
+import mb.spoofax.core.language.command.CommandInput;
+import mb.spoofax.core.language.command.CommandOutput;
 import mb.spoofax.core.language.command.arg.ParamDef;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.command.arg.TextToResourceKeyArgConverter;
@@ -101,11 +104,11 @@ public class TigerShowPrettyPrintedText implements TaskDef<CommandInput<TigerSho
         return TigerShowArgs.fromRawArgs(rawArgs);
     }
 
-    public CliCommandItem getCliCommandItem() {
+    public CliCommand getCliCommandItem() {
         final String operation = "reformat";
-        return CliCommandList.of(operation, "Reformats Tiger sources",
-            CliCommand.of(this, "file", TigerShowArgs.getFileCliParamDef(operation), "Reformats given Tiger file"),
-            CliCommand.of(this, "text", TigerShowArgs.getTextCliParamDef(operation, textToResourceKeyArgConverter), "Reformats given Tiger text")
+        return CliCommand.of(operation, "Reformats Tiger sources",
+            CliCommand.of("file", "Reformats given Tiger file", this, TigerShowArgs.getFileCliParams(operation)),
+            CliCommand.of("text", "Reformats given Tiger text", this, TigerShowArgs.getTextCliParams(operation, textToResourceKeyArgConverter))
         );
     }
 }

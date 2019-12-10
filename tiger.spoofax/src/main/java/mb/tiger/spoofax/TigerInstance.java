@@ -10,8 +10,7 @@ import mb.common.util.SetView;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageInstance;
-import mb.spoofax.core.language.cli.CliCommandItem;
-import mb.spoofax.core.language.cli.CliCommandList;
+import mb.spoofax.core.language.cli.CliCommand;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.arg.RawArgs;
@@ -30,7 +29,6 @@ import mb.tiger.spoofax.taskdef.command.TigerShowPrettyPrintedText;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
-import java.io.Serializable;
 import java.util.ArrayList;
 
 import static mb.spoofax.core.language.menu.CommandAction.ofManualContinuous;
@@ -114,15 +112,15 @@ public class TigerInstance implements LanguageInstance {
 
     @Override public CollectionView<AutoCommandRequest<?>> getAutoCommandRequests() {
         return CollectionView.of(
-            new AutoCommandRequest<Serializable>(compileFile),
-            new AutoCommandRequest<Serializable>(compileDirectory)
+            new AutoCommandRequest<>(compileFile),
+            new AutoCommandRequest<>(compileDirectory)
         );
     }
 
 
-    @Override public CliCommandItem getRootCliCommandItem() {
-        return CliCommandList.of("tiger", "Tiger language command-line interface",
-            showParsedAst.getCliCommandItem(),
+    @Override public CliCommand getCliCommand() {
+        return CliCommand.of("tiger", "Tiger language command-line interface",
+            showParsedAst.getCliCommand(),
             showPrettyPrintedText.getCliCommandItem(),
             showAnalyzedAst.getCliCommandItem(),
             showDesugaredAst.getCliCommandItem(),

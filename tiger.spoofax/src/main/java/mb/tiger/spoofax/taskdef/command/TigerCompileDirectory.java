@@ -16,10 +16,13 @@ import mb.resource.hierarchical.match.PathResourceMatcher;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.match.path.ExtensionsPathMatcher;
 import mb.spoofax.core.language.cli.CliCommand;
-import mb.spoofax.core.language.cli.CliCommandItem;
-import mb.spoofax.core.language.cli.CliParamDef;
 import mb.spoofax.core.language.cli.CliParams;
-import mb.spoofax.core.language.command.*;
+import mb.spoofax.core.language.command.CommandContextType;
+import mb.spoofax.core.language.command.CommandDef;
+import mb.spoofax.core.language.command.CommandExecutionType;
+import mb.spoofax.core.language.command.CommandFeedbacks;
+import mb.spoofax.core.language.command.CommandInput;
+import mb.spoofax.core.language.command.CommandOutput;
 import mb.spoofax.core.language.command.arg.ArgProviders;
 import mb.spoofax.core.language.command.arg.Param;
 import mb.spoofax.core.language.command.arg.ParamDef;
@@ -44,7 +47,7 @@ public class TigerCompileDirectory implements TaskDef<CommandInput<TigerCompileD
         @Override public boolean equals(@Nullable Object obj) {
             if(this == obj) return true;
             if(obj == null || getClass() != obj.getClass()) return false;
-            final Args other = (Args) obj;
+            final Args other = (Args)obj;
             return dir.equals(other.dir);
         }
 
@@ -102,9 +105,9 @@ public class TigerCompileDirectory implements TaskDef<CommandInput<TigerCompileD
             });
         } catch(RuntimeException e) {
             if(e.getCause() instanceof ExecException) {
-                throw (ExecException) e.getCause();
+                throw (ExecException)e.getCause();
             } else if(e.getCause() instanceof InterruptedException) {
-                throw (InterruptedException) e.getCause();
+                throw (InterruptedException)e.getCause();
             } else {
                 throw e;
             }
@@ -145,11 +148,9 @@ public class TigerCompileDirectory implements TaskDef<CommandInput<TigerCompileD
         return new TigerCompileDirectory.Args(dir);
     }
 
-    public CliCommandItem getCliCommandItem() {
-        return CliCommand.of(this, "compile-dir", new CliParamDef(
-                CliParams.positional("dir", 0, "DIR", "Directory to compile", null)
-            ),
-            "Compiles Tiger files in given directory and shows the compiled file"
+    public CliCommand getCliCommandItem() {
+        return CliCommand.of("compile-dir", "Compiles Tiger files in given directory and shows the compiled file", this,
+            CliParams.positional("dir", 0, "DIR", "Directory to compile", null)
         );
     }
 }
