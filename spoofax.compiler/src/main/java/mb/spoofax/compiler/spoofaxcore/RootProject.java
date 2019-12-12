@@ -48,6 +48,7 @@ public class RootProject {
         final ArrayList<String> includedProjects = new ArrayList<>(input.additionalIncludedProjects());
         includedProjects.add(shared.languageProject().coordinate().artifactId());
         includedProjects.add(shared.adapterProject().coordinate().artifactId());
+        includedProjects.add(shared.cliProject().coordinate().artifactId());
 
         try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.settingsGradleKtsFile()), charset)) {
             final HashMap<String, Object> map = new HashMap<>();

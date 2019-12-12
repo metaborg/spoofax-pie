@@ -107,18 +107,16 @@ public class AdapterProject {
 
         resourceService.getHierarchicalResource(input.gradleGenDirectory()).ensureDirectoryExists();
 
-        // Collect dependencies
-        final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
-        dependencies.add(GradleConfiguredDependency.api(input.languageProjectDependency()));
-        dependencies.add(GradleConfiguredDependency.api(shared.spoofaxCoreDep()));
-        dependencies.add(GradleConfiguredDependency.api(shared.pieApiDep()));
-        dependencies.add(GradleConfiguredDependency.api(shared.pieDaggerDep()));
-        dependencies.add(GradleConfiguredDependency.api(shared.daggerDep()));
-        dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
-        dependencies.add(GradleConfiguredDependency.annotationProcessor(shared.daggerCompilerDep()));
-
         // build.gradle.kts
         try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.buildGradleKtsFile()), charset)) {
+            final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
+            dependencies.add(GradleConfiguredDependency.api(input.languageProjectDependency()));
+            dependencies.add(GradleConfiguredDependency.api(shared.spoofaxCoreDep()));
+            dependencies.add(GradleConfiguredDependency.api(shared.pieApiDep()));
+            dependencies.add(GradleConfiguredDependency.api(shared.pieDaggerDep()));
+            dependencies.add(GradleConfiguredDependency.api(shared.daggerDep()));
+            dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
+            dependencies.add(GradleConfiguredDependency.annotationProcessor(shared.daggerCompilerDep()));
             final HashMap<String, Object> map = new HashMap<>();
             map.put("dependencyCodes", dependencies.stream().map(GradleConfiguredDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
             buildGradleTemplate.execute(input, map, writer);
@@ -372,6 +370,10 @@ public class AdapterProject {
                 return manualComponent().get();
             }
             return genComponent();
+        }
+
+        default TypeInfo daggerComponent() {
+            return TypeInfo.of(component().packageId(), "Dagger" + component().id());
         }
 
         // Dagger module

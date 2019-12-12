@@ -33,7 +33,7 @@ public final class StyleUtil {
         this.logger = loggerFactory.create(getClass());
     }
 
-    
+
     public TextPresentation createTextPresentation(mb.common.style.Color color, int length) {
         final TextPresentation presentation = new TextPresentation();
         final StyleRange styleRange = new StyleRange();
@@ -106,16 +106,16 @@ public final class StyleUtil {
         if(background != null) {
             styleRange.background = createColor(background);
         }
-        if(style.getIsBold()) {
+        if(style.isBold()) {
             styleRange.fontStyle |= SWT.BOLD;
         }
-        if(style.getIsItalic()) {
+        if(style.isItalic()) {
             styleRange.fontStyle |= SWT.ITALIC;
         }
-        if(style.getIsUnderscore()) {
+        if(style.isUnderscore()) {
             styleRange.underline = true;
         }
-        if(style.getIsStrikeout()) {
+        if(style.isStrikeout()) {
             styleRange.strikeout = true;
         }
 

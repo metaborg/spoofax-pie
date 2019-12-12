@@ -13,6 +13,7 @@ import mb.spoofax.compiler.command.AutoCommandDefRepr;
 import mb.spoofax.compiler.command.CommandDefRepr;
 import mb.spoofax.compiler.menu.MenuCommandActionRepr;
 import mb.spoofax.compiler.spoofaxcore.AdapterProject;
+import mb.spoofax.compiler.spoofaxcore.CliProject;
 import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzer;
 import mb.spoofax.compiler.spoofaxcore.LanguageProject;
 import mb.spoofax.compiler.spoofaxcore.Parser;
@@ -43,8 +44,13 @@ public class TigerInputs {
             .baseDirectory(baseDirectory)
             /// Metaborg log
             .logApiDep(fromSystemProperty("log.api:classpath"))
+            .logBackendSLF4JDep(fromSystemProperty("log.backend.slf4j:classpath"))
             /// Metaborg resource
             .resourceDep(fromSystemProperty("resource:classpath"))
+            /// PIE
+            .pieApiDep(fromSystemProperty("pie.api:classpath"))
+            .pieRuntimeDep(fromSystemProperty("pie.runtime:classpath"))
+            .pieDaggerDep(fromSystemProperty("pie.dagger:classpath"))
             /// Spoofax-PIE
             .commonDep(fromSystemProperty("common:classpath"))
             .jsglrCommonDep(fromSystemProperty("jsglr.common:classpath"))
@@ -57,6 +63,7 @@ public class TigerInputs {
             .statixCommonDep(fromSystemProperty("statix.common:classpath"))
             .spoofaxCompilerInterfacesDep(fromSystemProperty("spoofax.compiler.interfaces:classpath"))
             .spoofaxCoreDep(fromSystemProperty("spoofax.core:classpath"))
+            .spoofaxCliDep(fromSystemProperty("spoofax.cli:classpath"))
             ;
     }
 
@@ -241,10 +248,6 @@ public class TigerInputs {
             ;
     }
 
-    public static AdapterProject.Input adapterProject(Shared shared) {
-        return adapterProjectBuilder(shared).build();
-    }
-
     public static void copyTaskDefsIntoAdapterProject(AdapterProject.Input input, ResourceService resourceService) throws IOException {
         final ResourcePath srcMainJavaDirectory = input.shared().adapterProject().sourceMainJavaDirectory();
         final String taskPackagePath = Conversion.packageIdToPath(input.shared().adapterTaskPackage());
@@ -263,6 +266,16 @@ public class TigerInputs {
             }
             IOUtil.copy(inputStream, targetDirectory.appendSegment(fileName).openWrite());
         }
+    }
+
+
+    /// CLI project compiler input
+
+    public static CliProject.Input.Builder cliProjectBuilder(Shared shared, AdapterProject.Input adapterProject) {
+        return CliProject.Input.builder()
+            .shared(shared)
+            .adapterProject(adapterProject)
+            ;
     }
 
 

@@ -19,11 +19,11 @@ public interface EclipseIdentifiers {
     String getTransformCommand();
 
 
-    String baseMarker();
+    String getBaseMarker();
 
-    String infoMarker();
+    String getInfoMarker();
 
-    String warningMarker();
+    String getWarningMarker();
 
-    String errorMarker();
+    String getErrorMarker();
 }

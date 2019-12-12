@@ -133,7 +133,7 @@ public class LanguageProject {
             throw e.getCause();
         }
 
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.buildGradleKtsFile()), charset)) {
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.buildGradleKtsFile()).createParents(), charset)) {
             final HashMap<String, Object> map = new HashMap<>();
             final String languageDependencyCode = input.languageSpecificationDependency().caseOf()
                 .project((projectPath) -> "createProjectDependency(\"" + projectPath + "\")")
@@ -148,7 +148,7 @@ public class LanguageProject {
 
         try {
             input.settingsGradleKtsFile().ifPresent((f) -> {
-                try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(f), charset)) {
+                try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(f).createParents(), charset)) {
                     settingsGradleTemplate.execute(input, writer);
                     writer.flush();
                 } catch(IOException e) {

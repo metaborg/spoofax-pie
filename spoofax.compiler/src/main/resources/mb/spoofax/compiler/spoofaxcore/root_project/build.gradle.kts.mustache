@@ -1,3 +1,9 @@
 plugins {
   id("org.metaborg.gradle.config.root-project") version "{{shared.metaborgGradleConfigVersion}}"
 }
+
+subprojects {
+  metaborg {
+    configureSubProject()
+  }
+}

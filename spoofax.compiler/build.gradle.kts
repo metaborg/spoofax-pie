@@ -41,8 +41,13 @@ val testInjections = configurations.create("testInjections")
 dependencies {
   // Metaborg log
   testInjections("org.metaborg:log.api")
+  testInjections("org.metaborg:log.backend.slf4j")
   // Metaborg resource
   testInjections("org.metaborg:resource")
+  // PIE
+  testInjections("org.metaborg:pie.api")
+  testInjections("org.metaborg:pie.runtime")
+  testInjections("org.metaborg:pie.dagger")
   // Spoofax-PIE
   testInjections(project(":common"))
   testInjections(project(":jsglr.common"))
@@ -55,6 +60,7 @@ dependencies {
   testInjections(project(":statix.common"))
   testInjections(project(":spoofax.compiler.interfaces"))
   testInjections(project(":spoofax.core"))
+  testInjections(project(":spoofax.cli"))
   testInjections(project(":org.metaborg.lang.tiger", Dependency.DEFAULT_CONFIGURATION).also {
     it.isTransitive = false
     configureSpoofaxLanguageArtifact(it)

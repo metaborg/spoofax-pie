@@ -39,19 +39,19 @@ public class TigerEclipseIdentifiers implements EclipseIdentifiers {
     }
 
 
-    @Override public String baseMarker() {
+    @Override public String getBaseMarker() {
         return "tiger.eclipse.marker";
     }
 
-    @Override public String infoMarker() {
+    @Override public String getInfoMarker() {
         return "tiger.eclipse.marker.info";
     }
 
-    @Override public String warningMarker() {
+    @Override public String getWarningMarker() {
         return "tiger.eclipse.marker.warning";
     }
 
-    @Override public String errorMarker() {
+    @Override public String getErrorMarker() {
         return "tiger.eclipse.marker.error";
     }
 }

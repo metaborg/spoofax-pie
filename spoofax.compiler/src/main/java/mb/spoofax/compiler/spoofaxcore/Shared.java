@@ -30,7 +30,11 @@ public interface Shared extends Serializable {
     }
 
 
+    /// Configuration.
+
     String name();
+
+    ResourcePath baseDirectory();
 
     @Value.Default default String classSuffix() {
         return Conversion.nameToJavaId(name());
@@ -52,8 +56,8 @@ public interface Shared extends Serializable {
         return Conversion.nameToJavaPackageId(name());
     }
 
-    ResourcePath baseDirectory();
 
+    /// Root project
 
     @Value.Default default GradleProject rootProject() {
         final String artifactId = defaultArtifactId();
@@ -64,6 +68,9 @@ public interface Shared extends Serializable {
             .build();
     }
 
+
+    /// Language project
+
     @Value.Default default GradleProject languageProject() {
         final String artifactId = defaultArtifactId() + ".lang";
         return GradleProject.builder()
@@ -73,9 +80,12 @@ public interface Shared extends Serializable {
             .build();
     }
 
-    @Value.Default default String languagePackage() {
+    default String languagePackage() {
         return languageProject().packageId();
     }
+
+
+    /// Adapter project
 
     @Value.Default default GradleProject adapterProject() {
         final String artifactId = defaultArtifactId() + ".spoofax";
@@ -86,23 +96,39 @@ public interface Shared extends Serializable {
             .build();
     }
 
-    @Value.Default default String adapterPackage() {
+    default String adapterPackage() {
         return adapterProject().packageId();
     }
 
-    @Value.Default default String adapterTaskPackage() {
+    default String adapterTaskPackage() {
         return adapterPackage() + ".task";
     }
 
-    @Value.Default default String adapterCommandPackage() {
+    default String adapterCommandPackage() {
         return adapterPackage() + ".command";
+    }
+
+
+    /// CLI project
+
+    @Value.Default default GradleProject cliProject() {
+        final String artifactId = defaultArtifactId() + ".cli";
+        return GradleProject.builder()
+            .coordinate(defaultGroupId(), artifactId, defaultVersion())
+            .packageId(basePackageId() + ".cli")
+            .baseDirectory(baseDirectory().appendSegment(artifactId))
+            .build();
+    }
+
+    default String cliPackage() {
+        return cliProject().packageId();
     }
 
 
     /// Metaborg Gradle configuration plugin
 
     @Value.Default default String metaborgGradleConfigVersion() {
-        return "0.3.10";
+        return "0.3.12";
     }
 
 
@@ -132,21 +158,36 @@ public interface Shared extends Serializable {
     }
 
 
+    /// SLF4J
+
+    @Value.Default default String slf4jVersion() {
+        return "1.7.29";
+    }
+
+    @Value.Default default GradleDependency slf4jSimpleDep() {
+        return GradleDependency.module(Coordinate.of("org.slf4j", "slf4j-simple", slf4jVersion()));
+    }
+
+
     /// Metaborg log
 
     @Value.Default default String metaborgLogVersion() {
-        return "develop-SNAPSHOT";
+        return "0.3.0";
     }
 
     @Value.Default default GradleDependency logApiDep() {
         return GradleDependency.module(Coordinate.of("org.metaborg", "log.api", metaborgLogVersion()));
     }
 
+    @Value.Default default GradleDependency logBackendSLF4JDep() {
+        return GradleDependency.module(Coordinate.of("org.metaborg", "log.backend.slf4j", metaborgLogVersion()));
+    }
+
 
     /// Metaborg resource
 
     @Value.Default default String metaborgResourceVersion() {
-        return "develop-SNAPSHOT";
+        return "0.4.1";
     }
 
     @Value.Default default GradleDependency resourceDep() {
@@ -177,6 +218,10 @@ public interface Shared extends Serializable {
 
     @Value.Default default GradleDependency pieApiDep() {
         return GradleDependency.module(Coordinate.of("org.metaborg", "pie.api", pieVersion()));
+    }
+
+    @Value.Default default GradleDependency pieRuntimeDep() {
+        return GradleDependency.module(Coordinate.of("org.metaborg", "pie.runtime", pieVersion()));
     }
 
     @Value.Default default GradleDependency pieDaggerDep() {
@@ -232,6 +277,10 @@ public interface Shared extends Serializable {
 
     @Value.Default default GradleDependency spoofaxCoreDep() {
         return GradleDependency.module(Coordinate.of("org.metaborg", "spoofax.core", spoofaxPieVersion()));
+    }
+
+    @Value.Default default GradleDependency spoofaxCliDep() {
+        return GradleDependency.module(Coordinate.of("org.metaborg", "spoofax.cli", spoofaxPieVersion()));
     }
 
 
