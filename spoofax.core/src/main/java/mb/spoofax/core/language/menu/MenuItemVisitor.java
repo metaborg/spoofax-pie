@@ -1,8 +1,5 @@
 package mb.spoofax.core.language.menu;
 
-import mb.common.util.ListView;
-import mb.spoofax.core.language.command.CommandRequest;
-
 /**
  * Visitor interface for {@link MenuItem} objects.
  */
@@ -28,4 +25,5 @@ public interface MenuItemVisitor {
      * @param separator The separator being visited.
      */
     void separator(Separator separator);
+
 }

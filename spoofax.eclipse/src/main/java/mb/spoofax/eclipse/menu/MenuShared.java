@@ -18,6 +18,7 @@ import org.eclipse.ui.services.IServiceLocator;
 import java.util.HashMap;
 import java.util.Map;
 
+
 abstract class MenuShared extends CompoundContributionItem implements IWorkbenchContribution {
 
     @SuppressWarnings("NullableProblems") private @MonotonicNonNull IServiceLocator serviceLocator;
@@ -26,7 +27,8 @@ abstract class MenuShared extends CompoundContributionItem implements IWorkbench
         this.serviceLocator = serviceLocator;
     }
 
-    protected CommandContributionItem createCommand(String commandId, CommandRequest<?> commandRequest, CommandContext context, String displayName, String description) {
+    protected CommandContributionItem createCommand(String commandId, CommandRequest<?> commandRequest,
+                                                    CommandContext context, String displayName, String description) {
         return createCommand(commandId, commandRequest, ListView.of(context), displayName, description);
     }
 
@@ -38,16 +40,22 @@ abstract class MenuShared extends CompoundContributionItem implements IWorkbench
         return createCommand(commandId, label, null);
     }
 
-    protected CommandContributionItem createCommand(String commandId, @Nullable String label, @Nullable String tooltip) {
+    protected CommandContributionItem createCommand(String commandId, @Nullable String label,
+                                                    @Nullable String tooltip) {
         return createCommand(commandId, label, tooltip, null);
     }
 
-    protected CommandContributionItem createCommand(String commandId, @Nullable String label, @Nullable String tooltip, @Nullable Map<String, String> parameters) {
+    protected CommandContributionItem createCommand(String commandId, @Nullable String label,
+                                                    @Nullable String tooltip,
+                                                    @Nullable Map<String, String> parameters) {
         return createCommand(commandId, label, tooltip, parameters, CommandContributionItem.STYLE_PUSH);
     }
 
-    protected CommandContributionItem createCommand(String commandId, @Nullable String label, @Nullable String tooltip, @Nullable Map<String, String> parameters, int style) {
-        final CommandContributionItemParameter p = new CommandContributionItemParameter(serviceLocator, null, commandId, style);
+    protected CommandContributionItem createCommand(String commandId, @Nullable String label,
+                                                    @Nullable String tooltip,
+                                                    @Nullable Map<String, String> parameters, int style) {
+        final CommandContributionItemParameter p = new CommandContributionItemParameter(serviceLocator, null,
+            commandId, style);
         p.label = label;
         p.tooltip = tooltip;
         p.parameters = parameters;

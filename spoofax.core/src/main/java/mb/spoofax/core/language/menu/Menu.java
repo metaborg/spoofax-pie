@@ -2,6 +2,7 @@ package mb.spoofax.core.language.menu;
 
 import mb.common.util.ListView;
 
+
 /**
  * A menu menu item.
  */
@@ -64,18 +65,15 @@ public final class Menu implements MenuItem {
         return items;
     }
 
-    @Override
-    public String getDisplayName() {
+    @Override public String getDisplayName() {
         return displayName;
     }
 
-    @Override
-    public String getDescription() {
+    @Override public String getDescription() {
         return this.description;
     }
 
-    @Override
-    public void accept(MenuItemVisitor visitor) {
+    @Override public void accept(MenuItemVisitor visitor) {
         visitor.menu(this);
     }
 

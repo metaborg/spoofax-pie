@@ -5,9 +5,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.io.Serializable;
 import java.util.Objects;
 
+
 /**
  * A region represents a finite region in source code text.
- *
+ * <p>
  * A region has a start and end offset, represented by the
  * number of characters from the beginning of the source
  * text, with interval [0,#chars).
@@ -24,10 +25,11 @@ public class Region implements Serializable {
      * @param endOffset   The zero-based end offset of the next character following the region.
      */
     private Region(int startOffset, int endOffset) {
-        if (startOffset < 0)
+        if(startOffset < 0)
             throw new IllegalArgumentException("The start offset " + startOffset + " must be positive or zero");
-        if (endOffset < startOffset)
-            throw new IllegalArgumentException("The end offset " + endOffset + " must be at or after the start offset " + startOffset);
+        if(endOffset < startOffset)
+            throw new IllegalArgumentException("The end offset " + endOffset + " must be " +
+                "at or after the start offset " + startOffset);
 
         this.startOffset = startOffset;
         this.endOffset = endOffset;
@@ -52,7 +54,7 @@ public class Region implements Serializable {
      * @return The region.
      */
     public static Region fromOffsetLength(int startOffset, int length) {
-        if (length < 0)
+        if(length < 0)
             throw new IllegalArgumentException("The length " + length + " must be positive or zero");
 
         return new Region(startOffset, startOffset + length);
@@ -67,7 +69,7 @@ public class Region implements Serializable {
      */
     public static Region fromString(String regionStr) throws IllegalArgumentException {
         final int dashIndex = regionStr.indexOf('-');
-        if (dashIndex < 0) {
+        if(dashIndex < 0) {
             final int offset = Integer.parseInt(regionStr);
             return Region.fromOffsets(offset, offset);
         } else {
@@ -135,16 +137,16 @@ public class Region implements Serializable {
      */
     public boolean contains(Region region) {
         return region.getStartOffset() >= this.getStartOffset() &&
-                region.getStartOffset() <= this.getEndOffset() &&
-                region.getEndOffset() <= this.getEndOffset();
+            region.getStartOffset() <= this.getEndOffset() &&
+            region.getEndOffset() <= this.getEndOffset();
     }
 
     @Override public boolean equals(@Nullable Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
+        if(this == obj) return true;
+        if(obj == null || getClass() != obj.getClass()) return false;
         final Region other = (Region)obj;
         return startOffset == other.startOffset &&
-                endOffset == other.endOffset;
+            endOffset == other.endOffset;
     }
 
     @Override public int hashCode() {
@@ -152,7 +154,7 @@ public class Region implements Serializable {
     }
 
     @Override public String toString() {
-        if (this.startOffset == this.endOffset)
+        if(this.startOffset == this.endOffset)
             return Integer.toString(this.startOffset);
         else
             return startOffset + "-" + endOffset;

@@ -1,4 +1,5 @@
 package mb.spoofax.core.language.menu;
+
 /**
  * A menu separator item.
  */
@@ -17,18 +18,15 @@ public final class Separator implements MenuItem {
         this.displayName = displayName;
     }
 
-    @Override
-    public String getDisplayName() {
+    @Override public String getDisplayName() {
         return this.displayName;
     }
 
-    @Override
-    public String getDescription() {
+    @Override public String getDescription() {
         return "";
     }
 
-    @Override
-    public void accept(MenuItemVisitor visitor) {
+    @Override public void accept(MenuItemVisitor visitor) {
         visitor.separator(this);
     }
 
