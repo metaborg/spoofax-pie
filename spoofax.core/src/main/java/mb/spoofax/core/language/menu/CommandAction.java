@@ -3,6 +3,7 @@ package mb.spoofax.core.language.menu;
 import mb.spoofax.core.language.command.CommandRequest;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+
 /**
  * A menu command item.
  */
@@ -53,26 +54,23 @@ public final class CommandAction implements MenuItem {
         return this.commandRequest;
     }
 
-    @Override
-    public String getDisplayName() {
-        if (this.displayName != null) {
-            return this.displayName;
+    @Override public String getDisplayName() {
+        if(displayName != null) {
+            return displayName;
         } else {
-            return this.commandRequest.def.getDisplayName();
+            return commandRequest.def.getDisplayName();
         }
     }
 
-    @Override
-    public String getDescription() {
-        if (this.description != null) {
-            return this.description;
+    @Override public String getDescription() {
+        if(description != null) {
+            return description;
         } else {
-            return this.commandRequest.def.getDescription();
+            return commandRequest.def.getDescription();
         }
     }
 
-    @Override
-    public void accept(MenuItemVisitor visitor) {
+    @Override public void accept(MenuItemVisitor visitor) {
         visitor.command(this);
     }
 
