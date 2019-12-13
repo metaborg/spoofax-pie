@@ -1,0 +1,78 @@
+package {{type.packageId}};
+
+import mb.common.util.EnumSetView;
+import mb.common.util.ListView;
+import mb.pie.api.Task;
+import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.core.language.LanguageScope;
+import mb.spoofax.core.language.command.CommandContextType;
+import mb.spoofax.core.language.command.CommandDef;
+import mb.spoofax.core.language.command.CommandExecutionType;
+import mb.spoofax.core.language.command.CommandInput;
+import mb.spoofax.core.language.command.CommandOutput;
+import mb.spoofax.core.language.command.arg.ArgProvider;
+import mb.spoofax.core.language.command.arg.Param;
+import mb.spoofax.core.language.command.arg.ParamDef;
+import mb.spoofax.core.language.command.arg.RawArgs;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import javax.inject.Inject;
+
+@LanguageScope
+public class {{type.id}} implements CommandDef<{{argType.qualifiedId}}> {
+    private final {{taskDefInjection.variable}};
+
+
+    @Inject public {{type.id}}({{taskDefInjection.variable}}) {
+        {{taskDefInjection.thisAssign}};
+    }
+
+
+    @Override public String getId() {
+        return {{taskDefInjection.name}}.getId();
+    }
+
+    @Override public String getDisplayName() {
+        return "{{displayName}}";
+    }
+
+    @Override public EnumSetView<CommandExecutionType> getSupportedExecutionTypes() {
+        return EnumSetView.of(
+{{#supportedExecutionTypes}}
+            CommandExecutionType.{{this}}{{^-last}},{{/-last}}
+{{/supportedExecutionTypes}}
+        );
+    }
+
+    @Override public EnumSetView<CommandContextType> getRequiredContextTypes() {
+        return EnumSetView.of(
+{{#requiredContextTypes}}
+            CommandContextType.{{this}}{{^-last}},{{/-last}}
+{{/requiredContextTypes}}
+        );
+    }
+
+    @Override public ParamDef getParamDef() {
+        return new ParamDef(
+{{#params}}
+            Param.of("{{id}}", {{type.qualifiedId}}.class, {{required}}, {{#converter}}new {{type.qualifiedId}}(), {{/converter}}ListView.of({{#providers}}{{toJavaCode}}{{^-last}}, {{/-last}}{{/providers}})){{^-last}},{{/-last}}
+{{/params}}
+        );
+    }
+
+    @Override public {{argType.qualifiedId}} fromRawArgs(RawArgs rawArgs) {
+{{#params}}
+ {{#required}}
+        final {{type.qualifiedId}} {{id}} = rawArgs.getOrThrow("{{id}}");
+ {{/required}}
+ {{^required}}
+        final {{type.nullableQualifiedId}} {{id}} = rawArgs.getOrNull("{{id}}");
+ {{/required}}
+{{/params}}
+        return new {{argType.qualifiedId}}({{#params}}{{id}}{{^-last}}, {{/-last}}{{/params}});
+    }
+
+    @Override public Task<CommandOutput> createTask(CommandInput<{{argType.qualifiedId}}> input) {
+        return {{taskDefInjection.name}}.createTask(input);
+    }
+}

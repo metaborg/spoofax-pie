@@ -10,9 +10,12 @@ import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.cli.CliCommand;
-import mb.spoofax.core.language.cli.CliCommandItem;
-import mb.spoofax.core.language.cli.CliCommandList;
-import mb.spoofax.core.language.command.*;
+import mb.spoofax.core.language.command.CommandContextType;
+import mb.spoofax.core.language.command.CommandDef;
+import mb.spoofax.core.language.command.CommandExecutionType;
+import mb.spoofax.core.language.command.CommandFeedbacks;
+import mb.spoofax.core.language.command.CommandInput;
+import mb.spoofax.core.language.command.CommandOutput;
 import mb.spoofax.core.language.command.arg.ParamDef;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.command.arg.TextToResourceKeyArgConverter;
@@ -105,11 +108,11 @@ public class TigerShowDesugaredAst implements TaskDef<CommandInput<TigerShowArgs
         return TigerShowArgs.fromRawArgs(rawArgs);
     }
 
-    public CliCommandItem getCliCommandItem() {
+    public CliCommand getCliCommandItem() {
         final String operation = "desugar";
-        return CliCommandList.of("desugar", "Desugars Tiger sources and shows the desugared AST",
-            CliCommand.of(this, "file", TigerShowArgs.getFileCliParamDef(operation), "Desugars given Tiger file and shows the desugared AST"),
-            CliCommand.of(this, "text", TigerShowArgs.getTextCliParamDef(operation, textToResourceKeyArgConverter), "Desugars given Tiger text and shows the desugared AST")
+        return CliCommand.of("desugar", "Desugars Tiger sources and shows the desugared AST",
+            CliCommand.of("file", "Desugars given Tiger file and shows the desugared AST", this, TigerShowArgs.getFileCliParams(operation)),
+            CliCommand.of("text", "Desugars given Tiger text and shows the desugared AST", this, TigerShowArgs.getTextCliParams(operation, textToResourceKeyArgConverter))
         );
     }
 }

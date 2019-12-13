@@ -10,21 +10,20 @@ import mb.pie.api.TaskDef;
 import mb.resource.ReadableResource;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
-import mb.tiger.TigerParseTable;
 import mb.tiger.TigerParser;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 public class TigerParse implements TaskDef<ResourceKey, JSGLR1ParseResult> {
     private final ResourceService resourceService;
-    private final TigerParseTable parseTable;
+    private final Provider<TigerParser> parserProvider;
 
     @Inject
-    public TigerParse(ResourceService resourceService, TigerParseTable parseTable) {
+    public TigerParse(ResourceService resourceService, Provider<TigerParser> parserProvider) {
         this.resourceService = resourceService;
-        this.parseTable = parseTable;
+        this.parserProvider = parserProvider;
     }
 
     @Override public String getId() {
@@ -40,7 +39,7 @@ public class TigerParse implements TaskDef<ResourceKey, JSGLR1ParseResult> {
         }
         try {
             final String text = resource.readString();
-            final TigerParser parser = new TigerParser(parseTable);
+            final TigerParser parser = parserProvider.get();
             return parser.parse(text, "Module");
         } catch(IOException e) {
             return JSGLR1ParseResults.failed(Messages.of(new Message("Cannot parse file '" + key + "', reading contents failed unexpectedly", e)));

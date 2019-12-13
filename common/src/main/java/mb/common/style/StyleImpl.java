@@ -32,19 +32,19 @@ public class StyleImpl implements Style {
         return backgroundColor;
     }
 
-    @Override public boolean getIsBold() {
+    @Override public boolean isBold() {
         return bold;
     }
 
-    @Override public boolean getIsItalic() {
+    @Override public boolean isItalic() {
         return italic;
     }
 
-    @Override public boolean getIsUnderscore() {
+    @Override public boolean isUnderscore() {
         return underscore;
     }
 
-    @Override public boolean getIsStrikeout() {
+    @Override public boolean isStrikeout() {
         return strikeout;
     }
 

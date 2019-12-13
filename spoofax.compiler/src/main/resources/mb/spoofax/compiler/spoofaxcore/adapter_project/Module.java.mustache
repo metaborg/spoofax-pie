@@ -1,0 +1,138 @@
+package {{genModule.packageId}};
+
+import dagger.Module;
+import dagger.Provides;
+import dagger.multibindings.ElementsIntoSet;
+import mb.common.util.MapView;
+import mb.common.util.EntryView;
+import mb.log.api.LoggerFactory;
+import mb.pie.api.MapTaskDefs;
+import mb.pie.api.Pie;
+import mb.pie.api.PieSession;
+import mb.pie.api.TaskDef;
+import mb.pie.api.TaskDefs;
+import mb.spoofax.core.language.LanguageInstance;
+import mb.spoofax.core.language.LanguageScope;
+import mb.spoofax.core.language.command.CommandDef;
+import mb.spoofax.core.language.command.AutoCommandRequest;
+import mb.spoofax.core.language.command.arg.RawArgs;
+import mb.stratego.common.StrategoRuntime;
+import mb.stratego.common.StrategoRuntimeBuilder;
+
+import javax.inject.Named;
+import java.util.HashSet;
+import java.util.Set;
+
+@Module
+public class {{genModule.id}} {
+    @Provides @LanguageScope
+    {{parser.factory.qualifiedId}} provideParserFactory() {
+        return new {{parser.factory.qualifiedId}}();
+    }
+
+    @Provides /* Unscoped: parser has state, so create a new parser every call. */
+    {{parser.parser.qualifiedId}} provideParser({{parser.factory.qualifiedId}} parserFactory) {
+        return parserFactory.create();
+    }
+{{#styler}}
+
+
+    @Provides @LanguageScope
+    {{this.factory.qualifiedId}} provideStylerFactory(LoggerFactory loggerFactory) {
+        return new {{this.factory.qualifiedId}}(loggerFactory);
+    }
+
+    @Provides @LanguageScope
+    {{this.styler.qualifiedId}} provideStyler({{this.factory.qualifiedId}} stylerFactory) {
+        return stylerFactory.create();
+    }
+{{/styler}}
+{{#strategoRuntime}}
+
+
+    @Provides @LanguageScope
+    {{this.factory.qualifiedId}} provideStrategoRuntimeBuilderFactory() {
+        return new {{this.factory.qualifiedId}}();
+    }
+
+    @Provides @LanguageScope
+    StrategoRuntimeBuilder provideStrategoRuntimeBuilder({{this.factory.qualifiedId}} factory) {
+        return factory.create();
+    }
+
+    @Provides @LanguageScope
+    StrategoRuntime providePrototypeStrategoRuntime(StrategoRuntimeBuilder builder) {
+        return builder.build();
+    }
+{{/strategoRuntime}}
+{{#constraintAnalyzer}}
+
+
+    @Provides @LanguageScope
+    {{this.factory.qualifiedId}} provideConstraintAnalyzerFactory(StrategoRuntime prototypeStrategoRuntime) {
+        return new {{this.factory.qualifiedId}}(prototypeStrategoRuntime);
+    }
+
+    @Provides @LanguageScope
+    {{this.constraintAnalyzer.qualifiedId}} provideConstraintAnalyzer({{this.factory.qualifiedId}} factory) {
+        return factory.create();
+    }
+{{/constraintAnalyzer}}
+
+
+    @Provides @LanguageScope @Named("language") @ElementsIntoSet
+    static Set<TaskDef<?, ?>> provideTaskDefsSet(
+{{#providedTaskDefs}}
+        {{variable}}{{^-last}},{{/-last}}
+{{/providedTaskDefs}}
+    ) {
+        final HashSet<TaskDef<?, ?>> taskDefs = new HashSet<>();
+{{#providedTaskDefs}}
+        taskDefs.add({{name}});
+{{/providedTaskDefs}}
+        return taskDefs;
+    }
+
+    @Provides @LanguageScope @Named("language")
+    TaskDefs provideTaskDefs(@Named("language") Set<TaskDef<?, ?>> taskDefs) {
+        return new MapTaskDefs(taskDefs);
+    }
+
+
+    @Provides @LanguageScope
+    LanguageInstance provideLanguageInstance({{genInstance.id}} instance) {
+        return instance;
+    }
+
+    @Provides /* Unscoped: new session every call. */
+    PieSession providePieSession(Pie pie, @Named("language") TaskDefs languageTaskDefs) {
+        return pie.newSession(languageTaskDefs);
+    }
+
+
+    @Provides @LanguageScope @ElementsIntoSet
+    static Set<CommandDef<?>> provideCommandDefsSet(
+{{#providedCommandDefs}}
+        {{variable}}{{^-last}},{{/-last}}
+{{/providedCommandDefs}}
+    ) {
+        final HashSet<CommandDef<?>> commandDefs = new HashSet<>();
+{{#providedCommandDefs}}
+        commandDefs.add({{name}});
+{{/providedCommandDefs}}
+        return commandDefs;
+    }
+
+    @Provides @LanguageScope @ElementsIntoSet
+    static Set<AutoCommandRequest<?>> provideAutoCommandRequestsSet(
+{{#providedAutoCommandDefs}}
+        {{value.commandDef.qualifiedId}} {{name}}{{^-last}},{{/-last}}
+{{/providedAutoCommandDefs}}
+    ) {
+        final HashSet<AutoCommandRequest<?>> autoCommandDefs = new HashSet<>();
+{{#providedAutoCommandDefs}}
+        autoCommandDefs.add(new AutoCommandRequest<>({{name}}, new RawArgs(MapView.of({{#value.rawArgs.entrySet}}new EntryView<>("{{getKey}}", {{getValue}}){{^-last}},{{/-last}}{{/value.rawArgs.entrySet}}))));
+{{/providedAutoCommandDefs}}
+        return autoCommandDefs;
+    }
+}

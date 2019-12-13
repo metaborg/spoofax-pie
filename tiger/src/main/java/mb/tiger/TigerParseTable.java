@@ -15,15 +15,16 @@ public class TigerParseTable implements Serializable {
         this.parseTable = parseTable;
     }
 
-    public static TigerParseTable fromClassLoaderResources() throws JSGLR1ParseTableException, IOException {
+    public static TigerParseTable fromClassLoaderResources() {
         final String resource = "mb/tiger/target/metaborg/sdf.tbl";
         try(final @Nullable InputStream inputStream = TigerParseTable.class.getClassLoader().getResourceAsStream(resource)) {
             if(inputStream == null) {
-                throw new RuntimeException(
-                    "Cannot create parse table; cannot find resource '" + resource + "' in classloader resources");
+                throw new RuntimeException("Cannot create parse table; cannot find resource '" + resource + "' in classloader resources");
             }
             final JSGLR1ParseTable parseTable = JSGLR1ParseTable.fromStream(inputStream);
             return new TigerParseTable(parseTable);
+        } catch(JSGLR1ParseTableException | IOException e) {
+            throw new RuntimeException("Cannot create parse table; cannot read parse table from resource '" + resource + "' in classloader resources");
         }
     }
 }

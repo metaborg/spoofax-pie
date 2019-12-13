@@ -1,0 +1,33 @@
+package {{genStyleTaskDef.packageId}};
+
+import mb.common.style.Styling;
+import mb.jsglr1.common.JSGLR1ParseResult;
+import mb.pie.api.ExecContext;
+import mb.pie.api.ExecException;
+import mb.pie.api.TaskDef;
+import mb.resource.ResourceKey;
+import mb.spoofax.core.language.LanguageScope;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import javax.inject.Inject;
+
+@LanguageScope
+public class {{genStyleTaskDef.id}} implements TaskDef<ResourceKey, @Nullable Styling> {
+    private final {{parser.parseTaskDef.qualifiedId}} parse;
+    private final {{styler.qualifiedId}} styler;
+
+    @Inject public {{genStyleTaskDef.id}}({{parser.parseTaskDef.qualifiedId}} parse, {{styler.qualifiedId}} styler) {
+        this.parse = parse;
+        this.styler = styler;
+    }
+
+    @Override public String getId() {
+        return "{{genStyleTaskDef.qualifiedId}}";
+    }
+
+    @Override
+    public @Nullable Styling exec(ExecContext context, ResourceKey key) throws ExecException, InterruptedException {
+        final JSGLR1ParseResult parseResult = context.require(parse, key);
+        return parseResult.getTokens().map(styler::style).orElse(null);
+    }
+}

@@ -13,9 +13,16 @@ public abstract class CliParam {
         R positional(String paramId, int index, @Nullable String label, @Nullable String description, @Nullable ArgConverter<?> converter);
     }
 
+    public static CliParam option(String paramId, ListView<String> names, boolean negatable, @Nullable String label, @Nullable String description, @Nullable ArgConverter<?> converter) {
+        return CliParams.option(paramId, names, negatable, label, description, converter);
+    }
+
+    public static CliParam positional(String paramId, int index, @Nullable String label, @Nullable String description, @Nullable ArgConverter<?> converter) {
+        return CliParams.positional(paramId, index, label, description, converter);
+    }
+
 
     public abstract <R> R match(Cases<R> cases);
-
 
     public CliParams.CaseOfMatchers.TotalMatcher_Option caseOf() {
         return CliParams.caseOf(this);
@@ -33,7 +40,7 @@ public abstract class CliParam {
         return CliParams.getDescription(this);
     }
 
-    public @Nullable ArgConverter<?>  getConverter() {
+    public @Nullable ArgConverter<?> getConverter() {
         return CliParams.getConverter(this);
     }
 

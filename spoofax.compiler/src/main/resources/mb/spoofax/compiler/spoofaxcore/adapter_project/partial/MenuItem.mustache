@@ -1,0 +1,19 @@
+{{#isCommandAction}}
+CommandAction.of(
+    {{#commandDefType}}{{#getInjectedCommandDef}}{{/getInjectedCommandDef}}{{/commandDefType}},
+    CommandExecutionType.{{executionType}},
+    {{#displayName}}{{this}}{{/displayName}}{{^displayName}}null{{/displayName}},
+    new RawArgs(MapView.of({{#initialArgs.entrySet}}new EntryView<>("{{getKey}}", {{getValue}}){{^-last}},{{/-last}}{{/initialArgs.entrySet}}))
+)
+{{/isCommandAction}}
+{{#isMenu}}
+new Menu(
+     {{displayName}},
+{{#items}}
+    {{>adapter_project/partial/MenuItem.mustache}}{{^-last}},{{/-last}}
+{{/items}}
+)
+{{/isMenu}}
+{{#isSeparator}}
+new Separator()
+{{/isSeparator}}

@@ -16,10 +16,13 @@ import mb.resource.hierarchical.match.PathResourceMatcher;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.match.path.ExtensionsPathMatcher;
 import mb.spoofax.core.language.cli.CliCommand;
-import mb.spoofax.core.language.cli.CliCommandItem;
-import mb.spoofax.core.language.cli.CliParamDef;
 import mb.spoofax.core.language.cli.CliParams;
-import mb.spoofax.core.language.command.*;
+import mb.spoofax.core.language.command.CommandContextType;
+import mb.spoofax.core.language.command.CommandDef;
+import mb.spoofax.core.language.command.CommandExecutionType;
+import mb.spoofax.core.language.command.CommandFeedbacks;
+import mb.spoofax.core.language.command.CommandInput;
+import mb.spoofax.core.language.command.CommandOutput;
 import mb.spoofax.core.language.command.arg.ArgProviders;
 import mb.spoofax.core.language.command.arg.Param;
 import mb.spoofax.core.language.command.arg.ParamDef;
@@ -155,11 +158,9 @@ public class TigerCompileDirectory implements TaskDef<CommandInput<TigerCompileD
         return new TigerCompileDirectory.Args(dir);
     }
 
-    public CliCommandItem getCliCommandItem() {
-        return CliCommand.of(this, "compile-dir", new CliParamDef(
-                CliParams.positional("dir", 0, "DIR", "Directory to compile", null)
-            ),
-            "Compiles Tiger files in given directory and shows the compiled file"
+    public CliCommand getCliCommandItem() {
+        return CliCommand.of("compile-dir", "Compiles Tiger files in given directory and shows the compiled file", this,
+            CliParams.positional("dir", 0, "DIR", "Directory to compile", null)
         );
     }
 

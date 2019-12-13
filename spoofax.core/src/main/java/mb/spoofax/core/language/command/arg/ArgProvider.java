@@ -17,7 +17,21 @@ public abstract class ArgProvider {
         // TODO: environment variables
     }
 
+    public static ArgProvider value(Serializable arg) {
+        return ArgProviders.value(arg);
+    }
+
+    public static ArgProvider context() {
+        return ArgProviders.context();
+    }
+
+
     public abstract <R> R match(Cases<R> cases);
+
+    public ArgProviders.CaseOfMatchers.TotalMatcher_Value caseOf() {
+        return ArgProviders.caseOf(this);
+    }
+
 
     @Override public abstract int hashCode();
 

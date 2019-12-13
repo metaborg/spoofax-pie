@@ -3,84 +3,90 @@ package mb.tiger.spoofax;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
-import mb.jsglr1.common.JSGLR1ParseTableException;
 import mb.log.api.LoggerFactory;
-import mb.pie.api.*;
+import mb.pie.api.MapTaskDefs;
+import mb.pie.api.Pie;
+import mb.pie.api.PieSession;
+import mb.pie.api.TaskDef;
+import mb.pie.api.TaskDefs;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.LanguageScope;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
-import mb.stratego.common.StrategoRuntimeBuilderException;
-import mb.tiger.*;
-import mb.tiger.spoofax.taskdef.*;
-import mb.tiger.spoofax.taskdef.command.*;
+import mb.tiger.TigerConstraintAnalyzer;
+import mb.tiger.TigerConstraintAnalyzerFactory;
+import mb.tiger.TigerParser;
+import mb.tiger.TigerParserFactory;
+import mb.tiger.TigerStrategoRuntimeBuilderFactory;
+import mb.tiger.TigerStyler;
+import mb.tiger.TigerStylerFactory;
+import mb.tiger.spoofax.taskdef.TigerAnalyze;
+import mb.tiger.spoofax.taskdef.TigerCheck;
+import mb.tiger.spoofax.taskdef.TigerListDefNames;
+import mb.tiger.spoofax.taskdef.TigerListLiteralVals;
+import mb.tiger.spoofax.taskdef.TigerParse;
+import mb.tiger.spoofax.taskdef.TigerStyle;
+import mb.tiger.spoofax.taskdef.TigerTokenize;
+import mb.tiger.spoofax.taskdef.command.TigerAltCompileFile;
+import mb.tiger.spoofax.taskdef.command.TigerCompileDirectory;
+import mb.tiger.spoofax.taskdef.command.TigerCompileFile;
+import mb.tiger.spoofax.taskdef.command.TigerShowAnalyzedAst;
+import mb.tiger.spoofax.taskdef.command.TigerShowDesugaredAst;
+import mb.tiger.spoofax.taskdef.command.TigerShowParsedAst;
+import mb.tiger.spoofax.taskdef.command.TigerShowPrettyPrintedText;
 
 import javax.inject.Named;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
 @Module
 public class TigerModule {
-    private final TigerParseTable parseTable;
-    private final TigerStylingRules stylingRules;
-    private final StrategoRuntimeBuilder strategoRuntimeBuilder;
-    private final StrategoRuntime prototypeStrategoRuntime;
-    private final TigerConstraintAnalyzer constraintAnalyzer;
-
-    private TigerModule(
-        TigerParseTable parseTable,
-        TigerStylingRules stylingRules,
-        StrategoRuntimeBuilder strategoRuntimeBuilder,
-        StrategoRuntime prototypeStrategoRuntime,
-        TigerConstraintAnalyzer constraintAnalyzer
-    ) {
-        this.parseTable = parseTable;
-        this.stylingRules = stylingRules;
-        this.strategoRuntimeBuilder = strategoRuntimeBuilder;
-        this.prototypeStrategoRuntime = prototypeStrategoRuntime;
-        this.constraintAnalyzer = constraintAnalyzer;
+    @Provides @LanguageScope
+    TigerParserFactory provideParserFactory() {
+        return new TigerParserFactory();
     }
 
-    public static TigerModule fromClassLoaderResources() throws JSGLR1ParseTableException, IOException, StrategoRuntimeBuilderException {
-        final TigerParseTable parseTable = TigerParseTable.fromClassLoaderResources();
-        final TigerStylingRules stylingRules = TigerStylingRules.fromClassLoaderResources();
-        final StrategoRuntimeBuilder strategoRuntimeBuilder = TigerNaBL2StrategoRuntimeBuilder.create(TigerStrategoRuntimeBuilder.create());
-        final StrategoRuntime prototypeStrategoRuntime = strategoRuntimeBuilder.build();
-        final TigerConstraintAnalyzer constraintAnalyzer = new TigerConstraintAnalyzer(strategoRuntimeBuilder.buildFromPrototype(prototypeStrategoRuntime));
-        return new TigerModule(parseTable, stylingRules, strategoRuntimeBuilder, prototypeStrategoRuntime, constraintAnalyzer);
+    @Provides /* Unscoped: parser has state, so create a new parser every call. */
+    TigerParser provideParser(TigerParserFactory parserFactory) {
+        return parserFactory.create();
     }
 
 
     @Provides @LanguageScope
-    LanguageInstance provideLanguageInstance(TigerInstance tigerInstance) {
-        return tigerInstance;
+    TigerStylerFactory provideStylerFactory(LoggerFactory loggerFactory) {
+        return new TigerStylerFactory(loggerFactory);
+    }
+
+    @Provides @LanguageScope
+    TigerStyler provideStyler(TigerStylerFactory stylerFactory) {
+        return stylerFactory.create();
     }
 
 
     @Provides @LanguageScope
-    TigerParseTable provideParseTable() {
-        return parseTable;
+    TigerStrategoRuntimeBuilderFactory provideStrategoRuntimeBuilderFactory() {
+        return new TigerStrategoRuntimeBuilderFactory();
     }
 
     @Provides @LanguageScope
-    TigerStyler provideStyler(LoggerFactory loggerFactory) {
-        return new TigerStyler(stylingRules, loggerFactory);
+    StrategoRuntimeBuilder provideStrategoRuntimeBuilder(TigerStrategoRuntimeBuilderFactory factory) {
+        return factory.create();
     }
 
     @Provides @LanguageScope
-    StrategoRuntimeBuilder provideStrategoRuntimeBuilder() {
-        return strategoRuntimeBuilder;
+    StrategoRuntime providePrototypeStrategoRuntime(StrategoRuntimeBuilder builder) {
+        return builder.build();
+    }
+
+
+    @Provides @LanguageScope
+    TigerConstraintAnalyzerFactory provideConstraintAnalyzerFactory(StrategoRuntime prototypeStrategoRuntime) {
+        return new TigerConstraintAnalyzerFactory(prototypeStrategoRuntime);
     }
 
     @Provides @LanguageScope
-    StrategoRuntime providePrototypeStrategoRuntime() {
-        return prototypeStrategoRuntime;
-    }
-
-    @Provides @LanguageScope
-    TigerConstraintAnalyzer provideConstraintAnalyzer() {
-        return constraintAnalyzer;
+    TigerConstraintAnalyzer provideConstraintAnalyzer(TigerConstraintAnalyzerFactory factory) {
+        return factory.create();
     }
 
 
@@ -132,6 +138,11 @@ public class TigerModule {
         return new MapTaskDefs(taskDefs);
     }
 
+
+    @Provides @LanguageScope
+    LanguageInstance provideLanguageInstance(TigerInstance tigerInstance) {
+        return tigerInstance;
+    }
 
     @Provides /* Unscoped: new session every call. */
     PieSession providePieSession(Pie pie, @Named("language") TaskDefs languageTaskDefs) {

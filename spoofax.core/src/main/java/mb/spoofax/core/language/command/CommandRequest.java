@@ -1,5 +1,7 @@
 package mb.spoofax.core.language.command;
 
+import mb.pie.api.Task;
+import mb.spoofax.core.language.command.arg.ArgConverters;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -18,5 +20,9 @@ public class CommandRequest<A extends Serializable> {
 
     public CommandRequest(CommandDef<A> def, CommandExecutionType executionType) {
         this(def, executionType, null);
+    }
+
+    public Task<CommandOutput> createTask(CommandContext context, ArgConverters argConverters) {
+        return def.createTask(this, context, argConverters);
     }
 }

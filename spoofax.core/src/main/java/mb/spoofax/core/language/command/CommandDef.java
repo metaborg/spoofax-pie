@@ -2,8 +2,10 @@ package mb.spoofax.core.language.command;
 
 import mb.common.util.EnumSetView;
 import mb.pie.api.Task;
+import mb.spoofax.core.language.command.arg.ArgConverters;
 import mb.spoofax.core.language.command.arg.ParamDef;
 import mb.spoofax.core.language.command.arg.RawArgs;
+import mb.spoofax.core.language.command.arg.RawArgsBuilder;
 
 import java.io.Serializable;
 
@@ -26,4 +28,24 @@ public interface CommandDef<A extends Serializable> {
 
 
     Task<CommandOutput> createTask(CommandInput<A> input);
+
+
+    default CommandRequest<A> request(CommandExecutionType executionType, RawArgs initialArgs) {
+        return new CommandRequest<>(this, executionType, initialArgs);
+    }
+
+    default CommandRequest<A> request(CommandExecutionType executionType) {
+        return new CommandRequest<>(this, executionType);
+    }
+
+    default Task<CommandOutput> createTask(CommandRequest<A> request, CommandContext context, ArgConverters argConverters) {
+        final RawArgsBuilder builder = new RawArgsBuilder(getParamDef(), argConverters);
+        if(request.initialArgs != null) {
+            builder.setArgsFrom(request.initialArgs);
+        }
+        final RawArgs rawArgs = builder.build(context);
+        final A args = fromRawArgs(rawArgs);
+        final CommandInput<A> input = new CommandInput<>(args);
+        return createTask(input);
+    }
 }

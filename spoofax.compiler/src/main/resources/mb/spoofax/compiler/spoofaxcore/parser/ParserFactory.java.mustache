@@ -1,0 +1,15 @@
+package {{genFactory.packageId}};
+
+import mb.spoofax.compiler.interfaces.spoofaxcore.ParserFactory;
+
+public class {{genFactory.id}} implements ParserFactory {
+    private final {{genTable.qualifiedId}} parseTable;
+
+    public {{genFactory.id}}() {
+        this.parseTable = {{genTable.qualifiedId}}.fromLoaderResources();
+    }
+
+    @Override public {{genParser.qualifiedId}} create() {
+        return new {{genParser.qualifiedId}}(parseTable);
+    }
+}

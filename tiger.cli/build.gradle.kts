@@ -40,5 +40,3 @@ dependencies {
   annotationProcessor("com.google.dagger:dagger-compiler")
   annotationProcessor("info.picocli:picocli-codegen")
 }
-
-

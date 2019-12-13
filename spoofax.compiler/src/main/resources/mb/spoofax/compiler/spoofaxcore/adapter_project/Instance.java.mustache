@@ -1,0 +1,117 @@
+package {{genInstance.packageId}};
+
+import mb.common.message.KeyedMessages;
+import mb.common.style.Styling;
+import mb.common.token.Token;
+import mb.common.util.CollectionView;
+import mb.common.util.ListView;
+import mb.common.util.MapView;
+import mb.common.util.SetView;
+import mb.pie.api.Task;
+import mb.resource.ResourceKey;
+import mb.spoofax.core.language.LanguageInstance;
+import mb.spoofax.core.language.cli.CliCommand;
+import mb.spoofax.core.language.cli.CliParam;
+import mb.spoofax.core.language.command.AutoCommandRequest;
+import mb.spoofax.core.language.command.CommandDef;
+import mb.spoofax.core.language.command.CommandExecutionType;
+import mb.spoofax.core.language.command.CommandRequest;
+import mb.spoofax.core.language.command.arg.RawArgs;
+import mb.spoofax.core.language.menu.CommandAction;
+import mb.spoofax.core.language.menu.Menu;
+import mb.spoofax.core.language.menu.MenuItem;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import javax.inject.Inject;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Set;
+
+public class {{genInstance.id}} implements LanguageInstance {
+    private final static SetView<String> fileExtensions = SetView.of({{#fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/fileExtensions}});
+
+{{#injected}}
+    private final {{variable}};
+{{/injected}}
+
+    private final CollectionView<CommandDef<?>> commandDefs;
+    private final CollectionView<AutoCommandRequest<?>> autoCommandDefs;
+
+
+    @Inject public {{genInstance.id}}(
+{{#injected}}
+        {{variable}},
+{{/injected}}
+        Set<CommandDef<?>> commandDefs,
+        Set<AutoCommandRequest<?>> autoCommandDefs
+    ) {
+{{#injected}}
+        {{thisAssign}};
+{{/injected}}
+        this.commandDefs = CollectionView.copyOf(commandDefs);
+        this.autoCommandDefs = CollectionView.copyOf(autoCommandDefs);
+    }
+
+
+    @Override public String getDisplayName() {
+        return "{{shared.name}}";
+    }
+
+    @Override public SetView<String> getFileExtensions() {
+        return fileExtensions;
+    }
+
+
+    @Override public Task<@Nullable ArrayList<? extends Token<?>>> createTokenizeTask(ResourceKey resourceKey) {
+        return {{tokenizeInjection.name}}.createTask(resourceKey);
+    }
+
+    @Override public Task<KeyedMessages> createCheckTask(ResourceKey resourceKey) {
+        return {{checkInjection.name}}.createTask(resourceKey);
+    }
+
+    @Override public Task<@Nullable Styling> createStyleTask(ResourceKey resourceKey) {
+        return {{styleInjection.name}}.createTask(resourceKey);
+    }
+
+
+    @Override public CollectionView<CommandDef<?>> getCommandDefs() {
+        return commandDefs;
+    }
+
+    @Override public CollectionView<AutoCommandRequest<?>> getAutoCommandRequests() {
+        return autoCommandDefs;
+    }
+
+
+    @Override public CliCommand getCliCommand() {
+{{#cliCommand}}
+        return {{>adapter_project/partial/CliCommand.mustache}};
+{{/cliCommand}}
+    }
+
+
+    @Override public ListView<MenuItem> getMainMenuItems() {
+        return ListView.of(
+{{#mainMenuItems}}
+            {{>adapter_project/partial/MenuItem.mustache}}{{^-last}},{{/-last}}
+{{/mainMenuItems}}
+        );
+    }
+
+    @Override public ListView<MenuItem> getResourceContextMenuItems() {
+        return ListView.of(
+{{#resourceContextMenuItems}}
+            {{>adapter_project/partial/MenuItem.mustache}}{{^-last}},{{/-last}}
+{{/resourceContextMenuItems}}
+        );
+    }
+
+    @Override public ListView<MenuItem> getEditorContextMenuItems() {
+        return ListView.of(
+{{#editorContextMenuItems}}
+            {{>adapter_project/partial/MenuItem.mustache}}{{^-last}},{{/-last}}
+{{/editorContextMenuItems}}
+        );
+    }
+}

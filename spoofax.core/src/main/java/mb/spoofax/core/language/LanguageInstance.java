@@ -8,7 +8,7 @@ import mb.common.util.ListView;
 import mb.common.util.SetView;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
-import mb.spoofax.core.language.cli.CliCommandItem;
+import mb.spoofax.core.language.cli.CliCommand;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.menu.MenuItem;
@@ -34,7 +34,7 @@ public interface LanguageInstance {
     CollectionView<AutoCommandRequest<?>> getAutoCommandRequests();
 
 
-    CliCommandItem getRootCliCommandItem();
+    CliCommand getCliCommand();
 
 
     ListView<MenuItem> getMainMenuItems();

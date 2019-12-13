@@ -42,6 +42,3 @@ include("tiger.cli")
 include("tiger.intellij")
 include("tiger.eclipse")
 include("tiger.eclipse.externaldeps")
-
-include("lang.stlcrec")
-include("stlcrec")

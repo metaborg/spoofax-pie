@@ -35,11 +35,11 @@ public final class MarkerUtil {
     }
 
     public static void clearAll(EclipseIdentifiers eclipseIdentifiers, IResource resource) throws CoreException {
-        resource.deleteMarkers(eclipseIdentifiers.baseMarker(), true, IResource.DEPTH_ZERO);
+        resource.deleteMarkers(eclipseIdentifiers.getBaseMarker(), true, IResource.DEPTH_ZERO);
     }
 
     public static void clearAllRec(EclipseIdentifiers eclipseIdentifiers, IResource resource) throws CoreException {
-        resource.deleteMarkers(eclipseIdentifiers.baseMarker(), true, IResource.DEPTH_INFINITE);
+        resource.deleteMarkers(eclipseIdentifiers.getBaseMarker(), true, IResource.DEPTH_INFINITE);
     }
 
 
@@ -59,13 +59,13 @@ public final class MarkerUtil {
     private static String id(EclipseIdentifiers eclipseIdentifiers, int severity) {
         switch(severity) {
             case IMarker.SEVERITY_INFO:
-                return eclipseIdentifiers.infoMarker();
+                return eclipseIdentifiers.getInfoMarker();
             case IMarker.SEVERITY_WARNING:
-                return eclipseIdentifiers.warningMarker();
+                return eclipseIdentifiers.getWarningMarker();
             case IMarker.SEVERITY_ERROR:
-                return eclipseIdentifiers.errorMarker();
+                return eclipseIdentifiers.getErrorMarker();
             default:
-                return eclipseIdentifiers.baseMarker();
+                return eclipseIdentifiers.getBaseMarker();
         }
     }
 }

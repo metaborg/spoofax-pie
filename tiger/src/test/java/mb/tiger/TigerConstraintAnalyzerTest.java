@@ -7,18 +7,15 @@ import mb.constraint.common.ConstraintAnalyzer.SingleFileResult;
 import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.constraint.common.ConstraintAnalyzerException;
 import mb.jsglr1.common.JSGLR1ParseResult;
-import mb.jsglr1.common.JSGLR1ParseTableException;
-import mb.resource.SimpleResourceKey;
 import mb.resource.ResourceKey;
+import mb.resource.SimpleResourceKey;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
-import mb.stratego.common.StrategoRuntimeBuilderException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
 import org.spoofax.interpreter.library.IOAgent;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
-import java.io.IOException;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,14 +23,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class TigerConstraintAnalyzerTest {
     private static final String qualifier = "test";
 
-    private final TigerParser parser = new TigerParser(TigerParseTable.fromClassLoaderResources());
-    private final StrategoRuntimeBuilder strategoRuntimeBuilder =
-        TigerStrategoRuntimeBuilder.create();
-    private final StrategoRuntime strategoRuntime =
-        TigerNaBL2StrategoRuntimeBuilder.create(strategoRuntimeBuilder).build();
-    private final TigerConstraintAnalyzer analyzer = new TigerConstraintAnalyzer(strategoRuntime);
-
-    TigerConstraintAnalyzerTest() throws IOException, JSGLR1ParseTableException, StrategoRuntimeBuilderException {}
+    private final TigerParser parser = new TigerParserFactory().create();
+    private final StrategoRuntimeBuilder strategoRuntimeBuilder = new TigerStrategoRuntimeBuilderFactory().create();
+    private final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.build();
+    private final TigerConstraintAnalyzer analyzer = new TigerConstraintAnalyzerFactory(strategoRuntime).create();
 
     @Test void analyzeSingleErrors() throws InterruptedException, ConstraintAnalyzerException {
         final ResourceKey resource = new SimpleResourceKey(qualifier, "a.tig");

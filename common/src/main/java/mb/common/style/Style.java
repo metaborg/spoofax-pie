@@ -9,11 +9,11 @@ public interface Style extends Serializable {
 
     @Nullable Color getBackgroundColor();
 
-    boolean getIsBold();
+    boolean isBold();
 
-    boolean getIsItalic();
+    boolean isItalic();
 
-    boolean getIsUnderscore();
+    boolean isUnderscore();
 
-    boolean getIsStrikeout();
+    boolean isStrikeout();
 }

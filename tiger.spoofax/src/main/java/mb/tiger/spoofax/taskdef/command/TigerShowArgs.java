@@ -3,9 +3,13 @@ package mb.tiger.spoofax.taskdef.command;
 import mb.common.region.Region;
 import mb.common.util.ListView;
 import mb.resource.ResourceKey;
-import mb.spoofax.core.language.cli.CliParamDef;
+import mb.spoofax.core.language.cli.CliParam;
 import mb.spoofax.core.language.cli.CliParams;
-import mb.spoofax.core.language.command.arg.*;
+import mb.spoofax.core.language.command.arg.ArgProviders;
+import mb.spoofax.core.language.command.arg.Param;
+import mb.spoofax.core.language.command.arg.ParamDef;
+import mb.spoofax.core.language.command.arg.RawArgs;
+import mb.spoofax.core.language.command.arg.TextToResourceKeyArgConverter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
@@ -35,15 +39,15 @@ public class TigerShowArgs implements Serializable {
         );
     }
 
-    public static CliParamDef getFileCliParamDef(String operationName) {
-        return new CliParamDef(
+    public static ListView<CliParam> getFileCliParams(String operationName) {
+        return ListView.of(
             CliParams.positional("resource", 0, "FILE", "Source file to " + operationName, null),
             CliParams.option("region", ListView.of("-r", "--region"), false, "region", "Region in source file to " + operationName, null)
         );
     }
 
-    public static CliParamDef getTextCliParamDef(String operationName, TextToResourceKeyArgConverter converter) {
-        return new CliParamDef(
+    public static ListView<CliParam> getTextCliParams(String operationName, TextToResourceKeyArgConverter converter) {
+        return ListView.of(
             CliParams.positional("resource", 0, "TEXT", "Text to " + operationName, converter),
             CliParams.option("region", ListView.of("-r", "--region"), false, "region", "Region in source text to " + operationName, null)
         );
@@ -53,7 +57,7 @@ public class TigerShowArgs implements Serializable {
     @Override public boolean equals(@Nullable Object obj) {
         if(this == obj) return true;
         if(obj == null || getClass() != obj.getClass()) return false;
-        final TigerShowArgs other = (TigerShowArgs) obj;
+        final TigerShowArgs other = (TigerShowArgs)obj;
         return key.equals(other.key) &&
             Objects.equals(region, other.region);
     }

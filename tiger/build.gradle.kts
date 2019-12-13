@@ -5,9 +5,18 @@ plugins {
   id("org.metaborg.gradle.config.junit-testing")
 }
 
+sourceSets {
+  main {
+    java {
+      srcDir("$buildDir/generated/sources/spoofax/java")
+    }
+  }
+}
+
 dependencies {
   api(platform(project(":depconstraints")))
 
+  api(project(":spoofax.compiler.interfaces"))
   api(project(":common"))
   api(project(":jsglr1.common"))
   api(project(":esv.common"))
@@ -24,16 +33,31 @@ dependencies {
   testCompileOnly("org.checkerframework:checker-qual-android")
 }
 
-fun createProjectDependency(projectPath: String): ProjectDependency {
-  return dependencies.project(projectPath)
+fun createProjectDependency(projectPath: String): ModuleDependency {
+  return configureModuleDependency(dependencies.project(projectPath))
 }
 
 fun createModuleDependency(notation: String): ModuleDependency {
-  return dependencies.module(notation) as ModuleDependency
+  return configureModuleDependency(dependencies.module(notation) as ModuleDependency)
+}
+
+fun createFilesDependency(vararg paths: Any?): Dependency {
+  return dependencies.create(files(paths))
+}
+
+fun configureModuleDependency(dependency: ModuleDependency): ModuleDependency {
+  dependency.targetConfiguration = Dependency.DEFAULT_CONFIGURATION
+  dependency.isTransitive = false // Don't care about transitive dependencies, just want the '.spoofax-language' artifact.
+  dependency.artifact {
+    name = dependency.name
+    type = "spoofax-language"
+    extension = "spoofax-language"
+  }
+  return dependency
 }
 
 fun copySpoofaxLanguageResources(
-  dependency: ModuleDependency,
+  dependency: Dependency,
   destinationPackage: String,
   includeStrategoClasses: Boolean,
   includeStrategoJavastratClasses: Boolean,
@@ -47,14 +71,6 @@ fun copySpoofaxLanguageResources(
     allResources.add("target/metaborg/stratego-javastrat.jar")
   }
 
-  // Configure dependency.
-  dependency.targetConfiguration = Dependency.DEFAULT_CONFIGURATION
-  dependency.isTransitive = false // Don't care about transitive dependencies, just want the '.spoofax-language' artifact.
-  dependency.artifact {
-    name = dependency.name
-    type = "spoofax-language"
-    extension = "spoofax-language"
-  }
   // Create 'spoofaxLanguage' configuration that contains the dependency.
   val configuration = configurations.create("spoofaxLanguage") {
     dependencies.add(dependency)
