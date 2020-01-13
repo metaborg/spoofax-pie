@@ -21,7 +21,6 @@ import mb.spoofax.core.language.command.CommandContextType;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandExecutionType;
 import mb.spoofax.core.language.command.CommandFeedbacks;
-import mb.spoofax.core.language.command.CommandInput;
 import mb.spoofax.core.language.command.CommandOutput;
 import mb.spoofax.core.language.command.arg.ArgProviders;
 import mb.spoofax.core.language.command.arg.Param;
@@ -36,7 +35,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class TigerCompileDirectory implements TaskDef<CommandInput<TigerCompileDirectory.Args>, CommandOutput>, CommandDef<TigerCompileDirectory.Args> {
+public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args, CommandOutput>, CommandDef<TigerCompileDirectory.Args> {
     public static class Args implements Serializable {
         final ResourcePath dir;
 
@@ -75,8 +74,8 @@ public class TigerCompileDirectory implements TaskDef<CommandInput<TigerCompileD
         return getClass().getName();
     }
 
-    @Override public CommandOutput exec(ExecContext context, CommandInput<Args> input) throws Exception {
-        final ResourcePath dir = input.args.dir;
+    @Override public CommandOutput exec(ExecContext context, Args input) throws Exception {
+        final ResourcePath dir = input.dir;
 
         final ResourceMatcher matcher = new AllResourceMatcher(new FileResourceMatcher(), new PathResourceMatcher(new ExtensionsPathMatcher("tig")));
         final HierarchicalResource directory = context.require(dir, ResourceStampers.modifiedDir(matcher));
@@ -122,7 +121,7 @@ public class TigerCompileDirectory implements TaskDef<CommandInput<TigerCompileD
         return new CommandOutput(ListView.of(CommandFeedbacks.showFile(generatedPath, null)));
     }
 
-    @Override public Task<CommandOutput> createTask(CommandInput<Args> input) {
+    @Override public Task<CommandOutput> createTask(Args input) {
         return TaskDef.super.createTask(input);
     }
 

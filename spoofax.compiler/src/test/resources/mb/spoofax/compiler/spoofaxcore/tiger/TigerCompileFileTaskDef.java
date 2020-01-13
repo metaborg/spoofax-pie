@@ -9,7 +9,6 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.CommandFeedbacks;
-import mb.spoofax.core.language.command.CommandInput;
 import mb.spoofax.core.language.command.CommandOutput;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -19,7 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 @LanguageScope
-public class TigerCompileFileTaskDef implements TaskDef<CommandInput<TigerCompileFileTaskDef.Args>, CommandOutput> {
+public class TigerCompileFileTaskDef implements TaskDef<TigerCompileFileTaskDef.Args, CommandOutput> {
     public static class Args implements Serializable {
         final ResourcePath file;
 
@@ -58,8 +57,8 @@ public class TigerCompileFileTaskDef implements TaskDef<CommandInput<TigerCompil
         return getClass().getName();
     }
 
-    @Override public CommandOutput exec(ExecContext context, CommandInput<Args> input) throws Exception {
-        final ResourcePath file = input.args.file;
+    @Override public CommandOutput exec(ExecContext context, Args input) throws Exception {
+        final ResourcePath file = input.file;
 
         final @Nullable String literalsStr = context.require(listLiteralVals, file);
         //noinspection ConstantConditions (literalsStr can really be null)

@@ -14,7 +14,6 @@ import mb.spoofax.core.language.command.CommandContextType;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandExecutionType;
 import mb.spoofax.core.language.command.CommandFeedbacks;
-import mb.spoofax.core.language.command.CommandInput;
 import mb.spoofax.core.language.command.CommandOutput;
 import mb.spoofax.core.language.command.arg.ParamDef;
 import mb.spoofax.core.language.command.arg.RawArgs;
@@ -29,7 +28,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 
-public class TigerShowDesugaredAst implements TaskDef<CommandInput<TigerShowArgs>, CommandOutput>, CommandDef<TigerShowArgs> {
+public class TigerShowDesugaredAst implements TaskDef<TigerShowArgs, CommandOutput>, CommandDef<TigerShowArgs> {
     private final TigerParse parse;
     private final StrategoRuntimeBuilder strategoRuntimeBuilder;
     private final StrategoRuntime prototypeStrategoRuntime;
@@ -53,9 +52,9 @@ public class TigerShowDesugaredAst implements TaskDef<CommandInput<TigerShowArgs
         return getClass().getName();
     }
 
-    @Override public CommandOutput exec(ExecContext context, CommandInput<TigerShowArgs> input) throws Exception {
-        final ResourceKey key = input.args.key;
-        final @Nullable Region region = input.args.region;
+    @Override public CommandOutput exec(ExecContext context, TigerShowArgs input) throws Exception {
+        final ResourceKey key = input.key;
+        final @Nullable Region region = input.region;
 
         final JSGLR1ParseResult parseResult = context.require(parse, key);
         final IStrategoTerm ast = parseResult.getAst()
@@ -79,7 +78,7 @@ public class TigerShowDesugaredAst implements TaskDef<CommandInput<TigerShowArgs
         return new CommandOutput(ListView.of(CommandFeedbacks.showText(formatted, "Desugared AST for '" + key + "'", null)));
     }
 
-    @Override public Task<CommandOutput> createTask(CommandInput<TigerShowArgs> input) {
+    @Override public Task<CommandOutput> createTask(TigerShowArgs input) {
         return TaskDef.super.createTask(input);
     }
 

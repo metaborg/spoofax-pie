@@ -117,7 +117,7 @@ public class StrategoRuntime {
         // Stratego runtime builder factory
 
         @Value.Default default TypeInfo genFactory() {
-            return TypeInfo.of(shared().languagePackage(), shared().classSuffix() + "StrategoRuntimeBuilderFactory");
+            return TypeInfo.of(shared().languagePackage(), shared().classPrefix() + "StrategoRuntimeBuilderFactory");
         }
 
         Optional<TypeInfo> manualFactory();

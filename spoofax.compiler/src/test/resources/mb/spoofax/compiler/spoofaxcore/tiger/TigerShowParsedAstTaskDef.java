@@ -9,7 +9,6 @@ import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.CommandFeedbacks;
-import mb.spoofax.core.language.command.CommandInput;
 import mb.spoofax.core.language.command.CommandOutput;
 import mb.stratego.common.StrategoUtil;
 import mb.tiger.spoofax.task.TigerParse;
@@ -21,7 +20,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @LanguageScope
-public class TigerShowParsedAstTaskDef implements TaskDef<CommandInput<TigerShowParsedAstTaskDef.Args>, CommandOutput> {
+public class TigerShowParsedAstTaskDef implements TaskDef<TigerShowParsedAstTaskDef.Args, CommandOutput> {
     public static class Args implements Serializable {
         public final ResourceKey key;
         public final @Nullable Region region;
@@ -57,9 +56,9 @@ public class TigerShowParsedAstTaskDef implements TaskDef<CommandInput<TigerShow
         return getClass().getName();
     }
 
-    @Override public CommandOutput exec(ExecContext context, CommandInput<Args> input) throws Exception {
-        final ResourceKey key = input.args.key;
-        final @Nullable Region region = input.args.region;
+    @Override public CommandOutput exec(ExecContext context, Args input) throws Exception {
+        final ResourceKey key = input.key;
+        final @Nullable Region region = input.region;
 
         final JSGLR1ParseResult parseResult = context.require(parse, key);
         final IStrategoTerm ast = parseResult.getAst()

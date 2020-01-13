@@ -15,7 +15,6 @@ import mb.spoofax.core.language.command.CommandContextType;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandExecutionType;
 import mb.spoofax.core.language.command.CommandFeedbacks;
-import mb.spoofax.core.language.command.CommandInput;
 import mb.spoofax.core.language.command.CommandOutput;
 import mb.spoofax.core.language.command.arg.ArgProviders;
 import mb.spoofax.core.language.command.arg.Param;
@@ -29,7 +28,7 @@ import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-public class TigerCompileFile implements TaskDef<CommandInput<TigerCompileFile.Args>, CommandOutput>, CommandDef<TigerCompileFile.Args> {
+public class TigerCompileFile implements TaskDef<TigerCompileFile.Args, CommandOutput>, CommandDef<TigerCompileFile.Args> {
     public static class Args implements Serializable {
         final ResourcePath file;
 
@@ -68,8 +67,8 @@ public class TigerCompileFile implements TaskDef<CommandInput<TigerCompileFile.A
         return getClass().getName();
     }
 
-    @Override public CommandOutput exec(ExecContext context, CommandInput<Args> input) throws Exception {
-        final ResourcePath file = input.args.file;
+    @Override public CommandOutput exec(ExecContext context, Args input) throws Exception {
+        final ResourcePath file = input.file;
 
         final @Nullable String literalsStr = context.require(listLiteralVals, file);
         //noinspection ConstantConditions (literalsStr can really be null)
@@ -85,7 +84,7 @@ public class TigerCompileFile implements TaskDef<CommandInput<TigerCompileFile.A
         return new CommandOutput(ListView.of(CommandFeedbacks.showFile(generatedPath, null)));
     }
 
-    @Override public Task<CommandOutput> createTask(CommandInput<Args> input) {
+    @Override public Task<CommandOutput> createTask(Args input) {
         return TaskDef.super.createTask(input);
     }
 

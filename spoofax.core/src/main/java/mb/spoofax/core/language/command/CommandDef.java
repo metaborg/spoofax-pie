@@ -25,7 +25,7 @@ public interface CommandDef<A extends Serializable> {
     A fromRawArgs(RawArgs rawArgs);
 
 
-    Task<CommandOutput> createTask(CommandInput<A> input);
+    Task<CommandOutput> createTask(A args);
 
 
     default CommandRequest<A> request(CommandExecutionType executionType, RawArgs initialArgs) {
@@ -43,7 +43,6 @@ public interface CommandDef<A extends Serializable> {
         }
         final RawArgs rawArgs = builder.build(context);
         final A args = fromRawArgs(rawArgs);
-        final CommandInput<A> input = new CommandInput<>(args);
-        return createTask(input);
+        return createTask(args);
     }
 }

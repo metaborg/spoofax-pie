@@ -12,6 +12,14 @@ import java.util.Optional;
 
 @ADT
 public abstract class JSGLR1ParseResult implements Serializable {
+    public interface Cases<R> {
+        R success(IStrategoTerm ast, ArrayList<? extends Token<IStrategoTerm>> tokens, Messages messages);
+
+        R recovered(IStrategoTerm ast, ArrayList<? extends Token<IStrategoTerm>> tokens, Messages messages);
+
+        R failed(Messages messages);
+    }
+
     public Optional<IStrategoTerm> getAst() {
         return JSGLR1ParseResults.getAst(this);
     }
@@ -37,13 +45,7 @@ public abstract class JSGLR1ParseResult implements Serializable {
     }
 
 
-    public interface Cases<R> {
-        R success(IStrategoTerm ast, ArrayList<? extends Token<IStrategoTerm>> tokens, Messages messages);
 
-        R recovered(IStrategoTerm ast, ArrayList<? extends Token<IStrategoTerm>> tokens, Messages messages);
-
-        R failed(Messages messages);
-    }
 
     public abstract <R> R match(Cases<R> cases);
 

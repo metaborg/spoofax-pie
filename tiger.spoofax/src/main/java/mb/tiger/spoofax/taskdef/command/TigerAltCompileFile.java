@@ -15,7 +15,6 @@ import mb.spoofax.core.language.command.CommandContextType;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandExecutionType;
 import mb.spoofax.core.language.command.CommandFeedbacks;
-import mb.spoofax.core.language.command.CommandInput;
 import mb.spoofax.core.language.command.CommandOutput;
 import mb.spoofax.core.language.command.arg.ArgProviders;
 import mb.spoofax.core.language.command.arg.Param;
@@ -31,7 +30,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Objects;
 
-public class TigerAltCompileFile implements TaskDef<CommandInput<TigerAltCompileFile.Args>, CommandOutput>, CommandDef<TigerAltCompileFile.Args> {
+public class TigerAltCompileFile implements TaskDef<TigerAltCompileFile.Args, CommandOutput>, CommandDef<TigerAltCompileFile.Args> {
     public static class Args implements Serializable {
         final ResourcePath file;
         final boolean listDefNames;
@@ -82,12 +81,11 @@ public class TigerAltCompileFile implements TaskDef<CommandInput<TigerAltCompile
         return getClass().getName();
     }
 
-    @Override public CommandOutput exec(ExecContext context, CommandInput<Args> input) throws Exception {
-        final Args args = input.args;
-        final ResourcePath file = input.args.file;
+    @Override public CommandOutput exec(ExecContext context, Args input) throws Exception {
+        final ResourcePath file = input.file;
 
         @Nullable String str;
-        if(args.listDefNames) {
+        if(input.listDefNames) {
             str = context.require(listDefNames, file);
         } else {
             str = context.require(listLiteralVals, file);
@@ -98,11 +96,11 @@ public class TigerAltCompileFile implements TaskDef<CommandInput<TigerAltCompile
             return new CommandOutput(ListView.of());
         }
 
-        if(args.base64Encode) {
+        if(input.base64Encode) {
             str = Base64.getEncoder().encodeToString(str.getBytes(StandardCharsets.UTF_8));
         }
 
-        final ResourcePath generatedPath = file.replaceLeafExtension(args.compiledFileNameSuffix);
+        final ResourcePath generatedPath = file.replaceLeafExtension(input.compiledFileNameSuffix);
         final HierarchicalResource generatedResource = resourceService.getHierarchicalResource(generatedPath);
         generatedResource.writeBytes(str.getBytes(StandardCharsets.UTF_8));
         context.provide(generatedResource, ResourceStampers.hashFile());
@@ -111,11 +109,11 @@ public class TigerAltCompileFile implements TaskDef<CommandInput<TigerAltCompile
         return new CommandOutput(ListView.of(CommandFeedbacks.showFile(generatedPath, null)));
     }
 
-    @Override public Serializable key(CommandInput<Args> input) {
-        return input.args.file; // Task is keyed by file only.
+    @Override public Serializable key(Args input) {
+        return input.file; // Task is keyed by file only.
     }
 
-    @Override public Task<CommandOutput> createTask(CommandInput<Args> input) {
+    @Override public Task<CommandOutput> createTask(Args input) {
         return TaskDef.super.createTask(input);
     }
 

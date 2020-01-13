@@ -15,7 +15,7 @@ import java.util.Properties;
 public interface Shared extends Serializable {
     class Builder extends ImmutableShared.Builder implements BuilderBase {
         public Builder withPersistentProperties(Properties properties) {
-            with(properties, "classSuffix", this::classSuffix);
+            with(properties, "classPrefix", this::classPrefix);
             with(properties, "defaultGroupId", this::defaultGroupId);
             with(properties, "defaultArtifactId", this::defaultArtifactId);
             with(properties, "defaultVersion", this::defaultVersion);
@@ -36,7 +36,7 @@ public interface Shared extends Serializable {
 
     ResourcePath baseDirectory();
 
-    @Value.Default default String classSuffix() {
+    @Value.Default default String classPrefix() {
         return Conversion.nameToJavaId(name());
     }
 
@@ -285,7 +285,7 @@ public interface Shared extends Serializable {
 
 
     default void savePersistentProperties(Properties properties) {
-        properties.setProperty("classSuffix", classSuffix());
+        properties.setProperty("classPrefix", classPrefix());
         properties.setProperty("defaultGroupId", defaultGroupId());
         properties.setProperty("defaultArtifactId", defaultArtifactId());
         properties.setProperty("defaultVersion", defaultVersion());

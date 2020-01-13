@@ -140,13 +140,13 @@ public class Styler {
         // Styling rules
 
         @Value.Default default TypeInfo genRules() {
-            return TypeInfo.of(shared().languagePackage(), shared().classSuffix() + "StylingRules");
+            return TypeInfo.of(shared().languagePackage(), shared().classPrefix() + "StylingRules");
         }
 
         // Styler
 
         @Value.Default default TypeInfo genStyler() {
-            return TypeInfo.of(shared().languagePackage(), shared().classSuffix() + "Styler");
+            return TypeInfo.of(shared().languagePackage(), shared().classPrefix() + "Styler");
         }
 
         Optional<TypeInfo> manualStyler();
@@ -161,7 +161,7 @@ public class Styler {
         // Styler factory
 
         @Value.Default default TypeInfo genFactory() {
-            return TypeInfo.of(shared().languagePackage(), shared().classSuffix() + "StylerFactory");
+            return TypeInfo.of(shared().languagePackage(), shared().classPrefix() + "StylerFactory");
         }
 
         Optional<TypeInfo> manualFactory();
@@ -183,7 +183,7 @@ public class Styler {
         // Style task definition
 
         @Value.Default default TypeInfo genStyleTaskDef() {
-            return TypeInfo.of(shared().adapterTaskPackage(), shared().classSuffix() + "Style");
+            return TypeInfo.of(shared().adapterTaskPackage(), shared().classPrefix() + "Style");
         }
 
         Optional<TypeInfo> manualStyleTaskDef();

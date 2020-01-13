@@ -131,7 +131,7 @@ public class ConstraintAnalyzer {
         // Constraint analyzer
 
         @Value.Default default TypeInfo genConstraintAnalyzer() {
-            return TypeInfo.of(shared().languagePackage(), shared().classSuffix() + "ConstraintAnalyzer");
+            return TypeInfo.of(shared().languagePackage(), shared().classPrefix() + "ConstraintAnalyzer");
         }
 
         Optional<TypeInfo> manualConstraintAnalyzer();
@@ -146,7 +146,7 @@ public class ConstraintAnalyzer {
         // Constraint analyzer factory
 
         @Value.Default default TypeInfo genFactory() {
-            return TypeInfo.of(shared().languagePackage(), shared().classSuffix() + "ConstraintAnalyzerFactory");
+            return TypeInfo.of(shared().languagePackage(), shared().classPrefix() + "ConstraintAnalyzerFactory");
         }
 
         Optional<TypeInfo> manualFactory();
@@ -168,7 +168,7 @@ public class ConstraintAnalyzer {
         // Analyze
 
         @Value.Default default TypeInfo genAnalyzeTaskDef() {
-            return TypeInfo.of(shared().adapterTaskPackage(), shared().classSuffix() + "Analyze");
+            return TypeInfo.of(shared().adapterTaskPackage(), shared().classPrefix() + "Analyze");
         }
 
         Optional<TypeInfo> manualAnalyzeTaskDef();

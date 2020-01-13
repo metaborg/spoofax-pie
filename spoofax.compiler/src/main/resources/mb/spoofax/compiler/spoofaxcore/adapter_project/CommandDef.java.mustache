@@ -8,7 +8,6 @@ import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.CommandContextType;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandExecutionType;
-import mb.spoofax.core.language.command.CommandInput;
 import mb.spoofax.core.language.command.CommandOutput;
 import mb.spoofax.core.language.command.arg.ArgProvider;
 import mb.spoofax.core.language.command.arg.Param;
@@ -72,7 +71,7 @@ public class {{type.id}} implements CommandDef<{{argType.qualifiedId}}> {
         return new {{argType.qualifiedId}}({{#params}}{{id}}{{^-last}}, {{/-last}}{{/params}});
     }
 
-    @Override public Task<CommandOutput> createTask(CommandInput<{{argType.qualifiedId}}> input) {
-        return {{taskDefInjection.name}}.createTask(input);
+    @Override public Task<CommandOutput> createTask({{argType.qualifiedId}} args) {
+        return {{taskDefInjection.name}}.createTask(args);
     }
 }

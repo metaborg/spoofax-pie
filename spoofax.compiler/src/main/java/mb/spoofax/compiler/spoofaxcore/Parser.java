@@ -149,13 +149,13 @@ public class Parser {
         // Parse table
 
         @Value.Default default TypeInfo genTable() {
-            return TypeInfo.of(shared().languagePackage(), shared().classSuffix() + "ParseTable");
+            return TypeInfo.of(shared().languagePackage(), shared().classPrefix() + "ParseTable");
         }
 
         // Parser
 
         @Value.Default default TypeInfo genParser() {
-            return TypeInfo.of(shared().languagePackage(), shared().classSuffix() + "Parser");
+            return TypeInfo.of(shared().languagePackage(), shared().classPrefix() + "Parser");
         }
 
         Optional<TypeInfo> manualParser();
@@ -170,7 +170,7 @@ public class Parser {
         // Parser factory
 
         @Value.Default default TypeInfo genFactory() {
-            return TypeInfo.of(shared().languagePackage(), shared().classSuffix() + "ParserFactory");
+            return TypeInfo.of(shared().languagePackage(), shared().classPrefix() + "ParserFactory");
         }
 
         Optional<TypeInfo> manualFactory();
@@ -192,7 +192,7 @@ public class Parser {
         // Parse task definition
 
         @Value.Default default TypeInfo genParseTaskDef() {
-            return TypeInfo.of(shared().adapterTaskPackage(), shared().classSuffix() + "Parse");
+            return TypeInfo.of(shared().adapterTaskPackage(), shared().classPrefix() + "Parse");
         }
 
         Optional<TypeInfo> manualParseTaskDef();
@@ -207,7 +207,7 @@ public class Parser {
         // Tokenize task definition
 
         @Value.Default default TypeInfo genTokenizeTaskDef() {
-            return TypeInfo.of(shared().adapterTaskPackage(), shared().classSuffix() + "Tokenize");
+            return TypeInfo.of(shared().adapterTaskPackage(), shared().classPrefix() + "Tokenize");
         }
 
         Optional<TypeInfo> manualTokenizeTaskDef();

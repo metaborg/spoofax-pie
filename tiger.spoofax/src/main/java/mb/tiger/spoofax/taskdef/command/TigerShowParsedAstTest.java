@@ -9,7 +9,6 @@ import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.command.CommandFeedbacks;
-import mb.spoofax.core.language.command.CommandInput;
 import mb.spoofax.core.language.command.CommandOutput;
 import mb.stratego.common.StrategoUtil;
 import mb.tiger.spoofax.taskdef.TigerParse;
@@ -18,7 +17,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 
-public class TigerShowParsedAstTest implements TaskDef<CommandInput<TigerShowArgs>, CommandOutput> {
+public class TigerShowParsedAstTest implements TaskDef<TigerShowArgs, CommandOutput> {
     private final TigerParse parse;
 
     @Inject public TigerShowParsedAstTest(TigerParse parse) {
@@ -29,9 +28,9 @@ public class TigerShowParsedAstTest implements TaskDef<CommandInput<TigerShowArg
         return getClass().getName();
     }
 
-    @Override public CommandOutput exec(ExecContext context, CommandInput<TigerShowArgs> input) throws Exception {
-        final ResourceKey key = input.args.key;
-        final @Nullable Region region = input.args.region;
+    @Override public CommandOutput exec(ExecContext context, TigerShowArgs input) throws Exception {
+        final ResourceKey key = input.key;
+        final @Nullable Region region = input.region;
 
         final JSGLR1ParseResult parseResult = context.require(parse, key);
         final IStrategoTerm ast = parseResult.getAst()
@@ -48,7 +47,7 @@ public class TigerShowParsedAstTest implements TaskDef<CommandInput<TigerShowArg
         return new CommandOutput(ListView.of(CommandFeedbacks.showText(formatted, "Parsed AST for '" + key + "'", null)));
     }
 
-    @Override public Task<CommandOutput> createTask(CommandInput<TigerShowArgs> input) {
+    @Override public Task<CommandOutput> createTask(TigerShowArgs input) {
         return TaskDef.super.createTask(input);
     }
 }

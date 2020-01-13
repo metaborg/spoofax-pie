@@ -20,7 +20,7 @@ class SharedTest {
         final Properties persistentProperties = new Properties();
 
         final Shared shared1 = TigerInputs.shared(baseDirectory);
-        assertEquals("Tiger", shared1.classSuffix());
+        assertEquals("Tiger", shared1.classPrefix());
         final GradleProject languageProject1 = shared1.languageProject();
         final GradleProject adapterProject1 = shared1.adapterProject();
         shared1.savePersistentProperties(persistentProperties);
@@ -32,7 +32,7 @@ class SharedTest {
             .build();
 
         // Should not affect class suffix.
-        assertEquals(shared1.classSuffix(), shared2.classSuffix());
+        assertEquals(shared1.classPrefix(), shared2.classPrefix());
 
         // Should not affect language project.
         assertEquals(languageProject1.coordinate(), shared2.languageProject().coordinate());
