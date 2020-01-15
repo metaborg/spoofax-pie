@@ -1,10 +1,9 @@
 package mb.tiger.spoofax.taskdef;
 
-import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Provider;
 import mb.pie.api.TaskDef;
-import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
 import mb.stratego.common.StrategoIOAgent;
 import mb.stratego.common.StrategoRuntime;
@@ -14,10 +13,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
-import java.util.Optional;
 
-public class TigerListDefNames implements TaskDef<ResourceKey, @Nullable String> {
-    private final TigerParse parse;
+public class TigerListDefNames implements TaskDef<Provider<@Nullable IStrategoTerm>, @Nullable String> {
     private final StrategoRuntimeBuilder strategoRuntimeBuilder;
     private final StrategoRuntime prototypeStrategoRuntime;
     private final LoggerFactory loggerFactory;
@@ -25,13 +22,11 @@ public class TigerListDefNames implements TaskDef<ResourceKey, @Nullable String>
 
     @Inject
     public TigerListDefNames(
-        TigerParse parse,
         StrategoRuntimeBuilder strategoRuntimeBuilder,
         StrategoRuntime prototypeStrategoRuntime,
         LoggerFactory loggerFactory,
         ResourceService resourceService
     ) {
-        this.parse = parse;
         this.strategoRuntimeBuilder = strategoRuntimeBuilder;
         this.prototypeStrategoRuntime = prototypeStrategoRuntime;
         this.loggerFactory = loggerFactory;
@@ -43,16 +38,16 @@ public class TigerListDefNames implements TaskDef<ResourceKey, @Nullable String>
     }
 
     @Override
-    public @Nullable String exec(ExecContext context, ResourceKey key) throws Exception {
-        final JSGLR1ParseResult parseResult = context.require(parse, key);
-        final Optional<IStrategoTerm> ast = parseResult.getAst();
-        if(!ast.isPresent()) {
+    public @Nullable String exec(ExecContext context, Provider<@Nullable IStrategoTerm> astProvider) throws Exception {
+        final @Nullable IStrategoTerm ast = context.require(astProvider);
+        //noinspection ConstantConditions
+        if(ast == null) {
             return null;
         }
 
         final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.buildFromPrototype(prototypeStrategoRuntime);
         final String strategyId = "list-of-def-names";
-        final @Nullable IStrategoTerm result = strategoRuntime.invoke(strategyId, ast.get(), new StrategoIOAgent(loggerFactory, resourceService));
+        final @Nullable IStrategoTerm result = strategoRuntime.invoke(strategyId, ast, new StrategoIOAgent(loggerFactory, resourceService));
         if(result == null) {
             return null;
         }

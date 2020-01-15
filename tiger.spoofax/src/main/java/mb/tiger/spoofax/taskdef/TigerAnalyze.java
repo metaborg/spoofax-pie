@@ -3,9 +3,9 @@ package mb.tiger.spoofax.taskdef;
 import mb.constraint.common.ConstraintAnalyzer.SingleFileResult;
 import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.constraint.common.ConstraintAnalyzerException;
-import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Provider;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
@@ -15,17 +15,45 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
-import java.util.Optional;
+import java.io.Serializable;
+import java.util.Objects;
 
-public class TigerAnalyze implements TaskDef<ResourceKey, @Nullable SingleFileResult> {
-    private final TigerParse parse;
+public class TigerAnalyze implements TaskDef<TigerAnalyze.Input, @Nullable SingleFileResult> {
+    public static class Input implements Serializable {
+        public final ResourceKey resourceKey;
+        public final Provider<@Nullable IStrategoTerm> astProvider;
+
+        public Input(ResourceKey resourceKey, Provider<IStrategoTerm> astProvider) {
+            this.resourceKey = resourceKey;
+            this.astProvider = astProvider;
+        }
+
+        @Override public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            final Input input = (Input)o;
+            return resourceKey.equals(input.resourceKey) &&
+                astProvider.equals(input.astProvider);
+        }
+
+        @Override public int hashCode() {
+            return Objects.hash(resourceKey, astProvider);
+        }
+
+        @Override public String toString() {
+            return "Input{" +
+                "resourceKey=" + resourceKey +
+                ", astProvider=" + astProvider +
+                '}';
+        }
+    }
+
     private final TigerConstraintAnalyzer constraintAnalyzer;
     private final LoggerFactory loggerFactory;
     private final ResourceService resourceService;
 
     @Inject
-    public TigerAnalyze(TigerParse parse, TigerConstraintAnalyzer constraintAnalyzer, LoggerFactory loggerFactory, ResourceService resourceService) {
-        this.parse = parse;
+    public TigerAnalyze(TigerConstraintAnalyzer constraintAnalyzer, LoggerFactory loggerFactory, ResourceService resourceService) {
         this.constraintAnalyzer = constraintAnalyzer;
         this.loggerFactory = loggerFactory;
         this.resourceService = resourceService;
@@ -36,15 +64,15 @@ public class TigerAnalyze implements TaskDef<ResourceKey, @Nullable SingleFileRe
     }
 
     @Override
-    public @Nullable SingleFileResult exec(ExecContext context, ResourceKey key) throws Exception {
-        final JSGLR1ParseResult parseResult = context.require(parse, key);
-        final Optional<IStrategoTerm> ast = parseResult.getAst();
-        if(!ast.isPresent()) {
+    public @Nullable SingleFileResult exec(ExecContext context, Input input) throws Exception {
+        final @Nullable IStrategoTerm ast = context.require(input.astProvider);
+        //noinspection ConstantConditions
+        if(ast == null) {
             return null;
         }
 
         try {
-            return constraintAnalyzer.analyze(key, ast.get(), new ConstraintAnalyzerContext(), new StrategoIOAgent(loggerFactory, resourceService));
+            return constraintAnalyzer.analyze(input.resourceKey, ast, new ConstraintAnalyzerContext(), new StrategoIOAgent(loggerFactory, resourceService));
         } catch(ConstraintAnalyzerException e) {
             throw new RuntimeException("Constraint analysis failed unexpectedly", e);
         }

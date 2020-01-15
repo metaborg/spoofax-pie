@@ -45,8 +45,6 @@ public abstract class JSGLR1ParseResult implements Serializable {
     }
 
 
-
-
     public abstract <R> R match(Cases<R> cases);
 
     @Override public abstract int hashCode();

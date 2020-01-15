@@ -21,12 +21,12 @@ import mb.tiger.TigerStrategoRuntimeBuilderFactory;
 import mb.tiger.TigerStyler;
 import mb.tiger.TigerStylerFactory;
 import mb.tiger.spoofax.taskdef.TigerAnalyze;
-import mb.tiger.spoofax.taskdef.TigerCheck;
+import mb.tiger.spoofax.taskdef.TigerGetMessages;
 import mb.tiger.spoofax.taskdef.TigerListDefNames;
 import mb.tiger.spoofax.taskdef.TigerListLiteralVals;
 import mb.tiger.spoofax.taskdef.TigerParse;
 import mb.tiger.spoofax.taskdef.TigerStyle;
-import mb.tiger.spoofax.taskdef.TigerTokenize;
+import mb.tiger.spoofax.taskdef.TigerGetParsedTokens;
 import mb.tiger.spoofax.taskdef.command.TigerAltCompileFile;
 import mb.tiger.spoofax.taskdef.command.TigerCompileDirectory;
 import mb.tiger.spoofax.taskdef.command.TigerCompileFile;
@@ -98,9 +98,9 @@ public class TigerModule {
         TigerListLiteralVals listLiteralVals,
         TigerListDefNames listDefNames,
 
-        TigerTokenize tokenize,
+        TigerGetParsedTokens tokenize,
         TigerStyle style,
-        TigerCheck check,
+        TigerGetMessages check,
 
         TigerShowParsedAst showParsedAst,
         TigerShowPrettyPrintedText showPrettyPrintedText,

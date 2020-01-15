@@ -7,6 +7,7 @@ import mb.common.util.CollectionView;
 import mb.common.util.ListView;
 import mb.common.util.MapView;
 import mb.common.util.SetView;
+import mb.pie.api.ResourceStringProvider;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageInstance;
@@ -16,9 +17,10 @@ import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.menu.Menu;
 import mb.spoofax.core.language.menu.MenuItem;
-import mb.tiger.spoofax.taskdef.TigerCheck;
+import mb.tiger.spoofax.taskdef.TigerGetMessages;
+import mb.tiger.spoofax.taskdef.TigerGetParsedTokens;
+import mb.tiger.spoofax.taskdef.TigerParse;
 import mb.tiger.spoofax.taskdef.TigerStyle;
-import mb.tiger.spoofax.taskdef.TigerTokenize;
 import mb.tiger.spoofax.taskdef.command.TigerAltCompileFile;
 import mb.tiger.spoofax.taskdef.command.TigerCompileDirectory;
 import mb.tiger.spoofax.taskdef.command.TigerCompileFile;
@@ -37,9 +39,10 @@ import static mb.spoofax.core.language.menu.CommandAction.ofManualOnce;
 public class TigerInstance implements LanguageInstance {
     private final static SetView<String> extensions = SetView.of("tig");
 
-    private final TigerCheck check;
+    private final TigerParse parse;
+    private final TigerGetMessages tigerGetMessages;
     private final TigerStyle style;
-    private final TigerTokenize tokenize;
+    private final TigerGetParsedTokens getParsedTokens;
     private final TigerShowParsedAst showParsedAst;
     private final TigerShowPrettyPrintedText showPrettyPrintedText;
     private final TigerShowAnalyzedAst showAnalyzedAst;
@@ -50,8 +53,9 @@ public class TigerInstance implements LanguageInstance {
 
 
     @Inject public TigerInstance(
-        TigerCheck check,
-        TigerTokenize tokenize,
+        TigerParse parse,
+        TigerGetMessages tigerGetMessages,
+        TigerGetParsedTokens getParsedTokens,
         TigerStyle style,
 
         TigerShowParsedAst showParsedAst,
@@ -62,8 +66,9 @@ public class TigerInstance implements LanguageInstance {
         TigerAltCompileFile altCompileFile,
         TigerCompileDirectory compileDirectory
     ) {
-        this.check = check;
-        this.tokenize = tokenize;
+        this.parse = parse;
+        this.tigerGetMessages = tigerGetMessages;
+        this.getParsedTokens = getParsedTokens;
         this.style = style;
 
         this.showParsedAst = showParsedAst;
@@ -86,15 +91,15 @@ public class TigerInstance implements LanguageInstance {
 
 
     @Override public Task<@Nullable ArrayList<? extends Token<?>>> createTokenizeTask(ResourceKey resourceKey) {
-        return tokenize.createTask(resourceKey);
+        return getParsedTokens.createTask(resourceKey);
     }
 
     @Override public Task<@Nullable Styling> createStyleTask(ResourceKey resourceKey) {
-        return style.createTask(resourceKey);
+        return style.createTask(parse.createSerializableTask(new ResourceStringProvider(resourceKey)).map((r) -> r.getTokens().orElse(null)));
     }
 
     @Override public Task<KeyedMessages> createCheckTask(ResourceKey resourceKey) {
-        return check.createTask(resourceKey);
+        return tigerGetMessages.createTask(resourceKey);
     }
 
 
