@@ -3,11 +3,11 @@ package mb.spoofax.compiler.spoofaxcore;
 import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.TemplateCompiler;
+import mb.spoofax.compiler.util.TypeInfo;
 import org.immutables.value.Value;
 
 import java.io.IOException;
@@ -201,7 +201,10 @@ public class ConstraintAnalyzer {
     public interface LanguageProjectOutput extends Serializable {
         class Builder extends ConstraintAnalyzerData.LanguageProjectOutput.Builder {
             public Builder fromInput(Input input) {
-                addDependencies(GradleConfiguredDependency.api(input.shared().constraintCommonDep()));
+                final Shared shared = input.shared();
+                addDependencies(
+                    GradleConfiguredDependency.api(shared.constraintCommonDep())
+                );
                 return this;
             }
         }

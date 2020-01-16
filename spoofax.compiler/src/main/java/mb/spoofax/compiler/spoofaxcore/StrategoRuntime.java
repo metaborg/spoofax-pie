@@ -3,11 +3,11 @@ package mb.spoofax.compiler.spoofaxcore;
 import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.TemplateCompiler;
+import mb.spoofax.compiler.util.TypeInfo;
 import org.immutables.value.Value;
 
 import java.io.IOException;
@@ -144,17 +144,18 @@ public class StrategoRuntime {
     public interface LanguageProjectOutput extends Serializable {
         class Builder extends StrategoRuntimeData.LanguageProjectOutput.Builder {
             public Builder fromInput(Input input) {
+                final Shared shared = input.shared();
                 addDependencies(
-                    GradleConfiguredDependency.api(input.shared().strategoCommonDep()),
-                    GradleConfiguredDependency.api(input.shared().orgStrategoXTStrjDep()),
-                    GradleConfiguredDependency.implementation(input.shared().strategoXTMinJarDep())
+                    GradleConfiguredDependency.api(shared.strategoCommonDep()),
+                    GradleConfiguredDependency.api(shared.orgStrategoXTStrjDep()),
+                    GradleConfiguredDependency.implementation(shared.strategoXTMinJarDep())
                 );
                 // NaBL2 (required by Statix as well)
                 if(input.addNaBL2Primitives() || input.addStatixPrimitives()) {
-                    addDependencies(GradleConfiguredDependency.implementation(input.shared().nabl2CommonDep()));
+                    addDependencies(GradleConfiguredDependency.implementation(shared.nabl2CommonDep()));
                 }
                 if(input.addStatixPrimitives()) {
-                    addDependencies(GradleConfiguredDependency.implementation(input.shared().statixCommonDep()));
+                    addDependencies(GradleConfiguredDependency.implementation(shared.statixCommonDep()));
                     addCopyResources("src-gen/statix/statics.spec.aterm");
                 }
                 if(input.copyCTree()) {

@@ -30,7 +30,7 @@ public class TigerGetMessages implements TaskDef<ResourceKey, KeyedMessages> {
         final ResourceStringProvider stringProvider = new ResourceStringProvider(key);
         final JSGLR1ParseResult parseResult = context.require(parse, stringProvider);
         builder.addMessages(key, parseResult.getMessages());
-        final @Nullable SingleFileResult analysisResult = context.require(analyze, new TigerAnalyze.Input(key, parse.createSerializableTask(stringProvider).map((r) -> r.getAst().orElse(null))));
+        final @Nullable SingleFileResult analysisResult = context.require(analyze, new TigerAnalyze.Input(key, parse.createAstProvider(stringProvider)));
         //noinspection ConstantConditions
         if(analysisResult != null) {
             builder.addMessages(key, analysisResult.messages);

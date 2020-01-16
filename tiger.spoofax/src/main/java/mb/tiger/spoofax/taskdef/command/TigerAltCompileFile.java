@@ -3,6 +3,7 @@ package mb.tiger.spoofax.taskdef.command;
 import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Provider;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
@@ -22,7 +23,9 @@ import mb.spoofax.core.language.command.arg.ParamDef;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.tiger.spoofax.taskdef.TigerListDefNames;
 import mb.tiger.spoofax.taskdef.TigerListLiteralVals;
+import mb.tiger.spoofax.taskdef.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 import java.io.Serializable;
@@ -64,13 +67,15 @@ public class TigerAltCompileFile implements TaskDef<TigerAltCompileFile.Args, Co
     }
 
 
+    private final TigerParse parse;
     private final TigerListDefNames listDefNames;
     private final TigerListLiteralVals listLiteralVals;
     private final ResourceService resourceService;
 
 
     @Inject
-    public TigerAltCompileFile(TigerListDefNames listDefNames, TigerListLiteralVals listLiteralVals, ResourceService resourceService) {
+    public TigerAltCompileFile(TigerParse parse, TigerListDefNames listDefNames, TigerListLiteralVals listLiteralVals, ResourceService resourceService) {
+        this.parse = parse;
         this.listDefNames = listDefNames;
         this.listLiteralVals = listLiteralVals;
         this.resourceService = resourceService;
@@ -84,11 +89,12 @@ public class TigerAltCompileFile implements TaskDef<TigerAltCompileFile.Args, Co
     @Override public CommandOutput exec(ExecContext context, Args input) throws Exception {
         final ResourcePath file = input.file;
 
+        final Provider<@Nullable IStrategoTerm> astProvider = parse.createAstProvider(file);
         @Nullable String str;
         if(input.listDefNames) {
-            str = context.require(listDefNames, file);
+            str = context.require(listDefNames, astProvider);
         } else {
-            str = context.require(listLiteralVals, file);
+            str = context.require(listLiteralVals, astProvider);
         }
 
         //noinspection ConstantConditions (str can really be null)

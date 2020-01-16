@@ -4,6 +4,7 @@ import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
+import mb.pie.api.Provider;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
@@ -27,7 +28,9 @@ import mb.spoofax.core.language.command.arg.Param;
 import mb.spoofax.core.language.command.arg.ParamDef;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.tiger.spoofax.taskdef.TigerListDefNames;
+import mb.tiger.spoofax.taskdef.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 import java.io.Serializable;
@@ -60,11 +63,14 @@ public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args
     }
 
 
+    private final TigerParse parse;
     private final TigerListDefNames listDefNames;
     private final ResourceService resourceService;
 
 
-    @Inject public TigerCompileDirectory(TigerListDefNames listDefNames, ResourceService resourceService) {
+    @Inject
+    public TigerCompileDirectory(TigerParse parse, TigerListDefNames listDefNames, ResourceService resourceService) {
+        this.parse = parse;
         this.listDefNames = listDefNames;
         this.resourceService = resourceService;
     }
@@ -89,7 +95,8 @@ public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args
                     if(!first.get()) {
                         sb.append(", ");
                     }
-                    final @Nullable String defNames = context.require(listDefNames, f.getKey());
+                    final Provider<@Nullable IStrategoTerm> astProvider = parse.createAstProvider(f.getKey());
+                    final @Nullable String defNames = context.require(listDefNames, astProvider);
                     //noinspection ConstantConditions (defNames can really be null)
                     if(defNames != null) {
                         sb.append(defNames);

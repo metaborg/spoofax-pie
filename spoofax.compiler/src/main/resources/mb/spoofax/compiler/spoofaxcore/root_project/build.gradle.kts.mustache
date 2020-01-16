@@ -7,3 +7,11 @@ subprojects {
     configureSubProject()
   }
 }
+
+allprojects {
+  repositories {
+  {{#repositoryCodes}}
+    {{this}}
+  {{/repositoryCodes}}
+  }
+}

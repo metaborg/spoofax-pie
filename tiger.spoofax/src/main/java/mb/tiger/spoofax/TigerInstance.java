@@ -7,7 +7,6 @@ import mb.common.util.CollectionView;
 import mb.common.util.ListView;
 import mb.common.util.MapView;
 import mb.common.util.SetView;
-import mb.pie.api.ResourceStringProvider;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageInstance;
@@ -95,7 +94,7 @@ public class TigerInstance implements LanguageInstance {
     }
 
     @Override public Task<@Nullable Styling> createStyleTask(ResourceKey resourceKey) {
-        return style.createTask(parse.createSerializableTask(new ResourceStringProvider(resourceKey)).map((r) -> r.getTokens().orElse(null)));
+        return style.createTask(parse.createTokensProvider(resourceKey));
     }
 
     @Override public Task<KeyedMessages> createCheckTask(ResourceKey resourceKey) {

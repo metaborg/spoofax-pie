@@ -6,6 +6,7 @@ import mb.common.util.ListView;
 import mb.constraint.common.ConstraintAnalyzer;
 import mb.jsglr.common.TermTracer;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Provider;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
@@ -20,18 +21,21 @@ import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.command.arg.TextToResourceKeyArgConverter;
 import mb.stratego.common.StrategoUtil;
 import mb.tiger.spoofax.taskdef.TigerAnalyze;
+import mb.tiger.spoofax.taskdef.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 
 public class TigerShowAnalyzedAst implements TaskDef<TigerShowArgs, CommandOutput>, CommandDef<TigerShowArgs> {
+    private final TigerParse parse;
     private final TigerAnalyze analyze;
     private final TextToResourceKeyArgConverter textToResourceKeyArgConverter;
 
 
     @Inject
-    public TigerShowAnalyzedAst(TigerAnalyze analyze, TextToResourceKeyArgConverter textToResourceKeyArgConverter) {
+    public TigerShowAnalyzedAst(TigerParse parse, TigerAnalyze analyze, TextToResourceKeyArgConverter textToResourceKeyArgConverter) {
+        this.parse = parse;
         this.analyze = analyze;
         this.textToResourceKeyArgConverter = textToResourceKeyArgConverter;
     }
@@ -45,7 +49,8 @@ public class TigerShowAnalyzedAst implements TaskDef<TigerShowArgs, CommandOutpu
         final ResourceKey key = input.key;
         final @Nullable Region region = input.region;
 
-        final ConstraintAnalyzer.@Nullable SingleFileResult analysisResult = context.require(analyze, key);
+        final Provider<@Nullable IStrategoTerm> astProvider = parse.createAstProvider(key);
+        final ConstraintAnalyzer.@Nullable SingleFileResult analysisResult = context.require(analyze, new TigerAnalyze.Input(key, astProvider));
         // noinspection ConstantConditions (analysisResult can really be null).
         if(analysisResult == null) {
             throw new RuntimeException("Cannot show analyzed AST, analysis result for '" + key + "' is null");

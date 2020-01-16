@@ -11,6 +11,7 @@ import mb.spoofax.compiler.menu.MenuItemRepr;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
+import mb.spoofax.compiler.util.GradleRepository;
 import mb.spoofax.compiler.util.NamedTypeInfo;
 import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.TemplateCompiler;
@@ -109,6 +110,9 @@ public class AdapterProject {
 
         // build.gradle.kts
         try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.buildGradleKtsFile()), charset)) {
+            final HashMap<String, Object> map = new HashMap<>();
+            final ArrayList<GradleRepository> repositories = new ArrayList<>(shared.defaultRepositories());
+            map.put("repositoryCodes", repositories.stream().map(GradleRepository::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
             final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
             dependencies.add(GradleConfiguredDependency.api(input.languageProjectDependency()));
             dependencies.add(GradleConfiguredDependency.api(shared.spoofaxCoreDep()));
@@ -117,7 +121,6 @@ public class AdapterProject {
             dependencies.add(GradleConfiguredDependency.api(shared.daggerDep()));
             dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
             dependencies.add(GradleConfiguredDependency.annotationProcessor(shared.daggerCompilerDep()));
-            final HashMap<String, Object> map = new HashMap<>();
             map.put("dependencyCodes", dependencies.stream().map(GradleConfiguredDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
             buildGradleTemplate.execute(input, map, writer);
             writer.flush();

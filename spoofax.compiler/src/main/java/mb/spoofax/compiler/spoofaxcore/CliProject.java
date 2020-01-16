@@ -6,6 +6,7 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
+import mb.spoofax.compiler.util.GradleRepository;
 import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TypeInfo;
@@ -62,6 +63,9 @@ public class CliProject {
         resourceService.getHierarchicalResource(shared.cliProject().baseDirectory()).ensureDirectoryExists();
 
         try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.buildGradleKtsFile()).createParents(), charset)) {
+            final HashMap<String, Object> map = new HashMap<>();
+            final ArrayList<GradleRepository> repositories = new ArrayList<>(shared.defaultRepositories());
+            map.put("repositoryCodes", repositories.stream().map(GradleRepository::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
             final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
             dependencies.add(GradleConfiguredDependency.implementation(input.adapterProjectDependency()));
             dependencies.add(GradleConfiguredDependency.implementation(shared.spoofaxCliDep()));
@@ -70,7 +74,6 @@ public class CliProject {
             dependencies.add(GradleConfiguredDependency.implementation(shared.pieRuntimeDep()));
             dependencies.add(GradleConfiguredDependency.implementation(shared.pieDaggerDep()));
             dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
-            final HashMap<String, Object> map = new HashMap<>();
             map.put("dependencyCodes", dependencies.stream().map(GradleConfiguredDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
             buildGradleTemplate.execute(input, map, writer);
             writer.flush();

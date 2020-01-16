@@ -6,9 +6,12 @@ import mb.spoofax.compiler.util.Conversion;
 import mb.spoofax.compiler.util.Coordinate;
 import mb.spoofax.compiler.util.GradleDependency;
 import mb.spoofax.compiler.util.GradleProject;
+import mb.spoofax.compiler.util.GradleRepository;
 import org.immutables.value.Value;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 @Value.Immutable
@@ -124,6 +127,44 @@ public interface Shared extends Serializable {
         return cliProject().packageId();
     }
 
+
+    // Repositories
+
+    @Value.Default default GradleRepository metaborgReleasesRepository() {
+        return GradleRepository.maven("https://artifacts.metaborg.org/content/repositories/releases/");
+    }
+
+    @Value.Default default GradleRepository metaborgSnapshotsRepository() {
+        return GradleRepository.maven("https://artifacts.metaborg.org/content/repositories/snapshots/");
+    }
+
+    @Value.Default default GradleRepository metaborgMavenCentralMirrorRepository() {
+        return GradleRepository.maven("https://artifacts.metaborg.org/content/repositories/central/");
+    }
+
+    @Value.Default default GradleRepository useTheSourceRepository() {
+        return GradleRepository.maven("http://nexus.usethesource.io/content/repositories/public/");
+    }
+
+    @Value.Default default List<GradleRepository> defaultRepositories() {
+        final ArrayList<GradleRepository> repositories = new ArrayList<>();
+        repositories.add(useTheSourceRepository());
+        return repositories;
+    }
+
+    @Value.Default default List<GradleRepository> defaultPluginRepositories() {
+        final ArrayList<GradleRepository> repositories = new ArrayList<>();
+        repositories.add(metaborgReleasesRepository());
+        repositories.add(metaborgSnapshotsRepository());
+        repositories.add(metaborgMavenCentralMirrorRepository());
+        repositories.add(GradleRepository.mavenCentral());
+        repositories.add(GradleRepository.jcenter());
+        repositories.add(GradleRepository.gradlePluginPortal());
+        return repositories;
+    }
+
+
+    /// Dependencies and versions
 
     /// Metaborg Gradle configuration plugin
 

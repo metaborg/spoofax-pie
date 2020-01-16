@@ -3,6 +3,12 @@ plugins {
   id("org.metaborg.gradle.config.sub-project") version "{{shared.metaborgGradleConfigVersion}}"
   id("org.metaborg.gradle.config.java-application") version "{{shared.metaborgGradleConfigVersion}}"
 }
+
+repositories {
+{{#repositoryCodes}}
+  {{this}}
+{{/repositoryCodes}}
+}
 {{/standaloneProject}}
 {{^standaloneProject}}
 plugins {

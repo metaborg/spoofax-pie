@@ -3,6 +3,7 @@ package mb.spoofax.compiler.spoofaxcore;
 import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.util.GradleRepository;
 import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import org.immutables.value.Value;
@@ -13,6 +14,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Value.Enclosing
 public class RootProject {
@@ -45,20 +47,24 @@ public class RootProject {
 
         resourceService.getHierarchicalResource(shared.rootProject().baseDirectory()).ensureDirectoryExists();
 
-        final ArrayList<String> includedProjects = new ArrayList<>(input.additionalIncludedProjects());
-        includedProjects.add(shared.languageProject().coordinate().artifactId());
-        includedProjects.add(shared.adapterProject().coordinate().artifactId());
-        includedProjects.add(shared.cliProject().coordinate().artifactId());
-
         try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.settingsGradleKtsFile()), charset)) {
             final HashMap<String, Object> map = new HashMap<>();
+            final ArrayList<GradleRepository> pluginRepositories = new ArrayList<>(shared.defaultPluginRepositories());
+            map.put("pluginRepositoryCodes", pluginRepositories.stream().map(GradleRepository::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
+            final ArrayList<String> includedProjects = new ArrayList<>(input.additionalIncludedProjects());
+            includedProjects.add(shared.languageProject().coordinate().artifactId());
+            includedProjects.add(shared.adapterProject().coordinate().artifactId());
+            includedProjects.add(shared.cliProject().coordinate().artifactId());
             map.put("includedProjects", includedProjects);
             settingsGradleTemplate.execute(input, map, writer);
             writer.flush();
         }
 
         try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.buildGradleKtsFile()), charset)) {
-            buildGradleTemplate.execute(input, writer);
+            final HashMap<String, Object> map = new HashMap<>();
+            final ArrayList<GradleRepository> repositories = new ArrayList<>(shared.defaultRepositories());
+            map.put("repositoryCodes", repositories.stream().map(GradleRepository::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
+            buildGradleTemplate.execute(input, map, writer);
             writer.flush();
         }
 

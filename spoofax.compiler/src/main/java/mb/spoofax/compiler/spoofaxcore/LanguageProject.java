@@ -5,6 +5,7 @@ import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
+import mb.spoofax.compiler.util.GradleRepository;
 import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.StringUtil;
 import mb.spoofax.compiler.util.TemplateCompiler;
@@ -77,6 +78,8 @@ public class LanguageProject {
 
         resourceService.getHierarchicalResource(shared.languageProject().baseDirectory()).ensureDirectoryExists();
 
+        final ArrayList<GradleRepository> repositories = new ArrayList<>(shared.defaultRepositories());
+
         final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
         dependencies.add(GradleConfiguredDependency.api(shared.logApiDep()));
         dependencies.add(GradleConfiguredDependency.api(shared.resourceDep()));
@@ -140,6 +143,7 @@ public class LanguageProject {
                 .module((coordinate) -> "createModuleDependency(\"" + coordinate.toGradleNotation() + "\")")
                 .files((filePaths) -> "createFilesDependency(" + filePaths.stream().map((s) -> "\"" + s + "\"").collect(Collectors.joining(", ")) + ")");
             map.put("languageDependencyCode", languageDependencyCode);
+            map.put("repositoryCodes", repositories.stream().map(GradleRepository::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
             map.put("dependencyCodes", dependencies.stream().map(GradleConfiguredDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
             map.put("copyResourceCodes", copyResources.stream().map(StringUtil::doubleQuote).collect(Collectors.toCollection(ArrayList::new)));
             buildGradleTemplate.execute(input, map, writer);
