@@ -15,6 +15,7 @@ import mb.spoofax.compiler.menu.MenuCommandActionRepr;
 import mb.spoofax.compiler.spoofaxcore.AdapterProject;
 import mb.spoofax.compiler.spoofaxcore.CliProject;
 import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzer;
+import mb.spoofax.compiler.spoofaxcore.EclipseProject;
 import mb.spoofax.compiler.spoofaxcore.LanguageProject;
 import mb.spoofax.compiler.spoofaxcore.Parser;
 import mb.spoofax.compiler.spoofaxcore.RootProject;
@@ -278,6 +279,17 @@ public class TigerInputs {
             .adapterProject(adapterProject)
             ;
     }
+
+
+    /// Eclipse project compiler input
+
+    public static EclipseProject.Input.Builder eclipseProjectBuilder(Shared shared, AdapterProject.Input adapterProject) {
+        return EclipseProject.Input.builder()
+            .shared(shared)
+            .adapterProject(adapterProject)
+            ;
+    }
+
 
 
     /// Root project compiler input

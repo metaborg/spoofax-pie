@@ -55,6 +55,7 @@ public class RootProject {
             includedProjects.add(shared.languageProject().coordinate().artifactId());
             includedProjects.add(shared.adapterProject().coordinate().artifactId());
             includedProjects.add(shared.cliProject().coordinate().artifactId());
+            includedProjects.add(shared.eclipseProject().coordinate().artifactId());
             map.put("includedProjects", includedProjects);
             settingsGradleTemplate.execute(input, map, writer);
             writer.flush();

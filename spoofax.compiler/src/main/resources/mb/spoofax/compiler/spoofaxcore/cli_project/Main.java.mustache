@@ -1,4 +1,4 @@
-package mb.tiger.cli;
+package {{genMain.packageId}};
 
 import mb.log.slf4j.SLF4JLoggerFactory;
 import mb.pie.dagger.PieModule;
@@ -8,7 +8,7 @@ import mb.spoofax.cli.SpoofaxCli;
 import mb.spoofax.cli.SpoofaxCliComponent;
 import mb.spoofax.core.platform.LoggerFactoryModule;
 
-public class Main {
+public class {{genMain.id}} {
     public static void main(String[] args) {
         final SpoofaxCliComponent platformComponent = DaggerSpoofaxCliComponent.builder()
             .loggerFactoryModule(new LoggerFactoryModule(new SLF4JLoggerFactory()))

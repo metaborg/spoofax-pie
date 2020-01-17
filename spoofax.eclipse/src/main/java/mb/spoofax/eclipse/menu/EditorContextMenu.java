@@ -71,18 +71,18 @@ public class EditorContextMenu extends MenuShared {
         final EclipseIdentifiers identifiers = languageComponent.getEclipseIdentifiers();
         final MenuManager langMenu = new MenuManager(languageInstance.getDisplayName());
 
-        final String transformCommandId = identifiers.getTransformCommand();
+        final String runCommandCommandId = identifiers.getRunCommandCommand();
         for(MenuItem menuItem : getMenuItems(languageInstance)) {
             menuItem.accept(new EclipseMenuItemVisitor(langMenu) {
                 @Override
-                protected void transformAction(IContributionManager menu, String displayName, CommandRequest<?> commandRequest) {
+                protected void commandAction(IContributionManager menu, String displayName, CommandRequest<?> commandRequest) {
                     if(commandRequest.executionType == CommandExecutionType.AutomaticContinuous) {
                         return; // Automatic continuous execution is not supported when manually invoking commands.
                     }
                     if(!context.isSupportedBy(commandRequest.def.getRequiredContextTypes())) {
                         return; // Context is not supported by command.
                     }
-                    menu.add(createCommand(transformCommandId, commandRequest, context, displayName));
+                    menu.add(createCommand(runCommandCommandId, commandRequest, context, displayName));
                 }
             });
         }

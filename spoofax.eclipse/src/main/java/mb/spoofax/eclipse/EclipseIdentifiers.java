@@ -10,13 +10,13 @@ public interface EclipseIdentifiers {
 
     String getAddNatureCommand();
 
-    String getRemoveAddNatureCommand();
+    String getRemoveNatureCommand();
 
     String getObserveCommand();
 
     String getUnobserveCommand();
 
-    String getTransformCommand();
+    String getRunCommandCommand();
 
 
     String getBaseMarker();

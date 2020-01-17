@@ -1,9 +1,8 @@
-package mb.tiger.eclipse;
+package {{genPlugin.packageId}};
 
 import mb.pie.api.ExecException;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.util.StatusUtil;
-import mb.tiger.spoofax.TigerModule;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.WorkspaceJob;
@@ -15,36 +14,36 @@ import org.osgi.framework.BundleContext;
 
 import java.io.IOException;
 
-public class TigerPlugin extends AbstractUIPlugin {
-    public static final String pluginId = "tiger.eclipse";
+public class {{genPlugin.id}} extends AbstractUIPlugin {
+    public static final String pluginId = "{{pluginId}}";
 
-    private static @Nullable TigerEclipseComponent component;
+    private static @Nullable {{component.qualifiedId}} component;
 
-    public static TigerEclipseComponent getComponent() {
+    public static {{component.qualifiedId}} getComponent() {
         if(component == null) {
             throw new RuntimeException(
-                "Cannot access TigerComponent; TigerPlugin has not been started yet, or has been stopped");
+                "Cannot access {{component.id}}; {{genPlugin.id}} has not been started yet, or has been stopped");
         }
         return component;
     }
 
     @Override public void start(@NonNull BundleContext context) throws Exception {
         super.start(context);
-        component = DaggerTigerEclipseComponent
+        component = {{daggerComponent.qualifiedId}}
             .builder()
             .platformComponent(SpoofaxPlugin.getComponent())
-            .tigerModule(new TigerModule())
-            .tigerEclipseModule(new TigerEclipseModule())
+            .tigerModule(new {{adapterProject.module.qualifiedId}}())
+            .tigerEclipseModule(new {{module.qualifiedId}}())
             .build();
 
-        component.getEditorTracker().register();
+        component.getEditorRegistry().register();
 
-        new WorkspaceJob("Tiger startup") {
+        new WorkspaceJob("{{shared.name}} startup") {
             @Override public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
                 try {
                     SpoofaxPlugin.getComponent().getPieRunner().startup(component, monitor);
                 } catch(IOException | ExecException | InterruptedException e) {
-                    throw new CoreException(StatusUtil.error("Tiger startup job failed unexpectedly", e));
+                    throw new CoreException(StatusUtil.error("{{shared.name}} startup job failed unexpectedly", e));
                 }
                 return StatusUtil.success();
             }

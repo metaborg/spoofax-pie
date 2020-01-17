@@ -1,0 +1,42 @@
+{{#standaloneProject}}
+plugins {
+  id("org.metaborg.gradle.config.sub-project") version "{{shared.metaborgGradleConfigVersion}}"
+  id("org.metaborg.gradle.config.java-library") version "{{shared.metaborgGradleConfigVersion}}"
+  id("org.metaborg.coronium.bundle") version "{{shared.metaborgCoroniumVersion}}"
+}
+
+repositories {
+{{#repositoryCodes}}
+  {{this}}
+{{/repositoryCodes}}
+}
+{{/standaloneProject}}
+{{^standaloneProject}}
+plugins {
+  id("org.metaborg.gradle.config.java-library")
+  id("org.metaborg.coronium.bundle")
+}
+{{/standaloneProject}}
+
+sourceSets {
+  main {
+    java {
+      srcDir("$buildDir/generated/sources/spoofax/java")
+    }
+  }
+}
+
+bundle {
+  requireTargetPlatform("javax.inject")
+
+  requireBundle(":spoofax.eclipse")
+
+  requireEmbeddingBundle(":spoofax.eclipse.externaldeps")
+  //requireEmbeddingBundle(":tiger.eclipse.externaldeps") // TODO:
+}
+
+dependencies {
+{{#dependencyCodes}}
+  {{this}}
+{{/dependencyCodes}}
+}

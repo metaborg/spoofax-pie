@@ -75,10 +75,11 @@ public interface Shared extends Serializable {
     /// Language project
 
     @Value.Default default GradleProject languageProject() {
-        final String artifactId = defaultArtifactId() + ".lang";
+        final String suffix = ".lang";
+        final String artifactId = defaultArtifactId() + suffix;
         return GradleProject.builder()
             .coordinate(defaultGroupId(), artifactId, defaultVersion())
-            .packageId(basePackageId() + ".lang")
+            .packageId(basePackageId() + suffix)
             .baseDirectory(baseDirectory().appendSegment(artifactId))
             .build();
     }
@@ -91,10 +92,11 @@ public interface Shared extends Serializable {
     /// Adapter project
 
     @Value.Default default GradleProject adapterProject() {
-        final String artifactId = defaultArtifactId() + ".spoofax";
+        final String suffix = ".spoofax";
+        final String artifactId = defaultArtifactId() + suffix;
         return GradleProject.builder()
             .coordinate(defaultGroupId(), artifactId, defaultVersion())
-            .packageId(basePackageId() + ".spoofax")
+            .packageId(basePackageId() + suffix)
             .baseDirectory(baseDirectory().appendSegment(artifactId))
             .build();
     }
@@ -115,16 +117,34 @@ public interface Shared extends Serializable {
     /// CLI project
 
     @Value.Default default GradleProject cliProject() {
-        final String artifactId = defaultArtifactId() + ".cli";
+        final String suffix = ".cli";
+        final String artifactId = defaultArtifactId() + suffix;
         return GradleProject.builder()
             .coordinate(defaultGroupId(), artifactId, defaultVersion())
-            .packageId(basePackageId() + ".cli")
+            .packageId(basePackageId() + suffix)
             .baseDirectory(baseDirectory().appendSegment(artifactId))
             .build();
     }
 
     default String cliPackage() {
         return cliProject().packageId();
+    }
+
+
+    /// Eclipse project
+
+    @Value.Default default GradleProject eclipseProject() {
+        final String suffix = ".eclipse";
+        final String artifactId = defaultArtifactId() + suffix;
+        return GradleProject.builder()
+            .coordinate(defaultGroupId(), artifactId, defaultVersion())
+            .packageId(basePackageId() + suffix)
+            .baseDirectory(baseDirectory().appendSegment(artifactId))
+            .build();
+    }
+
+    default String eclipsePackage() {
+        return eclipseProject().packageId();
     }
 
 
@@ -170,6 +190,12 @@ public interface Shared extends Serializable {
 
     @Value.Default default String metaborgGradleConfigVersion() {
         return "0.3.12";
+    }
+
+    /// Metaborg Coronium version
+
+    @Value.Default default String metaborgCoroniumVersion() {
+        return "0.1.3";
     }
 
 

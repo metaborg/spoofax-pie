@@ -1,57 +1,57 @@
-package mb.tiger.eclipse;
+package {{genEclipseIdentifiers.packageId}};
 
 import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.eclipse.EclipseIdentifiers;
 
 @LanguageScope
-public class TigerEclipseIdentifiers implements EclipseIdentifiers {
+public class {{genEclipseIdentifiers.id}} implements EclipseIdentifiers {
     @Override public String getContext() {
-        return "tiger.eclipse.context";
+        return "{{contextId}}";
     }
 
     @Override public String getNature() {
-        return TigerProjectNature.id;
+        return {{projectNature.qualifiedId}}.id;
     }
 
     @Override public String getBuilder() {
-        return TigerProjectBuilder.id;
+        return {{projectBuilder.qualifiedId}}.id;
     }
 
 
     @Override public String getAddNatureCommand() {
-        return "tiger.eclipse.nature.add";
+        return "{{addNatureCommandId}}";
     }
 
     @Override public String getRemoveNatureCommand() {
-        return "tiger.eclipse.nature.remove";
+        return "{{removeNatureCommandId}}";
     }
 
     @Override public String getObserveCommand() {
-        return "tiger.eclipse.observe";
+        return "{{observeCommandId}}";
     }
 
     @Override public String getUnobserveCommand() {
-        return "tiger.eclipse.unobserve";
+        return "{{unobserveCommandId}}";
     }
 
     @Override public String getRunCommandCommand() {
-        return "tiger.eclipse.command";
+        return "{{runCommandCommandId}}";
     }
 
 
     @Override public String getBaseMarker() {
-        return "tiger.eclipse.marker";
+        return "{{baseMarkerId}}";
     }
 
     @Override public String getInfoMarker() {
-        return "tiger.eclipse.marker.info";
+        return "{{infoMarkerId}}";
     }
 
     @Override public String getWarningMarker() {
-        return "tiger.eclipse.marker.warning";
+        return "{{warningMarkerId}}";
     }
 
     @Override public String getErrorMarker() {
-        return "tiger.eclipse.marker.error";
+        return "{{errorMarkerId}}";
     }
 }

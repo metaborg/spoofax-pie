@@ -19,7 +19,7 @@ public abstract class EclipseMenuItemVisitor implements MenuItemVisitor {
     }
 
 
-    protected abstract void transformAction(IContributionManager menu, String displayName, CommandRequest<?> commandRequest);
+    protected abstract void commandAction(IContributionManager menu, String displayName, CommandRequest<?> commandRequest);
 
 
     @Override public void menuPush(String displayName, ListView<MenuItem> items) {
@@ -34,7 +34,7 @@ public abstract class EclipseMenuItemVisitor implements MenuItemVisitor {
 
 
     @Override public void command(String displayName, CommandRequest<?> commandRequest) {
-        transformAction(menuStack.peek(), displayName, commandRequest);
+        commandAction(menuStack.peek(), displayName, commandRequest);
     }
 
     @Override public void separator() {

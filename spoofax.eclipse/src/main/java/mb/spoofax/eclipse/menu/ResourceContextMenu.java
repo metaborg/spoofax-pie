@@ -94,7 +94,7 @@ public abstract class ResourceContextMenu extends MenuShared {
                 langMenu.add(createCommand(identifiers.getAddNatureCommand()));
             }
             if(removeNature) {
-                langMenu.add(createCommand(identifiers.getRemoveAddNatureCommand()));
+                langMenu.add(createCommand(identifiers.getRemoveNatureCommand()));
             }
         }
 
@@ -121,11 +121,11 @@ public abstract class ResourceContextMenu extends MenuShared {
         }
 
         // Transformations.
-        final String transformCommandId = identifiers.getTransformCommand();
+        final String runCommandCommandId = identifiers.getRunCommandCommand();
         for(MenuItem menuItem : languageInstance.getResourceContextMenuItems()) {
             menuItem.accept(new EclipseMenuItemVisitor(langMenu) {
                 @Override
-                protected void transformAction(IContributionManager menu, String displayName, CommandRequest<?> commandRequest) {
+                protected void commandAction(IContributionManager menu, String displayName, CommandRequest<?> commandRequest) {
                     final EnumSetView<CommandContextType> requiredContexts = commandRequest.def.getRequiredContextTypes();
                     final ArrayList<CommandContext> contexts;
                     if(hasProjects && requiredContexts.contains(CommandContextType.Project)) {
@@ -137,7 +137,7 @@ public abstract class ResourceContextMenu extends MenuShared {
                     } else {
                         return;
                     }
-                    menu.add(createCommand(transformCommandId, commandRequest, new ListView<>(contexts), displayName));
+                    menu.add(createCommand(runCommandCommandId, commandRequest, new ListView<>(contexts), displayName));
                 }
             });
         }
