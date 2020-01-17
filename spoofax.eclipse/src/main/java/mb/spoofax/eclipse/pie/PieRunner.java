@@ -11,6 +11,7 @@ import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecException;
 import mb.pie.api.Pie;
 import mb.pie.api.PieSession;
+import mb.pie.api.SessionAfterBottomUp;
 import mb.pie.api.Task;
 import mb.pie.api.TaskKey;
 import mb.pie.api.exec.CancelToken;
@@ -121,13 +122,13 @@ public class PieRunner {
             // First run a bottom-up build, to ensure that tasks affected by changed file are brought up-to-date.
             final HashSet<ResourceKey> changedResources = new HashSet<>();
             changedResources.add(key);
-            updateAffectedBy(changedResources, session, monitor);
+            final SessionAfterBottomUp postSession = updateAffectedBy(changedResources, session, monitor);
 
             final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
 
             final Task<@Nullable Styling> styleTask = languageInstance.createStyleTask(key);
             final String text = resource.getDocument().get();
-            final @Nullable Styling styling = requireWithoutObserving(styleTask, session, monitor);
+            final @Nullable Styling styling = requireWithoutObserving(styleTask, postSession, monitor);
             //noinspection ConstantConditions (styling can really be null)
             if(styling != null) {
                 workspaceUpdate.updateStyle(editor, text, styling);
@@ -136,7 +137,7 @@ public class PieRunner {
             }
 
             final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(key);
-            final KeyedMessages messages = requireWithoutObserving(checkTask, session, monitor);
+            final KeyedMessages messages = requireWithoutObserving(checkTask, postSession, monitor);
             workspaceUpdate.clearMessages(key);
             workspaceUpdate.replaceMessages(messages);
         }
@@ -423,11 +424,28 @@ public class PieRunner {
         return result;
     }
 
-    public void updateAffectedBy(Set<? extends ResourceKey> changedResources, PieSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
+    public SessionAfterBottomUp updateAffectedBy(Set<? extends ResourceKey> changedResources, PieSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
         logger.trace("Update affected by '{}'", changedResources);
         Stats.reset();
-        session.updateAffectedBy(changedResources, monitorCancelled(monitor));
+        final SessionAfterBottomUp newSession = session.updateAffectedBy(changedResources, monitorCancelled(monitor));
         logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
+        return newSession;
+    }
+
+    public <T extends Serializable> T requireWithoutObserving(Task<T> task, SessionAfterBottomUp session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
+        logger.trace("Require (without observing) '{}'", task);
+        Stats.reset();
+        final T result = session.requireWithoutObserving(task, monitorCancelled(monitor));
+        logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
+        return result;
+    }
+
+    public <T extends Serializable> T require(Task<T> task, SessionAfterBottomUp session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
+        logger.trace("Require '{}'", task);
+        Stats.reset();
+        final T result = session.require(task, monitorCancelled(monitor));
+        logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
+        return result;
     }
 
     public void unobserve(Task<?> task, Pie pie, PieSession session, @Nullable IProgressMonitor _monitor) {

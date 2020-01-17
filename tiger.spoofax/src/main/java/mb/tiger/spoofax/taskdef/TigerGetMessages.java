@@ -5,6 +5,7 @@ import mb.common.message.KeyedMessagesBuilder;
 import mb.constraint.common.ConstraintAnalyzer.SingleFileResult;
 import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.pie.api.ExecContext;
+import mb.pie.api.ExecException;
 import mb.pie.api.ResourceStringProvider;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
@@ -25,7 +26,8 @@ public class TigerGetMessages implements TaskDef<ResourceKey, KeyedMessages> {
         return getClass().getName();
     }
 
-    @Override public KeyedMessages exec(ExecContext context, ResourceKey key) throws Exception {
+    @Override
+    public KeyedMessages exec(ExecContext context, ResourceKey key) throws ExecException, InterruptedException {
         final KeyedMessagesBuilder builder = new KeyedMessagesBuilder();
         final ResourceStringProvider stringProvider = new ResourceStringProvider(key);
         final JSGLR1ParseResult parseResult = context.require(parse, stringProvider);

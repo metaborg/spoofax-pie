@@ -3,7 +3,8 @@ plugins {
   id("org.metaborg.gitonium") version "0.1.2"
 
   // Set versions for plugins to use, only applying them in subprojects (apply false here).
-  id("org.metaborg.coronium.bundle") version "develop-SNAPSHOT" apply false
+  id("org.metaborg.coronium.bundle") version "0.1.3" apply false
+  id("org.metaborg.coronium.embedding") version "0.1.3" apply false
   id("org.metaborg.spoofax.gradle.langspec") version "0.1.8" apply false
   id("org.metaborg.spoofax.gradle.project") version "0.1.8" apply false
   id("net.ltgt.apt") version "0.21" apply false

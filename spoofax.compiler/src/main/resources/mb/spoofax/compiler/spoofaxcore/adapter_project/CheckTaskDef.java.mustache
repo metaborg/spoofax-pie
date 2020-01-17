@@ -5,28 +5,25 @@ import mb.common.message.KeyedMessagesBuilder;
 import mb.constraint.common.ConstraintAnalyzer.SingleFileResult;
 import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.pie.api.ExecContext;
+import mb.pie.api.ExecException;
+import mb.pie.api.ResourceStringProvider;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import {{parser.parseTaskDef.qualifiedId}};
-{{#constraintAnalyzer}}
-import {{this.analyzeTaskDef.qualifiedId}};
-{{/constraintAnalyzer}}
-
 import javax.inject.Inject;
 
 @LanguageScope
 public class {{checkTaskDef.id}} implements TaskDef<ResourceKey, KeyedMessages> {
-    private final {{parser.parseTaskDef.id}} parse;
+    private final {{parser.parseTaskDef.qualifiedId}} parse;
 {{#constraintAnalyzer}}
-    private final {{this.analyzeTaskDef.id}} analyze;
+    private final {{this.analyzeTaskDef.qualifiedId}} analyze;
 {{/constraintAnalyzer}}
 
     @Inject public {{checkTaskDef.id}}(
-      {{parser.parseTaskDef.id}} parse{{#constraintAnalyzer}},
-      {{this.analyzeTaskDef.id}} analyze
+      {{parser.parseTaskDef.qualifiedId}} parse{{#constraintAnalyzer}},
+      {{this.analyzeTaskDef.qualifiedId}} analyze
 {{/constraintAnalyzer}}
     ) {
         this.parse = parse;
@@ -39,12 +36,13 @@ public class {{checkTaskDef.id}} implements TaskDef<ResourceKey, KeyedMessages> 
         return "{{checkTaskDef.qualifiedId}}";
     }
 
-    @Override public KeyedMessages exec(ExecContext context, ResourceKey key) throws Exception {
+    @Override public KeyedMessages exec(ExecContext context, ResourceKey key) throws ExecException, InterruptedException {
         final KeyedMessagesBuilder builder = new KeyedMessagesBuilder();
-        final JSGLR1ParseResult parseResult = context.require(parse, key);
+        final ResourceStringProvider stringProvider = new ResourceStringProvider(key);
+        final JSGLR1ParseResult parseResult = context.require(parse, stringProvider);
         builder.addMessages(key, parseResult.getMessages());
 {{#constraintAnalyzer}}
-        final @Nullable SingleFileResult analysisResult = context.require(analyze, key);
+        final @Nullable SingleFileResult analysisResult = context.require(analyze, new {{this.analyzeTaskDef.qualifiedId}}.Input(key, parse.createAstProvider(stringProvider)));
         if(analysisResult != null) {
             builder.addMessages(key, analysisResult.messages);
         }

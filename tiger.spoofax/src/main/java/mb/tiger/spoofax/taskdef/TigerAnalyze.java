@@ -5,6 +5,7 @@ import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.constraint.common.ConstraintAnalyzerException;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecContext;
+import mb.pie.api.ExecException;
 import mb.pie.api.Provider;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
@@ -15,6 +16,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -23,7 +25,7 @@ public class TigerAnalyze implements TaskDef<TigerAnalyze.Input, @Nullable Singl
         public final ResourceKey resourceKey;
         public final Provider<@Nullable IStrategoTerm> astProvider;
 
-        public Input(ResourceKey resourceKey, Provider<IStrategoTerm> astProvider) {
+        public Input(ResourceKey resourceKey, Provider<@Nullable IStrategoTerm> astProvider) {
             this.resourceKey = resourceKey;
             this.astProvider = astProvider;
         }
@@ -32,8 +34,7 @@ public class TigerAnalyze implements TaskDef<TigerAnalyze.Input, @Nullable Singl
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             final Input input = (Input)o;
-            return resourceKey.equals(input.resourceKey) &&
-                astProvider.equals(input.astProvider);
+            return resourceKey.equals(input.resourceKey) && astProvider.equals(input.astProvider);
         }
 
         @Override public int hashCode() {
@@ -41,10 +42,7 @@ public class TigerAnalyze implements TaskDef<TigerAnalyze.Input, @Nullable Singl
         }
 
         @Override public String toString() {
-            return "Input{" +
-                "resourceKey=" + resourceKey +
-                ", astProvider=" + astProvider +
-                '}';
+            return "Input(resourceKey=" + resourceKey + ", astProvider=" + astProvider + ')';
         }
     }
 
@@ -64,7 +62,7 @@ public class TigerAnalyze implements TaskDef<TigerAnalyze.Input, @Nullable Singl
     }
 
     @Override
-    public @Nullable SingleFileResult exec(ExecContext context, Input input) throws Exception {
+    public @Nullable SingleFileResult exec(ExecContext context, Input input) throws ExecException, IOException, InterruptedException {
         final @Nullable IStrategoTerm ast = context.require(input.astProvider);
         //noinspection ConstantConditions
         if(ast == null) {

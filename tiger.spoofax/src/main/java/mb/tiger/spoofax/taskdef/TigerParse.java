@@ -4,7 +4,6 @@ import mb.common.message.Message;
 import mb.common.message.Messages;
 import mb.common.token.Token;
 import mb.jsglr1.common.JSGLR1ParseResult;
-import mb.jsglr1.common.JSGLR1ParseResults;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
 import mb.pie.api.Provider;
@@ -42,7 +41,7 @@ public class TigerParse implements TaskDef<Provider<String>, JSGLR1ParseResult> 
         try {
             text = context.require(stringProvider);
         } catch(ExecException | IOException e) {
-            return JSGLR1ParseResults.failed(Messages.of(new Message("Cannot get text input for parser from '" + stringProvider + "'", e)));
+            return JSGLR1ParseResult.failed(Messages.of(new Message("Cannot get text input for parser from '" + stringProvider + "'", e)));
         }
         final TigerParser parser = parserProvider.get();
         return parser.parse(text, "Module");

@@ -237,6 +237,9 @@ public class AdapterProject {
             map.put("injected", injected);
 
             // Create injections for tasks required in the language instance.
+            final NamedTypeInfo parseInjection = uniqueNamer.makeUnique(input.parser().parseTaskDef());
+            map.put("parseInjection", parseInjection);
+            injected.add(parseInjection);
             final NamedTypeInfo tokenizeInjection = uniqueNamer.makeUnique(input.parser().tokenizeTaskDef());
             map.put("tokenizeInjection", tokenizeInjection);
             injected.add(tokenizeInjection);

@@ -20,6 +20,25 @@ public abstract class JSGLR1ParseResult implements Serializable {
         R failed(Messages messages);
     }
 
+    public static JSGLR1ParseResult success(IStrategoTerm ast, ArrayList<? extends Token<IStrategoTerm>> tokens, Messages messages) {
+        return JSGLR1ParseResults.success(ast, tokens, messages);
+    }
+
+    public static JSGLR1ParseResult recovered(IStrategoTerm ast, ArrayList<? extends Token<IStrategoTerm>> tokens, Messages messages) {
+        return JSGLR1ParseResults.recovered(ast, tokens, messages);
+    }
+
+    public static JSGLR1ParseResult failed(Messages messages) {
+        return JSGLR1ParseResults.failed(messages);
+    }
+
+
+    public abstract <R> R match(Cases<R> cases);
+
+    public JSGLR1ParseResults.CaseOfMatchers.TotalMatcher_Success caseOf() {
+        return JSGLR1ParseResults.caseOf(this);
+    }
+
     public Optional<IStrategoTerm> getAst() {
         return JSGLR1ParseResults.getAst(this);
     }
@@ -33,19 +52,17 @@ public abstract class JSGLR1ParseResult implements Serializable {
     }
 
     public boolean hasSucceeded() {
-        return JSGLR1ParseResults.caseOf(this).success_(true).otherwise_(false);
+        return caseOf().success_(true).otherwise_(false);
     }
 
     public boolean hasRecovered() {
-        return JSGLR1ParseResults.caseOf(this).recovered_(true).otherwise_(false);
+        return caseOf().recovered_(true).otherwise_(false);
     }
 
     public boolean hasFailed() {
-        return JSGLR1ParseResults.caseOf(this).failed_(true).otherwise_(false);
+        return caseOf().failed_(true).otherwise_(false);
     }
 
-
-    public abstract <R> R match(Cases<R> cases);
 
     @Override public abstract int hashCode();
 

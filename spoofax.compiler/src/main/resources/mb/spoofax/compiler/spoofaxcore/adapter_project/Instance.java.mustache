@@ -66,12 +66,12 @@ public class {{genInstance.id}} implements LanguageInstance {
         return {{tokenizeInjection.name}}.createTask(resourceKey);
     }
 
-    @Override public Task<KeyedMessages> createCheckTask(ResourceKey resourceKey) {
-        return {{checkInjection.name}}.createTask(resourceKey);
+    @Override public Task<@Nullable Styling> createStyleTask(ResourceKey resourceKey) {
+        return {{styleInjection.name}}.createTask({{parseInjection.name}}.createTokensProvider(resourceKey));
     }
 
-    @Override public Task<@Nullable Styling> createStyleTask(ResourceKey resourceKey) {
-        return {{styleInjection.name}}.createTask(resourceKey);
+    @Override public Task<KeyedMessages> createCheckTask(ResourceKey resourceKey) {
+        return {{checkInjection.name}}.createTask(resourceKey);
     }
 
 
