@@ -17,7 +17,7 @@ import java.io.IOException;
 public class {{genPlugin.id}} extends AbstractUIPlugin {
     public static final String pluginId = "{{pluginId}}";
 
-    private static @Nullable {{component.qualifiedId}} component;
+    private static {{component.nullableQualifiedId}} component;
 
     public static {{component.qualifiedId}} getComponent() {
         if(component == null) {
@@ -36,7 +36,7 @@ public class {{genPlugin.id}} extends AbstractUIPlugin {
             .tigerEclipseModule(new {{module.qualifiedId}}())
             .build();
 
-        component.getEditorRegistry().register();
+        component.getEditorTracker().register();
 
         new WorkspaceJob("{{shared.name}} startup") {
             @Override public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {

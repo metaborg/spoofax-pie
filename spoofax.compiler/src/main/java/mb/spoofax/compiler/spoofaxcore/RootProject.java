@@ -51,11 +51,7 @@ public class RootProject {
             final HashMap<String, Object> map = new HashMap<>();
             final ArrayList<GradleRepository> pluginRepositories = new ArrayList<>(shared.defaultPluginRepositories());
             map.put("pluginRepositoryCodes", pluginRepositories.stream().map(GradleRepository::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
-            final ArrayList<String> includedProjects = new ArrayList<>(input.additionalIncludedProjects());
-            includedProjects.add(shared.languageProject().coordinate().artifactId());
-            includedProjects.add(shared.adapterProject().coordinate().artifactId());
-            includedProjects.add(shared.cliProject().coordinate().artifactId());
-            includedProjects.add(shared.eclipseProject().coordinate().artifactId());
+            final ArrayList<String> includedProjects = new ArrayList<>(input.includedProjects());
             map.put("includedProjects", includedProjects);
             settingsGradleTemplate.execute(input, map, writer);
             writer.flush();
@@ -93,7 +89,7 @@ public class RootProject {
             return shared().rootProject().baseDirectory().appendRelativePath("settings.gradle.kts");
         }
 
-        List<String> additionalIncludedProjects();
+        List<String> includedProjects();
     }
 
     @Value.Immutable

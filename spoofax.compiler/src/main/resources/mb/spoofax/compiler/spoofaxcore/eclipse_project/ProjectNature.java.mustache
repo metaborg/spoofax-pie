@@ -1,0 +1,11 @@
+package {{genProjectNature.packageId}};
+
+import mb.spoofax.eclipse.nature.SpoofaxProjectNature;
+
+public class {{genProjectNature.id}} extends SpoofaxProjectNature {
+    public static final String id = {{plugin.qualifiedId}}.pluginId + ".nature";
+
+    public {{genProjectNature.id}}() {
+        super({{plugin.qualifiedId}}.getComponent());
+    }
+}

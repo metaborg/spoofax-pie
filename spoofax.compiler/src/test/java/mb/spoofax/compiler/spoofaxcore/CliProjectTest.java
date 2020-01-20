@@ -55,7 +55,15 @@ class CliProjectTest {
 
         // Compile root project, which links together language and adapter project.
         final RootProject rootProjectCompiler = RootProject.fromClassLoaderResources(resourceService, charset);
-        final RootProject.Output rootProjectOutput = rootProjectCompiler.compile(TigerInputs.rootProject(shared));
+        final RootProject.Output rootProjectOutput = rootProjectCompiler.compile(TigerInputs.rootProjectBuilder(shared)
+            .addIncludedProjects(
+                shared.languageProject().coordinate().artifactId(),
+                shared.adapterProject().coordinate().artifactId(),
+                shared.cliProject().coordinate().artifactId()
+            )
+            .build()
+        );
+
 
         // Run Gradle build assertion on the root project.
         final FileAssertions rootProjectDirectory = new FileAssertions(rootProjectOutput.baseDirectory(), resourceService);

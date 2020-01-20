@@ -7,7 +7,7 @@ bundle {
   requireTargetPlatform("javax.inject")
 
   requireBundle(":spoofax.eclipse")
-  
+
   requireEmbeddingBundle(":spoofax.eclipse.externaldeps")
   requireEmbeddingBundle(":tiger.eclipse.externaldeps")
 }

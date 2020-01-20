@@ -66,6 +66,8 @@ public class TigerInputs {
             .spoofaxCompilerInterfacesDep(fromSystemProperty("spoofax.compiler.interfaces:classpath"))
             .spoofaxCoreDep(fromSystemProperty("spoofax.core:classpath"))
             .spoofaxCliDep(fromSystemProperty("spoofax.cli:classpath"))
+            .spoofaxEclipseDep(fromSystemProperty("spoofax.eclipse:classpath"))
+            .spoofaxEclipseExternaldepsDep(fromSystemProperty("spoofax.eclipse.externaldeps:classpath"))
             ;
     }
 

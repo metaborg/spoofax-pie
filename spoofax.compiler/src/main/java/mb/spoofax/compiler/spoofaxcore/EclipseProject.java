@@ -5,6 +5,7 @@ import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
+import mb.spoofax.compiler.util.GradleConfiguredBundleDependency;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
 import mb.spoofax.compiler.util.GradleRepository;
@@ -34,6 +35,8 @@ public class EclipseProject {
     private final Template componentTemplate;
     private final Template identifiersTemplate;
     private final Template editorTrackerTemplate;
+    private final Template projectNatureTemplate;
+    private final Template projectBuilderTemplate;
     private final ResourceService resourceService;
     private final Charset charset;
 
@@ -47,6 +50,8 @@ public class EclipseProject {
         Template componentTemplate,
         Template identifiersTemplate,
         Template editorTrackerTemplate,
+        Template projectNatureTemplate,
+        Template projectBuilderTemplate,
         ResourceService resourceService,
         Charset charset
     ) {
@@ -59,6 +64,8 @@ public class EclipseProject {
         this.componentTemplate = componentTemplate;
         this.identifiersTemplate = identifiersTemplate;
         this.editorTrackerTemplate = editorTrackerTemplate;
+        this.projectNatureTemplate = projectNatureTemplate;
+        this.projectBuilderTemplate = projectBuilderTemplate;
         this.resourceService = resourceService;
         this.charset = charset;
     }
@@ -75,6 +82,8 @@ public class EclipseProject {
             templateCompiler.getOrCompile("eclipse_project/EclipseComponent.java.mustache"),
             templateCompiler.getOrCompile("eclipse_project/EclipseIdentifiers.java.mustache"),
             templateCompiler.getOrCompile("eclipse_project/EditorTracker.java.mustache"),
+            templateCompiler.getOrCompile("eclipse_project/ProjectNature.java.mustache"),
+            templateCompiler.getOrCompile("eclipse_project/ProjectBuilder.java.mustache"),
             resourceService,
             charset
         );
@@ -96,6 +105,10 @@ public class EclipseProject {
             dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
             dependencies.add(GradleConfiguredDependency.annotationProcessor(shared.daggerCompilerDep()));
             map.put("dependencyCodes", dependencies.stream().map(GradleConfiguredDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
+            final ArrayList<GradleConfiguredBundleDependency> bundleDependencies = new ArrayList<>(input.additionalBundleDependencies());
+            bundleDependencies.add(GradleConfiguredBundleDependency.bundle(shared.spoofaxEclipseDep(), true));
+            bundleDependencies.add(GradleConfiguredBundleDependency.embeddingBundle(shared.spoofaxEclipseExternaldepsDep(), true));
+            map.put("bundleDependencyCodes", bundleDependencies.stream().map(GradleConfiguredBundleDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
             buildGradleTemplate.execute(input, map, writer);
             writer.flush();
         }
@@ -137,7 +150,22 @@ public class EclipseProject {
             componentTemplate.execute(input, writer);
             writer.flush();
         }
-
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genEclipseIdentifiers().file(classesGenDirectory)).createParents(), charset)) {
+            identifiersTemplate.execute(input, writer);
+            writer.flush();
+        }
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genEditorTracker().file(classesGenDirectory)).createParents(), charset)) {
+            editorTrackerTemplate.execute(input, writer);
+            writer.flush();
+        }
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genProjectNature().file(classesGenDirectory)).createParents(), charset)) {
+            projectNatureTemplate.execute(input, writer);
+            writer.flush();
+        }
+        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genProjectBuilder().file(classesGenDirectory)).createParents(), charset)) {
+            projectBuilderTemplate.execute(input, writer);
+            writer.flush();
+        }
 
         return Output.builder().fromInput(input).build();
     }
@@ -162,6 +190,8 @@ public class EclipseProject {
         GradleDependency adapterProjectDependency();
 
         List<GradleConfiguredDependency> additionalDependencies();
+
+        List<GradleConfiguredBundleDependency> additionalBundleDependencies();
 
 
         /// Identifiers
@@ -318,6 +348,36 @@ public class EclipseProject {
                 return manualEditorTracker().get();
             }
             return genEditorTracker();
+        }
+
+        // Project nature
+
+        @Value.Default default TypeInfo genProjectNature() {
+            return TypeInfo.of(shared().eclipsePackage(), shared().classPrefix() + "ProjectNature");
+        }
+
+        Optional<TypeInfo> manualProjectNature();
+
+        default TypeInfo projectNature() {
+            if(classKind().isManual() && manualProjectNature().isPresent()) {
+                return manualProjectNature().get();
+            }
+            return genProjectNature();
+        }
+
+        // Project builder
+
+        @Value.Default default TypeInfo genProjectBuilder() {
+            return TypeInfo.of(shared().eclipsePackage(), shared().classPrefix() + "ProjectBuilder");
+        }
+
+        Optional<TypeInfo> manualProjectBuilder();
+
+        default TypeInfo projectBuilder() {
+            if(classKind().isManual() && manualProjectBuilder().isPresent()) {
+                return manualProjectBuilder().get();
+            }
+            return genProjectBuilder();
         }
 
 

@@ -195,7 +195,7 @@ public interface Shared extends Serializable {
     /// Metaborg Coronium version
 
     @Value.Default default String metaborgCoroniumVersion() {
-        return "0.1.3";
+        return "0.1.7";
     }
 
 
@@ -348,6 +348,14 @@ public interface Shared extends Serializable {
 
     @Value.Default default GradleDependency spoofaxCliDep() {
         return GradleDependency.module(Coordinate.of("org.metaborg", "spoofax.cli", spoofaxPieVersion()));
+    }
+
+    @Value.Default default GradleDependency spoofaxEclipseDep() {
+        return GradleDependency.module(Coordinate.of("org.metaborg", "spoofax.eclipse", spoofaxPieVersion()));
+    }
+
+    @Value.Default default GradleDependency spoofaxEclipseExternaldepsDep() {
+        return GradleDependency.module(Coordinate.of("org.metaborg", "spoofax.eclipse.externaldeps", spoofaxPieVersion()));
     }
 
 
