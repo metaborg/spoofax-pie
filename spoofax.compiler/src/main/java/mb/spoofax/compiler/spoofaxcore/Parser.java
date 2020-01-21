@@ -1,85 +1,42 @@
 package mb.spoofax.compiler.spoofaxcore;
 
-import com.samskivert.mustache.Template;
-import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
-import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.TemplateCompiler;
+import mb.spoofax.compiler.util.TemplateWriter;
+import mb.spoofax.compiler.util.TypeInfo;
 import org.immutables.value.Value;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Optional;
 
 @Value.Enclosing
 public class Parser {
-    private final Template tableTemplate;
-    private final Template parserTemplate;
-    private final Template factoryTemplate;
-    private final Template parseTaskDefTemplate;
-    private final Template tokenizeTaskDefTemplate;
-    private final ResourceService resourceService;
-    private final Charset charset;
+    private final TemplateWriter tableTemplate;
+    private final TemplateWriter parserTemplate;
+    private final TemplateWriter factoryTemplate;
+    private final TemplateWriter parseTaskDefTemplate;
+    private final TemplateWriter tokenizeTaskDefTemplate;
 
-
-    private Parser(
-        Template tableTemplate,
-        Template parserTemplate,
-        Template factoryTemplate,
-        Template parseTaskDefTemplate,
-        Template tokenizeTaskDefTemplate,
-        ResourceService resourceService,
-        Charset charset
-    ) {
-        this.tableTemplate = tableTemplate;
-        this.parserTemplate = parserTemplate;
-        this.factoryTemplate = factoryTemplate;
-        this.parseTaskDefTemplate = parseTaskDefTemplate;
-        this.tokenizeTaskDefTemplate = tokenizeTaskDefTemplate;
-        this.resourceService = resourceService;
-        this.charset = charset;
+    public Parser(TemplateCompiler templateCompiler) {
+        this.tableTemplate = templateCompiler.getOrCompileToWriter("parser/ParseTable.java.mustache");
+        this.parserTemplate = templateCompiler.getOrCompileToWriter("parser/Parser.java.mustache");
+        this.factoryTemplate = templateCompiler.getOrCompileToWriter("parser/ParserFactory.java.mustache");
+        this.parseTaskDefTemplate = templateCompiler.getOrCompileToWriter("parser/ParseTaskDef.java.mustache");
+        this.tokenizeTaskDefTemplate = templateCompiler.getOrCompileToWriter("parser/TokenizeTaskDef.java.mustache");
     }
-
-    public static Parser fromClassLoaderResources(ResourceService resourceService, Charset charset) {
-        final TemplateCompiler templateCompiler = new TemplateCompiler(Parser.class, resourceService, charset);
-        return new Parser(
-            templateCompiler.getOrCompile("parser/ParseTable.java.mustache"),
-            templateCompiler.getOrCompile("parser/Parser.java.mustache"),
-            templateCompiler.getOrCompile("parser/ParserFactory.java.mustache"),
-            templateCompiler.getOrCompile("parser/ParseTaskDef.java.mustache"),
-            templateCompiler.getOrCompile("parser/TokenizeTaskDef.java.mustache"),
-            resourceService,
-            charset
-        );
-    }
-
 
     public LanguageProjectOutput compileLanguageProject(Input input) throws IOException {
         final LanguageProjectOutput output = LanguageProjectOutput.builder().fromInput(input).build();
         if(input.classKind().isManualOnly()) return output; // Nothing to generate: return.
 
-        final ResourcePath genDirectory = input.languageGenDirectory();
-        resourceService.getHierarchicalResource(genDirectory).ensureDirectoryExists();
-
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genTable().file(genDirectory)).createParents(), charset)) {
-            tableTemplate.execute(input, writer);
-            writer.flush();
-        }
-
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genParser().file(genDirectory)).createParents(), charset)) {
-            parserTemplate.execute(input, writer);
-            writer.flush();
-        }
-
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genFactory().file(genDirectory)).createParents(), charset)) {
-            factoryTemplate.execute(input, writer);
-            writer.flush();
-        }
+        final ResourcePath classesGenDirectory = input.languageClassesGenDirectory();
+        tableTemplate.write(input, input.genTable().file(classesGenDirectory));
+        parserTemplate.write(input, input.genParser().file(classesGenDirectory));
+        factoryTemplate.write(input, input.genFactory().file(classesGenDirectory));
 
         return output;
     }
@@ -88,18 +45,9 @@ public class Parser {
         final AdapterProjectOutput output = AdapterProjectOutput.builder().fromInput(input).build();
         if(input.classKind().isManualOnly()) return output; // Nothing to generate: return.
 
-        final ResourcePath genDirectory = input.adapterGenDirectory();
-        resourceService.getHierarchicalResource(genDirectory).ensureDirectoryExists();
-
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genParseTaskDef().file(genDirectory)).createParents(), charset)) {
-            parseTaskDefTemplate.execute(input, writer);
-            writer.flush();
-        }
-
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genTokenizeTaskDef().file(genDirectory)).createParents(), charset)) {
-            tokenizeTaskDefTemplate.execute(input, writer);
-            writer.flush();
-        }
+        final ResourcePath classesGenDirectory = input.adapterClassesGenDirectory();
+        parseTaskDefTemplate.write(input, input.genParseTaskDef().file(classesGenDirectory));
+        tokenizeTaskDefTemplate.write(input, input.genTokenizeTaskDef().file(classesGenDirectory));
 
         return output;
     }
@@ -142,7 +90,7 @@ public class Parser {
 
         /// Language project classes
 
-        default ResourcePath languageGenDirectory() {
+        default ResourcePath languageClassesGenDirectory() {
             return shared().languageProject().genSourceSpoofaxJavaDirectory();
         }
 
@@ -185,7 +133,7 @@ public class Parser {
 
         /// Adapter project classes
 
-        default ResourcePath adapterGenDirectory() {
+        default ResourcePath adapterClassesGenDirectory() {
             return shared().adapterProject().genSourceSpoofaxJavaDirectory();
         }
 

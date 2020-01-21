@@ -16,11 +16,6 @@ class EclipseProjectTest extends TestBase {
         final Shared shared = TigerInputs.shared(baseDirectory);
 
         // Compile language project, as adapter project depends on it.
-        final Parser parserCompiler = Parser.fromClassLoaderResources(resourceService, charset);
-        final Styler stylerCompiler = Styler.fromClassLoaderResources(resourceService, charset);
-        final StrategoRuntime strategoRuntimeCompiler = StrategoRuntime.fromClassLoaderResources(resourceService, charset);
-        final ConstraintAnalyzer constraintAnalyzerCompiler = ConstraintAnalyzer.fromClassLoaderResources(resourceService, charset);
-        final LanguageProject languageProjectCompiler = LanguageProject.fromClassLoaderResources(resourceService, charset, parserCompiler, stylerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler);
         languageProjectCompiler.compile(TigerInputs.languageProject(shared));
 
         // Compile adapter project, as Eclipse project depends on it.
@@ -28,14 +23,13 @@ class EclipseProjectTest extends TestBase {
             .languageProjectDependency(GradleDependency.project(":" + shared.languageProject().coordinate().artifactId()))
             .build();
         TigerInputs.copyTaskDefsIntoAdapterProject(adapterProjectInput, resourceService);
-        final AdapterProject adapterProjectCompiler = AdapterProject.fromClassLoaderResources(resourceService, charset, parserCompiler, stylerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler);
         adapterProjectCompiler.compile(adapterProjectInput);
 
         // Compile Eclipse project and test generated files.
         final EclipseProject.Input input = TigerInputs.eclipseProjectBuilder(shared, adapterProjectInput)
             .adapterProjectDependency(GradleDependency.project(":" + shared.adapterProject().coordinate().artifactId()))
             .build();
-        final EclipseProject compiler = new EclipseProject(new TemplateCompiler(EclipseProject.class, resourceService, charset));
+        final EclipseProject compiler = new EclipseProject(new TemplateCompiler(Shared.class, resourceService, charset));
         compiler.compile(input);
         fileAssertions.asserts(input.buildGradleKtsFile(), (a) -> a.assertContains("org.metaborg.coronium.bundle"));
         fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {

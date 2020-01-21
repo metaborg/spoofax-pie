@@ -1,21 +1,18 @@
 package mb.spoofax.compiler.spoofaxcore;
 
-import com.samskivert.mustache.Template;
-import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
 import mb.spoofax.compiler.util.GradleRepository;
-import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.TemplateCompiler;
+import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
 import org.immutables.value.Value;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.UncheckedIOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,45 +21,32 @@ import java.util.stream.Collectors;
 
 @Value.Enclosing
 public class CliProject {
-    private final Template buildGradleTemplate;
-    private final Template settingsGradleTemplate;
-    private final Template mainTemplate;
-    private final ResourceService resourceService;
-    private final Charset charset;
+    private final TemplateWriter settingsGradleTemplate;
+    private final TemplateWriter buildGradleTemplate;
+    private final TemplateWriter mainTemplate;
 
-
-    private CliProject(
-        Template buildGradleTemplate,
-        Template settingsGradleTemplate,
-        Template mainTemplate,
-        ResourceService resourceService,
-        Charset charset
-    ) {
-        this.mainTemplate = mainTemplate;
-        this.resourceService = resourceService;
-        this.charset = charset;
-        this.buildGradleTemplate = buildGradleTemplate;
-        this.settingsGradleTemplate = settingsGradleTemplate;
+    public CliProject(TemplateCompiler templateCompiler) {
+        this.settingsGradleTemplate = templateCompiler.getOrCompileToWriter("gradle_project/settings.gradle.kts.mustache");
+        this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("cli_project/build.gradle.kts.mustache");
+        this.mainTemplate = templateCompiler.getOrCompileToWriter("cli_project/Main.java.mustache");
     }
-
-    public static CliProject fromClassLoaderResources(ResourceService resourceService, Charset charset) {
-        final TemplateCompiler templateCompiler = new TemplateCompiler(CliProject.class, resourceService, charset);
-        return new CliProject(
-            templateCompiler.getOrCompile("cli_project/build.gradle.kts.mustache"),
-            templateCompiler.getOrCompile("gradle_project/settings.gradle.kts.mustache"),
-            templateCompiler.getOrCompile("cli_project/Main.java.mustache"),
-            resourceService,
-            charset
-        );
-    }
-
 
     public Output compile(Input input) throws IOException {
         final Shared shared = input.shared();
 
-        resourceService.getHierarchicalResource(shared.cliProject().baseDirectory()).ensureDirectoryExists();
-
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.buildGradleKtsFile()).createParents(), charset)) {
+        // Gradle files
+        try {
+            input.settingsGradleKtsFile().ifPresent((f) -> {
+                try {
+                    settingsGradleTemplate.write(input, f);
+                } catch(IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            });
+        } catch(UncheckedIOException e) {
+            throw e.getCause();
+        }
+        {
             final HashMap<String, Object> map = new HashMap<>();
             final ArrayList<GradleRepository> repositories = new ArrayList<>(shared.defaultRepositories());
             map.put("repositoryCodes", repositories.stream().map(GradleRepository::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
@@ -75,30 +59,12 @@ public class CliProject {
             dependencies.add(GradleConfiguredDependency.implementation(shared.pieDaggerDep()));
             dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
             map.put("dependencyCodes", dependencies.stream().map(GradleConfiguredDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
-            buildGradleTemplate.execute(input, map, writer);
-            writer.flush();
+            buildGradleTemplate.write(input, map, input.buildGradleKtsFile());
         }
 
-        try {
-            input.settingsGradleKtsFile().ifPresent((f) -> {
-                try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(f).createParents(), charset)) {
-                    settingsGradleTemplate.execute(input, writer);
-                    writer.flush();
-                } catch(IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            });
-        } catch(UncheckedIOException e) {
-            throw e.getCause();
-        }
-
+        // Class files
         final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        resourceService.getHierarchicalResource(classesGenDirectory).ensureDirectoryExists();
-
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genMain().file(classesGenDirectory)).createParents(), charset)) {
-            mainTemplate.execute(input, writer);
-            writer.flush();
-        }
+        mainTemplate.write(input, input.genMain().file(classesGenDirectory));
 
         return Output.builder().fromInput(input).build();
     }

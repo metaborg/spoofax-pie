@@ -22,8 +22,8 @@ import java.util.stream.Collectors;
 
 @Value.Enclosing
 public class EclipseProject {
-    private final TemplateWriter buildGradleTemplate;
     private final TemplateWriter settingsGradleTemplate;
+    private final TemplateWriter buildGradleTemplate;
     private final TemplateWriter pluginXmlTemplate;
     private final TemplateWriter manifestTemplate;
     private final TemplateWriter pluginTemplate;
@@ -45,8 +45,8 @@ public class EclipseProject {
     private final TemplateWriter unobserveHandlerTemplate;
 
     public EclipseProject(TemplateCompiler templateCompiler) {
-        this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/build.gradle.kts.mustache");
         this.settingsGradleTemplate = templateCompiler.getOrCompileToWriter("gradle_project/settings.gradle.kts.mustache");
+        this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/build.gradle.kts.mustache");
         this.pluginXmlTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/plugin.xml.mustache");
         this.manifestTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/MANIFEST.MF.mustache");
         this.pluginTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/Plugin.java.mustache");
@@ -68,11 +68,21 @@ public class EclipseProject {
         this.unobserveHandlerTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/UnobserveHandler.java.mustache");
     }
 
-
     public Output compile(EclipseProject.Input input) throws IOException {
         final Shared shared = input.shared();
 
         // Gradle files
+        try {
+            input.settingsGradleKtsFile().ifPresent((f) -> {
+                try {
+                    settingsGradleTemplate.write(input, f);
+                } catch(IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            });
+        } catch(UncheckedIOException e) {
+            throw e.getCause();
+        }
         {
             final HashMap<String, Object> map = new HashMap<>();
             final ArrayList<GradleRepository> repositories = new ArrayList<>(shared.defaultRepositories());
@@ -87,17 +97,6 @@ public class EclipseProject {
             bundleDependencies.add(GradleConfiguredBundleDependency.embeddingBundle(shared.spoofaxEclipseExternaldepsDep(), true));
             map.put("bundleDependencyCodes", bundleDependencies.stream().map(GradleConfiguredBundleDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
             buildGradleTemplate.write(input, map, input.buildGradleKtsFile());
-        }
-        try {
-            input.settingsGradleKtsFile().ifPresent((f) -> {
-                try {
-                    settingsGradleTemplate.write(input, f);
-                } catch(IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            });
-        } catch(UncheckedIOException e) {
-            throw e.getCause();
         }
 
         // Eclipse files

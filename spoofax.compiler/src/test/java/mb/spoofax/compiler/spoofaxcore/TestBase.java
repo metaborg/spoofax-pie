@@ -6,6 +6,7 @@ import mb.resource.DefaultResourceService;
 import mb.resource.ResourceService;
 import mb.resource.fs.FSResourceRegistry;
 import mb.spoofax.compiler.spoofaxcore.util.FileAssertions;
+import mb.spoofax.compiler.util.TemplateCompiler;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -17,10 +18,13 @@ class TestBase {
     final FileAssertions fileAssertions = new FileAssertions(resourceService);
     final Charset charset = StandardCharsets.UTF_8;
 
-    final Parser parserCompiler = Parser.fromClassLoaderResources(resourceService, charset);
-    final Styler stylerCompiler = Styler.fromClassLoaderResources(resourceService, charset);
-    final StrategoRuntime strategoRuntimeCompiler = StrategoRuntime.fromClassLoaderResources(resourceService, charset);
-    final ConstraintAnalyzer constraintAnalyzerCompiler = ConstraintAnalyzer.fromClassLoaderResources(resourceService, charset);
+    final TemplateCompiler templateCompiler = new TemplateCompiler(Shared.class, resourceService, charset);
+    final Parser parserCompiler = new Parser(templateCompiler);
+    final Styler stylerCompiler = new Styler(templateCompiler);
+    final StrategoRuntime strategoRuntimeCompiler = new StrategoRuntime(templateCompiler);
+    final ConstraintAnalyzer constraintAnalyzerCompiler = new ConstraintAnalyzer(templateCompiler);
 
-    final RootProject rootProjectCompiler = RootProject.fromClassLoaderResources(resourceService, charset);
+    final RootProject rootProjectCompiler = new RootProject(templateCompiler);
+    final LanguageProject languageProjectCompiler = new LanguageProject(templateCompiler, parserCompiler, stylerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler);
+    final AdapterProject adapterProjectCompiler = new AdapterProject(templateCompiler, parserCompiler, stylerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler);
 }

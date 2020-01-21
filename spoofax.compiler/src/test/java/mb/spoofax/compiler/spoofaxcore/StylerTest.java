@@ -13,13 +13,13 @@ class StylerTest extends TestBase {
         final Styler.Input input = TigerInputs.styler(shared);
 
         stylerCompiler.compileLanguageProject(input);
-        fileAssertions.scopedExists(input.languageGenDirectory(), (s) -> {
+        fileAssertions.scopedExists(input.languageClassesGenDirectory(), (s) -> {
             s.assertPublicJavaClass(input.genRules(), "TigerStylingRules");
             s.assertPublicJavaClass(input.genStyler(), "TigerStyler");
             s.assertPublicJavaClass(input.genFactory(), "TigerStylerFactory");
         });
         stylerCompiler.compileAdapterProject(input);
-        fileAssertions.scopedExists(input.adapterGenDirectory(), (s) -> {
+        fileAssertions.scopedExists(input.adapterClassesGenDirectory(), (s) -> {
             s.assertPublicJavaClass(input.genStyleTaskDef(), "TigerStyle");
         });
     }

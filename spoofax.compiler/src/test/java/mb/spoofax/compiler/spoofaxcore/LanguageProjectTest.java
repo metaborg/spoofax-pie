@@ -16,9 +16,8 @@ class LanguageProjectTest extends TestBase {
         final LanguageProject.Input input = TigerInputs.languageProjectBuilder(TigerInputs.shared(baseDirectory))
             .standaloneProject(true)
             .build();
-        final LanguageProject compiler = LanguageProject.fromClassLoaderResources(resourceService, charset, parserCompiler, stylerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler);
 
-        compiler.compile(input);
+        languageProjectCompiler.compile(input);
         assertTrue(input.settingsGradleKtsFile().isPresent());
         fileAssertions.asserts(input.settingsGradleKtsFile().get(), (a) -> a.assertContains("gradlePluginPortal()"));
         fileAssertions.asserts(input.buildGradleKtsFile(), (a) -> a.assertContains("mb/tiger"));

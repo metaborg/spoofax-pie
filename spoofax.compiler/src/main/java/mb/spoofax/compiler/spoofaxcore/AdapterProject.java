@@ -1,8 +1,6 @@
 package mb.spoofax.compiler.spoofaxcore;
 
 import com.samskivert.mustache.Mustache;
-import com.samskivert.mustache.Template;
-import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.cli.CliCommandRepr;
 import mb.spoofax.compiler.command.AutoCommandDefRepr;
@@ -13,8 +11,8 @@ import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
 import mb.spoofax.compiler.util.GradleRepository;
 import mb.spoofax.compiler.util.NamedTypeInfo;
-import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.TemplateCompiler;
+import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.compiler.util.UniqueNamer;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -23,7 +21,6 @@ import org.immutables.value.Value;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.UncheckedIOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,84 +29,57 @@ import java.util.stream.Collectors;
 
 @Value.Enclosing
 public class AdapterProject {
-    private final Template buildGradleTemplate;
-    private final Template settingsGradleTemplate;
-    private final Template checkTaskDefTemplate;
-    private final Template componentTemplate;
-    private final Template moduleTemplate;
-    private final Template instanceTemplate;
-    private final Template commandDefTemplate;
-    private final ResourceService resourceService;
-    private final Charset charset;
+    private final TemplateWriter settingsGradleTemplate;
+    private final TemplateWriter buildGradleTemplate;
+    private final TemplateWriter checkTaskDefTemplate;
+    private final TemplateWriter componentTemplate;
+    private final TemplateWriter moduleTemplate;
+    private final TemplateWriter instanceTemplate;
+    private final TemplateWriter commandDefTemplate;
+
     private final Parser parserCompiler;
     private final Styler stylerCompiler;
     private final StrategoRuntime strategoRuntimeCompiler;
     private final ConstraintAnalyzer constraintAnalyzerCompiler;
 
-    private AdapterProject(
-        Template buildGradleTemplate,
-        Template settingsGradleTemplate,
-        Template checkTaskDefTemplate,
-        Template componentTemplate,
-        Template moduleTemplate,
-        Template instanceTemplate,
-        Template commandDefTemplate,
-        ResourceService resourceService,
-        Charset charset,
+    public AdapterProject(
+        TemplateCompiler templateCompiler,
         Parser parserCompiler,
         Styler stylerCompiler,
         StrategoRuntime strategoRuntimeCompiler,
         ConstraintAnalyzer constraintAnalyzerCompiler
     ) {
-        this.settingsGradleTemplate = settingsGradleTemplate;
-        this.componentTemplate = componentTemplate;
-        this.moduleTemplate = moduleTemplate;
-        this.instanceTemplate = instanceTemplate;
-        this.checkTaskDefTemplate = checkTaskDefTemplate;
-        this.commandDefTemplate = commandDefTemplate;
-        this.resourceService = resourceService;
-        this.buildGradleTemplate = buildGradleTemplate;
-        this.charset = charset;
+        this.settingsGradleTemplate = templateCompiler.getOrCompileToWriter("gradle_project/settings.gradle.kts.mustache");
+        this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("adapter_project/build.gradle.kts.mustache");
+        this.checkTaskDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/CheckTaskDef.java.mustache");
+        this.componentTemplate = templateCompiler.getOrCompileToWriter("adapter_project/Component.java.mustache");
+        this.moduleTemplate = templateCompiler.getOrCompileToWriter("adapter_project/Module.java.mustache");
+        this.instanceTemplate = templateCompiler.getOrCompileToWriter("adapter_project/Instance.java.mustache");
+        this.commandDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/CommandDef.java.mustache");
+
         this.parserCompiler = parserCompiler;
         this.stylerCompiler = stylerCompiler;
         this.strategoRuntimeCompiler = strategoRuntimeCompiler;
         this.constraintAnalyzerCompiler = constraintAnalyzerCompiler;
     }
 
-    public static AdapterProject fromClassLoaderResources(
-        ResourceService resourceService,
-        Charset charset,
-        Parser parserCompiler,
-        Styler stylerCompiler,
-        StrategoRuntime strategoRuntimeCompiler,
-        ConstraintAnalyzer constraintAnalyzerCompiler
-    ) {
-        final TemplateCompiler templateCompiler = new TemplateCompiler(AdapterProject.class, resourceService, charset);
-        return new AdapterProject(
-            templateCompiler.getOrCompile("adapter_project/build.gradle.kts.mustache"),
-            templateCompiler.getOrCompile("gradle_project/settings.gradle.kts.mustache"),
-            templateCompiler.getOrCompile("adapter_project/CheckTaskDef.java.mustache"),
-            templateCompiler.getOrCompile("adapter_project/Component.java.mustache"),
-            templateCompiler.getOrCompile("adapter_project/Module.java.mustache"),
-            templateCompiler.getOrCompile("adapter_project/Instance.java.mustache"),
-            templateCompiler.getOrCompile("adapter_project/CommandDef.java.mustache"),
-            resourceService,
-            charset,
-            parserCompiler,
-            stylerCompiler,
-            strategoRuntimeCompiler,
-            constraintAnalyzerCompiler
-        );
-    }
-
-
     public Output compile(Input input) throws IOException {
         final Shared shared = input.shared();
 
-        resourceService.getHierarchicalResource(input.gradleGenDirectory()).ensureDirectoryExists();
-
-        // build.gradle.kts
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.buildGradleKtsFile()), charset)) {
+        // Gradle files
+        try {
+            // settings.gradle.kts (if present)
+            input.settingsGradleKtsFile().ifPresent((f) -> {
+                try {
+                    settingsGradleTemplate.write(input, f);
+                } catch(IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            });
+        } catch(UncheckedIOException e) {
+            throw e.getCause();
+        }
+        {
             final HashMap<String, Object> map = new HashMap<>();
             final ArrayList<GradleRepository> repositories = new ArrayList<>(shared.defaultRepositories());
             map.put("repositoryCodes", repositories.stream().map(GradleRepository::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
@@ -122,22 +92,7 @@ public class AdapterProject {
             dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
             dependencies.add(GradleConfiguredDependency.annotationProcessor(shared.daggerCompilerDep()));
             map.put("dependencyCodes", dependencies.stream().map(GradleConfiguredDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
-            buildGradleTemplate.execute(input, map, writer);
-            writer.flush();
-        }
-
-        try {
-            // settings.gradle.kts (if present)
-            input.settingsGradleKtsFile().ifPresent((f) -> {
-                try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(f), charset)) {
-                    settingsGradleTemplate.execute(input, writer);
-                    writer.flush();
-                } catch(IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            });
-        } catch(UncheckedIOException e) {
-            throw e.getCause();
+            buildGradleTemplate.write(input, map, input.buildGradleKtsFile());
         }
 
         // Run adapter project compilers
@@ -171,32 +126,6 @@ public class AdapterProject {
             throw e.getCause();
         }
 
-        final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        resourceService.getHierarchicalResource(classesGenDirectory).ensureDirectoryExists();
-
-        // *CheckTaskDef.java
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.checkTaskDef().file(classesGenDirectory)).createParents(), charset)) {
-            checkTaskDefTemplate.execute(input, writer);
-            writer.flush();
-        }
-
-        // *Component.java
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genComponent().file(classesGenDirectory)).createParents(), charset)) {
-            componentTemplate.execute(input, writer);
-            writer.flush();
-        }
-
-        // *CommandDef.java
-        for(CommandDefRepr commandDef : input.commandDefs()) {
-            try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(commandDef.type().file(classesGenDirectory)).createParents(), charset)) {
-                final UniqueNamer uniqueNamer = new UniqueNamer();
-                final HashMap<String, Object> map = new HashMap<>();
-                map.put("taskDefInjection", uniqueNamer.makeUnique(commandDef.taskDefType()));
-                commandDefTemplate.execute(commandDef, map, writer);
-                writer.flush();
-            }
-        }
-
         // Collect all task definitions.
         final ArrayList<TypeInfo> allTaskDefs = new ArrayList<>(input.taskDefs());
         allTaskDefs.add(input.parser().tokenizeTaskDef());
@@ -211,8 +140,18 @@ public class AdapterProject {
         constraintAnalyzerOutput.ifPresent(o -> allTaskDefs.addAll(o.additionalTaskDefs()));
         allTaskDefs.add(input.checkTaskDef());
 
-        // *Module.java
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genModule().file(classesGenDirectory)).createParents(), charset)) {
+        // Class files
+        final ResourcePath classesGenDirectory = input.classesGenDirectory();
+        checkTaskDefTemplate.write(input, input.checkTaskDef().file(classesGenDirectory));
+        componentTemplate.write(input, input.genComponent().file(classesGenDirectory));
+        for(CommandDefRepr commandDef : input.commandDefs()) {
+            final UniqueNamer uniqueNamer = new UniqueNamer();
+            final HashMap<String, Object> map = new HashMap<>();
+            map.put("taskDefInjection", uniqueNamer.makeUnique(commandDef.taskDefType()));
+            commandDefTemplate.write(commandDef, map, commandDef.type().file(classesGenDirectory));
+        }
+
+        {
             final UniqueNamer uniqueNamer = new UniqueNamer();
             final HashMap<String, Object> map = new HashMap<>();
             map.put("providedTaskDefs", allTaskDefs.stream().map(uniqueNamer::makeUnique).collect(Collectors.toList()));
@@ -220,12 +159,9 @@ public class AdapterProject {
             map.put("providedCommandDefs", input.commandDefs().stream().map(CommandDefRepr::type).map(uniqueNamer::makeUnique).collect(Collectors.toList()));
             uniqueNamer.reset(); // New method scope
             map.put("providedAutoCommandDefs", input.autoCommandDefs().stream().map((c) -> uniqueNamer.makeUnique(c, c.commandDef().asVariableId())).collect(Collectors.toList()));
-            moduleTemplate.execute(input, map, writer);
-            writer.flush();
+            moduleTemplate.write(input, map, input.genModule().file(classesGenDirectory));
         }
-
-        // *Instance.java
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genInstance().file(classesGenDirectory)).createParents(), charset)) {
+        {
             final UniqueNamer uniqueNamer = new UniqueNamer();
             uniqueNamer.reserve("fileExtensions");
             uniqueNamer.reserve("commandDefs");
@@ -267,8 +203,7 @@ public class AdapterProject {
                 out.write(name);
             });
 
-            instanceTemplate.execute(input, map, writer);
-            writer.flush();
+            instanceTemplate.write(input, map, input.genInstance().file(classesGenDirectory));
         }
 
         return Output.builder()

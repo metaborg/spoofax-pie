@@ -13,12 +13,12 @@ class ConstraintAnalyzerTest extends TestBase {
         final ConstraintAnalyzer.Input input = TigerInputs.constraintAnalyzer(shared);
 
         constraintAnalyzerCompiler.compileLanguageProject(input);
-        fileAssertions.scopedExists(input.languageGenDirectory(), (s) -> {
+        fileAssertions.scopedExists(input.languageClassesGenDirectory(), (s) -> {
             s.assertPublicJavaClass(input.genConstraintAnalyzer(), "TigerConstraintAnalyzer");
             s.assertPublicJavaClass(input.genFactory(), "TigerConstraintAnalyzerFactory");
         });
         constraintAnalyzerCompiler.compileAdapterProject(input);
-        fileAssertions.scopedExists(input.adapterGenDirectory(), (s) -> {
+        fileAssertions.scopedExists(input.adapterClassesGenDirectory(), (s) -> {
             s.assertPublicJavaClass(input.analyzeTaskDef(), "TigerAnalyze");
         });
     }

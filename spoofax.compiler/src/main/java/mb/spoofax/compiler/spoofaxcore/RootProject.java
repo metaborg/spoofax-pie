@@ -1,16 +1,13 @@
 package mb.spoofax.compiler.spoofaxcore;
 
-import com.samskivert.mustache.Template;
-import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.GradleRepository;
-import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.TemplateCompiler;
+import mb.spoofax.compiler.util.TemplateWriter;
 import org.immutables.value.Value;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,51 +15,30 @@ import java.util.stream.Collectors;
 
 @Value.Enclosing
 public class RootProject {
-    private final Template settingsGradleTemplate;
-    private final Template buildGradleTemplate;
-    private final ResourceService resourceService;
-    private final Charset charset;
+    private final TemplateWriter settingsGradleTemplate;
+    private final TemplateWriter buildGradleTemplate;
 
-
-    private RootProject(Template settingsGradleTemplate, Template buildGradleTemplate, ResourceService resourceService, Charset charset) {
-        this.resourceService = resourceService;
-        this.charset = charset;
-        this.settingsGradleTemplate = settingsGradleTemplate;
-        this.buildGradleTemplate = buildGradleTemplate;
+    public RootProject(TemplateCompiler templateCompiler) {
+        this.settingsGradleTemplate = templateCompiler.getOrCompileToWriter("root_project/settings.gradle.kts.mustache");
+        this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("root_project/build.gradle.kts.mustache");
     }
-
-    public static RootProject fromClassLoaderResources(ResourceService resourceService, Charset charset) {
-        final TemplateCompiler templateCompiler = new TemplateCompiler(RootProject.class, resourceService, charset);
-        return new RootProject(
-            templateCompiler.getOrCompile("root_project/settings.gradle.kts.mustache"),
-            templateCompiler.getOrCompile("root_project/build.gradle.kts.mustache"),
-            resourceService,
-            charset
-        );
-    }
-
 
     public Output compile(Input input) throws IOException {
         final Shared shared = input.shared();
 
-        resourceService.getHierarchicalResource(shared.rootProject().baseDirectory()).ensureDirectoryExists();
-
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.settingsGradleKtsFile()), charset)) {
+        {
             final HashMap<String, Object> map = new HashMap<>();
             final ArrayList<GradleRepository> pluginRepositories = new ArrayList<>(shared.defaultPluginRepositories());
             map.put("pluginRepositoryCodes", pluginRepositories.stream().map(GradleRepository::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
             final ArrayList<String> includedProjects = new ArrayList<>(input.includedProjects());
             map.put("includedProjects", includedProjects);
-            settingsGradleTemplate.execute(input, map, writer);
-            writer.flush();
+            settingsGradleTemplate.write(input, map, input.settingsGradleKtsFile());
         }
-
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.buildGradleKtsFile()), charset)) {
+        {
             final HashMap<String, Object> map = new HashMap<>();
             final ArrayList<GradleRepository> repositories = new ArrayList<>(shared.defaultRepositories());
             map.put("repositoryCodes", repositories.stream().map(GradleRepository::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
-            buildGradleTemplate.execute(input, map, writer);
-            writer.flush();
+            buildGradleTemplate.write(input, map, input.buildGradleKtsFile());
         }
 
         return Output.builder().fromInput(input).build();

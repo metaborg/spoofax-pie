@@ -13,7 +13,7 @@ class StrategoRuntimeTest extends TestBase {
         final StrategoRuntime.Input input = TigerInputs.strategoRuntime(shared);
 
         strategoRuntimeCompiler.compileLanguageProject(input);
-        fileAssertions.scopedExists(input.languageGenDirectory(), (s) -> {
+        fileAssertions.scopedExists(input.languageClassesGenDirectory(), (s) -> {
             s.assertPublicJavaClass(input.genFactory(), "TigerStrategoRuntimeBuilderFactory");
         });
     }

@@ -36,13 +36,13 @@ class ParserTest extends TestBase {
         final Parser.Input input = TigerInputs.parser(shared);
 
         parserCompiler.compileLanguageProject(input);
-        fileAssertions.scopedExists(input.languageGenDirectory(), (s) -> {
+        fileAssertions.scopedExists(input.languageClassesGenDirectory(), (s) -> {
             s.assertPublicJavaClass(input.genTable(), "TigerParseTable");
             s.assertPublicJavaClass(input.genParser(), "TigerParser");
             s.assertPublicJavaClass(input.genFactory(), "TigerParserFactory");
         });
         parserCompiler.compileAdapterProject(input);
-        fileAssertions.scopedExists(input.adapterGenDirectory(), (s) -> {
+        fileAssertions.scopedExists(input.adapterClassesGenDirectory(), (s) -> {
             s.assertPublicJavaClass(input.genParseTaskDef(), "TigerParse");
             s.assertPublicJavaClass(input.tokenizeTaskDef(), "TigerTokenize");
         });
@@ -60,13 +60,13 @@ class ParserTest extends TestBase {
             .build();
 
         parserCompiler.compileLanguageProject(input);
-        fileAssertions.scopedNotExists(input.languageGenDirectory(), (s) -> {
+        fileAssertions.scopedNotExists(input.languageClassesGenDirectory(), (s) -> {
             s.assertNotExists(input.genTable());
             s.assertNotExists(input.genParser());
             s.assertNotExists(input.genFactory());
         });
         parserCompiler.compileAdapterProject(input);
-        fileAssertions.scopedNotExists(input.adapterGenDirectory(), (s) -> {
+        fileAssertions.scopedNotExists(input.adapterClassesGenDirectory(), (s) -> {
             s.assertNotExists(input.genParseTaskDef());
             s.assertNotExists(input.tokenizeTaskDef());
         });

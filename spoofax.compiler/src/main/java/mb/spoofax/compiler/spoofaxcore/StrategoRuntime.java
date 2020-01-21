@@ -1,62 +1,32 @@
 package mb.spoofax.compiler.spoofaxcore;
 
-import com.samskivert.mustache.Template;
-import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
-import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.TemplateCompiler;
+import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
 import org.immutables.value.Value;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Optional;
 
 @Value.Enclosing
 public class StrategoRuntime {
-    private final Template factoryTemplate;
-    private final ResourceService resourceService;
-    private final Charset charset;
+    private final TemplateWriter factoryTemplate;
 
-
-    private StrategoRuntime(
-        Template factoryTemplate,
-        ResourceService resourceService,
-        Charset charset
-    ) {
-        this.resourceService = resourceService;
-        this.factoryTemplate = factoryTemplate;
-        this.charset = charset;
+    public StrategoRuntime(TemplateCompiler templateCompiler) {
+        this.factoryTemplate = templateCompiler.getOrCompileToWriter("stratego_runtime/StrategoRuntimeBuilderFactory.java.mustache");
     }
-
-    public static StrategoRuntime fromClassLoaderResources(
-        ResourceService resourceService,
-        Charset charset
-    ) {
-        final TemplateCompiler templateCompiler = new TemplateCompiler(StrategoRuntime.class, resourceService, charset);
-        return new StrategoRuntime(
-            templateCompiler.getOrCompile("stratego_runtime/StrategoRuntimeBuilderFactory.java.mustache"),
-            resourceService,
-            charset
-        );
-    }
-
 
     public LanguageProjectOutput compileLanguageProject(Input input) throws IOException {
         final LanguageProjectOutput output = LanguageProjectOutput.builder().fromInput(input).build();
         if(input.classKind().isManualOnly()) return output; // Nothing to generate: return.
 
-        final ResourcePath genDirectory = input.languageGenDirectory();
-        resourceService.getHierarchicalResource(genDirectory).ensureDirectoryExists();
-
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genFactory().file(genDirectory)).createParents(), charset)) {
-            factoryTemplate.execute(input, writer);
-            writer.flush();
-        }
+        final ResourcePath classesGenDirectory = input.languageClassesGenDirectory();
+        factoryTemplate.write(input, input.genFactory().file(classesGenDirectory));
 
         return output;
     }
@@ -110,7 +80,7 @@ public class StrategoRuntime {
 
         /// Language project classes
 
-        default ResourcePath languageGenDirectory() {
+        default ResourcePath languageClassesGenDirectory() {
             return shared().languageProject().genSourceSpoofaxJavaDirectory();
         }
 

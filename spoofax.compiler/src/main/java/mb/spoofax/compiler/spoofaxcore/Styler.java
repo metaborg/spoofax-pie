@@ -1,84 +1,40 @@
 package mb.spoofax.compiler.spoofaxcore;
 
-import com.samskivert.mustache.Template;
-import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
-import mb.spoofax.compiler.util.ResourceWriter;
 import mb.spoofax.compiler.util.TemplateCompiler;
+import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
 import org.immutables.value.Value;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Optional;
 
 @Value.Enclosing
 public class Styler {
-    private final Template rulesTemplate;
-    private final Template stylerTemplate;
-    private final Template factoryTemplate;
-    private final Template styleTaskDefTemplate;
-    private final ResourceService resourceService;
-    private final Charset charset;
+    private final TemplateWriter rulesTemplate;
+    private final TemplateWriter stylerTemplate;
+    private final TemplateWriter factoryTemplate;
+    private final TemplateWriter styleTaskDefTemplate;
 
-
-    private Styler(
-        Template rulesTemplate,
-        Template stylerTemplate,
-        Template factoryTemplate,
-        Template styleTaskDefTemplate,
-        ResourceService resourceService,
-        Charset charset
-    ) {
-        this.styleTaskDefTemplate = styleTaskDefTemplate;
-        this.resourceService = resourceService;
-        this.rulesTemplate = rulesTemplate;
-        this.stylerTemplate = stylerTemplate;
-        this.factoryTemplate = factoryTemplate;
-        this.charset = charset;
+    public Styler(TemplateCompiler templateCompiler) {
+        this.rulesTemplate = templateCompiler.getOrCompileToWriter("styler/StylingRules.java.mustache");
+        this.stylerTemplate = templateCompiler.getOrCompileToWriter("styler/Styler.java.mustache");
+        this.factoryTemplate = templateCompiler.getOrCompileToWriter("styler/StylerFactory.java.mustache");
+        this.styleTaskDefTemplate = templateCompiler.getOrCompileToWriter("styler/StyleTaskDef.java.mustache");
     }
-
-    public static Styler fromClassLoaderResources(
-        ResourceService resourceService,
-        Charset charset
-    ) {
-        final TemplateCompiler templateCompiler = new TemplateCompiler(Styler.class, resourceService, charset);
-        return new Styler(
-            templateCompiler.getOrCompile("styler/StylingRules.java.mustache"),
-            templateCompiler.getOrCompile("styler/Styler.java.mustache"),
-            templateCompiler.getOrCompile("styler/StylerFactory.java.mustache"),
-            templateCompiler.getOrCompile("styler/StyleTaskDef.java.mustache"),
-            resourceService,
-            charset
-        );
-    }
-
 
     public LanguageProjectOutput compileLanguageProject(Input input) throws IOException {
         final LanguageProjectOutput output = LanguageProjectOutput.builder().from(input).build();
         if(input.classKind().isManualOnly()) return output; // Nothing to generate: return.
 
-        final ResourcePath genDirectory = input.languageGenDirectory();
-        resourceService.getHierarchicalResource(genDirectory).ensureDirectoryExists();
-
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genRules().file(genDirectory)).createParents(), charset)) {
-            rulesTemplate.execute(input, writer);
-            writer.flush();
-        }
-
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genStyler().file(genDirectory)).createParents(), charset)) {
-            stylerTemplate.execute(input, writer);
-            writer.flush();
-        }
-
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genFactory().file(genDirectory)).createParents(), charset)) {
-            factoryTemplate.execute(input, writer);
-            writer.flush();
-        }
+        final ResourcePath classesGenDirectory = input.languageClassesGenDirectory();
+        rulesTemplate.write(input, input.genRules().file(classesGenDirectory));
+        stylerTemplate.write(input, input.genStyler().file(classesGenDirectory));
+        factoryTemplate.write(input, input.genFactory().file(classesGenDirectory));
 
         return output;
     }
@@ -87,13 +43,8 @@ public class Styler {
         final AdapterProjectOutput output = AdapterProjectOutput.builder().fromInput(input).build();
         if(input.classKind().isManualOnly()) return output; // Nothing to generate: return.
 
-        final ResourcePath genDirectory = input.adapterGenDirectory();
-        resourceService.getHierarchicalResource(genDirectory).ensureDirectoryExists();
-
-        try(final ResourceWriter writer = new ResourceWriter(resourceService.getHierarchicalResource(input.genStyleTaskDef().file(genDirectory)).createParents(), charset)) {
-            styleTaskDefTemplate.execute(input, writer);
-            writer.flush();
-        }
+        final ResourcePath classesGenDirectory = input.adapterClassesGenDirectory();
+        styleTaskDefTemplate.write(input, input.genStyleTaskDef().file(classesGenDirectory));
 
         return output;
     }
@@ -133,7 +84,7 @@ public class Styler {
 
         /// Language project classes
 
-        default ResourcePath languageGenDirectory() {
+        default ResourcePath languageClassesGenDirectory() {
             return shared().languageProject().genSourceSpoofaxJavaDirectory();
         }
 
@@ -176,7 +127,7 @@ public class Styler {
 
         /// Adapter project classes
 
-        @Value.Derived default ResourcePath adapterGenDirectory() {
+        @Value.Derived default ResourcePath adapterClassesGenDirectory() {
             return shared().adapterProject().genSourceSpoofaxJavaDirectory();
         }
 
