@@ -1,29 +1,18 @@
 package mb.spoofax.compiler.spoofaxcore;
 
-import mb.resource.DefaultResourceService;
-import mb.resource.ResourceService;
 import mb.resource.fs.FSPath;
-import mb.resource.fs.FSResourceRegistry;
 import mb.spoofax.compiler.spoofaxcore.tiger.TigerInputs;
-import mb.spoofax.compiler.spoofaxcore.util.FileAssertions;
 import mb.spoofax.compiler.util.GradleDependency;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-
-class EclipseProjectTest {
+class EclipseProjectTest extends TestBase {
     @Test void testCompiler(@TempDir Path temporaryDirectoryPath) throws IOException {
-        final ResourceService resourceService = new DefaultResourceService(new FSResourceRegistry());
         final FSPath baseDirectory = new FSPath(temporaryDirectoryPath);
-        final Charset charset = StandardCharsets.UTF_8;
-
         final Shared shared = TigerInputs.shared(baseDirectory);
 
         // Compile language project, as adapter project depends on it.
@@ -34,7 +23,7 @@ class EclipseProjectTest {
         final LanguageProject languageProjectCompiler = LanguageProject.fromClassLoaderResources(resourceService, charset, parserCompiler, stylerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler);
         languageProjectCompiler.compile(TigerInputs.languageProject(shared));
 
-        // Compile adapter project, as CLI project depends on it.
+        // Compile adapter project, as Eclipse project depends on it.
         final AdapterProject.Input adapterProjectInput = TigerInputs.adapterProjectBuilder(shared)
             .languageProjectDependency(GradleDependency.project(":" + shared.languageProject().coordinate().artifactId()))
             .build();
@@ -42,20 +31,18 @@ class EclipseProjectTest {
         final AdapterProject adapterProjectCompiler = AdapterProject.fromClassLoaderResources(resourceService, charset, parserCompiler, stylerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler);
         adapterProjectCompiler.compile(adapterProjectInput);
 
+        // Compile Eclipse project and test generated files.
         final EclipseProject.Input input = TigerInputs.eclipseProjectBuilder(shared, adapterProjectInput)
             .adapterProjectDependency(GradleDependency.project(":" + shared.adapterProject().coordinate().artifactId()))
             .build();
         final EclipseProject compiler = new EclipseProject(new TemplateCompiler(EclipseProject.class, resourceService, charset));
         compiler.compile(input);
+        fileAssertions.asserts(input.buildGradleKtsFile(), (a) -> a.assertContains("org.metaborg.coronium.bundle"));
+        fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {
+            s.assertPublicJavaClass(input.plugin(), "TigerPlugin");
+        });
 
-        assertFalse(input.settingsGradleKtsFile().isPresent());
-
-        final FileAssertions buildGradleKtsFile = new FileAssertions(resourceService.getHierarchicalResource(input.buildGradleKtsFile()));
-        buildGradleKtsFile.assertExists();
-        buildGradleKtsFile.assertContains("org.metaborg.coronium.bundle");
-
-        // Compile root project, which links together language and adapter project.
-        final RootProject rootProjectCompiler = RootProject.fromClassLoaderResources(resourceService, charset);
+        // Compile root project, which links together language and adapter project, and build it.
         final RootProject.Output rootProjectOutput = rootProjectCompiler.compile(TigerInputs.rootProjectBuilder(shared)
             .addIncludedProjects(
                 shared.languageProject().coordinate().artifactId(),
@@ -64,12 +51,6 @@ class EclipseProjectTest {
             )
             .build()
         );
-
-        // Run Gradle build assertion on the root project.
-        final FileAssertions rootProjectDirectory = new FileAssertions(rootProjectOutput.baseDirectory(), resourceService);
-        rootProjectDirectory.assertExists();
-        rootProjectDirectory.assertGradleBuild("buildAll");
-
-        // TODO: assert generated file contents
+        fileAssertions.asserts(rootProjectOutput.baseDirectory(), (a) -> a.assertGradleBuild("buildAll"));
     }
 }

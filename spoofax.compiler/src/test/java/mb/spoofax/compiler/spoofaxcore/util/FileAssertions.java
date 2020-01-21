@@ -1,74 +1,61 @@
 package mb.spoofax.compiler.spoofaxcore.util;
 
 import mb.resource.ResourceService;
-import mb.resource.fs.FSResource;
-import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.gradle.tooling.GradleConnector;
-import org.gradle.tooling.ProjectConnection;
 
-import java.io.File;
 import java.io.IOException;
-
-import static org.junit.jupiter.api.Assertions.*;
+import java.io.UncheckedIOException;
+import java.util.function.Consumer;
 
 public class FileAssertions {
-    private final HierarchicalResource resource;
-    private @Nullable String string;
+    private final ResourceService resourceService;
+    private final JavaParser javaParser;
 
-    public FileAssertions(HierarchicalResource resource) {
-        this.resource = resource;
+    public FileAssertions(ResourceService resourceService, JavaParser javaParser) {
+        this.resourceService = resourceService;
+        this.javaParser = javaParser;
     }
 
-    public FileAssertions(ResourcePath path, ResourceService resourceService) {
-        this.resource = resourceService.getHierarchicalResource(path);
+    public FileAssertions(ResourceService resourceService) {
+        this(resourceService, new JavaParser());
     }
 
-
-    public void assertName(String expected) {
-        assertEquals(expected, resource.getLeaf());
-    }
-
-    public void assertExists() throws IOException {
-        assertTrue(resource.exists());
-    }
-
-    public void assertNotExists() throws IOException {
-        assertFalse(resource.exists());
-    }
-
-    public void assertContains(String s) throws IOException {
-        assertTrue(readString().contains(s));
-    }
-
-    public void assertJavaParses(JavaParser parser) throws IOException {
-        parser.assertParses(readString());
-    }
-
-    public void assertGradleBuild(String... tasks) {
-        final File projectDirectory = ((FSResource)resource).getJavaPath().toFile();
-        // noinspection CaughtExceptionImmediatelyRethrown
-        try(final ProjectConnection connection = GradleConnector.newConnector()
-            .forProjectDirectory(projectDirectory)
-            .connect()
-        ) {
-            //noinspection UnstableApiUsage
-            connection.newBuild()
-                .forTasks(tasks)
-                .addArguments("--quiet") // Only print important information messages and errors.
-                .setStandardOutput(System.out).setStandardError(System.err) // Redirect standard out and err.
-                .run();
-        } catch(Throwable e) {
-            throw e; // Place breakpoint here to debug failures.
+    public void asserts(ResourcePath filePath, Consumer<FileAssertion> consumer) throws IOException {
+        final FileAssertion assertion = new FileAssertion(filePath, resourceService, javaParser);
+        try {
+            consumer.accept(assertion);
+        } catch(UncheckedIOException e) {
+            throw e.getCause();
         }
     }
 
 
-    private String readString() throws IOException {
-        if(string == null) {
-            string = resource.readString();
+    public void assertPublicJavaClass(ResourcePath filePath, String className) throws IOException {
+        asserts(filePath, (a) -> a.assertPublicJavaClass(className));
+    }
+
+    public void assertPublicJavaInterface(ResourcePath filePath, String className) throws IOException {
+        asserts(filePath, (a) -> a.assertPublicJavaInterface(className));
+    }
+
+
+    public void scopedExists(ResourcePath dir, Consumer<ScopedFileAssertions> consumer) throws IOException {
+        asserts(dir, FileAssertion::assertExists);
+        final ScopedFileAssertions assertions = new ScopedFileAssertions(this, dir);
+        try {
+            consumer.accept(assertions);
+        } catch(UncheckedIOException e) {
+            throw e.getCause();
         }
-        return string;
+    }
+
+    public void scopedNotExists(ResourcePath dir, Consumer<ScopedFileAssertions> consumer) throws IOException {
+        asserts(dir, FileAssertion::assertNotExists);
+        final ScopedFileAssertions assertions = new ScopedFileAssertions(this, dir);
+        try {
+            consumer.accept(assertions);
+        } catch(UncheckedIOException e) {
+            throw e.getCause();
+        }
     }
 }

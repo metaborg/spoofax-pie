@@ -1,59 +1,26 @@
 package mb.spoofax.compiler.spoofaxcore;
 
-import com.google.common.jimfs.Configuration;
-import com.google.common.jimfs.Jimfs;
-import mb.resource.DefaultResourceService;
-import mb.resource.ResourceService;
 import mb.resource.fs.FSPath;
-import mb.resource.fs.FSResourceRegistry;
-import mb.resource.hierarchical.HierarchicalResource;
-import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.spoofaxcore.util.FileAssertions;
-import mb.spoofax.compiler.spoofaxcore.util.JavaParser;
 import mb.spoofax.compiler.spoofaxcore.tiger.TigerInputs;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystem;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-class StylerTest {
-    @Test void testCompilerDefault() throws IOException {
-        final JavaParser javaParser = new JavaParser();
-        final ResourceService resourceService = new DefaultResourceService(new FSResourceRegistry());
-        final FileSystem fileSystem = Jimfs.newFileSystem(Configuration.unix());
+class StylerTest extends TestBase {
+    @Test void testCompilerDefaults() throws IOException {
         final FSPath baseDirectory = new FSPath(fileSystem.getPath("repo"));
-
         final Shared shared = TigerInputs.shared(baseDirectory);
         final Styler.Input input = TigerInputs.styler(shared);
 
-        final Charset charset = StandardCharsets.UTF_8;
-        final Styler compiler = Styler.fromClassLoaderResources(resourceService, charset);
-        final Styler.LanguageProjectOutput output = compiler.compileLanguageProject(input);
-
-        final ResourcePath genPath = input.languageGenDirectory();
-        final HierarchicalResource genDirectory = resourceService.getHierarchicalResource(genPath);
-        assertTrue(genDirectory.exists());
-
-        final FileAssertions genStylingRulesFile = new FileAssertions(resourceService.getHierarchicalResource(input.genRules().file(genPath)));
-        genStylingRulesFile.assertName("TigerStylingRules.java");
-        genStylingRulesFile.assertExists();
-        genStylingRulesFile.assertContains("class TigerStylingRules");
-        genStylingRulesFile.assertJavaParses(javaParser);
-
-        final FileAssertions genStylerFile = new FileAssertions(resourceService.getHierarchicalResource(input.genStyler().file(genPath)));
-        genStylerFile.assertName("TigerStyler.java");
-        genStylerFile.assertExists();
-        genStylerFile.assertContains("class TigerStyler");
-        genStylerFile.assertJavaParses(javaParser);
-
-        final FileAssertions genStylerFactoryFile = new FileAssertions(resourceService.getHierarchicalResource(input.genFactory().file(genPath)));
-        genStylerFactoryFile.assertName("TigerStylerFactory.java");
-        genStylerFactoryFile.assertExists();
-        genStylerFactoryFile.assertContains("class TigerStylerFactory");
-        genStylerFactoryFile.assertJavaParses(javaParser);
+        stylerCompiler.compileLanguageProject(input);
+        fileAssertions.scopedExists(input.languageGenDirectory(), (s) -> {
+            s.assertPublicJavaClass(input.genRules(), "TigerStylingRules");
+            s.assertPublicJavaClass(input.genStyler(), "TigerStyler");
+            s.assertPublicJavaClass(input.genFactory(), "TigerStylerFactory");
+        });
+        stylerCompiler.compileAdapterProject(input);
+        fileAssertions.scopedExists(input.adapterGenDirectory(), (s) -> {
+            s.assertPublicJavaClass(input.genStyleTaskDef(), "TigerStyle");
+        });
     }
 }

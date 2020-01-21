@@ -22,7 +22,6 @@ import mb.spoofax.compiler.spoofaxcore.RootProject;
 import mb.spoofax.compiler.spoofaxcore.Shared;
 import mb.spoofax.compiler.spoofaxcore.StrategoRuntime;
 import mb.spoofax.compiler.spoofaxcore.Styler;
-import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.Conversion;
 import mb.spoofax.compiler.util.GradleDependency;
 import mb.spoofax.compiler.util.StringUtil;
@@ -291,7 +290,6 @@ public class TigerInputs {
             .adapterProject(adapterProject)
             ;
     }
-
 
 
     /// Root project compiler input
