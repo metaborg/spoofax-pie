@@ -30,6 +30,23 @@ public class {{genEclipseIdentifiers.id}} implements EclipseIdentifiers {
     }
 
 
+    @Override public String getBaseMarker() {
+        return "{{baseMarkerId}}";
+    }
+
+    @Override public String getInfoMarker() {
+        return "{{infoMarkerId}}";
+    }
+
+    @Override public String getWarningMarker() {
+        return "{{warningMarkerId}}";
+    }
+
+    @Override public String getErrorMarker() {
+        return "{{errorMarkerId}}";
+    }
+
+
     @Override public String getAddNatureCommand() {
         return "{{addNatureCommandId}}";
     }
@@ -46,24 +63,24 @@ public class {{genEclipseIdentifiers.id}} implements EclipseIdentifiers {
         return "{{unobserveCommandId}}";
     }
 
-    @Override public String getRunCommandCommand() {
-        return "{{runCommandCommandId}}";
+    @Override public String getRunCommand() {
+        return "{{runCommandId}}";
     }
 
 
-    @Override public String getBaseMarker() {
-        return "{{baseMarkerId}}";
+    @Override public String getResourceContextMenu() {
+        return "{{resourceContextMenuId}}";
     }
 
-    @Override public String getInfoMarker() {
-        return "{{infoMarkerId}}";
+    @Override public String getEditorContextMenu() {
+        return "{{editorContextMenuId}}";
     }
 
-    @Override public String getWarningMarker() {
-        return "{{warningMarkerId}}";
+    @Override public String getMainMenu() {
+        return "{{mainMenuId}}";
     }
 
-    @Override public String getErrorMarker() {
-        return "{{errorMarkerId}}";
+    @Override public String getMainMenuDynamic() {
+        return "{{mainMenuDynamicId}}";
     }
 }

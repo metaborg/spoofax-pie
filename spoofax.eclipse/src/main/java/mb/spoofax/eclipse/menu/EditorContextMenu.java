@@ -71,7 +71,7 @@ public class EditorContextMenu extends MenuShared {
         final EclipseIdentifiers identifiers = languageComponent.getEclipseIdentifiers();
         final MenuManager langMenu = new MenuManager(languageInstance.getDisplayName());
 
-        final String runCommandCommandId = identifiers.getRunCommandCommand();
+        final String runCommandCommandId = identifiers.getRunCommand();
         for(MenuItem menuItem : getMenuItems(languageInstance)) {
             menuItem.accept(new EclipseMenuItemVisitor(langMenu) {
                 @Override

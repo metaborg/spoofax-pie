@@ -202,7 +202,17 @@ public class EclipseProject {
 
         @Value.Default default String unobserveCommandId() { return pluginId() + ".unobserve"; }
 
-        @Value.Default default String runCommandCommandId() { return pluginId() + ".command"; }
+        @Value.Default default String runCommandId() { return pluginId() + ".runcommand"; }
+
+        @Value.Default default String baseMenuId() { return pluginId() + ".menu"; }
+
+        @Value.Default default String resourceContextMenuId() { return baseMenuId() + ".resource.context"; }
+
+        @Value.Default default String editorContextMenuId() { return baseMenuId() + ".editor.context"; }
+
+        @Value.Default default String mainMenuId() { return baseMenuId() + ".main"; }
+
+        @Value.Default default String mainMenuDynamicId() { return mainMenuId() + ".dynamic"; }
 
 
         Optional<ResourcePath> fileIconRelativePath();

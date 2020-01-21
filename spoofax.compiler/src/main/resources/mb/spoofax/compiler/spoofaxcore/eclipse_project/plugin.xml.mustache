@@ -136,24 +136,24 @@
   <extension point="org.eclipse.ui.menus">
     <!-- Project Explorer context menu -->
     <menuContribution locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
-      <dynamic id="tiger.eclipse.menu.resource.context" class="mb.tiger.eclipse.TigerResourceContextMenu"/>
+      <dynamic id="{{resourceContextMenuId}}" class="{{resourceContextMenu.qualifiedId}}"/>
     </menuContribution>
     <!-- Package Explorer context menu -->
     <menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=additions">
-      <dynamic id="tiger.eclipse.menu.resource.context" class="mb.tiger.eclipse.TigerResourceContextMenu"/>
+      <dynamic id="{{resourceContextMenuId}}" class="{{resourceContextMenu.qualifiedId}}"/>
     </menuContribution>
     <!-- Editor context menu -->
     <menuContribution locationURI="popup:#SpoofaxEditorContext?after=additions">
-      <dynamic id="tiger.eclipse.menu.editor.context" class="mb.tiger.eclipse.TigerEditorContextMenu"/>
+      <dynamic id="{{editorContextMenuId}}" class="{{editorContextMenu.qualifiedId}}"/>
     </menuContribution>
     <!-- Main menu -->
     <menuContribution locationURI="menu:org.eclipse.ui.main.menu">
-      <menu id="tiger.eclipse.menu.main" label="{{shared.name}}">
-        <dynamic id="tiger.eclipse.menu.main.dynamic" class="mb.tiger.eclipse.TigerMainMenu"/>
+      <menu id="{{mainMenuId}}" label="{{shared.name}}">
+        <dynamic id="{{mainMenuDynamicId}}" class="{{mainMenu.qualifiedId}}"/>
         <visibleWhen>
           <with variable="activeContexts">
             <iterate ifEmpty="false" operator="or">
-              <equals value="tiger.eclipse.context"/>
+              <equals value="{{contextId}}"/>
             </iterate>
           </with>
         </visibleWhen>
@@ -165,44 +165,44 @@
   <!-- Commands and Handlers -->
   <!-- Add/Remove Nature -->
   <extension point="org.eclipse.ui.commands">
-    <command id="tiger.eclipse.nature.add" name="Add {{shared.name}} nature"/>
-    <command id="tiger.eclipse.nature.remove" name="Remove {{shared.name}} nature"/>
+    <command id="{{addNatureCommandId}}" name="Add {{shared.name}} nature"/>
+    <command id="{{removeNatureCommandId}}" name="Remove {{shared.name}} nature"/>
   </extension>
   <extension point="org.eclipse.ui.handlers">
     <handler
-      commandId="tiger.eclipse.nature.add"
-      class="mb.tiger.eclipse.TigerAddNatureHandler"
+      commandId="{{addNatureCommandId}}"
+      class="{{addNatureHandler.qualifiedId}}"
     />
     <handler
-      commandId="tiger.eclipse.nature.remove"
-      class="mb.tiger.eclipse.TigerRemoveNatureHandler"
+      commandId="{{removeNatureCommandId}}"
+      class="{{removeNatureHandler.qualifiedId}}"
     />
   </extension>
   <!-- Observe/Unobserve -->
   <extension point="org.eclipse.ui.commands">
-    <command id="tiger.eclipse.observe" name="Observe file(s)"/>
-    <command id="tiger.eclipse.unobserve" name="Unobserve file(s)"/>
+    <command id="{{observeCommandId}}" name="Observe file(s) for {{shared.name}}-related tasks"/>
+    <command id="{{unobserveCommandId}}" name="Unobserve file(s) for {{shared.name}}-related tasks"/>
   </extension>
   <extension point="org.eclipse.ui.handlers">
     <handler
-      commandId="tiger.eclipse.observe"
-      class="mb.tiger.eclipse.TigerObserveHandler"
+      commandId="{{observeCommandId}}"
+      class="{{observeHandler.qualifiedId}}"
     />
     <handler
-      commandId="tiger.eclipse.unobserve"
-      class="mb.tiger.eclipse.TigerUnobserveHandler"
+      commandId="{{unobserveCommandId}}"
+      class="{{unobserveHandler.qualifiedId}}"
     />
   </extension>
   <!-- Transform -->
   <extension point="org.eclipse.ui.commands">
-    <command id="tiger.eclipse.command" name="Command">
+    <command id="{{runCommandId}}" name="Run {{shared.name}} command">
       <commandParameter id="data" name="Data" optional="false"/>
     </command>
   </extension>
   <extension point="org.eclipse.ui.handlers">
     <handler
-      commandId="tiger.eclipse.command"
-      class="mb.tiger.eclipse.TigerCommandHandler"
+      commandId="{{runCommandId}}"
+      class="{{runCommandHandler.qualifiedId}}"
     />
   </extension>
 </plugin>

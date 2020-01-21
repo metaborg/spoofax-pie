@@ -14,6 +14,15 @@ public interface EclipseIdentifiers {
     String getProjectBuilder();
 
 
+    String getBaseMarker();
+
+    String getInfoMarker();
+
+    String getWarningMarker();
+
+    String getErrorMarker();
+
+
     String getAddNatureCommand();
 
     String getRemoveNatureCommand();
@@ -22,14 +31,14 @@ public interface EclipseIdentifiers {
 
     String getUnobserveCommand();
 
-    String getRunCommandCommand();
+    String getRunCommand();
 
 
-    String getBaseMarker();
+    String getResourceContextMenu();
 
-    String getInfoMarker();
+    String getEditorContextMenu();
 
-    String getWarningMarker();
+    String getMainMenu();
 
-    String getErrorMarker();
+    String getMainMenuDynamic();
 }

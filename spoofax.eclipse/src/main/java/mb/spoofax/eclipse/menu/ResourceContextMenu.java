@@ -121,7 +121,7 @@ public abstract class ResourceContextMenu extends MenuShared {
         }
 
         // Transformations.
-        final String runCommandCommandId = identifiers.getRunCommandCommand();
+        final String runCommandCommandId = identifiers.getRunCommand();
         for(MenuItem menuItem : languageInstance.getResourceContextMenuItems()) {
             menuItem.accept(new EclipseMenuItemVisitor(langMenu) {
                 @Override
