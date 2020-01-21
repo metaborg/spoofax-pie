@@ -37,7 +37,7 @@ public class StrategoRuntime {
         ResourceService resourceService,
         Charset charset
     ) {
-        final TemplateCompiler templateCompiler = new TemplateCompiler(StrategoRuntime.class);
+        final TemplateCompiler templateCompiler = new TemplateCompiler(StrategoRuntime.class, resourceService, charset);
         return new StrategoRuntime(
             templateCompiler.getOrCompile("stratego_runtime/StrategoRuntimeBuilderFactory.java.mustache"),
             resourceService,

@@ -39,6 +39,12 @@ public interface Shared extends Serializable {
 
     ResourcePath baseDirectory();
 
+    @Value.Default default List<String> fileExtensions() {
+        final ArrayList<String> list = new ArrayList<>();
+        list.add(Conversion.nameToFileExtension(name()));
+        return list;
+    }
+
     @Value.Default default String classPrefix() {
         return Conversion.nameToJavaId(name());
     }

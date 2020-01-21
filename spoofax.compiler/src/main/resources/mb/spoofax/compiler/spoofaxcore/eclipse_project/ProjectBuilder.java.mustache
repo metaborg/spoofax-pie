@@ -3,7 +3,7 @@ package {{genProjectBuilder.packageId}};
 import mb.spoofax.eclipse.build.SpoofaxProjectBuilder;
 
 public class {{genProjectBuilder.id}} extends SpoofaxProjectBuilder {
-    public static final String id = {{plugin.qualifiedId}}.pluginId + ".builder";
+    public static final String id = "{{projectBuilderId}}";
 
     public {{genProjectBuilder.id}}() {
         super({{plugin.qualifiedId}}.getComponent());

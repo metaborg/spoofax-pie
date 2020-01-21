@@ -123,7 +123,7 @@
     id="nature"
   >
     <runtime>
-      <run class="mb.tiger.eclipse.TigerProjectNature"/>
+      <run class="mb.tiger.eclipse.TigerNature"/>
     </runtime>
     <builder id="tiger.eclipse.builder"/>
   </extension>

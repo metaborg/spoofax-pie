@@ -59,7 +59,7 @@ public class LanguageProject {
         StrategoRuntime strategoRuntimeCompiler,
         ConstraintAnalyzer constraintAnalyzerCompiler
     ) {
-        final TemplateCompiler templateCompiler = new TemplateCompiler(LanguageProject.class);
+        final TemplateCompiler templateCompiler = new TemplateCompiler(LanguageProject.class, resourceService, charset);
         return new LanguageProject(
             templateCompiler.getOrCompile("language_project/build.gradle.kts.mustache"),
             templateCompiler.getOrCompile("gradle_project/settings.gradle.kts.mustache"),

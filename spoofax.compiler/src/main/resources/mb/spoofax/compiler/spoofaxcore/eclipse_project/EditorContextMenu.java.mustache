@@ -1,0 +1,9 @@
+package {{genEditorContextMenu.packageId}};
+
+import mb.spoofax.eclipse.menu.EditorContextMenu;
+
+public class {{genEditorContextMenu.id}} extends EditorContextMenu {
+    public {{genEditorContextMenu.id}}() {
+        super({{plugin.qualifiedId}}.getComponent());
+    }
+}

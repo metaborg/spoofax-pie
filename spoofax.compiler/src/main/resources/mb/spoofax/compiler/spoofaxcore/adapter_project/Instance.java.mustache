@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.Set;
 
 public class {{genInstance.id}} implements LanguageInstance {
-    private final static SetView<String> fileExtensions = SetView.of({{#fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/fileExtensions}});
+    private final static SetView<String> fileExtensions = SetView.of({{#shared.fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/shared.fileExtensions}});
 
 {{#injected}}
     private final {{variable}};

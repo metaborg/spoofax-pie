@@ -84,7 +84,7 @@ public class AdapterProject {
         StrategoRuntime strategoRuntimeCompiler,
         ConstraintAnalyzer constraintAnalyzerCompiler
     ) {
-        final TemplateCompiler templateCompiler = new TemplateCompiler(AdapterProject.class);
+        final TemplateCompiler templateCompiler = new TemplateCompiler(AdapterProject.class, resourceService, charset);
         return new AdapterProject(
             templateCompiler.getOrCompile("adapter_project/build.gradle.kts.mustache"),
             templateCompiler.getOrCompile("gradle_project/settings.gradle.kts.mustache"),
@@ -305,8 +305,6 @@ public class AdapterProject {
         GradleDependency languageProjectDependency();
 
         List<GradleConfiguredDependency> additionalDependencies();
-
-        List<String> fileExtensions();
 
         List<TypeInfo> taskDefs();
 

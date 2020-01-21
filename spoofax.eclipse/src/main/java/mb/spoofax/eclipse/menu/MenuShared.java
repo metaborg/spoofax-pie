@@ -5,7 +5,7 @@ import mb.common.util.SerializationUtil;
 import mb.spoofax.core.language.command.CommandContext;
 import mb.spoofax.core.language.command.CommandRequest;
 import mb.spoofax.eclipse.command.CommandData;
-import mb.spoofax.eclipse.command.CommandHandler;
+import mb.spoofax.eclipse.command.RunCommandHandler;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -55,7 +55,7 @@ abstract class MenuShared extends CompoundContributionItem implements IWorkbench
         final CommandData data = new CommandData(commandRequest, contexts);
         final Map<String, String> parameters = new HashMap<>();
         final String serialized = SerializationUtil.serializeToString(data);
-        parameters.put(CommandHandler.dataParameterId, serialized);
+        parameters.put(RunCommandHandler.dataParameterId, serialized);
         return createCommand(commandId, displayName, parameters);
     }
 }

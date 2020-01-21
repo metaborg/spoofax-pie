@@ -9,12 +9,10 @@ import java.io.Serializable;
 public interface TypeInfo extends Serializable {
     class Builder extends ImmutableTypeInfo.Builder {}
 
-    static Builder builder() {
-        return new Builder();
-    }
+    static Builder builder() { return new Builder(); }
 
-    static ImmutableTypeInfo of(String packageId, String classId) {
-        return ImmutableTypeInfo.of(packageId, classId);
+    static ImmutableTypeInfo of(String packageId, String id) {
+        return ImmutableTypeInfo.of(packageId, id);
     }
 
     static ImmutableTypeInfo ofBoolean() {

@@ -1,0 +1,11 @@
+package {{genObserveHandler.packageId}};
+
+import mb.spoofax.eclipse.menu.ObserveHandler;
+
+public class {{genObserveHandler.id}} extends ObserveHandler {
+    public static final String commandId = "{{observeCommandId}}";
+
+    public {{genObserveHandler.id}}() {
+        super({{plugin.qualifiedId}}.getComponent());
+    }
+}

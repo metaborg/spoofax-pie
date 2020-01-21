@@ -10,7 +10,7 @@ val spoofaxCoreVersion = "2.6.0-SNAPSHOT"
 val picocliVersion = "4.0.4"
 val daggerVersion = "2.25.2"
 val derive4jVersion = "1.1.1"
-val immutablesVersion = "2.8.1"
+val immutablesVersion = "2.8.2"
 
 dependencies {
   constraints {

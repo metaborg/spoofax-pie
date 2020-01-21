@@ -10,10 +10,10 @@ public class TigerEclipseIdentifiers implements EclipseIdentifiers {
     }
 
     @Override public String getNature() {
-        return TigerProjectNature.id;
+        return TigerNature.id;
     }
 
-    @Override public String getBuilder() {
+    @Override public String getProjectBuilder() {
         return TigerProjectBuilder.id;
     }
 

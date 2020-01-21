@@ -64,10 +64,11 @@ class CliProjectTest {
             .build()
         );
 
-
         // Run Gradle build assertion on the root project.
         final FileAssertions rootProjectDirectory = new FileAssertions(rootProjectOutput.baseDirectory(), resourceService);
         rootProjectDirectory.assertExists();
         rootProjectDirectory.assertGradleBuild("buildAll");
+
+        // TODO: assert generated file contents
     }
 }

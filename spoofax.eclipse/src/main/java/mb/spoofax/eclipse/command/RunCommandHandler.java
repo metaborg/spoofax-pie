@@ -17,7 +17,7 @@ import org.eclipse.core.commands.ExecutionException;
 
 import java.util.HashMap;
 
-public class CommandHandler extends AbstractHandler {
+public class RunCommandHandler extends AbstractHandler {
     public final static String dataParameterId = "data";
 
     private final EclipseLanguageComponent languageComponent;
@@ -27,7 +27,7 @@ public class CommandHandler extends AbstractHandler {
     private final MapView<String, CommandDef> commandDefsPerId;
 
 
-    public CommandHandler(EclipseLanguageComponent languageComponent) {
+    public RunCommandHandler(EclipseLanguageComponent languageComponent) {
         this.languageComponent = languageComponent;
 
         final SpoofaxEclipseComponent component = SpoofaxPlugin.getComponent();
@@ -46,7 +46,7 @@ public class CommandHandler extends AbstractHandler {
         if(dataStr == null) {
             throw new ExecutionException("Cannot execute command, no argument for '" + dataParameterId + "' parameter was set");
         }
-        final CommandData data = SerializationUtil.deserialize(dataStr, CommandHandler.class.getClassLoader());
+        final CommandData data = SerializationUtil.deserialize(dataStr, RunCommandHandler.class.getClassLoader());
         final @Nullable CommandDef def = commandDefsPerId.get(data.commandId);
         if(def == null) {
             throw new ExecutionException("Cannot execute command with ID '" + data.commandId + "', command with that ID was not found in language '" + languageComponent.getLanguageInstance().getDisplayName() + "'");

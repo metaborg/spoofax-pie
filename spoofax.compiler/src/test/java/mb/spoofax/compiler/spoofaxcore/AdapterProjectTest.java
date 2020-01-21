@@ -61,5 +61,7 @@ class AdapterProjectTest {
         final FileAssertions rootProjectDirectory = new FileAssertions(rootProjectOutput.baseDirectory(), resourceService);
         rootProjectDirectory.assertExists();
         rootProjectDirectory.assertGradleBuild("buildAll");
+
+        // TODO: assert generated file contents
     }
 }

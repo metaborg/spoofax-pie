@@ -46,7 +46,7 @@ public class CliProject {
     }
 
     public static CliProject fromClassLoaderResources(ResourceService resourceService, Charset charset) {
-        final TemplateCompiler templateCompiler = new TemplateCompiler(CliProject.class);
+        final TemplateCompiler templateCompiler = new TemplateCompiler(CliProject.class, resourceService, charset);
         return new CliProject(
             templateCompiler.getOrCompile("cli_project/build.gradle.kts.mustache"),
             templateCompiler.getOrCompile("gradle_project/settings.gradle.kts.mustache"),

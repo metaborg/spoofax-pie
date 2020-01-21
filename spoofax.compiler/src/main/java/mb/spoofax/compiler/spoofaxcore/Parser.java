@@ -46,7 +46,7 @@ public class Parser {
     }
 
     public static Parser fromClassLoaderResources(ResourceService resourceService, Charset charset) {
-        final TemplateCompiler templateCompiler = new TemplateCompiler(Parser.class);
+        final TemplateCompiler templateCompiler = new TemplateCompiler(Parser.class, resourceService, charset);
         return new Parser(
             templateCompiler.getOrCompile("parser/ParseTable.java.mustache"),
             templateCompiler.getOrCompile("parser/Parser.java.mustache"),

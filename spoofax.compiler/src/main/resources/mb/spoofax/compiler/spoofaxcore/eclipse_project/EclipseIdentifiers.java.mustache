@@ -5,16 +5,28 @@ import mb.spoofax.eclipse.EclipseIdentifiers;
 
 @LanguageScope
 public class {{genEclipseIdentifiers.id}} implements EclipseIdentifiers {
+    @Override public String getPlugin() {
+        return "{{pluginId}}";
+    }
+
     @Override public String getContext() {
         return "{{contextId}}";
     }
 
-    @Override public String getNature() {
-        return {{projectNature.qualifiedId}}.id;
+    @Override public String getDocumentProvider() {
+        return "{{documentProviderId}}";
     }
 
-    @Override public String getBuilder() {
-        return {{projectBuilder.qualifiedId}}.id;
+    @Override public String getEditor() {
+        return "{{editorId}}";
+    }
+
+    @Override public String getNature() {
+        return "{{natureId}}";
+    }
+
+    @Override public String getProjectBuilder() {
+        return "{{projectBuilderId}}";
     }
 
 

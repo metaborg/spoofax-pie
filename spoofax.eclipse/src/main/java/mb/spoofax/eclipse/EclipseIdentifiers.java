@@ -1,11 +1,17 @@
 package mb.spoofax.eclipse;
 
 public interface EclipseIdentifiers {
+    String getPlugin();
+
     String getContext();
+
+    String getDocumentProvider();
+
+    String getEditor();
 
     String getNature();
 
-    String getBuilder();
+    String getProjectBuilder();
 
 
     String getAddNatureCommand();

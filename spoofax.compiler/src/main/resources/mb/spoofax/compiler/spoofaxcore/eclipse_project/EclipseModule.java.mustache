@@ -1,4 +1,4 @@
-package {{genModule.packageId}};
+package {{genEclipseModule.packageId}};
 
 import dagger.Module;
 import dagger.Provides;
@@ -6,7 +6,7 @@ import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.eclipse.EclipseIdentifiers;
 
 @Module
-public class {{genModule.id}} {
+public class {{genEclipseModule.id}} {
     @Provides @LanguageScope
     EclipseIdentifiers provideEclipseIdentifiers() {
         return new {{eclipseIdentifiers.qualifiedId}}();

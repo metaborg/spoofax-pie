@@ -7,6 +7,7 @@ import mb.resource.fs.FSResourceRegistry;
 import mb.spoofax.compiler.spoofaxcore.tiger.TigerInputs;
 import mb.spoofax.compiler.spoofaxcore.util.FileAssertions;
 import mb.spoofax.compiler.util.GradleDependency;
+import mb.spoofax.compiler.util.TemplateCompiler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -44,7 +45,7 @@ class EclipseProjectTest {
         final EclipseProject.Input input = TigerInputs.eclipseProjectBuilder(shared, adapterProjectInput)
             .adapterProjectDependency(GradleDependency.project(":" + shared.adapterProject().coordinate().artifactId()))
             .build();
-        final EclipseProject compiler = EclipseProject.fromClassLoaderResources(resourceService, charset);
+        final EclipseProject compiler = new EclipseProject(new TemplateCompiler(EclipseProject.class, resourceService, charset));
         compiler.compile(input);
 
         assertFalse(input.settingsGradleKtsFile().isPresent());
@@ -68,5 +69,7 @@ class EclipseProjectTest {
         final FileAssertions rootProjectDirectory = new FileAssertions(rootProjectOutput.baseDirectory(), resourceService);
         rootProjectDirectory.assertExists();
         rootProjectDirectory.assertGradleBuild("buildAll");
+
+        // TODO: assert generated file contents
     }
 }

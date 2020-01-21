@@ -46,7 +46,7 @@ public class Styler {
         ResourceService resourceService,
         Charset charset
     ) {
-        final TemplateCompiler templateCompiler = new TemplateCompiler(Styler.class);
+        final TemplateCompiler templateCompiler = new TemplateCompiler(Styler.class, resourceService, charset);
         return new Styler(
             templateCompiler.getOrCompile("styler/StylingRules.java.mustache"),
             templateCompiler.getOrCompile("styler/Styler.java.mustache"),

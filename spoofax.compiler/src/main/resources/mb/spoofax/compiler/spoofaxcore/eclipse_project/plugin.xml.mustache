@@ -4,7 +4,7 @@
   <!-- Context -->
   <extension point="org.eclipse.ui.contexts">
     <context
-      id="tiger.eclipse.context"
+      id="{{contextId}}"
       parentId="org.eclipse.ui.textEditorScope"
       name="Editing {{shared.name}} files"
       description="Editing {{shared.name}} files"
@@ -16,10 +16,12 @@
   <extension point="org.eclipse.ui.editors">
     <editor
       name="{{shared.name}} editor"
-      extensions="tig"
-      icon="./META-INF/fileIcon.png"
-      class="mb.tiger.eclipse.TigerEditor"
-      id="tiger.eclipse.editor"
+      extensions="{{#shared.fileExtensions}}{{this}}{{^-last}},{{/-last}}{{/shared.fileExtensions}}"
+{{#fileIconRelativePath}}
+      icon="{{this}}"
+{{/fileIconRelativePath}}
+      class="{{editor.qualifiedId}}"
+      id="{{editorId}}"
     />
   </extension>
 
@@ -28,7 +30,8 @@
   <!-- Base -->
   <extension
     point="org.eclipse.core.resources.markers"
-    id="tiger.eclipse.marker"
+    id="{{baseMarkerId}}"
+    name="{{shared.name}} marker"
   >
     <super type="org.eclipse.core.resources.textmarker"/>
     <super type="org.eclipse.core.resources.problemmarker"/>
@@ -37,7 +40,7 @@
   <!-- Info -->
   <extension
     point="org.eclipse.core.resources.markers"
-    id="tiger.eclipse.marker.info"
+    id="{{infoMarkerId}}"
     name="{{shared.name}} info marker"
   >
     <super type="tiger.eclipse.marker"/>
@@ -46,7 +49,7 @@
   <!-- Warning -->
   <extension
     point="org.eclipse.core.resources.markers"
-    id="tiger.eclipse.marker.warning"
+    id="{{warningMarkerId}}"
     name="{{shared.name}} warning marker"
   >
     <super type="tiger.eclipse.marker"/>
@@ -55,7 +58,7 @@
   <!-- Error -->
   <extension
     point="org.eclipse.core.resources.markers"
-    id="tiger.eclipse.marker.error"
+    id="{{errorMarkerId}}"
     name="{{shared.name}} error marker"
   >
     <super type="tiger.eclipse.marker"/>
@@ -67,21 +70,21 @@
   <extension point="org.eclipse.ui.editors.annotationTypes">
     <!-- Info -->
     <type
-      markerType="tiger.eclipse.marker.info"
+      markerType="{{infoMarkerId}}"
       super="org.eclipse.ui.workbench.texteditor.info"
       markerSeverity="0"
       name="{{shared.name}} info annotation"
     />
     <!-- Warning -->
     <type
-      markerType="tiger.eclipse.marker.warning"
+      markerType="{{warningMarkerId}}"
       super="org.eclipse.ui.workbench.texteditor.warning"
       markerSeverity="1"
       name="{{shared.name}} warning annotation"
     />
     <!-- Error -->
     <type
-      markerType="tiger.eclipse.marker.error"
+      markerType="{{errorMarkerId}}"
       super="org.eclipse.ui.workbench.texteditor.error"
       markerSeverity="2"
       name="{{shared.name}} error annotation"
@@ -92,9 +95,9 @@
   <!-- Document Provider -->
   <extension point="org.eclipse.ui.editors.documentProviders">
     <provider
-      extensions="tig"
-      class="mb.tiger.eclipse.TigerDocumentProvider"
-      id="tiger.eclipse.documentprovider"
+      extensions="{{#shared.fileExtensions}}{{this}}{{^-last}},{{/-last}}{{/shared.fileExtensions}}"
+      class="{{documentProvider.qualifiedId}}"
+      id="{{documentProviderId}}"
     />
   </extension>
 
@@ -103,7 +106,7 @@
   <extension
     point="org.eclipse.core.resources.builders"
     name="{{shared.name}} builder"
-    id="builder"
+    id="{{projectBuilderRelativeId}}"
   >
     <builder
       hasNature="true"
@@ -111,7 +114,7 @@
       callOnEmptyDelta="false"
       supportsConfigurations="false"
     >
-      <run class="mb.tiger.eclipse.TigerProjectBuilder"/>
+      <run class="{{projectBuilder.qualifiedId}}"/>
     </builder>
   </extension>
 
@@ -120,12 +123,12 @@
   <extension
     point="org.eclipse.core.resources.natures"
     name="{{shared.name}} nature"
-    id="nature"
+    id="{{natureRelativeId}}"
   >
     <runtime>
-      <run class="mb.tiger.eclipse.TigerProjectNature"/>
+      <run class="{{nature.qualifiedId}}"/>
     </runtime>
-    <builder id="tiger.eclipse.builder"/>
+    <builder id="{{projectBuilderId}}"/>
   </extension>
 
 
@@ -145,7 +148,7 @@
     </menuContribution>
     <!-- Main menu -->
     <menuContribution locationURI="menu:org.eclipse.ui.main.menu">
-      <menu id="tiger.eclipse.menu.main" label="Tiger">
+      <menu id="tiger.eclipse.menu.main" label="{{shared.name}}">
         <dynamic id="tiger.eclipse.menu.main.dynamic" class="mb.tiger.eclipse.TigerMainMenu"/>
         <visibleWhen>
           <with variable="activeContexts">

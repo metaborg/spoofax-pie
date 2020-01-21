@@ -1,0 +1,11 @@
+package {{genRemoveNatureHandler.packageId}};
+
+import mb.spoofax.eclipse.nature.RemoveNatureHandler;
+
+public class {{genRemoveNatureHandler.id}} extends RemoveNatureHandler {
+    public static final String commandId = "{{removeNatureCommandId}}";
+
+    public {{genRemoveNatureHandler.id}}() {
+        super({{plugin.qualifiedId}}.getComponent());
+    }
+}

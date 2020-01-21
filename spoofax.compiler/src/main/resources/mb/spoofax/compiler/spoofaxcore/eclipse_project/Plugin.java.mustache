@@ -17,23 +17,23 @@ import java.io.IOException;
 public class {{genPlugin.id}} extends AbstractUIPlugin {
     public static final String pluginId = "{{pluginId}}";
 
-    private static {{component.nullableQualifiedId}} component;
+    private static {{eclipseComponent.nullableQualifiedId}} component;
 
-    public static {{component.qualifiedId}} getComponent() {
+    public static {{eclipseComponent.qualifiedId}} getComponent() {
         if(component == null) {
             throw new RuntimeException(
-                "Cannot access {{component.id}}; {{genPlugin.id}} has not been started yet, or has been stopped");
+                "Cannot access {{eclipseComponent.id}}; {{genPlugin.id}} has not been started yet, or has been stopped");
         }
         return component;
     }
 
     @Override public void start(@NonNull BundleContext context) throws Exception {
         super.start(context);
-        component = {{daggerComponent.qualifiedId}}
+        component = {{daggerEclipseComponent.qualifiedId}}
             .builder()
             .platformComponent(SpoofaxPlugin.getComponent())
             .tigerModule(new {{adapterProject.module.qualifiedId}}())
-            .tigerEclipseModule(new {{module.qualifiedId}}())
+            .tigerEclipseModule(new {{eclipseModule.qualifiedId}}())
             .build();
 
         component.getEditorTracker().register();

@@ -43,7 +43,7 @@ public class ConstraintAnalyzer {
         ResourceService resourceService,
         Charset charset
     ) {
-        final TemplateCompiler templateCompiler = new TemplateCompiler(ConstraintAnalyzer.class);
+        final TemplateCompiler templateCompiler = new TemplateCompiler(ConstraintAnalyzer.class, resourceService, charset);
         return new ConstraintAnalyzer(
             templateCompiler.getOrCompile("constraint_analyzer/ConstraintAnalyzer.java.mustache"),
             templateCompiler.getOrCompile("constraint_analyzer/ConstraintAnalyzerFactory.java.mustache"),

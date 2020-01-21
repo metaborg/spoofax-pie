@@ -8,13 +8,13 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
 
-public abstract class SpoofaxProjectNature implements IProjectNature {
+public abstract class SpoofaxNature implements IProjectNature {
     private final EclipseLanguageComponent languageComponent;
 
     @SuppressWarnings("ConstantConditions") private @MonotonicNonNull IProject project = null;
 
 
-    protected SpoofaxProjectNature(EclipseLanguageComponent languageComponent) {
+    protected SpoofaxNature(EclipseLanguageComponent languageComponent) {
         this.languageComponent = languageComponent;
     }
 
