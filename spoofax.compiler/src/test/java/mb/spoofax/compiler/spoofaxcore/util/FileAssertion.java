@@ -75,6 +75,7 @@ public class FileAssertion {
             connection.newBuild()
                 .forTasks(tasks)
                 .addArguments("--quiet") // Only print important information messages and errors.
+                .addArguments("--stacktrace")
                 .setStandardOutput(System.out).setStandardError(System.err) // Redirect standard out and err.
                 .run();
         } catch(Throwable e) {

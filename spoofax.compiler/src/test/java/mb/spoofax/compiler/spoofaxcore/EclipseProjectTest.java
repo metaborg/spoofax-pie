@@ -3,7 +3,6 @@ package mb.spoofax.compiler.spoofaxcore;
 import mb.resource.fs.FSPath;
 import mb.spoofax.compiler.spoofaxcore.tiger.TigerInputs;
 import mb.spoofax.compiler.util.GradleDependency;
-import mb.spoofax.compiler.util.TemplateCompiler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -15,22 +14,28 @@ class EclipseProjectTest extends TestBase {
         final FSPath baseDirectory = new FSPath(temporaryDirectoryPath);
         final Shared shared = TigerInputs.shared(baseDirectory);
 
-        // Compile language project, as adapter project depends on it.
+        // Compile language project, as adapter project and Eclipse externaldeps project depends on it.
         languageProjectCompiler.compile(TigerInputs.languageProject(shared));
 
-        // Compile adapter project, as Eclipse project depends on it.
+        // Compile adapter project, as Eclipse externaldeps project depends on it.
         final AdapterProject.Input adapterProjectInput = TigerInputs.adapterProjectBuilder(shared)
             .languageProjectDependency(GradleDependency.project(":" + shared.languageProject().coordinate().artifactId()))
             .build();
         TigerInputs.copyTaskDefsIntoAdapterProject(adapterProjectInput, resourceService);
         adapterProjectCompiler.compile(adapterProjectInput);
 
+        // Compile Eclipse externaldeps project, as Eclipse project depends on it.
+        eclipseExternaldepsProjectCompiler.compile(TigerInputs.eclipseExternaldepsProjectBuilder(shared)
+            .languageProjectDependency(GradleDependency.project(":" + shared.languageProject().coordinate().artifactId()))
+            .adapterProjectDependency(GradleDependency.project(":" + shared.adapterProject().coordinate().artifactId()))
+            .build()
+        );
+
         // Compile Eclipse project and test generated files.
         final EclipseProject.Input input = TigerInputs.eclipseProjectBuilder(shared, adapterProjectInput)
-            .adapterProjectDependency(GradleDependency.project(":" + shared.adapterProject().coordinate().artifactId()))
+            .eclipseExternaldepsDependency(GradleDependency.project(":" + shared.eclipseExternaldepsProject().coordinate().artifactId()))
             .build();
-        final EclipseProject compiler = new EclipseProject(new TemplateCompiler(Shared.class, resourceService, charset));
-        compiler.compile(input);
+        eclipseProjectCompiler.compile(input);
         fileAssertions.asserts(input.buildGradleKtsFile(), (a) -> a.assertContains("org.metaborg.coronium.bundle"));
         fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {
             s.assertPublicJavaClass(input.genPlugin(), "TigerPlugin");
@@ -56,6 +61,7 @@ class EclipseProjectTest extends TestBase {
             .addIncludedProjects(
                 shared.languageProject().coordinate().artifactId(),
                 shared.adapterProject().coordinate().artifactId(),
+                shared.eclipseExternaldepsProject().coordinate().artifactId(),
                 shared.eclipseProject().coordinate().artifactId()
             )
             .build()

@@ -88,12 +88,12 @@ public class EclipseProject {
             final ArrayList<GradleRepository> repositories = new ArrayList<>(shared.defaultRepositories());
             map.put("repositoryCodes", repositories.stream().map(GradleRepository::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
             final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
-            dependencies.add(GradleConfiguredDependency.implementation(input.adapterProjectDependency()));
             dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
             dependencies.add(GradleConfiguredDependency.annotationProcessor(shared.daggerCompilerDep()));
             map.put("dependencyCodes", dependencies.stream().map(GradleConfiguredDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
             final ArrayList<GradleConfiguredBundleDependency> bundleDependencies = new ArrayList<>(input.additionalBundleDependencies());
             bundleDependencies.add(GradleConfiguredBundleDependency.bundle(shared.spoofaxEclipseDep(), true));
+            bundleDependencies.add(GradleConfiguredBundleDependency.embeddingBundle(input.eclipseExternaldepsDependency(), true));
             bundleDependencies.add(GradleConfiguredBundleDependency.embeddingBundle(shared.spoofaxEclipseExternaldepsDep(), true));
             map.put("bundleDependencyCodes", bundleDependencies.stream().map(GradleConfiguredBundleDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
             buildGradleTemplate.write(input, map, input.buildGradleKtsFile());
@@ -141,7 +141,7 @@ public class EclipseProject {
 
         /// Gradle configuration
 
-        GradleDependency adapterProjectDependency();
+        GradleDependency eclipseExternaldepsDependency();
 
         List<GradleConfiguredDependency> additionalDependencies();
 

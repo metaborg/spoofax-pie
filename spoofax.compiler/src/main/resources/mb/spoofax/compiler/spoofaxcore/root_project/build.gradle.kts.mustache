@@ -4,7 +4,11 @@ plugins {
   // Set versions for plugins to use, only applying them in subprojects (apply false here).
   id("org.metaborg.coronium.bundle") version "{{shared.metaborgCoroniumVersion}}" apply false
   id("org.metaborg.coronium.embedding") version "{{shared.metaborgCoroniumVersion}}" apply false
+  id("biz.aQute.bnd.builder") version "{{shared.bndPluginVersion}}" apply false
 }
+
+group = "{{shared.rootProject.coordinate.groupId}}"
+version = "{{shared.rootProject.coordinate.version}}"
 
 subprojects {
   metaborg {

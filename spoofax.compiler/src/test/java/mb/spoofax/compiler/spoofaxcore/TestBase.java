@@ -27,4 +27,9 @@ class TestBase {
     final RootProject rootProjectCompiler = new RootProject(templateCompiler);
     final LanguageProject languageProjectCompiler = new LanguageProject(templateCompiler, parserCompiler, stylerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler);
     final AdapterProject adapterProjectCompiler = new AdapterProject(templateCompiler, parserCompiler, stylerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler);
+
+    final CliProject cliProjectCompiler = new CliProject(templateCompiler);
+
+    final EclipseExternaldepsProject eclipseExternaldepsProjectCompiler = new EclipseExternaldepsProject(templateCompiler);
+    final EclipseProject eclipseProjectCompiler = new EclipseProject(templateCompiler);
 }

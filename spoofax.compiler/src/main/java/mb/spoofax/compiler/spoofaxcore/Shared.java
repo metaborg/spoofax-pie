@@ -137,6 +137,23 @@ public interface Shared extends Serializable {
     }
 
 
+    /// Eclipse externaldeps project
+
+    @Value.Default default GradleProject eclipseExternaldepsProject() {
+        final String suffix = ".eclipse.externaldeps";
+        final String artifactId = defaultArtifactId() + suffix;
+        return GradleProject.builder()
+            .coordinate(defaultGroupId(), artifactId, defaultVersion())
+            .packageId(basePackageId() + suffix)
+            .baseDirectory(baseDirectory().appendSegment(artifactId))
+            .build();
+    }
+
+    default String eclipseExternaldepsPackage() {
+        return eclipseExternaldepsProject().packageId();
+    }
+
+
     /// Eclipse project
 
     @Value.Default default GradleProject eclipseProject() {
@@ -202,6 +219,13 @@ public interface Shared extends Serializable {
 
     @Value.Default default String metaborgCoroniumVersion() {
         return "0.1.7";
+    }
+
+
+    /// BND plugin version
+
+    @Value.Default default String bndPluginVersion() {
+        return "4.3.1";
     }
 
 

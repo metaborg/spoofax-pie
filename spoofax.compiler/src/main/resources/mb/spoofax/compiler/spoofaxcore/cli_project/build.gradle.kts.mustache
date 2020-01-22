@@ -16,6 +16,9 @@ plugins {
 }
 {{/standaloneProject}}
 
+group = "{{shared.cliProject.coordinate.groupId}}"
+version = "{{shared.cliProject.coordinate.version}}"
+
 application {
   mainClassName = "{{main.qualifiedId}}"
 }
