@@ -33,7 +33,22 @@ class EclipseProjectTest extends TestBase {
         compiler.compile(input);
         fileAssertions.asserts(input.buildGradleKtsFile(), (a) -> a.assertContains("org.metaborg.coronium.bundle"));
         fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {
-            s.assertPublicJavaClass(input.plugin(), "TigerPlugin");
+            s.assertPublicJavaClass(input.genPlugin(), "TigerPlugin");
+            s.assertPublicJavaInterface(input.genEclipseComponent(), "TigerEclipseComponent");
+            s.assertPublicJavaClass(input.genEclipseModule(), "TigerEclipseModule");
+            s.assertPublicJavaClass(input.genEclipseIdentifiers(), "TigerEclipseIdentifiers");
+            s.assertPublicJavaClass(input.genEditor(), "TigerEditor");
+            s.assertPublicJavaClass(input.genEditorTracker(), "TigerEditorTracker");
+            s.assertPublicJavaClass(input.genNature(), "TigerNature");
+            s.assertPublicJavaClass(input.genAddNatureHandler(), "TigerAddNatureHandler");
+            s.assertPublicJavaClass(input.genRemoveNatureHandler(), "TigerRemoveNatureHandler");
+            s.assertPublicJavaClass(input.genProjectBuilder(), "TigerProjectBuilder");
+            s.assertPublicJavaClass(input.genMainMenu(), "TigerMainMenu");
+            s.assertPublicJavaClass(input.genEditorContextMenu(), "TigerEditorContextMenu");
+            s.assertPublicJavaClass(input.genResourceContextMenu(), "TigerResourceContextMenu");
+            s.assertPublicJavaClass(input.genRunCommandHandler(), "TigerRunCommandHandler");
+            s.assertPublicJavaClass(input.genObserveHandler(), "TigerObserveHandler");
+            s.assertPublicJavaClass(input.genUnobserveHandler(), "TigerUnobserveHandler");
         });
 
         // Compile root project, which links together language and adapter project, and build it.
