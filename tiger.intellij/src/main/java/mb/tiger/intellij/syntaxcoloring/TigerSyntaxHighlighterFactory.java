@@ -5,7 +5,8 @@ import mb.spoofax.intellij.editor.SpoofaxSyntaxHighlighterFactory;
 import mb.tiger.intellij.TigerPlugin;
 
 public class TigerSyntaxHighlighterFactory extends SpoofaxSyntaxHighlighterFactory {
-    public TigerSyntaxHighlighterFactory() {
+    // Instantiated by IntelliJ.
+    private TigerSyntaxHighlighterFactory() {
         super(
             SpoofaxPlugin.getComponent().getResourceRegistry(),
             TigerPlugin.getComponent().getLexerFactory(),

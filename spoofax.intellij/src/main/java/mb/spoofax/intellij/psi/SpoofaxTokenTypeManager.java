@@ -1,7 +1,7 @@
 package mb.spoofax.intellij.psi;
 
-import com.intellij.lang.Language;
 import com.intellij.psi.tree.TokenSet;
+import mb.spoofax.intellij.IntellijLanguage;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -19,7 +19,7 @@ public final class SpoofaxTokenTypeManager {
     private final HashMap<String, SpoofaxTokenType> scopedElementTypes = new HashMap<>();
 
     /** The language for which token types are created. */
-    private final Language language;
+    private final IntellijLanguage language;
 
 
     /**
@@ -27,7 +27,7 @@ public final class SpoofaxTokenTypeManager {
      *
      * @param language The language for which the token types are created.
      */
-    @Inject public SpoofaxTokenTypeManager(Language language) {
+    @Inject public SpoofaxTokenTypeManager(IntellijLanguage language) {
         this.language = language;
     }
 

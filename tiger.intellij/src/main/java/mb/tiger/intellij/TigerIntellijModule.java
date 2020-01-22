@@ -1,21 +1,22 @@
 package mb.tiger.intellij;
 
-import com.intellij.lang.Language;
-import com.intellij.openapi.fileTypes.LanguageFileType;
-import com.intellij.psi.tree.IFileElementType;
+import com.intellij.openapi.util.IconLoader;
 import dagger.Module;
 import dagger.Provides;
 import mb.spoofax.core.language.LanguageScope;
-import mb.spoofax.intellij.psi.SpoofaxFileElementType;
+import mb.spoofax.intellij.IntellijLanguage;
+
+import javax.swing.*;
 
 @Module
 public class TigerIntellijModule {
     @Provides @LanguageScope
-    Language provideLanguage() { return TigerLanguage.instance; }
+    IntellijLanguage provideSpoofaxLanguage(TigerLanguage language) {
+        return language;
+    }
 
     @Provides @LanguageScope
-    LanguageFileType provideLanguageFileType() { return TigerFileType.instance; }
-
-    @Provides @LanguageScope
-    IFileElementType provideFileElementType(SpoofaxFileElementType fileElementType) { return fileElementType; }
+    Icon provideFileIcon() {
+        return IconLoader.getIcon("META-INF/fileIcon.svg");
+    }
 }

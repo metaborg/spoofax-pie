@@ -1,6 +1,6 @@
 plugins {
   id("org.metaborg.gradle.config.java-library")
-  id("org.jetbrains.intellij") version "0.4.8"
+  id("org.jetbrains.intellij")
 }
 
 dependencies {
@@ -21,7 +21,7 @@ dependencies {
 }
 
 intellij {
-  version = "2019.1.1"
+  version = "2019.3.2"
 }
 
 // Skip non-incremental, slow, and unecessary buildSearchableOptions task from IntelliJ.

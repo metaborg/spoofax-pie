@@ -1,31 +1,13 @@
 package mb.tiger.intellij;
 
-import com.intellij.openapi.fileTypes.LanguageFileType;
-import org.jetbrains.annotations.Nullable;
+import mb.spoofax.core.language.LanguageScope;
+import mb.spoofax.intellij.IntellijLanguageFileType;
 
-import javax.swing.*;
+import javax.inject.Inject;
 
-public class TigerFileType extends LanguageFileType {
-    static final TigerFileType instance = new TigerFileType();
-    static final String extension = "tig";
-
-    private TigerFileType() {
-        super(TigerLanguage.instance);
-    }
-
-    @Override public String getName() {
-        return "Tiger";
-    }
-
-    @Override public String getDescription() {
-        return "Tiger file";
-    }
-
-    @Override public String getDefaultExtension() {
-        return extension;
-    }
-
-    @Override public @Nullable Icon getIcon() {
-        return TigerIntellijIcons.getFileIcon();
+@LanguageScope
+public class TigerFileType extends IntellijLanguageFileType {
+    @Inject protected TigerFileType() {
+        super(TigerPlugin.getComponent());
     }
 }

@@ -17,6 +17,4 @@ public abstract class SpoofaxFileViewProvider extends SingleRootFileViewProvider
     @Override public boolean supportsIncrementalReparse(Language rootLanguage) {
         return false;
     }
-
-    @Nullable @Override protected abstract PsiFile createFile(Project project, VirtualFile file, FileType fileType);
 }

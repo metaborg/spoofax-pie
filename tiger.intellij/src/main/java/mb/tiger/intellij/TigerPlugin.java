@@ -9,13 +9,12 @@ public class TigerPlugin {
 
     public static TigerIntellijComponent getComponent() {
         if(component == null) {
-            throw new RuntimeException(
-                "Cannot access TigerComponent; TigerPlugin has not been started yet, or has been stopped");
+            throw new RuntimeException("Cannot access TigerComponent; TigerPlugin has not been started yet, or has been stopped");
         }
         return component;
     }
 
-    public static void init() throws Exception {
+    public static void init() {
         component = DaggerTigerIntellijComponent
             .builder()
             .spoofaxIntellijComponent(SpoofaxPlugin.getComponent())

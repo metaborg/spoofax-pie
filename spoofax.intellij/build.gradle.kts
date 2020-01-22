@@ -1,6 +1,6 @@
 plugins {
   id("org.metaborg.gradle.config.java-library")
-  id("org.jetbrains.intellij") version "0.4.8"
+  id("org.jetbrains.intellij")
 }
 
 dependencies {

@@ -1,17 +1,15 @@
 package mb.spoofax.intellij.psi;
 
 import com.intellij.lang.ASTNode;
-import com.intellij.lang.Language;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilderFactory;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.tree.IFileElementType;
 import mb.resource.Resource;
 import mb.spoofax.core.language.LanguageScope;
+import mb.spoofax.intellij.IntellijLanguage;
 import mb.spoofax.intellij.editor.SpoofaxLexer;
-import mb.spoofax.intellij.resource.IntellijResource;
 import mb.spoofax.intellij.resource.IntellijResourceRegistry;
 
 import javax.inject.Inject;
@@ -24,7 +22,7 @@ public class SpoofaxFileElementType extends IFileElementType {
 
 
     @Inject public SpoofaxFileElementType(
-        Language language,
+        IntellijLanguage language,
         SpoofaxLexer.Factory lexerFactory,
         IntellijResourceRegistry resourceRegistry,
         SpoofaxAstBuilder.Factory astBuilderFactory

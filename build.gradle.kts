@@ -12,6 +12,7 @@ plugins {
   id("de.set.ecj") version "1.4.1" apply false
   id("biz.aQute.bnd.builder") version "4.3.1" apply false
   id("com.palantir.graal") version "0.6.0" apply false
+  id("org.jetbrains.intellij") version "0.4.15" apply false
 }
 
 subprojects {

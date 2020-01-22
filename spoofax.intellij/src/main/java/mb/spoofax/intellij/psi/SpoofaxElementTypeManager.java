@@ -1,6 +1,6 @@
 package mb.spoofax.intellij.psi;
 
-import com.intellij.lang.Language;
+import mb.spoofax.intellij.IntellijLanguage;
 
 import javax.inject.Inject;
 import java.util.Collections;
@@ -38,7 +38,7 @@ public final class SpoofaxElementTypeManager {
     private final SpoofaxElementType namedElementType;
 
 
-    @Inject public SpoofaxElementTypeManager(Language language) {
+    @Inject public SpoofaxElementTypeManager(IntellijLanguage language) {
         this.rootElementType = new SpoofaxRootElementType(language);
         this.defaultElementType = new SpoofaxElementType(language);
         this.namedElementType = new SpoofaxNamedElementType(language);
