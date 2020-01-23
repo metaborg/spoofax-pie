@@ -235,7 +235,7 @@ public interface Shared extends Serializable {
     /// Metaborg Coronium version
 
     @Value.Default default String metaborgCoroniumVersion() {
-        return "0.1.7";
+        return "0.1.8";
     }
 
     /// BND plugin version

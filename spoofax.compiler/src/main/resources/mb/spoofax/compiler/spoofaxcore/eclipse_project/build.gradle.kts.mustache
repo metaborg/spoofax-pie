@@ -18,6 +18,8 @@ sourceSets {
 }
 
 bundle {
+  manifestFile = project.file("$buildDir/generated/sources/spoofax/java/META-INF/MANIFEST.MF")
+
 {{#bundleDependencyCodes}}
   {{this}}
 {{/bundleDependencyCodes}}

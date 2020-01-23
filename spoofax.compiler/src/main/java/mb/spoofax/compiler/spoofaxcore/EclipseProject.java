@@ -194,11 +194,11 @@ public class EclipseProject {
         /// Eclipse files
 
         default ResourcePath pluginXmlFile() {
-            return shared().eclipseProject().baseDirectory().appendRelativePath("plugin.xml");
+            return shared().eclipseProject().genSourceSpoofaxResourcesDirectory().appendRelativePath("plugin.xml");
         }
 
         default ResourcePath manifestMfFile() {
-            return shared().eclipseProject().baseDirectory().appendRelativePath("META-INF/MANIFEST.MF");
+            return shared().eclipseProject().genSourceSpoofaxResourcesDirectory().appendRelativePath("META-INF/MANIFEST.MF");
         }
 
 
