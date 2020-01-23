@@ -8,19 +8,22 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 class LanguageProjectTest extends TestBase {
-    @Test void testCompilerDefaultsStandalone(@TempDir Path temporaryDirectoryPath) throws IOException {
+    @Test void testCompilerDefaults(@TempDir Path temporaryDirectoryPath) throws IOException {
         final FSPath baseDirectory = new FSPath(temporaryDirectoryPath);
-        final LanguageProject.Input input = TigerInputs.languageProjectBuilder(TigerInputs.shared(baseDirectory))
-            .standaloneProject(true)
+        final Shared shared = TigerInputs.shared(baseDirectory);
+        final LanguageProject.Input input = TigerInputs.languageProjectBuilder(shared)
             .build();
 
+        // Compile language project and test generated files.
         languageProjectCompiler.compile(input);
-        assertTrue(input.settingsGradleKtsFile().isPresent());
-        fileAssertions.asserts(input.settingsGradleKtsFile().get(), (a) -> a.assertContains("gradlePluginPortal()"));
         fileAssertions.asserts(input.buildGradleKtsFile(), (a) -> a.assertContains("mb/tiger"));
-        fileAssertions.asserts(baseDirectory, (a) -> a.assertGradleBuild("build"));
+
+        // Compile root project, which links together all projects, and build it.
+        final RootProject.Output rootProjectOutput = rootProjectCompiler.compile(TigerInputs.rootProjectBuilder(shared)
+            .addIncludedProjects(shared.languageProject().coordinate().artifactId())
+            .build()
+        );
+        fileAssertions.asserts(rootProjectOutput.baseDirectory(), (a) -> a.assertGradleBuild("buildAll"));
     }
 }

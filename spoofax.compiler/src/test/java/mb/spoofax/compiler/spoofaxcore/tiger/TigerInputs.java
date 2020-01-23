@@ -17,6 +17,7 @@ import mb.spoofax.compiler.spoofaxcore.CliProject;
 import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzer;
 import mb.spoofax.compiler.spoofaxcore.EclipseExternaldepsProject;
 import mb.spoofax.compiler.spoofaxcore.EclipseProject;
+import mb.spoofax.compiler.spoofaxcore.IntellijProject;
 import mb.spoofax.compiler.spoofaxcore.LanguageProject;
 import mb.spoofax.compiler.spoofaxcore.Parser;
 import mb.spoofax.compiler.spoofaxcore.RootProject;
@@ -68,6 +69,7 @@ public class TigerInputs {
             .spoofaxCliDep(fromSystemProperty("spoofax.cli:classpath"))
             .spoofaxEclipseDep(fromSystemProperty("spoofax.eclipse:classpath"))
             .spoofaxEclipseExternaldepsDep(fromSystemProperty("spoofax.eclipse.externaldeps:classpath"))
+            .spoofaxIntellijDep(fromSystemProperty("spoofax.intellij:classpath"))
             ;
     }
 
@@ -296,6 +298,16 @@ public class TigerInputs {
 
     public static EclipseProject.Input.Builder eclipseProjectBuilder(Shared shared, AdapterProject.Input adapterProject) {
         return EclipseProject.Input.builder()
+            .shared(shared)
+            .adapterProject(adapterProject)
+            ;
+    }
+
+
+    /// Intellij project compiler input
+
+    public static IntellijProject.Input.Builder intellijProjectBuilder(Shared shared, AdapterProject.Input adapterProject) {
+        return IntellijProject.Input.builder()
             .shared(shared)
             .adapterProject(adapterProject)
             ;

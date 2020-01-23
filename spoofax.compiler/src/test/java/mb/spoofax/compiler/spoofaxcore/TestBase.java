@@ -32,4 +32,6 @@ class TestBase {
 
     final EclipseExternaldepsProject eclipseExternaldepsProjectCompiler = new EclipseExternaldepsProject(templateCompiler);
     final EclipseProject eclipseProjectCompiler = new EclipseProject(templateCompiler);
+
+    final IntellijProject intellijProjectCompiler = new IntellijProject(templateCompiler);
 }

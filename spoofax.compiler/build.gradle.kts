@@ -63,6 +63,7 @@ dependencies {
   testInjections(project(":spoofax.cli"))
   testInjections(project(":spoofax.eclipse"))
   testInjections(project(":spoofax.eclipse.externaldeps"))
+  testInjections(project(":spoofax.intellij"))
   testInjections(project(":org.metaborg.lang.tiger", Dependency.DEFAULT_CONFIGURATION).also {
     it.isTransitive = false
     configureSpoofaxLanguageArtifact(it)

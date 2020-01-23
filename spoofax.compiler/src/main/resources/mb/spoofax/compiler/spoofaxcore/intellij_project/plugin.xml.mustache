@@ -1,0 +1,21 @@
+<idea-plugin>
+  <id>{{shared.intellijProject.coordinate.artifactId}}</id>
+  <name>{{shared.name}}</name>
+  <vendor>{{shared.intellijProject.coordinate.groupId}}</vendor>
+  <extensions defaultExtensionNs="com.intellij">
+    <ApplicationLoadListener
+      implementation="{{loader.qualifiedId}}"
+    />
+    <fileTypeFactory
+      implementation="{{fileTypeFactory.qualifiedId}}"
+    />
+    <lang.syntaxHighlighterFactory
+      language="{{shared.name}}"
+      implementationClass="{{syntaxHighlighterFactory.qualifiedId}}"
+    />
+    <lang.parserDefinition
+      language="{{shared.name}}"
+      implementationClass="{{parserDefinition.qualifiedId}}"
+    />
+  </extensions>
+</idea-plugin>

@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 class EclipseExternaldepsProjectTest extends TestBase {
-    @Test void testCompiler(@TempDir Path temporaryDirectoryPath) throws IOException {
+    @Test void testCompilerDefaults(@TempDir Path temporaryDirectoryPath) throws IOException {
         final FSPath baseDirectory = new FSPath(temporaryDirectoryPath);
         final Shared shared = TigerInputs.shared(baseDirectory);
 

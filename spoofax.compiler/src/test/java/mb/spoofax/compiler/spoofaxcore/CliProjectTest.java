@@ -3,14 +3,11 @@ package mb.spoofax.compiler.spoofaxcore;
 import mb.resource.fs.FSPath;
 import mb.spoofax.compiler.spoofaxcore.tiger.TigerInputs;
 import mb.spoofax.compiler.util.GradleDependency;
-import mb.spoofax.compiler.util.TemplateCompiler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
 import java.nio.file.Path;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class CliProjectTest extends TestBase {
     @Test void testCompilerDefaults(@TempDir Path temporaryDirectoryPath) throws IOException {
@@ -32,7 +29,6 @@ class CliProjectTest extends TestBase {
             .adapterProjectDependency(GradleDependency.project(":" + shared.adapterProject().coordinate().artifactId()))
             .build();
         cliProjectCompiler.compile(input);
-        assertFalse(input.settingsGradleKtsFile().isPresent());
         fileAssertions.asserts(input.buildGradleKtsFile(), (a) -> a.assertContains("org.metaborg.gradle.config.java-application"));
         fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {
             s.assertPublicJavaClass(input.genMain(), "Main");

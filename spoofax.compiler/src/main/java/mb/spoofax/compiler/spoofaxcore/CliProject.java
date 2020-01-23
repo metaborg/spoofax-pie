@@ -4,7 +4,6 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
-import mb.spoofax.compiler.util.GradleRepository;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
@@ -12,7 +11,6 @@ import org.immutables.value.Value;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,12 +19,10 @@ import java.util.stream.Collectors;
 
 @Value.Enclosing
 public class CliProject {
-    private final TemplateWriter settingsGradleTemplate;
     private final TemplateWriter buildGradleTemplate;
     private final TemplateWriter mainTemplate;
 
     public CliProject(TemplateCompiler templateCompiler) {
-        this.settingsGradleTemplate = templateCompiler.getOrCompileToWriter("gradle_project/settings.gradle.kts.mustache");
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("cli_project/build.gradle.kts.mustache");
         this.mainTemplate = templateCompiler.getOrCompileToWriter("cli_project/Main.java.mustache");
     }
@@ -35,21 +31,9 @@ public class CliProject {
         final Shared shared = input.shared();
 
         // Gradle files
-        try {
-            input.settingsGradleKtsFile().ifPresent((f) -> {
-                try {
-                    settingsGradleTemplate.write(input, f);
-                } catch(IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            });
-        } catch(UncheckedIOException e) {
-            throw e.getCause();
-        }
         {
             final HashMap<String, Object> map = new HashMap<>();
-            final ArrayList<GradleRepository> repositories = new ArrayList<>(shared.defaultRepositories());
-            map.put("repositoryCodes", repositories.stream().map(GradleRepository::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
+
             final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
             dependencies.add(GradleConfiguredDependency.implementation(input.adapterProjectDependency()));
             dependencies.add(GradleConfiguredDependency.implementation(shared.spoofaxCliDep()));
@@ -59,6 +43,7 @@ public class CliProject {
             dependencies.add(GradleConfiguredDependency.implementation(shared.pieDaggerDep()));
             dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
             map.put("dependencyCodes", dependencies.stream().map(GradleConfiguredDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
+
             buildGradleTemplate.write(input, map, input.buildGradleKtsFile());
         }
 
@@ -95,18 +80,6 @@ public class CliProject {
 
         @Value.Default default ResourcePath buildGradleKtsFile() {
             return shared().cliProject().baseDirectory().appendRelativePath("build.gradle.kts");
-        }
-
-        @Value.Default default boolean standaloneProject() {
-            return false;
-        }
-
-        @Value.Default @SuppressWarnings("immutables:untype") default Optional<ResourcePath> settingsGradleKtsFile() {
-            if(standaloneProject()) {
-                return Optional.of(shared().cliProject().baseDirectory().appendRelativePath("settings.gradle.kts"));
-            } else {
-                return Optional.empty();
-            }
         }
 
 

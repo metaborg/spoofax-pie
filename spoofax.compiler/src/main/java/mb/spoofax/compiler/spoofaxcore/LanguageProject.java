@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 
 @Value.Enclosing
 public class LanguageProject {
-    private final TemplateWriter settingsGradleTemplate;
     private final TemplateWriter buildGradleTemplate;
 
     private final Parser parserCompiler;
@@ -35,7 +34,6 @@ public class LanguageProject {
         StrategoRuntime strategoRuntimeCompiler,
         ConstraintAnalyzer constraintAnalyzerCompiler
     ) {
-        this.settingsGradleTemplate = templateCompiler.getOrCompileToWriter("gradle_project/settings.gradle.kts.mustache");
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("language_project/build.gradle.kts.mustache");
 
         this.parserCompiler = parserCompiler;
@@ -58,6 +56,7 @@ public class LanguageProject {
 
         final ArrayList<String> copyResources = new ArrayList<>(input.additionalCopyResources());
 
+        // Files from other compilers.
         final Parser.LanguageProjectOutput parserOutput = parserCompiler.compileLanguageProject(input.parser());
         dependencies.addAll(parserOutput.dependencies());
         copyResources.addAll(parserOutput.copyResources());
@@ -105,17 +104,7 @@ public class LanguageProject {
             throw e.getCause();
         }
 
-        try {
-            input.settingsGradleKtsFile().ifPresent((f) -> {
-                try {
-                    settingsGradleTemplate.write(input, f);
-                } catch(IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            });
-        } catch(UncheckedIOException e) {
-            throw e.getCause();
-        }
+        // Gradle files
         {
             final HashMap<String, Object> map = new HashMap<>();
             final String languageDependencyCode = input.languageSpecificationDependency().caseOf()
@@ -123,7 +112,6 @@ public class LanguageProject {
                 .module((coordinate) -> "createModuleDependency(\"" + coordinate.toGradleNotation() + "\")")
                 .files((filePaths) -> "createFilesDependency(" + filePaths.stream().map((s) -> "\"" + s + "\"").collect(Collectors.joining(", ")) + ")");
             map.put("languageDependencyCode", languageDependencyCode);
-            map.put("repositoryCodes", repositories.stream().map(GradleRepository::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
             map.put("dependencyCodes", dependencies.stream().map(GradleConfiguredDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
             map.put("copyResourceCodes", copyResources.stream().map(StringUtil::doubleQuote).collect(Collectors.toCollection(ArrayList::new)));
             buildGradleTemplate.write(input, map, input.buildGradleKtsFile());
@@ -158,28 +146,20 @@ public class LanguageProject {
         Optional<ConstraintAnalyzer.Input> constraintAnalyzer();
 
 
-        @Value.Default default ResourcePath buildGradleKtsFile() {
-            return shared().languageProject().baseDirectory().appendRelativePath("build.gradle.kts");
-        }
-
-        @Value.Default default boolean standaloneProject() {
-            return false;
-        }
-
-        @Value.Default @SuppressWarnings("immutables:untype") default Optional<ResourcePath> settingsGradleKtsFile() {
-            if(standaloneProject()) {
-                return Optional.of(shared().languageProject().baseDirectory().appendRelativePath("settings.gradle.kts"));
-            } else {
-                return Optional.empty();
-            }
-        }
-
+        /// Configuration
 
         GradleDependency languageSpecificationDependency();
 
         List<GradleConfiguredDependency> additionalDependencies();
 
         List<String> additionalCopyResources();
+
+
+        /// Gradle files
+
+        @Value.Default default ResourcePath buildGradleKtsFile() {
+            return shared().languageProject().baseDirectory().appendRelativePath("build.gradle.kts");
+        }
     }
 
     @Value.Immutable

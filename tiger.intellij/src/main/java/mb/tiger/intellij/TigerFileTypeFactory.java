@@ -1,14 +1,10 @@
 package mb.tiger.intellij;
 
-import com.intellij.openapi.fileTypes.FileTypeConsumer;
-import com.intellij.openapi.fileTypes.FileTypeFactory;
+import mb.spoofax.intellij.IntellijFileTypeFactory;
 
-public class TigerFileTypeFactory extends FileTypeFactory {
+public class TigerFileTypeFactory extends IntellijFileTypeFactory {
     // Instantiated by IntelliJ.
-    private TigerFileTypeFactory() {}
-
-    @Override public void createFileTypes(FileTypeConsumer consumer) {
-        final TigerFileType fileType = TigerPlugin.getComponent().getFileType();
-        consumer.consume(fileType, fileType.getDefaultExtension());
+    private TigerFileTypeFactory() {
+        super(TigerPlugin.getComponent());
     }
 }

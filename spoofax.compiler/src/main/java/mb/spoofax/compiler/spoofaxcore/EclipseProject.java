@@ -5,7 +5,6 @@ import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredBundleDependency;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
-import mb.spoofax.compiler.util.GradleRepository;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
@@ -13,7 +12,6 @@ import org.immutables.value.Value;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,14 +20,13 @@ import java.util.stream.Collectors;
 
 @Value.Enclosing
 public class EclipseProject {
-    private final TemplateWriter settingsGradleTemplate;
     private final TemplateWriter buildGradleTemplate;
     private final TemplateWriter pluginXmlTemplate;
     private final TemplateWriter manifestTemplate;
     private final TemplateWriter pluginTemplate;
-    private final TemplateWriter eclipseModuleTemplate;
-    private final TemplateWriter eclipseComponentTemplate;
-    private final TemplateWriter eclipseIdentifiersTemplate;
+    private final TemplateWriter moduleTemplate;
+    private final TemplateWriter componentTemplate;
+    private final TemplateWriter identifiersTemplate;
     private final TemplateWriter documentProviderTemplate;
     private final TemplateWriter editorTemplate;
     private final TemplateWriter editorTrackerTemplate;
@@ -45,14 +42,13 @@ public class EclipseProject {
     private final TemplateWriter unobserveHandlerTemplate;
 
     public EclipseProject(TemplateCompiler templateCompiler) {
-        this.settingsGradleTemplate = templateCompiler.getOrCompileToWriter("gradle_project/settings.gradle.kts.mustache");
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/build.gradle.kts.mustache");
         this.pluginXmlTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/plugin.xml.mustache");
         this.manifestTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/MANIFEST.MF.mustache");
         this.pluginTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/Plugin.java.mustache");
-        this.eclipseModuleTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/EclipseModule.java.mustache");
-        this.eclipseComponentTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/EclipseComponent.java.mustache");
-        this.eclipseIdentifiersTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/EclipseIdentifiers.java.mustache");
+        this.moduleTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/Module.java.mustache");
+        this.componentTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/Component.java.mustache");
+        this.identifiersTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/Identifiers.java.mustache");
         this.documentProviderTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/DocumentProvider.java.mustache");
         this.editorTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/Editor.java.mustache");
         this.editorTrackerTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/EditorTracker.java.mustache");
@@ -72,30 +68,20 @@ public class EclipseProject {
         final Shared shared = input.shared();
 
         // Gradle files
-        try {
-            input.settingsGradleKtsFile().ifPresent((f) -> {
-                try {
-                    settingsGradleTemplate.write(input, f);
-                } catch(IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            });
-        } catch(UncheckedIOException e) {
-            throw e.getCause();
-        }
         {
             final HashMap<String, Object> map = new HashMap<>();
-            final ArrayList<GradleRepository> repositories = new ArrayList<>(shared.defaultRepositories());
-            map.put("repositoryCodes", repositories.stream().map(GradleRepository::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
+
             final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
             dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
             dependencies.add(GradleConfiguredDependency.annotationProcessor(shared.daggerCompilerDep()));
             map.put("dependencyCodes", dependencies.stream().map(GradleConfiguredDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
+
             final ArrayList<GradleConfiguredBundleDependency> bundleDependencies = new ArrayList<>(input.additionalBundleDependencies());
             bundleDependencies.add(GradleConfiguredBundleDependency.bundle(shared.spoofaxEclipseDep(), true));
             bundleDependencies.add(GradleConfiguredBundleDependency.embeddingBundle(input.eclipseExternaldepsDependency(), true));
             bundleDependencies.add(GradleConfiguredBundleDependency.embeddingBundle(shared.spoofaxEclipseExternaldepsDep(), true));
             map.put("bundleDependencyCodes", bundleDependencies.stream().map(GradleConfiguredBundleDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
+
             buildGradleTemplate.write(input, map, input.buildGradleKtsFile());
         }
 
@@ -106,9 +92,9 @@ public class EclipseProject {
         // Class files
         final ResourcePath classesGenDirectory = input.classesGenDirectory();
         pluginTemplate.write(input, input.genPlugin().file(classesGenDirectory));
-        eclipseModuleTemplate.write(input, input.genEclipseModule().file(classesGenDirectory));
-        eclipseComponentTemplate.write(input, input.genEclipseComponent().file(classesGenDirectory));
-        eclipseIdentifiersTemplate.write(input, input.genEclipseIdentifiers().file(classesGenDirectory));
+        moduleTemplate.write(input, input.genEclipseModule().file(classesGenDirectory));
+        componentTemplate.write(input, input.genEclipseComponent().file(classesGenDirectory));
+        identifiersTemplate.write(input, input.genEclipseIdentifiers().file(classesGenDirectory));
         documentProviderTemplate.write(input, input.genDocumentProvider().file(classesGenDirectory));
         editorTemplate.write(input, input.genEditor().file(classesGenDirectory));
         editorTrackerTemplate.write(input, input.genEditorTracker().file(classesGenDirectory));
@@ -152,18 +138,6 @@ public class EclipseProject {
 
         default ResourcePath buildGradleKtsFile() {
             return shared().eclipseProject().baseDirectory().appendRelativePath("build.gradle.kts");
-        }
-
-        @Value.Default default boolean standaloneProject() {
-            return false;
-        }
-
-        @Value.Default @SuppressWarnings("immutables:untype") default Optional<ResourcePath> settingsGradleKtsFile() {
-            if(standaloneProject()) {
-                return Optional.of(shared().eclipseProject().baseDirectory().appendRelativePath("settings.gradle.kts"));
-            } else {
-                return Optional.empty();
-            }
         }
 
 

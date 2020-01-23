@@ -171,6 +171,23 @@ public interface Shared extends Serializable {
     }
 
 
+    /// IntelliJ project
+
+    @Value.Default default GradleProject intellijProject() {
+        final String suffix = ".intellij";
+        final String artifactId = defaultArtifactId() + suffix;
+        return GradleProject.builder()
+            .coordinate(defaultGroupId(), artifactId, defaultVersion())
+            .packageId(basePackageId() + suffix)
+            .baseDirectory(baseDirectory().appendSegment(artifactId))
+            .build();
+    }
+
+    default String intellijPackage() {
+        return intellijProject().packageId();
+    }
+
+
     // Repositories
 
     @Value.Default default GradleRepository metaborgReleasesRepository() {
@@ -221,11 +238,22 @@ public interface Shared extends Serializable {
         return "0.1.7";
     }
 
-
     /// BND plugin version
 
     @Value.Default default String bndPluginVersion() {
         return "4.3.1";
+    }
+
+    /// IntelliJ Gradle plugin version
+
+    @Value.Default default String intellijGradlePluginVersion() {
+        return "0.4.15";
+    }
+
+    /// IntelliJ Idea version
+
+    @Value.Default default String intellijIdeaVersion() {
+        return "2019.3.2";
     }
 
 
@@ -386,6 +414,10 @@ public interface Shared extends Serializable {
 
     @Value.Default default GradleDependency spoofaxEclipseExternaldepsDep() {
         return GradleDependency.module(Coordinate.of("org.metaborg", "spoofax.eclipse.externaldeps", spoofaxPieVersion()));
+    }
+
+    @Value.Default default GradleDependency spoofaxIntellijDep() {
+        return GradleDependency.module(Coordinate.of("org.metaborg", "spoofax.intellij", spoofaxPieVersion()));
     }
 
 

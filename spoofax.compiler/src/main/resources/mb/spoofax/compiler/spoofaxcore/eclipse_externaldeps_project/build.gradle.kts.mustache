@@ -1,27 +1,22 @@
-{{#standaloneProject}}
-plugins {
-  id("org.metaborg.gradle.config.sub-project") version "{{shared.metaborgGradleConfigVersion}}"
-  id("org.metaborg.gradle.config.java-library") version "{{shared.metaborgGradleConfigVersion}}"
-  id("biz.aQute.bnd.builder") version "{{shared.bndPluginVersion}}"
-  id("org.metaborg.coronium.embedding") version "{{shared.metaborgCoroniumVersion}}"
-}
-
-repositories {
-  {{#repositoryCodes}}
-  {{this}}
-  {{/repositoryCodes}}
-}
-{{/standaloneProject}}
-{{^standaloneProject}}
 plugins {
   id("org.metaborg.gradle.config.java-library")
   id("biz.aQute.bnd.builder")
   id("org.metaborg.coronium.embedding")
 }
-{{/standaloneProject}}
 
 group = "{{shared.eclipseExternaldepsProject.coordinate.groupId}}"
 version = "{{shared.eclipseExternaldepsProject.coordinate.version}}"
+
+sourceSets {
+  main {
+    java {
+      srcDir("$buildDir/generated/sources/spoofax/java")
+    }
+    resources {
+      srcDir("$buildDir/generated/sources/spoofax/resources")
+    }
+  }
+}
 
 // Add dependencies to JVM (non-OSGi) libraries. Must use `api` configuration for `coronium.embedding` plugin.
 dependencies {

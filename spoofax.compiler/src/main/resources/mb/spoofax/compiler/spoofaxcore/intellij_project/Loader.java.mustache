@@ -1,0 +1,17 @@
+package {{genLoader.packageId}};
+
+import com.intellij.ide.ApplicationLoadListener;
+import com.intellij.openapi.application.Application;
+
+public class {{genLoader.id}} implements ApplicationLoadListener {
+    // Instantiated by IntelliJ.
+    private {{genLoader.id}}() {}
+
+    @Override public void beforeApplicationLoaded(Application application, String configPath) {
+        try {
+            {{genLoader.id}}.init();
+        } catch(Exception e) {
+            throw new RuntimeException("Failed to initialize {{shared.name}} IntelliJ plugin", e);
+        }
+    }
+}

@@ -9,8 +9,6 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-
 class AdapterProjectTest extends TestBase {
     @Test void testCompilerDefaults(@TempDir Path temporaryDirectoryPath) throws IOException {
         final FSPath baseDirectory = new FSPath(temporaryDirectoryPath);
@@ -25,7 +23,6 @@ class AdapterProjectTest extends TestBase {
             .build();
         TigerInputs.copyTaskDefsIntoAdapterProject(input, resourceService);
         adapterProjectCompiler.compile(input);
-        assertFalse(input.settingsGradleKtsFile().isPresent());
         fileAssertions.asserts(input.buildGradleKtsFile(), (a) -> a.assertContains("org.metaborg.gradle.config.java-library"));
         fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {
             s.assertPublicJavaInterface(input.genComponent(), "TigerComponent");
@@ -34,7 +31,7 @@ class AdapterProjectTest extends TestBase {
             s.assertPublicJavaClass(input.genCheckTaskDef(), "TigerCheck");
         });
 
-        // Compile root project, which links together language and adapter project, and build it.
+        // Compile root project, which links together all projects, and build it.
         final RootProject.Output rootProjectOutput = rootProjectCompiler.compile(TigerInputs.rootProjectBuilder(shared)
             .addIncludedProjects(
                 shared.languageProject().coordinate().artifactId(),

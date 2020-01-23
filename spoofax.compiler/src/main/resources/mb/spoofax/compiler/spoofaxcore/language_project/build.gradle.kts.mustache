@@ -1,20 +1,6 @@
-{{#standaloneProject}}
-plugins {
-  id("org.metaborg.gradle.config.sub-project") version "{{shared.metaborgGradleConfigVersion}}"
-  id("org.metaborg.gradle.config.java-library") version "{{shared.metaborgGradleConfigVersion}}"
-}
-
-repositories {
-{{#repositoryCodes}}
-  {{this}}
-{{/repositoryCodes}}
-}
-{{/standaloneProject}}
-{{^standaloneProject}}
 plugins {
   id("org.metaborg.gradle.config.java-library")
 }
-{{/standaloneProject}}
 
 group = "{{shared.languageProject.coordinate.groupId}}"
 version = "{{shared.languageProject.coordinate.version}}"
@@ -23,6 +9,9 @@ sourceSets {
   main {
     java {
       srcDir("$buildDir/generated/sources/spoofax/java")
+    }
+    resources {
+      srcDir("$buildDir/generated/sources/spoofax/resources")
     }
   }
 }

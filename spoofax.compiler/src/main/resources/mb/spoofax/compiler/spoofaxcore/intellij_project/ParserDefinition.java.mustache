@@ -1,0 +1,11 @@
+package {{parserDefinition.packageId}};
+
+import mb.spoofax.intellij.editor.SpoofaxParserDefinition;
+import mb.tiger.intellij.TigerPlugin;
+
+public class {{parserDefinition.id}} extends SpoofaxParserDefinition {
+    // Instantiated by IntelliJ.
+    private {{parserDefinition.id}}() {
+        super({{plugin.qualifiedId}}.getComponent());
+    }
+}

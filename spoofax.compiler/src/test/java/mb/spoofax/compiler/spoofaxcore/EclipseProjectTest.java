@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 class EclipseProjectTest extends TestBase {
-    @Test void testCompiler(@TempDir Path temporaryDirectoryPath) throws IOException {
+    @Test void testCompilerDefaults(@TempDir Path temporaryDirectoryPath) throws IOException {
         final FSPath baseDirectory = new FSPath(temporaryDirectoryPath);
         final Shared shared = TigerInputs.shared(baseDirectory);
 
@@ -37,6 +37,8 @@ class EclipseProjectTest extends TestBase {
             .build();
         eclipseProjectCompiler.compile(input);
         fileAssertions.asserts(input.buildGradleKtsFile(), (a) -> a.assertContains("org.metaborg.coronium.bundle"));
+        fileAssertions.asserts(input.pluginXmlFile(), (s) -> s.assertAll("plugin.xml", "<plugin>"));
+        fileAssertions.asserts(input.manifestMfFile(), (s) -> s.assertAll("MANIFEST.MF", "Export-Package"));
         fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {
             s.assertPublicJavaClass(input.genPlugin(), "TigerPlugin");
             s.assertPublicJavaInterface(input.genEclipseComponent(), "TigerEclipseComponent");
@@ -56,7 +58,7 @@ class EclipseProjectTest extends TestBase {
             s.assertPublicJavaClass(input.genUnobserveHandler(), "TigerUnobserveHandler");
         });
 
-        // Compile root project, which links together language and adapter project, and build it.
+        // Compile root project, which links together all projects, and build it.
         final RootProject.Output rootProjectOutput = rootProjectCompiler.compile(TigerInputs.rootProjectBuilder(shared)
             .addIncludedProjects(
                 shared.languageProject().coordinate().artifactId(),

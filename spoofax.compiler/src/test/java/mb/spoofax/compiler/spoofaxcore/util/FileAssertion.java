@@ -58,10 +58,18 @@ public class FileAssertion {
         assertTrue(readString().contains(expected));
     }
 
+    public void assertAll(String expectedLeaf, String expectedContent) {
+        assertExists();
+        assertLeaf(expectedLeaf);
+        assertContains(expectedContent);
+    }
+
+
     public void assertJavaParses() {
         assertExists();
         javaParser.assertParses(readString());
     }
+
 
     public void assertGradleBuild(String... tasks) {
         assertExists();

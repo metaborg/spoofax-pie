@@ -1,22 +1,7 @@
-{{#standaloneProject}}
-plugins {
-  id("org.metaborg.gradle.config.sub-project") version "{{shared.metaborgGradleConfigVersion}}"
-  id("org.metaborg.gradle.config.java-library") version "{{shared.metaborgGradleConfigVersion}}"
-  id("org.metaborg.coronium.bundle") version "{{shared.metaborgCoroniumVersion}}"
-}
-
-repositories {
-{{#repositoryCodes}}
-  {{this}}
-{{/repositoryCodes}}
-}
-{{/standaloneProject}}
-{{^standaloneProject}}
 plugins {
   id("org.metaborg.gradle.config.java-library")
   id("org.metaborg.coronium.bundle")
 }
-{{/standaloneProject}}
 
 group = "{{shared.eclipseProject.coordinate.groupId}}"
 version = "{{shared.eclipseProject.coordinate.version}}"
@@ -25,6 +10,9 @@ sourceSets {
   main {
     java {
       srcDir("$buildDir/generated/sources/spoofax/java")
+    }
+    resources {
+      srcDir("$buildDir/generated/sources/spoofax/resources")
     }
   }
 }
