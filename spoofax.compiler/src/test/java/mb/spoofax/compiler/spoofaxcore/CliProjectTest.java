@@ -31,6 +31,7 @@ class CliProjectTest extends TestBase {
         cliProjectCompiler.compile(input);
         fileAssertions.asserts(input.buildGradleKtsFile(), (a) -> a.assertContains("org.metaborg.gradle.config.java-application"));
         fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {
+            s.asserts(input.packageInfo(), (a) -> a.assertAll("package-info.java", "@DefaultQualifier(NonNull.class)"));
             s.assertPublicJavaClass(input.genMain(), "Main");
         });
 

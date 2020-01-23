@@ -23,6 +23,7 @@ public class EclipseProject {
     private final TemplateWriter buildGradleTemplate;
     private final TemplateWriter pluginXmlTemplate;
     private final TemplateWriter manifestTemplate;
+    private final TemplateWriter packageInfoTemplate;
     private final TemplateWriter pluginTemplate;
     private final TemplateWriter moduleTemplate;
     private final TemplateWriter componentTemplate;
@@ -45,6 +46,7 @@ public class EclipseProject {
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/build.gradle.kts.mustache");
         this.pluginXmlTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/plugin.xml.mustache");
         this.manifestTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/MANIFEST.MF.mustache");
+        this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/package-info.java.mustache");
         this.pluginTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/Plugin.java.mustache");
         this.moduleTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/Module.java.mustache");
         this.componentTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/Component.java.mustache");
@@ -91,6 +93,7 @@ public class EclipseProject {
 
         // Class files
         final ResourcePath classesGenDirectory = input.classesGenDirectory();
+        packageInfoTemplate.write(input, input.genPackageInfo().file(classesGenDirectory));
         pluginTemplate.write(input, input.genPlugin().file(classesGenDirectory));
         moduleTemplate.write(input, input.genEclipseModule().file(classesGenDirectory));
         componentTemplate.write(input, input.genEclipseComponent().file(classesGenDirectory));
@@ -214,6 +217,21 @@ public class EclipseProject {
 
 
         /// Eclipse project classes
+
+        // package-info
+
+        @Value.Default default TypeInfo genPackageInfo() {
+            return TypeInfo.of(shared().eclipsePackage(), "package-info");
+        }
+
+        Optional<TypeInfo> manualPackageInfo();
+
+        default TypeInfo packageInfo() {
+            if(classKind().isManual() && manualPackageInfo().isPresent()) {
+                return manualPackageInfo().get();
+            }
+            return genPackageInfo();
+        }
 
         // Plugin
 

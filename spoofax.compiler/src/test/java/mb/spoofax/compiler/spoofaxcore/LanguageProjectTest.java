@@ -18,6 +18,9 @@ class LanguageProjectTest extends TestBase {
         // Compile language project and test generated files.
         languageProjectCompiler.compile(input);
         fileAssertions.asserts(input.buildGradleKtsFile(), (a) -> a.assertContains("mb/tiger"));
+        fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {
+            s.asserts(input.packageInfo(), (a) -> a.assertAll("package-info.java", "@DefaultQualifier(NonNull.class)"));
+        });
 
         // Compile root project, which links together all projects, and build it.
         final RootProject.Output rootProjectOutput = rootProjectCompiler.compile(TigerInputs.rootProjectBuilder(shared)

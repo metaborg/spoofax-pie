@@ -1,12 +1,13 @@
 package mb.spoofax.compiler.spoofaxcore;
 
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
-import mb.spoofax.compiler.util.GradleRepository;
 import mb.spoofax.compiler.util.StringUtil;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
+import mb.spoofax.compiler.util.TypeInfo;
 import org.immutables.value.Value;
 
 import java.io.IOException;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 @Value.Enclosing
 public class LanguageProject {
     private final TemplateWriter buildGradleTemplate;
+    private final TemplateWriter packageInfoTemplate;
 
     private final Parser parserCompiler;
     private final Styler stylerCompiler;
@@ -35,6 +37,7 @@ public class LanguageProject {
         ConstraintAnalyzer constraintAnalyzerCompiler
     ) {
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("language_project/build.gradle.kts.mustache");
+        this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("language_project/package-info.Java.mustache");
 
         this.parserCompiler = parserCompiler;
         this.stylerCompiler = stylerCompiler;
@@ -45,8 +48,11 @@ public class LanguageProject {
     public Output compile(Input input) throws IOException {
         final Shared shared = input.shared();
 
-        final ArrayList<GradleRepository> repositories = new ArrayList<>(shared.defaultRepositories());
+        // Class files
+        final ResourcePath classesGenDirectory = input.classesGenDirectory();
+        packageInfoTemplate.write(input, input.genPackageInfo().file(classesGenDirectory));
 
+        // Files from other compilers.
         final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
         dependencies.add(GradleConfiguredDependency.api(shared.logApiDep()));
         dependencies.add(GradleConfiguredDependency.api(shared.resourceDep()));
@@ -56,7 +62,6 @@ public class LanguageProject {
 
         final ArrayList<String> copyResources = new ArrayList<>(input.additionalCopyResources());
 
-        // Files from other compilers.
         final Parser.LanguageProjectOutput parserOutput = parserCompiler.compileLanguageProject(input.parser());
         dependencies.addAll(parserOutput.dependencies());
         copyResources.addAll(parserOutput.copyResources());
@@ -160,6 +165,38 @@ public class LanguageProject {
         @Value.Default default ResourcePath buildGradleKtsFile() {
             return shared().languageProject().baseDirectory().appendRelativePath("build.gradle.kts");
         }
+
+
+        /// Kinds of classes (generated/extended/manual)
+
+        @Value.Default default ClassKind classKind() {
+            return ClassKind.Generated;
+        }
+
+        default ResourcePath classesGenDirectory() {
+            return shared().languageProject().genSourceSpoofaxJavaDirectory();
+        }
+
+
+        /// Language project classes
+
+        // package-info
+
+        @Value.Default default TypeInfo genPackageInfo() {
+            return TypeInfo.of(shared().languagePackage(), "package-info");
+        }
+
+        Optional<TypeInfo> manualPackageInfo();
+
+        default TypeInfo packageInfo() {
+            if(classKind().isManual() && manualPackageInfo().isPresent()) {
+                return manualPackageInfo().get();
+            }
+            return genPackageInfo();
+        }
+
+
+        // TODO: add check
     }
 
     @Value.Immutable

@@ -40,6 +40,7 @@ class EclipseProjectTest extends TestBase {
         fileAssertions.asserts(input.pluginXmlFile(), (s) -> s.assertAll("plugin.xml", "<plugin>"));
         fileAssertions.asserts(input.manifestMfFile(), (s) -> s.assertAll("MANIFEST.MF", "Export-Package"));
         fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {
+            s.asserts(input.packageInfo(), (a) -> a.assertAll("package-info.java", "@DefaultQualifier(NonNull.class)"));
             s.assertPublicJavaClass(input.genPlugin(), "TigerPlugin");
             s.assertPublicJavaInterface(input.genEclipseComponent(), "TigerEclipseComponent");
             s.assertPublicJavaClass(input.genEclipseModule(), "TigerEclipseModule");

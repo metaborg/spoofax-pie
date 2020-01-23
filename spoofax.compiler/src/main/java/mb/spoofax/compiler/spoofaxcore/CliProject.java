@@ -20,10 +20,12 @@ import java.util.stream.Collectors;
 @Value.Enclosing
 public class CliProject {
     private final TemplateWriter buildGradleTemplate;
+    private final TemplateWriter packageInfoTemplate;
     private final TemplateWriter mainTemplate;
 
     public CliProject(TemplateCompiler templateCompiler) {
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("cli_project/build.gradle.kts.mustache");
+        this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("cli_project/package-info.java.mustache");
         this.mainTemplate = templateCompiler.getOrCompileToWriter("cli_project/Main.java.mustache");
     }
 
@@ -49,6 +51,7 @@ public class CliProject {
 
         // Class files
         final ResourcePath classesGenDirectory = input.classesGenDirectory();
+        packageInfoTemplate.write(input, input.genPackageInfo().file(classesGenDirectory));
         mainTemplate.write(input, input.genMain().file(classesGenDirectory));
 
         return Output.builder().fromInput(input).build();
@@ -95,6 +98,21 @@ public class CliProject {
 
 
         /// CLI project classes
+
+        // package-info
+
+        @Value.Default default TypeInfo genPackageInfo() {
+            return TypeInfo.of(shared().cliPackage(), "package-info");
+        }
+
+        Optional<TypeInfo> manualPackageInfo();
+
+        default TypeInfo packageInfo() {
+            if(classKind().isManual() && manualPackageInfo().isPresent()) {
+                return manualPackageInfo().get();
+            }
+            return genPackageInfo();
+        }
 
         // Main
 

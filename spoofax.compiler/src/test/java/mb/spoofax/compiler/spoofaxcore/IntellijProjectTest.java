@@ -32,10 +32,10 @@ class IntellijProjectTest extends TestBase {
         fileAssertions.asserts(input.buildGradleKtsFile(), (a) -> a.assertAll("build.gradle.kts", "org.jetbrains.intellij"));
         fileAssertions.asserts(input.genPluginXmlFile(), (a) -> a.assertAll("plugin.xml", "<idea-plugin>"));
         fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {
+            s.asserts(input.packageInfo(), (a) -> a.assertAll("package-info.java", "@DefaultQualifier(NonNull.class)"));
             s.assertPublicJavaClass(input.genPlugin(), "TigerPlugin");
             s.assertPublicJavaInterface(input.genComponent(), "TigerIntellijComponent");
             s.assertPublicJavaClass(input.genModule(), "TigerIntellijModule");
-            s.asserts(input.packageInfo(), (a) -> a.assertAll("package-info.java", "@DefaultQualifier(NonNull.class)"));
             s.assertPublicJavaClass(input.genPlugin(), "TigerPlugin");
             s.assertPublicJavaClass(input.genLoader(), "TigerLoader");
             s.assertPublicJavaClass(input.genLanguage(), "TigerLanguage");

@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 @Value.Enclosing
 public class AdapterProject {
     private final TemplateWriter buildGradleTemplate;
+    private final TemplateWriter packageInfoTemplate;
     private final TemplateWriter checkTaskDefTemplate;
     private final TemplateWriter componentTemplate;
     private final TemplateWriter moduleTemplate;
@@ -48,6 +49,7 @@ public class AdapterProject {
         ConstraintAnalyzer constraintAnalyzerCompiler
     ) {
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("adapter_project/build.gradle.kts.mustache");
+        this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("adapter_project/package-info.java.mustache");
         this.checkTaskDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/CheckTaskDef.java.mustache");
         this.componentTemplate = templateCompiler.getOrCompileToWriter("adapter_project/Component.java.mustache");
         this.moduleTemplate = templateCompiler.getOrCompileToWriter("adapter_project/Module.java.mustache");
@@ -127,6 +129,7 @@ public class AdapterProject {
 
         // Class files
         final ResourcePath classesGenDirectory = input.classesGenDirectory();
+        packageInfoTemplate.write(input, input.packageInfo().file(classesGenDirectory));
         checkTaskDefTemplate.write(input, input.checkTaskDef().file(classesGenDirectory));
         componentTemplate.write(input, input.genComponent().file(classesGenDirectory));
         for(CommandDefRepr commandDef : input.commandDefs()) {
@@ -268,6 +271,21 @@ public class AdapterProject {
 
 
         /// Adapter project classes
+
+        // package-info
+
+        @Value.Default default TypeInfo genPackageInfo() {
+            return TypeInfo.of(shared().adapterPackage(), "package-info");
+        }
+
+        Optional<TypeInfo> manualPackageInfo();
+
+        default TypeInfo packageInfo() {
+            if(classKind().isManual() && manualPackageInfo().isPresent()) {
+                return manualPackageInfo().get();
+            }
+            return genPackageInfo();
+        }
 
         // Dagger component
 
