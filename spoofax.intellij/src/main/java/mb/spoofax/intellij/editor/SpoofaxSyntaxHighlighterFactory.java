@@ -6,8 +6,10 @@ import com.intellij.openapi.fileTypes.SyntaxHighlighterFactory;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import mb.resource.Resource;
+import mb.spoofax.intellij.IntellijLanguageComponent;
+import mb.spoofax.intellij.SpoofaxPlugin;
 import mb.spoofax.intellij.resource.IntellijResourceRegistry;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * IntelliJ requires its own factory implementation for {@link SpoofaxSyntaxHighlighter}.
@@ -18,14 +20,10 @@ public abstract class SpoofaxSyntaxHighlighterFactory extends SyntaxHighlighterF
     private final SpoofaxSyntaxHighlighter.Factory highlighterFactory;
 
 
-    protected SpoofaxSyntaxHighlighterFactory(
-        IntellijResourceRegistry resourceRegistry,
-        SpoofaxLexer.Factory lexerBuilder,
-        SpoofaxSyntaxHighlighter.Factory highlighterBuilder
-    ) {
-        this.resourceRegistry = resourceRegistry;
-        this.lexerFactory = lexerBuilder;
-        this.highlighterFactory = highlighterBuilder;
+    protected SpoofaxSyntaxHighlighterFactory(IntellijLanguageComponent languageComponent) {
+        this.resourceRegistry = SpoofaxPlugin.getComponent().getResourceRegistry();
+        this.lexerFactory = languageComponent.getLexerFactory();
+        this.highlighterFactory = languageComponent.getHighlighterFactory();
     }
 
 

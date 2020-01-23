@@ -3,10 +3,12 @@ package mb.spoofax.intellij.psi;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.psi.tree.IElementType;
+import mb.spoofax.core.language.LanguageScope;
 
 import javax.inject.Inject;
 
 public final class SpoofaxAstBuilder {
+    @LanguageScope
     public static class Factory {
         private final SpoofaxElementTypeManager elementTypeManager;
 

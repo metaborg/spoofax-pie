@@ -6,10 +6,6 @@ import mb.tiger.intellij.TigerPlugin;
 public class TigerParserDefinition extends SpoofaxParserDefinition {
     // Instantiated by IntelliJ.
     private TigerParserDefinition() {
-        super(
-            TigerPlugin.getComponent().getFileType(),
-            TigerPlugin.getComponent().getFileElementType(),
-            TigerPlugin.getComponent().getTokenTypeManager()
-        );
+        super(TigerPlugin.getComponent());
     }
 }

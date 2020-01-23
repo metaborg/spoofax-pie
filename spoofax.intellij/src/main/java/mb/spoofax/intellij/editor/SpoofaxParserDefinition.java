@@ -12,6 +12,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.tree.IFileElementType;
 import com.intellij.psi.tree.TokenSet;
+import mb.spoofax.intellij.IntellijLanguageComponent;
 import mb.spoofax.intellij.psi.SpoofaxElementType;
 import mb.spoofax.intellij.psi.SpoofaxFile2;
 import mb.spoofax.intellij.psi.SpoofaxTokenTypeManager;
@@ -24,14 +25,10 @@ public class SpoofaxParserDefinition implements ParserDefinition {
     private final SpoofaxTokenTypeManager tokenTypeManager;
 
 
-    @Inject public SpoofaxParserDefinition(
-        LanguageFileType fileType,
-        IFileElementType fileElementType,
-        SpoofaxTokenTypeManager tokenTypeManager
-    ) {
-        this.fileType = fileType;
-        this.fileElementType = fileElementType;
-        this.tokenTypeManager = tokenTypeManager;
+    public SpoofaxParserDefinition(IntellijLanguageComponent languageComponent) {
+        this.fileType = languageComponent.getFileType();
+        this.fileElementType = languageComponent.getFileElementType();
+        this.tokenTypeManager = new SpoofaxTokenTypeManager(languageComponent.getLanguage());
     }
 
 

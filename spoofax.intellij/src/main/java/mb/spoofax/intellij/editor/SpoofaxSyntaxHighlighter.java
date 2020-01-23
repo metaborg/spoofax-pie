@@ -4,6 +4,7 @@ import com.intellij.lexer.Lexer;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase;
 import com.intellij.psi.tree.IElementType;
+import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.intellij.psi.SpoofaxTokenType;
 
 import javax.annotation.Nullable;
@@ -20,6 +21,7 @@ public final class SpoofaxSyntaxHighlighter extends SyntaxHighlighterBase {
     /**
      * Factory class for {@link SpoofaxSyntaxHighlighter}.
      */
+    @LanguageScope
     public static class Factory {
         private final ScopeManager scopeManager;
 

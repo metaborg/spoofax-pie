@@ -18,10 +18,4 @@ public interface TigerIntellijComponent extends IntellijLanguageComponent, Tiger
     @Override TigerFileType getFileType();
 
     @Override TigerFileElementType getFileElementType();
-
-    SpoofaxTokenTypeManager getTokenTypeManager();
-
-    SpoofaxLexer.Factory getLexerFactory();
-
-    SpoofaxSyntaxHighlighter.Factory getHighlighterFactory();
 }

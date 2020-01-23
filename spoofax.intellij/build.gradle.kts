@@ -7,9 +7,9 @@ dependencies {
   implementation(platform(project(":depconstraints")))
   annotationProcessor(platform(project(":depconstraints")))
 
-  implementation(project(":spoofax.core"))
+  api(project(":spoofax.core"))
 
-  implementation("org.metaborg:log.api")
+  api("org.metaborg:log.api")
   implementation("org.metaborg:log.backend.noop")
   implementation("org.metaborg:pie.runtime")
   implementation("org.metaborg:pie.dagger")
@@ -21,8 +21,8 @@ dependencies {
 }
 
 intellij {
-  version = "2019.1.1"
+  version = "2019.3.2"
 }
 
-// Skip non-incremental, slow, and unecessary buildSearchableOptions task from IntelliJ.
-tasks.getByName("buildSearchableOptions").onlyIf({ false })
+// Skip non-incremental, slow, and unnecessary buildSearchableOptions task from IntelliJ.
+tasks.getByName("buildSearchableOptions").onlyIf { false }
