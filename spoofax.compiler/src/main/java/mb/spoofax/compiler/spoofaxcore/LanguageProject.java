@@ -37,7 +37,7 @@ public class LanguageProject {
         ConstraintAnalyzer constraintAnalyzerCompiler
     ) {
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("language_project/build.gradle.kts.mustache");
-        this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("language_project/package-info.Java.mustache");
+        this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("language_project/package-info.java.mustache");
 
         this.parserCompiler = parserCompiler;
         this.stylerCompiler = stylerCompiler;
