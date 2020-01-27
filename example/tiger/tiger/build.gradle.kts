@@ -4,8 +4,6 @@ plugins {
   id("org.metaborg.spoofax.compiler.gradle.spoofaxcore.language")
 }
 
-apply(from = "../compiler.gradle.kts")
-
 sourceSets {
   main {
     java {
