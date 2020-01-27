@@ -18,7 +18,7 @@ pluginManagement {
   }
 }
 
-include("depconstraints")
+include("spoofax.depconstraints")
 
 include("common")
 
@@ -38,11 +38,14 @@ include("spoofax.eclipse")
 include("spoofax.eclipse.externaldeps")
 include("spoofax.compiler")
 include("spoofax.compiler.interfaces")
+include("spoofax.compiler.gradle")
 
-include("org.metaborg.lang.tiger")
-include("tiger")
-include("tiger.spoofax")
-include("tiger.cli")
-include("tiger.intellij")
-include("tiger.eclipse")
-include("tiger.eclipse.externaldeps")
+// Include rest of Tiger projects as a composite build (`spoofax.example.tiger`), because it requires the
+// `spoofax.compiler.gradle` Gradle plugin from this root multi-project build (`spoofax.pie`), and Gradle plugin are
+// only available in the same build as a composite build.
+includeBuild("example/tiger")
+// Include `org.metaborg.lang.tiger` as a separate composite build, because `spoofax.compiler`'s tests depend on it.
+// Including it in `example/tiger` would cause a cyclic composite build from `spoofax.pie` -> `spoofax.example.tiger` ->
+// `spoofax.pie`. There is not really a cycle between projects, but there is between the composite builds, which
+// Gradle does not allow.
+includeBuild("example/tiger/org.metaborg.lang.tiger")

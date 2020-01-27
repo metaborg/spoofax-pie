@@ -4,8 +4,8 @@ plugins {
 }
 
 dependencies {
-  implementation(platform(project(":depconstraints")))
-  annotationProcessor(platform(project(":depconstraints")))
+  implementation(platform(project(":spoofax.depconstraints")))
+  annotationProcessor(platform(project(":spoofax.depconstraints")))
 
   api(project(":spoofax.core"))
 

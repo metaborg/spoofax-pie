@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-  api(platform(project(":depconstraints")))
+  api(platform(project(":spoofax.depconstraints")))
 
   api(project(":common"))
   api(project(":jsglr.common"))

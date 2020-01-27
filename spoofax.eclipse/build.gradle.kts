@@ -27,8 +27,8 @@ bundle {
 
 dependencies {
   // Dependency constraints.
-  api(platform(project(":depconstraints")))
-  annotationProcessor(platform(project(":depconstraints")))
+  api(platform(project(":spoofax.depconstraints")))
+  annotationProcessor(platform(project(":spoofax.depconstraints")))
 
   // Compile-time annotations.
   compileOnly("org.checkerframework:checker-qual-android")

@@ -1,0 +1,24 @@
+plugins {
+  id("org.metaborg.gradle.config.kotlin-gradle-plugin")
+  id("org.metaborg.gitonium")
+  kotlin("jvm")
+  id("org.gradle.kotlin.kotlin-dsl") // Same as `kotlin-dsl`, but without version, which is already set in root project.
+}
+
+metaborg {
+  kotlinApiVersion = "1.2"
+  kotlinLanguageVersion = "1.2"
+}
+
+dependencies {
+  implementation("$group:spoofax.compiler:$version")
+}
+
+gradlePlugin {
+  plugins {
+    create("spoofax-compiler-spoofaxcore-language") {
+      id = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.language"
+      implementationClass = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.LanguagePlugin"
+    }
+  }
+}

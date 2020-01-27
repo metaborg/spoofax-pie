@@ -13,8 +13,8 @@ repositories {
 }
 
 dependencies {
-  api(platform(project(":depconstraints")))
-  annotationProcessor(platform(project(":depconstraints")))
+  api(platform(project(":spoofax.depconstraints")))
+  annotationProcessor(platform(project(":spoofax.depconstraints")))
 
   api(project(":common"))
   api(project(":spoofax.core"))
@@ -64,7 +64,7 @@ dependencies {
   testInjections(project(":spoofax.eclipse"))
   testInjections(project(":spoofax.eclipse.externaldeps"))
   testInjections(project(":spoofax.intellij"))
-  testInjections(project(":org.metaborg.lang.tiger", Dependency.DEFAULT_CONFIGURATION).also {
+  testInjections(create("$group", "org.metaborg.lang.tiger", "$version", Dependency.DEFAULT_CONFIGURATION).also {
     it.isTransitive = false
     configureSpoofaxLanguageArtifact(it)
   })
@@ -74,7 +74,8 @@ tasks.test {
   // Pass classpaths to tests in the form of system properties, which can be injected into projects that tests generate
   // to get access to the same classpaths that are used in the current Spoofax-PIE build.
   dependsOn(testInjections)
-  doFirst { // Wrap in doFirst to properly defer dependency resolution to the task execution phase.
+  doFirst {
+    // Wrap in doFirst to properly defer dependency resolution to the task execution phase.
     testInjections.resolvedConfiguration.resolvedArtifacts.forEach {
       systemProperty("${it.name}:classpath", it.file);
     }

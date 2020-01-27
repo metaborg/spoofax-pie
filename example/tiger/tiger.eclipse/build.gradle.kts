@@ -6,16 +6,16 @@ plugins {
 bundle {
   requireTargetPlatform("javax.inject")
 
-  requireBundle(":spoofax.eclipse")
+  requireBundle("$group", "spoofax.eclipse", "$version")
 
-  requireEmbeddingBundle(":spoofax.eclipse.externaldeps")
+  requireEmbeddingBundle("$group", "spoofax.eclipse.externaldeps", "$version")
   requireEmbeddingBundle(":tiger.eclipse.externaldeps")
 }
 
 dependencies {
   // Dependency constraints.
-  api(platform(project(":depconstraints")))
-  annotationProcessor(platform(project(":depconstraints")))
+  api(platform("$group:spoofax.depconstraints:$version"))
+  annotationProcessor(platform("$group:spoofax.depconstraints:$version"))
 
   // Compile-time annotations.
   compileOnly("org.checkerframework:checker-qual-android")

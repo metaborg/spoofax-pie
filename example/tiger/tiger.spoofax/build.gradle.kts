@@ -4,11 +4,11 @@ plugins {
   id("net.ltgt.apt-idea")
 }
 dependencies {
-  api(platform(project(":depconstraints")))
-  annotationProcessor(platform(project(":depconstraints")))
+  api(platform("$group:spoofax.depconstraints:$version"))
+  annotationProcessor(platform("$group:spoofax.depconstraints:$version"))
 
   api(project(":tiger"))
-  api(project(":spoofax.core"))
+  api("$group:spoofax.core:$version")
   api("org.metaborg:pie.api")
   api("org.metaborg:pie.dagger")
   api("com.google.dagger:dagger")

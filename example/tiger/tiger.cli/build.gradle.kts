@@ -24,11 +24,11 @@ graal {
 }
 
 dependencies {
-  implementation(platform(project(":depconstraints")))
-  annotationProcessor(platform(project(":depconstraints")))
+  implementation(platform("$group:spoofax.depconstraints:$version"))
+  annotationProcessor(platform("$group:spoofax.depconstraints:$version"))
 
   implementation(project(":tiger.spoofax"))
-  implementation(project(":spoofax.cli"))
+  implementation("$group:spoofax.cli:$version")
   implementation("org.metaborg:log.backend.slf4j")
   implementation("org.metaborg:pie.runtime")
   implementation("org.metaborg:pie.dagger")

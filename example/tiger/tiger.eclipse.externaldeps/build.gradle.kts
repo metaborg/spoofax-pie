@@ -6,7 +6,7 @@ plugins {
 
 // Add dependencies to JVM (non-OSGi) libraries. Must use `api` configuration for `coronium.embedding` plugin.
 dependencies {
-  api(platform(project(":depconstraints")))
+  api(platform("$group:spoofax.depconstraints:$version"))
 
   api(project(":tiger"))
   api(project(":tiger.spoofax"))

@@ -5,8 +5,8 @@ plugins {
 }
 
 dependencies {
-  api(platform(project(":depconstraints")))
-  annotationProcessor(platform(project(":depconstraints")))
+  api(platform(project(":spoofax.depconstraints")))
+  annotationProcessor(platform(project(":spoofax.depconstraints")))
 
   api("com.google.dagger:dagger")
   implementation(project(":spoofax.core"))

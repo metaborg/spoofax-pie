@@ -1,9 +1,10 @@
-import mb.spoofax.gradle.util.toSpoofaxDependency
-
 plugins {
   id("org.metaborg.gradle.config.java-library")
   id("org.metaborg.gradle.config.junit-testing")
+  id("org.metaborg.spoofax.compiler.gradle.spoofaxcore.language")
 }
+
+apply(from = "../compiler.gradle.kts")
 
 sourceSets {
   main {
@@ -14,16 +15,16 @@ sourceSets {
 }
 
 dependencies {
-  api(platform(project(":depconstraints")))
+  api(platform("$group:spoofax.depconstraints:$version"))
 
-  api(project(":spoofax.compiler.interfaces"))
-  api(project(":common"))
-  api(project(":jsglr1.common"))
-  api(project(":esv.common"))
-  api(project(":stratego.common"))
-  api(project(":constraint.common"))
+  api("$group:spoofax.compiler.interfaces:$version")
+  api("$group:common:$version")
+  api("$group:jsglr1.common:$version")
+  api("$group:esv.common:$version")
+  api("$group:stratego.common:$version")
+  api("$group:constraint.common:$version")
 
-  implementation(project(":nabl2.common"))
+  implementation("$group:nabl2.common:$version")
   implementation("org.metaborg:strategoxt-min-jar")
 
   compileOnly("org.checkerframework:checker-qual-android")
@@ -122,7 +123,7 @@ fun copySpoofaxLanguageResources(
   tasks.getByName(JavaPlugin.TEST_CLASSES_TASK_NAME).dependsOn(copyTestTask)
 }
 copySpoofaxLanguageResources(
-  createProjectDependency(":org.metaborg.lang.tiger"),
+  createModuleDependency("$group:org.metaborg.lang.tiger:$version"),
   "mb/tiger",
   true,
   true,

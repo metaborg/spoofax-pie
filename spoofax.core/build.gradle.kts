@@ -5,8 +5,8 @@ plugins {
 }
 
 dependencies {
-  api(platform(project(":depconstraints")))
-  annotationProcessor(platform(project(":depconstraints")))
+  api(platform(project(":spoofax.depconstraints")))
+  annotationProcessor(platform(project(":spoofax.depconstraints")))
 
   api(project(":common"))
   api("org.metaborg:log.api")

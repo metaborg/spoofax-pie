@@ -4,11 +4,11 @@ plugins {
 }
 
 dependencies {
-  implementation(platform(project(":depconstraints")))
-  annotationProcessor(platform(project(":depconstraints")))
+  implementation(platform("$group:spoofax.depconstraints:$version"))
+  annotationProcessor(platform("$group:spoofax.depconstraints:$version"))
 
-  implementation(project(":spoofax.core"))
-  implementation(project(":spoofax.intellij"))
+  implementation("$group:spoofax.core:$version")
+  implementation("$group:spoofax.intellij:$version")
   implementation(project(":tiger.spoofax")) {
     exclude(group = "org.slf4j")
   }
@@ -36,7 +36,8 @@ We tried getting access to the IntelliJ API via a normal Gradle dependency, but 
 not possible to directly depend on the IntelliJ API. You would need to download a ZIP file, extract it, and add that
 directory as an Ivy repository to get access to the IntelliJ API.
 */
-tasks.getByName("runIde").dependsOn(tasks.getByPath(":spoofax.intellij:jar"))
+// TODO: does not work anymore as composite build, how do we do this now? Is it still needed?
+//tasks.getByName("runIde").dependsOn(tasks.getByPath(":spoofax.intellij:jar"))
 
 // Use Java 8 version of JBR (JetBrains Runtime) to run the IDE.
 tasks.getByName<org.jetbrains.intellij.tasks.RunIdeTask>("runIde") {
