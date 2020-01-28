@@ -40,12 +40,29 @@ include("spoofax.compiler")
 include("spoofax.compiler.interfaces")
 include("spoofax.compiler.gradle")
 
+// Reusable function for configuring included builds with a dependency substitution that attempts to use local projects.
+// Note that is only works if the name of the module (artifactId) exactly matches the name of the project.
+// TODO: move this to gradle.config plugin?
+val useLocalProjectsSubstitution: ConfigurableIncludedBuild.() -> Unit = {
+  dependencySubstitution {
+    all {
+      if(requested is ModuleComponentSelector) {
+        // Explicit cast as smart cast is impossible due to open getter method.
+        val selector = requested as ModuleComponentSelector
+        val project = findProject(selector.module)
+        if(project != null) {
+          useTarget(project(":${selector.module}"), "Substituting with local project")
+        }
+      }
+    }
+  }
+}
 // Include rest of Tiger projects as a composite build (`spoofax.example.tiger`), because it requires the
 // `spoofax.compiler.gradle` Gradle plugin from this root multi-project build (`spoofax.pie`), and Gradle plugin are
 // only available in the same build as a composite build.
-includeBuild("example/tiger")
+includeBuild("example/tiger", useLocalProjectsSubstitution)
 // Include `org.metaborg.lang.tiger` as a separate composite build, because `spoofax.compiler`'s tests depend on it.
 // Including it in `example/tiger` would cause a cyclic composite build from `spoofax.pie` -> `spoofax.example.tiger` ->
 // `spoofax.pie`. There is not really a cycle between projects, but there is between the composite builds, which
 // Gradle does not allow.
-includeBuild("example/tiger/org.metaborg.lang.tiger")
+includeBuild("example/tiger/org.metaborg.lang.tiger", useLocalProjectsSubstitution)

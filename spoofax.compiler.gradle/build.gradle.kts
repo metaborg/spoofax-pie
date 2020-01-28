@@ -11,7 +11,7 @@ metaborg {
 }
 
 dependencies {
-  implementation("$group:spoofax.compiler:$version")
+  implementation(project(":spoofax.compiler"))
 }
 
 gradlePlugin {
