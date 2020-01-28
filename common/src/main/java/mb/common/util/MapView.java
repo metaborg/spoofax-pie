@@ -152,6 +152,10 @@ public class MapView<K, V> implements Iterable<Map.Entry<K, V>>, Serializable {
     }
 
 
+    public void addAllTo(Map<K, V> map) {
+        map.putAll(this.map);
+    }
+
     public Map<K, V> asUnmodifiable() {
         return Collections.unmodifiableMap(map);
     }

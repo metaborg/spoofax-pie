@@ -45,91 +45,78 @@ public class LanguageProject {
         this.constraintAnalyzerCompiler = constraintAnalyzerCompiler;
     }
 
-    public Output compile(Input input) throws IOException {
+    public void generateBuildGradleKts(Input input) throws IOException {
         final Shared shared = input.shared();
 
-        // Class files
-        final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        packageInfoTemplate.write(input, input.genPackageInfo().file(classesGenDirectory));
-
-        // Files from other compilers.
         final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
         dependencies.add(GradleConfiguredDependency.api(shared.logApiDep()));
         dependencies.add(GradleConfiguredDependency.api(shared.resourceDep()));
         dependencies.add(GradleConfiguredDependency.api(shared.spoofaxCompilerInterfacesDep()));
         dependencies.add(GradleConfiguredDependency.api(shared.commonDep()));
         dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
+        parserCompiler.getLanguageProjectDependencies(input.parser()).addAllTo(dependencies);
 
         final ArrayList<String> copyResources = new ArrayList<>(input.additionalCopyResources());
+        parserCompiler.getLanguageProjectCopyResources(input.parser()).addAllTo(copyResources);
+        input.styler().ifPresent((i) -> {
+            stylerCompiler.getLanguageProjectDependencies(i).addAllTo(dependencies);
+            stylerCompiler.getLanguageProjectCopyResources(i).addAllTo(copyResources);
+        });
+        input.strategoRuntime().ifPresent((i) -> {
+            strategoRuntimeCompiler.getLanguageProjectDependencies(i).addAllTo(dependencies);
+            strategoRuntimeCompiler.getLanguageProjectCopyResources(i).addAllTo(copyResources);
+        });
+        input.constraintAnalyzer().ifPresent((i) -> {
+            constraintAnalyzerCompiler.getLanguageProjectDependencies(i).addAllTo(dependencies);
+            constraintAnalyzerCompiler.getLanguageProjectCopyResources(i).addAllTo(copyResources);
+        });
 
-        final Parser.LanguageProjectOutput parserOutput = parserCompiler.compileLanguageProject(input.parser());
-        dependencies.addAll(parserOutput.dependencies());
-        copyResources.addAll(parserOutput.copyResources());
+        final HashMap<String, Object> map = new HashMap<>();
+        final String languageDependencyCode = input.languageSpecificationDependency().caseOf()
+            .project((projectPath) -> "createProjectDependency(\"" + projectPath + "\")")
+            .module((coordinate) -> "createModuleDependency(\"" + coordinate.toGradleNotation() + "\")")
+            .files((filePaths) -> "createFilesDependency(" + filePaths.stream().map((s) -> "\"" + s + "\"").collect(Collectors.joining(", ")) + ")");
+        map.put("languageDependencyCode", languageDependencyCode);
+        map.put("dependencyCodes", dependencies.stream().map(GradleConfiguredDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
+        map.put("copyResourceCodes", copyResources.stream().map(StringUtil::doubleQuote).collect(Collectors.toCollection(ArrayList::new)));
+        buildGradleTemplate.write(input, map, input.buildGradleKtsFile());
+    }
 
-        final Optional<Styler.LanguageProjectOutput> stylerOutput;
-        final Optional<StrategoRuntime.LanguageProjectOutput> strategoRuntimeOutput;
-        final Optional<ConstraintAnalyzer.LanguageProjectOutput> constraintAnalyzerOutput;
+    public void compile(Input input) throws IOException {
+        final Shared shared = input.shared();
+        // Class files
+        final ResourcePath classesGenDirectory = input.classesGenDirectory();
+        packageInfoTemplate.write(input, input.genPackageInfo().file(classesGenDirectory));
+        // Files from other compilers.
+        parserCompiler.compileLanguageProject(input.parser());
         try {
-            stylerOutput = input.styler().map((i) -> {
+            input.styler().ifPresent((i) -> {
                 try {
-                    return stylerCompiler.compileLanguageProject(i);
+                    stylerCompiler.compileLanguageProject(i);
                 } catch(IOException e) {
                     throw new UncheckedIOException(e);
                 }
             });
-            stylerOutput.ifPresent((o) -> {
-                dependencies.addAll(o.dependencies());
-                copyResources.addAll(o.copyResources());
-            });
-
-            strategoRuntimeOutput = input.strategoRuntime().map((i) -> {
+            input.strategoRuntime().ifPresent((i) -> {
                 try {
-                    return strategoRuntimeCompiler.compileLanguageProject(i);
+                    strategoRuntimeCompiler.compileLanguageProject(i);
                 } catch(IOException e) {
                     throw new UncheckedIOException(e);
                 }
             });
-            strategoRuntimeOutput.ifPresent((o) -> {
-                dependencies.addAll(o.dependencies());
-                copyResources.addAll(o.copyResources());
-            });
-
-            constraintAnalyzerOutput = input.constraintAnalyzer().map((i) -> {
+            input.constraintAnalyzer().ifPresent((i) -> {
                 try {
-                    return constraintAnalyzerCompiler.compileLanguageProject(i);
+                    constraintAnalyzerCompiler.compileLanguageProject(i);
                 } catch(IOException e) {
                     throw new UncheckedIOException(e);
                 }
-            });
-            constraintAnalyzerOutput.ifPresent((o) -> {
-                dependencies.addAll(o.dependencies());
-                copyResources.addAll(o.copyResources());
             });
         } catch(UncheckedIOException e) {
             throw e.getCause();
         }
-
-        // Gradle files
-        {
-            final HashMap<String, Object> map = new HashMap<>();
-            final String languageDependencyCode = input.languageSpecificationDependency().caseOf()
-                .project((projectPath) -> "createProjectDependency(\"" + projectPath + "\")")
-                .module((coordinate) -> "createModuleDependency(\"" + coordinate.toGradleNotation() + "\")")
-                .files((filePaths) -> "createFilesDependency(" + filePaths.stream().map((s) -> "\"" + s + "\"").collect(Collectors.joining(", ")) + ")");
-            map.put("languageDependencyCode", languageDependencyCode);
-            map.put("dependencyCodes", dependencies.stream().map(GradleConfiguredDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
-            map.put("copyResourceCodes", copyResources.stream().map(StringUtil::doubleQuote).collect(Collectors.toCollection(ArrayList::new)));
-            buildGradleTemplate.write(input, map, input.buildGradleKtsFile());
-        }
-
-        return Output.builder()
-            .parser(parserOutput)
-            .styler(stylerOutput)
-            .strategoRuntime(strategoRuntimeOutput)
-            .constraintAnalyzer(constraintAnalyzerOutput)
-            .build();
     }
 
+    // Input
 
     @Value.Immutable
     public interface Input extends Serializable {
@@ -197,23 +184,5 @@ public class LanguageProject {
 
 
         // TODO: add check
-    }
-
-    @Value.Immutable
-    public interface Output extends Serializable {
-        class Builder extends LanguageProjectData.Output.Builder {}
-
-        static Builder builder() {
-            return new Builder();
-        }
-
-
-        Parser.LanguageProjectOutput parser();
-
-        Optional<Styler.LanguageProjectOutput> styler();
-
-        Optional<StrategoRuntime.LanguageProjectOutput> strategoRuntime();
-
-        Optional<ConstraintAnalyzer.LanguageProjectOutput> constraintAnalyzer();
     }
 }

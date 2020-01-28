@@ -113,6 +113,10 @@ public class ListView<E> extends BaseCollectionView<E, List<? extends E>> implem
     }
 
 
+    public void addAllTo(List<E> list) {
+        list.addAll(this.collection);
+    }
+
     @Override public List<E> asUnmodifiable() {
         return Collections.unmodifiableList(collection);
     }

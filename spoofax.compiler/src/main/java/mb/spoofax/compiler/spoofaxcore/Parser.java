@@ -1,5 +1,6 @@
 package mb.spoofax.compiler.spoofaxcore;
 
+import mb.common.util.ListView;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
@@ -10,7 +11,6 @@ import org.immutables.value.Value;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.List;
 import java.util.Optional;
 
 @Value.Enclosing
@@ -29,29 +29,37 @@ public class Parser {
         this.tokenizeTaskDefTemplate = templateCompiler.getOrCompileToWriter("parser/TokenizeTaskDef.java.mustache");
     }
 
-    public LanguageProjectOutput compileLanguageProject(Input input) throws IOException {
-        final LanguageProjectOutput output = LanguageProjectOutput.builder().fromInput(input).build();
-        if(input.classKind().isManualOnly()) return output; // Nothing to generate: return.
+    // Language project
 
+    public ListView<GradleConfiguredDependency> getLanguageProjectDependencies(Input input) {
+        return ListView.of(
+            GradleConfiguredDependency.api(input.shared().jsglrCommonDep()),
+            GradleConfiguredDependency.api(input.shared().jsglr1CommonDep())
+        );
+    }
+
+    public ListView<String> getLanguageProjectCopyResources(Input input) {
+        return ListView.of(input.tableSourceRelPath());
+    }
+
+    public void compileLanguageProject(Input input) throws IOException {
+        if(input.classKind().isManualOnly()) return; // Nothing to generate: return.
         final ResourcePath classesGenDirectory = input.languageClassesGenDirectory();
         tableTemplate.write(input, input.genTable().file(classesGenDirectory));
         parserTemplate.write(input, input.genParser().file(classesGenDirectory));
         factoryTemplate.write(input, input.genFactory().file(classesGenDirectory));
-
-        return output;
     }
 
-    public AdapterProjectOutput compileAdapterProject(Input input) throws IOException {
-        final AdapterProjectOutput output = AdapterProjectOutput.builder().fromInput(input).build();
-        if(input.classKind().isManualOnly()) return output; // Nothing to generate: return.
+    // Adapter project
 
+    public void compileAdapterProject(Input input) throws IOException {
+        if(input.classKind().isManualOnly()) return; // Nothing to generate: return.
         final ResourcePath classesGenDirectory = input.adapterClassesGenDirectory();
         parseTaskDefTemplate.write(input, input.genParseTaskDef().file(classesGenDirectory));
         tokenizeTaskDefTemplate.write(input, input.genTokenizeTaskDef().file(classesGenDirectory));
-
-        return output;
     }
 
+    // Input
 
     @Value.Immutable
     public interface Input extends Serializable {
@@ -185,48 +193,5 @@ public class Parser {
                 throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualTokenizeTaskDef' has not been set");
             }
         }
-    }
-
-    @Value.Immutable
-    public interface LanguageProjectOutput extends Serializable {
-        class Builder extends ParserData.LanguageProjectOutput.Builder {
-            public Builder fromInput(Input input) {
-                addDependencies(
-                    GradleConfiguredDependency.api(input.shared().jsglrCommonDep()),
-                    GradleConfiguredDependency.api(input.shared().jsglr1CommonDep())
-                );
-                addCopyResources(input.tableSourceRelPath());
-                return this;
-            }
-        }
-
-        static Builder builder() {
-            return new Builder();
-        }
-
-
-        List<GradleConfiguredDependency> dependencies();
-
-        List<String> copyResources();
-    }
-
-    @Value.Immutable
-    public interface AdapterProjectOutput extends Serializable {
-        class Builder extends ParserData.AdapterProjectOutput.Builder {
-            public Builder fromInput(Input input) {
-                addAdditionalTaskDefs(input.parseTaskDef());
-                // Do not add tokenize task definition, as it is handled explicitly.
-                return this;
-            }
-        }
-
-        static Builder builder() {
-            return new Builder();
-        }
-
-
-        List<GradleConfiguredDependency> dependencies();
-
-        List<TypeInfo> additionalTaskDefs();
     }
 }

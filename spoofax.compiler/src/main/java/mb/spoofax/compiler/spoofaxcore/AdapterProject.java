@@ -62,49 +62,47 @@ public class AdapterProject {
         this.constraintAnalyzerCompiler = constraintAnalyzerCompiler;
     }
 
-    public Output compile(Input input) throws IOException {
+    public void generateBuildGradleKts(Input input) throws IOException {
         final Shared shared = input.shared();
 
-        // Gradle files
-        {
-            final HashMap<String, Object> map = new HashMap<>();
+        final HashMap<String, Object> map = new HashMap<>();
 
-            final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
-            dependencies.add(GradleConfiguredDependency.api(input.languageProjectDependency()));
-            dependencies.add(GradleConfiguredDependency.api(shared.spoofaxCoreDep()));
-            dependencies.add(GradleConfiguredDependency.api(shared.pieApiDep()));
-            dependencies.add(GradleConfiguredDependency.api(shared.pieDaggerDep()));
-            dependencies.add(GradleConfiguredDependency.api(shared.daggerDep()));
-            dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
-            dependencies.add(GradleConfiguredDependency.annotationProcessor(shared.daggerCompilerDep()));
-            map.put("dependencyCodes", dependencies.stream().map(GradleConfiguredDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
+        final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
+        dependencies.add(GradleConfiguredDependency.api(input.languageProjectDependency()));
+        dependencies.add(GradleConfiguredDependency.api(shared.spoofaxCoreDep()));
+        dependencies.add(GradleConfiguredDependency.api(shared.pieApiDep()));
+        dependencies.add(GradleConfiguredDependency.api(shared.pieDaggerDep()));
+        dependencies.add(GradleConfiguredDependency.api(shared.daggerDep()));
+        dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
+        dependencies.add(GradleConfiguredDependency.annotationProcessor(shared.daggerCompilerDep()));
+        map.put("dependencyCodes", dependencies.stream().map(GradleConfiguredDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
 
-            buildGradleTemplate.write(input, map, input.buildGradleKtsFile());
-        }
+        buildGradleTemplate.write(input, map, input.buildGradleKtsFile());
+    }
 
-        // Run adapter project compilers
-        final Parser.AdapterProjectOutput parserOutput = parserCompiler.compileAdapterProject(input.parser());
-        final Optional<Styler.AdapterProjectOutput> stylerOutput;
-        final Optional<StrategoRuntime.AdapterProjectOutput> strategoRuntimeOutput;
-        final Optional<ConstraintAnalyzer.AdapterProjectOutput> constraintAnalyzerOutput;
+    public void compile(Input input) throws IOException {
+        final Shared shared = input.shared();
+
+        // Files from other compilers.
+        parserCompiler.compileAdapterProject(input.parser());
         try {
-            stylerOutput = input.styler().map((i) -> {
+            input.styler().ifPresent((i) -> {
                 try {
-                    return stylerCompiler.compileAdapterProject(i);
+                    stylerCompiler.compileAdapterProject(i);
                 } catch(IOException e) {
                     throw new UncheckedIOException(e);
                 }
             });
-            strategoRuntimeOutput = input.strategoRuntime().map((i) -> {
+            input.strategoRuntime().ifPresent((i) -> {
                 try {
-                    return strategoRuntimeCompiler.compileAdapterProject(i);
+                    strategoRuntimeCompiler.compileAdapterProject(i);
                 } catch(IOException e) {
                     throw new UncheckedIOException(e);
                 }
             });
-            constraintAnalyzerOutput = input.constraintAnalyzer().map((i) -> {
+            input.constraintAnalyzer().ifPresent((i) -> {
                 try {
-                    return constraintAnalyzerCompiler.compileAdapterProject(i);
+                    constraintAnalyzerCompiler.compileAdapterProject(i);
                 } catch(IOException e) {
                     throw new UncheckedIOException(e);
                 }
@@ -116,15 +114,13 @@ public class AdapterProject {
         // Collect all task definitions.
         final ArrayList<TypeInfo> allTaskDefs = new ArrayList<>(input.taskDefs());
         allTaskDefs.add(input.parser().tokenizeTaskDef());
-        allTaskDefs.addAll(parserOutput.additionalTaskDefs());
+        allTaskDefs.add(input.parser().parseTaskDef());
         if(input.styler().isPresent()) {
             allTaskDefs.add(input.styler().get().styleTaskDef());
         } else {
             allTaskDefs.add(TypeInfo.of("mb.spoofax.core.language.taskdef", "NullStyler"));
         }
-        stylerOutput.ifPresent(o -> allTaskDefs.addAll(o.additionalTaskDefs()));
-        strategoRuntimeOutput.ifPresent(o -> allTaskDefs.addAll(o.additionalTaskDefs()));
-        constraintAnalyzerOutput.ifPresent(o -> allTaskDefs.addAll(o.additionalTaskDefs()));
+        input.constraintAnalyzer().ifPresent((i) -> allTaskDefs.add(i.analyzeTaskDef()));
         allTaskDefs.add(input.checkTaskDef());
 
         // Class files
@@ -193,13 +189,6 @@ public class AdapterProject {
 
             instanceTemplate.write(input, map, input.genInstance().file(classesGenDirectory));
         }
-
-        return Output.builder()
-            .parser(parserOutput)
-            .styler(stylerOutput)
-            .strategoRuntime(strategoRuntimeOutput)
-            .constraintAnalyzer(constraintAnalyzerOutput)
-            .build();
     }
 
 
@@ -372,23 +361,5 @@ public class AdapterProject {
                 throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualCheckTaskDef' has not been set");
             }
         }
-    }
-
-    @Value.Immutable
-    public interface Output extends Serializable {
-        class Builder extends AdapterProjectData.Output.Builder {}
-
-        static Builder builder() {
-            return new Builder();
-        }
-
-
-        Parser.AdapterProjectOutput parser();
-
-        Optional<Styler.AdapterProjectOutput> styler();
-
-        Optional<StrategoRuntime.AdapterProjectOutput> strategoRuntime();
-
-        Optional<ConstraintAnalyzer.AdapterProjectOutput> constraintAnalyzer();
     }
 }

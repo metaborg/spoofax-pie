@@ -15,13 +15,16 @@ class CliProjectTest extends TestBase {
         final Shared shared = TigerInputs.shared(baseDirectory);
 
         // Compile language project, as adapter project depends on it.
-        languageProjectCompiler.compile(TigerInputs.languageProject(shared));
+        final LanguageProject.Input languageProjectInput = TigerInputs.languageProject(shared);
+        languageProjectCompiler.generateBuildGradleKts(languageProjectInput);
+        languageProjectCompiler.compile(languageProjectInput);
 
         // Compile adapter project, as CLI project depends on it.
         final AdapterProject.Input adapterProjectInput = TigerInputs.adapterProjectBuilder(shared)
             .languageProjectDependency(GradleDependency.project(":" + shared.languageProject().coordinate().artifactId()))
             .build();
         TigerInputs.copyTaskDefsIntoAdapterProject(adapterProjectInput, resourceService);
+        adapterProjectCompiler.generateBuildGradleKts(adapterProjectInput);
         adapterProjectCompiler.compile(adapterProjectInput);
 
         // Compile CLI project and test generated files.

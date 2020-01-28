@@ -1,5 +1,6 @@
 package mb.spoofax.compiler.spoofaxcore;
 
+import mb.common.util.ListView;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
@@ -10,6 +11,7 @@ import org.immutables.value.Value;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,21 +23,48 @@ public class StrategoRuntime {
         this.factoryTemplate = templateCompiler.getOrCompileToWriter("stratego_runtime/StrategoRuntimeBuilderFactory.java.mustache");
     }
 
-    public LanguageProjectOutput compileLanguageProject(Input input) throws IOException {
-        final LanguageProjectOutput output = LanguageProjectOutput.builder().fromInput(input).build();
-        if(input.classKind().isManualOnly()) return output; // Nothing to generate: return.
+    // Language project
 
+    public ListView<GradleConfiguredDependency> getLanguageProjectDependencies(Input input) {
+        final Shared shared = input.shared();
+        final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>();
+        dependencies.add(GradleConfiguredDependency.api(shared.strategoCommonDep()));
+        dependencies.add(GradleConfiguredDependency.api(shared.orgStrategoXTStrjDep()));
+        dependencies.add(GradleConfiguredDependency.api(shared.strategoXTMinJarDep()));
+        // TODO: move to constraint analyzer compiler, and make this depend on it?
+        // NaBL2 (required by Statix as well)
+        if(input.addNaBL2Primitives() || input.addStatixPrimitives()) {
+            dependencies.add(GradleConfiguredDependency.implementation(shared.nabl2CommonDep()));
+        }
+        if(input.addStatixPrimitives()) {
+            dependencies.add(GradleConfiguredDependency.implementation(shared.statixCommonDep()));
+        }
+        return new ListView<>(dependencies);
+    }
+
+    public ListView<String> getLanguageProjectCopyResources(Input input) {
+        final ArrayList<String> copyResources = new ArrayList<>();
+        if(input.addStatixPrimitives()) {
+            // TODO: move to constraint analyzer compiler?
+            copyResources.add("src-gen/statix/statics.spec.aterm");
+        }
+        if(input.copyCTree()) {
+            copyResources.add("target/metaborg/stratego.ctree");
+        }
+        return new ListView<>(copyResources);
+    }
+
+    public void compileLanguageProject(Input input) throws IOException {
+        if(input.classKind().isManualOnly()) return; // Nothing to generate: return.
         final ResourcePath classesGenDirectory = input.languageClassesGenDirectory();
         factoryTemplate.write(input, input.genFactory().file(classesGenDirectory));
-
-        return output;
     }
 
+    // Adapter project
 
-    public AdapterProjectOutput compileAdapterProject(Input input) throws IOException {
-        return AdapterProjectOutput.builder().build();
-    }
+    public void compileAdapterProject(Input input) throws IOException {}
 
+    // Input
 
     @Value.Immutable
     public interface Input extends Serializable {
@@ -108,54 +137,5 @@ public class StrategoRuntime {
                 throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualFactory' has not been set");
             }
         }
-    }
-
-    @Value.Immutable
-    public interface LanguageProjectOutput extends Serializable {
-        class Builder extends StrategoRuntimeData.LanguageProjectOutput.Builder {
-            public Builder fromInput(Input input) {
-                final Shared shared = input.shared();
-                addDependencies(
-                    GradleConfiguredDependency.api(shared.strategoCommonDep()),
-                    GradleConfiguredDependency.api(shared.orgStrategoXTStrjDep()),
-                    GradleConfiguredDependency.implementation(shared.strategoXTMinJarDep())
-                );
-                // NaBL2 (required by Statix as well)
-                if(input.addNaBL2Primitives() || input.addStatixPrimitives()) {
-                    addDependencies(GradleConfiguredDependency.implementation(shared.nabl2CommonDep()));
-                }
-                if(input.addStatixPrimitives()) {
-                    addDependencies(GradleConfiguredDependency.implementation(shared.statixCommonDep()));
-                    addCopyResources("src-gen/statix/statics.spec.aterm");
-                }
-                if(input.copyCTree()) {
-                    addCopyResources("target/metaborg/stratego.ctree");
-                }
-                return this;
-            }
-        }
-
-        static Builder builder() {
-            return new Builder();
-        }
-
-
-        List<GradleConfiguredDependency> dependencies();
-
-        List<String> copyResources();
-    }
-
-    @Value.Immutable
-    public interface AdapterProjectOutput extends Serializable {
-        class Builder extends StrategoRuntimeData.AdapterProjectOutput.Builder {}
-
-        static Builder builder() {
-            return new Builder();
-        }
-
-
-        List<GradleConfiguredDependency> dependencies();
-
-        List<TypeInfo> additionalTaskDefs();
     }
 }

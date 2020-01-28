@@ -85,6 +85,10 @@ public class BaseCollectionView<E, C extends Collection<? extends E>> implements
     }
 
 
+    public void addAllTo(Collection<E> collection) {
+        collection.addAll(this.collection);
+    }
+
     public Collection<E> asUnmodifiable() {
         return Collections.unmodifiableCollection(collection);
     }

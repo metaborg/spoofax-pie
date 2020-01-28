@@ -41,6 +41,10 @@ public class SetView<E> extends BaseCollectionView<E, Set<? extends E>> implemen
     }
 
 
+    public void addAllTo(Set<E> set) {
+        set.addAll(this.collection);
+    }
+
     @Override public Set<E> asUnmodifiable() {
         return Collections.unmodifiableSet(collection);
     }
@@ -49,7 +53,7 @@ public class SetView<E> extends BaseCollectionView<E, Set<? extends E>> implemen
     @Override public boolean equals(@Nullable Object obj) {
         if(this == obj) return true;
         if(obj == null || getClass() != obj.getClass()) return false;
-        final SetView<?> other = (SetView<?>) obj;
+        final SetView<?> other = (SetView<?>)obj;
         return collection.equals(other.collection);
     }
 

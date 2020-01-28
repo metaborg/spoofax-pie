@@ -15,13 +15,16 @@ class EclipseProjectTest extends TestBase {
         final Shared shared = TigerInputs.shared(baseDirectory);
 
         // Compile language project, as adapter project and Eclipse externaldeps project depends on it.
-        languageProjectCompiler.compile(TigerInputs.languageProject(shared));
+        final LanguageProject.Input languageProjectInput = TigerInputs.languageProject(shared);
+        languageProjectCompiler.generateBuildGradleKts(languageProjectInput);
+        languageProjectCompiler.compile(languageProjectInput);
 
         // Compile adapter project, as Eclipse externaldeps project depends on it.
         final AdapterProject.Input adapterProjectInput = TigerInputs.adapterProjectBuilder(shared)
             .languageProjectDependency(GradleDependency.project(":" + shared.languageProject().coordinate().artifactId()))
             .build();
         TigerInputs.copyTaskDefsIntoAdapterProject(adapterProjectInput, resourceService);
+        adapterProjectCompiler.generateBuildGradleKts(adapterProjectInput);
         adapterProjectCompiler.compile(adapterProjectInput);
 
         // Compile Eclipse externaldeps project, as Eclipse project depends on it.

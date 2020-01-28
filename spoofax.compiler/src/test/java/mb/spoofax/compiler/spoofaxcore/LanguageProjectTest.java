@@ -16,6 +16,7 @@ class LanguageProjectTest extends TestBase {
             .build();
 
         // Compile language project and test generated files.
+        languageProjectCompiler.generateBuildGradleKts(input);
         languageProjectCompiler.compile(input);
         fileAssertions.asserts(input.buildGradleKtsFile(), (a) -> a.assertContains("mb/tiger"));
         fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {

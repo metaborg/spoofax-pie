@@ -15,13 +15,16 @@ class AdapterProjectTest extends TestBase {
         final Shared shared = TigerInputs.shared(baseDirectory);
 
         // Compile language project, as adapter project depends on it.
-        languageProjectCompiler.compile(TigerInputs.languageProject(shared));
+        final LanguageProject.Input languageProjectInput = TigerInputs.languageProject(shared);
+        languageProjectCompiler.generateBuildGradleKts(languageProjectInput);
+        languageProjectCompiler.compile(languageProjectInput);
 
         // Compile adapter project and test generated files.
         final AdapterProject.Input input = TigerInputs.adapterProjectBuilder(shared)
             .languageProjectDependency(GradleDependency.project(":" + shared.languageProject().coordinate().artifactId()))
             .build();
         TigerInputs.copyTaskDefsIntoAdapterProject(input, resourceService);
+        adapterProjectCompiler.generateBuildGradleKts(input);
         adapterProjectCompiler.compile(input);
         fileAssertions.asserts(input.buildGradleKtsFile(), (a) -> a.assertContains("org.metaborg.gradle.config.java-library"));
         fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {

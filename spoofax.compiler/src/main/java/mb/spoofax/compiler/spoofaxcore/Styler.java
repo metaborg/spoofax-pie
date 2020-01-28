@@ -1,5 +1,6 @@
 package mb.spoofax.compiler.spoofaxcore;
 
+import mb.common.util.ListView;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
@@ -10,7 +11,6 @@ import org.immutables.value.Value;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.List;
 import java.util.Optional;
 
 @Value.Enclosing
@@ -27,28 +27,33 @@ public class Styler {
         this.styleTaskDefTemplate = templateCompiler.getOrCompileToWriter("styler/StyleTaskDef.java.mustache");
     }
 
-    public LanguageProjectOutput compileLanguageProject(Input input) throws IOException {
-        final LanguageProjectOutput output = LanguageProjectOutput.builder().from(input).build();
-        if(input.classKind().isManualOnly()) return output; // Nothing to generate: return.
+    // Language project
 
+    public ListView<GradleConfiguredDependency> getLanguageProjectDependencies(Input input) {
+        return ListView.of(GradleConfiguredDependency.api(input.shared().esvCommonDep()));
+    }
+
+    public ListView<String> getLanguageProjectCopyResources(Input input) {
+        return ListView.of(input.packedESVSourceRelPath());
+    }
+
+    public void compileLanguageProject(Input input) throws IOException {
+        if(input.classKind().isManualOnly()) return; // Nothing to generate: return.
         final ResourcePath classesGenDirectory = input.languageClassesGenDirectory();
         rulesTemplate.write(input, input.genRules().file(classesGenDirectory));
         stylerTemplate.write(input, input.genStyler().file(classesGenDirectory));
         factoryTemplate.write(input, input.genFactory().file(classesGenDirectory));
-
-        return output;
     }
 
-    public AdapterProjectOutput compileAdapterProject(Input input) throws IOException {
-        final AdapterProjectOutput output = AdapterProjectOutput.builder().fromInput(input).build();
-        if(input.classKind().isManualOnly()) return output; // Nothing to generate: return.
+    // Adapter project
 
+    public void compileAdapterProject(Input input) throws IOException {
+        if(input.classKind().isManualOnly()) return; // Nothing to generate: return.
         final ResourcePath classesGenDirectory = input.adapterClassesGenDirectory();
         styleTaskDefTemplate.write(input, input.genStyleTaskDef().file(classesGenDirectory));
-
-        return output;
     }
 
+    // Input
 
     @Value.Immutable
     public interface Input extends Serializable {
@@ -161,44 +166,5 @@ public class Styler {
                 throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualStyleTaskDef' has not been set");
             }
         }
-    }
-
-    @Value.Immutable
-    public interface LanguageProjectOutput extends Serializable {
-        class Builder extends StylerData.LanguageProjectOutput.Builder {
-            public Builder from(Input input) {
-                addDependencies(GradleConfiguredDependency.api(input.shared().esvCommonDep()));
-                addCopyResources(input.packedESVSourceRelPath());
-                return this;
-            }
-        }
-
-        static Builder builder() {
-            return new Builder();
-        }
-
-
-        List<GradleConfiguredDependency> dependencies();
-
-        List<String> copyResources();
-    }
-
-    @Value.Immutable
-    public interface AdapterProjectOutput extends Serializable {
-        class Builder extends StylerData.AdapterProjectOutput.Builder {
-            public AdapterProjectOutput.Builder fromInput(Input input) {
-                // Do not add style task definition, as it is handled explicitly.
-                return this;
-            }
-        }
-
-        static Builder builder() {
-            return new Builder();
-        }
-
-
-        List<GradleConfiguredDependency> dependencies();
-
-        List<TypeInfo> additionalTaskDefs();
     }
 }
