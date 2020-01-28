@@ -5,9 +5,12 @@ import com.google.common.jimfs.Jimfs;
 import mb.resource.DefaultResourceService;
 import mb.resource.ResourceService;
 import mb.resource.fs.FSResourceRegistry;
+import mb.spoofax.compiler.spoofaxcore.tiger.TigerInputs;
 import mb.spoofax.compiler.spoofaxcore.util.FileAssertions;
+import mb.spoofax.compiler.util.GradleDependency;
 import mb.spoofax.compiler.util.TemplateCompiler;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
@@ -34,4 +37,27 @@ class TestBase {
     final EclipseProject eclipseProjectCompiler = new EclipseProject(templateCompiler);
 
     final IntellijProject intellijProjectCompiler = new IntellijProject(templateCompiler);
+
+
+    LanguageProject.Input compileLanguageProject(Shared shared) throws IOException {
+        final LanguageProject.Input input = TigerInputs.languageProject(shared);
+        languageProjectCompiler.generateBuildGradleKts(input);
+        languageProjectCompiler.compile(input);
+        return input;
+    }
+
+    AdapterProject.Input compileAdapterProject(Shared shared) throws IOException {
+        final AdapterProject.Input input = TigerInputs.adapterProjectBuilder(shared)
+            .languageProjectDependency(GradleDependency.project(":" + shared.languageProject().coordinate().artifactId()))
+            .build();
+        TigerInputs.copyTaskDefsIntoAdapterProject(input, resourceService);
+        adapterProjectCompiler.generateBuildGradleKts(input);
+        adapterProjectCompiler.compile(input);
+        return input;
+    }
+
+    AdapterProject.Input compileLanguageAndAdapterProject(Shared shared) throws IOException {
+        compileLanguageProject(shared);
+        return compileAdapterProject(shared);
+    }
 }

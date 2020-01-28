@@ -2,7 +2,6 @@ package mb.spoofax.compiler.spoofaxcore;
 
 import mb.resource.fs.FSPath;
 import mb.spoofax.compiler.spoofaxcore.tiger.TigerInputs;
-import mb.spoofax.compiler.util.GradleDependency;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -14,18 +13,9 @@ class AdapterProjectTest extends TestBase {
         final FSPath baseDirectory = new FSPath(temporaryDirectoryPath);
         final Shared shared = TigerInputs.shared(baseDirectory);
 
-        // Compile language project, as adapter project depends on it.
-        final LanguageProject.Input languageProjectInput = TigerInputs.languageProject(shared);
-        languageProjectCompiler.generateBuildGradleKts(languageProjectInput);
-        languageProjectCompiler.compile(languageProjectInput);
-
-        // Compile adapter project and test generated files.
-        final AdapterProject.Input input = TigerInputs.adapterProjectBuilder(shared)
-            .languageProjectDependency(GradleDependency.project(":" + shared.languageProject().coordinate().artifactId()))
-            .build();
-        TigerInputs.copyTaskDefsIntoAdapterProject(input, resourceService);
-        adapterProjectCompiler.generateBuildGradleKts(input);
-        adapterProjectCompiler.compile(input);
+        // Compile language and adapter projects.
+        final AdapterProject.Input input = compileLanguageAndAdapterProject(shared);
+        // Test generated files.
         fileAssertions.asserts(input.buildGradleKtsFile(), (a) -> a.assertContains("org.metaborg.gradle.config.java-library"));
         fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {
             s.asserts(input.packageInfo(), (a) -> a.assertAll("package-info.java", "@DefaultQualifier(NonNull.class)"));

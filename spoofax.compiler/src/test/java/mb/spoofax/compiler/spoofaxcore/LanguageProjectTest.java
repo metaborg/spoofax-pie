@@ -12,12 +12,9 @@ class LanguageProjectTest extends TestBase {
     @Test void testCompilerDefaults(@TempDir Path temporaryDirectoryPath) throws IOException {
         final FSPath baseDirectory = new FSPath(temporaryDirectoryPath);
         final Shared shared = TigerInputs.shared(baseDirectory);
-        final LanguageProject.Input input = TigerInputs.languageProjectBuilder(shared)
-            .build();
 
         // Compile language project and test generated files.
-        languageProjectCompiler.generateBuildGradleKts(input);
-        languageProjectCompiler.compile(input);
+        final LanguageProject.Input input = compileLanguageProject(shared);
         fileAssertions.asserts(input.buildGradleKtsFile(), (a) -> a.assertContains("mb/tiger"));
         fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {
             s.asserts(input.packageInfo(), (a) -> a.assertAll("package-info.java", "@DefaultQualifier(NonNull.class)"));
