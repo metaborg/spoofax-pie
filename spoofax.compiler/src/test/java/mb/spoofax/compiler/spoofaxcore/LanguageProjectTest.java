@@ -15,7 +15,7 @@ class LanguageProjectTest extends TestBase {
 
         // Compile language project and test generated files.
         final LanguageProject.Input input = compileLanguageProject(shared);
-        fileAssertions.asserts(input.buildGradleKtsFile(), (a) -> a.assertContains("mb/tiger"));
+        fileAssertions.asserts(input.generatedGradleKtsFile(), (a) -> a.assertContains("mb/tiger"));
         fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {
             s.asserts(input.packageInfo(), (a) -> a.assertAll("package-info.java", "@DefaultQualifier(NonNull.class)"));
         });

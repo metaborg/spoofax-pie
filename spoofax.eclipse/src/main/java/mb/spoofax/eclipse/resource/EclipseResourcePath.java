@@ -57,6 +57,10 @@ public class EclipseResourcePath implements ResourcePath {
         return Arrays.asList(path.segments());
     }
 
+    @Override public String asString() {
+        return pathString;
+    }
+
 
     @Override public @Nullable EclipseResourcePath getParent() {
         if(path.segmentCount() == 0) {
@@ -86,11 +90,23 @@ public class EclipseResourcePath implements ResourcePath {
             throw new ResourceRuntimeException(
                 "Cannot relativize against '" + other + "', it is not an EclipseResourceKey");
         }
-        return relativize((EclipseResourcePath) other);
+        return relativize((EclipseResourcePath)other);
     }
 
     public EclipseResourcePath relativize(EclipseResourcePath other) {
         return new EclipseResourcePath(path.makeRelativeTo(other.path));
+    }
+
+    @Override public String relativizeToString(ResourcePath other) {
+        if(!(other instanceof EclipseResourcePath)) {
+            throw new ResourceRuntimeException(
+                "Cannot relativize against '" + other + "', it is not an EclipseResourceKey");
+        }
+        return relativizeToString((EclipseResourcePath)other);
+    }
+
+    public String relativizeToString(EclipseResourcePath other) {
+        return path.makeRelativeTo(other.path).toPortableString();
     }
 
 
@@ -130,6 +146,10 @@ public class EclipseResourcePath implements ResourcePath {
         return new EclipseResourcePath(appendOrReplaceWithPath(Path.fromPortableString(other)));
     }
 
+    @Override public EclipseResourcePath appendString(String other) {
+        return new EclipseResourcePath(path.append(other));
+    }
+
     private IPath appendOrReplaceWithPath(IPath other) {
         if(other.isAbsolute()) {
             return other;
@@ -142,7 +162,7 @@ public class EclipseResourcePath implements ResourcePath {
             throw new ResourceRuntimeException(
                 "Cannot append '" + relativePath + "', it is not an EclipseResourcePath");
         }
-        return appendRelativePath((EclipseResourcePath) relativePath);
+        return appendRelativePath((EclipseResourcePath)relativePath);
     }
 
     public EclipseResourcePath appendRelativePath(EclipseResourcePath relativePath) {
@@ -154,7 +174,7 @@ public class EclipseResourcePath implements ResourcePath {
             throw new ResourceRuntimeException(
                 "Cannot append or replace from '" + other + "', it is not an EclipseResourcePath");
         }
-        return appendOrReplaceWithPath((EclipseResourcePath) other);
+        return appendOrReplaceWithPath((EclipseResourcePath)other);
     }
 
     public EclipseResourcePath appendOrReplaceWithPath(EclipseResourcePath other) {
@@ -173,7 +193,7 @@ public class EclipseResourcePath implements ResourcePath {
     @Override public boolean equals(Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
-        final EclipseResourcePath that = (EclipseResourcePath) o;
+        final EclipseResourcePath that = (EclipseResourcePath)o;
         return pathString.equals(that.pathString);
     }
 

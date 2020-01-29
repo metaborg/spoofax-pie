@@ -4,7 +4,7 @@ plugins {
 }
 
 val logVersion = "0.3.0"
-val resourceVersion = "0.4.1"
+val resourceVersion = "0.4.2"
 val pieVersion = "develop-SNAPSHOT"
 val spoofaxCoreVersion = "2.6.0-SNAPSHOT"
 val picocliVersion = "4.0.4"

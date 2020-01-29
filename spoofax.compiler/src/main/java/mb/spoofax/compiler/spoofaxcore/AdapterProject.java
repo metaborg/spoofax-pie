@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 @Value.Enclosing
 public class AdapterProject {
     private final TemplateWriter buildGradleTemplate;
+    private final TemplateWriter generatedGradleTemplate;
     private final TemplateWriter packageInfoTemplate;
     private final TemplateWriter checkTaskDefTemplate;
     private final TemplateWriter componentTemplate;
@@ -49,6 +50,7 @@ public class AdapterProject {
         ConstraintAnalyzer constraintAnalyzerCompiler
     ) {
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("adapter_project/build.gradle.kts.mustache");
+        this.generatedGradleTemplate = templateCompiler.getOrCompileToWriter("adapter_project/generated.gradle.kts.mustache");
         this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("adapter_project/package-info.java.mustache");
         this.checkTaskDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/CheckTaskDef.java.mustache");
         this.componentTemplate = templateCompiler.getOrCompileToWriter("adapter_project/Component.java.mustache");
@@ -60,6 +62,13 @@ public class AdapterProject {
         this.stylerCompiler = stylerCompiler;
         this.strategoRuntimeCompiler = strategoRuntimeCompiler;
         this.constraintAnalyzerCompiler = constraintAnalyzerCompiler;
+    }
+
+    public void generateInitial(Input input) throws IOException {
+        final String relativePath = input.shared().adapterProject().baseDirectory().relativizeToString(input.generatedGradleKtsFile());
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("relativeGeneratedGradleKtsFile", relativePath);
+        buildGradleTemplate.write(input, map, input.buildGradleKtsFile());
     }
 
     public void generateBuildGradleKts(Input input) throws IOException {
@@ -77,7 +86,7 @@ public class AdapterProject {
         dependencies.add(GradleConfiguredDependency.annotationProcessor(shared.daggerCompilerDep()));
         map.put("dependencyCodes", dependencies.stream().map(GradleConfiguredDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
 
-        buildGradleTemplate.write(input, map, input.buildGradleKtsFile());
+        generatedGradleTemplate.write(input, map, input.generatedGradleKtsFile());
     }
 
     public void compile(Input input) throws IOException {
@@ -239,12 +248,12 @@ public class AdapterProject {
 
         /// Gradle files
 
-        default ResourcePath gradleGenDirectory() {
-            return shared().adapterProject().baseDirectory();
+        @Value.Default default ResourcePath buildGradleKtsFile() {
+            return shared().adapterProject().baseDirectory().appendRelativePath("build.gradle.kts");
         }
 
-        @Value.Default default ResourcePath buildGradleKtsFile() {
-            return gradleGenDirectory().appendRelativePath("build.gradle.kts");
+        @Value.Default default ResourcePath generatedGradleKtsFile() {
+            return shared().adapterProject().genSourceSpoofaxGradleDirectory().appendRelativePath("generated.gradle.kts");
         }
 
 

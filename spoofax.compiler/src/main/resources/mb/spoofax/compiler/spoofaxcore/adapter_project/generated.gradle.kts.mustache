@@ -1,0 +1,30 @@
+apply(plugin = "org.metaborg.gradle.config.java-library")
+
+group = "{{shared.adapterProject.coordinate.groupId}}"
+version = "{{shared.adapterProject.coordinate.version}}"
+
+configure<SourceSetContainer> {
+  named("main") {
+    java {
+      srcDir("$buildDir/generated/sources/spoofax/java")
+    }
+    resources {
+      srcDir("$buildDir/generated/sources/spoofax/resources")
+    }
+  }
+}
+
+val api by configurations
+val implementation by configurations
+val compileOnly by configurations
+val runtimeOnly by configurations
+val testImplementation by configurations
+val testCompileOnly by configurations
+val testRuntimeOnly by configurations
+val annotationProcessor by configurations
+val testAnnotationProcessor by configurations
+dependencies {
+{{#dependencyCodes}}
+  {{this}}
+{{/dependencyCodes}}
+}

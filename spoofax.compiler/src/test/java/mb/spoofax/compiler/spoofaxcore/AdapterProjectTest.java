@@ -16,7 +16,7 @@ class AdapterProjectTest extends TestBase {
         // Compile language and adapter projects.
         final AdapterProject.Input input = compileLanguageAndAdapterProject(shared);
         // Test generated files.
-        fileAssertions.asserts(input.buildGradleKtsFile(), (a) -> a.assertContains("org.metaborg.gradle.config.java-library"));
+        fileAssertions.asserts(input.generatedGradleKtsFile(), (a) -> a.assertContains("org.metaborg.gradle.config.java-library"));
         fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {
             s.asserts(input.packageInfo(), (a) -> a.assertAll("package-info.java", "@DefaultQualifier(NonNull.class)"));
             s.assertPublicJavaInterface(input.genComponent(), "TigerComponent");

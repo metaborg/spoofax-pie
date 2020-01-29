@@ -41,9 +41,11 @@ public interface GradleProject extends Serializable {
         return sourceMainDirectory().appendSegment("resources");
     }
 
+
     @Value.Default default ResourcePath outputDirectory() {
         return baseDirectory().appendRelativePath("build");
     }
+
 
     @Value.Default default ResourcePath genSourceDirectory() {
         return outputDirectory().appendRelativePath("generated/sources");
@@ -59,5 +61,9 @@ public interface GradleProject extends Serializable {
 
     @Value.Default default ResourcePath genSourceSpoofaxResourcesDirectory() {
         return genSourceSpoofaxDirectory().appendSegment("resources");
+    }
+
+    @Value.Default default ResourcePath genSourceSpoofaxGradleDirectory() {
+        return genSourceSpoofaxDirectory().appendSegment("gradle");
     }
 }

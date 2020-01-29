@@ -41,7 +41,8 @@ class TestBase {
 
     LanguageProject.Input compileLanguageProject(Shared shared) throws IOException {
         final LanguageProject.Input input = TigerInputs.languageProject(shared);
-        languageProjectCompiler.generateBuildGradleKts(input);
+        languageProjectCompiler.generateInitial(input);
+        languageProjectCompiler.generateGradleFiles(input);
         languageProjectCompiler.compile(input);
         return input;
     }
@@ -51,6 +52,7 @@ class TestBase {
             .languageProjectDependency(GradleDependency.project(":" + shared.languageProject().coordinate().artifactId()))
             .build();
         TigerInputs.copyTaskDefsIntoAdapterProject(input, resourceService);
+        adapterProjectCompiler.generateInitial(input);
         adapterProjectCompiler.generateBuildGradleKts(input);
         adapterProjectCompiler.compile(input);
         return input;

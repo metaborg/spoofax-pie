@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 @Value.Enclosing
 public class LanguageProject {
     private final TemplateWriter buildGradleTemplate;
+    private final TemplateWriter generatedGradleTemplate;
     private final TemplateWriter packageInfoTemplate;
 
     private final Parser parserCompiler;
@@ -37,6 +38,7 @@ public class LanguageProject {
         ConstraintAnalyzer constraintAnalyzerCompiler
     ) {
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("language_project/build.gradle.kts.mustache");
+        this.generatedGradleTemplate = templateCompiler.getOrCompileToWriter("language_project/generated.gradle.kts.mustache");
         this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("language_project/package-info.java.mustache");
 
         this.parserCompiler = parserCompiler;
@@ -45,7 +47,14 @@ public class LanguageProject {
         this.constraintAnalyzerCompiler = constraintAnalyzerCompiler;
     }
 
-    public void generateBuildGradleKts(Input input) throws IOException {
+    public void generateInitial(Input input) throws IOException {
+        final String relativePath = input.shared().languageProject().baseDirectory().relativizeToString(input.generatedGradleKtsFile());
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("relativeGeneratedGradleKtsFile", relativePath);
+        buildGradleTemplate.write(input, map, input.buildGradleKtsFile());
+    }
+
+    public void generateGradleFiles(Input input) throws IOException {
         final Shared shared = input.shared();
 
         final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
@@ -79,7 +88,7 @@ public class LanguageProject {
         map.put("languageDependencyCode", languageDependencyCode);
         map.put("dependencyCodes", dependencies.stream().map(GradleConfiguredDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
         map.put("copyResourceCodes", copyResources.stream().map(StringUtil::doubleQuote).collect(Collectors.toCollection(ArrayList::new)));
-        buildGradleTemplate.write(input, map, input.buildGradleKtsFile());
+        generatedGradleTemplate.write(input, map, input.generatedGradleKtsFile());
     }
 
     public void compile(Input input) throws IOException {
@@ -151,6 +160,10 @@ public class LanguageProject {
 
         @Value.Default default ResourcePath buildGradleKtsFile() {
             return shared().languageProject().baseDirectory().appendRelativePath("build.gradle.kts");
+        }
+
+        @Value.Default default ResourcePath generatedGradleKtsFile() {
+            return shared().languageProject().genSourceSpoofaxGradleDirectory().appendRelativePath("generated.gradle.kts");
         }
 
 
