@@ -1,6 +1,7 @@
 package mb.spoofax.compiler.spoofaxcore;
 
 import mb.common.util.ListView;
+import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
@@ -11,6 +12,7 @@ import org.immutables.value.Value;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Optional;
 
 @Value.Enclosing
@@ -37,20 +39,28 @@ public class Styler {
         return ListView.of(input.packedESVSourceRelPath());
     }
 
-    public void compileLanguageProject(Input input) throws IOException {
-        if(input.classKind().isManualOnly()) return; // Nothing to generate: return.
+    public Output compileLanguageProject(Input input) throws IOException {
+        final Output.Builder outputBuilder = Output.builder();
+        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath classesGenDirectory = input.languageClassesGenDirectory();
-        rulesTemplate.write(input, input.genRules().file(classesGenDirectory));
-        stylerTemplate.write(input, input.genStyler().file(classesGenDirectory));
-        factoryTemplate.write(input, input.genFactory().file(classesGenDirectory));
+        outputBuilder.addProvidedResources(
+            rulesTemplate.write(input, input.genRules().file(classesGenDirectory)),
+            stylerTemplate.write(input, input.genStyler().file(classesGenDirectory)),
+            factoryTemplate.write(input, input.genFactory().file(classesGenDirectory))
+        );
+        return outputBuilder.build();
     }
 
     // Adapter project
 
-    public void compileAdapterProject(Input input) throws IOException {
-        if(input.classKind().isManualOnly()) return; // Nothing to generate: return.
+    public Output compileAdapterProject(Input input) throws IOException {
+        final Output.Builder outputBuilder = Output.builder();
+        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath classesGenDirectory = input.adapterClassesGenDirectory();
-        styleTaskDefTemplate.write(input, input.genStyleTaskDef().file(classesGenDirectory));
+        outputBuilder.addProvidedResources(
+            styleTaskDefTemplate.write(input, input.genStyleTaskDef().file(classesGenDirectory))
+        );
+        return outputBuilder.build();
     }
 
     // Input
@@ -166,5 +176,16 @@ public class Styler {
                 throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualStyleTaskDef' has not been set");
             }
         }
+    }
+
+    @Value.Immutable
+    public interface Output {
+        class Builder extends StylerData.Output.Builder {}
+
+        static Builder builder() {
+            return new Builder();
+        }
+
+        List<HierarchicalResource> providedResources();
     }
 }

@@ -1,6 +1,7 @@
 package mb.spoofax.compiler.spoofaxcore;
 
 import mb.common.util.ListView;
+import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
@@ -11,6 +12,7 @@ import org.immutables.value.Value;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Optional;
 
 @Value.Enclosing
@@ -35,19 +37,27 @@ public class ConstraintAnalyzer {
         return ListView.of();
     }
 
-    public void compileLanguageProject(Input input) throws IOException {
-        if(input.classKind().isManualOnly()) return; // Nothing to generate: return.
+    public Output compileLanguageProject(Input input) throws IOException {
+        final Output.Builder outputBuilder = Output.builder();
+        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath classesGenDirectory = input.languageClassesGenDirectory();
-        constraintAnalyzerTemplate.write(input, input.genConstraintAnalyzer().file(classesGenDirectory));
-        factoryTemplate.write(input, input.genFactory().file(classesGenDirectory));
+        outputBuilder.addProvidedResources(
+            constraintAnalyzerTemplate.write(input, input.genConstraintAnalyzer().file(classesGenDirectory)),
+            factoryTemplate.write(input, input.genFactory().file(classesGenDirectory))
+        );
+        return outputBuilder.build();
     }
 
     // Adapter project
 
-    public void compileAdapterProject(Input input) throws IOException {
-        if(input.classKind().isManualOnly()) return; // Nothing to generate: return.
+    public Output compileAdapterProject(Input input) throws IOException {
+        final Output.Builder outputBuilder = Output.builder();
+        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath classesGenDirectory = input.adapterClassesGenDirectory();
-        analyzeTaskDefTemplate.write(input, input.genAnalyzeTaskDef().file(classesGenDirectory));
+        outputBuilder.addProvidedResources(
+            analyzeTaskDefTemplate.write(input, input.genAnalyzeTaskDef().file(classesGenDirectory))
+        );
+        return outputBuilder.build();
     }
 
     // Input
@@ -63,7 +73,7 @@ public class ConstraintAnalyzer {
 
         Shared shared();
 
-        Parser.Input parse();
+        Parser.Input parser();
 
 
         /// Configuration
@@ -157,5 +167,16 @@ public class ConstraintAnalyzer {
                 throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualAnalyzeTaskDef' has not been set");
             }
         }
+    }
+
+    @Value.Immutable
+    public interface Output {
+        class Builder extends ConstraintAnalyzerData.Output.Builder {}
+
+        static Builder builder() {
+            return new Output.Builder();
+        }
+
+        List<HierarchicalResource> providedResources();
     }
 }

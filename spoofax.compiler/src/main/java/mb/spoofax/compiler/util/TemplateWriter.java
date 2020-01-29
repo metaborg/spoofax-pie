@@ -2,6 +2,8 @@ package mb.spoofax.compiler.util;
 
 import com.samskivert.mustache.Template;
 import mb.resource.ResourceService;
+import mb.resource.WritableResource;
+import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 
 import java.io.IOException;
@@ -18,21 +20,29 @@ public class TemplateWriter {
         this.charset = charset;
     }
 
-    public void write(Object context, ResourcePath path) throws IOException {
-        try(final ResourceWriter writer = writer(path)) {
+    public HierarchicalResource write(Object context, ResourcePath path) throws IOException {
+        final HierarchicalResource resource = resource(path);
+        try(final ResourceWriter writer = writer(resource)) {
             template.execute(context, writer);
             writer.flush();
         }
+        return resource;
     }
 
-    public void write(Object context, Object parentContext, ResourcePath path) throws IOException {
-        try(final ResourceWriter writer = writer(path)) {
+    public HierarchicalResource write(Object context, Object parentContext, ResourcePath path) throws IOException {
+        final HierarchicalResource resource = resource(path);
+        try(final ResourceWriter writer = writer(resource)) {
             template.execute(context, parentContext, writer);
             writer.flush();
         }
+        return resource;
     }
 
-    private ResourceWriter writer(ResourcePath path) throws IOException {
-        return new ResourceWriter(resourceService.getHierarchicalResource(path).createParents(), charset);
+    private HierarchicalResource resource(ResourcePath path) throws IOException {
+        return resourceService.getHierarchicalResource(path).createParents();
+    }
+
+    private ResourceWriter writer(WritableResource resource) throws IOException {
+        return new ResourceWriter(resource, charset);
     }
 }

@@ -1,6 +1,7 @@
 package mb.spoofax.compiler.spoofaxcore;
 
 import mb.common.util.ListView;
+import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
@@ -11,6 +12,7 @@ import org.immutables.value.Value;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Optional;
 
 @Value.Enclosing
@@ -42,21 +44,29 @@ public class Parser {
         return ListView.of(input.tableSourceRelPath());
     }
 
-    public void compileLanguageProject(Input input) throws IOException {
-        if(input.classKind().isManualOnly()) return; // Nothing to generate: return.
+    public Output compileLanguageProject(Input input) throws IOException {
+        final Output.Builder outputBuilder = Output.builder();
+        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath classesGenDirectory = input.languageClassesGenDirectory();
-        tableTemplate.write(input, input.genTable().file(classesGenDirectory));
-        parserTemplate.write(input, input.genParser().file(classesGenDirectory));
-        factoryTemplate.write(input, input.genFactory().file(classesGenDirectory));
+        outputBuilder.addProvidedResources(
+            tableTemplate.write(input, input.genTable().file(classesGenDirectory)),
+            parserTemplate.write(input, input.genParser().file(classesGenDirectory)),
+            factoryTemplate.write(input, input.genFactory().file(classesGenDirectory))
+        );
+        return outputBuilder.build();
     }
 
     // Adapter project
 
-    public void compileAdapterProject(Input input) throws IOException {
-        if(input.classKind().isManualOnly()) return; // Nothing to generate: return.
+    public Output compileAdapterProject(Input input) throws IOException {
+        final Output.Builder outputBuilder = Output.builder();
+        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath classesGenDirectory = input.adapterClassesGenDirectory();
-        parseTaskDefTemplate.write(input, input.genParseTaskDef().file(classesGenDirectory));
-        tokenizeTaskDefTemplate.write(input, input.genTokenizeTaskDef().file(classesGenDirectory));
+        outputBuilder.addProvidedResources(
+            parseTaskDefTemplate.write(input, input.genParseTaskDef().file(classesGenDirectory)),
+            tokenizeTaskDefTemplate.write(input, input.genTokenizeTaskDef().file(classesGenDirectory))
+        );
+        return outputBuilder.build();
     }
 
     // Input
@@ -138,6 +148,19 @@ public class Parser {
             return genFactory();
         }
 
+        // List of all language project generated files
+
+        default ListView<ResourcePath> generatedLanguageProjectFiles() {
+            if(classKind().isManualOnly()) {
+                return ListView.of();
+            }
+            return ListView.of(
+                genTable().file(languageClassesGenDirectory()),
+                genParser().file(languageClassesGenDirectory()),
+                genFactory().file(languageClassesGenDirectory())
+            );
+        }
+
 
         /// Adapter project classes
 
@@ -193,5 +216,16 @@ public class Parser {
                 throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualTokenizeTaskDef' has not been set");
             }
         }
+    }
+
+    @Value.Immutable
+    public interface Output {
+        class Builder extends ParserData.Output.Builder {}
+
+        static Builder builder() {
+            return new Builder();
+        }
+
+        List<HierarchicalResource> providedResources();
     }
 }

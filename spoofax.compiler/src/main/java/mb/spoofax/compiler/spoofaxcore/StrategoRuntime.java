@@ -1,6 +1,7 @@
 package mb.spoofax.compiler.spoofaxcore;
 
 import mb.common.util.ListView;
+import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
@@ -54,15 +55,22 @@ public class StrategoRuntime {
         return new ListView<>(copyResources);
     }
 
-    public void compileLanguageProject(Input input) throws IOException {
-        if(input.classKind().isManualOnly()) return; // Nothing to generate: return.
+    public Output compileLanguageProject(Input input) throws IOException {
+        final Output.Builder outputBuilder = Output.builder();
+        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath classesGenDirectory = input.languageClassesGenDirectory();
-        factoryTemplate.write(input, input.genFactory().file(classesGenDirectory));
+        outputBuilder.addProvidedResources(
+            factoryTemplate.write(input, input.genFactory().file(classesGenDirectory))
+        );
+        return outputBuilder.build();
     }
 
     // Adapter project
 
-    public void compileAdapterProject(Input input) throws IOException {}
+    public Output compileAdapterProject(Input input) throws IOException {
+        final Output.Builder outputBuilder = Output.builder();
+        return outputBuilder.build();
+    }
 
     // Input
 
@@ -137,5 +145,16 @@ public class StrategoRuntime {
                 throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualFactory' has not been set");
             }
         }
+    }
+
+    @Value.Immutable
+    public interface Output {
+        class Builder extends StrategoRuntimeData.Output.Builder {}
+
+        static Builder builder() {
+            return new Builder();
+        }
+
+        List<HierarchicalResource> providedResources();
     }
 }

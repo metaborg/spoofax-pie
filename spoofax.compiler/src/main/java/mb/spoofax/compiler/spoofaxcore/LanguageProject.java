@@ -1,5 +1,7 @@
 package mb.spoofax.compiler.spoofaxcore;
 
+import mb.common.util.ListView;
+import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
@@ -91,31 +93,32 @@ public class LanguageProject {
         generatedGradleTemplate.write(input, map, input.generatedGradleKtsFile());
     }
 
-    public void compile(Input input) throws IOException {
+    public Output compile(Input input) throws IOException {
         final Shared shared = input.shared();
+        final Output.Builder outputBuilder = Output.builder();
         // Class files
         final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        packageInfoTemplate.write(input, input.genPackageInfo().file(classesGenDirectory));
+        outputBuilder.addProvidedResources(packageInfoTemplate.write(input, input.genPackageInfo().file(classesGenDirectory)));
         // Files from other compilers.
-        parserCompiler.compileLanguageProject(input.parser());
+        outputBuilder.addAllProvidedResources(parserCompiler.compileLanguageProject(input.parser()).providedResources());
         try {
             input.styler().ifPresent((i) -> {
                 try {
-                    stylerCompiler.compileLanguageProject(i);
+                    outputBuilder.addAllProvidedResources(stylerCompiler.compileLanguageProject(i).providedResources());
                 } catch(IOException e) {
                     throw new UncheckedIOException(e);
                 }
             });
             input.strategoRuntime().ifPresent((i) -> {
                 try {
-                    strategoRuntimeCompiler.compileLanguageProject(i);
+                    outputBuilder.addAllProvidedResources(strategoRuntimeCompiler.compileLanguageProject(i).providedResources());
                 } catch(IOException e) {
                     throw new UncheckedIOException(e);
                 }
             });
             input.constraintAnalyzer().ifPresent((i) -> {
                 try {
-                    constraintAnalyzerCompiler.compileLanguageProject(i);
+                    outputBuilder.addAllProvidedResources(constraintAnalyzerCompiler.compileLanguageProject(i).providedResources());
                 } catch(IOException e) {
                     throw new UncheckedIOException(e);
                 }
@@ -123,6 +126,7 @@ public class LanguageProject {
         } catch(UncheckedIOException e) {
             throw e.getCause();
         }
+        return outputBuilder.build();
     }
 
     // Input
@@ -195,7 +199,30 @@ public class LanguageProject {
             return genPackageInfo();
         }
 
+        default ArrayList<ResourcePath> generatedLanguageProjectFiles() {
+            final ArrayList<ResourcePath> generatedFiles = new ArrayList<>();
+            if(classKind().isGenerating()) {
+                generatedFiles.add(genPackageInfo().file(classesGenDirectory()));
+            }
+            parser().generatedLanguageProjectFiles().addAllTo(generatedFiles);
+            // TODO: styler
+            // TODO: stratego runtime
+            // TODO: constraint analyzer
+            return generatedFiles;
+        }
+
 
         // TODO: add check
+    }
+
+    @Value.Immutable
+    public interface Output {
+        class Builder extends LanguageProjectData.Output.Builder {}
+
+        static Builder builder() {
+            return new Builder();
+        }
+
+        List<HierarchicalResource> providedResources();
     }
 }
