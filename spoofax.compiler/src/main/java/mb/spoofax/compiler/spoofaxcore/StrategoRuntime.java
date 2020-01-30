@@ -124,7 +124,7 @@ public class StrategoRuntime {
         // Stratego runtime builder factory
 
         @Value.Default default TypeInfo genFactory() {
-            return TypeInfo.of(shared().languagePackage(), shared().classPrefix() + "StrategoRuntimeBuilderFactory");
+            return TypeInfo.of(shared().languageProjectPackage(), shared().defaultClassPrefix() + "StrategoRuntimeBuilderFactory");
         }
 
         Optional<TypeInfo> manualFactory();
@@ -134,6 +134,17 @@ public class StrategoRuntime {
                 return manualFactory().get();
             }
             return genFactory();
+        }
+
+        // List of all generated files for language projects
+
+        default ListView<ResourcePath> generatedLanguageProjectFiles() {
+            if(classKind().isManualOnly()) {
+                return ListView.of();
+            }
+            return ListView.of(
+                genFactory().file(languageClassesGenDirectory())
+            );
         }
 
 

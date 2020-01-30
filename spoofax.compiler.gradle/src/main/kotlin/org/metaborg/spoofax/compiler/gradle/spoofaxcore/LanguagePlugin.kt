@@ -10,6 +10,7 @@ open class LanguagePlugin : Plugin<Project> {
   override fun apply(project: Project) {
     project.afterEvaluate {
       val extension = extensions.getByType<SpoofaxCompilerExtension>()
+      extension.languageProject.set(project.providers.provider { project.toGradleProject() })
       afterEvaluate(this, extension)
     }
   }
@@ -18,13 +19,13 @@ open class LanguagePlugin : Plugin<Project> {
     val compilerSettings = extension.finalized
     val input = compilerSettings.languageProjectInput
     val compiler = extension.languageProjectCompiler
+
     compiler.generateGradleFiles(input)
     project.apply(from = input.shared().languageProject().baseDirectory().relativizeToString(input.generatedGradleKtsFile()))
 
     val compileTask = project.tasks.register("spoofaxCompileLanguageProject") {
       inputs.property("input", input)
-      // TODO: convert to File's.
-      outputs.files(input.parser().generatedLanguageProjectFiles())
+      outputs.files(input.generatedLanguageProjectFiles().map { extension.resourceService.toLocalFile(it) })
       doLast {
         compiler.compile(input)
       }

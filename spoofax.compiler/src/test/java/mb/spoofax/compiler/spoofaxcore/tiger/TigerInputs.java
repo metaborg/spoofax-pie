@@ -43,8 +43,8 @@ public class TigerInputs {
     public static Shared.Builder sharedBuilder(ResourcePath baseDirectory) {
         return Shared.builder()
             .name("Tiger")
-            .basePackageId("mb.tiger")
             .baseDirectory(baseDirectory)
+            .defaultBasePackageId("mb.tiger")
             /// Metaborg log
             .logApiDep(fromSystemProperty("log.api:classpath"))
             .logBackendSLF4JDep(fromSystemProperty("log.backend.slf4j:classpath"))
@@ -162,16 +162,16 @@ public class TigerInputs {
     /// Adapter project compiler input
 
     public static AdapterProject.Input.Builder adapterProjectBuilder(Shared shared) {
-        final TypeInfo showParsedAstTaskDef = TypeInfo.of(shared.adapterTaskPackage(), "TigerShowParsedAstTaskDef");
-        final TypeInfo listDefNamesTaskDef = TypeInfo.of(shared.adapterTaskPackage(), "TigerListDefNames");
-        final TypeInfo listLiteralValsTaskDef = TypeInfo.of(shared.adapterTaskPackage(), "TigerListLiteralVals");
-        final TypeInfo tigerCompileFileTaskDef = TypeInfo.of(shared.adapterTaskPackage(), "TigerCompileFileTaskDef");
-        final TypeInfo tigerAltCompileFileTaskDef = TypeInfo.of(shared.adapterTaskPackage(), "TigerAltCompileFileTaskDef");
+        final TypeInfo showParsedAstTaskDef = TypeInfo.of(shared.adapterProjectTaskPackage(), "TigerShowParsedAstTaskDef");
+        final TypeInfo listDefNamesTaskDef = TypeInfo.of(shared.adapterProjectTaskPackage(), "TigerListDefNames");
+        final TypeInfo listLiteralValsTaskDef = TypeInfo.of(shared.adapterProjectTaskPackage(), "TigerListLiteralVals");
+        final TypeInfo tigerCompileFileTaskDef = TypeInfo.of(shared.adapterProjectTaskPackage(), "TigerCompileFileTaskDef");
+        final TypeInfo tigerAltCompileFileTaskDef = TypeInfo.of(shared.adapterProjectTaskPackage(), "TigerAltCompileFileTaskDef");
 
         final CommandDefRepr tigerShowParsedAst = CommandDefRepr.builder()
-            .type(shared.adapterCommandPackage(), "TigerShowParsedAst")
+            .type(shared.adapterProjectCommandPackage(), "TigerShowParsedAst")
             .taskDefType(showParsedAstTaskDef)
-            .argType(shared.adapterTaskPackage(), "TigerShowParsedAstTaskDef.Args")
+            .argType(shared.adapterProjectTaskPackage(), "TigerShowParsedAstTaskDef.Args")
             .displayName("Show parsed AST")
             .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
             .addRequiredContextTypes(CommandContextType.Resource)
@@ -180,9 +180,9 @@ public class TigerInputs {
             .build();
 
         final CommandDefRepr tigerCompileFile = CommandDefRepr.builder()
-            .type(TypeInfo.of(shared.adapterCommandPackage(), "TigerCompileFile"))
+            .type(TypeInfo.of(shared.adapterProjectCommandPackage(), "TigerCompileFile"))
             .taskDefType(tigerCompileFileTaskDef)
-            .argType(shared.adapterTaskPackage(), "TigerCompileFileTaskDef.Args")
+            .argType(shared.adapterProjectTaskPackage(), "TigerCompileFileTaskDef.Args")
             .displayName("'Compile' file (list literals)")
             .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous, CommandExecutionType.AutomaticContinuous)
             .addRequiredContextTypes(CommandContextType.File)
@@ -190,9 +190,9 @@ public class TigerInputs {
             .build();
 
         final CommandDefRepr tigerAltCompileFile = CommandDefRepr.builder()
-            .type(TypeInfo.of(shared.adapterCommandPackage(), "TigerAltCompileFile"))
+            .type(TypeInfo.of(shared.adapterProjectCommandPackage(), "TigerAltCompileFile"))
             .taskDefType(tigerAltCompileFileTaskDef)
-            .argType(shared.adapterTaskPackage(), "TigerAltCompileFileTaskDef.Args")
+            .argType(shared.adapterProjectTaskPackage(), "TigerAltCompileFileTaskDef.Args")
             .displayName("'Alternative compile' file")
             .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous, CommandExecutionType.AutomaticContinuous)
             .addRequiredContextTypes(CommandContextType.File)
@@ -256,7 +256,7 @@ public class TigerInputs {
 
     public static void copyTaskDefsIntoAdapterProject(AdapterProject.Input input, ResourceService resourceService) throws IOException {
         final ResourcePath srcMainJavaDirectory = input.shared().adapterProject().sourceMainJavaDirectory();
-        final String taskPackagePath = Conversion.packageIdToPath(input.shared().adapterTaskPackage());
+        final String taskPackagePath = Conversion.packageIdToPath(input.shared().adapterProjectTaskPackage());
         final HierarchicalResource taskDirectory = resourceService.getHierarchicalResource(srcMainJavaDirectory.appendRelativePath(taskPackagePath)).ensureDirectoryExists();
         copyResource("TigerShowParsedAstTaskDef.java", taskDirectory);
         copyResource("TigerListDefNames.java", taskDirectory);

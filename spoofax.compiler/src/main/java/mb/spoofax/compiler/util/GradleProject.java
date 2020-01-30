@@ -16,12 +16,6 @@ public interface GradleProject extends Serializable {
 
     Coordinate coordinate();
 
-    String packageId();
-
-    @Value.Derived default String packagePath() {
-        return Conversion.packageIdToPath(packageId());
-    }
-
     ResourcePath baseDirectory();
 
 

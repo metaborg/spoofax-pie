@@ -16,6 +16,10 @@ dependencies {
 
 gradlePlugin {
   plugins {
+    create("spoofax-compiler-spoofaxcore-root") {
+      id = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.root"
+      implementationClass = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.RootPlugin"
+    }
     create("spoofax-compiler-spoofaxcore-language") {
       id = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.language"
       implementationClass = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.LanguagePlugin"

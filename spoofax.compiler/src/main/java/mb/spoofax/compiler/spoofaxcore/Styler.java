@@ -86,7 +86,7 @@ public class Styler {
         }
 
         @Value.Default default String packedESVTargetRelPath() {
-            return shared().languageProject().packagePath() + "/" + packedESVSourceRelPath();
+            return shared().languageProjectPackagePath() + "/" + packedESVSourceRelPath();
         }
 
 
@@ -106,13 +106,13 @@ public class Styler {
         // Styling rules
 
         @Value.Default default TypeInfo genRules() {
-            return TypeInfo.of(shared().languagePackage(), shared().classPrefix() + "StylingRules");
+            return TypeInfo.of(shared().languageProjectPackage(), shared().defaultClassPrefix() + "StylingRules");
         }
 
         // Styler
 
         @Value.Default default TypeInfo genStyler() {
-            return TypeInfo.of(shared().languagePackage(), shared().classPrefix() + "Styler");
+            return TypeInfo.of(shared().languageProjectPackage(), shared().defaultClassPrefix() + "Styler");
         }
 
         Optional<TypeInfo> manualStyler();
@@ -127,7 +127,7 @@ public class Styler {
         // Styler factory
 
         @Value.Default default TypeInfo genFactory() {
-            return TypeInfo.of(shared().languagePackage(), shared().classPrefix() + "StylerFactory");
+            return TypeInfo.of(shared().languageProjectPackage(), shared().defaultClassPrefix() + "StylerFactory");
         }
 
         Optional<TypeInfo> manualFactory();
@@ -137,6 +137,19 @@ public class Styler {
                 return manualFactory().get();
             }
             return genFactory();
+        }
+
+        // List of all generated files for language projects
+
+        default ListView<ResourcePath> generatedLanguageProjectFiles() {
+            if(classKind().isManualOnly()) {
+                return ListView.of();
+            }
+            return ListView.of(
+                genRules().file(languageClassesGenDirectory()),
+                genStyler().file(languageClassesGenDirectory()),
+                genFactory().file(languageClassesGenDirectory())
+            );
         }
 
 
@@ -149,7 +162,7 @@ public class Styler {
         // Style task definition
 
         @Value.Default default TypeInfo genStyleTaskDef() {
-            return TypeInfo.of(shared().adapterTaskPackage(), shared().classPrefix() + "Style");
+            return TypeInfo.of(shared().adapterProjectTaskPackage(), shared().defaultClassPrefix() + "Style");
         }
 
         Optional<TypeInfo> manualStyleTaskDef();

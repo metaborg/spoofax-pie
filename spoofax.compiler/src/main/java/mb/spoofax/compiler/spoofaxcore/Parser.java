@@ -4,6 +4,7 @@ import mb.common.util.ListView;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
+import mb.spoofax.compiler.util.Conversion;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
@@ -95,7 +96,7 @@ public class Parser {
         }
 
         @Value.Default default String tableTargetRelPath() {
-            return shared().languageProject().packagePath() + "/" + tableSourceRelPath();
+            return shared().languageProjectPackagePath() + "/" + tableSourceRelPath();
         }
 
 
@@ -115,13 +116,13 @@ public class Parser {
         // Parse table
 
         @Value.Default default TypeInfo genTable() {
-            return TypeInfo.of(shared().languagePackage(), shared().classPrefix() + "ParseTable");
+            return TypeInfo.of(shared().languageProjectPackage(), shared().defaultClassPrefix() + "ParseTable");
         }
 
         // Parser
 
         @Value.Default default TypeInfo genParser() {
-            return TypeInfo.of(shared().languagePackage(), shared().classPrefix() + "Parser");
+            return TypeInfo.of(shared().languageProjectPackage(), shared().defaultClassPrefix() + "Parser");
         }
 
         Optional<TypeInfo> manualParser();
@@ -136,7 +137,7 @@ public class Parser {
         // Parser factory
 
         @Value.Default default TypeInfo genFactory() {
-            return TypeInfo.of(shared().languagePackage(), shared().classPrefix() + "ParserFactory");
+            return TypeInfo.of(shared().languageProjectPackage(), shared().defaultClassPrefix() + "ParserFactory");
         }
 
         Optional<TypeInfo> manualFactory();
@@ -148,7 +149,7 @@ public class Parser {
             return genFactory();
         }
 
-        // List of all language project generated files
+        // List of all generated files for language projects
 
         default ListView<ResourcePath> generatedLanguageProjectFiles() {
             if(classKind().isManualOnly()) {
@@ -171,7 +172,7 @@ public class Parser {
         // Parse task definition
 
         @Value.Default default TypeInfo genParseTaskDef() {
-            return TypeInfo.of(shared().adapterTaskPackage(), shared().classPrefix() + "Parse");
+            return TypeInfo.of(shared().adapterProjectTaskPackage(), shared().defaultClassPrefix() + "Parse");
         }
 
         Optional<TypeInfo> manualParseTaskDef();
@@ -186,7 +187,7 @@ public class Parser {
         // Tokenize task definition
 
         @Value.Default default TypeInfo genTokenizeTaskDef() {
-            return TypeInfo.of(shared().adapterTaskPackage(), shared().classPrefix() + "Tokenize");
+            return TypeInfo.of(shared().adapterProjectTaskPackage(), shared().defaultClassPrefix() + "Tokenize");
         }
 
         Optional<TypeInfo> manualTokenizeTaskDef();

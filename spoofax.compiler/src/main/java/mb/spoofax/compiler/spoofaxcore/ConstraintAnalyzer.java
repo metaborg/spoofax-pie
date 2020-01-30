@@ -103,7 +103,7 @@ public class ConstraintAnalyzer {
         // Constraint analyzer
 
         @Value.Default default TypeInfo genConstraintAnalyzer() {
-            return TypeInfo.of(shared().languagePackage(), shared().classPrefix() + "ConstraintAnalyzer");
+            return TypeInfo.of(shared().languageProjectPackage(), shared().defaultClassPrefix() + "ConstraintAnalyzer");
         }
 
         Optional<TypeInfo> manualConstraintAnalyzer();
@@ -118,7 +118,7 @@ public class ConstraintAnalyzer {
         // Constraint analyzer factory
 
         @Value.Default default TypeInfo genFactory() {
-            return TypeInfo.of(shared().languagePackage(), shared().classPrefix() + "ConstraintAnalyzerFactory");
+            return TypeInfo.of(shared().languageProjectPackage(), shared().defaultClassPrefix() + "ConstraintAnalyzerFactory");
         }
 
         Optional<TypeInfo> manualFactory();
@@ -128,6 +128,18 @@ public class ConstraintAnalyzer {
                 return manualFactory().get();
             }
             return genFactory();
+        }
+
+        // List of all generated files for language projects
+
+        default ListView<ResourcePath> generatedLanguageProjectFiles() {
+            if(classKind().isManualOnly()) {
+                return ListView.of();
+            }
+            return ListView.of(
+                genConstraintAnalyzer().file(languageClassesGenDirectory()),
+                genFactory().file(languageClassesGenDirectory())
+            );
         }
 
 
@@ -140,7 +152,7 @@ public class ConstraintAnalyzer {
         // Analyze
 
         @Value.Default default TypeInfo genAnalyzeTaskDef() {
-            return TypeInfo.of(shared().adapterTaskPackage(), shared().classPrefix() + "Analyze");
+            return TypeInfo.of(shared().adapterProjectTaskPackage(), shared().defaultClassPrefix() + "Analyze");
         }
 
         Optional<TypeInfo> manualAnalyzeTaskDef();

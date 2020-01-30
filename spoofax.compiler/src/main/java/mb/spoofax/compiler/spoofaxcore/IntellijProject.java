@@ -154,7 +154,7 @@ public class IntellijProject {
         // IntelliJ module
 
         @Value.Default default TypeInfo genModule() {
-            return TypeInfo.of(shared().intellijPackage(), shared().classPrefix() + "IntellijModule");
+            return TypeInfo.of(shared().intellijPackage(), shared().defaultClassPrefix() + "IntellijModule");
         }
 
         Optional<TypeInfo> manualModule();
@@ -169,7 +169,7 @@ public class IntellijProject {
         // IntelliJ component
 
         @Value.Default default TypeInfo genComponent() {
-            return TypeInfo.of(shared().intellijPackage(), shared().classPrefix() + "IntellijComponent");
+            return TypeInfo.of(shared().intellijPackage(), shared().defaultClassPrefix() + "IntellijComponent");
         }
 
         Optional<TypeInfo> manualComponent();
@@ -184,7 +184,7 @@ public class IntellijProject {
         // Plugin
 
         @Value.Default default TypeInfo genPlugin() {
-            return TypeInfo.of(shared().intellijPackage(), shared().classPrefix() + "Plugin");
+            return TypeInfo.of(shared().intellijPackage(), shared().defaultClassPrefix() + "Plugin");
         }
 
         Optional<TypeInfo> manualPlugin();
@@ -199,7 +199,7 @@ public class IntellijProject {
         // Loader
 
         @Value.Default default TypeInfo genLoader() {
-            return TypeInfo.of(shared().intellijPackage(), shared().classPrefix() + "Loader");
+            return TypeInfo.of(shared().intellijPackage(), shared().defaultClassPrefix() + "Loader");
         }
 
         Optional<TypeInfo> manualLoader();
@@ -214,7 +214,7 @@ public class IntellijProject {
         // Language
 
         @Value.Default default TypeInfo genLanguage() {
-            return TypeInfo.of(shared().intellijPackage(), shared().classPrefix() + "Language");
+            return TypeInfo.of(shared().intellijPackage(), shared().defaultClassPrefix() + "Language");
         }
 
         Optional<TypeInfo> manualLanguage();
@@ -229,7 +229,7 @@ public class IntellijProject {
         // File type
 
         @Value.Default default TypeInfo genFileType() {
-            return TypeInfo.of(shared().intellijPackage(), shared().classPrefix() + "FileType");
+            return TypeInfo.of(shared().intellijPackage(), shared().defaultClassPrefix() + "FileType");
         }
 
         Optional<TypeInfo> manualFileType();
@@ -244,7 +244,7 @@ public class IntellijProject {
         // File type
 
         @Value.Default default TypeInfo genFileElementType() {
-            return TypeInfo.of(shared().intellijPackage(), shared().classPrefix() + "FileElementType");
+            return TypeInfo.of(shared().intellijPackage(), shared().defaultClassPrefix() + "FileElementType");
         }
 
         Optional<TypeInfo> manualFileElementType();
@@ -259,7 +259,7 @@ public class IntellijProject {
         // File type factory
 
         @Value.Default default TypeInfo genFileTypeFactory() {
-            return TypeInfo.of(shared().intellijPackage(), shared().classPrefix() + "FileTypeFactory");
+            return TypeInfo.of(shared().intellijPackage(), shared().defaultClassPrefix() + "FileTypeFactory");
         }
 
         Optional<TypeInfo> manualFileTypeFactory();
@@ -274,7 +274,7 @@ public class IntellijProject {
         // Syntax highlighter factory
 
         @Value.Default default TypeInfo genSyntaxHighlighterFactory() {
-            return TypeInfo.of(shared().intellijPackage(), shared().classPrefix() + "SyntaxHighlighterFactory");
+            return TypeInfo.of(shared().intellijPackage(), shared().defaultClassPrefix() + "SyntaxHighlighterFactory");
         }
 
         Optional<TypeInfo> manualSyntaxHighlighterFactory();
@@ -289,7 +289,7 @@ public class IntellijProject {
         // Parser definition
 
         @Value.Default default TypeInfo genParserDefinition() {
-            return TypeInfo.of(shared().intellijPackage(), shared().classPrefix() + "ParserDefinition");
+            return TypeInfo.of(shared().intellijPackage(), shared().defaultClassPrefix() + "ParserDefinition");
         }
 
         Optional<TypeInfo> manualParserDefinition();

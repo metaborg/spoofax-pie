@@ -102,7 +102,7 @@ public class CliProject {
         // package-info
 
         @Value.Default default TypeInfo genPackageInfo() {
-            return TypeInfo.of(shared().cliPackage(), "package-info");
+            return TypeInfo.of(shared().cliProjectPackage(), "package-info");
         }
 
         Optional<TypeInfo> manualPackageInfo();
@@ -117,7 +117,7 @@ public class CliProject {
         // Main
 
         @Value.Default default TypeInfo genMain() {
-            return TypeInfo.of(shared().cliPackage(), "Main");
+            return TypeInfo.of(shared().cliProjectPackage(), "Main");
         }
 
         Optional<TypeInfo> manualMain();

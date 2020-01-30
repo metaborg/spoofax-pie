@@ -121,7 +121,7 @@ fun copySpoofaxLanguageResources(
 copySpoofaxLanguageResources(
   project,
   {{languageDependencyCode}},
-  "{{shared.languageProject.packagePath}}",
+  "{{shared.languageProjectPackagePath}}",
   {{#strategoRuntime}}{{copyClasses}}{{/strategoRuntime}}{{^strategoRuntime}}false{{/strategoRuntime}},
   {{#strategoRuntime}}{{copyJavaStrategyClasses}}{{/strategoRuntime}}{{^strategoRuntime}}false{{/strategoRuntime}}{{#copyResourceCodes}},
   {{this}}{{/copyResourceCodes}}

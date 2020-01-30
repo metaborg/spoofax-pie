@@ -221,7 +221,7 @@ public class EclipseProject {
         // package-info
 
         @Value.Default default TypeInfo genPackageInfo() {
-            return TypeInfo.of(shared().eclipsePackage(), "package-info");
+            return TypeInfo.of(shared().eclipseProjectPackage(), "package-info");
         }
 
         Optional<TypeInfo> manualPackageInfo();
@@ -236,7 +236,7 @@ public class EclipseProject {
         // Plugin
 
         @Value.Default default TypeInfo genPlugin() {
-            return TypeInfo.of(shared().eclipsePackage(), shared().classPrefix() + "Plugin");
+            return TypeInfo.of(shared().eclipseProjectPackage(), shared().defaultClassPrefix() + "Plugin");
         }
 
         Optional<TypeInfo> manualPlugin();
@@ -251,7 +251,7 @@ public class EclipseProject {
         // Dagger component
 
         @Value.Default default TypeInfo genEclipseComponent() {
-            return TypeInfo.of(shared().eclipsePackage(), shared().classPrefix() + "EclipseComponent");
+            return TypeInfo.of(shared().eclipseProjectPackage(), shared().defaultClassPrefix() + "EclipseComponent");
         }
 
         Optional<TypeInfo> manualEclipseComponent();
@@ -270,7 +270,7 @@ public class EclipseProject {
         // Dagger module
 
         @Value.Default default TypeInfo genEclipseModule() {
-            return TypeInfo.of(shared().eclipsePackage(), shared().classPrefix() + "EclipseModule");
+            return TypeInfo.of(shared().eclipseProjectPackage(), shared().defaultClassPrefix() + "EclipseModule");
         }
 
         Optional<TypeInfo> manualEclipseModule();
@@ -285,7 +285,7 @@ public class EclipseProject {
         // Eclipse Identifiers
 
         @Value.Default default TypeInfo genEclipseIdentifiers() {
-            return TypeInfo.of(shared().eclipsePackage(), shared().classPrefix() + "EclipseIdentifiers");
+            return TypeInfo.of(shared().eclipseProjectPackage(), shared().defaultClassPrefix() + "EclipseIdentifiers");
         }
 
         Optional<TypeInfo> manualEclipseIdentifiers();
@@ -300,7 +300,7 @@ public class EclipseProject {
         // Document provider
 
         @Value.Default default TypeInfo genDocumentProvider() {
-            return TypeInfo.of(shared().eclipsePackage(), shared().classPrefix() + "DocumentProvider");
+            return TypeInfo.of(shared().eclipseProjectPackage(), shared().defaultClassPrefix() + "DocumentProvider");
         }
 
         Optional<TypeInfo> manualDocumentProvider();
@@ -315,7 +315,7 @@ public class EclipseProject {
         // Editor
 
         @Value.Default default TypeInfo genEditor() {
-            return TypeInfo.of(shared().eclipsePackage(), shared().classPrefix() + "Editor");
+            return TypeInfo.of(shared().eclipseProjectPackage(), shared().defaultClassPrefix() + "Editor");
         }
 
         Optional<TypeInfo> manualEditor();
@@ -330,7 +330,7 @@ public class EclipseProject {
         // Editor Tracker
 
         @Value.Default default TypeInfo genEditorTracker() {
-            return TypeInfo.of(shared().eclipsePackage(), shared().classPrefix() + "EditorTracker");
+            return TypeInfo.of(shared().eclipseProjectPackage(), shared().defaultClassPrefix() + "EditorTracker");
         }
 
         Optional<TypeInfo> manualEditorTracker();
@@ -345,7 +345,7 @@ public class EclipseProject {
         // Project nature
 
         @Value.Default default TypeInfo genNature() {
-            return TypeInfo.of(shared().eclipsePackage(), shared().classPrefix() + "Nature");
+            return TypeInfo.of(shared().eclipseProjectPackage(), shared().defaultClassPrefix() + "Nature");
         }
 
         Optional<TypeInfo> manualNature();
@@ -360,7 +360,7 @@ public class EclipseProject {
         // Add nature handler
 
         @Value.Default default TypeInfo genAddNatureHandler() {
-            return TypeInfo.of(shared().eclipsePackage(), shared().classPrefix() + "AddNatureHandler");
+            return TypeInfo.of(shared().eclipseProjectPackage(), shared().defaultClassPrefix() + "AddNatureHandler");
         }
 
         Optional<TypeInfo> manualAddNatureHandler();
@@ -375,7 +375,7 @@ public class EclipseProject {
         // Remove nature handler
 
         @Value.Default default TypeInfo genRemoveNatureHandler() {
-            return TypeInfo.of(shared().eclipsePackage(), shared().classPrefix() + "RemoveNatureHandler");
+            return TypeInfo.of(shared().eclipseProjectPackage(), shared().defaultClassPrefix() + "RemoveNatureHandler");
         }
 
         Optional<TypeInfo> manualRemoveNatureHandler();
@@ -390,7 +390,7 @@ public class EclipseProject {
         // Project builder
 
         @Value.Default default TypeInfo genProjectBuilder() {
-            return TypeInfo.of(shared().eclipsePackage(), shared().classPrefix() + "ProjectBuilder");
+            return TypeInfo.of(shared().eclipseProjectPackage(), shared().defaultClassPrefix() + "ProjectBuilder");
         }
 
         Optional<TypeInfo> manualProjectBuilder();
@@ -405,7 +405,7 @@ public class EclipseProject {
         // Main menu
 
         @Value.Default default TypeInfo genMainMenu() {
-            return TypeInfo.of(shared().eclipsePackage(), shared().classPrefix() + "MainMenu");
+            return TypeInfo.of(shared().eclipseProjectPackage(), shared().defaultClassPrefix() + "MainMenu");
         }
 
         Optional<TypeInfo> manualMainMenu();
@@ -420,7 +420,7 @@ public class EclipseProject {
         // Editor context menu
 
         @Value.Default default TypeInfo genEditorContextMenu() {
-            return TypeInfo.of(shared().eclipsePackage(), shared().classPrefix() + "EditorContextMenu");
+            return TypeInfo.of(shared().eclipseProjectPackage(), shared().defaultClassPrefix() + "EditorContextMenu");
         }
 
         Optional<TypeInfo> manualEditorContextMenu();
@@ -435,7 +435,7 @@ public class EclipseProject {
         // Resource context menu
 
         @Value.Default default TypeInfo genResourceContextMenu() {
-            return TypeInfo.of(shared().eclipsePackage(), shared().classPrefix() + "ResourceContextMenu");
+            return TypeInfo.of(shared().eclipseProjectPackage(), shared().defaultClassPrefix() + "ResourceContextMenu");
         }
 
         Optional<TypeInfo> manualResourceContextMenu();
@@ -450,7 +450,7 @@ public class EclipseProject {
         // Command handler
 
         @Value.Default default TypeInfo genRunCommandHandler() {
-            return TypeInfo.of(shared().eclipsePackage(), shared().classPrefix() + "RunCommandHandler");
+            return TypeInfo.of(shared().eclipseProjectPackage(), shared().defaultClassPrefix() + "RunCommandHandler");
         }
 
         Optional<TypeInfo> manualRunCommandHandler();
@@ -465,7 +465,7 @@ public class EclipseProject {
         // Observe handler
 
         @Value.Default default TypeInfo genObserveHandler() {
-            return TypeInfo.of(shared().eclipsePackage(), shared().classPrefix() + "ObserveHandler");
+            return TypeInfo.of(shared().eclipseProjectPackage(), shared().defaultClassPrefix() + "ObserveHandler");
         }
 
         Optional<TypeInfo> manualObserveHandler();
@@ -480,7 +480,7 @@ public class EclipseProject {
         // Unobserve handler
 
         @Value.Default default TypeInfo genUnobserveHandler() {
-            return TypeInfo.of(shared().eclipsePackage(), shared().classPrefix() + "UnobserveHandler");
+            return TypeInfo.of(shared().eclipseProjectPackage(), shared().defaultClassPrefix() + "UnobserveHandler");
         }
 
         Optional<TypeInfo> manualUnobserveHandler();

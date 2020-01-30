@@ -18,12 +18,11 @@ import java.util.Properties;
 public interface Shared extends Serializable {
     class Builder extends ImmutableShared.Builder implements BuilderBase {
         public Builder withPersistentProperties(Properties properties) {
-            with(properties, "classPrefix", this::classPrefix);
+            with(properties, "defaultClassPrefix", this::defaultClassPrefix);
             with(properties, "defaultGroupId", this::defaultGroupId);
             with(properties, "defaultArtifactId", this::defaultArtifactId);
             with(properties, "defaultVersion", this::defaultVersion);
-            with(properties, "basePackageId", this::basePackageId);
-            with(properties, "spoofaxPieVersion", this::spoofaxPieVersion);
+            with(properties, "defaultBasePackageId", this::defaultBasePackageId);
             return this;
         }
     }
@@ -39,13 +38,15 @@ public interface Shared extends Serializable {
 
     ResourcePath baseDirectory();
 
+
     @Value.Default default List<String> fileExtensions() {
         final ArrayList<String> list = new ArrayList<>();
         list.add(Conversion.nameToFileExtension(name()));
         return list;
     }
 
-    @Value.Default default String classPrefix() {
+
+    @Value.Default default String defaultClassPrefix() {
         return Conversion.nameToJavaId(name());
     }
 
@@ -61,7 +62,7 @@ public interface Shared extends Serializable {
         return "0.1.0";
     }
 
-    @Value.Default default String basePackageId() {
+    @Value.Default default String defaultBasePackageId() {
         return Conversion.nameToJavaPackageId(name());
     }
 
@@ -72,7 +73,6 @@ public interface Shared extends Serializable {
         final String artifactId = defaultArtifactId();
         return GradleProject.builder()
             .coordinate(defaultGroupId(), artifactId, defaultVersion())
-            .packageId(basePackageId())
             .baseDirectory(baseDirectory())
             .build();
     }
@@ -80,111 +80,127 @@ public interface Shared extends Serializable {
 
     /// Language project
 
+    @Value.Default default String defaultLanguageProjectSuffix() {
+        return "";
+    }
+
     @Value.Default default GradleProject languageProject() {
-        final String suffix = ".lang";
-        final String artifactId = defaultArtifactId() + suffix;
+        final String artifactId = defaultArtifactId() + defaultLanguageProjectSuffix();
         return GradleProject.builder()
             .coordinate(defaultGroupId(), artifactId, defaultVersion())
-            .packageId(basePackageId() + suffix)
             .baseDirectory(baseDirectory().appendSegment(artifactId))
             .build();
     }
 
-    default String languagePackage() {
-        return languageProject().packageId();
+    @Value.Default default String languageProjectPackage() {
+        return defaultBasePackageId() + defaultLanguageProjectSuffix();
+    }
+
+    default String languageProjectPackagePath() {
+        return Conversion.packageIdToPath(languageProjectPackage());
     }
 
 
     /// Adapter project
 
+    @Value.Default default String defaultAdapterProjectSuffix() {
+        return ".spoofax";
+    }
+
     @Value.Default default GradleProject adapterProject() {
-        final String suffix = ".spoofax";
-        final String artifactId = defaultArtifactId() + suffix;
+        final String artifactId = defaultArtifactId() + defaultAdapterProjectSuffix();
         return GradleProject.builder()
             .coordinate(defaultGroupId(), artifactId, defaultVersion())
-            .packageId(basePackageId() + suffix)
             .baseDirectory(baseDirectory().appendSegment(artifactId))
             .build();
     }
 
-    default String adapterPackage() {
-        return adapterProject().packageId();
+    @Value.Default default String adapterProjectPackage() {
+        return defaultBasePackageId() + defaultAdapterProjectSuffix();
     }
 
-    default String adapterTaskPackage() {
-        return adapterPackage() + ".task";
+    @Value.Default default String adapterProjectTaskPackage() {
+        return adapterProjectPackage() + ".task";
     }
 
-    default String adapterCommandPackage() {
-        return adapterPackage() + ".command";
+    @Value.Default default String adapterProjectCommandPackage() {
+        return adapterProjectPackage() + ".command";
     }
 
 
     /// CLI project
 
+    @Value.Default default String defaultCliProjectSuffix() {
+        return ".cli";
+    }
+
     @Value.Default default GradleProject cliProject() {
-        final String suffix = ".cli";
-        final String artifactId = defaultArtifactId() + suffix;
+        final String artifactId = defaultArtifactId() + defaultCliProjectSuffix();
         return GradleProject.builder()
             .coordinate(defaultGroupId(), artifactId, defaultVersion())
-            .packageId(basePackageId() + suffix)
             .baseDirectory(baseDirectory().appendSegment(artifactId))
             .build();
     }
 
-    default String cliPackage() {
-        return cliProject().packageId();
+    @Value.Default default String cliProjectPackage() {
+        return defaultBasePackageId() + defaultCliProjectSuffix();
     }
 
 
     /// Eclipse externaldeps project
 
+    @Value.Default default String defaultEclipseExternaldepsProjectSuffix() {
+        return ".eclipse.externaldeps";
+    }
+
     @Value.Default default GradleProject eclipseExternaldepsProject() {
-        final String suffix = ".eclipse.externaldeps";
-        final String artifactId = defaultArtifactId() + suffix;
+        final String artifactId = defaultArtifactId() + defaultEclipseExternaldepsProjectSuffix();
         return GradleProject.builder()
             .coordinate(defaultGroupId(), artifactId, defaultVersion())
-            .packageId(basePackageId() + suffix)
             .baseDirectory(baseDirectory().appendSegment(artifactId))
             .build();
     }
 
-    default String eclipseExternaldepsPackage() {
-        return eclipseExternaldepsProject().packageId();
+    @Value.Default default String eclipseExternaldepsProjectPackage() {
+        return defaultBasePackageId() + defaultEclipseExternaldepsProjectSuffix();
     }
 
 
     /// Eclipse project
 
+    @Value.Default default String defaultEclipseProjectSuffix() {
+        return ".eclipse";
+    }
+
     @Value.Default default GradleProject eclipseProject() {
-        final String suffix = ".eclipse";
-        final String artifactId = defaultArtifactId() + suffix;
+        final String artifactId = defaultArtifactId() + defaultEclipseProjectSuffix();
         return GradleProject.builder()
             .coordinate(defaultGroupId(), artifactId, defaultVersion())
-            .packageId(basePackageId() + suffix)
             .baseDirectory(baseDirectory().appendSegment(artifactId))
             .build();
     }
 
-    default String eclipsePackage() {
-        return eclipseProject().packageId();
+    @Value.Default default String eclipseProjectPackage() {
+        return defaultBasePackageId() + defaultEclipseProjectSuffix();
     }
 
 
     /// IntelliJ project
 
+    @Value.Default default String defaultIntellijProjectSuffix() {
+        return ".intellij";
+    }
+
     @Value.Default default GradleProject intellijProject() {
-        final String suffix = ".intellij";
-        final String artifactId = defaultArtifactId() + suffix;
+        final String artifactId = defaultArtifactId() + defaultIntellijProjectSuffix();
         return GradleProject.builder()
             .coordinate(defaultGroupId(), artifactId, defaultVersion())
-            .packageId(basePackageId() + suffix)
             .baseDirectory(baseDirectory().appendSegment(artifactId))
             .build();
     }
 
-    default String intellijPackage() {
-        return intellijProject().packageId();
+    @Value.Default default String intellijPackage() {
+        return defaultBasePackageId() + defaultIntellijProjectSuffix();
     }
 
 
@@ -422,11 +438,11 @@ public interface Shared extends Serializable {
 
 
     default void savePersistentProperties(Properties properties) {
-        properties.setProperty("classPrefix", classPrefix());
+        properties.setProperty("defaultClassPrefix", defaultClassPrefix());
         properties.setProperty("defaultGroupId", defaultGroupId());
         properties.setProperty("defaultArtifactId", defaultArtifactId());
         properties.setProperty("defaultVersion", defaultVersion());
-        properties.setProperty("defaultPackageId", basePackageId());
+        properties.setProperty("defaultBasePackageId", defaultBasePackageId());
         properties.setProperty("spoofaxPieVersion", spoofaxPieVersion());
     }
 

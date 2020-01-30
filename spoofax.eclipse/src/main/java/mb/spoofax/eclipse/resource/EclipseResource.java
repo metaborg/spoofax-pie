@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 import static org.eclipse.core.resources.IResourceStatus.RESOURCE_EXISTS;
 
 public class EclipseResource implements HierarchicalResource, WrapsEclipseResource {
-    private final EclipseResourcePath path;
+    final EclipseResourcePath path;
     private transient @Nullable IResource resource;
     private transient @Nullable IFile file;
     private transient @Nullable IContainer container;

@@ -1,6 +1,5 @@
 package mb.spoofax.compiler.spoofaxcore;
 
-import mb.common.util.ListView;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
@@ -187,7 +186,7 @@ public class LanguageProject {
         // package-info
 
         @Value.Default default TypeInfo genPackageInfo() {
-            return TypeInfo.of(shared().languagePackage(), "package-info");
+            return TypeInfo.of(shared().languageProjectPackage(), "package-info");
         }
 
         Optional<TypeInfo> manualPackageInfo();
@@ -205,9 +204,9 @@ public class LanguageProject {
                 generatedFiles.add(genPackageInfo().file(classesGenDirectory()));
             }
             parser().generatedLanguageProjectFiles().addAllTo(generatedFiles);
-            // TODO: styler
-            // TODO: stratego runtime
-            // TODO: constraint analyzer
+            styler().ifPresent((i) -> i.generatedLanguageProjectFiles().addAllTo(generatedFiles));
+            strategoRuntime().ifPresent((i) -> i.generatedLanguageProjectFiles().addAllTo(generatedFiles));
+            constraintAnalyzer().ifPresent((i) -> i.generatedLanguageProjectFiles().addAllTo(generatedFiles));
             return generatedFiles;
         }
 

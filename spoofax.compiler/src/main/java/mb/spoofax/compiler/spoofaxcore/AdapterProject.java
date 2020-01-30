@@ -273,7 +273,7 @@ public class AdapterProject {
         // package-info
 
         @Value.Default default TypeInfo genPackageInfo() {
-            return TypeInfo.of(shared().adapterPackage(), "package-info");
+            return TypeInfo.of(shared().adapterProjectPackage(), "package-info");
         }
 
         Optional<TypeInfo> manualPackageInfo();
@@ -288,7 +288,7 @@ public class AdapterProject {
         // Dagger component
 
         @Value.Default default TypeInfo genComponent() {
-            return TypeInfo.of(shared().adapterPackage(), shared().classPrefix() + "Component");
+            return TypeInfo.of(shared().adapterProjectPackage(), shared().defaultClassPrefix() + "Component");
         }
 
         Optional<TypeInfo> manualComponent();
@@ -307,7 +307,7 @@ public class AdapterProject {
         // Dagger module
 
         @Value.Default default TypeInfo genModule() {
-            return TypeInfo.of(shared().adapterPackage(), shared().classPrefix() + "Module");
+            return TypeInfo.of(shared().adapterProjectPackage(), shared().defaultClassPrefix() + "Module");
         }
 
         Optional<TypeInfo> manualModule();
@@ -322,7 +322,7 @@ public class AdapterProject {
         // Language instance
 
         @Value.Default default TypeInfo genInstance() {
-            return TypeInfo.of(shared().adapterPackage(), shared().classPrefix() + "Instance");
+            return TypeInfo.of(shared().adapterProjectPackage(), shared().defaultClassPrefix() + "Instance");
         }
 
         Optional<TypeInfo> manualInstance();
@@ -340,7 +340,7 @@ public class AdapterProject {
         // Check task definition
 
         @Value.Default default TypeInfo genCheckTaskDef() {
-            return TypeInfo.of(shared().adapterTaskPackage(), shared().classPrefix() + "Check");
+            return TypeInfo.of(shared().adapterProjectTaskPackage(), shared().defaultClassPrefix() + "Check");
         }
 
         Optional<TypeInfo> manualCheckTaskDef();
