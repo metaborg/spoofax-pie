@@ -328,7 +328,7 @@ public interface Shared extends Serializable {
     /// Metaborg resource
 
     @Value.Default default String metaborgResourceVersion() {
-        return "0.4.1";
+        return "0.4.3";
     }
 
     @Value.Default default GradleDependency resourceDep() {
