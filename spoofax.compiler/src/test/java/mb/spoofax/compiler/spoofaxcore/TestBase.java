@@ -22,44 +22,44 @@ class TestBase {
     final Charset charset = StandardCharsets.UTF_8;
 
     final TemplateCompiler templateCompiler = new TemplateCompiler(Shared.class, resourceService, charset);
-    final Parser parserCompiler = new Parser(templateCompiler);
-    final Styler stylerCompiler = new Styler(templateCompiler);
-    final StrategoRuntime strategoRuntimeCompiler = new StrategoRuntime(templateCompiler);
-    final ConstraintAnalyzer constraintAnalyzerCompiler = new ConstraintAnalyzer(templateCompiler);
+    final ParserCompiler parserCompiler = new ParserCompiler(templateCompiler);
+    final StylerCompiler stylerCompiler = new StylerCompiler(templateCompiler);
+    final StrategoRuntimeCompiler strategoRuntimeCompiler = new StrategoRuntimeCompiler(templateCompiler);
+    final ConstraintAnalyzerCompiler constraintAnalyzerCompiler = new ConstraintAnalyzerCompiler(templateCompiler);
 
-    final RootProject rootProjectCompiler = new RootProject(templateCompiler);
-    final LanguageProject languageProjectCompiler = new LanguageProject(templateCompiler, parserCompiler, stylerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler);
-    final AdapterProject adapterProjectCompiler = new AdapterProject(templateCompiler, parserCompiler, stylerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler);
+    final RootProjectCompiler rootProjectCompiler = new RootProjectCompiler(templateCompiler);
+    final LanguageProjectCompiler languageProjectCompiler = new LanguageProjectCompiler(templateCompiler, parserCompiler, stylerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler);
+    final AdapterProjectCompiler adapterProjectCompiler = new AdapterProjectCompiler(templateCompiler, parserCompiler, stylerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler);
 
-    final CliProject cliProjectCompiler = new CliProject(templateCompiler);
+    final CliProjectCompiler cliProjectCompiler = new CliProjectCompiler(templateCompiler);
 
-    final EclipseExternaldepsProject eclipseExternaldepsProjectCompiler = new EclipseExternaldepsProject(templateCompiler);
-    final EclipseProject eclipseProjectCompiler = new EclipseProject(templateCompiler);
+    final EclipseExternaldepsProjectCompiler eclipseExternaldepsProjectCompiler = new EclipseExternaldepsProjectCompiler(templateCompiler);
+    final EclipseProjectCompiler eclipseProjectCompiler = new EclipseProjectCompiler(templateCompiler);
 
-    final IntellijProject intellijProjectCompiler = new IntellijProject(templateCompiler);
+    final IntellijProjectCompiler intellijProjectCompiler = new IntellijProjectCompiler(templateCompiler);
 
 
-    LanguageProject.Input compileLanguageProject(Shared shared) throws IOException {
-        final LanguageProject.Input input = TigerInputs.languageProject(shared);
+    LanguageProjectCompiler.Input compileLanguageProject(Shared shared, LanguageProject languageProject) throws IOException {
+        final LanguageProjectCompiler.Input input = TigerInputs.languageProjectInput(shared, languageProject).build();
         languageProjectCompiler.generateInitial(input);
         languageProjectCompiler.generateGradleFiles(input);
         languageProjectCompiler.compile(input);
         return input;
     }
 
-    AdapterProject.Input compileAdapterProject(Shared shared) throws IOException {
-        final AdapterProject.Input input = TigerInputs.adapterProjectBuilder(shared)
-            .languageProjectDependency(GradleDependency.project(":" + shared.languageProject().coordinate().artifactId()))
+    AdapterProjectCompiler.Input compileAdapterProject(Shared shared, LanguageProject languageProject, AdapterProject adapterProject) throws IOException {
+        final AdapterProjectCompiler.Input input = TigerInputs.adapterProjectInput(shared, languageProject, adapterProject)
+            .languageProjectDependency(GradleDependency.project(":" + languageProject.project().coordinate().artifactId()))
             .build();
         TigerInputs.copyTaskDefsIntoAdapterProject(input, resourceService);
         adapterProjectCompiler.generateInitial(input);
-        adapterProjectCompiler.generateBuildGradleKts(input);
+        adapterProjectCompiler.generateGradleFiles(input);
         adapterProjectCompiler.compile(input);
         return input;
     }
 
-    AdapterProject.Input compileLanguageAndAdapterProject(Shared shared) throws IOException {
-        compileLanguageProject(shared);
-        return compileAdapterProject(shared);
+    AdapterProjectCompiler.Input compileLanguageAndAdapterProject(Shared shared, LanguageProject languageProject, AdapterProject adapterProject) throws IOException {
+        compileLanguageProject(shared, languageProject);
+        return compileAdapterProject(shared, languageProject, adapterProject);
     }
 }

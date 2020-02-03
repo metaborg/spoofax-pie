@@ -13,18 +13,19 @@ import mb.spoofax.compiler.command.AutoCommandDefRepr;
 import mb.spoofax.compiler.command.CommandDefRepr;
 import mb.spoofax.compiler.menu.MenuCommandActionRepr;
 import mb.spoofax.compiler.spoofaxcore.AdapterProject;
-import mb.spoofax.compiler.spoofaxcore.CliProject;
-import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzer;
-import mb.spoofax.compiler.spoofaxcore.EclipseExternaldepsProject;
-import mb.spoofax.compiler.spoofaxcore.EclipseProject;
-import mb.spoofax.compiler.spoofaxcore.IntellijProject;
+import mb.spoofax.compiler.spoofaxcore.AdapterProjectCompiler;
+import mb.spoofax.compiler.spoofaxcore.CliProjectCompiler;
+import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler;
+import mb.spoofax.compiler.spoofaxcore.EclipseExternaldepsProjectCompiler;
+import mb.spoofax.compiler.spoofaxcore.EclipseProjectCompiler;
+import mb.spoofax.compiler.spoofaxcore.IntellijProjectCompiler;
 import mb.spoofax.compiler.spoofaxcore.LanguageProject;
-import mb.spoofax.compiler.spoofaxcore.Parser;
-import mb.spoofax.compiler.spoofaxcore.RootProject;
+import mb.spoofax.compiler.spoofaxcore.LanguageProjectCompiler;
+import mb.spoofax.compiler.spoofaxcore.ParserCompiler;
+import mb.spoofax.compiler.spoofaxcore.RootProjectCompiler;
 import mb.spoofax.compiler.spoofaxcore.Shared;
-import mb.spoofax.compiler.spoofaxcore.StrategoRuntime;
-import mb.spoofax.compiler.spoofaxcore.Styler;
-import mb.spoofax.compiler.util.Conversion;
+import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler;
+import mb.spoofax.compiler.spoofaxcore.StylerCompiler;
 import mb.spoofax.compiler.util.GradleDependency;
 import mb.spoofax.compiler.util.StringUtil;
 import mb.spoofax.compiler.util.TypeInfo;
@@ -38,13 +39,14 @@ import java.util.Collections;
 import java.util.Optional;
 
 public class TigerInputs {
-    /// Shared input
+    /// Shared
 
-    public static Shared.Builder sharedBuilder(ResourcePath baseDirectory) {
+    public static Shared.Builder shared(ResourcePath baseDirectory) {
         return Shared.builder()
             .name("Tiger")
             .baseDirectory(baseDirectory)
             .defaultBasePackageId("mb.tiger")
+            // Injected dependencies
             /// Metaborg log
             .logApiDep(fromSystemProperty("log.api:classpath"))
             .logBackendSLF4JDep(fromSystemProperty("log.backend.slf4j:classpath"))
@@ -77,101 +79,117 @@ public class TigerInputs {
         return GradleDependency.files(Preconditions.checkNotNull(System.getProperty(key)));
     }
 
-    public static Shared shared(ResourcePath baseDirectory) {
-        return sharedBuilder(baseDirectory).build();
+    /// Main projects
+
+    public static LanguageProject.Builder languageProject(Shared shared) {
+        return LanguageProject.builder().shared(shared);
     }
 
+    public static AdapterProject.Builder adapterProject(Shared shared) {
+        return AdapterProject.builder().shared(shared);
+    }
 
-    /// Parser compiler input
+    /// Parser compiler
 
-    public static Parser.Input.Builder parserBuilder(Shared shared) {
-        return Parser.Input.builder()
+    public static ParserCompiler.LanguageProjectInput.Builder parserLanguageProjectInput(Shared shared, LanguageProject languageProject) {
+        return ParserCompiler.LanguageProjectInput.builder()
             .startSymbol("Module")
             .shared(shared)
+            .languageProject(languageProject)
             ;
     }
 
-    public static Parser.Input parser(Shared shared) {
-        return parserBuilder(shared).build();
-    }
-
-
-    /// Styler compiler input
-
-    public static Styler.Input.Builder stylerBuilder(Shared shared) {
-        return Styler.Input.builder()
-            .parser(parser(shared))
+    public static ParserCompiler.AdapterProjectInput.Builder parserAdapterProjectInput(Shared shared, LanguageProject languageProject, AdapterProject adapterProject) {
+        return ParserCompiler.AdapterProjectInput.builder()
             .shared(shared)
+            .adapterProject(adapterProject)
+            .languageProjectInput(parserLanguageProjectInput(shared, languageProject).build())
             ;
     }
 
-    public static Styler.Input styler(Shared shared) {
-        return stylerBuilder(shared).build();
+    /// Styler compiler
+
+    public static StylerCompiler.LanguageProjectInput.Builder stylerLanguageProjectInput(Shared shared, LanguageProject languageProject) {
+        return StylerCompiler.LanguageProjectInput.builder()
+            .shared(shared)
+            .languageProject(languageProject)
+            ;
     }
 
-
-    /// Stratego runtime builder compiler input
-
-    public static StrategoRuntime.Input.Builder strategoRuntimeBuilder(Shared shared) {
-        return StrategoRuntime.Input.builder()
+    public static StylerCompiler.AdapterProjectInput.Builder stylerAdapterProjectInput(Shared shared, LanguageProject languageProject, AdapterProject adapterProject) {
+        return StylerCompiler.AdapterProjectInput.builder()
             .shared(shared)
-            .addInteropRegisterersByReflection("org.metaborg.lang.tiger.trans.InteropRegisterer", "org.metaborg.lang.tiger.strategies.InteropRegisterer")
+            .adapterProject(adapterProject)
+            .languageProjectInput(stylerLanguageProjectInput(shared, languageProject).build())
+            ;
+    }
+
+    /// Stratego runtime compiler
+
+    public static StrategoRuntimeCompiler.LanguageProjectInput.Builder strategoRuntimeLanguageProjectInput(Shared shared, LanguageProject languageProject) {
+        return StrategoRuntimeCompiler.LanguageProjectInput.builder()
+            .addInteropRegisterersByReflection(
+                "org.metaborg.lang.tiger.trans.InteropRegisterer",
+                "org.metaborg.lang.tiger.strategies.InteropRegisterer"
+            )
             .addNaBL2Primitives(true)
             .addStatixPrimitives(false)
             .copyJavaStrategyClasses(true)
-            ;
-    }
-
-    public static StrategoRuntime.Input strategoRuntime(Shared shared) {
-        return strategoRuntimeBuilder(shared).build();
-    }
-
-
-    /// Constraint analyzer compiler input
-
-    public static ConstraintAnalyzer.Input.Builder constraintAnalyzerBuilder(Shared shared) {
-        return ConstraintAnalyzer.Input.builder()
             .shared(shared)
-            .parser(parser(shared))
+            .languageProject(languageProject)
             ;
     }
 
-    public static ConstraintAnalyzer.Input constraintAnalyzer(Shared shared) {
-        return constraintAnalyzerBuilder(shared).build();
+    public static StrategoRuntimeCompiler.AdapterProjectInput.Builder strategoRuntimeAdapterProjectInput(Shared shared, LanguageProject languageProject, AdapterProject adapterProject) {
+        return StrategoRuntimeCompiler.AdapterProjectInput.builder()
+            .languageProjectInput(strategoRuntimeLanguageProjectInput(shared, languageProject).build())
+            ;
     }
 
+    /// Constraint analyzer compiler
 
-    /// Language project compiler input
-
-    public static LanguageProject.Input.Builder languageProjectBuilder(Shared shared) {
-        return LanguageProject.Input.builder()
+    public static ConstraintAnalyzerCompiler.LanguageProjectInput.Builder constraintAnalyzerLanguageProjectInput(Shared shared, LanguageProject languageProject) {
+        return ConstraintAnalyzerCompiler.LanguageProjectInput.builder()
             .shared(shared)
-            .parser(parser(shared))
-            .styler(styler(shared))
-            .strategoRuntime(strategoRuntime(shared))
-            .constraintAnalyzer(constraintAnalyzer(shared))
-            .languageSpecificationDependency(GradleDependency.files(Preconditions.checkNotNull(System.getProperty("org.metaborg.lang.tiger:classpath"))))
+            .languageProject(languageProject)
             ;
     }
 
-    public static LanguageProject.Input languageProject(Shared shared) {
-        return languageProjectBuilder(shared).build();
+    public static ConstraintAnalyzerCompiler.AdapterProjectInput.Builder constraintAnalyzerAdapterProjectInput(Shared shared, LanguageProject languageProject, AdapterProject adapterProject) {
+        return ConstraintAnalyzerCompiler.AdapterProjectInput.builder()
+            .shared(shared)
+            .adapterProject(adapterProject)
+            .languageProjectInput(constraintAnalyzerLanguageProjectInput(shared, languageProject).build())
+            ;
     }
 
+    /// Language project compiler
 
-    /// Adapter project compiler input
+    public static LanguageProjectCompiler.Input.Builder languageProjectInput(Shared shared, LanguageProject languageProject) {
+        return LanguageProjectCompiler.Input.builder()
+            .languageProject(languageProject)
+            .parser(parserLanguageProjectInput(shared, languageProject).build())
+            .styler(stylerLanguageProjectInput(shared, languageProject).build())
+            .strategoRuntime(strategoRuntimeLanguageProjectInput(shared, languageProject).build())
+            .constraintAnalyzer(constraintAnalyzerLanguageProjectInput(shared, languageProject).build())
+            .languageSpecificationDependency(fromSystemProperty("org.metaborg.lang.tiger:classpath"))
+            .shared(shared)
+            ;
+    }
 
-    public static AdapterProject.Input.Builder adapterProjectBuilder(Shared shared) {
-        final TypeInfo showParsedAstTaskDef = TypeInfo.of(shared.adapterProjectTaskPackage(), "TigerShowParsedAstTaskDef");
-        final TypeInfo listDefNamesTaskDef = TypeInfo.of(shared.adapterProjectTaskPackage(), "TigerListDefNames");
-        final TypeInfo listLiteralValsTaskDef = TypeInfo.of(shared.adapterProjectTaskPackage(), "TigerListLiteralVals");
-        final TypeInfo tigerCompileFileTaskDef = TypeInfo.of(shared.adapterProjectTaskPackage(), "TigerCompileFileTaskDef");
-        final TypeInfo tigerAltCompileFileTaskDef = TypeInfo.of(shared.adapterProjectTaskPackage(), "TigerAltCompileFileTaskDef");
+    /// Adapter project compiler
+
+    public static AdapterProjectCompiler.Input.Builder adapterProjectInput(Shared shared, LanguageProject languageProject, AdapterProject adapterProject) {
+        final TypeInfo showParsedAstTaskDef = TypeInfo.of(adapterProject.taskPackageId(), "TigerShowParsedAstTaskDef");
+        final TypeInfo listDefNamesTaskDef = TypeInfo.of(adapterProject.taskPackageId(), "TigerListDefNames");
+        final TypeInfo listLiteralValsTaskDef = TypeInfo.of(adapterProject.taskPackageId(), "TigerListLiteralVals");
+        final TypeInfo tigerCompileFileTaskDef = TypeInfo.of(adapterProject.taskPackageId(), "TigerCompileFileTaskDef");
+        final TypeInfo tigerAltCompileFileTaskDef = TypeInfo.of(adapterProject.taskPackageId(), "TigerAltCompileFileTaskDef");
 
         final CommandDefRepr tigerShowParsedAst = CommandDefRepr.builder()
-            .type(shared.adapterProjectCommandPackage(), "TigerShowParsedAst")
+            .type(adapterProject.commandPackageId(), "TigerShowParsedAst")
             .taskDefType(showParsedAstTaskDef)
-            .argType(shared.adapterProjectTaskPackage(), "TigerShowParsedAstTaskDef.Args")
+            .argType(adapterProject.taskPackageId(), "TigerShowParsedAstTaskDef.Args")
             .displayName("Show parsed AST")
             .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
             .addRequiredContextTypes(CommandContextType.Resource)
@@ -180,9 +198,9 @@ public class TigerInputs {
             .build();
 
         final CommandDefRepr tigerCompileFile = CommandDefRepr.builder()
-            .type(TypeInfo.of(shared.adapterProjectCommandPackage(), "TigerCompileFile"))
+            .type(TypeInfo.of(adapterProject.commandPackageId(), "TigerCompileFile"))
             .taskDefType(tigerCompileFileTaskDef)
-            .argType(shared.adapterProjectTaskPackage(), "TigerCompileFileTaskDef.Args")
+            .argType(adapterProject.taskPackageId(), "TigerCompileFileTaskDef.Args")
             .displayName("'Compile' file (list literals)")
             .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous, CommandExecutionType.AutomaticContinuous)
             .addRequiredContextTypes(CommandContextType.File)
@@ -190,9 +208,9 @@ public class TigerInputs {
             .build();
 
         final CommandDefRepr tigerAltCompileFile = CommandDefRepr.builder()
-            .type(TypeInfo.of(shared.adapterProjectCommandPackage(), "TigerAltCompileFile"))
+            .type(TypeInfo.of(adapterProject.commandPackageId(), "TigerAltCompileFile"))
             .taskDefType(tigerAltCompileFileTaskDef)
-            .argType(shared.adapterProjectTaskPackage(), "TigerAltCompileFileTaskDef.Args")
+            .argType(adapterProject.taskPackageId(), "TigerAltCompileFileTaskDef.Args")
             .displayName("'Alternative compile' file")
             .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous, CommandExecutionType.AutomaticContinuous)
             .addRequiredContextTypes(CommandContextType.File)
@@ -202,12 +220,12 @@ public class TigerInputs {
             .addParams("compiledFileNameSuffix", TypeInfo.ofString(), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.value(StringUtil.doubleQuote("defnames.aterm"))))
             .build();
 
-        return AdapterProject.Input.builder()
-            .shared(shared)
-            .parser(parser(shared))
-            .styler(styler(shared))
-            .strategoRuntime(strategoRuntime(shared))
-            .constraintAnalyzer(constraintAnalyzer(shared))
+        return AdapterProjectCompiler.Input.builder()
+            .adapterProject(adapterProject)
+            .parser(parserAdapterProjectInput(shared, languageProject, adapterProject).build())
+            .styler(stylerAdapterProjectInput(shared, languageProject, adapterProject).build())
+            .strategoRuntime(strategoRuntimeAdapterProjectInput(shared, languageProject, adapterProject).build())
+            .constraintAnalyzer(constraintAnalyzerAdapterProjectInput(shared, languageProject, adapterProject).build())
             .addTaskDefs(
                 showParsedAstTaskDef,
                 listDefNamesTaskDef,
@@ -251,12 +269,13 @@ public class TigerInputs {
                     .executionType(CommandExecutionType.ManualContinuous)
                     .build()
             )
+            .shared(shared)
             ;
     }
 
-    public static void copyTaskDefsIntoAdapterProject(AdapterProject.Input input, ResourceService resourceService) throws IOException {
-        final ResourcePath srcMainJavaDirectory = input.shared().adapterProject().sourceMainJavaDirectory();
-        final String taskPackagePath = Conversion.packageIdToPath(input.shared().adapterProjectTaskPackage());
+    public static void copyTaskDefsIntoAdapterProject(AdapterProjectCompiler.Input input, ResourceService resourceService) throws IOException {
+        final ResourcePath srcMainJavaDirectory = input.adapterProject().project().sourceMainJavaDirectory();
+        final String taskPackagePath = input.adapterProject().taskPackagePath();
         final HierarchicalResource taskDirectory = resourceService.getHierarchicalResource(srcMainJavaDirectory.appendRelativePath(taskPackagePath)).ensureDirectoryExists();
         copyResource("TigerShowParsedAstTaskDef.java", taskDirectory);
         copyResource("TigerListDefNames.java", taskDirectory);
@@ -274,55 +293,46 @@ public class TigerInputs {
         }
     }
 
+    /// CLI project compiler
 
-    /// CLI project compiler input
-
-    public static CliProject.Input.Builder cliProjectBuilder(Shared shared, AdapterProject.Input adapterProject) {
-        return CliProject.Input.builder()
+    public static CliProjectCompiler.Input.Builder cliProjectInput(Shared shared, AdapterProjectCompiler.Input adapterProject) {
+        return CliProjectCompiler.Input.builder()
             .shared(shared)
             .adapterProject(adapterProject)
             ;
     }
 
+    /// Eclipse externaldeps project compiler
 
-    /// Eclipse externaldeps project compiler input
-
-    public static EclipseExternaldepsProject.Input.Builder eclipseExternaldepsProjectBuilder(Shared shared) {
-        return EclipseExternaldepsProject.Input.builder()
+    public static EclipseExternaldepsProjectCompiler.Input.Builder eclipseExternaldepsProjectInput(Shared shared) {
+        return EclipseExternaldepsProjectCompiler.Input.builder()
             .shared(shared)
             ;
     }
 
+    /// Eclipse project compiler
 
-    /// Eclipse project compiler input
-
-    public static EclipseProject.Input.Builder eclipseProjectBuilder(Shared shared, AdapterProject.Input adapterProject) {
-        return EclipseProject.Input.builder()
+    public static EclipseProjectCompiler.Input.Builder eclipseProjectInput(Shared shared, AdapterProjectCompiler.Input adapterProject) {
+        return EclipseProjectCompiler.Input.builder()
             .shared(shared)
             .adapterProject(adapterProject)
             ;
     }
 
+    /// Intellij project compiler
 
-    /// Intellij project compiler input
-
-    public static IntellijProject.Input.Builder intellijProjectBuilder(Shared shared, AdapterProject.Input adapterProject) {
-        return IntellijProject.Input.builder()
+    public static IntellijProjectCompiler.Input.Builder intellijProjectInput(Shared shared, AdapterProjectCompiler.Input adapterProject) {
+        return IntellijProjectCompiler.Input.builder()
             .shared(shared)
             .adapterProject(adapterProject)
             ;
     }
 
+    /// Root project compiler
 
-    /// Root project compiler input
-
-    public static RootProject.Input.Builder rootProjectBuilder(Shared shared) {
-        return RootProject.Input.builder()
+    public static RootProjectCompiler.Input.Builder rootProjectInput(Shared shared) {
+        return RootProjectCompiler.Input.builder()
             .shared(shared)
             ;
-    }
-
-    public static RootProject.Input rootProject(Shared shared) {
-        return rootProjectBuilder(shared).build();
     }
 }

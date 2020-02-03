@@ -20,7 +20,7 @@ public class TemplateWriter {
         this.charset = charset;
     }
 
-    public HierarchicalResource write(Object context, ResourcePath path) throws IOException {
+    public HierarchicalResource write(ResourcePath path, Object context) throws IOException {
         final HierarchicalResource resource = resource(path);
         try(final ResourceWriter writer = writer(resource)) {
             template.execute(context, writer);
@@ -29,7 +29,7 @@ public class TemplateWriter {
         return resource;
     }
 
-    public HierarchicalResource write(Object context, Object parentContext, ResourcePath path) throws IOException {
+    public HierarchicalResource write(ResourcePath path, Object context, Object parentContext) throws IOException {
         final HierarchicalResource resource = resource(path);
         try(final ResourceWriter writer = writer(resource)) {
             template.execute(context, parentContext, writer);

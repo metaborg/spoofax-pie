@@ -47,12 +47,12 @@ public class {{analyzeTaskDef.id}} implements TaskDef<{{analyzeTaskDef.id}}.Inpu
         }
     }
 
-    private final {{constraintAnalyzer.qualifiedId}} constraintAnalyzer;
+    private final {{languageProjectInput.constraintAnalyzer.qualifiedId}} constraintAnalyzer;
     private final LoggerFactory loggerFactory;
     private final ResourceService resourceService;
 
     @Inject
-    public {{analyzeTaskDef.id}}({{constraintAnalyzer.qualifiedId}} constraintAnalyzer, LoggerFactory loggerFactory, ResourceService resourceService) {
+    public {{analyzeTaskDef.id}}({{languageProjectInput.constraintAnalyzer.qualifiedId}} constraintAnalyzer, LoggerFactory loggerFactory, ResourceService resourceService) {
         this.constraintAnalyzer = constraintAnalyzer;
         this.loggerFactory = loggerFactory;
         this.resourceService = resourceService;

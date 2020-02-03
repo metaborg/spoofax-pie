@@ -1,9 +1,10 @@
-import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzer
-import mb.spoofax.compiler.spoofaxcore.LanguageProject
-import mb.spoofax.compiler.spoofaxcore.Parser
+import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler
+import mb.spoofax.compiler.spoofaxcore.ParserCompiler
 import mb.spoofax.compiler.spoofaxcore.Shared
-import mb.spoofax.compiler.spoofaxcore.StrategoRuntime
-import mb.spoofax.compiler.spoofaxcore.Styler
+import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler
+import mb.spoofax.compiler.spoofaxcore.StylerCompiler
+import mb.spoofax.compiler.spoofaxcore.LanguageProjectCompiler
+import mb.spoofax.compiler.spoofaxcore.AdapterProjectCompiler
 import mb.spoofax.compiler.util.GradleDependency
 
 plugins {
@@ -44,18 +45,21 @@ spoofaxCompiler {
     .name("Tiger")
     .defaultBasePackageId("mb.tiger")
   )
-  parserBuilder.set(Parser.Input.builder()
+  parserBuilder.set(ParserCompiler.LanguageProjectInput.builder()
     .startSymbol("Start")
   )
-  stylerBuilder.set(Styler.Input.builder())
-  strategoRuntimeBuilder.set(StrategoRuntime.Input.builder()
+  stylerBuilder.set(StylerCompiler.LanguageProjectInput.builder())
+  strategoRuntimeBuilder.set(StrategoRuntimeCompiler.LanguageProjectInput.builder()
     .addInteropRegisterersByReflection("org.metaborg.lang.tiger.trans.InteropRegisterer", "org.metaborg.lang.tiger.strategies.InteropRegisterer")
     .addNaBL2Primitives(true)
     .addStatixPrimitives(false)
     .copyJavaStrategyClasses(true)
   )
-  constraintAnalyzerBuilder.set(ConstraintAnalyzer.Input.builder())
-  languageProjectBuilder.set(LanguageProject.Input.builder()
+  constraintAnalyzerBuilder.set(ConstraintAnalyzerCompiler.LanguageProjectInput.builder())
+  languageProjectBuilder.set(LanguageProjectCompiler.Input.builder()
     .languageSpecificationDependency(GradleDependency.module("$group:org.metaborg.lang.tiger:$version"))
+  )
+  adapterProjectBuilder.set(AdapterProjectCompiler.Input.builder()
+    .languageProjectDependency(GradleDependency.project(":tiger"))
   )
 }

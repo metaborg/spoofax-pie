@@ -8,8 +8,8 @@ plugins {
   id("org.jetbrains.intellij") version "{{shared.intellijGradlePluginVersion}}" apply false
 }
 
-group = "{{shared.rootProject.coordinate.groupId}}"
-version = "{{shared.rootProject.coordinate.version}}"
+group = "{{project.coordinate.groupId}}"
+version = "{{project.coordinate.version}}"
 
 subprojects {
   metaborg {

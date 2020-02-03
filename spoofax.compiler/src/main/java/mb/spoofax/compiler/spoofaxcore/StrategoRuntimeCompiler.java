@@ -1,7 +1,6 @@
 package mb.spoofax.compiler.spoofaxcore;
 
 import mb.common.util.ListView;
-import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
@@ -17,16 +16,16 @@ import java.util.List;
 import java.util.Optional;
 
 @Value.Enclosing
-public class StrategoRuntime {
+public class StrategoRuntimeCompiler {
     private final TemplateWriter factoryTemplate;
 
-    public StrategoRuntime(TemplateCompiler templateCompiler) {
+    public StrategoRuntimeCompiler(TemplateCompiler templateCompiler) {
         this.factoryTemplate = templateCompiler.getOrCompileToWriter("stratego_runtime/StrategoRuntimeBuilderFactory.java.mustache");
     }
 
     // Language project
 
-    public ListView<GradleConfiguredDependency> getLanguageProjectDependencies(Input input) {
+    public ListView<GradleConfiguredDependency> getLanguageProjectDependencies(LanguageProjectInput input) {
         final Shared shared = input.shared();
         final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>();
         dependencies.add(GradleConfiguredDependency.api(shared.strategoCommonDep()));
@@ -43,7 +42,7 @@ public class StrategoRuntime {
         return new ListView<>(dependencies);
     }
 
-    public ListView<String> getLanguageProjectCopyResources(Input input) {
+    public ListView<String> getLanguageProjectCopyResources(LanguageProjectInput input) {
         final ArrayList<String> copyResources = new ArrayList<>();
         if(input.addStatixPrimitives()) {
             // TODO: move to constraint analyzer compiler?
@@ -55,35 +54,33 @@ public class StrategoRuntime {
         return new ListView<>(copyResources);
     }
 
-    public Output compileLanguageProject(Input input) throws IOException {
+    public Output compileLanguageProject(LanguageProjectInput input) throws IOException {
         final Output.Builder outputBuilder = Output.builder();
         if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
-        final ResourcePath classesGenDirectory = input.languageClassesGenDirectory();
-        outputBuilder.addProvidedResources(
-            factoryTemplate.write(input, input.genFactory().file(classesGenDirectory))
-        );
+
+        final ResourcePath classesGenDirectory = input.classesGenDirectory();
+        factoryTemplate.write(input.genFactory().file(classesGenDirectory), input);
+
+        outputBuilder.addAllProvidedFiles(input.providedFiles());
         return outputBuilder.build();
     }
 
     // Adapter project
 
-    public Output compileAdapterProject(Input input) throws IOException {
-        final Output.Builder outputBuilder = Output.builder();
-        return outputBuilder.build();
+    public Output compileAdapterProject(AdapterProjectInput input) throws IOException {
+        // Nothing to generate for adapter project at the moment.
+        return Output.builder().build();
     }
 
-    // Input
+    // Inputs & outputs
 
     @Value.Immutable
-    public interface Input extends Serializable {
-        class Builder extends StrategoRuntimeData.Input.Builder {}
+    public interface LanguageProjectInput extends Serializable {
+        class Builder extends StrategoRuntimeCompilerData.LanguageProjectInput.Builder {}
 
         static Builder builder() {
             return new Builder();
         }
-
-
-        Shared shared();
 
 
         /// Configuration
@@ -117,14 +114,14 @@ public class StrategoRuntime {
 
         /// Language project classes
 
-        default ResourcePath languageClassesGenDirectory() {
-            return shared().languageProject().genSourceSpoofaxJavaDirectory();
+        default ResourcePath classesGenDirectory() {
+            return languageProject().project().genSourceSpoofaxJavaDirectory();
         }
 
         // Stratego runtime builder factory
 
         @Value.Default default TypeInfo genFactory() {
-            return TypeInfo.of(shared().languageProjectPackage(), shared().defaultClassPrefix() + "StrategoRuntimeBuilderFactory");
+            return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "StrategoRuntimeBuilderFactory");
         }
 
         Optional<TypeInfo> manualFactory();
@@ -136,16 +133,24 @@ public class StrategoRuntime {
             return genFactory();
         }
 
-        // List of all generated files for language projects
 
-        default ListView<ResourcePath> generatedLanguageProjectFiles() {
+        // Provided files
+
+        default ListView<ResourcePath> providedFiles() {
             if(classKind().isManualOnly()) {
                 return ListView.of();
             }
             return ListView.of(
-                genFactory().file(languageClassesGenDirectory())
+                genFactory().file(classesGenDirectory())
             );
         }
+
+
+        /// Automatically provided sub-inputs
+
+        Shared shared();
+
+        LanguageProject languageProject();
 
 
         @Value.Check default void check() {
@@ -159,13 +164,27 @@ public class StrategoRuntime {
     }
 
     @Value.Immutable
-    public interface Output {
-        class Builder extends StrategoRuntimeData.Output.Builder {}
+    public interface AdapterProjectInput extends Serializable {
+        class Builder extends StrategoRuntimeCompilerData.AdapterProjectInput.Builder {}
 
         static Builder builder() {
             return new Builder();
         }
 
-        List<HierarchicalResource> providedResources();
+
+        /// Automatically provided sub-inputs
+
+        LanguageProjectInput languageProjectInput();
+    }
+
+    @Value.Immutable
+    public interface Output {
+        class Builder extends StrategoRuntimeCompilerData.Output.Builder {}
+
+        static Builder builder() {
+            return new Builder();
+        }
+
+        List<ResourcePath> providedFiles();
     }
 }

@@ -67,141 +67,45 @@ public interface Shared extends Serializable {
     }
 
 
-    /// Root project
-
-    @Value.Default default GradleProject rootProject() {
-        final String artifactId = defaultArtifactId();
-        return GradleProject.builder()
-            .coordinate(defaultGroupId(), artifactId, defaultVersion())
-            .baseDirectory(baseDirectory())
-            .build();
-    }
 
 
-    /// Language project
-
-    @Value.Default default String defaultLanguageProjectSuffix() {
-        return "";
-    }
-
-    @Value.Default default GradleProject languageProject() {
-        final String artifactId = defaultArtifactId() + defaultLanguageProjectSuffix();
-        return GradleProject.builder()
-            .coordinate(defaultGroupId(), artifactId, defaultVersion())
-            .baseDirectory(baseDirectory().appendSegment(artifactId))
-            .build();
-    }
-
-    @Value.Default default String languageProjectPackage() {
-        return defaultBasePackageId() + defaultLanguageProjectSuffix();
-    }
-
-    default String languageProjectPackagePath() {
-        return Conversion.packageIdToPath(languageProjectPackage());
-    }
-
-
-    /// Adapter project
-
-    @Value.Default default String defaultAdapterProjectSuffix() {
-        return ".spoofax";
-    }
-
-    @Value.Default default GradleProject adapterProject() {
-        final String artifactId = defaultArtifactId() + defaultAdapterProjectSuffix();
-        return GradleProject.builder()
-            .coordinate(defaultGroupId(), artifactId, defaultVersion())
-            .baseDirectory(baseDirectory().appendSegment(artifactId))
-            .build();
-    }
-
-    @Value.Default default String adapterProjectPackage() {
-        return defaultBasePackageId() + defaultAdapterProjectSuffix();
-    }
-
-    @Value.Default default String adapterProjectTaskPackage() {
-        return adapterProjectPackage() + ".task";
-    }
-
-    @Value.Default default String adapterProjectCommandPackage() {
-        return adapterProjectPackage() + ".command";
-    }
-
-
-    /// CLI project
-
-    @Value.Default default String defaultCliProjectSuffix() {
-        return ".cli";
-    }
-
-    @Value.Default default GradleProject cliProject() {
-        final String artifactId = defaultArtifactId() + defaultCliProjectSuffix();
-        return GradleProject.builder()
-            .coordinate(defaultGroupId(), artifactId, defaultVersion())
-            .baseDirectory(baseDirectory().appendSegment(artifactId))
-            .build();
-    }
-
-    @Value.Default default String cliProjectPackage() {
-        return defaultBasePackageId() + defaultCliProjectSuffix();
-    }
-
-
-    /// Eclipse externaldeps project
-
-    @Value.Default default String defaultEclipseExternaldepsProjectSuffix() {
-        return ".eclipse.externaldeps";
-    }
-
-    @Value.Default default GradleProject eclipseExternaldepsProject() {
-        final String artifactId = defaultArtifactId() + defaultEclipseExternaldepsProjectSuffix();
-        return GradleProject.builder()
-            .coordinate(defaultGroupId(), artifactId, defaultVersion())
-            .baseDirectory(baseDirectory().appendSegment(artifactId))
-            .build();
-    }
-
-    @Value.Default default String eclipseExternaldepsProjectPackage() {
-        return defaultBasePackageId() + defaultEclipseExternaldepsProjectSuffix();
-    }
-
-
-    /// Eclipse project
-
-    @Value.Default default String defaultEclipseProjectSuffix() {
-        return ".eclipse";
-    }
-
-    @Value.Default default GradleProject eclipseProject() {
-        final String artifactId = defaultArtifactId() + defaultEclipseProjectSuffix();
-        return GradleProject.builder()
-            .coordinate(defaultGroupId(), artifactId, defaultVersion())
-            .baseDirectory(baseDirectory().appendSegment(artifactId))
-            .build();
-    }
-
-    @Value.Default default String eclipseProjectPackage() {
-        return defaultBasePackageId() + defaultEclipseProjectSuffix();
-    }
-
-
-    /// IntelliJ project
-
-    @Value.Default default String defaultIntellijProjectSuffix() {
-        return ".intellij";
-    }
-
-    @Value.Default default GradleProject intellijProject() {
-        final String artifactId = defaultArtifactId() + defaultIntellijProjectSuffix();
-        return GradleProject.builder()
-            .coordinate(defaultGroupId(), artifactId, defaultVersion())
-            .baseDirectory(baseDirectory().appendSegment(artifactId))
-            .build();
-    }
-
-    @Value.Default default String intellijPackage() {
-        return defaultBasePackageId() + defaultIntellijProjectSuffix();
-    }
+//
+//    /// Eclipse project
+//
+//    @Value.Default default String defaultEclipseProjectSuffix() {
+//        return ".eclipse";
+//    }
+//
+//    @Value.Default default GradleProject eclipseProject() {
+//        final String artifactId = defaultArtifactId() + defaultEclipseProjectSuffix();
+//        return GradleProject.builder()
+//            .coordinate(defaultGroupId(), artifactId, defaultVersion())
+//            .baseDirectory(baseDirectory().appendSegment(artifactId))
+//            .build();
+//    }
+//
+//    @Value.Default default String eclipseProjectPackage() {
+//        return defaultBasePackageId() + defaultEclipseProjectSuffix();
+//    }
+//
+//
+//    /// IntelliJ project
+//
+//    @Value.Default default String defaultIntellijProjectSuffix() {
+//        return ".intellij";
+//    }
+//
+//    @Value.Default default GradleProject intellijProject() {
+//        final String artifactId = defaultArtifactId() + defaultIntellijProjectSuffix();
+//        return GradleProject.builder()
+//            .coordinate(defaultGroupId(), artifactId, defaultVersion())
+//            .baseDirectory(baseDirectory().appendSegment(artifactId))
+//            .build();
+//    }
+//
+//    @Value.Default default String intellijPackage() {
+//        return defaultBasePackageId() + defaultIntellijProjectSuffix();
+//    }
 
 
     // Repositories

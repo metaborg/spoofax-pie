@@ -26,24 +26,24 @@ import java.util.Set;
 @Module
 public class {{genModule.id}} {
     @Provides @LanguageScope
-    {{parser.factory.qualifiedId}} provideParserFactory() {
-        return new {{parser.factory.qualifiedId}}();
+    {{parser.languageProjectInput.factory.qualifiedId}} provideParserFactory() {
+        return new {{parser.languageProjectInput.factory.qualifiedId}}();
     }
 
     @Provides /* Unscoped: parser has state, so create a new parser every call. */
-    {{parser.parser.qualifiedId}} provideParser({{parser.factory.qualifiedId}} parserFactory) {
+    {{parser.languageProjectInput.parser.qualifiedId}} provideParser({{parser.languageProjectInput.factory.qualifiedId}} parserFactory) {
         return parserFactory.create();
     }
 {{#styler}}
 
 
     @Provides @LanguageScope
-    {{this.factory.qualifiedId}} provideStylerFactory(LoggerFactory loggerFactory) {
-        return new {{this.factory.qualifiedId}}(loggerFactory);
+    {{this.languageProjectInput.factory.qualifiedId}} provideStylerFactory(LoggerFactory loggerFactory) {
+        return new {{this.languageProjectInput.factory.qualifiedId}}(loggerFactory);
     }
 
     @Provides @LanguageScope
-    {{this.styler.qualifiedId}} provideStyler({{this.factory.qualifiedId}} stylerFactory) {
+    {{this.languageProjectInput.styler.qualifiedId}} provideStyler({{this.languageProjectInput.factory.qualifiedId}} stylerFactory) {
         return stylerFactory.create();
     }
 {{/styler}}
@@ -51,12 +51,12 @@ public class {{genModule.id}} {
 
 
     @Provides @LanguageScope
-    {{this.factory.qualifiedId}} provideStrategoRuntimeBuilderFactory() {
-        return new {{this.factory.qualifiedId}}();
+    {{this.languageProjectInput.factory.qualifiedId}} provideStrategoRuntimeBuilderFactory() {
+        return new {{this.languageProjectInput.factory.qualifiedId}}();
     }
 
     @Provides @LanguageScope
-    StrategoRuntimeBuilder provideStrategoRuntimeBuilder({{this.factory.qualifiedId}} factory) {
+    StrategoRuntimeBuilder provideStrategoRuntimeBuilder({{this.languageProjectInput.factory.qualifiedId}} factory) {
         return factory.create();
     }
 
@@ -69,12 +69,12 @@ public class {{genModule.id}} {
 
 
     @Provides @LanguageScope
-    {{this.factory.qualifiedId}} provideConstraintAnalyzerFactory(StrategoRuntime prototypeStrategoRuntime) {
-        return new {{this.factory.qualifiedId}}(prototypeStrategoRuntime);
+    {{this.languageProjectInput.factory.qualifiedId}} provideConstraintAnalyzerFactory(StrategoRuntime prototypeStrategoRuntime) {
+        return new {{this.languageProjectInput.factory.qualifiedId}}(prototypeStrategoRuntime);
     }
 
     @Provides @LanguageScope
-    {{this.constraintAnalyzer.qualifiedId}} provideConstraintAnalyzer({{this.factory.qualifiedId}} factory) {
+    {{this.languageProjectInput.constraintAnalyzer.qualifiedId}} provideConstraintAnalyzer({{this.languageProjectInput.factory.qualifiedId}} factory) {
         return factory.create();
     }
 {{/constraintAnalyzer}}

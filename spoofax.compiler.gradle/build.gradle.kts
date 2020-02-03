@@ -24,5 +24,9 @@ gradlePlugin {
       id = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.language"
       implementationClass = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.LanguagePlugin"
     }
+    create("spoofax-compiler-spoofaxcore-adapter") {
+      id = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.adapter"
+      implementationClass = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.AdapterPlugin"
+    }
   }
 }

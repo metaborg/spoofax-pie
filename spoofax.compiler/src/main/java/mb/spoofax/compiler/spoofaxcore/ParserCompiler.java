@@ -4,7 +4,6 @@ import mb.common.util.ListView;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
-import mb.spoofax.compiler.util.Conversion;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
@@ -17,14 +16,14 @@ import java.util.List;
 import java.util.Optional;
 
 @Value.Enclosing
-public class Parser {
+public class ParserCompiler {
     private final TemplateWriter tableTemplate;
     private final TemplateWriter parserTemplate;
     private final TemplateWriter factoryTemplate;
     private final TemplateWriter parseTaskDefTemplate;
     private final TemplateWriter tokenizeTaskDefTemplate;
 
-    public Parser(TemplateCompiler templateCompiler) {
+    public ParserCompiler(TemplateCompiler templateCompiler) {
         this.tableTemplate = templateCompiler.getOrCompileToWriter("parser/ParseTable.java.mustache");
         this.parserTemplate = templateCompiler.getOrCompileToWriter("parser/Parser.java.mustache");
         this.factoryTemplate = templateCompiler.getOrCompileToWriter("parser/ParserFactory.java.mustache");
@@ -34,54 +33,49 @@ public class Parser {
 
     // Language project
 
-    public ListView<GradleConfiguredDependency> getLanguageProjectDependencies(Input input) {
+    public ListView<GradleConfiguredDependency> getLanguageProjectDependencies(LanguageProjectInput input) {
         return ListView.of(
             GradleConfiguredDependency.api(input.shared().jsglrCommonDep()),
             GradleConfiguredDependency.api(input.shared().jsglr1CommonDep())
         );
     }
 
-    public ListView<String> getLanguageProjectCopyResources(Input input) {
+    public ListView<String> getLanguageProjectCopyResources(LanguageProjectInput input) {
         return ListView.of(input.tableSourceRelPath());
     }
 
-    public Output compileLanguageProject(Input input) throws IOException {
+    public Output compileLanguageProject(LanguageProjectInput input) throws IOException {
         final Output.Builder outputBuilder = Output.builder();
         if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
-        final ResourcePath classesGenDirectory = input.languageClassesGenDirectory();
+        final ResourcePath classesGenDirectory = input.classesGenDirectory();
         outputBuilder.addProvidedResources(
-            tableTemplate.write(input, input.genTable().file(classesGenDirectory)),
-            parserTemplate.write(input, input.genParser().file(classesGenDirectory)),
-            factoryTemplate.write(input, input.genFactory().file(classesGenDirectory))
+            tableTemplate.write(input.genTable().file(classesGenDirectory), input),
+            parserTemplate.write(input.genParser().file(classesGenDirectory), input),
+            factoryTemplate.write(input.genFactory().file(classesGenDirectory), input)
         );
         return outputBuilder.build();
     }
 
     // Adapter project
 
-    public Output compileAdapterProject(Input input) throws IOException {
+    public Output compileAdapterProject(AdapterProjectInput input) throws IOException {
         final Output.Builder outputBuilder = Output.builder();
         if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
-        final ResourcePath classesGenDirectory = input.adapterClassesGenDirectory();
+        final ResourcePath classesGenDirectory = input.classesGenDirectory();
         outputBuilder.addProvidedResources(
-            parseTaskDefTemplate.write(input, input.genParseTaskDef().file(classesGenDirectory)),
-            tokenizeTaskDefTemplate.write(input, input.genTokenizeTaskDef().file(classesGenDirectory))
+            parseTaskDefTemplate.write(input.genParseTaskDef().file(classesGenDirectory), input),
+            tokenizeTaskDefTemplate.write(input.genTokenizeTaskDef().file(classesGenDirectory), input)
         );
         return outputBuilder.build();
     }
 
-    // Input
+    // Inputs
 
     @Value.Immutable
-    public interface Input extends Serializable {
-        class Builder extends ParserData.Input.Builder {}
+    public interface LanguageProjectInput extends Serializable {
+        class Builder extends ParserCompilerData.LanguageProjectInput.Builder {}
 
-        static Builder builder() {
-            return new Builder();
-        }
-
-
-        Shared shared();
+        static Builder builder() { return new Builder(); }
 
 
         /// Configuration
@@ -96,7 +90,7 @@ public class Parser {
         }
 
         @Value.Default default String tableTargetRelPath() {
-            return shared().languageProjectPackagePath() + "/" + tableSourceRelPath();
+            return languageProject().packagePath() + "/" + tableSourceRelPath();
         }
 
 
@@ -107,22 +101,22 @@ public class Parser {
         }
 
 
-        /// Language project classes
+        /// Classes
 
-        default ResourcePath languageClassesGenDirectory() {
-            return shared().languageProject().genSourceSpoofaxJavaDirectory();
+        default ResourcePath classesGenDirectory() {
+            return languageProject().project().genSourceSpoofaxJavaDirectory();
         }
 
         // Parse table
 
         @Value.Default default TypeInfo genTable() {
-            return TypeInfo.of(shared().languageProjectPackage(), shared().defaultClassPrefix() + "ParseTable");
+            return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "ParseTable");
         }
 
         // Parser
 
         @Value.Default default TypeInfo genParser() {
-            return TypeInfo.of(shared().languageProjectPackage(), shared().defaultClassPrefix() + "Parser");
+            return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "Parser");
         }
 
         Optional<TypeInfo> manualParser();
@@ -137,7 +131,7 @@ public class Parser {
         // Parser factory
 
         @Value.Default default TypeInfo genFactory() {
-            return TypeInfo.of(shared().languageProjectPackage(), shared().defaultClassPrefix() + "ParserFactory");
+            return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "ParserFactory");
         }
 
         Optional<TypeInfo> manualFactory();
@@ -149,30 +143,65 @@ public class Parser {
             return genFactory();
         }
 
-        // List of all generated files for language projects
 
-        default ListView<ResourcePath> generatedLanguageProjectFiles() {
+        /// List of all generated files
+
+        default ListView<ResourcePath> generatedFiles() {
             if(classKind().isManualOnly()) {
                 return ListView.of();
             }
             return ListView.of(
-                genTable().file(languageClassesGenDirectory()),
-                genParser().file(languageClassesGenDirectory()),
-                genFactory().file(languageClassesGenDirectory())
+                genTable().file(classesGenDirectory()),
+                genParser().file(classesGenDirectory()),
+                genFactory().file(classesGenDirectory())
             );
         }
 
 
-        /// Adapter project classes
+        /// Automatically provided sub-inputs.
 
-        default ResourcePath adapterClassesGenDirectory() {
-            return shared().adapterProject().genSourceSpoofaxJavaDirectory();
+        Shared shared();
+
+        LanguageProject languageProject();
+
+
+        @Value.Check default void check() {
+            final ClassKind kind = classKind();
+            final boolean manual = kind.isManual();
+            if(!manual) return;
+            if(!manualParser().isPresent()) {
+                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualParser' has not been set");
+            }
+            if(!manualFactory().isPresent()) {
+                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualFactory' has not been set");
+            }
+        }
+    }
+
+    @Value.Immutable
+    public interface AdapterProjectInput extends Serializable {
+        class Builder extends ParserCompilerData.AdapterProjectInput.Builder {}
+
+        static Builder builder() { return new Builder(); }
+
+
+        /// Kinds of classes (generated/extended/manual)
+
+        @Value.Default default ClassKind classKind() {
+            return ClassKind.Generated;
+        }
+
+
+        /// Classes
+
+        default ResourcePath classesGenDirectory() {
+            return adapterProject().project().genSourceSpoofaxJavaDirectory();
         }
 
         // Parse task definition
 
         @Value.Default default TypeInfo genParseTaskDef() {
-            return TypeInfo.of(shared().adapterProjectTaskPackage(), shared().defaultClassPrefix() + "Parse");
+            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "Parse");
         }
 
         Optional<TypeInfo> manualParseTaskDef();
@@ -187,7 +216,7 @@ public class Parser {
         // Tokenize task definition
 
         @Value.Default default TypeInfo genTokenizeTaskDef() {
-            return TypeInfo.of(shared().adapterProjectTaskPackage(), shared().defaultClassPrefix() + "Tokenize");
+            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "Tokenize");
         }
 
         Optional<TypeInfo> manualTokenizeTaskDef();
@@ -200,16 +229,32 @@ public class Parser {
         }
 
 
+        // List of all generated files
+
+        default ListView<ResourcePath> generatedFiles() {
+            if(classKind().isManualOnly()) {
+                return ListView.of();
+            }
+            return ListView.of(
+                genParseTaskDef().file(classesGenDirectory()),
+                genTokenizeTaskDef().file(classesGenDirectory())
+            );
+        }
+
+
+        /// Automatically provided sub-inputs.
+
+        Shared shared();
+
+        AdapterProject adapterProject();
+
+        LanguageProjectInput languageProjectInput();
+
+
         @Value.Check default void check() {
             final ClassKind kind = classKind();
             final boolean manual = kind.isManual();
             if(!manual) return;
-            if(!manualParser().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualParser' has not been set");
-            }
-            if(!manualFactory().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualFactory' has not been set");
-            }
             if(!manualParseTaskDef().isPresent()) {
                 throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualParseTaskDef' has not been set");
             }
@@ -221,7 +266,7 @@ public class Parser {
 
     @Value.Immutable
     public interface Output {
-        class Builder extends ParserData.Output.Builder {}
+        class Builder extends ParserCompilerData.Output.Builder {}
 
         static Builder builder() {
             return new Builder();

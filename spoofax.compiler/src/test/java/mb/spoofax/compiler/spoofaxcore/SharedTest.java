@@ -4,7 +4,6 @@ import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
 import mb.resource.fs.FSPath;
 import mb.spoofax.compiler.spoofaxcore.tiger.TigerInputs;
-import mb.spoofax.compiler.util.GradleProject;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.FileSystem;
@@ -19,14 +18,14 @@ class SharedTest {
 
         final Properties persistentProperties = new Properties();
 
-        final Shared shared1 = TigerInputs.shared(baseDirectory);
+        final Shared shared1 = TigerInputs.shared(baseDirectory).build();
         assertEquals("Tiger", shared1.defaultClassPrefix());
-        final GradleProject languageProject1 = shared1.languageProject();
-        final GradleProject adapterProject1 = shared1.adapterProject();
+        final LanguageProject languageProject1 = TigerInputs.languageProject(shared1).build();
+        final AdapterProject adapterProject1 = TigerInputs.adapterProject(shared1).build();
         shared1.savePersistentProperties(persistentProperties);
 
         // Create shared configuration with different language name.
-        final Shared shared2 = TigerInputs.sharedBuilder(baseDirectory)
+        final Shared shared2 = TigerInputs.shared(baseDirectory)
             .name("Tigerr") // Change language name.
             .withPersistentProperties(persistentProperties)
             .build();
@@ -35,9 +34,11 @@ class SharedTest {
         assertEquals(shared1.defaultClassPrefix(), shared2.defaultClassPrefix());
 
         // Should not affect language project.
-        assertEquals(languageProject1.coordinate(), shared2.languageProject().coordinate());
+        final LanguageProject languageProject2 = TigerInputs.languageProject(shared2).build();
+        assertEquals(languageProject1.project().coordinate(), languageProject2.project().coordinate());
 
         // Should not affect adapter project.
-        assertEquals(adapterProject1.coordinate(), shared2.adapterProject().coordinate());
+        final AdapterProject adapterProject2 = TigerInputs.adapterProject(shared2).build();
+        assertEquals(adapterProject1.project().coordinate(), adapterProject2.project().coordinate());
     }
 }

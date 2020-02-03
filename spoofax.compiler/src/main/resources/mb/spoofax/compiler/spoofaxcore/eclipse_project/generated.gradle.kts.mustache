@@ -1,0 +1,56 @@
+apply(plugin = "org.metaborg.gradle.config.java-library")
+apply(plugin = "org.metaborg.coronium.bundle")
+
+group = "{{project.coordinate.groupId}}"
+version = "{{project.coordinate.version}}"
+
+configure<SourceSetContainer> {
+  named("main") {
+    java {
+      srcDir("$buildDir/generated/sources/spoofax/java")
+    }
+    resources {
+      srcDir("$buildDir/generated/sources/spoofax/resources")
+    }
+  }
+}
+
+configure<mb.coronium.plugin.BundleExtension> {
+  manifestFile = project.file("$buildDir/generated/sources/spoofax/java/META-INF/MANIFEST.MF")
+
+{{#bundleDependencyCodes}}
+  {{this}}
+{{/bundleDependencyCodes}}
+
+  // HACK: explicitly add these (normally transitive) dependencies for testing purposes, because we do not have access to transitive dependencies in tests.
+  requireTargetPlatform("javax.inject")
+  requireTargetPlatform("org.eclipse.core.runtime")
+  requireTargetPlatform("org.eclipse.core.expressions")
+  requireTargetPlatform("org.eclipse.core.resources")
+  requireTargetPlatform("org.eclipse.core.filesystem")
+  requireTargetPlatform("org.eclipse.ui")
+  requireTargetPlatform("org.eclipse.ui.views")
+  requireTargetPlatform("org.eclipse.ui.editors")
+  requireTargetPlatform("org.eclipse.ui.console")
+  requireTargetPlatform("org.eclipse.ui.workbench")
+  requireTargetPlatform("org.eclipse.ui.workbench.texteditor")
+  requireTargetPlatform("org.eclipse.ui.ide")
+  requireTargetPlatform("org.eclipse.jface.text")
+  requireTargetPlatform("org.eclipse.swt")
+  requireTargetPlatform("com.ibm.icu")
+}
+
+val api by configurations
+val implementation by configurations
+val compileOnly by configurations
+val runtimeOnly by configurations
+val testImplementation by configurations
+val testCompileOnly by configurations
+val testRuntimeOnly by configurations
+val annotationProcessor by configurations
+val testAnnotationProcessor by configurations
+dependencies {
+{{#dependencyCodes}}
+  {{this}}
+{{/dependencyCodes}}
+}

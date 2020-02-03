@@ -6,20 +6,25 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.getByType
 
-open class LanguagePlugin : Plugin<Project> {
+open class AdapterPlugin : Plugin<Project> {
   override fun apply(project: Project) {
     val extension = project.extensions.getByType<SpoofaxCompilerExtension>()
-    extension.languageProject.set(project.providers.provider { project.toGradleProject() })
+    extension.adapterProject.set(project.providers.provider { project.toGradleProject() })
     project.afterEvaluate {
       afterEvaluate(this, extension)
     }
+
   }
 
   private fun afterEvaluate(project: Project, extension: SpoofaxCompilerExtension) {
     val compilerSettings = extension.finalized
-    val input = compilerSettings.languageProjectInput
-    val compiler = extension.languageProjectCompiler
-    val compileTask = project.tasks.register("spoofaxCompileLanguageProject") {
+    val input = compilerSettings.adapterProjectInput!!
+    val compiler = extension.adapterProjectCompiler
+
+    compiler.generateGradleFiles(input)
+    project.apply(from = input.relativeGeneratedGradleKtsFile())
+
+    val compileTask = project.tasks.register("spoofaxCompileAdapterProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
       outputs.files(input.providedFiles().map { extension.resourceService.toLocalFile(it) })

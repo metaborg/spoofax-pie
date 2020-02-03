@@ -16,12 +16,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Value.Enclosing
-public class ConstraintAnalyzer {
+public class ConstraintAnalyzerCompiler {
     private final TemplateWriter constraintAnalyzerTemplate;
     private final TemplateWriter factoryTemplate;
     private final TemplateWriter analyzeTaskDefTemplate;
 
-    public ConstraintAnalyzer(TemplateCompiler templateCompiler) {
+    public ConstraintAnalyzerCompiler(TemplateCompiler templateCompiler) {
         this.constraintAnalyzerTemplate = templateCompiler.getOrCompileToWriter("constraint_analyzer/ConstraintAnalyzer.java.mustache");
         this.factoryTemplate = templateCompiler.getOrCompileToWriter("constraint_analyzer/ConstraintAnalyzerFactory.java.mustache");
         this.analyzeTaskDefTemplate = templateCompiler.getOrCompileToWriter("constraint_analyzer/AnalyzeTaskDef.java.mustache");
@@ -29,51 +29,46 @@ public class ConstraintAnalyzer {
 
     // Language project
 
-    public ListView<GradleConfiguredDependency> getLanguageProjectDependencies(Input input) {
+    public ListView<GradleConfiguredDependency> getLanguageProjectDependencies(LanguageProjectInput input) {
         return ListView.of(GradleConfiguredDependency.api(input.shared().constraintCommonDep()));
     }
 
-    public ListView<String> getLanguageProjectCopyResources(Input input) {
+    public ListView<String> getLanguageProjectCopyResources(LanguageProjectInput input) {
         return ListView.of();
     }
 
-    public Output compileLanguageProject(Input input) throws IOException {
+    public Output compileLanguageProject(LanguageProjectInput input) throws IOException {
         final Output.Builder outputBuilder = Output.builder();
         if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
-        final ResourcePath classesGenDirectory = input.languageClassesGenDirectory();
+        final ResourcePath classesGenDirectory = input.classesGenDirectory();
         outputBuilder.addProvidedResources(
-            constraintAnalyzerTemplate.write(input, input.genConstraintAnalyzer().file(classesGenDirectory)),
-            factoryTemplate.write(input, input.genFactory().file(classesGenDirectory))
+            constraintAnalyzerTemplate.write(input.genConstraintAnalyzer().file(classesGenDirectory), input),
+            factoryTemplate.write(input.genFactory().file(classesGenDirectory), input)
         );
         return outputBuilder.build();
     }
 
     // Adapter project
 
-    public Output compileAdapterProject(Input input) throws IOException {
+    public Output compileAdapterProject(AdapterProjectInput input) throws IOException {
         final Output.Builder outputBuilder = Output.builder();
         if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
-        final ResourcePath classesGenDirectory = input.adapterClassesGenDirectory();
+        final ResourcePath classesGenDirectory = input.classesGenDirectory();
         outputBuilder.addProvidedResources(
-            analyzeTaskDefTemplate.write(input, input.genAnalyzeTaskDef().file(classesGenDirectory))
+            analyzeTaskDefTemplate.write(input.genAnalyzeTaskDef().file(classesGenDirectory), input)
         );
         return outputBuilder.build();
     }
 
-    // Input
+    // Inputs
 
     @Value.Immutable
-    public interface Input extends Serializable {
-        class Builder extends ConstraintAnalyzerData.Input.Builder {}
+    public interface LanguageProjectInput extends Serializable {
+        class Builder extends ConstraintAnalyzerCompilerData.LanguageProjectInput.Builder {}
 
         static Builder builder() {
             return new Builder();
         }
-
-
-        Shared shared();
-
-        Parser.Input parser();
 
 
         /// Configuration
@@ -94,16 +89,16 @@ public class ConstraintAnalyzer {
         }
 
 
-        /// Language project classes
+        /// Classes
 
-        @Value.Derived default ResourcePath languageClassesGenDirectory() {
-            return shared().languageProject().genSourceSpoofaxJavaDirectory();
+        @Value.Derived default ResourcePath classesGenDirectory() {
+            return languageProject().project().genSourceSpoofaxJavaDirectory();
         }
 
         // Constraint analyzer
 
         @Value.Default default TypeInfo genConstraintAnalyzer() {
-            return TypeInfo.of(shared().languageProjectPackage(), shared().defaultClassPrefix() + "ConstraintAnalyzer");
+            return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "ConstraintAnalyzer");
         }
 
         Optional<TypeInfo> manualConstraintAnalyzer();
@@ -118,7 +113,7 @@ public class ConstraintAnalyzer {
         // Constraint analyzer factory
 
         @Value.Default default TypeInfo genFactory() {
-            return TypeInfo.of(shared().languageProjectPackage(), shared().defaultClassPrefix() + "ConstraintAnalyzerFactory");
+            return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "ConstraintAnalyzerFactory");
         }
 
         Optional<TypeInfo> manualFactory();
@@ -130,39 +125,25 @@ public class ConstraintAnalyzer {
             return genFactory();
         }
 
-        // List of all generated files for language projects
 
-        default ListView<ResourcePath> generatedLanguageProjectFiles() {
+        // List of all generated files
+
+        default ListView<ResourcePath> generatedFiles() {
             if(classKind().isManualOnly()) {
                 return ListView.of();
             }
             return ListView.of(
-                genConstraintAnalyzer().file(languageClassesGenDirectory()),
-                genFactory().file(languageClassesGenDirectory())
+                genConstraintAnalyzer().file(classesGenDirectory()),
+                genFactory().file(classesGenDirectory())
             );
         }
 
 
-        /// Adapter project classes
+        /// Automatically provided sub-inputs
 
-        @Value.Derived default ResourcePath adapterClassesGenDirectory() {
-            return shared().adapterProject().genSourceSpoofaxJavaDirectory();
-        }
+        Shared shared();
 
-        // Analyze
-
-        @Value.Default default TypeInfo genAnalyzeTaskDef() {
-            return TypeInfo.of(shared().adapterProjectTaskPackage(), shared().defaultClassPrefix() + "Analyze");
-        }
-
-        Optional<TypeInfo> manualAnalyzeTaskDef();
-
-        default TypeInfo analyzeTaskDef() {
-            if(classKind().isManual() && manualAnalyzeTaskDef().isPresent()) {
-                return manualAnalyzeTaskDef().get();
-            }
-            return genAnalyzeTaskDef();
-        }
+        LanguageProject languageProject();
 
 
         @Value.Check default void check() {
@@ -175,6 +156,72 @@ public class ConstraintAnalyzer {
             if(!manualFactory().isPresent()) {
                 throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualFactory' has not been set");
             }
+        }
+    }
+
+    @Value.Immutable
+    public interface AdapterProjectInput extends Serializable {
+        class Builder extends ConstraintAnalyzerCompilerData.AdapterProjectInput.Builder {}
+
+        static Builder builder() {
+            return new Builder();
+        }
+
+
+        /// Kinds of classes (generated/extended/manual)
+
+        @Value.Default default ClassKind classKind() {
+            return ClassKind.Generated;
+        }
+
+
+        /// Classes
+
+        @Value.Derived default ResourcePath classesGenDirectory() {
+            return adapterProject().project().genSourceSpoofaxJavaDirectory();
+        }
+
+        // Analyze
+
+        @Value.Default default TypeInfo genAnalyzeTaskDef() {
+            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "Analyze");
+        }
+
+        Optional<TypeInfo> manualAnalyzeTaskDef();
+
+        default TypeInfo analyzeTaskDef() {
+            if(classKind().isManual() && manualAnalyzeTaskDef().isPresent()) {
+                return manualAnalyzeTaskDef().get();
+            }
+            return genAnalyzeTaskDef();
+        }
+
+
+        // List of all generated files
+
+        default ListView<ResourcePath> generatedFiles() {
+            if(classKind().isManualOnly()) {
+                return ListView.of();
+            }
+            return ListView.of(
+                genAnalyzeTaskDef().file(classesGenDirectory())
+            );
+        }
+
+
+        /// Automatically provided sub-inputs
+
+        Shared shared();
+
+        AdapterProject adapterProject();
+
+        LanguageProjectInput languageProjectInput();
+
+
+        @Value.Check default void check() {
+            final ClassKind kind = classKind();
+            final boolean manual = kind.isManual();
+            if(!manual) return;
             if(!manualAnalyzeTaskDef().isPresent()) {
                 throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualAnalyzeTaskDef' has not been set");
             }
@@ -183,7 +230,7 @@ public class ConstraintAnalyzer {
 
     @Value.Immutable
     public interface Output {
-        class Builder extends ConstraintAnalyzerData.Output.Builder {}
+        class Builder extends ConstraintAnalyzerCompilerData.Output.Builder {}
 
         static Builder builder() {
             return new Output.Builder();

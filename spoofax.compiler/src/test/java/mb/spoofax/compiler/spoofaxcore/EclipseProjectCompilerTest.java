@@ -9,27 +9,31 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Path;
 
-class EclipseProjectTest extends TestBase {
+class EclipseProjectCompilerTest extends TestBase {
     @Test void testCompilerDefaults(@TempDir Path temporaryDirectoryPath) throws IOException {
         final FSPath baseDirectory = new FSPath(temporaryDirectoryPath);
-        final Shared shared = TigerInputs.shared(baseDirectory);
+        final Shared shared = TigerInputs.shared(baseDirectory).build();
+        final LanguageProject languageProject = TigerInputs.languageProject(shared).build();
+        final AdapterProject adapterProject = TigerInputs.adapterProject(shared).build();
 
         // Compile language and adapter projects.
-        final AdapterProject.Input adapterProjectInput = compileLanguageAndAdapterProject(shared);
+        final AdapterProjectCompiler.Input adapterProjectInput = compileLanguageAndAdapterProject(shared, languageProject, adapterProject);
 
         // Compile Eclipse externaldeps project, as Eclipse project depends on it.
-        eclipseExternaldepsProjectCompiler.compile(TigerInputs.eclipseExternaldepsProjectBuilder(shared)
-            .languageProjectDependency(GradleDependency.project(":" + shared.languageProject().coordinate().artifactId()))
-            .adapterProjectDependency(GradleDependency.project(":" + shared.adapterProject().coordinate().artifactId()))
-            .build()
-        );
+        final EclipseExternaldepsProjectCompiler.Input eclipseExternalDepsInput = TigerInputs.eclipseExternaldepsProjectInput(shared)
+            .languageProjectDependency(GradleDependency.project(":" + languageProject.project().coordinate().artifactId()))
+            .adapterProjectDependency(GradleDependency.project(":" + adapterProject.project().coordinate().artifactId()))
+            .build();
+        eclipseExternaldepsProjectCompiler.compile(eclipseExternalDepsInput);
 
         // Compile Eclipse project and test generated files.
-        final EclipseProject.Input input = TigerInputs.eclipseProjectBuilder(shared, adapterProjectInput)
-            .eclipseExternaldepsDependency(GradleDependency.project(":" + shared.eclipseExternaldepsProject().coordinate().artifactId()))
+        final EclipseProjectCompiler.Input input = TigerInputs.eclipseProjectInput(shared, adapterProjectInput)
+            .eclipseExternaldepsDependency(GradleDependency.project(":" + eclipseExternalDepsInput.project().coordinate().artifactId()))
             .build();
+        eclipseProjectCompiler.generateInitial(input);
+        eclipseProjectCompiler.generateGradleFiles(input);
         eclipseProjectCompiler.compile(input);
-        fileAssertions.asserts(input.buildGradleKtsFile(), (a) -> a.assertContains("org.metaborg.coronium.bundle"));
+        fileAssertions.asserts(input.buildGradleKtsFile(), (a) -> a.assertContains("org.metaborg.spoofax.compiler.gradle.spoofaxcore.eclipse"));
         fileAssertions.asserts(input.pluginXmlFile(), (s) -> s.assertAll("plugin.xml", "<plugin>"));
         fileAssertions.asserts(input.manifestMfFile(), (s) -> s.assertAll("MANIFEST.MF", "Export-Package"));
         fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {
@@ -51,17 +55,5 @@ class EclipseProjectTest extends TestBase {
             s.assertPublicJavaClass(input.genObserveHandler(), "TigerObserveHandler");
             s.assertPublicJavaClass(input.genUnobserveHandler(), "TigerUnobserveHandler");
         });
-
-        // Compile root project, which links together all projects, and build it.
-        final RootProject.Output rootProjectOutput = rootProjectCompiler.compile(TigerInputs.rootProjectBuilder(shared)
-            .addIncludedProjects(
-                shared.languageProject().coordinate().artifactId(),
-                shared.adapterProject().coordinate().artifactId(),
-                shared.eclipseExternaldepsProject().coordinate().artifactId(),
-                shared.eclipseProject().coordinate().artifactId()
-            )
-            .build()
-        );
-        fileAssertions.asserts(rootProjectOutput.baseDirectory(), (a) -> a.assertGradleBuild("buildAll"));
     }
 }

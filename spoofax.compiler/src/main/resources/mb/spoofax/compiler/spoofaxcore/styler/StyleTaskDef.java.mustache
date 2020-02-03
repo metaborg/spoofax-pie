@@ -16,9 +16,9 @@ import java.util.ArrayList;
 
 @LanguageScope
 public class {{genStyleTaskDef.id}} implements TaskDef<Provider<@Nullable ArrayList<? extends Token<IStrategoTerm>>>, @Nullable Styling> {
-    private final {{styler.qualifiedId}} styler;
+    private final {{languageProjectInput.styler.qualifiedId}} styler;
 
-    @Inject public {{genStyleTaskDef.id}}({{styler.qualifiedId}} styler) {
+    @Inject public {{genStyleTaskDef.id}}({{languageProjectInput.styler.qualifiedId}} styler) {
         this.styler = styler;
     }
 

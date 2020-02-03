@@ -25,10 +25,10 @@ import java.util.function.Function;
 
 @LanguageScope
 public class {{parseTaskDef.id}} implements TaskDef<Provider<String>, JSGLR1ParseResult> {
-    private final javax.inject.Provider<{{parser.qualifiedId}}> parserProvider;
+    private final javax.inject.Provider<{{languageProjectInput.parser.qualifiedId}}> parserProvider;
 
     @Inject
-    public {{parseTaskDef.id}}(javax.inject.Provider<{{parser.qualifiedId}}> parserProvider) {
+    public {{parseTaskDef.id}}(javax.inject.Provider<{{languageProjectInput.parser.qualifiedId}}> parserProvider) {
         this.parserProvider = parserProvider;
     }
 
@@ -44,8 +44,8 @@ public class {{parseTaskDef.id}} implements TaskDef<Provider<String>, JSGLR1Pars
         } catch(ExecException | IOException e) {
             return JSGLR1ParseResult.failed(Messages.of(new Message("Cannot get text input for parser from '" + stringProvider + "'", e)));
         }
-        final {{parser.qualifiedId}} parser = parserProvider.get();
-        return parser.parse(text, "{{startSymbol}}");
+        final {{languageProjectInput.parser.qualifiedId}} parser = parserProvider.get();
+        return parser.parse(text, "{{languageProjectInput.startSymbol}}");
     }
 
 

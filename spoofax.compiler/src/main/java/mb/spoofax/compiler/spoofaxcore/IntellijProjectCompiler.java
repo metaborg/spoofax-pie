@@ -4,6 +4,7 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
+import mb.spoofax.compiler.util.GradleProject;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
@@ -14,12 +15,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Value.Enclosing
-public class IntellijProject {
+public class IntellijProjectCompiler {
     private final TemplateWriter buildGradleTemplate;
+    private final TemplateWriter generatedGradleTemplate;
     private final TemplateWriter pluginXmlTemplate;
     private final TemplateWriter packageInfoTemplate;
     private final TemplateWriter moduleTemplate;
@@ -33,9 +36,9 @@ public class IntellijProject {
     private final TemplateWriter syntaxHighlighterFactoryTemplate;
     private final TemplateWriter parserDefinitionTemplate;
 
-
-    public IntellijProject(TemplateCompiler templateCompiler) {
+    public IntellijProjectCompiler(TemplateCompiler templateCompiler) {
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("intellij_project/build.gradle.kts.mustache");
+        this.generatedGradleTemplate = templateCompiler.getOrCompileToWriter("intellij_project/generated.gradle.kts.mustache");
         this.pluginXmlTemplate = templateCompiler.getOrCompileToWriter("intellij_project/plugin.xml.mustache");
         this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("intellij_project/package-info.java.mustache");
         this.moduleTemplate = templateCompiler.getOrCompileToWriter("intellij_project/Module.java.mustache");
@@ -50,56 +53,74 @@ public class IntellijProject {
         this.parserDefinitionTemplate = templateCompiler.getOrCompileToWriter("intellij_project/ParserDefinition.java.mustache");
     }
 
+    public void generateInitial(Input input) throws IOException {
+        buildGradleTemplate.write(input.buildGradleKtsFile(), input);
+    }
+
+    public void generateGradleFiles(Input input) throws IOException {
+        final Shared shared = input.shared();
+        final HashMap<String, Object> map = new HashMap<>();
+
+        final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
+        dependencies.add(GradleConfiguredDependency.implementation(shared.spoofaxIntellijDep()));
+        dependencies.add(GradleConfiguredDependency.implementation(shared.daggerDep()));
+        dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
+        dependencies.add(GradleConfiguredDependency.annotationProcessor(shared.daggerCompilerDep()));
+        map.put("dependencyCodes", dependencies.stream().map(GradleConfiguredDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
+
+        generatedGradleTemplate.write(input.generatedGradleKtsFile(), input, map);
+    }
+
     public Output compile(Input input) throws IOException {
         final Shared shared = input.shared();
 
-        // Gradle files
-        {
-            final HashMap<String, Object> map = new HashMap<>();
-
-            final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
-            dependencies.add(GradleConfiguredDependency.implementation(shared.spoofaxIntellijDep()));
-            dependencies.add(GradleConfiguredDependency.implementation(shared.daggerDep()));
-            dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
-            dependencies.add(GradleConfiguredDependency.annotationProcessor(shared.daggerCompilerDep()));
-            map.put("dependencyCodes", dependencies.stream().map(GradleConfiguredDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
-
-            buildGradleTemplate.write(input, map, input.buildGradleKtsFile());
-        }
-
         // IntelliJ files
-        pluginXmlTemplate.write(input, input.genPluginXmlFile());
+        pluginXmlTemplate.write(input.pluginXmlFile(), input);
 
         // Class files
         final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        packageInfoTemplate.write(input, input.genPackageInfo().file(classesGenDirectory));
-        moduleTemplate.write(input, input.genModule().file(classesGenDirectory));
-        componentTemplate.write(input, input.genComponent().file(classesGenDirectory));
-        pluginTemplate.write(input, input.genPlugin().file(classesGenDirectory));
-        loaderTemplate.write(input, input.genLoader().file(classesGenDirectory));
-        languageTemplate.write(input, input.genLanguage().file(classesGenDirectory));
-        fileTypeTemplate.write(input, input.genFileType().file(classesGenDirectory));
-        fileElementTypeTemplate.write(input, input.genFileElementType().file(classesGenDirectory));
-        fileTypeFactoryTemplate.write(input, input.genFileTypeFactory().file(classesGenDirectory));
-        syntaxHighlighterFactoryTemplate.write(input, input.syntaxHighlighterFactory().file(classesGenDirectory));
-        parserDefinitionTemplate.write(input, input.parserDefinition().file(classesGenDirectory));
+        packageInfoTemplate.write(input.genPackageInfo().file(classesGenDirectory), input);
+        moduleTemplate.write(input.genModule().file(classesGenDirectory), input);
+        componentTemplate.write(input.genComponent().file(classesGenDirectory), input);
+        pluginTemplate.write(input.genPlugin().file(classesGenDirectory), input);
+        loaderTemplate.write(input.genLoader().file(classesGenDirectory), input);
+        languageTemplate.write(input.genLanguage().file(classesGenDirectory), input);
+        fileTypeTemplate.write(input.genFileType().file(classesGenDirectory), input);
+        fileElementTypeTemplate.write(input.genFileElementType().file(classesGenDirectory), input);
+        fileTypeFactoryTemplate.write(input.genFileTypeFactory().file(classesGenDirectory), input);
+        syntaxHighlighterFactoryTemplate.write(input.syntaxHighlighterFactory().file(classesGenDirectory), input);
+        parserDefinitionTemplate.write(input.parserDefinition().file(classesGenDirectory), input);
 
-        return Output.builder().fromInput(input).build();
+        return Output.builder().addAllProvidedFiles(input.providedFiles()).build();
     }
 
 
     @Value.Immutable
     public interface Input extends Serializable {
-        class Builder extends IntellijProjectData.Input.Builder {}
+        class Builder extends IntellijProjectCompilerData.Input.Builder {}
 
         static Builder builder() {
             return new Builder();
         }
 
 
-        Shared shared();
+        /// Project
 
-        AdapterProject.Input adapterProject();
+        @Value.Default default String defaultProjectSuffix() {
+            return ".intellij";
+        }
+
+        @Value.Default default GradleProject project() {
+            final String artifactId = shared().defaultArtifactId() + defaultProjectSuffix();
+            return GradleProject.builder()
+                .coordinate(shared().defaultGroupId(), artifactId, shared().defaultVersion())
+                .baseDirectory(shared().baseDirectory().appendSegment(artifactId))
+                .build();
+        }
+
+        @Value.Default default String packageId() {
+            return shared().defaultBasePackageId() + defaultProjectSuffix();
+        }
 
 
         /// Configuration
@@ -112,14 +133,23 @@ public class IntellijProject {
         /// Gradle files
 
         @Value.Default default ResourcePath buildGradleKtsFile() {
-            return shared().cliProject().baseDirectory().appendRelativePath("build.gradle.kts");
+            return project().baseDirectory().appendRelativePath("build.gradle.kts");
+        }
+
+        @Value.Default default ResourcePath generatedGradleKtsFile() {
+            return project().genSourceSpoofaxGradleDirectory().appendRelativePath("generated.gradle.kts");
+        }
+
+        default String relativeGeneratedGradleKtsFile() {
+            final ResourcePath parentDirectory = Objects.requireNonNull(buildGradleKtsFile().getParent());
+            return parentDirectory.relativizeToString(generatedGradleKtsFile());
         }
 
 
         /// IntelliJ files
 
-        default ResourcePath genPluginXmlFile() {
-            return shared().intellijProject().genSourceSpoofaxResourcesDirectory().appendRelativePath("plugin.xml");
+        default ResourcePath pluginXmlFile() {
+            return project().genSourceSpoofaxResourcesDirectory().appendRelativePath("plugin.xml");
         }
 
 
@@ -130,7 +160,7 @@ public class IntellijProject {
         }
 
         default ResourcePath classesGenDirectory() {
-            return shared().intellijProject().genSourceSpoofaxJavaDirectory();
+            return project().genSourceSpoofaxJavaDirectory();
         }
 
 
@@ -139,7 +169,7 @@ public class IntellijProject {
         // package-info
 
         @Value.Default default TypeInfo genPackageInfo() {
-            return TypeInfo.of(shared().intellijPackage(), "package-info");
+            return TypeInfo.of(packageId(), "package-info");
         }
 
         Optional<TypeInfo> manualPackageInfo();
@@ -154,7 +184,7 @@ public class IntellijProject {
         // IntelliJ module
 
         @Value.Default default TypeInfo genModule() {
-            return TypeInfo.of(shared().intellijPackage(), shared().defaultClassPrefix() + "IntellijModule");
+            return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "IntellijModule");
         }
 
         Optional<TypeInfo> manualModule();
@@ -169,7 +199,7 @@ public class IntellijProject {
         // IntelliJ component
 
         @Value.Default default TypeInfo genComponent() {
-            return TypeInfo.of(shared().intellijPackage(), shared().defaultClassPrefix() + "IntellijComponent");
+            return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "IntellijComponent");
         }
 
         Optional<TypeInfo> manualComponent();
@@ -181,10 +211,14 @@ public class IntellijProject {
             return genComponent();
         }
 
+        default TypeInfo daggerComponent() {
+            return TypeInfo.of(component().packageId(), "Dagger" + component().id());
+        }
+
         // Plugin
 
         @Value.Default default TypeInfo genPlugin() {
-            return TypeInfo.of(shared().intellijPackage(), shared().defaultClassPrefix() + "Plugin");
+            return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "Plugin");
         }
 
         Optional<TypeInfo> manualPlugin();
@@ -199,7 +233,7 @@ public class IntellijProject {
         // Loader
 
         @Value.Default default TypeInfo genLoader() {
-            return TypeInfo.of(shared().intellijPackage(), shared().defaultClassPrefix() + "Loader");
+            return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "Loader");
         }
 
         Optional<TypeInfo> manualLoader();
@@ -214,7 +248,7 @@ public class IntellijProject {
         // Language
 
         @Value.Default default TypeInfo genLanguage() {
-            return TypeInfo.of(shared().intellijPackage(), shared().defaultClassPrefix() + "Language");
+            return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "Language");
         }
 
         Optional<TypeInfo> manualLanguage();
@@ -229,7 +263,7 @@ public class IntellijProject {
         // File type
 
         @Value.Default default TypeInfo genFileType() {
-            return TypeInfo.of(shared().intellijPackage(), shared().defaultClassPrefix() + "FileType");
+            return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "FileType");
         }
 
         Optional<TypeInfo> manualFileType();
@@ -244,7 +278,7 @@ public class IntellijProject {
         // File type
 
         @Value.Default default TypeInfo genFileElementType() {
-            return TypeInfo.of(shared().intellijPackage(), shared().defaultClassPrefix() + "FileElementType");
+            return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "FileElementType");
         }
 
         Optional<TypeInfo> manualFileElementType();
@@ -259,7 +293,7 @@ public class IntellijProject {
         // File type factory
 
         @Value.Default default TypeInfo genFileTypeFactory() {
-            return TypeInfo.of(shared().intellijPackage(), shared().defaultClassPrefix() + "FileTypeFactory");
+            return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "FileTypeFactory");
         }
 
         Optional<TypeInfo> manualFileTypeFactory();
@@ -274,7 +308,7 @@ public class IntellijProject {
         // Syntax highlighter factory
 
         @Value.Default default TypeInfo genSyntaxHighlighterFactory() {
-            return TypeInfo.of(shared().intellijPackage(), shared().defaultClassPrefix() + "SyntaxHighlighterFactory");
+            return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "SyntaxHighlighterFactory");
         }
 
         Optional<TypeInfo> manualSyntaxHighlighterFactory();
@@ -289,7 +323,7 @@ public class IntellijProject {
         // Parser definition
 
         @Value.Default default TypeInfo genParserDefinition() {
-            return TypeInfo.of(shared().intellijPackage(), shared().defaultClassPrefix() + "ParserDefinition");
+            return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "ParserDefinition");
         }
 
         Optional<TypeInfo> manualParserDefinition();
@@ -302,19 +336,43 @@ public class IntellijProject {
         }
 
 
+        /// Provided files
+
+        default ArrayList<ResourcePath> providedFiles() {
+            final ArrayList<ResourcePath> generatedFiles = new ArrayList<>();
+            generatedFiles.add(pluginXmlFile());
+            if(classKind().isGenerating()) {
+                generatedFiles.add(genPackageInfo().file(classesGenDirectory()));
+                generatedFiles.add(genModule().file(classesGenDirectory()));
+                generatedFiles.add(genComponent().file(classesGenDirectory()));
+                generatedFiles.add(genPlugin().file(classesGenDirectory()));
+                generatedFiles.add(genLoader().file(classesGenDirectory()));
+                generatedFiles.add(genFileType().file(classesGenDirectory()));
+                generatedFiles.add(genFileElementType().file(classesGenDirectory()));
+                generatedFiles.add(genFileTypeFactory().file(classesGenDirectory()));
+                generatedFiles.add(genSyntaxHighlighterFactory().file(classesGenDirectory()));
+                generatedFiles.add(genParserDefinition().file(classesGenDirectory()));
+            }
+            return generatedFiles;
+        }
+
+
+        /// Automatically provided sub-inputs
+
+        Shared shared();
+
+        AdapterProjectCompiler.Input adapterProject();
+
+
         // TODO: add check
     }
 
     @Value.Immutable
     public interface Output extends Serializable {
-        class Builder extends IntellijProjectData.Output.Builder {
-            public Builder fromInput(Input input) {
-                return this;
-            }
-        }
+        class Builder extends IntellijProjectCompilerData.Output.Builder {}
 
-        static Builder builder() {
-            return new Builder();
-        }
+        static Builder builder() { return new Builder(); }
+
+        List<ResourcePath> providedFiles();
     }
 }

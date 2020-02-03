@@ -4,7 +4,7 @@ import mb.spoofax.intellij.SpoofaxPlugin;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class {{genPlugin.id}} {
-    private static @Nullable {{component.qualifiedId}} component;
+    private static {{component.nullableQualifiedId}} component;
 
     public static {{component.qualifiedId}} getComponent() {
         if(component == null) {
@@ -14,7 +14,7 @@ public class {{genPlugin.id}} {
     }
 
     public static void init() {
-        component = {{component.id}}
+        component = {{daggerComponent.id}}
             .builder()
             .spoofaxIntellijComponent(SpoofaxPlugin.getComponent())
             .tigerModule(new {{adapterProject.module.qualifiedId}}())

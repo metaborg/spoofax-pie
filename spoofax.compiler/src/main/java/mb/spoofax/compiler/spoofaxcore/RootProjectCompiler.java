@@ -1,6 +1,7 @@
 package mb.spoofax.compiler.spoofaxcore;
 
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.util.GradleProject;
 import mb.spoofax.compiler.util.GradleRepository;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
@@ -14,11 +15,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Value.Enclosing
-public class RootProject {
+public class RootProjectCompiler {
     private final TemplateWriter settingsGradleTemplate;
     private final TemplateWriter buildGradleTemplate;
 
-    public RootProject(TemplateCompiler templateCompiler) {
+    public RootProjectCompiler(TemplateCompiler templateCompiler) {
         this.settingsGradleTemplate = templateCompiler.getOrCompileToWriter("root_project/settings.gradle.kts.mustache");
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("root_project/build.gradle.kts.mustache");
     }
@@ -32,13 +33,13 @@ public class RootProject {
             map.put("pluginRepositoryCodes", pluginRepositories.stream().map(GradleRepository::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
             final ArrayList<String> includedProjects = new ArrayList<>(input.includedProjects());
             map.put("includedProjects", includedProjects);
-            settingsGradleTemplate.write(input, map, input.settingsGradleKtsFile());
+            settingsGradleTemplate.write(input.settingsGradleKtsFile(), input, map);
         }
         {
             final HashMap<String, Object> map = new HashMap<>();
             final ArrayList<GradleRepository> repositories = new ArrayList<>(shared.defaultRepositories());
             map.put("repositoryCodes", repositories.stream().map(GradleRepository::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
-            buildGradleTemplate.write(input, map, input.buildGradleKtsFile());
+            buildGradleTemplate.write(input.buildGradleKtsFile(), input, map);
         }
 
         return Output.builder().fromInput(input).build();
@@ -47,7 +48,7 @@ public class RootProject {
 
     @Value.Immutable
     public interface Input extends Serializable {
-        class Builder extends RootProjectData.Input.Builder {}
+        class Builder extends RootProjectCompilerData.Input.Builder {}
 
         static Builder builder() {
             return new Builder();
@@ -57,12 +58,21 @@ public class RootProject {
         Shared shared();
 
 
+        @Value.Default default GradleProject project() {
+            final String artifactId = shared().defaultArtifactId();
+            return GradleProject.builder()
+                .coordinate(shared().defaultGroupId(), artifactId, shared().defaultVersion())
+                .baseDirectory(shared().baseDirectory())
+                .build();
+        }
+
+
         @Value.Default default ResourcePath buildGradleKtsFile() {
-            return shared().rootProject().baseDirectory().appendRelativePath("build.gradle.kts");
+            return project().baseDirectory().appendRelativePath("build.gradle.kts");
         }
 
         @Value.Default default ResourcePath settingsGradleKtsFile() {
-            return shared().rootProject().baseDirectory().appendRelativePath("settings.gradle.kts");
+            return project().baseDirectory().appendRelativePath("settings.gradle.kts");
         }
 
         List<String> includedProjects();
@@ -70,9 +80,9 @@ public class RootProject {
 
     @Value.Immutable
     public interface Output extends Serializable {
-        class Builder extends RootProjectData.Output.Builder {
+        class Builder extends RootProjectCompilerData.Output.Builder {
             public Builder fromInput(Input input) {
-                baseDirectory(input.shared().rootProject().baseDirectory());
+                baseDirectory(input.project().baseDirectory());
                 return this;
             }
         }

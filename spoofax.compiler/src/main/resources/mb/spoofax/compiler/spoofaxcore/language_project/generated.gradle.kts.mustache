@@ -1,7 +1,7 @@
 apply(plugin = "org.metaborg.gradle.config.java-library")
 
-group = "{{shared.languageProject.coordinate.groupId}}"
-version = "{{shared.languageProject.coordinate.version}}"
+group = "{{languageProject.project.coordinate.groupId}}"
+version = "{{languageProject.project.coordinate.version}}"
 
 configure<SourceSetContainer> {
   named("main") {
@@ -121,7 +121,7 @@ fun copySpoofaxLanguageResources(
 copySpoofaxLanguageResources(
   project,
   {{languageDependencyCode}},
-  "{{shared.languageProjectPackagePath}}",
+  "{{languageProject.packagePath}}",
   {{#strategoRuntime}}{{copyClasses}}{{/strategoRuntime}}{{^strategoRuntime}}false{{/strategoRuntime}},
   {{#strategoRuntime}}{{copyJavaStrategyClasses}}{{/strategoRuntime}}{{^strategoRuntime}}false{{/strategoRuntime}}{{#copyResourceCodes}},
   {{this}}{{/copyResourceCodes}}

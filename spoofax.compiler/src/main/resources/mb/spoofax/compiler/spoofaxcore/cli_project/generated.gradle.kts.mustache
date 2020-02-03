@@ -1,7 +1,7 @@
-apply(plugin = "org.metaborg.gradle.config.java-library")
+apply(plugin = "org.metaborg.gradle.config.java-application")
 
-group = "{{adapterProject.project.coordinate.groupId}}"
-version = "{{adapterProject.project.coordinate.version}}"
+group = "{{project.coordinate.groupId}}"
+version = "{{project.coordinate.version}}"
 
 configure<SourceSetContainer> {
   named("main") {
@@ -14,7 +14,10 @@ configure<SourceSetContainer> {
   }
 }
 
-val api by configurations
+configure<ApplicationPluginConvention> {
+  mainClassName = "{{main.qualifiedId}}"
+}
+
 val implementation by configurations
 val compileOnly by configurations
 val runtimeOnly by configurations
