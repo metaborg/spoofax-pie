@@ -6,6 +6,7 @@ import mb.spoofax.compiler.spoofaxcore.StylerCompiler
 import mb.spoofax.compiler.spoofaxcore.LanguageProjectCompiler
 import mb.spoofax.compiler.spoofaxcore.AdapterProjectCompiler
 import mb.spoofax.compiler.util.GradleDependency
+import mb.spoofax.compiler.gradle.spoofaxcore.LanguageProjectCompilerSettings
 
 plugins {
   id("org.metaborg.gradle.config.root-project") version "0.3.12"
@@ -41,25 +42,21 @@ gitonium {
 }
 
 spoofaxCompiler {
-  sharedBuilder.set(Shared.builder()
+  sharedSettings.set(Shared.builder()
     .name("Tiger")
     .defaultBasePackageId("mb.tiger")
   )
-  parserBuilder.set(ParserCompiler.LanguageProjectInput.builder()
-    .startSymbol("Start")
-  )
-  stylerBuilder.set(StylerCompiler.LanguageProjectInput.builder())
-  strategoRuntimeBuilder.set(StrategoRuntimeCompiler.LanguageProjectInput.builder()
-    .addInteropRegisterersByReflection("org.metaborg.lang.tiger.trans.InteropRegisterer", "org.metaborg.lang.tiger.strategies.InteropRegisterer")
-    .addNaBL2Primitives(true)
-    .addStatixPrimitives(false)
-    .copyJavaStrategyClasses(true)
-  )
-  constraintAnalyzerBuilder.set(ConstraintAnalyzerCompiler.LanguageProjectInput.builder())
-  languageProjectBuilder.set(LanguageProjectCompiler.Input.builder()
-    .languageSpecificationDependency(GradleDependency.module("$group:org.metaborg.lang.tiger:$version"))
-  )
-  adapterProjectBuilder.set(AdapterProjectCompiler.Input.builder()
-    .languageProjectDependency(GradleDependency.project(":tiger"))
-  )
+  languageProjectCompilerSettings.set(LanguageProjectCompilerSettings(
+    parser = ParserCompiler.LanguageProjectInput.builder()
+      .startSymbol("Start"),
+    styler = StylerCompiler.LanguageProjectInput.builder(),
+    strategoRuntime = StrategoRuntimeCompiler.LanguageProjectInput.builder()
+      .addInteropRegisterersByReflection("org.metaborg.lang.tiger.trans.InteropRegisterer", "org.metaborg.lang.tiger.strategies.InteropRegisterer")
+      .addNaBL2Primitives(true)
+      .addStatixPrimitives(false)
+      .copyJavaStrategyClasses(true),
+    constraintAnalyzer = ConstraintAnalyzerCompiler.LanguageProjectInput.builder(),
+    compiler = LanguageProjectCompiler.Input.builder()
+      .languageSpecificationDependency(GradleDependency.module("$group:org.metaborg.lang.tiger:$version"))
+  ))
 }

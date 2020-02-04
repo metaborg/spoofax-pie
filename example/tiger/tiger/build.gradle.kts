@@ -4,6 +4,7 @@ plugins {
 }
 
 dependencies {
+  api(platform("org.metaborg:spoofax.depconstraints:$version"))
   testImplementation("org.metaborg:log.backend.noop")
   testCompileOnly("org.checkerframework:checker-qual-android")
 }

@@ -18,15 +18,15 @@ gradlePlugin {
   plugins {
     create("spoofax-compiler-spoofaxcore-root") {
       id = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.root"
-      implementationClass = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.RootPlugin"
+      implementationClass = "mb.spoofax.compiler.gradle.spoofaxcore.RootPlugin"
     }
     create("spoofax-compiler-spoofaxcore-language") {
       id = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.language"
-      implementationClass = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.LanguagePlugin"
+      implementationClass = "mb.spoofax.compiler.gradle.spoofaxcore.LanguagePlugin"
     }
     create("spoofax-compiler-spoofaxcore-adapter") {
       id = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.adapter"
-      implementationClass = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.AdapterPlugin"
+      implementationClass = "mb.spoofax.compiler.gradle.spoofaxcore.AdapterPlugin"
     }
   }
 }

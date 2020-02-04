@@ -4,8 +4,10 @@ import mb.spoofax.compiler.util.Conversion;
 import mb.spoofax.compiler.util.GradleProject;
 import org.immutables.value.Value;
 
+import java.io.Serializable;
+
 @Value.Immutable
-public interface LanguageProject {
+public interface LanguageProject extends Serializable {
     class Builder extends ImmutableLanguageProject.Builder {}
 
     static Builder builder() {

@@ -1,4 +1,4 @@
-package org.metaborg.spoofax.compiler.gradle.spoofaxcore
+package mb.spoofax.compiler.gradle.spoofaxcore
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -8,7 +8,6 @@ open class RootPlugin : Plugin<Project> {
   override fun apply(project: Project) {
     val persistentProperties = Properties() // TODO: load from file
     val extension = SpoofaxCompilerExtension(project.objects, project.projectDir, persistentProperties)
-    extension.rootProject.set(project.providers.provider { project.toGradleProject() })
     project.extensions.add(SpoofaxCompilerExtension.id, extension)
     project.subprojects {
       extensions.add(SpoofaxCompilerExtension.id, extension)

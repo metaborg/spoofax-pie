@@ -46,32 +46,32 @@ public class TigerInputs {
             .name("Tiger")
             .baseDirectory(baseDirectory)
             .defaultBasePackageId("mb.tiger")
-            // Injected dependencies
-            /// Metaborg log
-            .logApiDep(fromSystemProperty("log.api:classpath"))
-            .logBackendSLF4JDep(fromSystemProperty("log.backend.slf4j:classpath"))
-            /// Metaborg resource
-            .resourceDep(fromSystemProperty("resource:classpath"))
-            /// PIE
-            .pieApiDep(fromSystemProperty("pie.api:classpath"))
-            .pieRuntimeDep(fromSystemProperty("pie.runtime:classpath"))
-            .pieDaggerDep(fromSystemProperty("pie.dagger:classpath"))
-            /// Spoofax-PIE
-            .commonDep(fromSystemProperty("common:classpath"))
-            .jsglrCommonDep(fromSystemProperty("jsglr.common:classpath"))
-            .jsglr1CommonDep(fromSystemProperty("jsglr1.common:classpath"))
-            .jsglr2CommonDep(fromSystemProperty("jsglr2.common:classpath"))
-            .esvCommonDep(fromSystemProperty("esv.common:classpath"))
-            .strategoCommonDep(fromSystemProperty("stratego.common:classpath"))
-            .constraintCommonDep(fromSystemProperty("constraint.common:classpath"))
-            .nabl2CommonDep(fromSystemProperty("nabl2.common:classpath"))
-            .statixCommonDep(fromSystemProperty("statix.common:classpath"))
-            .spoofaxCompilerInterfacesDep(fromSystemProperty("spoofax.compiler.interfaces:classpath"))
-            .spoofaxCoreDep(fromSystemProperty("spoofax.core:classpath"))
-            .spoofaxCliDep(fromSystemProperty("spoofax.cli:classpath"))
-            .spoofaxEclipseDep(fromSystemProperty("spoofax.eclipse:classpath"))
-            .spoofaxEclipseExternaldepsDep(fromSystemProperty("spoofax.eclipse.externaldeps:classpath"))
-            .spoofaxIntellijDep(fromSystemProperty("spoofax.intellij:classpath"))
+//            // Injected dependencies
+//            /// Metaborg log
+//            .logApiDep(fromSystemProperty("log.api:classpath"))
+//            .logBackendSLF4JDep(fromSystemProperty("log.backend.slf4j:classpath"))
+//            /// Metaborg resource
+//            .resourceDep(fromSystemProperty("resource:classpath"))
+//            /// PIE
+//            .pieApiDep(fromSystemProperty("pie.api:classpath"))
+//            .pieRuntimeDep(fromSystemProperty("pie.runtime:classpath"))
+//            .pieDaggerDep(fromSystemProperty("pie.dagger:classpath"))
+//            /// Spoofax-PIE
+//            .commonDep(fromSystemProperty("common:classpath"))
+//            .jsglrCommonDep(fromSystemProperty("jsglr.common:classpath"))
+//            .jsglr1CommonDep(fromSystemProperty("jsglr1.common:classpath"))
+//            .jsglr2CommonDep(fromSystemProperty("jsglr2.common:classpath"))
+//            .esvCommonDep(fromSystemProperty("esv.common:classpath"))
+//            .strategoCommonDep(fromSystemProperty("stratego.common:classpath"))
+//            .constraintCommonDep(fromSystemProperty("constraint.common:classpath"))
+//            .nabl2CommonDep(fromSystemProperty("nabl2.common:classpath"))
+//            .statixCommonDep(fromSystemProperty("statix.common:classpath"))
+//            .spoofaxCompilerInterfacesDep(fromSystemProperty("spoofax.compiler.interfaces:classpath"))
+//            .spoofaxCoreDep(fromSystemProperty("spoofax.core:classpath"))
+//            .spoofaxCliDep(fromSystemProperty("spoofax.cli:classpath"))
+//            .spoofaxEclipseDep(fromSystemProperty("spoofax.eclipse:classpath"))
+//            .spoofaxEclipseExternaldepsDep(fromSystemProperty("spoofax.eclipse.externaldeps:classpath"))
+//            .spoofaxIntellijDep(fromSystemProperty("spoofax.intellij:classpath"))
             ;
     }
 
@@ -172,7 +172,7 @@ public class TigerInputs {
             .styler(stylerLanguageProjectInput(shared, languageProject).build())
             .strategoRuntime(strategoRuntimeLanguageProjectInput(shared, languageProject).build())
             .constraintAnalyzer(constraintAnalyzerLanguageProjectInput(shared, languageProject).build())
-            .languageSpecificationDependency(fromSystemProperty("org.metaborg.lang.tiger:classpath"))
+            .languageSpecificationDependency(GradleDependency.project(":tiger"))
             .shared(shared)
             ;
     }

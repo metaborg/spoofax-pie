@@ -18,7 +18,7 @@ class AdapterProjectCompilerTest extends TestBase {
         // Compile language and adapter projects.
         final AdapterProjectCompiler.Input input = compileLanguageAndAdapterProject(shared, languageProject, adapterProject);
         // Test generated files.
-        fileAssertions.asserts(input.buildGradleKtsFile(), (a) -> a.assertContains("org.metaborg.spoofax.compiler.gradle.spoofaxcore.adapter"));
+//        fileAssertions.asserts(input.buildGradleKtsFile(), (a) -> a.assertContains("org.metaborg.spoofax.compiler.gradle.spoofaxcore.adapter"));
         fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {
             s.asserts(input.packageInfo(), (a) -> a.assertAll("package-info.java", "@DefaultQualifier(NonNull.class)"));
             s.assertPublicJavaInterface(input.genComponent(), "TigerComponent");

@@ -9,11 +9,16 @@ pluginManagement {
     maven("https://artifacts.metaborg.org/content/repositories/central/") // Maven central mirror.
     mavenCentral() // Maven central as backup.
     jcenter()
+    // Required by spoofax.gradle plugin.
+    maven("https://pluto-build.github.io/mvnrepository/")
+    maven("https://sugar-lang.github.io/mvnrepository/")
+    maven("http://nexus.usethesource.io/content/repositories/public/")
     // Get plugins from Gradle plugin portal.
     gradlePluginPortal()
   }
 }
 
+include("org.metaborg.lang.tiger")
 include("tiger")
 include("tiger.spoofax")
 include("tiger.cli")

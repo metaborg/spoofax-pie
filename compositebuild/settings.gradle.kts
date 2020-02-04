@@ -1,4 +1,4 @@
-rootProject.name = "org.metaborg.lang.tiger"
+rootProject.name = "spoofax"
 
 pluginManagement {
   repositories {
@@ -17,3 +17,30 @@ pluginManagement {
     gradlePluginPortal()
   }
 }
+
+fun includeProject(id: String) {
+  include(id)
+  project(":$id").projectDir = file("../$id")
+}
+
+includeProject("spoofax.depconstraints")
+
+includeProject("common")
+
+includeProject("jsglr.common")
+includeProject("jsglr1.common")
+includeProject("jsglr2.common")
+includeProject("esv.common")
+includeProject("stratego.common")
+includeProject("constraint.common")
+includeProject("nabl2.common")
+includeProject("statix.common")
+
+includeProject("spoofax.core")
+includeProject("spoofax.cli")
+includeProject("spoofax.intellij")
+includeProject("spoofax.eclipse")
+includeProject("spoofax.eclipse.externaldeps")
+includeProject("spoofax.compiler")
+includeProject("spoofax.compiler.interfaces")
+includeProject("spoofax.compiler.gradle")
