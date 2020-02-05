@@ -9,7 +9,7 @@ import mb.spoofax.compiler.util.GradleDependency
 import mb.spoofax.compiler.gradle.spoofaxcore.LanguageProjectCompilerSettings
 
 plugins {
-  id("org.metaborg.gradle.config.root-project") version "0.3.13"
+  id("org.metaborg.gradle.config.root-project") version "0.3.14"
   id("org.metaborg.gitonium") version "0.1.2"
   id("org.metaborg.spoofax.compiler.gradle.spoofaxcore.root")
 
