@@ -1,4 +1,4 @@
-rootProject.name = "spoofax.example.tiger"
+rootProject.name = "spoofax.core.root"
 
 pluginManagement {
   repositories {
@@ -18,16 +18,24 @@ pluginManagement {
   }
 }
 
-// Only include composite builds when this is the root project (it has no parent), for example when running Gradle tasks
-// from the command-line. Otherwise, the parent project (spoofax) will include these composite builds.
-if(gradle.parent == null) {
-  includeBuild("../../core")
-}
+include("spoofax.depconstraints")
 
-include("org.metaborg.lang.tiger")
-include("tiger")
-include("tiger.spoofax")
-include("tiger.cli")
-include("tiger.intellij")
-include("tiger.eclipse")
-include("tiger.eclipse.externaldeps")
+include("common")
+
+include("jsglr.common")
+include("jsglr1.common")
+include("jsglr2.common")
+include("esv.common")
+include("stratego.common")
+include("constraint.common")
+include("nabl2.common")
+include("statix.common")
+
+include("spoofax.core")
+include("spoofax.cli")
+include("spoofax.intellij")
+include("spoofax.eclipse")
+include("spoofax.eclipse.externaldeps")
+include("spoofax.compiler")
+include("spoofax.compiler.interfaces")
+include("spoofax.compiler.gradle")

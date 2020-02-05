@@ -3,4 +3,25 @@ plugins {
   id("org.metaborg.gitonium") version "0.1.2"
 }
 
-// The main build is configured in 'compositebuild/build.gradle.kts'.
+tasks {
+  register("buildCore") {
+    group = "development"
+    description = "Build all projects in the 'spoofax.core.root' composite build"
+    val build = if(gradle.parent == null) {
+      gradle.includedBuild("spoofax.core.root")
+    } else {
+      gradle.parent!!.includedBuild("spoofax.core.root")
+    }
+    dependsOn(build.task(":buildAll"))
+  }
+  register("buildExampleTiger") {
+    group = "development"
+    description = "Build all projects in the 'spoofax.example.tiger' composite build"
+    val build = if(gradle.parent == null) {
+      gradle.includedBuild("spoofax.core.root")
+    } else {
+      gradle.parent!!.includedBuild("spoofax.core.root")
+    }
+    dependsOn(build.task(":buildAll"))
+  }
+}
