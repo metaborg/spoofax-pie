@@ -8,12 +8,14 @@ import mb.resource.fs.FSResourceRegistry
 import mb.spoofax.compiler.spoofaxcore.AdapterProjectCompiler
 import mb.spoofax.compiler.spoofaxcore.CliProjectCompiler
 import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler
+import mb.spoofax.compiler.spoofaxcore.EclipseExternaldepsProjectCompiler
 import mb.spoofax.compiler.spoofaxcore.LanguageProjectCompiler
 import mb.spoofax.compiler.spoofaxcore.ParserCompiler
 import mb.spoofax.compiler.spoofaxcore.Shared
 import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler
 import mb.spoofax.compiler.spoofaxcore.StylerCompiler
 import mb.spoofax.compiler.util.TemplateCompiler
+import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
@@ -44,6 +46,7 @@ open class SpoofaxCompilerExtension(objects: ObjectFactory, baseDirectory: File,
   internal val languageProjectCompiler = LanguageProjectCompiler(templateCompiler, parserCompiler, stylerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler)
   internal val adapterProjectCompiler = AdapterProjectCompiler(templateCompiler, parserCompiler, stylerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler)
   internal val cliProjectCompiler = CliProjectCompiler(templateCompiler)
+  internal val eclipseExternaldepsProjectCompiler = EclipseExternaldepsProjectCompiler(templateCompiler)
 
   internal val languageGradleProject: Property<Project> = objects.property()
   internal val adapterGradleProject: Property<Project> = objects.property()
@@ -55,5 +58,21 @@ open class SpoofaxCompilerExtension(objects: ObjectFactory, baseDirectory: File,
       .withPersistentProperties(persistentProperties)
       .baseDirectory(FSPath(baseDirectory))
       .build()
+  }
+
+  internal val languageProjectCompilerExtension: LanguageProjectCompilerExtension by lazy {
+    languageGradleProject.finalizeValue()
+    if(!languageGradleProject.isPresent) {
+      throw GradleException("Language project has not been set")
+    }
+    languageGradleProject.get().extensions.getByType<LanguageProjectCompilerExtension /* Type annotation required */>()
+  }
+
+  internal val adapterProjectCompilerExtension: AdapterProjectCompilerExtension by lazy {
+    adapterGradleProject.finalizeValue()
+    if(!adapterGradleProject.isPresent) {
+      throw GradleException("Adapter project has not been set")
+    }
+    adapterGradleProject.get().extensions.getByType<AdapterProjectCompilerExtension /* Type annotation required */>()
   }
 }

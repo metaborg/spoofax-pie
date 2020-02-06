@@ -19,26 +19,21 @@ import java.util.stream.Collectors;
 @Value.Enclosing
 public class EclipseExternaldepsProjectCompiler {
     private final TemplateWriter buildGradleTemplate;
-    private final TemplateWriter generatedGradleTemplate;
 
     public EclipseExternaldepsProjectCompiler(TemplateCompiler templateCompiler) {
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("eclipse_externaldeps_project/build.gradle.kts.mustache");
-        this.generatedGradleTemplate = templateCompiler.getOrCompileToWriter("eclipse_externaldeps_project/generated.gradle.kts.mustache");
     }
 
     public void generateInitial(Input input) throws IOException {
         buildGradleTemplate.write(input.buildGradleKtsFile(), input);
     }
 
-    public void generateGradleFiles(Input input) throws IOException {
-        final HashMap<String, Object> map = new HashMap<>();
-
+    public ArrayList<GradleConfiguredDependency> getDependencies(Input input) {
+        final Shared shared = input.shared();
         final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
         dependencies.add(GradleConfiguredDependency.api(input.languageProjectDependency()));
         dependencies.add(GradleConfiguredDependency.api(input.adapterProjectDependency()));
-        map.put("dependencyCodes", dependencies.stream().map(GradleConfiguredDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
-
-        generatedGradleTemplate.write(input.generatedGradleKtsFile(), input, map);
+        return dependencies;
     }
 
     public Output compile(Input input) throws IOException {

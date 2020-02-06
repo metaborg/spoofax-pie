@@ -12,6 +12,9 @@ metaborg {
 
 dependencies {
   implementation(project(":spoofax.compiler"))
+
+  compileOnly("org.metaborg:coronium:0.1.8")
+  compileOnly("biz.aQute.bnd:biz.aQute.bnd.gradle:4.3.1")
 }
 
 gradlePlugin {
@@ -31,6 +34,10 @@ gradlePlugin {
     create("spoofax-compiler-spoofaxcore-cli") {
       id = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.cli"
       implementationClass = "mb.spoofax.compiler.gradle.spoofaxcore.CliPlugin"
+    }
+    create("spoofax-compiler-spoofaxcore-eclipse-externaldeps") {
+      id = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.eclipse.externaldeps"
+      implementationClass = "mb.spoofax.compiler.gradle.spoofaxcore.EclipseExternaldepsPlugin"
     }
   }
 }

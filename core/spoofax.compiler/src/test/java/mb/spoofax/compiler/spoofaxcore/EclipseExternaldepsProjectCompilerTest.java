@@ -25,7 +25,6 @@ class EclipseExternaldepsProjectCompilerTest extends TestBase {
             .adapterProjectDependency(GradleDependency.project(":" + adapterProject.project().coordinate().artifactId()))
             .build();
         eclipseExternaldepsProjectCompiler.generateInitial(input);
-        eclipseExternaldepsProjectCompiler.generateGradleFiles(input);
         eclipseExternaldepsProjectCompiler.compile(input);
         fileAssertions.asserts(input.buildGradleKtsFile(), (a) -> a.assertContains("org.metaborg.spoofax.compiler.gradle.spoofaxcore.eclipse.externaldeps"));
     }

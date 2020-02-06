@@ -88,11 +88,7 @@ open class AdapterProjectCompilerExtension(
 
   internal val input: AdapterProjectCompiler.Input by lazy {
     settings.finalizeValue()
-    compilerExtension.languageGradleProject.finalizeValue()
-    if(!compilerExtension.languageGradleProject.isPresent) {
-      throw GradleException("Language project has not been set")
-    }
-    val languageProjectExtension = compilerExtension.languageGradleProject.get().extensions.getByType<LanguageProjectCompilerExtension>();
+    val languageProjectExtension = compilerExtension.languageProjectCompilerExtension
     settings.get().createInput(compilerExtension.shared, languageProjectExtension.input, project, languageProjectExtension.project.asProjectDependency())
   }
 }

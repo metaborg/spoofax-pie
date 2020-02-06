@@ -7,7 +7,6 @@ import mb.spoofax.compiler.spoofaxcore.AdapterProjectCompiler
 import mb.spoofax.compiler.spoofaxcore.CliProjectCompiler
 import mb.spoofax.compiler.spoofaxcore.Shared
 import mb.spoofax.compiler.util.GradleProject
-import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
@@ -41,12 +40,7 @@ open class CliProjectCompilerExtension(
 
   internal val input: CliProjectCompiler.Input by lazy {
     settings.finalizeValue()
-    compilerExtension.adapterGradleProject.finalizeValue()
-    if(!compilerExtension.adapterGradleProject.isPresent) {
-      throw GradleException("Adapter project has not been set")
-    }
-    val adapterProjectExtension = compilerExtension.adapterGradleProject.get().extensions.getByType<AdapterProjectCompilerExtension>();
-    settings.get().createInput(compilerExtension.shared, project.toSpoofaxCompilerProject(), adapterProjectExtension.input)
+    settings.get().createInput(compilerExtension.shared, project.toSpoofaxCompilerProject(), compilerExtension.adapterProjectCompilerExtension.input)
   }
 }
 
