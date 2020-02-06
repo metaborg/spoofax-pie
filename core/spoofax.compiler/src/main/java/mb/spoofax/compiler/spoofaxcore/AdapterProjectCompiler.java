@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 @Value.Enclosing
 public class AdapterProjectCompiler {
     private final TemplateWriter buildGradleTemplate;
-    private final TemplateWriter generatedGradleTemplate;
     private final TemplateWriter packageInfoTemplate;
     private final TemplateWriter checkTaskDefTemplate;
     private final TemplateWriter componentTemplate;
@@ -51,7 +50,6 @@ public class AdapterProjectCompiler {
         ConstraintAnalyzerCompiler constraintAnalyzerCompiler
     ) {
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("adapter_project/build.gradle.kts.mustache");
-        this.generatedGradleTemplate = templateCompiler.getOrCompileToWriter("adapter_project/generated.gradle.kts.mustache");
         this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("adapter_project/package-info.java.mustache");
         this.checkTaskDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/CheckTaskDef.java.mustache");
         this.componentTemplate = templateCompiler.getOrCompileToWriter("adapter_project/Component.java.mustache");
@@ -69,11 +67,8 @@ public class AdapterProjectCompiler {
         buildGradleTemplate.write(input.buildGradleKtsFile(), input);
     }
 
-    public void generateGradleFiles(Input input) throws IOException {
+    public ArrayList<GradleConfiguredDependency> getDependencies(Input input) {
         final Shared shared = input.shared();
-
-        final HashMap<String, Object> map = new HashMap<>();
-
         final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
         dependencies.add(GradleConfiguredDependency.api(input.languageProjectDependency()));
         dependencies.add(GradleConfiguredDependency.api(shared.spoofaxCoreDep()));
@@ -82,9 +77,7 @@ public class AdapterProjectCompiler {
         dependencies.add(GradleConfiguredDependency.api(shared.daggerDep()));
         dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
         dependencies.add(GradleConfiguredDependency.annotationProcessor(shared.daggerCompilerDep()));
-        map.put("dependencyCodes", dependencies.stream().map(GradleConfiguredDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
-
-        generatedGradleTemplate.write(input.generatedGradleKtsFile(), input, map);
+        return dependencies;
     }
 
     public Output compile(Input input) throws IOException {

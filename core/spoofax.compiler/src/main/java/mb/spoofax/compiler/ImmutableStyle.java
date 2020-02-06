@@ -10,6 +10,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.PACKAGE, ElementType.TYPE})
 @Retention(RetentionPolicy.CLASS) // Class retention for incremental compilation.
 @Value.Style(
+    jdkOnly = true,
     typeImmutableEnclosing = "*Data",
     deepImmutablesDetection = true
 ) @interface ImmutableStyle {}

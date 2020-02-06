@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 @Value.Enclosing
 public class LanguageProjectCompiler {
     private final TemplateWriter buildGradleTemplate;
-    private final TemplateWriter generatedGradleTemplate;
     private final TemplateWriter packageInfoTemplate;
 
     private final ParserCompiler parserCompiler;
@@ -39,7 +38,6 @@ public class LanguageProjectCompiler {
         ConstraintAnalyzerCompiler constraintAnalyzerCompiler
     ) {
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("language_project/build.gradle.kts.mustache");
-        this.generatedGradleTemplate = templateCompiler.getOrCompileToWriter("language_project/generated.gradle.kts.mustache");
         this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("language_project/package-info.java.mustache");
 
         this.parserCompiler = parserCompiler;
@@ -50,43 +48,6 @@ public class LanguageProjectCompiler {
 
     public void generateInitial(Input input) throws IOException {
         buildGradleTemplate.write(input.buildGradleKtsFile(), input);
-    }
-
-    public void generateGradleFiles(Input input) throws IOException {
-        final Shared shared = input.shared();
-
-        final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
-        dependencies.add(GradleConfiguredDependency.api(shared.logApiDep()));
-        dependencies.add(GradleConfiguredDependency.api(shared.resourceDep()));
-        dependencies.add(GradleConfiguredDependency.api(shared.spoofaxCompilerInterfacesDep()));
-        dependencies.add(GradleConfiguredDependency.api(shared.commonDep()));
-        dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
-        parserCompiler.getLanguageProjectDependencies(input.parser()).addAllTo(dependencies);
-
-        final ArrayList<String> copyResources = new ArrayList<>(input.additionalCopyResources());
-        parserCompiler.getLanguageProjectCopyResources(input.parser()).addAllTo(copyResources);
-        input.styler().ifPresent((i) -> {
-            stylerCompiler.getLanguageProjectDependencies(i).addAllTo(dependencies);
-            stylerCompiler.getLanguageProjectCopyResources(i).addAllTo(copyResources);
-        });
-        input.strategoRuntime().ifPresent((i) -> {
-            strategoRuntimeCompiler.getLanguageProjectDependencies(i).addAllTo(dependencies);
-            strategoRuntimeCompiler.getLanguageProjectCopyResources(i).addAllTo(copyResources);
-        });
-        input.constraintAnalyzer().ifPresent((i) -> {
-            constraintAnalyzerCompiler.getLanguageProjectDependencies(i).addAllTo(dependencies);
-            constraintAnalyzerCompiler.getLanguageProjectCopyResources(i).addAllTo(copyResources);
-        });
-
-        final HashMap<String, Object> map = new HashMap<>();
-        final String languageDependencyCode = input.languageSpecificationDependency().caseOf()
-            .project((projectPath) -> "createProjectDependency(\"" + projectPath + "\")")
-            .module((coordinate) -> "createModuleDependency(\"" + coordinate.toGradleNotation() + "\")")
-            .files((filePaths) -> "createFilesDependency(" + filePaths.stream().map((s) -> "\"" + s + "\"").collect(Collectors.joining(", ")) + ")");
-        map.put("languageDependencyCode", languageDependencyCode);
-        map.put("dependencyCodes", dependencies.stream().map(GradleConfiguredDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
-        map.put("copyResourceCodes", copyResources.stream().map(StringUtil::doubleQuote).collect(Collectors.toCollection(ArrayList::new)));
-        generatedGradleTemplate.write(input.generatedGradleKtsFile(), input, map);
     }
 
     public ArrayList<GradleConfiguredDependency> getDependencies(Input input) {

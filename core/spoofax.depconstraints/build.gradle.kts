@@ -33,10 +33,7 @@ dependencies {
     api("org.metaborg:nabl2.solver:$spoofaxCoreVersion")
     api("org.metaborg:nabl2.terms:$spoofaxCoreVersion")
     api("org.metaborg:statix.solver:$spoofaxCoreVersion")
-
-    runtime("org.metaborg:org.spoofax.interpreter.library.java:$spoofaxCoreVersion")
-    runtime("org.metaborg:org.spoofax.interpreter.library.jsglr:$spoofaxCoreVersion")
-    runtime("org.metaborg:org.spoofax.interpreter.library.xml:$spoofaxCoreVersion")
+    
     runtime("org.metaborg:strategoxt-min-jar:$spoofaxCoreVersion")
 
     api("info.picocli:picocli:$picocliVersion")

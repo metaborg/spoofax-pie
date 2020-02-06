@@ -1,6 +1,5 @@
-package mb.tiger.spoofax.taskdef.command;
+package mb.tiger.spoofax.task;
 
-import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
@@ -16,19 +15,8 @@ import mb.resource.hierarchical.match.FileResourceMatcher;
 import mb.resource.hierarchical.match.PathResourceMatcher;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.match.path.ExtensionsPathMatcher;
-import mb.spoofax.core.language.cli.CliCommand;
-import mb.spoofax.core.language.cli.CliParams;
-import mb.spoofax.core.language.command.CommandContextType;
-import mb.spoofax.core.language.command.CommandDef;
-import mb.spoofax.core.language.command.CommandExecutionType;
 import mb.spoofax.core.language.command.CommandFeedbacks;
 import mb.spoofax.core.language.command.CommandOutput;
-import mb.spoofax.core.language.command.arg.ArgProviders;
-import mb.spoofax.core.language.command.arg.Param;
-import mb.spoofax.core.language.command.arg.ParamDef;
-import mb.spoofax.core.language.command.arg.RawArgs;
-import mb.tiger.spoofax.taskdef.TigerListDefNames;
-import mb.tiger.spoofax.taskdef.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -38,7 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args, CommandOutput>, CommandDef<TigerCompileDirectory.Args> {
+public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args, CommandOutput> {
     public static class Args implements Serializable {
         final ResourcePath dir;
 
@@ -133,30 +121,30 @@ public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args
     }
 
 
-    @Override public String getDisplayName() {
-        return "'Compile' directory (list definition names)";
-    }
-
-    @Override public EnumSetView<CommandExecutionType> getSupportedExecutionTypes() {
-        return EnumSetView.of(CommandExecutionType.ManualOnce, CommandExecutionType.AutomaticContinuous);
-    }
-
-    @Override public EnumSetView<CommandContextType> getRequiredContextTypes() {
-        return EnumSetView.of(CommandContextType.Directory);
-    }
-
-    @Override public ParamDef getParamDef() {
-        return new ParamDef(Param.of("dir", ResourcePath.class, true, ListView.of(ArgProviders.context())));
-    }
-
-    @Override public Args fromRawArgs(RawArgs rawArgs) {
-        final ResourcePath dir = rawArgs.getOrThrow("dir");
-        return new TigerCompileDirectory.Args(dir);
-    }
-
-    public CliCommand getCliCommandItem() {
-        return CliCommand.of("compile-dir", "Compiles Tiger files in given directory and shows the compiled file", this,
-            CliParams.positional("dir", 0, "DIR", "Directory to compile", null)
-        );
-    }
+//    @Override public String getDisplayName() {
+//        return "'Compile' directory (list definition names)";
+//    }
+//
+//    @Override public EnumSetView<CommandExecutionType> getSupportedExecutionTypes() {
+//        return EnumSetView.of(CommandExecutionType.ManualOnce, CommandExecutionType.AutomaticContinuous);
+//    }
+//
+//    @Override public EnumSetView<CommandContextType> getRequiredContextTypes() {
+//        return EnumSetView.of(CommandContextType.Directory);
+//    }
+//
+//    @Override public ParamDef getParamDef() {
+//        return new ParamDef(Param.of("dir", ResourcePath.class, true, ListView.of(ArgProviders.context())));
+//    }
+//
+//    @Override public Args fromRawArgs(RawArgs rawArgs) {
+//        final ResourcePath dir = rawArgs.getOrThrow("dir");
+//        return new TigerCompileDirectory.Args(dir);
+//    }
+//
+//    public CliCommand getCliCommandItem() {
+//        return CliCommand.of("compile-dir", "Compiles Tiger files in given directory and shows the compiled file", this,
+//            CliParams.positional("dir", 0, "DIR", "Directory to compile", null)
+//        );
+//    }
 }

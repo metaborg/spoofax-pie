@@ -1,6 +1,8 @@
 package mb.spoofax.compiler.util;
 
-public enum ClassKind {
+import java.io.Serializable;
+
+public enum ClassKind implements Serializable {
     /**
      * Generated class.
      */

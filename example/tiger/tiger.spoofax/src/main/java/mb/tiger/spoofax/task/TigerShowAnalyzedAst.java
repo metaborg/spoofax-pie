@@ -1,7 +1,6 @@
-package mb.tiger.spoofax.taskdef.command;
+package mb.tiger.spoofax.task;
 
 import mb.common.region.Region;
-import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.constraint.common.ConstraintAnalyzer;
 import mb.jsglr.common.TermTracer;
@@ -10,24 +9,16 @@ import mb.pie.api.Provider;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
-import mb.spoofax.core.language.cli.CliCommand;
-import mb.spoofax.core.language.command.CommandContextType;
-import mb.spoofax.core.language.command.CommandDef;
-import mb.spoofax.core.language.command.CommandExecutionType;
 import mb.spoofax.core.language.command.CommandFeedbacks;
 import mb.spoofax.core.language.command.CommandOutput;
-import mb.spoofax.core.language.command.arg.ParamDef;
-import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.command.arg.TextToResourceKeyArgConverter;
 import mb.stratego.common.StrategoUtil;
-import mb.tiger.spoofax.taskdef.TigerAnalyze;
-import mb.tiger.spoofax.taskdef.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 
-public class TigerShowAnalyzedAst implements TaskDef<TigerShowArgs, CommandOutput>, CommandDef<TigerShowArgs> {
+public class TigerShowAnalyzedAst implements TaskDef<TigerShowArgs, CommandOutput> {
     private final TigerParse parse;
     private final TigerAnalyze analyze;
     private final TextToResourceKeyArgConverter textToResourceKeyArgConverter;
@@ -75,31 +66,31 @@ public class TigerShowAnalyzedAst implements TaskDef<TigerShowArgs, CommandOutpu
     }
 
 
-    @Override public String getDisplayName() {
-        return "Show analyzed AST";
-    }
-
-    @Override public EnumSetView<CommandExecutionType> getSupportedExecutionTypes() {
-        return EnumSetView.of(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous);
-    }
-
-    @Override public EnumSetView<CommandContextType> getRequiredContextTypes() {
-        return EnumSetView.of(CommandContextType.Resource);
-    }
-
-    @Override public ParamDef getParamDef() {
-        return TigerShowArgs.getParamDef();
-    }
-
-    @Override public TigerShowArgs fromRawArgs(RawArgs rawArgs) {
-        return TigerShowArgs.fromRawArgs(rawArgs);
-    }
-
-    public CliCommand getCliCommandItem() {
-        final String operation = "analyze";
-        return CliCommand.of(operation, "Analyzes Tiger sources and shows the analyzed AST",
-            CliCommand.of("file", "Analyzes given Tiger file and shows the analyzed AST", this, TigerShowArgs.getFileCliParams(operation)),
-            CliCommand.of("text", "Analyzes given Tiger text and shows the analyzed AST", this, TigerShowArgs.getTextCliParams(operation, textToResourceKeyArgConverter))
-        );
-    }
+//    @Override public String getDisplayName() {
+//        return "Show analyzed AST";
+//    }
+//
+//    @Override public EnumSetView<CommandExecutionType> getSupportedExecutionTypes() {
+//        return EnumSetView.of(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous);
+//    }
+//
+//    @Override public EnumSetView<CommandContextType> getRequiredContextTypes() {
+//        return EnumSetView.of(CommandContextType.Resource);
+//    }
+//
+//    @Override public ParamDef getParamDef() {
+//        return TigerShowArgs.getParamDef();
+//    }
+//
+//    @Override public TigerShowArgs fromRawArgs(RawArgs rawArgs) {
+//        return TigerShowArgs.fromRawArgs(rawArgs);
+//    }
+//
+//    public CliCommand getCliCommandItem() {
+//        final String operation = "analyze";
+//        return CliCommand.of(operation, "Analyzes Tiger sources and shows the analyzed AST",
+//            CliCommand.of("file", "Analyzes given Tiger file and shows the analyzed AST", this, TigerShowArgs.getFileCliParams(operation)),
+//            CliCommand.of("text", "Analyzes given Tiger text and shows the analyzed AST", this, TigerShowArgs.getTextCliParams(operation, textToResourceKeyArgConverter))
+//        );
+//    }
 }

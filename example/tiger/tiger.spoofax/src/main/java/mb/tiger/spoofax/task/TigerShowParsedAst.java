@@ -1,4 +1,4 @@
-package mb.tiger.spoofax.taskdef.command;
+package mb.tiger.spoofax.task;
 
 import mb.common.region.Region;
 import mb.common.util.ListView;
@@ -11,19 +11,23 @@ import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.command.CommandFeedbacks;
 import mb.spoofax.core.language.command.CommandOutput;
+import mb.spoofax.core.language.command.arg.TextToResourceKeyArgConverter;
 import mb.stratego.common.StrategoUtil;
-import mb.tiger.spoofax.taskdef.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 
-public class TigerShowParsedAstTest implements TaskDef<TigerShowArgs, CommandOutput> {
+public class TigerShowParsedAst implements TaskDef<TigerShowArgs, CommandOutput> {
     private final TigerParse parse;
+    private final TextToResourceKeyArgConverter textToResourceKeyArgConverter;
 
-    @Inject public TigerShowParsedAstTest(TigerParse parse) {
+
+    @Inject public TigerShowParsedAst(TigerParse parse, TextToResourceKeyArgConverter textToResourceKeyArgConverter) {
         this.parse = parse;
+        this.textToResourceKeyArgConverter = textToResourceKeyArgConverter;
     }
+
 
     @Override public String getId() {
         return getClass().getName();
@@ -51,4 +55,33 @@ public class TigerShowParsedAstTest implements TaskDef<TigerShowArgs, CommandOut
     @Override public Task<CommandOutput> createTask(TigerShowArgs input) {
         return TaskDef.super.createTask(input);
     }
+
+
+//    @Override public String getDisplayName() {
+//        return "Show parsed AST";
+//    }
+//
+//    @Override public EnumSetView<CommandExecutionType> getSupportedExecutionTypes() {
+//        return EnumSetView.of(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous);
+//    }
+//
+//    @Override public EnumSetView<CommandContextType> getRequiredContextTypes() {
+//        return EnumSetView.of(CommandContextType.Resource);
+//    }
+//
+//    @Override public ParamDef getParamDef() {
+//        return TigerShowArgs.getParamDef();
+//    }
+//
+//    @Override public TigerShowArgs fromRawArgs(RawArgs rawArgs) {
+//        return TigerShowArgs.fromRawArgs(rawArgs);
+//    }
+//
+//    public CliCommand getCliCommand() {
+//        final String operation = "parse";
+//        return CliCommand.of(operation, "Parses Tiger sources and shows the parsed AST",
+//            CliCommand.of("file", "Parses given Tiger file and shows the parsed AST", this, TigerShowArgs.getFileCliParams(operation)),
+//            CliCommand.of("text", "Parses given Tiger text and shows the parsed AST", this, TigerShowArgs.getTextCliParams(operation, textToResourceKeyArgConverter))
+//        );
+//    }
 }

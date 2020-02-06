@@ -3,7 +3,6 @@ package mb.tiger.eclipse;
 import mb.pie.api.ExecException;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.util.StatusUtil;
-import mb.tiger.spoofax.TigerModule;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.WorkspaceJob;

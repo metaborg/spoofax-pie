@@ -14,10 +14,5 @@ dependencies {
   api("org.metaborg:org.spoofax.interpreter.core")
   api("org.metaborg:org.strategoxt.strj")
 
-  // For some reason, Gradle ignores transitive dependencies of 'org.strategoxt.strj', so we add them here...
-  implementation("org.metaborg:org.spoofax.interpreter.library.java")
-  implementation("org.metaborg:org.spoofax.interpreter.library.jsglr")
-  implementation("org.metaborg:org.spoofax.interpreter.library.xml")
-
   compileOnly("org.checkerframework:checker-qual-android")
 }

@@ -3,32 +3,103 @@
 package mb.spoofax.compiler.gradle.spoofaxcore
 
 import mb.resource.ResourceService
+import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler
+import mb.spoofax.compiler.spoofaxcore.LanguageProject
 import mb.spoofax.compiler.spoofaxcore.LanguageProjectCompiler
+import mb.spoofax.compiler.spoofaxcore.ParserCompiler
+import mb.spoofax.compiler.spoofaxcore.Shared
+import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler
+import mb.spoofax.compiler.spoofaxcore.StylerCompiler
+import mb.spoofax.compiler.util.GradleProject
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ModuleDependency
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.Sync
 import org.gradle.kotlin.dsl.*
 
+open class LanguageProjectCompilerSettings(
+  val languageProject: LanguageProject.Builder = LanguageProject.builder(),
+  val parser: ParserCompiler.LanguageProjectInput.Builder = ParserCompiler.LanguageProjectInput.builder(),
+  val styler: StylerCompiler.LanguageProjectInput.Builder? = null, // Optional
+  val strategoRuntime: StrategoRuntimeCompiler.LanguageProjectInput.Builder? = null, // Optional
+  val constraintAnalyzer: ConstraintAnalyzerCompiler.LanguageProjectInput.Builder? = null, // Optional
+  val compiler: LanguageProjectCompiler.Input.Builder = LanguageProjectCompiler.Input.builder()
+) {
+  internal fun createInput(shared: Shared, project: GradleProject): LanguageProjectCompiler.Input {
+    val languageProject = this.languageProject.shared(shared).project(project).build()
+    val parser = this.parser.shared(shared).languageProject(languageProject).build()
+    val styler = if(this.styler != null) this.styler.shared(shared).languageProject(languageProject).build() else null
+    val strategoRuntime = if(this.strategoRuntime != null) this.strategoRuntime.shared(shared).languageProject(languageProject).build() else null
+    val constraintAnalyzer = if(this.constraintAnalyzer != null) this.constraintAnalyzer.shared(shared).languageProject(languageProject).build() else null
+    val compiler = this.compiler.shared(shared).languageProject(languageProject).parser(parser)
+    if(styler != null) {
+      compiler.styler(styler)
+    }
+    if(strategoRuntime != null) {
+      compiler.strategoRuntime(strategoRuntime)
+    }
+    if(constraintAnalyzer != null) {
+      compiler.constraintAnalyzer(constraintAnalyzer)
+    }
+    return compiler.build()
+  }
+}
+
+open class LanguageProjectCompilerExtension(
+  objects: ObjectFactory,
+  compilerExtension: SpoofaxCompilerExtension
+) {
+  val settings: Property<LanguageProjectCompilerSettings> = objects.property()
+
+  companion object {
+    internal const val id = "languageProjectCompiler"
+  }
+
+  init {
+    settings.convention(LanguageProjectCompilerSettings())
+  }
+
+  internal val project by lazy {
+    compilerExtension.languageGradleProject.finalizeValue()
+    if(!compilerExtension.languageGradleProject.isPresent) {
+      throw GradleException("Language project was not set")
+    }
+    compilerExtension.languageGradleProject.get().toSpoofaxCompilerProject()
+  }
+
+  internal val input: LanguageProjectCompiler.Input by lazy {
+    settings.finalizeValue()
+    settings.get().createInput(compilerExtension.shared, project)
+  }
+}
+
 open class LanguagePlugin : Plugin<Project> {
   override fun apply(project: Project) {
-    val extension = project.extensions.getByType<SpoofaxCompilerExtension>()
-    extension.languageProject.set(project.toSpoofaxCompilerProject())
+    val compilerExtension = project.extensions.getByType<SpoofaxCompilerExtension>()
+    val extension = LanguageProjectCompilerExtension(project.objects, compilerExtension)
+    project.extensions.add(LanguageProjectCompilerExtension.id, extension)
+    compilerExtension.languageGradleProject.set(project)
     project.afterEvaluate {
-      afterEvaluate(this, extension)
+      afterEvaluate(this, compilerExtension, extension)
     }
   }
 
-  private fun afterEvaluate(project: Project, extension: SpoofaxCompilerExtension) {
-    val compiler = extension.languageProjectCompiler
-    val input = extension.languageProjectCompilerInput
-    val resourceService = extension.resourceService
-    project.configureGeneratedSources(input.languageProject().project(), resourceService)
-    extension.languageProjectCompiler.getDependencies(input).forEach {
+  private fun afterEvaluate(project: Project, compilerExtension: SpoofaxCompilerExtension, extension: LanguageProjectCompilerExtension) {
+    val compiler = compilerExtension.languageProjectCompiler
+    val resourceService = compilerExtension.resourceService
+    val input = extension.input
+    val compilerProject = input.languageProject().project();
+    project.configureGroup(compilerProject)
+    project.configureVersion(compilerProject)
+    project.configureGeneratedSources(compilerProject, resourceService)
+    compiler.getDependencies(input).forEach {
       it.addToDependencies(project)
     }
     configureCompilerTask(project, input, compiler, resourceService)
@@ -126,15 +197,15 @@ open class LanguagePlugin : Plugin<Project> {
     }
     project.tasks.getByName(JavaPlugin.TEST_CLASSES_TASK_NAME).dependsOn(copyTestTask)
   }
-}
 
-private fun configureSpoofaxLanguageDependency(dependency: ModuleDependency): Dependency {
-  dependency.targetConfiguration = Dependency.DEFAULT_CONFIGURATION
-  dependency.isTransitive = false // Don't care about transitive dependencies, just want the '.spoofax-language' artifact.
-  dependency.artifact {
-    name = dependency.name
-    type = "spoofax-language"
-    extension = "spoofax-language"
+  private fun configureSpoofaxLanguageDependency(dependency: ModuleDependency): Dependency {
+    dependency.targetConfiguration = Dependency.DEFAULT_CONFIGURATION
+    dependency.isTransitive = false // Don't care about transitive dependencies, just want the '.spoofax-language' artifact.
+    dependency.artifact {
+      name = dependency.name
+      type = "spoofax-language"
+      extension = "spoofax-language"
+    }
+    return dependency
   }
-  return dependency
 }

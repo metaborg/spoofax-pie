@@ -8,8 +8,6 @@ import mb.spoofax.cli.SpoofaxCli;
 import mb.spoofax.cli.SpoofaxCliComponent;
 import mb.spoofax.core.platform.LoggerFactoryModule;
 import mb.tiger.spoofax.DaggerTigerComponent;
-import mb.tiger.spoofax.TigerComponent;
-import mb.tiger.spoofax.TigerModule;
 
 public class Main {
     public static void main(String[] args) {

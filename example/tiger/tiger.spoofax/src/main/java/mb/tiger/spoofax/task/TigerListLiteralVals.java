@@ -1,4 +1,4 @@
-package mb.tiger.spoofax.taskdef;
+package mb.tiger.spoofax.task;
 
 import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecContext;

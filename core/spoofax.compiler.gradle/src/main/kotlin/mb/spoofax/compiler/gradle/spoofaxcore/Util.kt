@@ -9,14 +9,21 @@ import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.tasks.SourceSetContainer
-import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.project
+import org.gradle.kotlin.dsl.*
 
 fun Project.toSpoofaxCompilerProject(): GradleProject {
   return GradleProject.builder()
     .coordinate(group.toString(), name, version.toString())
     .baseDirectory(FSPath(projectDir))
     .build()
+}
+
+fun Project.configureGroup(project: GradleProject) {
+  this.group = project.coordinate().groupId()
+}
+
+fun Project.configureVersion(project: GradleProject) {
+  this.version = project.coordinate().version()
 }
 
 fun Project.configureGeneratedSources(project: GradleProject, resourceService: ResourceService) {
@@ -55,6 +62,6 @@ fun GradleConfiguredDependency.addToDependencies(project: Project): Dependency {
 fun GradleDependency.toGradleDependency(project: Project): Dependency {
   return caseOf()
     .project<Dependency> { project.dependencies.project(it) }
-    .module { project.dependencies.module(it.toGradleNotation()) }
+    .module { project.dependencies.create(it.groupId(), it.artifactId(), it.version()) }
     .files { project.dependencies.create(project.files(it)) }
 }

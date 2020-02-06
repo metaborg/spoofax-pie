@@ -1,7 +1,6 @@
 package mb.tiger.intellij;
 
 import mb.spoofax.intellij.SpoofaxPlugin;
-import mb.tiger.spoofax.TigerModule;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class TigerPlugin {

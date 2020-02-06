@@ -3,8 +3,10 @@ package mb.spoofax.compiler.command;
 import mb.common.util.ADT;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.io.Serializable;
+
 @ADT
-public abstract class ArgProviderRepr {
+public abstract class ArgProviderRepr implements Serializable {
     interface Cases<R> {
         R value(String code);
 

@@ -60,4 +60,13 @@ public interface GradleProject extends Serializable {
     @Value.Default default ResourcePath genSourceSpoofaxGradleDirectory() {
         return genSourceSpoofaxDirectory().appendSegment("gradle");
     }
+
+
+    default GradleDependency asProjectDependency() {
+        return GradleDependency.project(":" + coordinate().artifactId());
+    }
+
+    default GradleDependency asModuleDependency() {
+        return GradleDependency.module(coordinate());
+    }
 }

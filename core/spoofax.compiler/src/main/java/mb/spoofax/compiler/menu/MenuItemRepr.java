@@ -1,6 +1,8 @@
 package mb.spoofax.compiler.menu;
 
-public interface MenuItemRepr {
+import java.io.Serializable;
+
+public interface MenuItemRepr extends Serializable {
     default boolean isCommandAction() {
         return this instanceof MenuCommandActionRepr;
     }

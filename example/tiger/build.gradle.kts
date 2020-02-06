@@ -1,12 +1,4 @@
-import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler
-import mb.spoofax.compiler.spoofaxcore.ParserCompiler
 import mb.spoofax.compiler.spoofaxcore.Shared
-import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler
-import mb.spoofax.compiler.spoofaxcore.StylerCompiler
-import mb.spoofax.compiler.spoofaxcore.LanguageProjectCompiler
-import mb.spoofax.compiler.spoofaxcore.AdapterProjectCompiler
-import mb.spoofax.compiler.util.GradleDependency
-import mb.spoofax.compiler.gradle.spoofaxcore.LanguageProjectCompilerSettings
 
 plugins {
   id("org.metaborg.gradle.config.root-project") version "0.3.14"
@@ -46,17 +38,4 @@ spoofaxCompiler {
     .name("Tiger")
     .defaultBasePackageId("mb.tiger")
   )
-  languageProjectCompilerSettings.set(LanguageProjectCompilerSettings(
-    parser = ParserCompiler.LanguageProjectInput.builder()
-      .startSymbol("Start"),
-    styler = StylerCompiler.LanguageProjectInput.builder(),
-    strategoRuntime = StrategoRuntimeCompiler.LanguageProjectInput.builder()
-      .addInteropRegisterersByReflection("org.metaborg.lang.tiger.trans.InteropRegisterer", "org.metaborg.lang.tiger.strategies.InteropRegisterer")
-      .addNaBL2Primitives(true)
-      .addStatixPrimitives(false)
-      .copyJavaStrategyClasses(true),
-    constraintAnalyzer = ConstraintAnalyzerCompiler.LanguageProjectInput.builder(),
-    compiler = LanguageProjectCompiler.Input.builder()
-      .languageSpecificationDependency(GradleDependency.project(":org.metaborg.lang.tiger"))
-  ))
 }

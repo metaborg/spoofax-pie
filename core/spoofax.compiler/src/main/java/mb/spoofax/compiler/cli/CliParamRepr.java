@@ -5,8 +5,10 @@ import mb.common.util.ListView;
 import mb.spoofax.compiler.util.StringUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.io.Serializable;
+
 @ADT
-public abstract class CliParamRepr {
+public abstract class CliParamRepr implements Serializable {
     interface Cases<R> {
         R option(String paramId, ListView<String> names, boolean negatable, @Nullable String label, @Nullable String description, @Nullable String converterCode);
 
