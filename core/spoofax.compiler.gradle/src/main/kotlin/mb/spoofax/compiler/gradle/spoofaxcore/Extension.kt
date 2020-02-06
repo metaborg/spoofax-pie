@@ -6,6 +6,7 @@ import mb.resource.DefaultResourceService
 import mb.resource.fs.FSPath
 import mb.resource.fs.FSResourceRegistry
 import mb.spoofax.compiler.spoofaxcore.AdapterProjectCompiler
+import mb.spoofax.compiler.spoofaxcore.CliProjectCompiler
 import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler
 import mb.spoofax.compiler.spoofaxcore.LanguageProjectCompiler
 import mb.spoofax.compiler.spoofaxcore.ParserCompiler
@@ -42,7 +43,7 @@ open class SpoofaxCompilerExtension(objects: ObjectFactory, baseDirectory: File,
   internal val constraintAnalyzerCompiler = ConstraintAnalyzerCompiler(templateCompiler)
   internal val languageProjectCompiler = LanguageProjectCompiler(templateCompiler, parserCompiler, stylerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler)
   internal val adapterProjectCompiler = AdapterProjectCompiler(templateCompiler, parserCompiler, stylerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler)
-
+  internal val cliProjectCompiler = CliProjectCompiler(templateCompiler)
 
   internal val languageGradleProject: Property<Project> = objects.property()
   internal val adapterGradleProject: Property<Project> = objects.property()

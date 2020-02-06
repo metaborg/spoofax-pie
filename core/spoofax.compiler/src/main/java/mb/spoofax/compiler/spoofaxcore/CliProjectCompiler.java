@@ -1,6 +1,5 @@
 package mb.spoofax.compiler.spoofaxcore;
 
-import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
@@ -14,22 +13,18 @@ import org.immutables.value.Value;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Value.Enclosing
 public class CliProjectCompiler {
     private final TemplateWriter buildGradleTemplate;
-    private final TemplateWriter generatedGradleTemplate;
     private final TemplateWriter packageInfoTemplate;
     private final TemplateWriter mainTemplate;
 
     public CliProjectCompiler(TemplateCompiler templateCompiler) {
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("cli_project/build.gradle.kts.mustache");
-        this.generatedGradleTemplate = templateCompiler.getOrCompileToWriter("cli_project/generated.gradle.kts.mustache");
         this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("cli_project/package-info.java.mustache");
         this.mainTemplate = templateCompiler.getOrCompileToWriter("cli_project/Main.java.mustache");
     }
@@ -38,10 +33,8 @@ public class CliProjectCompiler {
         buildGradleTemplate.write(input.buildGradleKtsFile(), input);
     }
 
-    public void generateGradleFiles(Input input) throws IOException {
+    public ArrayList<GradleConfiguredDependency> getDependencies(Input input) {
         final Shared shared = input.shared();
-        final HashMap<String, Object> map = new HashMap<>();
-
         final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
         dependencies.add(GradleConfiguredDependency.implementation(input.adapterProjectDependency()));
         dependencies.add(GradleConfiguredDependency.implementation(shared.spoofaxCliDep()));
@@ -50,9 +43,7 @@ public class CliProjectCompiler {
         dependencies.add(GradleConfiguredDependency.implementation(shared.pieRuntimeDep()));
         dependencies.add(GradleConfiguredDependency.implementation(shared.pieDaggerDep()));
         dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
-        map.put("dependencyCodes", dependencies.stream().map(GradleConfiguredDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
-
-        generatedGradleTemplate.write(input.generatedGradleKtsFile(), input, map);
+        return dependencies;
     }
 
     public Output compile(Input input) throws IOException {
@@ -94,7 +85,9 @@ public class CliProjectCompiler {
 
         /// Configuration
 
-        GradleDependency adapterProjectDependency();
+        @Value.Default default GradleDependency adapterProjectDependency() {
+            return adapterProjectCompilerInput().adapterProject().project().asProjectDependency();
+        }
 
         List<GradleConfiguredDependency> additionalDependencies();
 
@@ -175,7 +168,7 @@ public class CliProjectCompiler {
 
         Shared shared();
 
-        AdapterProjectCompiler.Input adapterProject();
+        AdapterProjectCompiler.Input adapterProjectCompilerInput();
 
 
         @Value.Check default void check() {

@@ -24,7 +24,6 @@ class CliProjectCompilerTest extends TestBase {
             .adapterProjectDependency(GradleDependency.project(":" + adapterProject.project().coordinate().artifactId()))
             .build();
         cliProjectCompiler.generateInitial(input);
-        cliProjectCompiler.generateGradleFiles(input);
         cliProjectCompiler.compile(input);
         fileAssertions.asserts(input.buildGradleKtsFile(), (a) -> a.assertContains("org.metaborg.spoofax.compiler.gradle.spoofaxcore.cli"));
         fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {

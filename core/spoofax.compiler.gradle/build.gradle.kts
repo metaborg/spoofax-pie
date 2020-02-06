@@ -28,5 +28,9 @@ gradlePlugin {
       id = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.adapter"
       implementationClass = "mb.spoofax.compiler.gradle.spoofaxcore.AdapterPlugin"
     }
+    create("spoofax-compiler-spoofaxcore-cli") {
+      id = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.cli"
+      implementationClass = "mb.spoofax.compiler.gradle.spoofaxcore.CliPlugin"
+    }
   }
 }

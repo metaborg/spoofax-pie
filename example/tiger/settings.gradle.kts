@@ -27,7 +27,7 @@ if(gradle.parent == null) {
 include("org.metaborg.lang.tiger")
 include("tiger")
 include("tiger.spoofax")
-//include("tiger.cli")
+include("tiger.cli")
 //include("tiger.intellij")
 //include("tiger.eclipse")
 //include("tiger.eclipse.externaldeps")

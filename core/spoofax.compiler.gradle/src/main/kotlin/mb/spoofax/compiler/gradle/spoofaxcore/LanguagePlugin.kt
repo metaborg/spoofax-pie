@@ -86,8 +86,8 @@ open class LanguagePlugin : Plugin<Project> {
     val extension = LanguageProjectCompilerExtension(project.objects, compilerExtension)
     project.extensions.add(LanguageProjectCompilerExtension.id, extension)
     compilerExtension.languageGradleProject.set(project)
-    project.afterEvaluate {
-      afterEvaluate(this, compilerExtension, extension)
+    project.gradle.projectsEvaluated {
+      afterEvaluate(project, compilerExtension, extension)
     }
   }
 

@@ -14,9 +14,9 @@ public class {{genMain.id}} {
             .loggerFactoryModule(new LoggerFactoryModule(new SLF4JLoggerFactory()))
             .pieModule(new PieModule(PieBuilderImpl::new))
             .build();
-        final {{adapterProject.component.qualifiedId}} tigerComponent = {{adapterProject.daggerComponent.qualifiedId}}.builder()
+        final {{adapterProjectCompilerInput.component.qualifiedId}} tigerComponent = {{adapterProjectCompilerInput.daggerComponent.qualifiedId}}.builder()
             .platformComponent(platformComponent)
-            .tigerModule(new {{adapterProject.module.qualifiedId}}())
+            .tigerModule(new {{adapterProjectCompilerInput.module.qualifiedId}}())
             .build();
         final SpoofaxCli cmd = platformComponent.getSpoofaxCmd();
         final int status = cmd.run(args, tigerComponent);

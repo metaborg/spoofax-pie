@@ -295,10 +295,10 @@ public class TigerInputs {
 
     /// CLI project compiler
 
-    public static CliProjectCompiler.Input.Builder cliProjectInput(Shared shared, AdapterProjectCompiler.Input adapterProject) {
+    public static CliProjectCompiler.Input.Builder cliProjectInput(Shared shared, AdapterProjectCompiler.Input adapterProjectCompilerInput) {
         return CliProjectCompiler.Input.builder()
             .shared(shared)
-            .adapterProject(adapterProject)
+            .adapterProjectCompilerInput(adapterProjectCompilerInput)
             ;
     }
 
