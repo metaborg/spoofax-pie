@@ -1,25 +1,19 @@
 plugins {
   id("org.metaborg.gradle.config.java-library")
-  id("org.jetbrains.intellij")
   id("org.metaborg.spoofax.compiler.gradle.spoofaxcore.intellij")
 }
 
-//dependencies {
-//  implementation(platform("$group:spoofax.depconstraints:$version"))
-//  annotationProcessor(platform("$group:spoofax.depconstraints:$version"))
-//
-//  implementation("$group:spoofax.core:$version")
-//  implementation("$group:spoofax.intellij:$version")
-//  implementation(project(":tiger.spoofax")) {
-//    exclude(group = "org.slf4j")
-//  }
-//
-//  implementation("com.google.dagger:dagger")
-//
-//  compileOnly("org.checkerframework:checker-qual-android")
-//
-//  annotationProcessor("com.google.dagger:dagger-compiler")
-//}
+intellij {
+  version = "2019.3.2"
+}
+
+// Use Java 8 version of JBR (JetBrains Runtime) to run the IDE, to prevent illegal reflective operation errors.
+tasks.getByName<org.jetbrains.intellij.tasks.RunIdeTask>("runIde") {
+  this.jbrVersion("8u232b1638.6")
+}
+
+// Skip non-incremental, slow, and unnecessary buildSearchableOptions task from IntelliJ.
+tasks.getByName("buildSearchableOptions").onlyIf { false }
 
 /*
 Explicitly make the `runIde` task depend on creating the JAR of `spoofax.intellij`, because the `org.jetbrains.intellij`
@@ -33,13 +27,5 @@ We tried getting access to the IntelliJ API via a normal Gradle dependency, but 
 not possible to directly depend on the IntelliJ API. You would need to download a ZIP file, extract it, and add that
 directory as an Ivy repository to get access to the IntelliJ API.
 */
-// TODO: does not work anymore as composite build, how do we do this now? Is it still needed?
+// TODO: does not work anymore because of composite build, how do we do this now? Is it still needed?
 //tasks.getByName("runIde").dependsOn(tasks.getByPath(":spoofax.intellij:jar"))
-
-// Use Java 8 version of JBR (JetBrains Runtime) to run the IDE.
-tasks.getByName<org.jetbrains.intellij.tasks.RunIdeTask>("runIde") {
-  this.jbrVersion("8u232b1638.6")
-}
-
-// Skip non-incremental, slow, and unnecessary buildSearchableOptions task from IntelliJ.
-tasks.getByName("buildSearchableOptions").onlyIf { false }

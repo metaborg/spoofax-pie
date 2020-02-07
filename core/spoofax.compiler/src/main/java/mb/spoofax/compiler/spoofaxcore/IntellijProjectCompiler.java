@@ -55,7 +55,8 @@ public class IntellijProjectCompiler {
     public ArrayList<GradleConfiguredDependency> getDependencies(Input input) {
         final Shared shared = input.shared();
         final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
-        dependencies.add(GradleConfiguredDependency.implementation(input.adapterProjectDependency()));
+        // HACK: exclude adapter project dependency, as slf4j must be excluded from it for the IntelliJ plugin to work, which is not possible with 'GradleConfiguredDependency'.
+        //dependencies.add(GradleConfiguredDependency.implementation(input.adapterProjectDependency()));
         dependencies.add(GradleConfiguredDependency.implementation(shared.spoofaxIntellijDep()));
         dependencies.add(GradleConfiguredDependency.implementation(shared.daggerDep()));
         dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
@@ -138,7 +139,7 @@ public class IntellijProjectCompiler {
         /// IntelliJ files
 
         default ResourcePath pluginXmlFile() {
-            return project().genSourceSpoofaxResourcesDirectory().appendRelativePath("plugin.xml");
+            return project().genSourceSpoofaxResourcesDirectory().appendRelativePath("META-INF/plugin.xml");
         }
 
 
