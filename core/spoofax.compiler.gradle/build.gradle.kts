@@ -10,12 +10,17 @@ metaborg {
   kotlinLanguageVersion = "1.2"
 }
 
+repositories {
+  gradlePluginPortal() // Gradle plugin portal as repository for regular dependencies, as we depend on Gradle plugins.
+}
+
 dependencies {
   implementation(project(":spoofax.compiler"))
 
   // Dependencies to be able to configure the extensions provided by these Gradle plugins.
   compileOnly("org.metaborg:coronium:0.1.8")
   compileOnly("biz.aQute.bnd:biz.aQute.bnd.gradle:4.3.1")
+  compileOnly("gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.4.16")
 }
 
 gradlePlugin {
@@ -43,6 +48,10 @@ gradlePlugin {
     create("spoofax-compiler-spoofaxcore-eclipse") {
       id = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.eclipse"
       implementationClass = "mb.spoofax.compiler.gradle.spoofaxcore.EclipsePlugin"
+    }
+    create("spoofax-compiler-spoofaxcore-intellij") {
+      id = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.intellij"
+      implementationClass = "mb.spoofax.compiler.gradle.spoofaxcore.IntellijPlugin"
     }
   }
 }

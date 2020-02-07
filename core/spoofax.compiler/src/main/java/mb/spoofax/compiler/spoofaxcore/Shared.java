@@ -170,12 +170,6 @@ public interface Shared extends Serializable {
         return "0.4.15";
     }
 
-    /// IntelliJ Idea version
-
-    @Value.Default default String intellijIdeaVersion() {
-        return "2019.3.2";
-    }
-
 
     /// Checker framework
 

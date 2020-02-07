@@ -52,9 +52,10 @@ public class IntellijProjectCompiler {
         buildGradleTemplate.write(input.buildGradleKtsFile(), input);
     }
 
-    public ArrayList<GradleConfiguredDependency> getDependencies(EclipseProjectCompiler.Input input) {
+    public ArrayList<GradleConfiguredDependency> getDependencies(Input input) {
         final Shared shared = input.shared();
         final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
+        dependencies.add(GradleConfiguredDependency.implementation(input.adapterProjectDependency()));
         dependencies.add(GradleConfiguredDependency.implementation(shared.spoofaxIntellijDep()));
         dependencies.add(GradleConfiguredDependency.implementation(shared.daggerDep()));
         dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
@@ -114,13 +115,17 @@ public class IntellijProjectCompiler {
         }
 
 
-        /// Configuration
+        /// Gradle configuration
 
         @Value.Default default GradleDependency adapterProjectDependency() {
             return adapterProjectCompilerInput().adapterProject().project().asProjectDependency();
         }
 
         List<GradleConfiguredDependency> additionalDependencies();
+
+        @Value.Default default String ideaVersion() {
+            return "2019.3.2";
+        }
 
 
         /// Gradle files

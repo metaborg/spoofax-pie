@@ -7,19 +7,19 @@ tasks {
   register("buildCore") {
     group = "development"
     description = "Build all projects in the 'spoofax.core.root' composite build"
-    dependsOn(includedBuildOrParent("spoofax.core.root").task(":buildAll"))
+    tryDependOnTaskInIncludedBuild("spoofax.core.root", ":buildAll")
   }
   register("buildExampleTiger") {
     group = "development"
     description = "Build all projects in the 'spoofax.example.tiger' composite build"
-    dependsOn(includedBuildOrParent("spoofax.example.tiger").task(":buildAll"))
+    tryDependOnTaskInIncludedBuild("spoofax.example.tiger", ":buildAll")
   }
 }
 
-fun Project.includedBuildOrParent(name: String): IncludedBuild {
-  return if(gradle.parent == null) {
-    gradle.includedBuild(name)
-  } else {
-    gradle.parent!!.includedBuild(name)
+fun Task.tryDependOnTaskInIncludedBuild(includedBuildName: String, taskPath: String) {
+  try {
+    dependsOn(gradle.includedBuild(includedBuildName).task(taskPath))
+  } catch(e: UnknownDomainObjectException) {
+    logger.warn("Could not depend on task '$taskPath' in included build with name '$includedBuildName'")
   }
 }
