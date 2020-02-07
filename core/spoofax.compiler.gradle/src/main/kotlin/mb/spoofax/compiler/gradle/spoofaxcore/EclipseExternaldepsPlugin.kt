@@ -21,13 +21,18 @@ open class EclipseExternaldepsProjectCompilerSettings(
   val compiler: EclipseExternaldepsProjectCompiler.Input.Builder = EclipseExternaldepsProjectCompiler.Input.builder()
 ) {
   internal fun createInput(shared: Shared, project: GradleProject, languageProjectDependency: GradleDependency, adapterProjectDependency: GradleDependency): EclipseExternaldepsProjectCompiler.Input {
-    return this.compiler.shared(shared).project(project).languageProjectDependency(languageProjectDependency).adapterProjectDependency(adapterProjectDependency).build()
+    return this.compiler
+      .shared(shared)
+      .project(project)
+      .languageProjectDependency(languageProjectDependency)
+      .adapterProjectDependency(adapterProjectDependency)
+      .build()
   }
 }
 
 open class EclipseExternaldepsProjectCompilerExtension(
   objects: ObjectFactory,
-  project: Project,
+  gradleProject: Project,
   compilerExtension: SpoofaxCompilerExtension
 ) {
   val settings: Property<EclipseExternaldepsProjectCompilerSettings> = objects.property()
@@ -40,15 +45,25 @@ open class EclipseExternaldepsProjectCompilerExtension(
     settings.convention(EclipseExternaldepsProjectCompilerSettings())
   }
 
+  internal val project by lazy {
+    gradleProject.toSpoofaxCompilerProject()
+  }
+
   internal val input: EclipseExternaldepsProjectCompiler.Input by lazy {
     settings.finalizeValue()
-    settings.get().createInput(compilerExtension.shared, project.toSpoofaxCompilerProject(), compilerExtension.languageProjectCompilerExtension.project.asProjectDependency(), compilerExtension.adapterProjectCompilerExtension.project.asProjectDependency())
+    settings.get().createInput(
+      compilerExtension.shared,
+      project,
+      compilerExtension.languageProjectCompilerExtension.project.asProjectDependency(),
+      compilerExtension.adapterProjectCompilerExtension.project.asProjectDependency()
+    )
   }
 }
 
 open class EclipseExternaldepsPlugin : Plugin<Project> {
   override fun apply(project: Project) {
     val compilerExtension = project.extensions.getByType<SpoofaxCompilerExtension>()
+    compilerExtension.eclipseExternaldepsGradleProject.set(project)
     val extension = EclipseExternaldepsProjectCompilerExtension(project.objects, project, compilerExtension)
     project.extensions.add(EclipseExternaldepsProjectCompilerExtension.id, extension)
     project.gradle.projectsEvaluated {

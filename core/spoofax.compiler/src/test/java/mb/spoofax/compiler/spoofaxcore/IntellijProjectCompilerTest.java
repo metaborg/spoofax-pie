@@ -24,10 +24,8 @@ class IntellijProjectCompilerTest extends TestBase {
             .adapterProjectDependency(GradleDependency.project(":" + adapterProject.project().coordinate().artifactId()))
             .build();
         intellijProjectCompiler.generateInitial(input);
-        intellijProjectCompiler.generateGradleFiles(input);
         intellijProjectCompiler.compile(input);
         fileAssertions.asserts(input.buildGradleKtsFile(), (a) -> a.assertContains("org.metaborg.spoofax.compiler.gradle.spoofaxcore.intellij"));
-        fileAssertions.asserts(input.generatedGradleKtsFile(), (a) -> a.assertContains("org.jetbrains.intellij"));
         fileAssertions.asserts(input.pluginXmlFile(), (a) -> a.assertAll("plugin.xml", "<idea-plugin>"));
         fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {
             s.asserts(input.packageInfo(), (a) -> a.assertAll("package-info.java", "@DefaultQualifier(NonNull.class)"));

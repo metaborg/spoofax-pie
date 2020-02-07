@@ -13,16 +13,12 @@ import org.immutables.value.Value;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Value.Enclosing
 public class IntellijProjectCompiler {
     private final TemplateWriter buildGradleTemplate;
-    private final TemplateWriter generatedGradleTemplate;
     private final TemplateWriter pluginXmlTemplate;
     private final TemplateWriter packageInfoTemplate;
     private final TemplateWriter moduleTemplate;
@@ -38,7 +34,6 @@ public class IntellijProjectCompiler {
 
     public IntellijProjectCompiler(TemplateCompiler templateCompiler) {
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("intellij_project/build.gradle.kts.mustache");
-        this.generatedGradleTemplate = templateCompiler.getOrCompileToWriter("intellij_project/generated.gradle.kts.mustache");
         this.pluginXmlTemplate = templateCompiler.getOrCompileToWriter("intellij_project/plugin.xml.mustache");
         this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("intellij_project/package-info.java.mustache");
         this.moduleTemplate = templateCompiler.getOrCompileToWriter("intellij_project/Module.java.mustache");
@@ -57,18 +52,14 @@ public class IntellijProjectCompiler {
         buildGradleTemplate.write(input.buildGradleKtsFile(), input);
     }
 
-    public void generateGradleFiles(Input input) throws IOException {
+    public ArrayList<GradleConfiguredDependency> getDependencies(EclipseProjectCompiler.Input input) {
         final Shared shared = input.shared();
-        final HashMap<String, Object> map = new HashMap<>();
-
         final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
         dependencies.add(GradleConfiguredDependency.implementation(shared.spoofaxIntellijDep()));
         dependencies.add(GradleConfiguredDependency.implementation(shared.daggerDep()));
         dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
         dependencies.add(GradleConfiguredDependency.annotationProcessor(shared.daggerCompilerDep()));
-        map.put("dependencyCodes", dependencies.stream().map(GradleConfiguredDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
-
-        generatedGradleTemplate.write(input.generatedGradleKtsFile(), input, map);
+        return dependencies;
     }
 
     public Output compile(Input input) throws IOException {
@@ -125,7 +116,9 @@ public class IntellijProjectCompiler {
 
         /// Configuration
 
-        GradleDependency adapterProjectDependency();
+        @Value.Default default GradleDependency adapterProjectDependency() {
+            return adapterProjectCompilerInput().adapterProject().project().asProjectDependency();
+        }
 
         List<GradleConfiguredDependency> additionalDependencies();
 
@@ -134,15 +127,6 @@ public class IntellijProjectCompiler {
 
         @Value.Default default ResourcePath buildGradleKtsFile() {
             return project().baseDirectory().appendRelativePath("build.gradle.kts");
-        }
-
-        @Value.Default default ResourcePath generatedGradleKtsFile() {
-            return project().genSourceSpoofaxGradleDirectory().appendRelativePath("generated.gradle.kts");
-        }
-
-        default String relativeGeneratedGradleKtsFile() {
-            final ResourcePath parentDirectory = Objects.requireNonNull(buildGradleKtsFile().getParent());
-            return parentDirectory.relativizeToString(generatedGradleKtsFile());
         }
 
 
@@ -361,7 +345,7 @@ public class IntellijProjectCompiler {
 
         Shared shared();
 
-        AdapterProjectCompiler.Input adapterProject();
+        AdapterProjectCompiler.Input adapterProjectCompilerInput();
 
 
         // TODO: add check

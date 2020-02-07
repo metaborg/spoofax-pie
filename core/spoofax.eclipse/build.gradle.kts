@@ -22,7 +22,7 @@ bundle {
   requireTargetPlatform("org.eclipse.swt")
   requireTargetPlatform("com.ibm.icu")
 
-  requireEmbeddingBundle(":spoofax.eclipse.externaldeps")
+  requireEmbeddingBundleProject(":spoofax.eclipse.externaldeps")
 }
 
 dependencies {

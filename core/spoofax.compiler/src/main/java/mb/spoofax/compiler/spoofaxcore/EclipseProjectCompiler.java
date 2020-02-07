@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 @Value.Enclosing
 public class EclipseProjectCompiler {
     private final TemplateWriter buildGradleTemplate;
-    private final TemplateWriter generatedGradleTemplate;
     private final TemplateWriter pluginXmlTemplate;
     private final TemplateWriter manifestTemplate;
     private final TemplateWriter packageInfoTemplate;
@@ -47,7 +46,6 @@ public class EclipseProjectCompiler {
 
     public EclipseProjectCompiler(TemplateCompiler templateCompiler) {
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/build.gradle.kts.mustache");
-        this.generatedGradleTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/generated.gradle.kts.mustache");
         this.pluginXmlTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/plugin.xml.mustache");
         this.manifestTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/MANIFEST.MF.mustache");
         this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/package-info.java.mustache");
@@ -74,22 +72,22 @@ public class EclipseProjectCompiler {
         buildGradleTemplate.write(input.buildGradleKtsFile(), input);
     }
 
-    public void generateGradleFiles(Input input) throws IOException {
+    public ArrayList<GradleConfiguredDependency> getDependencies(Input input) {
         final Shared shared = input.shared();
-        final HashMap<String, Object> map = new HashMap<>();
-
         final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
         dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
         dependencies.add(GradleConfiguredDependency.annotationProcessor(shared.daggerCompilerDep()));
-        map.put("dependencyCodes", dependencies.stream().map(GradleConfiguredDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
+        return dependencies;
+    }
 
+    public ArrayList<GradleConfiguredBundleDependency> getBundleDependencies(Input input) {
+        final Shared shared = input.shared();
         final ArrayList<GradleConfiguredBundleDependency> bundleDependencies = new ArrayList<>(input.additionalBundleDependencies());
+        bundleDependencies.add(GradleConfiguredBundleDependency.targetPlatform("javax.inject",null,true));
         bundleDependencies.add(GradleConfiguredBundleDependency.bundle(shared.spoofaxEclipseDep(), true));
         bundleDependencies.add(GradleConfiguredBundleDependency.embeddingBundle(input.eclipseExternaldepsDependency(), true));
         bundleDependencies.add(GradleConfiguredBundleDependency.embeddingBundle(shared.spoofaxEclipseExternaldepsDep(), true));
-        map.put("bundleDependencyCodes", bundleDependencies.stream().map(GradleConfiguredBundleDependency::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
-
-        generatedGradleTemplate.write(input.generatedGradleKtsFile(), input, map);
+        return bundleDependencies;
     }
 
     public Output compile(EclipseProjectCompiler.Input input) throws IOException {
@@ -163,15 +161,6 @@ public class EclipseProjectCompiler {
 
         @Value.Default default ResourcePath buildGradleKtsFile() {
             return project().baseDirectory().appendRelativePath("build.gradle.kts");
-        }
-
-        @Value.Default default ResourcePath generatedGradleKtsFile() {
-            return project().genSourceSpoofaxGradleDirectory().appendRelativePath("generated.gradle.kts");
-        }
-
-        default String relativeGeneratedGradleKtsFile() {
-            final ResourcePath parentDirectory = Objects.requireNonNull(buildGradleKtsFile().getParent());
-            return parentDirectory.relativizeToString(generatedGradleKtsFile());
         }
 
 
@@ -558,7 +547,7 @@ public class EclipseProjectCompiler {
 
         Shared shared();
 
-        AdapterProjectCompiler.Input adapterProject();
+        AdapterProjectCompiler.Input adapterProjectCompilerInput();
 
 
         // TODO: implement check

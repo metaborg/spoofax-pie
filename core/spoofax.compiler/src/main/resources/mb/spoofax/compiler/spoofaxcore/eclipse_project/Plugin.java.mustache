@@ -32,7 +32,7 @@ public class {{genPlugin.id}} extends AbstractUIPlugin {
         component = {{daggerEclipseComponent.qualifiedId}}
             .builder()
             .platformComponent(SpoofaxPlugin.getComponent())
-            .tigerModule(new {{adapterProject.module.qualifiedId}}())
+            .tigerModule(new {{adapterProjectCompilerInput.module.qualifiedId}}())
             .tigerEclipseModule(new {{eclipseModule.qualifiedId}}())
             .build();
 

@@ -9,6 +9,8 @@ import mb.spoofax.compiler.spoofaxcore.AdapterProjectCompiler
 import mb.spoofax.compiler.spoofaxcore.CliProjectCompiler
 import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler
 import mb.spoofax.compiler.spoofaxcore.EclipseExternaldepsProjectCompiler
+import mb.spoofax.compiler.spoofaxcore.EclipseProjectCompiler
+import mb.spoofax.compiler.spoofaxcore.IntellijProjectCompiler
 import mb.spoofax.compiler.spoofaxcore.LanguageProjectCompiler
 import mb.spoofax.compiler.spoofaxcore.ParserCompiler
 import mb.spoofax.compiler.spoofaxcore.Shared
@@ -47,10 +49,12 @@ open class SpoofaxCompilerExtension(objects: ObjectFactory, baseDirectory: File,
   internal val adapterProjectCompiler = AdapterProjectCompiler(templateCompiler, parserCompiler, stylerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler)
   internal val cliProjectCompiler = CliProjectCompiler(templateCompiler)
   internal val eclipseExternaldepsProjectCompiler = EclipseExternaldepsProjectCompiler(templateCompiler)
+  internal val eclipseProjectCompiler = EclipseProjectCompiler(templateCompiler)
+  internal val intellijProjectCompiler = IntellijProjectCompiler(templateCompiler)
 
   internal val languageGradleProject: Property<Project> = objects.property()
   internal val adapterGradleProject: Property<Project> = objects.property()
-
+  internal val eclipseExternaldepsGradleProject: Property<Project> = objects.property()
 
   internal val shared: Shared by lazy {
     sharedSettings.finalizeValue()
@@ -74,5 +78,13 @@ open class SpoofaxCompilerExtension(objects: ObjectFactory, baseDirectory: File,
       throw GradleException("Adapter project has not been set")
     }
     adapterGradleProject.get().extensions.getByType<AdapterProjectCompilerExtension /* Type annotation required */>()
+  }
+
+  internal val eclipseExternaldepsCompilerExtension: EclipseExternaldepsProjectCompilerExtension by lazy {
+    eclipseExternaldepsGradleProject.finalizeValue()
+    if(!eclipseExternaldepsGradleProject.isPresent) {
+      throw GradleException("Eclipse externaldeps project has not been set")
+    }
+    eclipseExternaldepsGradleProject.get().extensions.getByType<EclipseExternaldepsProjectCompilerExtension /* Type annotation required */>()
   }
 }

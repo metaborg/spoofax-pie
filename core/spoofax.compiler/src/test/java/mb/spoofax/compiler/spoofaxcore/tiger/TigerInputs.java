@@ -312,19 +312,19 @@ public class TigerInputs {
 
     /// Eclipse project compiler
 
-    public static EclipseProjectCompiler.Input.Builder eclipseProjectInput(Shared shared, AdapterProjectCompiler.Input adapterProject) {
+    public static EclipseProjectCompiler.Input.Builder eclipseProjectInput(Shared shared, AdapterProjectCompiler.Input adapterProjectCompilerInput) {
         return EclipseProjectCompiler.Input.builder()
             .shared(shared)
-            .adapterProject(adapterProject)
+            .adapterProjectCompilerInput(adapterProjectCompilerInput)
             ;
     }
 
     /// Intellij project compiler
 
-    public static IntellijProjectCompiler.Input.Builder intellijProjectInput(Shared shared, AdapterProjectCompiler.Input adapterProject) {
+    public static IntellijProjectCompiler.Input.Builder intellijProjectInput(Shared shared, AdapterProjectCompiler.Input adapterProjectCompilerInput) {
         return IntellijProjectCompiler.Input.builder()
             .shared(shared)
-            .adapterProject(adapterProject)
+            .adapterProjectCompilerInput(adapterProjectCompilerInput)
             ;
     }
 

@@ -17,7 +17,7 @@ public class {{genPlugin.id}} {
         component = {{daggerComponent.id}}
             .builder()
             .spoofaxIntellijComponent(SpoofaxPlugin.getComponent())
-            .tigerModule(new {{adapterProject.module.qualifiedId}}())
+            .tigerModule(new {{adapterProjectCompilerInput.module.qualifiedId}}())
             .tigerIntellijModule(new {{module.qualifiedId}}())
             .build();
     }
