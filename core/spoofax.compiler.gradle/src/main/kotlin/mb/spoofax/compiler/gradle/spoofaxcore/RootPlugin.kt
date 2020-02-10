@@ -12,12 +12,12 @@ open class RootPlugin : Plugin<Project> {
     project.subprojects {
       extensions.add(SpoofaxCompilerExtension.id, extension)
     }
-    project.afterEvaluate {
-      afterEvaluate(this)
-    }
+//    project.afterEvaluate {
+//      afterEvaluate(this)
+//    }
   }
 
-  private fun afterEvaluate(project: Project) {
-    // TODO: store persistent properties
-  }
+//  private fun afterEvaluate(project: Project) {
+//    // TODO: store persistent properties
+//  }
 }
