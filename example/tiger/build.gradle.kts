@@ -3,11 +3,11 @@ import mb.spoofax.compiler.spoofaxcore.Shared
 plugins {
   id("org.metaborg.gradle.config.root-project") version "0.3.15"
   id("org.metaborg.gitonium") version "0.1.2"
-  id("org.metaborg.spoofax.compiler.gradle.spoofaxcore.root")
+  id("org.metaborg.spoofax.compiler.gradle.spoofaxcore.root") /* No version: plugin must be in composite build. */
 
   // Set versions for plugins to use, only applying them in subprojects (apply false here).
-  id("org.metaborg.coronium.bundle") version "0.2.0" apply false
-  id("org.metaborg.coronium.embedding") version "0.2.0" apply false
+  id("org.metaborg.coronium.bundle") version "0.2.1" apply false
+  id("org.metaborg.coronium.embedding") version "0.2.1" apply false
   id("net.ltgt.apt") version "0.21" apply false
   id("net.ltgt.apt-idea") version "0.21" apply false
   id("biz.aQute.bnd.builder") version "4.3.1" apply false

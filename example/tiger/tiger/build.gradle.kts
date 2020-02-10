@@ -6,7 +6,6 @@ import mb.spoofax.compiler.spoofaxcore.StylerCompiler
 import mb.spoofax.compiler.util.GradleDependency
 
 plugins {
-  id("org.metaborg.gradle.config.java-library")
   id("org.metaborg.gradle.config.junit-testing")
   id("org.metaborg.spoofax.compiler.gradle.spoofaxcore.language")
 }
@@ -20,7 +19,7 @@ dependencies {
 languageProjectCompiler {
   settings.set(mb.spoofax.compiler.gradle.spoofaxcore.LanguageProjectCompilerSettings(
     parser = ParserCompiler.LanguageProjectInput.builder()
-      .startSymbol("Start"),
+      .startSymbol("Module"),
     styler = StylerCompiler.LanguageProjectInput.builder(),
     strategoRuntime = StrategoRuntimeCompiler.LanguageProjectInput.builder()
       .addInteropRegisterersByReflection("org.metaborg.lang.tiger.trans.InteropRegisterer", "org.metaborg.lang.tiger.strategies.InteropRegisterer")

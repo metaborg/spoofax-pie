@@ -66,9 +66,19 @@ open class EclipseExternaldepsPlugin : Plugin<Project> {
     compilerExtension.eclipseExternaldepsGradleProject.set(project)
     val extension = EclipseExternaldepsProjectCompilerExtension(project.objects, project, compilerExtension)
     project.extensions.add(EclipseExternaldepsProjectCompilerExtension.id, extension)
+
     project.gradle.projectsEvaluated {
       afterEvaluate(project, compilerExtension, extension)
     }
+
+    /*
+    HACK: apply plugins eagerly, otherwise their 'afterEvaluate' will not be triggered and the plugin will do nothing.
+    Ensure that plugins are applied after we add a 'projectsEvaluated' listener, to ensure that our listener gets
+    executed before those of the following plugins.
+    */
+    project.plugins.apply("org.metaborg.gradle.config.java-library")
+    project.plugins.apply("biz.aQute.bnd.builder")
+    project.plugins.apply("org.metaborg.coronium.embedding")
   }
 
   private fun afterEvaluate(project: Project, compilerExtension: SpoofaxCompilerExtension, extension: EclipseExternaldepsProjectCompilerExtension) {
@@ -107,8 +117,9 @@ open class EclipseExternaldepsPlugin : Plugin<Project> {
     project: Project,
     input: EclipseExternaldepsProjectCompiler.Input
   ) {
-    project.plugins.apply("biz.aQute.bnd.builder")
-    project.plugins.apply("org.metaborg.coronium.embedding")
+    // TODO: need to be applied here or early?
+//    project.plugins.apply("biz.aQute.bnd.builder")
+//    project.plugins.apply("org.metaborg.coronium.embedding")
 
     // Use bnd to create a single OSGi bundle JAR that includes all dependencies.
     val requires = listOf(

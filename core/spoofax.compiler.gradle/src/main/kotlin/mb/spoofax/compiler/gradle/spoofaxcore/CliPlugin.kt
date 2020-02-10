@@ -49,9 +49,17 @@ open class CliPlugin : Plugin<Project> {
     val compilerExtension = project.extensions.getByType<SpoofaxCompilerExtension>()
     val extension = CliProjectCompilerExtension(project.objects, project, compilerExtension)
     project.extensions.add(CliProjectCompilerExtension.id, extension)
+
     project.gradle.projectsEvaluated {
       afterEvaluate(project, compilerExtension, extension)
     }
+
+    /*
+    HACK: apply plugins eagerly, otherwise their 'afterEvaluate' will not be triggered and the plugin will do nothing.
+    Ensure that plugins are applied after we add a 'projectsEvaluated' listener, to ensure that our listener gets
+    executed before those of the following plugins.
+    */
+    project.plugins.apply("org.metaborg.gradle.config.java-application")
   }
 
   private fun afterEvaluate(project: Project, compilerExtension: SpoofaxCompilerExtension, extension: CliProjectCompilerExtension) {

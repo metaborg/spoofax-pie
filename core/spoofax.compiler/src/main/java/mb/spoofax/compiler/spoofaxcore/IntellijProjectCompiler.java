@@ -124,10 +124,6 @@ public class IntellijProjectCompiler {
 
         List<GradleConfiguredDependency> additionalDependencies();
 
-        @Value.Default default String ideaVersion() {
-            return "2019.3.2";
-        }
-
 
         /// Gradle files
 

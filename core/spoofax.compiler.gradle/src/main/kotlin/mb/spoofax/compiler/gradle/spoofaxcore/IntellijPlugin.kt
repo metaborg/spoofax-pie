@@ -15,7 +15,6 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.IntelliJPlugin
-import org.jetbrains.intellij.IntelliJPluginExtension
 
 open class IntellijProjectCompilerSettings(
   val compiler: IntellijProjectCompiler.Input.Builder = IntellijProjectCompiler.Input.builder()
@@ -58,6 +57,14 @@ open class IntellijPlugin : Plugin<Project> {
     project.gradle.projectsEvaluated {
       afterEvaluate(project, compilerExtension, extension)
     }
+
+    /*
+    HACK: apply plugins eagerly, otherwise their 'afterEvaluate' will not be triggered and the plugin will do nothing.
+    Ensure that plugins are applied after we add a 'projectsEvaluated' listener, to ensure that our listener gets
+    executed before those of the following plugins.
+    */
+    project.pluginManager.apply("org.metaborg.gradle.config.java-library")
+    project.pluginManager.apply("org.jetbrains.intellij")
   }
 
   private fun afterEvaluate(project: Project, compilerExtension: SpoofaxCompilerExtension, extension: IntellijProjectCompilerExtension) {
@@ -108,8 +115,9 @@ open class IntellijPlugin : Plugin<Project> {
     project.dependencies.add("implementation", input.adapterProjectDependency().toGradleDependency(project), closureOf<ModuleDependency> {
       exclude(group = "org.slf4j") // Exclude slf4j, as IntelliJ has its own special version of it.
     })
-    project.configure<IntelliJPluginExtension> {
-      version = input.ideaVersion() // TODO: version is set too late, and therefore ignored.
-    }
+//    // TODO: version is set too late, and therefore ignored.
+//    project.configure<IntelliJPluginExtension> {
+//      version = input.ideaVersion()
+//    }
   }
 }

@@ -67,47 +67,6 @@ public interface Shared extends Serializable {
     }
 
 
-
-
-//
-//    /// Eclipse project
-//
-//    @Value.Default default String defaultEclipseProjectSuffix() {
-//        return ".eclipse";
-//    }
-//
-//    @Value.Default default GradleProject eclipseProject() {
-//        final String artifactId = defaultArtifactId() + defaultEclipseProjectSuffix();
-//        return GradleProject.builder()
-//            .coordinate(defaultGroupId(), artifactId, defaultVersion())
-//            .baseDirectory(baseDirectory().appendSegment(artifactId))
-//            .build();
-//    }
-//
-//    @Value.Default default String eclipseProjectPackage() {
-//        return defaultBasePackageId() + defaultEclipseProjectSuffix();
-//    }
-//
-//
-//    /// IntelliJ project
-//
-//    @Value.Default default String defaultIntellijProjectSuffix() {
-//        return ".intellij";
-//    }
-//
-//    @Value.Default default GradleProject intellijProject() {
-//        final String artifactId = defaultArtifactId() + defaultIntellijProjectSuffix();
-//        return GradleProject.builder()
-//            .coordinate(defaultGroupId(), artifactId, defaultVersion())
-//            .baseDirectory(baseDirectory().appendSegment(artifactId))
-//            .build();
-//    }
-//
-//    @Value.Default default String intellijPackage() {
-//        return defaultBasePackageId() + defaultIntellijProjectSuffix();
-//    }
-
-
     // Repositories
 
     @Value.Default default GradleRepository metaborgReleasesRepository() {
@@ -149,13 +108,13 @@ public interface Shared extends Serializable {
     /// Metaborg Gradle configuration plugin
 
     @Value.Default default String metaborgGradleConfigVersion() {
-        return "0.3.12";
+        return "0.3.15";
     }
 
     /// Metaborg Coronium version
 
     @Value.Default default String metaborgCoroniumVersion() {
-        return "0.1.8";
+        return "0.2.1";
     }
 
     /// BND plugin version

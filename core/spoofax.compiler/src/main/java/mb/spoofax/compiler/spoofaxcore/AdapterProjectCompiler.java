@@ -23,7 +23,6 @@ import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -249,14 +248,6 @@ public class AdapterProjectCompiler {
             return adapterProject().project().baseDirectory().appendRelativePath("build.gradle.kts");
         }
 
-        @Value.Default default ResourcePath generatedGradleKtsFile() {
-            return adapterProject().project().genSourceSpoofaxGradleDirectory().appendRelativePath("generated.gradle.kts");
-        }
-
-        default String relativeGeneratedGradleKtsFile() {
-            final ResourcePath parentDirectory = Objects.requireNonNull(buildGradleKtsFile().getParent());
-            return parentDirectory.relativizeToString(generatedGradleKtsFile());
-        }
 
         /// Kinds of classes (generated/extended/manual)
 

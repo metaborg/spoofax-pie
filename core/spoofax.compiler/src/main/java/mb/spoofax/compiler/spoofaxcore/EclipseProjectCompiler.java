@@ -14,11 +14,8 @@ import org.immutables.value.Value;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Value.Enclosing
 public class EclipseProjectCompiler {
@@ -83,7 +80,7 @@ public class EclipseProjectCompiler {
     public ArrayList<GradleConfiguredBundleDependency> getBundleDependencies(Input input) {
         final Shared shared = input.shared();
         final ArrayList<GradleConfiguredBundleDependency> bundleDependencies = new ArrayList<>(input.additionalBundleDependencies());
-        bundleDependencies.add(GradleConfiguredBundleDependency.targetPlatform("javax.inject",null,true));
+        bundleDependencies.add(GradleConfiguredBundleDependency.targetPlatform("javax.inject", null, true));
         bundleDependencies.add(GradleConfiguredBundleDependency.bundle(shared.spoofaxEclipseDep(), true));
         bundleDependencies.add(GradleConfiguredBundleDependency.embeddingBundle(input.eclipseExternaldepsDependency(), true));
         bundleDependencies.add(GradleConfiguredBundleDependency.embeddingBundle(shared.spoofaxEclipseExternaldepsDep(), true));

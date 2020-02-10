@@ -4,7 +4,6 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
-import mb.spoofax.compiler.util.StringUtil;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
@@ -14,11 +13,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Value.Enclosing
 public class LanguageProjectCompiler {
@@ -165,15 +161,6 @@ public class LanguageProjectCompiler {
 
         @Value.Default default ResourcePath buildGradleKtsFile() {
             return languageProject().project().baseDirectory().appendRelativePath("build.gradle.kts");
-        }
-
-        @Value.Default default ResourcePath generatedGradleKtsFile() {
-            return languageProject().project().genSourceSpoofaxGradleDirectory().appendRelativePath("generated.gradle.kts");
-        }
-
-        default String relativeGeneratedGradleKtsFile() {
-            final ResourcePath parentDirectory = Objects.requireNonNull(buildGradleKtsFile().getParent());
-            return parentDirectory.relativizeToString(generatedGradleKtsFile());
         }
 
 

@@ -86,9 +86,17 @@ open class LanguagePlugin : Plugin<Project> {
     val extension = LanguageProjectCompilerExtension(project.objects, compilerExtension)
     project.extensions.add(LanguageProjectCompilerExtension.id, extension)
     compilerExtension.languageGradleProject.set(project)
+
     project.gradle.projectsEvaluated {
       afterEvaluate(project, compilerExtension, extension)
     }
+
+    /*
+    HACK: apply plugins eagerly, otherwise their 'afterEvaluate' will not be triggered and the plugin will do nothing.
+    Ensure that plugins are applied after we add a 'projectsEvaluated' listener, to ensure that our listener gets
+    executed before those of the following plugins.
+    */
+    project.plugins.apply("org.metaborg.gradle.config.java-library")
   }
 
   private fun afterEvaluate(project: Project, compilerExtension: SpoofaxCompilerExtension, extension: LanguageProjectCompilerExtension) {

@@ -65,11 +65,18 @@ open class EclipsePlugin : Plugin<Project> {
     val compilerExtension = project.extensions.getByType<SpoofaxCompilerExtension>()
     val extension = EclipseProjectCompilerExtension(project.objects, project, compilerExtension)
     project.extensions.add(EclipseProjectCompilerExtension.id, extension)
-    // HACK: apply bundle plugin early, otherwise its 'afterEvaluate' will not be triggered and the plugin will do nothing.
-    project.plugins.apply("org.metaborg.coronium.bundle")
+
     project.gradle.projectsEvaluated {
       afterEvaluate(project, compilerExtension, extension)
     }
+
+    /*
+    HACK: apply plugins eagerly, otherwise their 'afterEvaluate' will not be triggered and the plugin will do nothing.
+    Ensure that plugins are applied after we add a 'projectsEvaluated' listener, to ensure that our listener gets
+    executed before those of the following plugins.
+    */
+    project.plugins.apply("org.metaborg.gradle.config.java-library")
+    project.plugins.apply("org.metaborg.coronium.bundle")
   }
 
   private fun afterEvaluate(project: Project, compilerExtension: SpoofaxCompilerExtension, extension: EclipseProjectCompilerExtension) {
