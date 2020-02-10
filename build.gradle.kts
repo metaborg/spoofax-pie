@@ -1,5 +1,5 @@
 plugins {
-  id("org.metaborg.gradle.config.root-project") version "0.3.14"
+  id("org.metaborg.gradle.config.root-project") version "0.3.15"
   id("org.metaborg.gitonium") version "0.1.2"
 }
 
@@ -9,10 +9,21 @@ tasks {
     description = "Build all projects in the 'spoofax.core.root' composite build"
     tryDependOnTaskInIncludedBuild("spoofax.core.root", ":buildAll")
   }
-  register("buildExampleTiger") {
+
+  register("buildExampleTigerSpoofaxcore") {
     group = "development"
-    description = "Build all projects in the 'spoofax.example.tiger' composite build"
-    tryDependOnTaskInIncludedBuild("spoofax.example.tiger", ":buildAll")
+    description = "Build all projects in the 'spoofax.example.tiger.spoofaxcore' composite build"
+    tryDependOnTaskInIncludedBuild("spoofax.example.tiger.spoofaxcore", ":buildAll")
+  }
+  register("buildExampleTigerGenerated") {
+    group = "development"
+    description = "Build all projects in the 'spoofax.example.tiger.generated' composite build"
+    tryDependOnTaskInIncludedBuild("spoofax.example.tiger.generated", ":buildAll")
+  }
+  register("buildExampleTigerManual") {
+    group = "development"
+    description = "Build all projects in the 'spoofax.example.tiger.manual' composite build"
+    tryDependOnTaskInIncludedBuild("spoofax.example.tiger.manual", ":buildAll")
   }
 }
 

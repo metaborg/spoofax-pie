@@ -28,6 +28,6 @@ languageProjectCompiler {
       .copyJavaStrategyClasses(true),
     constraintAnalyzer = ConstraintAnalyzerCompiler.LanguageProjectInput.builder(),
     compiler = LanguageProjectCompiler.Input.builder()
-      .languageSpecificationDependency(GradleDependency.project(":org.metaborg.lang.tiger"))
+      .languageSpecificationDependency(GradleDependency.module("$group:org.metaborg.lang.tiger:$version"))
   ))
 }

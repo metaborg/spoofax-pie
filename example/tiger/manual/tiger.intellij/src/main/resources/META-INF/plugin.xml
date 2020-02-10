@@ -1,0 +1,21 @@
+<idea-plugin>
+  <id>tiger.intellij</id>
+  <name>Tiger</name>
+  <vendor>org.metaborg</vendor>
+  <extensions defaultExtensionNs="com.intellij">
+    <ApplicationLoadListener
+      implementation="mb.tiger.intellij.TigerLoader"
+    />
+    <fileTypeFactory
+      implementation="mb.tiger.intellij.TigerFileTypeFactory"
+    />
+    <lang.syntaxHighlighterFactory
+      language="Tiger"
+      implementationClass="mb.tiger.intellij.syntaxcoloring.TigerSyntaxHighlighterFactory"
+    />
+    <lang.parserDefinition
+      language="Tiger"
+      implementationClass="mb.tiger.intellij.syntaxcoloring.TigerParserDefinition"
+    />
+  </extensions>
+</idea-plugin>

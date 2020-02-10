@@ -22,5 +22,7 @@ if(gradle.parent == null) {
   // composite build is required.
   includeBuild("core")
   // Included builds listed below can use the Gradle plugins built in 'core'.
-  includeBuild("example/tiger")
+  includeBuild("example/tiger/spoofaxcore")
+  includeBuild("example/tiger/generated")
+  includeBuild("example/tiger/manual")
 }
