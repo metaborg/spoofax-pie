@@ -22,7 +22,6 @@ public class TigerListLiteralVals implements TaskDef<Provider<@Nullable IStrateg
 
     @Inject
     public TigerListLiteralVals(
-        TigerParse parse,
         StrategoRuntimeBuilder strategoRuntimeBuilder,
         StrategoRuntime prototypeStrategoRuntime,
         LoggerFactory loggerFactory,

@@ -19,8 +19,40 @@ public abstract class CliParamRepr implements Serializable {
         return CliParamReprs.option(paramId, names, negatable, label, description, converterCode);
     }
 
+    public static CliParamRepr option(String paramId, ListView<String> names, boolean negatable, @Nullable String label, @Nullable String description) {
+        return CliParamReprs.option(paramId, names, negatable, label, description, null);
+    }
+
+    public static CliParamRepr option(String paramId, ListView<String> names, boolean negatable, @Nullable String label) {
+        return CliParamReprs.option(paramId, names, negatable, label, null, null);
+    }
+
+    public static CliParamRepr option(String paramId, ListView<String> names, boolean negatable) {
+        return CliParamReprs.option(paramId, names, negatable, null, null, null);
+    }
+
+    public static CliParamRepr option(String paramId, ListView<String> names) {
+        return CliParamReprs.option(paramId, names, false, null, null, null);
+    }
+
+    public static CliParamRepr option(String paramId, String... names) {
+        return CliParamReprs.option(paramId, ListView.of(names), false, null, null, null);
+    }
+
     public static CliParamRepr positional(String paramId, int index, @Nullable String label, @Nullable String description, @Nullable String converterCode) {
         return CliParamReprs.positional(paramId, index, label, description, converterCode);
+    }
+
+    public static CliParamRepr positional(String paramId, int index, @Nullable String label, @Nullable String description) {
+        return CliParamReprs.positional(paramId, index, label, description, null);
+    }
+
+    public static CliParamRepr positional(String paramId, int index, @Nullable String label) {
+        return CliParamReprs.positional(paramId, index, label, null, null);
+    }
+
+    public static CliParamRepr positional(String paramId, int index) {
+        return CliParamReprs.positional(paramId, index, null, null, null);
     }
 
 
