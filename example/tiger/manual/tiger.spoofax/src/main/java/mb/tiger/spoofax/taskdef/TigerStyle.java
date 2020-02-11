@@ -28,7 +28,6 @@ public class TigerStyle implements TaskDef<Provider<@Nullable ArrayList<? extend
     @Override
     public @Nullable Styling exec(ExecContext context, Provider<@Nullable ArrayList<? extends Token<IStrategoTerm>>> tokensProvider) throws ExecException, IOException, InterruptedException {
         final @Nullable ArrayList<? extends Token<IStrategoTerm>> tokens = context.require(tokensProvider);
-        //noinspection ConstantConditions
         if(tokens == null) {
             return null;
         } else {

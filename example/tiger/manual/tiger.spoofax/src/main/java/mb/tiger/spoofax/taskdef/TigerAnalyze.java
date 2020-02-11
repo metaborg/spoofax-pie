@@ -11,6 +11,7 @@ import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
 import mb.stratego.common.StrategoIOAgent;
+import mb.tiger.TigerConstraintAnalyzer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -63,7 +64,6 @@ public class TigerAnalyze implements TaskDef<TigerAnalyze.Input, @Nullable Singl
     @Override
     public @Nullable SingleFileResult exec(ExecContext context, Input input) throws ExecException, IOException, InterruptedException {
         final @Nullable IStrategoTerm ast = context.require(input.astProvider);
-        //noinspection ConstantConditions
         if(ast == null) {
             return null;
         }

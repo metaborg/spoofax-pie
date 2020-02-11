@@ -41,7 +41,6 @@ public class TigerListLiteralVals implements TaskDef<Provider<@Nullable IStrateg
     @Override
     public @Nullable String exec(ExecContext context, Provider<@Nullable IStrategoTerm> astProvider) throws Exception {
         final @Nullable IStrategoTerm ast = context.require(astProvider);
-        //noinspection ConstantConditions
         if(ast == null) {
             return null;
         }

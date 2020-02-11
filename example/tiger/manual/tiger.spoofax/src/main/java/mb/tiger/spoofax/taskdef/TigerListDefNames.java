@@ -40,7 +40,6 @@ public class TigerListDefNames implements TaskDef<Provider<@Nullable IStrategoTe
     @Override
     public @Nullable String exec(ExecContext context, Provider<@Nullable IStrategoTerm> astProvider) throws Exception {
         final @Nullable IStrategoTerm ast = context.require(astProvider);
-        //noinspection ConstantConditions
         if(ast == null) {
             return null;
         }
