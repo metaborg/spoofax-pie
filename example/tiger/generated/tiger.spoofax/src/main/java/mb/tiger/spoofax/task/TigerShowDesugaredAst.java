@@ -11,7 +11,6 @@ import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.command.CommandFeedbacks;
 import mb.spoofax.core.language.command.CommandOutput;
-import mb.spoofax.core.language.command.arg.TextToResourceKeyArgConverter;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
 import mb.stratego.common.StrategoUtil;
@@ -25,21 +24,16 @@ public class TigerShowDesugaredAst implements TaskDef<TigerShowArgs, CommandOutp
     private final TigerParse parse;
     private final StrategoRuntimeBuilder strategoRuntimeBuilder;
     private final StrategoRuntime prototypeStrategoRuntime;
-    private final TextToResourceKeyArgConverter textToResourceKeyArgConverter;
-
 
     @Inject public TigerShowDesugaredAst(
         TigerParse parse,
         StrategoRuntimeBuilder strategoRuntimeBuilder,
-        StrategoRuntime prototypeStrategoRuntime,
-        TextToResourceKeyArgConverter textToResourceKeyArgConverter
+        StrategoRuntime prototypeStrategoRuntime
     ) {
         this.parse = parse;
         this.strategoRuntimeBuilder = strategoRuntimeBuilder;
         this.prototypeStrategoRuntime = prototypeStrategoRuntime;
-        this.textToResourceKeyArgConverter = textToResourceKeyArgConverter;
     }
-
 
     @Override public String getId() {
         return getClass().getName();
@@ -49,8 +43,8 @@ public class TigerShowDesugaredAst implements TaskDef<TigerShowArgs, CommandOutp
         final ResourceKey key = input.key;
         final @Nullable Region region = input.region;
 
-        final JSGLR1ParseResult parseResult = context.require(parse, new ResourceStringProvider(key));
-        final IStrategoTerm ast = parseResult.getAst()
+        @SuppressWarnings("ConstantConditions") final JSGLR1ParseResult parseResult = context.require(parse, new ResourceStringProvider(key));
+        @SuppressWarnings("ConstantConditions") final IStrategoTerm ast = parseResult.getAst()
             .orElseThrow(() -> new RuntimeException("Cannot show desugared AST, parsed AST for '" + key + "' is null"));
 
         final IStrategoTerm term;
@@ -74,33 +68,4 @@ public class TigerShowDesugaredAst implements TaskDef<TigerShowArgs, CommandOutp
     @Override public Task<CommandOutput> createTask(TigerShowArgs input) {
         return TaskDef.super.createTask(input);
     }
-
-
-//    @Override public String getDisplayName() {
-//        return "Show desugared AST";
-//    }
-//
-//    @Override public EnumSetView<CommandExecutionType> getSupportedExecutionTypes() {
-//        return EnumSetView.of(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous);
-//    }
-//
-//    @Override public EnumSetView<CommandContextType> getRequiredContextTypes() {
-//        return EnumSetView.of(CommandContextType.Resource);
-//    }
-//
-//    @Override public ParamDef getParamDef() {
-//        return TigerShowArgs.getParamDef();
-//    }
-//
-//    @Override public TigerShowArgs fromRawArgs(RawArgs rawArgs) {
-//        return TigerShowArgs.fromRawArgs(rawArgs);
-//    }
-//
-//    public CliCommand getCliCommandItem() {
-//        final String operation = "desugar";
-//        return CliCommand.of("desugar", "Desugars Tiger sources and shows the desugared AST",
-//            CliCommand.of("file", "Desugars given Tiger file and shows the desugared AST", this, TigerShowArgs.getFileCliParams(operation)),
-//            CliCommand.of("text", "Desugars given Tiger text and shows the desugared AST", this, TigerShowArgs.getTextCliParams(operation, textToResourceKeyArgConverter))
-//        );
-//    }
 }

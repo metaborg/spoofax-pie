@@ -7,6 +7,7 @@ import mb.spoofax.compiler.command.CommandDefRepr
 import mb.spoofax.compiler.command.ParamRepr
 import mb.spoofax.compiler.gradle.spoofaxcore.AdapterProjectCompilerSettings
 import mb.spoofax.compiler.menu.MenuCommandActionRepr
+import mb.spoofax.compiler.menu.MenuRepr
 import mb.spoofax.compiler.spoofaxcore.AdapterProjectCompiler
 import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler
 import mb.spoofax.compiler.spoofaxcore.ParserCompiler
@@ -14,6 +15,7 @@ import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler
 import mb.spoofax.compiler.spoofaxcore.StylerCompiler
 import mb.spoofax.compiler.util.StringUtil
 import mb.spoofax.compiler.util.TypeInfo
+import mb.spoofax.core.language.cli.CliParams
 import mb.spoofax.core.language.command.CommandContextType
 import mb.spoofax.core.language.command.CommandExecutionType
 import java.util.Optional
@@ -104,7 +106,7 @@ adapterProjectCompiler {
       val compileFileCommand = CommandDefRepr.builder()
         .type(TypeInfo.of(commandPackageId, "TigerCompileFileCommand"))
         .taskDefType(compileFile)
-        .argType(taskPackageId, "TigerCompileFile.Args")
+        .argType(compileFile.appendToId(".Args"))
         .displayName("'Compile' file (list literals)")
         .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous, CommandExecutionType.AutomaticContinuous)
         .addRequiredContextTypes(CommandContextType.File)
@@ -118,7 +120,7 @@ adapterProjectCompiler {
       val compileDirectoryCommand = CommandDefRepr.builder()
         .type(TypeInfo.of(commandPackageId, "TigerCompileDirectoryCommand"))
         .taskDefType(compileDirectory)
-        .argType(taskPackageId, "TigerCompileDirectory.Args")
+        .argType(compileDirectory.appendToId(".Args"))
         .displayName("'Compile' directory (list definition names)")
         .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous, CommandExecutionType.AutomaticContinuous)
         .addRequiredContextTypes(CommandContextType.Directory)
@@ -132,7 +134,7 @@ adapterProjectCompiler {
       val altCompileFileCommand = CommandDefRepr.builder()
         .type(TypeInfo.of(commandPackageId, "TigerAltCompileFileCommand"))
         .taskDefType(altCompileFile)
-        .argType(taskPackageId, "TigerAltCompileFile.Args")
+        .argType(altCompileFile.appendToId(".Args"))
         .displayName("'Alternative compile' file")
         .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous, CommandExecutionType.AutomaticContinuous)
         .addRequiredContextTypes(CommandContextType.File)
@@ -144,29 +146,67 @@ adapterProjectCompiler {
       builder.addCommandDefs(altCompileFileCommand)
 
       // CLI bindings
-      builder.cliCommand(CliCommandRepr.builder()
-        .name("tiger")
-        .description("Tiger language command-line interface")
-        .addSubCommands(
-          CliCommandRepr.builder()
-            .name("parse")
-            .description("Parses Tiger sources and shows the parsed AST")
-            .commandDefType(showParsedAstCommand.type())
-            .addParams(
-              CliParamRepr.positional("resource", 0, "FILE", "Source file to parse", null),
-              CliParamRepr.option("region", ListView.of("-r", "--region"), false, null, "Region in source file to parse", null)
-            )
-            .build()
-        )
-        .build()
+      fun showParams(operation: String) = listOf(
+        CliParamRepr.positional("resource", 0, "FILE", "Source file to $operation"),
+        CliParamRepr.option("region", ListView.of("-r", "--region"), false, "REGION", "Region in source file to $operation")
       )
+      builder.cliCommand(CliCommandRepr.of(
+        "tiger",
+        "Tiger language command-line interface",
+        CliCommandRepr.of("parse", "Parses Tiger sources and shows the parsed AST", showParsedAstCommand.type(), showParams("parse")),
+        CliCommandRepr.of("pretty-print", "Pretty-prints Tiger sources", showPrettyPrintedTextCommand.type(), showParams("pretty-print")),
+        CliCommandRepr.of("analyze", "Analyzes Tiger sources and shows the analyzed AST", showAnalyzedAstCommand.type(), showParams("analyze")),
+        CliCommandRepr.of("desugar", "Desugars Tiger sources and shows the desugared AST", showDesugaredAstCommand.type(), showParams("desugar")),
+        CliCommandRepr.of("compile-file", "Compiles Tiger sources and shows the compiled file", compileFileCommand.type(),
+          CliParamRepr.positional("file", 0, "FILE", "File to compile")
+        ),
+        CliCommandRepr.of("alt-compile-file", "Compiles Tiger sources in an alternative way and shows the compiled file", altCompileFileCommand.type(),
+          CliParamRepr.positional("file", 0, "FILE", "File to compile"),
+          CliParamRepr.option("listDefNames", ListView.of("-l", "--no-defnames"), true, "", "Whether to list definition names intead of literal values"),
+          CliParamRepr.option("base64Encode", ListView.of("-b", "--base64"), false, "", "Whether to Base64 encode the result"),
+          CliParamRepr.option("compiledFileNameSuffix", ListView.of("-s", "--suffix"), false, "SUFFIX", "Suffix to append to the compiled file name")
+        ),
+        CliCommandRepr.of("compile-dir", "Compiles Tiger sources in given directory and shows the compiled file", compileDirectoryCommand.type(),
+          CliParamRepr.positional("dir", 0, "DIR", "Directory to compile")
+        )
+      ))
 
-      // Editor menu bindings
-      builder.addEditorContextMenuItems(
-        MenuCommandActionRepr.of(showParsedAstCommand.type(), CommandExecutionType.ManualOnce, "${showParsedAstCommand.displayName()} (once)"),
-        MenuCommandActionRepr.of(showParsedAstCommand.type(), CommandExecutionType.ManualContinuous, "${showParsedAstCommand.displayName()} (continuous)"),
-        MenuCommandActionRepr.of(showDesugaredAstCommand.type(), CommandExecutionType.ManualOnce, "${showDesugaredAstCommand.displayName()} (once)"),
-        MenuCommandActionRepr.of(showDesugaredAstCommand.type(), CommandExecutionType.ManualContinuous, "${showDesugaredAstCommand.displayName()} (continuous)")
+      // Menu bindings
+      fun CommandDefRepr.action(execType: CommandExecutionType, suffix: String = "", initialArgs: Map<String, String> = mapOf()) = MenuCommandActionRepr.of(type(), execType, "${displayName()}$suffix", initialArgs)
+      fun CommandDefRepr.actionOnce(suffix: String = "", initialArgs: Map<String, String> = mapOf()) = action(CommandExecutionType.ManualOnce, "$suffix (once)", initialArgs)
+      fun CommandDefRepr.actionCont(suffix: String = "", initialArgs: Map<String, String> = mapOf()) = action(CommandExecutionType.ManualContinuous, "$suffix (continuous)", initialArgs)
+      val altCompileFileActions = listOf(
+        altCompileFileCommand.actionOnce("- default"),
+        altCompileFileCommand.actionOnce("- list literal values instead", mapOf(Pair("listDefNames", "false"), Pair("compiledFileNameSuffix", "\"litvals.aterm\""))),
+        altCompileFileCommand.actionOnce("- base64 encode", mapOf(Pair("base64Encode", "true"), Pair("compiledFileNameSuffix", "\"defnames_base64.txt\""))),
+        altCompileFileCommand.actionOnce("- list literal values instead + base64 encode", mapOf(Pair("listDefNames", "false"), Pair("base64Encode", "true"), Pair("compiledFileNameSuffix", "\"litvals_base64.txt\""))),
+        altCompileFileCommand.actionCont("- default"),
+        altCompileFileCommand.actionCont("- list literal values instead", mapOf(Pair("listDefNames", "false"), Pair("compiledFileNameSuffix", "\"litvals.aterm\""))),
+        altCompileFileCommand.actionCont("- base64 encode", mapOf(Pair("base64Encode", "true"), Pair("compiledFileNameSuffix", "\"defnames_base64.txt\""))),
+        altCompileFileCommand.actionCont("- list literal values instead + base64 encode", mapOf(Pair("listDefNames", "false"), Pair("base64Encode", "true"), Pair("compiledFileNameSuffix", "\"litvals_base64.txt\"")))
+      )
+      val mainAndEditorMenu = listOf(
+        MenuRepr.of("Compile", listOf(
+          compileFileCommand.action(CommandExecutionType.ManualOnce)
+        ) + altCompileFileActions),
+        MenuRepr.of("Debug",
+          MenuRepr.of("Syntax", showParsedAstCommand.actionOnce(), showParsedAstCommand.actionCont()),
+          MenuRepr.of("Static Semantics", showAnalyzedAstCommand.actionOnce(), showAnalyzedAstCommand.actionCont()),
+          MenuRepr.of("Transformations", showDesugaredAstCommand.actionOnce(), showDesugaredAstCommand.actionCont())
+        )
+      )
+      builder.addAllMainMenuItems(mainAndEditorMenu)
+      builder.addAllEditorContextMenuItems(mainAndEditorMenu)
+      builder.addResourceContextMenuItems(
+        MenuRepr.of("Compile", listOf(
+          compileFileCommand.action(CommandExecutionType.ManualOnce),
+          compileDirectoryCommand.action(CommandExecutionType.ManualOnce)
+        ) + altCompileFileActions),
+        MenuRepr.of("Debug",
+          MenuRepr.of("Syntax", showParsedAstCommand.actionOnce()),
+          MenuRepr.of("Static Semantics", showAnalyzedAstCommand.actionOnce()),
+          MenuRepr.of("Transformations", showDesugaredAstCommand.actionOnce())
+        )
       )
     }
   ))

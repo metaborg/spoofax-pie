@@ -11,7 +11,6 @@ import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.command.CommandFeedbacks;
 import mb.spoofax.core.language.command.CommandOutput;
-import mb.spoofax.core.language.command.arg.TextToResourceKeyArgConverter;
 import mb.stratego.common.StrategoUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -21,16 +20,11 @@ import javax.inject.Inject;
 public class TigerShowAnalyzedAst implements TaskDef<TigerShowArgs, CommandOutput> {
     private final TigerParse parse;
     private final TigerAnalyze analyze;
-    private final TextToResourceKeyArgConverter textToResourceKeyArgConverter;
 
-
-    @Inject
-    public TigerShowAnalyzedAst(TigerParse parse, TigerAnalyze analyze, TextToResourceKeyArgConverter textToResourceKeyArgConverter) {
+    @Inject public TigerShowAnalyzedAst(TigerParse parse, TigerAnalyze analyze) {
         this.parse = parse;
         this.analyze = analyze;
-        this.textToResourceKeyArgConverter = textToResourceKeyArgConverter;
     }
-
 
     @Override public String getId() {
         return getClass().getName();
@@ -42,7 +36,6 @@ public class TigerShowAnalyzedAst implements TaskDef<TigerShowArgs, CommandOutpu
 
         final Provider<@Nullable IStrategoTerm> astProvider = parse.createAstProvider(key);
         final ConstraintAnalyzer.@Nullable SingleFileResult analysisResult = context.require(analyze, new TigerAnalyze.Input(key, astProvider));
-        // noinspection ConstantConditions (analysisResult can really be null).
         if(analysisResult == null) {
             throw new RuntimeException("Cannot show analyzed AST, analysis result for '" + key + "' is null");
         }
@@ -64,33 +57,4 @@ public class TigerShowAnalyzedAst implements TaskDef<TigerShowArgs, CommandOutpu
     @Override public Task<CommandOutput> createTask(TigerShowArgs input) {
         return TaskDef.super.createTask(input);
     }
-
-
-//    @Override public String getDisplayName() {
-//        return "Show analyzed AST";
-//    }
-//
-//    @Override public EnumSetView<CommandExecutionType> getSupportedExecutionTypes() {
-//        return EnumSetView.of(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous);
-//    }
-//
-//    @Override public EnumSetView<CommandContextType> getRequiredContextTypes() {
-//        return EnumSetView.of(CommandContextType.Resource);
-//    }
-//
-//    @Override public ParamDef getParamDef() {
-//        return TigerShowArgs.getParamDef();
-//    }
-//
-//    @Override public TigerShowArgs fromRawArgs(RawArgs rawArgs) {
-//        return TigerShowArgs.fromRawArgs(rawArgs);
-//    }
-//
-//    public CliCommand getCliCommandItem() {
-//        final String operation = "analyze";
-//        return CliCommand.of(operation, "Analyzes Tiger sources and shows the analyzed AST",
-//            CliCommand.of("file", "Analyzes given Tiger file and shows the analyzed AST", this, TigerShowArgs.getFileCliParams(operation)),
-//            CliCommand.of("text", "Analyzes given Tiger text and shows the analyzed AST", this, TigerShowArgs.getTextCliParams(operation, textToResourceKeyArgConverter))
-//        );
-//    }
 }

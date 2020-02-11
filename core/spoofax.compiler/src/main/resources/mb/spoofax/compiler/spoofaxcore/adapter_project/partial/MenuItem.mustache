@@ -3,7 +3,7 @@ CommandAction.of(
     {{#commandDefType}}{{#getInjectedCommandDef}}{{/getInjectedCommandDef}}{{/commandDefType}},
     CommandExecutionType.{{executionType}},
     {{#displayName}}"{{this}}"{{/displayName}}{{^displayName}}null{{/displayName}},
-    new RawArgs(MapView.of({{#initialArgs.entrySet}}new EntryView<>("{{getKey}}", {{getValue}}){{^-last}},{{/-last}}{{/initialArgs.entrySet}}))
+    new RawArgs(MapView.<String, Serializable>of({{#initialArgs.entrySet}}new EntryView<String, Serializable>("{{getKey}}", {{getValue}}){{^-last}},{{/-last}}{{/initialArgs.entrySet}}))
 )
 {{/isCommandAction}}
 {{#isMenu}}

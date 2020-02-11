@@ -105,4 +105,9 @@ public interface TypeInfo extends Serializable {
     default String asVariableId() {
         return Conversion.classIdToVariableId(id());
     }
+
+
+    default TypeInfo appendToId(String append) {
+        return TypeInfo.of(this.packageId(), this.id() + append);
+    }
 }

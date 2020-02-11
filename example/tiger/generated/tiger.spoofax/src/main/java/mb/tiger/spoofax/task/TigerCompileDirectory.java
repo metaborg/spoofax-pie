@@ -50,11 +50,9 @@ public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args
         }
     }
 
-
     private final TigerParse parse;
     private final TigerListDefNames listDefNames;
     private final ResourceService resourceService;
-
 
     @Inject
     public TigerCompileDirectory(TigerParse parse, TigerListDefNames listDefNames, ResourceService resourceService) {
@@ -62,7 +60,6 @@ public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args
         this.listDefNames = listDefNames;
         this.resourceService = resourceService;
     }
-
 
     @Override public String getId() {
         return getClass().getName();
@@ -85,7 +82,6 @@ public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args
                     }
                     final Provider<@Nullable IStrategoTerm> astProvider = parse.createAstProvider(f.getKey());
                     final @Nullable String defNames = context.require(listDefNames, astProvider);
-                    //noinspection ConstantConditions (defNames can really be null)
                     if(defNames != null) {
                         sb.append(defNames);
                     } else {
@@ -119,32 +115,4 @@ public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args
     @Override public Task<CommandOutput> createTask(Args input) {
         return TaskDef.super.createTask(input);
     }
-
-
-//    @Override public String getDisplayName() {
-//        return "'Compile' directory (list definition names)";
-//    }
-//
-//    @Override public EnumSetView<CommandExecutionType> getSupportedExecutionTypes() {
-//        return EnumSetView.of(CommandExecutionType.ManualOnce, CommandExecutionType.AutomaticContinuous);
-//    }
-//
-//    @Override public EnumSetView<CommandContextType> getRequiredContextTypes() {
-//        return EnumSetView.of(CommandContextType.Directory);
-//    }
-//
-//    @Override public ParamDef getParamDef() {
-//        return new ParamDef(Param.of("dir", ResourcePath.class, true, ListView.of(ArgProviders.context())));
-//    }
-//
-//    @Override public Args fromRawArgs(RawArgs rawArgs) {
-//        final ResourcePath dir = rawArgs.getOrThrow("dir");
-//        return new TigerCompileDirectory.Args(dir);
-//    }
-//
-//    public CliCommand getCliCommandItem() {
-//        return CliCommand.of("compile-dir", "Compiles Tiger files in given directory and shows the compiled file", this,
-//            CliParams.positional("dir", 0, "DIR", "Directory to compile", null)
-//        );
-//    }
 }
