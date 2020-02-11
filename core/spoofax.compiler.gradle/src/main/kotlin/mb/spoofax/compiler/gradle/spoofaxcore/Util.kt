@@ -1,5 +1,6 @@
 package mb.spoofax.compiler.gradle.spoofaxcore
 
+import mb.resource.ResourceRuntimeException
 import mb.resource.ResourceService
 import mb.resource.fs.FSPath
 import mb.spoofax.compiler.util.GradleConfiguredDependency
@@ -26,20 +27,29 @@ fun Project.configureVersion(project: GradleProject) {
   this.version = project.coordinate().version()
 }
 
-fun Project.configureGeneratedSources(project: GradleProject, resourceService: ResourceService) {
+fun Project.configureGeneratedSources(compilerProject: GradleProject, resourceService: ResourceService) {
   configure<SourceSetContainer> {
     named("main") {
       java {
-        val dir = project.genSourceSpoofaxJavaDirectory()
+        val dir = compilerProject.genSourceSpoofaxJavaDirectory()
         srcDir(resourceService.toLocalFile(dir)
           ?: throw GradleException("Cannot configure java sources directory, directory '$dir' is not on the local filesystem"))
       }
       resources {
-        val dir = project.genSourceSpoofaxResourcesDirectory()
+        val dir = compilerProject.genSourceSpoofaxResourcesDirectory()
         srcDir(resourceService.toLocalFile(dir)
           ?: throw GradleException("Cannot configure resources directory, directory '$dir' is not on the local filesystem"))
       }
     }
+  }
+}
+
+fun Project.deleteGenSourceSpoofaxDirectory(compilerProject: GradleProject, resourceService: ResourceService) {
+  try {
+    val genSourceDir = resourceService.getHierarchicalResource(compilerProject.genSourceSpoofaxDirectory())
+    genSourceDir.delete(true)
+  } catch(e: ResourceRuntimeException) {
+    project.logger.warn("Failed to delete generated sources directory", e)
   }
 }
 

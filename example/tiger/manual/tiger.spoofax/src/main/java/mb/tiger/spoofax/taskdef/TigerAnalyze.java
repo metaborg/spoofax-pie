@@ -11,7 +11,6 @@ import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
 import mb.stratego.common.StrategoIOAgent;
-import mb.tiger.TigerConstraintAnalyzer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 

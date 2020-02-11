@@ -13,8 +13,6 @@ import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.LanguageScope;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
-import mb.tiger.TigerConstraintAnalyzer;
-import mb.tiger.TigerConstraintAnalyzerFactory;
 import mb.tiger.TigerParser;
 import mb.tiger.TigerParserFactory;
 import mb.tiger.TigerStrategoRuntimeBuilderFactory;

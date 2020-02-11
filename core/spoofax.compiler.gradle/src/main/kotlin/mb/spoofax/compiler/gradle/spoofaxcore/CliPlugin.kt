@@ -90,6 +90,7 @@ open class CliPlugin : Plugin<Project> {
       inputs.property("input", input)
       outputs.files(input.providedFiles().map { resourceService.toLocalFile(it) })
       doLast {
+        project.deleteGenSourceSpoofaxDirectory(input.project(), resourceService)
         compiler.compile(input)
       }
     }

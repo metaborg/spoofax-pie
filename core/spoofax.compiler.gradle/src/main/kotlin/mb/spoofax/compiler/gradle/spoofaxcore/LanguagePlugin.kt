@@ -2,6 +2,7 @@
 
 package mb.spoofax.compiler.gradle.spoofaxcore
 
+import mb.resource.ResourceRuntimeException
 import mb.resource.ResourceService
 import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler
 import mb.spoofax.compiler.spoofaxcore.LanguageProject
@@ -125,6 +126,7 @@ open class LanguagePlugin : Plugin<Project> {
       inputs.property("input", input)
       outputs.files(input.providedFiles().map { resourceService.toLocalFile(it) })
       doLast {
+        project.deleteGenSourceSpoofaxDirectory(input.languageProject().project(), resourceService)
         compiler.compile(input)
       }
     }

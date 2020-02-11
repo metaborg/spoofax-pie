@@ -107,6 +107,7 @@ open class EclipseExternaldepsPlugin : Plugin<Project> {
       inputs.property("input", input)
       outputs.files(input.providedFiles().map { resourceService.toLocalFile(it) })
       doLast {
+        project.deleteGenSourceSpoofaxDirectory(input.project(), resourceService)
         compiler.compile(input)
       }
     }
@@ -117,10 +118,6 @@ open class EclipseExternaldepsPlugin : Plugin<Project> {
     project: Project,
     input: EclipseExternaldepsProjectCompiler.Input
   ) {
-    // TODO: need to be applied here or early?
-//    project.plugins.apply("biz.aQute.bnd.builder")
-//    project.plugins.apply("org.metaborg.coronium.embedding")
-
     // Use bnd to create a single OSGi bundle JAR that includes all dependencies.
     val requires = listOf(
       "javax.inject", // Depends on javax.inject bundle provided by Eclipse.

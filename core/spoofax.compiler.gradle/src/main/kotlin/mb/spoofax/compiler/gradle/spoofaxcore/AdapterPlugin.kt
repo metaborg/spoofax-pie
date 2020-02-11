@@ -137,6 +137,7 @@ open class AdapterPlugin : Plugin<Project> {
       inputs.property("input", input)
       outputs.files(input.providedFiles().map { resourceService.toLocalFile(it) })
       doLast {
+        project.deleteGenSourceSpoofaxDirectory(input.adapterProject().project(), resourceService)
         compiler.compile(input)
       }
     }
