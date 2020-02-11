@@ -20,16 +20,17 @@ dependencies {
 languageProjectCompiler {
   settings.set(mb.spoofax.compiler.gradle.spoofaxcore.LanguageProjectCompilerSettings(
     parser = ParserCompiler.LanguageProjectInput.builder()
-      .startSymbol("Module"),
+      .startSymbol("Start"),
     styler = StylerCompiler.LanguageProjectInput.builder(),
     strategoRuntime = StrategoRuntimeCompiler.LanguageProjectInput.builder()
-      .addInteropRegisterersByReflection("org.metaborg.lang.tiger.trans.InteropRegisterer", "org.metaborg.lang.tiger.strategies.InteropRegisterer")
-      .addNaBL2Primitives(true)
-      .addStatixPrimitives(false)
-      .copyJavaStrategyClasses(true),
+      .addNaBL2Primitives(false)
+      .addStatixPrimitives(true)
+      .copyCTree(true)
+      .copyClasses(false)
+      .copyJavaStrategyClasses(false),
     constraintAnalyzer = ConstraintAnalyzerCompiler.LanguageProjectInput.builder(),
     compiler = LanguageProjectCompiler.Input.builder()
-      .languageSpecificationDependency(GradleDependency.module("$group:org.metaborg.lang.tiger:$version"))
+      .languageSpecificationDependency(GradleDependency.project(":mod.spoofaxcore"))
   ))
 }
 

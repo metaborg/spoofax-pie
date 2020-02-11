@@ -1,0 +1,90 @@
+module static-semantics
+
+signature
+
+  sorts Start constructors
+    Program : list(Item) -> Start
+  
+  sorts Item constructors
+    Dbg :          Exp        -> Item
+    Let : string * Exp        -> Item
+    Mod : string * list(Item) -> Item
+    Use :          Ref        -> Item
+    
+  sorts Exp constructors
+    NumLit : int -> Exp
+    ERef   : Ref -> Exp
+
+  sorts Ref constructors
+    Ref  :       string -> Ref
+    QRef : Ref * string -> Ref
+
+  sorts TYPE constructors
+    NUM :          TYPE
+    MOD : scope -> TYPE 
+
+  relations
+    typeOfDecl : occurrence -> TYPE
+
+  namespaces
+    Any : string
+
+  name-resolution
+    labels P
+    resolve Any filter P* min $ < P
+
+rules // Program
+
+  programOK : Start
+  
+  programOK(Program(items)) :- {s}
+    new s,
+    itemsOK(s, items).
+
+rules // Item
+    
+  itemOK : scope * Item
+  
+  itemOK(s, Dbg(exp)) :- 
+    typeOfExp(s, exp) == NUM().
+  itemOK(s, Let(id, exp)) :- {T}
+    typeOfExp(s, exp) == T,
+    s -> Any{id} with typeOfDecl T.
+  itemOK(s, Mod(id, items)) :- {s_mod}
+  	new s_mod, 
+  	s_mod -P-> s,
+    s -> Any{id} with typeOfDecl MOD(s_mod),
+    itemsOK(s_mod, items).
+  itemOK(s, Use(ref)) :- true. // TODO: imports
+  
+  itemsOK maps itemOK(*, list(*))
+
+rules // Expression
+
+  typeOfExp : scope * Exp -> TYPE
+  
+  typeOfExp(s, NumLit(_)) = NUM().
+  typeOfExp(s, ERef(ref)) = T :-
+    typeOfRef(s, ref) == T.
+
+rules // Reference
+
+  typeOfRef : scope * Ref -> TYPE
+  
+  typeOfRef(s, Ref(id)) = T :- {id'} 
+    typeOfDecl of Any{id} in s |-> [(_, (Any{id'}, T))], /* What does this mean? */
+    @id.ref := id'.
+  typeOfRef(s, QRef(ref, id)) = T :- {s_mod id'}
+    typeOfRef(s, ref) == MOD(s_mod),
+    typeOfDecl of Any{id} in s_mod |-> [(_, (Any{id'}, T))],    
+    @id.ref := id'.
+
+rules // multi-file entry point
+
+//  projectOk : scope
+//
+//  projectOk(s).
+//  
+//  fileOk : scope * Start
+//  
+//  fileOk(s, Empty()).

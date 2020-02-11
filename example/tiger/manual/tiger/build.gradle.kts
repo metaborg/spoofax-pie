@@ -1,6 +1,7 @@
 plugins {
   id("org.metaborg.gradle.config.java-library")
   id("org.metaborg.gradle.config.junit-testing")
+  id("de.set.ecj") // Use ECJ to speed up compilation of Stratego's generated Java files.
 }
 
 sourceSets {
@@ -128,3 +129,7 @@ copySpoofaxLanguageResources(
   true,
   "target/metaborg/editor.esv.af", "target/metaborg/sdf.tbl"
 )
+
+ecj {
+  toolVersion = "3.20.0"
+}

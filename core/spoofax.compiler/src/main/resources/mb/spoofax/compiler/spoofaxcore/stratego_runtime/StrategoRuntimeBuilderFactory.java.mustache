@@ -1,11 +1,5 @@
 package {{genFactory.packageId}};
 
-{{#addNaBL2Primitives}}
-import mb.nabl2.common.NaBL2PrimitiveLibrary;
-{{/addNaBL2Primitives}}
-{{#addStatixPrimitives}}
-import mb.statix.common.StatixPrimitiveLibrary;
-{{/addStatixPrimitives}}
 import mb.spoofax.compiler.interfaces.spoofaxcore.StrategoRuntimeBuilderFactory;
 import mb.stratego.common.StrategoRuntimeBuilder;
 
@@ -17,10 +11,15 @@ public class {{genFactory.id}} implements StrategoRuntimeBuilderFactory {
 {{/interopRegisterersByReflection}}
         builder.withJarParentClassLoader({{genFactory.id}}.class.getClassLoader());
 {{#addNaBL2Primitives}}
-        builder.addLibrary(new NaBL2PrimitiveLibrary());
+        builder.addLibrary(new mb.nabl2.common.NaBL2PrimitiveLibrary());
 {{/addNaBL2Primitives}}
 {{#addStatixPrimitives}}
-        builder.addLibrary(new StatixPrimitiveLibrary());
+        {
+            final java.net.URL locationURL = {{genFactory.id}}.class.getProtectionDomain().getCodeSource().getLocation();
+            final mb.resource.url.URLPath path = new mb.resource.url.URLPath(locationURL);
+            final mb.resource.url.URLPath correctedPath = path.appendRelativePath("{{languageProject.packagePath}}");
+            builder.addLibrary(new mb.statix.common.StatixPrimitiveLibrary("{{languageProject.project.coordinate.groupId}}", "{{languageProject.project.coordinate.artifactId}}", "{{languageProject.project.coordinate.version}}", correctedPath.toString()));
+        }
 {{/addStatixPrimitives}}
         return builder;
     }
