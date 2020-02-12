@@ -8,16 +8,17 @@ signature
   sorts Item constructors
     Dbg :          Exp        -> Item
     Let : string * Exp        -> Item
-    Mod : string * list(Item) -> Item
-    Use :          Ref        -> Item
+    Use :          UseRef     -> Item
+    
+  sorts UseRef constructors
+    UseRef  : string          -> UseRef
+    QUseRef : UseRef * string -> UseRef
     
   sorts Exp constructors
-    NumLit : int -> Exp
-    ERef   : Ref -> Exp
-
-  sorts Ref constructors
-    Ref  :       string -> Ref
-    QRef : Ref * string -> Ref
+    NumLit :          int -> Exp
+    Mod    :   list(Item) -> Exp
+    Ref    :       string -> Exp
+    QRef   : Exp * string -> Exp
 
   sorts TYPE constructors
     NUM :          TYPE
@@ -27,11 +28,11 @@ signature
     typeOfDecl : occurrence -> TYPE
 
   namespaces
-    Any : string
+    Var : string
 
   name-resolution
-    labels P
-    resolve Any filter P* min $ < P
+    labels P I
+    resolve Var filter P* | (P* I) min $ < P, $ < I, I < P
 
 rules // Program
 
@@ -44,47 +45,60 @@ rules // Program
 rules // Item
     
   itemOK : scope * Item
-  
-  itemOK(s, Dbg(exp)) :- 
-    typeOfExp(s, exp) == NUM().
+
+  itemOK(s, Dbg(exp)) :- {T}
+    typeOfExp(s, exp) == NUM().  
   itemOK(s, Let(id, exp)) :- {T}
     typeOfExp(s, exp) == T,
-    s -> Any{id} with typeOfDecl T.
-  itemOK(s, Mod(id, items)) :- {s_mod}
-  	new s_mod, 
-  	s_mod -P-> s,
-    s -> Any{id} with typeOfDecl MOD(s_mod),
-    itemsOK(s_mod, items).
-  itemOK(s, Use(ref)) :- true. // TODO: imports
+    s -> Var{id} with typeOfDecl T.
+  itemOK(s, Use(use_ref)) :- {s_mod}
+    scopeOfUseRef(s, use_ref) == s_mod,
+    s -I-> s_mod.
   
   itemsOK maps itemOK(*, list(*))
+    
+rules // Use reference
 
+  scopeOfUseRef : scope * UseRef -> scope
+  
+  scopeOfUseRef(s, UseRef(id)) = S :-
+  	resolveUse(s, id) == S.
+  scopeOfUseRef(s, QUseRef(use_ref, id)) = S :- {id' s_mod}
+    scopeOfUseRef(s, use_ref) == s_mod,
+  	resolveUse(s_mod, id) == S.
+
+  resolveUse : scope * string -> scope
+  
+  resolveUse(s, id) = S :- {id'}
+	query typeOfDecl 
+  	  filter P* and { Var{x'} :- x' == id }
+  	  min $ < P and true
+  	  in s |-> [(_, (Var{id'}, MOD(S)))],
+  	@id.ref := id'.
+  
 rules // Expression
 
   typeOfExp : scope * Exp -> TYPE
   
   typeOfExp(s, NumLit(_)) = NUM().
-  typeOfExp(s, ERef(ref)) = T :-
-    typeOfRef(s, ref) == T.
+  typeOfExp(s, Mod(items)) = MOD(s_mod) :-
+  	new s_mod, 
+  	s_mod -P-> s,
+    itemsOK(s_mod, items).
+  typeOfExp(s, Ref(id)) = T :- {id'}
+  	typeOfDecl of Var{id} in s |-> [(_, (Var{id'}, T))],
+  	@id.ref := id'.
+  typeOfExp(s, QRef(exp, id)) = T :- {s_mod id'}
+  	typeOfExp(s, exp) == MOD(s_mod),
+  	typeOfDecl of Var{id} in s_mod |-> [(_, (Var{id'}, T))],
+  	@id.ref := id'.
 
-rules // Reference
-
-  typeOfRef : scope * Ref -> TYPE
-  
-  typeOfRef(s, Ref(id)) = T :- {id'} 
-    typeOfDecl of Any{id} in s |-> [(_, (Any{id'}, T))], /* What does this mean? */
-    @id.ref := id'.
-  typeOfRef(s, QRef(ref, id)) = T :- {s_mod id'}
-    typeOfRef(s, ref) == MOD(s_mod),
-    typeOfDecl of Any{id} in s_mod |-> [(_, (Any{id'}, T))],    
-    @id.ref := id'.
-
-rules // multi-file entry point
-
-//  projectOk : scope
+//rules // multi-file entry point
 //
-//  projectOk(s).
-//  
-//  fileOk : scope * Start
-//  
-//  fileOk(s, Empty()).
+////  projectOk : scope
+////
+////  projectOk(s).
+////  
+////  fileOk : scope * Start
+////  
+////  fileOk(s, Empty()).

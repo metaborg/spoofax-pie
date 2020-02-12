@@ -14,12 +14,12 @@ context-free syntax
 
   Item.Dbg = <dbg <Exp>;>
   Item.Let = <let <ID> = <Exp>;>
-  Item.Mod = <mod <ID> {<{Item "\n"}*>}>
-  Item.Use = <use <Ref>;>
+  Item.Use = <use <UseRef>;>
+  
+  UseRef.UseRef  = ID
+  UseRef.QUseRef = <<UseRef>.<ID>> 
   
   Exp.NumLit = INT
-  Exp.ERef   = Ref
-
-  Ref.Ref   = ID
-  Ref.QRef = <<Ref>.<ID>>
-  
+  Exp.Mod    = <mod {<{Item "\n"}*>}>
+  Exp.Ref    = ID
+  Exp.QRef   = <<Exp>.<ID>>
