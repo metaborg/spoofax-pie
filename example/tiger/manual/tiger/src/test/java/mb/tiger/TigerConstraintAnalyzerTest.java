@@ -7,8 +7,13 @@ import mb.constraint.common.ConstraintAnalyzer.SingleFileResult;
 import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.constraint.common.ConstraintAnalyzerException;
 import mb.jsglr1.common.JSGLR1ParseResult;
+import mb.log.api.LoggerFactory;
+import mb.log.noop.NoopLoggerFactory;
+import mb.resource.DefaultResourceService;
 import mb.resource.ResourceKey;
+import mb.resource.ResourceService;
 import mb.resource.SimpleResourceKey;
+import mb.resource.fs.FSResourceRegistry;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -24,7 +29,9 @@ class TigerConstraintAnalyzerTest {
     private static final String qualifier = "test";
 
     private final TigerParser parser = new TigerParserFactory().create();
-    private final StrategoRuntimeBuilder strategoRuntimeBuilder = new TigerStrategoRuntimeBuilderFactory().create();
+    private final LoggerFactory loggerFactory = new NoopLoggerFactory();
+    private final ResourceService resourceService = new DefaultResourceService(new FSResourceRegistry());
+    private final StrategoRuntimeBuilder strategoRuntimeBuilder = new TigerStrategoRuntimeBuilderFactory().create(loggerFactory, resourceService);
     private final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.build();
     private final TigerConstraintAnalyzer analyzer = new TigerConstraintAnalyzerFactory(strategoRuntime).create();
 

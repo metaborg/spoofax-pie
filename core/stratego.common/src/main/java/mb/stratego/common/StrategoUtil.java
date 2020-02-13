@@ -20,7 +20,7 @@ public class StrategoUtil {
 
     public static String toString(IStrategoTerm term, int ppWidth) {
         if(term instanceof IStrategoString) {
-            return ((IStrategoString) term).stringValue();
+            return ((IStrategoString)term).stringValue();
         } else {
             final @Nullable IStrategoString pp = prettyPrintTerm(term, ppWidth);
             if(pp != null) {
@@ -37,10 +37,15 @@ public class StrategoUtil {
 
     private static @Nullable IStrategoString prettyPrintTerm(IStrategoTerm term, int ppWidth) {
         final Context context = org.strategoxt.stratego_aterm.Main.init();
-        term = aterm_escape_strings_0_0.instance.invoke(context, term);
-        term = pp_aterm_box_0_0.instance.invoke(context, term);
-        term = box2text_string_0_1.instance.invoke(context, term, context.getFactory().makeInt(ppWidth));
-        return (IStrategoString) term;
+        @Nullable IStrategoTerm transformedTerm = term;
+        transformedTerm = aterm_escape_strings_0_0.instance.invoke(context, transformedTerm);
+        transformedTerm = pp_aterm_box_0_0.instance.invoke(context, transformedTerm);
+        transformedTerm = box2text_string_0_1.instance.invoke(context, transformedTerm, context.getFactory().makeInt(ppWidth));
+        if(transformedTerm == null) {
+            return null;
+        } else {
+            return (IStrategoString)transformedTerm;
+        }
     }
 
 

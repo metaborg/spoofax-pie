@@ -13,7 +13,8 @@ plugins {
 
 dependencies {
   api(platform("org.metaborg:spoofax.depconstraints:$version"))
-  testImplementation("org.metaborg:log.backend.noop")
+  testImplementation("org.metaborg:log.backend.slf4j")
+  testImplementation("org.slf4j:slf4j-simple:1.7.30")
   testCompileOnly("org.checkerframework:checker-qual-android")
 }
 
@@ -23,8 +24,8 @@ languageProjectCompiler {
       .startSymbol("Start"),
     styler = StylerCompiler.LanguageProjectInput.builder(),
     strategoRuntime = StrategoRuntimeCompiler.LanguageProjectInput.builder()
-      .addNaBL2Primitives(false)
-      .addStatixPrimitives(true)
+      .enableNaBL2(false)
+      .enableStatix(true)
       .copyCTree(true)
       .copyClasses(false)
       .copyJavaStrategyClasses(false),
@@ -32,6 +33,14 @@ languageProjectCompiler {
     compiler = LanguageProjectCompiler.Input.builder()
       .languageSpecificationDependency(GradleDependency.project(":mod.spoofaxcore"))
   ))
+}
+
+tasks.test {
+  // Show standard out and err in tests.
+  testLogging {
+    events(org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_OUT, org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR)
+    showStandardStreams = true
+  }
 }
 
 ecj {

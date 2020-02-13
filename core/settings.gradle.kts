@@ -30,6 +30,7 @@ include("stratego.common")
 include("constraint.common")
 include("nabl2.common")
 include("statix.common")
+include("spoofax2.common")
 
 include("spoofax.core")
 include("spoofax.cli")

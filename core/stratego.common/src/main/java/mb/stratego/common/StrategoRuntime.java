@@ -2,7 +2,11 @@ package mb.stratego.common;
 
 import mb.common.util.StringFormatter;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spoofax.interpreter.core.*;
+import org.spoofax.interpreter.core.InterpreterErrorExit;
+import org.spoofax.interpreter.core.InterpreterException;
+import org.spoofax.interpreter.core.InterpreterExit;
+import org.spoofax.interpreter.core.Tools;
+import org.spoofax.interpreter.core.UndefinedStrategyException;
 import org.spoofax.interpreter.library.IOAgent;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -11,10 +15,17 @@ import org.strategoxt.HybridInterpreter;
 
 public class StrategoRuntime {
     final HybridInterpreter hybridInterpreter;
+    final @Nullable Object contextObject;
 
+
+    public StrategoRuntime(HybridInterpreter hybridInterpreter, @Nullable Object contextObject) {
+        this.hybridInterpreter = hybridInterpreter;
+        this.contextObject = contextObject;
+    }
 
     public StrategoRuntime(HybridInterpreter hybridInterpreter) {
         this.hybridInterpreter = hybridInterpreter;
+        this.contextObject = null;
     }
 
 
@@ -22,12 +33,12 @@ public class StrategoRuntime {
         return invoke(strategy, input, ioAgent, null);
     }
 
-    public @Nullable IStrategoTerm invoke(String strategy, IStrategoTerm input, IOAgent ioAgent, @Nullable Object contextObject) throws StrategoException {
+    public @Nullable IStrategoTerm invoke(String strategy, IStrategoTerm input, IOAgent ioAgent, @Nullable Object contextObjectOverride) throws StrategoException {
+        final @Nullable Object contextObject = contextObjectOverride != null ? contextObjectOverride : this.contextObject;
         hybridInterpreter.setCurrent(input);
         hybridInterpreter.setIOAgent(ioAgent);
         hybridInterpreter.getContext().setContextObject(contextObject);
         hybridInterpreter.getCompiledContext().setContextObject(contextObject);
-
         try {
             final boolean success = hybridInterpreter.invoke(strategy);
             if(!success) return null;
@@ -48,7 +59,7 @@ public class StrategoRuntime {
     }
 
 
-    private class ExceptionData {
+    private static class ExceptionData {
         final String message;
         final @Nullable Throwable inner;
 
@@ -82,7 +93,7 @@ public class StrategoRuntime {
         } catch(InterpreterException e) {
             final Throwable cause = e.getCause();
             if(cause instanceof InterpreterException) {
-                return handleException((InterpreterException) cause, strategy);
+                return handleException((InterpreterException)cause, strategy);
             } else {
                 final String message = StringFormatter.format("Invoking Stratego strategy {} failed unexpectedly\n{}\n{}", strategy, trace, e);
                 return new ExceptionData(message, null);

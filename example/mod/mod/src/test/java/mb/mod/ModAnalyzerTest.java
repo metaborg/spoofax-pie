@@ -1,4 +1,4 @@
-package mb.tiger;
+package mb.mod;
 
 import mb.common.message.Severity;
 import mb.constraint.common.ConstraintAnalyzer;
@@ -8,12 +8,13 @@ import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.constraint.common.ConstraintAnalyzerException;
 import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.log.api.LoggerFactory;
-import mb.log.noop.NoopLoggerFactory;
+import mb.log.slf4j.SLF4JLoggerFactory;
 import mb.resource.DefaultResourceService;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
 import mb.resource.SimpleResourceKey;
 import mb.resource.fs.FSResourceRegistry;
+import mb.resource.url.URLResourceRegistry;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -25,19 +26,20 @@ import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class TigerConstraintAnalyzerTest {
+class ModAnalyzerTest {
     private static final String qualifier = "test";
 
-    private final TigerParser parser = new TigerParserFactory().create();
-    private final LoggerFactory loggerFactory = new NoopLoggerFactory();
-    private final ResourceService resourceService = new DefaultResourceService(new FSResourceRegistry());
-    private final StrategoRuntimeBuilder strategoRuntimeBuilder = new TigerStrategoRuntimeBuilderFactory().create(loggerFactory, resourceService);
+    private final ModParser parser = new ModParserFactory().create();
+    private final String startSymbol = "Start";
+    private final LoggerFactory loggerFactory = new SLF4JLoggerFactory();
+    private final ResourceService resourceService = new DefaultResourceService(new FSResourceRegistry(), new URLResourceRegistry());
+    private final StrategoRuntimeBuilder strategoRuntimeBuilder = new ModStrategoRuntimeBuilderFactory().create(loggerFactory, resourceService);
     private final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.build();
-    private final TigerConstraintAnalyzer analyzer = new TigerConstraintAnalyzerFactory(strategoRuntime).create();
+    private final ModConstraintAnalyzer analyzer = new ModConstraintAnalyzerFactory(strategoRuntime).create();
 
     @Test void analyzeSingleErrors() throws InterruptedException, ConstraintAnalyzerException {
-        final ResourceKey resource = new SimpleResourceKey(qualifier, "a.tig");
-        final JSGLR1ParseResult parsed = parser.parse("1 + nil", "Module", resource);
+        final ResourceKey resource = new SimpleResourceKey(qualifier, "a.mod");
+        final JSGLR1ParseResult parsed = parser.parse("let a = mod {}; dbg a.b;", startSymbol, resource);
         assertTrue(parsed.getAst().isPresent());
         final SingleFileResult result =
             analyzer.analyze(resource, parsed.getAst().get(), new ConstraintAnalyzerContext(), new IOAgent());
@@ -47,8 +49,8 @@ class TigerConstraintAnalyzerTest {
     }
 
     @Test void analyzeSingleSuccess() throws InterruptedException, ConstraintAnalyzerException {
-        final ResourceKey resource = new SimpleResourceKey(qualifier, "a.tig");
-        final JSGLR1ParseResult parsed = parser.parse("1 + 2", "Module", resource);
+        final ResourceKey resource = new SimpleResourceKey(qualifier, "a.mod");
+        final JSGLR1ParseResult parsed = parser.parse("let a = mod { let b = 1; }; dbg a.b;", startSymbol, resource);
         assertTrue(parsed.getAst().isPresent());
         final SingleFileResult result =
             analyzer.analyze(resource, parsed.getAst().get(), new ConstraintAnalyzerContext(), new IOAgent());
@@ -58,14 +60,14 @@ class TigerConstraintAnalyzerTest {
     }
 
     @Test void analyzeMultipleErrors() throws InterruptedException, ConstraintAnalyzerException {
-        final ResourceKey resource1 = new SimpleResourceKey(qualifier, "a.tig");
-        final JSGLR1ParseResult parsed1 = parser.parse("1 + 1", "Module", resource1);
+        final ResourceKey resource1 = new SimpleResourceKey(qualifier, "a.mod");
+        final JSGLR1ParseResult parsed1 = parser.parse("let a = 1;", startSymbol, resource1);
         assertTrue(parsed1.getAst().isPresent());
-        final ResourceKey resource2 = new SimpleResourceKey(qualifier, "b.tig");
-        final JSGLR1ParseResult parsed2 = parser.parse("1 + 2", "Module", resource2);
+        final ResourceKey resource2 = new SimpleResourceKey(qualifier, "b.mod");
+        final JSGLR1ParseResult parsed2 = parser.parse("let b = 2;", startSymbol, resource2);
         assertTrue(parsed2.getAst().isPresent());
-        final ResourceKey resource3 = new SimpleResourceKey(qualifier, "c.tig");
-        final JSGLR1ParseResult parsed3 = parser.parse("1 + nil", "Module", resource3);
+        final ResourceKey resource3 = new SimpleResourceKey(qualifier, "c.mod");
+        final JSGLR1ParseResult parsed3 = parser.parse("let c = d;", startSymbol, resource3);
         assertTrue(parsed3.getAst().isPresent());
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
         asts.put(resource1, parsed1.getAst().get());
@@ -99,13 +101,13 @@ class TigerConstraintAnalyzerTest {
 
     @Test void analyzeMultipleSuccess() throws InterruptedException, ConstraintAnalyzerException {
         final ResourceKey resource1 = new SimpleResourceKey(qualifier, "a.tig");
-        final JSGLR1ParseResult parsed1 = parser.parse("1 + 1", "Module", resource1);
+        final JSGLR1ParseResult parsed1 = parser.parse("let a = 1;", startSymbol, resource1);
         assertTrue(parsed1.getAst().isPresent());
         final ResourceKey resource2 = new SimpleResourceKey(qualifier, "b.tig");
-        final JSGLR1ParseResult parsed2 = parser.parse("1 + 2", "Module", resource2);
+        final JSGLR1ParseResult parsed2 = parser.parse("let b = 1;", startSymbol, resource2);
         assertTrue(parsed2.getAst().isPresent());
         final ResourceKey resource3 = new SimpleResourceKey(qualifier, "c.tig");
-        final JSGLR1ParseResult parsed3 = parser.parse("1 + 3", "Module", resource3);
+        final JSGLR1ParseResult parsed3 = parser.parse("let c = 1;", startSymbol, resource3);
         assertTrue(parsed3.getAst().isPresent());
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
         asts.put(resource1, parsed1.getAst().get());

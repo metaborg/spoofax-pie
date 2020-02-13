@@ -24,8 +24,8 @@ languageProjectCompiler {
     styler = StylerCompiler.LanguageProjectInput.builder(),
     strategoRuntime = StrategoRuntimeCompiler.LanguageProjectInput.builder()
       .addInteropRegisterersByReflection("org.metaborg.lang.tiger.trans.InteropRegisterer", "org.metaborg.lang.tiger.strategies.InteropRegisterer")
-      .addNaBL2Primitives(true)
-      .addStatixPrimitives(false)
+      .enableNaBL2(true)
+      .enableStatix(false)
       .copyJavaStrategyClasses(true),
     constraintAnalyzer = ConstraintAnalyzerCompiler.LanguageProjectInput.builder(),
     compiler = LanguageProjectCompiler.Input.builder()

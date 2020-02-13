@@ -132,8 +132,8 @@ public class TigerInputs {
                 "org.metaborg.lang.tiger.trans.InteropRegisterer",
                 "org.metaborg.lang.tiger.strategies.InteropRegisterer"
             )
-            .addNaBL2Primitives(true)
-            .addStatixPrimitives(false)
+            .enableNaBL2(true)
+            .enableStatix(false)
             .copyJavaStrategyClasses(true)
             .shared(shared)
             .languageProject(languageProject)

@@ -16,7 +16,7 @@ import java.net.URL;
 import java.util.ArrayList;
 
 public class StrategoRuntimeBuilder {
-    @SuppressWarnings("NullableProblems") private ITermFactory termFactory;
+    private ITermFactory termFactory;
     private final ArrayList<String> components = new ArrayList<>();
     private final ArrayList<IOperatorRegistry> libraries = new ArrayList<>();
     private final ArrayList<ReadableResource> ctrees = new ArrayList<>();
@@ -24,6 +24,7 @@ public class StrategoRuntimeBuilder {
     private final ArrayList<InteropRegisterer> interopRegisterers = new ArrayList<>();
     private final ArrayList<String> interopRegisterersByReflection = new ArrayList<>();
     private @Nullable ClassLoader jarParentClassLoader;
+    private @Nullable Object contextObject;
 
 
     public StrategoRuntimeBuilder() {
@@ -90,6 +91,11 @@ public class StrategoRuntimeBuilder {
         return this;
     }
 
+    public StrategoRuntimeBuilder withContextObject(@Nullable Object contextObject) {
+        this.contextObject = contextObject;
+        return this;
+    }
+
 
     /**
      * @throws RuntimeException When building the Stratego runtime fails unexpectedly.
@@ -139,7 +145,7 @@ public class StrategoRuntimeBuilder {
         hybridInterpreter.getCompiledContext().getExceptionHandler().setEnabled(false);
         hybridInterpreter.init();
 
-        return new StrategoRuntime(hybridInterpreter);
+        return new StrategoRuntime(hybridInterpreter, contextObject);
     }
 
     public StrategoRuntime buildFromPrototype(StrategoRuntime prototype) {
@@ -157,6 +163,6 @@ public class StrategoRuntimeBuilder {
 
         hybridInterpreter.init();
 
-        return new StrategoRuntime(hybridInterpreter);
+        return new StrategoRuntime(hybridInterpreter, prototype.contextObject);
     }
 }

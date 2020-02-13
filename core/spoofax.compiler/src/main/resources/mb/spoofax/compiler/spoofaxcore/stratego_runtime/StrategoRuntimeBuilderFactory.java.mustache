@@ -1,14 +1,22 @@
 package {{genFactory.packageId}};
 
+import mb.log.api.LoggerFactory;
+import mb.resource.ResourceService;
 import mb.spoofax.compiler.interfaces.spoofaxcore.StrategoRuntimeBuilderFactory;
 import mb.stratego.common.StrategoRuntimeBuilder;
 
 public class {{genFactory.id}} implements StrategoRuntimeBuilderFactory {
-    @Override public StrategoRuntimeBuilder create() {
+    @Override public StrategoRuntimeBuilder create(LoggerFactory loggerFactory, ResourceService resourceService) {
         final StrategoRuntimeBuilder builder = new StrategoRuntimeBuilder();
 {{#interopRegisterersByReflection}}
         builder.addInteropRegistererByReflection("{{this}}");
 {{/interopRegisterersByReflection}}
+{{#copyCTree}}
+        {
+            final java.net.URL locationURL = ModStrategoRuntimeBuilderFactory.class.getProtectionDomain().getCodeSource().getLocation();
+            builder.addCtree(new mb.resource.url.URLResource(locationURL).appendRelativePath("{{languageProject.packagePath}}/target/metaborg/stratego.ctree"));
+        }
+{{/copyCTree}}
         builder.withJarParentClassLoader({{genFactory.id}}.class.getClassLoader());
 {{#addNaBL2Primitives}}
         builder.addLibrary(new mb.nabl2.common.NaBL2PrimitiveLibrary());
@@ -17,8 +25,10 @@ public class {{genFactory.id}} implements StrategoRuntimeBuilderFactory {
         {
             final java.net.URL locationURL = {{genFactory.id}}.class.getProtectionDomain().getCodeSource().getLocation();
             final mb.resource.url.URLPath path = new mb.resource.url.URLPath(locationURL);
-            final mb.resource.url.URLPath correctedPath = path.appendRelativePath("{{languageProject.packagePath}}");
-            builder.addLibrary(new mb.statix.common.StatixPrimitiveLibrary("{{languageProject.project.coordinate.groupId}}", "{{languageProject.project.coordinate.artifactId}}", "{{languageProject.project.coordinate.version}}", correctedPath.toString()));
+            final mb.resource.url.URLPath correctedPath = path.appendRelativePath("{{languageProject.packagePath}}/");
+            builder.addLibrary(new mb.statix.common.StatixPrimitiveLibrary());
+            builder.addLibrary(new mb.spoofax2.common.primitive.Spoofax2PrimitiveLibrary(loggerFactory, resourceService));
+            builder.withContextObject(new mb.spoofax2.common.primitive.generic.Spoofax2Context("{{languageProject.project.coordinate.groupId}}", "{{languageProject.project.coordinate.artifactId}}", "{{languageProject.project.coordinate.version}}", correctedPath, resourceService.toStringRepresentation(correctedPath)));
         }
 {{/addStatixPrimitives}}
         return builder;

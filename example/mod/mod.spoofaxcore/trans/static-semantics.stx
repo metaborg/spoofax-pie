@@ -42,6 +42,16 @@ rules // Program
     new s,
     itemsOK(s, items).
 
+//  projectOk : scope
+//
+//  projectOk(s).
+//  
+//  
+//  fileOk : scope * Start
+//  
+//  fileOk(s, Program(items)) :-
+//    itemsOK(s, items).
+
 rules // Item
     
   itemOK : scope * Item
@@ -92,13 +102,3 @@ rules // Expression
   	typeOfExp(s, exp) == MOD(s_mod),
   	typeOfDecl of Var{id} in s_mod |-> [(_, (Var{id'}, T))],
   	@id.ref := id'.
-
-//rules // multi-file entry point
-//
-////  projectOk : scope
-////
-////  projectOk(s).
-////  
-////  fileOk : scope * Start
-////  
-////  fileOk(s, Empty()).

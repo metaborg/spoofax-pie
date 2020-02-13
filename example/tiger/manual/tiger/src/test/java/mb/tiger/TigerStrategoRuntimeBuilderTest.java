@@ -1,6 +1,11 @@
 package mb.tiger;
 
 import mb.jsglr1.common.JSGLR1ParseResult;
+import mb.log.api.LoggerFactory;
+import mb.log.noop.NoopLoggerFactory;
+import mb.resource.DefaultResourceService;
+import mb.resource.ResourceService;
+import mb.resource.fs.FSResourceRegistry;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -13,7 +18,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TigerStrategoRuntimeBuilderTest {
     private final TigerParser parser = new TigerParserFactory().create();
-    private final StrategoRuntime runtime = new TigerStrategoRuntimeBuilderFactory().create().build();
+    private final LoggerFactory loggerFactory = new NoopLoggerFactory();
+    private final ResourceService resourceService = new DefaultResourceService(new FSResourceRegistry());
+    private final StrategoRuntime runtime = new TigerStrategoRuntimeBuilderFactory().create(loggerFactory, resourceService).build();
 
     @Test void parseUnparse() throws InterruptedException, StrategoException {
         final String str = "1 + 2";

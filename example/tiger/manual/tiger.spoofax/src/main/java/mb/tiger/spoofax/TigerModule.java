@@ -9,6 +9,7 @@ import mb.pie.api.Pie;
 import mb.pie.api.PieSession;
 import mb.pie.api.TaskDef;
 import mb.pie.api.TaskDefs;
+import mb.resource.ResourceService;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.LanguageScope;
 import mb.stratego.common.StrategoRuntime;
@@ -69,8 +70,8 @@ public class TigerModule {
     }
 
     @Provides @LanguageScope
-    StrategoRuntimeBuilder provideStrategoRuntimeBuilder(TigerStrategoRuntimeBuilderFactory factory) {
-        return factory.create();
+    StrategoRuntimeBuilder provideStrategoRuntimeBuilder(TigerStrategoRuntimeBuilderFactory factory, LoggerFactory loggerFactory, ResourceService resourceService) {
+        return factory.create(loggerFactory, resourceService);
     }
 
     @Provides @LanguageScope

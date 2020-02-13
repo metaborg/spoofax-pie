@@ -12,6 +12,7 @@ import org.immutables.value.Value;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,20 +34,21 @@ public class StrategoRuntimeCompiler {
         dependencies.add(GradleConfiguredDependency.api(shared.strategoXTMinJarDep()));
         // TODO: move to constraint analyzer compiler, and make this depend on it?
         // NaBL2 (required by Statix as well)
-        if(input.addNaBL2Primitives() || input.addStatixPrimitives()) {
+        if(input.enableNaBL2() || input.enableStatix()) {
             dependencies.add(GradleConfiguredDependency.implementation(shared.nabl2CommonDep()));
         }
-        if(input.addStatixPrimitives()) {
+        if(input.enableStatix()) {
             dependencies.add(GradleConfiguredDependency.implementation(shared.statixCommonDep()));
+            dependencies.add(GradleConfiguredDependency.implementation(shared.spoofax2CommonDep()));
         }
         return new ListView<>(dependencies);
     }
 
     public ListView<String> getLanguageProjectCopyResources(LanguageProjectInput input) {
         final ArrayList<String> copyResources = new ArrayList<>();
-        if(input.addStatixPrimitives()) {
+        if(input.enableStatix()) {
             // TODO: move to constraint analyzer compiler?
-            copyResources.add("src-gen/statix/statics.spec.aterm");
+            copyResources.add("src-gen/statix/static-semantics.spec.aterm");
         }
         if(input.copyCTree()) {
             copyResources.add("target/metaborg/stratego.ctree");
@@ -58,8 +60,11 @@ public class StrategoRuntimeCompiler {
         final Output.Builder outputBuilder = Output.builder();
         if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
 
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("addNaBL2Primitives", input.enableNaBL2() || input.enableStatix());
+        map.put("addStatixPrimitives", input.enableStatix());
         final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        factoryTemplate.write(input.genFactory().file(classesGenDirectory), input);
+        factoryTemplate.write(input.genFactory().file(classesGenDirectory), input, map);
 
         outputBuilder.addAllProvidedFiles(input.providedFiles());
         return outputBuilder.build();
@@ -87,9 +92,9 @@ public class StrategoRuntimeCompiler {
 
         List<String> interopRegisterersByReflection();
 
-        boolean addNaBL2Primitives();
+        boolean enableNaBL2();
 
-        boolean addStatixPrimitives();
+        boolean enableStatix();
 
 
         /// Whether to copy certain files from the Spoofax 2.x project.
