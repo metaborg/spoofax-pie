@@ -10,7 +10,6 @@ public class Spoofax2PrimitiveLibrary extends AbstractStrategoOperatorRegistry {
 
         add(new LanguageResourcesPrimitive(loggerFactory, resourceService));
         add(new ProjectResourcesPrimitive(loggerFactory, resourceService));
-        add(new ProjectSrcGenDirectory(loggerFactory, resourceService));
     }
 
     @Override public String getOperatorRegistryName() {
