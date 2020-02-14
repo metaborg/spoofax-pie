@@ -36,13 +36,14 @@ class ModAnalyzerTest {
     private final StrategoRuntimeBuilder strategoRuntimeBuilder = new ModStrategoRuntimeBuilderFactory().create(loggerFactory, resourceService);
     private final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.build();
     private final ModConstraintAnalyzer analyzer = new ModConstraintAnalyzerFactory(strategoRuntime).create();
+    private final ResourceKey rootKey = new SimpleResourceKey(qualifier, "root");
 
     @Test void analyzeSingleErrors() throws InterruptedException, ConstraintAnalyzerException {
         final ResourceKey resource = new SimpleResourceKey(qualifier, "a.mod");
         final JSGLR1ParseResult parsed = parser.parse("let a = mod {}; dbg a.b;", startSymbol, resource);
         assertTrue(parsed.getAst().isPresent());
         final SingleFileResult result =
-            analyzer.analyze(resource, parsed.getAst().get(), new ConstraintAnalyzerContext(), new IOAgent());
+            analyzer.analyze(rootKey, resource, parsed.getAst().get(), new ConstraintAnalyzerContext(), new IOAgent());
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
         assertTrue(result.messages.containsError());
@@ -53,7 +54,7 @@ class ModAnalyzerTest {
         final JSGLR1ParseResult parsed = parser.parse("let a = mod { let b = 1; }; dbg a.b;", startSymbol, resource);
         assertTrue(parsed.getAst().isPresent());
         final SingleFileResult result =
-            analyzer.analyze(resource, parsed.getAst().get(), new ConstraintAnalyzerContext(), new IOAgent());
+            analyzer.analyze(rootKey, resource, parsed.getAst().get(), new ConstraintAnalyzerContext(), new IOAgent());
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
         assertTrue(result.messages.isEmpty());
@@ -73,7 +74,7 @@ class ModAnalyzerTest {
         asts.put(resource1, parsed1.getAst().get());
         asts.put(resource2, parsed2.getAst().get());
         asts.put(resource3, parsed3.getAst().get());
-        final MultiFileResult result = analyzer.analyze(null, asts, new ConstraintAnalyzerContext(), new IOAgent());
+        final MultiFileResult result = analyzer.analyze(rootKey, asts, new ConstraintAnalyzerContext(), new IOAgent());
         final ConstraintAnalyzer.@Nullable Result result1 = result.getResult(resource1);
         assertNotNull(result1);
         assertNotNull(result1.ast);
@@ -113,7 +114,7 @@ class ModAnalyzerTest {
         asts.put(resource1, parsed1.getAst().get());
         asts.put(resource2, parsed2.getAst().get());
         asts.put(resource3, parsed3.getAst().get());
-        final MultiFileResult result = analyzer.analyze(null, asts, new ConstraintAnalyzerContext(), new IOAgent());
+        final MultiFileResult result = analyzer.analyze(rootKey, asts, new ConstraintAnalyzerContext(), new IOAgent());
         final ConstraintAnalyzer.@Nullable Result result1 = result.getResult(resource1);
         assertNotNull(result1);
         assertNotNull(result1.ast);

@@ -10,3 +10,4 @@ let x = mod {
   dbg b.c;
   dbg a.b.c;
 };
+let e = a.b;

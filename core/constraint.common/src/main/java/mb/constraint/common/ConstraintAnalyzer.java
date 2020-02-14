@@ -91,9 +91,14 @@ public class ConstraintAnalyzer {
 
     public SingleFileResult analyze(ResourceKey resource, IStrategoTerm ast, ConstraintAnalyzerContext context, IOAgent strategoIOAgent)
         throws ConstraintAnalyzerException {
+        return analyze(null, resource, ast, context, strategoIOAgent);
+    }
+
+    public SingleFileResult analyze(@Nullable ResourceKey root, ResourceKey resource, IStrategoTerm ast, ConstraintAnalyzerContext context, IOAgent strategoIOAgent)
+        throws ConstraintAnalyzerException {
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>(1);
         asts.put(resource, ast);
-        final MultiFileResult multiFileResult = doAnalyze(null, asts, context, strategoIOAgent);
+        final MultiFileResult multiFileResult = doAnalyze(root, asts, context, strategoIOAgent);
         final @Nullable Result result;
         try {
             result = multiFileResult.results.get(0);
@@ -387,7 +392,7 @@ public class ConstraintAnalyzer {
 
 
     private static @Nullable List<IStrategoTerm> match(@Nullable IStrategoTerm term, String op, int n) {
-        if(term == null || !Tools.isTermAppl(term) || !Tools.hasConstructor((IStrategoAppl) term, op, n)) {
+        if(term == null || !Tools.isTermAppl(term) || !Tools.hasConstructor((IStrategoAppl)term, op, n)) {
             return null;
         }
         return Arrays.asList(term.getAllSubterms());

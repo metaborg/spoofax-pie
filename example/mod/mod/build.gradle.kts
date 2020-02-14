@@ -29,7 +29,8 @@ languageProjectCompiler {
       .copyCTree(true)
       .copyClasses(false)
       .copyJavaStrategyClasses(false),
-    constraintAnalyzer = ConstraintAnalyzerCompiler.LanguageProjectInput.builder(),
+    constraintAnalyzer = ConstraintAnalyzerCompiler.LanguageProjectInput.builder()
+      .multiFile(true),
     compiler = LanguageProjectCompiler.Input.builder()
       .languageSpecificationDependency(GradleDependency.project(":mod.spoofaxcore"))
   ))

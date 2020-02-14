@@ -36,28 +36,28 @@ signature
 
 rules // Program
 
-  programOK : Start
-  
-  programOK(Program(items)) :- {s}
-    new s,
-    itemsOK(s, items).
-
-//  projectOk : scope
-//
-//  projectOk(s).
+//  programOK : Start
 //  
-//  
-//  fileOk : scope * Start
-//  
-//  fileOk(s, Program(items)) :-
+//  programOK(Program(items)) :- {s}
+//    new s,
 //    itemsOK(s, items).
+
+  projectOk : scope
+
+  projectOk(s).
+  
+  
+  fileOk : scope * Start
+  
+  fileOk(s, Program(items)) :-
+    itemsOK(s, items).
 
 rules // Item
     
   itemOK : scope * Item
 
   itemOK(s, Dbg(exp)) :- {T}
-    typeOfExp(s, exp) == NUM().  
+    typeOfExp(s, exp) == NUM() | error "Can only debug integers" @exp.
   itemOK(s, Let(id, exp)) :- {T}
     typeOfExp(s, exp) == T,
     s -> Var{id} with typeOfDecl T.
@@ -100,5 +100,8 @@ rules // Expression
   	@id.ref := id'.
   typeOfExp(s, QRef(exp, id)) = T :- {s_mod id'}
   	typeOfExp(s, exp) == MOD(s_mod),
-  	typeOfDecl of Var{id} in s_mod |-> [(_, (Var{id'}, T))],
+	query typeOfDecl 
+  	  filter e and { Var{x'} :- x' == id } // For qualified references, only look one level deep (filter e).
+  	  min and true
+  	  in s_mod |-> [(_, (Var{id'}, T))],
   	@id.ref := id'.

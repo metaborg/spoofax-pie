@@ -1,18 +1,14 @@
-let a = mod {
-  let b = 1;
-};
-
 // Use local declaration over import
-let b = 2;
 use a;
+let b = 2;
 dbg b;
 
 // Nested lookup
-let c = a.b;
-dbg c;
+let y = a.b;
+dbg y.c;
 
 // Import in module scope
-let x = mod {
-  use a; 
+let z = mod {
+  use x; 
   let c = b;
 };
