@@ -45,15 +45,15 @@ rules // Program
   projectOk : scope
 
   projectOk(s).
-  
-  
+
+
   fileOk : scope * Start
-  
+
   fileOk(s, Program(items)) :-
     itemsOK(s, items).
 
 rules // Item
-    
+
   itemOK : scope * Item
 
   itemOK(s, Dbg(exp)) :- {T}
@@ -64,13 +64,13 @@ rules // Item
   itemOK(s, Use(use_ref)) :- {s_mod}
     scopeOfUseRef(s, use_ref) == s_mod,
     s -I-> s_mod.
-  
+
   itemsOK maps itemOK(*, list(*))
-    
+
 rules // Use reference
 
   scopeOfUseRef : scope * UseRef -> scope
-  
+
   scopeOfUseRef(s, UseRef(id)) = S :-
   	resolveUse(s, id) == S.
   scopeOfUseRef(s, QUseRef(use_ref, id)) = S :- {id' s_mod}
@@ -78,18 +78,18 @@ rules // Use reference
   	resolveUse(s_mod, id) == S.
 
   resolveUse : scope * string -> scope
-  
+
   resolveUse(s, id) = S :- {id'}
 	query typeOfDecl 
   	  filter P* and { Var{x'} :- x' == id }
   	  min $ < P and true
   	  in s |-> [(_, (Var{id'}, MOD(S)))],
   	@id.ref := id'.
-  
+
 rules // Expression
 
   typeOfExp : scope * Exp -> TYPE
-  
+
   typeOfExp(s, NumLit(_)) = NUM().
   typeOfExp(s, Mod(items)) = MOD(s_mod) :-
   	new s_mod, 

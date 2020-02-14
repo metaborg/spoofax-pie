@@ -81,8 +81,8 @@ public class TigerModule {
 
 
     @Provides @LanguageScope
-    TigerConstraintAnalyzerFactory provideConstraintAnalyzerFactory(StrategoRuntime prototypeStrategoRuntime) {
-        return new TigerConstraintAnalyzerFactory(prototypeStrategoRuntime);
+    TigerConstraintAnalyzerFactory provideConstraintAnalyzerFactory(LoggerFactory loggerFactory, ResourceService resourceService, StrategoRuntime prototypeStrategoRuntime) {
+        return new TigerConstraintAnalyzerFactory(loggerFactory, resourceService, prototypeStrategoRuntime);
     }
 
     @Provides @LanguageScope

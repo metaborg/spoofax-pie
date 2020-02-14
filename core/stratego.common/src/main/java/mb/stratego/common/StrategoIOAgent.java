@@ -115,7 +115,7 @@ public class StrategoIOAgent extends IOAgent {
 
 
     @Override public String getWorkingDir() {
-        return resourceService.toStringRepresentation(workingDir.getKey());
+        return resourceService.toStringRepresentation(workingDir.getKey()).toString();
     }
 
     public HierarchicalResource getWorkingDirResource() {
@@ -135,7 +135,7 @@ public class StrategoIOAgent extends IOAgent {
 
 
     @Override public String getDefinitionDir() {
-        return resourceService.toStringRepresentation(definitionDir.getKey());
+        return resourceService.toStringRepresentation(definitionDir.getKey()).toString();
     }
 
     public HierarchicalResource getDefinitionDirResource() {
@@ -155,7 +155,7 @@ public class StrategoIOAgent extends IOAgent {
 
 
     @Override public String getTempDir() {
-        return resourceService.toStringRepresentation(tempDir.getKey());
+        return resourceService.toStringRepresentation(tempDir.getKey()).toString();
     }
 
     public HierarchicalResource getTempDirResource() {

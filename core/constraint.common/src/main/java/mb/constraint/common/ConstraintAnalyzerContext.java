@@ -11,20 +11,21 @@ import java.util.Set;
 
 public class ConstraintAnalyzerContext {
     private final HashMap<ResourceKey, Result> results = new HashMap<>();
-    private final HashMap<String, ResourceKey> resources = new HashMap<>();
+//    private final HashMap<String, ResourceKey> resources = new HashMap<>();
 
 
-    @Nullable Result getResult(ResourceKey resource) {
+    public @Nullable Result getResult(ResourceKey resource) {
         return results.get(resource);
     }
 
-    Set<Entry<ResourceKey, Result>> getResultEntries() {
+    public Set<Entry<ResourceKey, Result>> getResultEntries() {
         return results.entrySet();
     }
 
-    Set<ResourceKey> getResultResources() {
+    public Set<ResourceKey> getResultResources() {
         return results.keySet();
     }
+
 
     void updateResult(ResourceKey resource, IStrategoTerm ast, IStrategoTerm analysis) {
         results.put(resource, new Result(resource, ast, analysis));
@@ -44,15 +45,15 @@ public class ConstraintAnalyzerContext {
     }
 
 
-    @Nullable ResourceKey getResource(String str) {
-        return resources.get(str);
-    }
-
-    void registerResource(ResourceKey resource) {
-        resources.put(resource.toString(), resource);
-    }
-
-    void removeResource(ResourceKey resource) {
-        resources.remove(resource.toString());
-    }
+//    public @Nullable ResourceKey getResource(String str) {
+//        return resources.get(str);
+//    }
+//
+//    void registerResource(ResourceKey resource) {
+//        resources.put(resource.toString(), resource);
+//    }
+//
+//    void removeResource(ResourceKey resource) {
+//        resources.remove(resource.toString());
+//    }
 }

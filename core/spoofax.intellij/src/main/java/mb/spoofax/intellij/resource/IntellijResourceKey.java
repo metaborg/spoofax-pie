@@ -1,7 +1,7 @@
 package mb.spoofax.intellij.resource;
 
+import mb.resource.QualifiedResourceKeyString;
 import mb.resource.ResourceKey;
-import mb.resource.ResourceKeyConverter;
 
 public class IntellijResourceKey implements ResourceKey {
     private final String url;
@@ -24,7 +24,7 @@ public class IntellijResourceKey implements ResourceKey {
     @Override public boolean equals(Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
-        final IntellijResourceKey that = (IntellijResourceKey) o;
+        final IntellijResourceKey that = (IntellijResourceKey)o;
         return url.equals(that.url);
     }
 
@@ -33,6 +33,6 @@ public class IntellijResourceKey implements ResourceKey {
     }
 
     @Override public String toString() {
-        return ResourceKeyConverter.toString(getQualifier(), url);
+        return QualifiedResourceKeyString.toString(IntellijResourceRegistry.qualifier, url);
     }
 }

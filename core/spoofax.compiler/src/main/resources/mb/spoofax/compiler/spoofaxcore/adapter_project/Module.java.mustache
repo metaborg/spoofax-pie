@@ -3,6 +3,7 @@ package {{genModule.packageId}};
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
+import mb.log.api.LoggerFactory;
 import mb.common.util.MapView;
 import mb.common.util.EntryView;
 import mb.log.api.LoggerFactory;
@@ -70,8 +71,8 @@ public class {{genModule.id}} {
 
 
     @Provides @LanguageScope
-    {{this.languageProjectInput.factory.qualifiedId}} provideConstraintAnalyzerFactory(StrategoRuntime prototypeStrategoRuntime) {
-        return new {{this.languageProjectInput.factory.qualifiedId}}(prototypeStrategoRuntime);
+    {{this.languageProjectInput.factory.qualifiedId}} provideConstraintAnalyzerFactory(LoggerFactory loggerFactory, ResourceService resourceService, StrategoRuntime prototypeStrategoRuntime) {
+        return new {{this.languageProjectInput.factory.qualifiedId}}(loggerFactory, resourceService, prototypeStrategoRuntime);
     }
 
     @Provides @LanguageScope

@@ -4,7 +4,7 @@ plugins {
 }
 
 val logVersion = "0.3.0"
-val resourceVersion = "0.4.3"
+val resourceVersion = "0.5.1"
 val pieVersion = "develop-SNAPSHOT"
 val spoofaxCoreVersion = "2.6.0-SNAPSHOT"
 val picocliVersion = "4.0.4"
@@ -33,7 +33,7 @@ dependencies {
     api("org.metaborg:nabl2.solver:$spoofaxCoreVersion")
     api("org.metaborg:nabl2.terms:$spoofaxCoreVersion")
     api("org.metaborg:statix.solver:$spoofaxCoreVersion")
-    
+
     runtime("org.metaborg:strategoxt-min-jar:$spoofaxCoreVersion")
 
     api("info.picocli:picocli:$picocliVersion")

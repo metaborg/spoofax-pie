@@ -3,6 +3,7 @@ package mb.spoofax.core.language.command.arg;
 import mb.common.region.Region;
 import mb.common.util.MapView;
 import mb.resource.ResourceKey;
+import mb.resource.ResourceKeyString;
 import mb.resource.ResourceRuntimeException;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
@@ -24,7 +25,7 @@ public class ArgConverters {
 
     public final ArgConverter<ResourceKey> resourceKeyConverter = new ArgConverter<ResourceKey>() {
         @Override public ResourceKey convert(String argStr) throws ResourceRuntimeException {
-            return resourceService.getResourceKey(argStr);
+            return resourceService.getResourceKey(ResourceKeyString.parse(argStr));
         }
 
         @Override public Class<ResourceKey> getOutputClass() {
@@ -34,7 +35,7 @@ public class ArgConverters {
 
     public final ArgConverter<ResourcePath> resourcePathConverter = new ArgConverter<ResourcePath>() {
         @Override public ResourcePath convert(String argStr) throws ResourceRuntimeException {
-            return resourceService.getResourcePath(argStr);
+            return resourceService.getResourcePath(ResourceKeyString.parse(argStr));
         }
 
         @Override public Class<ResourcePath> getOutputClass() {

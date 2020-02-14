@@ -4,10 +4,14 @@ import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Messages;
 import mb.common.message.Severity;
+import mb.log.api.LoggerFactory;
 import mb.nabl2.terms.stratego.StrategoTermIndices;
 import mb.nabl2.terms.stratego.TermIndex;
 import mb.nabl2.terms.stratego.TermOrigin;
 import mb.resource.ResourceKey;
+import mb.resource.ResourceKeyString;
+import mb.resource.ResourceRuntimeException;
+import mb.resource.ResourceService;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -18,7 +22,6 @@ import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 
-import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -75,17 +78,21 @@ public class ConstraintAnalyzer {
     }
 
 
+    private final LoggerFactory loggerFactory;
+    private final ResourceService resourceService;
     private final StrategoRuntime strategoRuntime;
     private final ITermFactory termFactory;
     private final String strategyId;
-    private final boolean multifile;
+    private final boolean multiFile;
 
 
-    @Inject public ConstraintAnalyzer(StrategoRuntime strategoRuntime, String strategyId, boolean multifile) {
+    public ConstraintAnalyzer(LoggerFactory loggerFactory, ResourceService resourceService, StrategoRuntime strategoRuntime, String strategyId, boolean multiFile) {
+        this.loggerFactory = loggerFactory;
+        this.resourceService = resourceService;
         this.strategoRuntime = strategoRuntime;
         this.termFactory = strategoRuntime.getTermFactory();
         this.strategyId = strategyId;
-        this.multifile = multifile;
+        this.multiFile = multiFile;
     }
 
 
@@ -137,8 +144,7 @@ public class ConstraintAnalyzer {
 
         // Root analysis.
         final @Nullable IStrategoTerm rootChange;
-        if(multifile && root != null) {
-            context.registerResource(root);
+        if(multiFile && root != null) {
             final IStrategoTerm ast = mkProjectTerm(root);
             final IStrategoTerm change;
             final Expect expect;
@@ -163,14 +169,12 @@ public class ConstraintAnalyzer {
             if(cachedResult != null) {
                 changeTerms.add(mkTuple(mkString(resource), mkAppl("Removed", cachedResult.analysis)));
                 context.removeResult(resource);
-                context.removeResource(resource);
             }
         }
 
         // Added and changed resources.
         for(Map.Entry<ResourceKey, IStrategoTerm> entry : addedOrChangedAsts.entrySet()) {
             final ResourceKey resource = entry.getKey();
-            context.registerResource(resource);
             final IStrategoTerm ast = entry.getValue();
             final IStrategoTerm change;
             final @Nullable Result cachedResult = context.getResult(resource);
@@ -185,10 +189,9 @@ public class ConstraintAnalyzer {
         }
 
         // Cached resources.
-        if(multifile) {
+        if(multiFile) {
             for(Map.Entry<ResourceKey, Result> entry : context.getResultEntries()) {
                 final ResourceKey resource = entry.getKey();
-                context.registerResource(resource);
                 final Result cachedResult = entry.getValue();
                 if(!addedOrChangedAsts.containsKey(resource)) {
                     final IStrategoTerm change = mkAppl("Cached", cachedResult.analysis);
@@ -202,7 +205,7 @@ public class ConstraintAnalyzer {
 
         final Map<ResourceKey, IStrategoTerm> resultTerms = new HashMap<>();
         final IStrategoTerm action;
-        if(multifile && root != null) {
+        if(multiFile && root != null) {
             action = mkAppl("AnalyzeMulti", rootChange, termFactory.makeList(changeTerms));
         } else {
             action = mkAppl("AnalyzeSingle", termFactory.makeList(changeTerms));
@@ -236,10 +239,12 @@ public class ConstraintAnalyzer {
                 throw new RuntimeException("BUG: expected resource string as first component, got " + resourceTerm);
             }
             final String resourceString = Tools.asJavaString(resourceTerm);
-            final @Nullable ResourceKey resource = context.getResource(resourceString);
-            if(resource == null) {
+            final ResourceKey resource;
+            try {
+                resource = resourceService.getResourceKey(ResourceKeyString.parse(resourceString));
+            } catch(ResourceRuntimeException e) {
                 throw new RuntimeException(
-                    "BUG: could not get resource for resource string '" + resourceString + "' in result term " + entry);
+                    "BUG: could not get resource for resource string '" + resourceString + "' in result term " + entry, e);
             }
             final IStrategoTerm resultTerm = entry.getSubterm(1);
             resultTerms.put(resource, resultTerm);
@@ -292,7 +297,7 @@ public class ConstraintAnalyzer {
         }
 
         void addResultMessages(IStrategoTerm errors, IStrategoTerm warnings, IStrategoTerm notes, KeyedMessagesBuilder messagesBuilder) {
-            final @Nullable ResourceKey resourceOverride = multifile ? null : resource;
+            final @Nullable ResourceKey resourceOverride = multiFile ? null : resource;
             MessageUtil.addMessagesFromTerm(messagesBuilder, errors, Severity.Error, resourceOverride);
             MessageUtil.addMessagesFromTerm(messagesBuilder, warnings, Severity.Warning, resourceOverride);
             MessageUtil.addMessagesFromTerm(messagesBuilder, notes, Severity.Info, resourceOverride);
@@ -378,12 +383,16 @@ public class ConstraintAnalyzer {
         return termFactory.makeTuple(subterms);
     }
 
+    private IStrategoString mkString(ResourceKey resourceKey) {
+        return termFactory.makeString(resourceService.toStringRepresentation(resourceKey).toString());
+    }
+
     private IStrategoString mkString(Object obj) {
         return termFactory.makeString(obj.toString());
     }
 
     private IStrategoTerm mkProjectTerm(ResourceKey resource) {
-        final String resourceStr = resource.toString(); // TODO: must use ResourceService to turn this into a string.
+        final String resourceStr = resourceService.toStringRepresentation(resource).toString();
         IStrategoTerm ast = termFactory.makeTuple();
         ast = StrategoTermIndices.put(TermIndex.of(resourceStr, 0), ast, termFactory);
         TermOrigin.of(resourceStr).put(ast);

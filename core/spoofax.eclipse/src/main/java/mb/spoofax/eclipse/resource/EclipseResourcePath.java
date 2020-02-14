@@ -1,6 +1,6 @@
 package mb.spoofax.eclipse.resource;
 
-import mb.resource.ResourceKeyConverter;
+import mb.resource.QualifiedResourceKeyString;
 import mb.resource.ResourceRuntimeException;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -202,7 +202,7 @@ public class EclipseResourcePath implements ResourcePath {
     }
 
     @Override public String toString() {
-        return ResourceKeyConverter.toString(getQualifier(), pathString);
+        return QualifiedResourceKeyString.toString(EclipseResourceRegistry.qualifier, pathString);
     }
 
 

@@ -2,8 +2,10 @@ package mb.spoofax.eclipse.resource;
 
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
+import mb.resource.QualifiedResourceKeyString;
 import mb.resource.Resource;
 import mb.resource.ResourceKey;
+import mb.resource.ResourceKeyString;
 import mb.resource.ResourceRegistry;
 import mb.resource.ResourceRuntimeException;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -47,15 +49,24 @@ public class EclipseDocumentResourceRegistry implements ResourceRegistry {
             throw new ResourceRuntimeException(
                 "Cannot get Eclipse document resource with ID '" + id + "'; the ID is not of type String");
         }
-        return getResource((String) id);
+        return getResource((String)id);
     }
 
-
-    @Override public ResourceKey getResourceKey(String idStr) {
-        return new EclipseDocumentKey(idStr);
+    @Override public ResourceKey getResourceKey(ResourceKeyString keyStr) {
+        if(!keyStr.qualifierMatches(qualifier)) {
+            throw new ResourceRuntimeException("Qualifier of '" + keyStr + "' does not match qualifier '" + qualifier + "' of this resource registry");
+        }
+        return new EclipseDocumentKey(keyStr.getId());
     }
 
-    @Override public Resource getResource(String id) {
+    @Override public Resource getResource(ResourceKeyString keyStr) {
+        if(!keyStr.qualifierMatches(qualifier)) {
+            throw new ResourceRuntimeException("Qualifier of '" + keyStr + "' does not match qualifier '" + qualifier + "' of this resource registry");
+        }
+        return getResource(keyStr.getId());
+    }
+
+    public Resource getResource(String id) {
         final @Nullable EclipseDocumentResource resource = resources.get(id);
         if(resource != null) {
             return resource;
@@ -64,11 +75,11 @@ public class EclipseDocumentResourceRegistry implements ResourceRegistry {
         }
     }
 
-    @Override public String toStringRepresentation(Serializable id) {
+    @Override public QualifiedResourceKeyString toStringRepresentation(Serializable id) {
         if(!(id instanceof String)) {
             throw new ResourceRuntimeException(
                 "Cannot convert ID '" + id + "' to its string representation; it is not of type String");
         }
-        return (String) id;
+        return QualifiedResourceKeyString.of(qualifier, (String)id);
     }
 }

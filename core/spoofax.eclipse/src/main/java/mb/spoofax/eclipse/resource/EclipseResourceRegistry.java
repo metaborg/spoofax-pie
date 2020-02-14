@@ -1,6 +1,8 @@
 package mb.spoofax.eclipse.resource;
 
+import mb.resource.QualifiedResourceKeyString;
 import mb.resource.Resource;
+import mb.resource.ResourceKeyString;
 import mb.resource.ResourceRegistry;
 import mb.resource.ResourceRuntimeException;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -28,24 +30,29 @@ public class EclipseResourceRegistry implements ResourceRegistry {
             throw new ResourceRuntimeException(
                 "Cannot get Eclipse resource with ID '" + id + "'; the ID is not of type String");
         }
-        return getResource((String)id);
+        return new EclipseResource(new EclipseResourcePath((String)id));
     }
 
-
-    @Override public EclipseResourcePath getResourceKey(String idStr) {
-        return new EclipseResourcePath(idStr);
+    @Override public EclipseResourcePath getResourceKey(ResourceKeyString keyStr) {
+        if(!keyStr.qualifierMatches(qualifier)) {
+            throw new ResourceRuntimeException("Qualifier of '" + keyStr + "' does not match qualifier '" + qualifier + "' of this resource registry");
+        }
+        return new EclipseResourcePath(keyStr.getId());
     }
 
-    @Override public EclipseResource getResource(String idStr) {
-        return new EclipseResource(new EclipseResourcePath(idStr));
+    @Override public EclipseResource getResource(ResourceKeyString keyStr) {
+        if(!keyStr.qualifierMatches(qualifier)) {
+            throw new ResourceRuntimeException("Qualifier of '" + keyStr + "' does not match qualifier '" + qualifier + "' of this resource registry");
+        }
+        return new EclipseResource(new EclipseResourcePath(keyStr.getId()));
     }
 
-    @Override public String toStringRepresentation(Serializable id) {
+    @Override public QualifiedResourceKeyString toStringRepresentation(Serializable id) {
         if(!(id instanceof String)) {
             throw new ResourceRuntimeException(
                 "Cannot convert ID '" + id + "' to its string representation; it is not of type String");
         }
-        return (String)id;
+        return QualifiedResourceKeyString.of(qualifier, (String)id);
     }
 
     @Override public @Nullable File toLocalFile(Serializable id) {
@@ -53,7 +60,7 @@ public class EclipseResourceRegistry implements ResourceRegistry {
             throw new ResourceRuntimeException(
                 "Cannot attempt to convert identifier '" + id + "' to a local file; the ID is not of type String");
         }
-        final EclipseResourcePath path = getResourceKey((String)id);
+        final EclipseResourcePath path = new EclipseResourcePath((String)id);
         return path.path.toFile();
     }
 

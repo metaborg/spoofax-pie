@@ -1,7 +1,7 @@
 package mb.spoofax.eclipse.resource;
 
+import mb.resource.QualifiedResourceKeyString;
 import mb.resource.ResourceKey;
-import mb.resource.ResourceKeyConverter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IFile;
 
@@ -29,7 +29,7 @@ public class EclipseDocumentKey implements ResourceKey {
     @Override public boolean equals(@Nullable Object obj) {
         if(this == obj) return true;
         if(obj == null || getClass() != obj.getClass()) return false;
-        final EclipseDocumentKey other = (EclipseDocumentKey) obj;
+        final EclipseDocumentKey other = (EclipseDocumentKey)obj;
         return id.equals(other.id);
     }
 
@@ -38,6 +38,6 @@ public class EclipseDocumentKey implements ResourceKey {
     }
 
     @Override public String toString() {
-        return ResourceKeyConverter.toString(getQualifier(), id);
+        return QualifiedResourceKeyString.toString(EclipseDocumentResourceRegistry.qualifier, id);
     }
 }
