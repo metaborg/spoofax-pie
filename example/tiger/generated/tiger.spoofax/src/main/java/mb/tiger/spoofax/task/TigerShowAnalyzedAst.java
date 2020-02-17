@@ -2,14 +2,13 @@ package mb.tiger.spoofax.task;
 
 import mb.common.region.Region;
 import mb.common.util.ListView;
-import mb.constraint.common.ConstraintAnalyzer;
 import mb.jsglr.common.TermTracer;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Provider;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
-import mb.spoofax.core.language.command.CommandFeedbacks;
+import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.CommandOutput;
 import mb.stratego.common.StrategoUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -35,23 +34,23 @@ public class TigerShowAnalyzedAst implements TaskDef<TigerShowArgs, CommandOutpu
         final @Nullable Region region = input.region;
 
         final Provider<@Nullable IStrategoTerm> astProvider = parse.createAstProvider(key);
-        final ConstraintAnalyzer.@Nullable SingleFileResult analysisResult = context.require(analyze, new TigerAnalyze.Input(key, astProvider));
-        if(analysisResult == null) {
-            throw new RuntimeException("Cannot show analyzed AST, analysis result for '" + key + "' is null");
+        final TigerAnalyze.@Nullable Output output = context.require(analyze, new TigerAnalyze.Input(key, astProvider));
+        if(output == null) {
+            throw new RuntimeException("Cannot show analyzed AST, analysis output for '" + key + "' is null");
         }
-        if(analysisResult.ast == null) {
+        if(output.result.ast == null) {
             throw new RuntimeException("Cannot show analyzed AST, analyzed AST for '" + key + "' is null");
         }
 
         final IStrategoTerm term;
         if(region != null) {
-            term = TermTracer.getSmallestTermEncompassingRegion(analysisResult.ast, region);
+            term = TermTracer.getSmallestTermEncompassingRegion(output.result.ast, region);
         } else {
-            term = analysisResult.ast;
+            term = output.result.ast;
         }
 
         final String formatted = StrategoUtil.toString(term);
-        return new CommandOutput(ListView.of(CommandFeedbacks.showText(formatted, "Analyzed AST for '" + key + "'", null)));
+        return new CommandOutput(ListView.of(CommandFeedback.showText(formatted, "Analyzed AST for '" + key + "'")));
     }
 
     @Override public Task<CommandOutput> createTask(TigerShowArgs input) {

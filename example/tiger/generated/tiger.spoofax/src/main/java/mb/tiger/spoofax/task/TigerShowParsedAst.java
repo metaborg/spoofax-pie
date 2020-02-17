@@ -9,7 +9,7 @@ import mb.pie.api.ResourceStringProvider;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
-import mb.spoofax.core.language.command.CommandFeedbacks;
+import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.CommandOutput;
 import mb.stratego.common.StrategoUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -44,7 +44,7 @@ public class TigerShowParsedAst implements TaskDef<TigerShowArgs, CommandOutput>
         }
 
         final String formatted = StrategoUtil.toString(term);
-        return new CommandOutput(ListView.of(CommandFeedbacks.showText(formatted, "Parsed AST for '" + key + "'", null)));
+        return new CommandOutput(ListView.of(CommandFeedback.showText(formatted, "Parsed AST for '" + key + "'")));
     }
 
     @Override public Task<CommandOutput> createTask(TigerShowArgs input) {

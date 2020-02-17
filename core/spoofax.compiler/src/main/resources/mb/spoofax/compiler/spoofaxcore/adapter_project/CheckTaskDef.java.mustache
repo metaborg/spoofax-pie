@@ -42,9 +42,9 @@ public class {{checkTaskDef.id}} implements TaskDef<ResourceKey, KeyedMessages> 
         final JSGLR1ParseResult parseResult = context.require(parse, stringProvider);
         builder.addMessages(key, parseResult.getMessages());
 {{#constraintAnalyzer}}
-        final @Nullable SingleFileResult analysisResult = context.require(analyze, new {{this.analyzeTaskDef.qualifiedId}}.Input(key, parse.createAstProvider(stringProvider)));
-        if(analysisResult != null) {
-            builder.addMessages(key, analysisResult.messages);
+        final {{this.analyzeTaskDef.qualifiedId}}.@Nullable Output analysisOutput = context.require(analyze, new {{this.analyzeTaskDef.qualifiedId}}.Input(key, parse.createAstProvider(stringProvider)));
+        if(analysisOutput != null) {
+            builder.addMessages(key, analysisOutput.result.messages);
         }
 {{/constraintAnalyzer}}
         return builder.build();

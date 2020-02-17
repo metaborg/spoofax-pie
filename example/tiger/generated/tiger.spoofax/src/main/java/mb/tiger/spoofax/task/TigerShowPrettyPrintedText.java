@@ -9,7 +9,7 @@ import mb.pie.api.ResourceStringProvider;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
-import mb.spoofax.core.language.command.CommandFeedbacks;
+import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.CommandOutput;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
@@ -62,7 +62,7 @@ public class TigerShowPrettyPrintedText implements TaskDef<TigerShowArgs, Comman
         }
 
         final String formatted = StrategoUtil.toString(result);
-        return new CommandOutput(ListView.of(CommandFeedbacks.showText(formatted, "Pretty-printed text for '" + key + "'", null)));
+        return new CommandOutput(ListView.of(CommandFeedback.showText(formatted, "Pretty-printed text for '" + key + "'")));
     }
 
     @Override public Task<CommandOutput> createTask(TigerShowArgs input) {
