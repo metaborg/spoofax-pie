@@ -10,16 +10,18 @@ import mb.pie.api.ResourceStringProvider;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageScope;
+import mb.tiger.spoofax.task.reusable.TigerAnalyze;
+import mb.tiger.spoofax.task.reusable.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 
 @LanguageScope
-public class TigerCheck implements TaskDef<ResourceKey, KeyedMessages> {
+public class TigerIdeCheck implements TaskDef<ResourceKey, KeyedMessages> {
     private final TigerParse parse;
     private final TigerAnalyze analyze;
 
-    @Inject public TigerCheck(TigerParse parse, TigerAnalyze analyze) {
+    @Inject public TigerIdeCheck(TigerParse parse, TigerAnalyze analyze) {
         this.parse = parse;
         this.analyze = analyze;
     }

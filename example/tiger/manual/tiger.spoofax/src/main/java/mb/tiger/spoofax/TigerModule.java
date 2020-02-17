@@ -32,20 +32,20 @@ import mb.tiger.spoofax.command.TigerShowAnalyzedAstCommand;
 import mb.tiger.spoofax.command.TigerShowDesugaredAstCommand;
 import mb.tiger.spoofax.command.TigerShowParsedAstCommand;
 import mb.tiger.spoofax.command.TigerShowPrettyPrintedTextCommand;
-import mb.tiger.spoofax.task.TigerAltCompileFile;
-import mb.tiger.spoofax.task.TigerAnalyze;
-import mb.tiger.spoofax.task.TigerCheck;
 import mb.tiger.spoofax.task.TigerCompileDirectory;
 import mb.tiger.spoofax.task.TigerCompileFile;
-import mb.tiger.spoofax.task.TigerListDefNames;
-import mb.tiger.spoofax.task.TigerListLiteralVals;
-import mb.tiger.spoofax.task.TigerParse;
+import mb.tiger.spoofax.task.TigerCompileFileAlt;
+import mb.tiger.spoofax.task.TigerIdeCheck;
+import mb.tiger.spoofax.task.TigerIdeTokenize;
 import mb.tiger.spoofax.task.TigerShowAnalyzedAst;
 import mb.tiger.spoofax.task.TigerShowDesugaredAst;
 import mb.tiger.spoofax.task.TigerShowParsedAst;
 import mb.tiger.spoofax.task.TigerShowPrettyPrintedText;
-import mb.tiger.spoofax.task.TigerStyle;
-import mb.tiger.spoofax.task.TigerTokenize;
+import mb.tiger.spoofax.task.reusable.TigerAnalyze;
+import mb.tiger.spoofax.task.reusable.TigerListDefNames;
+import mb.tiger.spoofax.task.reusable.TigerListLiteralVals;
+import mb.tiger.spoofax.task.reusable.TigerParse;
+import mb.tiger.spoofax.task.reusable.TigerStyle;
 
 import javax.inject.Named;
 import java.util.HashSet;
@@ -110,16 +110,16 @@ public class TigerModule {
         TigerListLiteralVals listLiteralVals,
         TigerListDefNames listDefNames,
 
-        TigerTokenize tokenize,
+        TigerIdeTokenize tokenize,
         TigerStyle style,
-        TigerCheck check,
+        TigerIdeCheck check,
 
         TigerShowParsedAst showParsedAst,
         TigerShowPrettyPrintedText showPrettyPrintedText,
         TigerShowAnalyzedAst showAnalyzedAst,
         TigerShowDesugaredAst showDesugaredAst,
         TigerCompileFile compileFile,
-        TigerAltCompileFile altCompileFile,
+        TigerCompileFileAlt altCompileFile,
         TigerCompileDirectory compileDirectory
     ) {
         final HashSet<TaskDef<?, ?>> taskDefs = new HashSet<>();

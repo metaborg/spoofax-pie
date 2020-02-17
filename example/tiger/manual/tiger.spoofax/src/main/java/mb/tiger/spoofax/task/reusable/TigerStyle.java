@@ -1,4 +1,4 @@
-package mb.tiger.spoofax.task;
+package mb.tiger.spoofax.task.reusable;
 
 import mb.common.style.Styling;
 import mb.common.token.Token;

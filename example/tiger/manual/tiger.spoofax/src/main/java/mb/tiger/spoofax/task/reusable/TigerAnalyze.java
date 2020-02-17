@@ -1,4 +1,4 @@
-package mb.tiger.spoofax.task;
+package mb.tiger.spoofax.task.reusable;
 
 import mb.constraint.common.ConstraintAnalyzer.SingleFileResult;
 import mb.constraint.common.ConstraintAnalyzerContext;

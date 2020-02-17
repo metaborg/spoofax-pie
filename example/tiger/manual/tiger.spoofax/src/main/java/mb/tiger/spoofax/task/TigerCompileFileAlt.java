@@ -11,6 +11,9 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.command.CommandFeedbacks;
 import mb.spoofax.core.language.command.CommandOutput;
+import mb.tiger.spoofax.task.reusable.TigerListDefNames;
+import mb.tiger.spoofax.task.reusable.TigerListLiteralVals;
+import mb.tiger.spoofax.task.reusable.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -20,7 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Objects;
 
-public class TigerAltCompileFile implements TaskDef<TigerAltCompileFile.Args, CommandOutput> {
+public class TigerCompileFileAlt implements TaskDef<TigerCompileFileAlt.Args, CommandOutput> {
     public static class Args implements Serializable {
         final ResourcePath file;
         final boolean listDefNames;
@@ -59,7 +62,7 @@ public class TigerAltCompileFile implements TaskDef<TigerAltCompileFile.Args, Co
     private final ResourceService resourceService;
 
     @Inject
-    public TigerAltCompileFile(TigerParse parse, TigerListDefNames listDefNames, TigerListLiteralVals listLiteralVals, ResourceService resourceService) {
+    public TigerCompileFileAlt(TigerParse parse, TigerListDefNames listDefNames, TigerListLiteralVals listLiteralVals, ResourceService resourceService) {
         this.parse = parse;
         this.listDefNames = listDefNames;
         this.listLiteralVals = listLiteralVals;

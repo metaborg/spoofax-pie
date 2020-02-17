@@ -17,6 +17,8 @@ import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.match.path.ExtensionsPathMatcher;
 import mb.spoofax.core.language.command.CommandFeedbacks;
 import mb.spoofax.core.language.command.CommandOutput;
+import mb.tiger.spoofax.task.reusable.TigerListDefNames;
+import mb.tiger.spoofax.task.reusable.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 

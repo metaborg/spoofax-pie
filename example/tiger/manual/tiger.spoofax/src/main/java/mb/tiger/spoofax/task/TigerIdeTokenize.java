@@ -8,16 +8,17 @@ import mb.pie.api.ResourceStringProvider;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageScope;
+import mb.tiger.spoofax.task.reusable.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
 
 @LanguageScope
-public class TigerTokenize implements TaskDef<ResourceKey, @Nullable ArrayList<? extends Token<?>>> {
+public class TigerIdeTokenize implements TaskDef<ResourceKey, @Nullable ArrayList<? extends Token<?>>> {
     private final TigerParse parse;
 
-    @Inject public TigerTokenize(TigerParse parse) {
+    @Inject public TigerIdeTokenize(TigerParse parse) {
         this.parse = parse;
     }
 

@@ -1,4 +1,4 @@
-package mb.tiger.spoofax.task;
+package mb.tiger.spoofax.task.reusable;
 
 import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecContext;
@@ -14,13 +14,14 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 
-public class TigerListLiteralVals implements TaskDef<Provider<@Nullable IStrategoTerm>, @Nullable String> {
+public class TigerListDefNames implements TaskDef<Provider<@Nullable IStrategoTerm>, @Nullable String> {
     private final StrategoRuntimeBuilder strategoRuntimeBuilder;
     private final StrategoRuntime prototypeStrategoRuntime;
     private final LoggerFactory loggerFactory;
     private final ResourceService resourceService;
 
-    @Inject public TigerListLiteralVals(
+    @Inject
+    public TigerListDefNames(
         StrategoRuntimeBuilder strategoRuntimeBuilder,
         StrategoRuntime prototypeStrategoRuntime,
         LoggerFactory loggerFactory,
@@ -44,12 +45,12 @@ public class TigerListLiteralVals implements TaskDef<Provider<@Nullable IStrateg
         }
 
         final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.buildFromPrototype(prototypeStrategoRuntime);
-        final String strategyId = "list-of-literal-vals";
+        final String strategyId = "list-of-def-names";
         final @Nullable IStrategoTerm result = strategoRuntime.invoke(strategyId, ast, new StrategoIOAgent(loggerFactory, resourceService));
         if(result == null) {
             return null;
         }
 
-        return StrategoUtil.toString(result, Integer.MAX_VALUE);
+        return StrategoUtil.toString(result);
     }
 }

@@ -24,10 +24,10 @@ import mb.tiger.spoofax.command.TigerShowAnalyzedAstCommand;
 import mb.tiger.spoofax.command.TigerShowDesugaredAstCommand;
 import mb.tiger.spoofax.command.TigerShowParsedAstCommand;
 import mb.tiger.spoofax.command.TigerShowPrettyPrintedTextCommand;
-import mb.tiger.spoofax.task.TigerCheck;
-import mb.tiger.spoofax.task.TigerParse;
-import mb.tiger.spoofax.task.TigerStyle;
-import mb.tiger.spoofax.task.TigerTokenize;
+import mb.tiger.spoofax.task.TigerIdeCheck;
+import mb.tiger.spoofax.task.TigerIdeTokenize;
+import mb.tiger.spoofax.task.reusable.TigerParse;
+import mb.tiger.spoofax.task.reusable.TigerStyle;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
@@ -41,9 +41,9 @@ public class TigerInstance implements LanguageInstance {
     private final static SetView<String> extensions = SetView.of("tig");
 
     private final TigerParse parse;
-    private final TigerCheck tigerCheck;
+    private final TigerIdeCheck tigerIdeCheck;
     private final TigerStyle style;
-    private final TigerTokenize tokenize;
+    private final TigerIdeTokenize tokenize;
 
     private final TigerShowParsedAstCommand showParsedAstCommand;
     private final TigerShowPrettyPrintedTextCommand showPrettyPrintedTextCommand;
@@ -59,9 +59,9 @@ public class TigerInstance implements LanguageInstance {
 
     @Inject public TigerInstance(
         TigerParse parse,
-        TigerCheck tigerCheck,
+        TigerIdeCheck tigerIdeCheck,
         TigerStyle style,
-        TigerTokenize tokenize,
+        TigerIdeTokenize tokenize,
 
         TigerShowParsedAstCommand showParsedAstCommand,
         TigerShowPrettyPrintedTextCommand showPrettyPrintedTextCommand,
@@ -75,7 +75,7 @@ public class TigerInstance implements LanguageInstance {
         Set<AutoCommandRequest<?>> autoCommandDefs
     ) {
         this.parse = parse;
-        this.tigerCheck = tigerCheck;
+        this.tigerIdeCheck = tigerIdeCheck;
         this.style = style;
         this.tokenize = tokenize;
 
@@ -110,7 +110,7 @@ public class TigerInstance implements LanguageInstance {
     }
 
     @Override public Task<KeyedMessages> createCheckTask(ResourceKey resourceKey) {
-        return tigerCheck.createTask(resourceKey);
+        return tigerIdeCheck.createTask(resourceKey);
     }
 
 

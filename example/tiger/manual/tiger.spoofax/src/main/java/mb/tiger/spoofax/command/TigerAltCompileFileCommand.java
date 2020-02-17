@@ -13,22 +13,22 @@ import mb.spoofax.core.language.command.arg.ArgProvider;
 import mb.spoofax.core.language.command.arg.Param;
 import mb.spoofax.core.language.command.arg.ParamDef;
 import mb.spoofax.core.language.command.arg.RawArgs;
-import mb.tiger.spoofax.task.TigerAltCompileFile;
+import mb.tiger.spoofax.task.TigerCompileFileAlt;
 
 import javax.inject.Inject;
 
 @LanguageScope
-public class TigerAltCompileFileCommand implements CommandDef<TigerAltCompileFile.Args> {
-    private final TigerAltCompileFile tigerAltCompileFile;
+public class TigerAltCompileFileCommand implements CommandDef<TigerCompileFileAlt.Args> {
+    private final TigerCompileFileAlt tigerCompileFileAlt;
 
 
-    @Inject public TigerAltCompileFileCommand(TigerAltCompileFile tigerAltCompileFile) {
-        this.tigerAltCompileFile = tigerAltCompileFile;
+    @Inject public TigerAltCompileFileCommand(TigerCompileFileAlt tigerCompileFileAlt) {
+        this.tigerCompileFileAlt = tigerCompileFileAlt;
     }
 
 
     @Override public String getId() {
-        return tigerAltCompileFile.getId();
+        return tigerCompileFileAlt.getId();
     }
 
     @Override public String getDisplayName() {
@@ -58,15 +58,15 @@ public class TigerAltCompileFileCommand implements CommandDef<TigerAltCompileFil
         );
     }
 
-    @Override public TigerAltCompileFile.Args fromRawArgs(RawArgs rawArgs) {
+    @Override public TigerCompileFileAlt.Args fromRawArgs(RawArgs rawArgs) {
         final ResourcePath file = rawArgs.getOrThrow("file");
         final boolean listDefNames = rawArgs.getOrThrow("listDefNames");
         final boolean base64Encode = rawArgs.getOrThrow("base64Encode");
         final String compiledFileNameSuffix = rawArgs.getOrThrow("compiledFileNameSuffix");
-        return new TigerAltCompileFile.Args(file, listDefNames, base64Encode, compiledFileNameSuffix);
+        return new TigerCompileFileAlt.Args(file, listDefNames, base64Encode, compiledFileNameSuffix);
     }
 
-    @Override public Task<CommandOutput> createTask(TigerAltCompileFile.Args args) {
-        return tigerAltCompileFile.createTask(args);
+    @Override public Task<CommandOutput> createTask(TigerCompileFileAlt.Args args) {
+        return tigerCompileFileAlt.createTask(args);
     }
 }

@@ -1,4 +1,4 @@
-package mb.tiger.spoofax.task;
+package mb.tiger.spoofax.task.reusable;
 
 import mb.common.message.Message;
 import mb.common.message.Messages;
