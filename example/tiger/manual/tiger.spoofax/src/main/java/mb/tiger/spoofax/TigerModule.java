@@ -3,6 +3,7 @@ package mb.tiger.spoofax;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
+import mb.common.util.MapView;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.MapTaskDefs;
 import mb.pie.api.Pie;
@@ -12,6 +13,9 @@ import mb.pie.api.TaskDefs;
 import mb.resource.ResourceService;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.LanguageScope;
+import mb.spoofax.core.language.command.AutoCommandRequest;
+import mb.spoofax.core.language.command.CommandDef;
+import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
 import mb.tiger.TigerConstraintAnalyzer;
@@ -21,20 +25,27 @@ import mb.tiger.TigerParserFactory;
 import mb.tiger.TigerStrategoRuntimeBuilderFactory;
 import mb.tiger.TigerStyler;
 import mb.tiger.TigerStylerFactory;
-import mb.tiger.spoofax.taskdef.TigerAnalyze;
-import mb.tiger.spoofax.taskdef.TigerGetMessages;
-import mb.tiger.spoofax.taskdef.TigerGetParsedTokens;
-import mb.tiger.spoofax.taskdef.TigerListDefNames;
-import mb.tiger.spoofax.taskdef.TigerListLiteralVals;
-import mb.tiger.spoofax.taskdef.TigerParse;
-import mb.tiger.spoofax.taskdef.TigerStyle;
-import mb.tiger.spoofax.taskdef.command.TigerAltCompileFile;
-import mb.tiger.spoofax.taskdef.command.TigerCompileDirectory;
-import mb.tiger.spoofax.taskdef.command.TigerCompileFile;
-import mb.tiger.spoofax.taskdef.command.TigerShowAnalyzedAst;
-import mb.tiger.spoofax.taskdef.command.TigerShowDesugaredAst;
-import mb.tiger.spoofax.taskdef.command.TigerShowParsedAst;
-import mb.tiger.spoofax.taskdef.command.TigerShowPrettyPrintedText;
+import mb.tiger.spoofax.command.TigerAltCompileFileCommand;
+import mb.tiger.spoofax.command.TigerCompileDirectoryCommand;
+import mb.tiger.spoofax.command.TigerCompileFileCommand;
+import mb.tiger.spoofax.command.TigerShowAnalyzedAstCommand;
+import mb.tiger.spoofax.command.TigerShowDesugaredAstCommand;
+import mb.tiger.spoofax.command.TigerShowParsedAstCommand;
+import mb.tiger.spoofax.command.TigerShowPrettyPrintedTextCommand;
+import mb.tiger.spoofax.task.TigerAltCompileFile;
+import mb.tiger.spoofax.task.TigerAnalyze;
+import mb.tiger.spoofax.task.TigerCheck;
+import mb.tiger.spoofax.task.TigerCompileDirectory;
+import mb.tiger.spoofax.task.TigerCompileFile;
+import mb.tiger.spoofax.task.TigerListDefNames;
+import mb.tiger.spoofax.task.TigerListLiteralVals;
+import mb.tiger.spoofax.task.TigerParse;
+import mb.tiger.spoofax.task.TigerShowAnalyzedAst;
+import mb.tiger.spoofax.task.TigerShowDesugaredAst;
+import mb.tiger.spoofax.task.TigerShowParsedAst;
+import mb.tiger.spoofax.task.TigerShowPrettyPrintedText;
+import mb.tiger.spoofax.task.TigerStyle;
+import mb.tiger.spoofax.task.TigerTokenize;
 
 import javax.inject.Named;
 import java.util.HashSet;
@@ -99,9 +110,9 @@ public class TigerModule {
         TigerListLiteralVals listLiteralVals,
         TigerListDefNames listDefNames,
 
-        TigerGetParsedTokens tokenize,
+        TigerTokenize tokenize,
         TigerStyle style,
-        TigerGetMessages check,
+        TigerCheck check,
 
         TigerShowParsedAst showParsedAst,
         TigerShowPrettyPrintedText showPrettyPrintedText,
@@ -137,6 +148,39 @@ public class TigerModule {
     @Provides @LanguageScope @Named("language")
     TaskDefs provideTaskDefs(@Named("language") Set<TaskDef<?, ?>> taskDefs) {
         return new MapTaskDefs(taskDefs);
+    }
+
+
+    @Provides @LanguageScope @ElementsIntoSet
+    static Set<CommandDef<?>> provideCommandDefsSet(
+        TigerShowParsedAstCommand tigerShowParsedAstCommand,
+        TigerShowDesugaredAstCommand tigerShowDesugaredAstCommand,
+        TigerShowAnalyzedAstCommand tigerShowAnalyzedAstCommand,
+        TigerShowPrettyPrintedTextCommand tigerShowPrettyPrintedTextCommand,
+        TigerCompileFileCommand tigerCompileFileCommand,
+        TigerCompileDirectoryCommand tigerCompileDirectoryCommand,
+        TigerAltCompileFileCommand tigerAltCompileFileCommand
+    ) {
+        final HashSet<CommandDef<?>> commandDefs = new HashSet<>();
+        commandDefs.add(tigerShowParsedAstCommand);
+        commandDefs.add(tigerShowDesugaredAstCommand);
+        commandDefs.add(tigerShowAnalyzedAstCommand);
+        commandDefs.add(tigerShowPrettyPrintedTextCommand);
+        commandDefs.add(tigerCompileFileCommand);
+        commandDefs.add(tigerCompileDirectoryCommand);
+        commandDefs.add(tigerAltCompileFileCommand);
+        return commandDefs;
+    }
+
+    @Provides @LanguageScope @ElementsIntoSet
+    static Set<AutoCommandRequest<?>> provideAutoCommandRequestsSet(
+        TigerCompileFileCommand tigerCompileFileCommand,
+        TigerCompileDirectoryCommand tigerCompileDirectoryCommand
+    ) {
+        final HashSet<AutoCommandRequest<?>> autoCommandDefs = new HashSet<>();
+        autoCommandDefs.add(new AutoCommandRequest<>(tigerCompileFileCommand, new RawArgs(MapView.of())));
+        autoCommandDefs.add(new AutoCommandRequest<>(tigerCompileDirectoryCommand, new RawArgs(MapView.of())));
+        return autoCommandDefs;
     }
 
 

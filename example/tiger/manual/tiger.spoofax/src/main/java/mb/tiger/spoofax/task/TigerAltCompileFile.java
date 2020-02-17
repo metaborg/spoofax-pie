@@ -1,6 +1,5 @@
-package mb.tiger.spoofax.taskdef.command;
+package mb.tiger.spoofax.task;
 
-import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Provider;
@@ -10,20 +9,8 @@ import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.core.language.cli.CliCommand;
-import mb.spoofax.core.language.cli.CliParams;
-import mb.spoofax.core.language.command.CommandContextType;
-import mb.spoofax.core.language.command.CommandDef;
-import mb.spoofax.core.language.command.CommandExecutionType;
 import mb.spoofax.core.language.command.CommandFeedbacks;
 import mb.spoofax.core.language.command.CommandOutput;
-import mb.spoofax.core.language.command.arg.ArgProviders;
-import mb.spoofax.core.language.command.arg.Param;
-import mb.spoofax.core.language.command.arg.ParamDef;
-import mb.spoofax.core.language.command.arg.RawArgs;
-import mb.tiger.spoofax.taskdef.TigerListDefNames;
-import mb.tiger.spoofax.taskdef.TigerListLiteralVals;
-import mb.tiger.spoofax.taskdef.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -33,7 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Objects;
 
-public class TigerAltCompileFile implements TaskDef<TigerAltCompileFile.Args, CommandOutput>, CommandDef<TigerAltCompileFile.Args> {
+public class TigerAltCompileFile implements TaskDef<TigerAltCompileFile.Args, CommandOutput> {
     public static class Args implements Serializable {
         final ResourcePath file;
         final boolean listDefNames;
@@ -66,12 +53,10 @@ public class TigerAltCompileFile implements TaskDef<TigerAltCompileFile.Args, Co
         }
     }
 
-
     private final TigerParse parse;
     private final TigerListDefNames listDefNames;
     private final TigerListLiteralVals listLiteralVals;
     private final ResourceService resourceService;
-
 
     @Inject
     public TigerAltCompileFile(TigerParse parse, TigerListDefNames listDefNames, TigerListLiteralVals listLiteralVals, ResourceService resourceService) {
@@ -80,7 +65,6 @@ public class TigerAltCompileFile implements TaskDef<TigerAltCompileFile.Args, Co
         this.listLiteralVals = listLiteralVals;
         this.resourceService = resourceService;
     }
-
 
     @Override public String getId() {
         return getClass().getName();
@@ -97,7 +81,6 @@ public class TigerAltCompileFile implements TaskDef<TigerAltCompileFile.Args, Co
             str = context.require(listLiteralVals, astProvider);
         }
 
-        //noinspection ConstantConditions (str can really be null)
         if(str == null) {
             return new CommandOutput(ListView.of());
         }
@@ -121,44 +104,5 @@ public class TigerAltCompileFile implements TaskDef<TigerAltCompileFile.Args, Co
 
     @Override public Task<CommandOutput> createTask(Args input) {
         return TaskDef.super.createTask(input);
-    }
-
-
-    @Override public String getDisplayName() {
-        return "'Alternative compile' file";
-    }
-
-    @Override public EnumSetView<CommandExecutionType> getSupportedExecutionTypes() {
-        return EnumSetView.of(CommandExecutionType.ManualOnce, CommandExecutionType.AutomaticContinuous, CommandExecutionType.ManualContinuous);
-    }
-
-    @Override public EnumSetView<CommandContextType> getRequiredContextTypes() {
-        return EnumSetView.of(CommandContextType.File);
-    }
-
-    @Override public ParamDef getParamDef() {
-        return new ParamDef(
-            Param.of("file", ResourcePath.class, true, ListView.of(ArgProviders.context())),
-            Param.of("listDefNames", boolean.class, false, ArgProviders.value(true)),
-            Param.of("base64Encode", boolean.class, false, ArgProviders.value(false)),
-            Param.of("compiledFileNameSuffix", String.class, true, ArgProviders.value("defnames.aterm"))
-        );
-    }
-
-    @Override public Args fromRawArgs(RawArgs rawArgs) {
-        final ResourcePath file = rawArgs.getOrThrow("file");
-        final boolean listDefNames = rawArgs.getOrTrue("listDefNames");
-        final boolean base64Encode = rawArgs.getOrFalse("base64Encode");
-        final String compiledFileName = rawArgs.getOrThrow("compiledFileNameSuffix");
-        return new TigerAltCompileFile.Args(file, listDefNames, base64Encode, compiledFileName);
-    }
-
-    public CliCommand getCliCommandItem() {
-        return CliCommand.of("compile-file-alt", "Compiles given Tiger file in an alternative way and shows the compiled file", this,
-            CliParams.positional("file", 0, "FILE", "File to compile", null),
-            CliParams.option("listDefNames", ListView.of("-l", "--no-defnames"), true, "", "Whether to list definition names intead of literal values", null),
-            CliParams.option("base64Encode", ListView.of("-b", "--base64"), false, "", "Whether to Base64 encode the result", null),
-            CliParams.option("compiledFileNameSuffix", ListView.of("-s", "--suffix"), false, "SUFFIX", "Suffix to append to the compiled file name", null)
-        );
     }
 }

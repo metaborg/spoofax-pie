@@ -1,4 +1,4 @@
-package mb.tiger.spoofax.taskdef.command;
+package mb.tiger.spoofax.task;
 
 import mb.common.region.Region;
 import mb.common.util.ListView;
@@ -12,16 +12,15 @@ import mb.resource.ResourceKey;
 import mb.spoofax.core.language.command.CommandFeedbacks;
 import mb.spoofax.core.language.command.CommandOutput;
 import mb.stratego.common.StrategoUtil;
-import mb.tiger.spoofax.taskdef.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 
-public class TigerShowParsedAstTest implements TaskDef<TigerShowArgs, CommandOutput> {
+public class TigerShowParsedAst implements TaskDef<TigerShowArgs, CommandOutput> {
     private final TigerParse parse;
 
-    @Inject public TigerShowParsedAstTest(TigerParse parse) {
+    @Inject public TigerShowParsedAst(TigerParse parse) {
         this.parse = parse;
     }
 
@@ -33,8 +32,8 @@ public class TigerShowParsedAstTest implements TaskDef<TigerShowArgs, CommandOut
         final ResourceKey key = input.key;
         final @Nullable Region region = input.region;
 
-        final JSGLR1ParseResult parseResult = context.require(parse, new ResourceStringProvider(key));
-        final IStrategoTerm ast = parseResult.getAst()
+        @SuppressWarnings("ConstantConditions") final JSGLR1ParseResult parseResult = context.require(parse, new ResourceStringProvider(key));
+        @SuppressWarnings("ConstantConditions") final IStrategoTerm ast = parseResult.getAst()
             .orElseThrow(() -> new RuntimeException("Cannot show parsed AST, parsed AST for '" + key + "' is null"));
 
         final IStrategoTerm term;

@@ -5,13 +5,14 @@ import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Set;
 
-public class ConstraintAnalyzerContext {
+public class ConstraintAnalyzerContext implements Serializable {
+    // TODO: serializing hashmap may cause problems because it is not equal after a round-trip?
     private final HashMap<ResourceKey, Result> results = new HashMap<>();
-//    private final HashMap<String, ResourceKey> resources = new HashMap<>();
 
 
     public @Nullable Result getResult(ResourceKey resource) {
@@ -43,17 +44,4 @@ public class ConstraintAnalyzerContext {
     void removeResult(ResourceKey resource) {
         results.remove(resource);
     }
-
-
-//    public @Nullable ResourceKey getResource(String str) {
-//        return resources.get(str);
-//    }
-//
-//    void registerResource(ResourceKey resource) {
-//        resources.put(resource.toString(), resource);
-//    }
-//
-//    void removeResource(ResourceKey resource) {
-//        resources.remove(resource.toString());
-//    }
 }

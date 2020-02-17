@@ -1,4 +1,4 @@
-package mb.tiger.spoofax.taskdef;
+package mb.tiger.spoofax.task;
 
 import mb.constraint.common.ConstraintAnalyzer.SingleFileResult;
 import mb.constraint.common.ConstraintAnalyzerContext;
@@ -10,6 +10,7 @@ import mb.pie.api.Provider;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
+import mb.spoofax.core.language.LanguageScope;
 import mb.stratego.common.StrategoIOAgent;
 import mb.tiger.TigerConstraintAnalyzer;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Objects;
 
+@LanguageScope
 public class TigerAnalyze implements TaskDef<TigerAnalyze.Input, @Nullable SingleFileResult> {
     public static class Input implements Serializable {
         public final ResourceKey resourceKey;
@@ -58,12 +60,13 @@ public class TigerAnalyze implements TaskDef<TigerAnalyze.Input, @Nullable Singl
     }
 
     @Override public String getId() {
-        return getClass().getName();
+        return "mb.tiger.spoofax.task.TigerAnalyze";
     }
 
     @Override
     public @Nullable SingleFileResult exec(ExecContext context, Input input) throws ExecException, IOException, InterruptedException {
         final @Nullable IStrategoTerm ast = context.require(input.astProvider);
+        //noinspection ConstantConditions
         if(ast == null) {
             return null;
         }

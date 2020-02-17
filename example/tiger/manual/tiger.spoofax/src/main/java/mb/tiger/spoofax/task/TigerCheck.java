@@ -1,4 +1,4 @@
-package mb.tiger.spoofax.taskdef;
+package mb.tiger.spoofax.task;
 
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
@@ -9,21 +9,23 @@ import mb.pie.api.ExecException;
 import mb.pie.api.ResourceStringProvider;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
+import mb.spoofax.core.language.LanguageScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 
-public class TigerGetMessages implements TaskDef<ResourceKey, KeyedMessages> {
+@LanguageScope
+public class TigerCheck implements TaskDef<ResourceKey, KeyedMessages> {
     private final TigerParse parse;
     private final TigerAnalyze analyze;
 
-    @Inject public TigerGetMessages(TigerParse parse, TigerAnalyze analyze) {
+    @Inject public TigerCheck(TigerParse parse, TigerAnalyze analyze) {
         this.parse = parse;
         this.analyze = analyze;
     }
 
     @Override public String getId() {
-        return getClass().getName();
+        return "mb.tiger.spoofax.task.TigerCheck";
     }
 
     @Override
@@ -33,7 +35,6 @@ public class TigerGetMessages implements TaskDef<ResourceKey, KeyedMessages> {
         final JSGLR1ParseResult parseResult = context.require(parse, stringProvider);
         builder.addMessages(key, parseResult.getMessages());
         final @Nullable SingleFileResult analysisResult = context.require(analyze, new TigerAnalyze.Input(key, parse.createAstProvider(stringProvider)));
-        //noinspection ConstantConditions
         if(analysisResult != null) {
             builder.addMessages(key, analysisResult.messages);
         }

@@ -1,7 +1,6 @@
-package mb.tiger.spoofax.taskdef.command;
+package mb.tiger.spoofax.task;
 
 import mb.common.region.Region;
-import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.jsglr.common.TermTracer;
 import mb.jsglr1.common.JSGLR1ParseResult;
@@ -10,44 +9,31 @@ import mb.pie.api.ResourceStringProvider;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
-import mb.spoofax.core.language.cli.CliCommand;
-import mb.spoofax.core.language.command.CommandContextType;
-import mb.spoofax.core.language.command.CommandDef;
-import mb.spoofax.core.language.command.CommandExecutionType;
 import mb.spoofax.core.language.command.CommandFeedbacks;
 import mb.spoofax.core.language.command.CommandOutput;
-import mb.spoofax.core.language.command.arg.ParamDef;
-import mb.spoofax.core.language.command.arg.RawArgs;
-import mb.spoofax.core.language.command.arg.TextToResourceKeyArgConverter;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
 import mb.stratego.common.StrategoUtil;
-import mb.tiger.spoofax.taskdef.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.library.IOAgent;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 
-public class TigerShowPrettyPrintedText implements TaskDef<TigerShowArgs, CommandOutput>, CommandDef<TigerShowArgs> {
+public class TigerShowPrettyPrintedText implements TaskDef<TigerShowArgs, CommandOutput> {
     private final TigerParse parse;
     private final StrategoRuntimeBuilder strategoRuntimeBuilder;
     private final StrategoRuntime prototypeStrategoRuntime;
-    private final TextToResourceKeyArgConverter textToResourceKeyArgConverter;
-
 
     @Inject public TigerShowPrettyPrintedText(
         TigerParse parse,
         StrategoRuntimeBuilder strategoRuntimeBuilder,
-        StrategoRuntime prototypeStrategoRuntime,
-        TextToResourceKeyArgConverter textToResourceKeyArgConverter
+        StrategoRuntime prototypeStrategoRuntime
     ) {
         this.parse = parse;
         this.strategoRuntimeBuilder = strategoRuntimeBuilder;
         this.prototypeStrategoRuntime = prototypeStrategoRuntime;
-        this.textToResourceKeyArgConverter = textToResourceKeyArgConverter;
     }
-
 
     @Override public String getId() {
         return getClass().getName();
@@ -57,8 +43,8 @@ public class TigerShowPrettyPrintedText implements TaskDef<TigerShowArgs, Comman
         final ResourceKey key = input.key;
         final @Nullable Region region = input.region;
 
-        final JSGLR1ParseResult parseResult = context.require(parse, new ResourceStringProvider(key));
-        final IStrategoTerm ast = parseResult.getAst()
+        @SuppressWarnings("ConstantConditions") final JSGLR1ParseResult parseResult = context.require(parse, new ResourceStringProvider(key));
+        @SuppressWarnings("ConstantConditions") final IStrategoTerm ast = parseResult.getAst()
             .orElseThrow(() -> new RuntimeException("Cannot show pretty-printed text, parsed AST for '" + key + "' is null"));
 
         final IStrategoTerm term;
@@ -81,34 +67,5 @@ public class TigerShowPrettyPrintedText implements TaskDef<TigerShowArgs, Comman
 
     @Override public Task<CommandOutput> createTask(TigerShowArgs input) {
         return TaskDef.super.createTask(input);
-    }
-
-
-    @Override public String getDisplayName() {
-        return "Show pretty-printed text";
-    }
-
-    @Override public EnumSetView<CommandExecutionType> getSupportedExecutionTypes() {
-        return EnumSetView.of(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous);
-    }
-
-    @Override public EnumSetView<CommandContextType> getRequiredContextTypes() {
-        return EnumSetView.of(CommandContextType.Resource);
-    }
-
-    @Override public ParamDef getParamDef() {
-        return TigerShowArgs.getParamDef();
-    }
-
-    @Override public TigerShowArgs fromRawArgs(RawArgs rawArgs) {
-        return TigerShowArgs.fromRawArgs(rawArgs);
-    }
-
-    public CliCommand getCliCommandItem() {
-        final String operation = "reformat";
-        return CliCommand.of(operation, "Reformats Tiger sources",
-            CliCommand.of("file", "Reformats given Tiger file", this, TigerShowArgs.getFileCliParams(operation)),
-            CliCommand.of("text", "Reformats given Tiger text", this, TigerShowArgs.getTextCliParams(operation, textToResourceKeyArgConverter))
-        );
     }
 }

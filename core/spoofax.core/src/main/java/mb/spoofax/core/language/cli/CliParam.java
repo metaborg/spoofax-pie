@@ -17,8 +17,40 @@ public abstract class CliParam {
         return CliParams.option(paramId, names, negatable, label, description, converter);
     }
 
+    public static CliParam option(String paramId, ListView<String> names, boolean negatable, @Nullable String label, @Nullable String description) {
+        return CliParams.option(paramId, names, negatable, label, description, null);
+    }
+
+    public static CliParam option(String paramId, ListView<String> names, boolean negatable, @Nullable String label) {
+        return CliParams.option(paramId, names, negatable, label, null, null);
+    }
+
+    public static CliParam option(String paramId, ListView<String> names, boolean negatable) {
+        return CliParams.option(paramId, names, negatable, null, null, null);
+    }
+
+    public static CliParam option(String paramId, ListView<String> names) {
+        return CliParams.option(paramId, names, false, null, null, null);
+    }
+
+    public static CliParam option(String paramId, String... names) {
+        return CliParams.option(paramId, ListView.of(names), false, null, null, null);
+    }
+
     public static CliParam positional(String paramId, int index, @Nullable String label, @Nullable String description, @Nullable ArgConverter<?> converter) {
         return CliParams.positional(paramId, index, label, description, converter);
+    }
+
+    public static CliParam positional(String paramId, int index, @Nullable String label, @Nullable String description) {
+        return CliParams.positional(paramId, index, label, description, null);
+    }
+
+    public static CliParam positional(String paramId, int index, @Nullable String label) {
+        return CliParams.positional(paramId, index, label, null, null);
+    }
+
+    public static CliParam positional(String paramId, int index) {
+        return CliParams.positional(paramId, index, null, null, null);
     }
 
 

@@ -1,4 +1,4 @@
-package mb.tiger.spoofax.taskdef;
+package mb.tiger.spoofax.task;
 
 import mb.common.message.Message;
 import mb.common.message.Messages;
@@ -12,6 +12,7 @@ import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.ResourceStamper;
 import mb.resource.ReadableResource;
 import mb.resource.ResourceKey;
+import mb.spoofax.core.language.LanguageScope;
 import mb.tiger.TigerParser;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -23,6 +24,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.function.Function;
 
+@LanguageScope
 public class TigerParse implements TaskDef<Provider<String>, JSGLR1ParseResult> {
     private final javax.inject.Provider<TigerParser> parserProvider;
 
@@ -32,7 +34,7 @@ public class TigerParse implements TaskDef<Provider<String>, JSGLR1ParseResult> 
     }
 
     @Override public String getId() {
-        return getClass().getName();
+        return "mb.tiger.spoofax.task.TigerParse";
     }
 
     @Override
@@ -93,4 +95,3 @@ class TokensMapper implements Function<JSGLR1ParseResult, @Nullable ArrayList<? 
         return result.getTokens().orElse(null);
     }
 }
-
