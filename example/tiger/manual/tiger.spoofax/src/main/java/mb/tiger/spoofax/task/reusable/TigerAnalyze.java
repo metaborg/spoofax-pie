@@ -22,7 +22,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @LanguageScope
-public class TigerAnalyze implements TaskDef<TigerAnalyze.Input, @Nullable SingleFileResult> {
+public class TigerAnalyze implements TaskDef<TigerAnalyze.Input, TigerAnalyze.@Nullable Output> {
     public static class Input implements Serializable {
         public final ResourceKey resourceKey;
         public final Provider<@Nullable IStrategoTerm> astProvider;
@@ -48,6 +48,31 @@ public class TigerAnalyze implements TaskDef<TigerAnalyze.Input, @Nullable Singl
         }
     }
 
+    public static class Output implements Serializable {
+        public final ConstraintAnalyzerContext context;
+        public final SingleFileResult result;
+
+        public Output(ConstraintAnalyzerContext context, SingleFileResult result) {
+            this.result = result;
+            this.context = context;
+        }
+
+        @Override public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            final Output output = (Output)o;
+            return context.equals(output.context) && result.equals(output.result);
+        }
+
+        @Override public int hashCode() {
+            return Objects.hash(context, result);
+        }
+
+        @Override public String toString() {
+            return "Output(context=" + context + ", result=" + result + ')';
+        }
+    }
+
     private final TigerConstraintAnalyzer constraintAnalyzer;
     private final LoggerFactory loggerFactory;
     private final ResourceService resourceService;
@@ -64,15 +89,15 @@ public class TigerAnalyze implements TaskDef<TigerAnalyze.Input, @Nullable Singl
     }
 
     @Override
-    public @Nullable SingleFileResult exec(ExecContext context, Input input) throws ExecException, IOException, InterruptedException {
+    public @Nullable Output exec(ExecContext context, Input input) throws ExecException, IOException, InterruptedException {
         final @Nullable IStrategoTerm ast = context.require(input.astProvider);
-        //noinspection ConstantConditions
         if(ast == null) {
             return null;
         }
-
         try {
-            return constraintAnalyzer.analyze(input.resourceKey, ast, new ConstraintAnalyzerContext(), new StrategoIOAgent(loggerFactory, resourceService));
+            final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext();
+            final SingleFileResult result = constraintAnalyzer.analyze(input.resourceKey, ast, constraintAnalyzerContext, new StrategoIOAgent(loggerFactory, resourceService));
+            return new Output(constraintAnalyzerContext, result);
         } catch(ConstraintAnalyzerException e) {
             throw new RuntimeException("Constraint analysis failed unexpectedly", e);
         }

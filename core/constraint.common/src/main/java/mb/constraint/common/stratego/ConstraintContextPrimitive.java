@@ -1,6 +1,7 @@
 package mb.constraint.common.stratego;
 
 import mb.constraint.common.ConstraintAnalyzerContext;
+import mb.stratego.common.CompositeContextObject;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.core.InterpreterException;
 import org.spoofax.interpreter.library.AbstractPrimitive;
@@ -18,8 +19,11 @@ public abstract class ConstraintContextPrimitive extends AbstractPrimitive {
         super(name, 0, 0);
     }
 
-    @Override public final boolean call(IContext env, Strategy[] svars, IStrategoTerm[] tvars)
-        throws InterpreterException {
+    @Override public final boolean call(
+        IContext env,
+        Strategy[] svars,
+        IStrategoTerm[] tvars
+    ) throws InterpreterException {
         final ConstraintAnalyzerContext context = constraintContext(env);
         final IStrategoTerm term = env.current();
         final List<IStrategoTerm> terms = Arrays.asList(tvars);
@@ -34,14 +38,7 @@ public abstract class ConstraintContextPrimitive extends AbstractPrimitive {
     protected abstract Optional<? extends IStrategoTerm> call(ConstraintAnalyzerContext context, IStrategoTerm term,
         List<IStrategoTerm> terms, ITermFactory factory) throws InterpreterException;
 
-    private ConstraintAnalyzerContext constraintContext(IContext env) throws InterpreterException {
-        final Object contextObj = env.contextObject();
-        if(contextObj == null) {
-            throw new InterpreterException("No context present");
-        }
-        if(!(contextObj instanceof ConstraintAnalyzerContext)) {
-            throw new InterpreterException("Context does not implement ConstraintAnalyzerContext");
-        }
-        return (ConstraintAnalyzerContext)env.contextObject();
+    private ConstraintAnalyzerContext constraintContext(IContext env) {
+        return CompositeContextObject.adaptContextObject(env.contextObject(), ConstraintAnalyzerContext.class);
     }
 }

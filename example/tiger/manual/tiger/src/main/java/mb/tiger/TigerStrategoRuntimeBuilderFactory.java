@@ -1,5 +1,6 @@
 package mb.tiger;
 
+import mb.constraint.common.stratego.ConstraintPrimitiveLibrary;
 import mb.log.api.LoggerFactory;
 import mb.nabl2.common.NaBL2PrimitiveLibrary;
 import mb.resource.ResourceService;
@@ -13,6 +14,7 @@ public class TigerStrategoRuntimeBuilderFactory implements StrategoRuntimeBuilde
         builder.addInteropRegistererByReflection("org.metaborg.lang.tiger.strategies.InteropRegisterer");
         builder.withJarParentClassLoader(TigerStrategoRuntimeBuilderFactory.class.getClassLoader());
         builder.addLibrary(new NaBL2PrimitiveLibrary());
+        builder.addLibrary(new ConstraintPrimitiveLibrary(resourceService));
         return builder;
     }
 }

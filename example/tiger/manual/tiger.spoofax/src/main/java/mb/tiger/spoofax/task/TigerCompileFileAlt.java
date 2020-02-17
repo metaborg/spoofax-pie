@@ -9,7 +9,7 @@ import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.core.language.command.CommandFeedbacks;
+import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.CommandOutput;
 import mb.tiger.spoofax.task.reusable.TigerListDefNames;
 import mb.tiger.spoofax.task.reusable.TigerListLiteralVals;
@@ -97,8 +97,7 @@ public class TigerCompileFileAlt implements TaskDef<TigerCompileFileAlt.Args, Co
         generatedResource.writeBytes(str.getBytes(StandardCharsets.UTF_8));
         context.provide(generatedResource, ResourceStampers.hashFile());
 
-        //noinspection ConstantConditions (region may be null)
-        return new CommandOutput(ListView.of(CommandFeedbacks.showFile(generatedPath, null)));
+        return new CommandOutput(ListView.of(CommandFeedback.showFile(generatedPath)));
     }
 
     @Override public Serializable key(Args input) {

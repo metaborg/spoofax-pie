@@ -17,7 +17,7 @@ import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.menu.Menu;
 import mb.spoofax.core.language.menu.MenuItem;
-import mb.tiger.spoofax.command.TigerAltCompileFileCommand;
+import mb.tiger.spoofax.command.TigerCompileFileAltCommand;
 import mb.tiger.spoofax.command.TigerCompileDirectoryCommand;
 import mb.tiger.spoofax.command.TigerCompileFileCommand;
 import mb.tiger.spoofax.command.TigerShowAnalyzedAstCommand;
@@ -50,7 +50,7 @@ public class TigerInstance implements LanguageInstance {
     private final TigerShowAnalyzedAstCommand showAnalyzedAstCommand;
     private final TigerShowDesugaredAstCommand showDesugaredAstCommand;
     private final TigerCompileFileCommand compileFileCommand;
-    private final TigerAltCompileFileCommand altCompileFileCommand;
+    private final TigerCompileFileAltCommand altCompileFileCommand;
     private final TigerCompileDirectoryCommand compileDirectoryCommand;
 
     private final CollectionView<CommandDef<?>> commandDefs;
@@ -68,7 +68,7 @@ public class TigerInstance implements LanguageInstance {
         TigerShowAnalyzedAstCommand showAnalyzedAstCommand,
         TigerShowDesugaredAstCommand showDesugaredAstCommand,
         TigerCompileFileCommand compileFileCommand,
-        TigerAltCompileFileCommand altCompileFileCommand,
+        TigerCompileFileAltCommand altCompileFileCommand,
         TigerCompileDirectoryCommand compileDirectoryCommand,
 
         Set<CommandDef<?>> commandDefs,

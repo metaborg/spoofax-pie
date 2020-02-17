@@ -2,7 +2,6 @@ package mb.tiger.spoofax.task;
 
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
-import mb.constraint.common.ConstraintAnalyzer.SingleFileResult;
 import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
@@ -36,9 +35,9 @@ public class TigerIdeCheck implements TaskDef<ResourceKey, KeyedMessages> {
         final ResourceStringProvider stringProvider = new ResourceStringProvider(key);
         final JSGLR1ParseResult parseResult = context.require(parse, stringProvider);
         builder.addMessages(key, parseResult.getMessages());
-        final @Nullable SingleFileResult analysisResult = context.require(analyze, new TigerAnalyze.Input(key, parse.createAstProvider(stringProvider)));
-        if(analysisResult != null) {
-            builder.addMessages(key, analysisResult.messages);
+        final TigerAnalyze.@Nullable Output output = context.require(analyze, new TigerAnalyze.Input(key, parse.createAstProvider(stringProvider)));
+        if(output != null) {
+            builder.addMessages(key, output.result.messages);
         }
         return builder.build();
     }

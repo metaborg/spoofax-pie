@@ -6,6 +6,7 @@ dependencies {
   api(platform(project(":spoofax.depconstraints")))
 
   implementation(project(":common"))
+  implementation(project(":stratego.common"))
 
   api("org.metaborg:resource")
   api("org.metaborg:log.api")

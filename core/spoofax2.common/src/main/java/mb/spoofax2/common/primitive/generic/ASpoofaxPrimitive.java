@@ -1,5 +1,6 @@
 package mb.spoofax2.common.primitive.generic;
 
+import mb.stratego.common.CompositeContextObject;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.core.InterpreterException;
 import org.spoofax.interpreter.library.AbstractPrimitive;
@@ -35,13 +36,6 @@ public abstract class ASpoofaxPrimitive extends AbstractPrimitive {
     }
 
     protected Spoofax2Context getSpoofax2Context(IContext env) {
-        final @Nullable Object contextObject = env.contextObject();
-        if(contextObject == null) {
-            throw new RuntimeException("Cannot get Spoofax2Context object; context object is null");
-        }
-        if(!(contextObject instanceof Spoofax2Context)) {
-            throw new RuntimeException("Cannot get Spoofax2Context object; context object '" + contextObject + "' is not of type Spoofax2Context");
-        }
-        return (Spoofax2Context)contextObject;
+        return CompositeContextObject.adaptContextObject(env.contextObject(), Spoofax2Context.class);
     }
 }

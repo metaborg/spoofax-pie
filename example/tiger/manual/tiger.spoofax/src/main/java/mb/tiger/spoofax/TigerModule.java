@@ -25,13 +25,14 @@ import mb.tiger.TigerParserFactory;
 import mb.tiger.TigerStrategoRuntimeBuilderFactory;
 import mb.tiger.TigerStyler;
 import mb.tiger.TigerStylerFactory;
-import mb.tiger.spoofax.command.TigerAltCompileFileCommand;
+import mb.tiger.spoofax.command.TigerCompileFileAltCommand;
 import mb.tiger.spoofax.command.TigerCompileDirectoryCommand;
 import mb.tiger.spoofax.command.TigerCompileFileCommand;
 import mb.tiger.spoofax.command.TigerShowAnalyzedAstCommand;
 import mb.tiger.spoofax.command.TigerShowDesugaredAstCommand;
 import mb.tiger.spoofax.command.TigerShowParsedAstCommand;
 import mb.tiger.spoofax.command.TigerShowPrettyPrintedTextCommand;
+import mb.tiger.spoofax.command.TigerShowScopeGraphCommand;
 import mb.tiger.spoofax.task.TigerCompileDirectory;
 import mb.tiger.spoofax.task.TigerCompileFile;
 import mb.tiger.spoofax.task.TigerCompileFileAlt;
@@ -41,6 +42,7 @@ import mb.tiger.spoofax.task.TigerShowAnalyzedAst;
 import mb.tiger.spoofax.task.TigerShowDesugaredAst;
 import mb.tiger.spoofax.task.TigerShowParsedAst;
 import mb.tiger.spoofax.task.TigerShowPrettyPrintedText;
+import mb.tiger.spoofax.task.TigerShowScopeGraph;
 import mb.tiger.spoofax.task.reusable.TigerAnalyze;
 import mb.tiger.spoofax.task.reusable.TigerListDefNames;
 import mb.tiger.spoofax.task.reusable.TigerListLiteralVals;
@@ -105,41 +107,45 @@ public class TigerModule {
     @Provides @LanguageScope @Named("language") @ElementsIntoSet
     static Set<TaskDef<?, ?>> provideTaskDefsSet(
         TigerParse parse,
+        TigerStyle style,
         TigerAnalyze analyze,
 
         TigerListLiteralVals listLiteralVals,
         TigerListDefNames listDefNames,
 
         TigerIdeTokenize tokenize,
-        TigerStyle style,
         TigerIdeCheck check,
 
         TigerShowParsedAst showParsedAst,
         TigerShowPrettyPrintedText showPrettyPrintedText,
         TigerShowAnalyzedAst showAnalyzedAst,
+        TigerShowScopeGraph showScopeGraph,
         TigerShowDesugaredAst showDesugaredAst,
+
         TigerCompileFile compileFile,
-        TigerCompileFileAlt altCompileFile,
+        TigerCompileFileAlt compileFileAlt,
         TigerCompileDirectory compileDirectory
     ) {
         final HashSet<TaskDef<?, ?>> taskDefs = new HashSet<>();
 
         taskDefs.add(parse);
+        taskDefs.add(style);
         taskDefs.add(analyze);
 
         taskDefs.add(listLiteralVals);
         taskDefs.add(listDefNames);
 
         taskDefs.add(tokenize);
-        taskDefs.add(style);
         taskDefs.add(check);
 
         taskDefs.add(showParsedAst);
         taskDefs.add(showPrettyPrintedText);
         taskDefs.add(showAnalyzedAst);
+        taskDefs.add(showScopeGraph);
         taskDefs.add(showDesugaredAst);
+
         taskDefs.add(compileFile);
-        taskDefs.add(altCompileFile);
+        taskDefs.add(compileFileAlt);
         taskDefs.add(compileDirectory);
 
         return taskDefs;
@@ -153,22 +159,28 @@ public class TigerModule {
 
     @Provides @LanguageScope @ElementsIntoSet
     static Set<CommandDef<?>> provideCommandDefsSet(
-        TigerShowParsedAstCommand tigerShowParsedAstCommand,
-        TigerShowDesugaredAstCommand tigerShowDesugaredAstCommand,
-        TigerShowAnalyzedAstCommand tigerShowAnalyzedAstCommand,
-        TigerShowPrettyPrintedTextCommand tigerShowPrettyPrintedTextCommand,
-        TigerCompileFileCommand tigerCompileFileCommand,
-        TigerCompileDirectoryCommand tigerCompileDirectoryCommand,
-        TigerAltCompileFileCommand tigerAltCompileFileCommand
+        TigerShowParsedAstCommand showParsedAstCommand,
+        TigerShowDesugaredAstCommand showDesugaredAstCommand,
+        TigerShowAnalyzedAstCommand showAnalyzedAstCommand,
+        TigerShowScopeGraphCommand showScopeGraphCommand,
+        TigerShowPrettyPrintedTextCommand showPrettyPrintedTextCommand,
+
+        TigerCompileFileCommand compileFileCommand,
+        TigerCompileDirectoryCommand compileDirectoryCommand,
+        TigerCompileFileAltCommand compileFileAltCommand
     ) {
         final HashSet<CommandDef<?>> commandDefs = new HashSet<>();
-        commandDefs.add(tigerShowParsedAstCommand);
-        commandDefs.add(tigerShowDesugaredAstCommand);
-        commandDefs.add(tigerShowAnalyzedAstCommand);
-        commandDefs.add(tigerShowPrettyPrintedTextCommand);
-        commandDefs.add(tigerCompileFileCommand);
-        commandDefs.add(tigerCompileDirectoryCommand);
-        commandDefs.add(tigerAltCompileFileCommand);
+
+        commandDefs.add(showParsedAstCommand);
+        commandDefs.add(showDesugaredAstCommand);
+        commandDefs.add(showAnalyzedAstCommand);
+        commandDefs.add(showScopeGraphCommand);
+        commandDefs.add(showPrettyPrintedTextCommand);
+
+        commandDefs.add(compileFileCommand);
+        commandDefs.add(compileDirectoryCommand);
+        commandDefs.add(compileFileAltCommand);
+
         return commandDefs;
     }
 

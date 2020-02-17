@@ -18,11 +18,11 @@ import mb.tiger.spoofax.task.TigerCompileFileAlt;
 import javax.inject.Inject;
 
 @LanguageScope
-public class TigerAltCompileFileCommand implements CommandDef<TigerCompileFileAlt.Args> {
+public class TigerCompileFileAltCommand implements CommandDef<TigerCompileFileAlt.Args> {
     private final TigerCompileFileAlt tigerCompileFileAlt;
 
 
-    @Inject public TigerAltCompileFileCommand(TigerCompileFileAlt tigerCompileFileAlt) {
+    @Inject public TigerCompileFileAltCommand(TigerCompileFileAlt tigerCompileFileAlt) {
         this.tigerCompileFileAlt = tigerCompileFileAlt;
     }
 
