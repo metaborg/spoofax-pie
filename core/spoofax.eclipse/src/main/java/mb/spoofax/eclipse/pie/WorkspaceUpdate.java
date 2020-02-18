@@ -8,6 +8,7 @@ import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.resource.ResourceKey;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
+import mb.spoofax.eclipse.editor.ScopeManager;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.eclipse.util.MarkerUtil;
 import mb.spoofax.eclipse.util.ResourceUtil;
@@ -119,7 +120,7 @@ public class WorkspaceUpdate {
     }
 
     public void removeStyle(SpoofaxEditor editor, int textLength) {
-        final TextPresentation textPresentation = styleUtil.createTextPresentation(Color.black, textLength);
+        final TextPresentation textPresentation = styleUtil.createDefaultTextPresentation(textLength);
         styleUpdates.add(new StyleUpdate(editor, null, textLength, textPresentation));
     }
 

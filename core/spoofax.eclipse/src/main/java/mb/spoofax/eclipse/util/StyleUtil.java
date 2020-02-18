@@ -3,11 +3,14 @@ package mb.spoofax.eclipse.util;
 import mb.common.style.Style;
 import mb.common.style.Styling;
 import mb.common.style.TokenStyle;
+import mb.common.token.Token;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
+import mb.spoofax.eclipse.editor.ScopeManager;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
@@ -25,23 +28,14 @@ import java.util.Iterator;
 @Singleton
 public final class StyleUtil {
     private final ColorShare colorShare;
+    private final ScopeManager scopeManager;
     private final Logger logger;
 
 
-    @Inject public StyleUtil(ColorShare colorShare, LoggerFactory loggerFactory) {
+    @Inject public StyleUtil(ColorShare colorShare, ScopeManager scopeManager, LoggerFactory loggerFactory) {
         this.colorShare = colorShare;
+        this.scopeManager = scopeManager;
         this.logger = loggerFactory.create(getClass());
-    }
-
-
-    public TextPresentation createTextPresentation(mb.common.style.Color color, int length) {
-        final TextPresentation presentation = new TextPresentation();
-        final StyleRange styleRange = new StyleRange();
-        styleRange.start = 0;
-        styleRange.length = length;
-        styleRange.foreground = createColor(color);
-        presentation.addStyleRange(styleRange);
-        return presentation;
     }
 
     public ArrayList<TokenStyle> validateStyling(Styling styling, int length) {
@@ -69,6 +63,14 @@ public final class StyleUtil {
         return validated;
     }
 
+    public TextPresentation createDefaultTextPresentation(int length) {
+        final TextPresentation presentation = new TextPresentation();
+        TextAttribute defaultAttr = scopeManager.getTokenHighlight(ScopeManager.DEFAULT_SCOPE, null);
+        final StyleRange styleRange = createStyleRange(defaultAttr, 0, length);
+        presentation.addStyleRange(styleRange);
+        return presentation;
+    }
+
     public TextPresentation createTextPresentation(Styling styling, int length) {
         final ArrayList<TokenStyle> validated = validateStyling(styling, length);
         return createTextPresentation(validated);
@@ -77,57 +79,48 @@ public final class StyleUtil {
     public TextPresentation createTextPresentation(ArrayList<TokenStyle> stylePerToken) {
         final TextPresentation presentation = new TextPresentation();
         for(TokenStyle tokenStyle : stylePerToken) {
-            final StyleRange styleRange = createStyleRange(tokenStyle);
+            TextAttribute attr = scopeManager.getTokenHighlight("", tokenStyle.getStyle());
+            final StyleRange styleRange = createStyleRange(attr, tokenStyle.getToken());
             presentation.addStyleRange(styleRange);
         }
         @Nullable IRegion extent = presentation.getExtent();
-        if(extent == null) {
-            extent = new Region(0, 0);
-        }
-        final StyleRange defaultStyleRange = new StyleRange();
-        defaultStyleRange.start = extent.getOffset();
-        defaultStyleRange.length = extent.getLength();
-        defaultStyleRange.foreground = createColor(mb.common.style.Color.black);
+        if(extent == null) { extent = new Region(0, 0); }
+        TextAttribute defaultAttr = scopeManager.getTokenHighlight(ScopeManager.DEFAULT_SCOPE, null);
+        final StyleRange defaultStyleRange = createStyleRange(defaultAttr, extent.getOffset(), extent.getLength());
         presentation.setDefaultStyleRange(defaultStyleRange);
 
         return presentation;
     }
 
-    public StyleRange createStyleRange(TokenStyle tokenStyle) {
-        final Style style = tokenStyle.getStyle();
-        final mb.common.region.Region region = tokenStyle.getToken().getRegion();
-
-        final StyleRange styleRange = new StyleRange();
-        final mb.common.style.@Nullable Color foreground = style.getColor();
-        if(foreground != null) {
-            styleRange.foreground = createColor(foreground);
-        }
-        final mb.common.style.@Nullable Color background = style.getBackgroundColor();
-        if(background != null) {
-            styleRange.background = createColor(background);
-        }
-        if(style.isBold()) {
-            styleRange.fontStyle |= SWT.BOLD;
-        }
-        if(style.isItalic()) {
-            styleRange.fontStyle |= SWT.ITALIC;
-        }
-        if(style.isUnderscore()) {
-            styleRange.underline = true;
-        }
-        if(style.isStrikeout()) {
-            styleRange.strikeout = true;
-        }
-
-        styleRange.start = region.getStartOffset();
-        styleRange.length = region.length();
-
-        return styleRange;
+    /**
+     * Creates a style range from the given text attribute and token.
+     *
+     * @param textAttribute the text attribute, which defines the styling
+     * @param token the token
+     * @return the {@link StyleRange} with the token's styling
+     */
+    public StyleRange createStyleRange(TextAttribute textAttribute, Token token) {
+        final mb.common.region.Region region = token.getRegion();
+        return createStyleRange(textAttribute, region.getStartOffset(), region.length());
     }
 
-    private Color createColor(mb.common.style.Color color) {
-        final RGB rgb = new RGB(color.getRed(), color.getGreen(), color.getBlue());
-        return colorShare.getColor(rgb);
+    /**
+     * Creates a style range from the given text attribute and token start offset and length.
+     *
+     * @param textAttribute the text attribute, which defines the styling
+     * @param tokenStart the offset of the token
+     * @param tokenLength the length of the token
+     * @return the {@link StyleRange} with the token's styling
+     */
+    public StyleRange createStyleRange(TextAttribute textAttribute, int tokenStart, int tokenLength) {
+        final int style = textAttribute.getStyle();
+        final int fontStyle = style & (SWT.ITALIC | SWT.BOLD | SWT.NORMAL);
+        final StyleRange styleRange = new StyleRange(tokenStart, tokenLength,
+            textAttribute.getForeground(), textAttribute.getBackground(), fontStyle);
+        styleRange.strikeout = (style & TextAttribute.STRIKETHROUGH) != 0;
+        styleRange.underline = (style & TextAttribute.UNDERLINE) != 0;
+        styleRange.font = textAttribute.getFont();
+        return styleRange;
     }
 
 
