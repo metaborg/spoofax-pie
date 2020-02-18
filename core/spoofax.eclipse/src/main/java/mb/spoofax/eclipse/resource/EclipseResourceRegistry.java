@@ -47,12 +47,20 @@ public class EclipseResourceRegistry implements ResourceRegistry {
         return new EclipseResource(new EclipseResourcePath(keyStr.getId()));
     }
 
-    @Override public QualifiedResourceKeyString toStringRepresentation(Serializable id) {
+    @Override public QualifiedResourceKeyString toResourceKeyString(Serializable id) {
         if(!(id instanceof String)) {
             throw new ResourceRuntimeException(
                 "Cannot convert ID '" + id + "' to its string representation; it is not of type String");
         }
         return QualifiedResourceKeyString.of(qualifier, (String)id);
+    }
+
+    @Override public String toString(Serializable id) {
+        if(!(id instanceof String)) {
+            throw new ResourceRuntimeException(
+                "Cannot convert ID '" + id + "' to its string representation; it is not of type String");
+        }
+        return QualifiedResourceKeyString.toString(qualifier, (String)id);
     }
 
     @Override public @Nullable File toLocalFile(Serializable id) {

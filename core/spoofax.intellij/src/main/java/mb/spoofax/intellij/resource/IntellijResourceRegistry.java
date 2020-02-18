@@ -64,7 +64,7 @@ public final class IntellijResourceRegistry implements ResourceRegistry {
     }
 
     @Override public IntellijResourceKey getResourceKey(ResourceKeyString keyStr) {
-        if(!keyStr.qualifierMatches(qualifier)) {
+        if(!keyStr.qualifierMatchesOrMissing(qualifier)) {
             throw new ResourceRuntimeException("Qualifier of '" + keyStr + "' does not match qualifier '" + qualifier + "' of this resource registry");
         }
         final String url = keyStr.getId();
@@ -72,18 +72,26 @@ public final class IntellijResourceRegistry implements ResourceRegistry {
     }
 
     @Override public IntellijResource getResource(ResourceKeyString keyStr) {
-        if(!keyStr.qualifierMatches(qualifier)) {
+        if(!keyStr.qualifierMatchesOrMissing(qualifier)) {
             throw new ResourceRuntimeException("Qualifier of '" + keyStr + "' does not match qualifier '" + qualifier + "' of this resource registry");
         }
         final String url = keyStr.getId();
         return getResource(url);
     }
 
-    @Override public QualifiedResourceKeyString toStringRepresentation(Serializable id) {
+    @Override public QualifiedResourceKeyString toResourceKeyString(Serializable id) {
         if(!(id instanceof String)) {
             throw new ResourceRuntimeException(
                 "Cannot convert identifier '" + id + "' to its string representation; it is not of type String");
         }
         return QualifiedResourceKeyString.of(qualifier(), (String)id);
+    }
+
+    @Override public String toString(Serializable id) {
+        if(!(id instanceof String)) {
+            throw new ResourceRuntimeException(
+                "Cannot convert identifier '" + id + "' to its string representation; it is not of type String");
+        }
+        return QualifiedResourceKeyString.toString(qualifier(), (String)id);
     }
 }

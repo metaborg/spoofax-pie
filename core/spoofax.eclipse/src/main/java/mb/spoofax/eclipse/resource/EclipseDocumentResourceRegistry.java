@@ -53,14 +53,14 @@ public class EclipseDocumentResourceRegistry implements ResourceRegistry {
     }
 
     @Override public ResourceKey getResourceKey(ResourceKeyString keyStr) {
-        if(!keyStr.qualifierMatches(qualifier)) {
+        if(!keyStr.qualifierMatchesOrMissing(qualifier)) {
             throw new ResourceRuntimeException("Qualifier of '" + keyStr + "' does not match qualifier '" + qualifier + "' of this resource registry");
         }
         return new EclipseDocumentKey(keyStr.getId());
     }
 
     @Override public Resource getResource(ResourceKeyString keyStr) {
-        if(!keyStr.qualifierMatches(qualifier)) {
+        if(!keyStr.qualifierMatchesOrMissing(qualifier)) {
             throw new ResourceRuntimeException("Qualifier of '" + keyStr + "' does not match qualifier '" + qualifier + "' of this resource registry");
         }
         return getResource(keyStr.getId());
@@ -75,11 +75,19 @@ public class EclipseDocumentResourceRegistry implements ResourceRegistry {
         }
     }
 
-    @Override public QualifiedResourceKeyString toStringRepresentation(Serializable id) {
+    @Override public QualifiedResourceKeyString toResourceKeyString(Serializable id) {
         if(!(id instanceof String)) {
             throw new ResourceRuntimeException(
                 "Cannot convert ID '" + id + "' to its string representation; it is not of type String");
         }
         return QualifiedResourceKeyString.of(qualifier, (String)id);
+    }
+
+    @Override public String toString(Serializable id) {
+        if(!(id instanceof String)) {
+            throw new ResourceRuntimeException(
+                "Cannot convert ID '" + id + "' to its string representation; it is not of type String");
+        }
+        return QualifiedResourceKeyString.toString(qualifier, (String)id);
     }
 }

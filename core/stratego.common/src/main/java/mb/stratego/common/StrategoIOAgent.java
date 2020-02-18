@@ -16,7 +16,19 @@ import org.spoofax.interpreter.core.InterpreterException;
 import org.spoofax.interpreter.library.IOAgent;
 import org.spoofax.interpreter.library.PrintStreamWriter;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.Closeable;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.util.Map;
 
 public class StrategoIOAgent extends IOAgent {
@@ -97,7 +109,7 @@ public class StrategoIOAgent extends IOAgent {
     }
 
     public StrategoIOAgent(ResourceService resourceService, HierarchicalResource workingDir, HierarchicalResource definitionDir, OutputStream stdout,
-                           OutputStream stderr) {
+        OutputStream stderr) {
         super();
         this.acceptDirChanges = true; // Start accepting dir changes after IOAgent constructor call.
 
@@ -115,7 +127,7 @@ public class StrategoIOAgent extends IOAgent {
 
 
     @Override public String getWorkingDir() {
-        return resourceService.toStringRepresentation(workingDir.getKey()).toString();
+        return resourceService.toString(workingDir.getKey());
     }
 
     public HierarchicalResource getWorkingDirResource() {
@@ -135,7 +147,7 @@ public class StrategoIOAgent extends IOAgent {
 
 
     @Override public String getDefinitionDir() {
-        return resourceService.toStringRepresentation(definitionDir.getKey()).toString();
+        return resourceService.toString(definitionDir.getKey());
     }
 
     public HierarchicalResource getDefinitionDirResource() {
@@ -155,7 +167,7 @@ public class StrategoIOAgent extends IOAgent {
 
 
     @Override public String getTempDir() {
-        return resourceService.toStringRepresentation(tempDir.getKey()).toString();
+        return resourceService.toString(tempDir.getKey());
     }
 
     public HierarchicalResource getTempDirResource() {
@@ -205,9 +217,9 @@ public class StrategoIOAgent extends IOAgent {
 
     @Override public void writeChar(int fd, int c) throws IOException {
         if(fd == CONST_STDOUT || fd == CONST_STDERR) {
-            getWriter(fd).append((char) c);
+            getWriter(fd).append((char)c);
         } else {
-            getWriter(fd).append((char) c);
+            getWriter(fd).append((char)c);
         }
     }
 

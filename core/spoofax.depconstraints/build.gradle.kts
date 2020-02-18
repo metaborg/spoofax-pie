@@ -4,7 +4,7 @@ plugins {
 }
 
 val logVersion = "0.3.0"
-val resourceVersion = "0.5.1"
+val resourceVersion = "0.6.0"
 val pieVersion = "develop-SNAPSHOT"
 val spoofaxCoreVersion = "2.6.0-SNAPSHOT"
 val picocliVersion = "4.0.4"
@@ -47,7 +47,7 @@ dependencies {
     api("org.immutables:value-annotations:$immutablesVersion")
     api("javax.inject:javax.inject:1")
 
-    api("org.checkerframework:checker-qual-android:2.6.0") // Use android version: annotation retention policy is class instead of runtime.
+    api("org.checkerframework:checker-qual-android:3.0.0") // Use android version: annotation retention policy is class instead of runtime.
 
     // Test
     api("org.junit.jupiter:junit-jupiter-api:5.2.0")
