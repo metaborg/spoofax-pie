@@ -35,6 +35,11 @@ public class TigerCompileFileCommand implements CommandDef<TigerCompileFile.Args
         return "'Compile' file (list literals)";
     }
 
+    @Override
+    public String getDescription() {
+        return "";
+    }
+
     @Override public EnumSetView<CommandExecutionType> getSupportedExecutionTypes() {
         return EnumSetView.of(
             CommandExecutionType.ManualOnce,

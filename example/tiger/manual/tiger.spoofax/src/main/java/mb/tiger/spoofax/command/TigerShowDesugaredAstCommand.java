@@ -38,6 +38,11 @@ public class TigerShowDesugaredAstCommand implements CommandDef<TigerShowArgs> {
         return "Show desugared AST";
     }
 
+    @Override
+    public String getDescription() {
+        return "Shows the desugared Abstract Syntax Tree of the program.";
+    }
+
     @Override public EnumSetView<CommandExecutionType> getSupportedExecutionTypes() {
         return EnumSetView.of(
             CommandExecutionType.ManualOnce,

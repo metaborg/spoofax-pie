@@ -38,6 +38,11 @@ public class TigerShowParsedAstCommand implements CommandDef<TigerShowArgs> {
         return "Show parsed AST";
     }
 
+    @Override
+    public String getDescription() {
+        return "Shows the parsed Abstract Syntax Tree of the program.";
+    }
+
     @Override public EnumSetView<CommandExecutionType> getSupportedExecutionTypes() {
         return EnumSetView.of(
             CommandExecutionType.ManualOnce,

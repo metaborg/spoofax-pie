@@ -35,6 +35,11 @@ public class TigerCompileFileAltCommand implements CommandDef<TigerCompileFileAl
         return "'Alternative compile' file";
     }
 
+    @Override
+    public String getDescription() {
+        return "";
+    }
+
     @Override public EnumSetView<CommandExecutionType> getSupportedExecutionTypes() {
         return EnumSetView.of(
             CommandExecutionType.ManualOnce,

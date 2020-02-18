@@ -14,6 +14,7 @@ public interface CommandDef<A extends Serializable> {
 
     String getDisplayName();
 
+    String getDescription();
 
     EnumSetView<CommandExecutionType> getSupportedExecutionTypes();
 

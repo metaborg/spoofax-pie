@@ -38,6 +38,11 @@ public class TigerShowAnalyzedAstCommand implements CommandDef<TigerShowArgs> {
         return "Show analyzed AST";
     }
 
+    @Override
+    public String getDescription() {
+        return "Shows the analyzed Abstract Syntax Tree of the program.";
+    }
+
     @Override public EnumSetView<CommandExecutionType> getSupportedExecutionTypes() {
         return EnumSetView.of(
             CommandExecutionType.ManualOnce,

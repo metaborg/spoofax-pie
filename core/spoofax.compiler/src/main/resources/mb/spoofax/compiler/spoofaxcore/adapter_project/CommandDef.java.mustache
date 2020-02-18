@@ -35,6 +35,10 @@ public class {{type.id}} implements CommandDef<{{argType.qualifiedId}}> {
         return "{{displayName}}";
     }
 
+    @Override public String getDescription() {
+        return "{{description}}";
+    }
+
     @Override public EnumSetView<CommandExecutionType> getSupportedExecutionTypes() {
         return EnumSetView.of(
 {{#supportedExecutionTypes}}

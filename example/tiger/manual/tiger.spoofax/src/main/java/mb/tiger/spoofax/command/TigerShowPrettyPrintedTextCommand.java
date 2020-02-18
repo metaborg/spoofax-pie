@@ -38,6 +38,11 @@ public class TigerShowPrettyPrintedTextCommand implements CommandDef<TigerShowAr
         return "Show pretty-printed text";
     }
 
+    @Override
+    public String getDescription() {
+        return "Shows a pretty-printed version of the program.";
+    }
+
     @Override public EnumSetView<CommandExecutionType> getSupportedExecutionTypes() {
         return EnumSetView.of(
             CommandExecutionType.ManualOnce,

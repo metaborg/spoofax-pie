@@ -36,6 +36,11 @@ public class TigerShowScopeGraphCommand implements CommandDef<TigerShowArgs> {
         return "Show scope graph";
     }
 
+    @Override
+    public String getDescription() {
+        return "Shows the scope graph of the program.";
+    }
+
     @Override public EnumSetView<CommandExecutionType> getSupportedExecutionTypes() {
         return EnumSetView.of(
             CommandExecutionType.ManualOnce,

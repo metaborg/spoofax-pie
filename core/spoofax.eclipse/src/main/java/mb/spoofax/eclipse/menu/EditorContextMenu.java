@@ -9,6 +9,7 @@ import mb.spoofax.core.language.command.CommandContext;
 import mb.spoofax.core.language.command.CommandExecutionType;
 import mb.spoofax.core.language.command.CommandRequest;
 import mb.spoofax.core.language.command.ResourcePathWithKinds;
+import mb.spoofax.core.language.menu.CommandAction;
 import mb.spoofax.core.language.menu.MenuItem;
 import mb.spoofax.eclipse.EclipseIdentifiers;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
@@ -75,14 +76,15 @@ public class EditorContextMenu extends MenuShared {
         for(MenuItem menuItem : getMenuItems(languageInstance)) {
             menuItem.accept(new EclipseMenuItemVisitor(langMenu) {
                 @Override
-                protected void commandAction(IContributionManager menu, String displayName, CommandRequest<?> commandRequest) {
+                protected void commandAction(IContributionManager menu, CommandAction command) {
+                    CommandRequest commandRequest = command.getCommandRequest();
                     if(commandRequest.executionType == CommandExecutionType.AutomaticContinuous) {
                         return; // Automatic continuous execution is not supported when manually invoking commands.
                     }
                     if(!context.isSupportedBy(commandRequest.def.getRequiredContextTypes())) {
                         return; // Context is not supported by command.
                     }
-                    menu.add(createCommand(runCommandCommandId, commandRequest, context, displayName));
+                    menu.add(createCommand(runCommandCommandId, commandRequest, context, command.getDisplayName(), command.getDescription()));
                 }
             });
         }

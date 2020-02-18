@@ -9,14 +9,38 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class CommandAction implements MenuItem {
     private final CommandRequest commandRequest;
     private final @Nullable String displayName;
+    private final @Nullable String description;
 
-    public CommandAction(CommandRequest commandRequest, @Nullable String displayName) {
+    /**
+     * Initializes a new instance of the {@link CommandAction} class.
+     *
+     * @param commandRequest the command request
+     * @param displayName    the display name; or null to use the command definition's display name
+     * @param description    the short description of the command; or null to use the command definition's description
+     */
+    public CommandAction(CommandRequest commandRequest, @Nullable String displayName, @Nullable String description) {
         this.commandRequest = commandRequest;
         this.displayName = displayName;
+        this.description = description;
     }
 
+    /**
+     * Initializes a new instance of the {@link CommandAction} class.
+     *
+     * @param commandRequest the command request
+     * @param displayName    the display name; or null to use the command request's default display name
+     */
+    public CommandAction(CommandRequest commandRequest, @Nullable String displayName) {
+        this(commandRequest, displayName, null);
+    }
+
+    /**
+     * Initializes a new instance of the {@link CommandAction} class.
+     *
+     * @param commandRequest the command request
+     */
     public CommandAction(CommandRequest commandRequest) {
-        this(commandRequest, null);
+        this(commandRequest, null, null);
     }
 
     public static CommandAction of(CommandDef<?> commandDef, CommandExecutionType executionType, String displayName, RawArgs initialArgs) {
@@ -59,7 +83,11 @@ public class CommandAction implements MenuItem {
         return of(commandDef, CommandExecutionType.ManualContinuous, commandDef.getDisplayName() + " (continuous)");
     }
 
-
+    /**
+     * Gets the command request.
+     *
+     * @return the command request
+     */
     public CommandRequest getCommandRequest() {
         return commandRequest;
     }
@@ -72,7 +100,15 @@ public class CommandAction implements MenuItem {
         }
     }
 
+    @Override public String getDescription() {
+        if(description != null) {
+            return description;
+        } else {
+            return commandRequest.def.getDescription();
+        }
+    }
+
     @Override public void accept(MenuItemVisitor visitor) {
-        visitor.command(getDisplayName(), commandRequest);
+        visitor.command(this);
     }
 }

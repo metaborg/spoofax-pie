@@ -27,15 +27,21 @@ abstract class MenuShared extends CompoundContributionItem implements IWorkbench
     }
 
 
-    protected CommandContributionItem createCommand(String commandId, @Nullable String label, @Nullable Map<String, String> parameters, int style) {
+    protected CommandContributionItem createCommand(String commandId, @Nullable String label, @Nullable String tooltip,
+                                                    @Nullable Map<String, String> parameters, int style) {
         final CommandContributionItemParameter p = new CommandContributionItemParameter(serviceLocator, null, commandId, style);
         p.label = label;
+        p.tooltip = tooltip;
         p.parameters = parameters;
         return new CommandContributionItem(p);
     }
 
-    protected CommandContributionItem createCommand(String commandId, @Nullable String label, @Nullable Map<String, String> parameters) {
-        return createCommand(commandId, label, parameters, CommandContributionItem.STYLE_PUSH);
+    protected CommandContributionItem createCommand(String commandId, @Nullable String label, @Nullable String tooltip, @Nullable Map<String, String> parameters) {
+        return createCommand(commandId, label, tooltip, parameters, CommandContributionItem.STYLE_PUSH);
+    }
+
+    protected CommandContributionItem createCommand(String commandId, @Nullable String label, @Nullable String tooltip) {
+        return createCommand(commandId, label, tooltip, null);
     }
 
     protected CommandContributionItem createCommand(String commandId, @Nullable String label) {
@@ -47,15 +53,15 @@ abstract class MenuShared extends CompoundContributionItem implements IWorkbench
     }
 
 
-    protected CommandContributionItem createCommand(String commandId, CommandRequest<?> commandRequest, CommandContext context, String displayName) {
-        return createCommand(commandId, commandRequest, ListView.of(context), displayName);
+    protected CommandContributionItem createCommand(String commandId, CommandRequest<?> commandRequest, CommandContext context, String displayName, String description) {
+        return createCommand(commandId, commandRequest, ListView.of(context), displayName, description);
     }
 
-    protected CommandContributionItem createCommand(String commandId, CommandRequest<?> commandRequest, ListView<CommandContext> contexts, String displayName) {
+    protected CommandContributionItem createCommand(String commandId, CommandRequest<?> commandRequest, ListView<CommandContext> contexts, String displayName, String description) {
         final CommandData data = new CommandData(commandRequest, contexts);
         final Map<String, String> parameters = new HashMap<>();
         final String serialized = SerializationUtil.serializeToString(data);
         parameters.put(RunCommandHandler.dataParameterId, serialized);
-        return createCommand(commandId, displayName, parameters);
+        return createCommand(commandId, displayName, description, parameters);
     }
 }

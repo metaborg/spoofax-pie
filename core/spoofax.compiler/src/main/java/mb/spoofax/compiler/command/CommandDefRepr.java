@@ -26,6 +26,8 @@ public interface CommandDefRepr extends Serializable {
 
     String displayName();
 
+    String description();
+
     Set<CommandExecutionType> supportedExecutionTypes();
 
     Set<CommandContextType> requiredContextTypes();
