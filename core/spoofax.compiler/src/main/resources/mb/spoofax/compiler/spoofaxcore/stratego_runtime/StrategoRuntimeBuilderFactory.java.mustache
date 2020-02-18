@@ -28,7 +28,7 @@ public class {{genFactory.id}} implements StrategoRuntimeBuilderFactory {
             final mb.resource.url.URLPath correctedPath = path.appendRelativePath("{{languageProject.packagePath}}/");
             builder.addLibrary(new mb.statix.common.StatixPrimitiveLibrary());
             builder.addLibrary(new mb.spoofax2.common.primitive.Spoofax2PrimitiveLibrary(loggerFactory, resourceService));
-            builder.withContextObject(new mb.spoofax2.common.primitive.generic.Spoofax2Context("{{languageProject.project.coordinate.groupId}}", "{{languageProject.project.coordinate.artifactId}}", "{{languageProject.project.coordinate.version}}", correctedPath, resourceService.toStringRepresentation(correctedPath)));
+            builder.withContextObject(new mb.spoofax2.common.primitive.generic.Spoofax2Context("{{languageProject.project.coordinate.groupId}}", "{{languageProject.project.coordinate.artifactId}}", "{{languageProject.project.coordinate.version}}", correctedPath, resourceService.toResourceKeyString(correctedPath)));
         }
 {{/addStatixPrimitives}}
         return builder;
