@@ -18,6 +18,6 @@ public class TigerIntellijModule {
 
     @Provides @LanguageScope
     Icon provideFileIcon() {
-        return IconLoader.getIcon("META-INF/fileIcon.svg");
+        return IconLoader.getIcon("/META-INF/fileIcon.svg");
     }
 }
