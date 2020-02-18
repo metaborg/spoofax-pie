@@ -62,7 +62,7 @@ public class TigerShowScopeGraph implements TaskDef<TigerShowArgs, CommandOutput
         final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.buildFromPrototype(prototypeStrategoRuntime);
         final String strategyId = "spoofax3-editor-show-analysis-term";
         final ITermFactory termFactory = strategoRuntime.getTermFactory();
-        final IStrategoTerm inputTerm = termFactory.makeTuple(output.result.ast, termFactory.makeString(resourceService.toStringRepresentation(key).toString()));
+        final IStrategoTerm inputTerm = termFactory.makeTuple(output.result.ast, termFactory.makeString(resourceService.toString(key)));
         final @Nullable IStrategoTerm result = strategoRuntime.invoke(strategyId, inputTerm, new IOAgent(), output.context);
         if(result == null) {
             throw new RuntimeException("Cannot show scope graph, executing Stratego strategy '" + strategyId + "' failed");

@@ -384,7 +384,7 @@ public class ConstraintAnalyzer {
     }
 
     private IStrategoString mkString(ResourceKey resourceKey) {
-        return termFactory.makeString(resourceService.toStringRepresentation(resourceKey).toString());
+        return termFactory.makeString(resourceService.toString(resourceKey));
     }
 
     private IStrategoString mkString(Object obj) {
@@ -392,7 +392,7 @@ public class ConstraintAnalyzer {
     }
 
     private IStrategoTerm mkProjectTerm(ResourceKey resource) {
-        final String resourceStr = resourceService.toStringRepresentation(resource).toString();
+        final String resourceStr = resourceService.toString(resource);
         IStrategoTerm ast = termFactory.makeTuple();
         ast = StrategoTermIndices.put(TermIndex.of(resourceStr, 0), ast, termFactory);
         TermOrigin.of(resourceStr).put(ast);
