@@ -35,6 +35,10 @@ public class ListView<E> extends BaseCollectionView<E, List<? extends E>> implem
     }
 
     public static <E> ListView<E> of(Iterable<? extends E> elements) {
+        if (elements instanceof ListView<?>) {
+            //noinspection unchecked
+            return (ListView<E>)elements;
+        }
         final ArrayList<E> list = new ArrayList<>();
         IterableUtil.addAll(list, elements);
         return new ListView<>(list);
