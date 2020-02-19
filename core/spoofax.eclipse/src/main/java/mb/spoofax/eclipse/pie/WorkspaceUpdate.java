@@ -2,13 +2,12 @@ package mb.spoofax.eclipse.pie;
 
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
-import mb.common.style.Color;
+import mb.common.message.Messages;
 import mb.common.style.Styling;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.resource.ResourceKey;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
-import mb.spoofax.eclipse.editor.ScopeManager;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.eclipse.util.MarkerUtil;
 import mb.spoofax.eclipse.util.ResourceUtil;
@@ -86,6 +85,16 @@ public class WorkspaceUpdate {
     }
 
 
+    public void addMessages(ResourceKey resource, Messages messages) {
+        messagesBuilder.addMessages(resource, messages);
+    }
+
+    public void replaceMessages(ResourceKey resource, Messages messages) {
+        clearMessages(resource);
+        messagesBuilder.replaceMessages(resource, messages);
+    }
+
+
     public void addMessages(KeyedMessages messages) {
         messagesBuilder.addMessages(messages);
     }
@@ -130,7 +139,7 @@ public class WorkspaceUpdate {
 
         final KeyedMessages messages = messagesBuilder.build();
 
-        final ICoreRunnable makerUpdate = (IWorkspaceRunnable) workspaceMonitor -> {
+        final ICoreRunnable makerUpdate = (IWorkspaceRunnable)workspaceMonitor -> {
             for(ResourceKey resourceKey : clearRecursively) {
                 if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return;
                 final IResource resource = resourceUtil.getEclipseResource(resourceKey);

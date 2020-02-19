@@ -66,8 +66,18 @@ public class KeyedMessagesBuilder {
     }
 
 
+    public void replaceMessages(ResourceKey resourceKey, Collection<? extends Message> messages) {
+        this.messages.removeAll(resourceKey);
+        this.messages.putAll(resourceKey, messages);
+    }
+
     public void replaceMessages(ResourceKey resourceKey, ArrayList<Message> messages) {
         this.messages.replaceAll(resourceKey, messages);
+    }
+
+    public void replaceMessages(ResourceKey resourceKey, Messages messages) {
+        this.messages.removeAll(resourceKey);
+        this.messages.putAll(resourceKey, messages.messages);
     }
 
     public void replaceMessages(KeyedMessages messages) {

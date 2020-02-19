@@ -5,7 +5,7 @@ import mb.common.util.ListView;
 import mb.jsglr.common.TermTracer;
 import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.pie.api.ExecContext;
-import mb.pie.api.ResourceStringProvider;
+import mb.pie.api.ResourceStringSupplier;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
@@ -32,7 +32,7 @@ public class TigerShowParsedAst implements TaskDef<TigerShowArgs, CommandOutput>
         final ResourceKey key = input.key;
         final @Nullable Region region = input.region;
 
-        @SuppressWarnings("ConstantConditions") final JSGLR1ParseResult parseResult = context.require(parse, new ResourceStringProvider(key));
+        @SuppressWarnings("ConstantConditions") final JSGLR1ParseResult parseResult = context.require(parse, new ResourceStringSupplier(key));
         @SuppressWarnings("ConstantConditions") final IStrategoTerm ast = parseResult.getAst()
             .orElseThrow(() -> new RuntimeException("Cannot show parsed AST, parsed AST for '" + key + "' is null"));
 

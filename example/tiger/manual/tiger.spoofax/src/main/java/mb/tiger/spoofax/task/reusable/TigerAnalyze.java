@@ -6,7 +6,7 @@ import mb.constraint.common.ConstraintAnalyzerException;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
-import mb.pie.api.Provider;
+import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
@@ -25,26 +25,26 @@ import java.util.Objects;
 public class TigerAnalyze implements TaskDef<TigerAnalyze.Input, TigerAnalyze.@Nullable Output> {
     public static class Input implements Serializable {
         public final ResourceKey resourceKey;
-        public final Provider<@Nullable IStrategoTerm> astProvider;
+        public final Supplier<@Nullable IStrategoTerm> astSupplier;
 
-        public Input(ResourceKey resourceKey, Provider<@Nullable IStrategoTerm> astProvider) {
+        public Input(ResourceKey resourceKey, Supplier<@Nullable IStrategoTerm> astSupplier) {
             this.resourceKey = resourceKey;
-            this.astProvider = astProvider;
+            this.astSupplier = astSupplier;
         }
 
         @Override public boolean equals(Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             final Input input = (Input)o;
-            return resourceKey.equals(input.resourceKey) && astProvider.equals(input.astProvider);
+            return resourceKey.equals(input.resourceKey) && astSupplier.equals(input.astSupplier);
         }
 
         @Override public int hashCode() {
-            return Objects.hash(resourceKey, astProvider);
+            return Objects.hash(resourceKey, astSupplier);
         }
 
         @Override public String toString() {
-            return "Input(resourceKey=" + resourceKey + ", astProvider=" + astProvider + ')';
+            return "Input(resourceKey=" + resourceKey + ", astProvider=" + astSupplier + ')';
         }
     }
 
@@ -85,12 +85,12 @@ public class TigerAnalyze implements TaskDef<TigerAnalyze.Input, TigerAnalyze.@N
     }
 
     @Override public String getId() {
-        return "mb.tiger.spoofax.task.TigerAnalyze";
+        return "mb.tiger.spoofax.task.reusable.TigerAnalyzeSingle";
     }
 
     @Override
     public @Nullable Output exec(ExecContext context, Input input) throws ExecException, IOException, InterruptedException {
-        final @Nullable IStrategoTerm ast = context.require(input.astProvider);
+        final @Nullable IStrategoTerm ast = context.require(input.astSupplier);
         if(ast == null) {
             return null;
         }

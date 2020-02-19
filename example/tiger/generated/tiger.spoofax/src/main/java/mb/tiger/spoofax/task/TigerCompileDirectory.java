@@ -3,7 +3,7 @@ package mb.tiger.spoofax.task;
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
-import mb.pie.api.Provider;
+import mb.pie.api.Supplier;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
@@ -80,8 +80,8 @@ public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args
                     if(!first.get()) {
                         sb.append(", ");
                     }
-                    final Provider<@Nullable IStrategoTerm> astProvider = parse.createAstProvider(f.getKey());
-                    final @Nullable String defNames = context.require(listDefNames, astProvider);
+                    final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createAstSupplier(f.getKey());
+                    final @Nullable String defNames = context.require(listDefNames, astSupplier);
                     if(defNames != null) {
                         sb.append(defNames);
                     } else {

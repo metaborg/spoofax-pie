@@ -2,7 +2,7 @@ package mb.tiger.spoofax.task;
 
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
-import mb.pie.api.Provider;
+import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceService;
@@ -64,8 +64,8 @@ public class TigerCompileFileTaskDef implements TaskDef<TigerCompileFileTaskDef.
     @Override public CommandOutput exec(ExecContext context, Args input) throws Exception {
         final ResourcePath file = input.file;
 
-        final Provider<@Nullable IStrategoTerm> astProvider = parse.createAstProvider(file);
-        final @Nullable String literalsStr = context.require(listLiteralVals, astProvider);
+        final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createAstProvider(file);
+        final @Nullable String literalsStr = context.require(listLiteralVals, astSupplier);
         //noinspection ConstantConditions (literalsStr can really be null)
         if(literalsStr == null) {
             return new CommandOutput(ListView.of());

@@ -64,11 +64,11 @@ public class ConstraintAnalyzer {
 
     public static class MultiFileResult implements Serializable {
         public final ArrayList<Result> results;
-        public final KeyedMessages keyedMessages;
+        public final KeyedMessages messages;
 
-        public MultiFileResult(ArrayList<Result> results, KeyedMessages keyedMessages) {
+        public MultiFileResult(ArrayList<Result> results, KeyedMessages messages) {
             this.results = results;
-            this.keyedMessages = keyedMessages;
+            this.messages = messages;
         }
 
         public @Nullable Result getResult(ResourceKey resource) {
@@ -112,7 +112,7 @@ public class ConstraintAnalyzer {
         } catch(IndexOutOfBoundsException e) {
             throw new RuntimeException("BUG: no analysis result was found for resource '" + resource + "'", e);
         }
-        return new SingleFileResult(result.ast, result.analysis, multiFileResult.keyedMessages.asMessages());
+        return new SingleFileResult(result.ast, result.analysis, multiFileResult.messages.asMessages());
     }
 
     public MultiFileResult analyze(@Nullable ResourceKey root, HashMap<ResourceKey, IStrategoTerm> asts, ConstraintAnalyzerContext context, IOAgent strategoIOAgent)

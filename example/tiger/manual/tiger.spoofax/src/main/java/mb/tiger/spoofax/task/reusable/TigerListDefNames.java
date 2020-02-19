@@ -2,7 +2,7 @@ package mb.tiger.spoofax.task.reusable;
 
 import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecContext;
-import mb.pie.api.Provider;
+import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceService;
 import mb.stratego.common.StrategoIOAgent;
@@ -14,7 +14,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 
-public class TigerListDefNames implements TaskDef<Provider<@Nullable IStrategoTerm>, @Nullable String> {
+public class TigerListDefNames implements TaskDef<Supplier<@Nullable IStrategoTerm>, @Nullable String> {
     private final StrategoRuntimeBuilder strategoRuntimeBuilder;
     private final StrategoRuntime prototypeStrategoRuntime;
     private final LoggerFactory loggerFactory;
@@ -34,12 +34,12 @@ public class TigerListDefNames implements TaskDef<Provider<@Nullable IStrategoTe
     }
 
     @Override public String getId() {
-        return getClass().getName();
+        return "mb.tiger.spoofax.task.reusable.TigerListDefNames";
     }
 
     @Override
-    public @Nullable String exec(ExecContext context, Provider<@Nullable IStrategoTerm> astProvider) throws Exception {
-        final @Nullable IStrategoTerm ast = context.require(astProvider);
+    public @Nullable String exec(ExecContext context, Supplier<@Nullable IStrategoTerm> astSupplier) throws Exception {
+        final @Nullable IStrategoTerm ast = context.require(astSupplier);
         if(ast == null) {
             return null;
         }

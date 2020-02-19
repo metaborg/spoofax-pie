@@ -1,6 +1,6 @@
 package mb.spoofax.eclipse.pie;
 
-import mb.common.message.KeyedMessages;
+import mb.common.message.Messages;
 import mb.common.style.Styling;
 import mb.common.util.CollectionView;
 import mb.common.util.EnumSetView;
@@ -129,17 +129,15 @@ public class PieRunner {
             final Task<@Nullable Styling> styleTask = languageInstance.createStyleTask(key);
             final String text = resource.getDocument().get();
             final @Nullable Styling styling = requireWithoutObserving(styleTask, postSession, monitor);
-            //noinspection ConstantConditions (styling can really be null)
             if(styling != null) {
                 workspaceUpdate.updateStyle(editor, text, styling);
             } else {
                 workspaceUpdate.removeStyle(editor, text.length());
             }
 
-            final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(key);
-            final KeyedMessages messages = requireWithoutObserving(checkTask, postSession, monitor);
-            workspaceUpdate.clearMessages(key);
-            workspaceUpdate.replaceMessages(messages);
+            final Task<Messages> checkTask = languageInstance.createCheckTask(key);
+            final Messages messages = requireWithoutObserving(checkTask, postSession, monitor);
+            workspaceUpdate.replaceMessages(key, messages);
         }
 
         workspaceUpdate.update(resource.getWrappedEclipseResource(), monitor);
@@ -243,7 +241,7 @@ public class PieRunner {
         EclipseLanguageComponent languageComponent,
         EclipseResourcePath file
     ) {
-        final Task<KeyedMessages> checkTask = languageComponent.getLanguageInstance().createCheckTask(file);
+        final Task<Messages> checkTask = languageComponent.getLanguageInstance().createCheckTask(file);
         return pie.isObserved(checkTask);
     }
 
@@ -257,15 +255,15 @@ public class PieRunner {
             final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
             for(IFile file : files) {
                 final EclipseResourcePath resourceKey = new EclipseResourcePath(file);
-                final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(resourceKey);
+                final Task<Messages> checkTask = languageInstance.createCheckTask(resourceKey);
                 pie.setCallback(checkTask, (messages) -> {
                     if(bottomUpWorkspaceUpdate != null) {
-                        bottomUpWorkspaceUpdate.replaceMessages(messages);
+                        bottomUpWorkspaceUpdate.replaceMessages(resourceKey, messages);
                     }
                 });
                 if(!pie.isObserved(checkTask)) {
-                    final KeyedMessages messages = require(checkTask, session, monitor);
-                    workspaceUpdate.replaceMessages(messages);
+                    final Messages messages = require(checkTask, session, monitor);
+                    workspaceUpdate.replaceMessages(resourceKey, messages);
                 }
             }
         }
@@ -282,7 +280,7 @@ public class PieRunner {
             final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
             for(IFile file : files) {
                 final EclipseResourcePath resourceKey = new EclipseResourcePath(file);
-                final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(resourceKey);
+                final Task<Messages> checkTask = languageInstance.createCheckTask(resourceKey);
                 // BUG: this also clears messages for open editors, which it shouldn't do.
                 workspaceUpdate.clearMessages(resourceKey);
                 unobserve(checkTask, pie, session, monitor);
@@ -408,7 +406,7 @@ public class PieRunner {
 
     // Standard PIE operations with trace logging.
 
-    public <T extends Serializable> T requireWithoutObserving(Task<T> task, PieSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
+    public <T extends @Nullable Serializable> T requireWithoutObserving(Task<T> task, PieSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
         logger.trace("Require (without observing) '{}'", task);
         Stats.reset();
         final T result = session.requireWithoutObserving(task, monitorCancelled(monitor));
@@ -416,7 +414,7 @@ public class PieRunner {
         return result;
     }
 
-    public <T extends Serializable> T require(Task<T> task, PieSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
+    public <T extends @Nullable Serializable> T require(Task<T> task, PieSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
         logger.trace("Require '{}'", task);
         Stats.reset();
         final T result = session.require(task, monitorCancelled(monitor));
@@ -432,7 +430,7 @@ public class PieRunner {
         return newSession;
     }
 
-    public <T extends Serializable> T requireWithoutObserving(Task<T> task, SessionAfterBottomUp session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
+    public <T extends @Nullable Serializable> T requireWithoutObserving(Task<T> task, SessionAfterBottomUp session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
         logger.trace("Require (without observing) '{}'", task);
         Stats.reset();
         final T result = session.requireWithoutObserving(task, monitorCancelled(monitor));
@@ -440,7 +438,7 @@ public class PieRunner {
         return result;
     }
 
-    public <T extends Serializable> T require(Task<T> task, SessionAfterBottomUp session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
+    public <T extends @Nullable Serializable> T require(Task<T> task, SessionAfterBottomUp session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
         logger.trace("Require '{}'", task);
         Stats.reset();
         final T result = session.require(task, monitorCancelled(monitor));

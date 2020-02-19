@@ -1,6 +1,6 @@
 package {{genInstance.packageId}};
 
-import mb.common.message.KeyedMessages;
+import mb.common.message.Messages;
 import mb.common.style.Styling;
 import mb.common.token.Token;
 import mb.common.util.CollectionView;
@@ -68,10 +68,10 @@ public class {{genInstance.id}} implements LanguageInstance {
     }
 
     @Override public Task<@Nullable Styling> createStyleTask(ResourceKey resourceKey) {
-        return {{styleInjection.name}}.createTask({{parseInjection.name}}.createTokensProvider(resourceKey));
+        return {{styleInjection.name}}.createTask({{parseInjection.name}}.createTokensSupplier(resourceKey));
     }
 
-    @Override public Task<KeyedMessages> createCheckTask(ResourceKey resourceKey) {
+    @Override public Task<Messages> createCheckTask(ResourceKey resourceKey) {
         return {{checkInjection.name}}.createTask(resourceKey);
     }
 

@@ -4,7 +4,7 @@ import mb.common.style.Styling;
 import mb.common.token.Token;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
-import mb.pie.api.Provider;
+import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.spoofax.core.language.LanguageScope;
 import mb.tiger.TigerStyler;
@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 @LanguageScope
-public class TigerStyle implements TaskDef<Provider<@Nullable ArrayList<? extends Token<IStrategoTerm>>>, @Nullable Styling> {
+public class TigerStyle implements TaskDef<Supplier<@Nullable ArrayList<? extends Token<IStrategoTerm>>>, @Nullable Styling> {
     private final TigerStyler styler;
 
     @Inject public TigerStyle(TigerStyler styler) {
@@ -24,13 +24,14 @@ public class TigerStyle implements TaskDef<Provider<@Nullable ArrayList<? extend
     }
 
     @Override public String getId() {
-        return "mb.tiger.spoofax.task.TigerStyle";
+        return "mb.tiger.spoofax.task.reusable.TigerStyle";
     }
 
-    @Override
-    public @Nullable Styling exec(ExecContext context, Provider<@Nullable ArrayList<? extends Token<IStrategoTerm>>> tokensProvider) throws ExecException, IOException, InterruptedException {
-        final @Nullable ArrayList<? extends Token<IStrategoTerm>> tokens = context.require(tokensProvider);
-        //noinspection ConstantConditions
+    @Override public @Nullable Styling exec(
+        ExecContext context,
+        Supplier<@Nullable ArrayList<? extends Token<IStrategoTerm>>> tokensSupplier
+    ) throws ExecException, IOException, InterruptedException {
+        final @Nullable ArrayList<? extends Token<IStrategoTerm>> tokens = context.require(tokensSupplier);
         if(tokens == null) {
             return null;
         } else {

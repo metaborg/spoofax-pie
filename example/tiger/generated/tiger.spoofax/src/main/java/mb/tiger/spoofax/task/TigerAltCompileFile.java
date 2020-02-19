@@ -2,7 +2,7 @@ package mb.tiger.spoofax.task;
 
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
-import mb.pie.api.Provider;
+import mb.pie.api.Supplier;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
@@ -73,12 +73,12 @@ public class TigerAltCompileFile implements TaskDef<TigerAltCompileFile.Args, Co
     @Override public CommandOutput exec(ExecContext context, Args input) throws Exception {
         final ResourcePath file = input.file;
 
-        final Provider<@Nullable IStrategoTerm> astProvider = parse.createAstProvider(file);
+        final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createAstSupplier(file);
         @Nullable String str;
         if(input.listDefNames) {
-            str = context.require(listDefNames, astProvider);
+            str = context.require(listDefNames, astSupplier);
         } else {
-            str = context.require(listLiteralVals, astProvider);
+            str = context.require(listLiteralVals, astSupplier);
         }
 
         if(str == null) {

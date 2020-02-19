@@ -1,6 +1,6 @@
 package mb.spoofax.core.language;
 
-import mb.common.message.KeyedMessages;
+import mb.common.message.Messages;
 import mb.common.style.Styling;
 import mb.common.token.Token;
 import mb.common.util.CollectionView;
@@ -26,7 +26,7 @@ public interface LanguageInstance {
 
     Task<@Nullable Styling> createStyleTask(ResourceKey resourceKey);
 
-    Task<KeyedMessages> createCheckTask(ResourceKey resourceKey);
+    Task<Messages> createCheckTask(ResourceKey resourceKey);
 
 
     CollectionView<CommandDef<?>> getCommandDefs();

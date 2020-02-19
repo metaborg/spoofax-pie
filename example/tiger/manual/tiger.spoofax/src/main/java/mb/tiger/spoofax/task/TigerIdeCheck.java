@@ -1,11 +1,11 @@
 package mb.tiger.spoofax.task;
 
-import mb.common.message.KeyedMessages;
-import mb.common.message.KeyedMessagesBuilder;
+import mb.common.message.Messages;
+import mb.common.message.MessagesBuilder;
 import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
-import mb.pie.api.ResourceStringProvider;
+import mb.pie.api.ResourceStringSupplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageScope;
@@ -16,7 +16,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import javax.inject.Inject;
 
 @LanguageScope
-public class TigerIdeCheck implements TaskDef<ResourceKey, KeyedMessages> {
+public class TigerIdeCheck implements TaskDef<ResourceKey, Messages> {
     private final TigerParse parse;
     private final TigerAnalyze analyze;
 
@@ -30,14 +30,14 @@ public class TigerIdeCheck implements TaskDef<ResourceKey, KeyedMessages> {
     }
 
     @Override
-    public KeyedMessages exec(ExecContext context, ResourceKey key) throws ExecException, InterruptedException {
-        final KeyedMessagesBuilder builder = new KeyedMessagesBuilder();
-        final ResourceStringProvider stringProvider = new ResourceStringProvider(key);
+    public Messages exec(ExecContext context, ResourceKey key) throws ExecException, InterruptedException {
+        final MessagesBuilder builder = new MessagesBuilder();
+        final ResourceStringSupplier stringProvider = new ResourceStringSupplier(key);
         final JSGLR1ParseResult parseResult = context.require(parse, stringProvider);
-        builder.addMessages(key, parseResult.getMessages());
-        final TigerAnalyze.@Nullable Output analysisOutput = context.require(analyze, new TigerAnalyze.Input(key, parse.createAstProvider(stringProvider)));
+        builder.addMessages(parseResult.getMessages());
+        final TigerAnalyze.@Nullable Output analysisOutput = context.require(analyze, new TigerAnalyze.Input(key, parse.createAstSupplier(stringProvider)));
         if(analysisOutput != null) {
-            builder.addMessages(key, analysisOutput.result.messages);
+            builder.addMessages(analysisOutput.result.messages);
         }
         return builder.build();
     }

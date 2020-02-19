@@ -2,7 +2,7 @@ package mb.tiger.spoofax.task;
 
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
-import mb.pie.api.Provider;
+import mb.pie.api.Supplier;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
@@ -50,8 +50,8 @@ public class TigerShowScopeGraph implements TaskDef<TigerShowArgs, CommandOutput
     @Override public CommandOutput exec(ExecContext context, TigerShowArgs input) throws Exception {
         final ResourceKey key = input.key;
 
-        final Provider<@Nullable IStrategoTerm> astProvider = parse.createAstProvider(key);
-        final TigerAnalyze.@Nullable Output output = context.require(analyze, new TigerAnalyze.Input(key, astProvider));
+        final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createAstSupplier(key);
+        final TigerAnalyze.@Nullable Output output = context.require(analyze, new TigerAnalyze.Input(key, astSupplier));
         if(output == null) {
             throw new RuntimeException("Cannot show scope graph, analysis output for '" + key + "' is null");
         }

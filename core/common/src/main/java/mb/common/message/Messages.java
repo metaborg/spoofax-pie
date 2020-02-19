@@ -1,6 +1,9 @@
 package mb.common.message;
 
 import mb.common.util.ListView;
+import mb.common.util.MultiHashMap;
+import mb.resource.ResourceKey;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -112,6 +115,13 @@ public class Messages implements Serializable {
 
     public boolean containsTraceOrHigher() {
         return containsSeverityOrHigher(Severity.Trace);
+    }
+
+
+    public KeyedMessages toKeyed(@Nullable ResourceKey key) {
+        final MultiHashMap<@Nullable ResourceKey, Message> map = new MultiHashMap<>();
+        map.putAll(key, messages);
+        return new KeyedMessages(map);
     }
 
 

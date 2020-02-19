@@ -86,10 +86,10 @@ class TigerConstraintAnalyzerTest {
         assertNotNull(result3);
         assertNotNull(result3.ast);
         assertNotNull(result3.analysis);
-        assertEquals(1, result.keyedMessages.size());
-        assertTrue(result.keyedMessages.containsError());
+        assertEquals(1, result.messages.size());
+        assertTrue(result.messages.containsError());
         final boolean[] foundCorrectMessage = {false};
-        result.keyedMessages.accept((text, exception, severity, resource, region) -> {
+        result.messages.accept((text, exception, severity, resource, region) -> {
             if(resource3.equals(resource) && severity.equals(Severity.Error)) {
                 foundCorrectMessage[0] = true;
                 return false;
@@ -126,6 +126,6 @@ class TigerConstraintAnalyzerTest {
         assertNotNull(result3);
         assertNotNull(result3.ast);
         assertNotNull(result3.analysis);
-        assertTrue(result.keyedMessages.isEmpty());
+        assertTrue(result.messages.isEmpty());
     }
 }

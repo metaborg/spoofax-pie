@@ -1,6 +1,6 @@
 package mb.tiger.spoofax;
 
-import mb.common.message.KeyedMessages;
+import mb.common.message.Messages;
 import mb.common.style.Styling;
 import mb.common.token.Token;
 import mb.common.util.CollectionView;
@@ -17,8 +17,8 @@ import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.menu.Menu;
 import mb.spoofax.core.language.menu.MenuItem;
-import mb.tiger.spoofax.command.TigerCompileFileAltCommand;
 import mb.tiger.spoofax.command.TigerCompileDirectoryCommand;
+import mb.tiger.spoofax.command.TigerCompileFileAltCommand;
 import mb.tiger.spoofax.command.TigerCompileFileCommand;
 import mb.tiger.spoofax.command.TigerShowAnalyzedAstCommand;
 import mb.tiger.spoofax.command.TigerShowDesugaredAstCommand;
@@ -106,10 +106,10 @@ public class TigerInstance implements LanguageInstance {
     }
 
     @Override public Task<@Nullable Styling> createStyleTask(ResourceKey resourceKey) {
-        return style.createTask(parse.createTokensProvider(resourceKey));
+        return style.createTask(parse.createTokensSupplier(resourceKey));
     }
 
-    @Override public Task<KeyedMessages> createCheckTask(ResourceKey resourceKey) {
+    @Override public Task<Messages> createCheckTask(ResourceKey resourceKey) {
         return tigerIdeCheck.createTask(resourceKey);
     }
 
