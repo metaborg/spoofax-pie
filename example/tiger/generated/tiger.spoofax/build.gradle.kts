@@ -15,7 +15,6 @@ import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler
 import mb.spoofax.compiler.spoofaxcore.StylerCompiler
 import mb.spoofax.compiler.util.StringUtil
 import mb.spoofax.compiler.util.TypeInfo
-import mb.spoofax.core.language.cli.CliParams
 import mb.spoofax.core.language.command.CommandContextType
 import mb.spoofax.core.language.command.CommandExecutionType
 import java.util.Optional
@@ -55,7 +54,7 @@ adapterProjectCompiler {
         .taskDefType(showParsedAst)
         .argType(showArgs)
         .displayName("Show parsed AST")
-        .description("Shows the parsed Abstract Syntax Tree of the program.")
+        .description("Shows the parsed abstract syntax tree of the program")
         .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
         .addRequiredContextTypes(CommandContextType.Resource)
         .addAllParams(showParams)
@@ -69,7 +68,7 @@ adapterProjectCompiler {
         .taskDefType(showDesugaredAst)
         .argType(showArgs)
         .displayName("Show desugared AST")
-        .description("Shows the desugared Abstract Syntax Tree of the program.")
+        .description("Shows the desugared abstract syntax tree of the program")
         .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
         .addRequiredContextTypes(CommandContextType.Resource)
         .addAllParams(showParams)
@@ -83,7 +82,7 @@ adapterProjectCompiler {
         .taskDefType(showAnalyzedAst)
         .argType(showArgs)
         .displayName("Show analyzed AST")
-        .description("Shows the analyzed Abstract Syntax Tree of the program.")
+        .description("Shows the analyzed abstract syntax tree of the program")
         .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
         .addRequiredContextTypes(CommandContextType.Resource)
         .addAllParams(showParams)
@@ -97,7 +96,7 @@ adapterProjectCompiler {
         .taskDefType(showPrettyPrintedText)
         .argType(showArgs)
         .displayName("Show pretty-printed text")
-        .description("Shows a pretty-printed version of the program.")
+        .description("Shows a pretty-printed version of the program")
         .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
         .addRequiredContextTypes(CommandContextType.Resource)
         .addAllParams(showParams)
@@ -112,7 +111,7 @@ adapterProjectCompiler {
         .taskDefType(compileFile)
         .argType(compileFile.appendToId(".Args"))
         .displayName("'Compile' file (list literals)")
-        .description("")
+        .description("Compiles the file (lists literals) and shows the compiled file")
         .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous, CommandExecutionType.AutomaticContinuous)
         .addRequiredContextTypes(CommandContextType.File)
         .addParams("file", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), true, Optional.empty(), listOf(ArgProviderRepr.context()))
@@ -127,7 +126,7 @@ adapterProjectCompiler {
         .taskDefType(compileDirectory)
         .argType(compileDirectory.appendToId(".Args"))
         .displayName("'Compile' directory (list definition names)")
-        .description("")
+        .description("Compiles the directory (list definition names) and shows the compiled file")
         .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous, CommandExecutionType.AutomaticContinuous)
         .addRequiredContextTypes(CommandContextType.Directory)
         .addParams("dir", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), true, Optional.empty(), listOf(ArgProviderRepr.context()))
@@ -142,7 +141,7 @@ adapterProjectCompiler {
         .taskDefType(altCompileFile)
         .argType(altCompileFile.appendToId(".Args"))
         .displayName("'Alternative compile' file")
-        .description("")
+        .description("Compiles the file in an alternative way and shows the compiled file")
         .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous, CommandExecutionType.AutomaticContinuous)
         .addRequiredContextTypes(CommandContextType.File)
         .addParams("file", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), true, Optional.empty(), listOf(ArgProviderRepr.context()))
@@ -160,20 +159,20 @@ adapterProjectCompiler {
       builder.cliCommand(CliCommandRepr.of(
         "tiger",
         "Tiger language command-line interface",
-        CliCommandRepr.of("parse", "Parses Tiger sources and shows the parsed AST", showParsedAstCommand.type(), showParams("parse")),
-        CliCommandRepr.of("pretty-print", "Pretty-prints Tiger sources", showPrettyPrintedTextCommand.type(), showParams("pretty-print")),
-        CliCommandRepr.of("analyze", "Analyzes Tiger sources and shows the analyzed AST", showAnalyzedAstCommand.type(), showParams("analyze")),
-        CliCommandRepr.of("desugar", "Desugars Tiger sources and shows the desugared AST", showDesugaredAstCommand.type(), showParams("desugar")),
-        CliCommandRepr.of("compile-file", "Compiles Tiger sources and shows the compiled file", compileFileCommand.type(),
+        CliCommandRepr.of("parse", showParsedAstCommand.type(), showParams("parse")),
+        CliCommandRepr.of("pretty-print", showPrettyPrintedTextCommand.type(), showParams("pretty-print")),
+        CliCommandRepr.of("analyze", showAnalyzedAstCommand.type(), showParams("analyze")),
+        CliCommandRepr.of("desugar", showDesugaredAstCommand.type(), showParams("desugar")),
+        CliCommandRepr.of("compile-file", compileFileCommand.type(),
           CliParamRepr.positional("file", 0, "FILE", "File to compile")
         ),
-        CliCommandRepr.of("alt-compile-file", "Compiles Tiger sources in an alternative way and shows the compiled file", altCompileFileCommand.type(),
+        CliCommandRepr.of("alt-compile-file", altCompileFileCommand.type(),
           CliParamRepr.positional("file", 0, "FILE", "File to compile"),
           CliParamRepr.option("listDefNames", ListView.of("-l", "--no-defnames"), true, "", "Whether to list definition names intead of literal values"),
           CliParamRepr.option("base64Encode", ListView.of("-b", "--base64"), false, "", "Whether to Base64 encode the result"),
           CliParamRepr.option("compiledFileNameSuffix", ListView.of("-s", "--suffix"), false, "SUFFIX", "Suffix to append to the compiled file name")
         ),
-        CliCommandRepr.of("compile-dir", "Compiles Tiger sources in given directory and shows the compiled file", compileDirectoryCommand.type(),
+        CliCommandRepr.of("compile-dir", compileDirectoryCommand.type(),
           CliParamRepr.positional("dir", 0, "DIR", "Directory to compile")
         )
       ))
