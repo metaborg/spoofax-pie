@@ -76,7 +76,7 @@ public class CliCommand {
     }
 
     public @Nullable String getDescription() {
-        return description;
+        return description != null ? description : (commandDef != null ? commandDef.getDescription() : null);
     }
 
     public @Nullable CommandDef<?> getCommandDef() {
