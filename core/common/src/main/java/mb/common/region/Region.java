@@ -6,13 +6,13 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * A region represents a finite region in source code text. A region has a start and end offset, represented by the
+ * A region represents a finite region in source code text.
+ * A region has a start and end offset, represented by the
  * number of characters from the beginning of the source text, with interval [0,#chars).
  */
-public class Region implements Serializable {
+public final class Region implements Serializable {
     private final int startOffset;
     private final int endOffset;
-
 
     private Region(int startOffset, int endOffset) {
         if(startOffset < 0)
@@ -71,31 +71,82 @@ public class Region implements Serializable {
 
 
     /**
-     * @return The length of the region.
+     * Gets the number of characters in the region.
+     *
+     * @return the length of the region; which may be zero
      */
     public int length() {
         return getEndOffset() - getStartOffset();
     }
 
     /**
+     * Gets whether the region is empty.
+     *
+     * @return {@code true} when the region is empty; otherwise, {@code false}
+     */
+    public boolean isEmpty() { return length() == 0; }
+
+    /**
      * Checks if this region contains given region.
      *
-     * @param region Other region to check.
-     * @return {@code true} if this region contains given region, {@code false} otherwise.
+     * Invariant: if (a contains b) and (b contains a) then (a == b).
+     * Invariant: if (a contains b) or (b contains a) then (a intersects b).
+     *
+     * @param region the other region to check
+     * @return {@code true} if this region contains the given region; otherwise, {@code false}
      */
     public boolean contains(Region region) {
-        return region.getStartOffset() >= this.getStartOffset() &&
-            region.getStartOffset() <= this.getEndOffset() &&
-            region.getEndOffset() <= this.getEndOffset();
+        // @formatter:off
+        return region.getStartOffset() >= this.getStartOffset()
+            && region.getStartOffset() <= this.getEndOffset()
+            && region.getEndOffset()   <= this.getEndOffset();
+        // @formatter:on
     }
 
+    /**
+     * Checks if this region intersects the given region.
+     *
+     * Invariant: if this method returns {@code true},
+     * then {@link Region#intersectionOf(Region, Region)} )} will not return {@code null}.
+     *
+     * @param region the other region to check
+     * @return {@code true} if this region intersects the given region; otherwise, {@code false}
+     */
+    public boolean intersectsWith(Region region) {
+        // @formatter:off
+        return region.getStartOffset() <= this.getEndOffset()
+            && region.getEndOffset()   >= this.getStartOffset();
+        // @formatter:on
+    }
+
+    /**
+     * Gets the intersection of this region with the specified region.
+     *
+     * Invariant: a contains (a intersectionWith b)
+     * Invariant: b contains (a intersectionWith b)
+     * Invariant: if (a intersectionWith b) == a then (b contains a).
+     * Invariant: if (a intersectionWith b) == b then (a contains b).
+     *
+     * @param a one region to find the intersection with
+     * @param b another region to find the intersection with
+     * @return the intersection of both regions, which may be empty; or {@code null} when there is no intersection
+     */
+    public static @Nullable Region intersectionOf(Region a, Region b) {
+        if (!a.intersectsWith(b)) return null;
+        return new Region(
+            Math.max(a.startOffset, b.startOffset),
+            Math.min(a.endOffset, b.endOffset)
+        );
+    }
 
     @Override public boolean equals(@Nullable Object obj) {
         if(this == obj) return true;
         if(obj == null || getClass() != obj.getClass()) return false;
         final Region other = (Region) obj;
-        return startOffset == other.startOffset &&
-            endOffset == other.endOffset;
+        // @formatter:off
+        return startOffset == other.startOffset
+            && endOffset == other.endOffset;
+        // @formatter:on
     }
 
     @Override public int hashCode() {
