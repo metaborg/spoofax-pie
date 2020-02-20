@@ -13,7 +13,25 @@ public class BaseCollectionView<E, C extends Collection<? extends E>> implements
 
 
     public BaseCollectionView(C collection) {
+        if (containsNull(collection))
+            throw new IllegalArgumentException("The collection contains null.");
         this.collection = collection;
+    }
+
+    /**
+     * Determines whether the collection contains {@code null}.
+     *
+     * @param collection the collection to check
+     * @return {@code true} when the collection contains {@code null};
+     * otherwise, {@code false}.
+     */
+    private static boolean containsNull(Collection<?> collection) {
+        try {
+            return collection.contains(null);
+        } catch (NullPointerException e) {
+            // The collection does not support null.
+            return false;
+        }
     }
 
 
