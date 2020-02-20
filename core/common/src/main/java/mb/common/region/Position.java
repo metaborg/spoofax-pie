@@ -2,12 +2,13 @@ package mb.common.region;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * A position in a document, identified by a line number and character offset.
  */
-public final class Position {
+public final class Position implements Serializable {
 
     /**
      * Creates a new instance of the {@link Position} class

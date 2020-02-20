@@ -2,6 +2,7 @@ package mb.common.style;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -25,7 +26,7 @@ import java.util.stream.StreamSupport;
  *
  * Style names are called "scope names" in Textmate, but we'd like to avoid this confusing name.
  */
-public final class StyleName {
+public final class StyleName implements Serializable {
 
     private static final String DEFAULT_STRING = "<default>";
     private static final StyleName DEFAULT = new StyleName(new String[0]);
