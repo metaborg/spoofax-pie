@@ -18,6 +18,7 @@ public class {{genFactory.id}} implements StrategoRuntimeBuilderFactory {
         }
 {{/copyCTree}}
         builder.withJarParentClassLoader({{genFactory.id}}.class.getClassLoader());
+        builder.addLibrary(new mb.constraint.common.stratego.ConstraintPrimitiveLibrary(resourceService));
 {{#addNaBL2Primitives}}
         builder.addLibrary(new mb.nabl2.common.NaBL2PrimitiveLibrary());
 {{/addNaBL2Primitives}}

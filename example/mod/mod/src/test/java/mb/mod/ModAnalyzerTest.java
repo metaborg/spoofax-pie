@@ -21,7 +21,6 @@ import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
 import mb.stratego.common.StrategoUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.spoofax.interpreter.library.IOAgent;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -134,17 +133,18 @@ class ModAnalyzerTest {
         assertTrue(result.messages.isEmpty());
     }
 
-    @Test @Disabled("Using Statix analysis data after analysis is WIP")
-    void showScopeGraph() throws InterruptedException, ConstraintAnalyzerException, StrategoException {
+    @Test void showScopeGraph() throws InterruptedException, ConstraintAnalyzerException, StrategoException {
         final ResourceKey resource = new DefaultResourceKey(qualifier, "a.mod");
         final JSGLR1ParseResult parsed = parser.parse("let a = 1;", startSymbol, resource);
         assertTrue(parsed.getAst().isPresent());
+        final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext();
         final SingleFileResult result =
-            analyzer.analyze(rootKey, resource, parsed.getAst().get(), new ConstraintAnalyzerContext(), new IOAgent());
+            analyzer.analyze(rootKey, resource, parsed.getAst().get(), constraintAnalyzerContext, new IOAgent());
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
         assertTrue(result.messages.isEmpty());
         final IStrategoTerm input = StrategoUtil.createLegacyBuilderInputTerm(strategoRuntime.getTermFactory(), result.ast, resource.toString(), rootKey.toString());
-        strategoRuntime.invoke("stx--show-scopegraph", input, new IOAgent());
+        final @Nullable IStrategoTerm output = strategoRuntime.invoke("stx--show-scopegraph", input, new IOAgent(), constraintAnalyzerContext);
+        assertNotNull(output);
     }
 }
