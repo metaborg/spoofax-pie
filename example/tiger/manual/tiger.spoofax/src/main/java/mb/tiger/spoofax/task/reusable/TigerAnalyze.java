@@ -3,15 +3,12 @@ package mb.tiger.spoofax.task.reusable;
 import mb.constraint.common.ConstraintAnalyzer.SingleFileResult;
 import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.constraint.common.ConstraintAnalyzerException;
-import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
-import mb.resource.ResourceService;
 import mb.spoofax.core.language.LanguageScope;
-import mb.stratego.common.StrategoIOAgent;
 import mb.tiger.TigerConstraintAnalyzer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -74,14 +71,10 @@ public class TigerAnalyze implements TaskDef<TigerAnalyze.Input, TigerAnalyze.@N
     }
 
     private final TigerConstraintAnalyzer constraintAnalyzer;
-    private final LoggerFactory loggerFactory;
-    private final ResourceService resourceService;
 
     @Inject
-    public TigerAnalyze(TigerConstraintAnalyzer constraintAnalyzer, LoggerFactory loggerFactory, ResourceService resourceService) {
+    public TigerAnalyze(TigerConstraintAnalyzer constraintAnalyzer) {
         this.constraintAnalyzer = constraintAnalyzer;
-        this.loggerFactory = loggerFactory;
-        this.resourceService = resourceService;
     }
 
     @Override public String getId() {
@@ -96,7 +89,7 @@ public class TigerAnalyze implements TaskDef<TigerAnalyze.Input, TigerAnalyze.@N
         }
         try {
             final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext();
-            final SingleFileResult result = constraintAnalyzer.analyze(input.resourceKey, ast, constraintAnalyzerContext, new StrategoIOAgent(loggerFactory, resourceService));
+            final SingleFileResult result = constraintAnalyzer.analyze(input.resourceKey, ast, constraintAnalyzerContext);
             return new Output(constraintAnalyzerContext, result);
         } catch(ConstraintAnalyzerException e) {
             throw new RuntimeException("Constraint analysis failed unexpectedly", e);

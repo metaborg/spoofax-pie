@@ -1,7 +1,7 @@
 package mb.constraint.common.stratego;
 
 import mb.constraint.common.ConstraintAnalyzerContext;
-import mb.stratego.common.CompositeContextObject;
+import mb.stratego.common.AdaptableContext;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.core.InterpreterException;
 import org.spoofax.interpreter.library.AbstractPrimitive;
@@ -39,6 +39,6 @@ public abstract class ConstraintContextPrimitive extends AbstractPrimitive {
         List<IStrategoTerm> terms, ITermFactory factory) throws InterpreterException;
 
     private ConstraintAnalyzerContext constraintContext(IContext env) {
-        return CompositeContextObject.adaptContextObject(env.contextObject(), ConstraintAnalyzerContext.class);
+        return AdaptableContext.adaptContextObject(env.contextObject(), ConstraintAnalyzerContext.class);
     }
 }

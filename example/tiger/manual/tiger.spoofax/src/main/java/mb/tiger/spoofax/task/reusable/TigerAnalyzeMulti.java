@@ -3,22 +3,18 @@ package mb.tiger.spoofax.task.reusable;
 import mb.common.util.UncheckedException;
 import mb.constraint.common.ConstraintAnalyzer.MultiFileResult;
 import mb.constraint.common.ConstraintAnalyzerContext;
-import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Function;
 import mb.pie.api.ResourceStringSupplier;
-import mb.pie.api.STaskDef;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
-import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
 import mb.spoofax.core.language.LanguageScope;
-import mb.stratego.common.StrategoIOAgent;
 import mb.tiger.TigerConstraintAnalyzer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -105,14 +101,10 @@ public class TigerAnalyzeMulti implements TaskDef<TigerAnalyzeMulti.Input, Tiger
     }
 
     private final TigerConstraintAnalyzer constraintAnalyzer;
-    private final LoggerFactory loggerFactory;
-    private final ResourceService resourceService;
 
     @Inject
-    public TigerAnalyzeMulti(TigerConstraintAnalyzer constraintAnalyzer, LoggerFactory loggerFactory, ResourceService resourceService) {
+    public TigerAnalyzeMulti(TigerConstraintAnalyzer constraintAnalyzer) {
         this.constraintAnalyzer = constraintAnalyzer;
-        this.loggerFactory = loggerFactory;
-        this.resourceService = resourceService;
     }
 
     @Override public String getId() {
@@ -120,8 +112,6 @@ public class TigerAnalyzeMulti implements TaskDef<TigerAnalyzeMulti.Input, Tiger
     }
 
     @Override public @Nullable Output exec(ExecContext context, Input input) throws Exception {
-//        final ResourceWalker walker = new AllResourceWalker();
-//        final ResourceMatcher matcher = new AllResourceMatcher(new FileResourceMatcher(), new PathResourceMatcher(new ExtensionsPathMatcher("tig")));
         final HierarchicalResource root = context.require(input.root, ResourceStampers.modifiedDirRec(input.walker, input.matcher));
 
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
@@ -141,7 +131,7 @@ public class TigerAnalyzeMulti implements TaskDef<TigerAnalyzeMulti.Input, Tiger
         }
 
         final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext();
-        final MultiFileResult result = constraintAnalyzer.analyze(input.root, asts, constraintAnalyzerContext, new StrategoIOAgent(loggerFactory, resourceService));
+        final MultiFileResult result = constraintAnalyzer.analyze(input.root, asts, constraintAnalyzerContext);
         return new Output(constraintAnalyzerContext, result);
     }
 }

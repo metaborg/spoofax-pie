@@ -1,11 +1,8 @@
 package mb.tiger.spoofax.task;
 
-import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
-import mb.resource.ResourceService;
-import mb.stratego.common.StrategoIOAgent;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
 import mb.stratego.common.StrategoUtil;
@@ -17,20 +14,14 @@ import javax.inject.Inject;
 public class TigerListDefNames implements TaskDef<Supplier<@Nullable IStrategoTerm>, @Nullable String> {
     private final StrategoRuntimeBuilder strategoRuntimeBuilder;
     private final StrategoRuntime prototypeStrategoRuntime;
-    private final LoggerFactory loggerFactory;
-    private final ResourceService resourceService;
 
     @Inject
     public TigerListDefNames(
         StrategoRuntimeBuilder strategoRuntimeBuilder,
-        StrategoRuntime prototypeStrategoRuntime,
-        LoggerFactory loggerFactory,
-        ResourceService resourceService
+        StrategoRuntime prototypeStrategoRuntime
     ) {
         this.strategoRuntimeBuilder = strategoRuntimeBuilder;
         this.prototypeStrategoRuntime = prototypeStrategoRuntime;
-        this.loggerFactory = loggerFactory;
-        this.resourceService = resourceService;
     }
 
     @Override public String getId() {
@@ -46,7 +37,7 @@ public class TigerListDefNames implements TaskDef<Supplier<@Nullable IStrategoTe
 
         final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.buildFromPrototype(prototypeStrategoRuntime);
         final String strategyId = "list-of-def-names";
-        final @Nullable IStrategoTerm result = strategoRuntime.invoke(strategyId, ast, new StrategoIOAgent(loggerFactory, resourceService));
+        final @Nullable IStrategoTerm result = strategoRuntime.invoke(strategyId, ast);
         if(result == null) {
             return null;
         }

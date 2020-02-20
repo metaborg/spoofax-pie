@@ -125,6 +125,20 @@ public class StrategoIOAgent extends IOAgent {
         this.stderrWriter = new PrintStreamWriter(new PrintStream(stderr));
     }
 
+    public StrategoIOAgent(StrategoIOAgent other) {
+        super();
+        this.acceptDirChanges = true; // Start accepting dir changes after IOAgent constructor call.
+
+        this.resourceService = other.resourceService;
+        this.tempDir = other.tempDir;
+        this.stdout = other.stdout;
+        this.stdoutWriter = other.stdoutWriter;
+        this.stderr = other.stderr;
+        this.stderrWriter = other.stderrWriter;
+        this.workingDir = other.workingDir;
+        this.definitionDir = other.definitionDir;
+    }
+
 
     @Override public String getWorkingDir() {
         return resourceService.toString(workingDir.getKey());

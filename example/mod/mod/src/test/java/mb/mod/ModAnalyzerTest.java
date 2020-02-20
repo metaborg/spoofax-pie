@@ -22,7 +22,6 @@ import mb.stratego.common.StrategoRuntimeBuilder;
 import mb.stratego.common.StrategoUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
-import org.spoofax.interpreter.library.IOAgent;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import java.util.HashMap;
@@ -46,7 +45,7 @@ class ModAnalyzerTest {
         final JSGLR1ParseResult parsed = parser.parse("let a = mod {}; dbg a.b;", startSymbol, resource);
         assertTrue(parsed.getAst().isPresent());
         final SingleFileResult result =
-            analyzer.analyze(rootKey, resource, parsed.getAst().get(), new ConstraintAnalyzerContext(), new IOAgent());
+            analyzer.analyze(rootKey, resource, parsed.getAst().get(), new ConstraintAnalyzerContext());
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
         assertTrue(result.messages.containsError());
@@ -57,7 +56,7 @@ class ModAnalyzerTest {
         final JSGLR1ParseResult parsed = parser.parse("let a = mod { let b = 1; }; dbg a.b;", startSymbol, resource);
         assertTrue(parsed.getAst().isPresent());
         final SingleFileResult result =
-            analyzer.analyze(rootKey, resource, parsed.getAst().get(), new ConstraintAnalyzerContext(), new IOAgent());
+            analyzer.analyze(rootKey, resource, parsed.getAst().get(), new ConstraintAnalyzerContext());
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
         assertTrue(result.messages.isEmpty());
@@ -77,7 +76,7 @@ class ModAnalyzerTest {
         asts.put(resource1, parsed1.getAst().get());
         asts.put(resource2, parsed2.getAst().get());
         asts.put(resource3, parsed3.getAst().get());
-        final MultiFileResult result = analyzer.analyze(rootKey, asts, new ConstraintAnalyzerContext(), new IOAgent());
+        final MultiFileResult result = analyzer.analyze(rootKey, asts, new ConstraintAnalyzerContext());
         final ConstraintAnalyzer.@Nullable Result result1 = result.getResult(resource1);
         assertNotNull(result1);
         assertNotNull(result1.ast);
@@ -117,7 +116,7 @@ class ModAnalyzerTest {
         asts.put(resource1, parsed1.getAst().get());
         asts.put(resource2, parsed2.getAst().get());
         asts.put(resource3, parsed3.getAst().get());
-        final MultiFileResult result = analyzer.analyze(rootKey, asts, new ConstraintAnalyzerContext(), new IOAgent());
+        final MultiFileResult result = analyzer.analyze(rootKey, asts, new ConstraintAnalyzerContext());
         final ConstraintAnalyzer.@Nullable Result result1 = result.getResult(resource1);
         assertNotNull(result1);
         assertNotNull(result1.ast);
@@ -138,13 +137,12 @@ class ModAnalyzerTest {
         final JSGLR1ParseResult parsed = parser.parse("let a = 1;", startSymbol, resource);
         assertTrue(parsed.getAst().isPresent());
         final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext();
-        final SingleFileResult result =
-            analyzer.analyze(rootKey, resource, parsed.getAst().get(), constraintAnalyzerContext, new IOAgent());
+        final SingleFileResult result = analyzer.analyze(rootKey, resource, parsed.getAst().get(), constraintAnalyzerContext);
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
         assertTrue(result.messages.isEmpty());
         final IStrategoTerm input = StrategoUtil.createLegacyBuilderInputTerm(strategoRuntime.getTermFactory(), result.ast, resource.toString(), rootKey.toString());
-        final @Nullable IStrategoTerm output = strategoRuntime.invoke("stx--show-scopegraph", input, new IOAgent(), constraintAnalyzerContext);
+        final @Nullable IStrategoTerm output = strategoRuntime.addContextObject(constraintAnalyzerContext).invoke("stx--show-scopegraph", input);
         assertNotNull(output);
     }
 }

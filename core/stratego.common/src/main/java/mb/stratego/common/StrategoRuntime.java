@@ -7,34 +7,45 @@ import org.spoofax.interpreter.core.InterpreterException;
 import org.spoofax.interpreter.core.InterpreterExit;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.core.UndefinedStrategyException;
-import org.spoofax.interpreter.library.IOAgent;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.strategoxt.HybridInterpreter;
 
 public class StrategoRuntime {
-    final HybridInterpreter hybridInterpreter;
-    final @Nullable Object contextObject;
+    private final HybridInterpreter hybridInterpreter;
+    private final StrategoIOAgent ioAgent;
+    private final AdaptableContext contextObject;
 
 
-    public StrategoRuntime(HybridInterpreter hybridInterpreter, @Nullable Object contextObject) {
+    public StrategoRuntime(HybridInterpreter hybridInterpreter, StrategoIOAgent ioAgent, AdaptableContext contextObject) {
         this.hybridInterpreter = hybridInterpreter;
+        this.ioAgent = ioAgent;
         this.contextObject = contextObject;
     }
 
-    public StrategoRuntime(HybridInterpreter hybridInterpreter) {
-        this.hybridInterpreter = hybridInterpreter;
-        this.contextObject = null;
+    public StrategoRuntime(HybridInterpreter hybridInterpreter, StrategoIOAgent ioAgent) {
+        this(hybridInterpreter, ioAgent, new AdaptableContext());
+    }
+
+    @SuppressWarnings("CopyConstructorMissesField") public StrategoRuntime(StrategoRuntime other) {
+        this(other.hybridInterpreter, new StrategoIOAgent(other.ioAgent), new AdaptableContext(other.contextObject));
+    }
+
+    public StrategoRuntime(StrategoRuntime other, StrategoIOAgent ioAgent) {
+        this(other.hybridInterpreter, ioAgent, new AdaptableContext(other.contextObject));
+    }
+
+    public StrategoRuntime(StrategoRuntime other, AdaptableContext contextObject) {
+        this(other.hybridInterpreter, new StrategoIOAgent(other.ioAgent), contextObject);
+    }
+
+    public StrategoRuntime(StrategoRuntime other, StrategoIOAgent ioAgent, AdaptableContext contextObject) {
+        this(other.hybridInterpreter, ioAgent, contextObject);
     }
 
 
-    public @Nullable IStrategoTerm invoke(String strategy, IStrategoTerm input, IOAgent ioAgent) throws StrategoException {
-        return invoke(strategy, input, ioAgent, null);
-    }
-
-    public @Nullable IStrategoTerm invoke(String strategy, IStrategoTerm input, IOAgent ioAgent, @Nullable Object contextObjectOverride) throws StrategoException {
-        final @Nullable Object contextObject = contextObjectOverride != null ? contextObjectOverride : this.contextObject;
+    public @Nullable IStrategoTerm invoke(String strategy, IStrategoTerm input) throws StrategoException {
         hybridInterpreter.setCurrent(input);
         hybridInterpreter.setIOAgent(ioAgent);
         hybridInterpreter.getContext().setContextObject(contextObject);
@@ -50,12 +61,43 @@ public class StrategoRuntime {
     }
 
 
+    public StrategoRuntime withIoAgent(StrategoIOAgent ioAgent) {
+        return new StrategoRuntime(this, ioAgent);
+    }
+
+    public StrategoRuntime withContextObject(AdaptableContext contextObject) {
+        return new StrategoRuntime(this, contextObject);
+    }
+
+    public StrategoRuntime addContextObject(Object contextObject) {
+        final AdaptableContext newContextObject = new AdaptableContext(this.contextObject);
+        newContextObject.put(contextObject);
+        return new StrategoRuntime(this, newContextObject);
+    }
+
+    public StrategoRuntime addContextObjects(Object... contextObjects) {
+        final AdaptableContext newContextObject = new AdaptableContext(this.contextObject);
+        for(Object contextObject : contextObjects) {
+            newContextObject.put(contextObject);
+        }
+        return new StrategoRuntime(this, newContextObject);
+    }
+
+
+    public HybridInterpreter getHybridInterpreter() {
+        return hybridInterpreter;
+    }
+
     public ITermFactory getTermFactory() {
         return hybridInterpreter.getFactory();
     }
 
-    public HybridInterpreter getHybridInterpreter() {
-        return hybridInterpreter;
+    public StrategoIOAgent getIoAgent() {
+        return ioAgent;
+    }
+
+    public AdaptableContext getContextObject() {
+        return contextObject;
     }
 
 

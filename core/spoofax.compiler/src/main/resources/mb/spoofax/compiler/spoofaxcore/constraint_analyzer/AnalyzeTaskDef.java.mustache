@@ -3,14 +3,11 @@ package {{analyzeTaskDef.packageId}};
 import mb.constraint.common.ConstraintAnalyzer.SingleFileResult;
 import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.constraint.common.ConstraintAnalyzerException;
-import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
-import mb.resource.ResourceService;
-import mb.stratego.common.StrategoIOAgent;
 import mb.spoofax.core.language.LanguageScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -73,14 +70,10 @@ public class {{analyzeTaskDef.id}} implements TaskDef<{{analyzeTaskDef.id}}.Inpu
     }
 
     private final {{languageProjectInput.constraintAnalyzer.qualifiedId}} constraintAnalyzer;
-    private final LoggerFactory loggerFactory;
-    private final ResourceService resourceService;
 
     @Inject
-    public {{analyzeTaskDef.id}}({{languageProjectInput.constraintAnalyzer.qualifiedId}} constraintAnalyzer, LoggerFactory loggerFactory, ResourceService resourceService) {
+    public {{analyzeTaskDef.id}}({{languageProjectInput.constraintAnalyzer.qualifiedId}} constraintAnalyzer) {
         this.constraintAnalyzer = constraintAnalyzer;
-        this.loggerFactory = loggerFactory;
-        this.resourceService = resourceService;
     }
 
     @Override public String getId() {
@@ -90,14 +83,13 @@ public class {{analyzeTaskDef.id}} implements TaskDef<{{analyzeTaskDef.id}}.Inpu
     @Override
     public @Nullable Output exec(ExecContext context, Input input) throws ExecException, IOException, InterruptedException {
         final @Nullable IStrategoTerm ast = context.require(input.astSupplier);
-        //noinspection ConstantConditions
         if(ast == null) {
             return null;
         }
 
         try {
             final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext();
-            final SingleFileResult result = constraintAnalyzer.analyze(input.resourceKey, ast, constraintAnalyzerContext, new StrategoIOAgent(loggerFactory, resourceService));
+            final SingleFileResult result = constraintAnalyzer.analyze(input.resourceKey, ast, constraintAnalyzerContext);
             return new Output(constraintAnalyzerContext, result);
         } catch(ConstraintAnalyzerException e) {
             throw new RuntimeException("Constraint analysis failed unexpectedly", e);

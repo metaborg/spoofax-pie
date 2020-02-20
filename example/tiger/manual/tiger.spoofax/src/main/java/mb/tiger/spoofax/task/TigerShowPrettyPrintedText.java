@@ -16,7 +16,6 @@ import mb.stratego.common.StrategoRuntimeBuilder;
 import mb.stratego.common.StrategoUtil;
 import mb.tiger.spoofax.task.reusable.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spoofax.interpreter.library.IOAgent;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
@@ -57,7 +56,7 @@ public class TigerShowPrettyPrintedText implements TaskDef<TigerShowArgs, Comman
 
         final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.buildFromPrototype(prototypeStrategoRuntime);
         final String strategyId = "pp-Tiger-string";
-        final @Nullable IStrategoTerm result = strategoRuntime.invoke(strategyId, term, new IOAgent());
+        final @Nullable IStrategoTerm result = strategoRuntime.invoke(strategyId, term);
         if(result == null) {
             throw new RuntimeException("Cannot show pretty-printed text, executing Stratego strategy '" + strategyId + "' failed");
         }

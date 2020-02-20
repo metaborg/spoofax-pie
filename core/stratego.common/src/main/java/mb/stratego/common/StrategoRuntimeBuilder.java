@@ -1,6 +1,8 @@
 package mb.stratego.common;
 
+import mb.log.api.LoggerFactory;
 import mb.resource.ReadableResource;
+import mb.resource.ResourceService;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.core.InterpreterException;
 import org.spoofax.interpreter.library.IOperatorRegistry;
@@ -17,36 +19,75 @@ import java.util.ArrayList;
 
 public class StrategoRuntimeBuilder {
     private ITermFactory termFactory;
-    private final ArrayList<String> components = new ArrayList<>();
-    private final ArrayList<IOperatorRegistry> libraries = new ArrayList<>();
-    private final ArrayList<ReadableResource> ctrees = new ArrayList<>();
-    private final ArrayList<URL> jars = new ArrayList<>();
-    private final ArrayList<InteropRegisterer> interopRegisterers = new ArrayList<>();
-    private final ArrayList<String> interopRegisterersByReflection = new ArrayList<>();
+    private StrategoIOAgent ioAgent;
     private @Nullable ClassLoader jarParentClassLoader;
-    private @Nullable Object contextObject;
+    private AdaptableContext contextObject;
+
+    private final ArrayList<String> components;
+    private final ArrayList<IOperatorRegistry> libraries;
+    private final ArrayList<ReadableResource> ctrees;
+    private final ArrayList<URL> jars;
+    private final ArrayList<InteropRegisterer> interopRegisterers;
+    private final ArrayList<String> interopRegisterersByReflection;
 
 
-    public StrategoRuntimeBuilder() {
-        withDefaultTermFactory();
-        withDefaultComponents();
-        withDefaultJarParentClassLoader();
+    public StrategoRuntimeBuilder(LoggerFactory loggerFactory, ResourceService resourceService) {
+        this.termFactory = defaultTermFactory();
+        this.ioAgent = defaultIoAgent(loggerFactory, resourceService);
+        this.jarParentClassLoader = null;
+        this.contextObject = new AdaptableContext();
+
+        this.components = defaultComponents();
+        this.libraries = new ArrayList<>();
+        this.ctrees = new ArrayList<>();
+        this.jars = new ArrayList<>();
+        this.interopRegisterers = new ArrayList<>();
+        this.interopRegisterersByReflection = new ArrayList<>();
+    }
+
+    public StrategoRuntimeBuilder(StrategoRuntimeBuilder other) {
+        this.termFactory = other.termFactory;
+        this.ioAgent = new StrategoIOAgent(other.ioAgent);
+        this.jarParentClassLoader = other.jarParentClassLoader;
+        this.contextObject = new AdaptableContext(other.contextObject);
+
+        this.components = new ArrayList<>(other.components);
+        this.libraries = new ArrayList<>(other.libraries);
+        this.ctrees = new ArrayList<>(other.ctrees);
+        this.jars = new ArrayList<>(other.jars);
+        this.interopRegisterers = new ArrayList<>(other.interopRegisterers);
+        this.interopRegisterersByReflection = new ArrayList<>(other.interopRegisterersByReflection);
     }
 
 
+    private static ImploderOriginTermFactory defaultTermFactory() {
+        return new ImploderOriginTermFactory(new TermFactory());
+    }
+
     public StrategoRuntimeBuilder withDefaultTermFactory() {
-        termFactory = new ImploderOriginTermFactory(new TermFactory());
+        this.termFactory = defaultTermFactory();
         return this;
+    }
+
+    private static ArrayList<String> defaultComponents() {
+        final ArrayList<String> components = new ArrayList<>();
+        components.add("stratego_lib");
+        components.add("stratego_sglr");
+        return components;
     }
 
     public StrategoRuntimeBuilder withDefaultComponents() {
-        components.add("stratego_lib");
-        components.add("stratego_sglr");
+        this.components.clear();
+        this.components.addAll(defaultComponents());
         return this;
     }
 
-    public StrategoRuntimeBuilder withDefaultJarParentClassLoader() {
-        jarParentClassLoader = null;
+    private static StrategoIOAgent defaultIoAgent(LoggerFactory loggerFactory, ResourceService resourceService) {
+        return new StrategoIOAgent(loggerFactory, resourceService);
+    }
+
+    public StrategoRuntimeBuilder withDefaultIoAgent(LoggerFactory loggerFactory, ResourceService resourceService) {
+        this.ioAgent = defaultIoAgent(loggerFactory, resourceService);
         return this;
     }
 
@@ -91,9 +132,24 @@ public class StrategoRuntimeBuilder {
         return this;
     }
 
-    public StrategoRuntimeBuilder withContextObject(@Nullable Object contextObject) {
+    public StrategoRuntimeBuilder withContextObject(AdaptableContext contextObject) {
         this.contextObject = contextObject;
         return this;
+    }
+
+    public StrategoRuntimeBuilder addContextObject(Object contextObject) {
+        this.contextObject.put(contextObject);
+        return this;
+    }
+
+    public StrategoRuntimeBuilder addContextObjectsFrom(AdaptableContext contextObject) {
+        this.contextObject.putAll(contextObject);
+        return this;
+    }
+
+
+    public StrategoRuntimeBuilder copy() {
+        return new StrategoRuntimeBuilder(this);
     }
 
 
@@ -145,11 +201,11 @@ public class StrategoRuntimeBuilder {
         hybridInterpreter.getCompiledContext().getExceptionHandler().setEnabled(false);
         hybridInterpreter.init();
 
-        return new StrategoRuntime(hybridInterpreter, contextObject);
+        return new StrategoRuntime(hybridInterpreter, ioAgent, contextObject);
     }
 
     public StrategoRuntime buildFromPrototype(StrategoRuntime prototype) {
-        final HybridInterpreter hybridInterpreter = new HybridInterpreter(prototype.hybridInterpreter);
+        final HybridInterpreter hybridInterpreter = new HybridInterpreter(prototype.getHybridInterpreter());
 
         hybridInterpreter.getCompiledContext().getExceptionHandler().setEnabled(false);
 
@@ -163,6 +219,6 @@ public class StrategoRuntimeBuilder {
 
         hybridInterpreter.init();
 
-        return new StrategoRuntime(hybridInterpreter, prototype.contextObject);
+        return new StrategoRuntime(hybridInterpreter, new StrategoIOAgent(prototype.getIoAgent()), new AdaptableContext(prototype.getContextObject()));
     }
 }

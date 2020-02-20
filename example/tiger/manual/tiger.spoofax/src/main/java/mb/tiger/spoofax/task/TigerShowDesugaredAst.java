@@ -16,7 +16,6 @@ import mb.stratego.common.StrategoRuntimeBuilder;
 import mb.stratego.common.StrategoUtil;
 import mb.tiger.spoofax.task.reusable.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spoofax.interpreter.library.IOAgent;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
@@ -57,7 +56,7 @@ public class TigerShowDesugaredAst implements TaskDef<TigerShowArgs, CommandOutp
 
         final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.buildFromPrototype(prototypeStrategoRuntime);
         final String strategyId = "desugar-all";
-        final @Nullable IStrategoTerm result = strategoRuntime.invoke(strategyId, term, new IOAgent());
+        final @Nullable IStrategoTerm result = strategoRuntime.invoke(strategyId, term);
         if(result == null) {
             throw new RuntimeException("Cannot show desugared AST, executing Stratego strategy '" + strategyId + "' failed");
         }

@@ -7,7 +7,7 @@ import mb.stratego.common.StrategoRuntimeBuilder;
 
 public class {{genFactory.id}} implements StrategoRuntimeBuilderFactory {
     @Override public StrategoRuntimeBuilder create(LoggerFactory loggerFactory, ResourceService resourceService) {
-        final StrategoRuntimeBuilder builder = new StrategoRuntimeBuilder();
+        final StrategoRuntimeBuilder builder = new StrategoRuntimeBuilder(loggerFactory, resourceService);
 {{#interopRegisterersByReflection}}
         builder.addInteropRegistererByReflection("{{this}}");
 {{/interopRegisterersByReflection}}
@@ -29,7 +29,7 @@ public class {{genFactory.id}} implements StrategoRuntimeBuilderFactory {
             final mb.resource.url.URLPath correctedPath = path.appendRelativePath("{{languageProject.packagePath}}/");
             builder.addLibrary(new mb.statix.common.StatixPrimitiveLibrary());
             builder.addLibrary(new mb.spoofax2.common.primitive.Spoofax2PrimitiveLibrary(loggerFactory, resourceService));
-            builder.withContextObject(new mb.spoofax2.common.primitive.generic.Spoofax2Context("{{languageProject.project.coordinate.groupId}}", "{{languageProject.project.coordinate.artifactId}}", "{{languageProject.project.coordinate.version}}", correctedPath, resourceService.toResourceKeyString(correctedPath)));
+            builder.addContextObject(new mb.spoofax2.common.primitive.generic.Spoofax2Context("{{languageProject.project.coordinate.groupId}}", "{{languageProject.project.coordinate.artifactId}}", "{{languageProject.project.coordinate.version}}", correctedPath, resourceService.toResourceKeyString(correctedPath)));
         }
 {{/addStatixPrimitives}}
         return builder;

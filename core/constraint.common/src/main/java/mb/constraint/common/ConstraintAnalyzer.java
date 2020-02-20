@@ -16,7 +16,6 @@ import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.core.Tools;
-import org.spoofax.interpreter.library.IOAgent;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -86,7 +85,13 @@ public class ConstraintAnalyzer {
     private final boolean multiFile;
 
 
-    public ConstraintAnalyzer(LoggerFactory loggerFactory, ResourceService resourceService, StrategoRuntime strategoRuntime, String strategyId, boolean multiFile) {
+    public ConstraintAnalyzer(
+        LoggerFactory loggerFactory,
+        ResourceService resourceService,
+        StrategoRuntime strategoRuntime,
+        String strategyId,
+        boolean multiFile
+    ) {
         this.loggerFactory = loggerFactory;
         this.resourceService = resourceService;
         this.strategoRuntime = strategoRuntime;
@@ -96,16 +101,23 @@ public class ConstraintAnalyzer {
     }
 
 
-    public SingleFileResult analyze(ResourceKey resource, IStrategoTerm ast, ConstraintAnalyzerContext context, IOAgent strategoIOAgent)
-        throws ConstraintAnalyzerException {
-        return analyze(null, resource, ast, context, strategoIOAgent);
+    public SingleFileResult analyze(
+        ResourceKey resource,
+        IStrategoTerm ast,
+        ConstraintAnalyzerContext context
+    ) throws ConstraintAnalyzerException {
+        return analyze(null, resource, ast, context);
     }
 
-    public SingleFileResult analyze(@Nullable ResourceKey root, ResourceKey resource, IStrategoTerm ast, ConstraintAnalyzerContext context, IOAgent strategoIOAgent)
-        throws ConstraintAnalyzerException {
+    public SingleFileResult analyze(
+        @Nullable ResourceKey root,
+        ResourceKey resource,
+        IStrategoTerm ast,
+        ConstraintAnalyzerContext context
+    ) throws ConstraintAnalyzerException {
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>(1);
         asts.put(resource, ast);
-        final MultiFileResult multiFileResult = doAnalyze(root, asts, context, strategoIOAgent);
+        final MultiFileResult multiFileResult = doAnalyze(root, asts, context);
         final @Nullable Result result;
         try {
             result = multiFileResult.results.get(0);
@@ -115,16 +127,18 @@ public class ConstraintAnalyzer {
         return new SingleFileResult(result.ast, result.analysis, multiFileResult.messages.asMessages());
     }
 
-    public MultiFileResult analyze(@Nullable ResourceKey root, HashMap<ResourceKey, IStrategoTerm> asts, ConstraintAnalyzerContext context, IOAgent strategoIOAgent)
-        throws ConstraintAnalyzerException {
-        return doAnalyze(root, asts, context, strategoIOAgent);
+    public MultiFileResult analyze(
+        @Nullable ResourceKey root,
+        HashMap<ResourceKey, IStrategoTerm> asts,
+        ConstraintAnalyzerContext context
+    ) throws ConstraintAnalyzerException {
+        return doAnalyze(root, asts, context);
     }
 
     private MultiFileResult doAnalyze(
         @Nullable ResourceKey root,
         HashMap<ResourceKey, IStrategoTerm> asts,
-        ConstraintAnalyzerContext context,
-        IOAgent strategoIOAgent
+        ConstraintAnalyzerContext context
     ) throws ConstraintAnalyzerException {
         /// 1. Compute changeset from given asts and cache.
 
@@ -213,7 +227,7 @@ public class ConstraintAnalyzer {
 
         final @Nullable IStrategoTerm allResultsTerm;
         try {
-            allResultsTerm = strategoRuntime.invoke(strategyId, action, strategoIOAgent);
+            allResultsTerm = strategoRuntime.invoke(strategyId, action);
         } catch(StrategoException e) {
             throw new ConstraintAnalyzerException(e);
         }

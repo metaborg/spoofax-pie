@@ -9,18 +9,17 @@ import mb.constraint.common.ConstraintAnalyzerException;
 import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.log.api.LoggerFactory;
 import mb.log.noop.NoopLoggerFactory;
+import mb.resource.DefaultResourceKey;
 import mb.resource.DefaultResourceService;
 import mb.resource.DummyResourceRegistry;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
-import mb.resource.DefaultResourceKey;
 import mb.resource.fs.FSResourceRegistry;
 import mb.resource.url.URLResourceRegistry;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
-import org.spoofax.interpreter.library.IOAgent;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import java.util.HashMap;
@@ -42,7 +41,7 @@ class TigerConstraintAnalyzerTest {
         final JSGLR1ParseResult parsed = parser.parse("1 + nil", "Module", resource);
         assertTrue(parsed.getAst().isPresent());
         final SingleFileResult result =
-            analyzer.analyze(resource, parsed.getAst().get(), new ConstraintAnalyzerContext(), new IOAgent());
+            analyzer.analyze(resource, parsed.getAst().get(), new ConstraintAnalyzerContext());
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
         assertTrue(result.messages.containsError());
@@ -53,7 +52,7 @@ class TigerConstraintAnalyzerTest {
         final JSGLR1ParseResult parsed = parser.parse("1 + 2", "Module", resource);
         assertTrue(parsed.getAst().isPresent());
         final SingleFileResult result =
-            analyzer.analyze(resource, parsed.getAst().get(), new ConstraintAnalyzerContext(), new IOAgent());
+            analyzer.analyze(resource, parsed.getAst().get(), new ConstraintAnalyzerContext());
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
         assertTrue(result.messages.isEmpty());
@@ -73,7 +72,7 @@ class TigerConstraintAnalyzerTest {
         asts.put(resource1, parsed1.getAst().get());
         asts.put(resource2, parsed2.getAst().get());
         asts.put(resource3, parsed3.getAst().get());
-        final MultiFileResult result = analyzer.analyze(null, asts, new ConstraintAnalyzerContext(), new IOAgent());
+        final MultiFileResult result = analyzer.analyze(null, asts, new ConstraintAnalyzerContext());
         final ConstraintAnalyzer.@Nullable Result result1 = result.getResult(resource1);
         assertNotNull(result1);
         assertNotNull(result1.ast);
@@ -113,7 +112,7 @@ class TigerConstraintAnalyzerTest {
         asts.put(resource1, parsed1.getAst().get());
         asts.put(resource2, parsed2.getAst().get());
         asts.put(resource3, parsed3.getAst().get());
-        final MultiFileResult result = analyzer.analyze(null, asts, new ConstraintAnalyzerContext(), new IOAgent());
+        final MultiFileResult result = analyzer.analyze(null, asts, new ConstraintAnalyzerContext());
         final ConstraintAnalyzer.@Nullable Result result1 = result.getResult(resource1);
         assertNotNull(result1);
         assertNotNull(result1.ast);

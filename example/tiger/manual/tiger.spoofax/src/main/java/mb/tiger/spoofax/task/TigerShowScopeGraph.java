@@ -15,7 +15,6 @@ import mb.stratego.common.StrategoUtil;
 import mb.tiger.spoofax.task.reusable.TigerAnalyze;
 import mb.tiger.spoofax.task.reusable.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spoofax.interpreter.library.IOAgent;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 
@@ -63,7 +62,7 @@ public class TigerShowScopeGraph implements TaskDef<TigerShowArgs, CommandOutput
         final String strategyId = "spoofax3-editor-show-analysis-term";
         final ITermFactory termFactory = strategoRuntime.getTermFactory();
         final IStrategoTerm inputTerm = termFactory.makeTuple(output.result.ast, termFactory.makeString(resourceService.toString(key)));
-        final @Nullable IStrategoTerm result = strategoRuntime.invoke(strategyId, inputTerm, new IOAgent(), output.context);
+        final @Nullable IStrategoTerm result = strategoRuntime.addContextObject(output.context).invoke(strategyId, inputTerm);
         if(result == null) {
             throw new RuntimeException("Cannot show scope graph, executing Stratego strategy '" + strategyId + "' failed");
         }
