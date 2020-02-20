@@ -1,5 +1,7 @@
 package mb.common.region;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -137,11 +139,8 @@ public class RegionTests {
         @Test
         @DisplayName("when string is 'start-end', parses successfully")
         public void whenStringIsStartEnd_parsesSuccessfully() {
-            // Arrange
-            String regionStr = "3-7";
-
             // Act
-            @Nullable Region sut = Region.fromString(regionStr);
+            @Nullable Region sut = Region.fromString("3-7");
 
             // Assert
             assertNotNull(sut);
@@ -152,11 +151,8 @@ public class RegionTests {
         @Test
         @DisplayName("when string is 'offset-offset', parses successfully")
         public void whenStringIsOffsetOffset_parsesSuccessfully() {
-            // Arrange
-            String regionStr = "3-3";
-
             // Act
-            @Nullable Region sut = Region.fromString(regionStr);
+            @Nullable Region sut = Region.fromString("3-3");
 
             // Assert
             assertNotNull(sut);
@@ -168,11 +164,8 @@ public class RegionTests {
         @Test
         @DisplayName("when string is 'offset', parses successfully")
         public void whenStringIsOffset_parsesSuccessfully() {
-            // Arrange
-            String regionStr = "3";
-
             // Act
-            @Nullable Region sut = Region.fromString(regionStr);
+            @Nullable Region sut = Region.fromString("3");
 
             // Assert
             assertNotNull(sut);
@@ -184,11 +177,8 @@ public class RegionTests {
         @Test
         @DisplayName("when end is before start, returns null")
         public void whenEndIsBeforeStart_returnsNull() {
-            // Arrange
-            String regionStr = "3-1";
-
             // Act
-            @Nullable Region sut = Region.fromString(regionStr);
+            @Nullable Region sut = Region.fromString("3-1");
 
             // Assert
             assertNull(sut);
@@ -197,11 +187,8 @@ public class RegionTests {
         @Test
         @DisplayName("when format is invalid (1), returns null")
         public void whenFormatIsInvalid1_returnsNull() {
-            // Arrange
-            String regionStr = "-3";
-
             // Act
-            @Nullable Region sut = Region.fromString(regionStr);
+            @Nullable Region sut = Region.fromString("-3");
 
             // Assert
             assertNull(sut);
@@ -210,11 +197,8 @@ public class RegionTests {
         @Test
         @DisplayName("when format is invalid (2), returns null")
         public void whenFormatIsInvalid2_returnsNull() {
-            // Arrange
-            String regionStr = "-";
-
             // Act
-            @Nullable Region sut = Region.fromString(regionStr);
+            @Nullable Region sut = Region.fromString("-");
 
             // Assert
             assertNull(sut);
@@ -223,11 +207,8 @@ public class RegionTests {
         @Test
         @DisplayName("when numbers cannot be parsed, returns null")
         public void whenNumbersCannotBeParsed_returnsNull() {
-            // Arrange
-            String regionStr = "aa-bb";
-
             // Act
-            @Nullable Region sut = Region.fromString(regionStr);
+            @Nullable Region sut = Region.fromString("aa-bb");
 
             // Assert
             assertNull(sut);
@@ -237,11 +218,8 @@ public class RegionTests {
         @Test
         @DisplayName("when number cannot be parsed, returns null")
         public void whenNumberCannotBeParsed_returnsNull() {
-            // Arrange
-            String regionStr = "aa";
-
             // Act
-            @Nullable Region sut = Region.fromString(regionStr);
+            @Nullable Region sut = Region.fromString("aa");
 
             // Assert
             assertNull(sut);
@@ -422,47 +400,12 @@ public class RegionTests {
 
     }
 
-    private static Stream<Arguments> provideEqualityTestData() {
-        return Stream.of(
-            // @formatter:off
-            /* (..[]..) equals (.[]...)? */ Arguments.of(Region.fromOffsets(2, 3), Region.fromOffsets(1, 2), false),
-            /* (..[]..) equals (..[]..)? */ Arguments.of(Region.fromOffsets(2, 3), Region.fromOffsets(2, 3),  true),
-            /* (..[]..) equals (...[].)? */ Arguments.of(Region.fromOffsets(2, 3), Region.fromOffsets(3, 4), false),
-            /* (..[]..) equals (.[-]..)? */ Arguments.of(Region.fromOffsets(2, 3), Region.fromOffsets(1, 3), false),
-            /* (..[]..) equals (..[-].)? */ Arguments.of(Region.fromOffsets(2, 3), Region.fromOffsets(2, 4), false),
-            /* (..[]..) equals (.[--].)? */ Arguments.of(Region.fromOffsets(2, 3), Region.fromOffsets(1, 4), false),
-            /* (..[]..) equals (.|....)? */ Arguments.of(Region.fromOffsets(2, 3), Region.fromOffsets(1, 1), false),
-            /* (..[]..) equals (..|...)? */ Arguments.of(Region.fromOffsets(2, 3), Region.fromOffsets(2, 2), false),
-            /* (..[]..) equals (...|..)? */ Arguments.of(Region.fromOffsets(2, 3), Region.fromOffsets(3, 3), false),
-            /* (..[]..) equals (....|.)? */ Arguments.of(Region.fromOffsets(2, 3), Region.fromOffsets(4, 4), false),
-            /* (..|...) equals (..|...)? */ Arguments.of(Region.fromOffsets(2, 2), Region.fromOffsets(2, 2),  true)
-            // @formatter:on
-        );
-    }
 
-    /** Tests the {@link Region#equals(Object)} and {@link Region#hashCode()} methods. */
-    @DisplayName("equality")
-    @Nested public class EqualityTests {
 
-        @ParameterizedTest(name = "{0} equal to {1} = {2}")
-        @MethodSource("mb.common.region.RegionTests#provideEqualityTestData")
-        public void regionEquality(Region a, Region b, boolean equal) {
-            // Act
-            boolean aEqualToB = a.equals(b);
-            boolean bEqualToA = b.equals(a);
-            int aHashcode = a.hashCode();
-            int bHashcode = b.hashCode();
-
-            // Assert
-            assertEquals(equal, aEqualToB);
-            assertEquals(equal, bEqualToA);
-            assertEquals(equal, a.contains(b) && b.contains(a));
-            if (equal) {
-                assertEquals(aHashcode, bHashcode);
-                assertTrue(a.intersectsWith(b));
-                assertTrue(b.intersectsWith(a));
-            }
-        }
+    /** Tests the contract of the {@link Region#equals(Object)} and {@link Region#hashCode()} methods. */
+    @Test
+    public void equalityContract() {
+        EqualsVerifier.forClass(Region.class).verify();
     }
 
     /** Tests the {@link Region#toString()} method. */

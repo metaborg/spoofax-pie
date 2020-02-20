@@ -50,19 +50,19 @@ public final class Region implements Serializable {
     /**
      * Attempts to create a new region by parsing the specified region string.
      *
-     * @param regionStr the region string, in the format "start-end" or "offset"
+     * @param str the string to parse, in the format "start-end" or "offset"
      * @return the parsed region; or {@code null} when parsing failed
      */
-    public static @Nullable Region fromString(String regionStr) {
+    public static @Nullable Region fromString(String str) {
         try {
-            final int dashIndex = regionStr.indexOf('-');
-            if(dashIndex < 0) {
-                final int offset = Integer.parseInt(regionStr);
+            final int dashIndex = str.indexOf('-');
+            if(dashIndex <= 0) {
+                final int offset = Integer.parseInt(str);
                 return Region.fromOffsets(offset, offset);
             } else {
-                final String start = regionStr.substring(0, dashIndex);
+                final String start = str.substring(0, dashIndex);
                 final int startOffset = Integer.parseInt(start);
-                final String end = regionStr.substring(dashIndex + 1);
+                final String end = str.substring(dashIndex + 1);
                 final int endOffset = Integer.parseInt(end);
                 return Region.fromOffsets(startOffset, endOffset);
             }
