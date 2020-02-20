@@ -1,6 +1,5 @@
 package mb.spoofax.eclipse.util;
 
-import mb.common.style.Style;
 import mb.common.style.Styling;
 import mb.common.style.TokenStyle;
 import mb.common.token.Token;
@@ -14,8 +13,6 @@ import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.RGB;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -101,7 +98,7 @@ public final class StyleUtil {
      */
     public StyleRange createStyleRange(TextAttribute textAttribute, Token token) {
         final mb.common.region.Region region = token.getRegion();
-        return createStyleRange(textAttribute, region.getStartOffset(), region.length());
+        return createStyleRange(textAttribute, region.getStartOffset(), region.getLength());
     }
 
     /**

@@ -354,7 +354,7 @@ public class PieRunner {
                         //noinspection ConstantConditions (region can really be null)
                         if(region != null && editor instanceof ITextEditor) {
                             final ITextEditor textEditor = (ITextEditor)editor;
-                            textEditor.selectAndReveal(region.getStartOffset(), region.length());
+                            textEditor.selectAndReveal(region.getStartOffset(), region.getLength());
                         }
                     } catch(PartInitException e) {
                         throw new RuntimeException("Cannot open editor for file '" + file + "', opening editor failed unexpectedly", e);
@@ -389,7 +389,7 @@ public class PieRunner {
                             document.set(text);
                             //noinspection ConstantConditions (region can really be null)
                             if(region != null) {
-                                textEditor.selectAndReveal(region.getStartOffset(), region.length());
+                                textEditor.selectAndReveal(region.getStartOffset(), region.getLength());
                             }
                         } else {
                             logger.error("Cannot update text of editor with name '" + name + "', it does not implement ITextEditor");

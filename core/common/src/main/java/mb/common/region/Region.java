@@ -11,38 +11,63 @@ import java.util.Objects;
  * number of characters from the beginning of the source text, with interval [0,#chars).
  */
 public final class Region implements Serializable {
+
     private final int startOffset;
     private final int endOffset;
 
     private Region(int startOffset, int endOffset) {
         if(startOffset < 0)
-            throw new IllegalArgumentException("The start offset " + startOffset + " must be positive or zero");
+            throw new IllegalArgumentException("The start offset " + startOffset + " must be positive or zero.");
         if(endOffset < startOffset)
-            throw new IllegalArgumentException("The end offset " + endOffset + " must be after the start offset " + startOffset);
+            throw new IllegalArgumentException("The end offset " + endOffset + " must be greater than or equal to the start offset " + startOffset + ".");
 
         this.startOffset = startOffset;
         this.endOffset = endOffset;
     }
 
+    /**
+     * Creates a new region with the specified start and end offsets.
+     *
+     * @param startOffset the zero-based offset of the start of the region
+     * @param endOffset the zero-based offset of the end of the region, exclusive
+     * @return the created region
+     */
     public static Region fromOffsets(int startOffset, int endOffset) {
         return new Region(startOffset, endOffset);
     }
 
+    /**
+     * Creates a new region with the specified start and end offsets.
+     *
+     * @param startOffset the zero-based offset of the start of the region
+     * @param length the length of the region
+     * @return the created region
+     */
     public static Region fromOffsetLength(int startOffset, int length) {
         return new Region(startOffset, startOffset + length);
     }
 
-    public static Region fromString(String regionStr) throws IllegalArgumentException {
-        final int dashIndex = regionStr.indexOf('-');
-        if(dashIndex < 0) {
-            final int offset = Integer.parseInt(regionStr);
-            return Region.fromOffsets(offset, offset);
-        } else {
-            final String start = regionStr.substring(0, dashIndex);
-            final int startOffset = Integer.parseInt(start);
-            final String end = regionStr.substring(dashIndex);
-            final int endOffset = Integer.parseInt(end);
-            return Region.fromOffsets(startOffset, endOffset);
+    /**
+     * Attempts to create a new region by parsing the specified region string.
+     *
+     * @param regionStr the region string, in the format "start-end" or "offset"
+     * @return the parsed region; or {@code null} when parsing failed
+     */
+    public static @Nullable Region fromString(String regionStr) {
+        try {
+            final int dashIndex = regionStr.indexOf('-');
+            if(dashIndex < 0) {
+                final int offset = Integer.parseInt(regionStr);
+                return Region.fromOffsets(offset, offset);
+            } else {
+                final String start = regionStr.substring(0, dashIndex);
+                final int startOffset = Integer.parseInt(start);
+                final String end = regionStr.substring(dashIndex + 1);
+                final int endOffset = Integer.parseInt(end);
+                return Region.fromOffsets(startOffset, endOffset);
+            }
+        } catch (IllegalArgumentException e) {
+            return null;
         }
     }
 
@@ -75,7 +100,7 @@ public final class Region implements Serializable {
      *
      * @return the length of the region; which may be zero
      */
-    public int length() {
+    public int getLength() {
         return getEndOffset() - getStartOffset();
     }
 
@@ -84,11 +109,11 @@ public final class Region implements Serializable {
      *
      * @return {@code true} when the region is empty; otherwise, {@code false}
      */
-    public boolean isEmpty() { return length() == 0; }
+    public boolean isEmpty() { return getLength() == 0; }
 
     /**
      * Checks if this region contains given region.
-     *
+     * <p>
      * Invariant: if (a contains b) and (b contains a) then (a == b).
      * Invariant: if (a contains b) or (b contains a) then (a intersects b).
      *
@@ -154,6 +179,6 @@ public final class Region implements Serializable {
     }
 
     @Override public String toString() {
-        return startOffset + "-" + endOffset;
+        return isEmpty() ? "" + startOffset : startOffset + "-" + endOffset;
     }
 }

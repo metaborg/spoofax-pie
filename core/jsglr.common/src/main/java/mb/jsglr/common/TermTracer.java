@@ -63,7 +63,7 @@ public class TermTracer {
             final IStrategoTerm term = stack.pop();
             final @Nullable Region termRegion = getRegion(term);
             if(termRegion != null) {
-                final int length = termRegion.length();
+                final int length = termRegion.getLength();
                 if(termRegion.contains(region) && length < minimalLength) {
                     minimalTerm = term;
                     minimalLength = length;

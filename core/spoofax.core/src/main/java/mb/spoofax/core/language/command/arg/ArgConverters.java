@@ -7,6 +7,7 @@ import mb.resource.ResourceKeyString;
 import mb.resource.ResourceRuntimeException;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -45,7 +46,9 @@ public class ArgConverters {
 
     public final ArgConverter<Region> regionConverter = new ArgConverter<Region>() {
         @Override public Region convert(String argStr) throws IllegalArgumentException {
-            return Region.fromString(argStr);
+            @Nullable Region region = Region.fromString(argStr);
+            if (region == null) throw new IllegalArgumentException("The region string has an invalid format.");
+            return region;
         }
 
         @Override public Class<Region> getOutputClass() {
