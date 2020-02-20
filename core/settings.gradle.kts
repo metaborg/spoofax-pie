@@ -22,6 +22,7 @@ include("spoofax.depconstraints")
 
 include("common")
 
+include("completions.common")
 include("jsglr.common")
 include("jsglr1.common")
 include("jsglr2.common")

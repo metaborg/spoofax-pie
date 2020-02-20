@@ -19,6 +19,7 @@ dependencies {
 
   api(compositeBuild("spoofax.compiler.interfaces"))
   api(compositeBuild("common"))
+  api(compositeBuild("completions.common"))
   api(compositeBuild("jsglr1.common"))
   api(compositeBuild("esv.common"))
   api(compositeBuild("stratego.common"))
