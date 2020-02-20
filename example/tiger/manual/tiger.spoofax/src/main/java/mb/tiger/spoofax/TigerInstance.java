@@ -1,6 +1,5 @@
 package mb.tiger.spoofax;
 
-import mb.common.message.Messages;
 import mb.common.style.Styling;
 import mb.common.token.Token;
 import mb.common.util.CollectionView;
@@ -9,6 +8,7 @@ import mb.common.util.MapView;
 import mb.common.util.SetView;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
+import mb.spoofax.core.language.LanguageInspection;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.cli.CliCommand;
 import mb.spoofax.core.language.cli.CliParam;
@@ -109,8 +109,8 @@ public class TigerInstance implements LanguageInstance {
         return style.createTask(parse.createTokensSupplier(resourceKey));
     }
 
-    @Override public Task<Messages> createCheckTask(ResourceKey resourceKey) {
-        return tigerIdeCheck.createTask(resourceKey);
+    @Override public LanguageInspection getInspection() {
+        return LanguageInspection.singleFile(tigerIdeCheck::createTask);
     }
 
 

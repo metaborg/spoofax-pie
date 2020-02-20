@@ -45,11 +45,11 @@ public class KeyedMessagesBuilder {
     }
 
 
-    public void addMessages(Collection<? extends Message> messages) {
+    public void addMessages(Iterable<? extends Message> messages) {
         this.messages.putAll(null, messages);
     }
 
-    public void addMessages(ResourceKey resourceKey, Collection<? extends Message> messages) {
+    public void addMessages(ResourceKey resourceKey, Iterable<? extends Message> messages) {
         this.messages.putAll(resourceKey, messages);
     }
 
@@ -66,7 +66,7 @@ public class KeyedMessagesBuilder {
     }
 
 
-    public void replaceMessages(ResourceKey resourceKey, Collection<? extends Message> messages) {
+    public void replaceMessages(ResourceKey resourceKey, Iterable<? extends Message> messages) {
         this.messages.removeAll(resourceKey);
         this.messages.putAll(resourceKey, messages);
     }

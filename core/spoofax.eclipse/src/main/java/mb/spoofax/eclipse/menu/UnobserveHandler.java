@@ -31,7 +31,8 @@ public class UnobserveHandler extends AbstractHandler {
         final SetView<String> extensions = languageComponent.getLanguageInstance().getFileExtensions();
         files.removeIf((f) -> !extensions.contains(f.getFileExtension()));
         if(files.isEmpty()) return null;
-        pieRunner.unobserveCheckTasks(languageComponent, files, null);
+        // TODO: reimplement single/multi-file inspections.
+//        pieRunner.unobserveCheckTasks(languageComponent, files, null);
         return null;
     }
 }

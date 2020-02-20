@@ -1,4 +1,4 @@
-package {{analyzeTaskDef.packageId}};
+package {{genAnalyzeTaskDef.packageId}};
 
 import mb.constraint.common.ConstraintAnalyzer.SingleFileResult;
 import mb.constraint.common.ConstraintAnalyzerContext;
@@ -18,7 +18,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @LanguageScope
-public class {{analyzeTaskDef.id}} implements TaskDef<{{analyzeTaskDef.id}}.Input, {{analyzeTaskDef.id}}.@Nullable Output> {
+public class {{genAnalyzeTaskDef.id}} implements TaskDef<{{genAnalyzeTaskDef.id}}.Input, {{genAnalyzeTaskDef.id}}.@Nullable Output> {
     public static class Input implements Serializable {
         public final ResourceKey resourceKey;
         public final Supplier<@Nullable IStrategoTerm> astSupplier;
@@ -72,12 +72,12 @@ public class {{analyzeTaskDef.id}} implements TaskDef<{{analyzeTaskDef.id}}.Inpu
     private final {{languageProjectInput.constraintAnalyzer.qualifiedId}} constraintAnalyzer;
 
     @Inject
-    public {{analyzeTaskDef.id}}({{languageProjectInput.constraintAnalyzer.qualifiedId}} constraintAnalyzer) {
+    public {{genAnalyzeTaskDef.id}}({{languageProjectInput.constraintAnalyzer.qualifiedId}} constraintAnalyzer) {
         this.constraintAnalyzer = constraintAnalyzer;
     }
 
     @Override public String getId() {
-        return "{{analyzeTaskDef.qualifiedId}}";
+        return "{{genAnalyzeTaskDef.qualifiedId}}";
     }
 
     @Override

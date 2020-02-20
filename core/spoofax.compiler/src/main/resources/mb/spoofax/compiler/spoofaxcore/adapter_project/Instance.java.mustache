@@ -10,6 +10,7 @@ import mb.common.util.MapView;
 import mb.common.util.SetView;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
+import mb.spoofax.core.language.LanguageInspection;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.cli.CliCommand;
 import mb.spoofax.core.language.cli.CliParam;
@@ -71,9 +72,16 @@ public class {{genInstance.id}} implements LanguageInstance {
         return {{styleInjection.name}}.createTask({{parseInjection.name}}.createTokensSupplier(resourceKey));
     }
 
-    @Override public Task<Messages> createCheckTask(ResourceKey resourceKey) {
-        return {{checkInjection.name}}.createTask(resourceKey);
+{{#isMultiFile}}
+    @Override public LanguageInspection getInspection() {
+       return LanguageInspection.multiFile(i -> {{checkInjection.name}}.createTask(new {{checkInjection.type.qualifiedId}}.Input(i.root, i.walker, i.matcher)));
     }
+{{/isMultiFile}}
+{{^isMultiFile}}
+    @Override public LanguageInspection getInspection() {
+        return LanguageInspection.singleFile({{checkInjection.name}}::createTask);
+    }
+{{/isMultiFile}}
 
 
     @Override public CollectionView<CommandDef<?>> getCommandDefs() {

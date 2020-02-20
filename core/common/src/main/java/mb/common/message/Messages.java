@@ -8,9 +8,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
-public class Messages implements Serializable {
+public class Messages implements Iterable<Message>, Serializable {
     final ListView<Message> messages;
 
 
@@ -124,6 +125,10 @@ public class Messages implements Serializable {
         return new KeyedMessages(map);
     }
 
+
+    @Override public Iterator<Message> iterator() {
+        return messages.iterator();
+    }
 
     @Override public boolean equals(Object o) {
         if(this == o) return true;

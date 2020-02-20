@@ -10,15 +10,22 @@ import mb.spoofax.eclipse.SpoofaxEclipseComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.pie.PieRunner;
 import mb.spoofax.eclipse.resource.EclipseDocumentResource;
+import mb.spoofax.eclipse.resource.EclipseResource;
 import mb.spoofax.eclipse.util.EditorInputUtil;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.text.*;
+import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentListener;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.ITextViewerExtension4;
+import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.viewers.ISelection;
@@ -54,10 +61,10 @@ public abstract class SpoofaxEditor extends TextEditor {
     */
 
     // Set in initializeEditor, never null after that.
-    @SuppressWarnings("NullableProblems") private @MonotonicNonNull IJobManager jobManager;
-    @SuppressWarnings("NullableProblems") private @MonotonicNonNull LoggerFactory loggerFactory;
-    @SuppressWarnings("NullableProblems") private @MonotonicNonNull Logger logger;
-    @SuppressWarnings("NullableProblems") private @MonotonicNonNull PieRunner pieRunner;
+    private @MonotonicNonNull IJobManager jobManager;
+    private @MonotonicNonNull LoggerFactory loggerFactory;
+    private @MonotonicNonNull Logger logger;
+    private @MonotonicNonNull PieRunner pieRunner;
 
     // Set in createSourceViewer, unset in dispose, may never be null otherwise.
     private @Nullable IEditorInput input;
@@ -66,6 +73,7 @@ public abstract class SpoofaxEditor extends TextEditor {
     // Set in createSourceViewer, if unset in dispose, may never be null if documentProvider returns a null document.
     private @Nullable IDocument document;
     private @Nullable DocumentListener documentListener;
+    private @Nullable EclipseResource project;
     private @Nullable EclipseDocumentResource resource;
 
 
@@ -79,6 +87,10 @@ public abstract class SpoofaxEditor extends TextEditor {
         return languageComponent;
     }
 
+    public @Nullable EclipseResource getProject() {
+        return project;
+    }
+
     public @Nullable EclipseDocumentResource getResource() {
         return resource;
     }
@@ -86,7 +98,7 @@ public abstract class SpoofaxEditor extends TextEditor {
     public Optional<Selection> getSelection() {
         final @Nullable ISelection selection = doGetSelection();
         if(selection instanceof ITextSelection) {
-            final ITextSelection s = (ITextSelection) selection;
+            final ITextSelection s = (ITextSelection)selection;
             final int length = s.getLength();
             if(length == 0) {
                 return Optional.of(Selections.offset(s.getOffset()));
@@ -155,6 +167,10 @@ public abstract class SpoofaxEditor extends TextEditor {
 
             final @Nullable IFile file = EditorInputUtil.getFile(input);
             if(file != null) {
+                final @Nullable IProject eclipseProject = file.getProject();
+                if(eclipseProject != null) {
+                    project = new EclipseResource(eclipseProject);
+                }
                 resource = new EclipseDocumentResource(document, file);
             } else {
                 resource = new EclipseDocumentResource(document, input.getName());
@@ -170,7 +186,7 @@ public abstract class SpoofaxEditor extends TextEditor {
         final SourceViewerDecorationSupport decorationSupport = getSourceViewerDecorationSupport(sourceViewer);
         configureSourceViewerDecorationSupport(decorationSupport);
 
-        ((ITextViewerExtension4) sourceViewer).addTextPresentationListener(presentationMerger);
+        ((ITextViewerExtension4)sourceViewer).addTextPresentationListener(presentationMerger);
 
         if(document != null) {
             scheduleJob(true);
@@ -204,7 +220,7 @@ public abstract class SpoofaxEditor extends TextEditor {
     private void scheduleJob(boolean initialUpdate) {
         if(resource == null) return;
         cancelJobs();
-        final Job job = new EditorUpdateJob(loggerFactory, pieRunner, languageComponent, resource, this);
+        final Job job = new EditorUpdateJob(loggerFactory, pieRunner, languageComponent, project, resource, this);
         job.setRule(resource.getWrappedEclipseResource()); // May return null, but null is a valid scheduling rule.
         job.schedule(initialUpdate ? 0 : 300);
     }

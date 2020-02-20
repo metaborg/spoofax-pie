@@ -31,6 +31,7 @@ public class AdapterProjectCompiler {
     private final TemplateWriter buildGradleTemplate;
     private final TemplateWriter packageInfoTemplate;
     private final TemplateWriter checkTaskDefTemplate;
+    private final TemplateWriter checkMultiTaskDefTemplate;
     private final TemplateWriter componentTemplate;
     private final TemplateWriter moduleTemplate;
     private final TemplateWriter instanceTemplate;
@@ -51,6 +52,7 @@ public class AdapterProjectCompiler {
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("adapter_project/build.gradle.kts.mustache");
         this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("adapter_project/package-info.java.mustache");
         this.checkTaskDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/CheckTaskDef.java.mustache");
+        this.checkMultiTaskDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/CheckMultiTaskDef.java.mustache");
         this.componentTemplate = templateCompiler.getOrCompileToWriter("adapter_project/Component.java.mustache");
         this.moduleTemplate = templateCompiler.getOrCompileToWriter("adapter_project/Module.java.mustache");
         this.instanceTemplate = templateCompiler.getOrCompileToWriter("adapter_project/Instance.java.mustache");
@@ -119,13 +121,18 @@ public class AdapterProjectCompiler {
         } else {
             allTaskDefs.add(TypeInfo.of("mb.spoofax.core.language.taskdef", "NullStyler"));
         }
-        input.constraintAnalyzer().ifPresent((i) -> allTaskDefs.add(i.analyzeTaskDef()));
+        input.constraintAnalyzer().ifPresent((i) -> {
+            allTaskDefs.add(i.analyzeTaskDef());
+            allTaskDefs.add(i.analyzeMultiTaskDef());
+        });
         allTaskDefs.add(input.checkTaskDef());
+        allTaskDefs.add(input.checkMultiTaskDef());
 
         // Class files
         final ResourcePath classesGenDirectory = input.classesGenDirectory();
         packageInfoTemplate.write(input.packageInfo().file(classesGenDirectory), input);
-        checkTaskDefTemplate.write(input.checkTaskDef().file(classesGenDirectory), input);
+        checkTaskDefTemplate.write(input.genCheckTaskDef().file(classesGenDirectory), input);
+        checkMultiTaskDefTemplate.write(input.genCheckMultiTaskDef().file(classesGenDirectory), input);
         componentTemplate.write(input.genComponent().file(classesGenDirectory), input);
         for(CommandDefRepr commandDef : input.commandDefs()) {
             final UniqueNamer uniqueNamer = new UniqueNamer();
@@ -162,7 +169,12 @@ public class AdapterProjectCompiler {
             final NamedTypeInfo tokenizeInjection = uniqueNamer.makeUnique(input.parser().tokenizeTaskDef());
             map.put("tokenizeInjection", tokenizeInjection);
             injected.add(tokenizeInjection);
-            final NamedTypeInfo checkInjection = uniqueNamer.makeUnique(input.checkTaskDef());
+            final NamedTypeInfo checkInjection;
+            if(input.isMultiFile()) {
+                checkInjection = uniqueNamer.makeUnique(input.checkMultiTaskDef());
+            } else {
+                checkInjection = uniqueNamer.makeUnique(input.checkTaskDef());
+            }
             injected.add(checkInjection);
             map.put("checkInjection", checkInjection);
             final NamedTypeInfo styleInjection;
@@ -240,6 +252,10 @@ public class AdapterProjectCompiler {
         List<MenuItemRepr> resourceContextMenuItems();
 
         List<MenuItemRepr> editorContextMenuItems();
+
+        default boolean isMultiFile() {
+            return constraintAnalyzer().map(a -> a.languageProjectInput().multiFile()).orElse(false);
+        }
 
 
         /// Gradle files
@@ -344,6 +360,21 @@ public class AdapterProjectCompiler {
             return genCheckTaskDef();
         }
 
+        // Multi-file check task definition
+
+        @Value.Default default TypeInfo genCheckMultiTaskDef() {
+            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "CheckMulti");
+        }
+
+        Optional<TypeInfo> manualCheckMultiTaskDef();
+
+        default TypeInfo checkMultiTaskDef() {
+            if(classKind().isManual() && manualCheckMultiTaskDef().isPresent()) {
+                return manualCheckMultiTaskDef().get();
+            }
+            return genCheckMultiTaskDef();
+        }
+
 
         /// Provided files
 
@@ -356,6 +387,7 @@ public class AdapterProjectCompiler {
                 generatedFiles.add(genModule().file(classesGenDirectory));
                 generatedFiles.add(genInstance().file(classesGenDirectory));
                 generatedFiles.add(genCheckTaskDef().file(classesGenDirectory));
+                generatedFiles.add(genCheckMultiTaskDef().file(classesGenDirectory));
             }
             parser().generatedFiles().addAllTo(generatedFiles);
             styler().ifPresent((i) -> i.generatedFiles().addAllTo(generatedFiles));

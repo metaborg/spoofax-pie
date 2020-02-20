@@ -1,11 +1,13 @@
 package mb.spoofax.eclipse.pie;
 
+import mb.common.message.KeyedMessages;
 import mb.common.message.Messages;
 import mb.common.style.Styling;
 import mb.common.util.CollectionView;
 import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.common.util.SetView;
+import mb.common.util.UncheckedException;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecException;
@@ -19,6 +21,13 @@ import mb.pie.api.exec.NullCancelableToken;
 import mb.pie.runtime.exec.Stats;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.resource.hierarchical.match.PathResourceMatcher;
+import mb.resource.hierarchical.match.path.ExtensionPathMatcher;
+import mb.resource.hierarchical.match.path.ExtensionsPathMatcher;
+import mb.resource.hierarchical.match.path.NoHiddenPathMatcher;
+import mb.resource.hierarchical.walk.PathResourceWalker;
+import mb.resource.hierarchical.walk.TrueResourceWalker;
+import mb.spoofax.core.language.LanguageInspection;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandContext;
@@ -107,6 +116,7 @@ public class PieRunner {
 
     public <D extends IDocument & IDocumentExtension4> void addOrUpdateEditor(
         EclipseLanguageComponent languageComponent,
+        @Nullable EclipseResource project,
         EclipseDocumentResource resource,
         SpoofaxEditor editor,
         @Nullable IProgressMonitor monitor
@@ -135,9 +145,47 @@ public class PieRunner {
                 workspaceUpdate.removeStyle(editor, text.length());
             }
 
-            final Task<Messages> checkTask = languageInstance.createCheckTask(key);
-            final Messages messages = requireWithoutObserving(checkTask, postSession, monitor);
-            workspaceUpdate.replaceMessages(key, messages);
+            try {
+                languageInstance.getInspection().caseOf()
+                    .multiFile(f -> {
+                        if(project == null) {
+                            logger.warn("Cannot run inspections for resource '" + resource + "' of language '" + languageInstance.getDisplayName() + "', because it requires multi-file analysis but no project was given");
+                            return Optional.empty();
+                        }
+                        final LanguageInspection.MultiFileInput input = new LanguageInspection.MultiFileInput(
+                            project.getPath(),
+                            new PathResourceWalker(new NoHiddenPathMatcher()),
+                            new PathResourceMatcher(new ExtensionsPathMatcher(languageInstance.getFileExtensions().asUnmodifiable()))
+                        );
+                        final Task<KeyedMessages> task = f.apply(input);
+                        try {
+                            final KeyedMessages messages = requireWithoutObserving(task, postSession, monitor);
+                            workspaceUpdate.replaceMessages(key, messages.getMessages(key));
+                        } catch(ExecException | InterruptedException e) {
+                            throw new UncheckedException(e);
+                        }
+                        return Optional.empty();
+                    })
+                    .singleFile(f -> {
+                        final Task<Messages> task = f.apply(key);
+                        try {
+                            final Messages messages = requireWithoutObserving(task, postSession, monitor);
+                            workspaceUpdate.replaceMessages(key, messages);
+                        } catch(ExecException | InterruptedException e) {
+                            throw new UncheckedException(e);
+                        }
+                        return Optional.empty();
+                    });
+            } catch(UncheckedException e) {
+                final Exception cause = e.getCause();
+                if(cause instanceof ExecException) {
+                    throw (ExecException)cause;
+                }
+                if(cause instanceof InterruptedException) {
+                    throw (InterruptedException)cause;
+                }
+                throw e;
+            }
         }
 
         workspaceUpdate.update(resource.getWrappedEclipseResource(), monitor);
@@ -237,57 +285,62 @@ public class PieRunner {
 
     // Observing/unobserving check tasks.
 
-    public boolean isCheckObserved(
-        EclipseLanguageComponent languageComponent,
-        EclipseResourcePath file
-    ) {
-        final Task<Messages> checkTask = languageComponent.getLanguageInstance().createCheckTask(file);
-        return pie.isObserved(checkTask);
-    }
-
-    public void observeCheckTasks(
-        EclipseLanguageComponent languageComponent,
-        Iterable<IFile> files,
-        @Nullable IProgressMonitor monitor
-    ) throws ExecException, InterruptedException {
-        final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
-        try(final PieSession session = languageComponent.newPieSession()) {
-            final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
-            for(IFile file : files) {
-                final EclipseResourcePath resourceKey = new EclipseResourcePath(file);
-                final Task<Messages> checkTask = languageInstance.createCheckTask(resourceKey);
-                pie.setCallback(checkTask, (messages) -> {
-                    if(bottomUpWorkspaceUpdate != null) {
-                        bottomUpWorkspaceUpdate.replaceMessages(resourceKey, messages);
-                    }
-                });
-                if(!pie.isObserved(checkTask)) {
-                    final Messages messages = require(checkTask, session, monitor);
-                    workspaceUpdate.replaceMessages(resourceKey, messages);
-                }
-            }
-        }
-        workspaceUpdate.update(null, monitor);
-    }
-
-    public void unobserveCheckTasks(
-        EclipseLanguageComponent languageComponent,
-        Iterable<IFile> files,
-        @Nullable IProgressMonitor monitor
-    ) {
-        final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
-        try(final PieSession session = languageComponent.newPieSession()) {
-            final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
-            for(IFile file : files) {
-                final EclipseResourcePath resourceKey = new EclipseResourcePath(file);
-                final Task<Messages> checkTask = languageInstance.createCheckTask(resourceKey);
-                // BUG: this also clears messages for open editors, which it shouldn't do.
-                workspaceUpdate.clearMessages(resourceKey);
-                unobserve(checkTask, pie, session, monitor);
-            }
-        }
-        workspaceUpdate.update(null, monitor);
-    }
+    // TODO: reimplement single/multi-file inspections.
+//    public boolean isCheckObserved(
+//        EclipseLanguageComponent languageComponent,
+//        EclipseResourcePath project,
+//        EclipseResourcePath file
+//    ) {
+//        final Task<Messages> checkTask = languageComponent.getLanguageInstance().createCheckTask(file);
+//        return pie.isObserved(checkTask);
+//    }
+//
+//    public void observeCheckTasks(
+//        EclipseLanguageComponent languageComponent,
+//        IProject eclipseProject,
+//        Iterable<IFile> files,
+//        @Nullable IProgressMonitor monitor
+//    ) throws ExecException, InterruptedException {
+//        final EclipseResource project = new EclipseResource(eclipseProject);
+//        final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
+//        try(final PieSession session = languageComponent.newPieSession()) {
+//            final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
+//            for(IFile file : files) {
+//                final EclipseResourcePath resourceKey = new EclipseResourcePath(file);
+//                final Task<Messages> checkTask = languageInstance.createCheckTask(resourceKey);
+//                pie.setCallback(checkTask, (messages) -> {
+//                    if(bottomUpWorkspaceUpdate != null) {
+//                        bottomUpWorkspaceUpdate.replaceMessages(resourceKey, messages);
+//                    }
+//                });
+//                if(!pie.isObserved(checkTask)) {
+//                    final Messages messages = require(checkTask, session, monitor);
+//                    workspaceUpdate.replaceMessages(resourceKey, messages);
+//                }
+//            }
+//        }
+//        workspaceUpdate.update(null, monitor);
+//    }
+//
+//    public void unobserveCheckTasks(
+//        EclipseLanguageComponent languageComponent,
+//        IProject eclipseProject,
+//        Iterable<IFile> files,
+//        @Nullable IProgressMonitor monitor
+//    ) {
+//        final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
+//        try(final PieSession session = languageComponent.newPieSession()) {
+//            final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
+//            for(IFile file : files) {
+//                final EclipseResourcePath resourceKey = new EclipseResourcePath(file);
+//                final Task<Messages> checkTask = languageInstance.createCheckTask(resourceKey);
+//                // BUG: this also clears messages for open editors, which it shouldn't do.
+//                workspaceUpdate.clearMessages(resourceKey);
+//                unobserve(checkTask, pie, session, monitor);
+//            }
+//        }
+//        workspaceUpdate.update(null, monitor);
+//    }
 
 
     // Requiring commands

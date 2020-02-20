@@ -6,20 +6,20 @@ import mb.pie.api.ExecException;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.pie.PieRunner;
 import mb.spoofax.eclipse.resource.EclipseDocumentResource;
+import mb.spoofax.eclipse.resource.EclipseResource;
 import mb.spoofax.eclipse.util.StatusUtil;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.eclipse.core.resources.IFile;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentExtension4;
 
 public class EditorUpdateJob extends Job {
     private final Logger logger;
     private final PieRunner pieRunner;
     private final EclipseLanguageComponent languageComponent;
     private final String languageDisplayName;
+    private final @Nullable EclipseResource project;
     private final EclipseDocumentResource resource;
     private final SpoofaxEditor editor;
 
@@ -27,6 +27,7 @@ public class EditorUpdateJob extends Job {
         LoggerFactory loggerFactory,
         PieRunner pieRunner,
         EclipseLanguageComponent languageComponent,
+        @Nullable EclipseResource project,
         EclipseDocumentResource resource,
         SpoofaxEditor editor
     ) {
@@ -35,6 +36,7 @@ public class EditorUpdateJob extends Job {
         this.pieRunner = pieRunner;
         this.languageComponent = languageComponent;
         this.languageDisplayName = languageComponent.getLanguageInstance().getDisplayName();
+        this.project = project;
         this.resource = resource;
         this.editor = editor;
     }
@@ -57,7 +59,7 @@ public class EditorUpdateJob extends Job {
     }
 
     private IStatus update(IProgressMonitor monitor) throws ExecException, InterruptedException {
-        pieRunner.addOrUpdateEditor(languageComponent, resource, editor, monitor);
+        pieRunner.addOrUpdateEditor(languageComponent, project, resource, editor, monitor);
         return StatusUtil.success();
     }
 }

@@ -1,4 +1,4 @@
-package mb.tiger.spoofax.task.reusable;
+package {{genAnalyzeMultiTaskDef.packageId}};
 
 import mb.common.util.UncheckedException;
 import mb.constraint.common.ConstraintAnalyzer.MultiFileResult;
@@ -15,7 +15,6 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
 import mb.spoofax.core.language.LanguageScope;
-import mb.tiger.TigerConstraintAnalyzer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -24,12 +23,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Objects;
 
-/**
- * @implNote Although Tiger is a single-file language, we implement the multi-file analysis variant here as well for
- * development/testing purposes.
- */
 @LanguageScope
-public class TigerAnalyzeMulti implements TaskDef<TigerAnalyzeMulti.Input, TigerAnalyzeMulti.@Nullable Output> {
+public class {{genAnalyzeMultiTaskDef.id}} implements TaskDef<{{genAnalyzeMultiTaskDef.id}}.Input, {{genAnalyzeMultiTaskDef.id}}.@Nullable Output> {
     public static class Input implements Serializable {
         public final ResourcePath root;
         public final ResourceWalker walker;
@@ -93,22 +88,18 @@ public class TigerAnalyzeMulti implements TaskDef<TigerAnalyzeMulti.Input, Tiger
         }
 
         @Override public String toString() {
-            return "Output{" +
-                "context=" + context +
-                ", result=" + result +
-                '}';
+            return "Output(context=" + context + ", result=" + result + ')';
         }
     }
 
-    private final TigerConstraintAnalyzer constraintAnalyzer;
+    private final {{languageProjectInput.constraintAnalyzer.qualifiedId}} constraintAnalyzer;
 
-    @Inject
-    public TigerAnalyzeMulti(TigerConstraintAnalyzer constraintAnalyzer) {
+    @Inject public {{genAnalyzeMultiTaskDef.id}}({{languageProjectInput.constraintAnalyzer.qualifiedId}} constraintAnalyzer) {
         this.constraintAnalyzer = constraintAnalyzer;
     }
 
     @Override public String getId() {
-        return "mb.tiger.spoofax.task.reusable.TigerAnalyzeMulti";
+        return "{{genAnalyzeMultiTaskDef.qualifiedId}}";
     }
 
     @Override public @Nullable Output exec(ExecContext context, Input input) throws Exception {

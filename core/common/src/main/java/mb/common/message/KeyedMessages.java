@@ -53,6 +53,14 @@ public class KeyedMessages implements Serializable {
         }
     }
 
+    public Iterable<Message> getMessages(ResourceKey resource) {
+        return messages.get(resource);
+    }
+
+    public Iterable<Message> getMessagesWithoutOrigin() {
+        return messages.get(null);
+    }
+
     public Set<@Nullable ResourceKey> getResources() {
         return messages.keySet();
     }

@@ -2,7 +2,7 @@ package mb.spoofax.eclipse.pie;
 
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
-import mb.common.message.Messages;
+import mb.common.message.Message;
 import mb.common.style.Styling;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
@@ -85,11 +85,11 @@ public class WorkspaceUpdate {
     }
 
 
-    public void addMessages(ResourceKey resource, Messages messages) {
+    public void addMessages(ResourceKey resource, Iterable<? extends Message> messages) {
         messagesBuilder.addMessages(resource, messages);
     }
 
-    public void replaceMessages(ResourceKey resource, Messages messages) {
+    public void replaceMessages(ResourceKey resource, Iterable<? extends Message> messages) {
         clearMessages(resource);
         messagesBuilder.replaceMessages(resource, messages);
     }

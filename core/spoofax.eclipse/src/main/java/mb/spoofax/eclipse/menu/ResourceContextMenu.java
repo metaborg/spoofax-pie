@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -50,7 +49,7 @@ public abstract class ResourceContextMenu extends MenuShared {
         if(!(simpleSelection instanceof IStructuredSelection)) {
             return new IContributionItem[0];
         }
-        final IStructuredSelection selection = (IStructuredSelection) simpleSelection;
+        final IStructuredSelection selection = (IStructuredSelection)simpleSelection;
 
         final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
         final EclipseIdentifiers identifiers = languageComponent.getEclipseIdentifiers();
@@ -101,24 +100,25 @@ public abstract class ResourceContextMenu extends MenuShared {
 
         // Observe/unobserve check tasks.
         if(hasFiles) {
-            boolean showObserve = false;
-            boolean showUnobserve = false;
-            for(EclipseResourcePath file : langFiles) {
-                if(!pieRunner.isCheckObserved(languageComponent, file)) {
-                    showObserve = true;
-                } else {
-                    showUnobserve = true;
-                }
-            }
-            if(showObserve || showUnobserve) {
-                langMenu.add(new Separator());
-                if(showObserve) {
-                    langMenu.add(createCommand(identifiers.getObserveCommand()));
-                }
-                if(showUnobserve) {
-                    langMenu.add(createCommand(identifiers.getUnobserveCommand()));
-                }
-            }
+            // TODO: reimplement single/multi-file inspections.
+//            boolean showObserve = false;
+//            boolean showUnobserve = false;
+//            for(EclipseResourcePath file : langFiles) {
+//                if(!pieRunner.isCheckObserved(languageComponent, file)) {
+//                    showObserve = true;
+//                } else {
+//                    showUnobserve = true;
+//                }
+//            }
+//            if(showObserve || showUnobserve) {
+//                langMenu.add(new Separator());
+//                if(showObserve) {
+//                    langMenu.add(createCommand(identifiers.getObserveCommand()));
+//                }
+//                if(showUnobserve) {
+//                    langMenu.add(createCommand(identifiers.getUnobserveCommand()));
+//                }
+//            }
         }
 
         // Transformations.

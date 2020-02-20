@@ -20,11 +20,13 @@ public class ConstraintAnalyzerCompiler {
     private final TemplateWriter constraintAnalyzerTemplate;
     private final TemplateWriter factoryTemplate;
     private final TemplateWriter analyzeTaskDefTemplate;
+    private final TemplateWriter analyzeMultiTaskDefTemplate;
 
     public ConstraintAnalyzerCompiler(TemplateCompiler templateCompiler) {
         this.constraintAnalyzerTemplate = templateCompiler.getOrCompileToWriter("constraint_analyzer/ConstraintAnalyzer.java.mustache");
         this.factoryTemplate = templateCompiler.getOrCompileToWriter("constraint_analyzer/ConstraintAnalyzerFactory.java.mustache");
         this.analyzeTaskDefTemplate = templateCompiler.getOrCompileToWriter("constraint_analyzer/AnalyzeTaskDef.java.mustache");
+        this.analyzeMultiTaskDefTemplate = templateCompiler.getOrCompileToWriter("constraint_analyzer/AnalyzeMultiTaskDef.java.mustache");
     }
 
     // Language project
@@ -55,7 +57,8 @@ public class ConstraintAnalyzerCompiler {
         if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath classesGenDirectory = input.classesGenDirectory();
         outputBuilder.addProvidedResources(
-            analyzeTaskDefTemplate.write(input.genAnalyzeTaskDef().file(classesGenDirectory), input)
+            analyzeTaskDefTemplate.write(input.genAnalyzeTaskDef().file(classesGenDirectory), input),
+            analyzeMultiTaskDefTemplate.write(input.genAnalyzeMultiTaskDef().file(classesGenDirectory), input)
         );
         return outputBuilder.build();
     }
@@ -196,6 +199,21 @@ public class ConstraintAnalyzerCompiler {
             return genAnalyzeTaskDef();
         }
 
+        // Multi-file analyze
+
+        @Value.Default default TypeInfo genAnalyzeMultiTaskDef() {
+            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "AnalyzeMulti");
+        }
+
+        Optional<TypeInfo> manualAnalyzeMultiTaskDef();
+
+        default TypeInfo analyzeMultiTaskDef() {
+            if(classKind().isManual() && manualAnalyzeMultiTaskDef().isPresent()) {
+                return manualAnalyzeMultiTaskDef().get();
+            }
+            return genAnalyzeMultiTaskDef();
+        }
+
 
         // List of all generated files
 
@@ -204,7 +222,8 @@ public class ConstraintAnalyzerCompiler {
                 return ListView.of();
             }
             return ListView.of(
-                genAnalyzeTaskDef().file(classesGenDirectory())
+                genAnalyzeTaskDef().file(classesGenDirectory()),
+                genAnalyzeMultiTaskDef().file(classesGenDirectory())
             );
         }
 

@@ -33,13 +33,14 @@ public class ObserveHandler extends AbstractHandler {
         final SetView<String> extensions = languageComponent.getLanguageInstance().getFileExtensions();
         files.removeIf((f) -> !extensions.contains(f.getFileExtension()));
         if(files.isEmpty()) return null;
-        try {
-            pieRunner.observeCheckTasks(languageComponent, files, null);
-        } catch(ExecException e) {
-            throw new ExecutionException("Observing files '" + files + "' failed unexpectedly", e);
-        } catch(InterruptedException e) {
-            // Ignore
-        }
+        // TODO: reimplement single/multi-file inspections.
+//        try {
+//            pieRunner.observeCheckTasks(languageComponent, files, null);
+//        } catch(ExecException e) {
+//            throw new ExecutionException("Observing files '" + files + "' failed unexpectedly", e);
+//        } catch(InterruptedException e) {
+//            // Ignore
+//        }
         return null;
     }
 }
