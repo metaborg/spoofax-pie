@@ -3,7 +3,12 @@ package mb.common.util;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -34,18 +39,19 @@ public class ListView<E> extends BaseCollectionView<E, List<? extends E>> implem
         return new ListView<>(list);
     }
 
-    public static <E> ListView<E> of(Iterable<? extends E> elements) {
-        if (elements instanceof ListView<?>) {
-            //noinspection unchecked
-            return (ListView<E>)elements;
-        }
+    public static <E> ListView<E> of(List<? extends E> collection) {
+        return new ListView<>(collection);
+    }
+
+
+    public static <E> ListView<E> copyOf(Iterable<? extends E> elements) {
         final ArrayList<E> list = new ArrayList<>();
         IterableUtil.addAll(list, elements);
         return new ListView<>(list);
     }
 
-    public static <E> ListView<E> copyOf(List<? extends E> list) {
-        return new ListView<>(new ArrayList<>(list));
+    public static <E> ListView<E> copyOf(Collection<? extends E> elements) {
+        return new ListView<>(new ArrayList<>(elements));
     }
 
 
@@ -129,7 +135,7 @@ public class ListView<E> extends BaseCollectionView<E, List<? extends E>> implem
     @Override public boolean equals(@Nullable Object obj) {
         if(this == obj) return true;
         if(obj == null || getClass() != obj.getClass()) return false;
-        final ListView<?> other = (ListView<?>) obj;
+        final ListView<?> other = (ListView<?>)obj;
         return collection.equals(other.collection);
     }
 

@@ -36,6 +36,17 @@ public class CollectionView<E> extends BaseCollectionView<E, Collection<? extend
         return new CollectionView<>(collection);
     }
 
+    public static <E> CollectionView<E> of(Collection<? extends E> collection) {
+        return new CollectionView<>(collection);
+    }
+
+
+    public static <E> CollectionView<E> copyOf(Iterable<? extends E> elements) {
+        final ArrayList<E> list = new ArrayList<>();
+        IterableUtil.addAll(list, elements);
+        return new CollectionView<>(list);
+    }
+
     public static <E> CollectionView<E> copyOf(Collection<? extends E> collection) {
         return new CollectionView<>(new ArrayList<>(collection));
     }
@@ -44,7 +55,7 @@ public class CollectionView<E> extends BaseCollectionView<E, Collection<? extend
     @Override public boolean equals(@Nullable Object obj) {
         if(this == obj) return true;
         if(obj == null || getClass() != obj.getClass()) return false;
-        final CollectionView<?> other = (CollectionView<?>) obj;
+        final CollectionView<?> other = (CollectionView<?>)obj;
         return collection.equals(other.collection);
     }
 

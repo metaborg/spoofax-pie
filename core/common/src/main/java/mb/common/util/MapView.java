@@ -4,7 +4,11 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -63,9 +67,14 @@ public class MapView<K, V> implements Iterable<Map.Entry<K, V>>, Serializable {
         return new MapView<>(map);
     }
 
+    public static <K, V> MapView<K, V> of(Map<K, V> map) {
+        return new MapView<>(map);
+    }
+
     public static <K, V> MapView<K, V> of(Supplier<Map<K, V>> mapSupplier) {
         return new MapView<>(mapSupplier.get());
     }
+
 
     public static <K, V> MapView<K, V> copyOf(Map<? extends K, ? extends V> map) {
         return new MapView<>(new HashMap<>(map));
@@ -164,7 +173,7 @@ public class MapView<K, V> implements Iterable<Map.Entry<K, V>>, Serializable {
     @Override public boolean equals(@Nullable Object obj) {
         if(this == obj) return true;
         if(obj == null || getClass() != obj.getClass()) return false;
-        final MapView<?, ?> other = (MapView<?, ?>) obj;
+        final MapView<?, ?> other = (MapView<?, ?>)obj;
         return map.equals(other.map);
     }
 

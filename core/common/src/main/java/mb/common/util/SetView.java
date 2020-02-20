@@ -36,6 +36,17 @@ public class SetView<E> extends BaseCollectionView<E, Set<? extends E>> implemen
         return new SetView<>(set);
     }
 
+    public static <E> SetView<E> of(Set<? extends E> set) {
+        return new SetView<>(set);
+    }
+
+
+    public static <E> SetView<E> copyOf(Iterable<? extends E> elements) {
+        final HashSet<E> set = new HashSet<>();
+        IterableUtil.addAll(set, elements);
+        return new SetView<>(set);
+    }
+
     public static <E> SetView<E> copyOf(Set<? extends E> set) {
         return new SetView<>(new HashSet<>(set));
     }
