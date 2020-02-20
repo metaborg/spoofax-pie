@@ -6,6 +6,7 @@ plugins {
 dependencies {
   api(platform(project(":spoofax.depconstraints")))
   annotationProcessor(platform(project(":spoofax.depconstraints")))
+  testImplementation(platform(project(":spoofax.depconstraints")))
 
   api("org.metaborg:resource")
 
@@ -13,6 +14,7 @@ dependencies {
   compileOnly("org.checkerframework:checker-qual-android")
 
   testCompileOnly("org.checkerframework:checker-qual-android")
+  testImplementation("nl.jqno.equalsverifier:equalsverifier")
 
   annotationProcessor("org.derive4j:derive4j")
 }
