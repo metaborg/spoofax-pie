@@ -1,11 +1,13 @@
 package mb.tiger.spoofax;
 
+import mb.common.region.Region;
 import mb.common.style.Styling;
 import mb.common.token.Token;
 import mb.common.util.CollectionView;
 import mb.common.util.ListView;
 import mb.common.util.MapView;
 import mb.common.util.SetView;
+import mb.completions.common.CompletionResult;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageInspection;
@@ -26,6 +28,7 @@ import mb.tiger.spoofax.command.TigerShowParsedAstCommand;
 import mb.tiger.spoofax.command.TigerShowPrettyPrintedTextCommand;
 import mb.tiger.spoofax.task.TigerIdeCheck;
 import mb.tiger.spoofax.task.TigerIdeTokenize;
+import mb.tiger.spoofax.task.reusable.TigerComplete;
 import mb.tiger.spoofax.task.reusable.TigerParse;
 import mb.tiger.spoofax.task.reusable.TigerStyle;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -44,6 +47,7 @@ public class TigerInstance implements LanguageInstance {
     private final TigerIdeCheck tigerIdeCheck;
     private final TigerStyle style;
     private final TigerIdeTokenize tokenize;
+    private final TigerComplete complete;
 
     private final TigerShowParsedAstCommand showParsedAstCommand;
     private final TigerShowPrettyPrintedTextCommand showPrettyPrintedTextCommand;
@@ -62,6 +66,7 @@ public class TigerInstance implements LanguageInstance {
         TigerIdeCheck tigerIdeCheck,
         TigerStyle style,
         TigerIdeTokenize tokenize,
+        TigerComplete complete,
 
         TigerShowParsedAstCommand showParsedAstCommand,
         TigerShowPrettyPrintedTextCommand showPrettyPrintedTextCommand,
@@ -78,6 +83,7 @@ public class TigerInstance implements LanguageInstance {
         this.tigerIdeCheck = tigerIdeCheck;
         this.style = style;
         this.tokenize = tokenize;
+        this.complete = complete;
 
         this.showParsedAstCommand = showParsedAstCommand;
         this.showPrettyPrintedTextCommand = showPrettyPrintedTextCommand;
@@ -107,6 +113,11 @@ public class TigerInstance implements LanguageInstance {
 
     @Override public Task<@Nullable Styling> createStyleTask(ResourceKey resourceKey) {
         return style.createTask(parse.createTokensSupplier(resourceKey));
+    }
+
+    @Override
+    public Task<@Nullable CompletionResult> createCompletionTask(ResourceKey resourceKey, Region primarySelection) {
+        return complete.createTask(new TigerComplete.Input(parse.createAstSupplier(resourceKey)));
     }
 
     @Override public LanguageInspection getInspection() {

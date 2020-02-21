@@ -17,5 +17,9 @@
       language="Tiger"
       implementationClass="mb.tiger.intellij.syntaxcoloring.TigerParserDefinition"
     />
+    <completion.contributor
+      language="Tiger"
+      implementationClass="mb.tiger.intellij.editor.TigerCompletionContributor"
+    />
   </extensions>
 </idea-plugin>

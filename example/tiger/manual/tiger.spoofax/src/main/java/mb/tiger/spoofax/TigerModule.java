@@ -43,11 +43,7 @@ import mb.tiger.spoofax.task.TigerShowDesugaredAst;
 import mb.tiger.spoofax.task.TigerShowParsedAst;
 import mb.tiger.spoofax.task.TigerShowPrettyPrintedText;
 import mb.tiger.spoofax.task.TigerShowScopeGraph;
-import mb.tiger.spoofax.task.reusable.TigerAnalyze;
-import mb.tiger.spoofax.task.reusable.TigerListDefNames;
-import mb.tiger.spoofax.task.reusable.TigerListLiteralVals;
-import mb.tiger.spoofax.task.reusable.TigerParse;
-import mb.tiger.spoofax.task.reusable.TigerStyle;
+import mb.tiger.spoofax.task.reusable.*;
 
 import javax.inject.Named;
 import java.util.HashSet;
@@ -75,7 +71,6 @@ public class TigerModule {
     TigerStyler provideStyler(TigerStylerFactory stylerFactory) {
         return stylerFactory.create();
     }
-
 
     @Provides @LanguageScope
     TigerStrategoRuntimeBuilderFactory provideStrategoRuntimeBuilderFactory() {
@@ -109,6 +104,7 @@ public class TigerModule {
         TigerParse parse,
         TigerStyle style,
         TigerAnalyze analyze,
+        TigerComplete complete,
 
         TigerListLiteralVals listLiteralVals,
         TigerListDefNames listDefNames,
@@ -131,6 +127,7 @@ public class TigerModule {
         taskDefs.add(parse);
         taskDefs.add(style);
         taskDefs.add(analyze);
+        taskDefs.add(complete);
 
         taskDefs.add(listLiteralVals);
         taskDefs.add(listDefNames);
