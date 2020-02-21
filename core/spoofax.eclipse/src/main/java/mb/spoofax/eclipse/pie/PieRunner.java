@@ -224,9 +224,9 @@ public class PieRunner {
 
         bottomUpWorkspaceUpdate = workspaceUpdateFactory.create(languageComponent);
         try(final PieSession session = languageComponent.newPieSession()) {
-            updateAffectedBy(resourceChanges.changed, session, monitor);
-            observeAndUnobserveAutoTransforms(languageComponent, resourceChanges, session, monitor);
-            observeAndUnobserveInspections(languageComponent, resourceChanges, session, monitor);
+            final SessionAfterBottomUp afterSession = updateAffectedBy(resourceChanges.changed, session, monitor);
+            observeAndUnobserveAutoTransforms(languageComponent, resourceChanges, afterSession, monitor);
+            observeAndUnobserveInspections(languageComponent, resourceChanges, afterSession, monitor);
         }
         bottomUpWorkspaceUpdate.update(null, monitor);
         bottomUpWorkspaceUpdate = null;
@@ -240,14 +240,15 @@ public class PieRunner {
         IProject eclipseProject,
         @Nullable IProgressMonitor monitor
     ) throws IOException {
-        final EclipseResource project = new EclipseResource(eclipseProject);
-        final ResourceChanges resourceChanges = new ResourceChanges(project, languageComponent.getLanguageInstance().getFileExtensions());
-        resourceChanges.newProjects.add(project.getKey());
+        final EclipseResource projectResource = new EclipseResource(eclipseProject);
+        final ResourcePath project = projectResource.getPath();
+        final ResourceChanges resourceChanges = new ResourceChanges(projectResource, languageComponent.getLanguageInstance().getFileExtensions());
+        resourceChanges.newProjects.add(project);
         final AutoCommandRequests autoCommandRequests = new AutoCommandRequests(languageComponent); // OPTO: calculate once per language component
         try(final PieSession session = languageComponent.newPieSession()) {
             // Unobserve auto transforms.
             for(AutoCommandRequest<?> request : autoCommandRequests.project) {
-                final Task<CommandOutput> task = request.createTask(CommandContext.ofProject(project.getKey()), argConverters);
+                final Task<CommandOutput> task = request.createTask(CommandContext.ofProject(project), argConverters);
                 unobserve(task, pie, session, monitor);
             }
             for(ResourcePath directory : resourceChanges.newDirectories) {
@@ -262,7 +263,27 @@ public class PieRunner {
                     unobserve(task, pie, session, monitor);
                 }
             }
-            // TODO: unobserve inspection tasks
+            // Unobserve inspection tasks and clear messages.
+            final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
+            final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
+            languageInstance.getInspection().caseOf()
+                .multiFile(f -> {
+                    final LanguageInspection.MultiFileInput input = multiFileInspectionInput(languageInstance, project);
+                    final Task<KeyedMessages> task = f.apply(input);
+                    unobserve(task, pie, session, monitor);
+                    workspaceUpdate.clearMessagesRecursively(project);
+                    return Optional.empty();
+                })
+                .singleFile(f -> {
+                    for(ResourcePath file : resourceChanges.newFiles) {
+                        final Task<Messages> task = f.apply(file);
+                        unobserve(task, pie, session, monitor);
+                        workspaceUpdate.clearMessages(file);
+                    }
+                    return Optional.empty();
+                });
+            workspaceUpdate.update(null, monitor);
+            // Delete unobserved tasks and their provided files.
             deleteUnobservedTasks(session, monitor);
         }
     }
