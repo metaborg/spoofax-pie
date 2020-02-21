@@ -16,7 +16,7 @@ public class {{genMain.id}} {
             .build();
         final {{adapterProjectCompilerInput.component.qualifiedId}} tigerComponent = {{adapterProjectCompilerInput.daggerComponent.qualifiedId}}.builder()
             .platformComponent(platformComponent)
-            .tigerModule(new {{adapterProjectCompilerInput.module.qualifiedId}}())
+            .{{adapterProjectCompilerInput.module.idAsCamelCase}}(new {{adapterProjectCompilerInput.module.qualifiedId}}())
             .build();
         final SpoofaxCli cmd = platformComponent.getSpoofaxCmd();
         final int status = cmd.run(args, tigerComponent);

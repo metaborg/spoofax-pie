@@ -26,3 +26,8 @@ if(gradle.parent == null) {
 
 include("mod.spoofaxcore")
 include("mod")
+include("mod.spoofax")
+include("mod.cli")
+include("mod.eclipse.externaldeps")
+include("mod.eclipse")
+include("mod.intellij")

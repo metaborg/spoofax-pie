@@ -63,6 +63,14 @@ public interface TypeInfo extends Serializable {
 
     @Value.Parameter String id();
 
+    default String idAsCamelCase() {
+        final String id = id();
+        if(id.isEmpty()) {
+            return id;
+        }
+        return id.substring(0, 1).toLowerCase() + id.substring(1);
+    }
+
     default String qualifiedId() {
         if(isPrimitive()) {
             return id();
