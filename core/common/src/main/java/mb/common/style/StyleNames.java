@@ -2,14 +2,16 @@ package mb.common.style;
 
 import mb.common.util.Experimental;
 import mb.common.util.SetView;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * A set of style names.
+ * An ordered set of style names.
  *
  * A style name is interpreted by the environment, such as an IDE or the command line,
  * to give a specific style to a syntactic or semantic element, such as a source code token,
@@ -17,13 +19,15 @@ import java.util.Set;
  *
  * Often, multiple styles apply to the same element. For example, one style describes the syntactic kind
  * of element, and other styles modify the default style to indicate attributes such as
- * semantic attributes, the element being deprecated, the element being invalid, and so on.
+ * semantic attributes, the element being deprecated, the visibility of the element, and so on.
  * The style names of all these attributes are captured in this set.
+ *
+ * @see <a href="https://www.sublimetext.com/docs/3/scope_naming.html">Scope Naming</a>
  */
 @Experimental
 public final class StyleNames extends SetView<StyleName> implements Serializable {
 
-    private static final StyleNames EMPTY = new StyleNames(Collections.emptySet());
+    private static final StyleNames EMPTY = new StyleNames(new LinkedHashSet<>());
 
     /**
      * Gets the empty set of style names.
@@ -40,7 +44,7 @@ public final class StyleNames extends SetView<StyleName> implements Serializable
      * @return the created {@link StyleName} instance
      */
     public static StyleNames of(StyleName name) {
-        final HashSet<StyleName> set = new HashSet<>();
+        final LinkedHashSet<StyleName> set = new LinkedHashSet<>();
         set.add(name);
         return new StyleNames(set);
     }
@@ -50,11 +54,11 @@ public final class StyleNames extends SetView<StyleName> implements Serializable
      *
      * Note that duplicate names are removed.
      *
-     * @param names the names
+     * @param names the names, from most significant to least significant
      * @return the created {@link StyleName} instance
      */
     public static StyleNames of(StyleName... names) {
-        final HashSet<StyleName> set = new HashSet<>();
+        final LinkedHashSet<StyleName> set = new LinkedHashSet<>();
         Collections.addAll(set, names);
         return new StyleNames(set);
     }
@@ -62,9 +66,9 @@ public final class StyleNames extends SetView<StyleName> implements Serializable
     /**
      * Initializes a new instance of the {@link StyleNames} class.
      *
-     * @param set the set of style names
+     * @param set the set of style names, from most significant to least significant
      */
-    private StyleNames(Set<StyleName> set) {
+    private StyleNames(LinkedHashSet<StyleName> set) {
         // We assume the set does not contains null.
         // Also, we assume we are the only ones with control of the inner set.
         super(set);
@@ -88,8 +92,43 @@ public final class StyleNames extends SetView<StyleName> implements Serializable
      * otherwise, {@code false}.
      */
     public boolean anyStartsWith(StyleName name) {
-        if (this.collection.isEmpty()) return false;
-        return this.collection.stream().anyMatch(n -> n.startsWith(name));
+        return firstStartsWith(name) != null;
+    }
+
+    /**
+     * Determines whether this set contains any style name that starts with the specified style name.
+     *
+     * @param name the name to check
+     * @return {@code true} when any style name in this set starts with the specified style name;
+     * otherwise, {@code false}.
+     */
+    public boolean anyStartsWith(String name) {
+        return firstStartsWith(name) != null;
+    }
+
+    /**
+     * Finds the first style name for which the specified name is a prefix.
+     *
+     * @param name the name to check
+     * @return the first style name for which the specified name is a prefix;
+     * otherwise, {@code null}
+     */
+    public @Nullable StyleName firstStartsWith(StyleName name) {
+        if (this.collection.isEmpty()) return null;
+        return this.collection.stream().filter(n -> n.startsWith(name)).findFirst().orElse(null);
+    }
+
+    /**
+     * Finds the first style name for which the specified name is a prefix.
+     *
+     * @param name the name to check
+     * @return the first style name for which the specified name is a prefix;
+     * otherwise, {@code null}
+     */
+    public @Nullable StyleName firstStartsWith(String name) {
+        @Nullable StyleName styleName = StyleName.fromString(name);
+        if (styleName == null) throw new IllegalArgumentException("The name is not a valid style name.");
+        return firstStartsWith(styleName);
     }
 
 }

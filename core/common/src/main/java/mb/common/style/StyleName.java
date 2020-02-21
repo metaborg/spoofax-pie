@@ -24,7 +24,9 @@ import java.util.stream.StreamSupport;
  * of the "comment" style name, but a slightly different style for "comment.block.documentation" code.
  * Perhaps the IDE even supports styling JavaDoc comments differently from other language's block comments.
  *
- * Style names are called "scope names" in Textmate, but we'd like to avoid this confusing name.
+ * Style names are called "scope names" in Textmate and Sublime, but we'd like to avoid this confusing name.
+ *
+ * @see <a href="https://www.sublimetext.com/docs/3/scope_naming.html">Scope Naming</a>
  */
 public final class StyleName implements Serializable {
 
@@ -132,6 +134,20 @@ public final class StyleName implements Serializable {
                 return false;
         }
         return true;
+    }
+
+    /**
+     * Determines whether this style name starts with the specified style name.
+     *
+     * @param name the name to check
+     * @return {@code true} when this style name starts with the specified style name;
+     * otherwise, {@code false}.
+     */
+    public boolean startsWith(String name) {
+        @Nullable StyleName styleName = StyleName.fromString(name);
+        if (styleName == null)
+            throw new IllegalArgumentException("The specified name is not a valid style name.");
+        return startsWith(styleName);
     }
 
     @Override public boolean equals(Object o) {

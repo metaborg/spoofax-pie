@@ -1,7 +1,5 @@
 package mb.common.style;
 
-import mb.common.region.Position;
-import mb.common.region.Region;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.DisplayName;
@@ -289,7 +287,7 @@ public class StyleNameTests {
 
     /** Tests the {@link StyleName#startsWith(StyleName)} property. */
     @DisplayName("startsWith(StyleName)")
-    @Nested public class StartsWithTests {
+    @Nested public class StartsWithStyleNameTests {
 
         @Test
         @DisplayName("when both default, returns true")
@@ -419,10 +417,155 @@ public class StyleNameTests {
 
     }
 
+
+    /** Tests the {@link StyleName#startsWith(String)} property. */
+    @DisplayName("startsWith(String)")
+    @Nested public class StartsWithStringTests {
+
+        @Test
+        @DisplayName("when both default, returns true")
+        public void whenBothDefault_returnsTrue() {
+            // Arrange
+            StyleName a = StyleName.defaultStyleName();
+            String b = "";
+
+            // Act
+            boolean result = a.startsWith(b);
+
+            // Assert
+            assertTrue(result);
+        }
+
+        @Test
+        @DisplayName("when equal, returns true")
+        public void whenEqual_returnsTrue() {
+            // Arrange
+            StyleName a = StyleName.of("abc", "def");
+            String b = "abc.def";
+
+            // Act
+            boolean result = a.startsWith(b);
+
+            // Assert
+            assertTrue(result);
+        }
+
+        @Test
+        @DisplayName("when second is default, returns true")
+        public void whenSecondIsDefault_returnsTrue() {
+            // Arrange
+            StyleName a = StyleName.of("abc", "def");
+            String b = "<default>";
+
+            // Act
+            boolean result = a.startsWith(b);
+
+            // Assert
+            assertTrue(result);
+        }
+
+        @Test
+        @DisplayName("when second is prefix, returns true")
+        public void whenSecondIsPrefix_returnsTrue() {
+            // Arrange
+            StyleName a = StyleName.of("abc", "def");
+            String b = "abc";
+
+            // Act
+            boolean result = a.startsWith(b);
+
+            // Assert
+            assertTrue(result);
+        }
+
+        @Test
+        @DisplayName("when second is string prefix but not name prefix, returns false")
+        public void whenSecondIsStringPrefixButNotNamePrefix_returnsFalse() {
+            // Arrange
+            StyleName a = StyleName.of("abc", "def");
+            String b = "abc.de";
+
+            // Act
+            boolean result = a.startsWith(b);
+
+            // Assert
+            assertFalse(result);
+        }
+
+        @Test
+        @DisplayName("when second is different (1), returns false")
+        public void whenSecondIsDifferent1_returnsFalse() {
+            // Arrange
+            StyleName a = StyleName.of("abc", "def");
+            String b = "abc.DEF";
+
+            // Act
+            boolean result = a.startsWith(b);
+
+            // Assert
+            assertFalse(result);
+        }
+
+        @Test
+        @DisplayName("when second is different (2), returns false")
+        public void whenSecondIsDifferent2_returnsFalse() {
+            // Arrange
+            StyleName a = StyleName.of("abc", "def");
+            String b = "ABC.XYZ";
+
+            // Act
+            boolean result = a.startsWith(b);
+
+            // Assert
+            assertFalse(result);
+        }
+
+        @Test
+        @DisplayName("when first is default, returns false")
+        public void whenFirstIsDefault_returnsFalse() {
+            // Arrange
+            StyleName a = StyleName.defaultStyleName();
+            String b = "abc.def";
+
+            // Act
+            boolean result = a.startsWith(b);
+
+            // Assert
+            assertFalse(result);
+        }
+
+        @Test
+        @DisplayName("when second is longer, returns false")
+        public void whenSecondIsLonger_returnsFalse() {
+            // Arrange
+            StyleName a = StyleName.of("abc", "def");
+            String b = "abc.def.ghi";
+
+            // Act
+            boolean result = a.startsWith(b);
+
+            // Assert
+            assertFalse(result);
+        }
+
+        @Test
+        @DisplayName("when second is invalid, throws exception")
+        public void whenSecondIsInvalid_throwsException() {
+            // Arrange
+            StyleName a = StyleName.of("abc", "def");
+
+            // Act/Assert
+            assertThrows(IllegalArgumentException.class, () -> {
+                a.startsWith("---");
+            });
+        }
+
+    }
+
     /** Tests the contract of the {@link StyleName#equals(Object)} and {@link StyleName#hashCode()} methods. */
     @Test
     public void equalityContract() {
-        EqualsVerifier.forClass(Position.class).verify();
+        EqualsVerifier.forClass(StyleName.class).verify();
     }
 
 
