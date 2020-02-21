@@ -27,7 +27,7 @@ subprojects {
 allprojects {
   repositories {
     // Required by NaBL2/Statix solver.
-    maven("http://nexus.usethesource.io/content/repositories/public/")
+    maven("https://nexus.usethesource.io/content/repositories/public/")
   }
 }
 

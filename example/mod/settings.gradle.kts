@@ -12,7 +12,7 @@ pluginManagement {
     // Required by spoofax.gradle plugin.
     maven("https://pluto-build.github.io/mvnrepository/")
     maven("https://sugar-lang.github.io/mvnrepository/")
-    maven("http://nexus.usethesource.io/content/repositories/public/")
+    maven("https://nexus.usethesource.io/content/repositories/public/")
     // Get plugins from Gradle plugin portal.
     gradlePluginPortal()
   }
