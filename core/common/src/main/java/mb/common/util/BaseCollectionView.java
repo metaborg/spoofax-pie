@@ -3,35 +3,20 @@ package mb.common.util;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Objects;
+import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-@SuppressWarnings("unused")
 public class BaseCollectionView<E, C extends Collection<? extends E>> implements Iterable<E>, Serializable {
     protected final C collection;
 
 
     public BaseCollectionView(C collection) {
-        if (containsNull(collection))
-            throw new IllegalArgumentException("The collection contains null.");
         this.collection = collection;
-    }
-
-    /**
-     * Determines whether the collection contains {@code null}.
-     *
-     * @param collection the collection to check
-     * @return {@code true} when the collection contains {@code null};
-     * otherwise, {@code false}.
-     */
-    private static boolean containsNull(Collection<?> collection) {
-        try {
-            return collection.contains(null);
-        } catch (NullPointerException e) {
-            // The collection does not support null.
-            return false;
-        }
     }
 
 
@@ -83,17 +68,17 @@ public class BaseCollectionView<E, C extends Collection<? extends E>> implements
     }
 
     @Override public Spliterator<E> spliterator() {
-        @SuppressWarnings("unchecked") final Spliterator<E> spliterator = (Spliterator<E>) collection.spliterator();
+        @SuppressWarnings("unchecked") final Spliterator<E> spliterator = (Spliterator<E>)collection.spliterator();
         return spliterator;
     }
 
     public Stream<E> stream() {
-        @SuppressWarnings("unchecked") final Stream<E> stream = (Stream<E>) collection.stream();
+        @SuppressWarnings("unchecked") final Stream<E> stream = (Stream<E>)collection.stream();
         return stream;
     }
 
     public Stream<E> parallelStream() {
-        @SuppressWarnings("unchecked") final Stream<E> parallelStream = (Stream<E>) collection.parallelStream();
+        @SuppressWarnings("unchecked") final Stream<E> parallelStream = (Stream<E>)collection.parallelStream();
         return parallelStream;
     }
 
@@ -115,7 +100,7 @@ public class BaseCollectionView<E, C extends Collection<? extends E>> implements
     @Override public boolean equals(@Nullable Object obj) {
         if(this == obj) return true;
         if(obj == null || getClass() != obj.getClass()) return false;
-        final BaseCollectionView<?, ?> other = (BaseCollectionView<?, ?>) obj;
+        final BaseCollectionView<?, ?> other = (BaseCollectionView<?, ?>)obj;
         return collection.equals(other.collection);
     }
 
