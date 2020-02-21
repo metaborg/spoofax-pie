@@ -1,4 +1,4 @@
-package {{parseTaskDef.packageId}};
+package {{genParseTaskDef.packageId}};
 
 import mb.common.message.Message;
 import mb.common.message.Messages;
@@ -25,16 +25,16 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 
 @LanguageScope
-public class {{parseTaskDef.id}} implements TaskDef<Supplier<String>, JSGLR1ParseResult> {
+public class {{genParseTaskDef.id}} implements TaskDef<Supplier<String>, JSGLR1ParseResult> {
     private final Provider<{{languageProjectInput.parser.qualifiedId}}> parserProvider;
 
     @Inject
-    public {{parseTaskDef.id}}(Provider<{{languageProjectInput.parser.qualifiedId}}> parserProvider) {
+    public {{genParseTaskDef.id}}(Provider<{{languageProjectInput.parser.qualifiedId}}> parserProvider) {
         this.parserProvider = parserProvider;
     }
 
     @Override public String getId() {
-        return "{{parseTaskDef.qualifiedId}}";
+        return "{{genParseTaskDef.qualifiedId}}";
     }
 
     @Override

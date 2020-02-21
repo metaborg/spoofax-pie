@@ -1,4 +1,4 @@
-package {{tokenizeTaskDef.packageId}};
+package {{genTokenizeTaskDef.packageId}};
 
 import mb.common.token.Token;
 import mb.jsglr1.common.JSGLR1ParseResult;
@@ -14,15 +14,15 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 
 @LanguageScope
-public class {{tokenizeTaskDef.id}} implements TaskDef<ResourceKey, @Nullable ArrayList<? extends Token<?>>> {
+public class {{genTokenizeTaskDef.id}} implements TaskDef<ResourceKey, @Nullable ArrayList<? extends Token<?>>> {
     private final {{parseTaskDef.qualifiedId}} parse;
 
-    @Inject public {{tokenizeTaskDef.id}}({{parseTaskDef.qualifiedId}} parse) {
+    @Inject public {{genTokenizeTaskDef.id}}({{parseTaskDef.qualifiedId}} parse) {
         this.parse = parse;
     }
 
     @Override public String getId() {
-        return "{{tokenizeTaskDef.qualifiedId}}";
+        return "{{genTokenizeTaskDef.qualifiedId}}";
     }
 
     @Override
