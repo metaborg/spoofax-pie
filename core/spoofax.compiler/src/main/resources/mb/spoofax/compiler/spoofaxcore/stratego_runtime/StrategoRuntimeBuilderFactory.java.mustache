@@ -2,8 +2,13 @@ package {{genFactory.packageId}};
 
 import mb.log.api.LoggerFactory;
 import mb.resource.ResourceService;
+import mb.resource.url.URLPath;
+import mb.resource.url.URLResource;
 import mb.spoofax.compiler.interfaces.spoofaxcore.StrategoRuntimeBuilderFactory;
 import mb.stratego.common.StrategoRuntimeBuilder;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.net.URL;
 
 public class {{genFactory.id}} implements StrategoRuntimeBuilderFactory {
     @Override public StrategoRuntimeBuilder create(LoggerFactory loggerFactory, ResourceService resourceService) {
@@ -13,8 +18,12 @@ public class {{genFactory.id}} implements StrategoRuntimeBuilderFactory {
 {{/interopRegisterersByReflection}}
 {{#copyCTree}}
         {
-            final java.net.URL locationURL = ModStrategoRuntimeBuilderFactory.class.getProtectionDomain().getCodeSource().getLocation();
-            builder.addCtree(new mb.resource.url.URLResource(locationURL).appendRelativePath("{{languageProject.packagePath}}/target/metaborg/stratego.ctree"));
+            final String resource = "{{languageProject.packagePath}}/target/metaborg/stratego.ctree";
+            final @Nullable URL locationURL = {{genFactory.id}}.class.getClassLoader().getResource(resource);
+            if(locationURL == null) {
+                throw new RuntimeException("Cannot create Stratego runtime builder; cannot find resource '" + resource + "' in classloader resources");
+            }
+            builder.addCtree(new URLResource(locationURL));
         }
 {{/copyCTree}}
         builder.withJarParentClassLoader({{genFactory.id}}.class.getClassLoader());
@@ -24,12 +33,15 @@ public class {{genFactory.id}} implements StrategoRuntimeBuilderFactory {
 {{/addNaBL2Primitives}}
 {{#addStatixPrimitives}}
         {
-            final java.net.URL locationURL = {{genFactory.id}}.class.getProtectionDomain().getCodeSource().getLocation();
-            final mb.resource.url.URLPath path = new mb.resource.url.URLPath(locationURL);
-            final mb.resource.url.URLPath correctedPath = path.appendRelativePath("{{languageProject.packagePath}}/");
             builder.addLibrary(new mb.statix.common.StatixPrimitiveLibrary());
             builder.addLibrary(new mb.spoofax2.common.primitive.Spoofax2PrimitiveLibrary(loggerFactory, resourceService));
-            builder.addContextObject(new mb.spoofax2.common.primitive.generic.Spoofax2Context("{{languageProject.project.coordinate.groupId}}", "{{languageProject.project.coordinate.artifactId}}", "{{languageProject.project.coordinate.version}}", correctedPath, resourceService.toResourceKeyString(correctedPath)));
+            final String resource = "{{languageProject.packagePath}}/";
+            final @Nullable URL locationURL = {{genFactory.id}}.class.getClassLoader().getResource(resource);
+            if(locationURL == null) {
+                throw new RuntimeException("Cannot create Spoofax2Context; cannot find resource '" + resource + "' in classloader resources");
+            }
+            final URLPath path = new URLPath(locationURL);
+            builder.addContextObject(new mb.spoofax2.common.primitive.generic.Spoofax2Context("{{languageProject.project.coordinate.groupId}}", "{{languageProject.project.coordinate.artifactId}}", "{{languageProject.project.coordinate.version}}", path, resourceService.toResourceKeyString(path)));
         }
 {{/addStatixPrimitives}}
         return builder;

@@ -6,6 +6,7 @@ import dagger.multibindings.IntoSet;
 import mb.resource.ResourceRegistry;
 import mb.resource.fs.FSResourceRegistry;
 import mb.resource.text.TextResourceRegistry;
+import mb.resource.url.URLResourceRegistry;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -13,6 +14,7 @@ import javax.inject.Singleton;
 @Module
 public class ResourceRegistriesModule {
     private final FSResourceRegistry fsResourceRegistry = new FSResourceRegistry();
+    private final URLResourceRegistry urlResourceRegistry = new URLResourceRegistry();
     private final TextResourceRegistry textResourceRegistry = new TextResourceRegistry();
 
 
@@ -26,6 +28,15 @@ public class ResourceRegistriesModule {
 
     @Provides @Named("default") @Singleton ResourceRegistry provideFsResourceRegistryAsDefault() {
         return fsResourceRegistry;
+    }
+
+
+    @Provides @Singleton URLResourceRegistry provideUrlResourceRegistry() {
+        return urlResourceRegistry;
+    }
+
+    @Provides @Singleton @IntoSet ResourceRegistry provideUrlResourceRegistryIntoSet() {
+        return urlResourceRegistry;
     }
 
 
