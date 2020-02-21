@@ -26,6 +26,16 @@ public final class Region implements Serializable {
     }
 
     /**
+     * Creates a new region at the offset.
+     *
+     * @param offset the zero-based offset of the start and end of the region
+     * @return the created region
+     */
+    public static Region atOffset(int offset) {
+        return fromOffsets(offset, offset);
+    }
+
+    /**
      * Creates a new region with the specified start and end offsets.
      *
      * @param startOffset the zero-based offset of the start of the region
@@ -44,7 +54,7 @@ public final class Region implements Serializable {
      * @return the created region
      */
     public static Region fromOffsetLength(int startOffset, int length) {
-        return new Region(startOffset, startOffset + length);
+        return fromOffsets(startOffset, startOffset + length);
     }
 
     /**

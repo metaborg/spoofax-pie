@@ -18,6 +18,37 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("Region")
 public class RegionTests {
 
+    /** Tests the {@link Region#atOffset(int)} function. */
+    @DisplayName("atOffset(int)")
+    @Nested public class AtOffsetTests {
+
+        @Test
+        @DisplayName("returns empty region with specified offset")
+        public void returnsEmptyRegionWithSpecifiedOffset() {
+            // Arrange
+            int offset = 3;
+
+            // Act
+            Region sut = Region.atOffset(offset);
+
+            // Assert
+            assertEquals(offset, sut.getStartOffset());
+            assertEquals(offset, sut.getEndOffset());
+            assertTrue(sut.isEmpty());
+        }
+
+        @Test
+        @DisplayName("when offset is negative, throws exception")
+        public void whenOffsetIsNegative_throwsException() {
+            // Act/Assert
+            assertThrows(IllegalArgumentException.class, () -> {
+                Region.atOffset(-2);
+            });
+        }
+
+    }
+
+
     /** Tests the {@link Region#fromOffsets(int, int)} function. */
     @DisplayName("fromOffsets(int, int)")
     @Nested public class FromOffsetsTests {
