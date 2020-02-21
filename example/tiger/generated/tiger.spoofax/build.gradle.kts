@@ -103,6 +103,20 @@ adapterProjectCompiler {
         .build()
       builder.addCommandDefs(showPrettyPrintedTextCommand)
 
+      val showScopeGraph = TypeInfo.of(taskPackageId, "TigerShowScopeGraph")
+      builder.addTaskDefs(showScopeGraph)
+      val showScopeGraphCommand = CommandDefRepr.builder()
+        .type(commandPackageId, "TigerShowScopeGraphCommand")
+        .taskDefType(showScopeGraph)
+        .argType(showArgs)
+        .displayName("Show scope graph")
+        .description("Shows the scope graph for the program")
+        .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
+        .addRequiredContextTypes(CommandContextType.Resource)
+        .addAllParams(showParams)
+        .build()
+      builder.addCommandDefs(showScopeGraphCommand)
+
       // Compilation tasks and commands
       val compileFile = TypeInfo.of(taskPackageId, "TigerCompileFile")
       builder.addTaskDefs(compileFile)
@@ -163,6 +177,7 @@ adapterProjectCompiler {
         CliCommandRepr.of("pretty-print", showPrettyPrintedTextCommand.type(), showParams("pretty-print")),
         CliCommandRepr.of("analyze", showAnalyzedAstCommand.type(), showParams("analyze")),
         CliCommandRepr.of("desugar", showDesugaredAstCommand.type(), showParams("desugar")),
+        CliCommandRepr.of("scope-graph", showScopeGraphCommand.type(), showParams("show the scope graph for")),
         CliCommandRepr.of("compile-file", compileFileCommand.type(),
           CliParamRepr.positional("file", 0, "FILE", "File to compile")
         ),
@@ -197,7 +212,10 @@ adapterProjectCompiler {
         ) + altCompileFileActions),
         MenuRepr.of("Debug",
           MenuRepr.of("Syntax", showParsedAstCommand.actionOnce(), showParsedAstCommand.actionCont()),
-          MenuRepr.of("Static Semantics", showAnalyzedAstCommand.actionOnce(), showAnalyzedAstCommand.actionCont()),
+          MenuRepr.of("Static Semantics",
+            showAnalyzedAstCommand.actionOnce(), showAnalyzedAstCommand.actionCont(),
+            showScopeGraphCommand.actionOnce(), showScopeGraphCommand.actionCont()
+          ),
           MenuRepr.of("Transformations", showDesugaredAstCommand.actionOnce(), showDesugaredAstCommand.actionCont())
         )
       )
@@ -210,7 +228,10 @@ adapterProjectCompiler {
         ) + altCompileFileActions),
         MenuRepr.of("Debug",
           MenuRepr.of("Syntax", showParsedAstCommand.actionOnce()),
-          MenuRepr.of("Static Semantics", showAnalyzedAstCommand.actionOnce()),
+          MenuRepr.of("Static Semantics",
+            showAnalyzedAstCommand.actionOnce(),
+            showScopeGraphCommand.actionOnce()
+          ),
           MenuRepr.of("Transformations", showDesugaredAstCommand.actionOnce())
         )
       )
