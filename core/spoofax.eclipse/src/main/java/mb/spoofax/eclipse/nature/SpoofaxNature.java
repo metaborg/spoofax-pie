@@ -20,11 +20,11 @@ public abstract class SpoofaxNature implements IProjectNature {
 
 
     @Override public void configure() throws CoreException {
-        BuilderUtil.append(languageComponent.getEclipseIdentifiers().getNature(), getProject(), null);
+        BuilderUtil.append(languageComponent.getEclipseIdentifiers().getProjectBuilder(), getProject(), null);
     }
 
     @Override public void deconfigure() throws CoreException {
-        BuilderUtil.removeFrom(languageComponent.getEclipseIdentifiers().getNature(), getProject(), null);
+        BuilderUtil.removeFrom(languageComponent.getEclipseIdentifiers().getProjectBuilder(), getProject(), null);
     }
 
 
