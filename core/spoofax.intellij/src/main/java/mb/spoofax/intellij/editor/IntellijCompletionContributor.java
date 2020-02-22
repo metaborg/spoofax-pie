@@ -12,9 +12,7 @@ import com.intellij.util.PlatformIcons;
 import com.intellij.util.SmartList;
 import com.intellij.util.ui.EmptyIcon;
 import mb.common.region.Region;
-import mb.common.style.StyleName;
 import mb.common.style.StyleNames;
-import mb.common.token.Token;
 import mb.completions.common.CompletionProposal;
 import mb.completions.common.CompletionResult;
 import mb.pie.api.ExecException;
@@ -24,19 +22,20 @@ import mb.resource.Resource;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.intellij.IntellijLanguageComponent;
-import mb.spoofax.intellij.ScopeNames;
 import mb.spoofax.intellij.SpoofaxPlugin;
 import mb.spoofax.intellij.resource.IntellijResourceRegistry;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.jetbrains.annotations.NotNull;
-import static mb.common.style.StyleNameConstants.*;
 
 import javax.inject.Provider;
 import javax.swing.*;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import static mb.common.style.StyleNameConstants.*;
 
 /**
  * Completion contributor for IntelliJ.
@@ -67,6 +66,7 @@ public abstract class IntellijCompletionContributor extends CompletionContributo
         } catch (ExecException e) {
             throw new RuntimeException("Code completion on resource '" + resourceKey + "' failed unexpectedly.", e);
         }
+
         if (completionResult == null) return;
         result.addAllElements(completionResult.getProposals().stream().map(this::proposalToElement).collect(Collectors.toList()));
     }
@@ -74,7 +74,9 @@ public abstract class IntellijCompletionContributor extends CompletionContributo
     private LookupElement proposalToElement(CompletionProposal proposal) {
         return LookupElementBuilder
             .create(proposal.getLabel())
-            .withTailText(proposal.getDetails(), true);
+            .withTailText(proposal.getParameters() + (proposal.getLocation().isEmpty() ? "" : " " + proposal.getLocation()))
+            .withTypeText(proposal.getType().isEmpty() ? proposal.getDescription() : proposal.getType(), true)
+            .withIcon(getIcon(StyleNames.of(proposal.getKind())));
     }
 
     private @Nullable Icon getIcon(StyleNames styles) {
@@ -82,10 +84,12 @@ public abstract class IntellijCompletionContributor extends CompletionContributo
         final @Nullable Icon visibilityIcon = getVisibilityIcon(styles);
         final @Nullable Icon baseIcon = getBaseIcon(kindIcon, styles);
         if (baseIcon == null && visibilityIcon == null) return null;
+        if (baseIcon == null) return EmptyIcon.create(PlatformIcons.CLASS_ICON /* only size is used */);
+        if (visibilityIcon == null) return baseIcon;
 
         RowIcon resultIcon = new RowIcon(2);
-        resultIcon.setIcon(baseIcon != null ? baseIcon : EmptyIcon.create(PlatformIcons.CLASS_ICON), 0);
-        resultIcon.setIcon(visibilityIcon != null ? visibilityIcon : EmptyIcon.create(PlatformIcons.PUBLIC_ICON), 1);
+        resultIcon.setIcon(baseIcon, 0);
+        resultIcon.setIcon(visibilityIcon, 1);
         return resultIcon;
     }
 

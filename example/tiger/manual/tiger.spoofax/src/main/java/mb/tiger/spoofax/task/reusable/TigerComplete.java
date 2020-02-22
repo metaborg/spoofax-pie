@@ -1,5 +1,8 @@
 package mb.tiger.spoofax.task.reusable;
 
+import mb.common.style.StyleName;
+import mb.common.util.ListView;
+import mb.completions.common.CompletionProposal;
 import mb.completions.common.CompletionResult;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
@@ -10,6 +13,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 import java.io.Serializable;
+import java.util.Objects;
 
 @LanguageScope
 public class TigerComplete implements TaskDef<TigerComplete.Input, @Nullable CompletionResult> {
@@ -38,6 +42,9 @@ public class TigerComplete implements TaskDef<TigerComplete.Input, @Nullable Com
         // TODO: get the ast in 'completion mode', with placeholders
         @Nullable IStrategoTerm ast = input.astProvider.get(context);
 
-        return null;
+        return new CompletionResult(ListView.of(
+            new CompletionProposal("mypackage", "description", "", "", "mypackage", Objects.requireNonNull(StyleName.fromString("meta.package")), ListView.of(), false),
+            new CompletionProposal("myclass", "description", "", "T", "mypackage", Objects.requireNonNull(StyleName.fromString("meta.class")), ListView.of(), false)
+        ), true);
     }
 }

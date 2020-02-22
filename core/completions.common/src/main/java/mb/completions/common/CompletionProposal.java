@@ -13,7 +13,11 @@ import java.io.Serializable;
 public final class CompletionProposal implements Serializable {
 
     private final String label;
-    private final String details;
+    private final String description;
+    private final String parameters;
+    private final String type;
+    private final String location;
+    // documentation?
     private final StyleName kind;
     private final boolean deprecated;
     private final ListView<TextEdit> edits;
@@ -22,17 +26,24 @@ public final class CompletionProposal implements Serializable {
      * Initializes a new instance of the {@link CompletionProposal} class.
      *
      * @param label the label of the proposal
+     * @param description the details of the proposal; or an empty string
+     * @param parameters the parameters of the proposal; or an empty string
+     * @param type the type of the proposal; or an empty string
+     * @param location the location of the proposal; or an empty string
      * @param kind the kind of proposal
-     * @param details the details of the proposal; or an empty string
      * @param edits the edits to perform to insert the proposal
      * @param deprecated whether the proposal is deprecated
      */
-    public CompletionProposal(String label, StyleName kind, String details, ListView<TextEdit> edits, @Experimental boolean deprecated) {
+    public CompletionProposal(String label, String description, String parameters, String type, String location, StyleName kind, ListView<TextEdit> edits, @Experimental boolean deprecated) {
         this.label = label;
+        this.description = description;
+        this.parameters = parameters;
+        this.type = type;
+        this.location = location;
         this.kind = kind;
-        this.details = details;
         this.deprecated = deprecated;
         this.edits = edits;
+
     }
 
     /**
@@ -45,12 +56,43 @@ public final class CompletionProposal implements Serializable {
     }
 
     /**
-     * Gets the details of the proposal, such as type information.
+     * Gets the description of the proposal,
+     * such as a short description of a template,
+     * the method being overridden,
+     * or the field for which it is a getter.
      *
-     * @return the details; or an empty string
+     * @return the description; or an empty string
      */
-    public String getDetails() {
-        return details;
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * Gets the parameters of the proposal, such as type parameters and method parameters
+     * including brackets and parentheses.
+     *
+     * @return the parameter string; or an empty string
+     */
+    public String getParameters() {
+        return parameters;
+    }
+
+    /**
+     * Gets the type of the proposal, such as the field type or return type
+     *
+     * @return the type string; or an empty string
+     */
+    public String getType() {
+        return type;
+    }
+
+    /**
+     * Gets the location string of the proposal, such as the namespace, package, or class.
+     *
+     * @return the location string; or an empty string
+     */
+    public String getLocation() {
+        return location;
     }
 
     /**
