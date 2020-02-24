@@ -40,14 +40,14 @@ import static mb.common.style.StyleNameConstants.*;
 /**
  * Completion contributor for IntelliJ.
  */
-public abstract class IntellijCompletionContributor extends CompletionContributor {
+public abstract class SpoofaxCompletionContributor extends CompletionContributor {
 
 
     private final IntellijResourceRegistry resourceRegistry;
     private final LanguageInstance languageInstance;
     private final Provider<PieSession> pieSessionProvider;
 
-    protected IntellijCompletionContributor(IntellijLanguageComponent languageComponent) {
+    protected SpoofaxCompletionContributor(IntellijLanguageComponent languageComponent) {
         this.resourceRegistry = SpoofaxPlugin.getComponent().getResourceRegistry();
         this.languageInstance = languageComponent.getLanguageInstance();
         this.pieSessionProvider = languageComponent::newPieSession;
