@@ -3,6 +3,7 @@ import mb.spoofax.compiler.spoofaxcore.LanguageProjectCompiler
 import mb.spoofax.compiler.spoofaxcore.ParserCompiler
 import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler
 import mb.spoofax.compiler.spoofaxcore.StylerCompiler
+import mb.spoofax.compiler.spoofaxcore.CompleterCompiler
 import mb.spoofax.compiler.util.GradleDependency
 
 plugins {
@@ -23,6 +24,7 @@ languageProjectCompiler {
     parser = ParserCompiler.LanguageProjectInput.builder()
       .startSymbol("Start"),
     styler = StylerCompiler.LanguageProjectInput.builder(),
+    completer = CompleterCompiler.LanguageProjectInput.builder(),
     strategoRuntime = StrategoRuntimeCompiler.LanguageProjectInput.builder()
       .enableNaBL2(false)
       .enableStatix(true)

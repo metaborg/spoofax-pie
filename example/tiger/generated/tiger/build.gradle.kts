@@ -3,6 +3,7 @@ import mb.spoofax.compiler.spoofaxcore.LanguageProjectCompiler
 import mb.spoofax.compiler.spoofaxcore.ParserCompiler
 import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler
 import mb.spoofax.compiler.spoofaxcore.StylerCompiler
+import mb.spoofax.compiler.spoofaxcore.CompleterCompiler
 import mb.spoofax.compiler.util.GradleDependency
 
 plugins {
@@ -22,6 +23,7 @@ languageProjectCompiler {
     parser = ParserCompiler.LanguageProjectInput.builder()
       .startSymbol("Module"),
     styler = StylerCompiler.LanguageProjectInput.builder(),
+    completer = CompleterCompiler.LanguageProjectInput.builder(),
     strategoRuntime = StrategoRuntimeCompiler.LanguageProjectInput.builder()
       .addInteropRegisterersByReflection("org.metaborg.lang.tiger.trans.InteropRegisterer", "org.metaborg.lang.tiger.strategies.InteropRegisterer")
       .enableNaBL2(true)

@@ -3,11 +3,14 @@ package {{genInstance.packageId}};
 import mb.common.message.Messages;
 import mb.common.style.Styling;
 import mb.common.token.Token;
+
+import mb.common.region.Region;
 import mb.common.util.CollectionView;
 import mb.common.util.EntryView;
 import mb.common.util.ListView;
 import mb.common.util.MapView;
 import mb.common.util.SetView;
+import mb.completions.common.CompletionResult;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageInspection;
@@ -70,6 +73,11 @@ public class {{genInstance.id}} implements LanguageInstance {
 
     @Override public Task<@Nullable Styling> createStyleTask(ResourceKey resourceKey) {
         return {{styleInjection.name}}.createTask({{parseInjection.name}}.createTokensSupplier(resourceKey));
+    }
+
+    @Override
+    public Task<@Nullable CompletionResult> createCompletionTask(ResourceKey resourceKey, Region primarySelection) {
+        return {{completeInjection.name}}.createTask(new {{completeInjection.type.qualifiedId}}.Input({{parseInjection.name}}.createAstSupplier(resourceKey)));
     }
 
 {{#isMultiFile}}

@@ -8,7 +8,8 @@ import mb.spoofax.compiler.spoofaxcore.AdapterProjectCompiler
 import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler
 import mb.spoofax.compiler.spoofaxcore.ParserCompiler
 import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler.AdapterProjectInput.builder
-import mb.spoofax.compiler.spoofaxcore.StylerCompiler.AdapterProjectInput
+import mb.spoofax.compiler.spoofaxcore.StylerCompiler
+import mb.spoofax.compiler.spoofaxcore.CompleterCompiler
 import mb.spoofax.compiler.util.TypeInfo
 import mb.spoofax.core.language.command.CommandContextType
 import mb.spoofax.core.language.command.CommandExecutionType
@@ -20,7 +21,8 @@ plugins {
 adapterProjectCompiler {
   settings.set(AdapterProjectCompilerSettings(
     parser = ParserCompiler.AdapterProjectInput.builder(),
-    styler = AdapterProjectInput.builder(),
+    styler = StylerCompiler.AdapterProjectInput.builder(),
+    completer = CompleterCompiler.AdapterProjectInput.builder(),
     strategoRuntime = builder(),
     constraintAnalyzer = ConstraintAnalyzerCompiler.AdapterProjectInput.builder(),
     compiler = run {

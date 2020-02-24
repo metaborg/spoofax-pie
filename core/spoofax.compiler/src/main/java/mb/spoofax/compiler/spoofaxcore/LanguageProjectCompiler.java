@@ -23,6 +23,7 @@ public class LanguageProjectCompiler {
 
     private final ParserCompiler parserCompiler;
     private final StylerCompiler stylerCompiler;
+    private final CompleterCompiler completerCompiler;
     private final StrategoRuntimeCompiler strategoRuntimeCompiler;
     private final ConstraintAnalyzerCompiler constraintAnalyzerCompiler;
 
@@ -30,6 +31,7 @@ public class LanguageProjectCompiler {
         TemplateCompiler templateCompiler,
         ParserCompiler parserCompiler,
         StylerCompiler stylerCompiler,
+        CompleterCompiler completerCompiler,
         StrategoRuntimeCompiler strategoRuntimeCompiler,
         ConstraintAnalyzerCompiler constraintAnalyzerCompiler
     ) {
@@ -38,6 +40,7 @@ public class LanguageProjectCompiler {
 
         this.parserCompiler = parserCompiler;
         this.stylerCompiler = stylerCompiler;
+        this.completerCompiler = completerCompiler;
         this.strategoRuntimeCompiler = strategoRuntimeCompiler;
         this.constraintAnalyzerCompiler = constraintAnalyzerCompiler;
     }
@@ -58,6 +61,9 @@ public class LanguageProjectCompiler {
         input.styler().ifPresent((i) -> {
             stylerCompiler.getLanguageProjectDependencies(i).addAllTo(dependencies);
         });
+        input.completer().ifPresent((i) -> {
+            completerCompiler.getLanguageProjectDependencies(i).addAllTo(dependencies);
+        });
         input.strategoRuntime().ifPresent((i) -> {
             strategoRuntimeCompiler.getLanguageProjectDependencies(i).addAllTo(dependencies);
         });
@@ -73,6 +79,9 @@ public class LanguageProjectCompiler {
         parserCompiler.getLanguageProjectCopyResources(input.parser()).addAllTo(copyResources);
         input.styler().ifPresent((i) -> {
             stylerCompiler.getLanguageProjectCopyResources(i).addAllTo(copyResources);
+        });
+        input.completer().ifPresent((i) -> {
+            completerCompiler.getLanguageProjectCopyResources(i).addAllTo(copyResources);
         });
         input.strategoRuntime().ifPresent((i) -> {
             strategoRuntimeCompiler.getLanguageProjectCopyResources(i).addAllTo(copyResources);
@@ -96,6 +105,13 @@ public class LanguageProjectCompiler {
             input.styler().ifPresent((i) -> {
                 try {
                     stylerCompiler.compileLanguageProject(i).providedResources();
+                } catch(IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            });
+            input.completer().ifPresent((i) -> {
+                try {
+                    completerCompiler.compileLanguageProject(i).providedResources();
                 } catch(IOException e) {
                     throw new UncheckedIOException(e);
                 }
@@ -142,6 +158,8 @@ public class LanguageProjectCompiler {
         ParserCompiler.LanguageProjectInput parser();
 
         Optional<StylerCompiler.LanguageProjectInput> styler();
+
+        Optional<CompleterCompiler.LanguageProjectInput> completer();
 
         Optional<StrategoRuntimeCompiler.LanguageProjectInput> strategoRuntime();
 

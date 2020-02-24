@@ -13,6 +13,7 @@ import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler
 import mb.spoofax.compiler.spoofaxcore.ParserCompiler
 import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler
 import mb.spoofax.compiler.spoofaxcore.StylerCompiler
+import mb.spoofax.compiler.spoofaxcore.CompleterCompiler
 import mb.spoofax.compiler.util.StringUtil
 import mb.spoofax.compiler.util.TypeInfo
 import mb.spoofax.core.language.command.CommandContextType
@@ -27,6 +28,7 @@ adapterProjectCompiler {
   settings.set(AdapterProjectCompilerSettings(
     parser = ParserCompiler.AdapterProjectInput.builder(),
     styler = StylerCompiler.AdapterProjectInput.builder(),
+    completer = CompleterCompiler.AdapterProjectInput.builder(),
     strategoRuntime = StrategoRuntimeCompiler.AdapterProjectInput.builder(),
     constraintAnalyzer = ConstraintAnalyzerCompiler.AdapterProjectInput.builder(),
     compiler = run {

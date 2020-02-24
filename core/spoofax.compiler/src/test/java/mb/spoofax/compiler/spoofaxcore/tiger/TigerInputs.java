@@ -12,20 +12,7 @@ import mb.spoofax.compiler.command.ArgProviderRepr;
 import mb.spoofax.compiler.command.AutoCommandDefRepr;
 import mb.spoofax.compiler.command.CommandDefRepr;
 import mb.spoofax.compiler.menu.MenuCommandActionRepr;
-import mb.spoofax.compiler.spoofaxcore.AdapterProject;
-import mb.spoofax.compiler.spoofaxcore.AdapterProjectCompiler;
-import mb.spoofax.compiler.spoofaxcore.CliProjectCompiler;
-import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler;
-import mb.spoofax.compiler.spoofaxcore.EclipseExternaldepsProjectCompiler;
-import mb.spoofax.compiler.spoofaxcore.EclipseProjectCompiler;
-import mb.spoofax.compiler.spoofaxcore.IntellijProjectCompiler;
-import mb.spoofax.compiler.spoofaxcore.LanguageProject;
-import mb.spoofax.compiler.spoofaxcore.LanguageProjectCompiler;
-import mb.spoofax.compiler.spoofaxcore.ParserCompiler;
-import mb.spoofax.compiler.spoofaxcore.RootProjectCompiler;
-import mb.spoofax.compiler.spoofaxcore.Shared;
-import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler;
-import mb.spoofax.compiler.spoofaxcore.StylerCompiler;
+import mb.spoofax.compiler.spoofaxcore.*;
 import mb.spoofax.compiler.util.GradleDependency;
 import mb.spoofax.compiler.util.StringUtil;
 import mb.spoofax.compiler.util.TypeInfo;
@@ -124,6 +111,23 @@ public class TigerInputs {
             ;
     }
 
+    /// Completer compiler
+
+    public static CompleterCompiler.LanguageProjectInput.Builder completerLanguageProjectInput(Shared shared, LanguageProject languageProject) {
+        return CompleterCompiler.LanguageProjectInput.builder()
+            .shared(shared)
+            .languageProject(languageProject)
+            ;
+    }
+
+    public static CompleterCompiler.AdapterProjectInput.Builder completerAdapterProjectInput(Shared shared, LanguageProject languageProject, AdapterProject adapterProject) {
+        return CompleterCompiler.AdapterProjectInput.builder()
+            .shared(shared)
+            .adapterProject(adapterProject)
+            .languageProjectInput(completerLanguageProjectInput(shared, languageProject).build())
+            ;
+    }
+
     /// Stratego runtime compiler
 
     public static StrategoRuntimeCompiler.LanguageProjectInput.Builder strategoRuntimeLanguageProjectInput(Shared shared, LanguageProject languageProject) {
@@ -170,6 +174,7 @@ public class TigerInputs {
             .languageProject(languageProject)
             .parser(parserLanguageProjectInput(shared, languageProject).build())
             .styler(stylerLanguageProjectInput(shared, languageProject).build())
+            .completer(completerLanguageProjectInput(shared, languageProject).build())
             .strategoRuntime(strategoRuntimeLanguageProjectInput(shared, languageProject).build())
             .constraintAnalyzer(constraintAnalyzerLanguageProjectInput(shared, languageProject).build())
             .languageSpecificationDependency(GradleDependency.project(":tiger"))
@@ -227,6 +232,7 @@ public class TigerInputs {
             .adapterProject(adapterProject)
             .parser(parserAdapterProjectInput(shared, languageProject, adapterProject).build())
             .styler(stylerAdapterProjectInput(shared, languageProject, adapterProject).build())
+            .completer(completerAdapterProjectInput(shared, languageProject, adapterProject).build())
             .strategoRuntime(strategoRuntimeAdapterProjectInput(shared, languageProject, adapterProject).build())
             .constraintAnalyzer(constraintAnalyzerAdapterProjectInput(shared, languageProject, adapterProject).build())
             .addTaskDefs(

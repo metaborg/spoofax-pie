@@ -24,12 +24,13 @@ class TestBase {
     final TemplateCompiler templateCompiler = new TemplateCompiler(Shared.class, resourceService, charset);
     final ParserCompiler parserCompiler = new ParserCompiler(templateCompiler);
     final StylerCompiler stylerCompiler = new StylerCompiler(templateCompiler);
+    final CompleterCompiler completerCompiler = new CompleterCompiler(templateCompiler);
     final StrategoRuntimeCompiler strategoRuntimeCompiler = new StrategoRuntimeCompiler(templateCompiler);
     final ConstraintAnalyzerCompiler constraintAnalyzerCompiler = new ConstraintAnalyzerCompiler(templateCompiler);
 
     final RootProjectCompiler rootProjectCompiler = new RootProjectCompiler(templateCompiler);
-    final LanguageProjectCompiler languageProjectCompiler = new LanguageProjectCompiler(templateCompiler, parserCompiler, stylerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler);
-    final AdapterProjectCompiler adapterProjectCompiler = new AdapterProjectCompiler(templateCompiler, parserCompiler, stylerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler);
+    final LanguageProjectCompiler languageProjectCompiler = new LanguageProjectCompiler(templateCompiler, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler);
+    final AdapterProjectCompiler adapterProjectCompiler = new AdapterProjectCompiler(templateCompiler, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler);
 
     final CliProjectCompiler cliProjectCompiler = new CliProjectCompiler(templateCompiler);
 

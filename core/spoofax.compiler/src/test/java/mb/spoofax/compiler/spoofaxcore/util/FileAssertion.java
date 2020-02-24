@@ -33,7 +33,7 @@ public class FileAssertion {
 
     public void assertExists() {
         try {
-            assertTrue(resource.exists());
+            assertTrue(resource.exists(), "Expected resource to exist at: " + resource.getKey().toString());
         } catch(IOException e) {
             throw new UncheckedIOException(e);
         }

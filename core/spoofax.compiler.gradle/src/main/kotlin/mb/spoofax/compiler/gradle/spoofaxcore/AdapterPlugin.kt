@@ -3,14 +3,7 @@
 package mb.spoofax.compiler.gradle.spoofaxcore
 
 import mb.resource.ResourceService
-import mb.spoofax.compiler.spoofaxcore.AdapterProject
-import mb.spoofax.compiler.spoofaxcore.AdapterProjectCompiler
-import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler
-import mb.spoofax.compiler.spoofaxcore.LanguageProjectCompiler
-import mb.spoofax.compiler.spoofaxcore.ParserCompiler
-import mb.spoofax.compiler.spoofaxcore.Shared
-import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler
-import mb.spoofax.compiler.spoofaxcore.StylerCompiler
+import mb.spoofax.compiler.spoofaxcore.*
 import mb.spoofax.compiler.util.GradleDependency
 import mb.spoofax.compiler.util.GradleProject
 import org.gradle.api.GradleException
@@ -25,6 +18,7 @@ open class AdapterProjectCompilerSettings(
   val adapterProject: AdapterProject.Builder = AdapterProject.builder(),
   val parser: ParserCompiler.AdapterProjectInput.Builder = ParserCompiler.AdapterProjectInput.builder(),
   val styler: StylerCompiler.AdapterProjectInput.Builder? = null, // Optional
+  val completer: CompleterCompiler.AdapterProjectInput.Builder? = null, // Optional
   val strategoRuntime: StrategoRuntimeCompiler.AdapterProjectInput.Builder? = null, // Optional
   val constraintAnalyzer: ConstraintAnalyzerCompiler.AdapterProjectInput.Builder? = null, // Optional
   val compiler: AdapterProjectCompiler.Input.Builder = AdapterProjectCompiler.Input.builder()
@@ -37,6 +31,12 @@ open class AdapterProjectCompilerSettings(
         throw GradleException("Styler adapter project input is present, but styler language project input is not")
       }
       this.styler.shared(shared).adapterProject(adapterProject).languageProjectInput(languageProjectInput.styler().get()).build()
+    } else null
+    val completer = if(this.completer != null) {
+      if(!languageProjectInput.completer().isPresent) {
+        throw GradleException("Completer adapter project input is present, but completer language project input is not")
+      }
+      this.completer.shared(shared).adapterProject(adapterProject).languageProjectInput(languageProjectInput.completer().get()).build()
     } else null
     val strategoRuntime = if(this.strategoRuntime != null) {
       if(!languageProjectInput.strategoRuntime().isPresent) {
@@ -53,6 +53,9 @@ open class AdapterProjectCompilerSettings(
     val compiler = this.compiler.shared(shared).adapterProject(adapterProject).parser(parser).languageProjectDependency(languageProjectDependency)
     if(styler != null) {
       compiler.styler(styler)
+    }
+    if(completer != null) {
+      compiler.completer(completer)
     }
     if(strategoRuntime != null) {
       compiler.strategoRuntime(strategoRuntime)

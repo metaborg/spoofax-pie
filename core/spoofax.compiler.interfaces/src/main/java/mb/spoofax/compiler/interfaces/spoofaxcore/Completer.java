@@ -14,7 +14,7 @@ public interface Completer {
     /**
      * Produces completion results for the specified location in the specified text.
      *
-     * @param text the source code text
+     * @param ast the source code AST
      * @param primarySelection the primary selection
      * @param resource the resource key; or {@code null}
      * @return a completion result

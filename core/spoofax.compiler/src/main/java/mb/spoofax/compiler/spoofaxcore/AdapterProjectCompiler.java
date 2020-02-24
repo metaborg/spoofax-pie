@@ -14,6 +14,8 @@ import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.compiler.util.UniqueNamer;
+import mb.spoofax.core.language.taskdef.NullCompleteTaskDef;
+import mb.spoofax.core.language.taskdef.NullStyler;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 
@@ -39,6 +41,7 @@ public class AdapterProjectCompiler {
 
     private final ParserCompiler parserCompiler;
     private final StylerCompiler stylerCompiler;
+    private final CompleterCompiler completerCompiler;
     private final StrategoRuntimeCompiler strategoRuntimeCompiler;
     private final ConstraintAnalyzerCompiler constraintAnalyzerCompiler;
 
@@ -46,6 +49,7 @@ public class AdapterProjectCompiler {
         TemplateCompiler templateCompiler,
         ParserCompiler parserCompiler,
         StylerCompiler stylerCompiler,
+        CompleterCompiler completerCompiler,
         StrategoRuntimeCompiler strategoRuntimeCompiler,
         ConstraintAnalyzerCompiler constraintAnalyzerCompiler
     ) {
@@ -60,6 +64,7 @@ public class AdapterProjectCompiler {
 
         this.parserCompiler = parserCompiler;
         this.stylerCompiler = stylerCompiler;
+        this.completerCompiler = completerCompiler;
         this.strategoRuntimeCompiler = strategoRuntimeCompiler;
         this.constraintAnalyzerCompiler = constraintAnalyzerCompiler;
     }
@@ -94,6 +99,13 @@ public class AdapterProjectCompiler {
                     throw new UncheckedIOException(e);
                 }
             });
+            input.completer().ifPresent((i) -> {
+                try {
+                    completerCompiler.compileAdapterProject(i);
+                } catch(IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            });
             input.strategoRuntime().ifPresent((i) -> {
                 try {
                     strategoRuntimeCompiler.compileAdapterProject(i);
@@ -119,7 +131,12 @@ public class AdapterProjectCompiler {
         if(input.styler().isPresent()) {
             allTaskDefs.add(input.styler().get().styleTaskDef());
         } else {
-            allTaskDefs.add(TypeInfo.of("mb.spoofax.core.language.taskdef", "NullStyler"));
+            allTaskDefs.add(TypeInfo.of(NullStyler.class));
+        }
+        if(input.completer().isPresent()) {
+            allTaskDefs.add(input.completer().get().completeTaskDef());
+        } else {
+            allTaskDefs.add(TypeInfo.of(NullCompleteTaskDef.class));
         }
         input.constraintAnalyzer().ifPresent((i) -> {
             allTaskDefs.add(i.analyzeTaskDef());
@@ -181,10 +198,18 @@ public class AdapterProjectCompiler {
             if(input.styler().isPresent()) {
                 styleInjection = uniqueNamer.makeUnique(input.styler().get().styleTaskDef());
             } else {
-                styleInjection = uniqueNamer.makeUnique(TypeInfo.of("mb.spoofax.core.language.taskdef", "NullStyler"));
+                styleInjection = uniqueNamer.makeUnique(TypeInfo.of(NullStyler.class));
             }
             map.put("styleInjection", styleInjection);
             injected.add(styleInjection);
+            final NamedTypeInfo completeInjection;
+            if(input.completer().isPresent()) {
+                completeInjection = uniqueNamer.makeUnique(input.completer().get().completeTaskDef());
+            } else {
+                completeInjection = uniqueNamer.makeUnique(TypeInfo.of(NullCompleteTaskDef.class));
+            }
+            map.put("completeInjection", completeInjection);
+            injected.add(completeInjection);
 
             // Create injections for all command definitions. TODO: only inject needed command definitions?
             injected.addAll(input.commandDefs().stream().map(CommandDefRepr::type).map(uniqueNamer::makeUnique).collect(Collectors.toList()));
@@ -223,6 +248,8 @@ public class AdapterProjectCompiler {
         ParserCompiler.AdapterProjectInput parser();
 
         Optional<StylerCompiler.AdapterProjectInput> styler();
+
+        Optional<CompleterCompiler.AdapterProjectInput> completer();
 
         Optional<StrategoRuntimeCompiler.AdapterProjectInput> strategoRuntime();
 
@@ -391,6 +418,7 @@ public class AdapterProjectCompiler {
             }
             parser().generatedFiles().addAllTo(generatedFiles);
             styler().ifPresent((i) -> i.generatedFiles().addAllTo(generatedFiles));
+            completer().ifPresent((i) -> i.generatedFiles().addAllTo(generatedFiles));
             constraintAnalyzer().ifPresent((i) -> i.generatedFiles().addAllTo(generatedFiles));
             return generatedFiles;
         }

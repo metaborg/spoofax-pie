@@ -4,13 +4,7 @@ package mb.spoofax.compiler.gradle.spoofaxcore
 
 import mb.resource.ResourceRuntimeException
 import mb.resource.ResourceService
-import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler
-import mb.spoofax.compiler.spoofaxcore.LanguageProject
-import mb.spoofax.compiler.spoofaxcore.LanguageProjectCompiler
-import mb.spoofax.compiler.spoofaxcore.ParserCompiler
-import mb.spoofax.compiler.spoofaxcore.Shared
-import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler
-import mb.spoofax.compiler.spoofaxcore.StylerCompiler
+import mb.spoofax.compiler.spoofaxcore.*
 import mb.spoofax.compiler.util.GradleProject
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -29,6 +23,7 @@ open class LanguageProjectCompilerSettings(
   val languageProject: LanguageProject.Builder = LanguageProject.builder(),
   val parser: ParserCompiler.LanguageProjectInput.Builder = ParserCompiler.LanguageProjectInput.builder(),
   val styler: StylerCompiler.LanguageProjectInput.Builder? = null, // Optional
+  val completer: CompleterCompiler.LanguageProjectInput.Builder? = null, // Optional
   val strategoRuntime: StrategoRuntimeCompiler.LanguageProjectInput.Builder? = null, // Optional
   val constraintAnalyzer: ConstraintAnalyzerCompiler.LanguageProjectInput.Builder? = null, // Optional
   val compiler: LanguageProjectCompiler.Input.Builder = LanguageProjectCompiler.Input.builder()
@@ -37,11 +32,15 @@ open class LanguageProjectCompilerSettings(
     val languageProject = this.languageProject.shared(shared).project(project).build()
     val parser = this.parser.shared(shared).languageProject(languageProject).build()
     val styler = if(this.styler != null) this.styler.shared(shared).languageProject(languageProject).build() else null
+    val completer = if(this.completer != null) this.completer.shared(shared).languageProject(languageProject).build() else null
     val strategoRuntime = if(this.strategoRuntime != null) this.strategoRuntime.shared(shared).languageProject(languageProject).build() else null
     val constraintAnalyzer = if(this.constraintAnalyzer != null) this.constraintAnalyzer.shared(shared).languageProject(languageProject).build() else null
     val compiler = this.compiler.shared(shared).languageProject(languageProject).parser(parser)
     if(styler != null) {
       compiler.styler(styler)
+    }
+    if(completer != null) {
+      compiler.completer(completer)
     }
     if(strategoRuntime != null) {
       compiler.strategoRuntime(strategoRuntime)
