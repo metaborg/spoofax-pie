@@ -133,13 +133,8 @@ public class StrategoRuntime {
             final String message = StringFormatter.format("Invoking Stratego strategy {} failed, strategy is undefined\n{}\n{}", strategy, trace, e);
             return new ExceptionData(message, e);
         } catch(InterpreterException e) {
-            final Throwable cause = e.getCause();
-            if(cause instanceof InterpreterException) {
-                return handleException((InterpreterException)cause, strategy);
-            } else {
-                final String message = StringFormatter.format("Invoking Stratego strategy {} failed unexpectedly\n{}\n{}", strategy, trace, e);
-                return new ExceptionData(message, null);
-            }
+            final String message = StringFormatter.format("Invoking Stratego strategy {} failed unexpectedly\n{}\n{}", strategy, trace, e);
+            return new ExceptionData(message, e);
         }
     }
 
