@@ -126,6 +126,12 @@ public final class Region implements Serializable {
      * <p>
      * Invariant: if (a contains b) and (b contains a) then (a == b).
      * Invariant: if (a contains b) or (b contains a) then (a intersects b).
+     * <p>
+     * Note that calling this implementation with an empty region is different from calling the other
+     * {@link #contains(int)} overload with an offset. In this implementation,
+     * an empty region is considered to be in a region when (start <= offset <= end).
+     * <p>
+     * When this region is empty, it can only contain the other region when that is also empty.
      *
      * @param region the other region to check
      * @return {@code true} if this region contains the given region; otherwise, {@code false}
@@ -136,6 +142,23 @@ public final class Region implements Serializable {
             && region.getStartOffset() <= this.getEndOffset()
             && region.getEndOffset()   <= this.getEndOffset();
         // @formatter:on
+    }
+
+    /**
+     * Checks if this region contains the given offset.
+     * <p>
+     * Note that calling this implementation with an offset is different from calling the other
+     * {@link #contains(Region)} overload with an empty region. In this implementation,
+     * an offset is considered to be in a region when (start <= offset < end).
+     * <p>
+     * When this region is empty, it contains no offsets.
+     *
+     * @param offset the offset to check
+     * @return {@code true} if this region contains the given offset;
+     * otherwise, {@code false}.
+     */
+    public boolean contains(int offset) {
+        return this.getStartOffset() <= offset && offset < this.getEndOffset();
     }
 
     /**

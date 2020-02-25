@@ -341,7 +341,7 @@ public class RegionTests {
 
     }
 
-    private static Stream<Arguments> provideContainsTestData() {
+    private static Stream<Arguments> provideContainsRegionTestData() {
         return Stream.of(
             // @formatter:off
             /* (..[]..) contains (.[]...)? */ Arguments.of(Region.fromOffsets(2, 3), Region.fromOffsets(1, 2), false, false),
@@ -354,6 +354,18 @@ public class RegionTests {
             /* (..[]..) contains (..|...)? */ Arguments.of(Region.fromOffsets(2, 3), Region.fromOffsets(2, 2),  true, false),
             /* (..[]..) contains (...|..)? */ Arguments.of(Region.fromOffsets(2, 3), Region.fromOffsets(3, 3),  true, false),
             /* (..[]..) contains (....|.)? */ Arguments.of(Region.fromOffsets(2, 3), Region.fromOffsets(4, 4), false, false)
+            // @formatter:on
+        );
+    }
+
+    private static Stream<Arguments> provideContainsIntTestData() {
+        return Stream.of(
+            // @formatter:off
+            /* (..[.].) contains (.|....)? */ Arguments.of(Region.fromOffsets(2, 4), 1, false),
+            /* (..[.].) contains (..|...)? */ Arguments.of(Region.fromOffsets(2, 4), 2,  true),
+            /* (..[.].) contains (...|..)? */ Arguments.of(Region.fromOffsets(2, 4), 3,  true),
+            /* (..[.].) contains (....|.)? */ Arguments.of(Region.fromOffsets(2, 4), 4, false),
+            /* (..[.].) contains (....|.)? */ Arguments.of(Region.fromOffsets(2, 4), 5, false)
             // @formatter:on
         );
     }
@@ -381,7 +393,7 @@ public class RegionTests {
     @Nested public class ContainsTests {
 
         @ParameterizedTest(name = "region {0} contains {1}? {2}; region {1} contains {0}? {3}")
-        @MethodSource("mb.common.region.RegionTests#provideContainsTestData")
+        @MethodSource("mb.common.region.RegionTests#provideContainsRegionTestData")
         public void regionContains(Region a, Region b, boolean expectAContainsB, boolean expectBContainsA) {
             // Act
             boolean aContainsB = a.contains(b);
@@ -390,6 +402,16 @@ public class RegionTests {
             // Assert
             assertEquals(expectAContainsB, aContainsB);
             assertEquals(expectBContainsA, bContainsA);
+        }
+
+        @ParameterizedTest(name = "region {0} contains offset {1}? {2}")
+        @MethodSource("mb.common.region.RegionTests#provideContainsIntTestData")
+        public void offsetContains(Region a, int b, boolean expectAContainsB) {
+            // Act
+            boolean aContainsB = a.contains(b);
+
+            // Assert
+            assertEquals(expectAContainsB, aContainsB);
         }
 
     }
