@@ -43,7 +43,7 @@
     id="{{infoMarkerId}}"
     name="{{shared.name}} info marker"
   >
-    <super type="tiger.eclipse.marker"/>
+    <super type="{{baseMarkerId}}"/>
     <persistent value="true"/>
   </extension>
   <!-- Warning -->
@@ -52,7 +52,7 @@
     id="{{warningMarkerId}}"
     name="{{shared.name}} warning marker"
   >
-    <super type="tiger.eclipse.marker"/>
+    <super type="{{baseMarkerId}}"/>
     <persistent value="true"/>
   </extension>
   <!-- Error -->
@@ -61,7 +61,7 @@
     id="{{errorMarkerId}}"
     name="{{shared.name}} error marker"
   >
-    <super type="tiger.eclipse.marker"/>
+    <super type="{{baseMarkerId}}"/>
     <persistent value="true"/>
   </extension>
 

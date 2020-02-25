@@ -14,12 +14,12 @@ public class {{genMain.id}} {
             .loggerFactoryModule(new LoggerFactoryModule(new SLF4JLoggerFactory()))
             .pieModule(new PieModule(PieBuilderImpl::new))
             .build();
-        final {{adapterProjectCompilerInput.component.qualifiedId}} tigerComponent = {{adapterProjectCompilerInput.daggerComponent.qualifiedId}}.builder()
+        final {{adapterProjectCompilerInput.component.qualifiedId}} {{adapterProjectCompilerInput.component.idAsCamelCase}} = {{adapterProjectCompilerInput.daggerComponent.qualifiedId}}.builder()
             .platformComponent(platformComponent)
             .{{adapterProjectCompilerInput.module.idAsCamelCase}}(new {{adapterProjectCompilerInput.module.qualifiedId}}())
             .build();
         final SpoofaxCli cmd = platformComponent.getSpoofaxCmd();
-        final int status = cmd.run(args, tigerComponent);
+        final int status = cmd.run(args, {{adapterProjectCompilerInput.component.idAsCamelCase}});
         System.exit(status);
     }
 }
