@@ -104,7 +104,7 @@ public class TigerModule {
         TigerParse parse,
         TigerStyle style,
         TigerAnalyze analyze,
-        TigerComplete complete,
+        TigerCompleteTaskDef complete,
 
         TigerListLiteralVals listLiteralVals,
         TigerListDefNames listDefNames,

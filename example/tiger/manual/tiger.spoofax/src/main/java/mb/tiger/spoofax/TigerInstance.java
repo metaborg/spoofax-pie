@@ -28,7 +28,7 @@ import mb.tiger.spoofax.command.TigerShowParsedAstCommand;
 import mb.tiger.spoofax.command.TigerShowPrettyPrintedTextCommand;
 import mb.tiger.spoofax.task.TigerIdeCheck;
 import mb.tiger.spoofax.task.TigerIdeTokenize;
-import mb.tiger.spoofax.task.reusable.TigerComplete;
+import mb.tiger.spoofax.task.reusable.TigerCompleteTaskDef;
 import mb.tiger.spoofax.task.reusable.TigerParse;
 import mb.tiger.spoofax.task.reusable.TigerStyle;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -47,7 +47,7 @@ public class TigerInstance implements LanguageInstance {
     private final TigerIdeCheck tigerIdeCheck;
     private final TigerStyle style;
     private final TigerIdeTokenize tokenize;
-    private final TigerComplete complete;
+    private final TigerCompleteTaskDef complete;
 
     private final TigerShowParsedAstCommand showParsedAstCommand;
     private final TigerShowPrettyPrintedTextCommand showPrettyPrintedTextCommand;
@@ -66,7 +66,7 @@ public class TigerInstance implements LanguageInstance {
         TigerIdeCheck tigerIdeCheck,
         TigerStyle style,
         TigerIdeTokenize tokenize,
-        TigerComplete complete,
+        TigerCompleteTaskDef complete,
 
         TigerShowParsedAstCommand showParsedAstCommand,
         TigerShowPrettyPrintedTextCommand showPrettyPrintedTextCommand,
@@ -117,7 +117,7 @@ public class TigerInstance implements LanguageInstance {
 
     @Override
     public Task<@Nullable CompletionResult> createCompletionTask(ResourceKey resourceKey, Region primarySelection) {
-        return complete.createTask(new TigerComplete.Input(parse.createAstSupplier(resourceKey)));
+        return complete.createTask(new TigerCompleteTaskDef.Input(parse.createAstSupplier(resourceKey)));
     }
 
     @Override public LanguageInspection getInspection() {
