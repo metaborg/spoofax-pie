@@ -41,11 +41,9 @@ import mb.spoofax.eclipse.command.CommandUtil;
 import mb.spoofax.eclipse.editor.NamedEditorInput;
 import mb.spoofax.eclipse.editor.PartClosedCallback;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
-import mb.spoofax.eclipse.resource.EclipseDocumentKey;
-import mb.spoofax.eclipse.resource.EclipseDocumentResource;
-import mb.spoofax.eclipse.resource.EclipseDocumentResourceRegistry;
 import mb.spoofax.eclipse.resource.EclipseResource;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
+import mb.spoofax.eclipse.resource.EclipseResourceRegistry;
 import mb.spoofax.eclipse.util.ResourceUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IFile;
@@ -83,7 +81,7 @@ public class PieRunner {
     private final Logger logger;
     private final Pie pie;
     private final ArgConverters argConverters;
-    private final EclipseDocumentResourceRegistry eclipseDocumentResourceRegistry;
+    private final EclipseResourceRegistry resourceRegistry;
     private final WorkspaceUpdate.Factory workspaceUpdateFactory;
     private final ResourceUtil resourceUtil;
     private final PartClosedCallback partClosedCallback;
@@ -96,7 +94,7 @@ public class PieRunner {
         LoggerFactory loggerFactory,
         Pie pie,
         ArgConverters argConverters,
-        EclipseDocumentResourceRegistry eclipseDocumentResourceRegistry,
+        EclipseResourceRegistry resourceRegistry,
         WorkspaceUpdate.Factory workspaceUpdateFactory,
         ResourceUtil resourceUtil,
         PartClosedCallback partClosedCallback
@@ -105,7 +103,7 @@ public class PieRunner {
         this.argConverters = argConverters;
         this.resourceUtil = resourceUtil;
         this.pie = pie;
-        this.eclipseDocumentResourceRegistry = eclipseDocumentResourceRegistry;
+        this.resourceRegistry = resourceRegistry;
         this.workspaceUpdateFactory = workspaceUpdateFactory;
         this.partClosedCallback = partClosedCallback;
     }
@@ -115,28 +113,29 @@ public class PieRunner {
 
     public <D extends IDocument & IDocumentExtension4> void addOrUpdateEditor(
         EclipseLanguageComponent languageComponent,
-        @Nullable EclipseResource project,
-        EclipseDocumentResource resource,
+        @Nullable IProject project,
+        IFile file,
+        IDocument document,
         SpoofaxEditor editor,
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException {
-        logger.trace("Adding or updating editor for '{}'", resource);
+        logger.trace("Adding or updating editor for '{}'", file);
 
-        eclipseDocumentResourceRegistry.putDocumentResource(resource);
-        final EclipseDocumentKey key = resource.getKey();
+        final EclipseResourcePath path = new EclipseResourcePath(file);
+        resourceRegistry.putDocumentOverride(path, document);
 
         final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
 
         try(final PieSession session = languageComponent.newPieSession()) {
             // First run a bottom-up build, to ensure that tasks affected by changed file are brought up-to-date.
             final HashSet<ResourceKey> changedResources = new HashSet<>();
-            changedResources.add(key);
+            changedResources.add(path);
             final SessionAfterBottomUp postSession = updateAffectedBy(changedResources, session, monitor);
 
             final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
 
-            final Task<@Nullable Styling> styleTask = languageInstance.createStyleTask(key);
-            final String text = resource.getDocument().get();
+            final Task<@Nullable Styling> styleTask = languageInstance.createStyleTask(path);
+            final String text = document.get();
             final @Nullable Styling styling = requireWithoutObserving(styleTask, postSession, monitor);
             if(styling != null) {
                 workspaceUpdate.updateStyle(editor, text, styling);
@@ -148,24 +147,24 @@ public class PieRunner {
                 languageInstance.getInspection().caseOf()
                     .multiFile(f -> {
                         if(project == null) {
-                            logger.warn("Cannot run inspections for resource '" + resource + "' of language '" + languageInstance.getDisplayName() + "', because it requires multi-file analysis but no project was given");
+                            logger.warn("Cannot run inspections for resource '" + file + "' of language '" + languageInstance.getDisplayName() + "', because it requires multi-file analysis but no project was given");
                             return Optional.empty();
                         }
-                        final LanguageInspection.MultiFileInput input = multiFileInspectionInput(languageInstance, project.getPath());
+                        final LanguageInspection.MultiFileInput input = multiFileInspectionInput(languageInstance, new EclipseResourcePath(project));
                         final Task<KeyedMessages> task = f.apply(input);
                         try {
                             final KeyedMessages messages = requireWithoutObserving(task, postSession, monitor);
-                            workspaceUpdate.replaceMessages(key, messages.getMessages(key));
+                            workspaceUpdate.replaceMessages(messages);
                         } catch(ExecException | InterruptedException e) {
                             throw new UncheckedException(e);
                         }
                         return Optional.empty();
                     })
                     .singleFile(f -> {
-                        final Task<Messages> task = f.apply(key);
+                        final Task<Messages> task = f.apply(path);
                         try {
                             final Messages messages = requireWithoutObserving(task, postSession, monitor);
-                            workspaceUpdate.replaceMessages(key, messages);
+                            workspaceUpdate.replaceMessages(path, messages);
                         } catch(ExecException | InterruptedException e) {
                             throw new UncheckedException(e);
                         }
@@ -183,12 +182,12 @@ public class PieRunner {
             }
         }
 
-        workspaceUpdate.update(resource.getWrappedEclipseResource(), monitor);
+        workspaceUpdate.update(file, monitor);
     }
 
-    public void removeEditor(EclipseDocumentResource resource) {
-        logger.trace("Removing editor for '{}'", resource);
-        eclipseDocumentResourceRegistry.removeDocumentResource(resource);
+    public void removeEditor(IFile file) {
+        logger.trace("Removing editor for '{}'", file);
+        resourceRegistry.removeDocumentOverride(new EclipseResourcePath(file));
     }
 
 
@@ -201,7 +200,7 @@ public class PieRunner {
     ) throws IOException, ExecException, InterruptedException {
         logger.trace("Running full build for project '{}'", eclipseProject);
 
-        final EclipseResource project = new EclipseResource(eclipseProject);
+        final EclipseResource project = new EclipseResource(resourceRegistry, eclipseProject);
         final ResourceChanges resourceChanges = new ResourceChanges(project, languageComponent.getLanguageInstance().getFileExtensions());
         resourceChanges.newProjects.add(project.getKey());
 
@@ -240,7 +239,7 @@ public class PieRunner {
         IProject eclipseProject,
         @Nullable IProgressMonitor monitor
     ) throws IOException {
-        final EclipseResource projectResource = new EclipseResource(eclipseProject);
+        final EclipseResource projectResource = new EclipseResource(resourceRegistry, eclipseProject);
         final ResourcePath project = projectResource.getPath();
         final ResourceChanges resourceChanges = new ResourceChanges(projectResource, languageComponent.getLanguageInstance().getFileExtensions());
         resourceChanges.newProjects.add(project);
@@ -295,7 +294,7 @@ public class PieRunner {
         EclipseLanguageComponent languageComponent,
         @Nullable IProgressMonitor monitor
     ) throws IOException, CoreException, ExecException, InterruptedException {
-        final ResourceChanges resourceChanges = new ResourceChanges(languageComponent.getEclipseIdentifiers().getNature(), languageComponent.getLanguageInstance().getFileExtensions());
+        final ResourceChanges resourceChanges = new ResourceChanges(languageComponent.getEclipseIdentifiers().getNature(), languageComponent.getLanguageInstance().getFileExtensions(), resourceRegistry);
         try(final PieSession session = languageComponent.newPieSession()) {
             observeAndUnobserveAutoTransforms(languageComponent, resourceChanges, session, monitor);
             observeAndUnobserveInspections(languageComponent, resourceChanges, session, monitor);
@@ -527,10 +526,10 @@ public class PieRunner {
             });
         }
 
-        ResourceChanges(String projectNatureId, SetView<String> extensions) throws IOException, CoreException {
+        ResourceChanges(String projectNatureId, SetView<String> extensions, EclipseResourceRegistry resourceRegistry) throws IOException, CoreException {
             for(IProject eclipseProject : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
                 if(!eclipseProject.hasNature(projectNatureId)) continue;
-                final EclipseResource project = new EclipseResource(eclipseProject);
+                final EclipseResource project = new EclipseResource(resourceRegistry, eclipseProject);
                 newProjects.add(project.getKey());
                 walkProject(project, extensions);
             }

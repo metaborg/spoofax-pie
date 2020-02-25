@@ -16,9 +16,9 @@ import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.SpoofaxEclipseComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
-import mb.spoofax.eclipse.resource.EclipseDocumentResource;
-import mb.spoofax.eclipse.resource.EclipseResource;
+import mb.spoofax.eclipse.resource.EclipseResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.MenuManager;
@@ -41,7 +41,7 @@ public class EditorContextMenu extends MenuShared {
         final @Nullable IWorkbenchPart activePart = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().getActivePart();
         final SpoofaxEditor editor;
         if(activePart instanceof SpoofaxEditor) {
-            editor = (SpoofaxEditor) activePart;
+            editor = (SpoofaxEditor)activePart;
         } else {
             // Not a context menu for a Spoofax editor.
             return new IContributionItem[0];
@@ -50,17 +50,12 @@ public class EditorContextMenu extends MenuShared {
             // Context menu for a Spoofax editor of a different language.
             return new IContributionItem[0];
         }
-        final @Nullable EclipseDocumentResource documentResource = editor.getResource();
-        final @Nullable ResourceKey documentKey;
+        final @Nullable IFile eclipseFile = editor.getFile();
         final @Nullable ResourcePath filePath;
-        if(documentResource != null) {
-            documentKey = documentResource.getKey();
-            final @Nullable EclipseResource file = documentResource.getFile();
-            if(file != null) {
-                filePath = file.getPath();
-            } else {
-                filePath = null;
-            }
+        final @Nullable ResourceKey documentKey;
+        if(eclipseFile != null) {
+            filePath = new EclipseResourcePath(eclipseFile);
+            documentKey = filePath;
         } else {
             documentKey = null;
             filePath = null;

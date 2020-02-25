@@ -4,6 +4,7 @@ import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Messages;
 import mb.common.message.Severity;
+import mb.jsglr.common.ResourceKeyAttachment;
 import mb.log.api.LoggerFactory;
 import mb.nabl2.terms.stratego.StrategoTermIndices;
 import mb.nabl2.terms.stratego.TermIndex;
@@ -146,6 +147,7 @@ public class ConstraintAnalyzer {
         for(Entry<ResourceKey, IStrategoTerm> entry : asts.entrySet()) {
             final ResourceKey resource = entry.getKey();
             final IStrategoTerm ast = entry.getValue();
+            ResourceKeyAttachment.setResourceKey(ast, resource);
             addedOrChangedAsts.put(resource, ast);
         }
         final HashSet<ResourceKey> removed = new HashSet<>(context.getResultResources());

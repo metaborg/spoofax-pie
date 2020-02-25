@@ -9,8 +9,6 @@ import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.SpoofaxEclipseComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.pie.PieRunner;
-import mb.spoofax.eclipse.resource.EclipseDocumentResource;
-import mb.spoofax.eclipse.resource.EclipseResource;
 import mb.spoofax.eclipse.util.EditorInputUtil;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -73,8 +71,8 @@ public abstract class SpoofaxEditor extends TextEditor {
     // Set in createSourceViewer, if unset in dispose, may never be null if documentProvider returns a null document.
     private @Nullable IDocument document;
     private @Nullable DocumentListener documentListener;
-    private @Nullable EclipseResource project;
-    private @Nullable EclipseDocumentResource resource;
+    private @Nullable IProject project;
+    private @Nullable IFile file;
 
 
     protected SpoofaxEditor(EclipseLanguageComponent languageComponent) {
@@ -87,12 +85,12 @@ public abstract class SpoofaxEditor extends TextEditor {
         return languageComponent;
     }
 
-    public @Nullable EclipseResource getProject() {
+    public @Nullable IProject getProject() {
         return project;
     }
 
-    public @Nullable EclipseDocumentResource getResource() {
-        return resource;
+    public @Nullable IFile getFile() {
+        return file;
     }
 
     public Optional<Selection> getSelection() {
@@ -169,15 +167,13 @@ public abstract class SpoofaxEditor extends TextEditor {
             if(file != null) {
                 final @Nullable IProject eclipseProject = file.getProject();
                 if(eclipseProject != null) {
-                    project = new EclipseResource(eclipseProject);
+                    project = eclipseProject;
                 }
-                resource = new EclipseDocumentResource(document, file);
-            } else {
-                resource = new EclipseDocumentResource(document, input.getName());
+                this.file = file;
             }
         } else {
             logger.error("Editor cannot be initialized, document provider '{}' returned null for editor input '{}'", documentProvider, input);
-            resource = null;
+            file = null;
             documentListener = null;
         }
 
@@ -202,8 +198,8 @@ public abstract class SpoofaxEditor extends TextEditor {
             document.removeDocumentListener(documentListener);
         }
 
-        if(resource != null) {
-            pieRunner.removeEditor(resource);
+        if(file != null) {
+            pieRunner.removeEditor(file);
         }
 
         input = null;
@@ -211,17 +207,17 @@ public abstract class SpoofaxEditor extends TextEditor {
 
         document = null;
         documentListener = null;
-        resource = null;
+        file = null;
 
         super.dispose();
     }
 
 
     private void scheduleJob(boolean initialUpdate) {
-        if(resource == null) return;
+        if(document == null || file == null) return; // TODO: support case where file is null but document is not.
         cancelJobs();
-        final Job job = new EditorUpdateJob(loggerFactory, pieRunner, languageComponent, project, resource, this);
-        job.setRule(resource.getWrappedEclipseResource()); // May return null, but null is a valid scheduling rule.
+        final Job job = new EditorUpdateJob(loggerFactory, pieRunner, languageComponent, project, file, document, this);
+        job.setRule(file); // May return null, but null is a valid scheduling rule.
         job.schedule(initialUpdate ? 0 : 300);
     }
 

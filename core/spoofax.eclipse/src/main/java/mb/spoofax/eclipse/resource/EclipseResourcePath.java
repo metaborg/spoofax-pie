@@ -20,14 +20,17 @@ public class EclipseResourcePath implements ResourcePath {
     transient IPath path;
 
 
-    public EclipseResourcePath(IPath path) {
-        this.pathString = path.toPortableString();
+    EclipseResourcePath(String pathString, IPath path) {
+        this.pathString = pathString;
         this.path = path;
     }
 
+    public EclipseResourcePath(IPath path) {
+        this(path.toPortableString(), path);
+    }
+
     public EclipseResourcePath(String portablePathString) {
-        this.pathString = portablePathString;
-        this.path = Path.fromPortableString(portablePathString);
+        this(portablePathString, Path.fromPortableString(portablePathString));
     }
 
     public EclipseResourcePath(IResource resource) {

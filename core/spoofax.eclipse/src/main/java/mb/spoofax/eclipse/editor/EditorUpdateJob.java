@@ -5,30 +5,33 @@ import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecException;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.pie.PieRunner;
-import mb.spoofax.eclipse.resource.EclipseDocumentResource;
-import mb.spoofax.eclipse.resource.EclipseResource;
 import mb.spoofax.eclipse.util.StatusUtil;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.text.IDocument;
 
 public class EditorUpdateJob extends Job {
     private final Logger logger;
     private final PieRunner pieRunner;
     private final EclipseLanguageComponent languageComponent;
     private final String languageDisplayName;
-    private final @Nullable EclipseResource project;
-    private final EclipseDocumentResource resource;
+    private final @Nullable IProject project;
+    private final IFile file;
+    private final IDocument document;
     private final SpoofaxEditor editor;
 
     public EditorUpdateJob(
         LoggerFactory loggerFactory,
         PieRunner pieRunner,
         EclipseLanguageComponent languageComponent,
-        @Nullable EclipseResource project,
-        EclipseDocumentResource resource,
+        @Nullable IProject project,
+        IFile file,
+        IDocument document,
         SpoofaxEditor editor
     ) {
         super(languageComponent.getLanguageInstance().getDisplayName() + " editor update");
@@ -37,18 +40,19 @@ public class EditorUpdateJob extends Job {
         this.languageComponent = languageComponent;
         this.languageDisplayName = languageComponent.getLanguageInstance().getDisplayName();
         this.project = project;
-        this.resource = resource;
+        this.file = file;
+        this.document = document;
         this.editor = editor;
     }
 
     @Override protected IStatus run(@NonNull IProgressMonitor monitor) {
-        logger.trace("Running {} editor update job for {}", languageDisplayName, resource);
+        logger.trace("Running {} editor update job for {}", languageDisplayName, file);
         try {
             return update(monitor);
         } catch(@SuppressWarnings("unused") InterruptedException e) {
             return StatusUtil.cancel();
         } catch(ExecException e) {
-            final String message = languageDisplayName + " editor update for " + resource + " failed";
+            final String message = languageDisplayName + " editor update for " + file + " failed";
             logger.error(message, e);
             return StatusUtil.error(message, e);
         }
@@ -59,7 +63,7 @@ public class EditorUpdateJob extends Job {
     }
 
     private IStatus update(IProgressMonitor monitor) throws ExecException, InterruptedException {
-        pieRunner.addOrUpdateEditor(languageComponent, project, resource, editor, monitor);
+        pieRunner.addOrUpdateEditor(languageComponent, project, file, document, editor, monitor);
         return StatusUtil.success();
     }
 }

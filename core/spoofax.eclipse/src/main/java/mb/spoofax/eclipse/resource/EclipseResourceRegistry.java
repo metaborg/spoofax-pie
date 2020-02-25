@@ -1,50 +1,73 @@
 package mb.spoofax.eclipse.resource;
 
+import mb.log.api.Logger;
+import mb.log.api.LoggerFactory;
 import mb.resource.QualifiedResourceKeyString;
 import mb.resource.Resource;
 import mb.resource.ResourceKeyString;
 import mb.resource.ResourceRegistry;
 import mb.resource.ResourceRuntimeException;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.eclipse.jface.text.IDocument;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
 import java.io.Serializable;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Singleton
 public class EclipseResourceRegistry implements ResourceRegistry {
     static final String qualifier = "eclipse-resource";
 
+    private final Logger logger;
+    private final ConcurrentHashMap<EclipseResourcePath, IDocument> documentOverrides = new ConcurrentHashMap<>();
 
-    @Inject public EclipseResourceRegistry() { }
+
+    @Inject public EclipseResourceRegistry(LoggerFactory loggerFactory) {
+        this.logger = loggerFactory.create(EclipseResourceRegistry.class);
+    }
+
+
+    public void putDocumentOverride(EclipseResourcePath path, IDocument document) {
+        logger.trace("Overriding path '{}' to document '{}'", path, document);
+        documentOverrides.put(path, document);
+    }
+
+    public void removeDocumentOverride(EclipseResourcePath path) {
+        logger.trace("Removing document override of path '{}'", path);
+        documentOverrides.remove(path);
+    }
+
+    @Nullable IDocument getDocumentOverride(EclipseResourcePath path) {
+        return documentOverrides.get(path);
+    }
 
 
     @Override public String qualifier() {
         return qualifier;
     }
 
-
     @Override public EclipseResource getResource(Serializable id) {
         if(!(id instanceof String)) {
             throw new ResourceRuntimeException(
                 "Cannot get Eclipse resource with ID '" + id + "'; the ID is not of type String");
         }
-        return new EclipseResource(new EclipseResourcePath((String)id));
+        return new EclipseResource(this, new EclipseResourcePath((String)id));
     }
 
     @Override public EclipseResourcePath getResourceKey(ResourceKeyString keyStr) {
-        if(!keyStr.qualifierMatches(qualifier)) {
+        if(!keyStr.qualifierMatchesOrMissing(qualifier)) {
             throw new ResourceRuntimeException("Qualifier of '" + keyStr + "' does not match qualifier '" + qualifier + "' of this resource registry");
         }
         return new EclipseResourcePath(keyStr.getId());
     }
 
     @Override public EclipseResource getResource(ResourceKeyString keyStr) {
-        if(!keyStr.qualifierMatches(qualifier)) {
+        if(!keyStr.qualifierMatchesOrMissing(qualifier)) {
             throw new ResourceRuntimeException("Qualifier of '" + keyStr + "' does not match qualifier '" + qualifier + "' of this resource registry");
         }
-        return new EclipseResource(new EclipseResourcePath(keyStr.getId()));
+        return new EclipseResource(this, new EclipseResourcePath(keyStr.getId()));
     }
 
     @Override public QualifiedResourceKeyString toResourceKeyString(Serializable id) {
@@ -80,4 +103,6 @@ public class EclipseResourceRegistry implements ResourceRegistry {
         final EclipseResource eclipseResource = (EclipseResource)resource;
         return eclipseResource.path.path.toFile();
     }
+
+
 }

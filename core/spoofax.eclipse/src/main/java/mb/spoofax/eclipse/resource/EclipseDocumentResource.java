@@ -2,7 +2,6 @@ package mb.spoofax.eclipse.resource;
 
 import mb.resource.ReadableResource;
 import mb.resource.Resource;
-import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -27,10 +26,10 @@ public class EclipseDocumentResource implements Resource, ReadableResource, Wrap
         this.file = null;
     }
 
-    public EclipseDocumentResource(IDocument document, IFile file) {
+    public EclipseDocumentResource(IDocument document, IFile file, EclipseResourceRegistry resourceRegistry) {
         this.document = document;
         this.key = new EclipseDocumentKey(file);
-        this.file = new EclipseResource(file);
+        this.file = new EclipseResource(resourceRegistry, file);
     }
 
     @Override public void close() {
@@ -50,7 +49,7 @@ public class EclipseDocumentResource implements Resource, ReadableResource, Wrap
 
     @Override public Instant getLastModifiedTime() {
         if(document instanceof IDocumentExtension4) {
-            final IDocumentExtension4 documentExtension = (IDocumentExtension4) document;
+            final IDocumentExtension4 documentExtension = (IDocumentExtension4)document;
             final long stamp = documentExtension.getModificationStamp();
             if(stamp == IDocumentExtension4.UNKNOWN_MODIFICATION_STAMP) {
                 return Instant.MIN;
@@ -103,7 +102,7 @@ public class EclipseDocumentResource implements Resource, ReadableResource, Wrap
     @Override public boolean equals(@Nullable Object obj) {
         if(this == obj) return true;
         if(obj == null || getClass() != obj.getClass()) return false;
-        final EclipseDocumentResource other = (EclipseDocumentResource) obj;
+        final EclipseDocumentResource other = (EclipseDocumentResource)obj;
         return key.equals(other.key);
     }
 
