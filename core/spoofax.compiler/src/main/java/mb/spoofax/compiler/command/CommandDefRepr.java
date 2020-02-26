@@ -1,7 +1,6 @@
 package mb.spoofax.compiler.command;
 
 import mb.spoofax.compiler.util.TypeInfo;
-import mb.spoofax.core.language.command.CommandContextType;
 import mb.spoofax.core.language.command.CommandExecutionType;
 import org.immutables.value.Value;
 
@@ -29,8 +28,6 @@ public interface CommandDefRepr extends Serializable {
     String description();
 
     Set<CommandExecutionType> supportedExecutionTypes();
-
-    Set<CommandContextType> requiredContextTypes();
 
     List<ParamRepr> params();
 }

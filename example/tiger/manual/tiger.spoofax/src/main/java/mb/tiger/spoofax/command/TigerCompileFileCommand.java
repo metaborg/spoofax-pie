@@ -48,15 +48,9 @@ public class TigerCompileFileCommand implements CommandDef<TigerCompileFile.Args
         );
     }
 
-    @Override public EnumSetView<CommandContextType> getRequiredContextTypes() {
-        return EnumSetView.of(
-            CommandContextType.File
-        );
-    }
-
     @Override public ParamDef getParamDef() {
         return new ParamDef(
-            Param.of("file", ResourcePath.class, true, ListView.of(ArgProvider.context()))
+            Param.of("file", ResourcePath.class, true, ListView.of(ArgProvider.context(CommandContextType.FilePath)))
         );
     }
 

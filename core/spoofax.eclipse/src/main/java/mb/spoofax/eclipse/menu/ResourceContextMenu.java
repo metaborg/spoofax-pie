@@ -1,12 +1,10 @@
 package mb.spoofax.eclipse.menu;
 
-import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.command.CommandContext;
-import mb.spoofax.core.language.command.CommandContextType;
 import mb.spoofax.core.language.command.CommandRequest;
-import mb.spoofax.core.language.menu.CommandAction;
+import mb.spoofax.core.language.command.HierarchicalResourceType;
 import mb.spoofax.core.language.menu.MenuItem;
 import mb.spoofax.eclipse.EclipseIdentifiers;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
@@ -21,13 +19,13 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.IContributionItem;
-import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class ResourceContextMenu extends MenuShared {
@@ -124,23 +122,22 @@ public abstract class ResourceContextMenu extends MenuShared {
         // Transformations.
         final String runCommandCommandId = identifiers.getRunCommand();
         for(MenuItem menuItem : languageInstance.getResourceContextMenuItems()) {
-            menuItem.accept(new EclipseMenuItemVisitor(langMenu) {
-                @Override
-                protected void commandAction(IContributionManager menu, CommandAction command) {
-                    CommandRequest<?> commandRequest = command.getCommandRequest();
-                    final EnumSetView<CommandContextType> requiredContexts = commandRequest.def.getRequiredContextTypes();
-                    final ArrayList<CommandContext> contexts;
-                    if(hasProjects && requiredContexts.contains(CommandContextType.Project)) {
-                        contexts = projectContexts;
-                    } else if(hasDirectories && requiredContexts.contains(CommandContextType.Directory)) {
-                        contexts = directoryContexts;
-                    } else if(hasFiles && requiredContexts.contains(CommandContextType.File) || requiredContexts.contains(CommandContextType.Resource)) {
-                        contexts = langFileContexts;
-                    } else {
-                        return;
-                    }
-                    menu.add(createCommand(runCommandCommandId, commandRequest, new ListView<>(contexts), command.getDisplayName(), command.getDescription()));
+            EclipseMenuItemVisitor.run(langMenu, menuItem, (menu, commandAction) -> {
+                CommandRequest<?> commandRequest = commandAction.commandRequest();
+                final Set<HierarchicalResourceType> requiredResourceType = commandAction.requiredResourceType();
+                // TODO: support enclosing resource requirements
+//                final Set<HierarchicalResourceType> requiredEnclosingResourceType = commandAction.requiredEnclosingResourceType();
+                final ArrayList<CommandContext> contexts;
+                if(hasProjects && requiredResourceType.contains(HierarchicalResourceType.Project)) {
+                    contexts = projectContexts;
+                } else if(hasDirectories && requiredResourceType.contains(HierarchicalResourceType.Directory)) {
+                    contexts = directoryContexts;
+                } else if(hasFiles && requiredResourceType.contains(HierarchicalResourceType.File)) {
+                    contexts = langFileContexts;
+                } else {
+                    return;
                 }
+                menu.add(createCommand(runCommandCommandId, commandRequest, new ListView<>(contexts), commandAction.displayName(), commandAction.description()));
             });
         }
 

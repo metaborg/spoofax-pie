@@ -3,19 +3,19 @@ package mb.spoofax.core.language.command;
 import mb.common.region.Region;
 import mb.common.region.Selection;
 import mb.common.region.Selections;
-import mb.common.util.EnumSetView;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 
 public class CommandContext implements Serializable {
-    private final @Nullable ResourcePathWithKind resourcePath;
-    private final @Nullable ResourceKey resourceKey;
-    private final @Nullable Selection selection;
+    protected final @Nullable ResourcePathWithKind resourcePath;
+    protected final @Nullable ResourceKey resourceKey;
+    protected final @Nullable Selection selection;
 
 
     public CommandContext() {
@@ -108,46 +108,134 @@ public class CommandContext implements Serializable {
     }
 
 
-    public boolean isSupportedBy(EnumSetView<CommandContextType> types) {
-        if(types.contains(CommandContextType.Project)) {
-            if(resourcePath == null) return false;
-            return resourcePath.caseOf()
-                .project_(true)
-                .directory_(false)
-                .file_(false);
-        } else if(types.contains(CommandContextType.Directory)) {
-            if(resourcePath == null) return false;
-            return resourcePath.caseOf()
-                .project_(false)
-                .directory_(true)
-                .file_(false);
-        } else if(types.contains(CommandContextType.File)) {
-            if(resourcePath == null) return false;
-            return resourcePath.caseOf()
-                .project_(false)
-                .directory_(false)
-                .file_(true);
-        } else if(types.contains(CommandContextType.Resource) && resourceKey == null) {
-            return false;
-        } else if(types.contains(CommandContextType.Region)) {
-            if(selection == null) return false;
-            return selection.caseOf()
-                .region_(true)
-                .offset_(false);
-        } else if(types.contains(CommandContextType.Offset)) {
-            if(selection == null) return false;
-            return selection.caseOf()
-                .region_(false)
-                .offset_(true);
+    public @Nullable CommandContext getEnclosing(CommandContextType type) {
+        if(type == CommandContextType.DirectoryPath) {
+            if(resourcePath == null) return null;
+            final @Nullable ResourcePath parent = resourcePath.getPath().getParent();
+            if(parent == null) return null;
+            return CommandContext.ofDirectory(parent);
         }
-        return true;
+        return null;
+    }
+
+
+    public boolean supports(CommandContextType type) {
+        switch(type) {
+            case ProjectPath:
+                if(resourcePath == null) return false;
+                return resourcePath.caseOf()
+                    .project_(true)
+                    .directory_(false)
+                    .file_(false);
+            case DirectoryPath:
+                if(resourcePath == null) return false;
+                return resourcePath.caseOf()
+                    .project_(false)
+                    .directory_(true)
+                    .file_(false);
+            case FilePath:
+                if(resourcePath == null) return false;
+                return resourcePath.caseOf()
+                    .project_(false)
+                    .directory_(false)
+                    .file_(true);
+            case ResourcePath:
+                return resourcePath != null;
+            case ResourceKey:
+                return resourceKey != null;
+            case Region:
+                if(selection == null) return false;
+                return selection.caseOf()
+                    .region_(true)
+                    .offset_(false);
+            case Offset:
+                if(selection == null) return false;
+                return selection.caseOf()
+                    .region_(false)
+                    .offset_(true);
+        }
+        return false;
+    }
+
+    public boolean supports(EditorFileType type) {
+        switch(type) {
+            case HierarchicalResource:
+                return resourcePath != null;
+            case Resource:
+                return resourceKey != null;
+        }
+        return false;
+    }
+
+    public boolean supportsAnyEditorFileType(Collection<EditorFileType> types) {
+        if(types.isEmpty()) return true;
+        for(EditorFileType type : types) {
+            if(supports(type)) return true;
+        }
+        return false;
+    }
+
+    public boolean supports(EditorSelectionType type) {
+        switch(type) {
+            case Region:
+                if(selection == null) return false;
+                return selection.caseOf()
+                    .region_(true)
+                    .offset_(false);
+            case Offset:
+                if(selection == null) return false;
+                return selection.caseOf()
+                    .region_(false)
+                    .offset_(true);
+        }
+        return false;
+    }
+
+    public boolean supportsAnyEditorSelectionType(Collection<EditorSelectionType> types) {
+        if(types.isEmpty()) return true;
+        for(EditorSelectionType type : types) {
+            if(supports(type)) return true;
+        }
+        return false;
+    }
+
+    public boolean supports(HierarchicalResourceType type) {
+        switch(type) {
+            case Project:
+                if(resourcePath == null) return false;
+                return resourcePath.caseOf()
+                    .project_(true)
+                    .directory_(false)
+                    .file_(false);
+            case Directory:
+                if(resourcePath == null) return false;
+                return resourcePath.caseOf()
+                    .project_(false)
+                    .directory_(true)
+                    .file_(false);
+            case File:
+                if(resourcePath == null) return false;
+                return resourcePath.caseOf()
+                    .project_(false)
+                    .directory_(false)
+                    .file_(true);
+        }
+        return false;
+    }
+
+    public boolean supportsAnyHierarchicalResourceType(Collection<HierarchicalResourceType> types) {
+        if(types.isEmpty()) return true;
+        for(HierarchicalResourceType type : types) {
+            if(supports(type)) return true;
+        }
+        return false;
     }
 
 
     @Override public boolean equals(@Nullable Object obj) {
         if(this == obj) return true;
         if(obj == null || getClass() != obj.getClass()) return false;
-        final CommandContext other = (CommandContext) obj;
+        final CommandContext other = (CommandContext)obj;
         return Objects.equals(resourcePath, other.resourcePath) &&
             Objects.equals(resourceKey, other.resourceKey) &&
             Objects.equals(selection, other.selection);

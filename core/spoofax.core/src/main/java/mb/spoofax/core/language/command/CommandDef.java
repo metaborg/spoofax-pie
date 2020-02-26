@@ -18,8 +18,6 @@ public interface CommandDef<A extends Serializable> {
 
     EnumSetView<CommandExecutionType> getSupportedExecutionTypes();
 
-    EnumSetView<CommandContextType> getRequiredContextTypes();
-
 
     ParamDef getParamDef();
 
@@ -30,18 +28,16 @@ public interface CommandDef<A extends Serializable> {
 
 
     default CommandRequest<A> request(CommandExecutionType executionType, RawArgs initialArgs) {
-        return new CommandRequest<>(this, executionType, initialArgs);
+        return CommandRequest.of(this, executionType, initialArgs);
     }
 
     default CommandRequest<A> request(CommandExecutionType executionType) {
-        return new CommandRequest<>(this, executionType);
+        return CommandRequest.of(this, executionType);
     }
 
     default Task<CommandOutput> createTask(CommandRequest<A> request, CommandContext context, ArgConverters argConverters) {
         final RawArgsBuilder builder = new RawArgsBuilder(getParamDef(), argConverters);
-        if(request.initialArgs != null) {
-            builder.setArgsFrom(request.initialArgs);
-        }
+        request.initialArgs().ifPresent(builder::setArgsFrom);
         final RawArgs rawArgs = builder.build(context);
         final A args = fromRawArgs(rawArgs);
         return createTask(args);

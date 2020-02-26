@@ -2,14 +2,14 @@ import mb.spoofax.compiler.command.ArgProviderRepr
 import mb.spoofax.compiler.command.CommandDefRepr
 import mb.spoofax.compiler.command.ParamRepr
 import mb.spoofax.compiler.gradle.spoofaxcore.AdapterProjectCompilerSettings
-import mb.spoofax.compiler.menu.MenuCommandActionRepr
-import mb.spoofax.compiler.menu.MenuRepr
+import mb.spoofax.compiler.menu.CommandActionRepr
+import mb.spoofax.compiler.menu.MenuItemRepr
 import mb.spoofax.compiler.spoofaxcore.AdapterProjectCompiler
+import mb.spoofax.compiler.spoofaxcore.CompleterCompiler
 import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler
 import mb.spoofax.compiler.spoofaxcore.ParserCompiler
 import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler.AdapterProjectInput.builder
 import mb.spoofax.compiler.spoofaxcore.StylerCompiler
-import mb.spoofax.compiler.spoofaxcore.CompleterCompiler
 import mb.spoofax.compiler.util.TypeInfo
 import mb.spoofax.core.language.command.CommandContextType
 import mb.spoofax.core.language.command.CommandExecutionType
@@ -41,31 +41,33 @@ adapterProjectCompiler {
         .displayName("Show scope graph")
         .description("Shows the scope graph for the program")
         .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
-        .addRequiredContextTypes(CommandContextType.Project, CommandContextType.Resource)
         .addAllParams(listOf(
-          ParamRepr.of("project", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), true, ArgProviderRepr.context()),
-          ParamRepr.of("file", TypeInfo.of("mb.resource", "ResourceKey"), true, ArgProviderRepr.context())
+          ParamRepr.of("project", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), true, ArgProviderRepr.enclosingContext(CommandContextType.ProjectPath)),
+          ParamRepr.of("file", TypeInfo.of("mb.resource", "ResourceKey"), true, ArgProviderRepr.context(CommandContextType.FilePath))
         ))
         .build()
       builder.addCommandDefs(showScopeGraphCommand)
 
 
       // Menu bindings
-      fun CommandDefRepr.action(execType: CommandExecutionType, suffix: String = "", initialArgs: Map<String, String> = mapOf()) = MenuCommandActionRepr.of(type(), execType, "${displayName()}$suffix", initialArgs)
+      fun CommandDefRepr.action(execType: CommandExecutionType, suffix: String = "", initialArgs: Map<String, String> = mapOf()) = MenuItemRepr.commandAction(CommandActionRepr.of(type(), execType, "${displayName()}$suffix", initialArgs))
       fun CommandDefRepr.actionOnce(suffix: String = "", initialArgs: Map<String, String> = mapOf()) = action(CommandExecutionType.ManualOnce, "$suffix (once)", initialArgs)
       fun CommandDefRepr.actionCont(suffix: String = "", initialArgs: Map<String, String> = mapOf()) = action(CommandExecutionType.ManualContinuous, "$suffix (continuous)", initialArgs)
       val mainAndEditorMenu = listOf(
-        MenuRepr.of("Debug",
-          MenuRepr.of("Static Semantics",
-            showScopeGraphCommand.actionOnce(), showScopeGraphCommand.actionCont()
+        MenuItemRepr.menu("Debug",
+          MenuItemRepr.menu("Static Semantics",
+            showScopeGraphCommand.actionOnce(),
+            showScopeGraphCommand.actionCont()
           )
         )
       )
       builder.addAllMainMenuItems(mainAndEditorMenu)
       builder.addAllEditorContextMenuItems(mainAndEditorMenu)
       builder.addResourceContextMenuItems(
-        MenuRepr.of("Debug",
-          MenuRepr.of("Static Semantics", showScopeGraphCommand.actionOnce())
+        MenuItemRepr.menu("Debug",
+          MenuItemRepr.menu("Static Semantics",
+            showScopeGraphCommand.actionOnce()
+          )
         )
       )
     }

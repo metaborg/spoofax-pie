@@ -1,6 +1,5 @@
 package mb.spoofax.core.language.command.arg;
 
-import mb.common.util.ListView;
 import mb.common.util.MapView;
 import mb.spoofax.core.language.command.CommandContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -45,7 +44,6 @@ public class RawArgsBuilder {
             final Class<? extends Serializable> type = param.getType();
             final boolean isRequired = param.isRequired();
             final @Nullable ArgConverter<?> converter = param.getConverter();
-            final ListView<ArgProvider> providers = param.getProviders();
 
             @Nullable Serializable arg = args.get(id);
             if(arg == null) {
@@ -53,11 +51,11 @@ public class RawArgsBuilder {
             }
             final boolean argSet = arg != null;
             if(!argSet && isRequired) {
-                throw new RuntimeException("Parameter '" + id + "' of type '" + type + "' is required, but no argument was set, and no argument could be retrieved from providers '" + providers + "'");
+                throw new RuntimeException("Parameter '" + id + "' of type '" + type + "' is required, but no argument was set, and no argument could be retrieved from providers '" + param.getProviders() + "'");
             }
             if(argSet) {
                 if(String.class.equals(arg.getClass()) && !String.class.isAssignableFrom(type)) {
-                    arg = convert((String) arg, type, converter);
+                    arg = convert((String)arg, type, converter);
                 }
                 convertedArgs.put(id, arg);
             }

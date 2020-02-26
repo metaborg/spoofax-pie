@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 abstract class MenuShared extends CompoundContributionItem implements IWorkbenchContribution {
-    @SuppressWarnings("NullableProblems") private @MonotonicNonNull IServiceLocator serviceLocator;
+    private @MonotonicNonNull IServiceLocator serviceLocator;
 
 
     @Override public void initialize(@NonNull IServiceLocator serviceLocator) {
@@ -27,8 +27,13 @@ abstract class MenuShared extends CompoundContributionItem implements IWorkbench
     }
 
 
-    protected CommandContributionItem createCommand(String commandId, @Nullable String label, @Nullable String tooltip,
-                                                    @Nullable Map<String, String> parameters, int style) {
+    protected CommandContributionItem createCommand(
+        String commandId,
+        @Nullable String label,
+        @Nullable String tooltip,
+        @Nullable Map<String, String> parameters,
+        int style
+    ) {
         final CommandContributionItemParameter p = new CommandContributionItemParameter(serviceLocator, null, commandId, style);
         p.label = label;
         p.tooltip = tooltip;

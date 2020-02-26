@@ -25,17 +25,17 @@ public class CommandData implements Serializable {
     }
 
     public CommandData(CommandRequest<?> commandRequest, ListView<CommandContext> contexts) {
-        this(commandRequest.def.getId(), commandRequest.executionType, commandRequest.initialArgs, contexts);
+        this(commandRequest.def().getId(), commandRequest.executionType(), commandRequest.initialArgs().orElse(null), contexts);
     }
 
     public CommandRequest<?> toCommandRequest(CommandDef<?> def) {
-        return new CommandRequest<>(def, executionType, initialArgs);
+        return CommandRequest.of(def, executionType, initialArgs);
     }
 
     @Override public boolean equals(@Nullable Object obj) {
         if(this == obj) return true;
         if(obj == null || getClass() != obj.getClass()) return false;
-        final CommandData other = (CommandData) obj;
+        final CommandData other = (CommandData)obj;
         return commandId.equals(other.commandId) &&
             executionType == other.executionType &&
             Objects.equals(initialArgs, other.initialArgs) &&

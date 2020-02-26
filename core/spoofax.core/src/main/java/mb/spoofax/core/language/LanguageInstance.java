@@ -30,7 +30,7 @@ public interface LanguageInstance {
     /**
      * Creates a task that produces completions.
      *
-     * @param resourceKey the key of the resource in which completion is invoked
+     * @param resourceKey      the key of the resource in which completion is invoked
      * @param primarySelection the primary selection at which completion is invoked
      * @return a {@link CompletionResult}; or {@code null} when no completions could be generated
      */

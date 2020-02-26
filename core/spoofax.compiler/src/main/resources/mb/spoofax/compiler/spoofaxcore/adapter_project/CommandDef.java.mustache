@@ -47,14 +47,6 @@ public class {{type.id}} implements CommandDef<{{argType.qualifiedId}}> {
         );
     }
 
-    @Override public EnumSetView<CommandContextType> getRequiredContextTypes() {
-        return EnumSetView.of(
-{{#requiredContextTypes}}
-            CommandContextType.{{this}}{{^-last}},{{/-last}}
-{{/requiredContextTypes}}
-        );
-    }
-
     @Override public ParamDef getParamDef() {
         return new ParamDef(
 {{#params}}

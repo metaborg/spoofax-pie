@@ -3,28 +3,39 @@ package mb.spoofax.core.language.command;
 import mb.pie.api.Task;
 import mb.spoofax.core.language.command.arg.ArgConverters;
 import mb.spoofax.core.language.command.arg.RawArgs;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.immutables.value.Value;
 
 import java.io.Serializable;
+import java.util.Optional;
+import java.util.Set;
 
-public class AutoCommandRequest<A extends Serializable> {
-    public final CommandDef<A> def;
-    public final @Nullable RawArgs initialArgs;
+@Value.Immutable
+public interface AutoCommandRequest<A extends Serializable> {
+    class Builder<A extends Serializable> extends ImmutableAutoCommandRequest.Builder<A> {}
 
-    public AutoCommandRequest(CommandDef<A> def, @Nullable RawArgs initialArgs) {
-        this.def = def;
-        this.initialArgs = initialArgs;
+    static <A extends Serializable> Builder<A> builder() { return new Builder<>(); }
+
+    static <A extends Serializable> AutoCommandRequest<A> of(CommandDef<A> def, HierarchicalResourceType... resourceTypes) {
+        return AutoCommandRequest.<A>builder().def(def).addResourceTypes(resourceTypes).build();
     }
 
-    public AutoCommandRequest(CommandDef<A> def) {
-        this(def, null);
+    static <A extends Serializable> AutoCommandRequest<A> of(CommandDef<A> def, RawArgs initialArgs, HierarchicalResourceType... resourceTypes) {
+        return AutoCommandRequest.<A>builder().def(def).initialArgs(initialArgs).addResourceTypes(resourceTypes).build();
     }
 
-    public CommandRequest<A> toCommandRequest() {
-        return new CommandRequest<>(this.def, CommandExecutionType.AutomaticContinuous, initialArgs);
+
+    CommandDef<A> def();
+
+    Optional<RawArgs> initialArgs();
+
+    Set<HierarchicalResourceType> resourceTypes();
+
+
+    default CommandRequest<A> toCommandRequest() {
+        return CommandRequest.of(def(), CommandExecutionType.AutomaticContinuous, initialArgs().orElse(null));
     }
 
-    public Task<CommandOutput> createTask(CommandContext context, ArgConverters argConverters) {
-        return def.createTask(toCommandRequest(), context, argConverters);
+    default Task<CommandOutput> createTask(CommandContext context, ArgConverters argConverters) {
+        return def().createTask(toCommandRequest(), context, argConverters);
     }
 }

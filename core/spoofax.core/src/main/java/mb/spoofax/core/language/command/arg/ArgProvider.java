@@ -1,6 +1,7 @@
 package mb.spoofax.core.language.command.arg;
 
 import mb.common.util.ADT;
+import mb.spoofax.core.language.command.CommandContextType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
@@ -10,7 +11,9 @@ public abstract class ArgProvider {
     interface Cases<R> {
         R value(Serializable arg);
 
-        R context();
+        R context(CommandContextType contextType);
+
+        R enclosingContext(CommandContextType contextType);
 
         // TODO: configuration files
 
@@ -21,8 +24,12 @@ public abstract class ArgProvider {
         return ArgProviders.value(arg);
     }
 
-    public static ArgProvider context() {
-        return ArgProviders.context();
+    public static ArgProvider context(CommandContextType contextType) {
+        return ArgProviders.context(contextType);
+    }
+
+    public static ArgProvider enclosingContext(CommandContextType contextType) {
+        return ArgProviders.enclosingContext(contextType);
     }
 
 

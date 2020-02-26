@@ -50,16 +50,10 @@ public class TigerShowDesugaredAstCommand implements CommandDef<TigerShowArgs> {
         );
     }
 
-    @Override public EnumSetView<CommandContextType> getRequiredContextTypes() {
-        return EnumSetView.of(
-            CommandContextType.Resource
-        );
-    }
-
     @Override public ParamDef getParamDef() {
         return new ParamDef(
-            Param.of("resource", ResourceKey.class, true, ListView.of(ArgProvider.context())),
-            Param.of("region", Region.class, false, ListView.of(ArgProvider.context()))
+            Param.of("resource", ResourceKey.class, true, ListView.of(ArgProvider.context(CommandContextType.ResourceKey))),
+            Param.of("region", Region.class, false, ListView.of(ArgProvider.context(CommandContextType.Region)))
         );
     }
 

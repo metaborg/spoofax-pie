@@ -1,6 +1,9 @@
 package mb.spoofax.compiler.command;
 
 import mb.common.util.ADT;
+import mb.spoofax.core.language.command.CommandContextType;
+import mb.spoofax.core.language.command.arg.ArgProvider;
+import mb.spoofax.core.language.command.arg.ArgProviders;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
@@ -10,16 +13,23 @@ public abstract class ArgProviderRepr implements Serializable {
     interface Cases<R> {
         R value(String code);
 
-        R context();
+        R context(CommandContextType contextType);
+
+        R enclosingContext(CommandContextType contextType);
     }
 
     public static ArgProviderRepr value(String code) {
         return ArgProviderReprs.value(code);
     }
 
-    public static ArgProviderRepr context() {
-        return ArgProviderReprs.context();
+    public static ArgProviderRepr context(CommandContextType contextType) {
+        return ArgProviderReprs.context(contextType);
     }
+
+    public static ArgProviderRepr enclosingContext(CommandContextType contextType) {
+        return ArgProviderReprs.enclosingContext(contextType);
+    }
+
 
 
     public abstract <R> R match(Cases<R> cases);
@@ -31,7 +41,8 @@ public abstract class ArgProviderRepr implements Serializable {
     public String toJavaCode() {
         return caseOf()
             .value((code) -> "ArgProvider.value(" + code + ")")
-            .context_("ArgProvider.context()")
+            .context((t) -> "ArgProvider.context(mb.spoofax.core.language.command.CommandContextType." + t +")")
+            .enclosingContext((t) -> "ArgProvider.enclosingContext(mb.spoofax.core.language.command.CommandContextType." + t +")")
             ;
     }
 

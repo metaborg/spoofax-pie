@@ -4,7 +4,6 @@ import mb.common.message.KeyedMessages;
 import mb.common.message.Messages;
 import mb.common.style.Styling;
 import mb.common.util.CollectionView;
-import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.common.util.SetView;
 import mb.common.util.UncheckedException;
@@ -30,11 +29,11 @@ import mb.spoofax.core.language.LanguageInspection;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandContext;
-import mb.spoofax.core.language.command.CommandContextType;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.CommandFeedbacks;
 import mb.spoofax.core.language.command.CommandOutput;
 import mb.spoofax.core.language.command.CommandRequest;
+import mb.spoofax.core.language.command.HierarchicalResourceType;
 import mb.spoofax.core.language.command.arg.ArgConverters;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.command.CommandUtil;
@@ -311,7 +310,7 @@ public class PieRunner {
         SessionBase session,
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException {
-        switch(request.executionType) {
+        switch(request.executionType()) {
             case ManualOnce:
                 for(CommandContext context : contexts) {
                     final Task<CommandOutput> task = request.createTask(context, argConverters);
@@ -569,14 +568,14 @@ public class PieRunner {
             final ArrayList<AutoCommandRequest<?>> directory = new ArrayList<>();
             final ArrayList<AutoCommandRequest<?>> file = new ArrayList<>();
             for(AutoCommandRequest<?> request : languageComponent.getLanguageInstance().getAutoCommandRequests()) {
-                final EnumSetView<CommandContextType> supported = request.def.getRequiredContextTypes();
-                if(supported.contains(CommandContextType.Project)) {
+                final Set<HierarchicalResourceType> resourceTypes = request.resourceTypes();
+                if(resourceTypes.contains(HierarchicalResourceType.Project)) {
                     project.add(request);
                 }
-                if(supported.contains(CommandContextType.Directory)) {
+                if(resourceTypes.contains(HierarchicalResourceType.Directory)) {
                     directory.add(request);
                 }
-                if(supported.contains(CommandContextType.File)) {
+                if(resourceTypes.contains(HierarchicalResourceType.File)) {
                     file.add(request);
                 }
             }

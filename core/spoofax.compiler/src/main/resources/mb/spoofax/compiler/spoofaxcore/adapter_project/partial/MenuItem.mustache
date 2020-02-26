@@ -1,19 +1,18 @@
-{{#isCommandAction}}
-CommandAction.of(
+{{#getCommandAction}}
+CommandAction.builder().with(
     {{#commandDefType}}{{#getInjectedCommandDef}}{{/getInjectedCommandDef}}{{/commandDefType}},
     CommandExecutionType.{{executionType}},
     {{#displayName}}"{{this}}"{{/displayName}}{{^displayName}}null{{/displayName}},
     new RawArgs(MapView.<String, Serializable>of({{#initialArgs.entrySet}}new EntryView<String, Serializable>("{{getKey}}", {{getValue}}){{^-last}},{{/-last}}{{/initialArgs.entrySet}}))
-)
-{{/isCommandAction}}
-{{#isMenu}}
-new Menu(
-     "{{displayName}}",
+).buildItem()
+{{/getCommandAction}}
+{{#getMenu}}
+MenuItem.menu("{{displayName}}",
 {{#items}}
     {{>adapter_project/partial/MenuItem.mustache}}{{^-last}},{{/-last}}
 {{/items}}
 )
-{{/isMenu}}
-{{#isSeparator}}
-new Separator()
-{{/isSeparator}}
+{{/getMenu}}
+{{#getSeparator}}
+MenuItem.separator()
+{{/getSeparator}}

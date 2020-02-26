@@ -3,7 +3,7 @@ package mb.spoofax.compiler.spoofaxcore;
 import com.samskivert.mustache.Mustache;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.cli.CliCommandRepr;
-import mb.spoofax.compiler.command.AutoCommandDefRepr;
+import mb.spoofax.compiler.command.AutoCommandRequestRepr;
 import mb.spoofax.compiler.command.CommandDefRepr;
 import mb.spoofax.compiler.menu.MenuItemRepr;
 import mb.spoofax.compiler.util.ClassKind;
@@ -266,7 +266,7 @@ public class AdapterProjectCompiler {
 
         List<CommandDefRepr> commandDefs();
 
-        List<AutoCommandDefRepr> autoCommandDefs();
+        List<AutoCommandRequestRepr> autoCommandDefs();
 
         @Value.Default default CliCommandRepr cliCommand() {
             return CliCommandRepr.builder().name(shared().name()).build();

@@ -17,7 +17,7 @@ import mb.spoofax.core.language.cli.CliParam;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.arg.RawArgs;
-import mb.spoofax.core.language.menu.Menu;
+import mb.spoofax.core.language.menu.CommandAction;
 import mb.spoofax.core.language.menu.MenuItem;
 import mb.tiger.spoofax.command.TigerCompileDirectoryCommand;
 import mb.tiger.spoofax.command.TigerCompileFileAltCommand;
@@ -36,9 +36,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Set;
-
-import static mb.spoofax.core.language.menu.CommandAction.ofManualContinuous;
-import static mb.spoofax.core.language.menu.CommandAction.ofManualOnce;
 
 public class TigerInstance implements LanguageInstance {
     private final static SetView<String> extensions = SetView.of("tig");
@@ -174,28 +171,28 @@ public class TigerInstance implements LanguageInstance {
 
     @Override public ListView<MenuItem> getResourceContextMenuItems() {
         return ListView.of(
-            new Menu("Compile",
-                ofManualOnce(compileFileCommand),
-                ofManualOnce(compileDirectoryCommand),
-                ofManualOnce(altCompileFileCommand, "- default"),
-                ofManualOnce(altCompileFileCommand, "- list literal values instead", new RawArgs(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))),
-                ofManualOnce(altCompileFileCommand, "- base64 encode", new RawArgs(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))),
-                ofManualOnce(altCompileFileCommand, "- list literal values instead + base64 encode", new RawArgs(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt"))),
-                ofManualContinuous(altCompileFileCommand, "- default"),
-                ofManualContinuous(altCompileFileCommand, "- list literal values instead", new RawArgs(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))),
-                ofManualContinuous(altCompileFileCommand, "- base64 encode", new RawArgs(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))),
-                ofManualContinuous(altCompileFileCommand, "- list literal values instead + base64 encode", new RawArgs(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt")))
+            MenuItem.menu("Compile",
+                CommandAction.builder().manualOnce(compileFileCommand).fileRequired().buildItem(),
+                CommandAction.builder().manualOnce(compileDirectoryCommand).directoryRequired().buildItem(),
+                CommandAction.builder().manualOnce(altCompileFileCommand, "- default").fileRequired().buildItem(),
+                CommandAction.builder().manualOnce(altCompileFileCommand, "- list literal values instead", new RawArgs(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))).fileRequired().buildItem(),
+                CommandAction.builder().manualOnce(altCompileFileCommand, "- base64 encode", new RawArgs(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))).fileRequired().buildItem(),
+                CommandAction.builder().manualOnce(altCompileFileCommand, "- list literal values instead + base64 encode", new RawArgs(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt"))).fileRequired().buildItem(),
+                CommandAction.builder().manualContinuous(altCompileFileCommand, "- default").buildItem(),
+                CommandAction.builder().manualContinuous(altCompileFileCommand, "- list literal values instead", new RawArgs(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))).fileRequired().buildItem(),
+                CommandAction.builder().manualContinuous(altCompileFileCommand, "- base64 encode", new RawArgs(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))).fileRequired().buildItem(),
+                CommandAction.builder().manualContinuous(altCompileFileCommand, "- list literal values instead + base64 encode", new RawArgs(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt"))).fileRequired().buildItem()
             ),
-            new Menu("Debug",
-                new Menu("Syntax",
-                    ofManualOnce(showParsedAstCommand),
-                    ofManualOnce(showPrettyPrintedTextCommand)
+            MenuItem.menu("Debug",
+                MenuItem.menu("Syntax",
+                    CommandAction.builder().manualOnce(showParsedAstCommand).buildItem(),
+                    CommandAction.builder().manualOnce(showPrettyPrintedTextCommand).buildItem()
                 ),
-                new Menu("Static Semantics",
-                    ofManualOnce(showAnalyzedAstCommand)
+                MenuItem.menu("Static Semantics",
+                    CommandAction.builder().manualOnce(showAnalyzedAstCommand).buildItem()
                 ),
-                new Menu("Transformations",
-                    ofManualOnce(showDesugaredAstCommand)
+                MenuItem.menu("Transformations",
+                    CommandAction.builder().manualOnce(showDesugaredAstCommand).buildItem()
                 )
             )
         );
@@ -203,27 +200,31 @@ public class TigerInstance implements LanguageInstance {
 
     @Override public ListView<MenuItem> getEditorContextMenuItems() {
         return ListView.of(
-            new Menu("Compile",
-                ofManualOnce(compileFileCommand),
-                ofManualOnce(altCompileFileCommand, "- default"),
-                ofManualOnce(altCompileFileCommand, "- list literal values instead", new RawArgs(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))),
-                ofManualOnce(altCompileFileCommand, "- base64 encode", new RawArgs(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))),
-                ofManualOnce(altCompileFileCommand, "- list literal values instead + base64 encode", new RawArgs(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt"))),
-                ofManualContinuous(altCompileFileCommand, "- default"),
-                ofManualContinuous(altCompileFileCommand, "- list literal values instead", new RawArgs(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))),
-                ofManualContinuous(altCompileFileCommand, "- base64 encode", new RawArgs(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))),
-                ofManualContinuous(altCompileFileCommand, "- list literal values instead + base64 encode", new RawArgs(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt")))
+            MenuItem.menu("Compile",
+                CommandAction.builder().manualOnce(compileFileCommand).fileRequired().buildItem(),
+                CommandAction.builder().manualOnce(altCompileFileCommand, "- default").fileRequired().buildItem(),
+                CommandAction.builder().manualOnce(altCompileFileCommand, "- list literal values instead", new RawArgs(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))).fileRequired().buildItem(),
+                CommandAction.builder().manualOnce(altCompileFileCommand, "- base64 encode", new RawArgs(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))).fileRequired().buildItem(),
+                CommandAction.builder().manualOnce(altCompileFileCommand, "- list literal values instead + base64 encode", new RawArgs(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt"))).fileRequired().buildItem(),
+                CommandAction.builder().manualContinuous(altCompileFileCommand, "- default").fileRequired().buildItem(),
+                CommandAction.builder().manualContinuous(altCompileFileCommand, "- list literal values instead", new RawArgs(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))).fileRequired().buildItem(),
+                CommandAction.builder().manualContinuous(altCompileFileCommand, "- base64 encode", new RawArgs(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))).fileRequired().buildItem(),
+                CommandAction.builder().manualContinuous(altCompileFileCommand, "- list literal values instead + base64 encode", new RawArgs(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt"))).fileRequired().buildItem()
             ),
-            new Menu("Debug",
-                new Menu("Syntax",
-                    ofManualOnce(showParsedAstCommand), ofManualContinuous(showParsedAstCommand),
-                    ofManualOnce(showPrettyPrintedTextCommand), ofManualContinuous(showPrettyPrintedTextCommand)
+            MenuItem.menu("Debug",
+                MenuItem.menu("Syntax",
+                    CommandAction.builder().manualOnce(showParsedAstCommand).buildItem(),
+                    CommandAction.builder().manualContinuous(showParsedAstCommand).buildItem(),
+                    CommandAction.builder().manualOnce(showPrettyPrintedTextCommand).buildItem(),
+                    CommandAction.builder().manualContinuous(showPrettyPrintedTextCommand).buildItem()
                 ),
-                new Menu("Static Semantics",
-                    ofManualOnce(showAnalyzedAstCommand), ofManualContinuous(showAnalyzedAstCommand)
+                MenuItem.menu("Static Semantics",
+                    CommandAction.builder().manualOnce(showAnalyzedAstCommand).buildItem(),
+                    CommandAction.builder().manualContinuous(showAnalyzedAstCommand).buildItem()
                 ),
-                new Menu("Transformations",
-                    ofManualOnce(showDesugaredAstCommand), ofManualContinuous(showDesugaredAstCommand)
+                MenuItem.menu("Transformations",
+                    CommandAction.builder().manualOnce(showDesugaredAstCommand).buildItem(),
+                    CommandAction.builder().manualContinuous(showDesugaredAstCommand).buildItem()
                 )
             )
         );

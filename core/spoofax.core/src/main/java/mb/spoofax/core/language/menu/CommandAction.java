@@ -3,112 +3,136 @@ package mb.spoofax.core.language.menu;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandExecutionType;
 import mb.spoofax.core.language.command.CommandRequest;
+import mb.spoofax.core.language.command.EditorFileType;
+import mb.spoofax.core.language.command.EditorSelectionType;
+import mb.spoofax.core.language.command.HierarchicalResourceType;
 import mb.spoofax.core.language.command.arg.RawArgs;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.immutables.value.Value;
 
-public class CommandAction implements MenuItem {
-    private final CommandRequest commandRequest;
-    private final @Nullable String displayName;
-    private final @Nullable String description;
+import java.util.Set;
 
-    /**
-     * Initializes a new instance of the {@link CommandAction} class.
-     *
-     * @param commandRequest the command request
-     * @param displayName    the display name; or null to use the command definition's display name
-     * @param description    the short description of the command; or null to use the command definition's description
-     */
-    public CommandAction(CommandRequest commandRequest, @Nullable String displayName, @Nullable String description) {
-        this.commandRequest = commandRequest;
-        this.displayName = displayName;
-        this.description = description;
-    }
+@Value.Immutable
+public interface CommandAction {
+    class Builder extends ImmutableCommandAction.Builder {
+        public Builder with(CommandDef<?> commandDef, CommandExecutionType executionType) {
+            return with(commandDef, executionType, "");
+        }
 
-    /**
-     * Initializes a new instance of the {@link CommandAction} class.
-     *
-     * @param commandRequest the command request
-     * @param displayName    the display name; or null to use the command request's default display name
-     */
-    public CommandAction(CommandRequest commandRequest, @Nullable String displayName) {
-        this(commandRequest, displayName, null);
-    }
+        public Builder with(CommandDef<?> commandDef, CommandExecutionType executionType, String suffix) {
+            displayName(commandDef.getDisplayName() + suffix);
+            description(commandDef.getDescription());
+            commandRequest(commandDef.request(executionType));
+            return this;
+        }
 
-    /**
-     * Initializes a new instance of the {@link CommandAction} class.
-     *
-     * @param commandRequest the command request
-     */
-    public CommandAction(CommandRequest commandRequest) {
-        this(commandRequest, null, null);
-    }
+        public Builder with(CommandDef<?> commandDef, CommandExecutionType executionType, RawArgs initialArgs) {
+            return with(commandDef, executionType, "", initialArgs);
+        }
 
-    public static CommandAction of(CommandDef<?> commandDef, CommandExecutionType executionType, String displayName, RawArgs initialArgs) {
-        return new CommandAction(new CommandRequest<>(commandDef, executionType, initialArgs), displayName);
-    }
+        public Builder with(CommandDef<?> commandDef, CommandExecutionType executionType, String suffix, RawArgs initialArgs) {
+            displayName(commandDef.getDisplayName() + suffix);
+            description(commandDef.getDescription());
+            commandRequest(commandDef.request(executionType, initialArgs));
+            return this;
+        }
 
-    public static CommandAction of(CommandDef<?> commandDef, CommandExecutionType executionType, String displayName) {
-        return new CommandAction(new CommandRequest<>(commandDef, executionType), displayName);
-    }
 
-    public static CommandAction of(CommandDef<?> commandDef, CommandExecutionType executionType, RawArgs initialArgs) {
-        return new CommandAction(new CommandRequest<>(commandDef, executionType, initialArgs), commandDef.getDisplayName());
-    }
+        public Builder manualOnce(CommandDef<?> commandDef) {
+            return with(commandDef, CommandExecutionType.ManualOnce);
+        }
 
-    public static CommandAction of(CommandDef<?> commandDef, CommandExecutionType executionType) {
-        return new CommandAction(new CommandRequest<>(commandDef, executionType), commandDef.getDisplayName());
-    }
+        public Builder manualOnce(CommandDef<?> commandDef, String suffix) {
+            return with(commandDef, CommandExecutionType.ManualOnce, " " + suffix);
+        }
 
-    public static CommandAction ofManualOnce(CommandDef<?> commandDef, String suffix, RawArgs initialArgs) {
-        return of(commandDef, CommandExecutionType.ManualOnce, commandDef.getDisplayName() + " " + suffix, initialArgs);
-    }
+        public Builder manualOnce(CommandDef<?> commandDef, RawArgs initialArgs) {
+            return with(commandDef, CommandExecutionType.ManualOnce, initialArgs);
+        }
 
-    public static CommandAction ofManualOnce(CommandDef<?> commandDef, String suffix) {
-        return of(commandDef, CommandExecutionType.ManualOnce, commandDef.getDisplayName() + " " + suffix);
-    }
+        public Builder manualOnce(CommandDef<?> commandDef, String suffix, RawArgs initialArgs) {
+            return with(commandDef, CommandExecutionType.ManualOnce, " " + suffix, initialArgs);
+        }
 
-    public static CommandAction ofManualOnce(CommandDef<?> commandDef) {
-        return of(commandDef, CommandExecutionType.ManualOnce);
-    }
 
-    public static CommandAction ofManualContinuous(CommandDef<?> commandDef, String suffix, RawArgs initialArgs) {
-        return of(commandDef, CommandExecutionType.ManualContinuous, commandDef.getDisplayName() + " " + suffix + " (continuous)", initialArgs);
-    }
+        public Builder manualContinuous(CommandDef<?> commandDef) {
+            return with(commandDef, CommandExecutionType.ManualContinuous, " (continuous)");
+        }
 
-    public static CommandAction ofManualContinuous(CommandDef<?> commandDef, String suffix) {
-        return of(commandDef, CommandExecutionType.ManualContinuous, commandDef.getDisplayName() + " " + suffix + " (continuous)");
-    }
+        public Builder manualContinuous(CommandDef<?> commandDef, String suffix) {
+            return with(commandDef, CommandExecutionType.ManualContinuous, " " + suffix + " (continuous)");
+        }
 
-    public static CommandAction ofManualContinuous(CommandDef<?> commandDef) {
-        return of(commandDef, CommandExecutionType.ManualContinuous, commandDef.getDisplayName() + " (continuous)");
-    }
+        public Builder manualContinuous(CommandDef<?> commandDef, RawArgs initialArgs) {
+            return with(commandDef, CommandExecutionType.ManualContinuous, " (continuous)", initialArgs);
+        }
 
-    /**
-     * Gets the command request.
-     *
-     * @return the command request
-     */
-    public CommandRequest getCommandRequest() {
-        return commandRequest;
-    }
+        public Builder manualContinuous(CommandDef<?> commandDef, String suffix, RawArgs initialArgs) {
+            return with(commandDef, CommandExecutionType.ManualContinuous, " " + suffix + " (continuous)", initialArgs);
+        }
 
-    @Override public String getDisplayName() {
-        if(displayName != null) {
-            return displayName;
-        } else {
-            return commandRequest.def.getDisplayName();
+
+        public Builder fileRequired() {
+            addRequiredEditorFileTypes(EditorFileType.HierarchicalResource);
+            addRequiredResourceType(HierarchicalResourceType.File);
+            return this;
+        }
+
+        public Builder directoryRequired() {
+            addRequiredResourceType(HierarchicalResourceType.Directory);
+            return this;
+        }
+
+        public Builder projectRequired() {
+            addRequiredResourceType(HierarchicalResourceType.Project);
+            return this;
+        }
+
+        public Builder enclosingDirectoryRequired() {
+            addRequiredEnclosingResourceType(HierarchicalResourceType.Directory);
+            return this;
+        }
+
+        public Builder enclosingProjectRequired() {
+            addRequiredEnclosingResourceType(HierarchicalResourceType.Project);
+            return this;
+        }
+
+
+        public MenuItem buildItem() {
+            return MenuItem.commandAction(build());
         }
     }
 
-    @Override public String getDescription() {
-        if(description != null) {
-            return description;
-        } else {
-            return commandRequest.def.getDescription();
-        }
-    }
+    static Builder builder() { return new Builder(); }
 
-    @Override public void accept(MenuItemVisitor visitor) {
-        visitor.command(this);
-    }
+
+    String displayName();
+
+    String description();
+
+    CommandRequest commandRequest();
+
+    /**
+     * Gets whether this command action, in editor context menus, should only be shown when the text selection of the
+     * editor is of a type in this set. An empty set indicates that there is no requirement.
+     */
+    Set<EditorSelectionType> requiredEditorSelectionType();
+
+    /**
+     * Gets whether this command action, in editor context menus, should only be shown when the file of the editor is of
+     * a type in this set. An empty set indicates that there is no requirement.
+     */
+    Set<EditorFileType> requiredEditorFileTypes();
+
+    /**
+     * Gets whether this command action, in resource context menus, should only be shown when the selected resource is
+     * of a type in this set. An empty set indicates that there is no requirement.
+     */
+    Set<HierarchicalResourceType> requiredResourceType();
+
+    /**
+     * Gets whether this  command action, in resource context menus, should only be shown when the enclosing resource of
+     * the selected resource is of a type in this set. An empty set indicates that there is no requirement.
+     */
+    Set<HierarchicalResourceType> requiredEnclosingResourceType();
 }

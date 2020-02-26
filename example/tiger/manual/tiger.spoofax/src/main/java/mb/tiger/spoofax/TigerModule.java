@@ -3,7 +3,6 @@ package mb.tiger.spoofax;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
-import mb.common.util.MapView;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.MapTaskDefs;
 import mb.pie.api.Pie;
@@ -15,7 +14,7 @@ import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
-import mb.spoofax.core.language.command.arg.RawArgs;
+import mb.spoofax.core.language.command.HierarchicalResourceType;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
 import mb.tiger.TigerConstraintAnalyzer;
@@ -25,8 +24,8 @@ import mb.tiger.TigerParserFactory;
 import mb.tiger.TigerStrategoRuntimeBuilderFactory;
 import mb.tiger.TigerStyler;
 import mb.tiger.TigerStylerFactory;
-import mb.tiger.spoofax.command.TigerCompileFileAltCommand;
 import mb.tiger.spoofax.command.TigerCompileDirectoryCommand;
+import mb.tiger.spoofax.command.TigerCompileFileAltCommand;
 import mb.tiger.spoofax.command.TigerCompileFileCommand;
 import mb.tiger.spoofax.command.TigerShowAnalyzedAstCommand;
 import mb.tiger.spoofax.command.TigerShowDesugaredAstCommand;
@@ -43,7 +42,12 @@ import mb.tiger.spoofax.task.TigerShowDesugaredAst;
 import mb.tiger.spoofax.task.TigerShowParsedAst;
 import mb.tiger.spoofax.task.TigerShowPrettyPrintedText;
 import mb.tiger.spoofax.task.TigerShowScopeGraph;
-import mb.tiger.spoofax.task.reusable.*;
+import mb.tiger.spoofax.task.reusable.TigerAnalyze;
+import mb.tiger.spoofax.task.reusable.TigerCompleteTaskDef;
+import mb.tiger.spoofax.task.reusable.TigerListDefNames;
+import mb.tiger.spoofax.task.reusable.TigerListLiteralVals;
+import mb.tiger.spoofax.task.reusable.TigerParse;
+import mb.tiger.spoofax.task.reusable.TigerStyle;
 
 import javax.inject.Named;
 import java.util.HashSet;
@@ -187,8 +191,8 @@ public class TigerModule {
         TigerCompileDirectoryCommand tigerCompileDirectoryCommand
     ) {
         final HashSet<AutoCommandRequest<?>> autoCommandDefs = new HashSet<>();
-        autoCommandDefs.add(new AutoCommandRequest<>(tigerCompileFileCommand, new RawArgs(MapView.of())));
-        autoCommandDefs.add(new AutoCommandRequest<>(tigerCompileDirectoryCommand, new RawArgs(MapView.of())));
+        autoCommandDefs.add(AutoCommandRequest.of(tigerCompileFileCommand, HierarchicalResourceType.File));
+        autoCommandDefs.add(AutoCommandRequest.of(tigerCompileDirectoryCommand, HierarchicalResourceType.Directory));
         return autoCommandDefs;
     }
 

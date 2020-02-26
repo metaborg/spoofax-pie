@@ -9,10 +9,25 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.cli.CliCommandRepr;
 import mb.spoofax.compiler.cli.CliParamRepr;
 import mb.spoofax.compiler.command.ArgProviderRepr;
-import mb.spoofax.compiler.command.AutoCommandDefRepr;
+import mb.spoofax.compiler.command.AutoCommandRequestRepr;
 import mb.spoofax.compiler.command.CommandDefRepr;
-import mb.spoofax.compiler.menu.MenuCommandActionRepr;
-import mb.spoofax.compiler.spoofaxcore.*;
+import mb.spoofax.compiler.menu.CommandActionRepr;
+import mb.spoofax.compiler.menu.MenuItemRepr;
+import mb.spoofax.compiler.spoofaxcore.AdapterProject;
+import mb.spoofax.compiler.spoofaxcore.AdapterProjectCompiler;
+import mb.spoofax.compiler.spoofaxcore.CliProjectCompiler;
+import mb.spoofax.compiler.spoofaxcore.CompleterCompiler;
+import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler;
+import mb.spoofax.compiler.spoofaxcore.EclipseExternaldepsProjectCompiler;
+import mb.spoofax.compiler.spoofaxcore.EclipseProjectCompiler;
+import mb.spoofax.compiler.spoofaxcore.IntellijProjectCompiler;
+import mb.spoofax.compiler.spoofaxcore.LanguageProject;
+import mb.spoofax.compiler.spoofaxcore.LanguageProjectCompiler;
+import mb.spoofax.compiler.spoofaxcore.ParserCompiler;
+import mb.spoofax.compiler.spoofaxcore.RootProjectCompiler;
+import mb.spoofax.compiler.spoofaxcore.Shared;
+import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler;
+import mb.spoofax.compiler.spoofaxcore.StylerCompiler;
 import mb.spoofax.compiler.util.GradleDependency;
 import mb.spoofax.compiler.util.StringUtil;
 import mb.spoofax.compiler.util.TypeInfo;
@@ -33,32 +48,6 @@ public class TigerInputs {
             .name("Tiger")
             .baseDirectory(baseDirectory)
             .defaultBasePackageId("mb.tiger")
-//            // Injected dependencies
-//            /// Metaborg log
-//            .logApiDep(fromSystemProperty("log.api:classpath"))
-//            .logBackendSLF4JDep(fromSystemProperty("log.backend.slf4j:classpath"))
-//            /// Metaborg resource
-//            .resourceDep(fromSystemProperty("resource:classpath"))
-//            /// PIE
-//            .pieApiDep(fromSystemProperty("pie.api:classpath"))
-//            .pieRuntimeDep(fromSystemProperty("pie.runtime:classpath"))
-//            .pieDaggerDep(fromSystemProperty("pie.dagger:classpath"))
-//            /// Spoofax-PIE
-//            .commonDep(fromSystemProperty("common:classpath"))
-//            .jsglrCommonDep(fromSystemProperty("jsglr.common:classpath"))
-//            .jsglr1CommonDep(fromSystemProperty("jsglr1.common:classpath"))
-//            .jsglr2CommonDep(fromSystemProperty("jsglr2.common:classpath"))
-//            .esvCommonDep(fromSystemProperty("esv.common:classpath"))
-//            .strategoCommonDep(fromSystemProperty("stratego.common:classpath"))
-//            .constraintCommonDep(fromSystemProperty("constraint.common:classpath"))
-//            .nabl2CommonDep(fromSystemProperty("nabl2.common:classpath"))
-//            .statixCommonDep(fromSystemProperty("statix.common:classpath"))
-//            .spoofaxCompilerInterfacesDep(fromSystemProperty("spoofax.compiler.interfaces:classpath"))
-//            .spoofaxCoreDep(fromSystemProperty("spoofax.core:classpath"))
-//            .spoofaxCliDep(fromSystemProperty("spoofax.cli:classpath"))
-//            .spoofaxEclipseDep(fromSystemProperty("spoofax.eclipse:classpath"))
-//            .spoofaxEclipseExternaldepsDep(fromSystemProperty("spoofax.eclipse.externaldeps:classpath"))
-//            .spoofaxIntellijDep(fromSystemProperty("spoofax.intellij:classpath"))
             ;
     }
 
@@ -198,9 +187,8 @@ public class TigerInputs {
             .displayName("Show parsed AST")
             .description("Shows the parsed Abstract Syntax Tree of the program.")
             .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
-            .addRequiredContextTypes(CommandContextType.Resource)
-            .addParams("resource", TypeInfo.of("mb.resource", "ResourceKey"), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.context()))
-            .addParams("region", TypeInfo.of("mb.common.region", "Region"), false, Optional.empty(), Collections.singletonList(ArgProviderRepr.context()))
+            .addParams("resource", TypeInfo.of("mb.resource", "ResourceKey"), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.context(CommandContextType.ResourceKey)))
+            .addParams("region", TypeInfo.of("mb.common.region", "Region"), false, Optional.empty(), Collections.singletonList(ArgProviderRepr.context(CommandContextType.Region)))
             .build();
 
         final CommandDefRepr tigerCompileFile = CommandDefRepr.builder()
@@ -210,8 +198,7 @@ public class TigerInputs {
             .displayName("'Compile' file (list literals)")
             .description("")
             .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous, CommandExecutionType.AutomaticContinuous)
-            .addRequiredContextTypes(CommandContextType.File)
-            .addParams("file", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.context()))
+            .addParams("file", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.context(CommandContextType.FilePath)))
             .build();
 
         final CommandDefRepr tigerAltCompileFile = CommandDefRepr.builder()
@@ -221,8 +208,7 @@ public class TigerInputs {
             .displayName("'Alternative compile' file")
             .description("")
             .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous, CommandExecutionType.AutomaticContinuous)
-            .addRequiredContextTypes(CommandContextType.File)
-            .addParams("file", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.context()))
+            .addParams("file", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.context(CommandContextType.FilePath)))
             .addParams("listDefNames", TypeInfo.ofBoolean(), false, Optional.empty(), Collections.singletonList(ArgProviderRepr.value("true")))
             .addParams("base64Encode", TypeInfo.ofBoolean(), false, Optional.empty(), Collections.singletonList(ArgProviderRepr.value("false")))
             .addParams("compiledFileNameSuffix", TypeInfo.ofString(), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.value(StringUtil.doubleQuote("defnames.aterm"))))
@@ -247,13 +233,13 @@ public class TigerInputs {
                 tigerCompileFile,
                 tigerAltCompileFile
             )
-            .addAutoCommandDefs(AutoCommandDefRepr.builder()
+            .addAutoCommandDefs(AutoCommandRequestRepr.builder()
                 .commandDef(tigerCompileFile.type())
                 .build()
             )
-            .addAutoCommandDefs(AutoCommandDefRepr.builder()
+            .addAutoCommandDefs(AutoCommandRequestRepr.builder()
                 .commandDef(tigerAltCompileFile.type())
-                .putRawArgs("base64Encode", "true")
+                .putInitialArgs("base64Encode", "true")
                 .build()
             )
             .cliCommand(CliCommandRepr.builder()
@@ -273,10 +259,7 @@ public class TigerInputs {
                 .build()
             )
             .addEditorContextMenuItems(
-                MenuCommandActionRepr.builder()
-                    .commandDefType(tigerShowParsedAst.type())
-                    .executionType(CommandExecutionType.ManualContinuous)
-                    .build()
+                MenuItemRepr.commandAction(CommandActionRepr.of(tigerShowParsedAst.type(), CommandExecutionType.ManualContinuous))
             )
             .shared(shared)
             ;

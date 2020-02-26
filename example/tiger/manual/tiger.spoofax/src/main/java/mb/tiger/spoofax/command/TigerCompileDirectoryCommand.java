@@ -48,15 +48,9 @@ public class TigerCompileDirectoryCommand implements CommandDef<TigerCompileDire
         );
     }
 
-    @Override public EnumSetView<CommandContextType> getRequiredContextTypes() {
-        return EnumSetView.of(
-            CommandContextType.Directory
-        );
-    }
-
     @Override public ParamDef getParamDef() {
         return new ParamDef(
-            Param.of("dir", ResourcePath.class, true, ListView.of(ArgProvider.context()))
+            Param.of("dir", ResourcePath.class, true, ListView.of(ArgProvider.context(CommandContextType.DirectoryPath)))
         );
     }
 

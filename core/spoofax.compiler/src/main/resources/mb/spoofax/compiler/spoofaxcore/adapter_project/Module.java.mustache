@@ -15,8 +15,9 @@ import mb.pie.api.TaskDefs;
 import mb.resource.ResourceService;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.LanguageScope;
-import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.AutoCommandRequest;
+import mb.spoofax.core.language.command.CommandDef;
+import mb.spoofax.core.language.command.HierarchicalResourceType;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
@@ -133,7 +134,7 @@ public class {{genModule.id}} {
     ) {
         final HashSet<AutoCommandRequest<?>> autoCommandDefs = new HashSet<>();
 {{#providedAutoCommandDefs}}
-        autoCommandDefs.add(new AutoCommandRequest<>({{name}}, new RawArgs(MapView.of({{#value.rawArgs.entrySet}}new EntryView<>("{{getKey}}", {{getValue}}){{^-last}},{{/-last}}{{/value.rawArgs.entrySet}}))));
+        autoCommandDefs.add(AutoCommandRequest.of({{name}}, new RawArgs(MapView.of({{#value.initialArgs.entrySet}}new EntryView<>("{{getKey}}", {{getValue}}){{^-last}},{{/-last}}{{/value.initialArgs.entrySet}})){{#value.resourceTypes}}, HierarchicalResourceType.{{this}}{{/value.resourceTypes}}));
 {{/providedAutoCommandDefs}}
         return autoCommandDefs;
     }

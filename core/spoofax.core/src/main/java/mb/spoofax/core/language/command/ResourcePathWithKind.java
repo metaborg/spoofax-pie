@@ -16,6 +16,19 @@ public abstract class ResourcePathWithKind implements Serializable {
         R file(ResourcePath path);
     }
 
+    public static ResourcePathWithKind project(ResourcePath path) {
+        return ResourcePathWithKinds.project(path);
+    }
+
+    public static ResourcePathWithKind directory(ResourcePath path) {
+        return ResourcePathWithKinds.directory(path);
+    }
+
+    public static ResourcePathWithKind file(ResourcePath path) {
+        return ResourcePathWithKinds.file(path);
+    }
+
+
     public abstract <R> R match(Cases<R> cases);
 
     public ResourcePath getPath() {
@@ -25,6 +38,7 @@ public abstract class ResourcePathWithKind implements Serializable {
     public ResourcePathWithKinds.CaseOfMatchers.TotalMatcher_Project caseOf() {
         return ResourcePathWithKinds.caseOf(this);
     }
+
 
     @Override public abstract int hashCode();
 

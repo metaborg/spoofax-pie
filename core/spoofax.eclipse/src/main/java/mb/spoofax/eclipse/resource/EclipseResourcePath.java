@@ -38,6 +38,11 @@ public class EclipseResourcePath implements ResourcePath {
     }
 
 
+    public IPath getEclipsePath() {
+        return path;
+    }
+
+
     @Override public String getQualifier() {
         return EclipseResourceRegistry.qualifier;
     }

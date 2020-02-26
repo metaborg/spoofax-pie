@@ -1,11 +1,15 @@
 package mb.spoofax.core.language.command.arg;
 
+import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
-import mb.spoofax.core.language.command.CommandContext;
+import mb.spoofax.core.language.command.CommandContextType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
+import java.util.EnumSet;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Param {
     private final String id;
@@ -81,11 +85,35 @@ public class Param {
         return providers;
     }
 
+    public EnumSetView<CommandContextType> getUsedContextTypes() {
+        return EnumSetView.of(providers.stream()
+            .flatMap(provider -> provider.caseOf()
+                .context(type -> type)
+                .otherwiseEmpty()
+                .map(Stream::of)
+                .orElseGet(Stream::empty)
+            )
+            .collect(Collectors.toCollection(() -> EnumSet.noneOf(CommandContextType.class)))
+        );
+    }
+
+    public EnumSetView<CommandContextType> getUsedEnclosingContextTypes() {
+        return EnumSetView.of(providers.stream()
+            .flatMap(provider -> provider.caseOf()
+                .enclosingContext(type -> type)
+                .otherwiseEmpty()
+                .map(Stream::of)
+                .orElseGet(Stream::empty)
+            )
+            .collect(Collectors.toCollection(() -> EnumSet.noneOf(CommandContextType.class)))
+        );
+    }
+
 
     @Override public boolean equals(@Nullable Object obj) {
         if(this == obj) return true;
         if(obj == null || getClass() != obj.getClass()) return false;
-        final Param other = (Param) obj;
+        final Param other = (Param)obj;
         return required == other.required &&
             id.equals(other.id) &&
             type.equals(other.type) &&

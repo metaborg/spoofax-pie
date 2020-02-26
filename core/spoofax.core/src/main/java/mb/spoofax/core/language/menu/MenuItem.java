@@ -1,29 +1,60 @@
 package mb.spoofax.core.language.menu;
 
-/**
- * A menu item, such as a menu, command, or separator.
- */
-public interface MenuItem {
+import mb.common.util.ADT;
+import mb.common.util.ListView;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-    /**
-     * Gets the display name of the menu item.
-     *
-     * @return The name to display to the user; or an empty string.
-     */
-    String getDisplayName();
+import java.io.Serializable;
 
-    /**
-     * Gets a short description of the menu item.
-     *
-     * @return A short description to display to the user; or an empty string.
-     */
-    String getDescription();
+@ADT
+public abstract class MenuItem implements Serializable {
+    interface Cases<R> {
+        R commandAction(CommandAction commandAction);
 
-    /**
-     * Accepts a menu item visitor.
-     *
-     * @param visitor The visitor.
-     */
-    void accept(MenuItemVisitor visitor);
+        R menu(String displayName, @Nullable String description, ListView<MenuItem> items);
 
+        R separator(@Nullable String displayName);
+    }
+
+    public static MenuItem commandAction(CommandAction commandAction) {
+        return MenuItems.commandAction(commandAction);
+    }
+
+    public static MenuItem menu(String displayName, String description, ListView<MenuItem> items) {
+        return MenuItems.menu(displayName, description, items);
+    }
+
+    public static MenuItem menu(String displayName, String description, MenuItem... items) {
+        return MenuItems.menu(displayName, description, ListView.of(items));
+    }
+
+    public static MenuItem menu(String displayName, ListView<MenuItem> items) {
+        return MenuItems.menu(displayName, null, items);
+    }
+
+    public static MenuItem menu(String displayName, MenuItem... items) {
+        return MenuItems.menu(displayName, null, ListView.of(items));
+    }
+
+    public static MenuItem separator(String description) {
+        return MenuItems.separator(description);
+    }
+
+    public static MenuItem separator() {
+        return MenuItems.separator(null);
+    }
+
+
+    public abstract <R> R match(Cases<R> cases);
+
+    public MenuItems.CaseOfMatchers.TotalMatcher_CommandAction caseOf() {
+        return MenuItems.caseOf(this);
+    }
+
+
+    @Override public abstract int hashCode();
+
+    @Override public abstract boolean equals(@Nullable Object obj);
+
+    @Override public abstract String toString();
 }

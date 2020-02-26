@@ -32,6 +32,11 @@ public class EnumSetView<E extends Enum<E>> extends BaseCollectionView<E, EnumSe
         return new EnumSetView<>(EnumSet.of(element, elements));
     }
 
+    public static <E extends Enum<E>> EnumSetView<E> of(EnumSet<? extends E> enumSet) {
+        return new EnumSetView<>(enumSet);
+    }
+
+
     public static <E extends Enum<E>> EnumSetView<E> copyOf(EnumSet<E> enumSet) {
         return new EnumSetView<>(EnumSet.copyOf(enumSet));
     }
@@ -45,7 +50,7 @@ public class EnumSetView<E extends Enum<E>> extends BaseCollectionView<E, EnumSe
     @Override public boolean equals(@Nullable Object obj) {
         if(this == obj) return true;
         if(obj == null || getClass() != obj.getClass()) return false;
-        final EnumSetView<?> other = (EnumSetView<?>) obj;
+        final EnumSetView<?> other = (EnumSetView<?>)obj;
         return collection.equals(other.collection);
     }
 
