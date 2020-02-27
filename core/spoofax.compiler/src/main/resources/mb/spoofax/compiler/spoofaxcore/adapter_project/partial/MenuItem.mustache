@@ -1,9 +1,9 @@
 {{#getCommandAction}}
 CommandAction.builder().with(
-    {{#commandDefType}}{{#getInjectedCommandDef}}{{/getInjectedCommandDef}}{{/commandDefType}},
-    CommandExecutionType.{{executionType}},
-    {{#displayName}}"{{this}}"{{/displayName}}{{^displayName}}null{{/displayName}},
-    new RawArgs(MapView.<String, Serializable>of({{#initialArgs.entrySet}}new EntryView<String, Serializable>("{{getKey}}", {{getValue}}){{^-last}},{{/-last}}{{/initialArgs.entrySet}}))
+    {{#commandRequest.commandDefType}}{{#getInjectedCommandDef}}{{/getInjectedCommandDef}}{{/commandRequest.commandDefType}},
+    CommandExecutionType.{{commandRequest.executionType}},
+    {{#displayName}}"{{this}}"{{/displayName}}{{^displayName}}{{#commandRequest.commandDefType}}{{#getInjectedCommandDef}}{{/getInjectedCommandDef}}.getDisplayName(){{/commandRequest.commandDefType}}{{/displayName}},
+    new RawArgs(MapView.<String, Serializable>of({{#commandRequest.initialArgs.entrySet}}new EntryView<String, Serializable>("{{getKey}}", {{getValue}}){{^-last}},{{/-last}}{{/commandRequest.initialArgs.entrySet}}))
 ).buildItem()
 {{/getCommandAction}}
 {{#getMenu}}

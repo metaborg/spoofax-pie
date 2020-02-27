@@ -259,7 +259,7 @@ public class TigerInputs {
                 .build()
             )
             .addEditorContextMenuItems(
-                MenuItemRepr.commandAction(CommandActionRepr.of(tigerShowParsedAst.type(), CommandExecutionType.ManualContinuous))
+                CommandActionRepr.builder().manualOnce(tigerShowParsedAst).buildItem()
             )
             .shared(shared)
             ;

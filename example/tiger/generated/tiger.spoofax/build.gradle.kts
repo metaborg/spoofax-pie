@@ -2,9 +2,9 @@ import mb.common.util.ListView
 import mb.spoofax.compiler.cli.CliCommandRepr
 import mb.spoofax.compiler.cli.CliParamRepr
 import mb.spoofax.compiler.command.ArgProviderRepr
+import mb.spoofax.compiler.command.AutoCommandRequestRepr
 import mb.spoofax.compiler.command.CommandDefRepr
 import mb.spoofax.compiler.command.ParamRepr
-import mb.spoofax.compiler.command.AutoCommandRequestRepr
 import mb.spoofax.compiler.gradle.spoofaxcore.AdapterProjectCompilerSettings
 import mb.spoofax.compiler.menu.CommandActionRepr
 import mb.spoofax.compiler.menu.MenuItemRepr
@@ -188,37 +188,34 @@ adapterProjectCompiler {
       ))
 
       // Menu bindings
-      fun CommandDefRepr.action(execType: CommandExecutionType, suffix: String = "", initialArgs: Map<String, String> = mapOf()) = MenuItemRepr.commandAction(CommandActionRepr.of(type(), execType, "${displayName()}$suffix", initialArgs))
-      fun CommandDefRepr.actionOnce(suffix: String = "", initialArgs: Map<String, String> = mapOf()) = action(CommandExecutionType.ManualOnce, "$suffix (once)", initialArgs)
-      fun CommandDefRepr.actionCont(suffix: String = "", initialArgs: Map<String, String> = mapOf()) = action(CommandExecutionType.ManualContinuous, "$suffix (continuous)", initialArgs)
       val altCompileFileActions = listOf(
-        altCompileFileCommand.actionOnce("- default"),
-        altCompileFileCommand.actionOnce("- list literal values instead", mapOf(Pair("listDefNames", "false"), Pair("compiledFileNameSuffix", "\"litvals.aterm\""))),
-        altCompileFileCommand.actionOnce("- base64 encode", mapOf(Pair("base64Encode", "true"), Pair("compiledFileNameSuffix", "\"defnames_base64.txt\""))),
-        altCompileFileCommand.actionOnce("- list literal values instead + base64 encode", mapOf(Pair("listDefNames", "false"), Pair("base64Encode", "true"), Pair("compiledFileNameSuffix", "\"litvals_base64.txt\""))),
-        altCompileFileCommand.actionCont("- default"),
-        altCompileFileCommand.actionCont("- list literal values instead", mapOf(Pair("listDefNames", "false"), Pair("compiledFileNameSuffix", "\"litvals.aterm\""))),
-        altCompileFileCommand.actionCont("- base64 encode", mapOf(Pair("base64Encode", "true"), Pair("compiledFileNameSuffix", "\"defnames_base64.txt\""))),
-        altCompileFileCommand.actionCont("- list literal values instead + base64 encode", mapOf(Pair("listDefNames", "false"), Pair("base64Encode", "true"), Pair("compiledFileNameSuffix", "\"litvals_base64.txt\"")))
+        CommandActionRepr.builder().manualOnce(altCompileFileCommand, " - default").fileRequired().buildItem(),
+        CommandActionRepr.builder().manualOnce(altCompileFileCommand, " - list literal values instead", mapOf(Pair("listDefNames", "false"), Pair("compiledFileNameSuffix", "\"litvals.aterm\""))).fileRequired().buildItem(),
+        CommandActionRepr.builder().manualOnce(altCompileFileCommand, " - base64 encode", mapOf(Pair("base64Encode", "true"), Pair("compiledFileNameSuffix", "\"defnames_base64.txt\""))).fileRequired().buildItem(),
+        CommandActionRepr.builder().manualOnce(altCompileFileCommand, " - list literal values instead + base64 encode", mapOf(Pair("listDefNames", "false"), Pair("base64Encode", "true"), Pair("compiledFileNameSuffix", "\"litvals_base64.txt\""))).fileRequired().buildItem(),
+        CommandActionRepr.builder().manualContinuous(altCompileFileCommand, " - default").fileRequired().buildItem(),
+        CommandActionRepr.builder().manualContinuous(altCompileFileCommand, " - list literal values instead", mapOf(Pair("listDefNames", "false"), Pair("compiledFileNameSuffix", "\"litvals.aterm\""))).fileRequired().buildItem(),
+        CommandActionRepr.builder().manualContinuous(altCompileFileCommand, " - base64 encode", mapOf(Pair("base64Encode", "true"), Pair("compiledFileNameSuffix", "\"defnames_base64.txt\""))).fileRequired().buildItem(),
+        CommandActionRepr.builder().manualContinuous(altCompileFileCommand, " - list literal values instead + base64 encode", mapOf(Pair("listDefNames", "false"), Pair("base64Encode", "true"), Pair("compiledFileNameSuffix", "\"litvals_base64.txt\""))).fileRequired().buildItem()
       )
       val mainAndEditorMenu = listOf(
         MenuItemRepr.menu("Compile", listOf(
-          compileFileCommand.action(CommandExecutionType.ManualOnce)
+          CommandActionRepr.builder().manualOnce(compileFileCommand).fileRequired().buildItem()
         ) + altCompileFileActions),
         MenuItemRepr.menu("Debug",
           MenuItemRepr.menu("Syntax",
-            showParsedAstCommand.actionOnce(),
-            showParsedAstCommand.actionCont()
+            CommandActionRepr.builder().manualOnce(showParsedAstCommand).buildItem(),
+            CommandActionRepr.builder().manualContinuous(showParsedAstCommand).buildItem()
           ),
           MenuItemRepr.menu("Static Semantics",
-            showAnalyzedAstCommand.actionOnce(),
-            showAnalyzedAstCommand.actionCont(),
-            showScopeGraphCommand.actionOnce(),
-            showScopeGraphCommand.actionCont()
+            CommandActionRepr.builder().manualOnce(showAnalyzedAstCommand).buildItem(),
+            CommandActionRepr.builder().manualContinuous(showAnalyzedAstCommand).buildItem(),
+            CommandActionRepr.builder().manualOnce(showScopeGraphCommand).buildItem(),
+            CommandActionRepr.builder().manualContinuous(showScopeGraphCommand).buildItem()
           ),
           MenuItemRepr.menu("Transformations",
-            showDesugaredAstCommand.actionOnce(),
-            showDesugaredAstCommand.actionCont()
+            CommandActionRepr.builder().manualOnce(showDesugaredAstCommand).buildItem(),
+            CommandActionRepr.builder().manualContinuous(showDesugaredAstCommand).buildItem()
           )
         )
       )
@@ -226,19 +223,19 @@ adapterProjectCompiler {
       builder.addAllEditorContextMenuItems(mainAndEditorMenu)
       builder.addResourceContextMenuItems(
         MenuItemRepr.menu("Compile", listOf(
-          compileFileCommand.action(CommandExecutionType.ManualOnce),
-          compileDirectoryCommand.action(CommandExecutionType.ManualOnce)
+          CommandActionRepr.builder().manualOnce(compileFileCommand).fileRequired().buildItem(),
+          CommandActionRepr.builder().manualOnce(compileDirectoryCommand).directoryRequired().buildItem()
         ) + altCompileFileActions),
         MenuItemRepr.menu("Debug",
           MenuItemRepr.menu("Syntax",
-            showParsedAstCommand.actionOnce()
+            CommandActionRepr.builder().manualOnce(showParsedAstCommand).buildItem()
           ),
           MenuItemRepr.menu("Static Semantics",
-            showAnalyzedAstCommand.actionOnce(),
-            showScopeGraphCommand.actionOnce()
+            CommandActionRepr.builder().manualOnce(showAnalyzedAstCommand).buildItem(),
+            CommandActionRepr.builder().manualOnce(showScopeGraphCommand).buildItem()
           ),
           MenuItemRepr.menu("Transformations",
-            showDesugaredAstCommand.actionOnce()
+            CommandActionRepr.builder().manualOnce(showDesugaredAstCommand).buildItem()
           )
         )
       )

@@ -50,14 +50,11 @@ adapterProjectCompiler {
 
 
       // Menu bindings
-      fun CommandDefRepr.action(execType: CommandExecutionType, suffix: String = "", initialArgs: Map<String, String> = mapOf()) = MenuItemRepr.commandAction(CommandActionRepr.of(type(), execType, "${displayName()}$suffix", initialArgs))
-      fun CommandDefRepr.actionOnce(suffix: String = "", initialArgs: Map<String, String> = mapOf()) = action(CommandExecutionType.ManualOnce, "$suffix (once)", initialArgs)
-      fun CommandDefRepr.actionCont(suffix: String = "", initialArgs: Map<String, String> = mapOf()) = action(CommandExecutionType.ManualContinuous, "$suffix (continuous)", initialArgs)
       val mainAndEditorMenu = listOf(
         MenuItemRepr.menu("Debug",
           MenuItemRepr.menu("Static Semantics",
-            showScopeGraphCommand.actionOnce(),
-            showScopeGraphCommand.actionCont()
+            CommandActionRepr.builder().manualOnce(showScopeGraphCommand).enclosingProjectRequired().buildItem(),
+            CommandActionRepr.builder().manualContinuous(showScopeGraphCommand).enclosingProjectRequired().buildItem()
           )
         )
       )
@@ -66,7 +63,7 @@ adapterProjectCompiler {
       builder.addResourceContextMenuItems(
         MenuItemRepr.menu("Debug",
           MenuItemRepr.menu("Static Semantics",
-            showScopeGraphCommand.actionOnce()
+            CommandActionRepr.builder().manualOnce(showScopeGraphCommand).enclosingProjectRequired().buildItem()
           )
         )
       )
