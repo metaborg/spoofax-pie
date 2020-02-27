@@ -72,7 +72,7 @@ public class EditorContextMenu extends MenuShared {
                 if(commandRequest.executionType() == CommandExecutionType.AutomaticContinuous) {
                     return; // Automatic continuous execution is not supported when manually invoking commands.
                 }
-                if(context.supportsAnyEditorFileType(commandAction.requiredEditorFileTypes())) {
+                if(!context.supportsAnyEditorFileType(commandAction.requiredEditorFileTypes())) {
                     return; // Command requires a certain type of file, but the context does not have one.
                 }
                 if(!context.supportsAnyEditorSelectionType(commandAction.requiredEditorSelectionType())) {

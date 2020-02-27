@@ -15,25 +15,39 @@ import java.util.Set;
 public interface CommandAction {
     class Builder extends ImmutableCommandAction.Builder {
         public Builder with(CommandDef<?> commandDef, CommandExecutionType executionType) {
-            return with(commandDef, executionType, "");
+            displayName(commandDef.getDisplayName());
+            description(commandDef.getDescription());
+            commandRequest(commandDef.request(executionType));
+            return this;
         }
 
-        public Builder with(CommandDef<?> commandDef, CommandExecutionType executionType, String suffix) {
-            displayName(commandDef.getDisplayName() + suffix);
+        public Builder with(CommandDef<?> commandDef, CommandExecutionType executionType, String displayName) {
+            displayName(displayName);
             description(commandDef.getDescription());
             commandRequest(commandDef.request(executionType));
             return this;
         }
 
         public Builder with(CommandDef<?> commandDef, CommandExecutionType executionType, RawArgs initialArgs) {
-            return with(commandDef, executionType, "", initialArgs);
-        }
-
-        public Builder with(CommandDef<?> commandDef, CommandExecutionType executionType, String suffix, RawArgs initialArgs) {
-            displayName(commandDef.getDisplayName() + suffix);
+            displayName(commandDef.getDisplayName());
             description(commandDef.getDescription());
             commandRequest(commandDef.request(executionType, initialArgs));
             return this;
+        }
+
+        public Builder with(CommandDef<?> commandDef, CommandExecutionType executionType, String displayName, RawArgs initialArgs) {
+            displayName(displayName);
+            description(commandDef.getDescription());
+            commandRequest(commandDef.request(executionType, initialArgs));
+            return this;
+        }
+
+        public Builder withSuffix(CommandDef<?> commandDef, CommandExecutionType executionType, String suffix) {
+            return with(commandDef, executionType, commandDef.getDisplayName() + suffix);
+        }
+
+        public Builder withSuffix(CommandDef<?> commandDef, CommandExecutionType executionType, String suffix, RawArgs initialArgs) {
+            return with(commandDef, executionType, commandDef.getDisplayName() + suffix, initialArgs);
         }
 
 
@@ -42,7 +56,7 @@ public interface CommandAction {
         }
 
         public Builder manualOnce(CommandDef<?> commandDef, String suffix) {
-            return with(commandDef, CommandExecutionType.ManualOnce, " " + suffix);
+            return withSuffix(commandDef, CommandExecutionType.ManualOnce, " " + suffix);
         }
 
         public Builder manualOnce(CommandDef<?> commandDef, RawArgs initialArgs) {
@@ -50,24 +64,24 @@ public interface CommandAction {
         }
 
         public Builder manualOnce(CommandDef<?> commandDef, String suffix, RawArgs initialArgs) {
-            return with(commandDef, CommandExecutionType.ManualOnce, " " + suffix, initialArgs);
+            return withSuffix(commandDef, CommandExecutionType.ManualOnce, " " + suffix, initialArgs);
         }
 
 
         public Builder manualContinuous(CommandDef<?> commandDef) {
-            return with(commandDef, CommandExecutionType.ManualContinuous, " (continuous)");
+            return withSuffix(commandDef, CommandExecutionType.ManualContinuous, " (continuous)");
         }
 
         public Builder manualContinuous(CommandDef<?> commandDef, String suffix) {
-            return with(commandDef, CommandExecutionType.ManualContinuous, " " + suffix + " (continuous)");
+            return withSuffix(commandDef, CommandExecutionType.ManualContinuous, " " + suffix + " (continuous)");
         }
 
         public Builder manualContinuous(CommandDef<?> commandDef, RawArgs initialArgs) {
-            return with(commandDef, CommandExecutionType.ManualContinuous, " (continuous)", initialArgs);
+            return withSuffix(commandDef, CommandExecutionType.ManualContinuous, " (continuous)", initialArgs);
         }
 
         public Builder manualContinuous(CommandDef<?> commandDef, String suffix, RawArgs initialArgs) {
-            return with(commandDef, CommandExecutionType.ManualContinuous, " " + suffix + " (continuous)", initialArgs);
+            return withSuffix(commandDef, CommandExecutionType.ManualContinuous, " " + suffix + " (continuous)", initialArgs);
         }
 
 
