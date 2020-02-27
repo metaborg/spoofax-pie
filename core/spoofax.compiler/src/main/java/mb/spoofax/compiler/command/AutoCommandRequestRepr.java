@@ -16,10 +16,6 @@ public interface AutoCommandRequestRepr extends Serializable {
         return new Builder();
     }
 
-    static AutoCommandRequestRepr of(TypeInfo commandDef) {
-        return builder().commandDef(commandDef).build();
-    }
-
     static AutoCommandRequestRepr of(TypeInfo commandDef, HierarchicalResourceType... resourceTypes) {
         return builder().commandDef(commandDef).addResourceTypes(resourceTypes).build();
     }

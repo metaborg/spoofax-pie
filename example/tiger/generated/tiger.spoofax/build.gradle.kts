@@ -18,6 +18,7 @@ import mb.spoofax.compiler.util.StringUtil
 import mb.spoofax.compiler.util.TypeInfo
 import mb.spoofax.core.language.command.CommandContextType
 import mb.spoofax.core.language.command.CommandExecutionType
+import mb.spoofax.core.language.command.HierarchicalResourceType
 import java.util.Optional
 
 plugins {
@@ -127,7 +128,7 @@ adapterProjectCompiler {
         .addParams("file", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), true, Optional.empty(), listOf(ArgProviderRepr.context(CommandContextType.FilePath)))
         .build()
       builder.addCommandDefs(compileFileCommand)
-      builder.addAutoCommandDefs(AutoCommandRequestRepr.of(compileFileCommand.type()))
+      builder.addAutoCommandDefs(AutoCommandRequestRepr.of(compileFileCommand.type(), HierarchicalResourceType.File))
 
       val compileDirectory = TypeInfo.of(taskPackageId, "TigerCompileDirectory")
       builder.addTaskDefs(compileDirectory)
@@ -141,7 +142,7 @@ adapterProjectCompiler {
         .addParams("dir", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), true, Optional.empty(), listOf(ArgProviderRepr.context(CommandContextType.DirectoryPath)))
         .build()
       builder.addCommandDefs(compileDirectoryCommand)
-      builder.addAutoCommandDefs(mb.spoofax.compiler.command.AutoCommandRequestRepr.of(compileDirectoryCommand.type()))
+      builder.addAutoCommandDefs(AutoCommandRequestRepr.of(compileDirectoryCommand.type(), HierarchicalResourceType.Directory))
 
       val altCompileFile = TypeInfo.of(taskPackageId, "TigerAltCompileFile")
       builder.addTaskDefs(altCompileFile)
