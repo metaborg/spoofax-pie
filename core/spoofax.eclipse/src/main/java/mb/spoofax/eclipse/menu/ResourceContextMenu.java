@@ -5,6 +5,7 @@ import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.command.CommandContext;
 import mb.spoofax.core.language.command.CommandRequest;
 import mb.spoofax.core.language.command.HierarchicalResourceType;
+import mb.spoofax.core.language.command.ResourcePathWithKind;
 import mb.spoofax.core.language.menu.MenuItem;
 import mb.spoofax.eclipse.EclipseIdentifiers;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
@@ -56,10 +57,16 @@ public abstract class ResourceContextMenu extends MenuShared {
         // Selections.
         // OPTO: prevent allocating ArrayLists of unused Eclipse resource objects.
         final ArrayList<IProject> eclipseProjects = SelectionUtil.toProjects(selection);
-        final ArrayList<CommandContext> projectContexts = eclipseProjects.stream().map(EclipseResourcePath::new).map(CommandContext::new).collect(Collectors.toCollection(ArrayList::new));
+        final ArrayList<CommandContext> projectContexts = eclipseProjects.stream()
+            .map(project -> ResourcePathWithKind.project(new EclipseResourcePath(project)))
+            .map(CommandContext::new)
+            .collect(Collectors.toCollection(ArrayList::new));
         final boolean hasProjects = !projectContexts.isEmpty();
         final ArrayList<IContainer> eclipseContainers = SelectionUtil.toContainers(selection);
-        final ArrayList<CommandContext> directoryContexts = eclipseContainers.stream().map(EclipseResourcePath::new).map(CommandContext::new).collect(Collectors.toCollection(ArrayList::new));
+        final ArrayList<CommandContext> directoryContexts = eclipseContainers.stream()
+            .map(directory -> ResourcePathWithKind.directory(new EclipseResourcePath(directory)))
+            .map(CommandContext::new)
+            .collect(Collectors.toCollection(ArrayList::new));
         final boolean hasDirectories = !directoryContexts.isEmpty();
         final ArrayList<IFile> eclipseLangFiles = SelectionUtil.toFiles(selection);
         for(Iterator<IFile> it = eclipseLangFiles.iterator(); it.hasNext(); ) {
@@ -69,8 +76,13 @@ public abstract class ResourceContextMenu extends MenuShared {
                 it.remove(); // Remove non-language files.
             }
         }
-        final ArrayList<EclipseResourcePath> langFiles = eclipseLangFiles.stream().map(EclipseResourcePath::new).collect(Collectors.toCollection(ArrayList::new));
-        final ArrayList<CommandContext> langFileContexts = langFiles.stream().map(CommandContext::new).collect(Collectors.toCollection(ArrayList::new));
+        final ArrayList<EclipseResourcePath> langFiles = eclipseLangFiles.stream()
+            .map(EclipseResourcePath::new)
+            .collect(Collectors.toCollection(ArrayList::new));
+        final ArrayList<CommandContext> langFileContexts = langFiles.stream()
+            .map(ResourcePathWithKind::file)
+            .map(CommandContext::new)
+            .collect(Collectors.toCollection(ArrayList::new));
         final boolean hasFiles = !langFiles.isEmpty();
 
         // Add/remove nature.
