@@ -54,8 +54,8 @@ adapterProjectCompiler {
       val mainAndEditorMenu = listOf(
         MenuItemRepr.menu("Debug",
           MenuItemRepr.menu("Static Semantics",
-            CommandActionRepr.builder().manualOnce(showScopeGraphCommand).enclosingProjectRequired().buildItem(),
-            CommandActionRepr.builder().manualContinuous(showScopeGraphCommand).enclosingProjectRequired().buildItem()
+            CommandActionRepr.builder().manualOnce(showScopeGraphCommand).fileRequired().enclosingProjectRequired().buildItem(),
+            CommandActionRepr.builder().manualContinuous(showScopeGraphCommand).fileRequired().enclosingProjectRequired().buildItem()
           )
         )
       )
@@ -64,7 +64,7 @@ adapterProjectCompiler {
       builder.addResourceContextMenuItems(
         MenuItemRepr.menu("Debug",
           MenuItemRepr.menu("Static Semantics",
-            CommandActionRepr.builder().manualOnce(showScopeGraphCommand).enclosingProjectRequired().buildItem()
+            CommandActionRepr.builder().manualOnce(showScopeGraphCommand).fileRequired().enclosingProjectRequired().buildItem()
           )
         )
       )

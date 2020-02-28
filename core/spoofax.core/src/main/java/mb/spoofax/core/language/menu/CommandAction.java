@@ -146,8 +146,8 @@ public interface CommandAction {
     Set<HierarchicalResourceType> requiredResourceTypes();
 
     /**
-     * Gets whether this  command action, in resource context menus, should only be shown when the enclosing resource of
-     * the selected resource is of a type in this set. An empty set indicates that there is no requirement.
+     * Gets whether this command action, in context menus, should only be shown when the enclosing resource of the
+     * resource in context is of a type in this set. An empty set indicates that there is no requirement.
      */
     Set<EnclosingCommandContextType> requiredEnclosingResourceTypes();
 }

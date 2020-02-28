@@ -48,27 +48,27 @@ public class CommandContext implements Serializable {
 
 
     public static CommandContext ofProject(ResourcePath project) {
-        return new CommandContext(ResourcePathWithKinds.project(project));
+        return new CommandContext(ResourcePathWithKind.project(project));
     }
 
     public static CommandContext ofDirectory(ResourcePath directory) {
-        return new CommandContext(ResourcePathWithKinds.directory(directory));
+        return new CommandContext(ResourcePathWithKind.directory(directory));
     }
 
     public static CommandContext ofFile(ResourcePath file) {
-        return new CommandContext(ResourcePathWithKinds.file(file));
+        return new CommandContext(ResourcePathWithKind.file(file));
     }
 
     public static CommandContext ofFile(ResourcePath file, Selection selection) {
-        return new CommandContext(ResourcePathWithKinds.file(file), selection);
+        return new CommandContext(ResourcePathWithKind.file(file), selection);
     }
 
     public static CommandContext ofFile(ResourcePath file, Region region) {
-        return new CommandContext(ResourcePathWithKinds.file(file), Selections.region(region));
+        return new CommandContext(ResourcePathWithKind.file(file), Selections.region(region));
     }
 
     public static CommandContext ofFile(ResourcePath file, int offset) {
-        return new CommandContext(ResourcePathWithKinds.file(file), Selections.offset(offset));
+        return new CommandContext(ResourcePathWithKind.file(file), Selections.offset(offset));
     }
 
     public static CommandContext ofResource(ResourceKey resource) {

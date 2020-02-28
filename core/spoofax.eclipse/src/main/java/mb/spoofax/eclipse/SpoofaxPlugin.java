@@ -42,7 +42,7 @@ public class SpoofaxPlugin extends AbstractUIPlugin {
             .pieModule(new PieModule(PieBuilderImpl::new))
             .build();
 
-        component.partClosedCallback().register();
+        component.getPartClosedCallback().register();
     }
 
     @Override public void stop(@NonNull BundleContext context) throws Exception {

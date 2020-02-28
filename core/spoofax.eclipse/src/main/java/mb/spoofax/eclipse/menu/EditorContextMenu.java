@@ -14,6 +14,7 @@ import mb.spoofax.eclipse.EclipseIdentifiers;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.SpoofaxEclipseComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
+import mb.spoofax.eclipse.command.EnclosingCommandContextProvider;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -26,11 +27,14 @@ import org.eclipse.ui.PlatformUI;
 import java.util.Optional;
 
 public class EditorContextMenu extends MenuShared {
+    private final EnclosingCommandContextProvider enclosingCommandContextProvider;
+
     private final EclipseLanguageComponent languageComponent;
 
 
     public EditorContextMenu(EclipseLanguageComponent languageComponent) {
         final SpoofaxEclipseComponent component = SpoofaxPlugin.getComponent();
+        enclosingCommandContextProvider = component.getEnclosingCommandContextProvider();
         this.languageComponent = languageComponent;
     }
 
@@ -78,7 +82,11 @@ public class EditorContextMenu extends MenuShared {
                 if(!context.supportsAnyEditorSelectionType(commandAction.requiredEditorSelectionTypes())) {
                     return; // Command requires a certain type of selection, but the context does not have one.
                 }
-                menu.add(createCommand(runCommandCommandId, commandRequest, context, commandAction.displayName(), commandAction.description()));
+                final @Nullable CommandContext finalContext = enclosingCommandContextProvider.selectRequired(context, commandAction.requiredEnclosingResourceTypes());
+                if(finalContext == null) {
+                    return; // Command requires a certain type of enclosing context, but context does not have one.
+                }
+                menu.add(createCommand(runCommandCommandId, commandRequest, finalContext, commandAction.displayName(), commandAction.description()));
             });
         }
 
