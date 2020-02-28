@@ -3,6 +3,7 @@ package mb.spoofax.core.language.command.arg;
 import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.spoofax.core.language.command.CommandContextType;
+import mb.spoofax.core.language.command.EnclosingCommandContextType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
@@ -97,7 +98,7 @@ public class Param {
         );
     }
 
-    public EnumSetView<CommandContextType> getUsedEnclosingContextTypes() {
+    public EnumSetView<EnclosingCommandContextType> getUsedEnclosingContextTypes() {
         return EnumSetView.of(providers.stream()
             .flatMap(provider -> provider.caseOf()
                 .enclosingContext(type -> type)
@@ -105,7 +106,7 @@ public class Param {
                 .map(Stream::of)
                 .orElseGet(Stream::empty)
             )
-            .collect(Collectors.toCollection(() -> EnumSet.noneOf(CommandContextType.class)))
+            .collect(Collectors.toCollection(() -> EnumSet.noneOf(EnclosingCommandContextType.class)))
         );
     }
 

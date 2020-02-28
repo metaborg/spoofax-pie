@@ -306,7 +306,7 @@ public class PieRunner {
     public void requireCommand(
         EclipseLanguageComponent languageComponent,
         CommandRequest<?> request,
-        ListView<CommandContext> contexts,
+        ListView<? extends CommandContext> contexts,
         SessionBase session,
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException {

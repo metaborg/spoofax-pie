@@ -62,7 +62,7 @@ abstract class MenuShared extends CompoundContributionItem implements IWorkbench
         return createCommand(commandId, commandRequest, ListView.of(context), displayName, description);
     }
 
-    protected CommandContributionItem createCommand(String commandId, CommandRequest<?> commandRequest, ListView<CommandContext> contexts, String displayName, String description) {
+    protected CommandContributionItem createCommand(String commandId, CommandRequest<?> commandRequest, ListView<? extends CommandContext> contexts, String displayName, String description) {
         final CommandData data = new CommandData(commandRequest, contexts);
         final Map<String, String> parameters = new HashMap<>();
         final String serialized = SerializationUtil.serializeToString(data);

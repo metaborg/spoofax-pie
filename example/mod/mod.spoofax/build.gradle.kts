@@ -12,6 +12,7 @@ import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler.AdapterProjectInp
 import mb.spoofax.compiler.spoofaxcore.StylerCompiler
 import mb.spoofax.compiler.util.TypeInfo
 import mb.spoofax.core.language.command.CommandContextType
+import mb.spoofax.core.language.command.EnclosingCommandContextType
 import mb.spoofax.core.language.command.CommandExecutionType
 
 plugins {
@@ -42,8 +43,8 @@ adapterProjectCompiler {
         .description("Shows the scope graph for the program")
         .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
         .addAllParams(listOf(
-          ParamRepr.of("project", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), true, ArgProviderRepr.enclosingContext(CommandContextType.ProjectPath)),
-          ParamRepr.of("file", TypeInfo.of("mb.resource", "ResourceKey"), true, ArgProviderRepr.context(CommandContextType.FilePath))
+          ParamRepr.of("project", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), true, ArgProviderRepr.enclosingContext(EnclosingCommandContextType.Project)),
+          ParamRepr.of("file", TypeInfo.of("mb.resource", "ResourceKey"), true, ArgProviderRepr.context(CommandContextType.File))
         ))
         .build()
       builder.addCommandDefs(showScopeGraphCommand)

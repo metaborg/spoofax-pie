@@ -50,7 +50,7 @@ public class TigerCompileFileAltCommand implements CommandDef<TigerCompileFileAl
 
     @Override public ParamDef getParamDef() {
         return new ParamDef(
-            Param.of("file", ResourcePath.class, true, ListView.of(ArgProvider.context(CommandContextType.FilePath))),
+            Param.of("file", ResourcePath.class, true, ListView.of(ArgProvider.context(CommandContextType.File))),
             Param.of("listDefNames", boolean.class, false, ListView.of(ArgProvider.value(true))),
             Param.of("base64Encode", boolean.class, false, ListView.of(ArgProvider.value(false))),
             Param.of("compiledFileNameSuffix", String.class, true, ListView.of(ArgProvider.value("defnames.aterm")))

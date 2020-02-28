@@ -8,7 +8,7 @@ CommandAction.builder().with(
 .addRequiredEditorSelectionTypes({{#requiredEditorSelectionTypes}}EditorSelectionType.{{this}}{{^-last}},{{/-last}}{{/requiredEditorSelectionTypes}})
 .addRequiredEditorFileTypes({{#requiredEditorFileTypes}}EditorFileType.{{this}}{{^-last}},{{/-last}}{{/requiredEditorFileTypes}})
 .addRequiredResourceTypes({{#requiredResourceTypes}}HierarchicalResourceType.{{this}}{{^-last}},{{/-last}}{{/requiredResourceTypes}})
-.addRequiredEnclosingResourceTypes({{#requiredEnclosingResourceTypes}}HierarchicalResourceType.{{this}}{{^-last}},{{/-last}}{{/requiredEnclosingResourceTypes}})
+.addRequiredEnclosingResourceTypes({{#requiredEnclosingResourceTypes}}EnclosingCommandContextType.{{this}}{{^-last}},{{/-last}}{{/requiredEnclosingResourceTypes}})
 .buildItem()
 {{/getCommandAction}}
 {{#getMenu}}

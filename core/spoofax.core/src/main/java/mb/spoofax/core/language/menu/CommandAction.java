@@ -5,6 +5,7 @@ import mb.spoofax.core.language.command.CommandExecutionType;
 import mb.spoofax.core.language.command.CommandRequest;
 import mb.spoofax.core.language.command.EditorFileType;
 import mb.spoofax.core.language.command.EditorSelectionType;
+import mb.spoofax.core.language.command.EnclosingCommandContextType;
 import mb.spoofax.core.language.command.HierarchicalResourceType;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import org.immutables.value.Value;
@@ -102,12 +103,12 @@ public interface CommandAction {
         }
 
         public Builder enclosingDirectoryRequired() {
-            addRequiredEnclosingResourceTypes(HierarchicalResourceType.Directory);
+            addRequiredEnclosingResourceTypes(EnclosingCommandContextType.Directory);
             return this;
         }
 
         public Builder enclosingProjectRequired() {
-            addRequiredEnclosingResourceTypes(HierarchicalResourceType.Project);
+            addRequiredEnclosingResourceTypes(EnclosingCommandContextType.Project);
             return this;
         }
 
@@ -148,5 +149,5 @@ public interface CommandAction {
      * Gets whether this  command action, in resource context menus, should only be shown when the enclosing resource of
      * the selected resource is of a type in this set. An empty set indicates that there is no requirement.
      */
-    Set<HierarchicalResourceType> requiredEnclosingResourceTypes();
+    Set<EnclosingCommandContextType> requiredEnclosingResourceTypes();
 }

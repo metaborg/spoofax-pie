@@ -6,6 +6,7 @@ import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.command.CommandContext;
 import mb.spoofax.core.language.command.CommandContextType;
+import mb.spoofax.core.language.command.EnclosingCommandContextType;
 import mb.spoofax.core.language.command.ResourcePathWithKind;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -47,9 +48,9 @@ public class RawArgFromProviders {
         return null;
     }
 
-    private static @Nullable Serializable fromEnclosingContext(Class<? extends Serializable> type, CommandContextType enclosingContextType, CommandContext context) {
+    private static @Nullable Serializable fromEnclosingContext(Class<? extends Serializable> type, EnclosingCommandContextType enclosingContextType, CommandContext context) {
         final @Nullable CommandContext enclosingContext = context.getEnclosing(enclosingContextType);
         if(enclosingContext == null) return null;
-        return fromContext(type, enclosingContextType, enclosingContext);
+        return fromContext(type, enclosingContextType.toCommandContextType(), enclosingContext);
     }
 }

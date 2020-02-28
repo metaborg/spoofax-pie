@@ -50,7 +50,7 @@ public class TigerCompileDirectoryCommand implements CommandDef<TigerCompileDire
 
     @Override public ParamDef getParamDef() {
         return new ParamDef(
-            Param.of("dir", ResourcePath.class, true, ListView.of(ArgProvider.context(CommandContextType.DirectoryPath)))
+            Param.of("dir", ResourcePath.class, true, ListView.of(ArgProvider.context(CommandContextType.Directory)))
         );
     }
 

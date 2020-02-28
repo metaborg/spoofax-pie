@@ -12,7 +12,6 @@ import mb.spoofax.compiler.command.ArgProviderRepr;
 import mb.spoofax.compiler.command.AutoCommandRequestRepr;
 import mb.spoofax.compiler.command.CommandDefRepr;
 import mb.spoofax.compiler.menu.CommandActionRepr;
-import mb.spoofax.compiler.menu.MenuItemRepr;
 import mb.spoofax.compiler.spoofaxcore.AdapterProject;
 import mb.spoofax.compiler.spoofaxcore.AdapterProjectCompiler;
 import mb.spoofax.compiler.spoofaxcore.CliProjectCompiler;
@@ -198,7 +197,7 @@ public class TigerInputs {
             .displayName("'Compile' file (list literals)")
             .description("")
             .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous, CommandExecutionType.AutomaticContinuous)
-            .addParams("file", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.context(CommandContextType.FilePath)))
+            .addParams("file", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.context(CommandContextType.File)))
             .build();
 
         final CommandDefRepr tigerAltCompileFile = CommandDefRepr.builder()
@@ -208,7 +207,7 @@ public class TigerInputs {
             .displayName("'Alternative compile' file")
             .description("")
             .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous, CommandExecutionType.AutomaticContinuous)
-            .addParams("file", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.context(CommandContextType.FilePath)))
+            .addParams("file", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.context(CommandContextType.File)))
             .addParams("listDefNames", TypeInfo.ofBoolean(), false, Optional.empty(), Collections.singletonList(ArgProviderRepr.value("true")))
             .addParams("base64Encode", TypeInfo.ofBoolean(), false, Optional.empty(), Collections.singletonList(ArgProviderRepr.value("false")))
             .addParams("compiledFileNameSuffix", TypeInfo.ofString(), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.value(StringUtil.doubleQuote("defnames.aterm"))))

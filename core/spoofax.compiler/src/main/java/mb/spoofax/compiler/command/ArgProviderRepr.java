@@ -2,8 +2,7 @@ package mb.spoofax.compiler.command;
 
 import mb.common.util.ADT;
 import mb.spoofax.core.language.command.CommandContextType;
-import mb.spoofax.core.language.command.arg.ArgProvider;
-import mb.spoofax.core.language.command.arg.ArgProviders;
+import mb.spoofax.core.language.command.EnclosingCommandContextType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
@@ -15,7 +14,7 @@ public abstract class ArgProviderRepr implements Serializable {
 
         R context(CommandContextType contextType);
 
-        R enclosingContext(CommandContextType contextType);
+        R enclosingContext(EnclosingCommandContextType enclosingContextType);
     }
 
     public static ArgProviderRepr value(String code) {
@@ -26,10 +25,9 @@ public abstract class ArgProviderRepr implements Serializable {
         return ArgProviderReprs.context(contextType);
     }
 
-    public static ArgProviderRepr enclosingContext(CommandContextType contextType) {
-        return ArgProviderReprs.enclosingContext(contextType);
+    public static ArgProviderRepr enclosingContext(EnclosingCommandContextType enclosingContextType) {
+        return ArgProviderReprs.enclosingContext(enclosingContextType);
     }
-
 
 
     public abstract <R> R match(Cases<R> cases);
@@ -41,8 +39,8 @@ public abstract class ArgProviderRepr implements Serializable {
     public String toJavaCode() {
         return caseOf()
             .value((code) -> "ArgProvider.value(" + code + ")")
-            .context((t) -> "ArgProvider.context(mb.spoofax.core.language.command.CommandContextType." + t +")")
-            .enclosingContext((t) -> "ArgProvider.enclosingContext(mb.spoofax.core.language.command.CommandContextType." + t +")")
+            .context((t) -> "ArgProvider.context(mb.spoofax.core.language.command.CommandContextType." + t + ")")
+            .enclosingContext((t) -> "ArgProvider.enclosingContext(mb.spoofax.core.language.command.EnclosingCommandContextType." + t + ")")
             ;
     }
 

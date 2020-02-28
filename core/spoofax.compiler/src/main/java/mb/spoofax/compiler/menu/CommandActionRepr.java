@@ -5,6 +5,7 @@ import mb.spoofax.compiler.command.CommandRequestRepr;
 import mb.spoofax.core.language.command.CommandExecutionType;
 import mb.spoofax.core.language.command.EditorFileType;
 import mb.spoofax.core.language.command.EditorSelectionType;
+import mb.spoofax.core.language.command.EnclosingCommandContextType;
 import mb.spoofax.core.language.command.HierarchicalResourceType;
 import org.immutables.value.Value;
 
@@ -103,12 +104,12 @@ public interface CommandActionRepr extends Serializable {
         }
 
         public Builder enclosingDirectoryRequired() {
-            addRequiredEnclosingResourceTypes(HierarchicalResourceType.Directory);
+            addRequiredEnclosingResourceTypes(EnclosingCommandContextType.Directory);
             return this;
         }
 
         public Builder enclosingProjectRequired() {
-            addRequiredEnclosingResourceTypes(HierarchicalResourceType.Project);
+            addRequiredEnclosingResourceTypes(EnclosingCommandContextType.Project);
             return this;
         }
 
@@ -135,5 +136,5 @@ public interface CommandActionRepr extends Serializable {
 
     Set<HierarchicalResourceType> requiredResourceTypes();
 
-    Set<HierarchicalResourceType> requiredEnclosingResourceTypes();
+    Set<EnclosingCommandContextType> requiredEnclosingResourceTypes();
 }

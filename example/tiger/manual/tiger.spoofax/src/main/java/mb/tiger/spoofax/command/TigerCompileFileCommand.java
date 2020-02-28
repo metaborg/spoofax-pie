@@ -50,7 +50,7 @@ public class TigerCompileFileCommand implements CommandDef<TigerCompileFile.Args
 
     @Override public ParamDef getParamDef() {
         return new ParamDef(
-            Param.of("file", ResourcePath.class, true, ListView.of(ArgProvider.context(CommandContextType.FilePath)))
+            Param.of("file", ResourcePath.class, true, ListView.of(ArgProvider.context(CommandContextType.File)))
         );
     }
 

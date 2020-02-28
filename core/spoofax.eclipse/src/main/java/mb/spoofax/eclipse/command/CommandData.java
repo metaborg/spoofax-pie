@@ -15,16 +15,16 @@ public class CommandData implements Serializable {
     public final String commandId;
     public final CommandExecutionType executionType;
     public final @Nullable RawArgs initialArgs;
-    public final ListView<CommandContext> contexts;
+    public final ListView<? extends CommandContext> contexts;
 
-    public CommandData(String commandId, CommandExecutionType executionType, @Nullable RawArgs initialArgs, ListView<CommandContext> contexts) {
+    public CommandData(String commandId, CommandExecutionType executionType, @Nullable RawArgs initialArgs, ListView<? extends CommandContext> contexts) {
         this.commandId = commandId;
         this.executionType = executionType;
         this.initialArgs = initialArgs;
         this.contexts = contexts;
     }
 
-    public CommandData(CommandRequest<?> commandRequest, ListView<CommandContext> contexts) {
+    public CommandData(CommandRequest<?> commandRequest, ListView<? extends CommandContext> contexts) {
         this(commandRequest.def().getId(), commandRequest.executionType(), commandRequest.initialArgs().orElse(null), contexts);
     }
 

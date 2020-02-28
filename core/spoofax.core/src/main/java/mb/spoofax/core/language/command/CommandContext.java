@@ -9,6 +9,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -16,43 +17,35 @@ public class CommandContext implements Serializable {
     protected final @Nullable ResourcePathWithKind resourcePath;
     protected final @Nullable ResourceKey resourceKey;
     protected final @Nullable Selection selection;
+    protected final HashMap<EnclosingCommandContextType, CommandContext> enclosingContexts = new HashMap<>();
 
-
-    public CommandContext() {
-        this.resourcePath = null;
-        this.resourceKey = null;
-        this.selection = null;
-    }
-
-    public CommandContext(ResourcePathWithKind resourcePath) {
-        this.resourcePath = resourcePath;
-        this.resourceKey = resourcePath.getPath();
-        this.selection = null;
-    }
-
-    public CommandContext(ResourcePathWithKind resourcePath, Selection selection) {
-        this.resourcePath = resourcePath;
-        this.resourceKey = resourcePath.getPath();
-        this.selection = selection;
-    }
-
-    public CommandContext(ResourceKey resourceKey) {
-        this.resourcePath = null;
-        this.resourceKey = resourceKey;
-        this.selection = null;
-    }
-
-    public CommandContext(ResourceKey resourceKey, Selection selection) {
-        this.resourcePath = null;
-        this.resourceKey = resourceKey;
-        this.selection = selection;
-    }
 
     public CommandContext(@Nullable ResourcePathWithKind resourcePath, @Nullable ResourceKey resourceKey, @Nullable Selection selection) {
         this.resourcePath = resourcePath;
         this.resourceKey = resourceKey;
         this.selection = selection;
     }
+
+    public CommandContext(ResourcePathWithKind resourcePath, Selection selection) {
+        this(resourcePath, resourcePath.getPath(), selection);
+    }
+
+    public CommandContext(ResourcePathWithKind resourcePath) {
+        this(resourcePath, resourcePath.getPath(), null);
+    }
+
+    public CommandContext(ResourceKey resourceKey, Selection selection) {
+        this(null, resourceKey, selection);
+    }
+
+    public CommandContext(ResourceKey resourceKey) {
+        this(null, resourceKey, null);
+    }
+
+    public CommandContext() {
+        this(null, null, null);
+    }
+
 
     public static CommandContext ofProject(ResourcePath project) {
         return new CommandContext(ResourcePathWithKinds.project(project));
@@ -108,32 +101,30 @@ public class CommandContext implements Serializable {
     }
 
 
-    public @Nullable CommandContext getEnclosing(CommandContextType type) {
-        if(type == CommandContextType.DirectoryPath) {
-            if(resourcePath == null) return null;
-            final @Nullable ResourcePath parent = resourcePath.getPath().getParent();
-            if(parent == null) return null;
-            return CommandContext.ofDirectory(parent);
-        }
-        return null;
+    public @Nullable CommandContext getEnclosing(EnclosingCommandContextType type) {
+        return enclosingContexts.get(type);
+    }
+
+    public void setEnclosing(EnclosingCommandContextType type, CommandContext context) {
+        enclosingContexts.put(type, context);
     }
 
 
     public boolean supports(CommandContextType type) {
         switch(type) {
-            case ProjectPath:
+            case Project:
                 if(resourcePath == null) return false;
                 return resourcePath.caseOf()
                     .project_(true)
                     .directory_(false)
                     .file_(false);
-            case DirectoryPath:
+            case Directory:
                 if(resourcePath == null) return false;
                 return resourcePath.caseOf()
                     .project_(false)
                     .directory_(true)
                     .file_(false);
-            case FilePath:
+            case File:
                 if(resourcePath == null) return false;
                 return resourcePath.caseOf()
                     .project_(false)
@@ -232,17 +223,18 @@ public class CommandContext implements Serializable {
     }
 
 
-    @Override public boolean equals(@Nullable Object obj) {
-        if(this == obj) return true;
-        if(obj == null || getClass() != obj.getClass()) return false;
-        final CommandContext other = (CommandContext)obj;
-        return Objects.equals(resourcePath, other.resourcePath) &&
-            Objects.equals(resourceKey, other.resourceKey) &&
-            Objects.equals(selection, other.selection);
+    @Override public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        final CommandContext that = (CommandContext)o;
+        return Objects.equals(resourcePath, that.resourcePath) &&
+            Objects.equals(resourceKey, that.resourceKey) &&
+            Objects.equals(selection, that.selection) &&
+            enclosingContexts.equals(that.enclosingContexts);
     }
 
     @Override public int hashCode() {
-        return Objects.hash(resourcePath, resourceKey, selection);
+        return Objects.hash(resourcePath, resourceKey, selection, enclosingContexts);
     }
 
     @Override public String toString() {
@@ -250,6 +242,7 @@ public class CommandContext implements Serializable {
             "resourcePath=" + resourcePath +
             ", resourceKey=" + resourceKey +
             ", selection=" + selection +
+            ", enclosingContexts=" + enclosingContexts +
             '}';
     }
 }
