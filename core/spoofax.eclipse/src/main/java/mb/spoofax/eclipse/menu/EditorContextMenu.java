@@ -75,7 +75,7 @@ public class EditorContextMenu extends MenuShared {
                 if(!context.supportsAnyEditorFileType(commandAction.requiredEditorFileTypes())) {
                     return; // Command requires a certain type of file, but the context does not have one.
                 }
-                if(!context.supportsAnyEditorSelectionType(commandAction.requiredEditorSelectionType())) {
+                if(!context.supportsAnyEditorSelectionType(commandAction.requiredEditorSelectionTypes())) {
                     return; // Command requires a certain type of selection, but the context does not have one.
                 }
                 menu.add(createCommand(runCommandCommandId, commandRequest, context, commandAction.displayName(), commandAction.description()));

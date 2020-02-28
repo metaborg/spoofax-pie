@@ -124,7 +124,7 @@ public abstract class ResourceContextMenu extends MenuShared {
         for(MenuItem menuItem : languageInstance.getResourceContextMenuItems()) {
             EclipseMenuItemVisitor.run(langMenu, menuItem, (menu, commandAction) -> {
                 CommandRequest<?> commandRequest = commandAction.commandRequest();
-                final Set<HierarchicalResourceType> requiredResourceType = commandAction.requiredResourceType();
+                final Set<HierarchicalResourceType> requiredResourceType = commandAction.requiredResourceTypes();
                 // TODO: support enclosing resource requirements
 //                final Set<HierarchicalResourceType> requiredEnclosingResourceType = commandAction.requiredEnclosingResourceType();
                 final ArrayList<CommandContext> contexts;

@@ -88,27 +88,27 @@ public interface CommandActionRepr extends Serializable {
 
         public Builder fileRequired() {
             addRequiredEditorFileTypes(EditorFileType.HierarchicalResource);
-            addRequiredResourceType(HierarchicalResourceType.File);
+            addRequiredResourceTypes(HierarchicalResourceType.File);
             return this;
         }
 
         public Builder directoryRequired() {
-            addRequiredResourceType(HierarchicalResourceType.Directory);
+            addRequiredResourceTypes(HierarchicalResourceType.Directory);
             return this;
         }
 
         public Builder projectRequired() {
-            addRequiredResourceType(HierarchicalResourceType.Project);
+            addRequiredResourceTypes(HierarchicalResourceType.Project);
             return this;
         }
 
         public Builder enclosingDirectoryRequired() {
-            addRequiredEnclosingResourceType(HierarchicalResourceType.Directory);
+            addRequiredEnclosingResourceTypes(HierarchicalResourceType.Directory);
             return this;
         }
 
         public Builder enclosingProjectRequired() {
-            addRequiredEnclosingResourceType(HierarchicalResourceType.Project);
+            addRequiredEnclosingResourceTypes(HierarchicalResourceType.Project);
             return this;
         }
 
@@ -129,11 +129,11 @@ public interface CommandActionRepr extends Serializable {
 
     CommandRequestRepr commandRequest();
 
-    Set<EditorSelectionType> requiredEditorSelectionType();
+    Set<EditorSelectionType> requiredEditorSelectionTypes();
 
     Set<EditorFileType> requiredEditorFileTypes();
 
-    Set<HierarchicalResourceType> requiredResourceType();
+    Set<HierarchicalResourceType> requiredResourceTypes();
 
-    Set<HierarchicalResourceType> requiredEnclosingResourceType();
+    Set<HierarchicalResourceType> requiredEnclosingResourceTypes();
 }
