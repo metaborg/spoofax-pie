@@ -3,7 +3,7 @@ package mb.spoofax.eclipse.command;
 import mb.common.util.MapView;
 import mb.common.util.SerializationUtil;
 import mb.pie.api.ExecException;
-import mb.pie.api.PieSession;
+import mb.pie.api.MixedSession;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandRequest;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
@@ -53,7 +53,7 @@ public class RunCommandHandler extends AbstractHandler {
         }
         final CommandRequest<?> request = data.toCommandRequest(def);
         try {
-            try(final PieSession session = languageComponent.newPieSession()) {
+            try(final MixedSession session = languageComponent.newPieSession()) {
                 pieRunner.requireCommand(languageComponent, request, data.contexts, session, null);
             }
         } catch(ExecException e) {

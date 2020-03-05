@@ -6,7 +6,7 @@ import dagger.multibindings.ElementsIntoSet;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.MapTaskDefs;
 import mb.pie.api.Pie;
-import mb.pie.api.PieSession;
+import mb.pie.api.MixedSession;
 import mb.pie.api.TaskDef;
 import mb.pie.api.TaskDefs;
 import mb.resource.ResourceService;
@@ -203,7 +203,7 @@ public class TigerModule {
     }
 
     @Provides /* Unscoped: new session every call. */
-    PieSession providePieSession(Pie pie, @Named("language") TaskDefs languageTaskDefs) {
+    MixedSession providePieSession(Pie pie, @Named("language") TaskDefs languageTaskDefs) {
         return pie.newSession(languageTaskDefs);
     }
 }

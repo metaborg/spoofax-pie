@@ -11,9 +11,9 @@ import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecException;
 import mb.pie.api.Pie;
-import mb.pie.api.PieSession;
-import mb.pie.api.SessionAfterBottomUp;
-import mb.pie.api.SessionBase;
+import mb.pie.api.MixedSession;
+import mb.pie.api.TopDownSession;
+import mb.pie.api.Session;
 import mb.pie.api.Task;
 import mb.pie.api.TaskKey;
 import mb.pie.api.exec.CancelToken;
@@ -125,11 +125,11 @@ public class PieRunner {
 
         final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
 
-        try(final PieSession session = languageComponent.newPieSession()) {
+        try(final MixedSession session = languageComponent.newPieSession()) {
             // First run a bottom-up build, to ensure that tasks affected by changed file are brought up-to-date.
             final HashSet<ResourceKey> changedResources = new HashSet<>();
             changedResources.add(path);
-            final SessionAfterBottomUp postSession = updateAffectedBy(changedResources, session, monitor);
+            final TopDownSession postSession = updateAffectedBy(changedResources, session, monitor);
 
             final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
 
@@ -203,8 +203,8 @@ public class PieRunner {
         final ResourceChanges resourceChanges = new ResourceChanges(project, languageComponent.getLanguageInstance().getFileExtensions());
         resourceChanges.newProjects.add(project.getKey());
 
-        try(final PieSession session = languageComponent.newPieSession()) {
-            final SessionAfterBottomUp afterSession = updateAffectedBy(resourceChanges.changed, session, monitor);
+        try(final MixedSession session = languageComponent.newPieSession()) {
+            final TopDownSession afterSession = updateAffectedBy(resourceChanges.changed, session, monitor);
             observeAndUnobserveAutoTransforms(languageComponent, resourceChanges, afterSession, monitor);
             observeAndUnobserveInspections(languageComponent, resourceChanges, afterSession, monitor);
         }
@@ -221,8 +221,8 @@ public class PieRunner {
         final ResourceChanges resourceChanges = new ResourceChanges(delta, languageComponent.getLanguageInstance().getFileExtensions());
 
         bottomUpWorkspaceUpdate = workspaceUpdateFactory.create(languageComponent);
-        try(final PieSession session = languageComponent.newPieSession()) {
-            final SessionAfterBottomUp afterSession = updateAffectedBy(resourceChanges.changed, session, monitor);
+        try(final MixedSession session = languageComponent.newPieSession()) {
+            final TopDownSession afterSession = updateAffectedBy(resourceChanges.changed, session, monitor);
             observeAndUnobserveAutoTransforms(languageComponent, resourceChanges, afterSession, monitor);
             observeAndUnobserveInspections(languageComponent, resourceChanges, afterSession, monitor);
         }
@@ -243,7 +243,7 @@ public class PieRunner {
         final ResourceChanges resourceChanges = new ResourceChanges(projectResource, languageComponent.getLanguageInstance().getFileExtensions());
         resourceChanges.newProjects.add(project);
         final AutoCommandRequests autoCommandRequests = new AutoCommandRequests(languageComponent); // OPTO: calculate once per language component
-        try(final PieSession session = languageComponent.newPieSession()) {
+        try(final MixedSession session = languageComponent.newPieSession()) {
             // Unobserve auto transforms.
             for(AutoCommandRequest<?> request : autoCommandRequests.project) {
                 final Task<CommandOutput> task = request.createTask(CommandContext.ofProject(project), argConverters);
@@ -294,7 +294,7 @@ public class PieRunner {
         @Nullable IProgressMonitor monitor
     ) throws IOException, CoreException, ExecException, InterruptedException {
         final ResourceChanges resourceChanges = new ResourceChanges(languageComponent.getEclipseIdentifiers().getNature(), languageComponent.getLanguageInstance().getFileExtensions(), resourceRegistry);
-        try(final PieSession session = languageComponent.newPieSession()) {
+        try(final MixedSession session = languageComponent.newPieSession()) {
             observeAndUnobserveAutoTransforms(languageComponent, resourceChanges, session, monitor);
             observeAndUnobserveInspections(languageComponent, resourceChanges, session, monitor);
         }
@@ -307,7 +307,7 @@ public class PieRunner {
         EclipseLanguageComponent languageComponent,
         CommandRequest<?> request,
         ListView<? extends CommandContext> contexts,
-        SessionBase session,
+        Session session,
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException {
         switch(request.executionType()) {
@@ -325,7 +325,7 @@ public class PieRunner {
                     processOutput(output, true, (p) -> {
                         // POTI: this opens a new PIE session, which may be used concurrently with other sessions, which
                         // may not be (thread-)safe.
-                        try(final PieSession newSession = languageComponent.newPieSession()) {
+                        try(final MixedSession newSession = languageComponent.newPieSession()) {
                             unobserve(task, pie, newSession, monitor);
                         }
                         pie.removeCallback(task);
@@ -417,7 +417,7 @@ public class PieRunner {
 
     // Standard PIE operations with trace logging.
 
-    public <T extends @Nullable Serializable> T requireWithoutObserving(Task<T> task, SessionBase session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
+    public <T extends @Nullable Serializable> T requireWithoutObserving(Task<T> task, Session session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
         logger.trace("Require (without observing) '{}'", task);
         Stats.reset();
         final T result = session.requireWithoutObserving(task, monitorCancelled(monitor));
@@ -425,7 +425,7 @@ public class PieRunner {
         return result;
     }
 
-    public <T extends @Nullable Serializable> T require(Task<T> task, SessionBase session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
+    public <T extends @Nullable Serializable> T require(Task<T> task, Session session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
         logger.trace("Require '{}'", task);
         Stats.reset();
         final T result = session.require(task, monitorCancelled(monitor));
@@ -433,22 +433,22 @@ public class PieRunner {
         return result;
     }
 
-    public SessionAfterBottomUp updateAffectedBy(Set<? extends ResourceKey> changedResources, PieSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
+    public TopDownSession updateAffectedBy(Set<? extends ResourceKey> changedResources, MixedSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
         logger.trace("Update affected by '{}'", changedResources);
         Stats.reset();
-        final SessionAfterBottomUp newSession = session.updateAffectedBy(changedResources, monitorCancelled(monitor));
+        final TopDownSession newSession = session.updateAffectedBy(changedResources, monitorCancelled(monitor));
         logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
         return newSession;
     }
 
-    public void unobserve(Task<?> task, Pie pie, SessionBase session, @Nullable IProgressMonitor _monitor) {
+    public void unobserve(Task<?> task, Pie pie, Session session, @Nullable IProgressMonitor _monitor) {
         final TaskKey key = task.key();
         if(!pie.isObserved(key)) return;
         logger.trace("Unobserving '{}'", key);
         session.unobserve(key);
     }
 
-    public void deleteUnobservedTasks(SessionBase session, @Nullable IProgressMonitor _monitor) throws IOException {
+    public void deleteUnobservedTasks(Session session, @Nullable IProgressMonitor _monitor) throws IOException {
         logger.trace("Deleting unobserved tasks");
         session.deleteUnobservedTasks((t) -> true, (t, r) -> true);
     }
@@ -588,7 +588,7 @@ public class PieRunner {
     private void observeAndUnobserveAutoTransforms(
         EclipseLanguageComponent languageComponent,
         ResourceChanges resourceChanges,
-        SessionBase session,
+        Session session,
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException, IOException {
         final AutoCommandRequests autoCommandRequests = new AutoCommandRequests(languageComponent); // OPTO: calculate once per language component
@@ -630,7 +630,7 @@ public class PieRunner {
     private void observeAndUnobserveInspections(
         EclipseLanguageComponent languageComponent,
         ResourceChanges resourceChanges,
-        SessionBase session,
+        Session session,
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException {
         final LanguageInstance languageInstance = languageComponent.getLanguageInstance();

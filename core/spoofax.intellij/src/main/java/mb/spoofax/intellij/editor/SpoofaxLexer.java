@@ -11,7 +11,7 @@ import mb.common.util.IntUtil;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecException;
-import mb.pie.api.PieSession;
+import mb.pie.api.MixedSession;
 import mb.pie.api.Task;
 import mb.resource.ReadableResource;
 import mb.resource.ResourceKey;
@@ -40,7 +40,7 @@ public final class SpoofaxLexer extends LexerBase {
     private final SpoofaxTokenTypeManager tokenTypeManager;
     private final ScopeManager scopeManager;
     private final ResourceService resourceService;
-    private final Provider<PieSession> pieSessionProvider;
+    private final Provider<MixedSession> pieSessionProvider;
     private final LanguageInstance languageInstance;
 
     @Nullable private CharSequence buffer = null;
@@ -59,7 +59,7 @@ public final class SpoofaxLexer extends LexerBase {
         private final SpoofaxTokenTypeManager tokenTypeManager;
         private final ScopeManager scopeManager;
         private final ResourceService resourceService;
-        private final Provider<PieSession> pieSessionProvider;
+        private final Provider<MixedSession> pieSessionProvider;
         private final LanguageInstance languageInstance;
 
         @Inject
@@ -68,7 +68,7 @@ public final class SpoofaxLexer extends LexerBase {
                 SpoofaxTokenTypeManager tokenTypeManager,
                 ScopeManager scopeManager,
                 ResourceService resourceService,
-                Provider<PieSession> pieSessionProvider,
+                Provider<MixedSession> pieSessionProvider,
                 LanguageInstance languageInstance
         ) {
             this.loggerFactory = loggerFactory;
@@ -102,7 +102,7 @@ public final class SpoofaxLexer extends LexerBase {
             SpoofaxTokenTypeManager tokenTypeManager,
             ScopeManager scopeManager,
             ResourceService resourceService,
-            Provider<PieSession> pieSessionProvider,
+            Provider<MixedSession> pieSessionProvider,
             LanguageInstance languageInstance
     ) {
         this.resourceKey = resourceKey;
@@ -139,7 +139,7 @@ public final class SpoofaxLexer extends LexerBase {
             this.tokens = Collections.emptyList();
         } else {
             // GK: what is syntax coloring information doing here?
-            try (final PieSession session = this.pieSessionProvider.get()) {
+            try (final MixedSession session = this.pieSessionProvider.get()) {
                 final Task<@Nullable ArrayList<? extends mb.common.token.Token<?>>> tokenizerTask =
                         this.languageInstance.createTokenizeTask(this.resourceKey);
                 @Nullable List<? extends mb.common.token.Token> resourceTokens = session.require(tokenizerTask);

@@ -1,6 +1,6 @@
 package mb.spoofax.cli;
 
-import mb.pie.api.PieSession;
+import mb.pie.api.MixedSession;
 import mb.resource.ResourceService;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.language.LanguageInstance;
@@ -36,8 +36,8 @@ public class SpoofaxCli {
 
     public int run(String[] args, LanguageComponent languageComponent) {
         final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
-        try(final PieSession pieSession = languageComponent.newPieSession()) {
-            final CommandSpec commandSpec = toCommandSpec(languageInstance.getCliCommand(), pieSession);
+        try(final MixedSession session = languageComponent.newPieSession()) {
+            final CommandSpec commandSpec = toCommandSpec(languageInstance.getCliCommand(), session);
             final CommandLine commandLine = new CommandLine(commandSpec);
             for(ArgConverter<?> converter : argConverters.allConverters.values()) {
                 registerConverter(commandLine, new TypeConverter<>(converter));
@@ -46,12 +46,12 @@ public class SpoofaxCli {
         }
     }
 
-    private CommandSpec toCommandSpec(CliCommand cliCommand, PieSession pieSession) {
+    private CommandSpec toCommandSpec(CliCommand cliCommand, MixedSession session) {
         final CommandSpec commandSpec;
         final String name = cliCommand.getName();
         final @Nullable CommandDef<?> commandDef = cliCommand.getCommandDef();
         if(commandDef != null) { // CLI command with actual command definition that can be executed.
-            final CommandRunner<?> commandRunner = new CommandRunner<>(resourceService, pieSession, commandDef, argConverters);
+            final CommandRunner<?> commandRunner = new CommandRunner<>(resourceService, session, commandDef, argConverters);
             commandSpec = CommandSpec.wrapWithoutInspection(commandRunner);
             final ParamDef commandParams = commandDef.getParamDef();
             for(CliParam cliParam : cliCommand.getParams()) {
@@ -147,7 +147,7 @@ public class SpoofaxCli {
 
         // Add sub-commands.
         for(CliCommand subCommand : cliCommand.getSubCommands()) {
-            commandSpec.addSubcommand(subCommand.getName(), toCommandSpec(subCommand, pieSession));
+            commandSpec.addSubcommand(subCommand.getName(), toCommandSpec(subCommand, session));
         }
 
         return commandSpec;

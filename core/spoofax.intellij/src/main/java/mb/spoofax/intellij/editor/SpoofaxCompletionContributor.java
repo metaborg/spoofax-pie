@@ -16,7 +16,7 @@ import mb.common.style.StyleNames;
 import mb.completions.common.CompletionProposal;
 import mb.completions.common.CompletionResult;
 import mb.pie.api.ExecException;
-import mb.pie.api.PieSession;
+import mb.pie.api.MixedSession;
 import mb.pie.api.Task;
 import mb.resource.Resource;
 import mb.resource.ResourceKey;
@@ -45,7 +45,7 @@ public abstract class SpoofaxCompletionContributor extends CompletionContributor
 
     private final IntellijResourceRegistry resourceRegistry;
     private final LanguageInstance languageInstance;
-    private final Provider<PieSession> pieSessionProvider;
+    private final Provider<MixedSession> pieSessionProvider;
 
     protected SpoofaxCompletionContributor(IntellijLanguageComponent languageComponent) {
         this.resourceRegistry = SpoofaxPlugin.getComponent().getResourceRegistry();
@@ -60,7 +60,7 @@ public abstract class SpoofaxCompletionContributor extends CompletionContributor
         final ResourceKey resourceKey = resource.getKey();
         final Region selection = Region.atOffset(parameters.getOffset());
         final @Nullable CompletionResult completionResult;
-        try (final PieSession session = this.pieSessionProvider.get()) {
+        try (final MixedSession session = this.pieSessionProvider.get()) {
             Task<@Nullable CompletionResult> completionTask = this.languageInstance.createCompletionTask(resourceKey, selection);
             completionResult = session.require(completionTask);
         } catch (ExecException e) {

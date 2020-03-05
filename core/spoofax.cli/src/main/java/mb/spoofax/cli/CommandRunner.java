@@ -1,6 +1,6 @@
 package mb.spoofax.cli;
 
-import mb.pie.api.PieSession;
+import mb.pie.api.MixedSession;
 import mb.pie.api.Task;
 import mb.resource.ReadableResource;
 import mb.resource.ResourceRuntimeException;
@@ -13,19 +13,18 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
 class CommandRunner<A extends Serializable> implements Callable {
     private final ResourceService resourceService;
-    private final PieSession pieSession;
+    private final MixedSession session;
     private final CommandDef<A> commandDef;
     private final RawArgsBuilder rawArgsBuilder;
 
-    CommandRunner(ResourceService resourceService, PieSession pieSession, CommandDef<A> commandDef, ArgConverters argConverters) {
+    CommandRunner(ResourceService resourceService, MixedSession session, CommandDef<A> commandDef, ArgConverters argConverters) {
         this.resourceService = resourceService;
-        this.pieSession = pieSession;
+        this.session = session;
         this.commandDef = commandDef;
         this.rawArgsBuilder = new RawArgsBuilder(commandDef.getParamDef(), argConverters);
     }
@@ -44,7 +43,7 @@ class CommandRunner<A extends Serializable> implements Callable {
         final RawArgs rawArgs = rawArgsBuilder.build(new CommandContext());
         final A args = commandDef.fromRawArgs(rawArgs);
         final Task<CommandOutput> task = commandDef.createTask(args);
-        final CommandOutput output = pieSession.requireWithoutObserving(task);
+        final CommandOutput output = session.requireWithoutObserving(task);
         for(CommandFeedback feedback : output.feedback) {
             CommandFeedbacks.caseOf(feedback)
                 .showFile((file, region) -> {
