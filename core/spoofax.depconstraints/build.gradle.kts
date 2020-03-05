@@ -5,7 +5,7 @@ plugins {
 
 val logVersion = "0.3.0"
 val resourceVersion = "0.6.0"
-val pieVersion = "develop-SNAPSHOT"
+val pieVersion = "0.7.0"
 val spoofaxCoreVersion = "2.6.0-SNAPSHOT"
 val picocliVersion = "4.0.4"
 val daggerVersion = "2.25.2"
