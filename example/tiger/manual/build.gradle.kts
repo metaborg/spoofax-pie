@@ -1,5 +1,5 @@
 plugins {
-  id("org.metaborg.gradle.config.root-project") version "0.3.15"
+  id("org.metaborg.gradle.config.root-project") version "0.3.19"
   id("org.metaborg.gitonium") version "0.1.2"
 
   // Set versions for plugins to use, only applying them in subprojects (apply false here).
@@ -14,13 +14,6 @@ plugins {
 subprojects {
   metaborg {
     configureSubProject()
-  }
-}
-
-allprojects {
-  repositories {
-    // Required by NaBL2/Statix solver.
-    maven("https://nexus.usethesource.io/content/repositories/public/")
   }
 }
 

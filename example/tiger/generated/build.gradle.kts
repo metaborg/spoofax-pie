@@ -1,7 +1,7 @@
 import mb.spoofax.compiler.spoofaxcore.Shared
 
 plugins {
-  id("org.metaborg.gradle.config.root-project") version "0.3.15"
+  id("org.metaborg.gradle.config.root-project") version "0.3.19"
   id("org.metaborg.gitonium") version "0.1.2"
   id("org.metaborg.spoofax.compiler.gradle.spoofaxcore.root") /* No version: plugin must be in composite build. */
 
@@ -17,13 +17,6 @@ plugins {
 subprojects {
   metaborg {
     configureSubProject()
-  }
-}
-
-allprojects {
-  repositories {
-    // Required by NaBL2/Statix solver.
-    maven("https://nexus.usethesource.io/content/repositories/public/")
   }
 }
 
