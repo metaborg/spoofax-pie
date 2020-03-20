@@ -10,8 +10,8 @@ import mb.stratego.common.StrategoRuntimeBuilder;
 public class TigerStrategoRuntimeBuilderFactory implements StrategoRuntimeBuilderFactory {
     @Override public StrategoRuntimeBuilder create(LoggerFactory loggerFactory, ResourceService resourceService) {
         final StrategoRuntimeBuilder builder = new StrategoRuntimeBuilder(loggerFactory, resourceService);
-        builder.addInteropRegistererByReflection("org.metaborg.lang.tiger.trans.InteropRegisterer");
-        builder.addInteropRegistererByReflection("org.metaborg.lang.tiger.strategies.InteropRegisterer");
+        builder.addInteropRegistererByReflection("tiger.spoofaxcore.trans.InteropRegisterer");
+        builder.addInteropRegistererByReflection("tiger.spoofaxcore.strategies.InteropRegisterer");
         builder.withJarParentClassLoader(TigerStrategoRuntimeBuilderFactory.class.getClassLoader());
         builder.addLibrary(new NaBL2PrimitiveLibrary());
         builder.addLibrary(new ConstraintPrimitiveLibrary(resourceService));

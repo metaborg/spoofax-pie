@@ -48,7 +48,7 @@ public class StrategoRuntimeCompiler {
         final ArrayList<String> copyResources = new ArrayList<>();
         if(input.enableStatix()) {
             // TODO: move to constraint analyzer compiler?
-            copyResources.add("src-gen/statix/static-semantics.spec.aterm");
+            copyResources.add("src-gen/statix/");
         }
         if(input.copyCTree()) {
             copyResources.add("target/metaborg/stratego.ctree");

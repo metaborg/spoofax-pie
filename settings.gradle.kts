@@ -18,4 +18,5 @@ if(gradle.parent == null) {
   includeBuild("example/tiger/generated")
   includeBuild("example/tiger/manual")
   includeBuild("example/mod")
+  includeBuild("example/sdf3")
 }

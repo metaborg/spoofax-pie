@@ -14,7 +14,8 @@ plugins {
 
 dependencies {
   api(platform("org.metaborg:spoofax.depconstraints:$version"))
-  testImplementation("org.metaborg:log.backend.noop")
+  testImplementation("org.metaborg:log.backend.slf4j")
+  testImplementation("org.slf4j:slf4j-simple:1.7.30")
   testCompileOnly("org.checkerframework:checker-qual-android")
 }
 
@@ -25,14 +26,25 @@ languageProjectCompiler {
     styler = StylerCompiler.LanguageProjectInput.builder(),
     completer = CompleterCompiler.LanguageProjectInput.builder(),
     strategoRuntime = StrategoRuntimeCompiler.LanguageProjectInput.builder()
-      .addInteropRegisterersByReflection("tiger.spoofaxcore.trans.InteropRegisterer", "tiger.spoofaxcore.strategies.InteropRegisterer")
-      .enableNaBL2(true)
-      .enableStatix(false)
-      .copyJavaStrategyClasses(true),
-    constraintAnalyzer = ConstraintAnalyzerCompiler.LanguageProjectInput.builder(),
+      .enableNaBL2(false)
+      .enableStatix(true)
+      .copyCTree(true)
+      .copyClasses(false)
+      .copyJavaStrategyClasses(false),
+    constraintAnalyzer = ConstraintAnalyzerCompiler.LanguageProjectInput.builder()
+      .strategoStrategy("statix-editor-analyze")
+      .multiFile(true),
     compiler = LanguageProjectCompiler.Input.builder()
-      .languageSpecificationDependency(GradleDependency.module("$group:tiger.spoofaxcore:$version"))
+      .languageSpecificationDependency(GradleDependency.module("org.metaborg:org.metaborg.meta.lang.template:2.6.0-SNAPSHOT"))
   ))
+}
+
+tasks.test {
+  // Show standard out and err in tests.
+  testLogging {
+    events(org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_OUT, org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR)
+    showStandardStreams = true
+  }
 }
 
 ecj {

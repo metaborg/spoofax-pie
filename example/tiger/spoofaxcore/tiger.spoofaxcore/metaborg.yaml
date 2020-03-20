@@ -1,5 +1,5 @@
 ---
-id: org.metaborg:org.metaborg.lang.tiger:0.1.0-SNAPSHOT
+id: org.metaborg:tiger.spoofaxcore:0.1.0-SNAPSHOT
 name: Tiger
 dependencies:
   compile:

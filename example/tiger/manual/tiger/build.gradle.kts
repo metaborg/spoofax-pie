@@ -124,7 +124,7 @@ fun copySpoofaxLanguageResources(
   tasks.getByName(JavaPlugin.TEST_CLASSES_TASK_NAME).dependsOn(copyTestTask)
 }
 copySpoofaxLanguageResources(
-  createModuleDependency(compositeBuild("org.metaborg.lang.tiger")),
+  createModuleDependency(compositeBuild("tiger.spoofaxcore")),
   "mb/tiger",
   true,
   true,

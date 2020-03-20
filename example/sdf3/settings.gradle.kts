@@ -1,4 +1,4 @@
-rootProject.name = "spoofax.example.tiger.spoofaxcore"
+rootProject.name = "spoofax.example.sdf3"
 
 pluginManagement {
   repositories {
@@ -9,7 +9,12 @@ pluginManagement {
 // Only include composite builds when this is the root project (it has no parent), for example when running Gradle tasks
 // from the command-line. Otherwise, the parent project (spoofax) will include these composite builds.
 if(gradle.parent == null) {
-  includeBuild("../../../core")
+  includeBuild("../../core")
 }
 
-include("tiger.spoofaxcore")
+include("sdf3")
+//include("sdf3.spoofax")
+//include("sdf3.cli")
+//include("sdf3.eclipse.externaldeps")
+//include("sdf3.eclipse")
+//include("sdf3.intellij")

@@ -1,4 +1,4 @@
-package org.metaborg.lang.tiger.strategies;
+package tiger.spoofaxcore.strategies;
 
 import org.strategoxt.lang.JavaInteropRegisterer;
 import org.strategoxt.lang.Strategy;
