@@ -28,7 +28,8 @@ gitonium {
 
 spoofaxCompiler {
   sharedSettings.set(Shared.builder()
-    .name("Sdf3")
+    .name("SDF3")
+    .defaultClassPrefix("Sdf3")
     .defaultBasePackageId("mb.sdf3")
   )
 }

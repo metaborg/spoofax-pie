@@ -8,6 +8,8 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * Utility functions for creating and removing {@link IMarker} instances.
  */
@@ -22,15 +24,27 @@ public final class MarkerUtil {
         final int eclipseSeverity = severity(severity);
         final String markerId = id(eclipseIdentifiers, eclipseSeverity);
         final IMarker marker = resource.createMarker(markerId);
+        
         if(region != null) {
             marker.setAttribute(IMarker.CHAR_START, region.getStartOffset());
             marker.setAttribute(IMarker.CHAR_END, region.getEndOffset());
         } else {
             marker.setAttribute(IMarker.LINE_NUMBER, 1);
         }
-        marker.setAttribute(IMarker.MESSAGE, text);
+
+        // Clamp text to 65535 bytes, Mimicking behavior from MarkerInfo.checkValidAttribute.
+        final byte[] bytes = text.getBytes(StandardCharsets.UTF_8);
+        final String finalText;
+        if(bytes.length > 65535) {
+            finalText = text.substring(0, 10000);
+        } else {
+            finalText = text;
+        }
+        marker.setAttribute(IMarker.MESSAGE, finalText);
+
         marker.setAttribute(IMarker.SEVERITY, eclipseSeverity);
         marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
+
         return marker;
     }
 

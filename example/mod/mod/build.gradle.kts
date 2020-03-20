@@ -38,14 +38,6 @@ languageProjectCompiler {
   ))
 }
 
-tasks.test {
-  // Show standard out and err in tests.
-  testLogging {
-    events(org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_OUT, org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR)
-    showStandardStreams = true
-  }
-}
-
 ecj {
   toolVersion = "3.20.0"
 }

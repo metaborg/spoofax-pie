@@ -13,8 +13,8 @@ if(gradle.parent == null) {
 }
 
 include("sdf3")
-//include("sdf3.spoofax")
-//include("sdf3.cli")
-//include("sdf3.eclipse.externaldeps")
-//include("sdf3.eclipse")
-//include("sdf3.intellij")
+include("sdf3.spoofax")
+include("sdf3.cli")
+include("sdf3.eclipse.externaldeps")
+include("sdf3.eclipse")
+include("sdf3.intellij")
