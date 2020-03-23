@@ -1,9 +1,4 @@
-import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler
-import mb.spoofax.compiler.spoofaxcore.LanguageProjectCompiler
-import mb.spoofax.compiler.spoofaxcore.ParserCompiler
-import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler
-import mb.spoofax.compiler.spoofaxcore.StylerCompiler
-import mb.spoofax.compiler.spoofaxcore.CompleterCompiler
+import mb.spoofax.compiler.spoofaxcore.*
 import mb.spoofax.compiler.util.GradleDependency
 
 plugins {
@@ -35,7 +30,8 @@ languageProjectCompiler {
       .strategoStrategy("statix-editor-analyze")
       .multiFile(true),
     compiler = LanguageProjectCompiler.Input.builder()
-      .languageSpecificationDependency(GradleDependency.module("org.metaborg:org.metaborg.meta.lang.template:2.6.0-SNAPSHOT"))
+      // HACK: use org.metaborggggg groupId for SDF3, as that is used to prevent bootstrapping issues.
+      .languageSpecificationDependency(GradleDependency.module("org.metaborggggg:org.metaborg.meta.lang.template:2.6.0-SNAPSHOT"))
   ))
 }
 
