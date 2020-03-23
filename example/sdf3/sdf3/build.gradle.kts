@@ -25,7 +25,9 @@ languageProjectCompiler {
       .enableStatix(true)
       .copyCTree(true)
       .copyClasses(false)
-      .copyJavaStrategyClasses(false),
+      .copyJavaStrategyClasses(false)
+      .classKind(mb.spoofax.compiler.util.ClassKind.Extended)
+      .manualFactory("mb.sdf3", "Sdf3ManualStrategoRuntimeBuilderFactory"),
     constraintAnalyzer = ConstraintAnalyzerCompiler.LanguageProjectInput.builder()
       .strategoStrategy("statix-editor-analyze")
       .multiFile(true),

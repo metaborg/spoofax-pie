@@ -12,12 +12,12 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import javax.inject.Inject;
 
 @LanguageScope
-public class Sdf3ToCompletionColorer implements TaskDef<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> {
+public class Sdf3ToSignature implements TaskDef<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> {
     private final StrategoRuntimeBuilder strategoRuntimeBuilder;
     private final StrategoRuntime prototypeStrategoRuntime;
 
     @Inject
-    public Sdf3ToCompletionColorer(StrategoRuntimeBuilder strategoRuntimeBuilder, StrategoRuntime prototypeStrategoRuntime) {
+    public Sdf3ToSignature(StrategoRuntimeBuilder strategoRuntimeBuilder, StrategoRuntime prototypeStrategoRuntime) {
         this.strategoRuntimeBuilder = strategoRuntimeBuilder;
         this.prototypeStrategoRuntime = prototypeStrategoRuntime;
     }
@@ -33,7 +33,7 @@ public class Sdf3ToCompletionColorer implements TaskDef<Supplier<@Nullable IStra
             return null;
         }
         final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.buildFromPrototype(prototypeStrategoRuntime);
-        final String strategyId = "module-to-cmp-colorer";
+        final String strategyId = "module-to-sig";
         return strategoRuntime.invoke(strategyId, ast);
     }
 }

@@ -1,6 +1,5 @@
 import mb.spoofax.compiler.gradle.spoofaxcore.AdapterProjectCompilerSettings
 import mb.spoofax.compiler.spoofaxcore.*
-import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler.AdapterProjectInput.builder
 import mb.spoofax.compiler.util.TypeInfo
 
 plugins {
@@ -13,7 +12,7 @@ adapterProjectCompiler {
     parser = ParserCompiler.AdapterProjectInput.builder(),
     styler = StylerCompiler.AdapterProjectInput.builder(),
     completer = CompleterCompiler.AdapterProjectInput.builder(),
-    strategoRuntime = builder(),
+    strategoRuntime = StrategoRuntimeCompiler.AdapterProjectInput.builder(),
     constraintAnalyzer = ConstraintAnalyzerCompiler.AdapterProjectInput.builder(),
     compiler = run {
       val taskPackageId = "mb.sdf3.spoofax.task"
@@ -22,7 +21,11 @@ adapterProjectCompiler {
       val builder = AdapterProjectCompiler.Input.builder()
 
       val toCompletionColorer = TypeInfo.of(taskPackageId, "Sdf3ToCompletionColorer")
-      builder.addTaskDefs(toCompletionColorer)
+      val toCompletion = TypeInfo.of(taskPackageId, "Sdf3ToCompletion")
+      val toSignature = TypeInfo.of(taskPackageId, "Sdf3ToSignature")
+      val toDynsemSignature = TypeInfo.of(taskPackageId, "Sdf3ToDynsemSignature")
+      val toPrettyPrinter = TypeInfo.of(taskPackageId, "Sdf3ToPrettyPrinter")
+      builder.addTaskDefs(toCompletionColorer, toCompletion, toSignature, toDynsemSignature, toPrettyPrinter)
 
       builder
     }
