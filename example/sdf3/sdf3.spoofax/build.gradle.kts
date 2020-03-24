@@ -31,7 +31,10 @@ adapterProjectCompiler {
       val toSignature = TypeInfo.of(taskPackageId, "Sdf3ToSignature")
       val toDynsemSignature = TypeInfo.of(taskPackageId, "Sdf3ToDynsemSignature")
       val toPrettyPrinter = TypeInfo.of(taskPackageId, "Sdf3ToPrettyPrinter")
-      builder.addTaskDefs(toCompletionColorer, toCompletion, toSignature, toDynsemSignature, toPrettyPrinter)
+      val toPermissive = TypeInfo.of(taskPackageId, "Sdf3ToPermissive")
+      val toNormalForm = TypeInfo.of(taskPackageId, "Sdf3ToNormalForm")
+      builder.addTaskDefs(toCompletionColorer, toCompletion, toSignature, toDynsemSignature, toPrettyPrinter,
+        toPermissive, toNormalForm)
 
       builder
     }

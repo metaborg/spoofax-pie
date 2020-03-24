@@ -7,6 +7,8 @@ import mb.sdf3.spoofax.task.Sdf3Parse;
 import mb.sdf3.spoofax.task.Sdf3ToCompletion;
 import mb.sdf3.spoofax.task.Sdf3ToCompletionColorer;
 import mb.sdf3.spoofax.task.Sdf3ToDynsemSignature;
+import mb.sdf3.spoofax.task.Sdf3ToNormalForm;
+import mb.sdf3.spoofax.task.Sdf3ToPermissive;
 import mb.sdf3.spoofax.task.Sdf3ToPrettyPrinter;
 import mb.sdf3.spoofax.task.Sdf3ToSignature;
 import mb.spoofax.core.language.LanguageScope;
@@ -25,4 +27,8 @@ public interface Sdf3TestComponent extends Sdf3Component {
     Sdf3ToDynsemSignature getToDynsemSignature();
 
     Sdf3ToPrettyPrinter getToPrettyPrinter();
+
+    Sdf3ToPermissive getToPermissive();
+
+    Sdf3ToNormalForm getToNormalForm();
 }

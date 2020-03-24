@@ -146,6 +146,7 @@ open class EclipseExternaldepsPlugin : Plugin<Project> {
     )
 
     project.tasks.named<Jar>("jar").configure {
+      inputs.property("input", input)
       withConvention(BundleTaskConvention::class) {
         // Let BND use the runtime classpath, since this bundle is used for bundling runtime dependencies.
         setClasspath(sourceSet.runtimeClasspath)

@@ -154,6 +154,7 @@ open class LanguagePlugin : Plugin<Project> {
     // Unpack the '.spoofax-language' archive.
     val unpackSpoofaxLanguageDir = "${project.buildDir}/unpackedSpoofaxLanguage/"
     val unpackSpoofaxLanguageTask = project.tasks.register<Sync>("unpackSpoofaxLanguage") {
+      inputs.property("input", input)
       dependsOn(configuration)
       from({ configuration.map { project.zipTree(it) } })  /* Closure inside `from` to defer evaluation until task execution time */
       into(unpackSpoofaxLanguageDir)

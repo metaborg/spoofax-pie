@@ -21,11 +21,12 @@ languageProjectCompiler {
     styler = StylerCompiler.LanguageProjectInput.builder(),
     completer = CompleterCompiler.LanguageProjectInput.builder(),
     strategoRuntime = StrategoRuntimeCompiler.LanguageProjectInput.builder()
+      .addInteropRegisterersByReflection("org.metaborg.meta.lang.template.strategies.InteropRegisterer")
       .enableNaBL2(false)
       .enableStatix(true)
       .copyCTree(true)
       .copyClasses(false)
-      .copyJavaStrategyClasses(false)
+      .copyJavaStrategyClasses(true)
       .classKind(mb.spoofax.compiler.util.ClassKind.Extended)
       .manualFactory("mb.sdf3", "Sdf3ManualStrategoRuntimeBuilderFactory"),
     constraintAnalyzer = ConstraintAnalyzerCompiler.LanguageProjectInput.builder()
