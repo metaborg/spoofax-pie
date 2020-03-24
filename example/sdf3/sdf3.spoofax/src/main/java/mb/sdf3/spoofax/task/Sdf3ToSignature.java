@@ -5,25 +5,22 @@ import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.spoofax.core.language.LanguageScope;
 import mb.stratego.common.StrategoRuntime;
-import mb.stratego.common.StrategoRuntimeBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 @LanguageScope
 public class Sdf3ToSignature implements TaskDef<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> {
-    private final StrategoRuntimeBuilder strategoRuntimeBuilder;
-    private final StrategoRuntime prototypeStrategoRuntime;
+    private final Provider<StrategoRuntime> strategoRuntimeProvider;
     private final Sdf3DesugarTemplates desugarTemplates;
 
     @Inject public Sdf3ToSignature(
-        StrategoRuntimeBuilder strategoRuntimeBuilder,
-        StrategoRuntime prototypeStrategoRuntime,
+        Provider<StrategoRuntime> strategoRuntimeProvider,
         Sdf3DesugarTemplates desugarTemplates
     ) {
-        this.strategoRuntimeBuilder = strategoRuntimeBuilder;
-        this.prototypeStrategoRuntime = prototypeStrategoRuntime;
+        this.strategoRuntimeProvider = strategoRuntimeProvider;
         this.desugarTemplates = desugarTemplates;
     }
 
@@ -34,11 +31,8 @@ public class Sdf3ToSignature implements TaskDef<Supplier<@Nullable IStrategoTerm
     @Override
     public @Nullable IStrategoTerm exec(ExecContext context, Supplier<@Nullable IStrategoTerm> astSupplier) throws Exception {
         final @Nullable IStrategoTerm ast = context.require(desugarTemplates.createTask(astSupplier));
-        if(ast == null) {
-            return null;
-        }
-        final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.buildFromPrototype(prototypeStrategoRuntime);
-        final String strategyId = "module-to-sig";
-        return strategoRuntime.invoke(strategyId, ast);
+        if(ast == null) return null;
+        final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get();
+        return strategoRuntime.invoke("module-to-sig", ast);
     }
 }

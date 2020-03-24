@@ -63,9 +63,14 @@ public class {{genModule.id}} {
         return factory.create(loggerFactory, resourceService);
     }
 
-    @Provides @LanguageScope
+    @Provides @LanguageScope @Named("prototype")
     StrategoRuntime providePrototypeStrategoRuntime(StrategoRuntimeBuilder builder) {
         return builder.build();
+    }
+
+    @Provides /* Unscoped: new session every call. */
+    StrategoRuntime provideStrategoRuntime(StrategoRuntimeBuilder builder, @Named("prototype") StrategoRuntime prototype) {
+        return builder.buildFromPrototype(prototype);
     }
 {{/strategoRuntime}}
 {{#constraintAnalyzer}}
