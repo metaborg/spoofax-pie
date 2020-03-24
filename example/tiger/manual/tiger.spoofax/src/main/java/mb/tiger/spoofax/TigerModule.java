@@ -5,8 +5,8 @@ import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.MapTaskDefs;
-import mb.pie.api.Pie;
 import mb.pie.api.MixedSession;
+import mb.pie.api.Pie;
 import mb.pie.api.TaskDef;
 import mb.pie.api.TaskDefs;
 import mb.resource.ResourceService;
@@ -86,9 +86,14 @@ public class TigerModule {
         return factory.create(loggerFactory, resourceService);
     }
 
-    @Provides @LanguageScope
+    @Provides @LanguageScope @Named("prototype")
     StrategoRuntime providePrototypeStrategoRuntime(StrategoRuntimeBuilder builder) {
         return builder.build();
+    }
+
+    @Provides /* Unscoped: new session every call. */
+    StrategoRuntime provideStrategoRuntime(StrategoRuntimeBuilder builder, @Named("prototype") StrategoRuntime prototype) {
+        return builder.buildFromPrototype(prototype);
     }
 
 

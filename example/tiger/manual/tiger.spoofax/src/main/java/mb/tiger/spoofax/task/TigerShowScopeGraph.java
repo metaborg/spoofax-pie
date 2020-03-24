@@ -10,7 +10,6 @@ import mb.resource.ResourceService;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.CommandOutput;
 import mb.stratego.common.StrategoRuntime;
-import mb.stratego.common.StrategoRuntimeBuilder;
 import mb.stratego.common.StrategoUtil;
 import mb.tiger.spoofax.task.reusable.TigerAnalyze;
 import mb.tiger.spoofax.task.reusable.TigerParse;
@@ -19,27 +18,25 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 public class TigerShowScopeGraph implements TaskDef<TigerShowArgs, CommandOutput> {
     private final TigerParse parse;
     private final TigerAnalyze analyze;
     private final ResourceService resourceService;
-    private final StrategoRuntimeBuilder strategoRuntimeBuilder;
-    private final StrategoRuntime prototypeStrategoRuntime;
+    private final Provider<StrategoRuntime> strategoRuntimeProvider;
 
 
     @Inject public TigerShowScopeGraph(
         TigerParse parse,
         TigerAnalyze analyze,
         ResourceService resourceService,
-        StrategoRuntimeBuilder strategoRuntimeBuilder,
-        StrategoRuntime prototypeStrategoRuntime
+        Provider<StrategoRuntime> strategoRuntimeProvider
     ) {
         this.parse = parse;
         this.analyze = analyze;
         this.resourceService = resourceService;
-        this.strategoRuntimeBuilder = strategoRuntimeBuilder;
-        this.prototypeStrategoRuntime = prototypeStrategoRuntime;
+        this.strategoRuntimeProvider = strategoRuntimeProvider;
     }
 
     @Override public String getId() {
@@ -58,7 +55,7 @@ public class TigerShowScopeGraph implements TaskDef<TigerShowArgs, CommandOutput
             throw new RuntimeException("Cannot show scope graph, analyzed AST for '" + key + "' is null");
         }
 
-        final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.buildFromPrototype(prototypeStrategoRuntime);
+        final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get();
         final String strategyId = "spoofax3-editor-show-analysis-term";
         final ITermFactory termFactory = strategoRuntime.getTermFactory();
         final IStrategoTerm inputTerm = termFactory.makeTuple(output.result.ast, termFactory.makeString(resourceService.toString(key)));

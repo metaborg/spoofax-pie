@@ -4,24 +4,18 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.stratego.common.StrategoRuntime;
-import mb.stratego.common.StrategoRuntimeBuilder;
 import mb.stratego.common.StrategoUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 public class TigerListDefNames implements TaskDef<Supplier<@Nullable IStrategoTerm>, @Nullable String> {
-    private final StrategoRuntimeBuilder strategoRuntimeBuilder;
-    private final StrategoRuntime prototypeStrategoRuntime;
+    private final Provider<StrategoRuntime> strategoRuntimeProvider;
 
-    @Inject
-    public TigerListDefNames(
-        StrategoRuntimeBuilder strategoRuntimeBuilder,
-        StrategoRuntime prototypeStrategoRuntime
-    ) {
-        this.strategoRuntimeBuilder = strategoRuntimeBuilder;
-        this.prototypeStrategoRuntime = prototypeStrategoRuntime;
+    @Inject public TigerListDefNames(Provider<StrategoRuntime> strategoRuntimeProvider) {
+        this.strategoRuntimeProvider = strategoRuntimeProvider;
     }
 
     @Override public String getId() {
@@ -35,7 +29,7 @@ public class TigerListDefNames implements TaskDef<Supplier<@Nullable IStrategoTe
             return null;
         }
 
-        final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.buildFromPrototype(prototypeStrategoRuntime);
+        final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get();
         final String strategyId = "list-of-def-names";
         final @Nullable IStrategoTerm result = strategoRuntime.invoke(strategyId, ast);
         if(result == null) {
