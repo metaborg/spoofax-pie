@@ -31,9 +31,17 @@ languageProjectCompiler {
     constraintAnalyzer = ConstraintAnalyzerCompiler.LanguageProjectInput.builder()
       .strategoStrategy("statix-editor-analyze")
       .multiFile(true),
-    compiler = LanguageProjectCompiler.Input.builder()
-      // HACK: use org.metaborggggg groupId for SDF3, as that is used to prevent bootstrapping issues.
-      .languageSpecificationDependency(GradleDependency.module("org.metaborggggg:org.metaborg.meta.lang.template:2.6.0-SNAPSHOT"))
+    compiler = run {
+      val builder = LanguageProjectCompiler.Input.builder()
+      if (gradle.parent != null && gradle.parent!!.rootProject.name == "devenv") {
+        // HACK: use org.metaborggggg groupId for SDF3, as that is used to prevent bootstrapping issues.
+        builder.languageSpecificationDependency(GradleDependency.module("org.metaborggggg:org.metaborg.meta.lang.template:2.6.0-SNAPSHOT"))
+      } else {
+        // HACK: when building standalone (outside of devenv composite build), use a normal SDF3 dependency.
+        builder.languageSpecificationDependency(GradleDependency.module("org.metaborg:org.metaborg.meta.lang.template:2.6.0-SNAPSHOT"))
+      }
+      builder
+    }
   ))
 }
 
