@@ -27,14 +27,15 @@ adapterProjectCompiler {
 
       // Generation task definitions
       val toCompletionColorer = TypeInfo.of(taskPackageId, "Sdf3ToCompletionColorer")
+      val toCompletionRuntime = TypeInfo.of(taskPackageId, "Sdf3ToCompletionRuntime")
       val toCompletion = TypeInfo.of(taskPackageId, "Sdf3ToCompletion")
       val toSignature = TypeInfo.of(taskPackageId, "Sdf3ToSignature")
       val toDynsemSignature = TypeInfo.of(taskPackageId, "Sdf3ToDynsemSignature")
       val toPrettyPrinter = TypeInfo.of(taskPackageId, "Sdf3ToPrettyPrinter")
       val toPermissive = TypeInfo.of(taskPackageId, "Sdf3ToPermissive")
       val toNormalForm = TypeInfo.of(taskPackageId, "Sdf3ToNormalForm")
-      builder.addTaskDefs(toCompletionColorer, toCompletion, toSignature, toDynsemSignature, toPrettyPrinter,
-        toPermissive, toNormalForm)
+      builder.addTaskDefs(toCompletionColorer, toCompletionRuntime, toCompletion, toSignature, toDynsemSignature,
+        toPrettyPrinter, toPermissive, toNormalForm)
 
       builder
     }

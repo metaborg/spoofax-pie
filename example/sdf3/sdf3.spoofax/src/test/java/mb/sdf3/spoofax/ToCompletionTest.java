@@ -4,6 +4,7 @@ import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
 import mb.resource.text.TextResource;
 import mb.sdf3.spoofax.task.Sdf3ToCompletion;
+import mb.sdf3.spoofax.task.Sdf3ToCompletionRuntime;
 import org.junit.jupiter.api.Test;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -21,7 +22,8 @@ class ToCompletionTest extends TestBase {
             log.info("{}", output);
             assertNotNull(output);
             assertTrue(isAppl(output, "Module"));
-            assertTrue(isStringAt(output, 0, "completion/nested/a-cp"));
+            assertTrue(isApplAt(output, 0, "Unparameterized"));
+            assertTrue(isStringAt(output.getSubterm(0), 0, "completion/nested/a-completion-insertions"));
         }
     }
 }

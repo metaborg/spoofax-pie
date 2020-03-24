@@ -12,11 +12,11 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 @LanguageScope
-public class Sdf3ToCompletion implements TaskDef<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> {
+public class Sdf3ToCompletionRuntime implements TaskDef<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> {
     private final Provider<StrategoRuntime> strategoRuntimeProvider;
     private final Sdf3DesugarTemplates desugarTemplates;
 
-    @Inject public Sdf3ToCompletion(
+    @Inject public Sdf3ToCompletionRuntime(
         Provider<StrategoRuntime> strategoRuntimeProvider,
         Sdf3DesugarTemplates desugarTemplates
     ) {
@@ -33,6 +33,6 @@ public class Sdf3ToCompletion implements TaskDef<Supplier<@Nullable IStrategoTer
         final @Nullable IStrategoTerm ast = context.require(desugarTemplates.createTask(astSupplier));
         if(ast == null) return null;
         final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get();
-        return strategoRuntime.invoke("module-to-sdf3-completions", ast);
+        return strategoRuntime.invoke("module-to-new-cmp", ast);
     }
 }
