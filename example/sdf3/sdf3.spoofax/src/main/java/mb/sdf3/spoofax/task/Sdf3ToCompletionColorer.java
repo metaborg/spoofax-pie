@@ -15,11 +15,16 @@ import javax.inject.Inject;
 public class Sdf3ToCompletionColorer implements TaskDef<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> {
     private final StrategoRuntimeBuilder strategoRuntimeBuilder;
     private final StrategoRuntime prototypeStrategoRuntime;
+    private final Sdf3DesugarTemplates desugarTemplates;
 
-    @Inject
-    public Sdf3ToCompletionColorer(StrategoRuntimeBuilder strategoRuntimeBuilder, StrategoRuntime prototypeStrategoRuntime) {
+    @Inject public Sdf3ToCompletionColorer(
+        StrategoRuntimeBuilder strategoRuntimeBuilder,
+        StrategoRuntime prototypeStrategoRuntime,
+        Sdf3DesugarTemplates desugarTemplates
+    ) {
         this.strategoRuntimeBuilder = strategoRuntimeBuilder;
         this.prototypeStrategoRuntime = prototypeStrategoRuntime;
+        this.desugarTemplates = desugarTemplates;
     }
 
     @Override public String getId() {
@@ -28,7 +33,7 @@ public class Sdf3ToCompletionColorer implements TaskDef<Supplier<@Nullable IStra
 
     @Override
     public @Nullable IStrategoTerm exec(ExecContext context, Supplier<@Nullable IStrategoTerm> astSupplier) throws Exception {
-        final @Nullable IStrategoTerm ast = context.require(astSupplier);
+        final @Nullable IStrategoTerm ast = context.require(desugarTemplates.createTask(astSupplier));
         if(ast == null) {
             return null;
         }

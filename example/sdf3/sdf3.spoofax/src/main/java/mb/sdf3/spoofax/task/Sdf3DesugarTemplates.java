@@ -12,19 +12,16 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import javax.inject.Inject;
 
 @LanguageScope
-public class Sdf3ToDynsemSignature implements TaskDef<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> {
+public class Sdf3DesugarTemplates implements TaskDef<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> {
     private final StrategoRuntimeBuilder strategoRuntimeBuilder;
     private final StrategoRuntime prototypeStrategoRuntime;
-    private final Sdf3DesugarTemplates desugarTemplates;
 
-    @Inject public Sdf3ToDynsemSignature(
+    @Inject public Sdf3DesugarTemplates(
         StrategoRuntimeBuilder strategoRuntimeBuilder,
-        StrategoRuntime prototypeStrategoRuntime,
-        Sdf3DesugarTemplates desugarTemplates
+        StrategoRuntime prototypeStrategoRuntime
     ) {
         this.strategoRuntimeBuilder = strategoRuntimeBuilder;
         this.prototypeStrategoRuntime = prototypeStrategoRuntime;
-        this.desugarTemplates = desugarTemplates;
     }
 
     @Override public String getId() {
@@ -33,12 +30,12 @@ public class Sdf3ToDynsemSignature implements TaskDef<Supplier<@Nullable IStrate
 
     @Override
     public @Nullable IStrategoTerm exec(ExecContext context, Supplier<@Nullable IStrategoTerm> astSupplier) throws Exception {
-        final @Nullable IStrategoTerm ast = context.require(desugarTemplates.createTask(astSupplier));
+        final @Nullable IStrategoTerm ast = context.require(astSupplier);
         if(ast == null) {
             return null;
         }
         final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.buildFromPrototype(prototypeStrategoRuntime);
-        final String strategyId = "module-to-ds-sig";
+        final String strategyId = "desugar-templates";
         return strategoRuntime.invoke(strategyId, ast);
     }
 }

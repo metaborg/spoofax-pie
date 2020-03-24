@@ -15,11 +15,17 @@ adapterProjectCompiler {
     strategoRuntime = StrategoRuntimeCompiler.AdapterProjectInput.builder(),
     constraintAnalyzer = ConstraintAnalyzerCompiler.AdapterProjectInput.builder(),
     compiler = run {
-      val taskPackageId = "mb.sdf3.spoofax.task"
-      val commandPackageId = "mb.sdf3.spoofax.command"
+      val packageId = "mb.sdf3.spoofax"
+      val taskPackageId = "$packageId.task"
+      val commandPackageId = "$packageId.command"
 
       val builder = AdapterProjectCompiler.Input.builder()
 
+      // Utility task definitions
+      val desugarTemplates = TypeInfo.of(taskPackageId, "Sdf3DesugarTemplates")
+      builder.addTaskDefs(desugarTemplates)
+
+      // Generation task definitions
       val toCompletionColorer = TypeInfo.of(taskPackageId, "Sdf3ToCompletionColorer")
       val toCompletion = TypeInfo.of(taskPackageId, "Sdf3ToCompletion")
       val toSignature = TypeInfo.of(taskPackageId, "Sdf3ToSignature")
