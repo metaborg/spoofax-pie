@@ -12,6 +12,7 @@ import mb.sdf3.spoofax.task.Sdf3ToNormalForm;
 import mb.sdf3.spoofax.task.Sdf3ToPermissive;
 import mb.sdf3.spoofax.task.Sdf3ToPrettyPrinter;
 import mb.sdf3.spoofax.task.Sdf3ToSignature;
+import mb.sdf3.spoofax.task.Sdf3ToTable;
 import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.platform.PlatformComponent;
 
@@ -34,4 +35,6 @@ public interface Sdf3TestComponent extends Sdf3Component {
     Sdf3ToPermissive getToPermissive();
 
     Sdf3ToNormalForm getToNormalForm();
+
+    Sdf3ToTable getToTable();
 }

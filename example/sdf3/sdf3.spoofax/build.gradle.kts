@@ -34,8 +34,9 @@ adapterProjectCompiler {
       val toPrettyPrinter = TypeInfo.of(taskPackageId, "Sdf3ToPrettyPrinter")
       val toPermissive = TypeInfo.of(taskPackageId, "Sdf3ToPermissive")
       val toNormalForm = TypeInfo.of(taskPackageId, "Sdf3ToNormalForm")
+      val toTable = TypeInfo.of(taskPackageId, "Sdf3ToTable")
       builder.addTaskDefs(toCompletionColorer, toCompletionRuntime, toCompletion, toSignature, toDynsemSignature,
-        toPrettyPrinter, toPermissive, toNormalForm)
+        toPrettyPrinter, toPermissive, toNormalForm, toTable)
 
       builder
     }

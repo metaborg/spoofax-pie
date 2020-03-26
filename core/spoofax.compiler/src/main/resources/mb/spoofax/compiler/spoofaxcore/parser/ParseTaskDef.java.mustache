@@ -118,16 +118,52 @@ class AstMapper implements java.util.function.Function<JSGLR1ParseResult, @Nulla
     @Override public @Nullable IStrategoTerm apply(JSGLR1ParseResult result) {
         return result.getAst().orElse(null);
     }
+
+    @Override public boolean equals(@Nullable Object other) {
+        return this == other || other != null && this.getClass() == other.getClass();
+    }
+
+    @Override public int hashCode() {
+        return 0;
+    }
+
+    @Override public String toString() {
+        return "AstMapper()";
+    }
 }
 
 class TokensMapper implements java.util.function.Function<JSGLR1ParseResult, @Nullable ArrayList<? extends Token<IStrategoTerm>>>, Serializable {
     @Override public @Nullable ArrayList<? extends Token<IStrategoTerm>> apply(JSGLR1ParseResult result) {
         return result.getTokens().orElse(null);
     }
+
+    @Override public boolean equals(@Nullable Object other) {
+        return this == other || other != null && this.getClass() == other.getClass();
+    }
+
+    @Override public int hashCode() {
+        return 0;
+    }
+
+    @Override public String toString() {
+        return "TokensMapper()";
+    }
 }
 
 class MessagesMapper implements java.util.function.Function<JSGLR1ParseResult, Messages>, Serializable {
     @Override public Messages apply(JSGLR1ParseResult result) {
         return result.getMessages();
+    }
+
+    @Override public boolean equals(@Nullable Object other) {
+        return this == other || other != null && this.getClass() == other.getClass();
+    }
+
+    @Override public int hashCode() {
+        return 0;
+    }
+
+    @Override public String toString() {
+        return "MessagesMapper()";
     }
 }

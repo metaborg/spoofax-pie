@@ -1,5 +1,8 @@
 package mb.sdf3.spoofax.task;
 
+import mb.common.util.ListView;
+import mb.log.api.Logger;
+import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
 import mb.pie.api.Supplier;
@@ -12,20 +15,20 @@ import org.metaborg.sdf2table.parsetable.ParseTable;
 import org.metaborg.sdf2table.parsetable.ParseTableConfiguration;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
+import javax.inject.Inject;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Objects;
 
 @LanguageScope
 public class Sdf3ToTable implements TaskDef<Sdf3ToTable.Args, ParseTable> {
     public static class Args implements Serializable {
         private final Supplier<@Nullable IStrategoTerm> mainModuleAstSupplier;
-        private final ArrayList<Supplier<@Nullable IStrategoTerm>> modulesAstSuppliers;
+        private final ListView<Supplier<@Nullable IStrategoTerm>> modulesAstSuppliers;
         private final ParseTableConfiguration parseTableConfiguration;
 
         public Args(
             Supplier<@Nullable IStrategoTerm> mainModuleAstSupplier,
-            ArrayList<Supplier<@Nullable IStrategoTerm>> modulesAstSuppliers,
+            ListView<Supplier<@Nullable IStrategoTerm>> modulesAstSuppliers,
             ParseTableConfiguration parseTableConfiguration
         ) {
             this.mainModuleAstSupplier = mainModuleAstSupplier;
@@ -48,9 +51,14 @@ public class Sdf3ToTable implements TaskDef<Sdf3ToTable.Args, ParseTable> {
         }
     }
 
+    private final Logger log;
+    private final Sdf3ToPermissive toPermissive;
     private final Sdf3ToNormalForm toNormalForm;
 
-    public Sdf3ToTable(Sdf3ToNormalForm toNormalForm) {
+    @Inject
+    public Sdf3ToTable(LoggerFactory loggerFactory, Sdf3ToPermissive toPermissive, Sdf3ToNormalForm toNormalForm) {
+        this.log = loggerFactory.create(Sdf3ToTable.class);
+        this.toPermissive = toPermissive;
         this.toNormalForm = toNormalForm;
     }
 
@@ -58,26 +66,29 @@ public class Sdf3ToTable implements TaskDef<Sdf3ToTable.Args, ParseTable> {
         return getClass().getName();
     }
 
-    @Override
-    public @Nullable ParseTable exec(ExecContext context, Args args) throws Exception {
-        final @Nullable IStrategoTerm mainNormalizedGrammar = context.require(toNormalForm.createTask(args.mainModuleAstSupplier));
+    @Override public @Nullable ParseTable exec(ExecContext context, Args args) throws Exception {
+        final @Nullable IStrategoTerm mainNormalizedGrammar = context.require(toNormalForm.createTask(toPermissive.createSupplier(args.mainModuleAstSupplier)));
         if(mainNormalizedGrammar == null) {
             throw new ExecException("Transforming SDF3 grammar of main module " + args.mainModuleAstSupplier + " to normal form returned a null AST");
         }
+        log.info("Main: {}", mainNormalizedGrammar);
 
-        final ArrayList<IStrategoTerm> normalizedGrammars = new ArrayList<>(args.modulesAstSuppliers.size());
+        final NormGrammarReader normGrammarReader = new NormGrammarReader();
         for(Supplier<@Nullable IStrategoTerm> astSupplier : args.modulesAstSuppliers) {
-            final @Nullable IStrategoTerm normalizedGrammar = context.require(toNormalForm.createTask(astSupplier));
+            final @Nullable IStrategoTerm normalizedGrammar = context.require(toNormalForm.createTask(toPermissive.createSupplier(astSupplier)));
             if(normalizedGrammar == null) {
                 throw new ExecException("Transforming SDF3 grammar of " + astSupplier + " to normal form returned a null AST");
             }
-            normalizedGrammars.add(normalizedGrammar);
+            log.info("Other: {}", normalizedGrammar);
+            normGrammarReader.addModule(normalizedGrammar);
         }
 
-        final NormGrammarReader normGrammarReader = new NormGrammarReader();
-        // TODO: feed normalized grammar ASTs into normGrammarReader.
         final NormGrammar normalizedGrammar = normGrammarReader.readGrammar(mainNormalizedGrammar);
+        log.info("Full normalized grammar: {}", normalizedGrammar);
 
-        return new ParseTable(normalizedGrammar, args.parseTableConfiguration);
+        final ParseTable parseTable = new ParseTable(normalizedGrammar, args.parseTableConfiguration);
+        log.info("Parse table: {}", parseTable);
+
+        return parseTable;
     }
 }
