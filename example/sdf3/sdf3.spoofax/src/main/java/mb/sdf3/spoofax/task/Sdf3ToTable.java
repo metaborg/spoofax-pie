@@ -6,6 +6,7 @@ import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
 import mb.pie.api.Supplier;
+import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.spoofax.core.language.LanguageScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -25,40 +26,51 @@ public class Sdf3ToTable implements TaskDef<Sdf3ToTable.Args, ParseTable> {
         private final Supplier<@Nullable IStrategoTerm> mainModuleAstSupplier;
         private final ListView<Supplier<@Nullable IStrategoTerm>> modulesAstSuppliers;
         private final ParseTableConfiguration parseTableConfiguration;
+        private final boolean createCompletionTable;
 
         public Args(
             Supplier<@Nullable IStrategoTerm> mainModuleAstSupplier,
             ListView<Supplier<@Nullable IStrategoTerm>> modulesAstSuppliers,
-            ParseTableConfiguration parseTableConfiguration
+            ParseTableConfiguration parseTableConfiguration,
+            boolean createCompletionTable
         ) {
             this.mainModuleAstSupplier = mainModuleAstSupplier;
             this.modulesAstSuppliers = modulesAstSuppliers;
             this.parseTableConfiguration = parseTableConfiguration;
+            this.createCompletionTable = createCompletionTable;
         }
 
         @Override public boolean equals(Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             Args args = (Args)o;
-            return mainModuleAstSupplier.equals(args.mainModuleAstSupplier) &&
+            return createCompletionTable == args.createCompletionTable &&
+                mainModuleAstSupplier.equals(args.mainModuleAstSupplier) &&
                 modulesAstSuppliers.equals(args.modulesAstSuppliers) &&
                 parseTableConfiguration.equals(args.parseTableConfiguration);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(mainModuleAstSupplier, modulesAstSuppliers, parseTableConfiguration);
+            return Objects.hash(mainModuleAstSupplier, modulesAstSuppliers, parseTableConfiguration, createCompletionTable);
         }
     }
 
     private final Logger log;
     private final Sdf3ToPermissive toPermissive;
+    private final Sdf3ToCompletion toCompletion;
     private final Sdf3ToNormalForm toNormalForm;
 
     @Inject
-    public Sdf3ToTable(LoggerFactory loggerFactory, Sdf3ToPermissive toPermissive, Sdf3ToNormalForm toNormalForm) {
+    public Sdf3ToTable(
+        LoggerFactory loggerFactory,
+        Sdf3ToPermissive toPermissive,
+        Sdf3ToCompletion toCompletion,
+        Sdf3ToNormalForm toNormalForm
+    ) {
         this.log = loggerFactory.create(Sdf3ToTable.class);
         this.toPermissive = toPermissive;
+        this.toCompletion = toCompletion;
         this.toNormalForm = toNormalForm;
     }
 
@@ -67,28 +79,57 @@ public class Sdf3ToTable implements TaskDef<Sdf3ToTable.Args, ParseTable> {
     }
 
     @Override public @Nullable ParseTable exec(ExecContext context, Args args) throws Exception {
-        final @Nullable IStrategoTerm mainNormalizedGrammar = context.require(toNormalForm.createTask(toPermissive.createSupplier(args.mainModuleAstSupplier)));
+        final @Nullable IStrategoTerm mainNormalizedGrammar = context.require(toNormalized(args.mainModuleAstSupplier));
         if(mainNormalizedGrammar == null) {
             throw new ExecException("Transforming SDF3 grammar of main module " + args.mainModuleAstSupplier + " to normal form returned a null AST");
         }
         log.info("Main: {}", mainNormalizedGrammar);
 
         final NormGrammarReader normGrammarReader = new NormGrammarReader();
+
         for(Supplier<@Nullable IStrategoTerm> astSupplier : args.modulesAstSuppliers) {
-            final @Nullable IStrategoTerm normalizedGrammar = context.require(toNormalForm.createTask(toPermissive.createSupplier(astSupplier)));
-            if(normalizedGrammar == null) {
+            final @Nullable IStrategoTerm normalizedGrammarTerm = context.require(toNormalized(astSupplier));
+            if(normalizedGrammarTerm == null) {
                 throw new ExecException("Transforming SDF3 grammar of " + astSupplier + " to normal form returned a null AST");
             }
-            log.info("Other: {}", normalizedGrammar);
-            normGrammarReader.addModuleAst(normalizedGrammar);
+            log.info("Other: {}", normalizedGrammarTerm);
+            normGrammarReader.addModuleAst(normalizedGrammarTerm);
         }
 
-        final NormGrammar normalizedGrammar = normGrammarReader.readGrammar(mainNormalizedGrammar);
-        log.info("Full normalized grammar: {}", normalizedGrammar);
+        final NormGrammar normalizedGrammar;
+        if(!args.createCompletionTable) {
+            normalizedGrammar = normGrammarReader.readGrammar(mainNormalizedGrammar);
+        } else {
+            // Add main normalized grammar, instead of using it as the main module, since the completion version of the
+            // main module is the actual main module in case of creating a completion parse table.
+            normGrammarReader.addModuleAst(mainNormalizedGrammar);
 
-        final ParseTable parseTable = new ParseTable(normalizedGrammar, args.parseTableConfiguration);
-        log.info("Parse table: {}", parseTable);
+            final @Nullable IStrategoTerm mainCompletionNormalizedGrammar = context.require(toCompletionNormalized(args.mainModuleAstSupplier));
+            if(mainCompletionNormalizedGrammar == null) {
+                throw new ExecException("Transforming SDF3 grammar of main module " + args.mainModuleAstSupplier + " to completion normal form returned a null AST");
+            }
+            log.info("Main completion: {}", mainCompletionNormalizedGrammar);
 
-        return parseTable;
+            for(Supplier<@Nullable IStrategoTerm> astSupplier : args.modulesAstSuppliers) {
+                final @Nullable IStrategoTerm normalizedGrammarTerm = context.require(toCompletionNormalized(astSupplier));
+                if(normalizedGrammarTerm == null) {
+                    throw new ExecException("Transforming SDF3 grammar of " + astSupplier + " to completion normal form returned a null AST");
+                }
+                log.info("Other completion: {}", normalizedGrammarTerm);
+                normGrammarReader.addModuleAst(normalizedGrammarTerm);
+            }
+
+            normalizedGrammar = normGrammarReader.readGrammar(mainCompletionNormalizedGrammar);
+        }
+
+        return new ParseTable(normalizedGrammar, args.parseTableConfiguration);
+    }
+
+    private Task<@Nullable IStrategoTerm> toNormalized(Supplier<@Nullable IStrategoTerm> astSupplier) {
+        return toNormalForm.createTask(toPermissive.createSupplier(astSupplier));
+    }
+
+    private Task<@Nullable IStrategoTerm> toCompletionNormalized(Supplier<@Nullable IStrategoTerm> astSupplier) {
+        return toNormalForm.createTask(toCompletion.createSupplier(astSupplier));
     }
 }
