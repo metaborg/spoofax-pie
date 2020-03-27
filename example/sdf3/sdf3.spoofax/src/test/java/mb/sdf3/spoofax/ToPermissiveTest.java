@@ -14,10 +14,10 @@ import static org.spoofax.terms.util.TermUtils.*;
 
 class ToPermissiveTest extends TestBase {
     @Test void testTask() throws ExecException {
-        final TextResource resource = textResourceRegistry.createResource("module nested/a context-free syntax A = <A>", "a.sdf3");
+        final TextResource resource = createResource("module nested/a context-free syntax A = <A>", "a.sdf3");
         final Sdf3ToPermissive taskDef = languageComponent.getToPermissive();
         try(final MixedSession session = languageComponent.newPieSession()) {
-            final @Nullable IStrategoTerm output = session.require(taskDef.createTask(languageComponent.getParse().createAstSupplier(resource.key)));
+            final @Nullable IStrategoTerm output = session.require(taskDef.createTask(desugaredAstSupplier(resource)));
             log.info("{}", output);
             assertNotNull(output);
             assertTrue(isAppl(output, "Module"));
