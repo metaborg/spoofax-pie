@@ -80,7 +80,7 @@ public class Sdf3ToTable implements TaskDef<Sdf3ToTable.Args, ParseTable> {
                 throw new ExecException("Transforming SDF3 grammar of " + astSupplier + " to normal form returned a null AST");
             }
             log.info("Other: {}", normalizedGrammar);
-            normGrammarReader.addModule(normalizedGrammar);
+            normGrammarReader.addModuleAst(normalizedGrammar);
         }
 
         final NormGrammar normalizedGrammar = normGrammarReader.readGrammar(mainNormalizedGrammar);

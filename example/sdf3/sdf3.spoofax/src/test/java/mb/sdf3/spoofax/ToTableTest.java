@@ -48,7 +48,10 @@ class ToTableTest extends TestBase {
                 log.error("{}", message.message);
             }
             assertTrue(parseResult.isSuccess());
-            assertTrue(isAppl(((JSGLR2Success<IStrategoTerm>)parseResult).ast, "Start"));
+            final IStrategoTerm ast = ((JSGLR2Success<IStrategoTerm>)parseResult).ast;
+            assertTrue(isAppl(ast, "Start", 1));
+            assertTrue(isApplAt(ast,0, "A", 0));
+            assertTrue(isApplAt(ast,1, "B", 0));
         }
     }
 }
