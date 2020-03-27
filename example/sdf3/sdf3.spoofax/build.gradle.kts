@@ -34,9 +34,10 @@ adapterProjectCompiler {
       val toPrettyPrinter = TypeInfo.of(taskPackageId, "Sdf3ToPrettyPrinter")
       val toPermissive = TypeInfo.of(taskPackageId, "Sdf3ToPermissive")
       val toNormalForm = TypeInfo.of(taskPackageId, "Sdf3ToNormalForm")
-      val toTable = TypeInfo.of(taskPackageId, "Sdf3ToTable")
+      val toParseTable = TypeInfo.of(taskPackageId, "Sdf3ToParseTable")
+      val toParenthesizer = TypeInfo.of(taskPackageId, "Sdf3ToParenthesizer")
       builder.addTaskDefs(toCompletionColorer, toCompletionRuntime, toCompletion, toSignature, toDynsemSignature,
-        toPrettyPrinter, toPermissive, toNormalForm, toTable)
+        toPrettyPrinter, toPermissive, toNormalForm, toParseTable, toParenthesizer)
 
       builder
     }
@@ -44,6 +45,8 @@ adapterProjectCompiler {
 }
 
 dependencies {
+  api("org.metaborg:sdf2parenthesize")
+
   testAnnotationProcessor(platform("$group:spoofax.depconstraints:$version"))
   testImplementation("org.metaborg:log.backend.slf4j")
   testImplementation("org.slf4j:slf4j-simple:1.7.30")

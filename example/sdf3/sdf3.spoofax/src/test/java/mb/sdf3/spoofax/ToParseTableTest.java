@@ -5,7 +5,7 @@ import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
 import mb.resource.text.TextResource;
 import mb.sdf3.spoofax.task.Sdf3Parse;
-import mb.sdf3.spoofax.task.Sdf3ToTable;
+import mb.sdf3.spoofax.task.Sdf3ToParseTable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.metaborg.sdf2table.parsetable.ParseTable;
@@ -20,7 +20,7 @@ import org.spoofax.jsglr2.messages.Message;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.spoofax.terms.util.TermUtils.*;
 
-class ToTableTest extends TestBase {
+class ToParseTableTest extends TestBase {
     @ParameterizedTest
     @ValueSource(booleans = {false, true})
     void testTask(boolean createCompletionTable) throws ExecException {
@@ -28,10 +28,10 @@ class ToTableTest extends TestBase {
         final TextResource resourceLex = createResource("module lex lexical syntax LAYOUT = [\\ \\t\\n\\r]", "lex.sdf3");
         final TextResource resourceA = createResource("module nested/a context-free syntax A.A = <key>", "nested/a.sdf3");
         final TextResource resourceB = createResource("module nested/b context-free syntax B.B = <word>", "nested/b.sdf3");
-        final Sdf3ToTable taskDef = languageComponent.getToTable();
+        final Sdf3ToParseTable taskDef = languageComponent.getToParseTable();
         try(final MixedSession session = languageComponent.newPieSession()) {
             final Sdf3Parse parse = languageComponent.getParse();
-            final Sdf3ToTable.Args args = new Sdf3ToTable.Args(
+            final Sdf3ToParseTable.Args args = new Sdf3ToParseTable.Args(
                 desugaredAstSupplier(resourceMain),
                 ListView.of(
                     desugaredAstSupplier(resourceLex),

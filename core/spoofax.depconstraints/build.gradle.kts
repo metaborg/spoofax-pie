@@ -26,15 +26,25 @@ dependencies {
     api("org.metaborg:pie.runtime:$pieVersion")
     api("org.metaborg:pie.dagger:$pieVersion")
 
+
     api("org.metaborg:org.spoofax.terms:$spoofaxCoreVersion")
+
     api("org.metaborg:org.spoofax.jsglr:$spoofaxCoreVersion")
+    api("org.metaborg:sdf2table:$spoofaxCoreVersion")
+    api("org.metaborg:org.metaborg.parsetable:$spoofaxCoreVersion")
+    api("org.metaborg:sdf2parenthesize:$spoofaxCoreVersion")
+
     api("org.metaborg:org.spoofax.interpreter.core:$spoofaxCoreVersion")
+
     api("org.metaborg:org.strategoxt.strj:$spoofaxCoreVersion")
+
     api("org.metaborg:nabl2.solver:$spoofaxCoreVersion")
     api("org.metaborg:nabl2.terms:$spoofaxCoreVersion")
+
     api("org.metaborg:statix.solver:$spoofaxCoreVersion")
 
     runtime("org.metaborg:strategoxt-min-jar:$spoofaxCoreVersion")
+
 
     api("info.picocli:picocli:$picocliVersion")
     api("info.picocli:picocli-codegen:$picocliVersion")

@@ -5,15 +5,16 @@ import mb.sdf3.spoofax.Sdf3Component;
 import mb.sdf3.spoofax.Sdf3Module;
 import mb.sdf3.spoofax.task.Sdf3DesugarTemplates;
 import mb.sdf3.spoofax.task.Sdf3Parse;
-import mb.sdf3.spoofax.task.Sdf3ToCompletionColorer;
 import mb.sdf3.spoofax.task.Sdf3ToCompletion;
+import mb.sdf3.spoofax.task.Sdf3ToCompletionColorer;
 import mb.sdf3.spoofax.task.Sdf3ToCompletionRuntime;
 import mb.sdf3.spoofax.task.Sdf3ToDynsemSignature;
 import mb.sdf3.spoofax.task.Sdf3ToNormalForm;
+import mb.sdf3.spoofax.task.Sdf3ToParenthesizer;
+import mb.sdf3.spoofax.task.Sdf3ToParseTable;
 import mb.sdf3.spoofax.task.Sdf3ToPermissive;
 import mb.sdf3.spoofax.task.Sdf3ToPrettyPrinter;
 import mb.sdf3.spoofax.task.Sdf3ToSignature;
-import mb.sdf3.spoofax.task.Sdf3ToTable;
 import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.platform.PlatformComponent;
 
@@ -41,5 +42,7 @@ public interface Sdf3TestComponent extends Sdf3Component {
 
     Sdf3ToNormalForm getToNormalForm();
 
-    Sdf3ToTable getToTable();
+    Sdf3ToParseTable getToParseTable();
+
+    Sdf3ToParenthesizer getToParenthesizer();
 }

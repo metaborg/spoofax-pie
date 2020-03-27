@@ -21,7 +21,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @LanguageScope
-public class Sdf3ToTable implements TaskDef<Sdf3ToTable.Args, ParseTable> {
+public class Sdf3ToParseTable implements TaskDef<Sdf3ToParseTable.Args, ParseTable> {
     public static class Args implements Serializable {
         private final Supplier<@Nullable IStrategoTerm> mainModuleAstSupplier;
         private final ListView<Supplier<@Nullable IStrategoTerm>> modulesAstSuppliers;
@@ -62,13 +62,13 @@ public class Sdf3ToTable implements TaskDef<Sdf3ToTable.Args, ParseTable> {
     private final Sdf3ToNormalForm toNormalForm;
 
     @Inject
-    public Sdf3ToTable(
+    public Sdf3ToParseTable(
         LoggerFactory loggerFactory,
         Sdf3ToPermissive toPermissive,
         Sdf3ToCompletion toCompletion,
         Sdf3ToNormalForm toNormalForm
     ) {
-        this.log = loggerFactory.create(Sdf3ToTable.class);
+        this.log = loggerFactory.create(Sdf3ToParseTable.class);
         this.toPermissive = toPermissive;
         this.toCompletion = toCompletion;
         this.toNormalForm = toNormalForm;
@@ -78,7 +78,7 @@ public class Sdf3ToTable implements TaskDef<Sdf3ToTable.Args, ParseTable> {
         return getClass().getName();
     }
 
-    @Override public @Nullable ParseTable exec(ExecContext context, Args args) throws Exception {
+    @Override public ParseTable exec(ExecContext context, Args args) throws Exception {
         final @Nullable IStrategoTerm mainNormalizedGrammar = context.require(toNormalized(args.mainModuleAstSupplier));
         if(mainNormalizedGrammar == null) {
             throw new ExecException("Transforming SDF3 grammar of main module " + args.mainModuleAstSupplier + " to normal form returned a null AST");
