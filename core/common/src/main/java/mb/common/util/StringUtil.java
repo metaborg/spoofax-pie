@@ -26,31 +26,25 @@ public class StringUtil {
 
 
     /**
-     * <p>Checks if a CharSequence is empty ("") or null.</p>
+     * Checks if a CharSequence is empty ("").
      *
      * <pre>
-     * StringUtils.isEmpty(null)      = true
      * StringUtils.isEmpty("")        = true
      * StringUtils.isEmpty(" ")       = false
      * StringUtils.isEmpty("bob")     = false
      * StringUtils.isEmpty("  bob  ") = false
      * </pre>
      *
-     * <p>NOTE: This method changed in Lang version 2.0.
-     * It no longer trims the CharSequence. That functionality is available in isBlank().</p>
-     *
-     * @param cs the CharSequence to check, may be null
-     * @return {@code true} if the CharSequence is empty or null
-     * @since 3.0 Changed signature from isEmpty(String) to isEmpty(CharSequence)
+     * @param cs the CharSequence to check
+     * @return {@code true} if the CharSequence is empty
      */
     public static boolean isEmpty(final CharSequence cs) {
-        return cs == null || cs.length() == 0;
+        return cs.length() == 0;
     }
 
 
     /**
-     * <p>Returns padding using the specified delimiter repeated
-     * to a given length.</p>
+     * Returns padding using the specified delimiter repeated to a given length.
      *
      * <pre>
      * StringUtils.repeat('e', 0)  = ""
@@ -58,11 +52,10 @@ public class StringUtil {
      * StringUtils.repeat('e', -2) = ""
      * </pre>
      *
-     * <p>Note: this method does not support padding with
+     * Note: this method does not support padding with
      * <a href="http://www.unicode.org/glossary/#supplementary_character">Unicode Supplementary Characters</a>
      * as they require a pair of {@code char}s to be represented. If you are needing to support full I18N of your
      * applications consider using {@link #repeat(String, int)} instead.
-     * </p>
      *
      * @param ch     character to repeat
      * @param repeat number of times to repeat char, negative treated as zero
@@ -84,11 +77,9 @@ public class StringUtil {
     //-----------------------------------------------------------------------
 
     /**
-     * <p>Repeat a String {@code repeat} times to form a
-     * new String.</p>
+     * Repeat a String {@code repeat} times to form a new String.
      *
      * <pre>
-     * StringUtils.repeat(null, 2) = null
      * StringUtils.repeat("", 0)   = ""
      * StringUtils.repeat("", 2)   = ""
      * StringUtils.repeat("a", 3)  = "aaa"
@@ -96,16 +87,13 @@ public class StringUtil {
      * StringUtils.repeat("a", -2) = ""
      * </pre>
      *
-     * @param str    the String to repeat, may be null
+     * @param str    the String to repeat
      * @param repeat number of times to repeat str, negative treated as zero
-     * @return a new String consisting of the original String repeated, {@code null} if null String input
+     * @return a new String consisting of the original String repeated
      */
     public static String repeat(final String str, final int repeat) {
         // Performance tuned for 2.0 (JDK1.4)
 
-        if(str == null) {
-            return null;
-        }
         if(repeat <= 0) {
             return EMPTY;
         }
@@ -140,28 +128,21 @@ public class StringUtil {
     }
 
     /**
-     * <p>Repeat a String {@code repeat} times to form a
-     * new String, with a String separator injected each time. </p>
+     * Repeat a String {@code repeat} times to form a new String, with a String separator injected each time.
      *
      * <pre>
-     * StringUtils.repeat(null, null, 2) = null
-     * StringUtils.repeat(null, "x", 2)  = null
      * StringUtils.repeat("", null, 0)   = ""
      * StringUtils.repeat("", "", 2)     = ""
      * StringUtils.repeat("", "x", 3)    = "xxx"
      * StringUtils.repeat("?", ", ", 3)  = "?, ?, ?"
      * </pre>
      *
-     * @param str       the String to repeat, may be null
-     * @param separator the String to inject, may be null
+     * @param str       the String to repeat
+     * @param separator the String to inject
      * @param repeat    number of times to repeat str, negative treated as zero
-     * @return a new String consisting of the original String repeated, {@code null} if null String input
-     * @since 2.5
+     * @return a new String consisting of the original String repeated
      */
     public static String repeat(final String str, final String separator, final int repeat) {
-        if(str == null || separator == null) {
-            return repeat(str, repeat);
-        }
         // given that repeat(String, int) is quite optimized, better to rely on it than try and splice this into it
         final String result = repeat(str + separator, repeat);
         return removeEnd(result, separator);
@@ -169,15 +150,12 @@ public class StringUtil {
 
 
     /**
-     * <p>Removes a substring only if it is at the end of a source string,
-     * otherwise returns the source string.</p>
+     * Removes a substring only if it is at the end of a source string, otherwise returns the source string.
      *
-     * <p>A {@code null} source string will return {@code null}.
-     * An empty ("") source string will return the empty string. A {@code null} search string will return the source
-     * string.</p>
+     * A {@code null} source string will return {@code null}. An empty ("") source string will return the empty string.
+     * A {@code null} search string will return the source string.
      *
      * <pre>
-     * StringUtils.removeEnd(null, *)      = null
      * StringUtils.removeEnd("", *)        = ""
      * StringUtils.removeEnd(*, null)      = *
      * StringUtils.removeEnd("www.domain.com", ".com.")  = "www.domain.com"
@@ -186,10 +164,9 @@ public class StringUtil {
      * StringUtils.removeEnd("abc", "")    = "abc"
      * </pre>
      *
-     * @param str    the source String to search, may be null
+     * @param str    the source String to search
      * @param remove the String to search for and remove, may be null
-     * @return the substring with the string removed if found, {@code null} if null String input
-     * @since 2.1
+     * @return the substring with the string removed if found
      */
     public static String removeEnd(final String str, final String remove) {
         if(isEmpty(str) || isEmpty(remove)) {
@@ -203,12 +180,11 @@ public class StringUtil {
 
 
     /**
-     * <p>Left pad a String with spaces (' ').</p>
+     * Left pad a String with spaces (' ').
      *
-     * <p>The String is padded to the size of {@code size}.</p>
+     * The String is padded to the size of {@code size}.
      *
      * <pre>
-     * StringUtils.leftPad(null, *)   = null
      * StringUtils.leftPad("", 3)     = "   "
      * StringUtils.leftPad("bat", 3)  = "bat"
      * StringUtils.leftPad("bat", 5)  = "  bat"
@@ -216,21 +192,20 @@ public class StringUtil {
      * StringUtils.leftPad("bat", -1) = "bat"
      * </pre>
      *
-     * @param str  the String to pad out, may be null
+     * @param str  the String to pad out
      * @param size the size to pad to
-     * @return left padded String or original String if no padding is necessary, {@code null} if null String input
+     * @return left padded String or original String if no padding is necessary
      */
     public static String leftPad(final String str, final int size) {
         return leftPad(str, size, ' ');
     }
 
     /**
-     * <p>Left pad a String with a specified character.</p>
+     * Left pad a String with a specified character.
      *
-     * <p>Pad to a size of {@code size}.</p>
+     * Pad to a size of {@code size}.
      *
      * <pre>
-     * StringUtils.leftPad(null, *, *)     = null
      * StringUtils.leftPad("", 3, 'z')     = "zzz"
      * StringUtils.leftPad("bat", 3, 'z')  = "bat"
      * StringUtils.leftPad("bat", 5, 'z')  = "zzbat"
@@ -238,16 +213,12 @@ public class StringUtil {
      * StringUtils.leftPad("bat", -1, 'z') = "bat"
      * </pre>
      *
-     * @param str     the String to pad out, may be null
+     * @param str     the String to pad out
      * @param size    the size to pad to
      * @param padChar the character to pad with
-     * @return left padded String or original String if no padding is necessary, {@code null} if null String input
-     * @since 2.0
+     * @return left padded String or original String if no padding is necessary
      */
     public static String leftPad(final String str, final int size, final char padChar) {
-        if(str == null) {
-            return null;
-        }
         final int pads = size - str.length();
         if(pads <= 0) {
             return str; // returns original String when possible
@@ -259,12 +230,11 @@ public class StringUtil {
     }
 
     /**
-     * <p>Left pad a String with a specified String.</p>
+     * Left pad a String with a specified String.
      *
-     * <p>Pad to a size of {@code size}.</p>
+     * Pad to a size of {@code size}.
      *
      * <pre>
-     * StringUtils.leftPad(null, *, *)      = null
      * StringUtils.leftPad("", 3, "z")      = "zzz"
      * StringUtils.leftPad("bat", 3, "yz")  = "bat"
      * StringUtils.leftPad("bat", 5, "yz")  = "yzbat"
@@ -275,15 +245,12 @@ public class StringUtil {
      * StringUtils.leftPad("bat", 5, "")    = "  bat"
      * </pre>
      *
-     * @param str    the String to pad out, may be null
+     * @param str    the String to pad out
      * @param size   the size to pad to
      * @param padStr the String to pad with, null or empty treated as single space
-     * @return left padded String or original String if no padding is necessary, {@code null} if null String input
+     * @return left padded String or original String if no padding is necessary
      */
     public static String leftPad(final String str, final int size, String padStr) {
-        if(str == null) {
-            return null;
-        }
         if(isEmpty(padStr)) {
             padStr = SPACE;
         }
@@ -313,12 +280,11 @@ public class StringUtil {
 
 
     /**
-     * <p>Right pad a String with spaces (' ').</p>
+     * Right pad a String with spaces (' ').
      *
-     * <p>The String is padded to the size of {@code size}.</p>
+     * The String is padded to the size of {@code size}.
      *
      * <pre>
-     * StringUtils.rightPad(null, *)   = null
      * StringUtils.rightPad("", 3)     = "   "
      * StringUtils.rightPad("bat", 3)  = "bat"
      * StringUtils.rightPad("bat", 5)  = "bat  "
@@ -326,21 +292,20 @@ public class StringUtil {
      * StringUtils.rightPad("bat", -1) = "bat"
      * </pre>
      *
-     * @param str  the String to pad out, may be null
+     * @param str  the String to pad out
      * @param size the size to pad to
-     * @return right padded String or original String if no padding is necessary, {@code null} if null String input
+     * @return right padded String or original String if no padding is necessary
      */
     public static String rightPad(final String str, final int size) {
         return rightPad(str, size, ' ');
     }
 
     /**
-     * <p>Right pad a String with a specified character.</p>
+     * Right pad a String with a specified character.
      *
-     * <p>The String is padded to the size of {@code size}.</p>
+     * The String is padded to the size of {@code size}.
      *
      * <pre>
-     * StringUtils.rightPad(null, *, *)     = null
      * StringUtils.rightPad("", 3, 'z')     = "zzz"
      * StringUtils.rightPad("bat", 3, 'z')  = "bat"
      * StringUtils.rightPad("bat", 5, 'z')  = "batzz"
@@ -348,16 +313,12 @@ public class StringUtil {
      * StringUtils.rightPad("bat", -1, 'z') = "bat"
      * </pre>
      *
-     * @param str     the String to pad out, may be null
+     * @param str     the String to pad out
      * @param size    the size to pad to
      * @param padChar the character to pad with
-     * @return right padded String or original String if no padding is necessary, {@code null} if null String input
-     * @since 2.0
+     * @return right padded String or original String if no padding is necessary
      */
     public static String rightPad(final String str, final int size, final char padChar) {
-        if(str == null) {
-            return null;
-        }
         final int pads = size - str.length();
         if(pads <= 0) {
             return str; // returns original String when possible
@@ -369,12 +330,11 @@ public class StringUtil {
     }
 
     /**
-     * <p>Right pad a String with a specified String.</p>
+     * Right pad a String with a specified String.
      *
-     * <p>The String is padded to the size of {@code size}.</p>
+     * The String is padded to the size of {@code size}.
      *
      * <pre>
-     * StringUtils.rightPad(null, *, *)      = null
      * StringUtils.rightPad("", 3, "z")      = "zzz"
      * StringUtils.rightPad("bat", 3, "yz")  = "bat"
      * StringUtils.rightPad("bat", 5, "yz")  = "batyz"
@@ -385,15 +345,12 @@ public class StringUtil {
      * StringUtils.rightPad("bat", 5, "")    = "bat  "
      * </pre>
      *
-     * @param str    the String to pad out, may be null
+     * @param str    the String to pad out
      * @param size   the size to pad to
      * @param padStr the String to pad with, null or empty treated as single space
-     * @return right padded String or original String if no padding is necessary, {@code null} if null String input
+     * @return right padded String or original String if no padding is necessary
      */
     public static String rightPad(final String str, final int size, String padStr) {
-        if(str == null) {
-            return null;
-        }
         if(isEmpty(padStr)) {
             padStr = SPACE;
         }
@@ -419,5 +376,81 @@ public class StringUtil {
             }
             return str.concat(new String(padding));
         }
+    }
+
+    /**
+     * Capitalizes a string, changing the first character to title case as per {@link Character#toTitleCase(int)}. No
+     * other characters are changed.
+     *
+     * <pre>
+     * StringUtils.toTitleCase("")    = ""
+     * StringUtils.toTitleCase("cat") = "Cat"
+     * StringUtils.toTitleCase("cAt") = "CAt"
+     * StringUtils.toTitleCase("'cat'") = "'cat'"
+     * </pre>
+     *
+     * @param str String to capitalize
+     * @return Capitalized string
+     */
+    public static String capitalize(final String str) {
+        final int strLen = str.length();
+        if(strLen == 0) {
+            return str;
+        }
+
+        final int firstCodepoint = str.codePointAt(0);
+        final int newCodePoint = Character.toTitleCase(firstCodepoint);
+        if(firstCodepoint == newCodePoint) {
+            // already capitalized
+            return str;
+        }
+
+        final int[] newCodePoints = new int[strLen]; // cannot be longer than the char array
+        int outOffset = 0;
+        newCodePoints[outOffset++] = newCodePoint; // copy the first codepoint
+        for(int inOffset = Character.charCount(firstCodepoint); inOffset < strLen; ) {
+            final int codepoint = str.codePointAt(inOffset);
+            newCodePoints[outOffset++] = codepoint; // copy the remaining ones
+            inOffset += Character.charCount(codepoint);
+        }
+        return new String(newCodePoints, 0, outOffset);
+    }
+
+    /**
+     * Uncapitalizes a string, changing the first character to lower case as per {@link Character#toLowerCase(int)}. No
+     * other characters are changed.
+     *
+     * <pre>
+     * StringUtils.uncapitalize("")    = ""
+     * StringUtils.uncapitalize("cat") = "cat"
+     * StringUtils.uncapitalize("Cat") = "cat"
+     * StringUtils.uncapitalize("CAT") = "cAT"
+     * </pre>
+     *
+     * @param str String to uncapitalize
+     * @return Uncapitalized string
+     */
+    public static String uncapitalize(final String str) {
+        final int strLen = str.length();
+        if(strLen == 0) {
+            return str;
+        }
+
+        final int firstCodepoint = str.codePointAt(0);
+        final int newCodePoint = Character.toLowerCase(firstCodepoint);
+        if(firstCodepoint == newCodePoint) {
+            // already capitalized
+            return str;
+        }
+
+        final int[] newCodePoints = new int[strLen]; // cannot be longer than the char array
+        int outOffset = 0;
+        newCodePoints[outOffset++] = newCodePoint; // copy the first codepoint
+        for(int inOffset = Character.charCount(firstCodepoint); inOffset < strLen; ) {
+            final int codepoint = str.codePointAt(inOffset);
+            newCodePoints[outOffset++] = codepoint; // copy the remaining ones
+            inOffset += Character.charCount(codepoint);
+        }
+        return new String(newCodePoints, 0, outOffset);
     }
 }

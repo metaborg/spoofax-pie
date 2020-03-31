@@ -1,5 +1,5 @@
 import mb.spoofax.compiler.command.ArgProviderRepr
-import mb.spoofax.compiler.command.CommandDefRepr.builder
+import mb.spoofax.compiler.command.CommandDefRepr
 import mb.spoofax.compiler.command.ParamRepr
 import mb.spoofax.compiler.gradle.spoofaxcore.AdapterProjectCompilerSettings
 import mb.spoofax.compiler.menu.CommandActionRepr
@@ -48,35 +48,54 @@ adapterProjectCompiler {
 
       // Show (debugging) task definitions
       val debugTaskPackageId = "$taskPackageId.debug"
+      val showAbstractTaskDef = TypeInfo.of(debugTaskPackageId, "ShowTaskDef")
+      val showPrettyPrinter = TypeInfo.of(debugTaskPackageId, "Sdf3ShowPrettyPrinter")
       val showNormalForm = TypeInfo.of(debugTaskPackageId, "Sdf3ShowNormalForm")
-      builder.addTaskDefs(showNormalForm)
+      builder.addTaskDefs(
+        showPrettyPrinter,
+        showNormalForm
+      )
 
       // Show (debugging) commands
-      val showNormalFormCommand = builder()
-        .type(commandPackageId, "Sdf3ShowNormalFormCommand")
-        .taskDefType(showNormalForm)
-        .argType(showNormalForm.appendToId(".Args"))
-        .displayName("Show normal-form")
-        .description("Shows the normal-form of the file")
-        .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
-        .addAllParams(listOf(
-          ParamRepr.of("file", TypeInfo.of("mb.resource", "ResourceKey"), true, ArgProviderRepr.context(CommandContextType.File)),
-          ParamRepr.of("concrete", TypeInfo.ofBoolean(), true)
-        ))
-        .build()
-      builder.addCommandDefs(showNormalFormCommand)
+      fun showCommand(name: String, taskDefType: TypeInfo, resultName: String): CommandDefRepr {
+        return CommandDefRepr.builder()
+          .type(commandPackageId, name)
+          .taskDefType(taskDefType)
+          .argType(showAbstractTaskDef.appendToId(".Args"))
+          .displayName("Show $resultName")
+          .description("Shows the $resultName of the file")
+          .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
+          .addAllParams(listOf(
+            ParamRepr.of("file", TypeInfo.of("mb.resource", "ResourceKey"), true, ArgProviderRepr.context(CommandContextType.File)),
+            ParamRepr.of("concrete", TypeInfo.ofBoolean(), true)
+          ))
+          .build()
+      }
+
+      val showPrettyPrinterCommand = showCommand("Sdf3ShowPrettyPrinterCommand", showPrettyPrinter, "pretty-printer")
+      val showNormalFormCommand = showCommand("Sdf3ShowNormalFormCommand", showNormalForm, "normal-form")
+      builder.addCommandDefs(
+        showPrettyPrinterCommand,
+        showNormalFormCommand
+      )
 
       // Menu bindings
+      fun showManualOnce(commandDef: CommandDefRepr, concrete: Boolean) =
+        CommandActionRepr.builder().manualOnce(commandDef, mapOf(Pair("concrete", concrete.toString()))).fileRequired().buildItem()
+
+      fun showManualContinuous(commandDef: CommandDefRepr, concrete: Boolean) =
+        CommandActionRepr.builder().manualContinuous(commandDef, mapOf(Pair("concrete", concrete.toString()))).fileRequired().buildItem()
+
       val mainAndEditorMenu = listOf(
         MenuItemRepr.menu("Debug",
           MenuItemRepr.menu("Transform",
             MenuItemRepr.menu("Abstract",
-              CommandActionRepr.builder().manualOnce(showNormalFormCommand, mapOf(Pair("concrete", "false"))).fileRequired().buildItem(),
-              CommandActionRepr.builder().manualContinuous(showNormalFormCommand, mapOf(Pair("concrete", "false"))).fileRequired().buildItem()
+              showManualOnce(showPrettyPrinterCommand, false), showManualContinuous(showPrettyPrinterCommand, false),
+              showManualOnce(showNormalFormCommand, false), showManualContinuous(showNormalFormCommand, false)
             ),
             MenuItemRepr.menu("Concrete",
-              CommandActionRepr.builder().manualOnce(showNormalFormCommand, mapOf(Pair("concrete", "true"))).fileRequired().buildItem(),
-              CommandActionRepr.builder().manualContinuous(showNormalFormCommand, mapOf(Pair("concrete", "true"))).fileRequired().buildItem()
+              showManualOnce(showPrettyPrinterCommand, true), showManualContinuous(showPrettyPrinterCommand, true),
+              showManualOnce(showNormalFormCommand, true), showManualContinuous(showNormalFormCommand, true)
             )
           )
         )
@@ -87,10 +106,12 @@ adapterProjectCompiler {
         MenuItemRepr.menu("Debug",
           MenuItemRepr.menu("Transform",
             MenuItemRepr.menu("Abstract",
-              CommandActionRepr.builder().manualOnce(showNormalFormCommand, mapOf(Pair("concrete", "false"))).fileRequired().buildItem()
+              showManualOnce(showPrettyPrinterCommand, false),
+              showManualOnce(showNormalFormCommand, false)
             ),
             MenuItemRepr.menu("Concrete",
-              CommandActionRepr.builder().manualOnce(showNormalFormCommand, mapOf(Pair("concrete", "true"))).fileRequired().buildItem()
+              showManualOnce(showPrettyPrinterCommand, true),
+              showManualOnce(showNormalFormCommand, true)
             )
           )
         )
