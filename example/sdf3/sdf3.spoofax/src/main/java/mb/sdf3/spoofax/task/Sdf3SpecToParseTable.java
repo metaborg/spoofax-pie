@@ -21,7 +21,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @LanguageScope
-public class Sdf3ToParseTable implements TaskDef<Sdf3ToParseTable.Args, ParseTable> {
+public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Args, ParseTable> {
     public static class Args implements Serializable {
         private final Supplier<@Nullable IStrategoTerm> mainModuleAstSupplier;
         private final ListView<Supplier<@Nullable IStrategoTerm>> modulesAstSuppliers;
@@ -62,13 +62,13 @@ public class Sdf3ToParseTable implements TaskDef<Sdf3ToParseTable.Args, ParseTab
     private final Sdf3ToNormalForm toNormalForm;
 
     @Inject
-    public Sdf3ToParseTable(
+    public Sdf3SpecToParseTable(
         LoggerFactory loggerFactory,
         Sdf3ToPermissive toPermissive,
         Sdf3ToCompletion toCompletion,
         Sdf3ToNormalForm toNormalForm
     ) {
-        this.log = loggerFactory.create(Sdf3ToParseTable.class);
+        this.log = loggerFactory.create(Sdf3SpecToParseTable.class);
         this.toPermissive = toPermissive;
         this.toCompletion = toCompletion;
         this.toNormalForm = toNormalForm;

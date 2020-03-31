@@ -13,7 +13,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @LanguageScope
-public class Sdf3ToParenthesizer implements TaskDef<Sdf3ToParenthesizer.Args, IStrategoTerm> {
+public class Sdf3SpecToParenthesizer implements TaskDef<Sdf3SpecToParenthesizer.Args, IStrategoTerm> {
     public static class Args implements Serializable {
         private final Supplier<ParseTable> parseTableSupplier;
         private final String moduleName;
@@ -37,7 +37,7 @@ public class Sdf3ToParenthesizer implements TaskDef<Sdf3ToParenthesizer.Args, IS
         }
     }
 
-    @Inject public Sdf3ToParenthesizer() {
+    @Inject public Sdf3SpecToParenthesizer() {
 
     }
 
