@@ -7,9 +7,9 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 @LanguageScope
-public class Sdf3DesugarTemplates extends StrategoTransformTaskDef {
-    @Inject public Sdf3DesugarTemplates(Provider<StrategoRuntime> strategoRuntimeProvider) {
-        super(strategoRuntimeProvider, "desugar-templates");
+public class Sdf3Desugar extends StrategoTransformTaskDef {
+    @Inject public Sdf3Desugar(Provider<StrategoRuntime> strategoRuntimeProvider) {
+        super(strategoRuntimeProvider, "lifting", "desugar-templates");
     }
 
     @Override public String getId() {

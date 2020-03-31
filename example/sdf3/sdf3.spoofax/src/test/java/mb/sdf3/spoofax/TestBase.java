@@ -11,7 +11,7 @@ import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
 import mb.resource.text.TextResource;
 import mb.resource.text.TextResourceRegistry;
-import mb.sdf3.spoofax.task.Sdf3DesugarTemplates;
+import mb.sdf3.spoofax.task.Sdf3Desugar;
 import mb.sdf3.spoofax.task.Sdf3Parse;
 import mb.sdf3.spoofax.util.DaggerPlatformTestComponent;
 import mb.sdf3.spoofax.util.DaggerSdf3TestComponent;
@@ -38,7 +38,7 @@ class TestBase {
         .sdf3Module(new Sdf3Module())
         .build();
     final Sdf3Parse parse = languageComponent.getParse();
-    final Sdf3DesugarTemplates desugarTemplates = languageComponent.getDesugarTemplates();
+    final Sdf3Desugar desugar = languageComponent.getDesugar();
 
     final Sdf3Instance languageInstance = languageComponent.getLanguageInstance();
 
@@ -58,10 +58,10 @@ class TestBase {
 
 
     Supplier<@Nullable IStrategoTerm> desugaredAstSupplier(ResourceKey resourceKey) {
-        return desugarTemplates.createSupplier(parsedAstSupplier(resourceKey));
+        return desugar.createSupplier(parsedAstSupplier(resourceKey));
     }
 
     Supplier<@Nullable IStrategoTerm> desugaredAstSupplier(Resource resource) {
-        return desugarTemplates.createSupplier(parsedAstSupplier(resource));
+        return desugar.createSupplier(parsedAstSupplier(resource));
     }
 }

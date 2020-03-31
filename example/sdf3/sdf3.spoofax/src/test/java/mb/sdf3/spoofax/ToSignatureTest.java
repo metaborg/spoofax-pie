@@ -4,6 +4,7 @@ import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
 import mb.resource.text.TextResource;
 import mb.sdf3.spoofax.task.Sdf3ToSignature;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -13,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.spoofax.terms.util.TermUtils.*;
 
 class ToSignatureTest extends TestBase {
-    @Test void testTask() throws ExecException {
+    @Disabled("TODO: Uses index data, which is not yet supported") @Test void testTask() throws ExecException {
         final TextResource resource = createResource("module nested/a context-free syntax A = <A>", "a.sdf3");
         final Sdf3ToSignature taskDef = languageComponent.getToSignature();
         try(final MixedSession session = languageComponent.newPieSession()) {

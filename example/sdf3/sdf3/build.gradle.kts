@@ -34,6 +34,7 @@ languageProjectCompiler {
       .multiFile(true),
     compiler = run {
       val builder = LanguageProjectCompiler.Input.builder()
+      builder.addAdditionalCopyResources("target/metaborg/EditorService-pretty.pp.af")
       if (gradle.parent != null && gradle.parent!!.rootProject.name == "devenv") {
         // HACK: use org.metaborggggg groupId for SDF3, as that is used to prevent bootstrapping issues.
         builder.languageSpecificationDependency(GradleDependency.module("org.metaborggggg:org.metaborg.meta.lang.template:2.6.0-SNAPSHOT"))

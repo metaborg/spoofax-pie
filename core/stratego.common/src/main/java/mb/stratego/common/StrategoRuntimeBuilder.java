@@ -102,6 +102,11 @@ public class StrategoRuntimeBuilder {
         return this;
     }
 
+    public StrategoRuntimeBuilder withIoAgent(StrategoIOAgent ioAgent) {
+        this.ioAgent = ioAgent;
+        return this;
+    }
+
     public StrategoRuntimeBuilder addLibrary(IOperatorRegistry library) {
         this.libraries.add(library);
         return this;

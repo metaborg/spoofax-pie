@@ -28,9 +28,11 @@ adapterProjectCompiler {
 
       val builder = AdapterProjectCompiler.Input.builder()
 
+
       // Utility task definitions
-      val desugarTemplates = TypeInfo.of(taskPackageId, "Sdf3DesugarTemplates")
-      builder.addTaskDefs(desugarTemplates)
+      val desugar = TypeInfo.of(taskPackageId, "Sdf3Desugar")
+      builder.addTaskDefs(desugar)
+
 
       // Generation task definitions
       val toCompletionColorer = TypeInfo.of(taskPackageId, "Sdf3ToCompletionColorer")
@@ -46,57 +48,84 @@ adapterProjectCompiler {
       builder.addTaskDefs(toCompletionColorer, toCompletionRuntime, toCompletion, toSignature, toDynsemSignature,
         toPrettyPrinter, toPermissive, toNormalForm, specToParseTable, specToParenthesizer)
 
+
       // Show (debugging) task definitions
       val debugTaskPackageId = "$taskPackageId.debug"
       val showAbstractTaskDef = TypeInfo.of(debugTaskPackageId, "ShowTaskDef")
-      val showPrettyPrinter = TypeInfo.of(debugTaskPackageId, "Sdf3ShowPrettyPrinter")
+      val showDesugar = TypeInfo.of(debugTaskPackageId, "Sdf3ShowDesugar")
+      val showPermissive = TypeInfo.of(debugTaskPackageId, "Sdf3ShowPermissive")
       val showNormalForm = TypeInfo.of(debugTaskPackageId, "Sdf3ShowNormalForm")
+      val showSignature = TypeInfo.of(debugTaskPackageId, "Sdf3ShowSignature")
+      val showDynsemSignature = TypeInfo.of(debugTaskPackageId, "Sdf3ShowDynsemSignature")
+      val showPrettyPrinter = TypeInfo.of(debugTaskPackageId, "Sdf3ShowPrettyPrinter")
+      val showCompletion = TypeInfo.of(debugTaskPackageId, "Sdf3ShowCompletion")
+      val showCompletionRuntime = TypeInfo.of(debugTaskPackageId, "Sdf3ShowCompletionRuntime")
+      val showCompletionColorer = TypeInfo.of(debugTaskPackageId, "Sdf3ShowCompletionColorer")
       builder.addTaskDefs(
+        showDesugar,
+        showPermissive,
+        showNormalForm,
+        showSignature,
+        showDynsemSignature,
         showPrettyPrinter,
-        showNormalForm
+        showCompletion,
+        showCompletionRuntime,
+        showCompletionColorer
       )
+
 
       // Show (debugging) commands
-      fun showCommand(name: String, taskDefType: TypeInfo, resultName: String): CommandDefRepr {
-        return CommandDefRepr.builder()
-          .type(commandPackageId, name)
-          .taskDefType(taskDefType)
-          .argType(showAbstractTaskDef.appendToId(".Args"))
-          .displayName("Show $resultName")
-          .description("Shows the $resultName of the file")
-          .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
-          .addAllParams(listOf(
-            ParamRepr.of("file", TypeInfo.of("mb.resource", "ResourceKey"), true, ArgProviderRepr.context(CommandContextType.File)),
-            ParamRepr.of("concrete", TypeInfo.ofBoolean(), true)
-          ))
-          .build()
-      }
+      fun showCommand(taskDefType: TypeInfo, resultName: String) = CommandDefRepr.builder()
+        .type(commandPackageId, taskDefType.id() + "Command")
+        .taskDefType(taskDefType)
+        .argType(showAbstractTaskDef.appendToId(".Args"))
+        .displayName("Show $resultName")
+        .description("Shows the $resultName of the file")
+        .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
+        .addAllParams(listOf(
+          ParamRepr.of("file", TypeInfo.of("mb.resource", "ResourceKey"), true, ArgProviderRepr.context(CommandContextType.File)),
+          ParamRepr.of("concrete", TypeInfo.ofBoolean(), true)
+        ))
+        .build()
 
-      val showPrettyPrinterCommand = showCommand("Sdf3ShowPrettyPrinterCommand", showPrettyPrinter, "pretty-printer")
-      val showNormalFormCommand = showCommand("Sdf3ShowNormalFormCommand", showNormalForm, "normal-form")
-      builder.addCommandDefs(
+      val showDesugarCommand = showCommand(showDesugar, "desugared")
+      val showPermissiveCommand = showCommand(showPermissive, "permissive grammar")
+      val showNormalFormCommand = showCommand(showNormalForm, "normal-form")
+      val showSignatureCommand = showCommand(showSignature, "Stratego signatures")
+      val showDynsemSignatureCommand = showCommand(showDynsemSignature, "DynSem signatures")
+      val showPrettyPrinterCommand = showCommand(showPrettyPrinter, "pretty-printer")
+      val showCompletionCommand = showCommand(showCompletion, "completion insertions")
+      val showCompletionRuntimeCommand = showCommand(showCompletionRuntime, "completion runtime")
+      val showCompletionColorerCommand = showCommand(showCompletionColorer, "completion colorer")
+      val showCommands = listOf(
+        showDesugarCommand,
+        showPermissiveCommand,
+        showNormalFormCommand,
+        showSignatureCommand,
+        showDynsemSignatureCommand,
         showPrettyPrinterCommand,
-        showNormalFormCommand
+        showCompletionCommand,
+        showCompletionRuntimeCommand,
+        showCompletionColorerCommand
       )
+      builder.addAllCommandDefs(showCommands)
+
+
+      // Show (debugging) menu command actions
+      fun showManualOnce(commandDef: CommandDefRepr, concrete: Boolean) = CommandActionRepr.builder().manualOnce(commandDef, mapOf(Pair("concrete", concrete.toString()))).fileRequired().buildItem()
+      fun showManualContinuous(commandDef: CommandDefRepr, concrete: Boolean) = CommandActionRepr.builder().manualContinuous(commandDef, mapOf(Pair("concrete", concrete.toString()))).fileRequired().buildItem()
+      val showAbstractEditorMenuItems = showCommands.flatMap { listOf(showManualOnce(it, false), showManualContinuous(it, false)) }
+      val showConcreteEditorMenuItems = showCommands.flatMap { listOf(showManualOnce(it, true), showManualContinuous(it, true)) }
+      val showAbstractResourceMenuItems = showCommands.map { showManualOnce(it, false) }
+      val showConcreteResourceMenuItems = showCommands.map { showManualOnce(it, true) }
+
 
       // Menu bindings
-      fun showManualOnce(commandDef: CommandDefRepr, concrete: Boolean) =
-        CommandActionRepr.builder().manualOnce(commandDef, mapOf(Pair("concrete", concrete.toString()))).fileRequired().buildItem()
-
-      fun showManualContinuous(commandDef: CommandDefRepr, concrete: Boolean) =
-        CommandActionRepr.builder().manualContinuous(commandDef, mapOf(Pair("concrete", concrete.toString()))).fileRequired().buildItem()
-
       val mainAndEditorMenu = listOf(
         MenuItemRepr.menu("Debug",
           MenuItemRepr.menu("Transform",
-            MenuItemRepr.menu("Abstract",
-              showManualOnce(showPrettyPrinterCommand, false), showManualContinuous(showPrettyPrinterCommand, false),
-              showManualOnce(showNormalFormCommand, false), showManualContinuous(showNormalFormCommand, false)
-            ),
-            MenuItemRepr.menu("Concrete",
-              showManualOnce(showPrettyPrinterCommand, true), showManualContinuous(showPrettyPrinterCommand, true),
-              showManualOnce(showNormalFormCommand, true), showManualContinuous(showNormalFormCommand, true)
-            )
+            MenuItemRepr.menu("Abstract", showAbstractEditorMenuItems),
+            MenuItemRepr.menu("Concrete", showConcreteEditorMenuItems)
           )
         )
       )
@@ -105,14 +134,8 @@ adapterProjectCompiler {
       builder.addResourceContextMenuItems(
         MenuItemRepr.menu("Debug",
           MenuItemRepr.menu("Transform",
-            MenuItemRepr.menu("Abstract",
-              showManualOnce(showPrettyPrinterCommand, false),
-              showManualOnce(showNormalFormCommand, false)
-            ),
-            MenuItemRepr.menu("Concrete",
-              showManualOnce(showPrettyPrinterCommand, true),
-              showManualOnce(showNormalFormCommand, true)
-            )
+            MenuItemRepr.menu("Abstract", showAbstractResourceMenuItems),
+            MenuItemRepr.menu("Concrete", showConcreteResourceMenuItems)
           )
         )
       )

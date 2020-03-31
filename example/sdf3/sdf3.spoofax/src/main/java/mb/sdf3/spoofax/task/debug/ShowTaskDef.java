@@ -5,7 +5,6 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
-import mb.sdf3.spoofax.task.Sdf3DesugarTemplates;
 import mb.sdf3.spoofax.task.Sdf3Parse;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.CommandOutput;
@@ -46,7 +45,7 @@ public abstract class ShowTaskDef implements TaskDef<ShowTaskDef.Args, CommandOu
     }
 
     private final Sdf3Parse parse;
-    private final Sdf3DesugarTemplates desugarTemplates;
+    private final TaskDef<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> desugar;
     private final TaskDef<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> operation;
     private final Provider<StrategoRuntime> strategoRuntimeProvider;
     private final String prettyPrintStrategy;
@@ -54,14 +53,14 @@ public abstract class ShowTaskDef implements TaskDef<ShowTaskDef.Args, CommandOu
 
     public ShowTaskDef(
         Sdf3Parse parse,
-        Sdf3DesugarTemplates desugarTemplates,
+        TaskDef<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> desugar,
         TaskDef<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> operation,
         Provider<StrategoRuntime> strategoRuntimeProvider,
         String prettyPrintStrategy,
         String resultName
     ) {
         this.parse = parse;
-        this.desugarTemplates = desugarTemplates;
+        this.desugar = desugar;
         this.operation = operation;
         this.strategoRuntimeProvider = strategoRuntimeProvider;
         this.prettyPrintStrategy = prettyPrintStrategy;
@@ -70,7 +69,7 @@ public abstract class ShowTaskDef implements TaskDef<ShowTaskDef.Args, CommandOu
 
     @Override
     public CommandOutput exec(ExecContext context, Args args) throws Exception {
-        final @Nullable IStrategoTerm normalFormAst = context.require(operation.createTask(desugarTemplates.createSupplier(parse.createAstSupplier(args.file))));
+        final @Nullable IStrategoTerm normalFormAst = context.require(operation.createTask(desugar.createSupplier(parse.createAstSupplier(args.file))));
         if(normalFormAst == null) {
             throw new RuntimeException("Parse -> desugar -> transform to " + resultName + " failed (returned null)");
         }
