@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 @LanguageScope
-public class Sdf3ToDynsemSignature extends StrategoTransformTaskDef {
+public class Sdf3ToDynsemSignature extends StrategoTransformAnalyzedTaskDef {
     @Inject public Sdf3ToDynsemSignature(Provider<StrategoRuntime> strategoRuntimeProvider) {
         super(strategoRuntimeProvider, "module-to-ds-sig");
     }

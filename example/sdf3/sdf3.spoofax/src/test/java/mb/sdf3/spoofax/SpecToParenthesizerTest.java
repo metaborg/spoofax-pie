@@ -17,11 +17,11 @@ import static org.spoofax.terms.util.TermUtils.*;
 
 class SpecToParenthesizerTest extends TestBase {
     @Test void testTask() throws ExecException {
-        final TextResource resource = createResource("module test context-free syntax A = <A>", "a.sdf3");
+        final TextResource resource = createTextResource("module test context-free syntax A = <A>", "a.sdf3");
         final Sdf3SpecToParenthesizer taskDef = languageComponent.getSpecToParenthesizer();
         try(final MixedSession session = languageComponent.newPieSession()) {
             final Sdf3SpecToParseTable.Args parseTableArgs = new Sdf3SpecToParseTable.Args(
-                desugaredAstSupplier(resource),
+                desugarSupplier(resource),
                 ListView.of(),
                 new ParseTableConfiguration(false, false, true, false, false),
                 false

@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 @LanguageScope
-public class Sdf3ToSignature extends StrategoTransformTaskDef {
+public class Sdf3ToSignature extends StrategoTransformAnalyzedTaskDef {
     @Inject public Sdf3ToSignature(Provider<StrategoRuntime> strategoRuntimeProvider) {
         super(strategoRuntimeProvider, "module-to-sig");
     }

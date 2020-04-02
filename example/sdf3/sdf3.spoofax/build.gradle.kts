@@ -8,6 +8,7 @@ import mb.spoofax.compiler.spoofaxcore.*
 import mb.spoofax.compiler.util.TypeInfo
 import mb.spoofax.core.language.command.CommandContextType
 import mb.spoofax.core.language.command.CommandExecutionType
+import mb.spoofax.core.language.command.EnclosingCommandContextType
 
 plugins {
   id("org.metaborg.spoofax.compiler.gradle.spoofaxcore.adapter")
@@ -51,7 +52,6 @@ adapterProjectCompiler {
 
       // Show (debugging) task definitions
       val debugTaskPackageId = "$taskPackageId.debug"
-      val showAbstractTaskDef = TypeInfo.of(debugTaskPackageId, "ShowTaskDef")
       val showDesugar = TypeInfo.of(debugTaskPackageId, "Sdf3ShowDesugar")
       val showPermissive = TypeInfo.of(debugTaskPackageId, "Sdf3ShowPermissive")
       val showNormalForm = TypeInfo.of(debugTaskPackageId, "Sdf3ShowNormalForm")
@@ -75,6 +75,8 @@ adapterProjectCompiler {
 
 
       // Show (debugging) commands
+      val showAbstractTaskDef = TypeInfo.of(debugTaskPackageId, "ShowTaskDef")
+      val showAnalyzedAbstractTaskDef = TypeInfo.of(debugTaskPackageId, "ShowAnalyzedTaskDef")
       fun showCommand(taskDefType: TypeInfo, resultName: String) = CommandDefRepr.builder()
         .type(commandPackageId, taskDefType.id() + "Command")
         .taskDefType(taskDefType)
@@ -88,11 +90,25 @@ adapterProjectCompiler {
         ))
         .build()
 
+      fun showAnalyzedCommand(taskDefType: TypeInfo, resultName: String) = CommandDefRepr.builder()
+        .type(commandPackageId, taskDefType.id() + "Command")
+        .taskDefType(taskDefType)
+        .argType(showAnalyzedAbstractTaskDef.appendToId(".Args"))
+        .displayName("Show $resultName")
+        .description("Shows the $resultName of the file")
+        .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
+        .addAllParams(listOf(
+          ParamRepr.of("project", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), true, ArgProviderRepr.enclosingContext(EnclosingCommandContextType.Project)),
+          ParamRepr.of("file", TypeInfo.of("mb.resource", "ResourceKey"), true, ArgProviderRepr.context(CommandContextType.File)),
+          ParamRepr.of("concrete", TypeInfo.ofBoolean(), true)
+        ))
+        .build()
+
       val showDesugarCommand = showCommand(showDesugar, "desugared")
       val showPermissiveCommand = showCommand(showPermissive, "permissive grammar")
       val showNormalFormCommand = showCommand(showNormalForm, "normal-form")
-      val showSignatureCommand = showCommand(showSignature, "Stratego signatures")
-      val showDynsemSignatureCommand = showCommand(showDynsemSignature, "DynSem signatures")
+      val showSignatureCommand = showAnalyzedCommand(showSignature, "Stratego signatures")
+      val showDynsemSignatureCommand = showAnalyzedCommand(showDynsemSignature, "DynSem signatures")
       val showPrettyPrinterCommand = showCommand(showPrettyPrinter, "pretty-printer")
       val showCompletionCommand = showCommand(showCompletion, "completion insertions")
       val showCompletionRuntimeCommand = showCommand(showCompletionRuntime, "completion runtime")
@@ -101,31 +117,41 @@ adapterProjectCompiler {
         showDesugarCommand,
         showPermissiveCommand,
         showNormalFormCommand,
-        showSignatureCommand,
-        showDynsemSignatureCommand,
         showPrettyPrinterCommand,
         showCompletionCommand,
         showCompletionRuntimeCommand,
         showCompletionColorerCommand
       )
       builder.addAllCommandDefs(showCommands)
+      val showAnalyzedCommands = listOf(
+        showSignatureCommand,
+        showDynsemSignatureCommand
+      )
+      builder.addAllCommandDefs(showAnalyzedCommands)
+
 
 
       // Show (debugging) menu command actions
       fun showManualOnce(commandDef: CommandDefRepr, concrete: Boolean) = CommandActionRepr.builder().manualOnce(commandDef, mapOf(Pair("concrete", concrete.toString()))).fileRequired().buildItem()
       fun showManualContinuous(commandDef: CommandDefRepr, concrete: Boolean) = CommandActionRepr.builder().manualContinuous(commandDef, mapOf(Pair("concrete", concrete.toString()))).fileRequired().buildItem()
+      fun showAnalyzedManualOnce(commandDef: CommandDefRepr, concrete: Boolean) = CommandActionRepr.builder().manualOnce(commandDef, mapOf(Pair("concrete", concrete.toString()))).fileRequired().enclosingProjectRequired().buildItem()
+      fun showAnalyzedManualContinuous(commandDef: CommandDefRepr, concrete: Boolean) = CommandActionRepr.builder().manualContinuous(commandDef, mapOf(Pair("concrete", concrete.toString()))).fileRequired().enclosingProjectRequired().buildItem()
       val showAbstractEditorMenuItems = showCommands.flatMap { listOf(showManualOnce(it, false), showManualContinuous(it, false)) }
       val showConcreteEditorMenuItems = showCommands.flatMap { listOf(showManualOnce(it, true), showManualContinuous(it, true)) }
       val showAbstractResourceMenuItems = showCommands.map { showManualOnce(it, false) }
       val showConcreteResourceMenuItems = showCommands.map { showManualOnce(it, true) }
+      val showAnalyzedAbstractEditorMenuItems = showAnalyzedCommands.flatMap { listOf(showAnalyzedManualOnce(it, false), showAnalyzedManualContinuous(it, false)) }
+      val showAnalyzedConcreteEditorMenuItems = showAnalyzedCommands.flatMap { listOf(showAnalyzedManualOnce(it, true), showAnalyzedManualContinuous(it, true)) }
+      val showAnalyzedAbstractResourceMenuItems = showAnalyzedCommands.map { showAnalyzedManualOnce(it, false) }
+      val showAnalyzedConcreteResourceMenuItems = showAnalyzedCommands.map { showAnalyzedManualOnce(it, true) }
 
 
       // Menu bindings
       val mainAndEditorMenu = listOf(
         MenuItemRepr.menu("Debug",
           MenuItemRepr.menu("Transform",
-            MenuItemRepr.menu("Abstract", showAbstractEditorMenuItems),
-            MenuItemRepr.menu("Concrete", showConcreteEditorMenuItems)
+            MenuItemRepr.menu("Abstract", showAbstractEditorMenuItems + showAnalyzedAbstractEditorMenuItems),
+            MenuItemRepr.menu("Concrete", showConcreteEditorMenuItems + showAnalyzedConcreteEditorMenuItems)
           )
         )
       )
@@ -134,8 +160,8 @@ adapterProjectCompiler {
       builder.addResourceContextMenuItems(
         MenuItemRepr.menu("Debug",
           MenuItemRepr.menu("Transform",
-            MenuItemRepr.menu("Abstract", showAbstractResourceMenuItems),
-            MenuItemRepr.menu("Concrete", showConcreteResourceMenuItems)
+            MenuItemRepr.menu("Abstract", showAbstractResourceMenuItems + showAnalyzedAbstractResourceMenuItems),
+            MenuItemRepr.menu("Concrete", showConcreteResourceMenuItems + showAnalyzedConcreteResourceMenuItems)
           )
         )
       )
@@ -153,6 +179,7 @@ dependencies {
   testImplementation("org.slf4j:slf4j-simple:1.7.30")
   testImplementation("org.metaborg:pie.runtime")
   testImplementation("org.metaborg:pie.dagger")
+  testImplementation("com.google.jimfs:jimfs:1.1")
   testCompileOnly("org.checkerframework:checker-qual-android")
   testAnnotationProcessor("com.google.dagger:dagger-compiler")
 }

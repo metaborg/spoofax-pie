@@ -1,15 +1,12 @@
 package mb.sdf3.spoofax.task.debug;
 
-import mb.common.util.StringUtil;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.sdf3.spoofax.task.Sdf3Parse;
-import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.CommandOutput;
 import mb.stratego.common.StrategoRuntime;
-import mb.stratego.common.StrategoUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -17,7 +14,7 @@ import javax.inject.Provider;
 import java.io.Serializable;
 import java.util.Objects;
 
-public abstract class ShowTaskDef implements TaskDef<ShowTaskDef.Args, CommandOutput> {
+public abstract class ShowTaskDef extends ShowTaskDefShared implements TaskDef<ShowTaskDef.Args, CommandOutput> {
     public static class Args implements Serializable {
         public final ResourceKey file;
         public final boolean concrete;
@@ -47,9 +44,6 @@ public abstract class ShowTaskDef implements TaskDef<ShowTaskDef.Args, CommandOu
     private final Sdf3Parse parse;
     private final TaskDef<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> desugar;
     private final TaskDef<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> operation;
-    private final Provider<StrategoRuntime> strategoRuntimeProvider;
-    private final String prettyPrintStrategy;
-    private final String resultName;
 
     public ShowTaskDef(
         Sdf3Parse parse,
@@ -59,30 +53,16 @@ public abstract class ShowTaskDef implements TaskDef<ShowTaskDef.Args, CommandOu
         String prettyPrintStrategy,
         String resultName
     ) {
+        super(strategoRuntimeProvider, prettyPrintStrategy, resultName);
         this.parse = parse;
         this.desugar = desugar;
         this.operation = operation;
-        this.strategoRuntimeProvider = strategoRuntimeProvider;
-        this.prettyPrintStrategy = prettyPrintStrategy;
-        this.resultName = resultName;
     }
 
-    @Override
-    public CommandOutput exec(ExecContext context, Args args) throws Exception {
+    @Override public CommandOutput exec(ExecContext context, Args args) throws Exception {
         final @Nullable IStrategoTerm normalFormAst = context.require(operation.createTask(desugar.createSupplier(parse.createAstSupplier(args.file))));
-        if(normalFormAst == null) {
+        if(normalFormAst == null)
             throw new RuntimeException("Parse -> desugar -> transform to " + resultName + " failed (returned null)");
-        }
-
-        if(args.concrete) {
-            final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get();
-            final @Nullable IStrategoTerm normalFormText = strategoRuntime.invoke(prettyPrintStrategy, normalFormAst);
-            if(normalFormText == null) {
-                throw new RuntimeException("Pretty-printing " + resultName + " AST failed (returned null)");
-            }
-            return CommandOutput.of(CommandFeedback.showText(StrategoUtil.toString(normalFormText), StringUtil.capitalize(resultName) + " (concrete) of '" + args.file + "'"));
-        } else {
-            return CommandOutput.of(CommandFeedback.showText(StrategoUtil.toString(normalFormAst), StringUtil.capitalize(resultName) + " (abstract) of '" + args.file + "'"));
-        }
+        return provideOutput(args.concrete, normalFormAst, args.file);
     }
 }

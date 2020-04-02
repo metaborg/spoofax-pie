@@ -19,14 +19,14 @@ public class {{genFactory.id}} implements StrategoRuntimeBuilderFactory {
 {{#copyCTree}}
         {
             final String resource = "{{languageProject.packagePath}}/target/metaborg/stratego.ctree";
-            final @Nullable URL locationURL = {{genFactory.id}}.class.getClassLoader().getResource(resource);
+            final @Nullable URL locationURL = {{factory.id}}.class.getClassLoader().getResource(resource);
             if(locationURL == null) {
                 throw new RuntimeException("Cannot create Stratego runtime builder; cannot find resource '" + resource + "' in classloader resources");
             }
             builder.addCtree(new URLResource(locationURL));
         }
 {{/copyCTree}}
-        builder.withJarParentClassLoader({{genFactory.id}}.class.getClassLoader());
+        builder.withJarParentClassLoader({{factory.id}}.class.getClassLoader());
         builder.addLibrary(new mb.constraint.common.stratego.ConstraintPrimitiveLibrary(resourceService));
 {{#addNaBL2Primitives}}
         builder.addLibrary(new mb.nabl2.common.NaBL2PrimitiveLibrary());
@@ -35,8 +35,9 @@ public class {{genFactory.id}} implements StrategoRuntimeBuilderFactory {
         {
             builder.addLibrary(new mb.statix.common.StatixPrimitiveLibrary());
             builder.addLibrary(new mb.spoofax2.common.primitive.Spoofax2PrimitiveLibrary(loggerFactory, resourceService));
+
             final String resource = "{{languageProject.packagePath}}/";
-            final @Nullable URL locationURL = {{genFactory.id}}.class.getClassLoader().getResource(resource);
+            final @Nullable URL locationURL = {{factory.id}}.class.getClassLoader().getResource(resource);
             if(locationURL == null) {
                 throw new RuntimeException("Cannot create Spoofax2Context; cannot find resource '" + resource + "' in classloader resources");
             }

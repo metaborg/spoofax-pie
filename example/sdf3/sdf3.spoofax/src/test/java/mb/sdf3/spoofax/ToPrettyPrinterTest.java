@@ -14,10 +14,10 @@ import static org.spoofax.terms.util.TermUtils.*;
 
 class ToPrettyPrinterTest extends TestBase {
     @Test void testTask() throws ExecException {
-        final TextResource resource = createResource("module nested/a context-free syntax A = <A>", "a.sdf3");
+        final TextResource resource = createTextResource("module nested/a context-free syntax A = <A>", "a.sdf3");
         final Sdf3ToPrettyPrinter taskDef = languageComponent.getToPrettyPrinter();
         try(final MixedSession session = languageComponent.newPieSession()) {
-            final @Nullable IStrategoTerm output = session.require(taskDef.createTask(desugaredAstSupplier(resource)));
+            final @Nullable IStrategoTerm output = session.require(taskDef.createTask(desugarSupplier(resource)));
             log.info("{}", output);
             assertNotNull(output);
             assertTrue(isAppl(output, "Module"));

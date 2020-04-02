@@ -3,6 +3,7 @@ package mb.sdf3.spoofax.util;
 import dagger.Component;
 import mb.sdf3.spoofax.Sdf3Component;
 import mb.sdf3.spoofax.Sdf3Module;
+import mb.sdf3.spoofax.task.Sdf3AnalyzeMulti;
 import mb.sdf3.spoofax.task.Sdf3Desugar;
 import mb.sdf3.spoofax.task.Sdf3Parse;
 import mb.sdf3.spoofax.task.Sdf3SpecToParenthesizer;
@@ -21,6 +22,8 @@ import mb.spoofax.core.platform.PlatformComponent;
 @LanguageScope @Component(modules = {Sdf3Module.class}, dependencies = PlatformComponent.class)
 public interface Sdf3TestComponent extends Sdf3Component {
     Sdf3Parse getParse();
+
+    Sdf3AnalyzeMulti getAnalyze();
 
 
     Sdf3Desugar getDesugar();

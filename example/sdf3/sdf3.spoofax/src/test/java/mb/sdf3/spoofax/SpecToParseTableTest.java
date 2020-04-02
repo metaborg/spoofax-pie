@@ -24,19 +24,19 @@ class SpecToParseTableTest extends TestBase {
     @ParameterizedTest
     @ValueSource(booleans = {false, true})
     void testTask(boolean createCompletionTable) throws ExecException {
-        final TextResource resourceMain = createResource("module test imports lex nested/a nested/b context-free start-symbols Start context-free syntax Start.Start = <<A> <B>>", "test.sdf3");
-        final TextResource resourceLex = createResource("module lex lexical syntax LAYOUT = [\\ \\t\\n\\r]", "lex.sdf3");
-        final TextResource resourceA = createResource("module nested/a context-free syntax A.A = <key>", "nested/a.sdf3");
-        final TextResource resourceB = createResource("module nested/b context-free syntax B.B = <word>", "nested/b.sdf3");
+        final TextResource resourceMain = createTextResource("module test imports lex nested/a nested/b context-free start-symbols Start context-free syntax Start.Start = <<A> <B>>", "test.sdf3");
+        final TextResource resourceLex = createTextResource("module lex lexical syntax LAYOUT = [\\ \\t\\n\\r]", "lex.sdf3");
+        final TextResource resourceA = createTextResource("module nested/a context-free syntax A.A = <key>", "nested/a.sdf3");
+        final TextResource resourceB = createTextResource("module nested/b context-free syntax B.B = <word>", "nested/b.sdf3");
         final Sdf3SpecToParseTable taskDef = languageComponent.getSpecToParseTable();
         try(final MixedSession session = languageComponent.newPieSession()) {
             final Sdf3Parse parse = languageComponent.getParse();
             final Sdf3SpecToParseTable.Args args = new Sdf3SpecToParseTable.Args(
-                desugaredAstSupplier(resourceMain),
+                desugarSupplier(resourceMain),
                 ListView.of(
-                    desugaredAstSupplier(resourceLex),
-                    desugaredAstSupplier(resourceA),
-                    desugaredAstSupplier(resourceB)
+                    desugarSupplier(resourceLex),
+                    desugarSupplier(resourceA),
+                    desugarSupplier(resourceB)
                 ),
                 new ParseTableConfiguration(false, false, true, false, false),
                 createCompletionTable
