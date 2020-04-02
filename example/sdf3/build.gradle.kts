@@ -6,7 +6,7 @@ plugins {
   id("org.metaborg.spoofax.compiler.gradle.spoofaxcore.root") /* No version: plugin must be in composite build. */
 
   // Set versions for plugins to use, only applying them in subprojects (apply false here).
-  id("org.metaborg.spoofax.gradle.langspec") version "0.2.1" apply false
+  id("org.metaborg.spoofax.gradle.langspec") version "0.2.2" apply false
   id("de.set.ecj") version "1.4.1" apply false
   id("org.metaborg.coronium.bundle") version "0.2.1" apply false
   id("org.metaborg.coronium.embedding") version "0.2.1" apply false
