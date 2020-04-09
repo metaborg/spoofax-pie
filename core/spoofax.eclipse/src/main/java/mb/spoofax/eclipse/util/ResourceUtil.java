@@ -4,6 +4,7 @@ import mb.resource.Resource;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceRuntimeException;
 import mb.resource.ResourceService;
+import mb.spoofax.core.platform.Platform;
 import mb.spoofax.eclipse.resource.WrapsEclipseResource;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IFile;
@@ -17,7 +18,7 @@ public class ResourceUtil {
     private final ResourceService resourceService;
 
 
-    @Inject public ResourceUtil(ResourceService resourceService) {
+    @Inject public ResourceUtil(@Platform ResourceService resourceService) {
         this.resourceService = resourceService;
     }
 
@@ -30,7 +31,7 @@ public class ResourceUtil {
         if(!(resource instanceof WrapsEclipseResource)) {
             throw new ResourceRuntimeException("Resource '" + resource + "' does not wrap an Eclipse resource");
         }
-        final @Nullable IResource eclipseResource = ((WrapsEclipseResource) resource).getWrappedEclipseResource();
+        final @Nullable IResource eclipseResource = ((WrapsEclipseResource)resource).getWrappedEclipseResource();
         if(eclipseResource == null) {
             throw new ResourceRuntimeException("Resource '" + resource + "' wraps an Eclipse resource, but the wrapped resource is null");
         }
@@ -46,6 +47,6 @@ public class ResourceUtil {
         if(!(eclipseResource instanceof IFile)) {
             throw new ResourceRuntimeException("Resource '" + resource + "' wraps an Eclipse resource, but the wrapped resource is not a file");
         }
-        return (IFile) eclipseResource;
+        return (IFile)eclipseResource;
     }
 }

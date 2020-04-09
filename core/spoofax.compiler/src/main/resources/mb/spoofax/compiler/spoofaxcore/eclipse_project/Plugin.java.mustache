@@ -32,8 +32,6 @@ public class {{genPlugin.id}} extends AbstractUIPlugin {
         component = {{daggerEclipseComponent.qualifiedId}}
             .builder()
             .platformComponent(SpoofaxPlugin.getComponent())
-            .{{adapterProjectCompilerInput.module.idAsCamelCase}}(new {{adapterProjectCompilerInput.module.qualifiedId}}())
-            .{{eclipseModule.idAsCamelCase}}(new {{eclipseModule.qualifiedId}}())
             .build();
 
         component.getEditorTracker().register();

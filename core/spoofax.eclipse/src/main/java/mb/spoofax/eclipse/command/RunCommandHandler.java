@@ -53,7 +53,7 @@ public class RunCommandHandler extends AbstractHandler {
         }
         final CommandRequest<?> request = data.toCommandRequest(def);
         try {
-            try(final MixedSession session = languageComponent.newPieSession()) {
+            try(final MixedSession session = languageComponent.getPie().newSession()) {
                 pieRunner.requireCommand(languageComponent, request, data.contexts, session, null);
             }
         } catch(ExecException e) {

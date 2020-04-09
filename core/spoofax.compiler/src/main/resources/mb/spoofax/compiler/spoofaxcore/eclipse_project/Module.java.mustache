@@ -8,7 +8,7 @@ import mb.spoofax.eclipse.EclipseIdentifiers;
 @Module
 public class {{genEclipseModule.id}} {
     @Provides @LanguageScope
-    EclipseIdentifiers provideEclipseIdentifiers() {
+    static EclipseIdentifiers provideEclipseIdentifiers() {
         return new {{eclipseIdentifiers.qualifiedId}}();
     }
 }

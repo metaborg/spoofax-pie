@@ -16,7 +16,7 @@ class ToNormalFormTest extends TestBase {
     @Test void testTask() throws ExecException {
         final TextResource resource = createTextResource("module nested/a context-free syntax A = <A>", "a.sdf3");
         final Sdf3ToNormalForm taskDef = languageComponent.getToNormalForm();
-        try(final MixedSession session = languageComponent.newPieSession()) {
+        try(final MixedSession session = newSession()) {
             final @Nullable IStrategoTerm output = session.require(taskDef.createTask(desugarSupplier(resource)));
             log.info("{}", output);
             assertNotNull(output);

@@ -13,6 +13,7 @@ import mb.spoofax.core.language.command.arg.ArgConverters;
 import mb.spoofax.core.language.command.arg.Param;
 import mb.spoofax.core.language.command.arg.ParamDef;
 import mb.spoofax.core.language.command.arg.RawArgFromProviders;
+import mb.spoofax.core.platform.Platform;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import picocli.CommandLine;
 import picocli.CommandLine.Model.ArgSpec;
@@ -29,14 +30,14 @@ public class SpoofaxCli {
     private final ArgConverters argConverters;
 
     @Inject
-    public SpoofaxCli(ResourceService resourceService, ArgConverters argConverters) {
+    public SpoofaxCli(@Platform ResourceService resourceService, ArgConverters argConverters) {
         this.resourceService = resourceService;
         this.argConverters = argConverters;
     }
 
     public int run(String[] args, LanguageComponent languageComponent) {
         final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
-        try(final MixedSession session = languageComponent.newPieSession()) {
+        try(final MixedSession session = languageComponent.getPie().newSession()) {
             final CommandSpec commandSpec = toCommandSpec(languageInstance.getCliCommand(), session);
             final CommandLine commandLine = new CommandLine(commandSpec);
             for(ArgConverter<?> converter : argConverters.allConverters.values()) {

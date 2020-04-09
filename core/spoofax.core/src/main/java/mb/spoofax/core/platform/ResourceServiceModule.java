@@ -12,7 +12,7 @@ import java.util.Set;
 
 @Module
 public class ResourceServiceModule {
-    @Provides @Singleton
+    @Provides @Platform @Singleton
     static ResourceService provideResourceRegistry(@Named("default") ResourceRegistry defaultRegistry, Set<ResourceRegistry> registries) {
         return new DefaultResourceService(defaultRegistry, registries);
     }

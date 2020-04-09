@@ -13,12 +13,14 @@ import mb.pie.api.MixedSession;
 import mb.pie.api.TaskDef;
 import mb.pie.api.TaskDefs;
 import mb.resource.ResourceService;
+import mb.resource.classloader.ClassLoaderResourceRegistry;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.HierarchicalResourceType;
 import mb.spoofax.core.language.command.arg.RawArgs;
+import mb.spoofax.core.platform.Platform;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
 
@@ -29,24 +31,30 @@ import java.util.Set;
 @Module
 public class {{genModule.id}} {
     @Provides @LanguageScope
-    {{parser.languageProjectInput.factory.qualifiedId}} provideParserFactory() {
+    static ResourceService provideResourceRegistry(@Platform ResourceService resourceService) {
+        return resourceService.createChild(new ClassLoaderResourceRegistry({{genModule.id}}.class.getClassLoader()));
+    }
+
+
+    @Provides @LanguageScope
+    static {{parser.languageProjectInput.factory.qualifiedId}} provideParserFactory() {
         return new {{parser.languageProjectInput.factory.qualifiedId}}();
     }
 
     @Provides /* Unscoped: parser has state, so create a new parser every call. */
-    {{parser.languageProjectInput.parser.qualifiedId}} provideParser({{parser.languageProjectInput.factory.qualifiedId}} parserFactory) {
+    static {{parser.languageProjectInput.parser.qualifiedId}} provideParser({{parser.languageProjectInput.factory.qualifiedId}} parserFactory) {
         return parserFactory.create();
     }
 {{#styler}}
 
 
     @Provides @LanguageScope
-    {{this.languageProjectInput.factory.qualifiedId}} provideStylerFactory(LoggerFactory loggerFactory) {
+    static {{this.languageProjectInput.factory.qualifiedId}} provideStylerFactory(LoggerFactory loggerFactory) {
         return new {{this.languageProjectInput.factory.qualifiedId}}(loggerFactory);
     }
 
     @Provides @LanguageScope
-    {{this.languageProjectInput.styler.qualifiedId}} provideStyler({{this.languageProjectInput.factory.qualifiedId}} stylerFactory) {
+    static {{this.languageProjectInput.styler.qualifiedId}} provideStyler({{this.languageProjectInput.factory.qualifiedId}} stylerFactory) {
         return stylerFactory.create();
     }
 {{/styler}}
@@ -54,22 +62,22 @@ public class {{genModule.id}} {
 
 
     @Provides @LanguageScope
-    {{this.languageProjectInput.factory.qualifiedId}} provideStrategoRuntimeBuilderFactory() {
+    static {{this.languageProjectInput.factory.qualifiedId}} provideStrategoRuntimeBuilderFactory() {
         return new {{this.languageProjectInput.factory.qualifiedId}}();
     }
 
     @Provides @LanguageScope
-    StrategoRuntimeBuilder provideStrategoRuntimeBuilder({{this.languageProjectInput.factory.qualifiedId}} factory, LoggerFactory loggerFactory, ResourceService resourceService) {
+    static StrategoRuntimeBuilder provideStrategoRuntimeBuilder({{this.languageProjectInput.factory.qualifiedId}} factory, LoggerFactory loggerFactory, ResourceService resourceService) {
         return factory.create(loggerFactory, resourceService);
     }
 
     @Provides @LanguageScope @Named("prototype")
-    StrategoRuntime providePrototypeStrategoRuntime(StrategoRuntimeBuilder builder) {
+    static StrategoRuntime providePrototypeStrategoRuntime(StrategoRuntimeBuilder builder) {
         return builder.build();
     }
 
     @Provides /* Unscoped: new session every call. */
-    StrategoRuntime provideStrategoRuntime(StrategoRuntimeBuilder builder, @Named("prototype") StrategoRuntime prototype) {
+    static StrategoRuntime provideStrategoRuntime(StrategoRuntimeBuilder builder, @Named("prototype") StrategoRuntime prototype) {
         return builder.buildFromPrototype(prototype);
     }
 {{/strategoRuntime}}
@@ -77,18 +85,18 @@ public class {{genModule.id}} {
 
 
     @Provides @LanguageScope
-    {{this.languageProjectInput.factory.qualifiedId}} provideConstraintAnalyzerFactory(LoggerFactory loggerFactory, ResourceService resourceService, StrategoRuntime prototypeStrategoRuntime) {
+    static {{this.languageProjectInput.factory.qualifiedId}} provideConstraintAnalyzerFactory(LoggerFactory loggerFactory, ResourceService resourceService, StrategoRuntime prototypeStrategoRuntime) {
         return new {{this.languageProjectInput.factory.qualifiedId}}(loggerFactory, resourceService, prototypeStrategoRuntime);
     }
 
     @Provides @LanguageScope
-    {{this.languageProjectInput.constraintAnalyzer.qualifiedId}} provideConstraintAnalyzer({{this.languageProjectInput.factory.qualifiedId}} factory) {
+    static {{this.languageProjectInput.constraintAnalyzer.qualifiedId}} provideConstraintAnalyzer({{this.languageProjectInput.factory.qualifiedId}} factory) {
         return factory.create();
     }
 {{/constraintAnalyzer}}
 
 
-    @Provides @LanguageScope @Named("language") @ElementsIntoSet
+    @Provides @LanguageScope @ElementsIntoSet
     static Set<TaskDef<?, ?>> provideTaskDefsSet(
 {{#providedTaskDefs}}
         {{variable}}{{^-last}},{{/-last}}
@@ -101,20 +109,20 @@ public class {{genModule.id}} {
         return taskDefs;
     }
 
-    @Provides @LanguageScope @Named("language")
-    TaskDefs provideTaskDefs(@Named("language") Set<TaskDef<?, ?>> taskDefs) {
+    @Provides @LanguageScope
+    static TaskDefs provideTaskDefs(Set<TaskDef<?, ?>> taskDefs) {
         return new MapTaskDefs(taskDefs);
+    }
+
+    @Provides @LanguageScope
+    static Pie providePie(@Platform Pie pie, TaskDefs taskDefs, ResourceService resourceService) {
+        return pie.createChildBuilder().withTaskDefs(taskDefs).withResourceService(resourceService).build();
     }
 
 
     @Provides @LanguageScope
-    LanguageInstance provideLanguageInstance({{genInstance.id}} instance) {
+    static LanguageInstance provideLanguageInstance({{genInstance.id}} instance) {
         return instance;
-    }
-
-    @Provides /* Unscoped: new session every call. */
-    MixedSession provideMixedSession(Pie pie, @Named("language") TaskDefs languageTaskDefs) {
-        return pie.newSession(languageTaskDefs);
     }
 
 

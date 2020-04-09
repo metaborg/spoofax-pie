@@ -3,6 +3,7 @@ package mb.spoofax.eclipse.resource;
 import mb.resource.QualifiedResourceKeyString;
 import mb.resource.ResourceRuntimeException;
 import mb.resource.hierarchical.ResourcePath;
+import mb.resource.hierarchical.ResourcePathDefaults;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
@@ -13,7 +14,7 @@ import java.io.ObjectInputStream;
 import java.util.Arrays;
 import java.util.Collection;
 
-public class EclipseResourcePath implements ResourcePath {
+public class EclipseResourcePath extends ResourcePathDefaults<EclipseResourcePath> implements ResourcePath {
     // String version of the path which can be serialized and deserialized.
     final String pathString;
     // Transient and non-final for deserialization in readObject. Invariant: always nonnull.
@@ -177,24 +178,17 @@ public class EclipseResourcePath implements ResourcePath {
         return new EclipseResourcePath(appendRelativePath(relativePath.path));
     }
 
-    @Override public EclipseResourcePath appendOrReplaceWithPath(ResourcePath other) {
-        if(!(other instanceof EclipseResourcePath)) {
-            throw new ResourceRuntimeException(
-                "Cannot append or replace from '" + other + "', it is not an EclipseResourcePath");
-        }
-        return appendOrReplaceWithPath((EclipseResourcePath)other);
-    }
-
-    public EclipseResourcePath appendOrReplaceWithPath(EclipseResourcePath other) {
-        return new EclipseResourcePath(appendOrReplaceWithPath(other.path));
-    }
-
 
     @Override public EclipseResourcePath replaceLeaf(String segment) {
         if(path.segmentCount() == 0) {
             return this;
         }
         return new EclipseResourcePath(path.removeLastSegments(1).append(segment));
+    }
+
+
+    @Override protected EclipseResourcePath self() {
+        return this;
     }
 
 

@@ -14,7 +14,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
-public class EclipseDocumentResource implements Resource, ReadableResource, WrapsEclipseResource {
+public class EclipseDocumentResource implements ReadableResource, WrapsEclipseResource {
     private final IDocument document;
     private final EclipseDocumentKey key;
     private final @Nullable EclipseResource file;

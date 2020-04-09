@@ -19,7 +19,7 @@ class ToSignatureTest extends TestBase {
     @Test void testTask() throws ExecException, IOException {
         final FSResource resource = createTextFile("module nested/a context-free syntax A = <A>", "a.sdf3");
         final Sdf3ToSignature taskDef = languageComponent.getToSignature();
-        try(final MixedSession session = languageComponent.newPieSession()) {
+        try(final MixedSession session = newSession()) {
             final Supplier<SingleFileAnalysisResult> supplier = singleFileAnalysisResultSupplier(resource);
             final @Nullable IStrategoTerm output = session.require(taskDef.createTask(supplier));
             log.info("{}", output);

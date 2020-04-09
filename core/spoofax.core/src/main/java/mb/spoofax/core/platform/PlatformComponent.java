@@ -3,9 +3,7 @@ package mb.spoofax.core.platform;
 import dagger.Component;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.Pie;
-import mb.pie.dagger.PieModule;
 import mb.resource.ResourceService;
-import mb.spoofax.core.language.command.arg.TextToResourceKeyArgConverter;
 
 import javax.inject.Singleton;
 
@@ -14,14 +12,12 @@ import javax.inject.Singleton;
     LoggerFactoryModule.class,
     ResourceRegistriesModule.class,
     ResourceServiceModule.class,
-    PieModule.class
+    PlatformPieModule.class
 })
 public interface PlatformComponent {
     LoggerFactory getLoggerFactory();
 
-    ResourceService getResourceService();
+    @Platform ResourceService getResourceService();
 
-    Pie getPie();
-
-    TextToResourceKeyArgConverter getTextToResourceKeyArgConverter();
+    @Platform Pie getPie();
 }

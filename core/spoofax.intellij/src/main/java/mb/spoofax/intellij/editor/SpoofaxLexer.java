@@ -12,6 +12,7 @@ import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
+import mb.pie.api.Pie;
 import mb.pie.api.Task;
 import mb.resource.ReadableResource;
 import mb.resource.ResourceKey;
@@ -40,7 +41,7 @@ public final class SpoofaxLexer extends LexerBase {
     private final SpoofaxTokenTypeManager tokenTypeManager;
     private final ScopeManager scopeManager;
     private final ResourceService resourceService;
-    private final Provider<MixedSession> pieSessionProvider;
+    private final Pie pie;
     private final LanguageInstance languageInstance;
 
     @Nullable private CharSequence buffer = null;
@@ -59,7 +60,7 @@ public final class SpoofaxLexer extends LexerBase {
         private final SpoofaxTokenTypeManager tokenTypeManager;
         private final ScopeManager scopeManager;
         private final ResourceService resourceService;
-        private final Provider<MixedSession> pieSessionProvider;
+        private final Pie pie;
         private final LanguageInstance languageInstance;
 
         @Inject
@@ -68,14 +69,14 @@ public final class SpoofaxLexer extends LexerBase {
                 SpoofaxTokenTypeManager tokenTypeManager,
                 ScopeManager scopeManager,
                 ResourceService resourceService,
-                Provider<MixedSession> pieSessionProvider,
+                Pie pie,
                 LanguageInstance languageInstance
         ) {
             this.loggerFactory = loggerFactory;
             this.tokenTypeManager = tokenTypeManager;
             this.scopeManager = scopeManager;
             this.resourceService = resourceService;
-            this.pieSessionProvider = pieSessionProvider;
+            this.pie = pie;
             this.languageInstance = languageInstance;
         }
 
@@ -86,7 +87,7 @@ public final class SpoofaxLexer extends LexerBase {
                     tokenTypeManager,
                     scopeManager,
                     resourceService,
-                    pieSessionProvider,
+                    pie,
                     languageInstance);
         }
 
@@ -102,7 +103,7 @@ public final class SpoofaxLexer extends LexerBase {
             SpoofaxTokenTypeManager tokenTypeManager,
             ScopeManager scopeManager,
             ResourceService resourceService,
-            Provider<MixedSession> pieSessionProvider,
+            Pie pie,
             LanguageInstance languageInstance
     ) {
         this.resourceKey = resourceKey;
@@ -110,7 +111,7 @@ public final class SpoofaxLexer extends LexerBase {
         this.tokenTypeManager = tokenTypeManager;
         this.scopeManager = scopeManager;
         this.resourceService = resourceService;
-        this.pieSessionProvider = pieSessionProvider;
+        this.pie = pie;
         this.languageInstance = languageInstance;
     }
 
@@ -139,7 +140,7 @@ public final class SpoofaxLexer extends LexerBase {
             this.tokens = Collections.emptyList();
         } else {
             // GK: what is syntax coloring information doing here?
-            try (final MixedSession session = this.pieSessionProvider.get()) {
+            try (final MixedSession session = this.pie.newSession()) {
                 final Task<@Nullable ArrayList<? extends mb.common.token.Token<?>>> tokenizerTask =
                         this.languageInstance.createTokenizeTask(this.resourceKey);
                 @Nullable List<? extends mb.common.token.Token> resourceTokens = session.require(tokenizerTask);

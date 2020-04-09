@@ -20,7 +20,7 @@ import java.time.Instant;
 /**
  * An IntelliJ resource.
  */
-public final class IntellijResource implements Resource, ReadableResource {
+public final class IntellijResource implements ReadableResource {
 
     private final VirtualFile file;
 

@@ -3,6 +3,7 @@ package mb.spoofax.eclipse.resource;
 import mb.resource.ResourceRuntimeException;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.HierarchicalResourceAccess;
+import mb.resource.hierarchical.HierarchicalResourceDefaults;
 import mb.resource.hierarchical.HierarchicalResourceType;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.ResourceMatcher;
@@ -38,7 +39,7 @@ import java.util.stream.Stream;
 
 import static org.eclipse.core.resources.IResourceStatus.RESOURCE_EXISTS;
 
-public class EclipseResource implements HierarchicalResource, WrapsEclipseResource {
+public class EclipseResource extends HierarchicalResourceDefaults<EclipseResource> implements HierarchicalResource, WrapsEclipseResource {
     final EclipseResourceRegistry registry;
     final EclipseResourcePath path;
     private transient @Nullable IResource resource;
@@ -260,10 +261,6 @@ public class EclipseResource implements HierarchicalResource, WrapsEclipseResour
 
     @Override public EclipseResource appendRelativePath(ResourcePath relativePath) {
         return new EclipseResource(registry, path.appendRelativePath(relativePath));
-    }
-
-    @Override public EclipseResource appendOrReplaceWithPath(ResourcePath other) {
-        return new EclipseResource(registry, path.appendOrReplaceWithPath(other));
     }
 
 
@@ -517,6 +514,11 @@ public class EclipseResource implements HierarchicalResource, WrapsEclipseResour
 
     @Override public IResource getWrappedEclipseResource() {
         return getResource();
+    }
+
+
+    @Override protected EclipseResource self() {
+        return this;
     }
 
 

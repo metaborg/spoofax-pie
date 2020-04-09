@@ -17,8 +17,6 @@ public class {{genPlugin.id}} {
         component = {{daggerComponent.id}}
             .builder()
             .spoofaxIntellijComponent(SpoofaxPlugin.getComponent())
-            .{{adapterProjectCompilerInput.module.idAsCamelCase}}(new {{adapterProjectCompilerInput.module.qualifiedId}}())
-            .{{module.idAsCamelCase}}(new {{module.qualifiedId}}())
             .build();
     }
 }

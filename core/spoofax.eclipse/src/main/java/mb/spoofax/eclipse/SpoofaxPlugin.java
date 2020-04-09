@@ -1,8 +1,8 @@
 package mb.spoofax.eclipse;
 
-import mb.pie.dagger.PieModule;
 import mb.pie.runtime.PieBuilderImpl;
 import mb.spoofax.core.platform.LoggerFactoryModule;
+import mb.spoofax.core.platform.PlatformPieModule;
 import mb.spoofax.eclipse.log.EclipseLoggerFactory;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -39,7 +39,7 @@ public class SpoofaxPlugin extends AbstractUIPlugin {
         component = DaggerSpoofaxEclipseComponent
             .builder()
             .loggerFactoryModule(new LoggerFactoryModule(new EclipseLoggerFactory()))
-            .pieModule(new PieModule(PieBuilderImpl::new))
+            .platformPieModule(new PlatformPieModule(PieBuilderImpl::new))
             .build();
 
         component.getPartClosedCallback().register();

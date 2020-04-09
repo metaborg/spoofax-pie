@@ -29,7 +29,7 @@ class SpecToParseTableTest extends TestBase {
         final TextResource resourceA = createTextResource("module nested/a context-free syntax A.A = <key>", "nested/a.sdf3");
         final TextResource resourceB = createTextResource("module nested/b context-free syntax B.B = <word>", "nested/b.sdf3");
         final Sdf3SpecToParseTable taskDef = languageComponent.getSpecToParseTable();
-        try(final MixedSession session = languageComponent.newPieSession()) {
+        try(final MixedSession session = newSession()) {
             final Sdf3Parse parse = languageComponent.getParse();
             final Sdf3SpecToParseTable.Args args = new Sdf3SpecToParseTable.Args(
                 desugarSupplier(resourceMain),

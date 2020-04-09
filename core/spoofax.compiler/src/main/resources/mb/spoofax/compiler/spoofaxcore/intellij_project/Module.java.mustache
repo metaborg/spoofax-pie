@@ -11,13 +11,13 @@ import javax.swing.*;
 @Module
 public class {{genModule.id}} {
     @Provides @LanguageScope
-    IntellijLanguage provideSpoofaxLanguage({{language.qualifiedId}} language) {
+    static IntellijLanguage provideSpoofaxLanguage({{language.qualifiedId}} language) {
         // Downcast because injections in spoofax.intellij require an IntellijLanguage, and dagger does not implicitly downcast.
         return language;
     }
 
     @Provides @LanguageScope
-    Icon provideFileIcon() {
+    static Icon provideFileIcon() {
         return IconLoader.getIcon("META-INF/fileIcon.svg");
     }
 }

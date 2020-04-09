@@ -12,7 +12,6 @@ dependencies {
   api("org.metaborg:log.api")
   implementation("org.metaborg:log.backend.noop")
   implementation("org.metaborg:pie.runtime")
-  implementation("org.metaborg:pie.dagger")
   implementation("com.google.dagger:dagger")
 
   compileOnly("org.checkerframework:checker-qual-android")

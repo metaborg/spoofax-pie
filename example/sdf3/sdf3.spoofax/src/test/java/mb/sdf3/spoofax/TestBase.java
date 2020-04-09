@@ -6,12 +6,12 @@ import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.log.slf4j.SLF4JLoggerFactory;
 import mb.pie.api.Function;
+import mb.pie.api.MixedSession;
+import mb.pie.api.Pie;
 import mb.pie.api.Supplier;
-import mb.pie.dagger.PieModule;
 import mb.pie.runtime.PieBuilderImpl;
 import mb.resource.Resource;
 import mb.resource.ResourceKey;
-import mb.resource.ResourceService;
 import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.text.TextResource;
@@ -25,6 +25,7 @@ import mb.sdf3.spoofax.util.DaggerSdf3TestComponent;
 import mb.sdf3.spoofax.util.PlatformTestComponent;
 import mb.sdf3.spoofax.util.Sdf3TestComponent;
 import mb.spoofax.core.platform.LoggerFactoryModule;
+import mb.spoofax.core.platform.PlatformPieModule;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -39,24 +40,21 @@ class TestBase {
     final PlatformTestComponent platformComponent = DaggerPlatformTestComponent
         .builder()
         .loggerFactoryModule(new LoggerFactoryModule(new SLF4JLoggerFactory()))
-        .pieModule(new PieModule(PieBuilderImpl::new))
+        .platformPieModule(new PlatformPieModule(PieBuilderImpl::new))
         .build();
     final LoggerFactory loggerFactory = platformComponent.getLoggerFactory();
     final Logger log = loggerFactory.create(TestBase.class);
-    final ResourceService resourceService = platformComponent.getResourceService();
     final TextResourceRegistry textResourceRegistry = platformComponent.getTextResourceRegistry();
 
     final Sdf3TestComponent languageComponent = DaggerSdf3TestComponent
         .builder()
         .platformComponent(platformComponent)
-        .sdf3Module(new Sdf3Module())
         .build();
     final Sdf3Parse parse = languageComponent.getParse();
     final Sdf3Desugar desugar = languageComponent.getDesugar();
     final Function<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> desugarFunction = desugar.createFunction();
     final Sdf3AnalyzeMulti analyze = languageComponent.getAnalyze();
-
-    final Sdf3Instance languageInstance = languageComponent.getLanguageInstance();
+    final Pie pie = languageComponent.getPie();
 
 
     FSResource createTextFile(String text, String relativePath) throws IOException {
@@ -94,5 +92,10 @@ class TestBase {
 
     Supplier<SingleFileAnalysisResult> singleFileAnalysisResultSupplier(Resource file) {
         return singleFileAnalysisResultSupplier(rootDirectory.getPath(), file.getKey());
+    }
+
+
+    MixedSession newSession() {
+        return pie.newSession();
     }
 }

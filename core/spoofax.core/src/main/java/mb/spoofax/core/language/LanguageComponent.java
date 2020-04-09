@@ -1,10 +1,13 @@
 package mb.spoofax.core.language;
 
-import mb.pie.api.MixedSession;
+import mb.pie.api.Pie;
+import mb.resource.ResourceService;
 
 @LanguageScope
 public interface LanguageComponent {
     LanguageInstance getLanguageInstance();
 
-    MixedSession newPieSession();
+    ResourceService getResourceService();
+
+    Pie getPie();
 }

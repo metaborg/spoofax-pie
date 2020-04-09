@@ -9,6 +9,7 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.command.CommandContext;
 import mb.spoofax.core.language.command.EnclosingCommandContextType;
 import mb.spoofax.core.language.command.ResourcePathWithKind;
+import mb.spoofax.core.platform.Platform;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IProject;
@@ -26,7 +27,8 @@ public class EnclosingCommandContextProvider {
     private final Logger logger;
     private final ResourceService resourceService;
 
-    @Inject public EnclosingCommandContextProvider(LoggerFactory loggerFactory, ResourceService resourceService) {
+    @Inject
+    public EnclosingCommandContextProvider(LoggerFactory loggerFactory, @Platform ResourceService resourceService) {
         this.logger = loggerFactory.create(EnclosingCommandContextProvider.class);
         this.resourceService = resourceService;
     }

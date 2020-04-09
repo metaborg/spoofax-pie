@@ -19,7 +19,7 @@ class SpecToParenthesizerTest extends TestBase {
     @Test void testTask() throws ExecException {
         final TextResource resource = createTextResource("module test context-free syntax A = <A>", "a.sdf3");
         final Sdf3SpecToParenthesizer taskDef = languageComponent.getSpecToParenthesizer();
-        try(final MixedSession session = languageComponent.newPieSession()) {
+        try(final MixedSession session = newSession()) {
             final Sdf3SpecToParseTable.Args parseTableArgs = new Sdf3SpecToParseTable.Args(
                 desugarSupplier(resource),
                 ListView.of(),

@@ -5,16 +5,17 @@ import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.MapTaskDefs;
-import mb.pie.api.MixedSession;
 import mb.pie.api.Pie;
 import mb.pie.api.TaskDef;
 import mb.pie.api.TaskDefs;
 import mb.resource.ResourceService;
+import mb.resource.classloader.ClassLoaderResourceRegistry;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.HierarchicalResourceType;
+import mb.spoofax.core.platform.Platform;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
 import mb.tiger.TigerConstraintAnalyzer;
@@ -56,59 +57,65 @@ import java.util.Set;
 @Module
 public class TigerModule {
     @Provides @LanguageScope
-    TigerParserFactory provideParserFactory() {
+    static ResourceService provideResourceRegistry(@Platform ResourceService resourceService) {
+        return resourceService.createChild(new ClassLoaderResourceRegistry(TigerModule.class.getClassLoader()));
+    }
+
+
+    @Provides @LanguageScope
+    static TigerParserFactory provideParserFactory() {
         return new TigerParserFactory();
     }
 
     @Provides /* Unscoped: parser has state, so create a new parser every call. */
-    TigerParser provideParser(TigerParserFactory parserFactory) {
+    static TigerParser provideParser(TigerParserFactory parserFactory) {
         return parserFactory.create();
     }
 
 
     @Provides @LanguageScope
-    TigerStylerFactory provideStylerFactory(LoggerFactory loggerFactory) {
+    static TigerStylerFactory provideStylerFactory(LoggerFactory loggerFactory) {
         return new TigerStylerFactory(loggerFactory);
     }
 
     @Provides @LanguageScope
-    TigerStyler provideStyler(TigerStylerFactory stylerFactory) {
+    static TigerStyler provideStyler(TigerStylerFactory stylerFactory) {
         return stylerFactory.create();
     }
 
     @Provides @LanguageScope
-    TigerStrategoRuntimeBuilderFactory provideStrategoRuntimeBuilderFactory() {
+    static TigerStrategoRuntimeBuilderFactory provideStrategoRuntimeBuilderFactory() {
         return new TigerStrategoRuntimeBuilderFactory();
     }
 
     @Provides @LanguageScope
-    StrategoRuntimeBuilder provideStrategoRuntimeBuilder(TigerStrategoRuntimeBuilderFactory factory, LoggerFactory loggerFactory, ResourceService resourceService) {
+    static StrategoRuntimeBuilder provideStrategoRuntimeBuilder(TigerStrategoRuntimeBuilderFactory factory, LoggerFactory loggerFactory, ResourceService resourceService) {
         return factory.create(loggerFactory, resourceService);
     }
 
     @Provides @LanguageScope @Named("prototype")
-    StrategoRuntime providePrototypeStrategoRuntime(StrategoRuntimeBuilder builder) {
+    static StrategoRuntime providePrototypeStrategoRuntime(StrategoRuntimeBuilder builder) {
         return builder.build();
     }
 
     @Provides /* Unscoped: new session every call. */
-    StrategoRuntime provideStrategoRuntime(StrategoRuntimeBuilder builder, @Named("prototype") StrategoRuntime prototype) {
+    static StrategoRuntime provideStrategoRuntime(StrategoRuntimeBuilder builder, @Named("prototype") StrategoRuntime prototype) {
         return builder.buildFromPrototype(prototype);
     }
 
 
     @Provides @LanguageScope
-    TigerConstraintAnalyzerFactory provideConstraintAnalyzerFactory(LoggerFactory loggerFactory, ResourceService resourceService, StrategoRuntime prototypeStrategoRuntime) {
+    static TigerConstraintAnalyzerFactory provideConstraintAnalyzerFactory(LoggerFactory loggerFactory, ResourceService resourceService, StrategoRuntime prototypeStrategoRuntime) {
         return new TigerConstraintAnalyzerFactory(loggerFactory, resourceService, prototypeStrategoRuntime);
     }
 
     @Provides @LanguageScope
-    TigerConstraintAnalyzer provideConstraintAnalyzer(TigerConstraintAnalyzerFactory factory) {
+    static TigerConstraintAnalyzer provideConstraintAnalyzer(TigerConstraintAnalyzerFactory factory) {
         return factory.create();
     }
 
 
-    @Provides @LanguageScope @Named("language") @ElementsIntoSet
+    @Provides @LanguageScope @ElementsIntoSet
     static Set<TaskDef<?, ?>> provideTaskDefsSet(
         TigerParse parse,
         TigerStyle style,
@@ -157,9 +164,14 @@ public class TigerModule {
         return taskDefs;
     }
 
-    @Provides @LanguageScope @Named("language")
-    TaskDefs provideTaskDefs(@Named("language") Set<TaskDef<?, ?>> taskDefs) {
+    @Provides @LanguageScope
+    TaskDefs provideTaskDefs(Set<TaskDef<?, ?>> taskDefs) {
         return new MapTaskDefs(taskDefs);
+    }
+
+    @Provides @LanguageScope
+    static Pie providePie(@Platform Pie pie, TaskDefs taskDefs, ResourceService resourceService) {
+        return pie.createChildBuilder().withTaskDefs(taskDefs).withResourceService(resourceService).build();
     }
 
 
@@ -203,12 +215,7 @@ public class TigerModule {
 
 
     @Provides @LanguageScope
-    LanguageInstance provideLanguageInstance(TigerInstance tigerInstance) {
+    static LanguageInstance provideLanguageInstance(TigerInstance tigerInstance) {
         return tigerInstance;
-    }
-
-    @Provides /* Unscoped: new session every call. */
-    MixedSession providePieSession(Pie pie, @Named("language") TaskDefs languageTaskDefs) {
-        return pie.newSession(languageTaskDefs);
     }
 }
