@@ -222,10 +222,6 @@ public interface Shared extends Serializable {
         return GradleDependency.module(Coordinate.of("org.metaborg", "pie.runtime", pieVersion()));
     }
 
-    @Value.Default default GradleDependency pieDaggerDep() {
-        return GradleDependency.module(Coordinate.of("org.metaborg", "pie.dagger", pieVersion()));
-    }
-
 
     /// Spoofax-PIE
 

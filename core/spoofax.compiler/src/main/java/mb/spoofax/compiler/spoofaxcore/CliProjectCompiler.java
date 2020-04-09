@@ -40,7 +40,6 @@ public class CliProjectCompiler {
         dependencies.add(GradleConfiguredDependency.implementation(shared.logBackendSLF4JDep()));
         dependencies.add(GradleConfiguredDependency.implementation(shared.slf4jSimpleDep()));
         dependencies.add(GradleConfiguredDependency.implementation(shared.pieRuntimeDep()));
-        dependencies.add(GradleConfiguredDependency.implementation(shared.pieDaggerDep()));
         dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
         return dependencies;
     }

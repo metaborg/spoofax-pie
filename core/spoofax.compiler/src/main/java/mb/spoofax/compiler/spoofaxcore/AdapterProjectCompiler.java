@@ -79,7 +79,6 @@ public class AdapterProjectCompiler {
         dependencies.add(GradleConfiguredDependency.api(input.languageProjectDependency()));
         dependencies.add(GradleConfiguredDependency.api(shared.spoofaxCoreDep()));
         dependencies.add(GradleConfiguredDependency.api(shared.pieApiDep()));
-        dependencies.add(GradleConfiguredDependency.api(shared.pieDaggerDep()));
         dependencies.add(GradleConfiguredDependency.api(shared.daggerDep()));
         dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
         dependencies.add(GradleConfiguredDependency.annotationProcessor(shared.daggerCompilerDep()));
