@@ -21,7 +21,6 @@ import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
 import mb.stratego.common.StrategoUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -52,7 +51,7 @@ class ModAnalyzerTest {
         assertTrue(result.messages.containsError());
     }
 
-    @Disabled("Variable definions do not work at the moment") @Test void analyzeSingleSuccess() throws InterruptedException, ConstraintAnalyzerException {
+    @Test void analyzeSingleSuccess() throws InterruptedException, ConstraintAnalyzerException {
         final ResourceKey resource = new DefaultResourceKey(qualifier, "a.mod");
         final JSGLR1ParseResult parsed = parser.parse("let a = mod { let b = 1; }; dbg a.b;", startSymbol, resource);
         assertTrue(parsed.getAst().isPresent());
