@@ -59,8 +59,7 @@ rules // Item
   itemOK(s, Dbg(exp)) :- {T}
     typeOfExp(s, exp) == NUM() | error "Can only debug integers" @exp.
   itemOK(s, Let(id, exp)) :- {T}
-    typeOfExp(s, exp) == T,
-    s -> Var{id} with typeOfDecl T.
+    typeOfExp(s, exp) == T.
   itemOK(s, Use(use_ref)) :- {s_mod}
     scopeOfUseRef(s, use_ref) == s_mod,
     s -I-> s_mod.
