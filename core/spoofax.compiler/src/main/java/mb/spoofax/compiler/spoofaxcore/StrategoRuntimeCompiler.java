@@ -139,7 +139,7 @@ public class StrategoRuntimeCompiler {
         }
 
 
-        // Provided files
+        // List of all provided files
 
         default ListView<ResourcePath> providedFiles() {
             if(classKind().isManualOnly()) {

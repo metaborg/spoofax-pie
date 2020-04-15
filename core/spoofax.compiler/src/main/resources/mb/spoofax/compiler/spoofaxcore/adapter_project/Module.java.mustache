@@ -12,8 +12,11 @@ import mb.pie.api.Pie;
 import mb.pie.api.MixedSession;
 import mb.pie.api.TaskDef;
 import mb.pie.api.TaskDefs;
+import mb.resource.ResourceKeyString;
 import mb.resource.ResourceService;
+import mb.resource.classloader.ClassLoaderResource;
 import mb.resource.classloader.ClassLoaderResourceRegistry;
+import mb.resource.hierarchical.HierarchicalResource;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.AutoCommandRequest;
@@ -31,14 +34,29 @@ import java.util.Set;
 @Module
 public class {{genModule.id}} {
     @Provides @LanguageScope
-    static ResourceService provideResourceRegistry(@Platform ResourceService resourceService) {
-        return resourceService.createChild(new ClassLoaderResourceRegistry({{genModule.id}}.class.getClassLoader()));
+    static ClassLoaderResourceRegistry provideClassLoaderResourceRegistry() {
+        return {{classloaderResources.languageProjectInput.classloaderResources.qualifiedId}}.createClassLoaderResourceRegistry();
+    }
+
+    @Provides @LanguageScope
+    static ResourceService provideResourceRegistry(@Platform ResourceService resourceService, ClassLoaderResourceRegistry classLoaderResourceRegistry) {
+        return resourceService.createChild(classLoaderResourceRegistry);
+    }
+
+    @Provides @Named("definition-dir") @LanguageScope
+    static ClassLoaderResource provideDefinitionDir(ClassLoaderResourceRegistry registry) {
+        return {{classloaderResources.languageProjectInput.classloaderResources.qualifiedId}}.createDefinitionDir(registry);
+    }
+
+    @Provides @Named("definition-dir") @LanguageScope
+    static HierarchicalResource provideDefinitionDirAsHierarchicalResource(@Named("definition-dir") ClassLoaderResource definitionDir) {
+        return definitionDir;
     }
 
 
     @Provides @LanguageScope
-    static {{parser.languageProjectInput.factory.qualifiedId}} provideParserFactory() {
-        return new {{parser.languageProjectInput.factory.qualifiedId}}();
+    static {{parser.languageProjectInput.factory.qualifiedId}} provideParserFactory(@Named("definition-dir") HierarchicalResource definitionDir) {
+        return new {{parser.languageProjectInput.factory.qualifiedId}}(definitionDir);
     }
 
     @Provides /* Unscoped: parser has state, so create a new parser every call. */
@@ -49,8 +67,8 @@ public class {{genModule.id}} {
 
 
     @Provides @LanguageScope
-    static {{this.languageProjectInput.factory.qualifiedId}} provideStylerFactory(LoggerFactory loggerFactory) {
-        return new {{this.languageProjectInput.factory.qualifiedId}}(loggerFactory);
+    static {{this.languageProjectInput.factory.qualifiedId}} provideStylerFactory(LoggerFactory loggerFactory, @Named("definition-dir") HierarchicalResource definitionDir) {
+        return new {{this.languageProjectInput.factory.qualifiedId}}(loggerFactory, definitionDir);
     }
 
     @Provides @LanguageScope
@@ -62,13 +80,13 @@ public class {{genModule.id}} {
 
 
     @Provides @LanguageScope
-    static {{this.languageProjectInput.factory.qualifiedId}} provideStrategoRuntimeBuilderFactory() {
-        return new {{this.languageProjectInput.factory.qualifiedId}}();
+    static {{this.languageProjectInput.factory.qualifiedId}} provideStrategoRuntimeBuilderFactory(LoggerFactory loggerFactory, ResourceService resourceService, @Named("definition-dir") HierarchicalResource definitionDir) {
+        return new {{this.languageProjectInput.factory.qualifiedId}}(loggerFactory, resourceService, definitionDir);
     }
 
     @Provides @LanguageScope
-    static StrategoRuntimeBuilder provideStrategoRuntimeBuilder({{this.languageProjectInput.factory.qualifiedId}} factory, LoggerFactory loggerFactory, ResourceService resourceService) {
-        return factory.create(loggerFactory, resourceService);
+    static StrategoRuntimeBuilder provideStrategoRuntimeBuilder({{this.languageProjectInput.factory.qualifiedId}} factory) {
+        return factory.create();
     }
 
     @Provides @LanguageScope @Named("prototype")

@@ -22,6 +22,7 @@ class TestBase {
     final Charset charset = StandardCharsets.UTF_8;
 
     final TemplateCompiler templateCompiler = new TemplateCompiler(Shared.class, resourceService, charset);
+    final ClassloaderResourcesCompiler classloaderResourcesCompiler = new ClassloaderResourcesCompiler(templateCompiler);
     final ParserCompiler parserCompiler = new ParserCompiler(templateCompiler);
     final StylerCompiler stylerCompiler = new StylerCompiler(templateCompiler);
     final CompleterCompiler completerCompiler = new CompleterCompiler(templateCompiler);
@@ -29,7 +30,7 @@ class TestBase {
     final ConstraintAnalyzerCompiler constraintAnalyzerCompiler = new ConstraintAnalyzerCompiler(templateCompiler);
 
     final RootProjectCompiler rootProjectCompiler = new RootProjectCompiler(templateCompiler);
-    final LanguageProjectCompiler languageProjectCompiler = new LanguageProjectCompiler(templateCompiler, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler);
+    final LanguageProjectCompiler languageProjectCompiler = new LanguageProjectCompiler(templateCompiler, classloaderResourcesCompiler, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler);
     final AdapterProjectCompiler adapterProjectCompiler = new AdapterProjectCompiler(templateCompiler, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler);
 
     final CliProjectCompiler cliProjectCompiler = new CliProjectCompiler(templateCompiler);
@@ -42,8 +43,6 @@ class TestBase {
 
     LanguageProjectCompiler.Input compileLanguageProject(Shared shared, LanguageProject languageProject) throws IOException {
         final LanguageProjectCompiler.Input input = TigerInputs.languageProjectInput(shared, languageProject).build();
-//        languageProjectCompiler.generateInitial(input);
-//        languageProjectCompiler.generateGradleFiles(input);
         languageProjectCompiler.compile(input);
         return input;
     }
@@ -53,8 +52,6 @@ class TestBase {
             .languageProjectDependency(GradleDependency.project(":" + languageProject.project().coordinate().artifactId()))
             .build();
         TigerInputs.copyTaskDefsIntoAdapterProject(input, resourceService);
-//        adapterProjectCompiler.generateInitial(input);
-//        adapterProjectCompiler.generateGradleFiles(input);
         adapterProjectCompiler.compile(input);
         return input;
     }

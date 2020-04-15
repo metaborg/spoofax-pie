@@ -129,9 +129,9 @@ public class ConstraintAnalyzerCompiler {
         }
 
 
-        // List of all generated files
+        // List of all provided files
 
-        default ListView<ResourcePath> generatedFiles() {
+        default ListView<ResourcePath> providedFiles() {
             if(classKind().isManualOnly()) {
                 return ListView.of();
             }

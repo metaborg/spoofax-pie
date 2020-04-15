@@ -2,7 +2,7 @@ package mb.tiger;
 
 import mb.jsglr1.common.JSGLR1ParseTable;
 import mb.jsglr1.common.JSGLR1ParseTableException;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import mb.resource.hierarchical.HierarchicalResource;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,12 +15,9 @@ public class TigerParseTable implements Serializable {
         this.parseTable = parseTable;
     }
 
-    public static TigerParseTable fromClassLoaderResources() {
-        final String resource = "mb/tiger/target/metaborg/sdf.tbl";
-        try(final @Nullable InputStream inputStream = TigerParseTable.class.getClassLoader().getResourceAsStream(resource)) {
-            if(inputStream == null) {
-                throw new RuntimeException("Cannot create parse table; cannot find resource '" + resource + "' in classloader resources");
-            }
+    public static TigerParseTable fromDefinitionDir(HierarchicalResource definitionDir) {
+        final HierarchicalResource resource = definitionDir.appendRelativePath("target/metaborg/sdf.tbl");
+        try(final InputStream inputStream = resource.openRead()) {
             final JSGLR1ParseTable parseTable = JSGLR1ParseTable.fromStream(inputStream);
             return new TigerParseTable(parseTable);
         } catch(JSGLR1ParseTableException | IOException e) {

@@ -3,6 +3,7 @@ package mb.stratego.common;
 import mb.log.api.LoggerFactory;
 import mb.resource.ReadableResource;
 import mb.resource.ResourceService;
+import mb.resource.hierarchical.HierarchicalResource;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.core.InterpreterException;
 import org.spoofax.interpreter.library.IOperatorRegistry;
@@ -31,9 +32,9 @@ public class StrategoRuntimeBuilder {
     private final ArrayList<String> interopRegisterersByReflection;
 
 
-    public StrategoRuntimeBuilder(LoggerFactory loggerFactory, ResourceService resourceService) {
+    public StrategoRuntimeBuilder(LoggerFactory loggerFactory, ResourceService resourceService, HierarchicalResource definitionDir) {
         this.termFactory = defaultTermFactory();
-        this.ioAgent = defaultIoAgent(loggerFactory, resourceService);
+        this.ioAgent = defaultIoAgent(loggerFactory, resourceService, definitionDir);
         this.jarParentClassLoader = null;
         this.contextObject = new AdaptableContext();
 
@@ -82,12 +83,14 @@ public class StrategoRuntimeBuilder {
         return this;
     }
 
-    private static StrategoIOAgent defaultIoAgent(LoggerFactory loggerFactory, ResourceService resourceService) {
-        return new StrategoIOAgent(loggerFactory, resourceService);
+    private static StrategoIOAgent defaultIoAgent(LoggerFactory loggerFactory, ResourceService resourceService, HierarchicalResource definitionDir) {
+        final StrategoIOAgent ioAgent = new StrategoIOAgent(loggerFactory, resourceService);
+        ioAgent.setAbsoluteDefinitionDir(definitionDir);
+        return ioAgent;
     }
 
-    public StrategoRuntimeBuilder withDefaultIoAgent(LoggerFactory loggerFactory, ResourceService resourceService) {
-        this.ioAgent = defaultIoAgent(loggerFactory, resourceService);
+    public StrategoRuntimeBuilder withDefaultIoAgent(LoggerFactory loggerFactory, ResourceService resourceService, HierarchicalResource definitionDir) {
+        this.ioAgent = defaultIoAgent(loggerFactory, resourceService, definitionDir);
         return this;
     }
 

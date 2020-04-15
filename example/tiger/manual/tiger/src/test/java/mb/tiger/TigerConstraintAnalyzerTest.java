@@ -7,17 +7,8 @@ import mb.constraint.common.ConstraintAnalyzer.SingleFileResult;
 import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.constraint.common.ConstraintAnalyzerException;
 import mb.jsglr1.common.JSGLR1ParseResult;
-import mb.log.api.LoggerFactory;
-import mb.log.noop.NoopLoggerFactory;
 import mb.resource.DefaultResourceKey;
-import mb.resource.DefaultResourceService;
-import mb.resource.DummyResourceRegistry;
 import mb.resource.ResourceKey;
-import mb.resource.ResourceService;
-import mb.resource.fs.FSResourceRegistry;
-import mb.resource.url.URLResourceRegistry;
-import mb.stratego.common.StrategoRuntime;
-import mb.stratego.common.StrategoRuntimeBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -26,16 +17,7 @@ import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class TigerConstraintAnalyzerTest {
-    private static final String qualifier = "test";
-
-    private final TigerParser parser = new TigerParserFactory().create();
-    private final LoggerFactory loggerFactory = new NoopLoggerFactory();
-    private final ResourceService resourceService = new DefaultResourceService(new DummyResourceRegistry(qualifier), new FSResourceRegistry(), new URLResourceRegistry());
-    private final StrategoRuntimeBuilder strategoRuntimeBuilder = new TigerStrategoRuntimeBuilderFactory().create(loggerFactory, resourceService);
-    private final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.build();
-    private final TigerConstraintAnalyzer analyzer = new TigerConstraintAnalyzerFactory(loggerFactory, resourceService, strategoRuntime).create();
-
+class TigerConstraintAnalyzerTest extends TigerTestBase {
     @Test void analyzeSingleErrors() throws InterruptedException, ConstraintAnalyzerException {
         final ResourceKey resource = new DefaultResourceKey(qualifier, "a.tig");
         final JSGLR1ParseResult parsed = parser.parse("1 + nil", "Module", resource);

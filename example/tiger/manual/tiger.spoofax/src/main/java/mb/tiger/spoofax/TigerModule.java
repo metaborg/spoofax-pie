@@ -9,7 +9,9 @@ import mb.pie.api.Pie;
 import mb.pie.api.TaskDef;
 import mb.pie.api.TaskDefs;
 import mb.resource.ResourceService;
+import mb.resource.classloader.ClassLoaderResource;
 import mb.resource.classloader.ClassLoaderResourceRegistry;
+import mb.resource.hierarchical.HierarchicalResource;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.AutoCommandRequest;
@@ -18,6 +20,7 @@ import mb.spoofax.core.language.command.HierarchicalResourceType;
 import mb.spoofax.core.platform.Platform;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
+import mb.tiger.TigerClassloaderResources;
 import mb.tiger.TigerConstraintAnalyzer;
 import mb.tiger.TigerConstraintAnalyzerFactory;
 import mb.tiger.TigerParser;
@@ -57,14 +60,29 @@ import java.util.Set;
 @Module
 public class TigerModule {
     @Provides @LanguageScope
-    static ResourceService provideResourceRegistry(@Platform ResourceService resourceService) {
-        return resourceService.createChild(new ClassLoaderResourceRegistry(TigerModule.class.getClassLoader()));
+    static ClassLoaderResourceRegistry provideClassLoaderResourceRegistry() {
+        return TigerClassloaderResources.createClassLoaderResourceRegistry();
+    }
+
+    @Provides @LanguageScope
+    static ResourceService provideResourceRegistry(@Platform ResourceService resourceService, ClassLoaderResourceRegistry classLoaderResourceRegistry) {
+        return resourceService.createChild(classLoaderResourceRegistry);
+    }
+
+    @Provides @Named("definition-dir") @LanguageScope
+    static ClassLoaderResource provideDefinitionDir(ClassLoaderResourceRegistry registry) {
+        return TigerClassloaderResources.createDefinitionDir(registry);
+    }
+
+    @Provides @Named("definition-dir") @LanguageScope
+    static HierarchicalResource provideDefinitionDirAsHierarchicalResource(@Named("definition-dir") ClassLoaderResource definitionDir) {
+        return definitionDir;
     }
 
 
     @Provides @LanguageScope
-    static TigerParserFactory provideParserFactory() {
-        return new TigerParserFactory();
+    static TigerParserFactory provideParserFactory(@Named("definition-dir") HierarchicalResource definitionDir) {
+        return new TigerParserFactory(definitionDir);
     }
 
     @Provides /* Unscoped: parser has state, so create a new parser every call. */
@@ -74,8 +92,8 @@ public class TigerModule {
 
 
     @Provides @LanguageScope
-    static TigerStylerFactory provideStylerFactory(LoggerFactory loggerFactory) {
-        return new TigerStylerFactory(loggerFactory);
+    static TigerStylerFactory provideStylerFactory(LoggerFactory loggerFactory, @Named("definition-dir") HierarchicalResource definitionDir) {
+        return new TigerStylerFactory(loggerFactory, definitionDir);
     }
 
     @Provides @LanguageScope
@@ -84,13 +102,13 @@ public class TigerModule {
     }
 
     @Provides @LanguageScope
-    static TigerStrategoRuntimeBuilderFactory provideStrategoRuntimeBuilderFactory() {
-        return new TigerStrategoRuntimeBuilderFactory();
+    static TigerStrategoRuntimeBuilderFactory provideStrategoRuntimeBuilderFactory(LoggerFactory loggerFactory, ResourceService resourceService, @Named("definition-dir") HierarchicalResource definitionDir) {
+        return new TigerStrategoRuntimeBuilderFactory(loggerFactory, resourceService, definitionDir);
     }
 
     @Provides @LanguageScope
-    static StrategoRuntimeBuilder provideStrategoRuntimeBuilder(TigerStrategoRuntimeBuilderFactory factory, LoggerFactory loggerFactory, ResourceService resourceService) {
-        return factory.create(loggerFactory, resourceService);
+    static StrategoRuntimeBuilder provideStrategoRuntimeBuilder(TigerStrategoRuntimeBuilderFactory factory) {
+        return factory.create();
     }
 
     @Provides @LanguageScope @Named("prototype")

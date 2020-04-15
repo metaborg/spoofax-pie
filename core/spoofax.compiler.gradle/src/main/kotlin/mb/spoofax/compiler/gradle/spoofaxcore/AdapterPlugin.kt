@@ -3,7 +3,16 @@
 package mb.spoofax.compiler.gradle.spoofaxcore
 
 import mb.resource.ResourceService
-import mb.spoofax.compiler.spoofaxcore.*
+import mb.spoofax.compiler.spoofaxcore.AdapterProject
+import mb.spoofax.compiler.spoofaxcore.AdapterProjectCompiler
+import mb.spoofax.compiler.spoofaxcore.ClassloaderResourcesCompiler
+import mb.spoofax.compiler.spoofaxcore.CompleterCompiler
+import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler
+import mb.spoofax.compiler.spoofaxcore.LanguageProjectCompiler
+import mb.spoofax.compiler.spoofaxcore.ParserCompiler
+import mb.spoofax.compiler.spoofaxcore.Shared
+import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler
+import mb.spoofax.compiler.spoofaxcore.StylerCompiler
 import mb.spoofax.compiler.util.GradleDependency
 import mb.spoofax.compiler.util.GradleProject
 import org.gradle.api.GradleException
@@ -16,6 +25,7 @@ import org.gradle.kotlin.dsl.*
 
 open class AdapterProjectCompilerSettings(
   val adapterProject: AdapterProject.Builder = AdapterProject.builder(),
+  val classloaderResources: ClassloaderResourcesCompiler.AdapterProjectInput.Builder = ClassloaderResourcesCompiler.AdapterProjectInput.builder(),
   val parser: ParserCompiler.AdapterProjectInput.Builder = ParserCompiler.AdapterProjectInput.builder(),
   val styler: StylerCompiler.AdapterProjectInput.Builder? = null, // Optional
   val completer: CompleterCompiler.AdapterProjectInput.Builder? = null, // Optional
@@ -25,6 +35,7 @@ open class AdapterProjectCompilerSettings(
 ) {
   internal fun createInput(shared: Shared, languageProjectInput: LanguageProjectCompiler.Input, project: GradleProject, languageProjectDependency: GradleDependency): AdapterProjectCompiler.Input {
     val adapterProject = this.adapterProject.shared(shared).project(project).build()
+    val classloaderResources = this.classloaderResources.languageProjectInput(languageProjectInput.classloaderResources()).build()
     val parser = this.parser.shared(shared).adapterProject(adapterProject).languageProjectInput(languageProjectInput.parser()).build()
     val styler = if(this.styler != null) {
       if(!languageProjectInput.styler().isPresent) {
@@ -50,7 +61,13 @@ open class AdapterProjectCompilerSettings(
       }
       this.constraintAnalyzer.shared(shared).adapterProject(adapterProject).languageProjectInput(languageProjectInput.constraintAnalyzer().get()).build()
     } else null
-    val compiler = this.compiler.shared(shared).adapterProject(adapterProject).parser(parser).languageProjectDependency(languageProjectDependency)
+
+    val compiler = this.compiler
+      .shared(shared)
+      .adapterProject(adapterProject)
+      .classloaderResources(classloaderResources)
+      .parser(parser)
+      .languageProjectDependency(languageProjectDependency)
     if(styler != null) {
       compiler.styler(styler)
     }

@@ -5,7 +5,19 @@ package mb.spoofax.compiler.gradle.spoofaxcore
 import mb.resource.DefaultResourceService
 import mb.resource.fs.FSPath
 import mb.resource.fs.FSResourceRegistry
-import mb.spoofax.compiler.spoofaxcore.*
+import mb.spoofax.compiler.spoofaxcore.AdapterProjectCompiler
+import mb.spoofax.compiler.spoofaxcore.ClassloaderResourcesCompiler
+import mb.spoofax.compiler.spoofaxcore.CliProjectCompiler
+import mb.spoofax.compiler.spoofaxcore.CompleterCompiler
+import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler
+import mb.spoofax.compiler.spoofaxcore.EclipseExternaldepsProjectCompiler
+import mb.spoofax.compiler.spoofaxcore.EclipseProjectCompiler
+import mb.spoofax.compiler.spoofaxcore.IntellijProjectCompiler
+import mb.spoofax.compiler.spoofaxcore.LanguageProjectCompiler
+import mb.spoofax.compiler.spoofaxcore.ParserCompiler
+import mb.spoofax.compiler.spoofaxcore.Shared
+import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler
+import mb.spoofax.compiler.spoofaxcore.StylerCompiler
 import mb.spoofax.compiler.util.TemplateCompiler
 import org.gradle.api.GradleException
 import org.gradle.api.Project
@@ -31,12 +43,13 @@ open class SpoofaxCompilerExtension(objects: ObjectFactory, baseDirectory: File,
   internal val resourceService = DefaultResourceService(FSResourceRegistry())
   internal val charset = StandardCharsets.UTF_8
   internal val templateCompiler = TemplateCompiler(Shared::class.java, resourceService, charset)
+  internal val classloaderResourceService = ClassloaderResourcesCompiler(templateCompiler)
   internal val parserCompiler = ParserCompiler(templateCompiler)
   internal val stylerCompiler = StylerCompiler(templateCompiler)
   internal val completerCompiler = CompleterCompiler(templateCompiler)
   internal val strategoRuntimeCompiler = StrategoRuntimeCompiler(templateCompiler)
   internal val constraintAnalyzerCompiler = ConstraintAnalyzerCompiler(templateCompiler)
-  internal val languageProjectCompiler = LanguageProjectCompiler(templateCompiler, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler)
+  internal val languageProjectCompiler = LanguageProjectCompiler(templateCompiler, classloaderResourceService, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler)
   internal val adapterProjectCompiler = AdapterProjectCompiler(templateCompiler, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler)
   internal val cliProjectCompiler = CliProjectCompiler(templateCompiler)
   internal val eclipseExternaldepsProjectCompiler = EclipseExternaldepsProjectCompiler(templateCompiler)

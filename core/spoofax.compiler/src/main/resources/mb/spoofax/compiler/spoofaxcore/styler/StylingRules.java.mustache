@@ -1,7 +1,7 @@
 package {{genRules.packageId}};
 
 import mb.esv.common.ESVStylingRules;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import mb.resource.hierarchical.HierarchicalResource;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,12 +14,9 @@ public class {{genRules.id}} implements Serializable {
         this.stylingRules = stylingRules;
     }
 
-    public static {{genRules.id}} fromClassLoaderResources() {
-        final String resource = "{{packedESVTargetRelPath}}";
-        try(final @Nullable InputStream inputStream = {{genRules.id}}.class.getClassLoader().getResourceAsStream(resource)) {
-            if(inputStream == null) {
-                throw new RuntimeException("Cannot create styling rules; cannot find resource '" + resource + "' in classloader resources");
-            }
+    public static {{genRules.id}} fromDefinitionDir(HierarchicalResource definitionDir) {
+        final HierarchicalResource resource = definitionDir.appendRelativePath("{{packedESVRelPath}}");
+        try(final InputStream inputStream = resource.openRead()) {
             final ESVStylingRules stylingRules = ESVStylingRules.fromStream(inputStream);
             return new {{genRules.id}}(stylingRules);
         } catch(IOException e) {

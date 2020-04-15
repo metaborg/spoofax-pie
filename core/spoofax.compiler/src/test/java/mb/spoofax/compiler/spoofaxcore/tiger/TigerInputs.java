@@ -14,6 +14,7 @@ import mb.spoofax.compiler.command.CommandDefRepr;
 import mb.spoofax.compiler.menu.CommandActionRepr;
 import mb.spoofax.compiler.spoofaxcore.AdapterProject;
 import mb.spoofax.compiler.spoofaxcore.AdapterProjectCompiler;
+import mb.spoofax.compiler.spoofaxcore.ClassloaderResourcesCompiler;
 import mb.spoofax.compiler.spoofaxcore.CliProjectCompiler;
 import mb.spoofax.compiler.spoofaxcore.CompleterCompiler;
 import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler;
@@ -62,6 +63,21 @@ public class TigerInputs {
 
     public static AdapterProject.Builder adapterProject(Shared shared) {
         return AdapterProject.builder().shared(shared);
+    }
+
+    /// Classloader resources compiler
+
+    public static ClassloaderResourcesCompiler.LanguageProjectInput.Builder classloaderResourcesLanguageProjectInput(Shared shared, LanguageProject languageProject) {
+        return ClassloaderResourcesCompiler.LanguageProjectInput.builder()
+            .shared(shared)
+            .languageProject(languageProject)
+            ;
+    }
+
+    public static ClassloaderResourcesCompiler.AdapterProjectInput.Builder classloaderResourcesAdapterProjectInput(Shared shared, LanguageProject languageProject) {
+        return ClassloaderResourcesCompiler.AdapterProjectInput.builder()
+            .languageProjectInput(classloaderResourcesLanguageProjectInput(shared, languageProject).build())
+            ;
     }
 
     /// Parser compiler
@@ -160,6 +176,7 @@ public class TigerInputs {
     public static LanguageProjectCompiler.Input.Builder languageProjectInput(Shared shared, LanguageProject languageProject) {
         return LanguageProjectCompiler.Input.builder()
             .languageProject(languageProject)
+            .classloaderResources(classloaderResourcesLanguageProjectInput(shared, languageProject).build())
             .parser(parserLanguageProjectInput(shared, languageProject).build())
             .styler(stylerLanguageProjectInput(shared, languageProject).build())
             .completer(completerLanguageProjectInput(shared, languageProject).build())
@@ -215,6 +232,7 @@ public class TigerInputs {
 
         return AdapterProjectCompiler.Input.builder()
             .adapterProject(adapterProject)
+            .classloaderResources(classloaderResourcesAdapterProjectInput(shared, languageProject).build())
             .parser(parserAdapterProjectInput(shared, languageProject, adapterProject).build())
             .styler(stylerAdapterProjectInput(shared, languageProject, adapterProject).build())
             .completer(completerAdapterProjectInput(shared, languageProject, adapterProject).build())

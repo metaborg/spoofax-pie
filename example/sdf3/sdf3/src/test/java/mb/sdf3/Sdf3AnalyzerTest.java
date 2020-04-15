@@ -7,18 +7,9 @@ import mb.constraint.common.ConstraintAnalyzer.SingleFileResult;
 import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.constraint.common.ConstraintAnalyzerException;
 import mb.jsglr1.common.JSGLR1ParseResult;
-import mb.log.api.LoggerFactory;
-import mb.log.slf4j.SLF4JLoggerFactory;
 import mb.resource.DefaultResourceKey;
-import mb.resource.DefaultResourceService;
-import mb.resource.DummyResourceRegistry;
 import mb.resource.ResourceKey;
-import mb.resource.ResourceService;
-import mb.resource.fs.FSResourceRegistry;
-import mb.resource.url.URLResourceRegistry;
 import mb.stratego.common.StrategoException;
-import mb.stratego.common.StrategoRuntime;
-import mb.stratego.common.StrategoRuntimeBuilder;
 import mb.stratego.common.StrategoUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
@@ -28,18 +19,7 @@ import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class Sdf3AnalyzerTest {
-    private static final String qualifier = "test";
-
-    private final Sdf3Parser parser = new Sdf3ParserFactory().create();
-    private final String startSymbol = "Module";
-    private final LoggerFactory loggerFactory = new SLF4JLoggerFactory();
-    private final ResourceService resourceService = new DefaultResourceService(new DummyResourceRegistry(qualifier), new FSResourceRegistry(), new URLResourceRegistry());
-    private final StrategoRuntimeBuilder strategoRuntimeBuilder = new Sdf3StrategoRuntimeBuilderFactory().create(loggerFactory, resourceService);
-    private final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.build();
-    private final Sdf3ConstraintAnalyzer analyzer = new Sdf3ConstraintAnalyzerFactory(loggerFactory, resourceService, strategoRuntime).create();
-    private final ResourceKey rootKey = new DefaultResourceKey(qualifier, "root");
-
+class Sdf3AnalyzerTest extends Sdf3TestBase {
     @Test void analyzeSingleErrors() throws InterruptedException, ConstraintAnalyzerException {
         final ResourceKey resource = new DefaultResourceKey(qualifier, "a.sdf3");
         final JSGLR1ParseResult parsed = parser.parse("module a syntax A = B", startSymbol, resource);

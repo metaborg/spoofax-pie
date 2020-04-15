@@ -41,7 +41,7 @@ public class ParserCompiler {
     }
 
     public ListView<String> getLanguageProjectCopyResources(LanguageProjectInput input) {
-        return ListView.of(input.tableSourceRelPath());
+        return ListView.of(input.tableRelPath());
     }
 
     public Output compileLanguageProject(LanguageProjectInput input) throws IOException {
@@ -85,12 +85,8 @@ public class ParserCompiler {
 
         /// Parse table source file (to copy from), and destination file
 
-        @Value.Default default String tableSourceRelPath() {
+        @Value.Default default String tableRelPath() {
             return "target/metaborg/sdf.tbl";
-        }
-
-        @Value.Default default String tableTargetRelPath() {
-            return languageProject().packagePath() + "/" + tableSourceRelPath();
         }
 
 
@@ -144,9 +140,9 @@ public class ParserCompiler {
         }
 
 
-        /// List of all generated files
+        /// List of all provided files
 
-        default ListView<ResourcePath> generatedFiles() {
+        default ListView<ResourcePath> providedFiles() {
             if(classKind().isManualOnly()) {
                 return ListView.of();
             }

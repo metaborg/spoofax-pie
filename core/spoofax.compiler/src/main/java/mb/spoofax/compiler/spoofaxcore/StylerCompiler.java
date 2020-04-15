@@ -36,7 +36,7 @@ public class StylerCompiler {
     }
 
     public ListView<String> getLanguageProjectCopyResources(LanguageProjectInput input) {
-        return ListView.of(input.packedESVSourceRelPath());
+        return ListView.of(input.packedESVRelPath());
     }
 
     public Output compileLanguageProject(LanguageProjectInput input) throws IOException {
@@ -76,12 +76,8 @@ public class StylerCompiler {
 
         /// Packed ESV source file (to copy from), and destination file
 
-        @Value.Default default String packedESVSourceRelPath() {
+        @Value.Default default String packedESVRelPath() {
             return "target/metaborg/editor.esv.af";
-        }
-
-        @Value.Default default String packedESVTargetRelPath() {
-            return languageProject().packagePath() + "/" + packedESVSourceRelPath();
         }
 
 
@@ -135,9 +131,9 @@ public class StylerCompiler {
         }
 
 
-        /// List of all generated files
+        /// List of all provided files
 
-        default ListView<ResourcePath> generatedFiles() {
+        default ListView<ResourcePath> providedFiles() {
             if(classKind().isManualOnly()) {
                 return ListView.of();
             }

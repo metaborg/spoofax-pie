@@ -22,6 +22,7 @@ public class LanguageProjectCompiler {
     private final TemplateWriter packageInfoTemplate;
 
     private final ParserCompiler parserCompiler;
+    private final ClassloaderResourcesCompiler classloaderResourcesCompiler;
     private final StylerCompiler stylerCompiler;
     private final CompleterCompiler completerCompiler;
     private final StrategoRuntimeCompiler strategoRuntimeCompiler;
@@ -29,6 +30,7 @@ public class LanguageProjectCompiler {
 
     public LanguageProjectCompiler(
         TemplateCompiler templateCompiler,
+        ClassloaderResourcesCompiler classloaderResourcesCompiler,
         ParserCompiler parserCompiler,
         StylerCompiler stylerCompiler,
         CompleterCompiler completerCompiler,
@@ -39,6 +41,7 @@ public class LanguageProjectCompiler {
         this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("language_project/package-info.java.mustache");
 
         this.parserCompiler = parserCompiler;
+        this.classloaderResourcesCompiler = classloaderResourcesCompiler;
         this.stylerCompiler = stylerCompiler;
         this.completerCompiler = completerCompiler;
         this.strategoRuntimeCompiler = strategoRuntimeCompiler;
@@ -100,32 +103,33 @@ public class LanguageProjectCompiler {
         packageInfoTemplate.write(input.genPackageInfo().file(classesGenDirectory), input);
 
         // Files from other compilers.
-        parserCompiler.compileLanguageProject(input.parser()).providedResources();
+        classloaderResourcesCompiler.compileLanguageProject(input.classloaderResources());
+        parserCompiler.compileLanguageProject(input.parser());
         try {
             input.styler().ifPresent((i) -> {
                 try {
-                    stylerCompiler.compileLanguageProject(i).providedResources();
+                    stylerCompiler.compileLanguageProject(i);
                 } catch(IOException e) {
                     throw new UncheckedIOException(e);
                 }
             });
             input.completer().ifPresent((i) -> {
                 try {
-                    completerCompiler.compileLanguageProject(i).providedResources();
+                    completerCompiler.compileLanguageProject(i);
                 } catch(IOException e) {
                     throw new UncheckedIOException(e);
                 }
             });
             input.strategoRuntime().ifPresent((i) -> {
                 try {
-                    strategoRuntimeCompiler.compileLanguageProject(i).providedFiles();
+                    strategoRuntimeCompiler.compileLanguageProject(i);
                 } catch(IOException e) {
                     throw new UncheckedIOException(e);
                 }
             });
             input.constraintAnalyzer().ifPresent((i) -> {
                 try {
-                    constraintAnalyzerCompiler.compileLanguageProject(i).providedResources();
+                    constraintAnalyzerCompiler.compileLanguageProject(i);
                 } catch(IOException e) {
                     throw new UncheckedIOException(e);
                 }
@@ -154,6 +158,8 @@ public class LanguageProjectCompiler {
 
 
         /// Sub-inputs
+
+        ClassloaderResourcesCompiler.LanguageProjectInput classloaderResources();
 
         ParserCompiler.LanguageProjectInput parser();
 
@@ -214,15 +220,16 @@ public class LanguageProjectCompiler {
         /// Provided files
 
         default ArrayList<ResourcePath> providedFiles() {
-            final ArrayList<ResourcePath> generatedFiles = new ArrayList<>();
+            final ArrayList<ResourcePath> providedFiles = new ArrayList<>();
             if(classKind().isGenerating()) {
-                generatedFiles.add(genPackageInfo().file(classesGenDirectory()));
+                providedFiles.add(genPackageInfo().file(classesGenDirectory()));
             }
-            parser().generatedFiles().addAllTo(generatedFiles);
-            styler().ifPresent((i) -> i.generatedFiles().addAllTo(generatedFiles));
-            strategoRuntime().ifPresent((i) -> i.providedFiles().addAllTo(generatedFiles));
-            constraintAnalyzer().ifPresent((i) -> i.generatedFiles().addAllTo(generatedFiles));
-            return generatedFiles;
+            classloaderResources().providedFiles().addAllTo(providedFiles);
+            parser().providedFiles().addAllTo(providedFiles);
+            styler().ifPresent((i) -> i.providedFiles().addAllTo(providedFiles));
+            strategoRuntime().ifPresent((i) -> i.providedFiles().addAllTo(providedFiles));
+            constraintAnalyzer().ifPresent((i) -> i.providedFiles().addAllTo(providedFiles));
+            return providedFiles;
         }
 
 

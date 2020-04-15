@@ -2,7 +2,7 @@ package {{genTable.packageId}};
 
 import mb.jsglr1.common.JSGLR1ParseTable;
 import mb.jsglr1.common.JSGLR1ParseTableException;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import mb.resource.hierarchical.HierarchicalResource;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,12 +15,9 @@ public class {{genTable.id}} implements Serializable {
         this.parseTable = parseTable;
     }
 
-    public static {{genTable.id}} fromLoaderResources() {
-        final String resource = "{{tableTargetRelPath}}";
-        try(final @Nullable InputStream inputStream = {{genTable.id}}.class.getClassLoader().getResourceAsStream(resource)) {
-            if(inputStream == null) {
-                throw new RuntimeException("Cannot create parse table; cannot find resource '" + resource + "' in classloader resources");
-            }
+    public static {{genTable.id}} fromDefinitionDir(HierarchicalResource definitionDir) {
+        final HierarchicalResource resource = definitionDir.appendRelativePath("{{tableRelPath}}");
+        try(final InputStream inputStream = resource.openRead()) {
             final JSGLR1ParseTable parseTable = JSGLR1ParseTable.fromStream(inputStream);
             return new {{genTable.id}}(parseTable);
         } catch(JSGLR1ParseTableException | IOException e) {

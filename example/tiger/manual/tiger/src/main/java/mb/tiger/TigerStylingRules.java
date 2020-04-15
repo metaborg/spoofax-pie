@@ -1,7 +1,7 @@
 package mb.tiger;
 
 import mb.esv.common.ESVStylingRules;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import mb.resource.hierarchical.HierarchicalResource;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,12 +14,9 @@ public class TigerStylingRules implements Serializable {
         this.stylingRules = stylingRules;
     }
 
-    public static TigerStylingRules fromClassLoaderResources() {
-        final String resource = "mb/tiger/target/metaborg/editor.esv.af";
-        try(final @Nullable InputStream inputStream = TigerParseTable.class.getClassLoader().getResourceAsStream(resource)) {
-            if(inputStream == null) {
-                throw new RuntimeException("Cannot create styling rules; cannot find resource '" + resource + "' in classloader resources");
-            }
+    public static TigerStylingRules fromDefinitionDir(HierarchicalResource definitionDir) {
+        final HierarchicalResource resource = definitionDir.appendRelativePath("target/metaborg/editor.esv.af");
+        try(final InputStream inputStream = resource.openRead()) {
             final ESVStylingRules stylingRules = ESVStylingRules.fromStream(inputStream);
             return new TigerStylingRules(stylingRules);
         } catch(IOException e) {

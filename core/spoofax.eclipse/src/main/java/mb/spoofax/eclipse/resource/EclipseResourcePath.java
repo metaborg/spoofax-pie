@@ -1,6 +1,5 @@
 package mb.spoofax.eclipse.resource;
 
-import mb.resource.QualifiedResourceKeyString;
 import mb.resource.ResourceRuntimeException;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.ResourcePathDefaults;
@@ -64,10 +63,6 @@ public class EclipseResourcePath extends ResourcePathDefaults<EclipseResourcePat
 
     @Override public Iterable<String> getSegments() {
         return Arrays.asList(path.segments());
-    }
-
-    @Override public String asString() {
-        return pathString;
     }
 
 
@@ -204,12 +199,12 @@ public class EclipseResourcePath extends ResourcePathDefaults<EclipseResourcePat
     }
 
     @Override public String toString() {
-        return QualifiedResourceKeyString.toString(EclipseResourceRegistry.qualifier, pathString);
+        return pathString;
     }
 
 
     private void readObject(ObjectInputStream in) throws ClassNotFoundException, IOException {
         in.defaultReadObject();
-        this.path = Path.fromPortableString(this.pathString);
+        this.path = Path.fromPortableString(pathString);
     }
 }

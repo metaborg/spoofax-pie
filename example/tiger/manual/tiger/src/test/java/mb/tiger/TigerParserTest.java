@@ -2,14 +2,11 @@ package mb.tiger;
 
 import mb.jsglr1.common.JSGLR1ParseResult;
 import org.junit.jupiter.api.Test;
-import org.spoofax.interpreter.terms.ITermFactory;
-import org.spoofax.terms.TermFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class TigerParserTest {
-    private final TigerParser parser = new TigerParserFactory().create();
-    private final ITermFactory termFactory = new TermFactory();
+class TigerParserTest extends TigerTestBase {
+
 
     @Test void parse() throws InterruptedException {
         final JSGLR1ParseResult result = parser.parse("1", "Module");

@@ -244,6 +244,8 @@ public class AdapterProjectCompiler {
 
         /// Sub-inputs
 
+        ClassloaderResourcesCompiler.AdapterProjectInput classloaderResources();
+
         ParserCompiler.AdapterProjectInput parser();
 
         Optional<StylerCompiler.AdapterProjectInput> styler();
