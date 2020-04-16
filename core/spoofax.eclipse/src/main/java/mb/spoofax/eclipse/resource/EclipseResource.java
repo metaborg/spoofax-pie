@@ -162,7 +162,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
         if(document != null) {
             return document.get(); // Ignore the character set, we do not need to decode from bytes.
         } else {
-            return HierarchicalResource.super.readString(fromCharset);
+            return super.readString(fromCharset);
         }
     }
 
@@ -495,7 +495,19 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
             container = (IContainer)resource;
             return container;
         }
-        container = getWorkspaceRoot().getFolder(path.path);
+        final int segmentCount = path.path.segmentCount();
+        final IWorkspaceRoot root = getWorkspaceRoot();
+        switch(segmentCount) {
+            case 0:
+                container = root;
+                break;
+            case 1:
+                container = root.getProject(path.path.lastSegment());
+                break;
+            default:
+                container = root.getFolder(path.path);
+                break;
+        }
         return container;
     }
 

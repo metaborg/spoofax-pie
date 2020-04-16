@@ -4,7 +4,12 @@ import mb.spoofax.compiler.command.ParamRepr
 import mb.spoofax.compiler.gradle.spoofaxcore.AdapterProjectCompilerSettings
 import mb.spoofax.compiler.menu.CommandActionRepr
 import mb.spoofax.compiler.menu.MenuItemRepr
-import mb.spoofax.compiler.spoofaxcore.*
+import mb.spoofax.compiler.spoofaxcore.AdapterProjectCompiler
+import mb.spoofax.compiler.spoofaxcore.CompleterCompiler
+import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler
+import mb.spoofax.compiler.spoofaxcore.ParserCompiler
+import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler
+import mb.spoofax.compiler.spoofaxcore.StylerCompiler
 import mb.spoofax.compiler.util.TypeInfo
 import mb.spoofax.core.language.command.CommandContextType
 import mb.spoofax.core.language.command.CommandExecutionType
@@ -61,6 +66,8 @@ adapterProjectCompiler {
       val showCompletion = TypeInfo.of(debugTaskPackageId, "Sdf3ShowCompletion")
       val showCompletionRuntime = TypeInfo.of(debugTaskPackageId, "Sdf3ShowCompletionRuntime")
       val showCompletionColorer = TypeInfo.of(debugTaskPackageId, "Sdf3ShowCompletionColorer")
+      val showSpecParseTable = TypeInfo.of(debugTaskPackageId, "Sdf3ShowSpecParseTable")
+      val showSpecParenthesizer = TypeInfo.of(debugTaskPackageId, "Sdf3ShowSpecParenthesizer")
       builder.addTaskDefs(
         showDesugar,
         showPermissive,
@@ -70,7 +77,9 @@ adapterProjectCompiler {
         showPrettyPrinter,
         showCompletion,
         showCompletionRuntime,
-        showCompletionColorer
+        showCompletionColorer,
+        showSpecParseTable,
+        showSpecParenthesizer
       )
 
 
@@ -113,6 +122,20 @@ adapterProjectCompiler {
       val showCompletionCommand = showCommand(showCompletion, "completion insertions")
       val showCompletionRuntimeCommand = showCommand(showCompletionRuntime, "completion runtime")
       val showCompletionColorerCommand = showCommand(showCompletionColorer, "completion colorer")
+      val showSpecParenthesizerCommand = CommandDefRepr.builder()
+        .type(commandPackageId, showSpecParenthesizer.id() + "Command")
+        .taskDefType(showSpecParenthesizer)
+        .argType(showSpecParenthesizer.appendToId(".Args"))
+        .displayName("Show parenthesizer")
+        .description("Shows the parenthesizer built from given main file")
+        .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
+        .addAllParams(listOf(
+          ParamRepr.of("project", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), true, ArgProviderRepr.enclosingContext(EnclosingCommandContextType.Project)),
+          ParamRepr.of("file", TypeInfo.of("mb.resource", "ResourceKey"), true, ArgProviderRepr.context(CommandContextType.File)),
+          ParamRepr.of("concrete", TypeInfo.ofBoolean(), true)
+        ))
+        .build()
+
       val showCommands = listOf(
         showDesugarCommand,
         showPermissiveCommand,
@@ -125,10 +148,32 @@ adapterProjectCompiler {
       builder.addAllCommandDefs(showCommands)
       val showAnalyzedCommands = listOf(
         showSignatureCommand,
-        showDynsemSignatureCommand
+        showDynsemSignatureCommand,
+        showSpecParenthesizerCommand
       )
       builder.addAllCommandDefs(showAnalyzedCommands)
 
+
+      // Additional show (debugging) commands that do not fit the regular pattern.
+      val showSpecParseTableCommand = CommandDefRepr.builder()
+        .type(commandPackageId, showSpecParseTable.id() + "Command")
+        .taskDefType(showSpecParseTable)
+        .argType(showSpecParseTable.appendToId(".Args"))
+        .displayName("Show parse table")
+        .description("Shows the parse table built from given main file")
+        .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
+        .addAllParams(listOf(
+          ParamRepr.of("project", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), true, ArgProviderRepr.enclosingContext(EnclosingCommandContextType.Project)),
+          ParamRepr.of("file", TypeInfo.of("mb.resource", "ResourceKey"), true, ArgProviderRepr.context(CommandContextType.File))
+        ))
+        .build()
+      builder.addCommandDefs(
+        showSpecParseTableCommand,
+        showSpecParenthesizerCommand
+      )
+      val showSpecParseTableOnceMenuItem = CommandActionRepr.builder().manualOnce(showSpecParseTableCommand).fileRequired().enclosingProjectRequired().buildItem()
+      val showSpecParseTableContinuousMenuItem = CommandActionRepr.builder().manualContinuous(showSpecParseTableCommand).fileRequired().enclosingProjectRequired().buildItem()
+      val showSpecParseTableMenuItems = listOf(showSpecParseTableOnceMenuItem, showSpecParseTableContinuousMenuItem)
 
 
       // Show (debugging) menu command actions
@@ -150,7 +195,7 @@ adapterProjectCompiler {
       val mainAndEditorMenu = listOf(
         MenuItemRepr.menu("Debug",
           MenuItemRepr.menu("Transform",
-            MenuItemRepr.menu("Abstract", showAbstractEditorMenuItems + showAnalyzedAbstractEditorMenuItems),
+            MenuItemRepr.menu("Abstract", showAbstractEditorMenuItems + showAnalyzedAbstractEditorMenuItems + showSpecParseTableMenuItems),
             MenuItemRepr.menu("Concrete", showConcreteEditorMenuItems + showAnalyzedConcreteEditorMenuItems)
           )
         )
@@ -160,7 +205,7 @@ adapterProjectCompiler {
       builder.addResourceContextMenuItems(
         MenuItemRepr.menu("Debug",
           MenuItemRepr.menu("Transform",
-            MenuItemRepr.menu("Abstract", showAbstractResourceMenuItems + showAnalyzedAbstractResourceMenuItems),
+            MenuItemRepr.menu("Abstract", showAbstractResourceMenuItems + showAnalyzedAbstractResourceMenuItems + showSpecParseTableMenuItems),
             MenuItemRepr.menu("Concrete", showConcreteResourceMenuItems + showAnalyzedConcreteResourceMenuItems)
           )
         )
@@ -186,7 +231,7 @@ dependencies {
 
 tasks.test {
   // HACK: skip if not in devenv composite build, as that is not using the latest version of SDF3.
-  if (gradle.parent == null || gradle.parent!!.rootProject.name != "devenv") {
+  if(gradle.parent == null || gradle.parent!!.rootProject.name != "devenv") {
     onlyIf { false }
   }
 
