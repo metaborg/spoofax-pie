@@ -50,3 +50,16 @@ languageProjectCompiler {
 ecj {
   toolVersion = "3.20.0"
 }
+
+tasks.test {
+  // HACK: skip if not in devenv composite build, as that is not using the latest version of SDF3.
+  if (gradle.parent == null || gradle.parent!!.rootProject.name != "devenv") {
+    onlyIf { false }
+  }
+
+  // Show standard out and err in tests during development.
+  testLogging {
+    events(org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_OUT, org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR)
+    showStandardStreams = true
+  }
+}
