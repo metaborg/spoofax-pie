@@ -37,9 +37,7 @@ public class Sdf3SpecToParenthesizer implements TaskDef<Sdf3SpecToParenthesizer.
         }
     }
 
-    @Inject public Sdf3SpecToParenthesizer() {
-
-    }
+    @Inject public Sdf3SpecToParenthesizer() { /* Default @Inject constructor required */ }
 
     @Override public String getId() {
         return getClass().getName();

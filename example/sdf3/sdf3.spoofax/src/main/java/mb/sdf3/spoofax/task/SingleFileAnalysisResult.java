@@ -6,9 +6,6 @@ import mb.pie.api.Function;
 import mb.pie.api.Supplier;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
-import mb.resource.hierarchical.match.PathResourceMatcher;
-import mb.resource.hierarchical.match.path.ExtensionsPathMatcher;
-import mb.resource.hierarchical.walk.TrueResourceWalker;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -33,8 +30,8 @@ public class SingleFileAnalysisResult implements Serializable {
     ) {
         final Sdf3AnalyzeMulti.Input analyzeInput = new Sdf3AnalyzeMulti.Input(
             project,
-            new TrueResourceWalker(),
-            new PathResourceMatcher(new ExtensionsPathMatcher("tmpl", "sdf3")),
+            Sdf3Util.createResourceWalker(),
+            Sdf3Util.createResourceMatcher(),
             desugar.mapInput((ctx, i) -> parse.createAstSupplier(i))
         );
         return analyze.createSupplier(analyzeInput).map(analysisOutput -> {

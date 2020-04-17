@@ -4,6 +4,7 @@ import dagger.Component;
 import mb.sdf3.spoofax.Sdf3Component;
 import mb.sdf3.spoofax.Sdf3Module;
 import mb.sdf3.spoofax.task.Sdf3AnalyzeMulti;
+import mb.sdf3.spoofax.task.Sdf3CreateSpec;
 import mb.sdf3.spoofax.task.Sdf3Desugar;
 import mb.sdf3.spoofax.task.Sdf3Parse;
 import mb.sdf3.spoofax.task.Sdf3SpecToParenthesizer;
@@ -27,6 +28,8 @@ public interface Sdf3TestComponent extends Sdf3Component {
 
 
     Sdf3Desugar getDesugar();
+
+    Sdf3CreateSpec getCreateSpec();
 
 
     Sdf3ToCompletionColorer getToCompletionColorer();

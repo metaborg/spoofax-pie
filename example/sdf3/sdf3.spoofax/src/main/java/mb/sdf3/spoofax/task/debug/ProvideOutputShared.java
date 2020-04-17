@@ -12,12 +12,12 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Provider;
 
-class ShowTaskDefShared {
+class ProvideOutputShared {
     final Provider<StrategoRuntime> strategoRuntimeProvider;
     final String prettyPrintStrategy;
     final String resultName;
 
-    ShowTaskDefShared(Provider<StrategoRuntime> strategoRuntimeProvider, String prettyPrintStrategy, String resultName) {
+    ProvideOutputShared(Provider<StrategoRuntime> strategoRuntimeProvider, String prettyPrintStrategy, String resultName) {
         this.strategoRuntimeProvider = strategoRuntimeProvider;
         this.prettyPrintStrategy = prettyPrintStrategy;
         this.resultName = resultName;

@@ -1,6 +1,5 @@
 package mb.sdf3.spoofax;
 
-import mb.common.util.ListView;
 import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
 import mb.resource.text.TextResource;
@@ -18,7 +17,8 @@ import org.spoofax.jsglr2.JSGLR2Variant;
 import org.spoofax.jsglr2.messages.Message;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.spoofax.terms.util.TermUtils.*;
+import static org.spoofax.terms.util.TermUtils.isAppl;
+import static org.spoofax.terms.util.TermUtils.isApplAt;
 
 class SpecToParseTableTest extends TestBase {
     @ParameterizedTest
@@ -32,12 +32,7 @@ class SpecToParseTableTest extends TestBase {
         try(final MixedSession session = newSession()) {
             final Sdf3Parse parse = languageComponent.getParse();
             final Sdf3SpecToParseTable.Args args = new Sdf3SpecToParseTable.Args(
-                desugarSupplier(resourceMain),
-                ListView.of(
-                    desugarSupplier(resourceLex),
-                    desugarSupplier(resourceA),
-                    desugarSupplier(resourceB)
-                ),
+                specSupplier(desugarSupplier(resourceMain), desugarSupplier(resourceLex), desugarSupplier(resourceA), desugarSupplier(resourceB)),
                 new ParseTableConfiguration(false, false, true, false, false),
                 createCompletionTable
             );

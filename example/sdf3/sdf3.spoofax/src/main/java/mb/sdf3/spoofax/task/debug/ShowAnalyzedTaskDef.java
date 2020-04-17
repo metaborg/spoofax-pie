@@ -18,7 +18,7 @@ import javax.inject.Provider;
 import java.io.Serializable;
 import java.util.Objects;
 
-public abstract class ShowAnalyzedTaskDef extends ShowTaskDefShared implements TaskDef<ShowAnalyzedTaskDef.Args, CommandOutput> {
+public abstract class ShowAnalyzedTaskDef extends ProvideOutputShared implements TaskDef<ShowAnalyzedTaskDef.Args, CommandOutput> {
     public static class Args implements Serializable {
         public final ResourcePath project;
         public final ResourceKey file;

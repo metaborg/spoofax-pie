@@ -1,6 +1,5 @@
 package mb.sdf3.spoofax;
 
-import mb.common.util.ListView;
 import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
 import mb.resource.text.TextResource;
@@ -13,7 +12,8 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import javax.annotation.Nullable;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.spoofax.terms.util.TermUtils.*;
+import static org.spoofax.terms.util.TermUtils.isAppl;
+import static org.spoofax.terms.util.TermUtils.isStringAt;
 
 class SpecToParenthesizerTest extends TestBase {
     @Test void testTask() throws ExecException {
@@ -21,8 +21,7 @@ class SpecToParenthesizerTest extends TestBase {
         final Sdf3SpecToParenthesizer taskDef = languageComponent.getSpecToParenthesizer();
         try(final MixedSession session = newSession()) {
             final Sdf3SpecToParseTable.Args parseTableArgs = new Sdf3SpecToParseTable.Args(
-                desugarSupplier(resource),
-                ListView.of(),
+                specSupplier(desugarSupplier(resource)),
                 new ParseTableConfiguration(false, false, true, false, false),
                 false
             );

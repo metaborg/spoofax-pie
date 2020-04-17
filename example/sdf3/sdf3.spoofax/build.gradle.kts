@@ -37,7 +37,8 @@ adapterProjectCompiler {
 
       // Utility task definitions
       val desugar = TypeInfo.of(taskPackageId, "Sdf3Desugar")
-      builder.addTaskDefs(desugar)
+      val createSpec = TypeInfo.of(taskPackageId, "Sdf3CreateSpec")
+      builder.addTaskDefs(desugar, createSpec)
 
 
       // Generation task definitions

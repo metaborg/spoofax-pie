@@ -9,6 +9,7 @@ import mb.pie.api.Function;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Pie;
 import mb.pie.api.Supplier;
+import mb.pie.api.ValueSupplier;
 import mb.pie.runtime.PieBuilderImpl;
 import mb.resource.Resource;
 import mb.resource.ResourceKey;
@@ -17,8 +18,10 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.resource.text.TextResource;
 import mb.resource.text.TextResourceRegistry;
 import mb.sdf3.spoofax.task.Sdf3AnalyzeMulti;
+import mb.sdf3.spoofax.task.Sdf3CreateSpec;
 import mb.sdf3.spoofax.task.Sdf3Desugar;
 import mb.sdf3.spoofax.task.Sdf3Parse;
+import mb.sdf3.spoofax.task.Sdf3Spec;
 import mb.sdf3.spoofax.task.SingleFileAnalysisResult;
 import mb.sdf3.spoofax.util.DaggerPlatformTestComponent;
 import mb.sdf3.spoofax.util.DaggerSdf3TestComponent;
@@ -52,6 +55,7 @@ class TestBase {
         .build();
     final Sdf3Parse parse = languageComponent.getParse();
     final Sdf3Desugar desugar = languageComponent.getDesugar();
+    final Sdf3CreateSpec createSpec = languageComponent.getCreateSpec();
     final Function<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> desugarFunction = desugar.createFunction();
     final Sdf3AnalyzeMulti analyze = languageComponent.getAnalyze();
     final Pie pie = languageComponent.getPie();
@@ -92,6 +96,16 @@ class TestBase {
 
     Supplier<SingleFileAnalysisResult> singleFileAnalysisResultSupplier(Resource file) {
         return singleFileAnalysisResultSupplier(rootDirectory.getPath(), file.getKey());
+    }
+
+
+    Supplier<Sdf3Spec> specSupplier(ResourcePath project, ResourceKey mainFile) {
+        return createSpec.createSupplier(new Sdf3CreateSpec.Input(project, mainFile));
+    }
+
+    @SafeVarargs
+    final Supplier<Sdf3Spec> specSupplier(Supplier<@Nullable IStrategoTerm> mainModuleAstSupplier, Supplier<@Nullable IStrategoTerm>... modulesAstSuppliers) {
+        return new ValueSupplier<>(new Sdf3Spec(mainModuleAstSupplier, modulesAstSuppliers));
     }
 
 
