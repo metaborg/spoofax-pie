@@ -36,7 +36,8 @@ public class ParserCompiler {
     public ListView<GradleConfiguredDependency> getLanguageProjectDependencies(LanguageProjectInput input) {
         return ListView.of(
             GradleConfiguredDependency.api(input.shared().jsglrCommonDep()),
-            GradleConfiguredDependency.api(input.shared().jsglr1CommonDep())
+            GradleConfiguredDependency.api(input.shared().jsglr1CommonDep()),
+            GradleConfiguredDependency.api(input.shared().jsglr1PieDep())
         );
     }
 

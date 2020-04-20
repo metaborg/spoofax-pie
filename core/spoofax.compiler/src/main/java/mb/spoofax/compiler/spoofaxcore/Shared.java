@@ -5,7 +5,6 @@ import mb.spoofax.compiler.util.BuilderBase;
 import mb.spoofax.compiler.util.Conversion;
 import mb.spoofax.compiler.util.Coordinate;
 import mb.spoofax.compiler.util.GradleDependency;
-import mb.spoofax.compiler.util.GradleProject;
 import mb.spoofax.compiler.util.GradleRepository;
 import org.immutables.value.Value;
 
@@ -243,6 +242,10 @@ public interface Shared extends Serializable {
 
     @Value.Default default GradleDependency jsglr1CommonDep() {
         return GradleDependency.module(Coordinate.of("org.metaborg", "jsglr1.common", spoofaxPieVersion()));
+    }
+
+    @Value.Default default GradleDependency jsglr1PieDep() {
+        return GradleDependency.module(Coordinate.of("org.metaborg", "jsglr1.pie", spoofaxPieVersion()));
     }
 
     @Value.Default default GradleDependency jsglr2CommonDep() {
