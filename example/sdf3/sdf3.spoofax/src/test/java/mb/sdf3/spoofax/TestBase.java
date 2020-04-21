@@ -73,7 +73,7 @@ class TestBase {
 
 
     Supplier<@Nullable IStrategoTerm> parsedAstSupplier(ResourceKey resourceKey) {
-        return parse.createAstSupplier(resourceKey);
+        return parse.createNullableAstSupplier(resourceKey);
     }
 
     Supplier<@Nullable IStrategoTerm> parsedAstSupplier(Resource resource) {
