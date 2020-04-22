@@ -1,6 +1,7 @@
 package mb.spoofax.compiler.spoofaxcore;
 
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.util.Coordinate;
 import mb.spoofax.compiler.util.GradleProject;
 import mb.spoofax.compiler.util.GradleRepository;
 import mb.spoofax.compiler.util.TemplateCompiler;
@@ -61,7 +62,7 @@ public class RootProjectCompiler {
         @Value.Default default GradleProject project() {
             final String artifactId = shared().defaultArtifactId();
             return GradleProject.builder()
-                .coordinate(shared().defaultGroupId(), artifactId, shared().defaultVersion())
+                .coordinate(Coordinate.of(shared().defaultGroupId(), artifactId, shared().defaultVersion()))
                 .baseDirectory(shared().baseDirectory())
                 .build();
         }

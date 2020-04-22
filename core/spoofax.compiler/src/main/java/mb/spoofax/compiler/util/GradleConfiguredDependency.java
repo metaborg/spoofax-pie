@@ -27,6 +27,13 @@ public abstract class GradleConfiguredDependency implements Serializable {
         R annotationProcessor(GradleDependency dependency);
 
         R testAnnotationProcessor(GradleDependency dependency);
+
+
+        R apiPlatform(GradleDependency dependency);
+
+        R implementationPlatform(GradleDependency dependency);
+
+        R annotationProcessorPlatform(GradleDependency dependency);
     }
 
     public static GradleConfiguredDependency api(GradleDependency dependency) {
@@ -45,6 +52,7 @@ public abstract class GradleConfiguredDependency implements Serializable {
         return GradleConfiguredDependencies.runtimeOnly(dependency);
     }
 
+
     public static GradleConfiguredDependency testImplementation(GradleDependency dependency) {
         return GradleConfiguredDependencies.testImplementation(dependency);
     }
@@ -57,12 +65,27 @@ public abstract class GradleConfiguredDependency implements Serializable {
         return GradleConfiguredDependencies.testRuntimeOnly(dependency);
     }
 
+
     public static GradleConfiguredDependency annotationProcessor(GradleDependency dependency) {
         return GradleConfiguredDependencies.annotationProcessor(dependency);
     }
 
     public static GradleConfiguredDependency testAnnotationProcessor(GradleDependency dependency) {
         return GradleConfiguredDependencies.testAnnotationProcessor(dependency);
+    }
+
+
+    public static GradleConfiguredDependency apiPlatform(GradleDependency dependency) {
+        return GradleConfiguredDependencies.apiPlatform(dependency);
+    }
+
+    public static GradleConfiguredDependency implementationPlatform(GradleDependency dependency) {
+        return GradleConfiguredDependencies.implementationPlatform(dependency);
+    }
+
+
+    public static GradleConfiguredDependency annotationProcessorPlatform(GradleDependency dependency) {
+        return GradleConfiguredDependencies.annotationProcessorPlatform(dependency);
     }
 
 
@@ -82,11 +105,17 @@ public abstract class GradleConfiguredDependency implements Serializable {
             .implementation((dependency) -> "implementation(" + dependency.toKotlinCode() + ")")
             .compileOnly((dependency) -> "compileOnly(" + dependency.toKotlinCode() + ")")
             .runtimeOnly((dependency) -> "runtimeOnly(" + dependency.toKotlinCode() + ")")
+
             .testImplementation((dependency) -> "testImplementation(" + dependency.toKotlinCode() + ")")
             .testCompileOnly((dependency) -> "testCompileOnly(" + dependency.toKotlinCode() + ")")
             .testRuntimeOnly((dependency) -> "testRuntimeOnly(" + dependency.toKotlinCode() + ")")
+
             .annotationProcessor((dependency) -> "annotationProcessor(" + dependency.toKotlinCode() + ")")
             .testAnnotationProcessor((dependency) -> "testAnnotationProcessor(" + dependency.toKotlinCode() + ")")
+
+            .apiPlatform((dependency) -> "api(platform(" + dependency.toKotlinCode() + "))")
+            .implementationPlatform((dependency) -> "implementation(platform(" + dependency.toKotlinCode() + "))")
+            .annotationProcessorPlatform((dependency) -> "annotationProcessor(platform(" + dependency.toKotlinCode() + "))")
             ;
     }
 

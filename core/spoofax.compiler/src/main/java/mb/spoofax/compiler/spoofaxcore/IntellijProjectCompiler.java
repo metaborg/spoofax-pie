@@ -2,6 +2,7 @@ package mb.spoofax.compiler.spoofaxcore;
 
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
+import mb.spoofax.compiler.util.Coordinate;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
 import mb.spoofax.compiler.util.GradleProject;
@@ -55,6 +56,8 @@ public class IntellijProjectCompiler {
     public ArrayList<GradleConfiguredDependency> getDependencies(Input input) {
         final Shared shared = input.shared();
         final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
+        dependencies.add(GradleConfiguredDependency.apiPlatform(shared.spoofaxDependencyConstraintsDep()));
+        dependencies.add(GradleConfiguredDependency.annotationProcessorPlatform(shared.spoofaxDependencyConstraintsDep()));
         // HACK: exclude adapter project dependency, as slf4j must be excluded from it for the IntelliJ plugin to work, which is not possible with 'GradleConfiguredDependency'.
         //dependencies.add(GradleConfiguredDependency.implementation(input.adapterProjectDependency()));
         dependencies.add(GradleConfiguredDependency.implementation(shared.spoofaxIntellijDep()));
@@ -106,7 +109,7 @@ public class IntellijProjectCompiler {
         @Value.Default default GradleProject project() {
             final String artifactId = shared().defaultArtifactId() + defaultProjectSuffix();
             return GradleProject.builder()
-                .coordinate(shared().defaultGroupId(), artifactId, shared().defaultVersion())
+                .coordinate(Coordinate.of(shared().defaultGroupId(), artifactId, shared().defaultVersion()))
                 .baseDirectory(shared().baseDirectory().appendSegment(artifactId))
                 .build();
         }

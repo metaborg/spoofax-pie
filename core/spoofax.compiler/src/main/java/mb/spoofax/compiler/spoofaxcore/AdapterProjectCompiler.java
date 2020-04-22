@@ -76,6 +76,8 @@ public class AdapterProjectCompiler {
     public ArrayList<GradleConfiguredDependency> getDependencies(Input input) {
         final Shared shared = input.shared();
         final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
+        dependencies.add(GradleConfiguredDependency.apiPlatform(shared.spoofaxDependencyConstraintsDep()));
+        dependencies.add(GradleConfiguredDependency.annotationProcessorPlatform(shared.spoofaxDependencyConstraintsDep()));
         dependencies.add(GradleConfiguredDependency.api(input.languageProjectDependency()));
         dependencies.add(GradleConfiguredDependency.api(shared.spoofaxCoreDep()));
         dependencies.add(GradleConfiguredDependency.api(shared.pieApiDep()));

@@ -1,6 +1,7 @@
 package mb.spoofax.compiler.spoofaxcore;
 
 import mb.spoofax.compiler.util.Conversion;
+import mb.spoofax.compiler.util.Coordinate;
 import mb.spoofax.compiler.util.GradleProject;
 import org.immutables.value.Value;
 
@@ -22,7 +23,7 @@ public interface AdapterProject extends Serializable {
     @Value.Default default GradleProject project() {
         final String artifactId = shared().defaultArtifactId() + defaultProjectSuffix();
         return GradleProject.builder()
-            .coordinate(shared().defaultGroupId(), artifactId, shared().defaultVersion())
+            .coordinate(Coordinate.of(shared().defaultGroupId(), artifactId, shared().defaultVersion()))
             .baseDirectory(shared().baseDirectory().appendSegment(artifactId))
             .build();
     }

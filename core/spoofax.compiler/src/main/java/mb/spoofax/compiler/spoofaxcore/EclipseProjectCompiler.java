@@ -2,6 +2,7 @@ package mb.spoofax.compiler.spoofaxcore;
 
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
+import mb.spoofax.compiler.util.Coordinate;
 import mb.spoofax.compiler.util.GradleConfiguredBundleDependency;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
@@ -72,6 +73,8 @@ public class EclipseProjectCompiler {
     public ArrayList<GradleConfiguredDependency> getDependencies(Input input) {
         final Shared shared = input.shared();
         final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
+        dependencies.add(GradleConfiguredDependency.apiPlatform(shared.spoofaxDependencyConstraintsDep()));
+        dependencies.add(GradleConfiguredDependency.annotationProcessorPlatform(shared.spoofaxDependencyConstraintsDep()));
         dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
         dependencies.add(GradleConfiguredDependency.annotationProcessor(shared.daggerCompilerDep()));
         return dependencies;
@@ -135,7 +138,7 @@ public class EclipseProjectCompiler {
         @Value.Default default GradleProject project() {
             final String artifactId = shared().defaultArtifactId() + defaultProjectSuffix();
             return GradleProject.builder()
-                .coordinate(shared().defaultGroupId(), artifactId, shared().defaultVersion())
+                .coordinate(Coordinate.of(shared().defaultGroupId(), artifactId, shared().defaultVersion()))
                 .baseDirectory(shared().baseDirectory().appendSegment(artifactId))
                 .build();
         }

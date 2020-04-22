@@ -1,5 +1,6 @@
-import mb.spoofax.gradle.util.configureSpoofaxLanguageArtifact
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.kotlin.gradle.internal.ensureParentDirsCreated
+import java.util.*
 
 plugins {
   id("org.metaborg.gradle.config.java-library")
@@ -41,5 +42,46 @@ tasks.test {
   testLogging {
     events(TestLogEvent.STANDARD_OUT, TestLogEvent.STANDARD_ERROR)
     showStandardStreams = true
+  }
+}
+
+// Add generated resources directory as a resource source directory.
+val generatedResourcesDir = project.buildDir.resolve("generated/resources")
+sourceSets {
+  main {
+    resources {
+      srcDir(generatedResourcesDir)
+    }
+  }
+}
+
+// Task that writes (dependency) versions to a versions.properties file, which is used in the Shared class.
+val versionsPropertiesFile = generatedResourcesDir.resolve("versions.properties")
+val generateVersionPropertiesTask = tasks.register("generateVersionProperties") {
+  inputs.property("version", project.version.toString())
+  outputs.file(versionsPropertiesFile)
+  doLast {
+    val properties = NonShittyProperties()
+    properties.setProperty("spoofax3", project.version.toString())
+    versionsPropertiesFile.ensureParentDirsCreated()
+    versionsPropertiesFile.bufferedWriter().use {
+      properties.storeWithoutDate(it)
+    }
+  }
+}
+tasks.compileJava.configure { dependsOn(generateVersionPropertiesTask) }
+tasks.compileTestJava.configure { dependsOn(generateVersionPropertiesTask) }
+
+// Custom properties class that does not write the current date, fixing incrementality.
+class NonShittyProperties : Properties() {
+  fun storeWithoutDate(writer: java.io.BufferedWriter) {
+    val e: Enumeration<*> = keys()
+    while(e.hasMoreElements()) {
+      val key = e.nextElement()
+      val value = get(key)
+      writer.write("$key=$value")
+      writer.newLine()
+    }
+    writer.flush()
   }
 }

@@ -3,6 +3,7 @@ package mb.spoofax.compiler.gradle.spoofaxcore
 import mb.resource.ResourceRuntimeException
 import mb.resource.ResourceService
 import mb.resource.fs.FSPath
+import mb.spoofax.compiler.util.Coordinate
 import mb.spoofax.compiler.util.GradleConfiguredDependency
 import mb.spoofax.compiler.util.GradleDependency
 import mb.spoofax.compiler.util.GradleProject
@@ -14,7 +15,7 @@ import org.gradle.kotlin.dsl.*
 
 fun Project.toSpoofaxCompilerProject(): GradleProject {
   return GradleProject.builder()
-    .coordinate(group.toString(), name, version.toString())
+    .coordinate(Coordinate.of(group.toString(), name, version.toString()))
     .baseDirectory(FSPath(projectDir))
     .build()
 }
@@ -54,17 +55,23 @@ fun Project.deleteGenSourceSpoofaxDirectory(compilerProject: GradleProject, reso
 }
 
 fun GradleConfiguredDependency.addToDependencies(project: Project): Dependency {
-  val configurationName = caseOf()
-    .api_("api")
-    .implementation_("implementation")
-    .compileOnly_("compileOnly")
-    .runtimeOnly_("runtimeOnly")
-    .testImplementation_("testImplementation")
-    .testCompileOnly_("testCompileOnly")
-    .testRuntimeOnly_("testRuntimeOnly")
-    .annotationProcessor_("annotationProcessor")
-    .testAnnotationProcessor_("testAnnotationProcessor")
-  val dependency = this.dependency.toGradleDependency(project)
+  val (configurationName, isPlatform) = caseOf()
+    .api_("api" to false)
+    .implementation_("implementation" to false)
+    .compileOnly_("compileOnly" to false)
+    .runtimeOnly_("runtimeOnly" to false)
+    .testImplementation_("testImplementation" to false)
+    .testCompileOnly_("testCompileOnly" to false)
+    .testRuntimeOnly_("testRuntimeOnly" to false)
+    .annotationProcessor_("annotationProcessor" to false)
+    .testAnnotationProcessor_("testAnnotationProcessor" to false)
+    .apiPlatform_("api" to true)
+    .implementationPlatform_("implementation" to true)
+    .annotationProcessorPlatform_("annotationProcessor" to true)
+  var dependency = this.dependency.toGradleDependency(project)
+  if(isPlatform) {
+    dependency = project.dependencies.platform(dependency)
+  }
   project.dependencies.add(configurationName, dependency)
   return dependency
 }
@@ -72,6 +79,6 @@ fun GradleConfiguredDependency.addToDependencies(project: Project): Dependency {
 fun GradleDependency.toGradleDependency(project: Project): Dependency {
   return caseOf()
     .project<Dependency> { project.dependencies.project(it) }
-    .module { project.dependencies.create(it.groupId(), it.artifactId(), it.version()) }
+    .module { project.dependencies.create(it.groupId(), it.artifactId(), it.version().orElse(null)) }
     .files { project.dependencies.create(project.files(it)) }
 }
