@@ -25,7 +25,8 @@ fun Project.configureGroup(project: GradleProject) {
 }
 
 fun Project.configureVersion(project: GradleProject) {
-  this.version = project.coordinate().version()
+  project.coordinate().version().ifPresent { this.version = it }
+
 }
 
 fun Project.configureGeneratedSources(compilerProject: GradleProject, resourceService: ResourceService) {
