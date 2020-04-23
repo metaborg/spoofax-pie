@@ -3,103 +3,114 @@
 package mb.spoofax.compiler.gradle.spoofaxcore
 
 import mb.resource.ResourceService
-import mb.spoofax.compiler.spoofaxcore.AdapterProjectCompiler
 import mb.spoofax.compiler.spoofaxcore.IntellijProjectCompiler
-import mb.spoofax.compiler.spoofaxcore.Shared
-import mb.spoofax.compiler.util.GradleProject
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ModuleDependency
-import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.IntelliJPlugin
 
 open class IntellijProjectCompilerSettings(
+  val rootGradleProject: Project,
+  val adapterGradleProject: Project,
   val compiler: IntellijProjectCompiler.Input.Builder = IntellijProjectCompiler.Input.builder()
 ) {
-  internal fun createInput(shared: Shared, project: GradleProject, adapterProjectCompilerInput: AdapterProjectCompiler.Input): IntellijProjectCompiler.Input {
-    return compiler.shared(shared).project(project).adapterProjectCompilerInput(adapterProjectCompilerInput).build()
+  internal fun finalize(gradleProject: Project): IntellijProjectCompilerFinalized {
+    val project = gradleProject.toSpoofaxCompilerProject()
+    val spoofaxCompilerExtension: SpoofaxCompilerExtension = rootGradleProject.extensions.getByType()
+    val shared = spoofaxCompilerExtension.shared
+    val adapterProjectCompilerExtension: AdapterProjectCompilerExtension = adapterGradleProject.extensions.getByType()
+    val adapterProjectCompilerInput = adapterProjectCompilerExtension.finalized.input
+
+    val input = compiler.shared(shared).project(project).adapterProjectCompilerInput(adapterProjectCompilerInput).build()
+
+    val resourceService = spoofaxCompilerExtension.resourceService
+    val intellijProjectCompiler = spoofaxCompilerExtension.intellijProjectCompiler
+    return IntellijProjectCompilerFinalized(resourceService, intellijProjectCompiler, input)
   }
 }
 
-open class IntellijProjectCompilerExtension(
-  objects: ObjectFactory,
-  project: Project,
-  compilerExtension: SpoofaxCompilerExtension
-) {
-  val settings: Property<IntellijProjectCompilerSettings> = objects.property()
+open class IntellijProjectCompilerExtension(project: Project) {
+  val settings: Property<IntellijProjectCompilerSettings> = project.objects.property()
 
   companion object {
     internal const val id = "intellijProjectCompiler"
   }
 
-  init {
-    settings.convention(IntellijProjectCompilerSettings())
-  }
+  internal val finalizedProvider: Provider<IntellijProjectCompilerFinalized> = settings.map { it.finalize(project) }
+  internal val inputProvider: Provider<IntellijProjectCompiler.Input> = finalizedProvider.map { it.input }
+  internal val resourceServiceProvider: Provider<ResourceService> = finalizedProvider.map { it.resourceService }
 
-  internal val input: IntellijProjectCompiler.Input by lazy {
+  internal val finalized: IntellijProjectCompilerFinalized by lazy {
     settings.finalizeValue()
-    settings.get().createInput(compilerExtension.shared, project.toSpoofaxCompilerProject(), compilerExtension.adapterProjectCompilerExtension.input)
+    if(!settings.isPresent) {
+      throw GradleException("IntelliJ project compiler settings have not been set")
+    }
+    settings.get().finalize(project)
   }
 }
 
+internal class IntellijProjectCompilerFinalized(
+  val resourceService: ResourceService,
+  val compiler: IntellijProjectCompiler,
+  val input: IntellijProjectCompiler.Input
+)
+
 open class IntellijPlugin : Plugin<Project> {
   override fun apply(project: Project) {
-    val compilerExtension = project.extensions.getByType<SpoofaxCompilerExtension>()
-    val extension = IntellijProjectCompilerExtension(project.objects, project, compilerExtension)
+    val extension = IntellijProjectCompilerExtension(project)
     project.extensions.add(IntellijProjectCompilerExtension.id, extension)
 
-    // Apply required plugins early, such that their events are triggered accordingly.
-    project.pluginManager.apply("org.jetbrains.intellij")
-
-    project.gradle.projectsEvaluated {
-      afterEvaluate(project, compilerExtension, extension)
-    }
-
-    /*
-    HACK: apply plugins eagerly, otherwise their 'afterEvaluate' will not be triggered and the plugin will do nothing.
-    Ensure that plugins are applied after we add a 'projectsEvaluated' listener, to ensure that our listener gets
-    executed before those of the following plugins.
-    */
     project.pluginManager.apply("org.metaborg.gradle.config.java-library")
     project.pluginManager.apply("org.jetbrains.intellij")
+
+    configureIntellijLanguageProjectTask(project, extension)
+    configureCompilerTask(project, extension)
   }
 
-  private fun afterEvaluate(project: Project, compilerExtension: SpoofaxCompilerExtension, extension: IntellijProjectCompilerExtension) {
-    val compiler = compilerExtension.intellijProjectCompiler
-    val resourceService = compilerExtension.resourceService
-    val input = extension.input
-    val compilerProject = input.project()
-    project.configureGroup(compilerProject)
-    project.configureVersion(compilerProject)
-    project.configureGeneratedSources(compilerProject, resourceService)
-    compiler.getDependencies(input).forEach {
-      it.addToDependencies(project)
-    }
-
-    configureCompilerTask(project, input, compiler, resourceService)
-    configureIntellij(project, input)
-  }
-
-  private fun configureCompilerTask(
-    project: Project,
-    input: IntellijProjectCompiler.Input,
-    compiler: IntellijProjectCompiler,
-    resourceService: ResourceService
-  ) {
-    val compileTask = project.tasks.register("spoofaxCompileIntellijProject") {
+  private fun configureIntellijLanguageProjectTask(project: Project, extension: IntellijProjectCompilerExtension) {
+    val configureIntellijProjectTask = project.tasks.register("configureIntellijProject") {
       group = "spoofax compiler"
-      inputs.property("input", input)
-      outputs.files(input.providedFiles().map { resourceService.toLocalFile(it) })
+      inputs.property("input", extension.inputProvider)
+
       doLast {
-        project.deleteGenSourceSpoofaxDirectory(input.project(), resourceService)
-        compiler.compile(input)
+        val finalized = extension.finalized
+        val input = finalized.input
+        project.configureGeneratedSources(project.toSpoofaxCompilerProject(), finalized.resourceService)
+        finalized.compiler.getDependencies(input).forEach {
+          it.addToDependencies(project)
+        }
+        project.dependencies.add("implementation", input.adapterProjectDependency().toGradleDependency(project), closureOf<ModuleDependency> {
+          exclude(group = "org.slf4j") // Exclude slf4j, as IntelliJ has its own special version of it.
+        })
       }
     }
+
+    // Make compileJava depend on our task, because we configure source sets and dependencies.
+    project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(configureIntellijProjectTask)
+  }
+
+  private fun configureCompilerTask(project: Project, extension: IntellijProjectCompilerExtension) {
+    val compileTask = project.tasks.register("spoofaxCompileIntellijProject") {
+      group = "spoofax compiler"
+      inputs.property("input", extension.inputProvider)
+      outputs.files(extension.resourceServiceProvider.flatMap { resourceService -> extension.inputProvider.map { input -> input.providedFiles().map { resourceService.toLocalFile(it) } } })
+
+      doLast {
+        val finalized = extension.finalized
+        val input = finalized.input
+        project.deleteGenSourceSpoofaxDirectory(input.project(), finalized.resourceService)
+        finalized.compiler.compile(input)
+      }
+    }
+
     // Make compileJava depend on our task, because we generate Java code.
     project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(compileTask)
+
     // Make all of IntelliJ's tasks depend on our task, because we generate Java code and a plugin.xml file.
     project.tasks.getByName(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME).dependsOn(compileTask)
     project.tasks.getByName(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME).dependsOn(compileTask)
@@ -107,18 +118,5 @@ open class IntellijPlugin : Plugin<Project> {
     project.tasks.getByName(IntelliJPlugin.RUN_IDE_TASK_NAME).dependsOn(compileTask)
     project.tasks.getByName(IntelliJPlugin.PUBLISH_PLUGIN_TASK_NAME).dependsOn(compileTask)
     project.tasks.getByName(IntelliJPlugin.VERIFY_PLUGIN_TASK_NAME).dependsOn(compileTask)
-  }
-
-  private fun configureIntellij(
-    project: Project,
-    input: IntellijProjectCompiler.Input
-  ) {
-    project.dependencies.add("implementation", input.adapterProjectDependency().toGradleDependency(project), closureOf<ModuleDependency> {
-      exclude(group = "org.slf4j") // Exclude slf4j, as IntelliJ has its own special version of it.
-    })
-//    // TODO: version is set too late, and therefore ignored.
-//    project.configure<IntelliJPluginExtension> {
-//      version = input.ideaVersion()
-//    }
   }
 }

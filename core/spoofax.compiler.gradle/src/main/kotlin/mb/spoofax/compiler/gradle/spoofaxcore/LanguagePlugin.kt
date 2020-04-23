@@ -9,24 +9,23 @@ import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler
 import mb.spoofax.compiler.spoofaxcore.LanguageProject
 import mb.spoofax.compiler.spoofaxcore.LanguageProjectCompiler
 import mb.spoofax.compiler.spoofaxcore.ParserCompiler
-import mb.spoofax.compiler.spoofaxcore.Shared
 import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler
 import mb.spoofax.compiler.spoofaxcore.StylerCompiler
-import mb.spoofax.compiler.util.GradleProject
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ModuleDependency
-import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.Sync
 import org.gradle.kotlin.dsl.*
 
 open class LanguageProjectCompilerSettings(
+  val rootGradleProject: Project,
   val languageProject: LanguageProject.Builder = LanguageProject.builder(),
   val classloaderResources: ClassloaderResourcesCompiler.LanguageProjectInput.Builder = ClassloaderResourcesCompiler.LanguageProjectInput.builder(),
   val parser: ParserCompiler.LanguageProjectInput.Builder = ParserCompiler.LanguageProjectInput.builder(),
@@ -36,9 +35,13 @@ open class LanguageProjectCompilerSettings(
   val constraintAnalyzer: ConstraintAnalyzerCompiler.LanguageProjectInput.Builder? = null, // Optional
   val compiler: LanguageProjectCompiler.Input.Builder = LanguageProjectCompiler.Input.builder()
 ) {
-  internal fun createInput(shared: Shared, project: GradleProject): LanguageProjectCompiler.Input {
+  internal fun finalize(gradleProject: Project): LanguageProjectCompilerFinalized {
+    val project = gradleProject.toSpoofaxCompilerProject()
+    val spoofaxCompilerExtension: SpoofaxCompilerExtension = rootGradleProject.extensions.getByType()
+    val shared = spoofaxCompilerExtension.shared
+
     val languageProject = this.languageProject.shared(shared).project(project).build()
-    val classloaderResources = this.classloaderResources.shared(shared).languageProject(languageProject).build();
+    val classloaderResources = this.classloaderResources.shared(shared).languageProject(languageProject).build()
     val parser = this.parser.shared(shared).languageProject(languageProject).build()
     val styler = if(this.styler != null) this.styler.shared(shared).languageProject(languageProject).build() else null
     val completer = if(this.completer != null) this.completer.shared(shared).languageProject(languageProject).build() else null
@@ -62,132 +65,135 @@ open class LanguageProjectCompilerSettings(
     if(constraintAnalyzer != null) {
       compiler.constraintAnalyzer(constraintAnalyzer)
     }
-    return compiler.build()
+    val input = compiler.build()
+
+    val resourceService = spoofaxCompilerExtension.resourceService
+    val languageProjectCompiler = spoofaxCompilerExtension.languageProjectCompiler
+    return LanguageProjectCompilerFinalized(resourceService, languageProjectCompiler, input)
   }
 }
 
-open class LanguageProjectCompilerExtension(
-  objects: ObjectFactory,
-  compilerExtension: SpoofaxCompilerExtension
-) {
-  val settings: Property<LanguageProjectCompilerSettings> = objects.property()
+open class LanguageProjectCompilerExtension(project: Project) {
+  val settings: Property<LanguageProjectCompilerSettings> = project.objects.property()
 
   companion object {
     internal const val id = "languageProjectCompiler"
   }
 
-  init {
-    settings.convention(LanguageProjectCompilerSettings())
-  }
+  internal val finalizedProvider: Provider<LanguageProjectCompilerFinalized> = settings.map { it.finalize(project) }
+  internal val inputProvider: Provider<LanguageProjectCompiler.Input> = finalizedProvider.map { it.input }
+  internal val resourceServiceProvider: Provider<ResourceService> = finalizedProvider.map { it.resourceService }
 
-  internal val project by lazy {
-    compilerExtension.languageGradleProject.finalizeValue()
-    if(!compilerExtension.languageGradleProject.isPresent) {
-      throw GradleException("Language project was not set")
-    }
-    compilerExtension.languageGradleProject.get().toSpoofaxCompilerProject()
-  }
-
-  internal val input: LanguageProjectCompiler.Input by lazy {
+  internal val finalized: LanguageProjectCompilerFinalized by lazy {
     settings.finalizeValue()
-    settings.get().createInput(compilerExtension.shared, project)
+    if(!settings.isPresent) {
+      throw GradleException("Language project compiler settings have not been set")
+    }
+    settings.get().finalize(project)
   }
 }
 
+internal class LanguageProjectCompilerFinalized(
+  val resourceService: ResourceService,
+  val compiler: LanguageProjectCompiler,
+  val input: LanguageProjectCompiler.Input
+) {
+  val destinationPackage: String get() = input.languageProject().packagePath()
+  val includeStrategoClasses: Boolean get() = input.strategoRuntime().map { it.copyClasses() }.orElse(false)
+  val includeStrategoJavastratClasses: Boolean get() = input.strategoRuntime().map { it.copyJavaStrategyClasses() }.orElse(false)
+  val copyResources: ArrayList<String> get() = compiler.getCopyResources(input)
+}
+
+@Suppress("unused")
 open class LanguagePlugin : Plugin<Project> {
   override fun apply(project: Project) {
-    val compilerExtension = project.extensions.getByType<SpoofaxCompilerExtension>()
-    val extension = LanguageProjectCompilerExtension(project.objects, compilerExtension)
+    val extension = LanguageProjectCompilerExtension(project)
     project.extensions.add(LanguageProjectCompilerExtension.id, extension)
-    compilerExtension.languageGradleProject.set(project)
 
-    project.gradle.projectsEvaluated {
-      afterEvaluate(project, compilerExtension, extension)
-    }
-
-    /*
-    HACK: apply plugins eagerly, otherwise their 'afterEvaluate' will not be triggered and the plugin will do nothing.
-    Ensure that plugins are applied after we add a 'projectsEvaluated' listener, to ensure that our listener gets
-    executed before those of the following plugins.
-    */
     project.plugins.apply("org.metaborg.gradle.config.java-library")
+
+    configureConfigureLanguageProjectTask(project, extension)
+    configureCompileTask(project, extension)
+    configureCopySpoofaxLanguageTasks(project, extension)
   }
 
-  private fun afterEvaluate(project: Project, compilerExtension: SpoofaxCompilerExtension, extension: LanguageProjectCompilerExtension) {
-    val compiler = compilerExtension.languageProjectCompiler
-    val resourceService = compilerExtension.resourceService
-    val input = extension.input
-    val compilerProject = input.languageProject().project();
-    project.configureGroup(compilerProject)
-    project.configureVersion(compilerProject)
-    project.configureGeneratedSources(compilerProject, resourceService)
-    compiler.getDependencies(input).forEach {
-      it.addToDependencies(project)
-    }
-    configureCompilerTask(project, input, compiler, resourceService)
-    configureCopySpoofaxLanguageTasks(project, input, compiler)
-  }
-
-  private fun configureCompilerTask(
-    project: Project,
-    input: LanguageProjectCompiler.Input,
-    compiler: LanguageProjectCompiler,
-    resourceService: ResourceService
-  ) {
-    val compileTask = project.tasks.register("spoofaxCompileLanguageProject") {
+  private fun configureConfigureLanguageProjectTask(project: Project, extension: LanguageProjectCompilerExtension) {
+    val configureLanguageProjectTask = project.tasks.register("configureLanguageProject") {
       group = "spoofax compiler"
-      inputs.property("input", input)
-      outputs.files(input.providedFiles().map { resourceService.toLocalFile(it) })
+      inputs.property("input", extension.inputProvider)
+
       doLast {
-        project.deleteGenSourceSpoofaxDirectory(input.languageProject().project(), resourceService)
-        compiler.compile(input)
+        val finalized = extension.finalized
+        project.configureGeneratedSources(project.toSpoofaxCompilerProject(), finalized.resourceService)
+        finalized.compiler.getDependencies(finalized.input).forEach {
+          it.addToDependencies(project)
+        }
       }
     }
+
+    // Make compileJava depend on our task, because we configure source sets and dependencies.
+    project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(configureLanguageProjectTask)
+  }
+
+  private fun configureCompileTask(project: Project, extension: LanguageProjectCompilerExtension) {
+    val compileTask = project.tasks.register("spoofaxCompileLanguageProject") {
+      group = "spoofax compiler"
+      inputs.property("input", extension.inputProvider)
+      outputs.files(extension.resourceServiceProvider.flatMap { resourceService -> extension.inputProvider.map { input -> input.providedFiles().map { resourceService.toLocalFile(it) } } })
+
+      doLast {
+        val finalized = extension.finalized
+        val input = finalized.input
+        project.deleteGenSourceSpoofaxDirectory(input.languageProject().project(), finalized.resourceService)
+        finalized.compiler.compile(input)
+      }
+    }
+
+    // Make compileJava depend on our task, because we generate Java code.
     project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(compileTask)
   }
 
-  private fun configureCopySpoofaxLanguageTasks(
-    project: Project,
-    input: LanguageProjectCompiler.Input,
-    compiler: LanguageProjectCompiler
-  ) {
-    val destinationPackage = input.languageProject().packagePath()
-    val includeStrategoClasses = input.strategoRuntime().map { it.copyClasses() }.orElse(false)
-    val includeStrategoJavastratClasses = input.strategoRuntime().map { it.copyJavaStrategyClasses() }.orElse(false)
-    val copyResources = compiler.getCopyResources(input)
-
+  private fun configureCopySpoofaxLanguageTasks(project: Project, extension: LanguageProjectCompilerExtension) {
     // Create language specification dependency and 'spoofaxLanguage' configuration that contains this dependency.
-    val configuration = project.configurations.create("spoofaxLanguage") {
-      val dependency: Dependency = input.languageSpecificationDependency().caseOf()
-        .project { configureSpoofaxLanguageDependency(project.dependencies.project(it)) }
-        .module { configureSpoofaxLanguageDependency(project.dependencies.module(it.toGradleNotation()) as ModuleDependency) }
-        .files { project.dependencies.create(project.files(it)) }
-      dependencies.add(dependency)
+    val configuration = project.configurations.create("spoofaxLanguage") {}
+    val populateSpoofaxLanguageConfigurationTask = project.tasks.register("populateSpoofaxLanguageConfiguration") {
+      group = "spoofax compiler"
+      inputs.property("input", extension.inputProvider)
+
+      doLast {
+        val finalized = extension.finalized
+        val dependency: Dependency = finalized.input.languageSpecificationDependency().caseOf()
+          .project { configureSpoofaxLanguageDependency(project.dependencies.project(it)) }
+          .module { configureSpoofaxLanguageDependency(project.dependencies.module(it.toGradleNotation()) as ModuleDependency) }
+          .files { project.dependencies.create(project.files(it)) }
+        configuration.dependencies.add(dependency)
+      }
     }
 
     // Unpack the '.spoofax-language' archive.
     val unpackSpoofaxLanguageDir = "${project.buildDir}/unpackedSpoofaxLanguage/"
     val unpackSpoofaxLanguageTask = project.tasks.register<Sync>("unpackSpoofaxLanguage") {
-      inputs.property("input", input)
-      dependsOn(configuration)
+      group = "spoofax compiler"
+      inputs.property("input", extension.inputProvider)
+      dependsOn(populateSpoofaxLanguageConfigurationTask, configuration)
       from({ configuration.map { project.zipTree(it) } })  /* Closure inside `from` to defer evaluation until task execution time */
       into(unpackSpoofaxLanguageDir)
 
-      val allCopyResources = copyResources.toMutableList()
-      if(includeStrategoClasses) {
-        allCopyResources.add("target/metaborg/stratego.jar")
+      // TODO: is it OK to do doFirst here?
+      doFirst {
+        val finalized = extension.finalized
+        val allCopyResources = finalized.copyResources.toMutableList()
+        if(finalized.includeStrategoClasses) {
+          allCopyResources.add("target/metaborg/stratego.jar")
+        }
+        if(finalized.includeStrategoJavastratClasses) {
+          allCopyResources.add("target/metaborg/stratego-javastrat.jar")
+        }
+        include(allCopyResources)
       }
-      if(includeStrategoJavastratClasses) {
-        allCopyResources.add("target/metaborg/stratego-javastrat.jar")
-      }
-      include(allCopyResources)
     }
 
     // Copy resources into `mainSourceSet.java.outputDir` and `testSourceSet.java.outputDir`, so they end up in the target package.
-    val resourcesCopySpec = project.copySpec {
-      from(unpackSpoofaxLanguageDir)
-      include(copyResources)
-    }
     val strategoCopySpec = project.copySpec {
       from(project.zipTree("$unpackSpoofaxLanguageDir/target/metaborg/stratego.jar"))
       exclude("META-INF")
@@ -197,26 +203,44 @@ open class LanguagePlugin : Plugin<Project> {
       exclude("META-INF")
     }
     val copyMainTask = project.tasks.register<Copy>("copyMainResources") {
+      group = "spoofax compiler"
       dependsOn(unpackSpoofaxLanguageTask)
       into(project.the<SourceSetContainer>()["main"].java.outputDir)
-      into(destinationPackage) { with(resourcesCopySpec) }
-      if(includeStrategoClasses) {
-        into(".") { with(strategoCopySpec) }
-      }
-      if(includeStrategoJavastratClasses) {
-        into(".") { with(strategoJavastratCopySpec) }
+
+      // TODO: is it OK to do doFirst here?
+      doFirst {
+        val finalized = extension.finalized
+        into(finalized.destinationPackage) {
+          from(unpackSpoofaxLanguageDir)
+          include(finalized.copyResources)
+        }
+        if(finalized.includeStrategoClasses) {
+          into(".") { with(strategoCopySpec) }
+        }
+        if(finalized.includeStrategoJavastratClasses) {
+          into(".") { with(strategoJavastratCopySpec) }
+        }
       }
     }
     project.tasks.getByName(JavaPlugin.CLASSES_TASK_NAME).dependsOn(copyMainTask)
     val copyTestTask = project.tasks.register<Copy>("copyTestResources") {
+      group = "spoofax compiler"
       dependsOn(unpackSpoofaxLanguageTask)
       into(project.the<SourceSetContainer>()["test"].java.outputDir)
-      into(destinationPackage) { with(resourcesCopySpec) }
-      if(includeStrategoClasses) {
-        into(".") { with(strategoCopySpec) }
-      }
-      if(includeStrategoJavastratClasses) {
-        into(".") { with(strategoJavastratCopySpec) }
+
+      // TODO: is it OK to do doFirst here?
+      doFirst {
+        val finalized = extension.finalized
+        into(finalized.destinationPackage) {
+          from(unpackSpoofaxLanguageDir)
+          include(finalized.copyResources)
+        }
+        if(finalized.includeStrategoClasses) {
+          into(".") { with(strategoCopySpec) }
+        }
+        if(finalized.includeStrategoJavastratClasses) {
+          into(".") { with(strategoJavastratCopySpec) }
+        }
       }
     }
     project.tasks.getByName(JavaPlugin.TEST_CLASSES_TASK_NAME).dependsOn(copyTestTask)

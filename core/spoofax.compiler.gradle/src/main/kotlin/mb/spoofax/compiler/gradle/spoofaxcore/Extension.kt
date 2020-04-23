@@ -19,8 +19,6 @@ import mb.spoofax.compiler.spoofaxcore.Shared
 import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler
 import mb.spoofax.compiler.spoofaxcore.StylerCompiler
 import mb.spoofax.compiler.util.TemplateCompiler
-import org.gradle.api.GradleException
-import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.*
@@ -30,7 +28,6 @@ import java.util.*
 
 open class SpoofaxCompilerExtension(objects: ObjectFactory, baseDirectory: File, persistentProperties: Properties) {
   val sharedSettings: Property<Shared.Builder> = objects.property()
-
 
   companion object {
     internal const val id = "spoofaxCompiler"
@@ -56,39 +53,11 @@ open class SpoofaxCompilerExtension(objects: ObjectFactory, baseDirectory: File,
   internal val eclipseProjectCompiler = EclipseProjectCompiler(templateCompiler)
   internal val intellijProjectCompiler = IntellijProjectCompiler(templateCompiler)
 
-  internal val languageGradleProject: Property<Project> = objects.property()
-  internal val adapterGradleProject: Property<Project> = objects.property()
-  internal val eclipseExternaldepsGradleProject: Property<Project> = objects.property()
-
   internal val shared: Shared by lazy {
     sharedSettings.finalizeValue()
     sharedSettings.get()
       .withPersistentProperties(persistentProperties)
       .baseDirectory(FSPath(baseDirectory))
       .build()
-  }
-
-  internal val languageProjectCompilerExtension: LanguageProjectCompilerExtension by lazy {
-    languageGradleProject.finalizeValue()
-    if(!languageGradleProject.isPresent) {
-      throw GradleException("Language project has not been set")
-    }
-    languageGradleProject.get().extensions.getByType<LanguageProjectCompilerExtension /* Type annotation required */>()
-  }
-
-  internal val adapterProjectCompilerExtension: AdapterProjectCompilerExtension by lazy {
-    adapterGradleProject.finalizeValue()
-    if(!adapterGradleProject.isPresent) {
-      throw GradleException("Adapter project has not been set")
-    }
-    adapterGradleProject.get().extensions.getByType<AdapterProjectCompilerExtension /* Type annotation required */>()
-  }
-
-  internal val eclipseExternaldepsCompilerExtension: EclipseExternaldepsProjectCompilerExtension by lazy {
-    eclipseExternaldepsGradleProject.finalizeValue()
-    if(!eclipseExternaldepsGradleProject.isPresent) {
-      throw GradleException("Eclipse externaldeps project has not been set")
-    }
-    eclipseExternaldepsGradleProject.get().extensions.getByType<EclipseExternaldepsProjectCompilerExtension /* Type annotation required */>()
   }
 }
