@@ -26,7 +26,7 @@ import java.io.File
 import java.nio.charset.StandardCharsets
 import java.util.*
 
-open class SpoofaxCompilerExtension(objects: ObjectFactory, baseDirectory: File, persistentProperties: Properties) {
+open class RootProjectExtension(objects: ObjectFactory, baseDirectory: File, persistentProperties: Properties) {
   val sharedSettings: Property<Shared.Builder> = objects.property()
 
   companion object {

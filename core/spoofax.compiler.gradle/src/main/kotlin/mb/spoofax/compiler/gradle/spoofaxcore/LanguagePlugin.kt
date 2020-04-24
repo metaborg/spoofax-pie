@@ -37,8 +37,8 @@ open class LanguageProjectCompilerSettings(
 ) {
   internal fun finalize(gradleProject: Project): LanguageProjectCompilerFinalized {
     val project = gradleProject.toSpoofaxCompilerProject()
-    val spoofaxCompilerExtension: SpoofaxCompilerExtension = rootGradleProject.extensions.getByType()
-    val shared = spoofaxCompilerExtension.shared
+    val rootProjectExtension: RootProjectExtension = rootGradleProject.extensions.getByType()
+    val shared = rootProjectExtension.shared
 
     val languageProject = this.languageProject.shared(shared).project(project).build()
     val classloaderResources = this.classloaderResources.shared(shared).languageProject(languageProject).build()
@@ -67,8 +67,8 @@ open class LanguageProjectCompilerSettings(
     }
     val input = compiler.build()
 
-    val resourceService = spoofaxCompilerExtension.resourceService
-    val languageProjectCompiler = spoofaxCompilerExtension.languageProjectCompiler
+    val resourceService = rootProjectExtension.resourceService
+    val languageProjectCompiler = rootProjectExtension.languageProjectCompiler
     return LanguageProjectCompilerFinalized(resourceService, languageProjectCompiler, input)
   }
 }

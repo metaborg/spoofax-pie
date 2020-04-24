@@ -24,8 +24,8 @@ open class EclipseExternaldepsProjectCompilerSettings(
 ) {
   internal fun finalize(gradleProject: Project): EclipseExternaldepsProjectCompilerFinalized {
     val project = gradleProject.toSpoofaxCompilerProject()
-    val spoofaxCompilerExtension: SpoofaxCompilerExtension = rootGradleProject.extensions.getByType()
-    val shared = spoofaxCompilerExtension.shared
+    val rootProjectExtension: RootProjectExtension = rootGradleProject.extensions.getByType()
+    val shared = rootProjectExtension.shared
 
     val input = compiler
       .shared(shared)
@@ -34,8 +34,8 @@ open class EclipseExternaldepsProjectCompilerSettings(
       .adapterProjectDependency(adapterGradleProject.toSpoofaxCompilerProject().asProjectDependency())
       .build()
 
-    val resourceService = spoofaxCompilerExtension.resourceService
-    val eclipseExternaldepsProjectCompiler = spoofaxCompilerExtension.eclipseExternaldepsProjectCompiler
+    val resourceService = rootProjectExtension.resourceService
+    val eclipseExternaldepsProjectCompiler = rootProjectExtension.eclipseExternaldepsProjectCompiler
     return EclipseExternaldepsProjectCompilerFinalized(resourceService, eclipseExternaldepsProjectCompiler, input)
   }
 }
@@ -76,13 +76,13 @@ open class EclipseExternaldepsPlugin : Plugin<Project> {
     project.plugins.apply("biz.aQute.bnd.builder")
     project.plugins.apply("org.metaborg.coronium.embedding")
 
-    configureEclipseExternaldepsLanguageProjectTask(project, extension)
+    configureProjectTask(project, extension)
     configureCompilerTask(project, extension)
     configureJarTask(project, extension)
   }
 
-  private fun configureEclipseExternaldepsLanguageProjectTask(project: Project, extension: EclipseExternaldepsProjectCompilerExtension) {
-    val configureIntellijProjectTask = project.tasks.register("configureIntellijProject") {
+  private fun configureProjectTask(project: Project, extension: EclipseExternaldepsProjectCompilerExtension) {
+    val configureProjectTask = project.tasks.register("configureProject") {
       group = "spoofax compiler"
       inputs.property("input", extension.inputProvider)
 
@@ -100,7 +100,7 @@ open class EclipseExternaldepsPlugin : Plugin<Project> {
     }
 
     // Make compileJava depend on our task, because we configure source sets and dependencies.
-    project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(configureIntellijProjectTask)
+    project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(configureProjectTask)
   }
 
   private fun configureCompilerTask(project: Project, extension: EclipseExternaldepsProjectCompilerExtension) {

@@ -33,8 +33,8 @@ open class AdapterProjectCompilerSettings(
 ) {
   internal fun finalize(gradleProject: Project): AdapterProjectCompilerFinalized {
     val project = gradleProject.toSpoofaxCompilerProject()
-    val spoofaxCompilerExtension: SpoofaxCompilerExtension = rootGradleProject.extensions.getByType()
-    val shared = spoofaxCompilerExtension.shared
+    val rootProjectExtension: RootProjectExtension = rootGradleProject.extensions.getByType()
+    val shared = rootProjectExtension.shared
     val languageProjectCompilerExtension: LanguageProjectCompilerExtension = languageGradleProject.extensions.getByType()
     val languageProjectCompilerInput = languageProjectCompilerExtension.finalized.input
     val languageProjectDependency = languageGradleProject.toSpoofaxCompilerProject().asProjectDependency()
@@ -87,13 +87,13 @@ open class AdapterProjectCompilerSettings(
     }
     val input = compiler.build()
 
-    val resourceService = spoofaxCompilerExtension.resourceService
-    val adapterProjectCompiler = spoofaxCompilerExtension.adapterProjectCompiler
+    val resourceService = rootProjectExtension.resourceService
+    val adapterProjectCompiler = rootProjectExtension.adapterProjectCompiler
     return AdapterProjectCompilerFinalized(resourceService, adapterProjectCompiler, input)
   }
 }
 
-open class AdapterProjectCompilerExtension(project: Project) {
+open class AdapterProjectExtension(project: Project) {
   val settings: Property<AdapterProjectCompilerSettings> = project.objects.property()
 
   companion object {
@@ -122,8 +122,8 @@ internal class AdapterProjectCompilerFinalized(
 @Suppress("unused")
 open class AdapterPlugin : Plugin<Project> {
   override fun apply(project: Project) {
-    val extension = AdapterProjectCompilerExtension(project)
-    project.extensions.add(AdapterProjectCompilerExtension.id, extension)
+    val extension = AdapterProjectExtension(project)
+    project.extensions.add(AdapterProjectExtension.id, extension)
 
     project.plugins.apply("org.metaborg.gradle.config.java-library")
 
@@ -131,7 +131,7 @@ open class AdapterPlugin : Plugin<Project> {
     configureCompileTask(project, extension)
   }
 
-  private fun configureAdapterLanguageProjectTask(project: Project, extension: AdapterProjectCompilerExtension) {
+  private fun configureAdapterLanguageProjectTask(project: Project, extension: AdapterProjectExtension) {
     val configureAdapterProjectTask = project.tasks.register("configureAdapterProject") {
       group = "spoofax compiler"
       inputs.property("input", extension.inputProvider)
@@ -149,7 +149,7 @@ open class AdapterPlugin : Plugin<Project> {
     project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(configureAdapterProjectTask)
   }
 
-  private fun configureCompileTask(project: Project, extension: AdapterProjectCompilerExtension) {
+  private fun configureCompileTask(project: Project, extension: AdapterProjectExtension) {
     val compileTask = project.tasks.register("spoofaxCompileAdapterProject") {
       group = "spoofax compiler"
       inputs.property("input", extension.inputProvider)

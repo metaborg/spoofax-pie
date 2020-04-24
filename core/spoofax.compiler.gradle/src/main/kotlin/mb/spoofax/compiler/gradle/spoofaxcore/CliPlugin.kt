@@ -20,15 +20,15 @@ open class CliProjectCompilerSettings(
 ) {
   internal fun finalize(gradleProject: Project): CliProjectCompilerFinalized {
     val project = gradleProject.toSpoofaxCompilerProject()
-    val spoofaxCompilerExtension: SpoofaxCompilerExtension = rootGradleProject.extensions.getByType()
-    val shared = spoofaxCompilerExtension.shared
-    val adapterProjectCompilerExtension: AdapterProjectCompilerExtension = adapterGradleProject.extensions.getByType()
-    val adapterProjectCompilerInput = adapterProjectCompilerExtension.finalized.input
+    val rootProjectExtension: RootProjectExtension = rootGradleProject.extensions.getByType()
+    val shared = rootProjectExtension.shared
+    val adapterProjectExtension: AdapterProjectExtension = adapterGradleProject.extensions.getByType()
+    val adapterProjectCompilerInput = adapterProjectExtension.finalized.input
 
     val input = this.compiler.shared(shared).project(project).adapterProjectCompilerInput(adapterProjectCompilerInput).build()
 
-    val resourceService = spoofaxCompilerExtension.resourceService
-    val cliProjectCompiler = spoofaxCompilerExtension.cliProjectCompiler
+    val resourceService = rootProjectExtension.resourceService
+    val cliProjectCompiler = rootProjectExtension.cliProjectCompiler
     return CliProjectCompilerFinalized(resourceService, cliProjectCompiler, input)
   }
 }

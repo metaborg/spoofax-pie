@@ -19,10 +19,10 @@ open class RootPlugin : Plugin<Project> {
       }
     }
 
-    val extension = SpoofaxCompilerExtension(project.objects, project.projectDir, persistentProperties)
-    project.extensions.add(SpoofaxCompilerExtension.id, extension)
+    val extension = RootProjectExtension(project.objects, project.projectDir, persistentProperties)
+    project.extensions.add(RootProjectExtension.id, extension)
     project.subprojects {
-      extensions.add(SpoofaxCompilerExtension.id, extension)
+      extensions.add(RootProjectExtension.id, extension)
     }
 
     project.afterEvaluate {

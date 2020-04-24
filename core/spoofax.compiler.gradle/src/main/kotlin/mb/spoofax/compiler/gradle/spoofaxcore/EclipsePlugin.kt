@@ -4,120 +4,115 @@ package mb.spoofax.compiler.gradle.spoofaxcore
 
 import mb.coronium.plugin.BundleExtension
 import mb.resource.ResourceService
-import mb.spoofax.compiler.spoofaxcore.AdapterProjectCompiler
 import mb.spoofax.compiler.spoofaxcore.EclipseProjectCompiler
-import mb.spoofax.compiler.spoofaxcore.Shared
-import mb.spoofax.compiler.util.GradleDependency
-import mb.spoofax.compiler.util.GradleProject
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.*
 
-open class EclipseProjectCompilerSettings(
-  val compiler: EclipseProjectCompiler.Input.Builder = EclipseProjectCompiler.Input.builder()
+open class EclipseProjectSettings(
+  val rootGradleProject: Project,
+  val eclipseExternaldepsProject: Project,
+  val adapterGradleProject: Project,
+  val builder: EclipseProjectCompiler.Input.Builder = EclipseProjectCompiler.Input.builder()
 ) {
-  internal fun createInput(
-    shared: Shared,
-    project: GradleProject,
-    adapterProjectCompilerInput: AdapterProjectCompiler.Input,
-    eclipseExternaldepsDependency: GradleDependency
-  ): EclipseProjectCompiler.Input {
-    return this.compiler
+  internal fun finalize(gradleProject: Project): EclipseProjectFinalized {
+    val project = gradleProject.toSpoofaxCompilerProject()
+    val rootProjectExtension: RootProjectExtension = rootGradleProject.extensions.getByType()
+    val shared = rootProjectExtension.shared
+    val adapterProjectExtension: AdapterProjectExtension = adapterGradleProject.extensions.getByType()
+
+    val input = this.builder
       .shared(shared)
       .project(project)
-      .eclipseExternaldepsDependency(eclipseExternaldepsDependency)
-      .adapterProjectCompilerInput(adapterProjectCompilerInput)
+      .eclipseExternaldepsDependency(eclipseExternaldepsProject.toSpoofaxCompilerProject().asProjectDependency())
+      .adapterProjectCompilerInput(adapterProjectExtension.finalized.input)
       .build()
+
+    return EclipseProjectFinalized(rootProjectExtension.resourceService, rootProjectExtension.eclipseProjectCompiler, input)
   }
 }
 
-open class EclipseProjectCompilerExtension(
-  objects: ObjectFactory,
-  project: Project,
-  compilerExtension: SpoofaxCompilerExtension
-) {
-  val settings: Property<EclipseProjectCompilerSettings> = objects.property()
+open class EclipseProjectExtension(project: Project) {
+  val settings: Property<EclipseProjectSettings> = project.objects.property()
 
   companion object {
     internal const val id = "eclipseProjectCompiler"
   }
 
-  init {
-    settings.convention(EclipseProjectCompilerSettings())
-  }
+  internal val finalizedProvider: Provider<EclipseProjectFinalized> = settings.map { it.finalize(project) }
+  internal val inputProvider: Provider<EclipseProjectCompiler.Input> = finalizedProvider.map { it.input }
+  internal val resourceServiceProvider: Provider<ResourceService> = finalizedProvider.map { it.resourceService }
 
-  internal val input: EclipseProjectCompiler.Input by lazy {
+  internal val finalized: EclipseProjectFinalized by lazy {
     settings.finalizeValue()
-    settings.get().createInput(
-      compilerExtension.shared,
-      project.toSpoofaxCompilerProject(),
-      compilerExtension.adapterProjectCompilerExtension.input,
-      compilerExtension.eclipseExternaldepsCompilerExtension.project.asProjectDependency()
-    )
+    if(!settings.isPresent) {
+      throw GradleException("Eclipse externaldeps project compiler settings have not been set")
+    }
+    settings.get().finalize(project)
   }
 }
 
+internal class EclipseProjectFinalized(
+  val resourceService: ResourceService,
+  val compiler: EclipseProjectCompiler,
+  val input: EclipseProjectCompiler.Input
+)
+
 open class EclipsePlugin : Plugin<Project> {
   override fun apply(project: Project) {
-    val compilerExtension = project.extensions.getByType<SpoofaxCompilerExtension>()
-    val extension = EclipseProjectCompilerExtension(project.objects, project, compilerExtension)
-    project.extensions.add(EclipseProjectCompilerExtension.id, extension)
+    val extension = EclipseProjectExtension(project)
+    project.extensions.add(EclipseProjectExtension.id, extension)
 
-    project.gradle.projectsEvaluated {
-      afterEvaluate(project, compilerExtension, extension)
-    }
-
-    /*
-    HACK: apply plugins eagerly, otherwise their 'afterEvaluate' will not be triggered and the plugin will do nothing.
-    Ensure that plugins are applied after we add a 'projectsEvaluated' listener, to ensure that our listener gets
-    executed before those of the following plugins.
-    */
     project.plugins.apply("org.metaborg.gradle.config.java-library")
     project.plugins.apply("org.metaborg.coronium.bundle")
+
+    configureProjectTask(project, extension)
+    configureCompilerTask(project, extension)
+    configureBundle(project, extension)
   }
 
-  private fun afterEvaluate(project: Project, compilerExtension: SpoofaxCompilerExtension, extension: EclipseProjectCompilerExtension) {
-    val compiler = compilerExtension.eclipseProjectCompiler
-    val resourceService = compilerExtension.resourceService
-    val input = extension.input
-    val compilerProject = input.project()
-    project.configureGroup(compilerProject)
-    project.configureVersion(compilerProject)
-    project.configureGeneratedSources(compilerProject, resourceService)
-    compiler.getDependencies(input).forEach {
-      it.addToDependencies(project)
-    }
-    configureCompilerTask(project, input, compiler, resourceService)
-    configureBundle(project, input, compiler, resourceService)
-  }
-
-  private fun configureCompilerTask(
-    project: Project,
-    input: EclipseProjectCompiler.Input,
-    compiler: EclipseProjectCompiler,
-    resourceService: ResourceService
-  ) {
-    val compileTask = project.tasks.register("spoofaxCompileEclipseProject") {
+  private fun configureProjectTask(project: Project, extension: EclipseProjectExtension) {
+    val configureProjectTask = project.tasks.register("configureProject") {
       group = "spoofax compiler"
-      inputs.property("input", input)
-      outputs.files(input.providedFiles().map { resourceService.toLocalFile(it) })
+      inputs.property("input", extension.inputProvider)
+
       doLast {
-        project.deleteGenSourceSpoofaxDirectory(input.project(), resourceService)
-        compiler.compile(input)
+        val finalized = extension.finalized
+        val input = finalized.input
+        project.configureGeneratedSources(project.toSpoofaxCompilerProject(), finalized.resourceService)
+        finalized.compiler.getDependencies(input).forEach {
+          it.addToDependencies(project)
+        }
       }
     }
+
+    // Make compileJava depend on our task, because we configure source sets and dependencies.
+    project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(configureProjectTask)
+  }
+
+  private fun configureCompilerTask(project: Project, extension: EclipseProjectExtension) {
+    val compileTask = project.tasks.register("spoofaxCompileEclipseProject") {
+      group = "spoofax compiler"
+      inputs.property("input", extension.inputProvider)
+      outputs.files(extension.resourceServiceProvider.flatMap { resourceService -> extension.inputProvider.map { input -> input.providedFiles().map { resourceService.toLocalFile(it) } } })
+
+      doLast {
+        val finalized = extension.finalized
+        val input = finalized.input
+        project.deleteGenSourceSpoofaxDirectory(input.project(), finalized.resourceService)
+        finalized.compiler.compile(input)
+      }
+    }
+
+    // Make compileJava depend on our task, because we configure source sets and dependencies.
     project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(compileTask)
   }
 
-  private fun configureBundle(
-    project: Project,
-    input: EclipseProjectCompiler.Input,
-    compiler: EclipseProjectCompiler,
-    resourceService: ResourceService
-  ) {
+  private fun configureBundle(project: Project, extension: EclipseProjectExtension) {
     project.configure<BundleExtension> {
       manifestFile = resourceService.toLocalFile(input.manifestMfFile())!!
       compiler.getBundleDependencies(input).forEach {
