@@ -143,7 +143,7 @@ public interface Shared extends Serializable {
      * to align the versions of dependencies used by Spoofax 3 languages.
      */
     @Value.Default default GradleDependency spoofaxDependencyConstraintsDep() {
-        return GradleDependency.module(Coordinate.of("org.metaborg", "spoofax.depconstraints"));
+        return GradleDependency.module(Coordinate.of("org.metaborg", "spoofax.depconstraints", spoofax3Version()));
     }
 
 
