@@ -1,0 +1,10 @@
+let
+  var sum : int := 3
+  var n : int := 7
+ in 
+   if n > 0 then (
+     sum := sum + n;
+     n := n - 1
+   );
+   sum
+end

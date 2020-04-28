@@ -1,0 +1,21 @@
+module Analysis
+
+imports
+
+  statix/Menus
+
+language
+
+  observer : editor-analyze (constraint) (multifile)
+
+references
+
+  reference _ : editor-resolve
+
+  hover _ : editor-hover
+
+menus
+
+  menu: "Analysis" (meta) (openeditor)
+
+  action: "Show scope graph" = stx--show-scopegraph

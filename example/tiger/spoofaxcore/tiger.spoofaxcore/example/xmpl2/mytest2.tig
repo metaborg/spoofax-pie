@@ -1,0 +1,9 @@
+let var x : int := 1
+    var y : int := "a" 
+    var z := 2
+    function f(x : int) : int = x
+ in 
+   if x < 0 then x := f(z + x) else x := y;
+   for y := 1 to z do (z := z + 1);
+   while x < 0 do (x := x - z)
+end 

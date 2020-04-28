@@ -1,0 +1,25 @@
+module mod
+
+imports
+  
+  Common
+
+context-free start-symbols
+  
+  Start
+
+context-free syntax
+  
+  Start.Program = <<{Item "\n"}*>>
+
+  Item.Dbg = <dbg <Exp>;>
+  Item.Let = <let <ID> = <Exp>;>
+  Item.Use = <use <UseRef>;>
+  
+  UseRef.UseRef  = ID
+  UseRef.QUseRef = <<UseRef>.<ID>> 
+  
+  Exp.NumLit = INT
+  Exp.Mod    = <mod {<{Item "\n"}*>}>
+  Exp.Ref    = ID
+  Exp.QRef   = <<Exp>.<ID>>

@@ -1,0 +1,8 @@
+module dynamics/frames/values
+
+signature
+  sorts V
+  constructors
+    UndefV : V
+  variables 
+    vv : V

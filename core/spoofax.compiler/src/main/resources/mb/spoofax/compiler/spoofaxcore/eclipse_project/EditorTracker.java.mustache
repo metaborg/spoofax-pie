@@ -1,0 +1,14 @@
+package {{genEditorTracker.packageId}};
+
+import mb.spoofax.core.language.LanguageScope;
+import mb.spoofax.eclipse.EclipseIdentifiers;
+import mb.spoofax.eclipse.editor.EditorTracker;
+
+import javax.inject.Inject;
+
+@LanguageScope
+public class {{genEditorTracker.id}} extends EditorTracker {
+    @Inject public {{genEditorTracker.id}}(EclipseIdentifiers eclipseIdentifiers) {
+        super(eclipseIdentifiers);
+    }
+}

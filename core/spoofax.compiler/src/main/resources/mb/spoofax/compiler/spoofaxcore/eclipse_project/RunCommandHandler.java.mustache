@@ -1,0 +1,9 @@
+package {{genRunCommandHandler.packageId}};
+
+import mb.spoofax.eclipse.command.RunCommandHandler;
+
+public class {{genRunCommandHandler.id}} extends RunCommandHandler {
+    public {{genRunCommandHandler.id}}() {
+        super({{plugin.qualifiedId}}.getComponent());
+    }
+}

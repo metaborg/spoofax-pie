@@ -1,0 +1,10 @@
+package {{genFileTypeFactory.packageId}};
+
+import mb.spoofax.intellij.IntellijFileTypeFactory;
+
+public class {{genFileTypeFactory.id}} extends IntellijFileTypeFactory {
+    // Instantiated by IntelliJ.
+    private {{genFileTypeFactory.id}}() {
+        super({{plugin.qualifiedId}}.getComponent());
+    }
+}

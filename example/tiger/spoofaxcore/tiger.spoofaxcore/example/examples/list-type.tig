@@ -1,0 +1,9 @@
+let
+  type intlist = {hd : int, tl : intlist}
+  var l : intlist := nil
+ in
+   l := intlist{ hd = 1, tl = l };
+   l := intlist{ hd = 2, tl = l };
+   l := intlist{ hd = 3, tl = l };
+   l := 3 
+end

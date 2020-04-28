@@ -1,0 +1,22 @@
+package {{genPlugin.packageId}};
+
+import mb.spoofax.intellij.SpoofaxPlugin;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+public class {{genPlugin.id}} {
+    private static {{component.nullableQualifiedId}} component;
+
+    public static {{component.qualifiedId}} getComponent() {
+        if(component == null) {
+            throw new RuntimeException("Cannot access {{component.id}}; {{genPlugin.id}} has not been started yet, or has been stopped");
+        }
+        return component;
+    }
+
+    public static void init() {
+        component = {{daggerComponent.id}}
+            .builder()
+            .spoofaxIntellijComponent(SpoofaxPlugin.getComponent())
+            .build();
+    }
+}
