@@ -14,51 +14,53 @@ import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.IntelliJPlugin
 
-open class IntellijProjectCompilerSettings(
-  val rootGradleProject: Project,
+open class IntellijProjectSettings(
   val adapterGradleProject: Project,
-  val compiler: IntellijProjectCompiler.Input.Builder = IntellijProjectCompiler.Input.builder()
+  val builder: IntellijProjectCompiler.Input.Builder = IntellijProjectCompiler.Input.builder()
 ) {
   internal fun finalize(gradleProject: Project): IntellijProjectCompilerFinalized {
-    val project = gradleProject.toSpoofaxCompilerProject()
-    val rootProjectExtension: RootProjectExtension = rootGradleProject.extensions.getByType()
-    val shared = rootProjectExtension.shared
     val adapterProjectExtension: AdapterProjectExtension = adapterGradleProject.extensions.getByType()
-    val adapterProjectCompilerInput = adapterProjectExtension.finalized.input
+    val adapterProjectFinalized = adapterProjectExtension.finalized
+    val languageProjectFinalized = adapterProjectFinalized.languageProjectFinalized
 
-    val input = compiler.shared(shared).project(project).adapterProjectCompilerInput(adapterProjectCompilerInput).build()
+    val input = builder
+      .shared(languageProjectFinalized.shared)
+      .project(gradleProject.toSpoofaxCompilerProject())
+      .adapterProjectCompilerInput(adapterProjectFinalized.input)
+      .build()
 
-    val resourceService = rootProjectExtension.resourceService
-    val intellijProjectCompiler = rootProjectExtension.intellijProjectCompiler
-    return IntellijProjectCompilerFinalized(resourceService, intellijProjectCompiler, input)
+    return IntellijProjectCompilerFinalized(input, languageProjectFinalized.compilers)
   }
 }
 
 open class IntellijProjectCompilerExtension(project: Project) {
-  val settings: Property<IntellijProjectCompilerSettings> = project.objects.property()
+  val settings: Property<IntellijProjectSettings> = project.objects.property()
 
   companion object {
-    internal const val id = "intellijProjectCompiler"
+    internal const val id = "spoofaxIntellijProject"
   }
 
-  internal val finalizedProvider: Provider<IntellijProjectCompilerFinalized> = settings.map { it.finalize(project) }
+  internal val finalizedProvider: Provider<IntellijProjectCompilerFinalized> = project.providers.provider { finalized }
   internal val inputProvider: Provider<IntellijProjectCompiler.Input> = finalizedProvider.map { it.input }
   internal val resourceServiceProvider: Provider<ResourceService> = finalizedProvider.map { it.resourceService }
 
   internal val finalized: IntellijProjectCompilerFinalized by lazy {
+    project.logger.lifecycle("Finalizing Spoofax language IntelliJ project")
     settings.finalizeValue()
     if(!settings.isPresent) {
-      throw GradleException("IntelliJ project compiler settings have not been set")
+      throw GradleException("Spoofax language IntelliJ project settings have not been set")
     }
     settings.get().finalize(project)
   }
 }
 
 internal class IntellijProjectCompilerFinalized(
-  val resourceService: ResourceService,
-  val compiler: IntellijProjectCompiler,
-  val input: IntellijProjectCompiler.Input
-)
+  val input: IntellijProjectCompiler.Input,
+  val compilers: Compilers
+) {
+  val resourceService = compilers.resourceService
+  val compiler = compilers.intellijProjectCompiler
+}
 
 open class IntellijPlugin : Plugin<Project> {
   override fun apply(project: Project) {
@@ -73,7 +75,7 @@ open class IntellijPlugin : Plugin<Project> {
   }
 
   private fun configureIntellijLanguageProjectTask(project: Project, extension: IntellijProjectCompilerExtension) {
-    val configureIntellijProjectTask = project.tasks.register("configureIntellijProject") {
+    val configureTask = project.tasks.register("spoofaxConfigureIntellijProject") {
       group = "spoofax compiler"
       inputs.property("input", extension.inputProvider)
 
@@ -91,7 +93,7 @@ open class IntellijPlugin : Plugin<Project> {
     }
 
     // Make compileJava depend on our task, because we configure source sets and dependencies.
-    project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(configureIntellijProjectTask)
+    project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(configureTask)
   }
 
   private fun configureCompilerTask(project: Project, extension: IntellijProjectCompilerExtension) {

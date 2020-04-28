@@ -14,25 +14,23 @@ import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.*
 
 open class EclipseProjectSettings(
-  val rootGradleProject: Project,
-  val eclipseExternaldepsProject: Project,
   val adapterGradleProject: Project,
+  val eclipseExternaldepsGradleProject: Project,
   val builder: EclipseProjectCompiler.Input.Builder = EclipseProjectCompiler.Input.builder()
 ) {
   internal fun finalize(gradleProject: Project): EclipseProjectFinalized {
-    val project = gradleProject.toSpoofaxCompilerProject()
-    val rootProjectExtension: RootProjectExtension = rootGradleProject.extensions.getByType()
-    val shared = rootProjectExtension.shared
     val adapterProjectExtension: AdapterProjectExtension = adapterGradleProject.extensions.getByType()
+    val adapterProjectFinalized = adapterProjectExtension.finalized
+    val languageProjectFinalized = adapterProjectFinalized.languageProjectFinalized
 
     val input = this.builder
-      .shared(shared)
-      .project(project)
-      .eclipseExternaldepsDependency(eclipseExternaldepsProject.toSpoofaxCompilerProject().asProjectDependency())
+      .shared(languageProjectFinalized.shared)
+      .project(gradleProject.toSpoofaxCompilerProject())
+      .eclipseExternaldepsDependency(eclipseExternaldepsGradleProject.toSpoofaxCompilerProject().asProjectDependency())
       .adapterProjectCompilerInput(adapterProjectExtension.finalized.input)
       .build()
 
-    return EclipseProjectFinalized(rootProjectExtension.resourceService, rootProjectExtension.eclipseProjectCompiler, input)
+    return EclipseProjectFinalized(input, languageProjectFinalized.compilers)
   }
 }
 
@@ -40,7 +38,7 @@ open class EclipseProjectExtension(project: Project) {
   val settings: Property<EclipseProjectSettings> = project.objects.property()
 
   companion object {
-    internal const val id = "eclipseProjectCompiler"
+    internal const val id = "spoofaxEclipseProject"
   }
 
   internal val finalizedProvider: Provider<EclipseProjectFinalized> = settings.map { it.finalize(project) }
@@ -48,19 +46,22 @@ open class EclipseProjectExtension(project: Project) {
   internal val resourceServiceProvider: Provider<ResourceService> = finalizedProvider.map { it.resourceService }
 
   internal val finalized: EclipseProjectFinalized by lazy {
+    project.logger.lifecycle("Finalizing Spoofax language Eclipse project")
     settings.finalizeValue()
     if(!settings.isPresent) {
-      throw GradleException("Eclipse externaldeps project compiler settings have not been set")
+      throw GradleException("Spoofax language Eclipse project settings have not been set")
     }
     settings.get().finalize(project)
   }
 }
 
 internal class EclipseProjectFinalized(
-  val resourceService: ResourceService,
-  val compiler: EclipseProjectCompiler,
-  val input: EclipseProjectCompiler.Input
-)
+  val input: EclipseProjectCompiler.Input,
+  val compilers: Compilers
+) {
+  val resourceService = compilers.resourceService
+  val compiler = compilers.eclipseProjectCompiler
+}
 
 open class EclipsePlugin : Plugin<Project> {
   override fun apply(project: Project) {
@@ -68,15 +69,20 @@ open class EclipsePlugin : Plugin<Project> {
     project.extensions.add(EclipseProjectExtension.id, extension)
 
     project.plugins.apply("org.metaborg.gradle.config.java-library")
-    project.plugins.apply("org.metaborg.coronium.bundle")
 
     configureProjectTask(project, extension)
     configureCompilerTask(project, extension)
-    configureBundle(project, extension)
+
+    project.plugins.apply("org.metaborg.coronium.bundle")
+
+    // HACK: configure coronium plugin after all projects have been evaluated.
+    project.afterEvaluate {
+      //configureBundle(project, extension)
+    }
   }
 
   private fun configureProjectTask(project: Project, extension: EclipseProjectExtension) {
-    val configureProjectTask = project.tasks.register("configureProject") {
+    val configureTask = project.tasks.register("spoofaxConfigureEclipseProject") {
       group = "spoofax compiler"
       inputs.property("input", extension.inputProvider)
 
@@ -91,7 +97,7 @@ open class EclipsePlugin : Plugin<Project> {
     }
 
     // Make compileJava depend on our task, because we configure source sets and dependencies.
-    project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(configureProjectTask)
+    project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(configureTask)
   }
 
   private fun configureCompilerTask(project: Project, extension: EclipseProjectExtension) {
@@ -113,9 +119,12 @@ open class EclipsePlugin : Plugin<Project> {
   }
 
   private fun configureBundle(project: Project, extension: EclipseProjectExtension) {
+    // HACK: finalize in configuration phase, but after all projects have been evaluated.
+    val finalized = extension.finalized
+    val input = finalized.input
     project.configure<BundleExtension> {
-      manifestFile = resourceService.toLocalFile(input.manifestMfFile())!!
-      compiler.getBundleDependencies(input).forEach {
+      manifestFile = finalized.resourceService.toLocalFile(input.manifestMfFile())!!
+      finalized.compiler.getBundleDependencies(input).forEach {
         it.caseOf()
           .bundle { dep, reexport -> requireBundle(dep.toGradleDependency(project), reexport) }
           .embeddingBundle { dep, reexport -> requireEmbeddingBundle(dep.toGradleDependency(project), reexport) }

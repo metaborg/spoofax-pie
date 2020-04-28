@@ -2,6 +2,13 @@ plugins {
   id("org.metaborg.spoofax.compiler.gradle.spoofaxcore.intellij")
 }
 
+spoofaxIntellijProject {
+  settings.set(mb.spoofax.compiler.gradle.spoofaxcore.IntellijProjectSettings(
+    adapterGradleProject = project(":tiger.spoofax")
+  ))
+}
+
+
 intellij {
   version = "2019.3.2"
 }

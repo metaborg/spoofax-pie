@@ -15,7 +15,9 @@ repositories {
 }
 
 dependencies {
-  implementation(project(":spoofax.compiler"))
+  api(platform(project(":spoofax.depconstraints")))
+
+  api(project(":spoofax.compiler"))
 
   // Dependencies to be able to configure the extensions provided by these Gradle plugins.
   compileOnly("org.metaborg:coronium:0.1.8")
@@ -25,10 +27,6 @@ dependencies {
 
 gradlePlugin {
   plugins {
-    create("spoofax-compiler-spoofaxcore-root") {
-      id = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.root"
-      implementationClass = "mb.spoofax.compiler.gradle.spoofaxcore.RootPlugin"
-    }
     create("spoofax-compiler-spoofaxcore-language") {
       id = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.language"
       implementationClass = "mb.spoofax.compiler.gradle.spoofaxcore.LanguagePlugin"

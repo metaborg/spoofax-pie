@@ -16,61 +16,60 @@ import org.gradle.api.provider.Provider
 import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.*
 
-open class EclipseExternaldepsProjectCompilerSettings(
-  val rootGradleProject: Project,
-  val languageGradleProject: Project,
+open class EclipseExternaldepsProjectSettings(
   val adapterGradleProject: Project,
-  val compiler: EclipseExternaldepsProjectCompiler.Input.Builder = EclipseExternaldepsProjectCompiler.Input.builder()
+  val builder: EclipseExternaldepsProjectCompiler.Input.Builder = EclipseExternaldepsProjectCompiler.Input.builder()
 ) {
-  internal fun finalize(gradleProject: Project): EclipseExternaldepsProjectCompilerFinalized {
-    val project = gradleProject.toSpoofaxCompilerProject()
-    val rootProjectExtension: RootProjectExtension = rootGradleProject.extensions.getByType()
-    val shared = rootProjectExtension.shared
+  internal fun finalize(gradleProject: Project): EclipseExternaldepsProjectFinalized {
+    val adapterProjectExtension: AdapterProjectExtension = adapterGradleProject.extensions.getByType()
+    val adapterProjectFinalized = adapterProjectExtension.finalized
+    val languageProjectFinalized = adapterProjectFinalized.languageProjectFinalized
 
-    val input = compiler
-      .shared(shared)
-      .project(project)
-      .languageProjectDependency(languageGradleProject.toSpoofaxCompilerProject().asProjectDependency())
-      .adapterProjectDependency(adapterGradleProject.toSpoofaxCompilerProject().asProjectDependency())
+    val input = builder
+      .shared(languageProjectFinalized.shared)
+      .project(gradleProject.toSpoofaxCompilerProject())
+      .languageProjectDependency(languageProjectFinalized.input.languageProject().project().asProjectDependency())
+      .adapterProjectDependency(adapterProjectFinalized.input.adapterProject().project().asProjectDependency())
       .build()
 
-    val resourceService = rootProjectExtension.resourceService
-    val eclipseExternaldepsProjectCompiler = rootProjectExtension.eclipseExternaldepsProjectCompiler
-    return EclipseExternaldepsProjectCompilerFinalized(resourceService, eclipseExternaldepsProjectCompiler, input)
+    return EclipseExternaldepsProjectFinalized(input, languageProjectFinalized.compilers)
   }
 }
 
-open class EclipseExternaldepsProjectCompilerExtension(project: Project) {
-  val settings: Property<EclipseExternaldepsProjectCompilerSettings> = project.objects.property()
+open class EclipseExternaldepsProjectExtension(project: Project) {
+  val settings: Property<EclipseExternaldepsProjectSettings> = project.objects.property()
 
   companion object {
-    internal const val id = "eclipseExternaldepsProjectCompiler"
+    internal const val id = "spoofaxEclipseExternaldepsProject"
   }
 
-  internal val finalizedProvider: Provider<EclipseExternaldepsProjectCompilerFinalized> = settings.map { it.finalize(project) }
+  internal val finalizedProvider: Provider<EclipseExternaldepsProjectFinalized> = project.providers.provider { finalized }
   internal val inputProvider: Provider<EclipseExternaldepsProjectCompiler.Input> = finalizedProvider.map { it.input }
   internal val resourceServiceProvider: Provider<ResourceService> = finalizedProvider.map { it.resourceService }
 
-  internal val finalized: EclipseExternaldepsProjectCompilerFinalized by lazy {
+  internal val finalized: EclipseExternaldepsProjectFinalized by lazy {
+    project.logger.lifecycle("Finalizing Spoofax language Eclipse external dependencies project")
     settings.finalizeValue()
     if(!settings.isPresent) {
-      throw GradleException("Eclipse externaldeps project compiler settings have not been set")
+      throw GradleException("Spoofax language Eclipse external dependencies project settings have not been set")
     }
     settings.get().finalize(project)
   }
 }
 
-internal class EclipseExternaldepsProjectCompilerFinalized(
-  val resourceService: ResourceService,
-  val compiler: EclipseExternaldepsProjectCompiler,
-  val input: EclipseExternaldepsProjectCompiler.Input
-)
+internal class EclipseExternaldepsProjectFinalized(
+  val input: EclipseExternaldepsProjectCompiler.Input,
+  val compilers: Compilers
+) {
+  val resourceService = compilers.resourceService
+  val compiler = compilers.eclipseExternaldepsProjectCompiler
+}
 
 @Suppress("unused")
 open class EclipseExternaldepsPlugin : Plugin<Project> {
   override fun apply(project: Project) {
-    val extension = EclipseExternaldepsProjectCompilerExtension(project)
-    project.extensions.add(EclipseExternaldepsProjectCompilerExtension.id, extension)
+    val extension = EclipseExternaldepsProjectExtension(project)
+    project.extensions.add(EclipseExternaldepsProjectExtension.id, extension)
 
     project.plugins.apply("org.metaborg.gradle.config.java-library")
     project.plugins.apply("biz.aQute.bnd.builder")
@@ -81,8 +80,8 @@ open class EclipseExternaldepsPlugin : Plugin<Project> {
     configureJarTask(project, extension)
   }
 
-  private fun configureProjectTask(project: Project, extension: EclipseExternaldepsProjectCompilerExtension) {
-    val configureProjectTask = project.tasks.register("configureProject") {
+  private fun configureProjectTask(project: Project, extension: EclipseExternaldepsProjectExtension) {
+    val configureTask = project.tasks.register("spoofaxConfigureEclipseExternaldepsProject") {
       group = "spoofax compiler"
       inputs.property("input", extension.inputProvider)
 
@@ -100,10 +99,10 @@ open class EclipseExternaldepsPlugin : Plugin<Project> {
     }
 
     // Make compileJava depend on our task, because we configure source sets and dependencies.
-    project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(configureProjectTask)
+    project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(configureTask)
   }
 
-  private fun configureCompilerTask(project: Project, extension: EclipseExternaldepsProjectCompilerExtension) {
+  private fun configureCompilerTask(project: Project, extension: EclipseExternaldepsProjectExtension) {
     val compileTask = project.tasks.register("spoofaxCompileEclipseExternaldepsProject") {
       group = "spoofax compiler"
       inputs.property("input", extension.inputProvider)
@@ -121,7 +120,7 @@ open class EclipseExternaldepsPlugin : Plugin<Project> {
     project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(compileTask)
   }
 
-  private fun configureJarTask(project: Project, extension: EclipseExternaldepsProjectCompilerExtension) {
+  private fun configureJarTask(project: Project, extension: EclipseExternaldepsProjectExtension) {
     project.tasks.named<Jar>("jar").configure {
       inputs.property("input", extension.inputProvider)
 

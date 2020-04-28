@@ -13,57 +13,59 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.*
 
-open class CliProjectCompilerSettings(
-  val rootGradleProject: Project,
+open class CliProjectSettings(
   val adapterGradleProject: Project,
-  val compiler: CliProjectCompiler.Input.Builder = CliProjectCompiler.Input.builder()
+  val builder: CliProjectCompiler.Input.Builder = CliProjectCompiler.Input.builder()
 ) {
-  internal fun finalize(gradleProject: Project): CliProjectCompilerFinalized {
-    val project = gradleProject.toSpoofaxCompilerProject()
-    val rootProjectExtension: RootProjectExtension = rootGradleProject.extensions.getByType()
-    val shared = rootProjectExtension.shared
+  internal fun finalize(gradleProject: Project): CliProjectFinalized {
     val adapterProjectExtension: AdapterProjectExtension = adapterGradleProject.extensions.getByType()
-    val adapterProjectCompilerInput = adapterProjectExtension.finalized.input
+    val adapterProjectFinalized = adapterProjectExtension.finalized
+    val languageProjectFinalized = adapterProjectFinalized.languageProjectFinalized
 
-    val input = this.compiler.shared(shared).project(project).adapterProjectCompilerInput(adapterProjectCompilerInput).build()
+    val input = this.builder
+      .shared(languageProjectFinalized.shared)
+      .project(gradleProject.toSpoofaxCompilerProject())
+      .adapterProjectCompilerInput(adapterProjectFinalized.input)
+      .build()
 
-    val resourceService = rootProjectExtension.resourceService
-    val cliProjectCompiler = rootProjectExtension.cliProjectCompiler
-    return CliProjectCompilerFinalized(resourceService, cliProjectCompiler, input)
+    return CliProjectFinalized(input, languageProjectFinalized.compilers)
   }
 }
 
-open class CliProjectCompilerExtension(project: Project) {
-  val settings: Property<CliProjectCompilerSettings> = project.objects.property()
+open class CliProjectExtension(project: Project) {
+  val settings: Property<CliProjectSettings> = project.objects.property()
 
   companion object {
-    internal const val id = "cliProjectCompiler"
+    internal const val id = "spoofaxCliProject"
   }
 
-  internal val finalizedProvider: Provider<CliProjectCompilerFinalized> = settings.map { it.finalize(project) }
+  internal val finalizedProvider: Provider<CliProjectFinalized> = project.providers.provider { finalized }
   internal val inputProvider: Provider<CliProjectCompiler.Input> = finalizedProvider.map { it.input }
   internal val resourceServiceProvider: Provider<ResourceService> = finalizedProvider.map { it.resourceService }
 
-  internal val finalized: CliProjectCompilerFinalized by lazy {
+  internal val finalized: CliProjectFinalized by lazy {
+    project.logger.lifecycle("Finalizing Spoofax language CLI project")
     settings.finalizeValue()
     if(!settings.isPresent) {
-      throw GradleException("CLI project compiler settings have not been set")
+      throw GradleException("Spoofax language CLI project settings have not been set")
     }
     settings.get().finalize(project)
   }
 }
 
-internal class CliProjectCompilerFinalized(
-  val resourceService: ResourceService,
-  val compiler: CliProjectCompiler,
-  val input: CliProjectCompiler.Input
-)
+internal class CliProjectFinalized(
+  val input: CliProjectCompiler.Input,
+  val compilers: Compilers
+) {
+  val resourceService = compilers.resourceService
+  val compiler = compilers.cliProjectCompiler
+}
 
 @Suppress("unused")
 open class CliPlugin : Plugin<Project> {
   override fun apply(project: Project) {
-    val extension = CliProjectCompilerExtension(project)
-    project.extensions.add(CliProjectCompilerExtension.id, extension)
+    val extension = CliProjectExtension(project)
+    project.extensions.add(CliProjectExtension.id, extension)
 
     project.plugins.apply("org.metaborg.gradle.config.java-application")
 
@@ -71,8 +73,8 @@ open class CliPlugin : Plugin<Project> {
     configureCompileTask(project, extension)
   }
 
-  private fun configureCliLanguageProjectTask(project: Project, extension: CliProjectCompilerExtension) {
-    val configureCliProjectTask = project.tasks.register("configureCliProject") {
+  private fun configureCliLanguageProjectTask(project: Project, extension: CliProjectExtension) {
+    val configureTask = project.tasks.register("spoofaxConfigureCliProject") {
       group = "spoofax compiler"
       inputs.property("input", extension.inputProvider)
 
@@ -90,10 +92,10 @@ open class CliPlugin : Plugin<Project> {
     }
 
     // Make compileJava depend on our task, because we configure source sets and dependencies.
-    project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(configureCliProjectTask)
+    project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(configureTask)
   }
 
-  private fun configureCompileTask(project: Project, extension: CliProjectCompilerExtension) {
+  private fun configureCompileTask(project: Project, extension: CliProjectExtension) {
     val compileTask = project.tasks.register("spoofaxCompileCliProject") {
       group = "spoofax compiler"
       inputs.property("input", extension.inputProvider)

@@ -5,7 +5,6 @@ import mb.spoofax.compiler.command.ArgProviderRepr
 import mb.spoofax.compiler.command.AutoCommandRequestRepr
 import mb.spoofax.compiler.command.CommandDefRepr
 import mb.spoofax.compiler.command.ParamRepr
-import mb.spoofax.compiler.gradle.spoofaxcore.AdapterProjectCompilerSettings
 import mb.spoofax.compiler.menu.CommandActionRepr
 import mb.spoofax.compiler.menu.MenuItemRepr
 import mb.spoofax.compiler.spoofaxcore.AdapterProjectCompiler
@@ -25,14 +24,17 @@ plugins {
   id("org.metaborg.spoofax.compiler.gradle.spoofaxcore.adapter")
 }
 
-adapterProjectCompiler {
-  settings.set(AdapterProjectCompilerSettings(
+spoofaxAdapterProject {
+  settings.set(mb.spoofax.compiler.gradle.spoofaxcore.AdapterProjectSettings(
+    languageGradleProject = project(":tiger"),
+
     parser = ParserCompiler.AdapterProjectInput.builder(),
     styler = StylerCompiler.AdapterProjectInput.builder(),
     completer = CompleterCompiler.AdapterProjectInput.builder(),
     strategoRuntime = StrategoRuntimeCompiler.AdapterProjectInput.builder(),
     constraintAnalyzer = ConstraintAnalyzerCompiler.AdapterProjectInput.builder(),
-    compiler = run {
+
+    builder = run {
       val taskPackageId = "mb.tiger.spoofax.task"
       val commandPackageId = "mb.tiger.spoofax.command"
 

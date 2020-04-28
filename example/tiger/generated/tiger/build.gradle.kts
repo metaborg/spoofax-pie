@@ -1,9 +1,9 @@
+import mb.spoofax.compiler.spoofaxcore.CompleterCompiler
 import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler
 import mb.spoofax.compiler.spoofaxcore.LanguageProjectCompiler
 import mb.spoofax.compiler.spoofaxcore.ParserCompiler
 import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler
 import mb.spoofax.compiler.spoofaxcore.StylerCompiler
-import mb.spoofax.compiler.spoofaxcore.CompleterCompiler
 import mb.spoofax.compiler.util.GradleDependency
 
 plugins {
@@ -18,8 +18,12 @@ dependencies {
   testCompileOnly("org.checkerframework:checker-qual-android")
 }
 
-languageProjectCompiler {
-  settings.set(mb.spoofax.compiler.gradle.spoofaxcore.LanguageProjectCompilerSettings(
+spoofaxLanguageProject {
+  settings.set(mb.spoofax.compiler.gradle.spoofaxcore.LanguageProjectSettings(
+    shared = mb.spoofax.compiler.spoofaxcore.Shared.builder()
+      .name("Tiger")
+      .defaultBasePackageId("mb.tiger"),
+
     parser = ParserCompiler.LanguageProjectInput.builder()
       .startSymbol("Module"),
     styler = StylerCompiler.LanguageProjectInput.builder(),
@@ -30,7 +34,8 @@ languageProjectCompiler {
       .enableStatix(false)
       .copyJavaStrategyClasses(true),
     constraintAnalyzer = ConstraintAnalyzerCompiler.LanguageProjectInput.builder(),
-    compiler = LanguageProjectCompiler.Input.builder()
+
+    builder = LanguageProjectCompiler.Input.builder()
       .languageSpecificationDependency(GradleDependency.module("$group:tiger.spoofaxcore:$version"))
   ))
 }

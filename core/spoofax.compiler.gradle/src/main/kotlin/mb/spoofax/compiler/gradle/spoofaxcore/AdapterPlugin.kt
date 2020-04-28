@@ -19,9 +19,9 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.*
 
-open class AdapterProjectCompilerSettings(
-  val rootGradleProject: Project,
+open class AdapterProjectSettings(
   val languageGradleProject: Project,
+
   val adapterProject: AdapterProject.Builder = AdapterProject.builder(),
   val classloaderResources: ClassloaderResourcesCompiler.AdapterProjectInput.Builder = ClassloaderResourcesCompiler.AdapterProjectInput.builder(),
   val parser: ParserCompiler.AdapterProjectInput.Builder = ParserCompiler.AdapterProjectInput.builder(),
@@ -29,17 +29,16 @@ open class AdapterProjectCompilerSettings(
   val completer: CompleterCompiler.AdapterProjectInput.Builder? = null, // Optional
   val strategoRuntime: StrategoRuntimeCompiler.AdapterProjectInput.Builder? = null, // Optional
   val constraintAnalyzer: ConstraintAnalyzerCompiler.AdapterProjectInput.Builder? = null, // Optional
-  val compiler: AdapterProjectCompiler.Input.Builder = AdapterProjectCompiler.Input.builder()
-) {
-  internal fun finalize(gradleProject: Project): AdapterProjectCompilerFinalized {
-    val project = gradleProject.toSpoofaxCompilerProject()
-    val rootProjectExtension: RootProjectExtension = rootGradleProject.extensions.getByType()
-    val shared = rootProjectExtension.shared
-    val languageProjectCompilerExtension: LanguageProjectCompilerExtension = languageGradleProject.extensions.getByType()
-    val languageProjectCompilerInput = languageProjectCompilerExtension.finalized.input
-    val languageProjectDependency = languageGradleProject.toSpoofaxCompilerProject().asProjectDependency()
 
-    val adapterProject = this.adapterProject.shared(shared).project(project).build()
+  val builder: AdapterProjectCompiler.Input.Builder = AdapterProjectCompiler.Input.builder()
+) {
+  internal fun finalize(gradleProject: Project): AdapterProjectFinalized {
+    val languageProjectExtension: LanguageProjectExtension = languageGradleProject.extensions.getByType()
+    val languageProjectFinalized = languageProjectExtension.finalized
+    val shared = languageProjectFinalized.shared
+    val languageProjectCompilerInput = languageProjectFinalized.input
+
+    val adapterProject = this.adapterProject.shared(shared).project(gradleProject.toSpoofaxCompilerProject()).build()
     val classloaderResources = this.classloaderResources.languageProjectInput(languageProjectCompilerInput.classloaderResources()).build()
     val parser = this.parser.shared(shared).adapterProject(adapterProject).languageProjectInput(languageProjectCompilerInput.parser()).build()
     val styler = if(this.styler != null) {
@@ -67,57 +66,59 @@ open class AdapterProjectCompilerSettings(
       this.constraintAnalyzer.shared(shared).adapterProject(adapterProject).languageProjectInput(languageProjectCompilerInput.constraintAnalyzer().get()).build()
     } else null
 
-    val compiler = this.compiler
+    val builder = this.builder
       .shared(shared)
       .adapterProject(adapterProject)
       .classloaderResources(classloaderResources)
       .parser(parser)
-      .languageProjectDependency(languageProjectDependency)
+      .languageProjectDependency(languageGradleProject.toSpoofaxCompilerProject().asProjectDependency())
     if(styler != null) {
-      compiler.styler(styler)
+      builder.styler(styler)
     }
     if(completer != null) {
-      compiler.completer(completer)
+      builder.completer(completer)
     }
     if(strategoRuntime != null) {
-      compiler.strategoRuntime(strategoRuntime)
+      builder.strategoRuntime(strategoRuntime)
     }
     if(constraintAnalyzer != null) {
-      compiler.constraintAnalyzer(constraintAnalyzer)
+      builder.constraintAnalyzer(constraintAnalyzer)
     }
-    val input = compiler.build()
+    val input = builder.build()
 
-    val resourceService = rootProjectExtension.resourceService
-    val adapterProjectCompiler = rootProjectExtension.adapterProjectCompiler
-    return AdapterProjectCompilerFinalized(resourceService, adapterProjectCompiler, input)
+    return AdapterProjectFinalized(input, languageProjectFinalized)
   }
 }
 
 open class AdapterProjectExtension(project: Project) {
-  val settings: Property<AdapterProjectCompilerSettings> = project.objects.property()
+  val settings: Property<AdapterProjectSettings> = project.objects.property()
 
   companion object {
-    internal const val id = "adapterProjectCompiler"
+    internal const val id = "spoofaxAdapterProject"
   }
 
-  internal val finalizedProvider: Provider<AdapterProjectCompilerFinalized> = settings.map { it.finalize(project) }
+  internal val finalizedProvider: Provider<AdapterProjectFinalized> = project.providers.provider { finalized }
   internal val inputProvider: Provider<AdapterProjectCompiler.Input> = finalizedProvider.map { it.input }
   internal val resourceServiceProvider: Provider<ResourceService> = finalizedProvider.map { it.resourceService }
 
-  internal val finalized: AdapterProjectCompilerFinalized by lazy {
+  internal val finalized: AdapterProjectFinalized by lazy {
+    project.logger.lifecycle("Finalizing Spoofax language adapter project")
     settings.finalizeValue()
     if(!settings.isPresent) {
-      throw GradleException("Adapter project compiler settings have not been set")
+      throw GradleException("Spoofax language Adapter project settings have not been set")
     }
     settings.get().finalize(project)
   }
 }
 
-internal class AdapterProjectCompilerFinalized(
-  val resourceService: ResourceService,
-  val compiler: AdapterProjectCompiler,
-  val input: AdapterProjectCompiler.Input
-)
+internal class AdapterProjectFinalized(
+  val input: AdapterProjectCompiler.Input,
+  val languageProjectFinalized: LanguageProjectFinalized
+) {
+  val compilers = languageProjectFinalized.compilers
+  val resourceService = compilers.resourceService
+  val compiler = compilers.adapterProjectCompiler
+}
 
 @Suppress("unused")
 open class AdapterPlugin : Plugin<Project> {
@@ -132,7 +133,7 @@ open class AdapterPlugin : Plugin<Project> {
   }
 
   private fun configureAdapterLanguageProjectTask(project: Project, extension: AdapterProjectExtension) {
-    val configureAdapterProjectTask = project.tasks.register("configureAdapterProject") {
+    val configureTask = project.tasks.register("spoofaxConfigureAdapterProject") {
       group = "spoofax compiler"
       inputs.property("input", extension.inputProvider)
 
@@ -146,7 +147,7 @@ open class AdapterPlugin : Plugin<Project> {
     }
 
     // Make compileJava depend on our task, because we configure source sets and dependencies.
-    project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(configureAdapterProjectTask)
+    project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(configureTask)
   }
 
   private fun configureCompileTask(project: Project, extension: AdapterProjectExtension) {

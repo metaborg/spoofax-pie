@@ -1,5 +1,6 @@
+import mb.spoofax.compiler.gradle.spoofaxcore.*
 import mb.spoofax.compiler.spoofaxcore.*
-import mb.spoofax.compiler.util.GradleDependency
+import mb.spoofax.compiler.util.*
 
 plugins {
   id("org.metaborg.spoofax.compiler.gradle.spoofaxcore.language")
@@ -14,8 +15,13 @@ dependencies {
   testCompileOnly("org.checkerframework:checker-qual-android")
 }
 
-languageProjectCompiler {
-  settings.set(mb.spoofax.compiler.gradle.spoofaxcore.LanguageProjectCompilerSettings(
+spoofaxLanguageProject {
+  settings.set(LanguageProjectSettings(
+    shared = Shared.builder()
+      .name("SDF3")
+      .defaultClassPrefix("Sdf3")
+      .defaultBasePackageId("mb.sdf3"),
+
     parser = ParserCompiler.LanguageProjectInput.builder()
       .startSymbol("Module"),
     styler = StylerCompiler.LanguageProjectInput.builder(),
@@ -32,10 +38,11 @@ languageProjectCompiler {
     constraintAnalyzer = ConstraintAnalyzerCompiler.LanguageProjectInput.builder()
       .strategoStrategy("statix-editor-analyze")
       .multiFile(true),
-    compiler = run {
+
+    builder = run {
       val builder = LanguageProjectCompiler.Input.builder()
       builder.addAdditionalCopyResources("target/metaborg/EditorService-pretty.pp.af")
-      if (gradle.parent != null && gradle.parent!!.rootProject.name == "devenv") {
+      if(gradle.parent != null && gradle.parent!!.rootProject.name == "devenv") {
         // HACK: use org.metaborggggg groupId for SDF3, as that is used to prevent bootstrapping issues.
         builder.languageSpecificationDependency(GradleDependency.module("org.metaborggggg:org.metaborg.meta.lang.template:2.6.0-SNAPSHOT"))
       } else {
@@ -53,7 +60,7 @@ ecj {
 
 tasks.test {
   // HACK: skip if not in devenv composite build, as that is not using the latest version of SDF3.
-  if (gradle.parent == null || gradle.parent!!.rootProject.name != "devenv") {
+  if(gradle.parent == null || gradle.parent!!.rootProject.name != "devenv") {
     onlyIf { false }
   }
 
