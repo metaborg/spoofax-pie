@@ -6,9 +6,9 @@ plugins {
   id("de.set.ecj") version "1.4.1" apply false
   id("org.metaborg.coronium.bundle") version "0.2.2" apply false
   id("org.metaborg.coronium.embedding") version "0.2.2" apply false
-  id("biz.aQute.bnd.builder") version "4.3.1" apply false
+  id("biz.aQute.bnd.builder") version "5.0.1" apply false
+  id("org.jetbrains.intellij") version "0.4.18" apply false
   id("com.palantir.graal") version "0.6.0" apply false
-  id("org.jetbrains.intellij") version "0.4.15" apply false
 }
 
 subprojects {
