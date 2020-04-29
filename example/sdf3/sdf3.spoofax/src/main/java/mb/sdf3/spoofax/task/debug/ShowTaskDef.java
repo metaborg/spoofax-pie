@@ -60,7 +60,7 @@ public abstract class ShowTaskDef extends ProvideOutputShared implements TaskDef
     }
 
     @Override public CommandOutput exec(ExecContext context, Args args) throws Exception {
-        final @Nullable IStrategoTerm normalFormAst = context.require(operation.createTask(desugar.createSupplier(parse.createAstSupplier(args.file))));
+        final @Nullable IStrategoTerm normalFormAst = context.require(operation.createTask(desugar.createSupplier(parse.createNullableAstSupplier(args.file))));
         if(normalFormAst == null)
             throw new RuntimeException("Parse -> desugar -> transform to " + resultName + " failed (returned null)");
         return provideOutput(args.concrete, normalFormAst, args.file);

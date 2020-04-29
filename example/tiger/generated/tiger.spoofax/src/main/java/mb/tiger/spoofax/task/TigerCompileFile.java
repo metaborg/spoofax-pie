@@ -61,7 +61,7 @@ public class TigerCompileFile implements TaskDef<TigerCompileFile.Args, CommandO
     @Override public CommandOutput exec(ExecContext context, Args input) throws Exception {
         final ResourcePath file = input.file;
 
-        final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createAstSupplier(file);
+        final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createNullableAstSupplier(file);
         final @Nullable String literalsStr = context.require(listLiteralVals, astSupplier);
         if(literalsStr == null) {
             return new CommandOutput(ListView.of());

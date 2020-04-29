@@ -114,7 +114,7 @@ public class TigerInstance implements LanguageInstance {
 
     @Override
     public Task<@Nullable CompletionResult> createCompletionTask(ResourceKey resourceKey, Region primarySelection) {
-        return complete.createTask(new TigerCompleteTaskDef.Input(parse.createAstSupplier(resourceKey)));
+        return complete.createTask(new TigerCompleteTaskDef.Input(parse.createNullableRecoverableAstSupplier(resourceKey)));
     }
 
     @Override public LanguageInspection getInspection() {

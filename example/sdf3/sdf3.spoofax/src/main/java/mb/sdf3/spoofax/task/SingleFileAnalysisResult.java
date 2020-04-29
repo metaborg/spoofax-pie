@@ -32,7 +32,7 @@ public class SingleFileAnalysisResult implements Serializable {
             project,
             Sdf3Util.createResourceWalker(),
             Sdf3Util.createResourceMatcher(),
-            desugar.mapInput((ctx, i) -> parse.createAstSupplier(i))
+            desugar.mapInput((ctx, i) -> parse.createNullableRecoverableAstSupplier(i))
         );
         return analyze.createSupplier(analyzeInput).map(analysisOutput -> {
             if(analysisOutput == null) {

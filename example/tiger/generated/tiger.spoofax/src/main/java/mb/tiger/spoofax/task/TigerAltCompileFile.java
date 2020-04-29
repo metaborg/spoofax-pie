@@ -73,7 +73,7 @@ public class TigerAltCompileFile implements TaskDef<TigerAltCompileFile.Args, Co
     @Override public CommandOutput exec(ExecContext context, Args input) throws Exception {
         final ResourcePath file = input.file;
 
-        final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createAstSupplier(file);
+        final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createNullableAstSupplier(file);
         @Nullable String str;
         if(input.listDefNames) {
             str = context.require(listDefNames, astSupplier);

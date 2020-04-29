@@ -95,7 +95,7 @@ public class {{genCheckMultiTaskDef.id}} implements TaskDef<{{genCheckMultiTaskD
         }
 
 {{#constraintAnalyzer}}
-        final {{this.analyzeMultiTaskDef.qualifiedId}}.Input analyzeInput = new {{this.analyzeMultiTaskDef.qualifiedId}}.Input(input.root, input.walker, input.matcher, parse.createAstFunction());
+        final {{this.analyzeMultiTaskDef.qualifiedId}}.Input analyzeInput = new {{this.analyzeMultiTaskDef.qualifiedId}}.Input(input.root, input.walker, input.matcher, parse.createNullableRecoverableAstFunction());
         final {{this.analyzeMultiTaskDef.qualifiedId}}.@Nullable Output analysisOutput = context.require(analyze, analyzeInput);
         if(analysisOutput != null) {
             messagesBuilder.addMessages(analysisOutput.result.messages);
