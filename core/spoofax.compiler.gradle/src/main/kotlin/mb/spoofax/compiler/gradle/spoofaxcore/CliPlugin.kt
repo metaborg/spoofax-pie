@@ -2,29 +2,26 @@
 
 package mb.spoofax.compiler.gradle.spoofaxcore
 
-import mb.resource.ResourceService
-import mb.spoofax.compiler.spoofaxcore.CliProjectCompiler
+import mb.spoofax.compiler.spoofaxcore.*
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaApplication
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.*
 
 open class CliProjectSettings(
-  val adapterGradleProject: Project,
   val builder: CliProjectCompiler.Input.Builder = CliProjectCompiler.Input.builder()
 ) {
-  internal fun finalize(gradleProject: Project): CliProjectFinalized {
-    val adapterProjectExtension: AdapterProjectExtension = adapterGradleProject.extensions.getByType()
+  internal fun finalize(project: Project, adapterProject: Project): CliProjectFinalized {
+    val adapterProjectExtension: AdapterProjectExtension = adapterProject.extensions.getByType()
     val adapterProjectFinalized = adapterProjectExtension.finalized
     val languageProjectFinalized = adapterProjectFinalized.languageProjectFinalized
 
     val input = this.builder
       .shared(languageProjectFinalized.shared)
-      .project(gradleProject.toSpoofaxCompilerProject())
+      .project(project.toSpoofaxCompilerProject())
       .adapterProjectCompilerInput(adapterProjectFinalized.input)
       .build()
 
@@ -33,23 +30,34 @@ open class CliProjectSettings(
 }
 
 open class CliProjectExtension(project: Project) {
+  val adapterProject: Property<Project> = project.objects.property()
   val settings: Property<CliProjectSettings> = project.objects.property()
+
+  init {
+    settings.convention(CliProjectSettings())
+  }
 
   companion object {
     internal const val id = "spoofaxCliProject"
+    private const val name = "Spoofax language CLI project"
   }
 
-  internal val finalizedProvider: Provider<CliProjectFinalized> = project.providers.provider { finalized }
-  internal val inputProvider: Provider<CliProjectCompiler.Input> = finalizedProvider.map { it.input }
-  internal val resourceServiceProvider: Provider<ResourceService> = finalizedProvider.map { it.resourceService }
+  internal val adapterProjectFinalized: Project by lazy {
+    project.logger.debug("Finalizing $name's adapter project reference in $project")
+    adapterProject.finalizeValue()
+    if(!adapterProject.isPresent) {
+      throw GradleException("$name's adapter project reference in $project has not been set")
+    }
+    adapterProject.get()
+  }
 
   internal val finalized: CliProjectFinalized by lazy {
-    project.logger.lifecycle("Finalizing Spoofax language CLI project")
+    project.logger.debug("Finalizing $name settings in $project")
     settings.finalizeValue()
     if(!settings.isPresent) {
-      throw GradleException("Spoofax language CLI project settings have not been set")
+      throw GradleException("$name settings in $project have not been set")
     }
-    settings.get().finalize(project)
+    settings.get().finalize(project, adapterProjectFinalized)
   }
 }
 
@@ -69,41 +77,37 @@ open class CliPlugin : Plugin<Project> {
 
     project.plugins.apply("org.metaborg.gradle.config.java-application")
 
-    configureCliLanguageProjectTask(project, extension)
-    configureCompileTask(project, extension)
-  }
-
-  private fun configureCliLanguageProjectTask(project: Project, extension: CliProjectExtension) {
-    val configureTask = project.tasks.register("spoofaxConfigureCliProject") {
-      group = "spoofax compiler"
-      inputs.property("input", extension.inputProvider)
-
-      doLast {
-        val finalized = extension.finalized
-        val input = finalized.input
-        project.configureGeneratedSources(project.toSpoofaxCompilerProject(), finalized.resourceService)
-        finalized.compiler.getDependencies(input).forEach {
-          it.addToDependencies(project)
-        }
-        project.configure<JavaApplication> {
-          mainClassName = input.main().qualifiedId()
-        }
+    project.afterEvaluate {
+      extension.adapterProjectFinalized.whenAdapterProjectFinalized {
+        configure(project, extension.finalized)
       }
     }
-
-    // Make compileJava depend on our task, because we configure source sets and dependencies.
-    project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(configureTask)
   }
 
-  private fun configureCompileTask(project: Project, extension: CliProjectExtension) {
+  private fun configure(project: Project, finalized: CliProjectFinalized) {
+    configureProject(project, finalized)
+    configureCompileTask(project, finalized)
+  }
+
+  private fun configureProject(project: Project, finalized: CliProjectFinalized) {
+    val input = finalized.input
+    project.configureGeneratedSources(project.toSpoofaxCompilerProject(), finalized.resourceService)
+    finalized.compiler.getDependencies(input).forEach {
+      it.addToDependencies(project)
+    }
+    project.configure<JavaApplication> {
+      mainClassName = input.main().qualifiedId()
+    }
+  }
+
+  private fun configureCompileTask(project: Project, finalized: CliProjectFinalized) {
+    val input = finalized.input
     val compileTask = project.tasks.register("spoofaxCompileCliProject") {
       group = "spoofax compiler"
-      inputs.property("input", extension.inputProvider)
-      outputs.files(extension.resourceServiceProvider.flatMap { resourceService -> extension.inputProvider.map { input -> input.providedFiles().map { resourceService.toLocalFile(it) } } })
+      inputs.property("input", input)
+      outputs.files(input.providedFiles().map { finalized.resourceService.toLocalFile(it) })
 
       doLast {
-        val finalized = extension.finalized
-        val input = finalized.input
         project.deleteGenSourceSpoofaxDirectory(input.project(), finalized.resourceService)
         finalized.compiler.compile(input)
       }

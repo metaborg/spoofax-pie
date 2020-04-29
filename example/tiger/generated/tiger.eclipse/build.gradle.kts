@@ -3,8 +3,6 @@ plugins {
 }
 
 spoofaxEclipseProject {
-  settings.set(mb.spoofax.compiler.gradle.spoofaxcore.EclipseProjectSettings(
-    eclipseExternaldepsGradleProject = project(":tiger.eclipse.externaldeps"),
-    adapterGradleProject = project(":tiger.spoofax")
-  ))
+  eclipseExternaldepsProject.set(project(":tiger.eclipse.externaldeps"))
+  adapterProject.set(project(":tiger.spoofax"))
 }

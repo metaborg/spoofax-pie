@@ -2,26 +2,15 @@
 
 package mb.spoofax.compiler.gradle.spoofaxcore
 
-import mb.resource.ResourceService
-import mb.spoofax.compiler.spoofaxcore.AdapterProject
-import mb.spoofax.compiler.spoofaxcore.AdapterProjectCompiler
-import mb.spoofax.compiler.spoofaxcore.ClassloaderResourcesCompiler
-import mb.spoofax.compiler.spoofaxcore.CompleterCompiler
-import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler
-import mb.spoofax.compiler.spoofaxcore.ParserCompiler
-import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler
-import mb.spoofax.compiler.spoofaxcore.StylerCompiler
+import mb.spoofax.compiler.spoofaxcore.*
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.*
 
 open class AdapterProjectSettings(
-  val languageGradleProject: Project,
-
   val adapterProject: AdapterProject.Builder = AdapterProject.builder(),
   val classloaderResources: ClassloaderResourcesCompiler.AdapterProjectInput.Builder = ClassloaderResourcesCompiler.AdapterProjectInput.builder(),
   val parser: ParserCompiler.AdapterProjectInput.Builder = ParserCompiler.AdapterProjectInput.builder(),
@@ -32,13 +21,13 @@ open class AdapterProjectSettings(
 
   val builder: AdapterProjectCompiler.Input.Builder = AdapterProjectCompiler.Input.builder()
 ) {
-  internal fun finalize(gradleProject: Project): AdapterProjectFinalized {
-    val languageProjectExtension: LanguageProjectExtension = languageGradleProject.extensions.getByType()
+  internal fun finalize(project: Project, languageProject: Project): AdapterProjectFinalized {
+    val languageProjectExtension: LanguageProjectExtension = languageProject.extensions.getByType()
     val languageProjectFinalized = languageProjectExtension.finalized
     val shared = languageProjectFinalized.shared
     val languageProjectCompilerInput = languageProjectFinalized.input
 
-    val adapterProject = this.adapterProject.shared(shared).project(gradleProject.toSpoofaxCompilerProject()).build()
+    val adapterProject = this.adapterProject.shared(shared).project(project.toSpoofaxCompilerProject()).build()
     val classloaderResources = this.classloaderResources.languageProjectInput(languageProjectCompilerInput.classloaderResources()).build()
     val parser = this.parser.shared(shared).adapterProject(adapterProject).languageProjectInput(languageProjectCompilerInput.parser()).build()
     val styler = if(this.styler != null) {
@@ -71,7 +60,7 @@ open class AdapterProjectSettings(
       .adapterProject(adapterProject)
       .classloaderResources(classloaderResources)
       .parser(parser)
-      .languageProjectDependency(languageGradleProject.toSpoofaxCompilerProject().asProjectDependency())
+      .languageProjectDependency(languageProject.toSpoofaxCompilerProject().asProjectDependency())
     if(styler != null) {
       builder.styler(styler)
     }
@@ -91,23 +80,34 @@ open class AdapterProjectSettings(
 }
 
 open class AdapterProjectExtension(project: Project) {
+  val languageProject: Property<Project> = project.objects.property()
   val settings: Property<AdapterProjectSettings> = project.objects.property()
+
+  init {
+    settings.convention(AdapterProjectSettings())
+  }
 
   companion object {
     internal const val id = "spoofaxAdapterProject"
+    private const val name = "Spoofax language adapter project"
   }
 
-  internal val finalizedProvider: Provider<AdapterProjectFinalized> = project.providers.provider { finalized }
-  internal val inputProvider: Provider<AdapterProjectCompiler.Input> = finalizedProvider.map { it.input }
-  internal val resourceServiceProvider: Provider<ResourceService> = finalizedProvider.map { it.resourceService }
+  internal val languageProjectFinalized: Project by lazy {
+    project.logger.debug("Finalizing $name's language project reference in $project")
+    languageProject.finalizeValue()
+    if(!languageProject.isPresent) {
+      throw GradleException("$name's language project reference in $project has not been set")
+    }
+    languageProject.get()
+  }
 
   internal val finalized: AdapterProjectFinalized by lazy {
-    project.logger.lifecycle("Finalizing Spoofax language adapter project")
+    project.logger.debug("Finalizing $name settings in $project")
     settings.finalizeValue()
     if(!settings.isPresent) {
-      throw GradleException("Spoofax language Adapter project settings have not been set")
+      throw GradleException("$name settings in $project have not been set")
     }
-    settings.get().finalize(project)
+    settings.get().finalize(project, languageProjectFinalized)
   }
 }
 
@@ -120,6 +120,8 @@ internal class AdapterProjectFinalized(
   val compiler = compilers.adapterProjectCompiler
 }
 
+internal fun Project.whenAdapterProjectFinalized(closure: () -> Unit) = whenFinalized<AdapterProjectExtension>(closure)
+
 @Suppress("unused")
 open class AdapterPlugin : Plugin<Project> {
   override fun apply(project: Project) {
@@ -128,37 +130,33 @@ open class AdapterPlugin : Plugin<Project> {
 
     project.plugins.apply("org.metaborg.gradle.config.java-library")
 
-    configureAdapterLanguageProjectTask(project, extension)
-    configureCompileTask(project, extension)
-  }
-
-  private fun configureAdapterLanguageProjectTask(project: Project, extension: AdapterProjectExtension) {
-    val configureTask = project.tasks.register("spoofaxConfigureAdapterProject") {
-      group = "spoofax compiler"
-      inputs.property("input", extension.inputProvider)
-
-      doLast {
-        val finalized = extension.finalized
-        project.configureGeneratedSources(project.toSpoofaxCompilerProject(), finalized.resourceService)
-        finalized.compiler.getDependencies(finalized.input).forEach {
-          it.addToDependencies(project)
-        }
+    project.afterEvaluate {
+      extension.languageProjectFinalized.whenLanguageProjectFinalized {
+        configure(project, extension.finalized)
       }
     }
-
-    // Make compileJava depend on our task, because we configure source sets and dependencies.
-    project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(configureTask)
   }
 
-  private fun configureCompileTask(project: Project, extension: AdapterProjectExtension) {
+  private fun configure(project: Project, finalized: AdapterProjectFinalized) {
+    configureProject(project, finalized)
+    configureCompileTask(project, finalized)
+  }
+
+  private fun configureProject(project: Project, finalized: AdapterProjectFinalized) {
+    project.configureGeneratedSources(project.toSpoofaxCompilerProject(), finalized.resourceService)
+    finalized.compiler.getDependencies(finalized.input).forEach {
+      it.addToDependencies(project)
+    }
+  }
+
+  private fun configureCompileTask(project: Project, finalized: AdapterProjectFinalized) {
+    val input = finalized.input
     val compileTask = project.tasks.register("spoofaxCompileAdapterProject") {
       group = "spoofax compiler"
-      inputs.property("input", extension.inputProvider)
-      outputs.files(extension.resourceServiceProvider.flatMap { resourceService -> extension.inputProvider.map { input -> input.providedFiles().map { resourceService.toLocalFile(it) } } })
+      inputs.property("input", input)
+      outputs.files(input.providedFiles().map { finalized.resourceService.toLocalFile(it) })
 
       doLast {
-        val finalized = extension.finalized
-        val input = finalized.input
         project.deleteGenSourceSpoofaxDirectory(input.adapterProject().project(), finalized.resourceService)
         finalized.compiler.compile(input)
       }

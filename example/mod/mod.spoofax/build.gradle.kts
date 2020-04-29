@@ -12,9 +12,8 @@ plugins {
 }
 
 spoofaxAdapterProject {
+  languageProject.set(project(":mod"))
   settings.set(AdapterProjectSettings(
-    languageGradleProject = project(":mod"),
-
     parser = ParserCompiler.AdapterProjectInput.builder(),
     styler = StylerCompiler.AdapterProjectInput.builder(),
     completer = CompleterCompiler.AdapterProjectInput.builder(),

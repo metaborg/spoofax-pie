@@ -2,42 +2,25 @@
 
 package mb.spoofax.compiler.gradle.spoofaxcore
 
+import mb.common.util.Properties
 import mb.resource.DefaultResourceService
-import mb.resource.ResourceService
 import mb.resource.fs.FSPath
 import mb.resource.fs.FSResourceRegistry
-import mb.spoofax.compiler.spoofaxcore.AdapterProjectCompiler
-import mb.spoofax.compiler.spoofaxcore.ClassloaderResourcesCompiler
-import mb.spoofax.compiler.spoofaxcore.CliProjectCompiler
-import mb.spoofax.compiler.spoofaxcore.CompleterCompiler
-import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler
-import mb.spoofax.compiler.spoofaxcore.EclipseExternaldepsProjectCompiler
-import mb.spoofax.compiler.spoofaxcore.EclipseProjectCompiler
-import mb.spoofax.compiler.spoofaxcore.IntellijProjectCompiler
-import mb.spoofax.compiler.spoofaxcore.LanguageProject
-import mb.spoofax.compiler.spoofaxcore.LanguageProjectCompiler
-import mb.spoofax.compiler.spoofaxcore.ParserCompiler
-import mb.spoofax.compiler.spoofaxcore.Shared
-import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler
-import mb.spoofax.compiler.spoofaxcore.StylerCompiler
-import mb.spoofax.compiler.util.TemplateCompiler
+import mb.spoofax.compiler.spoofaxcore.*
+import mb.spoofax.compiler.util.*
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ModuleDependency
-import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.Sync
 import org.gradle.kotlin.dsl.*
-import org.gradle.language.base.plugins.LifecycleBasePlugin
 import java.io.IOException
 import java.nio.charset.StandardCharsets
-import java.util.*
 
 open class Compilers {
   internal val resourceService = DefaultResourceService(FSResourceRegistry())
@@ -72,10 +55,10 @@ open class LanguageProjectSettings(
 ) {
   internal fun finalize(gradleProject: Project): LanguageProjectFinalized {
     // Attempt to load compiler properties from file.
-    val spoofaxCompilerPropertiesFile = gradleProject.projectDir.resolve("spoofax_compiler.properties")
+    val spoofaxCompilerPropertiesFile = gradleProject.projectDir.resolve("spoofaxc.lock")
     val spoofaxCompilerProperties = Properties()
     if(spoofaxCompilerPropertiesFile.exists()) {
-      spoofaxCompilerPropertiesFile.inputStream().use {
+      spoofaxCompilerPropertiesFile.bufferedReader().use {
         try {
           spoofaxCompilerProperties.load(it)
         } catch(e: IOException) {
@@ -121,9 +104,9 @@ open class LanguageProjectSettings(
     shared.savePersistentProperties(spoofaxCompilerProperties)
     spoofaxCompilerPropertiesFile.parentFile.mkdirs()
     spoofaxCompilerPropertiesFile.createNewFile()
-    spoofaxCompilerPropertiesFile.outputStream().use {
+    spoofaxCompilerPropertiesFile.bufferedWriter().use {
       try {
-        spoofaxCompilerProperties.store(it, null)
+        spoofaxCompilerProperties.storeWithoutDate(it)
         it.flush()
       } catch(e: IOException) {
         gradleProject.logger.warn("Failed to save Spoofax compiler properties to file '$spoofaxCompilerPropertiesFile'", e)
@@ -137,19 +120,20 @@ open class LanguageProjectSettings(
 open class LanguageProjectExtension(project: Project) {
   val settings: Property<LanguageProjectSettings> = project.objects.property()
 
-  companion object {
-    internal const val id = "spoofaxLanguageProject"
+  init {
+    settings.convention(LanguageProjectSettings())
   }
 
-  internal val finalizedProvider: Provider<LanguageProjectFinalized> = project.providers.provider { finalized }
-  internal val inputProvider: Provider<LanguageProjectCompiler.Input> = finalizedProvider.map { it.input }
-  internal val resourceServiceProvider: Provider<ResourceService> = finalizedProvider.map { it.resourceService }
+  companion object {
+    internal const val id = "spoofaxLanguageProject"
+    private const val name = "Spoofax language project"
+  }
 
   internal val finalized: LanguageProjectFinalized by lazy {
-    project.logger.lifecycle("Finalizing Spoofax language project")
+    project.logger.debug("Finalizing $name settings in $project")
     settings.finalizeValue()
     if(!settings.isPresent) {
-      throw GradleException("Spoofax Language project settings have not been set")
+      throw GradleException("$name settings in $project have not been set")
     }
     settings.get().finalize(project)
   }
@@ -162,12 +146,9 @@ internal class LanguageProjectFinalized(
 ) {
   val resourceService = compilers.resourceService
   val compiler = compilers.languageProjectCompiler
-
-  val destinationPackage: String get() = input.languageProject().packagePath()
-  val includeStrategoClasses: Boolean get() = input.strategoRuntime().map { it.copyClasses() }.orElse(false)
-  val includeStrategoJavastratClasses: Boolean get() = input.strategoRuntime().map { it.copyJavaStrategyClasses() }.orElse(false)
-  val copyResources: ArrayList<String> get() = compiler.getCopyResources(input)
 }
+
+internal fun Project.whenLanguageProjectFinalized(closure: () -> Unit) = whenFinalized<LanguageProjectExtension>(closure)
 
 @Suppress("unused")
 open class LanguagePlugin : Plugin<Project> {
@@ -177,38 +158,32 @@ open class LanguagePlugin : Plugin<Project> {
 
     project.plugins.apply("org.metaborg.gradle.config.java-library")
 
-    configureConfigureLanguageProjectTask(project, extension)
-    configureCompileTask(project, extension)
-    configureCopySpoofaxLanguageTasks(project, extension)
-  }
-
-  private fun configureConfigureLanguageProjectTask(project: Project, extension: LanguageProjectExtension) {
-    val configureTask = project.tasks.register("spoofaxConfigureLanguageProject") {
-      group = "spoofax compiler"
-      inputs.property("input", extension.inputProvider)
-
-      doLast {
-        val finalized = extension.finalized
-        project.configureGeneratedSources(project.toSpoofaxCompilerProject(), finalized.resourceService)
-        finalized.compiler.getDependencies(finalized.input).forEach {
-          it.addToDependencies(project)
-        }
-      }
+    project.afterEvaluate {
+      configure(project, extension.finalized)
     }
-
-    // Make compileJava depend on our task, because we configure source sets and dependencies.
-    project.tasks.getByName(LifecycleBasePlugin.BUILD_TASK_NAME).dependsOn(configureTask)
   }
 
-  private fun configureCompileTask(project: Project, extension: LanguageProjectExtension) {
+  private fun configure(project: Project, finalized: LanguageProjectFinalized) {
+    configureProject(project, finalized)
+    configureCompileTask(project, finalized)
+    configureCopySpoofaxLanguageTasks(project, finalized)
+  }
+
+  private fun configureProject(project: Project, finalized: LanguageProjectFinalized) {
+    project.configureGeneratedSources(project.toSpoofaxCompilerProject(), finalized.resourceService)
+    finalized.compiler.getDependencies(finalized.input).forEach {
+      it.addToDependencies(project)
+    }
+  }
+
+  private fun configureCompileTask(project: Project, finalized: LanguageProjectFinalized) {
+    val input = finalized.input
     val compileTask = project.tasks.register("spoofaxCompileLanguageProject") {
       group = "spoofax compiler"
-      inputs.property("input", extension.inputProvider)
-      outputs.files(extension.resourceServiceProvider.flatMap { resourceService -> extension.inputProvider.map { input -> input.providedFiles().map { resourceService.toLocalFile(it) } } })
+      inputs.property("input", input)
+      outputs.files(input.providedFiles().map { finalized.resourceService.toLocalFile(it) })
 
       doLast {
-        val finalized = extension.finalized
-        val input = finalized.input
         project.deleteGenSourceSpoofaxDirectory(input.languageProject().project(), finalized.resourceService)
         finalized.compiler.compile(input)
       }
@@ -218,47 +193,45 @@ open class LanguagePlugin : Plugin<Project> {
     project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(compileTask)
   }
 
-  private fun configureCopySpoofaxLanguageTasks(project: Project, extension: LanguageProjectExtension) {
-    // Create language specification dependency and 'spoofaxLanguage' configuration that contains this dependency.
-    val configuration = project.configurations.create("spoofaxLanguage") {}
-    val populateSpoofaxLanguageConfigurationTask = project.tasks.register("populateSpoofaxLanguageConfiguration") {
-      group = "spoofax compiler"
-      inputs.property("input", extension.inputProvider)
+  private fun configureCopySpoofaxLanguageTasks(project: Project, finalized: LanguageProjectFinalized) {
+    val input = finalized.input
+    val destinationPackage = input.languageProject().packagePath()
+    val includeStrategoClasses = input.strategoRuntime().map { it.copyClasses() }.orElse(false)
+    val includeStrategoJavastratClasses = input.strategoRuntime().map { it.copyJavaStrategyClasses() }.orElse(false)
+    val copyResources = finalized.compiler.getCopyResources(input)
 
-      doLast {
-        val finalized = extension.finalized
-        val dependency: Dependency = finalized.input.languageSpecificationDependency().caseOf()
-          .project { configureSpoofaxLanguageDependency(project.dependencies.project(it)) }
-          .module { configureSpoofaxLanguageDependency(project.dependencies.module(it.toGradleNotation()) as ModuleDependency) }
-          .files { project.dependencies.create(project.files(it)) }
-        configuration.dependencies.add(dependency)
-      }
+    // Create language specification dependency and 'spoofaxLanguage' configuration that contains this dependency.
+    val configuration = project.configurations.create("spoofaxLanguage") {
+      val dependency: Dependency = input.languageSpecificationDependency().caseOf()
+        .project { configureSpoofaxLanguageDependency(project.dependencies.project(it)) }
+        .module { configureSpoofaxLanguageDependency(project.dependencies.module(it.toGradleNotation()) as ModuleDependency) }
+        .files { project.dependencies.create(project.files(it)) }
+      dependencies.add(dependency)
     }
 
     // Unpack the '.spoofax-language' archive.
     val unpackSpoofaxLanguageDir = "${project.buildDir}/unpackedSpoofaxLanguage/"
     val unpackSpoofaxLanguageTask = project.tasks.register<Sync>("unpackSpoofaxLanguage") {
-      group = "spoofax compiler"
-      inputs.property("input", extension.inputProvider)
-      dependsOn(populateSpoofaxLanguageConfigurationTask, configuration)
+      inputs.property("input", input)
+      dependsOn(configuration)
       from({ configuration.map { project.zipTree(it) } })  /* Closure inside `from` to defer evaluation until task execution time */
       into(unpackSpoofaxLanguageDir)
 
-      // TODO: is it OK to do doFirst here?
-      doFirst {
-        val finalized = extension.finalized
-        val allCopyResources = finalized.copyResources.toMutableList()
-        if(finalized.includeStrategoClasses) {
-          allCopyResources.add("target/metaborg/stratego.jar")
-        }
-        if(finalized.includeStrategoJavastratClasses) {
-          allCopyResources.add("target/metaborg/stratego-javastrat.jar")
-        }
-        include(allCopyResources)
+      val allCopyResources = copyResources.toMutableList()
+      if(includeStrategoClasses) {
+        allCopyResources.add("target/metaborg/stratego.jar")
       }
+      if(includeStrategoJavastratClasses) {
+        allCopyResources.add("target/metaborg/stratego-javastrat.jar")
+      }
+      include(allCopyResources)
     }
 
     // Copy resources into `mainSourceSet.java.outputDir` and `testSourceSet.java.outputDir`, so they end up in the target package.
+    val resourcesCopySpec = project.copySpec {
+      from(unpackSpoofaxLanguageDir)
+      include(copyResources)
+    }
     val strategoCopySpec = project.copySpec {
       from(project.zipTree("$unpackSpoofaxLanguageDir/target/metaborg/stratego.jar"))
       exclude("META-INF")
@@ -268,44 +241,26 @@ open class LanguagePlugin : Plugin<Project> {
       exclude("META-INF")
     }
     val copyMainTask = project.tasks.register<Copy>("copyMainResources") {
-      group = "spoofax compiler"
       dependsOn(unpackSpoofaxLanguageTask)
       into(project.the<SourceSetContainer>()["main"].java.outputDir)
-
-      // TODO: is it OK to do doFirst here?
-      doFirst {
-        val finalized = extension.finalized
-        into(finalized.destinationPackage) {
-          from(unpackSpoofaxLanguageDir)
-          include(finalized.copyResources)
-        }
-        if(finalized.includeStrategoClasses) {
-          into(".") { with(strategoCopySpec) }
-        }
-        if(finalized.includeStrategoJavastratClasses) {
-          into(".") { with(strategoJavastratCopySpec) }
-        }
+      into(destinationPackage) { with(resourcesCopySpec) }
+      if(includeStrategoClasses) {
+        into(".") { with(strategoCopySpec) }
+      }
+      if(includeStrategoJavastratClasses) {
+        into(".") { with(strategoJavastratCopySpec) }
       }
     }
     project.tasks.getByName(JavaPlugin.CLASSES_TASK_NAME).dependsOn(copyMainTask)
     val copyTestTask = project.tasks.register<Copy>("copyTestResources") {
-      group = "spoofax compiler"
       dependsOn(unpackSpoofaxLanguageTask)
       into(project.the<SourceSetContainer>()["test"].java.outputDir)
-
-      // TODO: is it OK to do doFirst here?
-      doFirst {
-        val finalized = extension.finalized
-        into(finalized.destinationPackage) {
-          from(unpackSpoofaxLanguageDir)
-          include(finalized.copyResources)
-        }
-        if(finalized.includeStrategoClasses) {
-          into(".") { with(strategoCopySpec) }
-        }
-        if(finalized.includeStrategoJavastratClasses) {
-          into(".") { with(strategoJavastratCopySpec) }
-        }
+      into(destinationPackage) { with(resourcesCopySpec) }
+      if(includeStrategoClasses) {
+        into(".") { with(strategoCopySpec) }
+      }
+      if(includeStrategoJavastratClasses) {
+        into(".") { with(strategoJavastratCopySpec) }
       }
     }
     project.tasks.getByName(JavaPlugin.TEST_CLASSES_TASK_NAME).dependsOn(copyTestTask)

@@ -1,8 +1,8 @@
 import mb.spoofax.compiler.command.*
-import mb.spoofax.compiler.gradle.spoofaxcore.*
 import mb.spoofax.compiler.menu.*
 import mb.spoofax.compiler.spoofaxcore.*
 import mb.spoofax.compiler.util.*
+import mb.spoofax.compiler.gradle.spoofaxcore.*
 import mb.spoofax.core.language.command.CommandContextType
 import mb.spoofax.core.language.command.CommandExecutionType
 import mb.spoofax.core.language.command.EnclosingCommandContextType
@@ -14,9 +14,8 @@ plugins {
 }
 
 spoofaxAdapterProject {
+  languageProject.set(project(":sdf3"))
   settings.set(AdapterProjectSettings(
-    languageGradleProject = project(":sdf3"),
-
     parser = ParserCompiler.AdapterProjectInput.builder(),
     styler = StylerCompiler.AdapterProjectInput.builder(),
     completer = CompleterCompiler.AdapterProjectInput.builder(),

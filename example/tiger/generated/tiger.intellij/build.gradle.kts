@@ -3,11 +3,8 @@ plugins {
 }
 
 spoofaxIntellijProject {
-  settings.set(mb.spoofax.compiler.gradle.spoofaxcore.IntellijProjectSettings(
-    adapterGradleProject = project(":tiger.spoofax")
-  ))
+  adapterProject.set(project(":tiger.spoofax"))
 }
-
 
 intellij {
   version = "2019.3.2"

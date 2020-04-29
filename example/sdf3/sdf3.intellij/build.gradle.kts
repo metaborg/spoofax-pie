@@ -5,9 +5,7 @@ plugins {
 }
 
 spoofaxIntellijProject {
-  settings.set(IntellijProjectSettings(
-    adapterGradleProject = project(":sdf3.spoofax")
-  ))
+  adapterProject.set(project(":sdf3.spoofax"))
 }
 
 intellij {

@@ -3,7 +3,5 @@ plugins {
 }
 
 spoofaxCliProject {
-  settings.set(mb.spoofax.compiler.gradle.spoofaxcore.CliProjectSettings(
-    adapterGradleProject = project(":tiger.spoofax")
-  ))
+  adapterProject.set(project(":tiger.spoofax"))
 }

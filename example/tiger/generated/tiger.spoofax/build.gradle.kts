@@ -1,20 +1,9 @@
 import mb.common.util.ListView
-import mb.spoofax.compiler.cli.CliCommandRepr
-import mb.spoofax.compiler.cli.CliParamRepr
-import mb.spoofax.compiler.command.ArgProviderRepr
-import mb.spoofax.compiler.command.AutoCommandRequestRepr
-import mb.spoofax.compiler.command.CommandDefRepr
-import mb.spoofax.compiler.command.ParamRepr
-import mb.spoofax.compiler.menu.CommandActionRepr
-import mb.spoofax.compiler.menu.MenuItemRepr
-import mb.spoofax.compiler.spoofaxcore.AdapterProjectCompiler
-import mb.spoofax.compiler.spoofaxcore.CompleterCompiler
-import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler
-import mb.spoofax.compiler.spoofaxcore.ParserCompiler
-import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler
-import mb.spoofax.compiler.spoofaxcore.StylerCompiler
-import mb.spoofax.compiler.util.StringUtil
-import mb.spoofax.compiler.util.TypeInfo
+import mb.spoofax.compiler.cli.*
+import mb.spoofax.compiler.command.*
+import mb.spoofax.compiler.menu.*
+import mb.spoofax.compiler.spoofaxcore.*
+import mb.spoofax.compiler.util.*
 import mb.spoofax.core.language.command.CommandContextType
 import mb.spoofax.core.language.command.CommandExecutionType
 import mb.spoofax.core.language.command.HierarchicalResourceType
@@ -25,9 +14,8 @@ plugins {
 }
 
 spoofaxAdapterProject {
+  languageProject.set(project(":tiger"))
   settings.set(mb.spoofax.compiler.gradle.spoofaxcore.AdapterProjectSettings(
-    languageGradleProject = project(":tiger"),
-
     parser = ParserCompiler.AdapterProjectInput.builder(),
     styler = StylerCompiler.AdapterProjectInput.builder(),
     completer = CompleterCompiler.AdapterProjectInput.builder(),

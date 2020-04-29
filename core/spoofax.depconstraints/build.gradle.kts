@@ -19,7 +19,32 @@ val immutablesVersion = "2.8.2"
 
 dependencies {
   constraints {
-    // Main
+    // Own projects
+    api(project(":common"))
+
+    api(project(":completions.common"))
+    api(project(":jsglr.common"))
+    api(project(":jsglr1.common"))
+    api(project(":jsglr1.pie"))
+    api(project(":jsglr2.common"))
+    api(project(":esv.common"))
+    api(project(":stratego.common"))
+    api(project(":constraint.common"))
+    api(project(":nabl2.common"))
+    api(project(":statix.common"))
+    api(project(":spoofax2.common"))
+
+    api(project(":spoofax.core"))
+    api(project(":spoofax.cli"))
+    api(project(":spoofax.intellij"))
+    api(project(":spoofax.eclipse"))
+    api(project(":spoofax.eclipse.externaldeps"))
+    api(project(":spoofax.compiler"))
+    api(project(":spoofax.compiler.interfaces"))
+    api(project(":spoofax.compiler.gradle"))
+
+
+    // Main dependencies
     /// Log
     api("org.metaborg:log.api:$logVersion")
     api("org.metaborg:log.backend.noop:$logVersion")
@@ -49,13 +74,13 @@ dependencies {
     api("info.picocli:picocli:$picocliVersion")
     api("info.picocli:picocli-codegen:$picocliVersion")
 
-    // Annotations only
+    // Annotation-only dependencies
     /// javax.inject
     api("javax.inject:javax.inject:$javaxInjectVersion")
     /// Checkerframework
     api("org.checkerframework:checker-qual-android:$checkerframeworkVersion") // Use android version: annotation retention policy is class instead of runtime.
 
-    // Annotation processors
+    // Annotation processor dependencies
     /// Dagger
     api("com.google.dagger:dagger:$daggerVersion")
     api("com.google.dagger:dagger-compiler:$daggerVersion")
@@ -67,7 +92,7 @@ dependencies {
     api("org.immutables:value-annotations:$immutablesVersion")
 
 
-    // Test
+    // Test dependencies // TODO: should be in a separate platform?
     api("org.junit.jupiter:junit-jupiter-api:5.2.0")
     api("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
     api("com.google.jimfs:jimfs:1.1")
