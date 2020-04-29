@@ -9,7 +9,6 @@ plugins {
 }
 
 dependencies {
-  api(platform("org.metaborg:spoofax.depconstraints:$version"))
   testImplementation("org.metaborg:log.backend.slf4j")
   testImplementation("org.slf4j:slf4j-simple:1.7.30")
   testCompileOnly("org.checkerframework:checker-qual-android")

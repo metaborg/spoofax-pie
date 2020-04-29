@@ -213,7 +213,6 @@ spoofaxAdapterProject {
 }
 
 dependencies {
-  api(platform("$group:spoofax.depconstraints:$version"))
   api("org.metaborg:sdf2parenthesize")
 
   testAnnotationProcessor(platform("$group:spoofax.depconstraints:$version"))
