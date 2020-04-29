@@ -3,12 +3,10 @@ package mb.spoofax.compiler.gradle.spoofaxcore
 import mb.resource.ResourceRuntimeException
 import mb.resource.ResourceService
 import mb.resource.fs.FSPath
-import mb.spoofax.compiler.util.Coordinate
-import mb.spoofax.compiler.util.GradleConfiguredDependency
-import mb.spoofax.compiler.util.GradleDependency
-import mb.spoofax.compiler.util.GradleProject
+import mb.spoofax.compiler.util.*
 import org.gradle.api.GradleException
 import org.gradle.api.Project
+import org.gradle.api.UnknownDomainObjectException
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.kotlin.dsl.*
@@ -20,13 +18,16 @@ fun Project.toSpoofaxCompilerProject(): GradleProject {
     .build()
 }
 
-fun Project.configureGroup(project: GradleProject) {
-  this.group = project.coordinate().groupId()
-}
-
-fun Project.configureVersion(project: GradleProject) {
-  project.coordinate().version().ifPresent { this.version = it }
-
+inline fun <reified E : Any> Project.whenFinalized(crossinline closure: () -> Unit) {
+  try {
+    extensions.getByType<E>()
+    closure()
+  } catch(e: UnknownDomainObjectException) {
+    afterEvaluate {
+      extensions.getByType<E>()
+      closure()
+    }
+  }
 }
 
 fun Project.configureGeneratedSources(compilerProject: GradleProject, resourceService: ResourceService) {

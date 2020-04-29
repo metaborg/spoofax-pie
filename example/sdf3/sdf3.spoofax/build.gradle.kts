@@ -1,33 +1,28 @@
-import mb.spoofax.compiler.command.ArgProviderRepr
-import mb.spoofax.compiler.command.CommandDefRepr
-import mb.spoofax.compiler.command.ParamRepr
-import mb.spoofax.compiler.gradle.spoofaxcore.AdapterProjectCompilerSettings
-import mb.spoofax.compiler.menu.CommandActionRepr
-import mb.spoofax.compiler.menu.MenuItemRepr
-import mb.spoofax.compiler.spoofaxcore.AdapterProjectCompiler
-import mb.spoofax.compiler.spoofaxcore.CompleterCompiler
-import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler
-import mb.spoofax.compiler.spoofaxcore.ParserCompiler
-import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler
-import mb.spoofax.compiler.spoofaxcore.StylerCompiler
-import mb.spoofax.compiler.util.TypeInfo
+import mb.spoofax.compiler.command.*
+import mb.spoofax.compiler.menu.*
+import mb.spoofax.compiler.spoofaxcore.*
+import mb.spoofax.compiler.util.*
+import mb.spoofax.compiler.gradle.spoofaxcore.*
 import mb.spoofax.core.language.command.CommandContextType
 import mb.spoofax.core.language.command.CommandExecutionType
 import mb.spoofax.core.language.command.EnclosingCommandContextType
+
 
 plugins {
   id("org.metaborg.spoofax.compiler.gradle.spoofaxcore.adapter")
   id("org.metaborg.gradle.config.junit-testing")
 }
 
-adapterProjectCompiler {
-  settings.set(AdapterProjectCompilerSettings(
+spoofaxAdapterProject {
+  languageProject.set(project(":sdf3"))
+  settings.set(AdapterProjectSettings(
     parser = ParserCompiler.AdapterProjectInput.builder(),
     styler = StylerCompiler.AdapterProjectInput.builder(),
     completer = CompleterCompiler.AdapterProjectInput.builder(),
     strategoRuntime = StrategoRuntimeCompiler.AdapterProjectInput.builder(),
     constraintAnalyzer = ConstraintAnalyzerCompiler.AdapterProjectInput.builder(),
-    compiler = run {
+
+    builder = run {
       val packageId = "mb.sdf3.spoofax"
       val taskPackageId = "$packageId.task"
       val commandPackageId = "$packageId.command"

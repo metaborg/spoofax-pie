@@ -286,7 +286,6 @@ public interface Shared extends Serializable {
         properties.setProperty("defaultArtifactId", defaultArtifactId());
         properties.setProperty("defaultVersion", defaultVersion());
         properties.setProperty("defaultBasePackageId", defaultBasePackageId());
-        properties.setProperty("spoofax3Version", spoofax3Version());
     }
 
     @Value.Check default void check() {

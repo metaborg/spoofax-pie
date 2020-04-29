@@ -1,5 +1,11 @@
+import mb.spoofax.compiler.gradle.spoofaxcore.*
+
 plugins {
   id("org.metaborg.spoofax.compiler.gradle.spoofaxcore.intellij")
+}
+
+spoofaxIntellijProject {
+  adapterProject.set(project(":mod.spoofax"))
 }
 
 intellij {

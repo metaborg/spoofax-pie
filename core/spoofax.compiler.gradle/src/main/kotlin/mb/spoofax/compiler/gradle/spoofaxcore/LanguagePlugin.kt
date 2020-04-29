@@ -2,31 +2,47 @@
 
 package mb.spoofax.compiler.gradle.spoofaxcore
 
-import mb.resource.ResourceService
-import mb.spoofax.compiler.spoofaxcore.ClassloaderResourcesCompiler
-import mb.spoofax.compiler.spoofaxcore.CompleterCompiler
-import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler
-import mb.spoofax.compiler.spoofaxcore.LanguageProject
-import mb.spoofax.compiler.spoofaxcore.LanguageProjectCompiler
-import mb.spoofax.compiler.spoofaxcore.ParserCompiler
-import mb.spoofax.compiler.spoofaxcore.Shared
-import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler
-import mb.spoofax.compiler.spoofaxcore.StylerCompiler
-import mb.spoofax.compiler.util.GradleProject
+import mb.common.util.Properties
+import mb.resource.DefaultResourceService
+import mb.resource.fs.FSPath
+import mb.resource.fs.FSResourceRegistry
+import mb.spoofax.compiler.spoofaxcore.*
+import mb.spoofax.compiler.util.*
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ModuleDependency
-import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.Sync
 import org.gradle.kotlin.dsl.*
+import java.io.IOException
+import java.nio.charset.StandardCharsets
 
-open class LanguageProjectCompilerSettings(
+open class Compilers {
+  internal val resourceService = DefaultResourceService(FSResourceRegistry())
+  internal val charset = StandardCharsets.UTF_8
+  internal val templateCompiler = TemplateCompiler(Shared::class.java, resourceService, charset)
+  internal val classloaderResourceService = ClassloaderResourcesCompiler(templateCompiler)
+  internal val parserCompiler = ParserCompiler(templateCompiler)
+  internal val stylerCompiler = StylerCompiler(templateCompiler)
+  internal val completerCompiler = CompleterCompiler(templateCompiler)
+  internal val strategoRuntimeCompiler = StrategoRuntimeCompiler(templateCompiler)
+  internal val constraintAnalyzerCompiler = ConstraintAnalyzerCompiler(templateCompiler)
+  internal val languageProjectCompiler = LanguageProjectCompiler(templateCompiler, classloaderResourceService, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler)
+  internal val adapterProjectCompiler = AdapterProjectCompiler(templateCompiler, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler)
+  internal val cliProjectCompiler = CliProjectCompiler(templateCompiler)
+  internal val eclipseExternaldepsProjectCompiler = EclipseExternaldepsProjectCompiler(templateCompiler)
+  internal val eclipseProjectCompiler = EclipseProjectCompiler(templateCompiler)
+  internal val intellijProjectCompiler = IntellijProjectCompiler(templateCompiler)
+}
+
+open class LanguageProjectSettings(
+  val shared: Shared.Builder = Shared.builder(),
+
   val languageProject: LanguageProject.Builder = LanguageProject.builder(),
   val classloaderResources: ClassloaderResourcesCompiler.LanguageProjectInput.Builder = ClassloaderResourcesCompiler.LanguageProjectInput.builder(),
   val parser: ParserCompiler.LanguageProjectInput.Builder = ParserCompiler.LanguageProjectInput.builder(),
@@ -34,127 +50,155 @@ open class LanguageProjectCompilerSettings(
   val completer: CompleterCompiler.LanguageProjectInput.Builder? = null, // Optional
   val strategoRuntime: StrategoRuntimeCompiler.LanguageProjectInput.Builder? = null, // Optional
   val constraintAnalyzer: ConstraintAnalyzerCompiler.LanguageProjectInput.Builder? = null, // Optional
-  val compiler: LanguageProjectCompiler.Input.Builder = LanguageProjectCompiler.Input.builder()
+
+  val builder: LanguageProjectCompiler.Input.Builder = LanguageProjectCompiler.Input.builder()
 ) {
-  internal fun createInput(shared: Shared, project: GradleProject): LanguageProjectCompiler.Input {
-    val languageProject = this.languageProject.shared(shared).project(project).build()
-    val classloaderResources = this.classloaderResources.shared(shared).languageProject(languageProject).build();
+  internal fun finalize(gradleProject: Project): LanguageProjectFinalized {
+    // Attempt to load compiler properties from file.
+    val spoofaxCompilerPropertiesFile = gradleProject.projectDir.resolve("spoofaxc.lock")
+    val spoofaxCompilerProperties = Properties()
+    if(spoofaxCompilerPropertiesFile.exists()) {
+      spoofaxCompilerPropertiesFile.bufferedReader().use {
+        try {
+          spoofaxCompilerProperties.load(it)
+        } catch(e: IOException) {
+          gradleProject.logger.warn("Failed to load Spoofax compiler properties from file '$spoofaxCompilerPropertiesFile'", e)
+        }
+      }
+    }
+
+    // Build shared settings.
+    val shared = shared
+      .withPersistentProperties(spoofaxCompilerProperties)
+      .baseDirectory(FSPath(gradleProject.projectDir.parent)) // TODO: remove the need to set a base directory, as it is often wrong.
+      .build()
+
+    // Build language project compiler settings.
+    val languageProject = this.languageProject.shared(shared).project(gradleProject.toSpoofaxCompilerProject()).build()
+    val classloaderResources = this.classloaderResources.shared(shared).languageProject(languageProject).build()
     val parser = this.parser.shared(shared).languageProject(languageProject).build()
     val styler = if(this.styler != null) this.styler.shared(shared).languageProject(languageProject).build() else null
     val completer = if(this.completer != null) this.completer.shared(shared).languageProject(languageProject).build() else null
     val strategoRuntime = if(this.strategoRuntime != null) this.strategoRuntime.shared(shared).languageProject(languageProject).build() else null
     val constraintAnalyzer = if(this.constraintAnalyzer != null) this.constraintAnalyzer.shared(shared).languageProject(languageProject).build() else null
-
-    val compiler = this.compiler
+    val builder = this.builder
       .shared(shared)
       .languageProject(languageProject)
       .classloaderResources(classloaderResources)
       .parser(parser)
     if(styler != null) {
-      compiler.styler(styler)
+      builder.styler(styler)
     }
     if(completer != null) {
-      compiler.completer(completer)
+      builder.completer(completer)
     }
     if(strategoRuntime != null) {
-      compiler.strategoRuntime(strategoRuntime)
+      builder.strategoRuntime(strategoRuntime)
     }
     if(constraintAnalyzer != null) {
-      compiler.constraintAnalyzer(constraintAnalyzer)
+      builder.constraintAnalyzer(constraintAnalyzer)
     }
-    return compiler.build()
+    val input = builder.build()
+
+    // Save compiler properties to file.
+    shared.savePersistentProperties(spoofaxCompilerProperties)
+    spoofaxCompilerPropertiesFile.parentFile.mkdirs()
+    spoofaxCompilerPropertiesFile.createNewFile()
+    spoofaxCompilerPropertiesFile.bufferedWriter().use {
+      try {
+        spoofaxCompilerProperties.storeWithoutDate(it)
+        it.flush()
+      } catch(e: IOException) {
+        gradleProject.logger.warn("Failed to save Spoofax compiler properties to file '$spoofaxCompilerPropertiesFile'", e)
+      }
+    }
+
+    return LanguageProjectFinalized(shared, input, Compilers())
   }
 }
 
-open class LanguageProjectCompilerExtension(
-  objects: ObjectFactory,
-  compilerExtension: SpoofaxCompilerExtension
-) {
-  val settings: Property<LanguageProjectCompilerSettings> = objects.property()
-
-  companion object {
-    internal const val id = "languageProjectCompiler"
-  }
+open class LanguageProjectExtension(project: Project) {
+  val settings: Property<LanguageProjectSettings> = project.objects.property()
 
   init {
-    settings.convention(LanguageProjectCompilerSettings())
+    settings.convention(LanguageProjectSettings())
   }
 
-  internal val project by lazy {
-    compilerExtension.languageGradleProject.finalizeValue()
-    if(!compilerExtension.languageGradleProject.isPresent) {
-      throw GradleException("Language project was not set")
-    }
-    compilerExtension.languageGradleProject.get().toSpoofaxCompilerProject()
+  companion object {
+    internal const val id = "spoofaxLanguageProject"
+    private const val name = "Spoofax language project"
   }
 
-  internal val input: LanguageProjectCompiler.Input by lazy {
+  internal val finalized: LanguageProjectFinalized by lazy {
+    project.logger.debug("Finalizing $name settings in $project")
     settings.finalizeValue()
-    settings.get().createInput(compilerExtension.shared, project)
+    if(!settings.isPresent) {
+      throw GradleException("$name settings in $project have not been set")
+    }
+    settings.get().finalize(project)
   }
 }
 
+internal class LanguageProjectFinalized(
+  val shared: Shared,
+  val input: LanguageProjectCompiler.Input,
+  val compilers: Compilers
+) {
+  val resourceService = compilers.resourceService
+  val compiler = compilers.languageProjectCompiler
+}
+
+internal fun Project.whenLanguageProjectFinalized(closure: () -> Unit) = whenFinalized<LanguageProjectExtension>(closure)
+
+@Suppress("unused")
 open class LanguagePlugin : Plugin<Project> {
   override fun apply(project: Project) {
-    val compilerExtension = project.extensions.getByType<SpoofaxCompilerExtension>()
-    val extension = LanguageProjectCompilerExtension(project.objects, compilerExtension)
-    project.extensions.add(LanguageProjectCompilerExtension.id, extension)
-    compilerExtension.languageGradleProject.set(project)
+    val extension = LanguageProjectExtension(project)
+    project.extensions.add(LanguageProjectExtension.id, extension)
 
-    project.gradle.projectsEvaluated {
-      afterEvaluate(project, compilerExtension, extension)
-    }
-
-    /*
-    HACK: apply plugins eagerly, otherwise their 'afterEvaluate' will not be triggered and the plugin will do nothing.
-    Ensure that plugins are applied after we add a 'projectsEvaluated' listener, to ensure that our listener gets
-    executed before those of the following plugins.
-    */
     project.plugins.apply("org.metaborg.gradle.config.java-library")
+
+    project.afterEvaluate {
+      configure(project, extension.finalized)
+    }
   }
 
-  private fun afterEvaluate(project: Project, compilerExtension: SpoofaxCompilerExtension, extension: LanguageProjectCompilerExtension) {
-    val compiler = compilerExtension.languageProjectCompiler
-    val resourceService = compilerExtension.resourceService
-    val input = extension.input
-    val compilerProject = input.languageProject().project();
-    project.configureGroup(compilerProject)
-    project.configureVersion(compilerProject)
-    project.configureGeneratedSources(compilerProject, resourceService)
-    compiler.getDependencies(input).forEach {
+  private fun configure(project: Project, finalized: LanguageProjectFinalized) {
+    configureProject(project, finalized)
+    configureCompileTask(project, finalized)
+    configureCopySpoofaxLanguageTasks(project, finalized)
+  }
+
+  private fun configureProject(project: Project, finalized: LanguageProjectFinalized) {
+    project.configureGeneratedSources(project.toSpoofaxCompilerProject(), finalized.resourceService)
+    finalized.compiler.getDependencies(finalized.input).forEach {
       it.addToDependencies(project)
     }
-    configureCompilerTask(project, input, compiler, resourceService)
-    configureCopySpoofaxLanguageTasks(project, input, compiler)
   }
 
-  private fun configureCompilerTask(
-    project: Project,
-    input: LanguageProjectCompiler.Input,
-    compiler: LanguageProjectCompiler,
-    resourceService: ResourceService
-  ) {
+  private fun configureCompileTask(project: Project, finalized: LanguageProjectFinalized) {
+    val input = finalized.input
     val compileTask = project.tasks.register("spoofaxCompileLanguageProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
-      outputs.files(input.providedFiles().map { resourceService.toLocalFile(it) })
+      outputs.files(input.providedFiles().map { finalized.resourceService.toLocalFile(it) })
+
       doLast {
-        project.deleteGenSourceSpoofaxDirectory(input.languageProject().project(), resourceService)
-        compiler.compile(input)
+        project.deleteGenSourceSpoofaxDirectory(input.languageProject().project(), finalized.resourceService)
+        finalized.compiler.compile(input)
       }
     }
+
+    // Make compileJava depend on our task, because we generate Java code.
     project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(compileTask)
   }
 
-  private fun configureCopySpoofaxLanguageTasks(
-    project: Project,
-    input: LanguageProjectCompiler.Input,
-    compiler: LanguageProjectCompiler
-  ) {
+  private fun configureCopySpoofaxLanguageTasks(project: Project, finalized: LanguageProjectFinalized) {
+    val input = finalized.input
     val destinationPackage = input.languageProject().packagePath()
     val includeStrategoClasses = input.strategoRuntime().map { it.copyClasses() }.orElse(false)
     val includeStrategoJavastratClasses = input.strategoRuntime().map { it.copyJavaStrategyClasses() }.orElse(false)
-    val copyResources = compiler.getCopyResources(input)
+    val copyResources = finalized.compiler.getCopyResources(input)
 
     // Create language specification dependency and 'spoofaxLanguage' configuration that contains this dependency.
     val configuration = project.configurations.create("spoofaxLanguage") {

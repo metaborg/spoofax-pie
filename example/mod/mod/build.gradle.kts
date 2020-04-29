@@ -1,10 +1,6 @@
-import mb.spoofax.compiler.spoofaxcore.ConstraintAnalyzerCompiler
-import mb.spoofax.compiler.spoofaxcore.LanguageProjectCompiler
-import mb.spoofax.compiler.spoofaxcore.ParserCompiler
-import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeCompiler
-import mb.spoofax.compiler.spoofaxcore.StylerCompiler
-import mb.spoofax.compiler.spoofaxcore.CompleterCompiler
-import mb.spoofax.compiler.util.GradleDependency
+import mb.spoofax.compiler.gradle.spoofaxcore.*
+import mb.spoofax.compiler.spoofaxcore.*
+import mb.spoofax.compiler.util.*
 
 plugins {
   id("org.metaborg.spoofax.compiler.gradle.spoofaxcore.language")
@@ -13,14 +9,17 @@ plugins {
 }
 
 dependencies {
-  api(platform("org.metaborg:spoofax.depconstraints:$version"))
   testImplementation("org.metaborg:log.backend.slf4j")
   testImplementation("org.slf4j:slf4j-simple:1.7.30")
   testCompileOnly("org.checkerframework:checker-qual-android")
 }
 
-languageProjectCompiler {
-  settings.set(mb.spoofax.compiler.gradle.spoofaxcore.LanguageProjectCompilerSettings(
+spoofaxLanguageProject {
+  settings.set(LanguageProjectSettings(
+    shared = Shared.builder()
+      .name("Mod")
+      .defaultBasePackageId("mb.mod"),
+
     parser = ParserCompiler.LanguageProjectInput.builder()
       .startSymbol("Start"),
     styler = StylerCompiler.LanguageProjectInput.builder(),
@@ -33,7 +32,8 @@ languageProjectCompiler {
       .copyJavaStrategyClasses(false),
     constraintAnalyzer = ConstraintAnalyzerCompiler.LanguageProjectInput.builder()
       .multiFile(true),
-    compiler = LanguageProjectCompiler.Input.builder()
+
+    builder = LanguageProjectCompiler.Input.builder()
       .languageSpecificationDependency(GradleDependency.project(":mod.spoofaxcore"))
   ))
 }

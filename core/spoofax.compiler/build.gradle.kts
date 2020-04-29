@@ -19,6 +19,7 @@ dependencies {
 
   api(project(":common"))
   api(project(":spoofax.core"))
+  api("org.metaborg:resource")
 
   api("com.samskivert:jmustache:1.15")
 
