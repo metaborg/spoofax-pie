@@ -7,7 +7,7 @@ val logVersion = "0.3.0"
 val slf4jVersion = "1.7.30"
 val resourceVersion = "0.7.1"
 val pieVersion = "0.9.0"
-val spoofax2Version = "2.6.0-SNAPSHOT"
+val spoofax2Version = "2.5.8"
 val picocliVersion = "4.0.4"
 
 val javaxInjectVersion = "1"
