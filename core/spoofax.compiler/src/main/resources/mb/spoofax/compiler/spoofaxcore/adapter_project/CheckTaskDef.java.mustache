@@ -44,7 +44,7 @@ public class {{genCheckTaskDef.id}} implements TaskDef<ResourceKey, Messages> {
         final JSGLR1ParseResult parseResult = context.require(parse, stringSupplier);
         messagesBuilder.addMessages(parseResult.getMessages());
 {{#constraintAnalyzer}}
-        final {{this.analyzeTaskDef.qualifiedId}}.@Nullable Output analysisOutput = context.require(analyze, new {{this.analyzeTaskDef.qualifiedId}}.Input(key, parse.createAstSupplier(stringSupplier)));
+        final {{this.analyzeTaskDef.qualifiedId}}.@Nullable Output analysisOutput = context.require(analyze, new {{this.analyzeTaskDef.qualifiedId}}.Input(key, parse.createNullableRecoverableAstSupplier(stringSupplier)));
         if(analysisOutput != null) {
             messagesBuilder.addMessages(analysisOutput.result.messages);
         }

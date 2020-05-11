@@ -35,7 +35,7 @@ public class TigerIdeCheck implements TaskDef<ResourceKey, Messages> {
         final ResourceStringSupplier stringProvider = new ResourceStringSupplier(key);
         final JSGLR1ParseResult parseResult = context.require(parse, stringProvider);
         builder.addMessages(parseResult.getMessages());
-        final TigerAnalyze.@Nullable Output analysisOutput = context.require(analyze, new TigerAnalyze.Input(key, parse.createAstSupplier(stringProvider)));
+        final TigerAnalyze.@Nullable Output analysisOutput = context.require(analyze, new TigerAnalyze.Input(key, parse.createNullableRecoverableAstSupplier(stringProvider)));
         if(analysisOutput != null) {
             builder.addMessages(analysisOutput.result.messages);
         }

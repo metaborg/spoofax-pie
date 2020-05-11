@@ -80,7 +80,7 @@ public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args
                     if(!first.get()) {
                         sb.append(", ");
                     }
-                    final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createAstSupplier(f.getKey());
+                    final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createNullableAstSupplier(f.getKey());
                     final @Nullable String defNames = context.require(listDefNames, astSupplier);
                     if(defNames != null) {
                         sb.append(defNames);

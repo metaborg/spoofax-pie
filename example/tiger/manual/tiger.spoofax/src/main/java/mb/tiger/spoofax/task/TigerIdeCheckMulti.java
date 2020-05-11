@@ -93,7 +93,7 @@ public class TigerIdeCheckMulti implements TaskDef<TigerIdeCheckMulti.Input, Key
             throw e.getCause();
         }
 
-        final TigerAnalyzeMulti.Input analyzeInput = new TigerAnalyzeMulti.Input(input.root, input.walker, input.matcher, parse.createAstFunction());
+        final TigerAnalyzeMulti.Input analyzeInput = new TigerAnalyzeMulti.Input(input.root, input.walker, input.matcher, parse.createNullableRecoverableAstFunction());
         final TigerAnalyzeMulti.@Nullable Output analysisOutput = context.require(analyze, analyzeInput);
         if(analysisOutput != null) {
             messagesBuilder.addMessages(analysisOutput.result.messages);
