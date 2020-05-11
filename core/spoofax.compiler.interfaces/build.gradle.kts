@@ -1,0 +1,15 @@
+plugins {
+  id("org.metaborg.gradle.config.java-library")
+}
+
+dependencies {
+  api(platform(project(":spoofax.depconstraints")))
+
+  api(project(":common"))
+  api(project(":jsglr1.common"))
+  api(project(":stratego.common"))
+  api(project(":constraint.common"))
+  api(project(":completions.common"))
+
+  compileOnly("org.checkerframework:checker-qual-android")
+}

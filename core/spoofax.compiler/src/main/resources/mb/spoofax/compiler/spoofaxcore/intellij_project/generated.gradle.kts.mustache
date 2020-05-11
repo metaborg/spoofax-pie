@@ -1,0 +1,61 @@
+apply(plugin = "org.metaborg.gradle.config.java-library")
+apply(plugin = "org.jetbrains.intellij")
+
+group = "{{project.coordinate.groupId}}"
+version = "{{project.coordinate.version}}"
+
+configure<SourceSetContainer> {
+  named("main") {
+    java {
+      srcDir("$buildDir/generated/sources/spoofax/java")
+    }
+    resources {
+      srcDir("$buildDir/generated/sources/spoofax/resources")
+    }
+  }
+}
+
+val api by configurations
+val implementation by configurations
+val compileOnly by configurations
+val runtimeOnly by configurations
+val testImplementation by configurations
+val testCompileOnly by configurations
+val testRuntimeOnly by configurations
+val annotationProcessor by configurations
+val testAnnotationProcessor by configurations
+dependencies {
+  implementation({{adapterProjectDependency.toKotlinCode}}) {
+    exclude(group = "org.slf4j")
+  }
+{{#dependencyCodes}}
+  {{this}}
+{{/dependencyCodes}}
+}
+
+configure<IntellijExtension> {
+  version = "{{shared.intellijIdeaVersion}}"
+}
+
+/*
+Explicitly make the `runIde` task depend on creating the JAR of `spoofax.intellij`, because the `org.jetbrains.intellij`
+plugin for some reason does not make (or even remove) this dependency, which causes `spoofax.intellij` to not be
+recompiled, resulting in all kinds of runtime errors.
+
+My hunch is that this happens because `spoofax.intellij` uses the `org.jetbrains.intellij` plugin to get access to the
+IntelliJ API, but is not actually a real plugin and thus we depend on it with a regular Gradle dependency.
+
+We tried getting access to the IntelliJ API via a normal Gradle dependency, but this turns out to the hard because it is
+not possible to directly depend on the IntelliJ API. You would need to download a ZIP file, extract it, and add that
+directory as an Ivy repository to get access to the IntelliJ API.
+*/
+// TODO: can't put this in generated code, but something like it might still be required if spoofax.intellij is a project dependency?
+//tasks.getByName("runIde").dependsOn(tasks.getByPath(":spoofax.intellij:jar"))
+
+// Use Java 8 version of JBR (JetBrains Runtime) to run the IDE.
+tasks.getByName<org.jetbrains.intellij.tasks.RunIdeTask>("runIde") {
+  this.jbrVersion("8u232b1638.6")
+}
+
+// Skip non-incremental, slow, and unnecessary buildSearchableOptions task from IntelliJ.
+tasks.getByName("buildSearchableOptions").onlyIf { false }

@@ -1,0 +1,13 @@
+package {{genFileElementType.packageId}};
+
+import mb.spoofax.core.language.LanguageScope;
+import mb.spoofax.intellij.IntellijFileElementType;
+
+import javax.inject.Inject;
+
+@LanguageScope
+public class {{genFileElementType.id}} extends IntellijFileElementType {
+    @Inject public {{genFileElementType.id}}() {
+        super({{plugin.qualifiedId}}.getComponent());
+    }
+}

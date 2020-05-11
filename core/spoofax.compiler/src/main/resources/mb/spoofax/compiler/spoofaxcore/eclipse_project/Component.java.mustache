@@ -1,0 +1,12 @@
+package {{genEclipseComponent.packageId}};
+
+import dagger.Component;
+import mb.spoofax.core.language.LanguageScope;
+import mb.spoofax.core.platform.PlatformComponent;
+import mb.spoofax.eclipse.EclipseLanguageComponent;
+
+@LanguageScope
+@Component(modules = { {{adapterProjectCompilerInput.module.qualifiedId}}.class, {{eclipseModule.qualifiedId}}.class }, dependencies = PlatformComponent.class)
+public interface {{genEclipseComponent.id}} extends EclipseLanguageComponent, {{adapterProjectCompilerInput.component.qualifiedId}} {
+    {{editorTracker.qualifiedId}} getEditorTracker();
+}

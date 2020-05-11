@@ -1,0 +1,13 @@
+rootProject.name = "{{project.coordinate.artifactId}}"
+
+pluginManagement {
+repositories {
+{{#pluginRepositoryCodes}}
+  {{this}}
+{{/pluginRepositoryCodes}}
+}
+}
+
+{{#includedProjects}}
+include("{{this}}")
+{{/includedProjects}}

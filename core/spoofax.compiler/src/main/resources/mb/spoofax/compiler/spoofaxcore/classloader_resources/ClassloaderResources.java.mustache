@@ -1,0 +1,15 @@
+package {{genClassloaderResources.packageId}};
+
+import mb.resource.ResourceKeyString;
+import mb.resource.classloader.ClassLoaderResource;
+import mb.resource.classloader.ClassLoaderResourceRegistry;
+
+public class {{genClassloaderResources.id}} {
+    public static ClassLoaderResourceRegistry createClassLoaderResourceRegistry() {
+        return new ClassLoaderResourceRegistry({{genClassloaderResources.id}}.class.getClassLoader());
+    }
+
+    public static ClassLoaderResource createDefinitionDir(ClassLoaderResourceRegistry classLoaderResourceRegistry) {
+        return classLoaderResourceRegistry.getResource(ResourceKeyString.of("{{languageProject.packagePath}}"));
+    }
+}

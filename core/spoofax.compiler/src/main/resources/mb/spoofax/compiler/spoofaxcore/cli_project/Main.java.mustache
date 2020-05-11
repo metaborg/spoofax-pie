@@ -1,0 +1,24 @@
+package {{genMain.packageId}};
+
+import mb.log.slf4j.SLF4JLoggerFactory;
+import mb.pie.runtime.PieBuilderImpl;
+import mb.spoofax.cli.DaggerSpoofaxCliComponent;
+import mb.spoofax.cli.SpoofaxCli;
+import mb.spoofax.cli.SpoofaxCliComponent;
+import mb.spoofax.core.platform.LoggerFactoryModule;
+import mb.spoofax.core.platform.PlatformPieModule;
+
+public class {{genMain.id}} {
+    public static void main(String[] args) {
+        final SpoofaxCliComponent platformComponent = DaggerSpoofaxCliComponent.builder()
+            .loggerFactoryModule(new LoggerFactoryModule(new SLF4JLoggerFactory()))
+            .platformPieModule(new PlatformPieModule(PieBuilderImpl::new))
+            .build();
+        final {{adapterProjectCompilerInput.component.qualifiedId}} {{adapterProjectCompilerInput.component.idAsCamelCase}} = {{adapterProjectCompilerInput.daggerComponent.qualifiedId}}.builder()
+            .platformComponent(platformComponent)
+            .build();
+        final SpoofaxCli cmd = platformComponent.getSpoofaxCmd();
+        final int status = cmd.run(args, {{adapterProjectCompilerInput.component.idAsCamelCase}});
+        System.exit(status);
+    }
+}

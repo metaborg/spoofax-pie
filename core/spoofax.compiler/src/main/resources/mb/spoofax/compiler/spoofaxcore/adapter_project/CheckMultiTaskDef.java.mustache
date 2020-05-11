@@ -1,0 +1,106 @@
+package {{genCheckMultiTaskDef.packageId}};
+
+import mb.common.message.KeyedMessages;
+import mb.common.message.KeyedMessagesBuilder;
+import mb.common.util.UncheckedException;
+import mb.jsglr1.common.JSGLR1ParseResult;
+import mb.pie.api.ExecContext;
+import mb.pie.api.ExecException;
+import mb.pie.api.ResourceStringSupplier;
+import mb.pie.api.TaskDef;
+import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.resource.hierarchical.HierarchicalResource;
+import mb.resource.hierarchical.ResourcePath;
+import mb.resource.hierarchical.match.ResourceMatcher;
+import mb.resource.hierarchical.walk.ResourceWalker;
+import mb.spoofax.core.language.LanguageScope;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import javax.inject.Inject;
+import java.io.Serializable;
+import java.util.Objects;
+
+@LanguageScope
+public class {{genCheckMultiTaskDef.id}} implements TaskDef<{{genCheckMultiTaskDef.id}}.Input, KeyedMessages> {
+    public static class Input implements Serializable {
+        public final ResourcePath root;
+        public final ResourceWalker walker;
+        public final ResourceMatcher matcher;
+
+        public Input(
+            ResourcePath root,
+            ResourceWalker walker,
+            ResourceMatcher matcher
+        ) {
+            this.root = root;
+            this.walker = walker;
+            this.matcher = matcher;
+        }
+
+        @Override public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            final Input input = (Input)o;
+            return root.equals(input.root) && walker.equals(input.walker) && matcher.equals(input.matcher);
+        }
+
+        @Override public int hashCode() {
+            return Objects.hash(root, walker, matcher);
+        }
+
+        @Override public String toString() {
+            return "Input{" +
+                "root=" + root +
+                ", walker=" + walker +
+                ", matcher=" + matcher +
+                '}';
+        }
+    }
+
+    private final {{parser.parseTaskDef.qualifiedId}} parse;
+{{#constraintAnalyzer}}
+    private final {{this.analyzeMultiTaskDef.qualifiedId}} analyze;
+{{/constraintAnalyzer}}
+
+    @Inject public {{genCheckMultiTaskDef.id}}(
+      {{parser.parseTaskDef.qualifiedId}} parse{{#constraintAnalyzer}},
+      {{this.analyzeMultiTaskDef.qualifiedId}} analyze
+{{/constraintAnalyzer}}
+    ) {
+        this.parse = parse;
+{{#constraintAnalyzer}}
+        this.analyze = analyze;
+{{/constraintAnalyzer}}
+    }
+
+    @Override public String getId() {
+        return "{{genCheckMultiTaskDef.qualifiedId}}";
+    }
+
+    @Override public KeyedMessages exec(ExecContext context, Input input) throws Exception {
+        final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
+        final HierarchicalResource root = context.require(input.root, ResourceStampers.modifiedDirRec(input.walker, input.matcher));
+        try {
+            root.walk(input.walker, input.matcher).forEach(file -> {
+                final ResourcePath filePath = file.getPath();
+                try {
+                    final JSGLR1ParseResult parseResult = context.require(parse, new ResourceStringSupplier(filePath));
+                    messagesBuilder.addMessages(filePath, parseResult.getMessages());
+                } catch(ExecException | InterruptedException e) {
+                    throw new UncheckedException(e);
+                }
+            });
+        } catch(UncheckedException e) {
+            throw e.getCause();
+        }
+
+{{#constraintAnalyzer}}
+        final {{this.analyzeMultiTaskDef.qualifiedId}}.Input analyzeInput = new {{this.analyzeMultiTaskDef.qualifiedId}}.Input(input.root, input.walker, input.matcher, parse.createNullableRecoverableAstFunction());
+        final {{this.analyzeMultiTaskDef.qualifiedId}}.@Nullable Output analysisOutput = context.require(analyze, analyzeInput);
+        if(analysisOutput != null) {
+            messagesBuilder.addMessages(analysisOutput.result.messages);
+        }
+{{/constraintAnalyzer}}
+        return messagesBuilder.build();
+    }
+}

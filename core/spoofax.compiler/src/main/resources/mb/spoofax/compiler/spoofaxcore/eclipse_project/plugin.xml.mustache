@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+  <!-- Context -->
+  <extension point="org.eclipse.ui.contexts">
+    <context
+      id="{{contextId}}"
+      parentId="org.eclipse.ui.textEditorScope"
+      name="Editing {{shared.name}} files"
+      description="Editing {{shared.name}} files"
+    />
+  </extension>
+
+
+  <!-- Editor -->
+  <extension point="org.eclipse.ui.editors">
+    <editor
+      name="{{shared.name}} editor"
+      extensions="{{#shared.fileExtensions}}{{this}}{{^-last}},{{/-last}}{{/shared.fileExtensions}}"
+{{#fileIconRelativePath}}
+      icon="{{this}}"
+{{/fileIconRelativePath}}
+      class="{{editor.qualifiedId}}"
+      id="{{editorId}}"
+    />
+  </extension>
+
+
+  <!-- Markers -->
+  <!-- Base -->
+  <extension
+    point="org.eclipse.core.resources.markers"
+    id="{{baseMarkerId}}"
+    name="{{shared.name}} marker"
+  >
+    <super type="org.eclipse.core.resources.textmarker"/>
+    <super type="org.eclipse.core.resources.problemmarker"/>
+    <persistent value="true"/>
+  </extension>
+  <!-- Info -->
+  <extension
+    point="org.eclipse.core.resources.markers"
+    id="{{infoMarkerId}}"
+    name="{{shared.name}} info marker"
+  >
+    <super type="{{baseMarkerId}}"/>
+    <persistent value="true"/>
+  </extension>
+  <!-- Warning -->
+  <extension
+    point="org.eclipse.core.resources.markers"
+    id="{{warningMarkerId}}"
+    name="{{shared.name}} warning marker"
+  >
+    <super type="{{baseMarkerId}}"/>
+    <persistent value="true"/>
+  </extension>
+  <!-- Error -->
+  <extension
+    point="org.eclipse.core.resources.markers"
+    id="{{errorMarkerId}}"
+    name="{{shared.name}} error marker"
+  >
+    <super type="{{baseMarkerId}}"/>
+    <persistent value="true"/>
+  </extension>
+
+
+  <!-- Annotations -->
+  <extension point="org.eclipse.ui.editors.annotationTypes">
+    <!-- Info -->
+    <type
+      markerType="{{infoMarkerId}}"
+      super="org.eclipse.ui.workbench.texteditor.info"
+      markerSeverity="0"
+      name="{{shared.name}} info annotation"
+    />
+    <!-- Warning -->
+    <type
+      markerType="{{warningMarkerId}}"
+      super="org.eclipse.ui.workbench.texteditor.warning"
+      markerSeverity="1"
+      name="{{shared.name}} warning annotation"
+    />
+    <!-- Error -->
+    <type
+      markerType="{{errorMarkerId}}"
+      super="org.eclipse.ui.workbench.texteditor.error"
+      markerSeverity="2"
+      name="{{shared.name}} error annotation"
+    />
+  </extension>
+
+
+  <!-- Document Provider -->
+  <extension point="org.eclipse.ui.editors.documentProviders">
+    <provider
+      extensions="{{#shared.fileExtensions}}{{this}}{{^-last}},{{/-last}}{{/shared.fileExtensions}}"
+      class="{{documentProvider.qualifiedId}}"
+      id="{{documentProviderId}}"
+    />
+  </extension>
+
+
+  <!-- Builder -->
+  <extension
+    point="org.eclipse.core.resources.builders"
+    name="{{shared.name}} builder"
+    id="{{projectBuilderRelativeId}}"
+  >
+    <builder
+      hasNature="true"
+      isConfigurable="false"
+      callOnEmptyDelta="false"
+      supportsConfigurations="false"
+    >
+      <run class="{{projectBuilder.qualifiedId}}"/>
+    </builder>
+  </extension>
+
+
+  <!-- Nature -->
+  <extension
+    point="org.eclipse.core.resources.natures"
+    name="{{shared.name}} nature"
+    id="{{natureRelativeId}}"
+  >
+    <runtime>
+      <run class="{{nature.qualifiedId}}"/>
+    </runtime>
+    <builder id="{{projectBuilderId}}"/>
+  </extension>
+
+
+  <!-- Menus -->
+  <extension point="org.eclipse.ui.menus">
+    <!-- Project Explorer context menu -->
+    <menuContribution locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
+      <dynamic id="{{resourceContextMenuId}}" class="{{resourceContextMenu.qualifiedId}}"/>
+    </menuContribution>
+    <!-- Package Explorer context menu -->
+    <menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=additions">
+      <dynamic id="{{resourceContextMenuId}}" class="{{resourceContextMenu.qualifiedId}}"/>
+    </menuContribution>
+    <!-- Editor context menu -->
+    <menuContribution locationURI="popup:#SpoofaxEditorContext?after=additions">
+      <dynamic id="{{editorContextMenuId}}" class="{{editorContextMenu.qualifiedId}}"/>
+    </menuContribution>
+    <!-- Main menu -->
+    <menuContribution locationURI="menu:org.eclipse.ui.main.menu">
+      <menu id="{{mainMenuId}}" label="{{shared.name}}">
+        <dynamic id="{{mainMenuDynamicId}}" class="{{mainMenu.qualifiedId}}"/>
+        <visibleWhen>
+          <with variable="activeContexts">
+            <iterate ifEmpty="false" operator="or">
+              <equals value="{{contextId}}"/>
+            </iterate>
+          </with>
+        </visibleWhen>
+      </menu>
+    </menuContribution>
+  </extension>
+
+
+  <!-- Commands and Handlers -->
+  <!-- Add/Remove Nature -->
+  <extension point="org.eclipse.ui.commands">
+    <command id="{{addNatureCommandId}}" name="Add {{shared.name}} nature"/>
+    <command id="{{removeNatureCommandId}}" name="Remove {{shared.name}} nature"/>
+  </extension>
+  <extension point="org.eclipse.ui.handlers">
+    <handler
+      commandId="{{addNatureCommandId}}"
+      class="{{addNatureHandler.qualifiedId}}"
+    />
+    <handler
+      commandId="{{removeNatureCommandId}}"
+      class="{{removeNatureHandler.qualifiedId}}"
+    />
+  </extension>
+  <!-- Observe/Unobserve -->
+  <extension point="org.eclipse.ui.commands">
+    <command id="{{observeCommandId}}" name="Observe file(s) for {{shared.name}}-related tasks"/>
+    <command id="{{unobserveCommandId}}" name="Unobserve file(s) for {{shared.name}}-related tasks"/>
+  </extension>
+  <extension point="org.eclipse.ui.handlers">
+    <handler
+      commandId="{{observeCommandId}}"
+      class="{{observeHandler.qualifiedId}}"
+    />
+    <handler
+      commandId="{{unobserveCommandId}}"
+      class="{{unobserveHandler.qualifiedId}}"
+    />
+  </extension>
+  <!-- Transform -->
+  <extension point="org.eclipse.ui.commands">
+    <command id="{{runCommandId}}" name="Run {{shared.name}} command">
+      <commandParameter id="data" name="Data" optional="false"/>
+    </command>
+  </extension>
+  <extension point="org.eclipse.ui.handlers">
+    <handler
+      commandId="{{runCommandId}}"
+      class="{{runCommandHandler.qualifiedId}}"
+    />
+  </extension>
+</plugin>

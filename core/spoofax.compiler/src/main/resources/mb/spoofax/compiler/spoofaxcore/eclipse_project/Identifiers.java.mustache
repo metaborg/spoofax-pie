@@ -1,0 +1,86 @@
+package {{genEclipseIdentifiers.packageId}};
+
+import mb.spoofax.core.language.LanguageScope;
+import mb.spoofax.eclipse.EclipseIdentifiers;
+
+@LanguageScope
+public class {{genEclipseIdentifiers.id}} implements EclipseIdentifiers {
+    @Override public String getPlugin() {
+        return "{{pluginId}}";
+    }
+
+    @Override public String getContext() {
+        return "{{contextId}}";
+    }
+
+    @Override public String getDocumentProvider() {
+        return "{{documentProviderId}}";
+    }
+
+    @Override public String getEditor() {
+        return "{{editorId}}";
+    }
+
+    @Override public String getNature() {
+        return "{{natureId}}";
+    }
+
+    @Override public String getProjectBuilder() {
+        return "{{projectBuilderId}}";
+    }
+
+
+    @Override public String getBaseMarker() {
+        return "{{baseMarkerId}}";
+    }
+
+    @Override public String getInfoMarker() {
+        return "{{infoMarkerId}}";
+    }
+
+    @Override public String getWarningMarker() {
+        return "{{warningMarkerId}}";
+    }
+
+    @Override public String getErrorMarker() {
+        return "{{errorMarkerId}}";
+    }
+
+
+    @Override public String getAddNatureCommand() {
+        return "{{addNatureCommandId}}";
+    }
+
+    @Override public String getRemoveNatureCommand() {
+        return "{{removeNatureCommandId}}";
+    }
+
+    @Override public String getObserveCommand() {
+        return "{{observeCommandId}}";
+    }
+
+    @Override public String getUnobserveCommand() {
+        return "{{unobserveCommandId}}";
+    }
+
+    @Override public String getRunCommand() {
+        return "{{runCommandId}}";
+    }
+
+
+    @Override public String getResourceContextMenu() {
+        return "{{resourceContextMenuId}}";
+    }
+
+    @Override public String getEditorContextMenu() {
+        return "{{editorContextMenuId}}";
+    }
+
+    @Override public String getMainMenu() {
+        return "{{mainMenuId}}";
+    }
+
+    @Override public String getMainMenuDynamic() {
+        return "{{mainMenuDynamicId}}";
+    }
+}

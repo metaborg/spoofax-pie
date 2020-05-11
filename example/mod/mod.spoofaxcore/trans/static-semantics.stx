@@ -1,0 +1,107 @@
+module static-semantics
+
+signature
+
+  sorts Start constructors
+    Program : list(Item) -> Start
+  
+  sorts Item constructors
+    Dbg :          Exp        -> Item
+    Let : string * Exp        -> Item
+    Use :          UseRef     -> Item
+    
+  sorts UseRef constructors
+    UseRef  : string          -> UseRef
+    QUseRef : UseRef * string -> UseRef
+    
+  sorts Exp constructors
+    NumLit :          int -> Exp
+    Mod    :   list(Item) -> Exp
+    Ref    :       string -> Exp
+    QRef   : Exp * string -> Exp
+
+  sorts TYPE constructors
+    NUM :          TYPE
+    MOD : scope -> TYPE 
+
+  relations
+    typeOfDecl : occurrence -> TYPE
+
+  namespaces
+    Var : string
+
+  name-resolution
+    labels P I
+    resolve Var filter P* | (P* I) min $ < P, $ < I, I < P
+
+rules // Program
+
+//  programOK : Start
+//  
+//  programOK(Program(items)) :- {s}
+//    new s,
+//    itemsOK(s, items).
+
+  projectOk : scope
+
+  projectOk(s).
+
+
+  fileOk : scope * Start
+
+  fileOk(s, Program(items)) :-
+    itemsOK(s, items).
+
+rules // Item
+
+  itemOK : scope * Item
+
+  itemOK(s, Dbg(exp)) :- {T}
+    typeOfExp(s, exp) == NUM() | error "Can only debug integers" @exp.
+  itemOK(s, Let(id, exp)) :- {T}
+    typeOfExp(s, exp) == T,
+    s -> Var{id} with typeOfDecl T.
+  itemOK(s, Use(use_ref)) :- {s_mod}
+    scopeOfUseRef(s, use_ref) == s_mod,
+    s -I-> s_mod.
+
+  itemsOK maps itemOK(*, list(*))
+
+rules // Use reference
+
+  scopeOfUseRef : scope * UseRef -> scope
+
+  scopeOfUseRef(s, UseRef(id)) = S :-
+  	resolveUse(s, id) == S.
+  scopeOfUseRef(s, QUseRef(use_ref, id)) = S :- {id' s_mod}
+    scopeOfUseRef(s, use_ref) == s_mod,
+  	resolveUse(s_mod, id) == S.
+
+  resolveUse : scope * string -> scope
+
+  resolveUse(s, id) = S :- {id'}
+	query typeOfDecl 
+  	  filter P* and { Var{x'} :- x' == id }
+  	  min $ < P and true
+  	  in s |-> [(_, (Var{id'}, MOD(S)))],
+  	@id.ref := id'.
+
+rules // Expression
+
+  typeOfExp : scope * Exp -> TYPE
+
+  typeOfExp(s, NumLit(_)) = NUM().
+  typeOfExp(s, Mod(items)) = MOD(s_mod) :-
+  	new s_mod, 
+  	s_mod -P-> s,
+    itemsOK(s_mod, items).
+  typeOfExp(s, Ref(id)) = T :- {id'}
+  	typeOfDecl of Var{id} in s |-> [(_, (Var{id'}, T))],
+  	@id.ref := id'.
+  typeOfExp(s, QRef(exp, id)) = T :- {s_mod id'}
+  	typeOfExp(s, exp) == MOD(s_mod),
+	query typeOfDecl 
+  	  filter e and { Var{x'} :- x' == id } // For qualified references, only look one level deep (filter e).
+  	  min and true
+  	  in s_mod |-> [(_, (Var{id'}, T))],
+  	@id.ref := id'.

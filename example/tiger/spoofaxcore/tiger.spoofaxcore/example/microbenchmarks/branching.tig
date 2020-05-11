@@ -1,0 +1,16 @@
+let
+  var cumsum := 0
+in
+  for c := 0 to 30
+  do (
+      timeGo();
+      for i := 0 to 500
+      do
+        (if i < 500
+        then
+          cumsum := cumsum + 1
+        else
+          cumsum := cumsum - 1);
+      timeStop())
+end
+ 
