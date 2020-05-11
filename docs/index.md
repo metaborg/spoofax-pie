@@ -1,1 +1,0 @@
-# Spoofax 3

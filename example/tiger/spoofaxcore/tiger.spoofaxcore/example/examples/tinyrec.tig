@@ -1,8 +1,0 @@
-let
-  type myrec = {x : int}
-  var rec1 : myrec := myrec{x = 1}
-in
-  rec1.x := 99;
-  rec1.x
-//  33
-end

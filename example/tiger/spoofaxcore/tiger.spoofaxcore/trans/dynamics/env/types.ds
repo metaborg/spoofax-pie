@@ -1,9 +1,0 @@
-module dynamics/env/types
-
-imports ds-signatures/Types-sig
-imports dynamics/env/base
-imports dynamics/env/bindings
-
-rules // type declarations
-
-  E |- TypeDecs(_) --> E

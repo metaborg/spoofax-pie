@@ -1,9 +1,0 @@
-/* define a recursive function */
-let
-
-function f(x : int) : int = 0
-
-in
-   f(f(0)) 
-end
-

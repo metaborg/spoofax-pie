@@ -1,3 +1,0 @@
-let function f(a : int) : int = a + 1
- in f()
-end
