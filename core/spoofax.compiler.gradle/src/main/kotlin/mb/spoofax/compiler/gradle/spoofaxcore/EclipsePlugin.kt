@@ -131,12 +131,25 @@ open class EclipsePlugin : Plugin<Project> {
   private fun configureBundle(project: Project, finalized: EclipseProjectFinalized) {
     val input = finalized.input
     project.configure<BundleExtension> {
-      manifestFile = finalized.resourceService.toLocalFile(input.manifestMfFile())!!
+      manifestFile.set(finalized.resourceService.toLocalFile(input.manifestMfFile())!!)
+
+      val bundleApi = project.configurations.getByName("bundleApi")
+      val bundleImplementation = project.configurations.getByName("bundleImplementation")
       finalized.compiler.getBundleDependencies(input).forEach {
         it.caseOf()
-          .bundle { dep, reexport -> requireBundle(dep.toGradleDependency(project), reexport) }
-          .embeddingBundle { dep, reexport -> requireEmbeddingBundle(dep.toGradleDependency(project), reexport) }
-          .targetPlatform { name, version, reexport -> requireTargetPlatform(name, version, reexport) }
+          .bundle { dep, reexport ->
+            val gradleDep = dep.toGradleDependency(project)
+            (if(reexport) bundleApi else bundleImplementation).dependencies.add(gradleDep)
+            gradleDep
+          }
+          .embeddingBundle { dep, reexport ->
+            val gradleDep = dep.toGradleDependency(project)
+            (if(reexport) bundleApi else bundleImplementation).dependencies.add(gradleDep)
+            gradleDep
+          }
+          .targetPlatform { name, version, reexport ->
+            requireTargetPlatform(name, version) // TODO: reexport is unsupported for now.
+          }
       }
     }
   }

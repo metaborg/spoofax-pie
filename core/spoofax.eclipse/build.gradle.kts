@@ -21,18 +21,15 @@ bundle {
   requireTargetPlatform("org.eclipse.jface.text")
   requireTargetPlatform("org.eclipse.swt")
   requireTargetPlatform("com.ibm.icu")
-
-  requireEmbeddingBundleProject(":spoofax.eclipse.externaldeps")
 }
 
 dependencies {
-  // Dependency constraints.
   api(platform(project(":spoofax.depconstraints")))
   annotationProcessor(platform(project(":spoofax.depconstraints")))
 
-  // Compile-time annotations.
+  bundleApi(project(":spoofax.eclipse.externaldeps"))
+
   compileOnly("org.checkerframework:checker-qual-android")
 
-  // Annotation processors.
   annotationProcessor("com.google.dagger:dagger-compiler")
 }

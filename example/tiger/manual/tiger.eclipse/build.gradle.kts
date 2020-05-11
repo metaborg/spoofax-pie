@@ -6,22 +6,33 @@ plugins {
 fun compositeBuild(name: String) = "$group:$name"
 
 bundle {
+  // Currently, target platform dependencies are not re-exported, so we need to depend on all relevant modules from the target platform
   requireTargetPlatform("javax.inject")
-
-  requireBundleModule(group.toString(), "spoofax.eclipse", version.toString())
-
-  requireEmbeddingBundleModule(group.toString(), "spoofax.eclipse.externaldeps", version.toString())
-  requireEmbeddingBundleProject(":tiger.eclipse.externaldeps")
+  requireTargetPlatform("org.eclipse.core.runtime")
+  requireTargetPlatform("org.eclipse.core.expressions")
+  requireTargetPlatform("org.eclipse.core.resources")
+  requireTargetPlatform("org.eclipse.core.filesystem")
+  requireTargetPlatform("org.eclipse.ui")
+  requireTargetPlatform("org.eclipse.ui.views")
+  requireTargetPlatform("org.eclipse.ui.editors")
+  requireTargetPlatform("org.eclipse.ui.console")
+  requireTargetPlatform("org.eclipse.ui.workbench")
+  requireTargetPlatform("org.eclipse.ui.workbench.texteditor")
+  requireTargetPlatform("org.eclipse.ui.ide")
+  requireTargetPlatform("org.eclipse.jface.text")
+  requireTargetPlatform("org.eclipse.swt")
+  requireTargetPlatform("com.ibm.icu")
 }
 
 dependencies {
-  // Dependency constraints.
   api(platform(compositeBuild("spoofax.depconstraints")))
   annotationProcessor(platform(compositeBuild("spoofax.depconstraints")))
 
-  // Compile-time annotations.
+  bundleApi("$group:spoofax.eclipse:$version")
+  bundleApi("$group:spoofax.eclipse.externaldeps:$version")
+  bundleApi(project(":tiger.eclipse.externaldeps"))
+
   compileOnly("org.checkerframework:checker-qual-android")
 
-  // Annotation processors.
   annotationProcessor("com.google.dagger:dagger-compiler")
 }
