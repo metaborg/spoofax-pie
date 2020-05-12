@@ -1,3 +1,38 @@
 site_name: Spoofax 3
+
+nav:
+  - Introduction: index.md
+
 theme:
   name: material
+  language: en
+  palette:
+    primary: indigo
+    accent: indigo
+
+repo_name: metaborg/spoofax-pie
+repo_url: https://github.com/metaborg/spoofax-pie
+
+markdown_extensions:
+  - admonition
+  - codehilite:
+      guess_lang: false
+  - toc:
+      permalink: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.inlinehilite
+  - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tabbed
+  - pymdownx.tilde
+
+plugins:
+  - search
+
