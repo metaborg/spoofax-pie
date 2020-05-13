@@ -15,8 +15,3 @@ subprojects {
     configureSubProject()
   }
 }
-
-gitonium {
-  // Disable snapshot dependency checks for releases, until we depend on a stable version of MetaBorg artifacts.
-  checkSnapshotDependenciesInRelease = false
-}

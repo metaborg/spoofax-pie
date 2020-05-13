@@ -6,6 +6,8 @@ pluginManagement {
   }
 }
 
+enableFeaturePreview("GRADLE_METADATA")
+
 include("spoofax.depconstraints")
 
 include("common")
