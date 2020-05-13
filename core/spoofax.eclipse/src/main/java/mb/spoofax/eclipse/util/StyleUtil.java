@@ -43,18 +43,18 @@ public final class StyleUtil {
             if(offset >= region.getStartOffset()) {
                 logger.warn("Skipping invalid {}, starting offset is greater than offset in previous regions",
                     tokenStyle);
-            } else if(offset >= region.getEndOffsetInclusive()) {
+            } else if(offset >= (region.getEndOffset() - 1)) {
                 logger.warn("Skipping invalid {}, ending offset is greater than offset in previous regions",
                     tokenStyle);
-            } else if(region.getStartOffset() > region.getEndOffsetInclusive()) {
+            } else if(region.getStartOffset() > (region.getEndOffset() - 1)) {
                 logger.warn("Skipping invalid {}, starting offset is greater than ending offset", tokenStyle);
             } else if(region.getStartOffset() > length) {
                 logger.warn("Skipping invalid {}, starting offset is greater than text length", tokenStyle);
-            } else if(region.getEndOffsetInclusive() >= length) {
+            } else if((region.getEndOffset() - 1) >= length) {
                 logger.warn("Skipping invalid {}, ending offset is greater than text length", tokenStyle);
             } else {
                 validated.add(tokenStyle);
-                offset = region.getEndOffsetInclusive();
+                offset = region.getEndOffset() - 1;
             }
         }
         return validated;
@@ -81,7 +81,9 @@ public final class StyleUtil {
             presentation.addStyleRange(styleRange);
         }
         @Nullable IRegion extent = presentation.getExtent();
-        if(extent == null) { extent = new Region(0, 0); }
+        if(extent == null) {
+            extent = new Region(0, 0);
+        }
         TextAttribute defaultAttr = scopeManager.getTokenHighlight(ScopeManager.DEFAULT_SCOPE, null);
         final StyleRange defaultStyleRange = createStyleRange(defaultAttr, extent.getOffset(), extent.getLength());
         presentation.setDefaultStyleRange(defaultStyleRange);
@@ -93,7 +95,7 @@ public final class StyleUtil {
      * Creates a style range from the given text attribute and token.
      *
      * @param textAttribute the text attribute, which defines the styling
-     * @param token the token
+     * @param token         the token
      * @return the {@link StyleRange} with the token's styling
      */
     public StyleRange createStyleRange(TextAttribute textAttribute, Token token) {
@@ -105,8 +107,8 @@ public final class StyleUtil {
      * Creates a style range from the given text attribute and token start offset and length.
      *
      * @param textAttribute the text attribute, which defines the styling
-     * @param tokenStart the offset of the token
-     * @param tokenLength the length of the token
+     * @param tokenStart    the offset of the token
+     * @param tokenLength   the length of the token
      * @return the {@link StyleRange} with the token's styling
      */
     public StyleRange createStyleRange(TextAttribute textAttribute, int tokenStart, int tokenLength) {
