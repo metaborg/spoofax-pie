@@ -1,43 +1,42 @@
 plugins {
   id("org.metaborg.gradle.config.java-library")
-  id("biz.aQute.bnd.builder")
-  id("org.metaborg.coronium.embedding")
+  id("org.metaborg.coronium.bundle")
 }
 
-// Add dependencies to JVM (non-OSGi) libraries. Must use `api` configuration for `coronium.embedding` plugin.
 dependencies {
   api(platform(project(":spoofax.depconstraints")))
 
-  api(project(":common"))
-  api(project(":spoofax.core"))
+  bundleTargetPlatformApi(eclipse("javax.inject"))
 
-  api("org.metaborg:log.api")
-  api("org.metaborg:resource")
-  api("org.metaborg:pie.api")
-  api("org.metaborg:pie.runtime")
-  api("org.metaborg:pie.dagger")
+  bundleEmbedApi(project(":common"))
+  bundleEmbedApi(project(":spoofax.core"))
 
-  api("org.metaborg:org.spoofax.terms")
+  bundleEmbedApi("org.metaborg:log.api")
+  bundleEmbedApi("org.metaborg:resource")
+  bundleEmbedApi("org.metaborg:pie.api")
+  bundleEmbedApi("org.metaborg:pie.runtime")
+  bundleEmbedApi("org.metaborg:pie.dagger")
 
-  api("com.google.dagger:dagger")
+  bundleEmbedApi("org.metaborg:org.spoofax.terms")
+
+  bundleEmbedApi("com.google.dagger:dagger")
 }
 
 // Use bnd to create a single OSGi bundle JAR that includes all dependencies.
 val exports = listOf(
   "mb.*;provider=mb;mandatory:=provider",
   "org.spoofax.*;provider=mb;mandatory:=provider",
+  "dagger;provider=mb;mandatory:=provider",
   "dagger.*;provider=mb;mandatory:=provider"
 )
 tasks {
   "jar"(Jar::class) {
     manifest {
       attributes(
-        Pair("Require-Bundle", "javax.inject"), // Depends on javax.inject bundle provided by Eclipse.
-        Pair("Export-Package", exports.joinToString(", ")),
-        Pair("Import-Package", ""), // Disable imports
-        Pair("Bundle-Version", embedding.bundleVersion),
-        Pair("-nouses", "true"), // Disable 'uses' directive generation for exports.
-        Pair("-nodefaultversion", "true") // Disable 'version' directive generation for exports.
+        Pair("Export-Package", exports.joinToString(", "))
+//        Pair("Import-Package", ""), // Disable imports
+//        Pair("-nouses", "true"), // Disable 'uses' directive generation for exports.
+//        Pair("-nodefaultversion", "true") // Disable 'version' directive generation for exports.
       )
     }
   }

@@ -4,6 +4,7 @@ package mb.spoofax.compiler.gradle.spoofaxcore
 
 import mb.coronium.plugin.BundleExtension
 import mb.spoofax.compiler.spoofaxcore.*
+import mb.spoofax.compiler.util.*
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -132,25 +133,21 @@ open class EclipsePlugin : Plugin<Project> {
     val input = finalized.input
     project.configure<BundleExtension> {
       manifestFile.set(finalized.resourceService.toLocalFile(input.manifestMfFile())!!)
+    }
+    configureBundleDependencies(project, finalized.compiler.getBundleDependencies(input))
+  }
+}
 
-      val bundleApi = project.configurations.getByName("bundleApi")
-      val bundleImplementation = project.configurations.getByName("bundleImplementation")
-      finalized.compiler.getBundleDependencies(input).forEach {
-        it.caseOf()
-          .bundle { dep, reexport ->
-            val gradleDep = dep.toGradleDependency(project)
-            (if(reexport) bundleApi else bundleImplementation).dependencies.add(gradleDep)
-            gradleDep
-          }
-          .embeddingBundle { dep, reexport ->
-            val gradleDep = dep.toGradleDependency(project)
-            (if(reexport) bundleApi else bundleImplementation).dependencies.add(gradleDep)
-            gradleDep
-          }
-          .targetPlatform { name, version, reexport ->
-            requireTargetPlatform(name, version) // TODO: reexport is unsupported for now.
-          }
-      }
+internal fun configureBundleDependencies(project: Project, dependencies: List<GradleConfiguredBundleDependency>) {
+  project.configure<BundleExtension> {
+    dependencies.forEach {
+      it.caseOf()
+        .bundleApi { dep -> project.dependencies.add("bundleApi", dep.toGradleDependency(project)) }
+        .bundleImplementation { dep -> project.dependencies.add("bundleImplementation", dep.toGradleDependency(project)) }
+        .bundleEmbedApi { dep -> project.dependencies.add("bundleEmbedApi", dep.toGradleDependency(project)) }
+        .bundleEmbedImplementation { dep -> project.dependencies.add("bundleEmbedImplementation", dep.toGradleDependency(project)) }
+        .bundleTargetPlatformApi { name, version -> project.dependencies.add("bundleTargetPlatformApi", createEclipseTargetPlatformDependency(name, version)) }
+        .bundleTargetPlatformImplementation { name, version -> project.dependencies.add("bundleTargetPlatformImplementation", createEclipseTargetPlatformDependency(name, version)) }
     }
   }
 }

@@ -5,43 +5,51 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
 
-import static mb.spoofax.compiler.util.StringUtil.doubleQuote;
-
 @ADT
 public abstract class GradleConfiguredBundleDependency implements Serializable {
     interface Cases<R> {
-        R bundle(GradleDependency dependency, boolean reexport);
+        R bundleApi(GradleDependency dependency);
 
-        R embeddingBundle(GradleDependency dependency, boolean reexport);
+        R bundleImplementation(GradleDependency dependency);
 
-        R targetPlatform(String name, @Nullable String version, boolean reexport);
+        R bundleEmbedApi(GradleDependency dependency);
+
+        R bundleEmbedImplementation(GradleDependency dependency);
+
+        R bundleTargetPlatformApi(String name, @Nullable String version);
+
+        R bundleTargetPlatformImplementation(String name, @Nullable String version);
     }
 
-    public static GradleConfiguredBundleDependency bundle(GradleDependency dependency, boolean reexport) {
-        return GradleConfiguredBundleDependencies.bundle(dependency, reexport);
+    public static GradleConfiguredBundleDependency bundleApi(GradleDependency dependency) {
+        return GradleConfiguredBundleDependencies.bundleApi(dependency);
     }
 
-    public static GradleConfiguredBundleDependency embeddingBundle(GradleDependency dependency, boolean reexport) {
-        return GradleConfiguredBundleDependencies.embeddingBundle(dependency, reexport);
+    public static GradleConfiguredBundleDependency bundleImplementation(GradleDependency dependency) {
+        return GradleConfiguredBundleDependencies.bundleImplementation(dependency);
     }
 
-    public static GradleConfiguredBundleDependency targetPlatform(String name, @Nullable String version, boolean reexport) {
-        return GradleConfiguredBundleDependencies.targetPlatform(name, version, reexport);
+    public static GradleConfiguredBundleDependency bundleEmbedApi(GradleDependency dependency) {
+        return GradleConfiguredBundleDependencies.bundleEmbedApi(dependency);
+    }
+
+    public static GradleConfiguredBundleDependency bundleEmbedImplementation(GradleDependency dependency) {
+        return GradleConfiguredBundleDependencies.bundleEmbedImplementation(dependency);
+    }
+
+    public static GradleConfiguredBundleDependency bundleTargetPlatformApi(String name, @Nullable String version) {
+        return GradleConfiguredBundleDependencies.bundleTargetPlatformApi(name, version);
+    }
+
+    public static GradleConfiguredBundleDependency bundleTargetPlatformImplementation(String name, @Nullable String version) {
+        return GradleConfiguredBundleDependencies.bundleTargetPlatformImplementation(name, version);
     }
 
 
     public abstract <R> R match(Cases<R> cases);
 
-    public GradleConfiguredBundleDependencies.CaseOfMatchers.TotalMatcher_Bundle caseOf() {
+    public GradleConfiguredBundleDependencies.CaseOfMatchers.TotalMatcher_BundleApi caseOf() {
         return GradleConfiguredBundleDependencies.caseOf(this);
-    }
-
-    public String toKotlinCode() {
-        return caseOf()
-            .bundle((dependency, reexport) -> "requireBundle(" + dependency.toKotlinCode() + ", " + reexport + ")")
-            .embeddingBundle((dependency, reexport) -> "requireEmbeddingBundle(" + dependency.toKotlinCode() + ", " + reexport + ")")
-            .targetPlatform((name, version, reexport) -> "requireTargetPlatform(" + doubleQuote(name) + ", " + (version != null ? doubleQuote(version) : "null") + ", " + reexport + ")")
-            ;
     }
 
 

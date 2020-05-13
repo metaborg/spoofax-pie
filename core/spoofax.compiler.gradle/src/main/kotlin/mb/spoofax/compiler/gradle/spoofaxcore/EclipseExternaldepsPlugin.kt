@@ -2,13 +2,10 @@
 
 package mb.spoofax.compiler.gradle.spoofaxcore
 
-import aQute.bnd.gradle.BundleTaskConvention
-import mb.coronium.plugin.EmbeddingExtension
 import mb.spoofax.compiler.spoofaxcore.*
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.artifacts.ModuleDependency
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
 import org.gradle.jvm.tasks.Jar
@@ -82,8 +79,7 @@ open class EclipseExternaldepsPlugin : Plugin<Project> {
     project.extensions.add(EclipseExternaldepsProjectExtension.id, extension)
 
     project.plugins.apply("org.metaborg.gradle.config.java-library")
-    project.plugins.apply("biz.aQute.bnd.builder")
-    project.plugins.apply("org.metaborg.coronium.embedding")
+    project.plugins.apply("org.metaborg.coronium.bundle")
 
     project.afterEvaluate {
       extension.adapterProjectFinalized.whenAdapterProjectFinalized {
@@ -93,20 +89,22 @@ open class EclipseExternaldepsPlugin : Plugin<Project> {
   }
 
   private fun configure(project: Project, finalized: EclipseExternaldepsProjectFinalized) {
-    configureProjectTask(project, finalized)
+    configureProject(project, finalized)
+    configureBundle(project, finalized)
     configureCompilerTask(project, finalized)
     configureJarTask(project, finalized)
   }
 
-  private fun configureProjectTask(project: Project, finalized: EclipseExternaldepsProjectFinalized) {
+  private fun configureProject(project: Project, finalized: EclipseExternaldepsProjectFinalized) {
     val input = finalized.input
     project.configureGeneratedSources(project.toSpoofaxCompilerProject(), finalized.resourceService)
     finalized.compiler.getDependencies(input).forEach {
       it.addToDependencies(project)
     }
-    project.dependencies.add("implementation", input.adapterProjectDependency().toGradleDependency(project), closureOf<ModuleDependency> {
-      exclude(group = "org.slf4j") // Exclude slf4j, as IntelliJ has its own special version of it.
-    })
+  }
+
+  private fun configureBundle(project: Project, finalized: EclipseExternaldepsProjectFinalized) {
+    configureBundleDependencies(project, finalized.compiler.getBundleDependencies(finalized.input))
   }
 
   private fun configureCompilerTask(project: Project, finalized: EclipseExternaldepsProjectFinalized) {
@@ -130,15 +128,6 @@ open class EclipseExternaldepsPlugin : Plugin<Project> {
     project.tasks.named<Jar>("jar").configure {
       inputs.property("input", finalized.input)
 
-      withConvention(BundleTaskConvention::class) {
-        // Let BND use the runtime classpath, since this bundle is used for bundling runtime dependencies.
-        setClasspath(sourceSet.runtimeClasspath)
-      }
-      // Use bnd to create a single OSGi bundle JAR that includes all dependencies.
-      val requires = listOf(
-        "javax.inject", // Depends on javax.inject bundle provided by Eclipse.
-        "spoofax.eclipse.externaldeps" // Depends on external dependencies from spoofax.eclipse.
-      )
       val exports = listOf(
         // Provided by 'javax.inject' bundle.
         "!javax.inject.*",
@@ -155,25 +144,14 @@ open class EclipseExternaldepsPlugin : Plugin<Project> {
         // Do not export compile-time annotation packages.
         "!org.checkerframework.*",
         "!org.codehaus.mojo.animal_sniffer.*",
-        // Allow split package for 'mb.nabl'.
+        // Allow split package for 'mb.nabl2'.
         "mb.nabl2.*;-split-package:=merge-first",
         // Export what is left, using a mandatory provider to prevent accidental imports via 'Import-Package'.
         "*;provider=${finalized.input.project().coordinate().artifactId()};mandatory:=provider"
       )
       manifest {
         attributes(
-          Pair("Bundle-Vendor", project.group),
-          Pair("Bundle-SymbolicName", project.name),
-          Pair("Bundle-Name", project.name),
-          Pair("Bundle-Version", project.the<EmbeddingExtension>().bundleVersion),
-
-          Pair("Require-Bundle", requires.joinToString(", ")),
-          Pair("Import-Package", ""), // Disable imports
-
-          Pair("Export-Package", exports.joinToString(", ")),
-
-          Pair("-nouses", "true"), // Disable 'uses' directive generation for exports.
-          Pair("-nodefaultversion", "true") // Disable 'version' directive generation for exports.
+          Pair("Export-Package", exports.joinToString(", "))
         )
       }
     }

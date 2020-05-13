@@ -83,25 +83,10 @@ public class EclipseProjectCompiler {
     public ArrayList<GradleConfiguredBundleDependency> getBundleDependencies(Input input) {
         final Shared shared = input.shared();
         final ArrayList<GradleConfiguredBundleDependency> bundleDependencies = new ArrayList<>(input.additionalBundleDependencies());
-        bundleDependencies.add(GradleConfiguredBundleDependency.targetPlatform("javax.inject", null, true));
-        bundleDependencies.add(GradleConfiguredBundleDependency.bundle(shared.spoofaxEclipseDep(), true));
-        bundleDependencies.add(GradleConfiguredBundleDependency.embeddingBundle(input.eclipseExternaldepsDependency(), true));
-        bundleDependencies.add(GradleConfiguredBundleDependency.embeddingBundle(shared.spoofaxEclipseExternaldepsDep(), true));
-        // Currently, target platform dependencies are not re-exported, so we need to depend on all relevant modules from the target platform
-        bundleDependencies.add(GradleConfiguredBundleDependency.targetPlatform("org.eclipse.core.runtime", null, true));
-        bundleDependencies.add(GradleConfiguredBundleDependency.targetPlatform("org.eclipse.core.expressions", null, true));
-        bundleDependencies.add(GradleConfiguredBundleDependency.targetPlatform("org.eclipse.core.resources", null, true));
-        bundleDependencies.add(GradleConfiguredBundleDependency.targetPlatform("org.eclipse.core.filesystem", null, true));
-        bundleDependencies.add(GradleConfiguredBundleDependency.targetPlatform("org.eclipse.ui", null, true));
-        bundleDependencies.add(GradleConfiguredBundleDependency.targetPlatform("org.eclipse.ui.views", null, true));
-        bundleDependencies.add(GradleConfiguredBundleDependency.targetPlatform("org.eclipse.ui.editors", null, true));
-        bundleDependencies.add(GradleConfiguredBundleDependency.targetPlatform("org.eclipse.ui.console", null, true));
-        bundleDependencies.add(GradleConfiguredBundleDependency.targetPlatform("org.eclipse.ui.workbench", null, true));
-        bundleDependencies.add(GradleConfiguredBundleDependency.targetPlatform("org.eclipse.ui.workbench.texteditor", null, true));
-        bundleDependencies.add(GradleConfiguredBundleDependency.targetPlatform("org.eclipse.ui.ide", null, true));
-        bundleDependencies.add(GradleConfiguredBundleDependency.targetPlatform("org.eclipse.jface.text", null, true));
-        bundleDependencies.add(GradleConfiguredBundleDependency.targetPlatform("org.eclipse.swt", null, true));
-        bundleDependencies.add(GradleConfiguredBundleDependency.targetPlatform("com.ibm.icu", null, true));
+        bundleDependencies.add(GradleConfiguredBundleDependency.bundleTargetPlatformApi("javax.inject", null));
+        bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.spoofaxEclipseDep()));
+        bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(input.eclipseExternaldepsDependency()));
+        bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.spoofaxEclipseExternaldepsDep()));
         return bundleDependencies;
     }
 

@@ -5,27 +5,25 @@ plugins {
   id("net.ltgt.apt-idea")
 }
 
-bundle {
-  requireTargetPlatform("javax.inject")
-  requireTargetPlatform("org.eclipse.core.runtime")
-  requireTargetPlatform("org.eclipse.core.expressions")
-  requireTargetPlatform("org.eclipse.core.resources")
-  requireTargetPlatform("org.eclipse.core.filesystem")
-  requireTargetPlatform("org.eclipse.ui")
-  requireTargetPlatform("org.eclipse.ui.views")
-  requireTargetPlatform("org.eclipse.ui.editors")
-  requireTargetPlatform("org.eclipse.ui.console")
-  requireTargetPlatform("org.eclipse.ui.workbench")
-  requireTargetPlatform("org.eclipse.ui.workbench.texteditor")
-  requireTargetPlatform("org.eclipse.ui.ide")
-  requireTargetPlatform("org.eclipse.jface.text")
-  requireTargetPlatform("org.eclipse.swt")
-  requireTargetPlatform("com.ibm.icu")
-}
-
 dependencies {
   api(platform(project(":spoofax.depconstraints")))
   annotationProcessor(platform(project(":spoofax.depconstraints")))
+
+  bundleTargetPlatformApi(eclipse("javax.inject"))
+  bundleTargetPlatformApi(eclipse("org.eclipse.core.runtime"))
+  bundleTargetPlatformApi(eclipse("org.eclipse.core.expressions"))
+  bundleTargetPlatformApi(eclipse("org.eclipse.core.resources"))
+  bundleTargetPlatformApi(eclipse("org.eclipse.core.filesystem"))
+  bundleTargetPlatformApi(eclipse("org.eclipse.ui"))
+  bundleTargetPlatformApi(eclipse("org.eclipse.ui.views"))
+  bundleTargetPlatformApi(eclipse("org.eclipse.ui.editors"))
+  bundleTargetPlatformApi(eclipse("org.eclipse.ui.console"))
+  bundleTargetPlatformApi(eclipse("org.eclipse.ui.workbench"))
+  bundleTargetPlatformApi(eclipse("org.eclipse.ui.workbench.texteditor"))
+  bundleTargetPlatformApi(eclipse("org.eclipse.ui.ide"))
+  bundleTargetPlatformApi(eclipse("org.eclipse.jface.text"))
+  bundleTargetPlatformApi(eclipse("org.eclipse.swt"))
+  bundleTargetPlatformApi(eclipse("com.ibm.icu"))
 
   bundleApi(project(":spoofax.eclipse.externaldeps"))
 

@@ -2,6 +2,7 @@ package mb.spoofax.compiler.spoofaxcore;
 
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.Coordinate;
+import mb.spoofax.compiler.util.GradleConfiguredBundleDependency;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
 import mb.spoofax.compiler.util.GradleProject;
@@ -31,9 +32,17 @@ public class EclipseExternaldepsProjectCompiler {
         final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
         dependencies.add(GradleConfiguredDependency.apiPlatform(shared.spoofaxDependencyConstraintsDep()));
         dependencies.add(GradleConfiguredDependency.annotationProcessorPlatform(shared.spoofaxDependencyConstraintsDep()));
-        dependencies.add(GradleConfiguredDependency.api(input.languageProjectDependency()));
-        dependencies.add(GradleConfiguredDependency.api(input.adapterProjectDependency()));
         return dependencies;
+    }
+
+    public ArrayList<GradleConfiguredBundleDependency> getBundleDependencies(Input input) {
+        final Shared shared = input.shared();
+        final ArrayList<GradleConfiguredBundleDependency> bundleDependencies = new ArrayList<>();
+        bundleDependencies.add(GradleConfiguredBundleDependency.bundleTargetPlatformApi("javax.inject", null));
+        bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.spoofaxEclipseExternaldepsDep()));
+        bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(input.languageProjectDependency()));
+        bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(input.adapterProjectDependency()));
+        return bundleDependencies;
     }
 
     public Output compile(Input input) throws IOException {

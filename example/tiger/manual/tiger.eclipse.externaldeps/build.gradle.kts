@@ -1,7 +1,6 @@
 plugins {
   id("org.metaborg.gradle.config.java-library")
-  id("biz.aQute.bnd.builder")
-  id("org.metaborg.coronium.embedding")
+  id("org.metaborg.coronium.bundle")
 }
 
 fun compositeBuild(name: String) = "$group:$name"
@@ -10,15 +9,13 @@ fun compositeBuild(name: String) = "$group:$name"
 dependencies {
   api(platform(compositeBuild("spoofax.depconstraints")))
 
-  api(project(":tiger"))
-  api(project(":tiger.spoofax"))
+  bundleTargetPlatformApi(eclipse("javax.inject"))
+  bundleApi(compositeBuild("spoofax.eclipse.externaldeps"))
+  bundleEmbedApi(project(":tiger"))
+  bundleEmbedApi(project(":tiger.spoofax"))
 }
 
 // Use bnd to create a single OSGi bundle JAR that includes all dependencies.
-val requires = listOf(
-  "javax.inject", // Depends on javax.inject bundle provided by Eclipse.
-  "spoofax.eclipse.externaldeps" // Depends on external dependencies from spoofax.eclipse.
-)
 val exports = listOf(
   // Provided by 'javax.inject' bundle.
   "!javax.inject.*",
@@ -42,24 +39,9 @@ val exports = listOf(
 )
 tasks {
   "jar"(Jar::class) {
-    this.withConvention(aQute.bnd.gradle.BundleTaskConvention::class) {
-      // Let BND use the runtime classpath, since this bundle is used for bundling runtime dependencies.
-      setClasspath(sourceSet.runtimeClasspath)
-    }
     manifest {
       attributes(
-        Pair("Bundle-Vendor", project.group),
-        Pair("Bundle-SymbolicName", project.name),
-        Pair("Bundle-Name", project.name),
-        Pair("Bundle-Version", embedding.bundleVersion),
-
-        Pair("Require-Bundle", requires.joinToString(", ")),
-        Pair("Import-Package", ""), // Disable imports
-
-        Pair("Export-Package", exports.joinToString(", ")),
-
-        Pair("-nouses", "true"), // Disable 'uses' directive generation for exports.
-        Pair("-nodefaultversion", "true") // Disable 'version' directive generation for exports.
+        Pair("Export-Package", exports.joinToString(", "))
       )
     }
   }
