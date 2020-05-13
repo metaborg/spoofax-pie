@@ -5,7 +5,6 @@ plugins {
 
 fun compositeBuild(name: String) = "$group:$name"
 
-// Add dependencies to JVM (non-OSGi) libraries. Must use `api` configuration for `coronium.embedding` plugin.
 dependencies {
   api(platform(compositeBuild("spoofax.depconstraints")))
 

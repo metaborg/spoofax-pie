@@ -20,9 +20,9 @@ dependencies {
   api(project(":spoofax.compiler"))
 
   // Dependencies to be able to configure the extensions provided by these Gradle plugins.
-  compileOnly("org.metaborg:coronium:0.1.8")
-  compileOnly("biz.aQute.bnd:biz.aQute.bnd.gradle:4.3.1")
-  compileOnly("gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.4.16")
+  compileOnly("org.metaborg:coronium:0.3.0")
+  compileOnly("biz.aQute.bnd:biz.aQute.bnd.gradle:5.0.1")
+  compileOnly("gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.4.21")
 }
 
 gradlePlugin {

@@ -34,9 +34,6 @@ tasks {
     manifest {
       attributes(
         Pair("Export-Package", exports.joinToString(", "))
-//        Pair("Import-Package", ""), // Disable imports
-//        Pair("-nouses", "true"), // Disable 'uses' directive generation for exports.
-//        Pair("-nodefaultversion", "true") // Disable 'version' directive generation for exports.
       )
     }
   }
