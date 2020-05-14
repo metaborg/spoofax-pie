@@ -97,15 +97,15 @@ public interface Shared extends Serializable {
     }
 
     @Value.Default default String metaborgCoroniumVersion() {
-        return "0.2.1";
+        return "0.3.0";
     }
 
     @Value.Default default String bndPluginVersion() {
-        return "4.3.1";
+        return "5.0.1";
     }
 
     @Value.Default default String intellijGradlePluginVersion() {
-        return "0.4.15";
+        return "0.4.21";
     }
 
 
@@ -116,7 +116,7 @@ public interface Shared extends Serializable {
      */
     @Value.Default default Properties versionProperties() {
         final Properties properties = new Properties();
-        final @Nullable InputStream inputStream = Shared.class.getClassLoader().getResourceAsStream("versions.properties");
+        final @Nullable InputStream inputStream = Shared.class.getClassLoader().getResourceAsStream("version.properties");
         if(inputStream != null) {
             try(final InputStream propertiesInputStream = inputStream) {
                 properties.load(inputStream);
@@ -130,12 +130,8 @@ public interface Shared extends Serializable {
     /**
      * Gets the Spoofax 3 version, defaulting to the same version that was used to build this class.
      */
-    @Value.Default default String spoofax3Version() {
-        final @Nullable String version = versionProperties().getProperty("spoofax3");
-        if(version != null) {
-            return version;
-        }
-        return "unspecified";
+    @Value.Default default @Nullable String spoofax3Version() {
+        return versionProperties().getProperty("spoofax3");
     }
 
     /**
@@ -208,75 +204,75 @@ public interface Shared extends Serializable {
     /// Spoofax 3.x
 
     @Value.Default default GradleDependency commonDep() {
-        return GradleDependency.module(Coordinate.of("org.metaborg", "common"));
+        return GradleDependency.module(Coordinate.of("org.metaborg", "common", spoofax3Version()));
     }
 
     @Value.Default default GradleDependency completionsCommonDep() {
-        return GradleDependency.module(Coordinate.of("org.metaborg", "completions.common"));
+        return GradleDependency.module(Coordinate.of("org.metaborg", "completions.common", spoofax3Version()));
     }
 
     @Value.Default default GradleDependency jsglrCommonDep() {
-        return GradleDependency.module(Coordinate.of("org.metaborg", "jsglr.common"));
+        return GradleDependency.module(Coordinate.of("org.metaborg", "jsglr.common", spoofax3Version()));
     }
 
     @Value.Default default GradleDependency jsglr1CommonDep() {
-        return GradleDependency.module(Coordinate.of("org.metaborg", "jsglr1.common"));
+        return GradleDependency.module(Coordinate.of("org.metaborg", "jsglr1.common", spoofax3Version()));
     }
 
     @Value.Default default GradleDependency jsglr1PieDep() {
-        return GradleDependency.module(Coordinate.of("org.metaborg", "jsglr1.pie"));
+        return GradleDependency.module(Coordinate.of("org.metaborg", "jsglr1.pie", spoofax3Version()));
     }
 
     @Value.Default default GradleDependency jsglr2CommonDep() {
-        return GradleDependency.module(Coordinate.of("org.metaborg", "jsglr2.common"));
+        return GradleDependency.module(Coordinate.of("org.metaborg", "jsglr2.common", spoofax3Version()));
     }
 
     @Value.Default default GradleDependency esvCommonDep() {
-        return GradleDependency.module(Coordinate.of("org.metaborg", "esv.common"));
+        return GradleDependency.module(Coordinate.of("org.metaborg", "esv.common", spoofax3Version()));
     }
 
     @Value.Default default GradleDependency strategoCommonDep() {
-        return GradleDependency.module(Coordinate.of("org.metaborg", "stratego.common"));
+        return GradleDependency.module(Coordinate.of("org.metaborg", "stratego.common", spoofax3Version()));
     }
 
     @Value.Default default GradleDependency constraintCommonDep() {
-        return GradleDependency.module(Coordinate.of("org.metaborg", "constraint.common"));
+        return GradleDependency.module(Coordinate.of("org.metaborg", "constraint.common", spoofax3Version()));
     }
 
     @Value.Default default GradleDependency nabl2CommonDep() {
-        return GradleDependency.module(Coordinate.of("org.metaborg", "nabl2.common"));
+        return GradleDependency.module(Coordinate.of("org.metaborg", "nabl2.common", spoofax3Version()));
     }
 
     @Value.Default default GradleDependency statixCommonDep() {
-        return GradleDependency.module(Coordinate.of("org.metaborg", "statix.common"));
+        return GradleDependency.module(Coordinate.of("org.metaborg", "statix.common", spoofax3Version()));
     }
 
     @Value.Default default GradleDependency spoofax2CommonDep() {
-        return GradleDependency.module(Coordinate.of("org.metaborg", "spoofax2.common"));
+        return GradleDependency.module(Coordinate.of("org.metaborg", "spoofax2.common", spoofax3Version()));
     }
 
     @Value.Default default GradleDependency spoofaxCompilerInterfacesDep() {
-        return GradleDependency.module(Coordinate.of("org.metaborg", "spoofax.compiler.interfaces"));
+        return GradleDependency.module(Coordinate.of("org.metaborg", "spoofax.compiler.interfaces", spoofax3Version()));
     }
 
     @Value.Default default GradleDependency spoofaxCoreDep() {
-        return GradleDependency.module(Coordinate.of("org.metaborg", "spoofax.core"));
+        return GradleDependency.module(Coordinate.of("org.metaborg", "spoofax.core", spoofax3Version()));
     }
 
     @Value.Default default GradleDependency spoofaxCliDep() {
-        return GradleDependency.module(Coordinate.of("org.metaborg", "spoofax.cli"));
+        return GradleDependency.module(Coordinate.of("org.metaborg", "spoofax.cli", spoofax3Version()));
     }
 
     @Value.Default default GradleDependency spoofaxEclipseDep() {
-        return GradleDependency.module(Coordinate.of("org.metaborg", "spoofax.eclipse"));
+        return GradleDependency.module(Coordinate.of("org.metaborg", "spoofax.eclipse", spoofax3Version()));
     }
 
     @Value.Default default GradleDependency spoofaxEclipseExternaldepsDep() {
-        return GradleDependency.module(Coordinate.of("org.metaborg", "spoofax.eclipse.externaldeps"));
+        return GradleDependency.module(Coordinate.of("org.metaborg", "spoofax.eclipse.externaldeps", spoofax3Version()));
     }
 
     @Value.Default default GradleDependency spoofaxIntellijDep() {
-        return GradleDependency.module(Coordinate.of("org.metaborg", "spoofax.intellij"));
+        return GradleDependency.module(Coordinate.of("org.metaborg", "spoofax.intellij", spoofax3Version()));
     }
 
 

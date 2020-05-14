@@ -57,7 +57,7 @@ sourceSets {
 }
 
 // Task that writes (dependency) versions to a versions.properties file, which is used in the Shared class.
-val versionsPropertiesFile = generatedResourcesDir.resolve("versions.properties")
+val versionsPropertiesFile = generatedResourcesDir.resolve("version.properties")
 val generateVersionPropertiesTask = tasks.register("generateVersionProperties") {
   inputs.property("version", project.version.toString())
   outputs.file(versionsPropertiesFile)

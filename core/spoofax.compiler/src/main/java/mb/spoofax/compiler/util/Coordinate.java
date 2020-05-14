@@ -1,5 +1,6 @@
 package mb.spoofax.compiler.util;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 
 import java.io.Serializable;
@@ -7,8 +8,8 @@ import java.util.Optional;
 
 @Value.Immutable
 public abstract class Coordinate implements Serializable {
-    public static Coordinate of(String groupId, String artifactId, String version) {
-        return ImmutableCoordinate.of(groupId, artifactId, Optional.of(version));
+    public static Coordinate of(String groupId, String artifactId, @Nullable String version) {
+        return ImmutableCoordinate.of(groupId, artifactId, Optional.ofNullable(version));
     }
 
     public static Coordinate of(String groupId, String artifactId) {
