@@ -1,6 +1,7 @@
 plugins {
   id("org.metaborg.gradle.config.java-library")
   id("org.metaborg.gradle.config.junit-testing")
+  id("org.metaborg.spoofax.gradle.base")
   id("de.set.ecj") // Use ECJ to speed up compilation of Stratego's generated Java files.
 }
 
@@ -35,29 +36,6 @@ dependencies {
   testCompileOnly("org.checkerframework:checker-qual-android")
 }
 
-fun createProjectDependency(projectPath: String): ModuleDependency {
-  return configureModuleDependency(dependencies.project(projectPath))
-}
-
-fun createModuleDependency(notation: String): ModuleDependency {
-  return configureModuleDependency(dependencies.module(notation) as ModuleDependency)
-}
-
-fun createFilesDependency(vararg paths: Any?): Dependency {
-  return dependencies.create(files(paths))
-}
-
-fun configureModuleDependency(dependency: ModuleDependency): ModuleDependency {
-  dependency.targetConfiguration = Dependency.DEFAULT_CONFIGURATION
-  dependency.isTransitive = false // Don't care about transitive dependencies, just want the '.spoofax-language' artifact.
-  dependency.artifact {
-    name = dependency.name
-    type = "spoofax-language"
-    extension = "spoofax-language"
-  }
-  return dependency
-}
-
 fun copySpoofaxLanguageResources(
   dependency: Dependency,
   destinationPackage: String,
@@ -73,15 +51,15 @@ fun copySpoofaxLanguageResources(
     allResources.add("target/metaborg/stratego-javastrat.jar")
   }
 
-  // Create 'spoofaxLanguage' configuration that contains the dependency.
-  val configuration = configurations.create("spoofaxLanguage") {
-    dependencies.add(dependency)
-  }
+  // Add language dependency.
+  dependencies.add("compileLanguage", dependency)
+
   // Unpack the '.spoofax-language' archive.
+  val languageFiles = project.configurations.getByName("languageFiles")
   val unpackSpoofaxLanguageDir = "$buildDir/unpackedSpoofaxLanguage/"
   val unpackSpoofaxLanguageTask = tasks.register<Sync>("unpackSpoofaxLanguage") {
-    dependsOn(configuration)
-    from({ configuration.map { project.zipTree(it) } })  /* Closure inside `from` to defer evaluation until task execution time */
+    dependsOn(languageFiles)
+    from({ languageFiles.map { project.zipTree(it) } })  /* Closure inside `from` to defer evaluation until task execution time */
     into(unpackSpoofaxLanguageDir)
     include(allResources)
   }
@@ -124,7 +102,7 @@ fun copySpoofaxLanguageResources(
   tasks.getByName(JavaPlugin.TEST_CLASSES_TASK_NAME).dependsOn(copyTestTask)
 }
 copySpoofaxLanguageResources(
-  createModuleDependency(compositeBuild("tiger.spoofaxcore")),
+  dependencies.create(compositeBuild("tiger.spoofaxcore")),
   "mb/tiger",
   true,
   true,

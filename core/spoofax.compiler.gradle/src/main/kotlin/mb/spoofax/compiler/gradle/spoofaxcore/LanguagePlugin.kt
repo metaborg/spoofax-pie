@@ -157,6 +157,7 @@ open class LanguagePlugin : Plugin<Project> {
     project.extensions.add(LanguageProjectExtension.id, extension)
 
     project.plugins.apply("org.metaborg.gradle.config.java-library")
+    project.plugins.apply("org.metaborg.spoofax.gradle.base")
 
     project.afterEvaluate {
       configure(project, extension.finalized)
@@ -200,21 +201,20 @@ open class LanguagePlugin : Plugin<Project> {
     val includeStrategoJavastratClasses = input.strategoRuntime().map { it.copyJavaStrategyClasses() }.orElse(false)
     val copyResources = finalized.compiler.getCopyResources(input)
 
-    // Create language specification dependency and 'spoofaxLanguage' configuration that contains this dependency.
-    val configuration = project.configurations.create("spoofaxLanguage") {
-      val dependency: Dependency = input.languageSpecificationDependency().caseOf()
-        .project { configureSpoofaxLanguageDependency(project.dependencies.project(it)) }
-        .module { configureSpoofaxLanguageDependency(project.dependencies.module(it.toGradleNotation()) as ModuleDependency) }
-        .files { project.dependencies.create(project.files(it)) }
-      dependencies.add(dependency)
-    }
+    // Add language dependency.
+    val languageDependency = input.languageSpecificationDependency().caseOf()
+      .project<Dependency> { project.dependencies.project(it) }
+      .module { project.dependencies.module(it.toGradleNotation()) }
+      .files { project.dependencies.create(project.files(it)) }
+    project.dependencies.add("compileLanguage", languageDependency)
 
     // Unpack the '.spoofax-language' archive.
+    val languageFiles = project.configurations.getByName("languageFiles")
     val unpackSpoofaxLanguageDir = "${project.buildDir}/unpackedSpoofaxLanguage/"
     val unpackSpoofaxLanguageTask = project.tasks.register<Sync>("unpackSpoofaxLanguage") {
       inputs.property("input", input)
-      dependsOn(configuration)
-      from({ configuration.map { project.zipTree(it) } })  /* Closure inside `from` to defer evaluation until task execution time */
+      dependsOn(languageFiles)
+      from({ languageFiles.map { project.zipTree(it) } })  /* Closure inside `from` to defer evaluation until task execution time */
       into(unpackSpoofaxLanguageDir)
 
       val allCopyResources = copyResources.toMutableList()
@@ -264,16 +264,5 @@ open class LanguagePlugin : Plugin<Project> {
       }
     }
     project.tasks.getByName(JavaPlugin.TEST_CLASSES_TASK_NAME).dependsOn(copyTestTask)
-  }
-
-  private fun configureSpoofaxLanguageDependency(dependency: ModuleDependency): Dependency {
-    dependency.targetConfiguration = Dependency.DEFAULT_CONFIGURATION
-    dependency.isTransitive = false // Don't care about transitive dependencies, just want the '.spoofax-language' artifact.
-    dependency.artifact {
-      name = dependency.name
-      type = "spoofax-language"
-      extension = "spoofax-language"
-    }
-    return dependency
   }
 }
