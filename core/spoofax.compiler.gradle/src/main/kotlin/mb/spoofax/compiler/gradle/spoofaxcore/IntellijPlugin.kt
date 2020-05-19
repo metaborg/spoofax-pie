@@ -11,6 +11,7 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.IntelliJPlugin
+import org.jetbrains.intellij.IntelliJPluginExtension
 
 open class IntellijProjectSettings(
   val builder: IntellijProjectCompiler.Input.Builder = IntellijProjectCompiler.Input.builder()
@@ -77,6 +78,12 @@ open class IntellijPlugin : Plugin<Project> {
 
     project.pluginManager.apply("org.metaborg.gradle.config.java-library")
     project.pluginManager.apply("org.jetbrains.intellij")
+
+    // Disable some IntelliJ plugin functionality to increase incrementality.
+    project.configure<IntelliJPluginExtension> {
+      instrumentCode = false
+    }
+    project.tasks.getByName("buildSearchableOptions").enabled = false
 
     project.afterEvaluate {
       extension.adapterProjectFinalized.whenAdapterProjectFinalized {

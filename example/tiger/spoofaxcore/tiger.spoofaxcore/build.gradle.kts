@@ -4,10 +4,6 @@ plugins {
   `maven-publish`
 }
 
-spoofax {
-  createPublication = true
-}
-
 ecj {
   toolVersion = "3.20.0"
 }
