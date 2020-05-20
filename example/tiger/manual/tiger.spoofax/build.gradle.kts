@@ -12,7 +12,7 @@ dependencies {
   testAnnotationProcessor(platform(compositeBuild("spoofax.depconstraints")))
 
   // Main
-  api(project(":tiger"))
+  api(project(":tiger.manual"))
   api(compositeBuild("spoofax.core"))
   api(compositeBuild("jsglr1.pie"))
   api("org.metaborg:pie.api")
