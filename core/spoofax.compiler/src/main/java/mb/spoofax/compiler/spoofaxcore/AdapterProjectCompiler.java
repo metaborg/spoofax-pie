@@ -34,6 +34,7 @@ public class AdapterProjectCompiler {
     private final TemplateWriter packageInfoTemplate;
     private final TemplateWriter checkTaskDefTemplate;
     private final TemplateWriter checkMultiTaskDefTemplate;
+    private final TemplateWriter checkAggregatorTaskDefTemplate;
     private final TemplateWriter componentTemplate;
     private final TemplateWriter moduleTemplate;
     private final TemplateWriter instanceTemplate;
@@ -57,6 +58,7 @@ public class AdapterProjectCompiler {
         this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("adapter_project/package-info.java.mustache");
         this.checkTaskDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/CheckTaskDef.java.mustache");
         this.checkMultiTaskDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/CheckMultiTaskDef.java.mustache");
+        this.checkAggregatorTaskDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/CheckAggregatorTaskDef.java.mustache");
         this.componentTemplate = templateCompiler.getOrCompileToWriter("adapter_project/Component.java.mustache");
         this.moduleTemplate = templateCompiler.getOrCompileToWriter("adapter_project/Module.java.mustache");
         this.instanceTemplate = templateCompiler.getOrCompileToWriter("adapter_project/Instance.java.mustache");
@@ -145,12 +147,14 @@ public class AdapterProjectCompiler {
         });
         allTaskDefs.add(input.checkTaskDef());
         allTaskDefs.add(input.checkMultiTaskDef());
+        allTaskDefs.add(input.checkAggregatorTaskDef());
 
         // Class files
         final ResourcePath classesGenDirectory = input.classesGenDirectory();
         packageInfoTemplate.write(input.packageInfo().file(classesGenDirectory), input);
         checkTaskDefTemplate.write(input.genCheckTaskDef().file(classesGenDirectory), input);
         checkMultiTaskDefTemplate.write(input.genCheckMultiTaskDef().file(classesGenDirectory), input);
+        checkAggregatorTaskDefTemplate.write(input.genCheckAggregatorTaskDef().file(classesGenDirectory), input);
         componentTemplate.write(input.genComponent().file(classesGenDirectory), input);
         for(CommandDefRepr commandDef : input.commandDefs()) {
             final UniqueNamer uniqueNamer = new UniqueNamer();
@@ -195,6 +199,10 @@ public class AdapterProjectCompiler {
             }
             injected.add(checkInjection);
             map.put("checkInjection", checkInjection);
+            // TODO: When LanguageInspection is removed, checkInjection can be used for aggregator
+            final NamedTypeInfo aggregatorInjection = uniqueNamer.makeUnique(input.checkAggregatorTaskDef());
+            injected.add(aggregatorInjection);
+            map.put("aggregatorInjection", aggregatorInjection);
             final NamedTypeInfo styleInjection;
             if(input.styler().isPresent()) {
                 styleInjection = uniqueNamer.makeUnique(input.styler().get().styleTaskDef());
@@ -405,6 +413,20 @@ public class AdapterProjectCompiler {
             return genCheckMultiTaskDef();
         }
 
+        // Single file check results aggregator task definition
+
+        @Value.Default default TypeInfo genCheckAggregatorTaskDef() {
+            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "CheckAggregator");
+        }
+
+        Optional<TypeInfo> manualAggregatorTaskDef();
+
+        default TypeInfo checkAggregatorTaskDef() {
+            if(classKind().isManual() && manualAggregatorTaskDef().isPresent()) {
+                return manualAggregatorTaskDef().get();
+            }
+            return genCheckAggregatorTaskDef();
+        }
 
         /// Provided files
 

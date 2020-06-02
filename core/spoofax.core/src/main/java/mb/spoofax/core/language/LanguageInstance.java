@@ -1,5 +1,6 @@
 package mb.spoofax.core.language;
 
+import mb.common.message.KeyedMessages;
 import mb.common.region.Region;
 import mb.common.style.Styling;
 import mb.common.token.Token;
@@ -9,6 +10,7 @@ import mb.common.util.SetView;
 import mb.completions.common.CompletionResult;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
+import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.cli.CliCommand;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
@@ -35,6 +37,8 @@ public interface LanguageInstance {
      * @return a {@link CompletionResult}; or {@code null} when no completions could be generated
      */
     Task<@Nullable CompletionResult> createCompletionTask(ResourceKey resourceKey, Region primarySelection);
+
+    @Nullable Task<KeyedMessages> createCheckTask(ResourcePath projectRoot);
 
     LanguageInspection getInspection();
 
