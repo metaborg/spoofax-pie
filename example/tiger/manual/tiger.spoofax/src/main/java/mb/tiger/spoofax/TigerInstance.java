@@ -126,7 +126,7 @@ public class TigerInstance implements LanguageInstance {
     }
 
     @Override
-    public @Nullable Task<KeyedMessages> createCheckTask(ResourcePath projectRoot) {
+    public Task<@Nullable KeyedMessages> createCheckTask(ResourcePath projectRoot) {
         return new TigerIdeCheckAggregate(tigerIdeCheck).createTask(new TigerIdeCheckAggregate.Input(
             projectRoot,
             new PathResourceWalker(new NoHiddenPathMatcher()),
