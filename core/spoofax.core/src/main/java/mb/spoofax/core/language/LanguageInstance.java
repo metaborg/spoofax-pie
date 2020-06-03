@@ -38,7 +38,7 @@ public interface LanguageInstance {
      */
     Task<@Nullable CompletionResult> createCompletionTask(ResourceKey resourceKey, Region primarySelection);
 
-    @Nullable Task<KeyedMessages> createCheckTask(ResourcePath projectRoot);
+    Task<@Nullable KeyedMessages> createCheckTask(ResourcePath projectRoot);
 
     CollectionView<CommandDef<?>> getCommandDefs();
 

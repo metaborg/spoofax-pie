@@ -157,14 +157,14 @@ public class WorkspaceUpdate {
                         Message message = msg.getValue();
                         if(resourceKey == null) {
                             logger.warn("Cannot create marker with text '" + message.text + "'; it has no corresponding resource");
-                        } else {
-                            final IResource resource = resourceUtil.getEclipseResource(resourceKey);
-                            try {
-                                MarkerUtil.createMarker(languageComponent.getEclipseIdentifiers(),
-                                    message.text, message.severity, resource, message.region);
-                            } catch(CoreException e) {
-                                throw new UncheckedCoreException(e);
-                            }
+                            return;
+                        }
+                        final IResource resource = resourceUtil.getEclipseResource(resourceKey);
+                        try {
+                            MarkerUtil.createMarker(languageComponent.getEclipseIdentifiers(),
+                                message.text, message.severity, resource, message.region);
+                        } catch(CoreException e) {
+                            throw new UncheckedCoreException(e);
                         }
                     });
                 }

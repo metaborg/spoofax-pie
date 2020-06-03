@@ -415,11 +415,11 @@ public class AdapterProjectCompiler {
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "CheckAggregator");
         }
 
-        Optional<TypeInfo> manualAggregatorTaskDef();
+        Optional<TypeInfo> manualCheckAggregatorTaskDef();
 
         default TypeInfo checkAggregatorTaskDef() {
-            if(classKind().isManual() && manualAggregatorTaskDef().isPresent()) {
-                return manualAggregatorTaskDef().get();
+            if(classKind().isManual() && manualCheckAggregatorTaskDef().isPresent()) {
+                return manualCheckAggregatorTaskDef().get();
             }
             return genCheckAggregatorTaskDef();
         }
