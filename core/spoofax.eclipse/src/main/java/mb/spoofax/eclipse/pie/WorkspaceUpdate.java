@@ -152,20 +152,21 @@ public class WorkspaceUpdate {
             }
             try {
                 if (workspaceMonitor == null || !workspaceMonitor.isCanceled()) {
-                    messages.asStream().forEach(msg -> {
-                        ResourceKey resourceKey = msg.getKey();
-                        Message message = msg.getValue();
-                        if(resourceKey == null) {
-                            logger.warn("Cannot create marker with text '" + message.text + "'; it has no corresponding resource");
-                            return;
-                        }
-                        final IResource resource = resourceUtil.getEclipseResource(resourceKey);
-                        try {
-                            MarkerUtil.createMarker(languageComponent.getEclipseIdentifiers(),
-                                message.text, message.severity, resource, message.region);
-                        } catch(CoreException e) {
-                            throw new UncheckedCoreException(e);
-                        }
+                    messages.innerMapView().forEach(entry -> {
+                        ResourceKey resourceKey = entry.getKey();
+                        entry.getValue().stream().forEach(message -> {
+                            if(resourceKey == null) {
+                                logger.warn("Cannot create marker withs text '" + message.text + "'; it has no corresponding resource");
+                                return;
+                            }
+                            final IResource resource = resourceUtil.getEclipseResource(resourceKey);
+                            try {
+                                MarkerUtil.createMarker(languageComponent.getEclipseIdentifiers(),
+                                    message.text, message.severity, resource, message.region);
+                            } catch(CoreException e) {
+                                throw new UncheckedCoreException(e);
+                            }
+                        });
                     });
                 }
             } catch(UncheckedCoreException e) {

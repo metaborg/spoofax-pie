@@ -69,10 +69,10 @@ class TigerConstraintAnalyzerTest extends TigerTestBase {
         assertNotNull(result3.analysis);
         assertEquals(1, result.messages.size());
         assertTrue(result.messages.containsError());
-        boolean foundCorrectMessage = result.messages
-            .asStream()
-            .anyMatch(msg -> resource3.equals(msg.getKey()) &&
-                msg.getValue().severity.equals(Severity.Error));
+        boolean foundCorrectMessage = result.messages.innerMapView().stream()
+            .filter(msg -> resource3.equals(msg.getKey()))
+            .flatMap(msg -> msg.getValue().stream())
+            .anyMatch(msg -> msg.severity.equals(Severity.Error));
         assertTrue(foundCorrectMessage);
     }
 

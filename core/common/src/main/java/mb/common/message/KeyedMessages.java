@@ -1,6 +1,7 @@
 package mb.common.message;
 
 import mb.common.util.ListView;
+import mb.common.util.MapView;
 import mb.common.util.MultiHashMap;
 import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -136,9 +137,7 @@ public class KeyedMessages implements Serializable {
         return stringBuilder.toString();
     }
 
-    public Stream<Entry<ResourceKey, Message>> asStream() {
-        return messages.entrySet().stream()
-            .flatMap(entry -> entry.getValue().stream()
-                .map(msg -> new AbstractMap.SimpleEntry<>(entry.getKey(), msg)));
+    public MapView<ResourceKey, ArrayList<Message>> innerMapView() {
+        return MapView.copyOf(messages.getInnerMap());
     }
 }
