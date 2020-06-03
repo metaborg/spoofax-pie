@@ -144,32 +144,13 @@ public class PieRunner {
             }
 
             try {
-                languageInstance.getInspection().caseOf()
-                    .multiFile(f -> {
-                        if(project == null) {
-                            logger.warn("Cannot run inspections for resource '" + file + "' of language '" + languageInstance.getDisplayName() + "', because it requires multi-file analysis but no project was given");
-                            return Optional.empty();
-                        }
-                        final LanguageInspection.MultiFileInput input = multiFileInspectionInput(languageInstance, new EclipseResourcePath(project));
-                        final Task<KeyedMessages> task = f.apply(input);
-                        try {
-                            final KeyedMessages messages = requireWithoutObserving(task, postSession, monitor);
-                            workspaceUpdate.replaceMessages(messages);
-                        } catch(ExecException | InterruptedException e) {
-                            throw new UncheckedException(e);
-                        }
-                        return Optional.empty();
-                    })
-                    .singleFile(f -> {
-                        final Task<Messages> task = f.apply(path);
-                        try {
-                            final Messages messages = requireWithoutObserving(task, postSession, monitor);
-                            workspaceUpdate.replaceMessages(path, messages);
-                        } catch(ExecException | InterruptedException e) {
-                            throw new UncheckedException(e);
-                        }
-                        return Optional.empty();
-                    });
+                if (project == null) {
+                    logger.warn("Cannot run inspections for resource '\" + file + \"' of language '\" + languageInstance.getDisplayName() + \"', because it requires multi-file analysis but no project was given");
+                } else {
+                    final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(new EclipseResourcePath(project));
+                    final KeyedMessages messages = requireWithoutObserving(checkTask, postSession, monitor);
+                    workspaceUpdate.replaceMessages(messages);
+                }
             } catch(UncheckedException e) {
                 final Exception cause = e.getCause();
                 if(cause instanceof ExecException) {
@@ -265,22 +246,9 @@ public class PieRunner {
             // Unobserve inspection tasks and clear messages.
             final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
             final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
-            languageInstance.getInspection().caseOf()
-                .multiFile(f -> {
-                    final LanguageInspection.MultiFileInput input = multiFileInspectionInput(languageInstance, project);
-                    final Task<KeyedMessages> task = f.apply(input);
-                    unobserve(task, pie, session, monitor);
-                    workspaceUpdate.clearMessagesRecursively(project);
-                    return Optional.empty();
-                })
-                .singleFile(f -> {
-                    for(ResourcePath file : resourceChanges.newFiles) {
-                        final Task<Messages> task = f.apply(file);
-                        unobserve(task, pie, session, monitor);
-                        workspaceUpdate.clearMessages(file);
-                    }
-                    return Optional.empty();
-                });
+            final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(projectResource.getPath());
+            unobserve(checkTask, pie, session, monitor);
+            workspaceUpdate.clearMessagesRecursively(project);
             workspaceUpdate.update(null, monitor);
             // Delete unobserved tasks and their provided files.
             deleteUnobservedTasks(session, monitor);
@@ -637,57 +605,27 @@ public class PieRunner {
         final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
         final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
         try {
-            languageInstance.getInspection().caseOf()
-                .multiFile(f -> {
-                    for(ResourcePath newProject : resourceChanges.newProjects) {
-                        final LanguageInspection.MultiFileInput input = multiFileInspectionInput(languageInstance, newProject);
-                        final Task<KeyedMessages> task = f.apply(input);
-                        pie.setCallback(task, (messages) -> {
-                            if(bottomUpWorkspaceUpdate != null) {
-                                bottomUpWorkspaceUpdate.replaceMessages(messages);
-                            }
-                        });
-                        if(!pie.isObserved(task)) {
-                            try {
-                                final KeyedMessages messages = require(task, session, monitor);
-                                workspaceUpdate.replaceMessages(messages);
-                            } catch(InterruptedException | ExecException e) {
-                                throw new UncheckedException(e);
-                            }
-                        }
+            resourceChanges.newProjects.forEach(newProject -> {
+                final Task<KeyedMessages> task = languageInstance.createCheckTask(newProject);
+                pie.setCallback(task, messages -> {
+                    if (bottomUpWorkspaceUpdate != null) {
+                        bottomUpWorkspaceUpdate.replaceMessages(messages);
                     }
-                    for(ResourcePath removedProject : resourceChanges.removedProjects) {
-                        final LanguageInspection.MultiFileInput input = multiFileInspectionInput(languageInstance, removedProject);
-                        final Task<KeyedMessages> task = f.apply(input);
-                        unobserve(task, pie, session, monitor);
-                        workspaceUpdate.clearMessagesRecursively(removedProject);
-                    }
-                    return Optional.empty();
-                })
-                .singleFile(f -> {
-                    for(ResourcePath newFile : resourceChanges.newFiles) {
-                        final Task<Messages> task = f.apply(newFile);
-                        pie.setCallback(task, (messages) -> {
-                            if(bottomUpWorkspaceUpdate != null) {
-                                bottomUpWorkspaceUpdate.replaceMessages(newFile, messages);
-                            }
-                        });
-                        if(!pie.isObserved(task)) {
-                            try {
-                                final Messages messages = require(task, session, monitor);
-                                workspaceUpdate.replaceMessages(newFile, messages);
-                            } catch(InterruptedException | ExecException e) {
-                                throw new UncheckedException(e);
-                            }
-                        }
-                    }
-                    for(ResourcePath removedFile : resourceChanges.removedFiles) {
-                        final Task<Messages> task = f.apply(removedFile);
-                        unobserve(task, pie, session, monitor);
-                        workspaceUpdate.clearMessages(removedFile);
-                    }
-                    return Optional.empty();
                 });
+                if (!pie.isObserved(task)) {
+                    try {
+                        final KeyedMessages messages = require(task, session, monitor);
+                        workspaceUpdate.replaceMessages(messages);
+                    } catch(InterruptedException | ExecException e) {
+                        throw new UncheckedException(e);
+                    }
+                }
+            });
+            resourceChanges.removedProjects.forEach(removedProject -> {
+                final Task<KeyedMessages> task = languageInstance.createCheckTask(removedProject);
+                unobserve(task, pie, session, monitor);
+                workspaceUpdate.clearMessagesRecursively(removedProject);
+            });
         } catch(UncheckedException e) {
             final Exception cause = e.getCause();
             if(cause instanceof ExecException) {
