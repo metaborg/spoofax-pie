@@ -6,11 +6,13 @@ import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class KeyedMessages implements Serializable {
     final MultiHashMap<@Nullable ResourceKey, Message> messages;
@@ -27,30 +29,6 @@ public class KeyedMessages implements Serializable {
 
     public boolean isEmpty() {
         return messages.isEmpty();
-    }
-
-    public void accept(KeyedMessageVisitor visitor) {
-        for(Entry<@Nullable ResourceKey, ArrayList<Message>> entry : messages.entrySet()) {
-            final @Nullable ResourceKey resource = entry.getKey();
-            for(Message msg : entry.getValue()) {
-                if(resource == null) {
-                    if(!visitor.noOrigin(msg.text, msg.exception, msg.severity)) return;
-                } else if(msg.region == null) {
-                    if(!visitor.resourceOrigin(msg.text, msg.exception, msg.severity, resource)) return;
-                } else {
-                    if(!visitor.regionOrigin(msg.text, msg.exception, msg.severity, resource, msg.region)) return;
-                }
-            }
-        }
-    }
-
-    public void accept(GeneralMessageVisitor visitor) {
-        for(Entry<@Nullable ResourceKey, ArrayList<Message>> entry : messages.entrySet()) {
-            final @Nullable ResourceKey resource = entry.getKey();
-            for(Message msg : entry.getValue()) {
-                if(!visitor.message(msg.text, msg.exception, msg.severity, resource, msg.region)) return;
-            }
-        }
     }
 
     public Iterable<Message> getMessages(ResourceKey resource) {
@@ -156,5 +134,11 @@ public class KeyedMessages implements Serializable {
             }
         });
         return stringBuilder.toString();
+    }
+
+    public Stream<Entry<ResourceKey, Message>> asStream() {
+        return messages.entrySet().stream()
+            .flatMap(entry -> entry.getValue().stream()
+                .map(msg -> new AbstractMap.SimpleEntry<>(entry.getKey(), msg)));
     }
 }
