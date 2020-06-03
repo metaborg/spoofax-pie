@@ -195,14 +195,10 @@ public class AdapterProjectCompiler {
             if(input.isMultiFile()) {
                 checkInjection = uniqueNamer.makeUnique(input.checkMultiTaskDef());
             } else {
-                checkInjection = uniqueNamer.makeUnique(input.checkTaskDef());
+                checkInjection = uniqueNamer.makeUnique(input.checkAggregatorTaskDef());
             }
             injected.add(checkInjection);
             map.put("checkInjection", checkInjection);
-            // TODO: When LanguageInspection is removed, checkInjection can be used for aggregator
-            final NamedTypeInfo aggregatorInjection = uniqueNamer.makeUnique(input.checkAggregatorTaskDef());
-            injected.add(aggregatorInjection);
-            map.put("aggregatorInjection", aggregatorInjection);
             final NamedTypeInfo styleInjection;
             if(input.styler().isPresent()) {
                 styleInjection = uniqueNamer.makeUnique(input.styler().get().styleTaskDef());

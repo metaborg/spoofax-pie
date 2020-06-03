@@ -89,22 +89,13 @@ public class {{genInstance.id}} implements LanguageInstance {
         return {{completeInjection.name}}.createTask(new {{completeInjection.type.qualifiedId}}.Input({{parseInjection.name}}.createNullableRecoverableAstSupplier(resourceKey)));
     }
 
-{{#isMultiFile}}
     @Override public Task<KeyedMessages> createCheckTask(ResourcePath projectRoot) {
         return {{checkInjection.name}}.createTask(new {{checkInjection.type.qualifiedId}}.Input(
             projectRoot,
             new PathResourceWalker(new NoHiddenPathMatcher()),
             new PathResourceMatcher(new ExtensionsPathMatcher(getFileExtensions().asUnmodifiable()))));
     }
-{{/isMultiFile}}
-{{^isMultiFile}}
-    @Override public Task<KeyedMessages> createCheckTask(ResourcePath projectRoot) {
-        return {{aggregatorInjection.name}}.createTask(new {{aggregatorInjection.type.qualifiedId}}.Input(
-            projectRoot,
-            new PathResourceWalker(new NoHiddenPathMatcher()),
-            new PathResourceMatcher(new ExtensionsPathMatcher(getFileExtensions().asUnmodifiable()))));
-    }
-{{/isMultiFile}}
+
     @Override public CollectionView<CommandDef<?>> getCommandDefs() {
         return commandDefs;
     }
