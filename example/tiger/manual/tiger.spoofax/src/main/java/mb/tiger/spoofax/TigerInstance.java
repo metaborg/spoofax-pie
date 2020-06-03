@@ -125,10 +125,6 @@ public class TigerInstance implements LanguageInstance {
         return complete.createTask(new TigerCompleteTaskDef.Input(parse.createNullableRecoverableAstSupplier(resourceKey)));
     }
 
-    @Override public LanguageInspection getInspection() {
-        return LanguageInspection.singleFile(tigerIdeCheck::createTask);
-    }
-
     @Override
     public @Nullable Task<KeyedMessages> createCheckTask(ResourcePath projectRoot) {
         return new TigerIdeCheckAggregate(tigerIdeCheck).createTask(new TigerIdeCheckAggregate.Input(

@@ -40,9 +40,6 @@ public interface LanguageInstance {
 
     @Nullable Task<KeyedMessages> createCheckTask(ResourcePath projectRoot);
 
-    LanguageInspection getInspection();
-
-
     CollectionView<CommandDef<?>> getCommandDefs();
 
     CollectionView<AutoCommandRequest<?>> getAutoCommandRequests();
