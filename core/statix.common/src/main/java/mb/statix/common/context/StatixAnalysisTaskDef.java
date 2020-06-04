@@ -107,13 +107,15 @@ public class StatixAnalysisTaskDef implements TaskDef<StatixAnalysisTaskDef.Inpu
 
         // Create messages
         KeyedMessagesBuilder builder = new KeyedMessagesBuilder();
-        results.forEach(res -> {
-            List<Message> messages = res.messages().entrySet().stream()
-                .map(entry -> MessageUtils.formatMessage(entry.getValue(), entry.getKey(), res.state().unifier()))
-                .collect(Collectors.toList());
-            ResourceKeyString key = ResourceKeyString.parse(res.state().resource());
-            builder.addMessages(new DefaultResourceKey(key.getQualifier(), key.getId()), messages);
-        });
+        results.stream()
+            .filter(r -> !r.messages().isEmpty())
+            .forEach(res -> {
+                List<Message> messages = res.messages().entrySet().stream()
+                    .map(entry -> MessageUtils.formatMessage(entry.getValue(), entry.getKey(), res.state().unifier()))
+                    .collect(Collectors.toList());
+                ResourceKeyString key = ResourceKeyString.parse(res.state().resource());
+                builder.addMessages(new DefaultResourceKey(key.getQualifier(), key.getId()), messages);
+            });
 
         return builder.build();
     }
