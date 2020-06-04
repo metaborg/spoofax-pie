@@ -69,7 +69,7 @@ For example, the main SDF3 file is always assumed to be `syntax/<language-name>.
 When the language name is changed, but we forget to change the name of this main file, no parse table is built.
 Configuration conventions should be changeable, and defaults should be persisted to ensure that renamings do not break things.
 
-### Summary of problems
+### Summary of Problems
 
 To summarize, Spoofax 2 suffers from the following problems that form the motivation for Spoofax 3:
 
@@ -111,6 +111,7 @@ Because language implementations are just regular Java libraries, they now requi
 However, we do not want language developers to write this Java boilerplate for standard cases.
 Therefore, we employ a Spoofax 3 compiler that generates this Java boilerplate.
 If the language developer is not happy with the implementation, or wants to customize parts, they can manually implement or extend Java classes where needed.
+It is also possible to not use the Spoofax 3 compiler at all, and manually implement all parts.
 
 To enable quick language prototyping, we still support dynamic language loading in environments that support them (e.g., Eclipse and IntelliJ), by dynamically loading the language implementation JAR when changed.
 For example, when prototyping the Tiger language in Eclipse, if the syntax definition is changed we run the Spoofax 3 compiler to (incrementally) create a new parse table and Java classes, and dynamically (re)load the JAR.
@@ -122,37 +123,76 @@ We also allow changing of defaults (conventions), and persist them to enable ren
 To improve error traceability, errors are reported inline where possible.
 Errors are traced through PIE pipelines and support origin tracking to easily support error traceability and inline errors for all language implementations.
 
-## Current status
+better builders:
+non-Stratego commands
+incremental commands
+separate commands from how they are executed
+support command parameters/arguments
+continuous execution
+
+modular and incremental development of Spoofax 3 itself with Gradle
+
+## Current Status
 
 We have stated our key ideas, but since Spoofax 3 is still under heavy development, they have not all been implemented yet.
-We now discuss the current status of Spoofax 3.
+We now discuss the current status of Spoofax 3 by summarizing the key ideas and whether they has been implemented, along with any comments.
 
-What works so far:
+* [x] **Decoupling**: Spoofax Core not depend on any meta-components. Language implementations instead depend on the meta-components they require.
+* [x] **Flexible, modular and incremental pipelines**: Use [PIE](https://github.com/metaborg/pie).
+* [x] **Static loading**: Use static loading by default, making language implementation plain JAR files, which are easy to use in the Java ecosystem.
+* [x] **`LanguageInstance` interface**: Language implementations must implement the `LanguageInstance` interface, which a platform library uses to integrate a language with the platform.
+    * An initial version of the `LanguageInstance` interface exists, but this interface is not yet stable and will receive many new features.
+    * Currently, this interface contains features pertaining both command-line platforms and IDE/code editor platforms. These may be split up in the future.
+* [x] **Generate Java boilerplate**: Generate the Java boilerplate that Spoofax 3 now requires due to the `LanguageInstance` interface and language implementations being plain JAR files.
+    * An initial version of the Spoofax 3 compiler exists that generates the Java boilerplate based on a Spoofax 2 language.
+    * Configuration for the Spoofax 3 compiler is provided through a Gradle build script, which is verbose.
+* [ ] **Quick language prototyping**: Support dynamic language loading in environments that support this, to enable quick language prototyping.
+* [ ] **Configuration DSL**: Use a configuration DSL to improve the developer/user experience.
+* [ ] **Error origin tracking**: Perform origin tracking and propagation on errors to improve the developer/user experience.
+* [x] **Commands**: More flexible and incremental version of "builders" from Spoofax 2.
+    * [x] **Non-Stratego commands**: Commands execute PIE tasks, which execute Java code.
+    * [x] **Incremental commands**: Commands are incremental because they execute PIE tasks.
+    * [x] **Separate commands from how they are executed**: Commands can be bound to IDE/editor menus, command-line commands, or to resource changes.
+    * [x] **Command parameters/arguments**: Commands can specify parameters, which must be provided as arguments when executed.
+* [x] **Modular and incremental development**: Use Gradle (instead of Maven) to build Spoofax 3, which increases modularity and provides incremental builds for faster iteration times.
 
-* Modularity
+Furthermore, we now discuss the status of features that were not new key ideas.
 
-* Incrementality
+* [ ] Language builds
+    * Spoofax 3 currently does not support *building languages* yet. It is only possible to convert a Spoofax 2 language into a Spoofax 3 language through the Spoofax 3 compiler.
+* [ ] Meta-language bootstrapping
+    * Because Spoofax 3 does not yet support building languages, bootstrapping is not yet possible.
+* Meta-tools
+    * Parsing with
+        * [x] JSGLR1
+        * [ ] JSGLR2
+            * [ ] Incremental parsing
+    * Semantic analysis with
+        * [x] NaBL2
+        * [x] Statix
+        * [ ] FlowSpec
+        * [ ] Stratego
+    * [x] Transformation (compilation) with Stratego
+* Editor services
+    * [x] Syntax-based styling
+    * [x] Inline error/warning/note messages
+    * [ ] Code completion
+    * [ ] Outline
+    * [ ]
+* Platforms
+    * [x] Command-line
+    * [ ] Eclipse
+        * An Eclipse plugin for your language is provided, but it not yet mature
+        * Concurrency/parallelism is completely ignored. Therefore, things may run concurrently that are not suppose to which cause data races and crashes.
+    * [ ] IntelliJ
+        * A very minimal IntelliJ plugin for your language is provided, currently only supporting syntax highlighting and inline parse errors.
+    * [ ] Gradle
+    * [ ] Maven
+    * [ ] REPL
 
+The following features will not be supported
 
-What has not been implemented yet:
-
-* No development of language specifications in Spoofax 3 yet. We use the artifacts that Spoofax 2 builds from a language specification, and turn it into a Spoofax 3 language. Therefore, the language specification must still be developed in Spoofax 2. However, the resulting Spoofax 3 language is modular and incremental.
-
-* No configuration DSL yet. Currently requires a lot of boilerplate in Gradle.
-
-* No improved error tracing yet.
-
-* No dynamic loading yet.
-
-
-Platform support:
-
-* Command-line interface: working well
-* Eclipse: partially works, but completely ignores concurrency. Therefore, concurrent operations may (and do) crash.
-* IntelliJ: only syntax highlighting works
-* Gradle: no support yet
-* Maven: no support
-
+* Analysis with NaBL/TS
 
 ## Architecture
 
