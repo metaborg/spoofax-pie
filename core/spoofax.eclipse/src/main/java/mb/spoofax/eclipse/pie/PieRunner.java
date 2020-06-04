@@ -1,7 +1,6 @@
 package mb.spoofax.eclipse.pie;
 
 import mb.common.message.KeyedMessages;
-import mb.common.message.Messages;
 import mb.common.style.Styling;
 import mb.common.util.CollectionView;
 import mb.common.util.ListView;
@@ -21,11 +20,6 @@ import mb.pie.api.exec.NullCancelableToken;
 import mb.pie.runtime.exec.Stats;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
-import mb.resource.hierarchical.match.PathResourceMatcher;
-import mb.resource.hierarchical.match.path.ExtensionsPathMatcher;
-import mb.resource.hierarchical.match.path.NoHiddenPathMatcher;
-import mb.resource.hierarchical.walk.PathResourceWalker;
-import mb.spoofax.core.language.LanguageInspection;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandContext;
@@ -144,7 +138,7 @@ public class PieRunner {
             }
 
             try {
-                if (project == null) {
+                if(project == null) {
                     logger.warn("Cannot run inspections for resource '\" + file + \"' of language '\" + languageInstance.getDisplayName() + \"', because it requires multi-file analysis but no project was given");
                 } else {
                     final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(new EclipseResourcePath(project));
@@ -608,11 +602,11 @@ public class PieRunner {
             resourceChanges.newProjects.forEach(newProject -> {
                 final Task<KeyedMessages> task = languageInstance.createCheckTask(newProject);
                 pie.setCallback(task, messages -> {
-                    if (bottomUpWorkspaceUpdate != null) {
+                    if(bottomUpWorkspaceUpdate != null) {
                         bottomUpWorkspaceUpdate.replaceMessages(messages);
                     }
                 });
-                if (!pie.isObserved(task)) {
+                if(!pie.isObserved(task)) {
                     try {
                         final KeyedMessages messages = require(task, session, monitor);
                         workspaceUpdate.replaceMessages(messages);
@@ -637,13 +631,5 @@ public class PieRunner {
             throw e;
         }
         workspaceUpdate.update(null, monitor);
-    }
-
-    private LanguageInspection.MultiFileInput multiFileInspectionInput(LanguageInstance languageInstance, ResourcePath root) {
-        return new LanguageInspection.MultiFileInput(
-            root,
-            new PathResourceWalker(new NoHiddenPathMatcher()),
-            new PathResourceMatcher(new ExtensionsPathMatcher(languageInstance.getFileExtensions().asUnmodifiable()))
-        );
     }
 }

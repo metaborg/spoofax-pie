@@ -2,24 +2,20 @@ package mb.common.message;
 
 import mb.common.util.ListView;
 import mb.common.util.MapView;
-import mb.common.util.MultiHashMap;
+import mb.common.util.SetView;
 import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class KeyedMessages implements Serializable {
-    final MultiHashMap<@Nullable ResourceKey, Message> messages;
+    final MapView<@Nullable ResourceKey, ArrayList<Message>> messages;
 
 
-    public KeyedMessages(MultiHashMap<@Nullable ResourceKey, Message> messages) {
+    public KeyedMessages(MapView<@Nullable ResourceKey, ArrayList<Message>> messages) {
         this.messages = messages;
     }
 
@@ -33,15 +29,19 @@ public class KeyedMessages implements Serializable {
     }
 
     public Iterable<Message> getMessages(ResourceKey resource) {
-        return messages.get(resource);
+        return messages.getOrDefault(resource, new ArrayList<>());
     }
 
     public Iterable<Message> getMessagesWithoutOrigin() {
-        return messages.get(null);
+        return messages.getOrDefault(null, new ArrayList<>());
     }
 
-    public Set<@Nullable ResourceKey> getResources() {
+    public SetView<@Nullable ResourceKey> getResources() {
         return messages.keySet();
+    }
+
+    public MapView<ResourceKey, ArrayList<Message>> getAllMessages() {
+        return messages;
     }
 
 
@@ -108,7 +108,7 @@ public class KeyedMessages implements Serializable {
     @Override public boolean equals(Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
-        final KeyedMessages that = (KeyedMessages) o;
+        final KeyedMessages that = (KeyedMessages)o;
         return messages.equals(that.messages);
     }
 
@@ -135,9 +135,5 @@ public class KeyedMessages implements Serializable {
             }
         });
         return stringBuilder.toString();
-    }
-
-    public MapView<ResourceKey, ArrayList<Message>> innerMapView() {
-        return MapView.copyOf(messages.getInnerMap());
     }
 }

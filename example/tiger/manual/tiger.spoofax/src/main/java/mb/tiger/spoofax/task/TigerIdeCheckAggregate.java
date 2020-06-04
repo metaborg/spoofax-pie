@@ -21,21 +21,54 @@ import java.util.Objects;
 
 @LanguageScope
 public class TigerIdeCheckAggregate implements TaskDef<TigerIdeCheckAggregate.Input, @Nullable KeyedMessages> {
+    public static class Input implements Serializable {
+        public final ResourcePath root;
+        public final ResourceWalker walker;
+        public final ResourceMatcher matcher;
+
+        public Input(
+            ResourcePath root,
+            ResourceWalker walker,
+            ResourceMatcher matcher
+        ) {
+            this.root = root;
+            this.walker = walker;
+            this.matcher = matcher;
+        }
+
+        @Override public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            final Input input = (Input)o;
+            return root.equals(input.root) &&
+                walker.equals(input.walker) &&
+                matcher.equals(input.matcher);
+        }
+
+        @Override public int hashCode() {
+            return Objects.hash(root, walker, matcher);
+        }
+
+        @Override public String toString() {
+            return "Input{" +
+                "root=" + root +
+                ", walker=" + walker +
+                ", matcher=" + matcher +
+                '}';
+        }
+    }
 
     private final TigerIdeCheck check;
 
-    @Inject
-    public TigerIdeCheckAggregate(TigerIdeCheck check) {
+    @Inject public TigerIdeCheckAggregate(TigerIdeCheck check) {
         this.check = check;
     }
 
-    @Override
-    public String getId() {
+    @Override public String getId() {
         return TigerIdeCheckAggregate.class.getSimpleName();
     }
 
-    @Override
-    public @Nullable KeyedMessages exec(ExecContext context, Input input) throws Exception {
+    @Override public @Nullable KeyedMessages exec(ExecContext context, Input input) throws Exception {
         final HierarchicalResource root = context.require(input.root, ResourceStampers.modifiedDirRec(input.walker, input.matcher));
         final KeyedMessagesBuilder builder = new KeyedMessagesBuilder();
         try {
@@ -55,44 +88,6 @@ public class TigerIdeCheckAggregate implements TaskDef<TigerIdeCheckAggregate.In
         }
 
         return builder.build();
-    }
-
-    public static class Input implements Serializable {
-        public final ResourcePath root;
-        public final ResourceWalker walker;
-        public final ResourceMatcher matcher;
-
-        public Input(ResourcePath root,
-                     ResourceWalker walker,
-                     ResourceMatcher matcher) {
-            this.root = root;
-            this.walker = walker;
-            this.matcher = matcher;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if(this == o) return true;
-            if(o == null || getClass() != o.getClass()) return false;
-            final Input input = (Input)o;
-            return root.equals(input.root) &&
-                walker.equals(input.walker) &&
-                matcher.equals(input.matcher);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(root, walker, matcher);
-        }
-
-        @Override
-        public String toString() {
-            return "Input{" +
-                "root=" + root +
-                ", walker=" + walker +
-                ", matcher=" + matcher +
-                '}';
-        }
     }
 }
 

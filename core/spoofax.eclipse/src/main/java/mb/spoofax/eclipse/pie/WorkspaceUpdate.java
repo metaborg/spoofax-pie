@@ -151,8 +151,8 @@ public class WorkspaceUpdate {
                 MarkerUtil.clearAll(languageComponent.getEclipseIdentifiers(), resource);
             }
             try {
-                if (workspaceMonitor == null || !workspaceMonitor.isCanceled()) {
-                    messages.innerMapView().forEach(entry -> {
+                if(workspaceMonitor == null || !workspaceMonitor.isCanceled()) {
+                    messages.getAllMessages().forEach(entry -> {
                         ResourceKey resourceKey = entry.getKey();
                         entry.getValue().stream().forEach(message -> {
                             if(resourceKey == null) {

@@ -21,59 +21,54 @@ import java.util.Objects;
 
 @LanguageScope
 public class {{genCheckAggregatorTaskDef.id}} implements TaskDef<{{genCheckAggregatorTaskDef.id}}.Input, @Nullable KeyedMessages> {
-
     public static class Input implements Serializable {
         public final ResourcePath root;
         public final ResourceWalker walker;
         public final ResourceMatcher matcher;
 
-        public Input(ResourcePath root,
-                     ResourceWalker walker,
-                     ResourceMatcher matcher) {
+        public Input(
+            ResourcePath root,
+            ResourceWalker walker,
+            ResourceMatcher matcher
+        ) {
             this.root = root;
             this.walker = walker;
             this.matcher = matcher;
         }
 
-        @Override
-        public boolean equals(Object o) {
+        @Override public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             final Input input = (Input) o;
             return root.equals(input.root) &&
-                    walker.equals(input.walker) &&
-                    matcher.equals(input.matcher);
+                walker.equals(input.walker) &&
+                matcher.equals(input.matcher);
         }
 
-        @Override
-        public int hashCode() {
+        @Override public int hashCode() {
             return Objects.hash(root, walker, matcher);
         }
 
-        @Override
-        public String toString() {
+        @Override public String toString() {
             return "Input{" +
-                    "root=" + root +
-                    ", walker=" + walker +
-                    ", matcher=" + matcher +
-                    '}';
+                "root=" + root +
+                ", walker=" + walker +
+                ", matcher=" + matcher +
+                '}';
         }
     }
 
     private final {{genCheckTaskDef.id}} check;
 
-    @Inject
-    public {{genCheckAggregatorTaskDef.id}}({{genCheckTaskDef.id}} check){
+    @Inject public {{genCheckAggregatorTaskDef.id}}({{genCheckTaskDef.id}} check){
         this.check = check;
     }
 
-    @Override
-    public String getId() {
-        return {{genCheckAggregatorTaskDef.id}}.class.getSimpleName();
+    @Override public String getId() {
+        return "{{genCheckAggregatorTaskDef.qualifiedId}}";
     }
 
-    @Override
-    public @Nullable KeyedMessages exec(ExecContext context, Input input) throws Exception {
+    @Override public @Nullable KeyedMessages exec(ExecContext context, Input input) throws Exception {
         final HierarchicalResource root = context.require(input.root, ResourceStampers.modifiedDirRec(input.walker, input.matcher));
         final KeyedMessagesBuilder builder = new KeyedMessagesBuilder();
         try {

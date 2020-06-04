@@ -1,6 +1,7 @@
 package mb.common.message;
 
 import mb.common.util.ListView;
+import mb.common.util.MapView;
 import mb.common.util.MultiHashMap;
 import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -105,7 +106,7 @@ public class Messages implements Iterable<Message>, Serializable {
     public KeyedMessages toKeyed(@Nullable ResourceKey key) {
         final MultiHashMap<@Nullable ResourceKey, Message> map = new MultiHashMap<>();
         map.putAll(key, messages);
-        return new KeyedMessages(map);
+        return new KeyedMessages(MapView.copyOf(map.getInnerMap()));
     }
 
 

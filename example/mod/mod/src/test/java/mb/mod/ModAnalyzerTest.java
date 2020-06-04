@@ -71,7 +71,7 @@ class ModAnalyzerTest extends ModTestBase {
         assertNotNull(result3.analysis);
         assertEquals(1, result.messages.size());
         assertTrue(result.messages.containsError());
-        boolean foundCorrectMessage = result.messages.innerMapView().stream()
+        boolean foundCorrectMessage = result.messages.getAllMessages().stream()
             .filter(msg -> resource3.equals(msg.getKey()))
             .flatMap(msg -> msg.getValue().stream())
             .anyMatch(msg -> msg.severity.equals(Severity.Error));
