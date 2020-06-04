@@ -117,7 +117,7 @@ public class StatixAnalysisTaskDef implements TaskDef<StatixAnalysisTaskDef.Inpu
 
         // Create messages
         KeyedMessagesBuilder builder = new KeyedMessagesBuilder();
-        results.stream().forEach(res -> {
+        results.forEach(res -> {
             List<Message> messages = res.messages().entrySet().stream()
                 .map(entry -> MessageUtils.formatMessage(entry.getValue(), entry.getKey(), res.state().unifier()))
                 .collect(Collectors.toList());
@@ -135,7 +135,8 @@ public class StatixAnalysisTaskDef implements TaskDef<StatixAnalysisTaskDef.Inpu
             // Create initial state from combined specifications
             final Spec combinedSpec = context.languages().stream()
                 .map(LanguageMetadata::statixSpec)
-                .reduce(new SpecUtils(termFactory).initialSpec(), SpecUtils::mergeSpecs);
+                .reduce(SpecUtils::mergeSpecs)
+                .orElseThrow(() -> new RuntimeException("Doing analysis without specs is not allowed"));
             initial = State.of(combinedSpec);
             // Create root scope instance
             IConstraint rootScopeConstraint = new CExists(Iterables2.singleton(ImmutableTermVar.of("", "s")),

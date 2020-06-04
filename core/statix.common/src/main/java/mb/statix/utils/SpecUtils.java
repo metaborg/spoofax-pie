@@ -80,12 +80,9 @@ public class SpecUtils {
         return fileSpecs.stream()
             .map(strategoTerms::fromStratego)
             .map(fileSpecToSpecMatcher::match)
-            .map(Optional::get)
-            .reduce(initialSpec(), SpecUtils::mergeSpecs);
-    }
-
-    public Spec initialSpec() {
-        return Spec.of().withNoRelationLabel(strategoTerms.fromStratego(termFactory.makeAppl("EOP")));
+            .map(Optional::get)// TODO: more clean exception
+            .reduce(SpecUtils::mergeSpecs)
+            .orElseThrow(() -> new RuntimeException("Error: no specs provided"));
     }
 
     public static Spec mergeSpecs(Spec acc, Spec newSpec) {
