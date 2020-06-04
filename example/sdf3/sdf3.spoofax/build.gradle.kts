@@ -214,6 +214,8 @@ spoofaxAdapterProject {
 
 dependencies {
   api("org.metaborg:sdf2parenthesize")
+  api("org.metaborg:statix.solver")
+  api("org.metaborg:statix.common")
 
   testAnnotationProcessor(platform("$group:spoofax.depconstraints:$version"))
   testImplementation("org.metaborg:log.backend.slf4j")

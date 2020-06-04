@@ -6,6 +6,7 @@ import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.log.slf4j.SLF4JLoggerFactory;
 import mb.pie.api.Function;
+import mb.pie.api.MapTaskDefs;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Pie;
 import mb.pie.api.Supplier;
@@ -29,8 +30,10 @@ import mb.sdf3.spoofax.util.PlatformTestComponent;
 import mb.sdf3.spoofax.util.Sdf3TestComponent;
 import mb.spoofax.core.platform.LoggerFactoryModule;
 import mb.spoofax.core.platform.PlatformPieModule;
+import mb.statix.common.context.StatixAnalysisTaskDef;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.interpreter.terms.ITermFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -58,8 +61,7 @@ class TestBase {
     final Sdf3CreateSpec createSpec = languageComponent.getCreateSpec();
     final Function<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> desugarFunction = desugar.createFunction();
     final Sdf3AnalyzeMulti analyze = languageComponent.getAnalyze();
-    final Pie pie = languageComponent.getPie();
-
+    Pie pie = languageComponent.getPie();
 
     FSResource createTextFile(String text, String relativePath) throws IOException {
         final FSResource resource = rootDirectory.appendRelativePath("a.sdf3");
@@ -108,6 +110,11 @@ class TestBase {
         return new ValueSupplier<>(new Sdf3Spec(mainModuleAstSupplier, modulesAstSuppliers));
     }
 
+    void addStatixTaskDef(ITermFactory termFactory) {
+        pie = pie.createChildBuilder()
+            .withTaskDefs(new MapTaskDefs(new StatixAnalysisTaskDef(termFactory)))
+            .build();
+    }
 
     MixedSession newSession() {
         return pie.newSession();
