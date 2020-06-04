@@ -1,6 +1,7 @@
 package mb.common.message;
 
 import mb.common.util.ListView;
+import mb.common.util.MapView;
 import mb.common.util.MultiHashMap;
 import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -47,23 +48,6 @@ public class Messages implements Iterable<Message>, Serializable {
     public boolean isEmpty() {
         return messages.isEmpty();
     }
-
-    public void accept(MessageVisitor visitor) {
-        for(Message msg : messages) {
-            if(msg.region == null) {
-                if(!visitor.noOrigin(msg.text, msg.exception, msg.severity)) return;
-            } else {
-                if(!visitor.regionOrigin(msg.text, msg.exception, msg.severity, msg.region)) return;
-            }
-        }
-    }
-
-    public void accept(GeneralMessageVisitor visitor) {
-        for(Message msg : messages) {
-            if(!visitor.message(msg.text, msg.exception, msg.severity, null, msg.region)) return;
-        }
-    }
-
 
     public boolean containsSeverity(Severity severity) {
         return messages.stream().anyMatch(
@@ -122,7 +106,7 @@ public class Messages implements Iterable<Message>, Serializable {
     public KeyedMessages toKeyed(@Nullable ResourceKey key) {
         final MultiHashMap<@Nullable ResourceKey, Message> map = new MultiHashMap<>();
         map.putAll(key, messages);
-        return new KeyedMessages(map);
+        return new KeyedMessages(MapView.copyOf(map.getInnerMap()));
     }
 
 

@@ -1,22 +1,21 @@
 package mb.common.message;
 
 import mb.common.util.ListView;
-import mb.common.util.MultiHashMap;
+import mb.common.util.MapView;
+import mb.common.util.SetView;
 import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class KeyedMessages implements Serializable {
-    final MultiHashMap<@Nullable ResourceKey, Message> messages;
+    final MapView<@Nullable ResourceKey, ArrayList<Message>> messages;
 
 
-    public KeyedMessages(MultiHashMap<@Nullable ResourceKey, Message> messages) {
+    public KeyedMessages(MapView<@Nullable ResourceKey, ArrayList<Message>> messages) {
         this.messages = messages;
     }
 
@@ -29,40 +28,20 @@ public class KeyedMessages implements Serializable {
         return messages.isEmpty();
     }
 
-    public void accept(KeyedMessageVisitor visitor) {
-        for(Entry<@Nullable ResourceKey, ArrayList<Message>> entry : messages.entrySet()) {
-            final @Nullable ResourceKey resource = entry.getKey();
-            for(Message msg : entry.getValue()) {
-                if(resource == null) {
-                    if(!visitor.noOrigin(msg.text, msg.exception, msg.severity)) return;
-                } else if(msg.region == null) {
-                    if(!visitor.resourceOrigin(msg.text, msg.exception, msg.severity, resource)) return;
-                } else {
-                    if(!visitor.regionOrigin(msg.text, msg.exception, msg.severity, resource, msg.region)) return;
-                }
-            }
-        }
-    }
-
-    public void accept(GeneralMessageVisitor visitor) {
-        for(Entry<@Nullable ResourceKey, ArrayList<Message>> entry : messages.entrySet()) {
-            final @Nullable ResourceKey resource = entry.getKey();
-            for(Message msg : entry.getValue()) {
-                if(!visitor.message(msg.text, msg.exception, msg.severity, resource, msg.region)) return;
-            }
-        }
-    }
-
     public Iterable<Message> getMessages(ResourceKey resource) {
-        return messages.get(resource);
+        return messages.getOrDefault(resource, new ArrayList<>());
     }
 
     public Iterable<Message> getMessagesWithoutOrigin() {
-        return messages.get(null);
+        return messages.getOrDefault(null, new ArrayList<>());
     }
 
-    public Set<@Nullable ResourceKey> getResources() {
+    public SetView<@Nullable ResourceKey> getResources() {
         return messages.keySet();
+    }
+
+    public MapView<ResourceKey, ArrayList<Message>> getAllMessages() {
+        return messages;
     }
 
 
@@ -129,7 +108,7 @@ public class KeyedMessages implements Serializable {
     @Override public boolean equals(Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
-        final KeyedMessages that = (KeyedMessages) o;
+        final KeyedMessages that = (KeyedMessages)o;
         return messages.equals(that.messages);
     }
 

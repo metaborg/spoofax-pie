@@ -11,7 +11,7 @@ dependencies {
 
   implementation(compositeBuild("spoofax.core"))
   implementation(compositeBuild("spoofax.intellij"))
-  implementation(project(":tiger.spoofax")) {
+  implementation(project(":tiger.manual.spoofax")) {
     exclude(group = "org.slf4j")
   }
 
@@ -24,6 +24,7 @@ dependencies {
 
 intellij {
   version = "2019.3.2"
+  instrumentCode = false
 }
 
 // Use Java 8 version of JBR (JetBrains Runtime) to run the IDE.
@@ -32,7 +33,7 @@ tasks.getByName<org.jetbrains.intellij.tasks.RunIdeTask>("runIde") {
 }
 
 // Skip non-incremental, slow, and unnecessary buildSearchableOptions task from IntelliJ.
-tasks.getByName("buildSearchableOptions").onlyIf { false }
+tasks.getByName("buildSearchableOptions").enabled = false
 
 /*
 Explicitly make the `runIde` task depend on creating the JAR of `spoofax.intellij`, because the `org.jetbrains.intellij`
