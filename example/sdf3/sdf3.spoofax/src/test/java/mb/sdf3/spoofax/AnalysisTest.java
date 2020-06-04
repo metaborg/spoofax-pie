@@ -100,7 +100,7 @@ public class AnalysisTest extends TestBase {
 
         try (MixedSession session = newSession()) {
             KeyedMessages messages = session.require(context.createAnalyzerTask());
-            assertTrue(messages.containsError());
+            assertFalse(messages.containsError());
         }
     }
 
@@ -113,7 +113,7 @@ public class AnalysisTest extends TestBase {
             .languageId("sdf3")
             .statixSpec(spec)
             .fileConstraint("statix/statics!moduleOK")
-            .projectConstraint("statix/statics!projectOk")
+            .projectConstraint("statix/statics!projectOK")
             .resourcesSupplier(new ValueSupplier<>(resources))
             .astSupplier(parse.createNullableRecoverableAstFunction())
             .build();
