@@ -219,11 +219,11 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#motivation-and-goals" class="md-nav__link">
-    Motivation and Goals
+  <a href="#motivation" class="md-nav__link">
+    Motivation
   </a>
   
-    <nav class="md-nav" aria-label="Motivation and Goals">
+    <nav class="md-nav" aria-label="Motivation">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -234,15 +234,15 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#static-loading" class="md-nav__link">
-    Static loading
+  <a href="#language-loading" class="md-nav__link">
+    Language loading
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#error-tracability" class="md-nav__link">
-    Error tracability
+  <a href="#error-tracing" class="md-nav__link">
+    Error tracing
   </a>
   
 </li>
@@ -250,6 +250,13 @@
           <li class="md-nav__item">
   <a href="#configuration" class="md-nav__link">
     Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#summary-of-problems" class="md-nav__link">
+    Summary of Problems
   </a>
   
 </li>
@@ -268,7 +275,7 @@
       
         <li class="md-nav__item">
   <a href="#current-status" class="md-nav__link">
-    Current status
+    Current Status
   </a>
   
 </li>
@@ -313,11 +320,11 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#motivation-and-goals" class="md-nav__link">
-    Motivation and Goals
+  <a href="#motivation" class="md-nav__link">
+    Motivation
   </a>
   
-    <nav class="md-nav" aria-label="Motivation and Goals">
+    <nav class="md-nav" aria-label="Motivation">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -328,15 +335,15 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#static-loading" class="md-nav__link">
-    Static loading
+  <a href="#language-loading" class="md-nav__link">
+    Language loading
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#error-tracability" class="md-nav__link">
-    Error tracability
+  <a href="#error-tracing" class="md-nav__link">
+    Error tracing
   </a>
   
 </li>
@@ -344,6 +351,13 @@
           <li class="md-nav__item">
   <a href="#configuration" class="md-nav__link">
     Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#summary-of-problems" class="md-nav__link">
+    Summary of Problems
   </a>
   
 </li>
@@ -362,7 +376,7 @@
       
         <li class="md-nav__item">
   <a href="#current-status" class="md-nav__link">
-    Current status
+    Current Status
   </a>
   
 </li>
@@ -400,28 +414,44 @@ It is a reimplementation of <a href="http://spoofax.org">Spoofax 2</a>, with the
 <p>Currently, Spoofax 3 is experimental and still a work-in-progress.
 Therefore, it does not have a stable API, lacks documentation and test coverage, and has not yet been applied to real-world use cases.
 If you are looking for a more mature alternative, see <a href="http://spoofax.org">Spoofax 2</a>, which Spoofax 3 is based on.</p>
-<h2 id="motivation-and-goals">Motivation and Goals<a class="headerlink" href="#motivation-and-goals" title="Permanent link">&para;</a></h2>
-<p>We first discuss the motivations for developing Spoofax 3, and what our goals for it are.</p>
+<h2 id="motivation">Motivation<a class="headerlink" href="#motivation" title="Permanent link">&para;</a></h2>
+<p>We first discuss the motivations for developing Spoofax 3.</p>
 <h3 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h3>
 <p>The main motivation for developing Spoofax 3 is the monolithic, inflexible, and non-incremental architecture of Spoofax 2:</p>
 <ul>
 <li>
-<p>It has an <em>inflexible fixed-function pipeline</em>, where every file of your language is parsed, analyzed, and transformed. This works fine, and can even be incremental when the files of your language can be separately compiled. However, this is often not the case. Languages should be able to define their own incremental pipelines with minimal effort. Those pipelines should be modular and flexible, enabling usage in a wide range applications such as command-line interfaces, build systems, code editors, and IDEs.</p>
+<p>It has an <em>inflexible fixed-function pipeline</em>, where every file of your language is parsed, analyzed, and transformed.
+  This works fine, and can even be incremental when the files of your language can be separately compiled.
+  However, this is often not the case.
+  Languages should be able to define their own incremental pipelines with minimal effort.
+  Those pipelines should be modular and flexible, enabling usage in a wide range applications such as command-line interfaces, build systems, code editors, and IDEs.</p>
 </li>
 <li>
-<p>It is monolithic for <em>language users</em> (i.e., the users of your programming language that you have developed with Spoofax), as every language developed with Spoofax 2 depends on Spoofax Core, which in turn depends on all meta-components: JSGLR1 and 2, NaBL+TS index and task engine, NaBL2 &amp; Statix solver, dynsem interpreter, Stratego runtime, config parsing libraries, etc. A language should only require the meta-components that it uses.</p>
+<p>It is monolithic for <em>language users</em> (i.e., the users of your programming language that you have developed with Spoofax), as every language developed with Spoofax 2 depends on Spoofax Core, which in turn depends on all meta-components: JSGLR1 and 2, NaBL+TS index and task engine, NaBL2 &amp; Statix solver, dynsem interpreter, Stratego runtime, config parsing libraries, etc.
+  A language should only require the meta-components that it uses.</p>
 </li>
 <li>
-<p>It is monolithic for <em>meta-component developers</em> (e.g., the developers of the language workbench, or researchers experimenting with new meta-tools or meta-languages). New meta-components need to be tightly integrated into Spoofax Core, requiring time-consuming changes and introducing increased  coupling. We should develop meta-components in separation, and loosely couple/integrate them (as much as possible).</p>
+<p>It is monolithic for <em>meta-component developers</em> (e.g., the developers of the language workbench, or researchers experimenting with new meta-tools or meta-languages).
+  New meta-components need to be tightly integrated into Spoofax Core, requiring time-consuming changes and introducing increased coupling.
+  We should develop meta-components in separation, and loosely couple/integrate them (as much as possible).</p>
 </li>
 <li>
-<p>The <em>build of Spoofax 2</em> itself is monolithic and non-incremental, as all its components are compiled in one huge non-incremental build, massively increasing iteration time during development. The build must be incremental, and components should be separated where possible to reduce coupling,  decreasing iteration times.</p>
+<p>The <em>build of Spoofax 2</em> itself is monolithic and non-incremental, as all its components are compiled in one huge non-incremental build, massively increasing iteration time during development.
+  The build must be incremental, and components should be separated where possible to reduce coupling, decreasing iteration times.</p>
 </li>
 </ul>
-<h3 id="static-loading">Static loading<a class="headerlink" href="#static-loading" title="Permanent link">&para;</a></h3>
-<p>Furthermore, Spoofax 2 <em>only support dynamic loading of languages</em>, where a language can be (re)loaded into the running environment. This is very useful during language development, as it enables fast prototyping. However, when we want to statically load the language, we still need to perform the dynamic loading ritual: somehow include the language archive in your application, and then load it at runtime. This hurts startup time, is not supported on some platforms (e.g., Graal native image), and is tedious. We should support both static and dynamic loading (where possible).</p>
-<h3 id="error-tracability">Error tracability<a class="headerlink" href="#error-tracability" title="Permanent link">&para;</a></h3>
-<p>Some errors are not being traced back to their source. For example, many errors in configuration only show up during build time (in the console, which may be hidden) and are not traced back to the configuration file. This confuses users, and may get stuck on simple things, which then require help from us. Errors, warnings, and informational messages should be traced back to their source, and shown inline at the source in IDE environments, or shown as a list of messages with origin information on the command-line. When there are errors, execution should continue in certain instances (e.g., parse error should recover and try to do analysis), but should not in others (e.g., error from static analysis should prevent execution since it could crash).</p>
+<h3 id="language-loading">Language loading<a class="headerlink" href="#language-loading" title="Permanent link">&para;</a></h3>
+<p>Furthermore, Spoofax 2 <em>only support dynamic loading of languages</em>, where a language can be (re)loaded into the running environment.
+This is very useful during language development, as it enables fast prototyping.
+However, when we want to statically load the language, we still need to perform the dynamic loading ritual: somehow include the language archive in your application, and then load it at runtime.
+This hurts startup time, is not supported on some platforms (e.g., Graal native image), and is tedious.
+We should support both static and dynamic loading (where possible).</p>
+<h3 id="error-tracing">Error tracing<a class="headerlink" href="#error-tracing" title="Permanent link">&para;</a></h3>
+<p>Some errors are not being traced back to their source.
+For example, many errors in configuration only show up during build time (in the console, which may be hidden) and are not traced back to the configuration file.
+This confuses users, and may get stuck on simple things, which then require help from us.
+Errors, warnings, and informational messages should be traced back to their source, and shown inline at the source in IDE environments, or shown as a list of messages with origin information on the command-line.
+When there are errors, execution should continue in certain instances (e.g., parse error should recover and try to do analysis), but should not in others (e.g., error from static analysis should prevent execution since it could crash).</p>
 <h3 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h3>
 <p>Another issue is the scattered configuration in language specifications, which is spread over many different places:</p>
 <ul>
@@ -432,55 +462,153 @@ If you are looking for a more mature alternative, see <a href="http://spoofax.or
 <li><code>pom.xml</code></li>
 <li><code>.mvn/extensions.xml</code></li>
 </ul>
-<p>Finding the right configuration option in these files, and keeping them in sync, is tedious. Furthermore, while most configuration is documented on our website, looking that up still causes a cognitive gap. We should consolidate configuration that belongs together, and not have any duplicate configuration that needs to be kept in sync.Configuration should be supported with editor services such as inline errors and code completion, if possible.</p>
-<p>Moreover, some parts of a language specification are configured by convention, and these conventions cannot be changed. For example, the main SDF3 file is always assumed to be <code>syntax/&lt;language-name&gt;.sdf3</code>. When the language name is changed, but we forget to change the name of this main file, no parse table is built. Configuration conventions should be changable, and defaults should be persisted to ensure that renamings do not break things.</p>
+<p>Finding the right configuration option in these files, and keeping them in sync, is tedious.
+Furthermore, while most configuration is documented on our website, looking that up still causes a cognitive gap.
+We should consolidate configuration that belongs together, and not have any duplicate configuration that needs to be kept in sync.
+Configuration should be supported with editor services such as inline errors and code completion, if possible.</p>
+<p>Moreover, some parts of a language specification are configured by convention, and these conventions cannot be changed.
+For example, the main SDF3 file is always assumed to be <code>syntax/&lt;language-name&gt;.sdf3</code>.
+When the language name is changed, but we forget to change the name of this main file, no parse table is built.
+Configuration conventions should be changeable, and defaults should be persisted to ensure that renamings do not break things.</p>
+<h3 id="summary-of-problems">Summary of Problems<a class="headerlink" href="#summary-of-problems" title="Permanent link">&para;</a></h3>
+<p>To summarize, Spoofax 2 suffers from the following problems that form the motivation for Spoofax 3:</p>
+<ul>
+<li>Monolithic, inflexible, and non-incremental architecture causing:<ul>
+<li>Inflexible and slow language processing due to non-incremental fixed-function pipeline</li>
+<li>Coupling in Spoofax Core: every language depends on Spoofax Core, and Spoofax Core depends on all meta-components</li>
+<li>Slow iteration times when developing Spoofax 2 due to its monolithic and non-incremental build</li>
+<li>Tedious to use languages due to dynamic language loading</li>
+</ul>
+</li>
+<li>Confusing (end-)user experience due to:<ul>
+<li>Bad error traceability</li>
+<li>Scattered configuration</li>
+<li>Non-incremental configuration (restarts required to update configuration)</li>
+</ul>
+</li>
+</ul>
 <h2 id="key-ideas">Key ideas<a class="headerlink" href="#key-ideas" title="Permanent link">&para;</a></h2>
-<ul>
-<li>
-<p>Languages depend directly and only on the meta-components they require.</p>
+<p>To solve these problems, we intend to employ the following key ideas in Spoofax 3.</p>
+<p>To reduce coupling, Spoofax 3's "Spoofax Core" does not depend on any meta-components.
+Instead, a language implementation depends directly on the meta-components that it requires.
+For example, the Tiger language implementation depends directly on the JSGLR2 parser, the NaBL2 constraint solver, and the Stratego runtime.</p>
+<p>To make language pipelines flexible, modular, and incremental, we use an incremental, modular, and expressive build system as the basis for creating pipelines: <a href="https://github.com/metaborg/pie">PIE</a>.
+Language processing steps such as parsing, styling text, analyzing, checking (to provide inline error messages), running (parts of) a compiler, etc. become PIE task definitions.
+Tasks, which are instances of these task definitions, can depend on each other, and depend on resources such as files.
+The PIE runtime efficiently and incrementally executes tasks.
+Furthermore, task definitions can be shared and used by other language implementations, making language implementations modular.</p>
+<p>To reduce the tedium of dynamic language loading, we instead choose to do static language loading as the default.
+A language implementation is just a JAR file that can be put on the classpath and used as a regular Java library.
+For example, to use the JSGLR2 parser of the Tiger language, we just depend on the Tiger language implementation as we would depend on a regular Java library, create an instance of the <code>TigerParser</code> class, and then use that to parse a string into an AST.</p>
+<p>We still want to automatically provide integrations with the command-line, build systems such as Gradle, and IDEs such as Eclipse and IntelliJ.
+Therefore, every language implementation must implement the <code>LanguageInstance</code> interface.
+Spoofax 3 then provides libraries which take a <code>LanguageInstance</code> object, and integrate it with a platform.
+For example, <code>spoofax.cli</code> takes a <code>LanguageInstance</code> object and provides a command-line application, and <code>spoofax.eclipse</code> does the same for an Eclipse plugin.</p>
+<p>Because language implementations are just regular Java libraries, they now require some Java boilerplate.
+However, we do not want language developers to write this Java boilerplate for standard cases.
+Therefore, we employ a Spoofax 3 compiler that generates this Java boilerplate.
+If the language developer is not happy with the implementation, or wants to customize parts, they can manually implement or extend Java classes where needed.
+It is also possible to not use the Spoofax 3 compiler at all, and manually implement all parts.</p>
+<p>To enable quick language prototyping, we still support dynamic language loading in environments that support them (e.g., Eclipse and IntelliJ), by dynamically loading the language implementation JAR when changed.
+For example, when prototyping the Tiger language in Eclipse, if the syntax definition is changed we run the Spoofax 3 compiler to (incrementally) create a new parse table and Java classes, and dynamically (re)load the JAR.</p>
+<p>To improve the user experience, we use a configuration DSL to configure language specifications and implementations.
+Thereby configuration is centralized, has domain-specific checking, and editor services such as inline errors and code completion.
+We also allow changing of defaults (conventions), and persist them to enable renaming.</p>
+<p>To improve error traceability, errors are reported inline where possible.
+Errors are traced through PIE pipelines and support origin tracking to easily support error traceability and inline errors for all language implementations.</p>
+<p>better builders:
+non-Stratego commands
+incremental commands
+separate commands from how they are executed
+support command parameters/arguments
+continuous execution</p>
+<p>modular and incremental development of Spoofax 3 itself with Gradle</p>
+<h2 id="current-status">Current Status<a class="headerlink" href="#current-status" title="Permanent link">&para;</a></h2>
+<p>We have stated our key ideas, but since Spoofax 3 is still under heavy development, they have not all been implemented yet.
+We now discuss the current status of Spoofax 3 by summarizing the key ideas and whether they has been implemented, along with any comments.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Decoupling</strong>: Spoofax Core not depend on any meta-components. Language implementations instead depend on the meta-components they require.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Flexible, modular and incremental pipelines</strong>: Use <a href="https://github.com/metaborg/pie">PIE</a>.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Static loading</strong>: Use static loading by default, making language implementation plain JAR files, which are easy to use in the Java ecosystem.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong><code>LanguageInstance</code> interface</strong>: Language implementations must implement the <code>LanguageInstance</code> interface, which a platform library uses to integrate a language with the platform.<ul>
+<li>An initial version of the <code>LanguageInstance</code> interface exists, but this interface is not yet stable and will receive many new features.</li>
+<li>Currently, this interface contains features pertaining both command-line platforms and IDE/code editor platforms. These may be split up in the future.</li>
+</ul>
 </li>
-<li>
-<p>Static loading as the default, build dynamic loading on top of this only in supported environemnts: IDEs such as Eclipse and IntelliJ.</p>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Generate Java boilerplate</strong>: Generate the Java boilerplate that Spoofax 3 now requires due to the <code>LanguageInstance</code> interface and language implementations being plain JAR files.<ul>
+<li>An initial version of the Spoofax 3 compiler exists that generates the Java boilerplate based on a Spoofax 2 language.</li>
+<li>Configuration for the Spoofax 3 compiler is provided through a Gradle build script, which is verbose.</li>
+</ul>
 </li>
-<li>
-<p>Use an incremental, modular, and expressive build system as the basis for creating pipelines: PIE. Support error tracing in these pipelines</p>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Quick language prototyping</strong>: Support dynamic language loading in environments that support this, to enable quick language prototyping.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Configuration DSL</strong>: Use a configuration DSL to improve the developer/user experience.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Error origin tracking</strong>: Perform origin tracking and propagation on errors to improve the developer/user experience.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Commands</strong>: More flexible and incremental version of "builders" from Spoofax 2.<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Non-Stratego commands</strong>: Commands execute PIE tasks, which execute Java code.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Incremental commands</strong>: Commands are incremental because they execute PIE tasks.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Separate commands from how they are executed</strong>: Commands can be bound to IDE/editor menus, command-line commands, or to resource changes.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Command parameters/arguments</strong>: Commands can specify parameters, which must be provided as arguments when executed.</li>
+</ul>
 </li>
-<li>
-<p>Sse a configuration DSL to configure language specifications: one place, better errors (and error tracing), code completion, etc. Allow changing of defaults (conventions) and persist them to enable renaming.</p>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Modular and incremental development</strong>: Use Gradle (instead of Maven) to build Spoofax 3, which increases modularity and provides incremental builds for faster iteration times.</li>
+</ul>
+<p>Furthermore, we now discuss the status of features that were not new key ideas.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Language builds<ul>
+<li>Spoofax 3 currently does not support <em>building languages</em> yet. It is only possible to convert a Spoofax 2 language into a Spoofax 3 language through the Spoofax 3 compiler.</li>
+</ul>
+</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Meta-language bootstrapping<ul>
+<li>Because Spoofax 3 does not yet support building languages, bootstrapping is not yet possible.</li>
+</ul>
+</li>
+<li>Meta-tools<ul class="task-list">
+<li>Parsing with<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> JSGLR1</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> JSGLR2<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Incremental parsing</li>
+</ul>
 </li>
 </ul>
-<h2 id="current-status">Current status<a class="headerlink" href="#current-status" title="Permanent link">&para;</a></h2>
-<p>What works so far:</p>
-<ul>
-<li>
-<p>Modularity</p>
 </li>
-<li>
-<p>Incrementality</p>
+<li>Semantic analysis with<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> NaBL2</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Statix</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> FlowSpec</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Stratego</li>
+</ul>
+</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Transformation (compilation) with Stratego</li>
+</ul>
+</li>
+<li>Editor services<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Syntax-based styling</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Inline error/warning/note messages</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Code completion</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Outline</li>
+<li>[ ]</li>
+</ul>
+</li>
+<li>Platforms<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Command-line</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Eclipse<ul>
+<li>An Eclipse plugin for your language is provided, but it not yet mature</li>
+<li>Concurrency/parallelism is completely ignored. Therefore, things may run concurrently that are not suppose to which cause data races and crashes.</li>
+</ul>
+</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> IntelliJ<ul>
+<li>A very minimal IntelliJ plugin for your language is provided, currently only supporting syntax highlighting and inline parse errors.</li>
+</ul>
+</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Gradle</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Maven</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> REPL</li>
+</ul>
 </li>
 </ul>
-<p>What has not been implemented yet:</p>
+<p>The following features will not be supported</p>
 <ul>
-<li>
-<p>No development of language specifications in Spoofax 3 yet. We use the artifacts that Spoofax 2 builds from a language specification, and turn it into a Spoofax 3 language. Therefore, the language specification must still be developed in Spoofax 2. However, the resulting Spoofax 3 language is modular and incremental.</p>
-</li>
-<li>
-<p>No configuration DSL yet. Currently requires a lot of boilerplate in Gradle.</p>
-</li>
-<li>
-<p>No improved error tracing yet.</p>
-</li>
-<li>
-<p>No dynamic loading yet.</p>
-</li>
-</ul>
-<p>Platform support:</p>
-<ul>
-<li>Command-line interface: working well</li>
-<li>Eclipse: partially works, but completely ignores concurrency. Therefore, concurrent operations may (and do) crash.</li>
-<li>IntelliJ: only syntax highlighting works</li>
-<li>Gradle: no support yet</li>
-<li>Maven: no support</li>
+<li>Analysis with NaBL/TS</li>
 </ul>
 <h2 id="architecture_1">Architecture<a class="headerlink" href="#architecture_1" title="Permanent link">&para;</a></h2>
                 
