@@ -62,4 +62,12 @@ public class AnalysisContext implements Serializable {
     public void updateSolverResult(State newResult) {
         this.cachedResult = newResult;
     }
+
+    public void clear() {
+        languages.clear();
+        cachedResult = null;
+        logLevel = null;
+    }
+
+    // TODO: Good hashing/equals for incrementality
 }

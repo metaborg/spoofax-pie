@@ -37,6 +37,7 @@ import mb.statix.solver.persistent.SolverResult;
 import mb.statix.solver.persistent.State;
 import mb.statix.spec.Spec;
 import mb.statix.spoofax.StatixTerms;
+import mb.statix.utils.MessageUtils;
 import mb.statix.utils.SpecUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.functions.Function1;
@@ -111,25 +112,20 @@ public class StatixAnalysisTaskDef implements TaskDef<StatixAnalysisTaskDef.Inpu
         final double dt = System.currentTimeMillis() - t0;
         input.context.updateSolverResult(State.builder().from(results.get(0).state()).build());
 
-        KeyedMessagesBuilder builder = new KeyedMessagesBuilder();
+        // TODO: solve project constraints
+        // TODO: mark delays as errors
+
         // Create messages
+        KeyedMessagesBuilder builder = new KeyedMessagesBuilder();
         results.stream().forEach(res -> {
-            List<Message> messages = res.messages().values().stream()
-                .map(message -> new Message(message.toString(), kindToSeverity(message.kind()),
-                    message.origin().map(ITerm::toString)
-                        .map(Region::fromString)
-                        .orElse(null))).collect(Collectors.toList());
+            List<Message> messages = res.messages().entrySet().stream()
+                .map(entry -> MessageUtils.formatMessage(entry.getValue(), entry.getKey(), res.state().unifier()))
+                .collect(Collectors.toList());
             ResourceKeyString key = ResourceKeyString.parse(res.state().resource());
             builder.addMessages(new DefaultResourceKey(key.getQualifier(), key.getId()), messages);
         });
 
         return builder.build();
-    }
-
-    private Severity kindToSeverity(MessageKind kind) {
-        return kind == MessageKind.ERROR ? Severity.Error:
-            kind == MessageKind.WARNING ? Severity.Warning :
-                Severity.Info;
     }
 
     private State getInitialState(AnalysisContext context, IDebugContext debug) {
