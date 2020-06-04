@@ -71,15 +71,11 @@ class ModAnalyzerTest extends ModTestBase {
         assertNotNull(result3.analysis);
         assertEquals(1, result.messages.size());
         assertTrue(result.messages.containsError());
-        final boolean[] foundCorrectMessage = {false};
-        result.messages.accept((text, exception, severity, resource, region) -> {
-            if(resource3.equals(resource) && severity.equals(Severity.Error)) {
-                foundCorrectMessage[0] = true;
-                return false;
-            }
-            return true;
-        });
-        assertTrue(foundCorrectMessage[0]);
+        boolean foundCorrectMessage = result.messages.getAllMessages().stream()
+            .filter(msg -> resource3.equals(msg.getKey()))
+            .flatMap(msg -> msg.getValue().stream())
+            .anyMatch(msg -> msg.severity.equals(Severity.Error));
+        assertTrue(foundCorrectMessage);
     }
 
     @Test void analyzeMultipleSuccess() throws InterruptedException, ConstraintAnalyzerException {

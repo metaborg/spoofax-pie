@@ -1,12 +1,12 @@
 package mb.common.message;
 
 import mb.common.region.Region;
+import mb.common.util.MapView;
 import mb.common.util.MultiHashMap;
 import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
-import java.util.Collection;
 
 public class KeyedMessagesBuilder {
     private final MultiHashMap<@Nullable ResourceKey, Message> messages = new MultiHashMap<>();
@@ -62,7 +62,7 @@ public class KeyedMessagesBuilder {
     }
 
     public void addMessages(KeyedMessages messages) {
-        this.messages.putAll(messages.messages);
+        this.messages.putAll(messages.messages.asUnmodifiable());
     }
 
 
@@ -81,7 +81,7 @@ public class KeyedMessagesBuilder {
     }
 
     public void replaceMessages(KeyedMessages messages) {
-        this.messages.replaceAll(messages.messages);
+        this.messages.replaceAll(messages.messages.asUnmodifiable());
     }
 
 
@@ -95,6 +95,6 @@ public class KeyedMessagesBuilder {
 
 
     public KeyedMessages build() {
-        return new KeyedMessages(new MultiHashMap<>(this.messages));
+        return new KeyedMessages(MapView.copyOf(this.messages.getInnerMap()));
     }
 }

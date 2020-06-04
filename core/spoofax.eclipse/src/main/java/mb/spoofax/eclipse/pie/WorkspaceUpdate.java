@@ -151,20 +151,24 @@ public class WorkspaceUpdate {
                 MarkerUtil.clearAll(languageComponent.getEclipseIdentifiers(), resource);
             }
             try {
-                messages.accept((text, exception, severity, resourceKey, region) -> {
-                    if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return false;
-                    if(resourceKey == null) {
-                        logger.warn("Cannot create marker with text '" + text + "'; it has no corresponding resource");
-                        return true;
-                    }
-                    final IResource resource = resourceUtil.getEclipseResource(resourceKey);
-                    try {
-                        MarkerUtil.createMarker(languageComponent.getEclipseIdentifiers(), text, severity, resource, region);
-                    } catch(CoreException e) {
-                        throw new UncheckedCoreException(e);
-                    }
-                    return true;
-                });
+                if(workspaceMonitor == null || !workspaceMonitor.isCanceled()) {
+                    messages.getAllMessages().forEach(entry -> {
+                        ResourceKey resourceKey = entry.getKey();
+                        entry.getValue().stream().forEach(message -> {
+                            if(resourceKey == null) {
+                                logger.warn("Cannot create marker withs text '" + message.text + "'; it has no corresponding resource");
+                                return;
+                            }
+                            final IResource resource = resourceUtil.getEclipseResource(resourceKey);
+                            try {
+                                MarkerUtil.createMarker(languageComponent.getEclipseIdentifiers(),
+                                    message.text, message.severity, resource, message.region);
+                            } catch(CoreException e) {
+                                throw new UncheckedCoreException(e);
+                            }
+                        });
+                    });
+                }
             } catch(UncheckedCoreException e) {
                 throw e.getCause();
             }

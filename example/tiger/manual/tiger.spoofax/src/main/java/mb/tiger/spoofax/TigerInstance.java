@@ -1,5 +1,6 @@
 package mb.tiger.spoofax;
 
+import mb.common.message.KeyedMessages;
 import mb.common.region.Region;
 import mb.common.style.Styling;
 import mb.common.token.Token;
@@ -10,7 +11,11 @@ import mb.common.util.SetView;
 import mb.completions.common.CompletionResult;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
-import mb.spoofax.core.language.LanguageInspection;
+import mb.resource.hierarchical.ResourcePath;
+import mb.resource.hierarchical.match.PathResourceMatcher;
+import mb.resource.hierarchical.match.path.ExtensionsPathMatcher;
+import mb.resource.hierarchical.match.path.NoHiddenPathMatcher;
+import mb.resource.hierarchical.walk.PathResourceWalker;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.cli.CliCommand;
 import mb.spoofax.core.language.cli.CliParam;
@@ -27,6 +32,7 @@ import mb.tiger.spoofax.command.TigerShowDesugaredAstCommand;
 import mb.tiger.spoofax.command.TigerShowParsedAstCommand;
 import mb.tiger.spoofax.command.TigerShowPrettyPrintedTextCommand;
 import mb.tiger.spoofax.task.TigerIdeCheck;
+import mb.tiger.spoofax.task.TigerIdeCheckAggregate;
 import mb.tiger.spoofax.task.TigerIdeTokenize;
 import mb.tiger.spoofax.task.reusable.TigerCompleteTaskDef;
 import mb.tiger.spoofax.task.reusable.TigerParse;
@@ -117,10 +123,14 @@ public class TigerInstance implements LanguageInstance {
         return complete.createTask(new TigerCompleteTaskDef.Input(parse.createNullableRecoverableAstSupplier(resourceKey)));
     }
 
-    @Override public LanguageInspection getInspection() {
-        return LanguageInspection.singleFile(tigerIdeCheck::createTask);
+    @Override
+    public Task<@Nullable KeyedMessages> createCheckTask(ResourcePath projectRoot) {
+        return new TigerIdeCheckAggregate(tigerIdeCheck).createTask(new TigerIdeCheckAggregate.Input(
+            projectRoot,
+            new PathResourceWalker(new NoHiddenPathMatcher()),
+            new PathResourceMatcher(new ExtensionsPathMatcher(this.getFileExtensions().asUnmodifiable()))
+        ));
     }
-
 
     @Override public CollectionView<CommandDef<?>> getCommandDefs() {
         return commandDefs;
