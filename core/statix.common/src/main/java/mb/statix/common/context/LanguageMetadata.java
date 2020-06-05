@@ -1,10 +1,9 @@
 package mb.statix.common.context;
 
-import mb.pie.api.Supplier;
 import mb.pie.api.Function;
+import mb.pie.api.Supplier;
 import mb.resource.ResourceKey;
 import mb.statix.spec.Spec;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -15,7 +14,7 @@ import java.util.HashSet;
 public interface LanguageMetadata {
     String languageId();
     Supplier<HashSet<ResourceKey>> resourcesSupplier(); // Use HashSet because should be serializable
-    Function<Supplier<String>, @Nullable IStrategoTerm> astSupplier();
+    Function<ResourceKey, IStrategoTerm> astFunction();
     Spec statixSpec();
     String fileConstraint();
     String projectConstraint();

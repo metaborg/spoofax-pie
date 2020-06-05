@@ -10,11 +10,13 @@ import mb.nabl2.terms.stratego.TermIndex;
 import mb.nabl2.terms.stratego.TermOrigin;
 import mb.nabl2.terms.unification.ud.IUniDisunifier;
 import mb.nabl2.util.TermFormatter;
+import mb.resource.ResourceKey;
 import mb.statix.constraints.Constraints;
 import mb.statix.constraints.messages.IMessage;
 import mb.statix.constraints.messages.MessageKind;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.persistent.Solver;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.functions.Function1;
 
 import java.util.Deque;
@@ -104,5 +106,12 @@ public class MessageUtils {
 
     private static String cleanupString(String string) {
         return string.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+    }
+
+    public static @Nullable ResourceKey resourceKeyFromOrigin(Optional<ITerm> origin) {
+        return origin.flatMap(term -> {
+            // TODO: try find key
+            return Optional.<ResourceKey>empty();
+        }).orElse(null);
     }
 }

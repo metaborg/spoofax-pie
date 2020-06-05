@@ -1,22 +1,8 @@
 package mb.statix.common.context;
 
-import io.usethesource.capsule.Set;
 import mb.common.message.KeyedMessages;
 import mb.common.util.CollectionView;
-import mb.common.util.ListView;
-import mb.nabl2.terms.ITerm;
-import mb.nabl2.terms.ITermVar;
-import mb.nabl2.terms.build.ImmutableTermVar;
-import mb.nabl2.terms.unification.OccursException;
-import mb.nabl2.terms.unification.u.IUnifier;
-import mb.nabl2.terms.unification.u.PersistentUnifier;
-import mb.nabl2.terms.unification.ud.PersistentUniDisunifier;
 import mb.pie.api.Task;
-import mb.statix.scopegraph.IScopeGraph;
-import mb.statix.scopegraph.reference.ScopeGraph;
-import mb.statix.scopegraph.terms.Scope;
-import mb.statix.solver.persistent.SolverResult;
-import mb.statix.solver.persistent.State;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.log.Level;
 import org.spoofax.terms.TermFactory;
@@ -28,15 +14,14 @@ import java.util.Map;
 public class AnalysisContext implements Serializable {
 
     private final Map<String, LanguageMetadata> languages = new HashMap<>();
-    private @Nullable State cachedResult;
-
+    private ACachedAnalysis cachedAnalysis = ACachedAnalysis.builder().build();
     private @Nullable Level logLevel;
 
     public void register(LanguageMetadata language) {
         if (!languages.containsKey(language.languageId())) {
             languages.put(language.languageId(), language);
-            cachedResult = null; // Added spec invalidate scope graph
-        } // Else update/validate equality?
+            cachedAnalysis = ACachedAnalysis.builder().build(); // Added spec invalidates scope graph
+        }
     }
 
     public Task<@Nullable KeyedMessages> createAnalyzerTask() {
@@ -55,17 +40,17 @@ public class AnalysisContext implements Serializable {
         return logLevel;
     }
 
-    public @Nullable State getCachedResult() {
-        return cachedResult;
+    public ACachedAnalysis getCachedAnalysis() {
+        return cachedAnalysis;
     }
 
-    public void updateSolverResult(State newResult) {
-        this.cachedResult = newResult;
+    public void updateCachedAnalysis(ACachedAnalysis newAnalysis) {
+        this.cachedAnalysis = newAnalysis;
     }
 
     public void clear() {
         languages.clear();
-        cachedResult = null;
+        cachedAnalysis = ACachedAnalysis.builder().build();
         logLevel = null;
     }
 
