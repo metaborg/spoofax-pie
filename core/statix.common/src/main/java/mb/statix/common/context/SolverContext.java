@@ -9,6 +9,7 @@ import mb.nabl2.terms.ITermVar;
 import mb.nabl2.terms.build.ImmutableTermVar;
 import mb.nabl2.terms.stratego.StrategoTermIndices;
 import mb.nabl2.terms.stratego.StrategoTerms;
+import mb.nabl2.terms.unification.ud.IUniDisunifier;
 import mb.nabl2.util.ImmutableTuple3;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
@@ -39,7 +40,9 @@ import org.spoofax.interpreter.terms.ITermFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -54,6 +57,7 @@ public class SolverContext {
     private final StrategoTerms st;
     private final IDebugContext debug;
     private final Spec combinedSpec;
+    private final Map<IConstraint, IMessage> messageMap = new HashMap<>();
     private final KeyedMessagesBuilder messages = new KeyedMessagesBuilder();
 
     public SolverContext(AnalysisContext analysisContext, ExecContext context, ITermFactory tf) {
@@ -83,12 +87,8 @@ public class SolverContext {
         final List<SolverResult> results = solveFileConstraints(State.builder().from(initialState).build(), globalScope);
 
         // Update messages
-        results.forEach(solverResult -> {
-            solverResult.messages().forEach((cons, msg) -> {
-                Message message = MessageUtils.formatMessage(msg, cons, solverResult.state().unifier());
-                messages.addMessage(message, msg.origin().map(MessageUtils::resourceKeyFromOrigin).orElse(null));
-            });
-        });
+        results.forEach(solverResult -> solverResult.messages()
+            .forEach((constraint, message) -> processMessage(constraint, message, solverResult.state().unifier())));
 
         // Create composed state to use for final constraint solving
         IState.Immutable state = results.stream()
@@ -102,20 +102,15 @@ public class SolverContext {
             .forEach(constraints::add);
 
         // Completely solve project constraints // TODO: timing
-        final SolverResult result = Solver.solve(combinedSpec, state, Constraints.conjoin(constraints), (s, l, st) -> true, debug);
+        final SolverResult globalResult = Solver.solve(combinedSpec, state, Constraints.conjoin(constraints), (s, l, st) -> true, debug);
 
         // Create messages
-        result.messages().forEach((key, value) -> {
-            Message message = MessageUtils.formatMessage(value, key, result.state().unifier());
-            @Nullable ResourceKey resourceKey = value.origin().map(MessageUtils::resourceKeyFromOrigin).orElse(null);
-            messages.addMessages(resourceKey, Iterables2.singleton(message));
-        });
-        result.delays().keySet().forEach(c -> {
-            IMessage msg = MessageUtil.findClosestMessage(c);
-            Message message = MessageUtils.formatMessage(msg, c, result.state().unifier());
-            @Nullable ResourceKey res = msg.origin().map(MessageUtils::resourceKeyFromOrigin).orElse(null);
-            messages.addMessages(res, Iterables2.singleton(message));
-        });
+        final IUniDisunifier resultUnifier = globalResult.state().unifier();
+        globalResult.messages().forEach((constraint, message) -> processMessage(constraint, message, resultUnifier));
+        globalResult.delays().keySet().forEach(constraint -> processMessage(constraint,
+            MessageUtil.findClosestMessage(constraint), resultUnifier));
+
+        SolverResult finalResult = globalResult.withMessages(messageMap);
 
         return messages.build();
     }
@@ -195,5 +190,13 @@ public class SolverContext {
         } catch(InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void processMessage(IConstraint constraint, IMessage message, IUniDisunifier unifier) {
+        messageMap.put(constraint, message);
+        Message msg = MessageUtils.formatMessage(message, constraint, unifier);
+        @Nullable ResourceKey resourceKey = message.origin()
+            .map(MessageUtils::resourceKeyFromOrigin).orElse(null);
+        messages.addMessages(resourceKey, Iterables2.singleton(msg));
     }
 }
