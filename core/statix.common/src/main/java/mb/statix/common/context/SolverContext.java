@@ -83,7 +83,7 @@ public class SolverContext {
         results.forEach(solverResult -> {
             solverResult.messages().forEach((cons, msg) -> {
                 Message message = MessageUtils.formatMessage(msg, cons, solverResult.state().unifier());
-                messages.addMessage(message, MessageUtils.resourceKeyFromOrigin(msg.origin()));
+                messages.addMessage(message, msg.origin().map(MessageUtils::resourceKeyFromOrigin).orElse(null));
             });
         });
 
@@ -105,7 +105,7 @@ public class SolverContext {
         // Create messages
         finalResult.messages().forEach((key, value) -> {
             Message message = MessageUtils.formatMessage(value, key, finalResult.state().unifier());
-            @Nullable ResourceKey resourceKey = MessageUtils.resourceKeyFromOrigin(value.origin());
+            @Nullable ResourceKey resourceKey = value.origin().map(MessageUtils::resourceKeyFromOrigin).orElse(null);
             // TODO: Find proper resource for message.
             messages.addMessages(resourceKey, Iterables2.singleton(message));
         });
@@ -145,7 +145,7 @@ public class SolverContext {
                 .map(key -> {
                     try {
                         IStrategoTerm indexedAst = StrategoTermIndices.index(lang.astFunction().apply(context, key),
-                            key.getId().toString(), tf);
+                            key.toString(), tf);
                         ITerm ast = st.fromStratego(indexedAst);
                         IConstraint fileConstraint = new CUser(fileConstraintName, Iterables2.from(globalScope, ast), null);
                         return ImmutableTuple2.of(key.toString(), fileConstraint);

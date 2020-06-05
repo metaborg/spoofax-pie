@@ -10,6 +10,8 @@ import mb.nabl2.terms.stratego.TermIndex;
 import mb.nabl2.terms.stratego.TermOrigin;
 import mb.nabl2.terms.unification.ud.IUniDisunifier;
 import mb.nabl2.util.TermFormatter;
+import mb.resource.DefaultResourceKey;
+import mb.resource.QualifiedResourceKeyString;
 import mb.resource.ResourceKey;
 import mb.statix.constraints.Constraints;
 import mb.statix.constraints.messages.IMessage;
@@ -108,10 +110,17 @@ public class MessageUtils {
         return string.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
     }
 
-    public static @Nullable ResourceKey resourceKeyFromOrigin(Optional<ITerm> origin) {
-        return origin.flatMap(term -> {
-            // TODO: try find key
-            return Optional.<ResourceKey>empty();
-        }).orElse(null);
+    public static @Nullable ResourceKey resourceKeyFromOrigin(ITerm origin) {
+        if (origin.getAttachments().containsKey(TermIndex.class)) {
+            TermIndex termIndex = (TermIndex) origin.getAttachments().get(TermIndex.class);
+            String resource = termIndex.getResource();
+            String[] split = resource.split(QualifiedResourceKeyString.separator);
+            if (split.length < 2) {
+                return new DefaultResourceKey(null, resource);
+            }
+            final String qualifier = split[0];
+            return new DefaultResourceKey(qualifier.isEmpty() ? null : qualifier, split[1]);
+        }
+        return null;
     }
 }

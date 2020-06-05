@@ -39,7 +39,7 @@ public class AnalysisTest extends TestBase {
 
     @Test void testSingleError() throws IOException, OccursException, ExecException {
         final HashSet<ResourceKey> resources = new HashSet<>();
-        final TextResource resource = createTextResource("module test context-free syntax A = <A>", "a.sdf3");
+        final TextResource resource = createTextResource("module a syntax A = B", "a.sdf3");
         resources.add(resource.getKey());
 
         // Loading spec
@@ -67,8 +67,8 @@ public class AnalysisTest extends TestBase {
 
     @Test void testMultipleError() throws IOException, OccursException, ExecException {
         final HashSet<ResourceKey> resources = new HashSet<>();
-        final TextResource resource1 = createTextResource("module b context-free syntax A = <A>", "a.sdf3");
-        final TextResource resource2 = createTextResource("module a context-free syntax B = <B>", "b.sdf3");
+        final TextResource resource1 = createTextResource("module a syntax B = A", "a.sdf3");
+        final TextResource resource2 = createTextResource("module b syntax C = A B", "b.sdf3");
         resources.add(resource1.getKey());
         resources.add(resource2.getKey());
 
