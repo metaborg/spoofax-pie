@@ -9,7 +9,6 @@ import mb.nabl2.terms.ITermVar;
 import mb.nabl2.terms.build.ImmutableTermVar;
 import mb.nabl2.terms.stratego.StrategoTermIndices;
 import mb.nabl2.terms.stratego.StrategoTerms;
-import mb.nabl2.util.ImmutableTuple2;
 import mb.nabl2.util.ImmutableTuple3;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
@@ -55,6 +54,7 @@ public class SolverContext {
     private final StrategoTerms st;
     private final IDebugContext debug;
     private final Spec combinedSpec;
+    private final KeyedMessagesBuilder messages = new KeyedMessagesBuilder();
 
     public SolverContext(AnalysisContext analysisContext, ExecContext context, ITermFactory tf) {
         this.analysisContext = analysisContext;
@@ -78,7 +78,6 @@ public class SolverContext {
         final SolverResult initialResult = initial.globalState();
         final IState.Immutable initialState = initialResult.state();
         final ITerm globalScope = initial.globalScope();
-        final KeyedMessagesBuilder messages = new KeyedMessagesBuilder();
 
         // Partial solve file results
         final List<SolverResult> results = solveFileConstraints(State.builder().from(initialState).build(), globalScope);
@@ -134,7 +133,6 @@ public class SolverContext {
             .collect(Collectors.toList());
         final double dt = System.currentTimeMillis() - t0;
 
-        // TODO: Update cached results
         return results;
     }
 
@@ -150,16 +148,15 @@ public class SolverContext {
                 .stream()
                 .map(key -> {
                     try {
-                        IStrategoTerm indexedAst = StrategoTermIndices.index(lang.astFunction().apply(context, key),
-                            key.toString(), tf);
-                        ITerm ast = st.fromStratego(indexedAst);
-                        IConstraint fileConstraint = new CUser(fileConstraintName, Iterables2.from(globalScope, ast), null);
-                        return ImmutableTuple2.of(key.toString(), fileConstraint);
+                        IStrategoTerm ast = lang.astFunction().apply(context, key);
+                        IStrategoTerm indexedAst = StrategoTermIndices.index(ast, key.toString(), tf);
+                        Iterable<ITerm> constraintArgs = Iterables2.from(globalScope, st.fromStratego(indexedAst));
+                        IConstraint fileConstraint = new CUser(fileConstraintName, constraintArgs, null);
+                        return ImmutableTuple3.of(key.toString(), fileConstraint, solveConstraint);
                     } catch(ExecException | InterruptedException e) {
                         throw new UncheckedException(e);
                     }
-                })
-                .map(c -> ImmutableTuple3.of(c._1(), c._2(), solveConstraint));
+                });
         } catch(ExecException | IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
