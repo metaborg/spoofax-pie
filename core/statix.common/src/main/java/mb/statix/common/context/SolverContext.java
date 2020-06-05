@@ -19,6 +19,8 @@ import mb.statix.constraints.CExists;
 import mb.statix.constraints.CNew;
 import mb.statix.constraints.CUser;
 import mb.statix.constraints.Constraints;
+import mb.statix.constraints.messages.IMessage;
+import mb.statix.constraints.messages.MessageUtil;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.IState;
 import mb.statix.solver.completeness.IsComplete;
@@ -56,7 +58,7 @@ public class SolverContext {
 
     public SolverContext(AnalysisContext analysisContext, ExecContext context, ITermFactory tf) {
         this.analysisContext = analysisContext;
-        this.debug = new NullDebugContext(); // TODO: derive from analysisContext#getLogLevel
+        this.debug = new NullDebugContext(); // TODO: derive from analysisContext#getLogLevel & implement logging
         this.context = context;
         this.tf = tf;
         this.st = new StrategoTerms(tf);
@@ -66,6 +68,8 @@ public class SolverContext {
             .map(LanguageMetadata::statixSpec)
             .reduce(SpecUtils::mergeSpecs)
             .orElseThrow(() -> new RuntimeException("Doing analysis without specs is not allowed"));
+
+        // TODO: Exception on overlapping constraints
     }
 
     public KeyedMessages execute() throws InterruptedException {
@@ -77,7 +81,7 @@ public class SolverContext {
         final KeyedMessagesBuilder messages = new KeyedMessagesBuilder();
 
         // Partial solve file results
-        final List<SolverResult> results = partialSolve(State.builder().from(initialState).build(), globalScope);
+        final List<SolverResult> results = solveFileConstraints(State.builder().from(initialState).build(), globalScope);
 
         // Update messages
         results.forEach(solverResult -> {
@@ -99,23 +103,25 @@ public class SolverContext {
             .forEach(constraints::add);
 
         // Completely solve project constraints // TODO: timing
-        final SolverResult finalResult  = Solver.solve(combinedSpec, state, Constraints.conjoin(constraints), (s, l, st) -> true, debug);
-        // TODO: mark delays as errors
+        final SolverResult result = Solver.solve(combinedSpec, state, Constraints.conjoin(constraints), (s, l, st) -> true, debug);
 
         // Create messages
-        finalResult.messages().forEach((key, value) -> {
-            Message message = MessageUtils.formatMessage(value, key, finalResult.state().unifier());
+        result.messages().forEach((key, value) -> {
+            Message message = MessageUtils.formatMessage(value, key, result.state().unifier());
             @Nullable ResourceKey resourceKey = value.origin().map(MessageUtils::resourceKeyFromOrigin).orElse(null);
-            // TODO: Find proper resource for message.
             messages.addMessages(resourceKey, Iterables2.singleton(message));
         });
-
-        // TODO: Update file states
+        result.delays().keySet().forEach(c -> {
+            IMessage msg = MessageUtil.findClosestMessage(c);
+            Message message = MessageUtils.formatMessage(msg, c, result.state().unifier());
+            @Nullable ResourceKey res = msg.origin().map(MessageUtils::resourceKeyFromOrigin).orElse(null);
+            messages.addMessages(res, Iterables2.singleton(message));
+        });
 
         return messages.build();
     }
 
-    private List<SolverResult> partialSolve(State initial, ITerm globalScope) {
+    private List<SolverResult> solveFileConstraints(State initial, ITerm globalScope) {
         List<ImmutableTuple3<String, IConstraint, Function2<String, IConstraint, SolverResult>>> constraints = analysisContext
             .languages()
                 .stream()
@@ -187,12 +193,10 @@ public class SolverContext {
 
     private SolverResult solveConstraint(Spec spec, IState.Immutable state, IConstraint constraint) {
         final IsComplete isComplete = (s, l, st) -> !state.scopes().contains(s);
-        final SolverResult resultConfig;
         try {
-            resultConfig = Solver.solve(spec, state, constraint, isComplete, debug);
+            return Solver.solve(spec, state, constraint, isComplete, debug);
         } catch(InterruptedException e) {
             throw new RuntimeException(e);
         }
-        return resultConfig;
     }
 }
