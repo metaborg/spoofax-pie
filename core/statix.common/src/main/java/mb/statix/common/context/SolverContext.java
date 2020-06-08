@@ -7,7 +7,6 @@ import mb.common.util.UncheckedException;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
 import mb.nabl2.terms.build.ImmutableTermVar;
-import mb.nabl2.terms.stratego.StrategoTermIndices;
 import mb.nabl2.terms.stratego.StrategoTerms;
 import mb.nabl2.terms.unification.ud.IUniDisunifier;
 import mb.nabl2.util.ImmutableTuple3;
@@ -49,7 +48,7 @@ import java.util.stream.Stream;
 /**
  * Shallow solver maintaining context for 1 solver run
  */
-public class SolverContext {
+class SolverContext {
 
     private final AnalysisContext analysisContext;
     private final ExecContext context;
@@ -144,8 +143,7 @@ public class SolverContext {
                 .map(key -> {
                     try {
                         IStrategoTerm ast = lang.astFunction().apply(context, key);
-                        IStrategoTerm indexedAst = StrategoTermIndices.index(ast, key.toString(), tf);
-                        Iterable<ITerm> constraintArgs = Iterables2.from(globalScope, st.fromStratego(indexedAst));
+                        Iterable<ITerm> constraintArgs = Iterables2.from(globalScope, st.fromStratego(ast));
                         IConstraint fileConstraint = new CUser(fileConstraintName, constraintArgs, null);
                         return ImmutableTuple3.of(key.toString(), fileConstraint, solveConstraint);
                     } catch(ExecException | InterruptedException e) {

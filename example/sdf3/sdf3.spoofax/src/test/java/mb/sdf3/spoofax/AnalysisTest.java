@@ -2,12 +2,8 @@ package mb.sdf3.spoofax;
 
 import mb.common.message.KeyedMessages;
 import mb.nabl2.terms.unification.OccursException;
-import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
-import mb.pie.api.Function;
 import mb.pie.api.MixedSession;
-import mb.pie.api.ResourceStringSupplier;
-import mb.pie.api.Supplier;
 import mb.pie.api.ValueSupplier;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceKeyString;
@@ -21,7 +17,6 @@ import mb.statix.common.context.LanguageMetadata;
 import mb.statix.spec.Spec;
 import mb.statix.utils.SpecUtils;
 import org.junit.jupiter.api.Test;
-import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.terms.TermFactory;
 
@@ -48,6 +43,13 @@ public class AnalysisTest extends TestBase {
         try (MixedSession session = newSession()) {
             KeyedMessages messages = session.require(context.createAnalyzerTask());
             assertTrue(messages.containsError());
+            assertEquals(1, messages.count());
+            /* Iterator<Message> msgs = messages.getMessages(resource.getKey()).iterator();
+            assertTrue(msgs.hasNext());
+            Message message = msgs.next();
+            assertEquals(Severity.Error, message.severity);
+            assertEquals("", message.region);
+            assertEquals("", message.text); */
         }
     }
 
@@ -61,7 +63,7 @@ public class AnalysisTest extends TestBase {
 
         try (MixedSession session = newSession()) {
             KeyedMessages messages = session.require(context.createAnalyzerTask());
-            assertEquals(0, messages.getAllMessages().size());
+            assertEquals(0, messages.count());
         }
     }
 
@@ -78,6 +80,7 @@ public class AnalysisTest extends TestBase {
         try (MixedSession session = newSession()) {
             KeyedMessages messages = session.require(context.createAnalyzerTask());
             assertTrue(messages.containsError());
+            assertEquals(4, messages.count());
         }
     }
 
@@ -94,6 +97,7 @@ public class AnalysisTest extends TestBase {
         try (MixedSession session = newSession()) {
             KeyedMessages messages = session.require(context.createAnalyzerTask());
             assertFalse(messages.containsError());
+            assertEquals(0, messages.count());
         }
     }
 
@@ -112,6 +116,7 @@ public class AnalysisTest extends TestBase {
         try (MixedSession session = newSession()) {
             KeyedMessages messages = session.require(context.createAnalyzerTask());
             assertFalse(messages.containsError());
+            assertEquals(0, messages.count());
         }
     }
 
@@ -126,9 +131,7 @@ public class AnalysisTest extends TestBase {
             .fileConstraint("statix/statics!moduleOK")
             .projectConstraint("statix/statics!projectOK")
             .resourcesSupplier(new ValueSupplier<>(resources))
-            .astFunction(languageComponent.getPreStatix().createFunction()
-                .mapInput(new ReadResourceFunction(parse.createRecoverableAstFunction())
-                    .mapOutput(ValueSupplier::new)))
+            .astFunction(languageComponent.getPreAnalysisTransform().createFunction())
             .build();
 
         AnalysisContext context = AnalysisContextService.getAnalysisContext("AnalysisTest");
@@ -137,18 +140,5 @@ public class AnalysisTest extends TestBase {
 
         addStatixTaskDef(termFactory);
         return context;
-    }
-
-    static class ReadResourceFunction implements Function<ResourceKey, IStrategoTerm> {
-        private final Function<Supplier<String>, IStrategoTerm> astFunction;
-
-        public ReadResourceFunction(Function<Supplier<String>, IStrategoTerm> astFunction) {
-            this.astFunction = astFunction;
-        }
-
-        @Override
-        public IStrategoTerm apply(ExecContext context, ResourceKey input) throws ExecException, InterruptedException {
-            return astFunction.apply(context, new ResourceStringSupplier(input));
-        }
     }
 }

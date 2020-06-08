@@ -9,6 +9,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class KeyedMessages implements Serializable {
@@ -135,5 +136,12 @@ public class KeyedMessages implements Serializable {
             }
         });
         return stringBuilder.toString();
+    }
+
+    public int count() {
+        return messages.stream()
+            .map(Map.Entry::getValue)
+            .mapToInt(ArrayList::size)
+            .sum();
     }
 }

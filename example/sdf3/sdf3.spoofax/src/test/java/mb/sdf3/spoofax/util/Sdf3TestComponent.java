@@ -3,11 +3,12 @@ package mb.sdf3.spoofax.util;
 import dagger.Component;
 import mb.sdf3.spoofax.Sdf3Component;
 import mb.sdf3.spoofax.Sdf3Module;
-import mb.sdf3.spoofax.task.SDF3PreStatix;
 import mb.sdf3.spoofax.task.Sdf3AnalyzeMulti;
 import mb.sdf3.spoofax.task.Sdf3CreateSpec;
 import mb.sdf3.spoofax.task.Sdf3Desugar;
 import mb.sdf3.spoofax.task.Sdf3Parse;
+import mb.sdf3.spoofax.task.Sdf3PreAnalysisTransform;
+import mb.sdf3.spoofax.task.Sdf3PreStatix;
 import mb.sdf3.spoofax.task.Sdf3SpecToParenthesizer;
 import mb.sdf3.spoofax.task.Sdf3SpecToParseTable;
 import mb.sdf3.spoofax.task.Sdf3ToCompletion;
@@ -53,5 +54,7 @@ public interface Sdf3TestComponent extends Sdf3Component {
 
     Sdf3SpecToParenthesizer getSpecToParenthesizer();
 
-    SDF3PreStatix getPreStatix();
+    Sdf3PreStatix getPreStatix();
+
+    Sdf3PreAnalysisTransform getPreAnalysisTransform();
 }

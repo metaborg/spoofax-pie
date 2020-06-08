@@ -5,13 +5,13 @@ import mb.stratego.common.StrategoRuntime;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-public class SDF3PreStatix extends StrategoTransformTaskDef {
+public class Sdf3PreStatix extends StrategoTransformTaskDef {
 
-    @Inject public SDF3PreStatix(Provider<StrategoRuntime> strategoRuntimeProvider) {
+    @Inject public Sdf3PreStatix(Provider<StrategoRuntime> strategoRuntimeProvider) {
         super(strategoRuntimeProvider, "statix-pre");
     }
 
     @Override public String getId() {
-        return SDF3PreStatix.class.getSimpleName();
+        return Sdf3PreStatix.class.getSimpleName();
     }
 }
