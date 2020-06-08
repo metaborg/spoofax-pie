@@ -29,6 +29,7 @@ public class Sdf3PreAnalysisTransform implements TaskDef<ResourceKey, @Nullable 
 
     @Override
     public @Nullable IStrategoTerm exec(ExecContext context, ResourceKey resourceKey) throws Exception {
+        // TODO: try with mapInput?
         IStrategoTerm ast = context.require(parse.createNullableAstSupplier(resourceKey));
         ResourceKeyAttachment.setResourceKey(ast, resourceKey);
         IStrategoTerm indexedAst = StrategoTermIndices.index(ast, resourceKey.toString(), tf);

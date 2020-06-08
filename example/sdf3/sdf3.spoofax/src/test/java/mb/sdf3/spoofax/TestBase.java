@@ -30,7 +30,7 @@ import mb.sdf3.spoofax.util.PlatformTestComponent;
 import mb.sdf3.spoofax.util.Sdf3TestComponent;
 import mb.spoofax.core.platform.LoggerFactoryModule;
 import mb.spoofax.core.platform.PlatformPieModule;
-import mb.statix.common.context.StatixAnalysisTaskDef;
+import mb.statix.multilang.StatixAnalysisTaskDef;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;

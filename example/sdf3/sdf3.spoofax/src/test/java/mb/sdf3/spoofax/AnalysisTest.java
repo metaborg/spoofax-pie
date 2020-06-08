@@ -11,11 +11,12 @@ import mb.resource.classloader.ClassLoaderResource;
 import mb.resource.classloader.ClassLoaderResourceRegistry;
 import mb.resource.text.TextResource;
 import mb.sdf3.Sdf3ClassloaderResources;
-import mb.statix.common.context.AnalysisContext;
-import mb.statix.common.context.AnalysisContextService;
-import mb.statix.common.context.LanguageMetadata;
+import mb.statix.multilang.AnalysisContext;
+import mb.statix.multilang.AnalysisContextService;
+import mb.statix.multilang.LanguageId;
+import mb.statix.multilang.LanguageMetadata;
+import mb.statix.multilang.utils.SpecUtils;
 import mb.statix.spec.Spec;
-import mb.statix.utils.SpecUtils;
 import org.junit.jupiter.api.Test;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.terms.TermFactory;
@@ -126,12 +127,13 @@ public class AnalysisTest extends TestBase {
         Spec spec = new SpecUtils(termFactory).loadSpec(statixSpec, "statix/statics");
 
         LanguageMetadata languageMetadata = LanguageMetadata.builder()
-            .languageId("sdf3")
+            .languageId(new LanguageId("sdf3"))
             .statixSpec(spec)
             .fileConstraint("statix/statics!moduleOK")
             .projectConstraint("statix/statics!projectOK")
             .resourcesSupplier(new ValueSupplier<>(resources))
             .astFunction(languageComponent.getPreAnalysisTransform().createFunction())
+            .postTransform(languageComponent.getPostStatix().createFunction())
             .build();
 
         AnalysisContext context = AnalysisContextService.getAnalysisContext("AnalysisTest");

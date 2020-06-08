@@ -1,4 +1,4 @@
-package mb.statix.common.context;
+package mb.statix.multilang;
 
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
@@ -20,6 +20,8 @@ import mb.statix.constraints.CUser;
 import mb.statix.constraints.Constraints;
 import mb.statix.constraints.messages.IMessage;
 import mb.statix.constraints.messages.MessageUtil;
+import mb.statix.multilang.utils.MessageUtils;
+import mb.statix.multilang.utils.SpecUtils;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.IState;
 import mb.statix.solver.completeness.IsComplete;
@@ -29,8 +31,6 @@ import mb.statix.solver.persistent.Solver;
 import mb.statix.solver.persistent.SolverResult;
 import mb.statix.solver.persistent.State;
 import mb.statix.spec.Spec;
-import mb.statix.utils.MessageUtils;
-import mb.statix.utils.SpecUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.functions.Function2;
 import org.metaborg.util.iterators.Iterables2;
@@ -77,7 +77,7 @@ class SolverContext {
 
     public KeyedMessages execute() throws InterruptedException {
         // Get initial state. This state contains all project constraints which are solved partially
-        final ACachedAnalysis initial = getInitialState();
+        final CachedAnalysis initial = getInitialState();
         final SolverResult initialResult = initial.globalState();
         final IState.Immutable initialState = initialResult.state();
         final ITerm globalScope = initial.globalScope();
@@ -155,12 +155,8 @@ class SolverContext {
         }
     }
 
-    private ACachedAnalysis getInitialState() {
-        // Return cached result if still valid
-        @Nullable ACachedAnalysis cachedResult = analysisContext.getCachedAnalysis();
-        if (cachedResult.globalState() != null) {
-            return cachedResult;
-        }
+    private CachedAnalysis getInitialState() {
+        // TODO: reuse cached results
 
         // Create constraint that calls all language's project constraints with a shared global scope
         ITermVar globalScopeVar = ImmutableTermVar.of("", "s");

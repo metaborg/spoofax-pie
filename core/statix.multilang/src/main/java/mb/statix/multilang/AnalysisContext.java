@@ -1,4 +1,4 @@
-package mb.statix.common.context;
+package mb.statix.multilang;
 
 import mb.common.message.KeyedMessages;
 import mb.common.util.CollectionView;
@@ -13,14 +13,14 @@ import java.util.Map;
 
 public class AnalysisContext implements Serializable {
 
-    private final Map<String, LanguageMetadata> languages = new HashMap<>();
-    private ACachedAnalysis cachedAnalysis = ACachedAnalysis.builder().build();
+    private final Map<LanguageId, LanguageMetadata> languages = new HashMap<>();
+    private CachedAnalysis cachedAnalysis = CachedAnalysis.builder().build();
     private @Nullable Level logLevel;
 
     public void register(LanguageMetadata language) {
         if (!languages.containsKey(language.languageId())) {
             languages.put(language.languageId(), language);
-            cachedAnalysis = ACachedAnalysis.builder().build(); // Added spec invalidates scope graph
+            cachedAnalysis = CachedAnalysis.builder().build(); // Added spec invalidates scope graph
         }
     }
 
@@ -40,17 +40,17 @@ public class AnalysisContext implements Serializable {
         return logLevel;
     }
 
-    public ACachedAnalysis getCachedAnalysis() {
+    public CachedAnalysis getCachedAnalysis() {
         return cachedAnalysis;
     }
 
-    public void updateCachedAnalysis(ACachedAnalysis newAnalysis) {
+    public void updateCachedAnalysis(CachedAnalysis newAnalysis) {
         this.cachedAnalysis = newAnalysis;
     }
 
     public void clear() {
         languages.clear();
-        cachedAnalysis = ACachedAnalysis.builder().build();
+        cachedAnalysis = CachedAnalysis.builder().build();
         logLevel = null;
     }
 

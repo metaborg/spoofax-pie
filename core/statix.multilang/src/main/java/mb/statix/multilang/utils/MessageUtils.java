@@ -1,4 +1,4 @@
-package mb.statix.utils;
+package mb.statix.multilang.utils;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
@@ -6,6 +6,7 @@ import mb.common.message.Message;
 import mb.common.message.Severity;
 import mb.common.region.Region;
 import mb.nabl2.terms.ITerm;
+import mb.nabl2.terms.build.TermBuild;
 import mb.nabl2.terms.stratego.TermIndex;
 import mb.nabl2.terms.stratego.TermOrigin;
 import mb.nabl2.terms.unification.ud.IUniDisunifier;
@@ -25,8 +26,6 @@ import java.util.Deque;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static mb.nabl2.terms.build.TermBuild.B;
 
 public class MessageUtils {
 
@@ -54,7 +53,7 @@ public class MessageUtils {
 
         // use empty origin if none was found
         if(originTerm == null) {
-            originTerm = B.EMPTY_TUPLE;
+            originTerm = TermBuild.B.EMPTY_TUPLE;
         }
 
         // add constraint message
@@ -102,7 +101,7 @@ public class MessageUtils {
         return Optional.of(unifier.findTerm(term))
             .filter(t -> TermIndex.get(t).isPresent())
             .filter(t -> TermOrigin.get(t).isPresent()) // HACK Ignore terms without origin, such as empty lists
-            .map(t -> B.EMPTY_TUPLE.withAttachments(t.getAttachments()));
+            .map(t -> TermBuild.B.EMPTY_TUPLE.withAttachments(t.getAttachments()));
         // @formatter:on
     }
 

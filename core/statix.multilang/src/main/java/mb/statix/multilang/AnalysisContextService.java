@@ -1,4 +1,4 @@
-package mb.statix.common.context;
+package mb.statix.multilang;
 
 import mb.nabl2.terms.unification.OccursException;
 

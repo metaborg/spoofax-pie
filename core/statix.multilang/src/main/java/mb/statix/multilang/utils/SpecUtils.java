@@ -1,4 +1,4 @@
-package mb.statix.utils;
+package mb.statix.multilang.utils;
 
 import com.google.common.collect.Iterables;
 import mb.nabl2.regexp.IAlphabet;
@@ -107,7 +107,7 @@ public class SpecUtils {
     }
 
     public static IMatcher<Spec> fileSpec() {
-        return M.appl6("FileSpec", M.list(), M.req(labels()), M.req(labels()), M.term(), rules(), M.req(scopeExtensions()),
+        return TermMatch.M.appl6("FileSpec", TermMatch.M.list(), TermMatch.M.req(StatixTerms.labels()), TermMatch.M.req(StatixTerms.labels()), TermMatch.M.term(), StatixTerms.rules(), TermMatch.M.req(StatixTerms.scopeExtensions()),
             (t, l, edgeLabels, relationLabels, noRelationLabel, rules, ext) -> {
                 final IAlphabet<ITerm> labels = new FiniteAlphabet<>(
                     Iterables2.cons(noRelationLabel, Iterables.concat(relationLabels, edgeLabels)));

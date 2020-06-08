@@ -9,4 +9,10 @@ dependencies {
   api(project(":common"))
 
   api("org.metaborg:statix.solver")
+  api("org.metaborg:pie.api")
+
+  compileOnly("org.checkerframework:checker-qual-android")
+  compileOnly("org.immutables:value-annotations")
+
+  annotationProcessor("org.immutables:value")
 }
