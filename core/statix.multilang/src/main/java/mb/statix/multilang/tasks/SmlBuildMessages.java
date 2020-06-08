@@ -50,10 +50,12 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
 
         // Add all file messages
         results.fileResults().forEach((key, fileResult) -> {
-            List<Message> resourceMessages = fileResult.messages().entrySet().stream()
+            List<Message> resourceMessages = fileResult.getResult().messages().entrySet().stream()
                 .map(e -> MessageUtils.formatMessage(e.getValue(), e.getKey(), resultUnifier))
                 .collect(Collectors.toList());
-            builder.addMessages(key.getResource(), resourceMessages);
+            if (!resourceMessages.isEmpty()) {
+                builder.addMessages(key.getResource(), resourceMessages);
+            }
         });
 
         // Process final result messages

@@ -8,6 +8,7 @@ import mb.statix.constraints.CConj;
 import mb.statix.multilang.AAnalysisResults;
 import mb.statix.multilang.AnalysisContext;
 import mb.statix.multilang.AnalysisResults;
+import mb.statix.multilang.FileResult;
 import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.LanguageMetadata;
 import mb.statix.multilang.utils.SpecUtils;
@@ -92,15 +93,15 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
             }));
 
         // Create file results (maintain resource key for error message mapping
-        Map<AAnalysisResults.FileKey, SolverResult> fileResults = analysisContext.languages().values().stream()
+        Map<AAnalysisResults.FileKey, FileResult> fileResults = analysisContext.languages().values().stream()
             .flatMap(languageMetadata -> {
                 try {
                     return languageMetadata.resourcesSupplier().get(context).stream()
                         .map(resourceKey -> {
                             try {
-                                SolverResult fileResult = context.require(partialSolveFile.createTask(new SmlPartialSolveFile.Input(globalState.getGlobalScope(),
+                                FileResult fileResult = context.require(partialSolveFile.createTask(new SmlPartialSolveFile.Input(globalState.getGlobalScope(),
                                     globalState.getResult(), debug, combinedSpec, languageMetadata.fileConstraint(),
-                                    languageMetadata.astFunction(),
+                                    languageMetadata.astFunction(), languageMetadata.postTransform(),
                                     resourceKey))).getFileResult();
                                 return new AbstractMap.SimpleEntry<>(
                                     new AAnalysisResults.FileKey(languageMetadata.languageId(), resourceKey),
@@ -115,12 +116,16 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
             })
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        IState.Immutable combinedState = Stream.concat(projectResults.values().stream(), fileResults.values().stream())
+        IState.Immutable combinedState = Stream.concat(
+                projectResults.values().stream(),
+                fileResults.values().stream().map(FileResult::getResult))
             .map(SolverResult::state)
             .reduce(IState.Immutable::add)
             .orElseThrow(() -> new RuntimeException("Expected at least one result"));
 
-        IConstraint combinedConstraint = Stream.concat(projectResults.values().stream(), fileResults.values().stream())
+        IConstraint combinedConstraint = Stream.concat(
+                projectResults.values().stream(),
+                fileResults.values().stream().map(FileResult::getResult))
             .map(SolverResult::delayed)
             .reduce(globalState.getResult().delayed(), CConj::new);
 

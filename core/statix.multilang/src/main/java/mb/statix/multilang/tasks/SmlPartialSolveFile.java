@@ -7,6 +7,7 @@ import mb.pie.api.Function;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.statix.constraints.CUser;
+import mb.statix.multilang.FileResult;
 import mb.statix.multilang.utils.SolverUtils;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.log.IDebugContext;
@@ -29,28 +30,31 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, S
         private final Spec spec;
         private final String fileConstraint;
         private final Function<ResourceKey, IStrategoTerm> astSupplier;
+        private final Function<IStrategoTerm, IStrategoTerm> postAnalysisTransform;
         private final ResourceKey resourceKey;
 
         public Input(ITerm globalScope, SolverResult globalResult, IDebugContext debug, Spec spec,
-                     String fileConstraint, Function<ResourceKey, IStrategoTerm> astSupplier, ResourceKey resourceKey) {
+                     String fileConstraint, Function<ResourceKey, IStrategoTerm> astSupplier,
+                     Function<IStrategoTerm, IStrategoTerm> postAnalysisTransform, ResourceKey resourceKey) {
             this.globalScope = globalScope;
             this.globalResult = globalResult;
             this.debug = debug;
             this.spec = spec;
             this.fileConstraint = fileConstraint;
             this.astSupplier = astSupplier;
+            this.postAnalysisTransform = postAnalysisTransform;
             this.resourceKey = resourceKey;
         }
     }
 
     public class Output implements Serializable {
-        private final SolverResult fileResult;
+        private final FileResult fileResult;
 
-        public Output(SolverResult fileResult) {
+        public Output(FileResult fileResult) {
             this.fileResult = fileResult;
         }
 
-        public SolverResult getFileResult() {
+        public FileResult getFileResult() {
             return fileResult;
         }
     }
@@ -75,6 +79,8 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, S
             fileConstraint,
             input.debug);
 
-        return new Output(fileResult);
+        IStrategoTerm analyzedAst = input.postAnalysisTransform.apply(context, ast);
+
+        return new Output(new FileResult(analyzedAst, fileResult));
     }
 }

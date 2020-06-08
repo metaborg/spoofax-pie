@@ -33,7 +33,7 @@ public abstract class AAnalysisResults implements Serializable {
 
     @Value.Parameter public abstract HashMap<LanguageId, SolverResult> projectResults();
 
-    @Value.Parameter public abstract HashMap<FileKey, SolverResult> fileResults();
+    @Value.Parameter public abstract HashMap<FileKey, FileResult> fileResults();
 
     @Value.Parameter public abstract SolverResult finalResult();
 }
