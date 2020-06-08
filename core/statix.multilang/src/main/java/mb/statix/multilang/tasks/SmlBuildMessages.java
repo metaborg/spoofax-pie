@@ -30,7 +30,11 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
         }
     }
 
-    private final SmlAnalyzeProject analyzeProject = new SmlAnalyzeProject();
+    private final SmlAnalyzeProject analyzeProject;
+
+    public SmlBuildMessages(SmlAnalyzeProject analyzeProject) {
+        this.analyzeProject = analyzeProject;
+    }
 
     @Override public String getId() {
         return SmlBuildMessages.class.getSimpleName();

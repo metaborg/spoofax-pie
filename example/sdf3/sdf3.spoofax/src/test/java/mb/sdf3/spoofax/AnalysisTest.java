@@ -15,6 +15,7 @@ import mb.statix.multilang.AnalysisContext;
 import mb.statix.multilang.AnalysisContextService;
 import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.LanguageMetadata;
+import mb.statix.multilang.tasks.SmlBuildMessages;
 import mb.statix.multilang.utils.SpecUtils;
 import mb.statix.spec.Spec;
 import org.junit.jupiter.api.Test;
@@ -42,7 +43,7 @@ public class AnalysisTest extends TestBase {
         AnalysisContext context = createAnalysisContext(resources);
 
         try (MixedSession session = newSession()) {
-            KeyedMessages messages = session.require(context.createAnalyzerTask());
+            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(context)));
             assertTrue(messages.containsError());
             assertEquals(1, messages.count());
             /* Iterator<Message> msgs = messages.getMessages(resource.getKey()).iterator();
@@ -63,7 +64,7 @@ public class AnalysisTest extends TestBase {
         AnalysisContext context = createAnalysisContext(resources);
 
         try (MixedSession session = newSession()) {
-            KeyedMessages messages = session.require(context.createAnalyzerTask());
+            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(context)));
             assertEquals(0, messages.count());
         }
     }
@@ -79,7 +80,7 @@ public class AnalysisTest extends TestBase {
         AnalysisContext context = createAnalysisContext(resources);
 
         try (MixedSession session = newSession()) {
-            KeyedMessages messages = session.require(context.createAnalyzerTask());
+            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(context)));
             assertTrue(messages.containsError());
             assertEquals(4, messages.count());
         }
@@ -96,7 +97,7 @@ public class AnalysisTest extends TestBase {
         AnalysisContext context = createAnalysisContext(resources);
 
         try (MixedSession session = newSession()) {
-            KeyedMessages messages = session.require(context.createAnalyzerTask());
+            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(context)));
             assertFalse(messages.containsError());
             assertEquals(0, messages.count());
         }
@@ -115,7 +116,7 @@ public class AnalysisTest extends TestBase {
         AnalysisContext context = createAnalysisContext(resources);
 
         try (MixedSession session = newSession()) {
-            KeyedMessages messages = session.require(context.createAnalyzerTask());
+            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(context)));
             assertFalse(messages.containsError());
             assertEquals(0, messages.count());
         }

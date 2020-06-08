@@ -49,9 +49,17 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
         }
     }
 
-    private final SmlInstantiateGlobalScope instantiateGlobalScope = new SmlInstantiateGlobalScope();
-    private final SmlPartialSolveProject partialSolveProject = new SmlPartialSolveProject();
-    private final SmlPartialSolveFile partialSolveFile = new SmlPartialSolveFile();
+    private final SmlInstantiateGlobalScope instantiateGlobalScope;
+    private final SmlPartialSolveProject partialSolveProject;
+    private final SmlPartialSolveFile partialSolveFile;
+
+    public SmlAnalyzeProject(SmlInstantiateGlobalScope instantiateGlobalScope,
+                             SmlPartialSolveProject partialSolveProject,
+                             SmlPartialSolveFile partialSolveFile) {
+        this.instantiateGlobalScope = instantiateGlobalScope;
+        this.partialSolveProject = partialSolveProject;
+        this.partialSolveFile = partialSolveFile;
+    }
 
     @Override public String getId() {
         return SmlAnalyzeProject.class.getSimpleName();

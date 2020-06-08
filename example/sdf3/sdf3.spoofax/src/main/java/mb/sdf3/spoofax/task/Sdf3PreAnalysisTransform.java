@@ -6,9 +6,10 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.pie.api.ValueSupplier;
 import mb.resource.ResourceKey;
+import mb.stratego.common.StrategoRuntimeBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.terms.TermFactory;
+import org.spoofax.interpreter.terms.ITermFactory;
 
 import javax.inject.Inject;
 
@@ -16,11 +17,13 @@ public class Sdf3PreAnalysisTransform implements TaskDef<ResourceKey, @Nullable 
 
     private Sdf3Parse parse;
     private Sdf3PreStatix preStatix;
-    private TermFactory tf = new TermFactory();
+    private ITermFactory tf;
 
-    @Inject public Sdf3PreAnalysisTransform(Sdf3Parse parse, Sdf3PreStatix preStatix) {
+    @Inject public Sdf3PreAnalysisTransform(Sdf3Parse parse, Sdf3PreStatix preStatix,
+                                            StrategoRuntimeBuilder strategoRuntimeBuilder) {
         this.parse = parse;
         this.preStatix = preStatix;
+        this.tf = strategoRuntimeBuilder.build().getTermFactory();
     }
 
     @Override public String getId() {

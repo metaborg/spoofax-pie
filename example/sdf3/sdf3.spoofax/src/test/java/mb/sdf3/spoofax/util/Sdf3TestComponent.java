@@ -22,6 +22,7 @@ import mb.sdf3.spoofax.task.Sdf3ToPrettyPrinter;
 import mb.sdf3.spoofax.task.Sdf3ToSignature;
 import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.platform.PlatformComponent;
+import mb.stratego.common.StrategoRuntimeBuilder;
 
 @LanguageScope @Component(modules = {Sdf3Module.class}, dependencies = PlatformComponent.class)
 public interface Sdf3TestComponent extends Sdf3Component {
@@ -60,4 +61,6 @@ public interface Sdf3TestComponent extends Sdf3Component {
     Sdf3PostStatix getPostStatix();
 
     Sdf3PreAnalysisTransform getPreAnalysisTransform();
+
+    StrategoRuntimeBuilder getStrategoRuntimeBuilder();
 }

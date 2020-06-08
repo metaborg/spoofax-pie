@@ -66,6 +66,13 @@ class TestBase {
     final Sdf3AnalyzeMulti analyze = languageComponent.getAnalyze();
     Pie pie = languageComponent.getPie();
 
+    final SmlInstantiateGlobalScope instantiateGlobalScope = new SmlInstantiateGlobalScope();
+    final SmlPartialSolveProject partialSolveProject = new SmlPartialSolveProject();
+    final SmlPartialSolveFile partialSolveFile = new SmlPartialSolveFile(languageComponent.getStrategoRuntimeBuilder().
+        build().getTermFactory());
+    final SmlAnalyzeProject analyzeProject = new SmlAnalyzeProject(instantiateGlobalScope, partialSolveProject, partialSolveFile);
+    final SmlBuildMessages buildMessages = new SmlBuildMessages(analyzeProject);
+
     FSResource createTextFile(String text, String relativePath) throws IOException {
         final FSResource resource = rootDirectory.appendRelativePath("a.sdf3");
         resource.writeString(text, StandardCharsets.UTF_8);
@@ -116,12 +123,11 @@ class TestBase {
     void addStatixTaskDef() {
         pie = pie.createChildBuilder()
             .withTaskDefs(new MapTaskDefs(
-                new SmlInstantiateGlobalScope(),
-                new SmlPartialSolveProject(),
-                new SmlPartialSolveFile(),
-                new SmlAnalyzeProject(),
-                new SmlBuildMessages()
-            ))
+                instantiateGlobalScope,
+                partialSolveProject,
+                partialSolveFile,
+                analyzeProject,
+                buildMessages))
             .build();
     }
 

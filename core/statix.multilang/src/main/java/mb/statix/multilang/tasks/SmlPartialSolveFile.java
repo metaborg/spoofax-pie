@@ -14,8 +14,9 @@ import mb.statix.solver.persistent.SolverResult;
 import mb.statix.spec.Spec;
 import org.metaborg.util.iterators.Iterables2;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.terms.TermFactory;
+import org.spoofax.interpreter.terms.ITermFactory;
 
+import javax.inject.Inject;
 import java.io.Serializable;
 
 public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, SmlPartialSolveFile.Output> {
@@ -54,8 +55,11 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, S
         }
     }
 
-    private final TermFactory tf = new TermFactory();
-    private final StrategoTerms st = new StrategoTerms(tf);
+    private final StrategoTerms st;
+
+    @Inject public SmlPartialSolveFile(ITermFactory termFactory) {
+        st = new StrategoTerms(termFactory);
+    }
 
     @Override public String getId() {
         return SmlPartialSolveFile.class.getSimpleName();
