@@ -122,4 +122,18 @@ public class MessageUtils {
         }
         return null;
     }
+
+    public static ResourceKey tryGetResourceKey(IConstraint constraint, IUniDisunifier unifier) {
+        IConstraint current = constraint;
+
+        while(current != null) {
+            ITerm origin = findOriginArgument(current, unifier).orElse(null);
+            if (origin != null) {
+                return resourceKeyFromOrigin(origin);
+            }
+            current = current.cause().orElse(null);
+        }
+
+        return null;
+    }
 }

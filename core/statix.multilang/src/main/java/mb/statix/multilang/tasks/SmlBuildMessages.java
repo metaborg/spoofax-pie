@@ -6,12 +6,9 @@ import mb.common.message.Message;
 import mb.nabl2.terms.unification.ud.IUniDisunifier;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
-import mb.resource.ResourceKey;
-import mb.statix.constraints.messages.IMessage;
 import mb.statix.multilang.AnalysisContext;
 import mb.statix.multilang.AnalysisResults;
 import mb.statix.multilang.utils.MessageUtils;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
 import java.util.AbstractMap;
@@ -60,16 +57,12 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
 
         // Process final result messages
         results.finalResult().messages().entrySet().stream()
-            .map(e -> new AbstractMap.SimpleEntry<>(tryGetResourceKey(e.getValue()),
+            .map(e -> new AbstractMap.SimpleEntry<>(MessageUtils.tryGetResourceKey(e.getKey(), results.finalResult().state().unifier()),
                 MessageUtils.formatMessage(e.getValue(), e.getKey(), resultUnifier)))
             .collect(Collectors.groupingBy(e -> Optional.ofNullable(e.getKey())))
             .forEach((resourceKey, messages) -> builder.addMessages(resourceKey.orElse(null), messages.stream()
                 .map(Map.Entry::getValue).collect(Collectors.toList())));
 
         return builder.build();
-    }
-
-    private @Nullable ResourceKey tryGetResourceKey(IMessage message) {
-        return message.origin().map(MessageUtils::resourceKeyFromOrigin).orElse(null);
     }
 }
