@@ -22,7 +22,6 @@ import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.terms.TermFactory;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -133,16 +132,9 @@ public class AnalysisTest extends TestBase {
             .fileConstraint("statix/statics!moduleOK")
             .projectConstraint("statix/statics!projectOK")
             .resourcesSupplier(new ValueSupplier<>(resources))
-            .astFunction((exec, res) -> {
-                try {
-                    return new ValueSupplier<>(exec.require(languageComponent
-                        .getPreAnalysisTransform()
-                        .createSupplier(res)));
-                } catch(IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            })
-            .postTransform(languageComponent.getPostStatix().createFunction())
+            .astFunction(languageComponent.getPreAnalysisTransform().createFunction())
+            // TODO: remove ValueSupplier somehow
+            .postTransform(languageComponent.getPostStatix().createFunction().mapInput(ValueSupplier::new))
             .build();
 
         AnalysisContext context = AnalysisContextService.createContext("AnalysisTest", languageMetadata);

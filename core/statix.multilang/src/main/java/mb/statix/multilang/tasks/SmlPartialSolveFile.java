@@ -3,7 +3,7 @@ package mb.statix.multilang.tasks;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.stratego.StrategoTerms;
 import mb.pie.api.ExecContext;
-import mb.pie.api.Supplier;
+import mb.pie.api.Function;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.statix.constraints.CUser;
@@ -27,11 +27,11 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, S
 
         private final Spec spec;
         private final String fileConstraint;
-        private final Supplier<IStrategoTerm> astSupplier;
+        private final Function<ResourceKey, IStrategoTerm> astSupplier;
         private final ResourceKey resourceKey;
 
         public Input(ITerm globalScope, SolverResult globalResult, IDebugContext debug, Spec spec,
-                     String fileConstraint, Supplier<IStrategoTerm> astSupplier, ResourceKey resourceKey) {
+                     String fileConstraint, Function<ResourceKey, IStrategoTerm> astSupplier, ResourceKey resourceKey) {
             this.globalScope = globalScope;
             this.globalResult = globalResult;
             this.debug = debug;
@@ -62,7 +62,7 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, S
     }
 
     @Override public Output exec(ExecContext context, Input input) throws Exception {
-        IStrategoTerm ast = input.astSupplier.get(context);
+        IStrategoTerm ast = input.astSupplier.apply(context, input.resourceKey);
         Iterable<ITerm> constraintArgs = Iterables2.from(input.globalScope, st.fromStratego(ast));
         IConstraint fileConstraint = new CUser(input.fileConstraint, constraintArgs, null);
 

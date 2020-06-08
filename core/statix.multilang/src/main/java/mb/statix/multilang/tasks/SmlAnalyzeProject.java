@@ -92,7 +92,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
                             try {
                                 SolverResult fileResult = context.require(partialSolveFile.createTask(new SmlPartialSolveFile.Input(globalState.getGlobalScope(),
                                     globalState.getResult(), debug, combinedSpec, languageMetadata.fileConstraint(),
-                                    languageMetadata.astFunction().apply(context, resourceKey),
+                                    languageMetadata.astFunction(),
                                     resourceKey))).getFileResult();
                                 return new AbstractMap.SimpleEntry<>(
                                     new AAnalysisResults.FileKey(languageMetadata.languageId(), resourceKey),
