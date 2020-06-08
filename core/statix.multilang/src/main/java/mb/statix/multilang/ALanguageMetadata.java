@@ -13,13 +13,9 @@ import java.util.HashSet;
 public abstract class ALanguageMetadata {
     @Value.Parameter public abstract LanguageId languageId();
     @Value.Parameter public abstract Supplier<HashSet<ResourceKey>> resourcesSupplier(); // Use HashSet because should be serializable
-    @Value.Parameter public abstract Function<ResourceKey, IStrategoTerm> astFunction();
+    @Value.Parameter public abstract Function<ResourceKey, Supplier<IStrategoTerm>> astFunction();
     @Value.Parameter public abstract Function<Supplier<IStrategoTerm>, IStrategoTerm> postTransform();
     @Value.Parameter public abstract Spec statixSpec();
     @Value.Parameter public abstract String fileConstraint();
     @Value.Parameter public abstract String projectConstraint();
-
-    static LanguageMetadata.Builder builder() {
-        return LanguageMetadata.builder();
-    }
 }

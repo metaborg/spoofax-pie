@@ -30,10 +30,13 @@ import mb.sdf3.spoofax.util.PlatformTestComponent;
 import mb.sdf3.spoofax.util.Sdf3TestComponent;
 import mb.spoofax.core.platform.LoggerFactoryModule;
 import mb.spoofax.core.platform.PlatformPieModule;
-import mb.statix.multilang.StatixAnalysisTaskDef;
+import mb.statix.multilang.tasks.SmlAnalyzeProject;
+import mb.statix.multilang.tasks.SmlBuildMessages;
+import mb.statix.multilang.tasks.SmlInstantiateGlobalScope;
+import mb.statix.multilang.tasks.SmlPartialSolveFile;
+import mb.statix.multilang.tasks.SmlPartialSolveProject;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.interpreter.terms.ITermFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -110,9 +113,15 @@ class TestBase {
         return new ValueSupplier<>(new Sdf3Spec(mainModuleAstSupplier, modulesAstSuppliers));
     }
 
-    void addStatixTaskDef(ITermFactory termFactory) {
+    void addStatixTaskDef() {
         pie = pie.createChildBuilder()
-            .withTaskDefs(new MapTaskDefs(new StatixAnalysisTaskDef(termFactory)))
+            .withTaskDefs(new MapTaskDefs(
+                new SmlInstantiateGlobalScope(),
+                new SmlPartialSolveProject(),
+                new SmlPartialSolveFile(),
+                new SmlAnalyzeProject(),
+                new SmlBuildMessages()
+            ))
             .build();
     }
 
