@@ -39,19 +39,13 @@ public class AnalysisTest extends TestBase {
         final TextResource resource = createTextResource("module a syntax A = B", "a.sdf3");
         resources.add(resource.getKey());
 
-        // Loading spec
         AnalysisContext context = createAnalysisContext(resources);
 
         try (MixedSession session = newSession()) {
             KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(context)));
             assertTrue(messages.containsError());
             assertEquals(1, messages.count());
-            /* Iterator<Message> msgs = messages.getMessages(resource.getKey()).iterator();
-            assertTrue(msgs.hasNext());
-            Message message = msgs.next();
-            assertEquals(Severity.Error, message.severity);
-            assertEquals("", message.region);
-            assertEquals("", message.text); */
+            assertEquals(1, messages.getAllMessages().get(resource.getKey()).size());
         }
     }
 
@@ -69,7 +63,7 @@ public class AnalysisTest extends TestBase {
         }
     }
 
-    @Test void testMultipleError() throws IOException, OccursException, ExecException {
+    @Test void testMultipleErrors() throws IOException, OccursException, ExecException {
         final HashSet<ResourceKey> resources = new HashSet<>();
         final TextResource resource1 = createTextResource("module a syntax B = A", "a.sdf3");
         final TextResource resource2 = createTextResource("module b syntax C = A B", "b.sdf3");
@@ -83,6 +77,9 @@ public class AnalysisTest extends TestBase {
             KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(context)));
             assertTrue(messages.containsError());
             assertEquals(4, messages.count());
+            assertTrue(messages.containsWarning());
+            assertEquals(1, messages.getAllMessages().get(resource1.getKey()).size());
+            assertEquals(3, messages.getAllMessages().get(resource2.getKey()).size());
         }
     }
 
