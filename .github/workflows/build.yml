@@ -8,16 +8,6 @@ jobs:
         os: [ubuntu-18.04, windows-2019, macos-10.15]
         gradle: [5.6.4, 6.5]
         experimental: [false]
-        include:
-          - os: ubuntu-18.04
-            gradle: rc
-            experimental: true
-          - os: windows-2019
-            gradle: rc
-            experimental: true
-          - os: macos-10.15
-            gradle: rc
-            experimental: true
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.experimental }}
     steps:
