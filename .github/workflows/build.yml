@@ -26,6 +26,17 @@ jobs:
         with:
           java-version: 8
       - uses: actions/cache@v2
+        id: cache-mavenize
+        with:
+          path: |
+            ~/.mavenize/eclipse_archive_cache/*.dmg
+            ~/.mavenize/eclipse_archive_cache/*.zip
+            ~/.mavenize/eclipse_archive_cache/*.tar.gz
+          key: mavenize-${{ runner.os }}-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            mavenize-${{ runner.os }}-
+      - uses: actions/cache@v2
+        id: cache-gradle
         with:
           path: ~/.gradle/caches
           key: gradle-${{ runner.os }}-${{ matrix.gradle }}-${{ hashFiles('**/*.gradle*') }}
