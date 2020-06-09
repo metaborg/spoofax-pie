@@ -9,6 +9,8 @@ import mb.resource.ResourceKey;
 import mb.resource.ResourceKeyString;
 import mb.resource.classloader.ClassLoaderResource;
 import mb.resource.classloader.ClassLoaderResourceRegistry;
+import mb.resource.fs.FSPath;
+import mb.resource.hierarchical.ResourcePath;
 import mb.resource.text.TextResource;
 import mb.sdf3.Sdf3ClassloaderResources;
 import mb.statix.multilang.AnalysisContext;
@@ -33,6 +35,7 @@ public class AnalysisTest extends TestBase {
 
     protected final ClassLoaderResourceRegistry statixRegistry = Sdf3ClassloaderResources.createClassLoaderResourceRegistry();
     protected ITermFactory termFactory = new TermFactory();
+    private final ResourcePath projectPath = new FSPath(".");
 
     @Test void testSingleError() throws IOException, OccursException, ExecException {
         final HashSet<ResourceKey> resources = new HashSet<>();
@@ -42,7 +45,7 @@ public class AnalysisTest extends TestBase {
         AnalysisContext context = createAnalysisContext(resources);
 
         try (MixedSession session = newSession()) {
-            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(context)));
+            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(projectPath, context)));
             assertTrue(messages.containsError());
             assertEquals(1, messages.count());
             assertEquals(1, messages.getAllMessages().get(resource.getKey()).size());
@@ -58,7 +61,7 @@ public class AnalysisTest extends TestBase {
         AnalysisContext context = createAnalysisContext(resources);
 
         try (MixedSession session = newSession()) {
-            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(context)));
+            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(projectPath, context)));
             assertEquals(0, messages.count());
         }
     }
@@ -74,7 +77,7 @@ public class AnalysisTest extends TestBase {
         AnalysisContext context = createAnalysisContext(resources);
 
         try (MixedSession session = newSession()) {
-            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(context)));
+            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(projectPath, context)));
             assertTrue(messages.containsError());
             assertEquals(4, messages.count());
             assertTrue(messages.containsWarning());
@@ -94,7 +97,7 @@ public class AnalysisTest extends TestBase {
         AnalysisContext context = createAnalysisContext(resources);
 
         try (MixedSession session = newSession()) {
-            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(context)));
+            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(projectPath, context)));
             assertFalse(messages.containsError());
             assertEquals(0, messages.count());
         }
@@ -113,7 +116,7 @@ public class AnalysisTest extends TestBase {
         AnalysisContext context = createAnalysisContext(resources);
 
         try (MixedSession session = newSession()) {
-            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(context)));
+            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(projectPath, context)));
             assertFalse(messages.containsError());
             assertEquals(0, messages.count());
         }
@@ -129,7 +132,7 @@ public class AnalysisTest extends TestBase {
             .statixSpec(spec)
             .fileConstraint("statix/statics!moduleOK")
             .projectConstraint("statix/statics!projectOK")
-            .resourcesSupplier(new ValueSupplier<>(resources))
+            .resourcesSupplier((c, p) -> resources)
             .astFunction(languageComponent.getPreAnalysisTransform().createFunction())
             // TODO: remove ValueSupplier somehow
             .postTransform(languageComponent.getPostStatix().createFunction().mapInput(ValueSupplier::new))

@@ -6,6 +6,7 @@ import mb.common.message.Message;
 import mb.nabl2.terms.unification.ud.IUniDisunifier;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
+import mb.resource.hierarchical.ResourcePath;
 import mb.statix.multilang.AnalysisContext;
 import mb.statix.multilang.AnalysisResults;
 import mb.statix.multilang.utils.MessageUtils;
@@ -21,9 +22,11 @@ import java.util.stream.Collectors;
 public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMessages> {
 
     public static class Input implements Serializable {
+        private final ResourcePath projectPath;
         private final AnalysisContext analysisContext;
 
-        public Input(AnalysisContext analysisContext) {
+        public Input(ResourcePath projectPath, AnalysisContext analysisContext) {
+            this.projectPath = projectPath;
             this.analysisContext = analysisContext;
         }
     }
@@ -40,7 +43,7 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
 
     @Override public KeyedMessages exec(ExecContext context, Input input) throws Exception {
         AnalysisResults results = context.require(analyzeProject.createTask(
-            new SmlAnalyzeProject.Input(input.analysisContext)
+            new SmlAnalyzeProject.Input(input.projectPath, input.analysisContext)
         )).getResults();
 
         final IUniDisunifier resultUnifier = results.finalResult().state().unifier();

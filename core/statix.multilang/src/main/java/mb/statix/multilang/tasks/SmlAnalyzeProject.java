@@ -4,6 +4,7 @@ import mb.common.util.UncheckedException;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
 import mb.pie.api.TaskDef;
+import mb.resource.hierarchical.ResourcePath;
 import mb.statix.constraints.CConj;
 import mb.statix.multilang.AAnalysisResults;
 import mb.statix.multilang.AnalysisContext;
@@ -21,7 +22,6 @@ import mb.statix.solver.persistent.SolverResult;
 import mb.statix.spec.Spec;
 
 import javax.inject.Inject;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.AbstractMap;
 import java.util.HashMap;
@@ -32,9 +32,11 @@ import java.util.stream.Stream;
 public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAnalyzeProject.Output> {
 
     public static class Input implements Serializable {
+        private final ResourcePath projectPath;
         private final AnalysisContext analysisContext;
 
-        public Input(AnalysisContext analysisContext) {
+        public Input(ResourcePath projectPath, AnalysisContext analysisContext) {
+            this.projectPath = projectPath;
             this.analysisContext = analysisContext;
         }
     }
@@ -99,7 +101,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
         Map<AAnalysisResults.FileKey, FileResult> fileResults = analysisContext.languages().values().stream()
             .flatMap(languageMetadata -> {
                 try {
-                    return languageMetadata.resourcesSupplier().get(context).stream()
+                    return languageMetadata.resourcesSupplier().apply(context, input.projectPath).stream()
                         .map(resourceKey -> {
                             try {
                                 FileResult fileResult = context.require(partialSolveFile.createTask(new SmlPartialSolveFile.Input(globalState.getGlobalScope(),
@@ -113,7 +115,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
                                 throw new UncheckedException(e);
                             }
                         });
-                } catch(ExecException | IOException | InterruptedException e) {
+                } catch(ExecException | InterruptedException e) {
                     throw new UncheckedException(e);
                 }
             })
