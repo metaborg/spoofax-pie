@@ -6,6 +6,7 @@ import mb.spoofax.compiler.spoofaxcore.*
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.*
@@ -128,7 +129,7 @@ open class AdapterPlugin : Plugin<Project> {
     val extension = AdapterProjectExtension(project)
     project.extensions.add(AdapterProjectExtension.id, extension)
 
-    project.plugins.apply("org.metaborg.gradle.config.java-library")
+    project.plugins.apply(JavaLibraryPlugin::class.java)
 
     project.afterEvaluate {
       extension.languageProjectFinalized.whenLanguageProjectFinalized {
