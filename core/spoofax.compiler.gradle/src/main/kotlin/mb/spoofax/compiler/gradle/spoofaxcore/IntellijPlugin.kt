@@ -7,6 +7,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ModuleDependency
+import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.*
@@ -76,7 +77,7 @@ open class IntellijPlugin : Plugin<Project> {
     val extension = IntellijProjectCompilerExtension(project)
     project.extensions.add(IntellijProjectCompilerExtension.id, extension)
 
-    project.pluginManager.apply("org.metaborg.gradle.config.java-library")
+    project.plugins.apply(JavaLibraryPlugin::class.java)
     project.pluginManager.apply("org.jetbrains.intellij")
 
     // Disable some IntelliJ plugin functionality to increase incrementality.

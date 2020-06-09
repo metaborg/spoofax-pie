@@ -6,7 +6,9 @@ import mb.spoofax.compiler.spoofaxcore.*
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.plugins.ApplicationPlugin
 import org.gradle.api.plugins.JavaApplication
+import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.*
@@ -75,7 +77,7 @@ open class CliPlugin : Plugin<Project> {
     val extension = CliProjectExtension(project)
     project.extensions.add(CliProjectExtension.id, extension)
 
-    project.plugins.apply("org.metaborg.gradle.config.java-application")
+    project.plugins.apply(ApplicationPlugin::class.java)
 
     project.afterEvaluate {
       extension.adapterProjectFinalized.whenAdapterProjectFinalized {

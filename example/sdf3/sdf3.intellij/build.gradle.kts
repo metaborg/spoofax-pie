@@ -1,6 +1,7 @@
 import mb.spoofax.compiler.gradle.spoofaxcore.*
 
 plugins {
+  id("org.metaborg.gradle.config.java-library")
   id("org.metaborg.spoofax.compiler.gradle.spoofaxcore.intellij")
 }
 

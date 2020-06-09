@@ -7,8 +7,8 @@ import mb.spoofax.compiler.spoofaxcore.StylerCompiler
 import mb.spoofax.compiler.util.GradleDependency
 
 plugins {
-  id("org.metaborg.spoofax.compiler.gradle.spoofaxcore.language")
   id("org.metaborg.gradle.config.junit-testing")
+  id("org.metaborg.spoofax.compiler.gradle.spoofaxcore.language")
 }
 
 dependencies {

@@ -1,0 +1,37 @@
+name: Build
+on: push
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-18.04, windows-2019, macos-10.15]
+        gradle: [5.6.4, 6.5]
+        experimental: [false]
+        include:
+          - os: ubuntu-18.04
+            gradle: rc
+            experimental: true
+          - os: windows-2019
+            gradle: rc
+            experimental: true
+          - os: macos-10.15
+            gradle: rc
+            experimental: true
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 8
+      - uses: actions/cache@v2
+        with:
+          path: ~/.gradle/caches
+          key: gradle-${{ runner.os }}-${{ matrix.gradle }}-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+      - uses: eskatos/gradle-command-action@v1
+        with:
+          gradle-version: ${{ matrix.gradle }}
+          arguments: buildAll --parallel --stacktrace
