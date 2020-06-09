@@ -6,7 +6,9 @@ pluginManagement {
   }
 }
 
-enableFeaturePreview("GRADLE_METADATA")
+if(org.gradle.util.VersionNumber.parse(gradle.gradleVersion).major < 6) {
+  enableFeaturePreview("GRADLE_METADATA")
+}
 
 // Only include composite builds when this is the root project (it has no parent), for example when running Gradle tasks
 // from the command-line. Otherwise, the parent project (spoofax) will include these composite builds.
