@@ -17,6 +17,7 @@ import mb.statix.solver.persistent.State;
 import mb.statix.spec.Spec;
 import org.metaborg.util.iterators.Iterables2;
 
+import javax.inject.Inject;
 import java.io.Serializable;
 
 public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalScope.Input, SmlInstantiateGlobalScope.Output> {
@@ -56,6 +57,8 @@ public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalSc
             return result;
         }
     }
+
+    @Inject public SmlInstantiateGlobalScope() { }
 
     @Override
     public String getId() {

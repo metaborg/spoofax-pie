@@ -11,6 +11,7 @@ import mb.statix.solver.persistent.SolverResult;
 import mb.statix.spec.Spec;
 import org.metaborg.util.iterators.Iterables2;
 
+import javax.inject.Inject;
 import java.io.Serializable;
 
 public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.Input, SmlPartialSolveProject.Output> {
@@ -43,6 +44,8 @@ public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.In
             return projectResult;
         }
     }
+
+    @Inject public SmlPartialSolveProject() { }
 
     @Override
     public String getId() {

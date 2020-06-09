@@ -20,6 +20,7 @@ import mb.statix.solver.persistent.Solver;
 import mb.statix.solver.persistent.SolverResult;
 import mb.statix.spec.Spec;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.AbstractMap;
@@ -54,9 +55,11 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
     private final SmlPartialSolveProject partialSolveProject;
     private final SmlPartialSolveFile partialSolveFile;
 
-    public SmlAnalyzeProject(SmlInstantiateGlobalScope instantiateGlobalScope,
-                             SmlPartialSolveProject partialSolveProject,
-                             SmlPartialSolveFile partialSolveFile) {
+    @Inject public SmlAnalyzeProject(
+        SmlInstantiateGlobalScope instantiateGlobalScope,
+        SmlPartialSolveProject partialSolveProject,
+        SmlPartialSolveFile partialSolveFile
+    ) {
         this.instantiateGlobalScope = instantiateGlobalScope;
         this.partialSolveProject = partialSolveProject;
         this.partialSolveFile = partialSolveFile;

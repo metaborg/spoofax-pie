@@ -10,6 +10,7 @@ import mb.statix.multilang.AnalysisContext;
 import mb.statix.multilang.AnalysisResults;
 import mb.statix.multilang.utils.MessageUtils;
 
+import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.AbstractMap;
 import java.util.List;
@@ -29,7 +30,7 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
 
     private final SmlAnalyzeProject analyzeProject;
 
-    public SmlBuildMessages(SmlAnalyzeProject analyzeProject) {
+    @Inject public SmlBuildMessages(SmlAnalyzeProject analyzeProject) {
         this.analyzeProject = analyzeProject;
     }
 
