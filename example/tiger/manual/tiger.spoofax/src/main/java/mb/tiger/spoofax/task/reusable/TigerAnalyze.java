@@ -22,7 +22,7 @@ import java.util.Objects;
 public class TigerAnalyze implements TaskDef<TigerAnalyze.Input, TigerAnalyze.@Nullable Output> {
     public static class Input implements Serializable {
         public final ResourceKey resourceKey;
-        public final Supplier<@Nullable IStrategoTerm> astSupplier;
+        public final Supplier<@Nullable IStrategoTerm> astSupplier; // TODO: use Result
 
         public Input(ResourceKey resourceKey, Supplier<@Nullable IStrategoTerm> astSupplier) {
             this.resourceKey = resourceKey;

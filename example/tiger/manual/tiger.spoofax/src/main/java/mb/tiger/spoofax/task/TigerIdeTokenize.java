@@ -1,7 +1,7 @@
 package mb.tiger.spoofax.task;
 
 import mb.common.token.Token;
-import mb.jsglr1.common.JSGLR1ParseResult;
+import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
 import mb.pie.api.ResourceStringSupplier;
@@ -28,7 +28,7 @@ public class TigerIdeTokenize implements TaskDef<ResourceKey, @Nullable ArrayLis
 
     @Override
     public @Nullable ArrayList<? extends Token<?>> exec(ExecContext context, ResourceKey key) throws ExecException, InterruptedException {
-        final @Nullable JSGLR1ParseResult parseResult = context.require(parse, new ResourceStringSupplier(key));
+        final @Nullable JSGLR1ParseOutput parseResult = context.require(parse, new ResourceStringSupplier(key));
         return parseResult.getTokens().orElse(null);
     }
 }

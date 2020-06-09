@@ -3,7 +3,7 @@ package mb.tiger.spoofax.task;
 import mb.common.region.Region;
 import mb.common.util.ListView;
 import mb.jsglr.common.TermTracer;
-import mb.jsglr1.common.JSGLR1ParseResult;
+import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ResourceStringSupplier;
 import mb.pie.api.Task;
@@ -40,7 +40,7 @@ public class TigerShowPrettyPrintedText implements TaskDef<TigerShowArgs, Comman
         final ResourceKey key = input.key;
         final @Nullable Region region = input.region;
 
-        final JSGLR1ParseResult parseResult = context.require(parse, new ResourceStringSupplier(key));
+        final JSGLR1ParseOutput parseResult = context.require(parse, new ResourceStringSupplier(key));
         final IStrategoTerm ast = parseResult.getAst()
             .orElseThrow(() -> new RuntimeException("Cannot show pretty-printed text, parsed AST for '" + key + "' is null"));
 

@@ -2,7 +2,8 @@ package mb.tiger.spoofax.task;
 
 import mb.common.message.Messages;
 import mb.common.message.MessagesBuilder;
-import mb.jsglr1.common.JSGLR1ParseResult;
+import mb.common.result.Result;
+import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
 import mb.pie.api.ResourceStringSupplier;
@@ -14,6 +15,7 @@ import mb.tiger.spoofax.task.reusable.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
+import java.io.IOException;
 
 @LanguageScope
 public class TigerIdeCheck implements TaskDef<ResourceKey, Messages> {
@@ -30,12 +32,12 @@ public class TigerIdeCheck implements TaskDef<ResourceKey, Messages> {
     }
 
     @Override
-    public Messages exec(ExecContext context, ResourceKey key) throws ExecException, InterruptedException {
+    public Messages exec(ExecContext context, ResourceKey key) throws IOException, ExecException, InterruptedException {
         final MessagesBuilder builder = new MessagesBuilder();
         final ResourceStringSupplier stringProvider = new ResourceStringSupplier(key);
-        final JSGLR1ParseResult parseResult = context.require(parse, stringProvider);
-        builder.addMessages(parseResult.getMessages());
-        final TigerAnalyze.@Nullable Output analysisOutput = context.require(analyze, new TigerAnalyze.Input(key, parse.createNullableRecoverableAstSupplier(stringProvider)));
+        final Messages parseMessages = context.require(parse.createMessagesSupplier(stringProvider));
+        builder.addMessages(parseMessages);
+        final TigerAnalyze.@Nullable Output analysisOutput = context.require(analyze, new TigerAnalyze.Input(key, parse.createRecoverableAstSupplier(stringProvider).map(Result::get)));
         if(analysisOutput != null) {
             builder.addMessages(analysisOutput.result.messages);
         }

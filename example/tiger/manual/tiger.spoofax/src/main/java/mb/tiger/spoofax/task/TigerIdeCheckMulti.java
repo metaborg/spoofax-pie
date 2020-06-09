@@ -3,7 +3,7 @@ package mb.tiger.spoofax.task;
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.util.UncheckedException;
-import mb.jsglr1.common.JSGLR1ParseResult;
+import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
 import mb.pie.api.ResourceStringSupplier;
@@ -83,7 +83,7 @@ public class TigerIdeCheckMulti implements TaskDef<TigerIdeCheckMulti.Input, Key
             root.walk(input.walker, input.matcher).forEach(file -> {
                 final ResourcePath filePath = file.getPath();
                 try {
-                    final JSGLR1ParseResult parseResult = context.require(parse, new ResourceStringSupplier(filePath));
+                    final JSGLR1ParseOutput parseResult = context.require(parse, new ResourceStringSupplier(filePath));
                     messagesBuilder.addMessages(filePath, parseResult.getMessages());
                 } catch(ExecException | InterruptedException e) {
                     throw new UncheckedException(e);

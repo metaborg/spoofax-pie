@@ -3,7 +3,7 @@ package mb.tiger.spoofax.task;
 import mb.common.region.Region;
 import mb.common.util.ListView;
 import mb.jsglr.common.TermTracer;
-import mb.jsglr1.common.JSGLR1ParseResult;
+import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ResourceStringSupplier;
 import mb.pie.api.Task;
@@ -12,7 +12,6 @@ import mb.resource.ResourceKey;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.CommandOutput;
 import mb.stratego.common.StrategoRuntime;
-import mb.stratego.common.StrategoRuntimeBuilder;
 import mb.stratego.common.StrategoUtil;
 import mb.tiger.spoofax.task.reusable.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -41,7 +40,7 @@ public class TigerShowDesugaredAst implements TaskDef<TigerShowArgs, CommandOutp
         final ResourceKey key = input.key;
         final @Nullable Region region = input.region;
 
-        final JSGLR1ParseResult parseResult = context.require(parse, new ResourceStringSupplier(key));
+        final JSGLR1ParseOutput parseResult = context.require(parse, new ResourceStringSupplier(key));
         final IStrategoTerm ast = parseResult.getAst()
             .orElseThrow(() -> new RuntimeException("Cannot show desugared AST, parsed AST for '" + key + "' is null"));
 
