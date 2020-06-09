@@ -45,4 +45,4 @@ jobs:
       - uses: eskatos/gradle-command-action@v1
         with:
           gradle-version: ${{ matrix.gradle }}
-          arguments: buildAll --parallel --stacktrace -Dorg.gradle.jvmargs=-Xmx2G
+          arguments: buildAll --parallel --stacktrace
