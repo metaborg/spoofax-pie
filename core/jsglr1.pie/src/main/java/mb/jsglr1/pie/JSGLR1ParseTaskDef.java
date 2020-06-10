@@ -3,7 +3,6 @@ package mb.jsglr1.pie;
 import mb.common.message.Messages;
 import mb.common.result.MessagesError;
 import mb.common.result.Result;
-import mb.common.result.ThrowableError;
 import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.jsglr.common.Tokens;
 import mb.pie.api.ExecContext;

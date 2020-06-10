@@ -31,6 +31,31 @@ public class MessagesError extends Throwable {
     }
 
 
+    public static MessagesError withStackTrace(Messages messages) {
+        return new MessagesError(messages);
+    }
+
+    public static MessagesError withStackTrace(Messages messages, @Nullable String description) {
+        return new MessagesError(messages, description);
+    }
+
+    public static MessagesError withStackTrace(Messages messages, @Nullable String description, @Nullable Throwable cause) {
+        return new MessagesError(messages, description, cause);
+    }
+
+    public static MessagesError withoutStackTrace(Messages messages) {
+        return new MessagesError(messages, null, null, true, false);
+    }
+
+    public static MessagesError withoutStackTrace(Messages messages, @Nullable String description) {
+        return new MessagesError(messages, description, null, true, false);
+    }
+
+    public static MessagesError withoutStackTrace(Messages messages, @Nullable String description, @Nullable Throwable cause) {
+        return new MessagesError(messages, description, cause, true, false);
+    }
+
+
     public Messages getMessages() {
         return messages;
     }
