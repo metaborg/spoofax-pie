@@ -37,6 +37,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -298,7 +299,10 @@ public class TigerInputs {
             if(inputStream == null) {
                 throw new IllegalStateException("Cannot get input stream for resource '" + fileName + "'");
             }
-            IOUtil.copy(inputStream, targetDirectory.appendSegment(fileName).openWrite());
+            try(final OutputStream outputStream = targetDirectory.appendSegment(fileName).openWrite()) {
+                IOUtil.copy(inputStream, outputStream);
+                outputStream.flush();
+            }
         }
     }
 
