@@ -1,5 +1,6 @@
 package mb.common.result;
 
+import mb.common.util.SneakyThrow;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
@@ -125,6 +126,13 @@ public interface Result<T extends Serializable, E extends Throwable> extends Ser
         }
     }
 
+    default void throwUncheckedIfError() {
+        if(isErr()) {
+            // noinspection OptionalGetWithoutIsPresent (get is safe because error is present if isErr returns true)
+            throw new RuntimeException(err().get());
+        }
+    }
+
 
     default <U extends Serializable> Result<U, E> map(Function<T, U> mapper) {
         // noinspection unchecked (cast is safe because it is impossible to get a value of type U in the err case)
@@ -167,6 +175,20 @@ public interface Result<T extends Serializable, E extends Throwable> extends Ser
     default T unwrap() throws E {
         // noinspection OptionalGetWithoutIsPresent (get is safe because error is present if not ok case)
         return ok().orElseThrow(() -> err().get());
+    }
+
+    default T unwrapSneaky() {
+        if(isErr()) {
+            // noinspection OptionalGetWithoutIsPresent (get is safe because error is present if err case)
+            SneakyThrow.doThrow(err().get());
+        }
+        // noinspection OptionalGetWithoutIsPresent (get is safe because value is present if not err case)
+        return ok().get();
+    }
+
+    default T unwrapUnchecked() {
+        // noinspection OptionalGetWithoutIsPresent (get is safe because error is present if not ok case)
+        return ok().orElseThrow(() -> new RuntimeException(err().get()));
     }
 
     default T unwrapOr(T def) {

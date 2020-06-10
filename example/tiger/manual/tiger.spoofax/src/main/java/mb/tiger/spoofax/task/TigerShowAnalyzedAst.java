@@ -35,7 +35,7 @@ public class TigerShowAnalyzedAst implements TaskDef<TigerShowArgs, CommandOutpu
         final ResourceKey key = input.key;
         final @Nullable Region region = input.region;
 
-        final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createNullableAstSupplier(key);
+        final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createAstSupplier(key);
         final TigerAnalyze.@Nullable Output output = context.require(analyze, new TigerAnalyze.Input(key, astSupplier));
         if(output == null) {
             throw new RuntimeException("Cannot show analyzed AST, analysis output for '" + key + "' is null");

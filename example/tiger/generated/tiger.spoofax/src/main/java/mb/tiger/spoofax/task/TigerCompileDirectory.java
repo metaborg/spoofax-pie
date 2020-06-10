@@ -1,5 +1,6 @@
 package mb.tiger.spoofax.task;
 
+import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
@@ -80,7 +81,7 @@ public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args
                     if(!first.get()) {
                         sb.append(", ");
                     }
-                    final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createNullableAstSupplier(f.getKey());
+                    final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createAstSupplier(f.getKey()).map(Result::get); // TODO: use Result
                     final @Nullable String defNames = context.require(listDefNames, astSupplier);
                     if(defNames != null) {
                         sb.append(defNames);

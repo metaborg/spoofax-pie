@@ -3,8 +3,8 @@ package mb.jsglr1.pie;
 import mb.common.message.Messages;
 import mb.common.result.MessagesError;
 import mb.common.result.Result;
-import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.jsglr.common.Tokens;
+import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
 import mb.pie.api.Function;
@@ -30,7 +30,7 @@ public abstract class JSGLR1ParseTaskDef implements TaskDef<Supplier<String>, Re
             final String text = context.require(stringSupplier);
             return parse(text);
         } catch(ExecException | IOException e) {
-            return Result.ofErr(new MessagesError("Parsing failed; cannot get text to parse from '" + stringSupplier + "'", new ThrowableError(e)));
+            return Result.ofErr(new MessagesError("Parsing failed; cannot get text to parse from '" + stringSupplier + "'", e));
         }
     }
 
@@ -199,7 +199,7 @@ class AstMapper extends Mapper<Result<JSGLR1ParseOutput, MessagesError>, Result<
     @Override public Result<IStrategoTerm, MessagesError> apply(Result<JSGLR1ParseOutput, MessagesError> result) {
         return result.andThen(r -> {
             if(r.recovered) {
-                return Result.ofErr(new MessagesError("Parser produced a recovered AST, but recovery was disallowed", r.messages));
+                return Result.ofErr(new MessagesError(r.messages, "Parser produced a recovered AST, but recovery was disallowed"));
             } else {
                 return Result.ofOk(r.ast);
             }
@@ -225,7 +225,7 @@ class TokensMapper extends Mapper<Result<JSGLR1ParseOutput, MessagesError>, Resu
     @Override public Result<Tokens, MessagesError> apply(Result<JSGLR1ParseOutput, MessagesError> result) {
         return result.andThen(r -> {
             if(r.recovered) {
-                return Result.ofErr(new MessagesError("Parser produced recovered tokens, but recovery was disallowed", r.messages));
+                return Result.ofErr(new MessagesError(r.messages, "Parser produced recovered tokens, but recovery was disallowed"));
             } else {
                 return Result.ofOk(r.tokens);
             }

@@ -70,7 +70,7 @@ public class JSGLR1Parser {
             final MessagesUtil messagesUtil = new MessagesUtil(true, true, parser.getCollectedErrors());
             messagesUtil.processFatalException(new NullTokenizer(text, null), e);
             final Messages messages = messagesUtil.getMessages();
-            return Result.ofErr(MessagesError.withoutStackTrace(messages, "Parsing failed; recovery failed"));
+            return Result.ofErr(new MessagesError(messages, "Parsing failed; recovery failed"));
         }
     }
 }

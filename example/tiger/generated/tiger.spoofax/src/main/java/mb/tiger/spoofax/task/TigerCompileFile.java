@@ -1,5 +1,6 @@
 package mb.tiger.spoofax.task;
 
+import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
@@ -61,7 +62,7 @@ public class TigerCompileFile implements TaskDef<TigerCompileFile.Args, CommandO
     @Override public CommandOutput exec(ExecContext context, Args input) throws Exception {
         final ResourcePath file = input.file;
 
-        final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createNullableAstSupplier(file);
+        final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createAstSupplier(file).map(Result::get); // TODO: use Result
         final @Nullable String literalsStr = context.require(listLiteralVals, astSupplier);
         if(literalsStr == null) {
             return new CommandOutput(ListView.of());

@@ -1,7 +1,6 @@
 package {{genTokenizeTaskDef.packageId}};
 
-import mb.common.token.Token;
-import mb.jsglr1.common.JSGLR1ParseOutput;
+import mb.jsglr.common.Tokens;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
 import mb.pie.api.ResourceStringSupplier;
@@ -11,10 +10,9 @@ import mb.spoofax.core.language.LanguageScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 
 @LanguageScope
-public class {{genTokenizeTaskDef.id}} implements TaskDef<ResourceKey, @Nullable ArrayList<? extends Token<?>>> {
+public class {{genTokenizeTaskDef.id}} implements TaskDef<ResourceKey, @Nullable Tokens> {
     private final {{parseTaskDef.qualifiedId}} parse;
 
     @Inject public {{genTokenizeTaskDef.id}}({{parseTaskDef.qualifiedId}} parse) {
@@ -26,8 +24,7 @@ public class {{genTokenizeTaskDef.id}} implements TaskDef<ResourceKey, @Nullable
     }
 
     @Override
-    public @Nullable ArrayList<? extends Token<?>> exec(ExecContext context, ResourceKey key) throws ExecException, InterruptedException {
-        final @Nullable JSGLR1ParseOutput parseResult = context.require(parse, new ResourceStringSupplier(key));
-        return parseResult.getTokens().orElse(null);
+    public @Nullable Tokens exec(ExecContext context, ResourceKey key) throws ExecException, InterruptedException {
+        return context.require(parse, new ResourceStringSupplier(key)).ok().map(o -> o.tokens).orElse(null);
     }
 }

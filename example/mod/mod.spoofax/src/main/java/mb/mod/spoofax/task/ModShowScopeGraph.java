@@ -1,5 +1,6 @@
 package mb.mod.spoofax.task;
 
+import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.constraint.common.ConstraintAnalyzer;
 import mb.pie.api.ExecContext;
@@ -84,7 +85,7 @@ public class ModShowScopeGraph implements TaskDef<ModShowScopeGraph.Args, Comman
     @Override public CommandOutput exec(ExecContext context, Args args) throws Exception {
         final ResourceWalker walker = new PathResourceWalker(new NoHiddenPathMatcher());
         final ResourceMatcher matcher = new PathResourceMatcher(new ExtensionPathMatcher("mod"));
-        final ModAnalyzeMulti.@Nullable Output output = context.require(analyze, new ModAnalyzeMulti.Input(args.project, walker, matcher, parse.createNullableAstFunction()));
+        final ModAnalyzeMulti.@Nullable Output output = context.require(analyze, new ModAnalyzeMulti.Input(args.project, walker, matcher, parse.createAstFunction().mapOutput(Result::get))); // TODO: use Result
         if(output == null) {
             throw new RuntimeException("Cannot show scope graph, analysis output for '" + args.project + "' is null");
         }

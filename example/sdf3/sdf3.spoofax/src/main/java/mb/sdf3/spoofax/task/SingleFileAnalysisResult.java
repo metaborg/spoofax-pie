@@ -1,5 +1,6 @@
 package mb.sdf3.spoofax.task;
 
+import mb.common.result.Result;
 import mb.constraint.common.ConstraintAnalyzer;
 import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.pie.api.Function;
@@ -32,7 +33,7 @@ public class SingleFileAnalysisResult implements Serializable {
             project,
             Sdf3Util.createResourceWalker(),
             Sdf3Util.createResourceMatcher(),
-            desugar.mapInput((ctx, i) -> parse.createNullableRecoverableAstSupplier(i))
+            desugar.mapInput((ctx, i) -> parse.createRecoverableAstSupplier(i).map(Result::get)) // TODO: use result
         );
         return analyze.createSupplier(analyzeInput).map(analysisOutput -> {
             if(analysisOutput == null) {

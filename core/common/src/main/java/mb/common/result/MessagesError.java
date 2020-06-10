@@ -9,17 +9,17 @@ public class MessagesError extends Throwable {
     private final Messages messages;
 
 
-    public MessagesError(Messages messages, @Nullable String description, @Nullable Throwable cause, boolean enableSuppression, boolean createStackTrace) {
+    public MessagesError(Messages messages, @Nullable String description, @Nullable Throwable cause, boolean createStackTrace, boolean enableSuppression) {
         super(description, cause, enableSuppression, createStackTrace);
         this.messages = messages;
     }
 
-    public MessagesError(Messages messages, @Nullable String description, @Nullable Throwable cause, boolean enableSuppression) {
-        this(messages, description, cause, enableSuppression, true);
+    public MessagesError(Messages messages, @Nullable String description, @Nullable Throwable cause, boolean createStackTrace) {
+        this(messages, description, cause, true, createStackTrace);
     }
 
     public MessagesError(Messages messages, @Nullable String description, @Nullable Throwable cause) {
-        this(messages, description, cause, true);
+        this(messages, description, cause, false /* By default, no stacktrace*/);
     }
 
     public MessagesError(Messages messages, @Nullable String description) {
@@ -28,6 +28,18 @@ public class MessagesError extends Throwable {
 
     public MessagesError(Messages messages) {
         this(messages, null);
+    }
+
+    public MessagesError(@Nullable String description, @Nullable Throwable cause) {
+        this(Messages.of(), description, cause);
+    }
+
+    public MessagesError(@Nullable String description) {
+        this(Messages.of(), description);
+    }
+
+    public MessagesError() {
+        this(Messages.of());
     }
 
 
@@ -41,18 +53,6 @@ public class MessagesError extends Throwable {
 
     public static MessagesError withStackTrace(Messages messages, @Nullable String description, @Nullable Throwable cause) {
         return new MessagesError(messages, description, cause);
-    }
-
-    public static MessagesError withoutStackTrace(Messages messages) {
-        return new MessagesError(messages, null, null, true, false);
-    }
-
-    public static MessagesError withoutStackTrace(Messages messages, @Nullable String description) {
-        return new MessagesError(messages, description, null, true, false);
-    }
-
-    public static MessagesError withoutStackTrace(Messages messages, @Nullable String description, @Nullable Throwable cause) {
-        return new MessagesError(messages, description, cause, true, false);
     }
 
 

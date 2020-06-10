@@ -1,6 +1,8 @@
 package mb.tiger.spoofax.task;
 
 import mb.common.region.Region;
+import mb.common.result.MessagesError;
+import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.jsglr.common.TermTracer;
 import mb.jsglr1.common.JSGLR1ParseOutput;
@@ -32,9 +34,10 @@ public class TigerShowParsedAst implements TaskDef<TigerShowArgs, CommandOutput>
         final ResourceKey key = input.key;
         final @Nullable Region region = input.region;
 
-        @SuppressWarnings("ConstantConditions") final JSGLR1ParseOutput parseResult = context.require(parse, new ResourceStringSupplier(key));
-        @SuppressWarnings("ConstantConditions") final IStrategoTerm ast = parseResult.getAst()
-            .orElseThrow(() -> new RuntimeException("Cannot show parsed AST, parsed AST for '" + key + "' is null"));
+        final Result<JSGLR1ParseOutput, MessagesError> parseResult = context.require(parse, new ResourceStringSupplier(key));
+        final IStrategoTerm ast = parseResult.ok()
+            .map(o -> o.ast)
+            .orElseThrow(() -> new RuntimeException("Cannot show parsed AST, parsed AST for '" + key + "' is null")); // TODO: use Result
 
         final IStrategoTerm term;
         if(region != null) {

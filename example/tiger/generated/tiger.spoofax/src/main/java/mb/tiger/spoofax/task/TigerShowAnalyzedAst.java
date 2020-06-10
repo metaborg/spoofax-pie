@@ -1,6 +1,7 @@
 package mb.tiger.spoofax.task;
 
 import mb.common.region.Region;
+import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.jsglr.common.TermTracer;
 import mb.pie.api.ExecContext;
@@ -33,7 +34,7 @@ public class TigerShowAnalyzedAst implements TaskDef<TigerShowArgs, CommandOutpu
         final ResourceKey key = input.key;
         final @Nullable Region region = input.region;
 
-        final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createNullableAstSupplier(key);
+        final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createAstSupplier(key).map(Result::get); // TODO: use Result
         final TigerAnalyze.@Nullable Output output = context.require(analyze, new TigerAnalyze.Input(key, astSupplier));
         if(output == null) {
             throw new RuntimeException("Cannot show analyzed AST, analysis output for '" + key + "' is null");
