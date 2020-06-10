@@ -8,8 +8,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public interface Result<T extends Serializable, E extends Error> extends Serializable {
-    class Ok<T extends Serializable, E extends Error> implements Result<T, E>, Serializable {
+public interface Result<T extends Serializable, E extends Throwable> extends Serializable {
+    class Ok<T extends Serializable, E extends Throwable> implements Result<T, E>, Serializable {
         public final T value;
 
         public Ok(T value) {
@@ -50,7 +50,7 @@ public interface Result<T extends Serializable, E extends Error> extends Seriali
         }
     }
 
-    class Err<T extends Serializable, E extends Error> implements Result<T, E>, Serializable {
+    class Err<T extends Serializable, E extends Throwable> implements Result<T, E>, Serializable {
         public final E error;
 
         public Err(E error) {
@@ -92,11 +92,11 @@ public interface Result<T extends Serializable, E extends Error> extends Seriali
     }
 
 
-    static <T extends Serializable, E extends Error> Result<T, E> ofOk(T value) {
+    static <T extends Serializable, E extends Throwable> Result<T, E> ofOk(T value) {
         return new Ok<>(value);
     }
 
-    static <T extends Serializable, E extends Error> Result<T, E> ofErr(E error) {
+    static <T extends Serializable, E extends Throwable> Result<T, E> ofErr(E error) {
         return new Err<>(error);
     }
 
@@ -118,6 +118,13 @@ public interface Result<T extends Serializable, E extends Error> extends Seriali
         err().ifPresent(consumer);
     }
 
+    default void throwIfError() throws E {
+        if(isErr()) {
+            // noinspection OptionalGetWithoutIsPresent (get is safe because error is present if isErr returns true)
+            throw err().get();
+        }
+    }
+
 
     default <U extends Serializable> Result<U, E> map(Function<T, U> mapper) {
         // noinspection unchecked (cast is safe because it is impossible to get a value of type U in the err case)
@@ -132,16 +139,16 @@ public interface Result<T extends Serializable, E extends Error> extends Seriali
         return ok().map(mapper).orElseGet(def);
     }
 
-    default <F extends Error> Result<T, F> mapErr(Function<E, F> mapper) {
+    default <F extends Throwable> Result<T, F> mapErr(Function<E, F> mapper) {
         // noinspection unchecked (cast is safe because it is impossible to get a value of type F in the ok case)
         return err().map(e -> Result.<T, F>ofErr(mapper.apply(e))).orElse((Result<T, F>)this);
     }
 
-    default <F extends Error> F mapErrOr(F def, Function<E, F> mapper) {
+    default <F extends Throwable> F mapErrOr(F def, Function<E, F> mapper) {
         return err().map(mapper).orElse(def);
     }
 
-    default <F extends Error> F mapErrOrElse(Supplier<F> def, Function<E, F> mapper) {
+    default <F extends Throwable> F mapErrOrElse(Supplier<F> def, Function<E, F> mapper) {
         return err().map(mapper).orElseGet(def);
     }
 
@@ -154,6 +161,32 @@ public interface Result<T extends Serializable, E extends Error> extends Seriali
     default <U extends Serializable> Result<U, E> andThen(Function<T, Result<U, E>> mapper) {
         // noinspection unchecked (cast is safe because it is impossible to get a value of type U in the err case)
         return ok().map(mapper).orElse((Result<U, E>)this);
+    }
+
+
+    default T unwrap() throws E {
+        // noinspection OptionalGetWithoutIsPresent (get is safe because error is present if not ok case)
+        return ok().orElseThrow(() -> err().get());
+    }
+
+    default T unwrapOr(T def) {
+        return ok().orElse(def);
+    }
+
+    default T unwrapOrElse(Supplier<T> def) {
+        return ok().orElseGet(def);
+    }
+
+    default E unwrapErr() {
+        return err().orElseThrow(() -> new RuntimeException("Called `unwrapErr` on an `Ok` result"));
+    }
+
+    default E unwrapErrOr(E def) {
+        return err().orElse(def);
+    }
+
+    default E unwrapErrOrElse(Supplier<E> def) {
+        return err().orElseGet(def);
     }
 
 
@@ -180,29 +213,4 @@ public interface Result<T extends Serializable, E extends Error> extends Seriali
     default @Nullable E getErrOrElse(Supplier<@Nullable E> def) {
         return err().orElseGet(def);
     }
-
-
-//    default @Nullable T unwrap() {
-//        return unwrapOr(null);
-//    }
-//
-//    default @Nullable T unwrapOr(@Nullable T def) {
-//        return ok().orElse(def);
-//    }
-//
-//    default @Nullable T unwrapOrElse(Supplier<@Nullable T> def) {
-//        return ok().orElseGet(def);
-//    }
-//
-//    default @Nullable E unwrapErr() {
-//        return unwrapErrOr(null);
-//    }
-//
-//    default @Nullable E unwrapErrOr(@Nullable E def) {
-//        return err().orElse(def);
-//    }
-//
-//    default @Nullable E unwrapErrOrElse(Supplier<@Nullable E> def) {
-//        return err().orElseGet(def);
-//    }
 }
