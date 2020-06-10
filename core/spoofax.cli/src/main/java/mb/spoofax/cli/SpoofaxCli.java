@@ -1,6 +1,7 @@
 package mb.spoofax.cli;
 
 import mb.pie.api.MixedSession;
+import mb.pie.api.Pie;
 import mb.resource.ResourceService;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.language.LanguageInstance;
@@ -36,7 +37,12 @@ public class SpoofaxCli {
 
     public int run(String[] args, LanguageComponent languageComponent) {
         final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
-        try(final MixedSession session = languageComponent.getPie().newSession()) {
+        final Pie pie = languageComponent.getPie();
+        return run(args, pie, languageInstance);
+    }
+
+    public int run(String[] args, Pie pie, LanguageInstance languageInstance) {
+        try(final MixedSession session = pie.newSession()) {
             final CommandSpec commandSpec = toCommandSpec(languageInstance.getCliCommand(), session);
             final CommandLine commandLine = new CommandLine(commandSpec);
             for(ArgConverter<?> converter : argConverters.allConverters.values()) {

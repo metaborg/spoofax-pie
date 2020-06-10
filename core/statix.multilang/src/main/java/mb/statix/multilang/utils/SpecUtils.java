@@ -5,8 +5,8 @@ import mb.nabl2.regexp.IAlphabet;
 import mb.nabl2.regexp.impl.FiniteAlphabet;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.matching.TermMatch;
+import mb.nabl2.terms.matching.TermMatch.IMatcher;
 import mb.nabl2.terms.stratego.StrategoTerms;
-import mb.resource.ResourceRegistry;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.statix.spec.Rule;
 import mb.statix.spec.RuleSet;
@@ -15,7 +15,7 @@ import mb.statix.spoofax.StatixTerms;
 import org.metaborg.util.iterators.Iterables2;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
-import org.spoofax.terms.TermFactory;
+import org.spoofax.terms.StrategoString;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,10 +25,6 @@ import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.stream.Collectors;
-
-import static mb.statix.spoofax.StatixTerms.*;
-import static mb.nabl2.terms.matching.TermMatch.M;
-import mb.nabl2.terms.matching.TermMatch.IMatcher;
 
 public class SpecUtils {
 
@@ -64,13 +60,12 @@ public class SpecUtils {
                 throw new RuntimeException("Invalid spec file. Imports section should be a list, but was: " + imports);
             }
             imports.forEach(importDecl -> {
-                if (!loadedModules.contains(importDecl)) {
-                    if (importDecl.getTermType() != IStrategoTerm.STRING) {
-                        throw new RuntimeException("Invalid file spec. Import module should be string, but was: " + importDecl);
-                    }
-                    if (!loadedModules.contains(importDecl) && !modulesToLoad.contains(importDecl)) {
-                        modulesToLoad.add(importDecl.toString());
-                    }
+                if (importDecl.getTermType() != IStrategoTerm.STRING) {
+                    throw new RuntimeException("Invalid file spec. Import module should be string, but was: " + importDecl);
+                }
+                String importedModule = ((StrategoString) importDecl).stringValue();
+                if (!loadedModules.contains(importedModule) && !modulesToLoad.contains(importedModule)) {
+                    modulesToLoad.add(importedModule);
                 }
             });
         }

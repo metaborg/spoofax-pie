@@ -26,6 +26,7 @@ import java.io.Serializable;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,8 +37,8 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
         private final AnalysisContext analysisContext;
 
         public Input(ResourcePath projectPath, AnalysisContext analysisContext) {
-            this.projectPath = projectPath;
-            this.analysisContext = analysisContext;
+            this.projectPath = Objects.requireNonNull(projectPath, "SmlAnalyzeProject.Input.projectPath may not be null");
+            this.analysisContext = Objects.requireNonNull(analysisContext, "SmlAnalyzeProject.Input.analysisContext may not be null");;
         }
     }
 
@@ -73,7 +74,10 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
 
     @Override public Output exec(ExecContext context, Input input) throws Exception {
         AnalysisContext analysisContext = input.analysisContext;
-        Spec combinedSpec = analysisContext.languages().values().stream()
+        Spec combinedSpec = analysisContext
+            .languages()
+            .values()
+            .stream()
             .map(LanguageMetadata::statixSpec)
             .reduce(SpecUtils::mergeSpecs)
             .orElseThrow(() -> new RuntimeException("Doing analysis without specs is not allowed"));

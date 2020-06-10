@@ -16,6 +16,7 @@ import java.io.Serializable;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -26,8 +27,8 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
         private final AnalysisContext analysisContext;
 
         public Input(ResourcePath projectPath, AnalysisContext analysisContext) {
-            this.projectPath = projectPath;
-            this.analysisContext = analysisContext;
+            this.projectPath = Objects.requireNonNull(projectPath, "SmlBuildMessages.Input.projectPath may not be null");;
+            this.analysisContext = Objects.requireNonNull(analysisContext, "SmlBuildMessages.Input.analysisContext may not be null");;
         }
     }
 
