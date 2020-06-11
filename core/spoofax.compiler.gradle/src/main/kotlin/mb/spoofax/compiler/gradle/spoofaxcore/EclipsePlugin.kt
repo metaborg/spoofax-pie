@@ -8,6 +8,7 @@ import mb.spoofax.compiler.util.*
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.*
@@ -86,7 +87,7 @@ open class EclipsePlugin : Plugin<Project> {
     val extension = EclipseProjectExtension(project)
     project.extensions.add(EclipseProjectExtension.id, extension)
 
-    project.plugins.apply("org.metaborg.gradle.config.java-library")
+    project.plugins.apply(JavaLibraryPlugin::class.java)
     project.plugins.apply("org.metaborg.coronium.bundle")
 
     project.afterEvaluate {

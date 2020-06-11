@@ -3,9 +3,9 @@ import mb.spoofax.compiler.spoofaxcore.*
 import mb.spoofax.compiler.util.*
 
 plugins {
-  id("org.metaborg.spoofax.compiler.gradle.spoofaxcore.language")
+  id("org.metaborg.gradle.config.java-library")
   id("org.metaborg.gradle.config.junit-testing")
-  id("de.set.ecj") // Use ECJ to speed up compilation of Stratego's generated Java files.
+  id("org.metaborg.spoofax.compiler.gradle.spoofaxcore.language")
 }
 
 dependencies {
@@ -51,10 +51,6 @@ spoofaxLanguageProject {
       builder
     }
   ))
-}
-
-ecj {
-  toolVersion = "3.20.0"
 }
 
 tasks.test {

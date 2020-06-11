@@ -8,6 +8,7 @@ import mb.spoofax.core.language.command.CommandExecutionType
 import mb.spoofax.core.language.command.EnclosingCommandContextType
 
 plugins {
+  id("org.metaborg.gradle.config.java-library")
   id("org.metaborg.spoofax.compiler.gradle.spoofaxcore.adapter")
 }
 
