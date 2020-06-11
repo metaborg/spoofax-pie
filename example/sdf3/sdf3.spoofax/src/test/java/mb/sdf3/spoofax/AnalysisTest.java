@@ -1,7 +1,6 @@
 package mb.sdf3.spoofax;
 
 import mb.common.message.KeyedMessages;
-import mb.nabl2.terms.unification.OccursException;
 import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
 import mb.pie.api.ValueSupplier;
@@ -43,7 +42,7 @@ public class AnalysisTest extends TestBase {
         .build();
     private final AnalysisContextService analysisContextService = multilangComponent.getAnalysisContextService();
 
-    @Test void testSingleError() throws IOException, OccursException, ExecException {
+    @Test void testSingleError() throws IOException, ExecException {
         final HashSet<ResourceKey> resources = new HashSet<>();
         final TextResource resource = createTextResource("module a syntax A = B", "a.sdf3");
         resources.add(resource.getKey());
@@ -58,7 +57,7 @@ public class AnalysisTest extends TestBase {
         }
     }
 
-    @Test void testSingleSuccess() throws IOException, OccursException, ExecException {
+    @Test void testSingleSuccess() throws IOException, ExecException {
         final HashSet<ResourceKey> resources = new HashSet<>();
         final TextResource resource1 = createTextResource("module a", "a.sdf3");
         resources.add(resource1.getKey());
@@ -72,7 +71,7 @@ public class AnalysisTest extends TestBase {
         }
     }
 
-    @Test void testMultipleErrors() throws IOException, OccursException, ExecException {
+    @Test void testMultipleErrors() throws IOException, ExecException {
         final HashSet<ResourceKey> resources = new HashSet<>();
         final TextResource resource1 = createTextResource("module a syntax B = A", "a.sdf3");
         final TextResource resource2 = createTextResource("module b syntax C = A B", "b.sdf3");
@@ -109,7 +108,7 @@ public class AnalysisTest extends TestBase {
         }
     }
 
-    @Test void testMutualResolve() throws IOException, OccursException, ExecException {
+    @Test void testMutualResolve() throws IOException, ExecException {
         final HashSet<ResourceKey> resources = new HashSet<>();
         final TextResource resource1 = createTextResource("module a syntax A = \"\"", "a.sdf3");
         final TextResource resource2 = createTextResource("module b imports a syntax B = A", "b.sdf3");
