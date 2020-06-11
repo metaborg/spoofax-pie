@@ -29,11 +29,6 @@ import mb.sdf3.spoofax.util.PlatformTestComponent;
 import mb.sdf3.spoofax.util.Sdf3TestComponent;
 import mb.spoofax.core.platform.LoggerFactoryModule;
 import mb.spoofax.core.platform.PlatformPieModule;
-import mb.statix.multilang.tasks.SmlAnalyzeProject;
-import mb.statix.multilang.tasks.SmlBuildMessages;
-import mb.statix.multilang.tasks.SmlInstantiateGlobalScope;
-import mb.statix.multilang.tasks.SmlPartialSolveFile;
-import mb.statix.multilang.tasks.SmlPartialSolveProject;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -64,6 +59,7 @@ class TestBase {
     final Function<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> desugarFunction = desugar.createFunction();
     final Sdf3AnalyzeMulti analyze = languageComponent.getAnalyze();
     final Pie pie = languageComponent.getPie();
+
 
     FSResource createTextFile(String text, String relativePath) throws IOException {
         final FSResource resource = rootDirectory.appendRelativePath("a.sdf3");
