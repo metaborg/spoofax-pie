@@ -36,6 +36,10 @@ public class AnalysisTest extends TestBase {
     protected final ClassLoaderResourceRegistry statixRegistry = Sdf3ClassloaderResources.createClassLoaderResourceRegistry();
     protected ITermFactory termFactory = new TermFactory();
     private final ResourcePath projectPath = new FSPath(".");
+    private final AnalysisContextService analysisContextService = new AnalysisContextService(
+        languageComponent.getPie(),
+        languageComponent.getResourceService()
+    );
 
     @Test void testSingleError() throws IOException, OccursException, ExecException {
         final HashSet<ResourceKey> resources = new HashSet<>();
@@ -44,7 +48,7 @@ public class AnalysisTest extends TestBase {
 
         AnalysisContext context = createAnalysisContext(resources);
 
-        try (MixedSession session = newSession()) {
+        try (MixedSession session = context.createPieForContext().newSession()) {
             KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(projectPath, context)));
             assertTrue(messages.containsError());
             assertEquals(1, messages.count());
@@ -60,7 +64,7 @@ public class AnalysisTest extends TestBase {
         // Loading spec
         AnalysisContext context = createAnalysisContext(resources);
 
-        try (MixedSession session = newSession()) {
+        try (MixedSession session = context.createPieForContext().newSession()) {
             KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(projectPath, context)));
             assertEquals(0, messages.count());
         }
@@ -76,7 +80,7 @@ public class AnalysisTest extends TestBase {
         // Loading spec
         AnalysisContext context = createAnalysisContext(resources);
 
-        try (MixedSession session = newSession()) {
+        try (MixedSession session = context.createPieForContext().newSession()) {
             KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(projectPath, context)));
             assertTrue(messages.containsError());
             assertEquals(4, messages.count());
@@ -86,7 +90,7 @@ public class AnalysisTest extends TestBase {
         }
     }
 
-    @Test void testMultipleSuccess() throws IOException, OccursException, ExecException {
+    @Test void testMultipleSuccess() throws IOException, ExecException {
         final HashSet<ResourceKey> resources = new HashSet<>();
         final TextResource resource1 = createTextResource("module a", "a.sdf3");
         final TextResource resource2 = createTextResource("module b", "b.sdf3");
@@ -96,7 +100,7 @@ public class AnalysisTest extends TestBase {
         // Loading spec
         AnalysisContext context = createAnalysisContext(resources);
 
-        try (MixedSession session = newSession()) {
+        try (MixedSession session = context.createPieForContext().newSession()) {
             KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(projectPath, context)));
             assertFalse(messages.containsError());
             assertEquals(0, messages.count());
@@ -115,7 +119,7 @@ public class AnalysisTest extends TestBase {
         // Loading spec
         AnalysisContext context = createAnalysisContext(resources);
 
-        try (MixedSession session = newSession()) {
+        try (MixedSession session = context.createPieForContext().newSession()) {
             KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(projectPath, context)));
             assertFalse(messages.containsError());
             assertEquals(0, messages.count());
@@ -134,13 +138,15 @@ public class AnalysisTest extends TestBase {
             .projectConstraint("statix/statics!projectOK")
             .resourcesSupplier((c, p) -> resources)
             .astFunction(languageComponent.getPreAnalysisTransform().createFunction())
+            .addTaskDefs(instantiateGlobalScope, partialSolveProject, partialSolveFile, analyzeProject, buildMessages)
+            // Adding resource registries not needed, since service is initialized with the language-specific instance
+            .addResourceRegistries()
             // TODO: remove ValueSupplier somehow
             .postTransform(languageComponent.getPostStatix().createFunction().mapInput(ValueSupplier::new))
             .build();
 
-        AnalysisContext context = AnalysisContextService.createContext("AnalysisTest", languageMetadata);
+        AnalysisContext context = analysisContextService.createContext("AnalysisTest", languageMetadata);
 
-        addStatixTaskDef();
         return context;
     }
 }

@@ -6,7 +6,6 @@ import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.log.slf4j.SLF4JLoggerFactory;
 import mb.pie.api.Function;
-import mb.pie.api.MapTaskDefs;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Pie;
 import mb.pie.api.Supplier;
@@ -64,7 +63,7 @@ class TestBase {
     final Sdf3CreateSpec createSpec = languageComponent.getCreateSpec();
     final Function<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> desugarFunction = desugar.createFunction();
     final Sdf3AnalyzeMulti analyze = languageComponent.getAnalyze();
-    Pie pie = languageComponent.getPie();
+    final Pie pie = languageComponent.getPie();
 
     final SmlInstantiateGlobalScope instantiateGlobalScope = new SmlInstantiateGlobalScope();
     final SmlPartialSolveProject partialSolveProject = new SmlPartialSolveProject();
@@ -118,17 +117,6 @@ class TestBase {
     @SafeVarargs
     final Supplier<Sdf3Spec> specSupplier(Supplier<@Nullable IStrategoTerm> mainModuleAstSupplier, Supplier<@Nullable IStrategoTerm>... modulesAstSuppliers) {
         return new ValueSupplier<>(new Sdf3Spec(mainModuleAstSupplier, modulesAstSuppliers));
-    }
-
-    void addStatixTaskDef() {
-        pie = pie.createChildBuilder()
-            .withTaskDefs(new MapTaskDefs(
-                instantiateGlobalScope,
-                partialSolveProject,
-                partialSolveFile,
-                analyzeProject,
-                buildMessages))
-            .build();
     }
 
     MixedSession newSession() {

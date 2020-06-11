@@ -8,6 +8,7 @@ dependencies {
   annotationProcessor(platform(project(":spoofax.depconstraints")))
 
   api(project(":common"))
+  api(project(":spoofax.core"))
 
   api("org.metaborg:statix.solver")
   api("org.metaborg:pie.api")
