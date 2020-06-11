@@ -10,5 +10,5 @@ import java.lang.annotation.RetentionPolicy;
  */
 @Scope
 @Retention(RetentionPolicy.RUNTIME)
-public @interface MultilangScope {
+public @interface MultiLangScope {
 }

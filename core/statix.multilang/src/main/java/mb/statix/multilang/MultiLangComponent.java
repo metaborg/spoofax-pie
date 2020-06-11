@@ -3,8 +3,8 @@ package mb.statix.multilang;
 import dagger.Component;
 import mb.spoofax.core.platform.PlatformComponent;
 
-@MultilangScope
+@MultiLangScope
 @Component(dependencies = PlatformComponent.class)
-public interface MultilangComponent {
+public interface MultiLangComponent {
     AnalysisContextService getAnalysisContextService();
 }

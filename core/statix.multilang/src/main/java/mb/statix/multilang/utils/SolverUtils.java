@@ -1,5 +1,6 @@
 package mb.statix.multilang.utils;
 
+import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.IState;
 import mb.statix.solver.completeness.IsComplete;
@@ -15,7 +16,7 @@ public class SolverUtils {
         try {
             return Solver.solve(spec, state, constraint, isComplete, debug);
         } catch(InterruptedException e) {
-            throw new RuntimeException(e);
+            throw new MultiLangAnalysisException(e);
         }
     }
 }

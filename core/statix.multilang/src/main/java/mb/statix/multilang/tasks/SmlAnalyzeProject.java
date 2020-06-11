@@ -1,6 +1,5 @@
 package mb.statix.multilang.tasks;
 
-import mb.common.util.UncheckedException;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
 import mb.pie.api.TaskDef;
@@ -12,6 +11,7 @@ import mb.statix.multilang.AnalysisResults;
 import mb.statix.multilang.FileResult;
 import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.LanguageMetadata;
+import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.multilang.spec.SpecBuilder;
 import mb.statix.multilang.spec.SpecUtils;
 import mb.statix.solver.IConstraint;
@@ -119,7 +119,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
             .map(LanguageMetadata::statixSpec)
             .map(SpecBuilder::toSpec)
             .reduce(SpecUtils::mergeSpecs)
-            .orElseThrow(() -> new RuntimeException("Doing analysis without specs is not allowed"));
+            .orElseThrow(() -> new MultiLangAnalysisException("Doing analysis without specs is not allowed"));
 
         IDebugContext debug = new NullDebugContext();
 
@@ -136,7 +136,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
                         combinedSpec,
                         entry.getValue().projectConstraint()))).getProjectResult();
                 } catch(ExecException | InterruptedException e) {
-                    throw new UncheckedException(e);
+                    throw new MultiLangAnalysisException(e);
                 }
             }));
 
@@ -155,11 +155,11 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
                                     new AAnalysisResults.FileKey(languageMetadata.languageId(), resourceKey),
                                     fileResult);
                             } catch(ExecException | InterruptedException e) {
-                                throw new UncheckedException(e);
+                                throw new MultiLangAnalysisException(e);
                             }
                         });
                 } catch(ExecException | InterruptedException e) {
-                    throw new UncheckedException(e);
+                    throw new MultiLangAnalysisException(e);
                 }
             })
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -169,7 +169,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
                 fileResults.values().stream().map(FileResult::getResult))
             .map(SolverResult::state)
             .reduce(IState.Immutable::add)
-            .orElseThrow(() -> new RuntimeException("Expected at least one result"));
+            .orElseThrow(() -> new MultiLangAnalysisException("Expected at least one result"));
 
         IConstraint combinedConstraint = Stream.concat(
                 projectResults.values().stream(),

@@ -11,7 +11,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@MultilangScope
+@MultiLangScope
 public class AnalysisContextService {
 
     private final Map<String, AnalysisContext> contexts = new HashMap<>();
@@ -24,6 +24,9 @@ public class AnalysisContextService {
     }
 
     public AnalysisContext getAnalysisContext(String contextId) {
+        if (!contexts.containsKey(contextId)) {
+            throw new MultiLangAnalysisException(String.format("No context with id '%s'created", contextId));
+        }
         return contexts.get(contextId);
     }
 

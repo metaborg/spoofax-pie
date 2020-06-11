@@ -59,7 +59,7 @@ public class MessageUtils {
         // add constraint message
         trace.addFirst(message.toString(formatter));
 
-        final String messageText = trace.stream().filter(s -> !s.isEmpty()).map(s -> cleanupString(s))
+        final String messageText = trace.stream().filter(s -> !s.isEmpty()).map(MessageUtils::cleanupString)
             .collect(Collectors.joining("<br>\n&gt;&nbsp;"));
 
         return new Message(messageText, kindToSeverity(message.kind()), Region.fromString(originTerm.toString()));

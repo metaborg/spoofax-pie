@@ -42,6 +42,4 @@ public abstract class AAnalysisContext implements Serializable {
             .withResourceService(baseResourceService().createChild(registries))
             .build();
     }
-
-    // TODO: Good hashing/equals for incrementality
 }

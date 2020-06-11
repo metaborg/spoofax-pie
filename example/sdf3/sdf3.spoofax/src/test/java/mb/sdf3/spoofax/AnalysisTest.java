@@ -15,10 +15,10 @@ import mb.resource.text.TextResource;
 import mb.sdf3.Sdf3ClassloaderResources;
 import mb.statix.multilang.AnalysisContext;
 import mb.statix.multilang.AnalysisContextService;
-import mb.statix.multilang.DaggerMultilangComponent;
+import mb.statix.multilang.DaggerMultiLangComponent;
 import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.LanguageMetadata;
-import mb.statix.multilang.MultilangComponent;
+import mb.statix.multilang.MultiLangComponent;
 import mb.statix.multilang.spec.SpecBuilder;
 import mb.statix.multilang.spec.SpecUtils;
 import mb.statix.multilang.tasks.SmlBuildMessages;
@@ -38,7 +38,7 @@ public class AnalysisTest extends TestBase {
     protected final ClassLoaderResourceRegistry statixRegistry = Sdf3ClassloaderResources.createClassLoaderResourceRegistry();
     protected ITermFactory termFactory = new TermFactory();
     private final ResourcePath projectPath = new FSPath(".");
-    private final MultilangComponent multilangComponent = DaggerMultilangComponent.builder()
+    private final MultiLangComponent multilangComponent = DaggerMultiLangComponent.builder()
         .platformComponent(platformComponent)
         .build();
     private final AnalysisContextService analysisContextService = multilangComponent.getAnalysisContextService();

@@ -22,8 +22,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class SpecUtils {
@@ -70,20 +72,20 @@ public class SpecUtils {
     public static Spec mergeSpecs(Spec acc, Spec newSpec) {
         // Error when EOP is not equal, throw exception
         if (!acc.noRelationLabel().equals(newSpec.noRelationLabel())) {
-            throw new RuntimeException("No relation labels do not match:" +
+            throw new SpecLoadException("No relation labels do not match:" +
                 acc.noRelationLabel() + " and " + newSpec.noRelationLabel());
         }
 
-        // Cant merge rules & labels: manually create new collections
         ArrayList<Rule> rules = new ArrayList<>(acc.rules().getAllRules());
         rules.addAll(newSpec.rules().getAllRules());
-        ArrayList<ITerm> labels = new ArrayList<>(acc.labels().symbols());
+        Set<ITerm> labels = new HashSet<>(acc.labels().symbols());
         labels.addAll(newSpec.labels().symbols());
-        return Spec.builder().from(acc)
+        return Spec.builder()
+            .from(acc)
             .rules(RuleSet.of(rules))
             .addAllEdgeLabels(newSpec.edgeLabels())
             .addAllRelationLabels(newSpec.relationLabels())
-            .labels(acc.labels())
+            .labels(new FiniteAlphabet<>(labels))
             .putAllScopeExtensions(acc.scopeExtensions())
             .build();
     }
