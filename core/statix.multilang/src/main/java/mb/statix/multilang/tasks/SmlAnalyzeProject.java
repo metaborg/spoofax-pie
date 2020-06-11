@@ -1,5 +1,6 @@
 package mb.statix.multilang.tasks;
 
+import com.google.common.collect.ListMultimap;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
 import mb.pie.api.TaskDef;
@@ -21,6 +22,7 @@ import mb.statix.solver.log.LoggerDebugContext;
 import mb.statix.solver.log.NullDebugContext;
 import mb.statix.solver.persistent.Solver;
 import mb.statix.solver.persistent.SolverResult;
+import mb.statix.spec.Rule;
 import mb.statix.spec.Spec;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.log.ILogger;
@@ -30,6 +32,7 @@ import org.metaborg.util.log.LoggerUtils;
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.AbstractMap;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -128,6 +131,20 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
             .map(SpecBuilder::toSpec)
             .reduce(SpecUtils::mergeSpecs)
             .orElseThrow(() -> new MultiLangAnalysisException("Doing analysis without specs is not allowed"));
+
+        final ListMultimap<String, Rule> rulesWithEquivalentPatterns = combinedSpec.rules().getAllEquivalentRules();
+        if(!rulesWithEquivalentPatterns.isEmpty()) {
+            logger.error("+--------------------------------------+");
+            logger.error("| FOUND RULES WITH EQUIVALENT PATTERNS |");
+            logger.error("+--------------------------------------+");
+            for(Map.Entry<String, Collection<Rule>> entry : rulesWithEquivalentPatterns.asMap().entrySet()) {
+                logger.error("| Overlapping rules for: {}", entry.getKey());
+                for(Rule rule : entry.getValue()) {
+                    logger.error("| * {}", rule);
+                }
+            }
+            logger.error("+--------------------------------------+");
+        }
 
         final IDebugContext debug = input.logLevel != null ?
             new LoggerDebugContext(input.analysisContext.logger(), input.logLevel) : new NullDebugContext();
