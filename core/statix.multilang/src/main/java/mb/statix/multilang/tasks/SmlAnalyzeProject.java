@@ -12,7 +12,8 @@ import mb.statix.multilang.AnalysisResults;
 import mb.statix.multilang.FileResult;
 import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.LanguageMetadata;
-import mb.statix.multilang.utils.SpecUtils;
+import mb.statix.multilang.spec.SpecBuilder;
+import mb.statix.multilang.spec.SpecUtils;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.IState;
 import mb.statix.solver.log.IDebugContext;
@@ -79,6 +80,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
             .values()
             .stream()
             .map(LanguageMetadata::statixSpec)
+            .map(SpecBuilder::toSpec)
             .reduce(SpecUtils::mergeSpecs)
             .orElseThrow(() -> new RuntimeException("Doing analysis without specs is not allowed"));
 

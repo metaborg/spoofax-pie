@@ -17,9 +17,9 @@ import mb.statix.multilang.AnalysisContext;
 import mb.statix.multilang.AnalysisContextService;
 import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.LanguageMetadata;
+import mb.statix.multilang.spec.SpecBuilder;
+import mb.statix.multilang.spec.SpecUtils;
 import mb.statix.multilang.tasks.SmlBuildMessages;
-import mb.statix.multilang.utils.SpecUtils;
-import mb.statix.spec.Spec;
 import org.junit.jupiter.api.Test;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.terms.TermFactory;
@@ -122,10 +122,10 @@ public class AnalysisTest extends TestBase {
         }
     }
 
-    private AnalysisContext createAnalysisContext(HashSet<ResourceKey> resources) throws IOException, OccursException {
+    private AnalysisContext createAnalysisContext(HashSet<ResourceKey> resources) throws IOException {
         ResourceKeyString id = ResourceKeyString.of("mb/sdf3/src-gen/statix");
         ClassLoaderResource statixSpec = statixRegistry.getResource(id);
-        Spec spec = new SpecUtils(termFactory).loadSpec(statixSpec, "statix/statics");
+        SpecBuilder spec = SpecUtils.loadSpec(statixSpec, "statix/statics", termFactory);
 
         LanguageMetadata languageMetadata = LanguageMetadata.builder()
             .languageId(new LanguageId("sdf3"))
