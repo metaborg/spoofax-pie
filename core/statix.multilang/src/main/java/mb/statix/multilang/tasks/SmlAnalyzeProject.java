@@ -41,6 +41,25 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
             this.projectPath = Objects.requireNonNull(projectPath, "SmlAnalyzeProject.Input.projectPath may not be null");
             this.analysisContext = Objects.requireNonNull(analysisContext, "SmlAnalyzeProject.Input.analysisContext may not be null");;
         }
+
+        @Override public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            Input input = (Input)o;
+            return projectPath.equals(input.projectPath) &&
+                analysisContext.equals(input.analysisContext);
+        }
+
+        @Override public int hashCode() {
+            return Objects.hash(projectPath, analysisContext);
+        }
+
+        @Override public String toString() {
+            return "Input{" +
+                "projectPath=" + projectPath +
+                ", analysisContext=" + analysisContext +
+                '}';
+        }
     }
 
     public static class Output implements Serializable {
@@ -52,6 +71,24 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
 
         public AnalysisResults getResults() {
             return results;
+        }
+
+        @Override public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            Output output = (Output)o;
+            return results.equals(output.results);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(results);
+        }
+
+        @Override public String toString() {
+            return "Output{" +
+                "results=" + results +
+                '}';
         }
     }
 

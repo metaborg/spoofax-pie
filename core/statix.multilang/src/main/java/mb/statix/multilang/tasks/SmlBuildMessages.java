@@ -30,6 +30,25 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
             this.projectPath = Objects.requireNonNull(projectPath, "SmlBuildMessages.Input.projectPath may not be null");;
             this.analysisContext = Objects.requireNonNull(analysisContext, "SmlBuildMessages.Input.analysisContext may not be null");;
         }
+
+        @Override public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            Input input = (Input)o;
+            return projectPath.equals(input.projectPath) &&
+                analysisContext.equals(input.analysisContext);
+        }
+
+        @Override public int hashCode() {
+            return Objects.hash(projectPath, analysisContext);
+        }
+
+        @Override public String toString() {
+            return "Input{" +
+                "projectPath=" + projectPath +
+                ", analysisContext=" + analysisContext +
+                '}';
+        }
     }
 
     private final SmlAnalyzeProject analyzeProject;

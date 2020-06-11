@@ -13,6 +13,7 @@ import org.metaborg.util.iterators.Iterables2;
 
 import javax.inject.Inject;
 import java.io.Serializable;
+import java.util.Objects;
 
 public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.Input, SmlPartialSolveProject.Output> {
 
@@ -31,6 +32,22 @@ public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.In
             this.spec = spec;
             this.projectConstraint = projectConstraint;
         }
+
+        @Override public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            Input input = (Input)o;
+            return globalScopeVar.equals(input.globalScopeVar) &&
+                globalResult.equals(input.globalResult) &&
+                debug.equals(input.debug) &&
+                spec.equals(input.spec) &&
+                projectConstraint.equals(input.projectConstraint);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(globalScopeVar, globalResult, debug, spec, projectConstraint);
+        }
     }
 
     public static class Output implements Serializable  {
@@ -42,6 +59,23 @@ public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.In
 
         public SolverResult getProjectResult() {
             return projectResult;
+        }
+
+        @Override public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            Output output = (Output)o;
+            return projectResult.equals(output.projectResult);
+        }
+
+        @Override public int hashCode() {
+            return Objects.hash(projectResult);
+        }
+
+        @Override public String toString() {
+            return "Output{" +
+                "projectResult=" + projectResult +
+                '}';
         }
     }
 

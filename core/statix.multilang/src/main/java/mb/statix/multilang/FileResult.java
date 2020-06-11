@@ -3,6 +3,8 @@ package mb.statix.multilang;
 import mb.statix.solver.persistent.SolverResult;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
+import java.util.Objects;
+
 public class FileResult {
 
     private final IStrategoTerm analyzedAst;
@@ -19,5 +21,25 @@ public class FileResult {
 
     public SolverResult getResult() {
         return result;
+    }
+
+    @Override public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        FileResult that = (FileResult)o;
+        return analyzedAst.equals(that.analyzedAst) &&
+            result.equals(that.result);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(analyzedAst, result);
+    }
+
+    @Override public String toString() {
+        return "FileResult{" +
+            "analyzedAst=" + analyzedAst +
+            ", result=" + result +
+            '}';
     }
 }

@@ -19,6 +19,7 @@ import org.metaborg.util.iterators.Iterables2;
 
 import javax.inject.Inject;
 import java.io.Serializable;
+import java.util.Objects;
 
 public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalScope.Input, SmlInstantiateGlobalScope.Output> {
 
@@ -31,6 +32,26 @@ public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalSc
             this.analysisContextId = globalScopeName;
             this.debug = debug;
             this.spec = spec;
+        }
+
+        @Override public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            Input input = (Input)o;
+            // Debug context should not influence results, so consider inputs with different debug settings as equal.
+            return analysisContextId.equals(input.analysisContextId) &&
+                spec.equals(input.spec);
+        }
+
+        @Override public int hashCode() {
+            return Objects.hash(analysisContextId, spec);
+        }
+
+        @Override public String toString() {
+            return "Input{" +
+                "analysisContextId='" + analysisContextId + '\'' +
+                ", spec=" + spec +
+                '}';
         }
     }
 
@@ -55,6 +76,27 @@ public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalSc
 
         public SolverResult getResult() {
             return result;
+        }
+
+        @Override public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            Output output = (Output)o;
+            return globalScope.equals(output.globalScope) &&
+                globalScopeVar.equals(output.globalScopeVar) &&
+                result.equals(output.result);
+        }
+
+        @Override public int hashCode() {
+            return Objects.hash(globalScope, globalScopeVar, result);
+        }
+
+        @Override public String toString() {
+            return "Output{" +
+                "globalScope=" + globalScope +
+                ", globalScopeVar=" + globalScopeVar +
+                ", result=" + result +
+                '}';
         }
     }
 

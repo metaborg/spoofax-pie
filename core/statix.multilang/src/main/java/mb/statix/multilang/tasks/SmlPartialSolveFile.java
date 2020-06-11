@@ -19,6 +19,7 @@ import org.spoofax.interpreter.terms.ITermFactory;
 
 import javax.inject.Inject;
 import java.io.Serializable;
+import java.util.Objects;
 
 public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, SmlPartialSolveFile.Output> {
 
@@ -45,9 +46,41 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, S
             this.postAnalysisTransform = postAnalysisTransform;
             this.resourceKey = resourceKey;
         }
+
+        @Override public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            Input input = (Input)o;
+            return globalScope.equals(input.globalScope) &&
+                globalResult.equals(input.globalResult) &&
+                debug.equals(input.debug) &&
+                spec.equals(input.spec) &&
+                fileConstraint.equals(input.fileConstraint) &&
+                astSupplier.equals(input.astSupplier) &&
+                postAnalysisTransform.equals(input.postAnalysisTransform) &&
+                resourceKey.equals(input.resourceKey);
+        }
+
+        @Override public int hashCode() {
+            return Objects.hash(globalScope, globalResult, debug, spec, fileConstraint, astSupplier,
+                postAnalysisTransform, resourceKey);
+        }
+
+        @Override public String toString() {
+            return "Input{" +
+                "globalScope=" + globalScope +
+                ", globalResult=" + globalResult +
+                ", debug=" + debug +
+                ", spec=" + spec +
+                ", fileConstraint='" + fileConstraint + '\'' +
+                ", astSupplier=" + astSupplier +
+                ", postAnalysisTransform=" + postAnalysisTransform +
+                ", resourceKey=" + resourceKey +
+                '}';
+        }
     }
 
-    public class Output implements Serializable {
+    public static class Output implements Serializable {
         private final FileResult fileResult;
 
         public Output(FileResult fileResult) {
@@ -56,6 +89,24 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, S
 
         public FileResult getFileResult() {
             return fileResult;
+        }
+
+        @Override public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            Output output = (Output)o;
+            return fileResult.equals(output.fileResult);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(fileResult);
+        }
+
+        @Override public String toString() {
+            return "Output{" +
+                "fileResult=" + fileResult +
+                '}';
         }
     }
 
