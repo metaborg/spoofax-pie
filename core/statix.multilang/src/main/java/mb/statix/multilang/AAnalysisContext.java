@@ -46,6 +46,6 @@ public abstract class AAnalysisContext implements Serializable {
     }
 
     @Value.Lazy public ILogger logger() {
-        return LoggerUtils.logger(String.format("MultilangAnalysis [%s]", contextId()));
+        return LoggerUtils.logger(String.format("MLA [%s]", contextId()));
     }
 }

@@ -23,7 +23,9 @@ import mb.statix.solver.persistent.Solver;
 import mb.statix.solver.persistent.SolverResult;
 import mb.statix.spec.Spec;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.metaborg.util.log.ILogger;
 import org.metaborg.util.log.Level;
+import org.metaborg.util.log.LoggerUtils;
 
 import javax.inject.Inject;
 import java.io.Serializable;
@@ -35,6 +37,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAnalyzeProject.Output> {
+    private static final ILogger logger = LoggerUtils.logger(SmlAnalyzeProject.class);
 
     public static class Input implements Serializable {
         private final ResourcePath projectPath;
@@ -183,7 +186,10 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
             .map(SolverResult::delayed)
             .reduce(globalState.getResult().delayed(), CConj::new);
 
+        long t0 = System.currentTimeMillis();
         SolverResult finalResult = Solver.solve(combinedSpec, combinedState, combinedConstraint, (s, l, st) -> true, debug);
+        long dt = System.currentTimeMillis() - t0;
+        logger.info("{} analyzed in {} ms] ", input.analysisContext.contextId(), dt);
 
         return new Output(AnalysisResults.of(globalState.getGlobalScope(), new HashMap<>(projectResults), new HashMap<>(fileResults), finalResult));
     }

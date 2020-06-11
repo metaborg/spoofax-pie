@@ -26,6 +26,7 @@ import mb.statix.multilang.tasks.SmlInstantiateGlobalScope;
 import mb.statix.multilang.tasks.SmlPartialSolveFile;
 import mb.statix.multilang.tasks.SmlPartialSolveProject;
 import org.junit.jupiter.api.Test;
+import org.metaborg.util.log.Level;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.terms.TermFactory;
 
@@ -53,6 +54,8 @@ public class AnalysisTest extends TestBase {
     private final SmlAnalyzeProject analyzeProject = new SmlAnalyzeProject(instantiateGlobalScope, partialSolveProject, partialSolveFile);
     private final SmlBuildMessages buildMessages = new SmlBuildMessages(analyzeProject);
 
+    private final Level logLevel = Level.Warn;
+
     @Test void testSingleError() throws IOException, ExecException {
         final HashSet<ResourceKey> resources = new HashSet<>();
         final TextResource resource = createTextResource("module a syntax A = B", "a.sdf3");
@@ -61,7 +64,8 @@ public class AnalysisTest extends TestBase {
         AnalysisContext context = createAnalysisContext(resources);
 
         try (MixedSession session = context.createPieForContext().newSession()) {
-            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(projectPath, context, logLevel)));
+            KeyedMessages messages = session.require(buildMessages
+                .createTask(new SmlBuildMessages.Input(projectPath, context, logLevel)));
             assertTrue(messages.containsError());
             assertEquals(1, messages.count());
             assertEquals(1, messages.getAllMessages().get(resource.getKey()).size());
@@ -77,7 +81,8 @@ public class AnalysisTest extends TestBase {
         AnalysisContext context = createAnalysisContext(resources);
 
         try (MixedSession session = context.createPieForContext().newSession()) {
-            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(projectPath, context, logLevel)));
+            KeyedMessages messages = session.require(buildMessages
+                .createTask(new SmlBuildMessages.Input(projectPath, context, logLevel)));
             assertEquals(0, messages.count());
         }
     }
@@ -93,7 +98,8 @@ public class AnalysisTest extends TestBase {
         AnalysisContext context = createAnalysisContext(resources);
 
         try (MixedSession session = context.createPieForContext().newSession()) {
-            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(projectPath, context, logLevel)));
+            KeyedMessages messages = session.require(buildMessages
+                .createTask(new SmlBuildMessages.Input(projectPath, context, logLevel)));
             assertTrue(messages.containsError());
             assertEquals(4, messages.count());
             assertTrue(messages.containsWarning());
@@ -113,7 +119,8 @@ public class AnalysisTest extends TestBase {
         AnalysisContext context = createAnalysisContext(resources);
 
         try (MixedSession session = context.createPieForContext().newSession()) {
-            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(projectPath, context, logLevel)));
+            KeyedMessages messages = session.require(buildMessages
+                .createTask(new SmlBuildMessages.Input(projectPath, context, logLevel)));
             assertFalse(messages.containsError());
             assertEquals(0, messages.count());
         }
@@ -132,7 +139,8 @@ public class AnalysisTest extends TestBase {
         AnalysisContext context = createAnalysisContext(resources);
 
         try (MixedSession session = context.createPieForContext().newSession()) {
-            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(projectPath, context, logLevel)));
+            KeyedMessages messages = session.require(buildMessages
+                .createTask(new SmlBuildMessages.Input(projectPath, context, logLevel)));
             assertFalse(messages.containsError());
             assertEquals(0, messages.count());
         }

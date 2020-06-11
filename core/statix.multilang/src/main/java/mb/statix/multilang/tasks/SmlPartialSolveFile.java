@@ -14,6 +14,8 @@ import mb.statix.solver.log.IDebugContext;
 import mb.statix.solver.persistent.SolverResult;
 import mb.statix.spec.Spec;
 import org.metaborg.util.iterators.Iterables2;
+import org.metaborg.util.log.ILogger;
+import org.metaborg.util.log.LoggerUtils;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 
@@ -22,6 +24,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, SmlPartialSolveFile.Output> {
+    private static final ILogger logger = LoggerUtils.logger(SmlPartialSolveFile.class);
 
     public static class Input implements Serializable {
         private final ITerm globalScope;
@@ -123,10 +126,13 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, S
         Iterable<ITerm> constraintArgs = Iterables2.from(input.globalScope, st.fromStratego(ast));
         IConstraint fileConstraint = new CUser(input.fileConstraint, constraintArgs, null);
 
+        long t0 = System.currentTimeMillis();
         SolverResult fileResult = SolverUtils.partialSolve(input.spec,
             input.globalResult.state().withResource(input.resourceKey.toString()),
             fileConstraint,
             input.debug);
+        long dt = System.currentTimeMillis() - t0;
+        logger.info("{} analyzed in {} ms] ", input.resourceKey, dt);
 
         IStrategoTerm analyzedAst = input.postAnalysisTransform.apply(context, ast);
 
