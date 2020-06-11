@@ -1,6 +1,5 @@
 package mb.statix.multilang.utils;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 import mb.common.message.Message;
 import mb.common.message.Severity;
@@ -22,6 +21,7 @@ import mb.statix.solver.persistent.Solver;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.functions.Function1;
 
+import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,7 +35,7 @@ public class MessageUtils {
         final TermFormatter formatter = Solver.shallowTermFormatter(unifier);
 
         ITerm originTerm = message.origin().flatMap(t -> getOriginTerm(t, unifier)).orElse(null);
-        final Deque<String> trace = Lists.newLinkedList();
+        final Deque<String> trace = new ArrayDeque<>();
         IConstraint current = constraint;
         int traceCount = 0;
         while(current != null) {
