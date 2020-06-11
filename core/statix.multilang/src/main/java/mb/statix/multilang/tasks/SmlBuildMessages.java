@@ -10,6 +10,7 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.statix.multilang.AnalysisContext;
 import mb.statix.multilang.AnalysisResults;
 import mb.statix.multilang.utils.MessageUtils;
+import org.metaborg.util.log.Level;
 
 import javax.inject.Inject;
 import java.io.Serializable;
@@ -25,9 +26,12 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
     public static class Input implements Serializable {
         private final ResourcePath projectPath;
         private final AnalysisContext analysisContext;
+        private final Level logLevel;
 
-        public Input(ResourcePath projectPath, AnalysisContext analysisContext) {
-            this.projectPath = Objects.requireNonNull(projectPath, "SmlBuildMessages.Input.projectPath may not be null");;
+        public Input(ResourcePath projectPath, AnalysisContext analysisContext, Level logLevel) {
+            this.projectPath = Objects.requireNonNull(projectPath, "SmlBuildMessages.Input.projectPath may not be null");
+            this.logLevel = logLevel;
+            ;
             this.analysisContext = Objects.requireNonNull(analysisContext, "SmlBuildMessages.Input.analysisContext may not be null");;
         }
 
@@ -63,7 +67,7 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
 
     @Override public KeyedMessages exec(ExecContext context, Input input) throws Exception {
         AnalysisResults results = context.require(analyzeProject.createTask(
-            new SmlAnalyzeProject.Input(input.projectPath, input.analysisContext)
+            new SmlAnalyzeProject.Input(input.projectPath, input.analysisContext, input.logLevel)
         )).getResults();
 
         final IUniDisunifier resultUnifier = results.finalResult().state().unifier();

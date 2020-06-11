@@ -6,6 +6,8 @@ import mb.pie.api.TaskDef;
 import mb.resource.ResourceRegistry;
 import mb.resource.ResourceService;
 import org.immutables.value.Value;
+import org.metaborg.util.log.ILogger;
+import org.metaborg.util.log.LoggerUtils;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -41,5 +43,9 @@ public abstract class AAnalysisContext implements Serializable {
             .withTaskDefs(new MapTaskDefs(taskDefs))
             .withResourceService(baseResourceService().createChild(registries))
             .build();
+    }
+
+    @Value.Lazy public ILogger logger() {
+        return LoggerUtils.logger(String.format("MultilangAnalysis [%s]", contextId()));
     }
 }

@@ -24,12 +24,12 @@ import java.util.Objects;
 public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalScope.Input, SmlInstantiateGlobalScope.Output> {
 
     public static class Input implements Serializable {
-        private final String analysisContextId;
+        private final String globalScopeName;
         private final IDebugContext debug;
         private final Spec spec;
 
         public Input(String globalScopeName, IDebugContext debug, Spec spec) {
-            this.analysisContextId = globalScopeName;
+            this.globalScopeName = globalScopeName;
             this.debug = debug;
             this.spec = spec;
         }
@@ -39,17 +39,17 @@ public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalSc
             if(o == null || getClass() != o.getClass()) return false;
             Input input = (Input)o;
             // Debug context should not influence results, so consider inputs with different debug settings as equal.
-            return analysisContextId.equals(input.analysisContextId) &&
+            return globalScopeName.equals(input.globalScopeName) &&
                 spec.equals(input.spec);
         }
 
         @Override public int hashCode() {
-            return Objects.hash(analysisContextId, spec);
+            return Objects.hash(globalScopeName, spec);
         }
 
         @Override public String toString() {
             return "Input{" +
-                "analysisContextId='" + analysisContextId + '\'' +
+                "globalScopeName='" + globalScopeName + '\'' +
                 ", spec=" + spec +
                 '}';
         }
@@ -110,7 +110,7 @@ public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalSc
     @Override
     public Output exec(ExecContext context, Input input) throws Exception {
         // Create uniquely named scope variable
-        ITermVar globalScopeVar = ImmutableTermVar.of("", String.format("global-%s", input.analysisContextId));
+        ITermVar globalScopeVar = ImmutableTermVar.of("", String.format("global-%s", input.globalScopeName));
         Iterable<ITermVar> scopeArgs = Iterables2.singleton(globalScopeVar);
         IConstraint globalConstraint = new CExists(scopeArgs, new CNew(Iterables2.fromConcat(scopeArgs)));
         IState.Immutable state = State.of(input.spec);

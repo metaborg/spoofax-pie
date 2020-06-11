@@ -61,7 +61,7 @@ public class AnalysisTest extends TestBase {
         AnalysisContext context = createAnalysisContext(resources);
 
         try (MixedSession session = context.createPieForContext().newSession()) {
-            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(projectPath, context)));
+            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(projectPath, context, logLevel)));
             assertTrue(messages.containsError());
             assertEquals(1, messages.count());
             assertEquals(1, messages.getAllMessages().get(resource.getKey()).size());
@@ -77,7 +77,7 @@ public class AnalysisTest extends TestBase {
         AnalysisContext context = createAnalysisContext(resources);
 
         try (MixedSession session = context.createPieForContext().newSession()) {
-            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(projectPath, context)));
+            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(projectPath, context, logLevel)));
             assertEquals(0, messages.count());
         }
     }
@@ -93,7 +93,7 @@ public class AnalysisTest extends TestBase {
         AnalysisContext context = createAnalysisContext(resources);
 
         try (MixedSession session = context.createPieForContext().newSession()) {
-            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(projectPath, context)));
+            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(projectPath, context, logLevel)));
             assertTrue(messages.containsError());
             assertEquals(4, messages.count());
             assertTrue(messages.containsWarning());
@@ -113,7 +113,7 @@ public class AnalysisTest extends TestBase {
         AnalysisContext context = createAnalysisContext(resources);
 
         try (MixedSession session = context.createPieForContext().newSession()) {
-            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(projectPath, context)));
+            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(projectPath, context, logLevel)));
             assertFalse(messages.containsError());
             assertEquals(0, messages.count());
         }
@@ -132,7 +132,7 @@ public class AnalysisTest extends TestBase {
         AnalysisContext context = createAnalysisContext(resources);
 
         try (MixedSession session = context.createPieForContext().newSession()) {
-            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(projectPath, context)));
+            KeyedMessages messages = session.require(buildMessages.createTask(new SmlBuildMessages.Input(projectPath, context, logLevel)));
             assertFalse(messages.containsError());
             assertEquals(0, messages.count());
         }

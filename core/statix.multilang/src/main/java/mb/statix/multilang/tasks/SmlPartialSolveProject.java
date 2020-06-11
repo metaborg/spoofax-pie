@@ -39,14 +39,22 @@ public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.In
             Input input = (Input)o;
             return globalScopeVar.equals(input.globalScopeVar) &&
                 globalResult.equals(input.globalResult) &&
-                debug.equals(input.debug) &&
                 spec.equals(input.spec) &&
                 projectConstraint.equals(input.projectConstraint);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(globalScopeVar, globalResult, debug, spec, projectConstraint);
+            return Objects.hash(globalScopeVar, globalResult, spec, projectConstraint);
+        }
+
+        @Override public String toString() {
+            return "Input{" +
+                "globalScopeVar=" + globalScopeVar +
+                ", globalResult=" + globalResult +
+                ", spec=" + spec +
+                ", projectConstraint='" + projectConstraint + '\'' +
+                '}';
         }
     }
 

@@ -17,10 +17,13 @@ import mb.statix.multilang.spec.SpecUtils;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.IState;
 import mb.statix.solver.log.IDebugContext;
+import mb.statix.solver.log.LoggerDebugContext;
 import mb.statix.solver.log.NullDebugContext;
 import mb.statix.solver.persistent.Solver;
 import mb.statix.solver.persistent.SolverResult;
 import mb.statix.spec.Spec;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.metaborg.util.log.Level;
 
 import javax.inject.Inject;
 import java.io.Serializable;
@@ -36,10 +39,12 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
     public static class Input implements Serializable {
         private final ResourcePath projectPath;
         private final AnalysisContext analysisContext;
+        private final @Nullable Level logLevel;
 
-        public Input(ResourcePath projectPath, AnalysisContext analysisContext) {
-            this.projectPath = Objects.requireNonNull(projectPath, "SmlAnalyzeProject.Input.projectPath may not be null");
-            this.analysisContext = Objects.requireNonNull(analysisContext, "SmlAnalyzeProject.Input.analysisContext may not be null");;
+        public Input(ResourcePath projectPath, AnalysisContext analysisContext, @Nullable Level logLevel) {
+            this.projectPath = projectPath;
+            this.analysisContext = analysisContext;
+            this.logLevel = logLevel;
         }
 
         @Override public boolean equals(Object o) {
@@ -121,7 +126,8 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
             .reduce(SpecUtils::mergeSpecs)
             .orElseThrow(() -> new MultiLangAnalysisException("Doing analysis without specs is not allowed"));
 
-        IDebugContext debug = new NullDebugContext();
+        final IDebugContext debug = input.logLevel != null ?
+            new LoggerDebugContext(input.analysisContext.logger(), input.logLevel) : new NullDebugContext();
 
         SmlInstantiateGlobalScope.Output globalState = context.require(instantiateGlobalScope.createTask(
             new SmlInstantiateGlobalScope.Input(input.analysisContext.contextId(), debug, combinedSpec)));

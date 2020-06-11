@@ -53,7 +53,6 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, S
             Input input = (Input)o;
             return globalScope.equals(input.globalScope) &&
                 globalResult.equals(input.globalResult) &&
-                debug.equals(input.debug) &&
                 spec.equals(input.spec) &&
                 fileConstraint.equals(input.fileConstraint) &&
                 astSupplier.equals(input.astSupplier) &&
@@ -62,7 +61,7 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, S
         }
 
         @Override public int hashCode() {
-            return Objects.hash(globalScope, globalResult, debug, spec, fileConstraint, astSupplier,
+            return Objects.hash(globalScope, globalResult, spec, fileConstraint, astSupplier,
                 postAnalysisTransform, resourceKey);
         }
 
@@ -70,7 +69,6 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, S
             return "Input{" +
                 "globalScope=" + globalScope +
                 ", globalResult=" + globalResult +
-                ", debug=" + debug +
                 ", spec=" + spec +
                 ", fileConstraint='" + fileConstraint + '\'' +
                 ", astSupplier=" + astSupplier +
