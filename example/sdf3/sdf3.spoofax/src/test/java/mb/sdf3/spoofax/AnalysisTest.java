@@ -20,7 +20,11 @@ import mb.statix.multilang.LanguageMetadata;
 import mb.statix.multilang.MultiLangComponent;
 import mb.statix.multilang.spec.SpecBuilder;
 import mb.statix.multilang.spec.SpecUtils;
+import mb.statix.multilang.tasks.SmlAnalyzeProject;
 import mb.statix.multilang.tasks.SmlBuildMessages;
+import mb.statix.multilang.tasks.SmlInstantiateGlobalScope;
+import mb.statix.multilang.tasks.SmlPartialSolveFile;
+import mb.statix.multilang.tasks.SmlPartialSolveProject;
 import org.junit.jupiter.api.Test;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.terms.TermFactory;
@@ -41,6 +45,13 @@ public class AnalysisTest extends TestBase {
         .platformComponent(platformComponent)
         .build();
     private final AnalysisContextService analysisContextService = multilangComponent.getAnalysisContextService();
+
+    private final SmlInstantiateGlobalScope instantiateGlobalScope = new SmlInstantiateGlobalScope();
+    private final SmlPartialSolveProject partialSolveProject = new SmlPartialSolveProject();
+    private final SmlPartialSolveFile partialSolveFile = new SmlPartialSolveFile(languageComponent.getStrategoRuntimeBuilder().
+        build().getTermFactory());
+    private final SmlAnalyzeProject analyzeProject = new SmlAnalyzeProject(instantiateGlobalScope, partialSolveProject, partialSolveFile);
+    private final SmlBuildMessages buildMessages = new SmlBuildMessages(analyzeProject);
 
     @Test void testSingleError() throws IOException, ExecException {
         final HashSet<ResourceKey> resources = new HashSet<>();

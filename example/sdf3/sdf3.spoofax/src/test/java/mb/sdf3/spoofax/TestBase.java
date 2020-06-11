@@ -65,13 +65,6 @@ class TestBase {
     final Sdf3AnalyzeMulti analyze = languageComponent.getAnalyze();
     final Pie pie = languageComponent.getPie();
 
-    final SmlInstantiateGlobalScope instantiateGlobalScope = new SmlInstantiateGlobalScope();
-    final SmlPartialSolveProject partialSolveProject = new SmlPartialSolveProject();
-    final SmlPartialSolveFile partialSolveFile = new SmlPartialSolveFile(languageComponent.getStrategoRuntimeBuilder().
-        build().getTermFactory());
-    final SmlAnalyzeProject analyzeProject = new SmlAnalyzeProject(instantiateGlobalScope, partialSolveProject, partialSolveFile);
-    final SmlBuildMessages buildMessages = new SmlBuildMessages(analyzeProject);
-
     FSResource createTextFile(String text, String relativePath) throws IOException {
         final FSResource resource = rootDirectory.appendRelativePath("a.sdf3");
         resource.writeString(text, StandardCharsets.UTF_8);
@@ -118,6 +111,7 @@ class TestBase {
     final Supplier<Sdf3Spec> specSupplier(Supplier<@Nullable IStrategoTerm> mainModuleAstSupplier, Supplier<@Nullable IStrategoTerm>... modulesAstSuppliers) {
         return new ValueSupplier<>(new Sdf3Spec(mainModuleAstSupplier, modulesAstSuppliers));
     }
+
 
     MixedSession newSession() {
         return pie.newSession();
