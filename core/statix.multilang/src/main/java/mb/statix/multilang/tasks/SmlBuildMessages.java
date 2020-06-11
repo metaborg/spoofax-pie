@@ -29,10 +29,9 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
         private final Level logLevel;
 
         public Input(ResourcePath projectPath, AnalysisContext analysisContext, Level logLevel) {
-            this.projectPath = Objects.requireNonNull(projectPath, "SmlBuildMessages.Input.projectPath may not be null");
+            this.projectPath = projectPath;
             this.logLevel = logLevel;
-            ;
-            this.analysisContext = Objects.requireNonNull(analysisContext, "SmlBuildMessages.Input.analysisContext may not be null");;
+            this.analysisContext = analysisContext;
         }
 
         @Override public boolean equals(Object o) {

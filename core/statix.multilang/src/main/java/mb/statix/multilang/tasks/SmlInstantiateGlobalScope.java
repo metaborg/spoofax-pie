@@ -7,11 +7,10 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.statix.constraints.CExists;
 import mb.statix.constraints.CNew;
+import mb.statix.multilang.utils.SolverUtils;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.IState;
-import mb.statix.solver.completeness.IsComplete;
 import mb.statix.solver.log.IDebugContext;
-import mb.statix.solver.persistent.Solver;
 import mb.statix.solver.persistent.SolverResult;
 import mb.statix.solver.persistent.State;
 import mb.statix.spec.Spec;
@@ -115,8 +114,7 @@ public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalSc
         IConstraint globalConstraint = new CExists(scopeArgs, new CNew(Iterables2.fromConcat(scopeArgs)));
         IState.Immutable state = State.of(input.spec);
 
-        final IsComplete isComplete = (s, l, st) -> !state.scopes().contains(s);
-        SolverResult result = Solver.solve(input.spec, state, globalConstraint, isComplete, input.debug);
+        SolverResult result = SolverUtils.partialSolve(input.spec, state, globalConstraint, input.debug);
 
         ITerm globalScope = result.state().unifier()
             .findRecursive(result.existentials().get(globalScopeVar));
