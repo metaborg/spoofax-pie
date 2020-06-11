@@ -15,8 +15,10 @@ import mb.resource.text.TextResource;
 import mb.sdf3.Sdf3ClassloaderResources;
 import mb.statix.multilang.AnalysisContext;
 import mb.statix.multilang.AnalysisContextService;
+import mb.statix.multilang.DaggerMultilangComponent;
 import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.LanguageMetadata;
+import mb.statix.multilang.MultilangComponent;
 import mb.statix.multilang.spec.SpecBuilder;
 import mb.statix.multilang.spec.SpecUtils;
 import mb.statix.multilang.tasks.SmlBuildMessages;
@@ -36,10 +38,10 @@ public class AnalysisTest extends TestBase {
     protected final ClassLoaderResourceRegistry statixRegistry = Sdf3ClassloaderResources.createClassLoaderResourceRegistry();
     protected ITermFactory termFactory = new TermFactory();
     private final ResourcePath projectPath = new FSPath(".");
-    private final AnalysisContextService analysisContextService = new AnalysisContextService(
-        languageComponent.getPie(),
-        languageComponent.getResourceService()
-    );
+    private final MultilangComponent multilangComponent = DaggerMultilangComponent.builder()
+        .platformComponent(platformComponent)
+        .build();
+    private final AnalysisContextService analysisContextService = multilangComponent.getAnalysisContextService();
 
     @Test void testSingleError() throws IOException, OccursException, ExecException {
         final HashSet<ResourceKey> resources = new HashSet<>();
@@ -138,15 +140,14 @@ public class AnalysisTest extends TestBase {
             .projectConstraint("statix/statics!projectOK")
             .resourcesSupplier((c, p) -> resources)
             .astFunction(languageComponent.getPreAnalysisTransform().createFunction())
-            .addTaskDefs(instantiateGlobalScope, partialSolveProject, partialSolveFile, analyzeProject, buildMessages)
-            // Adding resource registries not needed, since service is initialized with the language-specific instance
+            .addTaskDefs(instantiateGlobalScope, partialSolveProject, partialSolveFile, analyzeProject, buildMessages,
+                languageComponent.getPreStatix(), languageComponent.getPreAnalysisTransform(),
+                languageComponent.getPostStatix(), parse)
             .addResourceRegistries()
             // TODO: remove ValueSupplier somehow
             .postTransform(languageComponent.getPostStatix().createFunction().mapInput(ValueSupplier::new))
             .build();
 
-        AnalysisContext context = analysisContextService.createContext("AnalysisTest", languageMetadata);
-
-        return context;
+        return analysisContextService.createContext("AnalysisTest", languageMetadata);
     }
 }

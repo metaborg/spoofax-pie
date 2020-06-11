@@ -5,14 +5,13 @@ import mb.resource.ResourceService;
 import mb.spoofax.core.platform.Platform;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Singleton
+@MultilangScope
 public class AnalysisContextService {
 
     private final Map<String, AnalysisContext> contexts = new HashMap<>();

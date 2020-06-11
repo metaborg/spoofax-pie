@@ -16,6 +16,7 @@ dependencies {
   compileOnly("org.checkerframework:checker-qual-android")
   compileOnly("org.immutables:value-annotations")
 
+  annotationProcessor("com.google.dagger:dagger-compiler")
   annotationProcessor("org.immutables:value")
 
   testAnnotationProcessor(platform(project(":spoofax.depconstraints")))
