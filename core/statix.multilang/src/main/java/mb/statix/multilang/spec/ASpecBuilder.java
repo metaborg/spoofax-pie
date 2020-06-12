@@ -14,36 +14,17 @@ public interface ASpecBuilder {
         if (modules().isEmpty()) {
             throw new SpecLoadException("Cannot build Spec without any modules provided");
         }
-
-        // Checking that when a module is included multiple times,
-        // it is included in the exact same variant.
-        // Otherwise it is not possible to determine which variant to include
-        // while including both results in rule duplication (invalid Specs)
-        Set<String> invalidDuplicates = modules()
-            .stream()
-            .collect(Collectors.groupingBy(Module::moduleName))
-            .values()
-            .stream()
-            .filter(mods -> mods.size() > 1)
-            // There is no need for checking if the module terms differ
-            // since when a module has both the same name and AST, it would have been included
-            // only once in the initial modules set.
-            // Now that there are more modules with the same name, we can be sure their contents differ.
-            .map(mods -> mods.get(0))
-            .map(Module::moduleName)
-            .collect(Collectors.toSet());
-
-        if (!invalidDuplicates.isEmpty()) {
-            throw new SpecLoadException(
-                String.format("The following modules are included in different variants: %s. " +
-                    "Be sure that all the languages you use depend on the same shared interface.",
-                    String.join(", ", invalidDuplicates)));
-        }
     }
 
     @Value.Lazy default Spec toSpec() {
         return modules()
             .stream()
+            .collect(Collectors.groupingBy(Module::moduleName))
+            .values()
+            .stream()
+            // From all modules with the same name, just pick the first one
+            // For now, users are responsible to ensure their languages use the same interfaces
+            .map(modules -> modules.get(0))
             .map(Module::toSpec)
             .reduce(SpecUtils::mergeSpecs)
             // Safe, since check enforces at least one module to be present
@@ -53,5 +34,11 @@ public interface ASpecBuilder {
     default SpecBuilder.Builder extend() {
         return SpecBuilder.builder()
             .addAllModules(modules());
+    }
+
+    default SpecBuilder merge(ASpecBuilder other) {
+        return this.extend()
+            .addAllModules(other.modules())
+            .build();
     }
 }

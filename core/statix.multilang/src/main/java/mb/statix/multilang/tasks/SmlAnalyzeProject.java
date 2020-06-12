@@ -13,8 +13,7 @@ import mb.statix.multilang.FileResult;
 import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.LanguageMetadata;
 import mb.statix.multilang.MultiLangAnalysisException;
-import mb.statix.multilang.spec.SpecBuilder;
-import mb.statix.multilang.spec.SpecUtils;
+import mb.statix.multilang.spec.ASpecBuilder;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.IState;
 import mb.statix.solver.log.IDebugContext;
@@ -128,9 +127,9 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
             .values()
             .stream()
             .map(LanguageMetadata::statixSpec)
-            .map(SpecBuilder::toSpec)
-            .reduce(SpecUtils::mergeSpecs)
-            .orElseThrow(() -> new MultiLangAnalysisException("Doing analysis without specs is not allowed"));
+            .reduce(ASpecBuilder::merge)
+            .orElseThrow(() -> new MultiLangAnalysisException("Doing analysis without specs is not allowed"))
+            .toSpec();
 
         final ListMultimap<String, Rule> rulesWithEquivalentPatterns = combinedSpec.rules().getAllEquivalentRules();
         if(!rulesWithEquivalentPatterns.isEmpty()) {

@@ -76,10 +76,12 @@ public class SpecUtils {
                 acc.noRelationLabel() + " and " + newSpec.noRelationLabel());
         }
 
-        ArrayList<Rule> rules = new ArrayList<>(acc.rules().getAllRules());
+        Set<Rule> rules = new HashSet<>(acc.rules().getAllRules());
         rules.addAll(newSpec.rules().getAllRules());
+
         Set<ITerm> labels = new HashSet<>(acc.labels().symbols());
         labels.addAll(newSpec.labels().symbols());
+
         return Spec.builder()
             .from(acc)
             .rules(RuleSet.of(rules))
