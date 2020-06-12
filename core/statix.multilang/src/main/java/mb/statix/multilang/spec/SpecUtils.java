@@ -46,7 +46,7 @@ public class SpecUtils {
             IStrategoTerm stxFileSpec = termFactory.parseFromString(specString);
 
             // Update pointers
-            fileSpecs.add(Module.of(currentModule, strategoTerms.fromStratego(stxFileSpec)));
+            fileSpecs.add(ImmutableModule.of(currentModule, strategoTerms.fromStratego(stxFileSpec)));
             loadedModules.add(currentModule);
 
             // Queue newly imported files
@@ -66,7 +66,7 @@ public class SpecUtils {
         }
 
         // Create builder for files
-        return SpecBuilder.of(fileSpecs);
+        return ImmutableSpecBuilder.of(fileSpecs);
     }
 
     public static Spec mergeSpecs(Spec acc, Spec newSpec) {

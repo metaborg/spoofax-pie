@@ -15,15 +15,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Value.Immutable
-public abstract class AAnalysisContext implements Serializable {
+public interface AnalysisContext extends Serializable {
 
-    @Value.Parameter public abstract String contextId();
-    @Value.Parameter public abstract Map<LanguageId, LanguageMetadata> languages();
+    @Value.Parameter String contextId();
+    @Value.Parameter Map<LanguageId, LanguageMetadata> languages();
     // Pie instance to derive Pie instance for use in this context from
-    @Value.Parameter public abstract Pie basePie();
-    @Value.Parameter public abstract ResourceService baseResourceService();
+    @Value.Parameter Pie basePie();
+    @Value.Parameter ResourceService baseResourceService();
 
-    @Value.Lazy public Pie createPieForContext() {
+    @Value.Lazy default Pie createPieForContext() {
         Set<TaskDef<?, ?>> taskDefs = languages()
             .values()
             .stream()
@@ -45,7 +45,7 @@ public abstract class AAnalysisContext implements Serializable {
             .build();
     }
 
-    @Value.Lazy public ILogger logger() {
+    @Value.Lazy default ILogger logger() {
         return LoggerUtils.logger(String.format("MLA [%s]", contextId()));
     }
 }

@@ -9,8 +9,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 @Value.Immutable
-public abstract class AAnalysisResults implements Serializable {
-    public static class FileKey implements Serializable {
+public interface AnalysisResults extends Serializable {
+    class FileKey implements Serializable {
 
         private final LanguageId language;
         private final ResourceKey resource;
@@ -29,11 +29,11 @@ public abstract class AAnalysisResults implements Serializable {
         }
     }
 
-    @Value.Parameter public abstract ITerm globalScope();
+    @Value.Parameter ITerm globalScope();
 
-    @Value.Parameter public abstract HashMap<LanguageId, SolverResult> projectResults();
+    @Value.Parameter HashMap<LanguageId, SolverResult> projectResults();
 
-    @Value.Parameter public abstract HashMap<FileKey, FileResult> fileResults();
+    @Value.Parameter HashMap<FileKey, FileResult> fileResults();
 
-    @Value.Parameter public abstract SolverResult finalResult();
+    @Value.Parameter SolverResult finalResult();
 }

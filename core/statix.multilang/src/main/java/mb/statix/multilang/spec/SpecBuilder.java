@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Value.Immutable
-public interface ASpecBuilder {
+public interface SpecBuilder {
     @Value.Parameter Set<Module> modules();
 
     @Value.Check default void checkModules() throws SpecLoadException {
@@ -31,12 +31,12 @@ public interface ASpecBuilder {
             .orElseThrow(() -> new SpecLoadException("May not occur: at least one module should be present"));
     }
 
-    default SpecBuilder.Builder extend() {
-        return SpecBuilder.builder()
+    default ImmutableSpecBuilder.Builder extend() {
+        return ImmutableSpecBuilder.builder()
             .addAllModules(modules());
     }
 
-    default SpecBuilder merge(ASpecBuilder other) {
+    default SpecBuilder merge(SpecBuilder other) {
         return this.extend()
             .addAllModules(other.modules())
             .build();

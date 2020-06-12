@@ -5,7 +5,7 @@ import mb.statix.spec.Spec;
 import org.immutables.value.Value;
 
 @Value.Immutable
-public interface AModule {
+public interface Module {
     @Value.Parameter String moduleName();
 
     @Value.Parameter ITerm module();

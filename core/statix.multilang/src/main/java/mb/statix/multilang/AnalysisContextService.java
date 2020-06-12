@@ -34,7 +34,7 @@ public class AnalysisContextService {
         Map<LanguageId, LanguageMetadata> languages = Stream.of(languageMetadatas)
             .collect(Collectors.toMap(LanguageMetadata::languageId, Function.identity()));
 
-        AnalysisContext context = AnalysisContext.builder()
+        AnalysisContext context = ImmutableAnalysisContext.builder()
             .contextId(contextId)
             .languages(languages)
             .basePie(basePie)

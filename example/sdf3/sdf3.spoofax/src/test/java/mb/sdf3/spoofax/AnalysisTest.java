@@ -15,6 +15,7 @@ import mb.sdf3.Sdf3ClassloaderResources;
 import mb.statix.multilang.AnalysisContext;
 import mb.statix.multilang.AnalysisContextService;
 import mb.statix.multilang.DaggerMultiLangComponent;
+import mb.statix.multilang.ImmutableLanguageMetadata;
 import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.LanguageMetadata;
 import mb.statix.multilang.MultiLangComponent;
@@ -151,7 +152,7 @@ public class AnalysisTest extends TestBase {
         ClassLoaderResource statixSpec = statixRegistry.getResource(id);
         SpecBuilder spec = SpecUtils.loadSpec(statixSpec, "statix/statics", termFactory);
 
-        LanguageMetadata languageMetadata = LanguageMetadata.builder()
+        LanguageMetadata languageMetadata = ImmutableLanguageMetadata.builder()
             .languageId(new LanguageId("sdf3"))
             .statixSpec(spec)
             .fileConstraint("statix/statics!moduleOK")

@@ -54,7 +54,7 @@ public class SpecLoaderTest {
         SpecBuilder specBuilder2 = SpecUtils
             .loadSpec(root2, "compatible", termFactory);
 
-        Spec spec = specBuilder1.withModules(specBuilder2.modules()).toSpec();
+        Spec spec = specBuilder1.merge(specBuilder2).toSpec();
 
         assertEquals(0, spec.edgeLabels().size());
         assertEquals(1, spec.relationLabels().size()); // Decl()
@@ -73,7 +73,8 @@ public class SpecLoaderTest {
             .getResource(new DefaultResourceKeyString("mb/statix/multilang/incompatible"));
         SpecBuilder specBuilder2 = SpecUtils
             .loadSpec(root2, "incompatible", termFactory);
-        Spec combinedSpec = specBuilder1.extend().addAllModules(specBuilder2.modules()).build().toSpec();
+
+        Spec combinedSpec = specBuilder1.merge(specBuilder2).toSpec();
 
         // TODO: After we can do reliable detection of incompatible specs
         // test that this throws an exception.

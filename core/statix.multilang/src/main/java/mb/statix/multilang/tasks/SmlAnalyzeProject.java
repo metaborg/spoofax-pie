@@ -6,14 +6,14 @@ import mb.pie.api.ExecException;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.statix.constraints.CConj;
-import mb.statix.multilang.AAnalysisResults;
-import mb.statix.multilang.AnalysisContext;
 import mb.statix.multilang.AnalysisResults;
+import mb.statix.multilang.AnalysisContext;
 import mb.statix.multilang.FileResult;
+import mb.statix.multilang.ImmutableAnalysisResults;
 import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.LanguageMetadata;
 import mb.statix.multilang.MultiLangAnalysisException;
-import mb.statix.multilang.spec.ASpecBuilder;
+import mb.statix.multilang.spec.SpecBuilder;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.IState;
 import mb.statix.solver.log.IDebugContext;
@@ -127,7 +127,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
             .values()
             .stream()
             .map(LanguageMetadata::statixSpec)
-            .reduce(ASpecBuilder::merge)
+            .reduce(SpecBuilder::merge)
             .orElseThrow(() -> new MultiLangAnalysisException("Doing analysis without specs is not allowed"))
             .toSpec();
 
@@ -166,7 +166,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
             }));
 
         // Create file results (maintain resource key for error message mapping
-        Map<AAnalysisResults.FileKey, FileResult> fileResults = analysisContext.languages().values().stream()
+        Map<AnalysisResults.FileKey, FileResult> fileResults = analysisContext.languages().values().stream()
             .flatMap(languageMetadata -> {
                 try {
                     return languageMetadata.resourcesSupplier().apply(context, input.projectPath).stream()
@@ -177,7 +177,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
                                     languageMetadata.astFunction(), languageMetadata.postTransform(),
                                     resourceKey))).getFileResult();
                                 return new AbstractMap.SimpleEntry<>(
-                                    new AAnalysisResults.FileKey(languageMetadata.languageId(), resourceKey),
+                                    new AnalysisResults.FileKey(languageMetadata.languageId(), resourceKey),
                                     fileResult);
                             } catch(ExecException | InterruptedException e) {
                                 throw new MultiLangAnalysisException(e);
@@ -207,6 +207,6 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
         long dt = System.currentTimeMillis() - t0;
         logger.info("{} analyzed in {} ms] ", input.analysisContext.contextId(), dt);
 
-        return new Output(AnalysisResults.of(globalState.getGlobalScope(), new HashMap<>(projectResults), new HashMap<>(fileResults), finalResult));
+        return new Output(ImmutableAnalysisResults.of(globalState.getGlobalScope(), new HashMap<>(projectResults), new HashMap<>(fileResults), finalResult));
     }
 }
