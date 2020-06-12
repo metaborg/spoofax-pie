@@ -88,7 +88,7 @@ public class SpecUtils {
             .addAllEdgeLabels(newSpec.edgeLabels())
             .addAllRelationLabels(newSpec.relationLabels())
             .labels(new FiniteAlphabet<>(labels))
-            .putAllScopeExtensions(acc.scopeExtensions())
+            .putAllScopeExtensions(newSpec.scopeExtensions())
             .build();
     }
 
