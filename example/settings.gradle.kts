@@ -24,14 +24,14 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
 "tiger/spoofaxcore".run {
   includeProject("tiger.spoofaxcore")
 }
-"tiger/generated".run {
-  includeProject("tiger")
-  includeProject("tiger.spoofax")
-  includeProject("tiger.cli")
-  includeProject("tiger.eclipse.externaldeps")
-  includeProject("tiger.eclipse")
-  includeProject("tiger.intellij")
-}
+//"tiger/generated".run {
+//  includeProject("tiger")
+//  includeProject("tiger.spoofax")
+//  includeProject("tiger.cli")
+//  includeProject("tiger.eclipse.externaldeps")
+//  includeProject("tiger.eclipse")
+//  includeProject("tiger.intellij")
+//}
 "tiger/manual".run {
   // TODO: rename the Tiger manual project directories to include .manual in their name.
   includeProject("tiger.manual", "tiger/manual/tiger")

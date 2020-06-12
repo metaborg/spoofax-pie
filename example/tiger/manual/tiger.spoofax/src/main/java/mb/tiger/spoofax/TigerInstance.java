@@ -2,6 +2,7 @@ package mb.tiger.spoofax;
 
 import mb.common.message.KeyedMessages;
 import mb.common.region.Region;
+import mb.common.result.Result;
 import mb.common.style.Styling;
 import mb.common.token.Token;
 import mb.common.util.CollectionView;
@@ -9,6 +10,7 @@ import mb.common.util.ListView;
 import mb.common.util.MapView;
 import mb.common.util.SetView;
 import mb.completions.common.CompletionResult;
+import mb.jsglr.common.JSGLRTokens;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
@@ -110,17 +112,17 @@ public class TigerInstance implements LanguageInstance {
     }
 
 
-    @Override public Task<@Nullable ArrayList<? extends Token<?>>> createTokenizeTask(ResourceKey resourceKey) {
-        return tokenize.createTask(resourceKey);
+    @Override public Task<@Nullable JSGLRTokens> createTokenizeTask(ResourceKey resourceKey) {
+        return tokenize.createTask(resourceKey); // TODO: use Result.
     }
 
     @Override public Task<@Nullable Styling> createStyleTask(ResourceKey resourceKey) {
-        return style.createTask(parse.createTokensSupplier(resourceKey));
+        return style.createTask(parse.createRecoverableTokensSupplier(resourceKey).map(Result::get)); // TODO: use Result.
     }
 
     @Override
     public Task<@Nullable CompletionResult> createCompletionTask(ResourceKey resourceKey, Region primarySelection) {
-        return complete.createTask(new TigerCompleteTaskDef.Input(parse.createRecoverableAstSupplier(resourceKey)));
+        return complete.createTask(new TigerCompleteTaskDef.Input(parse.createRecoverableAstSupplier(resourceKey).map(Result::get))); // TODO: use Result.
     }
 
     @Override

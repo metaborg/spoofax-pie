@@ -5,7 +5,7 @@ import mb.common.result.MessagesError;
 import mb.common.result.Result;
 import mb.jsglr.common.ResourceKeyAttachment;
 import mb.jsglr.common.TokenUtil;
-import mb.jsglr.common.Tokens;
+import mb.jsglr.common.JSGLRTokens;
 import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -60,7 +60,7 @@ public class JSGLR1Parser {
             if(resource != null) {
                 ResourceKeyAttachment.setResourceKey(ast, resource);
             }
-            final Tokens tokens = TokenUtil.extract(ast);
+            final JSGLRTokens tokens = TokenUtil.extract(ast);
             final MessagesUtil messagesUtil = new MessagesUtil(true, false, parser.getCollectedErrors());
             messagesUtil.gatherNonFatalErrors(ast);
             final Messages messages = messagesUtil.getMessages();

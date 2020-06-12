@@ -4,8 +4,6 @@ import mb.common.message.KeyedMessages;
 import mb.common.message.Messages;
 import mb.common.result.Result;
 import mb.common.style.Styling;
-import mb.common.token.Token;
-
 import mb.common.region.Region;
 import mb.common.util.CollectionView;
 import mb.common.util.EntryView;
@@ -13,6 +11,7 @@ import mb.common.util.ListView;
 import mb.common.util.MapView;
 import mb.common.util.SetView;
 import mb.completions.common.CompletionResult;
+import mb.jsglr.common.JSGLRTokens;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
@@ -76,7 +75,7 @@ public class {{genInstance.id}} implements LanguageInstance {
     }
 
 
-    @Override public Task<@Nullable ArrayList<? extends Token<?>>> createTokenizeTask(ResourceKey resourceKey) {
+    @Override public Task<@Nullable JSGLRTokens> createTokenizeTask(ResourceKey resourceKey) {
         return {{tokenizeInjection.name}}.createTask(resourceKey);
     }
 

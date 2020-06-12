@@ -1,6 +1,8 @@
 package mb.tiger.spoofax.task;
 
-import mb.common.token.Token;
+import mb.common.result.MessagesError;
+import mb.common.result.Result;
+import mb.jsglr.common.JSGLRTokens;
 import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
@@ -12,10 +14,9 @@ import mb.tiger.spoofax.task.reusable.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 
 @LanguageScope
-public class TigerIdeTokenize implements TaskDef<ResourceKey, @Nullable ArrayList<? extends Token<?>>> {
+public class TigerIdeTokenize implements TaskDef<ResourceKey, @Nullable JSGLRTokens> {
     private final TigerParse parse;
 
     @Inject public TigerIdeTokenize(TigerParse parse) {
@@ -27,8 +28,8 @@ public class TigerIdeTokenize implements TaskDef<ResourceKey, @Nullable ArrayLis
     }
 
     @Override
-    public @Nullable ArrayList<? extends Token<?>> exec(ExecContext context, ResourceKey key) throws ExecException, InterruptedException {
-        final @Nullable JSGLR1ParseOutput parseResult = context.require(parse, new ResourceStringSupplier(key));
-        return parseResult.getTokens().orElse(null);
+    public @Nullable JSGLRTokens exec(ExecContext context, ResourceKey key) throws ExecException, InterruptedException {
+        final Result<JSGLR1ParseOutput, MessagesError> parseResult = context.require(parse, new ResourceStringSupplier(key));
+        return parseResult.mapOrNull(o -> o.tokens); // TODO: use Result.
     }
 }

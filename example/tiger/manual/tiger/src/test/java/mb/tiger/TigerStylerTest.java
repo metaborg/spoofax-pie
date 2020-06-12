@@ -1,6 +1,8 @@
 package mb.tiger;
 
 import mb.common.region.Region;
+import mb.common.result.MessagesError;
+import mb.common.result.Result;
 import mb.common.style.Color;
 import mb.common.style.Styling;
 import mb.common.style.TokenStyle;
@@ -14,14 +16,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TigerStylerTest extends TigerTestBase {
     @Test void style() throws InterruptedException {
-        final JSGLR1ParseOutput parseOutput = parser.parse("1 + 21", "Module");
-        assertTrue(parseOutput.hasSucceeded());
-        assertFalse(parseOutput.hasRecovered());
-        assertFalse(parseOutput.hasFailed());
-        assertTrue(parseOutput.getAst().isPresent());
-        assertTrue(parseOutput.getTokens().isPresent());
+        final Result<JSGLR1ParseOutput, MessagesError> parseResult = parser.parse("1 + 21", "Module");
+        assertTrue(parseResult.isOk());
 
-        final Styling styling = styler.style(parseOutput.getTokens().get());
+        final Styling styling = styler.style(parseResult.unwrapUnchecked().tokens.tokens);
         final ArrayList<TokenStyle> stylePerToken = styling.getStylePerToken();
         assertEquals(5, stylePerToken.size());
 

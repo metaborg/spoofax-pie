@@ -21,7 +21,7 @@ class TigerConstraintAnalyzerTest extends TigerTestBase {
     @Test void analyzeSingleErrors() throws InterruptedException, ConstraintAnalyzerException {
         final ResourceKey resource = new DefaultResourceKey(qualifier, "a.tig");
         final JSGLR1ParseOutput parsed = parser.parse("1 + nil", "Module", resource);
-        assertTrue(parsed.getAst().isPresent());
+        assertTrue(parsed.isOk());
         final SingleFileResult result =
             analyzer.analyze(resource, parsed.getAst().get(), new ConstraintAnalyzerContext());
         assertNotNull(result.ast);
@@ -32,7 +32,7 @@ class TigerConstraintAnalyzerTest extends TigerTestBase {
     @Test void analyzeSingleSuccess() throws InterruptedException, ConstraintAnalyzerException {
         final ResourceKey resource = new DefaultResourceKey(qualifier, "a.tig");
         final JSGLR1ParseOutput parsed = parser.parse("1 + 2", "Module", resource);
-        assertTrue(parsed.getAst().isPresent());
+        assertTrue(parsed.isOk());
         final SingleFileResult result =
             analyzer.analyze(resource, parsed.getAst().get(), new ConstraintAnalyzerContext());
         assertNotNull(result.ast);

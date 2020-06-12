@@ -1,7 +1,7 @@
 package mb.jsglr1.common;
 
 import mb.common.message.Messages;
-import mb.jsglr.common.Tokens;
+import mb.jsglr.common.JSGLRTokens;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import java.io.Serializable;
@@ -9,11 +9,11 @@ import java.util.Objects;
 
 public class JSGLR1ParseOutput implements Serializable {
     public final IStrategoTerm ast;
-    public final Tokens tokens;
+    public final JSGLRTokens tokens;
     public final Messages messages;
     public final boolean recovered;
 
-    public JSGLR1ParseOutput(IStrategoTerm ast, Tokens tokens, Messages messages, boolean recovered) {
+    public JSGLR1ParseOutput(IStrategoTerm ast, JSGLRTokens tokens, Messages messages, boolean recovered) {
         this.ast = ast;
         this.tokens = tokens;
         this.messages = messages;

@@ -1,20 +1,19 @@
 package mb.tiger;
 
+import mb.common.result.MessagesError;
+import mb.common.result.Result;
 import mb.jsglr1.common.JSGLR1ParseOutput;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 class TigerParserTest extends TigerTestBase {
-
-
     @Test void parse() throws InterruptedException {
-        final JSGLR1ParseOutput result = parser.parse("1", "Module");
-        assertTrue(result.hasSucceeded());
-        assertFalse(result.hasRecovered());
-        assertFalse(result.hasFailed());
-        assertTrue(result.getAst().isPresent());
-        assertTrue(result.getTokens().isPresent());
-        assertEquals(result.getAst().get(), termFactory.makeAppl(termFactory.makeConstructor("Mod", 1),
+        final Result<JSGLR1ParseOutput, MessagesError> result = parser.parse("1", "Module");
+        assertTrue(result.isOk());
+        final JSGLR1ParseOutput output = result.unwrapUnchecked();
+        assertFalse(output.recovered);
+        assertEquals(output.ast, termFactory.makeAppl(termFactory.makeConstructor("Mod", 1),
             termFactory.makeAppl(termFactory.makeConstructor("Int", 1), termFactory.makeString("1"))));
-        assertTrue(result.getMessages().isEmpty());
     }
 }

@@ -13,7 +13,7 @@ class TigerStrategoRuntimeBuilderTest extends TigerTestBase {
     @Test void parseUnparse() throws InterruptedException, StrategoException {
         final String str = "1 + 2";
         final JSGLR1ParseOutput parsed = parser.parse(str, "Module");
-        assertTrue(parsed.getAst().isPresent());
+        assertTrue(parsed.isOk());
         final @Nullable IStrategoTerm unparsedTerm = strategoRuntime.invoke("pp-Tiger-string", parsed.getAst().get());
         assertNotNull(unparsedTerm);
         final IStrategoString unparsedStringTerm = (IStrategoString)unparsedTerm;

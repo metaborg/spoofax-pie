@@ -147,6 +147,10 @@ public interface Result<T extends Serializable, E extends Throwable> extends Ser
         return ok().map(mapper).orElseGet(def);
     }
 
+    default <U extends @Nullable Serializable> @Nullable U mapOrNull(Function<T, U> mapper) {
+        return ok().map(mapper).orElse(null);
+    }
+
     default <F extends Throwable> Result<T, F> mapErr(Function<E, F> mapper) {
         // noinspection unchecked (cast is safe because it is impossible to get a value of type F in the ok case)
         return err().map(e -> Result.<T, F>ofErr(mapper.apply(e))).orElse((Result<T, F>)this);
@@ -158,6 +162,10 @@ public interface Result<T extends Serializable, E extends Throwable> extends Ser
 
     default <F extends Throwable> F mapErrOrElse(Supplier<F> def, Function<E, F> mapper) {
         return err().map(mapper).orElseGet(def);
+    }
+
+    default <F extends Throwable> @Nullable F mapErrOrNull(Function<E, F> mapper) {
+        return err().map(mapper).orElse(null);
     }
 
     default <R extends Serializable> R mapRes(Function<T, R> valueMapper, Function<E, R> errorMapper) {

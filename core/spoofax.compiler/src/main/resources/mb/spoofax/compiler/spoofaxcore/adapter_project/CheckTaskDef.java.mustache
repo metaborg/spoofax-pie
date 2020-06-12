@@ -41,7 +41,7 @@ public class {{genCheckTaskDef.id}} implements TaskDef<ResourceKey, Messages> {
     @Override public Messages exec(ExecContext context, ResourceKey key) throws ExecException, InterruptedException {
         final MessagesBuilder messagesBuilder = new MessagesBuilder();
         final ResourceStringSupplier stringSupplier = new ResourceStringSupplier(key);
-        final Messages parseMessages = context.require(parse.createMessagesSupplier(stringProvider));
+        final Messages parseMessages = context.require(parse.createMessagesSupplier(stringSupplier));
         builder.addMessages(parseMessages);
 {{#constraintAnalyzer}}
         final {{this.analyzeTaskDef.qualifiedId}}.@Nullable Output analysisOutput = context.require(analyze, new {{this.analyzeTaskDef.qualifiedId}}.Input(key, parse.createRecoverableAstSupplier(stringProvider).map(Result::get)));

@@ -3,7 +3,7 @@ package mb.jsglr1.pie;
 import mb.common.message.Messages;
 import mb.common.result.MessagesError;
 import mb.common.result.Result;
-import mb.jsglr.common.Tokens;
+import mb.jsglr.common.JSGLRTokens;
 import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
@@ -77,44 +77,44 @@ public abstract class JSGLR1ParseTaskDef implements TaskDef<Supplier<String>, Re
     }
 
 
-    public Supplier<Result<Tokens, MessagesError>> createRecoverableTokensSupplier(Supplier<String> stringSupplier) {
+    public Supplier<Result<JSGLRTokens, MessagesError>> createRecoverableTokensSupplier(Supplier<String> stringSupplier) {
         return createSupplier(stringSupplier).map(RecoverableTokensMapper.instance);
     }
 
-    public Supplier<Result<Tokens, MessagesError>> createRecoverableTokensSupplier(ResourceKey key) {
+    public Supplier<Result<JSGLRTokens, MessagesError>> createRecoverableTokensSupplier(ResourceKey key) {
         return createRecoverableTokensSupplier(rsp(key));
     }
 
-    public Supplier<Result<Tokens, MessagesError>> createRecoverableTokensSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper) {
+    public Supplier<Result<JSGLRTokens, MessagesError>> createRecoverableTokensSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper) {
         return createRecoverableTokensSupplier(rsp(key, stamper));
     }
 
-    public Supplier<Result<Tokens, MessagesError>> createRecoverableTokensSupplier(ResourceKey key, Charset charset) {
+    public Supplier<Result<JSGLRTokens, MessagesError>> createRecoverableTokensSupplier(ResourceKey key, Charset charset) {
         return createRecoverableTokensSupplier(rsp(key, charset));
     }
 
-    public Supplier<Result<Tokens, MessagesError>> createRecoverableTokensSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper, Charset charset) {
+    public Supplier<Result<JSGLRTokens, MessagesError>> createRecoverableTokensSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper, Charset charset) {
         return createRecoverableTokensSupplier(rsp(key, stamper, charset));
     }
 
 
-    public Supplier<Result<Tokens, MessagesError>> createTokensSupplier(Supplier<String> stringSupplier) {
+    public Supplier<Result<JSGLRTokens, MessagesError>> createTokensSupplier(Supplier<String> stringSupplier) {
         return createSupplier(stringSupplier).map(TokensMapper.instance);
     }
 
-    public Supplier<Result<Tokens, MessagesError>> createTokensSupplier(ResourceKey key) {
+    public Supplier<Result<JSGLRTokens, MessagesError>> createTokensSupplier(ResourceKey key) {
         return createTokensSupplier(rsp(key));
     }
 
-    public Supplier<Result<Tokens, MessagesError>> createTokensSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper) {
+    public Supplier<Result<JSGLRTokens, MessagesError>> createTokensSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper) {
         return createTokensSupplier(rsp(key, stamper));
     }
 
-    public Supplier<Result<Tokens, MessagesError>> createTokensSupplier(ResourceKey key, Charset charset) {
+    public Supplier<Result<JSGLRTokens, MessagesError>> createTokensSupplier(ResourceKey key, Charset charset) {
         return createTokensSupplier(rsp(key, charset));
     }
 
-    public Supplier<Result<Tokens, MessagesError>> createTokensSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper, Charset charset) {
+    public Supplier<Result<JSGLRTokens, MessagesError>> createTokensSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper, Charset charset) {
         return createTokensSupplier(rsp(key, stamper, charset));
     }
 
@@ -148,11 +148,11 @@ public abstract class JSGLR1ParseTaskDef implements TaskDef<Supplier<String>, Re
         return createFunction().mapOutput(RecoverableAstMapper.instance);
     }
 
-    public Function<Supplier<String>, Result<Tokens, MessagesError>> createTokensFunction() {
+    public Function<Supplier<String>, Result<JSGLRTokens, MessagesError>> createTokensFunction() {
         return createFunction().mapOutput(TokensMapper.instance);
     }
 
-    public Function<Supplier<String>, Result<Tokens, MessagesError>> createRecoverableTokensFunction() {
+    public Function<Supplier<String>, Result<JSGLRTokens, MessagesError>> createRecoverableTokensFunction() {
         return createFunction().mapOutput(RecoverableTokensMapper.instance);
     }
 
@@ -219,10 +219,10 @@ class RecoverableAstMapper extends Mapper<Result<JSGLR1ParseOutput, MessagesErro
     private RecoverableAstMapper() {}
 }
 
-class TokensMapper extends Mapper<Result<JSGLR1ParseOutput, MessagesError>, Result<Tokens, MessagesError>> {
+class TokensMapper extends Mapper<Result<JSGLR1ParseOutput, MessagesError>, Result<JSGLRTokens, MessagesError>> {
     public static final TokensMapper instance = new TokensMapper();
 
-    @Override public Result<Tokens, MessagesError> apply(Result<JSGLR1ParseOutput, MessagesError> result) {
+    @Override public Result<JSGLRTokens, MessagesError> apply(Result<JSGLR1ParseOutput, MessagesError> result) {
         return result.andThen(r -> {
             if(r.recovered) {
                 return Result.ofErr(new MessagesError(r.messages, "Parser produced recovered tokens, but recovery was disallowed"));
@@ -235,10 +235,10 @@ class TokensMapper extends Mapper<Result<JSGLR1ParseOutput, MessagesError>, Resu
     private TokensMapper() {}
 }
 
-class RecoverableTokensMapper extends Mapper<Result<JSGLR1ParseOutput, MessagesError>, Result<Tokens, MessagesError>> {
+class RecoverableTokensMapper extends Mapper<Result<JSGLR1ParseOutput, MessagesError>, Result<JSGLRTokens, MessagesError>> {
     public static final RecoverableTokensMapper instance = new RecoverableTokensMapper();
 
-    @Override public Result<Tokens, MessagesError> apply(Result<JSGLR1ParseOutput, MessagesError> result) {
+    @Override public Result<JSGLRTokens, MessagesError> apply(Result<JSGLR1ParseOutput, MessagesError> result) {
         return result.map(r -> r.tokens);
     }
 
