@@ -23,6 +23,8 @@ include("constraint.common")
 include("nabl2.common")
 include("statix.common")
 include("statix.multilang")
+include("statix.multilang.eclipse")
+include("statix.multilang.eclipse.externaldeps")
 include("spoofax2.common")
 
 include("spoofax.core")

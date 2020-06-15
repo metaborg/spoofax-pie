@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Activator: mb.statix.multilang.eclipse.MultiLangPlugin
+Export-Package: mb.statix.multilang.eclipse
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy
