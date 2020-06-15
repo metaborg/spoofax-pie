@@ -1,5 +1,5 @@
 plugins {
-  id("org.metaborg.gradle.config.java-application")
+  id("org.metaborg.gradle.config.java-library")
   id("org.metaborg.spoofax.compiler.gradle.spoofaxcore.cli")
 }
 
