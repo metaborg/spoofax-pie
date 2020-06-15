@@ -1,6 +1,8 @@
 package mb.spoofax.cli;
 
+import mb.common.util.ListView;
 import mb.pie.api.MixedSession;
+import mb.pie.api.Pie;
 import mb.resource.ResourceService;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.language.LanguageInstance;
@@ -24,6 +26,9 @@ import picocli.CommandLine.Model.PositionalParamSpec;
 
 import javax.inject.Inject;
 import java.io.Serializable;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SpoofaxCli {
     private final ResourceService resourceService;
@@ -36,8 +41,23 @@ public class SpoofaxCli {
 
     public int run(String[] args, LanguageComponent languageComponent) {
         final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
-        try(final MixedSession session = languageComponent.getPie().newSession()) {
-            final CommandSpec commandSpec = toCommandSpec(languageInstance.getCliCommand(), session);
+        final Pie pie = languageComponent.getPie();
+
+        return run(args, pie, languageInstance.getCliCommand());
+    }
+
+    public int run(String[] args, Pie pie, String prefix, LanguageInstance... languageInstances) {
+        List<CliCommand> commands = Stream.of(languageInstances)
+            .map(LanguageInstance::getCliCommand)
+            .collect(Collectors.toList());
+        CliCommand command = CliCommand.of(prefix, ListView.of(commands));
+
+        return run(args, pie, command);
+    }
+
+    public int run(String[] args, Pie pie, CliCommand command) {
+        try(final MixedSession session = pie.newSession()) {
+            final CommandSpec commandSpec = toCommandSpec(command, session);
             final CommandLine commandLine = new CommandLine(commandSpec);
             for(ArgConverter<?> converter : argConverters.allConverters.values()) {
                 registerConverter(commandLine, new TypeConverter<>(converter));

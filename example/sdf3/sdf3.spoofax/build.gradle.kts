@@ -48,8 +48,12 @@ spoofaxAdapterProject {
       val toNormalForm = TypeInfo.of(taskPackageId, "Sdf3ToNormalForm")
       val specToParseTable = TypeInfo.of(taskPackageId, "Sdf3SpecToParseTable")
       val specToParenthesizer = TypeInfo.of(taskPackageId, "Sdf3SpecToParenthesizer")
+      val preStatix = TypeInfo.of(taskPackageId, "Sdf3PreStatix")
+      val postStatix = TypeInfo.of(taskPackageId, "Sdf3PostStatix")
+      val indexAst = TypeInfo.of(taskPackageId, "Sdf3IndexAst")
       builder.addTaskDefs(toCompletionColorer, toCompletionRuntime, toCompletion, toSignature, toDynsemSignature,
-        toPrettyPrinter, toPermissive, toNormalForm, specToParseTable, specToParenthesizer)
+        toPrettyPrinter, toPermissive, toNormalForm, specToParseTable, specToParenthesizer, preStatix, postStatix,
+        indexAst)
 
 
       // Show (debugging) task definitions
@@ -215,6 +219,9 @@ spoofaxAdapterProject {
 
 dependencies {
   api("org.metaborg:sdf2parenthesize")
+  api("org.metaborg:statix.solver")
+  api("org.metaborg:statix.common")
+  api("org.metaborg:statix.multilang")
 
   testAnnotationProcessor(platform("$group:spoofax.depconstraints:$version"))
   testImplementation("org.metaborg:log.backend.slf4j")

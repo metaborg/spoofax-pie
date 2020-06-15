@@ -22,6 +22,7 @@ include("stratego.common")
 include("constraint.common")
 include("nabl2.common")
 include("statix.common")
+include("statix.multilang")
 include("spoofax2.common")
 
 include("spoofax.core")
