@@ -1,5 +1,6 @@
 package mb.sdf3.spoofax.task.debug;
 
+import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
@@ -60,7 +61,7 @@ public abstract class ShowTaskDef extends ProvideOutputShared implements TaskDef
     }
 
     @Override public CommandOutput exec(ExecContext context, Args args) throws Exception {
-        final @Nullable IStrategoTerm normalFormAst = context.require(operation.createTask(desugar.createSupplier(parse.createAstSupplier(args.file))));
+        final @Nullable IStrategoTerm normalFormAst = context.require(operation.createTask(desugar.createSupplier(parse.createAstSupplier(args.file).map(Result::get)))); // TODO: use Result
         if(normalFormAst == null)
             throw new RuntimeException("Parse -> desugar -> transform to " + resultName + " failed (returned null)");
         return provideOutput(args.concrete, normalFormAst, args.file);

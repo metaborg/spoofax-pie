@@ -1,11 +1,8 @@
 package {{genCheckTaskDef.packageId}};
 
-import mb.common.message.KeyedMessages;
 import mb.common.message.Messages;
-import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.MessagesBuilder;
-import mb.constraint.common.ConstraintAnalyzer.SingleFileResult;
-import mb.jsglr1.common.JSGLR1ParseOutput;
+import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
 import mb.pie.api.ResourceStringSupplier;
@@ -15,6 +12,7 @@ import mb.spoofax.core.language.LanguageScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
+import java.io.IOException;
 
 @LanguageScope
 public class {{genCheckTaskDef.id}} implements TaskDef<ResourceKey, Messages> {
@@ -38,13 +36,13 @@ public class {{genCheckTaskDef.id}} implements TaskDef<ResourceKey, Messages> {
         return "{{genCheckTaskDef.qualifiedId}}";
     }
 
-    @Override public Messages exec(ExecContext context, ResourceKey key) throws ExecException, InterruptedException {
+    @Override public Messages exec(ExecContext context, ResourceKey key) throws IOException, ExecException, InterruptedException {
         final MessagesBuilder messagesBuilder = new MessagesBuilder();
         final ResourceStringSupplier stringSupplier = new ResourceStringSupplier(key);
         final Messages parseMessages = context.require(parse.createMessagesSupplier(stringSupplier));
-        builder.addMessages(parseMessages);
+        messagesBuilder.addMessages(parseMessages);
 {{#constraintAnalyzer}}
-        final {{this.analyzeTaskDef.qualifiedId}}.@Nullable Output analysisOutput = context.require(analyze, new {{this.analyzeTaskDef.qualifiedId}}.Input(key, parse.createRecoverableAstSupplier(stringProvider).map(Result::get)));
+        final {{this.analyzeTaskDef.qualifiedId}}.@Nullable Output analysisOutput = context.require(analyze, new {{this.analyzeTaskDef.qualifiedId}}.Input(key, parse.createRecoverableAstSupplier(stringSupplier).map(Result::get)));
         if(analysisOutput != null) {
             messagesBuilder.addMessages(analysisOutput.result.messages);
         }

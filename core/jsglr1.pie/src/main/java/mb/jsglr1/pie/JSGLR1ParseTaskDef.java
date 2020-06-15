@@ -197,7 +197,7 @@ class AstMapper extends Mapper<Result<JSGLR1ParseOutput, MessagesError>, Result<
     public static final AstMapper instance = new AstMapper();
 
     @Override public Result<IStrategoTerm, MessagesError> apply(Result<JSGLR1ParseOutput, MessagesError> result) {
-        return result.andThen(r -> {
+        return result.flatMap(r -> {
             if(r.recovered) {
                 return Result.ofErr(new MessagesError(r.messages, "Parser produced a recovered AST, but recovery was disallowed"));
             } else {
@@ -223,7 +223,7 @@ class TokensMapper extends Mapper<Result<JSGLR1ParseOutput, MessagesError>, Resu
     public static final TokensMapper instance = new TokensMapper();
 
     @Override public Result<JSGLRTokens, MessagesError> apply(Result<JSGLR1ParseOutput, MessagesError> result) {
-        return result.andThen(r -> {
+        return result.flatMap(r -> {
             if(r.recovered) {
                 return Result.ofErr(new MessagesError(r.messages, "Parser produced recovered tokens, but recovery was disallowed"));
             } else {

@@ -2,11 +2,11 @@ package mb.tiger.spoofax.task;
 
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
+import mb.common.message.Messages;
+import mb.common.result.Result;
 import mb.common.util.UncheckedException;
-import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
-import mb.pie.api.ResourceStringSupplier;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.hierarchical.HierarchicalResource;
@@ -19,6 +19,7 @@ import mb.tiger.spoofax.task.reusable.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -83,9 +84,9 @@ public class TigerIdeCheckMulti implements TaskDef<TigerIdeCheckMulti.Input, Key
             root.walk(input.walker, input.matcher).forEach(file -> {
                 final ResourcePath filePath = file.getPath();
                 try {
-                    final JSGLR1ParseOutput parseResult = context.require(parse, new ResourceStringSupplier(filePath));
-                    messagesBuilder.addMessages(filePath, parseResult.getMessages());
-                } catch(ExecException | InterruptedException e) {
+                    final Messages messages = context.require(parse.createMessagesSupplier(filePath));
+                    messagesBuilder.addMessages(filePath, messages);
+                } catch(ExecException | InterruptedException | IOException e) {
                     throw new UncheckedException(e);
                 }
             });
@@ -93,7 +94,7 @@ public class TigerIdeCheckMulti implements TaskDef<TigerIdeCheckMulti.Input, Key
             throw e.getCause();
         }
 
-        final TigerAnalyzeMulti.Input analyzeInput = new TigerAnalyzeMulti.Input(input.root, input.walker, input.matcher, parse.createNullableRecoverableAstFunction());
+        final TigerAnalyzeMulti.Input analyzeInput = new TigerAnalyzeMulti.Input(input.root, input.walker, input.matcher, parse.createRecoverableAstFunction().mapOutput(Result::get)); // TODO: use Result.
         final TigerAnalyzeMulti.@Nullable Output analysisOutput = context.require(analyze, analyzeInput);
         if(analysisOutput != null) {
             messagesBuilder.addMessages(analysisOutput.result.messages);

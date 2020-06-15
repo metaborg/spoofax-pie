@@ -79,7 +79,7 @@ public class Sdf3CreateSpec implements TaskDef<Sdf3CreateSpec.Input, Sdf3Spec> {
             modulesAstSuppliers = project
                 .walk(new TrueResourceWalker(), new PathResourceMatcher(new ExtensionsPathMatcher("tmpl", "sdf3")))
                 .filter(file -> file.getPath() != input.mainFile) // Filter out main module, as it is supplied separately.
-                .map(file -> desugar.createSupplier(parse.createAstSupplier(file.getKey())))
+                .map(file -> desugar.createSupplier(parse.createAstSupplier(file.getKey()).map(Result::get))) // TODO: use Result
                 .collect(Collectors.toCollection(ArrayList::new));
         } catch(UncheckedException e) {
             throw e.getCause();

@@ -2,6 +2,7 @@ package mb.sdf3.spoofax;
 
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
+import mb.common.result.Result;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.log.slf4j.SLF4JLoggerFactory;
@@ -73,7 +74,7 @@ class TestBase {
 
 
     Supplier<@Nullable IStrategoTerm> parsedAstSupplier(ResourceKey resourceKey) {
-        return parse.createAstSupplier(resourceKey);
+        return parse.createAstSupplier(resourceKey).map(Result::get); // TODO: use Result
     }
 
     Supplier<@Nullable IStrategoTerm> parsedAstSupplier(Resource resource) {
