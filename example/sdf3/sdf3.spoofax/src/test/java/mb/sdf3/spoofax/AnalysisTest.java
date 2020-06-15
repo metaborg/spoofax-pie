@@ -2,8 +2,8 @@ package mb.sdf3.spoofax;
 
 import mb.common.message.KeyedMessages;
 import mb.pie.api.ExecException;
+import mb.pie.api.Function;
 import mb.pie.api.MixedSession;
-import mb.pie.api.ValueSupplier;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceKeyString;
 import mb.resource.classloader.ClassLoaderResource;
@@ -28,6 +28,7 @@ import mb.statix.multilang.tasks.SmlPartialSolveFile;
 import mb.statix.multilang.tasks.SmlPartialSolveProject;
 import org.junit.jupiter.api.Test;
 import org.metaborg.util.log.Level;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.terms.TermFactory;
 
@@ -152,19 +153,22 @@ public class AnalysisTest extends TestBase {
         ClassLoaderResource statixSpec = statixRegistry.getResource(id);
         SpecBuilder spec = SpecUtils.loadSpec(statixSpec, "statix/statics", termFactory);
 
+        Function<ResourceKey, IStrategoTerm> preAnalyze = languageComponent.getPreStatix().createFunction()
+            .mapInput((exec, key) -> languageComponent.getIndexAst().createSupplier(key));
+
         LanguageMetadata languageMetadata = ImmutableLanguageMetadata.builder()
             .languageId(new LanguageId("sdf3"))
             .statixSpec(spec)
             .fileConstraint("statix/statics!moduleOK")
             .projectConstraint("statix/statics!projectOK")
             .resourcesSupplier((c, p) -> resources)
-            .astFunction(languageComponent.getPreAnalysisTransform().createFunction())
+            .astFunction(preAnalyze)
             .addTaskDefs(instantiateGlobalScope, partialSolveProject, partialSolveFile, analyzeProject, buildMessages,
-                languageComponent.getPreStatix(), languageComponent.getPreAnalysisTransform(),
+                languageComponent.getPreStatix(), languageComponent.getIndexAst(),
                 languageComponent.getPostStatix(), parse)
             .addResourceRegistries()
             // TODO: remove ValueSupplier somehow
-            .postTransform(languageComponent.getPostStatix().createFunction().mapInput(ValueSupplier::new))
+            .postTransform(languageComponent.getPostStatix().createFunction())
             .build();
 
         return analysisContextService.createContext("AnalysisTest", languageMetadata);

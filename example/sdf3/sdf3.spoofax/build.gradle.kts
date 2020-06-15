@@ -50,10 +50,10 @@ spoofaxAdapterProject {
       val specToParenthesizer = TypeInfo.of(taskPackageId, "Sdf3SpecToParenthesizer")
       val preStatix = TypeInfo.of(taskPackageId, "Sdf3PreStatix")
       val postStatix = TypeInfo.of(taskPackageId, "Sdf3PostStatix")
-      val preAnalysisTransform = TypeInfo.of(taskPackageId, "Sdf3PreAnalysisTransform")
+      val indexAst = TypeInfo.of(taskPackageId, "Sdf3IndexAst")
       builder.addTaskDefs(toCompletionColorer, toCompletionRuntime, toCompletion, toSignature, toDynsemSignature,
         toPrettyPrinter, toPermissive, toNormalForm, specToParseTable, specToParenthesizer, preStatix, postStatix,
-        preAnalysisTransform)
+        indexAst)
 
 
       // Show (debugging) task definitions

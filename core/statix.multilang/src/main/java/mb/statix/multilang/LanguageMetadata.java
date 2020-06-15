@@ -1,6 +1,7 @@
 package mb.statix.multilang;
 
 import mb.pie.api.Function;
+import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceRegistry;
@@ -17,7 +18,7 @@ public interface LanguageMetadata {
     @Value.Parameter LanguageId languageId();
     @Value.Parameter Function<ResourcePath, HashSet<ResourceKey>> resourcesSupplier(); // Use HashSet because should be serializable
     @Value.Parameter Function<ResourceKey, IStrategoTerm> astFunction();
-    @Value.Parameter Function<IStrategoTerm, IStrategoTerm> postTransform();
+    @Value.Parameter Function<Supplier<IStrategoTerm>, IStrategoTerm> postTransform();
     @Value.Parameter SpecBuilder statixSpec();
     @Value.Parameter String fileConstraint();
     @Value.Parameter String projectConstraint();

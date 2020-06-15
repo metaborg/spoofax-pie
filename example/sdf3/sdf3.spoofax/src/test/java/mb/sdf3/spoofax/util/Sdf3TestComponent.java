@@ -8,7 +8,7 @@ import mb.sdf3.spoofax.task.Sdf3CreateSpec;
 import mb.sdf3.spoofax.task.Sdf3Desugar;
 import mb.sdf3.spoofax.task.Sdf3Parse;
 import mb.sdf3.spoofax.task.Sdf3PostStatix;
-import mb.sdf3.spoofax.task.Sdf3PreAnalysisTransform;
+import mb.sdf3.spoofax.task.Sdf3IndexAst;
 import mb.sdf3.spoofax.task.Sdf3PreStatix;
 import mb.sdf3.spoofax.task.Sdf3SpecToParenthesizer;
 import mb.sdf3.spoofax.task.Sdf3SpecToParseTable;
@@ -60,7 +60,7 @@ public interface Sdf3TestComponent extends Sdf3Component {
 
     Sdf3PostStatix getPostStatix();
 
-    Sdf3PreAnalysisTransform getPreAnalysisTransform();
+    Sdf3IndexAst getIndexAst();
 
     StrategoRuntimeBuilder getStrategoRuntimeBuilder();
 }
