@@ -11,7 +11,7 @@ public interface SpecBuilder {
     @Value.Parameter Set<Module> modules();
 
     @Value.Check default void checkModules() throws SpecLoadException {
-        if (modules().isEmpty()) {
+        if(modules().isEmpty()) {
             throw new SpecLoadException("Cannot build Spec without any modules provided");
         }
     }

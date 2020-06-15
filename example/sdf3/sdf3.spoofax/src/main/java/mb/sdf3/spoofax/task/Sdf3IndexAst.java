@@ -14,8 +14,8 @@ import javax.inject.Inject;
 
 public class Sdf3IndexAst implements TaskDef<ResourceKey, @Nullable IStrategoTerm> {
 
-    private Sdf3Parse parse;
-    private ITermFactory tf;
+    private final Sdf3Parse parse;
+    private final ITermFactory tf;
 
     @Inject public Sdf3IndexAst(Sdf3Parse parse, StrategoRuntimeBuilder strategoRuntimeBuilder) {
         this.parse = parse;

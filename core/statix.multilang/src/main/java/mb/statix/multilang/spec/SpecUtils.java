@@ -55,11 +55,11 @@ public class SpecUtils {
                 throw new RuntimeException("Invalid spec file. Imports section should be a list, but was: " + imports);
             }
             imports.forEach(importDecl -> {
-                if (!TermUtils.isString(importDecl)) {
+                if(!TermUtils.isString(importDecl)) {
                     throw new RuntimeException("Invalid file spec. Import module should be string, but was: " + importDecl);
                 }
-                String importedModule = ((IStrategoString) importDecl).stringValue();
-                if (!loadedModules.contains(importedModule) && !modulesToLoad.contains(importedModule)) {
+                String importedModule = ((IStrategoString)importDecl).stringValue();
+                if(!loadedModules.contains(importedModule) && !modulesToLoad.contains(importedModule)) {
                     modulesToLoad.add(importedModule);
                 }
             });
@@ -71,7 +71,7 @@ public class SpecUtils {
 
     public static Spec mergeSpecs(Spec acc, Spec newSpec) {
         // Error when EOP is not equal, throw exception
-        if (!acc.noRelationLabel().equals(newSpec.noRelationLabel())) {
+        if(!acc.noRelationLabel().equals(newSpec.noRelationLabel())) {
             throw new SpecLoadException("No relation labels do not match:" +
                 acc.noRelationLabel() + " and " + newSpec.noRelationLabel());
         }

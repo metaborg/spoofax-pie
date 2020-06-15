@@ -18,9 +18,12 @@ import java.util.stream.Collectors;
 public interface AnalysisContext extends Serializable {
 
     @Value.Parameter String contextId();
+
     @Value.Parameter Map<LanguageId, LanguageMetadata> languages();
+
     // Pie instance to derive Pie instance for use in this context from
     @Value.Parameter Pie basePie();
+
     @Value.Parameter ResourceService baseResourceService();
 
     @Value.Lazy default Pie createPieForContext() {

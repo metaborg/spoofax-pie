@@ -6,8 +6,8 @@ import mb.pie.api.ExecException;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.statix.constraints.CConj;
-import mb.statix.multilang.AnalysisResults;
 import mb.statix.multilang.AnalysisContext;
+import mb.statix.multilang.AnalysisResults;
 import mb.statix.multilang.FileResult;
 import mb.statix.multilang.ImmutableAnalysisResults;
 import mb.statix.multilang.LanguageId;
@@ -190,15 +190,15 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         IState.Immutable combinedState = Stream.concat(
-                projectResults.values().stream(),
-                fileResults.values().stream().map(FileResult::getResult))
+            projectResults.values().stream(),
+            fileResults.values().stream().map(FileResult::getResult))
             .map(SolverResult::state)
             .reduce(IState.Immutable::add)
             .orElseThrow(() -> new MultiLangAnalysisException("Expected at least one result"));
 
         IConstraint combinedConstraint = Stream.concat(
-                projectResults.values().stream(),
-                fileResults.values().stream().map(FileResult::getResult))
+            projectResults.values().stream(),
+            fileResults.values().stream().map(FileResult::getResult))
             .map(SolverResult::delayed)
             .reduce(globalState.getResult().delayed(), CConj::new);
 

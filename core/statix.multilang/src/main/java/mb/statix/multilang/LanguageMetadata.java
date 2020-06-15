@@ -16,12 +16,21 @@ import java.util.Set;
 @Value.Immutable
 public interface LanguageMetadata {
     @Value.Parameter LanguageId languageId();
-    @Value.Parameter Function<ResourcePath, HashSet<ResourceKey>> resourcesSupplier(); // Use HashSet because should be serializable
+
+    @Value.Parameter
+    Function<ResourcePath, HashSet<ResourceKey>> resourcesSupplier(); // Use HashSet because should be serializable
+
     @Value.Parameter Function<ResourceKey, IStrategoTerm> astFunction();
+
     @Value.Parameter Function<Supplier<IStrategoTerm>, IStrategoTerm> postTransform();
+
     @Value.Parameter SpecBuilder statixSpec();
+
     @Value.Parameter String fileConstraint();
+
     @Value.Parameter String projectConstraint();
+
     @Value.Parameter Set<TaskDef<?, ?>> taskDefs();
+
     @Value.Parameter Set<ResourceRegistry> resourceRegistries();
 }

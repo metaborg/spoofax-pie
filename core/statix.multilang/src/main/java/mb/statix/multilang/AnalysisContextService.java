@@ -24,7 +24,7 @@ public class AnalysisContextService {
     }
 
     public AnalysisContext getAnalysisContext(String contextId) {
-        if (!contexts.containsKey(contextId)) {
+        if(!contexts.containsKey(contextId)) {
             throw new MultiLangAnalysisException(String.format("No context with id '%s'created", contextId));
         }
         return contexts.get(contextId);

@@ -17,7 +17,7 @@ import java.util.Objects;
 
 public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.Input, SmlPartialSolveProject.Output> {
 
-    public static class Input implements Serializable  {
+    public static class Input implements Serializable {
         private final ITermVar globalScopeVar;
         private final SolverResult globalResult;
         private final IDebugContext debug;
@@ -58,7 +58,7 @@ public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.In
         }
     }
 
-    public static class Output implements Serializable  {
+    public static class Output implements Serializable {
         private final SolverResult projectResult;
 
         public Output(SolverResult projectResult) {
@@ -87,7 +87,8 @@ public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.In
         }
     }
 
-    @Inject public SmlPartialSolveProject() { }
+    @Inject public SmlPartialSolveProject() {
+    }
 
     @Override
     public String getId() {

@@ -66,7 +66,7 @@ public class MessageUtils {
     }
 
     private static Severity kindToSeverity(MessageKind kind) {
-        return kind == MessageKind.ERROR ? Severity.Error:
+        return kind == MessageKind.ERROR ? Severity.Error :
             kind == MessageKind.WARNING ? Severity.Warning :
                 Severity.Info;
     }
@@ -110,11 +110,11 @@ public class MessageUtils {
     }
 
     public static @Nullable ResourceKey resourceKeyFromOrigin(ITerm origin) {
-        if (origin.getAttachments().containsKey(TermIndex.class)) {
-            TermIndex termIndex = (TermIndex) origin.getAttachments().get(TermIndex.class);
+        if(origin.getAttachments().containsKey(TermIndex.class)) {
+            TermIndex termIndex = (TermIndex)origin.getAttachments().get(TermIndex.class);
             String resource = termIndex.getResource();
             String[] split = resource.split(QualifiedResourceKeyString.separator);
-            if (split.length < 2) {
+            if(split.length < 2) {
                 return new DefaultResourceKey(null, resource);
             }
             final String qualifier = split[0];
@@ -128,7 +128,7 @@ public class MessageUtils {
 
         while(current != null) {
             ITerm origin = findOriginArgument(current, unifier).orElse(null);
-            if (origin != null) {
+            if(origin != null) {
                 return resourceKeyFromOrigin(origin);
             }
             current = current.cause().orElse(null);

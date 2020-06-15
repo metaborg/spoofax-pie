@@ -10,6 +10,14 @@ import java.util.HashMap;
 
 @Value.Immutable
 public interface AnalysisResults extends Serializable {
+    @Value.Parameter ITerm globalScope();
+
+    @Value.Parameter HashMap<LanguageId, SolverResult> projectResults();
+
+    @Value.Parameter HashMap<FileKey, FileResult> fileResults();
+
+    @Value.Parameter SolverResult finalResult();
+
     class FileKey implements Serializable {
 
         private final LanguageId language;
@@ -28,12 +36,4 @@ public interface AnalysisResults extends Serializable {
             return resource;
         }
     }
-
-    @Value.Parameter ITerm globalScope();
-
-    @Value.Parameter HashMap<LanguageId, SolverResult> projectResults();
-
-    @Value.Parameter HashMap<FileKey, FileResult> fileResults();
-
-    @Value.Parameter SolverResult finalResult();
 }

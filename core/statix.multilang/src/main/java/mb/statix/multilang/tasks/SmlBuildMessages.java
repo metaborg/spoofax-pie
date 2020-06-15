@@ -77,7 +77,7 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
             List<Message> resourceMessages = fileResult.getResult().messages().entrySet().stream()
                 .map(e -> MessageUtils.formatMessage(e.getValue(), e.getKey(), resultUnifier))
                 .collect(Collectors.toList());
-            if (!resourceMessages.isEmpty()) {
+            if(!resourceMessages.isEmpty()) {
                 builder.addMessages(key.getResource(), resourceMessages);
             }
         });

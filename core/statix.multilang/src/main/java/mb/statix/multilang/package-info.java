@@ -4,7 +4,7 @@
     // prevent generation of javax.annotation.*; bogus entry, because empty list = allow all
     allowedClasspathAnnotations = {Override.class}
 )
-// @formatter:on
 package mb.statix.multilang;
+// @formatter:on
 
 import org.immutables.value.Value;

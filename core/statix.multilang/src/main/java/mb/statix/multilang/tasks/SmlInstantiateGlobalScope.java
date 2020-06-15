@@ -99,7 +99,8 @@ public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalSc
         }
     }
 
-    @Inject public SmlInstantiateGlobalScope() { }
+    @Inject public SmlInstantiateGlobalScope() {
+    }
 
     @Override
     public String getId() {
