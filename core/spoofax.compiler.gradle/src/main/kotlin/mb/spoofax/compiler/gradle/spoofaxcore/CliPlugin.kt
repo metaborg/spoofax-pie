@@ -6,11 +6,16 @@ import mb.spoofax.compiler.spoofaxcore.*
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Dependency
 import org.gradle.api.plugins.ApplicationPlugin
+import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.plugins.JavaApplication
-import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
+import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
+import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.*
 
 open class CliProjectSettings(
@@ -89,6 +94,7 @@ open class CliPlugin : Plugin<Project> {
   private fun configure(project: Project, finalized: CliProjectFinalized) {
     configureProject(project, finalized)
     configureCompileTask(project, finalized)
+    configureExecutableJarTask(project)
   }
 
   private fun configureProject(project: Project, finalized: CliProjectFinalized) {
@@ -117,5 +123,49 @@ open class CliPlugin : Plugin<Project> {
 
     // Make compileJava depend on our task, because we generate Java code.
     project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(compileTask)
+  }
+
+  private fun configureExecutableJarTask(project: Project) {
+    val executableJarTask = project.tasks.register<Jar>("executableJar") {
+      val runtimeClasspath by project.configurations
+      dependsOn(runtimeClasspath)
+
+      archiveClassifier.set("executable")
+
+      with(project.tasks.getByName<Jar>(JavaPlugin.JAR_TASK_NAME))
+      from({
+        // Closure inside to defer evaluation until task execution time.
+        runtimeClasspath.filter { it.exists() }.map {
+          @Suppress("IMPLICIT_CAST_TO_ANY") // Implicit cast to Any is fine, as from takes Any's.
+          if(it.isDirectory) it else project.zipTree(it)
+        }
+      })
+
+      doFirst { // Delay setting Main-Class attribute to just before execution, to ensure that mainClassName is set.
+        manifest {
+          @Suppress("UnstableApiUsage")
+          attributes["Main-Class"] = project.the<JavaApplication>().mainClassName
+        }
+      }
+    }
+    project.tasks.named(BasePlugin.ASSEMBLE_TASK_NAME).configure { dependsOn(executableJarTask) }
+
+    // Create an artifact for the executable JAR.
+    val executableJarArtifact = project.artifacts.add(Dependency.DEFAULT_CONFIGURATION, executableJarTask) {
+      classifier = "executable"
+    }
+
+    // Publish primary artifact from the Java component, and publish executable JAR and ZIP distribution as secondary artifacts.
+    project.plugins.withType(MavenPublishPlugin::class.java) {
+      project.configure<PublishingExtension> {
+        publications {
+          create<MavenPublication>("JavaApplication") {
+            from(project.components["java"])
+            artifact(executableJarArtifact)
+            artifact(project.tasks.getByName("distZip"))
+          }
+        }
+      }
+    }
   }
 }
