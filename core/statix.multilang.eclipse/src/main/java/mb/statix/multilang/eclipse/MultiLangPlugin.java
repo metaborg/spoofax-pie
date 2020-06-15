@@ -1,15 +1,16 @@
 package mb.statix.multilang.eclipse;
 
+import mb.spoofax.eclipse.SpoofaxPlugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.runtime.Plugin;
 import org.osgi.framework.BundleContext;
 
 public class MultiLangPlugin extends Plugin {
-    public static final String id = "spoofax.eclipse";
+    public static final String id = "statix.multilang.eclipse";
 
     private static @Nullable MultiLangPlugin plugin;
-    // private static @Nullable SpoofaxEclipseComponent component;
+    private static @Nullable MultiLangEclipseComponent component;
 
 
     public static MultiLangPlugin getPlugin() {
@@ -20,25 +21,22 @@ public class MultiLangPlugin extends Plugin {
         return plugin;
     }
 
-    /* public static SpoofaxEclipseComponent getComponent() {
+    public static MultiLangEclipseComponent getComponent() {
         if(component == null) {
             throw new RuntimeException(
-                "Cannot access SpoofaxEclipseComponent; SpoofaxPlugin has not been started yet, or has been stopped");
+                "Cannot access MultiLangEclipseComponent; MultiLangPlugin has not been started yet, or has been stopped");
         }
         return component;
-    } */
+    }
 
 
     @Override public void start(@NonNull BundleContext context) throws Exception {
         super.start(context);
         plugin = this;
-        /* component = DaggerSpoofaxEclipseComponent
+        component = DaggerMultiLangEclipseComponent
             .builder()
-            .loggerFactoryModule(new LoggerFactoryModule(new EclipseLoggerFactory()))
-            .platformPieModule(new PlatformPieModule(PieBuilderImpl::new))
+            .platformComponent(SpoofaxPlugin.getComponent())
             .build();
-
-        component.getPartClosedCallback().register();*/
     }
 
     @Override public void stop(@NonNull BundleContext context) throws Exception {

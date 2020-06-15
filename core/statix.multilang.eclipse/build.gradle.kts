@@ -14,6 +14,7 @@ dependencies {
   bundleTargetPlatformApi(eclipse("org.eclipse.core.expressions"))
   bundleTargetPlatformApi(eclipse("org.eclipse.core.resources"))
   bundleTargetPlatformApi(eclipse("org.eclipse.core.filesystem"))
+  bundleTargetPlatformApi(project(":spoofax.eclipse"))
 
   bundleApi(project(":statix.multilang.eclipse.externaldeps"))
 
