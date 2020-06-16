@@ -1,6 +1,6 @@
 package mb.tiger.spoofax.task.reusable;
 
-import mb.common.result.Result;
+import mb.common.option.Option;
 import mb.common.style.Styling;
 import mb.jsglr.common.JSGLRTokens;
 import mb.pie.api.ExecContext;
@@ -14,7 +14,7 @@ import javax.inject.Inject;
 import java.io.IOException;
 
 @LanguageScope
-public class TigerStyle implements TaskDef<Supplier<? extends Result<JSGLRTokens, ?>>, Result<Styling, ?>> {
+public class TigerStyle implements TaskDef<Supplier<Option<JSGLRTokens>>, Option<Styling>> {
     private final TigerStyler styler;
 
     @Inject public TigerStyle(TigerStyler styler) {
@@ -26,11 +26,10 @@ public class TigerStyle implements TaskDef<Supplier<? extends Result<JSGLRTokens
     }
 
     @Override
-    public Result<Styling, ?> exec(
+    public Option<Styling> exec(
         ExecContext context,
-        Supplier<? extends Result<JSGLRTokens, ?>> tokensSupplier
+        Supplier<Option<JSGLRTokens>> tokensSupplier
     ) throws ExecException, IOException, InterruptedException {
-        final Result<JSGLRTokens, ? extends Throwable> result = context.require(tokensSupplier);
-        return result.map(t -> styler.style(t.tokens));
+        return context.require(tokensSupplier).map(t -> styler.style(t.tokens));
     }
 }

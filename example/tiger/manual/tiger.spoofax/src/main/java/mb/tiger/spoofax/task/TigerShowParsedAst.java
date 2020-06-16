@@ -36,9 +36,7 @@ public class TigerShowParsedAst implements TaskDef<TigerShowArgs, CommandOutput>
         final @Nullable Region region = input.region;
 
         final Result<JSGLR1ParseOutput, MessagesError> parseResult = context.require(parse, new ResourceStringSupplier(key));
-        final IStrategoTerm ast = parseResult.ok()
-            .map(o -> o.ast)
-            .orElseThrow(() -> new RuntimeException("Cannot show parsed AST, parsed AST for '" + key + "' is null")); // TODO: use Result
+        final IStrategoTerm ast = parseResult.mapOrElseThrow(e -> new RuntimeException("Cannot show parsed AST; parsing failed", e), o -> o.ast); // TODO: use Result
 
         final IStrategoTerm term;
         if(region != null) {

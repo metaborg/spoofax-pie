@@ -25,6 +25,6 @@ public class {{genTokenizeTaskDef.id}} implements TaskDef<ResourceKey, @Nullable
 
     @Override
     public @Nullable JSGLRTokens exec(ExecContext context, ResourceKey key) throws ExecException, InterruptedException {
-        return context.require(parse, new ResourceStringSupplier(key)).ok().map(o -> o.tokens).orElse(null);
+        return context.require(parse, new ResourceStringSupplier(key)).mapOrNull(o -> o.tokens);
     }
 }

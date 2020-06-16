@@ -1,7 +1,7 @@
 package mb.spoofax.eclipse.pie;
 
 import mb.common.message.KeyedMessages;
-import mb.common.result.Result;
+import mb.common.option.Option;
 import mb.common.style.Styling;
 import mb.common.util.CollectionView;
 import mb.common.util.ListView;
@@ -129,12 +129,12 @@ public class PieRunner {
 
             final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
 
-            final Task<Result<Styling, ?>> styleTask = languageInstance.createStyleTask(path);
+            final Task<Option<Styling>> styleTask = languageInstance.createStyleTask(path);
             final String text = document.get();
-            final Result<Styling, ?> stylingResult = requireWithoutObserving(styleTask, postSession, monitor);
-            stylingResult.ifElse(styling -> {
+            final Option<Styling> stylingOption = requireWithoutObserving(styleTask, postSession, monitor);
+            stylingOption.ifElse(styling -> {
                 workspaceUpdate.updateStyle(editor, text, styling);
-            }, e -> {
+            }, () -> {
                 workspaceUpdate.removeStyle(editor, text.length());
             });
 

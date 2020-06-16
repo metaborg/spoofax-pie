@@ -2,6 +2,7 @@ package {{genInstance.packageId}};
 
 import mb.common.message.KeyedMessages;
 import mb.common.message.Messages;
+import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.common.style.Styling;
 import mb.common.region.Region;
@@ -79,8 +80,8 @@ public class {{genInstance.id}} implements LanguageInstance {
         return {{tokenizeInjection.name}}.createTask(resourceKey);
     }
 
-    @Override public Task<Result<Styling, ?>> createStyleTask(ResourceKey resourceKey) {
-        return {{styleInjection.name}}.createTask({{parseInjection.name}}.createRecoverableTokensSupplier(resourceKey));
+    @Override public Task<Option<Styling>> createStyleTask(ResourceKey resourceKey) {
+        return {{styleInjection.name}}.createTask({{parseInjection.name}}.createRecoverableTokensSupplier(resourceKey).map(Result::ok));
     }
 
     @Override

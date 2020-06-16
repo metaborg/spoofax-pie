@@ -1,6 +1,7 @@
 package mb.spoofax.core.language;
 
 import mb.common.message.KeyedMessages;
+import mb.common.option.Option;
 import mb.common.region.Region;
 import mb.common.result.Result;
 import mb.common.style.Styling;
@@ -26,7 +27,7 @@ public interface LanguageInstance {
 
     Task<? extends @Nullable Tokens<?>> createTokenizeTask(ResourceKey resourceKey);
 
-    Task<Result<Styling, ?>> createStyleTask(ResourceKey resourceKey);
+    Task<Option<Styling>> createStyleTask(ResourceKey resourceKey);
 
     /**
      * Creates a task that produces completions.

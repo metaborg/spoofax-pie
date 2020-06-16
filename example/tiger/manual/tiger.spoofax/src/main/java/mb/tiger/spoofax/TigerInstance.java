@@ -1,6 +1,7 @@
 package mb.tiger.spoofax;
 
 import mb.common.message.KeyedMessages;
+import mb.common.option.Option;
 import mb.common.region.Region;
 import mb.common.result.Result;
 import mb.common.style.Styling;
@@ -10,7 +11,6 @@ import mb.common.util.MapView;
 import mb.common.util.SetView;
 import mb.completions.common.CompletionResult;
 import mb.jsglr.common.JSGLRTokens;
-import mb.pie.api.Supplier;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
@@ -115,8 +115,8 @@ public class TigerInstance implements LanguageInstance {
         return tokenize.createTask(resourceKey); // TODO: use Result.
     }
 
-    @Override public Task<Result<Styling, ?>> createStyleTask(ResourceKey resourceKey) {
-        return style.createTask(parse.createRecoverableTokensSupplier(resourceKey));
+    @Override public Task<Option<Styling>> createStyleTask(ResourceKey resourceKey) {
+        return style.createTask(parse.createRecoverableTokensSupplier(resourceKey).map(Result::ok));
     }
 
     @Override
