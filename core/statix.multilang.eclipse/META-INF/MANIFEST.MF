@@ -4,3 +4,6 @@ Bundle-Activator: mb.statix.multilang.eclipse.MultiLangPlugin
 Export-Package: mb.statix.multilang.eclipse
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
+Bundle-SymbolicName: mb.statix.multilang.eclipse;singleton:=true
+Bundle-Name: Multilanguage Analysis Eclipse plugin
+Bundle-Vendor: Metaborg
