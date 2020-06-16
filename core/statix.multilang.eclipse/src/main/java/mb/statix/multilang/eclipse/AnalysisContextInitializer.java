@@ -4,7 +4,6 @@ import mb.statix.multilang.AnalysisContextService;
 import mb.statix.multilang.LanguageMetadata;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
-import org.eclipse.e4.core.di.annotations.Execute;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -13,8 +12,7 @@ import java.util.stream.Stream;
 public class AnalysisContextInitializer {
     private static final String ANALYSIS_CONTEXT_ID = "mb.metaborg.statix.multilang.analysiscontext";
 
-    @Execute
-    public void execute(IExtensionRegistry registry) {
+    public static void execute(IExtensionRegistry registry) {
         AnalysisContextService analysisContextService = MultiLangPlugin.getComponent().getAnalysisContextService();
         IConfigurationElement[] extensions = registry.getConfigurationElementsFor(ANALYSIS_CONTEXT_ID);
 

@@ -10,6 +10,7 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.statix.multilang.AnalysisContext;
 import mb.statix.multilang.AnalysisResults;
 import mb.statix.multilang.utils.MessageUtils;
+import org.metaborg.util.iterators.Iterables2;
 import org.metaborg.util.log.Level;
 
 import javax.inject.Inject;
@@ -89,6 +90,12 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
             .collect(Collectors.groupingBy(e -> Optional.ofNullable(e.getKey())))
             .forEach((resourceKey, messages) -> builder.addMessages(resourceKey.orElse(null), messages.stream()
                 .map(Map.Entry::getValue).collect(Collectors.toList())));
+
+        // Add empty message sets for keys with no message, to ensure they are cleared
+        results.fileResults().keySet()
+            .stream()
+            .map(AnalysisResults.FileKey::getResource)
+            .forEach(key -> builder.addMessages(key, Iterables2.empty()));
 
         return builder.build();
     }

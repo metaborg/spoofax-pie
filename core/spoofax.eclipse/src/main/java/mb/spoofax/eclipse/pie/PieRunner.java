@@ -597,6 +597,7 @@ public class PieRunner {
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException {
         final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
+        // TODO: implement renaming resources
         final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
         try {
             resourceChanges.newProjects.forEach(newProject -> {

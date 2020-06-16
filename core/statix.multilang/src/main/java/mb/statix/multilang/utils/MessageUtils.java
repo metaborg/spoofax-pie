@@ -4,14 +4,15 @@ import com.google.common.collect.Streams;
 import mb.common.message.Message;
 import mb.common.message.Severity;
 import mb.common.region.Region;
+import mb.jsglr.common.ResourceKeyAttachment;
+import mb.jsglr.common.TermTracer;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.build.TermBuild;
+import mb.nabl2.terms.stratego.StrategoAnnotations;
 import mb.nabl2.terms.stratego.TermIndex;
 import mb.nabl2.terms.stratego.TermOrigin;
 import mb.nabl2.terms.unification.ud.IUniDisunifier;
 import mb.nabl2.util.TermFormatter;
-import mb.resource.DefaultResourceKey;
-import mb.resource.QualifiedResourceKeyString;
 import mb.resource.ResourceKey;
 import mb.statix.constraints.Constraints;
 import mb.statix.constraints.messages.IMessage;
@@ -20,6 +21,12 @@ import mb.statix.solver.IConstraint;
 import mb.statix.solver.persistent.Solver;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.functions.Function1;
+import org.spoofax.interpreter.terms.ISimpleTerm;
+import org.spoofax.interpreter.terms.IStrategoAppl;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.jsglr.client.imploder.ImploderAttachment;
+import org.spoofax.terms.attachments.ITermAttachment;
+import org.spoofax.terms.attachments.ParentAttachment;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -62,7 +69,22 @@ public class MessageUtils {
         final String messageText = trace.stream().filter(s -> !s.isEmpty()).map(MessageUtils::cleanupString)
             .collect(Collectors.joining("<br>\n&gt;&nbsp;"));
 
-        return new Message(messageText, kindToSeverity(message.kind()), Region.fromString(originTerm.toString()));
+        return new Message(messageText, kindToSeverity(message.kind()), getRegion(originTerm));
+    }
+
+    private static Region getRegion(ITerm originTerm) {
+        StrategoAnnotations strategoAnnotations = originTerm.getAttachments().getInstance(StrategoAnnotations.class);
+        if (strategoAnnotations == null) {
+            return null;
+        }
+        return strategoAnnotations.getAnnotationList()
+            .stream()
+            .filter(IStrategoAppl.class::isInstance)
+            .map(IStrategoAppl.class::cast)
+            .filter(appl -> appl.getConstructor().getName().equals("TermIndex"))
+            .findAny()
+            .map(TermTracer::getRegion)
+            .orElse(null);
     }
 
     private static Severity kindToSeverity(MessageKind kind) {
@@ -110,17 +132,29 @@ public class MessageUtils {
     }
 
     public static @Nullable ResourceKey resourceKeyFromOrigin(ITerm origin) {
-        if(origin.getAttachments().containsKey(TermIndex.class)) {
-            TermIndex termIndex = (TermIndex)origin.getAttachments().get(TermIndex.class);
-            String resource = termIndex.getResource();
-            String[] split = resource.split(QualifiedResourceKeyString.separator);
-            if(split.length < 2) {
-                return new DefaultResourceKey(null, resource);
-            }
-            final String qualifier = split[0];
-            return new DefaultResourceKey(qualifier.isEmpty() ? null : qualifier, split[1]);
+        if(origin.getAttachments().containsKey(TermOrigin.class)) {
+            TermOrigin termOrigin = (TermOrigin)origin.getAttachments().get(TermOrigin.class);
+            ITermAttachment parent = termOrigin.getImploderAttachment();
+            return getResourceKeyFromParentAttachments(parent);
         }
         return null;
+    }
+
+    private static ResourceKey getResourceKeyFromParentAttachments(ITermAttachment attachment) {
+        if(attachment == null) {
+            return null;
+        }
+        if(attachment instanceof ResourceKeyAttachment) {
+            return ((ResourceKeyAttachment)attachment).resourceKey;
+        }
+
+        if (attachment instanceof ParentAttachment) {
+            IStrategoTerm parentTerm = ((ParentAttachment) attachment).getParent();
+            ISimpleTerm root = ParentAttachment.getRoot(parentTerm);
+            return getResourceKeyFromParentAttachments(root.getAttachment(ImploderAttachment.TYPE));
+        }
+
+        return getResourceKeyFromParentAttachments(attachment.getNext());
     }
 
     public static ResourceKey tryGetResourceKey(IConstraint constraint, IUniDisunifier unifier) {
@@ -129,7 +163,10 @@ public class MessageUtils {
         while(current != null) {
             ITerm origin = findOriginArgument(current, unifier).orElse(null);
             if(origin != null) {
-                return resourceKeyFromOrigin(origin);
+                ResourceKey result = resourceKeyFromOrigin(origin);
+                if(result != null) {
+                    return result;
+                }
             }
             current = current.cause().orElse(null);
         }

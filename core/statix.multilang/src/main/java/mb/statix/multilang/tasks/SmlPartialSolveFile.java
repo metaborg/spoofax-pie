@@ -123,7 +123,7 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, S
     }
 
     @Override public Output exec(ExecContext context, Input input) throws Exception {
-        Supplier<IStrategoTerm> astSupplier = exec -> input.astSupplier.apply(context, input.resourceKey);
+        Supplier<IStrategoTerm> astSupplier = exec -> input.astSupplier.apply(exec, input.resourceKey);
         IStrategoTerm ast = context.require(astSupplier);
         Iterable<ITerm> constraintArgs = Iterables2.from(input.globalScope, st.fromStratego(ast));
         IConstraint fileConstraint = new CUser(input.fileConstraint, constraintArgs, null);
