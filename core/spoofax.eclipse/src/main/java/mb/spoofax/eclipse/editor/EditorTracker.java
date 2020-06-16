@@ -89,14 +89,12 @@ public class EditorTracker extends EditorTrackerBase {
 
     private void activateContext() {
         if(contextActivation == null) {
-            System.out.println("Activating context: " + eclipseIdentifiers.getContext());
             contextActivation = contextService.activateContext(eclipseIdentifiers.getContext());
         }
     }
 
     private void deactivateContext() {
         if(contextActivation != null) {
-            System.out.println("Deactivating context: " + eclipseIdentifiers.getContext());
             contextService.deactivateContext(contextActivation);
             contextActivation = null;
         }
