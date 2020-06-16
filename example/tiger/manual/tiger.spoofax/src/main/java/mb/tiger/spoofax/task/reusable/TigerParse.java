@@ -8,17 +8,18 @@ import mb.spoofax.core.language.LanguageScope;
 import mb.tiger.TigerParser;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 @LanguageScope
 public class TigerParse extends JSGLR1ParseTaskDef {
-    private final javax.inject.Provider<TigerParser> parserProvider;
+    private final Provider<TigerParser> parserProvider;
 
-    @Inject public TigerParse(javax.inject.Provider<TigerParser> parserProvider) {
+    @Inject public TigerParse(Provider<TigerParser> parserProvider) {
         this.parserProvider = parserProvider;
     }
 
     @Override public String getId() {
-        return "mb.tiger.spoofax.task.reusable.TigerParse";
+        return getClass().getName();
     }
 
     @Override protected Result<JSGLR1ParseOutput, MessagesError> parse(String text) throws InterruptedException {

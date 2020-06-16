@@ -4,13 +4,13 @@ import mb.common.message.KeyedMessages;
 import mb.common.region.Region;
 import mb.common.result.Result;
 import mb.common.style.Styling;
-import mb.common.token.Token;
 import mb.common.util.CollectionView;
 import mb.common.util.ListView;
 import mb.common.util.MapView;
 import mb.common.util.SetView;
 import mb.completions.common.CompletionResult;
 import mb.jsglr.common.JSGLRTokens;
+import mb.pie.api.Supplier;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
@@ -42,7 +42,6 @@ import mb.tiger.spoofax.task.reusable.TigerStyle;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.Set;
 
 public class TigerInstance implements LanguageInstance {
@@ -116,8 +115,8 @@ public class TigerInstance implements LanguageInstance {
         return tokenize.createTask(resourceKey); // TODO: use Result.
     }
 
-    @Override public Task<@Nullable Styling> createStyleTask(ResourceKey resourceKey) {
-        return style.createTask(parse.createRecoverableTokensSupplier(resourceKey).map(Result::get)); // TODO: use Result.
+    @Override public Task<Result<Styling, ?>> createStyleTask(ResourceKey resourceKey) {
+        return style.createTask(parse.createRecoverableTokensSupplier(resourceKey));
     }
 
     @Override

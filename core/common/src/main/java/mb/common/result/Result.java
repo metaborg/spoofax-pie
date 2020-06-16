@@ -58,6 +58,12 @@ public interface Result<T extends Serializable, E extends Throwable> extends Ser
     }
 
 
+    default void ifElse(Consumer<? super T> okConsumer, Consumer<? super E> errConsumer) {
+        ok().ifPresent(okConsumer);
+        err().ifPresent(errConsumer);
+    }
+
+
     default <U extends Serializable> Result<U, E> map(Function<? super T, ? extends U> mapper) {
         // noinspection unchecked (cast is safe because it is impossible to get a value of type U in the err case)
         return ok().map(v -> Result.<U, E>ofOk(mapper.apply(v))).orElseGet(() -> (Result<U, E>)this);
@@ -69,6 +75,11 @@ public interface Result<T extends Serializable, E extends Throwable> extends Ser
 
     default <U extends Serializable> U mapOrElse(Supplier<? extends U> def, Function<? super T, U> mapper) {
         return ok().map(mapper).orElseGet(def);
+    }
+
+    default <U extends Serializable> U mapOrElse(Function<? super E, ? extends U> def, Function<? super T, U> mapper) {
+        //noinspection OptionalGetWithoutIsPresent (get is safe because error is present if not ok case)
+        return ok().map(mapper).orElseGet(() -> def.apply(err().get()));
     }
 
     default <U extends @Nullable Serializable> @Nullable U mapOrNull(Function<? super T, ? extends U> mapper) {
@@ -89,11 +100,17 @@ public interface Result<T extends Serializable, E extends Throwable> extends Ser
         return err().map(mapper).orElseGet(def);
     }
 
+    default <F extends Throwable> F mapErrOrElse(Function<? super T, ? extends F> def, Function<? super E, F> mapper) {
+        //noinspection OptionalGetWithoutIsPresent (get is safe because value is present if not err case)
+        return err().map(mapper).orElseGet(() -> def.apply(ok().get()));
+    }
+
     default <F extends Throwable> @Nullable F mapErrOrNull(Function<? super E, ? extends F> mapper) {
         return err().map(mapper).orElse(null);
     }
 
 
+    // TODO: remove, use mapOrElse
     default <R extends Serializable> R mapRes(Function<? super T, R> valueMapper, Function<? super E, R> errorMapper) {
         //noinspection OptionalGetWithoutIsPresent (get is safe because error is present if not ok case)
         return ok().map(valueMapper).orElseGet(() -> errorMapper.apply(err().get()));

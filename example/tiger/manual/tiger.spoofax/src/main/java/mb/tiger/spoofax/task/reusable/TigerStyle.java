@@ -1,5 +1,6 @@
 package mb.tiger.spoofax.task.reusable;
 
+import mb.common.result.Result;
 import mb.common.style.Styling;
 import mb.jsglr.common.JSGLRTokens;
 import mb.pie.api.ExecContext;
@@ -8,13 +9,12 @@ import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.spoofax.core.language.LanguageScope;
 import mb.tiger.TigerStyler;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import java.io.IOException;
 
 @LanguageScope
-public class TigerStyle implements TaskDef<Supplier<@Nullable JSGLRTokens>, @Nullable Styling> {
+public class TigerStyle implements TaskDef<Supplier<? extends Result<JSGLRTokens, ?>>, Result<Styling, ?>> {
     private final TigerStyler styler;
 
     @Inject public TigerStyle(TigerStyler styler) {
@@ -22,19 +22,15 @@ public class TigerStyle implements TaskDef<Supplier<@Nullable JSGLRTokens>, @Nul
     }
 
     @Override public String getId() {
-        return "mb.tiger.spoofax.task.reusable.TigerStyle";
+        return getClass().getName();
     }
 
     @Override
-    public @Nullable Styling exec(
+    public Result<Styling, ?> exec(
         ExecContext context,
-        Supplier<@Nullable JSGLRTokens> tokensSupplier
+        Supplier<? extends Result<JSGLRTokens, ?>> tokensSupplier
     ) throws ExecException, IOException, InterruptedException {
-        final @Nullable JSGLRTokens tokens = context.require(tokensSupplier);
-        if(tokens == null) {
-            return null;
-        } else {
-            return styler.style(tokens.tokens);
-        }
+        final Result<JSGLRTokens, ? extends Throwable> result = context.require(tokensSupplier);
+        return result.map(t -> styler.style(t.tokens));
     }
 }
