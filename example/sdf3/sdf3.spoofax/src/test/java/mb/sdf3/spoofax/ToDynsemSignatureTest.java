@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.spoofax.terms.util.TermUtils.*;
 
 class ToDynsemSignatureTest extends TestBase {
-    @Test void testTask() throws ExecException, IOException {
+    @Test void testTask() throws ExecException, IOException, InterruptedException {
         final FSResource resource = createTextFile("module nested/a context-free syntax A = <A>", "a.sdf3");
         final Sdf3ToDynsemSignature taskDef = languageComponent.getToDynsemSignature();
         try(final MixedSession session = newSession()) {

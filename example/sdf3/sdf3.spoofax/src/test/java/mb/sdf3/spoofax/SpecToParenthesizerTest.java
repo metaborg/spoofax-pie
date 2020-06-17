@@ -16,7 +16,7 @@ import static org.spoofax.terms.util.TermUtils.isAppl;
 import static org.spoofax.terms.util.TermUtils.isStringAt;
 
 class SpecToParenthesizerTest extends TestBase {
-    @Test void testTask() throws ExecException {
+    @Test void testTask() throws ExecException, InterruptedException {
         final TextResource resource = createTextResource("module test context-free syntax A = <A>", "a.sdf3");
         final Sdf3SpecToParenthesizer taskDef = languageComponent.getSpecToParenthesizer();
         try(final MixedSession session = newSession()) {

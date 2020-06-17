@@ -5,7 +5,6 @@ import mb.common.message.KeyedMessagesBuilder;
 import mb.common.util.UncheckedException;
 import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.pie.api.ExecContext;
-import mb.pie.api.ExecException;
 import mb.pie.api.ResourceStringSupplier;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
@@ -82,12 +81,8 @@ public class TigerIdeCheckMulti implements TaskDef<TigerIdeCheckMulti.Input, Key
         try {
             root.walk(input.walker, input.matcher).forEach(file -> {
                 final ResourcePath filePath = file.getPath();
-                try {
-                    final JSGLR1ParseResult parseResult = context.require(parse, new ResourceStringSupplier(filePath));
-                    messagesBuilder.addMessages(filePath, parseResult.getMessages());
-                } catch(ExecException | InterruptedException e) {
-                    throw new UncheckedException(e);
-                }
+                final JSGLR1ParseResult parseResult = context.require(parse, new ResourceStringSupplier(filePath));
+                messagesBuilder.addMessages(filePath, parseResult.getMessages());
             });
         } catch(UncheckedException e) {
             throw e.getCause();

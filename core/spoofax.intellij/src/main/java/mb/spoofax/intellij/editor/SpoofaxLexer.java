@@ -153,6 +153,8 @@ public final class SpoofaxLexer extends LexerBase {
                 this.tokens = tokenize(resourceTokens);
             } catch (ExecException e) {
                 throw new RuntimeException("Styling resource '" + this.resourceKey + "' failed unexpectedly", e);
+            } catch(InterruptedException e) {
+                // TODO: should anything special happen on interruption?
             }
         }
         logger.debug("Tokenizer produced {} tokens", this.tokens.size());

@@ -65,7 +65,7 @@ public class AnalysisTest extends TestBase {
     private final LanguageId languageId = new LanguageId("sdf3");
     private final ContextId contextId = new ContextId("AnalysisTest");
 
-    @Test void testSingleError() throws ExecException {
+    @Test void testSingleError() throws ExecException, InterruptedException {
         final TextResource resource = createTextResource("module a syntax A = B", "a.sdf3");
         resources.add(resource.getKey());
 
@@ -80,7 +80,7 @@ public class AnalysisTest extends TestBase {
         }
     }
 
-    @Test void testSingleSuccess() throws ExecException {
+    @Test void testSingleSuccess() throws ExecException, InterruptedException {
         final TextResource resource1 = createTextResource("module a", "a.sdf3");
         resources.add(resource1.getKey());
 
@@ -94,7 +94,7 @@ public class AnalysisTest extends TestBase {
         }
     }
 
-    @Test void testMultipleErrors() throws ExecException {
+    @Test void testMultipleErrors() throws ExecException, InterruptedException {
         final TextResource resource1 = createTextResource("module a syntax B = A", "a.sdf3");
         final TextResource resource2 = createTextResource("module b syntax C = A B", "b.sdf3");
         resources.add(resource1.getKey());
@@ -114,7 +114,7 @@ public class AnalysisTest extends TestBase {
         }
     }
 
-    @Test void testMultipleSuccess() throws ExecException {
+    @Test void testMultipleSuccess() throws ExecException, InterruptedException {
         final TextResource resource1 = createTextResource("module a", "a.sdf3");
         final TextResource resource2 = createTextResource("module b", "b.sdf3");
         resources.add(resource1.getKey());
@@ -131,7 +131,7 @@ public class AnalysisTest extends TestBase {
         }
     }
 
-    @Test void testMutualResolve() throws ExecException {
+    @Test void testMutualResolve() throws ExecException, InterruptedException {
         final TextResource resource1 = createTextResource("module a syntax A = \"\"", "a.sdf3");
         final TextResource resource2 = createTextResource("module b imports a syntax B = A", "b.sdf3");
         final TextResource resource3 = createTextResource("module c imports a b syntax C = A syntax C = B", "c.sdf3");

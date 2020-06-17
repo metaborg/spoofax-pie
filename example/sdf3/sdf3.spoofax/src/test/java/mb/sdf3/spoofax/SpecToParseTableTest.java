@@ -23,7 +23,7 @@ import static org.spoofax.terms.util.TermUtils.isApplAt;
 class SpecToParseTableTest extends TestBase {
     @ParameterizedTest
     @ValueSource(booleans = {false, true})
-    void testTask(boolean createCompletionTable) throws ExecException {
+    void testTask(boolean createCompletionTable) throws ExecException, InterruptedException {
         final TextResource resourceMain = createTextResource("module test imports lex nested/a nested/b context-free start-symbols Start context-free syntax Start.Start = <<A> <B>>", "test.sdf3");
         final TextResource resourceLex = createTextResource("module lex lexical syntax LAYOUT = [\\ \\t\\n\\r]", "lex.sdf3");
         final TextResource resourceA = createTextResource("module nested/a context-free syntax A.A = <key>", "nested/a.sdf3");
