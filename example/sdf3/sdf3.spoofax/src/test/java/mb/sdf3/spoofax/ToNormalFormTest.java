@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.spoofax.terms.util.TermUtils.*;
 
 class ToNormalFormTest extends TestBase {
-    @Test void testTask() throws ExecException {
+    @Test void testTask() throws ExecException, InterruptedException {
         final TextResource resource = createTextResource("module nested/a context-free syntax A = <A>", "a.sdf3");
         final Sdf3ToNormalForm taskDef = languageComponent.getToNormalForm();
         try(final MixedSession session = newSession()) {

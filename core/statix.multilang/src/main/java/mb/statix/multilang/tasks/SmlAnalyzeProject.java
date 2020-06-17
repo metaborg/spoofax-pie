@@ -2,7 +2,6 @@ package mb.statix.multilang.tasks;
 
 import com.google.common.collect.ListMultimap;
 import mb.pie.api.ExecContext;
-import mb.pie.api.ExecException;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.statix.constraints.CConj;
@@ -152,41 +151,29 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
             new SmlInstantiateGlobalScope.Input(input.analysisContext.contextId(), debug, combinedSpec)));
 
         Map<LanguageId, SolverResult> projectResults = analysisContext.languages().entrySet().stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, entry -> {
-                try {
-                    return context.require(partialSolveProject.createTask(new SmlPartialSolveProject.Input(
-                        globalState.getGlobalScopeVar(),
-                        globalState.getResult(),
-                        debug,
-                        combinedSpec,
-                        entry.getValue().projectConstraint()))).getProjectResult();
-                } catch(ExecException | InterruptedException e) {
-                    throw new MultiLangAnalysisException(e);
-                }
-            }));
+            .collect(Collectors.toMap(Map.Entry::getKey, entry ->
+                context.require(partialSolveProject.createTask(new SmlPartialSolveProject.Input(
+                    globalState.getGlobalScopeVar(),
+                    globalState.getResult(),
+                    debug,
+                    combinedSpec,
+                    entry.getValue().projectConstraint()))).getProjectResult()
+            ));
 
         // Create file results (maintain resource key for error message mapping
         Map<AnalysisResults.FileKey, FileResult> fileResults = analysisContext.languages().values().stream()
-            .flatMap(languageMetadata -> {
-                try {
-                    return languageMetadata.resourcesSupplier().apply(context, input.projectPath).stream()
-                        .map(resourceKey -> {
-                            try {
-                                FileResult fileResult = context.require(partialSolveFile.createTask(new SmlPartialSolveFile.Input(globalState.getGlobalScope(),
-                                    globalState.getResult(), debug, combinedSpec, languageMetadata.fileConstraint(),
-                                    languageMetadata.astFunction(), languageMetadata.postTransform(),
-                                    resourceKey))).getFileResult();
-                                return new AbstractMap.SimpleEntry<>(
-                                    new AnalysisResults.FileKey(languageMetadata.languageId(), resourceKey),
-                                    fileResult);
-                            } catch(ExecException | InterruptedException e) {
-                                throw new MultiLangAnalysisException(e);
-                            }
-                        });
-                } catch(ExecException | InterruptedException e) {
-                    throw new MultiLangAnalysisException(e);
-                }
-            })
+            .flatMap(languageMetadata ->
+                languageMetadata.resourcesSupplier().apply(context, input.projectPath).stream()
+                    .map(resourceKey -> {
+                        FileResult fileResult = context.require(partialSolveFile.createTask(new SmlPartialSolveFile.Input(globalState.getGlobalScope(),
+                            globalState.getResult(), debug, combinedSpec, languageMetadata.fileConstraint(),
+                            languageMetadata.astFunction(), languageMetadata.postTransform(),
+                            resourceKey))).getFileResult();
+                        return new AbstractMap.SimpleEntry<>(
+                            new AnalysisResults.FileKey(languageMetadata.languageId(), resourceKey),
+                            fileResult);
+                    })
+            )
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         IState.Immutable combinedState = Stream.concat(

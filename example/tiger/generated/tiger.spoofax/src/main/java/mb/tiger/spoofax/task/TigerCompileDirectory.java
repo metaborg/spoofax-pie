@@ -73,35 +73,21 @@ public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args
 
         final StringBuffer sb = new StringBuffer();
         sb.append("[\n  ");
-        try {
-            final AtomicBoolean first = new AtomicBoolean(true);
-            directory.list(matcher).forEach((f) -> {
-                try {
-                    if(!first.get()) {
-                        sb.append(", ");
-                    }
-                    final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createNullableAstSupplier(f.getKey());
-                    final @Nullable String defNames = context.require(listDefNames, astSupplier);
-                    if(defNames != null) {
-                        sb.append(defNames);
-                    } else {
-                        sb.append("[]");
-                    }
-                    sb.append('\n');
-                    first.set(false);
-                } catch(ExecException | InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-        } catch(RuntimeException e) {
-            if(e.getCause() instanceof ExecException) {
-                throw (ExecException)e.getCause();
-            } else if(e.getCause() instanceof InterruptedException) {
-                throw (InterruptedException)e.getCause();
-            } else {
-                throw e;
+        final AtomicBoolean first = new AtomicBoolean(true);
+        directory.list(matcher).forEach((f) -> {
+            if(!first.get()) {
+                sb.append(", ");
             }
-        }
+            final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createNullableAstSupplier(f.getKey());
+            final @Nullable String defNames = context.require(listDefNames, astSupplier);
+            if(defNames != null) {
+                sb.append(defNames);
+            } else {
+                sb.append("[]");
+            }
+            sb.append('\n');
+            first.set(false);
+        });
         sb.append(']');
 
         final ResourcePath generatedPath = dir.appendSegment("_defnames.aterm");

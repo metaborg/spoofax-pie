@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ShowScopeGraphTest extends TestBase {
-    @Test void test() throws ExecException {
+    @Test void test() throws ExecException, InterruptedException {
         final TextResource resource = textResourceRegistry.createResource("1 + 1", "a.tig");
         final TigerShowScopeGraphCommand command = languageComponent.getShowScopeGraphCommand();
         try(final MixedSession session = languageComponent.getPie().newSession()) {

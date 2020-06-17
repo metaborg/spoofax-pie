@@ -83,12 +83,8 @@ public class {{genCheckMultiTaskDef.id}} implements TaskDef<{{genCheckMultiTaskD
         try {
             root.walk(input.walker, input.matcher).forEach(file -> {
                 final ResourcePath filePath = file.getPath();
-                try {
-                    final JSGLR1ParseResult parseResult = context.require(parse, new ResourceStringSupplier(filePath));
-                    messagesBuilder.addMessages(filePath, parseResult.getMessages());
-                } catch(ExecException | InterruptedException e) {
-                    throw new UncheckedException(e);
-                }
+                final JSGLR1ParseResult parseResult = context.require(parse, new ResourceStringSupplier(filePath));
+                messagesBuilder.addMessages(filePath, parseResult.getMessages());
             });
         } catch(UncheckedException e) {
             throw e.getCause();

@@ -5,7 +5,6 @@ import mb.common.message.Messages;
 import mb.common.token.Token;
 import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.pie.api.ExecContext;
-import mb.pie.api.ExecException;
 import mb.pie.api.Function;
 import mb.pie.api.ResourceStringSupplier;
 import mb.pie.api.Supplier;
@@ -29,7 +28,7 @@ public abstract class JSGLR1ParseTaskDef implements TaskDef<Supplier<String>, JS
         final String text;
         try {
             text = context.require(stringSupplier);
-        } catch(ExecException | IOException e) {
+        } catch(IOException e) {
             return JSGLR1ParseResult.failed(Messages.of(new Message("Cannot get text to parse from '" + stringSupplier + "'", e)));
         }
         return parse(text);
