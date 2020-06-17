@@ -7,18 +7,28 @@ import org.immutables.value.Value;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Objects;
 
 @Value.Immutable
-public interface AnalysisResults extends Serializable {
-    @Value.Parameter ITerm globalScope();
+public abstract class AnalysisResults implements Serializable {
+    @Value.Parameter public abstract ITerm globalScope();
 
-    @Value.Parameter HashMap<LanguageId, SolverResult> projectResults();
+    @Value.Parameter public abstract HashMap<LanguageId, SolverResult> projectResults();
 
-    @Value.Parameter HashMap<FileKey, FileResult> fileResults();
+    @Value.Parameter public abstract HashMap<FileKey, FileResult> fileResults();
 
-    @Value.Parameter SolverResult finalResult();
+    @Value.Parameter public abstract SolverResult finalResult();
 
-    class FileKey implements Serializable {
+    @Override public String toString() {
+        return "AnalysisResults{" +
+            "globalScope" + globalScope() +
+            "projectResults" + projectResults().keySet() +
+            "fileResults" + fileResults().keySet() +
+            "finalResult" + finalResult().getClass().getSimpleName() +
+            '}';
+    }
+
+    public static class FileKey implements Serializable {
 
         private final LanguageId language;
         private final ResourceKey resource;
@@ -34,6 +44,26 @@ public interface AnalysisResults extends Serializable {
 
         public ResourceKey getResource() {
             return resource;
+        }
+
+        @Override public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            FileKey fileKey = (FileKey)o;
+            return Objects.equals(language, fileKey.language) &&
+                Objects.equals(resource, fileKey.resource);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(language, resource);
+        }
+
+        @Override public String toString() {
+            return "FileKey{" +
+                "language=" + language +
+                ", resource=" + resource +
+                '}';
         }
     }
 }

@@ -38,8 +38,8 @@ public class FileResult {
 
     @Override public String toString() {
         return "FileResult{" +
-            "analyzedAst=" + analyzedAst +
-            ", result=" + result +
+            "analyzedAst=" + analyzedAst.toString(2) +
+            ", result=" + result.getClass().getName() +
             '}';
     }
 }
