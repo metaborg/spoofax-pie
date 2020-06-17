@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @Value.Immutable
 public abstract class AnalysisContext implements Serializable {
 
-    @Value.Parameter public abstract String contextId();
+    @Value.Parameter public abstract ContextId contextId();
 
     @Value.Parameter public abstract Map<LanguageId, LanguageMetadata> languages();
 

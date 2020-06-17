@@ -14,6 +14,7 @@ import mb.resource.text.TextResource;
 import mb.sdf3.Sdf3ClassloaderResources;
 import mb.statix.multilang.AnalysisContext;
 import mb.statix.multilang.AnalysisContextService;
+import mb.statix.multilang.ContextId;
 import mb.statix.multilang.DaggerMultiLangComponent;
 import mb.statix.multilang.ImmutableLanguageMetadata;
 import mb.statix.multilang.LanguageId;
@@ -26,7 +27,9 @@ import mb.statix.multilang.tasks.SmlBuildMessages;
 import mb.statix.multilang.tasks.SmlInstantiateGlobalScope;
 import mb.statix.multilang.tasks.SmlPartialSolveFile;
 import mb.statix.multilang.tasks.SmlPartialSolveProject;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.metaborg.util.iterators.Iterables2;
 import org.metaborg.util.log.Level;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
@@ -42,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class AnalysisTest extends TestBase {
 
     protected final ClassLoaderResourceRegistry statixRegistry = Sdf3ClassloaderResources.createClassLoaderResourceRegistry();
-    protected ITermFactory termFactory = new TermFactory();
+    protected final ITermFactory termFactory = new TermFactory();
     private final ResourcePath projectPath = new FSPath(".");
     private final MultiLangComponent multilangComponent = DaggerMultiLangComponent.builder()
         .platformComponent(platformComponent)
@@ -57,13 +60,16 @@ public class AnalysisTest extends TestBase {
     private final SmlBuildMessages buildMessages = new SmlBuildMessages(analyzeProject);
 
     private final Level logLevel = Level.Warn;
+    private final HashSet<ResourceKey> resources = new HashSet<>();
 
-    @Test void testSingleError() throws IOException, ExecException {
-        final HashSet<ResourceKey> resources = new HashSet<>();
+    private final LanguageId languageId = new LanguageId("sdf3");
+    private final ContextId contextId = new ContextId("AnalysisTest");
+
+    @Test void testSingleError() throws ExecException {
         final TextResource resource = createTextResource("module a syntax A = B", "a.sdf3");
         resources.add(resource.getKey());
 
-        AnalysisContext context = createAnalysisContext(resources);
+        AnalysisContext context = analysisContextService.getAnalysisContext(contextId);
 
         try(MixedSession session = context.createPieForContext().newSession()) {
             KeyedMessages messages = session.require(buildMessages
@@ -74,13 +80,12 @@ public class AnalysisTest extends TestBase {
         }
     }
 
-    @Test void testSingleSuccess() throws IOException, ExecException {
-        final HashSet<ResourceKey> resources = new HashSet<>();
+    @Test void testSingleSuccess() throws ExecException {
         final TextResource resource1 = createTextResource("module a", "a.sdf3");
         resources.add(resource1.getKey());
 
         // Loading spec
-        AnalysisContext context = createAnalysisContext(resources);
+        AnalysisContext context = analysisContextService.getAnalysisContext(contextId);
 
         try(MixedSession session = context.createPieForContext().newSession()) {
             KeyedMessages messages = session.require(buildMessages
@@ -89,15 +94,14 @@ public class AnalysisTest extends TestBase {
         }
     }
 
-    @Test void testMultipleErrors() throws IOException, ExecException {
-        final HashSet<ResourceKey> resources = new HashSet<>();
+    @Test void testMultipleErrors() throws ExecException {
         final TextResource resource1 = createTextResource("module a syntax B = A", "a.sdf3");
         final TextResource resource2 = createTextResource("module b syntax C = A B", "b.sdf3");
         resources.add(resource1.getKey());
         resources.add(resource2.getKey());
 
         // Loading spec
-        AnalysisContext context = createAnalysisContext(resources);
+        AnalysisContext context = analysisContextService.getAnalysisContext(contextId);
 
         try(MixedSession session = context.createPieForContext().newSession()) {
             KeyedMessages messages = session.require(buildMessages
@@ -110,15 +114,14 @@ public class AnalysisTest extends TestBase {
         }
     }
 
-    @Test void testMultipleSuccess() throws IOException, ExecException {
-        final HashSet<ResourceKey> resources = new HashSet<>();
+    @Test void testMultipleSuccess() throws ExecException {
         final TextResource resource1 = createTextResource("module a", "a.sdf3");
         final TextResource resource2 = createTextResource("module b", "b.sdf3");
         resources.add(resource1.getKey());
         resources.add(resource2.getKey());
 
         // Loading spec
-        AnalysisContext context = createAnalysisContext(resources);
+        AnalysisContext context = analysisContextService.getAnalysisContext(contextId);
 
         try(MixedSession session = context.createPieForContext().newSession()) {
             KeyedMessages messages = session.require(buildMessages
@@ -128,8 +131,7 @@ public class AnalysisTest extends TestBase {
         }
     }
 
-    @Test void testMutualResolve() throws IOException, ExecException {
-        final HashSet<ResourceKey> resources = new HashSet<>();
+    @Test void testMutualResolve() throws ExecException {
         final TextResource resource1 = createTextResource("module a syntax A = \"\"", "a.sdf3");
         final TextResource resource2 = createTextResource("module b imports a syntax B = A", "b.sdf3");
         final TextResource resource3 = createTextResource("module c imports a b syntax C = A syntax C = B", "c.sdf3");
@@ -138,7 +140,7 @@ public class AnalysisTest extends TestBase {
         resources.add(resource3.getKey());
 
         // Loading spec
-        AnalysisContext context = createAnalysisContext(resources);
+        AnalysisContext context = analysisContextService.getAnalysisContext(contextId);
 
         try(MixedSession session = context.createPieForContext().newSession()) {
             KeyedMessages messages = session.require(buildMessages
@@ -148,7 +150,8 @@ public class AnalysisTest extends TestBase {
         }
     }
 
-    private AnalysisContext createAnalysisContext(HashSet<ResourceKey> resources) throws IOException {
+    @BeforeEach public void createAnalysisContext() throws IOException {
+        resources.clear();
         ResourceKeyString id = ResourceKeyString.of("mb/sdf3/src-gen/statix");
         ClassLoaderResource statixSpec = statixRegistry.getResource(id);
         SpecBuilder spec = SpecUtils.loadSpec(statixSpec, "statix/statics", termFactory);
@@ -157,7 +160,7 @@ public class AnalysisTest extends TestBase {
             .mapInput((exec, key) -> languageComponent.getIndexAst().createSupplier(key));
 
         LanguageMetadata languageMetadata = ImmutableLanguageMetadata.builder()
-            .languageId(new LanguageId("sdf3"))
+            .languageId(languageId)
             .statixSpec(spec)
             .fileConstraint("statix/statics!moduleOK")
             .projectConstraint("statix/statics!projectOK")
@@ -167,10 +170,11 @@ public class AnalysisTest extends TestBase {
                 languageComponent.getPreStatix(), languageComponent.getIndexAst(),
                 languageComponent.getPostStatix(), parse)
             .addResourceRegistries()
-            // TODO: remove ValueSupplier somehow
             .postTransform(languageComponent.getPostStatix().createFunction())
             .build();
 
-        return analysisContextService.createContext("AnalysisTest", languageMetadata);
+        analysisContextService.registerLanguage(languageMetadata);
+        analysisContextService.registerContextLanguage(contextId, Iterables2.singleton(languageId));
+        analysisContextService.initializeService();
     }
 }

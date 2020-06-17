@@ -149,7 +149,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
             new LoggerDebugContext(input.analysisContext.logger(), input.logLevel) : new NullDebugContext();
 
         SmlInstantiateGlobalScope.Output globalState = context.require(instantiateGlobalScope.createTask(
-            new SmlInstantiateGlobalScope.Input(input.analysisContext.contextId(), debug, combinedSpec)));
+            new SmlInstantiateGlobalScope.Input(input.analysisContext.contextId().toString(), debug, combinedSpec)));
 
         Map<LanguageId, SolverResult> projectResults = analysisContext.languages().entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getKey, entry -> {

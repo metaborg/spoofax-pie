@@ -22,8 +22,6 @@ public class LanguageId implements Serializable {
     }
 
     @Override public String toString() {
-        return "LanguageId{" +
-            "languageId='" + languageId + '\'' +
-            '}';
+        return languageId;
     }
 }
