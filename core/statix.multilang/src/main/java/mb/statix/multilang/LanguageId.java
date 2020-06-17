@@ -24,4 +24,8 @@ public class LanguageId implements Serializable {
     @Override public String toString() {
         return languageId;
     }
+
+    public String getId() {
+        return languageId;
+    }
 }
