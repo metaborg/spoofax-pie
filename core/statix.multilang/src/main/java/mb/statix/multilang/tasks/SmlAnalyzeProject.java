@@ -150,7 +150,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
             new SmlInstantiateGlobalScope.Input(input.analysisContext.contextId().toString(), debug, combinedSpec)));
 
         Map<LanguageId, SolverResult> projectResults = analysisContext.languages().entrySet().stream()
-            .collect(Collectors.toMap(entry -> entry.getKey(), entry ->
+            .collect(Collectors.toMap(Map.Entry::getKey, entry ->
                 context.require(partialSolveProject.createTask(new SmlPartialSolveProject.Input(
                     globalState.getGlobalScopeVar(),
                     globalState.getResult(),

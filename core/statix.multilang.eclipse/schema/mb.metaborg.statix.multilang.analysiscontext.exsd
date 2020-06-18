@@ -14,10 +14,10 @@
       </annotation>
       <complexType>
          <choice>
-            <element ref="languagemetadata" minOccurs="1" maxOccurs="unbounded"/>
+            <element ref="languagemetadata" minOccurs="0" maxOccurs="unbounded"/>
          </choice>
          <choice>
-            <element ref="contextmetadata" minOccurs="1" maxOccurs="unbounded"/>
+            <element ref="contextmetadata" minOccurs="0" maxOccurs="unbounded"/>
          </choice>
          <attribute name="point" type="string" use="required">
          </attribute>
