@@ -4,9 +4,7 @@ import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Messages;
 import mb.common.result.Result;
-import mb.common.util.UncheckedException;
 import mb.pie.api.ExecContext;
-import mb.pie.api.ExecException;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.hierarchical.HierarchicalResource;
@@ -21,6 +19,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.UncheckedIOException;
 import java.util.Objects;
 
 /**
@@ -86,11 +85,11 @@ public class TigerIdeCheckMulti implements TaskDef<TigerIdeCheckMulti.Input, Key
                 try {
                     final Messages messages = context.require(parse.createMessagesSupplier(filePath));
                     messagesBuilder.addMessages(filePath, messages);
-                } catch(ExecException | InterruptedException | IOException e) {
-                    throw new UncheckedException(e);
+                } catch(IOException e) {
+                    throw new UncheckedIOException(e);
                 }
             });
-        } catch(UncheckedException e) {
+        } catch(UncheckedIOException e) {
             throw e.getCause();
         }
 

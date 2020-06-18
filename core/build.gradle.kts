@@ -7,7 +7,7 @@ plugins {
   id("org.metaborg.coronium.bundle") version "0.3.3" apply false
   id("net.ltgt.apt") version "0.21" apply false
   id("net.ltgt.apt-idea") version "0.21" apply false
-  id("biz.aQute.bnd.builder") version "5.0.1" apply false
+  id("biz.aQute.bnd.builder") version "5.1.1" apply false
   id("org.jetbrains.intellij") version "0.4.18" apply false
   kotlin("jvm") version "1.3.41" // Use 1.3.41 to keep in sync with embedded Kotlin version of Gradle 5.6.4.
   `kotlin-dsl`

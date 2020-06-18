@@ -58,7 +58,7 @@ public class AnalysisTest extends TestBase {
 
     private final Level logLevel = Level.Warn;
 
-    @Test void testSingleError() throws IOException, ExecException {
+    @Test void testSingleError() throws IOException, ExecException, InterruptedException {
         final HashSet<ResourceKey> resources = new HashSet<>();
         final TextResource resource = createTextResource("module a syntax A = B", "a.sdf3");
         resources.add(resource.getKey());
@@ -74,7 +74,7 @@ public class AnalysisTest extends TestBase {
         }
     }
 
-    @Test void testSingleSuccess() throws IOException, ExecException {
+    @Test void testSingleSuccess() throws IOException, ExecException, InterruptedException {
         final HashSet<ResourceKey> resources = new HashSet<>();
         final TextResource resource1 = createTextResource("module a", "a.sdf3");
         resources.add(resource1.getKey());
@@ -89,7 +89,7 @@ public class AnalysisTest extends TestBase {
         }
     }
 
-    @Test void testMultipleErrors() throws IOException, ExecException {
+    @Test void testMultipleErrors() throws IOException, ExecException, InterruptedException {
         final HashSet<ResourceKey> resources = new HashSet<>();
         final TextResource resource1 = createTextResource("module a syntax B = A", "a.sdf3");
         final TextResource resource2 = createTextResource("module b syntax C = A B", "b.sdf3");
@@ -110,7 +110,7 @@ public class AnalysisTest extends TestBase {
         }
     }
 
-    @Test void testMultipleSuccess() throws IOException, ExecException {
+    @Test void testMultipleSuccess() throws IOException, ExecException, InterruptedException {
         final HashSet<ResourceKey> resources = new HashSet<>();
         final TextResource resource1 = createTextResource("module a", "a.sdf3");
         final TextResource resource2 = createTextResource("module b", "b.sdf3");
@@ -128,7 +128,7 @@ public class AnalysisTest extends TestBase {
         }
     }
 
-    @Test void testMutualResolve() throws IOException, ExecException {
+    @Test void testMutualResolve() throws IOException, ExecException, InterruptedException {
         final HashSet<ResourceKey> resources = new HashSet<>();
         final TextResource resource1 = createTextResource("module a syntax A = \"\"", "a.sdf3");
         final TextResource resource2 = createTextResource("module b imports a syntax B = A", "b.sdf3");

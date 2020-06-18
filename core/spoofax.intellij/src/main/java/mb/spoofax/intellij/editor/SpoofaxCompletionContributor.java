@@ -65,6 +65,8 @@ public abstract class SpoofaxCompletionContributor extends CompletionContributor
             completionResult = session.require(completionTask);
         } catch (ExecException e) {
             throw new RuntimeException("Code completion on resource '" + resourceKey + "' failed unexpectedly.", e);
+        } catch(InterruptedException e) {
+            return;
         }
 
         if (completionResult == null) return;

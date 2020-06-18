@@ -10,10 +10,11 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import javax.annotation.Nullable;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.spoofax.terms.util.TermUtils.*;
+import static org.spoofax.terms.util.TermUtils.isAppl;
+import static org.spoofax.terms.util.TermUtils.isStringAt;
 
 class ToCompletionRuntimeTest extends TestBase {
-    @Test void testTask() throws ExecException {
+    @Test void testTask() throws ExecException, InterruptedException {
         final TextResource resource = createTextResource("module nested/a context-free syntax A = <A>", "a.sdf3");
         final Sdf3ToCompletionRuntime taskDef = languageComponent.getToCompletionRuntime();
         try(final MixedSession session = newSession()) {

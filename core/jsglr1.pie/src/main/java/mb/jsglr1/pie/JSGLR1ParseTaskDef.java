@@ -6,7 +6,6 @@ import mb.common.result.Result;
 import mb.jsglr.common.JSGLRTokens;
 import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.pie.api.ExecContext;
-import mb.pie.api.ExecException;
 import mb.pie.api.Function;
 import mb.pie.api.ResourceStringSupplier;
 import mb.pie.api.Supplier;
@@ -27,9 +26,8 @@ public abstract class JSGLR1ParseTaskDef implements TaskDef<Supplier<String>, Re
     @Override
     public Result<JSGLR1ParseOutput, MessagesError> exec(ExecContext context, Supplier<String> stringSupplier) throws InterruptedException {
         try {
-            final String text = context.require(stringSupplier);
-            return parse(text);
-        } catch(ExecException | IOException e) {
+            return parse(context.require(stringSupplier));
+        } catch(IOException e) {
             return Result.ofErr(new MessagesError("Parsing failed; cannot get text to parse from '" + stringSupplier + "'", e));
         }
     }
