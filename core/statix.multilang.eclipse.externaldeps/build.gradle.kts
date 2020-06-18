@@ -7,6 +7,7 @@ dependencies {
   api(platform(project(":spoofax.depconstraints")))
 
   bundleTargetPlatformApi(eclipse("javax.inject"))
+  bundleApi(project(":spoofax.eclipse.externaldeps"))
 
   bundleEmbedApi(project(":common"))
   bundleEmbedApi(project(":statix.multilang"))
@@ -22,10 +23,22 @@ dependencies {
 
 // Use bnd to create a single OSGi bundle JAR that includes all dependencies.
 val exports = listOf(
-  "mb.*;provider=mb;mandatory:=provider",
-  "org.spoofax.*;provider=mb;mandatory:=provider",
-  "dagger;provider=mb;mandatory:=provider",
-  "dagger.*;provider=mb;mandatory:=provider"
+  // Provided by 'javax.inject' bundle.
+  "!javax.inject.*",
+  // Provided by 'spoofax.eclipse.externaldeps' bundle.
+  "!mb.log.*",
+  "!mb.resource.*",
+  "!mb.pie.*",
+  "!mb.common.*",
+  "!mb.spoofax.core.*",
+  "!dagger.*",
+  // Do not export compile-time annotation packages.
+  "!org.checkerframework.*",
+  "!org.codehaus.mojo.animal_sniffer.*",
+  // Allow split package for 'mb.statix'.
+  "mb.statix.*;-split-package:=merge-first",
+  // Export what is left, using a mandatory provider to prevent accidental imports via 'Import-Package'.
+  "*;provider=statix;mandatory:=provider"
 )
 tasks {
   "jar"(Jar::class) {

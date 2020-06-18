@@ -1,14 +1,10 @@
 package mb.statix.multilang.eclipse;
 
 import mb.spoofax.eclipse.SpoofaxPlugin;
-import mb.spoofax.eclipse.util.StatusUtil;
 import mb.statix.multilang.DaggerMultiLangComponent;
 import mb.statix.multilang.MultiLangComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.eclipse.core.resources.WorkspaceJob;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.osgi.framework.BundleContext;
@@ -44,14 +40,7 @@ public class MultiLangPlugin extends Plugin {
             .build();
 
         // Initialize extension point
-        // TODO: When implementing proper locking, ensure this job has ran before language plugins start analyses
-        new WorkspaceJob("Initialize Analysis Contexts") {
-            @Override
-            public IStatus runInWorkspace(IProgressMonitor monitor) {
-                AnalysisContextInitializer.execute(Platform.getExtensionRegistry());
-                return StatusUtil.success();
-            }
-        }.schedule();
+        AnalysisContextInitializer.execute(Platform.getExtensionRegistry());
     }
 
     @Override public void stop(@NonNull BundleContext context) throws Exception {

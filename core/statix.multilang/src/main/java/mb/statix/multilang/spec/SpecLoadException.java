@@ -5,6 +5,10 @@ public class SpecLoadException extends RuntimeException { // Note: used in @Valu
         super(s);
     }
 
+    public SpecLoadException(Throwable throwable) {
+        super(throwable);
+    }
+
     public SpecLoadException(String s, Throwable throwable) {
         super(s, throwable);
     }

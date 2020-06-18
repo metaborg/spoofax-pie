@@ -1,12 +1,15 @@
 package mb.statix.multilang;
 
+import mb.log.api.Logger;
 import mb.pie.api.MapTaskDefs;
 import mb.pie.api.Pie;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceRegistry;
 import mb.resource.ResourceService;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 import org.metaborg.util.log.ILogger;
+import org.metaborg.util.log.Level;
 import org.metaborg.util.log.LoggerUtils;
 
 import java.io.Serializable;
@@ -24,7 +27,14 @@ public abstract class AnalysisContext implements Serializable {
     // Pie instance to derive Pie instance for use in this context from
     @Value.Parameter public abstract Pie basePie();
 
-    @Value.Parameter public abstract  ResourceService baseResourceService();
+    @Value.Parameter public abstract ResourceService baseResourceService();
+
+    @Value.Parameter @Value.Auxiliary
+    public abstract Logger logger();
+
+    @Value.Default public @Nullable Level stxLogLevel() {
+        return Level.Warn;
+    }
 
     @Value.Lazy public Pie createPieForContext() {
         Set<TaskDef<?, ?>> taskDefs = languages()
@@ -48,8 +58,10 @@ public abstract class AnalysisContext implements Serializable {
             .build();
     }
 
-    @Value.Lazy public ILogger logger() {
-        return LoggerUtils.logger(String.format("MLA [%s]", contextId()));
+    // Statix debug contexts still use old logger API
+    // TODO: update statix logging / write adapter class
+    @Value.Lazy public ILogger stxLogger() {
+        return LoggerUtils.logger(String.format("SLA [%s]", contextId()));
     }
 
     @Override

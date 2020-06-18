@@ -13,6 +13,7 @@ dependencies {
 
   api("org.metaborg:statix.solver")
   api("org.metaborg:pie.api")
+  api("org.yaml:snakeyaml")
 
   compileOnly("org.checkerframework:checker-qual-android")
   compileOnly("org.immutables:value-annotations")

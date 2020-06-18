@@ -5,11 +5,7 @@
       <appinfo>
          <meta.schema plugin="mb.statix.multilang.eclipse" id="mb.metaborg.statix.multilang.analysiscontext" name="AnalysisContext"/>
       </appinfo>
-      <documentation>
-         [Enter description of this extension point.]
-      </documentation>
    </annotation>
-
    <element name="extension">
       <annotation>
          <appinfo>
@@ -20,25 +16,15 @@
          <choice>
             <element ref="languagemetadata" minOccurs="1" maxOccurs="unbounded"/>
          </choice>
+         <choice>
+            <element ref="contextmetadata" minOccurs="1" maxOccurs="unbounded"/>
+         </choice>
          <attribute name="point" type="string" use="required">
-            <annotation>
-               <documentation>
-                  
-               </documentation>
-            </annotation>
          </attribute>
          <attribute name="id" type="string">
-            <annotation>
-               <documentation>
-                  
-               </documentation>
-            </annotation>
          </attribute>
          <attribute name="name" type="string">
             <annotation>
-               <documentation>
-                  
-               </documentation>
                <appinfo>
                   <meta.attribute translatable="true"/>
                </appinfo>
@@ -46,14 +32,10 @@
          </attribute>
       </complexType>
    </element>
-
    <element name="languagemetadata">
       <complexType>
          <attribute name="class" type="string">
             <annotation>
-               <documentation>
-                  
-               </documentation>
                <appinfo>
                   <meta.attribute kind="java" basedOn=":mb.spoofax.multilang.eclipse.LanguageMetadataProvider"/>
                </appinfo>
@@ -61,42 +43,15 @@
          </attribute>
       </complexType>
    </element>
-
-   <annotation>
-      <appinfo>
-         <meta.section type="since"/>
-      </appinfo>
-      <documentation>
-         [Enter the first release in which this extension point appears.]
-      </documentation>
-   </annotation>
-
-   <annotation>
-      <appinfo>
-         <meta.section type="examples"/>
-      </appinfo>
-      <documentation>
-         [Enter extension point usage example here.]
-      </documentation>
-   </annotation>
-
-   <annotation>
-      <appinfo>
-         <meta.section type="apiinfo"/>
-      </appinfo>
-      <documentation>
-         [Enter API information here.]
-      </documentation>
-   </annotation>
-
-   <annotation>
-      <appinfo>
-         <meta.section type="implementation"/>
-      </appinfo>
-      <documentation>
-         [Enter information about supplied implementation of this extension point.]
-      </documentation>
-   </annotation>
-
-
+   <element name="contextmetadata">
+      <complexType>
+         <attribute name="class" type="string">
+            <annotation>
+               <appinfo>
+                  <meta.attribute kind="java" basedOn=":mb.spoofax.multilang.eclipse.ContextMetadataProvider"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
 </schema>

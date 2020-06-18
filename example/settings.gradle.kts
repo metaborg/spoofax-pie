@@ -60,3 +60,24 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   includeProject("sdf3.eclipse")
   includeProject("sdf3.intellij")
 }
+
+"multilang/spoofaxcore".run {
+  includeProject("minisdf.spoofaxcore")
+  includeProject("ministr.spoofaxcore")
+}
+
+"multilang/manual".run {
+  includeProject("minisdf.manual", "multilang/manual/minisdf")
+  includeProject("minisdf.manual.spoofax", "multilang/manual/minisdf.spoofax")
+  includeProject("minisdf.manual.eclipse.externaldeps", "multilang/manual/minisdf.eclipse.externaldeps")
+  includeProject("minisdf.manual.eclipse", "multilang/manual/minisdf.eclipse")
+
+  includeProject("ministr.manual", "multilang/manual/ministr")
+  includeProject("ministr.manual.spoofax", "multilang/manual/ministr.spoofax")
+  includeProject("ministr.manual.eclipse.externaldeps", "multilang/manual/ministr.eclipse.externaldeps")
+  includeProject("ministr.manual.eclipse", "multilang/manual/ministr.eclipse")
+
+  includeProject("multilang.manual.cli", "multilang/manual/multilang.cli")
+  includeProject("multilang.manual.test", "multilang/manual/multilang.test")
+  includeProject("multilang.manual.eclipse", "multilang/manual/multilang.eclipse")
+}

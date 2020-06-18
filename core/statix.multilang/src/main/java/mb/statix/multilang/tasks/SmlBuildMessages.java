@@ -67,7 +67,7 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
 
     @Override public KeyedMessages exec(ExecContext context, Input input) throws Exception {
         AnalysisResults results = context.require(analyzeProject.createTask(
-            new SmlAnalyzeProject.Input(input.projectPath, input.analysisContext, input.logLevel)
+            new SmlAnalyzeProject.Input(input.projectPath, input.analysisContext)
         )).getResults();
 
         final IUniDisunifier resultUnifier = results.finalResult().state().unifier();

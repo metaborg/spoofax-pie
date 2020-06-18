@@ -13,9 +13,11 @@ val picocliVersion = "4.0.4"
 val javaxInjectVersion = "1"
 val checkerframeworkVersion = "3.0.0"
 
-val daggerVersion = "2.25.2"
+val daggerVersion = "2.28"
 val derive4jVersion = "1.1.1"
 val immutablesVersion = "2.8.2"
+
+val yamlVersion = "1.26"
 
 dependencies {
   constraints {
@@ -91,6 +93,8 @@ dependencies {
     /// org.immutables
     api("org.immutables:value:$immutablesVersion")
     api("org.immutables:value-annotations:$immutablesVersion")
+    // Yaml
+    api("org.yaml:snakeyaml:$yamlVersion")
 
 
     // Test dependencies // TODO: should be in a separate platform?

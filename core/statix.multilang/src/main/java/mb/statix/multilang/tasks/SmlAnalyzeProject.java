@@ -43,12 +43,10 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
     public static class Input implements Serializable {
         private final ResourcePath projectPath;
         private final AnalysisContext analysisContext;
-        private final @Nullable Level logLevel;
 
-        public Input(ResourcePath projectPath, AnalysisContext analysisContext, @Nullable Level logLevel) {
+        public Input(ResourcePath projectPath, AnalysisContext analysisContext) {
             this.projectPath = projectPath;
             this.analysisContext = analysisContext;
-            this.logLevel = logLevel;
         }
 
         @Override public boolean equals(Object o) {
@@ -144,14 +142,15 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
             logger.error("+--------------------------------------+");
         }
 
-        final IDebugContext debug = input.logLevel != null ?
-            new LoggerDebugContext(input.analysisContext.logger(), input.logLevel) : new NullDebugContext();
+        @Nullable Level logLevel = input.analysisContext.stxLogLevel();
+        final IDebugContext debug = logLevel != null ?
+            new LoggerDebugContext(input.analysisContext.stxLogger(), logLevel) : new NullDebugContext();
 
         SmlInstantiateGlobalScope.Output globalState = context.require(instantiateGlobalScope.createTask(
             new SmlInstantiateGlobalScope.Input(input.analysisContext.contextId().toString(), debug, combinedSpec)));
 
         Map<LanguageId, SolverResult> projectResults = analysisContext.languages().entrySet().stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, entry ->
+            .collect(Collectors.toMap(entry -> entry.getKey(), entry ->
                 context.require(partialSolveProject.createTask(new SmlPartialSolveProject.Input(
                     globalState.getGlobalScopeVar(),
                     globalState.getResult(),

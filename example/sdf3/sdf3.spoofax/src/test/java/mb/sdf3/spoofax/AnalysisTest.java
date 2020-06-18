@@ -1,5 +1,6 @@
 package mb.sdf3.spoofax;
 
+import com.google.common.collect.Lists;
 import mb.common.message.KeyedMessages;
 import mb.pie.api.ExecException;
 import mb.pie.api.Function;
@@ -14,6 +15,7 @@ import mb.resource.text.TextResource;
 import mb.sdf3.Sdf3ClassloaderResources;
 import mb.statix.multilang.AnalysisContext;
 import mb.statix.multilang.AnalysisContextService;
+import mb.statix.multilang.ContextConfig;
 import mb.statix.multilang.ContextId;
 import mb.statix.multilang.DaggerMultiLangComponent;
 import mb.statix.multilang.ImmutableLanguageMetadata;
@@ -173,8 +175,11 @@ public class AnalysisTest extends TestBase {
             .postTransform(languageComponent.getPostStatix().createFunction())
             .build();
 
-        analysisContextService.registerLanguage(languageMetadata);
-        analysisContextService.registerContextLanguage(contextId, Iterables2.singleton(languageId));
+        ContextConfig config = new ContextConfig();
+        config.setLanguages(Lists.newArrayList(languageId.getId()));
+
+        analysisContextService.registerLanguageLoader(languageId, () -> languageMetadata);
+        analysisContextService.registerContextLanguageProvider(contextId, () -> Iterables2.singleton(config));
         analysisContextService.initializeService();
     }
 }
