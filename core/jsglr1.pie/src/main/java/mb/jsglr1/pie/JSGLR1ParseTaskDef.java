@@ -247,7 +247,7 @@ class MessagesMapper extends Mapper<Result<JSGLR1ParseOutput, MessagesError>, Me
     public static final MessagesMapper instance = new MessagesMapper();
 
     @Override public Messages apply(Result<JSGLR1ParseOutput, MessagesError> result) {
-        return result.mapOrElse(MessagesError::getMessages, v -> v.messages);
+        return result.mapOrElse(v -> v.messages, MessagesError::getMessages);
     }
 
     private MessagesMapper() {}

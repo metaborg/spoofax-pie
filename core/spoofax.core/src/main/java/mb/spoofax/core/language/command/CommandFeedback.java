@@ -1,6 +1,11 @@
 package mb.spoofax.core.language.command;
 
+import mb.common.message.KeyedMessages;
+import mb.common.message.Message;
+import mb.common.message.Messages;
 import mb.common.region.Region;
+import mb.common.result.KeyedMessagesError;
+import mb.common.result.MessagesError;
 import mb.common.util.ADT;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.cli.CliParams;
@@ -14,6 +19,12 @@ public abstract class CommandFeedback implements Serializable {
         R showFile(ResourceKey file, @Nullable Region region);
 
         R showText(String text, String name, @Nullable Region region);
+
+        R messagesError(MessagesError messagesError, @Nullable ResourceKey resource);
+
+        R keyedMessagesError(KeyedMessagesError keyedMessagesError, @Nullable ResourceKey resource);
+
+        R exceptionError(Exception exception);
     }
 
     public static CommandFeedback showFile(ResourceKey file, @Nullable Region region) {
@@ -30,6 +41,16 @@ public abstract class CommandFeedback implements Serializable {
 
     public static CommandFeedback showText(String text, String name) {
         return CommandFeedbacks.showText(text, name, null);
+    }
+
+    public static CommandFeedback fromException(Exception exception, @Nullable ResourceKey resource) {
+        if(exception instanceof MessagesError) {
+            return CommandFeedbacks.messagesError((MessagesError)exception, resource);
+        } else if(exception instanceof KeyedMessagesError) {
+            return CommandFeedbacks.keyedMessagesError((KeyedMessagesError)exception, resource);
+        } else {
+            return CommandFeedbacks.exceptionError(exception);
+        }
     }
 
 

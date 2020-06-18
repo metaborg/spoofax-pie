@@ -5,7 +5,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;
 
-public class MessagesError extends Throwable {
+public class MessagesError extends Exception {
     private final Messages messages;
 
 
@@ -15,7 +15,7 @@ public class MessagesError extends Throwable {
     }
 
     public MessagesError(Messages messages, @Nullable String description, @Nullable Throwable cause, boolean createStackTrace) {
-        this(messages, description, cause, true, createStackTrace);
+        this(messages, description, cause, createStackTrace, true);
     }
 
     public MessagesError(Messages messages, @Nullable String description, @Nullable Throwable cause) {

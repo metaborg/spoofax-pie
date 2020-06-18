@@ -1,7 +1,7 @@
 package mb.tiger.spoofax.task;
 
+import mb.common.result.MessagesError;
 import mb.common.result.Result;
-import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.Task;
@@ -76,29 +76,26 @@ public class TigerCompileFileAlt implements TaskDef<TigerCompileFileAlt.Args, Co
 
     @Override public CommandOutput exec(ExecContext context, Args input) throws Exception {
         final ResourcePath file = input.file;
-
-        final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createAstSupplier(file).map(Result::get); // TODO: use Result
-        @Nullable String str;
+        final Supplier<Result<IStrategoTerm, MessagesError>> astSupplier = parse.createAstSupplier(file);
+        Result<String, ?> strResult;
         if(input.listDefNames) {
-            str = context.require(listDefNames, astSupplier);
+            strResult = context.require(listDefNames, astSupplier);
         } else {
-            str = context.require(listLiteralVals, astSupplier);
+            strResult = context.require(listLiteralVals, astSupplier);
         }
-
-        if(str == null) {
-            return new CommandOutput(ListView.of());
-        }
-
-        if(input.base64Encode) {
-            str = Base64.getEncoder().encodeToString(str.getBytes(StandardCharsets.UTF_8));
-        }
-
-        final ResourcePath generatedPath = file.replaceLeafExtension(input.compiledFileNameSuffix);
-        final HierarchicalResource generatedResource = resourceService.getHierarchicalResource(generatedPath);
-        generatedResource.writeBytes(str.getBytes(StandardCharsets.UTF_8));
-        context.provide(generatedResource, ResourceStampers.hashFile());
-
-        return new CommandOutput(ListView.of(CommandFeedback.showFile(generatedPath)));
+        final CommandFeedback feedback = strResult
+            .mapCatching((str) -> {
+                if(input.base64Encode) {
+                    str = Base64.getEncoder().encodeToString(str.getBytes(StandardCharsets.UTF_8));
+                }
+                final ResourcePath generatedPath = file.replaceLeafExtension(input.compiledFileNameSuffix);
+                final HierarchicalResource generatedResource = resourceService.getHierarchicalResource(generatedPath);
+                generatedResource.writeBytes(str.getBytes(StandardCharsets.UTF_8));
+                context.provide(generatedResource, ResourceStampers.hashFile());
+                return generatedPath;
+            })
+            .mapOrElse(CommandFeedback::showFile, e -> CommandFeedback.fromException(e, file));
+        return CommandOutput.of(feedback);
     }
 
     @Override public Serializable key(Args input) {

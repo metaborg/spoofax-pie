@@ -1,5 +1,6 @@
 package mb.tiger.spoofax.task;
 
+import mb.common.result.MessagesError;
 import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
@@ -10,7 +11,9 @@ import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.core.language.command.CommandContext;
 import mb.spoofax.core.language.command.CommandFeedback;
+import mb.spoofax.core.language.command.CommandFeedbacks;
 import mb.spoofax.core.language.command.CommandOutput;
 import mb.tiger.spoofax.task.reusable.TigerListLiteralVals;
 import mb.tiger.spoofax.task.reusable.TigerParse;
@@ -18,6 +21,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
@@ -61,21 +65,28 @@ public class TigerCompileFile implements TaskDef<TigerCompileFile.Args, CommandO
         return getClass().getName();
     }
 
-    @Override public CommandOutput exec(ExecContext context, Args input) throws Exception {
+    @Override public CommandOutput exec(ExecContext context, Args input) {
         final ResourcePath file = input.file;
+        final Supplier<Result<IStrategoTerm, MessagesError>> astSupplier = parse.createAstSupplier(file);
+        final Result<String, ?> listedLiteralVals = context.require(listLiteralVals, astSupplier);
+        // Error type is erased (`?` means `? extends Exception`) from this point on, because `listLiteralVals` erases
+        // the error type. However, it could create a new error type that wraps all possible error types, and propagate
+        // that, but that is a bit tedious in Java.
 
-        final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createAstSupplier(file).map(Result::get); // TODO: use Result
-        final @Nullable String literalsStr = context.require(listLiteralVals, astSupplier);
-        if(literalsStr == null) {
-            return new CommandOutput(ListView.of());
-        }
-
-        final ResourcePath generatedPath = file.replaceLeafExtension("literals.aterm");
-        final HierarchicalResource generatedResource = resourceService.getHierarchicalResource(generatedPath);
-        generatedResource.writeBytes(literalsStr.getBytes(StandardCharsets.UTF_8));
-        context.provide(generatedResource, ResourceStampers.hashFile());
-
-        return new CommandOutput(ListView.of(CommandFeedback.showFile(generatedPath)));
+        final CommandFeedback feedback = listedLiteralVals
+            .mapCatching((literalVals) -> { // Use `mapCatching` to turn IOExceptions thrown below into error `Result`s.
+                // Unfortunately, the resulting type will be `Result<ResourcePath, ?>` because we cannot catch
+                // exceptions generically in Java due to type erasure.
+                final ResourcePath generatedPath = file.replaceLeafExtension("literals.aterm");
+                final HierarchicalResource generatedResource = resourceService.getHierarchicalResource(generatedPath);
+                generatedResource.writeBytes(literalVals.getBytes(StandardCharsets.UTF_8));
+                context.provide(generatedResource, ResourceStampers.hashFile());
+                return generatedPath;
+            })
+            .mapOrElse(CommandFeedback::showFile, e -> CommandFeedback.fromException(e, file));
+        // `CommandFeedback.fromException` will match the generic exception against built-in ones such as MessagesError,
+        // which can then be used by the IDE to show messages on files, or to show a popup detailing the error.
+        return CommandOutput.of(feedback);
     }
 
     @Override public Task<CommandOutput> createTask(Args input) {

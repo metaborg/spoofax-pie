@@ -20,6 +20,18 @@ public class KeyedMessages implements Serializable {
         this.messages = messages;
     }
 
+    public static KeyedMessages of() {
+        return new KeyedMessages(MapView.of());
+    }
+
+    public static KeyedMessages of(@Nullable ResourceKey resource, ArrayList<Message> messages) {
+        return new KeyedMessages(MapView.of(resource, messages));
+    }
+
+    public static KeyedMessages copyOf(Map<@Nullable ResourceKey, ArrayList<Message>> keyedMessages) {
+        return new KeyedMessages(MapView.copyOf(keyedMessages));
+    }
+
 
     public int size() {
         return messages.size();

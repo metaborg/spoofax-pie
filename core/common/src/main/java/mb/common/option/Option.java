@@ -10,7 +10,13 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class Option<T extends Serializable> implements Serializable {
+/**
+ * An option type that supports serialization with more functional mappers.
+ *
+ * @param <T> Types of values.
+ * @apiNote Only {@link Serializable} when {@link T} is {@link Serializable}.
+ */
+public class Option<T> implements Serializable {
     private static final Option<?> NONE = new Option<>();
 
     private final @Nullable T value;
@@ -25,16 +31,16 @@ public class Option<T extends Serializable> implements Serializable {
     }
 
 
-    public static <T extends Serializable> Option<T> ofNone() {
+    public static <T> Option<T> ofNone() {
         @SuppressWarnings("unchecked") final Option<T> empty = (Option<T>)NONE;
         return empty;
     }
 
-    public static <T extends Serializable> Option<T> ofSome(T value) {
+    public static <T> Option<T> ofSome(T value) {
         return new Option<>(value);
     }
 
-    public static <T extends Serializable> Option<T> ofNullable(@Nullable T value) {
+    public static <T> Option<T> ofNullable(@Nullable T value) {
         return value == null ? ofNone() : ofSome(value);
     }
 
@@ -68,30 +74,33 @@ public class Option<T extends Serializable> implements Serializable {
     }
 
 
-    public <U extends Serializable> Option<U> map(Function<? super T, ? extends U> mapper) {
+    public <U> Option<U> map(Function<? super T, ? extends U> mapper) {
         return value != null ? Option.ofSome(mapper.apply(value)) : ofNone();
     }
 
-    public <U extends Serializable> U mapOr(U def, Function<? super T, ? extends U> mapper) {
+    public <U> U mapOr(Function<? super T, ? extends U> mapper, U def) {
         return value != null ? mapper.apply(value) : def;
     }
 
-    public <U extends @Nullable Serializable> @Nullable U mapOrNull(Function<? super T, ? extends U> mapper) {
+    public <U> @Nullable U mapOrNull(Function<? super T, ? extends U> mapper) {
         return value != null ? mapper.apply(value) : null;
     }
 
-    public <U extends Serializable> U mapOrElse(Supplier<? extends U> def, Function<? super T, ? extends U> mapper) {
+    public <U> U mapOrElse(Function<? super T, ? extends U> mapper, Supplier<? extends U> def) {
         return value != null ? mapper.apply(value) : def.get();
     }
 
-    public <U extends Serializable, E extends Throwable> U mapOrElseThrow(Supplier<? extends E> exceptionSupplier, Function<? super T, ? extends U> mapper) throws E {
+    public <U, E extends Throwable> U mapOrElseThrow(
+        Function<? super T, ? extends U> mapper,
+        Supplier<? extends E> exceptionSupplier
+    ) throws E {
         if(value != null) {
             return mapper.apply(value);
         }
         throw exceptionSupplier.get();
     }
 
-    public <U extends Serializable> Option<U> flatMap(Function<? super T, Option<U>> mapper) {
+    public <U> Option<U> flatMap(Function<? super T, Option<U>> mapper) {
         return value != null ? mapper.apply(value) : ofNone();
     }
 

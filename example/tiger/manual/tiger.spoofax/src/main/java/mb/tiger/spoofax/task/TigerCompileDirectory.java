@@ -1,9 +1,9 @@
 package mb.tiger.spoofax.task;
 
+import mb.common.result.MessagesError;
 import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
-import mb.pie.api.ExecException;
 import mb.pie.api.Supplier;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
@@ -77,17 +77,13 @@ public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args
         final StringBuffer sb = new StringBuffer();
         sb.append("[\n  ");
         final AtomicBoolean first = new AtomicBoolean(true);
-        directory.list(matcher).forEach((f) -> {
+        directory.list(matcher).forEach((file) -> {
             if(!first.get()) {
                 sb.append(", ");
             }
-            final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createAstSupplier(f.getKey()).map(Result::get); // TODO: use Result.
-            final @Nullable String defNames = context.require(listDefNames, astSupplier);
-            if(defNames != null) {
-                sb.append(defNames);
-            } else {
-                sb.append("[]");
-            }
+            final Supplier<Result<IStrategoTerm, MessagesError>> astSupplier = parse.createAstSupplier(file.getPath());
+            context.require(listDefNames, astSupplier)
+                .ifElse(sb::append, () -> sb.append("[]")); // TODO: collect errors and put them on the directory?
             sb.append('\n');
             first.set(false);
         });

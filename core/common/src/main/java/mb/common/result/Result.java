@@ -8,12 +8,27 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public interface Result<T extends Serializable, E extends Throwable> extends Serializable {
-    static <T extends Serializable, E extends Throwable> Result<T, E> ofOk(T value) {
+/**
+ * A type that is either a value of type {@link T}, or an error of type {@link E}.
+ *
+ * @param <T> Type of values.
+ * @param <E> Type of errors, descendants of {@link Exception}.
+ * @apiNote Only {@link Serializable} when {@link T} and {@link E} are {@link Serializable}.
+ */
+public interface Result<T, E extends Exception> extends Serializable {
+    static <T, E extends Exception> Result<T, E> ofOk(T value) {
         return new Ok<>(value);
     }
 
-    static <T extends Serializable, E extends Throwable> Result<T, E> ofErr(E error) {
+    static <T, E extends Exception> Result<T, E> ofNullableOrElse(@Nullable T value, Supplier<? extends E> def) {
+        if(value != null) {
+            return new Ok<>(value);
+        } else {
+            return new Err<>(def.get());
+        }
+    }
+
+    static <T, E extends Exception> Result<T, E> ofErr(E error) {
         return new Err<>(error);
     }
 
@@ -37,88 +52,177 @@ public interface Result<T extends Serializable, E extends Throwable> extends Ser
 
     default void throwIfError() throws E {
         if(isErr()) {
-            // noinspection ConstantConditions (get is safe because error is present if isErr returns true)
-            throw err().get();
+            // noinspection ConstantConditions (`getErr` is safe because error is present if `isErr` returns true)
+            throw getErr();
         }
     }
 
     default void throwUncheckedIfError() {
         if(isErr()) {
-            // Get is safe because error is present if isErr returns true.
-            throw new RuntimeException(err().get());
+            // `getErr` is safe because error is present if `isErr` returns true.
+            throw new RuntimeException(getErr());
         }
     }
 
 
     default void ifElse(Consumer<? super T> okConsumer, Consumer<? super E> errConsumer) {
-        ok().ifSome(okConsumer);
-        err().ifSome(errConsumer);
+        if(isOk()) {
+            okConsumer.accept(get());
+        } else {
+            errConsumer.accept(getErr());
+        }
+    }
+
+    default void ifElse(Consumer<? super T> okConsumer, Runnable errRunner) {
+        if(isOk()) {
+            okConsumer.accept(get());
+        } else {
+            errRunner.run();
+        }
     }
 
 
-    default <U extends Serializable> Result<U, E> map(Function<? super T, ? extends U> mapper) {
-        // noinspection unchecked (cast is safe because it is impossible to get a value of type U in the err case)
-        return ok().map(v -> Result.<U, E>ofOk(mapper.apply(v))).unwrapOrElse(() -> (Result<U, E>)this);
+    default <U> Result<U, E> map(Function<? super T, ? extends U> mapper) {
+        if(isOk()) {
+            return Result.ofOk(mapper.apply(get()));
+        } else {
+            // noinspection unchecked (cast is safe because it is impossible to get a value of type U in the err case)
+            return (Result<U, E>)this;
+        }
     }
 
-    default <U extends Serializable> U mapOr(U def, Function<? super T, ? extends U> mapper) {
-        return ok().mapOr(def, mapper);
+    default <U, Ex extends E> Result<U, E> mapThrowing(ExceptionalFunction<? super T, ? extends U, Ex> mapper) throws Ex {
+        if(isOk()) {
+            //noinspection ConstantConditions (`get` is safe because value is present if `isOk` returns true)
+            return Result.ofOk(mapper.apply(get()));
+        } else {
+            // noinspection unchecked (cast is safe because it is impossible to get a value of type U in the err case)
+            return (Result<U, E>)this;
+        }
     }
 
-    default <U extends @Nullable Serializable> @Nullable U mapOrNull(Function<? super T, ? extends U> mapper) {
+    default <U> Result<U, ?> mapCatching(ExceptionalFunction<? super T, ? extends U, ?> mapper) {
+        if(isOk()) {
+            try {
+                //noinspection ConstantConditions (`get` is safe because value is present if `isOk` returns true)
+                return Result.ofOk(mapper.apply(get()));
+            } catch(Exception e) {
+                return Result.ofErr(e);
+            }
+        } else {
+            // noinspection unchecked (cast is safe because it is impossible to get a value of type U in the err case)
+            return (Result<U, ?>)this;
+        }
+    }
+
+    default <U, F extends Exception> Result<U, F> mapCatching(ExceptionalFunction<? super T, ? extends U, F> mapper, Class<F> exceptionClass) {
+        if(isOk()) {
+            try {
+                //noinspection ConstantConditions (`get` is safe because value is present if `isOk` returns true)
+                return Result.ofOk(mapper.apply(get()));
+            } catch(Exception e) {
+                if(e.getClass().equals(exceptionClass)) {
+                    // noinspection unchecked (cast is safe because `e`'s class is equal to `exceptionClass`)
+                    return Result.ofErr((F)e);
+                } else {
+                    // `e` is not of type `Ex`, and it cannot be another checked exception. Therefore, it is either a
+                    // `RuntimeException` or a checked exception that is sneakily thrown. In either case, it is safe to
+                    // sneakily rethrow the exception
+                    SneakyThrow.doThrow(e);
+                    // Because `SneakyThrow.doThrow` throws, the following statement will never be executed, but it is
+                    // still needed to make the Java compiler happy.
+                    throw new RuntimeException(e);
+                }
+            }
+        } else {
+            // noinspection unchecked (cast is safe because it is impossible to get a value of type U in the err case)
+            return (Result<U, F>)this;
+        }
+    }
+
+    default <U> U mapOr(Function<? super T, ? extends U> mapper, U def) {
+        return ok().mapOr(mapper, def);
+    }
+
+    default <U> @Nullable U mapOrNull(Function<? super T, ? extends U> mapper) {
         return ok().mapOrNull(mapper);
     }
 
-    default <U extends Serializable> U mapOrThrow(Function<? super T, ? extends U> mapper) throws E {
-        // Get is safe because error is present if not ok case.
-        return ok().mapOrElseThrow(() -> err().get(), mapper);
+    default <U> U mapOrThrow(Function<? super T, ? extends U> mapper) throws E {
+        // `getErr` is safe because error is present if not ok case.
+        return ok().mapOrElseThrow(mapper, this::getErr);
     }
 
-    default <U extends Serializable> U mapOrElse(Supplier<? extends U> def, Function<? super T, ? extends U> mapper) {
-        return ok().mapOrElse(def, mapper);
+    default <U> U mapOrElse(
+        Function<? super T, ? extends U> mapper,
+        Supplier<? extends U> def
+    ) {
+        return ok().mapOrElse(mapper, def);
     }
 
-    default <U extends Serializable> U mapOrElse(Function<? super E, ? extends U> def, Function<? super T, ? extends U> mapper) {
-        // Get is safe because error is present if not ok case.
-        return ok().mapOrElse(() -> def.apply(err().get()), mapper);
+    default <U> U mapOrElse(
+        Function<? super T, ? extends U> mapper,
+        Function<? super E, ? extends U> def
+    ) {
+        // `getErr` is safe because error is present if not ok case.
+        return ok().mapOrElse(mapper, () -> def.apply(getErr()));
     }
 
-    default <U extends Serializable, F extends Throwable> U mapOrElseThrow(Function<? super E, ? extends F> def, Function<? super T, ? extends U> mapper) throws F {
-        // Get is safe because error is present if not ok case.
-        return ok().mapOrElseThrow(() -> def.apply(err().get()), mapper);
+    default <U, F extends Exception> U mapOrElseThrow(
+        Function<? super T, ? extends U> mapper,
+        Function<? super E, ? extends F> def
+    ) throws F {
+        // `getErr` is safe because error is present if not ok case.
+        return ok().mapOrElseThrow(mapper, () -> def.apply(getErr()));
     }
 
 
-    default <F extends Throwable> Result<T, F> mapErr(Function<? super E, ? extends F> mapper) {
+    default <F extends Exception> Result<T, F> mapErr(Function<? super E, ? extends F> mapper) {
         // noinspection unchecked (cast is safe because it is impossible to get a value of type F in the ok case)
-        return err().map(e -> Result.<T, F>ofErr(mapper.apply(e))).unwrapOrElse(() -> (Result<T, F>)this);
+        return err()
+            .map(e -> Result.<T, F>ofErr(mapper.apply(e)))
+            .unwrapOrElse(() -> (Result<T, F>)this);
     }
 
-    default <F extends Throwable> F mapErrOr(F def, Function<? super E, ? extends F> mapper) {
-        return err().mapOr(def, mapper);
+    default <F extends Exception> F mapErrOr(Function<? super E, ? extends F> mapper, F def) {
+        return err().mapOr(mapper, def);
     }
 
-    default <F extends Throwable> @Nullable F mapErrOrNull(Function<? super E, ? extends F> mapper) {
+    default <F extends Exception> @Nullable F mapErrOrNull(Function<? super E, ? extends F> mapper) {
         return err().mapOrNull(mapper);
     }
 
-    default <F extends Throwable> F mapErrOrElse(Supplier<? extends F> def, Function<? super E, ? extends F> mapper) {
-        return err().mapOrElse(def, mapper);
+    default <F extends Exception> F mapErrOrElse(
+        Function<? super E, ? extends F> mapper,
+        Supplier<? extends F> def
+    ) {
+        return err().mapOrElse(mapper, def);
     }
 
-    default <F extends Throwable> F mapErrOrElse(Function<? super T, ? extends F> def, Function<? super E, ? extends F> mapper) {
-        // Get is safe because value is present if not err case.
-        return err().mapOrElse(() -> def.apply(ok().get()), mapper);
+    default <F extends Exception> F mapErrOrElse(
+        Function<? super E, ? extends F> mapper,
+        Function<? super T, ? extends F> def
+    ) {
+        // `get` is safe because value is present if not err case.
+        return err().mapOrElse(mapper, () -> def.apply(get()));
     }
 
 
-    default <U extends Serializable> Result<U, E> flatMap(Function<? super T, Result<U, E>> mapper) {
+    default <U> Result<U, E> flatMap(Function<? super T, ? extends Result<U, E>> mapper) {
         // noinspection unchecked (cast is safe because it is impossible to get a value of type U in the err case)
-        return ok().map(mapper).unwrapOrElse(() -> (Result<U, E>)this);
+        return ok().mapOrElse(mapper, () -> (Result<U, E>)this);
+    }
+
+    default <U, F extends Exception> Result<U, F> flatMapOrElse(
+        Function<? super T, ? extends Result<U, F>> okMapper,
+        Function<? super E, ? extends Result<U, F>> errMapper
+    ) {
+        // `getErr` is safe because error is present if not ok case.
+        return ok().mapOrElse(okMapper, () -> errMapper.apply(getErr()));
     }
 
 
-    default <U extends Serializable> Result<U, E> and(Result<U, E> other) {
+    default <U> Result<U, E> and(Result<U, E> other) {
         if(isErr()) {
             // noinspection unchecked (cast is safe because it is impossible to get a value of type U in the err case)
             return (Result<U, E>)this;
@@ -126,7 +230,7 @@ public interface Result<T extends Serializable, E extends Throwable> extends Ser
         return other;
     }
 
-    default <F extends Throwable> Result<T, F> or(Result<T, F> other) {
+    default <F extends Exception> Result<T, F> or(Result<T, F> other) {
         if(isOk()) {
             // noinspection unchecked (cast is safe because it is impossible to get a value of type F in the ok case)
             return (Result<T, F>)this;
@@ -193,7 +297,7 @@ public interface Result<T extends Serializable, E extends Throwable> extends Ser
     }
 
 
-    class Ok<T extends Serializable, E extends Throwable> implements Result<T, E>, Serializable {
+    class Ok<T, E extends Exception> implements Result<T, E>, Serializable {
         public final T value;
 
         public Ok(T value) {
@@ -234,7 +338,7 @@ public interface Result<T extends Serializable, E extends Throwable> extends Ser
         }
     }
 
-    class Err<T extends Serializable, E extends Throwable> implements Result<T, E>, Serializable {
+    class Err<T, E extends Exception> implements Result<T, E>, Serializable {
         public final E error;
 
         public Err(E error) {
