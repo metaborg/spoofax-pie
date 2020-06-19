@@ -13,10 +13,8 @@ import java.io.InputStream;
 public class ContextUtils {
     public static MultiLangConfig readYamlConfig(ResourceService resourceService, ResourcePath projectDir) {
         ResourcePath propertiesPath = projectDir.appendRelativePath("multilang.yaml");
-        try {
-            try (InputStream input = resourceService.getReadableResource(propertiesPath).openRead()) {
-                return readYamlConfig(input);
-            }
+        try(InputStream input = resourceService.getReadableResource(propertiesPath).openRead()) {
+            return readYamlConfig(input);
         } catch(IOException e) {
             throw new MultiLangAnalysisException("Cannot load " + propertiesPath, e);
         }

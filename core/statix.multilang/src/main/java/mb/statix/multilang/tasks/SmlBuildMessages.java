@@ -89,7 +89,7 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
             .forEach((resourceKey, messages) -> builder.addMessages(resourceKey.orElse(null), messages.stream()
                 .map(Map.Entry::getValue).collect(Collectors.toList())));
 
-        // Add empty message sets for keys with no message, to ensure they are cleared
+        // Add empty message sets for keys with no message, to ensure old messages on file are cleared
         results.fileResults().keySet()
             .stream()
             .map(AnalysisResults.FileKey::getResource)

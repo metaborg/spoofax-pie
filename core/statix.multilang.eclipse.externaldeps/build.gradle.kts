@@ -31,7 +31,8 @@ val exports = listOf(
   // Do not export compile-time annotation packages.
   "!org.checkerframework.*",
   "!org.codehaus.mojo.animal_sniffer.*",
-  // Allow split package for 'mb.statix'.
+  // Allow split package for 'mb.nabl2' and 'mb.statix'.
+  "mb.nabl2.*;-split-package:=merge-first",
   "mb.statix.*;-split-package:=merge-first",
   // Export what is left, using a mandatory provider to prevent accidental imports via 'Import-Package'.
   "*;provider=statix;mandatory:=provider"
