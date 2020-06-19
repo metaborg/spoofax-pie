@@ -181,7 +181,7 @@ public class AnalysisTest extends TestBase {
         config.setLogLevel(logLevel.toString());
 
         analysisContextService.registerLanguageLoader(languageId, () -> languageMetadata);
-        analysisContextService.registerContextLanguageProvider(contextId, () -> Iterables2.singleton(config));
+        analysisContextService.registerContextConfig(contextId, config);
         analysisContextService.initializeService();
     }
 }

@@ -36,7 +36,7 @@ public class AnalysisContextInitializer {
             .map(ContextMetadataProvider.class::cast)
             // Register contextId->Language mappings
             .forEach(provider -> provider.getContextConfigurations().forEach(entry -> analysisContextService
-                .registerContextLanguageProvider(entry.getKey(), new CachingSupplier<>(entry.getValue()))));
+                .registerContextConfig(entry.getKey(), entry.getValue())));
 
         analysisContextService.initializeService();
     }

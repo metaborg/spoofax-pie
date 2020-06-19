@@ -24,7 +24,7 @@ public class YamlContextMetadataProvider implements ContextMetadataProvider {
         .create(YamlContextMetadataProvider.class);
 
     @Override
-    public Iterable<Map.Entry<ContextId, Supplier<Iterable<ContextConfig>>>> getContextConfigurations() {
+    public Iterable<Map.Entry<ContextId, ContextConfig>> getContextConfigurations() {
         IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
         return Stream.of(projects)
             .map(project -> project.getFile("multilang.yaml"))
@@ -33,12 +33,11 @@ public class YamlContextMetadataProvider implements ContextMetadataProvider {
             ::iterator;
     }
 
-    private Stream<Map.Entry<ContextId, Supplier<Iterable<ContextConfig>>>> readFile(IFile configFile) {
+    private Stream<Map.Entry<ContextId, ContextConfig>> readFile(IFile configFile) {
         try {
             MultiLangConfig config = ContextUtils.readYamlConfig(configFile.getContents());
             return config.getCustomContexts().entrySet().stream()
-                .map(entry -> new AbstractMap.SimpleEntry<>(new ContextId(entry.getKey()),
-                    () -> Iterables2.singleton(entry.getValue())));
+                .map(entry -> new AbstractMap.SimpleEntry<>(new ContextId(entry.getKey()), entry.getValue()));
         } catch(CoreException | MultiLangAnalysisException e) {
             logger.warn("Could not load context configurations from " + configFile.getFullPath() + ". Returning empty config");
             return Stream.empty();

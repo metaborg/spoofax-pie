@@ -10,6 +10,7 @@ import mb.resource.ResourceService;
 import mb.spoofax.core.platform.Platform;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +27,7 @@ public class AnalysisContextService {
 
     private final Map<ContextId, AnalysisContext> contexts = new HashMap<>();
     private final Map<LanguageId, Supplier<LanguageMetadata>> languages = new HashMap<>();
-    private final MultiHashMap<ContextId, Supplier<Iterable<ContextConfig>>> contextLanguages = new MultiHashMap<>();
+    private final MultiHashMap<ContextId, ContextConfig> contextLanguages = new MultiHashMap<>();
 
     private final Pie basePie;
     private final ResourceService baseResourceService;
@@ -85,7 +86,7 @@ public class AnalysisContextService {
         languages.put(languageId, languageMetadata);
     }
 
-    public void registerContextLanguageProvider(ContextId contextId, Supplier<Iterable<ContextConfig>> configs) {
+    public void registerContextConfig(ContextId contextId, ContextConfig configs) {
         if (serviceInitialized && contexts.containsKey(contextId)) {
             logger.warn("Registering languages for already initialized context.");
             // TODO: Maybe update context?
@@ -101,11 +102,7 @@ public class AnalysisContextService {
             throw new MultiLangAnalysisException("No configuration for context with id " + contextId);
         }
 
-        Set<ContextConfig> contextConfigs = contextLanguages.get(contextId)
-            .stream()
-            .map(Supplier::get)
-            .flatMap(languageIds -> StreamSupport.stream(languageIds.spliterator(), false))
-            .collect(Collectors.toSet());
+        ArrayList<ContextConfig> contextConfigs = contextLanguages.get(contextId);
 
         Map<LanguageId, LanguageMetadata> languagesForContext = contextConfigs.stream()
             .map(ContextConfig::getLanguages)

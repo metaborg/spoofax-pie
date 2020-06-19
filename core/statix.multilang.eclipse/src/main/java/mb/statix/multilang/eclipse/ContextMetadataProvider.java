@@ -7,5 +7,5 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public interface ContextMetadataProvider {
-    Iterable<Map.Entry<ContextId, Supplier<Iterable<ContextConfig>>>> getContextConfigurations();
+    Iterable<Map.Entry<ContextId, ContextConfig>> getContextConfigurations();
 }
