@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-  <extension-point id="mb.metaborg.statix.multilang.analysiscontext" name="AnalysisContext" schema="schema/mb.metaborg.statix.multilang.analysiscontext.exsd"/>
+  <extension-point id="mb.metaborg.statix.multilang.analysiscontext"
+                   name="AnalysisContext"
+                   schema="schema/mb.metaborg.statix.multilang.analysiscontext.exsd"/>
 
   <!-- By default read all multilang.yaml files in projects -->
   <extension point="mb.metaborg.statix.multilang.analysiscontext">

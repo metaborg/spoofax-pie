@@ -1,57 +1,52 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
 <schema targetNamespace="mb.statix.multilang.eclipse" xmlns="http://www.w3.org/2001/XMLSchema">
-<annotation>
-      <appinfo>
-         <meta.schema plugin="mb.statix.multilang.eclipse" id="mb.metaborg.statix.multilang.analysiscontext" name="AnalysisContext"/>
-      </appinfo>
-   </annotation>
-   <element name="extension">
-      <annotation>
-         <appinfo>
-            <meta.element />
-         </appinfo>
-      </annotation>
-      <complexType>
-         <choice>
-            <element ref="languagemetadata" minOccurs="0" maxOccurs="unbounded"/>
-         </choice>
-         <choice>
-            <element ref="contextmetadata" minOccurs="0" maxOccurs="unbounded"/>
-         </choice>
-         <attribute name="point" type="string" use="required">
-         </attribute>
-         <attribute name="id" type="string">
-         </attribute>
-         <attribute name="name" type="string">
-            <annotation>
-               <appinfo>
-                  <meta.attribute translatable="true"/>
-               </appinfo>
-            </annotation>
-         </attribute>
-      </complexType>
-   </element>
-   <element name="languagemetadata">
-      <complexType>
-         <attribute name="class" type="string">
-            <annotation>
-               <appinfo>
-                  <meta.attribute kind="java" basedOn=":mb.spoofax.multilang.eclipse.LanguageMetadataProvider"/>
-               </appinfo>
-            </annotation>
-         </attribute>
-      </complexType>
-   </element>
-   <element name="contextmetadata">
-      <complexType>
-         <attribute name="class" type="string">
-            <annotation>
-               <appinfo>
-                  <meta.attribute kind="java" basedOn=":mb.spoofax.multilang.eclipse.ContextMetadataProvider"/>
-               </appinfo>
-            </annotation>
-         </attribute>
-      </complexType>
-   </element>
+  <annotation>
+    <appinfo>
+      <meta.schema plugin="mb.statix.multilang.eclipse"
+                   id="mb.metaborg.statix.multilang.analysiscontext"
+                   name="AnalysisContext"/>
+    </appinfo>
+  </annotation>
+  <element name="extension">
+    <complexType>
+      <choice>
+        <element ref="languagemetadata" minOccurs="0" maxOccurs="unbounded"/>
+      </choice>
+      <choice>
+        <element ref="contextmetadata" minOccurs="0" maxOccurs="unbounded"/>
+      </choice>
+      <attribute name="point" type="string" use="required"/>
+      <attribute name="id" type="string"/>
+      <attribute name="name" type="string">
+        <annotation>
+          <appinfo>
+            <meta.attribute translatable="true"/>
+          </appinfo>
+        </annotation>
+      </attribute>
+    </complexType>
+  </element>
+  <element name="languagemetadata">
+    <complexType>
+      <attribute name="class" type="string">
+        <annotation>
+          <appinfo>
+            <meta.attribute kind="java" basedOn=":mb.spoofax.multilang.eclipse.LanguageMetadataProvider"/>
+          </appinfo>
+        </annotation>
+      </attribute>
+    </complexType>
+  </element>
+  <element name="contextmetadata">
+    <complexType>
+      <attribute name="class" type="string">
+        <annotation>
+          <appinfo>
+            <meta.attribute kind="java" basedOn=":mb.spoofax.multilang.eclipse.ContextMetadataProvider"/>
+          </appinfo>
+        </annotation>
+      </attribute>
+    </complexType>
+  </element>
 </schema>

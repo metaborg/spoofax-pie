@@ -16,9 +16,6 @@ dependencies {
   bundleEmbedApi("org.metaborg:resource")
   bundleEmbedApi("org.metaborg:pie.api")
   bundleEmbedApi("org.metaborg:pie.runtime")
-  bundleEmbedApi("org.metaborg:pie.dagger")
-
-  bundleEmbedApi("com.google.dagger:dagger")
 }
 
 // Use bnd to create a single OSGi bundle JAR that includes all dependencies.
@@ -31,7 +28,6 @@ val exports = listOf(
   "!mb.pie.*",
   "!mb.common.*",
   "!mb.spoofax.core.*",
-  "!dagger.*",
   // Do not export compile-time annotation packages.
   "!org.checkerframework.*",
   "!org.codehaus.mojo.animal_sniffer.*",
