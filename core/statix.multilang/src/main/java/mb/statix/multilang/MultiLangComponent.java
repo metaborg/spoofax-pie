@@ -1,7 +1,6 @@
 package mb.statix.multilang;
 
 import dagger.Component;
-import mb.log.api.LoggerFactory;
 import mb.spoofax.core.platform.PlatformComponent;
 
 @MultiLangScope

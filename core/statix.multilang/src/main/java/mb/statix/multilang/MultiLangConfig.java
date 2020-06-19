@@ -5,22 +5,22 @@ import java.util.Map;
 import java.util.Objects;
 
 public class MultiLangConfig {
-    private Map<String, String> languageContexts = new HashMap<>();
-    private Map<String, ContextConfig> customContexts = new HashMap<>();
+    private Map<ContextId, LanguageId> languageContexts = new HashMap<>();
+    private Map<ContextId, ContextConfig> customContexts = new HashMap<>();
 
-    public Map<String, String> getLanguageContexts() {
+    public Map<ContextId, LanguageId> getLanguageContexts() {
         return languageContexts;
     }
 
-    public void setLanguageContexts(Map<String, String> languageContexts) {
+    public void setLanguageContexts(Map<ContextId, LanguageId> languageContexts) {
         this.languageContexts = languageContexts;
     }
 
-    public Map<String, ContextConfig> getCustomContexts() {
+    public Map<ContextId, ContextConfig> getCustomContexts() {
         return customContexts;
     }
 
-    public void setCustomContexts(Map<String, ContextConfig> customContexts) {
+    public void setCustomContexts(Map<ContextId, ContextConfig> customContexts) {
         this.customContexts = customContexts;
     }
 

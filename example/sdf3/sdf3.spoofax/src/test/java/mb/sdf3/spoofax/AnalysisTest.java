@@ -154,7 +154,6 @@ public class AnalysisTest extends TestBase {
     }
 
     @BeforeEach public void createAnalysisContext() throws IOException {
-        resources.clear();
         ResourceKeyString id = ResourceKeyString.of("mb/sdf3/src-gen/statix");
         ClassLoaderResource statixSpec = statixRegistry.getResource(id);
         SpecBuilder spec = SpecUtils.loadSpec(statixSpec, "statix/statics", termFactory);
@@ -177,7 +176,7 @@ public class AnalysisTest extends TestBase {
             .build();
 
         ContextConfig config = new ContextConfig();
-        config.setLanguages(Lists.newArrayList(languageId.getId()));
+        config.setLanguages(Lists.newArrayList(languageId));
         config.setLogLevel(logLevel.toString());
 
         analysisContextService.registerLanguageLoader(languageId, () -> languageMetadata);

@@ -8,15 +8,15 @@ import java.util.List;
 import java.util.Objects;
 
 public class ContextConfig {
-    private List<String> languages;
+    private List<LanguageId> languages;
     // String to enable case-insensitive parsing
     private @Nullable String logLevel;
 
-    public List<String> getLanguages() {
+    public List<LanguageId> getLanguages() {
         return languages;
     }
 
-    public void setLanguages(List<String> languages) {
+    public void setLanguages(List<LanguageId> languages) {
         this.languages = languages;
     }
 

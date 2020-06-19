@@ -36,8 +36,7 @@ public class YamlContextMetadataProvider implements ContextMetadataProvider {
     private Stream<Map.Entry<ContextId, ContextConfig>> readFile(IFile configFile) {
         try {
             MultiLangConfig config = ContextUtils.readYamlConfig(configFile.getContents());
-            return config.getCustomContexts().entrySet().stream()
-                .map(entry -> new AbstractMap.SimpleEntry<>(new ContextId(entry.getKey()), entry.getValue()));
+            return config.getCustomContexts().entrySet().stream();
         } catch(CoreException | MultiLangAnalysisException e) {
             logger.warn("Could not load context configurations from " + configFile.getFullPath() + ". Returning empty config");
             return Stream.empty();
