@@ -1,5 +1,6 @@
 package mb.statix.multilang.eclipse;
 
+import mb.log.api.Logger;
 import mb.statix.multilang.AnalysisContextService;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -9,6 +10,8 @@ import java.util.stream.Stream;
 
 public class AnalysisContextInitializer {
     private static final String ANALYSIS_CONTEXT_ID = "mb.metaborg.statix.multilang.analysiscontext";
+    private static final Logger logger = MultiLangPlugin.getComponent().getLoggerFactory()
+        .create(AnalysisContextInitializer.class);
 
     public static void execute(IExtensionRegistry registry) {
         AnalysisContextService analysisContextService = MultiLangPlugin.getComponent().getAnalysisContextService();
@@ -41,7 +44,7 @@ public class AnalysisContextInitializer {
         try {
             return conf.createExecutableExtension("class");
         } catch(CoreException e) {
-            e.printStackTrace();
+            logger.error("Error loading context initializer. Ignoring configuration element.", e);
         }
         return null;
     }

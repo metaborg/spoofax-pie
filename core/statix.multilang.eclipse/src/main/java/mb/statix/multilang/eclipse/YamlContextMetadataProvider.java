@@ -1,7 +1,9 @@
 package mb.statix.multilang.eclipse;
 
+import mb.log.api.Logger;
 import mb.statix.multilang.ContextConfig;
 import mb.statix.multilang.ContextId;
+import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.multilang.MultiLangConfig;
 import mb.statix.multilang.utils.ContextUtils;
 import org.eclipse.core.resources.IFile;
@@ -16,6 +18,10 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class YamlContextMetadataProvider implements ContextMetadataProvider {
+
+    private static final Logger logger = MultiLangPlugin.getComponent().getLoggerFactory()
+        .create(YamlContextMetadataProvider.class);
+
     @Override
     public Iterable<Map.Entry<ContextId, Supplier<Iterable<ContextConfig>>>> getContextConfigurations() {
         IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
@@ -32,7 +38,8 @@ public class YamlContextMetadataProvider implements ContextMetadataProvider {
             return config.getCustomContexts().entrySet().stream()
                 .map(entry -> new AbstractMap.SimpleEntry<>(new ContextId(entry.getKey()),
                     () -> Iterables2.singleton(entry.getValue())));
-        } catch(CoreException e) {
+        } catch(CoreException | MultiLangAnalysisException e) {
+            logger.warn("Could not load context configurations from " + configFile.getFullPath() + ". Returning empty config");
             return Stream.empty();
         }
     }
