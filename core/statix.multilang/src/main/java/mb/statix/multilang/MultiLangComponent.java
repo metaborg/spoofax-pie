@@ -8,5 +8,4 @@ import mb.spoofax.core.platform.PlatformComponent;
 @Component(dependencies = PlatformComponent.class)
 public interface MultiLangComponent {
     AnalysisContextService getAnalysisContextService();
-    LoggerFactory getLoggerFactory();
 }

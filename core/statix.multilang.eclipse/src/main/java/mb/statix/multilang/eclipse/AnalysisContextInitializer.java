@@ -1,6 +1,7 @@
 package mb.statix.multilang.eclipse;
 
 import mb.log.api.Logger;
+import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.statix.multilang.AnalysisContextService;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -10,7 +11,7 @@ import java.util.stream.Stream;
 
 public class AnalysisContextInitializer {
     private static final String ANALYSIS_CONTEXT_ID = "mb.metaborg.statix.multilang.analysiscontext";
-    private static final Logger logger = MultiLangPlugin.getComponent().getLoggerFactory()
+    private static final Logger logger = SpoofaxPlugin.getComponent().getLoggerFactory()
         .create(AnalysisContextInitializer.class);
 
     public static void execute(IExtensionRegistry registry) {

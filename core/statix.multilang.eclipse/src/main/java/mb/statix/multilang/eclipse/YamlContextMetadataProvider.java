@@ -1,6 +1,7 @@
 package mb.statix.multilang.eclipse;
 
 import mb.log.api.Logger;
+import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.statix.multilang.ContextConfig;
 import mb.statix.multilang.ContextId;
 import mb.statix.multilang.MultiLangAnalysisException;
@@ -19,7 +20,7 @@ import java.util.stream.Stream;
 
 public class YamlContextMetadataProvider implements ContextMetadataProvider {
 
-    private static final Logger logger = MultiLangPlugin.getComponent().getLoggerFactory()
+    private static final Logger logger = SpoofaxPlugin.getComponent().getLoggerFactory()
         .create(YamlContextMetadataProvider.class);
 
     @Override
