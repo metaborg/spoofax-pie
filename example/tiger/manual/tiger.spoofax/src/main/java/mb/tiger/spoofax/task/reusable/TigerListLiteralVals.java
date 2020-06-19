@@ -2,6 +2,7 @@ package mb.tiger.spoofax.task.reusable;
 
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
+import mb.pie.api.None;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.stratego.common.StrategoException;
@@ -12,8 +13,9 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import java.io.Serializable;
 
-public class TigerListLiteralVals implements TaskDef<Supplier<? extends Result<IStrategoTerm, ?>>, Result<String, ?>> {
+public class TigerListLiteralVals implements TaskDef<Supplier<? extends Result<IStrategoTerm, ?>>, Result<String, ? super Exception>> {
     private final Provider<StrategoRuntime> strategoRuntimeProvider;
 
     @Inject
@@ -25,7 +27,7 @@ public class TigerListLiteralVals implements TaskDef<Supplier<? extends Result<I
     public String getId() { return "mb.tiger.spoofax.task.reusable.TigerListLiteralVals"; }
 
     @Override
-    public Result<String, ?> exec(ExecContext context, Supplier<? extends Result<IStrategoTerm, ?>> astSupplier) throws Exception {
+    public Result<String, ? super Exception> exec(ExecContext context, Supplier<? extends Result<IStrategoTerm, ?>> astSupplier) throws Exception {
         return context.require(astSupplier)
             .flatMapOrElse((ast) -> {
                 final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get();

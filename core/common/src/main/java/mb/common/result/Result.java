@@ -91,7 +91,7 @@ public interface Result<T, E extends Exception> extends Serializable {
         }
     }
 
-    default <U, Ex extends E> Result<U, E> mapThrowing(ExceptionalFunction<? super T, ? extends U, Ex> mapper) throws Ex {
+    default <U, F extends Exception> Result<U, E> mapThrowing(ExceptionalFunction<? super T, ? extends U, F> mapper) throws F {
         if(isOk()) {
             //noinspection ConstantConditions (`get` is safe because value is present if `isOk` returns true)
             return Result.ofOk(mapper.apply(get()));
@@ -125,7 +125,7 @@ public interface Result<T, E extends Exception> extends Serializable {
                     // noinspection unchecked (cast is safe because `e`'s class is equal to `exceptionClass`)
                     return Result.ofErr((F)e);
                 } else {
-                    // `e` is not of type `Ex`, and it cannot be another checked exception. Therefore, it is either a
+                    // `e` is not of type `F`, and it cannot be another checked exception. Therefore, it is either a
                     // `RuntimeException` or a checked exception that is sneakily thrown. In either case, it is safe to
                     // sneakily rethrow the exception
                     SneakyThrow.doThrow(e);

@@ -55,7 +55,7 @@ public abstract class JSGLR1ParseTaskDef implements TaskDef<Supplier<String>, Re
 
 
     public Supplier<Result<IStrategoTerm, MessagesError>> createAstSupplier(Supplier<String> stringSupplier) {
-        return createSupplier(stringSupplier).map(AstMapper.instance);
+        return createSupplier(stringSupplier).map(AstMapper.instance); // TODO: pass an outputstamper that only does an equals check on the AST.
     }
 
     public Supplier<Result<IStrategoTerm, MessagesError>> createAstSupplier(ResourceKey key) {

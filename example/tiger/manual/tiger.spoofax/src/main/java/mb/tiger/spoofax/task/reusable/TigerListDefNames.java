@@ -13,7 +13,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-public class TigerListDefNames implements TaskDef<Supplier<? extends Result<IStrategoTerm, ?>>, Result<String, ?>> {
+public class TigerListDefNames implements TaskDef<Supplier<? extends Result<IStrategoTerm, ?>>, Result<String, ? super Exception>> {
     private final Provider<StrategoRuntime> strategoRuntimeProvider;
 
     @Inject
@@ -25,7 +25,7 @@ public class TigerListDefNames implements TaskDef<Supplier<? extends Result<IStr
     public String getId() { return "mb.tiger.spoofax.task.reusable.TigerListDefNames"; }
 
     @Override
-    public @Nullable Result<String, ?> exec(ExecContext context, Supplier<? extends Result<IStrategoTerm, ?>> astSupplier) throws Exception {
+    public @Nullable Result<String, ? super Exception> exec(ExecContext context, Supplier<? extends Result<IStrategoTerm, ?>> astSupplier) throws Exception {
         return context.require(astSupplier)
             .flatMapOrElse((ast) -> {
                 final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get();

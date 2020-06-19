@@ -1,8 +1,9 @@
 package mb.tiger.spoofax.task;
 
+import mb.common.message.KeyedMessagesBuilder;
+import mb.common.message.Severity;
 import mb.common.result.MessagesError;
 import mb.common.result.Result;
-import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.Task;
@@ -75,15 +76,20 @@ public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args
         final HierarchicalResource directory = context.require(dir, ResourceStampers.modifiedDir(matcher));
 
         final StringBuffer sb = new StringBuffer();
+        final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         sb.append("[\n  ");
         final AtomicBoolean first = new AtomicBoolean(true);
         directory.list(matcher).forEach((file) -> {
+            final ResourcePath filePath = file.getPath();
             if(!first.get()) {
                 sb.append(", ");
             }
-            final Supplier<Result<IStrategoTerm, MessagesError>> astSupplier = parse.createAstSupplier(file.getPath());
+            final Supplier<Result<IStrategoTerm, MessagesError>> astSupplier = parse.createAstSupplier(filePath);
             context.require(listDefNames, astSupplier)
-                .ifElse(sb::append, () -> sb.append("[]")); // TODO: collect errors and put them on the directory?
+                .ifElse(sb::append, (e) -> {
+                    sb.append("[]");
+                    messagesBuilder.addMessage("Listing definition names for '" + file + "' failed unexpectedly", e, Severity.Error, filePath);
+                });
             sb.append('\n');
             first.set(false);
         });
@@ -94,7 +100,7 @@ public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args
         generatedResource.writeBytes(sb.toString().getBytes(StandardCharsets.UTF_8));
         context.provide(generatedResource, ResourceStampers.hashFile());
 
-        return new CommandOutput(ListView.of(CommandFeedback.showFile(generatedPath)));
+        return CommandOutput.of(CommandFeedback.showFile(generatedPath), CommandFeedback.keyedMessages(messagesBuilder.build(), dir));
     }
 
     @Override public Task<CommandOutput> createTask(Args input) {
