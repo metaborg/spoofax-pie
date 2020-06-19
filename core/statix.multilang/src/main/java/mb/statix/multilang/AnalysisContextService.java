@@ -1,21 +1,15 @@
 package mb.statix.multilang;
 
-import org.metaborg.util.log.Level;
-
 import mb.common.util.MultiHashMap;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.Pie;
 import mb.resource.ResourceService;
 import mb.spoofax.core.platform.Platform;
+import org.metaborg.util.log.Level;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -55,18 +49,18 @@ public class AnalysisContextService {
 
     private void ensureContextInitialized(ContextId contextId) {
         waitForServiceInitialized();
-        if (contexts.containsKey(contextId)) {
+        if(contexts.containsKey(contextId)) {
             return;
         }
         synchronized(contexts) {
-            if (!contexts.containsKey(contextId)) {
+            if(!contexts.containsKey(contextId)) {
                 initializeContext(contextId);
             }
         }
     }
 
     private void waitForServiceInitialized() {
-        if (!serviceInitialized) {
+        if(!serviceInitialized) {
             synchronized(lock) {
                 try {
                     lock.wait(3000);
@@ -78,14 +72,14 @@ public class AnalysisContextService {
     }
 
     public void registerLanguageLoader(LanguageId languageId, Supplier<LanguageMetadata> languageMetadata) {
-        if (serviceInitialized && languages.containsKey(languageId)) {
+        if(serviceInitialized && languages.containsKey(languageId)) {
             logger.warn("Replacing language metadata after initialization. Already initialized contexts will keep using previously registered metadata");
         }
         languages.put(languageId, languageMetadata);
     }
 
     public void registerContextConfig(ContextId contextId, ContextConfig configs) {
-        if (serviceInitialized && contexts.containsKey(contextId)) {
+        if(serviceInitialized && contexts.containsKey(contextId)) {
             logger.warn("Registering languages for already initialized context.");
             // TODO: Maybe update context?
         }
@@ -93,10 +87,10 @@ public class AnalysisContextService {
     }
 
     private AnalysisContext initializeContext(ContextId contextId) {
-        if (contexts.containsKey(contextId)) {
+        if(contexts.containsKey(contextId)) {
             throw new MultiLangAnalysisException(String.format("Context with id '%s' is already initialized", contextId));
         }
-        if (!contextConfigurations.containsKey(contextId)) {
+        if(!contextConfigurations.containsKey(contextId)) {
             throw new MultiLangAnalysisException("No configuration for context with id " + contextId);
         }
 
