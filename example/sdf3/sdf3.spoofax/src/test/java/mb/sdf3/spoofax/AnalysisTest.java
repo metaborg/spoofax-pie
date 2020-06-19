@@ -57,11 +57,12 @@ public class AnalysisTest extends TestBase {
     private final SmlInstantiateGlobalScope instantiateGlobalScope = new SmlInstantiateGlobalScope();
     private final SmlPartialSolveProject partialSolveProject = new SmlPartialSolveProject();
     private final SmlPartialSolveFile partialSolveFile = new SmlPartialSolveFile(languageComponent.getStrategoRuntimeBuilder().
-        build().getTermFactory());
-    private final SmlAnalyzeProject analyzeProject = new SmlAnalyzeProject(instantiateGlobalScope, partialSolveProject, partialSolveFile);
+        build().getTermFactory(), platformComponent.getLoggerFactory());
+    private final SmlAnalyzeProject analyzeProject = new SmlAnalyzeProject(instantiateGlobalScope, partialSolveProject,
+        partialSolveFile, platformComponent.getLoggerFactory());
     private final SmlBuildMessages buildMessages = new SmlBuildMessages(analyzeProject);
 
-    private final Level logLevel = Level.Warn;
+    private final Level logLevel = Level.Info;
     private final HashSet<ResourceKey> resources = new HashSet<>();
 
     private final LanguageId languageId = new LanguageId("sdf3");
@@ -75,7 +76,7 @@ public class AnalysisTest extends TestBase {
 
         try(MixedSession session = context.createPieForContext().newSession()) {
             KeyedMessages messages = session.require(buildMessages
-                .createTask(new SmlBuildMessages.Input(projectPath, context, logLevel)));
+                .createTask(new SmlBuildMessages.Input(projectPath, context)));
             assertTrue(messages.containsError());
             assertEquals(1, messages.count());
             assertEquals(1, messages.getAllMessages().get(resource.getKey()).size());
@@ -91,7 +92,7 @@ public class AnalysisTest extends TestBase {
 
         try(MixedSession session = context.createPieForContext().newSession()) {
             KeyedMessages messages = session.require(buildMessages
-                .createTask(new SmlBuildMessages.Input(projectPath, context, logLevel)));
+                .createTask(new SmlBuildMessages.Input(projectPath, context)));
             assertEquals(0, messages.count());
         }
     }
@@ -107,7 +108,7 @@ public class AnalysisTest extends TestBase {
 
         try(MixedSession session = context.createPieForContext().newSession()) {
             KeyedMessages messages = session.require(buildMessages
-                .createTask(new SmlBuildMessages.Input(projectPath, context, logLevel)));
+                .createTask(new SmlBuildMessages.Input(projectPath, context)));
             assertTrue(messages.containsError());
             assertEquals(4, messages.count());
             assertTrue(messages.containsWarning());
@@ -127,7 +128,7 @@ public class AnalysisTest extends TestBase {
 
         try(MixedSession session = context.createPieForContext().newSession()) {
             KeyedMessages messages = session.require(buildMessages
-                .createTask(new SmlBuildMessages.Input(projectPath, context, logLevel)));
+                .createTask(new SmlBuildMessages.Input(projectPath, context)));
             assertFalse(messages.containsError());
             assertEquals(0, messages.count());
         }
@@ -146,7 +147,7 @@ public class AnalysisTest extends TestBase {
 
         try(MixedSession session = context.createPieForContext().newSession()) {
             KeyedMessages messages = session.require(buildMessages
-                .createTask(new SmlBuildMessages.Input(projectPath, context, logLevel)));
+                .createTask(new SmlBuildMessages.Input(projectPath, context)));
             assertFalse(messages.containsError());
             assertEquals(0, messages.count());
         }
@@ -177,6 +178,7 @@ public class AnalysisTest extends TestBase {
 
         ContextConfig config = new ContextConfig();
         config.setLanguages(Lists.newArrayList(languageId.getId()));
+        config.setLogLevel(logLevel.toString());
 
         analysisContextService.registerLanguageLoader(languageId, () -> languageMetadata);
         analysisContextService.registerContextLanguageProvider(contextId, () -> Iterables2.singleton(config));

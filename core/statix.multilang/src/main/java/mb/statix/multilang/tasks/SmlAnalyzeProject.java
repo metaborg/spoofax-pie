@@ -1,6 +1,8 @@
 package mb.statix.multilang.tasks;
 
 import com.google.common.collect.ListMultimap;
+import mb.log.api.Logger;
+import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
@@ -38,8 +40,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAnalyzeProject.Output> {
-    private static final ILogger logger = LoggerUtils.logger(SmlAnalyzeProject.class);
-
     public static class Input implements Serializable {
         private final ResourcePath projectPath;
         private final AnalysisContext analysisContext;
@@ -102,15 +102,18 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
     private final SmlInstantiateGlobalScope instantiateGlobalScope;
     private final SmlPartialSolveProject partialSolveProject;
     private final SmlPartialSolveFile partialSolveFile;
+    private final Logger logger;
 
     @Inject public SmlAnalyzeProject(
         SmlInstantiateGlobalScope instantiateGlobalScope,
         SmlPartialSolveProject partialSolveProject,
-        SmlPartialSolveFile partialSolveFile
+        SmlPartialSolveFile partialSolveFile,
+        LoggerFactory loggerFactory
     ) {
         this.instantiateGlobalScope = instantiateGlobalScope;
         this.partialSolveProject = partialSolveProject;
         this.partialSolveFile = partialSolveFile;
+        logger = loggerFactory.create(SmlAnalyzeProject.class);
     }
 
     @Override public String getId() {

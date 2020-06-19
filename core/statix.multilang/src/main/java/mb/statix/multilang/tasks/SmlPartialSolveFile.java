@@ -1,5 +1,7 @@
 package mb.statix.multilang.tasks;
 
+import mb.log.api.Logger;
+import mb.log.api.LoggerFactory;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.stratego.StrategoTerms;
 import mb.pie.api.ExecContext;
@@ -25,7 +27,6 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, SmlPartialSolveFile.Output> {
-    private static final ILogger logger = LoggerUtils.logger(SmlPartialSolveFile.class);
 
     public static class Input implements Serializable {
         private final ITerm globalScope;
@@ -113,9 +114,11 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, S
     }
 
     private final StrategoTerms st;
+    private final Logger logger;
 
-    @Inject public SmlPartialSolveFile(ITermFactory termFactory) {
+    @Inject public SmlPartialSolveFile(ITermFactory termFactory, LoggerFactory loggerFactory) {
         st = new StrategoTerms(termFactory);
+        logger = loggerFactory.create(SmlPartialSolveFile.class);
     }
 
     @Override public String getId() {

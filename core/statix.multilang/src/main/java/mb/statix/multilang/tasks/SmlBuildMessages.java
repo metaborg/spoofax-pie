@@ -27,11 +27,9 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
     public static class Input implements Serializable {
         private final ResourcePath projectPath;
         private final AnalysisContext analysisContext;
-        private final Level logLevel;
 
-        public Input(ResourcePath projectPath, AnalysisContext analysisContext, Level logLevel) {
+        public Input(ResourcePath projectPath, AnalysisContext analysisContext) {
             this.projectPath = projectPath;
-            this.logLevel = logLevel;
             this.analysisContext = analysisContext;
         }
 
