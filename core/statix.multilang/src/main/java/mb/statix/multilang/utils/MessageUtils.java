@@ -74,7 +74,7 @@ public class MessageUtils {
 
     private static Region getRegion(ITerm originTerm) {
         StrategoAnnotations strategoAnnotations = originTerm.getAttachments().getInstance(StrategoAnnotations.class);
-        if (strategoAnnotations == null) {
+        if(strategoAnnotations == null) {
             return null;
         }
         return strategoAnnotations.getAnnotationList()
@@ -148,8 +148,8 @@ public class MessageUtils {
             return ((ResourceKeyAttachment)attachment).resourceKey;
         }
 
-        if (attachment instanceof ParentAttachment) {
-            IStrategoTerm parentTerm = ((ParentAttachment) attachment).getParent();
+        if(attachment instanceof ParentAttachment) {
+            IStrategoTerm parentTerm = ((ParentAttachment)attachment).getParent();
             ISimpleTerm root = ParentAttachment.getRoot(parentTerm);
             return getResourceKeyFromParentAttachments(root.getAttachment(ImploderAttachment.TYPE));
         }

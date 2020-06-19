@@ -11,7 +11,6 @@ import mb.statix.multilang.AnalysisContext;
 import mb.statix.multilang.AnalysisResults;
 import mb.statix.multilang.utils.MessageUtils;
 import org.metaborg.util.iterators.Iterables2;
-import org.metaborg.util.log.Level;
 
 import javax.inject.Inject;
 import java.io.Serializable;

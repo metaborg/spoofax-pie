@@ -25,9 +25,7 @@ import mb.statix.solver.persistent.SolverResult;
 import mb.statix.spec.Rule;
 import mb.statix.spec.Spec;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.metaborg.util.log.ILogger;
 import org.metaborg.util.log.Level;
-import org.metaborg.util.log.LoggerUtils;
 
 import javax.inject.Inject;
 import java.io.Serializable;
@@ -196,6 +194,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
         long dt = System.currentTimeMillis() - t0;
         logger.info("{} analyzed in {} ms] ", input.analysisContext.contextId(), dt);
 
-        return new Output(ImmutableAnalysisResults.of(globalState.getGlobalScope(), new HashMap<>(projectResults), new HashMap<>(fileResults), finalResult));
+        return new Output(ImmutableAnalysisResults.of(globalState.getGlobalScope(),
+            new HashMap<>(projectResults), new HashMap<>(fileResults), finalResult));
     }
 }

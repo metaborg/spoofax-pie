@@ -31,7 +31,6 @@ import mb.statix.multilang.tasks.SmlPartialSolveFile;
 import mb.statix.multilang.tasks.SmlPartialSolveProject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.metaborg.util.iterators.Iterables2;
 import org.metaborg.util.log.Level;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;

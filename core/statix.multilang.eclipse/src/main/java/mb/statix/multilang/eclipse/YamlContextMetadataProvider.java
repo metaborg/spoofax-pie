@@ -11,11 +11,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.metaborg.util.iterators.Iterables2;
 
-import java.util.AbstractMap;
 import java.util.Map;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class YamlContextMetadataProvider implements ContextMetadataProvider {

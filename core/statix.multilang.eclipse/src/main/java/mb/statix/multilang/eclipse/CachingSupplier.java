@@ -14,10 +14,10 @@ class CachingSupplier<T> implements Supplier<T> {
 
     public T get() {
         T val = value.get();
-        if (val == null) {
+        if(val == null) {
             synchronized(value) {
                 val = value.get();
-                if (val == null) {
+                if(val == null) {
                     val = Objects.requireNonNull(delegate.get());
                     value.set(val);
                 }
