@@ -51,6 +51,7 @@ open class LanguageProjectSettings(
   val completer: CompleterCompiler.LanguageProjectInput.Builder? = null, // Optional
   val strategoRuntime: StrategoRuntimeCompiler.LanguageProjectInput.Builder? = null, // Optional
   val constraintAnalyzer: ConstraintAnalyzerCompiler.LanguageProjectInput.Builder? = null, // Optional
+  val multilangAnalyzer: MultilangAnalyzerCompiler.LanguageProjectInput.Builder? = null, // Optional
 
   val builder: LanguageProjectCompiler.Input.Builder = LanguageProjectCompiler.Input.builder()
 ) {
@@ -82,6 +83,7 @@ open class LanguageProjectSettings(
     val completer = if(this.completer != null) this.completer.shared(shared).languageProject(languageProject).build() else null
     val strategoRuntime = if(this.strategoRuntime != null) this.strategoRuntime.shared(shared).languageProject(languageProject).build() else null
     val constraintAnalyzer = if(this.constraintAnalyzer != null) this.constraintAnalyzer.shared(shared).languageProject(languageProject).build() else null
+    val multilangAnalyzer = if(this.multilangAnalyzer != null) this.multilangAnalyzer.shared(shared).languageProject(languageProject).build() else null
     val builder = this.builder
       .shared(shared)
       .languageProject(languageProject)
@@ -98,6 +100,9 @@ open class LanguageProjectSettings(
     }
     if(constraintAnalyzer != null) {
       builder.constraintAnalyzer(constraintAnalyzer)
+    }
+    if(multilangAnalyzer != null) {
+      builder.multilangAnalyzer(multilangAnalyzer)
     }
     val input = builder.build()
 

@@ -3,6 +3,7 @@ package {{genIndexAstTaskDef.packageId}};
 import mb.jsglr.common.ResourceKeyAttachment;
 import mb.nabl2.terms.stratego.StrategoTermIndices;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.stratego.common.StrategoRuntimeBuilder;
@@ -11,6 +12,8 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 
 import javax.inject.Inject;
+import java.io.Serializable;
+import java.util.Objects;
 
 public class {{genIndexAstTaskDef.id}} implements TaskDef<{{genIndexAstTaskDef.id}}.Input, @Nullable IStrategoTerm> {
 
@@ -46,7 +49,7 @@ public class {{genIndexAstTaskDef.id}} implements TaskDef<{{genIndexAstTaskDef.i
     }
 
     @Override public String getId() {
-        return {{genIndexAstTaskDef.qualifiedId}};
+        return "{{genIndexAstTaskDef.qualifiedId}}";
     }
 
     @Override

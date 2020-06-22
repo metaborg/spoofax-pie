@@ -24,7 +24,7 @@ public class {{genAnalyzeTaskDef.id}} implements TaskDef<ResourcePath, CommandOu
     private final AnalysisContextService analysisContextService;
     private final ResourceService resourceService;
 
-    @Inject public {{genAnalyzeTaskDef.packageId}}(
+    @Inject public {{genAnalyzeTaskDef.id}}(
         SmlBuildMessages buildMessages,
         AnalysisContextService analysisContextService,
         ResourceService resourceService
@@ -42,7 +42,7 @@ public class {{genAnalyzeTaskDef.id}} implements TaskDef<ResourcePath, CommandOu
     public CommandOutput exec(ExecContext context, ResourcePath projectRoot) {
         MultiLangConfig config = ContextUtils.readYamlConfig(resourceService, projectRoot);
         ContextId contextId = config.getLanguageContexts()
-                .getOrDefault(new LanguageId({{languageId}}), new ContextId({{contextId}}));
+                .getOrDefault(new LanguageId("{{languageId}}"), new ContextId("{{contextId}}"));
         AnalysisContext analysisContext = analysisContextService
                 .getAnalysisContext(contextId);
 

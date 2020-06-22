@@ -19,6 +19,7 @@ open class AdapterProjectSettings(
   val completer: CompleterCompiler.AdapterProjectInput.Builder? = null, // Optional
   val strategoRuntime: StrategoRuntimeCompiler.AdapterProjectInput.Builder? = null, // Optional
   val constraintAnalyzer: ConstraintAnalyzerCompiler.AdapterProjectInput.Builder? = null, // Optional
+  val multilangAnalyzer: MultilangAnalyzerCompiler.AdapterProjectInput.Builder? = null, // Optional
 
   val builder: AdapterProjectCompiler.Input.Builder = AdapterProjectCompiler.Input.builder()
 ) {
@@ -55,6 +56,12 @@ open class AdapterProjectSettings(
       }
       this.constraintAnalyzer.shared(shared).adapterProject(adapterProject).languageProjectInput(languageProjectCompilerInput.constraintAnalyzer().get()).build()
     } else null
+    val multilangAnalyzer = if(this.multilangAnalyzer != null) {
+      if(!languageProjectCompilerInput.multilangAnalyzer().isPresent) {
+        throw GradleException("Constraint analyzer adapter project input is present, but constraint analyzer runtime language project input is not")
+      }
+      this.multilangAnalyzer.shared(shared).adapterProject(adapterProject).languageProjectInput(languageProjectCompilerInput.multilangAnalyzer().get()).build()
+    } else null
 
     val builder = this.builder
       .shared(shared)
@@ -73,6 +80,9 @@ open class AdapterProjectSettings(
     }
     if(constraintAnalyzer != null) {
       builder.constraintAnalyzer(constraintAnalyzer)
+    }
+    if(multilangAnalyzer != null) {
+      builder.multilangAnalyzer(multilangAnalyzer)
     }
     val input = builder.build()
 

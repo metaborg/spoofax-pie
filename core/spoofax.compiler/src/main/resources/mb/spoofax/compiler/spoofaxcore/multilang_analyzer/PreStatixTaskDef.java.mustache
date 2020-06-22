@@ -3,6 +3,7 @@ package {{genPreStatixTaskDef.packageId}};
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
+import mb.spoofax.core.language.LanguageScope;
 import mb.stratego.common.StrategoRuntime;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -18,7 +19,7 @@ public class {{genPreStatixTaskDef.id}} implements TaskDef<Supplier<@Nullable IS
     }
 
     @Override public String getId() {
-        return {{genPreStatixTaskDef.qualifiedId}};
+        return "{{genPreStatixTaskDef.qualifiedId}}";
     }
 
     @Override
@@ -27,6 +28,6 @@ public class {{genPreStatixTaskDef.id}} implements TaskDef<Supplier<@Nullable IS
         if (ast == null) {
             return null;
         }
-        return strategoRuntime.invoke({{preAnalysisStrategy}}, ast);
+        return strategoRuntime.invoke("{{preAnalysisStrategy}}", ast);
     }
 }
