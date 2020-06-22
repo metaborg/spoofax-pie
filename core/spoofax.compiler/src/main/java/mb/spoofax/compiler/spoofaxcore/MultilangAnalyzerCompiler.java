@@ -13,6 +13,7 @@ import org.immutables.value.Value;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -190,6 +191,17 @@ public class MultilangAnalyzerCompiler {
 
         @Value.Default default String contextId() {
             return shared().defaultBasePackageId();
+        }
+
+        default Collection<TypeInfo> libraryTaskDefs() {
+            ArrayList<TypeInfo> taskDefs = new ArrayList<>();
+            String multilangTaskDefPackage = "mb.statix.multilang.tasks";
+            taskDefs.add(TypeInfo.of(multilangTaskDefPackage, "SmlAnalyzeProject"));
+            taskDefs.add(TypeInfo.of(multilangTaskDefPackage, "SmlBuildMessages"));
+            taskDefs.add(TypeInfo.of(multilangTaskDefPackage, "SmlInstantiateGlobalScope"));
+            taskDefs.add(TypeInfo.of(multilangTaskDefPackage, "SmlPartialSolveFile"));
+            taskDefs.add(TypeInfo.of(multilangTaskDefPackage, "SmlPartialSolveProject"));
+            return taskDefs;
         }
 
 

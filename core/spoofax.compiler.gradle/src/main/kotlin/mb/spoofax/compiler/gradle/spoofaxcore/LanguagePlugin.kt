@@ -34,7 +34,7 @@ open class Compilers {
   internal val constraintAnalyzerCompiler = ConstraintAnalyzerCompiler(templateCompiler)
   internal val multilangAnalyzerCompiler = MultilangAnalyzerCompiler(templateCompiler)
   internal val languageProjectCompiler = LanguageProjectCompiler(templateCompiler, classloaderResourceService, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler, multilangAnalyzerCompiler)
-  internal val adapterProjectCompiler = AdapterProjectCompiler(templateCompiler, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler)
+  internal val adapterProjectCompiler = AdapterProjectCompiler(templateCompiler, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler, multilangAnalyzerCompiler)
   internal val cliProjectCompiler = CliProjectCompiler(templateCompiler)
   internal val eclipseExternaldepsProjectCompiler = EclipseExternaldepsProjectCompiler(templateCompiler)
   internal val eclipseProjectCompiler = EclipseProjectCompiler(templateCompiler)

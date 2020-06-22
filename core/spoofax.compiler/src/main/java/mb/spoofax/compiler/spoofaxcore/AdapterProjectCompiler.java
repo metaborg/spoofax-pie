@@ -45,6 +45,7 @@ public class AdapterProjectCompiler {
     private final CompleterCompiler completerCompiler;
     private final StrategoRuntimeCompiler strategoRuntimeCompiler;
     private final ConstraintAnalyzerCompiler constraintAnalyzerCompiler;
+    private final MultilangAnalyzerCompiler multilangAnalyzerCompiler;
 
     public AdapterProjectCompiler(
         TemplateCompiler templateCompiler,
@@ -52,8 +53,8 @@ public class AdapterProjectCompiler {
         StylerCompiler stylerCompiler,
         CompleterCompiler completerCompiler,
         StrategoRuntimeCompiler strategoRuntimeCompiler,
-        ConstraintAnalyzerCompiler constraintAnalyzerCompiler
-    ) {
+        ConstraintAnalyzerCompiler constraintAnalyzerCompiler,
+        MultilangAnalyzerCompiler multilangAnalyzerCompiler) {
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("adapter_project/build.gradle.kts.mustache");
         this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("adapter_project/package-info.java.mustache");
         this.checkTaskDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/CheckTaskDef.java.mustache");
@@ -69,6 +70,7 @@ public class AdapterProjectCompiler {
         this.completerCompiler = completerCompiler;
         this.strategoRuntimeCompiler = strategoRuntimeCompiler;
         this.constraintAnalyzerCompiler = constraintAnalyzerCompiler;
+        this.multilangAnalyzerCompiler = multilangAnalyzerCompiler;
     }
 
     public void generateInitial(Input input) throws IOException {
@@ -123,6 +125,13 @@ public class AdapterProjectCompiler {
                     throw new UncheckedIOException(e);
                 }
             });
+            input.multilangAnalyzer().ifPresent((i) -> {
+                try {
+                    multilangAnalyzerCompiler.compileAdapterProject(i);
+                } catch(IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            });
         } catch(UncheckedIOException e) {
             throw e.getCause();
         }
@@ -144,6 +153,13 @@ public class AdapterProjectCompiler {
         input.constraintAnalyzer().ifPresent((i) -> {
             allTaskDefs.add(i.analyzeTaskDef());
             allTaskDefs.add(i.analyzeMultiTaskDef());
+        });
+        input.multilangAnalyzer().ifPresent((i) -> {
+            allTaskDefs.add(i.analyzeTaskDef());
+            allTaskDefs.add(i.indexAstTaskDef());
+            allTaskDefs.add(i.preStatixTaskDef());
+            allTaskDefs.add(i.postStatixTaskDef());
+            allTaskDefs.addAll(i.libraryTaskDefs());
         });
         allTaskDefs.add(input.checkTaskDef());
         allTaskDefs.add(input.checkMultiTaskDef());
@@ -262,6 +278,8 @@ public class AdapterProjectCompiler {
 
         Optional<ConstraintAnalyzerCompiler.AdapterProjectInput> constraintAnalyzer();
 
+        Optional<MultilangAnalyzerCompiler.AdapterProjectInput> multilangAnalyzer();
+
 
         /// Configuration
 
@@ -291,6 +309,9 @@ public class AdapterProjectCompiler {
             return constraintAnalyzer().map(a -> a.languageProjectInput().multiFile()).orElse(false);
         }
 
+        default boolean isMultiLang() {
+            return multilangAnalyzer().isPresent();
+        }
 
         /// Gradle files
 
@@ -441,6 +462,7 @@ public class AdapterProjectCompiler {
             styler().ifPresent((i) -> i.generatedFiles().addAllTo(generatedFiles));
             completer().ifPresent((i) -> i.generatedFiles().addAllTo(generatedFiles));
             constraintAnalyzer().ifPresent((i) -> i.generatedFiles().addAllTo(generatedFiles));
+            multilangAnalyzer().ifPresent((i) -> i.generatedFiles().addAllTo(generatedFiles));
             return generatedFiles;
         }
 
