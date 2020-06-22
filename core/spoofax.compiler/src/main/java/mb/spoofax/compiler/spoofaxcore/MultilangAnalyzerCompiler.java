@@ -12,6 +12,7 @@ import org.immutables.value.Value;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,11 +34,11 @@ public class MultilangAnalyzerCompiler {
     // Language project
 
     public ListView<GradleConfiguredDependency> getLanguageProjectDependencies(LanguageProjectInput input) {
-        return ListView.of(GradleConfiguredDependency.api(input.shared().constraintCommonDep()));
+        return ListView.of(GradleConfiguredDependency.api(input.shared().multilangDep()));
     }
 
     public ListView<String> getLanguageProjectCopyResources(LanguageProjectInput input) {
-        return ListView.of();
+        return ListView.of("src-gen/statix/");
     }
 
     public Output compileLanguageProject(LanguageProjectInput input) {

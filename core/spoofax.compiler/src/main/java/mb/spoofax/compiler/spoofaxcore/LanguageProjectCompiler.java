@@ -27,6 +27,7 @@ public class LanguageProjectCompiler {
     private final CompleterCompiler completerCompiler;
     private final StrategoRuntimeCompiler strategoRuntimeCompiler;
     private final ConstraintAnalyzerCompiler constraintAnalyzerCompiler;
+    private final MultilangAnalyzerCompiler multilangAnalyzerCompiler;
 
     public LanguageProjectCompiler(
         TemplateCompiler templateCompiler,
@@ -35,7 +36,8 @@ public class LanguageProjectCompiler {
         StylerCompiler stylerCompiler,
         CompleterCompiler completerCompiler,
         StrategoRuntimeCompiler strategoRuntimeCompiler,
-        ConstraintAnalyzerCompiler constraintAnalyzerCompiler
+        ConstraintAnalyzerCompiler constraintAnalyzerCompiler,
+        MultilangAnalyzerCompiler multilangAnalyzerCompiler
     ) {
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("language_project/build.gradle.kts.mustache");
         this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("language_project/package-info.java.mustache");
@@ -46,6 +48,7 @@ public class LanguageProjectCompiler {
         this.completerCompiler = completerCompiler;
         this.strategoRuntimeCompiler = strategoRuntimeCompiler;
         this.constraintAnalyzerCompiler = constraintAnalyzerCompiler;
+        this.multilangAnalyzerCompiler = multilangAnalyzerCompiler;
     }
 
     public void generateInitial(Input input) throws IOException {
@@ -76,6 +79,9 @@ public class LanguageProjectCompiler {
         input.constraintAnalyzer().ifPresent((i) -> {
             constraintAnalyzerCompiler.getLanguageProjectDependencies(i).addAllTo(dependencies);
         });
+        input.multilangAnalyzer().ifPresent((i) -> {
+            multilangAnalyzerCompiler.getLanguageProjectDependencies(i).addAllTo(dependencies);
+        });
         return dependencies;
     }
 
@@ -94,6 +100,9 @@ public class LanguageProjectCompiler {
         });
         input.constraintAnalyzer().ifPresent((i) -> {
             constraintAnalyzerCompiler.getLanguageProjectCopyResources(i).addAllTo(copyResources);
+        });
+        input.multilangAnalyzer().ifPresent((i) -> {
+            multilangAnalyzerCompiler.getLanguageProjectCopyResources(i).addAllTo(copyResources);
         });
         return copyResources;
     }
@@ -137,6 +146,9 @@ public class LanguageProjectCompiler {
                     throw new UncheckedIOException(e);
                 }
             });
+            input.multilangAnalyzer().ifPresent((i) -> {
+                multilangAnalyzerCompiler.compileLanguageProject(i);
+            });
         } catch(UncheckedIOException e) {
             throw e.getCause();
         }
@@ -173,6 +185,8 @@ public class LanguageProjectCompiler {
         Optional<StrategoRuntimeCompiler.LanguageProjectInput> strategoRuntime();
 
         Optional<ConstraintAnalyzerCompiler.LanguageProjectInput> constraintAnalyzer();
+
+        Optional<MultilangAnalyzerCompiler.LanguageProjectInput> multilangAnalyzer();
 
 
         /// Configuration
@@ -232,6 +246,7 @@ public class LanguageProjectCompiler {
             styler().ifPresent((i) -> i.providedFiles().addAllTo(providedFiles));
             strategoRuntime().ifPresent((i) -> i.providedFiles().addAllTo(providedFiles));
             constraintAnalyzer().ifPresent((i) -> i.providedFiles().addAllTo(providedFiles));
+            multilangAnalyzer().ifPresent((i) -> i.providedFiles().addAllTo(providedFiles));
             return providedFiles;
         }
 

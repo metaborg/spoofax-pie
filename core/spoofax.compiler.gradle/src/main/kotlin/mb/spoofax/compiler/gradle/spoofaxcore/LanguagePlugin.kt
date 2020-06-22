@@ -12,7 +12,6 @@ import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
-import org.gradle.api.artifacts.ModuleDependency
 import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
@@ -33,7 +32,8 @@ open class Compilers {
   internal val completerCompiler = CompleterCompiler(templateCompiler)
   internal val strategoRuntimeCompiler = StrategoRuntimeCompiler(templateCompiler)
   internal val constraintAnalyzerCompiler = ConstraintAnalyzerCompiler(templateCompiler)
-  internal val languageProjectCompiler = LanguageProjectCompiler(templateCompiler, classloaderResourceService, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler)
+  internal val multilangAnalyzerCompiler = MultilangAnalyzerCompiler(templateCompiler)
+  internal val languageProjectCompiler = LanguageProjectCompiler(templateCompiler, classloaderResourceService, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler, multilangAnalyzerCompiler)
   internal val adapterProjectCompiler = AdapterProjectCompiler(templateCompiler, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler)
   internal val cliProjectCompiler = CliProjectCompiler(templateCompiler)
   internal val eclipseExternaldepsProjectCompiler = EclipseExternaldepsProjectCompiler(templateCompiler)
