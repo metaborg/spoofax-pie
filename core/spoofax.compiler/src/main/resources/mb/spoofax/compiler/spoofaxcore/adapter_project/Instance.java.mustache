@@ -14,6 +14,7 @@ import mb.common.util.SetView;
 import mb.completions.common.CompletionResult;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
+import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.PathResourceMatcher;
 import mb.resource.hierarchical.match.path.ExtensionsPathMatcher;
@@ -33,6 +34,15 @@ import mb.spoofax.core.language.command.HierarchicalResourceType;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.menu.CommandAction;
 import mb.spoofax.core.language.menu.MenuItem;
+{{#isMultiLang}}
+import mb.statix.multilang.AnalysisContext;
+import mb.statix.multilang.AnalysisContextService;
+import mb.statix.multilang.ContextId;
+import mb.statix.multilang.LanguageId;
+import mb.statix.multilang.MultiLangConfig;
+import mb.statix.multilang.tasks.SmlBuildMessages;
+import mb.statix.multilang.utils.ContextUtils;
+{{/isMultiLang}}
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
@@ -89,10 +99,19 @@ public class {{genInstance.id}} implements LanguageInstance {
     }
 
     @Override public Task<KeyedMessages> createCheckTask(ResourcePath projectRoot) {
+        {{#isMultiLang}}
+        MultiLangConfig config = ContextUtils.readYamlConfig(resourceService, projectRoot);
+        ContextId contextId = config.getLanguageContexts()
+                .getOrDefault(new LanguageId("{{languageId}}"), new ContextId("{{contextId}}"));
+        AnalysisContext context = analysisContextService.getAnalysisContext(contextId);
+        return {{analyzeInjection.name}}.createTask(new SmlBuildMessages.Input(projectRoot, context));
+        {{/isMultiLang}}
+        {{^isMultiLang}}
         return {{checkInjection.name}}.createTask(new {{checkInjection.type.qualifiedId}}.Input(
             projectRoot,
             new PathResourceWalker(new NoHiddenPathMatcher()),
             new PathResourceMatcher(new ExtensionsPathMatcher(getFileExtensions().asUnmodifiable()))));
+        {{/isMultiLang}}
     }
 
     @Override public CollectionView<CommandDef<?>> getCommandDefs() {

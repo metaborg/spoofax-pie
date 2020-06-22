@@ -4,9 +4,15 @@ import dagger.Component;
 import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.platform.PlatformComponent;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
+{{#this.adapterProjectCompilerInput.isMultiLang}}
+import mb.statix.multilang.MultiLangComponent;
+{{/this.adapterProjectCompilerInput.isMultiLang}}
 
 @LanguageScope
-@Component(modules = { {{adapterProjectCompilerInput.module.qualifiedId}}.class, {{eclipseModule.qualifiedId}}.class }, dependencies = PlatformComponent.class)
+@Component(
+    modules = { {{adapterProjectCompilerInput.module.qualifiedId}}.class, {{eclipseModule.qualifiedId}}.class },
+    dependencies = { PlatformComponent.class{{#this.adapterProjectCompilerInput.isMultiLang}}, MultiLangComponent.class{{/this.adapterProjectCompilerInput.isMultiLang}} }
+)
 public interface {{genEclipseComponent.id}} extends EclipseLanguageComponent, {{adapterProjectCompilerInput.component.qualifiedId}} {
     {{editorTracker.qualifiedId}} getEditorTracker();
 }

@@ -208,6 +208,23 @@ public class AdapterProjectCompiler {
             map.put("tokenizeInjection", tokenizeInjection);
             injected.add(tokenizeInjection);
             final NamedTypeInfo checkInjection;
+            if(input.multilangAnalyzer().isPresent()) { // isMultiLang will be true
+                map.put("languageId", input.multilangAnalyzer().get().languageId());
+                map.put("contextId", input.multilangAnalyzer().get().contextId());
+
+                final TypeInfo analysisContext = TypeInfo.of("mb.statix.multilang", "AnalysisContextService");
+                final NamedTypeInfo analysisContextInjection = uniqueNamer.makeUnique(analysisContext);
+                injected.add(analysisContextInjection);
+
+                final TypeInfo analyzeTask = TypeInfo.of("mb.statix.multilang.tasks", "SmlBuildMessages");
+                final NamedTypeInfo analyzeInjection = uniqueNamer.makeUnique(analyzeTask);
+                injected.add(analyzeInjection);
+                map.put("analyzeInjection", analyzeInjection);
+
+                final TypeInfo resourceService = TypeInfo.of("mb.resource", "ResourceService");
+                final NamedTypeInfo resourceServiceInjection = uniqueNamer.makeUnique(resourceService);
+                injected.add(resourceServiceInjection);
+            }
             if(input.isMultiFile()) {
                 checkInjection = uniqueNamer.makeUnique(input.checkMultiTaskDef());
             } else {

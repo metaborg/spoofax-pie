@@ -24,8 +24,13 @@ import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.HierarchicalResourceType;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.platform.Platform;
+{{#isMultiLang}}
+import mb.statix.multilang.AnalysisContextService;
+import mb.statix.multilang.ContextId;
+{{/isMultiLang}}
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
+import org.spoofax.interpreter.terms.ITermFactory;
 
 import javax.inject.Named;
 import java.util.HashSet;
@@ -98,6 +103,11 @@ public class {{genModule.id}} {
     static StrategoRuntime provideStrategoRuntime(StrategoRuntimeBuilder builder, @Named("prototype") StrategoRuntime prototype) {
         return builder.buildFromPrototype(prototype);
     }
+
+    @Provides @LanguageScope
+    static ITermFactory provideTermFactory(@Named("prototype") StrategoRuntime prototype) {
+        return prototype.getTermFactory();
+    }
 {{/strategoRuntime}}
 {{#constraintAnalyzer}}
 
@@ -132,10 +142,18 @@ public class {{genModule.id}} {
         return new MapTaskDefs(taskDefs);
     }
 
+    {{#multilangAnalyzer}}
+    @Provides @LanguageScope
+    static Pie providePie(AnalysisContextService analysisContextService) {
+        return analysisContextService.getAnalysisContext(new ContextId("{{contextId}}")).createPieForContext();
+    }
+    {{/multilangAnalyzer}}
+    {{^multilangAnalyzer}}
     @Provides @LanguageScope
     static Pie providePie(@Platform Pie pie, TaskDefs taskDefs, ResourceService resourceService) {
         return pie.createChildBuilder().withTaskDefs(taskDefs).withResourceService(resourceService).build();
     }
+    {{/multilangAnalyzer}}
 
 
     @Provides @LanguageScope

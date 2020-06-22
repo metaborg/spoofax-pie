@@ -4,8 +4,15 @@ import dagger.Component;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.platform.PlatformComponent;
+{{#isMultiLang}}
+import mb.statix.multilang.MultiLangComponent;
+{{/isMultiLang}}
 
-@LanguageScope @Component(modules = {{genModule.id}}.class, dependencies = PlatformComponent.class)
+@LanguageScope
+@Component(
+    modules = {{genModule.id}}.class,
+    dependencies = { PlatformComponent.class{{#isMultiLang}}, MultiLangComponent.class {{/isMultiLang}} }
+)
 public interface {{genComponent.id}} extends LanguageComponent {
     @Override {{genInstance.id}} getLanguageInstance();
 }
