@@ -1,0 +1,32 @@
+package {{genPreStatixTaskDef.packageId}};
+
+import mb.pie.api.ExecContext;
+import mb.pie.api.Supplier;
+import mb.pie.api.TaskDef;
+import mb.stratego.common.StrategoRuntime;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+
+import javax.inject.Inject;
+
+@LanguageScope
+public class {{genPreStatixTaskDef.id}} implements TaskDef<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> {
+    private final StrategoRuntime strategoRuntime;
+
+    @Inject public {{genPreStatixTaskDef.id}}(StrategoRuntime strategoRuntime) {
+        this.strategoRuntime = strategoRuntime;
+    }
+
+    @Override public String getId() {
+        return {{genPreStatixTaskDef.qualifiedId}};
+    }
+
+    @Override
+    public @Nullable IStrategoTerm exec(ExecContext context, Supplier<@Nullable IStrategoTerm> input) throws Exception {
+        @Nullable IStrategoTerm ast = context.require(input);
+        if (ast == null) {
+            return null;
+        }
+        return strategoRuntime.invoke({{preAnalysisStrategy}}, ast);
+    }
+}

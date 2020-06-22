@@ -1,0 +1,32 @@
+package {{genPostStatixTaskDef.packageId}};
+
+import mb.pie.api.ExecContext;
+import mb.pie.api.Supplier;
+import mb.pie.api.TaskDef;
+import mb.stratego.common.StrategoRuntime;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+
+import javax.inject.Inject;
+
+@LanguageScope
+public class {{genPostStatixTaskDef.id}} implements TaskDef<Supplier<IStrategoTerm>, IStrategoTerm> {
+    private final StrategoRuntime strategoRuntime;
+
+    @Inject public {{genPostStatixTaskDef.id}}(StrategoRuntime strategoRuntime) {
+        this.strategoRuntime = strategoRuntime;
+    }
+
+
+    @Override public String getId() {
+        return {{genPostStatixTaskDef.qualifiedId}};
+    }
+
+    @Override
+    public IStrategoTerm exec(ExecContext context, Supplier<IStrategoTerm> input) throws Exception {
+        @Nullable IStrategoTerm ast = context.require(input);
+        if (ast == null) {
+            return null;
+        }
+        return strategoRuntime.invoke({{postAnalysisStrategy}}, ast);
+    }
+}

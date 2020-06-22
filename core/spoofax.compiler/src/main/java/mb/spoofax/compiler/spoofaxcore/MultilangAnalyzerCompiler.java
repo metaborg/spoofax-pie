@@ -18,16 +18,16 @@ import java.util.Optional;
 @Value.Enclosing
 public class MultilangAnalyzerCompiler {
 
-    // private final TemplateWriter constraintAnalyzerTemplate;
-    // private final TemplateWriter factoryTemplate;
-    // private final TemplateWriter analyzeTaskDefTemplate;
-    // private final TemplateWriter analyzeMultiTaskDefTemplate;
+    private final TemplateWriter analyzeProjectTemplate;
+    private final TemplateWriter indexAstTaskDefTemplate;
+    private final TemplateWriter preStatixTaskDefTemplate;
+    private final TemplateWriter postStatixTaskDefTemplate;
 
     public MultilangAnalyzerCompiler(TemplateCompiler templateCompiler) {
-//        this.constraintAnalyzerTemplate = templateCompiler.getOrCompileToWriter("constraint_analyzer/ConstraintAnalyzer.java.mustache");
-//        this.factoryTemplate = templateCompiler.getOrCompileToWriter("constraint_analyzer/ConstraintAnalyzerFactory.java.mustache");
-//        this.analyzeTaskDefTemplate = templateCompiler.getOrCompileToWriter("constraint_analyzer/AnalyzeTaskDef.java.mustache");
-//        this.analyzeMultiTaskDefTemplate = templateCompiler.getOrCompileToWriter("constraint_analyzer/AnalyzeMultiTaskDef.java.mustache");
+        this.analyzeProjectTemplate = templateCompiler.getOrCompileToWriter("multilang_analyzer/AnalyzeProjectTaskDef.java.mustache");
+        this.indexAstTaskDefTemplate = templateCompiler.getOrCompileToWriter("multilang_analyzer/IndexAstTaskDef.java.mustache");
+        this.preStatixTaskDefTemplate = templateCompiler.getOrCompileToWriter("multilang_analyzer/PreStatixTaskDef.java.mustache");
+        this.postStatixTaskDefTemplate = templateCompiler.getOrCompileToWriter("multilang_analyzer/PostStatixTaskDef.java.mustache");
     }
 
     // Language project
@@ -40,15 +40,9 @@ public class MultilangAnalyzerCompiler {
         return ListView.of();
     }
 
-    public Output compileLanguageProject(LanguageProjectInput input) throws IOException {
-        final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
-        final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        outputBuilder.addProvidedResources(
-            // constraintAnalyzerTemplate.write(input.genConstraintAnalyzer().file(classesGenDirectory), input),
-            // factoryTemplate.write(input.genFactory().file(classesGenDirectory), input)
-        );
-        return outputBuilder.build();
+    public Output compileLanguageProject(LanguageProjectInput input) {
+        // There is only compilation output in the adapter project, so return empty result here.
+        return Output.builder().build();
     }
 
     // Adapter project
@@ -58,8 +52,10 @@ public class MultilangAnalyzerCompiler {
         if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath classesGenDirectory = input.classesGenDirectory();
         outputBuilder.addProvidedResources(
-            // analyzeTaskDefTemplate.write(input.genAnalyzeTaskDef().file(classesGenDirectory), input),
-            // analyzeMultiTaskDefTemplate.write(input.genAnalyzeMultiTaskDef().file(classesGenDirectory), input)
+            analyzeProjectTemplate.write(input.genAnalyzeTaskDef().file(classesGenDirectory), input),
+            indexAstTaskDefTemplate.write(input.genIndexAstTaskDef().file(classesGenDirectory), input),
+            preStatixTaskDefTemplate.write(input.genPreStatixTaskDef().file(classesGenDirectory), input),
+            postStatixTaskDefTemplate.write(input.genPostStatixTaskDef().file(classesGenDirectory), input)
         );
         return outputBuilder.build();
     }

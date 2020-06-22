@@ -1,0 +1,63 @@
+package {{genIndexAstTaskDef.packageId}};
+
+import mb.jsglr.common.ResourceKeyAttachment;
+import mb.nabl2.terms.stratego.StrategoTermIndices;
+import mb.pie.api.ExecContext;
+import mb.pie.api.TaskDef;
+import mb.resource.ResourceKey;
+import mb.stratego.common.StrategoRuntimeBuilder;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.interpreter.terms.ITermFactory;
+
+import javax.inject.Inject;
+
+public class {{genIndexAstTaskDef.id}} implements TaskDef<{{genIndexAstTaskDef.id}}.Input, @Nullable IStrategoTerm> {
+
+    public static class Input implements Serializable {
+        public final ResourceKey resourceKey;
+        public final Supplier<@Nullable IStrategoTerm> astSupplier;
+
+        public Input(ResourceKey resourceKey, Supplier<@Nullable IStrategoTerm> astSupplier) {
+            this.resourceKey = resourceKey;
+            this.astSupplier = astSupplier;
+        }
+
+        @Override public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            final Input input = (Input)o;
+            return resourceKey.equals(input.resourceKey) && astSupplier.equals(input.astSupplier);
+        }
+
+        @Override public int hashCode() {
+        return Objects.hash(resourceKey, astSupplier);
+    }
+
+        @Override public String toString() {
+            return "Input(resourceKey=" + resourceKey + ", astSupplier=" + astSupplier + ')';
+        }
+    }
+
+    private final ITermFactory tf;
+
+    @Inject public {{genIndexAstTaskDef.id}}(StrategoRuntimeBuilder strategoRuntimeBuilder) {
+        this.tf = strategoRuntimeBuilder.build().getTermFactory();
+    }
+
+    @Override public String getId() {
+        return {{genIndexAstTaskDef.qualifiedId}};
+    }
+
+    @Override
+    public @Nullable IStrategoTerm exec(ExecContext context, Input input) throws Exception {
+        @Nullable IStrategoTerm ast = context.require(input.astSupplier);
+        if(ast == null) {
+            return null;
+        }
+
+        ResourceKeyAttachment.setResourceKey(ast, input.resourceKey);
+        return StrategoTermIndices.index(ast, input.resourceKey.toString(), tf);
+    }
+}
+
