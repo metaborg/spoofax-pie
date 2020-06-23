@@ -20,7 +20,7 @@ class EclipseExternaldepsProjectCompilerTest extends TestBase {
         compileLanguageAndAdapterProject(shared, languageProject, adapterProject);
 
         // Compile Eclipse externaldeps project and test generated files.
-        final EclipseExternaldepsProjectCompiler.Input input = TigerInputs.eclipseExternaldepsProjectInput(shared)
+        final EclipseExternaldepsProjectCompiler.Input input = TigerInputs.eclipseExternaldepsProjectInput(shared, languageProject, adapterProject)
             .languageProjectDependency(GradleDependency.project(":" + languageProject.project().coordinate().artifactId()))
             .adapterProjectDependency(GradleDependency.project(":" + adapterProject.project().coordinate().artifactId()))
             .build();

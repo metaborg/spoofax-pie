@@ -6,6 +6,7 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
+import mb.spoofax.core.language.LanguageScope;
 import mb.stratego.common.StrategoRuntimeBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -15,6 +16,7 @@ import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.Objects;
 
+@LanguageScope
 public class {{genIndexAstTaskDef.id}} implements TaskDef<{{genIndexAstTaskDef.id}}.Input, @Nullable IStrategoTerm> {
 
     public static class Input implements Serializable {

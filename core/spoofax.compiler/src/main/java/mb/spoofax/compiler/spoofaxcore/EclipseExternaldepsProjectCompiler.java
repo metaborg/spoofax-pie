@@ -42,6 +42,9 @@ public class EclipseExternaldepsProjectCompiler {
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.spoofaxEclipseExternaldepsDep()));
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(input.languageProjectDependency()));
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(input.adapterProjectDependency()));
+        if(input.adapterProjectCompilerInput().isMultiLang()) {
+            bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.multilangEclipseExternaldepsDep()));
+        }
         return bundleDependencies;
     }
 
@@ -98,6 +101,8 @@ public class EclipseExternaldepsProjectCompiler {
         /// Automatically provided sub-inputs
 
         Shared shared();
+
+        AdapterProjectCompiler.Input adapterProjectCompilerInput();
     }
 
     @Value.Immutable

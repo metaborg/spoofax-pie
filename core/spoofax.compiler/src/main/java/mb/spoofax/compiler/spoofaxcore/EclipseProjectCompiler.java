@@ -41,6 +41,8 @@ public class EclipseProjectCompiler {
     private final TemplateWriter runCommandHandlerTemplate;
     private final TemplateWriter observeHandlerTemplate;
     private final TemplateWriter unobserveHandlerTemplate;
+    private final TemplateWriter contextProviderTemplate;
+    private final TemplateWriter metadataProviderTemplate;
 
     public EclipseProjectCompiler(TemplateCompiler templateCompiler) {
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/build.gradle.kts.mustache");
@@ -64,6 +66,8 @@ public class EclipseProjectCompiler {
         this.runCommandHandlerTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/RunCommandHandler.java.mustache");
         this.observeHandlerTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/ObserveHandler.java.mustache");
         this.unobserveHandlerTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/UnobserveHandler.java.mustache");
+        this.contextProviderTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/ContextProvider.java.mustache");
+        this.metadataProviderTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/MetadataProvider.java.mustache");
     }
 
     public void generateInitial(Input input) throws IOException {
@@ -87,6 +91,9 @@ public class EclipseProjectCompiler {
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.spoofaxEclipseDep()));
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(input.eclipseExternaldepsDependency()));
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.spoofaxEclipseExternaldepsDep()));
+        if (input.adapterProjectCompilerInput().isMultiLang()) {
+            bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.multilangEclipseDep()));
+        }
         return bundleDependencies;
     }
 
@@ -117,6 +124,10 @@ public class EclipseProjectCompiler {
         runCommandHandlerTemplate.write(input.genRunCommandHandler().file(classesGenDirectory), input);
         observeHandlerTemplate.write(input.genObserveHandler().file(classesGenDirectory), input);
         unobserveHandlerTemplate.write(input.genUnobserveHandler().file(classesGenDirectory), input);
+        if(input.adapterProjectCompilerInput().isMultiLang()) {
+            contextProviderTemplate.write(input.genContextProvider().file(classesGenDirectory), input);
+            metadataProviderTemplate.write(input.genMetadataProvider().file(classesGenDirectory), input);
+        }
 
         return Output.builder().addAllProvidedFiles(input.providedFiles()).build();
     }
@@ -512,6 +523,36 @@ public class EclipseProjectCompiler {
             return genUnobserveHandler();
         }
 
+        // ContextProvider
+
+        @Value.Default default TypeInfo genContextProvider() {
+            return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "ContextProvider");
+        }
+
+        Optional<TypeInfo> manualContextProvider();
+
+        default TypeInfo contextProvider() {
+            if(classKind().isManual() && manualContextProvider().isPresent()) {
+                return manualContextProvider().get();
+            }
+            return genContextProvider();
+        }
+
+        // Language Metadata Provider
+
+        @Value.Default default TypeInfo genMetadataProvider() {
+            return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "MetadataProvider");
+        }
+
+        Optional<TypeInfo> manualMetadataProvider();
+
+        default TypeInfo metadataProvider() {
+            if(classKind().isManual() && manualMetadataProvider().isPresent()) {
+                return manualMetadataProvider().get();
+            }
+            return genMetadataProvider();
+        }
+
 
         /// Provided files
 
@@ -538,6 +579,10 @@ public class EclipseProjectCompiler {
                 generatedFiles.add(genRunCommandHandler().file(classesGenDirectory()));
                 generatedFiles.add(genObserveHandler().file(classesGenDirectory()));
                 generatedFiles.add(genUnobserveHandler().file(classesGenDirectory()));
+                if(adapterProjectCompilerInput().isMultiLang()) {
+                    generatedFiles.add(genContextProvider().file(classesGenDirectory()));
+                    generatedFiles.add(genMetadataProvider().file(classesGenDirectory()));
+                }
             }
             return generatedFiles;
         }
@@ -548,6 +593,8 @@ public class EclipseProjectCompiler {
         Shared shared();
 
         AdapterProjectCompiler.Input adapterProjectCompilerInput();
+
+        LanguageProjectCompiler.Input languageProjectCompilerInput();
 
 
         // TODO: implement check

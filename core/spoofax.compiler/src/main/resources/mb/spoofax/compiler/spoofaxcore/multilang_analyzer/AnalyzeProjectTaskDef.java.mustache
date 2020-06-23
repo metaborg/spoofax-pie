@@ -5,6 +5,7 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.CommandOutput;
 import mb.statix.multilang.AnalysisContext;
@@ -19,6 +20,7 @@ import javax.inject.Inject;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@LanguageScope
 public class {{genAnalyzeTaskDef.id}} implements TaskDef<ResourcePath, CommandOutput> {
     private final SmlBuildMessages buildMessages;
     private final AnalysisContextService analysisContextService;

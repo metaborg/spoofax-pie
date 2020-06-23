@@ -25,7 +25,8 @@ open class EclipseProjectSettings(
       .shared(languageProjectFinalized.shared)
       .project(project.toSpoofaxCompilerProject())
       .eclipseExternaldepsDependency(eclipseExternaldepsProject.toSpoofaxCompilerProject().asProjectDependency())
-      .adapterProjectCompilerInput(adapterProjectExtension.finalized.input)
+      .languageProjectCompilerInput(languageProjectFinalized.input)
+      .adapterProjectCompilerInput(adapterProjectFinalized.input)
       .build()
 
     return EclipseProjectFinalized(input, languageProjectFinalized.compilers)

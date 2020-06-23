@@ -23,6 +23,7 @@ open class EclipseExternaldepsProjectSettings(
     val input = builder
       .shared(languageProjectFinalized.shared)
       .project(project.toSpoofaxCompilerProject())
+      .adapterProjectCompilerInput(adapterProjectFinalized.input)
       .languageProjectDependency(languageProjectFinalized.input.languageProject().project().asProjectDependency())
       .adapterProjectDependency(adapterProjectFinalized.input.adapterProject().project().asProjectDependency())
       .build()

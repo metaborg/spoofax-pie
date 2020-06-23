@@ -317,17 +317,29 @@ public class TigerInputs {
 
     /// Eclipse externaldeps project compiler
 
-    public static EclipseExternaldepsProjectCompiler.Input.Builder eclipseExternaldepsProjectInput(Shared shared) {
+    public static EclipseExternaldepsProjectCompiler.Input.Builder eclipseExternaldepsProjectInput(
+        Shared shared,
+        LanguageProject languageProject,
+        AdapterProject adapterProject
+    ) {
         return EclipseExternaldepsProjectCompiler.Input.builder()
             .shared(shared)
+            .adapterProjectCompilerInput(adapterProjectInput(shared, languageProject, adapterProject)
+                .languageProjectDependency(GradleDependency.project(":" + languageProject.project().coordinate().artifactId()))
+                .build())
             ;
     }
 
     /// Eclipse project compiler
 
-    public static EclipseProjectCompiler.Input.Builder eclipseProjectInput(Shared shared, AdapterProjectCompiler.Input adapterProjectCompilerInput) {
+    public static EclipseProjectCompiler.Input.Builder eclipseProjectInput(
+        Shared shared,
+        LanguageProjectCompiler.Input languageProjectInput,
+        AdapterProjectCompiler.Input adapterProjectCompilerInput
+    ) {
         return EclipseProjectCompiler.Input.builder()
             .shared(shared)
+            .languageProjectCompilerInput(languageProjectInput)
             .adapterProjectCompilerInput(adapterProjectCompilerInput)
             ;
     }

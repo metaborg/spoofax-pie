@@ -193,6 +193,22 @@ public class MultilangAnalyzerCompiler {
             return shared().defaultBasePackageId();
         }
 
+        // Statix spec metadata
+
+        @Value.Default default String specRoot() {
+            return shared().defaultBasePackageId().replace('.', '/') + "/src-gen/statix";
+        }
+
+        String rootModule();
+
+        @Value.Default default String fileConstraint() {
+            return "fileOk";
+        }
+
+        @Value.Default default String projectConstraint() {
+            return "projectOk";
+        }
+
         default Collection<TypeInfo> libraryTaskDefs() {
             ArrayList<TypeInfo> taskDefs = new ArrayList<>();
             String multilangTaskDefPackage = "mb.statix.multilang.tasks";

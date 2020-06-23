@@ -3,6 +3,9 @@ package {{genPlugin.packageId}};
 import mb.pie.api.ExecException;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.util.StatusUtil;
+{{#this.adapterProjectCompilerInput.isMultiLang}}
+import mb.statix.multilang.eclipse.MultiLangPlugin;
+{{/this.adapterProjectCompilerInput.isMultiLang}}
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.WorkspaceJob;
@@ -32,6 +35,9 @@ public class {{genPlugin.id}} extends AbstractUIPlugin {
         component = {{daggerEclipseComponent.qualifiedId}}
             .builder()
             .platformComponent(SpoofaxPlugin.getComponent())
+            {{#this.adapterProjectCompilerInput.multilangAnalyzer}}
+            .multiLangComponent(MultiLangPlugin.getComponent())
+            {{/this.adapterProjectCompilerInput.multilangAnalyzer}}
             .build();
 
         component.getEditorTracker().register();

@@ -13,8 +13,11 @@ import mb.common.util.MapView;
 import mb.common.util.SetView;
 import mb.completions.common.CompletionResult;
 import mb.pie.api.Task;
+import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
+import mb.resource.ResourceKeyString;
 import mb.resource.ResourceService;
+import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.PathResourceMatcher;
 import mb.resource.hierarchical.match.path.ExtensionsPathMatcher;
@@ -38,17 +41,26 @@ import mb.spoofax.core.language.menu.MenuItem;
 import mb.statix.multilang.AnalysisContext;
 import mb.statix.multilang.AnalysisContextService;
 import mb.statix.multilang.ContextId;
+import mb.statix.multilang.ImmutableLanguageMetadata;
 import mb.statix.multilang.LanguageId;
+import mb.statix.multilang.LanguageMetadata;
 import mb.statix.multilang.MultiLangConfig;
+import mb.statix.multilang.spec.SpecBuilder;
+import mb.statix.multilang.spec.SpecLoadException;
+import mb.statix.multilang.spec.SpecUtils;
 import mb.statix.multilang.tasks.SmlBuildMessages;
 import mb.statix.multilang.utils.ContextUtils;
 {{/isMultiLang}}
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.io.Serializable;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.HashSet;
+import java.util.stream.Collectors;
 
 public class {{genInstance.id}} implements LanguageInstance {
     private final static SetView<String> fileExtensions = SetView.of({{#shared.fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/shared.fileExtensions}});
@@ -57,20 +69,22 @@ public class {{genInstance.id}} implements LanguageInstance {
     private final {{variable}};
 {{/injected}}
 
+    private final CollectionView<TaskDef<?, ?>> taskDefs;
     private final CollectionView<CommandDef<?>> commandDefs;
     private final CollectionView<AutoCommandRequest<?>> autoCommandDefs;
-
 
     @Inject public {{genInstance.id}}(
 {{#injected}}
         {{variable}},
 {{/injected}}
+        Set<TaskDef<?, ?>> taskDefs,
         Set<CommandDef<?>> commandDefs,
         Set<AutoCommandRequest<?>> autoCommandDefs
     ) {
 {{#injected}}
         {{thisAssign}};
 {{/injected}}
+        this.taskDefs = CollectionView.copyOf(taskDefs);
         this.commandDefs = CollectionView.copyOf(commandDefs);
         this.autoCommandDefs = CollectionView.copyOf(autoCommandDefs);
     }
@@ -153,4 +167,40 @@ public class {{genInstance.id}} implements LanguageInstance {
 {{/editorContextMenuItems}}
         );
     }
+    {{#multilangAnalyzer}}
+    public LanguageMetadata getLanguageMetadata() {
+        SpecBuilder spec;
+        try {
+            spec = SpecUtils.loadSpec({{resourceServiceInjection.name}}
+                .getHierarchicalResource(ResourceKeyString.of("{{specRoot}}")), "{{rootModule}}", {{termFactoryInjection.name}});
+        } catch(IOException e) {
+            throw new SpecLoadException(e);
+        }
+
+        return ImmutableLanguageMetadata.builder()
+            .resourcesSupplier((exec, projectDir) -> {
+                HierarchicalResource res = exec.getHierarchicalResource(projectDir);
+                try {
+                    return res.walk(
+                    new PathResourceWalker(new NoHiddenPathMatcher()),
+                    new PathResourceMatcher(new ExtensionsPathMatcher(fileExtensions.asUnmodifiable())))
+                    .map(HierarchicalResource::getKey)
+                    .collect(Collectors.toCollection(HashSet::new));
+                } catch(IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            })
+            .astFunction({{preStatixInjection.name}}.createFunction().mapInput((exec, key) -> {{indexAstInjection.name}}
+                .createSupplier(new {{indexAstInjection.type.qualifiedId}}.Input(key, {{parseInjection.name}}
+                    .createNullableRecoverableAstSupplier(key)))))
+            .postTransform({{postStatixInjection.name}}.createFunction())
+            .languageId(new LanguageId("{{languageId}}"))
+            .addAllTaskDefs(taskDefs)
+            .addResourceRegistries({{classLoaderResourceRegistryInjection.name}})
+            .statixSpec(spec)
+            .fileConstraint("{{fileConstraint}}")
+            .projectConstraint("{{projectConstraint}}")
+            .build();
+    }
+    {{/multilangAnalyzer}}
 }
