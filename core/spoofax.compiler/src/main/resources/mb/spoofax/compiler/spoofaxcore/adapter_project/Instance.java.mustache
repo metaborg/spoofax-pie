@@ -171,8 +171,8 @@ public class {{genInstance.id}} implements LanguageInstance {
     public LanguageMetadata getLanguageMetadata() {
         SpecBuilder spec;
         try {
-            spec = SpecUtils.loadSpec({{resourceServiceInjection.name}}
-                .getHierarchicalResource(ResourceKeyString.of("{{specRoot}}")), "{{rootModule}}", {{termFactoryInjection.name}});
+            spec = SpecUtils.loadSpec({{classLoaderResourceRegistryInjection.name}}
+                .getResource(ResourceKeyString.of("{{specRoot}}")), "{{rootModule}}", {{termFactoryInjection.name}});
         } catch(IOException e) {
             throw new SpecLoadException(e);
         }

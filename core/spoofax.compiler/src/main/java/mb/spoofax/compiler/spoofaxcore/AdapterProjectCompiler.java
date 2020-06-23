@@ -193,6 +193,7 @@ public class AdapterProjectCompiler {
         {
             final UniqueNamer uniqueNamer = new UniqueNamer();
             uniqueNamer.reserve("fileExtensions");
+            uniqueNamer.reserve("taskDefs");
             uniqueNamer.reserve("commandDefs");
             uniqueNamer.reserve("autoCommandDefs");
             final HashMap<String, Object> map = new HashMap<>();
