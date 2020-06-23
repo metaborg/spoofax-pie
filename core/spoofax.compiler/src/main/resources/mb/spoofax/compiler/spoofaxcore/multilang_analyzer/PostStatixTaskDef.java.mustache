@@ -13,6 +13,7 @@ import javax.inject.Inject;
 @LanguageScope
 public class {{genPostStatixTaskDef.id}} implements TaskDef<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> {
     private final StrategoRuntime strategoRuntime;
+    private final Object lock = new Object();
 
     @Inject public {{genPostStatixTaskDef.id}}(StrategoRuntime strategoRuntime) {
         this.strategoRuntime = strategoRuntime;
@@ -29,6 +30,8 @@ public class {{genPostStatixTaskDef.id}} implements TaskDef<Supplier<@Nullable I
         if (ast == null) {
             return null;
         }
-        return strategoRuntime.invoke("{{postAnalysisStrategy}}", ast);
+        synchronized(lock) {
+            return strategoRuntime.invoke("{{postAnalysisStrategy}}", ast);
+        }
     }
 }
