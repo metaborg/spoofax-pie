@@ -1,116 +1,95 @@
 package mb.spoofax.core.language.command;
 
 import mb.common.message.KeyedMessages;
-import mb.common.message.Messages;
-import mb.common.region.Region;
-import mb.common.result.KeyedMessagesError;
-import mb.common.result.MessagesError;
-import mb.common.util.ADT;
+import mb.common.result.KeyedMessagesException;
+import mb.common.result.MessagesException;
+import mb.common.util.ListView;
 import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
 
-@ADT
-public abstract class CommandFeedback implements Serializable {
-    public interface Cases<R> {
-        R showFile(ResourceKey file, @Nullable Region region);
+public class CommandFeedback implements Serializable {
+    private final KeyedMessages messages;
+    private final @Nullable Exception exception;
+    private final ListView<ShowFeedback> showFeedbacks;
 
-        R showText(String text, String name, @Nullable Region region);
 
-        R messages(Messages messages, @Nullable ResourceKey origin);
-
-        R keyedMessages(KeyedMessages keyedMessages, @Nullable ResourceKey defaultOrigin);
-
-        R messagesError(MessagesError messagesError, @Nullable ResourceKey origin);
-
-        R keyedMessagesError(KeyedMessagesError keyedMessagesError, @Nullable ResourceKey defaultOrigin);
-
-        R exceptionError(Exception exception);
+    public CommandFeedback(KeyedMessages messages, @Nullable Exception exception, ListView<ShowFeedback> showFeedbacks) {
+        this.showFeedbacks = showFeedbacks;
+        this.messages = messages;
+        this.exception = exception;
     }
 
-    @SuppressWarnings("ConstantConditions")
-    public static CommandFeedback showFile(ResourceKey file, @Nullable Region region) {
-        return CommandFeedbacks.showFile(file, region);
+
+    public static CommandFeedback of() {
+        return new CommandFeedback(KeyedMessages.of(), null, ListView.of());
     }
 
-    @SuppressWarnings("ConstantConditions")
-    public static CommandFeedback showFile(ResourceKey file) {
-        return CommandFeedbacks.showFile(file, null);
+    public static CommandFeedback of(KeyedMessages keyedMessages) {
+        return new CommandFeedback(keyedMessages, null, ListView.of());
     }
 
-    @SuppressWarnings("ConstantConditions")
-    public static CommandFeedback showText(String text, String name, @Nullable Region region) {
-        return CommandFeedbacks.showText(text, name, region);
+    public static CommandFeedback of(Exception exception, @Nullable ResourceKey origin) {
+        final KeyedMessages keyedMessages = exceptionToKeyedMessages(exception, origin);
+        return new CommandFeedback(keyedMessages, exception, ListView.of());
     }
 
-    @SuppressWarnings("ConstantConditions")
-    public static CommandFeedback showText(String text, String name) {
-        return CommandFeedbacks.showText(text, name, null);
+    public static CommandFeedback of(Exception exception) {
+        return CommandFeedback.of(exception, null);
     }
 
-    @SuppressWarnings("ConstantConditions")
-    public static CommandFeedback messages(Messages messages, @Nullable ResourceKey origin) {
-        return CommandFeedbacks.messages(messages, origin);
+    public static CommandFeedback of(ShowFeedback showFeedback) {
+        return new CommandFeedback(KeyedMessages.of(), null, ListView.of(showFeedback));
     }
 
-    @SuppressWarnings("ConstantConditions")
-    public static CommandFeedback messages(Messages messages) {
-        return CommandFeedbacks.messages(messages, null);
+    public static CommandFeedback of(ShowFeedback... showFeedbacks) {
+        return new CommandFeedback(KeyedMessages.of(), null, ListView.of(showFeedbacks));
     }
 
-    @SuppressWarnings("ConstantConditions")
-    public static CommandFeedback keyedMessages(KeyedMessages keyedMessages, @Nullable ResourceKey defaultOrigin) {
-        return CommandFeedbacks.keyedMessages(keyedMessages, defaultOrigin);
+    public static CommandFeedback of(ListView<ShowFeedback> showFeedbacks) {
+        return new CommandFeedback(KeyedMessages.of(), null, showFeedbacks);
     }
 
-    @SuppressWarnings("ConstantConditions")
-    public static CommandFeedback keyedMessages(KeyedMessages keyedMessages) {
-        return CommandFeedbacks.keyedMessages(keyedMessages, null);
+    public static CommandFeedback of(KeyedMessages keyedMessages, ShowFeedback showFeedback) {
+        return new CommandFeedback(keyedMessages, null, ListView.of(showFeedback));
     }
 
-    @SuppressWarnings("ConstantConditions")
-    public static CommandFeedback messagesError(MessagesError messagesError, @Nullable ResourceKey origin) {
-        return CommandFeedbacks.messagesError(messagesError, origin);
+    public static CommandFeedback of(KeyedMessages keyedMessages, ShowFeedback... showFeedbacks) {
+        return new CommandFeedback(keyedMessages, null, ListView.of(showFeedbacks));
     }
 
-    @SuppressWarnings("ConstantConditions")
-    public static CommandFeedback messagesError(MessagesError messagesError) {
-        return CommandFeedbacks.messagesError(messagesError, null);
+    public static CommandFeedback of(KeyedMessages keyedMessages, ListView<ShowFeedback> showFeedbacks) {
+        return new CommandFeedback(keyedMessages, null, showFeedbacks);
     }
 
-    @SuppressWarnings("ConstantConditions")
-    public static CommandFeedback keyedMessagesError(KeyedMessagesError keyedMessagesError, @Nullable ResourceKey defaultOrigin) {
-        return CommandFeedbacks.keyedMessagesError(keyedMessagesError, defaultOrigin);
+
+    public ListView<ShowFeedback> getShowFeedbacks() {
+        return showFeedbacks;
     }
 
-    @SuppressWarnings("ConstantConditions")
-    public static CommandFeedback keyedMessagesError(KeyedMessagesError keyedMessagesError) {
-        return CommandFeedbacks.keyedMessagesError(keyedMessagesError, null);
+    public KeyedMessages getMessages() {
+        return messages;
     }
 
-    @SuppressWarnings("ConstantConditions")
-    public static CommandFeedback fromException(Exception exception, @Nullable ResourceKey resource) {
-        if(exception instanceof MessagesError) {
-            return CommandFeedbacks.messagesError((MessagesError)exception, resource);
-        } else if(exception instanceof KeyedMessagesError) {
-            return CommandFeedbacks.keyedMessagesError((KeyedMessagesError)exception, resource);
+    public @Nullable Exception getException() {
+        return exception;
+    }
+
+
+    static KeyedMessages exceptionToKeyedMessages(Exception exception, @Nullable ResourceKey origin) {
+        if(exception instanceof KeyedMessagesException) {
+            final KeyedMessagesException keyedMessagesException = (KeyedMessagesException)exception;
+            return keyedMessagesException.getMessages();
+        } else if(exception instanceof MessagesException) {
+            final MessagesException messagesException = (MessagesException)exception;
+            if(origin != null) {
+                return KeyedMessages.of(origin, messagesException.getMessages());
+            } else {
+                return KeyedMessages.of(messagesException.getMessages());
+            }
         } else {
-            return CommandFeedbacks.exceptionError(exception);
+            return KeyedMessages.of();
         }
     }
-
-
-    public abstract <R> R match(Cases<R> cases);
-
-    public CommandFeedbacks.CaseOfMatchers.TotalMatcher_ShowFile caseOf() {
-        return CommandFeedbacks.caseOf(this);
-    }
-
-
-    @Override public abstract int hashCode();
-
-    @Override public abstract boolean equals(@Nullable Object obj);
-
-    @Override public abstract String toString();
 }

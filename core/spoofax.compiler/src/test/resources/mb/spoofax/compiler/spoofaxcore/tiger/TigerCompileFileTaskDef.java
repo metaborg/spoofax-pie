@@ -10,7 +10,7 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.CommandFeedbacks;
-import mb.spoofax.core.language.command.CommandOutput;
+import mb.spoofax.core.language.command.CommandFeedback;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -20,7 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 @LanguageScope
-public class TigerCompileFileTaskDef implements TaskDef<TigerCompileFileTaskDef.Args, CommandOutput> {
+public class TigerCompileFileTaskDef implements TaskDef<TigerCompileFileTaskDef.Args, CommandFeedback> {
     public static class Args implements Serializable {
         final ResourcePath file;
 
@@ -61,14 +61,14 @@ public class TigerCompileFileTaskDef implements TaskDef<TigerCompileFileTaskDef.
         return getClass().getName();
     }
 
-    @Override public CommandOutput exec(ExecContext context, Args input) throws Exception {
+    @Override public CommandFeedback exec(ExecContext context, Args input) throws Exception {
         final ResourcePath file = input.file;
 
         final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createAstProvider(file);
         final @Nullable String literalsStr = context.require(listLiteralVals, astSupplier);
         //noinspection ConstantConditions (literalsStr can really be null)
         if(literalsStr == null) {
-            return new CommandOutput(ListView.of());
+            return new CommandFeedback(ListView.of());
         }
 
         final ResourcePath generatedPath = file.replaceLeafExtension("literals.aterm");
@@ -76,6 +76,6 @@ public class TigerCompileFileTaskDef implements TaskDef<TigerCompileFileTaskDef.
         generatedResource.writeBytes(literalsStr.getBytes(StandardCharsets.UTF_8));
         context.provide(generatedResource, ResourceStampers.hashFile());
 
-        return new CommandOutput(ListView.of(CommandFeedbacks.showFile(generatedPath, null)));
+        return new CommandFeedback(ListView.of(CommandFeedbacks.showFile(generatedPath, null)));
     }
 }

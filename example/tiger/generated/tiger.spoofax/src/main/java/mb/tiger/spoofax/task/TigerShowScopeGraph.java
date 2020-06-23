@@ -9,7 +9,7 @@ import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
 import mb.spoofax.core.language.command.CommandFeedback;
-import mb.spoofax.core.language.command.CommandOutput;
+import mb.spoofax.core.language.command.CommandFeedback;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
 import mb.stratego.common.StrategoUtil;
@@ -19,7 +19,7 @@ import org.spoofax.interpreter.terms.ITermFactory;
 
 import javax.inject.Inject;
 
-public class TigerShowScopeGraph implements TaskDef<TigerShowArgs, CommandOutput> {
+public class TigerShowScopeGraph implements TaskDef<TigerShowArgs, CommandFeedback> {
     private final TigerParse parse;
     private final TigerAnalyze analyze;
     private final ResourceService resourceService;
@@ -45,7 +45,7 @@ public class TigerShowScopeGraph implements TaskDef<TigerShowArgs, CommandOutput
         return getClass().getName();
     }
 
-    @Override public CommandOutput exec(ExecContext context, TigerShowArgs input) throws Exception {
+    @Override public CommandFeedback exec(ExecContext context, TigerShowArgs input) throws Exception {
         final ResourceKey key = input.key;
 
         final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createAstSupplier(key).map(Result::get); // TODO: use Result
@@ -67,10 +67,10 @@ public class TigerShowScopeGraph implements TaskDef<TigerShowArgs, CommandOutput
         }
 
         final String formatted = StrategoUtil.toString(result);
-        return new CommandOutput(ListView.of(CommandFeedback.showText(formatted, "Scope graph for '" + key + "'")));
+        return new CommandFeedback(ListView.of(CommandFeedback.showText(formatted, "Scope graph for '" + key + "'")));
     }
 
-    @Override public Task<CommandOutput> createTask(TigerShowArgs input) {
+    @Override public Task<CommandFeedback> createTask(TigerShowArgs input) {
         return TaskDef.super.createTask(input);
     }
 }

@@ -3,7 +3,7 @@ package mb.sdf3.spoofax.task.debug;
 import mb.common.util.StringUtil;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.command.CommandFeedback;
-import mb.spoofax.core.language.command.CommandOutput;
+import mb.spoofax.core.language.command.ShowFeedback;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoUtil;
@@ -23,16 +23,16 @@ class ProvideOutputShared {
         this.resultName = resultName;
     }
 
-    CommandOutput provideOutput(boolean concrete, IStrategoTerm ast, ResourceKey file) throws StrategoException {
+    CommandFeedback provideOutput(boolean concrete, IStrategoTerm ast, ResourceKey file) throws StrategoException {
         if(concrete) {
             final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get();
             final @Nullable IStrategoTerm text = strategoRuntime.invoke(prettyPrintStrategy, ast);
             if(text == null) {
                 throw new RuntimeException("Pretty-printing " + resultName + " AST failed (returned null)");
             }
-            return CommandOutput.of(CommandFeedback.showText(StrategoUtil.toString(text), StringUtil.capitalize(resultName) + " (concrete) of '" + file + "'"));
+            return CommandFeedback.of(ShowFeedback.showText(StrategoUtil.toString(text), StringUtil.capitalize(resultName) + " (concrete) of '" + file + "'"));
         } else {
-            return CommandOutput.of(CommandFeedback.showText(StrategoUtil.toString(ast), StringUtil.capitalize(resultName) + " (abstract) of '" + file + "'"));
+            return CommandFeedback.of(ShowFeedback.showText(StrategoUtil.toString(ast), StringUtil.capitalize(resultName) + " (abstract) of '" + file + "'"));
         }
     }
 }

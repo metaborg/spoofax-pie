@@ -24,7 +24,7 @@ public interface CommandDef<A extends Serializable> {
     A fromRawArgs(RawArgs rawArgs);
 
 
-    Task<CommandOutput> createTask(A args);
+    Task<CommandFeedback> createTask(A args);
 
 
     default CommandRequest<A> request(CommandExecutionType executionType, RawArgs initialArgs) {
@@ -35,7 +35,7 @@ public interface CommandDef<A extends Serializable> {
         return CommandRequest.of(this, executionType);
     }
 
-    default Task<CommandOutput> createTask(CommandRequest<A> request, CommandContext context, ArgConverters argConverters) {
+    default Task<CommandFeedback> createTask(CommandRequest<A> request, CommandContext context, ArgConverters argConverters) {
         final RawArgsBuilder builder = new RawArgsBuilder(getParamDef(), argConverters);
         request.initialArgs().ifPresent(builder::setArgsFrom);
         final RawArgs rawArgs = builder.build(context);

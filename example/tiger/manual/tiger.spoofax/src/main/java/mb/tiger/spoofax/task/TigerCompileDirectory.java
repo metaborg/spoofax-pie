@@ -2,7 +2,7 @@ package mb.tiger.spoofax.task;
 
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
-import mb.common.result.MessagesError;
+import mb.common.result.MessagesException;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
@@ -18,7 +18,7 @@ import mb.resource.hierarchical.match.PathResourceMatcher;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.match.path.ExtensionsPathMatcher;
 import mb.spoofax.core.language.command.CommandFeedback;
-import mb.spoofax.core.language.command.CommandOutput;
+import mb.spoofax.core.language.command.ShowFeedback;
 import mb.tiger.spoofax.task.reusable.TigerListDefNames;
 import mb.tiger.spoofax.task.reusable.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -30,7 +30,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args, CommandOutput> {
+public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args, CommandFeedback> {
     public static class Args implements Serializable {
         final ResourcePath dir;
 
@@ -69,7 +69,7 @@ public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args
         return getClass().getName();
     }
 
-    @Override public CommandOutput exec(ExecContext context, Args input) throws Exception {
+    @Override public CommandFeedback exec(ExecContext context, Args input) throws Exception {
         final ResourcePath dir = input.dir;
 
         final ResourceMatcher matcher = new AllResourceMatcher(new FileResourceMatcher(), new PathResourceMatcher(new ExtensionsPathMatcher("tig")));
@@ -84,7 +84,7 @@ public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args
             if(!first.get()) {
                 sb.append(", ");
             }
-            final Supplier<Result<IStrategoTerm, MessagesError>> astSupplier = parse.createAstSupplier(filePath);
+            final Supplier<Result<IStrategoTerm, MessagesException>> astSupplier = parse.createAstSupplier(filePath);
             context.require(listDefNames, astSupplier)
                 .ifElse(sb::append, (e) -> {
                     sb.append("[]");
@@ -100,10 +100,10 @@ public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args
         generatedResource.writeBytes(sb.toString().getBytes(StandardCharsets.UTF_8));
         context.provide(generatedResource, ResourceStampers.hashFile());
 
-        return CommandOutput.of(CommandFeedback.showFile(generatedPath), CommandFeedback.keyedMessages(messagesBuilder.build(), dir));
+        return CommandFeedback.of(messagesBuilder.build(), ShowFeedback.showFile(generatedPath));
     }
 
-    @Override public Task<CommandOutput> createTask(Args input) {
+    @Override public Task<CommandFeedback> createTask(Args input) {
         return TaskDef.super.createTask(input);
     }
 }

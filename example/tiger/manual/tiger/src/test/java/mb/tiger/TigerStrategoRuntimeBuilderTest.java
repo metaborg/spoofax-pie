@@ -1,6 +1,6 @@
 package mb.tiger;
 
-import mb.common.result.MessagesError;
+import mb.common.result.MessagesException;
 import mb.common.result.Result;
 import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.stratego.common.StrategoException;
@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class TigerStrategoRuntimeBuilderTest extends TigerTestBase {
     @Test void parseUnparse() throws InterruptedException, StrategoException {
         final String str = "1 + 2";
-        final Result<JSGLR1ParseOutput, MessagesError> parsed = parser.parse(str, "Module");
+        final Result<JSGLR1ParseOutput, MessagesException> parsed = parser.parse(str, "Module");
         assertTrue(parsed.isOk());
         final @Nullable IStrategoTerm unparsedTerm = strategoRuntime.invoke("pp-Tiger-string", parsed.unwrapUnchecked().ast);
         assertNotNull(unparsedTerm);

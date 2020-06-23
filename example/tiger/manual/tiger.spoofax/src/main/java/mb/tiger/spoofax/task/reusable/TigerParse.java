@@ -1,6 +1,6 @@
 package mb.tiger.spoofax.task.reusable;
 
-import mb.common.result.MessagesError;
+import mb.common.result.MessagesException;
 import mb.common.result.Result;
 import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.jsglr1.pie.JSGLR1ParseTaskDef;
@@ -22,7 +22,7 @@ public class TigerParse extends JSGLR1ParseTaskDef {
         return getClass().getName();
     }
 
-    @Override protected Result<JSGLR1ParseOutput, MessagesError> parse(String text) throws InterruptedException {
+    @Override protected Result<JSGLR1ParseOutput, MessagesException> parse(String text) throws InterruptedException {
         final TigerParser parser = parserProvider.get();
         return parser.parse(text, "Module");
     }

@@ -31,7 +31,7 @@ public interface CommandRequest<A extends Serializable> {
     @Value.Parameter Optional<RawArgs> initialArgs();
 
 
-    default Task<CommandOutput> createTask(CommandContext context, ArgConverters argConverters) {
+    default Task<CommandFeedback> createTask(CommandContext context, ArgConverters argConverters) {
         return def().createTask(this, context, argConverters);
     }
 }

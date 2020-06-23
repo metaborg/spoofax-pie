@@ -10,7 +10,7 @@ import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.CommandFeedbacks;
-import mb.spoofax.core.language.command.CommandOutput;
+import mb.spoofax.core.language.command.CommandFeedback;
 import mb.stratego.common.StrategoUtil;
 import mb.tiger.spoofax.task.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -21,7 +21,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @LanguageScope
-public class TigerShowParsedAstTaskDef implements TaskDef<TigerShowParsedAstTaskDef.Args, CommandOutput> {
+public class TigerShowParsedAstTaskDef implements TaskDef<TigerShowParsedAstTaskDef.Args, CommandFeedback> {
     public static class Args implements Serializable {
         public final ResourceKey key;
         public final @Nullable Region region;
@@ -57,7 +57,7 @@ public class TigerShowParsedAstTaskDef implements TaskDef<TigerShowParsedAstTask
         return getClass().getName();
     }
 
-    @Override public CommandOutput exec(ExecContext context, Args input) throws Exception {
+    @Override public CommandFeedback exec(ExecContext context, Args input) throws Exception {
         final ResourceKey key = input.key;
         final @Nullable Region region = input.region;
 
@@ -73,6 +73,6 @@ public class TigerShowParsedAstTaskDef implements TaskDef<TigerShowParsedAstTask
         }
 
         final String formatted = StrategoUtil.toString(term);
-        return new CommandOutput(ListView.of(CommandFeedbacks.showText(formatted, "Parsed AST for '" + key + "'", null)));
+        return new CommandFeedback(ListView.of(CommandFeedbacks.showText(formatted, "Parsed AST for '" + key + "'", null)));
     }
 }

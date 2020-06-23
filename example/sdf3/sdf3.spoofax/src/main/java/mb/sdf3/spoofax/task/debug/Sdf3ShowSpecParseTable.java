@@ -8,7 +8,7 @@ import mb.sdf3.spoofax.task.Sdf3CreateSpec;
 import mb.sdf3.spoofax.task.Sdf3SpecToParseTable;
 import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.CommandFeedback;
-import mb.spoofax.core.language.command.CommandOutput;
+import mb.spoofax.core.language.command.ShowFeedback;
 import mb.stratego.common.StrategoUtil;
 import org.metaborg.sdf2table.io.ParseTableIO;
 import org.metaborg.sdf2table.parsetable.ParseTable;
@@ -20,7 +20,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @LanguageScope
-public class Sdf3ShowSpecParseTable implements TaskDef<Sdf3ShowSpecParseTable.Args, CommandOutput> {
+public class Sdf3ShowSpecParseTable implements TaskDef<Sdf3ShowSpecParseTable.Args, CommandFeedback> {
     public static class Args implements Serializable {
         public final ResourcePath project;
         public final ResourceKey mainFile;
@@ -59,13 +59,13 @@ public class Sdf3ShowSpecParseTable implements TaskDef<Sdf3ShowSpecParseTable.Ar
         return getClass().getName();
     }
 
-    @Override public CommandOutput exec(ExecContext context, Args args) throws Exception {
+    @Override public CommandFeedback exec(ExecContext context, Args args) throws Exception {
         final ParseTable parseTable = context.require(specToParseTable, new Sdf3SpecToParseTable.Args(
             createSpec.createSupplier(new Sdf3CreateSpec.Input(args.project, args.mainFile)),
             new ParseTableConfiguration(false, false, true, false, false),
             false
         ));
         final IStrategoTerm ast = ParseTableIO.generateATerm(parseTable);
-        return CommandOutput.of(CommandFeedback.showText(StrategoUtil.toString(ast), "Parse table for '" + args.mainFile + "' in project '" + args.project + "'"));
+        return CommandFeedback.of(ShowFeedback.showText(StrategoUtil.toString(ast), "Parse table for '" + args.mainFile + "' in project '" + args.project + "'"));
     }
 }

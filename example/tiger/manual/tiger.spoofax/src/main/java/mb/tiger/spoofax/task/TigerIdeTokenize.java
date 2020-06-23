@@ -1,6 +1,6 @@
 package mb.tiger.spoofax.task;
 
-import mb.common.result.MessagesError;
+import mb.common.result.MessagesException;
 import mb.common.result.Result;
 import mb.jsglr.common.JSGLRTokens;
 import mb.jsglr1.common.JSGLR1ParseOutput;
@@ -29,7 +29,7 @@ public class TigerIdeTokenize implements TaskDef<ResourceKey, @Nullable JSGLRTok
 
     @Override
     public @Nullable JSGLRTokens exec(ExecContext context, ResourceKey key) throws ExecException, InterruptedException {
-        final Result<JSGLR1ParseOutput, MessagesError> parseResult = context.require(parse, new ResourceStringSupplier(key));
+        final Result<JSGLR1ParseOutput, MessagesException> parseResult = context.require(parse, new ResourceStringSupplier(key));
         return parseResult.mapOrNull(o -> o.tokens); // TODO: use Result.
     }
 }

@@ -100,7 +100,7 @@ public class WorkspaceUpdate {
     }
 
     public void replaceMessages(KeyedMessages messages) {
-        for(@Nullable ResourceKey resource : messages.getResources()) {
+        for(@Nullable ResourceKey resource : messages.getKeys()) {
             if(resource != null) {
                 clearMessages(resource);
             }
@@ -152,7 +152,7 @@ public class WorkspaceUpdate {
             }
             try {
                 if(workspaceMonitor == null || !workspaceMonitor.isCanceled()) {
-                    messages.getAllMessages().forEach(entry -> {
+                    messages.getMessagesWithKey().forEach(entry -> {
                         ResourceKey resourceKey = entry.getKey();
                         entry.getValue().stream().forEach(message -> {
                             if(resourceKey == null) {

@@ -42,10 +42,11 @@ class CommandRunner<A extends Serializable> implements Callable {
     @Override public @Nullable Object call() throws Exception {
         final RawArgs rawArgs = rawArgsBuilder.build(new CommandContext());
         final A args = commandDef.fromRawArgs(rawArgs);
-        final Task<CommandOutput> task = commandDef.createTask(args);
-        final CommandOutput output = session.requireWithoutObserving(task);
-        for(CommandFeedback feedback : output.feedback) {
-            CommandFeedbacks.caseOf(feedback)
+        final Task<CommandFeedback> task = commandDef.createTask(args);
+        final CommandFeedback feedback = session.requireWithoutObserving(task);
+        // TODO: handle error feedback
+        for(ShowFeedback showFeedback : feedback.getShowFeedbacks()) {
+            showFeedback.caseOf()
                 .showFile((file, region) -> {
                     System.out.println(file + ":");
                     System.out.println();

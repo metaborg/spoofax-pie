@@ -9,7 +9,7 @@ import mb.sdf3.spoofax.task.Sdf3CreateSpec;
 import mb.sdf3.spoofax.task.Sdf3SpecToParenthesizer;
 import mb.sdf3.spoofax.task.Sdf3SpecToParseTable;
 import mb.spoofax.core.language.LanguageScope;
-import mb.spoofax.core.language.command.CommandOutput;
+import mb.spoofax.core.language.command.CommandFeedback;
 import mb.stratego.common.StrategoRuntime;
 import org.metaborg.sdf2table.parsetable.ParseTable;
 import org.metaborg.sdf2table.parsetable.ParseTableConfiguration;
@@ -21,7 +21,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @LanguageScope
-public class Sdf3ShowSpecParenthesizer extends ProvideOutputShared implements TaskDef<Sdf3ShowSpecParenthesizer.Args, CommandOutput> {
+public class Sdf3ShowSpecParenthesizer extends ProvideOutputShared implements TaskDef<Sdf3ShowSpecParenthesizer.Args, CommandFeedback> {
     public static class Args implements Serializable {
         public final ResourcePath project;
         public final ResourceKey mainFile;
@@ -71,7 +71,7 @@ public class Sdf3ShowSpecParenthesizer extends ProvideOutputShared implements Ta
         return getClass().getName();
     }
 
-    @Override public CommandOutput exec(ExecContext context, Args args) throws Exception {
+    @Override public CommandFeedback exec(ExecContext context, Args args) throws Exception {
         final Supplier<ParseTable> parseTableSupplier = specToParseTable.createSupplier(new Sdf3SpecToParseTable.Args(
             createSpec.createSupplier(new Sdf3CreateSpec.Input(args.project, args.mainFile)),
             new ParseTableConfiguration(false, false, true, false, false),

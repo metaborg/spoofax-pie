@@ -1,6 +1,6 @@
 package mb.tiger;
 
-import mb.common.result.MessagesError;
+import mb.common.result.MessagesException;
 import mb.common.result.Result;
 import mb.jsglr1.common.JSGLR1ParseOutput;
 import org.junit.jupiter.api.Test;
@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TigerParserTest extends TigerTestBase {
     @Test void parse() throws InterruptedException {
-        final Result<JSGLR1ParseOutput, MessagesError> result = parser.parse("1", "Module");
+        final Result<JSGLR1ParseOutput, MessagesException> result = parser.parse("1", "Module");
         assertTrue(result.isOk());
         final JSGLR1ParseOutput output = result.unwrapUnchecked();
         assertFalse(output.recovered);

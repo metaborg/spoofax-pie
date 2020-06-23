@@ -1,10 +1,8 @@
 package mb.common.message;
 
 import mb.common.util.ListView;
-import mb.common.util.MapView;
 import mb.common.util.MultiHashMap;
 import mb.resource.ResourceKey;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -106,10 +104,14 @@ public class Messages implements Iterable<Message>, Serializable {
     }
 
 
-    public KeyedMessages toKeyed(@Nullable ResourceKey key) {
-        final MultiHashMap<@Nullable ResourceKey, Message> map = new MultiHashMap<>();
+    public KeyedMessages toKeyed(ResourceKey key) {
+        final MultiHashMap<ResourceKey, Message> map = new MultiHashMap<>();
         map.putAll(key, messages);
-        return new KeyedMessages(MapView.copyOf(map.getInnerMap()));
+        return KeyedMessages.copyOf(map.getInnerMap());
+    }
+
+    public KeyedMessages toKeyed() {
+        return KeyedMessages.of(messages);
     }
 
 

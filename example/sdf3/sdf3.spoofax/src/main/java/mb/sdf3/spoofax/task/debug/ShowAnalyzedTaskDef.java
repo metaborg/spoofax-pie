@@ -9,7 +9,7 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.spoofax.task.Sdf3AnalyzeMulti;
 import mb.sdf3.spoofax.task.Sdf3Parse;
 import mb.sdf3.spoofax.task.SingleFileAnalysisResult;
-import mb.spoofax.core.language.command.CommandOutput;
+import mb.spoofax.core.language.command.CommandFeedback;
 import mb.stratego.common.StrategoRuntime;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -18,7 +18,7 @@ import javax.inject.Provider;
 import java.io.Serializable;
 import java.util.Objects;
 
-public abstract class ShowAnalyzedTaskDef extends ProvideOutputShared implements TaskDef<ShowAnalyzedTaskDef.Args, CommandOutput> {
+public abstract class ShowAnalyzedTaskDef extends ProvideOutputShared implements TaskDef<ShowAnalyzedTaskDef.Args, CommandFeedback> {
     public static class Args implements Serializable {
         public final ResourcePath project;
         public final ResourceKey file;
@@ -69,7 +69,7 @@ public abstract class ShowAnalyzedTaskDef extends ProvideOutputShared implements
         this.operation = operation;
     }
 
-    @Override public CommandOutput exec(ExecContext context, Args args) throws Exception {
+    @Override public CommandFeedback exec(ExecContext context, Args args) throws Exception {
         final Supplier<SingleFileAnalysisResult> analyzeResultSupplier = SingleFileAnalysisResult.createSupplier(
             args.project, args.file, parse, desugar, analyze
         );

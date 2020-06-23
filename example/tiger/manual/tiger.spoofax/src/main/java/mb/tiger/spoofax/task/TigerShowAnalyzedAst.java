@@ -2,7 +2,6 @@ package mb.tiger.spoofax.task;
 
 import mb.common.region.Region;
 import mb.common.result.Result;
-import mb.common.util.ListView;
 import mb.jsglr.common.TermTracer;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
@@ -10,7 +9,7 @@ import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.command.CommandFeedback;
-import mb.spoofax.core.language.command.CommandOutput;
+import mb.spoofax.core.language.command.ShowFeedback;
 import mb.stratego.common.StrategoUtil;
 import mb.tiger.spoofax.task.reusable.TigerAnalyze;
 import mb.tiger.spoofax.task.reusable.TigerParse;
@@ -19,7 +18,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 
-public class TigerShowAnalyzedAst implements TaskDef<TigerShowArgs, CommandOutput> {
+public class TigerShowAnalyzedAst implements TaskDef<TigerShowArgs, CommandFeedback> {
     private final TigerParse parse;
     private final TigerAnalyze analyze;
 
@@ -32,7 +31,7 @@ public class TigerShowAnalyzedAst implements TaskDef<TigerShowArgs, CommandOutpu
         return getClass().getName();
     }
 
-    @Override public CommandOutput exec(ExecContext context, TigerShowArgs input) throws Exception {
+    @Override public CommandFeedback exec(ExecContext context, TigerShowArgs input) throws Exception {
         final ResourceKey key = input.key;
         final @Nullable Region region = input.region;
 
@@ -53,10 +52,10 @@ public class TigerShowAnalyzedAst implements TaskDef<TigerShowArgs, CommandOutpu
         }
 
         final String formatted = StrategoUtil.toString(term);
-        return new CommandOutput(ListView.of(CommandFeedback.showText(formatted, "Analyzed AST for '" + key + "'")));
+        return CommandFeedback.of(ShowFeedback.showText(formatted, "Analyzed AST for '" + key + "'"));
     }
 
-    @Override public Task<CommandOutput> createTask(TigerShowArgs input) {
+    @Override public Task<CommandFeedback> createTask(TigerShowArgs input) {
         return TaskDef.super.createTask(input);
     }
 }

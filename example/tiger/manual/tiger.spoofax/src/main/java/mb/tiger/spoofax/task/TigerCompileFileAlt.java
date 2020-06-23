@@ -1,6 +1,6 @@
 package mb.tiger.spoofax.task;
 
-import mb.common.result.MessagesError;
+import mb.common.result.MessagesException;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
@@ -11,7 +11,7 @@ import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.command.CommandFeedback;
-import mb.spoofax.core.language.command.CommandOutput;
+import mb.spoofax.core.language.command.ShowFeedback;
 import mb.tiger.spoofax.task.reusable.TigerListDefNames;
 import mb.tiger.spoofax.task.reusable.TigerListLiteralVals;
 import mb.tiger.spoofax.task.reusable.TigerParse;
@@ -24,7 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Objects;
 
-public class TigerCompileFileAlt implements TaskDef<TigerCompileFileAlt.Args, CommandOutput> {
+public class TigerCompileFileAlt implements TaskDef<TigerCompileFileAlt.Args, CommandFeedback> {
     public static class Args implements Serializable {
         final ResourcePath file;
         final boolean listDefNames;
@@ -74,16 +74,16 @@ public class TigerCompileFileAlt implements TaskDef<TigerCompileFileAlt.Args, Co
         return getClass().getName();
     }
 
-    @Override public CommandOutput exec(ExecContext context, Args input) throws Exception {
+    @Override public CommandFeedback exec(ExecContext context, Args input) throws Exception {
         final ResourcePath file = input.file;
-        final Supplier<Result<IStrategoTerm, MessagesError>> astSupplier = parse.createAstSupplier(file);
+        final Supplier<Result<IStrategoTerm, MessagesException>> astSupplier = parse.createAstSupplier(file);
         Result<String, ?> strResult;
         if(input.listDefNames) {
             strResult = context.require(listDefNames, astSupplier);
         } else {
             strResult = context.require(listLiteralVals, astSupplier);
         }
-        final CommandFeedback feedback = strResult
+        return strResult
             .mapCatching((str) -> {
                 if(input.base64Encode) {
                     str = Base64.getEncoder().encodeToString(str.getBytes(StandardCharsets.UTF_8));
@@ -94,15 +94,14 @@ public class TigerCompileFileAlt implements TaskDef<TigerCompileFileAlt.Args, Co
                 context.provide(generatedResource, ResourceStampers.hashFile());
                 return generatedPath;
             })
-            .mapOrElse(CommandFeedback::showFile, e -> CommandFeedback.fromException(e, file));
-        return CommandOutput.of(feedback);
+            .mapOrElse(f -> CommandFeedback.of(ShowFeedback.showFile(f)), e -> CommandFeedback.of(e, file));
     }
 
     @Override public Serializable key(Args input) {
         return input.file; // Task is keyed by file only.
     }
 
-    @Override public Task<CommandOutput> createTask(Args input) {
+    @Override public Task<CommandFeedback> createTask(Args input) {
         return TaskDef.super.createTask(input);
     }
 }

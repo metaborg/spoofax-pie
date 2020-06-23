@@ -6,7 +6,7 @@ import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.sdf3.spoofax.task.Sdf3Parse;
-import mb.spoofax.core.language.command.CommandOutput;
+import mb.spoofax.core.language.command.CommandFeedback;
 import mb.stratego.common.StrategoRuntime;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -15,7 +15,7 @@ import javax.inject.Provider;
 import java.io.Serializable;
 import java.util.Objects;
 
-public abstract class ShowTaskDef extends ProvideOutputShared implements TaskDef<ShowTaskDef.Args, CommandOutput> {
+public abstract class ShowTaskDef extends ProvideOutputShared implements TaskDef<ShowTaskDef.Args, CommandFeedback> {
     public static class Args implements Serializable {
         public final ResourceKey file;
         public final boolean concrete;
@@ -60,7 +60,7 @@ public abstract class ShowTaskDef extends ProvideOutputShared implements TaskDef
         this.operation = operation;
     }
 
-    @Override public CommandOutput exec(ExecContext context, Args args) throws Exception {
+    @Override public CommandFeedback exec(ExecContext context, Args args) throws Exception {
         final @Nullable IStrategoTerm normalFormAst = context.require(operation.createTask(desugar.createSupplier(parse.createAstSupplier(args.file).map(Result::get)))); // TODO: use Result
         if(normalFormAst == null)
             throw new RuntimeException("Parse -> desugar -> transform to " + resultName + " failed (returned null)");

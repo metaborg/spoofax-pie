@@ -9,7 +9,7 @@ import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.CommandContextType;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandExecutionType;
-import mb.spoofax.core.language.command.CommandOutput;
+import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.arg.ArgProvider;
 import mb.spoofax.core.language.command.arg.Param;
 import mb.spoofax.core.language.command.arg.ParamDef;
@@ -63,7 +63,7 @@ public class TigerShowParsedAstCommand implements CommandDef<TigerShowArgs> {
         return new TigerShowArgs(resource, region);
     }
 
-    @Override public Task<CommandOutput> createTask(TigerShowArgs args) {
+    @Override public Task<CommandFeedback> createTask(TigerShowArgs args) {
         return tigerShowParsedAst.createTask(args);
     }
 }

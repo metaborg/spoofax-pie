@@ -34,7 +34,7 @@ public class TigerListLiteralVals implements TaskDef<Supplier<? extends Result<I
                 final String strategyId = "list-of-literal-vals";
                 // TODO: strategoRuntime.invoke should return a Result that handles what the following code does.
                 // TODO: strategoRuntime.invoke should additionally support a term format to report messages, which can
-                //       then be returned as a (Keyed)MessagesError.
+                //       then be returned as a (Keyed)MessagesException.
                 try {
                     final @Nullable IStrategoTerm result = strategoRuntime.invoke(strategyId, ast);
                     return Result.ofNullableOrElse(result, () -> new Exception("Invoking '" + strategyId + "' on '" + ast + "' failed unexpectedly"));

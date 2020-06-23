@@ -135,6 +135,10 @@ public class ListView<E> extends BaseCollectionView<E, List<? extends E>> implem
         return Collections.unmodifiableList(collection);
     }
 
+    @Override public ArrayList<E> asCopy() {
+        return new ArrayList<>(collection);
+    }
+
 
     @Override public boolean equals(@Nullable Object obj) {
         if(this == obj) return true;

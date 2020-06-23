@@ -25,10 +25,9 @@ import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandContext;
 import mb.spoofax.core.language.command.CommandFeedback;
-import mb.spoofax.core.language.command.CommandFeedbacks;
-import mb.spoofax.core.language.command.CommandOutput;
 import mb.spoofax.core.language.command.CommandRequest;
 import mb.spoofax.core.language.command.HierarchicalResourceType;
+import mb.spoofax.core.language.command.ShowFeedback;
 import mb.spoofax.core.language.command.arg.ArgConverters;
 import mb.spoofax.core.platform.Platform;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
@@ -223,18 +222,18 @@ public class PieRunner {
         try(final MixedSession session = languageComponent.getPie().newSession()) {
             // Unobserve auto transforms.
             for(AutoCommandRequest<?> request : autoCommandRequests.project) {
-                final Task<CommandOutput> task = request.createTask(CommandContext.ofProject(project), argConverters);
+                final Task<CommandFeedback> task = request.createTask(CommandContext.ofProject(project), argConverters);
                 unobserve(task, pie, session, monitor);
             }
             for(ResourcePath directory : resourceChanges.newDirectories) {
                 for(AutoCommandRequest<?> request : autoCommandRequests.directory) {
-                    final Task<CommandOutput> task = request.createTask(CommandContext.ofDirectory(directory), argConverters);
+                    final Task<CommandFeedback> task = request.createTask(CommandContext.ofDirectory(directory), argConverters);
                     unobserve(task, pie, session, monitor);
                 }
             }
             for(ResourcePath file : resourceChanges.newFiles) {
                 for(AutoCommandRequest<?> request : autoCommandRequests.file) {
-                    final Task<CommandOutput> task = request.createTask(CommandContext.ofFile(file), argConverters);
+                    final Task<CommandFeedback> task = request.createTask(CommandContext.ofFile(file), argConverters);
                     unobserve(task, pie, session, monitor);
                 }
             }
@@ -277,16 +276,16 @@ public class PieRunner {
         switch(request.executionType()) {
             case ManualOnce:
                 for(CommandContext context : contexts) {
-                    final Task<CommandOutput> task = request.createTask(context, argConverters);
-                    final CommandOutput output = requireWithoutObserving(task, session, monitor);
-                    processOutput(output, true, null);
+                    final Task<CommandFeedback> task = request.createTask(context, argConverters);
+                    final CommandFeedback output = requireWithoutObserving(task, session, monitor);
+                    processFeedback(output, true, false, null);
                 }
                 break;
             case ManualContinuous:
                 for(CommandContext context : contexts) {
-                    final Task<CommandOutput> task = request.createTask(context, argConverters);
-                    final CommandOutput output = require(task, session, monitor);
-                    processOutput(output, true, (p) -> {
+                    final Task<CommandFeedback> task = request.createTask(context, argConverters);
+                    final CommandFeedback output = require(task, session, monitor);
+                    processFeedback(output, true, false, (p) -> {
                         // POTI: this opens a new PIE session, which may be used concurrently with other sessions, which
                         // may not be (thread-)safe.
                         try(final MixedSession newSession = languageComponent.getPie().newSession()) {
@@ -294,28 +293,39 @@ public class PieRunner {
                         }
                         pie.removeCallback(task);
                     });
-                    pie.setCallback(task, (o) -> processOutput(o, false, null));
+                    pie.setCallback(task, (o) -> processFeedback(o, false, false, null));
                 }
                 break;
             case AutomaticContinuous:
                 for(CommandContext context : contexts) {
-                    final Task<CommandOutput> task = request.createTask(context, argConverters);
-                    require(task, session, monitor);
-                    // Feedback for AutomaticContinuous is ignored intentionally: do not want to suddenly open new
-                    // editors when a resource is saved.
+                    final Task<CommandFeedback> task = request.createTask(context, argConverters);
+                    final CommandFeedback output = require(task, session, monitor);
+                    processFeedback(output, true, true, (p) -> {
+                        // POTI: this opens a new PIE session, which may be used concurrently with other sessions, which
+                        // may not be (thread-)safe.
+                        try(final MixedSession newSession = languageComponent.getPie().newSession()) {
+                            unobserve(task, pie, newSession, monitor);
+                        }
+                        pie.removeCallback(task);
+                    });
+                    pie.setCallback(task, (o) -> processFeedback(o, false, true, null));
                 }
                 break;
         }
     }
 
-    private void processOutput(CommandOutput output, boolean activate, @Nullable Consumer<IWorkbenchPart> closedCallback) {
-        for(CommandFeedback feedback : output.feedback) {
-            processFeedback(feedback, activate, closedCallback);
+    private void processFeedback(CommandFeedback feedback, boolean activate, boolean isUserTriggered, @Nullable Consumer<IWorkbenchPart> closedCallback) {
+        if(isUserTriggered) {
+            // Only process show feedbacks when the feedback comes from a user-triggered (e.g., menu action) command.
+            for(ShowFeedback showFeedback : feedback.getShowFeedbacks()) {
+                processShowFeedback(showFeedback, activate, closedCallback);
+            }
         }
+        // TODO: process error feedback
     }
 
-    private void processFeedback(CommandFeedback feedback, boolean activate, @Nullable Consumer<IWorkbenchPart> closedCallback) {
-        CommandFeedbacks.caseOf(feedback)
+    private void processShowFeedback(ShowFeedback showFeedback, boolean activate, @Nullable Consumer<IWorkbenchPart> closedCallback) {
+        showFeedback.caseOf()
             .showFile((file, region) -> {
                 final IFile eclipseFile = resourceUtil.getEclipseFile(file);
                 // Execute in UI thread because getActiveWorkbenchWindow is only available in the UI thread.
@@ -375,7 +385,8 @@ public class PieRunner {
                 });
 
                 return Optional.empty(); // Return value is required.
-            });
+            })
+        ;
     }
 
 
@@ -562,7 +573,7 @@ public class PieRunner {
                 requireCommand(languageComponent, request, CommandUtil.context(CommandContext.ofProject(newProject)), session, monitor);
             }
             for(ResourcePath removedProject : resourceChanges.removedProjects) {
-                final Task<CommandOutput> task = request.createTask(CommandContext.ofProject(removedProject), argConverters);
+                final Task<CommandFeedback> task = request.createTask(CommandContext.ofProject(removedProject), argConverters);
                 unobserve(task, pie, session, monitor);
             }
         }
@@ -572,7 +583,7 @@ public class PieRunner {
                 requireCommand(languageComponent, request, CommandUtil.context(CommandContext.ofDirectory(newDirectory)), session, monitor);
             }
             for(ResourcePath removedDirectory : resourceChanges.removedDirectories) {
-                final Task<CommandOutput> task = request.createTask(CommandContext.ofDirectory(removedDirectory), argConverters);
+                final Task<CommandFeedback> task = request.createTask(CommandContext.ofDirectory(removedDirectory), argConverters);
                 unobserve(task, pie, session, monitor);
             }
         }
@@ -582,7 +593,7 @@ public class PieRunner {
                 requireCommand(languageComponent, request, CommandUtil.context(CommandContext.ofFile(newFile)), session, monitor);
             }
             for(ResourcePath removedFile : resourceChanges.removedFiles) {
-                final Task<CommandOutput> task = request.createTask(CommandContext.ofFile(removedFile), argConverters);
+                final Task<CommandFeedback> task = request.createTask(CommandContext.ofFile(removedFile), argConverters);
                 unobserve(task, pie, session, monitor);
             }
         }
