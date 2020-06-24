@@ -4,10 +4,12 @@ import mb.common.util.MapView;
 import mb.common.util.SerializationUtil;
 import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
+import mb.resource.ResourceKey;
 import mb.spoofax.core.language.command.CommandContext;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.CommandRequest;
+import mb.spoofax.core.language.command.ResourcePathWithKind;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.SpoofaxEclipseComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
@@ -62,6 +64,7 @@ public class RunCommandHandler extends AbstractHandler {
             throw new ExecutionException("Cannot execute command with ID '" + data.commandId + "', command with that ID was not found in language '" + languageComponent.getLanguageInstance().getDisplayName() + "'");
         }
         final CommandRequest<?> request = data.toCommandRequest(def);
+        // TODO: run this in a Job, both to enable progress/cancellation, and better error reporting.
         try(final MixedSession session = languageComponent.getPie().newSession()) {
             final ArrayList<CommandContextAndFeedback> contextsAndFeedbacks = pieRunner.requireCommand(languageComponent, request, data.contexts, session, null);
             final ArrayList<Exception> exceptions = new ArrayList<>();
@@ -72,10 +75,19 @@ public class RunCommandHandler extends AbstractHandler {
                 final CommandFeedback feedback = contextAndFeedback.feedback;
                 if(feedback.hasErrorMessagesOrException()) {
                     error = true;
-                    sb.append("Executing command request '").append(request.def().getDisplayName()).append("' on '").append(context).append("' failed.\n");
+                    final @Nullable String resourceStr = context.getResourcePathWithKind()
+                        .map(ResourcePathWithKind::toString)
+                        .orElseGet(() -> context.getResourceKey().map(ResourceKey::toString).orElse(null));
+                    sb.append("Executing command request '");
+                    sb.append(request.def().getDisplayName());
+                    if(resourceStr != null) {
+                        sb.append("' on '");
+                        sb.append(resourceStr);
+                    }
+                    sb.append("' failed.\n");
                 }
                 if(feedback.hasErrorMessages()) {
-                    sb.append("The following messages were produced:\n");
+                    sb.append("\nThe following messages were produced:\n");
                     feedback.getMessages().addToStringBuilder(sb);
                 }
                 final @Nullable Exception exception = feedback.getException();
@@ -84,14 +96,20 @@ public class RunCommandHandler extends AbstractHandler {
                 }
             }
             final String pluginId = languageComponent.getEclipseIdentifiers().getPlugin();
-            final MultiStatus multiStatus = new MultiStatus(pluginId, IStatus.ERROR, "Exceptions occurred", null);
-            for(Exception e : exceptions) {
-                multiStatus.add(new Status(IStatus.ERROR, pluginId, e.getMessage(), e));
+            final IStatus status;
+            if(exceptions.isEmpty()) {
+                status = new Status(IStatus.ERROR, pluginId, sb.toString());
+            } else {
+                final MultiStatus multiStatus = new MultiStatus(pluginId, IStatus.ERROR, sb.toString(), null);
+                for(Exception e : exceptions) {
+                    multiStatus.add(new Status(IStatus.ERROR, pluginId, e.getMessage(), e));
+                }
+                status = multiStatus;
             }
             if(error) {
                 PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().getDisplay().asyncExec(() -> {
                     final Shell activeShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-                    ErrorDialog.openError(activeShell, "Executing command request '" + request.def().getDisplayName() + "' failed unexpectedly", sb.toString(), multiStatus);
+                    ErrorDialog.openError(activeShell, "Executing command '" + request.def().getDisplayName() + "' failed", null, status);
                 });
             }
         } catch(ExecException e) {
