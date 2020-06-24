@@ -89,6 +89,10 @@ public class ClassloaderResourcesCompiler {
             return genClassloaderResources();
         }
 
+        @Value.Default default String qualifier() {
+            return shared().defaultBasePackageId().replace(".", "-") + "-classloader-resource";
+        }
+
         /// List of all provided files
 
         default ListView<ResourcePath> providedFiles() {

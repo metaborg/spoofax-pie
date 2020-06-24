@@ -11,7 +11,7 @@ import mb.statix.multilang.MultiLangComponent;
 @LanguageScope
 @Component(
     modules = {{genModule.id}}.class,
-    dependencies = { PlatformComponent.class{{#isMultiLang}}, MultiLangComponent.class {{/isMultiLang}} }
+    dependencies = { PlatformComponent.class{{#isMultiLang}}, MultiLangComponent.class{{/isMultiLang}} }
 )
 public interface {{genComponent.id}} extends LanguageComponent {
     @Override {{genInstance.id}} getLanguageInstance();

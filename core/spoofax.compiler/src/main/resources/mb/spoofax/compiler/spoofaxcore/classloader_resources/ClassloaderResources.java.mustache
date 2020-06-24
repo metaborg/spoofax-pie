@@ -6,7 +6,7 @@ import mb.resource.classloader.ClassLoaderResourceRegistry;
 
 public class {{genClassloaderResources.id}} {
     public static ClassLoaderResourceRegistry createClassLoaderResourceRegistry() {
-        return new ClassLoaderResourceRegistry({{genClassloaderResources.id}}.class.getClassLoader());
+        return new ClassLoaderResourceRegistry("{{qualifier}}", {{genClassloaderResources.id}}.class.getClassLoader());
     }
 
     public static ClassLoaderResource createDefinitionDir(ClassLoaderResourceRegistry classLoaderResourceRegistry) {

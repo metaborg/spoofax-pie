@@ -55,7 +55,8 @@ public class AdapterProjectCompiler {
         CompleterCompiler completerCompiler,
         StrategoRuntimeCompiler strategoRuntimeCompiler,
         ConstraintAnalyzerCompiler constraintAnalyzerCompiler,
-        MultilangAnalyzerCompiler multilangAnalyzerCompiler) {
+        MultilangAnalyzerCompiler multilangAnalyzerCompiler
+    ) {
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("adapter_project/build.gradle.kts.mustache");
         this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("adapter_project/package-info.java.mustache");
         this.checkTaskDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/CheckTaskDef.java.mustache");
