@@ -34,10 +34,6 @@ public class KeyedMessages implements Serializable {
         return KeyedMessages.of(resource, messages, ListView.of());
     }
 
-    public static KeyedMessages of(ResourceKey resource, Messages messages) {
-        return KeyedMessages.of(resource, messages.messages.asCopy(), ListView.of());
-    }
-
     public static KeyedMessages of(ListView<Message> messagesWithoutKey) {
         return new KeyedMessages(MapView.of(), messagesWithoutKey);
     }
@@ -46,12 +42,29 @@ public class KeyedMessages implements Serializable {
         return new KeyedMessages(MapView.of(), messagesWithoutKey.messages);
     }
 
+
     public static KeyedMessages copyOf(Map<ResourceKey, ArrayList<Message>> keyedMessages, Collection<Message> messagesWithoutKey) {
         return new KeyedMessages(MapView.copyOf(keyedMessages), ListView.copyOf(messagesWithoutKey));
     }
 
     public static KeyedMessages copyOf(Map<ResourceKey, ArrayList<Message>> keyedMessages) {
         return KeyedMessages.copyOf(keyedMessages, new ArrayList<>());
+    }
+
+    public static KeyedMessages copyOf(ResourceKey resource, Messages messages, ListView<Message> messagesWithoutKey) {
+        return KeyedMessages.of(resource, messages.messages.asCopy(), messagesWithoutKey);
+    }
+
+    public static KeyedMessages copyOf(ResourceKey resource, Collection<? extends Message> messages, ListView<Message> messagesWithoutKey) {
+        return KeyedMessages.of(resource, new ArrayList<>(messages), messagesWithoutKey);
+    }
+
+    public static KeyedMessages copyOf(ResourceKey resource, Messages messages) {
+        return KeyedMessages.of(resource, messages.messages.asCopy(), ListView.of());
+    }
+
+    public static KeyedMessages copyOf(ResourceKey resource,  Collection<? extends Message> messages) {
+        return KeyedMessages.of(resource, new ArrayList<>(messages), ListView.of());
     }
 
 
@@ -161,6 +174,23 @@ public class KeyedMessages implements Serializable {
     }
 
 
+    public void addToStringBuilder(StringBuilder sb) {
+        messages.forEach((c, ms) -> {
+            sb.append(c);
+            sb.append(":\n");
+            ms.forEach(m -> {
+                sb.append("  ");
+                sb.append(m.toString());
+                sb.append('\n');
+            });
+        });
+        messagesWithoutKey.forEach((m) -> {
+            sb.append(m.toString());
+            sb.append('\n');
+        });
+    }
+
+
     @Override public boolean equals(Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
@@ -174,20 +204,8 @@ public class KeyedMessages implements Serializable {
     }
 
     @Override public String toString() {
-        final StringBuilder stringBuilder = new StringBuilder();
-        messages.forEach((c, ms) -> {
-            stringBuilder.append(c);
-            stringBuilder.append(":\n");
-            ms.forEach(m -> {
-                stringBuilder.append("  ");
-                stringBuilder.append(m.toString());
-                stringBuilder.append('\n');
-            });
-        });
-        messagesWithoutKey.forEach((m) -> {
-            stringBuilder.append(m.toString());
-            stringBuilder.append('\n');
-        });
-        return stringBuilder.toString();
+        final StringBuilder sb = new StringBuilder();
+        addToStringBuilder(sb);
+        return sb.toString();
     }
 }

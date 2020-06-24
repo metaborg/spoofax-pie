@@ -31,8 +31,13 @@ public class CommandFeedback implements Serializable {
     }
 
     public static CommandFeedback of(Exception exception, @Nullable ResourceKey origin) {
-        final KeyedMessages keyedMessages = exceptionToKeyedMessages(exception, origin);
-        return new CommandFeedback(keyedMessages, exception, ListView.of());
+        final @Nullable KeyedMessages keyedMessages = exceptionToKeyedMessages(exception, origin);
+        if(keyedMessages != null) {
+            // Keyed messages were extracted from the exception, so do not set the exception.
+            return new CommandFeedback(keyedMessages, null, ListView.of());
+        } else {
+            return new CommandFeedback(KeyedMessages.of(), exception, ListView.of());
+        }
     }
 
     public static CommandFeedback of(Exception exception) {
@@ -77,19 +82,32 @@ public class CommandFeedback implements Serializable {
     }
 
 
-    static KeyedMessages exceptionToKeyedMessages(Exception exception, @Nullable ResourceKey origin) {
+    public boolean hasErrorMessages() {
+        return messages.containsErrorOrHigher();
+    }
+
+    public boolean hasException() {
+        return exception != null;
+    }
+
+    public boolean hasErrorMessagesOrException() {
+        return hasErrorMessages() || hasException();
+    }
+
+
+    static @Nullable KeyedMessages exceptionToKeyedMessages(Exception exception, @Nullable ResourceKey origin) {
         if(exception instanceof KeyedMessagesException) {
             final KeyedMessagesException keyedMessagesException = (KeyedMessagesException)exception;
             return keyedMessagesException.getMessages();
         } else if(exception instanceof MessagesException) {
             final MessagesException messagesException = (MessagesException)exception;
             if(origin != null) {
-                return KeyedMessages.of(origin, messagesException.getMessages());
+                return KeyedMessages.copyOf(origin, messagesException.getMessages());
             } else {
                 return KeyedMessages.of(messagesException.getMessages());
             }
         } else {
-            return KeyedMessages.of();
+            return null;
         }
     }
 }

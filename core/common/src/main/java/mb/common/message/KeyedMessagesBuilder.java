@@ -77,9 +77,19 @@ public class KeyedMessagesBuilder {
         keyedMessages.messagesWithoutKey.addAllTo(this.messagesWithoutKey);
     }
 
+    public void addMessagesWithDefaultKey(KeyedMessages keyedMessages, ResourceKey defaultKey) {
+        keyedMessages.messages.addAllTo(this.messages.getInnerMap());
+        this.messages.putAll(defaultKey, keyedMessages.messagesWithoutKey);
+    }
+
     public void addMessages(KeyedMessagesBuilder keyedMessagesBuilder) {
         this.messages.putAll(keyedMessagesBuilder.messages);
         this.messagesWithoutKey.addAll(keyedMessagesBuilder.messagesWithoutKey);
+    }
+
+    public void addMessagesWithDefaultKey(KeyedMessagesBuilder keyedMessagesBuilder, ResourceKey defaultKey) {
+        this.messages.putAll(keyedMessagesBuilder.messages);
+        this.messages.putAll(defaultKey, keyedMessagesBuilder.messagesWithoutKey);
     }
 
 
@@ -117,6 +127,10 @@ public class KeyedMessagesBuilder {
 
 
     public KeyedMessages build() {
+        return new KeyedMessages(MapView.copyOf(messages.getInnerMap()), ListView.copyOf(messagesWithoutKey));
+    }
+
+    public KeyedMessages build(ResourceKey defaultKey) {
         return new KeyedMessages(MapView.copyOf(messages.getInnerMap()), ListView.copyOf(messagesWithoutKey));
     }
 }

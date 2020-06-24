@@ -199,7 +199,7 @@
   <extension point="org.eclipse.ui.handlers">
     <handler
       commandId="tiger.eclipse.command"
-      class="mb.tiger.eclipse.TigerCommandHandler"
+      class="mb.tiger.eclipse.TigerRunCommandHandler"
     />
   </extension>
 </plugin>

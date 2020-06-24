@@ -143,7 +143,7 @@ public class PieRunner {
                 } else {
                     final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(new EclipseResourcePath(project));
                     final KeyedMessages messages = requireWithoutObserving(checkTask, postSession, monitor);
-                    workspaceUpdate.replaceMessages(messages);
+                    workspaceUpdate.replaceMessages(messages, path);
                 }
             } catch(UncheckedException e) {
                 final Exception cause = e.getCause();
@@ -157,7 +157,7 @@ public class PieRunner {
             }
         }
 
-        workspaceUpdate.update(file, monitor);
+        workspaceUpdate.update(file, file, monitor);
     }
 
     public void removeEditor(IFile file) {
@@ -202,7 +202,7 @@ public class PieRunner {
             observeAndUnobserveAutoTransforms(languageComponent, resourceChanges, afterSession, monitor);
             observeAndUnobserveInspections(languageComponent, resourceChanges, afterSession, monitor);
         }
-        bottomUpWorkspaceUpdate.update(null, monitor);
+        bottomUpWorkspaceUpdate.update(project, null, monitor);
         bottomUpWorkspaceUpdate = null;
     }
 
@@ -242,8 +242,8 @@ public class PieRunner {
             final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
             final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(projectResource.getPath());
             unobserve(checkTask, pie, session, monitor);
-            workspaceUpdate.clearMessagesRecursively(project);
-            workspaceUpdate.update(null, monitor);
+            workspaceUpdate.clearMessages(project, true);
+            workspaceUpdate.update(eclipseProject, null, monitor);
             // Delete unobserved tasks and their provided files.
             deleteUnobservedTasks(session, monitor);
         }
@@ -266,26 +266,29 @@ public class PieRunner {
 
     // Requiring commands
 
-    public void requireCommand(
+    public ArrayList<CommandContextAndFeedback> requireCommand(
         EclipseLanguageComponent languageComponent,
         CommandRequest<?> request,
         ListView<? extends CommandContext> contexts,
         Session session,
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException {
+        final ArrayList<CommandContextAndFeedback> contextsAndFeedbacks = new ArrayList<>();
         switch(request.executionType()) {
             case ManualOnce:
                 for(CommandContext context : contexts) {
                     final Task<CommandFeedback> task = request.createTask(context, argConverters);
-                    final CommandFeedback output = requireWithoutObserving(task, session, monitor);
-                    processFeedback(output, true, false, null);
+                    final CommandFeedback feedback = requireWithoutObserving(task, session, monitor);
+                    processShowFeedbacks(feedback, true, null);
+                    contextsAndFeedbacks.add(new CommandContextAndFeedback(context, feedback));
                 }
                 break;
             case ManualContinuous:
                 for(CommandContext context : contexts) {
                     final Task<CommandFeedback> task = request.createTask(context, argConverters);
-                    final CommandFeedback output = require(task, session, monitor);
-                    processFeedback(output, true, false, (p) -> {
+                    final CommandFeedback feedback = require(task, session, monitor);
+                    contextsAndFeedbacks.add(new CommandContextAndFeedback(context, feedback));
+                    processShowFeedbacks(feedback, true, (p) -> {
                         // POTI: this opens a new PIE session, which may be used concurrently with other sessions, which
                         // may not be (thread-)safe.
                         try(final MixedSession newSession = languageComponent.getPie().newSession()) {
@@ -293,35 +296,32 @@ public class PieRunner {
                         }
                         pie.removeCallback(task);
                     });
-                    pie.setCallback(task, (o) -> processFeedback(o, false, false, null));
+                    if(feedback.hasErrorMessagesOrException()) {
+                        // Command feedback indicates failure, unobserve to cancel continuous execution.
+                        try(final MixedSession newSession = languageComponent.getPie().newSession()) {
+                            unobserve(task, pie, newSession, monitor);
+                        }
+                    } else {
+                        // Command feedback indicates success, set a callback to process feedback when task is required.
+                        pie.setCallback(task, (o) -> processShowFeedbacks(o, false, null));
+                    }
                 }
                 break;
             case AutomaticContinuous:
+                // TODO: remove AutomaticContinuous builders, they should just be hooked into a compile task.
                 for(CommandContext context : contexts) {
                     final Task<CommandFeedback> task = request.createTask(context, argConverters);
-                    final CommandFeedback output = require(task, session, monitor);
-                    processFeedback(output, true, true, (p) -> {
-                        // POTI: this opens a new PIE session, which may be used concurrently with other sessions, which
-                        // may not be (thread-)safe.
-                        try(final MixedSession newSession = languageComponent.getPie().newSession()) {
-                            unobserve(task, pie, newSession, monitor);
-                        }
-                        pie.removeCallback(task);
-                    });
-                    pie.setCallback(task, (o) -> processFeedback(o, false, true, null));
+                    require(task, session, monitor);
                 }
                 break;
         }
+        return contextsAndFeedbacks;
     }
 
-    private void processFeedback(CommandFeedback feedback, boolean activate, boolean isUserTriggered, @Nullable Consumer<IWorkbenchPart> closedCallback) {
-        if(isUserTriggered) {
-            // Only process show feedbacks when the feedback comes from a user-triggered (e.g., menu action) command.
-            for(ShowFeedback showFeedback : feedback.getShowFeedbacks()) {
-                processShowFeedback(showFeedback, activate, closedCallback);
-            }
+    private void processShowFeedbacks(CommandFeedback feedback, boolean activate, @Nullable Consumer<IWorkbenchPart> closedCallback) {
+        for(ShowFeedback showFeedback : feedback.getShowFeedbacks()) {
+            processShowFeedback(showFeedback, activate, closedCallback);
         }
-        // TODO: process error feedback
     }
 
     private void processShowFeedback(ShowFeedback showFeedback, boolean activate, @Nullable Consumer<IWorkbenchPart> closedCallback) {
@@ -615,13 +615,13 @@ public class PieRunner {
                 final Task<KeyedMessages> task = languageInstance.createCheckTask(newProject);
                 pie.setCallback(task, messages -> {
                     if(bottomUpWorkspaceUpdate != null) {
-                        bottomUpWorkspaceUpdate.replaceMessages(messages);
+                        bottomUpWorkspaceUpdate.replaceMessages(messages, newProject);
                     }
                 });
                 if(!pie.isObserved(task)) {
                     try {
                         final KeyedMessages messages = require(task, session, monitor);
-                        workspaceUpdate.replaceMessages(messages);
+                        workspaceUpdate.replaceMessages(messages, newProject);
                     } catch(InterruptedException | ExecException e) {
                         throw new UncheckedException(e);
                     }
@@ -630,7 +630,7 @@ public class PieRunner {
             resourceChanges.removedProjects.forEach(removedProject -> {
                 final Task<KeyedMessages> task = languageInstance.createCheckTask(removedProject);
                 unobserve(task, pie, session, monitor);
-                workspaceUpdate.clearMessagesRecursively(removedProject);
+                workspaceUpdate.clearMessages(removedProject, true);
             });
         } catch(UncheckedException e) {
             final Exception cause = e.getCause();
@@ -642,6 +642,6 @@ public class PieRunner {
             }
             throw e;
         }
-        workspaceUpdate.update(null, monitor);
+        workspaceUpdate.update(ResourcesPlugin.getWorkspace().getRoot(), null, monitor);
     }
 }
