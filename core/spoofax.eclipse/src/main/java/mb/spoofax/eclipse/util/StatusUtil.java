@@ -9,7 +9,7 @@ import org.eclipse.core.runtime.Status;
 /**
  * Utility functions for creating {@link IStatus} instances.
  */
-public final class StatusUtil {
+public class StatusUtil {
     public static IStatus status(int severity, int code, String message, @Nullable Throwable t) {
         return new Status(severity, SpoofaxPlugin.id, code, message, t);
     }

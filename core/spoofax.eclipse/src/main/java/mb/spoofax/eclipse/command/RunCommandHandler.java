@@ -64,6 +64,7 @@ public class RunCommandHandler extends AbstractHandler {
             throw new ExecutionException("Cannot execute command with ID '" + data.commandId + "', command with that ID was not found in language '" + languageComponent.getLanguageInstance().getDisplayName() + "'");
         }
         final CommandRequest<?> request = data.toCommandRequest(def);
+        final String pluginId = languageComponent.getEclipseIdentifiers().getPlugin();
         // TODO: run this in a Job, both to enable progress/cancellation, and better error reporting.
         try(final MixedSession session = languageComponent.getPie().newSession()) {
             final ArrayList<CommandContextAndFeedback> contextsAndFeedbacks = pieRunner.requireCommand(languageComponent, request, data.contexts, session, null);
@@ -95,7 +96,6 @@ public class RunCommandHandler extends AbstractHandler {
                     exceptions.add(exception);
                 }
             }
-            final String pluginId = languageComponent.getEclipseIdentifiers().getPlugin();
             final IStatus status;
             if(exceptions.isEmpty()) {
                 status = new Status(IStatus.ERROR, pluginId, sb.toString());
@@ -112,8 +112,12 @@ public class RunCommandHandler extends AbstractHandler {
                     ErrorDialog.openError(activeShell, "Executing command '" + request.def().getDisplayName() + "' failed", null, status);
                 });
             }
-        } catch(ExecException e) {
-            throw new ExecutionException("Executing command request '" + request.def().getDisplayName() + "' failed unexpectedly", e);
+        } catch(ExecException | RuntimeException e) {
+            final IStatus status = new Status(IStatus.ERROR, pluginId, "Executing command '" + request.def().getDisplayName() + "' failed unexpectedly", e);
+            PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().getDisplay().asyncExec(() -> {
+                final Shell activeShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+                ErrorDialog.openError(activeShell, "Executing command '" + request.def().getDisplayName() + "' failed", null, status);
+            });
         } catch(InterruptedException e) {
             // Execution was interrupted. No need to re-set interrupt, as we are the final handler of the interrupt.
         }

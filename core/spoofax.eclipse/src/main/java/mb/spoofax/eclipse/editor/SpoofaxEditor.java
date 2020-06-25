@@ -218,7 +218,7 @@ public abstract class SpoofaxEditor extends TextEditor {
         if(document == null || file == null) return; // TODO: support case where file is null but document is not.
         cancelJobs();
         final Job job = new EditorUpdateJob(loggerFactory, pieRunner, languageComponent, project, file, document, this);
-        job.setRule(MultiRule.combine(file /* May return null, but null is a valid scheduling rule */, languageComponent.startupLockRule()));
+        job.setRule(MultiRule.combine(file /* May return null, but null is a valid scheduling rule */, languageComponent.startupReadLockRule()));
         job.schedule(initialUpdate ? 0 : 300);
     }
 

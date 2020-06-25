@@ -49,7 +49,7 @@ public class TigerPlugin extends AbstractUIPlugin {
                 return StatusUtil.success();
             }
         };
-        job.setRule(component.startupLockRule());
+        job.setRule(component.startupWriteLockRule());
         job.schedule();
     }
 
