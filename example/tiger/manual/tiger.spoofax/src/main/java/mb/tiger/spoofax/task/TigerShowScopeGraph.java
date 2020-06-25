@@ -1,14 +1,15 @@
 package mb.tiger.spoofax.task;
 
+import mb.common.region.Region;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
-import mb.pie.api.Supplier;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
+import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoUtil;
 import mb.tiger.spoofax.task.reusable.TigerAnalyze;
@@ -43,29 +44,30 @@ public class TigerShowScopeGraph implements TaskDef<TigerShowArgs, CommandFeedba
         return getClass().getName();
     }
 
-    @Override public CommandFeedback exec(ExecContext context, TigerShowArgs input) throws Exception {
+    @Override public CommandFeedback exec(ExecContext context, TigerShowArgs input) {
         final ResourceKey key = input.key;
-
-        final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createAstSupplier(key).map(Result::get); // TODO: use Result
-        final TigerAnalyze.@Nullable Output output = context.require(analyze, new TigerAnalyze.Input(key, astSupplier));
-        if(output == null) {
-            throw new RuntimeException("Cannot show scope graph, analysis output for '" + key + "' is null");
-        }
-        if(output.result.ast == null) {
-            throw new RuntimeException("Cannot show scope graph, analyzed AST for '" + key + "' is null");
-        }
-
-        final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get();
-        final String strategyId = "spoofax3-editor-show-analysis-term";
-        final ITermFactory termFactory = strategoRuntime.getTermFactory();
-        final IStrategoTerm inputTerm = termFactory.makeTuple(output.result.ast, termFactory.makeString(resourceService.toString(key)));
-        final @Nullable IStrategoTerm result = strategoRuntime.addContextObject(output.context).invoke(strategyId, inputTerm);
-        if(result == null) {
-            throw new RuntimeException("Cannot show scope graph, executing Stratego strategy '" + strategyId + "' failed");
-        }
-
-        final String formatted = StrategoUtil.toString(result);
-        return CommandFeedback.of(ShowFeedback.showText(formatted, "Scope graph for '" + key + "'"));
+        final @Nullable Region region = input.region;
+        return context.require(analyze, new TigerAnalyze.Input(key, parse.createAstSupplier(key)))
+            .flatMapOrElse((o) -> Result.ofNullableOrElse(
+                o.result.ast,
+                () -> new Exception("Cannot show scope graph, analyzed AST for '" + key + "' is null")
+            ), Result::ofErr)
+            .flatMapOrElse(ast -> {
+                try {
+                    final String strategyId = "spoofax3-editor-show-analysis-term";
+                    final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get();
+                    final ITermFactory termFactory = strategoRuntime.getTermFactory();
+                    final IStrategoTerm inputTerm = termFactory.makeTuple(ast, termFactory.makeString(resourceService.toString(key)));
+                    return Result.ofNullableOrElse(
+                        strategoRuntime.invoke(strategyId, inputTerm),
+                        () -> new Exception("Cannot show scope graph, invoking '" + strategyId + "' on '" + ast + "' failed unexpectedly")
+                    );
+                } catch(StrategoException e) {
+                    return Result.ofErr(e);
+                }
+            }, Result::ofErr) // TODO: any way we don't have to use flatMapOrElse that threads the error to convert the type?
+            .map(StrategoUtil::toString)
+            .mapOrElse(text -> CommandFeedback.of(ShowFeedback.showText(text, "Scope graph for '" + key + "'")), e -> CommandFeedback.of(e, key));
     }
 
     @Override public Task<CommandFeedback> createTask(TigerShowArgs input) {

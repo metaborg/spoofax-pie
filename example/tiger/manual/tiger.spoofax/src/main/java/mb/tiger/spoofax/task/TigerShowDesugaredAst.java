@@ -48,14 +48,15 @@ public class TigerShowDesugaredAst implements TaskDef<TigerShowArgs, CommandFeed
             })
             .flatMapOrElse(ast -> {
                 try {
+                    final String strategyId = "desugar-all";
                     return Result.ofNullableOrElse(
-                        strategoRuntimeProvider.get().invoke("desugar-all", ast),
-                        () -> new Exception("Invoking 'desugar-all' on '" + ast + "' failed unexpectedly")
+                        strategoRuntimeProvider.get().invoke(strategyId, ast),
+                        () -> new Exception("Cannot show desugared AST, invoking '" + strategyId + "' on '" + ast + "' failed unexpectedly")
                     );
                 } catch(StrategoException e) {
                     return Result.ofErr(e);
                 }
-            }, Result::ofErr)
+            }, Result::ofErr) // TODO: any way we don't have to use flatMapOrElse that threads the error to convert the type?
             .map(StrategoUtil::toString)
             .mapOrElse(text -> CommandFeedback.of(ShowFeedback.showText(text, "Desugared AST for '" + key + "'")), e -> CommandFeedback.of(e, key));
     }

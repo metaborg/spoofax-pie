@@ -1,10 +1,9 @@
 package mb.tiger.spoofax.task.reusable;
 
+import mb.common.result.Result;
 import mb.constraint.common.ConstraintAnalyzer.SingleFileResult;
 import mb.constraint.common.ConstraintAnalyzerContext;
-import mb.constraint.common.ConstraintAnalyzerException;
 import mb.pie.api.ExecContext;
-import mb.pie.api.ExecException;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
@@ -19,12 +18,12 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @LanguageScope
-public class TigerAnalyze implements TaskDef<TigerAnalyze.Input, TigerAnalyze.@Nullable Output> {
+public class TigerAnalyze implements TaskDef<TigerAnalyze.Input, Result<TigerAnalyze.Output, ?>> {
     public static class Input implements Serializable {
         public final ResourceKey resourceKey;
-        public final Supplier<@Nullable IStrategoTerm> astSupplier; // TODO: use Result
+        public final Supplier<? extends Result<IStrategoTerm, ?>> astSupplier;
 
-        public Input(ResourceKey resourceKey, Supplier<@Nullable IStrategoTerm> astSupplier) {
+        public Input(ResourceKey resourceKey, Supplier<? extends Result<IStrategoTerm, ?>> astSupplier) {
             this.resourceKey = resourceKey;
             this.astSupplier = astSupplier;
         }
@@ -82,17 +81,12 @@ public class TigerAnalyze implements TaskDef<TigerAnalyze.Input, TigerAnalyze.@N
     }
 
     @Override
-    public @Nullable Output exec(ExecContext context, Input input) throws ExecException, IOException, InterruptedException {
-        final @Nullable IStrategoTerm ast = context.require(input.astSupplier);
-        if(ast == null) {
-            return null;
-        }
-        try {
-            final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext();
-            final SingleFileResult result = constraintAnalyzer.analyze(input.resourceKey, ast, constraintAnalyzerContext);
-            return new Output(constraintAnalyzerContext, result);
-        } catch(ConstraintAnalyzerException e) {
-            throw new RuntimeException("Constraint analysis failed unexpectedly", e);
-        }
+    public @Nullable Result<TigerAnalyze.Output, ?> exec(ExecContext context, Input input) throws IOException {
+        return context.require(input.astSupplier)
+            .mapCatching((ast) -> {
+                final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext();
+                final SingleFileResult result = constraintAnalyzer.analyze(input.resourceKey, ast, constraintAnalyzerContext);
+                return new Output(constraintAnalyzerContext, result);
+            });
     }
 }

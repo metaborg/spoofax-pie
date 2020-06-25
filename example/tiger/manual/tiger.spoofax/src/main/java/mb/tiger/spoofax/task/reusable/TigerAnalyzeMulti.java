@@ -1,6 +1,7 @@
 package mb.tiger.spoofax.task.reusable;
 
-import mb.common.util.UncheckedException;
+import mb.common.result.MessagesException;
+import mb.common.result.Result;
 import mb.constraint.common.ConstraintAnalyzer.MultiFileResult;
 import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.pie.api.ExecContext;
@@ -29,18 +30,18 @@ import java.util.Objects;
  * development/testing purposes.
  */
 @LanguageScope
-public class TigerAnalyzeMulti implements TaskDef<TigerAnalyzeMulti.Input, TigerAnalyzeMulti.@Nullable Output> {
+public class TigerAnalyzeMulti implements TaskDef<TigerAnalyzeMulti.Input, Result<TigerAnalyzeMulti.Output, ?>> {
     public static class Input implements Serializable {
         public final ResourcePath root;
         public final ResourceWalker walker;
         public final ResourceMatcher matcher;
-        public final Function<Supplier<String>, @Nullable IStrategoTerm> astFunction;
+        public final Function<Supplier<String>, Result<IStrategoTerm, MessagesException>> astFunction;
 
         public Input(
             ResourcePath root,
             ResourceWalker walker,
             ResourceMatcher matcher,
-            Function<Supplier<String>, @Nullable IStrategoTerm> astFunction
+            Function<Supplier<String>, Result<IStrategoTerm, MessagesException>> astFunction
         ) {
             this.root = root;
             this.walker = walker;
@@ -111,25 +112,21 @@ public class TigerAnalyzeMulti implements TaskDef<TigerAnalyzeMulti.Input, Tiger
         return "mb.tiger.spoofax.task.reusable.TigerAnalyzeMulti";
     }
 
-    @Override public @Nullable Output exec(ExecContext context, Input input) throws Exception {
-        final HierarchicalResource root = context.require(input.root, ResourceStampers.modifiedDirRec(input.walker, input.matcher));
-        final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
+    @Override public @Nullable Result<Output, ?> exec(ExecContext context, Input input) {
         try {
-            root.walk(input.walker, input.matcher).forEach(file -> {
-                try {
-                    final @Nullable IStrategoTerm ast = context.require(input.astFunction, new ResourceStringSupplier(file.getPath()));
-                    if(ast != null) {
-                        asts.put(file.getKey(), ast);
-                    }
-                } catch(Exception e) {
-                    throw new UncheckedException(e);
-                }
-            });
-        } catch(UncheckedException e) {
-            throw e.getCause();
+            final HierarchicalResource root = context.require(input.root, ResourceStampers.modifiedDirRec(input.walker, input.matcher));
+            final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
+            root.walk(input.walker, input.matcher)
+                // TODO: propagate errors? we do not want parse messages to end up as the result of this task though, as
+                //       those parse messages will then be duplicated in the check task.
+                .forEach(file -> context.require(input.astFunction, new ResourceStringSupplier(file.getPath()))
+                    .ifOk((ast) -> asts.put(file.getKey(), ast))
+                );
+            final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext();
+            final MultiFileResult result = constraintAnalyzer.analyze(input.root, asts, constraintAnalyzerContext);
+            return Result.ofOk(new Output(constraintAnalyzerContext, result));
+        } catch(Exception e) {
+            return Result.ofErr(e); // TODO: produce a better exception here?
         }
-        final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext();
-        final MultiFileResult result = constraintAnalyzer.analyze(input.root, asts, constraintAnalyzerContext);
-        return new Output(constraintAnalyzerContext, result);
     }
 }

@@ -28,15 +28,14 @@ public class TigerListDefNames implements TaskDef<Supplier<? extends Result<IStr
     public @Nullable Result<String, ? super Exception> exec(ExecContext context, Supplier<? extends Result<IStrategoTerm, ?>> astSupplier) throws Exception {
         return context.require(astSupplier)
             .flatMapOrElse((ast) -> {
-                final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get();
                 final String strategyId = "list-of-def-names";
                 try {
-                    final @Nullable IStrategoTerm result = strategoRuntime.invoke(strategyId, ast);
+                    final @Nullable IStrategoTerm result = strategoRuntimeProvider.get().invoke(strategyId, ast);
                     return Result.ofNullableOrElse(result, () -> new Exception("Invoking '" + strategyId + "' on '" + ast + "' failed unexpectedly"));
                 } catch(StrategoException e) {
                     return Result.ofErr(e);
                 }
-            }, Result::ofErr)
-            .map((ast) -> StrategoUtil.toString(ast, Integer.MAX_VALUE));
+            }, Result::ofErr) // TODO: any way we don't have to use flatMapOrElse that threads the error to convert the type?
+            .map(StrategoUtil::toString);
     }
 }

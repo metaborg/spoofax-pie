@@ -37,10 +37,11 @@ public class TigerIdeCheck implements TaskDef<ResourceKey, Messages> {
         final ResourceStringSupplier stringProvider = new ResourceStringSupplier(key);
         final Messages parseMessages = context.require(parse.createMessagesSupplier(stringProvider));
         builder.addMessages(parseMessages);
-        final TigerAnalyze.@Nullable Output analysisOutput = context.require(analyze, new TigerAnalyze.Input(key, parse.createRecoverableAstSupplier(stringProvider).map(Result::get)));
-        if(analysisOutput != null) {
-            builder.addMessages(analysisOutput.result.messages);
-        }
+        // TODO: propagate error/messages from analysis failure as well.
+        final Result<TigerAnalyze.Output, ?> analysisOutput = context.require(analyze, new TigerAnalyze.Input(key, parse.createRecoverableAstSupplier(stringProvider)));
+        analysisOutput.ifOk(output -> {
+            builder.addMessages(output.result.messages);
+        });
         return builder.build();
     }
 }
