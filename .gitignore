@@ -25,3 +25,6 @@ hs_err_pid*
 # Spoofax
 **/src-gen
 **/target
+
+# Eclipse Runner
+Eclipse.app/
