@@ -33,7 +33,6 @@ import mb.tiger.spoofax.command.TigerShowAnalyzedAstCommand;
 import mb.tiger.spoofax.command.TigerShowDesugaredAstCommand;
 import mb.tiger.spoofax.command.TigerShowParsedAstCommand;
 import mb.tiger.spoofax.command.TigerShowPrettyPrintedTextCommand;
-import mb.tiger.spoofax.task.TigerIdeCheck;
 import mb.tiger.spoofax.task.TigerIdeCheckAggregate;
 import mb.tiger.spoofax.task.TigerIdeTokenize;
 import mb.tiger.spoofax.task.reusable.TigerCompleteTaskDef;
@@ -48,7 +47,7 @@ public class TigerInstance implements LanguageInstance {
     private final static SetView<String> extensions = SetView.of("tig");
 
     private final TigerParse parse;
-    private final TigerIdeCheck tigerIdeCheck;
+    private final TigerIdeCheckAggregate tigerIdeCheckAggregate;
     private final TigerStyle style;
     private final TigerIdeTokenize tokenize;
     private final TigerCompleteTaskDef complete;
@@ -67,7 +66,7 @@ public class TigerInstance implements LanguageInstance {
 
     @Inject public TigerInstance(
         TigerParse parse,
-        TigerIdeCheck tigerIdeCheck,
+        TigerIdeCheckAggregate tigerIdeCheckAggregate,
         TigerStyle style,
         TigerIdeTokenize tokenize,
         TigerCompleteTaskDef complete,
@@ -84,7 +83,7 @@ public class TigerInstance implements LanguageInstance {
         Set<AutoCommandRequest<?>> autoCommandDefs
     ) {
         this.parse = parse;
-        this.tigerIdeCheck = tigerIdeCheck;
+        this.tigerIdeCheckAggregate = tigerIdeCheckAggregate;
         this.style = style;
         this.tokenize = tokenize;
         this.complete = complete;
@@ -126,7 +125,7 @@ public class TigerInstance implements LanguageInstance {
 
     @Override
     public Task<@Nullable KeyedMessages> createCheckTask(ResourcePath projectRoot) {
-        return new TigerIdeCheckAggregate(tigerIdeCheck).createTask(new TigerIdeCheckAggregate.Input(
+        return tigerIdeCheckAggregate.createTask(new TigerIdeCheckAggregate.Input(
             projectRoot,
             new PathResourceWalker(new NoHiddenPathMatcher()),
             new PathResourceMatcher(new ExtensionsPathMatcher(this.getFileExtensions().asUnmodifiable()))

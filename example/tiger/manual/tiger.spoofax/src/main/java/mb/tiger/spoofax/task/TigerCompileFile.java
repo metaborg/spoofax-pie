@@ -64,7 +64,7 @@ public class TigerCompileFile implements TaskDef<TigerCompileFile.Args, CommandF
     @Override public CommandFeedback exec(ExecContext context, Args input) {
         final ResourcePath file = input.file;
         final Supplier<Result<IStrategoTerm, MessagesException>> astSupplier = parse.createAstSupplier(file);
-        final Result<String, ?> listedLiteralVals = context.require(listLiteralVals, astSupplier);
+        final Result<String, ? super Exception> listedLiteralVals = context.require(listLiteralVals, astSupplier);
         // Error type is erased (`?` means `? extends Exception`) from this point on, because `listLiteralVals` erases
         // the error type. However, it could create a new error type that wraps all possible error types, and propagate
         // that, but that is a bit tedious in Java.

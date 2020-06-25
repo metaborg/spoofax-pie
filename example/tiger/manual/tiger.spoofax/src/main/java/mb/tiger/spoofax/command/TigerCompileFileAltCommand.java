@@ -32,7 +32,7 @@ public class TigerCompileFileAltCommand implements CommandDef<TigerCompileFileAl
     }
 
     @Override public String getDisplayName() {
-        return "'Alternative compile' file";
+        return "Alternative compile file";
     }
 
     @Override

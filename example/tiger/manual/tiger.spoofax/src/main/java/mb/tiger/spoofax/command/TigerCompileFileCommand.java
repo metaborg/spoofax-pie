@@ -32,7 +32,7 @@ public class TigerCompileFileCommand implements CommandDef<TigerCompileFile.Args
     }
 
     @Override public String getDisplayName() {
-        return "'Compile' file (list literals)";
+        return "Compile file (list literals)";
     }
 
     @Override

@@ -32,7 +32,7 @@ public class TigerCompileDirectoryCommand implements CommandDef<TigerCompileDire
     }
 
     @Override public String getDisplayName() {
-        return "'Compile' directory (list definition names)";
+        return "Compile directory (list definition names)";
     }
 
     @Override

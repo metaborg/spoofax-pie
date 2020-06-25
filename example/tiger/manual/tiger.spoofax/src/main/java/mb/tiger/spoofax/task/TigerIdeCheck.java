@@ -32,7 +32,7 @@ public class TigerIdeCheck implements TaskDef<ResourceKey, Messages> {
     }
 
     @Override
-    public Messages exec(ExecContext context, ResourceKey key) throws IOException, ExecException, InterruptedException {
+    public Messages exec(ExecContext context, ResourceKey key) throws IOException {
         final MessagesBuilder builder = new MessagesBuilder();
         final ResourceStringSupplier stringProvider = new ResourceStringSupplier(key);
         final Messages parseMessages = context.require(parse.createMessagesSupplier(stringProvider));
