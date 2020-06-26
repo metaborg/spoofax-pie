@@ -72,7 +72,7 @@ public class TigerIdeCheckMulti implements TaskDef<TigerIdeCheckMulti.Input, Key
     }
 
     @Override public String getId() {
-        return "mb.tiger.spoofax.task.TigerCheck";
+        return getClass().getName();
     }
 
     @Override
@@ -93,11 +93,12 @@ public class TigerIdeCheckMulti implements TaskDef<TigerIdeCheckMulti.Input, Key
             throw e.getCause();
         }
 
-        final TigerAnalyzeMulti.Input analyzeInput = new TigerAnalyzeMulti.Input(input.root, input.walker, input.matcher, parse.createRecoverableAstFunction().mapOutput(Result::get)); // TODO: use Result.
-        final TigerAnalyzeMulti.@Nullable Output analysisOutput = context.require(analyze, analyzeInput);
-        if(analysisOutput != null) {
-            messagesBuilder.addMessages(analysisOutput.result.messages);
-        }
+        final TigerAnalyzeMulti.Input analyzeInput = new TigerAnalyzeMulti.Input(input.root, input.walker, input.matcher, parse.createRecoverableAstFunction());
+        final Result<TigerAnalyzeMulti.Output, ?> analysisResult = context.require(analyze, analyzeInput);
+        // TODO: propagate error/messages from analysis failure as well.
+        analysisResult.ifOk((o) -> {
+            messagesBuilder.addMessages(o.result.messages);
+        });
         return messagesBuilder.build();
     }
 }

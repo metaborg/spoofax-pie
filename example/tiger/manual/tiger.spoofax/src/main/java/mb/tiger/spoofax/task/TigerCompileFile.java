@@ -79,7 +79,7 @@ public class TigerCompileFile implements TaskDef<TigerCompileFile.Args, CommandF
                 context.provide(generatedResource, ResourceStampers.hashFile());
                 return generatedPath;
             })
-            .mapOrElse(f -> CommandFeedback.of(ShowFeedback.showFile(f)), e -> CommandFeedback.of(e, file));
+            .mapOrElse(f -> CommandFeedback.of(ShowFeedback.showFile(f)), e -> CommandFeedback.ofTryExtractMessagesFrom(e, file));
         // `CommandFeedback.of` with exception will match the generic exception against built-in ones such as
         // MessagesException, which can then be used by the IDE to show messages on files, or to show a popup detailing
         // the error.

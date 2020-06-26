@@ -59,7 +59,7 @@ public class TigerShowPrettyPrintedText implements TaskDef<TigerShowArgs, Comman
                 }
             }, Result::ofErr) // TODO: any way we don't have to use flatMapOrElse that threads the error to convert the type?
             .map(StrategoUtil::toString)
-            .mapOrElse(text -> CommandFeedback.of(ShowFeedback.showText(text, "Pretty-printed text for '" + key + "'")), e -> CommandFeedback.of(e, key));
+            .mapOrElse(text -> CommandFeedback.of(ShowFeedback.showText(text, "Pretty-printed text for '" + key + "'")), e -> CommandFeedback.ofTryExtractMessagesFrom(e, key));
     }
 
     @Override public Task<CommandFeedback> createTask(TigerShowArgs input) {

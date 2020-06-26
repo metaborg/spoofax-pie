@@ -38,7 +38,7 @@ public class TigerShowParsedAst implements TaskDef<TigerShowArgs, CommandFeedbac
                 }
             })
             .map(StrategoUtil::toString)
-            .mapOrElse(text -> CommandFeedback.of(ShowFeedback.showText(text, "Parsed AST for '" + key + "'")), e -> CommandFeedback.of(e, key));
+            .mapOrElse(text -> CommandFeedback.of(ShowFeedback.showText(text, "Parsed AST for '" + key + "'")), e -> CommandFeedback.ofTryExtractMessagesFrom(e, key));
     }
 
     @Override public Task<CommandFeedback> createTask(TigerShowArgs input) {

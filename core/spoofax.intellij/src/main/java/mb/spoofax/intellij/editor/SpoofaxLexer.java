@@ -3,6 +3,7 @@ package mb.spoofax.intellij.editor;
 import com.google.common.collect.Lists;
 import com.intellij.lexer.LexerBase;
 import com.intellij.psi.tree.IElementType;
+import mb.common.option.Option;
 import mb.common.region.Region;
 import mb.common.token.TokenImpl;
 import mb.common.token.TokenType;
@@ -142,16 +143,16 @@ public final class SpoofaxLexer extends LexerBase {
         } else {
             // GK: what is syntax coloring information doing here?
             try (final MixedSession session = this.pie.newSession()) {
-                final Task<? extends @Nullable Tokens<?>> tokenizerTask =
+                final Task<? extends Option<? extends Tokens<?>>> tokenizerTask =
                         this.languageInstance.createTokenizeTask(this.resourceKey);
-                final @Nullable Tokens<?> tokens = session.require(tokenizerTask);
+                final Option<? extends Tokens<?>> tokens = session.require(tokenizerTask);
                 @Nullable List<? extends mb.common.token.Token<?>> resourceTokens;
-                if (tokens == null) {
+                if (tokens.isNone()) {
                     resourceTokens = getDefaultTokens(this.resourceKey);
                     logger.debug("Tokenizer task returned no tokens");
                 } else {
-                    resourceTokens = tokens.getTokens();
-                    logger.debug("Tokenizer task returned {} tokens", tokens.getTokens().size());
+                    resourceTokens = tokens.get().getTokens();
+                    logger.debug("Tokenizer task returned {} tokens", resourceTokens.size());
                 }
                 this.tokens = tokenize(resourceTokens);
             } catch (ExecException e) {

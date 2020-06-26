@@ -30,18 +30,8 @@ public class CommandFeedback implements Serializable {
         return new CommandFeedback(keyedMessages, null, ListView.of());
     }
 
-    public static CommandFeedback of(Exception exception, @Nullable ResourceKey origin) {
-        final @Nullable KeyedMessages keyedMessages = exceptionToKeyedMessages(exception, origin);
-        if(keyedMessages != null) {
-            // Keyed messages were extracted from the exception, so do not set the exception.
-            return new CommandFeedback(keyedMessages, null, ListView.of());
-        } else {
-            return new CommandFeedback(KeyedMessages.of(), exception, ListView.of());
-        }
-    }
-
     public static CommandFeedback of(Exception exception) {
-        return CommandFeedback.of(exception, null);
+        return new CommandFeedback(KeyedMessages.of(), exception, ListView.of());
     }
 
     public static CommandFeedback of(ShowFeedback showFeedback) {
@@ -66,6 +56,21 @@ public class CommandFeedback implements Serializable {
 
     public static CommandFeedback of(KeyedMessages keyedMessages, ListView<ShowFeedback> showFeedbacks) {
         return new CommandFeedback(keyedMessages, null, showFeedbacks);
+    }
+
+
+    public static CommandFeedback ofTryExtractMessagesFrom(Exception exception, @Nullable ResourceKey origin) {
+        final @Nullable KeyedMessages keyedMessages = exceptionToKeyedMessages(exception, origin);
+        if(keyedMessages != null) {
+            // Keyed messages were extracted from the exception, so do not set the exception.
+            return new CommandFeedback(keyedMessages, null, ListView.of());
+        } else {
+            return new CommandFeedback(KeyedMessages.of(), exception, ListView.of());
+        }
+    }
+
+    public static CommandFeedback ofTryExtractMessagesFrom(Exception exception) {
+        return CommandFeedback.ofTryExtractMessagesFrom(exception, null);
     }
 
 

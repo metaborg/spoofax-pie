@@ -48,26 +48,29 @@ public class TigerShowScopeGraph implements TaskDef<TigerShowArgs, CommandFeedba
         final ResourceKey key = input.key;
         final @Nullable Region region = input.region;
         return context.require(analyze, new TigerAnalyze.Input(key, parse.createAstSupplier(key)))
-            .flatMapOrElse((o) -> Result.ofNullableOrElse(
-                o.result.ast,
-                () -> new Exception("Cannot show scope graph, analyzed AST for '" + key + "' is null")
-            ), Result::ofErr)
-            .flatMapOrElse(ast -> {
+            .flatMapOrElse((output) -> {
+                if(output.result.ast != null) {
+                    return Result.ofOk(output);
+                } else {
+                    return Result.ofErr(new Exception("Cannot show scope graph, analyzed AST for '" + key + "' is null"));
+                }
+            }, Result::ofErr)
+            .flatMapOrElse(output -> {
                 try {
                     final String strategyId = "spoofax3-editor-show-analysis-term";
-                    final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get();
+                    final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get().addContextObject(output.context);
                     final ITermFactory termFactory = strategoRuntime.getTermFactory();
-                    final IStrategoTerm inputTerm = termFactory.makeTuple(ast, termFactory.makeString(resourceService.toString(key)));
+                    final IStrategoTerm inputTerm = termFactory.makeTuple(output.result.ast, termFactory.makeString(resourceService.toString(key)));
                     return Result.ofNullableOrElse(
                         strategoRuntime.invoke(strategyId, inputTerm),
-                        () -> new Exception("Cannot show scope graph, invoking '" + strategyId + "' on '" + ast + "' failed unexpectedly")
+                        () -> new Exception("Cannot show scope graph, invoking '" + strategyId + "' on '" + output.result.ast + "' failed unexpectedly")
                     );
                 } catch(StrategoException e) {
                     return Result.ofErr(e);
                 }
             }, Result::ofErr) // TODO: any way we don't have to use flatMapOrElse that threads the error to convert the type?
             .map(StrategoUtil::toString)
-            .mapOrElse(text -> CommandFeedback.of(ShowFeedback.showText(text, "Scope graph for '" + key + "'")), e -> CommandFeedback.of(e, key));
+            .mapOrElse(text -> CommandFeedback.of(ShowFeedback.showText(text, "Scope graph for '" + key + "'")), e -> CommandFeedback.ofTryExtractMessagesFrom(e, key));
     }
 
     @Override public Task<CommandFeedback> createTask(TigerShowArgs input) {

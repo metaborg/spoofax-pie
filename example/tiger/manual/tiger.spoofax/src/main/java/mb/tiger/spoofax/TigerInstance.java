@@ -110,8 +110,8 @@ public class TigerInstance implements LanguageInstance {
     }
 
 
-    @Override public Task<@Nullable JSGLRTokens> createTokenizeTask(ResourceKey resourceKey) {
-        return tokenize.createTask(resourceKey); // TODO: use Result.
+    @Override public Task<Option<JSGLRTokens>> createTokenizeTask(ResourceKey resourceKey) {
+        return tokenize.createTask(resourceKey);
     }
 
     @Override public Task<Option<Styling>> createStyleTask(ResourceKey resourceKey) {

@@ -3,16 +3,13 @@ package mb.tiger.spoofax.task;
 import mb.common.message.Messages;
 import mb.common.message.MessagesBuilder;
 import mb.common.result.Result;
-import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.pie.api.ExecContext;
-import mb.pie.api.ExecException;
 import mb.pie.api.ResourceStringSupplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageScope;
 import mb.tiger.spoofax.task.reusable.TigerAnalyze;
 import mb.tiger.spoofax.task.reusable.TigerParse;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -28,7 +25,7 @@ public class TigerIdeCheck implements TaskDef<ResourceKey, Messages> {
     }
 
     @Override public String getId() {
-        return "mb.tiger.spoofax.task.TigerCheck";
+        return getClass().getName();
     }
 
     @Override

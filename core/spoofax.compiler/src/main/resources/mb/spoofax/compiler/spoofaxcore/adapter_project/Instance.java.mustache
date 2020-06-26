@@ -76,7 +76,7 @@ public class {{genInstance.id}} implements LanguageInstance {
     }
 
 
-    @Override public Task<@Nullable JSGLRTokens> createTokenizeTask(ResourceKey resourceKey) {
+    @Override public Task<Option<JSGLRTokens>> createTokenizeTask(ResourceKey resourceKey) {
         return {{tokenizeInjection.name}}.createTask(resourceKey);
     }
 
