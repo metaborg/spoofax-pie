@@ -1,5 +1,6 @@
 package mb.jsglr1.pie;
 
+import mb.common.message.Message;
 import mb.common.message.Messages;
 import mb.common.result.MessagesException;
 import mb.common.result.Result;
@@ -28,7 +29,7 @@ public abstract class JSGLR1ParseTaskDef implements TaskDef<Supplier<String>, Re
         try {
             return parse(context.require(stringSupplier));
         } catch(IOException e) {
-            return Result.ofErr(new MessagesException("Parsing failed; cannot get text to parse from '" + stringSupplier + "'", e));
+            return Result.ofErr(new MessagesException(Messages.of(new Message("Parsing failed; cannot get text to parse from '" + stringSupplier + "'", e))));
         }
     }
 
@@ -194,7 +195,8 @@ abstract class Mapper<T, R> implements java.util.function.Function<T, R>, Serial
 class AstMapper extends Mapper<Result<JSGLR1ParseOutput, MessagesException>, Result<IStrategoTerm, MessagesException>> {
     public static final AstMapper instance = new AstMapper();
 
-    @Override public Result<IStrategoTerm, MessagesException> apply(Result<JSGLR1ParseOutput, MessagesException> result) {
+    @Override
+    public Result<IStrategoTerm, MessagesException> apply(Result<JSGLR1ParseOutput, MessagesException> result) {
         return result.flatMap(r -> {
             if(r.recovered) {
                 return Result.ofErr(new MessagesException(r.messages, "Parser produced a recovered AST, but recovery was disallowed"));
@@ -210,7 +212,8 @@ class AstMapper extends Mapper<Result<JSGLR1ParseOutput, MessagesException>, Res
 class RecoverableAstMapper extends Mapper<Result<JSGLR1ParseOutput, MessagesException>, Result<IStrategoTerm, MessagesException>> {
     public static final RecoverableAstMapper instance = new RecoverableAstMapper();
 
-    @Override public Result<IStrategoTerm, MessagesException> apply(Result<JSGLR1ParseOutput, MessagesException> result) {
+    @Override
+    public Result<IStrategoTerm, MessagesException> apply(Result<JSGLR1ParseOutput, MessagesException> result) {
         return result.map(r -> r.ast);
     }
 
