@@ -1,6 +1,5 @@
 package mb.tiger;
 
-import mb.common.result.Result;
 import mb.jsglr1.common.JSGLR1ParseException;
 import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.jsglr1.common.JSGLR1Parser;
@@ -16,12 +15,12 @@ public class TigerParser implements Parser {
     }
 
     @Override
-    public Result<JSGLR1ParseOutput, JSGLR1ParseException> parse(String text, String startSymbol) throws InterruptedException {
+    public JSGLR1ParseOutput parse(String text, String startSymbol) throws JSGLR1ParseException, InterruptedException {
         return parser.parse(text, startSymbol, null);
     }
 
     @Override
-    public Result<JSGLR1ParseOutput, JSGLR1ParseException> parse(String text, String startSymbol, @Nullable ResourceKey resource) throws InterruptedException {
+    public JSGLR1ParseOutput parse(String text, String startSymbol, @Nullable ResourceKey resource) throws JSGLR1ParseException, InterruptedException {
         return parser.parse(text, startSymbol, resource);
     }
 }

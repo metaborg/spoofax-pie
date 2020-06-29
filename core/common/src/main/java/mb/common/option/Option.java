@@ -44,6 +44,10 @@ public class Option<T> implements Serializable {
         return value == null ? ofNone() : ofSome(value);
     }
 
+    public static <T> Option<T> ofOptional(@SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<T> value) {
+        return value.map(Option::ofSome).orElseGet(Option::ofNone);
+    }
+
 
     public boolean isSome() {
         return value != null;

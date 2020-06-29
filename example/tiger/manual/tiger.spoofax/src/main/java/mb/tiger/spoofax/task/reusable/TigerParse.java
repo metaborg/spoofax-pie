@@ -24,6 +24,10 @@ public class TigerParse extends JSGLR1ParseTaskDef {
 
     @Override protected Result<JSGLR1ParseOutput, JSGLR1ParseException> parse(String text) throws InterruptedException {
         final TigerParser parser = parserProvider.get();
-        return parser.parse(text, "Module");
+        try {
+            return Result.ofOk(parser.parse(text, "Module"));
+        } catch(JSGLR1ParseException e) {
+            return Result.ofErr(e);
+        }
     }
 }

@@ -28,6 +28,33 @@ public interface Result<T, E extends Exception> extends Serializable {
         }
     }
 
+    static <T, E extends Exception> Result<T, ?> ofOkOrCatching(ExceptionalSupplier<? extends T, E> supplier) {
+        try {
+            return Result.ofOk(supplier.get());
+        } catch(Exception e) {
+            return Result.ofErr(e);
+        }
+    }
+
+    static <T, E extends Exception> Result<T, E> ofOkOrCatching(ExceptionalSupplier<? extends T, E> supplier, Class<E> exceptionClass) {
+        try {
+            return Result.ofOk(supplier.get());
+        } catch(Exception e) {
+            if(e.getClass().equals(exceptionClass)) {
+                // noinspection unchecked (cast is safe because `e`'s class is equal to `exceptionClass`)
+                return Result.ofErr((E)e);
+            } else {
+                // `e` is not of type `F`, and it cannot be another checked exception. Therefore, it is either a
+                // `RuntimeException` or a checked exception that is sneakily thrown. In either case, it is safe to
+                // sneakily rethrow the exception
+                SneakyThrow.doThrow(e);
+                // Because `SneakyThrow.doThrow` throws, the following statement will never be executed, but it is
+                // still needed to make the Java compiler happy.
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     static <T, E extends Exception> Result<T, E> ofErr(E error) {
         return new Err<>(error);
     }

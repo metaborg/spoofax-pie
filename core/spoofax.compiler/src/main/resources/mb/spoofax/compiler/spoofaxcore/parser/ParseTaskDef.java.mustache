@@ -24,6 +24,10 @@ public class {{genParseTaskDef.id}} extends JSGLR1ParseTaskDef {
 
     @Override protected Result<JSGLR1ParseOutput, JSGLR1ParseException> parse(String text) throws InterruptedException {
         final {{languageProjectInput.parser.qualifiedId}} parser = parserProvider.get();
-        return parser.parse(text, "{{languageProjectInput.startSymbol}}");
+        try {
+            return Result.ofOk(parser.parse(text, "{{languageProjectInput.startSymbol}}"));
+        } catch(JSGLR1ParseException e) {
+            return Result.ofErr(e);
+        }
     }
 }
