@@ -102,7 +102,7 @@ public class RunCommandHandler extends AbstractHandler {
             } else {
                 final MultiStatus multiStatus = new MultiStatus(pluginId, IStatus.ERROR, sb.toString(), null);
                 for(Exception e : exceptions) {
-                    multiStatus.add(new Status(IStatus.ERROR, pluginId, e.getMessage(), e));
+                    multiStatus.add(new Status(IStatus.ERROR, pluginId, null, e));
                 }
                 status = multiStatus;
             }
