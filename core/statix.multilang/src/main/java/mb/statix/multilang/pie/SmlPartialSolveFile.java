@@ -11,6 +11,7 @@ import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.statix.constraints.CUser;
 import mb.statix.multilang.FileResult;
+import mb.statix.multilang.MultiLangScope;
 import mb.statix.multilang.utils.SolverUtils;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.log.IDebugContext;
@@ -26,6 +27,7 @@ import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.Objects;
 
+@MultiLangScope
 public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, FileResult> {
 
     public static class Input implements Serializable {

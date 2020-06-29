@@ -52,11 +52,11 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   includeProject("mod.intellij")
 }
 
-"sdf3".run {
+/* "sdf3".run {
   includeProject("sdf3")
   includeProject("sdf3.spoofax")
   includeProject("sdf3.cli")
   includeProject("sdf3.eclipse.externaldeps")
   includeProject("sdf3.eclipse")
   includeProject("sdf3.intellij")
-}
+} */

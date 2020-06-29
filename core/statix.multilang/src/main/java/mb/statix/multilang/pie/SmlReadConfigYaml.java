@@ -6,11 +6,13 @@ import mb.resource.ReadableResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.multilang.MultiLangConfig;
+import mb.statix.multilang.MultiLangScope;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
 import java.io.Serializable;
 
+@MultiLangScope
 public class SmlReadConfigYaml implements TaskDef<SmlReadConfigYaml.Input, MultiLangConfig> {
     public static class Input implements Serializable {
         private final ResourcePath projectDir;

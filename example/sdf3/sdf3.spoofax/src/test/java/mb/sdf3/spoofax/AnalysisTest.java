@@ -24,11 +24,11 @@ import mb.statix.multilang.LanguageMetadata;
 import mb.statix.multilang.MultiLangComponent;
 import mb.statix.multilang.spec.SpecBuilder;
 import mb.statix.multilang.spec.SpecUtils;
-import mb.statix.multilang.tasks.SmlAnalyzeProject;
-import mb.statix.multilang.tasks.SmlBuildMessages;
-import mb.statix.multilang.tasks.SmlInstantiateGlobalScope;
-import mb.statix.multilang.tasks.SmlPartialSolveFile;
-import mb.statix.multilang.tasks.SmlPartialSolveProject;
+import mb.statix.multilang.pie.SmlAnalyzeProject;
+import mb.statix.multilang.pie.SmlBuildMessages;
+import mb.statix.multilang.pie.SmlInstantiateGlobalScope;
+import mb.statix.multilang.pie.SmlPartialSolveFile;
+import mb.statix.multilang.pie.SmlPartialSolveProject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.metaborg.util.log.Level;
@@ -58,8 +58,8 @@ public class AnalysisTest extends TestBase {
     private final SmlPartialSolveFile partialSolveFile = new SmlPartialSolveFile(languageComponent.getStrategoRuntimeBuilder().
         build().getTermFactory(), platformComponent.getLoggerFactory());
     private final SmlAnalyzeProject analyzeProject = new SmlAnalyzeProject(instantiateGlobalScope, partialSolveProject,
-        partialSolveFile, platformComponent.getLoggerFactory());
-    private final SmlBuildMessages buildMessages = new SmlBuildMessages(analyzeProject);
+        partialSolveFile, buildContextConfiguration, specFunction, analysisContextService, platformComponent.getLoggerFactory());
+    private final SmlBuildMessages buildMessages = new SmlBuildMessages(analyzeProject, readConfigYaml, buildContextConfiguration, analysisContextService);
 
     private final Level logLevel = Level.Info;
     private final HashSet<ResourceKey> resources = new HashSet<>();

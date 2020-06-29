@@ -5,6 +5,7 @@ import mb.pie.api.TaskDef;
 import mb.statix.multilang.AnalysisContextService;
 import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.MultiLangAnalysisException;
+import mb.statix.multilang.MultiLangScope;
 import mb.statix.multilang.spec.SpecBuilder;
 import mb.statix.spec.Spec;
 
@@ -13,8 +14,16 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 
+@MultiLangScope
 public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Spec> {
     public static class Input implements Serializable {
+        // This input directly specifies the collection of languages to build a specification for
+        // Not that we could also have chosen to use Supplier<HashSet<LanguageId>> as key. In that case the
+        // task identity would probably be (projectPath, contextId).
+        // We choose this identity deliberately for performance (storage usage reasons), because most typical
+        // use cases will involve small sets of language. These sets will often be equal in other contexts and projects
+        // Therefore this choice of key will have the highest task sharing, and therefore the lowest memory footprint
+        // reinstantiations and reruns.
         private final HashSet<LanguageId> languages;
 
         public Input(Collection<LanguageId> languages) {

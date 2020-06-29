@@ -5,6 +5,7 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.statix.constraints.CUser;
+import mb.statix.multilang.MultiLangScope;
 import mb.statix.multilang.utils.SolverUtils;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.log.IDebugContext;
@@ -18,7 +19,8 @@ import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.Input, SmlPartialSolveProject.Output> {
+@MultiLangScope
+public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.Input, SolverResult> {
 
     public static class Input implements Serializable {
         private final Supplier<Spec> specSupplier;
@@ -58,35 +60,6 @@ public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.In
         }
     }
 
-    public static class Output implements Serializable {
-        private final SolverResult projectResult;
-
-        public Output(SolverResult projectResult) {
-            this.projectResult = projectResult;
-        }
-
-        public SolverResult getProjectResult() {
-            return projectResult;
-        }
-
-        @Override public boolean equals(Object o) {
-            if(this == o) return true;
-            if(o == null || getClass() != o.getClass()) return false;
-            Output output = (Output)o;
-            return projectResult.equals(output.projectResult);
-        }
-
-        @Override public int hashCode() {
-            return Objects.hash(projectResult);
-        }
-
-        @Override public String toString() {
-            return "Output{" +
-                "projectResult=" + projectResult +
-                '}';
-        }
-    }
-
     @Inject public SmlPartialSolveProject() {
     }
 
@@ -96,15 +69,14 @@ public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.In
     }
 
     @Override
-    public Output exec(ExecContext context, Input input) throws Exception {
+    public SolverResult exec(ExecContext context, Input input) throws Exception {
         GlobalResult globalResult = context.require(input.globalResultSupplier);
         Iterable<ITermVar> scopeArgs = Iterables2.singleton(globalResult.getGlobalScopeVar());
         IConstraint projectConstraint = new CUser(input.projectConstraint, scopeArgs);
 
         IDebugContext debug = TaskUtils.createDebugContext(SmlPartialSolveFile.class, input.logLevel);
         Spec spec = context.require(input.specSupplier);
-        SolverResult result = SolverUtils.partialSolve(spec, globalResult.getResult().state(), projectConstraint, debug);
 
-        return new Output(result);
+        return SolverUtils.partialSolve(spec, globalResult.getResult().state(), projectConstraint, debug);
     }
 }

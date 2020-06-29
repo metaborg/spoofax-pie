@@ -7,12 +7,15 @@ import mb.statix.multilang.AnalysisContextService;
 import mb.statix.multilang.ContextConfig;
 import mb.statix.multilang.ContextId;
 import mb.statix.multilang.MultiLangAnalysisException;
+import mb.statix.multilang.MultiLangScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+@MultiLangScope
 public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConfiguration.Input, ContextConfig> {
     public static class Input implements Serializable {
         private final ResourcePath projectDir;
@@ -27,7 +30,7 @@ public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConf
     private final SmlReadConfigYaml readConfigYaml;
     private final AnalysisContextService analysisContextService;
 
-    public SmlBuildContextConfiguration(SmlReadConfigYaml readConfigYaml, AnalysisContextService analysisContextService) {
+    @Inject public SmlBuildContextConfiguration(SmlReadConfigYaml readConfigYaml, AnalysisContextService analysisContextService) {
         this.readConfigYaml = readConfigYaml;
         this.analysisContextService = analysisContextService;
     }

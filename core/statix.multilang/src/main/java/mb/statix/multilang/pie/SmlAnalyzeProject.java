@@ -16,6 +16,7 @@ import mb.statix.multilang.FileResult;
 import mb.statix.multilang.ImmutableAnalysisResults;
 import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.MultiLangAnalysisException;
+import mb.statix.multilang.MultiLangScope;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.IState;
 import mb.statix.solver.log.IDebugContext;
@@ -23,6 +24,7 @@ import mb.statix.solver.persistent.Solver;
 import mb.statix.solver.persistent.SolverResult;
 import mb.statix.spec.Rule;
 import mb.statix.spec.Spec;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.log.Level;
 
 import javax.inject.Inject;
@@ -36,16 +38,15 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@MultiLangScope
 public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, AnalysisResults> {
     public static class Input implements Serializable {
         private final ResourcePath projectPath;
         private final ContextId contextId;
-        private final Level logLevel; // Not part of input identity
 
-        public Input(ResourcePath projectPath, ContextId contextId, Level logLevel) {
+        public Input(ResourcePath projectPath, ContextId contextId) {
             this.projectPath = projectPath;
             this.contextId = contextId;
-            this.logLevel = logLevel;
         }
 
         @Override public boolean equals(Object o) {
@@ -120,10 +121,11 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Analy
             logger.error("+--------------------------------------+");
         }
 
-        IDebugContext debug = TaskUtils.createDebugContext(String.format("MLA [%s]", input.contextId), input.logLevel);
+        @Nullable Level logLevel = config.parseLevel();
+        IDebugContext debug = TaskUtils.createDebugContext(String.format("MLA [%s]", input.contextId), logLevel);
 
         Supplier<GlobalResult> globalResultSupplier = instantiateGlobalScope.createSupplier(
-            new SmlInstantiateGlobalScope.Input(input.contextId.toString(), input.logLevel, specSupplier));
+            new SmlInstantiateGlobalScope.Input(input.contextId.toString(), config.parseLevel(), specSupplier));
 
         Map<LanguageId, SolverResult> projectResults = config.getLanguages().stream()
             .collect(Collectors.toMap(Function.identity(), languageId ->
@@ -131,7 +133,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Analy
                     globalResultSupplier,
                     specSupplier,
                     analysisContextService.getLanguageMetadata(languageId).projectConstraint(),
-                    input.logLevel))).getProjectResult()
+                    logLevel)))
             ));
 
         // Create file results (maintain resource key for error message mapping
@@ -147,7 +149,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Analy
                             specSupplier,
                             globalResultSupplier,
                             languageMetadata.fileConstraint(),
-                            input.logLevel)));
+                            logLevel)));
                         return new AbstractMap.SimpleEntry<>(
                             new AnalysisResults.FileKey(languageMetadata.languageId(), resourceKey),
                             fileResult);

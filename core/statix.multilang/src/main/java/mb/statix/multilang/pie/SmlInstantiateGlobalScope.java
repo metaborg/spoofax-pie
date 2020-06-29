@@ -8,6 +8,7 @@ import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.statix.constraints.CExists;
 import mb.statix.constraints.CNew;
+import mb.statix.multilang.MultiLangScope;
 import mb.statix.multilang.utils.SolverUtils;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.IState;
@@ -23,6 +24,7 @@ import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.Objects;
 
+@MultiLangScope
 public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalScope.Input, GlobalResult> {
 
     public static class Input implements Serializable {

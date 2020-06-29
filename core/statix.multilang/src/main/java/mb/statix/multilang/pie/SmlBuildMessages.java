@@ -12,6 +12,7 @@ import mb.statix.multilang.AnalysisResults;
 import mb.statix.multilang.ContextId;
 import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.MultiLangConfig;
+import mb.statix.multilang.MultiLangScope;
 import mb.statix.multilang.utils.MessageUtils;
 import org.metaborg.util.iterators.Iterables2;
 import org.metaborg.util.log.Level;
@@ -25,6 +26,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@MultiLangScope
 public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMessages> {
 
     public static class Input implements Serializable {
@@ -85,8 +87,7 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
         }
 
         AnalysisResults results = context.require(analyzeProject.createTask(
-            new SmlAnalyzeProject.Input(input.projectPath, contextId, Level.parse(config.getCustomContexts()
-                .get(contextId).getLogLevel()))));
+            new SmlAnalyzeProject.Input(input.projectPath, contextId, config.getCustomContexts().get(contextId).parseLevel())));
 
         final IUniDisunifier resultUnifier = results.finalResult().state().unifier();
         KeyedMessagesBuilder builder = new KeyedMessagesBuilder();
