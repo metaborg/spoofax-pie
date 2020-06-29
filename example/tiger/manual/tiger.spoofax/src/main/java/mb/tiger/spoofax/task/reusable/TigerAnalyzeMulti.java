@@ -1,6 +1,5 @@
 package mb.tiger.spoofax.task.reusable;
 
-import mb.common.result.MessagesException;
 import mb.common.result.Result;
 import mb.constraint.common.ConstraintAnalyzer.MultiFileResult;
 import mb.constraint.common.ConstraintAnalyzerContext;
@@ -35,13 +34,13 @@ public class TigerAnalyzeMulti implements TaskDef<TigerAnalyzeMulti.Input, Resul
         public final ResourcePath root;
         public final ResourceWalker walker;
         public final ResourceMatcher matcher;
-        public final Function<Supplier<String>, Result<IStrategoTerm, MessagesException>> astFunction;
+        public final Function<Supplier<String>, ? extends Result<IStrategoTerm, ?>> astFunction;
 
         public Input(
             ResourcePath root,
             ResourceWalker walker,
             ResourceMatcher matcher,
-            Function<Supplier<String>, Result<IStrategoTerm, MessagesException>> astFunction
+            Function<Supplier<String>, ? extends Result<IStrategoTerm, ?>> astFunction
         ) {
             this.root = root;
             this.walker = walker;

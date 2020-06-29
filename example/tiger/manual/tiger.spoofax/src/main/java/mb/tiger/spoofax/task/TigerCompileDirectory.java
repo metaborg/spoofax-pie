@@ -2,8 +2,8 @@ package mb.tiger.spoofax.task;
 
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
-import mb.common.result.MessagesException;
 import mb.common.result.Result;
+import mb.jsglr1.common.JSGLR1ParseException;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.Task;
@@ -84,7 +84,7 @@ public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args
             if(!first.get()) {
                 sb.append(", ");
             }
-            final Supplier<Result<IStrategoTerm, MessagesException>> astSupplier = parse.createAstSupplier(filePath);
+            final Supplier<Result<IStrategoTerm, JSGLR1ParseException>> astSupplier = parse.createAstSupplier(filePath);
             context.require(listDefNames, astSupplier)
                 .ifElse(sb::append, (e) -> {
                     sb.append("[]");

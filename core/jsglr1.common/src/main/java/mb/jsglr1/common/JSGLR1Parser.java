@@ -1,11 +1,10 @@
 package mb.jsglr1.common;
 
 import mb.common.message.Messages;
-import mb.common.result.MessagesException;
 import mb.common.result.Result;
+import mb.jsglr.common.JSGLRTokens;
 import mb.jsglr.common.ResourceKeyAttachment;
 import mb.jsglr.common.TokenUtil;
-import mb.jsglr.common.JSGLRTokens;
 import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -43,11 +42,11 @@ public class JSGLR1Parser {
         disambiguator.setHeuristicFilters(false);
     }
 
-    public Result<JSGLR1ParseOutput, MessagesException> parse(String text, String startSymbol) throws InterruptedException {
+    public Result<JSGLR1ParseOutput, JSGLR1ParseException> parse(String text, String startSymbol) throws InterruptedException {
         return parse(text, startSymbol, null);
     }
 
-    public Result<JSGLR1ParseOutput, MessagesException> parse(String text, String startSymbol, @Nullable ResourceKey resource) throws InterruptedException {
+    public Result<JSGLR1ParseOutput, JSGLR1ParseException> parse(String text, String startSymbol, @Nullable ResourceKey resource) throws InterruptedException {
         try {
             final SGLRParseResult result = parser.parse(text, null, startSymbol);
             if(result.output == null) {
@@ -70,7 +69,7 @@ public class JSGLR1Parser {
             final MessagesUtil messagesUtil = new MessagesUtil(true, true, parser.getCollectedErrors());
             messagesUtil.processFatalException(new NullTokenizer(text, null), e);
             final Messages messages = messagesUtil.getMessages();
-            return Result.ofErr(new MessagesException(messages, "Parsing failed; recovery failed"));
+            return Result.ofErr(JSGLR1ParseException.parseFail(messages));
         }
     }
 }

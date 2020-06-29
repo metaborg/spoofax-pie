@@ -1,13 +1,13 @@
 package mb.sdf3;
 
 import mb.common.message.Severity;
-import mb.common.result.MessagesException;
 import mb.common.result.Result;
 import mb.constraint.common.ConstraintAnalyzer;
 import mb.constraint.common.ConstraintAnalyzer.MultiFileResult;
 import mb.constraint.common.ConstraintAnalyzer.SingleFileResult;
 import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.constraint.common.ConstraintAnalyzerException;
+import mb.jsglr1.common.JSGLR1ParseException;
 import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.resource.DefaultResourceKey;
 import mb.resource.ResourceKey;
@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class Sdf3AnalyzerTest extends Sdf3TestBase {
     @Test void analyzeSingleErrors() throws InterruptedException, ConstraintAnalyzerException {
         final ResourceKey resource = new DefaultResourceKey(qualifier, "a.sdf3");
-        final Result<JSGLR1ParseOutput, MessagesException> parsed = parser.parse("module a syntax A = B", startSymbol, resource);
+        final Result<JSGLR1ParseOutput, JSGLR1ParseException> parsed = parser.parse("module a syntax A = B", startSymbol, resource);
         assertTrue(parsed.isOk());
         final SingleFileResult result =
             analyzer.analyze(rootKey, resource, parsed.unwrapUnchecked().ast, new ConstraintAnalyzerContext());
@@ -35,7 +35,7 @@ class Sdf3AnalyzerTest extends Sdf3TestBase {
 
     @Test void analyzeSingleSuccess() throws InterruptedException, ConstraintAnalyzerException {
         final ResourceKey resource = new DefaultResourceKey(qualifier, "a.sdf3");
-        final Result<JSGLR1ParseOutput, MessagesException> parsed = parser.parse("module a", startSymbol, resource);
+        final Result<JSGLR1ParseOutput, JSGLR1ParseException> parsed = parser.parse("module a", startSymbol, resource);
         assertTrue(parsed.isOk());
         final SingleFileResult result =
             analyzer.analyze(rootKey, resource, parsed.unwrapUnchecked().ast, new ConstraintAnalyzerContext());
@@ -46,13 +46,13 @@ class Sdf3AnalyzerTest extends Sdf3TestBase {
 
     @Test void analyzeMultipleErrors() throws InterruptedException, ConstraintAnalyzerException {
         final ResourceKey resource1 = new DefaultResourceKey(qualifier, "a.sdf3");
-        final Result<JSGLR1ParseOutput, MessagesException> parsed1 = parser.parse("module a", startSymbol, resource1);
+        final Result<JSGLR1ParseOutput, JSGLR1ParseException> parsed1 = parser.parse("module a", startSymbol, resource1);
         assertTrue(parsed1.isOk());
         final ResourceKey resource2 = new DefaultResourceKey(qualifier, "b.sdf3");
-        final Result<JSGLR1ParseOutput, MessagesException> parsed2 = parser.parse("module b syntax B = A", startSymbol, resource2);
+        final Result<JSGLR1ParseOutput, JSGLR1ParseException> parsed2 = parser.parse("module b syntax B = A", startSymbol, resource2);
         assertTrue(parsed2.isOk());
         final ResourceKey resource3 = new DefaultResourceKey(qualifier, "c.sdf3");
-        final Result<JSGLR1ParseOutput, MessagesException> parsed3 = parser.parse("module c syntax C = A B", startSymbol, resource3);
+        final Result<JSGLR1ParseOutput, JSGLR1ParseException> parsed3 = parser.parse("module c syntax C = A B", startSymbol, resource3);
         assertTrue(parsed3.isOk());
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
         asts.put(resource1, parsed1.unwrapUnchecked().ast);
@@ -83,13 +83,13 @@ class Sdf3AnalyzerTest extends Sdf3TestBase {
 
     @Test void analyzeMultipleSuccess() throws InterruptedException, ConstraintAnalyzerException {
         final ResourceKey resource1 = new DefaultResourceKey(qualifier, "a.sdf3");
-        final Result<JSGLR1ParseOutput, MessagesException> parsed1 = parser.parse("module a syntax A = \"\"", startSymbol, resource1);
+        final Result<JSGLR1ParseOutput, JSGLR1ParseException> parsed1 = parser.parse("module a syntax A = \"\"", startSymbol, resource1);
         assertTrue(parsed1.isOk());
         final ResourceKey resource2 = new DefaultResourceKey(qualifier, "b.sdf3");
-        final Result<JSGLR1ParseOutput, MessagesException> parsed2 = parser.parse("module b imports a syntax B = A", startSymbol, resource2);
+        final Result<JSGLR1ParseOutput, JSGLR1ParseException> parsed2 = parser.parse("module b imports a syntax B = A", startSymbol, resource2);
         assertTrue(parsed2.isOk());
         final ResourceKey resource3 = new DefaultResourceKey(qualifier, "c.sdf3");
-        final Result<JSGLR1ParseOutput, MessagesException> parsed3 = parser.parse("module c imports a b syntax C = A syntax C = B", startSymbol, resource3);
+        final Result<JSGLR1ParseOutput, JSGLR1ParseException> parsed3 = parser.parse("module c imports a b syntax C = A syntax C = B", startSymbol, resource3);
         assertTrue(parsed3.isOk());
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
         asts.put(resource1, parsed1.unwrapUnchecked().ast);
@@ -114,7 +114,7 @@ class Sdf3AnalyzerTest extends Sdf3TestBase {
 
     @Test void showScopeGraph() throws InterruptedException, ConstraintAnalyzerException, StrategoException {
         final ResourceKey resource = new DefaultResourceKey(qualifier, "a.sdf3");
-        final Result<JSGLR1ParseOutput, MessagesException> parsed = parser.parse("module a", startSymbol, resource);
+        final Result<JSGLR1ParseOutput, JSGLR1ParseException> parsed = parser.parse("module a", startSymbol, resource);
         assertTrue(parsed.isOk());
         final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext();
         final SingleFileResult result = analyzer.analyze(rootKey, resource, parsed.unwrapUnchecked().ast, constraintAnalyzerContext);

@@ -1,12 +1,12 @@
 package mb.tiger;
 
 import mb.common.region.Region;
-import mb.common.result.MessagesException;
 import mb.common.result.Result;
 import mb.common.style.Color;
 import mb.common.style.Styling;
 import mb.common.style.TokenStyle;
 import mb.common.token.TokenTypes;
+import mb.jsglr1.common.JSGLR1ParseException;
 import mb.jsglr1.common.JSGLR1ParseOutput;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TigerStylerTest extends TigerTestBase {
     @Test void style() throws InterruptedException {
-        final Result<JSGLR1ParseOutput, MessagesException> parseResult = parser.parse("1 + 21", "Module");
+        final Result<JSGLR1ParseOutput, JSGLR1ParseException> parseResult = parser.parse("1 + 21", "Module");
         assertTrue(parseResult.isOk());
 
         final Styling styling = styler.style(parseResult.unwrapUnchecked().tokens.tokens);

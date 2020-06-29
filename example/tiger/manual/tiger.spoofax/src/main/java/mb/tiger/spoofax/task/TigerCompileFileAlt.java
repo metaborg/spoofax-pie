@@ -1,7 +1,7 @@
 package mb.tiger.spoofax.task;
 
-import mb.common.result.MessagesException;
 import mb.common.result.Result;
+import mb.jsglr1.common.JSGLR1ParseException;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.Task;
@@ -76,7 +76,7 @@ public class TigerCompileFileAlt implements TaskDef<TigerCompileFileAlt.Args, Co
 
     @Override public CommandFeedback exec(ExecContext context, Args input) throws Exception {
         final ResourcePath file = input.file;
-        final Supplier<Result<IStrategoTerm, MessagesException>> astSupplier = parse.createAstSupplier(file);
+        final Supplier<Result<IStrategoTerm, JSGLR1ParseException>> astSupplier = parse.createAstSupplier(file);
         Result<String, ?> strResult;
         if(input.listDefNames) {
             strResult = context.require(listDefNames, astSupplier);

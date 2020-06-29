@@ -1,7 +1,7 @@
 package mb.tiger.spoofax.task;
 
-import mb.common.result.MessagesException;
 import mb.common.result.Result;
+import mb.jsglr1.common.JSGLR1ParseException;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.Task;
@@ -63,7 +63,7 @@ public class TigerCompileFile implements TaskDef<TigerCompileFile.Args, CommandF
 
     @Override public CommandFeedback exec(ExecContext context, Args input) {
         final ResourcePath file = input.file;
-        final Supplier<Result<IStrategoTerm, MessagesException>> astSupplier = parse.createAstSupplier(file);
+        final Supplier<Result<IStrategoTerm, JSGLR1ParseException>> astSupplier = parse.createAstSupplier(file);
         final Result<String, ? super Exception> listedLiteralVals = context.require(listLiteralVals, astSupplier);
         // Error type is erased (`?` means `? extends Exception`) from this point on, because `listLiteralVals` erases
         // the error type. However, it could create a new error type that wraps all possible error types, and propagate
