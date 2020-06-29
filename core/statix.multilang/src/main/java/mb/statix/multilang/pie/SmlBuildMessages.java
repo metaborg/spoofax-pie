@@ -1,4 +1,4 @@
-package mb.statix.multilang.tasks;
+package mb.statix.multilang.pie;
 
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
@@ -7,10 +7,14 @@ import mb.nabl2.terms.unification.ud.IUniDisunifier;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
-import mb.statix.multilang.AnalysisContext;
+import mb.statix.multilang.AnalysisContextService;
 import mb.statix.multilang.AnalysisResults;
+import mb.statix.multilang.ContextId;
+import mb.statix.multilang.LanguageId;
+import mb.statix.multilang.MultiLangConfig;
 import mb.statix.multilang.utils.MessageUtils;
 import org.metaborg.util.iterators.Iterables2;
+import org.metaborg.util.log.Level;
 
 import javax.inject.Inject;
 import java.io.Serializable;
@@ -25,11 +29,11 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
 
     public static class Input implements Serializable {
         private final ResourcePath projectPath;
-        private final AnalysisContext analysisContext;
+        private final LanguageId initiatingLanguage;
 
-        public Input(ResourcePath projectPath, AnalysisContext analysisContext) {
+        public Input(ResourcePath projectPath, LanguageId initiatingLanguage) {
             this.projectPath = projectPath;
-            this.analysisContext = analysisContext;
+            this.initiatingLanguage = initiatingLanguage;
         }
 
         @Override public boolean equals(Object o) {
@@ -37,25 +41,31 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
             if(o == null || getClass() != o.getClass()) return false;
             Input input = (Input)o;
             return projectPath.equals(input.projectPath) &&
-                analysisContext.equals(input.analysisContext);
+                initiatingLanguage.equals(input.initiatingLanguage);
         }
 
         @Override public int hashCode() {
-            return Objects.hash(projectPath, analysisContext);
+            return Objects.hash(projectPath, initiatingLanguage);
         }
 
         @Override public String toString() {
             return "Input{" +
                 "projectPath=" + projectPath +
-                ", analysisContext=" + analysisContext +
+                ", initiatingLanguage=" + initiatingLanguage +
                 '}';
         }
     }
 
     private final SmlAnalyzeProject analyzeProject;
+    private final SmlReadConfigYaml readConfigYaml;
+    private final SmlBuildContextConfiguration buildContextConfiguration;
+    private final AnalysisContextService analysisContextService;
 
-    @Inject public SmlBuildMessages(SmlAnalyzeProject analyzeProject) {
+    @Inject public SmlBuildMessages(SmlAnalyzeProject analyzeProject, SmlReadConfigYaml readConfigYaml, SmlBuildContextConfiguration buildContextConfiguration, AnalysisContextService analysisContextService) {
         this.analyzeProject = analyzeProject;
+        this.readConfigYaml = readConfigYaml;
+        this.buildContextConfiguration = buildContextConfiguration;
+        this.analysisContextService = analysisContextService;
     }
 
     @Override public String getId() {
@@ -63,9 +73,20 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
     }
 
     @Override public KeyedMessages exec(ExecContext context, Input input) throws Exception {
+        MultiLangConfig config = context.require(readConfigYaml.createTask(
+            new SmlReadConfigYaml.Input(input.projectPath)
+        ));
+
+        final ContextId contextId;
+        if(config.getLanguageContexts().containsKey(input.initiatingLanguage)) {
+            contextId = config.getLanguageContexts().get(input.initiatingLanguage);
+        } else {
+            contextId = analysisContextService.getDefaultContextId(input.initiatingLanguage);
+        }
+
         AnalysisResults results = context.require(analyzeProject.createTask(
-            new SmlAnalyzeProject.Input(input.projectPath, input.analysisContext)
-        )).getResults();
+            new SmlAnalyzeProject.Input(input.projectPath, contextId, Level.parse(config.getCustomContexts()
+                .get(contextId).getLogLevel()))));
 
         final IUniDisunifier resultUnifier = results.finalResult().state().unifier();
         KeyedMessagesBuilder builder = new KeyedMessagesBuilder();

@@ -3,9 +3,10 @@ package mb.statix.multilang;
 import mb.statix.solver.persistent.SolverResult;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class FileResult {
+public class FileResult implements Serializable {
 
     private final IStrategoTerm analyzedAst;
     private final SolverResult result;

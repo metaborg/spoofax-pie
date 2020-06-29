@@ -3,11 +3,15 @@ package mb.statix.multilang;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.log.Level;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
-public class ContextConfig {
+public class ContextConfig  implements Serializable {
     private List<LanguageId> languages;
     // String to enable case-insensitive parsing
     private @Nullable String logLevel;
@@ -53,5 +57,20 @@ public class ContextConfig {
             .filter(e -> e.name().equalsIgnoreCase(logLevel))
             .findAny()
             .orElse(null);
+    }
+
+    public static ContextConfig merge(ContextConfig contextConfig, ContextConfig contextConfig1) {
+        final ContextConfig result = new ContextConfig();
+        final List<LanguageId> languages = new ArrayList<>(contextConfig.languages);
+        languages.addAll(contextConfig1.languages);
+        result.setLanguages(languages);
+
+        result.setLogLevel(Stream.of(contextConfig.parseLevel(), contextConfig1.parseLevel())
+            .filter(Objects::nonNull)
+            .min(Comparator.comparing(Enum::ordinal))
+            .map(Level::toString)
+            .orElse(null));
+
+        return result;
     }
 }

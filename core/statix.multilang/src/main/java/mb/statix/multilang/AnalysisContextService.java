@@ -6,6 +6,9 @@ import mb.log.api.LoggerFactory;
 import mb.pie.api.Pie;
 import mb.resource.ResourceService;
 import mb.spoofax.core.platform.Platform;
+import mb.statix.multilang.spec.SpecBuilder;
+import mb.statix.spec.Spec;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.log.Level;
 
 import javax.inject.Inject;
@@ -129,5 +132,28 @@ public class AnalysisContextService {
     public AnalysisContext getAnalysisContext(ContextId contextId) {
         ensureContextInitialized(contextId);
         return contexts.get(contextId);
+    }
+
+    public SpecBuilder getLanguageSpec(LanguageId languageId) {
+        return languages.get(languageId).get().statixSpec();
+    }
+
+    public Collection<LanguageId> getlanguageIds(ContextId contextId) {
+        return getContextConfig(contextId).getLanguages();
+    }
+
+    public @Nullable ContextConfig getContextConfig(ContextId contextId) {
+        return contextConfigurations.get(contextId).stream()
+            .reduce(ContextConfig::merge)
+            .orElse(null);
+    }
+
+    public LanguageMetadata getLanguageMetadata(LanguageId languageId) {
+        return languages.get(languageId).get();
+    }
+
+    public ContextId getDefaultContextId(LanguageId initiatingLanguage) {
+        // TODO: Maintain map with default contexts
+        return new ContextId(initiatingLanguage.getId());
     }
 }

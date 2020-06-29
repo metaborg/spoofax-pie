@@ -1,26 +1,30 @@
 package mb.statix.multilang;
 
+import com.sun.javafx.collections.MappingChange;
+import mb.common.util.MapView;
+
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class MultiLangConfig {
-    private Map<LanguageId, ContextId> languageContexts = new HashMap<>();
-    private Map<ContextId, ContextConfig> customContexts = new HashMap<>();
+public class MultiLangConfig implements Serializable {
+    private HashMap<LanguageId, ContextId> languageContexts = new HashMap<>();
+    private HashMap<ContextId, ContextConfig> customContexts = new HashMap<>();
 
-    public Map<LanguageId, ContextId> getLanguageContexts() {
-        return languageContexts;
+    public MapView<LanguageId, ContextId> getLanguageContexts() {
+        return MapView.copyOf(languageContexts);
     }
 
-    public void setLanguageContexts(Map<LanguageId, ContextId> languageContexts) {
+    public void setLanguageContexts(HashMap<LanguageId, ContextId> languageContexts) {
         this.languageContexts = languageContexts;
     }
 
-    public Map<ContextId, ContextConfig> getCustomContexts() {
-        return customContexts;
+    public MapView<ContextId, ContextConfig> getCustomContexts() {
+        return MapView.copyOf(customContexts);
     }
 
-    public void setCustomContexts(Map<ContextId, ContextConfig> customContexts) {
+    public void setCustomContexts(HashMap<ContextId, ContextConfig> customContexts) {
         this.customContexts = customContexts;
     }
 

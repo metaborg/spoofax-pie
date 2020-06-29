@@ -28,6 +28,7 @@ public abstract class AnalysisResults implements Serializable {
             '}';
     }
 
+    // TODO: Remove and replace usages with ResourceKey
     public static class FileKey implements Serializable {
 
         private final LanguageId language;

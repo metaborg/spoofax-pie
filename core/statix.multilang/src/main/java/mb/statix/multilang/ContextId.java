@@ -1,8 +1,9 @@
 package mb.statix.multilang;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class ContextId {
+public class ContextId implements Serializable {
 
     private final String contextId;
 

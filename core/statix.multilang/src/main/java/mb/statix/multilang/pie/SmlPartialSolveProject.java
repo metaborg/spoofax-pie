@@ -1,7 +1,8 @@
-package mb.statix.multilang.tasks;
+package mb.statix.multilang.pie;
 
 import mb.nabl2.terms.ITermVar;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.statix.constraints.CUser;
 import mb.statix.multilang.utils.SolverUtils;
@@ -9,7 +10,9 @@ import mb.statix.solver.IConstraint;
 import mb.statix.solver.log.IDebugContext;
 import mb.statix.solver.persistent.SolverResult;
 import mb.statix.spec.Spec;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.iterators.Iterables2;
+import org.metaborg.util.log.Level;
 
 import javax.inject.Inject;
 import java.io.Serializable;
@@ -18,41 +21,38 @@ import java.util.Objects;
 public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.Input, SmlPartialSolveProject.Output> {
 
     public static class Input implements Serializable {
-        private final ITermVar globalScopeVar;
-        private final SolverResult globalResult;
-        private final IDebugContext debug;
+        private final Supplier<Spec> specSupplier;
+        private final Supplier<GlobalResult> globalResultSupplier;
 
-        private final Spec spec;
         private final String projectConstraint;
+        private final @Nullable Level logLevel;
 
-        public Input(ITermVar globalScopeVar, SolverResult globalResult, IDebugContext debug, Spec spec, String projectConstraint) {
-            this.globalScopeVar = globalScopeVar;
-            this.globalResult = globalResult;
-            this.debug = debug;
-            this.spec = spec;
+        public Input(Supplier<GlobalResult> globalResultSupplier, Supplier<Spec> specSupplier, String projectConstraint,
+                     @Nullable Level logLevel) {
+            this.globalResultSupplier = globalResultSupplier;
+            this.specSupplier = specSupplier;
             this.projectConstraint = projectConstraint;
+            this.logLevel = logLevel;
         }
 
         @Override public boolean equals(Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             Input input = (Input)o;
-            return globalScopeVar.equals(input.globalScopeVar) &&
-                globalResult.equals(input.globalResult) &&
-                spec.equals(input.spec) &&
+            return globalResultSupplier.equals(input.globalResultSupplier) &&
+                specSupplier.equals(input.specSupplier) &&
                 projectConstraint.equals(input.projectConstraint);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(globalScopeVar, globalResult, spec, projectConstraint);
+            return Objects.hash(globalResultSupplier, specSupplier, projectConstraint);
         }
 
         @Override public String toString() {
             return "Input{" +
-                "globalScopeVar=" + globalScopeVar +
-                ", globalResult=" + globalResult +
-                ", spec=" + spec +
+                "globalResultSupplier=" + globalResultSupplier +
+                ", specSupplier=" + specSupplier +
                 ", projectConstraint='" + projectConstraint + '\'' +
                 '}';
         }
@@ -97,10 +97,13 @@ public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.In
 
     @Override
     public Output exec(ExecContext context, Input input) throws Exception {
-        Iterable<ITermVar> scopeArgs = Iterables2.singleton(input.globalScopeVar);
+        GlobalResult globalResult = context.require(input.globalResultSupplier);
+        Iterable<ITermVar> scopeArgs = Iterables2.singleton(globalResult.getGlobalScopeVar());
         IConstraint projectConstraint = new CUser(input.projectConstraint, scopeArgs);
 
-        SolverResult result = SolverUtils.partialSolve(input.spec, input.globalResult.state(), projectConstraint, input.debug);
+        IDebugContext debug = TaskUtils.createDebugContext(SmlPartialSolveFile.class, input.logLevel);
+        Spec spec = context.require(input.specSupplier);
+        SolverResult result = SolverUtils.partialSolve(spec, globalResult.getResult().state(), projectConstraint, debug);
 
         return new Output(result);
     }
