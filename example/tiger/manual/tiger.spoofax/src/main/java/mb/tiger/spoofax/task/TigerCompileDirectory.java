@@ -25,6 +25,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
@@ -69,7 +70,7 @@ public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args
         return getClass().getName();
     }
 
-    @Override public CommandFeedback exec(ExecContext context, Args input) throws Exception {
+    @Override public CommandFeedback exec(ExecContext context, Args input) throws IOException {
         final ResourcePath dir = input.dir;
 
         final ResourceMatcher matcher = new AllResourceMatcher(new FileResourceMatcher(), new PathResourceMatcher(new ExtensionsPathMatcher("tig")));

@@ -17,12 +17,6 @@ public abstract class JSGLR1ParseException extends Exception {
         R recoveryDisallowedFail(Messages messages);
     }
 
-
-    public JSGLR1ParseException() {
-        super(null, null, true, false);
-    }
-
-
     public static JSGLR1ParseException readStringFail(String source, IOException cause) {
         final JSGLR1ParseException e = JSGLR1ParseExceptions.readStringFail(source, cause);
         e.initCause(cause);
@@ -56,10 +50,14 @@ public abstract class JSGLR1ParseException extends Exception {
             .recoveryDisallowedFail((messages) -> "Parsing recovered from failure, but recovery was disallowed; see error messages");
     }
 
-
     @Override public abstract int hashCode();
 
     @Override public abstract boolean equals(@Nullable Object obj);
 
     @Override public abstract String toString();
+
+
+    protected JSGLR1ParseException() {
+        super(null, null, true, false);
+    }
 }

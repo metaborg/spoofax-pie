@@ -74,7 +74,7 @@ public class TigerCompileFileAlt implements TaskDef<TigerCompileFileAlt.Args, Co
         return getClass().getName();
     }
 
-    @Override public CommandFeedback exec(ExecContext context, Args input) throws Exception {
+    @Override public CommandFeedback exec(ExecContext context, Args input) {
         final ResourcePath file = input.file;
         final Supplier<Result<IStrategoTerm, JSGLR1ParseException>> astSupplier = parse.createAstSupplier(file);
         Result<String, ?> strResult;
@@ -94,7 +94,7 @@ public class TigerCompileFileAlt implements TaskDef<TigerCompileFileAlt.Args, Co
                 context.provide(generatedResource, ResourceStampers.hashFile());
                 return generatedPath;
             })
-            .mapOrElse(f -> CommandFeedback.of(ShowFeedback.showFile(f)), e -> CommandFeedback.ofTryExtractMessagesFrom(e, file));
+            .mapOrElse(f -> CommandFeedback.of(ShowFeedback.showFile(f)), e -> CommandFeedback.of(e));
     }
 
     @Override public Serializable key(Args input) {

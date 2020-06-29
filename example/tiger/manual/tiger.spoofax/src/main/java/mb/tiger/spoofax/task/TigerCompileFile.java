@@ -64,7 +64,7 @@ public class TigerCompileFile implements TaskDef<TigerCompileFile.Args, CommandF
     @Override public CommandFeedback exec(ExecContext context, Args input) {
         final ResourcePath file = input.file;
         final Supplier<Result<IStrategoTerm, JSGLR1ParseException>> astSupplier = parse.createAstSupplier(file);
-        final Result<String, ? super Exception> listedLiteralVals = context.require(listLiteralVals, astSupplier);
+        final Result<String, ?> listedLiteralVals = context.require(listLiteralVals, astSupplier);
         // Error type is erased (`?` means `? extends Exception`) from this point on, because `listLiteralVals` erases
         // the error type. However, it could create a new error type that wraps all possible error types, and propagate
         // that, but that is a bit tedious in Java.
@@ -79,7 +79,7 @@ public class TigerCompileFile implements TaskDef<TigerCompileFile.Args, CommandF
                 context.provide(generatedResource, ResourceStampers.hashFile());
                 return generatedPath;
             })
-            .mapOrElse(f -> CommandFeedback.of(ShowFeedback.showFile(f)), e -> CommandFeedback.ofTryExtractMessagesFrom(e, file));
+            .mapOrElse(f -> CommandFeedback.of(ShowFeedback.showFile(f)), e -> CommandFeedback.of(e));
         // `CommandFeedback.of` with exception will match the generic exception against built-in ones such as
         // MessagesException, which can then be used by the IDE to show messages on files, or to show a popup detailing
         // the error.

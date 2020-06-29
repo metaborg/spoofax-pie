@@ -1,13 +1,10 @@
 package mb.mod;
 
 import mb.common.message.Severity;
-import mb.common.result.Result;
 import mb.constraint.common.ConstraintAnalyzer;
 import mb.constraint.common.ConstraintAnalyzer.MultiFileResult;
 import mb.constraint.common.ConstraintAnalyzer.SingleFileResult;
 import mb.constraint.common.ConstraintAnalyzerContext;
-import mb.constraint.common.ConstraintAnalyzerException;
-import mb.jsglr1.common.JSGLR1ParseException;
 import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.resource.DefaultResourceKey;
 import mb.resource.ResourceKey;
@@ -22,41 +19,35 @@ import java.util.HashMap;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ModAnalyzerTest extends ModTestBase {
-    @Test void analyzeSingleErrors() throws InterruptedException, ConstraintAnalyzerException {
+    @Test void analyzeSingleErrors() throws Exception {
         final ResourceKey resource = new DefaultResourceKey(qualifier, "a.mod");
-        final Result<JSGLR1ParseOutput, JSGLR1ParseException> parsed = parser.parse("let a = mod {}; dbg a.b;", startSymbol, resource);
-        assertTrue(parsed.isOk());
-        final SingleFileResult result = analyzer.analyze(rootKey, resource, parsed.unwrapUnchecked().ast, new ConstraintAnalyzerContext());
+        final JSGLR1ParseOutput parsed = parser.parse("let a = mod {}; dbg a.b;", startSymbol, resource);
+        final SingleFileResult result = analyzer.analyze(rootKey, resource, parsed.ast, new ConstraintAnalyzerContext());
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
         assertTrue(result.messages.containsError());
     }
 
-    @Test void analyzeSingleSuccess() throws InterruptedException, ConstraintAnalyzerException {
+    @Test void analyzeSingleSuccess() throws Exception {
         final ResourceKey resource = new DefaultResourceKey(qualifier, "a.mod");
-        final Result<JSGLR1ParseOutput, JSGLR1ParseException> parsed = parser.parse("let a = mod { let b = 1; }; dbg a.b;", startSymbol, resource);
-        assertTrue(parsed.isOk());
-        final SingleFileResult result =
-            analyzer.analyze(rootKey, resource, parsed.unwrapUnchecked().ast, new ConstraintAnalyzerContext());
+        final JSGLR1ParseOutput parsed = parser.parse("let a = mod { let b = 1; }; dbg a.b;", startSymbol, resource);
+        final SingleFileResult result = analyzer.analyze(rootKey, resource, parsed.ast, new ConstraintAnalyzerContext());
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
         assertTrue(result.messages.isEmpty());
     }
 
-    @Test void analyzeMultipleErrors() throws InterruptedException, ConstraintAnalyzerException {
+    @Test void analyzeMultipleErrors() throws Exception {
         final ResourceKey resource1 = new DefaultResourceKey(qualifier, "a.mod");
-        final Result<JSGLR1ParseOutput, JSGLR1ParseException> parsed1 = parser.parse("let a = 1;", startSymbol, resource1);
-        assertTrue(parsed1.isOk());
+        final JSGLR1ParseOutput parsed1 = parser.parse("let a = 1;", startSymbol, resource1);
         final ResourceKey resource2 = new DefaultResourceKey(qualifier, "b.mod");
-        final Result<JSGLR1ParseOutput, JSGLR1ParseException> parsed2 = parser.parse("let b = 2;", startSymbol, resource2);
-        assertTrue(parsed2.isOk());
+        final JSGLR1ParseOutput parsed2 = parser.parse("let b = 2;", startSymbol, resource2);
         final ResourceKey resource3 = new DefaultResourceKey(qualifier, "c.mod");
-        final Result<JSGLR1ParseOutput, JSGLR1ParseException> parsed3 = parser.parse("let c = d;", startSymbol, resource3);
-        assertTrue(parsed3.isOk());
+        final JSGLR1ParseOutput parsed3 = parser.parse("let c = d;", startSymbol, resource3);
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
-        asts.put(resource1, parsed1.unwrapUnchecked().ast);
-        asts.put(resource2, parsed2.unwrapUnchecked().ast);
-        asts.put(resource3, parsed3.unwrapUnchecked().ast);
+        asts.put(resource1, parsed1.ast);
+        asts.put(resource2, parsed2.ast);
+        asts.put(resource3, parsed3.ast);
         final MultiFileResult result = analyzer.analyze(rootKey, asts, new ConstraintAnalyzerContext());
         final ConstraintAnalyzer.@Nullable Result result1 = result.getResult(resource1);
         assertNotNull(result1);
@@ -79,20 +70,17 @@ class ModAnalyzerTest extends ModTestBase {
         assertTrue(foundCorrectMessage);
     }
 
-    @Test void analyzeMultipleSuccess() throws InterruptedException, ConstraintAnalyzerException {
+    @Test void analyzeMultipleSuccess() throws Exception {
         final ResourceKey resource1 = new DefaultResourceKey(qualifier, "a.tig");
-        final Result<JSGLR1ParseOutput, JSGLR1ParseException> parsed1 = parser.parse("let a = 1;", startSymbol, resource1);
-        assertTrue(parsed1.isOk());
+        final JSGLR1ParseOutput parsed1 = parser.parse("let a = 1;", startSymbol, resource1);
         final ResourceKey resource2 = new DefaultResourceKey(qualifier, "b.tig");
-        final Result<JSGLR1ParseOutput, JSGLR1ParseException> parsed2 = parser.parse("let b = 1;", startSymbol, resource2);
-        assertTrue(parsed2.isOk());
+        final JSGLR1ParseOutput parsed2 = parser.parse("let b = 1;", startSymbol, resource2);
         final ResourceKey resource3 = new DefaultResourceKey(qualifier, "c.tig");
-        final Result<JSGLR1ParseOutput, JSGLR1ParseException> parsed3 = parser.parse("let c = 1;", startSymbol, resource3);
-        assertTrue(parsed3.isOk());
+        final JSGLR1ParseOutput parsed3 = parser.parse("let c = 1;", startSymbol, resource3);
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
-        asts.put(resource1, parsed1.unwrapUnchecked().ast);
-        asts.put(resource2, parsed2.unwrapUnchecked().ast);
-        asts.put(resource3, parsed3.unwrapUnchecked().ast);
+        asts.put(resource1, parsed1.ast);
+        asts.put(resource2, parsed2.ast);
+        asts.put(resource3, parsed3.ast);
         final MultiFileResult result = analyzer.analyze(rootKey, asts, new ConstraintAnalyzerContext());
         final ConstraintAnalyzer.@Nullable Result result1 = result.getResult(resource1);
         assertNotNull(result1);
@@ -109,12 +97,11 @@ class ModAnalyzerTest extends ModTestBase {
         assertTrue(result.messages.isEmpty());
     }
 
-    @Test void showScopeGraph() throws InterruptedException, ConstraintAnalyzerException, StrategoException {
+    @Test void showScopeGraph() throws Exception, StrategoException {
         final ResourceKey resource = new DefaultResourceKey(qualifier, "a.mod");
-        final Result<JSGLR1ParseOutput, JSGLR1ParseException> parsed = parser.parse("let a = 1;", startSymbol, resource);
-        assertTrue(parsed.isOk());
+        final JSGLR1ParseOutput parsed = parser.parse("let a = 1;", startSymbol, resource);
         final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext();
-        final SingleFileResult result = analyzer.analyze(rootKey, resource, parsed.unwrapUnchecked().ast, constraintAnalyzerContext);
+        final SingleFileResult result = analyzer.analyze(rootKey, resource, parsed.ast, constraintAnalyzerContext);
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
         assertTrue(result.messages.isEmpty());
