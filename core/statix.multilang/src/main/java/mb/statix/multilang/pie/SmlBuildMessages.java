@@ -59,15 +59,11 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
     }
 
     private final SmlAnalyzeProject analyzeProject;
-    private final SmlReadConfigYaml readConfigYaml;
-    private final SmlBuildContextConfiguration buildContextConfiguration;
-    private final AnalysisContextService analysisContextService;
+    private final SmlLanguageContext languageContext;
 
-    @Inject public SmlBuildMessages(SmlAnalyzeProject analyzeProject, SmlReadConfigYaml readConfigYaml, SmlBuildContextConfiguration buildContextConfiguration, AnalysisContextService analysisContextService) {
+    @Inject public SmlBuildMessages(SmlAnalyzeProject analyzeProject, SmlLanguageContext languageContext) {
         this.analyzeProject = analyzeProject;
-        this.readConfigYaml = readConfigYaml;
-        this.buildContextConfiguration = buildContextConfiguration;
-        this.analysisContextService = analysisContextService;
+        this.languageContext = languageContext;
     }
 
     @Override public String getId() {
@@ -75,22 +71,15 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
     }
 
     @Override public KeyedMessages exec(ExecContext context, Input input) throws Exception {
-        MultiLangConfig config = context.require(readConfigYaml.createTask(
-            new SmlReadConfigYaml.Input(input.projectPath)
+        final ContextId contextId = context.require(languageContext.createTask(
+            new SmlLanguageContext.Input(input.projectPath, input.initiatingLanguage)
         ));
 
-        final ContextId contextId;
-        if(config.getLanguageContexts().containsKey(input.initiatingLanguage)) {
-            contextId = config.getLanguageContexts().get(input.initiatingLanguage);
-        } else {
-            contextId = analysisContextService.getDefaultContextId(input.initiatingLanguage);
-        }
-
-        AnalysisResults results = context.require(analyzeProject.createTask(
-            new SmlAnalyzeProject.Input(input.projectPath, contextId, config.getCustomContexts().get(contextId).parseLevel())));
+        final AnalysisResults results = context.require(analyzeProject.createTask(
+            new SmlAnalyzeProject.Input(input.projectPath, contextId)));
 
         final IUniDisunifier resultUnifier = results.finalResult().state().unifier();
-        KeyedMessagesBuilder builder = new KeyedMessagesBuilder();
+        final KeyedMessagesBuilder builder = new KeyedMessagesBuilder();
 
         // Add all file messages
         results.fileResults().forEach((key, fileResult) -> {

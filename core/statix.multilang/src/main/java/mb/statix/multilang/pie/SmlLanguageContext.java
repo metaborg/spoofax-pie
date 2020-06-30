@@ -46,5 +46,7 @@ public class SmlLanguageContext implements TaskDef<SmlLanguageContext.Input, Con
         if (config.getLanguageContexts().containsKey(input.languageId)) {
             return config.getLanguageContexts().get(input.languageId);
         }
+
+        return analysisContextService.getDefaultContextId(input.languageId);
     }
 }
