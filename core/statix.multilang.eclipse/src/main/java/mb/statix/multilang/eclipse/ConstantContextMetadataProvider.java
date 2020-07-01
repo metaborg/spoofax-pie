@@ -1,20 +1,21 @@
 package mb.statix.multilang.eclipse;
 
-import mb.statix.multilang.ContextConfig;
 import mb.statix.multilang.ContextId;
+import mb.statix.multilang.LanguageId;
 
 import java.util.Map;
+import java.util.Set;
 
 public class ConstantContextMetadataProvider implements ContextMetadataProvider {
 
-    private final Map<ContextId, ContextConfig> contextMetadata;
+    private final Map<ContextId, Set<LanguageId>> contextMetadata;
 
-    protected ConstantContextMetadataProvider(Map<ContextId, ContextConfig> contextMetadata) {
+    protected ConstantContextMetadataProvider(Map<ContextId, Set<LanguageId>> contextMetadata) {
         this.contextMetadata = contextMetadata;
     }
 
     @Override
-    public Iterable<Map.Entry<ContextId, ContextConfig>> getContextConfigurations() {
-        return contextMetadata.entrySet();
+    public Map<ContextId, Set<LanguageId>> getContextLanguages() {
+        return contextMetadata;
     }
 }

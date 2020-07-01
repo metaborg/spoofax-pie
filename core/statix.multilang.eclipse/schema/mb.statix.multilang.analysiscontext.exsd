@@ -4,7 +4,7 @@
   <annotation>
     <appinfo>
       <meta.schema plugin="mb.statix.multilang.eclipse"
-                   id="mb.metaborg.statix.multilang.analysiscontext"
+                   id="mb.statix.multilang.analysiscontext"
                    name="AnalysisContext"/>
     </appinfo>
   </annotation>

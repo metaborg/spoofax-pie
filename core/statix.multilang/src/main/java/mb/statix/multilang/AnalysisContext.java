@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Value.Immutable
+// TODO: Remove
 public abstract class AnalysisContext implements Serializable {
 
     @Value.Parameter public abstract ContextId contextId();

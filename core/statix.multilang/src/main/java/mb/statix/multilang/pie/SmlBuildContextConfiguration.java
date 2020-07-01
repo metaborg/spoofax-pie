@@ -6,14 +6,16 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.statix.multilang.AnalysisContextService;
 import mb.statix.multilang.ContextConfig;
 import mb.statix.multilang.ContextId;
-import mb.statix.multilang.MultiLangAnalysisException;
+import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.MultiLangScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import java.io.Serializable;
-import java.util.Objects;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 @MultiLangScope
 public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConfiguration.Input, ContextConfig> {
@@ -41,16 +43,26 @@ public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConf
     }
 
     @Override
-    public ContextConfig exec(ExecContext context, Input input) throws Exception {
-        @Nullable ContextConfig staticConfig = analysisContextService.getContextConfig(input.contextId);
+    public ContextConfig exec(ExecContext context, Input input) {
+        Set<LanguageId> staticLanguages = analysisContextService.getContextLanguages(input.contextId);
         @Nullable ContextConfig dynamicConfig = context.require(readConfigYaml
             .createTask(new SmlReadConfigYaml.Input(input.projectDir)))
             .getCustomContexts()
             .get(input.contextId);
 
-        return Stream.of(staticConfig, dynamicConfig)
-            .filter(Objects::nonNull)
-            .reduce(ContextConfig::merge)
-            .orElseThrow(() -> new MultiLangAnalysisException("No configuration for context with id: " + input.contextId));
+        if(dynamicConfig == null) {
+            ContextConfig result = new ContextConfig();
+            result.setLanguages(new ArrayList<>(staticLanguages));
+            return result;
+        } else if(staticLanguages.isEmpty()) {
+            return dynamicConfig;
+        } else {
+            ContextConfig result = new ContextConfig();
+            HashSet<LanguageId> languages = new HashSet<>(dynamicConfig.getLanguages());
+            languages.addAll(staticLanguages);
+            result.setLanguages(new ArrayList<>(languages));
+            result.setLogLevel(dynamicConfig.getLogLevel());
+            return result;
+        }
     }
 }

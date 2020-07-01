@@ -53,24 +53,9 @@ public class ContextConfig  implements Serializable {
     }
 
     public @Nullable Level parseLevel() {
-        return Arrays.stream(Level.values())
-            .filter(e -> e.name().equalsIgnoreCase(logLevel))
-            .findAny()
+        return Stream.of(Level.values())
+            .filter(level -> level.toString().equalsIgnoreCase(this.logLevel))
+            .findFirst()
             .orElse(null);
-    }
-
-    public static ContextConfig merge(ContextConfig contextConfig, ContextConfig contextConfig1) {
-        final ContextConfig result = new ContextConfig();
-        final List<LanguageId> languages = new ArrayList<>(contextConfig.languages);
-        languages.addAll(contextConfig1.languages);
-        result.setLanguages(languages);
-
-        result.setLogLevel(Stream.of(contextConfig.parseLevel(), contextConfig1.parseLevel())
-            .filter(Objects::nonNull)
-            .min(Comparator.comparing(Enum::ordinal))
-            .map(Level::toString)
-            .orElse(null));
-
-        return result;
     }
 }

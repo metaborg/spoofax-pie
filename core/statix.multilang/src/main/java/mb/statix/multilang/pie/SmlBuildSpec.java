@@ -4,6 +4,7 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.statix.multilang.AnalysisContextService;
 import mb.statix.multilang.LanguageId;
+import mb.statix.multilang.LanguageMetadata;
 import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.multilang.MultiLangScope;
 import mb.statix.multilang.spec.SpecBuilder;
@@ -43,7 +44,8 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Spec> {
 
     @Override public Spec exec(ExecContext context, Input input) throws Exception {
         return input.languages.stream()
-            .map(analysisContextService::getLanguageSpec)
+            .map(analysisContextService::getLanguageMetadata)
+            .map(LanguageMetadata::statixSpec)
             .reduce(SpecBuilder::merge)
             .orElseThrow(() -> new MultiLangAnalysisException("Doing analysis without specs is not allowed"))
             .toSpec();

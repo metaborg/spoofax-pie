@@ -1,13 +1,12 @@
 package mb.statix.multilang;
 
-import com.sun.javafx.collections.MappingChange;
 import mb.common.util.MapView;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
+// Not immutable since it must have java beans semantics to work with yaml reader (see SmlReadConfigYaml).
 public class MultiLangConfig implements Serializable {
     private HashMap<LanguageId, ContextId> languageContexts = new HashMap<>();
     private HashMap<ContextId, ContextConfig> customContexts = new HashMap<>();

@@ -1,159 +1,45 @@
 package mb.statix.multilang;
 
-import mb.common.util.MultiHashMap;
-import mb.log.api.Logger;
-import mb.log.api.LoggerFactory;
-import mb.pie.api.Pie;
-import mb.resource.ResourceService;
-import mb.spoofax.core.platform.Platform;
-import mb.statix.multilang.spec.SpecBuilder;
-import mb.statix.spec.Spec;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.metaborg.util.log.Level;
+import org.immutables.value.Value;
 
-import javax.inject.Inject;
-import java.util.*;
-import java.util.function.Function;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
-@MultiLangScope
-public class AnalysisContextService {
+@Value.Immutable
+public abstract class AnalysisContextService {
 
-    private final Map<ContextId, AnalysisContext> contexts = new HashMap<>();
-    private final Map<LanguageId, Supplier<LanguageMetadata>> languages = new HashMap<>();
-    private final MultiHashMap<ContextId, ContextConfig> contextConfigurations = new MultiHashMap<>();
+    @Value.Parameter public abstract Map<LanguageId, ContextId> defaultLanguageContexts();
+    @Value.Parameter public abstract Map<LanguageId, Supplier<LanguageMetadata>> languageMetadataSuppliers();
+    @Value.Parameter public abstract Map<ContextId, Set<LanguageId>> contextConfigurations();
 
-    private final Pie basePie;
-    private final ResourceService baseResourceService;
-    private final LoggerFactory loggerFactory;
-    private final Logger logger;
+    // Map used to cache language metadata instances, so that they will not be recomputed by subsequent accesses.
+    private final Map<LanguageId, LanguageMetadata> languageMetadataCache = new HashMap<>();
 
-    private boolean serviceInitialized = false;
-    private final Object lock = new Object();
-
-    @Inject public AnalysisContextService(
-        @Platform Pie basePie,
-        @Platform ResourceService baseResourceService,
-        LoggerFactory loggerFactory
-    ) {
-        this.basePie = basePie;
-        this.baseResourceService = baseResourceService;
-        this.loggerFactory = loggerFactory;
-        this.logger = loggerFactory.create(AnalysisContextService.class);
+    @Value.Lazy public LanguageMetadata getLanguageMetadata(LanguageId languageId) {
+        return languageMetadataCache
+            // Consult cache to return value
+            .computeIfAbsent(languageId, k -> languageMetadataSuppliers()
+                // Compute value from supplier
+                .computeIfAbsent(languageId, k2 -> {
+                    // If no supplier registered, throw exception.
+                    throw new MultiLangAnalysisException("No language metadata for id " + languageId);
+                })
+                .get());
     }
 
-    public void initializeService() {
-        serviceInitialized = true;
-        synchronized(lock) {
-            lock.notifyAll();
-        }
+    public Set<LanguageId> getContextLanguages(ContextId contextId) {
+        return contextConfigurations().getOrDefault(contextId, Collections.emptySet());
     }
 
-    private void ensureContextInitialized(ContextId contextId) {
-        waitForServiceInitialized();
-        if(contexts.containsKey(contextId)) {
-            return;
-        }
-        synchronized(contexts) {
-            if(!contexts.containsKey(contextId)) {
-                initializeContext(contextId);
-            }
-        }
+    public ContextId getDefaultContextId(LanguageId languageId) {
+        return defaultLanguageContexts().getOrDefault(languageId, new ContextId(languageId.getId()));
     }
 
-    private void waitForServiceInitialized() {
-        if(!serviceInitialized) {
-            synchronized(lock) {
-                try {
-                    lock.wait(3000);
-                } catch(InterruptedException e) {
-                    throw new MultiLangAnalysisException(e);
-                }
-            }
-        }
-    }
-
-    public void registerLanguageLoader(LanguageId languageId, Supplier<LanguageMetadata> languageMetadata) {
-        if(serviceInitialized && languages.containsKey(languageId)) {
-            logger.warn("Replacing language metadata after initialization. Already initialized contexts will keep using previously registered metadata");
-        }
-        languages.put(languageId, languageMetadata);
-    }
-
-    public void registerContextConfig(ContextId contextId, ContextConfig configs) {
-        if(serviceInitialized && contexts.containsKey(contextId)) {
-            logger.warn("Registering languages for already initialized context.");
-            // TODO: Maybe update context?
-        }
-        contextConfigurations.put(contextId, configs);
-    }
-
-    private AnalysisContext initializeContext(ContextId contextId) {
-        if(contexts.containsKey(contextId)) {
-            throw new MultiLangAnalysisException(String.format("Context with id '%s' is already initialized", contextId));
-        }
-        if(!contextConfigurations.containsKey(contextId)) {
-            throw new MultiLangAnalysisException("No configuration for context with id " + contextId);
-        }
-
-        ArrayList<ContextConfig> contextConfigs = contextConfigurations.get(contextId);
-
-        Map<LanguageId, LanguageMetadata> languagesForContext = contextConfigs.stream()
-            .map(ContextConfig::getLanguages)
-            .flatMap(List::stream)
-            .map(languageId -> languages.computeIfAbsent(languageId, key -> {
-                throw new MultiLangAnalysisException("Cannot initialize context " + key +
-                    ". No metadata for language " + key);
-            }))
-            .map(Supplier::get)
-            .collect(Collectors.toMap(LanguageMetadata::languageId, Function.identity()));
-
-        Level logLevel = contextConfigs.stream()
-            .map(ContextConfig::parseLevel)
-            .filter(Objects::nonNull)
-            .min(Comparator.comparing(Enum::ordinal))
-            .orElse(null);
-
-        AnalysisContext context = ImmutableAnalysisContext.builder()
-            .contextId(contextId)
-            .languages(languagesForContext)
-            .basePie(basePie)
-            .baseResourceService(baseResourceService)
-            .logger(loggerFactory.create(String.format("MLA [%s]", contextId)))
-            .stxLogLevel(logLevel)
-            .build();
-
-        contexts.put(contextId, context);
-
-        return context;
-    }
-
-    public AnalysisContext getAnalysisContext(ContextId contextId) {
-        ensureContextInitialized(contextId);
-        return contexts.get(contextId);
-    }
-
-    public SpecBuilder getLanguageSpec(LanguageId languageId) {
-        return languages.get(languageId).get().statixSpec();
-    }
-
-    public Collection<LanguageId> getlanguageIds(ContextId contextId) {
-        return getContextConfig(contextId).getLanguages();
-    }
-
-    public @Nullable ContextConfig getContextConfig(ContextId contextId) {
-        return contextConfigurations.get(contextId).stream()
-            .reduce(ContextConfig::merge)
-            .orElse(null);
-    }
-
-    public LanguageMetadata getLanguageMetadata(LanguageId languageId) {
-        return languages.get(languageId).get();
-    }
-
-    public ContextId getDefaultContextId(LanguageId initiatingLanguage) {
-        // TODO: Maintain map with default contexts
-        return new ContextId(initiatingLanguage.getId());
+    public static ImmutableAnalysisContextService.Builder builder() {
+        return ImmutableAnalysisContextService.builder();
     }
 }

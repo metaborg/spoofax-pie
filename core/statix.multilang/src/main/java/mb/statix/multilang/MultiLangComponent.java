@@ -4,7 +4,9 @@ import dagger.Component;
 import mb.spoofax.core.platform.PlatformComponent;
 
 @MultiLangScope
-@Component(dependencies = PlatformComponent.class)
+@Component(
+    modules = MultiLangModule.class,
+    dependencies = PlatformComponent.class)
 public interface MultiLangComponent {
     AnalysisContextService getAnalysisContextService();
 }
