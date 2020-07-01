@@ -68,7 +68,7 @@ public class TigerIdeCheckAggregate implements TaskDef<TigerIdeCheckAggregate.In
         return TigerIdeCheckAggregate.class.getName();
     }
 
-    @Override public @Nullable KeyedMessages exec(ExecContext context, Input input) {
+    @Override public KeyedMessages exec(ExecContext context, Input input) {
         final KeyedMessagesBuilder builder = new KeyedMessagesBuilder();
         try {
             final HierarchicalResource root = context.require(input.root, ResourceStampers.modifiedDirRec(input.walker, input.matcher));

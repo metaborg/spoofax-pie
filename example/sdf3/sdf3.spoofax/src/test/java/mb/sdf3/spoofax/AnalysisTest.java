@@ -1,6 +1,7 @@
 package mb.sdf3.spoofax;
 
 import mb.common.message.KeyedMessages;
+import mb.common.result.Result;
 import mb.pie.api.ExecException;
 import mb.pie.api.Function;
 import mb.pie.api.MixedSession;
@@ -35,9 +36,7 @@ import org.spoofax.terms.TermFactory;
 import java.io.IOException;
 import java.util.HashSet;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class AnalysisTest extends TestBase {
 
@@ -153,8 +152,8 @@ public class AnalysisTest extends TestBase {
         ClassLoaderResource statixSpec = statixRegistry.getResource(id);
         SpecBuilder spec = SpecUtils.loadSpec(statixSpec, "statix/statics", termFactory);
 
-        Function<ResourceKey, IStrategoTerm> preAnalyze = languageComponent.getPreStatix().createFunction()
-            .mapInput((exec, key) -> languageComponent.getIndexAst().createSupplier(key));
+        Function<ResourceKey, Result<IStrategoTerm, ?>> preAnalyze = languageComponent.getPreStatix().createFunction()
+            .mapInput((key) -> languageComponent.getIndexAst().createSupplier(key));
 
         LanguageMetadata languageMetadata = ImmutableLanguageMetadata.builder()
             .languageId(new LanguageId("sdf3"))

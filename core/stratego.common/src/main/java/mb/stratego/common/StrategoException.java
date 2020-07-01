@@ -133,6 +133,7 @@ public abstract class StrategoException extends Exception {
         return sb.toString();
     }
 
+
     @Override public abstract int hashCode();
 
     @Override public abstract boolean equals(@Nullable Object obj);

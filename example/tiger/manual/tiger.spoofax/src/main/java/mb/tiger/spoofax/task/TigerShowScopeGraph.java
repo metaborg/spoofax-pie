@@ -1,6 +1,5 @@
 package mb.tiger.spoofax.task;
 
-import mb.common.region.Region;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Task;
@@ -9,12 +8,10 @@ import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
-import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoUtil;
 import mb.tiger.spoofax.task.reusable.TigerAnalyze;
 import mb.tiger.spoofax.task.reusable.TigerParse;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 
@@ -46,7 +43,6 @@ public class TigerShowScopeGraph implements TaskDef<TigerShowArgs, CommandFeedba
 
     @Override public CommandFeedback exec(ExecContext context, TigerShowArgs input) {
         final ResourceKey key = input.key;
-        final @Nullable Region region = input.region;
         return context.require(analyze, new TigerAnalyze.Input(key, parse.createAstSupplier(key)))
             .flatMapOrElse((output) -> {
                 if(output.result.ast != null) {
@@ -55,21 +51,12 @@ public class TigerShowScopeGraph implements TaskDef<TigerShowArgs, CommandFeedba
                     return Result.ofErr(new Exception("Cannot show scope graph, analyzed AST for '" + key + "' is null"));
                 }
             }, Result::ofErr)
-            .flatMapOrElse(output -> {
-                try {
-                    final String strategyId = "spoofax3-editor-show-analysis-term";
-                    final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get().addContextObject(output.context);
-                    final ITermFactory termFactory = strategoRuntime.getTermFactory();
-                    final IStrategoTerm inputTerm = termFactory.makeTuple(output.result.ast, termFactory.makeString(resourceService.toString(key)));
-                    return Result.ofNullableOrElse(
-                        strategoRuntime.invoke(strategyId, inputTerm),
-                        () -> new Exception("Cannot show scope graph, invoking '" + strategyId + "' on '" + output.result.ast + "' failed unexpectedly")
-                    );
-                } catch(StrategoException e) {
-                    return Result.ofErr(e);
-                }
-            }, Result::ofErr) // TODO: any way we don't have to use flatMapOrElse that threads the error to convert the type?
-            .map(StrategoUtil::toString)
+            .mapCatching(output -> {
+                final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get().addContextObject(output.context);
+                final ITermFactory termFactory = strategoRuntime.getTermFactory();
+                final IStrategoTerm inputTerm = termFactory.makeTuple(output.result.ast, termFactory.makeString(resourceService.toString(key)));
+                return StrategoUtil.toString(strategoRuntime.invoke("spoofax3-editor-show-analysis-term", inputTerm));
+            })
             .mapOrElse(text -> CommandFeedback.of(ShowFeedback.showText(text, "Scope graph for '" + key + "'")), e -> CommandFeedback.ofTryExtractMessagesFrom(e, key));
     }
 

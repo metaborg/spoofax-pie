@@ -4,6 +4,7 @@ import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Messages;
 import mb.common.result.Result;
+import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
@@ -14,7 +15,6 @@ import mb.resource.hierarchical.walk.ResourceWalker;
 import mb.spoofax.core.language.LanguageScope;
 import mb.tiger.spoofax.task.reusable.TigerAnalyzeMulti;
 import mb.tiger.spoofax.task.reusable.TigerParse;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -76,7 +76,7 @@ public class TigerIdeCheckMulti implements TaskDef<TigerIdeCheckMulti.Input, Key
     }
 
     @Override
-    public KeyedMessages exec(ExecContext context, Input input) throws Exception {
+    public KeyedMessages exec(ExecContext context, Input input) throws IOException {
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         final HierarchicalResource root = context.require(input.root, ResourceStampers.modifiedDirRec(input.walker, input.matcher));
         try {
@@ -94,7 +94,7 @@ public class TigerIdeCheckMulti implements TaskDef<TigerIdeCheckMulti.Input, Key
         }
 
         final TigerAnalyzeMulti.Input analyzeInput = new TigerAnalyzeMulti.Input(input.root, input.walker, input.matcher, parse.createRecoverableAstFunction());
-        final Result<TigerAnalyzeMulti.Output, ?> analysisResult = context.require(analyze, analyzeInput);
+        final Result<ConstraintAnalyzeMultiTaskDef.Output, ?> analysisResult = context.require(analyze, analyzeInput);
         // TODO: propagate error/messages from analysis failure as well.
         analysisResult.ifOk((o) -> {
             messagesBuilder.addMessages(o.result.messages);

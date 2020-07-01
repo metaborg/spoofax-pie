@@ -36,16 +36,17 @@ public class {{genCheckTaskDef.id}} implements TaskDef<ResourceKey, Messages> {
         return "{{genCheckTaskDef.qualifiedId}}";
     }
 
-    @Override public Messages exec(ExecContext context, ResourceKey key) throws IOException, ExecException, InterruptedException {
+    @Override public Messages exec(ExecContext context, ResourceKey key) throws IOException {
         final MessagesBuilder messagesBuilder = new MessagesBuilder();
         final ResourceStringSupplier stringSupplier = new ResourceStringSupplier(key);
         final Messages parseMessages = context.require(parse.createMessagesSupplier(stringSupplier));
         messagesBuilder.addMessages(parseMessages);
 {{#constraintAnalyzer}}
-        final {{this.analyzeTaskDef.qualifiedId}}.@Nullable Output analysisOutput = context.require(analyze, new {{this.analyzeTaskDef.qualifiedId}}.Input(key, parse.createRecoverableAstSupplier(stringSupplier).map(Result::get)));
-        if(analysisOutput != null) {
-            messagesBuilder.addMessages(analysisOutput.result.messages);
-        }
+        // TODO: propagate error/messages from analysis failure as well.
+        final Result<{{this.analyzeTaskDef.qualifiedId}}.Output, ?> analysisOutput = context.require(analyze, new {{this.analyzeTaskDef.qualifiedId}}.Input(key, parse.createRecoverableAstSupplier(stringSupplier)));
+        analysisOutput.ifOk(output -> {
+            messagesBuilder.addMessages(output.result.messages);
+        });
 {{/constraintAnalyzer}}
         return messagesBuilder.build();
     }

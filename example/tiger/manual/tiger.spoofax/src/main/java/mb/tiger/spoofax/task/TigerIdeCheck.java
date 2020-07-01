@@ -30,15 +30,15 @@ public class TigerIdeCheck implements TaskDef<ResourceKey, Messages> {
 
     @Override
     public Messages exec(ExecContext context, ResourceKey key) throws IOException {
-        final MessagesBuilder builder = new MessagesBuilder();
-        final ResourceStringSupplier stringProvider = new ResourceStringSupplier(key);
-        final Messages parseMessages = context.require(parse.createMessagesSupplier(stringProvider));
-        builder.addMessages(parseMessages);
+        final MessagesBuilder messagesBuilder = new MessagesBuilder();
+        final ResourceStringSupplier stringSupplier = new ResourceStringSupplier(key);
+        final Messages parseMessages = context.require(parse.createMessagesSupplier(stringSupplier));
+        messagesBuilder.addMessages(parseMessages);
         // TODO: propagate error/messages from analysis failure as well.
-        final Result<TigerAnalyze.Output, ?> analysisOutput = context.require(analyze, new TigerAnalyze.Input(key, parse.createRecoverableAstSupplier(stringProvider)));
+        final Result<TigerAnalyze.Output, ?> analysisOutput = context.require(analyze, new TigerAnalyze.Input(key, parse.createRecoverableAstSupplier(stringSupplier)));
         analysisOutput.ifOk(output -> {
-            builder.addMessages(output.result.messages);
+            messagesBuilder.addMessages(output.result.messages);
         });
-        return builder.build();
+        return messagesBuilder.build();
     }
 }

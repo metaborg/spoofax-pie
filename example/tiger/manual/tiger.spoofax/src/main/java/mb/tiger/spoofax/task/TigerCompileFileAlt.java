@@ -94,7 +94,7 @@ public class TigerCompileFileAlt implements TaskDef<TigerCompileFileAlt.Args, Co
                 context.provide(generatedResource, ResourceStampers.hashFile());
                 return generatedPath;
             })
-            .mapOrElse(f -> CommandFeedback.of(ShowFeedback.showFile(f)), e -> CommandFeedback.of(e));
+            .mapOrElse(f -> CommandFeedback.of(ShowFeedback.showFile(f)), e -> CommandFeedback.ofTryExtractMessagesFrom(e, file));
     }
 
     @Override public Serializable key(Args input) {

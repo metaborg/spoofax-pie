@@ -72,6 +72,12 @@ public class StrategoRuntimeCompiler {
 
     // Adapter project
 
+    public ListView<GradleConfiguredDependency> getAdapterProjectDependencies(AdapterProjectInput input) {
+        return ListView.of(
+            GradleConfiguredDependency.api(input.languageProjectInput().shared().strategoPieDep())
+        );
+    }
+
     public Output compileAdapterProject(AdapterProjectInput input) throws IOException {
         // Nothing to generate for adapter project at the moment.
         return Output.builder().build();

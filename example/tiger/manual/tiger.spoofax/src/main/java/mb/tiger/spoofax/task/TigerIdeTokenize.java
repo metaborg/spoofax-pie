@@ -7,7 +7,6 @@ import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageScope;
 import mb.tiger.spoofax.task.reusable.TigerParse;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -25,7 +24,7 @@ public class TigerIdeTokenize implements TaskDef<ResourceKey, Option<JSGLRTokens
     }
 
     @Override
-    public @Nullable Option<JSGLRTokens> exec(ExecContext context, ResourceKey key) throws IOException {
+    public Option<JSGLRTokens> exec(ExecContext context, ResourceKey key) throws IOException {
         return context.require(parse.createTokensSupplier(key)).ok();
     }
 }

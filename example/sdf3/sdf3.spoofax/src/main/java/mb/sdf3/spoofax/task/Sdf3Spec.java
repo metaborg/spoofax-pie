@@ -1,24 +1,24 @@
 package mb.sdf3.spoofax.task;
 
+import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.pie.api.Supplier;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import java.io.Serializable;
 import java.util.Objects;
 
 public class Sdf3Spec implements Serializable {
-    public final Supplier<@Nullable IStrategoTerm> mainModuleAstSupplier;
-    public final ListView<Supplier<@Nullable IStrategoTerm>> modulesAstSuppliers;
+    public final Supplier<? extends Result<IStrategoTerm, ?>> mainModuleAstSupplier;
+    public final ListView<Supplier<? extends Result<IStrategoTerm, ?>>> modulesAstSuppliers;
 
-    public Sdf3Spec(Supplier<@Nullable IStrategoTerm> mainModuleAstSupplier, ListView<Supplier<@Nullable IStrategoTerm>> modulesAstSuppliers) {
+    public Sdf3Spec(Supplier<? extends Result<IStrategoTerm, ?>> mainModuleAstSupplier, ListView<Supplier<? extends Result<IStrategoTerm, ?>>> modulesAstSuppliers) {
         this.mainModuleAstSupplier = mainModuleAstSupplier;
         this.modulesAstSuppliers = modulesAstSuppliers;
     }
 
     @SafeVarargs
-    public Sdf3Spec(Supplier<@Nullable IStrategoTerm> mainModuleAstSupplier, Supplier<@Nullable IStrategoTerm>... modulesAstSuppliers) {
+    public Sdf3Spec(Supplier<? extends Result<IStrategoTerm, ?>> mainModuleAstSupplier, Supplier<? extends Result<IStrategoTerm, ?>>... modulesAstSuppliers) {
         this(mainModuleAstSupplier, ListView.of(modulesAstSuppliers));
     }
 
