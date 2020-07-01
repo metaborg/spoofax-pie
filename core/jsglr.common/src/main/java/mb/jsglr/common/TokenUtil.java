@@ -7,6 +7,7 @@ import mb.common.token.TokenType;
 import mb.common.token.TokenTypes;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.imploder.IToken;
+import org.spoofax.jsglr.client.imploder.ITokenizer;
 import org.spoofax.jsglr.client.imploder.ITokens;
 import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 
@@ -15,13 +16,13 @@ import java.util.ArrayList;
 public class TokenUtil {
     public static ArrayList<Token<IStrategoTerm>> extract(IStrategoTerm ast) {
         final ImploderAttachment rootImploderAttachment = ImploderAttachment.get(ast);
-        final ITokens tokens = rootImploderAttachment.getLeftToken().getTokenizer();
-        final int tokenCount = tokens.getTokenCount();
+        final ITokenizer tokenizer = (ITokenizer)rootImploderAttachment.getLeftToken().getTokenizer();
+        final int tokenCount = tokenizer.getTokenCount();
         final ArrayList<Token<IStrategoTerm>> tokenStream = new ArrayList<>(tokenCount);
         int offset = -1;
         for(int i = 0; i < tokenCount; ++i) {
-            final IToken jsglrToken = tokens.getTokenAt(i);
-            if(tokens.isAmbiguous() && jsglrToken.getStartOffset() < offset) {
+            final IToken jsglrToken = tokenizer.getTokenAt(i);
+            if(tokenizer.isAmbiguous() && jsglrToken.getStartOffset() < offset) {
                 // In case of ambiguities, tokens inside the ambiguity are duplicated, ignore.
                 continue;
             }
@@ -47,19 +48,19 @@ public class TokenUtil {
         return new TokenImpl<>(tokenType, region, fragment);
     }
 
-    private static TokenType convertTokenKind(int kind) {
+    private static TokenType convertTokenKind(IToken.Kind kind) {
         switch(kind) {
-            case IToken.TK_IDENTIFIER:
+            case TK_IDENTIFIER:
                 return TokenTypes.identifier();
-            case IToken.TK_STRING:
+            case TK_STRING:
                 return TokenTypes.string();
-            case IToken.TK_NUMBER:
+            case TK_NUMBER:
                 return TokenTypes.number();
-            case IToken.TK_KEYWORD:
+            case TK_KEYWORD:
                 return TokenTypes.keyword();
-            case IToken.TK_OPERATOR:
+            case TK_OPERATOR:
                 return TokenTypes.operator();
-            case IToken.TK_LAYOUT:
+            case TK_LAYOUT:
                 return TokenTypes.layout();
             default:
                 return TokenTypes.unknown();
