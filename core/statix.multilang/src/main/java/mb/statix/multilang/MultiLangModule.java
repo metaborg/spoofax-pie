@@ -11,7 +11,7 @@ public class MultiLangModule {
         this.analysisContextService = analysisContextService;
     }
 
-    @Provides public AnalysisContextService provideAnalysisContextService() {
+    @Provides @MultiLangScope public AnalysisContextService provideAnalysisContextService() {
         return analysisContextService;
     }
 }
