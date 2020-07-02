@@ -10,19 +10,15 @@ import mb.statix.multilang.MultiLangScope;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
+import javax.inject.Inject;
 import java.io.Serializable;
 
 @MultiLangScope
-public class SmlReadConfigYaml implements TaskDef<SmlReadConfigYaml.Input, MultiLangConfig> {
-    public static class Input implements Serializable {
-        private final ResourcePath projectDir;
-
-        public Input(ResourcePath projectDir) {
-            this.projectDir = projectDir;
-        }
-    }
-
+public class SmlReadConfigYaml implements TaskDef<ResourcePath, MultiLangConfig> {
     private static final String configFileName = "multilang.yaml";
+
+    @Inject public SmlReadConfigYaml() {
+    }
 
     @Override
     public String getId() {
@@ -30,8 +26,8 @@ public class SmlReadConfigYaml implements TaskDef<SmlReadConfigYaml.Input, Multi
     }
 
     @Override
-    public MultiLangConfig exec(ExecContext context, Input input) throws Exception {
-        ResourcePath configFilePath = input.projectDir.appendRelativePath(configFileName);
+    public MultiLangConfig exec(ExecContext context, ResourcePath projectPath) throws Exception {
+        ResourcePath configFilePath = projectPath.appendRelativePath(configFileName);
         ReadableResource configFileResource = context.require(configFilePath, context.getDefaultRequireReadableResourceStamper());
 
         if (!configFileResource.exists() || !configFileResource.isReadable()) {

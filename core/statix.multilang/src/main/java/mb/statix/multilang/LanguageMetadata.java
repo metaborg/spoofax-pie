@@ -10,6 +10,7 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.statix.multilang.spec.SpecBuilder;
 import org.immutables.value.Value;
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.interpreter.terms.ITermFactory;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -32,4 +33,6 @@ public interface LanguageMetadata {
     @Value.Parameter String projectConstraint();
 
     @Value.Parameter Pie languagePie();
+
+    @Value.Parameter ITermFactory termFactory();
 }

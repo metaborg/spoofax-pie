@@ -63,7 +63,7 @@ public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConf
     @Override
     public Output exec(ExecContext context, Input input) {
         final MultiLangConfig config = context.require(readConfigYaml
-            .createTask(new SmlReadConfigYaml.Input(input.projectDir)));
+            .createTask(input.projectDir));
 
         ContextId contextId = config.getLanguageContexts()
             .getOrDefault(input.languageId, analysisContextService.getDefaultContextId(input.languageId));

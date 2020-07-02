@@ -10,7 +10,6 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.statix.constraints.CConj;
 import mb.statix.multilang.AnalysisContextService;
 import mb.statix.multilang.AnalysisResults;
-import mb.statix.multilang.ContextConfig;
 import mb.statix.multilang.ContextId;
 import mb.statix.multilang.FileResult;
 import mb.statix.multilang.ImmutableAnalysisResults;
@@ -24,7 +23,6 @@ import mb.statix.solver.persistent.Solver;
 import mb.statix.solver.persistent.SolverResult;
 import mb.statix.spec.Rule;
 import mb.statix.spec.Spec;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.log.Level;
 
 import javax.inject.Inject;
@@ -79,7 +77,6 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Analy
     private final SmlInstantiateGlobalScope instantiateGlobalScope;
     private final SmlPartialSolveProject partialSolveProject;
     private final SmlPartialSolveFile partialSolveFile;
-    private final SmlBuildContextConfiguration buildContextConfiguration;
     private final SmlBuildSpec buildSpec;
     private final AnalysisContextService analysisContextService;
     private final Logger logger;
@@ -88,7 +85,6 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Analy
         SmlInstantiateGlobalScope instantiateGlobalScope,
         SmlPartialSolveProject partialSolveProject,
         SmlPartialSolveFile partialSolveFile,
-        SmlBuildContextConfiguration buildContextConfiguration,
         SmlBuildSpec buildSpec,
         AnalysisContextService analysisContextService,
         LoggerFactory loggerFactory
@@ -96,7 +92,6 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Analy
         this.instantiateGlobalScope = instantiateGlobalScope;
         this.partialSolveProject = partialSolveProject;
         this.partialSolveFile = partialSolveFile;
-        this.buildContextConfiguration = buildContextConfiguration;
         this.buildSpec = buildSpec;
         this.analysisContextService = analysisContextService;
         logger = loggerFactory.create(SmlAnalyzeProject.class);
@@ -107,10 +102,6 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Analy
     }
 
     @Override public AnalysisResults exec(ExecContext context, Input input) throws Exception {
-        /* final ContextConfig config = context.require(buildContextConfiguration.createTask(
-            new SmlBuildContextConfiguration.Input(input.projectPath, input.contextId)
-        )); */
-
         final Supplier<Spec> specSupplier = buildSpec.createSupplier(new SmlBuildSpec.Input(input.languages));
         final Spec combinedSpec = context.require(specSupplier);
 
@@ -144,23 +135,19 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Analy
 
         // Create file results (maintain resource key for error message mapping
         Map<AnalysisResults.FileKey, FileResult> fileResults = input.languages.stream()
-            .map(analysisContextService::getLanguageMetadata)
-            .flatMap(languageMetadata ->
-                languageMetadata.resourcesSupplier().apply(context, input.projectPath).stream()
-                    .map(resourceKey -> {
-                        FileResult fileResult = context.require(partialSolveFile.createTask(new SmlPartialSolveFile.Input(
-                            languageMetadata.astFunction(),
-                            languageMetadata.postTransform(),
-                            resourceKey,
-                            specSupplier,
-                            globalResultSupplier,
-                            languageMetadata.fileConstraint(),
-                            input.logLevel)));
-                        return new AbstractMap.SimpleEntry<>(
-                            new AnalysisResults.FileKey(languageMetadata.languageId(), resourceKey),
-                            fileResult);
-                    })
-            )
+            .flatMap(languageId -> analysisContextService
+                .getLanguageMetadata(languageId)
+                .resourcesSupplier()
+                .apply(context, input.projectPath)
+                .stream()
+                .map(resourceKey -> new AbstractMap.SimpleEntry<>(
+                    new AnalysisResults.FileKey(languageId, resourceKey),
+                    context.require(partialSolveFile.createTask(new SmlPartialSolveFile.Input(
+                        languageId,
+                        resourceKey,
+                        specSupplier,
+                        globalResultSupplier,
+                        input.logLevel))))))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         IState.Immutable combinedState = Stream.concat(
