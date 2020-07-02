@@ -78,7 +78,7 @@ public class TigerIdeCheckAggregate implements TaskDef<TigerIdeCheckAggregate.In
                 builder.addMessages(fileKey, messages);
             });
         } catch(Exception e) {
-            builder.addMessage("Aggregating messages for '" + input.root + "' failed unexpectedly", e, Severity.Error);
+            builder.addMessage("Aggregating messages for '" + input.root + "' failed", e, Severity.Error);
         }
         return builder.build(input.root);
     }

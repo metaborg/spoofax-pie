@@ -29,30 +29,11 @@ public interface Result<T, E extends Exception> extends Serializable {
     }
 
     static <T, E extends Exception> Result<T, ?> ofOkOrCatching(ExceptionalSupplier<? extends T, E> supplier) {
-        try {
-            return Result.ofOk(supplier.get());
-        } catch(Exception e) {
-            return Result.ofErr(e);
-        }
+        return Catcher.tryCatch(() -> Result.ofOk(supplier.get()), Result::ofErr);
     }
 
     static <T, E extends Exception> Result<T, E> ofOkOrCatching(ExceptionalSupplier<? extends T, E> supplier, Class<E> exceptionClass) {
-        try {
-            return Result.ofOk(supplier.get());
-        } catch(Exception e) {
-            if(e.getClass().equals(exceptionClass)) {
-                // noinspection unchecked (cast is safe because `e`'s class is equal to `exceptionClass`)
-                return Result.ofErr((E)e);
-            } else {
-                // `e` is not of type `F`, and it cannot be another checked exception. Therefore, it is either a
-                // `RuntimeException` or a checked exception that is sneakily thrown. In either case, it is safe to
-                // sneakily rethrow the exception
-                SneakyThrow.doThrow(e);
-                // Because `SneakyThrow.doThrow` throws, the following statement will never be executed, but it is
-                // still needed to make the Java compiler happy.
-                throw new RuntimeException(e);
-            }
-        }
+        return Catcher.tryCatch(() -> Result.ofOk(supplier.get()), Result::ofErr, exceptionClass);
     }
 
     static <T, E extends Exception> Result<T, E> ofErr(E error) {
@@ -64,8 +45,9 @@ public interface Result<T, E extends Exception> extends Serializable {
 
     Option<T> ok();
 
-    default void ifOk(Consumer<? super T> consumer) {
+    default Result<T, E> ifOk(Consumer<? super T> consumer) {
         ok().ifSome(consumer);
+        return this;
     }
 
 
@@ -73,22 +55,25 @@ public interface Result<T, E extends Exception> extends Serializable {
 
     Option<E> err();
 
-    default void ifErr(Consumer<? super E> consumer) {
+    default Result<T, E> ifErr(Consumer<? super E> consumer) {
         err().ifSome(consumer);
+        return this;
     }
 
-    default void throwIfError() throws E {
+    default Result<T, E> throwIfError() throws E {
         if(isErr()) {
             // noinspection ConstantConditions (`getErr` is safe because error is present if `isErr` returns true)
             throw getErr();
         }
+        return this;
     }
 
-    default void throwUncheckedIfError() {
+    default Result<T, E> throwUncheckedIfError() {
         if(isErr()) {
             // `getErr` is safe because error is present if `isErr` returns true.
             throw new RuntimeException(getErr());
         }
+        return this;
     }
 
 
@@ -130,12 +115,8 @@ public interface Result<T, E extends Exception> extends Serializable {
 
     default <U> Result<U, ?> mapCatching(ExceptionalFunction<? super T, ? extends U, ?> mapper) {
         if(isOk()) {
-            try {
-                //noinspection ConstantConditions (`get` is safe because value is present if `isOk` returns true)
-                return Result.ofOk(mapper.apply(get()));
-            } catch(Exception e) {
-                return Result.ofErr(e);
-            }
+            //noinspection ConstantConditions (`get` is safe because value is present if `isOk` returns true)
+            return Catcher.tryCatch(() -> Result.ofOk(mapper.apply(get())), Result::ofErr);
         } else {
             // noinspection unchecked (cast is safe because it is impossible to get a value of type U in the err case)
             return (Result<U, ?>)this;
@@ -144,23 +125,8 @@ public interface Result<T, E extends Exception> extends Serializable {
 
     default <U, F extends Exception> Result<U, F> mapCatching(ExceptionalFunction<? super T, ? extends U, F> mapper, Class<F> exceptionClass) {
         if(isOk()) {
-            try {
-                //noinspection ConstantConditions (`get` is safe because value is present if `isOk` returns true)
-                return Result.ofOk(mapper.apply(get()));
-            } catch(Exception e) {
-                if(e.getClass().equals(exceptionClass)) {
-                    // noinspection unchecked (cast is safe because `e`'s class is equal to `exceptionClass`)
-                    return Result.ofErr((F)e);
-                } else {
-                    // `e` is not of type `F`, and it cannot be another checked exception. Therefore, it is either a
-                    // `RuntimeException` or a checked exception that is sneakily thrown. In either case, it is safe to
-                    // sneakily rethrow the exception
-                    SneakyThrow.doThrow(e);
-                    // Because `SneakyThrow.doThrow` throws, the following statement will never be executed, but it is
-                    // still needed to make the Java compiler happy.
-                    throw new RuntimeException(e);
-                }
-            }
+            //noinspection ConstantConditions (`get` is safe because value is present if `isOk` returns true)
+            return Catcher.tryCatch(() -> Result.ofOk(mapper.apply(get())), Result::ofErr, exceptionClass);
         } else {
             // noinspection unchecked (cast is safe because it is impossible to get a value of type U in the err case)
             return (Result<U, F>)this;

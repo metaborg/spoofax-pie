@@ -89,7 +89,7 @@ public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args
             context.require(listDefNames, astSupplier)
                 .ifElse(sb::append, (e) -> {
                     sb.append("[]");
-                    messagesBuilder.addMessage("Listing definition names for '" + file + "' failed unexpectedly", e, Severity.Error, filePath);
+                    messagesBuilder.addMessage("Listing definition names for '" + file + "' failed", e, Severity.Error, filePath);
                 });
             sb.append('\n');
             first.set(false);

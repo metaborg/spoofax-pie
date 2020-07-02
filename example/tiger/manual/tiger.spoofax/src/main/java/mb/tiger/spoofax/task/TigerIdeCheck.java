@@ -2,6 +2,7 @@ package mb.tiger.spoofax.task;
 
 import mb.common.message.Messages;
 import mb.common.message.MessagesBuilder;
+import mb.common.message.Severity;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ResourceStringSupplier;
@@ -34,11 +35,10 @@ public class TigerIdeCheck implements TaskDef<ResourceKey, Messages> {
         final ResourceStringSupplier stringSupplier = new ResourceStringSupplier(key);
         final Messages parseMessages = context.require(parse.createMessagesSupplier(stringSupplier));
         messagesBuilder.addMessages(parseMessages);
-        // TODO: propagate error/messages from analysis failure as well.
-        final Result<TigerAnalyze.Output, ?> analysisOutput = context.require(analyze, new TigerAnalyze.Input(key, parse.createRecoverableAstSupplier(stringSupplier)));
-        analysisOutput.ifOk(output -> {
-            messagesBuilder.addMessages(output.result.messages);
-        });
+        final Result<TigerAnalyze.Output, ?> analysisResult = context.require(analyze, new TigerAnalyze.Input(key, parse.createRecoverableAstSupplier(stringSupplier)));
+        analysisResult
+            .ifOk(output -> messagesBuilder.addMessages(output.result.messages))
+            .ifErr(e -> messagesBuilder.addMessage("Analysis failed", e, Severity.Error));
         return messagesBuilder.build();
     }
 }

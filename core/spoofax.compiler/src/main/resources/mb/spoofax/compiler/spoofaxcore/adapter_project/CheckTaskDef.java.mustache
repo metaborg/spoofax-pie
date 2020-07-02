@@ -2,14 +2,13 @@ package {{genCheckTaskDef.packageId}};
 
 import mb.common.message.Messages;
 import mb.common.message.MessagesBuilder;
+import mb.common.message.Severity;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
-import mb.pie.api.ExecException;
 import mb.pie.api.ResourceStringSupplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageScope;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -42,11 +41,10 @@ public class {{genCheckTaskDef.id}} implements TaskDef<ResourceKey, Messages> {
         final Messages parseMessages = context.require(parse.createMessagesSupplier(stringSupplier));
         messagesBuilder.addMessages(parseMessages);
 {{#constraintAnalyzer}}
-        // TODO: propagate error/messages from analysis failure as well.
-        final Result<{{this.analyzeTaskDef.qualifiedId}}.Output, ?> analysisOutput = context.require(analyze, new {{this.analyzeTaskDef.qualifiedId}}.Input(key, parse.createRecoverableAstSupplier(stringSupplier)));
-        analysisOutput.ifOk(output -> {
-            messagesBuilder.addMessages(output.result.messages);
-        });
+        final Result<{{this.analyzeTaskDef.qualifiedId}}.Output, ?> analysisResult = context.require(analyze, new {{this.analyzeTaskDef.qualifiedId}}.Input(key, parse.createRecoverableAstSupplier(stringSupplier)));
+        analysisResult
+            .ifOk(output -> messagesBuilder.addMessages(output.result.messages))
+            .ifErr(e -> messagesBuilder.addMessage("Analysis failed", e, Severity.Error));
 {{/constraintAnalyzer}}
         return messagesBuilder.build();
     }

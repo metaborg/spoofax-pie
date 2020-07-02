@@ -3,6 +3,7 @@ package mb.tiger.spoofax.task;
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Messages;
+import mb.common.message.Severity;
 import mb.common.result.Result;
 import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
 import mb.pie.api.ExecContext;
@@ -95,10 +96,9 @@ public class TigerIdeCheckMulti implements TaskDef<TigerIdeCheckMulti.Input, Key
 
         final TigerAnalyzeMulti.Input analyzeInput = new TigerAnalyzeMulti.Input(input.root, input.walker, input.matcher, parse.createRecoverableAstFunction());
         final Result<ConstraintAnalyzeMultiTaskDef.Output, ?> analysisResult = context.require(analyze, analyzeInput);
-        // TODO: propagate error/messages from analysis failure as well.
-        analysisResult.ifOk((o) -> {
-            messagesBuilder.addMessages(o.result.messages);
-        });
+        analysisResult
+            .ifOk(output -> messagesBuilder.addMessages(output.result.messages))
+            .ifErr(e -> messagesBuilder.addMessage("Project-wide analysis failed", e, Severity.Error, input.root));
         return messagesBuilder.build();
     }
 }
