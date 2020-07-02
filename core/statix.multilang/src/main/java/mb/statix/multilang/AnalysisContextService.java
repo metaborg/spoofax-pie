@@ -22,15 +22,12 @@ public abstract class AnalysisContextService {
     private final Map<LanguageId, LanguageMetadata> languageMetadataCache = new HashMap<>();
 
     public LanguageMetadata getLanguageMetadata(LanguageId languageId) {
-        return languageMetadataCache
-            // Consult cache to return value
-            .computeIfAbsent(languageId, k -> languageMetadataSuppliers()
-                // Compute value from supplier
-                .computeIfAbsent(languageId, k2 -> {
-                    // If no supplier registered, throw exception.
-                    throw new MultiLangAnalysisException("No language metadata for id " + languageId);
-                })
-                .get());
+        if(!languageMetadataSuppliers().containsKey(languageId)) {
+            throw new MultiLangAnalysisException("No language metadata for id " + languageId);
+        }
+
+        // Consult cache to return value, else compute from supplier
+        return languageMetadataCache.computeIfAbsent(languageId, lid -> languageMetadataSuppliers().get(lid).get());
     }
 
     public Set<LanguageId> getContextLanguages(ContextId contextId) {

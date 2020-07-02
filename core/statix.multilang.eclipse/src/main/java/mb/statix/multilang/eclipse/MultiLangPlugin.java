@@ -110,7 +110,9 @@ public class MultiLangPlugin extends Plugin {
                 }))
             .forEach(analysisContextServiceBuilder::putContextConfigurations);
 
-        return analysisContextServiceBuilder.build();
+        return analysisContextServiceBuilder
+            .platformPie(SpoofaxPlugin.getComponent().getPie())
+            .build();
     }
 
     private static @Nullable Object loadClass(IConfigurationElement conf) {
