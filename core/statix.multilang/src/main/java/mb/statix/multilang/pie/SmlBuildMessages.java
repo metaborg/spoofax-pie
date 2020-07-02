@@ -18,6 +18,7 @@ import org.metaborg.util.log.Level;
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.AbstractMap;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -35,9 +36,9 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
         private final ContextId contextId;
         private final Level logLevel;
 
-        public Input(ResourcePath projectPath, HashSet<LanguageId> languages, ContextId contextId, Level logLevel) {
+        public Input(ResourcePath projectPath, Collection<LanguageId> languages, ContextId contextId, Level logLevel) {
             this.projectPath = projectPath;
-            this.languages = languages;
+            this.languages = new HashSet<>(languages);
             this.contextId = contextId;
             this.logLevel = logLevel;
         }

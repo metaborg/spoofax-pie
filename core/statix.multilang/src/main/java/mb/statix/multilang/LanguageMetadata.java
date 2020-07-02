@@ -1,6 +1,7 @@
 package mb.statix.multilang;
 
 import mb.pie.api.Function;
+import mb.pie.api.Pie;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
@@ -30,7 +31,5 @@ public interface LanguageMetadata {
 
     @Value.Parameter String projectConstraint();
 
-    @Value.Parameter Set<TaskDef<?, ?>> taskDefs();
-
-    @Value.Parameter Set<ResourceRegistry> resourceRegistries();
+    @Value.Parameter Pie languagePie();
 }

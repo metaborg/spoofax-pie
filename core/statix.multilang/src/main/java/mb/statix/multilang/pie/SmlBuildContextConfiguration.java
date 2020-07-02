@@ -18,7 +18,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @MultiLangScope
-public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConfiguration.Input, ContextConfig> {
+public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConfiguration.Input, SmlBuildContextConfiguration.Output> {
     public static class Input implements Serializable {
         private final ResourcePath projectDir;
         private final LanguageId languageId;
@@ -26,6 +26,24 @@ public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConf
         public Input(ResourcePath projectDir, LanguageId languageId) {
             this.projectDir = projectDir;
             this.languageId = languageId;
+        }
+    }
+
+    public static class Output implements Serializable {
+        private final ContextId contextId;
+        private final ContextConfig contextConfig;
+
+        public Output(ContextId contextId, ContextConfig contextConfig) {
+            this.contextId = contextId;
+            this.contextConfig = contextConfig;
+        }
+
+        public ContextId getContextId() {
+            return contextId;
+        }
+
+        public ContextConfig getContextConfig() {
+            return contextConfig;
         }
     }
 
@@ -43,7 +61,7 @@ public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConf
     }
 
     @Override
-    public ContextConfig exec(ExecContext context, Input input) {
+    public Output exec(ExecContext context, Input input) {
         final MultiLangConfig config = context.require(readConfigYaml
             .createTask(new SmlReadConfigYaml.Input(input.projectDir)));
 
@@ -55,19 +73,20 @@ public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConf
             .getCustomContexts()
             .get(contextId);
 
+        final ContextConfig contextConfig;
         if(dynamicConfig == null) {
-            ContextConfig result = new ContextConfig();
-            result.setLanguages(new ArrayList<>(staticLanguages));
-            return result;
+            contextConfig = new ContextConfig();
+            contextConfig.setLanguages(new ArrayList<>(staticLanguages));
         } else if(staticLanguages.isEmpty()) {
-            return dynamicConfig;
+            contextConfig = dynamicConfig;
         } else {
-            ContextConfig result = new ContextConfig();
+            contextConfig = new ContextConfig();
             HashSet<LanguageId> languages = new HashSet<>(dynamicConfig.getLanguages());
             languages.addAll(staticLanguages);
-            result.setLanguages(new ArrayList<>(languages));
-            result.setLogLevel(dynamicConfig.getLogLevel());
-            return result;
+            contextConfig.setLanguages(new ArrayList<>(languages));
+            contextConfig.setLogLevel(dynamicConfig.getLogLevel());
         }
+
+        return new Output(contextId, contextConfig);
     }
 }
