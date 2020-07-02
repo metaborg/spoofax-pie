@@ -115,11 +115,11 @@ public abstract class StrategoException extends Exception {
     private String createMessage(String strategyName, IStrategoTerm input, String[] trace, String postfix) {
         final StringBuilder sb = new StringBuilder();
         sb
-            .append("Invoking Stratego strategy:\n\t")
+            .append("Invoking Stratego strategy '")
             .append(strategyName)
-            .append("\non input:\n\t")
+            .append("' failed on input:\n")
             .append(StrategoUtil.toString(input))
-            .append("\nfailed")
+            .append("\n")
             .append(postfix)
         ;
         if(!postfix.isEmpty()) {

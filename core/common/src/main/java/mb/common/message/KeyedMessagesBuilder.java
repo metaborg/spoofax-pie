@@ -9,6 +9,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 public class KeyedMessagesBuilder {
     private final MultiHashMap<ResourceKey, Message> messages = new MultiHashMap<>();
@@ -73,12 +74,16 @@ public class KeyedMessagesBuilder {
     }
 
     public void addMessages(KeyedMessages keyedMessages) {
-        keyedMessages.messages.addAllTo(this.messages.getInnerMap());
+        for(Map.Entry<ResourceKey, ArrayList<Message>> entry : keyedMessages.messages) {
+            this.messages.putAll(entry.getKey(), entry.getValue());
+        }
         keyedMessages.messagesWithoutKey.addAllTo(this.messagesWithoutKey);
     }
 
     public void addMessagesWithDefaultKey(KeyedMessages keyedMessages, ResourceKey defaultKey) {
-        keyedMessages.messages.addAllTo(this.messages.getInnerMap());
+        for(Map.Entry<ResourceKey, ArrayList<Message>> entry : keyedMessages.messages) {
+            this.messages.putAll(entry.getKey(), entry.getValue());
+        }
         this.messages.putAll(defaultKey, keyedMessages.messagesWithoutKey);
     }
 

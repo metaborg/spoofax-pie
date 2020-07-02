@@ -25,6 +25,8 @@ dependencies {
   bundleTargetPlatformApi(eclipse("org.eclipse.swt"))
   bundleTargetPlatformApi(eclipse("com.ibm.icu"))
 
+  bundleTargetPlatformImplementation(eclipse("org.eclipse.ui.views.log"))
+
   bundleApi(project(":spoofax.eclipse.externaldeps"))
 
   compileOnly("org.checkerframework:checker-qual-android")

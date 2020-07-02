@@ -19,18 +19,25 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class RunCommandHandler extends AbstractHandler {
     public final static String dataParameterId = "data";
+
+    private static final Bundle bundle = FrameworkUtil.getBundle(RunCommandHandler.class);
+    private static final ILog logger = Platform.getLog(bundle);
 
     private final EclipseLanguageComponent languageComponent;
 
@@ -99,10 +106,10 @@ public class RunCommandHandler extends AbstractHandler {
             final IStatus status;
             if(exceptions.isEmpty()) {
                 status = new Status(IStatus.ERROR, pluginId, sb.toString());
-            } else {
+            }else {
                 final MultiStatus multiStatus = new MultiStatus(pluginId, IStatus.ERROR, sb.toString(), null);
                 for(Exception e : exceptions) {
-                    multiStatus.add(new Status(IStatus.ERROR, pluginId, null, e));
+                    multiStatus.add(exceptionToStatus(e, pluginId));
                 }
                 status = multiStatus;
             }
@@ -111,6 +118,7 @@ public class RunCommandHandler extends AbstractHandler {
                     final Shell activeShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
                     ErrorDialog.openError(activeShell, "Executing command '" + request.def().getDisplayName() + "' failed", null, status);
                 });
+                logger.log(status);
             }
         } catch(ExecException | RuntimeException e) {
             final IStatus status = new Status(IStatus.ERROR, pluginId, "Executing command '" + request.def().getDisplayName() + "' failed unexpectedly", e);
@@ -118,9 +126,19 @@ public class RunCommandHandler extends AbstractHandler {
                 final Shell activeShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
                 ErrorDialog.openError(activeShell, "Executing command '" + request.def().getDisplayName() + "' failed", null, status);
             });
+            logger.log(status);
         } catch(InterruptedException e) {
             // Execution was interrupted. No need to re-set interrupt, as we are the final handler of the interrupt.
         }
         return null;
+    }
+
+    private IStatus exceptionToStatus(Throwable e, String pluginId) {
+        final @Nullable Throwable cause = e.getCause();
+        if(cause == null) {
+            return new Status(IStatus.ERROR, pluginId, e.getMessage(), e);
+        } else {
+            return new MultiStatus(pluginId, IStatus.ERROR, new IStatus[]{exceptionToStatus(cause, pluginId)}, e.getMessage(), e);
+        }
     }
 }
