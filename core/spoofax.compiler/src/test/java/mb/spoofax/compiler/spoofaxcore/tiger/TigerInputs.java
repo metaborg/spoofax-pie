@@ -143,7 +143,7 @@ public class TigerInputs {
             )
             .enableNaBL2(true)
             .enableStatix(false)
-            .copyJavaStrategyClasses(true)
+            .copyClasses(true)
             .shared(shared)
             .languageProject(languageProject)
             ;

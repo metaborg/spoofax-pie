@@ -17,6 +17,8 @@ import mb.statix.spec.Spec;
 import org.metaborg.util.iterators.Iterables2;
 import org.metaborg.util.log.ILogger;
 import org.metaborg.util.log.LoggerUtils;
+import org.metaborg.util.task.NullCancel;
+import org.metaborg.util.task.NullProgress;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 
@@ -132,7 +134,9 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, S
         SolverResult fileResult = SolverUtils.partialSolve(input.spec,
             input.globalResult.state().withResource(input.resourceKey.toString()),
             fileConstraint,
-            input.debug);
+            input.debug,
+            new NullProgress(),
+            new NullCancel());
         long dt = System.currentTimeMillis() - t0;
         logger.info("{} analyzed in {} ms] ", input.resourceKey, dt);
 

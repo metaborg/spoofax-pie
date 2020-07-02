@@ -28,8 +28,7 @@ spoofaxLanguageProject {
       .enableNaBL2(false)
       .enableStatix(true)
       .copyCTree(true)
-      .copyClasses(false)
-      .copyJavaStrategyClasses(false),
+      .copyClasses(false),
     constraintAnalyzer = ConstraintAnalyzerCompiler.LanguageProjectInput.builder()
       .multiFile(true),
 

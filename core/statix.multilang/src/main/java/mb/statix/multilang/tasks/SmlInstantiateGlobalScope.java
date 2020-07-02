@@ -2,7 +2,7 @@ package mb.statix.multilang.tasks;
 
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
-import mb.nabl2.terms.build.ImmutableTermVar;
+import mb.nabl2.terms.build.TermVar;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.statix.constraints.CExists;
@@ -15,6 +15,8 @@ import mb.statix.solver.persistent.SolverResult;
 import mb.statix.solver.persistent.State;
 import mb.statix.spec.Spec;
 import org.metaborg.util.iterators.Iterables2;
+import org.metaborg.util.task.NullCancel;
+import org.metaborg.util.task.NullProgress;
 
 import javax.inject.Inject;
 import java.io.Serializable;
@@ -110,12 +112,12 @@ public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalSc
     @Override
     public Output exec(ExecContext context, Input input) throws Exception {
         // Create uniquely named scope variable
-        ITermVar globalScopeVar = ImmutableTermVar.of("", String.format("global-%s", input.globalScopeName));
+        ITermVar globalScopeVar = TermVar.of("", String.format("global-%s", input.globalScopeName));
         Iterable<ITermVar> scopeArgs = Iterables2.singleton(globalScopeVar);
         IConstraint globalConstraint = new CExists(scopeArgs, new CNew(Iterables2.fromConcat(scopeArgs)));
         IState.Immutable state = State.of(input.spec);
 
-        SolverResult result = SolverUtils.partialSolve(input.spec, state, globalConstraint, input.debug);
+        SolverResult result = SolverUtils.partialSolve(input.spec, state, globalConstraint, input.debug, new NullProgress(), new NullCancel());
 
         ITerm globalScope = result.state().unifier()
             .findRecursive(result.existentials().get(globalScopeVar));
