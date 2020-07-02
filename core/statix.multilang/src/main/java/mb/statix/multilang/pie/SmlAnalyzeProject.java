@@ -32,6 +32,7 @@ import java.io.Serializable;
 import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -42,11 +43,15 @@ import java.util.stream.Stream;
 public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, AnalysisResults> {
     public static class Input implements Serializable {
         private final ResourcePath projectPath;
+        private final HashSet<LanguageId> languages;
         private final ContextId contextId;
+        private final Level logLevel;
 
-        public Input(ResourcePath projectPath, ContextId contextId) {
+        public Input(ResourcePath projectPath, HashSet<LanguageId> languages, ContextId contextId, Level logLevel) {
             this.projectPath = projectPath;
+            this.languages = languages;
             this.contextId = contextId;
+            this.logLevel = logLevel;
         }
 
         @Override public boolean equals(Object o) {
@@ -54,16 +59,18 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Analy
             if(o == null || getClass() != o.getClass()) return false;
             Input input = (Input)o;
             return projectPath.equals(input.projectPath) &&
+                languages.equals(input.languages) &&
                 contextId.equals(input.contextId);
         }
 
         @Override public int hashCode() {
-            return Objects.hash(projectPath, contextId);
+            return Objects.hash(projectPath, languages, contextId);
         }
 
         @Override public String toString() {
             return "Input{" +
                 "projectPath=" + projectPath +
+                ", languages=" + languages +
                 ", contextId=" + contextId +
                 '}';
         }
@@ -100,11 +107,11 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Analy
     }
 
     @Override public AnalysisResults exec(ExecContext context, Input input) throws Exception {
-        final ContextConfig config = context.require(buildContextConfiguration.createTask(
+        /* final ContextConfig config = context.require(buildContextConfiguration.createTask(
             new SmlBuildContextConfiguration.Input(input.projectPath, input.contextId)
-        ));
+        )); */
 
-        final Supplier<Spec> specSupplier = buildSpec.createSupplier(new SmlBuildSpec.Input(config.getLanguages()));
+        final Supplier<Spec> specSupplier = buildSpec.createSupplier(new SmlBuildSpec.Input(input.languages));
         final Spec combinedSpec = context.require(specSupplier);
 
         final ListMultimap<String, Rule> rulesWithEquivalentPatterns = combinedSpec.rules().getAllEquivalentRules();
@@ -121,23 +128,22 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Analy
             logger.error("+--------------------------------------+");
         }
 
-        @Nullable Level logLevel = config.parseLevel();
-        IDebugContext debug = TaskUtils.createDebugContext(String.format("MLA [%s]", input.contextId), logLevel);
+        IDebugContext debug = TaskUtils.createDebugContext(String.format("MLA [%s]", input.contextId), input.logLevel);
 
         Supplier<GlobalResult> globalResultSupplier = instantiateGlobalScope.createSupplier(
-            new SmlInstantiateGlobalScope.Input(input.contextId.toString(), config.parseLevel(), specSupplier));
+            new SmlInstantiateGlobalScope.Input(input.contextId.toString(), input.logLevel, specSupplier));
 
-        Map<LanguageId, SolverResult> projectResults = config.getLanguages().stream()
+        Map<LanguageId, SolverResult> projectResults = input.languages.stream()
             .collect(Collectors.toMap(Function.identity(), languageId ->
                 context.require(partialSolveProject.createTask(new SmlPartialSolveProject.Input(
                     globalResultSupplier,
                     specSupplier,
                     analysisContextService.getLanguageMetadata(languageId).projectConstraint(),
-                    logLevel)))
+                    input.logLevel)))
             ));
 
         // Create file results (maintain resource key for error message mapping
-        Map<AnalysisResults.FileKey, FileResult> fileResults = config.getLanguages().stream()
+        Map<AnalysisResults.FileKey, FileResult> fileResults = input.languages.stream()
             .map(analysisContextService::getLanguageMetadata)
             .flatMap(languageMetadata ->
                 languageMetadata.resourcesSupplier().apply(context, input.projectPath).stream()
@@ -149,7 +155,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Analy
                             specSupplier,
                             globalResultSupplier,
                             languageMetadata.fileConstraint(),
-                            logLevel)));
+                            input.logLevel)));
                         return new AbstractMap.SimpleEntry<>(
                             new AnalysisResults.FileKey(languageMetadata.languageId(), resourceKey),
                             fileResult);

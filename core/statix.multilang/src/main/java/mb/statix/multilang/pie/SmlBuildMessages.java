@@ -7,11 +7,9 @@ import mb.nabl2.terms.unification.ud.IUniDisunifier;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
-import mb.statix.multilang.AnalysisContextService;
 import mb.statix.multilang.AnalysisResults;
 import mb.statix.multilang.ContextId;
 import mb.statix.multilang.LanguageId;
-import mb.statix.multilang.MultiLangConfig;
 import mb.statix.multilang.MultiLangScope;
 import mb.statix.multilang.utils.MessageUtils;
 import org.metaborg.util.iterators.Iterables2;
@@ -20,10 +18,12 @@ import org.metaborg.util.log.Level;
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.AbstractMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @MultiLangScope
@@ -31,11 +31,15 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
 
     public static class Input implements Serializable {
         private final ResourcePath projectPath;
-        private final LanguageId initiatingLanguage;
+        private final HashSet<LanguageId> languages;
+        private final ContextId contextId;
+        private final Level logLevel;
 
-        public Input(ResourcePath projectPath, LanguageId initiatingLanguage) {
+        public Input(ResourcePath projectPath, HashSet<LanguageId> languages, ContextId contextId, Level logLevel) {
             this.projectPath = projectPath;
-            this.initiatingLanguage = initiatingLanguage;
+            this.languages = languages;
+            this.contextId = contextId;
+            this.logLevel = logLevel;
         }
 
         @Override public boolean equals(Object o) {
@@ -43,40 +47,36 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
             if(o == null || getClass() != o.getClass()) return false;
             Input input = (Input)o;
             return projectPath.equals(input.projectPath) &&
-                initiatingLanguage.equals(input.initiatingLanguage);
+                languages.equals(input.languages) &&
+                contextId.equals(input.contextId);
         }
 
         @Override public int hashCode() {
-            return Objects.hash(projectPath, initiatingLanguage);
+            return Objects.hash(projectPath, languages, contextId);
         }
 
         @Override public String toString() {
             return "Input{" +
                 "projectPath=" + projectPath +
-                ", initiatingLanguage=" + initiatingLanguage +
+                ", languages=" + languages +
+                ", contextId=" + contextId +
                 '}';
         }
     }
 
     private final SmlAnalyzeProject analyzeProject;
-    private final SmlLanguageContext languageContext;
 
-    @Inject public SmlBuildMessages(SmlAnalyzeProject analyzeProject, SmlLanguageContext languageContext) {
+    @Inject public SmlBuildMessages(SmlAnalyzeProject analyzeProject) {
         this.analyzeProject = analyzeProject;
-        this.languageContext = languageContext;
     }
 
     @Override public String getId() {
         return SmlBuildMessages.class.getSimpleName();
     }
 
-    @Override public KeyedMessages exec(ExecContext context, Input input) throws Exception {
-        final ContextId contextId = context.require(languageContext.createTask(
-            new SmlLanguageContext.Input(input.projectPath, input.initiatingLanguage)
-        ));
-
+    @Override public KeyedMessages exec(ExecContext context, Input input) {
         final AnalysisResults results = context.require(analyzeProject.createTask(
-            new SmlAnalyzeProject.Input(input.projectPath, contextId)));
+            new SmlAnalyzeProject.Input(input.projectPath, input.languages, input.contextId, input.logLevel)));
 
         final IUniDisunifier resultUnifier = results.finalResult().state().unifier();
         final KeyedMessagesBuilder builder = new KeyedMessagesBuilder();

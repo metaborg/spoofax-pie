@@ -9,7 +9,6 @@ import mb.statix.multilang.pie.SmlBuildContextConfiguration;
 import mb.statix.multilang.pie.SmlBuildMessages;
 import mb.statix.multilang.pie.SmlBuildSpec;
 import mb.statix.multilang.pie.SmlInstantiateGlobalScope;
-import mb.statix.multilang.pie.SmlLanguageContext;
 import mb.statix.multilang.pie.SmlPartialSolveFile;
 import mb.statix.multilang.pie.SmlPartialSolveProject;
 import mb.statix.multilang.pie.SmlReadConfigYaml;
@@ -36,7 +35,6 @@ public class MultiLangModule {
         SmlBuildMessages buildMessages,
         SmlBuildSpec buildSpec,
         SmlInstantiateGlobalScope instantiateGlobalScope,
-        SmlLanguageContext languageContext,
         SmlPartialSolveFile partialSolveFile,
         SmlPartialSolveProject partialSolveProject,
         SmlReadConfigYaml readConfigYaml
@@ -47,7 +45,6 @@ public class MultiLangModule {
         taskDefs.add(buildMessages);
         taskDefs.add(buildSpec);
         taskDefs.add(instantiateGlobalScope);
-        taskDefs.add(languageContext);
         taskDefs.add(partialSolveFile);
         taskDefs.add(partialSolveProject);
         taskDefs.add(readConfigYaml);

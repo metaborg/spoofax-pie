@@ -7,13 +7,13 @@ import mb.statix.multilang.AnalysisContextService;
 import mb.statix.multilang.ContextConfig;
 import mb.statix.multilang.ContextId;
 import mb.statix.multilang.LanguageId;
+import mb.statix.multilang.MultiLangConfig;
 import mb.statix.multilang.MultiLangScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,11 +21,11 @@ import java.util.Set;
 public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConfiguration.Input, ContextConfig> {
     public static class Input implements Serializable {
         private final ResourcePath projectDir;
-        private final ContextId contextId;
+        private final LanguageId languageId;
 
-        public Input(ResourcePath projectDir, ContextId contextId) {
+        public Input(ResourcePath projectDir, LanguageId languageId) {
             this.projectDir = projectDir;
-            this.contextId = contextId;
+            this.languageId = languageId;
         }
     }
 
@@ -44,11 +44,16 @@ public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConf
 
     @Override
     public ContextConfig exec(ExecContext context, Input input) {
-        Set<LanguageId> staticLanguages = analysisContextService.getContextLanguages(input.contextId);
-        @Nullable ContextConfig dynamicConfig = context.require(readConfigYaml
-            .createTask(new SmlReadConfigYaml.Input(input.projectDir)))
+        final MultiLangConfig config = context.require(readConfigYaml
+            .createTask(new SmlReadConfigYaml.Input(input.projectDir)));
+
+        ContextId contextId = config.getLanguageContexts()
+            .getOrDefault(input.languageId, analysisContextService.getDefaultContextId(input.languageId));
+
+        Set<LanguageId> staticLanguages = analysisContextService.getContextLanguages(contextId);
+        @Nullable ContextConfig dynamicConfig = config
             .getCustomContexts()
-            .get(input.contextId);
+            .get(contextId);
 
         if(dynamicConfig == null) {
             ContextConfig result = new ContextConfig();
