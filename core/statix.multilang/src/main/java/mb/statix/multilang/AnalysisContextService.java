@@ -18,7 +18,7 @@ public abstract class AnalysisContextService {
     // Map used to cache language metadata instances, so that they will not be recomputed by subsequent accesses.
     private final Map<LanguageId, LanguageMetadata> languageMetadataCache = new HashMap<>();
 
-    @Value.Lazy public LanguageMetadata getLanguageMetadata(LanguageId languageId) {
+    public LanguageMetadata getLanguageMetadata(LanguageId languageId) {
         return languageMetadataCache
             // Consult cache to return value
             .computeIfAbsent(languageId, k -> languageMetadataSuppliers()
