@@ -28,16 +28,56 @@ public class MultiLangModule {
         return analysisContextService;
     }
 
-    @Provides @MultiLangScope @ElementsIntoSet
+    @Provides @MultiLangScope @MultiLang
+    public SmlAnalyzeProject provideAnalyzeProject(SmlAnalyzeProject analyzeProject) {
+        return analyzeProject;
+    }
+
+    @Provides @MultiLangScope @MultiLang
+    public SmlBuildContextConfiguration provideSmlBuildContextConfiguration(SmlBuildContextConfiguration buildContextConfiguration) {
+        return buildContextConfiguration;
+    }
+
+    @Provides @MultiLangScope @MultiLang
+    public SmlBuildMessages provideBuildMessages(SmlBuildMessages buildMessages) {
+        return buildMessages;
+    }
+
+    @Provides @MultiLangScope @MultiLang
+    public SmlBuildSpec provideBuildSpec(SmlBuildSpec buildSpec) {
+        return buildSpec;
+    }
+
+    @Provides @MultiLangScope @MultiLang
+    public SmlInstantiateGlobalScope provideInstantiateGlobalScope(SmlInstantiateGlobalScope instantiateGlobalScope) {
+        return instantiateGlobalScope;
+    }
+
+    @Provides @MultiLangScope @MultiLang
+    public SmlPartialSolveFile providePartialSolveFile(SmlPartialSolveFile partialSolveFile) {
+        return partialSolveFile;
+    }
+
+    @Provides @MultiLangScope @MultiLang
+    public SmlPartialSolveProject providePartialSolveProject(SmlPartialSolveProject partialSolveProject) {
+        return partialSolveProject;
+    }
+
+    @Provides @MultiLangScope @MultiLang
+    public SmlReadConfigYaml provideReadConfigYaml(SmlReadConfigYaml readConfigYaml) {
+        return readConfigYaml;
+    }
+
+    @Provides @MultiLangScope @MultiLang @ElementsIntoSet
     public Set<TaskDef<?, ?>> provideTaskDefs(
-        SmlAnalyzeProject analyzeProject,
-        SmlBuildContextConfiguration buildContextConfiguration,
-        SmlBuildMessages buildMessages,
-        SmlBuildSpec buildSpec,
-        SmlInstantiateGlobalScope instantiateGlobalScope,
-        SmlPartialSolveFile partialSolveFile,
-        SmlPartialSolveProject partialSolveProject,
-        SmlReadConfigYaml readConfigYaml
+        @MultiLang SmlAnalyzeProject analyzeProject,
+        @MultiLang SmlBuildContextConfiguration buildContextConfiguration,
+        @MultiLang SmlBuildMessages buildMessages,
+        @MultiLang SmlBuildSpec buildSpec,
+        @MultiLang SmlInstantiateGlobalScope instantiateGlobalScope,
+        @MultiLang SmlPartialSolveFile partialSolveFile,
+        @MultiLang SmlPartialSolveProject partialSolveProject,
+        @MultiLang SmlReadConfigYaml readConfigYaml
     ) {
         Set<TaskDef<?, ?>> taskDefs = new HashSet<>();
         taskDefs.add(analyzeProject);
