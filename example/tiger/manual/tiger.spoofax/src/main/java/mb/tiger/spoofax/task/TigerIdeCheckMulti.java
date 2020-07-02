@@ -97,7 +97,10 @@ public class TigerIdeCheckMulti implements TaskDef<TigerIdeCheckMulti.Input, Key
         final TigerAnalyzeMulti.Input analyzeInput = new TigerAnalyzeMulti.Input(input.root, input.walker, input.matcher, parse.createRecoverableAstFunction());
         final Result<ConstraintAnalyzeMultiTaskDef.Output, ?> analysisResult = context.require(analyze, analyzeInput);
         analysisResult
-            .ifOk(output -> messagesBuilder.addMessages(output.result.messages))
+            .ifOk(output -> {
+                messagesBuilder.addMessages(output.result.messages);
+                messagesBuilder.addMessages(output.messagesFromAstProviders);
+            })
             .ifErr(e -> messagesBuilder.addMessage("Project-wide analysis failed", e, Severity.Error, input.root));
         return messagesBuilder.build();
     }

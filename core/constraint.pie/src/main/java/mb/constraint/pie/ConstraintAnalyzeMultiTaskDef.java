@@ -1,6 +1,9 @@
 package mb.constraint.pie;
 
+import mb.common.message.KeyedMessages;
+import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Messages;
+import mb.common.message.Severity;
 import mb.common.result.Result;
 import mb.constraint.common.ConstraintAnalyzer;
 import mb.constraint.common.ConstraintAnalyzerContext;
@@ -19,6 +22,7 @@ import mb.resource.hierarchical.walk.ResourceWalker;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Objects;
@@ -67,10 +71,12 @@ public abstract class ConstraintAnalyzeMultiTaskDef implements TaskDef<Constrain
     }
 
     public static class Output implements Serializable {
+        public final KeyedMessages messagesFromAstProviders;
         public final ConstraintAnalyzerContext context;
         public final ConstraintAnalyzer.MultiFileResult result;
 
-        public Output(ConstraintAnalyzerContext context, ConstraintAnalyzer.MultiFileResult result) {
+        public Output(KeyedMessages messagesFromAstProviders, ConstraintAnalyzerContext context, ConstraintAnalyzer.MultiFileResult result) {
+            this.messagesFromAstProviders = messagesFromAstProviders;
             this.result = result;
             this.context = context;
         }
@@ -79,16 +85,19 @@ public abstract class ConstraintAnalyzeMultiTaskDef implements TaskDef<Constrain
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             final Output output = (Output)o;
-            return context.equals(output.context) && result.equals(output.result);
+            return messagesFromAstProviders.equals(output.messagesFromAstProviders) &&
+                context.equals(output.context) &&
+                result.equals(output.result);
         }
 
         @Override public int hashCode() {
-            return Objects.hash(context, result);
+            return Objects.hash(messagesFromAstProviders, context, result);
         }
 
         @Override public String toString() {
             return "Output{" +
-                "context=" + context +
+                "messagesFromAstProviders=" + messagesFromAstProviders +
+                ", context=" + context +
                 ", result=" + result +
                 '}';
         }
@@ -124,21 +133,20 @@ public abstract class ConstraintAnalyzeMultiTaskDef implements TaskDef<Constrain
 
     protected abstract ConstraintAnalyzer.MultiFileResult analyze(ResourceKey root, HashMap<ResourceKey, IStrategoTerm> asts, ConstraintAnalyzerContext context) throws ConstraintAnalyzerException;
 
-    @Override public Result<Output, ?> exec(ExecContext context, Input input) {
+    @Override public Result<Output, ?> exec(ExecContext context, Input input) throws IOException {
+        final HierarchicalResource root = context.require(input.root, ResourceStampers.modifiedDirRec(input.walker, input.matcher));
+        final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
+        final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
+        root.walk(input.walker, input.matcher).forEach(file -> context.require(input.astFunction, new ResourceStringSupplier(file.getPath()))
+            .ifOk((ast) -> asts.put(file.getKey(), ast))
+            .ifErr((e) -> messagesBuilder.addMessage("Getting AST for analysis failed", e, Severity.Error, file.getKey()))
+        );
         try {
-            final HierarchicalResource root = context.require(input.root, ResourceStampers.modifiedDirRec(input.walker, input.matcher));
-            final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
-            root.walk(input.walker, input.matcher)
-                // TODO: propagate errors? we do not want parse messages to end up as the result of this task though, as
-                //       those parse messages will then be duplicated in the check task.
-                .forEach(file -> context.require(input.astFunction, new ResourceStringSupplier(file.getPath()))
-                    .ifOk((ast) -> asts.put(file.getKey(), ast))
-                );
             final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext();
             final ConstraintAnalyzer.MultiFileResult result = analyze(input.root, asts, constraintAnalyzerContext);
-            return Result.ofOk(new Output(constraintAnalyzerContext, result));
-        } catch(Exception e) {
-            return Result.ofErr(e); // TODO: produce a better exception here?
+            return Result.ofOk(new Output(messagesBuilder.build(), constraintAnalyzerContext, result));
+        } catch(ConstraintAnalyzerException e) {
+            return Result.ofErr(e);
         }
     }
 

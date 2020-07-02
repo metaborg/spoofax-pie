@@ -20,11 +20,48 @@ public interface Result<T, E extends Exception> extends Serializable {
         return new Ok<>(value);
     }
 
+    static <T, E extends Exception> Result<T, E> ofErr(E error) {
+        return new Err<>(error);
+    }
+
+
     static <T, E extends Exception> Result<T, E> ofNullableOrElse(@Nullable T value, Supplier<? extends E> def) {
         if(value != null) {
             return new Ok<>(value);
         } else {
             return new Err<>(def.get());
+        }
+    }
+
+    static <T> Result<T, ?> ofNullableOrExpect(@Nullable T value, String message) {
+        if(value != null) {
+            return new Ok<>(value);
+        } else {
+            return new Err<>(new ExpectException(message));
+        }
+    }
+
+    static <T> Result<T, ?> ofNullableOrExpect(@Nullable T value, String message, @Nullable Throwable cause) {
+        if(value != null) {
+            return new Ok<>(value);
+        } else {
+            return new Err<>(new ExpectException(message, cause));
+        }
+    }
+
+    static <T> Result<T, ?> ofNullableOrElseExpect(@Nullable T value, Supplier<String> messageSupplier) {
+        if(value != null) {
+            return new Ok<>(value);
+        } else {
+            return new Err<>(new ExpectException(messageSupplier.get()));
+        }
+    }
+
+    static <T> Result<T, ?> ofNullableOrElseExpect(@Nullable T value, Supplier<String> messageSupplier, Supplier<@Nullable Throwable> causeSupplier) {
+        if(value != null) {
+            return new Ok<>(value);
+        } else {
+            return new Err<>(new ExpectException(messageSupplier.get(), causeSupplier.get()));
         }
     }
 
@@ -34,10 +71,6 @@ public interface Result<T, E extends Exception> extends Serializable {
 
     static <T, E extends Exception> Result<T, E> ofOkOrCatching(ExceptionalSupplier<? extends T, E> supplier, Class<E> exceptionClass) {
         return Catcher.tryCatch(() -> Result.ofOk(supplier.get()), Result::ofErr, exceptionClass);
-    }
-
-    static <T, E extends Exception> Result<T, E> ofErr(E error) {
-        return new Err<>(error);
     }
 
 
@@ -118,7 +151,7 @@ public interface Result<T, E extends Exception> extends Serializable {
             //noinspection ConstantConditions (`get` is safe because value is present if `isOk` returns true)
             return Catcher.tryCatch(() -> Result.ofOk(mapper.apply(get())), Result::ofErr);
         } else {
-            // noinspection unchecked (cast is safe because it is impossible to get a value of type U in the err case)
+            // noinspection unchecked (cast is safe because it is impossible to get a value of type U in the err case
             return (Result<U, ?>)this;
         }
     }
@@ -250,6 +283,18 @@ public interface Result<T, E extends Exception> extends Serializable {
         return ok().unwrapOrElse(def);
     }
 
+    default T expect(String message) {
+        return ok().unwrapOrElseThrow(() -> new ExpectException(message, err().get()));
+    }
+
+    default T expect(Supplier<String> messageSupplier) {
+        return ok().unwrapOrElseThrow(() -> new ExpectException(messageSupplier.get(), err().get()));
+    }
+
+    default <F extends Exception> T expect(Function<E, F> mapper) throws F {
+        return ok().unwrapOrElseThrow(() -> mapper.apply(err().get()));
+    }
+
 
     default E unwrapErr() {
         return err().unwrapOrElseThrow(() -> new RuntimeException("Called `unwrapErr` on an `Ok` result"));
@@ -261,6 +306,14 @@ public interface Result<T, E extends Exception> extends Serializable {
 
     default E unwrapErrOrElse(Supplier<? extends E> def) {
         return err().unwrapOrElse(def);
+    }
+
+    default E expectErr(String message) {
+        return err().unwrapOrElseThrow(() -> new ExpectException(message));
+    }
+
+    default E expectErr(Supplier<String> messageSupplier) {
+        return err().unwrapOrElseThrow(() -> new ExpectException(messageSupplier.get()));
     }
 
 

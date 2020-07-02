@@ -1,7 +1,6 @@
 package mb.tiger.spoofax.task;
 
 import mb.common.region.Region;
-import mb.common.result.Result;
 import mb.jsglr.common.TermTracer;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Task;
@@ -33,15 +32,11 @@ public class TigerShowAnalyzedAst implements TaskDef<TigerShowArgs, CommandFeedb
         final ResourceKey key = input.key;
         final @Nullable Region region = input.region;
         return context.require(analyze, new TigerAnalyze.Input(key, parse.createAstSupplier(key)))
-            .flatMapOrElse((o) -> Result.ofNullableOrElse(
-                o.result.ast,
-                () -> new Exception("Cannot show analyzed AST, analyzed AST for '" + key + "' is null")
-            ), Result::ofErr)
-            .map(ast -> {
+            .map(output -> {
                 if(region != null) {
-                    return TermTracer.getSmallestTermEncompassingRegion(ast, region);
+                    return TermTracer.getSmallestTermEncompassingRegion(output.result.ast, region);
                 } else {
-                    return ast;
+                    return output.result.ast;
                 }
             })
             .map(StrategoUtil::toString)

@@ -28,7 +28,7 @@ class ProvideOutputShared {
                 final IStrategoTerm text = strategoRuntimeProvider.get().invoke(prettyPrintStrategy, ast);
                 return CommandFeedback.of(ShowFeedback.showText(StrategoUtil.toString(text), StringUtil.capitalize(resultName) + " (concrete) of '" + file + "'"));
             } catch(StrategoException e) {
-                return CommandFeedback.of(new Exception("Pretty-printing " + resultName + " AST failed", e));
+                return CommandFeedback.of(new Exception("Pretty-printing '" + resultName + "' AST failed", e));
             }
         } else {
             return CommandFeedback.of(ShowFeedback.showText(StrategoUtil.toString(ast), StringUtil.capitalize(resultName) + " (abstract) of '" + file + "'"));

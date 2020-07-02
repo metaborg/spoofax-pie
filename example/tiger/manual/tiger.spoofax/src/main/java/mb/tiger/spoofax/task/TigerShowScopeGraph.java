@@ -1,6 +1,5 @@
 package mb.tiger.spoofax.task;
 
-import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
@@ -44,13 +43,6 @@ public class TigerShowScopeGraph implements TaskDef<TigerShowArgs, CommandFeedba
     @Override public CommandFeedback exec(ExecContext context, TigerShowArgs input) {
         final ResourceKey key = input.key;
         return context.require(analyze, new TigerAnalyze.Input(key, parse.createAstSupplier(key)))
-            .flatMapOrElse((output) -> {
-                if(output.result.ast != null) {
-                    return Result.ofOk(output);
-                } else {
-                    return Result.ofErr(new Exception("Cannot show scope graph, analyzed AST for '" + key + "' is null"));
-                }
-            }, Result::ofErr)
             .mapCatching(output -> {
                 final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get().addContextObject(output.context);
                 final ITermFactory termFactory = strategoRuntime.getTermFactory();

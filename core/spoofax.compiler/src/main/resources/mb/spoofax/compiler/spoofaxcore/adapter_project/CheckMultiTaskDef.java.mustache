@@ -98,7 +98,10 @@ public class {{genCheckMultiTaskDef.id}} implements TaskDef<{{genCheckMultiTaskD
         final {{this.analyzeMultiTaskDef.qualifiedId}}.Input analyzeInput = new {{this.analyzeMultiTaskDef.qualifiedId}}.Input(input.root, input.walker, input.matcher, parse.createRecoverableAstFunction());
         final Result<{{this.analyzeMultiTaskDef.qualifiedId}}.Output, ?> analysisResult = context.require(analyze, analyzeInput);
         analysisResult
-            .ifOk(output -> messagesBuilder.addMessages(output.result.messages))
+            .ifOk(output -> {
+                messagesBuilder.addMessages(output.result.messages);
+                messagesBuilder.addMessages(output.messagesFromAstProviders);
+            })
             .ifErr(e -> messagesBuilder.addMessage("Project-wide analysis failed", e, Severity.Error, input.root));
 {{/constraintAnalyzer}}
         return messagesBuilder.build();

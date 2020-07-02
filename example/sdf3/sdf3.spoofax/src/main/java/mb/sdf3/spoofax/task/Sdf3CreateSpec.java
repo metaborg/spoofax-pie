@@ -10,11 +10,8 @@ import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.resource.hierarchical.match.PathResourceMatcher;
 import mb.resource.hierarchical.match.ResourceMatcher;
-import mb.resource.hierarchical.match.path.ExtensionsPathMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
-import mb.resource.hierarchical.walk.TrueResourceWalker;
 import mb.sdf3.spoofax.task.util.Sdf3Util;
 import mb.spoofax.core.language.LanguageScope;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -68,15 +65,15 @@ public class Sdf3CreateSpec implements TaskDef<Sdf3CreateSpec.Input, Sdf3Spec> {
     }
 
     @Override public Sdf3Spec exec(ExecContext context, Input input) throws IOException {
-        final Supplier<? extends Result<IStrategoTerm, ?>> mainModuleAstSupplier = desugar.createSupplier(parse.createAstSupplier(input.mainFile));
+        final Supplier<Result<IStrategoTerm, ?>> mainModuleAstSupplier = desugar.createSupplier(parse.createAstSupplier(input.mainFile));
         final ResourceWalker walker = Sdf3Util.createResourceWalker();
         final ResourceMatcher matcher = Sdf3Util.createResourceMatcher();
         final HierarchicalResource project = resourceService.getHierarchicalResource(input.project);
         // Create dependency to project dir, such that this task gets re-executed when an SDF3 file is added/removed.
         context.require(project, ResourceStampers.modifiedDirRec(walker, matcher));
         final ArrayList<Supplier<? extends Result<IStrategoTerm, ?>>> modulesAstSuppliers = project
-            .walk(new TrueResourceWalker(), new PathResourceMatcher(new ExtensionsPathMatcher("tmpl", "sdf3")))
-            .filter(file -> file.getPath() != input.mainFile) // Filter out main module, as it is supplied separately.
+            .walk(Sdf3Util.createResourceWalker(), Sdf3Util.createResourceMatcher())
+            .filter(file -> !file.getPath().equals(input.mainFile)) // Filter out main module, as it is supplied separately.
             .map(file -> desugar.createSupplier(parse.createAstSupplier(file.getKey())))
             .collect(Collectors.toCollection(ArrayList::new));
         return new Sdf3Spec(mainModuleAstSupplier, ListView.of(modulesAstSuppliers));
