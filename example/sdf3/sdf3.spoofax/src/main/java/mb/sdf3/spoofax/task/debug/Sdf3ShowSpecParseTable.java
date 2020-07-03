@@ -62,7 +62,7 @@ public class Sdf3ShowSpecParseTable implements TaskDef<Sdf3ShowSpecParseTable.Ar
     @Override public CommandOutput exec(ExecContext context, Args args) throws Exception {
         final ParseTable parseTable = context.require(specToParseTable, new Sdf3SpecToParseTable.Args(
             createSpec.createSupplier(new Sdf3CreateSpec.Input(args.project, args.mainFile)),
-            new ParseTableConfiguration(false, false, true, false, false),
+            new ParseTableConfiguration(false, false, true, false, false, false),
             false
         ));
         final IStrategoTerm ast = ParseTableIO.generateATerm(parseTable);
