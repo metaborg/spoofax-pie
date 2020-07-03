@@ -217,14 +217,18 @@ public class ConstraintAnalyzer {
             }
         }
 
+        // Progress and cancel terms
+        final IStrategoTerm progressTerm = mkTuple();   // ()
+        final IStrategoTerm cancelTerm = mkTuple();     // ()
+
         /// 3. Call analysis, and list results.
 
         final Map<ResourceKey, IStrategoTerm> resultTerms = new HashMap<>();
         final IStrategoTerm action;
         if(multiFile && root != null) {
-            action = mkAppl("AnalyzeMulti", rootChange, termFactory.makeList(changeTerms));
+            action = mkAppl("AnalyzeMulti", rootChange, termFactory.makeList(changeTerms), progressTerm, cancelTerm);
         } else {
-            action = mkAppl("AnalyzeSingle", termFactory.makeList(changeTerms));
+            action = mkAppl("AnalyzeSingle", termFactory.makeList(changeTerms), progressTerm, cancelTerm);
         }
 
         final @Nullable IStrategoTerm allResultsTerm;
