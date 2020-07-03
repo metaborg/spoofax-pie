@@ -5,6 +5,7 @@ import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.statix.multilang.AnalysisContextService;
 import mb.statix.multilang.DaggerMultiLangComponent;
 import mb.statix.multilang.ImmutableAnalysisContextService;
+import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.MultiLangComponent;
 import mb.statix.multilang.MultiLangModule;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -16,6 +17,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.osgi.framework.BundleContext;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -105,8 +107,9 @@ public class MultiLangPlugin extends Plugin {
                 // When encountering duplicate contextIds, merge the 2 language id sets
                 // By using sets, it deduplicates for free
                 (left, right) -> {
-                    left.addAll(right);
-                    return left;
+                    HashSet<LanguageId> result = new HashSet<>(left);
+                    result.addAll(right);
+                    return result;
                 }))
             .forEach(analysisContextServiceBuilder::putContextConfigurations);
 
