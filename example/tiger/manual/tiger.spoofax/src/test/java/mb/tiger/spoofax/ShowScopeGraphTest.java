@@ -15,7 +15,7 @@ class ShowScopeGraphTest extends TestBase {
     @Test void test() throws ExecException, InterruptedException {
         final TextResource resource = textResourceRegistry.createResource("1 + 1", "a.tig");
         final TigerShowScopeGraphCommand command = languageComponent.getShowScopeGraphCommand();
-        try(final MixedSession session = languageComponent.getPie().newSession()) {
+        try(final MixedSession session = languageComponent.getPieProvider().get().newSession()) {
             final CommandOutput output = session.require(command.createTask(new TigerShowArgs(resource.key, null)));
             assertFalse(output.feedback.isEmpty());
             final CommandFeedback feedback = output.feedback.get(0);

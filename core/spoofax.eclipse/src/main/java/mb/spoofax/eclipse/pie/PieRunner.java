@@ -120,7 +120,7 @@ public class PieRunner {
 
         final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
 
-        try(final MixedSession session = languageComponent.getPie().newSession()) {
+        try(final MixedSession session = languageComponent.getPieProvider().get().newSession()) {
             // First run a bottom-up build, to ensure that tasks affected by changed file are brought up-to-date.
             final HashSet<ResourceKey> changedResources = new HashSet<>();
             changedResources.add(path);
@@ -179,7 +179,7 @@ public class PieRunner {
         final ResourceChanges resourceChanges = new ResourceChanges(project, languageComponent.getLanguageInstance().getFileExtensions());
         resourceChanges.newProjects.add(project.getKey());
 
-        try(final MixedSession session = languageComponent.getPie().newSession()) {
+        try(final MixedSession session = languageComponent.getPieProvider().get().newSession()) {
             final TopDownSession afterSession = updateAffectedBy(resourceChanges.changed, session, monitor);
             observeAndUnobserveAutoTransforms(languageComponent, resourceChanges, afterSession, monitor);
             observeAndUnobserveInspections(languageComponent, resourceChanges, afterSession, monitor);
@@ -197,7 +197,7 @@ public class PieRunner {
         final ResourceChanges resourceChanges = new ResourceChanges(delta, languageComponent.getLanguageInstance().getFileExtensions());
 
         bottomUpWorkspaceUpdate = workspaceUpdateFactory.create(languageComponent);
-        try(final MixedSession session = languageComponent.getPie().newSession()) {
+        try(final MixedSession session = languageComponent.getPieProvider().get().newSession()) {
             final TopDownSession afterSession = updateAffectedBy(resourceChanges.changed, session, monitor);
             observeAndUnobserveAutoTransforms(languageComponent, resourceChanges, afterSession, monitor);
             observeAndUnobserveInspections(languageComponent, resourceChanges, afterSession, monitor);
@@ -219,7 +219,7 @@ public class PieRunner {
         final ResourceChanges resourceChanges = new ResourceChanges(projectResource, languageComponent.getLanguageInstance().getFileExtensions());
         resourceChanges.newProjects.add(project);
         final AutoCommandRequests autoCommandRequests = new AutoCommandRequests(languageComponent); // OPTO: calculate once per language component
-        try(final MixedSession session = languageComponent.getPie().newSession()) {
+        try(final MixedSession session = languageComponent.getPieProvider().get().newSession()) {
             // Unobserve auto transforms.
             for(AutoCommandRequest<?> request : autoCommandRequests.project) {
                 final Task<CommandOutput> task = request.createTask(CommandContext.ofProject(project), argConverters);
@@ -257,7 +257,7 @@ public class PieRunner {
         @Nullable IProgressMonitor monitor
     ) throws IOException, CoreException, ExecException, InterruptedException {
         final ResourceChanges resourceChanges = new ResourceChanges(languageComponent.getEclipseIdentifiers().getNature(), languageComponent.getLanguageInstance().getFileExtensions(), resourceRegistry);
-        try(final MixedSession session = languageComponent.getPie().newSession()) {
+        try(final MixedSession session = languageComponent.getPieProvider().get().newSession()) {
             observeAndUnobserveAutoTransforms(languageComponent, resourceChanges, session, monitor);
             observeAndUnobserveInspections(languageComponent, resourceChanges, session, monitor);
         }
@@ -288,7 +288,7 @@ public class PieRunner {
                     processOutput(output, true, (p) -> {
                         // POTI: this opens a new PIE session, which may be used concurrently with other sessions, which
                         // may not be (thread-)safe.
-                        try(final MixedSession newSession = languageComponent.getPie().newSession()) {
+                        try(final MixedSession newSession = languageComponent.getPieProvider().get().newSession()) {
                             unobserve(task, pie, newSession, monitor);
                         }
                         pie.removeCallback(task);

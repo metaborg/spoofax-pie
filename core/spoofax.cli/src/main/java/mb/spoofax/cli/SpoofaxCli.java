@@ -41,7 +41,7 @@ public class SpoofaxCli {
 
     public int run(String[] args, LanguageComponent languageComponent) {
         final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
-        final Pie pie = languageComponent.getPie();
+        final Pie pie = languageComponent.getPieProvider().get();
 
         return run(args, pie, languageInstance.getCliCommand());
     }
