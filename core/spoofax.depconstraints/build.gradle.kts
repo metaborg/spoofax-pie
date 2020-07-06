@@ -5,8 +5,8 @@ plugins {
 
 val logVersion = "0.3.0"
 val slf4jVersion = "1.7.30"
-val resourceVersion = "0.7.2"
-val pieVersion = "0.10.0"
+val resourceVersion = "0.7.3"
+val pieVersion = "0.11.0"
 val spoofax2Version = "2.5.9" // Needs to be kept in sync with metaborgVersion of Spoofax 2 Gradle plugin.
 val picocliVersion = "4.0.4"
 
