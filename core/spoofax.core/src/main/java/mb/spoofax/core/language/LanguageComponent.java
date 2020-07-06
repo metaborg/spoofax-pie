@@ -2,6 +2,7 @@ package mb.spoofax.core.language;
 
 import mb.pie.api.Pie;
 import mb.resource.ResourceService;
+import mb.spoofax.core.pie.PieProvider;
 
 import javax.inject.Provider;
 
@@ -11,5 +12,5 @@ public interface LanguageComponent {
 
     ResourceService getResourceService();
 
-    Provider<Pie> getPieProvider();
+    PieProvider getPieProvider();
 }
