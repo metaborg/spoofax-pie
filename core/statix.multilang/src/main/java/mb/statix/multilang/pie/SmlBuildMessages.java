@@ -16,6 +16,7 @@ import org.metaborg.util.iterators.Iterables2;
 import org.metaborg.util.log.Level;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.AbstractMap;
 import java.util.Collection;
@@ -75,7 +76,10 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
         return SmlBuildMessages.class.getSimpleName();
     }
 
-    @Override public KeyedMessages exec(ExecContext context, Input input) {
+    @Override public KeyedMessages exec(ExecContext context, Input input) throws IOException {
+        // Make sure to depend on configuration, to work around issue with different Pie instances
+        context.require(input.projectPath.appendRelativePath("multilang.yaml"), context.getDefaultRequireReadableResourceStamper());
+
         final AnalysisResults results = context.require(analyzeProject.createTask(
             new SmlAnalyzeProject.Input(input.projectPath, input.languages, input.contextId, input.logLevel)));
 
