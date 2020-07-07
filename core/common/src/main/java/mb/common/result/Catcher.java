@@ -6,6 +6,8 @@ class Catcher {
     static <T> T tryCatch(ExceptionalSupplier<T, ?> function, Function<? super Exception, T> exceptionFunction) {
         try {
             return function.get();
+        } catch(RuntimeException e) {
+            throw e;
         } catch(Exception e) {
             return exceptionFunction.apply(e);
         }
@@ -14,6 +16,8 @@ class Catcher {
     static <T, E extends Exception> T tryCatch(ExceptionalSupplier<T, E> supplier, Function<E, T> exceptionFunction, Class<E> exceptionClass) {
         try {
             return supplier.get();
+        } catch(RuntimeException e) {
+            throw e;
         } catch(Exception e) {
             if(e.getClass().equals(exceptionClass)) {
                 // noinspection unchecked (cast is safe because `e`'s class is equal to `exceptionClass`)
