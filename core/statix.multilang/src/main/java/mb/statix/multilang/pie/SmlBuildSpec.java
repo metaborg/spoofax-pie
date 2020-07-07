@@ -14,6 +14,7 @@ import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 
 @MultiLangScope
 public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Spec> {
@@ -29,6 +30,24 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Spec> {
 
         public Input(Collection<LanguageId> languages) {
             this.languages = new HashSet<>(languages);
+        }
+
+        @Override public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            Input input = (Input)o;
+            return languages.equals(input.languages);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(languages);
+        }
+
+        @Override public String toString() {
+            return "Input{" +
+                "languages=" + languages +
+                '}';
         }
     }
 

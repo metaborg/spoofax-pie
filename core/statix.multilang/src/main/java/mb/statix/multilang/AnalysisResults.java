@@ -19,6 +19,7 @@ public abstract class AnalysisResults implements Serializable {
 
     @Value.Parameter public abstract SolverResult finalResult();
 
+    // Custom toString to prevent memory leaks when logging
     @Override public String toString() {
         return "AnalysisResults{" +
             "globalScope" + globalScope() +
