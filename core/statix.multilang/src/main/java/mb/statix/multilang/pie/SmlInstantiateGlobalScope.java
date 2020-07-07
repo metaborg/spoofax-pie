@@ -28,12 +28,10 @@ import java.util.Objects;
 public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalScope.Input, GlobalResult> {
 
     public static class Input implements Serializable {
-        private final String globalScopeName;
         private final @Nullable Level logLevel;
         private final Supplier<Spec> specSupplier;
 
-        public Input(String globalScopeName, @Nullable Level logLevel, Supplier<Spec> specSupplier) {
-            this.globalScopeName = globalScopeName;
+        public Input(@Nullable Level logLevel, Supplier<Spec> specSupplier) {
             this.logLevel = logLevel;
             this.specSupplier = specSupplier;
         }
@@ -43,18 +41,16 @@ public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalSc
             if(o == null || getClass() != o.getClass()) return false;
             Input input = (Input)o;
             // Debug context should not influence results, so consider inputs with different debug settings as equal.
-            return globalScopeName.equals(input.globalScopeName) &&
-                specSupplier.equals(input.specSupplier);
+            return specSupplier.equals(input.specSupplier);
         }
 
         @Override public int hashCode() {
-            return Objects.hash(globalScopeName, specSupplier);
+            return Objects.hash(specSupplier);
         }
 
         @Override public String toString() {
             return "Input{" +
-                "globalScopeName='" + globalScopeName + '\'' +
-                ", specSupplier=" + specSupplier +
+                "specSupplier=" + specSupplier +
                 '}';
         }
     }
@@ -70,12 +66,12 @@ public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalSc
     @Override
     public GlobalResult exec(ExecContext context, Input input) throws Exception {
         // Create uniquely named scope variable
-        ITermVar globalScopeVar = ImmutableTermVar.of("", String.format("global-%s", input.globalScopeName));
+        ITermVar globalScopeVar = ImmutableTermVar.of("", "s");
         Iterable<ITermVar> scopeArgs = Iterables2.singleton(globalScopeVar);
         IConstraint globalConstraint = new CExists(scopeArgs, new CNew(Iterables2.fromConcat(scopeArgs)));
         Spec spec = context.require(input.specSupplier);
         IState.Immutable state = State.of(spec);
-        IDebugContext debug = TaskUtils.createDebugContext(String.format("MLA [%s]", input.globalScopeName), input.logLevel);
+        IDebugContext debug = TaskUtils.createDebugContext("MLA", input.logLevel);
 
         SolverResult result = SolverUtils.partialSolve(spec, state, globalConstraint, debug);
 

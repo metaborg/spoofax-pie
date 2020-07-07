@@ -42,13 +42,11 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Analy
     public static class Input implements Serializable {
         private final ResourcePath projectPath;
         private final HashSet<LanguageId> languages;
-        private final ContextId contextId;
         private final Level logLevel;
 
-        public Input(ResourcePath projectPath, HashSet<LanguageId> languages, ContextId contextId, Level logLevel) {
+        public Input(ResourcePath projectPath, HashSet<LanguageId> languages, Level logLevel) {
             this.projectPath = projectPath;
             this.languages = languages;
-            this.contextId = contextId;
             this.logLevel = logLevel;
         }
 
@@ -57,19 +55,17 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Analy
             if(o == null || getClass() != o.getClass()) return false;
             Input input = (Input)o;
             return projectPath.equals(input.projectPath) &&
-                languages.equals(input.languages) &&
-                contextId.equals(input.contextId);
+                languages.equals(input.languages);
         }
 
         @Override public int hashCode() {
-            return Objects.hash(projectPath, languages, contextId);
+            return Objects.hash(projectPath, languages);
         }
 
         @Override public String toString() {
             return "Input{" +
                 "projectPath=" + projectPath +
                 ", languages=" + languages +
-                ", contextId=" + contextId +
                 '}';
         }
     }
@@ -119,10 +115,10 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Analy
             logger.error("+--------------------------------------+");
         }
 
-        IDebugContext debug = TaskUtils.createDebugContext(String.format("MLA [%s]", input.contextId), input.logLevel);
+        IDebugContext debug = TaskUtils.createDebugContext("MLA [%s]", input.logLevel);
 
         Supplier<GlobalResult> globalResultSupplier = instantiateGlobalScope.createSupplier(
-            new SmlInstantiateGlobalScope.Input(input.contextId.toString(), input.logLevel, specSupplier));
+            new SmlInstantiateGlobalScope.Input(input.logLevel, specSupplier));
 
         Map<LanguageId, SolverResult> projectResults = input.languages.stream()
             .collect(Collectors.toMap(Function.identity(), languageId ->
@@ -167,7 +163,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Analy
         long t0 = System.currentTimeMillis();
         SolverResult finalResult = Solver.solve(combinedSpec, combinedState, combinedConstraint, (s, l, st) -> true, debug);
         long dt = System.currentTimeMillis() - t0;
-        logger.info("{} analyzed in {} ms", input.contextId, dt);
+        logger.info("Project analyzed in {} ms", dt);
 
         return ImmutableAnalysisResults.of(globalResult.getGlobalScope(),
             new HashMap<>(projectResults), new HashMap<>(fileResults), finalResult);

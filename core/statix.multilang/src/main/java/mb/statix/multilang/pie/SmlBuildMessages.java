@@ -34,13 +34,11 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
     public static class Input implements Serializable {
         private final ResourcePath projectPath;
         private final HashSet<LanguageId> languages;
-        private final ContextId contextId;
         private final Level logLevel;
 
-        public Input(ResourcePath projectPath, Collection<LanguageId> languages, ContextId contextId, Level logLevel) {
+        public Input(ResourcePath projectPath, Collection<LanguageId> languages, Level logLevel) {
             this.projectPath = projectPath;
             this.languages = new HashSet<>(languages);
-            this.contextId = contextId;
             this.logLevel = logLevel;
         }
 
@@ -49,19 +47,17 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
             if(o == null || getClass() != o.getClass()) return false;
             Input input = (Input)o;
             return projectPath.equals(input.projectPath) &&
-                languages.equals(input.languages) &&
-                contextId.equals(input.contextId);
+                languages.equals(input.languages);
         }
 
         @Override public int hashCode() {
-            return Objects.hash(projectPath, languages, contextId);
+            return Objects.hash(projectPath, languages);
         }
 
         @Override public String toString() {
             return "Input{" +
                 "projectPath=" + projectPath +
                 ", languages=" + languages +
-                ", contextId=" + contextId +
                 '}';
         }
     }
@@ -81,7 +77,7 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
         context.require(input.projectPath.appendRelativePath("multilang.yaml"), context.getDefaultRequireReadableResourceStamper());
 
         final AnalysisResults results = context.require(analyzeProject.createTask(
-            new SmlAnalyzeProject.Input(input.projectPath, input.languages, input.contextId, input.logLevel)));
+            new SmlAnalyzeProject.Input(input.projectPath, input.languages, input.logLevel)));
 
         final IUniDisunifier resultUnifier = results.finalResult().state().unifier();
         final KeyedMessagesBuilder builder = new KeyedMessagesBuilder();
