@@ -32,20 +32,17 @@ public class ConfigResourceChangeListener implements IResourceChangeListener {
 
         try {
             rootDelta.accept(delta -> {
-                if(delta.getResource().getType() == IResource.ROOT || delta.getResource().getType() == IResource.PROJECT) {
+                if(delta.getResource().getType() == IResource.ROOT) {
                     // If change is project, visit children (possibly multilang.yaml)
                     return true;
                 }
-                if(delta.getResource().getType() == IResource.FILE && delta.getResource().getName().equals("multilang.yaml")) {
-                    // Reconstruct project path URI from config file
-                    final IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
-                    final String projectName = delta.getFullPath().makeRelative().removeLastSegments(1).toString();
-                    IProject project = workspaceRoot.getProject(projectName);
-                    if(project != null) {
-                        projects.add(project);
-                    } else {
-                        logger.warn("Could not find project for " + delta.getFullPath() + ". Cannot process config change");
+                if(delta.getResource().getType() == IResource.PROJECT) {
+                    for(IResourceDelta child : delta.getAffectedChildren()) {
+                        if(child.getResource().getType() == IResource.FILE && child.getResource().getName().equals("multilang.yaml")) {
+                            projects.add((IProject)delta.getResource());
+                        }
                     }
+                    return true; // For nested projects
                 }
                 return false;
             });
