@@ -15,11 +15,11 @@ import mb.spoofax2.common.primitive.generic.Spoofax2Context;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.core.InterpreterException;
-import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.stratego.Strategy;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.terms.io.binary.TermReader;
+import org.spoofax.terms.util.TermUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -149,10 +149,10 @@ public abstract class AResourcesPrimitive extends ASpoofaxContextPrimitive imple
             throw new InterpreterException("Strategy failed to get path for name " + name);
         }
         IStrategoTerm current = strategoContext.current();
-        if(!Tools.isTermString(current)) {
+        if(!TermUtils.isString(current)) {
             throw new InterpreterException("Expected path string, got " + current);
         }
-        return Tools.asJavaString(current);
+        return TermUtils.toJavaString(current);
 
     }
 
@@ -166,7 +166,7 @@ public abstract class AResourcesPrimitive extends ASpoofaxContextPrimitive imple
     }
 
     private List<IStrategoTerm> parseNames(IStrategoTerm current) throws InterpreterException {
-        if(!Tools.isTermList(current)) {
+        if(!TermUtils.isList(current)) {
             throw new InterpreterException("Expected list of names, got " + current);
         }
         return Lists.newArrayList(current.getAllSubterms());

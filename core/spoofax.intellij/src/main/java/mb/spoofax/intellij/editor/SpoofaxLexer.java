@@ -3,10 +3,12 @@ package mb.spoofax.intellij.editor;
 import com.google.common.collect.Lists;
 import com.intellij.lexer.LexerBase;
 import com.intellij.psi.tree.IElementType;
+import mb.common.option.Option;
 import mb.common.region.Region;
 import mb.common.token.TokenImpl;
 import mb.common.token.TokenType;
 import mb.common.token.TokenTypes;
+import mb.common.token.Tokens;
 import mb.common.util.IntUtil;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
@@ -141,13 +143,15 @@ public final class SpoofaxLexer extends LexerBase {
         } else {
             // GK: what is syntax coloring information doing here?
             try (final MixedSession session = this.pie.newSession()) {
-                final Task<@Nullable ArrayList<? extends mb.common.token.Token<?>>> tokenizerTask =
+                final Task<? extends Option<? extends Tokens<?>>> tokenizerTask =
                         this.languageInstance.createTokenizeTask(this.resourceKey);
-                @Nullable List<? extends mb.common.token.Token> resourceTokens = session.require(tokenizerTask);
-                if (resourceTokens == null) {
-                    logger.debug("Tokenizer task returned no tokens");
+                final Option<? extends Tokens<?>> tokens = session.require(tokenizerTask);
+                @Nullable List<? extends mb.common.token.Token<?>> resourceTokens;
+                if (tokens.isNone()) {
                     resourceTokens = getDefaultTokens(this.resourceKey);
+                    logger.debug("Tokenizer task returned no tokens");
                 } else {
+                    resourceTokens = tokens.get().getTokens();
                     logger.debug("Tokenizer task returned {} tokens", resourceTokens.size());
                 }
                 this.tokens = tokenize(resourceTokens);
@@ -166,7 +170,7 @@ public final class SpoofaxLexer extends LexerBase {
      * @param resourceKey The resource key.
      * @return The default tokens for the resource.
      */
-    private List<mb.common.token.Token> getDefaultTokens(ResourceKey resourceKey) {
+    private List<mb.common.token.Token<?>> getDefaultTokens(ResourceKey resourceKey) {
         final ReadableResource resource = this.resourceService.getReadableResource(resourceKey);
         try {
             int length = (int)resource.getSize();

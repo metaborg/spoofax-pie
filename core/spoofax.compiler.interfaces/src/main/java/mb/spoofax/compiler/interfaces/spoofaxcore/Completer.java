@@ -2,7 +2,6 @@ package mb.spoofax.compiler.interfaces.spoofaxcore;
 
 import mb.common.region.Region;
 import mb.completions.common.CompletionResult;
-import mb.jsglr1.common.JSGLR1ParseResult;
 import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;

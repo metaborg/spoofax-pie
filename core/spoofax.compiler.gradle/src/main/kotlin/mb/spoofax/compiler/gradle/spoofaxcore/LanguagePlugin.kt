@@ -204,7 +204,6 @@ open class LanguagePlugin : Plugin<Project> {
     val input = finalized.input
     val destinationPackage = input.languageProject().packagePath()
     val includeStrategoClasses = input.strategoRuntime().map { it.copyClasses() }.orElse(false)
-    val includeStrategoJavastratClasses = input.strategoRuntime().map { it.copyJavaStrategyClasses() }.orElse(false)
     val copyResources = finalized.compiler.getCopyResources(input)
 
     // Add language dependency.
@@ -227,9 +226,6 @@ open class LanguagePlugin : Plugin<Project> {
       if(includeStrategoClasses) {
         allCopyResources.add("target/metaborg/stratego.jar")
       }
-      if(includeStrategoJavastratClasses) {
-        allCopyResources.add("target/metaborg/stratego-javastrat.jar")
-      }
       include(allCopyResources)
     }
 
@@ -242,19 +238,12 @@ open class LanguagePlugin : Plugin<Project> {
       from(project.zipTree("$unpackSpoofaxLanguageDir/target/metaborg/stratego.jar"))
       exclude("META-INF")
     }
-    val strategoJavastratCopySpec = project.copySpec {
-      from(project.zipTree("$unpackSpoofaxLanguageDir/target/metaborg/stratego-javastrat.jar"))
-      exclude("META-INF")
-    }
     val copyMainTask = project.tasks.register<Copy>("copyMainResources") {
       dependsOn(unpackSpoofaxLanguageTask)
       into(project.the<SourceSetContainer>()["main"].java.outputDir)
       into(destinationPackage) { with(resourcesCopySpec) }
       if(includeStrategoClasses) {
         into(".") { with(strategoCopySpec) }
-      }
-      if(includeStrategoJavastratClasses) {
-        into(".") { with(strategoJavastratCopySpec) }
       }
     }
     project.tasks.getByName(JavaPlugin.CLASSES_TASK_NAME).dependsOn(copyMainTask)
@@ -264,9 +253,6 @@ open class LanguagePlugin : Plugin<Project> {
       into(destinationPackage) { with(resourcesCopySpec) }
       if(includeStrategoClasses) {
         into(".") { with(strategoCopySpec) }
-      }
-      if(includeStrategoJavastratClasses) {
-        into(".") { with(strategoJavastratCopySpec) }
       }
     }
     project.tasks.getByName(JavaPlugin.TEST_CLASSES_TASK_NAME).dependsOn(copyTestTask)

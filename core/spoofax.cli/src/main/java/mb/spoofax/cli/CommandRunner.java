@@ -1,11 +1,15 @@
 package mb.spoofax.cli;
 
+import mb.common.message.KeyedMessages;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Task;
 import mb.resource.ReadableResource;
 import mb.resource.ResourceRuntimeException;
 import mb.resource.ResourceService;
-import mb.spoofax.core.language.command.*;
+import mb.spoofax.core.language.command.CommandContext;
+import mb.spoofax.core.language.command.CommandDef;
+import mb.spoofax.core.language.command.CommandFeedback;
+import mb.spoofax.core.language.command.ShowFeedback;
 import mb.spoofax.core.language.command.arg.ArgConverters;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.command.arg.RawArgsBuilder;
@@ -36,33 +40,44 @@ class CommandRunner<A extends Serializable> implements Callable {
         if(!(value instanceof Serializable)) {
             throw new IllegalArgumentException("Cannot set argument '" + value + "', it does not implement Serializable");
         }
-        rawArgsBuilder.setArg(paramId, (Serializable) value);
+        rawArgsBuilder.setArg(paramId, (Serializable)value);
     }
 
     @Override public @Nullable Object call() throws Exception {
         final RawArgs rawArgs = rawArgsBuilder.build(new CommandContext());
         final A args = commandDef.fromRawArgs(rawArgs);
-        final Task<CommandOutput> task = commandDef.createTask(args);
-        final CommandOutput output = session.requireWithoutObserving(task);
-        for(CommandFeedback feedback : output.feedback) {
-            CommandFeedbacks.caseOf(feedback)
+        final Task<CommandFeedback> task = commandDef.createTask(args);
+        final CommandFeedback feedback = session.requireWithoutObserving(task);
+
+        final @Nullable Exception exception = feedback.getException();
+        if(exception != null) {
+            System.err.println("An exception occurred while executing command '" + commandDef.getDisplayName() + "':");
+            exception.printStackTrace(System.err);
+        }
+
+        final KeyedMessages keyedMessages = feedback.getMessages();
+        if(!keyedMessages.isEmpty()) {
+            System.out.println("The following messages were produced by command '" + commandDef.getDisplayName() + "':\n" + keyedMessages.toString());
+        }
+
+        for(ShowFeedback showFeedback : feedback.getShowFeedbacks()) {
+            showFeedback.caseOf()
                 .showFile((file, region) -> {
-                    System.out.println(file + ":");
-                    System.out.println();
                     try {
                         final ReadableResource resource = resourceService.getReadableResource(file);
-                        try {
-                            final String text = resource.readString();
-                            System.out.println(text);
-                        } catch(IOException e) {
-                            e.printStackTrace();
-                        }
-                    } catch(ResourceRuntimeException e) {
-                        e.printStackTrace();
+                        final String text = resource.readString();
+                        System.out.println(file + ":");
+                        System.out.println();
+                        System.out.println(text);
+                    } catch(IOException | ResourceRuntimeException e) {
+                        System.err.println("An exception occurred while showing file '" + file + "':");
+                        e.printStackTrace(System.err);
                     }
                     return Optional.empty();
                 })
                 .showText((text, name, region) -> {
+                    System.out.println(name + ":");
+                    System.out.println();
                     System.out.println(text);
                     return Optional.empty();
                 });

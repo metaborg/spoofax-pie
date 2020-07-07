@@ -1,6 +1,7 @@
 package mb.common.message;
 
 import mb.common.region.Region;
+import mb.common.util.CollectionView;
 import mb.common.util.IterableUtil;
 import mb.common.util.ListView;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -35,6 +36,14 @@ public class MessagesBuilder {
 
     public void addMessages(Collection<? extends Message> messages) {
         this.messages.addAll(messages);
+    }
+
+    public void addMessages(CollectionView<Message> messages) {
+        messages.addAllTo(this.messages);
+    }
+
+    public void addMessages(ListView<Message> messages) {
+        messages.addAllTo(this.messages);
     }
 
     public void addMessages(Messages messages) {

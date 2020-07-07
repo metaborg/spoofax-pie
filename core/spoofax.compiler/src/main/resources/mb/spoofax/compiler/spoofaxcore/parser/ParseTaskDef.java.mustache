@@ -1,6 +1,8 @@
 package {{genParseTaskDef.packageId}};
 
-import mb.jsglr1.common.JSGLR1ParseResult;
+import mb.common.result.Result;
+import mb.jsglr1.common.JSGLR1ParseException;
+import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.jsglr1.pie.JSGLR1ParseTaskDef;
 import mb.spoofax.core.language.LanguageScope;
 
@@ -20,8 +22,12 @@ public class {{genParseTaskDef.id}} extends JSGLR1ParseTaskDef {
         return "{{genParseTaskDef.qualifiedId}}";
     }
 
-    @Override protected JSGLR1ParseResult parse(String text) throws InterruptedException {
+    @Override protected Result<JSGLR1ParseOutput, JSGLR1ParseException> parse(String text) throws InterruptedException {
         final {{languageProjectInput.parser.qualifiedId}} parser = parserProvider.get();
-        return parser.parse(text, "{{languageProjectInput.startSymbol}}");
+        try {
+            return Result.ofOk(parser.parse(text, "{{languageProjectInput.startSymbol}}"));
+        } catch(JSGLR1ParseException e) {
+            return Result.ofErr(e);
+        }
     }
 }

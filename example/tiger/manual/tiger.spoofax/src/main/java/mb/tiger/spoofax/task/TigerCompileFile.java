@@ -1,6 +1,7 @@
 package mb.tiger.spoofax.task;
 
-import mb.common.util.ListView;
+import mb.common.result.Result;
+import mb.jsglr1.common.JSGLR1ParseException;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.Task;
@@ -10,7 +11,7 @@ import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.command.CommandFeedback;
-import mb.spoofax.core.language.command.CommandOutput;
+import mb.spoofax.core.language.command.ShowFeedback;
 import mb.tiger.spoofax.task.reusable.TigerListLiteralVals;
 import mb.tiger.spoofax.task.reusable.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -21,7 +22,7 @@ import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-public class TigerCompileFile implements TaskDef<TigerCompileFile.Args, CommandOutput> {
+public class TigerCompileFile implements TaskDef<TigerCompileFile.Args, CommandFeedback> {
     public static class Args implements Serializable {
         final ResourcePath file;
 
@@ -60,24 +61,22 @@ public class TigerCompileFile implements TaskDef<TigerCompileFile.Args, CommandO
         return getClass().getName();
     }
 
-    @Override public CommandOutput exec(ExecContext context, Args input) throws Exception {
+    @Override public CommandFeedback exec(ExecContext context, Args input) {
         final ResourcePath file = input.file;
-
-        final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createNullableAstSupplier(file);
-        final @Nullable String literalsStr = context.require(listLiteralVals, astSupplier);
-        if(literalsStr == null) {
-            return new CommandOutput(ListView.of());
-        }
-
-        final ResourcePath generatedPath = file.replaceLeafExtension("literals.aterm");
-        final HierarchicalResource generatedResource = resourceService.getHierarchicalResource(generatedPath);
-        generatedResource.writeBytes(literalsStr.getBytes(StandardCharsets.UTF_8));
-        context.provide(generatedResource, ResourceStampers.hashFile());
-
-        return new CommandOutput(ListView.of(CommandFeedback.showFile(generatedPath)));
+        final Supplier<Result<IStrategoTerm, JSGLR1ParseException>> astSupplier = parse.createAstSupplier(file);
+        final Result<String, ?> listedLiteralVals = context.require(listLiteralVals, astSupplier);
+        return listedLiteralVals
+            .mapCatching((literalVals) -> {
+                final ResourcePath generatedPath = file.replaceLeafExtension("literals.aterm");
+                final HierarchicalResource generatedResource = resourceService.getHierarchicalResource(generatedPath);
+                generatedResource.writeBytes(literalVals.getBytes(StandardCharsets.UTF_8));
+                context.provide(generatedResource, ResourceStampers.hashFile());
+                return generatedPath;
+            })
+            .mapOrElse(f -> CommandFeedback.of(ShowFeedback.showFile(f)), e -> CommandFeedback.ofTryExtractMessagesFrom(e, file));
     }
 
-    @Override public Task<CommandOutput> createTask(Args input) {
+    @Override public Task<CommandFeedback> createTask(Args input) {
         return TaskDef.super.createTask(input);
     }
 }

@@ -1,6 +1,6 @@
 package mb.sdf3.spoofax;
 
-import mb.pie.api.ExecException;
+import mb.common.result.Result;
 import mb.pie.api.MixedSession;
 import mb.resource.text.TextResource;
 import mb.sdf3.spoofax.task.Sdf3Parse;
@@ -17,13 +17,12 @@ import org.spoofax.jsglr2.JSGLR2Variant;
 import org.spoofax.jsglr2.messages.Message;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.spoofax.terms.util.TermUtils.isAppl;
-import static org.spoofax.terms.util.TermUtils.isApplAt;
+import static org.spoofax.terms.util.TermUtils.*;
 
 class SpecToParseTableTest extends TestBase {
     @ParameterizedTest
     @ValueSource(booleans = {false, true})
-    void testTask(boolean createCompletionTable) throws ExecException, InterruptedException {
+    void testTask(boolean createCompletionTable) throws Exception {
         final TextResource resourceMain = createTextResource("module test imports lex nested/a nested/b context-free start-symbols Start context-free syntax Start.Start = <<A> <B>>", "test.sdf3");
         final TextResource resourceLex = createTextResource("module lex lexical syntax LAYOUT = [\\ \\t\\n\\r]", "lex.sdf3");
         final TextResource resourceA = createTextResource("module nested/a context-free syntax A.A = <key>", "nested/a.sdf3");
@@ -33,10 +32,12 @@ class SpecToParseTableTest extends TestBase {
             final Sdf3Parse parse = languageComponent.getParse();
             final Sdf3SpecToParseTable.Args args = new Sdf3SpecToParseTable.Args(
                 specSupplier(desugarSupplier(resourceMain), desugarSupplier(resourceLex), desugarSupplier(resourceA), desugarSupplier(resourceB)),
-                new ParseTableConfiguration(false, false, true, false, false),
+                new ParseTableConfiguration(false, false, true, false, false, false),
                 createCompletionTable
             );
-            final ParseTable parseTable = session.require(taskDef.createTask(args));
+            final Result<ParseTable, ?> parseTableResult = session.require(taskDef.createTask(args));
+            assertTrue(parseTableResult.isOk());
+            final ParseTable parseTable = parseTableResult.unwrap();
             assertNotNull(parseTable);
             final JSGLR2<IStrategoTerm> parser = JSGLR2Variant.Preset.standard.getJSGLR2(parseTable);
             {

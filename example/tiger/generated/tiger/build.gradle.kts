@@ -31,7 +31,7 @@ spoofaxLanguageProject {
       .addInteropRegisterersByReflection("tiger.spoofaxcore.trans.InteropRegisterer", "tiger.spoofaxcore.strategies.InteropRegisterer")
       .enableNaBL2(true)
       .enableStatix(false)
-      .copyJavaStrategyClasses(true),
+      .copyClasses(true),
     constraintAnalyzer = ConstraintAnalyzerCompiler.LanguageProjectInput.builder(),
 
     builder = LanguageProjectCompiler.Input.builder()

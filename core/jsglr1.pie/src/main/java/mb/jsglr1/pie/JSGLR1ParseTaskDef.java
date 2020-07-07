@@ -1,9 +1,10 @@
 package mb.jsglr1.pie;
 
-import mb.common.message.Message;
 import mb.common.message.Messages;
-import mb.common.token.Token;
-import mb.jsglr1.common.JSGLR1ParseResult;
+import mb.common.result.Result;
+import mb.jsglr.common.JSGLRTokens;
+import mb.jsglr1.common.JSGLR1ParseException;
+import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Function;
 import mb.pie.api.ResourceStringSupplier;
@@ -18,198 +19,101 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 
-public abstract class JSGLR1ParseTaskDef implements TaskDef<Supplier<String>, JSGLR1ParseResult> {
-    protected abstract JSGLR1ParseResult parse(String text) throws InterruptedException;
+public abstract class JSGLR1ParseTaskDef implements TaskDef<Supplier<String>, Result<JSGLR1ParseOutput, JSGLR1ParseException>> {
+    protected abstract Result<JSGLR1ParseOutput, JSGLR1ParseException> parse(String text) throws InterruptedException;
 
     @Override
-    public JSGLR1ParseResult exec(ExecContext context, Supplier<String> stringSupplier) throws InterruptedException {
-        final String text;
+    public Result<JSGLR1ParseOutput, JSGLR1ParseException> exec(ExecContext context, Supplier<String> stringSupplier) throws InterruptedException {
         try {
-            text = context.require(stringSupplier);
+            return parse(context.require(stringSupplier));
         } catch(IOException e) {
-            return JSGLR1ParseResult.failed(Messages.of(new Message("Cannot get text to parse from '" + stringSupplier + "'", e)));
+            return Result.ofErr(JSGLR1ParseException.readStringFail(stringSupplier.toString(), e));
         }
-        return parse(text);
     }
 
 
-    // AST supplier that throws on parse failures, including recovered ASTs.
-
-    public Supplier<IStrategoTerm> createAstSupplier(Supplier<String> stringSupplier) {
-        return createSupplier(stringSupplier).map(ThrowsAstMapper.instance);
+    public Supplier<Result<IStrategoTerm, JSGLR1ParseException>> createRecoverableAstSupplier(Supplier<String> stringSupplier) {
+        return createSupplier(stringSupplier).map(RecoverableAstMapper.instance);
     }
 
-    public Supplier<IStrategoTerm> createAstSupplier(ResourceKey key) {
-        return createAstSupplier(rsp(key));
-    }
-
-    public Supplier<IStrategoTerm> createAstSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper) {
-        return createAstSupplier(rsp(key, stamper));
-    }
-
-    public Supplier<IStrategoTerm> createAstSupplier(ResourceKey key, Charset charset) {
-        return createAstSupplier(rsp(key, charset));
-    }
-
-    public Supplier<IStrategoTerm> createAstSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper, Charset charset) {
-        return createAstSupplier(rsp(key, stamper, charset));
-    }
-
-    // AST supplier that throws on parse failures, excluding recovered ASTs.
-
-    public Supplier<IStrategoTerm> createRecoverableAstSupplier(Supplier<String> stringSupplier) {
-        return createSupplier(stringSupplier).map(ThrowsRecoverableAstMapper.instance);
-    }
-
-    public Supplier<IStrategoTerm> createRecoverableAstSupplier(ResourceKey key) {
+    public Supplier<Result<IStrategoTerm, JSGLR1ParseException>> createRecoverableAstSupplier(ResourceKey key) {
         return createRecoverableAstSupplier(rsp(key));
     }
 
-    public Supplier<IStrategoTerm> createRecoverableAstSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper) {
+    public Supplier<Result<IStrategoTerm, JSGLR1ParseException>> createRecoverableAstSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper) {
         return createRecoverableAstSupplier(rsp(key, stamper));
     }
 
-    public Supplier<IStrategoTerm> createRecoverableAstSupplier(ResourceKey key, Charset charset) {
+    public Supplier<Result<IStrategoTerm, JSGLR1ParseException>> createRecoverableAstSupplier(ResourceKey key, Charset charset) {
         return createRecoverableAstSupplier(rsp(key, charset));
     }
 
-    public Supplier<IStrategoTerm> createRecoverableAstSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper, Charset charset) {
+    public Supplier<Result<IStrategoTerm, JSGLR1ParseException>> createRecoverableAstSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper, Charset charset) {
         return createRecoverableAstSupplier(rsp(key, stamper, charset));
     }
 
-    // AST supplier that returns null on parse failures, including recovered ASTs.
 
-    public Supplier<IStrategoTerm> createNullableAstSupplier(Supplier<String> stringSupplier) {
-        return createSupplier(stringSupplier).map(NullableAstMapper.instance);
+    public Supplier<Result<IStrategoTerm, JSGLR1ParseException>> createAstSupplier(Supplier<String> stringSupplier) {
+        return createSupplier(stringSupplier).map(AstMapper.instance); // TODO: pass an outputstamper that only does an equals check on the AST.
     }
 
-    public Supplier<IStrategoTerm> createNullableAstSupplier(ResourceKey key) {
-        return createNullableAstSupplier(rsp(key));
+    public Supplier<Result<IStrategoTerm, JSGLR1ParseException>> createAstSupplier(ResourceKey key) {
+        return createAstSupplier(rsp(key));
     }
 
-    public Supplier<IStrategoTerm> createNullableAstSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper) {
-        return createNullableAstSupplier(rsp(key, stamper));
+    public Supplier<Result<IStrategoTerm, JSGLR1ParseException>> createAstSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper) {
+        return createAstSupplier(rsp(key, stamper));
     }
 
-    public Supplier<IStrategoTerm> createNullableAstSupplier(ResourceKey key, Charset charset) {
-        return createNullableAstSupplier(rsp(key, charset));
+    public Supplier<Result<IStrategoTerm, JSGLR1ParseException>> createAstSupplier(ResourceKey key, Charset charset) {
+        return createAstSupplier(rsp(key, charset));
     }
 
-    public Supplier<IStrategoTerm> createNullableAstSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper, Charset charset) {
-        return createNullableAstSupplier(rsp(key, stamper, charset));
-    }
-
-    // AST supplier that returns null on parse failures, excluding recovered ASTs.
-
-    public Supplier<IStrategoTerm> createNullableRecoverableAstSupplier(Supplier<String> stringSupplier) {
-        return createSupplier(stringSupplier).map(NullableRecoverableAstMapper.instance);
-    }
-
-    public Supplier<IStrategoTerm> createNullableRecoverableAstSupplier(ResourceKey key) {
-        return createNullableRecoverableAstSupplier(rsp(key));
-    }
-
-    public Supplier<IStrategoTerm> createNullableRecoverableAstSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper) {
-        return createNullableRecoverableAstSupplier(rsp(key, stamper));
-    }
-
-    public Supplier<IStrategoTerm> createNullableRecoverableAstSupplier(ResourceKey key, Charset charset) {
-        return createNullableRecoverableAstSupplier(rsp(key, charset));
-    }
-
-    public Supplier<IStrategoTerm> createNullableRecoverableAstSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper, Charset charset) {
-        return createNullableRecoverableAstSupplier(rsp(key, stamper, charset));
+    public Supplier<Result<IStrategoTerm, JSGLR1ParseException>> createAstSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper, Charset charset) {
+        return createAstSupplier(rsp(key, stamper, charset));
     }
 
 
-    // Tokens supplier that throws on parse failures, including recovered tokens.
-
-    public Supplier<ArrayList<? extends Token<IStrategoTerm>>> createTokensSupplier(Supplier<String> stringSupplier) {
-        return createSupplier(stringSupplier).map(ThrowsTokensMapper.instance);
+    public Supplier<Result<JSGLRTokens, JSGLR1ParseException>> createRecoverableTokensSupplier(Supplier<String> stringSupplier) {
+        return createSupplier(stringSupplier).map(RecoverableTokensMapper.instance);
     }
 
-    public Supplier<ArrayList<? extends Token<IStrategoTerm>>> createTokensSupplier(ResourceKey key) {
-        return createTokensSupplier(rsp(key));
-    }
-
-    public Supplier<ArrayList<? extends Token<IStrategoTerm>>> createTokensSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper) {
-        return createTokensSupplier(rsp(key, stamper));
-    }
-
-    public Supplier<ArrayList<? extends Token<IStrategoTerm>>> createTokensSupplier(ResourceKey key, Charset charset) {
-        return createTokensSupplier(rsp(key, charset));
-    }
-
-    public Supplier<ArrayList<? extends Token<IStrategoTerm>>> createTokensSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper, Charset charset) {
-        return createTokensSupplier(rsp(key, stamper, charset));
-    }
-
-    // Tokens supplier that throws on parse failures, excluding recovered tokens.
-
-    public Supplier<ArrayList<? extends Token<IStrategoTerm>>> createRecoverableTokensSupplier(Supplier<String> stringSupplier) {
-        return createSupplier(stringSupplier).map(ThrowsRecoverableTokensMapper.instance);
-    }
-
-    public Supplier<ArrayList<? extends Token<IStrategoTerm>>> createRecoverableTokensSupplier(ResourceKey key) {
+    public Supplier<Result<JSGLRTokens, JSGLR1ParseException>> createRecoverableTokensSupplier(ResourceKey key) {
         return createRecoverableTokensSupplier(rsp(key));
     }
 
-    public Supplier<ArrayList<? extends Token<IStrategoTerm>>> createRecoverableTokensSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper) {
+    public Supplier<Result<JSGLRTokens, JSGLR1ParseException>> createRecoverableTokensSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper) {
         return createRecoverableTokensSupplier(rsp(key, stamper));
     }
 
-    public Supplier<ArrayList<? extends Token<IStrategoTerm>>> createRecoverableTokensSupplier(ResourceKey key, Charset charset) {
+    public Supplier<Result<JSGLRTokens, JSGLR1ParseException>> createRecoverableTokensSupplier(ResourceKey key, Charset charset) {
         return createRecoverableTokensSupplier(rsp(key, charset));
     }
 
-    public Supplier<ArrayList<? extends Token<IStrategoTerm>>> createRecoverableTokensSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper, Charset charset) {
+    public Supplier<Result<JSGLRTokens, JSGLR1ParseException>> createRecoverableTokensSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper, Charset charset) {
         return createRecoverableTokensSupplier(rsp(key, stamper, charset));
     }
 
-    // Tokens supplier that returns null on parse failures, including recovered tokens.
 
-    public Supplier<@Nullable ArrayList<? extends Token<IStrategoTerm>>> createNullableTokensSupplier(Supplier<String> stringSupplier) {
-        return createSupplier(stringSupplier).map(NullableTokensMapper.instance);
+    public Supplier<Result<JSGLRTokens, JSGLR1ParseException>> createTokensSupplier(Supplier<String> stringSupplier) {
+        return createSupplier(stringSupplier).map(TokensMapper.instance);
     }
 
-    public Supplier<@Nullable ArrayList<? extends Token<IStrategoTerm>>> createNullableTokensSupplier(ResourceKey key) {
-        return createNullableTokensSupplier(rsp(key));
+    public Supplier<Result<JSGLRTokens, JSGLR1ParseException>> createTokensSupplier(ResourceKey key) {
+        return createTokensSupplier(rsp(key));
     }
 
-    public Supplier<@Nullable ArrayList<? extends Token<IStrategoTerm>>> createNullableTokensSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper) {
-        return createNullableTokensSupplier(rsp(key, stamper));
+    public Supplier<Result<JSGLRTokens, JSGLR1ParseException>> createTokensSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper) {
+        return createTokensSupplier(rsp(key, stamper));
     }
 
-    public Supplier<@Nullable ArrayList<? extends Token<IStrategoTerm>>> createNullableTokensSupplier(ResourceKey key, Charset charset) {
-        return createNullableTokensSupplier(rsp(key, charset));
+    public Supplier<Result<JSGLRTokens, JSGLR1ParseException>> createTokensSupplier(ResourceKey key, Charset charset) {
+        return createTokensSupplier(rsp(key, charset));
     }
 
-    public Supplier<@Nullable ArrayList<? extends Token<IStrategoTerm>>> createNullableTokensSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper, Charset charset) {
-        return createNullableTokensSupplier(rsp(key, stamper, charset));
-    }
-
-    // Tokens supplier that returns null on parse failures, excluding recovered tokens.
-
-    public Supplier<@Nullable ArrayList<? extends Token<IStrategoTerm>>> createNullableRecoverableTokensSupplier(Supplier<String> stringSupplier) {
-        return createSupplier(stringSupplier).map(NullableRecoverableTokensMapper.instance);
-    }
-
-    public Supplier<@Nullable ArrayList<? extends Token<IStrategoTerm>>> createNullableRecoverableTokensSupplier(ResourceKey key) {
-        return createNullableRecoverableTokensSupplier(rsp(key));
-    }
-
-    public Supplier<@Nullable ArrayList<? extends Token<IStrategoTerm>>> createNullableRecoverableTokensSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper) {
-        return createNullableRecoverableTokensSupplier(rsp(key, stamper));
-    }
-
-    public Supplier<@Nullable ArrayList<? extends Token<IStrategoTerm>>> createNullableRecoverableTokensSupplier(ResourceKey key, Charset charset) {
-        return createNullableRecoverableTokensSupplier(rsp(key, charset));
-    }
-
-    public Supplier<@Nullable ArrayList<? extends Token<IStrategoTerm>>> createNullableRecoverableTokensSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper, Charset charset) {
-        return createNullableRecoverableTokensSupplier(rsp(key, stamper, charset));
+    public Supplier<Result<JSGLRTokens, JSGLR1ParseException>> createTokensSupplier(ResourceKey key, ResourceStamper<ReadableResource> stamper, Charset charset) {
+        return createTokensSupplier(rsp(key, stamper, charset));
     }
 
 
@@ -234,39 +138,21 @@ public abstract class JSGLR1ParseTaskDef implements TaskDef<Supplier<String>, JS
     }
 
 
-    public Function<Supplier<String>, IStrategoTerm> createAstFunction() {
-        return createFunction().mapOutput(ThrowsAstMapper.instance);
+    public Function<Supplier<String>, Result<IStrategoTerm, JSGLR1ParseException>> createAstFunction() {
+        return createFunction().mapOutput(AstMapper.instance);
     }
 
-    public Function<Supplier<String>, IStrategoTerm> createRecoverableAstFunction() {
-        return createFunction().mapOutput(ThrowsRecoverableAstMapper.instance);
+    public Function<Supplier<String>, Result<IStrategoTerm, JSGLR1ParseException>> createRecoverableAstFunction() {
+        return createFunction().mapOutput(RecoverableAstMapper.instance);
     }
 
-    public Function<Supplier<String>, @Nullable IStrategoTerm> createNullableAstFunction() {
-        return createFunction().mapOutput(NullableAstMapper.instance);
+    public Function<Supplier<String>, Result<JSGLRTokens, JSGLR1ParseException>> createTokensFunction() {
+        return createFunction().mapOutput(TokensMapper.instance);
     }
 
-    public Function<Supplier<String>, @Nullable IStrategoTerm> createNullableRecoverableAstFunction() {
-        return createFunction().mapOutput(NullableRecoverableAstMapper.instance);
+    public Function<Supplier<String>, Result<JSGLRTokens, JSGLR1ParseException>> createRecoverableTokensFunction() {
+        return createFunction().mapOutput(RecoverableTokensMapper.instance);
     }
-
-
-    public Function<Supplier<String>, ArrayList<? extends Token<IStrategoTerm>>> createTokensFunction() {
-        return createFunction().mapOutput(ThrowsTokensMapper.instance);
-    }
-
-    public Function<Supplier<String>, ArrayList<? extends Token<IStrategoTerm>>> createRecoverableTokensFunction() {
-        return createFunction().mapOutput(ThrowsRecoverableTokensMapper.instance);
-    }
-
-    public Function<Supplier<String>, @Nullable ArrayList<? extends Token<IStrategoTerm>>> createNullableTokensFunction() {
-        return createFunction().mapOutput(NullableTokensMapper.instance);
-    }
-
-    public Function<Supplier<String>, @Nullable ArrayList<? extends Token<IStrategoTerm>>> createNullableRecoverableTokensFunction() {
-        return createFunction().mapOutput(NullableRecoverableTokensMapper.instance);
-    }
-
 
     public Function<Supplier<String>, Messages> createMessagesFunction() {
         return createFunction().mapOutput(MessagesMapper.instance);
@@ -305,111 +191,67 @@ abstract class Mapper<T, R> implements java.util.function.Function<T, R>, Serial
     // OPTO: deserialize to singleton instance.
 }
 
+class AstMapper extends Mapper<Result<JSGLR1ParseOutput, JSGLR1ParseException>, Result<IStrategoTerm, JSGLR1ParseException>> {
+    public static final AstMapper instance = new AstMapper();
 
-class ThrowsAstMapper extends Mapper<JSGLR1ParseResult, IStrategoTerm> {
-    public static final ThrowsAstMapper instance = new ThrowsAstMapper();
-
-    @Override public @Nullable IStrategoTerm apply(JSGLR1ParseResult result) {
-        return result.caseOf()
-            .success((ast, tokens, messages) -> ast)
-            .otherwiseEmpty().orElseThrow(() -> new ParseFailedException(result.getMessages()));
+    @Override
+    public Result<IStrategoTerm, JSGLR1ParseException> apply(Result<JSGLR1ParseOutput, JSGLR1ParseException> result) {
+        return result.flatMap(r -> {
+            if(r.recovered) {
+                return Result.ofErr(JSGLR1ParseException.recoveryDisallowedFail(r.messages));
+            } else {
+                return Result.ofOk(r.ast);
+            }
+        });
     }
 
-    private ThrowsAstMapper() {}
+    private AstMapper() {}
 }
 
-class ThrowsRecoverableAstMapper extends Mapper<JSGLR1ParseResult, IStrategoTerm> {
-    public static final ThrowsRecoverableAstMapper instance = new ThrowsRecoverableAstMapper();
+class RecoverableAstMapper extends Mapper<Result<JSGLR1ParseOutput, JSGLR1ParseException>, Result<IStrategoTerm, JSGLR1ParseException>> {
+    public static final RecoverableAstMapper instance = new RecoverableAstMapper();
 
-    @Override public @Nullable IStrategoTerm apply(JSGLR1ParseResult result) {
-        return result
-            .getAst()
-            .orElseThrow(() -> new ParseFailedException(result.getMessages()));
+    @Override
+    public Result<IStrategoTerm, JSGLR1ParseException> apply(Result<JSGLR1ParseOutput, JSGLR1ParseException> result) {
+        return result.map(r -> r.ast);
     }
 
-    private ThrowsRecoverableAstMapper() {}
+    private RecoverableAstMapper() {}
 }
 
-class NullableAstMapper extends Mapper<JSGLR1ParseResult, @Nullable IStrategoTerm> {
-    public static final NullableAstMapper instance = new NullableAstMapper();
+class TokensMapper extends Mapper<Result<JSGLR1ParseOutput, JSGLR1ParseException>, Result<JSGLRTokens, JSGLR1ParseException>> {
+    public static final TokensMapper instance = new TokensMapper();
 
-    @SuppressWarnings("ConstantConditions") @Override public @Nullable IStrategoTerm apply(JSGLR1ParseResult result) {
-        return result.caseOf()
-            .success((ast, tokens, messages) -> ast)
-            .otherwise_(null);
+    @Override
+    public Result<JSGLRTokens, JSGLR1ParseException> apply(Result<JSGLR1ParseOutput, JSGLR1ParseException> result) {
+        return result.flatMap(r -> {
+            if(r.recovered) {
+                return Result.ofErr(JSGLR1ParseException.recoveryDisallowedFail(r.messages));
+            } else {
+                return Result.ofOk(r.tokens);
+            }
+        });
     }
 
-    private NullableAstMapper() {}
+    private TokensMapper() {}
 }
 
-class NullableRecoverableAstMapper extends Mapper<JSGLR1ParseResult, @Nullable IStrategoTerm> {
-    public static final NullableRecoverableAstMapper instance = new NullableRecoverableAstMapper();
+class RecoverableTokensMapper extends Mapper<Result<JSGLR1ParseOutput, JSGLR1ParseException>, Result<JSGLRTokens, JSGLR1ParseException>> {
+    public static final RecoverableTokensMapper instance = new RecoverableTokensMapper();
 
-    @Override public @Nullable IStrategoTerm apply(JSGLR1ParseResult result) {
-        return result
-            .getAst()
-            .orElse(null);
+    @Override
+    public Result<JSGLRTokens, JSGLR1ParseException> apply(Result<JSGLR1ParseOutput, JSGLR1ParseException> result) {
+        return result.map(r -> r.tokens);
     }
 
-    private NullableRecoverableAstMapper() {}
+    private RecoverableTokensMapper() {}
 }
 
-
-class ThrowsTokensMapper extends Mapper<JSGLR1ParseResult, ArrayList<? extends Token<IStrategoTerm>>> {
-    public static final ThrowsTokensMapper instance = new ThrowsTokensMapper();
-
-    @Override public @Nullable ArrayList<? extends Token<IStrategoTerm>> apply(JSGLR1ParseResult result) {
-        return result.caseOf()
-            .success((ast, tokens, messages) -> tokens)
-            .otherwiseEmpty().orElseThrow(() -> new ParseFailedException(result.getMessages()));
-    }
-
-    private ThrowsTokensMapper() {}
-}
-
-class ThrowsRecoverableTokensMapper extends Mapper<JSGLR1ParseResult, ArrayList<? extends Token<IStrategoTerm>>> {
-    public static final ThrowsRecoverableTokensMapper instance = new ThrowsRecoverableTokensMapper();
-
-    @Override public @Nullable ArrayList<? extends Token<IStrategoTerm>> apply(JSGLR1ParseResult result) {
-        return result
-            .getTokens()
-            .orElseThrow(() -> new ParseFailedException(result.getMessages()));
-    }
-
-    private ThrowsRecoverableTokensMapper() {}
-}
-
-class NullableTokensMapper extends Mapper<JSGLR1ParseResult, @Nullable ArrayList<? extends Token<IStrategoTerm>>> {
-    public static final NullableTokensMapper instance = new NullableTokensMapper();
-
-    @SuppressWarnings("ConstantConditions") @Override
-    public @Nullable ArrayList<? extends Token<IStrategoTerm>> apply(JSGLR1ParseResult result) {
-        return result.caseOf()
-            .success((ast, tokens, messages) -> tokens)
-            .otherwise_(null);
-    }
-
-    private NullableTokensMapper() {}
-}
-
-class NullableRecoverableTokensMapper extends Mapper<JSGLR1ParseResult, @Nullable ArrayList<? extends Token<IStrategoTerm>>> {
-    public static final NullableRecoverableTokensMapper instance = new NullableRecoverableTokensMapper();
-
-    @Override public @Nullable ArrayList<? extends Token<IStrategoTerm>> apply(JSGLR1ParseResult result) {
-        return result
-            .getTokens()
-            .orElse(null);
-    }
-
-    private NullableRecoverableTokensMapper() {}
-}
-
-
-class MessagesMapper extends Mapper<JSGLR1ParseResult, Messages> {
+class MessagesMapper extends Mapper<Result<JSGLR1ParseOutput, JSGLR1ParseException>, Messages> {
     public static final MessagesMapper instance = new MessagesMapper();
 
-    @Override public Messages apply(JSGLR1ParseResult result) {
-        return result.getMessages();
+    @Override public Messages apply(Result<JSGLR1ParseOutput, JSGLR1ParseException> result) {
+        return result.mapOrElse(v -> v.messages, e -> e.getMessages().orElseGet(Messages::of));
     }
 
     private MessagesMapper() {}

@@ -2,9 +2,9 @@ package {{genInstance.packageId}};
 
 import mb.common.message.KeyedMessages;
 import mb.common.message.Messages;
+import mb.common.option.Option;
+import mb.common.result.Result;
 import mb.common.style.Styling;
-import mb.common.token.Token;
-
 import mb.common.region.Region;
 import mb.common.util.CollectionView;
 import mb.common.util.EntryView;
@@ -12,6 +12,7 @@ import mb.common.util.ListView;
 import mb.common.util.MapView;
 import mb.common.util.SetView;
 import mb.completions.common.CompletionResult;
+import mb.jsglr.common.JSGLRTokens;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
@@ -99,17 +100,17 @@ public class {{genInstance.id}} implements LanguageInstance {
     }
 
 
-    @Override public Task<@Nullable ArrayList<? extends Token<?>>> createTokenizeTask(ResourceKey resourceKey) {
+    @Override public Task<Option<JSGLRTokens>> createTokenizeTask(ResourceKey resourceKey) {
         return {{tokenizeInjection.name}}.createTask(resourceKey);
     }
 
-    @Override public Task<@Nullable Styling> createStyleTask(ResourceKey resourceKey) {
-        return {{styleInjection.name}}.createTask({{parseInjection.name}}.createNullableRecoverableTokensSupplier(resourceKey));
+    @Override public Task<Option<Styling>> createStyleTask(ResourceKey resourceKey) {
+        return {{styleInjection.name}}.createTask({{parseInjection.name}}.createRecoverableTokensSupplier(resourceKey).map(Result::ok));
     }
 
     @Override
     public Task<@Nullable CompletionResult> createCompletionTask(ResourceKey resourceKey, Region primarySelection) {
-        return {{completeInjection.name}}.createTask(new {{completeInjection.type.qualifiedId}}.Input({{parseInjection.name}}.createNullableRecoverableAstSupplier(resourceKey)));
+        return {{completeInjection.name}}.createTask(new {{completeInjection.type.qualifiedId}}.Input({{parseInjection.name}}.createRecoverableAstSupplier(resourceKey).map(Result::get))); // TODO: use Result
     }
 
     @Override public Task<KeyedMessages> createCheckTask(ResourcePath projectRoot) {

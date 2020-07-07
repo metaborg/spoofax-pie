@@ -52,6 +52,10 @@ public class ConstraintAnalyzerCompiler {
 
     // Adapter project
 
+    public ListView<GradleConfiguredDependency> getAdapterProjectDependencies(AdapterProjectInput input) {
+        return ListView.of(GradleConfiguredDependency.api(input.shared().constraintPieDep()));
+    }
+
     public Output compileAdapterProject(AdapterProjectInput input) throws IOException {
         final Output.Builder outputBuilder = Output.builder();
         if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.

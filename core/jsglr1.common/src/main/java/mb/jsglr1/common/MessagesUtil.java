@@ -13,6 +13,7 @@ import org.spoofax.jsglr.client.ParseTimeoutException;
 import org.spoofax.jsglr.client.RegionRecovery;
 import org.spoofax.jsglr.client.imploder.AbstractTokenizer;
 import org.spoofax.jsglr.client.imploder.IToken;
+import org.spoofax.jsglr.client.imploder.ITokenizer;
 import org.spoofax.jsglr.client.imploder.ITokens;
 import org.spoofax.jsglr.client.imploder.Token;
 import org.spoofax.jsglr.shared.BadTokenException;
@@ -55,20 +56,20 @@ class MessagesUtil {
      */
 
     void gatherNonFatalErrors(IStrategoTerm top) {
-        final ITokens tokens = getTokenizer(top);
+        final ITokenizer tokens = (ITokenizer)getTokenizer(top);
         if(tokens != null) {
             for(int i = 0, max = tokens.getTokenCount(); i < max; i++) {
-                final IToken token = tokens.getTokenAt(i);
+                final Token token = tokens.getTokenAt(i);
                 final @Nullable String error = token.getError();
                 if(error != null) {
-                    if(error.equals(ITokens.ERROR_SKIPPED_REGION)) {
+                    if(error.equals(ITokenizer.ERROR_SKIPPED_REGION)) {
                         i = findRightMostWithSameError(token, null);
                         reportSkippedRegion(token, tokens.getTokenAt(i));
-                    } else if(error.startsWith(ITokens.ERROR_WARNING_PREFIX)) {
+                    } else if(error.startsWith(ITokenizer.ERROR_WARNING_PREFIX)) {
                         i = findRightMostWithSameError(token, null);
                         reportWarningAtTokens(token, tokens.getTokenAt(i), error);
-                    } else if(error.startsWith(ITokens.ERROR_WATER_PREFIX)) {
-                        i = findRightMostWithSameError(token, ITokens.ERROR_WATER_PREFIX);
+                    } else if(error.startsWith(ITokenizer.ERROR_WATER_PREFIX)) {
+                        i = findRightMostWithSameError(token, ITokenizer.ERROR_WATER_PREFIX);
                         reportErrorAtTokens(token, tokens.getTokenAt(i), error);
                     } else {
                         i = findRightMostWithSameError(token, null);
@@ -81,9 +82,9 @@ class MessagesUtil {
         }
     }
 
-    private static int findRightMostWithSameError(IToken token, @Nullable String prefix) {
+    private static int findRightMostWithSameError(Token token, @Nullable String prefix) {
         final String expectedError = token.getError();
-        final ITokens tokens = token.getTokenizer();
+        final ITokenizer tokens = (ITokenizer)token.getTokenizer();
         int i = token.getIndex();
         for(int max = tokens.getTokenCount(); i + 1 < max; i++) {
             final String error = tokens.getTokenAt(i + 1).getError();
@@ -107,7 +108,7 @@ class MessagesUtil {
 
         if(reportedLine == -1) {
             // Report entire region
-            reportErrorAtTokens(left, right, ITokens.ERROR_SKIPPED_REGION);
+            reportErrorAtTokens(left, right, ITokenizer.ERROR_SKIPPED_REGION);
         } else if(reportedLine - line >= LARGE_REGION_SIZE) {
             // Warn at start of region
             reportErrorAtTokens(findLeftMostTokenOnSameLine(left), findRightMostTokenOnSameLine(left),
@@ -172,7 +173,7 @@ class MessagesUtil {
         } else {
             @Nullable IToken token = tokens.getTokenAtOffset(exception.getOffset()); // TODO: token can be null?
             token = findNextNonEmptyToken(token);
-            message = ITokens.ERROR_WATER_PREFIX + ": " + token.toString().trim();
+            message = ITokenizer.ERROR_WATER_PREFIX + ": " + token.toString().trim();
         }
         reportErrorNearOffset(tokens, exception.getOffset(), message);
     }
@@ -185,7 +186,7 @@ class MessagesUtil {
     }
 
     private static @Nullable IToken findNextNonEmptyToken(IToken token) {
-        final ITokens tokens = token.getTokenizer();
+        final ITokenizer tokens = (ITokenizer)token.getTokenizer();
         @Nullable IToken result = null;
         for(int i = token.getIndex(), max = tokens.getTokenCount(); i < max; i++) {
             result = tokens.getTokenAt(i);

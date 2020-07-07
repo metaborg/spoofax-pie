@@ -1,6 +1,7 @@
 package mb.tiger.spoofax.task;
 
-import mb.common.util.ListView;
+import mb.common.result.Result;
+import mb.jsglr1.common.JSGLR1ParseException;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.Task;
@@ -10,7 +11,7 @@ import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.command.CommandFeedback;
-import mb.spoofax.core.language.command.CommandOutput;
+import mb.spoofax.core.language.command.ShowFeedback;
 import mb.tiger.spoofax.task.reusable.TigerListDefNames;
 import mb.tiger.spoofax.task.reusable.TigerListLiteralVals;
 import mb.tiger.spoofax.task.reusable.TigerParse;
@@ -23,7 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Objects;
 
-public class TigerCompileFileAlt implements TaskDef<TigerCompileFileAlt.Args, CommandOutput> {
+public class TigerCompileFileAlt implements TaskDef<TigerCompileFileAlt.Args, CommandFeedback> {
     public static class Args implements Serializable {
         final ResourcePath file;
         final boolean listDefNames;
@@ -73,38 +74,34 @@ public class TigerCompileFileAlt implements TaskDef<TigerCompileFileAlt.Args, Co
         return getClass().getName();
     }
 
-    @Override public CommandOutput exec(ExecContext context, Args input) throws Exception {
+    @Override public CommandFeedback exec(ExecContext context, Args input) {
         final ResourcePath file = input.file;
-
-        final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createNullableAstSupplier(file);
-        @Nullable String str;
+        final Supplier<Result<IStrategoTerm, JSGLR1ParseException>> astSupplier = parse.createAstSupplier(file);
+        Result<String, ?> strResult;
         if(input.listDefNames) {
-            str = context.require(listDefNames, astSupplier);
+            strResult = context.require(listDefNames, astSupplier);
         } else {
-            str = context.require(listLiteralVals, astSupplier);
+            strResult = context.require(listLiteralVals, astSupplier);
         }
-
-        if(str == null) {
-            return new CommandOutput(ListView.of());
-        }
-
-        if(input.base64Encode) {
-            str = Base64.getEncoder().encodeToString(str.getBytes(StandardCharsets.UTF_8));
-        }
-
-        final ResourcePath generatedPath = file.replaceLeafExtension(input.compiledFileNameSuffix);
-        final HierarchicalResource generatedResource = resourceService.getHierarchicalResource(generatedPath);
-        generatedResource.writeBytes(str.getBytes(StandardCharsets.UTF_8));
-        context.provide(generatedResource, ResourceStampers.hashFile());
-
-        return new CommandOutput(ListView.of(CommandFeedback.showFile(generatedPath)));
+        return strResult
+            .mapCatching((str) -> {
+                if(input.base64Encode) {
+                    str = Base64.getEncoder().encodeToString(str.getBytes(StandardCharsets.UTF_8));
+                }
+                final ResourcePath generatedPath = file.replaceLeafExtension(input.compiledFileNameSuffix);
+                final HierarchicalResource generatedResource = resourceService.getHierarchicalResource(generatedPath);
+                generatedResource.writeBytes(str.getBytes(StandardCharsets.UTF_8));
+                context.provide(generatedResource, ResourceStampers.hashFile());
+                return generatedPath;
+            })
+            .mapOrElse(f -> CommandFeedback.of(ShowFeedback.showFile(f)), e -> CommandFeedback.ofTryExtractMessagesFrom(e, file));
     }
 
     @Override public Serializable key(Args input) {
         return input.file; // Task is keyed by file only.
     }
 
-    @Override public Task<CommandOutput> createTask(Args input) {
+    @Override public Task<CommandFeedback> createTask(Args input) {
         return TaskDef.super.createTask(input);
     }
 }

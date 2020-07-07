@@ -1,14 +1,11 @@
 package mb.common.message;
 
 import mb.common.util.ListView;
-import mb.common.util.MapView;
 import mb.common.util.MultiHashMap;
 import mb.resource.ResourceKey;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -25,19 +22,23 @@ public class Messages implements Iterable<Message>, Serializable {
     }
 
     public static Messages of(Message message) {
-        final ArrayList<Message> list = new ArrayList<>();
-        list.add(message);
-        return new Messages(new ListView<>(list));
+        return new Messages(ListView.of(message));
     }
 
     public static Messages of(Message... messages) {
-        final ArrayList<Message> list = new ArrayList<>();
-        Collections.addAll(list, messages);
-        return new Messages(new ListView<>(list));
+        return new Messages(ListView.of(messages));
     }
 
-    public static Messages copyOf(List<Message> messages) {
-        return new Messages(new ListView<>(new ArrayList<>(messages)));
+    public static Messages of(List<? extends Message> list) {
+        return new Messages(ListView.of(list));
+    }
+
+    public static Messages copyOf(Iterable<Message> messages) {
+        return new Messages(ListView.copyOf(messages));
+    }
+
+    public static Messages copyOf(Collection<Message> messages) {
+        return new Messages(ListView.copyOf(messages));
     }
 
 
@@ -103,10 +104,14 @@ public class Messages implements Iterable<Message>, Serializable {
     }
 
 
-    public KeyedMessages toKeyed(@Nullable ResourceKey key) {
-        final MultiHashMap<@Nullable ResourceKey, Message> map = new MultiHashMap<>();
+    public KeyedMessages toKeyed(ResourceKey key) {
+        final MultiHashMap<ResourceKey, Message> map = new MultiHashMap<>();
         map.putAll(key, messages);
-        return new KeyedMessages(MapView.copyOf(map.getInnerMap()));
+        return KeyedMessages.copyOf(map.getInnerMap());
+    }
+
+    public KeyedMessages toKeyed() {
+        return KeyedMessages.of(messages);
     }
 
 
@@ -117,7 +122,7 @@ public class Messages implements Iterable<Message>, Serializable {
     @Override public boolean equals(Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
-        final Messages that = (Messages) o;
+        final Messages that = (Messages)o;
         return messages.equals(that.messages);
     }
 

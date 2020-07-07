@@ -235,8 +235,16 @@ public interface Shared extends Serializable {
         return GradleDependency.module(Coordinate.of("org.metaborg", "stratego.common", spoofax3Version()));
     }
 
+    @Value.Default default GradleDependency strategoPieDep() {
+        return GradleDependency.module(Coordinate.of("org.metaborg", "stratego.pie", spoofax3Version()));
+    }
+
     @Value.Default default GradleDependency constraintCommonDep() {
         return GradleDependency.module(Coordinate.of("org.metaborg", "constraint.common", spoofax3Version()));
+    }
+
+    @Value.Default default GradleDependency constraintPieDep() {
+        return GradleDependency.module(Coordinate.of("org.metaborg", "constraint.pie", spoofax3Version()));
     }
 
     @Value.Default default GradleDependency nabl2CommonDep() {

@@ -11,7 +11,7 @@ dependencies {
 
   implementation(compositeBuild("spoofax.core"))
   implementation(compositeBuild("spoofax.intellij"))
-  implementation(project(":tiger.manual.spoofax")) {
+  implementation(project(":tiger.spoofax")) {
     exclude(group = "org.slf4j")
   }
 

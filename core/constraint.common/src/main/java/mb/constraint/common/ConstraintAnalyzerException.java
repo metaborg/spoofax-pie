@@ -1,21 +1,39 @@
 package mb.constraint.common;
 
+import mb.common.util.ADT;
+import mb.stratego.common.StrategoException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class ConstraintAnalyzerException extends Exception {
-    public ConstraintAnalyzerException() {
-        super();
+@ADT
+public abstract class ConstraintAnalyzerException extends Exception {
+    public interface Cases<R> {
+        R strategoInvokeFail(StrategoException cause);
     }
 
-    public ConstraintAnalyzerException(String message) {
-        super(message);
+    public static ConstraintAnalyzerException strategoInvokeFail(StrategoException cause) {
+        final ConstraintAnalyzerException e = ConstraintAnalyzerExceptions.strategoInvokeFail(cause);
+        e.initCause(cause);
+        return e;
     }
 
-    public ConstraintAnalyzerException(String message, @Nullable Throwable cause) {
-        super(message, cause);
+
+    public abstract <R> R match(ConstraintAnalyzerException.Cases<R> cases);
+
+    @Override public String getMessage() {
+        return ConstraintAnalyzerExceptions.cases()
+            .strategoInvokeFail(StrategoException::getMessage)
+            .apply(this);
     }
 
-    public ConstraintAnalyzerException(Throwable cause) {
-        super(cause);
+
+    @Override public abstract int hashCode();
+
+    @Override public abstract boolean equals(@Nullable Object obj);
+
+    @Override public abstract String toString();
+
+
+    protected ConstraintAnalyzerException() {
+        super(null, null, true, false);
     }
 }

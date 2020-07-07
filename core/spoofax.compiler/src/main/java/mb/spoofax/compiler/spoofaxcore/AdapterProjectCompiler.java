@@ -90,6 +90,13 @@ public class AdapterProjectCompiler {
         dependencies.add(GradleConfiguredDependency.api(shared.daggerDep()));
         dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
         dependencies.add(GradleConfiguredDependency.annotationProcessor(shared.daggerCompilerDep()));
+        parserCompiler.getAdapterProjectDependencies(input.parser()).addAllTo(dependencies);
+        input.constraintAnalyzer().ifPresent((i) -> {
+            constraintAnalyzerCompiler.getAdapterProjectDependencies(i).addAllTo(dependencies);
+        });
+        input.strategoRuntime().ifPresent((i) -> {
+            strategoRuntimeCompiler.getAdapterProjectDependencies(i).addAllTo(dependencies);
+        });
         return dependencies;
     }
 

@@ -1,7 +1,7 @@
 package mb.jsglr1.common;
 
 import mb.common.message.Messages;
-import mb.common.token.Token;
+import mb.jsglr.common.JSGLRTokens;
 import mb.jsglr.common.ResourceKeyAttachment;
 import mb.jsglr.common.TokenUtil;
 import mb.resource.ResourceKey;
@@ -18,8 +18,6 @@ import org.spoofax.jsglr.io.SGLR;
 import org.spoofax.jsglr.shared.SGLRException;
 import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.attachments.ParentTermFactory;
-
-import java.util.ArrayList;
 
 public class JSGLR1Parser {
     private final SGLR parser;
@@ -43,11 +41,11 @@ public class JSGLR1Parser {
         disambiguator.setHeuristicFilters(false);
     }
 
-    public JSGLR1ParseResult parse(String text, String startSymbol) throws InterruptedException {
+    public JSGLR1ParseOutput parse(String text, String startSymbol) throws JSGLR1ParseException, InterruptedException {
         return parse(text, startSymbol, null);
     }
 
-    public JSGLR1ParseResult parse(String text, String startSymbol, @Nullable ResourceKey resource) throws InterruptedException {
+    public JSGLR1ParseOutput parse(String text, String startSymbol, @Nullable ResourceKey resource) throws JSGLR1ParseException, InterruptedException {
         try {
             final SGLRParseResult result = parser.parse(text, null, startSymbol);
             if(result.output == null) {
@@ -56,25 +54,21 @@ public class JSGLR1Parser {
             if(!(result.output instanceof IStrategoTerm)) {
                 throw new RuntimeException("BUG: parser returned an output that is not an instance of IStrategoTerm");
             }
-            final IStrategoTerm ast = (IStrategoTerm) result.output;
+            final IStrategoTerm ast = (IStrategoTerm)result.output;
             if(resource != null) {
                 ResourceKeyAttachment.setResourceKey(ast, resource);
             }
-            final ArrayList<Token<IStrategoTerm>> tokenStream = TokenUtil.extract(ast);
+            final JSGLRTokens tokens = TokenUtil.extract(ast);
             final MessagesUtil messagesUtil = new MessagesUtil(true, false, parser.getCollectedErrors());
             messagesUtil.gatherNonFatalErrors(ast);
             final Messages messages = messagesUtil.getMessages();
             final boolean recovered = messages.containsError();
-            if(recovered) {
-                return JSGLR1ParseResults.recovered(ast, tokenStream, messages);
-            } else {
-                return JSGLR1ParseResults.success(ast, tokenStream, messages);
-            }
+            return new JSGLR1ParseOutput(ast, tokens, messages, recovered);
         } catch(SGLRException e) {
             final MessagesUtil messagesUtil = new MessagesUtil(true, true, parser.getCollectedErrors());
             messagesUtil.processFatalException(new NullTokenizer(text, null), e);
             final Messages messages = messagesUtil.getMessages();
-            return JSGLR1ParseResults.failed(messages);
+            throw JSGLR1ParseException.parseFail(messages);
         }
     }
 }

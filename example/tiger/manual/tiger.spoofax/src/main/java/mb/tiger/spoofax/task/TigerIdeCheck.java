@@ -2,18 +2,18 @@ package mb.tiger.spoofax.task;
 
 import mb.common.message.Messages;
 import mb.common.message.MessagesBuilder;
-import mb.jsglr1.common.JSGLR1ParseResult;
+import mb.common.message.Severity;
+import mb.common.result.Result;
 import mb.pie.api.ExecContext;
-import mb.pie.api.ExecException;
 import mb.pie.api.ResourceStringSupplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageScope;
 import mb.tiger.spoofax.task.reusable.TigerAnalyze;
 import mb.tiger.spoofax.task.reusable.TigerParse;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
+import java.io.IOException;
 
 @LanguageScope
 public class TigerIdeCheck implements TaskDef<ResourceKey, Messages> {
@@ -26,19 +26,19 @@ public class TigerIdeCheck implements TaskDef<ResourceKey, Messages> {
     }
 
     @Override public String getId() {
-        return "mb.tiger.spoofax.task.TigerCheck";
+        return getClass().getName();
     }
 
     @Override
-    public Messages exec(ExecContext context, ResourceKey key) throws ExecException, InterruptedException {
-        final MessagesBuilder builder = new MessagesBuilder();
-        final ResourceStringSupplier stringProvider = new ResourceStringSupplier(key);
-        final JSGLR1ParseResult parseResult = context.require(parse, stringProvider);
-        builder.addMessages(parseResult.getMessages());
-        final TigerAnalyze.@Nullable Output analysisOutput = context.require(analyze, new TigerAnalyze.Input(key, parse.createNullableRecoverableAstSupplier(stringProvider)));
-        if(analysisOutput != null) {
-            builder.addMessages(analysisOutput.result.messages);
-        }
-        return builder.build();
+    public Messages exec(ExecContext context, ResourceKey key) throws IOException {
+        final MessagesBuilder messagesBuilder = new MessagesBuilder();
+        final ResourceStringSupplier stringSupplier = new ResourceStringSupplier(key);
+        final Messages parseMessages = context.require(parse.createMessagesSupplier(stringSupplier));
+        messagesBuilder.addMessages(parseMessages);
+        final Result<TigerAnalyze.Output, ?> analysisResult = context.require(analyze, new TigerAnalyze.Input(key, parse.createRecoverableAstSupplier(stringSupplier)));
+        analysisResult
+            .ifOk(output -> messagesBuilder.addMessages(output.result.messages))
+            .ifErr(e -> messagesBuilder.addMessage("Analysis failed", e, Severity.Error));
+        return messagesBuilder.build();
     }
 }

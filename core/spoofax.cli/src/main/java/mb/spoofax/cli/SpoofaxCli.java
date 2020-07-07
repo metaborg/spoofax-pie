@@ -48,11 +48,10 @@ public class SpoofaxCli {
     }
 
     public int run(String[] args, Pie pie, String prefix, LanguageInstance... languageInstances) {
-        List<CliCommand> commands = Stream.of(languageInstances)
+        final List<CliCommand> commands = Stream.of(languageInstances)
             .map(LanguageInstance::getCliCommand)
             .collect(Collectors.toList());
-        CliCommand command = CliCommand.of(prefix, ListView.of(commands));
-
+        final CliCommand command = CliCommand.of(prefix, ListView.of(commands));
         return run(args, pie, command);
     }
 
@@ -104,8 +103,7 @@ public class SpoofaxCli {
                             builder.converters(new TypeConverter<>(converter));
                         }
                         builder.setter(new ISetter() {
-                            @Override
-                            public <T> @Nullable T set(@Nullable T value) throws IllegalArgumentException {
+                            @Override public <T> @Nullable T set(@Nullable T value) throws IllegalArgumentException {
                                 commandRunner.set(paramId, value);
                                 return null;
                             }
@@ -139,8 +137,7 @@ public class SpoofaxCli {
                             builder.converters(new TypeConverter<>(converter));
                         }
                         builder.setter(new ISetter() {
-                            @Override
-                            public <T> @Nullable T set(@Nullable T value) throws IllegalArgumentException {
+                            @Override                            public <T> @Nullable T set(@Nullable T value) throws IllegalArgumentException {
                                 commandRunner.set(paramId, value);
                                 return null;
                             }

@@ -59,6 +59,12 @@ public class ParserCompiler {
 
     // Adapter project
 
+    public ListView<GradleConfiguredDependency> getAdapterProjectDependencies(AdapterProjectInput input) {
+        return ListView.of(
+            GradleConfiguredDependency.api(input.shared().jsglr1PieDep())
+        );
+    }
+
     public Output compileAdapterProject(AdapterProjectInput input) throws IOException {
         final Output.Builder outputBuilder = Output.builder();
         if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.

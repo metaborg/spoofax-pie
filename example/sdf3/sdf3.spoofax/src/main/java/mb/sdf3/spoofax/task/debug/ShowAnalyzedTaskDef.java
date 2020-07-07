@@ -1,5 +1,7 @@
 package mb.sdf3.spoofax.task.debug;
 
+import mb.common.result.Result;
+import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Function;
 import mb.pie.api.Supplier;
@@ -8,17 +10,16 @@ import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.spoofax.task.Sdf3AnalyzeMulti;
 import mb.sdf3.spoofax.task.Sdf3Parse;
-import mb.sdf3.spoofax.task.SingleFileAnalysisResult;
-import mb.spoofax.core.language.command.CommandOutput;
+import mb.sdf3.spoofax.task.util.Sdf3Util;
+import mb.spoofax.core.language.command.CommandFeedback;
 import mb.stratego.common.StrategoRuntime;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Provider;
 import java.io.Serializable;
 import java.util.Objects;
 
-public abstract class ShowAnalyzedTaskDef extends ProvideOutputShared implements TaskDef<ShowAnalyzedTaskDef.Args, CommandOutput> {
+public abstract class ShowAnalyzedTaskDef extends ProvideOutputShared implements TaskDef<ShowAnalyzedTaskDef.Args, CommandFeedback> {
     public static class Args implements Serializable {
         public final ResourcePath project;
         public final ResourceKey file;
@@ -49,15 +50,15 @@ public abstract class ShowAnalyzedTaskDef extends ProvideOutputShared implements
     }
 
     private final Sdf3Parse parse;
-    private final Function<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> desugar;
+    private final Function<Supplier<? extends Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> desugar;
     private final Sdf3AnalyzeMulti analyze;
-    private final Function<Supplier<SingleFileAnalysisResult>, @Nullable IStrategoTerm> operation;
+    private final Function<Supplier<? extends Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?>>, Result<IStrategoTerm, ?>> operation;
 
     public ShowAnalyzedTaskDef(
         Sdf3Parse parse,
-        Function<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> desugar,
+        Function<Supplier<? extends Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> desugar,
         Sdf3AnalyzeMulti analyze,
-        Function<Supplier<SingleFileAnalysisResult>, @Nullable IStrategoTerm> operation,
+        Function<Supplier<? extends Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?>>, Result<IStrategoTerm, ?>> operation,
         Provider<StrategoRuntime> strategoRuntimeProvider,
         String prettyPrintStrategy,
         String resultName
@@ -69,12 +70,9 @@ public abstract class ShowAnalyzedTaskDef extends ProvideOutputShared implements
         this.operation = operation;
     }
 
-    @Override public CommandOutput exec(ExecContext context, Args args) throws Exception {
-        final Supplier<SingleFileAnalysisResult> analyzeResultSupplier = SingleFileAnalysisResult.createSupplier(
-            args.project, args.file, parse, desugar, analyze
-        );
-        final @Nullable IStrategoTerm ast = context.require(operation, analyzeResultSupplier);
-        if(ast == null) throw new RuntimeException("Transform to " + resultName + "failed (returned null)");
-        return provideOutput(args.concrete, ast, args.file);
+    @Override public CommandFeedback exec(ExecContext context, Args args) {
+        return context
+            .require(operation, analyze.createSingleFileOutputSupplier(new Sdf3AnalyzeMulti.Input(args.project, Sdf3Util.createResourceWalker(), Sdf3Util.createResourceMatcher(), desugar.mapInput((ctx, i) -> parse.createRecoverableAstSupplier(i))), args.file))
+            .mapOrElse(ast -> provideOutput(args.concrete, ast, args.file), e -> CommandFeedback.ofTryExtractMessagesFrom(e, args.file));
     }
 }

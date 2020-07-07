@@ -1,21 +1,18 @@
 package mb.tiger.spoofax.task;
 
-import mb.common.token.Token;
-import mb.jsglr1.common.JSGLR1ParseResult;
+import mb.common.option.Option;
+import mb.jsglr.common.JSGLRTokens;
 import mb.pie.api.ExecContext;
-import mb.pie.api.ExecException;
-import mb.pie.api.ResourceStringSupplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageScope;
 import mb.tiger.spoofax.task.reusable.TigerParse;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
+import java.io.IOException;
 
 @LanguageScope
-public class TigerIdeTokenize implements TaskDef<ResourceKey, @Nullable ArrayList<? extends Token<?>>> {
+public class TigerIdeTokenize implements TaskDef<ResourceKey, Option<JSGLRTokens>> {
     private final TigerParse parse;
 
     @Inject public TigerIdeTokenize(TigerParse parse) {
@@ -27,8 +24,7 @@ public class TigerIdeTokenize implements TaskDef<ResourceKey, @Nullable ArrayLis
     }
 
     @Override
-    public @Nullable ArrayList<? extends Token<?>> exec(ExecContext context, ResourceKey key) throws ExecException, InterruptedException {
-        final @Nullable JSGLR1ParseResult parseResult = context.require(parse, new ResourceStringSupplier(key));
-        return parseResult.getTokens().orElse(null);
+    public Option<JSGLRTokens> exec(ExecContext context, ResourceKey key) throws IOException {
+        return context.require(parse.createTokensSupplier(key)).ok();
     }
 }

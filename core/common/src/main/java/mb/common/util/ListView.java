@@ -39,19 +39,23 @@ public class ListView<E> extends BaseCollectionView<E, List<? extends E>> implem
         return new ListView<>(list);
     }
 
-    public static <E> ListView<E> of(List<? extends E> collection) {
-        return new ListView<>(collection);
-    }
-
-
-    public static <E> ListView<E> copyOf(Iterable<? extends E> elements) {
-        final ArrayList<E> list = new ArrayList<>();
-        IterableUtil.addAll(list, elements);
+    public static <E> ListView<E> of(List<? extends E> list) {
         return new ListView<>(list);
     }
 
-    public static <E> ListView<E> copyOf(Collection<? extends E> elements) {
-        return new ListView<>(new ArrayList<>(elements));
+
+    public static <E> ListView<E> copyOf(Iterable<? extends E> iterable) {
+        final ArrayList<E> list = new ArrayList<>();
+        IterableUtil.addAll(list, iterable);
+        return new ListView<>(list);
+    }
+
+    public static <E> ListView<E> copyOf(Collection<? extends E> collection) {
+        return new ListView<>(new ArrayList<>(collection));
+    }
+
+    public static <E> ListView<E> copyOf(ListView<? extends E> list) {
+        return new ListView<>(new ArrayList<>(list.collection));
     }
 
 
@@ -129,6 +133,10 @@ public class ListView<E> extends BaseCollectionView<E, List<? extends E>> implem
 
     @Override public List<E> asUnmodifiable() {
         return Collections.unmodifiableList(collection);
+    }
+
+    @Override public ArrayList<E> asCopy() {
+        return new ArrayList<>(collection);
     }
 
 

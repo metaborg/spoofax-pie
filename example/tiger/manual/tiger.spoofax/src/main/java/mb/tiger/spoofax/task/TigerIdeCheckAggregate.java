@@ -3,7 +3,7 @@ package mb.tiger.spoofax.task;
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Messages;
-import mb.common.util.UncheckedException;
+import mb.common.message.Severity;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
@@ -65,29 +65,22 @@ public class TigerIdeCheckAggregate implements TaskDef<TigerIdeCheckAggregate.In
     }
 
     @Override public String getId() {
-        return TigerIdeCheckAggregate.class.getSimpleName();
+        return TigerIdeCheckAggregate.class.getName();
     }
 
-    @Override public @Nullable KeyedMessages exec(ExecContext context, Input input) throws Exception {
-        final HierarchicalResource root = context.require(input.root, ResourceStampers.modifiedDirRec(input.walker, input.matcher));
+    @Override public KeyedMessages exec(ExecContext context, Input input) {
         final KeyedMessagesBuilder builder = new KeyedMessagesBuilder();
         try {
+            final HierarchicalResource root = context.require(input.root, ResourceStampers.modifiedDirRec(input.walker, input.matcher));
             root.walk(input.walker, input.matcher).forEach(file -> {
-                try {
-                    final ResourceKey fileKey = file.getKey();
-                    final @Nullable Messages messages = context.require(check, fileKey);
-                    if(messages != null) {
-                        builder.addMessages(fileKey, messages);
-                    }
-                } catch(Exception e) {
-                    throw new UncheckedException(e);
-                }
+                final ResourceKey fileKey = file.getKey();
+                final Messages messages = context.require(check, fileKey);
+                builder.addMessages(fileKey, messages);
             });
-        } catch(UncheckedException e) {
-            throw e.getCause();
+        } catch(Exception e) {
+            builder.addMessage("Aggregating messages for '" + input.root + "' failed", e, Severity.Error);
         }
-
-        return builder.build();
+        return builder.build(input.root);
     }
 }
 

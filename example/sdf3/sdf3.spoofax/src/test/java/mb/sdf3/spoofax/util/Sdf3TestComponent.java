@@ -10,7 +10,7 @@ import mb.sdf3.spoofax.task.Sdf3IndexAst;
 import mb.sdf3.spoofax.task.Sdf3Parse;
 import mb.sdf3.spoofax.task.Sdf3PostStatix;
 import mb.sdf3.spoofax.task.Sdf3PreStatix;
-import mb.sdf3.spoofax.task.Sdf3SpecToParenthesizer;
+import mb.sdf3.spoofax.task.Sdf3ParseTableToParenthesizer;
 import mb.sdf3.spoofax.task.Sdf3SpecToParseTable;
 import mb.sdf3.spoofax.task.Sdf3ToCompletion;
 import mb.sdf3.spoofax.task.Sdf3ToCompletionColorer;
@@ -54,7 +54,7 @@ public interface Sdf3TestComponent extends Sdf3Component {
 
     Sdf3SpecToParseTable getSpecToParseTable();
 
-    Sdf3SpecToParenthesizer getSpecToParenthesizer();
+    Sdf3ParseTableToParenthesizer getSpecToParenthesizer();
 
     Sdf3PreStatix getPreStatix();
 

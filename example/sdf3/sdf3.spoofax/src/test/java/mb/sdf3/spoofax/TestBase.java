@@ -2,6 +2,7 @@ package mb.sdf3.spoofax;
 
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
+import mb.common.result.Result;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.log.slf4j.SLF4JLoggerFactory;
@@ -22,14 +23,13 @@ import mb.sdf3.spoofax.task.Sdf3CreateSpec;
 import mb.sdf3.spoofax.task.Sdf3Desugar;
 import mb.sdf3.spoofax.task.Sdf3Parse;
 import mb.sdf3.spoofax.task.Sdf3Spec;
-import mb.sdf3.spoofax.task.SingleFileAnalysisResult;
+import mb.sdf3.spoofax.task.util.Sdf3Util;
 import mb.sdf3.spoofax.util.DaggerPlatformTestComponent;
 import mb.sdf3.spoofax.util.DaggerSdf3TestComponent;
 import mb.sdf3.spoofax.util.PlatformTestComponent;
 import mb.sdf3.spoofax.util.Sdf3TestComponent;
 import mb.spoofax.core.platform.LoggerFactoryModule;
 import mb.spoofax.core.platform.PlatformPieModule;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import java.io.IOException;
@@ -56,7 +56,7 @@ class TestBase {
     final Sdf3Parse parse = languageComponent.getParse();
     final Sdf3Desugar desugar = languageComponent.getDesugar();
     final Sdf3CreateSpec createSpec = languageComponent.getCreateSpec();
-    final Function<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> desugarFunction = desugar.createFunction();
+    final Function<Supplier<? extends Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> desugarFunction = desugar.createFunction();
     final Sdf3AnalyzeMulti analyze = languageComponent.getAnalyze();
     final Pie pie = languageComponent.getPie();
 
@@ -72,29 +72,29 @@ class TestBase {
     }
 
 
-    Supplier<@Nullable IStrategoTerm> parsedAstSupplier(ResourceKey resourceKey) {
-        return parse.createNullableAstSupplier(resourceKey);
+    Supplier<? extends Result<IStrategoTerm, ?>> parsedAstSupplier(ResourceKey resourceKey) {
+        return parse.createAstSupplier(resourceKey);
     }
 
-    Supplier<@Nullable IStrategoTerm> parsedAstSupplier(Resource resource) {
+    Supplier<? extends Result<IStrategoTerm, ?>> parsedAstSupplier(Resource resource) {
         return parsedAstSupplier(resource.getKey());
     }
 
 
-    Supplier<@Nullable IStrategoTerm> desugarSupplier(ResourceKey resourceKey) {
+    Supplier<Result<IStrategoTerm, ?>> desugarSupplier(ResourceKey resourceKey) {
         return desugar.createSupplier(parsedAstSupplier(resourceKey));
     }
 
-    Supplier<@Nullable IStrategoTerm> desugarSupplier(Resource resource) {
+    Supplier<Result<IStrategoTerm, ?>> desugarSupplier(Resource resource) {
         return desugar.createSupplier(parsedAstSupplier(resource));
     }
 
 
-    Supplier<SingleFileAnalysisResult> singleFileAnalysisResultSupplier(ResourcePath project, ResourceKey file) {
-        return SingleFileAnalysisResult.createSupplier(project, file, parse, desugarFunction, analyze);
+    Supplier<? extends Result<Sdf3AnalyzeMulti.SingleFileOutput, ?>> singleFileAnalysisResultSupplier(ResourcePath project, ResourceKey file) {
+        return analyze.createSingleFileOutputSupplier(new Sdf3AnalyzeMulti.Input(project, Sdf3Util.createResourceWalker(), Sdf3Util.createResourceMatcher(), desugar.createFunction().mapInput((ctx, i) -> parse.createRecoverableAstSupplier(i))), file);
     }
 
-    Supplier<SingleFileAnalysisResult> singleFileAnalysisResultSupplier(Resource file) {
+    Supplier<? extends Result<Sdf3AnalyzeMulti.SingleFileOutput, ?>> singleFileAnalysisResultSupplier(Resource file) {
         return singleFileAnalysisResultSupplier(rootDirectory.getPath(), file.getKey());
     }
 
@@ -104,7 +104,7 @@ class TestBase {
     }
 
     @SafeVarargs
-    final Supplier<Sdf3Spec> specSupplier(Supplier<@Nullable IStrategoTerm> mainModuleAstSupplier, Supplier<@Nullable IStrategoTerm>... modulesAstSuppliers) {
+    final Supplier<Sdf3Spec> specSupplier(Supplier<Result<IStrategoTerm, ?>> mainModuleAstSupplier, Supplier<Result<IStrategoTerm, ?>>... modulesAstSuppliers) {
         return new ValueSupplier<>(new Sdf3Spec(mainModuleAstSupplier, modulesAstSuppliers));
     }
 

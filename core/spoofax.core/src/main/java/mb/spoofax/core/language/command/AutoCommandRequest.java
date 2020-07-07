@@ -35,7 +35,7 @@ public interface AutoCommandRequest<A extends Serializable> {
         return CommandRequest.of(def(), CommandExecutionType.AutomaticContinuous, initialArgs().orElse(null));
     }
 
-    default Task<CommandOutput> createTask(CommandContext context, ArgConverters argConverters) {
+    default Task<CommandFeedback> createTask(CommandContext context, ArgConverters argConverters) {
         return def().createTask(toCommandRequest(), context, argConverters);
     }
 }

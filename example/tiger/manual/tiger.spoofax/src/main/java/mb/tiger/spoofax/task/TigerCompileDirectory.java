@@ -1,8 +1,10 @@
 package mb.tiger.spoofax.task;
 
-import mb.common.util.ListView;
+import mb.common.message.KeyedMessagesBuilder;
+import mb.common.message.Severity;
+import mb.common.result.Result;
+import mb.jsglr1.common.JSGLR1ParseException;
 import mb.pie.api.ExecContext;
-import mb.pie.api.ExecException;
 import mb.pie.api.Supplier;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
@@ -16,19 +18,20 @@ import mb.resource.hierarchical.match.PathResourceMatcher;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.match.path.ExtensionsPathMatcher;
 import mb.spoofax.core.language.command.CommandFeedback;
-import mb.spoofax.core.language.command.CommandOutput;
+import mb.spoofax.core.language.command.ShowFeedback;
 import mb.tiger.spoofax.task.reusable.TigerListDefNames;
 import mb.tiger.spoofax.task.reusable.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args, CommandOutput> {
+public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args, CommandFeedback> {
     public static class Args implements Serializable {
         final ResourcePath dir;
 
@@ -67,26 +70,27 @@ public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args
         return getClass().getName();
     }
 
-    @Override public CommandOutput exec(ExecContext context, Args input) throws Exception {
+    @Override public CommandFeedback exec(ExecContext context, Args input) throws IOException {
         final ResourcePath dir = input.dir;
 
         final ResourceMatcher matcher = new AllResourceMatcher(new FileResourceMatcher(), new PathResourceMatcher(new ExtensionsPathMatcher("tig")));
         final HierarchicalResource directory = context.require(dir, ResourceStampers.modifiedDir(matcher));
 
         final StringBuffer sb = new StringBuffer();
+        final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         sb.append("[\n  ");
         final AtomicBoolean first = new AtomicBoolean(true);
-        directory.list(matcher).forEach((f) -> {
+        directory.list(matcher).forEach((file) -> {
+            final ResourcePath filePath = file.getPath();
             if(!first.get()) {
                 sb.append(", ");
             }
-            final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createNullableAstSupplier(f.getKey());
-            final @Nullable String defNames = context.require(listDefNames, astSupplier);
-            if(defNames != null) {
-                sb.append(defNames);
-            } else {
-                sb.append("[]");
-            }
+            final Supplier<Result<IStrategoTerm, JSGLR1ParseException>> astSupplier = parse.createAstSupplier(filePath);
+            context.require(listDefNames, astSupplier)
+                .ifElse(sb::append, (e) -> {
+                    sb.append("[]");
+                    messagesBuilder.addMessage("Listing definition names for '" + file + "' failed", e, Severity.Error, filePath);
+                });
             sb.append('\n');
             first.set(false);
         });
@@ -97,10 +101,10 @@ public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args
         generatedResource.writeBytes(sb.toString().getBytes(StandardCharsets.UTF_8));
         context.provide(generatedResource, ResourceStampers.hashFile());
 
-        return new CommandOutput(ListView.of(CommandFeedback.showFile(generatedPath)));
+        return CommandFeedback.of(messagesBuilder.build(), ShowFeedback.showFile(generatedPath));
     }
 
-    @Override public Task<CommandOutput> createTask(Args input) {
+    @Override public Task<CommandFeedback> createTask(Args input) {
         return TaskDef.super.createTask(input);
     }
 }

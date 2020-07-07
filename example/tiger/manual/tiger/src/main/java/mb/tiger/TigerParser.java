@@ -1,6 +1,7 @@
 package mb.tiger;
 
-import mb.jsglr1.common.JSGLR1ParseResult;
+import mb.jsglr1.common.JSGLR1ParseException;
+import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.jsglr1.common.JSGLR1Parser;
 import mb.resource.ResourceKey;
 import mb.spoofax.compiler.interfaces.spoofaxcore.Parser;
@@ -14,12 +15,12 @@ public class TigerParser implements Parser {
     }
 
     @Override
-    public JSGLR1ParseResult parse(String text, String startSymbol) throws InterruptedException {
+    public JSGLR1ParseOutput parse(String text, String startSymbol) throws JSGLR1ParseException, InterruptedException {
         return parser.parse(text, startSymbol, null);
     }
 
     @Override
-    public JSGLR1ParseResult parse(String text, String startSymbol, @Nullable ResourceKey resource) throws InterruptedException {
+    public JSGLR1ParseOutput parse(String text, String startSymbol, @Nullable ResourceKey resource) throws JSGLR1ParseException, InterruptedException {
         return parser.parse(text, startSymbol, resource);
     }
 }

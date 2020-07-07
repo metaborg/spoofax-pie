@@ -1,39 +1,47 @@
 package mb.common.message;
 
 import mb.common.region.Region;
+import mb.common.util.ListView;
 import mb.common.util.MapView;
 import mb.common.util.MultiHashMap;
 import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
 
 public class KeyedMessagesBuilder {
-    private final MultiHashMap<@Nullable ResourceKey, Message> messages = new MultiHashMap<>();
+    private final MultiHashMap<ResourceKey, Message> messages = new MultiHashMap<>();
+    private final ArrayList<Message> messagesWithoutKey = new ArrayList<>();
 
 
-    public void addMessage(String text, @Nullable Throwable exception, Severity severity, @Nullable ResourceKey resourceKey, @Nullable Region region) {
+    public void addMessage(String text, @Nullable Throwable exception, Severity severity, ResourceKey resourceKey, @Nullable Region region) {
         messages.put(resourceKey, new Message(text, exception, severity, region));
     }
 
-    public void addMessage(String text, Severity severity, @Nullable ResourceKey resourceKey, @Nullable Region region) {
+    public void addMessage(String text, Severity severity, ResourceKey resourceKey, @Nullable Region region) {
         messages.put(resourceKey, new Message(text, severity, region));
     }
 
-    public void addMessage(String text, @Nullable Throwable exception, Severity severity, @Nullable ResourceKey resourceKey) {
+    public void addMessage(String text, @Nullable Throwable exception, Severity severity, ResourceKey resourceKey) {
         messages.put(resourceKey, new Message(text, exception, severity, null));
     }
 
-    public void addMessage(String text, Severity severity, @Nullable ResourceKey resourceKey) {
+    public void addMessage(String text, Severity severity, ResourceKey resourceKey) {
         messages.put(resourceKey, new Message(text, severity));
     }
 
+    public void addMessage(String text, @Nullable Throwable exception, Severity severity, @Nullable Region region) {
+        messagesWithoutKey.add(new Message(text, exception, severity, region));
+    }
+
     public void addMessage(String text, @Nullable Throwable exception, Severity severity) {
-        messages.put(null, new Message(text, exception, severity, null));
+        messagesWithoutKey.add(new Message(text, exception, severity, null));
     }
 
     public void addMessage(String text, Severity severity) {
-        messages.put(null, new Message(text, severity));
+        messagesWithoutKey.add(new Message(text, severity));
     }
 
     public void addMessage(Message message, ResourceKey resourceKey) {
@@ -41,12 +49,12 @@ public class KeyedMessagesBuilder {
     }
 
     public void addMessage(Message message) {
-        this.messages.put(null, message);
+        this.messagesWithoutKey.add(message);
     }
 
 
-    public void addMessages(Iterable<? extends Message> messages) {
-        this.messages.putAll(null, messages);
+    public void addMessages(Collection<? extends Message> messages) {
+        this.messagesWithoutKey.addAll(messages);
     }
 
     public void addMessages(ResourceKey resourceKey, Iterable<? extends Message> messages) {
@@ -61,8 +69,32 @@ public class KeyedMessagesBuilder {
         this.messages.putAll(messages);
     }
 
-    public void addMessages(KeyedMessages messages) {
-        this.messages.putAll(messages.messages.asUnmodifiable());
+    public void addMessages(Messages messages) {
+        messages.messages.addAllTo(this.messagesWithoutKey);
+    }
+
+    public void addMessages(KeyedMessages keyedMessages) {
+        for(Map.Entry<ResourceKey, ArrayList<Message>> entry : keyedMessages.messages) {
+            this.messages.putAll(entry.getKey(), entry.getValue());
+        }
+        keyedMessages.messagesWithoutKey.addAllTo(this.messagesWithoutKey);
+    }
+
+    public void addMessagesWithDefaultKey(KeyedMessages keyedMessages, ResourceKey defaultKey) {
+        for(Map.Entry<ResourceKey, ArrayList<Message>> entry : keyedMessages.messages) {
+            this.messages.putAll(entry.getKey(), entry.getValue());
+        }
+        this.messages.putAll(defaultKey, keyedMessages.messagesWithoutKey);
+    }
+
+    public void addMessages(KeyedMessagesBuilder keyedMessagesBuilder) {
+        this.messages.putAll(keyedMessagesBuilder.messages);
+        this.messagesWithoutKey.addAll(keyedMessagesBuilder.messagesWithoutKey);
+    }
+
+    public void addMessagesWithDefaultKey(KeyedMessagesBuilder keyedMessagesBuilder, ResourceKey defaultKey) {
+        this.messages.putAll(keyedMessagesBuilder.messages);
+        this.messages.putAll(defaultKey, keyedMessagesBuilder.messagesWithoutKey);
     }
 
 
@@ -80,21 +112,30 @@ public class KeyedMessagesBuilder {
         this.messages.putAll(resourceKey, messages.messages);
     }
 
-    public void replaceMessages(KeyedMessages messages) {
-        this.messages.replaceAll(messages.messages.asUnmodifiable());
+    public void replaceMessages(KeyedMessages keyedMessages) {
+        this.messages.replaceAll(keyedMessages.messages.asUnmodifiable());
     }
 
 
     public void clear(ResourceKey resourceKey) {
-        this.messages.removeAll(resourceKey);
+        messages.removeAll(resourceKey);
+    }
+
+    public void clearWithoutKey() {
+        messagesWithoutKey.clear();
     }
 
     public void clearAll() {
-        this.messages.clear();
+        messages.clear();
+        messagesWithoutKey.clear();
     }
 
 
     public KeyedMessages build() {
-        return new KeyedMessages(MapView.copyOf(this.messages.getInnerMap()));
+        return new KeyedMessages(MapView.copyOf(messages.getInnerMap()), ListView.copyOf(messagesWithoutKey));
+    }
+
+    public KeyedMessages build(ResourceKey defaultKey) {
+        return new KeyedMessages(MapView.copyOf(messages.getInnerMap()), ListView.copyOf(messagesWithoutKey));
     }
 }

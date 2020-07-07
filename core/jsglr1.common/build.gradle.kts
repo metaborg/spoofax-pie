@@ -10,8 +10,8 @@ dependencies {
   api(project(":jsglr.common"))
   api("org.metaborg:org.spoofax.jsglr")
 
-  compileOnly("org.derive4j:derive4j-annotation")
   compileOnly("org.checkerframework:checker-qual-android")
+  compileOnly("org.derive4j:derive4j-annotation")
 
   annotationProcessor("org.derive4j:derive4j")
 }

@@ -27,7 +27,7 @@ dependencies {
   implementation(platform(compositeBuild("spoofax.depconstraints")))
   annotationProcessor(platform(compositeBuild("spoofax.depconstraints")))
 
-  implementation(project(":tiger.manual.spoofax"))
+  implementation(project(":tiger.spoofax"))
   implementation(compositeBuild("spoofax.cli"))
   implementation("org.metaborg:log.backend.slf4j")
   implementation("org.metaborg:pie.runtime")

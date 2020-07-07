@@ -34,28 +34,33 @@ import java.util.Map.Entry;
 public class ConstraintAnalyzer {
     public static class Result implements Serializable {
         public final ResourceKey resource;
-        public final @Nullable IStrategoTerm ast;
-        public final @Nullable IStrategoTerm analysis;
+        public final IStrategoTerm ast;
+        public final IStrategoTerm analysis;
 
-        public Result(ResourceKey resource, @Nullable IStrategoTerm ast, @Nullable IStrategoTerm analysis) {
+        public Result(ResourceKey resource, IStrategoTerm ast, IStrategoTerm analysis) {
             this.resource = resource;
             this.ast = ast;
             this.analysis = analysis;
         }
+    }
 
-        public Result(ResourceKey resource) {
+    public static class ProjectResult implements Serializable {
+        public final ResourceKey resource;
+        public final IStrategoTerm analysis;
+
+        public ProjectResult(ResourceKey resource, IStrategoTerm analysis) {
             this.resource = resource;
-            this.ast = null;
-            this.analysis = null;
+            this.analysis = analysis;
         }
     }
 
+
     public static class SingleFileResult implements Serializable {
-        public final @Nullable IStrategoTerm ast;
-        public final @Nullable IStrategoTerm analysis;
+        public final IStrategoTerm ast;
+        public final IStrategoTerm analysis;
         public final Messages messages;
 
-        public SingleFileResult(@Nullable IStrategoTerm ast, @Nullable IStrategoTerm analysis, Messages messages) {
+        public SingleFileResult(IStrategoTerm ast, IStrategoTerm analysis, Messages messages) {
             this.ast = ast;
             this.analysis = analysis;
             this.messages = messages;
@@ -63,6 +68,7 @@ public class ConstraintAnalyzer {
     }
 
     public static class MultiFileResult implements Serializable {
+//        public final ProjectResult projectResult;
         public final ArrayList<Result> results;
         public final KeyedMessages messages;
 
@@ -136,6 +142,7 @@ public class ConstraintAnalyzer {
         return doAnalyze(root, asts, context);
     }
 
+
     private MultiFileResult doAnalyze(
         @Nullable ResourceKey root,
         HashMap<ResourceKey, IStrategoTerm> asts,
@@ -167,11 +174,11 @@ public class ConstraintAnalyzer {
             final @Nullable Result cachedResult = context.getResult(root);
             if(cachedResult != null) {
                 change = mkAppl("Cached", cachedResult.analysis);
-                expect = new Update(root);
+                expect = new ProjectUpdate(root);
                 context.removeResult(root);
             } else {
                 change = mkAppl("Added", ast);
-                expect = new Project(root);
+                expect = new ProjectFull(root);
             }
             expects.put(root, expect);
             rootChange = mkTuple(mkString(root), change);
@@ -217,24 +224,25 @@ public class ConstraintAnalyzer {
             }
         }
 
+        // Progress and cancel terms
+        final IStrategoTerm progressTerm = mkTuple();   // ()
+        final IStrategoTerm cancelTerm = mkTuple();     // ()
+
         /// 3. Call analysis, and list results.
 
         final Map<ResourceKey, IStrategoTerm> resultTerms = new HashMap<>();
         final IStrategoTerm action;
         if(multiFile && root != null) {
-            action = mkAppl("AnalyzeMulti", rootChange, termFactory.makeList(changeTerms));
+            action = mkAppl("AnalyzeMulti", rootChange, termFactory.makeList(changeTerms), progressTerm, cancelTerm);
         } else {
-            action = mkAppl("AnalyzeSingle", termFactory.makeList(changeTerms));
+            action = mkAppl("AnalyzeSingle", termFactory.makeList(changeTerms), progressTerm, cancelTerm);
         }
 
-        final @Nullable IStrategoTerm allResultsTerm;
+        final IStrategoTerm allResultsTerm;
         try {
             allResultsTerm = strategoRuntime.invoke(strategyId, action);
         } catch(StrategoException e) {
-            throw new ConstraintAnalyzerException(e);
-        }
-        if(allResultsTerm == null) {
-            throw new ConstraintAnalyzerException("Constraint analysis strategy '" + strategyId + "' failed");
+            throw ConstraintAnalyzerException.strategoInvokeFail(e);
         }
 
         final @Nullable List<IStrategoTerm> allResultTerms = match(allResultsTerm, "AnalysisResult", 1);
@@ -298,7 +306,7 @@ public class ConstraintAnalyzer {
             if(result != null) {
                 results.add(result);
             } else {
-                results.add(new Result(resource));
+                throw new RuntimeException("BUG: context is missing analysis result for '" + resource + "'");
             }
         }
         return new MultiFileResult(results, messagesBuilder.build());
@@ -369,8 +377,29 @@ public class ConstraintAnalyzer {
         }
     }
 
-    class Project extends Expect {
-        Project(ResourceKey resourceKey) {
+    class ProjectUpdate extends Expect {
+        ProjectUpdate(ResourceKey resourceKey) {
+            super(resourceKey);
+        }
+
+        @Override
+        public void processResultTerm(IStrategoTerm resultTerm, ConstraintAnalyzerContext context, KeyedMessagesBuilder messagesBuilder) {
+            final @Nullable List<IStrategoTerm> results;
+            if((results = match(resultTerm, "Update", 4)) != null) {
+                final IStrategoTerm analysis = results.get(0);
+                addResultMessages(results.get(1), results.get(2), results.get(3), messagesBuilder);
+                context.updateProjectResult(resource, analysis);
+            } else if(match(resultTerm, "Failed", 0) != null) {
+                addFailMessage("Analysis failed", messagesBuilder);
+                context.removeProjectResult(resource);
+            } else {
+                addFailMessage("Analysis returned incorrect result", messagesBuilder);
+            }
+        }
+    }
+
+    class ProjectFull extends Expect {
+        ProjectFull(ResourceKey resourceKey) {
             super(resourceKey);
         }
 
@@ -380,10 +409,10 @@ public class ConstraintAnalyzer {
             if((results = match(resultTerm, "Full", 5)) != null) {
                 final IStrategoTerm analysis = results.get(1);
                 addResultMessages(results.get(2), results.get(3), results.get(4), messagesBuilder);
-                context.updateResult(resource, analysis);
+                context.updateProjectResult(resource, analysis);
             } else if(match(resultTerm, "Failed", 0) != null) {
                 addFailMessage("Analysis failed", messagesBuilder);
-                context.removeResult(resource);
+                context.removeProjectResult(resource);
             } else {
                 addFailMessage("Analysis returned incorrect result", messagesBuilder);
             }

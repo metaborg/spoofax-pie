@@ -1,20 +1,18 @@
 package {{genTokenizeTaskDef.packageId}};
 
-import mb.common.token.Token;
-import mb.jsglr1.common.JSGLR1ParseResult;
+import mb.common.option.Option;
+import mb.jsglr.common.JSGLRTokens;
 import mb.pie.api.ExecContext;
-import mb.pie.api.ExecException;
-import mb.pie.api.ResourceStringSupplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
+import java.io.IOException;
 
 @LanguageScope
-public class {{genTokenizeTaskDef.id}} implements TaskDef<ResourceKey, @Nullable ArrayList<? extends Token<?>>> {
+public class {{genTokenizeTaskDef.id}} implements TaskDef<ResourceKey, Option<JSGLRTokens>> {
     private final {{parseTaskDef.qualifiedId}} parse;
 
     @Inject public {{genTokenizeTaskDef.id}}({{parseTaskDef.qualifiedId}} parse) {
@@ -26,8 +24,7 @@ public class {{genTokenizeTaskDef.id}} implements TaskDef<ResourceKey, @Nullable
     }
 
     @Override
-    public @Nullable ArrayList<? extends Token<?>> exec(ExecContext context, ResourceKey key) throws ExecException, InterruptedException {
-        final @Nullable JSGLR1ParseResult parseResult = context.require(parse, new ResourceStringSupplier(key));
-        return parseResult.getTokens().orElse(null);
+    public @Nullable Option<JSGLRTokens> exec(ExecContext context, ResourceKey key) throws IOException {
+        return context.require(parse.createTokensSupplier(key)).ok();
     }
 }

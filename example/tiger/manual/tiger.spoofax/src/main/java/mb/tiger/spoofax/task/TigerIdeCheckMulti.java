@@ -2,10 +2,11 @@ package mb.tiger.spoofax.task;
 
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
-import mb.common.util.UncheckedException;
-import mb.jsglr1.common.JSGLR1ParseResult;
+import mb.common.message.Messages;
+import mb.common.message.Severity;
+import mb.common.result.Result;
+import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
 import mb.pie.api.ExecContext;
-import mb.pie.api.ResourceStringSupplier;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.hierarchical.HierarchicalResource;
@@ -15,10 +16,11 @@ import mb.resource.hierarchical.walk.ResourceWalker;
 import mb.spoofax.core.language.LanguageScope;
 import mb.tiger.spoofax.task.reusable.TigerAnalyzeMulti;
 import mb.tiger.spoofax.task.reusable.TigerParse;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.io.Serializable;
+import java.io.UncheckedIOException;
 import java.util.Objects;
 
 /**
@@ -71,28 +73,35 @@ public class TigerIdeCheckMulti implements TaskDef<TigerIdeCheckMulti.Input, Key
     }
 
     @Override public String getId() {
-        return "mb.tiger.spoofax.task.TigerCheck";
+        return getClass().getName();
     }
 
     @Override
-    public KeyedMessages exec(ExecContext context, Input input) throws Exception {
+    public KeyedMessages exec(ExecContext context, Input input) throws IOException {
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         final HierarchicalResource root = context.require(input.root, ResourceStampers.modifiedDirRec(input.walker, input.matcher));
         try {
             root.walk(input.walker, input.matcher).forEach(file -> {
                 final ResourcePath filePath = file.getPath();
-                final JSGLR1ParseResult parseResult = context.require(parse, new ResourceStringSupplier(filePath));
-                messagesBuilder.addMessages(filePath, parseResult.getMessages());
+                try {
+                    final Messages messages = context.require(parse.createMessagesSupplier(filePath));
+                    messagesBuilder.addMessages(filePath, messages);
+                } catch(IOException e) {
+                    throw new UncheckedIOException(e);
+                }
             });
-        } catch(UncheckedException e) {
+        } catch(UncheckedIOException e) {
             throw e.getCause();
         }
 
-        final TigerAnalyzeMulti.Input analyzeInput = new TigerAnalyzeMulti.Input(input.root, input.walker, input.matcher, parse.createNullableRecoverableAstFunction());
-        final TigerAnalyzeMulti.@Nullable Output analysisOutput = context.require(analyze, analyzeInput);
-        if(analysisOutput != null) {
-            messagesBuilder.addMessages(analysisOutput.result.messages);
-        }
+        final TigerAnalyzeMulti.Input analyzeInput = new TigerAnalyzeMulti.Input(input.root, input.walker, input.matcher, parse.createRecoverableAstFunction());
+        final Result<ConstraintAnalyzeMultiTaskDef.Output, ?> analysisResult = context.require(analyze, analyzeInput);
+        analysisResult
+            .ifOk(output -> {
+                messagesBuilder.addMessages(output.result.messages);
+                messagesBuilder.addMessages(output.messagesFromAstProviders);
+            })
+            .ifErr(e -> messagesBuilder.addMessage("Project-wide analysis failed", e, Severity.Error, input.root));
         return messagesBuilder.build();
     }
 }

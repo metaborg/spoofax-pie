@@ -39,15 +39,11 @@ fun copySpoofaxLanguageResources(
   dependency: Dependency,
   destinationPackage: String,
   includeStrategoClasses: Boolean,
-  includeStrategoJavastratClasses: Boolean,
   vararg resources: String
 ) {
   val allResources = resources.toMutableList()
   if(includeStrategoClasses) {
     allResources.add("target/metaborg/stratego.jar")
-  }
-  if(includeStrategoJavastratClasses) {
-    allResources.add("target/metaborg/stratego-javastrat.jar")
   }
 
   // Add language dependency.
@@ -71,19 +67,12 @@ fun copySpoofaxLanguageResources(
     from(project.zipTree("$unpackSpoofaxLanguageDir/target/metaborg/stratego.jar"))
     exclude("META-INF")
   }
-  val strategoJavastratCopySpec = copySpec {
-    from(project.zipTree("$unpackSpoofaxLanguageDir/target/metaborg/stratego-javastrat.jar"))
-    exclude("META-INF")
-  }
   val copyMainTask = tasks.register<Copy>("copyMainResources") {
     dependsOn(unpackSpoofaxLanguageTask)
     into(sourceSets.main.get().java.outputDir)
     into(destinationPackage) { with(resourcesCopySpec) }
     if(includeStrategoClasses) {
       into(".") { with(strategoCopySpec) }
-    }
-    if(includeStrategoJavastratClasses) {
-      into(".") { with(strategoJavastratCopySpec) }
     }
   }
   tasks.getByName(JavaPlugin.CLASSES_TASK_NAME).dependsOn(copyMainTask)
@@ -94,16 +83,12 @@ fun copySpoofaxLanguageResources(
     if(includeStrategoClasses) {
       into(".") { with(strategoCopySpec) }
     }
-    if(includeStrategoJavastratClasses) {
-      into(".") { with(strategoJavastratCopySpec) }
-    }
   }
   tasks.getByName(JavaPlugin.TEST_CLASSES_TASK_NAME).dependsOn(copyTestTask)
 }
 copySpoofaxLanguageResources(
   dependencies.create(compositeBuild("tiger.spoofaxcore")),
   "mb/tiger",
-  true,
   true,
   "target/metaborg/editor.esv.af", "target/metaborg/sdf.tbl"
 )

@@ -80,6 +80,10 @@ public class MapView<K, V> implements Iterable<Map.Entry<K, V>>, Serializable {
         return new MapView<>(new HashMap<>(map));
     }
 
+    public static <K, V> MapView<K, V> copyOf(MapView<? extends K, ? extends V> map) {
+        return new MapView<>(new HashMap<>(map.map));
+    }
+
 
     public int size() {
         return map.size();
