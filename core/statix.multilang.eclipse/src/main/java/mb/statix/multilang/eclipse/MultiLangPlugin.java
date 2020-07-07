@@ -1,6 +1,7 @@
 package mb.statix.multilang.eclipse;
 
 import mb.log.api.Logger;
+import mb.spoofax.eclipse.SpoofaxEclipseComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.statix.multilang.AnalysisContextService;
 import mb.statix.multilang.DaggerMultiLangComponent;
@@ -10,6 +11,7 @@ import mb.statix.multilang.MultiLangComponent;
 import mb.statix.multilang.MultiLangModule;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
@@ -32,10 +34,11 @@ public class MultiLangPlugin extends Plugin {
     private static @Nullable MultiLangPlugin plugin;
     private static @Nullable MultiLangComponent component;
 
+    private static ConfigResourceChangeListener configResourceChangeListener;
+
     public static MultiLangPlugin getPlugin() {
         if(plugin == null) {
-            throw new RuntimeException(
-                "Cannot access MultiLangPlugin instance; it has not been started yet, or has been stopped");
+            throw new RuntimeException("Cannot access MultiLangPlugin instance; it has not been started yet, or has been stopped");
         }
         return plugin;
     }
@@ -48,20 +51,32 @@ public class MultiLangPlugin extends Plugin {
         return component;
     }
 
+    public static ConfigResourceChangeListener getConfigResourceChangeListener() {
+        return configResourceChangeListener;
+    }
+
     @Override public void start(@NonNull BundleContext context) throws Exception {
         super.start(context);
         plugin = this;
         AnalysisContextService analysisContextService = initializeExtensionPoint(Platform.getExtensionRegistry());
+        SpoofaxEclipseComponent platformComponent = SpoofaxPlugin.getComponent();
+
         component = DaggerMultiLangComponent
             .builder()
             .multiLangModule(new MultiLangModule(analysisContextService))
-            .platformComponent(SpoofaxPlugin.getComponent())
+            .platformComponent(platformComponent)
             .build();
+
+        // Add listener to multilang.yaml files, which triggers analysis updates
+        configResourceChangeListener = new ConfigResourceChangeListener();
+        ResourcesPlugin.getWorkspace().addResourceChangeListener(configResourceChangeListener);
     }
 
     @Override public void stop(@NonNull BundleContext context) throws Exception {
         super.stop(context);
         plugin = null;
+        ResourcesPlugin.getWorkspace().removeResourceChangeListener(configResourceChangeListener);
+        configResourceChangeListener.clearDelegates();
     }
 
     private static AnalysisContextService initializeExtensionPoint(IExtensionRegistry registry) {
@@ -126,4 +141,5 @@ public class MultiLangPlugin extends Plugin {
         }
         return null;
     }
+
 }

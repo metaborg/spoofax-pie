@@ -1,5 +1,6 @@
 package mb.statix.multilang;
 
+import mb.pie.api.MixedSession;
 import mb.pie.api.Pie;
 import org.immutables.value.Value;
 
@@ -47,5 +48,9 @@ public abstract class AnalysisContextService {
 
     public static ImmutableAnalysisContextService.Builder builder() {
         return ImmutableAnalysisContextService.builder();
+    }
+
+    public Pie buildPieForAllTriggeredLanguages() {
+        return buildPieForLanguages(languageMetadataCache.keySet());
     }
 }

@@ -20,6 +20,7 @@ import mb.pie.api.exec.NullCancelableToken;
 import mb.pie.runtime.exec.Stats;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandContext;
@@ -143,9 +144,7 @@ public class PieRunner {
                 if(project == null) {
                     logger.warn("Cannot run inspections for resource '\" + file + \"' of language '\" + languageInstance.getDisplayName() + \"', because it requires multi-file analysis but no project was given");
                 } else {
-                    final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(new EclipseResourcePath(project));
-                    final KeyedMessages messages = requireWithoutObserving(checkTask, postSession, monitor);
-                    workspaceUpdate.replaceMessages(messages);
+                    requireCheck(project, monitor, workspaceUpdate, postSession, languageInstance);
                 }
             } catch(UncheckedException e) {
                 final Exception cause = e.getCause();
@@ -160,6 +159,19 @@ public class PieRunner {
         }
 
         workspaceUpdate.update(file, monitor);
+    }
+
+    public WorkspaceUpdate requireCheck(IProject project, @Nullable IProgressMonitor monitor, TopDownSession session, EclipseLanguageComponent languageComponent) throws ExecException, InterruptedException {
+        WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
+        LanguageInstance languageInstance = languageComponent.getLanguageInstance();
+        requireCheck(project, monitor, workspaceUpdate, session, languageInstance);
+        return workspaceUpdate;
+    }
+
+    private void requireCheck(IProject project, @Nullable IProgressMonitor monitor, WorkspaceUpdate workspaceUpdate, TopDownSession session, LanguageInstance languageInstance) throws ExecException, InterruptedException {
+        final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(new EclipseResourcePath(project));
+        final KeyedMessages messages = requireWithoutObserving(checkTask, session, monitor);
+        workspaceUpdate.replaceMessages(messages);
     }
 
     public void removeEditor(IFile file) {
