@@ -22,10 +22,10 @@ public abstract class AnalysisResults implements Serializable {
     // Custom toString to prevent memory leaks when logging
     @Override public String toString() {
         return "AnalysisResults{" +
-            "globalScope" + globalScope() +
-            "projectResults" + projectResults().keySet() +
-            "fileResults" + fileResults().keySet() +
-            "finalResult" + finalResult().getClass().getSimpleName() +
+            "globalScope=" + globalScope() +
+            ", projectResults=" + projectResults().keySet() +
+            ", fileResults=" + fileResults().keySet() +
+            ", finalResult=" + finalResult().getClass().getSimpleName() +
             '}';
     }
 
