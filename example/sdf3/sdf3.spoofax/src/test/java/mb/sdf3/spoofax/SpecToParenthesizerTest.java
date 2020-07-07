@@ -22,7 +22,7 @@ class SpecToParenthesizerTest extends TestBase {
         try(final MixedSession session = newSession()) {
             final Sdf3SpecToParseTable.Args parseTableArgs = new Sdf3SpecToParseTable.Args(
                 specSupplier(desugarSupplier(resource)),
-                new ParseTableConfiguration(false, false, true, false, false),
+                new ParseTableConfiguration(false, false, true, false, false, false),
                 false
             );
             final Sdf3SpecToParenthesizer.Args parenthesizerArgs = new Sdf3SpecToParenthesizer.Args(

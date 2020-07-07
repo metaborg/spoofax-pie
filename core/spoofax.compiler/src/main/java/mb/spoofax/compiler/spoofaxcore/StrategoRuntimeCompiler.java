@@ -107,8 +107,6 @@ public class StrategoRuntimeCompiler {
             return true;
         }
 
-        boolean copyJavaStrategyClasses();
-
 
         /// Kinds of classes (generated/extended/manual)
 

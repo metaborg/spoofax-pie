@@ -10,6 +10,8 @@ import mb.statix.solver.log.IDebugContext;
 import mb.statix.solver.persistent.SolverResult;
 import mb.statix.spec.Spec;
 import org.metaborg.util.iterators.Iterables2;
+import org.metaborg.util.task.NullCancel;
+import org.metaborg.util.task.NullProgress;
 
 import javax.inject.Inject;
 import java.io.Serializable;
@@ -100,7 +102,8 @@ public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.In
         Iterable<ITermVar> scopeArgs = Iterables2.singleton(input.globalScopeVar);
         IConstraint projectConstraint = new CUser(input.projectConstraint, scopeArgs);
 
-        SolverResult result = SolverUtils.partialSolve(input.spec, input.globalResult.state(), projectConstraint, input.debug);
+        SolverResult result = SolverUtils.partialSolve(input.spec, input.globalResult.state(), projectConstraint,
+            input.debug, new NullProgress(), new NullCancel());
 
         return new Output(result);
     }
