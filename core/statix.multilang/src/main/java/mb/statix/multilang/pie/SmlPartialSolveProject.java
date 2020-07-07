@@ -14,6 +14,8 @@ import mb.statix.spec.Spec;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.iterators.Iterables2;
 import org.metaborg.util.log.Level;
+import org.metaborg.util.task.NullCancel;
+import org.metaborg.util.task.NullProgress;
 
 import javax.inject.Inject;
 import java.io.Serializable;
@@ -77,6 +79,7 @@ public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.In
         IDebugContext debug = TaskUtils.createDebugContext(SmlPartialSolveFile.class, input.logLevel);
         Spec spec = context.require(input.specSupplier);
 
-        return SolverUtils.partialSolve(spec, globalResult.getResult().state(), projectConstraint, debug);
+        return SolverUtils.partialSolve(spec, globalResult.getResult().state(), projectConstraint, debug,
+            new NullProgress(), new NullCancel());
     }
 }

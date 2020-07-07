@@ -35,7 +35,7 @@ public class UpdateAnalysisConfigChangeListener implements ConfigChangeListener 
         final Pie pie = pieProvider.getPie(projectPath);
         try(MixedSession session = pie.newSession()) {
             TopDownSession postSession = session.updateAffectedBy(Collections.singleton(projectPath));
-            pieRunner.requireCheck(project, monitor, postSession, languageComponent).update(null, monitor);
+            pieRunner.requireCheck(project, monitor, postSession, languageComponent).update(project, null, monitor);
         } catch(InterruptedException| ExecException e) {
             logger.error("Error executing analysis after configuration update", e);
         }

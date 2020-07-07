@@ -24,6 +24,8 @@ import mb.statix.solver.persistent.SolverResult;
 import mb.statix.spec.Rule;
 import mb.statix.spec.Spec;
 import org.metaborg.util.log.Level;
+import org.metaborg.util.task.NullCancel;
+import org.metaborg.util.task.NullProgress;
 
 import javax.inject.Inject;
 import java.io.Serializable;
@@ -161,7 +163,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Analy
             .reduce(globalResult.getResult().delayed(), CConj::new);
 
         long t0 = System.currentTimeMillis();
-        SolverResult finalResult = Solver.solve(combinedSpec, combinedState, combinedConstraint, (s, l, st) -> true, debug);
+        SolverResult finalResult = Solver.solve(combinedSpec, combinedState, combinedConstraint, (s, l, st) -> true, debug, new NullProgress(), new NullCancel());
         long dt = System.currentTimeMillis() - t0;
         logger.info("Project analyzed in {} ms", dt);
 

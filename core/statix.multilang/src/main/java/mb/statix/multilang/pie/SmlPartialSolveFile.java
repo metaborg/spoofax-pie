@@ -1,5 +1,6 @@
 package mb.statix.multilang.pie;
 
+import mb.common.result.Result;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.nabl2.terms.ITerm;
@@ -23,6 +24,8 @@ import mb.statix.spec.Spec;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.iterators.Iterables2;
 import org.metaborg.util.log.Level;
+import org.metaborg.util.task.NullCancel;
+import org.metaborg.util.task.NullProgress;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 
@@ -90,8 +93,8 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, F
 
     @Override public FileResult exec(ExecContext context, Input input) throws Exception {
         LanguageMetadata languageMetadata = analysisContextService.getLanguageMetadata(input.languageId);
-        Supplier<IStrategoTerm> astSupplier = exec -> languageMetadata.astFunction().apply(exec, input.resourceKey);
-        IStrategoTerm ast = context.require(astSupplier);
+        Supplier<Result<IStrategoTerm, ?>> astSupplier = exec -> languageMetadata.astFunction().apply(exec, input.resourceKey);
+        IStrategoTerm ast = context.require(astSupplier).unwrap();
 
         GlobalResult globalResult = context.require(input.globalResultSupplier);
         Spec spec = context.require(input.specSupplier);
@@ -106,11 +109,14 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, F
         SolverResult fileResult = SolverUtils.partialSolve(spec,
             globalResult.getResult().state().withResource(input.resourceKey.toString()),
             fileConstraint,
-            debug);
+            debug,
+            new NullProgress(),
+            new NullCancel()
+        );
         long dt = System.currentTimeMillis() - t0;
         logger.info("{} analyzed in {} ms] ", input.resourceKey, dt);
 
-        IStrategoTerm analyzedAst = languageMetadata.postTransform().apply(context, astSupplier);
+        IStrategoTerm analyzedAst = languageMetadata.postTransform().apply(context, astSupplier).unwrap();
         return new FileResult(analyzedAst, fileResult);
     }
 }

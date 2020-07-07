@@ -169,9 +169,10 @@ public class PieRunner {
     }
 
     private void requireCheck(IProject project, @Nullable IProgressMonitor monitor, WorkspaceUpdate workspaceUpdate, TopDownSession session, LanguageInstance languageInstance) throws ExecException, InterruptedException {
-        final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(new EclipseResourcePath(project));
+        final EclipseResourcePath resourcePath = new EclipseResourcePath(project);
+        final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(resourcePath);
         final KeyedMessages messages = requireWithoutObserving(checkTask, session, monitor);
-        workspaceUpdate.replaceMessages(messages);
+        workspaceUpdate.replaceMessages(messages, resourcePath);
     }
 
     public void removeEditor(IFile file) {
