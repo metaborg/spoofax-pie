@@ -33,7 +33,7 @@ public interface Result<T, E extends Exception> extends Serializable {
         }
     }
 
-    static <T> Result<T, ?> ofNullableOrExpect(@Nullable T value, String message) {
+    static <T> Result<T, ExpectException> ofNullableOrExpect(@Nullable T value, String message) {
         if(value != null) {
             return new Ok<>(value);
         } else {
@@ -41,7 +41,7 @@ public interface Result<T, E extends Exception> extends Serializable {
         }
     }
 
-    static <T> Result<T, ?> ofNullableOrExpect(@Nullable T value, String message, @Nullable Throwable cause) {
+    static <T> Result<T, ExpectException> ofNullableOrExpect(@Nullable T value, String message, @Nullable Throwable cause) {
         if(value != null) {
             return new Ok<>(value);
         } else {
@@ -49,7 +49,7 @@ public interface Result<T, E extends Exception> extends Serializable {
         }
     }
 
-    static <T> Result<T, ?> ofNullableOrElseExpect(@Nullable T value, Supplier<String> messageSupplier) {
+    static <T> Result<T, ExpectException> ofNullableOrElseExpect(@Nullable T value, Supplier<String> messageSupplier) {
         if(value != null) {
             return new Ok<>(value);
         } else {
@@ -57,7 +57,7 @@ public interface Result<T, E extends Exception> extends Serializable {
         }
     }
 
-    static <T> Result<T, ?> ofNullableOrElseExpect(@Nullable T value, Supplier<String> messageSupplier, Supplier<@Nullable Throwable> causeSupplier) {
+    static <T> Result<T, ExpectException> ofNullableOrElseExpect(@Nullable T value, Supplier<String> messageSupplier, Supplier<@Nullable Throwable> causeSupplier) {
         if(value != null) {
             return new Ok<>(value);
         } else {
