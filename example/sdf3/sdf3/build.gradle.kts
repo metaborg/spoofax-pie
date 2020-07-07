@@ -30,8 +30,7 @@ spoofaxLanguageProject {
       .enableNaBL2(false)
       .enableStatix(true)
       .copyCTree(true)
-      .copyClasses(false)
-      .copyJavaStrategyClasses(true)
+      .copyClasses(true)
       .classKind(mb.spoofax.compiler.util.ClassKind.Extended)
       .manualFactory("mb.sdf3", "Sdf3ManualStrategoRuntimeBuilderFactory"),
     constraintAnalyzer = ConstraintAnalyzerCompiler.LanguageProjectInput.builder()
@@ -43,10 +42,10 @@ spoofaxLanguageProject {
       builder.addAdditionalCopyResources("target/metaborg/EditorService-pretty.pp.af")
       if(gradle.parent != null && gradle.parent!!.rootProject.name == "devenv") {
         // HACK: use org.metaborggggg groupId for SDF3, as that is used to prevent bootstrapping issues.
-        builder.languageSpecificationDependency(GradleDependency.module("org.metaborggggg:org.metaborg.meta.lang.template:2.6.0-SNAPSHOT"))
+        builder.languageSpecificationDependency(GradleDependency.module("org.metaborggggg:org.metaborg.meta.lang.template:2.5.10"))
       } else {
         // HACK: when building standalone (outside of devenv composite build), use a normal SDF3 dependency.
-        builder.languageSpecificationDependency(GradleDependency.module("org.metaborg:org.metaborg.meta.lang.template:2.5.9"))
+        builder.languageSpecificationDependency(GradleDependency.module("org.metaborg:org.metaborg.meta.lang.template:2.5.10"))
       }
       builder
     }

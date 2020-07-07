@@ -74,7 +74,7 @@ public class Sdf3ShowSpecParenthesizer extends ProvideOutputShared implements Ta
     @Override public CommandFeedback exec(ExecContext context, Args args) throws Exception {
         final Supplier<? extends Result<ParseTable, ?>> parseTableSupplier = specToParseTable.createSupplier(new Sdf3SpecToParseTable.Args(
             createSpec.createSupplier(new Sdf3CreateSpec.Input(args.project, args.mainFile)),
-            new ParseTableConfiguration(false, false, true, false, false),
+            new ParseTableConfiguration(false, false, true, false, false, false),
             false
         ));
         return context.require(specToParenthesizer, new Sdf3ParseTableToParenthesizer.Args(parseTableSupplier, "parenthesizer"))

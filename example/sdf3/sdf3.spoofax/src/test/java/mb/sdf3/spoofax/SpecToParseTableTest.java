@@ -32,7 +32,7 @@ class SpecToParseTableTest extends TestBase {
             final Sdf3Parse parse = languageComponent.getParse();
             final Sdf3SpecToParseTable.Args args = new Sdf3SpecToParseTable.Args(
                 specSupplier(desugarSupplier(resourceMain), desugarSupplier(resourceLex), desugarSupplier(resourceA), desugarSupplier(resourceB)),
-                new ParseTableConfiguration(false, false, true, false, false),
+                new ParseTableConfiguration(false, false, true, false, false, false),
                 createCompletionTable
             );
             final Result<ParseTable, ?> parseTableResult = session.require(taskDef.createTask(args));

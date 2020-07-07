@@ -26,6 +26,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.log.ILogger;
 import org.metaborg.util.log.Level;
 import org.metaborg.util.log.LoggerUtils;
+import org.metaborg.util.task.NullCancel;
+import org.metaborg.util.task.NullProgress;
 
 import javax.inject.Inject;
 import java.io.Serializable;
@@ -190,7 +192,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, SmlAn
             .reduce(globalState.getResult().delayed(), CConj::new);
 
         long t0 = System.currentTimeMillis();
-        SolverResult finalResult = Solver.solve(combinedSpec, combinedState, combinedConstraint, (s, l, st) -> true, debug);
+        SolverResult finalResult = Solver.solve(combinedSpec, combinedState, combinedConstraint, (s, l, st) -> true, debug, new NullProgress(), new NullCancel());
         long dt = System.currentTimeMillis() - t0;
         logger.info("{} analyzed in {} ms] ", input.analysisContext.contextId(), dt);
 

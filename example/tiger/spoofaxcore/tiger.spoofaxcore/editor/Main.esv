@@ -11,15 +11,13 @@ language
 
   //provider : target/metaborg/stratego.ctree
   provider : target/metaborg/stratego.jar
-  provider : target/metaborg/stratego-javastrat.jar
-  
+
 menus
 
   menu: "Transform" (openeditor) (realtime)
-  
+
     action: "Desugar"       = editor-desugar (source)
     action: "Desugar AST"   = editor-desugar-ast (source)
     action: "Make Occurrences" = editor-transform-occurrences
     action: "Show SG" = editor-show-analysis-term
     action: "Show analyzed AST" = debug-show-analyzed
-  
