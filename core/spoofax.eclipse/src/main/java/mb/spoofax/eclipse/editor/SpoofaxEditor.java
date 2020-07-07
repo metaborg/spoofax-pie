@@ -18,6 +18,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
@@ -217,7 +218,7 @@ public abstract class SpoofaxEditor extends TextEditor {
         if(document == null || file == null) return; // TODO: support case where file is null but document is not.
         cancelJobs();
         final Job job = new EditorUpdateJob(loggerFactory, pieRunner, languageComponent, project, file, document, this);
-        job.setRule(file); // May return null, but null is a valid scheduling rule.
+        job.setRule(MultiRule.combine(file /* May return null, but null is a valid scheduling rule */, languageComponent.startupReadLockRule()));
         job.schedule(initialUpdate ? 0 : 300);
     }
 

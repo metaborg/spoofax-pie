@@ -1,21 +1,19 @@
 package {{genStyleTaskDef.packageId}};
 
+import mb.common.option.Option;
 import mb.common.style.Styling;
-import mb.common.token.Token;
+import mb.jsglr.common.JSGLRTokens;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.spoofax.core.language.LanguageScope;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 import java.io.IOException;
-import java.util.ArrayList;
 
 @LanguageScope
-public class {{genStyleTaskDef.id}} implements TaskDef<Supplier<@Nullable ArrayList<? extends Token<IStrategoTerm>>>, @Nullable Styling> {
+public class {{genStyleTaskDef.id}} implements TaskDef<Supplier<Option<JSGLRTokens>>, Option<Styling>> {
     private final {{languageProjectInput.styler.qualifiedId}} styler;
 
     @Inject public {{genStyleTaskDef.id}}({{languageProjectInput.styler.qualifiedId}} styler) {
@@ -27,13 +25,7 @@ public class {{genStyleTaskDef.id}} implements TaskDef<Supplier<@Nullable ArrayL
     }
 
     @Override
-    public @Nullable Styling exec(ExecContext context, Supplier<@Nullable ArrayList<? extends Token<IStrategoTerm>>> tokensSupplier) throws ExecException, IOException, InterruptedException {
-        final @Nullable ArrayList<? extends Token<IStrategoTerm>> tokens = context.require(tokensSupplier);
-        //noinspection ConstantConditions
-        if(tokens == null) {
-            return null;
-        } else {
-            return styler.style(tokens);
-        }
+    public Option<Styling> exec(ExecContext context, Supplier<Option<JSGLRTokens>> tokensSupplier) throws ExecException, IOException, InterruptedException {
+        return context.require(tokensSupplier).map(t -> styler.style(t.tokens));
     }
 }

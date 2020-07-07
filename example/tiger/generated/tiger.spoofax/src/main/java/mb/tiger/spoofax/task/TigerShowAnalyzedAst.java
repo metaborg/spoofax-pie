@@ -1,6 +1,7 @@
 package mb.tiger.spoofax.task;
 
 import mb.common.region.Region;
+import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.jsglr.common.TermTracer;
 import mb.pie.api.ExecContext;
@@ -9,14 +10,14 @@ import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.command.CommandFeedback;
-import mb.spoofax.core.language.command.CommandOutput;
+import mb.spoofax.core.language.command.CommandFeedback;
 import mb.stratego.common.StrategoUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 
-public class TigerShowAnalyzedAst implements TaskDef<TigerShowArgs, CommandOutput> {
+public class TigerShowAnalyzedAst implements TaskDef<TigerShowArgs, CommandFeedback> {
     private final TigerParse parse;
     private final TigerAnalyze analyze;
 
@@ -29,11 +30,11 @@ public class TigerShowAnalyzedAst implements TaskDef<TigerShowArgs, CommandOutpu
         return getClass().getName();
     }
 
-    @Override public CommandOutput exec(ExecContext context, TigerShowArgs input) throws Exception {
+    @Override public CommandFeedback exec(ExecContext context, TigerShowArgs input) throws Exception {
         final ResourceKey key = input.key;
         final @Nullable Region region = input.region;
 
-        final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createNullableAstSupplier(key);
+        final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createAstSupplier(key).map(Result::get); // TODO: use Result
         final TigerAnalyze.@Nullable Output output = context.require(analyze, new TigerAnalyze.Input(key, astSupplier));
         if(output == null) {
             throw new RuntimeException("Cannot show analyzed AST, analysis output for '" + key + "' is null");
@@ -50,10 +51,10 @@ public class TigerShowAnalyzedAst implements TaskDef<TigerShowArgs, CommandOutpu
         }
 
         final String formatted = StrategoUtil.toString(term);
-        return new CommandOutput(ListView.of(CommandFeedback.showText(formatted, "Analyzed AST for '" + key + "'")));
+        return new CommandFeedback(ListView.of(CommandFeedback.showText(formatted, "Analyzed AST for '" + key + "'")));
     }
 
-    @Override public Task<CommandOutput> createTask(TigerShowArgs input) {
+    @Override public Task<CommandFeedback> createTask(TigerShowArgs input) {
         return TaskDef.super.createTask(input);
     }
 }

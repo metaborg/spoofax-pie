@@ -8,7 +8,7 @@ import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.CommandContextType;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandExecutionType;
-import mb.spoofax.core.language.command.CommandOutput;
+import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.arg.ArgProvider;
 import mb.spoofax.core.language.command.arg.Param;
 import mb.spoofax.core.language.command.arg.ParamDef;
@@ -32,7 +32,7 @@ public class TigerCompileFileCommand implements CommandDef<TigerCompileFile.Args
     }
 
     @Override public String getDisplayName() {
-        return "'Compile' file (list literals)";
+        return "Compile file (list literals)";
     }
 
     @Override
@@ -59,7 +59,7 @@ public class TigerCompileFileCommand implements CommandDef<TigerCompileFile.Args
         return new TigerCompileFile.Args(file);
     }
 
-    @Override public Task<CommandOutput> createTask(TigerCompileFile.Args args) {
+    @Override public Task<CommandFeedback> createTask(TigerCompileFile.Args args) {
         return tigerCompileFile.createTask(args);
     }
 }

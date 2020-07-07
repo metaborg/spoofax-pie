@@ -1,5 +1,6 @@
 package mb.tiger.spoofax.task;
 
+import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
@@ -10,7 +11,7 @@ import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.command.CommandFeedback;
-import mb.spoofax.core.language.command.CommandOutput;
+import mb.spoofax.core.language.command.CommandFeedback;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -20,7 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Objects;
 
-public class TigerAltCompileFile implements TaskDef<TigerAltCompileFile.Args, CommandOutput> {
+public class TigerAltCompileFile implements TaskDef<TigerAltCompileFile.Args, CommandFeedback> {
     public static class Args implements Serializable {
         final ResourcePath file;
         final boolean listDefNames;
@@ -70,10 +71,10 @@ public class TigerAltCompileFile implements TaskDef<TigerAltCompileFile.Args, Co
         return getClass().getName();
     }
 
-    @Override public CommandOutput exec(ExecContext context, Args input) throws Exception {
+    @Override public CommandFeedback exec(ExecContext context, Args input) throws Exception {
         final ResourcePath file = input.file;
 
-        final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createNullableAstSupplier(file);
+        final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createAstSupplier(file).map(Result::get); // TODO: use Result
         @Nullable String str;
         if(input.listDefNames) {
             str = context.require(listDefNames, astSupplier);
@@ -82,7 +83,7 @@ public class TigerAltCompileFile implements TaskDef<TigerAltCompileFile.Args, Co
         }
 
         if(str == null) {
-            return new CommandOutput(ListView.of());
+            return new CommandFeedback(ListView.of());
         }
 
         if(input.base64Encode) {
@@ -94,14 +95,14 @@ public class TigerAltCompileFile implements TaskDef<TigerAltCompileFile.Args, Co
         generatedResource.writeBytes(str.getBytes(StandardCharsets.UTF_8));
         context.provide(generatedResource, ResourceStampers.hashFile());
 
-        return new CommandOutput(ListView.of(CommandFeedback.showFile(generatedPath)));
+        return new CommandFeedback(ListView.of(CommandFeedback.showFile(generatedPath)));
     }
 
     @Override public Serializable key(Args input) {
         return input.file; // Task is keyed by file only.
     }
 
-    @Override public Task<CommandOutput> createTask(Args input) {
+    @Override public Task<CommandFeedback> createTask(Args input) {
         return TaskDef.super.createTask(input);
     }
 }

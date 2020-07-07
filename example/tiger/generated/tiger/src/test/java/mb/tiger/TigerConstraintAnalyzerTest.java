@@ -6,7 +6,7 @@ import mb.constraint.common.ConstraintAnalyzer.MultiFileResult;
 import mb.constraint.common.ConstraintAnalyzer.SingleFileResult;
 import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.constraint.common.ConstraintAnalyzerException;
-import mb.jsglr1.common.JSGLR1ParseResult;
+import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.resource.DefaultResourceKey;
 import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -20,8 +20,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class TigerConstraintAnalyzerTest extends TigerTestBase {
     @Test void analyzeSingleErrors() throws InterruptedException, ConstraintAnalyzerException {
         final ResourceKey resource = new DefaultResourceKey(qualifier, "a.tig");
-        final JSGLR1ParseResult parsed = parser.parse("1 + nil", "Module", resource);
-        assertTrue(parsed.getAst().isPresent());
+        final JSGLR1ParseOutput parsed = parser.parse("1 + nil", "Module", resource);
+        assertTrue(parsed.isOk());
         final SingleFileResult result =
             analyzer.analyze(resource, parsed.getAst().get(), new ConstraintAnalyzerContext());
         assertNotNull(result.ast);
@@ -31,8 +31,8 @@ class TigerConstraintAnalyzerTest extends TigerTestBase {
 
     @Test void analyzeSingleSuccess() throws InterruptedException, ConstraintAnalyzerException {
         final ResourceKey resource = new DefaultResourceKey(qualifier, "a.tig");
-        final JSGLR1ParseResult parsed = parser.parse("1 + 2", "Module", resource);
-        assertTrue(parsed.getAst().isPresent());
+        final JSGLR1ParseOutput parsed = parser.parse("1 + 2", "Module", resource);
+        assertTrue(parsed.isOk());
         final SingleFileResult result =
             analyzer.analyze(resource, parsed.getAst().get(), new ConstraintAnalyzerContext());
         assertNotNull(result.ast);
@@ -42,13 +42,13 @@ class TigerConstraintAnalyzerTest extends TigerTestBase {
 
     @Test void analyzeMultipleErrors() throws InterruptedException, ConstraintAnalyzerException {
         final ResourceKey resource1 = new DefaultResourceKey(qualifier, "a.tig");
-        final JSGLR1ParseResult parsed1 = parser.parse("1 + 1", "Module", resource1);
+        final JSGLR1ParseOutput parsed1 = parser.parse("1 + 1", "Module", resource1);
         assertTrue(parsed1.getAst().isPresent());
         final ResourceKey resource2 = new DefaultResourceKey(qualifier, "b.tig");
-        final JSGLR1ParseResult parsed2 = parser.parse("1 + 2", "Module", resource2);
+        final JSGLR1ParseOutput parsed2 = parser.parse("1 + 2", "Module", resource2);
         assertTrue(parsed2.getAst().isPresent());
         final ResourceKey resource3 = new DefaultResourceKey(qualifier, "c.tig");
-        final JSGLR1ParseResult parsed3 = parser.parse("1 + nil", "Module", resource3);
+        final JSGLR1ParseOutput parsed3 = parser.parse("1 + nil", "Module", resource3);
         assertTrue(parsed3.getAst().isPresent());
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
         asts.put(resource1, parsed1.getAst().get());
@@ -78,13 +78,13 @@ class TigerConstraintAnalyzerTest extends TigerTestBase {
 
     @Test void analyzeMultipleSuccess() throws InterruptedException, ConstraintAnalyzerException {
         final ResourceKey resource1 = new DefaultResourceKey(qualifier, "a.tig");
-        final JSGLR1ParseResult parsed1 = parser.parse("1 + 1", "Module", resource1);
+        final JSGLR1ParseOutput parsed1 = parser.parse("1 + 1", "Module", resource1);
         assertTrue(parsed1.getAst().isPresent());
         final ResourceKey resource2 = new DefaultResourceKey(qualifier, "b.tig");
-        final JSGLR1ParseResult parsed2 = parser.parse("1 + 2", "Module", resource2);
+        final JSGLR1ParseOutput parsed2 = parser.parse("1 + 2", "Module", resource2);
         assertTrue(parsed2.getAst().isPresent());
         final ResourceKey resource3 = new DefaultResourceKey(qualifier, "c.tig");
-        final JSGLR1ParseResult parsed3 = parser.parse("1 + 3", "Module", resource3);
+        final JSGLR1ParseOutput parsed3 = parser.parse("1 + 3", "Module", resource3);
         assertTrue(parsed3.getAst().isPresent());
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
         asts.put(resource1, parsed1.getAst().get());

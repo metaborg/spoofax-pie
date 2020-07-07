@@ -1,20 +1,20 @@
 package mb.sdf3.spoofax.task.debug;
 
+import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.sdf3.spoofax.task.Sdf3Parse;
-import mb.spoofax.core.language.command.CommandOutput;
+import mb.spoofax.core.language.command.CommandFeedback;
 import mb.stratego.common.StrategoRuntime;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Provider;
 import java.io.Serializable;
 import java.util.Objects;
 
-public abstract class ShowTaskDef extends ProvideOutputShared implements TaskDef<ShowTaskDef.Args, CommandOutput> {
+public abstract class ShowTaskDef extends ProvideOutputShared implements TaskDef<ShowTaskDef.Args, CommandFeedback> {
     public static class Args implements Serializable {
         public final ResourceKey file;
         public final boolean concrete;
@@ -42,13 +42,13 @@ public abstract class ShowTaskDef extends ProvideOutputShared implements TaskDef
     }
 
     private final Sdf3Parse parse;
-    private final TaskDef<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> desugar;
-    private final TaskDef<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> operation;
+    private final TaskDef<Supplier<? extends Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> desugar;
+    private final TaskDef<Supplier<? extends Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> operation;
 
     public ShowTaskDef(
         Sdf3Parse parse,
-        TaskDef<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> desugar,
-        TaskDef<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> operation,
+        TaskDef<Supplier<? extends Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> desugar,
+        TaskDef<Supplier<? extends Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> operation,
         Provider<StrategoRuntime> strategoRuntimeProvider,
         String prettyPrintStrategy,
         String resultName
@@ -59,10 +59,8 @@ public abstract class ShowTaskDef extends ProvideOutputShared implements TaskDef
         this.operation = operation;
     }
 
-    @Override public CommandOutput exec(ExecContext context, Args args) throws Exception {
-        final @Nullable IStrategoTerm normalFormAst = context.require(operation.createTask(desugar.createSupplier(parse.createNullableAstSupplier(args.file))));
-        if(normalFormAst == null)
-            throw new RuntimeException("Parse -> desugar -> transform to " + resultName + " failed (returned null)");
-        return provideOutput(args.concrete, normalFormAst, args.file);
+    @Override public CommandFeedback exec(ExecContext context, Args args) {
+        return context.require(operation.createTask(desugar.createSupplier(parse.createAstSupplier(args.file))))
+            .mapOrElse(ast -> provideOutput(args.concrete, ast, args.file), e -> CommandFeedback.ofTryExtractMessagesFrom(e, args.file));
     }
 }

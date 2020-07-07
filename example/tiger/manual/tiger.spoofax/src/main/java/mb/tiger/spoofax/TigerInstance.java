@@ -1,14 +1,16 @@
 package mb.tiger.spoofax;
 
 import mb.common.message.KeyedMessages;
+import mb.common.option.Option;
 import mb.common.region.Region;
+import mb.common.result.Result;
 import mb.common.style.Styling;
-import mb.common.token.Token;
 import mb.common.util.CollectionView;
 import mb.common.util.ListView;
 import mb.common.util.MapView;
 import mb.common.util.SetView;
 import mb.completions.common.CompletionResult;
+import mb.jsglr.common.JSGLRTokens;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
@@ -31,7 +33,6 @@ import mb.tiger.spoofax.command.TigerShowAnalyzedAstCommand;
 import mb.tiger.spoofax.command.TigerShowDesugaredAstCommand;
 import mb.tiger.spoofax.command.TigerShowParsedAstCommand;
 import mb.tiger.spoofax.command.TigerShowPrettyPrintedTextCommand;
-import mb.tiger.spoofax.task.TigerIdeCheck;
 import mb.tiger.spoofax.task.TigerIdeCheckAggregate;
 import mb.tiger.spoofax.task.TigerIdeTokenize;
 import mb.tiger.spoofax.task.reusable.TigerCompleteTaskDef;
@@ -40,14 +41,13 @@ import mb.tiger.spoofax.task.reusable.TigerStyle;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.Set;
 
 public class TigerInstance implements LanguageInstance {
     private final static SetView<String> extensions = SetView.of("tig");
 
     private final TigerParse parse;
-    private final TigerIdeCheck tigerIdeCheck;
+    private final TigerIdeCheckAggregate tigerIdeCheckAggregate;
     private final TigerStyle style;
     private final TigerIdeTokenize tokenize;
     private final TigerCompleteTaskDef complete;
@@ -66,7 +66,7 @@ public class TigerInstance implements LanguageInstance {
 
     @Inject public TigerInstance(
         TigerParse parse,
-        TigerIdeCheck tigerIdeCheck,
+        TigerIdeCheckAggregate tigerIdeCheckAggregate,
         TigerStyle style,
         TigerIdeTokenize tokenize,
         TigerCompleteTaskDef complete,
@@ -83,7 +83,7 @@ public class TigerInstance implements LanguageInstance {
         Set<AutoCommandRequest<?>> autoCommandDefs
     ) {
         this.parse = parse;
-        this.tigerIdeCheck = tigerIdeCheck;
+        this.tigerIdeCheckAggregate = tigerIdeCheckAggregate;
         this.style = style;
         this.tokenize = tokenize;
         this.complete = complete;
@@ -110,22 +110,22 @@ public class TigerInstance implements LanguageInstance {
     }
 
 
-    @Override public Task<@Nullable ArrayList<? extends Token<?>>> createTokenizeTask(ResourceKey resourceKey) {
+    @Override public Task<Option<JSGLRTokens>> createTokenizeTask(ResourceKey resourceKey) {
         return tokenize.createTask(resourceKey);
     }
 
-    @Override public Task<@Nullable Styling> createStyleTask(ResourceKey resourceKey) {
-        return style.createTask(parse.createTokensSupplier(resourceKey));
+    @Override public Task<Option<Styling>> createStyleTask(ResourceKey resourceKey) {
+        return style.createTask(parse.createRecoverableTokensSupplier(resourceKey).map(Result::ok));
     }
 
     @Override
     public Task<@Nullable CompletionResult> createCompletionTask(ResourceKey resourceKey, Region primarySelection) {
-        return complete.createTask(new TigerCompleteTaskDef.Input(parse.createNullableRecoverableAstSupplier(resourceKey)));
+        return complete.createTask(new TigerCompleteTaskDef.Input(parse.createRecoverableAstSupplier(resourceKey).map(Result::get))); // TODO: use Result.
     }
 
     @Override
-    public Task<@Nullable KeyedMessages> createCheckTask(ResourcePath projectRoot) {
-        return new TigerIdeCheckAggregate(tigerIdeCheck).createTask(new TigerIdeCheckAggregate.Input(
+    public Task<KeyedMessages> createCheckTask(ResourcePath projectRoot) {
+        return tigerIdeCheckAggregate.createTask(new TigerIdeCheckAggregate.Input(
             projectRoot,
             new PathResourceWalker(new NoHiddenPathMatcher()),
             new PathResourceMatcher(new ExtensionsPathMatcher(this.getFileExtensions().asUnmodifiable()))

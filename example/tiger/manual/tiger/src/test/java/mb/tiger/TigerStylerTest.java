@@ -5,7 +5,7 @@ import mb.common.style.Color;
 import mb.common.style.Styling;
 import mb.common.style.TokenStyle;
 import mb.common.token.TokenTypes;
-import mb.jsglr1.common.JSGLR1ParseResult;
+import mb.jsglr1.common.JSGLR1ParseOutput;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -13,15 +13,10 @@ import java.util.ArrayList;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TigerStylerTest extends TigerTestBase {
-    @Test void style() throws InterruptedException {
-        final JSGLR1ParseResult parseOutput = parser.parse("1 + 21", "Module");
-        assertTrue(parseOutput.hasSucceeded());
-        assertFalse(parseOutput.hasRecovered());
-        assertFalse(parseOutput.hasFailed());
-        assertTrue(parseOutput.getAst().isPresent());
-        assertTrue(parseOutput.getTokens().isPresent());
+    @Test void style() throws Exception {
+        final JSGLR1ParseOutput parsed = parser.parse("1 + 21", "Module");
 
-        final Styling styling = styler.style(parseOutput.getTokens().get());
+        final Styling styling = styler.style(parsed.tokens.tokens);
         final ArrayList<TokenStyle> stylePerToken = styling.getStylePerToken();
         assertEquals(5, stylePerToken.size());
 

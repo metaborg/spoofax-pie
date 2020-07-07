@@ -11,7 +11,7 @@ dependencies {
 
   bundleApi(compositeBuild("spoofax.eclipse"))
   bundleApi(compositeBuild("spoofax.eclipse.externaldeps"))
-  bundleApi(project(":tiger.manual.eclipse.externaldeps"))
+  bundleApi(project(":tiger.eclipse.externaldeps"))
 
   compileOnly("org.checkerframework:checker-qual-android")
 

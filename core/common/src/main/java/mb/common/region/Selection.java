@@ -14,6 +14,15 @@ public abstract class Selection implements Serializable {
         R offset(int offset);
     }
 
+    public static Selection region(Region region) {
+        return Selections.region(region);
+    }
+
+    public static Selection offset(int offset) {
+        return Selections.offset(offset);
+    }
+
+
     public abstract <R> R match(Cases<R> cases);
 
     public Optional<Region> getRegion() {
@@ -27,6 +36,7 @@ public abstract class Selection implements Serializable {
     public Selections.CaseOfMatchers.TotalMatcher_Region caseOf() {
         return Selections.caseOf(this);
     }
+
 
     @Override public abstract int hashCode();
 

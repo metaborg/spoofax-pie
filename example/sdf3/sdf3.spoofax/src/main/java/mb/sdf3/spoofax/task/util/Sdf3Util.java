@@ -1,4 +1,4 @@
-package mb.sdf3.spoofax.task;
+package mb.sdf3.spoofax.task.util;
 
 import mb.resource.hierarchical.match.PathResourceMatcher;
 import mb.resource.hierarchical.match.ResourceMatcher;

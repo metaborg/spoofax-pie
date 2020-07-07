@@ -14,7 +14,7 @@ import java.nio.charset.StandardCharsets;
  * Utility functions for creating and removing {@link IMarker} instances.
  */
 public final class MarkerUtil {
-    public static IMarker createMarker(
+    public static IMarker create(
         EclipseIdentifiers eclipseIdentifiers,
         String text,
         Severity severity,
@@ -24,7 +24,7 @@ public final class MarkerUtil {
         final int eclipseSeverity = severity(severity);
         final String markerId = id(eclipseIdentifiers, eclipseSeverity);
         final IMarker marker = resource.createMarker(markerId);
-        
+
         if(region != null) {
             marker.setAttribute(IMarker.CHAR_START, region.getStartOffset());
             marker.setAttribute(IMarker.CHAR_END, region.getEndOffset());
@@ -48,12 +48,14 @@ public final class MarkerUtil {
         return marker;
     }
 
-    public static void clearAll(EclipseIdentifiers eclipseIdentifiers, IResource resource) throws CoreException {
-        resource.deleteMarkers(eclipseIdentifiers.getBaseMarker(), true, IResource.DEPTH_ZERO);
-    }
-
-    public static void clearAllRec(EclipseIdentifiers eclipseIdentifiers, IResource resource) throws CoreException {
-        resource.deleteMarkers(eclipseIdentifiers.getBaseMarker(), true, IResource.DEPTH_INFINITE);
+    public static void clear(
+        EclipseIdentifiers eclipseIdentifiers,
+        IResource resource,
+        boolean recursive
+    ) throws CoreException {
+        final String type = eclipseIdentifiers.getBaseMarker();
+        final int depth = recursive ? IResource.DEPTH_INFINITE : IResource.DEPTH_ZERO;
+        resource.deleteMarkers(type, true, depth);
     }
 
 

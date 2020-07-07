@@ -1,5 +1,6 @@
 package mb.statix.multilang.tasks;
 
+import mb.common.result.Result;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.stratego.StrategoTerms;
 import mb.pie.api.ExecContext;
@@ -14,6 +15,7 @@ import mb.statix.solver.IConstraint;
 import mb.statix.solver.log.IDebugContext;
 import mb.statix.solver.persistent.SolverResult;
 import mb.statix.spec.Spec;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.iterators.Iterables2;
 import org.metaborg.util.log.ILogger;
 import org.metaborg.util.log.LoggerUtils;
@@ -36,13 +38,13 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, S
 
         private final Spec spec;
         private final String fileConstraint;
-        private final Function<ResourceKey, IStrategoTerm> astSupplier;
-        private final Function<Supplier<IStrategoTerm>, IStrategoTerm> postAnalysisTransform;
+        private final Function<ResourceKey, Result<IStrategoTerm, ?>> astSupplier;
+        private final Function<Supplier<? extends Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> postAnalysisTransform;
         private final ResourceKey resourceKey;
 
         public Input(ITerm globalScope, SolverResult globalResult, IDebugContext debug, Spec spec,
-                     String fileConstraint, Function<ResourceKey, IStrategoTerm> astSupplier,
-                     Function<Supplier<IStrategoTerm>, IStrategoTerm> postAnalysisTransform, ResourceKey resourceKey) {
+                     String fileConstraint, Function<ResourceKey, Result<IStrategoTerm, ?>> astSupplier,
+                     Function<Supplier<? extends Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> postAnalysisTransform, ResourceKey resourceKey) {
             this.globalScope = globalScope;
             this.globalResult = globalResult;
             this.debug = debug;
@@ -125,8 +127,8 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, S
     }
 
     @Override public Output exec(ExecContext context, Input input) throws Exception {
-        Supplier<IStrategoTerm> astSupplier = exec -> input.astSupplier.apply(context, input.resourceKey);
-        IStrategoTerm ast = context.require(astSupplier);
+        Supplier<Result<IStrategoTerm, ?>> astSupplier = exec -> input.astSupplier.apply(context, input.resourceKey);
+        @Nullable IStrategoTerm ast = context.require(astSupplier).get(); // TODO: propagate Result
         Iterable<ITerm> constraintArgs = Iterables2.from(input.globalScope, st.fromStratego(ast));
         IConstraint fileConstraint = new CUser(input.fileConstraint, constraintArgs, null);
 
@@ -140,7 +142,7 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, S
         long dt = System.currentTimeMillis() - t0;
         logger.info("{} analyzed in {} ms] ", input.resourceKey, dt);
 
-        IStrategoTerm analyzedAst = input.postAnalysisTransform.apply(context, astSupplier);
+        IStrategoTerm analyzedAst = input.postAnalysisTransform.apply(context, astSupplier).get(); // TODO: propagate Result
 
         return new Output(new FileResult(analyzedAst, fileResult));
     }

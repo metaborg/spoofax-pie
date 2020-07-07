@@ -10,8 +10,8 @@ dependencies {
 
   bundleTargetPlatformApi(eclipse("javax.inject"))
   bundleApi(compositeBuild("spoofax.eclipse.externaldeps"))
-  bundleEmbedApi(project(":tiger.manual"))
-  bundleEmbedApi(project(":tiger.manual.spoofax"))
+  bundleEmbedApi(project(":tiger"))
+  bundleEmbedApi(project(":tiger.spoofax"))
 }
 
 // Use bnd to create a single OSGi bundle JAR that includes all dependencies.

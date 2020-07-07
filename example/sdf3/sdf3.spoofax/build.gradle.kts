@@ -47,12 +47,12 @@ spoofaxAdapterProject {
       val toPermissive = TypeInfo.of(taskPackageId, "Sdf3ToPermissive")
       val toNormalForm = TypeInfo.of(taskPackageId, "Sdf3ToNormalForm")
       val specToParseTable = TypeInfo.of(taskPackageId, "Sdf3SpecToParseTable")
-      val specToParenthesizer = TypeInfo.of(taskPackageId, "Sdf3SpecToParenthesizer")
+      val parseTableToParenthesizer = TypeInfo.of(taskPackageId, "Sdf3ParseTableToParenthesizer")
       val preStatix = TypeInfo.of(taskPackageId, "Sdf3PreStatix")
       val postStatix = TypeInfo.of(taskPackageId, "Sdf3PostStatix")
       val indexAst = TypeInfo.of(taskPackageId, "Sdf3IndexAst")
       builder.addTaskDefs(toCompletionColorer, toCompletionRuntime, toCompletion, toSignature, toDynsemSignature,
-        toPrettyPrinter, toPermissive, toNormalForm, specToParseTable, specToParenthesizer, preStatix, postStatix,
+        toPrettyPrinter, toPermissive, toNormalForm, specToParseTable, parseTableToParenthesizer, preStatix, postStatix,
         indexAst)
 
 

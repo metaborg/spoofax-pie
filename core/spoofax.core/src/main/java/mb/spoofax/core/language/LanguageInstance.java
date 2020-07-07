@@ -1,9 +1,10 @@
 package mb.spoofax.core.language;
 
 import mb.common.message.KeyedMessages;
+import mb.common.option.Option;
 import mb.common.region.Region;
 import mb.common.style.Styling;
-import mb.common.token.Token;
+import mb.common.token.Tokens;
 import mb.common.util.CollectionView;
 import mb.common.util.ListView;
 import mb.common.util.SetView;
@@ -17,17 +18,15 @@ import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.menu.MenuItem;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.ArrayList;
-
 public interface LanguageInstance {
     String getDisplayName();
 
     SetView<String> getFileExtensions();
 
 
-    Task<@Nullable ArrayList<? extends Token<?>>> createTokenizeTask(ResourceKey resourceKey);
+    Task<? extends Option<? extends Tokens<?>>> createTokenizeTask(ResourceKey resourceKey);
 
-    Task<@Nullable Styling> createStyleTask(ResourceKey resourceKey);
+    Task<Option<Styling>> createStyleTask(ResourceKey resourceKey);
 
     /**
      * Creates a task that produces completions.
@@ -38,7 +37,7 @@ public interface LanguageInstance {
      */
     Task<@Nullable CompletionResult> createCompletionTask(ResourceKey resourceKey, Region primarySelection);
 
-    Task<@Nullable KeyedMessages> createCheckTask(ResourcePath projectRoot);
+    Task<KeyedMessages> createCheckTask(ResourcePath projectRoot);
 
     CollectionView<CommandDef<?>> getCommandDefs();
 

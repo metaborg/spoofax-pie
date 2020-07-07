@@ -3,6 +3,7 @@ package mb.common.util;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -94,6 +95,10 @@ public class BaseCollectionView<E, C extends Collection<? extends E>> implements
 
     public Collection<E> asUnmodifiable() {
         return Collections.unmodifiableCollection(collection);
+    }
+
+    public Collection<E> asCopy() {
+        return new ArrayList(collection);
     }
 
 

@@ -8,7 +8,7 @@ import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.CommandContextType;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandExecutionType;
-import mb.spoofax.core.language.command.CommandOutput;
+import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.arg.ArgProvider;
 import mb.spoofax.core.language.command.arg.Param;
 import mb.spoofax.core.language.command.arg.ParamDef;
@@ -32,7 +32,7 @@ public class TigerCompileFileAltCommand implements CommandDef<TigerCompileFileAl
     }
 
     @Override public String getDisplayName() {
-        return "'Alternative compile' file";
+        return "Alternative compile file";
     }
 
     @Override
@@ -65,7 +65,7 @@ public class TigerCompileFileAltCommand implements CommandDef<TigerCompileFileAl
         return new TigerCompileFileAlt.Args(file, listDefNames, base64Encode, compiledFileNameSuffix);
     }
 
-    @Override public Task<CommandOutput> createTask(TigerCompileFileAlt.Args args) {
+    @Override public Task<CommandFeedback> createTask(TigerCompileFileAlt.Args args) {
         return tigerCompileFileAlt.createTask(args);
     }
 }

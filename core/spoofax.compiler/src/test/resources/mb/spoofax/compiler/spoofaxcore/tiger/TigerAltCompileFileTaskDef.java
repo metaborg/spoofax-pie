@@ -10,7 +10,7 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.CommandFeedbacks;
-import mb.spoofax.core.language.command.CommandOutput;
+import mb.spoofax.core.language.command.CommandFeedback;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -21,7 +21,7 @@ import java.util.Base64;
 import java.util.Objects;
 
 @LanguageScope
-public class TigerAltCompileFileTaskDef implements TaskDef<TigerAltCompileFileTaskDef.Args, CommandOutput> {
+public class TigerAltCompileFileTaskDef implements TaskDef<TigerAltCompileFileTaskDef.Args, CommandFeedback> {
     public static class Args implements Serializable {
         final ResourcePath file;
         final boolean listDefNames;
@@ -74,7 +74,7 @@ public class TigerAltCompileFileTaskDef implements TaskDef<TigerAltCompileFileTa
         return getClass().getName();
     }
 
-    @Override public CommandOutput exec(ExecContext context, Args input) throws Exception {
+    @Override public CommandFeedback exec(ExecContext context, Args input) throws Exception {
         final ResourcePath file = input.file;
 
         final Supplier<@Nullable IStrategoTerm> astSupplier = parse.createAstProvider(file);
@@ -87,7 +87,7 @@ public class TigerAltCompileFileTaskDef implements TaskDef<TigerAltCompileFileTa
 
         //noinspection ConstantConditions (str can really be null)
         if(str == null) {
-            return new CommandOutput(ListView.of());
+            return new CommandFeedback(ListView.of());
         }
 
         if(input.base64Encode) {
@@ -100,7 +100,7 @@ public class TigerAltCompileFileTaskDef implements TaskDef<TigerAltCompileFileTa
         context.provide(generatedResource, ResourceStampers.hashFile());
 
         //noinspection ConstantConditions (region may be null)
-        return new CommandOutput(ListView.of(CommandFeedbacks.showFile(generatedPath, null)));
+        return new CommandFeedback(ListView.of(CommandFeedbacks.showFile(generatedPath, null)));
     }
 
     @Override public Serializable key(Args input) {

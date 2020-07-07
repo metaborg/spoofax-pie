@@ -14,7 +14,7 @@ import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 import java.util.ArrayList;
 
 public class TokenUtil {
-    public static ArrayList<Token<IStrategoTerm>> extract(IStrategoTerm ast) {
+    public static JSGLRTokens extract(IStrategoTerm ast) {
         final ImploderAttachment rootImploderAttachment = ImploderAttachment.get(ast);
         final ITokenizer tokenizer = (ITokenizer)rootImploderAttachment.getLeftToken().getTokenizer();
         final int tokenCount = tokenizer.getTokenCount();
@@ -38,13 +38,13 @@ public class TokenUtil {
             final Token<IStrategoTerm> token = convertToken(jsglrToken);
             tokenStream.add(token);
         }
-        return tokenStream;
+        return new JSGLRTokens(tokenStream);
     }
 
     private static Token<IStrategoTerm> convertToken(IToken token) {
         final TokenType tokenType = convertTokenKind(token.getKind());
         final Region region = RegionUtil.fromToken(token);
-        final IStrategoTerm fragment = (IStrategoTerm) token.getAstNode();
+        final IStrategoTerm fragment = (IStrategoTerm)token.getAstNode();
         return new TokenImpl<>(tokenType, region, fragment);
     }
 

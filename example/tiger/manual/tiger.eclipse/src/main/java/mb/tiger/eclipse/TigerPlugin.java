@@ -39,7 +39,7 @@ public class TigerPlugin extends AbstractUIPlugin {
 
         component.getEditorTracker().register();
 
-        new WorkspaceJob("Tiger startup") {
+        final WorkspaceJob job = new WorkspaceJob("Tiger startup") {
             @Override public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
                 try {
                     SpoofaxPlugin.getComponent().getPieRunner().startup(component, monitor);
@@ -48,8 +48,9 @@ public class TigerPlugin extends AbstractUIPlugin {
                 }
                 return StatusUtil.success();
             }
-        }.schedule();
-
+        };
+        job.setRule(component.startupWriteLockRule());
+        job.schedule();
     }
 
     @Override public void stop(@NonNull BundleContext context) throws Exception {

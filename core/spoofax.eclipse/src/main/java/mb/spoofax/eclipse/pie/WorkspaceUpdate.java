@@ -27,6 +27,7 @@ import org.eclipse.jface.text.TextPresentation;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.ArrayList;
+import java.util.Collection;
 
 public class WorkspaceUpdate {
     @Singleton
@@ -47,6 +48,16 @@ public class WorkspaceUpdate {
         }
     }
 
+    private static class ClearMessages {
+        public final ResourceKey origin;
+        public final boolean recursive;
+
+        private ClearMessages(ResourceKey origin, boolean recursive) {
+            this.origin = origin;
+            this.recursive = recursive;
+        }
+    }
+
 
     private final Logger logger;
     private final ResourceUtil resourceUtil;
@@ -54,9 +65,8 @@ public class WorkspaceUpdate {
 
     private final EclipseLanguageComponent languageComponent;
 
-    private final ArrayList<ResourceKey> clear = new ArrayList<>();
-    private final ArrayList<ResourceKey> clearRecursively = new ArrayList<>();
-    private final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
+    private final ArrayList<ClearMessages> clears = new ArrayList<>();
+    private final KeyedMessagesBuilder keyedMessagesBuilder = new KeyedMessagesBuilder();
     private final ArrayList<StyleUpdate> styleUpdates = new ArrayList<>();
 
 
@@ -69,43 +79,40 @@ public class WorkspaceUpdate {
 
 
     public void reset() {
-        clear.clear();
-        clearRecursively.clear();
-        messagesBuilder.clearAll();
+        clears.clear();
+        keyedMessagesBuilder.clearAll();
         styleUpdates.clear();
     }
 
 
-    public void clearMessages(ResourceKey resource) {
-        clear.add(resource);
-    }
-
-    public void clearMessagesRecursively(ResourceKey resource) {
-        clearRecursively.add(resource);
+    public void clearMessages(ResourceKey origin, boolean recursive) {
+        clears.add(new ClearMessages(origin, recursive));
     }
 
 
-    public void addMessages(ResourceKey resource, Iterable<? extends Message> messages) {
-        messagesBuilder.addMessages(resource, messages);
+    public void addMessages(ResourceKey origin, Collection<? extends Message> messages) {
+        keyedMessagesBuilder.addMessages(origin, messages);
     }
 
-    public void replaceMessages(ResourceKey resource, Iterable<? extends Message> messages) {
-        clearMessages(resource);
-        messagesBuilder.replaceMessages(resource, messages);
-    }
-
-
-    public void addMessages(KeyedMessages messages) {
-        messagesBuilder.addMessages(messages);
-    }
-
-    public void replaceMessages(KeyedMessages messages) {
-        for(@Nullable ResourceKey resource : messages.getResources()) {
-            if(resource != null) {
-                clearMessages(resource);
-            }
+    public void addMessages(KeyedMessages keyedMessages, @Nullable ResourceKey defaultOrigin) {
+        if(defaultOrigin != null) {
+            keyedMessagesBuilder.addMessagesWithDefaultKey(keyedMessages, defaultOrigin);
+        } else {
+            keyedMessagesBuilder.addMessages(keyedMessages);
         }
-        messagesBuilder.replaceMessages(messages);
+    }
+
+
+    public void replaceMessages(ResourceKey origin, Collection<? extends Message> messages) {
+        clearMessages(origin, false);
+        addMessages(origin, messages);
+    }
+
+    public void replaceMessages(KeyedMessages keyedMessages, @Nullable ResourceKey defaultOrigin) {
+        for(ResourceKey origin : keyedMessages.getKeys()) {
+            clearMessages(origin, false);
+        }
+        addMessages(keyedMessages, defaultOrigin);
     }
 
 
@@ -134,39 +141,34 @@ public class WorkspaceUpdate {
     }
 
 
-    public void update(@Nullable ISchedulingRule rule, @Nullable IProgressMonitor monitor) {
+    public void update(IResource defaultOrigin, @Nullable ISchedulingRule rule, @Nullable IProgressMonitor monitor) {
         if(monitor != null && monitor.isCanceled()) return;
-
-        final KeyedMessages messages = messagesBuilder.build();
-
+        final KeyedMessages keyedMessages = keyedMessagesBuilder.build();
         final ICoreRunnable makerUpdate = (IWorkspaceRunnable)workspaceMonitor -> {
-            for(ResourceKey resourceKey : clearRecursively) {
+            for(ClearMessages clear : clears) {
                 if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return;
-                final IResource resource = resourceUtil.getEclipseResource(resourceKey);
-                MarkerUtil.clearAllRec(languageComponent.getEclipseIdentifiers(), resource);
-            }
-            for(ResourceKey resourceKey : clear) {
-                if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return;
-                final IResource resource = resourceUtil.getEclipseResource(resourceKey);
-                MarkerUtil.clearAll(languageComponent.getEclipseIdentifiers(), resource);
+                final IResource resource = resourceUtil.getEclipseResource(clear.origin);
+                MarkerUtil.clear(languageComponent.getEclipseIdentifiers(), resource, clear.recursive);
             }
             try {
                 if(workspaceMonitor == null || !workspaceMonitor.isCanceled()) {
-                    messages.getAllMessages().forEach(entry -> {
+                    keyedMessages.getMessagesWithKey().forEach(entry -> {
                         ResourceKey resourceKey = entry.getKey();
-                        entry.getValue().stream().forEach(message -> {
-                            if(resourceKey == null) {
-                                logger.warn("Cannot create marker withs text '" + message.text + "'; it has no corresponding resource");
-                                return;
-                            }
+                        entry.getValue().forEach(message -> {
                             final IResource resource = resourceUtil.getEclipseResource(resourceKey);
                             try {
-                                MarkerUtil.createMarker(languageComponent.getEclipseIdentifiers(),
-                                    message.text, message.severity, resource, message.region);
+                                MarkerUtil.create(languageComponent.getEclipseIdentifiers(), message.text, message.severity, resource, message.region);
                             } catch(CoreException e) {
                                 throw new UncheckedCoreException(e);
                             }
                         });
+                    });
+                    keyedMessages.getMessagesWithoutKey().forEach(message -> {
+                        try {
+                            MarkerUtil.create(languageComponent.getEclipseIdentifiers(), message.text, message.severity, defaultOrigin, message.region);
+                        } catch(CoreException e) {
+                            throw new UncheckedCoreException(e);
+                        }
                     });
                 }
             } catch(UncheckedCoreException e) {
