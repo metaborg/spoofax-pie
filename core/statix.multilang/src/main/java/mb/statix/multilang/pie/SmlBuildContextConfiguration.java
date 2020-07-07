@@ -7,6 +7,7 @@ import mb.statix.multilang.AnalysisContextService;
 import mb.statix.multilang.ContextConfig;
 import mb.statix.multilang.ContextId;
 import mb.statix.multilang.LanguageId;
+import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.multilang.MultiLangConfig;
 import mb.statix.multilang.MultiLangScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -85,6 +86,15 @@ public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConf
             languages.addAll(staticLanguages);
             contextConfig.setLanguages(new ArrayList<>(languages));
             contextConfig.setLogLevel(dynamicConfig.getLogLevel());
+        }
+
+        if(!contextConfig.getLanguages().contains(input.languageId)) {
+            throw new MultiLangAnalysisException("Invalid configuration. In project '"
+                + input.projectDir
+                + "', language " + input.languageId
+                + "has configured to do analysis in context " + contextId
+                + ", but it is not included in the configuration for that context. "
+                + "Included languages: " + contextConfig.getLanguages());
         }
 
         return new Output(contextId, contextConfig);
