@@ -56,11 +56,13 @@ public class ConstraintAnalyzer {
 
 
     public static class SingleFileResult implements Serializable {
+        public final @Nullable ProjectResult projectResult;
         public final IStrategoTerm ast;
         public final IStrategoTerm analysis;
         public final Messages messages;
 
-        public SingleFileResult(IStrategoTerm ast, IStrategoTerm analysis, Messages messages) {
+        public SingleFileResult(@Nullable ProjectResult projectResult, IStrategoTerm ast, IStrategoTerm analysis, Messages messages) {
+            this.projectResult = projectResult;
             this.ast = ast;
             this.analysis = analysis;
             this.messages = messages;
@@ -68,11 +70,12 @@ public class ConstraintAnalyzer {
     }
 
     public static class MultiFileResult implements Serializable {
-//        public final ProjectResult projectResult;
+        public final @Nullable ProjectResult projectResult;
         public final ArrayList<Result> results;
         public final KeyedMessages messages;
 
-        public MultiFileResult(ArrayList<Result> results, KeyedMessages messages) {
+        public MultiFileResult(@Nullable ProjectResult projectResult, ArrayList<Result> results, KeyedMessages messages) {
+            this.projectResult = projectResult;
             this.results = results;
             this.messages = messages;
         }
@@ -131,7 +134,7 @@ public class ConstraintAnalyzer {
         } catch(IndexOutOfBoundsException e) {
             throw new RuntimeException("BUG: no analysis result was found for resource '" + resource + "'", e);
         }
-        return new SingleFileResult(result.ast, result.analysis, multiFileResult.messages.asMessages());
+        return new SingleFileResult(multiFileResult.projectResult, result.ast, result.analysis, multiFileResult.messages.asMessages());
     }
 
     public MultiFileResult analyze(
@@ -175,7 +178,7 @@ public class ConstraintAnalyzer {
             if(cachedResult != null) {
                 change = mkAppl("Cached", cachedResult.analysis);
                 expect = new ProjectUpdate(root);
-                context.removeResult(root);
+                context.removeProjectResult(root);
             } else {
                 change = mkAppl("Added", ast);
                 expect = new ProjectFull(root);
@@ -291,6 +294,11 @@ public class ConstraintAnalyzer {
         }
 
         // Check if all input resources have been covered.
+        if(root != null) {
+            if(!resultTerms.containsKey(root)) {
+                expects.get(root).addFailMessage("Missing project result", messagesBuilder);
+            }
+        }
         for(Map.Entry<ResourceKey, IStrategoTerm> entry : addedOrChangedAsts.entrySet()) {
             final ResourceKey resource = entry.getKey();
             if(!resultTerms.containsKey(resource)) {
@@ -299,6 +307,16 @@ public class ConstraintAnalyzer {
         }
 
         /// 5. Build and return result object.
+
+        final @Nullable ProjectResult projectResult;
+        if(root != null) {
+            projectResult = context.getProjectResult(root);
+            if(projectResult == null) {
+                throw new RuntimeException("BUG: context is missing project result for '" + root + "'");
+            }
+        } else {
+            projectResult = null;
+        }
 
         final ArrayList<Result> results = new ArrayList<>(asts.size());
         for(ResourceKey resource : addedOrChangedAsts.keySet()) {
@@ -309,7 +327,8 @@ public class ConstraintAnalyzer {
                 throw new RuntimeException("BUG: context is missing analysis result for '" + resource + "'");
             }
         }
-        return new MultiFileResult(results, messagesBuilder.build());
+
+        return new MultiFileResult(projectResult, results, messagesBuilder.build());
     }
 
 
