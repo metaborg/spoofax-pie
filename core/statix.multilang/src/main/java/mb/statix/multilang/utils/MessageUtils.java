@@ -8,6 +8,7 @@ import mb.jsglr.common.ResourceKeyAttachment;
 import mb.jsglr.common.TermTracer;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.build.TermBuild;
+import mb.nabl2.terms.stratego.AStrategoAnnotations;
 import mb.nabl2.terms.stratego.StrategoAnnotations;
 import mb.nabl2.terms.stratego.TermIndex;
 import mb.nabl2.terms.stratego.TermOrigin;
@@ -73,7 +74,7 @@ public class MessageUtils {
     }
 
     private static Region getRegion(ITerm originTerm) {
-        StrategoAnnotations strategoAnnotations = originTerm.getAttachments().getInstance(StrategoAnnotations.class);
+        AStrategoAnnotations strategoAnnotations = originTerm.getAttachments().getInstance(AStrategoAnnotations.class);
         if(strategoAnnotations == null) {
             return null;
         }
