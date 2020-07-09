@@ -2,14 +2,13 @@ package mb.spoofax2.common.primitive;
 
 import mb.spoofax2.common.primitive.generic.ASpoofaxContextPrimitive;
 import mb.spoofax2.common.primitive.generic.Spoofax2Context;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.stratego.Strategy;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.IStrategoTuple;
 import org.spoofax.interpreter.terms.ITermFactory;
-
-import javax.annotation.Nullable;
 
 public class LanguageComponentPrimitive extends ASpoofaxContextPrimitive {
     public LanguageComponentPrimitive() {

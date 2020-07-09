@@ -1,0 +1,5 @@
+defaultGroupId=org.metaborg
+defaultClassPrefix=Stratego
+defaultBasePackageId=mb.str
+defaultArtifactId=stratego
+defaultVersion=0.1.0
