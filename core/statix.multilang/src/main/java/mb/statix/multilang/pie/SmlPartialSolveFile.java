@@ -1,5 +1,6 @@
 package mb.statix.multilang.pie;
 
+import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
@@ -93,7 +94,7 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, F
 
     @Override public FileResult exec(ExecContext context, Input input) throws Exception {
         LanguageMetadata languageMetadata = analysisContextService.getLanguageMetadata(input.languageId);
-        Supplier<Result<IStrategoTerm, ?>> astSupplier = exec -> languageMetadata.astFunction().apply(exec, input.resourceKey);
+        Supplier<Option<IStrategoTerm>> astSupplier = exec -> languageMetadata.astFunction().apply(exec, input.resourceKey);
         IStrategoTerm ast = context.require(astSupplier).unwrap();
 
         GlobalResult globalResult = context.require(input.globalResultSupplier);

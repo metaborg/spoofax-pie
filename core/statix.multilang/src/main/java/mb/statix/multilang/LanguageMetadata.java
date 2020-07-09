@@ -1,22 +1,17 @@
 package mb.statix.multilang;
 
-import mb.common.result.Result;
+import mb.common.option.Option;
 import mb.pie.api.Function;
 import mb.pie.api.Pie;
 import mb.pie.api.Supplier;
-import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
-import mb.resource.ResourceRegistry;
 import mb.resource.hierarchical.ResourcePath;
 import mb.statix.multilang.spec.SpecBuilder;
 import org.immutables.value.Value;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 
-import javax.swing.text.html.Option;
 import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
 
 @Value.Immutable
 public interface LanguageMetadata {
@@ -25,9 +20,9 @@ public interface LanguageMetadata {
     @Value.Parameter
     Function<ResourcePath, HashSet<ResourceKey>> resourcesSupplier(); // Use HashSet because should be serializable
 
-    @Value.Parameter Function<ResourceKey, Result<IStrategoTerm, ?>> astFunction();
+    @Value.Parameter Function<ResourceKey, Option<IStrategoTerm>> astFunction();
 
-    @Value.Parameter Function<Supplier<? extends Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> postTransform();
+    @Value.Parameter Function<Supplier<Option<IStrategoTerm>>, Option<IStrategoTerm>> postTransform();
 
     @Value.Parameter SpecBuilder statixSpec();
 
