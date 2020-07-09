@@ -170,7 +170,7 @@ class SingleFileMapper implements java.util.function.Function<Result<ConstraintA
             final ConstraintAnalyzer.@Nullable Result result = output.result.getResult(resource);
             if(result != null) {
                 final Messages messages = new Messages(output.result.messages.getMessagesOfKey(resource));
-                return new ConstraintAnalyzeMultiTaskDef.SingleFileOutput(output.context, new ConstraintAnalyzer.SingleFileResult(result.ast, result.analysis, messages));
+                return new ConstraintAnalyzeMultiTaskDef.SingleFileOutput(output.context, new ConstraintAnalyzer.SingleFileResult(output.result.projectResult, result.ast, result.analysis, messages));
             } else {
                 throw new RuntimeException("BUG: multi file result is missing a result for resource '" + resource + "' that was part of the input");
             }
