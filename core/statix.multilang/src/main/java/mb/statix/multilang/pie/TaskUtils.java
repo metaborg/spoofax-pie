@@ -1,5 +1,6 @@
 package mb.statix.multilang.pie;
 
+import mb.common.result.ExceptionalSupplier;
 import mb.common.result.Result;
 import mb.statix.multilang.FileResult;
 import mb.statix.multilang.MultiLangAnalysisException;
@@ -12,7 +13,7 @@ import org.metaborg.util.log.LoggerUtils;
 
 import java.io.IOException;
 
-final class TaskUtils {
+public final class TaskUtils {
     private TaskUtils() {
     }
 
@@ -29,7 +30,7 @@ final class TaskUtils {
     }
 
 
-    static <O> Result<O, MultiLangAnalysisException> executeIOWrapped(
+    public static <O> Result<O, MultiLangAnalysisException> executeIOWrapped(
         IOExceptionThrowingFunction<Result<O, MultiLangAnalysisException>> function,
         String exceptionMessage
     ) {
@@ -40,12 +41,19 @@ final class TaskUtils {
         }
     }
 
-    interface IOExceptionThrowingFunction<O> {
-        O apply() throws IOException;
+    // TODO: Make interface more generic
+    public static <O> Result<O, MultiLangAnalysisException> executeWrapped(
+        ExceptionalSupplier<Result<O, MultiLangAnalysisException>, Exception> function,
+        String exceptionMessage
+    ) {
+        try {
+            return function.get();
+        } catch(Exception e) {
+            return Result.ofErr(new MultiLangAnalysisException(exceptionMessage, e));
+        }
     }
 
-
-    static <O> Result<O, MultiLangAnalysisException> executeInterruptionWrapped(
+    public static <O> Result<O, MultiLangAnalysisException> executeInterruptionWrapped(
         InterruptedExceptionThrowingFunction<Result<O, MultiLangAnalysisException>> function,
         String exceptionMessage
     ) {
@@ -56,7 +64,11 @@ final class TaskUtils {
         }
     }
 
-    interface InterruptedExceptionThrowingFunction<O> {
+    public interface InterruptedExceptionThrowingFunction<O> {
         O apply() throws InterruptedException;
+    }
+
+    public interface IOExceptionThrowingFunction<O> {
+        O apply() throws IOException;
     }
 }
