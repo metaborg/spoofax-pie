@@ -9,7 +9,6 @@ import mb.jsglr.common.TermTracer;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.build.TermBuild;
 import mb.nabl2.terms.stratego.AStrategoAnnotations;
-import mb.nabl2.terms.stratego.StrategoAnnotations;
 import mb.nabl2.terms.stratego.TermIndex;
 import mb.nabl2.terms.stratego.TermOrigin;
 import mb.nabl2.terms.unification.ud.IUniDisunifier;
@@ -42,9 +41,9 @@ public class MessageUtils {
     public static Message formatMessage(final IMessage message, final IConstraint constraint, final IUniDisunifier unifier) {
         final TermFormatter formatter = Solver.shallowTermFormatter(unifier);
 
-        ITerm originTerm = message.origin().flatMap(t -> getOriginTerm(t, unifier)).orElse(null);
+        @Nullable ITerm originTerm = message.origin().flatMap(t -> getOriginTerm(t, unifier)).orElse(null);
         final Deque<String> trace = new ArrayDeque<>();
-        IConstraint current = constraint;
+        @Nullable IConstraint current = constraint;
         int traceCount = 0;
         while(current != null) {
             if(originTerm == null) {
@@ -73,8 +72,8 @@ public class MessageUtils {
         return new Message(messageText, kindToSeverity(message.kind()), getRegion(originTerm));
     }
 
-    private static Region getRegion(ITerm originTerm) {
-        AStrategoAnnotations strategoAnnotations = originTerm.getAttachments().getInstance(AStrategoAnnotations.class);
+    private static @Nullable Region getRegion(ITerm originTerm) {
+        @Nullable AStrategoAnnotations strategoAnnotations = originTerm.getAttachments().getInstance(AStrategoAnnotations.class);
         if(strategoAnnotations == null) {
             return null;
         }
@@ -141,7 +140,7 @@ public class MessageUtils {
         return null;
     }
 
-    private static ResourceKey getResourceKeyFromParentAttachments(ITermAttachment attachment) {
+    private static @Nullable ResourceKey getResourceKeyFromParentAttachments(@Nullable ITermAttachment attachment) {
         if(attachment == null) {
             return null;
         }
@@ -158,13 +157,13 @@ public class MessageUtils {
         return getResourceKeyFromParentAttachments(attachment.getNext());
     }
 
-    public static ResourceKey tryGetResourceKey(IConstraint constraint, IUniDisunifier unifier) {
-        IConstraint current = constraint;
+    public static @Nullable ResourceKey tryGetResourceKey(IConstraint constraint, IUniDisunifier unifier) {
+        @Nullable IConstraint current = constraint;
 
         while(current != null) {
-            ITerm origin = findOriginArgument(current, unifier).orElse(null);
+            @Nullable ITerm origin = findOriginArgument(current, unifier).orElse(null);
             if(origin != null) {
-                ResourceKey result = resourceKeyFromOrigin(origin);
+                @Nullable ResourceKey result = resourceKeyFromOrigin(origin);
                 if(result != null) {
                     return result;
                 }
