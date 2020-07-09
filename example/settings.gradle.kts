@@ -1,4 +1,4 @@
-rootProject.name = "spoofax.example"
+rootProject.name = "spoofax.example.root"
 
 pluginManagement {
   repositories {
@@ -50,4 +50,13 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   includeProject("sdf3.eclipse.externaldeps")
   includeProject("sdf3.eclipse")
   includeProject("sdf3.intellij")
+}
+
+"stratego".run {
+  includeProject("stratego")
+  includeProject("stratego.spoofax")
+  includeProject("stratego.cli")
+  includeProject("stratego.eclipse.externaldeps")
+  includeProject("stratego.eclipse")
+  includeProject("stratego.intellij")
 }
