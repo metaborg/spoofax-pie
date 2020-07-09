@@ -45,6 +45,7 @@ public class SharedPieProvider implements PieProvider {
         try(MixedSession session = languagePie.newSession()) {
             List<LanguageId> languageIds = session.require(buildContextConfiguration
                 .createTask(new SmlBuildContextConfiguration.Input(projectDir, languageId)))
+                .unwrap() // TODO: handle exception properly
                 .getContextConfig()
                 .getLanguages();
             return analysisContextService.buildPieForLanguages(languageIds);

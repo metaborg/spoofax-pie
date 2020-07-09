@@ -15,7 +15,7 @@ public abstract class AnalysisResults implements Serializable {
 
     @Value.Parameter public abstract HashMap<LanguageId, SolverResult> projectResults();
 
-    @Value.Parameter public abstract HashMap<FileKey, FileResult> fileResults();
+    @Value.Parameter public abstract HashMap<ResourceKey, FileResult> fileResults();
 
     @Value.Parameter public abstract SolverResult finalResult();
 
@@ -27,45 +27,5 @@ public abstract class AnalysisResults implements Serializable {
             ", fileResults=" + fileResults().keySet() +
             ", finalResult=" + finalResult().getClass().getSimpleName() +
             '}';
-    }
-
-    // TODO: Remove and replace usages with ResourceKey
-    public static class FileKey implements Serializable {
-
-        private final LanguageId language;
-        private final ResourceKey resource;
-
-        public FileKey(LanguageId language, ResourceKey resource) {
-            this.language = language;
-            this.resource = resource;
-        }
-
-        public LanguageId getLanguage() {
-            return language;
-        }
-
-        public ResourceKey getResource() {
-            return resource;
-        }
-
-        @Override public boolean equals(Object o) {
-            if(this == o) return true;
-            if(o == null || getClass() != o.getClass()) return false;
-            FileKey fileKey = (FileKey)o;
-            return Objects.equals(language, fileKey.language) &&
-                Objects.equals(resource, fileKey.resource);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(language, resource);
-        }
-
-        @Override public String toString() {
-            return "FileKey{" +
-                "language=" + language +
-                ", resource=" + resource +
-                '}';
-        }
     }
 }

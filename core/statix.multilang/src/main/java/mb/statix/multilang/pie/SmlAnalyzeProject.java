@@ -7,6 +7,7 @@ import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
+import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.statix.constraints.CConj;
 import mb.statix.multilang.AnalysisContextService;
@@ -144,14 +145,14 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Resul
                 }
 
                 // Create file results (maintain resource key for error message mapping
-                Map<AnalysisResults.FileKey, Result<FileResult, MultiLangAnalysisException>> fileResults = input.languages.stream()
+                Map<ResourceKey, Result<FileResult, MultiLangAnalysisException>> fileResults = input.languages.stream()
                     .flatMap(languageId -> analysisContextService
                         .getLanguageMetadata(languageId)
                         .resourcesSupplier()
                         .apply(context, input.projectPath)
                         .stream()
                         .map(resourceKey -> new AbstractMap.SimpleEntry<>(
-                            new AnalysisResults.FileKey(languageId, resourceKey),
+                            resourceKey,
                             context.require(partialSolveFile.createTask(new SmlPartialSolveFile.Input(
                                 languageId,
                                 resourceKey,
@@ -172,7 +173,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Resul
                     .stream()
                     .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().unwrap()));
 
-                Map<AnalysisResults.FileKey, FileResult> unWrappedFileResults = fileResults
+                Map<ResourceKey, FileResult> unWrappedFileResults = fileResults
                     .entrySet()
                     .stream()
                     .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().unwrap()));

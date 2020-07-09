@@ -16,6 +16,7 @@ import org.metaborg.util.iterators.Iterables2;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
+import org.spoofax.interpreter.terms.TermType;
 import org.spoofax.terms.util.TermUtils;
 
 import java.io.BufferedReader;
@@ -51,7 +52,7 @@ public class SpecUtils {
 
             // Queue newly imported files
             IStrategoTerm imports = stxFileSpec.getSubterm(0);
-            if(imports.getTermType() != IStrategoTerm.LIST) {
+            if(imports.getType() != TermType.LIST) {
                 throw new RuntimeException("Invalid spec file. Imports section should be a list, but was: " + imports);
             }
             imports.forEach(importDecl -> {

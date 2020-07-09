@@ -93,7 +93,7 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
                     .map(e -> MessageUtils.formatMessage(e.getValue(), e.getKey(), resultUnifier))
                     .collect(Collectors.toList());
                 if(!resourceMessages.isEmpty()) {
-                    builder.addMessages(key.getResource(), resourceMessages);
+                    builder.addMessages(key, resourceMessages);
                 }
             });
 
@@ -114,10 +114,7 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
 
             // Add empty message sets for keys with no message, to ensure old messages on file are cleared
             builder.addMessages(input.projectPath, Collections.emptySet());
-            results.fileResults().keySet()
-                .stream()
-                .map(AnalysisResults.FileKey::getResource)
-                .forEach(key -> builder.addMessages(key, Iterables2.empty()));
+            results.fileResults().keySet().forEach(key -> builder.addMessages(key, Collections.emptySet()));
 
             return builder.build();
         }, MultiLangAnalysisException::toKeyedMessages);
