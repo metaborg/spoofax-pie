@@ -1,6 +1,8 @@
 package mb.statix.multilang.spec;
 
-public class SpecLoadException extends RuntimeException { // Note: used in @Value.Check method, and therefore needs to extend RuntimeException
+import mb.statix.multilang.MultiLangAnalysisException;
+
+public class SpecLoadException extends MultiLangAnalysisException {
     public SpecLoadException(String s) {
         super(s);
     }

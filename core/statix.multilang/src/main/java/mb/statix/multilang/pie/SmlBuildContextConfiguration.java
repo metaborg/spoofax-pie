@@ -1,14 +1,14 @@
 package mb.statix.multilang.pie;
 
+import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.statix.multilang.AnalysisContextService;
+import mb.statix.multilang.ConfigurationException;
 import mb.statix.multilang.ContextConfig;
 import mb.statix.multilang.ContextId;
 import mb.statix.multilang.LanguageId;
-import mb.statix.multilang.MultiLangAnalysisException;
-import mb.statix.multilang.MultiLangConfig;
 import mb.statix.multilang.MultiLangScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -20,7 +20,8 @@ import java.util.Objects;
 import java.util.Set;
 
 @MultiLangScope
-public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConfiguration.Input, SmlBuildContextConfiguration.Output> {
+public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConfiguration.Input,
+    Result<SmlBuildContextConfiguration.Output, ConfigurationException>> {
     public static class Input implements Serializable {
         private final ResourcePath projectDir;
         private final LanguageId languageId;
@@ -92,7 +93,8 @@ public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConf
     private final SmlReadConfigYaml readConfigYaml;
     private final AnalysisContextService analysisContextService;
 
-    @Inject public SmlBuildContextConfiguration(SmlReadConfigYaml readConfigYaml, AnalysisContextService analysisContextService) {
+    @Inject
+    public SmlBuildContextConfiguration(SmlReadConfigYaml readConfigYaml, AnalysisContextService analysisContextService) {
         this.readConfigYaml = readConfigYaml;
         this.analysisContextService = analysisContextService;
     }
@@ -103,41 +105,41 @@ public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConf
     }
 
     @Override
-    public Output exec(ExecContext context, Input input) {
-        final MultiLangConfig config = context.require(readConfigYaml
-            .createTask(input.projectDir));
+    public Result<Output, ConfigurationException> exec(ExecContext context, Input input) {
+        return context.require(readConfigYaml.createTask(input.projectDir))
+            .mapErr(ConfigurationException::new)
+            .flatMap(config -> {
+                ContextId contextId = config.getLanguageContexts()
+                    .getOrDefault(input.languageId, analysisContextService.getDefaultContextId(input.languageId));
 
-        ContextId contextId = config.getLanguageContexts()
-            .getOrDefault(input.languageId, analysisContextService.getDefaultContextId(input.languageId));
+                Set<LanguageId> staticLanguages = analysisContextService.getContextLanguages(contextId);
+                @Nullable ContextConfig dynamicConfig = config
+                    .getCustomContexts()
+                    .get(contextId);
 
-        Set<LanguageId> staticLanguages = analysisContextService.getContextLanguages(contextId);
-        @Nullable ContextConfig dynamicConfig = config
-            .getCustomContexts()
-            .get(contextId);
+                final ContextConfig contextConfig;
+                if(dynamicConfig == null) {
+                    contextConfig = new ContextConfig();
+                    contextConfig.setLanguages(new ArrayList<>(staticLanguages));
+                } else if(staticLanguages.isEmpty()) {
+                    contextConfig = dynamicConfig;
+                } else {
+                    contextConfig = new ContextConfig();
+                    HashSet<LanguageId> languages = new HashSet<>(dynamicConfig.getLanguages());
+                    languages.addAll(staticLanguages);
+                    contextConfig.setLanguages(new ArrayList<>(languages));
+                    contextConfig.setLogLevel(dynamicConfig.getLogLevel());
+                }
 
-        final ContextConfig contextConfig;
-        if(dynamicConfig == null) {
-            contextConfig = new ContextConfig();
-            contextConfig.setLanguages(new ArrayList<>(staticLanguages));
-        } else if(staticLanguages.isEmpty()) {
-            contextConfig = dynamicConfig;
-        } else {
-            contextConfig = new ContextConfig();
-            HashSet<LanguageId> languages = new HashSet<>(dynamicConfig.getLanguages());
-            languages.addAll(staticLanguages);
-            contextConfig.setLanguages(new ArrayList<>(languages));
-            contextConfig.setLogLevel(dynamicConfig.getLogLevel());
-        }
-
-        if(!contextConfig.getLanguages().contains(input.languageId)) {
-            throw new MultiLangAnalysisException("Invalid configuration. In project '"
-                + input.projectDir
-                + "', language " + input.languageId
-                + "has configured to do analysis in context " + contextId
-                + ", but it is not included in the configuration for that context. "
-                + "Included languages: " + contextConfig.getLanguages());
-        }
-
-        return new Output(contextId, contextConfig);
+                if(!contextConfig.getLanguages().contains(input.languageId)) {
+                    return Result.ofErr(new ConfigurationException("Invalid configuration. In project '"
+                        + input.projectDir
+                        + "', language " + input.languageId
+                        + "has configured to do analysis in context " + contextId
+                        + ", but it is not included in the configuration for that context. "
+                        + "Included languages: " + contextConfig.getLanguages()));
+                }
+                return Result.ofOk(new Output(contextId, contextConfig));
+            });
     }
 }

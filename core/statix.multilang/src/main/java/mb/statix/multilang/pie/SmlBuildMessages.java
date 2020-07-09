@@ -3,13 +3,17 @@ package mb.statix.multilang.pie;
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Message;
+import mb.common.result.Result;
 import mb.nabl2.terms.unification.ud.IUniDisunifier;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
+import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.statix.multilang.AnalysisResults;
 import mb.statix.multilang.ContextId;
 import mb.statix.multilang.LanguageId;
+import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.multilang.MultiLangScope;
 import mb.statix.multilang.utils.MessageUtils;
 import org.metaborg.util.iterators.Iterables2;
@@ -20,6 +24,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.AbstractMap;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -76,36 +81,45 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
         // Make sure to depend on configuration, to work around issue with different Pie instances
         context.require(input.projectPath.appendRelativePath("multilang.yaml"), context.getDefaultRequireReadableResourceStamper());
 
-        final AnalysisResults results = context.require(analyzeProject.createTask(
-            new SmlAnalyzeProject.Input(input.projectPath, input.languages, input.logLevel)));
+        Task<Result<AnalysisResults, MultiLangAnalysisException>> analyzeTask = analyzeProject
+            .createTask(new SmlAnalyzeProject.Input(input.projectPath, input.languages, input.logLevel));
+        return context.require(analyzeTask).mapOrElse(results -> {
+            final IUniDisunifier resultUnifier = results.finalResult().state().unifier();
+            final KeyedMessagesBuilder builder = new KeyedMessagesBuilder();
 
-        final IUniDisunifier resultUnifier = results.finalResult().state().unifier();
-        final KeyedMessagesBuilder builder = new KeyedMessagesBuilder();
+            // Add all file messages
+            results.fileResults().forEach((key, fileResult) -> {
+                List<Message> resourceMessages = fileResult.getResult().messages().entrySet().stream()
+                    .map(e -> MessageUtils.formatMessage(e.getValue(), e.getKey(), resultUnifier))
+                    .collect(Collectors.toList());
+                if(!resourceMessages.isEmpty()) {
+                    builder.addMessages(key.getResource(), resourceMessages);
+                }
+            });
 
-        // Add all file messages
-        results.fileResults().forEach((key, fileResult) -> {
-            List<Message> resourceMessages = fileResult.getResult().messages().entrySet().stream()
-                .map(e -> MessageUtils.formatMessage(e.getValue(), e.getKey(), resultUnifier))
-                .collect(Collectors.toList());
-            if(!resourceMessages.isEmpty()) {
-                builder.addMessages(key.getResource(), resourceMessages);
-            }
-        });
+            // Process final result messages
+            final Map<Boolean, List<AbstractMap.SimpleEntry<ResourceKey, Message>>> messagesKeyPartitioning = results.finalResult().messages().entrySet().stream()
+                .map(e -> new AbstractMap.SimpleEntry<>(MessageUtils.tryGetResourceKey(e.getKey(), results.finalResult().state().unifier()),
+                    MessageUtils.formatMessage(e.getValue(), e.getKey(), resultUnifier)))
+                .collect(Collectors.partitioningBy(Objects::isNull));
 
-        // Process final result messages
-        results.finalResult().messages().entrySet().stream()
-            .map(e -> new AbstractMap.SimpleEntry<>(MessageUtils.tryGetResourceKey(e.getKey(), results.finalResult().state().unifier()),
-                MessageUtils.formatMessage(e.getValue(), e.getKey(), resultUnifier)))
-            .collect(Collectors.groupingBy(e -> Optional.ofNullable(e.getKey())))
-            .forEach((resourceKey, messages) -> builder.addMessages(resourceKey.orElse(null), messages.stream()
-                .map(Map.Entry::getValue).collect(Collectors.toList())));
+            // Add all messages without key to project resource
+            messagesKeyPartitioning.get(true)
+                .stream()
+                .map(Map.Entry::getValue)
+                .forEach(message -> builder.addMessage(message, input.projectPath));
 
-        // Add empty message sets for keys with no message, to ensure old messages on file are cleared
-        results.fileResults().keySet()
-            .stream()
-            .map(AnalysisResults.FileKey::getResource)
-            .forEach(key -> builder.addMessages(key, Iterables2.empty()));
+            // Add all messages with remaining key
+            messagesKeyPartitioning.get(false).forEach(entry -> builder.addMessage(entry.getValue(), entry.getKey()));
 
-        return builder.build();
+            // Add empty message sets for keys with no message, to ensure old messages on file are cleared
+            builder.addMessages(input.projectPath, Collections.emptySet());
+            results.fileResults().keySet()
+                .stream()
+                .map(AnalysisResults.FileKey::getResource)
+                .forEach(key -> builder.addMessages(key, Iterables2.empty()));
+
+            return builder.build();
+        }, MultiLangAnalysisException::toKeyedMessages);
     }
 }

@@ -1,5 +1,6 @@
 package mb.statix.multilang.pie;
 
+import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.statix.multilang.AnalysisContextService;
@@ -8,6 +9,7 @@ import mb.statix.multilang.LanguageMetadata;
 import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.multilang.MultiLangScope;
 import mb.statix.multilang.spec.SpecBuilder;
+import mb.statix.multilang.spec.SpecLoadException;
 import mb.statix.spec.Spec;
 
 import javax.inject.Inject;
@@ -17,7 +19,7 @@ import java.util.HashSet;
 import java.util.Objects;
 
 @MultiLangScope
-public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Spec> {
+public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, SpecLoadException>> {
     public static class Input implements Serializable {
         // This input directly specifies the collection of languages to build a specification for
         // Not that we could also have chosen to use Supplier<HashSet<LanguageId>> as key. In that case the
@@ -61,12 +63,13 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Spec> {
         return SmlBuildSpec.class.getCanonicalName();
     }
 
-    @Override public Spec exec(ExecContext context, Input input) throws Exception {
+    @Override public Result<Spec, SpecLoadException> exec(ExecContext context, Input input) {
         return input.languages.stream()
             .map(analysisContextService::getLanguageMetadata)
             .map(LanguageMetadata::statixSpec)
             .reduce(SpecBuilder::merge)
-            .orElseThrow(() -> new MultiLangAnalysisException("Doing analysis without specs is not allowed"))
-            .toSpec();
+            .map(SpecBuilder::toSpec)
+            .map(Result::<Spec, SpecLoadException>ofOk)
+            .orElse(Result.ofErr(new SpecLoadException("Doing analysis without specs is not allowed")));
     }
 }

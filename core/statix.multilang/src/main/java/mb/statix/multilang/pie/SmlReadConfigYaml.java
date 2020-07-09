@@ -1,5 +1,6 @@
 package mb.statix.multilang.pie;
 
+import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.ReadableResource;
@@ -11,10 +12,11 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.io.Serializable;
 
 @MultiLangScope
-public class SmlReadConfigYaml implements TaskDef<ResourcePath, MultiLangConfig> {
+public class SmlReadConfigYaml implements TaskDef<ResourcePath, Result<MultiLangConfig, IOException>> {
     private static final String configFileName = "multilang.yaml";
 
     @Inject public SmlReadConfigYaml() {
@@ -26,17 +28,17 @@ public class SmlReadConfigYaml implements TaskDef<ResourcePath, MultiLangConfig>
     }
 
     @Override
-    public MultiLangConfig exec(ExecContext context, ResourcePath projectPath) throws Exception {
-        ResourcePath configFilePath = projectPath.appendRelativePath(configFileName);
-        ReadableResource configFileResource = context.require(configFilePath, context.getDefaultRequireReadableResourceStamper());
-
-        if (!configFileResource.exists() || !configFileResource.isReadable()) {
-            return new MultiLangConfig();
-        }
+    public Result<MultiLangConfig, IOException> exec(ExecContext context, ResourcePath projectPath) {
         try {
-            return new Yaml(new Constructor(MultiLangConfig.class)).load(configFileResource.openRead());
-        } catch(Exception e) {
-            throw new MultiLangAnalysisException("Cannot load multilang yaml config", e);
+            ResourcePath configFilePath = projectPath.appendRelativePath(configFileName);
+            ReadableResource configFileResource = context.require(configFilePath, context.getDefaultRequireReadableResourceStamper());
+
+            if (!configFileResource.exists() || !configFileResource.isReadable()) {
+                return Result.ofOk(new MultiLangConfig());
+            }
+            return Result.ofOk(new Yaml(new Constructor(MultiLangConfig.class)).load(configFileResource.openRead()));
+        } catch(IOException e) {
+            return Result.ofErr(e);
         }
     }
 }
