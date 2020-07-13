@@ -1,9 +1,8 @@
 package mb.statix.multilang.pie;
 
+import mb.common.result.ExceptionalFunction;
 import mb.common.result.ExceptionalSupplier;
 import mb.common.result.Result;
-import mb.statix.multilang.FileResult;
-import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.solver.log.IDebugContext;
 import mb.statix.solver.log.LoggerDebugContext;
@@ -12,8 +11,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.log.Level;
 import org.metaborg.util.log.LoggerUtils;
 
-import java.io.IOException;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 public final class TaskUtils {
     private TaskUtils() {
@@ -58,5 +56,38 @@ public final class TaskUtils {
                 return Result.ofErr(new MultiLangAnalysisException(e));
             }
         }
+    }
+
+    public static <I, O> Function<I, Result<O, MultiLangAnalysisException>> executeWrapped(
+        ExceptionalFunction<I, Result<O, MultiLangAnalysisException>, ? extends Exception> function,
+        String exceptionMessage
+    ) {
+        return input -> {
+            try {
+                return function.apply(input);
+            } catch(Exception e) {
+                if(e instanceof MultiLangAnalysisException) {
+                    return Result.ofErr((MultiLangAnalysisException)e);
+                } else {
+                    return Result.ofErr(new MultiLangAnalysisException(exceptionMessage, e));
+                }
+            }
+        };
+    }
+
+    public static <I, O> Function<I, Result<O, MultiLangAnalysisException>> executeWrapped(
+        ExceptionalFunction<I, Result<O, MultiLangAnalysisException>, ? extends Exception> function
+    ) {
+        return input -> {
+            try {
+                return function.apply(input);
+            } catch(Exception e) {
+                if(e instanceof MultiLangAnalysisException) {
+                    return Result.ofErr((MultiLangAnalysisException)e);
+                } else {
+                    return Result.ofErr(new MultiLangAnalysisException(e));
+                }
+            }
+        };
     }
 }
