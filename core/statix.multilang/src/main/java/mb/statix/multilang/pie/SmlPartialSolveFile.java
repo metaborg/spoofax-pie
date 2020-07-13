@@ -94,7 +94,7 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
 
     @Override public Result<FileResult, MultiLangAnalysisException> exec(ExecContext context, Input input) {
         return analysisContextService.getLanguageMetadataResult(input.languageId).flatMap(languageMetadata -> {
-            Supplier<Option<IStrategoTerm>> astSupplier = exec -> languageMetadata.astFunction().apply(exec, input.resourceKey);
+            Supplier<Result<IStrategoTerm, ?>> astSupplier = exec -> languageMetadata.astFunction().apply(exec, input.resourceKey);
             return TaskUtils.executeWrapped(() -> context.require(astSupplier)
                     .map(ast -> analyzeAst(context, input, ast))
                     .unwrapOr(Result.ofErr(new MultiLangAnalysisException("No ast provided for " + input.resourceKey))),
@@ -132,10 +132,12 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
                     logger.info("{} analyzed in {} ms", input.resourceKey, dt);
                     return Result.ofOk(result);
                 }, "Analysis for input file " + input.resourceKey + " interrupted")
-                .map(fileResult -> {
-                    Supplier<Option<IStrategoTerm>> astSupplier = exec -> languageMetadata.astFunction().apply(exec, input.resourceKey);
-                    IStrategoTerm analyzedAst = languageMetadata.postTransform().apply(context, astSupplier).unwrap();
-                    return new FileResult(analyzedAst, fileResult);
+                .mapErr(MultiLangAnalysisException::new)
+                .flatMap(fileResult -> {
+                    Supplier<Result<IStrategoTerm, ?>> astSupplier = languageMetadata.astFunction().createSupplier(input.resourceKey);
+                    return languageMetadata.postTransform().apply(context, astSupplier)
+                        .mapErr(MultiLangAnalysisException::new)
+                        .map(analyzedAst -> new FileResult(analyzedAst, fileResult));
                 });
             })), "Exception when resolving specification");
     }

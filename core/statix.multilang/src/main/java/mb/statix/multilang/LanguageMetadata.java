@@ -1,6 +1,6 @@
 package mb.statix.multilang;
 
-import mb.common.option.Option;
+import mb.common.result.Result;
 import mb.pie.api.Function;
 import mb.pie.api.Pie;
 import mb.pie.api.Supplier;
@@ -20,9 +20,9 @@ public interface LanguageMetadata {
     @Value.Parameter
     Function<ResourcePath, HashSet<ResourceKey>> resourcesSupplier(); // Use HashSet because should be serializable
 
-    @Value.Parameter Function<ResourceKey, Option<IStrategoTerm>> astFunction();
+    @Value.Parameter Function<ResourceKey, Result<IStrategoTerm, ?>> astFunction();
 
-    @Value.Parameter Function<Supplier<Option<IStrategoTerm>>, Option<IStrategoTerm>> postTransform();
+    @Value.Parameter Function<Supplier<Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> postTransform();
 
     @Value.Parameter SpecBuilder statixSpec();
 
