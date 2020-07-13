@@ -1,6 +1,7 @@
 package mb.statix.multilang.pie;
 
 import com.google.common.collect.ListMultimap;
+import dagger.Lazy;
 import mb.common.result.Result;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
@@ -18,6 +19,7 @@ import mb.statix.multilang.FileResult;
 import mb.statix.multilang.ImmutableAnalysisResults;
 import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.LanguageMetadata;
+import mb.statix.multilang.MultiLang;
 import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.multilang.MultiLangScope;
 import mb.statix.multilang.ProjectAnalysisException;
@@ -84,7 +86,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Resul
     private final SmlPartialSolveProject partialSolveProject;
     private final SmlPartialSolveFile partialSolveFile;
     private final SmlBuildSpec buildSpec;
-    private final AnalysisContextService analysisContextService;
+    private final Lazy<AnalysisContextService> analysisContextService;
     private final Logger logger;
 
     @Inject public SmlAnalyzeProject(
@@ -92,7 +94,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Resul
         SmlPartialSolveProject partialSolveProject,
         SmlPartialSolveFile partialSolveFile,
         SmlBuildSpec buildSpec,
-        AnalysisContextService analysisContextService,
+        @MultiLang Lazy<AnalysisContextService> analysisContextService,
         LoggerFactory loggerFactory
     ) {
         this.instantiateGlobalScope = instantiateGlobalScope;
@@ -219,7 +221,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Resul
 
     private Result<Map<LanguageId, LanguageMetadata>, MultiLangAnalysisException> getLanguageMetadata(Collection<LanguageId> languages) {
         Set<Result<LanguageMetadata, MultiLangAnalysisException>> metadataResultSet = languages.stream()
-            .map(languageId -> TaskUtils.executeWrapped(() -> Result.ofOk(analysisContextService.getLanguageMetadata(languageId))))
+            .map(languageId -> TaskUtils.executeWrapped(() -> Result.ofOk(analysisContextService.get().getLanguageMetadata(languageId))))
             .collect(Collectors.toSet());
         if(metadataResultSet.stream().anyMatch(Result::isErr)) {
             MultiLangAnalysisException exception = new MultiLangAnalysisException("Error when resolving language metadata");

@@ -58,12 +58,11 @@ public class MultiLangPlugin extends Plugin {
     @Override public void start(@NonNull BundleContext context) throws Exception {
         super.start(context);
         plugin = this;
-        AnalysisContextService analysisContextService = initializeExtensionPoint(Platform.getExtensionRegistry());
         SpoofaxEclipseComponent platformComponent = SpoofaxPlugin.getComponent();
 
         component = DaggerMultiLangComponent
             .builder()
-            .multiLangModule(new MultiLangModule(analysisContextService))
+            .multiLangModule(new MultiLangModule(() -> initializeExtensionPoint(Platform.getExtensionRegistry())))
             .platformComponent(platformComponent)
             .build();
 

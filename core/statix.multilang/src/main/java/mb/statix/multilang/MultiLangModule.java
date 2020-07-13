@@ -15,17 +15,19 @@ import mb.statix.multilang.pie.SmlReadConfigYaml;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Supplier;
 
 @Module
 public class MultiLangModule {
-    private final AnalysisContextService analysisContextService;
+    private final Supplier<AnalysisContextService> analysisContextServiceSupplier;
 
-    public MultiLangModule(AnalysisContextService analysisContextService) {
-        this.analysisContextService = analysisContextService;
+    public MultiLangModule(Supplier<AnalysisContextService> analysisContextServiceSupplier) {
+        this.analysisContextServiceSupplier = analysisContextServiceSupplier;
     }
 
-    @Provides @MultiLangScope public AnalysisContextService provideAnalysisContextService() {
-        return analysisContextService;
+    @Provides @MultiLangScope @MultiLang
+    public AnalysisContextService provideAnalysisContextService() {
+        return analysisContextServiceSupplier.get();
     }
 
     @Provides @MultiLangScope @MultiLang

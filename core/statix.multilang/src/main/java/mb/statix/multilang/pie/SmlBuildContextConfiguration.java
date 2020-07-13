@@ -1,5 +1,6 @@
 package mb.statix.multilang.pie;
 
+import dagger.Lazy;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
@@ -9,6 +10,7 @@ import mb.statix.multilang.ConfigurationException;
 import mb.statix.multilang.ContextConfig;
 import mb.statix.multilang.ContextId;
 import mb.statix.multilang.LanguageId;
+import mb.statix.multilang.MultiLang;
 import mb.statix.multilang.MultiLangScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -91,10 +93,10 @@ public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConf
     }
 
     private final SmlReadConfigYaml readConfigYaml;
-    private final AnalysisContextService analysisContextService;
+    private final Lazy<AnalysisContextService> analysisContextService;
 
     @Inject
-    public SmlBuildContextConfiguration(SmlReadConfigYaml readConfigYaml, AnalysisContextService analysisContextService) {
+    public SmlBuildContextConfiguration(SmlReadConfigYaml readConfigYaml, @MultiLang Lazy<AnalysisContextService> analysisContextService) {
         this.readConfigYaml = readConfigYaml;
         this.analysisContextService = analysisContextService;
     }
@@ -110,9 +112,9 @@ public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConf
             .mapErr(ConfigurationException::new)
             .flatMap(config -> {
                 ContextId contextId = config.getLanguageContexts()
-                    .getOrDefault(input.languageId, analysisContextService.getDefaultContextId(input.languageId));
+                    .getOrDefault(input.languageId, analysisContextService.get().getDefaultContextId(input.languageId));
 
-                Set<LanguageId> staticLanguages = analysisContextService.getContextLanguages(contextId);
+                Set<LanguageId> staticLanguages = analysisContextService.get().getContextLanguages(contextId);
                 @Nullable ContextConfig dynamicConfig = config
                     .getCustomContexts()
                     .get(contextId);
@@ -135,7 +137,7 @@ public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConf
                     return Result.ofErr(new ConfigurationException("Invalid configuration. In project '"
                         + input.projectDir
                         + "', language " + input.languageId
-                        + "has configured to do analysis in context " + contextId
+                        + " has configured to do analysis in context " + contextId
                         + ", but it is not included in the configuration for that context. "
                         + "Included languages: " + contextConfig.getLanguages()));
                 }

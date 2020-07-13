@@ -1,5 +1,6 @@
 package mb.statix.multilang.pie;
 
+import dagger.Lazy;
 import mb.common.result.Result;
 import mb.common.result.ResultCollector;
 import mb.pie.api.ExecContext;
@@ -7,6 +8,7 @@ import mb.pie.api.TaskDef;
 import mb.statix.multilang.AnalysisContextService;
 import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.LanguageMetadata;
+import mb.statix.multilang.MultiLang;
 import mb.statix.multilang.MultiLangScope;
 import mb.statix.multilang.spec.SpecBuilder;
 import mb.statix.multilang.spec.SpecLoadException;
@@ -53,9 +55,9 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
         }
     }
 
-    private final AnalysisContextService analysisContextService;
+    private final Lazy<AnalysisContextService> analysisContextService;
 
-    @Inject public SmlBuildSpec(AnalysisContextService analysisContextService) {
+    @Inject public SmlBuildSpec(@MultiLang Lazy<AnalysisContextService> analysisContextService) {
         this.analysisContextService = analysisContextService;
     }
 
@@ -65,7 +67,7 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
 
     @Override public Result<Spec, SpecLoadException> exec(ExecContext context, Input input) {
         return input.languages.stream()
-            .map(analysisContextService::getLanguageMetadataResult)
+            .map(lid -> analysisContextService.get().getLanguageMetadataResult(lid))
             .collect(ResultCollector.getWithBaseException(new SpecLoadException("Exception getting language metadata")))
             .flatMap(languageMetadataSet -> languageMetadataSet.stream()
                 .map(LanguageMetadata::statixSpec)

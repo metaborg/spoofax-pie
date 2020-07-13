@@ -1,5 +1,6 @@
 package mb.statix.multilang;
 
+import dagger.Lazy;
 import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Pie;
@@ -18,13 +19,13 @@ public class SharedPieProvider implements PieProvider {
 
     private final Pie languagePie;
     private final LanguageId languageId;
-    private final AnalysisContextService analysisContextService;
+    private final Lazy<AnalysisContextService> analysisContextService;
     private final SmlBuildContextConfiguration buildContextConfiguration;
 
     @Inject public SharedPieProvider(
         Pie languagePie,
         LanguageId languageId,
-        AnalysisContextService analysisContextService,
+        Lazy<AnalysisContextService> analysisContextService,
         SmlBuildContextConfiguration buildContextConfiguration
     ) {
         this.languagePie = languagePie;
@@ -37,17 +38,17 @@ public class SharedPieProvider implements PieProvider {
     public Pie getPie(@Nullable ResourcePath projectDir) {
         try(MixedSession session = languagePie.newSession()) {
             if(projectDir == null) {
-                // Return default Pie
-                ContextId defaultContextId = analysisContextService.getDefaultContextId(languageId);
-                Set<LanguageId> languageIds = analysisContextService.getContextLanguages(defaultContextId);
-                return analysisContextService.buildPieForLanguages(languageIds);
+                // Return default Pie TODO: call get once
+                ContextId defaultContextId = analysisContextService.get().getDefaultContextId(languageId);
+                Set<LanguageId> languageIds = analysisContextService.get().getContextLanguages(defaultContextId);
+                return analysisContextService.get().buildPieForLanguages(languageIds);
             }
             List<LanguageId> languageIds = session.require(buildContextConfiguration
                 .createTask(new SmlBuildContextConfiguration.Input(projectDir, languageId)))
                 .unwrap()
                 .getContextConfig()
                 .getLanguages();
-            return analysisContextService.buildPieForLanguages(languageIds);
+            return analysisContextService.get().buildPieForLanguages(languageIds);
         } catch(InterruptedException | ExecException | MultiLangAnalysisException e) {
             throw new RuntimeException("Cannot build pie for " + languageId + " in " + projectDir, e);
         }

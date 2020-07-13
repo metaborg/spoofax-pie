@@ -1,6 +1,6 @@
 package mb.statix.multilang.pie;
 
-import mb.common.option.Option;
+import dagger.Lazy;
 import mb.common.result.Result;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
@@ -14,7 +14,7 @@ import mb.statix.constraints.CUser;
 import mb.statix.multilang.AnalysisContextService;
 import mb.statix.multilang.FileResult;
 import mb.statix.multilang.LanguageId;
-import mb.statix.multilang.LanguageMetadata;
+import mb.statix.multilang.MultiLang;
 import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.multilang.MultiLangScope;
 import mb.statix.multilang.spec.SpecLoadException;
@@ -80,10 +80,10 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
     // The statix solver needs to transform strategoTerms to nabl terms, using the StrategoTerms class. This class
     // requires an ITermFactory, which is language specfic, and therefore needs to be injected. It can not be injected
     // By a supplier, because it is not Serializable. Therefore, we need to request it directly from the service.
-    private final AnalysisContextService analysisContextService;
+    private final Lazy<AnalysisContextService> analysisContextService;
     private final Logger logger;
 
-    @Inject public SmlPartialSolveFile(AnalysisContextService analysisContextService, LoggerFactory loggerFactory) {
+    @Inject public SmlPartialSolveFile(@MultiLang Lazy<AnalysisContextService> analysisContextService, LoggerFactory loggerFactory) {
         this.analysisContextService = analysisContextService;
         logger = loggerFactory.create(SmlPartialSolveFile.class);
     }
@@ -93,7 +93,7 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
     }
 
     @Override public Result<FileResult, MultiLangAnalysisException> exec(ExecContext context, Input input) {
-        return analysisContextService.getLanguageMetadataResult(input.languageId).flatMap(languageMetadata -> {
+        return analysisContextService.get().getLanguageMetadataResult(input.languageId).flatMap(languageMetadata -> {
             Supplier<Result<IStrategoTerm, ?>> astSupplier = exec -> languageMetadata.astFunction().apply(exec, input.resourceKey);
             return TaskUtils.executeWrapped(() -> context.require(astSupplier)
                     .map(ast -> analyzeAst(context, input, ast))
@@ -112,7 +112,7 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
     private Result<FileResult, MultiLangAnalysisException> analyzeForGlobal(ExecContext context, Input input, IStrategoTerm ast, GlobalResult globalResult) {
         return TaskUtils.executeWrapped(() -> context.require(input.specSupplier)
             .mapErr(MultiLangAnalysisException::wrapIfNeeded)
-            .flatMap(spec -> analysisContextService.getLanguageMetadataResult(input.languageId).flatMap(languageMetadata -> {
+            .flatMap(spec -> analysisContextService.get().getLanguageMetadataResult(input.languageId).flatMap(languageMetadata -> {
                 StrategoTerms st = new StrategoTerms(languageMetadata.termFactory());
 
                 IDebugContext debug = TaskUtils.createDebugContext(SmlPartialSolveFile.class, input.logLevel);

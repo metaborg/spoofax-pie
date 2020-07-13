@@ -1,5 +1,6 @@
 package mb.statix.multilang.pie;
 
+import dagger.Lazy;
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Messages;
@@ -25,9 +26,14 @@ public abstract class SmlCheck implements TaskDef<ResourcePath, KeyedMessages>  
     private final Function<ResourceKey, Messages> parseMessageFunction;
     private final SmlBuildContextConfiguration buildContextConfiguration;
     private final SmlBuildMessages buildMessages;
-    private final AnalysisContextService analysisContextService;
+    private final Lazy<AnalysisContextService> analysisContextService;
 
-    public SmlCheck(Function<ResourceKey, Messages> parseMessageFunction, SmlBuildContextConfiguration buildContextConfiguration, SmlBuildMessages buildMessages, AnalysisContextService analysisContextService) {
+    public SmlCheck(
+        Function<ResourceKey, Messages> parseMessageFunction,
+        SmlBuildContextConfiguration buildContextConfiguration,
+        SmlBuildMessages buildMessages,
+        Lazy<AnalysisContextService> analysisContextService
+    ) {
         this.parseMessageFunction = parseMessageFunction;
         this.buildContextConfiguration = buildContextConfiguration;
         this.buildMessages = buildMessages;
@@ -38,7 +44,7 @@ public abstract class SmlCheck implements TaskDef<ResourcePath, KeyedMessages>  
     public KeyedMessages exec(ExecContext context, ResourcePath projectPath) {
         // Aggregate all parse messages
         final KeyedMessagesBuilder builder = new KeyedMessagesBuilder();
-        analysisContextService.getLanguageMetadataResult(new LanguageId("mb.minisdf"))
+        analysisContextService.get().getLanguageMetadataResult(getLanguageId())
             .ifElse(
                 languageMetadata -> languageMetadata
                     .resourcesSupplier()
@@ -55,7 +61,7 @@ public abstract class SmlCheck implements TaskDef<ResourcePath, KeyedMessages>  
             );
 
         // Aggregate all Analysis Messages
-        return context.require(buildContextConfiguration.createTask(new SmlBuildContextConfiguration.Input(projectPath, new LanguageId("mb.minisdf"))))
+        return context.require(buildContextConfiguration.createTask(new SmlBuildContextConfiguration.Input(projectPath, getLanguageId())))
             .mapErr(MultiLangAnalysisException::wrapIfNeeded)
             .flatMap(contextInfo -> {
                 final List<LanguageId> languageIds = contextInfo.getContextConfig().getLanguages();
@@ -65,7 +71,7 @@ public abstract class SmlCheck implements TaskDef<ResourcePath, KeyedMessages>  
                     // depends directly on all the files SmlBuildMessages depends on:
                     // - language source files:     via parse tasks
                     // - multilang.yaml:            via buildContextConfiguration tasks
-                    final Pie sharedPie = analysisContextService.buildPieForLanguages(languageIds);
+                    final Pie sharedPie = analysisContextService.get().buildPieForLanguages(languageIds);
                     try(MixedSession session = sharedPie.newSession()) {
                         final Task<KeyedMessages> messagesTask = buildMessages.createTask(new SmlBuildMessages.Input(
                             projectPath,
@@ -83,4 +89,6 @@ public abstract class SmlCheck implements TaskDef<ResourcePath, KeyedMessages>  
                 return builder.build();
             }, MultiLangAnalysisException::toKeyedMessages);
     }
+
+    protected abstract LanguageId getLanguageId();
 }

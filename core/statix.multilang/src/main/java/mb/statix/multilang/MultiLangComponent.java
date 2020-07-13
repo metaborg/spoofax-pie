@@ -1,6 +1,7 @@
 package mb.statix.multilang;
 
 import dagger.Component;
+import dagger.Lazy;
 import mb.spoofax.core.platform.PlatformComponent;
 import mb.statix.multilang.pie.SmlAnalyzeProject;
 import mb.statix.multilang.pie.SmlBuildContextConfiguration;
@@ -17,8 +18,7 @@ import mb.statix.multilang.pie.SmlReadConfigYaml;
     dependencies = PlatformComponent.class
 )
 public interface MultiLangComponent {
-    AnalysisContextService getAnalysisContextService();
-
+    @MultiLang AnalysisContextService getAnalysisContextService();
     @MultiLang SmlAnalyzeProject getAnalyzeProject();
     @MultiLang SmlBuildContextConfiguration getBuildContextConfiguration();
     @MultiLang SmlBuildMessages getBuildMessages();
