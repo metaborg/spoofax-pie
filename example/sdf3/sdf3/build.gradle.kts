@@ -57,10 +57,4 @@ tasks.test {
   if(gradle.parent == null || gradle.parent!!.rootProject.name != "devenv") {
     onlyIf { false }
   }
-
-  // Show standard out and err in tests during development.
-  testLogging {
-    events(org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_OUT, org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR)
-    showStandardStreams = true
-  }
 }

@@ -34,11 +34,3 @@ dependencies {
 
   testAnnotationProcessor("com.google.dagger:dagger-compiler")
 }
-
-tasks.test {
-  // Show standard out and err in tests.
-  testLogging {
-    events(org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_OUT, org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR)
-    showStandardStreams = true
-  }
-}
