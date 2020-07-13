@@ -104,14 +104,14 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
 
     private Result<FileResult, MultiLangAnalysisException> analyzeAst(ExecContext context, Input input, IStrategoTerm ast) {
         return TaskUtils.executeWrapped(() -> context.require(input.globalResultSupplier)
-                .mapErr(MultiLangAnalysisException::new)
+                .mapErr(MultiLangAnalysisException::wrapIfNeeded)
                 .flatMap(globalResult -> analyzeForGlobal(context, input, ast, globalResult)),
             "Exception when resolving global result");
     }
 
     private Result<FileResult, MultiLangAnalysisException> analyzeForGlobal(ExecContext context, Input input, IStrategoTerm ast, GlobalResult globalResult) {
         return TaskUtils.executeWrapped(() -> context.require(input.specSupplier)
-            .mapErr(MultiLangAnalysisException::new)
+            .mapErr(MultiLangAnalysisException::wrapIfNeeded)
             .flatMap(spec -> analysisContextService.getLanguageMetadataResult(input.languageId).flatMap(languageMetadata -> {
                 StrategoTerms st = new StrategoTerms(languageMetadata.termFactory());
 
@@ -132,11 +132,11 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
                     logger.info("{} analyzed in {} ms", input.resourceKey, dt);
                     return Result.ofOk(result);
                 }, "Analysis for input file " + input.resourceKey + " interrupted")
-                .mapErr(MultiLangAnalysisException::new)
+                .mapErr(MultiLangAnalysisException::wrapIfNeeded)
                 .flatMap(fileResult -> {
                     Supplier<Result<IStrategoTerm, ?>> astSupplier = languageMetadata.astFunction().createSupplier(input.resourceKey);
                     return languageMetadata.postTransform().apply(context, astSupplier)
-                        .mapErr(MultiLangAnalysisException::new)
+                        .mapErr(MultiLangAnalysisException::wrapIfNeeded)
                         .map(analyzedAst -> new FileResult(analyzedAst, fileResult));
                 });
             })), "Exception when resolving specification");

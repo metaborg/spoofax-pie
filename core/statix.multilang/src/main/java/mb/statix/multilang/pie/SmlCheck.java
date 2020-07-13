@@ -56,7 +56,7 @@ public abstract class SmlCheck implements TaskDef<ResourcePath, KeyedMessages>  
 
         // Aggregate all Analysis Messages
         return context.require(buildContextConfiguration.createTask(new SmlBuildContextConfiguration.Input(projectPath, new LanguageId("mb.minisdf"))))
-            .mapErr(MultiLangAnalysisException::new)
+            .mapErr(MultiLangAnalysisException::wrapIfNeeded)
             .flatMap(contextInfo -> {
                 final List<LanguageId> languageIds = contextInfo.getContextConfig().getLanguages();
                 try {

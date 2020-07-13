@@ -36,11 +36,7 @@ public final class TaskUtils {
         try {
             return function.get();
         } catch(Exception e) {
-            if (e instanceof MultiLangAnalysisException) {
-                return Result.ofErr((MultiLangAnalysisException) e);
-            } else {
-                return Result.ofErr(new MultiLangAnalysisException(exceptionMessage, e));
-            }
+            return Result.ofErr(MultiLangAnalysisException.wrapIfNeeded(exceptionMessage, e));
         }
     }
 
@@ -50,11 +46,7 @@ public final class TaskUtils {
         try {
             return function.get();
         } catch(Exception e) {
-            if (e instanceof MultiLangAnalysisException) {
-                return Result.ofErr((MultiLangAnalysisException) e);
-            } else {
-                return Result.ofErr(new MultiLangAnalysisException(e));
-            }
+            return Result.ofErr(MultiLangAnalysisException.wrapIfNeeded(e));
         }
     }
 
@@ -66,11 +58,7 @@ public final class TaskUtils {
             try {
                 return function.apply(input);
             } catch(Exception e) {
-                if(e instanceof MultiLangAnalysisException) {
-                    return Result.ofErr((MultiLangAnalysisException)e);
-                } else {
-                    return Result.ofErr(new MultiLangAnalysisException(exceptionMessage, e));
-                }
+                return Result.ofErr(MultiLangAnalysisException.wrapIfNeeded(exceptionMessage, e));
             }
         };
     }
@@ -82,11 +70,7 @@ public final class TaskUtils {
             try {
                 return function.apply(input);
             } catch(Exception e) {
-                if(e instanceof MultiLangAnalysisException) {
-                    return Result.ofErr((MultiLangAnalysisException)e);
-                } else {
-                    return Result.ofErr(new MultiLangAnalysisException(e));
-                }
+                return Result.ofErr(MultiLangAnalysisException.wrapIfNeeded(e));
             }
         };
     }

@@ -80,14 +80,14 @@ public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.In
     @Override
     public Result<SolverResult, MultiLangAnalysisException> exec(ExecContext context, Input input) throws Exception {
         return context.require(input.globalResultSupplier)
-            .mapErr(MultiLangAnalysisException::new)
+            .mapErr(MultiLangAnalysisException::wrapIfNeeded)
             .flatMap(globalResult -> {
                 Iterable<ITermVar> scopeArgs = Iterables2.singleton(globalResult.getGlobalScopeVar());
                 IConstraint projectConstraint = new CUser(input.projectConstraint, scopeArgs);
 
                 IDebugContext debug = TaskUtils.createDebugContext(SmlPartialSolveProject.class, input.logLevel);
                 return TaskUtils.executeWrapped(() -> context.require(input.specSupplier)
-                    .mapErr(MultiLangAnalysisException::new)
+                    .mapErr(MultiLangAnalysisException::wrapIfNeeded)
                     .flatMap((Spec spec) -> TaskUtils.executeWrapped(() -> {
                         SolverResult res = SolverUtils.partialSolve(spec, globalResult.getResult().state(),
                             projectConstraint, debug, new NullProgress(), new NullCancel());

@@ -76,10 +76,10 @@ public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalSc
         // Create uniquely named scope variable
         try {
             return context.require(input.specSupplier)
-                .mapErr(MultiLangAnalysisException::new)
+                .mapErr(MultiLangAnalysisException::wrapIfNeeded)
                 .flatMap(spec -> instantiateGlobalScopeForSpec(input, spec));
         } catch(IOException e) {
-            return Result.ofErr(new MultiLangAnalysisException("Error while creating global scope: cannot load specification", e));
+            return Result.ofErr(MultiLangAnalysisException.wrapIfNeeded("Error while creating global scope: cannot load specification", e));
         }
     }
 
@@ -97,7 +97,7 @@ public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalSc
                 .findRecursive(result.existentials().get(globalScopeVar));
             return Result.ofOk(new GlobalResult(globalScope, globalScopeVar, result));
         } catch(InterruptedException e) {
-            return Result.ofErr(new MultiLangAnalysisException("Constraint solving interrupted", e));
+            return Result.ofErr(MultiLangAnalysisException.wrapIfNeeded("Constraint solving interrupted", e));
         }
     }
 }

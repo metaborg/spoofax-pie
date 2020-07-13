@@ -59,4 +59,18 @@ public class MultiLangAnalysisException extends Exception {
         }
         return KeyedMessages.of(Messages.of(new Message(throwable.getMessage(), throwable, Severity.Error)));
     }
+
+    public static MultiLangAnalysisException wrapIfNeeded(Throwable throwable) {
+        if(throwable instanceof MultiLangAnalysisException) {
+            return (MultiLangAnalysisException) throwable;
+        }
+        return new MultiLangAnalysisException(throwable);
+    }
+
+    public static MultiLangAnalysisException wrapIfNeeded(String message, Throwable throwable) {
+        if(throwable instanceof MultiLangAnalysisException) {
+            return (MultiLangAnalysisException) throwable;
+        }
+        return new MultiLangAnalysisException(message, throwable);
+    }
 }
