@@ -35,22 +35,21 @@ public class SharedPieProvider implements PieProvider {
 
     @Override
     public Pie getPie(@Nullable ResourcePath projectDir) {
-        if(projectDir == null) {
-            // Return default Pie
-            ContextId defaultContextId = analysisContextService.getDefaultContextId(languageId);
-            Set<LanguageId> languageIds = analysisContextService.getContextLanguages(defaultContextId);
-            return analysisContextService.buildPieForLanguages(languageIds);
-        }
-
         try(MixedSession session = languagePie.newSession()) {
+            if(projectDir == null) {
+                // Return default Pie
+                ContextId defaultContextId = analysisContextService.getDefaultContextId(languageId);
+                Set<LanguageId> languageIds = analysisContextService.getContextLanguages(defaultContextId);
+                return analysisContextService.buildPieForLanguages(languageIds);
+            }
             List<LanguageId> languageIds = session.require(buildContextConfiguration
                 .createTask(new SmlBuildContextConfiguration.Input(projectDir, languageId)))
-                .unwrap() // TODO: handle exception properly
+                .unwrap()
                 .getContextConfig()
                 .getLanguages();
             return analysisContextService.buildPieForLanguages(languageIds);
-        } catch(InterruptedException | ExecException e) {
-            throw new MultiLangAnalysisException("Cannot build pie for " + languageId + " in " + projectDir, e);
+        } catch(InterruptedException | ExecException | MultiLangAnalysisException e) {
+            throw new RuntimeException("Cannot build pie for " + languageId + " in " + projectDir, e);
         }
     }
 }

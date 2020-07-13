@@ -47,7 +47,7 @@ public class ConfigResourceChangeListener implements IResourceChangeListener {
                 return false;
             });
         } catch(CoreException e) {
-            throw new MultiLangAnalysisException("Error when updating analysis after config change", e);
+            logger.error("Error when updating analysis after config change", e);
         }
 
         new WorkspaceJob("Process multilang.yaml change") {

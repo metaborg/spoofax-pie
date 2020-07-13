@@ -1,6 +1,7 @@
 package mb.statix.multilang.spec;
 
 import com.google.common.collect.Iterables;
+import mb.common.result.Result;
 import mb.nabl2.regexp.IAlphabet;
 import mb.nabl2.regexp.impl.FiniteAlphabet;
 import mb.nabl2.terms.ITerm;
@@ -70,27 +71,35 @@ public class SpecUtils {
         return ImmutableSpecBuilder.of(fileSpecs);
     }
 
-    public static Spec mergeSpecs(Spec acc, Spec newSpec) {
-        // Error when EOP is not equal, throw exception
-        if(!acc.noRelationLabel().equals(newSpec.noRelationLabel())) {
-            throw new SpecLoadException("No relation labels do not match:" +
-                acc.noRelationLabel() + " and " + newSpec.noRelationLabel());
-        }
+    public static Result<Spec, SpecLoadException> mergeSpecs(Result<Spec, SpecLoadException> accResult, Result<Spec, SpecLoadException> newSpecResult) {
+        return accResult.mapOrElse(acc -> newSpecResult.mapOrElse(newSpec -> {
+            // Error when EOP is not equal, throw exception
+            if(!acc.noRelationLabel().equals(newSpec.noRelationLabel())) {
+                return Result.ofErr(new SpecLoadException("No relation labels do not match:" +
+                    acc.noRelationLabel() + " and " + newSpec.noRelationLabel()));
+            }
 
-        Set<Rule> rules = new HashSet<>(acc.rules().getAllRules());
-        rules.addAll(newSpec.rules().getAllRules());
+            Set<Rule> rules = new HashSet<>(acc.rules().getAllRules());
+            rules.addAll(newSpec.rules().getAllRules());
 
-        Set<ITerm> labels = new HashSet<>(acc.labels().symbols());
-        labels.addAll(newSpec.labels().symbols());
+            Set<ITerm> labels = new HashSet<>(acc.labels().symbols());
+            labels.addAll(newSpec.labels().symbols());
 
-        return Spec.builder()
-            .from(acc)
-            .rules(RuleSet.of(rules))
-            .addAllEdgeLabels(newSpec.edgeLabels())
-            .addAllRelationLabels(newSpec.relationLabels())
-            .labels(new FiniteAlphabet<>(labels))
-            .putAllScopeExtensions(newSpec.scopeExtensions())
-            .build();
+            return Result.ofOk(Spec.builder()
+                .from(acc)
+                .rules(RuleSet.of(rules))
+                .addAllEdgeLabels(newSpec.edgeLabels())
+                .addAllRelationLabels(newSpec.relationLabels())
+                .labels(new FiniteAlphabet<>(labels))
+                .putAllScopeExtensions(newSpec.scopeExtensions())
+                .build());
+        }, Result::ofErr), accErr -> newSpecResult.mapOrElse(
+            res -> Result.ofErr(accErr),
+            err -> {
+                accErr.addSuppressed(err);
+                return Result.ofErr(accErr);
+            }
+        ));
     }
 
     public static IMatcher<Spec> fileSpec() {

@@ -1,5 +1,6 @@
 package mb.statix.multilang;
 
+import mb.common.result.Result;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Pie;
 import org.immutables.value.Value;
@@ -10,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @Value.Immutable
 public abstract class AnalysisContextService {
@@ -22,13 +24,22 @@ public abstract class AnalysisContextService {
     // Map used to cache language metadata instances, so that they will not be recomputed by subsequent accesses.
     private final Map<LanguageId, LanguageMetadata> languageMetadataCache = new HashMap<>();
 
-    public LanguageMetadata getLanguageMetadata(LanguageId languageId) {
+    public LanguageMetadata getLanguageMetadata(LanguageId languageId) throws MultiLangAnalysisException {
         if(!languageMetadataSuppliers().containsKey(languageId)) {
             throw new MultiLangAnalysisException("No language metadata for id " + languageId);
         }
 
         // Consult cache to return value, else compute from supplier
         return languageMetadataCache.computeIfAbsent(languageId, lid -> languageMetadataSuppliers().get(lid).get());
+    }
+
+    public Result<LanguageMetadata, MultiLangAnalysisException> getLanguageMetadataResult(LanguageId languageId) {
+        if(!languageMetadataSuppliers().containsKey(languageId)) {
+            return Result.ofErr(new MultiLangAnalysisException("No language metadata for id " + languageId));
+        }
+
+        // Consult cache to return value, else compute from supplier
+        return Result.ofOk(languageMetadataCache.computeIfAbsent(languageId, lid -> languageMetadataSuppliers().get(lid).get()));
     }
 
     public Set<LanguageId> getContextLanguages(ContextId contextId) {
@@ -39,9 +50,23 @@ public abstract class AnalysisContextService {
         return defaultLanguageContexts().getOrDefault(languageId, new ContextId(languageId.getId()));
     }
 
-    public Pie buildPieForLanguages(Collection<LanguageId> languages) {
-        return platformPie().createChildBuilder(languages.stream()
-            .map(this::getLanguageMetadata)
+    public Pie buildPieForLanguages(Collection<LanguageId> languages) throws MultiLangAnalysisException {
+        if(languages.isEmpty()) {
+            throw new MultiLangAnalysisException("Cannot build combined Pie when no languages are supplied");
+        }
+
+        Set<Result<LanguageMetadata, MultiLangAnalysisException>> results = languages.stream()
+            .map(this::getLanguageMetadataResult)
+            .collect(Collectors.toSet());
+
+        if(results.stream().anyMatch(Result::isErr)) {
+            MultiLangAnalysisException exception = new MultiLangAnalysisException("Error loading language metadata");
+            results.stream().filter(Result::isErr).map(Result::unwrapErr).forEach(exception::addSuppressed);
+            throw exception;
+        }
+
+        return platformPie().createChildBuilder(results.stream()
+            .map(Result::unwrapUnchecked)
             .map(LanguageMetadata::languagePie)
             .toArray(Pie[]::new)).build();
     }
@@ -50,7 +75,7 @@ public abstract class AnalysisContextService {
         return ImmutableAnalysisContextService.builder();
     }
 
-    public Pie buildPieForAllTriggeredLanguages() {
+    public Pie buildPieForAllTriggeredLanguages() throws MultiLangAnalysisException {
         return buildPieForLanguages(languageMetadataCache.keySet());
     }
 }

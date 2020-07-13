@@ -8,7 +8,7 @@ import mb.common.message.Severity;
 import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class MultiLangAnalysisException extends RuntimeException {
+public class MultiLangAnalysisException extends Exception {
 
     private @Nullable ResourceKey resourceKey = null;
 
@@ -54,7 +54,7 @@ public class MultiLangAnalysisException extends RuntimeException {
     }
 
     protected KeyedMessages throwableToKeyedMessages(Throwable throwable) {
-        if (throwable instanceof MultiLangAnalysisException) {
+        if(throwable instanceof MultiLangAnalysisException) {
             return ((MultiLangAnalysisException)throwable).toKeyedMessages();
         }
         return KeyedMessages.of(Messages.of(new Message(throwable.getMessage(), throwable, Severity.Error)));

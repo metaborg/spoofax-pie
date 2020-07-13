@@ -93,13 +93,13 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
     }
 
     @Override public Result<FileResult, MultiLangAnalysisException> exec(ExecContext context, Input input) {
-        LanguageMetadata languageMetadata = analysisContextService.getLanguageMetadata(input.languageId);
-        Supplier<Option<IStrategoTerm>> astSupplier = exec -> languageMetadata.astFunction().apply(exec, input.resourceKey);
-
-        return TaskUtils.executeIOWrapped(() -> context.require(astSupplier)
-                .map(ast -> analyzeAst(context, input, ast))
-                .unwrapOr(Result.ofErr(new MultiLangAnalysisException("No ast provided for " + input.resourceKey))),
-            "Error loading file AST");
+        return analysisContextService.getLanguageMetadataResult(input.languageId).flatMap(languageMetadata -> {
+            Supplier<Option<IStrategoTerm>> astSupplier = exec -> languageMetadata.astFunction().apply(exec, input.resourceKey);
+            return TaskUtils.executeIOWrapped(() -> context.require(astSupplier)
+                    .map(ast -> analyzeAst(context, input, ast))
+                    .unwrapOr(Result.ofErr(new MultiLangAnalysisException("No ast provided for " + input.resourceKey))),
+                "Error loading file AST");
+        });
     }
 
     private Result<FileResult, MultiLangAnalysisException> analyzeAst(ExecContext context, Input input, IStrategoTerm ast) {
@@ -112,34 +112,31 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
     private Result<FileResult, MultiLangAnalysisException> analyzeForGlobal(ExecContext context, Input input, IStrategoTerm ast, GlobalResult globalResult) {
         return TaskUtils.executeIOWrapped(() -> context.require(input.specSupplier)
             .mapErr(MultiLangAnalysisException::new)
-            .flatMap(spec -> {
-                LanguageMetadata languageMetadata = analysisContextService.getLanguageMetadata(input.languageId);
+            .flatMap(spec -> analysisContextService.getLanguageMetadataResult(input.languageId).flatMap(languageMetadata -> {
                 StrategoTerms st = new StrategoTerms(languageMetadata.termFactory());
 
                 IDebugContext debug = TaskUtils.createDebugContext(SmlPartialSolveFile.class, input.logLevel);
                 Iterable<ITerm> constraintArgs = Iterables2.from(globalResult.getGlobalScope(), st.fromStratego(ast));
                 IConstraint fileConstraint = new CUser(languageMetadata.fileConstraint(), constraintArgs, null);
 
-                return TaskUtils
-                    .executeInterruptionWrapped(() -> {
-                        long t0 = System.currentTimeMillis();
-                        SolverResult result = SolverUtils.partialSolve(spec,
-                            globalResult.getResult().state().withResource(input.resourceKey.toString()),
-                            fileConstraint,
-                            debug,
-                            new NullProgress(),
-                            new NullCancel()
-                        );
-                        long dt = System.currentTimeMillis() - t0;
-                        logger.info("{} analyzed in {} ms", input.resourceKey, dt);
-                        return Result.ofOk(result);
-                    }, "Analysis for input file " + input.resourceKey + " interrupted")
-                    .map(fileResult -> {
-                        Supplier<Option<IStrategoTerm>> astSupplier = exec -> languageMetadata.astFunction().apply(exec, input.resourceKey);
-                        IStrategoTerm analyzedAst = languageMetadata.postTransform().apply(context, astSupplier).unwrap();
-                        return new FileResult(analyzedAst, fileResult);
-                    });
-
-            }), "Exception when resolving specification");
+                return TaskUtils.executeInterruptionWrapped(() -> {
+                    long t0 = System.currentTimeMillis();
+                    SolverResult result = SolverUtils.partialSolve(spec,
+                        globalResult.getResult().state().withResource(input.resourceKey.toString()),
+                        fileConstraint,
+                        debug,
+                        new NullProgress(),
+                        new NullCancel()
+                    );
+                    long dt = System.currentTimeMillis() - t0;
+                    logger.info("{} analyzed in {} ms", input.resourceKey, dt);
+                    return Result.ofOk(result);
+                }, "Analysis for input file " + input.resourceKey + " interrupted")
+                .map(fileResult -> {
+                    Supplier<Option<IStrategoTerm>> astSupplier = exec -> languageMetadata.astFunction().apply(exec, input.resourceKey);
+                    IStrategoTerm analyzedAst = languageMetadata.postTransform().apply(context, astSupplier).unwrap();
+                    return new FileResult(analyzedAst, fileResult);
+                });
+            })), "Exception when resolving specification");
     }
 }

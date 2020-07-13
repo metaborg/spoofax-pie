@@ -3,6 +3,7 @@ package mb.statix.multilang.pie;
 import mb.common.result.ExceptionalSupplier;
 import mb.common.result.Result;
 import mb.statix.multilang.FileResult;
+import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.solver.log.IDebugContext;
 import mb.statix.solver.log.LoggerDebugContext;
@@ -12,6 +13,7 @@ import org.metaborg.util.log.Level;
 import org.metaborg.util.log.LoggerUtils;
 
 import java.io.IOException;
+import java.util.function.Consumer;
 
 public final class TaskUtils {
     private TaskUtils() {
@@ -61,6 +63,16 @@ public final class TaskUtils {
             return function.apply();
         } catch(InterruptedException e) {
             return Result.ofErr(new MultiLangAnalysisException(exceptionMessage, e));
+        }
+    }
+
+    public static <O> Result<O, MultiLangAnalysisException> executeMultilangWrapped(
+        ExceptionalSupplier<Result<O, MultiLangAnalysisException>, MultiLangAnalysisException> function
+    ) {
+        try {
+            return function.get();
+        } catch(MultiLangAnalysisException e) {
+            return Result.ofErr(e);
         }
     }
 

@@ -17,6 +17,7 @@ import mb.statix.multilang.FileAnalysisException;
 import mb.statix.multilang.FileResult;
 import mb.statix.multilang.ImmutableAnalysisResults;
 import mb.statix.multilang.LanguageId;
+import mb.statix.multilang.LanguageMetadata;
 import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.multilang.MultiLangScope;
 import mb.statix.multilang.ProjectAnalysisException;
@@ -40,6 +41,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -107,33 +110,26 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Resul
     @Override public Result<AnalysisResults, MultiLangAnalysisException> exec(ExecContext context, Input input) throws Exception {
         final Supplier<Result<Spec, SpecLoadException>> specSupplier = buildSpec.createSupplier(new SmlBuildSpec.Input(input.languages));
         return context.require(specSupplier)
-            .mapErr(MultiLangAnalysisException::new)
+            // Upcast to make typing work
+            .mapErr(MultiLangAnalysisException.class::cast)
             .flatMap(combinedSpec -> {
-                final ListMultimap<String, Rule> rulesWithEquivalentPatterns = combinedSpec.rules().getAllEquivalentRules();
-                if(!rulesWithEquivalentPatterns.isEmpty()) {
-                    logger.error("+--------------------------------------+");
-                    logger.error("| FOUND RULES WITH EQUIVALENT PATTERNS |");
-                    logger.error("+--------------------------------------+");
-                    for(Map.Entry<String, Collection<Rule>> entry : rulesWithEquivalentPatterns.asMap().entrySet()) {
-                        logger.error("| Overlapping rules for: {}", entry.getKey());
-                        for(Rule rule : entry.getValue()) {
-                            logger.error("| * {}", rule);
-                        }
-                    }
-                    logger.error("+--------------------------------------+");
+                final Result<Map<LanguageId, LanguageMetadata>, MultiLangAnalysisException> languageMetadataMapResult = getLanguageMetadata(input.languages);
+                if(languageMetadataMapResult.isErr()) {
+                    return Result.ofErr(languageMetadataMapResult.unwrapErr());
                 }
+                Map<LanguageId, LanguageMetadata> languageMetadataMap = languageMetadataMapResult.unwrapUnchecked();
 
+                validateOverlappingRules(combinedSpec);
                 IDebugContext debug = TaskUtils.createDebugContext("MLA [%s]", input.logLevel);
-
                 Supplier<Result<GlobalResult, MultiLangAnalysisException>> globalResultSupplier = instantiateGlobalScope.createSupplier(
                     new SmlInstantiateGlobalScope.Input(input.logLevel, specSupplier));
 
-                Map<LanguageId, Result<SolverResult, MultiLangAnalysisException>> projectResults = input.languages.stream()
-                    .collect(Collectors.toMap(Function.identity(), languageId ->
+                Map<LanguageId, Result<SolverResult, MultiLangAnalysisException>> projectResults = languageMetadataMap.entrySet().stream()
+                    .collect(Collectors.toMap(Map.Entry::getKey, entry ->
                         context.require(partialSolveProject.createTask(new SmlPartialSolveProject.Input(
                             globalResultSupplier,
                             specSupplier,
-                            analysisContextService.getLanguageMetadata(languageId).projectConstraint(),
+                            entry.getValue().projectConstraint(),
                             input.logLevel)))
                     ));
 
@@ -145,16 +141,15 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Resul
                 }
 
                 // Create file results (maintain resource key for error message mapping
-                Map<ResourceKey, Result<FileResult, MultiLangAnalysisException>> fileResults = input.languages.stream()
-                    .flatMap(languageId -> analysisContextService
-                        .getLanguageMetadata(languageId)
+                Map<ResourceKey, Result<FileResult, MultiLangAnalysisException>> fileResults = languageMetadataMap.entrySet().stream()
+                    .flatMap(entry -> entry.getValue()
                         .resourcesSupplier()
                         .apply(context, input.projectPath)
                         .stream()
                         .map(resourceKey -> new AbstractMap.SimpleEntry<>(
                             resourceKey,
                             context.require(partialSolveFile.createTask(new SmlPartialSolveFile.Input(
-                                languageId,
+                                entry.getKey(),
                                 resourceKey,
                                 specSupplier,
                                 globalResultSupplier,
@@ -171,21 +166,20 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Resul
                 Map<LanguageId, SolverResult> unWrappedProjectResults = projectResults
                     .entrySet()
                     .stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().unwrap()));
+                    .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().unwrapUnchecked())); // Safe, because validated earlier
 
                 Map<ResourceKey, FileResult> unWrappedFileResults = fileResults
                     .entrySet()
                     .stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().unwrap()));
+                    .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().unwrapUnchecked())); // Safe, because validated earlier
 
-                IState.Immutable combinedState = Stream.concat(
+                Optional<IState.Immutable> combinedState = Stream.concat(
                     unWrappedProjectResults.values().stream(),
                     unWrappedFileResults.values().stream().map(FileResult::getResult))
                     .map(SolverResult::state)
-                    .reduce(IState.Immutable::add)
-                    .orElseThrow(() -> new MultiLangAnalysisException("Expected at least one result"));
+                    .reduce(IState.Immutable::add);
 
-                return TaskUtils.executeIOWrapped(() -> context.require(globalResultSupplier).flatMap(globalResult -> {
+                return combinedState.<Result<AnalysisResults, MultiLangAnalysisException>>map(immutable -> TaskUtils.executeIOWrapped(() -> context.require(globalResultSupplier).flatMap(globalResult -> {
                     IConstraint combinedConstraint = Stream.concat(
                         unWrappedProjectResults.values().stream(),
                         unWrappedFileResults.values().stream().map(FileResult::getResult))
@@ -195,14 +189,45 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Resul
                     return TaskUtils.executeInterruptionWrapped(() -> {
                         long t0 = System.currentTimeMillis();
                         SolverResult result = Solver.solve(combinedSpec,
-                            combinedState, combinedConstraint, (s, l, st) -> true, debug, new NullProgress(), new NullCancel());
+                            immutable, combinedConstraint, (s, l, st) -> true, debug, new NullProgress(), new NullCancel());
                         long dt = System.currentTimeMillis() - t0;
                         logger.info("Project analyzed in {} ms", dt);
                         return Result.ofOk(result);
                     }, "Solving final constraints interrupted")
-                    .map(finalResult -> ImmutableAnalysisResults.of(globalResult.getGlobalScope(),
-                        new HashMap<>(unWrappedProjectResults), new HashMap<>(unWrappedFileResults), finalResult));
-                }), "IO exception while requiring global result");
+                        .map(finalResult -> ImmutableAnalysisResults.of(globalResult.getGlobalScope(),
+                            new HashMap<>(unWrappedProjectResults), new HashMap<>(unWrappedFileResults), finalResult));
+                }), "IO exception while requiring global result")).orElseGet(() -> Result.ofErr(new MultiLangAnalysisException("BUG: Analysis gave 0 results")));
+
             });
+    }
+
+    private void validateOverlappingRules(Spec combinedSpec) {
+        final ListMultimap<String, Rule> rulesWithEquivalentPatterns = combinedSpec.rules().getAllEquivalentRules();
+        if(!rulesWithEquivalentPatterns.isEmpty()) {
+            logger.error("+--------------------------------------+");
+            logger.error("| FOUND RULES WITH EQUIVALENT PATTERNS |");
+            logger.error("+--------------------------------------+");
+            for(Map.Entry<String, Collection<Rule>> entry : rulesWithEquivalentPatterns.asMap().entrySet()) {
+                logger.error("| Overlapping rules for: {}", entry.getKey());
+                for(Rule rule : entry.getValue()) {
+                    logger.error("| * {}", rule);
+                }
+            }
+            logger.error("+--------------------------------------+");
+        }
+    }
+
+    private Result<Map<LanguageId, LanguageMetadata>, MultiLangAnalysisException> getLanguageMetadata(Collection<LanguageId> languages) {
+        Set<Result<LanguageMetadata, MultiLangAnalysisException>> metadataResultSet = languages.stream()
+            .map(languageId -> TaskUtils.executeMultilangWrapped(() -> Result.ofOk(analysisContextService.getLanguageMetadata(languageId))))
+            .collect(Collectors.toSet());
+        if(metadataResultSet.stream().anyMatch(Result::isErr)) {
+            MultiLangAnalysisException exception = new MultiLangAnalysisException("Error when resolving language metadata");
+            metadataResultSet.forEach(result -> result.ifErr(exception::addSuppressed));
+            return Result.ofErr(exception);
+        }
+        return Result.ofOk(metadataResultSet.stream()
+            .map(Result::unwrapUnchecked) // Safe because error values would have taken if-branch
+            .collect(Collectors.toMap(LanguageMetadata::languageId, Function.identity())));
     }
 }

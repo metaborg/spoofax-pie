@@ -20,7 +20,7 @@ public class SpecLoaderTest {
     private final ClassLoaderResourceRegistry resourceRegistry = new ClassLoaderResourceRegistry(SpecLoaderTest.class.getClassLoader());
     private final ITermFactory termFactory = new TermFactory();
 
-    @Test void loadEmptySpec() throws IOException {
+    @Test void loadEmptySpec() throws IOException, SpecLoadException {
         final ClassLoaderResource statixRoot = resourceRegistry
             .getResource(new DefaultResourceKeyString("mb/statix/multilang/empty"));
 
@@ -30,7 +30,7 @@ public class SpecLoaderTest {
         assertNotNull(spec);
     }
 
-    @Test void loadRegularSpec() throws IOException {
+    @Test void loadRegularSpec() throws IOException, SpecLoadException {
         final ClassLoaderResource statixRoot = resourceRegistry
             .getResource(new DefaultResourceKeyString("mb/statix/multilang/base"));
         Spec spec = SpecUtils
@@ -45,7 +45,7 @@ public class SpecLoaderTest {
         assertEquals(1, rules.getRules("imported!rule").size());
     }
 
-    @Test void loadCompatibleSpecs() throws IOException {
+    @Test void loadCompatibleSpecs() throws IOException, SpecLoadException {
         final ClassLoaderResource root1 = resourceRegistry
             .getResource(new DefaultResourceKeyString("mb/statix/multilang/base"));
         SpecBuilder specBuilder1 = SpecUtils
@@ -65,7 +65,7 @@ public class SpecLoaderTest {
         assertEquals(1, rules.getRules("imported!rule").size());
     }
 
-    @Test void loadIncompatibleSpecs() throws IOException {
+    @Test void loadIncompatibleSpecs() throws IOException, SpecLoadException {
         final ClassLoaderResource root1 = resourceRegistry
             .getResource(new DefaultResourceKeyString("mb/statix/multilang/base"));
         SpecBuilder specBuilder1 = SpecUtils
