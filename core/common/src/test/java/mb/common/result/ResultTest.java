@@ -4,8 +4,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -443,6 +447,36 @@ class ResultTest {
     @Test
     void getErrOrElse() {
         // TODO
+    }
+
+    @Test
+    void collectValues() throws AggregateException {
+        Result<List<String>, AggregateException> result = Stream.of(
+            Result.ofOk("Value 1"),
+            Result.ofOk("Value 2"))
+            .collect(ResultCollector.getWithCollection(ArrayList::new));
+
+        assertTrue(result.isOk());
+        assertEquals(2, result.unwrap().size());
+        assertTrue(result.unwrap().contains("Value 1"));
+        assertTrue(result.unwrap().contains("Value 2"));
+    }
+
+    @Test
+    void collectError() {
+        Result<Set<String>, AggregateException> result = Stream.<Result<String, Exception>>of(
+                Result.ofOk("Value 1"),
+                Result.ofErr(new Exception("Exception 1")),
+                Result.ofErr(new Exception("Exception 2")))
+            .collect(ResultCollector.getDefault());
+
+        assertTrue(result.isErr());
+        assertEquals(2, result.unwrapErr().getInnerExceptions().size());
+        assertTrue(result.unwrapErr().getInnerExceptions().stream().anyMatch(e -> e.getMessage().equals("Exception 1")));
+        assertTrue(result.unwrapErr().getInnerExceptions().stream().anyMatch(e -> e.getMessage().equals("Exception 2")));
+
+        assertEquals(1, result.unwrapErr().getValues().size());
+        assertTrue(result.unwrapErr().getValues().contains("Value 1"));
     }
 
 
