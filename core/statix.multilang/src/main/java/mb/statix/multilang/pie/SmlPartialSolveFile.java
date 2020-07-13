@@ -95,7 +95,7 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
     @Override public Result<FileResult, MultiLangAnalysisException> exec(ExecContext context, Input input) {
         return analysisContextService.getLanguageMetadataResult(input.languageId).flatMap(languageMetadata -> {
             Supplier<Option<IStrategoTerm>> astSupplier = exec -> languageMetadata.astFunction().apply(exec, input.resourceKey);
-            return TaskUtils.executeIOWrapped(() -> context.require(astSupplier)
+            return TaskUtils.executeWrapped(() -> context.require(astSupplier)
                     .map(ast -> analyzeAst(context, input, ast))
                     .unwrapOr(Result.ofErr(new MultiLangAnalysisException("No ast provided for " + input.resourceKey))),
                 "Error loading file AST");
@@ -103,14 +103,14 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
     }
 
     private Result<FileResult, MultiLangAnalysisException> analyzeAst(ExecContext context, Input input, IStrategoTerm ast) {
-        return TaskUtils.executeIOWrapped(() -> context.require(input.globalResultSupplier)
+        return TaskUtils.executeWrapped(() -> context.require(input.globalResultSupplier)
                 .mapErr(MultiLangAnalysisException::new)
                 .flatMap(globalResult -> analyzeForGlobal(context, input, ast, globalResult)),
             "Exception when resolving global result");
     }
 
     private Result<FileResult, MultiLangAnalysisException> analyzeForGlobal(ExecContext context, Input input, IStrategoTerm ast, GlobalResult globalResult) {
-        return TaskUtils.executeIOWrapped(() -> context.require(input.specSupplier)
+        return TaskUtils.executeWrapped(() -> context.require(input.specSupplier)
             .mapErr(MultiLangAnalysisException::new)
             .flatMap(spec -> analysisContextService.getLanguageMetadataResult(input.languageId).flatMap(languageMetadata -> {
                 StrategoTerms st = new StrategoTerms(languageMetadata.termFactory());
@@ -119,7 +119,7 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
                 Iterable<ITerm> constraintArgs = Iterables2.from(globalResult.getGlobalScope(), st.fromStratego(ast));
                 IConstraint fileConstraint = new CUser(languageMetadata.fileConstraint(), constraintArgs, null);
 
-                return TaskUtils.executeInterruptionWrapped(() -> {
+                return TaskUtils.executeWrapped(() -> {
                     long t0 = System.currentTimeMillis();
                     SolverResult result = SolverUtils.partialSolve(spec,
                         globalResult.getResult().state().withResource(input.resourceKey.toString()),

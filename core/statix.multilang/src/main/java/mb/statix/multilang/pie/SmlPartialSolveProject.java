@@ -85,10 +85,10 @@ public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.In
                 Iterable<ITermVar> scopeArgs = Iterables2.singleton(globalResult.getGlobalScopeVar());
                 IConstraint projectConstraint = new CUser(input.projectConstraint, scopeArgs);
 
-                IDebugContext debug = TaskUtils.createDebugContext(SmlPartialSolveFile.class, input.logLevel);
-                return TaskUtils.executeIOWrapped(() -> context.require(input.specSupplier)
+                IDebugContext debug = TaskUtils.createDebugContext(SmlPartialSolveProject.class, input.logLevel);
+                return TaskUtils.executeWrapped(() -> context.require(input.specSupplier)
                     .mapErr(MultiLangAnalysisException::new)
-                    .flatMap((Spec spec) -> TaskUtils.executeInterruptionWrapped(() -> {
+                    .flatMap((Spec spec) -> TaskUtils.executeWrapped(() -> {
                         SolverResult res = SolverUtils.partialSolve(spec, globalResult.getResult().state(),
                             projectConstraint, debug, new NullProgress(), new NullCancel());
                         return Result.ofOk(res);

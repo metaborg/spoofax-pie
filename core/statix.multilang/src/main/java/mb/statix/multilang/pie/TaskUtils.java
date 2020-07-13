@@ -31,56 +31,32 @@ public final class TaskUtils {
             new LoggerDebugContext(LoggerUtils.logger(cls), logLevel) : new NullDebugContext();
     }
 
-
-    public static <O> Result<O, MultiLangAnalysisException> executeIOWrapped(
-        IOExceptionThrowingFunction<Result<O, MultiLangAnalysisException>> function,
-        String exceptionMessage
-    ) {
-        try {
-            return function.apply();
-        } catch(IOException e) {
-            return Result.ofErr(new MultiLangAnalysisException(exceptionMessage, e));
-        }
-    }
-
-    // TODO: Make interface more generic
     public static <O> Result<O, MultiLangAnalysisException> executeWrapped(
-        ExceptionalSupplier<Result<O, MultiLangAnalysisException>, Exception> function,
+        ExceptionalSupplier<Result<O, MultiLangAnalysisException>, ? extends Exception> function,
         String exceptionMessage
     ) {
         try {
             return function.get();
         } catch(Exception e) {
-            return Result.ofErr(new MultiLangAnalysisException(exceptionMessage, e));
+            if (e instanceof MultiLangAnalysisException) {
+                return Result.ofErr((MultiLangAnalysisException) e);
+            } else {
+                return Result.ofErr(new MultiLangAnalysisException(exceptionMessage, e));
+            }
         }
     }
 
-    public static <O> Result<O, MultiLangAnalysisException> executeInterruptionWrapped(
-        InterruptedExceptionThrowingFunction<Result<O, MultiLangAnalysisException>> function,
-        String exceptionMessage
-    ) {
-        try {
-            return function.apply();
-        } catch(InterruptedException e) {
-            return Result.ofErr(new MultiLangAnalysisException(exceptionMessage, e));
-        }
-    }
-
-    public static <O> Result<O, MultiLangAnalysisException> executeMultilangWrapped(
-        ExceptionalSupplier<Result<O, MultiLangAnalysisException>, MultiLangAnalysisException> function
+    public static <O> Result<O, MultiLangAnalysisException> executeWrapped(
+        ExceptionalSupplier<Result<O, MultiLangAnalysisException>, ? extends Exception> function
     ) {
         try {
             return function.get();
-        } catch(MultiLangAnalysisException e) {
-            return Result.ofErr(e);
+        } catch(Exception e) {
+            if (e instanceof MultiLangAnalysisException) {
+                return Result.ofErr((MultiLangAnalysisException) e);
+            } else {
+                return Result.ofErr(new MultiLangAnalysisException(e));
+            }
         }
-    }
-
-    public interface InterruptedExceptionThrowingFunction<O> {
-        O apply() throws InterruptedException;
-    }
-
-    public interface IOExceptionThrowingFunction<O> {
-        O apply() throws IOException;
     }
 }

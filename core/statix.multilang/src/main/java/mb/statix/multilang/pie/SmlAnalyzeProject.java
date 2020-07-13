@@ -120,7 +120,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Resul
                 Map<LanguageId, LanguageMetadata> languageMetadataMap = languageMetadataMapResult.unwrapUnchecked();
 
                 validateOverlappingRules(combinedSpec);
-                IDebugContext debug = TaskUtils.createDebugContext("MLA [%s]", input.logLevel);
+                IDebugContext debug = TaskUtils.createDebugContext("MLA", input.logLevel);
                 Supplier<Result<GlobalResult, MultiLangAnalysisException>> globalResultSupplier = instantiateGlobalScope.createSupplier(
                     new SmlInstantiateGlobalScope.Input(input.logLevel, specSupplier));
 
@@ -179,14 +179,14 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Resul
                     .map(SolverResult::state)
                     .reduce(IState.Immutable::add);
 
-                return combinedState.<Result<AnalysisResults, MultiLangAnalysisException>>map(immutable -> TaskUtils.executeIOWrapped(() -> context.require(globalResultSupplier).flatMap(globalResult -> {
+                return combinedState.<Result<AnalysisResults, MultiLangAnalysisException>>map(immutable -> TaskUtils.executeWrapped(() -> context.require(globalResultSupplier).flatMap(globalResult -> {
                     IConstraint combinedConstraint = Stream.concat(
                         unWrappedProjectResults.values().stream(),
                         unWrappedFileResults.values().stream().map(FileResult::getResult))
                         .map(SolverResult::delayed)
                         .reduce(globalResult.getResult().delayed(), CConj::new);
 
-                    return TaskUtils.executeInterruptionWrapped(() -> {
+                    return TaskUtils.executeWrapped(() -> {
                         long t0 = System.currentTimeMillis();
                         SolverResult result = Solver.solve(combinedSpec,
                             immutable, combinedConstraint, (s, l, st) -> true, debug, new NullProgress(), new NullCancel());
@@ -219,7 +219,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Resul
 
     private Result<Map<LanguageId, LanguageMetadata>, MultiLangAnalysisException> getLanguageMetadata(Collection<LanguageId> languages) {
         Set<Result<LanguageMetadata, MultiLangAnalysisException>> metadataResultSet = languages.stream()
-            .map(languageId -> TaskUtils.executeMultilangWrapped(() -> Result.ofOk(analysisContextService.getLanguageMetadata(languageId))))
+            .map(languageId -> TaskUtils.executeWrapped(() -> Result.ofOk(analysisContextService.getLanguageMetadata(languageId))))
             .collect(Collectors.toSet());
         if(metadataResultSet.stream().anyMatch(Result::isErr)) {
             MultiLangAnalysisException exception = new MultiLangAnalysisException("Error when resolving language metadata");
