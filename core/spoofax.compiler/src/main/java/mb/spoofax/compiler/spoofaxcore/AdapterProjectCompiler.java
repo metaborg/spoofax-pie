@@ -459,7 +459,7 @@ public class AdapterProjectCompiler {
 
         @Value.Check default void check() {
             final ClassKind kind = classKind();
-            final boolean manual = kind.isManual();
+            final boolean manual = kind.isManualOnly();
             if(!manual) return;
             if(!manualComponent().isPresent()) {
                 throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualComponent' has not been set");

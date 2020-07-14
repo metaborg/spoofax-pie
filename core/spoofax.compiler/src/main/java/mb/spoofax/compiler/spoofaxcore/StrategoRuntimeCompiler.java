@@ -164,7 +164,7 @@ public class StrategoRuntimeCompiler {
 
         @Value.Check default void check() {
             final ClassKind kind = classKind();
-            final boolean manual = kind.isManual();
+            final boolean manual = kind.isManualOnly();
             if(!manual) return;
             if(!manualFactory().isPresent()) {
                 throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualFactory' has not been set");
