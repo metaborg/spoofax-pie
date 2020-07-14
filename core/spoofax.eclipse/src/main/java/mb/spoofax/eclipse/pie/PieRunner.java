@@ -27,6 +27,7 @@ import mb.spoofax.core.language.command.CommandContext;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.CommandRequest;
 import mb.spoofax.core.language.command.HierarchicalResourceType;
+import mb.spoofax.core.language.command.ResourcePathWithKind;
 import mb.spoofax.core.language.command.ShowFeedback;
 import mb.spoofax.core.language.command.arg.ArgConverters;
 import mb.spoofax.core.platform.Platform;
@@ -40,6 +41,7 @@ import mb.spoofax.eclipse.resource.EclipseResourcePath;
 import mb.spoofax.eclipse.resource.EclipseResourceRegistry;
 import mb.spoofax.eclipse.util.ResourceUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.NoDefaultQualifierForUse;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -66,6 +68,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -307,17 +310,18 @@ public class PieRunner {
                     final Task<CommandFeedback> task = request.createTask(context, argConverters);
                     final CommandFeedback feedback = require(task, session, monitor);
                     contextsAndFeedbacks.add(new CommandContextAndFeedback(context, feedback));
+                    @Nullable ResourcePath projectDir = contextProjectDir(context);
                     processShowFeedbacks(feedback, true, (p) -> {
                         // POTI: this opens a new PIE session, which may be used concurrently with other sessions, which
                         // may not be (thread-)safe.
-                        try(final MixedSession newSession = languageComponent.getPieProvider().getPie(null).newSession()) {
+                        try(final MixedSession newSession = languageComponent.getPieProvider().getPie(projectDir).newSession()) {
                             unobserve(task, pie, newSession, monitor);
                         }
                         pie.removeCallback(task);
                     });
                     if(feedback.hasErrorMessagesOrException()) {
                         // Command feedback indicates failure, unobserve to cancel continuous execution.
-                        try(final MixedSession newSession = languageComponent.getPieProvider().getPie(null).newSession()) {
+                        try(final MixedSession newSession = languageComponent.getPieProvider().getPie(projectDir).newSession()) {
                             unobserve(task, pie, newSession, monitor);
                         }
                     } else {
@@ -335,6 +339,14 @@ public class PieRunner {
                 break;
         }
         return contextsAndFeedbacks;
+    }
+
+    private  @Nullable ResourcePath contextProjectDir(CommandContext context) {
+        return context.getResourcePathWithKind()
+            .map(ResourcePathWithKind::getPath)
+            .map(resourceUtil::getProject)
+            .map(EclipseResourcePath::new)
+            .orElse(null);
     }
 
     private void processShowFeedbacks(CommandFeedback feedback, boolean activate, @Nullable Consumer<IWorkbenchPart> closedCallback) {

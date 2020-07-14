@@ -15,10 +15,13 @@ import mb.spoofax.eclipse.SpoofaxEclipseComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.pie.CommandContextAndFeedback;
 import mb.spoofax.eclipse.pie.PieRunner;
+import mb.spoofax.eclipse.resource.EclipseResourcePath;
+import mb.spoofax.eclipse.util.ResourceUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
@@ -32,6 +35,8 @@ import org.osgi.framework.FrameworkUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
+import java.util.Optional;
 
 public class RunCommandHandler extends AbstractHandler {
     public final static String dataParameterId = "data";
@@ -42,15 +47,16 @@ public class RunCommandHandler extends AbstractHandler {
     private final EclipseLanguageComponent languageComponent;
 
     private final PieRunner pieRunner;
+    private final ResourceUtil resourceUtil;
 
     private final MapView<String, CommandDef> commandDefsPerId;
-
 
     public RunCommandHandler(EclipseLanguageComponent languageComponent) {
         this.languageComponent = languageComponent;
 
         final SpoofaxEclipseComponent component = SpoofaxPlugin.getComponent();
         this.pieRunner = component.getPieRunner();
+        this.resourceUtil = component.getResourceUtil();
 
         final HashMap<String, CommandDef> transformDefsPerId = new HashMap<>();
         for(CommandDef commandDef : languageComponent.getLanguageInstance().getCommandDefs()) {
@@ -58,7 +64,6 @@ public class RunCommandHandler extends AbstractHandler {
         }
         this.commandDefsPerId = new MapView<>(transformDefsPerId);
     }
-
 
     @Override public @Nullable Object execute(ExecutionEvent event) throws ExecutionException {
         final @Nullable String dataStr = event.getParameter(dataParameterId);
@@ -73,8 +78,21 @@ public class RunCommandHandler extends AbstractHandler {
         final CommandRequest<?> request = data.toCommandRequest(def);
 
         final String pluginId = languageComponent.getEclipseIdentifiers().getPlugin();
+
+        // Try to find project directory
+        final @Nullable EclipseResourcePath projectDir = data.contexts.stream()
+            .map(CommandContext::getResourcePathWithKind)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .map(ResourcePathWithKind::getPath)
+            .map(resourceUtil::getProject)
+            .filter(Objects::nonNull)
+            .findFirst()
+            .map(EclipseResourcePath::new)
+            .orElse(null);
+
         // TODO: run this in a Job, both to enable progress/cancellation, and better error reporting.
-        try(final MixedSession session = languageComponent.getPieProvider().getPie(null).newSession()) {
+        try(final MixedSession session = languageComponent.getPieProvider().getPie(projectDir).newSession()) {
             final ArrayList<CommandContextAndFeedback> contextsAndFeedbacks = pieRunner.requireCommand(languageComponent, request, data.contexts, session, null);
             final ArrayList<Exception> exceptions = new ArrayList<>();
             final StringBuilder sb = new StringBuilder();

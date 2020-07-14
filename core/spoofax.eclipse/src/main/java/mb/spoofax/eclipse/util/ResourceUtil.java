@@ -4,10 +4,12 @@ import mb.resource.Resource;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceRuntimeException;
 import mb.resource.ResourceService;
+import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.platform.Platform;
 import mb.spoofax.eclipse.resource.WrapsEclipseResource;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import javax.inject.Inject;
@@ -48,5 +50,9 @@ public class ResourceUtil {
             throw new ResourceRuntimeException("Resource '" + resource + "' wraps an Eclipse resource, but the wrapped resource is not a file");
         }
         return (IFile)eclipseResource;
+    }
+
+    public @Nullable IProject getProject(ResourcePath resourcePath) {
+        return getEclipseResource(resourcePath).getProject();
     }
 }
