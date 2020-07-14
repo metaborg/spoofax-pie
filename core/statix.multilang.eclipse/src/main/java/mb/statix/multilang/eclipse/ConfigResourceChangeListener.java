@@ -19,6 +19,10 @@ import org.eclipse.jface.util.SafeRunnable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * {@link IResourceChangeListener} that listens to changes to {@code multilang.yaml} files, and notifies all registered
+ * {@link ConfigChangeListener config change listeners}.
+ */
 public class ConfigResourceChangeListener implements IResourceChangeListener {
     private static final Logger logger = SpoofaxPlugin.getComponent().getLoggerFactory().create(ConfigResourceChangeListener.class);
     private final ArrayList<ConfigChangeListener> delegates = new ArrayList<>();
@@ -38,6 +42,7 @@ public class ConfigResourceChangeListener implements IResourceChangeListener {
                 }
                 if(delta.getResource().getType() == IResource.PROJECT) {
                     for(IResourceDelta child : delta.getAffectedChildren()) {
+                        // Only trigger when a multilang.yaml file in project root in changed
                         if(child.getResource().getType() == IResource.FILE && child.getResource().getName().equals("multilang.yaml")) {
                             projects.add((IProject)delta.getResource());
                         }
