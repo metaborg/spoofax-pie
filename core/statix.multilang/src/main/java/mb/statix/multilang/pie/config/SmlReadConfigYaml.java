@@ -1,11 +1,10 @@
-package mb.statix.multilang.pie;
+package mb.statix.multilang.pie.config;
 
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.ReadableResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.multilang.MultiLangConfig;
 import mb.statix.multilang.MultiLangScope;
 import org.yaml.snakeyaml.Yaml;
@@ -13,7 +12,6 @@ import org.yaml.snakeyaml.constructor.Constructor;
 
 import javax.inject.Inject;
 import java.io.IOException;
-import java.io.Serializable;
 
 @MultiLangScope
 public class SmlReadConfigYaml implements TaskDef<ResourcePath, Result<MultiLangConfig, IOException>> {

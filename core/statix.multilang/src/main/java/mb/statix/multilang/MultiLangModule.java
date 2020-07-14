@@ -5,13 +5,13 @@ import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
 import mb.pie.api.TaskDef;
 import mb.statix.multilang.pie.SmlAnalyzeProject;
-import mb.statix.multilang.pie.SmlBuildContextConfiguration;
+import mb.statix.multilang.pie.config.SmlBuildContextConfiguration;
 import mb.statix.multilang.pie.SmlBuildMessages;
 import mb.statix.multilang.pie.SmlBuildSpec;
 import mb.statix.multilang.pie.SmlInstantiateGlobalScope;
 import mb.statix.multilang.pie.SmlPartialSolveFile;
 import mb.statix.multilang.pie.SmlPartialSolveProject;
-import mb.statix.multilang.pie.SmlReadConfigYaml;
+import mb.statix.multilang.pie.config.SmlReadConfigYaml;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -1,16 +1,15 @@
 package mb.statix.multilang;
 
 import dagger.Component;
-import dagger.Lazy;
 import mb.spoofax.core.platform.PlatformComponent;
 import mb.statix.multilang.pie.SmlAnalyzeProject;
-import mb.statix.multilang.pie.SmlBuildContextConfiguration;
+import mb.statix.multilang.pie.config.SmlBuildContextConfiguration;
 import mb.statix.multilang.pie.SmlBuildMessages;
 import mb.statix.multilang.pie.SmlBuildSpec;
 import mb.statix.multilang.pie.SmlInstantiateGlobalScope;
 import mb.statix.multilang.pie.SmlPartialSolveFile;
 import mb.statix.multilang.pie.SmlPartialSolveProject;
-import mb.statix.multilang.pie.SmlReadConfigYaml;
+import mb.statix.multilang.pie.config.SmlReadConfigYaml;
 
 @MultiLangScope
 @Component(

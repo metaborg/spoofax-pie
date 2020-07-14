@@ -7,7 +7,7 @@ import mb.pie.api.Pie;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.pie.PieProvider;
-import mb.statix.multilang.pie.SmlBuildContextConfiguration;
+import mb.statix.multilang.pie.config.SmlBuildContextConfiguration;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;

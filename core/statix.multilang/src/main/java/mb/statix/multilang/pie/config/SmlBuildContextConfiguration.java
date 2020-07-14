@@ -1,4 +1,4 @@
-package mb.statix.multilang.pie;
+package mb.statix.multilang.pie.config;
 
 import dagger.Lazy;
 import mb.common.result.Result;
