@@ -5,9 +5,9 @@ import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
-import mb.statix.multilang.AnalysisContextService;
 import mb.statix.multilang.ConfigurationException;
 import mb.statix.multilang.ContextConfig;
+import mb.statix.multilang.ContextDataManager;
 import mb.statix.multilang.ContextId;
 import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.MultiLang;
@@ -54,12 +54,12 @@ public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConf
     }
 
     private final SmlReadConfigYaml readConfigYaml;
-    private final Lazy<AnalysisContextService> analysisContextService;
+    private final Lazy<ContextDataManager> contextDataManager;
 
     @Inject
-    public SmlBuildContextConfiguration(SmlReadConfigYaml readConfigYaml, @MultiLang Lazy<AnalysisContextService> analysisContextService) {
+    public SmlBuildContextConfiguration(SmlReadConfigYaml readConfigYaml, @MultiLang Lazy<ContextDataManager> contextDataManager) {
         this.readConfigYaml = readConfigYaml;
-        this.analysisContextService = analysisContextService;
+        this.contextDataManager = contextDataManager;
     }
 
     @Override
@@ -73,9 +73,9 @@ public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConf
             .mapErr(ConfigurationException::new)
             .flatMap(config -> {
                 ContextId contextId = config.getLanguageContexts()
-                    .getOrDefault(input.languageId, analysisContextService.get().getDefaultContextId(input.languageId));
+                    .getOrDefault(input.languageId, contextDataManager.get().getDefaultContextId(input.languageId));
 
-                Set<LanguageId> staticLanguages = analysisContextService.get().getContextLanguages(contextId);
+                Set<LanguageId> staticLanguages = contextDataManager.get().getContextLanguages(contextId);
                 @Nullable ContextConfig dynamicConfig = config
                     .getCustomContexts()
                     .get(contextId);

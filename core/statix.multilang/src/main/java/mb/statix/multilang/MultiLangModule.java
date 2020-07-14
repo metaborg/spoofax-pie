@@ -27,8 +27,28 @@ public class MultiLangModule {
     }
 
     @Provides @MultiLangScope @MultiLang
-    public SmlSolveProject provideAnalyzeProject(SmlSolveProject analyzeProject) {
-        return analyzeProject;
+    public LanguageMetadataManager provideLanguageMetadataManager(@MultiLang AnalysisContextService analysisContextService) {
+        return analysisContextService;
+    }
+
+    @Provides @MultiLangScope @MultiLang
+    public ContextPieManager provideContextPieManager(@MultiLang AnalysisContextService analysisContextService) {
+        return analysisContextService;
+    }
+
+    @Provides @MultiLangScope @MultiLang
+    public ContextDataManager provideContextDataManager(@MultiLang AnalysisContextService analysisContextService) {
+        return analysisContextService;
+    }
+
+    @Provides @MultiLangScope @MultiLang
+    public LanguagePieManager provideLanguagePieManager(@MultiLang AnalysisContextService analysisContextService) {
+        return analysisContextService;
+    }
+
+    @Provides @MultiLangScope @MultiLang
+    public SmlSolveProject provideSolveProject(SmlSolveProject solveProject) {
+        return solveProject;
     }
 
     @Provides @MultiLangScope @MultiLang

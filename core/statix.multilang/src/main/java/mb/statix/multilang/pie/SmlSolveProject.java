@@ -11,12 +11,12 @@ import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.statix.constraints.CConj;
-import mb.statix.multilang.AnalysisContextService;
 import mb.statix.multilang.AnalysisResults;
 import mb.statix.multilang.FileResult;
 import mb.statix.multilang.ImmutableAnalysisResults;
 import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.LanguageMetadata;
+import mb.statix.multilang.LanguageMetadataManager;
 import mb.statix.multilang.MultiLang;
 import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.multilang.MultiLangScope;
@@ -80,7 +80,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
     private final SmlPartialSolveProject partialSolveProject;
     private final SmlPartialSolveFile partialSolveFile;
     private final SmlBuildSpec buildSpec;
-    private final Lazy<AnalysisContextService> analysisContextService;
+    private final Lazy<LanguageMetadataManager> languageMetadataManager;
     private final Logger logger;
 
     @Inject public SmlSolveProject(
@@ -88,14 +88,14 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
         SmlPartialSolveProject partialSolveProject,
         SmlPartialSolveFile partialSolveFile,
         SmlBuildSpec buildSpec,
-        @MultiLang Lazy<AnalysisContextService> analysisContextService,
+        @MultiLang Lazy<LanguageMetadataManager> languageMetadataManager,
         LoggerFactory loggerFactory
     ) {
         this.instantiateGlobalScope = instantiateGlobalScope;
         this.partialSolveProject = partialSolveProject;
         this.partialSolveFile = partialSolveFile;
         this.buildSpec = buildSpec;
-        this.analysisContextService = analysisContextService;
+        this.languageMetadataManager = languageMetadataManager;
         logger = loggerFactory.create(SmlSolveProject.class);
     }
 
@@ -183,7 +183,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
 
     private Result<Map<LanguageId, LanguageMetadata>, MultiLangAnalysisException> getLanguageMetadata(Collection<LanguageId> languages) {
         return languages.stream()
-            .map(languageId -> TaskUtils.executeWrapped(() -> Result.ofOk(analysisContextService.get().getLanguageMetadata(languageId)))
+            .map(languageId -> TaskUtils.executeWrapped(() -> Result.ofOk(languageMetadataManager.get().getLanguageMetadata(languageId)))
                 .map(res -> new AbstractMap.SimpleImmutableEntry<>(languageId, res)))
             .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("Error when resolving language metadata")))
             .map(SmlSolveProject::entrySetToMap);

@@ -14,8 +14,9 @@ import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
-import mb.statix.multilang.AnalysisContextService;
 import mb.statix.multilang.LanguageId;
+import mb.statix.multilang.LanguageMetadataManager;
+import mb.statix.multilang.LanguagePieManager;
 import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.multilang.pie.config.SmlBuildContextConfiguration;
 
@@ -26,25 +27,28 @@ public abstract class SmlCheckTaskDef implements TaskDef<ResourcePath, KeyedMess
     private final Function<ResourceKey, Messages> parseMessageFunction;
     private final SmlBuildContextConfiguration buildContextConfiguration;
     private final SmlBuildMessages buildMessages;
-    private final Lazy<AnalysisContextService> analysisContextService;
+    private final Lazy<LanguageMetadataManager> languageMetadataManager;
+    private final Lazy<LanguagePieManager> languagePieManager;
 
     public SmlCheckTaskDef(
         Function<ResourceKey, Messages> parseMessageFunction,
         SmlBuildContextConfiguration buildContextConfiguration,
         SmlBuildMessages buildMessages,
-        Lazy<AnalysisContextService> analysisContextService
+        Lazy<LanguageMetadataManager> languageMetadataManager,
+        Lazy<LanguagePieManager> languagePieManager
     ) {
         this.parseMessageFunction = parseMessageFunction;
         this.buildContextConfiguration = buildContextConfiguration;
         this.buildMessages = buildMessages;
-        this.analysisContextService = analysisContextService;
+        this.languageMetadataManager = languageMetadataManager;
+        this.languagePieManager = languagePieManager;
     }
 
     @Override
     public KeyedMessages exec(ExecContext context, ResourcePath projectPath) {
         // Aggregate all parse messages
         final KeyedMessagesBuilder builder = new KeyedMessagesBuilder();
-        analysisContextService.get().getLanguageMetadataResult(getLanguageId())
+        languageMetadataManager.get().getLanguageMetadataResult(getLanguageId())
             .ifElse(languageMetadata -> languageMetadata
                 .resourcesSupplier()
                 .apply(context, projectPath)
@@ -70,7 +74,7 @@ public abstract class SmlCheckTaskDef implements TaskDef<ResourcePath, KeyedMess
                     // depends directly on all the files SmlBuildMessages depends on:
                     // - language source files:     via parse tasks
                     // - multilang.yaml:            via buildContextConfiguration tasks
-                    final Pie sharedPie = analysisContextService.get().buildPieForLanguages(languageIds);
+                    final Pie sharedPie = languagePieManager.get().buildPieForLanguages(languageIds);
                     try(MixedSession session = sharedPie.newSession()) {
                         final Task<KeyedMessages> messagesTask = buildMessages.createTask(new SmlBuildMessages.Input(
                             projectPath,

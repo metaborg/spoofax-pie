@@ -20,24 +20,24 @@ public class SharedPieProvider implements PieProvider {
 
     private final Pie languagePie;
     private final LanguageId languageId;
-    private final Lazy<AnalysisContextService> analysisContextService;
+    private final Lazy<ContextPieManager> contextPieManager;
     private final SmlBuildContextConfiguration buildContextConfiguration;
 
     @Inject public SharedPieProvider(
         @Named("prototype") Pie languagePie,
         LanguageId languageId,
-        Lazy<AnalysisContextService> analysisContextService,
+        Lazy<ContextPieManager> contextPieManager,
         SmlBuildContextConfiguration buildContextConfiguration
     ) {
         this.languagePie = languagePie;
         this.languageId = languageId;
-        this.analysisContextService = analysisContextService;
+        this.contextPieManager = contextPieManager;
         this.buildContextConfiguration = buildContextConfiguration;
     }
 
     @Override
     public Pie getPie(@Nullable ResourcePath projectDir) {
-        AnalysisContextService analysisContextService = this.analysisContextService.get();
+        ContextPieManager analysisContextService = this.contextPieManager.get();
         try(MixedSession session = languagePie.newSession()) {
             if(projectDir == null) {
                 ContextId defaultContextId = analysisContextService.getDefaultContextId(languageId);
