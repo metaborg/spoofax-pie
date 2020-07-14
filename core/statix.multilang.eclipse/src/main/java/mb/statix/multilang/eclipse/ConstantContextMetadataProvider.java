@@ -6,7 +6,7 @@ import mb.statix.multilang.LanguageId;
 import java.util.Map;
 import java.util.Set;
 
-public class ConstantContextMetadataProvider implements ContextMetadataProvider {
+public abstract class ConstantContextMetadataProvider implements ContextMetadataProvider {
 
     private final Map<ContextId, Set<LanguageId>> contextMetadata;
 
