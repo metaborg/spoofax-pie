@@ -224,7 +224,7 @@ public class MultilangAnalyzerCompiler {
         default Collection<TypeInfo> libraryTaskDefs() {
             ArrayList<TypeInfo> taskDefs = new ArrayList<>();
             String multilangTaskDefPackage = "mb.statix.multilang.pie";
-            taskDefs.add(TypeInfo.of(multilangTaskDefPackage, "SmlAnalyzeProject"));
+            taskDefs.add(TypeInfo.of(multilangTaskDefPackage, "SmlSolveProject"));
             taskDefs.add(TypeInfo.of(multilangTaskDefPackage, "SmlBuildMessages"));
             taskDefs.add(TypeInfo.of(multilangTaskDefPackage, "SmlBuildSpec"));
             taskDefs.add(TypeInfo.of(multilangTaskDefPackage, "SmlInstantiateGlobalScope"));

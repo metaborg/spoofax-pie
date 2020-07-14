@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @MultiLangScope
-public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Result<AnalysisResults, MultiLangAnalysisException>> {
+public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<AnalysisResults, MultiLangAnalysisException>> {
     public static class Input implements Serializable {
         private final ResourcePath projectPath;
         private final HashSet<LanguageId> languages;
@@ -83,7 +83,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Resul
     private final Lazy<AnalysisContextService> analysisContextService;
     private final Logger logger;
 
-    @Inject public SmlAnalyzeProject(
+    @Inject public SmlSolveProject(
         SmlInstantiateGlobalScope instantiateGlobalScope,
         SmlPartialSolveProject partialSolveProject,
         SmlPartialSolveFile partialSolveFile,
@@ -96,11 +96,11 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Resul
         this.partialSolveFile = partialSolveFile;
         this.buildSpec = buildSpec;
         this.analysisContextService = analysisContextService;
-        logger = loggerFactory.create(SmlAnalyzeProject.class);
+        logger = loggerFactory.create(SmlSolveProject.class);
     }
 
     @Override public String getId() {
-        return SmlAnalyzeProject.class.getSimpleName();
+        return SmlSolveProject.class.getSimpleName();
     }
 
     @Override public Result<AnalysisResults, MultiLangAnalysisException> exec(ExecContext context, Input input) {
@@ -111,7 +111,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Resul
                 lmd.projectConstraint(),
                 input.logLevel))).map(res -> new AbstractMap.SimpleImmutableEntry<>(lmd.languageId(), res)))
             .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("At least one project constraint has an unexpected exception")))
-            .map(SmlAnalyzeProject::entrySetToMap)
+            .map(SmlSolveProject::entrySetToMap)
             .flatMap(projectResults -> analyzeFiles(context, input, languageMetadataMap, projectResults)));
     }
 
@@ -131,7 +131,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Resul
                     input.logLevel)))
                     .map(res -> new AbstractMap.SimpleImmutableEntry<>(resourceKey, res))))
             .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("At least one file constraint has an unexpected exception")))
-            .map(SmlAnalyzeProject::entrySetToMap)
+            .map(SmlSolveProject::entrySetToMap)
             .flatMap(fileResults -> solveCombined(context, input, projectResults, fileResults));
     }
 
@@ -186,7 +186,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Resul
             .map(languageId -> TaskUtils.executeWrapped(() -> Result.ofOk(analysisContextService.get().getLanguageMetadata(languageId)))
                 .map(res -> new AbstractMap.SimpleImmutableEntry<>(languageId, res)))
             .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("Error when resolving language metadata")))
-            .map(SmlAnalyzeProject::entrySetToMap);
+            .map(SmlSolveProject::entrySetToMap);
     }
 
     private Supplier<Result<Spec, SpecLoadException>> specSupplier(Input input) {

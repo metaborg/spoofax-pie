@@ -8,16 +8,13 @@ import mb.nabl2.terms.unification.ud.IUniDisunifier;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
-import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.statix.multilang.AnalysisResults;
-import mb.statix.multilang.ContextId;
 import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.multilang.MultiLangScope;
 import mb.statix.multilang.utils.MessageUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.metaborg.util.iterators.Iterables2;
 import org.metaborg.util.log.Level;
 
 import javax.inject.Inject;
@@ -28,10 +25,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @MultiLangScope
@@ -68,9 +62,9 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
         }
     }
 
-    private final SmlAnalyzeProject analyzeProject;
+    private final SmlSolveProject analyzeProject;
 
-    @Inject public SmlBuildMessages(SmlAnalyzeProject analyzeProject) {
+    @Inject public SmlBuildMessages(SmlSolveProject analyzeProject) {
         this.analyzeProject = analyzeProject;
     }
 
@@ -83,7 +77,7 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
         context.require(input.projectPath.appendRelativePath("multilang.yaml"), context.getDefaultRequireReadableResourceStamper());
 
         Task<Result<AnalysisResults, MultiLangAnalysisException>> analyzeTask = analyzeProject
-            .createTask(new SmlAnalyzeProject.Input(input.projectPath, input.languages, input.logLevel));
+            .createTask(new SmlSolveProject.Input(input.projectPath, input.languages, input.logLevel));
         return context.require(analyzeTask).mapOrElse(results -> {
             final IUniDisunifier resultUnifier = results.finalResult().state().unifier();
             final KeyedMessagesBuilder builder = new KeyedMessagesBuilder();

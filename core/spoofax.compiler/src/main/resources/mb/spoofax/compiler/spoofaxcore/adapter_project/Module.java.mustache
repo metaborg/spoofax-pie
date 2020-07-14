@@ -38,7 +38,7 @@ import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.LanguageMetadata;
 import mb.statix.multilang.MultiLang;
 import mb.statix.multilang.SharedPieProvider;
-import mb.statix.multilang.pie.SmlAnalyzeProject;
+import mb.statix.multilang.pie.SmlSolveProject;
 import mb.statix.multilang.pie.SmlBuildMessages;
 import mb.statix.multilang.pie.SmlBuildSpec;
 import mb.statix.multilang.pie.SmlInstantiateGlobalScope;
@@ -247,8 +247,8 @@ public class {{genModule.id}} {
     }
 
     @Provides @LanguageScope
-    static SmlAnalyzeProject provideAnalyzeProject(@MultiLang SmlAnalyzeProject analyzeProject) {
-        return analyzeProject;
+    static SmlSolveProject provideSolveProject(@MultiLang SmlSolveProject solveProject) {
+        return solveProject;
     }
 
     @Provides @LanguageScope
