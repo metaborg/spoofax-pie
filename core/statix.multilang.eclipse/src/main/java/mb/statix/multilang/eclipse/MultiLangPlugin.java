@@ -93,15 +93,11 @@ public class MultiLangPlugin extends Plugin {
         // Register suppliers
         languageMetadataProviders.stream()
             .map(LanguageMetadataProvider::getLanguageMetadataSuppliers)
-            // TODO: This method might throw a DuplicateKeysException when multiple extension provide
-            // suppliers for same language id. This exception must be handled nicely (but not ignored)
             .forEach(analysisContextServiceBuilder::putAllLanguageMetadataSuppliers);
 
         // Register default context ids
         languageMetadataProviders.stream()
             .map(LanguageMetadataProvider::getDefaultLanguageContexts)
-            // TODO: This method might throw a DuplicateKeysException when multiple extension provide
-            // suppliers for same language id. This exception must be handled nicely (but not ignored)
             .forEach(analysisContextServiceBuilder::putAllDefaultLanguageContexts);
 
         // Initialize languages for context
