@@ -1,13 +1,13 @@
 package {{genContextProvider.packageId}};
 
-import com.google.common.collect.Lists;
-import mb.statix.multilang.ContextConfig;
 import mb.statix.multilang.ContextId;
 import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.eclipse.ConstantContextMetadataProvider;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class {{genContextProvider.id}} extends ConstantContextMetadataProvider {
 
@@ -15,14 +15,13 @@ public class {{genContextProvider.id}} extends ConstantContextMetadataProvider {
         super(getDefaultContexts());
     }
 
-    private static Map<ContextId, ContextConfig> getDefaultContexts() {
-        ContextConfig config = new ContextConfig();
-        {{#adapterProjectCompilerInput.multilangAnalyzer}}
-        config.setLanguages(Lists.newArrayList(new LanguageId("{{languageId}}")));
-        HashMap<ContextId, ContextConfig> configMap = new HashMap<>();
-        configMap.put(new ContextId("{{languageId}}"), config);
-        configMap.put(new ContextId("{{contextId}}"), config);
-        {{/adapterProjectCompilerInput.multilangAnalyzer}}
+    {{#adapterProjectCompilerInput.multilangAnalyzer}}
+    private static Map<ContextId, Set<LanguageId>> getDefaultContexts() {
+        Set<LanguageId> languageIdSet = Collections.singleton(new LanguageId("{{languageId}}"));
+        HashMap<ContextId, Set<LanguageId>> configMap = new HashMap<>();
+        configMap.put(new ContextId("{{languageId}}"), languageIdSet);
+        configMap.put(new ContextId("{{contextId}}"), languageIdSet);
         return configMap;
     }
+    {{/adapterProjectCompilerInput.multilangAnalyzer}}
 }

@@ -1,24 +1,31 @@
 package {{genMetadataProvider.packageId}};
 
+import mb.statix.multilang.ContextId;
 import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.LanguageMetadata;
 import mb.statix.multilang.eclipse.LanguageMetadataProvider;
-import org.metaborg.util.iterators.Iterables2;
 
-import java.util.AbstractMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
 public class {{genMetadataProvider.id}} implements LanguageMetadataProvider {
 
+    // Don't inline this method into getLanguageMetadataSuppliers
+    // Because call of getComponent should be delayed for concurrency reasons
     private LanguageMetadata getLanguageMetadata() {
-        {{adapterProjectCompilerInput.component.qualifiedId}} component = {{genPlugin.id}}.getComponent();
-        {{adapterProjectCompilerInput.instance.qualifiedId}} langInstance = component.getLanguageInstance();
-        return langInstance.getLanguageMetadata();
+        return {{genPlugin.id}}.getComponent().getLanguageMetadata();
     }
 
-    @Override
-    public Iterable<Map.Entry<LanguageId, Supplier<LanguageMetadata>>> getLanguageMetadatas() {
-        return Iterables2.singleton(new AbstractMap.SimpleEntry<>(new LanguageId("{{adapterProjectCompilerInput.multilangAnalyzer.value.languageId}}"), this::getLanguageMetadata));
+    @Override public Map<LanguageId, Supplier<LanguageMetadata>> getLanguageMetadataSuppliers() {
+        Map<LanguageId, Supplier<LanguageMetadata>> result = new HashMap<>();
+        result.put(new LanguageId("{{adapterProjectCompilerInput.multilangAnalyzer.value.languageId}}"), this::getLanguageMetadata);
+        return result;
+    }
+
+    @Override public Map<LanguageId, ContextId> getDefaultLanguageContexts() {
+        Map<LanguageId, ContextId> result = new HashMap<>();
+        result.put(new LanguageId("{{adapterProjectCompilerInput.multilangAnalyzer.value.languageId}}"), new ContextId("{{adapterProjectCompilerInput.multilangAnalyzer.value.contextId}}"));
+        return result;
     }
 }

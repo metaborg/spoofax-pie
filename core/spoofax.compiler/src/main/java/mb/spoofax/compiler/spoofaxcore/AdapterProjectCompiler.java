@@ -168,6 +168,7 @@ public class AdapterProjectCompiler {
             allTaskDefs.add(i.indexAstTaskDef());
             allTaskDefs.add(i.preStatixTaskDef());
             allTaskDefs.add(i.postStatixTaskDef());
+            allTaskDefs.add(i.checkTaskDef());
             allTaskDefs.addAll(i.libraryTaskDefs());
         });
         allTaskDefs.add(input.checkTaskDef());
