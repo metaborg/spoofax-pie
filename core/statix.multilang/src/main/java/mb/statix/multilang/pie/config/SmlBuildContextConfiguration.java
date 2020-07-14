@@ -22,8 +22,7 @@ import java.util.Objects;
 import java.util.Set;
 
 @MultiLangScope
-public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConfiguration.Input,
-    Result<SmlBuildContextConfiguration.Output, ConfigurationException>> {
+public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConfiguration.Input, Result<ContextConfig, ConfigurationException>> {
     public static class Input implements Serializable {
         private final ResourcePath projectDir;
         private final LanguageId languageId;
@@ -54,44 +53,6 @@ public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConf
         }
     }
 
-    public static class Output implements Serializable {
-        private final ContextId contextId;
-        private final ContextConfig contextConfig;
-
-        public Output(ContextId contextId, ContextConfig contextConfig) {
-            this.contextId = contextId;
-            this.contextConfig = contextConfig;
-        }
-
-        public ContextId getContextId() {
-            return contextId;
-        }
-
-        public ContextConfig getContextConfig() {
-            return contextConfig;
-        }
-
-        @Override public boolean equals(Object o) {
-            if(this == o) return true;
-            if(o == null || getClass() != o.getClass()) return false;
-            Output output = (Output)o;
-            return contextId.equals(output.contextId) &&
-                contextConfig.equals(output.contextConfig);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(contextId, contextConfig);
-        }
-
-        @Override public String toString() {
-            return "Output{" +
-                "contextId=" + contextId +
-                ", contextConfig=" + contextConfig +
-                '}';
-        }
-    }
-
     private final SmlReadConfigYaml readConfigYaml;
     private final Lazy<AnalysisContextService> analysisContextService;
 
@@ -107,7 +68,7 @@ public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConf
     }
 
     @Override
-    public Result<Output, ConfigurationException> exec(ExecContext context, Input input) {
+    public Result<ContextConfig, ConfigurationException> exec(ExecContext context, Input input) {
         return context.require(readConfigYaml.createTask(input.projectDir))
             .mapErr(ConfigurationException::new)
             .flatMap(config -> {
@@ -141,7 +102,7 @@ public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConf
                         + ", but it is not included in the configuration for that context. "
                         + "Included languages: " + contextConfig.getLanguages()));
                 }
-                return Result.ofOk(new Output(contextId, contextConfig));
+                return Result.ofOk(contextConfig);
             });
     }
 }

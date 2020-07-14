@@ -63,7 +63,7 @@ public abstract class SmlCheckTaskDef implements TaskDef<ResourcePath, KeyedMess
         return context.require(buildContextConfiguration.createTask(new SmlBuildContextConfiguration.Input(projectPath, getLanguageId())))
             .mapErr(MultiLangAnalysisException::wrapIfNeeded)
             .flatMap(contextInfo -> {
-                final List<LanguageId> languageIds = contextInfo.getContextConfig().getLanguages();
+                final List<LanguageId> languageIds = contextInfo.getLanguages();
                 try {
                     // We execute the actual analysis in the context of a shared Pie, to make sure all information is present.
                     // This will not break incrementality, because this task (or its equivalents for other languages)
@@ -75,7 +75,7 @@ public abstract class SmlCheckTaskDef implements TaskDef<ResourcePath, KeyedMess
                         final Task<KeyedMessages> messagesTask = buildMessages.createTask(new SmlBuildMessages.Input(
                             projectPath,
                             languageIds,
-                            contextInfo.getContextConfig().parseLevel()
+                            contextInfo.parseLevel()
                         ));
                         return TaskUtils.executeWrapped(() -> Result.ofOk(session.require(messagesTask)), "Exception executing analysis");
                     }
