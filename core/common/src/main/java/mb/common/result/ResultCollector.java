@@ -109,8 +109,12 @@ public class ResultCollector<V, C extends Collection<V>, E extends Exception, A 
             result.ifElse(values::add, exceptions::add);
         }
 
+        @SuppressWarnings("unchecked") /* other has type parameter E, so cast to E is safe after build */
         @Override public ResultAccumulator<V, C, E> combine(ResultAccumulator<V, C, E> other) {
-            other.build(AggregateException::new).ifElse(values::addAll, exc -> exceptions.addAll(exc.getInnerExceptionsAs()));
+            other.build(AggregateException::new)
+                .ifElse(values::addAll, exc -> exc.getInnerExceptions().stream()
+                    .map(e -> (E) e)
+                    .forEach(exceptions::add));
             return this;
         }
 
