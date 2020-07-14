@@ -27,9 +27,6 @@ public class ConfigResourceChangeListener implements IResourceChangeListener {
     private static final Logger logger = SpoofaxPlugin.getComponent().getLoggerFactory().create(ConfigResourceChangeListener.class);
     private final ArrayList<ConfigChangeListener> delegates = new ArrayList<>();
 
-    public ConfigResourceChangeListener() {
-    }
-
     @Override
     public void resourceChanged(IResourceChangeEvent event) {
         IResourceDelta rootDelta = event.getDelta();

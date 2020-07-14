@@ -309,7 +309,7 @@ public class {{genModule.id}} {
         return ImmutableLanguageMetadata.builder()
             .resourcesSupplier(MetadataUtils.resourcesSupplierForExtensions({{#shared.fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/shared.fileExtensions}}))
             .astFunction(preStatix.createFunction().mapInput(indexAst::createSupplier))
-            .postTransform(postStatix.createFunction().mapInput((exec, i) -> i)) // mapInput needed for typing
+            .postTransform(postStatix.createFunction())
             .languageId(new LanguageId("{{languageId}}"))
             .languagePie(languagePie)
             .termFactory(termFactory)
