@@ -91,7 +91,7 @@ public class EclipseProjectCompiler {
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.spoofaxEclipseDep()));
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(input.eclipseExternaldepsDependency()));
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.spoofaxEclipseExternaldepsDep()));
-        if (input.adapterProjectCompilerInput().isMultiLang()) {
+        if (input.adapterProjectCompilerInput().multilangAnalyzer().isPresent()) {
             bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.multilangEclipseDep()));
         }
         return bundleDependencies;
@@ -124,7 +124,7 @@ public class EclipseProjectCompiler {
         runCommandHandlerTemplate.write(input.genRunCommandHandler().file(classesGenDirectory), input);
         observeHandlerTemplate.write(input.genObserveHandler().file(classesGenDirectory), input);
         unobserveHandlerTemplate.write(input.genUnobserveHandler().file(classesGenDirectory), input);
-        if(input.adapterProjectCompilerInput().isMultiLang()) {
+        if(input.adapterProjectCompilerInput().multilangAnalyzer().isPresent()) {
             contextProviderTemplate.write(input.genContextProvider().file(classesGenDirectory), input);
             metadataProviderTemplate.write(input.genMetadataProvider().file(classesGenDirectory), input);
         }
@@ -579,7 +579,7 @@ public class EclipseProjectCompiler {
                 generatedFiles.add(genRunCommandHandler().file(classesGenDirectory()));
                 generatedFiles.add(genObserveHandler().file(classesGenDirectory()));
                 generatedFiles.add(genUnobserveHandler().file(classesGenDirectory()));
-                if(adapterProjectCompilerInput().isMultiLang()) {
+                if(adapterProjectCompilerInput().multilangAnalyzer().isPresent()) {
                     generatedFiles.add(genContextProvider().file(classesGenDirectory()));
                     generatedFiles.add(genMetadataProvider().file(classesGenDirectory()));
                 }
