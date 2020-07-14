@@ -9,6 +9,7 @@ dependencies {
 
   api(project(":common"))
   api(project(":jsglr.common"))
+  api(project(":stratego.common"))
   api(project(":spoofax.core"))
 
   api("org.metaborg:statix.solver")
