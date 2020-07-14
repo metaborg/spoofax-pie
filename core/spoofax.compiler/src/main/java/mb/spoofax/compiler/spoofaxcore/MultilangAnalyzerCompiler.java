@@ -211,10 +211,6 @@ public class MultilangAnalyzerCompiler {
 
         // Statix spec metadata
 
-        @Value.Default default String specRoot() {
-            return shared().defaultBasePackageId().replace('.', '/') + "/src-gen/statix";
-        }
-
         String rootModule();
 
         @Value.Default default String fileConstraint() {
