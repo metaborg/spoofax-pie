@@ -192,7 +192,7 @@ public class TigerModule {
         return new MapTaskDefs(taskDefs);
     }
 
-    @Provides @LanguageScope
+    @Provides @LanguageScope @Named("prototype")
     static Pie providePie(@Platform Pie pie, TaskDefs taskDefs, ResourceService resourceService) {
         return pie.createChildBuilder().withTaskDefs(taskDefs).withResourceService(resourceService).build();
     }
