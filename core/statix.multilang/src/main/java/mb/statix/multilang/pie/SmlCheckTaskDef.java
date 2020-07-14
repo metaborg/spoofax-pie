@@ -45,18 +45,17 @@ public abstract class SmlCheckTaskDef implements TaskDef<ResourcePath, KeyedMess
         // Aggregate all parse messages
         final KeyedMessagesBuilder builder = new KeyedMessagesBuilder();
         analysisContextService.get().getLanguageMetadataResult(getLanguageId())
-            .ifElse(
-                languageMetadata -> languageMetadata
-                    .resourcesSupplier()
-                    .apply(context, projectPath)
-                    .forEach(resourceKey -> {
-                        try {
-                            Messages messages = context.require(parseMessageFunction.createSupplier(resourceKey));
-                            builder.addMessages(resourceKey, messages);
-                        } catch(IOException e) {
-                            builder.addMessage("IO Exception when parsing file", e, Severity.Error, resourceKey);
-                        }
-                    }),
+            .ifElse(languageMetadata -> languageMetadata
+                .resourcesSupplier()
+                .apply(context, projectPath)
+                .forEach(resourceKey -> {
+                    try {
+                        Messages messages = context.require(parseMessageFunction.createSupplier(resourceKey));
+                        builder.addMessages(resourceKey, messages);
+                    } catch(IOException e) {
+                        builder.addMessage("IO Exception when parsing file", e, Severity.Error, resourceKey);
+                    }
+                }),
                 err -> builder.addMessages(err.toKeyedMessages())
             );
 
@@ -84,7 +83,7 @@ public abstract class SmlCheckTaskDef implements TaskDef<ResourcePath, KeyedMess
                     return Result.ofErr(e);
                 }
             })
-            .mapOrElse((KeyedMessages messages) -> {
+            .mapOrElse(messages -> {
                 builder.addMessages(messages);
                 return builder.build();
             }, MultiLangAnalysisException::toKeyedMessages);
