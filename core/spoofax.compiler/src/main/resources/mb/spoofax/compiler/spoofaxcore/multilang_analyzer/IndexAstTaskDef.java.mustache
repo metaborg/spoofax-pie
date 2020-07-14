@@ -1,9 +1,13 @@
 package {{genIndexAstTaskDef.packageId}};
 
+import mb.common.result.Result;
 import mb.jsglr1.common.JSGLR1ParseException;
+import mb.pie.api.Function;
+import mb.pie.api.Supplier;
 import mb.spoofax.core.language.LanguageScope;
 import mb.statix.multilang.pie.transform.SmlIndexAstTaskDef;
 import mb.stratego.common.StrategoRuntime;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -13,7 +17,7 @@ public class {{genIndexAstTaskDef.id}} extends SmlIndexAstTaskDef<JSGLR1ParseExc
 
     @Inject public {{genIndexAstTaskDef.id}}(
         Provider<StrategoRuntime> strategoRuntimeProvider,
-        Function<Supplier<String>, IStrategoTerm> astSupplier
+        Function<Supplier<String>, Result<IStrategoTerm, JSGLR1ParseException>> astSupplier
     ) {
         super(strategoRuntimeProvider, astSupplier);
     }

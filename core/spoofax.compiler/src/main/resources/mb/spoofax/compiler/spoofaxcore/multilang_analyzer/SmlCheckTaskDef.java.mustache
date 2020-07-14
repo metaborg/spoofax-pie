@@ -12,6 +12,7 @@ import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.pie.SmlBuildMessages;
 import mb.statix.multilang.pie.SmlCheckTaskDef;
 import mb.statix.multilang.pie.config.SmlBuildContextConfiguration;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 
@@ -19,12 +20,12 @@ import javax.inject.Inject;
 public class {{genCheckTaskDef.id}} extends SmlCheckTaskDef {
 
     @Inject public {{genCheckTaskDef.id}}(
-        Function<Supplier<String>, IStrategoTerm> astSupplier,
+        Function<Supplier<String>, Messages> messagesSupplier,
         SmlBuildContextConfiguration buildContextConfiguration,
         SmlBuildMessages buildMessages,
         Lazy<AnalysisContextService> analysisContextService
     ) {
-        super(astSupplier.mapInput(key -> new ResourceStringSupplier(key), buildContextConfiguration, buildMessages, analysisContextService));
+        super(messagesSupplier.mapInput((java.util.function.Function<ResourceKey, Supplier<String>>)ResourceStringSupplier::new), buildContextConfiguration, buildMessages, analysisContextService);
     }
 
     @Override public String getId() {

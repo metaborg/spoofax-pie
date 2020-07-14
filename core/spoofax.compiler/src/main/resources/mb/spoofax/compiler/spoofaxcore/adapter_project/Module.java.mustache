@@ -3,13 +3,18 @@ package {{genModule.packageId}};
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
+import mb.common.result.Result;
+import mb.jsglr1.common.JSGLR1ParseException;
 import mb.log.api.LoggerFactory;
 import mb.common.util.MapView;
 import mb.common.util.EntryView;
+import mb.common.message.Messages;
 import mb.log.api.LoggerFactory;
+import mb.pie.api.Function;
 import mb.pie.api.MapTaskDefs;
 import mb.pie.api.Pie;
 import mb.pie.api.MixedSession;
+import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.pie.api.TaskDefs;
 import mb.resource.ResourceKeyString;
@@ -28,12 +33,24 @@ import mb.spoofax.core.pie.PieProvider;
 import mb.spoofax.core.pie.DefaultPieProvider;
 {{#isMultiLang}}
 import mb.statix.multilang.AnalysisContextService;
-import mb.statix.multilang.ContextId;
+import mb.statix.multilang.ImmutableLanguageMetadata;
 import mb.statix.multilang.LanguageId;
+import mb.statix.multilang.LanguageMetadata;
+import mb.statix.multilang.MultiLang;
 import mb.statix.multilang.SharedPieProvider;
+import mb.statix.multilang.pie.SmlAnalyzeProject;
+import mb.statix.multilang.pie.SmlBuildMessages;
+import mb.statix.multilang.pie.SmlBuildSpec;
+import mb.statix.multilang.pie.SmlInstantiateGlobalScope;
+import mb.statix.multilang.pie.SmlPartialSolveFile;
+import mb.statix.multilang.pie.SmlPartialSolveProject;
+import mb.statix.multilang.pie.config.SmlBuildContextConfiguration;
+import mb.statix.multilang.pie.config.SmlReadConfigYaml;
+import mb.statix.multilang.utils.MetadataUtils;
 {{/isMultiLang}}
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 
 import javax.inject.Named;
@@ -200,8 +217,58 @@ public class {{genModule.id}} {
     }
 {{#isMultiLang}}
     @Provides @LanguageScope
-    static Function<Supplier<String>, IStrategoTerm> provideParseFunction({{parser.parseTaskDef.qualifiedId}} parse) {
-        return parse.createFunction();
+    static SmlBuildMessages provideBuildMessages(@MultiLang SmlBuildMessages buildMessages) {
+        return buildMessages;
+    }
+
+    @Provides @LanguageScope
+    static SmlBuildSpec provideBuildSpec(@MultiLang SmlBuildSpec buildSpec) {
+        return buildSpec;
+    }
+
+    @Provides @LanguageScope
+    static SmlPartialSolveFile providePartialSolveFile(@MultiLang SmlPartialSolveFile partialSolveFile) {
+        return partialSolveFile;
+    }
+
+    @Provides @LanguageScope
+    static SmlPartialSolveProject providePartialSolveProject(@MultiLang SmlPartialSolveProject partialSolveProject) {
+        return partialSolveProject;
+    }
+
+    @Provides @LanguageScope
+    static SmlInstantiateGlobalScope provideInstantiateGlobalScope(@MultiLang SmlInstantiateGlobalScope instantiateGlobalScope) {
+        return instantiateGlobalScope;
+    }
+
+    @Provides @LanguageScope
+    static SmlBuildContextConfiguration provideBuildContextConfiguration(@MultiLang SmlBuildContextConfiguration buildContextConfiguration) {
+        return buildContextConfiguration;
+    }
+
+    @Provides @LanguageScope
+    static SmlAnalyzeProject provideAnalyzeProject(@MultiLang SmlAnalyzeProject analyzeProject) {
+        return analyzeProject;
+    }
+
+    @Provides @LanguageScope
+    static SmlReadConfigYaml provideReadConfigYaml(@MultiLang SmlReadConfigYaml readConfigYaml) {
+        return readConfigYaml;
+    }
+
+    @Provides @LanguageScope
+    static AnalysisContextService getAnalysisContextService(@MultiLang AnalysisContextService analysisContextService) {
+        return analysisContextService;
+    }
+
+    @Provides @LanguageScope
+    static Function<Supplier<String>, Result<IStrategoTerm, JSGLR1ParseException>> provideParseFunction({{parser.parseTaskDef.qualifiedId}} parse) {
+        return parse.createAstFunction();
+    }
+
+    @Provides @LanguageScope
+    static Function<Supplier<String>, Messages> provideParseMessagesFunction({{parser.parseTaskDef.qualifiedId}} parse) {
+        return parse.createMessagesFunction();
     }
 
     @Provides @LanguageScope

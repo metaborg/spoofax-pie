@@ -4,6 +4,7 @@ import mb.common.message.KeyedMessages;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.CommandFeedback;
 
 import javax.inject.Inject;
@@ -22,7 +23,7 @@ public class {{genAnalyzeTaskDef.id}} implements TaskDef<ResourcePath, CommandFe
     }
 
     @Override
-    public CommandOutput exec(ExecContext context, ResourcePath projectRoot) {
+    public CommandFeedback exec(ExecContext context, ResourcePath projectRoot) {
         KeyedMessages messages = context.require(check.createTask(projectRoot));
         return CommandFeedback.of(messages);
     }
