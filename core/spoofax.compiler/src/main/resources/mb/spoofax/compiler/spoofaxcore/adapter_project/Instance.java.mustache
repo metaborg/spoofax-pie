@@ -161,41 +161,4 @@ public class {{genInstance.id}} implements LanguageInstance {
 {{/editorContextMenuItems}}
         );
     }
-
-    {{#multilangAnalyzer}}
-    public LanguageMetadata getLanguageMetadata() {
-        SpecBuilder spec;
-        try {
-            spec = SpecUtils.loadSpec({{classLoaderResourceRegistryInjection.name}}
-                .getResource(ResourceKeyString.of("{{specRoot}}")), "{{rootModule}}", {{termFactoryInjection.name}});
-        } catch(IOException e) {
-            throw new SpecLoadException(e);
-        }
-
-        return ImmutableLanguageMetadata.builder()
-            .resourcesSupplier((exec, projectDir) -> {
-                HierarchicalResource res = exec.getHierarchicalResource(projectDir);
-                try {
-                    return res.walk(
-                    new PathResourceWalker(new NoHiddenPathMatcher()),
-                    new PathResourceMatcher(new ExtensionsPathMatcher(fileExtensions.asUnmodifiable())))
-                    .map(HierarchicalResource::getKey)
-                    .collect(Collectors.toCollection(HashSet::new));
-                } catch(IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            })
-            .astFunction({{preStatixInjection.name}}.createFunction().mapInput((exec, key) -> {{indexAstInjection.name}}
-                .createSupplier(new {{indexAstInjection.type.qualifiedId}}.Input(key, {{parseInjection.name}}
-                    .createNullableRecoverableAstSupplier(key)))))
-            .postTransform({{postStatixInjection.name}}.createFunction())
-            .languageId(new LanguageId("{{languageId}}"))
-            .addAllTaskDefs(taskDefs)
-            .addResourceRegistries({{classLoaderResourceRegistryInjection.name}})
-            .statixSpec(spec)
-            .fileConstraint("{{fileConstraint}}")
-            .projectConstraint("{{projectConstraint}}")
-            .build();
-    }
-    {{/multilangAnalyzer}}
 }
