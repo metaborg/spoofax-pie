@@ -64,7 +64,7 @@ class ParserCompilerTest extends TestBase {
         });
     }
 
-    @ParameterizedTest @EnumSource(value = ClassKind.class, names = {"Manual", "Extended"})
+    @ParameterizedTest @EnumSource(value = ClassKind.class, names = {"Manual"})
     void testManualRequiresClasses(ClassKind classKind) {
         final FSPath baseDirectory = new FSPath(fileSystem.getPath("repo"));
         final Shared shared = TigerInputs.shared(baseDirectory).build();
@@ -74,7 +74,7 @@ class ParserCompilerTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> {
             TigerInputs.parserLanguageProjectInput(shared, languageProject)
                 .classKind(classKind)
-                .build(); // Class kind is Manual or Extended, but manual class names were not set: check fails.
+                .build(); // Class kind is Manual but manual class names were not set: check fails.
         });
         TigerInputs.parserLanguageProjectInput(shared, languageProject)
             .classKind(classKind)
@@ -85,7 +85,7 @@ class ParserCompilerTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> {
             TigerInputs.parserAdapterProjectInput(shared, languageProject, adapterProject)
                 .classKind(classKind)
-                .build(); // Class kind is Manual or Extended, but manual class names were not set: check fails.
+                .build(); // Class kind is Manual, but manual class names were not set: check fails.
         });
         TigerInputs.parserAdapterProjectInput(shared, languageProject, adapterProject)
             .classKind(classKind)
