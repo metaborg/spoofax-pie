@@ -17,15 +17,17 @@ public class {{genMetadataProvider.id}} implements LanguageMetadataProvider {
         return {{genPlugin.id}}.getComponent().getLanguageMetadata();
     }
 
+    {{#adapterProjectCompilerInput.multilangAnalyzer}}
     @Override public Map<LanguageId, Supplier<LanguageMetadata>> getLanguageMetadataSuppliers() {
         Map<LanguageId, Supplier<LanguageMetadata>> result = new HashMap<>();
-        result.put(new LanguageId("{{adapterProjectCompilerInput.multilangAnalyzer.value.languageId}}"), this::getLanguageMetadata);
+        result.put(new LanguageId("{{languageId}}"), this::getLanguageMetadata);
         return result;
     }
 
     @Override public Map<LanguageId, ContextId> getDefaultLanguageContexts() {
         Map<LanguageId, ContextId> result = new HashMap<>();
-        result.put(new LanguageId("{{adapterProjectCompilerInput.multilangAnalyzer.value.languageId}}"), new ContextId("{{adapterProjectCompilerInput.multilangAnalyzer.value.contextId}}"));
+        result.put(new LanguageId("{{languageId}}"), new ContextId("{{contextId}}"));
         return result;
     }
+    {{/adapterProjectCompilerInput.multilangAnalyzer}}
 }
