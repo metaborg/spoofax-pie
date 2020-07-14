@@ -271,13 +271,14 @@ public class {{genModule.id}} {
         return parse.createMessagesFunction();
     }
 
+    {{#multilangAnalyzer}}
     @Provides @LanguageScope
     static LanguageMetadata getLanguageMetadata(
         @Named("prototype") StrategoRuntime strategoRuntime,
         @Named("definition-dir") ClassLoaderResource definitionDir,
-        {{multilangAnalyzer.value.preStatixTaskDef.qualifiedId}} preStatix,
-        {{multilangAnalyzer.value.postStatixTaskDef.qualifiedId}} postStatix,
-        {{multilangAnalyzer.value.indexAstTaskDef.qualifiedId}} indexAst,
+        {{preStatixTaskDef.qualifiedId}} preStatix,
+        {{postStatixTaskDef.qualifiedId}} postStatix,
+        {{indexAstTaskDef.qualifiedId}} indexAst,
         Pie languagePie
     ) {
         ITermFactory termFactory = strategoRuntime.getTermFactory();
@@ -285,13 +286,14 @@ public class {{genModule.id}} {
             .resourcesSupplier(MetadataUtils.resourcesSupplierForExtensions({{#shared.fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/shared.fileExtensions}}))
             .astFunction(preStatix.createFunction().mapInput(indexAst::createSupplier))
             .postTransform(postStatix.createFunction().mapInput((exec, i) -> i)) // mapInput needed for typing
-            .languageId(new LanguageId("{{multilangAnalyzer.value.languageId}}"))
+            .languageId(new LanguageId("{{languageId}}"))
             .languagePie(languagePie)
             .termFactory(termFactory)
-            .statixSpec(MetadataUtils.loadSpec(definitionDir, termFactory, "{{multilangAnalyzer.value.rootModule}}"))
-            .fileConstraint("{{multilangAnalyzer.value.fileConstraint}}")
-            .projectConstraint("{{multilangAnalyzer.value.projectConstraint}}")
+            .statixSpec(MetadataUtils.loadSpec(definitionDir, termFactory, "{{rootModule}}"))
+            .fileConstraint("{{fileConstraint}}")
+            .projectConstraint("{{projectConstraint}}")
             .build();
     }
+    {{/multilangAnalyzer}}
 {{/isMultiLang}}
 }
