@@ -11,6 +11,7 @@ import mb.statix.multilang.pie.config.SmlBuildContextConfiguration;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.util.List;
 import java.util.Set;
 
@@ -23,7 +24,7 @@ public class SharedPieProvider implements PieProvider {
     private final SmlBuildContextConfiguration buildContextConfiguration;
 
     @Inject public SharedPieProvider(
-        Pie languagePie,
+        @Named("prototype") Pie languagePie,
         LanguageId languageId,
         Lazy<AnalysisContextService> analysisContextService,
         SmlBuildContextConfiguration buildContextConfiguration
