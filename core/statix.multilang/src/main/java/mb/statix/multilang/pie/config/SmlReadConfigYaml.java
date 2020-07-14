@@ -31,7 +31,7 @@ public class SmlReadConfigYaml implements TaskDef<ResourcePath, Result<MultiLang
             ResourcePath configFilePath = projectPath.appendRelativePath(configFileName);
             ReadableResource configFileResource = context.require(configFilePath, context.getDefaultRequireReadableResourceStamper());
 
-            if (!configFileResource.exists() || !configFileResource.isReadable()) {
+            if(!configFileResource.exists() || !configFileResource.isReadable()) {
                 return Result.ofOk(new MultiLangConfig());
             }
             return Result.ofOk(new Yaml(new Constructor(MultiLangConfig.class)).load(configFileResource.openRead()));
