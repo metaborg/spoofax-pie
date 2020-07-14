@@ -22,7 +22,7 @@ public interface LanguageMetadata {
 
     @Value.Parameter Function<ResourceKey, Result<IStrategoTerm, ?>> astFunction();
 
-    @Value.Parameter Function<Supplier<Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> postTransform();
+    @Value.Parameter Function<Supplier<? extends Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> postTransform();
 
     @Value.Parameter SpecBuilder statixSpec();
 
