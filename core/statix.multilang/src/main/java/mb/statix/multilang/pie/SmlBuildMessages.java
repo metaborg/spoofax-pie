@@ -16,6 +16,7 @@ import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.multilang.MultiLangScope;
 import mb.statix.multilang.utils.MessageUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.iterators.Iterables2;
 import org.metaborg.util.log.Level;
 
@@ -98,19 +99,10 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
             });
 
             // Process final result messages
-            final Map<Boolean, List<AbstractMap.SimpleEntry<ResourceKey, Message>>> messagesKeyPartitioning = results.finalResult().messages().entrySet().stream()
+            results.finalResult().messages().entrySet().stream()
                 .map(e -> new AbstractMap.SimpleEntry<>(MessageUtils.tryGetResourceKey(e.getKey(), results.finalResult().state().unifier()),
                     MessageUtils.formatMessage(e.getValue(), e.getKey(), resultUnifier)))
-                .collect(Collectors.partitioningBy(Objects::isNull));
-
-            // Add all messages without key to project resource
-            messagesKeyPartitioning.get(true)
-                .stream()
-                .map(Map.Entry::getValue)
-                .forEach(message -> builder.addMessage(message, input.projectPath));
-
-            // Add all messages with remaining key
-            messagesKeyPartitioning.get(false).forEach(entry -> builder.addMessage(entry.getValue(), entry.getKey()));
+                .forEach(entry -> builder.addMessage(entry.getValue(), defaultIfNull(entry.getKey(), input.projectPath)));
 
             // Add empty message sets for keys with no message, to ensure old messages on file are cleared
             builder.addMessages(input.projectPath, Collections.emptySet());
@@ -118,5 +110,9 @@ public class SmlBuildMessages implements TaskDef<SmlBuildMessages.Input, KeyedMe
 
             return builder.build();
         }, MultiLangAnalysisException::toKeyedMessages);
+    }
+
+    public static <T> T defaultIfNull(@Nullable T value, T defaultValue) {
+        return value == null ? defaultValue : value;
     }
 }
