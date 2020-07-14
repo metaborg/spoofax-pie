@@ -24,7 +24,6 @@ import mb.statix.solver.log.IDebugContext;
 import mb.statix.solver.persistent.SolverResult;
 import mb.statix.spec.Spec;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.metaborg.util.iterators.Iterables2;
 import org.metaborg.util.log.Level;
 import org.metaborg.util.task.NullCancel;
 import org.metaborg.util.task.NullProgress;
@@ -32,6 +31,8 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Objects;
 
 @MultiLangScope
@@ -115,7 +116,7 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
                 StrategoTerms st = new StrategoTerms(languageMetadata.termFactory());
 
                 IDebugContext debug = TaskUtils.createDebugContext(input.logLevel);
-                Iterable<ITerm> constraintArgs = Iterables2.from(globalResult.getGlobalScope(), st.fromStratego(ast));
+                Iterable<ITerm> constraintArgs = Arrays.asList(globalResult.getGlobalScope(), st.fromStratego(ast));
                 IConstraint fileConstraint = new CUser(languageMetadata.fileConstraint(), constraintArgs, null);
 
                 return TaskUtils.executeWrapped(() -> {

@@ -13,7 +13,6 @@ import mb.statix.spec.Rule;
 import mb.statix.spec.RuleSet;
 import mb.statix.spec.Spec;
 import mb.statix.spoofax.StatixTerms;
-import org.metaborg.util.iterators.Iterables2;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
@@ -24,7 +23,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
@@ -105,8 +106,10 @@ public class SpecUtils {
     public static IMatcher<Spec> fileSpec() {
         return TermMatch.M.appl6("FileSpec", TermMatch.M.list(), TermMatch.M.req(StatixTerms.labels()), TermMatch.M.req(StatixTerms.labels()), TermMatch.M.term(), StatixTerms.rules(), TermMatch.M.req(StatixTerms.scopeExtensions()),
             (t, l, edgeLabels, relationLabels, noRelationLabel, rules, ext) -> {
-                final IAlphabet<ITerm> labels = new FiniteAlphabet<>(
-                    Iterables2.cons(noRelationLabel, Iterables.concat(relationLabels, edgeLabels)));
+                List<ITerm> allTerms = new ArrayList<>(relationLabels);
+                Collections.addAll(allTerms, edgeLabels.toArray(new ITerm[0]));
+                allTerms.add(0, noRelationLabel);
+                final IAlphabet<ITerm> labels = new FiniteAlphabet<>(allTerms);
                 return Spec.of(rules, edgeLabels, relationLabels, noRelationLabel, labels, ext);
             });
     }
