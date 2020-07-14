@@ -5,6 +5,7 @@ import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.util.StatusUtil;
 {{#this.adapterProjectCompilerInput.isMultiLang}}
 import mb.statix.multilang.eclipse.MultiLangPlugin;
+import mb.statix.multilang.eclipse.UpdateAnalysisConfigChangeListener;
 {{/this.adapterProjectCompilerInput.isMultiLang}}
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -21,6 +22,9 @@ public class {{genPlugin.id}} extends AbstractUIPlugin {
     public static final String pluginId = "{{pluginId}}";
 
     private static {{eclipseComponent.nullableQualifiedId}} component;
+    {{#this.adapterProjectCompilerInput.multilangAnalyzer}}
+    private static @Nullable UpdateAnalysisConfigChangeListener configListener;
+    {{/this.adapterProjectCompilerInput.multilangAnalyzer}}
 
     public static {{eclipseComponent.qualifiedId}} getComponent() {
         if(component == null) {
@@ -41,6 +45,10 @@ public class {{genPlugin.id}} extends AbstractUIPlugin {
             .build();
 
         component.getEditorTracker().register();
+        {{#this.adapterProjectCompilerInput.multilangAnalyzer}}
+        configListener = new UpdateAnalysisConfigChangeListener(component);
+        MultiLangPlugin.getConfigResourceChangeListener().addDelegate(configListener);
+        {{/this.adapterProjectCompilerInput.multilangAnalyzer}}
 
         new WorkspaceJob("{{shared.name}} startup") {
             @Override public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
@@ -52,10 +60,16 @@ public class {{genPlugin.id}} extends AbstractUIPlugin {
                 return StatusUtil.success();
             }
         }.schedule();
-
     }
 
     @Override public void stop(@NonNull BundleContext context) throws Exception {
         super.stop(context);
+        {{#this.adapterProjectCompilerInput.multilangAnalyzer}}
+        if(configListener != null) {
+            MultiLangPlugin.getConfigResourceChangeListener().removeDelegate(configListener);
+        }
+        configListener = null;
+        {{/this.adapterProjectCompilerInput.multilangAnalyzer}}
+        component = null;
     }
 }
