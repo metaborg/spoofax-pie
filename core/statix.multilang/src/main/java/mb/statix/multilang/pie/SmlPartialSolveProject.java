@@ -15,14 +15,15 @@ import mb.statix.solver.log.IDebugContext;
 import mb.statix.solver.persistent.SolverResult;
 import mb.statix.spec.Spec;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.metaborg.util.iterators.Iterables2;
 import org.metaborg.util.log.Level;
 import org.metaborg.util.task.NullCancel;
 import org.metaborg.util.task.NullProgress;
 
 import javax.inject.Inject;
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Objects;
+import java.util.Set;
 
 @MultiLangScope
 public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.Input, Result<SolverResult, MultiLangAnalysisException>> {
@@ -82,13 +83,13 @@ public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.In
         return context.require(input.globalResultSupplier)
             .mapErr(MultiLangAnalysisException::wrapIfNeeded)
             .flatMap(globalResult -> {
-                Iterable<ITermVar> scopeArgs = Iterables2.singleton(globalResult.getGlobalScopeVar());
+                Set<ITermVar> scopeArgs = Collections.singleton(globalResult.getGlobalScopeVar());
                 IConstraint projectConstraint = new CUser(input.projectConstraint, scopeArgs);
 
                 IDebugContext debug = TaskUtils.createDebugContext(SmlPartialSolveProject.class, input.logLevel);
                 return TaskUtils.executeWrapped(() -> context.require(input.specSupplier)
                     .mapErr(MultiLangAnalysisException::wrapIfNeeded)
-                    .flatMap((Spec spec) -> TaskUtils.executeWrapped(() -> {
+                    .flatMap(spec -> TaskUtils.executeWrapped(() -> {
                         SolverResult res = SolverUtils.partialSolve(spec, globalResult.getResult().state(),
                             projectConstraint, debug, new NullProgress(), new NullCancel());
                         return Result.ofOk(res);

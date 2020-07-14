@@ -36,7 +36,6 @@ import java.util.Objects;
 
 @MultiLangScope
 public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, Result<FileResult, MultiLangAnalysisException>> {
-
     public static class Input implements Serializable {
         private final LanguageId languageId;
         private final ResourceKey resourceKey;
@@ -132,13 +131,13 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
                     logger.info("{} analyzed in {} ms", input.resourceKey, dt);
                     return Result.ofOk(result);
                 }, "Analysis for input file " + input.resourceKey + " interrupted")
-                .mapErr(MultiLangAnalysisException::wrapIfNeeded)
-                .flatMap(fileResult -> {
-                    Supplier<Result<IStrategoTerm, ?>> astSupplier = languageMetadata.astFunction().createSupplier(input.resourceKey);
-                    return languageMetadata.postTransform().apply(context, astSupplier)
-                        .mapErr(MultiLangAnalysisException::wrapIfNeeded)
-                        .map(analyzedAst -> new FileResult(analyzedAst, fileResult));
-                });
+                    .mapErr(MultiLangAnalysisException::wrapIfNeeded)
+                    .flatMap(fileResult -> {
+                        Supplier<Result<IStrategoTerm, ?>> astSupplier = languageMetadata.astFunction().createSupplier(input.resourceKey);
+                        return languageMetadata.postTransform().apply(context, astSupplier)
+                            .mapErr(MultiLangAnalysisException::wrapIfNeeded)
+                            .map(analyzedAst -> new FileResult(analyzedAst, fileResult));
+                    });
             })), "Exception when resolving specification");
     }
 }
