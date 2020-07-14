@@ -14,11 +14,7 @@ import mb.common.util.SetView;
 import mb.completions.common.CompletionResult;
 import mb.jsglr.common.JSGLRTokens;
 import mb.pie.api.Task;
-import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
-import mb.resource.ResourceKeyString;
-import mb.resource.ResourceService;
-import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.PathResourceMatcher;
 import mb.resource.hierarchical.match.path.ExtensionsPathMatcher;
@@ -38,27 +34,13 @@ import mb.spoofax.core.language.command.HierarchicalResourceType;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.menu.CommandAction;
 import mb.spoofax.core.language.menu.MenuItem;
-{{#isMultiLang}}
-import mb.statix.multilang.AnalysisContextService;
-import mb.statix.multilang.ContextId;
-import mb.statix.multilang.ImmutableLanguageMetadata;
-import mb.statix.multilang.LanguageId;
-import mb.statix.multilang.LanguageMetadata;
-import mb.statix.multilang.MultiLangConfig;
-import mb.statix.multilang.spec.SpecBuilder;
-import mb.statix.multilang.spec.SpecLoadException;
-import mb.statix.multilang.spec.SpecUtils;
-{{/isMultiLang}}
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
-import java.io.IOException;
 import java.io.Serializable;
-import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Set;
-import java.util.HashSet;
-import java.util.stream.Collectors;
+
 
 public class {{genInstance.id}} implements LanguageInstance {
     private final static SetView<String> fileExtensions = SetView.of({{#shared.fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/shared.fileExtensions}});
@@ -67,7 +49,6 @@ public class {{genInstance.id}} implements LanguageInstance {
     private final {{variable}};
 {{/injected}}
 
-    private final CollectionView<TaskDef<?, ?>> taskDefs;
     private final CollectionView<CommandDef<?>> commandDefs;
     private final CollectionView<AutoCommandRequest<?>> autoCommandDefs;
 
@@ -75,14 +56,12 @@ public class {{genInstance.id}} implements LanguageInstance {
 {{#injected}}
         {{variable}},
 {{/injected}}
-        Set<TaskDef<?, ?>> taskDefs,
         Set<CommandDef<?>> commandDefs,
         Set<AutoCommandRequest<?>> autoCommandDefs
     ) {
 {{#injected}}
         {{thisAssign}};
 {{/injected}}
-        this.taskDefs = CollectionView.copyOf(taskDefs);
         this.commandDefs = CollectionView.copyOf(commandDefs);
         this.autoCommandDefs = CollectionView.copyOf(autoCommandDefs);
     }
