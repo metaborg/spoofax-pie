@@ -15,9 +15,10 @@ import mb.statix.multilang.pie.config.SmlBuildContextConfiguration;
 
 import javax.inject.Inject;
 
+@LanguageScope
 public class {{genCheckTaskDef.id}} extends SmlCheckTaskDef {
 
-    public {{genCheckTaskDef.id}}(
+    @Inject public {{genCheckTaskDef.id}}(
         Function<Supplier<String>, IStrategoTerm> astSupplier
         SmlBuildContextConfiguration buildContextConfiguration,
         SmlBuildMessages buildMessages,

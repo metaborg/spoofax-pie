@@ -358,8 +358,13 @@ public class AdapterProjectCompiler {
             return constraintAnalyzer().map(a -> a.languageProjectInput().multiFile()).orElse(false);
         }
 
-        default boolean isMultiLang() {
-            return multilangAnalyzer().isPresent();
+        default Optional<AdapterProjectCompiler.Input> isMultiLang() {
+            // Hack: return this ony if multilang is present
+            // To make sure the compiler can reference data from other compilers as well
+            if(multilangAnalyzer().isPresent()) {
+                return Optional.of(this);
+            }
+            return Optional.empty();
         }
 
         /// Gradle files

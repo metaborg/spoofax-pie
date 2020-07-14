@@ -114,11 +114,7 @@ public class {{genInstance.id}} implements LanguageInstance {
 
     @Override public Task<KeyedMessages> createCheckTask(ResourcePath projectRoot) {
         {{#isMultiLang}}
-        MultiLangConfig config = ContextUtils.readYamlConfig(resourceService, projectRoot);
-        ContextId contextId = config.getLanguageContexts()
-                .getOrDefault(new LanguageId("{{languageId}}"), new ContextId("{{contextId}}"));
-        AnalysisContext context = analysisContextService.getAnalysisContext(contextId);
-        return {{analyzeInjection.name}}.createTask(new SmlBuildMessages.Input(projectRoot, context));
+        return {{checkInjection.name}}.createTask(projectRoot);
         {{/isMultiLang}}
         {{^isMultiLang}}
         return {{checkInjection.name}}.createTask(new {{checkInjection.type.qualifiedId}}.Input(

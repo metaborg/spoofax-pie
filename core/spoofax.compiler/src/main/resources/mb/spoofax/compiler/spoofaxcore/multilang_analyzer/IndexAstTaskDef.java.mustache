@@ -1,15 +1,17 @@
 package {{genIndexAstTaskDef.packageId}};
 
 import mb.jsglr1.common.JSGLR1ParseException;
+import mb.spoofax.core.language.LanguageScope;
 import mb.statix.multilang.pie.transform.SmlIndexAstTaskDef;
 import mb.stratego.common.StrategoRuntime;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 
+@LanguageScope
 public class {{genIndexAstTaskDef.id}} extends SmlIndexAstTaskDef<JSGLR1ParseException> {
 
-    public {{genIndexAstTaskDef.id}}(
+    @Inject public {{genIndexAstTaskDef.id}}(
         Provider<StrategoRuntime> strategoRuntimeProvider,
         Function<Supplier<String>, IStrategoTerm> astSupplier
     ) {

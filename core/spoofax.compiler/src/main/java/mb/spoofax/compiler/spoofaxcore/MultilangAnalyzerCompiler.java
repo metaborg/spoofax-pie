@@ -247,7 +247,8 @@ public class MultilangAnalyzerCompiler {
                 genAnalyzeTaskDef().file(classesGenDirectory()),
                 genIndexAstTaskDef().file(classesGenDirectory()),
                 genPreStatixTaskDef().file(classesGenDirectory()),
-                genPostStatixTaskDef().file(classesGenDirectory())
+                genPostStatixTaskDef().file(classesGenDirectory()),
+                genCheckTaskDef().file(classesGenDirectory())
             );
         }
 

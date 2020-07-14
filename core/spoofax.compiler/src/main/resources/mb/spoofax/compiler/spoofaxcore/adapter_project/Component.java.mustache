@@ -6,6 +6,7 @@ import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.platform.PlatformComponent;
 {{#isMultiLang}}
 import mb.statix.multilang.MultiLangComponent;
+import mb.statix.multilang.SupportsMLA;
 {{/isMultiLang}}
 
 @LanguageScope
@@ -13,6 +14,6 @@ import mb.statix.multilang.MultiLangComponent;
     modules = {{genModule.id}}.class,
     dependencies = { PlatformComponent.class{{#isMultiLang}}, MultiLangComponent.class{{/isMultiLang}} }
 )
-public interface {{genComponent.id}} extends LanguageComponent {
+public interface {{genComponent.id}} extends LanguageComponent{{#isMultiLang}}, SupportsMLA{{/isMultiLang}}  {
     @Override {{genInstance.id}} getLanguageInstance();
 }
