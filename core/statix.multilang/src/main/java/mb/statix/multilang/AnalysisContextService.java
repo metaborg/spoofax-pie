@@ -1,15 +1,14 @@
 package mb.statix.multilang;
 
 import mb.common.result.Result;
-import mb.pie.api.MixedSession;
 import mb.pie.api.Pie;
 import org.immutables.value.Value;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -22,7 +21,7 @@ public abstract class AnalysisContextService {
     @Value.Parameter public abstract Pie platformPie();
 
     // Map used to cache language metadata instances, so that they will not be recomputed by subsequent accesses.
-    private final Map<LanguageId, LanguageMetadata> languageMetadataCache = new HashMap<>();
+    private final ConcurrentHashMap<LanguageId, LanguageMetadata> languageMetadataCache = new ConcurrentHashMap<>();
 
     public LanguageMetadata getLanguageMetadata(LanguageId languageId) throws MultiLangAnalysisException {
         if(!languageMetadataSuppliers().containsKey(languageId)) {
