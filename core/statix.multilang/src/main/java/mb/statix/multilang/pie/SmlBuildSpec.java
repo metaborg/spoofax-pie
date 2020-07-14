@@ -1,8 +1,11 @@
 package mb.statix.multilang.pie;
 
+import com.google.common.collect.ListMultimap;
 import dagger.Lazy;
 import mb.common.result.Result;
 import mb.common.result.ResultCollector;
+import mb.log.api.Logger;
+import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.statix.multilang.AnalysisContextService;
@@ -12,12 +15,14 @@ import mb.statix.multilang.MultiLang;
 import mb.statix.multilang.MultiLangScope;
 import mb.statix.multilang.spec.SpecBuilder;
 import mb.statix.multilang.spec.SpecLoadException;
+import mb.statix.spec.Rule;
 import mb.statix.spec.Spec;
 
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 
 @MultiLangScope
@@ -56,9 +61,11 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
     }
 
     private final Lazy<AnalysisContextService> analysisContextService;
+    private final Logger logger;
 
-    @Inject public SmlBuildSpec(@MultiLang Lazy<AnalysisContextService> analysisContextService) {
+    @Inject public SmlBuildSpec(@MultiLang Lazy<AnalysisContextService> analysisContextService, LoggerFactory loggerFactory) {
         this.analysisContextService = analysisContextService;
+        logger = loggerFactory.create(SmlBuildSpec.class);
     }
 
     @Override public String getId() {
@@ -73,6 +80,23 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
                 .map(LanguageMetadata::statixSpec)
                 .reduce(SpecBuilder::merge)
                 .map(SpecBuilder::toSpecResult)
+                .map(spec -> spec.ifOk(this::validateOverlappingRules))
                 .orElse(Result.ofErr(new SpecLoadException("Doing analysis without specs is not allowed"))));
+    }
+
+    private void validateOverlappingRules(Spec combinedSpec) {
+        final ListMultimap<String, Rule> rulesWithEquivalentPatterns = combinedSpec.rules().getAllEquivalentRules();
+        if(!rulesWithEquivalentPatterns.isEmpty()) {
+            logger.error("+--------------------------------------+");
+            logger.error("| FOUND RULES WITH EQUIVALENT PATTERNS |");
+            logger.error("+--------------------------------------+");
+            for(Map.Entry<String, Collection<Rule>> entry : rulesWithEquivalentPatterns.asMap().entrySet()) {
+                logger.error("| Overlapping rules for: {}", entry.getKey());
+                for(Rule rule : entry.getValue()) {
+                    logger.error("| * {}", rule);
+                }
+            }
+            logger.error("+--------------------------------------+");
+        }
     }
 }
