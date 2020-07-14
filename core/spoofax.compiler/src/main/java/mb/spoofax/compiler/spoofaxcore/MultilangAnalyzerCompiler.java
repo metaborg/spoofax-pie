@@ -24,12 +24,14 @@ public class MultilangAnalyzerCompiler {
     private final TemplateWriter indexAstTaskDefTemplate;
     private final TemplateWriter preStatixTaskDefTemplate;
     private final TemplateWriter postStatixTaskDefTemplate;
+    private final TemplateWriter checkTaskDefTemplate;
 
     public MultilangAnalyzerCompiler(TemplateCompiler templateCompiler) {
         this.analyzeProjectTemplate = templateCompiler.getOrCompileToWriter("multilang_analyzer/AnalyzeProjectTaskDef.java.mustache");
         this.indexAstTaskDefTemplate = templateCompiler.getOrCompileToWriter("multilang_analyzer/IndexAstTaskDef.java.mustache");
         this.preStatixTaskDefTemplate = templateCompiler.getOrCompileToWriter("multilang_analyzer/PreStatixTaskDef.java.mustache");
         this.postStatixTaskDefTemplate = templateCompiler.getOrCompileToWriter("multilang_analyzer/PostStatixTaskDef.java.mustache");
+        this.checkTaskDefTemplate = templateCompiler.getOrCompileToWriter("multilang_analyzer/SmlCheckTaskDef.java.mustache");
     }
 
     // Language project
@@ -57,7 +59,8 @@ public class MultilangAnalyzerCompiler {
             analyzeProjectTemplate.write(input.genAnalyzeTaskDef().file(classesGenDirectory), input),
             indexAstTaskDefTemplate.write(input.genIndexAstTaskDef().file(classesGenDirectory), input),
             preStatixTaskDefTemplate.write(input.genPreStatixTaskDef().file(classesGenDirectory), input),
-            postStatixTaskDefTemplate.write(input.genPostStatixTaskDef().file(classesGenDirectory), input)
+            postStatixTaskDefTemplate.write(input.genPostStatixTaskDef().file(classesGenDirectory), input),
+            checkTaskDefTemplate.write(input.genCheckTaskDef().file(classesGenDirectory), input)
         );
         return outputBuilder.build();
     }
@@ -173,6 +176,19 @@ public class MultilangAnalyzerCompiler {
             return genPostStatixTaskDef();
         }
 
+        @Value.Default default TypeInfo genCheckTaskDef() {
+            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "SmlCheck");
+        }
+
+        Optional<TypeInfo> manualCheckTaskDef();
+
+        default TypeInfo checkTaskDef() {
+            if(classKind().isManual() && manualCheckTaskDef().isPresent()) {
+                return manualCheckTaskDef().get();
+            }
+            return genCheckTaskDef();
+        }
+
         // Transformation settings
 
         @Value.Default default String preAnalysisStrategy() {
@@ -211,7 +227,7 @@ public class MultilangAnalyzerCompiler {
 
         default Collection<TypeInfo> libraryTaskDefs() {
             ArrayList<TypeInfo> taskDefs = new ArrayList<>();
-            String multilangTaskDefPackage = "mb.statix.multilang.tasks";
+            String multilangTaskDefPackage = "mb.statix.multilang.pie";
             taskDefs.add(TypeInfo.of(multilangTaskDefPackage, "SmlAnalyzeProject"));
             taskDefs.add(TypeInfo.of(multilangTaskDefPackage, "SmlBuildMessages"));
             taskDefs.add(TypeInfo.of(multilangTaskDefPackage, "SmlInstantiateGlobalScope"));

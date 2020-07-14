@@ -1,0 +1,36 @@
+package {{genCheckTaskDef.packageId}};
+
+import dagger.Lazy;
+import mb.common.message.Messages;
+import mb.pie.api.Function;
+import mb.pie.api.ResourceStringSupplier;
+import mb.pie.api.Supplier;
+import mb.resource.ResourceKey;
+import mb.spoofax.core.language.LanguageScope;
+import mb.statix.multilang.AnalysisContextService;
+import mb.statix.multilang.LanguageId;
+import mb.statix.multilang.pie.SmlBuildMessages;
+import mb.statix.multilang.pie.SmlCheckTaskDef;
+import mb.statix.multilang.pie.config.SmlBuildContextConfiguration;
+
+import javax.inject.Inject;
+
+public class {{genCheckTaskDef.id}} extends SmlCheckTaskDef {
+
+    public {{genCheckTaskDef.id}}(
+        Function<Supplier<String>, IStrategoTerm> astSupplier
+        SmlBuildContextConfiguration buildContextConfiguration,
+        SmlBuildMessages buildMessages,
+        Lazy<AnalysisContextService> analysisContextService
+    ) {
+        super(astSupplier.mapInput(key -> new ResourceStringSupplier(key), buildContextConfiguration, buildMessages, analysisContextService);
+    }
+
+    @Override public String getId() {
+        return "{{genCheckTaskDef.qualifiedId}}";
+    }
+
+    @Override protected LanguageId getLanguageId() {
+        return new LanguageId("{{languageId}}");
+    }
+}

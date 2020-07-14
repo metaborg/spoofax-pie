@@ -1,37 +1,32 @@
 package {{genPostStatixTaskDef.packageId}};
 
+import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
-import mb.pie.api.TaskDef;
-import mb.spoofax.core.language.LanguageScope;
 import mb.stratego.common.StrategoRuntime;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import mb.stratego.pie.AstStrategoTransformTaskDef;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
+import java.io.IOException;
 
 @LanguageScope
-public class {{genPostStatixTaskDef.id}} implements TaskDef<Supplier<@Nullable IStrategoTerm>, @Nullable IStrategoTerm> {
-    private final StrategoRuntime strategoRuntime;
-    private final Object lock = new Object();
-
-    @Inject public {{genPostStatixTaskDef.id}}(StrategoRuntime strategoRuntime) {
-        this.strategoRuntime = strategoRuntime;
+public class {{genPostStatixTaskDef.id}} extends AstStrategoTransformTaskDef {
+    @Inject public {{genPostStatixTaskDef.id}}(Provider<StrategoRuntime> strategoRuntimeProvider) {
+        super(strategoRuntimeProvider, "{{postAnalysisStrategy}}");
     }
-
 
     @Override public String getId() {
         return "{{genPostStatixTaskDef.qualifiedId}}";
     }
 
     @Override
-    public @Nullable IStrategoTerm exec(ExecContext context, Supplier<@Nullable IStrategoTerm> input) throws Exception {
-        @Nullable IStrategoTerm ast = context.require(input);
-        if (ast == null) {
-            return null;
-        }
-        synchronized(lock) {
-            return strategoRuntime.invoke("{{postAnalysisStrategy}}", ast);
+    public Result<IStrategoTerm, ?> exec(ExecContext context, Supplier<? extends Result<IStrategoTerm, ?>> supplier) {
+        try {
+            return super.exec(context, supplier);
+        } catch(IOException e) {
+            return Result.ofErr(e);
         }
     }
 }
