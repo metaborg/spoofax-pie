@@ -9,14 +9,15 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.jface.util.SafeRunnable;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ConfigResourceChangeListener implements IResourceChangeListener {
     private static final Logger logger = SpoofaxPlugin.getComponent().getLoggerFactory().create(ConfigResourceChangeListener.class);
@@ -33,7 +34,6 @@ public class ConfigResourceChangeListener implements IResourceChangeListener {
         try {
             rootDelta.accept(delta -> {
                 if(delta.getResource().getType() == IResource.ROOT) {
-                    // If change is project, visit children (possibly multilang.yaml)
                     return true;
                 }
                 if(delta.getResource().getType() == IResource.PROJECT) {
@@ -53,9 +53,24 @@ public class ConfigResourceChangeListener implements IResourceChangeListener {
         new WorkspaceJob("Process multilang.yaml change") {
             @Override
             public IStatus runInWorkspace(IProgressMonitor monitor) {
+                List<Throwable> exceptions = new ArrayList<>();
                 // Update all projects for changes configs
-                projects.forEach(path -> delegates.forEach(delegate -> delegate.configChanged(path, monitor)));
-                return StatusUtil.success();
+                projects.forEach(path -> delegates.forEach(delegate -> SafeRunner.run(new SafeRunnable() {
+                    @Override public void run(){
+                        delegate.configChanged(path, monitor);
+                    }
+
+                    @Override
+                    public void handleException(Throwable e) {
+                        exceptions.add(e);
+                    }
+                })));
+                if(exceptions.isEmpty()) {
+                    return StatusUtil.success();
+                }
+                MultiLangAnalysisException wrapper = new MultiLangAnalysisException("Errors processing multilang.yaml change");
+                exceptions.forEach(wrapper::addSuppressed);
+                return StatusUtil.error("Errors processing multilang.yaml change", wrapper);
             }
         }.schedule();
     }

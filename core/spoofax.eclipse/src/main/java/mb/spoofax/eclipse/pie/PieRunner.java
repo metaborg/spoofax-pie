@@ -21,7 +21,6 @@ import mb.pie.api.exec.NullCancelableToken;
 import mb.pie.runtime.exec.Stats;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandContext;
@@ -457,6 +456,12 @@ public class PieRunner {
         } else {
             return NullCancelableToken.instance;
         }
+    }
+
+    public void clearMessages(IProject project, @Nullable IProgressMonitor monitor, EclipseLanguageComponent languageComponent) {
+        WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
+        workspaceUpdate.clearMessages(new EclipseResourcePath(project), true);
+        workspaceUpdate.update(project, null, monitor);
     }
 
 
