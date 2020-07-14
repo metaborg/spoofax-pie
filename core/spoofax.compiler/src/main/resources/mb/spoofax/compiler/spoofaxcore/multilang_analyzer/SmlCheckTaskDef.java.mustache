@@ -7,8 +7,9 @@ import mb.pie.api.ResourceStringSupplier;
 import mb.pie.api.Supplier;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageScope;
-import mb.statix.multilang.AnalysisContextService;
 import mb.statix.multilang.LanguageId;
+import mb.statix.multilang.LanguageMetadataManager;
+import mb.statix.multilang.LanguagePieManager;
 import mb.statix.multilang.pie.SmlBuildMessages;
 import mb.statix.multilang.pie.SmlCheckTaskDef;
 import mb.statix.multilang.pie.config.SmlBuildContextConfiguration;
@@ -23,9 +24,11 @@ public class {{genCheckTaskDef.id}} extends SmlCheckTaskDef {
         Function<Supplier<String>, Messages> messagesSupplier,
         SmlBuildContextConfiguration buildContextConfiguration,
         SmlBuildMessages buildMessages,
-        Lazy<AnalysisContextService> analysisContextService
+        Lazy<LanguageMetadataManager> languageMetadataManager,
+        Lazy<LanguagePieManager> languagePieManager
     ) {
-        super(messagesSupplier.mapInput((java.util.function.Function<ResourceKey, Supplier<String>>)ResourceStringSupplier::new), buildContextConfiguration, buildMessages, analysisContextService);
+        super(messagesSupplier.mapInput((java.util.function.Function<ResourceKey, Supplier<String>>)ResourceStringSupplier::new),
+                buildContextConfiguration, buildMessages, languageMetadataManager, languagePieManager);
     }
 
     @Override public String getId() {
