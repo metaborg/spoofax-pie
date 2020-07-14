@@ -40,7 +40,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -168,7 +167,7 @@ public class SmlAnalyzeProject implements TaskDef<SmlAnalyzeProject.Input, Resul
         Level logLevel
     ) {
         return TaskUtils.executeWrapped(() -> {
-            IDebugContext debug = TaskUtils.createDebugContext("MLA", logLevel);
+            IDebugContext debug = TaskUtils.createDebugContext(logLevel);
             IConstraint combinedConstraint = Stream.concat(
                 projectResults.values().stream(),
                 fileResults.values().stream().map(FileResult::getResult))

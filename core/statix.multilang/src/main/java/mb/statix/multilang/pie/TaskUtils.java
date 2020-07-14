@@ -17,16 +17,10 @@ public final class TaskUtils {
     private TaskUtils() {
     }
 
-    static IDebugContext createDebugContext(String name, @Nullable Level logLevel) {
+    static IDebugContext createDebugContext(@Nullable Level logLevel) {
         return logLevel != null ?
             // Statix solver still uses org.metaborg.util.log
-            new LoggerDebugContext(LoggerUtils.logger(name), logLevel) : new NullDebugContext();
-    }
-
-    static IDebugContext createDebugContext(Class<?> cls, @Nullable Level logLevel) {
-        return logLevel != null ?
-            // Statix solver still uses org.metaborg.util.log
-            new LoggerDebugContext(LoggerUtils.logger(cls), logLevel) : new NullDebugContext();
+            new LoggerDebugContext(LoggerUtils.logger("MLA"), logLevel) : new NullDebugContext();
     }
 
     public static <O> Result<O, MultiLangAnalysisException> executeWrapped(
