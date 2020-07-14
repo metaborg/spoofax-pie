@@ -69,27 +69,4 @@ public class MultiLangModule {
     public SmlReadConfigYaml provideReadConfigYaml(SmlReadConfigYaml readConfigYaml) {
         return readConfigYaml;
     }
-
-    @Provides @MultiLangScope @MultiLang @ElementsIntoSet
-    public Set<TaskDef<?, ?>> provideTaskDefs(
-        @MultiLang SmlAnalyzeProject analyzeProject,
-        @MultiLang SmlBuildContextConfiguration buildContextConfiguration,
-        @MultiLang SmlBuildMessages buildMessages,
-        @MultiLang SmlBuildSpec buildSpec,
-        @MultiLang SmlInstantiateGlobalScope instantiateGlobalScope,
-        @MultiLang SmlPartialSolveFile partialSolveFile,
-        @MultiLang SmlPartialSolveProject partialSolveProject,
-        @MultiLang SmlReadConfigYaml readConfigYaml
-    ) {
-        Set<TaskDef<?, ?>> taskDefs = new HashSet<>();
-        taskDefs.add(analyzeProject);
-        taskDefs.add(buildContextConfiguration);
-        taskDefs.add(buildMessages);
-        taskDefs.add(buildSpec);
-        taskDefs.add(instantiateGlobalScope);
-        taskDefs.add(partialSolveFile);
-        taskDefs.add(partialSolveProject);
-        taskDefs.add(readConfigYaml);
-        return taskDefs;
-    }
 }
