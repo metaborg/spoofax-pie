@@ -48,8 +48,7 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
             return languages.equals(input.languages);
         }
 
-        @Override
-        public int hashCode() {
+        @Override public int hashCode() {
             return Objects.hash(languages);
         }
 

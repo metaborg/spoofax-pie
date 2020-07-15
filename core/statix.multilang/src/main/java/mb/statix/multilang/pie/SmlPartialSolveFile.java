@@ -69,9 +69,17 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
                 Objects.equals(globalResultSupplier, input.globalResultSupplier);
         }
 
-        @Override
-        public int hashCode() {
+        @Override public int hashCode() {
             return Objects.hash(languageId, resourceKey, specSupplier, globalResultSupplier);
+        }
+
+        @Override public String toString() {
+            return "Input{" +
+                "languageId=" + languageId +
+                ", resourceKey=" + resourceKey +
+                ", specSupplier=" + specSupplier +
+                ", globalResultSupplier=" + globalResultSupplier +
+                '}';
         }
     }
 

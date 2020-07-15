@@ -44,8 +44,7 @@ public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConf
                 languageId.equals(input.languageId);
         }
 
-        @Override
-        public int hashCode() {
+        @Override public int hashCode() {
             return Objects.hash(projectDir, languageId);
         }
 
@@ -96,8 +95,7 @@ public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConf
 
                 if(!contextConfig.languages().contains(input.languageId)) {
                     return Result.ofErr(new ConfigurationException("BUG: In project '"
-                        + input.projectDir
-                        + "', language " + input.languageId
+                        + input.projectDir + "', language " + input.languageId
                         + " has configured to do analysis in context " + contextId
                         + ", but it is not included in the configuration for that context. "
                         + "Included languages: " + contextConfig.languages()));

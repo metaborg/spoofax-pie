@@ -68,7 +68,7 @@ public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalSc
 
     @Override
     public String getId() {
-        return SmlInstantiateGlobalScope.class.getSimpleName();
+        return SmlInstantiateGlobalScope.class.getCanonicalName();
     }
 
     @Override

@@ -8,10 +8,11 @@ import mb.common.message.Severity;
 import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class MultiLangAnalysisException extends Exception {
+public class MultiLangAnalysisException extends Exception implements Serializable {
 
     private @Nullable ResourceKey resourceKey = null;
     // If true, toKeyedMessages will include a message for this exception

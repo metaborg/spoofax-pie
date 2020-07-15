@@ -27,6 +27,7 @@ import mb.statix.solver.log.IDebugContext;
 import mb.statix.solver.persistent.Solver;
 import mb.statix.solver.persistent.SolverResult;
 import mb.statix.spec.Spec;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.log.Level;
 import org.metaborg.util.task.NullCancel;
 import org.metaborg.util.task.NullProgress;
@@ -48,9 +49,9 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
     public static class Input implements Serializable {
         private final ResourcePath projectPath;
         private final HashSet<LanguageId> languages;
-        private final Level logLevel;
+        private final @Nullable Level logLevel;
 
-        public Input(ResourcePath projectPath, HashSet<LanguageId> languages, Level logLevel) {
+        public Input(ResourcePath projectPath, HashSet<LanguageId> languages, @Nullable Level logLevel) {
             this.projectPath = projectPath;
             this.languages = languages;
             this.logLevel = logLevel;
@@ -100,7 +101,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
     }
 
     @Override public String getId() {
-        return SmlSolveProject.class.getSimpleName();
+        return SmlSolveProject.class.getCanonicalName();
     }
 
     @Override public Result<AnalysisResults, MultiLangAnalysisException> exec(ExecContext context, Input input) {
@@ -164,7 +165,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
         IState.Immutable state,
         GlobalResult globalResult,
         Spec combinedSpec,
-        Level logLevel
+        @Nullable Level logLevel
     ) {
         return TaskUtils.executeWrapped(() -> {
             IDebugContext debug = TaskUtils.createDebugContext(logLevel);
