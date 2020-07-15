@@ -75,14 +75,14 @@ public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConf
         return context.require(readConfigYaml.createTask(input.projectDir))
             .mapErr(ConfigurationException::new)
             .flatMap(dynamicConfig -> {
-                final ContextId contextId = dynamicConfig.getLanguageContexts()
+                final ContextId contextId = dynamicConfig.languageContexts()
                     .getOrDefault(input.languageId, contextDataManager.get().getDefaultContextId(input.languageId));
 
                 Set<LanguageId> languages = new HashSet<>(contextDataManager.get().getContextLanguages(contextId));
                 // Remove all languages with dynamic configurations
-                languages.removeAll(dynamicConfig.getLanguageContexts().keySet());
+                languages.removeAll(dynamicConfig.languageContexts().keySet());
                 // Add all languages which have the same context configured
-                languages.addAll(dynamicConfig.getLanguageContexts().entrySet()
+                languages.addAll(dynamicConfig.languageContexts().entrySet()
                     .stream()
                     .filter(entry -> entry.getValue().equals(contextId))
                     .map(Map.Entry::getKey)
@@ -90,7 +90,7 @@ public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConf
 
                 final ContextConfig contextConfig = ImmutableContextConfig.builder()
                     .addAllLanguages(languages)
-                    .logLevel(dynamicConfig.getLogging().getOrDefault(contextId, null))
+                    .logLevel(dynamicConfig.logging().getOrDefault(contextId, null))
                     .build();
 
                 if(!contextConfig.languages().contains(input.languageId)) {
