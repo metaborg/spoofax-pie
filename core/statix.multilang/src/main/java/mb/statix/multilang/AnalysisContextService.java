@@ -37,6 +37,10 @@ public abstract class AnalysisContextService implements LanguageMetadataManager,
         return contextConfigurations().getOrDefault(contextId, Collections.emptySet());
     }
 
+    @Override public Set<LanguageId> getAvailableLanguages() {
+        return languageMetadataSuppliers().keySet();
+    }
+
     @Override public ContextId getDefaultContextId(LanguageId languageId) {
         return defaultLanguageContexts().getOrDefault(languageId, new ContextId(languageId.getId()));
     }

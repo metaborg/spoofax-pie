@@ -9,8 +9,10 @@ import mb.statix.multilang.ConfigurationException;
 import mb.statix.multilang.ContextConfig;
 import mb.statix.multilang.ContextDataManager;
 import mb.statix.multilang.ContextId;
+import mb.statix.multilang.ImmutableContextConfig;
 import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.MultiLang;
+import mb.statix.multilang.MultiLangConfig;
 import mb.statix.multilang.MultiLangScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -18,8 +20,10 @@ import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @MultiLangScope
 public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConfiguration.Input, Result<ContextConfig, ConfigurationException>> {
@@ -71,36 +75,32 @@ public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConf
     public Result<ContextConfig, ConfigurationException> exec(ExecContext context, Input input) {
         return context.require(readConfigYaml.createTask(input.projectDir))
             .mapErr(ConfigurationException::new)
-            .flatMap(config -> {
-                ContextId contextId = config.getLanguageContexts()
+            .flatMap(dynamicConfig -> {
+                final ContextId contextId = dynamicConfig.getLanguageContexts()
                     .getOrDefault(input.languageId, contextDataManager.get().getDefaultContextId(input.languageId));
 
-                Set<LanguageId> staticLanguages = contextDataManager.get().getContextLanguages(contextId);
-                @Nullable ContextConfig dynamicConfig = config
-                    .getCustomContexts()
-                    .get(contextId);
+                Set<LanguageId> languages = new HashSet<>(contextDataManager.get().getContextLanguages(contextId));
+                // Remove all languages with dynamic configurations
+                languages.removeAll(dynamicConfig.getLanguageContexts().keySet());
+                // Add all languages which have the same context configured
+                languages.addAll(dynamicConfig.getLanguageContexts().entrySet()
+                    .stream()
+                    .filter(entry -> entry.getValue().equals(contextId))
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toSet()));
 
-                final ContextConfig contextConfig;
-                if(dynamicConfig == null) {
-                    contextConfig = new ContextConfig();
-                    contextConfig.setLanguages(new ArrayList<>(staticLanguages));
-                } else if(staticLanguages.isEmpty()) {
-                    contextConfig = dynamicConfig;
-                } else {
-                    contextConfig = new ContextConfig();
-                    HashSet<LanguageId> languages = new HashSet<>(dynamicConfig.getLanguages());
-                    languages.addAll(staticLanguages);
-                    contextConfig.setLanguages(new ArrayList<>(languages));
-                    contextConfig.setLogLevel(dynamicConfig.getLogLevel());
-                }
+                final ContextConfig contextConfig = ImmutableContextConfig.builder()
+                    .addAllLanguages(languages)
+                    .logLevel(dynamicConfig.getLogging().getOrDefault(contextId, null))
+                    .build();
 
-                if(!contextConfig.getLanguages().contains(input.languageId)) {
-                    return Result.ofErr(new ConfigurationException("Invalid configuration. In project '"
+                if(!contextConfig.languages().contains(input.languageId)) {
+                    return Result.ofErr(new ConfigurationException("BUG: In project '"
                         + input.projectDir
                         + "', language " + input.languageId
                         + " has configured to do analysis in context " + contextId
                         + ", but it is not included in the configuration for that context. "
-                        + "Included languages: " + contextConfig.getLanguages()));
+                        + "Included languages: " + contextConfig.languages()));
                 }
                 return Result.ofOk(contextConfig);
             });

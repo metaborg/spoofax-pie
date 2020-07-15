@@ -68,7 +68,7 @@ public abstract class SmlCheckTaskDef implements TaskDef<ResourcePath, KeyedMess
 
         context.require(configTask)
             .mapErr(MultiLangAnalysisException::wrapIfNeeded)
-            .map(contextInfo -> new SmlSolveProject.Input(projectPath, new HashSet<>(contextInfo.getLanguages()), contextInfo.parseLevel()))
+            .map(contextInfo -> new SmlSolveProject.Input(projectPath, new HashSet<>(contextInfo.languages()), contextInfo.parseLevel()))
             .map(solveProject::createTask)
             .flatMap(solveTask -> TaskUtils.executeWrapped(() -> context.require(solveTask), "Exception executing analysis"))
             .flatMap(results -> resourceKeysResult.map(resourceKeys -> resultsToMessages(results, resourceKeys, projectPath)))

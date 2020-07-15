@@ -12,7 +12,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.util.List;
 import java.util.Set;
 
 @LanguageScope
@@ -44,10 +43,10 @@ public class SharedPieProvider implements PieProvider {
                 Set<LanguageId> languageIds = contextPieManager.getContextLanguages(defaultContextId);
                 return contextPieManager.buildPieForLanguages(languageIds);
             }
-            List<LanguageId> languageIds = session.require(buildContextConfiguration
+            Set<LanguageId> languageIds = session.require(buildContextConfiguration
                 .createTask(new SmlBuildContextConfiguration.Input(projectDir, languageId)))
                 .unwrap()
-                .getLanguages();
+                .languages();
             return contextPieManager.buildPieForLanguages(languageIds);
         } catch(InterruptedException | ExecException | MultiLangAnalysisException e) {
             throw new RuntimeException("Cannot build pie for " + languageId + " in " + projectDir, e);

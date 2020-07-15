@@ -9,11 +9,11 @@ import java.util.Objects;
 // Not immutable since it must have java beans semantics to work with yaml reader (see SmlReadConfigYaml).
 public class MultiLangConfig implements Serializable {
     private HashMap<LanguageId, ContextId> languageContexts;
-    private HashMap<ContextId, ContextConfig> customContexts;
+    private HashMap<ContextId, String> logging;
 
-    public MultiLangConfig(HashMap<LanguageId, ContextId> languageContexts, HashMap<ContextId, ContextConfig> customContexts) {
+    public MultiLangConfig(HashMap<LanguageId, ContextId> languageContexts, HashMap<ContextId, String> logging) {
         this.languageContexts = languageContexts;
-        this.customContexts = customContexts;
+        this.logging = logging;
     }
 
     public MultiLangConfig() {
@@ -28,12 +28,12 @@ public class MultiLangConfig implements Serializable {
         this.languageContexts = languageContexts;
     }
 
-    public Map<ContextId, ContextConfig> getCustomContexts() {
-        return Collections.unmodifiableMap(customContexts);
+    public Map<ContextId, String> getLogging() {
+        return Collections.unmodifiableMap(logging);
     }
 
-    public void setCustomContexts(HashMap<ContextId, ContextConfig> customContexts) {
-        this.customContexts = customContexts;
+    public void setLogging(HashMap<ContextId, String> logging) {
+        this.logging = logging;
     }
 
     @Override public boolean equals(Object o) {
@@ -41,18 +41,18 @@ public class MultiLangConfig implements Serializable {
         if(o == null || getClass() != o.getClass()) return false;
         MultiLangConfig that = (MultiLangConfig)o;
         return Objects.equals(languageContexts, that.languageContexts) &&
-            Objects.equals(customContexts, that.customContexts);
+            Objects.equals(logging, that.logging);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(languageContexts, customContexts);
+        return Objects.hash(languageContexts, logging);
     }
 
     @Override public String toString() {
         return "MultiLangConfig{" +
             "languageContexts=" + languageContexts +
-            ", customContexts=" + customContexts +
+            ", logging=" + logging +
             '}';
     }
 }
