@@ -126,11 +126,6 @@ public class {{genModule.id}} {
     static StrategoRuntime provideStrategoRuntime(StrategoRuntimeBuilder builder, @Named("prototype") StrategoRuntime prototype) {
         return builder.buildFromPrototype(prototype);
     }
-
-    @Provides @LanguageScope
-    static ITermFactory provideTermFactory(@Named("prototype") StrategoRuntime prototype) {
-        return prototype.getTermFactory();
-    }
 {{/strategoRuntime}}
 {{#constraintAnalyzer}}
 

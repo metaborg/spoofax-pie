@@ -222,31 +222,6 @@ public class AdapterProjectCompiler {
             if(input.multilangAnalyzer().isPresent()) { // isMultiLang will be true
                 map.put("languageId", input.multilangAnalyzer().get().languageId());
                 map.put("contextId", input.multilangAnalyzer().get().contextId());
-                final TypeInfo resourceService = TypeInfo.of("mb.resource", "ResourceService");
-                final NamedTypeInfo resourceServiceInjection = uniqueNamer.makeUnique(resourceService);
-                injected.add(resourceServiceInjection);
-                map.put("resourceServiceInjection", resourceServiceInjection);
-
-                final NamedTypeInfo indexAstInjection = uniqueNamer.makeUnique(input.multilangAnalyzer().get().indexAstTaskDef());
-                injected.add(indexAstInjection);
-                map.put("indexAstInjection", indexAstInjection);
-
-                final NamedTypeInfo preStatixInjection = uniqueNamer.makeUnique(input.multilangAnalyzer().get().preStatixTaskDef());
-                injected.add(preStatixInjection);
-                map.put("preStatixInjection", preStatixInjection);
-
-                final NamedTypeInfo postStatixInjection = uniqueNamer.makeUnique(input.multilangAnalyzer().get().postStatixTaskDef());
-                injected.add(postStatixInjection);
-                map.put("postStatixInjection", postStatixInjection);
-
-                final NamedTypeInfo classLoaderResourceRegistryInjection = uniqueNamer.makeUnique(TypeInfo.of(ClassLoaderResourceRegistry.class));
-                injected.add(classLoaderResourceRegistryInjection);
-                map.put("classLoaderResourceRegistryInjection", classLoaderResourceRegistryInjection);
-
-                final TypeInfo termFactory = TypeInfo.of("org.spoofax.interpreter.terms", "ITermFactory");
-                final NamedTypeInfo termFactoryInjection = uniqueNamer.makeUnique(termFactory);
-                injected.add(termFactoryInjection);
-                map.put("termFactoryInjection", termFactoryInjection);
             }
             if (input.multilangAnalyzer().isPresent()) {
                 checkInjection = uniqueNamer.makeUnique(input.multilangAnalyzer().get().checkTaskDef());
