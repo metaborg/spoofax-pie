@@ -51,6 +51,7 @@ public class RunCommandHandler extends AbstractHandler {
 
     private final MapView<String, CommandDef> commandDefsPerId;
 
+
     public RunCommandHandler(EclipseLanguageComponent languageComponent) {
         this.languageComponent = languageComponent;
 
@@ -76,7 +77,6 @@ public class RunCommandHandler extends AbstractHandler {
             throw new ExecutionException("Cannot execute command with ID '" + data.commandId + "', command with that ID was not found in language '" + languageComponent.getLanguageInstance().getDisplayName() + "'");
         }
         final CommandRequest<?> request = data.toCommandRequest(def);
-
         final String pluginId = languageComponent.getEclipseIdentifiers().getPlugin();
 
         // Try to find project directory

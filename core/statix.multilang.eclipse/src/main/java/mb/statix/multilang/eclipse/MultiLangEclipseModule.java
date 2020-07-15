@@ -8,6 +8,7 @@ import mb.statix.multilang.MultiLangScope;
 
 @Module
 public class MultiLangEclipseModule {
+
     @Provides @MultiLang @MultiLangScope
     static LockRule provideMultilangStartupLockRule() {
         return new LockRule("Multilang startup lockrule");

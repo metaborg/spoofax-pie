@@ -75,10 +75,6 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
         }
     }
 
-    // This task unfortunately has to be tightly integrated with AnalysisContextService, for the following reason:
-    // The statix solver needs to transform strategoTerms to nabl terms, using the StrategoTerms class. This class
-    // requires an ITermFactory, which is language specfic, and therefore needs to be injected. It can not be injected
-    // By a supplier, because it is not Serializable. Therefore, we need to request it directly from the service.
     private final Lazy<LanguageMetadataManager> languageMetadataManager;
     private final Logger logger;
 
@@ -93,7 +89,7 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
 
     @Override public Result<FileResult, MultiLangAnalysisException> exec(ExecContext context, Input input) {
         return languageMetadataManager.get().getLanguageMetadataResult(input.languageId).flatMap(languageMetadata -> {
-            Supplier<Result<IStrategoTerm, ?>> astSupplier = exec -> languageMetadata.astFunction().apply(exec, input.resourceKey);
+            Supplier<Result<IStrategoTerm, ?>> astSupplier = languageMetadata.astFunction().createSupplier(input.resourceKey);
             return TaskUtils.executeWrapped(() -> context.require(astSupplier)
                     .mapErr(err -> MultiLangAnalysisException.wrapIfNeeded("No ast provided for " + input.resourceKey, err))
                     .flatMap((IStrategoTerm ast) -> analyzeAst(context, input, ast)),

@@ -75,7 +75,7 @@ public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.In
 
     @Override
     public String getId() {
-        return SmlPartialSolveProject.class.getSimpleName();
+        return SmlPartialSolveProject.class.getCanonicalName();
     }
 
     @Override

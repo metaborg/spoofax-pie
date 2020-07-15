@@ -8,7 +8,6 @@ import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
-import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.statix.constraints.CConj;
 import mb.statix.multilang.AnalysisResults;
@@ -143,19 +142,19 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
         Map<FileKey, FileResult> fileResults
     ) {
         return Stream.concat(
-                projectResults.values().stream(),
-                fileResults.values().stream().map(FileResult::getResult))
+            projectResults.values().stream(),
+            fileResults.values().stream().map(FileResult::getResult))
             .map(SolverResult::state)
             .reduce(IState.Immutable::add)
             .<Result<AnalysisResults, MultiLangAnalysisException>>map(state ->
                 TaskUtils.executeWrapped(() -> context.require(globalResultSupplier(input))
-                    .flatMap(globalResult -> TaskUtils.executeWrapped(() -> context.require(specSupplier(input))
-                        // Upcast to make typing work
-                        .mapErr(MultiLangAnalysisException.class::cast)
-                        .flatMap(combinedSpec -> solveWithSpec(projectResults, fileResults, state, globalResult, combinedSpec, input.logLevel)), "Solving final constraints interrupted")
-                        .map(finalResult -> ImmutableAnalysisResults.of(globalResult.getGlobalScope(),
-                            new HashMap<>(projectResults), new HashMap<>(fileResults), finalResult))),
-                "IO exception while requiring global result"))
+                        .flatMap(globalResult -> TaskUtils.executeWrapped(() -> context.require(specSupplier(input))
+                            // Upcast to make typing work
+                            .mapErr(MultiLangAnalysisException.class::cast)
+                            .flatMap(combinedSpec -> solveWithSpec(projectResults, fileResults, state, globalResult, combinedSpec, input.logLevel)), "Solving final constraints interrupted")
+                            .map(finalResult -> ImmutableAnalysisResults.of(globalResult.getGlobalScope(),
+                                new HashMap<>(projectResults), new HashMap<>(fileResults), finalResult))),
+                    "IO exception while requiring global result"))
             .orElseGet(() -> Result.ofErr(new MultiLangAnalysisException("BUG: Analysis gave no results")));
     }
 

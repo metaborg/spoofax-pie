@@ -4,7 +4,6 @@ import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.eclipse.job.LockRule;
 import mb.spoofax.eclipse.job.ReadLockRule;
-import mb.spoofax.eclipse.util.ResourceUtil;
 
 import javax.inject.Named;
 

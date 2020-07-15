@@ -1,6 +1,5 @@
 package mb.statix.multilang.spec;
 
-import com.google.common.collect.Iterables;
 import mb.common.result.Result;
 import mb.nabl2.regexp.IAlphabet;
 import mb.nabl2.regexp.impl.FiniteAlphabet;
@@ -33,7 +32,7 @@ import java.util.stream.Collectors;
 
 public class SpecUtils {
 
-    public static SpecBuilder loadSpec(HierarchicalResource root, String initialModulePath, ITermFactory termFactory) throws IOException {
+    public static SpecBuilder loadSpec(HierarchicalResource root, String initialModulePath, ITermFactory termFactory) throws SpecLoadException {
         StrategoTerms strategoTerms = new StrategoTerms(termFactory);
         ArrayList<String> loadedModules = new ArrayList<>();
         ArrayList<Module> fileSpecs = new ArrayList<>();
@@ -44,28 +43,32 @@ public class SpecUtils {
             String currentModule = modulesToLoad.remove();
             // Load spec file content
             HierarchicalResource res = root.appendRelativePath(currentModule).appendExtensionToLeaf("spec.aterm");
-            BufferedReader specReader = new BufferedReader(new InputStreamReader(res.openRead()));
-            String specString = specReader.lines().collect(Collectors.joining("\n"));
-            IStrategoTerm stxFileSpec = termFactory.parseFromString(specString);
+            try(BufferedReader specReader = new BufferedReader(new InputStreamReader(res.openRead()))) {
 
-            // Update pointers
-            fileSpecs.add(ImmutableModule.of(currentModule, strategoTerms.fromStratego(stxFileSpec)));
-            loadedModules.add(currentModule);
+                String specString = specReader.lines().collect(Collectors.joining("\n"));
+                IStrategoTerm stxFileSpec = termFactory.parseFromString(specString);
 
-            // Queue newly imported files
-            IStrategoTerm imports = stxFileSpec.getSubterm(0);
-            if(imports.getType() != TermType.LIST) {
-                throw new RuntimeException("Invalid spec file. Imports section should be a list, but was: " + imports);
+                // Update pointers
+                fileSpecs.add(ImmutableModule.of(currentModule, strategoTerms.fromStratego(stxFileSpec)));
+                loadedModules.add(currentModule);
+
+                // Queue newly imported files
+                IStrategoTerm imports = stxFileSpec.getSubterm(0);
+                if(imports.getType() != TermType.LIST) {
+                    throw new SpecLoadException("Invalid spec file. Imports section should be a list, but was: " + imports);
+                }
+                for(IStrategoTerm importDecl : imports) {
+                    if(!TermUtils.isString(importDecl)) {
+                        throw new SpecLoadException("Invalid file spec. Import module should be string, but was: " + importDecl);
+                    }
+                    String importedModule = ((IStrategoString)importDecl).stringValue();
+                    if(!loadedModules.contains(importedModule) && !modulesToLoad.contains(importedModule)) {
+                        modulesToLoad.add(importedModule);
+                    }
+                }
+            } catch(IOException e) {
+                throw new SpecLoadException(e);
             }
-            imports.forEach(importDecl -> {
-                if(!TermUtils.isString(importDecl)) {
-                    throw new RuntimeException("Invalid file spec. Import module should be string, but was: " + importDecl);
-                }
-                String importedModule = ((IStrategoString)importDecl).stringValue();
-                if(!loadedModules.contains(importedModule) && !modulesToLoad.contains(importedModule)) {
-                    modulesToLoad.add(importedModule);
-                }
-            });
         }
 
         // Create builder for files
@@ -73,34 +76,36 @@ public class SpecUtils {
     }
 
     public static Result<Spec, SpecLoadException> mergeSpecs(Result<Spec, SpecLoadException> accResult, Result<Spec, SpecLoadException> newSpecResult) {
-        return accResult.mapOrElse(acc -> newSpecResult.mapOrElse(newSpec -> {
-            // Error when EOP is not equal, throw exception
-            if(!acc.noRelationLabel().equals(newSpec.noRelationLabel())) {
-                return Result.ofErr(new SpecLoadException("No relation labels do not match:" +
-                    acc.noRelationLabel() + " and " + newSpec.noRelationLabel()));
-            }
+        return accResult.mapOrElse(acc -> newSpecResult
+                .mapOrElse(newSpec -> {
+                    // Error when EOP is not equal, throw exception
+                    if(!acc.noRelationLabel().equals(newSpec.noRelationLabel())) {
+                        return Result.ofErr(new SpecLoadException("No relation labels do not match:" +
+                            acc.noRelationLabel() + " and " + newSpec.noRelationLabel()));
+                    }
 
-            Set<Rule> rules = new HashSet<>(acc.rules().getAllRules());
-            rules.addAll(newSpec.rules().getAllRules());
+                    Set<Rule> rules = new HashSet<>(acc.rules().getAllRules());
+                    rules.addAll(newSpec.rules().getAllRules());
 
-            Set<ITerm> labels = new HashSet<>(acc.labels().symbols());
-            labels.addAll(newSpec.labels().symbols());
+                    Set<ITerm> labels = new HashSet<>(acc.labels().symbols());
+                    labels.addAll(newSpec.labels().symbols());
 
-            return Result.ofOk(Spec.builder()
-                .from(acc)
-                .rules(RuleSet.of(rules))
-                .addAllEdgeLabels(newSpec.edgeLabels())
-                .addAllRelationLabels(newSpec.relationLabels())
-                .labels(new FiniteAlphabet<>(labels))
-                .putAllScopeExtensions(newSpec.scopeExtensions())
-                .build());
-        }, Result::ofErr), accErr -> newSpecResult.mapOrElse(
-            res -> Result.ofErr(accErr),
-            err -> {
-                accErr.addSuppressed(err);
-                return Result.ofErr(accErr);
-            }
-        ));
+                    return Result.ofOk(Spec.builder()
+                        .from(acc)
+                        .rules(RuleSet.of(rules))
+                        .addAllEdgeLabels(newSpec.edgeLabels())
+                        .addAllRelationLabels(newSpec.relationLabels())
+                        .labels(new FiniteAlphabet<>(labels))
+                        .putAllScopeExtensions(newSpec.scopeExtensions())
+                        .build());
+                }, Result::ofErr),
+            accErr -> newSpecResult.mapOrElse(
+                res -> Result.ofErr(accErr),
+                err -> {
+                    accErr.addSuppressed(err);
+                    return Result.ofErr(accErr);
+                }
+            ));
     }
 
     public static IMatcher<Spec> fileSpec() {

@@ -2,7 +2,10 @@ package mb.statix.multilang;
 
 import dagger.Component;
 import mb.spoofax.core.platform.PlatformComponent;
-import mb.statix.multilang.pie.*;
+import mb.statix.multilang.pie.SmlBuildSpec;
+import mb.statix.multilang.pie.SmlInstantiateGlobalScope;
+import mb.statix.multilang.pie.SmlPartialSolveFile;
+import mb.statix.multilang.pie.SmlPartialSolveProject;
 import mb.statix.multilang.pie.SmlSolveProject;
 import mb.statix.multilang.pie.config.SmlBuildContextConfiguration;
 import mb.statix.multilang.pie.config.SmlReadConfigYaml;

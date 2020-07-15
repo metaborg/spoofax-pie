@@ -62,8 +62,4 @@ public abstract class AnalysisContextService implements LanguageMetadataManager,
     public static ImmutableAnalysisContextService.Builder builder() {
         return ImmutableAnalysisContextService.builder();
     }
-
-    public Pie buildPieForAllTriggeredLanguages() throws MultiLangAnalysisException {
-        return buildPieForLanguages(languageMetadataCache.keySet());
-    }
 }

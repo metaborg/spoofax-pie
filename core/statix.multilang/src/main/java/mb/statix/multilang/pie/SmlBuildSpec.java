@@ -33,8 +33,8 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
         // task identity would probably be (projectPath, contextId).
         // We choose this identity deliberately for performance (storage usage reasons), because most typical
         // use cases will involve small sets of language. These sets will often be equal in other contexts and projects
-        // Therefore this choice of key will have the highest task sharing, and therefore the lowest memory footprint
-        // reinstantiations and reruns.
+        // Therefore this choice of key will have the highest task sharing, and therefore the lowest memory footprint,
+        // reinstantiation count and reruns.
         private final HashSet<LanguageId> languages;
 
         public Input(Collection<LanguageId> languages) {

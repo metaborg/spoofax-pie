@@ -28,8 +28,8 @@ public class MetadataUtils {
         ClassLoaderResource specRoot = definitionDir.appendRelativePath("src-gen/statix");
         try {
             return SpecUtils.loadSpec(specRoot, initialModule, termFactory);
-        } catch(IOException e) {
-            throw new RuntimeException(new SpecLoadException("Error loading spec from " + definitionDir, e));
+        } catch(SpecLoadException e) {
+            throw new RuntimeException(e);
         }
     }
 
