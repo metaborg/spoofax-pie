@@ -12,6 +12,7 @@ import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.statix.constraints.CConj;
 import mb.statix.multilang.AnalysisResults;
+import mb.statix.multilang.FileKey;
 import mb.statix.multilang.FileResult;
 import mb.statix.multilang.ImmutableAnalysisResults;
 import mb.statix.multilang.LanguageId;
@@ -129,7 +130,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
                     specSupplier(input),
                     globalResultSupplier(input),
                     input.logLevel)))
-                    .map(res -> new AbstractMap.SimpleImmutableEntry<>(resourceKey, res))))
+                    .map(res -> new AbstractMap.SimpleImmutableEntry<>(new FileKey(resourceKey, languageMetadata.languageId()), res))))
             .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("At least one file constraint has an unexpected exception")))
             .map(SmlSolveProject::entrySetToMap)
             .flatMap(fileResults -> solveCombined(context, input, projectResults, fileResults));
@@ -139,7 +140,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
         ExecContext context,
         Input input,
         Map<LanguageId, SolverResult> projectResults,
-        Map<ResourceKey, FileResult> fileResults
+        Map<FileKey, FileResult> fileResults
     ) {
         return Stream.concat(
                 projectResults.values().stream(),
@@ -160,7 +161,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
 
     private Result<SolverResult, MultiLangAnalysisException> solveWithSpec(
         Map<LanguageId, SolverResult> projectResults,
-        Map<ResourceKey, FileResult> fileResults,
+        Map<FileKey, FileResult> fileResults,
         IState.Immutable state,
         GlobalResult globalResult,
         Spec combinedSpec,

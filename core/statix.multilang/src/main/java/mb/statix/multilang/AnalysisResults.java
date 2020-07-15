@@ -15,7 +15,7 @@ public abstract class AnalysisResults implements Serializable {
 
     @Value.Parameter public abstract HashMap<LanguageId, SolverResult> projectResults();
 
-    @Value.Parameter public abstract HashMap<ResourceKey, FileResult> fileResults();
+    @Value.Parameter public abstract HashMap<FileKey, FileResult> fileResults();
 
     @Value.Parameter public abstract SolverResult finalResult();
 

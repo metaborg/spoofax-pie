@@ -4,7 +4,6 @@ import dagger.Module;
 import dagger.Provides;
 import mb.statix.multilang.pie.SmlSolveProject;
 import mb.statix.multilang.pie.config.SmlBuildContextConfiguration;
-import mb.statix.multilang.pie.SmlBuildMessages;
 import mb.statix.multilang.pie.SmlBuildSpec;
 import mb.statix.multilang.pie.SmlInstantiateGlobalScope;
 import mb.statix.multilang.pie.SmlPartialSolveFile;
@@ -54,11 +53,6 @@ public class MultiLangModule {
     @Provides @MultiLangScope @MultiLang
     public SmlBuildContextConfiguration provideSmlBuildContextConfiguration(SmlBuildContextConfiguration buildContextConfiguration) {
         return buildContextConfiguration;
-    }
-
-    @Provides @MultiLangScope @MultiLang
-    public SmlBuildMessages provideBuildMessages(SmlBuildMessages buildMessages) {
-        return buildMessages;
     }
 
     @Provides @MultiLangScope @MultiLang

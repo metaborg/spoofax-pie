@@ -16,7 +16,6 @@ public interface MultiLangComponent {
     @MultiLang AnalysisContextService getAnalysisContextService();
     @MultiLang SmlSolveProject getAnalyzeProject();
     @MultiLang SmlBuildContextConfiguration getBuildContextConfiguration();
-    @MultiLang SmlBuildMessages getBuildMessages();
     @MultiLang SmlBuildSpec getBuildSpec();
     @MultiLang SmlInstantiateGlobalScope getInstantiateGlobalScope();
     @MultiLang SmlPartialSolveFile getPartialSolveFile();

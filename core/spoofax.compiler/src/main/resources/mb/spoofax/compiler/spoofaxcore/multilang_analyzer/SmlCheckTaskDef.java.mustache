@@ -10,7 +10,7 @@ import mb.spoofax.core.language.LanguageScope;
 import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.LanguageMetadataManager;
 import mb.statix.multilang.LanguagePieManager;
-import mb.statix.multilang.pie.SmlBuildMessages;
+import mb.statix.multilang.pie.SmlSolveProject;
 import mb.statix.multilang.pie.SmlCheckTaskDef;
 import mb.statix.multilang.pie.config.SmlBuildContextConfiguration;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -23,12 +23,11 @@ public class {{genCheckTaskDef.id}} extends SmlCheckTaskDef {
     @Inject public {{genCheckTaskDef.id}}(
         Function<Supplier<String>, Messages> messagesSupplier,
         SmlBuildContextConfiguration buildContextConfiguration,
-        SmlBuildMessages buildMessages,
-        Lazy<LanguageMetadataManager> languageMetadataManager,
-        Lazy<LanguagePieManager> languagePieManager
+        SmlSolveProject solveProject,
+        Lazy<LanguageMetadataManager> languageMetadataManager
     ) {
         super(messagesSupplier.mapInput((java.util.function.Function<ResourceKey, Supplier<String>>)ResourceStringSupplier::new),
-                buildContextConfiguration, buildMessages, languageMetadataManager, languagePieManager);
+                buildContextConfiguration, solveProject, languageMetadataManager);
     }
 
     @Override public String getId() {

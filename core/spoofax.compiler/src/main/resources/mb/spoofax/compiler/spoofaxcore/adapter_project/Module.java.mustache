@@ -43,7 +43,6 @@ import mb.statix.multilang.LanguagePieManager;
 import mb.statix.multilang.MultiLang;
 import mb.statix.multilang.SharedPieProvider;
 import mb.statix.multilang.pie.SmlSolveProject;
-import mb.statix.multilang.pie.SmlBuildMessages;
 import mb.statix.multilang.pie.SmlBuildSpec;
 import mb.statix.multilang.pie.SmlInstantiateGlobalScope;
 import mb.statix.multilang.pie.SmlPartialSolveFile;
@@ -220,11 +219,6 @@ public class {{genModule.id}} {
         return autoCommandDefs;
     }
 {{#isMultiLang}}
-    @Provides @LanguageScope
-    static SmlBuildMessages provideBuildMessages(@MultiLang SmlBuildMessages buildMessages) {
-        return buildMessages;
-    }
-
     @Provides @LanguageScope
     static SmlBuildSpec provideBuildSpec(@MultiLang SmlBuildSpec buildSpec) {
         return buildSpec;
