@@ -95,8 +95,8 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
         return languageMetadataManager.get().getLanguageMetadataResult(input.languageId).flatMap(languageMetadata -> {
             Supplier<Result<IStrategoTerm, ?>> astSupplier = exec -> languageMetadata.astFunction().apply(exec, input.resourceKey);
             return TaskUtils.executeWrapped(() -> context.require(astSupplier)
-                    .map(ast -> analyzeAst(context, input, ast))
-                    .unwrapOr(Result.ofErr(new MultiLangAnalysisException("No ast provided for " + input.resourceKey, false /* message already given as parse error */))),
+                    .mapErr(err -> MultiLangAnalysisException.wrapIfNeeded("No ast provided for " + input.resourceKey, err))
+                    .flatMap((IStrategoTerm ast) -> analyzeAst(context, input, ast)),
                 "Error loading file AST");
         });
     }

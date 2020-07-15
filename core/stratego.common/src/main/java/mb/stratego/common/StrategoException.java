@@ -140,8 +140,11 @@ public abstract class StrategoException extends Exception {
 
     @Override public abstract String toString();
 
-
-    protected StrategoException() {
+    /* protected StrategoException() {
         super(null, null, true, false);
+    } */
+
+    public StackTraceElement[] getStackTrace() {
+        return new StackTraceElement[0];
     }
 }
