@@ -651,6 +651,11 @@ public class PieRunner {
                 pie.setCallback(task, messages -> {
                     if(bottomUpWorkspaceUpdate != null) {
                         bottomUpWorkspaceUpdate.replaceMessages(messages, newProject);
+                    } else {
+                        // Perform local messages update
+                        WorkspaceUpdate localUpdate = workspaceUpdateFactory.create(languageComponent);
+                        localUpdate.replaceMessages(messages, newProject);
+                        localUpdate.update(resourceUtil.getEclipseResource(newProject), null, monitor);
                     }
                 });
                 if(!pie.isObserved(task)) {
