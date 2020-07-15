@@ -43,29 +43,4 @@ public final class TaskUtils {
             return Result.ofErr(MultiLangAnalysisException.wrapIfNeeded(e));
         }
     }
-
-    public static <I, O> Function<I, Result<O, MultiLangAnalysisException>> executeWrapped(
-        ExceptionalFunction<I, Result<O, MultiLangAnalysisException>, ? extends Exception> function,
-        String exceptionMessage
-    ) {
-        return input -> {
-            try {
-                return function.apply(input);
-            } catch(Exception e) {
-                return Result.ofErr(MultiLangAnalysisException.wrapIfNeeded(exceptionMessage, e));
-            }
-        };
-    }
-
-    public static <I, O> Function<I, Result<O, MultiLangAnalysisException>> executeWrapped(
-        ExceptionalFunction<I, Result<O, MultiLangAnalysisException>, ? extends Exception> function
-    ) {
-        return input -> {
-            try {
-                return function.apply(input);
-            } catch(Exception e) {
-                return Result.ofErr(MultiLangAnalysisException.wrapIfNeeded(e));
-            }
-        };
-    }
 }
