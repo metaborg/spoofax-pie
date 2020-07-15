@@ -39,7 +39,6 @@ import mb.statix.multilang.ImmutableLanguageMetadata;
 import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.LanguageMetadata;
 import mb.statix.multilang.LanguageMetadataManager;
-import mb.statix.multilang.LanguagePieManager;
 import mb.statix.multilang.MultiLang;
 import mb.statix.multilang.SharedPieProvider;
 import mb.statix.multilang.pie.SmlSolveProject;
@@ -271,11 +270,6 @@ public class {{genModule.id}} {
 
     @Provides @LanguageScope
     static ContextDataManager provideContextDataManager(@MultiLang AnalysisContextService analysisContextService) {
-        return analysisContextService;
-    }
-
-    @Provides @LanguageScope
-    static LanguagePieManager provideLanguagePieManager(@MultiLang AnalysisContextService analysisContextService) {
         return analysisContextService;
     }
 

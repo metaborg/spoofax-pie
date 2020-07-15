@@ -41,11 +41,6 @@ public class MultiLangModule {
     }
 
     @Provides @MultiLangScope @MultiLang
-    public LanguagePieManager provideLanguagePieManager(@MultiLang AnalysisContextService analysisContextService) {
-        return analysisContextService;
-    }
-
-    @Provides @MultiLangScope @MultiLang
     public SmlSolveProject provideSolveProject(SmlSolveProject solveProject) {
         return solveProject;
     }
