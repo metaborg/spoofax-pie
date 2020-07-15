@@ -1,6 +1,7 @@
 package mb.statix.multilang;
 
 import mb.common.result.Result;
+import mb.common.result.ResultCollector;
 import mb.pie.api.Pie;
 import org.immutables.value.Value;
 
@@ -45,20 +46,13 @@ public abstract class AnalysisContextService implements LanguageMetadataManager,
             throw new MultiLangAnalysisException("Cannot build combined Pie when no languages are supplied");
         }
 
-        Set<Result<LanguageMetadata, MultiLangAnalysisException>> results = languages.stream()
+        return languages.stream()
             .map(this::getLanguageMetadataResult)
-            .collect(Collectors.toSet());
-
-        if(results.stream().anyMatch(Result::isErr)) {
-            MultiLangAnalysisException exception = new MultiLangAnalysisException("Error loading language metadata");
-            results.stream().filter(Result::isErr).map(Result::unwrapErr).forEach(exception::addSuppressed);
-            throw exception;
-        }
-
-        return platformPie().createChildBuilder(results.stream()
-            .map(Result::unwrapUnchecked)
-            .map(LanguageMetadata::languagePie)
-            .toArray(Pie[]::new)).build();
+            .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("Error loading language metadata", false)))
+            .map(results -> platformPie().createChildBuilder(results.stream()
+                .map(LanguageMetadata::languagePie)
+                .toArray(Pie[]::new)).build())
+            .unwrap();
     }
 
     public static ImmutableAnalysisContextService.Builder builder() {

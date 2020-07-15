@@ -14,4 +14,8 @@ public class SpecLoadException extends MultiLangAnalysisException {
     public SpecLoadException(String s, Throwable throwable) {
         super(s, throwable);
     }
+
+    public SpecLoadException(String s, boolean includeMessage) {
+        super(s, includeMessage);
+    }
 }

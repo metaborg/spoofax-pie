@@ -11,32 +11,53 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class MultiLangAnalysisException extends Exception {
 
     private @Nullable ResourceKey resourceKey = null;
+    // If true, toKeyedMessages will include a message for this exception
+    // By default, it is true when no cause is provided, but false otherwise
+    private final boolean includeMessage;
 
     public MultiLangAnalysisException(String s) {
+        this(s, true);
+    }
+
+    public MultiLangAnalysisException(String s, boolean includeMessage) {
         super(s);
+        this.includeMessage = includeMessage;
     }
 
     public MultiLangAnalysisException(Throwable throwable) {
+        this(throwable, false);
+    }
+
+    public MultiLangAnalysisException(Throwable throwable, boolean includeMessage) {
         super(throwable);
+        this.includeMessage = includeMessage;
     }
 
-    public MultiLangAnalysisException(String s, Throwable throwable) {
-        super(s, throwable);
+    public MultiLangAnalysisException(String message, Throwable throwable) {
+        this(message, throwable, false);
     }
 
-    public MultiLangAnalysisException(ResourceKey resourceKey, String s, Throwable throwable) {
-        super(s, throwable);
+    public MultiLangAnalysisException(String message, Throwable throwable, boolean includeMessage) {
+        super(message, throwable);
+        this.includeMessage = includeMessage;
+    }
+
+    public MultiLangAnalysisException(ResourceKey resourceKey, String message, Throwable throwable) {
+        this(resourceKey, message, throwable, false);
+    }
+
+    public MultiLangAnalysisException(ResourceKey resourceKey, String message, Throwable throwable, boolean includeMessage) {
+        super(message, throwable);
         this.resourceKey = resourceKey;
+        this.includeMessage = includeMessage;
     }
 
     public KeyedMessages toKeyedMessages() {
-        KeyedMessagesBuilder builder = new KeyedMessagesBuilder();
+        return toKeyedMessages(true);
+    }
 
-        if(resourceKey == null) {
-            builder.addMessage(this.toMessage());
-        } else {
-            builder.addMessage(this.toMessage(), resourceKey);
-        }
+    protected KeyedMessages toKeyedMessages(boolean root) {
+        KeyedMessagesBuilder builder = new KeyedMessagesBuilder();
 
         if(getCause() != null) {
             builder.addMessages(throwableToKeyedMessages(getCause()));
@@ -44,6 +65,15 @@ public class MultiLangAnalysisException extends Exception {
 
         for(Throwable throwable : getSuppressed()) {
             builder.addMessages(throwableToKeyedMessages(throwable));
+        }
+
+        // Add message for this exception when it is needed, or when there are no other messages (which may make this exception unnoticed)
+        if((root && builder.isEmpty()) || includeMessage) {
+            if(resourceKey == null) {
+                builder.addMessage(this.toMessage());
+            } else {
+                builder.addMessage(this.toMessage(), resourceKey);
+            }
         }
 
         return builder.build();
@@ -55,7 +85,7 @@ public class MultiLangAnalysisException extends Exception {
 
     protected KeyedMessages throwableToKeyedMessages(Throwable throwable) {
         if(throwable instanceof MultiLangAnalysisException) {
-            return ((MultiLangAnalysisException)throwable).toKeyedMessages();
+            return ((MultiLangAnalysisException)throwable).toKeyedMessages(false);
         }
         return KeyedMessages.of(Messages.of(new Message(throwable.getMessage(), throwable, Severity.Error)));
     }

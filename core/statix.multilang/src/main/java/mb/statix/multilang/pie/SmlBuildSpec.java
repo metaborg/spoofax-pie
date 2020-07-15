@@ -75,7 +75,7 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
     @Override public Result<Spec, SpecLoadException> exec(ExecContext context, Input input) {
         return input.languages.stream()
             .map(lid -> languageMetadataManager.get().getLanguageMetadataResult(lid))
-            .collect(ResultCollector.getWithBaseException(new SpecLoadException("Exception getting language metadata")))
+            .collect(ResultCollector.getWithBaseException(new SpecLoadException("Exception getting language metadata", false)))
             .flatMap(languageMetadataSet -> languageMetadataSet.stream()
                 .map(LanguageMetadata::statixSpec)
                 .reduce(SpecBuilder::merge)

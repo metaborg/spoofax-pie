@@ -32,12 +32,12 @@ public interface SpecBuilder {
             // For now, users are responsible to ensure their languages use the same interfaces
             .map(modules -> modules.get(0))
             .map(Module::toSpecResult)
-            .collect(ResultCollector.getWithBaseException(new SpecLoadException("Error mapping module to spec")))
+            .collect(ResultCollector.getWithBaseException(new SpecLoadException("Error mapping module to spec", false)))
             .flatMap(specs -> specs.stream()
                 .map(Result::<Spec, SpecLoadException>ofOk)
                 .reduce(SpecUtils::mergeSpecs)
                 // When Check method holds, this can not occur
-                .orElse(Result.ofErr(new SpecLoadException("May not occur: at least one module should be present"))));
+                .orElse(Result.ofErr(new SpecLoadException("Bug: check should ensure at least one module should be present"))));
     }
 
     default ImmutableSpecBuilder.Builder extend() {

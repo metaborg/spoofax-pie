@@ -111,7 +111,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
                 specSupplier(input),
                 lmd.projectConstraint(),
                 input.logLevel))).map(res -> new AbstractMap.SimpleImmutableEntry<>(lmd.languageId(), res)))
-            .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("At least one project constraint has an unexpected exception")))
+            .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("At least one project constraint has an unexpected exception", false)))
             .map(SmlSolveProject::entrySetToMap)
             .flatMap(projectResults -> analyzeFiles(context, input, languageMetadataMap, projectResults)));
     }
@@ -131,7 +131,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
                     globalResultSupplier(input),
                     input.logLevel)))
                     .map(res -> new AbstractMap.SimpleImmutableEntry<>(new FileKey(resourceKey, languageMetadata.languageId()), res))))
-            .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("At least one file constraint has an unexpected exception")))
+            .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("At least one file constraint has an unexpected exception", false)))
             .map(SmlSolveProject::entrySetToMap)
             .flatMap(fileResults -> solveCombined(context, input, projectResults, fileResults));
     }
@@ -186,7 +186,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
         return languages.stream()
             .map(languageId -> TaskUtils.executeWrapped(() -> Result.ofOk(languageMetadataManager.get().getLanguageMetadata(languageId)))
                 .map(res -> new AbstractMap.SimpleImmutableEntry<>(languageId, res)))
-            .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("Error when resolving language metadata")))
+            .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("Error when resolving language metadata", false)))
             .map(SmlSolveProject::entrySetToMap);
     }
 

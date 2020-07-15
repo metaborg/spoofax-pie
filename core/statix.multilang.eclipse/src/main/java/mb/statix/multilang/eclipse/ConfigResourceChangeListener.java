@@ -70,7 +70,7 @@ public class ConfigResourceChangeListener implements IResourceChangeListener {
                 if(exceptions.isEmpty()) {
                     return StatusUtil.success();
                 }
-                MultiLangAnalysisException wrapper = new MultiLangAnalysisException("Errors processing multilang.yaml change");
+                MultiLangAnalysisException wrapper = new MultiLangAnalysisException("Errors processing multilang.yaml change", false);
                 exceptions.forEach(wrapper::addSuppressed);
                 return StatusUtil.error("Errors processing multilang.yaml change", wrapper);
             }

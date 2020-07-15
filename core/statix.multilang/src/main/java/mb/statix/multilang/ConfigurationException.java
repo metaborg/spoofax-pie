@@ -7,7 +7,7 @@ public class ConfigurationException extends MultiLangAnalysisException {
     }
 
     public ConfigurationException(Throwable throwable) {
-        super(throwable);
+        super(throwable, false);
     }
 
     public ConfigurationException(String s, Throwable throwable) {
