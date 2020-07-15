@@ -7,6 +7,7 @@ plugins {
 
 dependencies {
   api(platform(project(":spoofax.depconstraints")))
+  annotationProcessor(platform(project(":spoofax.depconstraints")))
 
   bundleTargetPlatformApi(eclipse("javax.inject"))
   bundleTargetPlatformApi(eclipse("org.eclipse.core.runtime"))
@@ -16,6 +17,8 @@ dependencies {
   bundleTargetPlatformApi(project(":spoofax.eclipse"))
 
   bundleApi(project(":statix.multilang.eclipse.externaldeps"))
+
+  annotationProcessor("com.google.dagger:dagger-compiler")
 
   compileOnly("org.checkerframework:checker-qual-android")
 }

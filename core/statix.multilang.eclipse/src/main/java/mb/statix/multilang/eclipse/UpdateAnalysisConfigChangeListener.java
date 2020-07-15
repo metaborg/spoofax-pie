@@ -33,7 +33,7 @@ public class UpdateAnalysisConfigChangeListener implements ConfigChangeListener 
         final EclipseResourcePath projectPath = new EclipseResourcePath(project.getFullPath());
         try(MixedSession session = pieProvider.getPie(projectPath).newSession()) {
             TopDownSession postSession = session.updateAffectedBy(Collections.singleton(projectPath));
-            pieRunner.requireCheck(project, monitor, postSession, languageComponent);
+            pieRunner.requireCheck(project, monitor, postSession, languageComponent).update(project, null, monitor);
         } catch(InterruptedException | ExecException e) {
             pieRunner.clearMessages(project, monitor, languageComponent);
             logger.error("Error executing analysis after configuration update", e);

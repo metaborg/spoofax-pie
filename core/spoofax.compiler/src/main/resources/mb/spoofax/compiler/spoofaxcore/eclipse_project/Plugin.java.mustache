@@ -40,7 +40,7 @@ public class {{genPlugin.id}} extends AbstractUIPlugin {
             .builder()
             .platformComponent(SpoofaxPlugin.getComponent())
             {{#this.adapterProjectCompilerInput.multilangAnalyzer}}
-            .multiLangComponent(MultiLangPlugin.getComponent())
+            .multiLangEclipseComponent(MultiLangPlugin.getComponent())
             {{/this.adapterProjectCompilerInput.multilangAnalyzer}}
             .build();
 
@@ -50,7 +50,7 @@ public class {{genPlugin.id}} extends AbstractUIPlugin {
         MultiLangPlugin.getConfigResourceChangeListener().addDelegate(configListener);
         {{/this.adapterProjectCompilerInput.multilangAnalyzer}}
 
-        new WorkspaceJob("{{shared.name}} startup") {
+        WorkspaceJob job = new WorkspaceJob("{{shared.name}} startup") {
             @Override public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
                 try {
                     SpoofaxPlugin.getComponent().getPieRunner().startup(component, monitor);
@@ -59,8 +59,9 @@ public class {{genPlugin.id}} extends AbstractUIPlugin {
                 }
                 return StatusUtil.success();
             }
-        }.schedule();
-
+        };
+        job.setRule(component.startupWriteLockRule());
+        job.schedule();
     }
 
     @Override public void stop(@NonNull BundleContext context) throws Exception {

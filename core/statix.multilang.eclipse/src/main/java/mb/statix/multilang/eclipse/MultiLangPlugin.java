@@ -3,6 +3,7 @@ package mb.statix.multilang.eclipse;
 import mb.log.api.Logger;
 import mb.spoofax.eclipse.SpoofaxEclipseComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
+import mb.spoofax.eclipse.job.LockRule;
 import mb.statix.multilang.AnalysisContextService;
 import mb.statix.multilang.DaggerMultiLangComponent;
 import mb.statix.multilang.ImmutableAnalysisContextService;
@@ -32,9 +33,9 @@ public class MultiLangPlugin extends Plugin {
     private static final Logger logger = SpoofaxPlugin.getComponent().getLoggerFactory().create(MultiLangPlugin.class);
 
     private static @Nullable MultiLangPlugin plugin;
-    private static @Nullable MultiLangComponent component;
+    private static @Nullable MultiLangEclipseComponent component;
 
-    private static ConfigResourceChangeListener configResourceChangeListener;
+    private static @Nullable ConfigResourceChangeListener configResourceChangeListener;
 
     public static MultiLangPlugin getPlugin() {
         if(plugin == null) {
@@ -43,7 +44,7 @@ public class MultiLangPlugin extends Plugin {
         return plugin;
     }
 
-    public static MultiLangComponent getComponent() {
+    public static MultiLangEclipseComponent getComponent() {
         if(component == null) {
             throw new RuntimeException(
                 "Cannot access MultiLangComponent; MultiLangPlugin has not been started yet, or has been stopped");
@@ -60,7 +61,7 @@ public class MultiLangPlugin extends Plugin {
         plugin = this;
         SpoofaxEclipseComponent platformComponent = SpoofaxPlugin.getComponent();
 
-        component = DaggerMultiLangComponent
+        component = DaggerMultiLangEclipseComponent
             .builder()
             .multiLangModule(new MultiLangModule(() -> initializeExtensionPoint(Platform.getExtensionRegistry())))
             .platformComponent(platformComponent)
