@@ -1,5 +1,6 @@
 package mb.statix.multilang.pie;
 
+import com.google.common.collect.ImmutableMap;
 import dagger.Lazy;
 import mb.common.result.Result;
 import mb.common.result.ResultCollector;
@@ -10,6 +11,8 @@ import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.statix.constraints.CConj;
+import mb.statix.constraints.messages.IMessage;
+import mb.statix.constraints.messages.MessageUtil;
 import mb.statix.multilang.AnalysisResults;
 import mb.statix.multilang.FileKey;
 import mb.statix.multilang.FileResult;
@@ -178,7 +181,16 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
             SolverResult result = Solver.solve(combinedSpec, state, combinedConstraint, (s, l, st) -> true, debug, new NullProgress(), new NullCancel());
             long dt = System.currentTimeMillis() - t0;
             logger.info("Project analyzed in {} ms", dt);
-            return Result.ofOk(result);
+
+            // Mark Delays as Errors
+            final ImmutableMap.Builder<IConstraint, IMessage> messages = ImmutableMap.builder();
+            messages.putAll(result.messages());
+            result.delays().keySet().forEach(c -> {
+                messages.put(c, MessageUtil.findClosestMessage(c));
+            });
+            final SolverResult newResult = result.withMessages(messages.build()).withDelays(ImmutableMap.of());
+
+            return Result.ofOk(newResult);
         });
     }
 
