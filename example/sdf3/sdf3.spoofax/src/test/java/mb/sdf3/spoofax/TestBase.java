@@ -62,7 +62,7 @@ class TestBase {
 
 
     FSResource createTextFile(String text, String relativePath) throws IOException {
-        final FSResource resource = rootDirectory.appendRelativePath("a.sdf3");
+        final FSResource resource = rootDirectory.appendRelativePath(relativePath);
         resource.writeString(text, StandardCharsets.UTF_8);
         return resource;
     }
