@@ -11,7 +11,7 @@ import mb.statix.multilang.LanguageMetadataProvider;
 
 @LanguageScope
 @Component(
-    modules = {{genModule.id}}.class,
+    modules = {{genModule.id}}.class{{#additionalModules}}{{#-first}}, {{/-first}}{{qualifiedId}}.class{{^-last}}, {{/-last}}{{/additionalModules}},
     dependencies = { PlatformComponent.class{{#isMultiLang}}, MultiLangComponent.class{{/isMultiLang}} }
 )
 public interface {{genComponent.id}} extends LanguageComponent{{#isMultiLang}}, LanguageMetadataProvider{{/isMultiLang}}  {

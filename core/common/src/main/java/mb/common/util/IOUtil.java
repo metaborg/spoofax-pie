@@ -18,6 +18,7 @@
  */
 package mb.common.util;
 
+import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -449,6 +450,24 @@ public class IOUtil {
             }
         }
         return totalRead;
+    }
+
+
+    /**
+     * Gets the contents of an <code>InputStream</code> as a <code>byte[]</code>.
+     *
+     * This method buffers the input internally, so there is no need to use a
+     * <code>BufferedInputStream</code>.
+     *
+     * @param input the <code>InputStream</code> to read from
+     * @return the requested byte array
+     * @throws IOException if an I/O error occurs
+     */
+    public static byte[] toByteArray(final InputStream input) throws IOException {
+        try(final ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            copy(input, output);
+            return output.toByteArray();
+        }
     }
 
 

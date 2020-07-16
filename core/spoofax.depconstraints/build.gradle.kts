@@ -69,6 +69,7 @@ dependencies {
     api("org.metaborg:sdf2parenthesize:$spoofax2Version")
     api("org.metaborg:org.spoofax.interpreter.core:$spoofax2Version")
     api("org.metaborg:org.strategoxt.strj:$spoofax2Version")
+    api("org.metaborg:stratego.build:$spoofax2Version")
     api("org.metaborg:nabl2.solver:$spoofax2Version")
     api("org.metaborg:nabl2.terms:$spoofax2Version")
     api("org.metaborg:statix.solver:$spoofax2Version")

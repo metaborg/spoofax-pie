@@ -10,7 +10,7 @@ import mb.statix.multilang.eclipse.MultiLangEclipseComponent;
 
 @LanguageScope
 @Component(
-    modules = { {{adapterProjectCompilerInput.module.qualifiedId}}.class, {{eclipseModule.qualifiedId}}.class },
+    modules = { {{adapterProjectCompilerInput.module.qualifiedId}}.class, {{eclipseModule.qualifiedId}}.class{{#adapterProjectCompilerInput.additionalModules}}{{#-first}}, {{/-first}}{{qualifiedId}}.class{{^-last}}, {{/-last}}{{/adapterProjectCompilerInput.additionalModules}} },
     dependencies = { PlatformComponent.class{{#this.adapterProjectCompilerInput.isMultiLang}}, MultiLangEclipseComponent.class{{/this.adapterProjectCompilerInput.isMultiLang}} }
 )
 public interface {{genEclipseComponent.id}} extends EclipseLanguageComponent, {{adapterProjectCompilerInput.component.qualifiedId}} {

@@ -6,7 +6,7 @@ import mb.spoofax.intellij.IntellijLanguageComponent;
 import mb.spoofax.intellij.SpoofaxIntellijComponent;
 
 @LanguageScope
-@Component(modules = { {{adapterProjectCompilerInput.module.qualifiedId}}.class, {{module.qualifiedId}}.class }, dependencies = SpoofaxIntellijComponent.class)
+@Component(modules = { {{adapterProjectCompilerInput.module.qualifiedId}}.class, {{module.qualifiedId}}.class{{#adapterProjectCompilerInput.additionalModules}}{{#-first}}, {{/-first}}{{qualifiedId}}.class{{^-last}}, {{/-last}}{{/adapterProjectCompilerInput.additionalModules}} }, dependencies = SpoofaxIntellijComponent.class)
 public interface {{genComponent.id}} extends IntellijLanguageComponent, {{adapterProjectCompilerInput.component.qualifiedId}} {
     @Override {{language.qualifiedId}} getLanguage();
 
