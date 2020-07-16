@@ -25,8 +25,6 @@ public abstract class AnalysisContextService implements LanguageMetadataManager,
 
     @Value.Parameter public abstract Map<LanguageId, Supplier<LanguageMetadata>> languageMetadataSuppliers();
 
-    @Value.Parameter public abstract Map<ContextId, Set<LanguageId>> contextConfigurations();
-
     @Value.Parameter public abstract Pie platformPie();
 
     // Map used to cache language metadata instances, so that they will not be recomputed by subsequent accesses.
@@ -43,7 +41,12 @@ public abstract class AnalysisContextService implements LanguageMetadataManager,
     }
 
     @Override public Set<LanguageId> getContextLanguages(ContextId contextId) {
-        return contextConfigurations().getOrDefault(contextId, Collections.emptySet());
+        return defaultLanguageContexts()
+            .entrySet()
+            .stream()
+            .filter(entry -> entry.getValue().equals(contextId))
+            .map(Map.Entry::getKey)
+            .collect(Collectors.toSet());
     }
 
     @Override public ContextId getDefaultContextId(LanguageId languageId) {

@@ -41,7 +41,6 @@ public class EclipseProjectCompiler {
     private final TemplateWriter runCommandHandlerTemplate;
     private final TemplateWriter observeHandlerTemplate;
     private final TemplateWriter unobserveHandlerTemplate;
-    private final TemplateWriter contextProviderTemplate;
     private final TemplateWriter metadataProviderTemplate;
 
     public EclipseProjectCompiler(TemplateCompiler templateCompiler) {
@@ -66,7 +65,6 @@ public class EclipseProjectCompiler {
         this.runCommandHandlerTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/RunCommandHandler.java.mustache");
         this.observeHandlerTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/ObserveHandler.java.mustache");
         this.unobserveHandlerTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/UnobserveHandler.java.mustache");
-        this.contextProviderTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/ContextProvider.java.mustache");
         this.metadataProviderTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/MetadataProvider.java.mustache");
     }
 
@@ -125,7 +123,6 @@ public class EclipseProjectCompiler {
         observeHandlerTemplate.write(input.genObserveHandler().file(classesGenDirectory), input);
         unobserveHandlerTemplate.write(input.genUnobserveHandler().file(classesGenDirectory), input);
         if(input.adapterProjectCompilerInput().multilangAnalyzer().isPresent()) {
-            contextProviderTemplate.write(input.genContextProvider().file(classesGenDirectory), input);
             metadataProviderTemplate.write(input.genMetadataProvider().file(classesGenDirectory), input);
         }
 
@@ -570,21 +567,6 @@ public class EclipseProjectCompiler {
             return genUnobserveHandler();
         }
 
-        // ContextProvider
-
-        @Value.Default default TypeInfo genContextProvider() {
-            return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "ContextProvider");
-        }
-
-        Optional<TypeInfo> manualContextProvider();
-
-        default TypeInfo contextProvider() {
-            if(classKind().isManual() && manualContextProvider().isPresent()) {
-                return manualContextProvider().get();
-            }
-            return genContextProvider();
-        }
-
         // Language Metadata Provider
 
         @Value.Default default TypeInfo genMetadataProvider() {
@@ -627,7 +609,6 @@ public class EclipseProjectCompiler {
                 generatedFiles.add(genObserveHandler().file(classesGenDirectory()));
                 generatedFiles.add(genUnobserveHandler().file(classesGenDirectory()));
                 if(adapterProjectCompilerInput().multilangAnalyzer().isPresent()) {
-                    generatedFiles.add(genContextProvider().file(classesGenDirectory()));
                     generatedFiles.add(genMetadataProvider().file(classesGenDirectory()));
                 }
             }

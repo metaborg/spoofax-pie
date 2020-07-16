@@ -13,9 +13,6 @@
       <choice>
         <element ref="languagemetadata" minOccurs="0" maxOccurs="unbounded"/>
       </choice>
-      <choice>
-        <element ref="contextmetadata" minOccurs="0" maxOccurs="unbounded"/>
-      </choice>
       <attribute name="point" type="string" use="required"/>
       <attribute name="id" type="string"/>
       <attribute name="name" type="string">
@@ -33,17 +30,6 @@
         <annotation>
           <appinfo>
             <meta.attribute kind="java" basedOn=":mb.spoofax.multilang.eclipse.LanguageMetadataProvider"/>
-          </appinfo>
-        </annotation>
-      </attribute>
-    </complexType>
-  </element>
-  <element name="contextmetadata">
-    <complexType>
-      <attribute name="class" type="string">
-        <annotation>
-          <appinfo>
-            <meta.attribute kind="java" basedOn=":mb.spoofax.multilang.eclipse.ContextMetadataProvider"/>
           </appinfo>
         </annotation>
       </attribute>

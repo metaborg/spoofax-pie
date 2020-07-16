@@ -3,12 +3,8 @@ package mb.statix.multilang.eclipse;
 import mb.log.api.Logger;
 import mb.spoofax.eclipse.SpoofaxEclipseComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
-import mb.spoofax.eclipse.job.LockRule;
 import mb.statix.multilang.AnalysisContextService;
-import mb.statix.multilang.DaggerMultiLangComponent;
 import mb.statix.multilang.ImmutableAnalysisContextService;
-import mb.statix.multilang.LanguageId;
-import mb.statix.multilang.MultiLangComponent;
 import mb.statix.multilang.MultiLangModule;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -20,10 +16,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.osgi.framework.BundleContext;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -53,6 +46,10 @@ public class MultiLangPlugin extends Plugin {
     }
 
     public static ConfigResourceChangeListener getConfigResourceChangeListener() {
+        if(configResourceChangeListener == null) {
+            throw new RuntimeException(
+                "Cannot access MultiLangComponent; MultiLangPlugin has not been started yet, or has been stopped");
+        }
         return configResourceChangeListener;
     }
 
@@ -76,7 +73,9 @@ public class MultiLangPlugin extends Plugin {
         super.stop(context);
         plugin = null;
         ResourcesPlugin.getWorkspace().removeResourceChangeListener(configResourceChangeListener);
-        configResourceChangeListener.clearDelegates();
+        if(configResourceChangeListener != null) {
+            configResourceChangeListener.clearDelegates();
+        }
     }
 
     private static AnalysisContextService initializeExtensionPoint(IExtensionRegistry registry) {
@@ -100,29 +99,6 @@ public class MultiLangPlugin extends Plugin {
         languageMetadataProviders.stream()
             .map(LanguageMetadataProvider::getDefaultLanguageContexts)
             .forEach(analysisContextServiceBuilder::putAllDefaultLanguageContexts);
-
-        // Initialize languages for context
-        Stream.of(extensions)
-            // Collect all valid context metadata suppliers
-            .filter(conf -> conf.getName().equals("contextmetadata"))
-            .map(MultiLangPlugin::loadClass)
-            .filter(ContextMetadataProvider.class::isInstance)
-            .map(ContextMetadataProvider.class::cast)
-            .map(ContextMetadataProvider::getContextLanguages)
-            // Configuration for a context can come from different sources, so there may be duplicate keys in the maps
-            // However, Immutables builders dont accept those. Therefore we merge all lists associated with the same key
-            .map(Map::entrySet)
-            .flatMap(Set::stream)
-            .collect(Collectors.toMap(Map.Entry::getKey,
-                Map.Entry::getValue,
-                // When encountering duplicate contextIds, merge the 2 language id sets
-                // By using sets, it deduplicates for free
-                (left, right) -> {
-                    HashSet<LanguageId> result = new HashSet<>(left);
-                    result.addAll(right);
-                    return result;
-                }))
-            .forEach(analysisContextServiceBuilder::putContextConfigurations);
 
         return analysisContextServiceBuilder
             .platformPie(SpoofaxPlugin.getComponent().getPie())
