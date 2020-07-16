@@ -46,9 +46,7 @@ public abstract class StrategoException extends Exception {
     }
 
     public static StrategoException exceptionalFail(String strategyName, IStrategoTerm input, String[] trace, InterpreterException cause) {
-        final StrategoException e = StrategoExceptions.exceptionalFail(strategyName, input, trace, cause);
-        e.initCause(cause);
-        return e;
+        return StrategoExceptions.exceptionalFail(strategyName, input, trace, cause);
     }
 
     public static StrategoException fromInterpreterException(String strategyName, IStrategoTerm input, String[] trace, InterpreterException interpreterException) {
@@ -110,6 +108,16 @@ public abstract class StrategoException extends Exception {
             .strategyUndefined((strategyName, input, trace, undefinedStrategyName) -> createMessage(strategyName, input, trace, "; strategy '" + undefinedStrategyName + "' is undefined"))
             .exceptionalFail((strategyName, input, trace, cause) -> createMessage(strategyName, input, trace, "unexpectedly due to:\n\n" + cause.getMessage()))
             ;
+    }
+
+    @Override public synchronized Throwable getCause() {
+        return caseOf()
+            .strategyFail((strategyName, input, trace) -> (Throwable)null)
+            .fatalFail((strategyName, input, trace) -> null)
+            .fatalFailWithTerm((strategyName, input, trace, term) -> null)
+            .exitFail((strategyName, input, trace, exitCode) -> null)
+            .strategyUndefined((strategyName, input, trace, undefinedStrategyName) -> null)
+            .exceptionalFail((strategyName, input, trace, cause) -> cause);
     }
 
     private String createMessage(String strategyName, IStrategoTerm input, String[] trace, String postfix) {
