@@ -15,6 +15,8 @@ import org.metaborg.sdf2table.parsetable.ParseTableConfiguration;
 
 import javax.inject.Inject;
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Objects;
 
 @LanguageScope
@@ -59,7 +61,7 @@ public class Sdf3ShowSpecParseTable implements TaskDef<Sdf3ShowSpecParseTable.Ar
 
     @Override public CommandFeedback exec(ExecContext context, Args args) {
         return context.require(specToParseTable, new Sdf3SpecToParseTable.Args(
-            createSpec.createSupplier(new Sdf3CreateSpec.Input(args.project, args.mainFile)),
+            createSpec.createSupplier(new Sdf3CreateSpec.Input(args.mainFile, Arrays.asList(args.project), Collections.emptyList())),
             new ParseTableConfiguration(false, false, true, false, false, false),
             false
         ))
