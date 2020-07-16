@@ -93,7 +93,7 @@ public class SpoofaxCli {
                         if(label != null) {
                             builder.paramLabel(label);
                         }
-                        // noinspection ConstantConditions (label can really be null)
+                        // noinspection ConstantConditions (description can really be null)
                         if(description != null) {
                             builder.description(description);
                         }
@@ -127,7 +127,7 @@ public class SpoofaxCli {
                         if(label != null) {
                             builder.paramLabel(label);
                         }
-                        // noinspection ConstantConditions (label can really be null)
+                        // noinspection ConstantConditions (description can really be null)
                         if(description != null) {
                             builder.description(description);
                         }

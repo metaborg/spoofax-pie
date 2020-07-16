@@ -12,6 +12,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * A command-line parameter.
+ */
 public class Param {
     private final String id;
     private final Class<? extends Serializable> type;
