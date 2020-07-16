@@ -40,7 +40,7 @@ spoofaxAdapterProject {
 
       val builder = AdapterProjectCompiler.Input.builder()
 
-      builder.addAdditionalModules(incrPackageId, "StrategoIncrModule")
+//      builder.addAdditionalModules(incrPackageId, "StrategoIncrModule")
 
       builder.classKind(ClassKind.Extended)
       builder.genComponent(packageId, "GeneratedStrategoComponent")
