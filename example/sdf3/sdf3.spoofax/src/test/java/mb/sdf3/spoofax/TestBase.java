@@ -35,6 +35,8 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
+import java.util.Arrays;
+import java.util.Collections;
 
 class TestBase {
     final FileSystem fileSystem = Jimfs.newFileSystem(Configuration.unix());
@@ -100,7 +102,7 @@ class TestBase {
 
 
     Supplier<Sdf3Spec> specSupplier(ResourcePath project, ResourceKey mainFile) {
-        return createSpec.createSupplier(new Sdf3CreateSpec.Input(project, mainFile));
+        return createSpec.createSupplier(new Sdf3CreateSpec.Input(mainFile, Arrays.asList(project), Collections.emptyList()));
     }
 
     @SafeVarargs

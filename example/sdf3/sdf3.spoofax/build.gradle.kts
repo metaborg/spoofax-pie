@@ -4,8 +4,12 @@ import mb.spoofax.compiler.spoofaxcore.*
 import mb.spoofax.compiler.util.*
 import mb.spoofax.compiler.gradle.spoofaxcore.*
 import mb.spoofax.core.language.command.CommandContextType
-import mb.spoofax.core.language.command.CommandExecutionType
 import mb.spoofax.core.language.command.EnclosingCommandContextType
+import mb.spoofax.compiler.cli.CliCommandRepr
+import mb.spoofax.compiler.cli.CliParamRepr
+import mb.spoofax.core.language.command.CommandExecutionType
+import java.util.Optional
+import mb.common.util.ListView
 
 
 plugins {
@@ -211,6 +215,48 @@ spoofaxAdapterProject {
           )
         )
       )
+
+
+    // Command line actions
+    val saveParseTableTaskDef: TypeInfo = TypeInfo.of(taskPackageId, "Sdf3SaveParseTableCommand")
+    builder.addTaskDefs(
+      saveParseTableTaskDef
+    )
+    val saveParseTableCommand = CommandDefRepr.builder()
+      .type(commandPackageId, saveParseTableTaskDef.id() + "Command")
+      .taskDefType(saveParseTableTaskDef)
+      .argType(saveParseTableTaskDef.appendToId(".Args"))
+      .displayName("Save parse table")
+      .description("Saves the parse table to a file.")
+      .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
+      .addAllParams(listOf(
+        ParamRepr.of("inputx", TypeInfo.of("mb.resource", "ResourceKey"), true, ArgProviderRepr.context(CommandContextType.File)),
+        ParamRepr.of("outputx", TypeInfo.of("mb.resource", "ResourceKey"), false, ArgProviderRepr.context(CommandContextType.File)),
+        // TODO: Should be lists/sets
+        ParamRepr.of("includePaths", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), false, ArgProviderRepr.context(CommandContextType.ResourcePath)),
+        ParamRepr.of("includeFiles", TypeInfo.of("mb.resource", "ResourceKey"), false, ArgProviderRepr.context(CommandContextType.File))
+      ))
+      .build()
+    builder.addCommandDefs(
+      saveParseTableCommand
+    )
+    builder.cliCommand(CliCommandRepr.builder()
+      .name("sdf")
+      .description("SDF3 language command-line interface")
+      .addSubCommands(
+        CliCommandRepr.builder()
+          .name("parsetable")
+          .description("Generates a parse table")
+          .commandDefType(saveParseTableCommand.type())
+          .addAllParams(listOf(
+            CliParamRepr.positional("inputx", 0, "FILE", "Source file to parse"),
+            CliParamRepr.option("outputx", ListView.of("-o", "--output"), false, "FILE", "Target file to write the parse table to"),
+            // TODO: Should be lists/sets
+            CliParamRepr.option("includePaths", ListView.of("-p", "--include-path"), false, "PATH", "Include path"),
+            CliParamRepr.option("includeFiles", ListView.of("-i", "--include"), false, "FILE", "Include file")
+          ))
+          .build()
+      ).build())
 
       builder
     }
