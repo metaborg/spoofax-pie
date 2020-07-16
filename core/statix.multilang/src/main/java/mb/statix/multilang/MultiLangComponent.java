@@ -17,11 +17,18 @@ import mb.statix.multilang.pie.config.SmlReadConfigYaml;
 )
 public interface MultiLangComponent {
     @MultiLang AnalysisContextService getAnalysisContextService();
+
     @MultiLang SmlSolveProject getAnalyzeProject();
+
     @MultiLang SmlBuildContextConfiguration getBuildContextConfiguration();
+
     @MultiLang SmlBuildSpec getBuildSpec();
+
     @MultiLang SmlInstantiateGlobalScope getInstantiateGlobalScope();
+
     @MultiLang SmlPartialSolveFile getPartialSolveFile();
+
     @MultiLang SmlPartialSolveProject getPartialSolveProject();
+
     @MultiLang SmlReadConfigYaml getReadConfigYaml();
 }

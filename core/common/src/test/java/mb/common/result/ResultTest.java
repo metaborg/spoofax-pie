@@ -465,9 +465,9 @@ class ResultTest {
     @Test
     void collectError() {
         Result<Set<String>, AggregateException> result = Stream.<Result<String, Exception>>of(
-                Result.ofOk("Value 1"),
-                Result.ofErr(new Exception("Exception 1")),
-                Result.ofErr(new Exception("Exception 2")))
+            Result.ofOk("Value 1"),
+            Result.ofErr(new Exception("Exception 1")),
+            Result.ofErr(new Exception("Exception 2")))
             .collect(ResultCollector.getDefault());
 
         assertTrue(result.isErr());

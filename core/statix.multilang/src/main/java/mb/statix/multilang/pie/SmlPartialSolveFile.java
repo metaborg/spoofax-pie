@@ -86,7 +86,10 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
     private final Lazy<LanguageMetadataManager> languageMetadataManager;
     private final Logger logger;
 
-    @Inject public SmlPartialSolveFile(@MultiLang Lazy<LanguageMetadataManager> languageMetadataManager, LoggerFactory loggerFactory) {
+    @Inject public SmlPartialSolveFile(
+        @MultiLang Lazy<LanguageMetadataManager> languageMetadataManager,
+        LoggerFactory loggerFactory
+    ) {
         this.languageMetadataManager = languageMetadataManager;
         logger = loggerFactory.create(SmlPartialSolveFile.class);
     }

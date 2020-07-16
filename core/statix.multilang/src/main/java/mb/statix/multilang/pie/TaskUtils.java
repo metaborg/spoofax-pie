@@ -1,6 +1,5 @@
 package mb.statix.multilang.pie;
 
-import mb.common.result.ExceptionalFunction;
 import mb.common.result.ExceptionalSupplier;
 import mb.common.result.Result;
 import mb.statix.multilang.MultiLangAnalysisException;
@@ -10,8 +9,6 @@ import mb.statix.solver.log.NullDebugContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.log.Level;
 import org.metaborg.util.log.LoggerUtils;
-
-import java.util.function.Function;
 
 public final class TaskUtils {
     private TaskUtils() {

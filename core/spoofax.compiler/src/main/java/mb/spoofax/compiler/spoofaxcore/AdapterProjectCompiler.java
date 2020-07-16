@@ -1,7 +1,6 @@
 package mb.spoofax.compiler.spoofaxcore;
 
 import com.samskivert.mustache.Mustache;
-import mb.resource.classloader.ClassLoaderResourceRegistry;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.cli.CliCommandRepr;
 import mb.spoofax.compiler.command.AutoCommandRequestRepr;
@@ -223,7 +222,7 @@ public class AdapterProjectCompiler {
                 map.put("languageId", input.multilangAnalyzer().get().languageId());
                 map.put("contextId", input.multilangAnalyzer().get().contextId());
             }
-            if (input.multilangAnalyzer().isPresent()) {
+            if(input.multilangAnalyzer().isPresent()) {
                 checkInjection = uniqueNamer.makeUnique(input.multilangAnalyzer().get().checkTaskDef());
             } else if(input.isMultiFile()) {
                 checkInjection = uniqueNamer.makeUnique(input.checkMultiTaskDef());
@@ -271,9 +270,12 @@ public class AdapterProjectCompiler {
 
     @Value.Immutable
     public interface Input extends Serializable {
-        class Builder extends AdapterProjectCompilerData.Input.Builder {}
+        class Builder extends AdapterProjectCompilerData.Input.Builder {
+        }
 
-        static Builder builder() { return new Builder(); }
+        static Builder builder() {
+            return new Builder();
+        }
 
 
         /// Project
@@ -515,7 +517,8 @@ public class AdapterProjectCompiler {
 
     @Value.Immutable
     public interface Output {
-        class Builder extends AdapterProjectCompilerData.Output.Builder {}
+        class Builder extends AdapterProjectCompilerData.Output.Builder {
+        }
 
         static Builder builder() {
             return new Builder();

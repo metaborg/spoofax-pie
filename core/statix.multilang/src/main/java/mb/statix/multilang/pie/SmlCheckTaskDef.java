@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public abstract class SmlCheckTaskDef implements TaskDef<ResourcePath, KeyedMessages>  {
+public abstract class SmlCheckTaskDef implements TaskDef<ResourcePath, KeyedMessages> {
     private final Function<ResourceKey, Messages> parseMessageFunction;
     private final SmlBuildContextConfiguration buildContextConfiguration;
     private final SmlSolveProject solveProject;
@@ -103,7 +103,7 @@ public abstract class SmlCheckTaskDef implements TaskDef<ResourcePath, KeyedMess
                     .map(e -> MessageUtils.formatMessage(e.getValue(), e.getKey(), resultUnifier))
                     .collect(Collectors.toList());
                 builder.addMessages(entry.getKey().getResourceKey(), resourceMessages);
-        });
+            });
 
         // Process final result messages
         results.finalResult().messages().entrySet().stream()

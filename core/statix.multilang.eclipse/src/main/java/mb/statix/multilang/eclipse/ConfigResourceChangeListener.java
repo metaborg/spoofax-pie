@@ -58,7 +58,7 @@ public class ConfigResourceChangeListener implements IResourceChangeListener {
                 List<Throwable> exceptions = new ArrayList<>();
                 // Update all projects for changes configs
                 projects.forEach(path -> delegates.forEach(delegate -> SafeRunner.run(new SafeRunnable() {
-                    @Override public void run(){
+                    @Override public void run() {
                         delegate.configChanged(path, monitor);
                     }
 

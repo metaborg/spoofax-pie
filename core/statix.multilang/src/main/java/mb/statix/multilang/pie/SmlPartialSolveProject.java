@@ -27,7 +27,6 @@ import java.util.Set;
 
 @MultiLangScope
 public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.Input, Result<SolverResult, MultiLangAnalysisException>> {
-
     public static class Input implements Serializable {
         private final Supplier<Result<Spec, SpecLoadException>> specSupplier;
         private final Supplier<Result<GlobalResult, MultiLangAnalysisException>> globalResultSupplier;

@@ -18,8 +18,7 @@ public class ContextId implements Serializable {
         return Objects.equals(contextId, contextId1.contextId);
     }
 
-    @Override
-    public int hashCode() {
+    @Override public int hashCode() {
         return Objects.hash(contextId);
     }
 

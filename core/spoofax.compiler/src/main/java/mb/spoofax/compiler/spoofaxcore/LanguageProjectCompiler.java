@@ -160,7 +160,8 @@ public class LanguageProjectCompiler {
 
     @Value.Immutable
     public interface Input extends Serializable {
-        class Builder extends LanguageProjectCompilerData.Input.Builder {}
+        class Builder extends LanguageProjectCompilerData.Input.Builder {
+        }
 
         static Builder builder() {
             return new Builder();
@@ -261,7 +262,8 @@ public class LanguageProjectCompiler {
 
     @Value.Immutable
     public interface Output {
-        class Builder extends LanguageProjectCompilerData.Output.Builder {}
+        class Builder extends LanguageProjectCompilerData.Output.Builder {
+        }
 
         static Builder builder() {
             return new Builder();

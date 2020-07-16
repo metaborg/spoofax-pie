@@ -62,7 +62,10 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
     private final Lazy<LanguageMetadataManager> languageMetadataManager;
     private final Logger logger;
 
-    @Inject public SmlBuildSpec(@MultiLang Lazy<LanguageMetadataManager> languageMetadataManager, LoggerFactory loggerFactory) {
+    @Inject public SmlBuildSpec(
+        @MultiLang Lazy<LanguageMetadataManager> languageMetadataManager,
+        LoggerFactory loggerFactory
+    ) {
         this.languageMetadataManager = languageMetadataManager;
         logger = loggerFactory.create(SmlBuildSpec.class);
     }

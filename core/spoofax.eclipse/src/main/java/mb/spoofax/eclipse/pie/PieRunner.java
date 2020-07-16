@@ -339,7 +339,7 @@ public class PieRunner {
         return contextsAndFeedbacks;
     }
 
-    private  @Nullable ResourcePath contextProjectDir(CommandContext context) {
+    private @Nullable ResourcePath contextProjectDir(CommandContext context) {
         return context.getResourcePathWithKind()
             .map(ResourcePathWithKind::getPath)
             .map(resourceUtil::getProject)

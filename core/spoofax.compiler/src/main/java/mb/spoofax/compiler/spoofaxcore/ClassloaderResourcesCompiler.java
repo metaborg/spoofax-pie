@@ -54,7 +54,8 @@ public class ClassloaderResourcesCompiler {
 
     @Value.Immutable
     public interface LanguageProjectInput extends Serializable {
-        class Builder extends ClassloaderResourcesCompilerData.LanguageProjectInput.Builder {}
+        class Builder extends ClassloaderResourcesCompilerData.LanguageProjectInput.Builder {
+        }
 
         static Builder builder() {
             return new Builder();
@@ -124,7 +125,8 @@ public class ClassloaderResourcesCompiler {
 
     @Value.Immutable
     public interface AdapterProjectInput extends Serializable {
-        class Builder extends ClassloaderResourcesCompilerData.AdapterProjectInput.Builder {}
+        class Builder extends ClassloaderResourcesCompilerData.AdapterProjectInput.Builder {
+        }
 
         static Builder builder() {
             return new Builder();
@@ -138,7 +140,8 @@ public class ClassloaderResourcesCompiler {
 
     @Value.Immutable
     public interface Output {
-        class Builder extends ClassloaderResourcesCompilerData.Output.Builder {}
+        class Builder extends ClassloaderResourcesCompilerData.Output.Builder {
+        }
 
         static Builder builder() {
             return new Builder();

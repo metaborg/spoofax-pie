@@ -17,8 +17,8 @@ import java.util.HashSet;
 public interface LanguageMetadata {
     @Value.Parameter LanguageId languageId();
 
-    @Value.Parameter
-    Function<ResourcePath, HashSet<ResourceKey>> resourcesSupplier(); // Use HashSet because should be serializable
+    // Use HashSet because should be serializable
+    @Value.Parameter Function<ResourcePath, HashSet<ResourceKey>> resourcesSupplier();
 
     @Value.Parameter Function<ResourceKey, Result<IStrategoTerm, ?>> astFunction();
 

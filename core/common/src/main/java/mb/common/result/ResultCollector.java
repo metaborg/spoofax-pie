@@ -12,7 +12,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 
-public class ResultCollector<V, C extends Collection<V>, E extends Exception, A extends Exception> implements Collector<Result<V, E>, ResultCollector.ResultAccumulator<V,C,E>, Result<C, A>> {
+public class ResultCollector<V, C extends Collection<V>, E extends Exception, A extends Exception> implements Collector<Result<V, E>, ResultCollector.ResultAccumulator<V, C, E>, Result<C, A>> {
 
     private final Supplier<C> collectionSupplier;
     private final BiFunction<C, Collection<E>, A> exceptionBuilder;
@@ -23,22 +23,22 @@ public class ResultCollector<V, C extends Collection<V>, E extends Exception, A 
     }
 
     @Override
-    public Supplier<ResultAccumulator<V,C,E>> supplier() {
+    public Supplier<ResultAccumulator<V, C, E>> supplier() {
         return () -> new ResultAccumulatorImpl<>(collectionSupplier.get());
     }
 
     @Override
-    public BiConsumer<ResultAccumulator<V,C,E>, Result<V, E>> accumulator() {
+    public BiConsumer<ResultAccumulator<V, C, E>, Result<V, E>> accumulator() {
         return ResultAccumulator::add;
     }
 
     @Override
-    public BinaryOperator<ResultAccumulator<V,C,E>> combiner() {
+    public BinaryOperator<ResultAccumulator<V, C, E>> combiner() {
         return ResultAccumulator::combine;
     }
 
     @Override
-    public Function<ResultAccumulator<V,C,E>, Result<C, A>> finisher() {
+    public Function<ResultAccumulator<V, C, E>, Result<C, A>> finisher() {
         return acc -> acc.build(exceptionBuilder);
     }
 
@@ -113,7 +113,7 @@ public class ResultCollector<V, C extends Collection<V>, E extends Exception, A 
         @Override public ResultAccumulator<V, C, E> combine(ResultAccumulator<V, C, E> other) {
             other.build(AggregateException::new)
                 .ifElse(values::addAll, exc -> exc.getInnerExceptions().stream()
-                    .map(e -> (E) e)
+                    .map(e -> (E)e)
                     .forEach(exceptions::add));
             return this;
         }

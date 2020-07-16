@@ -91,7 +91,7 @@ public class EclipseProjectCompiler {
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.spoofaxEclipseDep()));
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(input.eclipseExternaldepsDependency()));
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.spoofaxEclipseExternaldepsDep()));
-        if (input.adapterProjectCompilerInput().multilangAnalyzer().isPresent()) {
+        if(input.adapterProjectCompilerInput().multilangAnalyzer().isPresent()) {
             bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.multilangEclipseDep()));
         }
         return bundleDependencies;
@@ -135,9 +135,12 @@ public class EclipseProjectCompiler {
 
     @Value.Immutable
     public interface Input extends Serializable {
-        class Builder extends EclipseProjectCompilerData.Input.Builder {}
+        class Builder extends EclipseProjectCompilerData.Input.Builder {
+        }
 
-        static Builder builder() { return new Builder(); }
+        static Builder builder() {
+            return new Builder();
+        }
 
 
         /// Project
@@ -177,49 +180,93 @@ public class EclipseProjectCompiler {
 
         /// Eclipse configuration
 
-        @Value.Default default String pluginId() { return project().coordinate().artifactId(); }
+        @Value.Default default String pluginId() {
+            return project().coordinate().artifactId();
+        }
 
-        @Value.Default default String contextId() { return pluginId() + ".context"; }
+        @Value.Default default String contextId() {
+            return pluginId() + ".context";
+        }
 
-        @Value.Default default String documentProviderId() { return pluginId() + ".documentprovider"; }
+        @Value.Default default String documentProviderId() {
+            return pluginId() + ".documentprovider";
+        }
 
-        @Value.Default default String editorId() { return pluginId() + ".editor"; }
+        @Value.Default default String editorId() {
+            return pluginId() + ".editor";
+        }
 
-        @Value.Default default String natureRelativeId() { return "nature"; }
+        @Value.Default default String natureRelativeId() {
+            return "nature";
+        }
 
-        @Value.Default default String natureId() { return pluginId() + "." + natureRelativeId(); }
+        @Value.Default default String natureId() {
+            return pluginId() + "." + natureRelativeId();
+        }
 
-        @Value.Default default String addNatureCommandId() { return natureId() + ".add"; }
+        @Value.Default default String addNatureCommandId() {
+            return natureId() + ".add";
+        }
 
-        @Value.Default default String removeNatureCommandId() { return natureId() + ".remove"; }
+        @Value.Default default String removeNatureCommandId() {
+            return natureId() + ".remove";
+        }
 
-        @Value.Default default String projectBuilderRelativeId() { return "builder"; }
+        @Value.Default default String projectBuilderRelativeId() {
+            return "builder";
+        }
 
-        @Value.Default default String projectBuilderId() { return pluginId() + "." + projectBuilderRelativeId(); }
+        @Value.Default default String projectBuilderId() {
+            return pluginId() + "." + projectBuilderRelativeId();
+        }
 
-        @Value.Default default String baseMarkerId() { return pluginId() + ".marker"; }
+        @Value.Default default String baseMarkerId() {
+            return pluginId() + ".marker";
+        }
 
-        @Value.Default default String infoMarkerId() { return baseMarkerId() + ".info"; }
+        @Value.Default default String infoMarkerId() {
+            return baseMarkerId() + ".info";
+        }
 
-        @Value.Default default String warningMarkerId() { return baseMarkerId() + ".warning"; }
+        @Value.Default default String warningMarkerId() {
+            return baseMarkerId() + ".warning";
+        }
 
-        @Value.Default default String errorMarkerId() { return baseMarkerId() + ".error"; }
+        @Value.Default default String errorMarkerId() {
+            return baseMarkerId() + ".error";
+        }
 
-        @Value.Default default String observeCommandId() { return pluginId() + ".observe"; }
+        @Value.Default default String observeCommandId() {
+            return pluginId() + ".observe";
+        }
 
-        @Value.Default default String unobserveCommandId() { return pluginId() + ".unobserve"; }
+        @Value.Default default String unobserveCommandId() {
+            return pluginId() + ".unobserve";
+        }
 
-        @Value.Default default String runCommandId() { return pluginId() + ".runcommand"; }
+        @Value.Default default String runCommandId() {
+            return pluginId() + ".runcommand";
+        }
 
-        @Value.Default default String baseMenuId() { return pluginId() + ".menu"; }
+        @Value.Default default String baseMenuId() {
+            return pluginId() + ".menu";
+        }
 
-        @Value.Default default String resourceContextMenuId() { return baseMenuId() + ".resource.context"; }
+        @Value.Default default String resourceContextMenuId() {
+            return baseMenuId() + ".resource.context";
+        }
 
-        @Value.Default default String editorContextMenuId() { return baseMenuId() + ".editor.context"; }
+        @Value.Default default String editorContextMenuId() {
+            return baseMenuId() + ".editor.context";
+        }
 
-        @Value.Default default String mainMenuId() { return baseMenuId() + ".main"; }
+        @Value.Default default String mainMenuId() {
+            return baseMenuId() + ".main";
+        }
 
-        @Value.Default default String mainMenuDynamicId() { return mainMenuId() + ".dynamic"; }
+        @Value.Default default String mainMenuDynamicId() {
+            return mainMenuId() + ".dynamic";
+        }
 
 
         Optional<ResourcePath> fileIconRelativePath();
@@ -602,9 +649,12 @@ public class EclipseProjectCompiler {
 
     @Value.Immutable
     public interface Output extends Serializable {
-        class Builder extends EclipseProjectCompilerData.Output.Builder {}
+        class Builder extends EclipseProjectCompilerData.Output.Builder {
+        }
 
-        static Builder builder() { return new Builder(); }
+        static Builder builder() {
+            return new Builder();
+        }
 
         List<ResourcePath> providedFiles();
     }

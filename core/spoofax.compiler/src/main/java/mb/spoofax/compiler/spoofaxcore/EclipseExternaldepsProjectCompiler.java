@@ -48,16 +48,19 @@ public class EclipseExternaldepsProjectCompiler {
         return bundleDependencies;
     }
 
-    public Output compile(Input input) throws IOException {
+    public Output compile(Input input) {
         return Output.builder().addAllProvidedFiles(input.providedFiles()).build();
     }
 
 
     @Value.Immutable
     public interface Input extends Serializable {
-        class Builder extends EclipseExternaldepsProjectCompilerData.Input.Builder {}
+        class Builder extends EclipseExternaldepsProjectCompilerData.Input.Builder {
+        }
 
-        static Builder builder() { return new Builder(); }
+        static Builder builder() {
+            return new Builder();
+        }
 
 
         /// Project
@@ -107,9 +110,12 @@ public class EclipseExternaldepsProjectCompiler {
 
     @Value.Immutable
     public interface Output extends Serializable {
-        class Builder extends EclipseExternaldepsProjectCompilerData.Output.Builder {}
+        class Builder extends EclipseExternaldepsProjectCompilerData.Output.Builder {
+        }
 
-        static Builder builder() { return new Builder(); }
+        static Builder builder() {
+            return new Builder();
+        }
 
         List<ResourcePath> providedFiles();
     }

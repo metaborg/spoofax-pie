@@ -100,14 +100,14 @@ public class MultiLangAnalysisException extends Exception implements Serializabl
 
     public static MultiLangAnalysisException wrapIfNeeded(Throwable throwable) {
         if(throwable instanceof MultiLangAnalysisException) {
-            return (MultiLangAnalysisException) throwable;
+            return (MultiLangAnalysisException)throwable;
         }
         return new MultiLangAnalysisException(throwable);
     }
 
     public static MultiLangAnalysisException wrapIfNeeded(String message, Throwable throwable) {
         if(throwable instanceof MultiLangAnalysisException) {
-            return (MultiLangAnalysisException) throwable;
+            return (MultiLangAnalysisException)throwable;
         }
         return new MultiLangAnalysisException(message, throwable);
     }

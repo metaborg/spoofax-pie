@@ -137,7 +137,7 @@ public class SpoofaxCli {
                             builder.converters(new TypeConverter<>(converter));
                         }
                         builder.setter(new ISetter() {
-                            @Override                            public <T> @Nullable T set(@Nullable T value) throws IllegalArgumentException {
+                            @Override public <T> @Nullable T set(@Nullable T value) throws IllegalArgumentException {
                                 commandRunner.set(paramId, value);
                                 return null;
                             }

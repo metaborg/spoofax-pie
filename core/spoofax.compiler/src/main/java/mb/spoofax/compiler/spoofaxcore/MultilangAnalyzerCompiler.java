@@ -69,7 +69,8 @@ public class MultilangAnalyzerCompiler {
 
     @Value.Immutable
     public interface LanguageProjectInput extends Serializable {
-        class Builder extends MultilangAnalyzerCompilerData.LanguageProjectInput.Builder {}
+        class Builder extends MultilangAnalyzerCompilerData.LanguageProjectInput.Builder {
+        }
 
         static Builder builder() {
             return new Builder();
@@ -100,7 +101,8 @@ public class MultilangAnalyzerCompiler {
 
     @Value.Immutable
     public interface AdapterProjectInput extends Serializable {
-        class Builder extends MultilangAnalyzerCompilerData.AdapterProjectInput.Builder {}
+        class Builder extends MultilangAnalyzerCompilerData.AdapterProjectInput.Builder {
+        }
 
         static Builder builder() {
             return new Builder();
@@ -263,7 +265,8 @@ public class MultilangAnalyzerCompiler {
 
     @Value.Immutable
     public interface Output {
-        class Builder extends MultilangAnalyzerCompilerData.Output.Builder {}
+        class Builder extends MultilangAnalyzerCompilerData.Output.Builder {
+        }
 
         static Builder builder() {
             return new Output.Builder();
