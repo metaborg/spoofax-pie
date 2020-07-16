@@ -18,9 +18,7 @@ public abstract class JSGLR1ParseException extends Exception {
     }
 
     public static JSGLR1ParseException readStringFail(String source, IOException cause) {
-        final JSGLR1ParseException e = JSGLR1ParseExceptions.readStringFail(source, cause);
-        e.initCause(cause);
-        return e;
+        return JSGLR1ParseExceptions.readStringFail(source, cause);
     }
 
     public static JSGLR1ParseException parseFail(Messages messages) {
@@ -48,6 +46,13 @@ public abstract class JSGLR1ParseException extends Exception {
             .readStringFail((source, cause) -> "Parsing failed; cannot get text to parse from '" + source + "'")
             .parseFail((messages) -> "Parsing failed; see error messages")
             .recoveryDisallowedFail((messages) -> "Parsing recovered from failure, but recovery was disallowed; see error messages");
+    }
+
+    @Override public synchronized Throwable getCause() {
+        return caseOf()
+            .readStringFail((source, cause) -> cause)
+            .parseFail((messages) -> null)
+            .recoveryDisallowedFail((messages) -> null);
     }
 
     @Override public abstract int hashCode();
