@@ -3,13 +3,11 @@ package mb.sdf3.spoofax.task;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
-import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
 import mb.resource.WritableResource;
-import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.CommandFeedback;
@@ -34,19 +32,17 @@ import java.util.Objects;
  * Command to save an SDF3 parse table to a file.
  */
 @LanguageScope
-public class Sdf3SaveParseTableCommand implements TaskDef<Sdf3SaveParseTableCommand.Args, CommandFeedback> {
+public class Sdf3SaveParseTableTaskDef implements TaskDef<Sdf3SaveParseTableTaskDef.Args, CommandFeedback> {
 
     public static class Args implements Serializable {
         public final ResourceKey input;
         public final ResourceKey output;
         public final ResourcePath includePaths;
         public final ResourceKey includeFiles;
-//        public final ResourcePath projectPath;
 
         public Args(ResourceKey inputx, ResourceKey outputx, ResourcePath includePaths, ResourceKey includeFiles) {
             this.input = inputx;
             this.output = outputx;
-//            this.projectPath = projectPath;
             this.includePaths = includePaths;
             this.includeFiles = includeFiles;
         }
@@ -59,7 +55,6 @@ public class Sdf3SaveParseTableCommand implements TaskDef<Sdf3SaveParseTableComm
                 && this.output.equals(other.output)
                 && this.includePaths.equals(other.includePaths)
                 && this.includeFiles.equals(other.includeFiles);
-//                && this.projectPath.equals(other.projectPath);
         }
 
         @Override public int hashCode() {
@@ -68,7 +63,6 @@ public class Sdf3SaveParseTableCommand implements TaskDef<Sdf3SaveParseTableComm
                 output,
                 includePaths,
                 includeFiles
-//                projectPath
             );
         }
 
@@ -81,7 +75,7 @@ public class Sdf3SaveParseTableCommand implements TaskDef<Sdf3SaveParseTableComm
     private final Sdf3CreateSpec createSpec;
     private final Sdf3SpecToParseTable specToParseTableTaskDef;
 
-    @Inject public Sdf3SaveParseTableCommand(ResourceService resourceService, Sdf3CreateSpec createSpec, Sdf3SpecToParseTable specToParseTableTaskDef) {
+    @Inject public Sdf3SaveParseTableTaskDef(ResourceService resourceService, Sdf3CreateSpec createSpec, Sdf3SpecToParseTable specToParseTableTaskDef) {
         this.resourceService = resourceService;
         this.createSpec = createSpec;
         this.specToParseTableTaskDef = specToParseTableTaskDef;
@@ -92,6 +86,7 @@ public class Sdf3SaveParseTableCommand implements TaskDef<Sdf3SaveParseTableComm
     }
 
     @Override public CommandFeedback exec(ExecContext context, Args args) throws Exception {
+
         final Supplier<Sdf3Spec> specSupplier = createSpec.createSupplier(new Sdf3CreateSpec.Input(args.input,
             args.includePaths != null ? Arrays.asList(args.includePaths) : Collections.emptyList(),
             args.includeFiles != null ? Arrays.asList(args.includeFiles) : Collections.emptyList()));

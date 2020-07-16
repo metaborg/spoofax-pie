@@ -218,7 +218,7 @@ spoofaxAdapterProject {
 
 
     // Command line actions
-    val saveParseTableTaskDef: TypeInfo = TypeInfo.of(taskPackageId, "Sdf3SaveParseTableCommand")
+    val saveParseTableTaskDef: TypeInfo = TypeInfo.of(taskPackageId, "Sdf3SaveParseTableTaskDef")
     builder.addTaskDefs(
       saveParseTableTaskDef
     )
