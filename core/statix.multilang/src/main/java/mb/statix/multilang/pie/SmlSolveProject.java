@@ -17,6 +17,7 @@ import mb.statix.multilang.AnalysisResults;
 import mb.statix.multilang.FileKey;
 import mb.statix.multilang.FileResult;
 import mb.statix.multilang.ImmutableAnalysisResults;
+import mb.statix.multilang.ImmutableFileKey;
 import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.LanguageMetadata;
 import mb.statix.multilang.LanguageMetadataManager;
@@ -36,6 +37,7 @@ import org.metaborg.util.task.NullCancel;
 import org.metaborg.util.task.NullProgress;
 
 import javax.inject.Inject;
+import java.io.File;
 import java.io.Serializable;
 import java.util.AbstractMap;
 import java.util.Collection;
@@ -133,7 +135,10 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
                     specSupplier(input),
                     globalResultSupplier(input),
                     input.logLevel)))
-                    .map(res -> new AbstractMap.SimpleImmutableEntry<>(new FileKey(resourceKey, languageMetadata.languageId()), res))))
+                    .map(res -> new AbstractMap.SimpleImmutableEntry<FileKey, FileResult>(ImmutableFileKey.builder()
+                        .languageId(languageMetadata.languageId())
+                        .resourceKey(resourceKey)
+                        .build(), res))))
             .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("At least one file constraint has an unexpected exception", false)))
             .map(SmlSolveProject::entrySetToMap)
             .flatMap(fileResults -> solveCombined(context, input, projectResults, fileResults));
@@ -147,7 +152,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
     ) {
         return Stream.concat(
             projectResults.values().stream(),
-            fileResults.values().stream().map(FileResult::getResult))
+            fileResults.values().stream().map(FileResult::result))
             .map(SolverResult::state)
             .reduce(IState.Immutable::add)
             .<Result<AnalysisResults, MultiLangAnalysisException>>map(state ->
@@ -156,7 +161,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
                             // Upcast to make typing work
                             .mapErr(MultiLangAnalysisException.class::cast)
                             .flatMap(combinedSpec -> solveWithSpec(projectResults, fileResults, state, globalResult, combinedSpec, input.logLevel)), "Solving final constraints interrupted")
-                            .map(finalResult -> ImmutableAnalysisResults.of(globalResult.getGlobalScope(),
+                            .map(finalResult -> ImmutableAnalysisResults.of(globalResult.globalScope(),
                                 new HashMap<>(projectResults), new HashMap<>(fileResults), finalResult))),
                     "IO exception while requiring global result"))
             .orElseGet(() -> Result.ofErr(new MultiLangAnalysisException("BUG: Analysis gave no results")));
@@ -174,9 +179,9 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
             IDebugContext debug = TaskUtils.createDebugContext(logLevel);
             IConstraint combinedConstraint = Stream.concat(
                 projectResults.values().stream(),
-                fileResults.values().stream().map(FileResult::getResult))
+                fileResults.values().stream().map(FileResult::result))
                 .map(SolverResult::delayed)
-                .reduce(globalResult.getResult().delayed(), CConj::new);
+                .reduce(globalResult.result().delayed(), CConj::new);
             long t0 = System.currentTimeMillis();
             SolverResult result = Solver.solve(combinedSpec, state, combinedConstraint, (s, l, st) -> true, debug, new NullProgress(), new NullCancel());
             long dt = System.currentTimeMillis() - t0;

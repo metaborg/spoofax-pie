@@ -97,12 +97,12 @@ public abstract class SmlCheckTaskDef implements TaskDef<ResourcePath, KeyedMess
 
         // Add all file messages
         results.fileResults().entrySet().stream()
-            .filter(entry -> entry.getKey().getLanguageId().equals(getLanguageId()))
+            .filter(entry -> entry.getKey().languageId().equals(getLanguageId()))
             .forEach(entry -> {
-                List<Message> resourceMessages = entry.getValue().getResult().messages().entrySet().stream()
+                List<Message> resourceMessages = entry.getValue().result().messages().entrySet().stream()
                     .map(e -> MessageUtils.formatMessage(e.getValue(), e.getKey(), resultUnifier))
                     .collect(Collectors.toList());
-                builder.addMessages(entry.getKey().getResourceKey(), resourceMessages);
+                builder.addMessages(entry.getKey().resourceKey(), resourceMessages);
             });
 
         // Process final result messages

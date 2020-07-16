@@ -92,7 +92,11 @@ public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalSc
         try {
             SolverResult result = SolverUtils.partialSolve(spec, state, globalConstraint, debug, new NullProgress(), new NullCancel());
             ITerm globalScope = result.state().unifier().findRecursive(result.existentials().get(globalScopeVar));
-            return Result.ofOk(new GlobalResult(globalScope, globalScopeVar, result));
+            return Result.ofOk(ImmutableGlobalResult.builder()
+                .globalScope(globalScope)
+                .globalScopeVar(globalScopeVar)
+                .result(result)
+                .build());
         } catch(InterruptedException e) {
             return Result.ofErr(MultiLangAnalysisException.wrapIfNeeded("Constraint solving interrupted", e));
         }

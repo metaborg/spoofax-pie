@@ -12,6 +12,7 @@ import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.statix.constraints.CUser;
 import mb.statix.multilang.FileResult;
+import mb.statix.multilang.ImmutableFileResult;
 import mb.statix.multilang.LanguageId;
 import mb.statix.multilang.LanguageMetadataManager;
 import mb.statix.multilang.MultiLang;
@@ -122,13 +123,13 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
                 StrategoTerms st = new StrategoTerms(languageMetadata.termFactory());
 
                 IDebugContext debug = TaskUtils.createDebugContext(input.logLevel);
-                Iterable<ITerm> constraintArgs = Arrays.asList(globalResult.getGlobalScope(), st.fromStratego(ast));
+                Iterable<ITerm> constraintArgs = Arrays.asList(globalResult.globalScope(), st.fromStratego(ast));
                 IConstraint fileConstraint = new CUser(languageMetadata.fileConstraint(), constraintArgs, null);
 
                 return TaskUtils.executeWrapped(() -> {
                     long t0 = System.currentTimeMillis();
                     SolverResult result = SolverUtils.partialSolve(spec,
-                        globalResult.getResult().state().withResource(input.resourceKey.toString()),
+                        globalResult.result().state().withResource(input.resourceKey.toString()),
                         fileConstraint,
                         debug,
                         new NullProgress(),
@@ -143,7 +144,10 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
                         Supplier<Result<IStrategoTerm, ?>> astSupplier = languageMetadata.astFunction().createSupplier(input.resourceKey);
                         return languageMetadata.postTransform().apply(context, astSupplier)
                             .mapErr(MultiLangAnalysisException::wrapIfNeeded)
-                            .map(analyzedAst -> new FileResult(analyzedAst, fileResult));
+                            .map(analyzedAst -> ImmutableFileResult.builder()
+                                .analyzedAst(analyzedAst)
+                                .result(fileResult)
+                                .build());
                     });
             })), "Exception when resolving specification");
     }

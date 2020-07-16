@@ -1,46 +1,16 @@
 package mb.statix.multilang;
 
 import mb.statix.solver.persistent.SolverResult;
+import org.immutables.value.Value;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import java.io.Serializable;
 import java.util.Objects;
 
-public class FileResult implements Serializable {
+@Value.Immutable
+public interface FileResult extends Serializable {
 
-    private final IStrategoTerm analyzedAst;
-    private final SolverResult result;
+    IStrategoTerm analyzedAst();
 
-    public FileResult(IStrategoTerm analyzedAst, SolverResult result) {
-        this.analyzedAst = analyzedAst;
-        this.result = result;
-    }
-
-    public IStrategoTerm getAnalyzedAst() {
-        return analyzedAst;
-    }
-
-    public SolverResult getResult() {
-        return result;
-    }
-
-    @Override public boolean equals(Object o) {
-        if(this == o) return true;
-        if(o == null || getClass() != o.getClass()) return false;
-        FileResult that = (FileResult)o;
-        return analyzedAst.equals(that.analyzedAst) &&
-            result.equals(that.result);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(analyzedAst, result);
-    }
-
-    @Override public String toString() {
-        return "FileResult{" +
-            "analyzedAst=" + analyzedAst.toString(2) +
-            ", result=" + result.getClass().getName() +
-            '}';
-    }
+    SolverResult result();
 }

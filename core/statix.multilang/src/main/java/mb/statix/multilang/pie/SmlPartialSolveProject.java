@@ -81,14 +81,14 @@ public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.In
         return TaskUtils.executeWrapped(() -> context.require(input.globalResultSupplier)
             .mapErr(MultiLangAnalysisException::wrapIfNeeded)
             .flatMap(globalResult -> {
-                Set<ITermVar> scopeArgs = Collections.singleton(globalResult.getGlobalScopeVar());
+                Set<ITermVar> scopeArgs = Collections.singleton(globalResult.globalScopeVar());
                 IConstraint projectConstraint = new CUser(input.projectConstraint, scopeArgs);
 
                 IDebugContext debug = TaskUtils.createDebugContext(input.logLevel);
                 return TaskUtils.executeWrapped(() -> context.require(input.specSupplier)
                     .mapErr(MultiLangAnalysisException::wrapIfNeeded)
                     .flatMap(spec -> TaskUtils.executeWrapped(() -> {
-                        SolverResult res = SolverUtils.partialSolve(spec, globalResult.getResult().state(),
+                        SolverResult res = SolverUtils.partialSolve(spec, globalResult.result().state(),
                             projectConstraint, debug, new NullProgress(), new NullCancel());
                         return Result.ofOk(res);
                     }, "Project constraint solving interrupted")), "Error loading specification");
