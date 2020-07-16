@@ -276,6 +276,8 @@ public class AdapterProjectCompiler {
 
         List<GradleConfiguredDependency> additionalDependencies();
 
+        List<TypeInfo> additionalModules();
+
         List<TypeInfo> taskDefs();
 
         List<CommandDefRepr> commandDefs();
