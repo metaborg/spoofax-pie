@@ -6,7 +6,7 @@ import mb.pie.api.Pie;
 import mb.pie.api.Supplier;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
-import mb.statix.multilang.spec.SpecBuilder;
+import mb.statix.multilang.metadata.spec.SpecBuilder;
 import org.immutables.value.Value;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;

@@ -1,4 +1,4 @@
-package mb.statix.multilang.spec;
+package mb.statix.multilang.metadata.spec;
 
 import mb.resource.DefaultResourceKeyString;
 import mb.resource.classloader.ClassLoaderResource;

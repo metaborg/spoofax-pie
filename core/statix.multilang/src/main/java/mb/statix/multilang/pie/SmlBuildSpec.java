@@ -13,8 +13,8 @@ import mb.statix.multilang.metadata.LanguageMetadata;
 import mb.statix.multilang.metadata.LanguageMetadataManager;
 import mb.statix.multilang.MultiLang;
 import mb.statix.multilang.MultiLangScope;
-import mb.statix.multilang.spec.SpecBuilder;
-import mb.statix.multilang.spec.SpecLoadException;
+import mb.statix.multilang.metadata.spec.SpecBuilder;
+import mb.statix.multilang.metadata.spec.SpecLoadException;
 import mb.statix.spec.Rule;
 import mb.statix.spec.Spec;
 

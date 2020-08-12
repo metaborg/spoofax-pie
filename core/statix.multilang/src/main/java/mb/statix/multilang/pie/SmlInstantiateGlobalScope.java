@@ -11,7 +11,7 @@ import mb.statix.constraints.CExists;
 import mb.statix.constraints.CNew;
 import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.multilang.MultiLangScope;
-import mb.statix.multilang.spec.SpecLoadException;
+import mb.statix.multilang.metadata.spec.SpecLoadException;
 import mb.statix.multilang.utils.SolverUtils;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.IState;
