@@ -1,12 +1,12 @@
-package mb.statix.multilang;
+package mb.statix.multilang.metadata;
 
 import mb.common.result.Result;
 import mb.common.result.ResultCollector;
 import mb.pie.api.Pie;
+import mb.statix.multilang.MultiLangAnalysisException;
 import org.immutables.value.Value;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;

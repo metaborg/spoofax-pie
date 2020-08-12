@@ -1,5 +1,6 @@
-package mb.statix.multilang;
+package mb.statix.multilang.pie.config;
 
+import mb.statix.multilang.metadata.LanguageId;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 import org.metaborg.util.log.Level;

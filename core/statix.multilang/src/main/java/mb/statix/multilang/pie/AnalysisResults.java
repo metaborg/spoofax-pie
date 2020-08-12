@@ -1,13 +1,12 @@
-package mb.statix.multilang;
+package mb.statix.multilang.pie;
 
 import mb.nabl2.terms.ITerm;
-import mb.resource.ResourceKey;
+import mb.statix.multilang.metadata.LanguageId;
 import mb.statix.solver.persistent.SolverResult;
 import org.immutables.value.Value;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.Objects;
 
 @Value.Immutable
 public abstract class AnalysisResults implements Serializable {

@@ -1,4 +1,4 @@
-package mb.statix.multilang;
+package mb.statix.multilang.metadata;
 
 import java.util.Set;
 

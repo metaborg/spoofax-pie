@@ -2,6 +2,10 @@ package mb.statix.multilang;
 
 import dagger.Module;
 import dagger.Provides;
+import mb.statix.multilang.metadata.AnalysisContextService;
+import mb.statix.multilang.metadata.ContextDataManager;
+import mb.statix.multilang.metadata.ContextPieManager;
+import mb.statix.multilang.metadata.LanguageMetadataManager;
 import mb.statix.multilang.pie.SmlBuildSpec;
 import mb.statix.multilang.pie.SmlInstantiateGlobalScope;
 import mb.statix.multilang.pie.SmlPartialSolveFile;
