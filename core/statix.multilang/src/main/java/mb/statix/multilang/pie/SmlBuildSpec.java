@@ -9,20 +9,16 @@ import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.statix.multilang.metadata.LanguageId;
-import mb.statix.multilang.metadata.LanguageMetadata;
-import mb.statix.multilang.metadata.LanguageMetadataManager;
 import mb.statix.multilang.MultiLang;
 import mb.statix.multilang.MultiLangScope;
-import mb.statix.multilang.metadata.spec.SpecBuilder;
+import mb.statix.multilang.metadata.SpecManager;
 import mb.statix.multilang.metadata.spec.SpecLoadException;
-import mb.statix.spec.Rule;
 import mb.statix.spec.Spec;
 
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Objects;
 
 @MultiLangScope
@@ -59,15 +55,12 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
         }
     }
 
-    private final Lazy<LanguageMetadataManager> languageMetadataManager;
-    private final Logger logger;
+    private final Lazy<SpecManager> specManager;
 
     @Inject public SmlBuildSpec(
-        @MultiLang Lazy<LanguageMetadataManager> languageMetadataManager,
-        LoggerFactory loggerFactory
+        @MultiLang Lazy<SpecManager> specManager
     ) {
-        this.languageMetadataManager = languageMetadataManager;
-        logger = loggerFactory.create(SmlBuildSpec.class);
+        this.specManager = specManager;
     }
 
     @Override public String getId() {
@@ -75,30 +68,6 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
     }
 
     @Override public Result<Spec, SpecLoadException> exec(ExecContext context, Input input) {
-        return input.languages.stream()
-            .map(lid -> languageMetadataManager.get().getLanguageMetadataResult(lid))
-            .collect(ResultCollector.getWithBaseException(new SpecLoadException("Exception getting language metadata", false)))
-            .flatMap(languageMetadataSet -> languageMetadataSet.stream()
-                .map(LanguageMetadata::statixSpec)
-                .reduce(SpecBuilder::merge)
-                .map(SpecBuilder::toSpecResult)
-                .map(spec -> spec.ifOk(this::validateOverlappingRules))
-                .orElse(Result.ofErr(new SpecLoadException("Doing analysis without specs is not allowed"))));
-    }
-
-    private void validateOverlappingRules(Spec combinedSpec) {
-        final ListMultimap<String, Rule> rulesWithEquivalentPatterns = combinedSpec.rules().getAllEquivalentRules();
-        if(!rulesWithEquivalentPatterns.isEmpty()) {
-            logger.error("+--------------------------------------+");
-            logger.error("| FOUND RULES WITH EQUIVALENT PATTERNS |");
-            logger.error("+--------------------------------------+");
-            for(Map.Entry<String, Collection<Rule>> entry : rulesWithEquivalentPatterns.asMap().entrySet()) {
-                logger.error("| Overlapping rules for: {}", entry.getKey());
-                for(Rule rule : entry.getValue()) {
-                    logger.error("| * {}", rule);
-                }
-            }
-            logger.error("+--------------------------------------+");
-        }
+        return specManager.get().getSpecResult(input.languages.toArray(new LanguageId[0]));
     }
 }

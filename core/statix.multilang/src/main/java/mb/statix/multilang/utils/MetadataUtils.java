@@ -9,7 +9,7 @@ import mb.resource.hierarchical.match.PathResourceMatcher;
 import mb.resource.hierarchical.match.path.ExtensionsPathMatcher;
 import mb.resource.hierarchical.match.path.NoHiddenPathMatcher;
 import mb.resource.hierarchical.walk.PathResourceWalker;
-import mb.statix.multilang.metadata.spec.SpecBuilder;
+import mb.statix.multilang.metadata.spec.SpecFragment;
 import mb.statix.multilang.metadata.spec.SpecLoadException;
 import mb.statix.multilang.metadata.spec.SpecUtils;
 import org.spoofax.interpreter.terms.ITermFactory;
@@ -24,7 +24,7 @@ public class MetadataUtils {
     private MetadataUtils() {
     }
 
-    public static SpecBuilder loadSpec(ClassLoaderResource definitionDir, ITermFactory termFactory, String initialModule) {
+    public static SpecFragment loadSpec(ClassLoaderResource definitionDir, ITermFactory termFactory, String initialModule) {
         ClassLoaderResource specRoot = definitionDir.appendRelativePath("src-gen/statix");
         try {
             return SpecUtils.loadSpec(specRoot, initialModule, termFactory);

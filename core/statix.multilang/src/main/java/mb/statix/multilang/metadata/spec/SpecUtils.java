@@ -22,6 +22,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -32,18 +33,25 @@ import java.util.stream.Collectors;
 
 public class SpecUtils {
 
-    public static SpecBuilder loadSpec(HierarchicalResource root, String initialModulePath, ITermFactory termFactory) throws SpecLoadException {
+    public static SpecFragment loadSpec(HierarchicalResource root, String initialModulePath, ITermFactory termFactory) throws SpecLoadException {
+        return loadSpec(root, Collections.singleton(initialModulePath), termFactory);
+    }
+    public static SpecFragment loadSpec(HierarchicalResource root, Collection<String> initialModulePaths, ITermFactory termFactory) throws SpecLoadException {
         StrategoTerms strategoTerms = new StrategoTerms(termFactory);
         ArrayList<String> loadedModules = new ArrayList<>();
+        ArrayList<String> delayedModules = new ArrayList<>();
         ArrayList<Module> fileSpecs = new ArrayList<>();
-        Queue<String> modulesToLoad = new PriorityQueue<>();
-        modulesToLoad.add(initialModulePath);
+        Queue<String> modulesToLoad = new PriorityQueue<>(initialModulePaths);
 
         while(!modulesToLoad.isEmpty()) {
             String currentModule = modulesToLoad.remove();
             // Load spec file content
             HierarchicalResource res = root.appendRelativePath(currentModule).appendExtensionToLeaf("spec.aterm");
             try(BufferedReader specReader = new BufferedReader(new InputStreamReader(res.openRead()))) {
+                if(!res.exists()) {
+                    delayedModules.add(currentModule);
+                    continue;
+                }
 
                 String specString = specReader.lines().collect(Collectors.joining("\n"));
                 IStrategoTerm stxFileSpec = termFactory.parseFromString(specString);
@@ -62,7 +70,7 @@ public class SpecUtils {
                         throw new SpecLoadException("Invalid file spec. Import module should be string, but was: " + importDecl);
                     }
                     String importedModule = ((IStrategoString)importDecl).stringValue();
-                    if(!loadedModules.contains(importedModule) && !modulesToLoad.contains(importedModule)) {
+                    if(!loadedModules.contains(importedModule) && !modulesToLoad.contains(importedModule) && !delayedModules.contains(importedModule)) {
                         modulesToLoad.add(importedModule);
                     }
                 }
@@ -72,33 +80,11 @@ public class SpecUtils {
         }
 
         // Create builder for files
-        return ImmutableSpecBuilder.of(fileSpecs);
+        return ImmutableSpecFragment.of(fileSpecs, delayedModules);
     }
 
     public static Result<Spec, SpecLoadException> mergeSpecs(Result<Spec, SpecLoadException> accResult, Result<Spec, SpecLoadException> newSpecResult) {
-        return accResult.mapOrElse(acc -> newSpecResult
-                .mapOrElse(newSpec -> {
-                    // Error when EOP is not equal, throw exception
-                    if(!acc.noRelationLabel().equals(newSpec.noRelationLabel())) {
-                        return Result.ofErr(new SpecLoadException("No relation labels do not match:" +
-                            acc.noRelationLabel() + " and " + newSpec.noRelationLabel()));
-                    }
-
-                    Set<Rule> rules = new HashSet<>(acc.rules().getAllRules());
-                    rules.addAll(newSpec.rules().getAllRules());
-
-                    Set<ITerm> labels = new HashSet<>(acc.labels().symbols());
-                    labels.addAll(newSpec.labels().symbols());
-
-                    return Result.ofOk(Spec.builder()
-                        .from(acc)
-                        .rules(RuleSet.of(rules))
-                        .addAllEdgeLabels(newSpec.edgeLabels())
-                        .addAllRelationLabels(newSpec.relationLabels())
-                        .labels(new FiniteAlphabet<>(labels))
-                        .putAllScopeExtensions(newSpec.scopeExtensions())
-                        .build());
-                }, Result::ofErr),
+        return accResult.mapOrElse(acc -> newSpecResult.mapOrElse(newSpec -> mergeSpecs(acc, newSpec), Result::ofErr),
             accErr -> newSpecResult.mapOrElse(
                 res -> Result.ofErr(accErr),
                 err -> {
@@ -106,6 +92,29 @@ public class SpecUtils {
                     return Result.ofErr(accErr);
                 }
             ));
+    }
+
+    public static Result<Spec, SpecLoadException> mergeSpecs(Spec acc, Spec newSpec) {
+        // Error when EOP is not equal, throw exception
+        if(!acc.noRelationLabel().equals(newSpec.noRelationLabel())) {
+            return Result.ofErr(new SpecLoadException("No relation labels do not match:" +
+                acc.noRelationLabel() + " and " + newSpec.noRelationLabel()));
+        }
+
+        Set<Rule> rules = new HashSet<>(acc.rules().getAllRules());
+        rules.addAll(newSpec.rules().getAllRules());
+
+        Set<ITerm> labels = new HashSet<>(acc.labels().symbols());
+        labels.addAll(newSpec.labels().symbols());
+
+        return Result.ofOk(Spec.builder()
+            .from(acc)
+            .rules(RuleSet.of(rules))
+            .addAllEdgeLabels(newSpec.edgeLabels())
+            .addAllRelationLabels(newSpec.relationLabels())
+            .labels(new FiniteAlphabet<>(labels))
+            .putAllScopeExtensions(newSpec.scopeExtensions())
+            .build());
     }
 
     public static IMatcher<Spec> fileSpec() {

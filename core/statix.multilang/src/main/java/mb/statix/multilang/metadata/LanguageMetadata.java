@@ -6,7 +6,6 @@ import mb.pie.api.Pie;
 import mb.pie.api.Supplier;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
-import mb.statix.multilang.metadata.spec.SpecBuilder;
 import org.immutables.value.Value;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
@@ -23,8 +22,6 @@ public interface LanguageMetadata {
     @Value.Parameter Function<ResourceKey, Result<IStrategoTerm, ?>> astFunction();
 
     @Value.Parameter Function<Supplier<? extends Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> postTransform();
-
-    @Value.Parameter SpecBuilder statixSpec();
 
     @Value.Parameter String fileConstraint();
 

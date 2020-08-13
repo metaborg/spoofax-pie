@@ -9,18 +9,16 @@ import org.junit.jupiter.api.Test;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.terms.TermFactory;
 
-import java.io.IOException;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SpecLoaderTest {
 
     private final ClassLoaderResourceRegistry resourceRegistry = new ClassLoaderResourceRegistry(SpecLoaderTest.class.getClassLoader());
     private final ITermFactory termFactory = new TermFactory();
 
-    @Test void loadEmptySpec() throws IOException, SpecLoadException {
+    @Test void loadEmptySpec() throws SpecLoadException {
         final ClassLoaderResource statixRoot = resourceRegistry
             .getResource(new DefaultResourceKeyString("mb/statix/multilang/empty"));
 
@@ -30,7 +28,7 @@ public class SpecLoaderTest {
         assertNotNull(spec);
     }
 
-    @Test void loadRegularSpec() throws IOException, SpecLoadException {
+    @Test void loadRegularSpec() throws SpecLoadException {
         final ClassLoaderResource statixRoot = resourceRegistry
             .getResource(new DefaultResourceKeyString("mb/statix/multilang/base"));
         Spec spec = SpecUtils
@@ -45,42 +43,40 @@ public class SpecLoaderTest {
         assertEquals(1, rules.getRules("imported!rule").size());
     }
 
-    @Test void loadCompatibleSpecs() throws IOException, SpecLoadException {
+    @Test void loadCompatibleSpecs() throws SpecLoadException {
         final ClassLoaderResource root1 = resourceRegistry
             .getResource(new DefaultResourceKeyString("mb/statix/multilang/base"));
-        SpecBuilder specBuilder1 = SpecUtils
+        SpecFragment specFragment1 = SpecUtils
             .loadSpec(root1, "base", termFactory);
 
         final ClassLoaderResource root2 = resourceRegistry
             .getResource(new DefaultResourceKeyString("mb/statix/multilang/compatible"));
-        SpecBuilder specBuilder2 = SpecUtils
+        SpecFragment specFragment2 = SpecUtils
             .loadSpec(root2, "compatible", termFactory);
 
-        Spec spec = specBuilder1.merge(specBuilder2).toSpec();
+        Spec spec = SpecUtils.mergeSpecs(specFragment1.toSpec(), specFragment2.toSpec()).unwrap();
 
         assertEquals(0, spec.edgeLabels().size());
         assertEquals(1, spec.relationLabels().size()); // Decl()
         RuleSet rules = spec.rules();
         assertEquals(1, rules.getRules("root!ok").size());
-        assertEquals(1, rules.getRules("imported!rule").size());
+        assertEquals(2, rules.getRules("imported!rule").size());
     }
 
-    @Test void loadIncompatibleSpecs() throws IOException, SpecLoadException {
+    @Test void loadIncompatibleSpecs() throws SpecLoadException {
         final ClassLoaderResource root1 = resourceRegistry
             .getResource(new DefaultResourceKeyString("mb/statix/multilang/base"));
-        SpecBuilder specBuilder1 = SpecUtils
+        SpecFragment specFragment1 = SpecUtils
             .loadSpec(root1, "base", termFactory);
 
         final ClassLoaderResource root2 = resourceRegistry
             .getResource(new DefaultResourceKeyString("mb/statix/multilang/incompatible"));
-        SpecBuilder specBuilder2 = SpecUtils
+        SpecFragment specFragment2 = SpecUtils
             .loadSpec(root2, "incompatible", termFactory);
 
-        Spec combinedSpec = specBuilder1.merge(specBuilder2).toSpec();
+        Spec combinedSpec = SpecUtils.mergeSpecs(specFragment1.toSpec(), specFragment2.toSpec()).unwrap();
 
-        // TODO: After we can do reliable detection of incompatible specs
-        // test that this throws an exception.
-        assertTrue(combinedSpec.rules().getAllEquivalentRules().isEmpty());
-        assertEquals(1, combinedSpec.rules().getRules("imported!rule").size());
+        assertFalse(combinedSpec.rules().getAllEquivalentRules().isEmpty());
+        assertEquals(2, combinedSpec.rules().getRules("imported!rule").size());
     }
 }
