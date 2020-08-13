@@ -95,6 +95,11 @@ public class MultiLangPlugin extends Plugin {
             .map(LanguageMetadataProvider::getLanguageMetadataSuppliers)
             .forEach(analysisContextServiceBuilder::putAllLanguageMetadataSuppliers);
 
+        // Register spec configurations
+        languageMetadataProviders.stream()
+            .map(LanguageMetadataProvider::getSpecConfigs)
+            .forEach(analysisContextServiceBuilder::putAllSpecConfigs);
+
         // Register default context ids
         languageMetadataProviders.stream()
             .map(LanguageMetadataProvider::getDefaultLanguageContexts)
