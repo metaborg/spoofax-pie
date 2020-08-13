@@ -27,4 +27,10 @@ public interface SpecConfig {
             return Result.ofErr(e);
         }
     }
+
+    @Value.Check default void rootModulesNonEmpty() {
+        if(rootModules().isEmpty()) {
+            throw new IllegalStateException("At least one root module must be given to the loader");
+        }
+    }
 }

@@ -296,7 +296,6 @@ public class {{genModule.id}} {
             .languageId(new LanguageId("{{languageId}}"))
             .languagePie(languagePie)
             .termFactory(termFactory)
-            .statixSpec(MetadataUtils.loadSpec(definitionDir, termFactory, "{{rootModule}}"))
             .fileConstraint("{{fileConstraint}}")
             .projectConstraint("{{projectConstraint}}")
             .build();
