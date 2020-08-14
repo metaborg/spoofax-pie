@@ -131,11 +131,11 @@ public abstract class AnalysisContextService implements LanguageMetadataManager,
         StringBuilder errorMessage = new StringBuilder(String.format("Specs from %s cannot be combined%n", ids));
 
         if(!unresolvedModules.isEmpty()) {
-            errorMessage.append(String.format("- The following imported modules are not resolved: %s%n" + unresolvedModules));
+            errorMessage.append(String.format("- The following imported modules are not resolved: %s%n", unresolvedModules));
         }
 
         if(!duplicatedModules.isEmpty()) {
-            errorMessage.append(String.format("- The following modules are included multiple times: %s%n" + duplicatedModules));
+            errorMessage.append(String.format("- The following modules are included multiple times: %s%n", duplicatedModules));
         }
 
         return Result.ofErr(new SpecLoadException(errorMessage.toString()));

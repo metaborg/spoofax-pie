@@ -6,6 +6,8 @@ import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.statix.multilang.metadata.AnalysisContextService;
 import mb.statix.multilang.metadata.ImmutableAnalysisContextService;
 import mb.statix.multilang.MultiLangModule;
+import mb.statix.multilang.metadata.SpecFragmentId;
+import mb.statix.multilang.metadata.spec.SpecConfig;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -16,6 +18,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.osgi.framework.BundleContext;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -96,9 +99,12 @@ public class MultiLangPlugin extends Plugin {
             .forEach(analysisContextServiceBuilder::putAllLanguageMetadataSuppliers);
 
         // Register spec configurations
+        // Local map needed to prevent duplicate key errors
+        final HashMap<SpecFragmentId, SpecConfig> specConfigMap = new HashMap<>();
         languageMetadataProviders.stream()
             .map(LanguageMetadataProvider::getSpecConfigs)
-            .forEach(analysisContextServiceBuilder::putAllSpecConfigs);
+            .forEach(specConfigMap::putAll);
+        analysisContextServiceBuilder.putAllSpecConfigs(specConfigMap);
 
         // Register default context ids
         languageMetadataProviders.stream()

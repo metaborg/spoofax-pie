@@ -36,6 +36,7 @@ public class SpecUtils {
     public static SpecFragment loadSpec(HierarchicalResource root, String initialModulePath, ITermFactory termFactory) throws SpecLoadException {
         return loadSpec(root, Collections.singleton(initialModulePath), termFactory);
     }
+
     public static SpecFragment loadSpec(HierarchicalResource root, Collection<String> initialModulePaths, ITermFactory termFactory) throws SpecLoadException {
         StrategoTerms strategoTerms = new StrategoTerms(termFactory);
         ArrayList<String> loadedModules = new ArrayList<>();
@@ -47,12 +48,16 @@ public class SpecUtils {
             String currentModule = modulesToLoad.remove();
             // Load spec file content
             HierarchicalResource res = root.appendRelativePath(currentModule).appendExtensionToLeaf("spec.aterm");
-            try(BufferedReader specReader = new BufferedReader(new InputStreamReader(res.openRead()))) {
+            try {
                 if(!res.exists()) {
                     delayedModules.add(currentModule);
                     continue;
                 }
+            } catch(IOException e) {
+                throw new SpecLoadException(e);
+            }
 
+            try(BufferedReader specReader = new BufferedReader(new InputStreamReader(res.openRead()))) {
                 String specString = specReader.lines().collect(Collectors.joining("\n"));
                 IStrategoTerm stxFileSpec = termFactory.parseFromString(specString);
 
