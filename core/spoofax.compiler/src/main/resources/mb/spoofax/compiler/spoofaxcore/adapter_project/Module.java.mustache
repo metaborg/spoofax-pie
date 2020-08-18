@@ -41,6 +41,8 @@ import mb.statix.multilang.metadata.LanguageMetadata;
 import mb.statix.multilang.metadata.LanguageMetadataManager;
 import mb.statix.multilang.MultiLang;
 import mb.statix.multilang.SharedPieProvider;
+import mb.statix.multilang.metadata.SpecFragmentId;
+import mb.statix.multilang.metadata.spec.SpecConfig;
 import mb.statix.multilang.pie.SmlSolveProject;
 import mb.statix.multilang.pie.SmlBuildSpec;
 import mb.statix.multilang.pie.SmlInstantiateGlobalScope;
@@ -58,6 +60,7 @@ import org.spoofax.interpreter.terms.ITermFactory;
 import javax.inject.Named;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Map;
 
 @Module
 public class {{genModule.id}} {
@@ -299,6 +302,11 @@ public class {{genModule.id}} {
             .fileConstraint("{{fileConstraint}}")
             .projectConstraint("{{projectConstraint}}")
             .build();
+    }
+
+    @Provides @LanguageScope
+    static Map<SpecFragmentId, SpecConfig> getSpecConfig(@Named("prototype") StrategoRuntime strategoRuntime) {
+        return {{languageProjectInput.specConfigFactory.qualifiedId}}.getSpecConfigs(strategoRuntime.getTermFactory());
     }
     {{/multilangAnalyzer}}
 {{/isMultiLang}}

@@ -1,0 +1,43 @@
+package {{genSpecConfigFactory.packageId}};
+
+import mb.statix.multilang.metadata.SpecFragmentId;
+import mb.statix.multilang.metadata.spec.ImmutableSpecConfig;
+import mb.statix.multilang.metadata.spec.SpecConfig;
+import org.spoofax.interpreter.terms.ITermFactory;
+import org.spoofax.jsglr.client.imploder.ImploderOriginTermFactory;
+import org.spoofax.terms.TermFactory;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class {{genSpecConfigFactory.id}} {
+
+    public static SpecFragmentId getSpecId() {
+        return new SpecFragmentId("{{languageId}}");
+    }
+
+    public static SpecConfig getSpecConfig(ITermFactory termFactory) {
+        return ImmutableSpecConfig.builder()
+            .rootPackage({{classloaderResources.classloaderResources.id}}.createDefinitionDir({{classloaderResources.classloaderResources.id}}.createClassLoaderResourceRegistry())
+            .appendRelativePath("src-gen/statix"))
+            .termFactory(termFactory)
+            .addRootModules({{#rootModules}}"{{this}}"{{^-last}}, {{/-last}}{{/rootModules}})
+            {{#dependencyFactories}}
+            .addDependencies({{qualifiedId}}.getSpecId())
+            {{/dependencyFactories}}
+            .build();
+    }
+
+    public static Map<SpecFragmentId, SpecConfig> getSpecConfigs() {
+        return getSpecConfigs(new ImploderOriginTermFactory(new TermFactory()));
+    }
+
+    public static Map<SpecFragmentId, SpecConfig> getSpecConfigs(ITermFactory termFactory) {
+        final HashMap<SpecFragmentId, SpecConfig> result = new HashMap<>();
+        {{#dependencyFactories}}
+        result.putAll({{qualifiedId}}.getSpecConfigs());
+        {{/dependencyFactories}}
+        result.put(getSpecId(), getSpecConfig(termFactory));
+        return result;
+    }
+}

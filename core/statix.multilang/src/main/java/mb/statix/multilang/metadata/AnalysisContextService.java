@@ -104,7 +104,7 @@ public abstract class AnalysisContextService implements LanguageMetadataManager,
             .collect(Collectors.toList());
 
         Set<String> delayedModules  = specFragments.stream()
-            .map(SpecFragment::providedModuleNames)
+            .map(SpecFragment::delayedModuleNames)
             .flatMap(Set::stream)
             .collect(Collectors.toSet());
 

@@ -147,7 +147,11 @@ public class LanguageProjectCompiler {
                 }
             });
             input.multilangAnalyzer().ifPresent((i) -> {
-                multilangAnalyzerCompiler.compileLanguageProject(i);
+                try {
+                    multilangAnalyzerCompiler.compileLanguageProject(i);
+                } catch(IOException e) {
+                    throw new UncheckedIOException(e);
+                }
             });
         } catch(UncheckedIOException e) {
             throw e.getCause();

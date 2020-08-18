@@ -25,6 +25,7 @@ public class MultilangAnalyzerCompiler {
     private final TemplateWriter preStatixTaskDefTemplate;
     private final TemplateWriter postStatixTaskDefTemplate;
     private final TemplateWriter checkTaskDefTemplate;
+    private final TemplateWriter specConfigFactoryTemplate;
 
     public MultilangAnalyzerCompiler(TemplateCompiler templateCompiler) {
         this.analyzeProjectTemplate = templateCompiler.getOrCompileToWriter("multilang_analyzer/AnalyzeProjectTaskDef.java.mustache");
@@ -32,6 +33,7 @@ public class MultilangAnalyzerCompiler {
         this.preStatixTaskDefTemplate = templateCompiler.getOrCompileToWriter("multilang_analyzer/PreStatixTaskDef.java.mustache");
         this.postStatixTaskDefTemplate = templateCompiler.getOrCompileToWriter("multilang_analyzer/PostStatixTaskDef.java.mustache");
         this.checkTaskDefTemplate = templateCompiler.getOrCompileToWriter("multilang_analyzer/SmlCheckTaskDef.java.mustache");
+        this.specConfigFactoryTemplate = templateCompiler.getOrCompileToWriter("multilang_analyzer/SpecConfigFactory.java.mustache");
     }
 
     // Language project
@@ -44,9 +46,14 @@ public class MultilangAnalyzerCompiler {
         return ListView.of("src-gen/statix/");
     }
 
-    public Output compileLanguageProject(LanguageProjectInput input) {
-        // There is only compilation output in the adapter project, so return empty result here.
-        return Output.builder().build();
+    public Output compileLanguageProject(LanguageProjectInput input) throws IOException {
+        final Output.Builder outputBuilder = Output.builder();
+        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
+        final ResourcePath classesGenDirectory = input.classesGenDirectory();
+        outputBuilder.addProvidedResources(
+            specConfigFactoryTemplate.write(input.genSpecConfigFactory().file(classesGenDirectory), input)
+        );
+        return outputBuilder.build();
     }
 
     // Adapter project
@@ -86,11 +93,41 @@ public class MultilangAnalyzerCompiler {
             return languageProject().project().genSourceSpoofaxJavaDirectory();
         }
 
+        // Spec factory
+
+        @Value.Default default TypeInfo genSpecConfigFactory() {
+            return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "SpecConfigFactory");
+        }
+
+        Optional<TypeInfo> manualSpecConfigFactory();
+
+        default TypeInfo specConfigFactory() {
+            if(classKind().isManual() && manualSpecConfigFactory().isPresent()) {
+                return manualSpecConfigFactory().get();
+            }
+            return genSpecConfigFactory();
+        }
+
+        @Value.Default default String languageId() {
+            return shared().defaultBasePackageId();
+        }
+
+        @Value.Default default List<TypeInfo> dependencyFactories() {
+            return new ArrayList<>();
+        }
+
+        List<String> rootModules();
+
         // List of all provided files
 
         default ListView<ResourcePath> providedFiles() {
             return ListView.of();
         }
+
+        // Subinputs
+
+        // TODO: Remove!!!!
+        ClassloaderResourcesCompiler.LanguageProjectInput classloaderResources();
 
         /// Automatically provided sub-inputs
 
@@ -204,7 +241,7 @@ public class MultilangAnalyzerCompiler {
         // Identifiers
 
         @Value.Default default String languageId() {
-            return shared().defaultBasePackageId();
+            return languageProjectInput().languageId();
         }
 
         @Value.Default default String contextId() {

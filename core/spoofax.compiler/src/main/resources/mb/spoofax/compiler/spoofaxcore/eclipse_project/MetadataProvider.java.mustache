@@ -4,6 +4,8 @@ import mb.statix.multilang.metadata.ContextId;
 import mb.statix.multilang.metadata.LanguageId;
 import mb.statix.multilang.metadata.LanguageMetadata;
 import mb.statix.multilang.eclipse.LanguageMetadataProvider;
+import mb.statix.multilang.metadata.SpecFragmentId;
+import mb.statix.multilang.metadata.spec.SpecConfig;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,9 +14,9 @@ import java.util.function.Supplier;
 public class {{genMetadataProvider.id}} implements LanguageMetadataProvider {
 
     // Don't inline this method into getLanguageMetadataSuppliers
-    // Because call of getComponent should be delayed for concurrency reasons
+    // Because call to getComponent should be delayed for concurrency reasons
     private LanguageMetadata getLanguageMetadata() {
-        return {{genPlugin.id}}.getComponent().getLanguageMetadata();
+        return {{plugin.id}}.getComponent().getLanguageMetadata();
     }
 
     {{#adapterProjectCompilerInput.multilangAnalyzer}}
@@ -22,6 +24,11 @@ public class {{genMetadataProvider.id}} implements LanguageMetadataProvider {
         Map<LanguageId, Supplier<LanguageMetadata>> result = new HashMap<>();
         result.put(new LanguageId("{{languageId}}"), this::getLanguageMetadata);
         return result;
+    }
+
+    @Override
+    public Map<SpecFragmentId, SpecConfig> getSpecConfigs() {
+        return {{plugin.id}}.getComponent().getSpecConfigs();
     }
 
     @Override public Map<LanguageId, ContextId> getDefaultLanguageContexts() {
