@@ -13,7 +13,7 @@ val picocliVersion = "4.0.4"
 val javaxInjectVersion = "1"
 val checkerframeworkVersion = "3.0.0"
 
-val daggerVersion = "2.25.2"
+val daggerVersion = "2.27"
 val derive4jVersion = "1.1.1"
 val immutablesVersion = "2.8.2"
 
@@ -95,7 +95,7 @@ dependencies {
 
 
     // Test dependencies // TODO: should be in a separate platform?
-    api("org.junit.jupiter:junit-jupiter-api:5.2.0")
+    api("org.junit.jupiter:junit-jupiter-api:5.3.1")
     api("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
     api("com.google.jimfs:jimfs:1.1")
     api("nl.jqno.equalsverifier:equalsverifier:3.1.12")
