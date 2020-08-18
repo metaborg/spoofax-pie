@@ -272,15 +272,17 @@ public class {{genModule.id}} {
         return analysisContextService;
     }
 
+    {{#parser}}
     @Provides @LanguageScope
-    static Function<Supplier<String>, Result<IStrategoTerm, JSGLR1ParseException>> provideParseFunction({{parser.parseTaskDef.qualifiedId}} parse) {
+    static Function<Supplier<String>, Result<IStrategoTerm, JSGLR1ParseException>> provideParseFunction({{parseTaskDef.qualifiedId}} parse) {
         return parse.createAstFunction();
     }
 
     @Provides @LanguageScope
-    static Function<Supplier<String>, Messages> provideParseMessagesFunction({{parser.parseTaskDef.qualifiedId}} parse) {
+    static Function<Supplier<String>, Messages> provideParseMessagesFunction({{parseTaskDef.qualifiedId}} parse) {
         return parse.createMessagesFunction();
     }
+    {{/parser}}
 
     {{#multilangAnalyzer}}
     @Provides @LanguageScope

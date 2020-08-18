@@ -46,7 +46,7 @@ open class LanguageProjectSettings(
 
   val languageProject: LanguageProject.Builder = LanguageProject.builder(),
   val classloaderResources: ClassloaderResourcesCompiler.LanguageProjectInput.Builder = ClassloaderResourcesCompiler.LanguageProjectInput.builder(),
-  val parser: ParserCompiler.LanguageProjectInput.Builder = ParserCompiler.LanguageProjectInput.builder(),
+  val parser: ParserCompiler.LanguageProjectInput.Builder? = null, // Optional
   val styler: StylerCompiler.LanguageProjectInput.Builder? = null, // Optional
   val completer: CompleterCompiler.LanguageProjectInput.Builder? = null, // Optional
   val strategoRuntime: StrategoRuntimeCompiler.LanguageProjectInput.Builder? = null, // Optional
@@ -78,7 +78,7 @@ open class LanguageProjectSettings(
     // Build language project compiler settings.
     val languageProject = this.languageProject.shared(shared).project(gradleProject.toSpoofaxCompilerProject()).build()
     val classloaderResources = this.classloaderResources.shared(shared).languageProject(languageProject).build()
-    val parser = this.parser.shared(shared).languageProject(languageProject).build()
+    val parser = if(this.parser != null) this.parser.shared(shared).languageProject(languageProject).build() else null
     val styler = if(this.styler != null) this.styler.shared(shared).languageProject(languageProject).build() else null
     val completer = if(this.completer != null) this.completer.shared(shared).languageProject(languageProject).build() else null
     val strategoRuntime = if(this.strategoRuntime != null) this.strategoRuntime.shared(shared).languageProject(languageProject).build() else null
@@ -88,7 +88,9 @@ open class LanguageProjectSettings(
       .shared(shared)
       .languageProject(languageProject)
       .classloaderResources(classloaderResources)
-      .parser(parser)
+    if(parser != null) {
+      builder.parser(parser)
+    }
     if(styler != null) {
       builder.styler(styler)
     }

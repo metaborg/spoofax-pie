@@ -72,8 +72,10 @@ open class AdapterProjectSettings(
       .shared(shared)
       .adapterProject(adapterProject)
       .classloaderResources(classloaderResources)
-      .parser(parser)
       .languageProjectDependency(languageProject.toSpoofaxCompilerProject().asProjectDependency())
+    if(parser != null) {
+      builder.parser(parser)
+    }
     if(styler != null) {
       builder.styler(styler)
     }
