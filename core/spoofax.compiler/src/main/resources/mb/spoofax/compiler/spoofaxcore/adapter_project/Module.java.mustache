@@ -84,16 +84,17 @@ public class {{genModule.id}} {
         return definitionDir;
     }
 
-
+{{#parser}}
     @Provides @LanguageScope
-    static {{parser.languageProjectInput.factory.qualifiedId}} provideParserFactory(@Named("definition-dir") HierarchicalResource definitionDir) {
-        return new {{parser.languageProjectInput.factory.qualifiedId}}(definitionDir);
+    static {{this.languageProjectInput.factory.qualifiedId}} provideParserFactory(@Named("definition-dir") HierarchicalResource definitionDir) {
+        return new {{this.languageProjectInput.factory.qualifiedId}}(definitionDir);
     }
 
     @Provides /* Unscoped: parser has state, so create a new parser every call. */
-    static {{parser.languageProjectInput.parser.qualifiedId}} provideParser({{parser.languageProjectInput.factory.qualifiedId}} parserFactory) {
+    static {{this.languageProjectInput.parser.qualifiedId}} provideParser({{this.languageProjectInput.factory.qualifiedId}} parserFactory) {
         return parserFactory.create();
     }
+{{/parser}}
 {{#styler}}
 
 

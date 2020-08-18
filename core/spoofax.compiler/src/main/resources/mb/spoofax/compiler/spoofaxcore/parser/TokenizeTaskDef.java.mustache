@@ -13,6 +13,7 @@ import java.io.IOException;
 
 @LanguageScope
 public class {{genTokenizeTaskDef.id}} implements TaskDef<ResourceKey, Option<JSGLRTokens>> {
+
     private final {{parseTaskDef.qualifiedId}} parse;
 
     @Inject public {{genTokenizeTaskDef.id}}({{parseTaskDef.qualifiedId}} parse) {

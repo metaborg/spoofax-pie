@@ -15,20 +15,19 @@ import java.io.IOException;
 
 @LanguageScope
 public class {{genCheckTaskDef.id}} implements TaskDef<ResourceKey, Messages> {
-    private final {{parser.parseTaskDef.qualifiedId}} parse;
-{{#constraintAnalyzer}}
-    private final {{this.analyzeTaskDef.qualifiedId}} analyze;
-{{/constraintAnalyzer}}
+
+{{#checkInjections}}
+    {{variable}};
+{{/checkInjections}}
 
     @Inject public {{genCheckTaskDef.id}}(
-      {{parser.parseTaskDef.qualifiedId}} parse{{#constraintAnalyzer}},
-      {{this.analyzeTaskDef.qualifiedId}} analyze
-{{/constraintAnalyzer}}
+{{#checkInjections}}
+    {{variable}}{{^-last}},{{/-last}}
+{{/checkInjections}}
     ) {
-        this.parse = parse;
-{{#constraintAnalyzer}}
-        this.analyze = analyze;
-{{/constraintAnalyzer}}
+{{#checkInjections}}
+        {{thisAssign}};
+{{/checkInjections}}
     }
 
     @Override public String getId() {
@@ -38,8 +37,10 @@ public class {{genCheckTaskDef.id}} implements TaskDef<ResourceKey, Messages> {
     @Override public Messages exec(ExecContext context, ResourceKey key) throws IOException {
         final MessagesBuilder messagesBuilder = new MessagesBuilder();
         final ResourceStringSupplier stringSupplier = new ResourceStringSupplier(key);
+{{#parser}}
         final Messages parseMessages = context.require(parse.createMessagesSupplier(stringSupplier));
         messagesBuilder.addMessages(parseMessages);
+{{/parser}}
 {{#constraintAnalyzer}}
         final Result<{{this.analyzeTaskDef.qualifiedId}}.Output, ?> analysisResult = context.require(analyze, new {{this.analyzeTaskDef.qualifiedId}}.Input(key, parse.createRecoverableAstSupplier(stringSupplier)));
         analysisResult

@@ -57,20 +57,18 @@ public class {{genCheckMultiTaskDef.id}} implements TaskDef<{{genCheckMultiTaskD
         }
     }
 
-    private final {{parser.parseTaskDef.qualifiedId}} parse;
-{{#constraintAnalyzer}}
-    private final {{this.analyzeMultiTaskDef.qualifiedId}} analyze;
-{{/constraintAnalyzer}}
+    {{#checkMultiInjections}}
+        {{variable}};
+    {{/checkMultiInjections}}
 
     @Inject public {{genCheckMultiTaskDef.id}}(
-      {{parser.parseTaskDef.qualifiedId}} parse{{#constraintAnalyzer}},
-      {{this.analyzeMultiTaskDef.qualifiedId}} analyze
-{{/constraintAnalyzer}}
+    {{#checkMultiInjections}}
+        {{variable}}{{^-last}},{{/-last}}
+    {{/checkMultiInjections}}
     ) {
-        this.parse = parse;
-{{#constraintAnalyzer}}
-        this.analyze = analyze;
-{{/constraintAnalyzer}}
+    {{#checkMultiInjections}}
+        {{thisAssign}};
+    {{/checkMultiInjections}}
     }
 
     @Override public String getId() {
@@ -80,6 +78,7 @@ public class {{genCheckMultiTaskDef.id}} implements TaskDef<{{genCheckMultiTaskD
     @Override public KeyedMessages exec(ExecContext context, Input input) throws IOException {
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         final HierarchicalResource root = context.require(input.root, ResourceStampers.modifiedDirRec(input.walker, input.matcher));
+{{#parser}}
         try {
             root.walk(input.walker, input.matcher).forEach(file -> {
                 final ResourcePath filePath = file.getPath();
@@ -93,7 +92,7 @@ public class {{genCheckMultiTaskDef.id}} implements TaskDef<{{genCheckMultiTaskD
         } catch(UncheckedIOException e) {
             throw e.getCause();
         }
-
+{{/parser}}
 {{#constraintAnalyzer}}
         final {{this.analyzeMultiTaskDef.qualifiedId}}.Input analyzeInput = new {{this.analyzeMultiTaskDef.qualifiedId}}.Input(input.root, input.walker, input.matcher, parse.createRecoverableAstFunction());
         final Result<{{this.analyzeMultiTaskDef.qualifiedId}}.Output, ?> analysisResult = context.require(analyze, analyzeInput);

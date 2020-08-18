@@ -15,7 +15,9 @@ import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.compiler.util.UniqueNamer;
 import mb.spoofax.core.language.taskdef.NullCompleteTaskDef;
+import mb.spoofax.core.language.taskdef.NullParser;
 import mb.spoofax.core.language.taskdef.NullStyler;
+import mb.spoofax.core.language.taskdef.NullTokenizer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 
@@ -89,7 +91,9 @@ public class AdapterProjectCompiler {
         dependencies.add(GradleConfiguredDependency.api(shared.daggerDep()));
         dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
         dependencies.add(GradleConfiguredDependency.annotationProcessor(shared.daggerCompilerDep()));
-        parserCompiler.getAdapterProjectDependencies(input.parser()).addAllTo(dependencies);
+        input.parser().ifPresent((i) -> {
+            parserCompiler.getAdapterProjectDependencies(i).addAllTo(dependencies);
+        });
         input.constraintAnalyzer().ifPresent((i) -> {
             constraintAnalyzerCompiler.getAdapterProjectDependencies(i).addAllTo(dependencies);
         });
@@ -103,8 +107,14 @@ public class AdapterProjectCompiler {
         final Shared shared = input.shared();
 
         // Files from other compilers.
-        parserCompiler.compileAdapterProject(input.parser());
         try {
+            input.parser().ifPresent((i) -> {
+                try {
+                    parserCompiler.compileAdapterProject(i);
+                } catch(IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            });
             input.styler().ifPresent((i) -> {
                 try {
                     stylerCompiler.compileAdapterProject(i);
@@ -146,8 +156,13 @@ public class AdapterProjectCompiler {
 
         // Collect all task definitions.
         final ArrayList<TypeInfo> allTaskDefs = new ArrayList<>(input.taskDefs());
-        allTaskDefs.add(input.parser().tokenizeTaskDef());
-        allTaskDefs.add(input.parser().parseTaskDef());
+        if(input.parser().isPresent()){
+            allTaskDefs.add(input.parser().get().tokenizeTaskDef());
+            allTaskDefs.add(input.parser().get().parseTaskDef());
+        } else {
+            allTaskDefs.add(TypeInfo.of(NullTokenizer.class));
+            allTaskDefs.add(TypeInfo.of(NullParser.class));
+        }
         if(input.styler().isPresent()) {
             allTaskDefs.add(input.styler().get().styleTaskDef());
         } else {
@@ -211,12 +226,14 @@ public class AdapterProjectCompiler {
             map.put("injected", injected);
 
             // Create injections for tasks required in the language instance.
-            final NamedTypeInfo parseInjection = uniqueNamer.makeUnique(input.parser().parseTaskDef());
-            map.put("parseInjection", parseInjection);
-            injected.add(parseInjection);
-            final NamedTypeInfo tokenizeInjection = uniqueNamer.makeUnique(input.parser().tokenizeTaskDef());
-            map.put("tokenizeInjection", tokenizeInjection);
-            injected.add(tokenizeInjection);
+            if(input.parser().isPresent()) {
+                final NamedTypeInfo parseInjection = uniqueNamer.makeUnique(input.parser().get().parseTaskDef());
+                map.put("parseInjection", parseInjection);
+                injected.add(parseInjection);
+                final NamedTypeInfo tokenizeInjection = uniqueNamer.makeUnique(input.parser().get().tokenizeTaskDef());
+                map.put("tokenizeInjection", tokenizeInjection);
+                injected.add(tokenizeInjection);
+            }
             final NamedTypeInfo checkInjection;
             if(input.multilangAnalyzer().isPresent()) { // isMultiLang will be true
                 map.put("languageId", input.multilangAnalyzer().get().languageId());
@@ -287,7 +304,7 @@ public class AdapterProjectCompiler {
 
         ClassloaderResourcesCompiler.AdapterProjectInput classloaderResources();
 
-        ParserCompiler.AdapterProjectInput parser();
+        Optional<ParserCompiler.AdapterProjectInput> parser();
 
         Optional<StylerCompiler.AdapterProjectInput> styler();
 
@@ -337,6 +354,28 @@ public class AdapterProjectCompiler {
                 return Optional.of(this);
             }
             return Optional.empty();
+        }
+
+        default List<NamedTypeInfo> checkInjections() {
+            ArrayList<NamedTypeInfo> results = new ArrayList<>();
+            parser().ifPresent((i) -> {
+                results.add(NamedTypeInfo.of("parse", i.parseTaskDef()));
+            });
+            constraintAnalyzer().ifPresent((i) -> {
+                results.add(NamedTypeInfo.of("analyze", i.analyzeTaskDef()));
+            });
+            return results;
+        }
+
+        default List<NamedTypeInfo> checkMultiInjections() {
+            ArrayList<NamedTypeInfo> results = new ArrayList<>();
+            parser().ifPresent((i) -> {
+                results.add(NamedTypeInfo.of("parse", i.parseTaskDef()));
+            });
+            constraintAnalyzer().ifPresent((i) -> {
+                results.add(NamedTypeInfo.of("analyze", i.analyzeMultiTaskDef()));
+            });
+            return results;
         }
 
         /// Gradle files
@@ -484,7 +523,7 @@ public class AdapterProjectCompiler {
                 generatedFiles.add(genCheckTaskDef().file(classesGenDirectory));
                 generatedFiles.add(genCheckMultiTaskDef().file(classesGenDirectory));
             }
-            parser().generatedFiles().addAllTo(generatedFiles);
+            parser().ifPresent((i) -> i.generatedFiles().addAllTo(generatedFiles));
             styler().ifPresent((i) -> i.generatedFiles().addAllTo(generatedFiles));
             completer().ifPresent((i) -> i.generatedFiles().addAllTo(generatedFiles));
             constraintAnalyzer().ifPresent((i) -> i.generatedFiles().addAllTo(generatedFiles));

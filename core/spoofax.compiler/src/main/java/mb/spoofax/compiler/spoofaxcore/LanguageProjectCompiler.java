@@ -66,7 +66,9 @@ public class LanguageProjectCompiler {
         dependencies.add(GradleConfiguredDependency.api(shared.spoofaxCompilerInterfacesDep()));
         dependencies.add(GradleConfiguredDependency.api(shared.commonDep()));
         dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
-        parserCompiler.getLanguageProjectDependencies(input.parser()).addAllTo(dependencies);
+        input.parser().ifPresent((i) -> {
+            parserCompiler.getLanguageProjectDependencies(i).addAllTo(dependencies);
+        });
         input.styler().ifPresent((i) -> {
             stylerCompiler.getLanguageProjectDependencies(i).addAllTo(dependencies);
         });
@@ -88,7 +90,9 @@ public class LanguageProjectCompiler {
     public ArrayList<String> getCopyResources(Input input) {
         final Shared shared = input.shared();
         final ArrayList<String> copyResources = new ArrayList<>(input.additionalCopyResources());
-        parserCompiler.getLanguageProjectCopyResources(input.parser()).addAllTo(copyResources);
+        input.parser().ifPresent((i) -> {
+            parserCompiler.getLanguageProjectCopyResources(i).addAllTo(copyResources);
+        });
         input.styler().ifPresent((i) -> {
             stylerCompiler.getLanguageProjectCopyResources(i).addAllTo(copyResources);
         });
@@ -116,8 +120,15 @@ public class LanguageProjectCompiler {
 
         // Files from other compilers.
         classloaderResourcesCompiler.compileLanguageProject(input.classloaderResources());
-        parserCompiler.compileLanguageProject(input.parser());
+
         try {
+            input.parser().ifPresent((i) -> {
+                try {
+                    parserCompiler.compileLanguageProject(i);
+                } catch(IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            });
             input.styler().ifPresent((i) -> {
                 try {
                     stylerCompiler.compileLanguageProject(i);
@@ -181,7 +192,7 @@ public class LanguageProjectCompiler {
 
         ClassloaderResourcesCompiler.LanguageProjectInput classloaderResources();
 
-        ParserCompiler.LanguageProjectInput parser();
+        Optional<ParserCompiler.LanguageProjectInput> parser();
 
         Optional<StylerCompiler.LanguageProjectInput> styler();
 
@@ -247,7 +258,7 @@ public class LanguageProjectCompiler {
                 providedFiles.add(genPackageInfo().file(classesGenDirectory()));
             }
             classloaderResources().providedFiles().addAllTo(providedFiles);
-            parser().providedFiles().addAllTo(providedFiles);
+            parser().ifPresent((i) -> i.providedFiles().addAllTo(providedFiles));
             styler().ifPresent((i) -> i.providedFiles().addAllTo(providedFiles));
             strategoRuntime().ifPresent((i) -> i.providedFiles().addAllTo(providedFiles));
             constraintAnalyzer().ifPresent((i) -> i.providedFiles().addAllTo(providedFiles));
