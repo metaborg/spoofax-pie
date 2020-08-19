@@ -133,15 +133,14 @@ public abstract class StrategoException extends Exception {
         return sb.toString();
     }
 
+    @Override public Throwable fillInStackTrace() {
+        return this; // Do nothing so that no stack trace is created, saving memory and CPU time.
+    }
+
 
     @Override public abstract int hashCode();
 
     @Override public abstract boolean equals(@Nullable Object obj);
 
     @Override public abstract String toString();
-
-
-    protected StrategoException() {
-        super(null, null, true, false);
-    }
 }

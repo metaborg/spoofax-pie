@@ -3,5 +3,5 @@
 
 gradlePipeline(
   slack: true,
-  slackChannel: "#pie-dev"
+  slackChannel: '#pie-dev'
 )

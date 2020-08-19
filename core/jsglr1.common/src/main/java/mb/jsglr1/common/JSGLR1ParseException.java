@@ -50,14 +50,14 @@ public abstract class JSGLR1ParseException extends Exception {
             .recoveryDisallowedFail((messages) -> "Parsing recovered from failure, but recovery was disallowed; see error messages");
     }
 
+    @Override public Throwable fillInStackTrace() {
+        return this; // Do nothing so that no stack trace is created, saving memory and CPU time.
+    }
+    
+
     @Override public abstract int hashCode();
 
     @Override public abstract boolean equals(@Nullable Object obj);
 
     @Override public abstract String toString();
-
-
-    protected JSGLR1ParseException() {
-        super(null, null, true, false);
-    }
 }
