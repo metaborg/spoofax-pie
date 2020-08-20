@@ -46,6 +46,14 @@ spoofaxAdapterProject {
       builder.genComponent(packageId, "GeneratedStrategoComponent")
       builder.manualComponent(packageId, "StrategoComponent")
 
+      val strBuildTaskPackageId = "mb.stratego.build.strincr"
+      builder.addTaskDefs(strBuildTaskPackageId, "StrIncr")
+      builder.addTaskDefs(strBuildTaskPackageId, "StrIncrAnalysis")
+      builder.addTaskDefs(strBuildTaskPackageId, "Frontend")
+      builder.addTaskDefs(strBuildTaskPackageId, "Backend")
+
+      builder.addTaskDefs(taskPackageId, "StrategoCompile")
+
       builder
     }
   ))

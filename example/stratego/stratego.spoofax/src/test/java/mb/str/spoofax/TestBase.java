@@ -18,6 +18,7 @@ import mb.resource.text.TextResource;
 import mb.resource.text.TextResourceRegistry;
 import mb.spoofax.core.platform.LoggerFactoryModule;
 import mb.spoofax.core.platform.PlatformPieModule;
+import mb.str.spoofax.task.StrategoCompile;
 import mb.str.spoofax.task.StrategoParse;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -43,13 +44,18 @@ public class TestBase {
         .platformComponent(platformComponent)
         .build();
     public final StrategoParse parse = languageComponent.getStrategoParse();
+    public final StrategoCompile compile = languageComponent.getStrCompile();
     public final Pie pie = languageComponent.getPie();
 
 
-    public FSResource createTextFile(String text, String relativePath) throws IOException {
+    public FSResource createTextFile(FSResource rootDirectory, String text, String relativePath) throws IOException {
         final FSResource resource = rootDirectory.appendRelativePath(relativePath);
         resource.writeString(text, StandardCharsets.UTF_8);
         return resource;
+    }
+
+    public FSResource createTextFile(String text, String relativePath) throws IOException {
+        return createTextFile(this.rootDirectory, text, relativePath);
     }
 
     public TextResource createTextResource(String text, String id) {
