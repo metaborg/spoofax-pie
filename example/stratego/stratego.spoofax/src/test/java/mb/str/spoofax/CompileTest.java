@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CompileTest extends TestBase {
-    @Disabled("Not working yet") @Test void testParseTask() throws Exception {
+    @Test void testParseTask() throws Exception {
         final FSResource projectDir = rootDirectory.appendRelativePath("project").createDirectory(true);
         final FSResource mainFile = createTextFile(projectDir, "module a", "a.str");
         final FSResource outputDir = rootDirectory.appendRelativePath("output").createDirectory(true);
@@ -26,10 +26,11 @@ class CompileTest extends TestBase {
                 new ArrayList<>(),
                 null,
                 outputDir.getPath(),
-                null,
+                "my.package",
                 new ArrayList<>()
             )));
             assertTrue(result.isOk());
+            assertTrue(outputDir.exists());
         }
     }
 }

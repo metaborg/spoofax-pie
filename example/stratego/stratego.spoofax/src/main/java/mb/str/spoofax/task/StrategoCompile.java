@@ -23,7 +23,7 @@ public class StrategoCompile implements TaskDef<StrategoCompile.Args, Result<Non
         public final ArrayList<String> builtinLibs;
         public final @Nullable ResourcePath cacheDir;
         public final ResourcePath outputDir;
-        public final @Nullable String outputJavaPackageId;
+        public final String outputJavaPackageId;
         public final ArrayList<STask> originTasks;
 
         public Args(
@@ -33,7 +33,7 @@ public class StrategoCompile implements TaskDef<StrategoCompile.Args, Result<Non
             ArrayList<String> builtinLibs,
             @Nullable ResourcePath cacheDir,
             ResourcePath outputDir,
-            @Nullable String outputJavaPackageId,
+            String outputJavaPackageId,
             ArrayList<STask> originTasks
         ) {
             this.projectDir = projectDir;
@@ -56,7 +56,7 @@ public class StrategoCompile implements TaskDef<StrategoCompile.Args, Result<Non
                 builtinLibs.equals(args.builtinLibs) &&
                 Objects.equals(cacheDir, args.cacheDir) &&
                 outputDir.equals(args.outputDir) &&
-                Objects.equals(outputJavaPackageId, args.outputJavaPackageId) &&
+                outputJavaPackageId.equals(args.outputJavaPackageId) &&
                 originTasks.equals(args.originTasks);
         }
 

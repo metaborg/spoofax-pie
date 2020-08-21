@@ -42,7 +42,7 @@ public class Spoofax3ParseStratego implements ParseStratego {
         final String text = new String(IOUtil.toByteArray(inputStream), charset);
         final StrategoParser parser = parserProvider.get();
         if(path != null) {
-            return parser.parse(text, "Module", resourceService.getResourceKey(ResourceKeyString.of(path))).ast;
+            return parser.parse(text, "Module", resourceService.getResourceKey(ResourceKeyString.parse(path))).ast;
         } else {
             return parser.parse(text, "Module").ast;
         }

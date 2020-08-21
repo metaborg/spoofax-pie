@@ -50,6 +50,7 @@ spoofaxAdapterProject {
       builder.addTaskDefs(strBuildTaskPackageId, "StrIncr")
       builder.addTaskDefs(strBuildTaskPackageId, "StrIncrAnalysis")
       builder.addTaskDefs(strBuildTaskPackageId, "Frontend")
+      builder.addTaskDefs(strBuildTaskPackageId, "SubFrontend")
       builder.addTaskDefs(strBuildTaskPackageId, "Backend")
 
       builder.addTaskDefs(taskPackageId, "StrategoCompile")
