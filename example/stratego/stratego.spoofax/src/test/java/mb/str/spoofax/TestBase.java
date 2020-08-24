@@ -18,6 +18,7 @@ import mb.resource.text.TextResource;
 import mb.resource.text.TextResourceRegistry;
 import mb.spoofax.core.platform.LoggerFactoryModule;
 import mb.spoofax.core.platform.PlatformPieModule;
+import mb.str.spoofax.task.StrategoAnalyze;
 import mb.str.spoofax.task.StrategoCompile;
 import mb.str.spoofax.task.StrategoParse;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -44,7 +45,8 @@ public class TestBase {
         .platformComponent(platformComponent)
         .build();
     public final StrategoParse parse = languageComponent.getStrategoParse();
-    public final StrategoCompile compile = languageComponent.getStrCompile();
+    public final StrategoCompile compile = languageComponent.getStrategoCompile();
+    public final StrategoAnalyze analyze = languageComponent.getStrategoAnalyze();
     public final Pie pie = languageComponent.getPie();
 
 

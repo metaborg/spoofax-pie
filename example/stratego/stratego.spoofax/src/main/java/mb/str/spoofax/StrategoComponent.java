@@ -4,6 +4,7 @@ import dagger.Component;
 import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.platform.PlatformComponent;
 import mb.str.spoofax.incr.StrategoIncrModule;
+import mb.str.spoofax.task.StrategoAnalyze;
 import mb.str.spoofax.task.StrategoCompile;
 import mb.str.spoofax.task.StrategoParse;
 
@@ -12,5 +13,7 @@ import mb.str.spoofax.task.StrategoParse;
 public interface StrategoComponent extends GeneratedStrategoComponent {
     StrategoParse getStrategoParse();
 
-    StrategoCompile getStrCompile();
+    StrategoCompile getStrategoCompile();
+
+    StrategoAnalyze getStrategoAnalyze();
 }

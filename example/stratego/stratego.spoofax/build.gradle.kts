@@ -46,6 +46,13 @@ spoofaxAdapterProject {
       builder.genComponent(packageId, "GeneratedStrategoComponent")
       builder.manualComponent(packageId, "StrategoComponent")
 
+      builder.isMultiFile(true)
+      builder.genCheckMultiTaskDef(taskPackageId, "GeneratedStrategoCheckMulti")
+      builder.manualCheckMultiTaskDef(taskPackageId, "StrategoCheckMulti")
+
+      builder.addTaskDefs(taskPackageId, "StrategoCompile")
+      builder.addTaskDefs(taskPackageId, "StrategoAnalyze")
+
       val strBuildTaskPackageId = "mb.stratego.build.strincr"
       builder.addTaskDefs(strBuildTaskPackageId, "StrIncr")
       builder.addTaskDefs(strBuildTaskPackageId, "StrIncrAnalysis")
@@ -53,8 +60,6 @@ spoofaxAdapterProject {
       builder.addTaskDefs(strBuildTaskPackageId, "SubFrontend")
       builder.addTaskDefs(strBuildTaskPackageId, "LibFrontend")
       builder.addTaskDefs(strBuildTaskPackageId, "Backend")
-
-      builder.addTaskDefs(taskPackageId, "StrategoCompile")
 
       builder
     }
