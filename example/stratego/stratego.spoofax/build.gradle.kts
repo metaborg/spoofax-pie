@@ -51,6 +51,7 @@ spoofaxAdapterProject {
       builder.addTaskDefs(strBuildTaskPackageId, "StrIncrAnalysis")
       builder.addTaskDefs(strBuildTaskPackageId, "Frontend")
       builder.addTaskDefs(strBuildTaskPackageId, "SubFrontend")
+      builder.addTaskDefs(strBuildTaskPackageId, "LibFrontend")
       builder.addTaskDefs(strBuildTaskPackageId, "Backend")
 
       builder.addTaskDefs(taskPackageId, "StrategoCompile")
@@ -59,3 +60,12 @@ spoofaxAdapterProject {
     }
   ))
 }
+
+//tasks.test {
+//  testLogging {
+//    lifecycle {
+//      events.add(org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_OUT)
+//      events.add(org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR)
+//    }
+//  }
+//}

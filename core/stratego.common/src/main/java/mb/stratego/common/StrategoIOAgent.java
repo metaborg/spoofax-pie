@@ -8,6 +8,7 @@ import mb.log.api.LoggingOutputStream;
 import mb.resource.ResourceService;
 import mb.resource.WritableResource;
 import mb.resource.fs.FSResource;
+import mb.resource.hierarchical.DirectoryAlreadyExistsException;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.HierarchicalResourceType;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -387,9 +388,11 @@ public class StrategoIOAgent extends IOAgent {
     @Override public boolean mkdir(@NonNull String fn) {
         final HierarchicalResource resource = resourceService.appendOrReplaceWithHierarchical(workingDir, fn);
         try {
-            final boolean created = !resource.exists();
+            if(resource.exists() && resource.isDirectory()) {
+                return false;
+            }
             resource.createDirectory();
-            return created;
+            return true;
         } catch(IOException e) {
             throw new RuntimeException("Could not create directory " + resource, e);
         }
