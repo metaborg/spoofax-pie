@@ -51,6 +51,10 @@ public class EclipseResourcePath extends ResourcePathDefaults<EclipseResourcePat
         return pathString;
     }
 
+    @Override public String getIdAsString() {
+        return pathString;
+    }
+
 
     @Override public boolean isAbsolute() {
         return path.isAbsolute();
@@ -187,7 +191,7 @@ public class EclipseResourcePath extends ResourcePathDefaults<EclipseResourcePat
     }
 
 
-    @Override public boolean equals(Object o) {
+    @Override public boolean equals(@Nullable Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         final EclipseResourcePath that = (EclipseResourcePath)o;
@@ -199,7 +203,7 @@ public class EclipseResourcePath extends ResourcePathDefaults<EclipseResourcePat
     }
 
     @Override public String toString() {
-        return pathString;
+        return asString();
     }
 
 

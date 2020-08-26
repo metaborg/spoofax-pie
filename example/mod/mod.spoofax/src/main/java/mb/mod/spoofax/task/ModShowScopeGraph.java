@@ -4,7 +4,6 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
-import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.PathResourceMatcher;
 import mb.resource.hierarchical.match.ResourceMatcher;
@@ -16,6 +15,7 @@ import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoUtil;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 
@@ -34,7 +34,7 @@ public class ModShowScopeGraph implements TaskDef<ModShowScopeGraph.Args, Comman
             this.file = file;
         }
 
-        @Override public boolean equals(Object o) {
+        @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             final Args args = (Args)o;
@@ -56,18 +56,15 @@ public class ModShowScopeGraph implements TaskDef<ModShowScopeGraph.Args, Comman
 
     private final ModParse parse;
     private final ModAnalyzeMulti analyze;
-    private final ResourceService resourceService;
     private final Provider<StrategoRuntime> strategoRuntimeProvider;
 
     @Inject public ModShowScopeGraph(
         ModParse parse,
         ModAnalyzeMulti analyze,
-        ResourceService resourceService,
         Provider<StrategoRuntime> strategoRuntimeProvider
     ) {
         this.parse = parse;
         this.analyze = analyze;
-        this.resourceService = resourceService;
         this.strategoRuntimeProvider = strategoRuntimeProvider;
     }
 
@@ -84,7 +81,7 @@ public class ModShowScopeGraph implements TaskDef<ModShowScopeGraph.Args, Comman
             .mapCatching(output -> {
                 final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get().addContextObject(output.context);
                 final ITermFactory termFactory = strategoRuntime.getTermFactory();
-                final IStrategoTerm inputTerm = StrategoUtil.createLegacyBuilderInputTerm(strategoRuntime.getTermFactory(), output.result.ast, resourceService.toString(file), resourceService.toString(project));
+                final IStrategoTerm inputTerm = StrategoUtil.createLegacyBuilderInputTerm(strategoRuntime.getTermFactory(), output.result.ast, file.asString(), project.asString());
                 return StrategoUtil.toString(strategoRuntime.invoke("stx--show-scopegraph", inputTerm));
             })
             .mapOrElse(text -> CommandFeedback.of(ShowFeedback.showText(text, "Scope graph for '" + file + "'")), e -> CommandFeedback.ofTryExtractMessagesFrom(e, file));

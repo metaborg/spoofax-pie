@@ -8,7 +8,6 @@ import mb.log.api.LoggingOutputStream;
 import mb.resource.ResourceService;
 import mb.resource.WritableResource;
 import mb.resource.fs.FSResource;
-import mb.resource.hierarchical.DirectoryAlreadyExistsException;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.HierarchicalResourceType;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -142,7 +141,7 @@ public class StrategoIOAgent extends IOAgent {
 
 
     @Override public String getWorkingDir() {
-        return resourceService.toString(workingDir.getKey());
+        return workingDir.getPath().asString();
     }
 
     public HierarchicalResource getWorkingDirResource() {
@@ -162,7 +161,7 @@ public class StrategoIOAgent extends IOAgent {
 
 
     @Override public String getDefinitionDir() {
-        return resourceService.toString(definitionDir.getKey());
+        return definitionDir.getPath().asString();
     }
 
     public HierarchicalResource getDefinitionDirResource() {
@@ -182,7 +181,7 @@ public class StrategoIOAgent extends IOAgent {
 
 
     @Override public String getTempDir() {
-        return resourceService.toString(tempDir.getKey());
+        return tempDir.getPath().asString();
     }
 
     public HierarchicalResource getTempDirResource() {

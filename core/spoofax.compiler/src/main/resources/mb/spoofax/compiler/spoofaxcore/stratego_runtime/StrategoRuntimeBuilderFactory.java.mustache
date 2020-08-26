@@ -38,8 +38,7 @@ public class {{genFactory.id}} implements StrategoRuntimeBuilderFactory {
                 "{{languageProject.project.coordinate.groupId}}",
                 "{{languageProject.project.coordinate.artifactId}}",
                 "{{languageProject.project.coordinate.version}}",
-                definitionDir.getPath(),
-                resourceService.toResourceKeyString(definitionDir.getPath())
+                definitionDir.getPath()
             ));
         }
 {{/addStatixPrimitives}}

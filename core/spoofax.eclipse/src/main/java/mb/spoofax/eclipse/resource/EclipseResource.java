@@ -534,7 +534,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
     }
 
 
-    @Override public boolean equals(Object o) {
+    @Override public boolean equals(@Nullable Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         final EclipseResource that = (EclipseResource)o;

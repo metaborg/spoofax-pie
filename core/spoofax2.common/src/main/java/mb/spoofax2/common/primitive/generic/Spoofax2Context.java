@@ -8,19 +8,16 @@ public class Spoofax2Context {
     public final String languageId;
     public final String languageVersion;
     public final ResourcePath languagePath;
-    public final QualifiedResourceKeyString languagePathString;
 
     public Spoofax2Context(
         String languageGroupId,
         String languageId,
         String languageVersion,
-        ResourcePath languagePath,
-        QualifiedResourceKeyString languagePathString
+        ResourcePath languagePath
     ) {
         this.languageGroupId = languageGroupId;
         this.languageId = languageId;
         this.languageVersion = languageVersion;
         this.languagePath = languagePath;
-        this.languagePathString = languagePathString;
     }
 }

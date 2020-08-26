@@ -448,15 +448,15 @@ public class ConstraintAnalyzer {
     }
 
     private IStrategoString mkString(ResourceKey resourceKey) {
-        return termFactory.makeString(resourceService.toString(resourceKey));
+        return termFactory.makeString(resourceKey.asString());
     }
 
     private IStrategoString mkString(Object obj) {
         return termFactory.makeString(obj.toString());
     }
 
-    private IStrategoTerm mkProjectTerm(ResourceKey resource) {
-        final String resourceStr = resourceService.toString(resource);
+    private IStrategoTerm mkProjectTerm(ResourceKey resourceKey) {
+        final String resourceStr = resourceKey.asString();
         IStrategoTerm ast = termFactory.makeTuple();
         ast = StrategoTermIndices.put(TermIndex.of(resourceStr, 0), ast, termFactory);
         TermOrigin.of(resourceStr).put(ast);
