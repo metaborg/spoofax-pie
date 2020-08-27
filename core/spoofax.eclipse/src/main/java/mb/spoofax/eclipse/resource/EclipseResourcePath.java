@@ -1,6 +1,7 @@
 package mb.spoofax.eclipse.resource;
 
 import mb.resource.ResourceRuntimeException;
+import mb.resource.fs.FSPath;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.ResourcePathDefaults;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -67,6 +68,18 @@ public class EclipseResourcePath extends ResourcePathDefaults<EclipseResourcePat
 
     @Override public Iterable<String> getSegments() {
         return Arrays.asList(path.segments());
+    }
+
+
+    @Override public boolean startsWith(ResourcePath prefix) {
+        if(!(prefix instanceof EclipseResourcePath)) {
+            throw new ResourceRuntimeException("Cannot check if this path starts with '" + prefix + "', it is not an EclipseResourcePath");
+        }
+        return startsWith((EclipseResourcePath)prefix);
+    }
+
+    public boolean startsWith(EclipseResourcePath prefix) {
+        return prefix.path.isPrefixOf(path);
     }
 
 
