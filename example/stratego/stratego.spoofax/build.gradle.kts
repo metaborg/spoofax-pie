@@ -10,6 +10,7 @@ plugins {
 
 dependencies {
   api("org.metaborg:stratego.build")
+  api("org.metaborg:pie.task.java")
 
   // Required because @Nullable has runtime retention (which includes classfile retention), and the Java compiler requires access to it.
   compileOnly("com.google.code.findbugs:jsr305")
@@ -40,6 +41,7 @@ spoofaxAdapterProject {
 
       val builder = AdapterProjectCompiler.Input.builder()
 
+      builder.addAdditionalModules(packageId, "JavaTasksModule")
       builder.addAdditionalModules(incrPackageId, "StrategoIncrModule")
 
       builder.classKind(ClassKind.Extended)
@@ -61,16 +63,27 @@ spoofaxAdapterProject {
       builder.addTaskDefs(strBuildTaskPackageId, "LibFrontend")
       builder.addTaskDefs(strBuildTaskPackageId, "Backend")
 
+      val pieTaskJavaPackageId = "mb.pie.task.java"
+      builder.addTaskDefs(pieTaskJavaPackageId, "CompileJava")
+      builder.addTaskDefs(pieTaskJavaPackageId, "CreateJar")
+
       builder
     }
   ))
 }
 
-//tasks.test {
-//  testLogging {
-//    lifecycle {
-//      events.add(org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_OUT)
-//      events.add(org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR)
-//    }
-//  }
-//}
+// Additional dependencies which are injected into tests.
+val classPathInjection = configurations.create("classPathInjection")
+dependencies {
+  classPathInjection(platform("$group:spoofax.depconstraints:$version"))
+  classPathInjection("org.metaborg:org.strategoxt.strj")
+}
+
+tasks.test {
+  // Pass classPathInjection to tests in the form of system properties
+  dependsOn(classPathInjection)
+  doFirst {
+    // Wrap in doFirst to properly defer dependency resolution to the task execution phase.
+    systemProperty("classPath", classPathInjection.resolvedConfiguration.resolvedArtifacts.map { it.file }.joinToString(File.pathSeparator))
+  }
+}

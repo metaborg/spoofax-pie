@@ -59,6 +59,7 @@ dependencies {
     api("org.metaborg:pie.api:$pieVersion")
     api("org.metaborg:pie.runtime:$pieVersion")
     api("org.metaborg:pie.dagger:$pieVersion")
+    api("org.metaborg:pie.task.java:$pieVersion")
     /// Spoofax 2
     api("org.metaborg:org.spoofax.terms:$spoofax2Version")
     api("org.metaborg:org.spoofax.jsglr:$spoofax2Version")
