@@ -7,7 +7,7 @@ import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.platform.PlatformComponent;
 import mb.str.spoofax.incr.StrategoIncrModule;
 import mb.str.spoofax.task.StrategoAnalyze;
-import mb.str.spoofax.task.StrategoCompile;
+import mb.str.spoofax.task.StrategoCompileToJava;
 import mb.str.spoofax.task.StrategoParse;
 
 @LanguageScope
@@ -15,7 +15,7 @@ import mb.str.spoofax.task.StrategoParse;
 public interface StrategoComponent extends GeneratedStrategoComponent {
     StrategoParse getStrategoParse();
 
-    StrategoCompile getStrategoCompile();
+    StrategoCompileToJava getStrategoCompile();
 
     StrategoAnalyze getStrategoAnalyze();
 

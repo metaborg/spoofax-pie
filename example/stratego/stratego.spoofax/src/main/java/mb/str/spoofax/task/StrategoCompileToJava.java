@@ -15,7 +15,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class StrategoCompile implements TaskDef<StrategoCompile.Args, Result<None, ?>> {
+public class StrategoCompileToJava implements TaskDef<StrategoCompileToJava.Args, Result<None, ?>> {
     public static class Args implements Serializable {
         public final ResourcePath projectDir;
         public final ResourcePath mainFile;
@@ -68,7 +68,7 @@ public class StrategoCompile implements TaskDef<StrategoCompile.Args, Result<Non
 
     private final StrIncr strIncr;
 
-    @Inject public StrategoCompile(StrIncr strIncr) {
+    @Inject public StrategoCompileToJava(StrIncr strIncr) {
         this.strIncr = strIncr;
     }
 

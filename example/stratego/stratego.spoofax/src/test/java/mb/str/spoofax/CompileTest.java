@@ -8,7 +8,7 @@ import mb.pie.task.java.CompileJava;
 import mb.pie.task.java.CreateJar;
 import mb.resource.ResourceKey;
 import mb.resource.fs.FSResource;
-import mb.str.spoofax.task.StrategoCompile;
+import mb.str.spoofax.task.StrategoCompileToJava;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -47,7 +47,7 @@ class CompileTest extends TestBase {
 
         try(final MixedSession session = newSession()) {
             // Compile Stratego source files to Java source files.
-            final Task<Result<None, ?>> strategoCompileTask = compile.createTask(new StrategoCompile.Args(
+            final Task<Result<None, ?>> strategoCompileTask = compile.createTask(new StrategoCompileToJava.Args(
                 strategoSourceDir.getPath(),
                 strategoMainFile.getPath(),
                 createList(strategoSourceDir.getPath()),
