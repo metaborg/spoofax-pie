@@ -6,5 +6,5 @@ import mb.statix.multilang.MultiLangAnalysisException;
 import java.util.Collection;
 
 public interface ContextPieManager extends ContextDataManager {
-    Pie buildPieForLanguages(Collection<LanguageId> languages) throws MultiLangAnalysisException;
+    Pie buildPieForContext() throws MultiLangAnalysisException;
 }

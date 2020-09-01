@@ -50,7 +50,7 @@ public abstract class SpoofaxCompletionContributor extends CompletionContributor
     protected SpoofaxCompletionContributor(IntellijLanguageComponent languageComponent) {
         this.resourceRegistry = SpoofaxPlugin.getComponent().getResourceRegistry();
         this.languageInstance = languageComponent.getLanguageInstance();
-        this.pieSessionProvider = () -> languageComponent.getPieProvider().getPie(null).newSession();
+        this.pieSessionProvider = () -> languageComponent.getPie().newSession();
 
     }
 

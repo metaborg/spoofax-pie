@@ -1,10 +1,11 @@
 package mb.statix.multilang.eclipse;
 
+import dagger.Lazy;
 import mb.log.api.Logger;
 import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
+import mb.pie.api.Pie;
 import mb.pie.api.TopDownSession;
-import mb.spoofax.core.pie.PieProvider;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.pie.PieRunner;
@@ -20,7 +21,7 @@ public class UpdateAnalysisConfigChangeListener implements ConfigChangeListener 
         .create(UpdateAnalysisConfigChangeListener.class);
 
     private final PieRunner pieRunner = SpoofaxPlugin.getComponent().getPieRunner();
-    private final PieProvider pieProvider;
+    private final Lazy<Pie> pieProvider;
     private final EclipseLanguageComponent languageComponent;
 
     public UpdateAnalysisConfigChangeListener(EclipseLanguageComponent languageComponent) {
@@ -31,7 +32,7 @@ public class UpdateAnalysisConfigChangeListener implements ConfigChangeListener 
     @Override
     public void configChanged(IProject project, @Nullable IProgressMonitor monitor) {
         final EclipseResourcePath projectPath = new EclipseResourcePath(project.getFullPath());
-        try(MixedSession session = pieProvider.getPie(projectPath).newSession()) {
+        try(MixedSession session = pieProvider.get().newSession()) {
             TopDownSession postSession = session.updateAffectedBy(Collections.singleton(projectPath));
             pieRunner.requireCheck(project, monitor, postSession, languageComponent).update(project, null, monitor);
         } catch(InterruptedException | ExecException e) {
