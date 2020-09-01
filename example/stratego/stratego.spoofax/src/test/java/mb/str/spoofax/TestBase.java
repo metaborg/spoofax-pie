@@ -43,7 +43,7 @@ public class TestBase {
         .platformComponent(platformComponent)
         .build();
     public final StrategoParse parse = languageComponent.getStrategoParse();
-    public final Pie pie = languageComponent.getPieProvider().getPie(null);
+    public final Pie pie = languageComponent.getPie();
 
 
     public FSResource createTextFile(String text, String relativePath) throws IOException {

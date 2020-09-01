@@ -57,7 +57,7 @@ class TestBase {
     final Sdf3Desugar desugar = languageComponent.getDesugar();
     final Sdf3CreateSpec createSpec = languageComponent.getCreateSpec();
     final Sdf3AnalyzeMulti analyze = languageComponent.getAnalyze();
-    final Pie pie = languageComponent.getPieProvider().getPie(null);
+    final Pie pie = languageComponent.getPie();
 
 
     FSResource createTextFile(String text, String relativePath) throws IOException {
