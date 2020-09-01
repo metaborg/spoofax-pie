@@ -65,7 +65,7 @@ public class SpecLoaderTest {
         assertEquals(1, rules.getRules("imported!rule").size());
     }
 
-    @Test void loadIncompatibleSpecs() throws IOException, SpecLoadException {
+    @Test void loadIncompatibleSpecs() throws SpecLoadException {
         final ClassLoaderResource root1 = resourceRegistry
             .getResource(new DefaultResourceKeyString("mb/statix/multilang/base"));
         SpecBuilder specBuilder1 = SpecUtils

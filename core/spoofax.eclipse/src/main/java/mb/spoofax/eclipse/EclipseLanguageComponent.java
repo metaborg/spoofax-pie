@@ -1,7 +1,5 @@
 package mb.spoofax.eclipse;
 
-import dagger.Lazy;
-import mb.pie.api.Pie;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.eclipse.job.LockRule;
@@ -16,6 +14,4 @@ public interface EclipseLanguageComponent extends LanguageComponent {
     @Named("StartupWriteLock") LockRule startupWriteLockRule();
 
     ReadLockRule startupReadLockRule();
-
-    Lazy<Pie> getPieProvider(); // TODO: Remove
 }
