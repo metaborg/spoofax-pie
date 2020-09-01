@@ -336,7 +336,7 @@ public class StrategoIOAgent extends IOAgent {
             if(!resource.exists() || !resource.isDirectory()) {
                 return new String[0];
             }
-            return resource.list().map(c -> resource.getKey().relativize(c.getKey()).toString()).toArray(String[]::new);
+            return resource.list().map(c -> resource.getKey().relativize(c.getKey())).toArray(String[]::new);
         } catch(IOException e) {
             throw new RuntimeException("Could not list contents of directory " + resource, e);
         }

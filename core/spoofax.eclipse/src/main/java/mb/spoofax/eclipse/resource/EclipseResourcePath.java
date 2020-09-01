@@ -1,7 +1,6 @@
 package mb.spoofax.eclipse.resource;
 
 import mb.resource.ResourceRuntimeException;
-import mb.resource.fs.FSPath;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.ResourcePathDefaults;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -106,7 +105,7 @@ public class EclipseResourcePath extends ResourcePathDefaults<EclipseResourcePat
         return this;
     }
 
-    @Override public EclipseResourcePath relativize(ResourcePath other) {
+    @Override public String relativize(ResourcePath other) {
         if(!(other instanceof EclipseResourcePath)) {
             throw new ResourceRuntimeException(
                 "Cannot relativize against '" + other + "', it is not an EclipseResourceKey");
@@ -114,19 +113,7 @@ public class EclipseResourcePath extends ResourcePathDefaults<EclipseResourcePat
         return relativize((EclipseResourcePath)other);
     }
 
-    public EclipseResourcePath relativize(EclipseResourcePath other) {
-        return new EclipseResourcePath(path.makeRelativeTo(other.path));
-    }
-
-    @Override public String relativizeToString(ResourcePath other) {
-        if(!(other instanceof EclipseResourcePath)) {
-            throw new ResourceRuntimeException(
-                "Cannot relativize against '" + other + "', it is not an EclipseResourceKey");
-        }
-        return relativizeToString((EclipseResourcePath)other);
-    }
-
-    public String relativizeToString(EclipseResourcePath other) {
+    public String relativize(EclipseResourcePath other) {
         return path.makeRelativeTo(other.path).toPortableString();
     }
 
