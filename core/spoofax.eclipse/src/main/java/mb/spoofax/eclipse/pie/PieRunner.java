@@ -69,6 +69,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 @Singleton
 public class PieRunner {
@@ -206,7 +207,7 @@ public class PieRunner {
     ) throws ExecException, InterruptedException, CoreException, IOException {
         logger.trace("Running incremental build for project '{}'", project);
 
-        final ResourceChanges resourceChanges = new ResourceChanges(delta, languageComponent.getLanguageInstance().getFileExtensions());
+        final ResourceChanges resourceChanges = new ResourceChanges(delta);
         bottomUpWorkspaceUpdate = workspaceUpdateFactory.create(languageComponent);
         try(final MixedSession session = languageComponent.getPie().newSession()) {
             final TopDownSession afterSession = updateAffectedBy(resourceChanges.changed, session, monitor);
@@ -477,7 +478,24 @@ public class PieRunner {
             walkProject(project, extensions);
         }
 
+        ResourceChanges(IResourceDelta delta) throws CoreException {
+            walkDelta(delta, path -> true);
+        }
+
         ResourceChanges(IResourceDelta delta, SetView<String> extensions) throws CoreException {
+            walkDelta(delta, path -> {
+                final @Nullable String extension = path.getLeafExtension();
+                return extension != null && extensions.contains(extension);
+            });
+        }
+
+        ResourceChanges(IProject eclipseProject, SetView<String> extensions, EclipseResourceRegistry resourceRegistry) throws IOException {
+            final EclipseResource project = new EclipseResource(resourceRegistry, eclipseProject);
+            newProjects.add(project.getKey());
+            walkProject(project, extensions);
+        }
+
+        private void walkDelta(IResourceDelta delta, Predicate<ResourcePath> filePredicate) throws CoreException {
             delta.accept((d) -> {
                 final int kind = d.getKind();
                 final boolean added = kind == IResourceDelta.ADDED;
@@ -506,8 +524,7 @@ public class PieRunner {
                         }
                         break;
                     case IResource.FILE:
-                        final @Nullable String extension = path.getLeafExtension();
-                        if(extension != null && extensions.contains(extension)) {
+                        if(filePredicate.test(path)) {
                             if(added) {
                                 newFiles.add(path);
                             } else if(removed) {
@@ -519,13 +536,6 @@ public class PieRunner {
                 return true;
             });
         }
-
-        ResourceChanges(IProject eclipseProject, SetView<String> extensions, EclipseResourceRegistry resourceRegistry) throws IOException {
-            final EclipseResource project = new EclipseResource(resourceRegistry, eclipseProject);
-            newProjects.add(project.getKey());
-            walkProject(project, extensions);
-        }
-
 
         private void walkProject(EclipseResource project, SetView<String> extensions) throws IOException {
             changed.add(project.getKey());

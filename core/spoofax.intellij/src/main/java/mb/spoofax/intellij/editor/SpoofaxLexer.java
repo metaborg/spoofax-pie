@@ -21,7 +21,6 @@ import mb.resource.ReadableResource;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
 import mb.spoofax.core.language.LanguageInstance;
-import mb.spoofax.core.pie.PieProvider;
 import mb.spoofax.intellij.ScopeNames;
 import mb.spoofax.intellij.psi.SpoofaxTokenTypeManager;
 import org.checkerframework.checker.nullness.qual.Nullable;
