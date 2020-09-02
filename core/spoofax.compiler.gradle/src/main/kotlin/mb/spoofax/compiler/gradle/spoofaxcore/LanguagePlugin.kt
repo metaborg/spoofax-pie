@@ -123,13 +123,23 @@ open class LanguageProjectSettings(
 
     return LanguageProjectFinalized(shared, input, Compilers())
   }
+
+  fun addStatixDependencies(statixDependencies: List<Project>) {
+    statixDependencies.forEach {
+      val ext : LanguageProjectExtension = it.extensions.getByType()
+      val factory = ext.settingsFinalized.input.multilangAnalyzer().get().specConfigFactory()
+      this.multilangAnalyzer?.addDependencyFactories(factory)
+    }
+  }
 }
 
 open class LanguageProjectExtension(project: Project) {
+  val statixDependencies: Property<List<Project>> = project.objects.property()
   val settings: Property<LanguageProjectSettings> = project.objects.property()
 
   init {
     settings.convention(LanguageProjectSettings())
+    statixDependencies.convention(listOf())
   }
 
   companion object {
@@ -137,13 +147,32 @@ open class LanguageProjectExtension(project: Project) {
     private const val name = "Spoofax language project"
   }
 
-  internal val finalized: LanguageProjectFinalized by lazy {
+  internal val settingsFinalized: LanguageProjectFinalized by lazy {
     project.logger.debug("Finalizing $name settings in $project")
     settings.finalizeValue()
     if(!settings.isPresent) {
       throw GradleException("$name settings in $project have not been set")
     }
-    settings.get().finalize(project)
+    val settings = settings.get()
+    val statixDependencies = statixDependenciesFinalized
+
+    if(settings.multilangAnalyzer == null) {
+      if(statixDependencies.isNotEmpty()) {
+        project.logger.warn("Statix dependencies given, but no multilang analyzer configuration set. Ignoring statix dependencies")
+      }
+    } else {
+      settings.addStatixDependencies(statixDependencies)
+    }
+    settings.finalize(project)
+  }
+
+  internal val statixDependenciesFinalized: List<Project> by lazy {
+    project.logger.debug("Finalizing $name statix dependencies in $project")
+    statixDependencies.finalizeValue()
+    if(!statixDependencies.isPresent) {
+      throw GradleException("$name statix dependencies in $project have not been set")
+    }
+    statixDependencies.get()
   }
 }
 
@@ -156,7 +185,10 @@ internal class LanguageProjectFinalized(
   val compiler = compilers.languageProjectCompiler
 }
 
-internal fun Project.whenLanguageProjectFinalized(closure: () -> Unit) = whenFinalized<LanguageProjectExtension>(closure)
+internal fun Project.whenLanguageProjectFinalized(closure: () -> Unit) = whenFinalized<LanguageProjectExtension> {
+  val extension : LanguageProjectExtension = extensions.getByType()
+  extension.statixDependenciesFinalized.whenDependenciesFinalized(closure)
+}
 
 @Suppress("unused")
 open class LanguagePlugin : Plugin<Project> {
@@ -168,7 +200,9 @@ open class LanguagePlugin : Plugin<Project> {
     project.plugins.apply("org.metaborg.spoofax.gradle.base")
 
     project.afterEvaluate {
-      configure(project, extension.finalized)
+      extension.statixDependenciesFinalized.whenDependenciesFinalized {
+        configure(project, extension.settingsFinalized)
+      }
     }
   }
 
@@ -258,5 +292,18 @@ open class LanguagePlugin : Plugin<Project> {
       }
     }
     project.tasks.getByName(JavaPlugin.TEST_CLASSES_TASK_NAME).dependsOn(copyTestTask)
+  }
+}
+
+private fun List<Project>.whenDependenciesFinalized(closure: () -> Unit) {
+  if(isEmpty()) {
+    // No dependencies to wait for, so execute immediately
+    closure()
+  }
+  else {
+    // After first project in list is finalized, invoke wait for the others
+    get(0).whenLanguageProjectFinalized {
+      drop(1).whenDependenciesFinalized(closure)
+    }
   }
 }

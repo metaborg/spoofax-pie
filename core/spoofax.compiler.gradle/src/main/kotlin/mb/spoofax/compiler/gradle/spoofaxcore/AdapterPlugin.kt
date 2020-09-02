@@ -25,7 +25,7 @@ open class AdapterProjectSettings(
 ) {
   internal fun finalize(project: Project, languageProject: Project): AdapterProjectFinalized {
     val languageProjectExtension: LanguageProjectExtension = languageProject.extensions.getByType()
-    val languageProjectFinalized = languageProjectExtension.finalized
+    val languageProjectFinalized = languageProjectExtension.settingsFinalized
     val shared = languageProjectFinalized.shared
     val languageProjectCompilerInput = languageProjectFinalized.input
 
@@ -138,7 +138,10 @@ internal class AdapterProjectFinalized(
   val compiler = compilers.adapterProjectCompiler
 }
 
-internal fun Project.whenAdapterProjectFinalized(closure: () -> Unit) = whenFinalized<AdapterProjectExtension>(closure)
+internal fun Project.whenAdapterProjectFinalized(closure: () -> Unit) = whenFinalized<AdapterProjectExtension> {
+  val extension : AdapterProjectExtension = extensions.getByType()
+  extension.languageProjectFinalized.whenLanguageProjectFinalized(closure)
+}
 
 @Suppress("unused")
 open class AdapterPlugin : Plugin<Project> {
