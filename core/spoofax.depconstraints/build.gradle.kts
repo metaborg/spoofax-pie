@@ -6,12 +6,12 @@ plugins {
 val logVersion = "0.3.0"
 val slf4jVersion = "1.7.30"
 val resourceVersion = "0.7.3"
-val pieVersion = "0.12.1"
-val spoofax2Version = "2.5.10" // Needs to be kept in sync with metaborgVersion of Spoofax 2 Gradle plugin.
-val picocliVersion = "4.0.4"
+val pieVersion = "0.12.2"
+val spoofax2Version = "2.5.11" // Needs to be kept in sync with metaborgVersion of Spoofax 2 Gradle plugin.
+val picocliVersion = "4.5.0"
 
 val javaxInjectVersion = "1"
-val checkerframeworkVersion = "3.0.0"
+val checkerframeworkVersion = "3.6.0"
 
 val daggerVersion = "2.27"
 val derive4jVersion = "1.1.1"
@@ -61,6 +61,7 @@ dependencies {
     api("org.metaborg:pie.api:$pieVersion")
     api("org.metaborg:pie.runtime:$pieVersion")
     api("org.metaborg:pie.dagger:$pieVersion")
+    api("org.metaborg:pie.task.java:$pieVersion")
     /// Spoofax 2
     api("org.metaborg:org.spoofax.terms:$spoofax2Version")
     api("org.metaborg:org.spoofax.jsglr:$spoofax2Version")
@@ -99,7 +100,7 @@ dependencies {
 
 
     // Test dependencies // TODO: should be in a separate platform?
-    api("org.junit.jupiter:junit-jupiter-api:5.2.0")
+    api("org.junit.jupiter:junit-jupiter-api:5.3.1")
     api("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
     api("com.google.jimfs:jimfs:1.1")
     api("nl.jqno.equalsverifier:equalsverifier:3.1.12")

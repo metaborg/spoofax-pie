@@ -2,8 +2,6 @@ package mb.spoofax.eclipse.resource;
 
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
-import mb.resource.QualifiedResourceKeyString;
-import mb.resource.Resource;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceKeyString;
 import mb.resource.ResourceRegistry;
@@ -12,7 +10,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Singleton
@@ -44,14 +41,6 @@ public class EclipseDocumentResourceRegistry implements ResourceRegistry {
     }
 
 
-    @Override public Resource getResource(Serializable id) {
-        if(!(id instanceof String)) {
-            throw new ResourceRuntimeException(
-                "Cannot get Eclipse document resource with ID '" + id + "'; the ID is not of type String");
-        }
-        return getResource((String)id);
-    }
-
     @Override public ResourceKey getResourceKey(ResourceKeyString keyStr) {
         if(!keyStr.qualifierMatchesOrMissing(qualifier)) {
             throw new ResourceRuntimeException("Qualifier of '" + keyStr + "' does not match qualifier '" + qualifier + "' of this resource registry");
@@ -59,14 +48,21 @@ public class EclipseDocumentResourceRegistry implements ResourceRegistry {
         return new EclipseDocumentKey(keyStr.getId());
     }
 
-    @Override public Resource getResource(ResourceKeyString keyStr) {
-        if(!keyStr.qualifierMatchesOrMissing(qualifier)) {
-            throw new ResourceRuntimeException("Qualifier of '" + keyStr + "' does not match qualifier '" + qualifier + "' of this resource registry");
+    @Override public EclipseDocumentResource getResource(ResourceKey key) {
+        if(!(key instanceof EclipseDocumentKey)) {
+            throw new ResourceRuntimeException(
+                "Cannot get Eclipse document resource for key '" + key + "'; it is not of type EclipseDocumentKey");
         }
-        return getResource(keyStr.getId());
+        final EclipseDocumentKey eclipseDocumentKey = (EclipseDocumentKey)key;
+        final @Nullable EclipseDocumentResource resource = resources.get(eclipseDocumentKey.getId());
+        if(resource != null) {
+            return resource;
+        } else {
+            throw new ResourceRuntimeException("Cannot get Eclipse document resource for key '" + key + "', it does not exist");
+        }
     }
 
-    public Resource getResource(String id) {
+    public EclipseDocumentResource getResource(String id) {
         final @Nullable EclipseDocumentResource resource = resources.get(id);
         if(resource != null) {
             return resource;
@@ -75,19 +71,10 @@ public class EclipseDocumentResourceRegistry implements ResourceRegistry {
         }
     }
 
-    @Override public QualifiedResourceKeyString toResourceKeyString(Serializable id) {
-        if(!(id instanceof String)) {
-            throw new ResourceRuntimeException(
-                "Cannot convert ID '" + id + "' to its string representation; it is not of type String");
+    @Override public EclipseDocumentResource getResource(ResourceKeyString keyStr) {
+        if(!keyStr.qualifierMatchesOrMissing(qualifier)) {
+            throw new ResourceRuntimeException("Qualifier of '" + keyStr + "' does not match qualifier '" + qualifier + "' of this resource registry");
         }
-        return QualifiedResourceKeyString.of(qualifier, (String)id);
-    }
-
-    @Override public String toString(Serializable id) {
-        if(!(id instanceof String)) {
-            throw new ResourceRuntimeException(
-                "Cannot convert ID '" + id + "' to its string representation; it is not of type String");
-        }
-        return QualifiedResourceKeyString.toString(qualifier, (String)id);
+        return getResource(keyStr.getId());
     }
 }

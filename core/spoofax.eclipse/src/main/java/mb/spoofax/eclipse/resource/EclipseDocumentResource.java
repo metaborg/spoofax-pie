@@ -20,10 +20,14 @@ public class EclipseDocumentResource implements ReadableResource, WrapsEclipseRe
     private final @Nullable EclipseResource file;
 
 
-    public EclipseDocumentResource(IDocument document, String id) {
+    public EclipseDocumentResource(IDocument document, EclipseDocumentKey key) {
         this.document = document;
-        this.key = new EclipseDocumentKey(id);
+        this.key = key;
         this.file = null;
+    }
+
+    public EclipseDocumentResource(IDocument document, String id) {
+        this(document, new EclipseDocumentKey(id));
     }
 
     public EclipseDocumentResource(IDocument document, IFile file, EclipseResourceRegistry resourceRegistry) {

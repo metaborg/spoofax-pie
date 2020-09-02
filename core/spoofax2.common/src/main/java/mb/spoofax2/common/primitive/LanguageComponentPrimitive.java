@@ -26,7 +26,7 @@ public class LanguageComponentPrimitive extends ASpoofaxContextPrimitive {
         final IStrategoString groupIdTerm = termFactory.makeString(context.languageGroupId);
         final IStrategoString idTerm = termFactory.makeString(context.languageId);
         final IStrategoString versionTerm = termFactory.makeString(context.languageVersion);
-        final IStrategoString locationTerm = termFactory.makeString(context.languagePathString.toString());
+        final IStrategoString locationTerm = termFactory.makeString(context.languagePath.asString());
         final IStrategoTuple tuple = termFactory.makeTuple(groupIdTerm, idTerm, versionTerm, locationTerm);
         return termFactory.makeListCons(tuple, termFactory.makeList());
     }

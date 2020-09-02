@@ -1,7 +1,7 @@
 package mb.spoofax.intellij.resource;
 
-import mb.resource.QualifiedResourceKeyString;
 import mb.resource.ResourceKey;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class IntellijResourceKey implements ResourceKey {
     private final String url;
@@ -20,8 +20,12 @@ public class IntellijResourceKey implements ResourceKey {
         return url;
     }
 
+    @Override public String getIdAsString() {
+        return url;
+    }
 
-    @Override public boolean equals(Object o) {
+
+    @Override public boolean equals(@Nullable Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         final IntellijResourceKey that = (IntellijResourceKey)o;
@@ -33,6 +37,6 @@ public class IntellijResourceKey implements ResourceKey {
     }
 
     @Override public String toString() {
-        return QualifiedResourceKeyString.toString(IntellijResourceRegistry.qualifier, url);
+        return asString();
     }
 }

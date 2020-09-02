@@ -33,8 +33,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
 import java.time.Instant;
+import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.stream.Stream;
 
 import static org.eclipse.core.resources.IResourceStatus.RESOURCE_EXISTS;
@@ -423,10 +425,14 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
     }
 
     @Override public EclipseResource createParents() throws IOException {
+        final Deque<IContainer> containers = new ArrayDeque<>();
         IContainer parent = getResource().getParent();
         while(parent != null) {
-            createDirectory(parent);
+            containers.push(parent);
             parent = parent.getParent();
+        }
+        for(IContainer container : containers) {
+            createDirectory(container);
         }
         return this;
     }
@@ -435,12 +441,18 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
         try {
             if(container instanceof IFolder) {
                 final IFolder folder = (IFolder)container;
-                folder.create(true, true, null);
+                if(!folder.exists()) {
+                    folder.create(true, true, null);
+                }
                 return;
             } else if(container instanceof IProject) {
                 final IProject project = (IProject)container;
-                project.create(null);
+                if(!project.exists()) {
+                    project.create(null);
+                }
                 return;
+            } else if(container instanceof IWorkspaceRoot) {
+                return; // Ignore; workspace root always exists.
             }
         } catch(CoreException e) {
             throw new IOException("Creating directory '" + container + "' failed unexpectedly", e);
@@ -534,7 +546,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
     }
 
 
-    @Override public boolean equals(Object o) {
+    @Override public boolean equals(@Nullable Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         final EclipseResource that = (EclipseResource)o;

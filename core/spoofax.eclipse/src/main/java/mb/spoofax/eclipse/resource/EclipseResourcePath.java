@@ -51,6 +51,10 @@ public class EclipseResourcePath extends ResourcePathDefaults<EclipseResourcePat
         return pathString;
     }
 
+    @Override public String getIdAsString() {
+        return pathString;
+    }
+
 
     @Override public boolean isAbsolute() {
         return path.isAbsolute();
@@ -63,6 +67,18 @@ public class EclipseResourcePath extends ResourcePathDefaults<EclipseResourcePat
 
     @Override public Iterable<String> getSegments() {
         return Arrays.asList(path.segments());
+    }
+
+
+    @Override public boolean startsWith(ResourcePath prefix) {
+        if(!(prefix instanceof EclipseResourcePath)) {
+            throw new ResourceRuntimeException("Cannot check if this path starts with '" + prefix + "', it is not an EclipseResourcePath");
+        }
+        return startsWith((EclipseResourcePath)prefix);
+    }
+
+    public boolean startsWith(EclipseResourcePath prefix) {
+        return prefix.path.isPrefixOf(path);
     }
 
 
@@ -89,7 +105,7 @@ public class EclipseResourcePath extends ResourcePathDefaults<EclipseResourcePat
         return this;
     }
 
-    @Override public EclipseResourcePath relativize(ResourcePath other) {
+    @Override public String relativize(ResourcePath other) {
         if(!(other instanceof EclipseResourcePath)) {
             throw new ResourceRuntimeException(
                 "Cannot relativize against '" + other + "', it is not an EclipseResourceKey");
@@ -97,19 +113,7 @@ public class EclipseResourcePath extends ResourcePathDefaults<EclipseResourcePat
         return relativize((EclipseResourcePath)other);
     }
 
-    public EclipseResourcePath relativize(EclipseResourcePath other) {
-        return new EclipseResourcePath(path.makeRelativeTo(other.path));
-    }
-
-    @Override public String relativizeToString(ResourcePath other) {
-        if(!(other instanceof EclipseResourcePath)) {
-            throw new ResourceRuntimeException(
-                "Cannot relativize against '" + other + "', it is not an EclipseResourceKey");
-        }
-        return relativizeToString((EclipseResourcePath)other);
-    }
-
-    public String relativizeToString(EclipseResourcePath other) {
+    public String relativize(EclipseResourcePath other) {
         return path.makeRelativeTo(other.path).toPortableString();
     }
 
@@ -187,7 +191,7 @@ public class EclipseResourcePath extends ResourcePathDefaults<EclipseResourcePat
     }
 
 
-    @Override public boolean equals(Object o) {
+    @Override public boolean equals(@Nullable Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         final EclipseResourcePath that = (EclipseResourcePath)o;
@@ -199,7 +203,7 @@ public class EclipseResourcePath extends ResourcePathDefaults<EclipseResourcePat
     }
 
     @Override public String toString() {
-        return pathString;
+        return asString();
     }
 
 
