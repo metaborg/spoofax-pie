@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 /**
  * A partial specification (for which dependent specifications are not resolved yet).
+ * Usually, there is one SpecFragment per language (or interface).
  */
 @Value.Immutable
 public interface SpecFragment {
@@ -25,14 +26,17 @@ public interface SpecFragment {
         return modules().stream().map(Module::moduleName).collect(Collectors.toSet());
     }
 
-    @Value.Lazy default Spec toSpec() throws SpecLoadException {
+    default Spec toSpec() throws SpecLoadException {
+        return toSpecResult().unwrap();
+    }
+
+    @Value.Lazy default Result<Spec, SpecLoadException> toSpecResult() {
         return modules()
             .stream()
             .map(Module::toSpecResult)
             .reduce(SpecUtils::mergeSpecs)
             // Cannot occur when check holds
-            .orElse(Result.ofErr(new SpecLoadException("Bug: No modules in spec fragment")))
-            .unwrap();
+            .orElse(Result.ofErr(new SpecLoadException("Bug: No modules in spec fragment")));
     }
 
     @Value.Check default void checkNotEmpty() {

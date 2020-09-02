@@ -143,9 +143,7 @@ public abstract class AnalysisContextService implements LanguageMetadataManager,
 
     private Result<Spec, SpecLoadException> toSpec(Set<SpecFragment> specFragments) {
         return specFragments.stream()
-            .map(SpecFragment::modules)
-            .flatMap(Set::stream)
-            .map(Module::toSpecResult)
+            .map(SpecFragment::toSpecResult)
             .reduce(SpecUtils::mergeSpecs)
             // When check holds, this orElse call will never be executed
             .orElse(Result.ofErr(new SpecLoadException("Bug: Tried to build spec from 0 fragments")))
@@ -163,7 +161,8 @@ public abstract class AnalysisContextService implements LanguageMetadataManager,
 
     private Result<Set<SpecFragmentId>, SpecLoadException> getRequiredFragments(LanguageId... languageIds) {
         return Stream.of(languageIds)
-            .map(languageId -> new SpecFragmentId(languageId.getId()))
+            .map(LanguageId::getId)
+            .map(SpecFragmentId::new)
             .map(this::getRequiredFragments)
             .collect(ResultCollector.getWithBaseException(new SpecLoadException("Error computing spec dependencies for " + Arrays.toString(languageIds))))
             .map(sets -> sets.stream().flatMap(Set::stream).collect(Collectors.toCollection(HashSet::new)));
@@ -177,7 +176,7 @@ public abstract class AnalysisContextService implements LanguageMetadataManager,
                 .collect(ResultCollector.getWithBaseException(new SpecLoadException("Error computing spec dependencies for " + specFragmentId)))
                 .map(sets -> {
                     final HashSet<SpecFragmentId> result = new HashSet<>(Collections.singleton(specFragmentId));
-                    result.addAll(sets.stream().flatMap(Set::stream).collect(Collectors.toCollection(HashSet::new)));
+                    sets.forEach(result::addAll);
                     return result;
                 });
         }
@@ -200,7 +199,5 @@ public abstract class AnalysisContextService implements LanguageMetadataManager,
                 throw new IllegalStateException(String.format("Spec %1$s has a dependency on %2$s, but no config for %2$s is found.", specId, depId ));
             }
         }));
-
-        // TODO: check for cyclic dependencies?
     }
 }
