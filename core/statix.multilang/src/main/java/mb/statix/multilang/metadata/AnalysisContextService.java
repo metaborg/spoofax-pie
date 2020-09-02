@@ -90,7 +90,7 @@ public abstract class AnalysisContextService implements LanguageMetadataManager,
 
     @Override public Result<Spec, SpecLoadException> getSpecResult(LanguageId... languageIds) {
         Result<Set<SpecFragmentId>, SpecLoadException> fragmentIds = getRequiredFragments(languageIds);
-        return fragmentIds.flatMap(ids -> ids.stream().map(id -> specConfigs().get(id))
+        return fragmentIds.flatMap(ids -> ids.stream().map(specConfigs()::get)
             .map(SpecConfig::load)
             .collect(ResultCollector.getWithBaseException(new SpecLoadException("Error loading base exception")))
             .flatMap(fragments -> this.validateIntegrity(fragments, ids))
@@ -128,14 +128,14 @@ public abstract class AnalysisContextService implements LanguageMetadataManager,
             return Result.ofOk(specFragments);
         }
 
-        StringBuilder errorMessage = new StringBuilder(String.format("Specs from %s cannot be combined%n", ids));
+        StringBuilder errorMessage = new StringBuilder(String.format("Specs from %s cannot be combined", ids));
 
         if(!unresolvedModules.isEmpty()) {
-            errorMessage.append(String.format("- The following imported modules are not resolved: %s%n", unresolvedModules));
+            errorMessage.append(String.format("%n- The following imported modules are not resolved: %s", unresolvedModules));
         }
 
         if(!duplicatedModules.isEmpty()) {
-            errorMessage.append(String.format("- The following modules are included multiple times: %s%n", duplicatedModules));
+            errorMessage.append(String.format("%n- The following modules are included multiple times: %s", duplicatedModules));
         }
 
         return Result.ofErr(new SpecLoadException(errorMessage.toString()));
