@@ -28,7 +28,7 @@ spoofaxLanguageProject {
 
     builder = run {
       val builder = LanguageProjectCompiler.Input.builder()
-      builder.languageSpecificationDependency(GradleDependency.module("org.metaborg:org.metaborg.meta.lang.stratego:2.5.10"))
+      builder.languageSpecificationDependency(GradleDependency.module("org.metaborg:org.metaborg.meta.lang.stratego:2.5.11"))
       builder
     }
   ))

@@ -343,7 +343,7 @@ public class AdapterProjectCompiler {
 
         List<MenuItemRepr> editorContextMenuItems();
 
-        default boolean isMultiFile() {
+        @Value.Default default boolean isMultiFile() {
             return constraintAnalyzer().map(a -> a.languageProjectInput().multiFile()).orElse(false);
         }
 

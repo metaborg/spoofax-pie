@@ -210,22 +210,22 @@ public interface Result<T, E extends Exception> extends Serializable {
             .unwrapOrElse(() -> (Result<T, F>)this);
     }
 
-    default <F extends Exception> F mapErrOr(Function<? super E, ? extends F> mapper, F def) {
+    default <F> F mapErrOr(Function<? super E, ? extends F> mapper, F def) {
         return err().mapOr(mapper, def);
     }
 
-    default <F extends Exception> @Nullable F mapErrOrNull(Function<? super E, ? extends F> mapper) {
+    default <F> @Nullable F mapErrOrNull(Function<? super E, ? extends F> mapper) {
         return err().mapOrNull(mapper);
     }
 
-    default <F extends Exception> F mapErrOrElse(
+    default <F> F mapErrOrElse(
         Function<? super E, ? extends F> mapper,
         Supplier<? extends F> def
     ) {
         return err().mapOrElse(mapper, def);
     }
 
-    default <F extends Exception> F mapErrOrElse(
+    default <F> F mapErrOrElse(
         Function<? super E, ? extends F> mapper,
         Function<? super T, ? extends F> def
     ) {

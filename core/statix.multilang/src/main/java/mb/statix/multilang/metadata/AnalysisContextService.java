@@ -70,18 +70,18 @@ public abstract class AnalysisContextService implements LanguageMetadataManager,
         return defaultLanguageContexts().getOrDefault(languageId, new ContextId(languageId.getId()));
     }
 
-    @Override public Pie buildPieForLanguages(Collection<LanguageId> languages) throws MultiLangAnalysisException {
-        if(languages.isEmpty()) {
-            throw new MultiLangAnalysisException("Cannot build combined Pie when no languages are supplied");
-        }
-
-        return languages.stream()
+    @Override public Pie buildPieForContext() throws MultiLangAnalysisException {
+        Pie[] languagePies = languageMetadataSuppliers().keySet().stream()
             .map(this::getLanguageMetadataResult)
-            .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("Error loading language metadata", false)))
-            .map(results -> platformPie().createChildBuilder(results.stream()
-                .map(LanguageMetadata::languagePie)
-                .toArray(Pie[]::new)).build())
-            .unwrap();
+            .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("Exception fetching language metadata")))
+            .unwrap()
+            .stream()
+            .map(LanguageMetadata::languagePie)
+            .toArray(Pie[]::new);
+
+        return platformPie()
+            .createChildBuilder(languagePies)
+            .build();
     }
 
     public static ImmutableAnalysisContextService.Builder builder() {

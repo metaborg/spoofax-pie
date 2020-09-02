@@ -31,8 +31,6 @@ public class MultiLangPlugin extends Plugin {
     private static @Nullable MultiLangPlugin plugin;
     private static @Nullable MultiLangEclipseComponent component;
 
-    private static @Nullable ConfigResourceChangeListener configResourceChangeListener;
-
     public static MultiLangPlugin getPlugin() {
         if(plugin == null) {
             throw new RuntimeException("Cannot access MultiLangPlugin instance; it has not been started yet, or has been stopped");
@@ -48,14 +46,6 @@ public class MultiLangPlugin extends Plugin {
         return component;
     }
 
-    public static ConfigResourceChangeListener getConfigResourceChangeListener() {
-        if(configResourceChangeListener == null) {
-            throw new RuntimeException(
-                "Cannot access MultiLangComponent; MultiLangPlugin has not been started yet, or has been stopped");
-        }
-        return configResourceChangeListener;
-    }
-
     @Override public void start(@NonNull BundleContext context) throws Exception {
         super.start(context);
         plugin = this;
@@ -66,19 +56,11 @@ public class MultiLangPlugin extends Plugin {
             .multiLangModule(new MultiLangModule(() -> initializeExtensionPoint(Platform.getExtensionRegistry())))
             .platformComponent(platformComponent)
             .build();
-
-        // Add listener to multilang.yaml files, which triggers analysis updates
-        configResourceChangeListener = new ConfigResourceChangeListener();
-        ResourcesPlugin.getWorkspace().addResourceChangeListener(configResourceChangeListener);
     }
 
     @Override public void stop(@NonNull BundleContext context) throws Exception {
         super.stop(context);
         plugin = null;
-        ResourcesPlugin.getWorkspace().removeResourceChangeListener(configResourceChangeListener);
-        if(configResourceChangeListener != null) {
-            configResourceChangeListener.clearDelegates();
-        }
     }
 
     private static AnalysisContextService initializeExtensionPoint(IExtensionRegistry registry) {

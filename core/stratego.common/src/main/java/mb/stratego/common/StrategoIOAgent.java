@@ -141,7 +141,7 @@ public class StrategoIOAgent extends IOAgent {
 
 
     @Override public String getWorkingDir() {
-        return resourceService.toString(workingDir.getKey());
+        return workingDir.getPath().asString();
     }
 
     public HierarchicalResource getWorkingDirResource() {
@@ -161,7 +161,7 @@ public class StrategoIOAgent extends IOAgent {
 
 
     @Override public String getDefinitionDir() {
-        return resourceService.toString(definitionDir.getKey());
+        return definitionDir.getPath().asString();
     }
 
     public HierarchicalResource getDefinitionDirResource() {
@@ -181,7 +181,7 @@ public class StrategoIOAgent extends IOAgent {
 
 
     @Override public String getTempDir() {
-        return resourceService.toString(tempDir.getKey());
+        return tempDir.getPath().asString();
     }
 
     public HierarchicalResource getTempDirResource() {
@@ -336,7 +336,7 @@ public class StrategoIOAgent extends IOAgent {
             if(!resource.exists() || !resource.isDirectory()) {
                 return new String[0];
             }
-            return resource.list().map(c -> resource.getKey().relativize(c.getKey()).toString()).toArray(String[]::new);
+            return resource.list().map(c -> resource.getKey().relativize(c.getKey())).toArray(String[]::new);
         } catch(IOException e) {
             throw new RuntimeException("Could not list contents of directory " + resource, e);
         }
@@ -387,9 +387,11 @@ public class StrategoIOAgent extends IOAgent {
     @Override public boolean mkdir(@NonNull String fn) {
         final HierarchicalResource resource = resourceService.appendOrReplaceWithHierarchical(workingDir, fn);
         try {
-            final boolean created = !resource.exists();
+            if(resource.exists() && resource.isDirectory()) {
+                return false;
+            }
             resource.createDirectory();
-            return created;
+            return true;
         } catch(IOException e) {
             throw new RuntimeException("Could not create directory " + resource, e);
         }

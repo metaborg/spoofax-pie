@@ -11,6 +11,8 @@ import mb.pie.api.Pie;
 import mb.pie.api.ResourceStringSupplier;
 import mb.pie.api.Supplier;
 import mb.pie.runtime.PieBuilderImpl;
+import mb.pie.task.java.CompileJava;
+import mb.pie.task.java.CreateJar;
 import mb.resource.Resource;
 import mb.resource.ResourceKey;
 import mb.resource.fs.FSResource;
@@ -18,12 +20,16 @@ import mb.resource.text.TextResource;
 import mb.resource.text.TextResourceRegistry;
 import mb.spoofax.core.platform.LoggerFactoryModule;
 import mb.spoofax.core.platform.PlatformPieModule;
+import mb.str.spoofax.task.StrategoAnalyze;
+import mb.str.spoofax.task.StrategoCompileToJava;
 import mb.str.spoofax.task.StrategoParse;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class TestBase {
     public final FileSystem fileSystem = Jimfs.newFileSystem(Configuration.unix());
@@ -43,13 +49,31 @@ public class TestBase {
         .platformComponent(platformComponent)
         .build();
     public final StrategoParse parse = languageComponent.getStrategoParse();
-    public final Pie pie = languageComponent.getPieProvider().getPie(null);
+    public final StrategoCompileToJava compile = languageComponent.getStrategoCompile();
+    public final StrategoAnalyze analyze = languageComponent.getStrategoAnalyze();
+    public final CompileJava compileJava = languageComponent.getCompileJava();
+    public final CreateJar createJar = languageComponent.getCreateJar();
+    public final Pie pie = languageComponent.getPie();
 
 
-    public FSResource createTextFile(String text, String relativePath) throws IOException {
+    @SafeVarargs public final <T> ArrayList<T> createList(T... items) {
+        final ArrayList<T> list = new ArrayList<>();
+        Collections.addAll(list, items);
+        return list;
+    }
+
+    public FSResource createDir(FSResource parent, String relativePath) throws IOException {
+        return parent.appendRelativePath(relativePath).createDirectory(true);
+    }
+
+    public FSResource createTextFile(FSResource rootDirectory, String text, String relativePath) throws IOException {
         final FSResource resource = rootDirectory.appendRelativePath(relativePath);
         resource.writeString(text, StandardCharsets.UTF_8);
         return resource;
+    }
+
+    public FSResource createTextFile(String text, String relativePath) throws IOException {
+        return createTextFile(this.rootDirectory, text, relativePath);
     }
 
     public TextResource createTextResource(String text, String id) {

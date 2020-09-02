@@ -1,6 +1,5 @@
 package mb.spoofax.eclipse.resource;
 
-import mb.resource.QualifiedResourceKeyString;
 import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IFile;
@@ -18,6 +17,7 @@ public class EclipseDocumentKey implements ResourceKey {
         this.id = file.getFullPath().toPortableString();
     }
 
+
     @Override public String getQualifier() {
         return EclipseDocumentResourceRegistry.qualifier;
     }
@@ -25,6 +25,11 @@ public class EclipseDocumentKey implements ResourceKey {
     @Override public String getId() {
         return id;
     }
+
+    @Override public String getIdAsString() {
+        return id;
+    }
+
 
     @Override public boolean equals(@Nullable Object obj) {
         if(this == obj) return true;
@@ -38,6 +43,6 @@ public class EclipseDocumentKey implements ResourceKey {
     }
 
     @Override public String toString() {
-        return QualifiedResourceKeyString.toString(EclipseDocumentResourceRegistry.qualifier, id);
+        return asString();
     }
 }

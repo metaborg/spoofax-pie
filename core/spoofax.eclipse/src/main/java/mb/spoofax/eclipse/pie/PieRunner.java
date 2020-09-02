@@ -27,7 +27,6 @@ import mb.spoofax.core.language.command.CommandContext;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.CommandRequest;
 import mb.spoofax.core.language.command.HierarchicalResourceType;
-import mb.spoofax.core.language.command.ResourcePathWithKind;
 import mb.spoofax.core.language.command.ShowFeedback;
 import mb.spoofax.core.language.command.arg.ArgConverters;
 import mb.spoofax.core.platform.Platform;
@@ -70,6 +69,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 @Singleton
 public class PieRunner {
@@ -120,10 +120,8 @@ public class PieRunner {
         resourceRegistry.putDocumentOverride(path, document);
 
         final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
-        final @Nullable EclipseResourcePath projectDir = project == null ? null :
-            new EclipseResourcePath(project);
 
-        try(final MixedSession session = languageComponent.getPieProvider().getPie(projectDir).newSession()) {
+        try(final MixedSession session = languageComponent.getPie().newSession()) {
             // First run a bottom-up build, to ensure that tasks affected by changed file are brought up-to-date.
             final HashSet<ResourceKey> changedResources = new HashSet<>();
             changedResources.add(path);
@@ -194,7 +192,7 @@ public class PieRunner {
         final ResourceChanges resourceChanges = new ResourceChanges(project, languageComponent.getLanguageInstance().getFileExtensions());
         resourceChanges.newProjects.add(project.getKey());
 
-        try(final MixedSession session = languageComponent.getPieProvider().getPie(project.getPath()).newSession()) {
+        try(final MixedSession session = languageComponent.getPie().newSession()) {
             final TopDownSession afterSession = updateAffectedBy(resourceChanges.changed, session, monitor);
             observeAndUnobserveAutoTransforms(languageComponent, resourceChanges, afterSession, monitor);
             observeAndUnobserveInspections(languageComponent, resourceChanges, afterSession, monitor);
@@ -209,11 +207,9 @@ public class PieRunner {
     ) throws ExecException, InterruptedException, CoreException, IOException {
         logger.trace("Running incremental build for project '{}'", project);
 
-        final ResourceChanges resourceChanges = new ResourceChanges(delta, languageComponent.getLanguageInstance().getFileExtensions());
+        final ResourceChanges resourceChanges = new ResourceChanges(delta);
         bottomUpWorkspaceUpdate = workspaceUpdateFactory.create(languageComponent);
-        EclipseResourcePath projectPath = new EclipseResourcePath(project);
-
-        try(final MixedSession session = languageComponent.getPieProvider().getPie(projectPath).newSession()) {
+        try(final MixedSession session = languageComponent.getPie().newSession()) {
             final TopDownSession afterSession = updateAffectedBy(resourceChanges.changed, session, monitor);
             observeAndUnobserveAutoTransforms(languageComponent, resourceChanges, afterSession, monitor);
             observeAndUnobserveInspections(languageComponent, resourceChanges, afterSession, monitor);
@@ -235,7 +231,7 @@ public class PieRunner {
         final ResourceChanges resourceChanges = new ResourceChanges(projectResource, languageComponent.getLanguageInstance().getFileExtensions());
         resourceChanges.newProjects.add(project);
         final AutoCommandRequests autoCommandRequests = new AutoCommandRequests(languageComponent); // OPTO: calculate once per language component
-        try(final MixedSession session = languageComponent.getPieProvider().getPie(project).newSession()) {
+        try(final MixedSession session = languageComponent.getPie().newSession()) {
             // Unobserve auto transforms.
             for(AutoCommandRequest<?> request : autoCommandRequests.project) {
                 final Task<CommandFeedback> task = request.createTask(CommandContext.ofProject(project), argConverters);
@@ -274,9 +270,8 @@ public class PieRunner {
     ) throws IOException, CoreException, ExecException, InterruptedException {
         for(IProject eclipseProject : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
             if(!eclipseProject.hasNature(languageComponent.getEclipseIdentifiers().getNature())) continue;
-            final EclipseResource project = new EclipseResource(resourceRegistry, eclipseProject);
             final ResourceChanges resourceChanges = new ResourceChanges(eclipseProject, languageComponent.getLanguageInstance().getFileExtensions(), resourceRegistry);
-            try(final MixedSession session = languageComponent.getPieProvider().getPie(project.getPath()).newSession()) {
+            try(final MixedSession session = languageComponent.getPie().newSession()) {
                 observeAndUnobserveAutoTransforms(languageComponent, resourceChanges, session, monitor);
                 observeAndUnobserveInspections(languageComponent, resourceChanges, session, monitor);
             }
@@ -308,18 +303,17 @@ public class PieRunner {
                     final Task<CommandFeedback> task = request.createTask(context, argConverters);
                     final CommandFeedback feedback = require(task, session, monitor);
                     contextsAndFeedbacks.add(new CommandContextAndFeedback(context, feedback));
-                    @Nullable ResourcePath projectDir = contextProjectDir(context);
                     processShowFeedbacks(feedback, true, (p) -> {
                         // POTI: this opens a new PIE session, which may be used concurrently with other sessions, which
                         // may not be (thread-)safe.
-                        try(final MixedSession newSession = languageComponent.getPieProvider().getPie(projectDir).newSession()) {
+                        try(final MixedSession newSession = languageComponent.getPie().newSession()) {
                             unobserve(task, pie, newSession, monitor);
                         }
                         pie.removeCallback(task);
                     });
                     if(feedback.hasErrorMessagesOrException()) {
                         // Command feedback indicates failure, unobserve to cancel continuous execution.
-                        try(final MixedSession newSession = languageComponent.getPieProvider().getPie(projectDir).newSession()) {
+                        try(final MixedSession newSession = languageComponent.getPie().newSession()) {
                             unobserve(task, pie, newSession, monitor);
                         }
                     } else {
@@ -337,14 +331,6 @@ public class PieRunner {
                 break;
         }
         return contextsAndFeedbacks;
-    }
-
-    private @Nullable ResourcePath contextProjectDir(CommandContext context) {
-        return context.getResourcePathWithKind()
-            .map(ResourcePathWithKind::getPath)
-            .map(resourceUtil::getProject)
-            .map(EclipseResourcePath::new)
-            .orElse(null);
     }
 
     private void processShowFeedbacks(CommandFeedback feedback, boolean activate, @Nullable Consumer<IWorkbenchPart> closedCallback) {
@@ -492,7 +478,24 @@ public class PieRunner {
             walkProject(project, extensions);
         }
 
+        ResourceChanges(IResourceDelta delta) throws CoreException {
+            walkDelta(delta, path -> true);
+        }
+
         ResourceChanges(IResourceDelta delta, SetView<String> extensions) throws CoreException {
+            walkDelta(delta, path -> {
+                final @Nullable String extension = path.getLeafExtension();
+                return extension != null && extensions.contains(extension);
+            });
+        }
+
+        ResourceChanges(IProject eclipseProject, SetView<String> extensions, EclipseResourceRegistry resourceRegistry) throws IOException {
+            final EclipseResource project = new EclipseResource(resourceRegistry, eclipseProject);
+            newProjects.add(project.getKey());
+            walkProject(project, extensions);
+        }
+
+        private void walkDelta(IResourceDelta delta, Predicate<ResourcePath> filePredicate) throws CoreException {
             delta.accept((d) -> {
                 final int kind = d.getKind();
                 final boolean added = kind == IResourceDelta.ADDED;
@@ -521,8 +524,7 @@ public class PieRunner {
                         }
                         break;
                     case IResource.FILE:
-                        final @Nullable String extension = path.getLeafExtension();
-                        if(extension != null && extensions.contains(extension)) {
+                        if(filePredicate.test(path)) {
                             if(added) {
                                 newFiles.add(path);
                             } else if(removed) {
@@ -534,13 +536,6 @@ public class PieRunner {
                 return true;
             });
         }
-
-        ResourceChanges(IProject eclipseProject, SetView<String> extensions, EclipseResourceRegistry resourceRegistry) throws IOException {
-            final EclipseResource project = new EclipseResource(resourceRegistry, eclipseProject);
-            newProjects.add(project.getKey());
-            walkProject(project, extensions);
-        }
-
 
         private void walkProject(EclipseResource project, SetView<String> extensions) throws IOException {
             changed.add(project.getKey());

@@ -17,8 +17,6 @@ import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.HierarchicalResourceType;
-import mb.spoofax.core.pie.DefaultPieProvider;
-import mb.spoofax.core.pie.PieProvider;
 import mb.spoofax.core.platform.Platform;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
@@ -193,13 +191,13 @@ public class TigerModule {
     }
 
     @Provides @LanguageScope @Named("prototype")
-    static Pie providePie(@Platform Pie pie, TaskDefs taskDefs, ResourceService resourceService) {
+    static Pie providePrototypePie(@Platform Pie pie, TaskDefs taskDefs, ResourceService resourceService) {
         return pie.createChildBuilder().withTaskDefs(taskDefs).withResourceService(resourceService).build();
     }
 
     @Provides @LanguageScope
-    static PieProvider providePieProvider(DefaultPieProvider pieProvider) {
-        return pieProvider;
+    static Pie providePie( @Named("prototype") Pie pie) {
+        return pie;
     }
 
     @Provides @LanguageScope @ElementsIntoSet

@@ -8,6 +8,8 @@ import mb.stratego.build.strincr.ParseStratego;
 import mb.stratego.build.util.IOAgentTrackerFactory;
 import mb.stratego.common.StrategoRuntime;
 import org.spoofax.interpreter.terms.ITermFactory;
+import org.spoofax.jsglr.client.imploder.ImploderOriginTermFactory;
+import org.spoofax.terms.TermFactory;
 
 import javax.inject.Named;
 
@@ -22,6 +24,6 @@ public abstract class StrategoIncrModule {
 
     @Provides @LanguageScope
     public static ITermFactory provideTermFactory(@Named("prototype") StrategoRuntime prototypeStrategoRuntime) {
-        return prototypeStrategoRuntime.getTermFactory();
+        return new TermFactory(); // HACK: Stratego incremental compiler requires a term factory that does not implement OriginTermFactory.
     }
 }

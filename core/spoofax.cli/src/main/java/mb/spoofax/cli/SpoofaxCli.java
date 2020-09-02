@@ -3,7 +3,6 @@ package mb.spoofax.cli;
 import mb.common.util.ListView;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Pie;
-import mb.resource.ResourceKeyString;
 import mb.resource.ResourceService;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.language.LanguageInstance;
@@ -42,7 +41,7 @@ public class SpoofaxCli {
 
     public int run(String[] args, LanguageComponent languageComponent) {
         final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
-        final Pie pie = languageComponent.getPieProvider().getPie(resourceService.getResourcePath(ResourceKeyString.of(".")));
+        final Pie pie = languageComponent.getPie();
 
         return run(args, pie, languageInstance.getCliCommand());
     }

@@ -136,7 +136,8 @@ open class EclipseExternaldepsPlugin : Plugin<Project> {
         // Provided by 'spoofax.eclipse.externaldeps' bundle.
         "!mb.log.*",
         "!mb.resource.*",
-        "!mb.pie.*",
+        "!mb.pie.api.*",
+        "!mb.pie.runtime.*",
         "!mb.common.*",
         "!mb.spoofax.core.*",
         "!dagger.*",
