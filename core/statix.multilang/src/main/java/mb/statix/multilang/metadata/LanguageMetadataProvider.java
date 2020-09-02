@@ -11,5 +11,8 @@ import java.util.Map;
 public interface LanguageMetadataProvider {
     LanguageMetadata getLanguageMetadata();
 
+    // Provides config of own spec + spec of all dependencies
+    // Dependencies are included so that it is still possible to register them without generating plugins for each
+    // It is provided via a component so that the term factory it depends on can be injected properly
     Map<SpecFragmentId, SpecConfig> getSpecConfigs();
 }
