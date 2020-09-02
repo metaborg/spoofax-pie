@@ -62,21 +62,4 @@ public class SpecLoaderTest {
         assertEquals(1, rules.getRules("root!ok").size());
         assertEquals(2, rules.getRules("imported!rule").size());
     }
-
-    @Test void loadIncompatibleSpecs() throws SpecLoadException {
-        final ClassLoaderResource root1 = resourceRegistry
-            .getResource(new DefaultResourceKeyString("mb/statix/multilang/base"));
-        SpecFragment specFragment1 = SpecUtils
-            .loadSpec(root1, "base", termFactory);
-
-        final ClassLoaderResource root2 = resourceRegistry
-            .getResource(new DefaultResourceKeyString("mb/statix/multilang/incompatible"));
-        SpecFragment specFragment2 = SpecUtils
-            .loadSpec(root2, "incompatible", termFactory);
-
-        Spec combinedSpec = SpecUtils.mergeSpecs(specFragment1.toSpec(), specFragment2.toSpec()).unwrap();
-
-        assertFalse(combinedSpec.rules().getAllEquivalentRules().isEmpty());
-        assertEquals(2, combinedSpec.rules().getRules("imported!rule").size());
-    }
 }
