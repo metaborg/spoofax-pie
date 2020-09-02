@@ -31,17 +31,17 @@ open class AdapterProjectSettings(
 
     val adapterProject = this.adapterProject.shared(shared).project(project.toSpoofaxCompilerProject()).build()
     val classloaderResources = this.classloaderResources.languageProjectInput(languageProjectCompilerInput.classloaderResources()).build()
-    val styler = if(this.styler != null) {
-      if(!languageProjectCompilerInput.styler().isPresent) {
-        throw GradleException("Styler adapter project input is present, but styler language project input is not")
-      }
-      this.styler.shared(shared).adapterProject(adapterProject).languageProjectInput(languageProjectCompilerInput.styler().get()).build()
-    } else null
     val parser = if(this.parser != null) {
       if(!languageProjectCompilerInput.styler().isPresent) {
         throw GradleException("Parser adapter project input is present, but parser language project input is not")
       }
       this.parser.shared(shared).adapterProject(adapterProject).languageProjectInput(languageProjectCompilerInput.parser().get()).build()
+    } else null
+    val styler = if(this.styler != null) {
+      if(!languageProjectCompilerInput.styler().isPresent) {
+        throw GradleException("Styler adapter project input is present, but styler language project input is not")
+      }
+      this.styler.shared(shared).adapterProject(adapterProject).languageProjectInput(languageProjectCompilerInput.styler().get()).build()
     } else null
     val completer = if(this.completer != null) {
       if(!languageProjectCompilerInput.completer().isPresent) {
@@ -140,6 +140,7 @@ internal class AdapterProjectFinalized(
 
 internal fun Project.whenAdapterProjectFinalized(closure: () -> Unit) = whenFinalized<AdapterProjectExtension> {
   val extension : AdapterProjectExtension = extensions.getByType()
+  // Adapter project is only fully finalized when its dependent language project is finalized as well
   extension.languageProjectFinalized.whenLanguageProjectFinalized(closure)
 }
 
