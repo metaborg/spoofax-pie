@@ -83,7 +83,8 @@ open class LanguageProjectSettings(
     val completer = if(this.completer != null) this.completer.shared(shared).languageProject(languageProject).build() else null
     val strategoRuntime = if(this.strategoRuntime != null) this.strategoRuntime.shared(shared).languageProject(languageProject).build() else null
     val constraintAnalyzer = if(this.constraintAnalyzer != null) this.constraintAnalyzer.shared(shared).languageProject(languageProject).build() else null
-    val multilangAnalyzer = if(this.multilangAnalyzer != null) this.multilangAnalyzer.shared(shared).languageProject(languageProject).classloaderResources(classloaderResources).build() else null
+    val multilangAnalyzer = if(this.multilangAnalyzer != null) this.multilangAnalyzer.shared(shared).languageProject(languageProject)
+      .classloaderResources(classloaderResources.classloaderResources()).build() else null
     val builder = this.builder
       .shared(shared)
       .languageProject(languageProject)
@@ -302,8 +303,7 @@ internal fun List<Project>.whenAllLanguageProjectsFinalized(closure: () -> Unit)
   if(isEmpty()) {
     // No dependencies to wait for, so execute immediately
     closure()
-  }
-  else {
+  } else {
     // After first project in list is finalized, invoke wait for the others
     first().whenLanguageProjectFinalized {
       drop(1).whenAllLanguageProjectsFinalized(closure)

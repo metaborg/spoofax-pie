@@ -126,8 +126,7 @@ public class MultilangAnalyzerCompiler {
 
         // Subinputs
 
-        // TODO: Remove!!!!
-        ClassloaderResourcesCompiler.LanguageProjectInput classloaderResources();
+        TypeInfo classloaderResources();
 
         /// Automatically provided sub-inputs
 
