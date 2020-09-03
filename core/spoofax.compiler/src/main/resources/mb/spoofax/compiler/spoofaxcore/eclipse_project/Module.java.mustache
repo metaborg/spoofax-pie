@@ -6,6 +6,9 @@ import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.eclipse.EclipseIdentifiers;
 import mb.spoofax.eclipse.job.LockRule;
 import mb.spoofax.eclipse.job.ReadLockRule;
+{{#adapterProjectCompilerInput.multilangAnalyzer}}
+import mb.statix.multilang.MultiLang;
+{{/adapterProjectCompilerInput.multilangAnalyzer}}
 
 import javax.inject.Named;
 
@@ -16,10 +19,18 @@ public class {{genEclipseModule.id}} {
         return new {{eclipseIdentifiers.qualifiedId}}();
     }
 
+{{#adapterProjectCompilerInput.multilangAnalyzer}}
+    @Provides @Named("StartupWriteLock") @LanguageScope
+    static LockRule provideStartupWriteLockRule(@MultiLang LockRule startUpWriteLockRule) {
+        return startUpWriteLockRule;
+    }
+{{/adapterProjectCompilerInput.multilangAnalyzer}}
+{{^adapterProjectCompilerInput.multilangAnalyzer}}
     @Provides @Named("StartupWriteLock") @LanguageScope
     static LockRule provideStartupWriteLockRule() {
         return new LockRule("Startup write lock");
     }
+{{/adapterProjectCompilerInput.multilangAnalyzer}}
 
     @Provides @LanguageScope
     static ReadLockRule provideStartupReadLockRule(@Named("StartupWriteLock") LockRule writeLock) {

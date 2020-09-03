@@ -69,6 +69,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 @Singleton
 public class PieRunner {
@@ -141,9 +142,7 @@ public class PieRunner {
                 if(project == null) {
                     logger.warn("Cannot run inspections for resource '\" + file + \"' of language '\" + languageInstance.getDisplayName() + \"', because it requires multi-file analysis but no project was given");
                 } else {
-                    final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(new EclipseResourcePath(project));
-                    final KeyedMessages messages = requireWithoutObserving(checkTask, postSession, monitor);
-                    workspaceUpdate.replaceMessages(messages, path);
+                    requireCheck(project, monitor, workspaceUpdate, postSession, languageInstance);
                 }
             } catch(UncheckedException e) {
                 final Exception cause = e.getCause();
@@ -158,6 +157,20 @@ public class PieRunner {
         }
 
         workspaceUpdate.update(file, file, monitor);
+    }
+
+    public WorkspaceUpdate requireCheck(IProject project, @Nullable IProgressMonitor monitor, TopDownSession session, EclipseLanguageComponent languageComponent) throws ExecException, InterruptedException {
+        WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
+        LanguageInstance languageInstance = languageComponent.getLanguageInstance();
+        requireCheck(project, monitor, workspaceUpdate, session, languageInstance);
+        return workspaceUpdate;
+    }
+
+    private void requireCheck(IProject project, @Nullable IProgressMonitor monitor, WorkspaceUpdate workspaceUpdate, TopDownSession session, LanguageInstance languageInstance) throws ExecException, InterruptedException {
+        final EclipseResourcePath resourcePath = new EclipseResourcePath(project);
+        final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(resourcePath);
+        final KeyedMessages messages = requireWithoutObserving(checkTask, session, monitor);
+        workspaceUpdate.replaceMessages(messages, resourcePath);
     }
 
     public void removeEditor(IFile file) {
@@ -194,8 +207,7 @@ public class PieRunner {
     ) throws ExecException, InterruptedException, CoreException, IOException {
         logger.trace("Running incremental build for project '{}'", project);
 
-        final ResourceChanges resourceChanges = new ResourceChanges(delta, languageComponent.getLanguageInstance().getFileExtensions());
-
+        final ResourceChanges resourceChanges = new ResourceChanges(delta);
         bottomUpWorkspaceUpdate = workspaceUpdateFactory.create(languageComponent);
         try(final MixedSession session = languageComponent.getPie().newSession()) {
             final TopDownSession afterSession = updateAffectedBy(resourceChanges.changed, session, monitor);
@@ -256,10 +268,13 @@ public class PieRunner {
         EclipseLanguageComponent languageComponent,
         @Nullable IProgressMonitor monitor
     ) throws IOException, CoreException, ExecException, InterruptedException {
-        final ResourceChanges resourceChanges = new ResourceChanges(languageComponent.getEclipseIdentifiers().getNature(), languageComponent.getLanguageInstance().getFileExtensions(), resourceRegistry);
-        try(final MixedSession session = languageComponent.getPie().newSession()) {
-            observeAndUnobserveAutoTransforms(languageComponent, resourceChanges, session, monitor);
-            observeAndUnobserveInspections(languageComponent, resourceChanges, session, monitor);
+        for(IProject eclipseProject : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
+            if(!eclipseProject.hasNature(languageComponent.getEclipseIdentifiers().getNature())) continue;
+            final ResourceChanges resourceChanges = new ResourceChanges(eclipseProject, languageComponent.getLanguageInstance().getFileExtensions(), resourceRegistry);
+            try(final MixedSession session = languageComponent.getPie().newSession()) {
+                observeAndUnobserveAutoTransforms(languageComponent, resourceChanges, session, monitor);
+                observeAndUnobserveInspections(languageComponent, resourceChanges, session, monitor);
+            }
         }
     }
 
@@ -439,6 +454,12 @@ public class PieRunner {
         }
     }
 
+    public void clearMessages(IProject project, @Nullable IProgressMonitor monitor, EclipseLanguageComponent languageComponent) {
+        WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
+        workspaceUpdate.clearMessages(new EclipseResourcePath(project), true);
+        workspaceUpdate.update(project, null, monitor);
+    }
+
 
     private static class ResourceChanges {
         final HashSet<ResourcePath> changed = new HashSet<>();
@@ -457,7 +478,24 @@ public class PieRunner {
             walkProject(project, extensions);
         }
 
+        ResourceChanges(IResourceDelta delta) throws CoreException {
+            walkDelta(delta, path -> true);
+        }
+
         ResourceChanges(IResourceDelta delta, SetView<String> extensions) throws CoreException {
+            walkDelta(delta, path -> {
+                final @Nullable String extension = path.getLeafExtension();
+                return extension != null && extensions.contains(extension);
+            });
+        }
+
+        ResourceChanges(IProject eclipseProject, SetView<String> extensions, EclipseResourceRegistry resourceRegistry) throws IOException {
+            final EclipseResource project = new EclipseResource(resourceRegistry, eclipseProject);
+            newProjects.add(project.getKey());
+            walkProject(project, extensions);
+        }
+
+        private void walkDelta(IResourceDelta delta, Predicate<ResourcePath> filePredicate) throws CoreException {
             delta.accept((d) -> {
                 final int kind = d.getKind();
                 final boolean added = kind == IResourceDelta.ADDED;
@@ -486,8 +524,7 @@ public class PieRunner {
                         }
                         break;
                     case IResource.FILE:
-                        final @Nullable String extension = path.getLeafExtension();
-                        if(extension != null && extensions.contains(extension)) {
+                        if(filePredicate.test(path)) {
                             if(added) {
                                 newFiles.add(path);
                             } else if(removed) {
@@ -499,16 +536,6 @@ public class PieRunner {
                 return true;
             });
         }
-
-        ResourceChanges(String projectNatureId, SetView<String> extensions, EclipseResourceRegistry resourceRegistry) throws IOException, CoreException {
-            for(IProject eclipseProject : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
-                if(!eclipseProject.hasNature(projectNatureId)) continue;
-                final EclipseResource project = new EclipseResource(resourceRegistry, eclipseProject);
-                newProjects.add(project.getKey());
-                walkProject(project, extensions);
-            }
-        }
-
 
         private void walkProject(EclipseResource project, SetView<String> extensions) throws IOException {
             changed.add(project.getKey());
@@ -616,6 +643,11 @@ public class PieRunner {
                 pie.setCallback(task, messages -> {
                     if(bottomUpWorkspaceUpdate != null) {
                         bottomUpWorkspaceUpdate.replaceMessages(messages, newProject);
+                    } else {
+                        // Perform local messages update
+                        WorkspaceUpdate localUpdate = workspaceUpdateFactory.create(languageComponent);
+                        localUpdate.replaceMessages(messages, newProject);
+                        localUpdate.update(resourceUtil.getEclipseResource(newProject), null, monitor);
                     }
                 });
                 if(!pie.isObserved(task)) {

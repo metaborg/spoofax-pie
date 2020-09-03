@@ -17,6 +17,8 @@ val daggerVersion = "2.27"
 val derive4jVersion = "1.1.1"
 val immutablesVersion = "2.8.2"
 
+val yamlVersion = "1.26"
+
 dependencies {
   constraints {
     // Own projects
@@ -93,6 +95,8 @@ dependencies {
     /// org.immutables
     api("org.immutables:value:$immutablesVersion")
     api("org.immutables:value-annotations:$immutablesVersion")
+    // Yaml
+    api("org.yaml:snakeyaml:$yamlVersion")
 
 
     // Test dependencies // TODO: should be in a separate platform?

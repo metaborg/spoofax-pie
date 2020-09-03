@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Schema file written by PDE -->
+<schema targetNamespace="mb.statix.multilang.eclipse" xmlns="http://www.w3.org/2001/XMLSchema">
+  <annotation>
+    <appinfo>
+      <meta.schema plugin="mb.statix.multilang.eclipse"
+                   id="mb.statix.multilang.analysiscontext"
+                   name="AnalysisContext"/>
+    </appinfo>
+  </annotation>
+  <element name="extension">
+    <complexType>
+      <choice>
+        <element ref="languagemetadata" minOccurs="0" maxOccurs="unbounded"/>
+      </choice>
+      <attribute name="point" type="string" use="required"/>
+      <attribute name="id" type="string"/>
+      <attribute name="name" type="string">
+        <annotation>
+          <appinfo>
+            <meta.attribute translatable="true"/>
+          </appinfo>
+        </annotation>
+      </attribute>
+    </complexType>
+  </element>
+  <element name="languagemetadata">
+    <complexType>
+      <attribute name="class" type="string">
+        <annotation>
+          <appinfo>
+            <meta.attribute kind="java" basedOn=":mb.spoofax.multilang.eclipse.LanguageMetadataProvider"/>
+          </appinfo>
+        </annotation>
+      </attribute>
+    </complexType>
+  </element>
+</schema>

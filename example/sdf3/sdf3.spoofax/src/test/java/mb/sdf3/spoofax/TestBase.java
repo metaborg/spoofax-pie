@@ -56,7 +56,6 @@ class TestBase {
     final Sdf3Parse parse = languageComponent.getParse();
     final Sdf3Desugar desugar = languageComponent.getDesugar();
     final Sdf3CreateSpec createSpec = languageComponent.getCreateSpec();
-    final Function<Supplier<? extends Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> desugarFunction = desugar.createFunction();
     final Sdf3AnalyzeMulti analyze = languageComponent.getAnalyze();
     final Pie pie = languageComponent.getPie();
 

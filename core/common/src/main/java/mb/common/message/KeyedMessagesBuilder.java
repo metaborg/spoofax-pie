@@ -138,4 +138,8 @@ public class KeyedMessagesBuilder {
     public KeyedMessages build(ResourceKey defaultKey) {
         return new KeyedMessages(MapView.copyOf(messages.getInnerMap()), ListView.copyOf(messagesWithoutKey));
     }
+
+    public boolean isEmpty() {
+        return messagesWithoutKey.isEmpty() && messages.values().stream().allMatch(ArrayList::isEmpty);
+    }
 }

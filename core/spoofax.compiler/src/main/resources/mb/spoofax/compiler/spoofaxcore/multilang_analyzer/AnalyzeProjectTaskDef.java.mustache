@@ -1,0 +1,30 @@
+package {{genAnalyzeTaskDef.packageId}};
+
+import mb.common.message.KeyedMessages;
+import mb.pie.api.ExecContext;
+import mb.pie.api.TaskDef;
+import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.core.language.LanguageScope;
+import mb.spoofax.core.language.command.CommandFeedback;
+
+import javax.inject.Inject;
+
+@LanguageScope
+public class {{genAnalyzeTaskDef.id}} implements TaskDef<ResourcePath, CommandFeedback> {
+
+    private final {{genCheckTaskDef.qualifiedId}} check;
+
+    @Inject public {{genAnalyzeTaskDef.id}}({{genCheckTaskDef.qualifiedId}} check) {
+        this.check = check;
+    }
+
+    @Override public String getId() {
+        return "{{genAnalyzeTaskDef.qualifiedId}}";
+    }
+
+    @Override
+    public CommandFeedback exec(ExecContext context, ResourcePath projectRoot) {
+        KeyedMessages messages = context.require(check.createTask(projectRoot));
+        return CommandFeedback.of(messages);
+    }
+}

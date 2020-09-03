@@ -60,16 +60,16 @@ public abstract class SpoofaxCompletionContributor extends CompletionContributor
         final ResourceKey resourceKey = resource.getKey();
         final Region selection = Region.atOffset(parameters.getOffset());
         final @Nullable CompletionResult completionResult;
-        try (final MixedSession session = this.pieSessionProvider.get()) {
+        try(final MixedSession session = this.pieSessionProvider.get()) {
             Task<@Nullable CompletionResult> completionTask = this.languageInstance.createCompletionTask(resourceKey, selection);
             completionResult = session.require(completionTask);
-        } catch (ExecException e) {
+        } catch(ExecException e) {
             throw new RuntimeException("Code completion on resource '" + resourceKey + "' failed unexpectedly.", e);
         } catch(InterruptedException e) {
             return;
         }
 
-        if (completionResult == null) return;
+        if(completionResult == null) return;
         result.addAllElements(completionResult.getProposals().stream().map(this::proposalToElement).collect(Collectors.toList()));
     }
 
@@ -85,9 +85,9 @@ public abstract class SpoofaxCompletionContributor extends CompletionContributor
         final @Nullable Icon kindIcon = getKindIcon(styles);
         final @Nullable Icon visibilityIcon = getVisibilityIcon(styles);
         final @Nullable Icon baseIcon = getBaseIcon(kindIcon, styles);
-        if (baseIcon == null && visibilityIcon == null) return null;
-        if (baseIcon == null) return EmptyIcon.create(PlatformIcons.CLASS_ICON /* only size is used */);
-        if (visibilityIcon == null) return baseIcon;
+        if(baseIcon == null && visibilityIcon == null) return null;
+        if(baseIcon == null) return EmptyIcon.create(PlatformIcons.CLASS_ICON /* only size is used */);
+        if(visibilityIcon == null) return baseIcon;
 
         RowIcon resultIcon = new RowIcon(2);
         resultIcon.setIcon(baseIcon, 0);
@@ -118,8 +118,8 @@ public abstract class SpoofaxCompletionContributor extends CompletionContributor
     );
 
     private @Nullable Icon getKindIcon(StyleNames styles) {
-        for (Map.Entry<String, Function<StyleNames, @Nullable Icon>> entry : kindIcons) {
-            if (styles.anyStartsWith(entry.getKey())) {
+        for(Map.Entry<String, Function<StyleNames, @Nullable Icon>> entry : kindIcons) {
+            if(styles.anyStartsWith(entry.getKey())) {
                 return entry.getValue().apply(styles);
             }
         }
@@ -137,8 +137,8 @@ public abstract class SpoofaxCompletionContributor extends CompletionContributor
     );
 
     private @Nullable Icon getVisibilityIcon(StyleNames styles) {
-        for (Map.Entry<String, Function<StyleNames, @Nullable Icon>> entry : visibilityIcons) {
-            if (styles.anyStartsWith(entry.getKey())) {
+        for(Map.Entry<String, Function<StyleNames, @Nullable Icon>> entry : visibilityIcons) {
+            if(styles.anyStartsWith(entry.getKey())) {
                 return entry.getValue().apply(styles);
             }
         }
@@ -146,27 +146,27 @@ public abstract class SpoofaxCompletionContributor extends CompletionContributor
     }
 
     private @Nullable Icon getBaseIcon(@Nullable Icon kindIcon, StyleNames styles) {
-        if (kindIcon == null) return null;
+        if(kindIcon == null) return null;
 
         SmartList<Icon> iconLayers = new SmartList<>();
 
-        if (styles.anyStartsWith(STORAGE_EXTERNAL)) {
+        if(styles.anyStartsWith(STORAGE_EXTERNAL)) {
             iconLayers.add(PlatformIcons.LOCKED_ICON);
         }
-        if (styles.anyStartsWith(STORAGE_STATIC)) {
+        if(styles.anyStartsWith(STORAGE_STATIC)) {
             iconLayers.add(AllIcons.Nodes.StaticMark);
         }
-        if (styles.anyStartsWith(ENTITY_EXCLUDED)) {
+        if(styles.anyStartsWith(ENTITY_EXCLUDED)) {
             iconLayers.add(PlatformIcons.EXCLUDED_FROM_COMPILE_ICON);
         }
-        if (styles.anyStartsWith(ENTITY_TEST)) {
+        if(styles.anyStartsWith(ENTITY_TEST)) {
             // Currently has no icon.
         }
 
-        if (!iconLayers.isEmpty()) {
+        if(!iconLayers.isEmpty()) {
             LayeredIcon layeredIcon = new LayeredIcon(1 + iconLayers.size());
             layeredIcon.setIcon(kindIcon, 0);
-            for (int i = 0; i < iconLayers.size(); i++) {
+            for(int i = 0; i < iconLayers.size(); i++) {
                 layeredIcon.setIcon(iconLayers.get(i), i + 1);
             }
             return layeredIcon;

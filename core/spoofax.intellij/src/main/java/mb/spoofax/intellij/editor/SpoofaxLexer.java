@@ -3,6 +3,7 @@ package mb.spoofax.intellij.editor;
 import com.google.common.collect.Lists;
 import com.intellij.lexer.LexerBase;
 import com.intellij.psi.tree.IElementType;
+import dagger.Lazy;
 import mb.common.option.Option;
 import mb.common.region.Region;
 import mb.common.token.TokenImpl;
@@ -25,7 +26,6 @@ import mb.spoofax.intellij.psi.SpoofaxTokenTypeManager;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,7 +43,7 @@ public final class SpoofaxLexer extends LexerBase {
     private final SpoofaxTokenTypeManager tokenTypeManager;
     private final ScopeManager scopeManager;
     private final ResourceService resourceService;
-    private final Pie pie;
+    private final Lazy<Pie> pieProvider;
     private final LanguageInstance languageInstance;
 
     @Nullable private CharSequence buffer = null;
@@ -62,7 +62,7 @@ public final class SpoofaxLexer extends LexerBase {
         private final SpoofaxTokenTypeManager tokenTypeManager;
         private final ScopeManager scopeManager;
         private final ResourceService resourceService;
-        private final Pie pie;
+        private final Lazy<Pie> pieProvider;
         private final LanguageInstance languageInstance;
 
         @Inject
@@ -71,14 +71,14 @@ public final class SpoofaxLexer extends LexerBase {
                 SpoofaxTokenTypeManager tokenTypeManager,
                 ScopeManager scopeManager,
                 ResourceService resourceService,
-                Pie pie,
+                Lazy<Pie> pieProvider,
                 LanguageInstance languageInstance
         ) {
             this.loggerFactory = loggerFactory;
             this.tokenTypeManager = tokenTypeManager;
             this.scopeManager = scopeManager;
             this.resourceService = resourceService;
-            this.pie = pie;
+            this.pieProvider = pieProvider;
             this.languageInstance = languageInstance;
         }
 
@@ -89,7 +89,7 @@ public final class SpoofaxLexer extends LexerBase {
                     tokenTypeManager,
                     scopeManager,
                     resourceService,
-                    pie,
+                    pieProvider,
                     languageInstance);
         }
 
@@ -105,7 +105,7 @@ public final class SpoofaxLexer extends LexerBase {
             SpoofaxTokenTypeManager tokenTypeManager,
             ScopeManager scopeManager,
             ResourceService resourceService,
-            Pie pie,
+            Lazy<Pie> pieProvider,
             LanguageInstance languageInstance
     ) {
         this.resourceKey = resourceKey;
@@ -113,7 +113,7 @@ public final class SpoofaxLexer extends LexerBase {
         this.tokenTypeManager = tokenTypeManager;
         this.scopeManager = scopeManager;
         this.resourceService = resourceService;
-        this.pie = pie;
+        this.pieProvider = pieProvider;
         this.languageInstance = languageInstance;
     }
 
@@ -142,7 +142,7 @@ public final class SpoofaxLexer extends LexerBase {
             this.tokens = Collections.emptyList();
         } else {
             // GK: what is syntax coloring information doing here?
-            try (final MixedSession session = this.pie.newSession()) {
+            try (final MixedSession session = this.pieProvider.get().newSession()) {
                 final Task<? extends Option<? extends Tokens<?>>> tokenizerTask =
                         this.languageInstance.createTokenizeTask(this.resourceKey);
                 final Option<? extends Tokens<?>> tokens = session.require(tokenizerTask);

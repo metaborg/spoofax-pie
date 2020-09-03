@@ -17,17 +17,19 @@ class EclipseProjectCompilerTest extends TestBase {
         final AdapterProject adapterProject = TigerInputs.adapterProject(shared).build();
 
         // Compile language and adapter projects.
-        final AdapterProjectCompiler.Input adapterProjectInput = compileLanguageAndAdapterProject(shared, languageProject, adapterProject);
+        final LanguageProjectCompiler.Input languageProjectInput = compileLanguageProject(shared, languageProject);
+        final AdapterProjectCompiler.Input adapterProjectInput = compileAdapterProject(shared, languageProject, adapterProject);
 
         // Compile Eclipse externaldeps project, as Eclipse project depends on it.
-        final EclipseExternaldepsProjectCompiler.Input eclipseExternalDepsInput = TigerInputs.eclipseExternaldepsProjectInput(shared)
+        final EclipseExternaldepsProjectCompiler.Input eclipseExternalDepsInput = TigerInputs
+            .eclipseExternaldepsProjectInput(shared, languageProject, adapterProject)
             .languageProjectDependency(GradleDependency.project(":" + languageProject.project().coordinate().artifactId()))
             .adapterProjectDependency(GradleDependency.project(":" + adapterProject.project().coordinate().artifactId()))
             .build();
         eclipseExternaldepsProjectCompiler.compile(eclipseExternalDepsInput);
 
         // Compile Eclipse project and test generated files.
-        final EclipseProjectCompiler.Input input = TigerInputs.eclipseProjectInput(shared, adapterProjectInput)
+        final EclipseProjectCompiler.Input input = TigerInputs.eclipseProjectInput(shared, languageProjectInput, adapterProjectInput)
             .eclipseExternaldepsDependency(GradleDependency.project(":" + eclipseExternalDepsInput.project().coordinate().artifactId()))
             .build();
         eclipseProjectCompiler.generateInitial(input);

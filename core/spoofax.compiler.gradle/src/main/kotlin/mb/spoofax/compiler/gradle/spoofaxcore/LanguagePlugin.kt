@@ -12,7 +12,6 @@ import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
-import org.gradle.api.artifacts.ModuleDependency
 import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
@@ -33,8 +32,9 @@ open class Compilers {
   internal val completerCompiler = CompleterCompiler(templateCompiler)
   internal val strategoRuntimeCompiler = StrategoRuntimeCompiler(templateCompiler)
   internal val constraintAnalyzerCompiler = ConstraintAnalyzerCompiler(templateCompiler)
-  internal val languageProjectCompiler = LanguageProjectCompiler(templateCompiler, classloaderResourceService, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler)
-  internal val adapterProjectCompiler = AdapterProjectCompiler(templateCompiler, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler)
+  internal val multilangAnalyzerCompiler = MultilangAnalyzerCompiler(templateCompiler)
+  internal val languageProjectCompiler = LanguageProjectCompiler(templateCompiler, classloaderResourceService, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler, multilangAnalyzerCompiler)
+  internal val adapterProjectCompiler = AdapterProjectCompiler(templateCompiler, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler, multilangAnalyzerCompiler)
   internal val cliProjectCompiler = CliProjectCompiler(templateCompiler)
   internal val eclipseExternaldepsProjectCompiler = EclipseExternaldepsProjectCompiler(templateCompiler)
   internal val eclipseProjectCompiler = EclipseProjectCompiler(templateCompiler)
@@ -46,11 +46,12 @@ open class LanguageProjectSettings(
 
   val languageProject: LanguageProject.Builder = LanguageProject.builder(),
   val classloaderResources: ClassloaderResourcesCompiler.LanguageProjectInput.Builder = ClassloaderResourcesCompiler.LanguageProjectInput.builder(),
-  val parser: ParserCompiler.LanguageProjectInput.Builder = ParserCompiler.LanguageProjectInput.builder(),
+  val parser: ParserCompiler.LanguageProjectInput.Builder? = null, // Optional
   val styler: StylerCompiler.LanguageProjectInput.Builder? = null, // Optional
   val completer: CompleterCompiler.LanguageProjectInput.Builder? = null, // Optional
   val strategoRuntime: StrategoRuntimeCompiler.LanguageProjectInput.Builder? = null, // Optional
   val constraintAnalyzer: ConstraintAnalyzerCompiler.LanguageProjectInput.Builder? = null, // Optional
+  val multilangAnalyzer: MultilangAnalyzerCompiler.LanguageProjectInput.Builder? = null, // Optional
 
   val builder: LanguageProjectCompiler.Input.Builder = LanguageProjectCompiler.Input.builder()
 ) {
@@ -77,16 +78,20 @@ open class LanguageProjectSettings(
     // Build language project compiler settings.
     val languageProject = this.languageProject.shared(shared).project(gradleProject.toSpoofaxCompilerProject()).build()
     val classloaderResources = this.classloaderResources.shared(shared).languageProject(languageProject).build()
-    val parser = this.parser.shared(shared).languageProject(languageProject).build()
+    val parser = if(this.parser != null) this.parser.shared(shared).languageProject(languageProject).build() else null
     val styler = if(this.styler != null) this.styler.shared(shared).languageProject(languageProject).build() else null
     val completer = if(this.completer != null) this.completer.shared(shared).languageProject(languageProject).build() else null
     val strategoRuntime = if(this.strategoRuntime != null) this.strategoRuntime.shared(shared).languageProject(languageProject).build() else null
     val constraintAnalyzer = if(this.constraintAnalyzer != null) this.constraintAnalyzer.shared(shared).languageProject(languageProject).build() else null
+    val multilangAnalyzer = if(this.multilangAnalyzer != null) this.multilangAnalyzer.shared(shared).languageProject(languageProject)
+      .classloaderResources(classloaderResources.classloaderResources()).build() else null
     val builder = this.builder
       .shared(shared)
       .languageProject(languageProject)
       .classloaderResources(classloaderResources)
-      .parser(parser)
+    if(parser != null) {
+      builder.parser(parser)
+    }
     if(styler != null) {
       builder.styler(styler)
     }
@@ -98,6 +103,9 @@ open class LanguageProjectSettings(
     }
     if(constraintAnalyzer != null) {
       builder.constraintAnalyzer(constraintAnalyzer)
+    }
+    if(multilangAnalyzer != null) {
+      builder.multilangAnalyzer(multilangAnalyzer)
     }
     val input = builder.build()
 
@@ -116,13 +124,25 @@ open class LanguageProjectSettings(
 
     return LanguageProjectFinalized(shared, input, Compilers())
   }
+
+  internal fun addStatixDependencies(statixDependencies: List<Project>) {
+    statixDependencies.forEach {
+      val ext : LanguageProjectExtension = it.extensions.getByType()
+      val factory = ext.settingsFinalized.input.multilangAnalyzer().get().specConfigFactory()
+      this.multilangAnalyzer?.addDependencyFactories(factory)
+    }
+  }
 }
 
 open class LanguageProjectExtension(project: Project) {
+  // statixDependencies must be in a separate property, since its finalized
+  // value is used to check if the settings property can be finalized
+  val statixDependencies: Property<List<Project>> = project.objects.property()
   val settings: Property<LanguageProjectSettings> = project.objects.property()
 
   init {
     settings.convention(LanguageProjectSettings())
+    statixDependencies.convention(listOf())
   }
 
   companion object {
@@ -130,13 +150,32 @@ open class LanguageProjectExtension(project: Project) {
     private const val name = "Spoofax language project"
   }
 
-  internal val finalized: LanguageProjectFinalized by lazy {
+  internal val settingsFinalized: LanguageProjectFinalized by lazy {
     project.logger.debug("Finalizing $name settings in $project")
     settings.finalizeValue()
     if(!settings.isPresent) {
       throw GradleException("$name settings in $project have not been set")
     }
-    settings.get().finalize(project)
+    val settings = settings.get()
+    val statixDependencies = statixDependenciesFinalized
+
+    if(settings.multilangAnalyzer == null) {
+      if(statixDependencies.isNotEmpty()) {
+        project.logger.warn("Statix dependencies given, but no multilang analyzer configuration set. Ignoring statix dependencies")
+      }
+    } else {
+      settings.addStatixDependencies(statixDependencies)
+    }
+    settings.finalize(project)
+  }
+
+  internal val statixDependenciesFinalized: List<Project> by lazy {
+    project.logger.debug("Finalizing $name statix dependencies in $project")
+    statixDependencies.finalizeValue()
+    if(!statixDependencies.isPresent) {
+      throw GradleException("$name statix dependencies in $project have not been set")
+    }
+    statixDependencies.get()
   }
 }
 
@@ -149,7 +188,11 @@ internal class LanguageProjectFinalized(
   val compiler = compilers.languageProjectCompiler
 }
 
-internal fun Project.whenLanguageProjectFinalized(closure: () -> Unit) = whenFinalized<LanguageProjectExtension>(closure)
+internal fun Project.whenLanguageProjectFinalized(closure: () -> Unit) = whenFinalized<LanguageProjectExtension> {
+  val extension : LanguageProjectExtension = extensions.getByType()
+  // Project is fully finalized only iff all dependencies are finalized as well
+  extension.statixDependenciesFinalized.whenAllLanguageProjectsFinalized(closure)
+}
 
 @Suppress("unused")
 open class LanguagePlugin : Plugin<Project> {
@@ -161,7 +204,9 @@ open class LanguagePlugin : Plugin<Project> {
     project.plugins.apply("org.metaborg.spoofax.gradle.base")
 
     project.afterEvaluate {
-      configure(project, extension.finalized)
+      extension.statixDependenciesFinalized.whenAllLanguageProjectsFinalized {
+        configure(project, extension.settingsFinalized)
+      }
     }
   }
 
@@ -251,5 +296,17 @@ open class LanguagePlugin : Plugin<Project> {
       }
     }
     project.tasks.getByName(JavaPlugin.TEST_CLASSES_TASK_NAME).dependsOn(copyTestTask)
+  }
+}
+
+internal fun List<Project>.whenAllLanguageProjectsFinalized(closure: () -> Unit) {
+  if(isEmpty()) {
+    // No dependencies to wait for, so execute immediately
+    closure()
+  } else {
+    // After first project in list is finalized, invoke wait for the others
+    first().whenLanguageProjectFinalized {
+      drop(1).whenAllLanguageProjectsFinalized(closure)
+    }
   }
 }

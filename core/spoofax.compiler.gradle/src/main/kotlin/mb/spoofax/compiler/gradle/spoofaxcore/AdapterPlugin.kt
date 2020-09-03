@@ -14,23 +14,29 @@ import org.gradle.kotlin.dsl.*
 open class AdapterProjectSettings(
   val adapterProject: AdapterProject.Builder = AdapterProject.builder(),
   val classloaderResources: ClassloaderResourcesCompiler.AdapterProjectInput.Builder = ClassloaderResourcesCompiler.AdapterProjectInput.builder(),
-  val parser: ParserCompiler.AdapterProjectInput.Builder = ParserCompiler.AdapterProjectInput.builder(),
+  val parser: ParserCompiler.AdapterProjectInput.Builder? = null, // Optional
   val styler: StylerCompiler.AdapterProjectInput.Builder? = null, // Optional
   val completer: CompleterCompiler.AdapterProjectInput.Builder? = null, // Optional
   val strategoRuntime: StrategoRuntimeCompiler.AdapterProjectInput.Builder? = null, // Optional
   val constraintAnalyzer: ConstraintAnalyzerCompiler.AdapterProjectInput.Builder? = null, // Optional
+  val multilangAnalyzer: MultilangAnalyzerCompiler.AdapterProjectInput.Builder? = null, // Optional
 
   val builder: AdapterProjectCompiler.Input.Builder = AdapterProjectCompiler.Input.builder()
 ) {
   internal fun finalize(project: Project, languageProject: Project): AdapterProjectFinalized {
     val languageProjectExtension: LanguageProjectExtension = languageProject.extensions.getByType()
-    val languageProjectFinalized = languageProjectExtension.finalized
+    val languageProjectFinalized = languageProjectExtension.settingsFinalized
     val shared = languageProjectFinalized.shared
     val languageProjectCompilerInput = languageProjectFinalized.input
 
     val adapterProject = this.adapterProject.shared(shared).project(project.toSpoofaxCompilerProject()).build()
     val classloaderResources = this.classloaderResources.languageProjectInput(languageProjectCompilerInput.classloaderResources()).build()
-    val parser = this.parser.shared(shared).adapterProject(adapterProject).languageProjectInput(languageProjectCompilerInput.parser()).build()
+    val parser = if(this.parser != null) {
+      if(!languageProjectCompilerInput.styler().isPresent) {
+        throw GradleException("Parser adapter project input is present, but parser language project input is not")
+      }
+      this.parser.shared(shared).adapterProject(adapterProject).languageProjectInput(languageProjectCompilerInput.parser().get()).build()
+    } else null
     val styler = if(this.styler != null) {
       if(!languageProjectCompilerInput.styler().isPresent) {
         throw GradleException("Styler adapter project input is present, but styler language project input is not")
@@ -55,13 +61,21 @@ open class AdapterProjectSettings(
       }
       this.constraintAnalyzer.shared(shared).adapterProject(adapterProject).languageProjectInput(languageProjectCompilerInput.constraintAnalyzer().get()).build()
     } else null
+    val multilangAnalyzer = if(this.multilangAnalyzer != null) {
+      if(!languageProjectCompilerInput.multilangAnalyzer().isPresent) {
+        throw GradleException("Constraint analyzer adapter project input is present, but constraint analyzer runtime language project input is not")
+      }
+      this.multilangAnalyzer.shared(shared).adapterProject(adapterProject).languageProjectInput(languageProjectCompilerInput.multilangAnalyzer().get()).build()
+    } else null
 
     val builder = this.builder
       .shared(shared)
       .adapterProject(adapterProject)
       .classloaderResources(classloaderResources)
-      .parser(parser)
       .languageProjectDependency(languageProject.toSpoofaxCompilerProject().asProjectDependency())
+    if(parser != null) {
+      builder.parser(parser)
+    }
     if(styler != null) {
       builder.styler(styler)
     }
@@ -73,6 +87,9 @@ open class AdapterProjectSettings(
     }
     if(constraintAnalyzer != null) {
       builder.constraintAnalyzer(constraintAnalyzer)
+    }
+    if(multilangAnalyzer != null) {
+      builder.multilangAnalyzer(multilangAnalyzer)
     }
     val input = builder.build()
 
@@ -121,7 +138,11 @@ internal class AdapterProjectFinalized(
   val compiler = compilers.adapterProjectCompiler
 }
 
-internal fun Project.whenAdapterProjectFinalized(closure: () -> Unit) = whenFinalized<AdapterProjectExtension>(closure)
+internal fun Project.whenAdapterProjectFinalized(closure: () -> Unit) = whenFinalized<AdapterProjectExtension> {
+  val extension : AdapterProjectExtension = extensions.getByType()
+  // Adapter project is only fully finalized when its dependent language project is finalized as well
+  extension.languageProjectFinalized.whenLanguageProjectFinalized(closure)
+}
 
 @Suppress("unused")
 open class AdapterPlugin : Plugin<Project> {

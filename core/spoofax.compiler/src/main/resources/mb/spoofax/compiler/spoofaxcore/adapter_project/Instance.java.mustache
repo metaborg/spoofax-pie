@@ -41,6 +41,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Set;
 
+
 public class {{genInstance.id}} implements LanguageInstance {
     private final static SetView<String> fileExtensions = SetView.of({{#shared.fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/shared.fileExtensions}});
 
@@ -50,7 +51,6 @@ public class {{genInstance.id}} implements LanguageInstance {
 
     private final CollectionView<CommandDef<?>> commandDefs;
     private final CollectionView<AutoCommandRequest<?>> autoCommandDefs;
-
 
     @Inject public {{genInstance.id}}(
 {{#injected}}
@@ -90,10 +90,15 @@ public class {{genInstance.id}} implements LanguageInstance {
     }
 
     @Override public Task<KeyedMessages> createCheckTask(ResourcePath projectRoot) {
+        {{#isMultiLang}}
+        return {{checkInjection.name}}.createTask(projectRoot);
+        {{/isMultiLang}}
+        {{^isMultiLang}}
         return {{checkInjection.name}}.createTask(new {{checkInjection.type.qualifiedId}}.Input(
             projectRoot,
             new PathResourceWalker(new NoHiddenPathMatcher()),
             new PathResourceMatcher(new ExtensionsPathMatcher(getFileExtensions().asUnmodifiable()))));
+        {{/isMultiLang}}
     }
 
     @Override public CollectionView<CommandDef<?>> getCommandDefs() {

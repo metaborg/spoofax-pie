@@ -28,10 +28,11 @@ class TestBase {
     final CompleterCompiler completerCompiler = new CompleterCompiler(templateCompiler);
     final StrategoRuntimeCompiler strategoRuntimeCompiler = new StrategoRuntimeCompiler(templateCompiler);
     final ConstraintAnalyzerCompiler constraintAnalyzerCompiler = new ConstraintAnalyzerCompiler(templateCompiler);
+    final MultilangAnalyzerCompiler multilangAnalyzerCompiler = new MultilangAnalyzerCompiler(templateCompiler);
 
     final RootProjectCompiler rootProjectCompiler = new RootProjectCompiler(templateCompiler);
-    final LanguageProjectCompiler languageProjectCompiler = new LanguageProjectCompiler(templateCompiler, classloaderResourcesCompiler, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler);
-    final AdapterProjectCompiler adapterProjectCompiler = new AdapterProjectCompiler(templateCompiler, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler);
+    final LanguageProjectCompiler languageProjectCompiler = new LanguageProjectCompiler(templateCompiler, classloaderResourcesCompiler, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler, multilangAnalyzerCompiler);
+    final AdapterProjectCompiler adapterProjectCompiler = new AdapterProjectCompiler(templateCompiler, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler, multilangAnalyzerCompiler);
 
     final CliProjectCompiler cliProjectCompiler = new CliProjectCompiler(templateCompiler);
 

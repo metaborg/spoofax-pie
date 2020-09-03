@@ -42,19 +42,25 @@ public class EclipseExternaldepsProjectCompiler {
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.spoofaxEclipseExternaldepsDep()));
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(input.languageProjectDependency()));
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(input.adapterProjectDependency()));
+        if(input.adapterProjectCompilerInput().multilangAnalyzer().isPresent()) {
+            bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.multilangEclipseExternaldepsDep()));
+        }
         return bundleDependencies;
     }
 
-    public Output compile(Input input) throws IOException {
+    public Output compile(Input input) {
         return Output.builder().addAllProvidedFiles(input.providedFiles()).build();
     }
 
 
     @Value.Immutable
     public interface Input extends Serializable {
-        class Builder extends EclipseExternaldepsProjectCompilerData.Input.Builder {}
+        class Builder extends EclipseExternaldepsProjectCompilerData.Input.Builder {
+        }
 
-        static Builder builder() { return new Builder(); }
+        static Builder builder() {
+            return new Builder();
+        }
 
 
         /// Project
@@ -98,13 +104,18 @@ public class EclipseExternaldepsProjectCompiler {
         /// Automatically provided sub-inputs
 
         Shared shared();
+
+        AdapterProjectCompiler.Input adapterProjectCompilerInput();
     }
 
     @Value.Immutable
     public interface Output extends Serializable {
-        class Builder extends EclipseExternaldepsProjectCompilerData.Output.Builder {}
+        class Builder extends EclipseExternaldepsProjectCompilerData.Output.Builder {
+        }
 
-        static Builder builder() { return new Builder(); }
+        static Builder builder() {
+            return new Builder();
+        }
 
         List<ResourcePath> providedFiles();
     }

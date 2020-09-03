@@ -1,0 +1,32 @@
+package {{genPreStatixTaskDef.packageId}};
+import mb.common.result.Result;
+import mb.spoofax.core.language.LanguageScope;
+import mb.pie.api.ExecContext;
+import mb.pie.api.Supplier;
+import mb.stratego.common.StrategoRuntime;
+import mb.stratego.pie.AstStrategoTransformTaskDef;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
+import java.io.IOException;
+
+@LanguageScope
+public class {{genPreStatixTaskDef.id}} extends AstStrategoTransformTaskDef {
+    @Inject public {{genPreStatixTaskDef.id}}(Provider<StrategoRuntime> strategoRuntimeProvider) {
+        super(strategoRuntimeProvider, "{{preAnalysisStrategy}}");
+    }
+
+    @Override public String getId() {
+        return "{{genPreStatixTaskDef.qualifiedId}}";
+    }
+
+    @Override
+    public Result<IStrategoTerm, ?> exec(ExecContext context, Supplier<? extends Result<IStrategoTerm, ?>> supplier) {
+        try {
+            return super.exec(context, supplier);
+        } catch(IOException e) {
+            return Result.ofErr(e);
+        }
+    }
+}

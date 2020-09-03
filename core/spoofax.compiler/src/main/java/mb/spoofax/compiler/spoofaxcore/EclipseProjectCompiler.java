@@ -41,6 +41,7 @@ public class EclipseProjectCompiler {
     private final TemplateWriter runCommandHandlerTemplate;
     private final TemplateWriter observeHandlerTemplate;
     private final TemplateWriter unobserveHandlerTemplate;
+    private final TemplateWriter metadataProviderTemplate;
 
     public EclipseProjectCompiler(TemplateCompiler templateCompiler) {
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/build.gradle.kts.mustache");
@@ -64,6 +65,7 @@ public class EclipseProjectCompiler {
         this.runCommandHandlerTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/RunCommandHandler.java.mustache");
         this.observeHandlerTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/ObserveHandler.java.mustache");
         this.unobserveHandlerTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/UnobserveHandler.java.mustache");
+        this.metadataProviderTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/MetadataProvider.java.mustache");
     }
 
     public void generateInitial(Input input) throws IOException {
@@ -87,6 +89,9 @@ public class EclipseProjectCompiler {
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.spoofaxEclipseDep()));
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(input.eclipseExternaldepsDependency()));
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.spoofaxEclipseExternaldepsDep()));
+        if(input.adapterProjectCompilerInput().multilangAnalyzer().isPresent()) {
+            bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.multilangEclipseDep()));
+        }
         return bundleDependencies;
     }
 
@@ -117,6 +122,9 @@ public class EclipseProjectCompiler {
         runCommandHandlerTemplate.write(input.genRunCommandHandler().file(classesGenDirectory), input);
         observeHandlerTemplate.write(input.genObserveHandler().file(classesGenDirectory), input);
         unobserveHandlerTemplate.write(input.genUnobserveHandler().file(classesGenDirectory), input);
+        if(input.adapterProjectCompilerInput().multilangAnalyzer().isPresent()) {
+            metadataProviderTemplate.write(input.genMetadataProvider().file(classesGenDirectory), input);
+        }
 
         return Output.builder().addAllProvidedFiles(input.providedFiles()).build();
     }
@@ -124,9 +132,12 @@ public class EclipseProjectCompiler {
 
     @Value.Immutable
     public interface Input extends Serializable {
-        class Builder extends EclipseProjectCompilerData.Input.Builder {}
+        class Builder extends EclipseProjectCompilerData.Input.Builder {
+        }
 
-        static Builder builder() { return new Builder(); }
+        static Builder builder() {
+            return new Builder();
+        }
 
 
         /// Project
@@ -166,49 +177,93 @@ public class EclipseProjectCompiler {
 
         /// Eclipse configuration
 
-        @Value.Default default String pluginId() { return project().coordinate().artifactId(); }
+        @Value.Default default String pluginId() {
+            return project().coordinate().artifactId();
+        }
 
-        @Value.Default default String contextId() { return pluginId() + ".context"; }
+        @Value.Default default String contextId() {
+            return pluginId() + ".context";
+        }
 
-        @Value.Default default String documentProviderId() { return pluginId() + ".documentprovider"; }
+        @Value.Default default String documentProviderId() {
+            return pluginId() + ".documentprovider";
+        }
 
-        @Value.Default default String editorId() { return pluginId() + ".editor"; }
+        @Value.Default default String editorId() {
+            return pluginId() + ".editor";
+        }
 
-        @Value.Default default String natureRelativeId() { return "nature"; }
+        @Value.Default default String natureRelativeId() {
+            return "nature";
+        }
 
-        @Value.Default default String natureId() { return pluginId() + "." + natureRelativeId(); }
+        @Value.Default default String natureId() {
+            return pluginId() + "." + natureRelativeId();
+        }
 
-        @Value.Default default String addNatureCommandId() { return natureId() + ".add"; }
+        @Value.Default default String addNatureCommandId() {
+            return natureId() + ".add";
+        }
 
-        @Value.Default default String removeNatureCommandId() { return natureId() + ".remove"; }
+        @Value.Default default String removeNatureCommandId() {
+            return natureId() + ".remove";
+        }
 
-        @Value.Default default String projectBuilderRelativeId() { return "builder"; }
+        @Value.Default default String projectBuilderRelativeId() {
+            return "builder";
+        }
 
-        @Value.Default default String projectBuilderId() { return pluginId() + "." + projectBuilderRelativeId(); }
+        @Value.Default default String projectBuilderId() {
+            return pluginId() + "." + projectBuilderRelativeId();
+        }
 
-        @Value.Default default String baseMarkerId() { return pluginId() + ".marker"; }
+        @Value.Default default String baseMarkerId() {
+            return pluginId() + ".marker";
+        }
 
-        @Value.Default default String infoMarkerId() { return baseMarkerId() + ".info"; }
+        @Value.Default default String infoMarkerId() {
+            return baseMarkerId() + ".info";
+        }
 
-        @Value.Default default String warningMarkerId() { return baseMarkerId() + ".warning"; }
+        @Value.Default default String warningMarkerId() {
+            return baseMarkerId() + ".warning";
+        }
 
-        @Value.Default default String errorMarkerId() { return baseMarkerId() + ".error"; }
+        @Value.Default default String errorMarkerId() {
+            return baseMarkerId() + ".error";
+        }
 
-        @Value.Default default String observeCommandId() { return pluginId() + ".observe"; }
+        @Value.Default default String observeCommandId() {
+            return pluginId() + ".observe";
+        }
 
-        @Value.Default default String unobserveCommandId() { return pluginId() + ".unobserve"; }
+        @Value.Default default String unobserveCommandId() {
+            return pluginId() + ".unobserve";
+        }
 
-        @Value.Default default String runCommandId() { return pluginId() + ".runcommand"; }
+        @Value.Default default String runCommandId() {
+            return pluginId() + ".runcommand";
+        }
 
-        @Value.Default default String baseMenuId() { return pluginId() + ".menu"; }
+        @Value.Default default String baseMenuId() {
+            return pluginId() + ".menu";
+        }
 
-        @Value.Default default String resourceContextMenuId() { return baseMenuId() + ".resource.context"; }
+        @Value.Default default String resourceContextMenuId() {
+            return baseMenuId() + ".resource.context";
+        }
 
-        @Value.Default default String editorContextMenuId() { return baseMenuId() + ".editor.context"; }
+        @Value.Default default String editorContextMenuId() {
+            return baseMenuId() + ".editor.context";
+        }
 
-        @Value.Default default String mainMenuId() { return baseMenuId() + ".main"; }
+        @Value.Default default String mainMenuId() {
+            return baseMenuId() + ".main";
+        }
 
-        @Value.Default default String mainMenuDynamicId() { return mainMenuId() + ".dynamic"; }
+        @Value.Default default String mainMenuDynamicId() {
+            return mainMenuId() + ".dynamic";
+        }
 
 
         Optional<ResourcePath> fileIconRelativePath();
@@ -512,6 +567,21 @@ public class EclipseProjectCompiler {
             return genUnobserveHandler();
         }
 
+        // Language Metadata Provider
+
+        @Value.Default default TypeInfo genMetadataProvider() {
+            return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "MetadataProvider");
+        }
+
+        Optional<TypeInfo> manualMetadataProvider();
+
+        default TypeInfo metadataProvider() {
+            if(classKind().isManual() && manualMetadataProvider().isPresent()) {
+                return manualMetadataProvider().get();
+            }
+            return genMetadataProvider();
+        }
+
 
         /// Provided files
 
@@ -538,6 +608,9 @@ public class EclipseProjectCompiler {
                 generatedFiles.add(genRunCommandHandler().file(classesGenDirectory()));
                 generatedFiles.add(genObserveHandler().file(classesGenDirectory()));
                 generatedFiles.add(genUnobserveHandler().file(classesGenDirectory()));
+                if(adapterProjectCompilerInput().multilangAnalyzer().isPresent()) {
+                    generatedFiles.add(genMetadataProvider().file(classesGenDirectory()));
+                }
             }
             return generatedFiles;
         }
@@ -549,15 +622,20 @@ public class EclipseProjectCompiler {
 
         AdapterProjectCompiler.Input adapterProjectCompilerInput();
 
+        LanguageProjectCompiler.Input languageProjectCompilerInput();
+
 
         // TODO: implement check
     }
 
     @Value.Immutable
     public interface Output extends Serializable {
-        class Builder extends EclipseProjectCompilerData.Output.Builder {}
+        class Builder extends EclipseProjectCompilerData.Output.Builder {
+        }
 
-        static Builder builder() { return new Builder(); }
+        static Builder builder() {
+            return new Builder();
+        }
 
         List<ResourcePath> providedFiles();
     }
