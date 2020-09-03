@@ -4,11 +4,11 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import mb.spoofax.core.language.LanguageScope;
+import mb.stratego.build.strincr.Backend;
 import mb.stratego.build.strincr.ParseStratego;
 import mb.stratego.build.util.IOAgentTrackerFactory;
 import mb.stratego.common.StrategoRuntime;
 import org.spoofax.interpreter.terms.ITermFactory;
-import org.spoofax.jsglr.client.imploder.ImploderOriginTermFactory;
 import org.spoofax.terms.TermFactory;
 
 import javax.inject.Named;
@@ -20,6 +20,9 @@ public abstract class StrategoIncrModule {
 
     @Binds @LanguageScope
     public abstract IOAgentTrackerFactory bindIOAgentTrackerFactory(@LanguageScope StrategoIOAgentTrackerFactory ioAgentTrackerFactory);
+
+    @Binds @LanguageScope
+    public abstract Backend.ResourcePathConverter bindResourcePathConverter(@LanguageScope AsStringResourcePathConverter asStringResourcePathConverter);
 
 
     @Provides @LanguageScope
