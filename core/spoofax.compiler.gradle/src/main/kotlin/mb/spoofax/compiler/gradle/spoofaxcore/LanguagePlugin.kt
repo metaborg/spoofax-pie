@@ -14,6 +14,7 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.SourceSetContainer
@@ -127,7 +128,7 @@ open class LanguageProjectSettings(
 
   internal fun addStatixDependencies(statixDependencies: List<Project>) {
     statixDependencies.forEach {
-      val ext : LanguageProjectExtension = it.extensions.getByType()
+      val ext: LanguageProjectExtension = it.extensions.getByType()
       val factory = ext.settingsFinalized.input.multilangAnalyzer().get().specConfigFactory()
       this.multilangAnalyzer?.addDependencyFactories(factory)
     }
@@ -137,12 +138,11 @@ open class LanguageProjectSettings(
 open class LanguageProjectExtension(project: Project) {
   // statixDependencies must be in a separate property, since its finalized
   // value is used to check if the settings property can be finalized
-  val statixDependencies: Property<List<Project>> = project.objects.property()
+  val statixDependencies: ListProperty<Project> = project.objects.listProperty()
   val settings: Property<LanguageProjectSettings> = project.objects.property()
 
   init {
     settings.convention(LanguageProjectSettings())
-    statixDependencies.convention(listOf())
   }
 
   companion object {
@@ -189,7 +189,7 @@ internal class LanguageProjectFinalized(
 }
 
 internal fun Project.whenLanguageProjectFinalized(closure: () -> Unit) = whenFinalized<LanguageProjectExtension> {
-  val extension : LanguageProjectExtension = extensions.getByType()
+  val extension: LanguageProjectExtension = extensions.getByType()
   // Project is fully finalized only iff all dependencies are finalized as well
   extension.statixDependenciesFinalized.whenAllLanguageProjectsFinalized(closure)
 }
