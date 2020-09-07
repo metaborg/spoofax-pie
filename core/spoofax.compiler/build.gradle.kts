@@ -61,8 +61,43 @@ sourceSets {
   }
 }
 
-tasks.register<CompileJava>("daggerCompileJava") {
-
+// HACK: run dagger annotation processor as a separate compilation step, ensuring that other annotation processors have
+// run before it. This solves the problem where Dagger fails to run because of compile errors due to sources of other
+// annotation processors not being included (or those annotation processors have not executed yet). We run into this
+// problem because our own source files reference yet-to-be-generated source files, inducing a sort of cyclic dependency.
+val daggerAnnotationProcessor = configurations.create("daggerAnnotationProcessor")
+dependencies {
+  daggerAnnotationProcessor(platform(project(":spoofax.depconstraints")))
+  daggerAnnotationProcessor("com.google.dagger:dagger-compiler")
+}
+val daggerJavaCompile = tasks.create<JavaCompile>("daggerJavaCompile") {
+  dependsOn(daggerAnnotationProcessor)
+  dependsOn(tasks.compileJava)
+  options.annotationProcessorPath = daggerAnnotationProcessor
+}
+sourceSets.main.configure {
+  daggerJavaCompile.source = java.plus(this.output.generatedSourcesDirs.asFileTree) // Add generated sources
+  daggerJavaCompile.classpath = compileClasspath
+  daggerJavaCompile.destinationDir = java.outputDir
+  daggerJavaCompile.options.annotationProcessorGeneratedSourcesDirectory = this.output.generatedSourcesDirs.singleFile
+}
+tasks.classes.configure {
+  dependsOn(daggerJavaCompile)
+}
+tasks.jar.configure {
+  dependsOn(daggerJavaCompile)
+}
+tasks.assemble.configure {
+  dependsOn(daggerJavaCompile)
+}
+daggerAnnotationProcessor.outgoing.artifact(tasks.jar) {
+  builtBy(daggerJavaCompile)
+}
+run {
+  val javaComponent = project.components.findByName("java") as AdhocComponentWithVariants
+  javaComponent.addVariantsFromConfiguration(daggerAnnotationProcessor) {
+    mapToMavenScope("compile")
+  }
 }
 
 // Task that writes (dependency) versions to a versions.properties file, which is used in the Shared class.
