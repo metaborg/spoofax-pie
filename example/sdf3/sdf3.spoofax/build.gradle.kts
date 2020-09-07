@@ -17,11 +17,11 @@ plugins {
 spoofaxAdapterProject {
   languageProject.set(project(":sdf3"))
   settings.set(AdapterProjectSettings(
-    parser = ParserCompiler.AdapterProjectInput.builder(),
-    styler = StylerCompiler.AdapterProjectInput.builder(),
-    completer = CompleterCompiler.AdapterProjectInput.builder(),
-    strategoRuntime = StrategoRuntimeCompiler.AdapterProjectInput.builder(),
-    constraintAnalyzer = ConstraintAnalyzerCompiler.AdapterProjectInput.builder(),
+    parser = ParserAdapterCompiler.Input.builder(),
+    styler = StylerAdapterCompiler.Input.builder(),
+    completer = CompleterAdapterCompiler.Input.builder(),
+    strategoRuntime = StrategoRuntimeAdapterCompiler.Input.builder(),
+    constraintAnalyzer = ConstraintAnalyzerAdapterCompiler.Input.builder(),
 
     builder = run {
       val packageId = "mb.sdf3.spoofax"

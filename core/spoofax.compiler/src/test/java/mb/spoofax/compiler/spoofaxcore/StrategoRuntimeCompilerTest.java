@@ -1,21 +1,22 @@
 package mb.spoofax.compiler.spoofaxcore;
 
+import mb.pie.api.MixedSession;
 import mb.resource.fs.FSPath;
 import mb.spoofax.compiler.spoofaxcore.tiger.TigerInputs;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-
 class StrategoRuntimeCompilerTest extends TestBase {
-    @Test void testCompilerDefaults() throws IOException {
+    @Test void testCompilerDefaults() throws Exception {
         final FSPath baseDirectory = new FSPath(fileSystem.getPath("repo"));
         final Shared shared = TigerInputs.shared(baseDirectory).build();
         final LanguageProject languageProject = TigerInputs.languageProject(shared).build();
         final StrategoRuntimeLanguageCompiler.Input input = TigerInputs.strategoRuntimeLanguageProjectInput(shared, languageProject).build();
 
-        strategoRuntimeCompiler.compileLanguageProject(input);
-        fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {
-            s.assertPublicJavaClass(input.genFactory(), "TigerStrategoRuntimeBuilderFactory");
-        });
+        try(MixedSession session = pie.newSession()) {
+            session.require(component.getStrategoRuntimeLanguageCompiler().createTask(input));
+            fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {
+                s.assertPublicJavaClass(input.genFactory(), "TigerStrategoRuntimeBuilderFactory");
+            });
+        }
     }
 }

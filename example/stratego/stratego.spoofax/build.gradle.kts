@@ -33,10 +33,10 @@ dependencies {
 spoofaxAdapterProject {
   languageProject.set(project(":stratego"))
   settings.set(AdapterProjectSettings(
-    parser = ParserCompiler.AdapterProjectInput.builder(),
-    styler = StylerCompiler.AdapterProjectInput.builder(),
-    completer = CompleterCompiler.AdapterProjectInput.builder(),
-    strategoRuntime = StrategoRuntimeCompiler.AdapterProjectInput.builder(),
+    parser = ParserAdapterCompiler.Input.builder(),
+    styler = StylerAdapterCompiler.Input.builder(),
+    completer = CompleterAdapterCompiler.Input.builder(),
+    strategoRuntime = StrategoRuntimeAdapterCompiler.Input.builder(),
 
     builder = run {
       val packageId = "mb.str.spoofax"

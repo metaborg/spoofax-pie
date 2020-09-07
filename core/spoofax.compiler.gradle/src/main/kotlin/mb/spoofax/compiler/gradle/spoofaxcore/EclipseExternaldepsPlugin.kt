@@ -28,7 +28,7 @@ open class EclipseExternaldepsProjectSettings(
       .adapterProjectDependency(adapterProjectFinalized.input.adapterProject().project().asProjectDependency())
       .build()
 
-    return EclipseExternaldepsProjectFinalized(input, languageProjectFinalized.compilers)
+    return EclipseExternaldepsProjectFinalized(input, languageProjectFinalized)
   }
 }
 
@@ -66,10 +66,11 @@ open class EclipseExternaldepsProjectExtension(project: Project) {
 
 internal class EclipseExternaldepsProjectFinalized(
   val input: EclipseExternaldepsProjectCompiler.Input,
-  val compilers: Compilers
+  languageProjectFinalized: LanguageProjectFinalized
 ) {
-  val resourceService = compilers.resourceService
-  val compiler = compilers.eclipseExternaldepsProjectCompiler
+  val pie = languageProjectFinalized.pie
+  val resourceService = languageProjectFinalized.resourceService
+  val compiler = languageProjectFinalized.component.eclipseExternaldepsProjectCompiler
 }
 
 internal fun Project.whenEclipseExternaldepsProjectFinalized(closure: () -> Unit) = whenFinalized<EclipseExternaldepsProjectExtension>(closure)
@@ -118,7 +119,9 @@ open class EclipseExternaldepsPlugin : Plugin<Project> {
 
       doLast {
         project.deleteGenSourceSpoofaxDirectory(input.project(), finalized.resourceService)
-        finalized.compiler.compile(input)
+        finalized.pie.newSession().use { session ->
+          session.require(finalized.compiler.createTask(input))
+        }
       }
     }
 

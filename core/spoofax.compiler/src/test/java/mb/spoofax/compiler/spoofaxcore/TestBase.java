@@ -2,63 +2,48 @@ package mb.spoofax.compiler.spoofaxcore;
 
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
-import mb.resource.DefaultResourceService;
+import mb.pie.api.ExecException;
+import mb.pie.api.MixedSession;
+import mb.pie.api.Pie;
+import mb.pie.runtime.PieBuilderImpl;
 import mb.resource.ResourceService;
-import mb.resource.fs.FSResourceRegistry;
+import mb.spoofax.compiler.dagger.SpoofaxCompilerModule;
 import mb.spoofax.compiler.spoofaxcore.tiger.TigerInputs;
 import mb.spoofax.compiler.spoofaxcore.util.FileAssertions;
 import mb.spoofax.compiler.util.GradleDependency;
 import mb.spoofax.compiler.util.TemplateCompiler;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 
 class TestBase {
     final FileSystem fileSystem = Jimfs.newFileSystem(Configuration.unix());
-    final ResourceService resourceService = new DefaultResourceService(new FSResourceRegistry());
+    final SpoofaxCompilerTestComponent component = DaggerSpoofaxCompilerTestComponent.builder()
+        .spoofaxCompilerModule(new SpoofaxCompilerModule(new TemplateCompiler(Shared.class, StandardCharsets.UTF_8)))
+        .spoofaxCompilerTestModule(new SpoofaxCompilerTestModule(PieBuilderImpl::new))
+        .build();
+    final ResourceService resourceService = component.getResourceService();
+    final Pie pie = component.getPie();
     final FileAssertions fileAssertions = new FileAssertions(resourceService);
-    final Charset charset = StandardCharsets.UTF_8;
 
-    final TemplateCompiler templateCompiler = new TemplateCompiler(Shared.class, resourceService, charset);
-    final ClassloaderResourcesCompiler classloaderResourcesCompiler = new ClassloaderResourcesCompiler(templateCompiler);
-    final ParserLanguageCompiler parserCompiler = new ParserLanguageCompiler(templateCompiler);
-    final StylerLanguageCompiler stylerCompiler = new StylerLanguageCompiler(templateCompiler);
-    final CompleterLanguageCompiler completerCompiler = new CompleterLanguageCompiler(templateCompiler);
-    final StrategoRuntimeLanguageCompiler strategoRuntimeCompiler = new StrategoRuntimeLanguageCompiler(templateCompiler);
-    final ConstraintAnalyzerLanguageCompiler constraintAnalyzerCompiler = new ConstraintAnalyzerLanguageCompiler(templateCompiler);
-    final MultilangAnalyzerLanguageCompiler multilangAnalyzerCompiler = new MultilangAnalyzerLanguageCompiler(templateCompiler);
-
-    final RootProjectCompiler rootProjectCompiler = new RootProjectCompiler(templateCompiler);
-    final LanguageProjectCompiler languageProjectCompiler = new LanguageProjectCompiler(templateCompiler, classloaderResourcesCompiler, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler, multilangAnalyzerCompiler);
-    final AdapterProjectCompiler adapterProjectCompiler = new AdapterProjectCompiler(templateCompiler, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler, multilangAnalyzerCompiler);
-
-    final CliProjectCompiler cliProjectCompiler = new CliProjectCompiler(templateCompiler);
-
-    final EclipseExternaldepsProjectCompiler eclipseExternaldepsProjectCompiler = new EclipseExternaldepsProjectCompiler(templateCompiler);
-    final EclipseProjectCompiler eclipseProjectCompiler = new EclipseProjectCompiler(templateCompiler);
-
-    final IntellijProjectCompiler intellijProjectCompiler = new IntellijProjectCompiler(templateCompiler);
-
-
-    LanguageProjectCompiler.Input compileLanguageProject(Shared shared, LanguageProject languageProject) throws IOException {
+    LanguageProjectCompiler.Input compileLanguageProject(MixedSession session, Shared shared, LanguageProject languageProject) throws ExecException, InterruptedException {
         final LanguageProjectCompiler.Input input = TigerInputs.languageProjectInput(shared, languageProject).build();
-        languageProjectCompiler.compile(input);
+        session.require(component.getLanguageProjectCompiler().createTask(input));
         return input;
     }
 
-    AdapterProjectCompiler.Input compileAdapterProject(Shared shared, LanguageProject languageProject, AdapterProject adapterProject) throws IOException {
+    AdapterProjectCompiler.Input compileAdapterProject(MixedSession session, Shared shared, LanguageProject languageProject, AdapterProject adapterProject) throws IOException, ExecException, InterruptedException {
         final AdapterProjectCompiler.Input input = TigerInputs.adapterProjectInput(shared, languageProject, adapterProject)
             .languageProjectDependency(GradleDependency.project(":" + languageProject.project().coordinate().artifactId()))
             .build();
         TigerInputs.copyTaskDefsIntoAdapterProject(input, resourceService);
-        adapterProjectCompiler.compile(input);
+        session.require(component.getAdapterProjectCompiler().createTask(input));
         return input;
     }
 
-    AdapterProjectCompiler.Input compileLanguageAndAdapterProject(Shared shared, LanguageProject languageProject, AdapterProject adapterProject) throws IOException {
-        compileLanguageProject(shared, languageProject);
-        return compileAdapterProject(shared, languageProject, adapterProject);
+    AdapterProjectCompiler.Input compileLanguageAndAdapterProject(MixedSession session, Shared shared, LanguageProject languageProject, AdapterProject adapterProject) throws IOException, ExecException, InterruptedException {
+        compileLanguageProject(session, shared, languageProject);
+        return compileAdapterProject(session, shared, languageProject, adapterProject);
     }
 }

@@ -3,9 +3,9 @@
 package mb.spoofax.compiler.gradle.spoofaxcore
 
 import mb.common.util.Properties
-import mb.resource.DefaultResourceService
+import mb.pie.runtime.PieBuilderImpl
 import mb.resource.fs.FSPath
-import mb.resource.fs.FSResourceRegistry
+import mb.spoofax.compiler.dagger.*
 import mb.spoofax.compiler.spoofaxcore.*
 import mb.spoofax.compiler.util.*
 import org.gradle.api.GradleException
@@ -22,25 +22,6 @@ import org.gradle.api.tasks.Sync
 import org.gradle.kotlin.dsl.*
 import java.io.IOException
 import java.nio.charset.StandardCharsets
-
-open class Compilers {
-  internal val resourceService = DefaultResourceService(FSResourceRegistry())
-  internal val charset = StandardCharsets.UTF_8
-  internal val templateCompiler = TemplateCompiler(Shared::class.java, resourceService, charset)
-  internal val classloaderResourceService = ClassloaderResourcesCompiler(templateCompiler)
-  internal val parserCompiler = ParserLanguageCompiler(templateCompiler)
-  internal val stylerCompiler = StylerLanguageCompiler(templateCompiler)
-  internal val completerCompiler = CompleterLanguageCompiler(templateCompiler)
-  internal val strategoRuntimeCompiler = StrategoRuntimeLanguageCompiler(templateCompiler)
-  internal val constraintAnalyzerCompiler = ConstraintAnalyzerLanguageCompiler(templateCompiler)
-  internal val multilangAnalyzerCompiler = MultilangAnalyzerLanguageCompiler(templateCompiler)
-  internal val languageProjectCompiler = LanguageProjectCompiler(templateCompiler, classloaderResourceService, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler, multilangAnalyzerCompiler)
-  internal val adapterProjectCompiler = AdapterProjectCompiler(templateCompiler, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler, multilangAnalyzerCompiler)
-  internal val cliProjectCompiler = CliProjectCompiler(templateCompiler)
-  internal val eclipseExternaldepsProjectCompiler = EclipseExternaldepsProjectCompiler(templateCompiler)
-  internal val eclipseProjectCompiler = EclipseProjectCompiler(templateCompiler)
-  internal val intellijProjectCompiler = IntellijProjectCompiler(templateCompiler)
-}
 
 open class LanguageProjectSettings(
   val shared: Shared.Builder = Shared.builder(),
@@ -123,7 +104,12 @@ open class LanguageProjectSettings(
       }
     }
 
-    return LanguageProjectFinalized(shared, input, Compilers())
+    val component = DaggerSpoofaxCompilerGradleComponent.builder()
+      .spoofaxCompilerModule(SpoofaxCompilerModule(TemplateCompiler(Shared::class.java, StandardCharsets.UTF_8)))
+      .spoofaxCompilerGradleModule(SpoofaxCompilerGradleModule({ PieBuilderImpl() }))
+      .build()
+
+    return LanguageProjectFinalized(shared, input, component)
   }
 
   internal fun addStatixDependencies(statixDependencies: List<Project>) {
@@ -182,10 +168,11 @@ open class LanguageProjectExtension(project: Project) {
 internal class LanguageProjectFinalized(
   val shared: Shared,
   val input: LanguageProjectCompiler.Input,
-  val compilers: Compilers
+  val component: SpoofaxCompilerGradleComponent
 ) {
-  val resourceService = compilers.resourceService
-  val compiler = compilers.languageProjectCompiler
+  val resourceService = component.resourceService
+  val pie = component.pie
+  val compiler = component.languageProjectCompiler
 }
 
 internal fun Project.whenLanguageProjectFinalized(closure: () -> Unit) = whenFinalized<LanguageProjectExtension> {
@@ -232,7 +219,9 @@ open class LanguagePlugin : Plugin<Project> {
 
       doLast {
         project.deleteGenSourceSpoofaxDirectory(input.languageProject().project(), finalized.resourceService)
-        finalized.compiler.compile(input)
+        finalized.pie.newSession().use { session ->
+          session.require(finalized.compiler.createTask(input))
+        }
       }
     }
 

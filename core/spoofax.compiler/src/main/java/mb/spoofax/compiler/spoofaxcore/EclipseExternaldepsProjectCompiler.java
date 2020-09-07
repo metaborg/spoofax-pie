@@ -22,7 +22,7 @@ import java.util.List;
 public class EclipseExternaldepsProjectCompiler implements TaskDef<EclipseExternaldepsProjectCompiler.Input, EclipseExternaldepsProjectCompiler.Output> {
     private final TemplateWriter buildGradleTemplate;
 
-    public EclipseExternaldepsProjectCompiler(TemplateCompiler templateCompiler) {
+    @Inject public EclipseExternaldepsProjectCompiler(TemplateCompiler templateCompiler) {
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("eclipse_externaldeps_project/build.gradle.kts.mustache");
     }
 

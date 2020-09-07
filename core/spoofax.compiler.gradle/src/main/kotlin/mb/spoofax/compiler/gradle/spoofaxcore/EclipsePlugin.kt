@@ -29,7 +29,7 @@ open class EclipseProjectSettings(
       .adapterProjectCompilerInput(adapterProjectFinalized.input)
       .build()
 
-    return EclipseProjectFinalized(input, languageProjectFinalized.compilers)
+    return EclipseProjectFinalized(input, languageProjectFinalized)
   }
 }
 
@@ -77,10 +77,11 @@ open class EclipseProjectExtension(project: Project) {
 
 internal class EclipseProjectFinalized(
   val input: EclipseProjectCompiler.Input,
-  val compilers: Compilers
+  languageProjectFinalized: LanguageProjectFinalized
 ) {
-  val resourceService = compilers.resourceService
-  val compiler = compilers.eclipseProjectCompiler
+  val pie = languageProjectFinalized.pie
+  val resourceService = languageProjectFinalized.resourceService
+  val compiler = languageProjectFinalized.component.eclipseProjectCompiler
 }
 
 open class EclipsePlugin : Plugin<Project> {
@@ -123,7 +124,9 @@ open class EclipsePlugin : Plugin<Project> {
 
       doLast {
         project.deleteGenSourceSpoofaxDirectory(input.project(), finalized.resourceService)
-        finalized.compiler.compile(input)
+        finalized.pie.newSession().use { session ->
+          session.require(finalized.compiler.createTask(input))
+        }
       }
     }
 

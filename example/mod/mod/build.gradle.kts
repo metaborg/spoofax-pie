@@ -20,16 +20,16 @@ spoofaxLanguageProject {
       .name("Mod")
       .defaultBasePackageId("mb.mod"),
 
-    parser = ParserCompiler.LanguageProjectInput.builder()
+    parser = ParserLanguageCompiler.Input.builder()
       .startSymbol("Start"),
-    styler = StylerCompiler.LanguageProjectInput.builder(),
-    completer = CompleterCompiler.LanguageProjectInput.builder(),
-    strategoRuntime = StrategoRuntimeCompiler.LanguageProjectInput.builder()
+    styler = StylerLanguageCompiler.Input.builder(),
+    completer = CompleterLanguageCompiler.Input.builder(),
+    strategoRuntime = StrategoRuntimeLanguageCompiler.Input.builder()
       .enableNaBL2(false)
       .enableStatix(true)
       .copyCTree(true)
       .copyClasses(false),
-    constraintAnalyzer = ConstraintAnalyzerCompiler.LanguageProjectInput.builder()
+    constraintAnalyzer = ConstraintAnalyzerLanguageCompiler.Input.builder()
       .multiFile(true),
 
     builder = LanguageProjectCompiler.Input.builder()

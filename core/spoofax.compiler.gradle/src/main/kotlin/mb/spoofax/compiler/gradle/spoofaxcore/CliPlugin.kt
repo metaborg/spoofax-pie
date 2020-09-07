@@ -32,7 +32,7 @@ open class CliProjectSettings(
       .adapterProjectCompilerInput(adapterProjectFinalized.input)
       .build()
 
-    return CliProjectFinalized(input, languageProjectFinalized.compilers)
+    return CliProjectFinalized(input, languageProjectFinalized)
   }
 }
 
@@ -70,10 +70,11 @@ open class CliProjectExtension(project: Project) {
 
 internal class CliProjectFinalized(
   val input: CliProjectCompiler.Input,
-  val compilers: Compilers
+  languageProjectFinalized: LanguageProjectFinalized
 ) {
-  val resourceService = compilers.resourceService
-  val compiler = compilers.cliProjectCompiler
+  val pie = languageProjectFinalized.pie
+  val resourceService = languageProjectFinalized.resourceService
+  val compiler = languageProjectFinalized.component.cliProjectCompiler
 }
 
 @Suppress("unused")
@@ -117,7 +118,9 @@ open class CliPlugin : Plugin<Project> {
 
       doLast {
         project.deleteGenSourceSpoofaxDirectory(input.project(), finalized.resourceService)
-        finalized.compiler.compile(input)
+        finalized.pie.newSession().use { session ->
+          session.require(finalized.compiler.createTask(input))
+        }
       }
     }
 

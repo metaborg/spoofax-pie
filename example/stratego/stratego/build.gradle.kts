@@ -15,11 +15,11 @@ spoofaxLanguageProject {
       .defaultClassPrefix("Stratego")
       .defaultBasePackageId("mb.str"),
 
-    parser = ParserCompiler.LanguageProjectInput.builder()
+    parser = ParserLanguageCompiler.Input.builder()
       .startSymbol("Module"),
-    styler = StylerCompiler.LanguageProjectInput.builder(),
-    completer = CompleterCompiler.LanguageProjectInput.builder(),
-    strategoRuntime = StrategoRuntimeCompiler.LanguageProjectInput.builder()
+    styler = StylerLanguageCompiler.Input.builder(),
+    completer = CompleterLanguageCompiler.Input.builder(),
+    strategoRuntime = StrategoRuntimeLanguageCompiler.Input.builder()
       .addInteropRegisterersByReflection("org.metaborg.meta.lang.stratego.trans.InteropRegisterer")
       .enableNaBL2(false)
       .enableStatix(false)

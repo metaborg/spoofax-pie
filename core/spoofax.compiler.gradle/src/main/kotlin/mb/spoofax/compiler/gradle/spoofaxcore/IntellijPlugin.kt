@@ -28,7 +28,7 @@ open class IntellijProjectSettings(
       .adapterProjectCompilerInput(adapterProjectFinalized.input)
       .build()
 
-    return IntellijProjectCompilerFinalized(input, languageProjectFinalized.compilers)
+    return IntellijProjectCompilerFinalized(input, languageProjectFinalized)
   }
 }
 
@@ -66,10 +66,11 @@ open class IntellijProjectCompilerExtension(project: Project) {
 
 internal class IntellijProjectCompilerFinalized(
   val input: IntellijProjectCompiler.Input,
-  val compilers: Compilers
+  languageProjectFinalized: LanguageProjectFinalized
 ) {
-  val resourceService = compilers.resourceService
-  val compiler = compilers.intellijProjectCompiler
+  val pie = languageProjectFinalized.pie
+  val resourceService = languageProjectFinalized.resourceService
+  val compiler = languageProjectFinalized.component.intellijProjectCompiler
 }
 
 open class IntellijPlugin : Plugin<Project> {
@@ -118,7 +119,9 @@ open class IntellijPlugin : Plugin<Project> {
 
       doLast {
         project.deleteGenSourceSpoofaxDirectory(input.project(), finalized.resourceService)
-        finalized.compiler.compile(input)
+        finalized.pie.newSession().use { session ->
+          session.require(finalized.compiler.createTask(input))
+        }
       }
     }
 

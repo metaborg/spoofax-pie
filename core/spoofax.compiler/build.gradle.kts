@@ -22,7 +22,6 @@ dependencies {
   api(project(":spoofax.core"))
   api("org.metaborg:resource")
   api("org.metaborg:pie.api")
-  api("com.google.dagger:dagger")
 
   api("com.samskivert:jmustache:1.15")
 
@@ -32,15 +31,18 @@ dependencies {
 
   annotationProcessor("org.immutables:value")
   annotationProcessor("org.derive4j:derive4j")
-//  annotationProcessor("com.google.dagger:dagger-compiler")
 
+  testImplementation(project(":spoofax.compiler.dagger"))
+  testImplementation("com.google.dagger:dagger")
+  testImplementation("org.metaborg:pie.runtime")
   testImplementation("org.junit.jupiter:junit-jupiter-params:${metaborg.junitVersion}")
   testImplementation("com.google.jimfs:jimfs:1.1")
   testImplementation("org.eclipse.jdt:org.eclipse.jdt.core:3.19.0")
   testImplementation("org.gradle:gradle-tooling-api:5.6.4")
   testRuntimeOnly("org.slf4j:slf4j-simple:1.7.10") // SLF4J implementation required for Gradle tooling API.
   testCompileOnly("org.checkerframework:checker-qual-android")
-  //testAnnotationProcessor("com.google.dagger:dagger-compiler")
+  testCompileOnly("org.immutables:value-annotations") // Dagger accesses these annotations, which have class retention.
+  testAnnotationProcessor("com.google.dagger:dagger-compiler")
 }
 
 tasks.test {
@@ -58,45 +60,6 @@ sourceSets {
     resources {
       srcDir(generatedResourcesDir)
     }
-  }
-}
-
-// HACK: run dagger annotation processor as a separate compilation step, ensuring that other annotation processors have
-// run before it. This solves the problem where Dagger fails to run because of compile errors due to sources of other
-// annotation processors not being included (or those annotation processors have not executed yet). We run into this
-// problem because our own source files reference yet-to-be-generated source files, inducing a sort of cyclic dependency.
-val daggerAnnotationProcessor = configurations.create("daggerAnnotationProcessor")
-dependencies {
-  daggerAnnotationProcessor(platform(project(":spoofax.depconstraints")))
-  daggerAnnotationProcessor("com.google.dagger:dagger-compiler")
-}
-val daggerJavaCompile = tasks.create<JavaCompile>("daggerJavaCompile") {
-  dependsOn(daggerAnnotationProcessor)
-  dependsOn(tasks.compileJava)
-  options.annotationProcessorPath = daggerAnnotationProcessor
-}
-sourceSets.main.configure {
-  daggerJavaCompile.source = java.plus(this.output.generatedSourcesDirs.asFileTree) // Add generated sources
-  daggerJavaCompile.classpath = compileClasspath
-  daggerJavaCompile.destinationDir = java.outputDir
-  daggerJavaCompile.options.annotationProcessorGeneratedSourcesDirectory = this.output.generatedSourcesDirs.singleFile
-}
-tasks.classes.configure {
-  dependsOn(daggerJavaCompile)
-}
-tasks.jar.configure {
-  dependsOn(daggerJavaCompile)
-}
-tasks.assemble.configure {
-  dependsOn(daggerJavaCompile)
-}
-daggerAnnotationProcessor.outgoing.artifact(tasks.jar) {
-  builtBy(daggerJavaCompile)
-}
-run {
-  val javaComponent = project.components.findByName("java") as AdhocComponentWithVariants
-  javaComponent.addVariantsFromConfiguration(daggerAnnotationProcessor) {
-    mapToMavenScope("compile")
   }
 }
 

@@ -21,11 +21,11 @@ spoofaxLanguageProject {
       .defaultClassPrefix("Sdf3")
       .defaultBasePackageId("mb.sdf3"),
 
-    parser = ParserCompiler.LanguageProjectInput.builder()
+    parser = ParserLanguageCompiler.Input.builder()
       .startSymbol("Module"),
-    styler = StylerCompiler.LanguageProjectInput.builder(),
-    completer = CompleterCompiler.LanguageProjectInput.builder(),
-    strategoRuntime = StrategoRuntimeCompiler.LanguageProjectInput.builder()
+    styler = StylerLanguageCompiler.Input.builder(),
+    completer = CompleterLanguageCompiler.Input.builder(),
+    strategoRuntime = StrategoRuntimeLanguageCompiler.Input.builder()
       .addInteropRegisterersByReflection("org.metaborg.meta.lang.template.strategies.InteropRegisterer")
       .enableNaBL2(false)
       .enableStatix(true)
@@ -33,7 +33,7 @@ spoofaxLanguageProject {
       .copyClasses(true)
       .classKind(mb.spoofax.compiler.util.ClassKind.Extended)
       .manualFactory("mb.sdf3", "Sdf3ManualStrategoRuntimeBuilderFactory"),
-    constraintAnalyzer = ConstraintAnalyzerCompiler.LanguageProjectInput.builder()
+    constraintAnalyzer = ConstraintAnalyzerLanguageCompiler.Input.builder()
       .strategoStrategy("statix-editor-analyze")
       .multiFile(true),
 

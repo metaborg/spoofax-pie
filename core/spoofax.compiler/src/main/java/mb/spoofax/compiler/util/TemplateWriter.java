@@ -22,6 +22,7 @@ public class TemplateWriter {
 
     public HierarchicalResource write(ExecContext execContext, ResourcePath path, Object context) throws IOException {
         final HierarchicalResource resource = execContext.getHierarchicalResource(path);
+        resource.createParents();
         try(final Writer writer = writer(resource)) {
             template.execute(context, writer);
             writer.flush();
@@ -32,6 +33,7 @@ public class TemplateWriter {
 
     public HierarchicalResource write(ExecContext execContext, ResourcePath path, Object context, Object parentContext) throws IOException {
         final HierarchicalResource resource = execContext.getHierarchicalResource(path);
+        resource.createParents();
         try(final Writer writer = writer(resource)) {
             template.execute(context, parentContext, writer);
             writer.flush();

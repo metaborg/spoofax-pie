@@ -13,13 +13,12 @@ import org.gradle.kotlin.dsl.*
 
 open class AdapterProjectSettings(
   val adapterProject: AdapterProject.Builder = AdapterProject.builder(),
-  val classloaderResources: ClassloaderResourcesCompiler.AdapterProjectInput.Builder = ClassloaderResourcesCompiler.AdapterProjectInput.builder(),
-  val parser: ParserLanguageCompiler.AdapterProjectInput.Builder? = null, // Optional
-  val styler: StylerLanguageCompiler.AdapterProjectInput.Builder? = null, // Optional
-  val completer: CompleterLanguageCompiler.AdapterProjectInput.Builder? = null, // Optional
-  val strategoRuntime: StrategoRuntimeLanguageCompiler.AdapterProjectInput.Builder? = null, // Optional
-  val constraintAnalyzer: ConstraintAnalyzerLanguageCompiler.AdapterProjectInput.Builder? = null, // Optional
-  val multilangAnalyzer: MultilangAnalyzerLanguageCompiler.AdapterProjectInput.Builder? = null, // Optional
+  val parser: ParserAdapterCompiler.Input.Builder? = null, // Optional
+  val styler: StylerAdapterCompiler.Input.Builder? = null, // Optional
+  val completer: CompleterAdapterCompiler.Input.Builder? = null, // Optional
+  val strategoRuntime: StrategoRuntimeAdapterCompiler.Input.Builder? = null, // Optional
+  val constraintAnalyzer: ConstraintAnalyzerAdapterCompiler.Input.Builder? = null, // Optional
+  val multilangAnalyzer: MultilangAnalyzerAdapterCompiler.Input.Builder? = null, // Optional
 
   val builder: AdapterProjectCompiler.Input.Builder = AdapterProjectCompiler.Input.builder()
 ) {
@@ -30,7 +29,6 @@ open class AdapterProjectSettings(
     val languageProjectCompilerInput = languageProjectFinalized.input
 
     val adapterProject = this.adapterProject.shared(shared).project(project.toSpoofaxCompilerProject()).build()
-    val classloaderResources = this.classloaderResources.languageProjectInput(languageProjectCompilerInput.classloaderResources()).build()
     val parser = if(this.parser != null) {
       if(!languageProjectCompilerInput.styler().isPresent) {
         throw GradleException("Parser adapter project input is present, but parser language project input is not")
@@ -71,7 +69,6 @@ open class AdapterProjectSettings(
     val builder = this.builder
       .shared(shared)
       .adapterProject(adapterProject)
-      .classloaderResources(classloaderResources)
       .languageProjectDependency(languageProject.toSpoofaxCompilerProject().asProjectDependency())
     if(parser != null) {
       builder.parser(parser)
@@ -133,13 +130,13 @@ internal class AdapterProjectFinalized(
   val input: AdapterProjectCompiler.Input,
   val languageProjectFinalized: LanguageProjectFinalized
 ) {
-  val compilers = languageProjectFinalized.compilers
-  val resourceService = compilers.resourceService
-  val compiler = compilers.adapterProjectCompiler
+  val pie = languageProjectFinalized.pie
+  val resourceService = languageProjectFinalized.resourceService
+  val compiler = languageProjectFinalized.component.adapterProjectCompiler
 }
 
 internal fun Project.whenAdapterProjectFinalized(closure: () -> Unit) = whenFinalized<AdapterProjectExtension> {
-  val extension : AdapterProjectExtension = extensions.getByType()
+  val extension: AdapterProjectExtension = extensions.getByType()
   // Adapter project is only fully finalized when its dependent language project is finalized as well
   extension.languageProjectFinalized.whenLanguageProjectFinalized(closure)
 }
@@ -180,7 +177,9 @@ open class AdapterPlugin : Plugin<Project> {
 
       doLast {
         project.deleteGenSourceSpoofaxDirectory(input.adapterProject().project(), finalized.resourceService)
-        finalized.compiler.compile(input)
+        finalized.pie.newSession().use { session ->
+          session.require(finalized.compiler.createTask(input))
+        }
       }
     }
 
