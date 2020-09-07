@@ -1,6 +1,8 @@
 package mb.spoofax.compiler.spoofaxcore;
 
 import com.samskivert.mustache.Mustache;
+import mb.pie.api.ExecContext;
+import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.cli.CliCommandRepr;
 import mb.spoofax.compiler.command.AutoCommandRequestRepr;
@@ -21,9 +23,8 @@ import mb.spoofax.core.language.taskdef.NullTokenizer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 
-import java.io.IOException;
+import javax.inject.Inject;
 import java.io.Serializable;
-import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +32,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Value.Enclosing
-public class AdapterProjectCompiler {
+public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.Input, AdapterProjectCompiler.Output> {
     private final TemplateWriter buildGradleTemplate;
     private final TemplateWriter packageInfoTemplate;
     private final TemplateWriter checkTaskDefTemplate;
@@ -42,21 +43,21 @@ public class AdapterProjectCompiler {
     private final TemplateWriter instanceTemplate;
     private final TemplateWriter commandDefTemplate;
 
-    private final ParserCompiler parserCompiler;
-    private final StylerCompiler stylerCompiler;
-    private final CompleterCompiler completerCompiler;
-    private final StrategoRuntimeCompiler strategoRuntimeCompiler;
-    private final ConstraintAnalyzerCompiler constraintAnalyzerCompiler;
-    private final MultilangAnalyzerCompiler multilangAnalyzerCompiler;
+    private final ParserAdapterCompiler parserCompiler;
+    private final StylerAdapterCompiler stylerCompiler;
+    private final CompleterAdapterCompiler completerCompiler;
+    private final StrategoRuntimeAdapterCompiler strategoRuntimeCompiler;
+    private final ConstraintAnalyzerAdapterCompiler constraintAnalyzerCompiler;
+    private final MultilangAnalyzerAdapterCompiler multilangAnalyzerCompiler;
 
-    public AdapterProjectCompiler(
+    @Inject public AdapterProjectCompiler(
         TemplateCompiler templateCompiler,
-        ParserCompiler parserCompiler,
-        StylerCompiler stylerCompiler,
-        CompleterCompiler completerCompiler,
-        StrategoRuntimeCompiler strategoRuntimeCompiler,
-        ConstraintAnalyzerCompiler constraintAnalyzerCompiler,
-        MultilangAnalyzerCompiler multilangAnalyzerCompiler
+        ParserAdapterCompiler parserCompiler,
+        StylerAdapterCompiler stylerCompiler,
+        CompleterAdapterCompiler completerCompiler,
+        StrategoRuntimeAdapterCompiler strategoRuntimeCompiler,
+        ConstraintAnalyzerAdapterCompiler constraintAnalyzerCompiler,
+        MultilangAnalyzerAdapterCompiler multilangAnalyzerCompiler
     ) {
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("adapter_project/build.gradle.kts.mustache");
         this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("adapter_project/package-info.java.mustache");
@@ -76,87 +77,25 @@ public class AdapterProjectCompiler {
         this.multilangAnalyzerCompiler = multilangAnalyzerCompiler;
     }
 
-    public void generateInitial(Input input) throws IOException {
-        buildGradleTemplate.write(input.buildGradleKtsFile(), input);
+
+    @Override public String getId() {
+        return getClass().getName();
     }
 
-    public ArrayList<GradleConfiguredDependency> getDependencies(Input input) {
-        final Shared shared = input.shared();
-        final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
-        dependencies.add(GradleConfiguredDependency.apiPlatform(shared.spoofaxDependencyConstraintsDep()));
-        dependencies.add(GradleConfiguredDependency.annotationProcessorPlatform(shared.spoofaxDependencyConstraintsDep()));
-        dependencies.add(GradleConfiguredDependency.api(input.languageProjectDependency()));
-        dependencies.add(GradleConfiguredDependency.api(shared.spoofaxCoreDep()));
-        dependencies.add(GradleConfiguredDependency.api(shared.pieApiDep()));
-        dependencies.add(GradleConfiguredDependency.api(shared.daggerDep()));
-        dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
-        dependencies.add(GradleConfiguredDependency.annotationProcessor(shared.daggerCompilerDep()));
-        input.parser().ifPresent((i) -> {
-            parserCompiler.getAdapterProjectDependencies(i).addAllTo(dependencies);
-        });
-        input.constraintAnalyzer().ifPresent((i) -> {
-            constraintAnalyzerCompiler.getAdapterProjectDependencies(i).addAllTo(dependencies);
-        });
-        input.strategoRuntime().ifPresent((i) -> {
-            strategoRuntimeCompiler.getAdapterProjectDependencies(i).addAllTo(dependencies);
-        });
-        return dependencies;
-    }
-
-    public Output compile(Input input) throws IOException {
+    @Override public Output exec(ExecContext context, Input input) throws Exception {
         final Shared shared = input.shared();
 
         // Files from other compilers.
-        try {
-            input.parser().ifPresent((i) -> {
-                try {
-                    parserCompiler.compileAdapterProject(i);
-                } catch(IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            });
-            input.styler().ifPresent((i) -> {
-                try {
-                    stylerCompiler.compileAdapterProject(i);
-                } catch(IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            });
-            input.completer().ifPresent((i) -> {
-                try {
-                    completerCompiler.compileAdapterProject(i);
-                } catch(IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            });
-            input.strategoRuntime().ifPresent((i) -> {
-                try {
-                    strategoRuntimeCompiler.compileAdapterProject(i);
-                } catch(IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            });
-            input.constraintAnalyzer().ifPresent((i) -> {
-                try {
-                    constraintAnalyzerCompiler.compileAdapterProject(i);
-                } catch(IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            });
-            input.multilangAnalyzer().ifPresent((i) -> {
-                try {
-                    multilangAnalyzerCompiler.compileAdapterProject(i);
-                } catch(IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            });
-        } catch(UncheckedIOException e) {
-            throw e.getCause();
-        }
+        input.parser().ifPresent((i) -> context.require(parserCompiler, i));
+        input.styler().ifPresent((i) -> context.require(stylerCompiler, i));
+        input.completer().ifPresent((i) -> context.require(completerCompiler, i));
+        input.strategoRuntime().ifPresent((i) -> context.require(strategoRuntimeCompiler, i));
+        input.constraintAnalyzer().ifPresent((i) -> context.require(constraintAnalyzerCompiler, i));
+        input.multilangAnalyzer().ifPresent((i) -> context.require(multilangAnalyzerCompiler, i));
 
         // Collect all task definitions.
         final ArrayList<TypeInfo> allTaskDefs = new ArrayList<>(input.taskDefs());
-        if(input.parser().isPresent()){
+        if(input.parser().isPresent()) {
             allTaskDefs.add(input.parser().get().tokenizeTaskDef());
             allTaskDefs.add(input.parser().get().parseTaskDef());
         } else {
@@ -191,16 +130,16 @@ public class AdapterProjectCompiler {
 
         // Class files
         final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        packageInfoTemplate.write(input.packageInfo().file(classesGenDirectory), input);
-        checkTaskDefTemplate.write(input.genCheckTaskDef().file(classesGenDirectory), input);
-        checkMultiTaskDefTemplate.write(input.genCheckMultiTaskDef().file(classesGenDirectory), input);
-        checkAggregatorTaskDefTemplate.write(input.genCheckAggregatorTaskDef().file(classesGenDirectory), input);
-        componentTemplate.write(input.genComponent().file(classesGenDirectory), input);
+        packageInfoTemplate.write(context, input.packageInfo().file(classesGenDirectory), input);
+        checkTaskDefTemplate.write(context, input.genCheckTaskDef().file(classesGenDirectory), input);
+        checkMultiTaskDefTemplate.write(context, input.genCheckMultiTaskDef().file(classesGenDirectory), input);
+        checkAggregatorTaskDefTemplate.write(context, input.genCheckAggregatorTaskDef().file(classesGenDirectory), input);
+        componentTemplate.write(context, input.genComponent().file(classesGenDirectory), input);
         for(CommandDefRepr commandDef : input.commandDefs()) {
             final UniqueNamer uniqueNamer = new UniqueNamer();
             final HashMap<String, Object> map = new HashMap<>();
             map.put("taskDefInjection", uniqueNamer.makeUnique(commandDef.taskDefType()));
-            commandDefTemplate.write(commandDef.type().file(classesGenDirectory), commandDef, map);
+            commandDefTemplate.write(context, commandDef.type().file(classesGenDirectory), commandDef, map);
         }
 
         {
@@ -211,7 +150,7 @@ public class AdapterProjectCompiler {
             map.put("providedCommandDefs", input.commandDefs().stream().map(CommandDefRepr::type).map(uniqueNamer::makeUnique).collect(Collectors.toList()));
             uniqueNamer.reset(); // New method scope
             map.put("providedAutoCommandDefs", input.autoCommandDefs().stream().map((c) -> uniqueNamer.makeUnique(c, c.commandDef().asVariableId())).collect(Collectors.toList()));
-            moduleTemplate.write(input.genModule().file(classesGenDirectory), input, map);
+            moduleTemplate.write(context, input.genModule().file(classesGenDirectory), input, map);
         }
         {
             final UniqueNamer uniqueNamer = new UniqueNamer();
@@ -277,22 +216,45 @@ public class AdapterProjectCompiler {
                 out.write(name);
             });
 
-            instanceTemplate.write(input.genInstance().file(classesGenDirectory), input, map);
+            instanceTemplate.write(context, input.genInstance().file(classesGenDirectory), input, map);
         }
 
-        return Output.builder().addAllProvidedFiles(input.providedFiles()).build();
+        return Output.builder().build();
     }
 
-    // Inputs
 
-    @Value.Immutable
-    public interface Input extends Serializable {
-        class Builder extends AdapterProjectCompilerData.Input.Builder {
-        }
+    //    public void generateInitial(Input input) throws IOException {
+//        buildGradleTemplate.write(input.buildGradleKtsFile(), input);
+//    }
 
-        static Builder builder() {
-            return new Builder();
-        }
+    public ArrayList<GradleConfiguredDependency> getDependencies(Input input) {
+        final Shared shared = input.shared();
+        final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
+        dependencies.add(GradleConfiguredDependency.apiPlatform(shared.spoofaxDependencyConstraintsDep()));
+        dependencies.add(GradleConfiguredDependency.annotationProcessorPlatform(shared.spoofaxDependencyConstraintsDep()));
+        dependencies.add(GradleConfiguredDependency.api(input.languageProjectDependency()));
+        dependencies.add(GradleConfiguredDependency.api(shared.spoofaxCoreDep()));
+        dependencies.add(GradleConfiguredDependency.api(shared.pieApiDep()));
+        dependencies.add(GradleConfiguredDependency.api(shared.daggerDep()));
+        dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
+        dependencies.add(GradleConfiguredDependency.annotationProcessor(shared.daggerCompilerDep()));
+        input.parser().ifPresent((i) -> {
+            parserCompiler.getDependencies(i).addAllTo(dependencies);
+        });
+        input.constraintAnalyzer().ifPresent((i) -> {
+            constraintAnalyzerCompiler.getDependencies(i).addAllTo(dependencies);
+        });
+        input.strategoRuntime().ifPresent((i) -> {
+            strategoRuntimeCompiler.getDependencies(i).addAllTo(dependencies);
+        });
+        return dependencies;
+    }
+
+
+    @Value.Immutable public interface Input extends Serializable {
+        class Builder extends AdapterProjectCompilerData.Input.Builder {}
+
+        static Builder builder() { return new Builder(); }
 
 
         /// Project
@@ -302,19 +264,19 @@ public class AdapterProjectCompiler {
 
         /// Sub-inputs
 
-        ClassloaderResourcesCompiler.AdapterProjectInput classloaderResources();
+        ClassloaderResourcesCompiler.Input classloaderResources();
 
-        Optional<ParserCompiler.AdapterProjectInput> parser();
+        Optional<ParserAdapterCompiler.Input> parser();
 
-        Optional<StylerCompiler.AdapterProjectInput> styler();
+        Optional<StylerAdapterCompiler.Input> styler();
 
-        Optional<CompleterCompiler.AdapterProjectInput> completer();
+        Optional<CompleterAdapterCompiler.Input> completer();
 
-        Optional<StrategoRuntimeCompiler.AdapterProjectInput> strategoRuntime();
+        Optional<StrategoRuntimeAdapterCompiler.Input> strategoRuntime();
 
-        Optional<ConstraintAnalyzerCompiler.AdapterProjectInput> constraintAnalyzer();
+        Optional<ConstraintAnalyzerAdapterCompiler.Input> constraintAnalyzer();
 
-        Optional<MultilangAnalyzerCompiler.AdapterProjectInput> multilangAnalyzer();
+        Optional<MultilangAnalyzerAdapterCompiler.Input> multilangAnalyzer();
 
 
         /// Configuration
@@ -556,15 +518,11 @@ public class AdapterProjectCompiler {
         }
     }
 
-    @Value.Immutable
-    public interface Output {
-        class Builder extends AdapterProjectCompilerData.Output.Builder {
-        }
+    @Value.Immutable public interface Output extends Serializable {
+        class Builder extends AdapterProjectCompilerData.Output.Builder {}
 
         static Builder builder() {
             return new Builder();
         }
-
-        List<ResourcePath> providedFiles();
     }
 }

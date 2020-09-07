@@ -11,7 +11,7 @@ class StrategoRuntimeCompilerTest extends TestBase {
         final FSPath baseDirectory = new FSPath(fileSystem.getPath("repo"));
         final Shared shared = TigerInputs.shared(baseDirectory).build();
         final LanguageProject languageProject = TigerInputs.languageProject(shared).build();
-        final StrategoRuntimeCompiler.LanguageProjectInput input = TigerInputs.strategoRuntimeLanguageProjectInput(shared, languageProject).build();
+        final StrategoRuntimeLanguageCompiler.Input input = TigerInputs.strategoRuntimeLanguageProjectInput(shared, languageProject).build();
 
         strategoRuntimeCompiler.compileLanguageProject(input);
         fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {

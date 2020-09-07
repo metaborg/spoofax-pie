@@ -1,5 +1,7 @@
 package mb.spoofax.compiler.spoofaxcore;
 
+import mb.pie.api.ExecContext;
+import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
@@ -9,35 +11,34 @@ import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
 import org.immutables.value.Value;
 
-import java.io.IOException;
+import javax.inject.Inject;
 import java.io.Serializable;
-import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Value.Enclosing
-public class LanguageProjectCompiler {
+public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.Input, LanguageProjectCompiler.Output> {
     private final TemplateWriter buildGradleTemplate;
     private final TemplateWriter packageInfoTemplate;
 
-    private final ParserCompiler parserCompiler;
+    private final ParserLanguageCompiler parserCompiler;
     private final ClassloaderResourcesCompiler classloaderResourcesCompiler;
-    private final StylerCompiler stylerCompiler;
-    private final CompleterCompiler completerCompiler;
-    private final StrategoRuntimeCompiler strategoRuntimeCompiler;
-    private final ConstraintAnalyzerCompiler constraintAnalyzerCompiler;
-    private final MultilangAnalyzerCompiler multilangAnalyzerCompiler;
+    private final StylerLanguageCompiler stylerCompiler;
+    private final CompleterLanguageCompiler completerCompiler;
+    private final StrategoRuntimeLanguageCompiler strategoRuntimeCompiler;
+    private final ConstraintAnalyzerLanguageCompiler constraintAnalyzerCompiler;
+    private final MultilangAnalyzerLanguageCompiler multilangAnalyzerCompiler;
 
-    public LanguageProjectCompiler(
+    @Inject public LanguageProjectCompiler(
         TemplateCompiler templateCompiler,
         ClassloaderResourcesCompiler classloaderResourcesCompiler,
-        ParserCompiler parserCompiler,
-        StylerCompiler stylerCompiler,
-        CompleterCompiler completerCompiler,
-        StrategoRuntimeCompiler strategoRuntimeCompiler,
-        ConstraintAnalyzerCompiler constraintAnalyzerCompiler,
-        MultilangAnalyzerCompiler multilangAnalyzerCompiler
+        ParserLanguageCompiler parserCompiler,
+        StylerLanguageCompiler stylerCompiler,
+        CompleterLanguageCompiler completerCompiler,
+        StrategoRuntimeLanguageCompiler strategoRuntimeCompiler,
+        ConstraintAnalyzerLanguageCompiler constraintAnalyzerCompiler,
+        MultilangAnalyzerLanguageCompiler multilangAnalyzerCompiler
     ) {
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("language_project/build.gradle.kts.mustache");
         this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("language_project/package-info.java.mustache");
@@ -51,9 +52,34 @@ public class LanguageProjectCompiler {
         this.multilangAnalyzerCompiler = multilangAnalyzerCompiler;
     }
 
-    public void generateInitial(Input input) throws IOException {
-        buildGradleTemplate.write(input.buildGradleKtsFile(), input);
+
+    @Override public String getId() {
+        return getClass().getName();
     }
+
+    @Override public Output exec(ExecContext context, Input input) throws Exception {
+        final Shared shared = input.shared();
+
+        // Class files
+        final ResourcePath classesGenDirectory = input.classesGenDirectory();
+        packageInfoTemplate.write(context, input.genPackageInfo().file(classesGenDirectory), input);
+
+        // Files from other compilers.
+        context.require(classloaderResourcesCompiler, input.classloaderResources());
+        input.parser().ifPresent((i) -> context.require(parserCompiler, i));
+        input.styler().ifPresent((i) -> context.require(stylerCompiler, i));
+        input.completer().ifPresent((i) -> context.require(completerCompiler, i));
+        input.strategoRuntime().ifPresent((i) -> context.require(strategoRuntimeCompiler, i));
+        input.constraintAnalyzer().ifPresent((i) -> context.require(constraintAnalyzerCompiler, i));
+        input.multilangAnalyzer().ifPresent((i) -> context.require(multilangAnalyzerCompiler, i));
+
+        return Output.builder().build();
+    }
+
+
+//    public void generateInitial(Input input) throws IOException {
+//        buildGradleTemplate.write(input.buildGradleKtsFile(), input);
+//    }
 
     public ArrayList<GradleConfiguredDependency> getDependencies(Input input) {
         final Shared shared = input.shared();
@@ -67,22 +93,22 @@ public class LanguageProjectCompiler {
         dependencies.add(GradleConfiguredDependency.api(shared.commonDep()));
         dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
         input.parser().ifPresent((i) -> {
-            parserCompiler.getLanguageProjectDependencies(i).addAllTo(dependencies);
+            parserCompiler.getDependencies(i).addAllTo(dependencies);
         });
         input.styler().ifPresent((i) -> {
-            stylerCompiler.getLanguageProjectDependencies(i).addAllTo(dependencies);
+            stylerCompiler.getDependencies(i).addAllTo(dependencies);
         });
         input.completer().ifPresent((i) -> {
-            completerCompiler.getLanguageProjectDependencies(i).addAllTo(dependencies);
+            completerCompiler.getDependencies(i).addAllTo(dependencies);
         });
         input.strategoRuntime().ifPresent((i) -> {
-            strategoRuntimeCompiler.getLanguageProjectDependencies(i).addAllTo(dependencies);
+            strategoRuntimeCompiler.getDependencies(i).addAllTo(dependencies);
         });
         input.constraintAnalyzer().ifPresent((i) -> {
-            constraintAnalyzerCompiler.getLanguageProjectDependencies(i).addAllTo(dependencies);
+            constraintAnalyzerCompiler.getDependencies(i).addAllTo(dependencies);
         });
         input.multilangAnalyzer().ifPresent((i) -> {
-            multilangAnalyzerCompiler.getLanguageProjectDependencies(i).addAllTo(dependencies);
+            multilangAnalyzerCompiler.getDependencies(i).addAllTo(dependencies);
         });
         return dependencies;
     }
@@ -91,96 +117,31 @@ public class LanguageProjectCompiler {
         final Shared shared = input.shared();
         final ArrayList<String> copyResources = new ArrayList<>(input.additionalCopyResources());
         input.parser().ifPresent((i) -> {
-            parserCompiler.getLanguageProjectCopyResources(i).addAllTo(copyResources);
+            parserCompiler.getCopyResources(i).addAllTo(copyResources);
         });
         input.styler().ifPresent((i) -> {
-            stylerCompiler.getLanguageProjectCopyResources(i).addAllTo(copyResources);
+            stylerCompiler.getCopyResources(i).addAllTo(copyResources);
         });
         input.completer().ifPresent((i) -> {
-            completerCompiler.getLanguageProjectCopyResources(i).addAllTo(copyResources);
+            completerCompiler.getCopyResources(i).addAllTo(copyResources);
         });
         input.strategoRuntime().ifPresent((i) -> {
-            strategoRuntimeCompiler.getLanguageProjectCopyResources(i).addAllTo(copyResources);
+            strategoRuntimeCompiler.getCopyResources(i).addAllTo(copyResources);
         });
         input.constraintAnalyzer().ifPresent((i) -> {
-            constraintAnalyzerCompiler.getLanguageProjectCopyResources(i).addAllTo(copyResources);
+            constraintAnalyzerCompiler.getCopyResources(i).addAllTo(copyResources);
         });
         input.multilangAnalyzer().ifPresent((i) -> {
-            multilangAnalyzerCompiler.getLanguageProjectCopyResources(i).addAllTo(copyResources);
+            multilangAnalyzerCompiler.getCopyResources(i).addAllTo(copyResources);
         });
         return copyResources;
     }
 
-    public Output compile(Input input) throws IOException {
-        final Shared shared = input.shared();
 
-        // Class files
-        final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        packageInfoTemplate.write(input.genPackageInfo().file(classesGenDirectory), input);
+    @Value.Immutable public interface Input extends Serializable {
+        class Builder extends LanguageProjectCompilerData.Input.Builder {}
 
-        // Files from other compilers.
-        classloaderResourcesCompiler.compileLanguageProject(input.classloaderResources());
-
-        try {
-            input.parser().ifPresent((i) -> {
-                try {
-                    parserCompiler.compileLanguageProject(i);
-                } catch(IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            });
-            input.styler().ifPresent((i) -> {
-                try {
-                    stylerCompiler.compileLanguageProject(i);
-                } catch(IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            });
-            input.completer().ifPresent((i) -> {
-                try {
-                    completerCompiler.compileLanguageProject(i);
-                } catch(IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            });
-            input.strategoRuntime().ifPresent((i) -> {
-                try {
-                    strategoRuntimeCompiler.compileLanguageProject(i);
-                } catch(IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            });
-            input.constraintAnalyzer().ifPresent((i) -> {
-                try {
-                    constraintAnalyzerCompiler.compileLanguageProject(i);
-                } catch(IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            });
-            input.multilangAnalyzer().ifPresent((i) -> {
-                try {
-                    multilangAnalyzerCompiler.compileLanguageProject(i);
-                } catch(IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            });
-        } catch(UncheckedIOException e) {
-            throw e.getCause();
-        }
-
-        return Output.builder().addAllProvidedFiles(input.providedFiles()).build();
-    }
-
-    // Inputs
-
-    @Value.Immutable
-    public interface Input extends Serializable {
-        class Builder extends LanguageProjectCompilerData.Input.Builder {
-        }
-
-        static Builder builder() {
-            return new Builder();
-        }
+        static Builder builder() { return new Builder(); }
 
 
         /// Project
@@ -190,19 +151,19 @@ public class LanguageProjectCompiler {
 
         /// Sub-inputs
 
-        ClassloaderResourcesCompiler.LanguageProjectInput classloaderResources();
+        ClassloaderResourcesCompiler.Input classloaderResources();
 
-        Optional<ParserCompiler.LanguageProjectInput> parser();
+        Optional<ParserLanguageCompiler.Input> parser();
 
-        Optional<StylerCompiler.LanguageProjectInput> styler();
+        Optional<StylerLanguageCompiler.Input> styler();
 
-        Optional<CompleterCompiler.LanguageProjectInput> completer();
+        Optional<CompleterLanguageCompiler.Input> completer();
 
-        Optional<StrategoRuntimeCompiler.LanguageProjectInput> strategoRuntime();
+        Optional<StrategoRuntimeLanguageCompiler.Input> strategoRuntime();
 
-        Optional<ConstraintAnalyzerCompiler.LanguageProjectInput> constraintAnalyzer();
+        Optional<ConstraintAnalyzerLanguageCompiler.Input> constraintAnalyzer();
 
-        Optional<MultilangAnalyzerCompiler.LanguageProjectInput> multilangAnalyzer();
+        Optional<MultilangAnalyzerLanguageCompiler.Input> multilangAnalyzer();
 
 
         /// Configuration
@@ -275,15 +236,9 @@ public class LanguageProjectCompiler {
         // TODO: add check
     }
 
-    @Value.Immutable
-    public interface Output {
-        class Builder extends LanguageProjectCompilerData.Output.Builder {
-        }
+    @Value.Immutable public interface Output extends Serializable {
+        class Builder extends LanguageProjectCompilerData.Output.Builder {}
 
-        static Builder builder() {
-            return new Builder();
-        }
-
-        List<ResourcePath> providedFiles();
+        static Builder builder() { return new Builder(); }
     }
 }

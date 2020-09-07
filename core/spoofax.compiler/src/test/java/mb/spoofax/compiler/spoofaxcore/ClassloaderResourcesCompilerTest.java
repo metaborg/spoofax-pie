@@ -12,10 +12,10 @@ class ClassloaderResourcesCompilerTest extends TestBase {
         final Shared shared = TigerInputs.shared(baseDirectory).build();
         final LanguageProject languageProject = TigerInputs.languageProject(shared).build();
 
-        final ClassloaderResourcesCompiler.LanguageProjectInput languageProjectInput = TigerInputs.classloaderResourcesLanguageProjectInput(shared, languageProject).build();
-        classloaderResourcesCompiler.compileLanguageProject(languageProjectInput);
-        fileAssertions.scopedExists(languageProjectInput.classesGenDirectory(), (s) -> {
-            s.assertPublicJavaClass(languageProjectInput.classloaderResources(), "TigerClassloaderResources");
+        final ClassloaderResourcesCompiler.Input input = TigerInputs.classloaderResourcesLanguageProjectInput(shared, languageProject).build();
+        classloaderResourcesCompiler.compileLanguageProject(input);
+        fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {
+            s.assertPublicJavaClass(input.classloaderResources(), "TigerClassloaderResources");
         });
     }
 }

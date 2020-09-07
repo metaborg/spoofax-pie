@@ -23,12 +23,12 @@ class TestBase {
 
     final TemplateCompiler templateCompiler = new TemplateCompiler(Shared.class, resourceService, charset);
     final ClassloaderResourcesCompiler classloaderResourcesCompiler = new ClassloaderResourcesCompiler(templateCompiler);
-    final ParserCompiler parserCompiler = new ParserCompiler(templateCompiler);
-    final StylerCompiler stylerCompiler = new StylerCompiler(templateCompiler);
-    final CompleterCompiler completerCompiler = new CompleterCompiler(templateCompiler);
-    final StrategoRuntimeCompiler strategoRuntimeCompiler = new StrategoRuntimeCompiler(templateCompiler);
-    final ConstraintAnalyzerCompiler constraintAnalyzerCompiler = new ConstraintAnalyzerCompiler(templateCompiler);
-    final MultilangAnalyzerCompiler multilangAnalyzerCompiler = new MultilangAnalyzerCompiler(templateCompiler);
+    final ParserLanguageCompiler parserCompiler = new ParserLanguageCompiler(templateCompiler);
+    final StylerLanguageCompiler stylerCompiler = new StylerLanguageCompiler(templateCompiler);
+    final CompleterLanguageCompiler completerCompiler = new CompleterLanguageCompiler(templateCompiler);
+    final StrategoRuntimeLanguageCompiler strategoRuntimeCompiler = new StrategoRuntimeLanguageCompiler(templateCompiler);
+    final ConstraintAnalyzerLanguageCompiler constraintAnalyzerCompiler = new ConstraintAnalyzerLanguageCompiler(templateCompiler);
+    final MultilangAnalyzerLanguageCompiler multilangAnalyzerCompiler = new MultilangAnalyzerLanguageCompiler(templateCompiler);
 
     final RootProjectCompiler rootProjectCompiler = new RootProjectCompiler(templateCompiler);
     final LanguageProjectCompiler languageProjectCompiler = new LanguageProjectCompiler(templateCompiler, classloaderResourcesCompiler, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler, multilangAnalyzerCompiler);

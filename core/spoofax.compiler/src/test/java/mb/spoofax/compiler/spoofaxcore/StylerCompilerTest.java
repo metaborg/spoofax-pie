@@ -13,7 +13,7 @@ class StylerCompilerTest extends TestBase {
         final LanguageProject languageProject = TigerInputs.languageProject(shared).build();
         final AdapterProject adapterProject = TigerInputs.adapterProject(shared).build();
 
-        final StylerCompiler.LanguageProjectInput languageProjectInput = TigerInputs.stylerLanguageProjectInput(shared, languageProject).build();
+        final StylerLanguageCompiler.Input languageProjectInput = TigerInputs.stylerLanguageProjectInput(shared, languageProject).build();
         stylerCompiler.compileLanguageProject(languageProjectInput);
         fileAssertions.scopedExists(languageProjectInput.classesGenDirectory(), (s) -> {
             s.assertPublicJavaClass(languageProjectInput.genRules(), "TigerStylingRules");
@@ -21,7 +21,7 @@ class StylerCompilerTest extends TestBase {
             s.assertPublicJavaClass(languageProjectInput.genFactory(), "TigerStylerFactory");
         });
 
-        final StylerCompiler.AdapterProjectInput adapterProjectInput = TigerInputs.stylerAdapterProjectInput(shared, languageProject, adapterProject).build();
+        final StylerLanguageCompiler.AdapterProjectInput adapterProjectInput = TigerInputs.stylerAdapterProjectInput(shared, languageProject, adapterProject).build();
         stylerCompiler.compileAdapterProject(adapterProjectInput);
         fileAssertions.scopedExists(adapterProjectInput.classesGenDirectory(), (s) -> {
             s.assertPublicJavaClass(adapterProjectInput.genStyleTaskDef(), "TigerStyle");

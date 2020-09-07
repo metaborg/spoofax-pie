@@ -14,12 +14,12 @@ import org.gradle.kotlin.dsl.*
 open class AdapterProjectSettings(
   val adapterProject: AdapterProject.Builder = AdapterProject.builder(),
   val classloaderResources: ClassloaderResourcesCompiler.AdapterProjectInput.Builder = ClassloaderResourcesCompiler.AdapterProjectInput.builder(),
-  val parser: ParserCompiler.AdapterProjectInput.Builder? = null, // Optional
-  val styler: StylerCompiler.AdapterProjectInput.Builder? = null, // Optional
-  val completer: CompleterCompiler.AdapterProjectInput.Builder? = null, // Optional
-  val strategoRuntime: StrategoRuntimeCompiler.AdapterProjectInput.Builder? = null, // Optional
-  val constraintAnalyzer: ConstraintAnalyzerCompiler.AdapterProjectInput.Builder? = null, // Optional
-  val multilangAnalyzer: MultilangAnalyzerCompiler.AdapterProjectInput.Builder? = null, // Optional
+  val parser: ParserLanguageCompiler.AdapterProjectInput.Builder? = null, // Optional
+  val styler: StylerLanguageCompiler.AdapterProjectInput.Builder? = null, // Optional
+  val completer: CompleterLanguageCompiler.AdapterProjectInput.Builder? = null, // Optional
+  val strategoRuntime: StrategoRuntimeLanguageCompiler.AdapterProjectInput.Builder? = null, // Optional
+  val constraintAnalyzer: ConstraintAnalyzerLanguageCompiler.AdapterProjectInput.Builder? = null, // Optional
+  val multilangAnalyzer: MultilangAnalyzerLanguageCompiler.AdapterProjectInput.Builder? = null, // Optional
 
   val builder: AdapterProjectCompiler.Input.Builder = AdapterProjectCompiler.Input.builder()
 ) {

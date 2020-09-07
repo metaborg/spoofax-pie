@@ -1,6 +1,8 @@
 package mb.spoofax.compiler.spoofaxcore;
 
 import mb.common.util.ListView;
+import mb.pie.api.ExecContext;
+import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
@@ -9,6 +11,7 @@ import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
 import org.immutables.value.Value;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -17,16 +20,31 @@ import java.util.List;
 import java.util.Optional;
 
 @Value.Enclosing
-public class StrategoRuntimeCompiler {
+public class StrategoRuntimeLanguageCompiler implements TaskDef<StrategoRuntimeLanguageCompiler.Input, StrategoRuntimeLanguageCompiler.Output> {
     private final TemplateWriter factoryTemplate;
 
-    public StrategoRuntimeCompiler(TemplateCompiler templateCompiler) {
+    @Inject public StrategoRuntimeLanguageCompiler(TemplateCompiler templateCompiler) {
         this.factoryTemplate = templateCompiler.getOrCompileToWriter("stratego_runtime/StrategoRuntimeBuilderFactory.java.mustache");
     }
 
-    // Language project
 
-    public ListView<GradleConfiguredDependency> getLanguageProjectDependencies(LanguageProjectInput input) {
+    @Override public String getId() {
+        return getClass().getName();
+    }
+
+    @Override public Output exec(ExecContext context, Input input) throws IOException {
+        final Output.Builder outputBuilder = Output.builder();
+        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("addNaBL2Primitives", input.enableNaBL2() || input.enableStatix());
+        map.put("addStatixPrimitives", input.enableStatix());
+        final ResourcePath classesGenDirectory = input.classesGenDirectory();
+        factoryTemplate.write(context, input.genFactory().file(classesGenDirectory), input, map);
+        return outputBuilder.build();
+    }
+
+
+    public ListView<GradleConfiguredDependency> getDependencies(Input input) {
         final Shared shared = input.shared();
         final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>();
         dependencies.add(GradleConfiguredDependency.api(shared.strategoCommonDep()));
@@ -44,7 +62,7 @@ public class StrategoRuntimeCompiler {
         return new ListView<>(dependencies);
     }
 
-    public ListView<String> getLanguageProjectCopyResources(LanguageProjectInput input) {
+    public ListView<String> getCopyResources(Input input) {
         final ArrayList<String> copyResources = new ArrayList<>();
         if(input.enableStatix()) {
             // TODO: move to constraint analyzer compiler?
@@ -56,42 +74,11 @@ public class StrategoRuntimeCompiler {
         return new ListView<>(copyResources);
     }
 
-    public Output compileLanguageProject(LanguageProjectInput input) throws IOException {
-        final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
 
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("addNaBL2Primitives", input.enableNaBL2() || input.enableStatix());
-        map.put("addStatixPrimitives", input.enableStatix());
-        final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        factoryTemplate.write(input.genFactory().file(classesGenDirectory), input, map);
+    @Value.Immutable public interface Input extends Serializable {
+        class Builder extends StrategoRuntimeLanguageCompilerData.Input.Builder {}
 
-        outputBuilder.addAllProvidedFiles(input.providedFiles());
-        return outputBuilder.build();
-    }
-
-    // Adapter project
-
-    public ListView<GradleConfiguredDependency> getAdapterProjectDependencies(AdapterProjectInput input) {
-        return ListView.of(
-            GradleConfiguredDependency.api(input.languageProjectInput().shared().strategoPieDep())
-        );
-    }
-
-    public Output compileAdapterProject(AdapterProjectInput input) throws IOException {
-        // Nothing to generate for adapter project at the moment.
-        return Output.builder().build();
-    }
-
-    // Inputs & outputs
-
-    @Value.Immutable
-    public interface LanguageProjectInput extends Serializable {
-        class Builder extends StrategoRuntimeCompilerData.LanguageProjectInput.Builder {}
-
-        static Builder builder() {
-            return new Builder();
-        }
+        static Builder builder() { return new Builder(); }
 
 
         /// Configuration
@@ -105,20 +92,14 @@ public class StrategoRuntimeCompiler {
 
         /// Whether to copy certain files from the Spoofax 2.x project.
 
-        @Value.Default default boolean copyCTree() {
-            return false;
-        }
+        @Value.Default default boolean copyCTree() { return false; }
 
-        @Value.Default default boolean copyClasses() {
-            return true;
-        }
+        @Value.Default default boolean copyClasses() { return true; }
 
 
         /// Kinds of classes (generated/extended/manual)
 
-        @Value.Default default ClassKind classKind() {
-            return ClassKind.Generated;
-        }
+        @Value.Default default ClassKind classKind() { return ClassKind.Generated; }
 
 
         /// Language project classes
@@ -172,28 +153,9 @@ public class StrategoRuntimeCompiler {
         }
     }
 
-    @Value.Immutable
-    public interface AdapterProjectInput extends Serializable {
-        class Builder extends StrategoRuntimeCompilerData.AdapterProjectInput.Builder {}
+    @Value.Immutable public interface Output extends Serializable {
+        class Builder extends StrategoRuntimeLanguageCompilerData.Output.Builder {}
 
-        static Builder builder() {
-            return new Builder();
-        }
-
-
-        /// Automatically provided sub-inputs
-
-        LanguageProjectInput languageProjectInput();
-    }
-
-    @Value.Immutable
-    public interface Output {
-        class Builder extends StrategoRuntimeCompilerData.Output.Builder {}
-
-        static Builder builder() {
-            return new Builder();
-        }
-
-        List<ResourcePath> providedFiles();
+        static Builder builder() { return new Builder(); }
     }
 }

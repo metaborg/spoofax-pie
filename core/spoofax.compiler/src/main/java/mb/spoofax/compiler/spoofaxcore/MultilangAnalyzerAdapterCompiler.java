@@ -1,155 +1,65 @@
 package mb.spoofax.compiler.spoofaxcore;
 
 import mb.common.util.ListView;
-import mb.resource.hierarchical.HierarchicalResource;
+import mb.pie.api.ExecContext;
+import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
-import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
 import org.immutables.value.Value;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 @Value.Enclosing
-public class MultilangAnalyzerCompiler {
-
+public class MultilangAnalyzerAdapterCompiler implements TaskDef<MultilangAnalyzerAdapterCompiler.Input, MultilangAnalyzerAdapterCompiler.Output> {
     private final TemplateWriter analyzeProjectTemplate;
     private final TemplateWriter indexAstTaskDefTemplate;
     private final TemplateWriter preStatixTaskDefTemplate;
     private final TemplateWriter postStatixTaskDefTemplate;
     private final TemplateWriter checkTaskDefTemplate;
-    private final TemplateWriter specConfigFactoryTemplate;
 
-    public MultilangAnalyzerCompiler(TemplateCompiler templateCompiler) {
+    @Inject public MultilangAnalyzerAdapterCompiler(TemplateCompiler templateCompiler) {
         this.analyzeProjectTemplate = templateCompiler.getOrCompileToWriter("multilang_analyzer/AnalyzeProjectTaskDef.java.mustache");
         this.indexAstTaskDefTemplate = templateCompiler.getOrCompileToWriter("multilang_analyzer/IndexAstTaskDef.java.mustache");
         this.preStatixTaskDefTemplate = templateCompiler.getOrCompileToWriter("multilang_analyzer/PreStatixTaskDef.java.mustache");
         this.postStatixTaskDefTemplate = templateCompiler.getOrCompileToWriter("multilang_analyzer/PostStatixTaskDef.java.mustache");
         this.checkTaskDefTemplate = templateCompiler.getOrCompileToWriter("multilang_analyzer/SmlCheckTaskDef.java.mustache");
-        this.specConfigFactoryTemplate = templateCompiler.getOrCompileToWriter("multilang_analyzer/SpecConfigFactory.java.mustache");
     }
 
-    // Language project
 
-    public ListView<GradleConfiguredDependency> getLanguageProjectDependencies(LanguageProjectInput input) {
-        return ListView.of(GradleConfiguredDependency.api(input.shared().multilangDep()));
+    @Override public String getId() {
+        return getClass().getName();
     }
 
-    public ListView<String> getLanguageProjectCopyResources(LanguageProjectInput input) {
-        return ListView.of("src-gen/statix/");
-    }
-
-    public Output compileLanguageProject(LanguageProjectInput input) throws IOException {
+    @Override public Output exec(ExecContext context, Input input) throws IOException {
         final Output.Builder outputBuilder = Output.builder();
         if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        outputBuilder.addProvidedResources(
-            specConfigFactoryTemplate.write(input.genSpecConfigFactory().file(classesGenDirectory), input)
-        );
+        analyzeProjectTemplate.write(context, input.genAnalyzeTaskDef().file(classesGenDirectory), input);
+        indexAstTaskDefTemplate.write(context, input.genIndexAstTaskDef().file(classesGenDirectory), input);
+        preStatixTaskDefTemplate.write(context, input.genPreStatixTaskDef().file(classesGenDirectory), input);
+        postStatixTaskDefTemplate.write(context, input.genPostStatixTaskDef().file(classesGenDirectory), input);
+        checkTaskDefTemplate.write(context, input.genCheckTaskDef().file(classesGenDirectory), input);
         return outputBuilder.build();
     }
 
-    // Adapter project
 
-    public Output compileAdapterProject(AdapterProjectInput input) throws IOException {
-        final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
-        final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        outputBuilder.addProvidedResources(
-            analyzeProjectTemplate.write(input.genAnalyzeTaskDef().file(classesGenDirectory), input),
-            indexAstTaskDefTemplate.write(input.genIndexAstTaskDef().file(classesGenDirectory), input),
-            preStatixTaskDefTemplate.write(input.genPreStatixTaskDef().file(classesGenDirectory), input),
-            postStatixTaskDefTemplate.write(input.genPostStatixTaskDef().file(classesGenDirectory), input),
-            checkTaskDefTemplate.write(input.genCheckTaskDef().file(classesGenDirectory), input)
-        );
-        return outputBuilder.build();
-    }
+    @Value.Immutable public interface Input extends Serializable {
+        class Builder extends MultilangAnalyzerAdapterCompilerData.Input.Builder {}
 
-    // Inputs
-
-    @Value.Immutable
-    public interface LanguageProjectInput extends Serializable {
-        class Builder extends MultilangAnalyzerCompilerData.LanguageProjectInput.Builder {
-        }
-
-        static Builder builder() {
-            return new Builder();
-        }
-
-        /// Kinds of classes (generated/extended/manual)
-
-        @Value.Default default ClassKind classKind() {
-            return ClassKind.Generated;
-        }
-
-        @Value.Derived default ResourcePath classesGenDirectory() {
-            return languageProject().project().genSourceSpoofaxJavaDirectory();
-        }
-
-        // Spec factory
-
-        @Value.Default default TypeInfo genSpecConfigFactory() {
-            return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "SpecConfigFactory");
-        }
-
-        Optional<TypeInfo> manualSpecConfigFactory();
-
-        default TypeInfo specConfigFactory() {
-            if(classKind().isManual() && manualSpecConfigFactory().isPresent()) {
-                return manualSpecConfigFactory().get();
-            }
-            return genSpecConfigFactory();
-        }
-
-        @Value.Default default String languageId() {
-            return shared().defaultBasePackageId();
-        }
-
-        @Value.Default default List<TypeInfo> dependencyFactories() {
-            return new ArrayList<>();
-        }
-
-        List<String> rootModules();
-
-        // List of all provided files
-
-        default ListView<ResourcePath> providedFiles() {
-            return ListView.of();
-        }
-
-        // Subinputs
-
-        TypeInfo classloaderResources();
-
-        /// Automatically provided sub-inputs
-
-        Shared shared();
-
-        LanguageProject languageProject();
-    }
-
-    @Value.Immutable
-    public interface AdapterProjectInput extends Serializable {
-        class Builder extends MultilangAnalyzerCompilerData.AdapterProjectInput.Builder {
-        }
-
-        static Builder builder() {
-            return new Builder();
-        }
+        static Builder builder() { return new Builder(); }
 
 
         /// Kinds of classes (generated/extended/manual)
 
-        @Value.Default default ClassKind classKind() {
-            return ClassKind.Generated;
-        }
+        @Value.Default default ClassKind classKind() { return ClassKind.Generated; }
 
 
         /// Classes
@@ -229,35 +139,23 @@ public class MultilangAnalyzerCompiler {
 
         // Transformation settings
 
-        @Value.Default default String preAnalysisStrategy() {
-            return "pre";
-        }
+        @Value.Default default String preAnalysisStrategy() { return "pre"; }
 
-        @Value.Default default String postAnalysisStrategy() {
-            return "post";
-        }
+        @Value.Default default String postAnalysisStrategy() { return "post"; }
 
         // Identifiers
 
-        @Value.Default default String languageId() {
-            return languageProjectInput().languageId();
-        }
+        @Value.Default default String languageId() { return languageProjectInput().languageId(); }
 
-        @Value.Default default String contextId() {
-            return shared().defaultBasePackageId();
-        }
+        @Value.Default default String contextId() { return shared().defaultBasePackageId(); }
 
         // Statix spec metadata
 
         String rootModule();
 
-        @Value.Default default String fileConstraint() {
-            return "fileOk";
-        }
+        @Value.Default default String fileConstraint() { return "fileOk"; }
 
-        @Value.Default default String projectConstraint() {
-            return "projectOk";
-        }
+        @Value.Default default String projectConstraint() { return "projectOk"; }
 
         default Collection<TypeInfo> libraryTaskDefs() {
             ArrayList<TypeInfo> taskDefs = new ArrayList<>();
@@ -296,19 +194,13 @@ public class MultilangAnalyzerCompiler {
 
         AdapterProject adapterProject();
 
-        LanguageProjectInput languageProjectInput();
+        MultilangAnalyzerLanguageCompiler.Input languageProjectInput();
     }
 
-    @Value.Immutable
-    public interface Output {
-        class Builder extends MultilangAnalyzerCompilerData.Output.Builder {
-        }
+    @Value.Immutable public interface Output extends Serializable {
+        class Builder extends MultilangAnalyzerAdapterCompilerData.Output.Builder {}
 
-        static Builder builder() {
-            return new Output.Builder();
-        }
-
-        List<HierarchicalResource> providedResources();
+        static Builder builder() { return new Builder(); }
     }
 }
 

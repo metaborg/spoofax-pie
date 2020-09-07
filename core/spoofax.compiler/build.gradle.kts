@@ -16,10 +16,13 @@ repositories {
 dependencies {
   api(platform(project(":spoofax.depconstraints")))
   annotationProcessor(platform(project(":spoofax.depconstraints")))
+  testAnnotationProcessor(platform(project(":spoofax.depconstraints")))
 
   api(project(":common"))
   api(project(":spoofax.core"))
   api("org.metaborg:resource")
+  api("org.metaborg:pie.api")
+  api("com.google.dagger:dagger")
 
   api("com.samskivert:jmustache:1.15")
 
@@ -29,6 +32,7 @@ dependencies {
 
   annotationProcessor("org.immutables:value")
   annotationProcessor("org.derive4j:derive4j")
+//  annotationProcessor("com.google.dagger:dagger-compiler")
 
   testImplementation("org.junit.jupiter:junit-jupiter-params:${metaborg.junitVersion}")
   testImplementation("com.google.jimfs:jimfs:1.1")
@@ -36,6 +40,7 @@ dependencies {
   testImplementation("org.gradle:gradle-tooling-api:5.6.4")
   testRuntimeOnly("org.slf4j:slf4j-simple:1.7.10") // SLF4J implementation required for Gradle tooling API.
   testCompileOnly("org.checkerframework:checker-qual-android")
+  //testAnnotationProcessor("com.google.dagger:dagger-compiler")
 }
 
 tasks.test {
@@ -54,6 +59,10 @@ sourceSets {
       srcDir(generatedResourcesDir)
     }
   }
+}
+
+tasks.register<CompileJava>("daggerCompileJava") {
+
 }
 
 // Task that writes (dependency) versions to a versions.properties file, which is used in the Shared class.

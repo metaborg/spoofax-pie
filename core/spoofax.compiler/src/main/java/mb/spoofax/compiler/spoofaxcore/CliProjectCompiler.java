@@ -1,5 +1,7 @@
 package mb.spoofax.compiler.spoofaxcore;
 
+import mb.pie.api.ExecContext;
+import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.Coordinate;
@@ -11,27 +13,43 @@ import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
 import org.immutables.value.Value;
 
-import java.io.IOException;
+import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Value.Enclosing
-public class CliProjectCompiler {
+public class CliProjectCompiler implements TaskDef<CliProjectCompiler.Input, CliProjectCompiler.Output> {
     private final TemplateWriter buildGradleTemplate;
     private final TemplateWriter packageInfoTemplate;
     private final TemplateWriter mainTemplate;
 
-    public CliProjectCompiler(TemplateCompiler templateCompiler) {
+    @Inject public CliProjectCompiler(TemplateCompiler templateCompiler) {
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("cli_project/build.gradle.kts.mustache");
         this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("cli_project/package-info.java.mustache");
         this.mainTemplate = templateCompiler.getOrCompileToWriter("cli_project/Main.java.mustache");
     }
 
-    public void generateInitial(Input input) throws IOException {
-        buildGradleTemplate.write(input.buildGradleKtsFile(), input);
+
+    @Override public String getId() {
+        return getClass().getName();
     }
+
+    @Override public Output exec(ExecContext context, Input input) throws Exception {
+        final Shared shared = input.shared();
+
+        final ResourcePath classesGenDirectory = input.classesGenDirectory();
+        packageInfoTemplate.write(context, input.genPackageInfo().file(classesGenDirectory), input);
+        mainTemplate.write(context, input.genMain().file(classesGenDirectory), input);
+
+        return Output.builder().build();
+    }
+
+
+//    public void generateInitial(Input input) throws IOException {
+//        buildGradleTemplate.write(input.buildGradleKtsFile(), input);
+//    }
 
     public ArrayList<GradleConfiguredDependency> getDependencies(Input input) {
         final Shared shared = input.shared();
@@ -47,19 +65,8 @@ public class CliProjectCompiler {
         return dependencies;
     }
 
-    public Output compile(Input input) throws IOException {
-        final Shared shared = input.shared();
 
-        final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        packageInfoTemplate.write(input.genPackageInfo().file(classesGenDirectory), input);
-        mainTemplate.write(input.genMain().file(classesGenDirectory), input);
-
-        return Output.builder().addAllProvidedFiles(input.providedFiles()).build();
-    }
-
-
-    @Value.Immutable
-    public interface Input extends Serializable {
+    @Value.Immutable public interface Input extends Serializable {
         class Builder extends CliProjectCompilerData.Input.Builder {}
 
         static Builder builder() { return new Builder(); }
@@ -67,9 +74,7 @@ public class CliProjectCompiler {
 
         /// Project
 
-        @Value.Default default String defaultProjectSuffix() {
-            return ".cli";
-        }
+        @Value.Default default String defaultProjectSuffix() { return ".cli"; }
 
         @Value.Default default GradleProject project() {
             final String artifactId = shared().defaultArtifactId() + defaultProjectSuffix();
@@ -79,9 +84,7 @@ public class CliProjectCompiler {
                 .build();
         }
 
-        @Value.Default default String packageId() {
-            return shared().defaultBasePackageId() + defaultProjectSuffix();
-        }
+        @Value.Default default String packageId() { return shared().defaultBasePackageId() + defaultProjectSuffix(); }
 
 
         /// Configuration
@@ -102,13 +105,9 @@ public class CliProjectCompiler {
 
         /// Kinds of classes (generated/extended/manual)
 
-        @Value.Default default ClassKind classKind() {
-            return ClassKind.Generated;
-        }
+        @Value.Default default ClassKind classKind() { return ClassKind.Generated; }
 
-        default ResourcePath classesGenDirectory() {
-            return project().genSourceSpoofaxJavaDirectory();
-        }
+        default ResourcePath classesGenDirectory() { return project().genSourceSpoofaxJavaDirectory(); }
 
 
         /// Classes
@@ -173,12 +172,9 @@ public class CliProjectCompiler {
         }
     }
 
-    @Value.Immutable
-    public interface Output extends Serializable {
+    @Value.Immutable public interface Output extends Serializable {
         class Builder extends CliProjectCompilerData.Output.Builder {}
 
         static Builder builder() { return new Builder(); }
-
-        List<ResourcePath> providedFiles();
     }
 }

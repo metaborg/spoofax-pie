@@ -28,12 +28,12 @@ open class Compilers {
   internal val charset = StandardCharsets.UTF_8
   internal val templateCompiler = TemplateCompiler(Shared::class.java, resourceService, charset)
   internal val classloaderResourceService = ClassloaderResourcesCompiler(templateCompiler)
-  internal val parserCompiler = ParserCompiler(templateCompiler)
-  internal val stylerCompiler = StylerCompiler(templateCompiler)
-  internal val completerCompiler = CompleterCompiler(templateCompiler)
-  internal val strategoRuntimeCompiler = StrategoRuntimeCompiler(templateCompiler)
-  internal val constraintAnalyzerCompiler = ConstraintAnalyzerCompiler(templateCompiler)
-  internal val multilangAnalyzerCompiler = MultilangAnalyzerCompiler(templateCompiler)
+  internal val parserCompiler = ParserLanguageCompiler(templateCompiler)
+  internal val stylerCompiler = StylerLanguageCompiler(templateCompiler)
+  internal val completerCompiler = CompleterLanguageCompiler(templateCompiler)
+  internal val strategoRuntimeCompiler = StrategoRuntimeLanguageCompiler(templateCompiler)
+  internal val constraintAnalyzerCompiler = ConstraintAnalyzerLanguageCompiler(templateCompiler)
+  internal val multilangAnalyzerCompiler = MultilangAnalyzerLanguageCompiler(templateCompiler)
   internal val languageProjectCompiler = LanguageProjectCompiler(templateCompiler, classloaderResourceService, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler, multilangAnalyzerCompiler)
   internal val adapterProjectCompiler = AdapterProjectCompiler(templateCompiler, parserCompiler, stylerCompiler, completerCompiler, strategoRuntimeCompiler, constraintAnalyzerCompiler, multilangAnalyzerCompiler)
   internal val cliProjectCompiler = CliProjectCompiler(templateCompiler)
@@ -46,13 +46,13 @@ open class LanguageProjectSettings(
   val shared: Shared.Builder = Shared.builder(),
 
   val languageProject: LanguageProject.Builder = LanguageProject.builder(),
-  val classloaderResources: ClassloaderResourcesCompiler.LanguageProjectInput.Builder = ClassloaderResourcesCompiler.LanguageProjectInput.builder(),
-  val parser: ParserCompiler.LanguageProjectInput.Builder? = null, // Optional
-  val styler: StylerCompiler.LanguageProjectInput.Builder? = null, // Optional
-  val completer: CompleterCompiler.LanguageProjectInput.Builder? = null, // Optional
-  val strategoRuntime: StrategoRuntimeCompiler.LanguageProjectInput.Builder? = null, // Optional
-  val constraintAnalyzer: ConstraintAnalyzerCompiler.LanguageProjectInput.Builder? = null, // Optional
-  val multilangAnalyzer: MultilangAnalyzerCompiler.LanguageProjectInput.Builder? = null, // Optional
+  val classloaderResources: ClassloaderResourcesCompiler.Input.Builder = ClassloaderResourcesCompiler.Input.builder(),
+  val parser: ParserLanguageCompiler.Input.Builder? = null, // Optional
+  val styler: StylerLanguageCompiler.Input.Builder? = null, // Optional
+  val completer: CompleterLanguageCompiler.Input.Builder? = null, // Optional
+  val strategoRuntime: StrategoRuntimeLanguageCompiler.Input.Builder? = null, // Optional
+  val constraintAnalyzer: ConstraintAnalyzerLanguageCompiler.Input.Builder? = null, // Optional
+  val multilangAnalyzer: MultilangAnalyzerLanguageCompiler.Input.Builder? = null, // Optional
 
   val builder: LanguageProjectCompiler.Input.Builder = LanguageProjectCompiler.Input.builder()
 ) {

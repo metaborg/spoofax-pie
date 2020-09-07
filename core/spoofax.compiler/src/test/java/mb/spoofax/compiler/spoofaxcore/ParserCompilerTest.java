@@ -18,7 +18,7 @@ class ParserCompilerTest extends TestBase {
         final LanguageProject languageProject = TigerInputs.languageProject(shared).build();
         final AdapterProject adapterProject = TigerInputs.adapterProject(shared).build();
 
-        final ParserCompiler.LanguageProjectInput languageProjectInput = TigerInputs.parserLanguageProjectInput(shared, languageProject).build();
+        final ParserLanguageCompiler.Input languageProjectInput = TigerInputs.parserLanguageProjectInput(shared, languageProject).build();
         parserCompiler.compileLanguageProject(languageProjectInput);
         fileAssertions.scopedExists(languageProjectInput.classesGenDirectory(), (s) -> {
             s.assertPublicJavaClass(languageProjectInput.genTable(), "TigerParseTable");
@@ -26,7 +26,7 @@ class ParserCompilerTest extends TestBase {
             s.assertPublicJavaClass(languageProjectInput.genFactory(), "TigerParserFactory");
         });
 
-        final ParserCompiler.AdapterProjectInput adapterProjectInput = TigerInputs.parserAdapterProjectInput(shared, languageProject, adapterProject).build();
+        final ParserLanguageCompiler.AdapterProjectInput adapterProjectInput = TigerInputs.parserAdapterProjectInput(shared, languageProject, adapterProject).build();
         parserCompiler.compileAdapterProject(adapterProjectInput);
         fileAssertions.scopedExists(adapterProjectInput.classesGenDirectory(), (s) -> {
             s.assertPublicJavaClass(adapterProjectInput.genParseTaskDef(), "TigerParse");
@@ -40,7 +40,7 @@ class ParserCompilerTest extends TestBase {
         final LanguageProject languageProject = TigerInputs.languageProject(shared).build();
         final AdapterProject adapterProject = TigerInputs.adapterProject(shared).build();
 
-        final ParserCompiler.LanguageProjectInput languageProjectInput = TigerInputs.parserLanguageProjectInput(shared, languageProject)
+        final ParserLanguageCompiler.Input languageProjectInput = TigerInputs.parserLanguageProjectInput(shared, languageProject)
             .classKind(ClassKind.Manual)
             .manualParser("my.lang", "MyParser")
             .manualFactory("my.lang", "MyParserFactory")
@@ -52,7 +52,7 @@ class ParserCompilerTest extends TestBase {
             s.assertNotExists(languageProjectInput.genFactory());
         });
 
-        final ParserCompiler.AdapterProjectInput adapterProjectInput = TigerInputs.parserAdapterProjectInput(shared, languageProject, adapterProject)
+        final ParserLanguageCompiler.AdapterProjectInput adapterProjectInput = TigerInputs.parserAdapterProjectInput(shared, languageProject, adapterProject)
             .classKind(ClassKind.Manual)
             .manualParseTaskDef("my.adapter.taskdef", "MyParseTaskDef")
             .manualTokenizeTaskDef("my.adapter.taskdef", "MyTokenizeTaskDef")

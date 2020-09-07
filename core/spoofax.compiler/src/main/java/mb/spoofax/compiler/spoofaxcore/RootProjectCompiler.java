@@ -1,5 +1,7 @@
 package mb.spoofax.compiler.spoofaxcore;
 
+import mb.pie.api.ExecContext;
+import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.Coordinate;
 import mb.spoofax.compiler.util.GradleProject;
@@ -8,7 +10,7 @@ import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import org.immutables.value.Value;
 
-import java.io.IOException;
+import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,16 +18,21 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Value.Enclosing
-public class RootProjectCompiler {
+public class RootProjectCompiler implements TaskDef<RootProjectCompiler.Input, RootProjectCompiler.Output> {
     private final TemplateWriter settingsGradleTemplate;
     private final TemplateWriter buildGradleTemplate;
 
-    public RootProjectCompiler(TemplateCompiler templateCompiler) {
+    @Inject public RootProjectCompiler(TemplateCompiler templateCompiler) {
         this.settingsGradleTemplate = templateCompiler.getOrCompileToWriter("root_project/settings.gradle.kts.mustache");
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("root_project/build.gradle.kts.mustache");
     }
 
-    public Output compile(Input input) throws IOException {
+
+    @Override public String getId() {
+        return getClass().getName();
+    }
+
+    @Override public Output exec(ExecContext context, Input input) throws Exception {
         final Shared shared = input.shared();
 
         {
@@ -34,26 +41,23 @@ public class RootProjectCompiler {
             map.put("pluginRepositoryCodes", pluginRepositories.stream().map(GradleRepository::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
             final ArrayList<String> includedProjects = new ArrayList<>(input.includedProjects());
             map.put("includedProjects", includedProjects);
-            settingsGradleTemplate.write(input.settingsGradleKtsFile(), input, map);
+            settingsGradleTemplate.write(context, input.settingsGradleKtsFile(), input, map);
         }
         {
             final HashMap<String, Object> map = new HashMap<>();
             final ArrayList<GradleRepository> repositories = new ArrayList<>(shared.defaultRepositories());
             map.put("repositoryCodes", repositories.stream().map(GradleRepository::toKotlinCode).collect(Collectors.toCollection(ArrayList::new)));
-            buildGradleTemplate.write(input.buildGradleKtsFile(), input, map);
+            buildGradleTemplate.write(context, input.buildGradleKtsFile(), input, map);
         }
 
         return Output.builder().fromInput(input).build();
     }
 
 
-    @Value.Immutable
-    public interface Input extends Serializable {
+    @Value.Immutable public interface Input extends Serializable {
         class Builder extends RootProjectCompilerData.Input.Builder {}
 
-        static Builder builder() {
-            return new Builder();
-        }
+        static Builder builder() { return new Builder(); }
 
 
         Shared shared();
@@ -79,8 +83,7 @@ public class RootProjectCompiler {
         List<String> includedProjects();
     }
 
-    @Value.Immutable
-    public interface Output extends Serializable {
+    @Value.Immutable public interface Output extends Serializable {
         class Builder extends RootProjectCompilerData.Output.Builder {
             public Builder fromInput(Input input) {
                 baseDirectory(input.project().baseDirectory());
@@ -88,9 +91,7 @@ public class RootProjectCompiler {
             }
         }
 
-        static Builder builder() {
-            return new Builder();
-        }
+        static Builder builder() { return new Builder(); }
 
 
         ResourcePath baseDirectory();

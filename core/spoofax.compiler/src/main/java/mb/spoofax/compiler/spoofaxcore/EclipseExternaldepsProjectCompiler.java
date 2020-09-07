@@ -1,5 +1,7 @@
 package mb.spoofax.compiler.spoofaxcore;
 
+import mb.pie.api.ExecContext;
+import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.Coordinate;
 import mb.spoofax.compiler.util.GradleConfiguredBundleDependency;
@@ -16,16 +18,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Value.Enclosing
-public class EclipseExternaldepsProjectCompiler {
+public class EclipseExternaldepsProjectCompiler implements TaskDef<EclipseExternaldepsProjectCompiler.Input, EclipseExternaldepsProjectCompiler.Output> {
     private final TemplateWriter buildGradleTemplate;
 
     public EclipseExternaldepsProjectCompiler(TemplateCompiler templateCompiler) {
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("eclipse_externaldeps_project/build.gradle.kts.mustache");
     }
 
-    public void generateInitial(Input input) throws IOException {
-        buildGradleTemplate.write(input.buildGradleKtsFile(), input);
+
+    @Override public String getId() {
+        return getClass().getName();
     }
+
+    @Override public Output exec(ExecContext context, Input input) throws IOException {
+        return Output.builder().build();
+    }
+
+
+//    public void generateInitial(Input input) throws IOException {
+//        buildGradleTemplate.write(input.buildGradleKtsFile(), input);
+//    }
 
     public ArrayList<GradleConfiguredDependency> getDependencies(Input input) {
         final Shared shared = input.shared();
@@ -48,26 +60,16 @@ public class EclipseExternaldepsProjectCompiler {
         return bundleDependencies;
     }
 
-    public Output compile(Input input) {
-        return Output.builder().addAllProvidedFiles(input.providedFiles()).build();
-    }
 
+    @Value.Immutable public interface Input extends Serializable {
+        class Builder extends EclipseExternaldepsProjectCompilerData.Input.Builder {}
 
-    @Value.Immutable
-    public interface Input extends Serializable {
-        class Builder extends EclipseExternaldepsProjectCompilerData.Input.Builder {
-        }
-
-        static Builder builder() {
-            return new Builder();
-        }
+        static Builder builder() { return new Builder(); }
 
 
         /// Project
 
-        @Value.Default default String defaultProjectSuffix() {
-            return ".eclipse.externaldeps";
-        }
+        @Value.Default default String defaultProjectSuffix() { return ".eclipse.externaldeps"; }
 
         @Value.Default default GradleProject project() {
             final String artifactId = shared().defaultArtifactId() + defaultProjectSuffix();
@@ -108,15 +110,9 @@ public class EclipseExternaldepsProjectCompiler {
         AdapterProjectCompiler.Input adapterProjectCompilerInput();
     }
 
-    @Value.Immutable
-    public interface Output extends Serializable {
-        class Builder extends EclipseExternaldepsProjectCompilerData.Output.Builder {
-        }
+    @Value.Immutable public interface Output extends Serializable {
+        class Builder extends EclipseExternaldepsProjectCompilerData.Output.Builder {}
 
-        static Builder builder() {
-            return new Builder();
-        }
-
-        List<ResourcePath> providedFiles();
+        static Builder builder() { return new Builder(); }
     }
 }

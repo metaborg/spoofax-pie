@@ -1,5 +1,7 @@
 package mb.spoofax.compiler.spoofaxcore;
 
+import mb.pie.api.ExecContext;
+import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.Coordinate;
@@ -11,14 +13,14 @@ import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
 import org.immutables.value.Value;
 
-import java.io.IOException;
+import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Value.Enclosing
-public class IntellijProjectCompiler {
+public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.Input, IntellijProjectCompiler.Output> {
     private final TemplateWriter buildGradleTemplate;
     private final TemplateWriter pluginXmlTemplate;
     private final TemplateWriter packageInfoTemplate;
@@ -33,7 +35,7 @@ public class IntellijProjectCompiler {
     private final TemplateWriter syntaxHighlighterFactoryTemplate;
     private final TemplateWriter parserDefinitionTemplate;
 
-    public IntellijProjectCompiler(TemplateCompiler templateCompiler) {
+    @Inject public IntellijProjectCompiler(TemplateCompiler templateCompiler) {
         this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("intellij_project/build.gradle.kts.mustache");
         this.pluginXmlTemplate = templateCompiler.getOrCompileToWriter("intellij_project/plugin.xml.mustache");
         this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("intellij_project/package-info.java.mustache");
@@ -49,9 +51,38 @@ public class IntellijProjectCompiler {
         this.parserDefinitionTemplate = templateCompiler.getOrCompileToWriter("intellij_project/ParserDefinition.java.mustache");
     }
 
-    public void generateInitial(Input input) throws IOException {
-        buildGradleTemplate.write(input.buildGradleKtsFile(), input);
+
+    @Override public String getId() {
+        return getClass().getName();
     }
+
+    @Override public Output exec(ExecContext context, Input input) throws Exception {
+        final Shared shared = input.shared();
+
+        // IntelliJ files
+        pluginXmlTemplate.write(context, input.pluginXmlFile(), input);
+
+        // Class files
+        final ResourcePath classesGenDirectory = input.classesGenDirectory();
+        packageInfoTemplate.write(context, input.genPackageInfo().file(classesGenDirectory), input);
+        moduleTemplate.write(context, input.genModule().file(classesGenDirectory), input);
+        componentTemplate.write(context, input.genComponent().file(classesGenDirectory), input);
+        pluginTemplate.write(context, input.genPlugin().file(classesGenDirectory), input);
+        loaderTemplate.write(context, input.genLoader().file(classesGenDirectory), input);
+        languageTemplate.write(context, input.genLanguage().file(classesGenDirectory), input);
+        fileTypeTemplate.write(context, input.genFileType().file(classesGenDirectory), input);
+        fileElementTypeTemplate.write(context, input.genFileElementType().file(classesGenDirectory), input);
+        fileTypeFactoryTemplate.write(context, input.genFileTypeFactory().file(classesGenDirectory), input);
+        syntaxHighlighterFactoryTemplate.write(context, input.syntaxHighlighterFactory().file(classesGenDirectory), input);
+        parserDefinitionTemplate.write(context, input.parserDefinition().file(classesGenDirectory), input);
+
+        return Output.builder().build();
+    }
+
+
+//    public void generateInitial(Input input) throws IOException {
+//        buildGradleTemplate.write(input.buildGradleKtsFile(), input);
+//    }
 
     public ArrayList<GradleConfiguredDependency> getDependencies(Input input) {
         final Shared shared = input.shared();
@@ -67,44 +98,16 @@ public class IntellijProjectCompiler {
         return dependencies;
     }
 
-    public Output compile(Input input) throws IOException {
-        final Shared shared = input.shared();
 
-        // IntelliJ files
-        pluginXmlTemplate.write(input.pluginXmlFile(), input);
-
-        // Class files
-        final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        packageInfoTemplate.write(input.genPackageInfo().file(classesGenDirectory), input);
-        moduleTemplate.write(input.genModule().file(classesGenDirectory), input);
-        componentTemplate.write(input.genComponent().file(classesGenDirectory), input);
-        pluginTemplate.write(input.genPlugin().file(classesGenDirectory), input);
-        loaderTemplate.write(input.genLoader().file(classesGenDirectory), input);
-        languageTemplate.write(input.genLanguage().file(classesGenDirectory), input);
-        fileTypeTemplate.write(input.genFileType().file(classesGenDirectory), input);
-        fileElementTypeTemplate.write(input.genFileElementType().file(classesGenDirectory), input);
-        fileTypeFactoryTemplate.write(input.genFileTypeFactory().file(classesGenDirectory), input);
-        syntaxHighlighterFactoryTemplate.write(input.syntaxHighlighterFactory().file(classesGenDirectory), input);
-        parserDefinitionTemplate.write(input.parserDefinition().file(classesGenDirectory), input);
-
-        return Output.builder().addAllProvidedFiles(input.providedFiles()).build();
-    }
-
-
-    @Value.Immutable
-    public interface Input extends Serializable {
+    @Value.Immutable public interface Input extends Serializable {
         class Builder extends IntellijProjectCompilerData.Input.Builder {}
 
-        static Builder builder() {
-            return new Builder();
-        }
+        static Builder builder() { return new Builder(); }
 
 
         /// Project
 
-        @Value.Default default String defaultProjectSuffix() {
-            return ".intellij";
-        }
+        @Value.Default default String defaultProjectSuffix() { return ".intellij"; }
 
         @Value.Default default GradleProject project() {
             final String artifactId = shared().defaultArtifactId() + defaultProjectSuffix();
@@ -114,9 +117,7 @@ public class IntellijProjectCompiler {
                 .build();
         }
 
-        @Value.Default default String packageId() {
-            return shared().defaultBasePackageId() + defaultProjectSuffix();
-        }
+        @Value.Default default String packageId() { return shared().defaultBasePackageId() + defaultProjectSuffix(); }
 
 
         /// Gradle configuration
@@ -356,12 +357,9 @@ public class IntellijProjectCompiler {
         // TODO: add check
     }
 
-    @Value.Immutable
-    public interface Output extends Serializable {
+    @Value.Immutable public interface Output extends Serializable {
         class Builder extends IntellijProjectCompilerData.Output.Builder {}
 
         static Builder builder() { return new Builder(); }
-
-        List<ResourcePath> providedFiles();
     }
 }
