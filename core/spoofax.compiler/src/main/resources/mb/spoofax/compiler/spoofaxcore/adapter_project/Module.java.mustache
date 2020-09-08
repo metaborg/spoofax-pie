@@ -64,7 +64,7 @@ import java.util.Map;
 public class {{genModule.id}} {
     @Provides @LanguageScope
     static ClassLoaderResourceRegistry provideClassLoaderResourceRegistry() {
-        return {{classloaderResources.languageProjectInput.classloaderResources.qualifiedId}}.createClassLoaderResourceRegistry();
+        return {{classloaderResources.classloaderResources.qualifiedId}}.createClassLoaderResourceRegistry();
     }
 
     @Provides @LanguageScope
@@ -74,7 +74,7 @@ public class {{genModule.id}} {
 
     @Provides @Named("definition-dir") @LanguageScope
     static ClassLoaderResource provideDefinitionDir(ClassLoaderResourceRegistry registry) {
-        return {{classloaderResources.languageProjectInput.classloaderResources.qualifiedId}}.createDefinitionDir(registry);
+        return {{classloaderResources.classloaderResources.qualifiedId}}.createDefinitionDir(registry);
     }
 
     @Provides @Named("definition-dir") @LanguageScope

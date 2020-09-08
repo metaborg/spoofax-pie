@@ -11,7 +11,7 @@ class ClassloaderResourcesCompilerTest extends TestBase {
         final Shared shared = TigerInputs.shared(baseDirectory).build();
         final LanguageProject languageProject = TigerInputs.languageProject(shared).build();
 
-        final ClassloaderResourcesCompiler.Input input = TigerInputs.classloaderResourcesLanguageProjectInput(shared, languageProject).build();
+        final ClassloaderResourcesCompiler.Input input = TigerInputs.classloaderResourcesProjectInput(shared, languageProject).build();
         try(MixedSession session = pie.newSession()) {
             session.require(component.getClassloaderResourcesCompiler().createTask(input));
             fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {

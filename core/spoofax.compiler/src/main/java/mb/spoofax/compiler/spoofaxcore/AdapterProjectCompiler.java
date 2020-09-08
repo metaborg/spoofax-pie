@@ -264,6 +264,8 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
 
         /// Sub-inputs
 
+        ClassloaderResourcesCompiler.Input classloaderResources();
+
         Optional<ParserAdapterCompiler.Input> parser();
 
         Optional<StylerAdapterCompiler.Input> styler();

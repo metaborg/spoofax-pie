@@ -73,7 +73,7 @@ public class TigerInputs {
 
     /// Classloader resources compiler
 
-    public static ClassloaderResourcesCompiler.Input.Builder classloaderResourcesLanguageProjectInput(Shared shared, LanguageProject languageProject) {
+    public static ClassloaderResourcesCompiler.Input.Builder classloaderResourcesProjectInput(Shared shared, LanguageProject languageProject) {
         return ClassloaderResourcesCompiler.Input.builder()
             .shared(shared)
             .languageProject(languageProject)
@@ -176,7 +176,7 @@ public class TigerInputs {
     public static LanguageProjectCompiler.Input.Builder languageProjectInput(Shared shared, LanguageProject languageProject) {
         return LanguageProjectCompiler.Input.builder()
             .languageProject(languageProject)
-            .classloaderResources(classloaderResourcesLanguageProjectInput(shared, languageProject).build())
+            .classloaderResources(classloaderResourcesProjectInput(shared, languageProject).build())
             .parser(parserLanguageProjectInput(shared, languageProject).build())
             .styler(stylerLanguageProjectInput(shared, languageProject).build())
             .completer(completerLanguageProjectInput(shared, languageProject).build())
@@ -232,6 +232,7 @@ public class TigerInputs {
 
         return AdapterProjectCompiler.Input.builder()
             .adapterProject(adapterProject)
+            .classloaderResources(classloaderResourcesProjectInput(shared, languageProject).build())
             .parser(parserAdapterProjectInput(shared, languageProject, adapterProject).build())
             .styler(stylerAdapterProjectInput(shared, languageProject, adapterProject).build())
             .completer(completerAdapterProjectInput(shared, languageProject, adapterProject).build())

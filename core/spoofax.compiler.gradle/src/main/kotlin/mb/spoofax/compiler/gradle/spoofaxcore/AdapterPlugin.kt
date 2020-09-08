@@ -29,6 +29,7 @@ open class AdapterProjectSettings(
     val languageProjectCompilerInput = languageProjectFinalized.input
 
     val adapterProject = this.adapterProject.shared(shared).project(project.toSpoofaxCompilerProject()).build()
+    val classloaderResources = languageProjectCompilerInput.classloaderResources();
     val parser = if(this.parser != null) {
       if(!languageProjectCompilerInput.styler().isPresent) {
         throw GradleException("Parser adapter project input is present, but parser language project input is not")
@@ -70,6 +71,7 @@ open class AdapterProjectSettings(
       .shared(shared)
       .adapterProject(adapterProject)
       .languageProjectDependency(languageProject.toSpoofaxCompilerProject().asProjectDependency())
+      .classloaderResources(classloaderResources)
     if(parser != null) {
       builder.parser(parser)
     }
