@@ -77,7 +77,7 @@ public class MultilangAnalyzerLanguageCompiler implements TaskDef<MultilangAnaly
             return genSpecConfigFactory();
         }
 
-        @Value.Default default String languageId() { return shared().defaultBasePackageId(); }
+        @Value.Default default String languageId() { return shared().defaultPackageId(); }
 
         @Value.Default default List<TypeInfo> dependencyFactories() { return new ArrayList<>(); }
 

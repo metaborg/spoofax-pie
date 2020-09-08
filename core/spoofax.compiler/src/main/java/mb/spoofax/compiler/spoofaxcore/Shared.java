@@ -1,6 +1,5 @@
 package mb.spoofax.compiler.spoofaxcore;
 
-import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.BuilderBase;
 import mb.spoofax.compiler.util.Conversion;
 import mb.spoofax.compiler.util.Coordinate;
@@ -24,7 +23,7 @@ public interface Shared extends Serializable {
             with(properties, "defaultGroupId", this::defaultGroupId);
             with(properties, "defaultArtifactId", this::defaultArtifactId);
             with(properties, "defaultVersion", this::defaultVersion);
-            with(properties, "defaultBasePackageId", this::defaultBasePackageId);
+            with(properties, "defaultPackageId", this::defaultPackageId);
             return this;
         }
     }
@@ -37,8 +36,6 @@ public interface Shared extends Serializable {
     /// Configuration.
 
     String name();
-
-    ResourcePath baseDirectory();
 
 
     @Value.Default default List<String> fileExtensions() {
@@ -64,8 +61,12 @@ public interface Shared extends Serializable {
         return "0.1.0";
     }
 
-    @Value.Default default String defaultBasePackageId() {
-        return Conversion.nameToJavaPackageId(name());
+    @Value.Default default String defaultPackageIdPrefix() {
+        return "mb.";
+    }
+
+    @Value.Default default String defaultPackageId() {
+        return defaultPackageIdPrefix() + Conversion.nameToJavaPackageId(name());
     }
 
 
@@ -300,7 +301,7 @@ public interface Shared extends Serializable {
         properties.setProperty("defaultGroupId", defaultGroupId());
         properties.setProperty("defaultArtifactId", defaultArtifactId());
         properties.setProperty("defaultVersion", defaultVersion());
-        properties.setProperty("defaultBasePackageId", defaultBasePackageId());
+        properties.setProperty("defaultBasePackageId", defaultPackageId());
     }
 
     @Value.Check default void check() {

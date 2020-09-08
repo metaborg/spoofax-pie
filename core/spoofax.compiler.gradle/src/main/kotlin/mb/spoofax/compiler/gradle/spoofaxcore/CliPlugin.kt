@@ -21,14 +21,17 @@ import org.gradle.kotlin.dsl.*
 open class CliProjectSettings(
   val builder: CliProjectCompiler.Input.Builder = CliProjectCompiler.Input.builder()
 ) {
-  internal fun finalize(project: Project, adapterProject: Project): CliProjectFinalized {
+  internal fun finalize(gradleProject: Project, adapterProject: Project): CliProjectFinalized {
     val adapterProjectExtension: AdapterProjectExtension = adapterProject.extensions.getByType()
     val adapterProjectFinalized = adapterProjectExtension.finalized
     val languageProjectFinalized = adapterProjectFinalized.languageProjectFinalized
 
+    val shared = languageProjectFinalized.shared
+    val project = gradleProject.toSpoofaxCompilerProject()
     val input = this.builder
-      .shared(languageProjectFinalized.shared)
-      .project(project.toSpoofaxCompilerProject())
+      .shared(shared)
+      .project(project)
+      .packageId(CliProjectCompiler.Input.Builder.defaultPackageId(shared))
       .adapterProjectCompilerInput(adapterProjectFinalized.input)
       .build()
 

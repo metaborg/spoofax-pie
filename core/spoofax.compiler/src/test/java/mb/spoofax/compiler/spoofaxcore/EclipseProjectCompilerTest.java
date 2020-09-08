@@ -12,9 +12,9 @@ import java.nio.file.Path;
 class EclipseProjectCompilerTest extends TestBase {
     @Test void testCompilerDefaults(@TempDir Path temporaryDirectoryPath) throws Exception {
         final FSPath baseDirectory = new FSPath(temporaryDirectoryPath);
-        final Shared shared = TigerInputs.shared(baseDirectory).build();
-        final LanguageProject languageProject = TigerInputs.languageProject(shared).build();
-        final AdapterProject adapterProject = TigerInputs.adapterProject(shared).build();
+        final Shared shared = TigerInputs.shared().build();
+        final LanguageProject languageProject = TigerInputs.languageProject(baseDirectory, shared).build();
+        final AdapterProject adapterProject = TigerInputs.adapterProject(baseDirectory, shared).build();
 
         try(MixedSession session = pie.newSession()) {
             // Compile language and adapter projects.
@@ -23,14 +23,14 @@ class EclipseProjectCompilerTest extends TestBase {
 
             // Compile Eclipse externaldeps project, as Eclipse project depends on it.
             final EclipseExternaldepsProjectCompiler.Input eclipseExternalDepsInput = TigerInputs
-                .eclipseExternaldepsProjectInput(shared, languageProject, adapterProject)
+                .eclipseExternaldepsProjectInput(baseDirectory, shared, languageProject, adapterProject)
                 .languageProjectDependency(GradleDependency.project(":" + languageProject.project().coordinate().artifactId()))
                 .adapterProjectDependency(GradleDependency.project(":" + adapterProject.project().coordinate().artifactId()))
                 .build();
             session.require(component.getEclipseExternaldepsProjectCompiler().createTask(eclipseExternalDepsInput));
 
             // Compile Eclipse project and test generated files.
-            final EclipseProjectCompiler.Input input = TigerInputs.eclipseProjectInput(shared, languageProjectInput, adapterProjectInput)
+            final EclipseProjectCompiler.Input input = TigerInputs.eclipseProjectInput(baseDirectory, shared, languageProjectInput, adapterProjectInput)
                 .eclipseExternaldepsDependency(GradleDependency.project(":" + eclipseExternalDepsInput.project().coordinate().artifactId()))
                 .build();
 

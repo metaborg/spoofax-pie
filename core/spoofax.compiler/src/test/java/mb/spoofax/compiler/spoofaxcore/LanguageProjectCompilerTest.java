@@ -11,8 +11,8 @@ import java.nio.file.Path;
 class LanguageProjectCompilerTest extends TestBase {
     @Test void testCompilerDefaults(@TempDir Path temporaryDirectoryPath) throws Exception {
         final FSPath baseDirectory = new FSPath(temporaryDirectoryPath);
-        final Shared shared = TigerInputs.shared(baseDirectory).build();
-        final LanguageProject languageProject = TigerInputs.languageProject(shared).build();
+        final Shared shared = TigerInputs.shared().build();
+        final LanguageProject languageProject = TigerInputs.languageProject(baseDirectory, shared).build();
 
         try(MixedSession session = pie.newSession()) {
             // Compile language project and test generated files.

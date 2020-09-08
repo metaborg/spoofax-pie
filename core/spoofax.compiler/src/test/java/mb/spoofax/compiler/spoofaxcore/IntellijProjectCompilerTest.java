@@ -12,16 +12,16 @@ import java.nio.file.Path;
 class IntellijProjectCompilerTest extends TestBase {
     @Test void testCompilerDefaults(@TempDir Path temporaryDirectoryPath) throws Exception {
         final FSPath baseDirectory = new FSPath(temporaryDirectoryPath);
-        final Shared shared = TigerInputs.shared(baseDirectory).build();
-        final LanguageProject languageProject = TigerInputs.languageProject(shared).build();
-        final AdapterProject adapterProject = TigerInputs.adapterProject(shared).build();
+        final Shared shared = TigerInputs.shared().build();
+        final LanguageProject languageProject = TigerInputs.languageProject(baseDirectory, shared).build();
+        final AdapterProject adapterProject = TigerInputs.adapterProject(baseDirectory, shared).build();
 
         try(MixedSession session = pie.newSession()) {
             // Compile language and adapter projects.
             final AdapterProjectCompiler.Input adapterProjectInput = compileLanguageAndAdapterProject(session, shared, languageProject, adapterProject);
 
             // Compile IntelliJ project and test generated files.
-            final IntellijProjectCompiler.Input input = TigerInputs.intellijProjectInput(shared, adapterProjectInput)
+            final IntellijProjectCompiler.Input input = TigerInputs.intellijProjectInput(baseDirectory, shared, adapterProjectInput)
                 .adapterProjectDependency(GradleDependency.project(":" + adapterProject.project().coordinate().artifactId()))
                 .build();
             session.require(component.getIntellijProjectCompiler().createTask(input));

@@ -15,14 +15,17 @@ import org.gradle.kotlin.dsl.*
 open class EclipseExternaldepsProjectSettings(
   val builder: EclipseExternaldepsProjectCompiler.Input.Builder = EclipseExternaldepsProjectCompiler.Input.builder()
 ) {
-  internal fun finalize(project: Project, adapterProject: Project): EclipseExternaldepsProjectFinalized {
+  internal fun finalize(gradleProject: Project, adapterProject: Project): EclipseExternaldepsProjectFinalized {
     val adapterProjectExtension: AdapterProjectExtension = adapterProject.extensions.getByType()
     val adapterProjectFinalized = adapterProjectExtension.finalized
     val languageProjectFinalized = adapterProjectFinalized.languageProjectFinalized
 
+    val shared = languageProjectFinalized.shared
+    val project = gradleProject.toSpoofaxCompilerProject()
     val input = builder
-      .shared(languageProjectFinalized.shared)
-      .project(project.toSpoofaxCompilerProject())
+      .shared(shared)
+      .project(project)
+      .packageId(EclipseExternaldepsProjectCompiler.Input.Builder.defaultPackageId(shared))
       .adapterProjectCompilerInput(adapterProjectFinalized.input)
       .languageProjectDependency(languageProjectFinalized.input.languageProject().project().asProjectDependency())
       .adapterProjectDependency(adapterProjectFinalized.input.adapterProject().project().asProjectDependency())

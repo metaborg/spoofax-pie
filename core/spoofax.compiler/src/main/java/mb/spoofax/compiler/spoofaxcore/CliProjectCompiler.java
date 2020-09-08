@@ -4,7 +4,6 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
-import mb.spoofax.compiler.util.Coordinate;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
 import mb.spoofax.compiler.util.GradleProject;
@@ -21,12 +20,10 @@ import java.util.Optional;
 
 @Value.Enclosing
 public class CliProjectCompiler implements TaskDef<CliProjectCompiler.Input, CliProjectCompiler.Output> {
-    private final TemplateWriter buildGradleTemplate;
     private final TemplateWriter packageInfoTemplate;
     private final TemplateWriter mainTemplate;
 
     @Inject public CliProjectCompiler(TemplateCompiler templateCompiler) {
-        this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("cli_project/build.gradle.kts.mustache");
         this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("cli_project/package-info.java.mustache");
         this.mainTemplate = templateCompiler.getOrCompileToWriter("cli_project/Main.java.mustache");
     }
@@ -47,10 +44,6 @@ public class CliProjectCompiler implements TaskDef<CliProjectCompiler.Input, Cli
     }
 
 
-//    public void generateInitial(Input input) throws IOException {
-//        buildGradleTemplate.write(input.buildGradleKtsFile(), input);
-//    }
-
     public ArrayList<GradleConfiguredDependency> getDependencies(Input input) {
         final Shared shared = input.shared();
         final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
@@ -67,24 +60,43 @@ public class CliProjectCompiler implements TaskDef<CliProjectCompiler.Input, Cli
 
 
     @Value.Immutable public interface Input extends Serializable {
-        class Builder extends CliProjectCompilerData.Input.Builder {}
+        class Builder extends CliProjectCompilerData.Input.Builder {
+            public Builder withDefaultProjectFromParentDirectory(ResourcePath parentDirectory, Shared shared) {
+                return withDefaultProject(parentDirectory.appendRelativePath(defaultArtifactId(shared)), shared);
+            }
+
+            public Builder withDefaultProject(ResourcePath baseDirectory, Shared shared) {
+                final GradleProject gradleProject = GradleProject.builder()
+                    .coordinate(shared.defaultGroupId(), defaultArtifactId(shared), Optional.of(shared.defaultVersion()))
+                    .baseDirectory(baseDirectory)
+                    .build();
+                return this
+                    .project(gradleProject)
+                    .packageId(defaultPackageId(shared))
+                    ;
+            }
+
+            public static String defaultProjectSuffix() {
+                return ".cli";
+            }
+
+            public static String defaultArtifactId(Shared shared) {
+                return shared.defaultArtifactId() + defaultProjectSuffix();
+            }
+
+            public static String defaultPackageId(Shared shared) {
+                return shared.defaultPackageId() + defaultProjectSuffix();
+            }
+        }
 
         static Builder builder() { return new Builder(); }
 
 
         /// Project
 
-        @Value.Default default String defaultProjectSuffix() { return ".cli"; }
+        GradleProject project();
 
-        @Value.Default default GradleProject project() {
-            final String artifactId = shared().defaultArtifactId() + defaultProjectSuffix();
-            return GradleProject.builder()
-                .coordinate(Coordinate.of(shared().defaultGroupId(), artifactId, shared().defaultVersion()))
-                .baseDirectory(shared().baseDirectory().appendSegment(artifactId))
-                .build();
-        }
-
-        @Value.Default default String packageId() { return shared().defaultBasePackageId() + defaultProjectSuffix(); }
+        String packageId();
 
 
         /// Configuration

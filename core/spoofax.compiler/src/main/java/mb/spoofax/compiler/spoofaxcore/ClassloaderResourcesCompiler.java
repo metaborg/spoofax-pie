@@ -70,7 +70,7 @@ public class ClassloaderResourcesCompiler implements TaskDef<ClassloaderResource
         }
 
         @Value.Default default String qualifier() {
-            return shared().defaultBasePackageId().replace(".", "-") + "-classloader-resource";
+            return languageProject().packageId().replace(".", "-") + "-classloader-resource";
         }
 
         /// List of all provided files

@@ -22,13 +22,14 @@ open class AdapterProjectSettings(
 
   val builder: AdapterProjectCompiler.Input.Builder = AdapterProjectCompiler.Input.builder()
 ) {
-  internal fun finalize(project: Project, languageProject: Project): AdapterProjectFinalized {
+  internal fun finalize(gradleProject: Project, languageProject: Project): AdapterProjectFinalized {
     val languageProjectExtension: LanguageProjectExtension = languageProject.extensions.getByType()
     val languageProjectFinalized = languageProjectExtension.settingsFinalized
     val shared = languageProjectFinalized.shared
     val languageProjectCompilerInput = languageProjectFinalized.input
 
-    val adapterProject = this.adapterProject.shared(shared).project(project.toSpoofaxCompilerProject()).build()
+    val project = gradleProject.toSpoofaxCompilerProject()
+    val adapterProject = this.adapterProject.project(project).packageId(AdapterProject.Builder.defaultPackageId(shared)).build()
     val classloaderResources = languageProjectCompilerInput.classloaderResources();
     val parser = if(this.parser != null) {
       if(!languageProjectCompilerInput.styler().isPresent) {

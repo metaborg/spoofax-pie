@@ -13,9 +13,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class ParserCompilerTest extends TestBase {
     @Test void testCompilerDefaults() throws Exception {
         final FSPath baseDirectory = new FSPath(fileSystem.getPath("repo"));
-        final Shared shared = TigerInputs.shared(baseDirectory).build();
-        final LanguageProject languageProject = TigerInputs.languageProject(shared).build();
-        final AdapterProject adapterProject = TigerInputs.adapterProject(shared).build();
+        final Shared shared = TigerInputs.shared().build();
+        final LanguageProject languageProject = TigerInputs.languageProject(baseDirectory, shared).build();
+        final AdapterProject adapterProject = TigerInputs.adapterProject(baseDirectory, shared).build();
 
         try(MixedSession session = pie.newSession()) {
             final ParserLanguageCompiler.Input languageProjectInput = TigerInputs.parserLanguageProjectInput(shared, languageProject).build();
@@ -37,9 +37,9 @@ class ParserCompilerTest extends TestBase {
 
     @Test void testCompilerManual() throws Exception {
         final FSPath baseDirectory = new FSPath(fileSystem.getPath("repo"));
-        final Shared shared = TigerInputs.shared(baseDirectory).build();
-        final LanguageProject languageProject = TigerInputs.languageProject(shared).build();
-        final AdapterProject adapterProject = TigerInputs.adapterProject(shared).build();
+        final Shared shared = TigerInputs.shared().build();
+        final LanguageProject languageProject = TigerInputs.languageProject(baseDirectory, shared).build();
+        final AdapterProject adapterProject = TigerInputs.adapterProject(baseDirectory, shared).build();
 
         try(MixedSession session = pie.newSession()) {
             final ParserLanguageCompiler.Input languageProjectInput = TigerInputs.parserLanguageProjectInput(shared, languageProject)
@@ -70,9 +70,9 @@ class ParserCompilerTest extends TestBase {
     @ParameterizedTest @EnumSource(value = ClassKind.class, names = {"Manual"})
     void testManualRequiresClasses(ClassKind classKind) {
         final FSPath baseDirectory = new FSPath(fileSystem.getPath("repo"));
-        final Shared shared = TigerInputs.shared(baseDirectory).build();
-        final LanguageProject languageProject = TigerInputs.languageProject(shared).build();
-        final AdapterProject adapterProject = TigerInputs.adapterProject(shared).build();
+        final Shared shared = TigerInputs.shared().build();
+        final LanguageProject languageProject = TigerInputs.languageProject(baseDirectory, shared).build();
+        final AdapterProject adapterProject = TigerInputs.adapterProject(baseDirectory, shared).build();
 
         assertThrows(IllegalArgumentException.class, () -> {
             TigerInputs.parserLanguageProjectInput(shared, languageProject)

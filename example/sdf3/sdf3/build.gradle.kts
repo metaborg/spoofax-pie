@@ -19,7 +19,7 @@ spoofaxLanguageProject {
     shared = Shared.builder()
       .name("SDF3")
       .defaultClassPrefix("Sdf3")
-      .defaultBasePackageId("mb.sdf3"),
+      .defaultPackageId("mb.sdf3"),
 
     parser = ParserLanguageCompiler.Input.builder()
       .startSymbol("Module"),

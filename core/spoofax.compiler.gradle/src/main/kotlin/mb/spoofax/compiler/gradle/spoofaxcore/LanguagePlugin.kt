@@ -4,7 +4,6 @@ package mb.spoofax.compiler.gradle.spoofaxcore
 
 import mb.common.util.Properties
 import mb.pie.runtime.PieBuilderImpl
-import mb.resource.fs.FSPath
 import mb.spoofax.compiler.dagger.*
 import mb.spoofax.compiler.spoofaxcore.*
 import mb.spoofax.compiler.util.*
@@ -54,11 +53,11 @@ open class LanguageProjectSettings(
     // Build shared settings.
     val shared = shared
       .withPersistentProperties(spoofaxCompilerProperties)
-      .baseDirectory(FSPath(gradleProject.projectDir.parent)) // TODO: remove the need to set a base directory, as it is often wrong.
       .build()
 
     // Build language project compiler settings.
-    val languageProject = this.languageProject.shared(shared).project(gradleProject.toSpoofaxCompilerProject()).build()
+    val project = gradleProject.toSpoofaxCompilerProject()
+    val languageProject = this.languageProject.project(project).packageId(LanguageProject.Builder.defaultPackageId(shared)).build()
     val classloaderResources = this.classloaderResources.shared(shared).languageProject(languageProject).build()
     val parser = if(this.parser != null) this.parser.shared(shared).languageProject(languageProject).build() else null
     val styler = if(this.styler != null) this.styler.shared(shared).languageProject(languageProject).build() else null

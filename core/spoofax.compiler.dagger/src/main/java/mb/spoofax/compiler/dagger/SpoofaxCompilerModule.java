@@ -19,7 +19,6 @@ import mb.spoofax.compiler.spoofaxcore.MultilangAnalyzerAdapterCompiler;
 import mb.spoofax.compiler.spoofaxcore.MultilangAnalyzerLanguageCompiler;
 import mb.spoofax.compiler.spoofaxcore.ParserAdapterCompiler;
 import mb.spoofax.compiler.spoofaxcore.ParserLanguageCompiler;
-import mb.spoofax.compiler.spoofaxcore.RootProjectCompiler;
 import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeAdapterCompiler;
 import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.spoofaxcore.StylerAdapterCompiler;
@@ -56,7 +55,6 @@ public class SpoofaxCompilerModule {
         MultilangAnalyzerLanguageCompiler multilangAnalyzerLanguageCompiler,
         ParserAdapterCompiler parserAdapterCompiler,
         ParserLanguageCompiler parserLanguageCompiler,
-        RootProjectCompiler rootProjectCompiler,
         StrategoRuntimeAdapterCompiler strategoRuntimeAdapterCompiler,
         StrategoRuntimeLanguageCompiler strategoRuntimeLanguageCompiler,
         StylerAdapterCompiler stylerAdapterCompiler,
@@ -78,7 +76,6 @@ public class SpoofaxCompilerModule {
         taskDefs.add(multilangAnalyzerLanguageCompiler);
         taskDefs.add(parserAdapterCompiler);
         taskDefs.add(parserLanguageCompiler);
-        taskDefs.add(rootProjectCompiler);
         taskDefs.add(strategoRuntimeAdapterCompiler);
         taskDefs.add(strategoRuntimeLanguageCompiler);
         taskDefs.add(stylerAdapterCompiler);

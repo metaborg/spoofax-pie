@@ -18,7 +18,7 @@ spoofaxLanguageProject {
   settings.set(LanguageProjectSettings(
     shared = Shared.builder()
       .name("Mod")
-      .defaultBasePackageId("mb.mod"),
+      .defaultPackageId("mb.mod"),
 
     parser = ParserLanguageCompiler.Input.builder()
       .startSymbol("Start"),

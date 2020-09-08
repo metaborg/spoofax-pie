@@ -27,7 +27,6 @@ import mb.spoofax.compiler.spoofaxcore.LanguageProject;
 import mb.spoofax.compiler.spoofaxcore.LanguageProjectCompiler;
 import mb.spoofax.compiler.spoofaxcore.ParserAdapterCompiler;
 import mb.spoofax.compiler.spoofaxcore.ParserLanguageCompiler;
-import mb.spoofax.compiler.spoofaxcore.RootProjectCompiler;
 import mb.spoofax.compiler.spoofaxcore.Shared;
 import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeAdapterCompiler;
 import mb.spoofax.compiler.spoofaxcore.StrategoRuntimeLanguageCompiler;
@@ -49,11 +48,10 @@ import java.util.Optional;
 public class TigerInputs {
     /// Shared
 
-    public static Shared.Builder shared(ResourcePath baseDirectory) {
+    public static Shared.Builder shared() {
         return Shared.builder()
             .name("Tiger")
-            .baseDirectory(baseDirectory)
-            .defaultBasePackageId("mb.tiger")
+            .defaultPackageId("mb.tiger")
             ;
     }
 
@@ -63,12 +61,16 @@ public class TigerInputs {
 
     /// Main projects
 
-    public static LanguageProject.Builder languageProject(Shared shared) {
-        return LanguageProject.builder().shared(shared);
+    public static LanguageProject.Builder languageProject(ResourcePath rootDirectory, Shared shared) {
+        return LanguageProject.builder()
+            .withDefaultsFromParentDirectory(rootDirectory, shared)
+            ;
     }
 
-    public static AdapterProject.Builder adapterProject(Shared shared) {
-        return AdapterProject.builder().shared(shared);
+    public static AdapterProject.Builder adapterProject(ResourcePath rootDirectory, Shared shared) {
+        return AdapterProject.builder()
+            .withDefaultsFromParentDirectory(rootDirectory, shared)
+            ;
     }
 
     /// Classloader resources compiler
@@ -307,9 +309,10 @@ public class TigerInputs {
 
     /// CLI project compiler
 
-    public static CliProjectCompiler.Input.Builder cliProjectInput(Shared shared, AdapterProjectCompiler.Input adapterProjectCompilerInput) {
+    public static CliProjectCompiler.Input.Builder cliProjectInput(ResourcePath rootDirectory, Shared shared, AdapterProjectCompiler.Input adapterProjectCompilerInput) {
         return CliProjectCompiler.Input.builder()
             .shared(shared)
+            .withDefaultProjectFromParentDirectory(rootDirectory, shared)
             .adapterProjectCompilerInput(adapterProjectCompilerInput)
             ;
     }
@@ -317,12 +320,14 @@ public class TigerInputs {
     /// Eclipse externaldeps project compiler
 
     public static EclipseExternaldepsProjectCompiler.Input.Builder eclipseExternaldepsProjectInput(
+        ResourcePath rootDirectory,
         Shared shared,
         LanguageProject languageProject,
         AdapterProject adapterProject
     ) {
         return EclipseExternaldepsProjectCompiler.Input.builder()
             .shared(shared)
+            .withDefaultProjectFromParentDirectory(rootDirectory, shared)
             .adapterProjectCompilerInput(adapterProjectInput(shared, languageProject, adapterProject)
                 .languageProjectDependency(GradleDependency.project(":" + languageProject.project().coordinate().artifactId()))
                 .build())
@@ -332,12 +337,14 @@ public class TigerInputs {
     /// Eclipse project compiler
 
     public static EclipseProjectCompiler.Input.Builder eclipseProjectInput(
+        ResourcePath rootDirectory,
         Shared shared,
         LanguageProjectCompiler.Input languageProjectInput,
         AdapterProjectCompiler.Input adapterProjectCompilerInput
     ) {
         return EclipseProjectCompiler.Input.builder()
             .shared(shared)
+            .withDefaultProjectFromParentDirectory(rootDirectory, shared)
             .languageProjectCompilerInput(languageProjectInput)
             .adapterProjectCompilerInput(adapterProjectCompilerInput)
             ;
@@ -345,18 +352,11 @@ public class TigerInputs {
 
     /// Intellij project compiler
 
-    public static IntellijProjectCompiler.Input.Builder intellijProjectInput(Shared shared, AdapterProjectCompiler.Input adapterProjectCompilerInput) {
+    public static IntellijProjectCompiler.Input.Builder intellijProjectInput(ResourcePath rootDirectory, Shared shared, AdapterProjectCompiler.Input adapterProjectCompilerInput) {
         return IntellijProjectCompiler.Input.builder()
             .shared(shared)
+            .withDefaultProjectFromParentDirectory(rootDirectory, shared)
             .adapterProjectCompilerInput(adapterProjectCompilerInput)
-            ;
-    }
-
-    /// Root project compiler
-
-    public static RootProjectCompiler.Input.Builder rootProjectInput(Shared shared) {
-        return RootProjectCompiler.Input.builder()
-            .shared(shared)
             ;
     }
 }

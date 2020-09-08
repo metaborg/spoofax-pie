@@ -19,7 +19,6 @@ import java.util.Optional;
 
 @Value.Enclosing
 public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.Input, LanguageProjectCompiler.Output> {
-    private final TemplateWriter buildGradleTemplate;
     private final TemplateWriter packageInfoTemplate;
 
     private final ParserLanguageCompiler parserCompiler;
@@ -40,7 +39,6 @@ public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.
         ConstraintAnalyzerLanguageCompiler constraintAnalyzerCompiler,
         MultilangAnalyzerLanguageCompiler multilangAnalyzerCompiler
     ) {
-        this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("language_project/build.gradle.kts.mustache");
         this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("language_project/package-info.java.mustache");
 
         this.parserCompiler = parserCompiler;
@@ -76,10 +74,6 @@ public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.
         return Output.builder().build();
     }
 
-
-//    public void generateInitial(Input input) throws IOException {
-//        buildGradleTemplate.write(input.buildGradleKtsFile(), input);
-//    }
 
     public ArrayList<GradleConfiguredDependency> getDependencies(Input input) {
         final Shared shared = input.shared();

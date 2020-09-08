@@ -17,14 +17,17 @@ import org.jetbrains.intellij.IntelliJPluginExtension
 open class IntellijProjectSettings(
   val builder: IntellijProjectCompiler.Input.Builder = IntellijProjectCompiler.Input.builder()
 ) {
-  internal fun finalize(project: Project, adapterProject: Project): IntellijProjectCompilerFinalized {
+  internal fun finalize(gradleProject: Project, adapterProject: Project): IntellijProjectCompilerFinalized {
     val adapterProjectExtension: AdapterProjectExtension = adapterProject.extensions.getByType()
     val adapterProjectFinalized = adapterProjectExtension.finalized
     val languageProjectFinalized = adapterProjectFinalized.languageProjectFinalized
 
+    val shared = languageProjectFinalized.shared
+    val project = gradleProject.toSpoofaxCompilerProject()
     val input = builder
-      .shared(languageProjectFinalized.shared)
-      .project(project.toSpoofaxCompilerProject())
+      .shared(shared)
+      .project(project)
+      .packageId(IntellijProjectCompiler.Input.Builder.defaultPackageId(shared))
       .adapterProjectCompilerInput(adapterProjectFinalized.input)
       .build()
 

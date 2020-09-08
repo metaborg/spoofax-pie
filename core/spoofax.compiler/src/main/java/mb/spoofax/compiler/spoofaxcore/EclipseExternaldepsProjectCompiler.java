@@ -3,13 +3,10 @@ package mb.spoofax.compiler.spoofaxcore;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.Coordinate;
 import mb.spoofax.compiler.util.GradleConfiguredBundleDependency;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
 import mb.spoofax.compiler.util.GradleProject;
-import mb.spoofax.compiler.util.TemplateCompiler;
-import mb.spoofax.compiler.util.TemplateWriter;
 import org.immutables.value.Value;
 
 import javax.inject.Inject;
@@ -17,14 +14,11 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Value.Enclosing
 public class EclipseExternaldepsProjectCompiler implements TaskDef<EclipseExternaldepsProjectCompiler.Input, EclipseExternaldepsProjectCompiler.Output> {
-    private final TemplateWriter buildGradleTemplate;
-
-    @Inject public EclipseExternaldepsProjectCompiler(TemplateCompiler templateCompiler) {
-        this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("eclipse_externaldeps_project/build.gradle.kts.mustache");
-    }
+    @Inject public EclipseExternaldepsProjectCompiler() {}
 
 
     @Override public String getId() {
@@ -35,10 +29,6 @@ public class EclipseExternaldepsProjectCompiler implements TaskDef<EclipseExtern
         return Output.builder().build();
     }
 
-
-//    public void generateInitial(Input input) throws IOException {
-//        buildGradleTemplate.write(input.buildGradleKtsFile(), input);
-//    }
 
     public ArrayList<GradleConfiguredDependency> getDependencies(Input input) {
         final Shared shared = input.shared();
@@ -63,22 +53,43 @@ public class EclipseExternaldepsProjectCompiler implements TaskDef<EclipseExtern
 
 
     @Value.Immutable public interface Input extends Serializable {
-        class Builder extends EclipseExternaldepsProjectCompilerData.Input.Builder {}
+        class Builder extends EclipseExternaldepsProjectCompilerData.Input.Builder {
+            public Builder withDefaultProjectFromParentDirectory(ResourcePath parentDirectory, Shared shared) {
+                return withDefaultProject(parentDirectory.appendRelativePath(defaultArtifactId(shared)), shared);
+            }
+
+            public Builder withDefaultProject(ResourcePath baseDirectory, Shared shared) {
+                final GradleProject gradleProject = GradleProject.builder()
+                    .coordinate(shared.defaultGroupId(), defaultArtifactId(shared), Optional.of(shared.defaultVersion()))
+                    .baseDirectory(baseDirectory)
+                    .build();
+                return this
+                    .project(gradleProject)
+                    .packageId(defaultPackageId(shared))
+                    ;
+            }
+
+            public static String defaultProjectSuffix() {
+                return ".eclipse.externaldeps";
+            }
+
+            public static String defaultArtifactId(Shared shared) {
+                return shared.defaultArtifactId() + defaultProjectSuffix();
+            }
+
+            public static String defaultPackageId(Shared shared) {
+                return shared.defaultPackageId() + defaultProjectSuffix();
+            }
+        }
 
         static Builder builder() { return new Builder(); }
 
 
         /// Project
 
-        @Value.Default default String defaultProjectSuffix() { return ".eclipse.externaldeps"; }
+        GradleProject project();
 
-        @Value.Default default GradleProject project() {
-            final String artifactId = shared().defaultArtifactId() + defaultProjectSuffix();
-            return GradleProject.builder()
-                .coordinate(Coordinate.of(shared().defaultGroupId(), artifactId, shared().defaultVersion()))
-                .baseDirectory(shared().baseDirectory().appendSegment(artifactId))
-                .build();
-        }
+        String packageId();
 
 
         /// Configuration

@@ -147,7 +147,7 @@ public class MultilangAnalyzerAdapterCompiler implements TaskDef<MultilangAnalyz
 
         @Value.Default default String languageId() { return languageProjectInput().languageId(); }
 
-        @Value.Default default String contextId() { return shared().defaultBasePackageId(); }
+        @Value.Default default String contextId() { return shared().defaultPackageId(); }
 
         // Statix spec metadata
 

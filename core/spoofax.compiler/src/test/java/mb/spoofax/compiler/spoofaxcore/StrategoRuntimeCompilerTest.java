@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 class StrategoRuntimeCompilerTest extends TestBase {
     @Test void testCompilerDefaults() throws Exception {
         final FSPath baseDirectory = new FSPath(fileSystem.getPath("repo"));
-        final Shared shared = TigerInputs.shared(baseDirectory).build();
-        final LanguageProject languageProject = TigerInputs.languageProject(shared).build();
+        final Shared shared = TigerInputs.shared().build();
+        final LanguageProject languageProject = TigerInputs.languageProject(baseDirectory, shared).build();
         final StrategoRuntimeLanguageCompiler.Input input = TigerInputs.strategoRuntimeLanguageProjectInput(shared, languageProject).build();
 
         try(MixedSession session = pie.newSession()) {

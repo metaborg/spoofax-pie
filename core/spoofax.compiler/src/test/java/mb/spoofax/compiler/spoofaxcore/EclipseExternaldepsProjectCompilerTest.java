@@ -12,16 +12,16 @@ import java.nio.file.Path;
 class EclipseExternaldepsProjectCompilerTest extends TestBase {
     @Test void testCompilerDefaults(@TempDir Path temporaryDirectoryPath) throws Exception {
         final FSPath baseDirectory = new FSPath(temporaryDirectoryPath);
-        final Shared shared = TigerInputs.shared(baseDirectory).build();
-        final LanguageProject languageProject = TigerInputs.languageProject(shared).build();
-        final AdapterProject adapterProject = TigerInputs.adapterProject(shared).build();
+        final Shared shared = TigerInputs.shared().build();
+        final LanguageProject languageProject = TigerInputs.languageProject(baseDirectory, shared).build();
+        final AdapterProject adapterProject = TigerInputs.adapterProject(baseDirectory, shared).build();
 
         try(MixedSession session = pie.newSession()) {
             // Compile language and adapter projects.
             compileLanguageAndAdapterProject(session, shared, languageProject, adapterProject);
 
             // Compile Eclipse externaldeps project and test generated files.
-            final EclipseExternaldepsProjectCompiler.Input input = TigerInputs.eclipseExternaldepsProjectInput(shared, languageProject, adapterProject)
+            final EclipseExternaldepsProjectCompiler.Input input = TigerInputs.eclipseExternaldepsProjectInput(baseDirectory, shared, languageProject, adapterProject)
                 .languageProjectDependency(GradleDependency.project(":" + languageProject.project().coordinate().artifactId()))
                 .adapterProjectDependency(GradleDependency.project(":" + adapterProject.project().coordinate().artifactId()))
                 .build();

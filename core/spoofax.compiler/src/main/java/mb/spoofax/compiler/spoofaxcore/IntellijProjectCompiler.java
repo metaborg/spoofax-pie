@@ -4,7 +4,6 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
-import mb.spoofax.compiler.util.Coordinate;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
 import mb.spoofax.compiler.util.GradleProject;
@@ -21,7 +20,6 @@ import java.util.Optional;
 
 @Value.Enclosing
 public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.Input, IntellijProjectCompiler.Output> {
-    private final TemplateWriter buildGradleTemplate;
     private final TemplateWriter pluginXmlTemplate;
     private final TemplateWriter packageInfoTemplate;
     private final TemplateWriter moduleTemplate;
@@ -36,7 +34,6 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
     private final TemplateWriter parserDefinitionTemplate;
 
     @Inject public IntellijProjectCompiler(TemplateCompiler templateCompiler) {
-        this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("intellij_project/build.gradle.kts.mustache");
         this.pluginXmlTemplate = templateCompiler.getOrCompileToWriter("intellij_project/plugin.xml.mustache");
         this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("intellij_project/package-info.java.mustache");
         this.moduleTemplate = templateCompiler.getOrCompileToWriter("intellij_project/Module.java.mustache");
@@ -80,10 +77,6 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
     }
 
 
-//    public void generateInitial(Input input) throws IOException {
-//        buildGradleTemplate.write(input.buildGradleKtsFile(), input);
-//    }
-
     public ArrayList<GradleConfiguredDependency> getDependencies(Input input) {
         final Shared shared = input.shared();
         final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
@@ -100,24 +93,43 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
 
 
     @Value.Immutable public interface Input extends Serializable {
-        class Builder extends IntellijProjectCompilerData.Input.Builder {}
+        class Builder extends IntellijProjectCompilerData.Input.Builder {
+            public Builder withDefaultProjectFromParentDirectory(ResourcePath parentDirectory, Shared shared) {
+                return withDefaultProject(parentDirectory.appendRelativePath(defaultArtifactId(shared)), shared);
+            }
+
+            public Builder withDefaultProject(ResourcePath baseDirectory, Shared shared) {
+                final GradleProject gradleProject = GradleProject.builder()
+                    .coordinate(shared.defaultGroupId(), defaultArtifactId(shared), Optional.of(shared.defaultVersion()))
+                    .baseDirectory(baseDirectory)
+                    .build();
+                return this
+                    .project(gradleProject)
+                    .packageId(defaultPackageId(shared))
+                    ;
+            }
+
+            public static String defaultProjectSuffix() {
+                return ".intellij";
+            }
+
+            public static String defaultArtifactId(Shared shared) {
+                return shared.defaultArtifactId() + defaultProjectSuffix();
+            }
+
+            public static String defaultPackageId(Shared shared) {
+                return shared.defaultPackageId() + defaultProjectSuffix();
+            }
+        }
 
         static Builder builder() { return new Builder(); }
 
 
         /// Project
 
-        @Value.Default default String defaultProjectSuffix() { return ".intellij"; }
+        GradleProject project();
 
-        @Value.Default default GradleProject project() {
-            final String artifactId = shared().defaultArtifactId() + defaultProjectSuffix();
-            return GradleProject.builder()
-                .coordinate(Coordinate.of(shared().defaultGroupId(), artifactId, shared().defaultVersion()))
-                .baseDirectory(shared().baseDirectory().appendSegment(artifactId))
-                .build();
-        }
-
-        @Value.Default default String packageId() { return shared().defaultBasePackageId() + defaultProjectSuffix(); }
+        String packageId();
 
 
         /// Gradle configuration

@@ -13,7 +13,7 @@ spoofaxLanguageProject {
     shared = Shared.builder()
       .name("Stratego")
       .defaultClassPrefix("Stratego")
-      .defaultBasePackageId("mb.str"),
+      .defaultPackageId("mb.str"),
 
     parser = ParserLanguageCompiler.Input.builder()
       .startSymbol("Module"),

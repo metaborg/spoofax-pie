@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
 
 @Value.Enclosing
 public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.Input, AdapterProjectCompiler.Output> {
-    private final TemplateWriter buildGradleTemplate;
     private final TemplateWriter packageInfoTemplate;
     private final TemplateWriter checkTaskDefTemplate;
     private final TemplateWriter checkMultiTaskDefTemplate;
@@ -59,7 +58,6 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
         ConstraintAnalyzerAdapterCompiler constraintAnalyzerCompiler,
         MultilangAnalyzerAdapterCompiler multilangAnalyzerCompiler
     ) {
-        this.buildGradleTemplate = templateCompiler.getOrCompileToWriter("adapter_project/build.gradle.kts.mustache");
         this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("adapter_project/package-info.java.mustache");
         this.checkTaskDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/CheckTaskDef.java.mustache");
         this.checkMultiTaskDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/CheckMultiTaskDef.java.mustache");
@@ -222,10 +220,6 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
         return Output.builder().build();
     }
 
-
-    //    public void generateInitial(Input input) throws IOException {
-//        buildGradleTemplate.write(input.buildGradleKtsFile(), input);
-//    }
 
     public ArrayList<GradleConfiguredDependency> getDependencies(Input input) {
         final Shared shared = input.shared();
