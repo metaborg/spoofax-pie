@@ -3,10 +3,10 @@ package mb.spoofax.compiler.language;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
+import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
@@ -88,48 +88,24 @@ public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.
         dependencies.add(GradleConfiguredDependency.api(shared.spoofaxCompilerInterfacesDep()));
         dependencies.add(GradleConfiguredDependency.api(shared.commonDep()));
         dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
-        input.parser().ifPresent((i) -> {
-            parserCompiler.getDependencies(i).addAllTo(dependencies);
-        });
-        input.styler().ifPresent((i) -> {
-            stylerCompiler.getDependencies(i).addAllTo(dependencies);
-        });
-        input.completer().ifPresent((i) -> {
-            completerCompiler.getDependencies(i).addAllTo(dependencies);
-        });
-        input.strategoRuntime().ifPresent((i) -> {
-            strategoRuntimeCompiler.getDependencies(i).addAllTo(dependencies);
-        });
-        input.constraintAnalyzer().ifPresent((i) -> {
-            constraintAnalyzerCompiler.getDependencies(i).addAllTo(dependencies);
-        });
-        input.multilangAnalyzer().ifPresent((i) -> {
-            multilangAnalyzerCompiler.getDependencies(i).addAllTo(dependencies);
-        });
+        input.parser().ifPresent((i) -> parserCompiler.getDependencies(i).addAllTo(dependencies));
+        input.styler().ifPresent((i) -> stylerCompiler.getDependencies(i).addAllTo(dependencies));
+        input.completer().ifPresent((i) -> completerCompiler.getDependencies(i).addAllTo(dependencies));
+        input.strategoRuntime().ifPresent((i) -> strategoRuntimeCompiler.getDependencies(i).addAllTo(dependencies));
+        input.constraintAnalyzer().ifPresent((i) -> constraintAnalyzerCompiler.getDependencies(i).addAllTo(dependencies));
+        input.multilangAnalyzer().ifPresent((i) -> multilangAnalyzerCompiler.getDependencies(i).addAllTo(dependencies));
         return dependencies;
     }
 
     public ArrayList<String> getCopyResources(Input input) {
         final Shared shared = input.shared();
         final ArrayList<String> copyResources = new ArrayList<>(input.additionalCopyResources());
-        input.parser().ifPresent((i) -> {
-            parserCompiler.getCopyResources(i).addAllTo(copyResources);
-        });
-        input.styler().ifPresent((i) -> {
-            stylerCompiler.getCopyResources(i).addAllTo(copyResources);
-        });
-        input.completer().ifPresent((i) -> {
-            completerCompiler.getCopyResources(i).addAllTo(copyResources);
-        });
-        input.strategoRuntime().ifPresent((i) -> {
-            strategoRuntimeCompiler.getCopyResources(i).addAllTo(copyResources);
-        });
-        input.constraintAnalyzer().ifPresent((i) -> {
-            constraintAnalyzerCompiler.getCopyResources(i).addAllTo(copyResources);
-        });
-        input.multilangAnalyzer().ifPresent((i) -> {
-            multilangAnalyzerCompiler.getCopyResources(i).addAllTo(copyResources);
-        });
+        input.parser().ifPresent((i) -> parserCompiler.getCopyResources(i).addAllTo(copyResources));
+        input.styler().ifPresent((i) -> stylerCompiler.getCopyResources(i).addAllTo(copyResources));
+        input.completer().ifPresent((i) -> completerCompiler.getCopyResources(i).addAllTo(copyResources));
+        input.strategoRuntime().ifPresent((i) -> strategoRuntimeCompiler.getCopyResources(i).addAllTo(copyResources));
+        input.constraintAnalyzer().ifPresent((i) -> constraintAnalyzerCompiler.getCopyResources(i).addAllTo(copyResources));
+        input.multilangAnalyzer().ifPresent((i) -> multilangAnalyzerCompiler.getCopyResources(i).addAllTo(copyResources));
         return copyResources;
     }
 

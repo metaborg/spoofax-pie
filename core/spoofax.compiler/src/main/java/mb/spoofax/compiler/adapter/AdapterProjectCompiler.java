@@ -235,15 +235,9 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
         dependencies.add(GradleConfiguredDependency.api(shared.daggerDep()));
         dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
         dependencies.add(GradleConfiguredDependency.annotationProcessor(shared.daggerCompilerDep()));
-        input.parser().ifPresent((i) -> {
-            parserCompiler.getDependencies(i).addAllTo(dependencies);
-        });
-        input.constraintAnalyzer().ifPresent((i) -> {
-            constraintAnalyzerCompiler.getDependencies(i).addAllTo(dependencies);
-        });
-        input.strategoRuntime().ifPresent((i) -> {
-            strategoRuntimeCompiler.getDependencies(i).addAllTo(dependencies);
-        });
+        input.parser().ifPresent((i) -> parserCompiler.getDependencies(i).addAllTo(dependencies));
+        input.constraintAnalyzer().ifPresent((i) -> constraintAnalyzerCompiler.getDependencies(i).addAllTo(dependencies));
+        input.strategoRuntime().ifPresent((i) -> strategoRuntimeCompiler.getDependencies(i).addAllTo(dependencies));
         return dependencies;
     }
 
