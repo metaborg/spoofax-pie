@@ -1,5 +1,5 @@
 import mb.spoofax.compiler.gradle.spoofaxcore.*
-import mb.spoofax.compiler.spoofaxcore.*
+import mb.spoofax.compiler.language.*
 import mb.spoofax.compiler.util.*
 
 plugins {

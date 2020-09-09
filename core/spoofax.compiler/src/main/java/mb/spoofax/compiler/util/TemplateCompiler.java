@@ -15,9 +15,17 @@ public class TemplateCompiler {
     private final Class<?> clazz;
     private final Charset charset;
 
-    public TemplateCompiler(Class<?> clazz, Charset charset) {
+    TemplateCompiler(Class<?> clazz, Charset charset) {
         this.clazz = clazz;
         this.charset = charset;
+    }
+
+    public TemplateCompiler(Charset charset) {
+        this(TemplateCompiler.class, charset);
+    }
+
+    public TemplateCompiler loadingFromClass(Class<?> clazz) {
+        return new TemplateCompiler(clazz, charset);
     }
 
     public Template getOrCompile(String resource) {

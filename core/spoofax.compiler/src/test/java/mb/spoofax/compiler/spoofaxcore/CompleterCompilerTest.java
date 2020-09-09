@@ -2,6 +2,11 @@ package mb.spoofax.compiler.spoofaxcore;
 
 import mb.pie.api.MixedSession;
 import mb.resource.fs.FSPath;
+import mb.spoofax.compiler.adapter.CompleterAdapterCompiler;
+import mb.spoofax.compiler.language.CompleterLanguageCompiler;
+import mb.spoofax.compiler.util.Shared;
+import mb.spoofax.compiler.adapter.AdapterProject;
+import mb.spoofax.compiler.language.LanguageProject;
 import mb.spoofax.compiler.spoofaxcore.tiger.TigerInputs;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;

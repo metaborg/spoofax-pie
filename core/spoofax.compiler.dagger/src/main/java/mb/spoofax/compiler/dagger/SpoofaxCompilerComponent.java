@@ -1,12 +1,12 @@
 package mb.spoofax.compiler.dagger;
 
 import dagger.Component;
-import mb.spoofax.compiler.spoofaxcore.AdapterProjectCompiler;
-import mb.spoofax.compiler.spoofaxcore.CliProjectCompiler;
-import mb.spoofax.compiler.spoofaxcore.EclipseExternaldepsProjectCompiler;
-import mb.spoofax.compiler.spoofaxcore.EclipseProjectCompiler;
-import mb.spoofax.compiler.spoofaxcore.IntellijProjectCompiler;
-import mb.spoofax.compiler.spoofaxcore.LanguageProjectCompiler;
+import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
+import mb.spoofax.compiler.platform.CliProjectCompiler;
+import mb.spoofax.compiler.platform.EclipseExternaldepsProjectCompiler;
+import mb.spoofax.compiler.platform.EclipseProjectCompiler;
+import mb.spoofax.compiler.platform.IntellijProjectCompiler;
+import mb.spoofax.compiler.language.LanguageProjectCompiler;
 
 import javax.inject.Singleton;
 

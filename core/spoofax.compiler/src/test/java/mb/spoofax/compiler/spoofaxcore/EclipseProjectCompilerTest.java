@@ -2,6 +2,13 @@ package mb.spoofax.compiler.spoofaxcore;
 
 import mb.pie.api.MixedSession;
 import mb.resource.fs.FSPath;
+import mb.spoofax.compiler.util.Shared;
+import mb.spoofax.compiler.adapter.AdapterProject;
+import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
+import mb.spoofax.compiler.platform.EclipseExternaldepsProjectCompiler;
+import mb.spoofax.compiler.platform.EclipseProjectCompiler;
+import mb.spoofax.compiler.language.LanguageProject;
+import mb.spoofax.compiler.language.LanguageProjectCompiler;
 import mb.spoofax.compiler.spoofaxcore.tiger.TigerInputs;
 import mb.spoofax.compiler.util.GradleDependency;
 import org.junit.jupiter.api.Test;

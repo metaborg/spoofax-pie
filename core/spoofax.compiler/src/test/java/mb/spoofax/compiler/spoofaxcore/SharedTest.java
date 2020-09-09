@@ -3,6 +3,9 @@ package mb.spoofax.compiler.spoofaxcore;
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
 import mb.resource.fs.FSPath;
+import mb.spoofax.compiler.util.Shared;
+import mb.spoofax.compiler.adapter.AdapterProject;
+import mb.spoofax.compiler.language.LanguageProject;
 import mb.spoofax.compiler.spoofaxcore.tiger.TigerInputs;
 import org.junit.jupiter.api.Test;
 

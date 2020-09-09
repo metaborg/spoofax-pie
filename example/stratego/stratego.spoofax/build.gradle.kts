@@ -1,11 +1,8 @@
-import mb.spoofax.compiler.command.*
 import mb.spoofax.compiler.gradle.spoofaxcore.*
-import mb.spoofax.compiler.menu.*
-import mb.spoofax.compiler.spoofaxcore.*
+import mb.spoofax.compiler.adapter.*
+import mb.spoofax.compiler.adapter.data.*
 import mb.spoofax.compiler.util.*
-import mb.spoofax.core.language.command.CommandContextType
-import mb.spoofax.core.language.command.CommandExecutionType
-import mb.spoofax.core.language.command.EnclosingCommandContextType
+import mb.spoofax.core.language.command.*
 
 plugins {
   id("org.metaborg.gradle.config.java-library")

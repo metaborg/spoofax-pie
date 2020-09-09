@@ -3,7 +3,7 @@
 package mb.spoofax.compiler.gradle.spoofaxcore
 
 import mb.coronium.plugin.BundleExtension
-import mb.spoofax.compiler.spoofaxcore.*
+import mb.spoofax.compiler.platform.*
 import mb.spoofax.compiler.util.*
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin

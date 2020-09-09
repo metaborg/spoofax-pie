@@ -5,7 +5,7 @@ package mb.spoofax.compiler.gradle.spoofaxcore
 import mb.common.util.Properties
 import mb.pie.runtime.PieBuilderImpl
 import mb.spoofax.compiler.dagger.*
-import mb.spoofax.compiler.spoofaxcore.*
+import mb.spoofax.compiler.language.*
 import mb.spoofax.compiler.util.*
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -104,8 +104,8 @@ open class LanguageProjectSettings(
     }
 
     val component = DaggerSpoofaxCompilerGradleComponent.builder()
-      .spoofaxCompilerModule(SpoofaxCompilerModule(TemplateCompiler(Shared::class.java, StandardCharsets.UTF_8)))
-      .spoofaxCompilerGradleModule(SpoofaxCompilerGradleModule({ PieBuilderImpl() }))
+      .spoofaxCompilerModule(SpoofaxCompilerModule(TemplateCompiler(StandardCharsets.UTF_8)))
+      .spoofaxCompilerGradleModule(SpoofaxCompilerGradleModule { PieBuilderImpl() })
       .build()
 
     return LanguageProjectFinalized(shared, input, component)

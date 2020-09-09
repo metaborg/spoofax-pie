@@ -7,10 +7,15 @@ import mb.pie.api.MixedSession;
 import mb.pie.api.Pie;
 import mb.pie.runtime.PieBuilderImpl;
 import mb.resource.ResourceService;
+import mb.spoofax.compiler.adapter.AdapterProject;
+import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
 import mb.spoofax.compiler.dagger.SpoofaxCompilerModule;
+import mb.spoofax.compiler.language.LanguageProject;
+import mb.spoofax.compiler.language.LanguageProjectCompiler;
 import mb.spoofax.compiler.spoofaxcore.tiger.TigerInputs;
 import mb.spoofax.compiler.spoofaxcore.util.FileAssertions;
 import mb.spoofax.compiler.util.GradleDependency;
+import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TemplateCompiler;
 
 import java.io.IOException;
@@ -20,7 +25,7 @@ import java.nio.file.FileSystem;
 class TestBase {
     final FileSystem fileSystem = Jimfs.newFileSystem(Configuration.unix());
     final SpoofaxCompilerTestComponent component = DaggerSpoofaxCompilerTestComponent.builder()
-        .spoofaxCompilerModule(new SpoofaxCompilerModule(new TemplateCompiler(Shared.class, StandardCharsets.UTF_8)))
+        .spoofaxCompilerModule(new SpoofaxCompilerModule(new TemplateCompiler(StandardCharsets.UTF_8)))
         .spoofaxCompilerTestModule(new SpoofaxCompilerTestModule(PieBuilderImpl::new))
         .build();
     final ResourceService resourceService = component.getResourceService();

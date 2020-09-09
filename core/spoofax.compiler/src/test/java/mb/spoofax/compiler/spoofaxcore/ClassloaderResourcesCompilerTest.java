@@ -2,6 +2,9 @@ package mb.spoofax.compiler.spoofaxcore;
 
 import mb.pie.api.MixedSession;
 import mb.resource.fs.FSPath;
+import mb.spoofax.compiler.language.ClassloaderResourcesCompiler;
+import mb.spoofax.compiler.util.Shared;
+import mb.spoofax.compiler.language.LanguageProject;
 import mb.spoofax.compiler.spoofaxcore.tiger.TigerInputs;
 import org.junit.jupiter.api.Test;
 
