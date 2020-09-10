@@ -293,15 +293,18 @@ open class LanguagePlugin : Plugin<Project> {
 
   private fun configureCompileTask(project: Project, finalized: LanguageProjectFinalized) {
     val input = finalized.input
+    val spoofax2Input = finalized.spoofax2Input
     val compileTask = project.tasks.register("spoofaxCompileLanguageProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
+      inputs.property("spoofax2Input", spoofax2Input)
       outputs.files(input.providedFiles().map { finalized.resourceService.toLocalFile(it) })
 
       doLast {
         project.deleteGenSourceSpoofaxDirectory(input.languageProject().project(), finalized.resourceService)
         finalized.pie.newSession().use { session ->
           session.require(finalized.compiler.createTask(input))
+          session.require(finalized.spoofax2Compiler.createTask(spoofax2Input))
         }
       }
     }
