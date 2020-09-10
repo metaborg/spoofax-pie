@@ -46,7 +46,7 @@ public class Spoofax2ConstraintAnalyzerLanguageCompiler implements TaskDef<Spoof
         @Value.Default default String statixSpecificationRelativePath() { return "src-gen/statix/"; }
 
 
-        default void setEnableStatix(ConstraintAnalyzerLanguageCompiler.Input.Builder builder) {
+        default void syncTo(ConstraintAnalyzerLanguageCompiler.Input.Builder builder) {
             builder.enableStatix(copyStatix());
         }
     }

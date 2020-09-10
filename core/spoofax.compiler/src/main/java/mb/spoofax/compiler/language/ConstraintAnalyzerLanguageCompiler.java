@@ -126,7 +126,7 @@ public class ConstraintAnalyzerLanguageCompiler implements TaskDef<ConstraintAna
         LanguageProject languageProject();
 
 
-        default void addStrategoPrimitiveLibrariesTo(StrategoRuntimeLanguageCompiler.Input.Builder builder) {
+        default void syncTo(StrategoRuntimeLanguageCompiler.Input.Builder builder) {
             if(enableNaBL2()) {
                 builder.addNaBL2Primitives(true);
             }

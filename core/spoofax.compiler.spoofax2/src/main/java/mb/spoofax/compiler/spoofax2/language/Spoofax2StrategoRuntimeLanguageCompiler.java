@@ -51,7 +51,7 @@ public class Spoofax2StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax2
         @Value.Default default boolean copyClasses() { return true; }
 
 
-        default void addCtreeRelativePath(StrategoRuntimeLanguageCompiler.Input.Builder builder) {
+        default void syncTo(StrategoRuntimeLanguageCompiler.Input.Builder builder) {
             if(copyCtree()) {
                 builder.addCtreeRelativePaths(ctreeRelativePath());
             }

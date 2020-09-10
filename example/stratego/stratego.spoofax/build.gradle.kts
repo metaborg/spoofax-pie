@@ -32,7 +32,6 @@ spoofaxAdapterProject {
   settings.set(AdapterProjectSettings(
     parser = ParserAdapterCompiler.Input.builder(),
     styler = StylerAdapterCompiler.Input.builder(),
-    completer = CompleterAdapterCompiler.Input.builder(),
     strategoRuntime = StrategoRuntimeAdapterCompiler.Input.builder(),
 
     builder = run {

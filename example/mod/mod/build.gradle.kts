@@ -16,27 +16,30 @@ dependencies {
 }
 
 spoofaxLanguageProject {
-  settings.set(LanguageProjectSettings(
-    shared = Shared.builder()
+  settings.set(LanguageProjectSettings().apply {
+    shared
       .name("Mod")
-      .defaultPackageId("mb.mod"),
+      .defaultPackageId("mb.mod")
 
-    parser = ParserLanguageCompiler.Input.builder()
-      .startSymbol("Start"),
-    styler = StylerLanguageCompiler.Input.builder(),
-    completer = CompleterLanguageCompiler.Input.builder(),
-    constraintAnalyzer = ConstraintAnalyzerLanguageCompiler.Input.builder()
-      .enableNaBL2(false)
-      .enableStatix(true)
-      .multiFile(true),
-    strategoRuntime = StrategoRuntimeLanguageCompiler.Input.builder(),
+    builder.run {
+      parser = ParserLanguageCompiler.Input.builder()
+        .startSymbol("Start")
+      styler = StylerLanguageCompiler.Input.builder()
+      constraintAnalyzer = ConstraintAnalyzerLanguageCompiler.Input.builder()
+        .enableNaBL2(false)
+        .enableStatix(true)
+        .multiFile(true)
+      strategoRuntime = StrategoRuntimeLanguageCompiler.Input.builder()
+    }
 
-    spoofax2ConstraintAnalyzer = Spoofax2ConstraintAnalyzerLanguageCompiler.Input.builder()
-      .copyStatix(true),
-    spoofax2StrategoRuntime = Spoofax2StrategoRuntimeLanguageCompiler.Input.builder()
-      .copyCtree(true)
-      .copyClasses(false),
-    spoofax2Builder = Spoofax2LanguageProjectCompiler.Input.builder()
-      .languageSpecificationDependency(GradleDependency.project(":mod.spoofaxcore"))
-  ))
+    spoofax2Builder.run {
+      constraintAnalyzer = Spoofax2ConstraintAnalyzerLanguageCompiler.Input.builder()
+        .copyStatix(true)
+      strategoRuntime = Spoofax2StrategoRuntimeLanguageCompiler.Input.builder()
+        .copyCtree(true)
+        .copyClasses(false)
+      languageProject
+        .languageSpecificationDependency(GradleDependency.project(":mod.spoofaxcore"))
+    }
+  })
 }

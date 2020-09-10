@@ -45,7 +45,7 @@ public class Spoofax2ParserLanguageCompiler implements TaskDef<Spoofax2ParserLan
         }
 
 
-        default void setParseTableRelativePath(ParserLanguageCompiler.Input.Builder builder) {
+        default void syncTo(ParserLanguageCompiler.Input.Builder builder) {
             builder.parseTableRelativePath(parseTableRelativePath());
         }
     }

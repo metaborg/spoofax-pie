@@ -45,7 +45,7 @@ public class Spoofax2StylerLanguageCompiler implements TaskDef<Spoofax2StylerLan
         }
 
 
-        default void setPackedEsvRelativePath(StylerLanguageCompiler.Input.Builder builder) {
+        default void syncTo(StylerLanguageCompiler.Input.Builder builder) {
             builder.packedEsvRelativePath(packedEsvRelativePath());
         }
     }

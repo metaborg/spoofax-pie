@@ -23,24 +23,11 @@ import org.gradle.kotlin.dsl.*
 import java.io.IOException
 import java.nio.charset.StandardCharsets
 
-open class LanguageProjectSettings(
-  val shared: Shared.Builder = Shared.builder(),
+open class LanguageProjectSettings {
+  val shared: Shared.Builder = Shared.builder()
+  val builder: LanguageProjectBuilder = LanguageProjectBuilder()
+  val spoofax2Builder: Spoofax2LanguageProjectBuilder = Spoofax2LanguageProjectBuilder()
 
-  // TODO: add other Spoofax 2 builders
-  val spoofax2ConstraintAnalyzer: Spoofax2ConstraintAnalyzerLanguageCompiler.Input.Builder? = null, // Optional
-  val spoofax2StrategoRuntime: Spoofax2StrategoRuntimeLanguageCompiler.Input.Builder? = null, // Optional
-  val spoofax2Builder: Spoofax2LanguageProjectCompiler.Input.Builder = Spoofax2LanguageProjectCompiler.Input.builder(),
-
-  val languageProject: LanguageProject.Builder = LanguageProject.builder(),
-  val classloaderResources: ClassloaderResourcesCompiler.Input.Builder = ClassloaderResourcesCompiler.Input.builder(),
-  val parser: ParserLanguageCompiler.Input.Builder? = null, // Optional
-  val styler: StylerLanguageCompiler.Input.Builder? = null, // Optional
-  val completer: CompleterLanguageCompiler.Input.Builder? = null, // Optional
-  val constraintAnalyzer: ConstraintAnalyzerLanguageCompiler.Input.Builder? = null, // Optional
-  val multilangAnalyzer: MultilangAnalyzerLanguageCompiler.Input.Builder? = null, // Optional
-  val strategoRuntime: StrategoRuntimeLanguageCompiler.Input.Builder? = null, // Optional
-  val builder: LanguageProjectCompiler.Input.Builder = LanguageProjectCompiler.Input.builder()
-) {
   internal fun finalize(gradleProject: Project): LanguageProjectFinalized {
     // Attempt to load compiler properties from file.
     val spoofaxCompilerPropertiesFile = gradleProject.projectDir.resolve("spoofaxc.lock")
@@ -60,115 +47,12 @@ open class LanguageProjectSettings(
       .withPersistentProperties(spoofaxCompilerProperties)
       .build()
 
-    // Build Spoofax 2language project compiler settings.
-    val spoofax2Parser = if(parser != null) {
-      Spoofax2ParserLanguageCompiler.Input.builder().build()
-    } else null
-    val spoofax2Styler = if(styler != null) {
-      Spoofax2StylerLanguageCompiler.Input.builder().build()
-    } else null
-    val spoofax2ConstraintAnalyzer = if(constraintAnalyzer != null && spoofax2ConstraintAnalyzer != null) {
-      this.spoofax2ConstraintAnalyzer.build()
-    } else null
-    val spoofax2MultilangAnalyzer = if(multilangAnalyzer != null) {
-      Spoofax2MultilangAnalyzerLanguageCompiler.Input.builder().build()
-    } else null
-    val spoofax2StrategoRuntime = if(strategoRuntime != null && this.spoofax2StrategoRuntime != null) {
-      this.spoofax2StrategoRuntime.build()
-    } else null
-    val spoofax2Builder = this.spoofax2Builder
-    if(spoofax2Parser != null) {
-      spoofax2Builder.parser(spoofax2Parser)
-    }
-    if(spoofax2Styler != null) {
-      spoofax2Builder.styler(spoofax2Styler)
-    }
-    if(spoofax2ConstraintAnalyzer != null) {
-      spoofax2Builder.constraintAnalyzer(spoofax2ConstraintAnalyzer)
-    }
-    if(spoofax2MultilangAnalyzer != null) {
-      spoofax2Builder.multilangAnalyzer(spoofax2MultilangAnalyzer)
-    }
-    if(spoofax2StrategoRuntime != null) {
-      spoofax2Builder.strategoRuntime(spoofax2StrategoRuntime)
-    }
-    val spoofax2Input = spoofax2Builder.build()
-
-    // Build language project compiler settings.
-    val project = gradleProject.toSpoofaxCompilerProject()
-    val languageProject = this.languageProject
-      .project(project)
+    builder.project
+      .project(gradleProject.toSpoofaxCompilerProject())
       .packageId(LanguageProject.Builder.defaultPackageId(shared))
-      .build()
-    val classloaderResources = this.classloaderResources
-      .shared(shared)
-      .languageProject(languageProject)
-      .build()
-    val parser = if(this.parser != null) {
-      spoofax2Parser?.setParseTableRelativePath(this.parser)
-      this.parser
-        .shared(shared)
-        .languageProject(languageProject)
-        .build()
-    } else null
-    val styler = if(this.styler != null) {
-      spoofax2Styler?.setPackedEsvRelativePath(this.styler)
-      this.styler
-        .shared(shared)
-        .languageProject(languageProject)
-        .build()
-    } else null
-    val completer = if(this.completer != null) {
-      this.completer
-        .shared(shared)
-        .languageProject(languageProject)
-        .build()
-    } else null
-    val constraintAnalyzer = if(this.constraintAnalyzer != null) {
-      spoofax2ConstraintAnalyzer?.setEnableStatix(this.constraintAnalyzer)
-      this.constraintAnalyzer
-        .shared(shared)
-        .languageProject(languageProject)
-        .build()
-    } else null
-    val multilangAnalyzer = if(this.multilangAnalyzer != null) {
-      this.multilangAnalyzer
-        .shared(shared)
-        .languageProject(languageProject)
-        .classloaderResources(classloaderResources.classloaderResources())
-        .build()
-    } else null
-    val strategoRuntime = if(this.strategoRuntime != null) {
-      spoofax2StrategoRuntime?.addCtreeRelativePath(this.strategoRuntime)
-      constraintAnalyzer?.addStrategoPrimitiveLibrariesTo(this.strategoRuntime)
-      this.strategoRuntime
-        .shared(shared)
-        .languageProject(languageProject)
-        .build()
-    } else null
-    val builder = this.builder
-      .shared(shared)
-      .languageProject(languageProject)
-      .classloaderResources(classloaderResources)
-    if(parser != null) {
-      builder.parser(parser)
-    }
-    if(styler != null) {
-      builder.styler(styler)
-    }
-    if(completer != null) {
-      builder.completer(completer)
-    }
-    if(constraintAnalyzer != null) {
-      builder.constraintAnalyzer(constraintAnalyzer)
-    }
-    if(multilangAnalyzer != null) {
-      builder.multilangAnalyzer(multilangAnalyzer)
-    }
-    if(strategoRuntime != null) {
-      builder.strategoRuntime(strategoRuntime)
-    }
-    val input = builder.build()
+
+    val spoofax2Input = spoofax2Builder.buildAndSync(builder)
+    val input = builder.build(shared)
 
     // Save compiler properties to file.
     shared.savePersistentProperties(spoofaxCompilerProperties)
@@ -195,7 +79,7 @@ open class LanguageProjectSettings(
     statixDependencies.forEach {
       val ext: LanguageProjectExtension = it.extensions.getByType()
       val factory = ext.settingsFinalized.input.multilangAnalyzer().get().specConfigFactory()
-      this.multilangAnalyzer?.addDependencyFactories(factory)
+      this.builder.multilangAnalyzer?.addDependencyFactories(factory)
     }
   }
 }
@@ -224,7 +108,7 @@ open class LanguageProjectExtension(project: Project) {
     val settings = settings.get()
     val statixDependencies = statixDependenciesFinalized
 
-    if(settings.multilangAnalyzer == null) {
+    if(settings.builder.multilangAnalyzer == null) {
       if(statixDependencies.isNotEmpty()) {
         project.logger.warn("Statix dependencies given, but no multilang analyzer configuration set. Ignoring statix dependencies")
       }

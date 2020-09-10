@@ -4,6 +4,7 @@ import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.None;
 import mb.pie.api.TaskDef;
+import mb.spoofax.compiler.language.MultilangAnalyzerLanguageCompiler;
 import org.immutables.value.Value;
 
 import javax.inject.Inject;
@@ -34,5 +35,10 @@ public class Spoofax2MultilangAnalyzerLanguageCompiler implements TaskDef<Spoofa
         class Builder extends Spoofax2MultilangAnalyzerLanguageCompilerData.Input.Builder {}
 
         static Builder builder() { return new Builder(); }
+
+
+        default void syncTo(MultilangAnalyzerLanguageCompiler.Input.Builder builder) {
+            // Nothing to sync right now.
+        }
     }
 }

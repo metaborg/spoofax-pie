@@ -10,23 +10,26 @@ plugins {
 }
 
 spoofaxLanguageProject {
-  settings.set(LanguageProjectSettings(
-    shared = Shared.builder()
+  settings.set(LanguageProjectSettings().apply {
+    shared
       .name("Stratego")
       .defaultClassPrefix("Stratego")
-      .defaultPackageId("mb.str"),
+      .defaultPackageId("mb.str")
 
-    parser = ParserLanguageCompiler.Input.builder()
-      .startSymbol("Module"),
-    styler = StylerLanguageCompiler.Input.builder(),
-    completer = CompleterLanguageCompiler.Input.builder(),
-    strategoRuntime = StrategoRuntimeLanguageCompiler.Input.builder()
-      .addInteropRegisterersByReflection("org.metaborg.meta.lang.stratego.trans.InteropRegisterer"),
+    builder.run {
+      parser = ParserLanguageCompiler.Input.builder()
+        .startSymbol("Module")
+      styler = StylerLanguageCompiler.Input.builder()
+      strategoRuntime = StrategoRuntimeLanguageCompiler.Input.builder()
+        .addInteropRegisterersByReflection("org.metaborg.meta.lang.stratego.trans.InteropRegisterer")
+    }
 
-    spoofax2StrategoRuntime = Spoofax2StrategoRuntimeLanguageCompiler.Input.builder()
-      .copyCtree(false)
-      .copyClasses(true),
-    spoofax2Builder = Spoofax2LanguageProjectCompiler.Input.builder()
-      .languageSpecificationDependency(GradleDependency.module("org.metaborg:org.metaborg.meta.lang.stratego:2.5.11"))
-  ))
+    spoofax2Builder.run {
+      strategoRuntime = Spoofax2StrategoRuntimeLanguageCompiler.Input.builder()
+        .copyCtree(false)
+        .copyClasses(true)
+      languageProject
+        .languageSpecificationDependency(GradleDependency.module("org.metaborg:org.metaborg.meta.lang.stratego:2.5.11"))
+    }
+  })
 }
