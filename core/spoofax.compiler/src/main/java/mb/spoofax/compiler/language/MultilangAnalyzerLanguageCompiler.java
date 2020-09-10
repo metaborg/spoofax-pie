@@ -4,9 +4,9 @@ import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
+import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
@@ -46,15 +46,12 @@ public class MultilangAnalyzerLanguageCompiler implements TaskDef<MultilangAnaly
         return ListView.of(GradleConfiguredDependency.api(input.shared().multilangDep()));
     }
 
-    public ListView<String> getCopyResources(Input input) {
-        return ListView.of("src-gen/statix/");
-    }
-
 
     @Value.Immutable public interface Input extends Serializable {
         class Builder extends MultilangAnalyzerLanguageCompilerData.Input.Builder {}
 
         static Builder builder() { return new Builder(); }
+
 
         /// Kinds of classes (generated/extended/manual)
 
@@ -63,6 +60,7 @@ public class MultilangAnalyzerLanguageCompiler implements TaskDef<MultilangAnaly
         @Value.Derived default ResourcePath classesGenDirectory() {
             return languageProject().project().genSourceSpoofaxJavaDirectory();
         }
+
 
         // Spec factory
 
@@ -85,13 +83,23 @@ public class MultilangAnalyzerLanguageCompiler implements TaskDef<MultilangAnaly
 
         List<String> rootModules();
 
+
         // List of all provided files
 
-        default ListView<ResourcePath> providedFiles() { return ListView.of(); }
+        default ListView<ResourcePath> providedFiles() {
+            if(classKind().isManualOnly()) {
+                return ListView.of();
+            }
+            return ListView.of(
+                genSpecConfigFactory().file(classesGenDirectory())
+            );
+        }
+
 
         // Subinputs
 
         TypeInfo classloaderResources();
+
 
         /// Automatically provided sub-inputs
 

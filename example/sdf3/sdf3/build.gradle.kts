@@ -1,5 +1,6 @@
 import mb.spoofax.compiler.gradle.spoofaxcore.*
 import mb.spoofax.compiler.language.*
+import mb.spoofax.compiler.spoofax2.language.*
 import mb.spoofax.compiler.util.*
 
 plugins {
@@ -25,20 +26,23 @@ spoofaxLanguageProject {
       .startSymbol("Module"),
     styler = StylerLanguageCompiler.Input.builder(),
     completer = CompleterLanguageCompiler.Input.builder(),
-    strategoRuntime = StrategoRuntimeLanguageCompiler.Input.builder()
-      .addInteropRegisterersByReflection("org.metaborg.meta.lang.template.strategies.InteropRegisterer")
-      .enableNaBL2(false)
-      .enableStatix(true)
-      .copyCTree(true)
-      .copyClasses(true)
-      .classKind(mb.spoofax.compiler.util.ClassKind.Extended)
-      .manualFactory("mb.sdf3", "Sdf3ManualStrategoRuntimeBuilderFactory"),
     constraintAnalyzer = ConstraintAnalyzerLanguageCompiler.Input.builder()
       .strategoStrategy("statix-editor-analyze")
+      .enableNaBL2(false)
+      .enableStatix(true)
       .multiFile(true),
+    strategoRuntime = StrategoRuntimeLanguageCompiler.Input.builder()
+      .addInteropRegisterersByReflection("org.metaborg.meta.lang.template.strategies.InteropRegisterer")
+      .classKind(mb.spoofax.compiler.util.ClassKind.Extended)
+      .manualFactory("mb.sdf3", "Sdf3ManualStrategoRuntimeBuilderFactory"),
 
-    builder = run {
-      val builder = LanguageProjectCompiler.Input.builder()
+    spoofax2ConstraintAnalyzer = Spoofax2ConstraintAnalyzerLanguageCompiler.Input.builder()
+      .copyStatix(true),
+    spoofax2StrategoRuntime = Spoofax2StrategoRuntimeLanguageCompiler.Input.builder()
+      .copyCtree(true)
+      .copyClasses(true),
+    spoofax2Builder = run {
+      val builder = Spoofax2LanguageProjectCompiler.Input.builder()
       builder.addAdditionalCopyResources("target/metaborg/EditorService-pretty.pp.af")
       if(gradle.parent != null && gradle.parent!!.rootProject.name == "devenv") {
         // HACK: use org.metaborggggg groupId for SDF3, as that is used to prevent bootstrapping issues.

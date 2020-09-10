@@ -15,7 +15,7 @@ public class {{genRules.id}} implements Serializable {
     }
 
     public static {{genRules.id}} fromDefinitionDir(HierarchicalResource definitionDir) {
-        final HierarchicalResource resource = definitionDir.appendRelativePath("{{packedESVRelPath}}");
+        final HierarchicalResource resource = definitionDir.appendRelativePath("{{packedEsvRelativePath}}");
         try(final InputStream inputStream = resource.openRead()) {
             final ESVStylingRules stylingRules = ESVStylingRules.fromStream(inputStream);
             return new {{genRules.id}}(stylingRules);

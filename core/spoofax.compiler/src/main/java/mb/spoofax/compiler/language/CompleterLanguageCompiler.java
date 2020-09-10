@@ -4,9 +4,9 @@ import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
+import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TypeInfo;
 import org.immutables.value.Value;
 
@@ -76,9 +76,9 @@ public class CompleterLanguageCompiler implements TaskDef<CompleterLanguageCompi
         }
 
 
-        /// List of all generated files
+        /// List of all provided files
 
-        default ListView<ResourcePath> generatedFiles() {
+        default ListView<ResourcePath> providedFiles() {
             if(classKind().isManualOnly()) {
                 return ListView.of();
             }

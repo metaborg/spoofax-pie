@@ -46,10 +46,6 @@ public class ConstraintAnalyzerLanguageCompiler implements TaskDef<ConstraintAna
         return ListView.of(GradleConfiguredDependency.api(input.shared().constraintCommonDep()));
     }
 
-    public ListView<String> getCopyResources(Input input) {
-        return ListView.of();
-    }
-
 
     @Value.Immutable public interface Input extends Serializable {
         class Builder extends ConstraintAnalyzerLanguageCompilerData.Input.Builder {}
@@ -58,6 +54,10 @@ public class ConstraintAnalyzerLanguageCompiler implements TaskDef<ConstraintAna
 
 
         /// Configuration
+
+        boolean enableNaBL2();
+
+        boolean enableStatix();
 
         @Value.Default default String strategoStrategy() { return "editor-analyze"; }
 
@@ -124,6 +124,17 @@ public class ConstraintAnalyzerLanguageCompiler implements TaskDef<ConstraintAna
         Shared shared();
 
         LanguageProject languageProject();
+
+
+        default void addStrategoPrimitiveLibrariesTo(StrategoRuntimeLanguageCompiler.Input.Builder builder) {
+            if(enableNaBL2()) {
+                builder.addNaBL2Primitives(true);
+            }
+            if(enableStatix()) {
+                builder.addNaBL2Primitives(true);
+                builder.addStatixPrimitives(true);
+            }
+        }
 
 
         @Value.Check default void check() {

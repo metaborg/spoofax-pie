@@ -1,5 +1,6 @@
 import mb.spoofax.compiler.gradle.spoofaxcore.*
 import mb.spoofax.compiler.language.*
+import mb.spoofax.compiler.spoofax2.language.*
 import mb.spoofax.compiler.util.*
 
 plugins {
@@ -24,15 +25,18 @@ spoofaxLanguageProject {
       .startSymbol("Start"),
     styler = StylerLanguageCompiler.Input.builder(),
     completer = CompleterLanguageCompiler.Input.builder(),
-    strategoRuntime = StrategoRuntimeLanguageCompiler.Input.builder()
+    constraintAnalyzer = ConstraintAnalyzerLanguageCompiler.Input.builder()
       .enableNaBL2(false)
       .enableStatix(true)
-      .copyCTree(true)
-      .copyClasses(false),
-    constraintAnalyzer = ConstraintAnalyzerLanguageCompiler.Input.builder()
       .multiFile(true),
+    strategoRuntime = StrategoRuntimeLanguageCompiler.Input.builder(),
 
-    builder = LanguageProjectCompiler.Input.builder()
+    spoofax2ConstraintAnalyzer = Spoofax2ConstraintAnalyzerLanguageCompiler.Input.builder()
+      .copyStatix(true),
+    spoofax2StrategoRuntime = Spoofax2StrategoRuntimeLanguageCompiler.Input.builder()
+      .copyCtree(true)
+      .copyClasses(false),
+    spoofax2Builder = Spoofax2LanguageProjectCompiler.Input.builder()
       .languageSpecificationDependency(GradleDependency.project(":mod.spoofaxcore"))
   ))
 }

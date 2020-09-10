@@ -86,6 +86,7 @@ public class TigerInputs {
 
     public static ParserLanguageCompiler.Input.Builder parserLanguageProjectInput(Shared shared, LanguageProject languageProject) {
         return ParserLanguageCompiler.Input.builder()
+            .parseTableRelativePath("target/metaborg/sdf.tbl")
             .startSymbol("Module")
             .shared(shared)
             .languageProject(languageProject)
@@ -104,6 +105,7 @@ public class TigerInputs {
 
     public static StylerLanguageCompiler.Input.Builder stylerLanguageProjectInput(Shared shared, LanguageProject languageProject) {
         return StylerLanguageCompiler.Input.builder()
+            .packedEsvRelativePath("target/metaborg/editor.esv.af")
             .shared(shared)
             .languageProject(languageProject)
             ;
@@ -142,9 +144,6 @@ public class TigerInputs {
                 "org.metaborg.lang.tiger.trans.InteropRegisterer",
                 "org.metaborg.lang.tiger.strategies.InteropRegisterer"
             )
-            .enableNaBL2(true)
-            .enableStatix(false)
-            .copyClasses(true)
             .shared(shared)
             .languageProject(languageProject)
             ;
@@ -160,6 +159,8 @@ public class TigerInputs {
 
     public static ConstraintAnalyzerLanguageCompiler.Input.Builder constraintAnalyzerLanguageProjectInput(Shared shared, LanguageProject languageProject) {
         return ConstraintAnalyzerLanguageCompiler.Input.builder()
+            .enableNaBL2(true)
+            .enableStatix(false)
             .shared(shared)
             .languageProject(languageProject)
             ;
@@ -184,7 +185,7 @@ public class TigerInputs {
             .completer(completerLanguageProjectInput(shared, languageProject).build())
             .strategoRuntime(strategoRuntimeLanguageProjectInput(shared, languageProject).build())
             .constraintAnalyzer(constraintAnalyzerLanguageProjectInput(shared, languageProject).build())
-            .languageSpecificationDependency(GradleDependency.project(":tiger"))
+            //.languageSpecificationDependency(GradleDependency.project(":tiger")) // TODO: moved to Spoofax 2 compiler.
             .shared(shared)
             ;
     }

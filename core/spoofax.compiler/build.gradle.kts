@@ -22,7 +22,6 @@ dependencies {
   api(project(":spoofax.core"))
   api("org.metaborg:resource")
   api("org.metaborg:pie.api")
-
   api("com.samskivert:jmustache:1.15")
 
   compileOnly("org.checkerframework:checker-qual-android")

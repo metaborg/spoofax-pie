@@ -32,11 +32,18 @@ include("statix.multilang.eclipse.externaldeps")
 include("spoofax2.common")
 
 include("spoofax.core")
+
 include("spoofax.cli")
 include("spoofax.intellij")
 include("spoofax.eclipse")
 include("spoofax.eclipse.externaldeps")
+
 include("spoofax.compiler")
 include("spoofax.compiler.dagger")
+include("spoofax.compiler.spoofax2")
+include("spoofax.compiler.spoofax2.dagger")
+include("spoofax.compiler.spoofax3")
 include("spoofax.compiler.interfaces")
 include("spoofax.compiler.gradle")
+include("spoofax.compiler.gradle.spoofax2")
+include("spoofax.compiler.gradle.spoofax3")

@@ -2,11 +2,12 @@ package mb.spoofax.compiler.language;
 
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
+import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
+import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
@@ -16,12 +17,11 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
 @Value.Enclosing
-public class StrategoRuntimeLanguageCompiler implements TaskDef<StrategoRuntimeLanguageCompiler.Input, StrategoRuntimeLanguageCompiler.Output> {
+public class StrategoRuntimeLanguageCompiler implements TaskDef<StrategoRuntimeLanguageCompiler.Input, None> {
     private final TemplateWriter factoryTemplate;
 
     @Inject public StrategoRuntimeLanguageCompiler(TemplateCompiler templateCompiler) {
@@ -34,15 +34,11 @@ public class StrategoRuntimeLanguageCompiler implements TaskDef<StrategoRuntimeL
         return getClass().getName();
     }
 
-    @Override public Output exec(ExecContext context, Input input) throws IOException {
-        final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("addNaBL2Primitives", input.enableNaBL2() || input.enableStatix());
-        map.put("addStatixPrimitives", input.enableStatix());
+    @Override public None exec(ExecContext context, Input input) throws IOException {
+        if(input.classKind().isManualOnly()) return None.instance; // Nothing to generate: return.
         final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        factoryTemplate.write(context, input.genFactory().file(classesGenDirectory), input, map);
-        return outputBuilder.build();
+        factoryTemplate.write(context, input.genFactory().file(classesGenDirectory), input);
+        return None.instance;
     }
 
 
@@ -52,28 +48,14 @@ public class StrategoRuntimeLanguageCompiler implements TaskDef<StrategoRuntimeL
         dependencies.add(GradleConfiguredDependency.api(shared.strategoCommonDep()));
         dependencies.add(GradleConfiguredDependency.api(shared.orgStrategoXTStrjDep()));
         dependencies.add(GradleConfiguredDependency.api(shared.strategoXTMinJarDep()));
-        // TODO: move to constraint analyzer compiler, and make this depend on it?
-        // NaBL2 (required by Statix as well)
-        if(input.enableNaBL2() || input.enableStatix()) {
+        if(input.addNaBL2Primitives()) {
             dependencies.add(GradleConfiguredDependency.implementation(shared.nabl2CommonDep()));
         }
-        if(input.enableStatix()) {
+        if(input.addStatixPrimitives()) {
             dependencies.add(GradleConfiguredDependency.implementation(shared.statixCommonDep()));
             dependencies.add(GradleConfiguredDependency.implementation(shared.spoofax2CommonDep()));
         }
         return new ListView<>(dependencies);
-    }
-
-    public ListView<String> getCopyResources(Input input) {
-        final ArrayList<String> copyResources = new ArrayList<>();
-        if(input.enableStatix()) {
-            // TODO: move to constraint analyzer compiler?
-            copyResources.add("src-gen/statix/");
-        }
-        if(input.copyCTree()) {
-            copyResources.add("target/metaborg/stratego.ctree");
-        }
-        return new ListView<>(copyResources);
     }
 
 
@@ -87,16 +69,11 @@ public class StrategoRuntimeLanguageCompiler implements TaskDef<StrategoRuntimeL
 
         List<String> interopRegisterersByReflection();
 
-        boolean enableNaBL2();
+        List<String> ctreeRelativePaths();
 
-        boolean enableStatix();
+        @Value.Default default boolean addNaBL2Primitives() { return false; }
 
-
-        /// Whether to copy certain files from the Spoofax 2.x project.
-
-        @Value.Default default boolean copyCTree() { return false; }
-
-        @Value.Default default boolean copyClasses() { return true; }
+        @Value.Default default boolean addStatixPrimitives() { return false; }
 
 
         /// Kinds of classes (generated/extended/manual)
@@ -153,11 +130,5 @@ public class StrategoRuntimeLanguageCompiler implements TaskDef<StrategoRuntimeL
                 throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualFactory' has not been set");
             }
         }
-    }
-
-    @Value.Immutable public interface Output extends Serializable {
-        class Builder extends StrategoRuntimeLanguageCompilerData.Output.Builder {}
-
-        static Builder builder() { return new Builder(); }
     }
 }

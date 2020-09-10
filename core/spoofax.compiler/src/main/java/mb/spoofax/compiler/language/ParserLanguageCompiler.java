@@ -2,11 +2,12 @@ package mb.spoofax.compiler.language;
 
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
+import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
+import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
@@ -18,7 +19,7 @@ import java.io.Serializable;
 import java.util.Optional;
 
 @Value.Enclosing
-public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.Input, ParserLanguageCompiler.Output> {
+public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.Input, None> {
     private final TemplateWriter tableTemplate;
     private final TemplateWriter parserTemplate;
     private final TemplateWriter factoryTemplate;
@@ -35,27 +36,21 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
         return getClass().getName();
     }
 
-    @Override public Output exec(ExecContext context, Input input) throws IOException {
-        final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
+    @Override public None exec(ExecContext context, Input input) throws IOException {
+        if(input.classKind().isManualOnly()) return None.instance; // Nothing to generate: return.
         final ResourcePath classesGenDirectory = input.classesGenDirectory();
         tableTemplate.write(context, input.genTable().file(classesGenDirectory), input);
         parserTemplate.write(context, input.genParser().file(classesGenDirectory), input);
         factoryTemplate.write(context, input.genFactory().file(classesGenDirectory), input);
-        return outputBuilder.build();
+        return None.instance;
     }
 
 
     public ListView<GradleConfiguredDependency> getDependencies(Input input) {
         return ListView.of(
             GradleConfiguredDependency.api(input.shared().jsglrCommonDep()),
-            GradleConfiguredDependency.api(input.shared().jsglr1CommonDep()),
-            GradleConfiguredDependency.api(input.shared().jsglr1PieDep())
+            GradleConfiguredDependency.api(input.shared().jsglr1CommonDep())
         );
-    }
-
-    public ListView<String> getCopyResources(Input input) {
-        return ListView.of(input.tableRelPath());
     }
 
 
@@ -71,11 +66,10 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
         String startSymbol();
 
 
-        /// Parse table source file (to copy from), and destination file
-
-        @Value.Default default String tableRelPath() {
-            return "target/metaborg/sdf.tbl";
-        }
+        /**
+         * @return path to the parse table to load, relative to the classloader resources.
+         */
+        String parseTableRelativePath();
 
 
         /// Kinds of classes (generated/extended/manual)
@@ -159,14 +153,6 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
             if(!manualFactory().isPresent()) {
                 throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualFactory' has not been set");
             }
-        }
-    }
-
-    @Value.Immutable public interface Output extends Serializable {
-        class Builder extends ParserLanguageCompilerData.Output.Builder {}
-
-        static Builder builder() {
-            return new Builder();
         }
     }
 }

@@ -1,6 +1,5 @@
 package mb.spoofax2.common.primitive.generic;
 
-import mb.resource.QualifiedResourceKeyString;
 import mb.resource.hierarchical.ResourcePath;
 
 public class Spoofax2Context {

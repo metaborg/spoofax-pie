@@ -13,4 +13,4 @@ import java.lang.annotation.Target;
     jdkOnly = true,
     typeImmutableEnclosing = "*Data",
     deepImmutablesDetection = true
-) @interface ImmutableStyle {}
+) public @interface ImmutableStyle {}

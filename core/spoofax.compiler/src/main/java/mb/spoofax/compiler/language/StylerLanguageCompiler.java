@@ -2,11 +2,12 @@ package mb.spoofax.compiler.language;
 
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
+import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
+import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
@@ -18,7 +19,7 @@ import java.io.Serializable;
 import java.util.Optional;
 
 @Value.Enclosing
-public class StylerLanguageCompiler implements TaskDef<StylerLanguageCompiler.Input, StylerLanguageCompiler.Output> {
+public class StylerLanguageCompiler implements TaskDef<StylerLanguageCompiler.Input, None> {
     private final TemplateWriter rulesTemplate;
     private final TemplateWriter stylerTemplate;
     private final TemplateWriter factoryTemplate;
@@ -35,23 +36,18 @@ public class StylerLanguageCompiler implements TaskDef<StylerLanguageCompiler.In
         return getClass().getName();
     }
 
-    @Override public Output exec(ExecContext context, Input input) throws IOException {
-        final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
+    @Override public None exec(ExecContext context, Input input) throws IOException {
+        if(input.classKind().isManualOnly()) return None.instance; // Nothing to generate: return.
         final ResourcePath classesGenDirectory = input.classesGenDirectory();
         rulesTemplate.write(context, input.genRules().file(classesGenDirectory), input);
         stylerTemplate.write(context, input.genStyler().file(classesGenDirectory), input);
         factoryTemplate.write(context, input.genFactory().file(classesGenDirectory), input);
-        return outputBuilder.build();
+        return None.instance;
     }
 
 
     public ListView<GradleConfiguredDependency> getDependencies(Input input) {
         return ListView.of(GradleConfiguredDependency.api(input.shared().esvCommonDep()));
-    }
-
-    public ListView<String> getCopyResources(Input input) {
-        return ListView.of(input.packedESVRelPath());
     }
 
 
@@ -62,11 +58,10 @@ public class StylerLanguageCompiler implements TaskDef<StylerLanguageCompiler.In
         static Builder builder() { return new Builder(); }
 
 
-        /// Packed ESV source file (to copy from), and destination file
-
-        @Value.Default default String packedESVRelPath() {
-            return "target/metaborg/editor.esv.af";
-        }
+        /**
+         * @return path to the packed ESV to load, relative to the classloader resources.
+         */
+        String packedEsvRelativePath();
 
 
         /// Kinds of classes (generated/extended/manual)
@@ -151,12 +146,5 @@ public class StylerLanguageCompiler implements TaskDef<StylerLanguageCompiler.In
                 throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualFactory' has not been set");
             }
         }
-    }
-
-    @Value.Immutable
-    public interface Output extends Serializable {
-        class Builder extends StylerLanguageCompilerData.Output.Builder {}
-
-        static Builder builder() { return new Builder(); }
     }
 }

@@ -16,7 +16,7 @@ public class {{genTable.id}} implements Serializable {
     }
 
     public static {{genTable.id}} fromDefinitionDir(HierarchicalResource definitionDir) {
-        final HierarchicalResource resource = definitionDir.appendRelativePath("{{tableRelPath}}");
+        final HierarchicalResource resource = definitionDir.appendRelativePath("{{parseTableRelativePath}}");
         try(final InputStream inputStream = resource.openRead()) {
             final JSGLR1ParseTable parseTable = JSGLR1ParseTable.fromStream(inputStream);
             return new {{genTable.id}}(parseTable);

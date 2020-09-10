@@ -11,11 +11,12 @@ import mb.resource.DefaultResourceService
 import mb.resource.ResourceService
 import mb.resource.fs.FSResourceRegistry
 import mb.spoofax.compiler.dagger.*
+import mb.spoofax.compiler.spoofax2.dagger.*
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = [SpoofaxCompilerModule::class, SpoofaxCompilerGradleModule::class])
-interface SpoofaxCompilerGradleComponent : SpoofaxCompilerComponent {
+@Component(modules = [SpoofaxCompilerModule::class, Spoofax2CompilerModule::class, SpoofaxCompilerGradleModule::class])
+interface SpoofaxCompilerGradleComponent : Spoofax2CompilerComponent {
   val resourceService: ResourceService
 
   val pie: Pie

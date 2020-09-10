@@ -22,9 +22,9 @@ public class {{genFactory.id}} implements StrategoRuntimeBuilderFactory {
 {{#interopRegisterersByReflection}}
         builder.addInteropRegistererByReflection("{{this}}");
 {{/interopRegisterersByReflection}}
-{{#copyCTree}}
-        builder.addCtree(definitionDir.appendRelativePath("target/metaborg/stratego.ctree"));
-{{/copyCTree}}
+{{#ctreeRelativePaths}}
+        builder.addCtree(definitionDir.appendRelativePath("{{this}}"));
+{{/ctreeRelativePaths}}
         builder.withJarParentClassLoader({{factory.id}}.class.getClassLoader());
         builder.addLibrary(new mb.constraint.common.stratego.ConstraintPrimitiveLibrary(resourceService));
 {{#addNaBL2Primitives}}
