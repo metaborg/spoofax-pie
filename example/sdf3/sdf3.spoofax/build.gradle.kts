@@ -1,4 +1,4 @@
-import mb.spoofax.compiler.gradle.spoofaxcore.*
+import mb.spoofax.compiler.gradle.plugin.*
 import mb.spoofax.compiler.adapter.*
 import mb.spoofax.compiler.adapter.data.*
 import mb.spoofax.compiler.util.*
@@ -7,10 +7,26 @@ import mb.spoofax.core.language.command.*
 plugins {
   id("org.metaborg.gradle.config.java-library")
   id("org.metaborg.gradle.config.junit-testing")
-  id("org.metaborg.spoofax.compiler.gradle.spoofaxcore.adapter")
+  id("org.metaborg.spoofax.compiler.gradle.adapter")
 }
 
-spoofaxAdapterProject {
+dependencies {
+  api("org.metaborg:sdf2parenthesize")
+  api("org.metaborg:statix.solver")
+  api("org.metaborg:statix.common")
+  api("org.metaborg:statix.multilang")
+
+  testAnnotationProcessor(platform("$group:spoofax.depconstraints:$version"))
+  testImplementation("org.metaborg:log.backend.slf4j")
+  testImplementation("org.slf4j:slf4j-simple:1.7.30")
+  testImplementation("org.metaborg:pie.runtime")
+  testImplementation("org.metaborg:pie.dagger")
+  testImplementation("com.google.jimfs:jimfs:1.1")
+  testCompileOnly("org.checkerframework:checker-qual-android")
+  testAnnotationProcessor("com.google.dagger:dagger-compiler")
+}
+
+languageAdapterProject {
   languageProject.set(project(":sdf3"))
   settings.set(AdapterProjectSettings(
     parser = ParserAdapterCompiler.Input.builder(),
@@ -210,27 +226,4 @@ spoofaxAdapterProject {
       builder
     }
   ))
-}
-
-dependencies {
-  api("org.metaborg:sdf2parenthesize")
-  api("org.metaborg:statix.solver")
-  api("org.metaborg:statix.common")
-  api("org.metaborg:statix.multilang")
-
-  testAnnotationProcessor(platform("$group:spoofax.depconstraints:$version"))
-  testImplementation("org.metaborg:log.backend.slf4j")
-  testImplementation("org.slf4j:slf4j-simple:1.7.30")
-  testImplementation("org.metaborg:pie.runtime")
-  testImplementation("org.metaborg:pie.dagger")
-  testImplementation("com.google.jimfs:jimfs:1.1")
-  testCompileOnly("org.checkerframework:checker-qual-android")
-  testAnnotationProcessor("com.google.dagger:dagger-compiler")
-}
-
-tasks.test {
-  // HACK: skip if not in devenv composite build, as that is not using the latest version of SDF3.
-  if(gradle.parent == null || gradle.parent!!.rootProject.name != "devenv") {
-    onlyIf { false }
-  }
 }

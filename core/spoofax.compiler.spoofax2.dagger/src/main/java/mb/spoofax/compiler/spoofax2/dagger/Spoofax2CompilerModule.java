@@ -4,7 +4,6 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
 import mb.pie.api.TaskDef;
-import mb.spoofax.compiler.dagger.SpoofaxCompilerModule;
 import mb.spoofax.compiler.spoofax2.language.Spoofax2ConstraintAnalyzerLanguageCompiler;
 import mb.spoofax.compiler.spoofax2.language.Spoofax2LanguageProjectCompiler;
 import mb.spoofax.compiler.spoofax2.language.Spoofax2MultilangAnalyzerLanguageCompiler;
@@ -16,7 +15,7 @@ import javax.inject.Singleton;
 import java.util.HashSet;
 import java.util.Set;
 
-@Module(includes = SpoofaxCompilerModule.class)
+@Module
 public class Spoofax2CompilerModule {
     @Provides @Singleton @ElementsIntoSet static Set<TaskDef<?, ?>> provideTaskDefsSet(
         Spoofax2LanguageProjectCompiler languageProjectCompiler,

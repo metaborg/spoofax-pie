@@ -1,8 +1,9 @@
 @file:Suppress("UnstableApiUsage")
 
-package mb.spoofax.compiler.gradle.spoofaxcore
+package mb.spoofax.compiler.gradle.plugin
 
 import mb.coronium.plugin.BundleExtension
+import mb.spoofax.compiler.gradle.*
 import mb.spoofax.compiler.platform.*
 import mb.spoofax.compiler.util.*
 import org.gradle.api.GradleException
@@ -46,8 +47,8 @@ open class EclipseProjectExtension(project: Project) {
   }
 
   companion object {
-    internal const val id = "spoofaxEclipseProject"
-    private const val name = "Spoofax language Eclipse project"
+    internal const val id = "languageEclipseProject"
+    private const val name = "language Eclipse project"
   }
 
   internal val adapterProjectFinalized: Project by lazy {
@@ -80,12 +81,8 @@ open class EclipseProjectExtension(project: Project) {
 
 internal class EclipseProjectFinalized(
   val input: EclipseProjectCompiler.Input,
-  languageProjectFinalized: LanguageProjectFinalized
-) {
-  val pie = languageProjectFinalized.pie
-  val resourceService = languageProjectFinalized.resourceService
-  val compiler = languageProjectFinalized.component.eclipseProjectCompiler
-}
+  val languageProjectFinalized: LanguageProjectFinalized
+)
 
 open class EclipsePlugin : Plugin<Project> {
   override fun apply(project: Project) {
@@ -98,37 +95,37 @@ open class EclipsePlugin : Plugin<Project> {
     project.afterEvaluate {
       extension.adapterProjectFinalized.whenAdapterProjectFinalized {
         extension.eclipseExternaldepsProjectFinalized.whenEclipseExternaldepsProjectFinalized {
-          configure(project, extension.finalized)
+          configure(project, extension.finalized.languageProjectFinalized.component, extension.finalized)
         }
       }
     }
   }
 
-  private fun configure(project: Project, finalized: EclipseProjectFinalized) {
-    configureProject(project, finalized)
-    configureCompilerTask(project, finalized)
-    configureBundle(project, finalized)
+  private fun configure(project: Project, component: SpoofaxCompilerGradleComponent, finalized: EclipseProjectFinalized) {
+    configureProject(project, component, finalized)
+    configureCompilerTask(project, component, finalized)
+    configureBundle(project, component, finalized)
   }
 
-  private fun configureProject(project: Project, finalized: EclipseProjectFinalized) {
+  private fun configureProject(project: Project, component: SpoofaxCompilerGradleComponent, finalized: EclipseProjectFinalized) {
     val input = finalized.input
-    project.configureGeneratedSources(project.toSpoofaxCompilerProject(), finalized.resourceService)
-    finalized.compiler.getDependencies(input).forEach {
+    project.configureGeneratedSources(project.toSpoofaxCompilerProject(), component.resourceService)
+    component.eclipseProjectCompiler.getDependencies(input).forEach {
       it.addToDependencies(project)
     }
   }
 
-  private fun configureCompilerTask(project: Project, finalized: EclipseProjectFinalized) {
+  private fun configureCompilerTask(project: Project, component: SpoofaxCompilerGradleComponent, finalized: EclipseProjectFinalized) {
     val input = finalized.input
     val compileTask = project.tasks.register("spoofaxCompileEclipseProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
-      outputs.files(input.providedFiles().map { finalized.resourceService.toLocalFile(it) })
+      outputs.files(input.providedFiles().map { component.resourceService.toLocalFile(it) })
 
       doLast {
-        project.deleteGenSourceSpoofaxDirectory(input.project(), finalized.resourceService)
-        finalized.pie.newSession().use { session ->
-          session.require(finalized.compiler.createTask(input))
+        project.deleteGenSourceSpoofaxDirectory(input.project(), component.resourceService)
+        component.pie.newSession().use { session ->
+          session.require(component.eclipseProjectCompiler.createTask(input))
         }
       }
     }
@@ -137,12 +134,12 @@ open class EclipsePlugin : Plugin<Project> {
     project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(compileTask)
   }
 
-  private fun configureBundle(project: Project, finalized: EclipseProjectFinalized) {
+  private fun configureBundle(project: Project, component: SpoofaxCompilerGradleComponent, finalized: EclipseProjectFinalized) {
     val input = finalized.input
     project.configure<BundleExtension> {
-      manifestFile.set(finalized.resourceService.toLocalFile(input.manifestMfFile())!!)
+      manifestFile.set(component.resourceService.toLocalFile(input.manifestMfFile())!!)
     }
-    configureBundleDependencies(project, finalized.compiler.getBundleDependencies(input))
+    configureBundleDependencies(project, component.eclipseProjectCompiler.getBundleDependencies(input))
   }
 }
 

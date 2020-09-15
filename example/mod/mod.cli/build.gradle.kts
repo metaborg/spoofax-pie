@@ -1,8 +1,8 @@
 plugins {
   id("org.metaborg.gradle.config.java-library")
-  id("org.metaborg.spoofax.compiler.gradle.spoofaxcore.cli")
+  id("org.metaborg.spoofax.compiler.gradle.cli")
 }
 
-spoofaxCliProject {
+languageCliProject {
   adapterProject.set(project(":mod.spoofax"))
 }

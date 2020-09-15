@@ -1,7 +1,8 @@
 @file:Suppress("UnstableApiUsage")
 
-package mb.spoofax.compiler.gradle.spoofaxcore
+package mb.spoofax.compiler.gradle.plugin
 
+import mb.spoofax.compiler.gradle.*
 import mb.spoofax.compiler.platform.*
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -48,8 +49,8 @@ open class CliProjectExtension(project: Project) {
   }
 
   companion object {
-    internal const val id = "spoofaxCliProject"
-    private const val name = "Spoofax language CLI project"
+    internal const val id = "languageCliProject"
+    private const val name = "language CLI project"
   }
 
   internal val adapterProjectFinalized: Project by lazy {
@@ -73,12 +74,8 @@ open class CliProjectExtension(project: Project) {
 
 internal class CliProjectFinalized(
   val input: CliProjectCompiler.Input,
-  languageProjectFinalized: LanguageProjectFinalized
-) {
-  val pie = languageProjectFinalized.pie
-  val resourceService = languageProjectFinalized.resourceService
-  val compiler = languageProjectFinalized.component.cliProjectCompiler
-}
+  val languageProjectFinalized: LanguageProjectFinalized
+)
 
 @Suppress("unused")
 open class CliPlugin : Plugin<Project> {
@@ -90,21 +87,21 @@ open class CliPlugin : Plugin<Project> {
 
     project.afterEvaluate {
       extension.adapterProjectFinalized.whenAdapterProjectFinalized {
-        configure(project, extension.finalized)
+        configure(project, extension.finalized.languageProjectFinalized.component, extension.finalized)
       }
     }
   }
 
-  private fun configure(project: Project, finalized: CliProjectFinalized) {
-    configureProject(project, finalized)
-    configureCompileTask(project, finalized)
+  private fun configure(project: Project, component: SpoofaxCompilerGradleComponent, finalized: CliProjectFinalized) {
+    configureProject(project, component, finalized)
+    configureCompileTask(project, component, finalized)
     configureExecutableJarTask(project)
   }
 
-  private fun configureProject(project: Project, finalized: CliProjectFinalized) {
+  private fun configureProject(project: Project, component: SpoofaxCompilerGradleComponent, finalized: CliProjectFinalized) {
     val input = finalized.input
-    project.configureGeneratedSources(project.toSpoofaxCompilerProject(), finalized.resourceService)
-    finalized.compiler.getDependencies(input).forEach {
+    project.configureGeneratedSources(project.toSpoofaxCompilerProject(), component.resourceService)
+    component.cliProjectCompiler.getDependencies(input).forEach {
       it.addToDependencies(project)
     }
     project.configure<JavaApplication> {
@@ -112,17 +109,17 @@ open class CliPlugin : Plugin<Project> {
     }
   }
 
-  private fun configureCompileTask(project: Project, finalized: CliProjectFinalized) {
+  private fun configureCompileTask(project: Project, component: SpoofaxCompilerGradleComponent, finalized: CliProjectFinalized) {
     val input = finalized.input
     val compileTask = project.tasks.register("spoofaxCompileCliProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
-      outputs.files(input.providedFiles().map { finalized.resourceService.toLocalFile(it) })
+      outputs.files(input.providedFiles().map { component.resourceService.toLocalFile(it) })
 
       doLast {
-        project.deleteGenSourceSpoofaxDirectory(input.project(), finalized.resourceService)
-        finalized.pie.newSession().use { session ->
-          session.require(finalized.compiler.createTask(input))
+        project.deleteGenSourceSpoofaxDirectory(input.project(), component.resourceService)
+        component.pie.newSession().use { session ->
+          session.require(component.cliProjectCompiler.createTask(input))
         }
       }
     }

@@ -1,6 +1,6 @@
 plugins {
   id("org.metaborg.gradle.config.java-library")
-  id("org.metaborg.spoofax.compiler.gradle.spoofaxcore.eclipse")
+  id("org.metaborg.spoofax.compiler.gradle.eclipse")
 }
 
 dependencies {
@@ -8,7 +8,7 @@ dependencies {
   compileOnly("com.google.code.findbugs:jsr305")
 }
 
-spoofaxEclipseProject {
+languageEclipseProject {
   eclipseExternaldepsProject.set(project(":stratego.eclipse.externaldeps"))
   adapterProject.set(project(":stratego.spoofax"))
 }

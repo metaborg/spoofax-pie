@@ -1,4 +1,4 @@
-package mb.spoofax.compiler.gradle.spoofaxcore
+package mb.spoofax.compiler.gradle
 
 import mb.resource.ResourceRuntimeException
 import mb.resource.ResourceService
@@ -21,13 +21,14 @@ fun Project.toSpoofaxCompilerProject(): GradleProject {
 inline fun <reified E : Any> Project.whenFinalized(crossinline closure: () -> Unit) {
   try {
     extensions.getByType<E>()
-    closure()
   } catch(e: UnknownDomainObjectException) {
     afterEvaluate {
       extensions.getByType<E>()
       closure()
     }
+    return
   }
+  closure()
 }
 
 fun Project.configureGeneratedSources(compilerProject: GradleProject, resourceService: ResourceService) {

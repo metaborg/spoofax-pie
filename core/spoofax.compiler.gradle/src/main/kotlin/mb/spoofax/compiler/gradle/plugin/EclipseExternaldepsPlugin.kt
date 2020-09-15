@@ -1,7 +1,8 @@
 @file:Suppress("UnstableApiUsage")
 
-package mb.spoofax.compiler.gradle.spoofaxcore
+package mb.spoofax.compiler.gradle.plugin
 
+import mb.spoofax.compiler.gradle.*
 import mb.spoofax.compiler.platform.*
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -44,8 +45,8 @@ open class EclipseExternaldepsProjectExtension(project: Project) {
   }
 
   companion object {
-    internal const val id = "spoofaxEclipseExternaldepsProject"
-    private const val name = "Spoofax Eclipse external dependencies project"
+    internal const val id = "languageEclipseExternaldepsProject"
+    private const val name = "language Eclipse external dependencies project"
   }
 
   internal val adapterProjectFinalized: Project by lazy {
@@ -69,12 +70,8 @@ open class EclipseExternaldepsProjectExtension(project: Project) {
 
 internal class EclipseExternaldepsProjectFinalized(
   val input: EclipseExternaldepsProjectCompiler.Input,
-  languageProjectFinalized: LanguageProjectFinalized
-) {
-  val pie = languageProjectFinalized.pie
-  val resourceService = languageProjectFinalized.resourceService
-  val compiler = languageProjectFinalized.component.eclipseExternaldepsProjectCompiler
-}
+  val languageProjectFinalized: LanguageProjectFinalized
+)
 
 internal fun Project.whenEclipseExternaldepsProjectFinalized(closure: () -> Unit) = whenFinalized<EclipseExternaldepsProjectExtension>(closure)
 
@@ -89,41 +86,41 @@ open class EclipseExternaldepsPlugin : Plugin<Project> {
 
     project.afterEvaluate {
       extension.adapterProjectFinalized.whenAdapterProjectFinalized {
-        configure(project, extension.finalized)
+        configure(project, extension.finalized.languageProjectFinalized.component, extension.finalized)
       }
     }
   }
 
-  private fun configure(project: Project, finalized: EclipseExternaldepsProjectFinalized) {
-    configureProject(project, finalized)
-    configureBundle(project, finalized)
-    configureCompilerTask(project, finalized)
+  private fun configure(project: Project, component: SpoofaxCompilerGradleComponent, finalized: EclipseExternaldepsProjectFinalized) {
+    configureProject(project, component, finalized)
+    configureBundle(project, component, finalized)
+    configureCompilerTask(project, component, finalized)
     configureJarTask(project, finalized)
   }
 
-  private fun configureProject(project: Project, finalized: EclipseExternaldepsProjectFinalized) {
+  private fun configureProject(project: Project, component: SpoofaxCompilerGradleComponent, finalized: EclipseExternaldepsProjectFinalized) {
     val input = finalized.input
-    project.configureGeneratedSources(project.toSpoofaxCompilerProject(), finalized.resourceService)
-    finalized.compiler.getDependencies(input).forEach {
+    project.configureGeneratedSources(project.toSpoofaxCompilerProject(), component.resourceService)
+    component.eclipseExternaldepsProjectCompiler.getDependencies(input).forEach {
       it.addToDependencies(project)
     }
   }
 
-  private fun configureBundle(project: Project, finalized: EclipseExternaldepsProjectFinalized) {
-    configureBundleDependencies(project, finalized.compiler.getBundleDependencies(finalized.input))
+  private fun configureBundle(project: Project, component: SpoofaxCompilerGradleComponent, finalized: EclipseExternaldepsProjectFinalized) {
+    configureBundleDependencies(project, component.eclipseExternaldepsProjectCompiler.getBundleDependencies(finalized.input))
   }
 
-  private fun configureCompilerTask(project: Project, finalized: EclipseExternaldepsProjectFinalized) {
+  private fun configureCompilerTask(project: Project, component: SpoofaxCompilerGradleComponent, finalized: EclipseExternaldepsProjectFinalized) {
     val input = finalized.input
     val compileTask = project.tasks.register("spoofaxCompileEclipseExternaldepsProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
-      outputs.files(input.providedFiles().map { finalized.resourceService.toLocalFile(it) })
+      outputs.files(input.providedFiles().map { component.resourceService.toLocalFile(it) })
 
       doLast {
-        project.deleteGenSourceSpoofaxDirectory(input.project(), finalized.resourceService)
-        finalized.pie.newSession().use { session ->
-          session.require(finalized.compiler.createTask(input))
+        project.deleteGenSourceSpoofaxDirectory(input.project(), component.resourceService)
+        component.pie.newSession().use { session ->
+          session.require(component.eclipseExternaldepsProjectCompiler.createTask(input))
         }
       }
     }

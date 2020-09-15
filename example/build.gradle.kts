@@ -9,6 +9,14 @@ plugins {
   id("biz.aQute.bnd.builder") version "5.0.1" apply false
   id("org.jetbrains.intellij") version "0.4.21" apply false
   id("com.palantir.graal") version "0.6.0" apply false
+
+  id("org.metaborg.spoofax.compiler.gradle.language") apply false
+  id("org.metaborg.spoofax.compiler.gradle.adapter") apply false
+  id("org.metaborg.spoofax.compiler.gradle.cli") apply false
+  id("org.metaborg.spoofax.compiler.gradle.eclipse.externaldeps") apply false
+  id("org.metaborg.spoofax.compiler.gradle.eclipse") apply false
+  id("org.metaborg.spoofax.compiler.gradle.intellij") apply false
+  id("org.metaborg.spoofax.compiler.gradle.spoofax2.language") apply false
 }
 
 subprojects {

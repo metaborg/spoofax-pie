@@ -1,4 +1,4 @@
-import mb.spoofax.compiler.gradle.spoofaxcore.*
+import mb.spoofax.compiler.gradle.plugin.*
 import mb.spoofax.compiler.adapter.*
 import mb.spoofax.compiler.adapter.data.*
 import mb.spoofax.compiler.util.*
@@ -6,10 +6,10 @@ import mb.spoofax.core.language.command.*
 
 plugins {
   id("org.metaborg.gradle.config.java-library")
-  id("org.metaborg.spoofax.compiler.gradle.spoofaxcore.adapter")
+  id("org.metaborg.spoofax.compiler.gradle.adapter")
 }
 
-spoofaxAdapterProject {
+languageAdapterProject {
   languageProject.set(project(":mod"))
   settings.set(AdapterProjectSettings(
     parser = ParserAdapterCompiler.Input.builder(),

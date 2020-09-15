@@ -3,11 +3,14 @@ package mb.spoofax.compiler.spoofax2.language;
 import mb.pie.api.ExecContext;
 import mb.pie.api.None;
 import mb.pie.api.TaskDef;
+import mb.spoofax.compiler.language.LanguageProjectBuilder;
+import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
 import org.immutables.value.Value;
 
 import javax.inject.Inject;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -85,5 +88,25 @@ public class Spoofax2LanguageProjectCompiler implements TaskDef<Spoofax2Language
         GradleDependency languageSpecificationDependency();
 
         List<String> additionalCopyResources();
+
+
+        default void syncTo(LanguageProjectBuilder builder) {
+            if(parser().isPresent() == (builder.parser == null))
+                throw new RuntimeException("Mismatch between presence of parser input between language project and Spoofax 2-based language project");
+            if(styler().isPresent() == (builder.styler == null))
+                throw new RuntimeException("Mismatch between presence of styler input between language project and Spoofax 2-based language project");
+            if(constraintAnalyzer().isPresent() == (builder.constraintAnalyzer == null))
+                throw new RuntimeException("Mismatch between presence of constraint analyzer input between language project and Spoofax 2-based language project");
+            if(multilangAnalyzer().isPresent() == (builder.multilangAnalyzer == null))
+                throw new RuntimeException("Mismatch between presence of multi-language analyzer input between language project and Spoofax 2-based language project");
+            if(strategoRuntime().isPresent() == (builder.strategoRuntime == null))
+                throw new RuntimeException("Mismatch between presence of stratego runtime input between language project and Spoofax 2-based language project");
+
+            parser().ifPresent((i) -> i.syncTo(builder.parser));
+            styler().ifPresent((i) -> i.syncTo(builder.styler));
+            constraintAnalyzer().ifPresent((i) -> i.syncTo(builder.constraintAnalyzer));
+            multilangAnalyzer().ifPresent((i) -> i.syncTo(builder.multilangAnalyzer));
+            strategoRuntime().ifPresent((i) -> i.syncTo(builder.strategoRuntime));
+        }
     }
 }

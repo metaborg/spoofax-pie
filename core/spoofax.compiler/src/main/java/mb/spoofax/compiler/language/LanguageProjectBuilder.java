@@ -3,6 +3,8 @@ package mb.spoofax.compiler.language;
 import mb.spoofax.compiler.util.Shared;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.function.Function;
+
 /**
  * Facade for consistently and easily building a {@link LanguageProjectCompiler.Input} instance.
  */
@@ -16,6 +18,52 @@ public class LanguageProjectBuilder {
     public MultilangAnalyzerLanguageCompiler.Input.@Nullable Builder multilangAnalyzer = null; // Optional
     public StrategoRuntimeLanguageCompiler.Input.@Nullable Builder strategoRuntime = null; // Optional
     public LanguageProjectCompiler.Input.Builder languageProject = LanguageProjectCompiler.Input.builder();
+
+
+    public void withParser() {
+        parser = ParserLanguageCompiler.Input.builder();
+    }
+
+    public void withParser(Function<ParserLanguageCompiler.Input.Builder, ParserLanguageCompiler.Input.Builder> f) {
+        parser = f.apply(ParserLanguageCompiler.Input.builder());
+    }
+
+
+    public void withStyler() {
+        styler = StylerLanguageCompiler.Input.builder();
+    }
+
+    public void withStyler(Function<StylerLanguageCompiler.Input.Builder, StylerLanguageCompiler.Input.Builder> f) {
+        styler = f.apply(StylerLanguageCompiler.Input.builder());
+    }
+
+
+    public void withConstraintAnalyzer() {
+        constraintAnalyzer = ConstraintAnalyzerLanguageCompiler.Input.builder();
+    }
+
+    public void withConstraintAnalyzer(Function<ConstraintAnalyzerLanguageCompiler.Input.Builder, ConstraintAnalyzerLanguageCompiler.Input.Builder> f) {
+        constraintAnalyzer = f.apply(ConstraintAnalyzerLanguageCompiler.Input.builder());
+    }
+
+
+    public void withMultilangAnalyzer() {
+        multilangAnalyzer = MultilangAnalyzerLanguageCompiler.Input.builder();
+    }
+
+    public void withMultilangAnalyzer(Function<MultilangAnalyzerLanguageCompiler.Input.Builder, MultilangAnalyzerLanguageCompiler.Input.Builder> f) {
+        multilangAnalyzer = f.apply(MultilangAnalyzerLanguageCompiler.Input.builder());
+    }
+
+
+    public void withStrategoRuntime() {
+        strategoRuntime = StrategoRuntimeLanguageCompiler.Input.builder();
+    }
+
+    public void withStrategoRuntime(Function<StrategoRuntimeLanguageCompiler.Input.Builder, StrategoRuntimeLanguageCompiler.Input.Builder> f) {
+        strategoRuntime = f.apply(StrategoRuntimeLanguageCompiler.Input.builder());
+    }
+
 
     public LanguageProjectCompiler.Input build(Shared shared) {
         final LanguageProject project = this.project.build();

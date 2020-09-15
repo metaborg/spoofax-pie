@@ -11,25 +11,29 @@ metaborg {
   kotlinLanguageVersion = "1.2"
 }
 
-repositories {
-  gradlePluginPortal() // Gradle plugin portal as repository for regular dependencies, as we depend on Gradle plugins.
-}
-
 dependencies {
   api(platform(project(":spoofax.depconstraints")))
   kapt(platform(project(":spoofax.depconstraints")))
 
   api(project(":spoofax.compiler"))
   api(project(":spoofax.compiler.dagger"))
+  api(project(":spoofax.compiler.spoofax2"))
+  api(project(":spoofax.compiler.spoofax2.dagger"))
   api("com.google.dagger:dagger")
-
   implementation("org.metaborg:pie.runtime")
 
   kapt("com.google.dagger:dagger-compiler")
   compileOnly("org.immutables:value-annotations") // Dagger accesses these annotations, which have class retention.
 
-  // Dependencies to be able to configure the extensions provided by these Gradle plugins.
-  compileOnly("org.metaborg:coronium:0.3.0")
-  compileOnly("biz.aQute.bnd:biz.aQute.bnd.gradle:5.0.1")
-  compileOnly("gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.4.21")
+  // Dependencies to be able to use/configure the extensions provided by these Gradle plugins.
+  compileOnly(project(":spoofax.compiler.gradle"))
+}
+
+gradlePlugin {
+  plugins {
+    create("spoofax-compiler-spoofax2-language") {
+      id = "org.metaborg.spoofax.compiler.gradle.spoofax2.language"
+      implementationClass = "mb.spoofax.compiler.gradle.spoofax2.plugin.Spoofax2LanguagePlugin"
+    }
+  }
 }

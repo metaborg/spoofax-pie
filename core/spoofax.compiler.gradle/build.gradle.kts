@@ -21,8 +21,6 @@ dependencies {
 
   api(project(":spoofax.compiler"))
   api(project(":spoofax.compiler.dagger"))
-  api(project(":spoofax.compiler.spoofax2"))
-  api(project(":spoofax.compiler.spoofax2.dagger"))
   api("com.google.dagger:dagger")
 
   implementation("org.metaborg:pie.runtime")
@@ -38,29 +36,29 @@ dependencies {
 
 gradlePlugin {
   plugins {
-    create("spoofax-compiler-spoofaxcore-language") {
-      id = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.language"
-      implementationClass = "mb.spoofax.compiler.gradle.spoofaxcore.LanguagePlugin"
+    create("spoofax-compiler-language") {
+      id = "org.metaborg.spoofax.compiler.gradle.language"
+      implementationClass = "mb.spoofax.compiler.gradle.plugin.LanguagePlugin"
     }
-    create("spoofax-compiler-spoofaxcore-adapter") {
-      id = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.adapter"
-      implementationClass = "mb.spoofax.compiler.gradle.spoofaxcore.AdapterPlugin"
+    create("spoofax-compiler-adapter") {
+      id = "org.metaborg.spoofax.compiler.gradle.adapter"
+      implementationClass = "mb.spoofax.compiler.gradle.plugin.AdapterPlugin"
     }
-    create("spoofax-compiler-spoofaxcore-cli") {
-      id = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.cli"
-      implementationClass = "mb.spoofax.compiler.gradle.spoofaxcore.CliPlugin"
+    create("spoofax-compiler-cli") {
+      id = "org.metaborg.spoofax.compiler.gradle.cli"
+      implementationClass = "mb.spoofax.compiler.gradle.plugin.CliPlugin"
     }
-    create("spoofax-compiler-spoofaxcore-eclipse-externaldeps") {
-      id = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.eclipse.externaldeps"
-      implementationClass = "mb.spoofax.compiler.gradle.spoofaxcore.EclipseExternaldepsPlugin"
+    create("spoofax-compiler-eclipse-externaldeps") {
+      id = "org.metaborg.spoofax.compiler.gradle.eclipse.externaldeps"
+      implementationClass = "mb.spoofax.compiler.gradle.plugin.EclipseExternaldepsPlugin"
     }
-    create("spoofax-compiler-spoofaxcore-eclipse") {
-      id = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.eclipse"
-      implementationClass = "mb.spoofax.compiler.gradle.spoofaxcore.EclipsePlugin"
+    create("spoofax-compiler-eclipse") {
+      id = "org.metaborg.spoofax.compiler.gradle.eclipse"
+      implementationClass = "mb.spoofax.compiler.gradle.plugin.EclipsePlugin"
     }
-    create("spoofax-compiler-spoofaxcore-intellij") {
-      id = "org.metaborg.spoofax.compiler.gradle.spoofaxcore.intellij"
-      implementationClass = "mb.spoofax.compiler.gradle.spoofaxcore.IntellijPlugin"
+    create("spoofax-compiler-intellij") {
+      id = "org.metaborg.spoofax.compiler.gradle.intellij"
+      implementationClass = "mb.spoofax.compiler.gradle.plugin.IntellijPlugin"
     }
   }
 }
