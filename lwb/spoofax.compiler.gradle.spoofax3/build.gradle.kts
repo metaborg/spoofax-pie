@@ -15,12 +15,14 @@ repositories {
   gradlePluginPortal() // Gradle plugin portal as repository for regular dependencies, as we depend on Gradle plugins.
 }
 
-dependencies {
-  api(platform(project(":spoofax.depconstraints")))
-  kapt(platform(project(":spoofax.depconstraints")))
+fun compositeBuild(name: String) = "$group:$name"
 
-  api(project(":spoofax.compiler"))
-  api(project(":spoofax.compiler.dagger"))
+dependencies {
+  api(platform(compositeBuild("spoofax.depconstraints")))
+  kapt(platform(compositeBuild("spoofax.depconstraints")))
+
+  api(compositeBuild("spoofax.compiler"))
+  api(compositeBuild("spoofax.compiler.dagger"))
   api("com.google.dagger:dagger")
 
   implementation("org.metaborg:pie.runtime")
