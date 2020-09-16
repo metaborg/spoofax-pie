@@ -25,7 +25,7 @@ open class LanguageProjectSettings {
 
   internal fun finalize(
     gradleProject: Project,
-    configurationClosures: MutableList<(LanguageProjectSettings) -> Unit>,
+    configurationClosures: List<(LanguageProjectSettings) -> Unit>,
     component: SpoofaxCompilerGradleComponent
   ): LanguageProjectFinalized {
     // Apply configuration closures to ourselves before finalizing.

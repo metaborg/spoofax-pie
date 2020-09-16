@@ -7,7 +7,6 @@ import mb.spoofax.compiler.util.*
 plugins {
   id("org.metaborg.gradle.config.java-library")
   id("org.metaborg.gradle.config.junit-testing")
-  id("org.metaborg.spoofax.compiler.gradle.language")
   id("org.metaborg.spoofax.compiler.gradle.spoofax2.language")
 }
 
