@@ -6,9 +6,9 @@ plugins {
   id("org.metaborg.spoofax.gradle.langspec") version "0.4.2" apply false
   id("de.set.ecj") version "1.4.1" apply false
   id("org.metaborg.coronium.bundle") version "0.3.3" apply false
-  id("biz.aQute.bnd.builder") version "5.0.1" apply false
-  id("org.jetbrains.intellij") version "0.4.21" apply false
-  id("com.palantir.graal") version "0.6.0" apply false
+  id("biz.aQute.bnd.builder") version "5.1.2" apply false
+  id("org.jetbrains.intellij") version "0.4.22" apply false
+  id("com.palantir.graal") version "0.7.1" apply false
 
   id("org.metaborg.spoofax.compiler.gradle.language") apply false
   id("org.metaborg.spoofax.compiler.gradle.adapter") apply false

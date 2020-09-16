@@ -3,14 +3,14 @@ plugins {
   id("org.metaborg.gitonium") version "0.1.3"
 
   // Set versions for plugins to use, only applying them in subprojects (apply false here).
-  kotlin("jvm") version "1.3.41" // Use 1.3.41 to keep in sync with embedded Kotlin version of Gradle 5.6.4.
-  `kotlin-dsl`
+  kotlin("jvm") version "1.3.41" apply false // Use 1.3.41 to keep in sync with embedded Kotlin version of Gradle 5.6.4.
+  `kotlin-dsl` apply false
 
   id("org.metaborg.spoofax.gradle.langspec") version "0.4.2" apply false
   id("de.set.ecj") version "1.4.1" apply false
   id("org.metaborg.coronium.bundle") version "0.3.3" apply false
-  id("biz.aQute.bnd.builder") version "5.0.1" apply false
-  id("org.jetbrains.intellij") version "0.4.21" apply false
+  id("biz.aQute.bnd.builder") version "5.1.2" apply false
+  id("org.jetbrains.intellij") version "0.4.22" apply false
 
   id("org.metaborg.spoofax.compiler.gradle.language") apply false
   id("org.metaborg.spoofax.compiler.gradle.adapter") apply false
