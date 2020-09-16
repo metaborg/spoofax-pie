@@ -1,34 +1,20 @@
 package mb.spoofax.compiler.spoofaxcore;
 
 import mb.pie.api.MixedSession;
-import mb.resource.fs.FSPath;
-import mb.spoofax.compiler.util.Shared;
-import mb.spoofax.compiler.adapter.AdapterProject;
 import mb.spoofax.compiler.platform.EclipseExternaldepsProjectCompiler;
-import mb.spoofax.compiler.language.LanguageProject;
 import mb.spoofax.compiler.spoofaxcore.tiger.TigerInputs;
-import mb.spoofax.compiler.util.GradleDependency;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
 
 class EclipseExternaldepsProjectCompilerTest extends TestBase {
-    @Test void testCompilerDefaults(@TempDir Path temporaryDirectoryPath) throws Exception {
-        final FSPath baseDirectory = new FSPath(temporaryDirectoryPath);
-        final Shared shared = TigerInputs.shared().build();
-        final LanguageProject languageProject = TigerInputs.languageProject(baseDirectory, shared).build();
-        final AdapterProject adapterProject = TigerInputs.adapterProject(baseDirectory, shared).build();
+    @Test void testCompilerDefaults() throws Exception {
+        final TigerInputs inputs = defaultInputs();
 
         try(MixedSession session = pie.newSession()) {
-            // Compile language and adapter projects.
-            compileLanguageAndAdapterProject(session, shared, languageProject, adapterProject);
-
-            // Compile Eclipse externaldeps project and test generated files.
-            final EclipseExternaldepsProjectCompiler.Input input = TigerInputs.eclipseExternaldepsProjectInput(baseDirectory, shared, languageProject, adapterProject)
-                .languageProjectDependency(GradleDependency.project(":" + languageProject.project().coordinate().artifactId()))
-                .adapterProjectDependency(GradleDependency.project(":" + adapterProject.project().coordinate().artifactId()))
-                .build();
+            compileLanguageAndAdapterProject(session, inputs);
+            final EclipseExternaldepsProjectCompiler.Input input = inputs.eclipseExternaldepsProjectInput().build();
             session.require(component.getEclipseExternaldepsProjectCompiler().createTask(input));
         }
     }

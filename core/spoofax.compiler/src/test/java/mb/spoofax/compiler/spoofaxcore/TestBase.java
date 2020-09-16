@@ -7,14 +7,13 @@ import mb.pie.api.MixedSession;
 import mb.pie.api.Pie;
 import mb.pie.runtime.PieBuilderImpl;
 import mb.resource.ResourceService;
-import mb.spoofax.compiler.adapter.AdapterProject;
+import mb.resource.fs.FSPath;
+import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
 import mb.spoofax.compiler.dagger.SpoofaxCompilerModule;
-import mb.spoofax.compiler.language.LanguageProject;
 import mb.spoofax.compiler.language.LanguageProjectCompiler;
 import mb.spoofax.compiler.spoofaxcore.tiger.TigerInputs;
 import mb.spoofax.compiler.spoofaxcore.util.FileAssertions;
-import mb.spoofax.compiler.util.GradleDependency;
 import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TemplateCompiler;
 
@@ -32,23 +31,35 @@ class TestBase {
     final Pie pie = component.getPie();
     final FileAssertions fileAssertions = new FileAssertions(resourceService);
 
-    LanguageProjectCompiler.Input compileLanguageProject(MixedSession session, Shared shared, LanguageProject languageProject) throws ExecException, InterruptedException {
-        final LanguageProjectCompiler.Input input = TigerInputs.languageProjectInput(shared, languageProject).build();
+
+    ResourcePath defaultRootDirectory() {
+        return new FSPath(fileSystem.getPath("repo"));
+    }
+
+    TigerInputs defaultInputs() {
+        return new TigerInputs(defaultRootDirectory());
+    }
+
+    TigerInputs defaultInputs(Shared shared) {
+        return new TigerInputs(defaultRootDirectory(), shared);
+    }
+
+
+    LanguageProjectCompiler.Input compileLanguageProject(MixedSession session, TigerInputs inputs) throws ExecException, InterruptedException {
+        final LanguageProjectCompiler.Input input = inputs.languageProjectCompilerInput();
         session.require(component.getLanguageProjectCompiler().createTask(input));
         return input;
     }
 
-    AdapterProjectCompiler.Input compileAdapterProject(MixedSession session, Shared shared, LanguageProject languageProject, AdapterProject adapterProject) throws IOException, ExecException, InterruptedException {
-        final AdapterProjectCompiler.Input input = TigerInputs.adapterProjectInput(shared, languageProject, adapterProject)
-            .languageProjectDependency(GradleDependency.project(":" + languageProject.project().coordinate().artifactId()))
-            .build();
-        TigerInputs.copyTaskDefsIntoAdapterProject(input, resourceService);
+    AdapterProjectCompiler.Input compileAdapterProject(MixedSession session, TigerInputs inputs) throws IOException, ExecException, InterruptedException {
+        final AdapterProjectCompiler.Input input = inputs.adapterProjectCompilerInput();
+        inputs.copyTaskDefsIntoAdapterProject(resourceService);
         session.require(component.getAdapterProjectCompiler().createTask(input));
         return input;
     }
 
-    AdapterProjectCompiler.Input compileLanguageAndAdapterProject(MixedSession session, Shared shared, LanguageProject languageProject, AdapterProject adapterProject) throws IOException, ExecException, InterruptedException {
-        compileLanguageProject(session, shared, languageProject);
-        return compileAdapterProject(session, shared, languageProject, adapterProject);
+    AdapterProjectCompiler.Input compileLanguageAndAdapterProject(MixedSession session, TigerInputs inputs) throws IOException, ExecException, InterruptedException {
+        compileLanguageProject(session, inputs);
+        return compileAdapterProject(session, inputs);
     }
 }

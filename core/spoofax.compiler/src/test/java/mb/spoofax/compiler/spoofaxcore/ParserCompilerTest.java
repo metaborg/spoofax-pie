@@ -1,12 +1,8 @@
 package mb.spoofax.compiler.spoofaxcore;
 
 import mb.pie.api.MixedSession;
-import mb.resource.fs.FSPath;
 import mb.spoofax.compiler.adapter.ParserAdapterCompiler;
 import mb.spoofax.compiler.language.ParserLanguageCompiler;
-import mb.spoofax.compiler.util.Shared;
-import mb.spoofax.compiler.adapter.AdapterProject;
-import mb.spoofax.compiler.language.LanguageProject;
 import mb.spoofax.compiler.spoofaxcore.tiger.TigerInputs;
 import mb.spoofax.compiler.util.ClassKind;
 import org.junit.jupiter.api.Test;
@@ -17,13 +13,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ParserCompilerTest extends TestBase {
     @Test void testCompilerDefaults() throws Exception {
-        final FSPath baseDirectory = new FSPath(fileSystem.getPath("repo"));
-        final Shared shared = TigerInputs.shared().build();
-        final LanguageProject languageProject = TigerInputs.languageProject(baseDirectory, shared).build();
-        final AdapterProject adapterProject = TigerInputs.adapterProject(baseDirectory, shared).build();
+        final TigerInputs inputs = defaultInputs();
 
         try(MixedSession session = pie.newSession()) {
-            final ParserLanguageCompiler.Input languageProjectInput = TigerInputs.parserLanguageProjectInput(shared, languageProject).build();
+            final ParserLanguageCompiler.Input languageProjectInput = inputs.parserLanguageCompilerInput();
             session.require(component.getParserLanguageCompiler().createTask(languageProjectInput));
             fileAssertions.scopedExists(languageProjectInput.classesGenDirectory(), (s) -> {
                 s.assertPublicJavaClass(languageProjectInput.genTable(), "TigerParseTable");
@@ -31,7 +24,7 @@ class ParserCompilerTest extends TestBase {
                 s.assertPublicJavaClass(languageProjectInput.genFactory(), "TigerParserFactory");
             });
 
-            final ParserAdapterCompiler.Input adapterProjectInput = TigerInputs.parserAdapterProjectInput(shared, languageProject, adapterProject).build();
+            final ParserAdapterCompiler.Input adapterProjectInput = inputs.parserAdapterCompilerInput();
             session.require(component.getParserAdapterCompiler().createTask(adapterProjectInput));
             fileAssertions.scopedExists(adapterProjectInput.classesGenDirectory(), (s) -> {
                 s.assertPublicJavaClass(adapterProjectInput.genParseTaskDef(), "TigerParse");
@@ -41,17 +34,15 @@ class ParserCompilerTest extends TestBase {
     }
 
     @Test void testCompilerManual() throws Exception {
-        final FSPath baseDirectory = new FSPath(fileSystem.getPath("repo"));
-        final Shared shared = TigerInputs.shared().build();
-        final LanguageProject languageProject = TigerInputs.languageProject(baseDirectory, shared).build();
-        final AdapterProject adapterProject = TigerInputs.adapterProject(baseDirectory, shared).build();
+        final TigerInputs inputs = defaultInputs();
 
         try(MixedSession session = pie.newSession()) {
-            final ParserLanguageCompiler.Input languageProjectInput = TigerInputs.parserLanguageProjectInput(shared, languageProject)
+            inputs.languageProjectBuilder.configureParser(b -> b
                 .classKind(ClassKind.Manual)
                 .manualParser("my.lang", "MyParser")
                 .manualFactory("my.lang", "MyParserFactory")
-                .build();
+            );
+            final ParserLanguageCompiler.Input languageProjectInput = inputs.parserLanguageCompilerInput();
             session.require(component.getParserLanguageCompiler().createTask(languageProjectInput));
             fileAssertions.scopedNotExists(languageProjectInput.classesGenDirectory(), (s) -> {
                 s.assertNotExists(languageProjectInput.genTable());
@@ -59,11 +50,12 @@ class ParserCompilerTest extends TestBase {
                 s.assertNotExists(languageProjectInput.genFactory());
             });
 
-            final ParserAdapterCompiler.Input adapterProjectInput = TigerInputs.parserAdapterProjectInput(shared, languageProject, adapterProject)
+            inputs.adapterProjectBuilder.configureParser(b -> b
                 .classKind(ClassKind.Manual)
                 .manualParseTaskDef("my.adapter.taskdef", "MyParseTaskDef")
                 .manualTokenizeTaskDef("my.adapter.taskdef", "MyTokenizeTaskDef")
-                .build();
+            );
+            final ParserAdapterCompiler.Input adapterProjectInput = inputs.parserAdapterCompilerInput();
             session.require(component.getParserAdapterCompiler().createTask(adapterProjectInput));
             fileAssertions.scopedNotExists(adapterProjectInput.classesGenDirectory(), (s) -> {
                 s.assertNotExists(adapterProjectInput.genParseTaskDef());
@@ -74,31 +66,28 @@ class ParserCompilerTest extends TestBase {
 
     @ParameterizedTest @EnumSource(value = ClassKind.class, names = {"Manual"})
     void testManualRequiresClasses(ClassKind classKind) {
-        final FSPath baseDirectory = new FSPath(fileSystem.getPath("repo"));
-        final Shared shared = TigerInputs.shared().build();
-        final LanguageProject languageProject = TigerInputs.languageProject(baseDirectory, shared).build();
-        final AdapterProject adapterProject = TigerInputs.adapterProject(baseDirectory, shared).build();
+        final TigerInputs inputs = defaultInputs();
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            TigerInputs.parserLanguageProjectInput(shared, languageProject)
-                .classKind(classKind)
-                .build(); // Class kind is Manual but manual class names were not set: check fails.
-        });
-        TigerInputs.parserLanguageProjectInput(shared, languageProject)
+        inputs.languageProjectBuilder.configureParser(b -> b.classKind(classKind));
+        assertThrows(IllegalArgumentException.class, inputs::languageProjectCompilerInput); // Class kind is Manual but manual class names were not set: check fails.
+        inputs.clearBuiltInputs();
+
+        inputs.languageProjectBuilder.configureParser(b -> b
             .classKind(classKind)
             .manualParser("my.lang", "MyParser")
             .manualFactory("my.lang", "MyParserFactory")
-            .build();
+        );
+        inputs.languageProjectCompilerInput(); // Manual classes are set: no exception.
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            TigerInputs.parserAdapterProjectInput(shared, languageProject, adapterProject)
-                .classKind(classKind)
-                .build(); // Class kind is Manual, but manual class names were not set: check fails.
-        });
-        TigerInputs.parserAdapterProjectInput(shared, languageProject, adapterProject)
+        inputs.adapterProjectBuilder.configureParser(b -> b.classKind(classKind));
+        assertThrows(IllegalArgumentException.class, inputs::adapterProjectCompilerInput); // Class kind is Manual but manual class names were not set: check fails.
+        inputs.clearBuiltInputs();
+
+        inputs.adapterProjectBuilder.configureParser(b -> b
             .classKind(classKind)
             .manualParseTaskDef("my.adapter.taskdef", "MyParseTaskDef")
             .manualTokenizeTaskDef("my.adapter.taskdef", "MyTokenizeTaskDef")
-            .build();
+        );
+        inputs.adapterProjectCompilerInput(); // Manual classes are set: no exception.
     }
 }

@@ -1,24 +1,17 @@
 package mb.spoofax.compiler.spoofaxcore;
 
 import mb.pie.api.MixedSession;
-import mb.resource.fs.FSPath;
-import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.adapter.StylerAdapterCompiler;
 import mb.spoofax.compiler.language.StylerLanguageCompiler;
-import mb.spoofax.compiler.adapter.AdapterProject;
-import mb.spoofax.compiler.language.LanguageProject;
 import mb.spoofax.compiler.spoofaxcore.tiger.TigerInputs;
 import org.junit.jupiter.api.Test;
 
 class StylerCompilerTest extends TestBase {
     @Test void testCompilerDefaults() throws Exception {
-        final FSPath baseDirectory = new FSPath(fileSystem.getPath("repo"));
-        final Shared shared = TigerInputs.shared().build();
-        final LanguageProject languageProject = TigerInputs.languageProject(baseDirectory, shared).build();
-        final AdapterProject adapterProject = TigerInputs.adapterProject(baseDirectory, shared).build();
+        final TigerInputs inputs = defaultInputs();
 
         try(MixedSession session = pie.newSession()) {
-            final StylerLanguageCompiler.Input languageProjectInput = TigerInputs.stylerLanguageProjectInput(shared, languageProject).build();
+            final StylerLanguageCompiler.Input languageProjectInput = inputs.stylerLanguageCompilerInput();
             session.require(component.getStylerLanguageCompiler().createTask(languageProjectInput));
             fileAssertions.scopedExists(languageProjectInput.classesGenDirectory(), (s) -> {
                 s.assertPublicJavaClass(languageProjectInput.genRules(), "TigerStylingRules");
@@ -26,7 +19,7 @@ class StylerCompilerTest extends TestBase {
                 s.assertPublicJavaClass(languageProjectInput.genFactory(), "TigerStylerFactory");
             });
 
-            final StylerAdapterCompiler.Input adapterProjectInput = TigerInputs.stylerAdapterProjectInput(shared, languageProject, adapterProject).build();
+            final StylerAdapterCompiler.Input adapterProjectInput = inputs.stylerAdapterCompilerInput();
             session.require(component.getStylerAdapterCompiler().createTask(adapterProjectInput));
             fileAssertions.scopedExists(adapterProjectInput.classesGenDirectory(), (s) -> {
                 s.assertPublicJavaClass(adapterProjectInput.genStyleTaskDef(), "TigerStyle");

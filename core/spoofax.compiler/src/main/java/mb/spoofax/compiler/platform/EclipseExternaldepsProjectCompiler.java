@@ -96,9 +96,13 @@ public class EclipseExternaldepsProjectCompiler implements TaskDef<EclipseExtern
 
         /// Configuration
 
-        GradleDependency languageProjectDependency();
+        @Value.Default default GradleDependency languageProjectDependency() {
+            return adapterProjectCompilerInput().languageProjectDependency();
+        }
 
-        GradleDependency adapterProjectDependency();
+        @Value.Default default GradleDependency adapterProjectDependency() {
+            return adapterProjectCompilerInput().adapterProject().project().asProjectDependency();
+        }
 
         List<GradleConfiguredDependency> additionalDependencies();
 
