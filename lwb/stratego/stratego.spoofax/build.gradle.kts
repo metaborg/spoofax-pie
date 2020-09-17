@@ -29,14 +29,12 @@ dependencies {
 
 languageAdapterProject {
   languageProject.set(project(":stratego"))
-  settings.set(AdapterProjectSettings().apply { builder.configureBuilder() })
-}
-
-fun AdapterProjectBuilder.configureBuilder() {
-  withParser()
-  withStyler()
-  withStrategoRuntime()
-  adapterProject.run { configureCompilerInput() }
+  compilerInput {
+    withParser()
+    withStyler()
+    withStrategoRuntime()
+    project.configureCompilerInput()
+  }
 }
 
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {

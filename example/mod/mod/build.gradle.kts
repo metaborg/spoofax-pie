@@ -17,38 +17,36 @@ dependencies {
 }
 
 languageProject {
-  settings.set(LanguageProjectSettings().apply {
-    shared
-      .name("Mod")
-      .defaultPackageId("mb.mod")
-
-    builder.run {
-      withParser { it.startSymbol("Start") }
-      withStyler()
-      withConstraintAnalyzer {
-        it.enableNaBL2(false)
-          .enableStatix(true)
-          .multiFile(true)
-      }
-      withStrategoRuntime()
+  shared {
+    name("Mod")
+    defaultPackageId("mb.mod")
+  }
+  compilerInput {
+    withParser().run {
+      startSymbol("Start")
     }
-  })
+    withStyler()
+    withConstraintAnalyzer().run {
+      enableNaBL2(false)
+      enableStatix(true)
+      multiFile(true)
+    }
+    withStrategoRuntime()
+  }
 }
 
 spoofax2BasedLanguageProject {
-  settings.set(Spoofax2LanguageProjectSettings().apply {
-    builder.run {
-      withParser()
-      withStyler()
-      withConstraintAnalyzer {
-        it.copyStatix(true)
-      }
-      withStrategoRuntime {
-        it.copyCtree(true)
-          .copyClasses(false)
-      }
-      languageProject
-        .languageSpecificationDependency(GradleDependency.project(":mod.spoofaxcore"))
+  compilerInput {
+    withParser()
+    withStyler()
+    withConstraintAnalyzer().run {
+      copyStatix(true)
     }
-  })
+    withStrategoRuntime().run {
+      copyCtree(true)
+      copyClasses(false)
+    }
+    project
+      .languageSpecificationDependency(GradleDependency.project(":mod.spoofaxcore"))
+  }
 }

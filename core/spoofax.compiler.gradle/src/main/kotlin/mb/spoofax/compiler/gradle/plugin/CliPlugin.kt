@@ -19,33 +19,16 @@ import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.*
 
-open class CliProjectSettings(
-  val builder: CliProjectCompiler.Input.Builder = CliProjectCompiler.Input.builder()
-) {
-  internal fun finalize(gradleProject: Project, adapterProject: Project): CliProjectFinalized {
-    val adapterProjectExtension: AdapterProjectExtension = adapterProject.extensions.getByType()
-    val adapterProjectFinalized = adapterProjectExtension.finalized
-    val languageProjectFinalized = adapterProjectFinalized.languageProjectFinalized
-
-    val shared = languageProjectFinalized.shared
-    val project = gradleProject.toSpoofaxCompilerProject()
-    val input = this.builder
-      .shared(shared)
-      .project(project)
-      .packageId(CliProjectCompiler.Input.Builder.defaultPackageId(shared))
-      .adapterProjectCompilerInput(adapterProjectFinalized.input)
-      .build()
-
-    return CliProjectFinalized(input, languageProjectFinalized)
-  }
-}
-
 open class CliProjectExtension(project: Project) {
   val adapterProject: Property<Project> = project.objects.property()
-  val settings: Property<CliProjectSettings> = project.objects.property()
+  val compilerInput: Property<CliProjectCompiler.Input.Builder> = project.objects.property()
+
+  fun compilerInput(closure: CliProjectCompiler.Input.Builder.() -> Unit) {
+    compilerInput.get().closure()
+  }
 
   init {
-    settings.convention(CliProjectSettings())
+    compilerInput.convention(CliProjectCompiler.Input.builder())
   }
 
   companion object {
@@ -61,21 +44,21 @@ open class CliProjectExtension(project: Project) {
     }
     adapterProject.get()
   }
+  internal val adapterProjectExtension get() = adapterProjectFinalized.extensions.getByType<AdapterProjectExtension>()
+  internal val languageProjectExtension get() = adapterProjectExtension.languageProjectExtension
 
-  internal val finalized: CliProjectFinalized by lazy {
-    project.logger.debug("Finalizing $name settings in $project")
-    settings.finalizeValue()
-    if(!settings.isPresent) {
-      throw GradleException("$name settings in $project have not been set")
-    }
-    settings.get().finalize(project, adapterProjectFinalized)
+  internal val compilerInputFinalized: CliProjectCompiler.Input by lazy {
+    project.logger.debug("Finalizing $name's compiler input in $project")
+    compilerInput.finalizeValue()
+    val shared = languageProjectExtension.sharedFinalized
+    compilerInput.get()
+      .shared(shared)
+      .project(project.toSpoofaxCompilerProject())
+      .packageId(CliProjectCompiler.Input.Builder.defaultPackageId(shared))
+      .adapterProjectCompilerInput(adapterProjectExtension.compilerInputFinalized)
+      .build()
   }
 }
-
-internal class CliProjectFinalized(
-  val input: CliProjectCompiler.Input,
-  val languageProjectFinalized: LanguageProjectFinalized
-)
 
 @Suppress("unused")
 open class CliPlugin : Plugin<Project> {
@@ -87,19 +70,18 @@ open class CliPlugin : Plugin<Project> {
 
     project.afterEvaluate {
       extension.adapterProjectFinalized.whenAdapterProjectFinalized {
-        configure(project, extension.finalized.languageProjectFinalized.component, extension.finalized)
+        configure(project, extension.languageProjectExtension.component, extension.compilerInputFinalized)
       }
     }
   }
 
-  private fun configure(project: Project, component: SpoofaxCompilerGradleComponent, finalized: CliProjectFinalized) {
-    configureProject(project, component, finalized)
-    configureCompileTask(project, component, finalized)
+  private fun configure(project: Project, component: SpoofaxCompilerGradleComponent, input: CliProjectCompiler.Input) {
+    configureProject(project, component, input)
+    configureCompileTask(project, component, input)
     configureExecutableJarTask(project)
   }
 
-  private fun configureProject(project: Project, component: SpoofaxCompilerGradleComponent, finalized: CliProjectFinalized) {
-    val input = finalized.input
+  private fun configureProject(project: Project, component: SpoofaxCompilerGradleComponent, input: CliProjectCompiler.Input) {
     project.configureGeneratedSources(project.toSpoofaxCompilerProject(), component.resourceService)
     component.cliProjectCompiler.getDependencies(input).forEach {
       it.addToDependencies(project)
@@ -109,8 +91,7 @@ open class CliPlugin : Plugin<Project> {
     }
   }
 
-  private fun configureCompileTask(project: Project, component: SpoofaxCompilerGradleComponent, finalized: CliProjectFinalized) {
-    val input = finalized.input
+  private fun configureCompileTask(project: Project, component: SpoofaxCompilerGradleComponent, input: CliProjectCompiler.Input) {
     val compileTask = project.tasks.register("spoofaxCompileCliProject") {
       group = "spoofax compiler"
       inputs.property("input", input)

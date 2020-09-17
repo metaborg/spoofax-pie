@@ -15,33 +15,16 @@ import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.IntelliJPluginExtension
 
-open class IntellijProjectSettings(
-  val builder: IntellijProjectCompiler.Input.Builder = IntellijProjectCompiler.Input.builder()
-) {
-  internal fun finalize(gradleProject: Project, adapterProject: Project): IntellijProjectCompilerFinalized {
-    val adapterProjectExtension: AdapterProjectExtension = adapterProject.extensions.getByType()
-    val adapterProjectFinalized = adapterProjectExtension.finalized
-    val languageProjectFinalized = adapterProjectFinalized.languageProjectFinalized
-
-    val shared = languageProjectFinalized.shared
-    val project = gradleProject.toSpoofaxCompilerProject()
-    val input = builder
-      .shared(shared)
-      .project(project)
-      .packageId(IntellijProjectCompiler.Input.Builder.defaultPackageId(shared))
-      .adapterProjectCompilerInput(adapterProjectFinalized.input)
-      .build()
-
-    return IntellijProjectCompilerFinalized(input, languageProjectFinalized)
-  }
-}
-
 open class IntellijProjectCompilerExtension(project: Project) {
   val adapterProject: Property<Project> = project.objects.property()
-  val settings: Property<IntellijProjectSettings> = project.objects.property()
+  val compilerInput: Property<IntellijProjectCompiler.Input.Builder> = project.objects.property()
+
+  fun compilerInput(closure: IntellijProjectCompiler.Input.Builder.() -> Unit) {
+    compilerInput.get().closure()
+  }
 
   init {
-    settings.convention(IntellijProjectSettings())
+    compilerInput.convention(IntellijProjectCompiler.Input.builder())
   }
 
   companion object {
@@ -57,21 +40,21 @@ open class IntellijProjectCompilerExtension(project: Project) {
     }
     adapterProject.get()
   }
+  internal val adapterProjectExtension get() = adapterProjectFinalized.extensions.getByType<AdapterProjectExtension>()
+  internal val languageProjectExtension get() = adapterProjectExtension.languageProjectExtension
 
-  internal val finalized: IntellijProjectCompilerFinalized by lazy {
-    project.logger.debug("Finalizing $name settings in $project")
-    settings.finalizeValue()
-    if(!settings.isPresent) {
-      throw GradleException("$name settings in $project have not been set")
-    }
-    settings.get().finalize(project, adapterProjectFinalized)
+  internal val compilerInputFinalized: IntellijProjectCompiler.Input by lazy {
+    project.logger.debug("Finalizing $name's compiler input in $project")
+    compilerInput.finalizeValue()
+    val shared = languageProjectExtension.sharedFinalized
+    compilerInput.get()
+      .shared(shared)
+      .project(project.toSpoofaxCompilerProject())
+      .packageId(IntellijProjectCompiler.Input.Builder.defaultPackageId(shared))
+      .adapterProjectCompilerInput(adapterProjectExtension.compilerInputFinalized)
+      .build()
   }
 }
-
-internal class IntellijProjectCompilerFinalized(
-  val input: IntellijProjectCompiler.Input,
-  val languageProjectFinalized: LanguageProjectFinalized
-)
 
 open class IntellijPlugin : Plugin<Project> {
   override fun apply(project: Project) {
@@ -89,18 +72,17 @@ open class IntellijPlugin : Plugin<Project> {
 
     project.afterEvaluate {
       extension.adapterProjectFinalized.whenAdapterProjectFinalized {
-        configure(project, extension.finalized.languageProjectFinalized.component, extension.finalized)
+        configure(project, extension.languageProjectExtension.component, extension.compilerInputFinalized)
       }
     }
   }
 
-  private fun configure(project: Project, component: SpoofaxCompilerGradleComponent, finalized: IntellijProjectCompilerFinalized) {
-    configureProject(project, component, finalized)
-    configureCompilerTask(project, component, finalized)
+  private fun configure(project: Project, component: SpoofaxCompilerGradleComponent, input: IntellijProjectCompiler.Input) {
+    configureProject(project, component, input)
+    configureCompilerTask(project, component, input)
   }
 
-  private fun configureProject(project: Project, component: SpoofaxCompilerGradleComponent, finalized: IntellijProjectCompilerFinalized) {
-    val input = finalized.input
+  private fun configureProject(project: Project, component: SpoofaxCompilerGradleComponent, input: IntellijProjectCompiler.Input) {
     project.configureGeneratedSources(project.toSpoofaxCompilerProject(), component.resourceService)
     component.intellijProjectCompiler.getDependencies(input).forEach {
       it.addToDependencies(project)
@@ -110,8 +92,7 @@ open class IntellijPlugin : Plugin<Project> {
     })
   }
 
-  private fun configureCompilerTask(project: Project, component: SpoofaxCompilerGradleComponent, finalized: IntellijProjectCompilerFinalized) {
-    val input = finalized.input
+  private fun configureCompilerTask(project: Project, component: SpoofaxCompilerGradleComponent, input: IntellijProjectCompiler.Input) {
     val compileTask = project.tasks.register("spoofaxCompileIntellijProject") {
       group = "spoofax compiler"
       inputs.property("input", input)

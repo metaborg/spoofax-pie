@@ -8,7 +8,6 @@ import mb.spoofax.compiler.dagger.*
 import mb.spoofax.compiler.gradle.*
 import mb.spoofax.compiler.language.*
 import mb.spoofax.compiler.util.*
-import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaLibraryPlugin
@@ -19,74 +18,31 @@ import org.gradle.kotlin.dsl.*
 import java.io.IOException
 import java.nio.charset.StandardCharsets
 
-open class LanguageProjectSettings {
-  val shared: Shared.Builder = Shared.builder()
-  val builder: LanguageProjectBuilder = LanguageProjectBuilder()
-
-  internal fun finalize(
-    gradleProject: Project,
-    configurationClosures: List<(LanguageProjectSettings) -> Unit>,
-    component: SpoofaxCompilerGradleComponent
-  ): LanguageProjectFinalized {
-    // Apply configuration closures to ourselves before finalizing.
-    configurationClosures.forEach { it(this) }
-
-    // Attempt to load compiler properties from file.
-    val spoofaxCompilerPropertiesFile = gradleProject.projectDir.resolve("spoofaxc.lock")
-    val spoofaxCompilerProperties = Properties()
-    if(spoofaxCompilerPropertiesFile.exists()) {
-      spoofaxCompilerPropertiesFile.bufferedReader().use {
-        try {
-          spoofaxCompilerProperties.load(it)
-        } catch(e: IOException) {
-          gradleProject.logger.warn("Failed to load Spoofax compiler properties from file '$spoofaxCompilerPropertiesFile'", e)
-        }
-      }
-    }
-
-    // Build shared settings.
-    val shared = shared
-      .withPersistentProperties(spoofaxCompilerProperties)
-      .build()
-
-    // Build language project input.
-    builder.project
-      .project(gradleProject.toSpoofaxCompilerProject())
-      .packageId(LanguageProject.Builder.defaultPackageId(shared))
-    val input = builder.build(shared)
-
-    // Save compiler properties to file.
-    shared.savePersistentProperties(spoofaxCompilerProperties)
-    spoofaxCompilerPropertiesFile.parentFile.mkdirs()
-    spoofaxCompilerPropertiesFile.createNewFile()
-    spoofaxCompilerPropertiesFile.bufferedWriter().use {
-      try {
-        spoofaxCompilerProperties.storeWithoutDate(it)
-        it.flush()
-      } catch(e: IOException) {
-        gradleProject.logger.warn("Failed to save Spoofax compiler properties to file '$spoofaxCompilerPropertiesFile'", e)
-      }
-    }
-
-    return LanguageProjectFinalized(shared, input, component)
-  }
-
-  internal fun addStatixDependencies(statixDependencies: List<Project>) {
-    statixDependencies.forEach {
-      val ext: LanguageProjectExtension = it.extensions.getByType()
-      val factory = ext.settingsFinalized.input.multilangAnalyzer().get().specConfigFactory()
-      this.builder.multilangAnalyzer?.addDependencyFactories(factory)
-    }
-  }
-}
-
 open class LanguageProjectExtension(project: Project) {
-  val settings: Property<LanguageProjectSettings> = project.objects.property()
-  val settingsConfigurationClosures: ListProperty<(LanguageProjectSettings) -> Unit> = project.objects.listProperty()
+  val shared: Property<Shared.Builder> = project.objects.property()
+  val languageProject: Property<LanguageProject.Builder> = project.objects.property()
+  val compilerInput: Property<LanguageProjectCompilerInputBuilder> = project.objects.property()
+  val compilerInputConfigurationClosures: ListProperty<LanguageProjectCompilerInputBuilder.() -> Unit> = project.objects.listProperty()
   val statixDependencies: ListProperty<Project> = project.objects.listProperty() // statixDependencies must be in a separate property, since its finalized value is used to check if the settings property can be finalized
 
+  fun shared(closure: Shared.Builder.() -> Unit) {
+    shared.get().closure()
+  }
+
+  fun languageProject(closure: LanguageProject.Builder.() -> Unit) {
+    languageProject.get().closure()
+  }
+
+  fun compilerInput(closure: LanguageProjectCompilerInputBuilder.() -> Unit) {
+    compilerInputConfigurationClosures.add { closure() }
+  }
+
   init {
-    settings.convention(LanguageProjectSettings())
+    shared.convention(Shared.builder())
+    languageProject.convention(LanguageProject.builder()
+      .project(project.toSpoofaxCompilerProject())
+    )
+    compilerInput.convention(LanguageProjectCompilerInputBuilder())
   }
 
   companion object {
@@ -99,40 +55,81 @@ open class LanguageProjectExtension(project: Project) {
     .spoofaxCompilerGradleModule(SpoofaxCompilerGradleModule { PieBuilderImpl() })
     .build()
 
-  val settingsFinalized: LanguageProjectFinalized by lazy {
-    project.logger.debug("Finalizing $name settings in $project")
-    settings.finalizeValue()
-    if(!settings.isPresent) {
-      throw GradleException("$name settings in $project have not been set")
+  val sharedFinalized: Shared by lazy {
+    project.logger.debug("Finalizing $name shared settings in $project")
+    shared.finalizeValue()
+
+    val spoofaxCompilerPropertiesFile = project.projectDir.resolve("spoofaxc.lock")
+    val spoofaxCompilerProperties = Properties()
+    if(spoofaxCompilerPropertiesFile.exists()) {
+      spoofaxCompilerPropertiesFile.bufferedReader().use {
+        try {
+          spoofaxCompilerProperties.load(it)
+        } catch(e: IOException) {
+          project.logger.warn("Failed to load shared settings from '$spoofaxCompilerPropertiesFile'", e)
+        }
+      }
     }
-    val settings = settings.get()
+
+    val shared = shared.get()
+      .withPersistentProperties(spoofaxCompilerProperties)
+      .build()
+
+    shared.savePersistentProperties(spoofaxCompilerProperties)
+    spoofaxCompilerPropertiesFile.parentFile.mkdirs()
+    spoofaxCompilerPropertiesFile.createNewFile()
+    spoofaxCompilerPropertiesFile.bufferedWriter().use {
+      try {
+        spoofaxCompilerProperties.storeWithoutDate(it)
+        it.flush()
+      } catch(e: IOException) {
+        project.logger.warn("Failed to save shared settings to '$spoofaxCompilerPropertiesFile'", e)
+      }
+    }
+
+    shared
+  }
+
+  val languageProjectFinalized: LanguageProject by lazy {
+    project.logger.debug("Finalizing $name's project in $project")
+    languageProject.finalizeValue()
+    languageProject.get()
+      .packageId(LanguageProject.Builder.defaultPackageId(sharedFinalized))
+      .build()
+  }
+
+  val compilerInputFinalized: LanguageProjectCompiler.Input by lazy {
+    project.logger.debug("Finalizing $name's compiler input in $project")
+    compilerInput.finalizeValue()
+    val languageProjectBuilder = compilerInput.get()
+
+    project.logger.debug("Finalizing $name's compiler input configuration closures in $project")
+    compilerInputConfigurationClosures.finalizeValue()
+    compilerInputConfigurationClosures.get().forEach { languageProjectBuilder.it() }
+
     val statixDependencies = statixDependenciesFinalized
-    if(settings.builder.multilangAnalyzer == null) {
+    val multilangAnalyzer = languageProjectBuilder.multilangAnalyzer
+    if(multilangAnalyzer == null) {
       if(statixDependencies.isNotEmpty()) {
         project.logger.warn("Statix dependencies given, but no multilang analyzer configuration set. Ignoring statix dependencies")
       }
     } else {
-      settings.addStatixDependencies(statixDependencies)
+      statixDependencies.forEach {
+        val ext: LanguageProjectExtension = it.extensions.getByType()
+        val factory = ext.compilerInputFinalized.multilangAnalyzer().get().specConfigFactory()
+        multilangAnalyzer.addDependencyFactories(factory)
+      }
     }
-    settingsConfigurationClosures.finalizeValue()
-    settings.finalize(project, settingsConfigurationClosures.get(), component)
+
+    languageProjectBuilder.build(sharedFinalized, languageProjectFinalized)
   }
 
   val statixDependenciesFinalized: List<Project> by lazy {
     project.logger.debug("Finalizing $name statix dependencies in $project")
     statixDependencies.finalizeValue()
-    if(!statixDependencies.isPresent) {
-      throw GradleException("$name statix dependencies in $project have not been set")
-    }
     statixDependencies.get()
   }
 }
-
-class LanguageProjectFinalized(
-  val shared: Shared,
-  val input: LanguageProjectCompiler.Input,
-  val component: SpoofaxCompilerGradleComponent
-)
 
 fun Project.whenLanguageProjectFinalized(closure: () -> Unit) = whenFinalized<LanguageProjectExtension> {
   val extension: LanguageProjectExtension = extensions.getByType()
@@ -162,25 +159,24 @@ open class LanguagePlugin : Plugin<Project> {
 
     project.afterEvaluate {
       extension.statixDependenciesFinalized.whenAllLanguageProjectsFinalized {
-        configure(project, extension.component, extension.settingsFinalized)
+        configure(project, extension.component, extension.compilerInputFinalized)
       }
     }
   }
 
-  private fun configure(project: Project, component: SpoofaxCompilerGradleComponent, finalized: LanguageProjectFinalized) {
-    configureProject(project, component, finalized)
-    configureCompileTask(project, component, finalized)
+  private fun configure(project: Project, component: SpoofaxCompilerGradleComponent, input: LanguageProjectCompiler.Input) {
+    configureProject(project, component, input)
+    configureCompileTask(project, component, input)
   }
 
-  private fun configureProject(project: Project, component: SpoofaxCompilerGradleComponent, finalized: LanguageProjectFinalized) {
+  private fun configureProject(project: Project, component: SpoofaxCompilerGradleComponent, input: LanguageProjectCompiler.Input) {
     project.configureGeneratedSources(project.toSpoofaxCompilerProject(), component.resourceService)
-    component.languageProjectCompiler.getDependencies(finalized.input).forEach {
+    component.languageProjectCompiler.getDependencies(input).forEach {
       it.addToDependencies(project)
     }
   }
 
-  private fun configureCompileTask(project: Project, component: SpoofaxCompilerGradleComponent, finalized: LanguageProjectFinalized) {
-    val input = finalized.input
+  private fun configureCompileTask(project: Project, component: SpoofaxCompilerGradleComponent, input: LanguageProjectCompiler.Input) {
     val compileTask = project.tasks.register("spoofaxCompileLanguageProject") {
       group = "spoofax compiler"
       inputs.property("input", input)

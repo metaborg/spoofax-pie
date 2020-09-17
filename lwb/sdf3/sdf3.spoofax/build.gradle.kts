@@ -28,15 +28,13 @@ dependencies {
 
 languageAdapterProject {
   languageProject.set(project(":sdf3"))
-  settings.set(AdapterProjectSettings().apply { builder.configureBuilder() })
-}
-
-fun AdapterProjectBuilder.configureBuilder() {
-  withParser()
-  withStyler()
-  withStrategoRuntime()
-  withConstraintAnalyzer()
-  adapterProject.run { configureCompilerInput() }
+  compilerInput {
+    withParser()
+    withStyler()
+    withStrategoRuntime()
+    withConstraintAnalyzer()
+    project.configureCompilerInput()
+  }
 }
 
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
@@ -62,12 +60,13 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   val toNormalForm = TypeInfo.of(taskPackageId, "Sdf3ToNormalForm")
   val specToParseTable = TypeInfo.of(taskPackageId, "Sdf3SpecToParseTable")
   val parseTableToParenthesizer = TypeInfo.of(taskPackageId, "Sdf3ParseTableToParenthesizer")
+  val parseTableToFile = TypeInfo.of(taskPackageId, "Sdf3ParseTableToFile")
   val preStatix = TypeInfo.of(taskPackageId, "Sdf3PreStatix")
   val postStatix = TypeInfo.of(taskPackageId, "Sdf3PostStatix")
   val indexAst = TypeInfo.of(taskPackageId, "Sdf3IndexAst")
   addTaskDefs(toCompletionColorer, toCompletionRuntime, toCompletion, toSignature, toDynsemSignature,
-    toPrettyPrinter, toPermissive, toNormalForm, specToParseTable, parseTableToParenthesizer, preStatix, postStatix,
-    indexAst)
+    toPrettyPrinter, toPermissive, toNormalForm, specToParseTable, parseTableToParenthesizer, parseTableToFile,
+    preStatix, postStatix, indexAst)
 
 
   // Show (debugging) task definitions

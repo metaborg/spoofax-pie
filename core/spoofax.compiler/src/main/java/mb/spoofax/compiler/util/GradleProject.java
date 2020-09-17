@@ -36,13 +36,13 @@ public interface GradleProject extends Serializable {
     }
 
 
-    @Value.Default default ResourcePath outputDirectory() {
+    @Value.Default default ResourcePath buildDirectory() {
         return baseDirectory().appendRelativePath("build");
     }
 
 
     @Value.Default default ResourcePath genSourceDirectory() {
-        return outputDirectory().appendRelativePath("generated/sources");
+        return buildDirectory().appendRelativePath("generated/sources");
     }
 
     @Value.Default default ResourcePath genSourceSpoofaxDirectory() {

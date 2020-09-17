@@ -11,35 +11,31 @@ plugins {
 }
 
 languageProject {
-  settings.set(LanguageProjectSettings().apply {
-    shared
-      .name("Stratego")
-      .defaultClassPrefix("Stratego")
-      .defaultPackageId("mb.str")
-
-    builder.run {
-      withParser {
-        it.startSymbol("Module")
-      }
-      withStyler()
-      withStrategoRuntime {
-        it.addInteropRegisterersByReflection("org.metaborg.meta.lang.stratego.trans.InteropRegisterer")
-      }
+  shared {
+    name("Stratego")
+    defaultClassPrefix("Stratego")
+    defaultPackageId("mb.str")
+  }
+  compilerInput {
+    withParser().run {
+      startSymbol("Module")
     }
-  })
+    withStyler()
+    withStrategoRuntime().run {
+      addInteropRegisterersByReflection("org.metaborg.meta.lang.stratego.trans.InteropRegisterer")
+    }
+  }
 }
 
 spoofax2BasedLanguageProject {
-  settings.set(Spoofax2LanguageProjectSettings().apply {
-    builder.run {
-      withParser()
-      withStyler()
-      withStrategoRuntime {
-        it.copyCtree(false)
-          .copyClasses(true)
-      }
-      languageProject
-        .languageSpecificationDependency(GradleDependency.module("org.metaborg:org.metaborg.meta.lang.stratego:2.5.11"))
+  compilerInput {
+    withParser()
+    withStyler()
+    withStrategoRuntime().run {
+      copyCtree(false)
+      copyClasses(true)
     }
-  })
+    project
+      .languageSpecificationDependency(GradleDependency.module("org.metaborg:org.metaborg.meta.lang.stratego:2.5.11"))
+  }
 }

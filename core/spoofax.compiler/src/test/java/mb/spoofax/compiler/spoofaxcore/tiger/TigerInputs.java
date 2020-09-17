@@ -6,8 +6,8 @@ import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.AdapterProject;
-import mb.spoofax.compiler.adapter.AdapterProjectBuilder;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
+import mb.spoofax.compiler.adapter.AdapterProjectCompilerInputBuilder;
 import mb.spoofax.compiler.adapter.CompleterAdapterCompiler;
 import mb.spoofax.compiler.adapter.ConstraintAnalyzerAdapterCompiler;
 import mb.spoofax.compiler.adapter.ParserAdapterCompiler;
@@ -21,8 +21,9 @@ import mb.spoofax.compiler.adapter.data.CommandActionRepr;
 import mb.spoofax.compiler.adapter.data.CommandDefRepr;
 import mb.spoofax.compiler.language.CompleterLanguageCompiler;
 import mb.spoofax.compiler.language.ConstraintAnalyzerLanguageCompiler;
-import mb.spoofax.compiler.language.LanguageProjectBuilder;
+import mb.spoofax.compiler.language.LanguageProject;
 import mb.spoofax.compiler.language.LanguageProjectCompiler;
+import mb.spoofax.compiler.language.LanguageProjectCompilerInputBuilder;
 import mb.spoofax.compiler.language.ParserLanguageCompiler;
 import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.language.StylerLanguageCompiler;
@@ -30,7 +31,6 @@ import mb.spoofax.compiler.platform.CliProjectCompiler;
 import mb.spoofax.compiler.platform.EclipseExternaldepsProjectCompiler;
 import mb.spoofax.compiler.platform.EclipseProjectCompiler;
 import mb.spoofax.compiler.platform.IntellijProjectCompiler;
-import mb.spoofax.compiler.util.GradleDependency;
 import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.StringUtil;
 import mb.spoofax.compiler.util.TypeInfo;
@@ -47,18 +47,27 @@ import java.util.Optional;
 public class TigerInputs {
     public final ResourcePath rootDirectory;
     public final Shared shared;
-    public final LanguageProjectBuilder languageProjectBuilder;
+
+    public final LanguageProject languageProject;
+    public final AdapterProject adapterProject;
+
+    public final LanguageProjectCompilerInputBuilder languageProjectCompilerInputBuilder;
     private LanguageProjectCompiler.@Nullable Input languageProjectCompilerInput = null;
-    public final AdapterProjectBuilder adapterProjectBuilder;
+
+    public final AdapterProjectCompilerInputBuilder adapterProjectCompilerInputBuilder;
     private AdapterProjectCompiler.@Nullable Input adapterProjectCompilerInput = null;
 
     public TigerInputs(ResourcePath rootDirectory, Shared shared) {
         this.rootDirectory = rootDirectory;
         this.shared = shared;
-        this.languageProjectBuilder = new LanguageProjectBuilder();
-        setLanguageProjectCompilerInput(rootDirectory, shared, this.languageProjectBuilder);
-        this.adapterProjectBuilder = new AdapterProjectBuilder();
-        setAdapterProjectCompilerInput(rootDirectory, shared, this.adapterProjectBuilder);
+
+        this.languageProject = LanguageProject.builder().withDefaultsFromParentDirectory(rootDirectory, shared).build();
+        this.languageProjectCompilerInputBuilder = new LanguageProjectCompilerInputBuilder();
+        setLanguageProjectCompilerInput(rootDirectory, shared, this.languageProjectCompilerInputBuilder);
+
+        this.adapterProject = AdapterProject.builder().withDefaultsFromParentDirectory(rootDirectory, shared).build();
+        this.adapterProjectCompilerInputBuilder = new AdapterProjectCompilerInputBuilder();
+        setAdapterProjectCompilerInput(rootDirectory, shared, this.adapterProjectCompilerInputBuilder);
     }
 
     public TigerInputs(ResourcePath rootDirectory) {
@@ -75,7 +84,7 @@ public class TigerInputs {
 
     public LanguageProjectCompiler.Input languageProjectCompilerInput() {
         if(languageProjectCompilerInput == null) {
-            languageProjectCompilerInput = languageProjectBuilder.build(shared);
+            languageProjectCompilerInput = languageProjectCompilerInputBuilder.build(shared, languageProject);
         }
         return languageProjectCompilerInput;
     }
@@ -108,7 +117,7 @@ public class TigerInputs {
 
     public AdapterProjectCompiler.Input adapterProjectCompilerInput() {
         if(adapterProjectCompilerInput == null) {
-            adapterProjectCompilerInput = adapterProjectBuilder.build(languageProjectCompilerInput());
+            adapterProjectCompilerInput = adapterProjectCompilerInputBuilder.build(languageProjectCompilerInput(), adapterProject);
         }
         return adapterProjectCompilerInput;
     }
@@ -180,37 +189,29 @@ public class TigerInputs {
     }
 
 
-    private static void setLanguageProjectCompilerInput(ResourcePath rootDirectory, Shared shared, LanguageProjectBuilder languageProjectBuilder) {
-        languageProjectBuilder.project.withDefaultsFromParentDirectory(rootDirectory, shared);
-        languageProjectBuilder.withParser(ParserLanguageCompiler.Input.builder()
+    private void setLanguageProjectCompilerInput(ResourcePath rootDirectory, Shared shared, LanguageProjectCompilerInputBuilder languageProjectCompilerInputBuilder) {
+        languageProjectCompilerInputBuilder.withParser()
             .parseTableRelativePath("target/metaborg/sdf.tbl")
-            .startSymbol("Module")
-        );
-        languageProjectBuilder.withStyler(StylerLanguageCompiler.Input.builder()
-            .packedEsvRelativePath("target/metaborg/editor.esv.af")
-        );
-        languageProjectBuilder.withConstraintAnalyzer(ConstraintAnalyzerLanguageCompiler.Input.builder()
+            .startSymbol("Module");
+        languageProjectCompilerInputBuilder.withStyler()
+            .packedEsvRelativePath("target/metaborg/editor.esv.af");
+        languageProjectCompilerInputBuilder.withConstraintAnalyzer()
             .enableNaBL2(true)
-            .enableStatix(false)
-        );
-        languageProjectBuilder.withStrategoRuntime(StrategoRuntimeLanguageCompiler.Input.builder()
+            .enableStatix(false);
+        languageProjectCompilerInputBuilder.withStrategoRuntime()
             .addInteropRegisterersByReflection(
                 "org.metaborg.lang.tiger.trans.InteropRegisterer",
                 "org.metaborg.lang.tiger.strategies.InteropRegisterer"
-            )
-        );
-        languageProjectBuilder.withCompleter(CompleterLanguageCompiler.Input.builder()
-        );
+            );
+        languageProjectCompilerInputBuilder.withCompleter();
     }
 
-    private static void setAdapterProjectCompilerInput(ResourcePath rootDirectory, Shared shared, AdapterProjectBuilder adapterProjectBuilder) {
-        adapterProjectBuilder.project.withDefaultsFromParentDirectory(rootDirectory, shared);
-        adapterProjectBuilder.withParser();
-        adapterProjectBuilder.withStyler();
-        adapterProjectBuilder.withConstraintAnalyzer();
-        adapterProjectBuilder.withStrategoRuntime();
-        adapterProjectBuilder.withCompleter();
-        final AdapterProject adapterProject = adapterProjectBuilder.project.build();
+    private void setAdapterProjectCompilerInput(ResourcePath rootDirectory, Shared shared, AdapterProjectCompilerInputBuilder adapterProjectCompilerInputBuilder) {
+        adapterProjectCompilerInputBuilder.withParser();
+        adapterProjectCompilerInputBuilder.withStyler();
+        adapterProjectCompilerInputBuilder.withConstraintAnalyzer();
+        adapterProjectCompilerInputBuilder.withStrategoRuntime();
+        adapterProjectCompilerInputBuilder.withCompleter();
 
         final TypeInfo showParsedAstTaskDef = TypeInfo.of(adapterProject.taskPackageId(), "TigerShowParsedAstTaskDef");
         final TypeInfo listDefNamesTaskDef = TypeInfo.of(adapterProject.taskPackageId(), "TigerListDefNames");
@@ -252,7 +253,7 @@ public class TigerInputs {
             .addParams("compiledFileNameSuffix", TypeInfo.ofString(), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.value(StringUtil.doubleQuote("defnames.aterm"))))
             .build();
 
-        adapterProjectBuilder.adapterProject
+        adapterProjectCompilerInputBuilder.project
             .addTaskDefs(
                 showParsedAstTaskDef,
                 listDefNamesTaskDef,

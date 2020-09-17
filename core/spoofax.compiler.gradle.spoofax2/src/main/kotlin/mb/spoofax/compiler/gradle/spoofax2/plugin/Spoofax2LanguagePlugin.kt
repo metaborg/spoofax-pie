@@ -6,7 +6,6 @@ import mb.spoofax.compiler.gradle.plugin.*
 import mb.spoofax.compiler.gradle.spoofax2.*
 import mb.spoofax.compiler.language.*
 import mb.spoofax.compiler.spoofax2.language.*
-import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
@@ -17,20 +16,15 @@ import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.Sync
 import org.gradle.kotlin.dsl.*
 
-open class Spoofax2LanguageProjectSettings {
-  val builder: Spoofax2LanguageProjectBuilder = Spoofax2LanguageProjectBuilder()
-
-  internal fun finalize(): Spoofax2LanguageProjectFinalized {
-    val input = builder.build()
-    return Spoofax2LanguageProjectFinalized(input)
-  }
-}
-
 open class Spoofax2LanguageProjectExtension(project: Project) {
-  val settings: Property<Spoofax2LanguageProjectSettings> = project.objects.property()
+  val compilerInput: Property<Spoofax2LanguageProjectCompilerInputBuilder> = project.objects.property()
+
+  fun compilerInput(closure: Spoofax2LanguageProjectCompilerInputBuilder.() -> Unit) {
+    compilerInput.get().closure()
+  }
 
   init {
-    settings.convention(Spoofax2LanguageProjectSettings())
+    compilerInput.convention(Spoofax2LanguageProjectCompilerInputBuilder())
   }
 
   companion object {
@@ -38,20 +32,12 @@ open class Spoofax2LanguageProjectExtension(project: Project) {
     private const val name = "Spoofax2-based language project"
   }
 
-  val settingsFinalized: Spoofax2LanguageProjectFinalized by lazy {
-    project.logger.debug("Finalizing $name settings in $project")
-    settings.finalizeValue()
-    if(!settings.isPresent) {
-      throw GradleException("$name settings in $project have not been set")
-    }
-    val settings = settings.get()
-    settings.finalize()
+  val compilerInputFinalized: Spoofax2LanguageProjectCompiler.Input by lazy {
+    project.logger.debug("Finalizing $name's compiler input in $project")
+    compilerInput.finalizeValue()
+    compilerInput.get().build()
   }
 }
-
-class Spoofax2LanguageProjectFinalized(
-  val input: Spoofax2LanguageProjectCompiler.Input
-)
 
 @Suppress("unused")
 open class Spoofax2LanguagePlugin : Plugin<Project> {
@@ -67,33 +53,32 @@ open class Spoofax2LanguagePlugin : Plugin<Project> {
     val extension = Spoofax2LanguageProjectExtension(project)
     project.extensions.add(Spoofax2LanguageProjectExtension.id, extension)
 
-    // Add a settings configuration closure for the shared language compiler that syncs our finalized input to their builder.
-    languageProjectExtension.settingsConfigurationClosures.add { extension.settingsFinalized.input.syncTo(it.builder) }
+    // Add a configuration closure to the language project that syncs our finalized input to their builder.
+    languageProjectExtension.compilerInput { extension.compilerInputFinalized.syncTo(this) }
 
     // Apply Spoofax 2 Gradle base plugin to make its configurations and variants available.
     project.plugins.apply("org.metaborg.spoofax.gradle.base")
 
     project.afterEvaluate {
-      configure(project, component, extension.settingsFinalized, languageProjectExtension.settingsFinalized.input)
+      configure(project, component, extension.compilerInputFinalized, languageProjectExtension.compilerInputFinalized)
     }
   }
 
   private fun configure(
     project: Project,
     component: Spoofax2CompilerGradleComponent,
-    finalized: Spoofax2LanguageProjectFinalized,
+    input: Spoofax2LanguageProjectCompiler.Input,
     sharedInput: LanguageProjectCompiler.Input
   ) {
-    configureCompileTask(project, component, finalized)
-    configureCopySpoofaxLanguageTasks(project, component, finalized, sharedInput)
+    configureCompileTask(project, component, input)
+    configureCopySpoofaxLanguageTasks(project, component, input, sharedInput)
   }
 
   private fun configureCompileTask(
     project: Project,
     component: Spoofax2CompilerGradleComponent,
-    finalized: Spoofax2LanguageProjectFinalized
+    input: Spoofax2LanguageProjectCompiler.Input
   ) {
-    val input = finalized.input
     val compileTask = project.tasks.register("compileLanguageProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
@@ -112,10 +97,9 @@ open class Spoofax2LanguagePlugin : Plugin<Project> {
   private fun configureCopySpoofaxLanguageTasks(
     project: Project,
     component: Spoofax2CompilerGradleComponent,
-    finalized: Spoofax2LanguageProjectFinalized,
+    input: Spoofax2LanguageProjectCompiler.Input,
     sharedInput: LanguageProjectCompiler.Input
   ) {
-    val input = finalized.input
     val destinationPackage = sharedInput.languageProject().packagePath()
     val includeStrategoClasses = input.strategoRuntime().map { it.copyClasses() }.orElse(false)
     val copyResources = component.spoofax2LanguageProjectCompiler.getCopyResources(input)

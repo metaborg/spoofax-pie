@@ -11,15 +11,13 @@ plugins {
 
 languageAdapterProject {
   languageProject.set(project(":mod"))
-  settings.set(AdapterProjectSettings().apply { builder.configureBuilder() })
-}
-
-fun AdapterProjectBuilder.configureBuilder() {
-  withParser()
-  withStyler()
-  withStrategoRuntime()
-  withConstraintAnalyzer()
-  adapterProject.run { configureCompilerInput() }
+  compilerInput {
+    withParser()
+    withStyler()
+    withStrategoRuntime()
+    withConstraintAnalyzer()
+    project.configureCompilerInput()
+  }
 }
 
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {

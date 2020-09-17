@@ -37,11 +37,10 @@ class ParserCompilerTest extends TestBase {
         final TigerInputs inputs = defaultInputs();
 
         try(MixedSession session = pie.newSession()) {
-            inputs.languageProjectBuilder.configureParser(b -> b
+            inputs.languageProjectCompilerInputBuilder.withParser()
                 .classKind(ClassKind.Manual)
                 .manualParser("my.lang", "MyParser")
-                .manualFactory("my.lang", "MyParserFactory")
-            );
+                .manualFactory("my.lang", "MyParserFactory");
             final ParserLanguageCompiler.Input languageProjectInput = inputs.parserLanguageCompilerInput();
             session.require(component.getParserLanguageCompiler().createTask(languageProjectInput));
             fileAssertions.scopedNotExists(languageProjectInput.classesGenDirectory(), (s) -> {
@@ -50,11 +49,10 @@ class ParserCompilerTest extends TestBase {
                 s.assertNotExists(languageProjectInput.genFactory());
             });
 
-            inputs.adapterProjectBuilder.configureParser(b -> b
+            inputs.adapterProjectCompilerInputBuilder.withParser()
                 .classKind(ClassKind.Manual)
                 .manualParseTaskDef("my.adapter.taskdef", "MyParseTaskDef")
-                .manualTokenizeTaskDef("my.adapter.taskdef", "MyTokenizeTaskDef")
-            );
+                .manualTokenizeTaskDef("my.adapter.taskdef", "MyTokenizeTaskDef");
             final ParserAdapterCompiler.Input adapterProjectInput = inputs.parserAdapterCompilerInput();
             session.require(component.getParserAdapterCompiler().createTask(adapterProjectInput));
             fileAssertions.scopedNotExists(adapterProjectInput.classesGenDirectory(), (s) -> {
@@ -68,26 +66,26 @@ class ParserCompilerTest extends TestBase {
     void testManualRequiresClasses(ClassKind classKind) {
         final TigerInputs inputs = defaultInputs();
 
-        inputs.languageProjectBuilder.configureParser(b -> b.classKind(classKind));
+        inputs.languageProjectCompilerInputBuilder.withParser()
+            .classKind(classKind);
         assertThrows(IllegalArgumentException.class, inputs::languageProjectCompilerInput); // Class kind is Manual but manual class names were not set: check fails.
         inputs.clearBuiltInputs();
 
-        inputs.languageProjectBuilder.configureParser(b -> b
+        inputs.languageProjectCompilerInputBuilder.withParser()
             .classKind(classKind)
             .manualParser("my.lang", "MyParser")
-            .manualFactory("my.lang", "MyParserFactory")
-        );
+            .manualFactory("my.lang", "MyParserFactory");
         inputs.languageProjectCompilerInput(); // Manual classes are set: no exception.
 
-        inputs.adapterProjectBuilder.configureParser(b -> b.classKind(classKind));
+        inputs.adapterProjectCompilerInputBuilder.withParser()
+            .classKind(classKind);
         assertThrows(IllegalArgumentException.class, inputs::adapterProjectCompilerInput); // Class kind is Manual but manual class names were not set: check fails.
         inputs.clearBuiltInputs();
 
-        inputs.adapterProjectBuilder.configureParser(b -> b
+        inputs.adapterProjectCompilerInputBuilder.withParser()
             .classKind(classKind)
             .manualParseTaskDef("my.adapter.taskdef", "MyParseTaskDef")
-            .manualTokenizeTaskDef("my.adapter.taskdef", "MyTokenizeTaskDef")
-        );
+            .manualTokenizeTaskDef("my.adapter.taskdef", "MyTokenizeTaskDef");
         inputs.adapterProjectCompilerInput(); // Manual classes are set: no exception.
     }
 }

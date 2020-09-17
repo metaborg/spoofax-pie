@@ -1,6 +1,7 @@
 package mb.common.result;
 
 import mb.common.option.Option;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
