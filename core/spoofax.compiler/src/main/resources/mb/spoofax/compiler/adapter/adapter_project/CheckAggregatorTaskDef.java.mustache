@@ -12,14 +12,13 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
-import mb.spoofax.core.language.LanguageScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.Objects;
 
-@LanguageScope
+@{{scope.qualifiedId}}
 public class {{genCheckAggregatorTaskDef.id}} implements TaskDef<{{genCheckAggregatorTaskDef.id}}.Input, @Nullable KeyedMessages> {
     public static class Input implements Serializable {
         public final ResourcePath root;

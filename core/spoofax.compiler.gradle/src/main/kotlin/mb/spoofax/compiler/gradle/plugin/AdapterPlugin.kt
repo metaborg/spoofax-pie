@@ -49,8 +49,10 @@ open class AdapterProjectExtension(project: Project) {
   internal val adapterProjectFinalized: AdapterProject by lazy {
     project.logger.debug("Finalizing $name's project in $project")
     adapterProject.finalizeValue()
+    val shared = languageProjectExtension.sharedFinalized
     adapterProject.get()
-      .packageId(AdapterProject.Builder.defaultPackageId(languageProjectExtension.sharedFinalized))
+      .packageId(AdapterProject.Builder.defaultPackageId(shared))
+      .shared(shared)
       .build()
   }
 

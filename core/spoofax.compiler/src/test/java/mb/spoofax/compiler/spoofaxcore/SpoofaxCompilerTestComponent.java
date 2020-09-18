@@ -5,6 +5,7 @@ import mb.pie.api.Pie;
 import mb.resource.ResourceService;
 import mb.spoofax.compiler.dagger.SpoofaxCompilerComponent;
 import mb.spoofax.compiler.dagger.SpoofaxCompilerModule;
+import mb.spoofax.compiler.dagger.SpoofaxCompilerScope;
 import mb.spoofax.compiler.language.ClassloaderResourcesCompiler;
 import mb.spoofax.compiler.adapter.CompleterAdapterCompiler;
 import mb.spoofax.compiler.language.CompleterLanguageCompiler;
@@ -21,7 +22,7 @@ import mb.spoofax.compiler.language.StylerLanguageCompiler;
 
 import javax.inject.Singleton;
 
-@Singleton @Component(modules = {SpoofaxCompilerModule.class, SpoofaxCompilerTestModule.class})
+@SpoofaxCompilerScope @Component(modules = {SpoofaxCompilerModule.class, SpoofaxCompilerTestModule.class})
 public interface SpoofaxCompilerTestComponent extends SpoofaxCompilerComponent {
     ResourceService getResourceService();
 

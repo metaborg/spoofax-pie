@@ -1,7 +1,6 @@
 package mb.spoofax.intellij.psi;
 
 import com.intellij.psi.tree.TokenSet;
-import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.intellij.IntellijLanguage;
 
 import javax.annotation.Nullable;
@@ -11,11 +10,10 @@ import java.util.HashMap;
 /**
  * Manages token types for Spoofax languages.
  *
- * IntelliJ used TokenTypes to distinguish and style different kinds of tokens.
- * Since Spoofax lacks this concept, we dynamically create a unique token types
- * to represent each unique style (scope) of token, to allow them to be distinguished by IntelliJ.
+ * IntelliJ used TokenTypes to distinguish and style different kinds of tokens. Since Spoofax lacks this concept, we
+ * dynamically create a unique token types to represent each unique style (scope) of token, to allow them to be
+ * distinguished by IntelliJ.
  */
-@LanguageScope
 public final class SpoofaxTokenTypeManager {
     /** Caches the created token types. */
     private final HashMap<String, SpoofaxTokenType> scopedElementTypes = new HashMap<>();

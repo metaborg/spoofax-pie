@@ -1,11 +1,10 @@
 package {{genComponent.packageId}};
 
 import dagger.Component;
-import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.intellij.IntellijLanguageComponent;
 import mb.spoofax.intellij.SpoofaxIntellijComponent;
 
-@LanguageScope
+@{{adapterProjectCompilerInput.scope.qualifiedId}}
 @Component(modules = { {{adapterProjectCompilerInput.module.qualifiedId}}.class, {{module.qualifiedId}}.class{{#adapterProjectCompilerInput.additionalModules}}{{#-first}}, {{/-first}}{{qualifiedId}}.class{{^-last}}, {{/-last}}{{/adapterProjectCompilerInput.additionalModules}} }, dependencies = SpoofaxIntellijComponent.class)
 public interface {{genComponent.id}} extends IntellijLanguageComponent, {{adapterProjectCompilerInput.component.qualifiedId}} {
     @Override {{language.qualifiedId}} getLanguage();

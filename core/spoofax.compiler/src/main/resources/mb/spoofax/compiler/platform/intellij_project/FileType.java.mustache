@@ -1,11 +1,10 @@
 package {{fileType.packageId}};
 
-import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.intellij.IntellijLanguageFileType;
 
 import javax.inject.Inject;
 
-@LanguageScope
+@{{adapterProjectCompilerInput.scope.qualifiedId}}
 public class {{genFileType.id}} extends IntellijLanguageFileType {
     @Inject protected {{genFileType.id}}() {
         super({{plugin.qualifiedId}}.getComponent());

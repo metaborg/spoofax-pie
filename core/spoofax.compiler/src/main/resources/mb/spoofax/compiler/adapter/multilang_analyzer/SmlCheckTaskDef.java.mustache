@@ -6,7 +6,6 @@ import mb.pie.api.Function;
 import mb.pie.api.ResourceStringSupplier;
 import mb.pie.api.Supplier;
 import mb.resource.ResourceKey;
-import mb.spoofax.core.language.LanguageScope;
 import mb.statix.multilang.metadata.LanguageId;
 import mb.statix.multilang.metadata.LanguageMetadataManager;
 import mb.statix.multilang.pie.SmlSolveProject;
@@ -16,7 +15,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 
-@LanguageScope
+@{{adapterProject.scope.qualifiedId}}
 public class {{genCheckTaskDef.id}} extends SmlCheckTaskDef {
 
     @Inject public {{genCheckTaskDef.id}}(

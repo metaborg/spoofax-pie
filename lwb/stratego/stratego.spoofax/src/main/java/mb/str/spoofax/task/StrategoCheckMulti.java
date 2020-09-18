@@ -10,7 +10,7 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
-import mb.spoofax.core.language.LanguageScope;
+import mb.str.spoofax.StrategoScope;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -19,7 +19,7 @@ import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Objects;
 
-@LanguageScope
+@StrategoScope
 public class StrategoCheckMulti implements TaskDef<StrategoCheckMulti.Input, KeyedMessages> {
     public static class Input implements Serializable {
         public final ResourcePath root;

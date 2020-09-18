@@ -2,7 +2,6 @@ package {{genEclipseModule.packageId}};
 
 import dagger.Module;
 import dagger.Provides;
-import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.eclipse.EclipseIdentifiers;
 import mb.spoofax.eclipse.job.LockRule;
 import mb.spoofax.eclipse.job.ReadLockRule;
@@ -10,29 +9,31 @@ import mb.spoofax.eclipse.job.ReadLockRule;
 import mb.statix.multilang.MultiLang;
 {{/adapterProjectCompilerInput.multilangAnalyzer}}
 
+import {{adapterProjectCompilerInput.scope.qualifiedId}};
+
 import javax.inject.Named;
 
 @Module
 public class {{genEclipseModule.id}} {
-    @Provides @LanguageScope
+    @Provides @{{adapterProjectCompilerInput.scope.id}}
     static EclipseIdentifiers provideEclipseIdentifiers() {
         return new {{eclipseIdentifiers.qualifiedId}}();
     }
 
 {{#adapterProjectCompilerInput.multilangAnalyzer}}
-    @Provides @Named("StartupWriteLock") @LanguageScope
+    @Provides @Named("StartupWriteLock") @{{adapterProjectCompilerInput.scope.id}}
     static LockRule provideStartupWriteLockRule(@MultiLang LockRule startUpWriteLockRule) {
         return startUpWriteLockRule;
     }
 {{/adapterProjectCompilerInput.multilangAnalyzer}}
 {{^adapterProjectCompilerInput.multilangAnalyzer}}
-    @Provides @Named("StartupWriteLock") @LanguageScope
+    @Provides @Named("StartupWriteLock") @{{adapterProjectCompilerInput.scope.id}}
     static LockRule provideStartupWriteLockRule() {
         return new LockRule("Startup write lock");
     }
 {{/adapterProjectCompilerInput.multilangAnalyzer}}
 
-    @Provides @LanguageScope
+    @Provides @{{adapterProjectCompilerInput.scope.id}}
     static ReadLockRule provideStartupReadLockRule(@Named("StartupWriteLock") LockRule writeLock) {
         return new ReadLockRule(writeLock, "Startup read lock");
     }

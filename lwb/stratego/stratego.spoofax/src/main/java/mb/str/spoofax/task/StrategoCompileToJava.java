@@ -6,6 +6,7 @@ import mb.pie.api.None;
 import mb.pie.api.STask;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
+import mb.str.spoofax.StrategoScope;
 import mb.stratego.build.strincr.StrIncr;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.cmd.Arguments;
@@ -15,6 +16,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Objects;
 
+@StrategoScope
 public class StrategoCompileToJava implements TaskDef<StrategoCompileToJava.Args, Result<None, ?>> {
     public static class Args implements Serializable {
         public final ResourcePath projectDir;

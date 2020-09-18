@@ -12,6 +12,7 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
+import mb.sdf3.spoofax.Sdf3Scope;
 import mb.sdf3.spoofax.task.util.Sdf3Util;
 import mb.spoofax.core.language.LanguageScope;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -23,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-@LanguageScope
+@Sdf3Scope
 public class Sdf3CreateSpec implements TaskDef<Sdf3CreateSpec.Input, Sdf3Spec> {
     public static class Input implements Serializable {
         public final ResourcePath project;

@@ -46,10 +46,8 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   addAdditionalModules(packageId, "JavaTasksModule")
   addAdditionalModules(incrPackageId, "StrategoIncrModule")
 
-  // Manual component implementation
+  // Enable manual class implementation
   classKind(ClassKind.Extended)
-  genComponent(packageId, "GeneratedStrategoComponent")
-  manualComponent(packageId, "StrategoComponent")
 
   // Manual multifile check implementation
   isMultiFile(true)

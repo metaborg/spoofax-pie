@@ -5,13 +5,12 @@ import mb.jsglr.common.JSGLRTokens;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
-import mb.spoofax.core.language.LanguageScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import java.io.IOException;
 
-@LanguageScope
+@{{adapterProject.scope.qualifiedId}}
 public class {{genTokenizeTaskDef.id}} implements TaskDef<ResourceKey, Option<JSGLRTokens>> {
     private final {{parseTaskDef.qualifiedId}} parse;
 

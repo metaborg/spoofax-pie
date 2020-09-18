@@ -8,6 +8,7 @@ import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.command.CommandFeedback;
+import mb.str.spoofax.StrategoScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
@@ -15,6 +16,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Objects;
 
+@StrategoScope
 public class StrategoEditorCompileToJava implements TaskDef<StrategoEditorCompileToJava.Args, CommandFeedback> {
     public static class Args implements Serializable {
         public final ResourcePath projectDir;
@@ -73,7 +75,8 @@ public class StrategoEditorCompileToJava implements TaskDef<StrategoEditorCompil
         return getClass().getName();
     }
 
-    @Override public CommandFeedback exec(ExecContext context, StrategoEditorCompileToJava.Args input) throws Exception {
+    @Override
+    public CommandFeedback exec(ExecContext context, StrategoEditorCompileToJava.Args input) throws Exception {
         final ArrayList<ResourcePath> includeDirs = new ArrayList<>(input.includeDirs);
         if(includeDirs.isEmpty()) {
             includeDirs.add(input.projectDir);
@@ -98,7 +101,7 @@ public class StrategoEditorCompileToJava implements TaskDef<StrategoEditorCompil
         } else {
             outputJavaPackageId = input.outputJavaPackageId;
         }
-        
+
         final Result<None, ?> result = context.require(compileToJava, new StrategoCompileToJava.Args(input.projectDir, input.mainFile, includeDirs, builtinLibs, input.cacheDir, outputDir, outputJavaPackageId, new ArrayList<>()));
         return result.mapErrOrElse(e -> CommandFeedback.ofTryExtractMessagesFrom(e, input.mainFile), none -> CommandFeedback.of());
     }

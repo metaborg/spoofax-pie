@@ -4,7 +4,7 @@ import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
-import mb.spoofax.core.language.LanguageScope;
+import mb.sdf3.spoofax.Sdf3Scope;
 import org.metaborg.sdf2parenthesize.parenthesizer.Parenthesizer;
 import org.metaborg.sdf2table.parsetable.ParseTable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Objects;
 
-@LanguageScope
+@Sdf3Scope
 public class Sdf3ParseTableToParenthesizer implements TaskDef<Sdf3ParseTableToParenthesizer.Args, Result<IStrategoTerm, ?>> {
     public static class Args implements Serializable {
         private final Supplier<? extends Result<ParseTable, ?>> parseTableSupplier;

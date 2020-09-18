@@ -13,6 +13,7 @@ import mb.resource.ResourceKey;
 import mb.resource.ResourceKeyString;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
+import mb.str.spoofax.StrategoScope;
 import mb.stratego.build.strincr.Analysis;
 import mb.stratego.build.strincr.Message;
 import mb.stratego.build.strincr.MessageSeverity;
@@ -24,6 +25,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Objects;
 
+@StrategoScope
 public class StrategoAnalyze implements TaskDef<StrategoAnalyze.Args, KeyedMessages> {
     public static class Args implements Serializable {
         public final ResourcePath projectDir;

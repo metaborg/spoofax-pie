@@ -6,12 +6,14 @@ import mb.nabl2.terms.stratego.StrategoTermIndices;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
+import mb.sdf3.spoofax.Sdf3Scope;
 import mb.stratego.common.StrategoRuntimeBuilder;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 
 import javax.inject.Inject;
 
+@Sdf3Scope
 public class Sdf3IndexAst implements TaskDef<ResourceKey, Result<IStrategoTerm, ?>> {
     private final Sdf3Parse parse;
     private final ITermFactory tf;

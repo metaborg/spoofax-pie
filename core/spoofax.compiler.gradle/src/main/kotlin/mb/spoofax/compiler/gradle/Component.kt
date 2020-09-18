@@ -11,9 +11,8 @@ import mb.resource.DefaultResourceService
 import mb.resource.ResourceService
 import mb.resource.fs.FSResourceRegistry
 import mb.spoofax.compiler.dagger.*
-import javax.inject.Singleton
 
-@Singleton
+@SpoofaxCompilerScope
 @Component(modules = [SpoofaxCompilerModule::class, SpoofaxCompilerGradleModule::class])
 interface SpoofaxCompilerGradleComponent : SpoofaxCompilerComponent {
   val resourceService: ResourceService
@@ -25,13 +24,13 @@ class SpoofaxCompilerGradleModule(
   val builderSupplier: () -> PieBuilder
 ) {
   @Provides
-  @Singleton
+  @SpoofaxCompilerScope
   fun provideResourceService(): ResourceService {
     return DefaultResourceService(FSResourceRegistry())
   }
 
   @Provides
-  @Singleton
+  @SpoofaxCompilerScope
   fun providePie(resourceService: ResourceService, taskDefs: MutableSet<TaskDef<*, *>>): Pie {
     val builder: PieBuilder = builderSupplier()
     builder.withTaskDefs(MapTaskDefs(taskDefs))

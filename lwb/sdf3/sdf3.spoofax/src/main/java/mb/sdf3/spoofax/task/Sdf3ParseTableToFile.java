@@ -7,7 +7,7 @@ import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.WritableResource;
-import mb.spoofax.core.language.LanguageScope;
+import mb.sdf3.spoofax.Sdf3Scope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.sdf2table.io.ParseTableIO;
 import org.metaborg.sdf2table.parsetable.ParseTable;
@@ -19,7 +19,7 @@ import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-@LanguageScope
+@Sdf3Scope
 public class Sdf3ParseTableToFile implements TaskDef<Sdf3ParseTableToFile.Args, Result<None, ?>> {
     public static class Args implements Serializable {
         private final Supplier<? extends Result<ParseTable, ?>> parseTableSupplier;

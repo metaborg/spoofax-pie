@@ -39,6 +39,8 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
     private final TemplateWriter checkTaskDefTemplate;
     private final TemplateWriter checkMultiTaskDefTemplate;
     private final TemplateWriter checkAggregatorTaskDefTemplate;
+    private final TemplateWriter scopeTemplate;
+    private final TemplateWriter qualifierTemplate;
     private final TemplateWriter componentTemplate;
     private final TemplateWriter moduleTemplate;
     private final TemplateWriter instanceTemplate;
@@ -65,6 +67,8 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
         this.checkTaskDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/CheckTaskDef.java.mustache");
         this.checkMultiTaskDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/CheckMultiTaskDef.java.mustache");
         this.checkAggregatorTaskDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/CheckAggregatorTaskDef.java.mustache");
+        this.scopeTemplate = templateCompiler.getOrCompileToWriter("adapter_project/Scope.java.mustache");
+        this.qualifierTemplate = templateCompiler.getOrCompileToWriter("adapter_project/Qualifier.java.mustache");
         this.componentTemplate = templateCompiler.getOrCompileToWriter("adapter_project/Component.java.mustache");
         this.moduleTemplate = templateCompiler.getOrCompileToWriter("adapter_project/Module.java.mustache");
         this.instanceTemplate = templateCompiler.getOrCompileToWriter("adapter_project/Instance.java.mustache");
@@ -135,15 +139,26 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
         checkTaskDefTemplate.write(context, input.genCheckTaskDef().file(classesGenDirectory), input);
         checkMultiTaskDefTemplate.write(context, input.genCheckMultiTaskDef().file(classesGenDirectory), input);
         checkAggregatorTaskDefTemplate.write(context, input.genCheckAggregatorTaskDef().file(classesGenDirectory), input);
-        componentTemplate.write(context, input.genComponent().file(classesGenDirectory), input);
+
+        scopeTemplate.write(context, input.adapterProject().genScope().file(classesGenDirectory), input);
+        qualifierTemplate.write(context, input.genQualifier().file(classesGenDirectory), input);
+
         for(CommandDefRepr commandDef : input.commandDefs()) {
             final UniqueNamer uniqueNamer = new UniqueNamer();
             final HashMap<String, Object> map = new HashMap<>();
+            map.put("scope", input.scope());
             map.put("taskDefInjection", uniqueNamer.makeUnique(commandDef.taskDefType()));
             commandDefTemplate.write(context, commandDef.type().file(classesGenDirectory), commandDef, map);
         }
 
-        {
+        { // Component
+            final UniqueNamer uniqueNamer = new UniqueNamer();
+            final HashMap<String, Object> map = new HashMap<>();
+            map.put("providedTaskDefs", allTaskDefs.stream().map(uniqueNamer::makeUnique).collect(Collectors.toList()));
+            componentTemplate.write(context, input.genComponent().file(classesGenDirectory), input, map);
+        }
+
+        { // Module
             final UniqueNamer uniqueNamer = new UniqueNamer();
             final HashMap<String, Object> map = new HashMap<>();
             map.put("providedTaskDefs", allTaskDefs.stream().map(uniqueNamer::makeUnique).collect(Collectors.toList()));
@@ -153,7 +168,8 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
             map.put("providedAutoCommandDefs", input.autoCommandDefs().stream().map((c) -> uniqueNamer.makeUnique(c, c.commandDef().asVariableId())).collect(Collectors.toList()));
             moduleTemplate.write(context, input.genModule().file(classesGenDirectory), input, map);
         }
-        {
+
+        { // Instance
             final UniqueNamer uniqueNamer = new UniqueNamer();
             uniqueNamer.reserve("fileExtensions");
             uniqueNamer.reserve("taskDefs");
@@ -364,6 +380,27 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
                 return manualPackageInfo().get();
             }
             return genPackageInfo();
+        }
+
+        // Dagger Scope (passthrough from AdapterProject)
+
+        default TypeInfo genScope() { return adapterProject().genScope(); }
+
+        default TypeInfo scope() { return adapterProject().scope(); }
+
+        // Dagger Qualifier
+
+        @Value.Default default TypeInfo genQualifier() {
+            return TypeInfo.of(adapterProject().packageId(), shared().defaultClassPrefix() + "Qualifier");
+        }
+
+        Optional<TypeInfo> manualQualifier();
+
+        default TypeInfo qualifier() {
+            if(classKind().isManual() && manualQualifier().isPresent()) {
+                return manualQualifier().get();
+            }
+            return genQualifier();
         }
 
         // Dagger component

@@ -1,6 +1,5 @@
 package {{genPreStatixTaskDef.packageId}};
 import mb.common.result.Result;
-import mb.spoofax.core.language.LanguageScope;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.stratego.common.StrategoRuntime;
@@ -11,7 +10,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import java.io.IOException;
 
-@LanguageScope
+@{{adapterProject.scope.qualifiedId}}
 public class {{genPreStatixTaskDef.id}} extends AstStrategoTransformTaskDef {
     @Inject public {{genPreStatixTaskDef.id}}(Provider<StrategoRuntime> strategoRuntimeProvider) {
         super(strategoRuntimeProvider, "{{preAnalysisStrategy}}");

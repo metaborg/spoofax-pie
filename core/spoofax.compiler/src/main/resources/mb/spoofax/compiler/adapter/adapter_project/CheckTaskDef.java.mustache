@@ -8,12 +8,10 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.ResourceStringSupplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
-import mb.spoofax.core.language.LanguageScope;
-
 import javax.inject.Inject;
 import java.io.IOException;
 
-@LanguageScope
+@{{scope.qualifiedId}}
 public class {{genCheckTaskDef.id}} implements TaskDef<ResourceKey, Messages> {
 
 {{#checkInjections}}

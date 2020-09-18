@@ -5,8 +5,8 @@ import mb.jsglr1.common.JSGLR1ParseException;
 import mb.pie.api.ExecException;
 import mb.resource.ResourceKeyString;
 import mb.resource.ResourceService;
-import mb.spoofax.core.language.LanguageScope;
 import mb.str.StrategoParser;
+import mb.str.spoofax.StrategoScope;
 import mb.stratego.build.strincr.ParseStratego;
 import mb.stratego.common.StrategoRuntime;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
-@LanguageScope
+@StrategoScope
 public class Spoofax3ParseStratego implements ParseStratego {
     private final ResourceService resourceService;
     private final Provider<StrategoParser> parserProvider;

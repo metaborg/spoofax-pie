@@ -9,6 +9,7 @@ import mb.pie.api.TaskDef;
 import mb.resource.DefaultResourceService;
 import mb.resource.ResourceService;
 import mb.resource.fs.FSResourceRegistry;
+import mb.spoofax.compiler.dagger.SpoofaxCompilerScope;
 
 import javax.inject.Singleton;
 import java.util.Set;
@@ -22,11 +23,11 @@ public class SpoofaxCompilerTestModule {
         this.builderSupplier = builderSupplier;
     }
 
-    @Provides @Singleton public ResourceService provideResourceService() {
+    @Provides @SpoofaxCompilerScope public ResourceService provideResourceService() {
         return new DefaultResourceService(new FSResourceRegistry());
     }
 
-    @Provides @Singleton public Pie providePie(Set<TaskDef<?, ?>> taskDefs, ResourceService resourceService) {
+    @Provides @SpoofaxCompilerScope public Pie providePie(Set<TaskDef<?, ?>> taskDefs, ResourceService resourceService) {
         final PieBuilder builder = builderSupplier.get();
         builder.withTaskDefs(new MapTaskDefs(taskDefs));
         builder.withResourceService(resourceService);

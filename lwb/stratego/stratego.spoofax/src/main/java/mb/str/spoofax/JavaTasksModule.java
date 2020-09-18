@@ -4,16 +4,15 @@ import dagger.Module;
 import dagger.Provides;
 import mb.pie.task.java.CompileJava;
 import mb.pie.task.java.CreateJar;
-import mb.spoofax.core.language.LanguageScope;
 
 @Module
 public class JavaTasksModule {
-    @Provides @LanguageScope
+    @Provides @StrategoScope
     public static CompileJava provideCompileJava() {
         return new CompileJava();
     }
 
-    @Provides @LanguageScope
+    @Provides @StrategoScope
     public static CreateJar provideCreateJar() {
         return new CreateJar();
     }

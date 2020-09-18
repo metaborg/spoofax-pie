@@ -23,7 +23,6 @@ import mb.resource.classloader.ClassLoaderResource;
 import mb.resource.classloader.ClassLoaderResourceRegistry;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.spoofax.core.language.LanguageInstance;
-import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.HierarchicalResourceType;
@@ -55,6 +54,8 @@ import mb.stratego.common.StrategoRuntimeBuilder;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 
+import {{scope.qualifiedId}};
+
 import javax.inject.Named;
 import java.util.HashSet;
 import java.util.Set;
@@ -62,28 +63,33 @@ import java.util.Map;
 
 @Module
 public class {{genModule.id}} {
-    @Provides @LanguageScope
+    @Provides @{{scope.id}}
     static ClassLoaderResourceRegistry provideClassLoaderResourceRegistry() {
         return {{classloaderResources.classloaderResources.qualifiedId}}.createClassLoaderResourceRegistry();
     }
 
-    @Provides @LanguageScope
-    static ResourceService provideResourceRegistry(@Platform ResourceService resourceService, ClassLoaderResourceRegistry classLoaderResourceRegistry) {
+    @Provides @{{scope.id}} @{{qualifier.id}}
+    static ResourceService provideQualifiedResourceRegistry(@Platform ResourceService resourceService, ClassLoaderResourceRegistry classLoaderResourceRegistry) {
         return resourceService.createChild(classLoaderResourceRegistry);
     }
 
-    @Provides @Named("definition-dir") @LanguageScope
+    @Provides @{{scope.id}}
+    static ResourceService provideResourceRegistry(@{{qualifier.id}} ResourceService resourceService) {
+        return resourceService;
+    }
+
+    @Provides @Named("definition-dir") @{{scope.id}}
     static ClassLoaderResource provideDefinitionDir(ClassLoaderResourceRegistry registry) {
         return {{classloaderResources.classloaderResources.qualifiedId}}.createDefinitionDir(registry);
     }
 
-    @Provides @Named("definition-dir") @LanguageScope
+    @Provides @Named("definition-dir") @{{scope.id}}
     static HierarchicalResource provideDefinitionDirAsHierarchicalResource(@Named("definition-dir") ClassLoaderResource definitionDir) {
         return definitionDir;
     }
 
 {{#parser}}
-    @Provides @LanguageScope
+    @Provides @{{scope.id}}
     static {{this.languageProjectInput.factory.qualifiedId}} provideParserFactory(@Named("definition-dir") HierarchicalResource definitionDir) {
         return new {{this.languageProjectInput.factory.qualifiedId}}(definitionDir);
     }
@@ -96,12 +102,12 @@ public class {{genModule.id}} {
 {{#styler}}
 
 
-    @Provides @LanguageScope
+    @Provides @{{scope.id}}
     static {{this.languageProjectInput.factory.qualifiedId}} provideStylerFactory(LoggerFactory loggerFactory, @Named("definition-dir") HierarchicalResource definitionDir) {
         return new {{this.languageProjectInput.factory.qualifiedId}}(loggerFactory, definitionDir);
     }
 
-    @Provides @LanguageScope
+    @Provides @{{scope.id}}
     static {{this.languageProjectInput.styler.qualifiedId}} provideStyler({{this.languageProjectInput.factory.qualifiedId}} stylerFactory) {
         return stylerFactory.create();
     }
@@ -109,17 +115,17 @@ public class {{genModule.id}} {
 {{#strategoRuntime}}
 
 
-    @Provides @LanguageScope
+    @Provides @{{scope.id}}
     static {{this.languageProjectInput.factory.qualifiedId}} provideStrategoRuntimeBuilderFactory(LoggerFactory loggerFactory, ResourceService resourceService, @Named("definition-dir") HierarchicalResource definitionDir) {
         return new {{this.languageProjectInput.factory.qualifiedId}}(loggerFactory, resourceService, definitionDir);
     }
 
-    @Provides @LanguageScope
+    @Provides @{{scope.id}}
     static StrategoRuntimeBuilder provideStrategoRuntimeBuilder({{this.languageProjectInput.factory.qualifiedId}} factory) {
         return factory.create();
     }
 
-    @Provides @LanguageScope @Named("prototype")
+    @Provides @{{scope.id}} @Named("prototype")
     static StrategoRuntime providePrototypeStrategoRuntime(StrategoRuntimeBuilder builder) {
         return builder.build();
     }
@@ -132,19 +138,19 @@ public class {{genModule.id}} {
 {{#constraintAnalyzer}}
 
 
-    @Provides @LanguageScope
+    @Provides @{{scope.id}}
     static {{this.languageProjectInput.factory.qualifiedId}} provideConstraintAnalyzerFactory(LoggerFactory loggerFactory, ResourceService resourceService, StrategoRuntime prototypeStrategoRuntime) {
         return new {{this.languageProjectInput.factory.qualifiedId}}(loggerFactory, resourceService, prototypeStrategoRuntime);
     }
 
-    @Provides @LanguageScope
+    @Provides @{{scope.id}}
     static {{this.languageProjectInput.constraintAnalyzer.qualifiedId}} provideConstraintAnalyzer({{this.languageProjectInput.factory.qualifiedId}} factory) {
         return factory.create();
     }
 {{/constraintAnalyzer}}
 
 
-    @Provides @LanguageScope @ElementsIntoSet
+    @Provides @{{scope.id}} @ElementsIntoSet
     static Set<TaskDef<?, ?>> provideTaskDefsSet(
 {{#providedTaskDefs}}
         {{variable}}{{^-last}},{{/-last}}
@@ -157,22 +163,22 @@ public class {{genModule.id}} {
         return taskDefs;
     }
 
-    @Provides @LanguageScope
+    @Provides @{{scope.id}}
     static TaskDefs provideTaskDefs(Set<TaskDef<?, ?>> taskDefs) {
         return new MapTaskDefs(taskDefs);
     }
 
-    @Provides @LanguageScope @Named("prototype")
+    @Provides @{{scope.id}} @Named("prototype")
     static Pie providePrototypePie(@Platform Pie pie, TaskDefs taskDefs, ResourceService resourceService) {
         return pie.createChildBuilder().withTaskDefs(taskDefs).withResourceService(resourceService).build();
     }
     {{#multilangAnalyzer}}
-    @Provides @LanguageScope
+    @Provides @{{scope.id}}
     static LanguageId provideLanguageId() {
         return new LanguageId("{{languageId}}");
     }
-    @Provides @LanguageScope
-    static Pie providePie(ContextPieManager pieManager) {
+    @Provides @{{scope.id}} @{{qualifier.id}}
+    static Pie provideQualifiedPie(ContextPieManager pieManager) {
         try {
             return pieManager.buildPieForContext();
         } catch(MultiLangAnalysisException e) {
@@ -181,19 +187,25 @@ public class {{genModule.id}} {
     }
     {{/multilangAnalyzer}}
     {{^multilangAnalyzer}}
-    @Provides @LanguageScope
-    static Pie providePie(@Named("prototype") Pie languagePie) {
+    @Provides @{{scope.id}} @{{qualifier.id}}
+    static Pie provideQualifiedPie(@Named("prototype") Pie languagePie) {
         return languagePie;
     }
     {{/multilangAnalyzer}}
 
-    @Provides @LanguageScope
+    @Provides @{{scope.id}}
+    static Pie providePie(@{{qualifier.id}} Pie languagePie) {
+        return languagePie;
+    }
+
+
+    @Provides @{{scope.id}}
     static LanguageInstance provideLanguageInstance({{genInstance.id}} instance) {
         return instance;
     }
 
 
-    @Provides @LanguageScope @ElementsIntoSet
+    @Provides @{{scope.id}} @ElementsIntoSet
     static Set<CommandDef<?>> provideCommandDefsSet(
 {{#providedCommandDefs}}
         {{variable}}{{^-last}},{{/-last}}
@@ -206,7 +218,7 @@ public class {{genModule.id}} {
         return commandDefs;
     }
 
-    @Provides @LanguageScope @ElementsIntoSet
+    @Provides @{{scope.id}} @ElementsIntoSet
     static Set<AutoCommandRequest<?>> provideAutoCommandRequestsSet(
 {{#providedAutoCommandDefs}}
         {{value.commandDef.qualifiedId}} {{name}}{{^-last}},{{/-last}}
@@ -219,75 +231,75 @@ public class {{genModule.id}} {
         return autoCommandDefs;
     }
 {{#isMultiLang}}
-    @Provides @LanguageScope
+    @Provides @{{scope.id}}
     static SmlBuildSpec provideBuildSpec(@MultiLang SmlBuildSpec buildSpec) {
         return buildSpec;
     }
 
-    @Provides @LanguageScope
+    @Provides @{{scope.id}}
     static SmlPartialSolveFile providePartialSolveFile(@MultiLang SmlPartialSolveFile partialSolveFile) {
         return partialSolveFile;
     }
 
-    @Provides @LanguageScope
+    @Provides @{{scope.id}}
     static SmlPartialSolveProject providePartialSolveProject(@MultiLang SmlPartialSolveProject partialSolveProject) {
         return partialSolveProject;
     }
 
-    @Provides @LanguageScope
+    @Provides @{{scope.id}}
     static SmlInstantiateGlobalScope provideInstantiateGlobalScope(@MultiLang SmlInstantiateGlobalScope instantiateGlobalScope) {
         return instantiateGlobalScope;
     }
 
-    @Provides @LanguageScope
+    @Provides @{{scope.id}}
     static SmlBuildContextConfiguration provideBuildContextConfiguration(@MultiLang SmlBuildContextConfiguration buildContextConfiguration) {
         return buildContextConfiguration;
     }
 
-    @Provides @LanguageScope
+    @Provides @{{scope.id}}
     static SmlSolveProject provideSolveProject(@MultiLang SmlSolveProject solveProject) {
         return solveProject;
     }
 
-    @Provides @LanguageScope
+    @Provides @{{scope.id}}
     static SmlReadConfigYaml provideReadConfigYaml(@MultiLang SmlReadConfigYaml readConfigYaml) {
         return readConfigYaml;
     }
 
-    @Provides @LanguageScope
+    @Provides @{{scope.id}}
     static AnalysisContextService getAnalysisContextService(@MultiLang AnalysisContextService analysisContextService) {
         return analysisContextService;
     }
 
-    @Provides @LanguageScope
+    @Provides @{{scope.id}}
     static LanguageMetadataManager provideLanguageMetadataManager(@MultiLang AnalysisContextService analysisContextService) {
         return analysisContextService;
     }
 
-    @Provides @LanguageScope
+    @Provides @{{scope.id}}
     static ContextPieManager provideContextPieManager(@MultiLang AnalysisContextService analysisContextService) {
         return analysisContextService;
     }
 
-    @Provides @LanguageScope
+    @Provides @{{scope.id}}
     static ContextDataManager provideContextDataManager(@MultiLang AnalysisContextService analysisContextService) {
         return analysisContextService;
     }
 
     {{#parser}}
-    @Provides @LanguageScope
+    @Provides @{{scope.id}}
     static Function<Supplier<String>, Result<IStrategoTerm, JSGLR1ParseException>> provideParseFunction({{parseTaskDef.qualifiedId}} parse) {
         return parse.createAstFunction();
     }
 
-    @Provides @LanguageScope
+    @Provides @{{scope.id}}
     static Function<Supplier<String>, Messages> provideParseMessagesFunction({{parseTaskDef.qualifiedId}} parse) {
         return parse.createMessagesFunction();
     }
     {{/parser}}
 
     {{#multilangAnalyzer}}
-    @Provides @LanguageScope
+    @Provides @{{scope.id}}
     static LanguageMetadata getLanguageMetadata(
         @Named("prototype") StrategoRuntime strategoRuntime,
         @Named("definition-dir") ClassLoaderResource definitionDir,
@@ -309,7 +321,7 @@ public class {{genModule.id}} {
             .build();
     }
 
-    @Provides @LanguageScope
+    @Provides @{{scope.id}}
     static Map<SpecFragmentId, SpecConfig> getSpecConfig(@Named("prototype") StrategoRuntime strategoRuntime) {
         return {{languageProjectInput.specConfigFactory.qualifiedId}}.getSpecConfigs(strategoRuntime.getTermFactory());
     }

@@ -8,6 +8,7 @@ import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
+import mb.str.spoofax.StrategoScope;
 import mb.str.spoofax.task.StrategoParse;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoUtil;
@@ -16,6 +17,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
+@StrategoScope
 public class StrategoShowDesugaredAst implements TaskDef<StrategoShowArgs, CommandFeedback> {
     private final StrategoParse parse;
     private final Provider<StrategoRuntime> strategoRuntimeProvider;

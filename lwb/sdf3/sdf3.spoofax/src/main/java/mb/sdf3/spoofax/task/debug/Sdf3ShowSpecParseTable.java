@@ -4,9 +4,9 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.sdf3.spoofax.Sdf3Scope;
 import mb.sdf3.spoofax.task.Sdf3CreateSpec;
 import mb.sdf3.spoofax.task.Sdf3SpecToParseTable;
-import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
 import mb.stratego.common.StrategoUtil;
@@ -17,7 +17,7 @@ import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.Objects;
 
-@LanguageScope
+@Sdf3Scope
 public class Sdf3ShowSpecParseTable implements TaskDef<Sdf3ShowSpecParseTable.Args, CommandFeedback> {
     public static class Args implements Serializable {
         public final ResourcePath project;

@@ -1,5 +1,6 @@
 package mb.mod.spoofax.task;
 
+import mb.mod.spoofax.ModScope;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
@@ -24,6 +25,7 @@ import javax.inject.Provider;
 import java.io.Serializable;
 import java.util.Objects;
 
+@ModScope
 public class ModShowScopeGraph implements TaskDef<ModShowScopeGraph.Args, CommandFeedback> {
     public static class Args implements Serializable {
         public final ResourcePath project;

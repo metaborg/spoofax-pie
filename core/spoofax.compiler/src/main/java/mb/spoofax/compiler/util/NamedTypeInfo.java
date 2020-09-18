@@ -26,4 +26,13 @@ public interface NamedTypeInfo {
     default String thisAssign() {
         return "this." + name() + " = " + name();
     }
+
+    default String getter() {
+        String name = name();
+        final char firstChar = name.charAt(0);
+        if(Character.isLowerCase(firstChar)) {
+            name = Character.toUpperCase(firstChar) + name.substring(1);
+        }
+        return type().qualifiedId() + " get" + name + "();";
+    }
 }

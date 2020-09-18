@@ -8,9 +8,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 
-@LanguageScope
 public class NullStyler extends NullTaskDef<Supplier<?>, @Nullable Styling> {
-
     @Inject public NullStyler() {}
-
 }

@@ -2,18 +2,34 @@ package {{genComponent.packageId}};
 
 import dagger.Component;
 import mb.spoofax.core.language.LanguageComponent;
-import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.platform.PlatformComponent;
+import mb.resource.ResourceService;
+import mb.pie.api.Pie;
 {{#isMultiLang}}
 import mb.statix.multilang.MultiLangComponent;
 import mb.statix.multilang.metadata.LanguageMetadataProvider;
 {{/isMultiLang}}
 
-@LanguageScope
+import {{qualifier.qualifiedId}};
+
+@{{scope.qualifiedId}}
 @Component(
-    modules = { {{genModule.id}}.class{{#additionalModules}}{{#-first}}, {{/-first}}{{qualifiedId}}.class{{^-last}}, {{/-last}}{{/additionalModules}} },
+    modules = { {{genModule.qualifiedId}}.class{{#additionalModules}}{{#-first}}, {{/-first}}{{qualifiedId}}.class{{^-last}}, {{/-last}}{{/additionalModules}} },
     dependencies = { PlatformComponent.class{{#isMultiLang}}, MultiLangComponent.class{{/isMultiLang}} }
 )
 public interface {{genComponent.id}} extends LanguageComponent{{#isMultiLang}}, LanguageMetadataProvider{{/isMultiLang}}  {
     @Override {{genInstance.id}} getLanguageInstance();
+
+    @Override @{{qualifier.id}} ResourceService getResourceService();
+
+    @Override @{{qualifier.id}} Pie getPie();
+
+{{#providedTaskDefs}}
+{{#-first}}
+
+    // Task definitions
+
+{{/-first}}
+    {{getter}}
+{{/providedTaskDefs}}
 }

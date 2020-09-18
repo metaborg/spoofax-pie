@@ -8,7 +8,7 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
-import mb.spoofax.core.language.LanguageScope;
+import mb.sdf3.spoofax.Sdf3Scope;
 import org.metaborg.sdf2table.grammar.NormGrammar;
 import org.metaborg.sdf2table.io.NormGrammarReader;
 import org.metaborg.sdf2table.parsetable.ParseTable;
@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Objects;
 
-@LanguageScope
+@Sdf3Scope
 public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Args, Result<ParseTable, ?>> {
     public static class Args implements Serializable {
         private final Supplier<Sdf3Spec> specSupplier;

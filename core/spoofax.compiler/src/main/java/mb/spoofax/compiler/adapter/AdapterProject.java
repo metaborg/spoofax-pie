@@ -1,9 +1,11 @@
 package mb.spoofax.compiler.adapter;
 
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.Conversion;
 import mb.spoofax.compiler.util.GradleProject;
+import mb.spoofax.compiler.util.TypeInfo;
 import org.immutables.value.Value;
 
 import java.io.Serializable;
@@ -24,6 +26,7 @@ public interface AdapterProject extends Serializable {
             return this
                 .project(gradleProject)
                 .packageId(defaultPackageId(shared))
+                .shared(shared)
                 ;
         }
 
@@ -45,10 +48,11 @@ public interface AdapterProject extends Serializable {
     }
 
 
+    /// Configuration
+
     GradleProject project();
 
     String packageId();
-
 
     default String packagePath() {
         return Conversion.packageIdToPath(packageId());
@@ -65,4 +69,32 @@ public interface AdapterProject extends Serializable {
     @Value.Default default String commandPackageId() {
         return packageId() + ".command";
     }
+
+
+    /// Kinds of classes (generated/extended/manual)
+
+    @Value.Default default ClassKind classKind() {
+        return ClassKind.Generated;
+    }
+
+
+    // Dagger Scope
+
+    @Value.Default default TypeInfo genScope() {
+        return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "Scope");
+    }
+
+    Optional<TypeInfo> manualScope();
+
+    default TypeInfo scope() {
+        if(classKind().isManual() && manualScope().isPresent()) {
+            return manualScope().get();
+        }
+        return genScope();
+    }
+
+
+    /// Automatically provided sub-inputs
+
+    Shared shared();
 }

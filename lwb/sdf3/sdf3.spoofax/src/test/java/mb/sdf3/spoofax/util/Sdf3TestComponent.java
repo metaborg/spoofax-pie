@@ -3,6 +3,7 @@ package mb.sdf3.spoofax.util;
 import dagger.Component;
 import mb.sdf3.spoofax.Sdf3Component;
 import mb.sdf3.spoofax.Sdf3Module;
+import mb.sdf3.spoofax.Sdf3Scope;
 import mb.sdf3.spoofax.task.Sdf3AnalyzeMulti;
 import mb.sdf3.spoofax.task.Sdf3CreateSpec;
 import mb.sdf3.spoofax.task.Sdf3Desugar;
@@ -24,43 +25,7 @@ import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.platform.PlatformComponent;
 import mb.stratego.common.StrategoRuntimeBuilder;
 
-@LanguageScope @Component(modules = {Sdf3Module.class}, dependencies = PlatformComponent.class)
+@Sdf3Scope @Component(modules = {Sdf3Module.class}, dependencies = PlatformComponent.class)
 public interface Sdf3TestComponent extends Sdf3Component {
-    Sdf3Parse getParse();
-
-    Sdf3AnalyzeMulti getAnalyze();
-
-
-    Sdf3Desugar getDesugar();
-
-    Sdf3CreateSpec getCreateSpec();
-
-
-    Sdf3ToCompletionColorer getToCompletionColorer();
-
-    Sdf3ToCompletionRuntime getToCompletionRuntime();
-
-    Sdf3ToCompletion getToCompletion();
-
-    Sdf3ToSignature getToSignature();
-
-    Sdf3ToDynsemSignature getToDynsemSignature();
-
-    Sdf3ToPrettyPrinter getToPrettyPrinter();
-
-    Sdf3ToPermissive getToPermissive();
-
-    Sdf3ToNormalForm getToNormalForm();
-
-    Sdf3SpecToParseTable getSpecToParseTable();
-
-    Sdf3ParseTableToParenthesizer getSpecToParenthesizer();
-
-    Sdf3PreStatix getPreStatix();
-
-    Sdf3PostStatix getPostStatix();
-
-    Sdf3IndexAst getIndexAst();
-
     StrategoRuntimeBuilder getStrategoRuntimeBuilder();
 }

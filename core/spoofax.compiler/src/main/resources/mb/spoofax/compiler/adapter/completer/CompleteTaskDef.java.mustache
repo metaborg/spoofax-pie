@@ -7,7 +7,6 @@ import mb.completions.common.CompletionResult;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
-import mb.spoofax.core.language.LanguageScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -15,7 +14,7 @@ import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.Objects;
 
-@LanguageScope
+@{{adapterProject.scope.qualifiedId}}
 public class {{genCompleteTaskDef.id}} implements TaskDef<{{genCompleteTaskDef.id}}.Input, @Nullable CompletionResult> {
 
     public static class Input implements Serializable {

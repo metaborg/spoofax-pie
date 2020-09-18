@@ -13,7 +13,7 @@ import static org.spoofax.terms.util.TermUtils.*;
 class ToCompletionColorerTest extends TestBase {
     @Test void testTask() throws Exception {
         final TextResource resource = createTextResource("module nested/a context-free syntax A = <A>", "a.sdf3");
-        final Sdf3ToCompletionColorer taskDef = languageComponent.getToCompletionColorer();
+        final Sdf3ToCompletionColorer taskDef = languageComponent.getSdf3ToCompletionColorer();
         try(final MixedSession session = newSession()) {
             final Result<IStrategoTerm, ?> result = session.require(taskDef.createTask(desugarSupplier(resource)));
             assertTrue(result.isOk());

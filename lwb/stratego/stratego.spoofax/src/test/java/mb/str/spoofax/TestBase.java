@@ -49,7 +49,7 @@ public class TestBase {
         .platformComponent(platformComponent)
         .build();
     public final StrategoParse parse = languageComponent.getStrategoParse();
-    public final StrategoCompileToJava compile = languageComponent.getStrategoCompile();
+    public final StrategoCompileToJava compile = languageComponent.getStrategoCompileToJava();
     public final StrategoAnalyze analyze = languageComponent.getStrategoAnalyze();
     public final CompileJava compileJava = languageComponent.getCompileJava();
     public final CreateJar createJar = languageComponent.getCreateJar();

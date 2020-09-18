@@ -53,10 +53,10 @@ class TestBase {
         .builder()
         .platformComponent(platformComponent)
         .build();
-    final Sdf3Parse parse = languageComponent.getParse();
-    final Sdf3Desugar desugar = languageComponent.getDesugar();
-    final Sdf3CreateSpec createSpec = languageComponent.getCreateSpec();
-    final Sdf3AnalyzeMulti analyze = languageComponent.getAnalyze();
+    final Sdf3Parse parse = languageComponent.getSdf3Parse();
+    final Sdf3Desugar desugar = languageComponent.getSdf3Desugar();
+    final Sdf3CreateSpec createSpec = languageComponent.getSdf3CreateSpec();
+    final Sdf3AnalyzeMulti analyze = languageComponent.getSdf3AnalyzeMulti();
     final Pie pie = languageComponent.getPie();
 
 

@@ -5,13 +5,12 @@ import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.constraint.common.ConstraintAnalyzerException;
 import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
 import mb.resource.ResourceKey;
-import mb.spoofax.core.language.LanguageScope;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 import java.util.HashMap;
 
-@LanguageScope
+@{{adapterProject.scope.qualifiedId}}
 public class {{genAnalyzeMultiTaskDef.id}} extends ConstraintAnalyzeMultiTaskDef {
     private final {{languageProjectInput.constraintAnalyzer.qualifiedId}} constraintAnalyzer;
 

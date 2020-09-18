@@ -1,15 +1,15 @@
 package mb.sdf3.spoofax.task.debug;
 
+import mb.sdf3.spoofax.Sdf3Scope;
 import mb.sdf3.spoofax.task.Sdf3Desugar;
 import mb.sdf3.spoofax.task.Sdf3Parse;
 import mb.sdf3.spoofax.task.Sdf3ToCompletion;
-import mb.spoofax.core.language.LanguageScope;
 import mb.stratego.common.StrategoRuntime;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-@LanguageScope
+@Sdf3Scope
 public class Sdf3ShowCompletion extends ShowTaskDef {
     @Inject public Sdf3ShowCompletion(
         Sdf3Parse parse,

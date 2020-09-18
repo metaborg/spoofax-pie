@@ -1,9 +1,8 @@
 package {{genEclipseIdentifiers.packageId}};
 
-import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.eclipse.EclipseIdentifiers;
 
-@LanguageScope
+@{{adapterProjectCompilerInput.scope.qualifiedId}}
 public class {{genEclipseIdentifiers.id}} implements EclipseIdentifiers {
     @Override public String getPlugin() {
         return "{{pluginId}}";

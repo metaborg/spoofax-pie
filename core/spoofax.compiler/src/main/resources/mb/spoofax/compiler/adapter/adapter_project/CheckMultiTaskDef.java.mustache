@@ -12,15 +12,13 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
-import mb.spoofax.core.language.LanguageScope;
-
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.UncheckedIOException;
 import java.util.Objects;
 
-@LanguageScope
+@{{scope.qualifiedId}}
 public class {{genCheckMultiTaskDef.id}} implements TaskDef<{{genCheckMultiTaskDef.id}}.Input, KeyedMessages> {
     public static class Input implements Serializable {
         public final ResourcePath root;

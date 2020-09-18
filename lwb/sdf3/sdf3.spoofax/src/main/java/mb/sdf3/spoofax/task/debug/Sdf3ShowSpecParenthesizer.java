@@ -6,10 +6,10 @@ import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.sdf3.spoofax.Sdf3Scope;
 import mb.sdf3.spoofax.task.Sdf3CreateSpec;
 import mb.sdf3.spoofax.task.Sdf3ParseTableToParenthesizer;
 import mb.sdf3.spoofax.task.Sdf3SpecToParseTable;
-import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.stratego.common.StrategoRuntime;
 import org.metaborg.sdf2table.parsetable.ParseTable;
@@ -20,7 +20,7 @@ import javax.inject.Provider;
 import java.io.Serializable;
 import java.util.Objects;
 
-@LanguageScope
+@Sdf3Scope
 public class Sdf3ShowSpecParenthesizer extends ProvideOutputShared implements TaskDef<Sdf3ShowSpecParenthesizer.Args, CommandFeedback> {
     public static class Args implements Serializable {
         public final ResourcePath project;

@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
 import com.intellij.openapi.editor.HighlighterColors;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
-import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.intellij.ScopeNames;
 
 import javax.inject.Inject;
@@ -13,7 +12,6 @@ import java.util.List;
 /**
  * Manages the scope names and their styles.
  */
-@LanguageScope
 public final class ScopeManager {
     @Inject public ScopeManager() {}
 

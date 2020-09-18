@@ -13,7 +13,7 @@ import static org.spoofax.terms.util.TermUtils.*;
 class ToPermissiveTest extends TestBase {
     @Test void testTask() throws Exception {
         final TextResource resource = createTextResource("module nested/a context-free syntax A = <A>", "a.sdf3");
-        final Sdf3ToPermissive taskDef = languageComponent.getToPermissive();
+        final Sdf3ToPermissive taskDef = languageComponent.getSdf3ToPermissive();
         try(final MixedSession session = newSession()) {
             final Result<IStrategoTerm, ?> result = session.require(taskDef.createTask(desugarSupplier(resource)));
             assertTrue(result.isOk());

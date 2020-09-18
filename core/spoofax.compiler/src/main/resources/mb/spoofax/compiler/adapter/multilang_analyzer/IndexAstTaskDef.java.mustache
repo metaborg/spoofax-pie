@@ -4,7 +4,6 @@ import mb.common.result.Result;
 import mb.jsglr1.common.JSGLR1ParseException;
 import mb.pie.api.Function;
 import mb.pie.api.Supplier;
-import mb.spoofax.core.language.LanguageScope;
 import mb.statix.multilang.pie.transform.SmlIndexAstTaskDef;
 import mb.stratego.common.StrategoRuntime;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -12,7 +11,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-@LanguageScope
+@{{adapterProject.scope.qualifiedId}}
 public class {{genIndexAstTaskDef.id}} extends SmlIndexAstTaskDef<JSGLR1ParseException> {
 
     @Inject public {{genIndexAstTaskDef.id}}(

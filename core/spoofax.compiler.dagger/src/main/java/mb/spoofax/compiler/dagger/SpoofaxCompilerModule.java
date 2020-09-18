@@ -5,27 +5,26 @@ import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
 import mb.pie.api.TaskDef;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
-import mb.spoofax.compiler.language.ClassloaderResourcesCompiler;
-import mb.spoofax.compiler.platform.CliProjectCompiler;
 import mb.spoofax.compiler.adapter.CompleterAdapterCompiler;
-import mb.spoofax.compiler.language.CompleterLanguageCompiler;
 import mb.spoofax.compiler.adapter.ConstraintAnalyzerAdapterCompiler;
+import mb.spoofax.compiler.adapter.MultilangAnalyzerAdapterCompiler;
+import mb.spoofax.compiler.adapter.ParserAdapterCompiler;
+import mb.spoofax.compiler.adapter.StrategoRuntimeAdapterCompiler;
+import mb.spoofax.compiler.adapter.StylerAdapterCompiler;
+import mb.spoofax.compiler.language.ClassloaderResourcesCompiler;
+import mb.spoofax.compiler.language.CompleterLanguageCompiler;
 import mb.spoofax.compiler.language.ConstraintAnalyzerLanguageCompiler;
+import mb.spoofax.compiler.language.LanguageProjectCompiler;
+import mb.spoofax.compiler.language.MultilangAnalyzerLanguageCompiler;
+import mb.spoofax.compiler.language.ParserLanguageCompiler;
+import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
+import mb.spoofax.compiler.language.StylerLanguageCompiler;
+import mb.spoofax.compiler.platform.CliProjectCompiler;
 import mb.spoofax.compiler.platform.EclipseExternaldepsProjectCompiler;
 import mb.spoofax.compiler.platform.EclipseProjectCompiler;
 import mb.spoofax.compiler.platform.IntellijProjectCompiler;
-import mb.spoofax.compiler.language.LanguageProjectCompiler;
-import mb.spoofax.compiler.adapter.MultilangAnalyzerAdapterCompiler;
-import mb.spoofax.compiler.language.MultilangAnalyzerLanguageCompiler;
-import mb.spoofax.compiler.adapter.ParserAdapterCompiler;
-import mb.spoofax.compiler.language.ParserLanguageCompiler;
-import mb.spoofax.compiler.adapter.StrategoRuntimeAdapterCompiler;
-import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
-import mb.spoofax.compiler.adapter.StylerAdapterCompiler;
-import mb.spoofax.compiler.language.StylerLanguageCompiler;
 import mb.spoofax.compiler.util.TemplateCompiler;
 
-import javax.inject.Singleton;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -37,9 +36,9 @@ public class SpoofaxCompilerModule {
         this.templateCompiler = templateCompiler;
     }
 
-    @Provides @Singleton public TemplateCompiler provideTemplateCompiler() { return templateCompiler; }
+    @Provides @SpoofaxCompilerScope public TemplateCompiler provideTemplateCompiler() { return templateCompiler; }
 
-    @Provides @Singleton @ElementsIntoSet static Set<TaskDef<?, ?>> provideTaskDefsSet(
+    @Provides @SpoofaxCompilerScope @ElementsIntoSet static Set<TaskDef<?, ?>> provideTaskDefsSet(
         AdapterProjectCompiler adapterProjectCompiler,
         ClassloaderResourcesCompiler classloaderResourcesCompiler,
         CliProjectCompiler cliProjectCompiler,
