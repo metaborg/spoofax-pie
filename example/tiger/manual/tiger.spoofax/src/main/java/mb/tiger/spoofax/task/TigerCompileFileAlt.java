@@ -12,6 +12,7 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
+import mb.tiger.spoofax.TigerScope;
 import mb.tiger.spoofax.task.reusable.TigerListDefNames;
 import mb.tiger.spoofax.task.reusable.TigerListLiteralVals;
 import mb.tiger.spoofax.task.reusable.TigerParse;
@@ -24,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Objects;
 
+@TigerScope
 public class TigerCompileFileAlt implements TaskDef<TigerCompileFileAlt.Args, CommandFeedback> {
     public static class Args implements Serializable {
         final ResourcePath file;

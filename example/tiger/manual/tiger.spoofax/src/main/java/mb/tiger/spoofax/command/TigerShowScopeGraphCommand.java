@@ -4,7 +4,6 @@ import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
-import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.CommandContextType;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandExecutionType;
@@ -13,12 +12,13 @@ import mb.spoofax.core.language.command.arg.ArgProvider;
 import mb.spoofax.core.language.command.arg.Param;
 import mb.spoofax.core.language.command.arg.ParamDef;
 import mb.spoofax.core.language.command.arg.RawArgs;
+import mb.tiger.spoofax.TigerScope;
 import mb.tiger.spoofax.task.TigerShowArgs;
 import mb.tiger.spoofax.task.TigerShowScopeGraph;
 
 import javax.inject.Inject;
 
-@LanguageScope
+@TigerScope
 public class TigerShowScopeGraphCommand implements CommandDef<TigerShowArgs> {
     private final TigerShowScopeGraph showScopeGraph;
 

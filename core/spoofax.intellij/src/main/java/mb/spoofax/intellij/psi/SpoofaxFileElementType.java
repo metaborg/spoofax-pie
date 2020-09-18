@@ -7,14 +7,12 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.tree.IFileElementType;
 import mb.resource.Resource;
-import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.intellij.IntellijLanguage;
 import mb.spoofax.intellij.editor.SpoofaxLexer;
 import mb.spoofax.intellij.resource.IntellijResourceRegistry;
 
 import javax.inject.Inject;
 
-@LanguageScope
 public class SpoofaxFileElementType extends IFileElementType {
     private final SpoofaxLexer.Factory lexerFactory;
     private final IntellijResourceRegistry resourceRegistry;

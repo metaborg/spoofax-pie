@@ -1,6 +1,5 @@
 package mb.spoofax.intellij.psi;
 
-import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.intellij.IntellijLanguage;
 
 import javax.inject.Inject;
@@ -8,7 +7,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
-@LanguageScope
 public final class SpoofaxElementTypeManager {
     private final static class ScopeType {
         final String scope;

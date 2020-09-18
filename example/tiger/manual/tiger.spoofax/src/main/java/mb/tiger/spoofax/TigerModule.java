@@ -13,7 +13,6 @@ import mb.resource.classloader.ClassLoaderResource;
 import mb.resource.classloader.ClassLoaderResourceRegistry;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.spoofax.core.language.LanguageInstance;
-import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.HierarchicalResourceType;
@@ -60,28 +59,33 @@ import java.util.Set;
 
 @Module
 public class TigerModule {
-    @Provides @LanguageScope
+    @Provides @TigerScope
     static ClassLoaderResourceRegistry provideClassLoaderResourceRegistry() {
         return TigerClassloaderResources.createClassLoaderResourceRegistry();
     }
 
-    @Provides @LanguageScope
-    static ResourceService provideResourceRegistry(@Platform ResourceService resourceService, ClassLoaderResourceRegistry classLoaderResourceRegistry) {
+    @Provides @TigerScope @TigerQualifier
+    static ResourceService provideQualifiedResourceRegistry(@Platform ResourceService resourceService, ClassLoaderResourceRegistry classLoaderResourceRegistry) {
         return resourceService.createChild(classLoaderResourceRegistry);
     }
 
-    @Provides @Named("definition-dir") @LanguageScope
+    @Provides @TigerScope
+    static ResourceService provideResourceRegistry(@TigerQualifier ResourceService resourceService) {
+        return resourceService;
+    }
+
+    @Provides @Named("definition-dir") @TigerScope
     static ClassLoaderResource provideDefinitionDir(ClassLoaderResourceRegistry registry) {
         return TigerClassloaderResources.createDefinitionDir(registry);
     }
 
-    @Provides @Named("definition-dir") @LanguageScope
+    @Provides @Named("definition-dir") @TigerScope
     static HierarchicalResource provideDefinitionDirAsHierarchicalResource(@Named("definition-dir") ClassLoaderResource definitionDir) {
         return definitionDir;
     }
 
 
-    @Provides @LanguageScope
+    @Provides @TigerScope
     static TigerParserFactory provideParserFactory(@Named("definition-dir") HierarchicalResource definitionDir) {
         return new TigerParserFactory(definitionDir);
     }
@@ -92,27 +96,27 @@ public class TigerModule {
     }
 
 
-    @Provides @LanguageScope
+    @Provides @TigerScope
     static TigerStylerFactory provideStylerFactory(LoggerFactory loggerFactory, @Named("definition-dir") HierarchicalResource definitionDir) {
         return new TigerStylerFactory(loggerFactory, definitionDir);
     }
 
-    @Provides @LanguageScope
+    @Provides @TigerScope
     static TigerStyler provideStyler(TigerStylerFactory stylerFactory) {
         return stylerFactory.create();
     }
 
-    @Provides @LanguageScope
+    @Provides @TigerScope
     static TigerStrategoRuntimeBuilderFactory provideStrategoRuntimeBuilderFactory(LoggerFactory loggerFactory, ResourceService resourceService, @Named("definition-dir") HierarchicalResource definitionDir) {
         return new TigerStrategoRuntimeBuilderFactory(loggerFactory, resourceService, definitionDir);
     }
 
-    @Provides @LanguageScope
+    @Provides @TigerScope
     static StrategoRuntimeBuilder provideStrategoRuntimeBuilder(TigerStrategoRuntimeBuilderFactory factory) {
         return factory.create();
     }
 
-    @Provides @LanguageScope @Named("prototype")
+    @Provides @TigerScope @Named("prototype")
     static StrategoRuntime providePrototypeStrategoRuntime(StrategoRuntimeBuilder builder) {
         return builder.build();
     }
@@ -123,18 +127,18 @@ public class TigerModule {
     }
 
 
-    @Provides @LanguageScope
+    @Provides @TigerScope
     static TigerConstraintAnalyzerFactory provideConstraintAnalyzerFactory(LoggerFactory loggerFactory, ResourceService resourceService, StrategoRuntime prototypeStrategoRuntime) {
         return new TigerConstraintAnalyzerFactory(loggerFactory, resourceService, prototypeStrategoRuntime);
     }
 
-    @Provides @LanguageScope
+    @Provides @TigerScope
     static TigerConstraintAnalyzer provideConstraintAnalyzer(TigerConstraintAnalyzerFactory factory) {
         return factory.create();
     }
 
 
-    @Provides @LanguageScope @ElementsIntoSet
+    @Provides @TigerScope @ElementsIntoSet
     static Set<TaskDef<?, ?>> provideTaskDefsSet(
         TigerParse parse,
         TigerStyle style,
@@ -185,22 +189,28 @@ public class TigerModule {
         return taskDefs;
     }
 
-    @Provides @LanguageScope
+    @Provides @TigerScope
     TaskDefs provideTaskDefs(Set<TaskDef<?, ?>> taskDefs) {
         return new MapTaskDefs(taskDefs);
     }
 
-    @Provides @LanguageScope @Named("prototype")
+    @Provides @TigerScope @Named("prototype")
     static Pie providePrototypePie(@Platform Pie pie, TaskDefs taskDefs, ResourceService resourceService) {
         return pie.createChildBuilder().withTaskDefs(taskDefs).withResourceService(resourceService).build();
     }
 
-    @Provides @LanguageScope
-    static Pie providePie( @Named("prototype") Pie pie) {
-        return pie;
+    @Provides @TigerScope @TigerQualifier
+    static Pie provideQualifiedPie(@Named("prototype") Pie languagePie) {
+        return languagePie;
     }
 
-    @Provides @LanguageScope @ElementsIntoSet
+    @Provides @TigerScope
+    static Pie providePie(@TigerQualifier Pie languagePie) {
+        return languagePie;
+    }
+
+
+    @Provides @TigerScope @ElementsIntoSet
     static Set<CommandDef<?>> provideCommandDefsSet(
         TigerShowParsedAstCommand showParsedAstCommand,
         TigerShowDesugaredAstCommand showDesugaredAstCommand,
@@ -227,7 +237,7 @@ public class TigerModule {
         return commandDefs;
     }
 
-    @Provides @LanguageScope @ElementsIntoSet
+    @Provides @TigerScope @ElementsIntoSet
     static Set<AutoCommandRequest<?>> provideAutoCommandRequestsSet(
         TigerCompileFileCommand tigerCompileFileCommand,
         TigerCompileDirectoryCommand tigerCompileDirectoryCommand
@@ -239,7 +249,7 @@ public class TigerModule {
     }
 
 
-    @Provides @LanguageScope
+    @Provides @TigerScope
     static LanguageInstance provideLanguageInstance(TigerInstance tigerInstance) {
         return tigerInstance;
     }

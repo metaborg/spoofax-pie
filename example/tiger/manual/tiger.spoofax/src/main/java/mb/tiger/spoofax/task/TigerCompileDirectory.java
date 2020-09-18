@@ -19,6 +19,7 @@ import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.match.path.ExtensionsPathMatcher;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
+import mb.tiger.spoofax.TigerScope;
 import mb.tiger.spoofax.task.reusable.TigerListDefNames;
 import mb.tiger.spoofax.task.reusable.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -31,6 +32,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+@TigerScope
 public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args, CommandFeedback> {
     public static class Args implements Serializable {
         final ResourcePath dir;

@@ -1,12 +1,12 @@
 package mb.tiger.eclipse;
 
-import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.eclipse.EclipseIdentifiers;
 import mb.spoofax.eclipse.editor.EditorTracker;
+import mb.tiger.spoofax.TigerScope;
 
 import javax.inject.Inject;
 
-@LanguageScope
+@TigerScope
 public class TigerEditorTracker extends EditorTracker {
     @Inject public TigerEditorTracker(EclipseIdentifiers eclipseIdentifiers) {
         super(eclipseIdentifiers);

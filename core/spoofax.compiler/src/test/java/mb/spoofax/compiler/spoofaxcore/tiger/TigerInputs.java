@@ -296,28 +296,4 @@ public class TigerInputs {
             )
         ;
     }
-
-    public void copyTaskDefsIntoAdapterProject(ResourceService resourceService) throws IOException {
-        final AdapterProject adapterProject = adapterProjectCompilerInput().adapterProject();
-        final ResourcePath srcMainJavaDirectory = adapterProject.project().sourceMainJavaDirectory();
-        final String taskPackagePath = adapterProject.taskPackagePath();
-        final HierarchicalResource taskDirectory = resourceService.getHierarchicalResource(srcMainJavaDirectory.appendRelativePath(taskPackagePath)).ensureDirectoryExists();
-        copyResource("TigerShowParsedAstTaskDef.java", taskDirectory);
-        copyResource("TigerListDefNames.java", taskDirectory);
-        copyResource("TigerListLiteralVals.java", taskDirectory);
-        copyResource("TigerCompileFileTaskDef.java", taskDirectory);
-        copyResource("TigerAltCompileFileTaskDef.java", taskDirectory);
-    }
-
-    private void copyResource(String fileName, HierarchicalResource targetDirectory) throws IOException {
-        try(final @Nullable InputStream inputStream = TigerInputs.class.getResourceAsStream(fileName)) {
-            if(inputStream == null) {
-                throw new IllegalStateException("Cannot get input stream for resource '" + fileName + "'");
-            }
-            try(final OutputStream outputStream = targetDirectory.appendSegment(fileName).openWrite()) {
-                IOUtil.copy(inputStream, outputStream);
-                outputStream.flush();
-            }
-        }
-    }
 }

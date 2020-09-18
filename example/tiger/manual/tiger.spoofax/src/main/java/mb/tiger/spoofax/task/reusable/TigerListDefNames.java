@@ -6,11 +6,13 @@ import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoUtil;
+import mb.tiger.spoofax.TigerScope;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 
+@TigerScope
 public class TigerListDefNames implements TaskDef<Supplier<? extends Result<IStrategoTerm, ?>>, Result<String, ?>> {
     private final Provider<StrategoRuntime> strategoRuntimeProvider;
 

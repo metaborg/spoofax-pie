@@ -17,7 +17,6 @@ import mb.spoofax.compiler.spoofaxcore.util.FileAssertions;
 import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TemplateCompiler;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 
@@ -51,14 +50,13 @@ class TestBase {
         return input;
     }
 
-    AdapterProjectCompiler.Input compileAdapterProject(MixedSession session, TigerInputs inputs) throws IOException, ExecException, InterruptedException {
+    AdapterProjectCompiler.Input compileAdapterProject(MixedSession session, TigerInputs inputs) throws ExecException, InterruptedException {
         final AdapterProjectCompiler.Input input = inputs.adapterProjectCompilerInput();
-        inputs.copyTaskDefsIntoAdapterProject(resourceService);
         session.require(component.getAdapterProjectCompiler().createTask(input));
         return input;
     }
 
-    AdapterProjectCompiler.Input compileLanguageAndAdapterProject(MixedSession session, TigerInputs inputs) throws IOException, ExecException, InterruptedException {
+    AdapterProjectCompiler.Input compileLanguageAndAdapterProject(MixedSession session, TigerInputs inputs) throws ExecException, InterruptedException {
         compileLanguageProject(session, inputs);
         return compileAdapterProject(session, inputs);
     }

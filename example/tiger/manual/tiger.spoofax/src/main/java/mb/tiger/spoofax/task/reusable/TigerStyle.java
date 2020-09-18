@@ -6,13 +6,13 @@ import mb.jsglr.common.JSGLRTokens;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
-import mb.spoofax.core.language.LanguageScope;
 import mb.tiger.TigerStyler;
+import mb.tiger.spoofax.TigerScope;
 
 import javax.inject.Inject;
 import java.io.IOException;
 
-@LanguageScope
+@TigerScope
 public class TigerStyle implements TaskDef<Supplier<Option<JSGLRTokens>>, Option<Styling>> {
     private final TigerStyler styler;
 

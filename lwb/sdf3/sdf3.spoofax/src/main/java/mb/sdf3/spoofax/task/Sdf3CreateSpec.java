@@ -14,7 +14,6 @@ import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
 import mb.sdf3.spoofax.Sdf3Scope;
 import mb.sdf3.spoofax.task.util.Sdf3Util;
-import mb.spoofax.core.language.LanguageScope;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;

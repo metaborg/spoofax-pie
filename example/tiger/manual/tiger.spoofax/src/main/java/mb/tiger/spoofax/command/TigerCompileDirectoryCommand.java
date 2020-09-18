@@ -4,7 +4,6 @@ import mb.common.util.EnumSetView;
 import mb.common.util.ListView;
 import mb.pie.api.Task;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.core.language.command.CommandContextType;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandExecutionType;
@@ -13,11 +12,12 @@ import mb.spoofax.core.language.command.arg.ArgProvider;
 import mb.spoofax.core.language.command.arg.Param;
 import mb.spoofax.core.language.command.arg.ParamDef;
 import mb.spoofax.core.language.command.arg.RawArgs;
+import mb.tiger.spoofax.TigerScope;
 import mb.tiger.spoofax.task.TigerCompileDirectory;
 
 import javax.inject.Inject;
 
-@LanguageScope
+@TigerScope
 public class TigerCompileDirectoryCommand implements CommandDef<TigerCompileDirectory.Args> {
     private final TigerCompileDirectory tigerCompileDirectory;
 

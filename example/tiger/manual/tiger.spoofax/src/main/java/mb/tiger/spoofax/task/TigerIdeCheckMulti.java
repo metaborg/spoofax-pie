@@ -13,7 +13,7 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
-import mb.spoofax.core.language.LanguageScope;
+import mb.tiger.spoofax.TigerScope;
 import mb.tiger.spoofax.task.reusable.TigerAnalyzeMulti;
 import mb.tiger.spoofax.task.reusable.TigerParse;
 
@@ -27,7 +27,7 @@ import java.util.Objects;
  * @implNote Although Tiger is a single-file language, we implement the multi-file check variant here as well for
  * development/testing purposes.
  */
-@LanguageScope
+@TigerScope
 public class TigerIdeCheckMulti implements TaskDef<TigerIdeCheckMulti.Input, KeyedMessages> {
     public static class Input implements Serializable {
         public final ResourcePath root;

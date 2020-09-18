@@ -12,14 +12,14 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
-import mb.spoofax.core.language.LanguageScope;
+import mb.tiger.spoofax.TigerScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.Objects;
 
-@LanguageScope
+@TigerScope
 public class TigerIdeCheckAggregate implements TaskDef<TigerIdeCheckAggregate.Input, @Nullable KeyedMessages> {
     public static class Input implements Serializable {
         public final ResourcePath root;

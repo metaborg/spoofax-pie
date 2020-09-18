@@ -1,11 +1,11 @@
 package mb.tiger.intellij;
 
-import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.intellij.IntellijLanguage;
+import mb.tiger.spoofax.TigerScope;
 
 import javax.inject.Inject;
 
-@LanguageScope
+@TigerScope
 public class TigerLanguage extends IntellijLanguage {
     @Inject public TigerLanguage() {
         super(TigerPlugin.getComponent());

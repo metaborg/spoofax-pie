@@ -8,7 +8,7 @@ import mb.completions.common.CompletionResult;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
-import mb.spoofax.core.language.LanguageScope;
+import mb.tiger.spoofax.TigerScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.imploder.ImploderAttachment;
@@ -20,7 +20,7 @@ import java.io.Serializable;
 import java.util.Objects;
 //import org.spoofax.terms.util.TermUtils;
 
-@LanguageScope
+@TigerScope
 public class TigerCompleteTaskDef implements TaskDef<TigerCompleteTaskDef.Input, @Nullable CompletionResult> {
 
     public static class Input implements Serializable {

@@ -4,13 +4,13 @@ import mb.common.result.Result;
 import mb.jsglr1.common.JSGLR1ParseException;
 import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.jsglr1.pie.JSGLR1ParseTaskDef;
-import mb.spoofax.core.language.LanguageScope;
 import mb.tiger.TigerParser;
+import mb.tiger.spoofax.TigerScope;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-@LanguageScope
+@TigerScope
 public class TigerParse extends JSGLR1ParseTaskDef {
     private final Provider<TigerParser> parserProvider;
 

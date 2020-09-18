@@ -1,9 +1,9 @@
 package mb.tiger.eclipse;
 
-import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.eclipse.EclipseIdentifiers;
+import mb.tiger.spoofax.TigerScope;
 
-@LanguageScope
+@TigerScope
 public class TigerEclipseIdentifiers implements EclipseIdentifiers {
     @Override public String getPlugin() {
         return TigerPlugin.pluginId;

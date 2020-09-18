@@ -10,6 +10,7 @@ import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoUtil;
+import mb.tiger.spoofax.TigerScope;
 import mb.tiger.spoofax.task.reusable.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -17,6 +18,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import java.io.IOException;
 
+@TigerScope
 public class TigerShowPrettyPrintedText implements TaskDef<TigerShowArgs, CommandFeedback> {
     private final TigerParse parse;
     private final Provider<StrategoRuntime> strategoRuntimeProvider;

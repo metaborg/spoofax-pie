@@ -1,11 +1,11 @@
 package mb.tiger.intellij;
 
-import mb.spoofax.core.language.LanguageScope;
 import mb.spoofax.intellij.IntellijFileElementType;
+import mb.tiger.spoofax.TigerScope;
 
 import javax.inject.Inject;
 
-@LanguageScope
+@TigerScope
 public class TigerFileElementType extends IntellijFileElementType {
     @Inject public TigerFileElementType() {
         super(TigerPlugin.getComponent());

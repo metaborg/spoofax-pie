@@ -8,6 +8,7 @@ import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoUtil;
+import mb.tiger.spoofax.TigerScope;
 import mb.tiger.spoofax.task.reusable.TigerAnalyze;
 import mb.tiger.spoofax.task.reusable.TigerParse;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -16,6 +17,7 @@ import org.spoofax.interpreter.terms.ITermFactory;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
+@TigerScope
 public class TigerShowScopeGraph implements TaskDef<TigerShowArgs, CommandFeedback> {
     private final TigerParse parse;
     private final TigerAnalyze analyze;

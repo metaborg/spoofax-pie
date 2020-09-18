@@ -5,13 +5,13 @@ import mb.jsglr.common.JSGLRTokens;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
-import mb.spoofax.core.language.LanguageScope;
+import mb.tiger.spoofax.TigerScope;
 import mb.tiger.spoofax.task.reusable.TigerParse;
 
 import javax.inject.Inject;
 import java.io.IOException;
 
-@LanguageScope
+@TigerScope
 public class TigerIdeTokenize implements TaskDef<ResourceKey, Option<JSGLRTokens>> {
     private final TigerParse parse;
 

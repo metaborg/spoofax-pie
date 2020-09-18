@@ -1,10 +1,9 @@
-package mb.spoofax.core.language;
+package mb.tiger.spoofax;
 
-import javax.inject.Scope;
+import javax.inject.Qualifier;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-@Scope
+@Qualifier
 @Retention(RetentionPolicy.RUNTIME)
-public @interface LanguageScope {
-}
+public @interface TigerQualifier {}

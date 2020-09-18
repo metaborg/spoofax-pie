@@ -8,14 +8,14 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.ResourceStringSupplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
-import mb.spoofax.core.language.LanguageScope;
+import mb.tiger.spoofax.TigerScope;
 import mb.tiger.spoofax.task.reusable.TigerAnalyze;
 import mb.tiger.spoofax.task.reusable.TigerParse;
 
 import javax.inject.Inject;
 import java.io.IOException;
 
-@LanguageScope
+@TigerScope
 public class TigerIdeCheck implements TaskDef<ResourceKey, Messages> {
     private final TigerParse parse;
     private final TigerAnalyze analyze;

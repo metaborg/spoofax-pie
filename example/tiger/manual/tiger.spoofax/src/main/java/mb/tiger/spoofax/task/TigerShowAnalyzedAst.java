@@ -9,12 +9,14 @@ import mb.resource.ResourceKey;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
 import mb.stratego.common.StrategoUtil;
+import mb.tiger.spoofax.TigerScope;
 import mb.tiger.spoofax.task.reusable.TigerAnalyze;
 import mb.tiger.spoofax.task.reusable.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 
+@TigerScope
 public class TigerShowAnalyzedAst implements TaskDef<TigerShowArgs, CommandFeedback> {
     private final TigerParse parse;
     private final TigerAnalyze analyze;
