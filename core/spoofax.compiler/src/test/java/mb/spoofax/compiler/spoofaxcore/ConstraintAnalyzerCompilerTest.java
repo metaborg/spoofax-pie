@@ -13,14 +13,14 @@ class ConstraintAnalyzerCompilerTest extends TestBase {
         try(MixedSession session = pie.newSession()) {
             final ConstraintAnalyzerLanguageCompiler.Input languageProjectInput = inputs.constraintAnalyzerLanguageCompilerInput();
             session.require(component.getConstraintAnalyzerLanguageCompiler().createTask(languageProjectInput));
-            fileAssertions.scopedExists(languageProjectInput.classesGenDirectory(), (s) -> {
+            fileAssertions.scopedExists(languageProjectInput.generatedJavaSourcesDirectory(), (s) -> {
                 s.assertPublicJavaClass(languageProjectInput.genConstraintAnalyzer(), "TigerConstraintAnalyzer");
                 s.assertPublicJavaClass(languageProjectInput.genFactory(), "TigerConstraintAnalyzerFactory");
             });
 
             final ConstraintAnalyzerAdapterCompiler.Input adapterProjectInput = inputs.constraintAnalyzerAdapterCompilerInput();
             session.require(component.getConstraintAnalyzerAdapterCompiler().createTask(adapterProjectInput));
-            fileAssertions.scopedExists(adapterProjectInput.classesGenDirectory(), (s) -> {
+            fileAssertions.scopedExists(adapterProjectInput.generatedJavaSourcesDirectory(), (s) -> {
                 s.assertPublicJavaClass(adapterProjectInput.analyzeTaskDef(), "TigerAnalyze");
             });
         }

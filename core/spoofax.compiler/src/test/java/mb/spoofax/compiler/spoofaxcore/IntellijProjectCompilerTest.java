@@ -15,7 +15,7 @@ class IntellijProjectCompilerTest extends TestBase {
             final IntellijProjectCompiler.Input input = inputs.intellijProjectInput().build();
             session.require(component.getIntellijProjectCompiler().createTask(input));
             fileAssertions.asserts(input.pluginXmlFile(), (a) -> a.assertAll("plugin.xml", "<idea-plugin>"));
-            fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {
+            fileAssertions.scopedExists(input.generatedJavaSourcesDirectory(), (s) -> {
                 s.asserts(input.packageInfo(), (a) -> a.assertAll("package-info.java", "@DefaultQualifier(NonNull.class)"));
                 s.assertPublicJavaClass(input.genPlugin(), "TigerPlugin");
                 s.assertPublicJavaInterface(input.genComponent(), "TigerIntellijComponent");

@@ -64,7 +64,7 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
 
 
         @Value.Default default ResourcePath sdf3RootDirectory() {
-            return languageProject().project().baseDirectory().appendRelativePath("src/main/sdf3");
+            return languageProject().project().srcMainDirectory().appendRelativePath("sdf3");
         }
 
         @Value.Default default ResourcePath sdf3MainFile() {
@@ -87,16 +87,18 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
         }
 
         default ResourcePath sdf3ParseTableOutputFile() {
-            return languageProject().project()
-                .genSourceSpoofaxResourcesDirectory() // Generated resources directory, so that Gradle includes the parse table in the JAR file.
+            return generatedResourcesDirectory() // Generated resources directory, so that Gradle includes the parse table in the JAR file.
                 .appendRelativePath(languageProject().packagePath()) // Append package path to make location unique, enabling JAR files to be merged.
-                .appendRelativePath(sdf3ParseTableRelativePath()); // Append the relative path to the parse table.
+                .appendRelativePath(sdf3ParseTableRelativePath()) // Append the relative path to the parse table.
+                ;
         }
 
 
         /// Automatically provided sub-inputs
 
         LanguageProject languageProject();
+
+        ResourcePath generatedResourcesDirectory();
 
 
         default void syncTo(ParserLanguageCompiler.Input.Builder builder) {

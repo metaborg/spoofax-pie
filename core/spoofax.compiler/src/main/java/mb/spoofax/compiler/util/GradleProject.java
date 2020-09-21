@@ -19,20 +19,12 @@ public interface GradleProject extends Serializable {
     ResourcePath baseDirectory();
 
 
-    @Value.Default default ResourcePath sourceDirectory() {
+    @Value.Default default ResourcePath srcDirectory() {
         return baseDirectory().appendSegment("src");
     }
 
-    @Value.Default default ResourcePath sourceMainDirectory() {
-        return sourceDirectory().appendSegment("main");
-    }
-
-    @Value.Default default ResourcePath sourceMainJavaDirectory() {
-        return sourceMainDirectory().appendSegment("java");
-    }
-
-    @Value.Default default ResourcePath sourceMainResourcesDirectory() {
-        return sourceMainDirectory().appendSegment("resources");
+    @Value.Default default ResourcePath srcMainDirectory() {
+        return srcDirectory().appendSegment("main");
     }
 
 
@@ -41,24 +33,12 @@ public interface GradleProject extends Serializable {
     }
 
 
-    @Value.Default default ResourcePath genSourceDirectory() {
+    @Value.Default default ResourcePath buildGeneratedSourcesDirectory() {
         return buildDirectory().appendRelativePath("generated/sources");
     }
 
-    @Value.Default default ResourcePath genSourceSpoofaxDirectory() {
-        return genSourceDirectory().appendSegment("spoofax");
-    }
-
-    @Value.Default default ResourcePath genSourceSpoofaxJavaDirectory() {
-        return genSourceSpoofaxDirectory().appendSegment("java");
-    }
-
-    @Value.Default default ResourcePath genSourceSpoofaxResourcesDirectory() {
-        return genSourceSpoofaxDirectory().appendSegment("resources");
-    }
-
-    @Value.Default default ResourcePath genSourceSpoofaxGradleDirectory() {
-        return genSourceSpoofaxDirectory().appendSegment("gradle");
+    @Value.Default default ResourcePath buildGeneratedResourcesDirectory() {
+        return buildDirectory().appendRelativePath("generated/resources");
     }
 
 

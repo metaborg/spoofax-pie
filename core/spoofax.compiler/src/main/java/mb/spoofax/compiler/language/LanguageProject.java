@@ -53,4 +53,8 @@ public interface LanguageProject extends Serializable {
     @Value.Default default String packagePath() {
         return Conversion.packageIdToPath(packageId());
     }
+
+    @Value.Default default ResourcePath generatedJavaSourcesDirectory() {
+        return project().buildGeneratedSourcesDirectory().appendRelativePath("language");
+    }
 }

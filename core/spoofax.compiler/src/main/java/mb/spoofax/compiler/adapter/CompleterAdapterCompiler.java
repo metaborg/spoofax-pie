@@ -34,8 +34,8 @@ public class CompleterAdapterCompiler implements TaskDef<CompleterAdapterCompile
     @Override public Output exec(ExecContext context, Input input) throws IOException {
         final Output.Builder outputBuilder = Output.builder();
         if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
-        final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        completeTaskDefTemplate.write(context, input.genCompleteTaskDef().file(classesGenDirectory), input);
+        final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
+        completeTaskDefTemplate.write(context, input.genCompleteTaskDef().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
     }
 
@@ -53,8 +53,8 @@ public class CompleterAdapterCompiler implements TaskDef<CompleterAdapterCompile
 
         /// Classes
 
-        default ResourcePath classesGenDirectory() {
-            return adapterProject().project().genSourceSpoofaxJavaDirectory();
+        default ResourcePath generatedJavaSourcesDirectory() {
+            return adapterProject().generatedJavaSourcesDirectory();
         }
 
         // Complete task definition
@@ -79,7 +79,7 @@ public class CompleterAdapterCompiler implements TaskDef<CompleterAdapterCompile
                 return ListView.of();
             }
             return ListView.of(
-                genCompleteTaskDef().file(classesGenDirectory())
+                genCompleteTaskDef().file(generatedJavaSourcesDirectory())
             );
         }
 

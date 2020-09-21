@@ -71,6 +71,11 @@ public interface AdapterProject extends Serializable {
     }
 
 
+    @Value.Default default ResourcePath generatedJavaSourcesDirectory() {
+        return project().buildGeneratedSourcesDirectory().appendRelativePath("adapter");
+    }
+
+
     /// Kinds of classes (generated/extended/manual)
 
     @Value.Default default ClassKind classKind() {

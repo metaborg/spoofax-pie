@@ -4,7 +4,6 @@ package mb.spoofax.compiler.gradle.plugin
 
 import mb.spoofax.compiler.adapter.*
 import mb.spoofax.compiler.gradle.*
-import mb.spoofax.compiler.util.*
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -90,7 +89,7 @@ open class AdapterPlugin : Plugin<Project> {
   }
 
   private fun configureProject(project: Project, component: SpoofaxCompilerGradleComponent, input: AdapterProjectCompiler.Input) {
-    project.configureGeneratedSources(project.toSpoofaxCompilerProject(), component.resourceService)
+    project.addMainJavaSourceDirectory(input.adapterProject().generatedJavaSourcesDirectory(), component.resourceService)
     component.adapterProjectCompiler.getDependencies(input).forEach {
       it.addToDependencies(project)
     }
@@ -103,7 +102,7 @@ open class AdapterPlugin : Plugin<Project> {
       outputs.files(input.providedFiles().map { component.resourceService.toLocalFile(it) })
 
       doLast {
-        project.deleteGenSourceSpoofaxDirectory(input.adapterProject().project(), component.resourceService)
+        project.deleteDirectory(input.adapterProject().generatedJavaSourcesDirectory(), component.resourceService)
         component.pie.newSession().use { session ->
           session.require(component.adapterProjectCompiler.createTask(input))
         }

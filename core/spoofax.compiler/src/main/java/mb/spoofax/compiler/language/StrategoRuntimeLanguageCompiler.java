@@ -36,8 +36,8 @@ public class StrategoRuntimeLanguageCompiler implements TaskDef<StrategoRuntimeL
 
     @Override public None exec(ExecContext context, Input input) throws IOException {
         if(input.classKind().isManualOnly()) return None.instance; // Nothing to generate: return.
-        final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        factoryTemplate.write(context, input.genFactory().file(classesGenDirectory), input);
+        final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
+        factoryTemplate.write(context, input.genFactory().file(generatedJavaSourcesDirectory), input);
         return None.instance;
     }
 
@@ -75,6 +75,10 @@ public class StrategoRuntimeLanguageCompiler implements TaskDef<StrategoRuntimeL
 
         @Value.Default default boolean addStatixPrimitives() { return false; }
 
+        default boolean addConstraintSolverPrimitives() {
+            return addNaBL2Primitives() || addStatixPrimitives();
+        }
+
 
         /// Kinds of classes (generated/extended/manual)
 
@@ -83,8 +87,8 @@ public class StrategoRuntimeLanguageCompiler implements TaskDef<StrategoRuntimeL
 
         /// Language project classes
 
-        default ResourcePath classesGenDirectory() {
-            return languageProject().project().genSourceSpoofaxJavaDirectory();
+        default ResourcePath generatedJavaSourcesDirectory() {
+            return languageProject().generatedJavaSourcesDirectory();
         }
 
         // Stratego runtime builder factory
@@ -110,7 +114,7 @@ public class StrategoRuntimeLanguageCompiler implements TaskDef<StrategoRuntimeL
                 return ListView.of();
             }
             return ListView.of(
-                genFactory().file(classesGenDirectory())
+                genFactory().file(generatedJavaSourcesDirectory())
             );
         }
 

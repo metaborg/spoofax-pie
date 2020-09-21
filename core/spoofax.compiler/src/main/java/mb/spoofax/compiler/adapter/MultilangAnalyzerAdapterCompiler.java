@@ -44,12 +44,12 @@ public class MultilangAnalyzerAdapterCompiler implements TaskDef<MultilangAnalyz
     @Override public Output exec(ExecContext context, Input input) throws IOException {
         final Output.Builder outputBuilder = Output.builder();
         if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
-        final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        analyzeProjectTemplate.write(context, input.genAnalyzeTaskDef().file(classesGenDirectory), input);
-        indexAstTaskDefTemplate.write(context, input.genIndexAstTaskDef().file(classesGenDirectory), input);
-        preStatixTaskDefTemplate.write(context, input.genPreStatixTaskDef().file(classesGenDirectory), input);
-        postStatixTaskDefTemplate.write(context, input.genPostStatixTaskDef().file(classesGenDirectory), input);
-        checkTaskDefTemplate.write(context, input.genCheckTaskDef().file(classesGenDirectory), input);
+        final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
+        analyzeProjectTemplate.write(context, input.genAnalyzeTaskDef().file(generatedJavaSourcesDirectory), input);
+        indexAstTaskDefTemplate.write(context, input.genIndexAstTaskDef().file(generatedJavaSourcesDirectory), input);
+        preStatixTaskDefTemplate.write(context, input.genPreStatixTaskDef().file(generatedJavaSourcesDirectory), input);
+        postStatixTaskDefTemplate.write(context, input.genPostStatixTaskDef().file(generatedJavaSourcesDirectory), input);
+        checkTaskDefTemplate.write(context, input.genCheckTaskDef().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
     }
 
@@ -67,8 +67,8 @@ public class MultilangAnalyzerAdapterCompiler implements TaskDef<MultilangAnalyz
 
         /// Classes
 
-        @Value.Derived default ResourcePath classesGenDirectory() {
-            return adapterProject().project().genSourceSpoofaxJavaDirectory();
+        default ResourcePath generatedJavaSourcesDirectory() {
+            return adapterProject().generatedJavaSourcesDirectory();
         }
 
         // Analyze
@@ -182,11 +182,11 @@ public class MultilangAnalyzerAdapterCompiler implements TaskDef<MultilangAnalyz
                 return ListView.of();
             }
             return ListView.of(
-                genAnalyzeTaskDef().file(classesGenDirectory()),
-                genIndexAstTaskDef().file(classesGenDirectory()),
-                genPreStatixTaskDef().file(classesGenDirectory()),
-                genPostStatixTaskDef().file(classesGenDirectory()),
-                genCheckTaskDef().file(classesGenDirectory())
+                genAnalyzeTaskDef().file(generatedJavaSourcesDirectory()),
+                genIndexAstTaskDef().file(generatedJavaSourcesDirectory()),
+                genPreStatixTaskDef().file(generatedJavaSourcesDirectory()),
+                genPostStatixTaskDef().file(generatedJavaSourcesDirectory()),
+                genCheckTaskDef().file(generatedJavaSourcesDirectory())
             );
         }
 

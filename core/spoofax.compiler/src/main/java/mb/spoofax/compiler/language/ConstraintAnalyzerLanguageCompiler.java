@@ -35,9 +35,9 @@ public class ConstraintAnalyzerLanguageCompiler implements TaskDef<ConstraintAna
     @Override public Output exec(ExecContext context, Input input) throws Exception {
         final Output.Builder outputBuilder = Output.builder();
         if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
-        final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        constraintAnalyzerTemplate.write(context, input.genConstraintAnalyzer().file(classesGenDirectory), input);
-        factoryTemplate.write(context, input.genFactory().file(classesGenDirectory), input);
+        final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
+        constraintAnalyzerTemplate.write(context, input.genConstraintAnalyzer().file(generatedJavaSourcesDirectory), input);
+        factoryTemplate.write(context, input.genFactory().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
     }
 
@@ -71,8 +71,8 @@ public class ConstraintAnalyzerLanguageCompiler implements TaskDef<ConstraintAna
 
         /// Classes
 
-        @Value.Derived default ResourcePath classesGenDirectory() {
-            return languageProject().project().genSourceSpoofaxJavaDirectory();
+        default ResourcePath generatedJavaSourcesDirectory() {
+            return languageProject().generatedJavaSourcesDirectory();
         }
 
         // Constraint analyzer
@@ -113,8 +113,8 @@ public class ConstraintAnalyzerLanguageCompiler implements TaskDef<ConstraintAna
                 return ListView.of();
             }
             return ListView.of(
-                genConstraintAnalyzer().file(classesGenDirectory()),
-                genFactory().file(classesGenDirectory())
+                genConstraintAnalyzer().file(generatedJavaSourcesDirectory()),
+                genFactory().file(generatedJavaSourcesDirectory())
             );
         }
 

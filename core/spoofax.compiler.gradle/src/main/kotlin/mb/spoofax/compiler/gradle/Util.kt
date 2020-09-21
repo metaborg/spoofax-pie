@@ -3,6 +3,7 @@ package mb.spoofax.compiler.gradle
 import mb.resource.ResourceRuntimeException
 import mb.resource.ResourceService
 import mb.resource.fs.FSPath
+import mb.resource.hierarchical.ResourcePath
 import mb.spoofax.compiler.util.*
 import org.gradle.api.GradleException
 import org.gradle.api.Project
@@ -16,6 +17,7 @@ fun Project.toSpoofaxCompilerProject(): GradleProject {
     .coordinate(Coordinate.of(group.toString(), name, version.toString()))
     .baseDirectory(FSPath(projectDir))
     .build()
+  // TODO: set src/main and build directory
 }
 
 inline fun <reified E : Any> Project.whenFinalized(crossinline closure: () -> Unit) {
@@ -31,29 +33,34 @@ inline fun <reified E : Any> Project.whenFinalized(crossinline closure: () -> Un
   closure()
 }
 
-fun Project.configureGeneratedSources(compilerProject: GradleProject, resourceService: ResourceService) {
+fun Project.addMainJavaSourceDirectory(directory: ResourcePath, resourceService: ResourceService) {
   configure<SourceSetContainer> {
     named("main") {
       java {
-        val dir = compilerProject.genSourceSpoofaxJavaDirectory()
-        srcDir(resourceService.toLocalFile(dir)
-          ?: throw GradleException("Cannot configure java sources directory, directory '$dir' is not on the local filesystem"))
-      }
-      resources {
-        val dir = compilerProject.genSourceSpoofaxResourcesDirectory()
-        srcDir(resourceService.toLocalFile(dir)
-          ?: throw GradleException("Cannot configure resources directory, directory '$dir' is not on the local filesystem"))
+        srcDir(resourceService.toLocalFile(directory)
+          ?: throw GradleException("Cannot configure java sources directory, directory '$directory' is not on the local filesystem"))
       }
     }
   }
 }
 
-fun Project.deleteGenSourceSpoofaxDirectory(compilerProject: GradleProject, resourceService: ResourceService) {
+fun Project.addMainResourceDirectory(directory: ResourcePath, resourceService: ResourceService) {
+  configure<SourceSetContainer> {
+    named("main") {
+      resources {
+        srcDir(resourceService.toLocalFile(directory)
+          ?: throw GradleException("Cannot configure resources directory, directory '$directory' is not on the local filesystem"))
+      }
+    }
+  }
+}
+
+fun Project.deleteDirectory(directory: ResourcePath, resourceService: ResourceService) {
   try {
-    val genSourceDir = resourceService.getHierarchicalResource(compilerProject.genSourceSpoofaxDirectory())
+    val genSourceDir = resourceService.getHierarchicalResource(directory)
     genSourceDir.delete(true)
   } catch(e: ResourceRuntimeException) {
-    project.logger.warn("Failed to delete generated sources directory", e)
+    project.logger.warn("Failed to delete directory", e)
   }
 }
 

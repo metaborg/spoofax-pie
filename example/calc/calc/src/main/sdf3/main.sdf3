@@ -1,0 +1,17 @@
+module main
+
+imports
+
+  lexical
+
+context-free start-symbols
+
+  Start
+
+context-free sorts
+
+  Start
+
+context-free syntax
+
+  Start.Empty = <>

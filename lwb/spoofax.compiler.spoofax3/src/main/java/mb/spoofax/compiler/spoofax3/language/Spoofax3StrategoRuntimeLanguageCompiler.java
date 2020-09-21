@@ -6,6 +6,7 @@ import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.LanguageProject;
 import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
+import mb.spoofax.compiler.util.Conversion;
 import mb.str.spoofax.task.StrategoCompileToJava;
 import org.immutables.value.Value;
 
@@ -37,7 +38,8 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
             input.strategoMainFile(),
             new ArrayList<>(input.strategoIncludeDirs()),
             new ArrayList<>(input.strategoBuiltinLibs()),
-            input.strategoCacheDir().orElse(null),
+            null,
+            //input.strategoCacheDir().orElse(null), // TODO: this makes the compiler crash
             input.strategoOutputDir(),
             input.strategoOutputJavaPackageId(),
             new ArrayList<>()
@@ -55,7 +57,7 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
 
 
         @Value.Default default ResourcePath strategoRootDirectory() {
-            return languageProject().project().baseDirectory().appendRelativePath("src/main/str");
+            return languageProject().project().srcMainDirectory().appendRelativePath("str");
         }
 
         @Value.Default default ResourcePath strategoMainFile() {
@@ -79,19 +81,25 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
         }
 
         @Value.Default default ResourcePath strategoOutputDir() {
-            return languageProject().project()
-                .genSourceSpoofaxJavaDirectory(); // Generated Java sources directory, so that Gradle compiles the Java sources into classes.
-            // TODO: should this include the package path?
+            return generatedJavaSourcesDirectory() // Generated Java sources directory, so that Gradle compiles the Java sources into classes.
+                .appendRelativePath(strategoOutputJavaPackagePath()) // Append package path.
+                ;
         }
 
         @Value.Default default String strategoOutputJavaPackageId() {
             return languageProject().packageId() + ".strategies";
         }
 
+        default String strategoOutputJavaPackagePath() {
+            return Conversion.packageIdToPath(strategoOutputJavaPackageId());
+        }
+
 
         /// Automatically provided sub-inputs
 
         LanguageProject languageProject();
+
+        ResourcePath generatedJavaSourcesDirectory();
 
 
         default void syncTo(StrategoRuntimeLanguageCompiler.Input.Builder builder) {

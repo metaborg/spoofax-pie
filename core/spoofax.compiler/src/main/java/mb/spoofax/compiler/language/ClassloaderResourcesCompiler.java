@@ -33,8 +33,8 @@ public class ClassloaderResourcesCompiler implements TaskDef<ClassloaderResource
     @Override public Output exec(ExecContext context, Input input) throws IOException {
         final Output.Builder outputBuilder = Output.builder();
         if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
-        final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        classloaderResourcesTemplate.write(context, input.genClassloaderResources().file(classesGenDirectory), input);
+        final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
+        classloaderResourcesTemplate.write(context, input.genClassloaderResources().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
     }
 
@@ -52,8 +52,8 @@ public class ClassloaderResourcesCompiler implements TaskDef<ClassloaderResource
 
         /// Language project classes
 
-        default ResourcePath classesGenDirectory() {
-            return languageProject().project().genSourceSpoofaxJavaDirectory();
+        default ResourcePath generatedJavaSourcesDirectory() {
+            return languageProject().generatedJavaSourcesDirectory();
         }
 
         // Classloader resources
@@ -82,7 +82,7 @@ public class ClassloaderResourcesCompiler implements TaskDef<ClassloaderResource
                 return ListView.of();
             }
             return ListView.of(
-                genClassloaderResources().file(classesGenDirectory())
+                genClassloaderResources().file(generatedJavaSourcesDirectory())
             );
         }
 

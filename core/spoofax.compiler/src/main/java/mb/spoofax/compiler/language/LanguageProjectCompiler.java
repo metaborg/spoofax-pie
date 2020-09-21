@@ -60,8 +60,8 @@ public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.
         final Shared shared = input.shared();
 
         // Class files.
-        final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        packageInfoTemplate.write(context, input.genPackageInfo().file(classesGenDirectory), input);
+        final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
+        packageInfoTemplate.write(context, input.genPackageInfo().file(generatedJavaSourcesDirectory), input);
 
         // Files from other compilers.
         context.require(classloaderResourcesCompiler, input.classloaderResources());
@@ -136,12 +136,12 @@ public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.
             return ClassKind.Generated;
         }
 
-        default ResourcePath classesGenDirectory() {
-            return languageProject().project().genSourceSpoofaxJavaDirectory();
-        }
-
 
         /// Language project classes
+
+        default ResourcePath generatedJavaSourcesDirectory() {
+            return languageProject().generatedJavaSourcesDirectory();
+        }
 
         // package-info
 
@@ -164,7 +164,7 @@ public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.
         default ArrayList<ResourcePath> providedFiles() {
             final ArrayList<ResourcePath> providedFiles = new ArrayList<>();
             if(classKind().isGenerating()) {
-                providedFiles.add(genPackageInfo().file(classesGenDirectory()));
+                providedFiles.add(genPackageInfo().file(generatedJavaSourcesDirectory()));
             }
             parser().ifPresent((i) -> i.providedFiles().addAllTo(providedFiles));
             styler().ifPresent((i) -> i.providedFiles().addAllTo(providedFiles));

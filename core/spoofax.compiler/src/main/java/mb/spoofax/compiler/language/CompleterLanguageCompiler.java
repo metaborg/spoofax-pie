@@ -27,7 +27,7 @@ public class CompleterLanguageCompiler implements TaskDef<CompleterLanguageCompi
     @Override public Output exec(ExecContext context, Input input) throws IOException {
         final Output.Builder outputBuilder = Output.builder();
         if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
-        final ResourcePath classesGenDirectory = input.classesGenDirectory();
+        final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         return outputBuilder.build();
     }
 
@@ -56,8 +56,8 @@ public class CompleterLanguageCompiler implements TaskDef<CompleterLanguageCompi
 
         /// Classes
 
-        default ResourcePath classesGenDirectory() {
-            return languageProject().project().genSourceSpoofaxJavaDirectory();
+        default ResourcePath generatedJavaSourcesDirectory() {
+            return languageProject().generatedJavaSourcesDirectory();
         }
 
         // Completer
@@ -83,7 +83,7 @@ public class CompleterLanguageCompiler implements TaskDef<CompleterLanguageCompi
                 return ListView.of();
             }
             return ListView.of(
-                genCompleter().file(classesGenDirectory())
+                genCompleter().file(generatedJavaSourcesDirectory())
             );
         }
 

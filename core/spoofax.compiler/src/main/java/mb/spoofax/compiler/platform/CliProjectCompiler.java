@@ -3,12 +3,12 @@ package mb.spoofax.compiler.platform;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
 import mb.spoofax.compiler.util.GradleProject;
+import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
@@ -39,9 +39,9 @@ public class CliProjectCompiler implements TaskDef<CliProjectCompiler.Input, Cli
     @Override public Output exec(ExecContext context, Input input) throws Exception {
         final Shared shared = input.shared();
 
-        final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        packageInfoTemplate.write(context, input.genPackageInfo().file(classesGenDirectory), input);
-        mainTemplate.write(context, input.genMain().file(classesGenDirectory), input);
+        final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
+        packageInfoTemplate.write(context, input.genPackageInfo().file(generatedJavaSourcesDirectory), input);
+        mainTemplate.write(context, input.genMain().file(generatedJavaSourcesDirectory), input);
 
         return Output.builder().build();
     }
@@ -111,18 +111,13 @@ public class CliProjectCompiler implements TaskDef<CliProjectCompiler.Input, Cli
         List<GradleConfiguredDependency> additionalDependencies();
 
 
-        /// Gradle files
-
-        @Value.Default default ResourcePath buildGradleKtsFile() {
-            return project().baseDirectory().appendRelativePath("build.gradle.kts");
-        }
-
-
         /// Kinds of classes (generated/extended/manual)
 
         @Value.Default default ClassKind classKind() { return ClassKind.Generated; }
 
-        default ResourcePath classesGenDirectory() { return project().genSourceSpoofaxJavaDirectory(); }
+        default ResourcePath generatedJavaSourcesDirectory() {
+            return project().buildGeneratedSourcesDirectory().appendRelativePath("cli");
+        }
 
 
         /// Classes
@@ -163,8 +158,8 @@ public class CliProjectCompiler implements TaskDef<CliProjectCompiler.Input, Cli
         default ArrayList<ResourcePath> providedFiles() {
             final ArrayList<ResourcePath> generatedFiles = new ArrayList<>();
             if(classKind().isGenerating()) {
-                generatedFiles.add(genPackageInfo().file(classesGenDirectory()));
-                generatedFiles.add(genMain().file(classesGenDirectory()));
+                generatedFiles.add(genPackageInfo().file(generatedJavaSourcesDirectory()));
+                generatedFiles.add(genMain().file(generatedJavaSourcesDirectory()));
             }
             return generatedFiles;
         }

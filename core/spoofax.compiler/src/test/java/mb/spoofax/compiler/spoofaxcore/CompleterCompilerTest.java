@@ -15,12 +15,12 @@ class CompleterCompilerTest extends TestBase {
         try(MixedSession session = pie.newSession()) {
             final CompleterLanguageCompiler.Input languageProjectInput = inputs.completerLanguageCompilerInput();
             session.require(component.getCompleterLanguageCompiler().createTask(languageProjectInput));
-            fileAssertions.scopedExists(languageProjectInput.classesGenDirectory(), (s) -> {
+            fileAssertions.scopedExists(languageProjectInput.generatedJavaSourcesDirectory(), (s) -> {
             });
 
             final CompleterAdapterCompiler.Input adapterProjectInput = inputs.completerAdapterCompilerInput();
             session.require(component.getCompleterAdapterCompiler().createTask(adapterProjectInput));
-            fileAssertions.scopedExists(adapterProjectInput.classesGenDirectory(), (s) -> {
+            fileAssertions.scopedExists(adapterProjectInput.generatedJavaSourcesDirectory(), (s) -> {
                 s.assertPublicJavaClass(adapterProjectInput.genCompleteTaskDef(), "TigerCompleteTaskDef");
             });
         }

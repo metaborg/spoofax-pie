@@ -37,9 +37,9 @@ public class ParserAdapterCompiler implements TaskDef<ParserAdapterCompiler.Inpu
     @Override public Output exec(ExecContext context, Input input) throws IOException {
         final Output.Builder outputBuilder = Output.builder();
         if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
-        final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        parseTaskDefTemplate.write(context, input.genParseTaskDef().file(classesGenDirectory), input);
-        tokenizeTaskDefTemplate.write(context, input.genTokenizeTaskDef().file(classesGenDirectory), input);
+        final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
+        parseTaskDefTemplate.write(context, input.genParseTaskDef().file(generatedJavaSourcesDirectory), input);
+        tokenizeTaskDefTemplate.write(context, input.genTokenizeTaskDef().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
     }
 
@@ -66,8 +66,8 @@ public class ParserAdapterCompiler implements TaskDef<ParserAdapterCompiler.Inpu
 
         /// Classes
 
-        default ResourcePath classesGenDirectory() {
-            return adapterProject().project().genSourceSpoofaxJavaDirectory();
+        default ResourcePath generatedJavaSourcesDirectory() {
+            return adapterProject().generatedJavaSourcesDirectory();
         }
 
         // Parse task definition
@@ -108,8 +108,8 @@ public class ParserAdapterCompiler implements TaskDef<ParserAdapterCompiler.Inpu
                 return ListView.of();
             }
             return ListView.of(
-                genParseTaskDef().file(classesGenDirectory()),
-                genTokenizeTaskDef().file(classesGenDirectory())
+                genParseTaskDef().file(generatedJavaSourcesDirectory()),
+                genTokenizeTaskDef().file(generatedJavaSourcesDirectory())
             );
         }
 

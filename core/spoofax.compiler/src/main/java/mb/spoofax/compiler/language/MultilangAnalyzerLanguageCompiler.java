@@ -36,8 +36,8 @@ public class MultilangAnalyzerLanguageCompiler implements TaskDef<MultilangAnaly
     @Override public Output exec(ExecContext context, Input input) throws IOException {
         final Output.Builder outputBuilder = Output.builder();
         if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
-        final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        specConfigFactoryTemplate.write(context, input.genSpecConfigFactory().file(classesGenDirectory), input);
+        final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
+        specConfigFactoryTemplate.write(context, input.genSpecConfigFactory().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
     }
 
@@ -57,8 +57,8 @@ public class MultilangAnalyzerLanguageCompiler implements TaskDef<MultilangAnaly
 
         @Value.Default default ClassKind classKind() { return ClassKind.Generated; }
 
-        @Value.Derived default ResourcePath classesGenDirectory() {
-            return languageProject().project().genSourceSpoofaxJavaDirectory();
+        default ResourcePath generatedJavaSourcesDirectory() {
+            return languageProject().generatedJavaSourcesDirectory();
         }
 
 
@@ -91,7 +91,7 @@ public class MultilangAnalyzerLanguageCompiler implements TaskDef<MultilangAnaly
                 return ListView.of();
             }
             return ListView.of(
-                genSpecConfigFactory().file(classesGenDirectory())
+                genSpecConfigFactory().file(generatedJavaSourcesDirectory())
             );
         }
 

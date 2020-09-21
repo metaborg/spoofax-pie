@@ -82,7 +82,7 @@ open class CliPlugin : Plugin<Project> {
   }
 
   private fun configureProject(project: Project, component: SpoofaxCompilerGradleComponent, input: CliProjectCompiler.Input) {
-    project.configureGeneratedSources(project.toSpoofaxCompilerProject(), component.resourceService)
+    project.addMainJavaSourceDirectory(input.generatedJavaSourcesDirectory(), component.resourceService)
     component.cliProjectCompiler.getDependencies(input).forEach {
       it.addToDependencies(project)
     }
@@ -98,7 +98,7 @@ open class CliPlugin : Plugin<Project> {
       outputs.files(input.providedFiles().map { component.resourceService.toLocalFile(it) })
 
       doLast {
-        project.deleteGenSourceSpoofaxDirectory(input.project(), component.resourceService)
+        project.deleteDirectory(input.generatedJavaSourcesDirectory(), component.resourceService)
         component.pie.newSession().use { session ->
           session.require(component.cliProjectCompiler.createTask(input))
         }

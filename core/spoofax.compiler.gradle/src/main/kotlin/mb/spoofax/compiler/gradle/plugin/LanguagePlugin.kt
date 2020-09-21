@@ -170,7 +170,7 @@ open class LanguagePlugin : Plugin<Project> {
   }
 
   private fun configureProject(project: Project, component: SpoofaxCompilerGradleComponent, input: LanguageProjectCompiler.Input) {
-    project.configureGeneratedSources(project.toSpoofaxCompilerProject(), component.resourceService)
+    project.addMainJavaSourceDirectory(input.languageProject().generatedJavaSourcesDirectory(), component.resourceService)
     component.languageProjectCompiler.getDependencies(input).forEach {
       it.addToDependencies(project)
     }
@@ -183,7 +183,7 @@ open class LanguagePlugin : Plugin<Project> {
       outputs.files(input.providedFiles().map { component.resourceService.toLocalFile(it) })
 
       doLast {
-        project.deleteGenSourceSpoofaxDirectory(input.languageProject().project(), component.resourceService)
+        project.deleteDirectory(input.languageProject().generatedJavaSourcesDirectory(), component.resourceService)
         component.pie.newSession().use { session ->
           session.require(component.languageProjectCompiler.createTask(input))
         }

@@ -390,7 +390,7 @@ public class StrategoIOAgent extends IOAgent {
             if(resource.exists() && resource.isDirectory()) {
                 return false;
             }
-            resource.createDirectory();
+            resource.createDirectory(true);
             return true;
         } catch(IOException e) {
             throw new RuntimeException("Could not create directory " + resource, e);

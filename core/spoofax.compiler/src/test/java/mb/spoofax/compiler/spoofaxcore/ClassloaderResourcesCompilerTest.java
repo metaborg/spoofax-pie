@@ -12,7 +12,7 @@ class ClassloaderResourcesCompilerTest extends TestBase {
         final ClassloaderResourcesCompiler.Input input = inputs.languageProjectCompilerInput().classloaderResources();
         try(MixedSession session = pie.newSession()) {
             session.require(component.getClassloaderResourcesCompiler().createTask(input));
-            fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {
+            fileAssertions.scopedExists(input.generatedJavaSourcesDirectory(), (s) -> {
                 s.assertPublicJavaClass(input.classloaderResources(), "TigerClassloaderResources");
             });
         }

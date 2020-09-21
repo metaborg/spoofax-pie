@@ -18,10 +18,9 @@ import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.compiler.util.UniqueNamer;
+import mb.spoofax.core.language.taskdef.NoneStyler;
+import mb.spoofax.core.language.taskdef.NoneTokenizer;
 import mb.spoofax.core.language.taskdef.NullCompleteTaskDef;
-import mb.spoofax.core.language.taskdef.NullParser;
-import mb.spoofax.core.language.taskdef.NullStyler;
-import mb.spoofax.core.language.taskdef.NullTokenizer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 
@@ -104,13 +103,12 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
             allTaskDefs.add(input.parser().get().tokenizeTaskDef());
             allTaskDefs.add(input.parser().get().parseTaskDef());
         } else {
-            allTaskDefs.add(TypeInfo.of(NullTokenizer.class));
-            allTaskDefs.add(TypeInfo.of(NullParser.class));
+            allTaskDefs.add(TypeInfo.of(NoneTokenizer.class));
         }
         if(input.styler().isPresent()) {
             allTaskDefs.add(input.styler().get().styleTaskDef());
         } else {
-            allTaskDefs.add(TypeInfo.of(NullStyler.class));
+            allTaskDefs.add(TypeInfo.of(NoneStyler.class));
         }
         if(input.completer().isPresent()) {
             allTaskDefs.add(input.completer().get().completeTaskDef());
@@ -134,28 +132,28 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
         allTaskDefs.add(input.checkAggregatorTaskDef());
 
         // Class files
-        final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        packageInfoTemplate.write(context, input.packageInfo().file(classesGenDirectory), input);
-        checkTaskDefTemplate.write(context, input.genCheckTaskDef().file(classesGenDirectory), input);
-        checkMultiTaskDefTemplate.write(context, input.genCheckMultiTaskDef().file(classesGenDirectory), input);
-        checkAggregatorTaskDefTemplate.write(context, input.genCheckAggregatorTaskDef().file(classesGenDirectory), input);
+        final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
+        packageInfoTemplate.write(context, input.packageInfo().file(generatedJavaSourcesDirectory), input);
+        checkTaskDefTemplate.write(context, input.genCheckTaskDef().file(generatedJavaSourcesDirectory), input);
+        checkMultiTaskDefTemplate.write(context, input.genCheckMultiTaskDef().file(generatedJavaSourcesDirectory), input);
+        checkAggregatorTaskDefTemplate.write(context, input.genCheckAggregatorTaskDef().file(generatedJavaSourcesDirectory), input);
 
-        scopeTemplate.write(context, input.adapterProject().genScope().file(classesGenDirectory), input);
-        qualifierTemplate.write(context, input.genQualifier().file(classesGenDirectory), input);
+        scopeTemplate.write(context, input.adapterProject().genScope().file(generatedJavaSourcesDirectory), input);
+        qualifierTemplate.write(context, input.genQualifier().file(generatedJavaSourcesDirectory), input);
 
         for(CommandDefRepr commandDef : input.commandDefs()) {
             final UniqueNamer uniqueNamer = new UniqueNamer();
             final HashMap<String, Object> map = new HashMap<>();
             map.put("scope", input.scope());
             map.put("taskDefInjection", uniqueNamer.makeUnique(commandDef.taskDefType()));
-            commandDefTemplate.write(context, commandDef.type().file(classesGenDirectory), commandDef, map);
+            commandDefTemplate.write(context, commandDef.type().file(generatedJavaSourcesDirectory), commandDef, map);
         }
 
         { // Component
             final UniqueNamer uniqueNamer = new UniqueNamer();
             final HashMap<String, Object> map = new HashMap<>();
             map.put("providedTaskDefs", allTaskDefs.stream().map(uniqueNamer::makeUnique).collect(Collectors.toList()));
-            componentTemplate.write(context, input.genComponent().file(classesGenDirectory), input, map);
+            componentTemplate.write(context, input.genComponent().file(generatedJavaSourcesDirectory), input, map);
         }
 
         { // Module
@@ -166,7 +164,7 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
             map.put("providedCommandDefs", input.commandDefs().stream().map(CommandDefRepr::type).map(uniqueNamer::makeUnique).collect(Collectors.toList()));
             uniqueNamer.reset(); // New method scope
             map.put("providedAutoCommandDefs", input.autoCommandDefs().stream().map((c) -> uniqueNamer.makeUnique(c, c.commandDef().asVariableId())).collect(Collectors.toList()));
-            moduleTemplate.write(context, input.genModule().file(classesGenDirectory), input, map);
+            moduleTemplate.write(context, input.genModule().file(generatedJavaSourcesDirectory), input, map);
         }
 
         { // Instance
@@ -208,7 +206,7 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
             if(input.styler().isPresent()) {
                 styleInjection = uniqueNamer.makeUnique(input.styler().get().styleTaskDef());
             } else {
-                styleInjection = uniqueNamer.makeUnique(TypeInfo.of(NullStyler.class));
+                styleInjection = uniqueNamer.makeUnique(TypeInfo.of(NoneStyler.class));
             }
             map.put("styleInjection", styleInjection);
             injected.add(styleInjection);
@@ -233,7 +231,7 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
                 out.write(name);
             });
 
-            instanceTemplate.write(context, input.genInstance().file(classesGenDirectory), input, map);
+            instanceTemplate.write(context, input.genInstance().file(generatedJavaSourcesDirectory), input, map);
         }
 
         return Output.builder().build();
@@ -360,12 +358,12 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
             return ClassKind.Generated;
         }
 
-        default ResourcePath classesGenDirectory() {
-            return adapterProject().project().genSourceSpoofaxJavaDirectory();
-        }
-
 
         /// Adapter project classes
+
+        default ResourcePath generatedJavaSourcesDirectory() {
+            return adapterProject().generatedJavaSourcesDirectory();
+        }
 
         // package-info
 
@@ -505,7 +503,7 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
         default ArrayList<ResourcePath> providedFiles() {
             final ArrayList<ResourcePath> generatedFiles = new ArrayList<>();
             if(classKind().isGenerating()) {
-                final ResourcePath classesGenDirectory = classesGenDirectory();
+                final ResourcePath classesGenDirectory = generatedJavaSourcesDirectory();
                 generatedFiles.add(genPackageInfo().file(classesGenDirectory));
                 generatedFiles.add(genComponent().file(classesGenDirectory));
                 generatedFiles.add(genModule().file(classesGenDirectory));

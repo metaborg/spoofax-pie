@@ -3,12 +3,12 @@ package mb.spoofax.compiler.platform;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
 import mb.spoofax.compiler.util.GradleProject;
+import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
@@ -63,7 +63,7 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
         pluginXmlTemplate.write(context, input.pluginXmlFile(), input);
 
         // Class files
-        final ResourcePath classesGenDirectory = input.classesGenDirectory();
+        final ResourcePath classesGenDirectory = input.generatedJavaSourcesDirectory();
         packageInfoTemplate.write(context, input.genPackageInfo().file(classesGenDirectory), input);
         moduleTemplate.write(context, input.genModule().file(classesGenDirectory), input);
         componentTemplate.write(context, input.genComponent().file(classesGenDirectory), input);
@@ -144,17 +144,14 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
         List<GradleConfiguredDependency> additionalDependencies();
 
 
-        /// Gradle files
-
-        @Value.Default default ResourcePath buildGradleKtsFile() {
-            return project().baseDirectory().appendRelativePath("build.gradle.kts");
-        }
-
-
         /// IntelliJ files
 
+        @Value.Default default ResourcePath generatedResourcesDirectory() {
+            return project().buildGeneratedResourcesDirectory().appendRelativePath("intellij");
+        }
+
         default ResourcePath pluginXmlFile() {
-            return project().genSourceSpoofaxResourcesDirectory().appendRelativePath("META-INF/plugin.xml");
+            return generatedResourcesDirectory().appendRelativePath("META-INF/plugin.xml");
         }
 
 
@@ -164,8 +161,8 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
             return ClassKind.Generated;
         }
 
-        default ResourcePath classesGenDirectory() {
-            return project().genSourceSpoofaxJavaDirectory();
+        @Value.Default default ResourcePath generatedJavaSourcesDirectory() {
+            return project().buildGeneratedSourcesDirectory().appendRelativePath("intellij");
         }
 
 
@@ -347,16 +344,16 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
             final ArrayList<ResourcePath> generatedFiles = new ArrayList<>();
             generatedFiles.add(pluginXmlFile());
             if(classKind().isGenerating()) {
-                generatedFiles.add(genPackageInfo().file(classesGenDirectory()));
-                generatedFiles.add(genModule().file(classesGenDirectory()));
-                generatedFiles.add(genComponent().file(classesGenDirectory()));
-                generatedFiles.add(genPlugin().file(classesGenDirectory()));
-                generatedFiles.add(genLoader().file(classesGenDirectory()));
-                generatedFiles.add(genFileType().file(classesGenDirectory()));
-                generatedFiles.add(genFileElementType().file(classesGenDirectory()));
-                generatedFiles.add(genFileTypeFactory().file(classesGenDirectory()));
-                generatedFiles.add(genSyntaxHighlighterFactory().file(classesGenDirectory()));
-                generatedFiles.add(genParserDefinition().file(classesGenDirectory()));
+                generatedFiles.add(genPackageInfo().file(generatedJavaSourcesDirectory()));
+                generatedFiles.add(genModule().file(generatedJavaSourcesDirectory()));
+                generatedFiles.add(genComponent().file(generatedJavaSourcesDirectory()));
+                generatedFiles.add(genPlugin().file(generatedJavaSourcesDirectory()));
+                generatedFiles.add(genLoader().file(generatedJavaSourcesDirectory()));
+                generatedFiles.add(genFileType().file(generatedJavaSourcesDirectory()));
+                generatedFiles.add(genFileElementType().file(generatedJavaSourcesDirectory()));
+                generatedFiles.add(genFileTypeFactory().file(generatedJavaSourcesDirectory()));
+                generatedFiles.add(genSyntaxHighlighterFactory().file(generatedJavaSourcesDirectory()));
+                generatedFiles.add(genParserDefinition().file(generatedJavaSourcesDirectory()));
             }
             return generatedFiles;
         }

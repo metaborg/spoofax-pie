@@ -13,7 +13,7 @@ class CliProjectCompilerTest extends TestBase {
             compileLanguageAndAdapterProject(session, inputs);
             final CliProjectCompiler.Input input = inputs.cliProjectInput().build();
             session.require(component.getCliProjectCompiler().createTask(input));
-            fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {
+            fileAssertions.scopedExists(input.generatedJavaSourcesDirectory(), (s) -> {
                 s.asserts(input.packageInfo(), (a) -> a.assertAll("package-info.java", "@DefaultQualifier(NonNull.class)"));
                 s.assertPublicJavaClass(input.genMain(), "Main");
             });

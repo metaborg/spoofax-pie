@@ -80,7 +80,6 @@ open class EclipseExternaldepsPlugin : Plugin<Project> {
   }
 
   private fun configureProject(project: Project, component: SpoofaxCompilerGradleComponent, input: EclipseExternaldepsProjectCompiler.Input) {
-    project.configureGeneratedSources(project.toSpoofaxCompilerProject(), component.resourceService)
     component.eclipseExternaldepsProjectCompiler.getDependencies(input).forEach {
       it.addToDependencies(project)
     }
@@ -97,7 +96,6 @@ open class EclipseExternaldepsPlugin : Plugin<Project> {
       outputs.files(input.providedFiles().map { component.resourceService.toLocalFile(it) })
 
       doLast {
-        project.deleteGenSourceSpoofaxDirectory(input.project(), component.resourceService)
         component.pie.newSession().use { session ->
           session.require(component.eclipseExternaldepsProjectCompiler.createTask(input))
         }

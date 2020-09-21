@@ -3,7 +3,6 @@ package mb.spoofax.compiler.platform;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
 import mb.spoofax.compiler.language.LanguageProjectCompiler;
 import mb.spoofax.compiler.util.ClassKind;
@@ -11,6 +10,7 @@ import mb.spoofax.compiler.util.GradleConfiguredBundleDependency;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
 import mb.spoofax.compiler.util.GradleProject;
+import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
@@ -83,7 +83,7 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
         manifestTemplate.write(context, input.manifestMfFile(), input);
 
         // Class files
-        final ResourcePath classesGenDirectory = input.classesGenDirectory();
+        final ResourcePath classesGenDirectory = input.generatedJavaSourcesDirectory();
         packageInfoTemplate.write(context, input.genPackageInfo().file(classesGenDirectory), input);
         pluginTemplate.write(context, input.genPlugin().file(classesGenDirectory), input);
         moduleTemplate.write(context, input.genEclipseModule().file(classesGenDirectory), input);
@@ -183,13 +183,6 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
         List<GradleConfiguredBundleDependency> additionalBundleDependencies();
 
 
-        /// Gradle files
-
-        @Value.Default default ResourcePath buildGradleKtsFile() {
-            return project().baseDirectory().appendRelativePath("build.gradle.kts");
-        }
-
-
         /// Eclipse configuration
 
         @Value.Default default String pluginId() { return project().coordinate().artifactId(); }
@@ -242,12 +235,16 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
 
         /// Eclipse files
 
+        @Value.Default default ResourcePath generatedResourcesDirectory() {
+            return project().buildGeneratedResourcesDirectory().appendRelativePath("eclipse");
+        }
+
         default ResourcePath pluginXmlFile() {
-            return project().genSourceSpoofaxResourcesDirectory().appendRelativePath("plugin.xml");
+            return generatedResourcesDirectory().appendRelativePath("plugin.xml");
         }
 
         default ResourcePath manifestMfFile() {
-            return project().genSourceSpoofaxResourcesDirectory().appendRelativePath("META-INF/MANIFEST.MF");
+            return generatedResourcesDirectory().appendRelativePath("META-INF/MANIFEST.MF");
         }
 
 
@@ -255,7 +252,9 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
 
         @Value.Default default ClassKind classKind() { return ClassKind.Generated; }
 
-        default ResourcePath classesGenDirectory() { return project().genSourceSpoofaxJavaDirectory(); }
+        @Value.Default default ResourcePath generatedJavaSourcesDirectory() {
+            return project().buildGeneratedSourcesDirectory().appendRelativePath("eclipse");
+        }
 
 
         /// Eclipse project classes
@@ -555,26 +554,26 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
             generatedFiles.add(pluginXmlFile());
             generatedFiles.add(manifestMfFile());
             if(classKind().isGenerating()) {
-                generatedFiles.add(genPackageInfo().file(classesGenDirectory()));
-                generatedFiles.add(genPlugin().file(classesGenDirectory()));
-                generatedFiles.add(genEclipseComponent().file(classesGenDirectory()));
-                generatedFiles.add(genEclipseModule().file(classesGenDirectory()));
-                generatedFiles.add(genEclipseIdentifiers().file(classesGenDirectory()));
-                generatedFiles.add(genDocumentProvider().file(classesGenDirectory()));
-                generatedFiles.add(genEditor().file(classesGenDirectory()));
-                generatedFiles.add(genEditorTracker().file(classesGenDirectory()));
-                generatedFiles.add(genNature().file(classesGenDirectory()));
-                generatedFiles.add(genAddNatureHandler().file(classesGenDirectory()));
-                generatedFiles.add(genRemoveNatureHandler().file(classesGenDirectory()));
-                generatedFiles.add(genProjectBuilder().file(classesGenDirectory()));
-                generatedFiles.add(genMainMenu().file(classesGenDirectory()));
-                generatedFiles.add(genEditorContextMenu().file(classesGenDirectory()));
-                generatedFiles.add(genResourceContextMenu().file(classesGenDirectory()));
-                generatedFiles.add(genRunCommandHandler().file(classesGenDirectory()));
-                generatedFiles.add(genObserveHandler().file(classesGenDirectory()));
-                generatedFiles.add(genUnobserveHandler().file(classesGenDirectory()));
+                generatedFiles.add(genPackageInfo().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(genPlugin().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(genEclipseComponent().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(genEclipseModule().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(genEclipseIdentifiers().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(genDocumentProvider().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(genEditor().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(genEditorTracker().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(genNature().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(genAddNatureHandler().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(genRemoveNatureHandler().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(genProjectBuilder().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(genMainMenu().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(genEditorContextMenu().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(genResourceContextMenu().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(genRunCommandHandler().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(genObserveHandler().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(genUnobserveHandler().file(this.generatedJavaSourcesDirectory()));
                 if(adapterProjectCompilerInput().multilangAnalyzer().isPresent()) {
-                    generatedFiles.add(genMetadataProvider().file(classesGenDirectory()));
+                    generatedFiles.add(genMetadataProvider().file(this.generatedJavaSourcesDirectory()));
                 }
             }
             return generatedFiles;

@@ -14,7 +14,7 @@ class AdapterProjectCompilerTest extends TestBase {
 
         try(MixedSession session = pie.newSession()) {
             final AdapterProjectCompiler.Input input = compileLanguageAndAdapterProject(session, inputs);
-            fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {
+            fileAssertions.scopedExists(input.generatedJavaSourcesDirectory(), (s) -> {
                 s.asserts(input.packageInfo(), (a) -> a.assertAll("package-info.java", "@DefaultQualifier(NonNull.class)"));
                 s.assertPublicJavaInterface(input.genComponent(), "TigerComponent");
                 s.assertPublicJavaClass(input.genModule(), "TigerModule");

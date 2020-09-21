@@ -3,12 +3,12 @@ package mb.spoofax.compiler.platform;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
 import mb.spoofax.compiler.util.GradleConfiguredBundleDependency;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
 import mb.spoofax.compiler.util.GradleProject;
+import mb.spoofax.compiler.util.Shared;
 import org.immutables.value.Value;
 
 import javax.inject.Inject;
@@ -105,13 +105,6 @@ public class EclipseExternaldepsProjectCompiler implements TaskDef<EclipseExtern
         }
 
         List<GradleConfiguredDependency> additionalDependencies();
-
-
-        /// Gradle files
-
-        @Value.Default default ResourcePath buildGradleKtsFile() {
-            return project().baseDirectory().appendRelativePath("build.gradle.kts");
-        }
 
 
         /// Provided files

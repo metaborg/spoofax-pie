@@ -38,10 +38,10 @@ public class StylerLanguageCompiler implements TaskDef<StylerLanguageCompiler.In
 
     @Override public None exec(ExecContext context, Input input) throws IOException {
         if(input.classKind().isManualOnly()) return None.instance; // Nothing to generate: return.
-        final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        rulesTemplate.write(context, input.genRules().file(classesGenDirectory), input);
-        stylerTemplate.write(context, input.genStyler().file(classesGenDirectory), input);
-        factoryTemplate.write(context, input.genFactory().file(classesGenDirectory), input);
+        final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
+        rulesTemplate.write(context, input.genRules().file(generatedJavaSourcesDirectory), input);
+        stylerTemplate.write(context, input.genStyler().file(generatedJavaSourcesDirectory), input);
+        factoryTemplate.write(context, input.genFactory().file(generatedJavaSourcesDirectory), input);
         return None.instance;
     }
 
@@ -73,8 +73,8 @@ public class StylerLanguageCompiler implements TaskDef<StylerLanguageCompiler.In
 
         /// Language project classes
 
-        default ResourcePath classesGenDirectory() {
-            return languageProject().project().genSourceSpoofaxJavaDirectory();
+        default ResourcePath generatedJavaSourcesDirectory() {
+            return languageProject().generatedJavaSourcesDirectory();
         }
 
         // Styling rules
@@ -121,9 +121,9 @@ public class StylerLanguageCompiler implements TaskDef<StylerLanguageCompiler.In
                 return ListView.of();
             }
             return ListView.of(
-                genRules().file(classesGenDirectory()),
-                genStyler().file(classesGenDirectory()),
-                genFactory().file(classesGenDirectory())
+                genRules().file(generatedJavaSourcesDirectory()),
+                genStyler().file(generatedJavaSourcesDirectory()),
+                genFactory().file(generatedJavaSourcesDirectory())
             );
         }
 

@@ -38,10 +38,10 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
 
     @Override public None exec(ExecContext context, Input input) throws IOException {
         if(input.classKind().isManualOnly()) return None.instance; // Nothing to generate: return.
-        final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        tableTemplate.write(context, input.genTable().file(classesGenDirectory), input);
-        parserTemplate.write(context, input.genParser().file(classesGenDirectory), input);
-        factoryTemplate.write(context, input.genFactory().file(classesGenDirectory), input);
+        final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
+        tableTemplate.write(context, input.genTable().file(generatedJavaSourcesDirectory), input);
+        parserTemplate.write(context, input.genParser().file(generatedJavaSourcesDirectory), input);
+        factoryTemplate.write(context, input.genFactory().file(generatedJavaSourcesDirectory), input);
         return None.instance;
     }
 
@@ -81,8 +81,8 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
 
         /// Classes
 
-        default ResourcePath classesGenDirectory() {
-            return languageProject().project().genSourceSpoofaxJavaDirectory();
+        default ResourcePath generatedJavaSourcesDirectory() {
+            return languageProject().generatedJavaSourcesDirectory();
         }
 
         // Parse table
@@ -129,9 +129,9 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
                 return ListView.of();
             }
             return ListView.of(
-                genTable().file(classesGenDirectory()),
-                genParser().file(classesGenDirectory()),
-                genFactory().file(classesGenDirectory())
+                genTable().file(generatedJavaSourcesDirectory()),
+                genParser().file(generatedJavaSourcesDirectory()),
+                genFactory().file(generatedJavaSourcesDirectory())
             );
         }
 

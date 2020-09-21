@@ -17,7 +17,7 @@ class EclipseProjectCompilerTest extends TestBase {
             session.require(component.getEclipseProjectCompiler().createTask(input));
             fileAssertions.asserts(input.pluginXmlFile(), (s) -> s.assertAll("plugin.xml", "<plugin>"));
             fileAssertions.asserts(input.manifestMfFile(), (s) -> s.assertAll("MANIFEST.MF", "Export-Package"));
-            fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {
+            fileAssertions.scopedExists(input.generatedJavaSourcesDirectory(), (s) -> {
                 s.asserts(input.packageInfo(), (a) -> a.assertAll("package-info.java", "@DefaultQualifier(NonNull.class)"));
                 s.assertPublicJavaClass(input.genPlugin(), "TigerPlugin");
                 s.assertPublicJavaInterface(input.genEclipseComponent(), "TigerEclipseComponent");

@@ -1,0 +1,5 @@
+defaultGroupId=org.metaborg
+defaultClassPrefix=Calc
+defaultBasePackageId=mb.calc
+defaultArtifactId=calc
+defaultVersion=0.1.0

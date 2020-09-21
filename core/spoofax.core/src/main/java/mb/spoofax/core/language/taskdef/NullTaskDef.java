@@ -7,7 +7,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.io.Serializable;
 
 /**
- * A task that always returns null.
+ * A task that always returns {@code null}.
  *
  * @param <I> the type of input of the task
  * @param <O> the type of output of the task

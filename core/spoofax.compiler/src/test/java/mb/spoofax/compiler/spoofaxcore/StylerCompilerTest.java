@@ -13,7 +13,7 @@ class StylerCompilerTest extends TestBase {
         try(MixedSession session = pie.newSession()) {
             final StylerLanguageCompiler.Input languageProjectInput = inputs.stylerLanguageCompilerInput();
             session.require(component.getStylerLanguageCompiler().createTask(languageProjectInput));
-            fileAssertions.scopedExists(languageProjectInput.classesGenDirectory(), (s) -> {
+            fileAssertions.scopedExists(languageProjectInput.generatedJavaSourcesDirectory(), (s) -> {
                 s.assertPublicJavaClass(languageProjectInput.genRules(), "TigerStylingRules");
                 s.assertPublicJavaClass(languageProjectInput.genStyler(), "TigerStyler");
                 s.assertPublicJavaClass(languageProjectInput.genFactory(), "TigerStylerFactory");
@@ -21,7 +21,7 @@ class StylerCompilerTest extends TestBase {
 
             final StylerAdapterCompiler.Input adapterProjectInput = inputs.stylerAdapterCompilerInput();
             session.require(component.getStylerAdapterCompiler().createTask(adapterProjectInput));
-            fileAssertions.scopedExists(adapterProjectInput.classesGenDirectory(), (s) -> {
+            fileAssertions.scopedExists(adapterProjectInput.generatedJavaSourcesDirectory(), (s) -> {
                 s.assertPublicJavaClass(adapterProjectInput.genStyleTaskDef(), "TigerStyle");
             });
         }

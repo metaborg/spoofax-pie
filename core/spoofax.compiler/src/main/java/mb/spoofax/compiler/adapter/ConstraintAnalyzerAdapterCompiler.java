@@ -36,9 +36,9 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
     @Override public Output exec(ExecContext context, Input input) throws Exception {
         final Output.Builder outputBuilder = Output.builder();
         if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
-        final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        analyzeTaskDefTemplate.write(context, input.genAnalyzeTaskDef().file(classesGenDirectory), input);
-        analyzeMultiTaskDefTemplate.write(context, input.genAnalyzeMultiTaskDef().file(classesGenDirectory), input);
+        final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
+        analyzeTaskDefTemplate.write(context, input.genAnalyzeTaskDef().file(generatedJavaSourcesDirectory), input);
+        analyzeMultiTaskDefTemplate.write(context, input.genAnalyzeMultiTaskDef().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
     }
 
@@ -61,8 +61,8 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
 
         /// Classes
 
-        @Value.Derived default ResourcePath classesGenDirectory() {
-            return adapterProject().project().genSourceSpoofaxJavaDirectory();
+        default ResourcePath generatedJavaSourcesDirectory() {
+            return adapterProject().generatedJavaSourcesDirectory();
         }
 
         // Analyze
@@ -103,8 +103,8 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
                 return ListView.of();
             }
             return ListView.of(
-                genAnalyzeTaskDef().file(classesGenDirectory()),
-                genAnalyzeMultiTaskDef().file(classesGenDirectory())
+                genAnalyzeTaskDef().file(generatedJavaSourcesDirectory()),
+                genAnalyzeMultiTaskDef().file(generatedJavaSourcesDirectory())
             );
         }
 

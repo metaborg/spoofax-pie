@@ -2,11 +2,16 @@
 
 package mb.spoofax.compiler.gradle.spoofax3.plugin
 
+import mb.log.noop.NoopLoggerFactory
+import mb.pie.runtime.PieBuilderImpl
 import mb.sdf3.spoofax.DaggerSdf3Component
+import mb.spoofax.compiler.gradle.*
 import mb.spoofax.compiler.gradle.plugin.*
 import mb.spoofax.compiler.gradle.spoofax3.*
 import mb.spoofax.compiler.spoofax3.language.*
 import mb.spoofax.core.platform.DaggerPlatformComponent
+import mb.spoofax.core.platform.LoggerFactoryModule
+import mb.spoofax.core.platform.PlatformPieModule
 import mb.str.spoofax.DaggerStrategoComponent
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -33,7 +38,7 @@ open class Spoofax3LanguageProjectExtension(project: Project) {
   val compilerInputFinalized: Spoofax3LanguageProjectCompiler.Input by lazy {
     project.logger.debug("Finalizing $name's compiler input in $project")
     compilerInput.finalizeValue()
-    compilerInput.get().build()
+    compilerInput.get().build(project.extensions.getByType<LanguageProjectExtension>().languageProjectFinalized)
   }
 }
 
@@ -44,7 +49,10 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
     project.plugins.apply("org.metaborg.spoofax.compiler.gradle.language")
     val languageProjectExtension = project.extensions.getByType<LanguageProjectExtension>()
 
-    val platformComponent = DaggerPlatformComponent.builder().build()
+    val platformComponent = DaggerPlatformComponent.builder()
+      .loggerFactoryModule(LoggerFactoryModule(NoopLoggerFactory()))
+      .platformPieModule(PlatformPieModule { PieBuilderImpl() })
+      .build() // OPTO: cache instantiation of platform component?
     val component = DaggerSpoofax3CompilerGradleComponent.builder()
       .spoofax3CompilerGradleModule(Spoofax3CompilerGradleModule(languageProjectExtension.component.resourceService, languageProjectExtension.component.pie))
       // OPTO: cache instantiation of the SDF3 and Stratego components?
@@ -68,7 +76,17 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
     component: Spoofax3CompilerGradleComponent,
     input: Spoofax3LanguageProjectCompiler.Input
   ) {
+    configureProject(project, component, input)
     configureCompileTask(project, component, input)
+  }
+
+  private fun configureProject(
+    project: Project,
+    component: Spoofax3CompilerGradleComponent,
+    input: Spoofax3LanguageProjectCompiler.Input
+  ) {
+    project.addMainJavaSourceDirectory(input.generatedJavaSourcesDirectory(), component.resourceService)
+    project.addMainResourceDirectory(input.generatedResourcesDirectory(), component.resourceService)
   }
 
   private fun configureCompileTask(
@@ -81,6 +99,8 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
       inputs.property("input", input)
 
       doLast {
+        project.deleteDirectory(input.generatedJavaSourcesDirectory(), component.resourceService)
+        project.deleteDirectory(input.generatedResourcesDirectory(), component.resourceService)
         component.pie.newSession().use { session ->
           session.require(component.spoofax3LanguageProjectCompiler.createTask(input))
         }

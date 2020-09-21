@@ -14,7 +14,7 @@ class LanguageProjectCompilerTest extends TestBase {
 
         try(MixedSession session = pie.newSession()) {
             final LanguageProjectCompiler.Input input = compileLanguageProject(session, inputs);
-            fileAssertions.scopedExists(input.classesGenDirectory(), (s) -> {
+            fileAssertions.scopedExists(input.generatedJavaSourcesDirectory(), (s) -> {
                 s.asserts(input.packageInfo(), (a) -> a.assertAll("package-info.java", "@DefaultQualifier(NonNull.class)"));
             });
         }

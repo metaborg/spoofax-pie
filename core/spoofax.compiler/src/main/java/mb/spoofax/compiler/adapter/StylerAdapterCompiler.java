@@ -4,9 +4,9 @@ import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.language.StylerLanguageCompiler;
 import mb.spoofax.compiler.util.ClassKind;
+import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
@@ -34,8 +34,8 @@ public class StylerAdapterCompiler implements TaskDef<StylerAdapterCompiler.Inpu
     @Override public Output exec(ExecContext context, Input input) throws IOException {
         final Output.Builder outputBuilder = Output.builder();
         if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
-        final ResourcePath classesGenDirectory = input.classesGenDirectory();
-        styleTaskDefTemplate.write(context, input.genStyleTaskDef().file(classesGenDirectory), input);
+        final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
+        styleTaskDefTemplate.write(context, input.genStyleTaskDef().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
     }
 
@@ -54,8 +54,8 @@ public class StylerAdapterCompiler implements TaskDef<StylerAdapterCompiler.Inpu
 
         /// Adapter project classes
 
-        @Value.Derived default ResourcePath classesGenDirectory() {
-            return adapterProject().project().genSourceSpoofaxJavaDirectory();
+        default ResourcePath generatedJavaSourcesDirectory() {
+            return adapterProject().generatedJavaSourcesDirectory();
         }
 
         // Style task definition
@@ -81,7 +81,7 @@ public class StylerAdapterCompiler implements TaskDef<StylerAdapterCompiler.Inpu
                 return ListView.of();
             }
             return ListView.of(
-                genStyleTaskDef().file(classesGenDirectory())
+                genStyleTaskDef().file(generatedJavaSourcesDirectory())
             );
         }
 

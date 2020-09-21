@@ -18,7 +18,7 @@ class ParserCompilerTest extends TestBase {
         try(MixedSession session = pie.newSession()) {
             final ParserLanguageCompiler.Input languageProjectInput = inputs.parserLanguageCompilerInput();
             session.require(component.getParserLanguageCompiler().createTask(languageProjectInput));
-            fileAssertions.scopedExists(languageProjectInput.classesGenDirectory(), (s) -> {
+            fileAssertions.scopedExists(languageProjectInput.generatedJavaSourcesDirectory(), (s) -> {
                 s.assertPublicJavaClass(languageProjectInput.genTable(), "TigerParseTable");
                 s.assertPublicJavaClass(languageProjectInput.genParser(), "TigerParser");
                 s.assertPublicJavaClass(languageProjectInput.genFactory(), "TigerParserFactory");
@@ -26,7 +26,7 @@ class ParserCompilerTest extends TestBase {
 
             final ParserAdapterCompiler.Input adapterProjectInput = inputs.parserAdapterCompilerInput();
             session.require(component.getParserAdapterCompiler().createTask(adapterProjectInput));
-            fileAssertions.scopedExists(adapterProjectInput.classesGenDirectory(), (s) -> {
+            fileAssertions.scopedExists(adapterProjectInput.generatedJavaSourcesDirectory(), (s) -> {
                 s.assertPublicJavaClass(adapterProjectInput.genParseTaskDef(), "TigerParse");
                 s.assertPublicJavaClass(adapterProjectInput.tokenizeTaskDef(), "TigerTokenize");
             });
@@ -43,7 +43,7 @@ class ParserCompilerTest extends TestBase {
                 .manualFactory("my.lang", "MyParserFactory");
             final ParserLanguageCompiler.Input languageProjectInput = inputs.parserLanguageCompilerInput();
             session.require(component.getParserLanguageCompiler().createTask(languageProjectInput));
-            fileAssertions.scopedNotExists(languageProjectInput.classesGenDirectory(), (s) -> {
+            fileAssertions.scopedNotExists(languageProjectInput.generatedJavaSourcesDirectory(), (s) -> {
                 s.assertNotExists(languageProjectInput.genTable());
                 s.assertNotExists(languageProjectInput.genParser());
                 s.assertNotExists(languageProjectInput.genFactory());
@@ -55,7 +55,7 @@ class ParserCompilerTest extends TestBase {
                 .manualTokenizeTaskDef("my.adapter.taskdef", "MyTokenizeTaskDef");
             final ParserAdapterCompiler.Input adapterProjectInput = inputs.parserAdapterCompilerInput();
             session.require(component.getParserAdapterCompiler().createTask(adapterProjectInput));
-            fileAssertions.scopedNotExists(adapterProjectInput.classesGenDirectory(), (s) -> {
+            fileAssertions.scopedNotExists(adapterProjectInput.generatedJavaSourcesDirectory(), (s) -> {
                 s.assertNotExists(adapterProjectInput.genParseTaskDef());
                 s.assertNotExists(adapterProjectInput.tokenizeTaskDef());
             });
