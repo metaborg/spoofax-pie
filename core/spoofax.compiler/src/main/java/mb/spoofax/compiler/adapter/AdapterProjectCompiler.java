@@ -153,6 +153,7 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
             final UniqueNamer uniqueNamer = new UniqueNamer();
             final HashMap<String, Object> map = new HashMap<>();
             map.put("providedTaskDefs", allTaskDefs.stream().map(uniqueNamer::makeUnique).collect(Collectors.toList()));
+            map.put("providedCommandDefs", input.commandDefs().stream().map(CommandDefRepr::type).map(uniqueNamer::makeUnique).collect(Collectors.toList()));
             componentTemplate.write(context, input.genComponent().file(generatedJavaSourcesDirectory), input, map);
         }
 

@@ -6,7 +6,6 @@ import mb.common.result.Result;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.log.slf4j.SLF4JLoggerFactory;
-import mb.pie.api.Function;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Pie;
 import mb.pie.api.Supplier;
@@ -24,11 +23,9 @@ import mb.sdf3.spoofax.task.Sdf3Desugar;
 import mb.sdf3.spoofax.task.Sdf3Parse;
 import mb.sdf3.spoofax.task.Sdf3Spec;
 import mb.sdf3.spoofax.task.util.Sdf3Util;
-import mb.sdf3.spoofax.util.DaggerPlatformTestComponent;
-import mb.sdf3.spoofax.util.DaggerSdf3TestComponent;
-import mb.sdf3.spoofax.util.PlatformTestComponent;
-import mb.sdf3.spoofax.util.Sdf3TestComponent;
+import mb.spoofax.core.platform.DaggerPlatformComponent;
 import mb.spoofax.core.platform.LoggerFactoryModule;
+import mb.spoofax.core.platform.PlatformComponent;
 import mb.spoofax.core.platform.PlatformPieModule;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -40,7 +37,7 @@ class TestBase {
     final FileSystem fileSystem = Jimfs.newFileSystem(Configuration.unix());
     final FSResource rootDirectory = new FSResource(fileSystem.getPath("/"));
 
-    final PlatformTestComponent platformComponent = DaggerPlatformTestComponent
+    final PlatformComponent platformComponent = DaggerPlatformComponent
         .builder()
         .loggerFactoryModule(new LoggerFactoryModule(new SLF4JLoggerFactory()))
         .platformPieModule(new PlatformPieModule(PieBuilderImpl::new))
@@ -49,7 +46,7 @@ class TestBase {
     final Logger log = loggerFactory.create(TestBase.class);
     final TextResourceRegistry textResourceRegistry = platformComponent.getTextResourceRegistry();
 
-    final Sdf3TestComponent languageComponent = DaggerSdf3TestComponent
+    final Sdf3Component languageComponent = DaggerSdf3Component
         .builder()
         .platformComponent(platformComponent)
         .build();

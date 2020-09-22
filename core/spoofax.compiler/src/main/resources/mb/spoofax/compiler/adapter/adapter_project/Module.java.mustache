@@ -89,6 +89,8 @@ public class {{genModule.id}} {
     }
 
 {{#parser}}
+
+
     @Provides @{{scope.id}}
     static {{this.languageProjectInput.factory.qualifiedId}} provideParserFactory(@Named("definition-dir") HierarchicalResource definitionDir) {
         return new {{this.languageProjectInput.factory.qualifiedId}}(definitionDir);
@@ -112,29 +114,6 @@ public class {{genModule.id}} {
         return stylerFactory.create();
     }
 {{/styler}}
-{{#strategoRuntime}}
-
-
-    @Provides @{{scope.id}}
-    static {{this.languageProjectInput.factory.qualifiedId}} provideStrategoRuntimeBuilderFactory(LoggerFactory loggerFactory, ResourceService resourceService, @Named("definition-dir") HierarchicalResource definitionDir) {
-        return new {{this.languageProjectInput.factory.qualifiedId}}(loggerFactory, resourceService, definitionDir);
-    }
-
-    @Provides @{{scope.id}}
-    static StrategoRuntimeBuilder provideStrategoRuntimeBuilder({{this.languageProjectInput.factory.qualifiedId}} factory) {
-        return factory.create();
-    }
-
-    @Provides @{{scope.id}} @Named("prototype")
-    static StrategoRuntime providePrototypeStrategoRuntime(StrategoRuntimeBuilder builder) {
-        return builder.build();
-    }
-
-    @Provides /* Unscoped: new session every call. */
-    static StrategoRuntime provideStrategoRuntime(StrategoRuntimeBuilder builder, @Named("prototype") StrategoRuntime prototype) {
-        return builder.buildFromPrototype(prototype);
-    }
-{{/strategoRuntime}}
 {{#constraintAnalyzer}}
 
 
@@ -148,7 +127,39 @@ public class {{genModule.id}} {
         return factory.create();
     }
 {{/constraintAnalyzer}}
+{{#strategoRuntime}}
 
+
+    @Provides @{{scope.id}}
+    static {{this.languageProjectInput.factory.qualifiedId}} provideStrategoRuntimeBuilderFactory(LoggerFactory loggerFactory, ResourceService resourceService, @Named("definition-dir") HierarchicalResource definitionDir) {
+        return new {{this.languageProjectInput.factory.qualifiedId}}(loggerFactory, resourceService, definitionDir);
+    }
+
+    @Provides @{{scope.id}} @{{qualifier.id}}
+    static StrategoRuntimeBuilder provideQualifiedStrategoRuntimeBuilder({{this.languageProjectInput.factory.qualifiedId}} factory) {
+        return factory.create();
+    }
+
+    @Provides @{{scope.id}}
+    static StrategoRuntimeBuilder provideStrategoRuntimeBuilder(@{{qualifier.id}} StrategoRuntimeBuilder strategoRuntimeBuilder) {
+        return strategoRuntimeBuilder;
+    }
+
+    @Provides @{{scope.id}} @Named("prototype")
+    static StrategoRuntime providePrototypeStrategoRuntime(StrategoRuntimeBuilder builder) {
+        return builder.build();
+    }
+
+    @Provides @{{qualifier.id}} /* Unscoped: new stratego runtime every call. */
+    static StrategoRuntime provideQualifiedStrategoRuntime(StrategoRuntimeBuilder builder, @Named("prototype") StrategoRuntime prototype) {
+        return builder.buildFromPrototype(prototype);
+    }
+
+    @Provides /* Unscoped: new stratego runtime every call. */
+    static StrategoRuntime provideStrategoRuntime(@{{qualifier.id}} StrategoRuntime strategoRuntime) {
+        return strategoRuntime;
+    }
+{{/strategoRuntime}}
 
     @Provides @{{scope.id}} @ElementsIntoSet
     static Set<TaskDef<?, ?>> provideTaskDefsSet(
@@ -172,7 +183,7 @@ public class {{genModule.id}} {
     static Pie providePrototypePie(@Platform Pie pie, TaskDefs taskDefs, ResourceService resourceService) {
         return pie.createChildBuilder().withTaskDefs(taskDefs).withResourceService(resourceService).build();
     }
-    {{#multilangAnalyzer}}
+{{#multilangAnalyzer}}
     @Provides @{{scope.id}}
     static LanguageId provideLanguageId() {
         return new LanguageId("{{languageId}}");
@@ -185,13 +196,13 @@ public class {{genModule.id}} {
             throw new RuntimeException("Cannot build shared Pie", e);
         }
     }
-    {{/multilangAnalyzer}}
-    {{^multilangAnalyzer}}
+{{/multilangAnalyzer}}
+{{^multilangAnalyzer}}
     @Provides @{{scope.id}} @{{qualifier.id}}
     static Pie provideQualifiedPie(@Named("prototype") Pie languagePie) {
         return languagePie;
     }
-    {{/multilangAnalyzer}}
+{{/multilangAnalyzer}}
 
     @Provides @{{scope.id}}
     static Pie providePie(@{{qualifier.id}} Pie languagePie) {

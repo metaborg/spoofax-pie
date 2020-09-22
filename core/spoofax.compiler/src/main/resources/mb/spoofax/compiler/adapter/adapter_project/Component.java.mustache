@@ -9,6 +9,7 @@ import mb.pie.api.Pie;
 import mb.statix.multilang.MultiLangComponent;
 import mb.statix.multilang.metadata.LanguageMetadataProvider;
 {{/isMultiLang}}
+import javax.inject.Provider;
 
 import {{qualifier.qualifiedId}};
 
@@ -23,13 +24,44 @@ public interface {{genComponent.id}} extends LanguageComponent{{#isMultiLang}}, 
     @Override @{{qualifier.id}} ResourceService getResourceService();
 
     @Override @{{qualifier.id}} Pie getPie();
+{{#parser}}
 
+
+    Provider<{{languageProjectInput.parser.qualifiedId}}> getParserProvider();
+{{/parser}}
+{{#styler}}
+
+
+    {{languageProjectInput.styler.qualifiedId}} getStyler();
+{{/styler}}
+{{#constraintAnalyzer}}
+
+
+    {{languageProjectInput.constraintAnalyzer.qualifiedId}} getConstraintAnalyzer();
+{{/constraintAnalyzer}}
+{{#strategoRuntime}}
+
+
+    @{{qualifier.id}} mb.stratego.common.StrategoRuntimeBuilder getStrategoRuntimeBuilder();
+
+    @{{qualifier.id}} Provider<mb.stratego.common.StrategoRuntime> getStrategoRuntimeProvider();
+{{/strategoRuntime}}
 {{#providedTaskDefs}}
 {{#-first}}
+
 
     // Task definitions
 
 {{/-first}}
     {{getter}}
 {{/providedTaskDefs}}
+{{#providedCommandDefs}}
+{{#-first}}
+
+
+    // Command definitions
+
+{{/-first}}
+    {{getter}}
+{{/providedCommandDefs}}
 }

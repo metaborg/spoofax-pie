@@ -14,57 +14,56 @@ import javax.inject.Singleton;
 
 @Module
 public class ResourceRegistriesModule {
-    private final FSResourceRegistry fsResourceRegistry = new FSResourceRegistry();
-    private final ClassLoaderResourceRegistry classLoaderResourceRegistry = new ClassLoaderResourceRegistry();
-    private final URLResourceRegistry urlResourceRegistry = new URLResourceRegistry();
-    private final TextResourceRegistry textResourceRegistry = new TextResourceRegistry();
-
-
     @Provides @Singleton
-    FSResourceRegistry provideFsResourceRegistry() {
-        return fsResourceRegistry;
+    static FSResourceRegistry provideFsResourceRegistry() {
+        return new FSResourceRegistry();
     }
 
     @Provides @Singleton @IntoSet
-    ResourceRegistry provideFsResourceRegistryIntoSet() {
-        return fsResourceRegistry;
+    static ResourceRegistry provideFsResourceRegistryIntoSet(FSResourceRegistry registry) {
+        return registry;
     }
 
     @Provides @Named("default") @Singleton
-    ResourceRegistry provideFsResourceRegistryAsDefault() {
-        return fsResourceRegistry;
+    static ResourceRegistry provideFsResourceRegistryAsDefault(FSResourceRegistry registry) {
+        return registry;
     }
 
 
     @Provides @Singleton
-    ClassLoaderResourceRegistry provideClassLoaderResourceRegistry() {
-        return classLoaderResourceRegistry;
+    static ClassLoaderResourceRegistry provideClassLoaderResourceRegistry() {
+        return new ClassLoaderResourceRegistry();
     }
 
     @Provides @Singleton @IntoSet
-    ResourceRegistry provideClassLoaderResourceRegistryIntoSet() {
-        return classLoaderResourceRegistry;
+    static ResourceRegistry provideClassLoaderResourceRegistryIntoSet(ClassLoaderResourceRegistry registry) {
+        return registry;
     }
 
 
     @Provides @Singleton
-    URLResourceRegistry provideUrlResourceRegistry() {
-        return urlResourceRegistry;
+    static URLResourceRegistry provideUrlResourceRegistry() {
+        return new URLResourceRegistry();
     }
 
     @Provides @Singleton @IntoSet
-    ResourceRegistry provideUrlResourceRegistryIntoSet() {
-        return urlResourceRegistry;
+    static ResourceRegistry provideUrlResourceRegistryIntoSet(URLResourceRegistry registry) {
+        return registry;
     }
 
+
+    @Provides @Singleton @Platform
+    static TextResourceRegistry provideQualifiedTextResourceRegistry() {
+        return new TextResourceRegistry();
+    }
 
     @Provides @Singleton
-    TextResourceRegistry provideTextResourceRegistry() {
-        return textResourceRegistry;
+    static TextResourceRegistry provideTextResourceRegistry(@Platform TextResourceRegistry registry) {
+        return registry;
     }
 
     @Provides @Singleton @IntoSet
-    ResourceRegistry provideTextResourceRegistryIntoSet() {
-        return textResourceRegistry;
+    static ResourceRegistry provideTextResourceRegistryIntoSet(@Platform TextResourceRegistry registry) {
+        return registry;
     }
 }

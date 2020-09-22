@@ -18,7 +18,9 @@ import mb.resource.ResourceKey;
 import mb.resource.fs.FSResource;
 import mb.resource.text.TextResource;
 import mb.resource.text.TextResourceRegistry;
+import mb.spoofax.core.platform.DaggerPlatformComponent;
 import mb.spoofax.core.platform.LoggerFactoryModule;
+import mb.spoofax.core.platform.PlatformComponent;
 import mb.spoofax.core.platform.PlatformPieModule;
 import mb.str.spoofax.task.StrategoAnalyze;
 import mb.str.spoofax.task.StrategoCompileToJava;
@@ -35,7 +37,7 @@ public class TestBase {
     public final FileSystem fileSystem = Jimfs.newFileSystem(Configuration.unix());
     public final FSResource rootDirectory = new FSResource(fileSystem.getPath("/"));
 
-    public final PlatformTestComponent platformComponent = DaggerPlatformTestComponent
+    public final PlatformComponent platformComponent = DaggerPlatformComponent
         .builder()
         .loggerFactoryModule(new LoggerFactoryModule(new SLF4JLoggerFactory()))
         .platformPieModule(new PlatformPieModule(PieBuilderImpl::new))
