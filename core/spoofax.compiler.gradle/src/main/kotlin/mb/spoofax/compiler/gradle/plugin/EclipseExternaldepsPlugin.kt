@@ -90,7 +90,7 @@ open class EclipseExternaldepsPlugin : Plugin<Project> {
   }
 
   private fun configureCompilerTask(project: Project, component: SpoofaxCompilerGradleComponent, input: EclipseExternaldepsProjectCompiler.Input) {
-    val compileTask = project.tasks.register("spoofaxCompileEclipseExternaldepsProject") {
+    val compileTask = project.tasks.register("compileEclipseExternaldepsProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
       outputs.files(input.providedFiles().map { component.resourceService.toLocalFile(it) })

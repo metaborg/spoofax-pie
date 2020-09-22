@@ -1,5 +1,6 @@
 package mb.spoofax.compiler.spoofax3.language;
 
+import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.None;
 import mb.pie.api.TaskDef;
@@ -14,10 +15,9 @@ import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Value.Enclosing
-public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3StrategoRuntimeLanguageCompiler.Input, None> {
+public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3StrategoRuntimeLanguageCompiler.Input, Result<None, ?>> {
     private final StrategoCompileToJava strategoCompileToJava;
 
     @Inject public Spoofax3StrategoRuntimeLanguageCompiler(StrategoCompileToJava strategoCompileToJava) {
@@ -29,7 +29,7 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
         return getClass().getName();
     }
 
-    @Override public None exec(ExecContext context, Input input) throws Exception {
+    @Override public Result<None, ?> exec(ExecContext context, Input input) throws Exception {
         // TODO: error when Stratego root directory does not exist.
         // TODO: error when a Stratego include directory does not exist.
         // TODO: error when Stratego main file does not exist.
@@ -44,8 +44,7 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
             input.strategoOutputJavaPackageId(),
             new ArrayList<>()
         );
-        context.require(strategoCompileToJava, strategoCompileInput);
-        return None.instance;
+        return context.require(strategoCompileToJava, strategoCompileInput);
     }
 
 
@@ -76,8 +75,8 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
             return strategoBuiltinLibs;
         }
 
-        @Value.Default default Optional<ResourcePath> strategoCacheDir() {
-            return Optional.of(languageProject().project().buildDirectory().appendRelativePath("stratego-cache"));
+        @Value.Default default ResourcePath strategoCacheDir() {
+            return languageProject().project().buildDirectory().appendRelativePath("stratego-cache");
         }
 
         @Value.Default default ResourcePath strategoOutputDir() {

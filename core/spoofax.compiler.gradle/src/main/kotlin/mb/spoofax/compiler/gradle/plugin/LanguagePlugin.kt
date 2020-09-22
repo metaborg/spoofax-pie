@@ -177,7 +177,7 @@ open class LanguagePlugin : Plugin<Project> {
   }
 
   private fun configureCompileTask(project: Project, component: SpoofaxCompilerGradleComponent, input: LanguageProjectCompiler.Input) {
-    val compileTask = project.tasks.register("spoofaxCompileLanguageProject") {
+    val compileTask = project.tasks.register("compileLanguageProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
       outputs.files(input.providedFiles().map { component.resourceService.toLocalFile(it) })

@@ -92,7 +92,7 @@ open class CliPlugin : Plugin<Project> {
   }
 
   private fun configureCompileTask(project: Project, component: SpoofaxCompilerGradleComponent, input: CliProjectCompiler.Input) {
-    val compileTask = project.tasks.register("spoofaxCompileCliProject") {
+    val compileTask = project.tasks.register("compileCliProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
       outputs.files(input.providedFiles().map { component.resourceService.toLocalFile(it) })

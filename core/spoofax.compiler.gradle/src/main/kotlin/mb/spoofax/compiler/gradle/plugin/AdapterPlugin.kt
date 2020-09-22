@@ -96,7 +96,7 @@ open class AdapterPlugin : Plugin<Project> {
   }
 
   private fun configureCompileTask(project: Project, component: SpoofaxCompilerGradleComponent, input: AdapterProjectCompiler.Input) {
-    val compileTask = project.tasks.register("spoofaxCompileAdapterProject") {
+    val compileTask = project.tasks.register("compileAdapterProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
       outputs.files(input.providedFiles().map { component.resourceService.toLocalFile(it) })

@@ -20,7 +20,7 @@ import javax.inject.Inject;
 import java.io.Serializable;
 
 @Value.Enclosing
-public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLanguageCompiler.Input, None> {
+public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLanguageCompiler.Input, Result<None, ?>> {
     private final Sdf3CreateSpec sdf3CreateSpec;
     private final Sdf3SpecToParseTable sdf3SpecToParseTable;
     private final Sdf3ParseTableToFile sdf3ParseTableToFile;
@@ -40,20 +40,18 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
         return getClass().getName();
     }
 
-    @Override public None exec(ExecContext context, Input input) throws Exception {
+    @Override public Result<None, ?> exec(ExecContext context, Input input) throws Exception {
         // TODO: error when SDF3 root directory does not exist.
         // TODO: error when SDF3 main file does not exist.
 
         final Supplier<Sdf3Spec> sdf3SpecSupplier = sdf3CreateSpec.createSupplier(new Sdf3CreateSpec.Input(input.sdf3RootDirectory(), input.sdf3MainFile()));
         final Supplier<Result<ParseTable, ?>> sdf3ToParseTableSupplier = sdf3SpecToParseTable.createSupplier(new Sdf3SpecToParseTable.Args(sdf3SpecSupplier, input.sdf3ParseTableConfiguration(), false));
-        context.require(sdf3ParseTableToFile, new Sdf3ParseTableToFile.Args(sdf3ToParseTableSupplier, input.sdf3ParseTableOutputFile()));
+        return context.require(sdf3ParseTableToFile, new Sdf3ParseTableToFile.Args(sdf3ToParseTableSupplier, input.sdf3ParseTableOutputFile()));
 
         // TODO: sdf3 to signatures, and pass that to origin task of the stratego compiler.
         // TODO: sdf3 to parenthesize, and pass that to origin task of the stratego compiler.
         // TODO: sdf3 to pretty-printer, and pass that to origin task of the stratego compiler.
         // TODO: sdf3 to completer, and pass that to origin task of the stratego compiler.
-
-        return None.instance;
     }
 
 
@@ -68,7 +66,7 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
         }
 
         @Value.Default default ResourcePath sdf3MainFile() {
-            return sdf3RootDirectory().appendRelativePath("main.sdf3");
+            return sdf3RootDirectory().appendRelativePath("start.sdf3");
         }
 
         @Value.Default default ParseTableConfiguration sdf3ParseTableConfiguration() {

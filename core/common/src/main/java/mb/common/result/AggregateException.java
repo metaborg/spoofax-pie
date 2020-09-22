@@ -10,6 +10,11 @@ public class AggregateException extends Exception {
 
     public AggregateException(Collection<?> values, Collection<? extends Exception> exceptions) {
         nestedThrowables = new ArrayList<>(exceptions);
+        if(nestedThrowables.size() == 1) {
+            initCause(nestedThrowables.get(0));
+        } else {
+            for(Exception e : exceptions) addSuppressed(e);
+        }
         this.values = values;
     }
 
@@ -19,5 +24,19 @@ public class AggregateException extends Exception {
 
     public Collection<?> getValues() {
         return values;
+    }
+
+
+    @Override public String getMessage() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("One or more exceptions occurred:\n\n");
+        for(Exception e : nestedThrowables) {
+            sb.append(e.getMessage());
+        }
+        return sb.toString();
+    }
+
+    @Override public Throwable fillInStackTrace() {
+        return this; // Do nothing so that no stack trace is created.
     }
 }

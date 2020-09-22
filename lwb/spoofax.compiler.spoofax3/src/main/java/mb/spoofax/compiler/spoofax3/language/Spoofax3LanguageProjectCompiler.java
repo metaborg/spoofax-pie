@@ -1,5 +1,7 @@
 package mb.spoofax.compiler.spoofax3.language;
 
+import mb.common.result.AggregateException;
+import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.None;
 import mb.pie.api.TaskDef;
@@ -9,10 +11,11 @@ import org.immutables.value.Value;
 
 import javax.inject.Inject;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Value.Enclosing
-public class Spoofax3LanguageProjectCompiler implements TaskDef<Spoofax3LanguageProjectCompiler.Input, None> {
+public class Spoofax3LanguageProjectCompiler implements TaskDef<Spoofax3LanguageProjectCompiler.Input, Result<None, AggregateException>> {
     private final Spoofax3ParserLanguageCompiler parserCompiler;
     private final Spoofax3StrategoRuntimeLanguageCompiler strategoRuntimeCompiler;
 
@@ -29,10 +32,14 @@ public class Spoofax3LanguageProjectCompiler implements TaskDef<Spoofax3Language
         return getClass().getName();
     }
 
-    @Override public None exec(ExecContext context, Input input) throws Exception {
-        input.parser().ifPresent(i -> context.require(parserCompiler, i));
-        input.strategoRuntime().ifPresent(i -> context.require(strategoRuntimeCompiler, i));
-        return None.instance;
+    @Override public Result<None, AggregateException> exec(ExecContext context, Input input) throws Exception {
+        final ArrayList<Exception> exceptions = new ArrayList<>();
+        input.parser().ifPresent(i -> context.require(parserCompiler, i).ifErr(exceptions::add));
+        input.strategoRuntime().ifPresent(i -> context.require(strategoRuntimeCompiler, i).ifErr(exceptions::add));
+        if(!exceptions.isEmpty()) {
+            return Result.ofErr(new AggregateException(new ArrayList<>(), exceptions));
+        }
+        return Result.ofOk(None.instance);
     }
 
 

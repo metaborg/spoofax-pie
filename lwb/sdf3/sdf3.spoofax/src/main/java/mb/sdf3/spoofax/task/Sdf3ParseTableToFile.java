@@ -7,6 +7,8 @@ import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.WritableResource;
+import mb.resource.hierarchical.HierarchicalResource;
+import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.spoofax.Sdf3Scope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.sdf2table.io.ParseTableIO;
@@ -23,9 +25,9 @@ import java.util.Objects;
 public class Sdf3ParseTableToFile implements TaskDef<Sdf3ParseTableToFile.Args, Result<None, ?>> {
     public static class Args implements Serializable {
         private final Supplier<? extends Result<ParseTable, ?>> parseTableSupplier;
-        private final ResourceKey outputFile;
+        private final ResourcePath outputFile;
 
-        public Args(Supplier<? extends Result<ParseTable, ?>> parseTableSupplier, ResourceKey outputFile) {
+        public Args(Supplier<? extends Result<ParseTable, ?>> parseTableSupplier, ResourcePath outputFile) {
             this.parseTableSupplier = parseTableSupplier;
             this.outputFile = outputFile;
         }
@@ -52,10 +54,10 @@ public class Sdf3ParseTableToFile implements TaskDef<Sdf3ParseTableToFile.Args, 
     @Override public Result<None, ?> exec(ExecContext context, Args args) throws IOException {
         return context.require(args.parseTableSupplier)
             .mapCatching(parseTable -> {
-                final IStrategoTerm parseTableTerm = ParseTableIO.generateATerm(parseTable);
-                final WritableResource writableResource = context.getWritableResource(args.outputFile);
-                writableResource.writeString(parseTable.toString(), StandardCharsets.UTF_8);
-                context.provide(writableResource);
+                final HierarchicalResource resource = context.getHierarchicalResource(args.outputFile);
+                resource.ensureFileExists();
+                resource.writeString(ParseTableIO.generateATerm(parseTable).toString(), StandardCharsets.UTF_8);
+                context.provide(resource);
                 return None.instance;
             });
     }

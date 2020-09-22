@@ -99,7 +99,7 @@ open class EclipsePlugin : Plugin<Project> {
   }
 
   private fun configureCompilerTask(project: Project, component: SpoofaxCompilerGradleComponent, input: EclipseProjectCompiler.Input) {
-    val compileTask = project.tasks.register("spoofaxCompileEclipseProject") {
+    val compileTask = project.tasks.register("compileEclipseProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
       outputs.files(input.providedFiles().map { component.resourceService.toLocalFile(it) })

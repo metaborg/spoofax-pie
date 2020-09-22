@@ -13,6 +13,7 @@ import mb.spoofax.core.platform.DaggerPlatformComponent
 import mb.spoofax.core.platform.LoggerFactoryModule
 import mb.spoofax.core.platform.PlatformPieModule
 import mb.str.spoofax.DaggerStrategoComponent
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlugin
@@ -94,15 +95,46 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
     component: Spoofax3CompilerGradleComponent,
     input: Spoofax3LanguageProjectCompiler.Input
   ) {
-    val compileTask = project.tasks.register("compileLanguageProject") {
+    val resourceService = component.resourceService
+    val compileTask = project.tasks.register("compileSpoofax3BasedLanguageProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
+      input.parser().ifPresent { parserInput ->
+        val sdf3RootDirectory = resourceService.toLocalFile(parserInput.sdf3RootDirectory())
+        if(sdf3RootDirectory != null) {
+          inputs.files(project.fileTree(sdf3RootDirectory) { include("**/*.sdf3") })
+        } else {
+          logger.warn("Cannot set SDF3 files as task inputs, because ${parserInput.sdf3RootDirectory()} cannot be converted into a local file. This disables incrementality for this Gradle task")
+        }
+        val sdf3ParseTableOutputFile = resourceService.toLocalFile(parserInput.sdf3ParseTableOutputFile())
+        if(sdf3ParseTableOutputFile != null) {
+          outputs.file(sdf3ParseTableOutputFile)
+        } else {
+          logger.warn("Cannot set the SDF3 parse table as a task output, because ${parserInput.sdf3ParseTableOutputFile()} cannot be converted into a local file. This disables incrementality for this Gradle task")
+        }
+      }
+      input.strategoRuntime().ifPresent { strategoRuntimeInput ->
+        val strategoRootDirectory = resourceService.toLocalFile(strategoRuntimeInput.strategoRootDirectory())
+        if(strategoRootDirectory != null) {
+          inputs.files(project.fileTree(strategoRootDirectory) { include("**/*.str") })
+        } else {
+          logger.warn("Cannot set Stratego files as task inputs, because ${strategoRuntimeInput.strategoRootDirectory()} cannot be converted into a local file. This disables incrementality for this Gradle task")
+        }
+        val strategoOutputDir = resourceService.toLocalFile(strategoRuntimeInput.strategoOutputDir())
+        if(strategoOutputDir != null) {
+          outputs.dir(strategoOutputDir)
+        } else {
+          logger.warn("Cannot set the Stratego output directory as a task output, because ${strategoRuntimeInput.strategoOutputDir()} cannot be converted into a local file. This disables incrementality for this Gradle task")
+        }
+      }
 
       doLast {
         project.deleteDirectory(input.generatedJavaSourcesDirectory(), component.resourceService)
         project.deleteDirectory(input.generatedResourcesDirectory(), component.resourceService)
         component.pie.newSession().use { session ->
-          session.require(component.spoofax3LanguageProjectCompiler.createTask(input))
+          session.require(component.spoofax3LanguageProjectCompiler.createTask(input)).ifErr { e ->
+            throw GradleException("Failed to compile Spoofax 3 based language project", e)
+          }
         }
       }
     }

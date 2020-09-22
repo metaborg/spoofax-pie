@@ -79,7 +79,7 @@ open class Spoofax2LanguagePlugin : Plugin<Project> {
     component: Spoofax2CompilerGradleComponent,
     input: Spoofax2LanguageProjectCompiler.Input
   ) {
-    val compileTask = project.tasks.register("compileLanguageProject") {
+    val compileTask = project.tasks.register("compileSpoofax2BasedLanguageProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
 

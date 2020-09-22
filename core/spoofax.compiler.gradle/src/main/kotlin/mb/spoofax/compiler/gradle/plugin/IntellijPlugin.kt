@@ -94,7 +94,7 @@ open class IntellijPlugin : Plugin<Project> {
   }
 
   private fun configureCompilerTask(project: Project, component: SpoofaxCompilerGradleComponent, input: IntellijProjectCompiler.Input) {
-    val compileTask = project.tasks.register("spoofaxCompileIntellijProject") {
+    val compileTask = project.tasks.register("compileIntellijProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
       outputs.files(input.providedFiles().map { component.resourceService.toLocalFile(it) })

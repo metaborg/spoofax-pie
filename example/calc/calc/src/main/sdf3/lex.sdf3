@@ -1,4 +1,4 @@
-module lexical
+module lex
 
 lexical sorts
   ID INT STRING

@@ -23,7 +23,7 @@ languageProject {
   }
   compilerInput {
     withParser().run {
-      startSymbol("Start")
+      startSymbol("Program")
     }
     withStrategoRuntime()
   }
