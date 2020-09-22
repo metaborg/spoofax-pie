@@ -16,14 +16,11 @@ dependencies {
   api("org.metaborg:statix.common")
   api("org.metaborg:statix.multilang")
 
-  testAnnotationProcessor(platform("$group:spoofax.depconstraints:$version"))
   testImplementation("org.metaborg:log.backend.slf4j")
   testImplementation("org.slf4j:slf4j-simple:1.7.30")
   testImplementation("org.metaborg:pie.runtime")
-  testImplementation("org.metaborg:pie.dagger")
   testImplementation("com.google.jimfs:jimfs:1.1")
   testCompileOnly("org.checkerframework:checker-qual-android")
-  testAnnotationProcessor("com.google.dagger:dagger-compiler")
 }
 
 languageAdapterProject {

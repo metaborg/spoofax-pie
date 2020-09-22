@@ -1,50 +1,50 @@
 module lex
 
-lexical sorts
-  ID INT STRING
-  STRING_CHAR BACKSLASH_CHAR
-  COMMENT_CHAR INSIDE_COMMENT
-  NEWLINE_EOF EOF
+lexical syntax
+  ID = [a-zA-Z] [a-zA-Z0-9]*
+lexical restrictions
+  ID -/- [a-zA-Z0-9\_]
+
+lexical syntax // numbers
+  INT      = "-"? [0-9]+
+  IntGroup = [0-9][0-9][0-9]
+  IntPref  = ([0-9] | ([0-9][0-9])) ","
+  INT      = IntPref? {IntGroup ","}+
+  FLOAT    = INT "." [0-9]+
+  NUM      = INT | FLOAT
+lexical restrictions
+  INT   -/- [0-9]
+  FLOAT -/- [0-9]
+  NUM   -/- [0-9]
 
 lexical syntax
+  STRING         = "\"" StringChar* "\""
+  StringChar     = ~[\"\n]
+  StringChar     = "\\\""
+  StringChar     = BackSlashChar
+  BackSlashChar  = "\\"
+lexical restrictions
+  // Backslash chars in strings may not be followed by "
+  BackSlashChar -/- [\"]
 
-  ID               = [a-zA-Z] [a-zA-Z0-9]*
-  INT              = "-"? [0-9]+
-  STRING           = "\"" STRING_CHAR* "\""
-  STRING_CHAR      = ~[\"\n]
-  STRING_CHAR      = "\\\""
-  STRING_CHAR      = BACKSLASH_CHAR
-  BACKSLASH_CHAR   = "\\"
-  LAYOUT           = [\ \t\n\r]
-  COMMENT_CHAR     = [\*]
-  LAYOUT           = "/*" INSIDE_COMMENT* "*/"
-  INSIDE_COMMENT   = ~[\*]
-  INSIDE_COMMENT   = COMMENT_CHAR
-  LAYOUT           = "//" ~[\n\r]* NEWLINE_EOF
-  NEWLINE_EOF      = [\n\r]
-  NEWLINE_EOF      = EOF
-  EOF              =
+lexical syntax // layout: whitespace and comments
+  LAYOUT         = [\ \t\n\r]
+  CommentChar    = [\*]
+  LAYOUT         = "/*" InsideComment* "*/"
+  InsideComment  = ~[\*]
+  InsideComment  = CommentChar
+  LAYOUT         = "//" ~[\n\r]* NewLineEOF
+  NewLineEOF     = [\n\r]
+  NewLineEOF     = EOF
+  EOF            =
 
 lexical restrictions
-
-  // Ensure greedy matching for lexicals
-
-  COMMENT_CHAR    -/- [\/]
-  INT             -/- [0-9]
-  ID              -/- [a-zA-Z0-9\_]
-
+  CommentChar -/- [\/]
   // EOF may not be followed by any char
-
-  EOF             -/- ~[]
-
-  // Backslash chars in strings may not be followed by "
-
-  BACKSLASH_CHAR  -/- [\"]
+  EOF         -/- ~[]
 
 context-free restrictions
-
   // Ensure greedy matching for comments
-
   LAYOUT? -/- [\ \t\n\r]
   LAYOUT? -/- [\/].[\/]
   LAYOUT? -/- [\/].[\*]
