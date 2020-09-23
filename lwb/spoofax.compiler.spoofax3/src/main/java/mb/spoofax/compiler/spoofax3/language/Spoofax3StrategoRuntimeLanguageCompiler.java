@@ -1,14 +1,20 @@
 package mb.spoofax.compiler.spoofax3.language;
 
+import mb.common.message.KeyedMessages;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.None;
 import mb.pie.api.TaskDef;
+import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.LanguageProject;
 import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.util.Conversion;
+import mb.str.spoofax.task.StrategoCheckMulti;
 import mb.str.spoofax.task.StrategoCompileToJava;
+import mb.str.spoofax.util.StrategoUtil;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 
 import javax.inject.Inject;
@@ -17,10 +23,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Value.Enclosing
-public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3StrategoRuntimeLanguageCompiler.Input, Result<None, ?>> {
+public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3StrategoRuntimeLanguageCompiler.Input, Result<KeyedMessages, StrategoCompilerException>> {
+    private final StrategoCheckMulti strategoCheckMulti;
     private final StrategoCompileToJava strategoCompileToJava;
 
-    @Inject public Spoofax3StrategoRuntimeLanguageCompiler(StrategoCompileToJava strategoCompileToJava) {
+    @Inject public Spoofax3StrategoRuntimeLanguageCompiler(
+        StrategoCheckMulti strategoCheckMulti,
+        StrategoCompileToJava strategoCompileToJava
+    ) {
+        this.strategoCheckMulti = strategoCheckMulti;
         this.strategoCompileToJava = strategoCompileToJava;
     }
 
@@ -29,10 +40,32 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
         return getClass().getName();
     }
 
-    @Override public Result<None, ?> exec(ExecContext context, Input input) throws Exception {
-        // TODO: error when Stratego root directory does not exist.
-        // TODO: error when a Stratego include directory does not exist.
-        // TODO: error when Stratego main file does not exist.
+    @Override
+    public Result<KeyedMessages, StrategoCompilerException> exec(ExecContext context, Input input) throws Exception {
+        // Check main file, root directory, and include directories.
+        final HierarchicalResource mainFile = context.require(input.strategoMainFile(), ResourceStampers.<HierarchicalResource>exists());
+        if(!mainFile.exists() || !mainFile.isFile()) {
+            return Result.ofErr(StrategoCompilerException.mainFileFail(mainFile.getPath()));
+        }
+        final HierarchicalResource rootDirectory = context.require(input.strategoRootDirectory(), ResourceStampers.<HierarchicalResource>exists());
+        if(!rootDirectory.exists() || !rootDirectory.isDirectory()) {
+            return Result.ofErr(StrategoCompilerException.rootDirectoryFail(rootDirectory.getPath()));
+        }
+        for(ResourcePath includeDirectory : input.strategoIncludeDirs()) {
+            if(!rootDirectory.exists() || !rootDirectory.isDirectory()) {
+                return Result.ofErr(StrategoCompilerException.includeDirectoryFail(includeDirectory));
+            }
+        }
+
+        // Check Stratego source files.
+        final @Nullable KeyedMessages messages = context.require(strategoCheckMulti.createTask(
+            new StrategoCheckMulti.Input(rootDirectory.getPath(), StrategoUtil.createResourceWalker(), StrategoUtil.createResourceMatcher())
+        ));
+        if(messages.containsError()) {
+            return Result.ofErr(StrategoCompilerException.checkFail(messages));
+        }
+
+        // Compile Stratego sources to Java sources.
         final StrategoCompileToJava.Args strategoCompileInput = new StrategoCompileToJava.Args(
             input.strategoRootDirectory(),
             input.strategoMainFile(),
@@ -44,7 +77,12 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
             input.strategoOutputJavaPackageId(),
             new ArrayList<>()
         );
-        return context.require(strategoCompileToJava, strategoCompileInput);
+        final Result<None, ?> compileResult = context.require(strategoCompileToJava, strategoCompileInput);
+        if(compileResult.isErr()) {
+            return Result.ofErr(StrategoCompilerException.compilerFail(compileResult.getErr()));
+        }
+
+        return Result.ofOk(messages);
     }
 
 

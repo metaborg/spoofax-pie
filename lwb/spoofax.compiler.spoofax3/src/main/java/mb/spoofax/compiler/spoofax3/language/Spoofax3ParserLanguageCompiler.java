@@ -49,29 +49,32 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
         return getClass().getName();
     }
 
-    @Override public Result<KeyedMessages, ParserCompilerException> exec(ExecContext context, Input input) throws Exception {
+    @Override
+    public Result<KeyedMessages, ParserCompilerException> exec(ExecContext context, Input input) throws Exception {
         // Check main file and root directory.
         final HierarchicalResource mainFile = context.require(input.sdf3MainFile(), ResourceStampers.<HierarchicalResource>exists());
         if(!mainFile.exists() || !mainFile.isFile()) {
-            return Result.ofErr(ParserCompilerException.mainFileFail(input.sdf3MainFile()));
+            return Result.ofErr(ParserCompilerException.mainFileFail(mainFile.getPath()));
         }
         final HierarchicalResource rootDirectory = context.require(input.sdf3RootDirectory(), ResourceStampers.<HierarchicalResource>exists());
         if(!rootDirectory.exists() || !rootDirectory.isDirectory()) {
-            return Result.ofErr(ParserCompilerException.rootDirectoryFail(input.sdf3RootDirectory()));
+            return Result.ofErr(ParserCompilerException.rootDirectoryFail(rootDirectory.getPath()));
         }
 
-        // Check SDF3 specification
-        final @Nullable KeyedMessages messages = context.require(sdf3CheckMulti.createTask(new Sdf3CheckMulti.Input(input.sdf3RootDirectory(), Sdf3Util.createResourceWalker(), Sdf3Util.createResourceMatcher())));
+        // Check SDF3 source files.
+        final @Nullable KeyedMessages messages = context.require(sdf3CheckMulti.createTask(
+            new Sdf3CheckMulti.Input(rootDirectory.getPath(), Sdf3Util.createResourceWalker(), Sdf3Util.createResourceMatcher())
+        ));
         if(messages.containsError()) {
             return Result.ofErr(ParserCompilerException.checkFail(messages));
         }
 
-        // Compile SDF3 to a parse table
+        // Compile SDF3 sources to a parse table.
         final Supplier<Sdf3Spec> sdf3SpecSupplier = sdf3CreateSpec.createSupplier(new Sdf3CreateSpec.Input(input.sdf3RootDirectory(), input.sdf3MainFile()));
         final Supplier<Result<ParseTable, ?>> sdf3ToParseTableSupplier = sdf3SpecToParseTable.createSupplier(new Sdf3SpecToParseTable.Args(sdf3SpecSupplier, input.sdf3ParseTableConfiguration(), false));
         final Result<None, ?> compileResult = context.require(sdf3ParseTableToFile, new Sdf3ParseTableToFile.Args(sdf3ToParseTableSupplier, input.sdf3ParseTableOutputFile()));
         if(compileResult.isErr()) {
-            return Result.ofErr(ParserCompilerException.createParseTableFail(compileResult.getErr()));
+            return Result.ofErr(ParserCompilerException.compilerFail(compileResult.getErr()));
         }
 
         return Result.ofOk(messages);

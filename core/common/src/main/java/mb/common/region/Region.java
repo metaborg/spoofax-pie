@@ -4,25 +4,37 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.OptionalInt;
 
 /**
- * A region represents a finite region in source code text.
- * A region has a start and end offset, represented by the
- * number of characters from the beginning of the source text, with interval [0,#chars).
+ * A region represents a finite region in source code text. A region has a start and end offset, represented by the
+ * number of characters from the beginning of the source text, with interval [0,#chars). Additionally, a region may
+ * optionally contain a start and end line number, with interval [0,#lines).
  */
 public final class Region implements Serializable {
-
     private final int startOffset;
     private final int endOffset;
+    private final int startLine;
+    private final int endLine;
 
-    private Region(int startOffset, int endOffset) {
+    private Region(int startOffset, int endOffset, int startLine, int endLine) {
         if(startOffset < 0)
-            throw new IllegalArgumentException("The start offset " + startOffset + " must be positive or zero.");
+            throw new IllegalArgumentException("The start offset " + startOffset + " must be positive or zero");
         if(endOffset < startOffset)
-            throw new IllegalArgumentException("The end offset " + endOffset + " must be greater than or equal to the start offset " + startOffset + ".");
+            throw new IllegalArgumentException("The end offset " + endOffset + " must be greater than or equal to the start offset " + startOffset);
+        if(startLine < -1)
+            throw new IllegalArgumentException("The start line " + startLine + " must be positive, zero, or -1 indicating that there is no line information");
+        if(endLine < startLine)
+            throw new IllegalArgumentException("The end line " + endLine + " must be greater than or equal to the start line " + startLine);
 
         this.startOffset = startOffset;
         this.endOffset = endOffset;
+        this.startLine = startLine;
+        this.endLine = endLine;
+    }
+
+    private Region(int startOffset, int endOffset) {
+        this(startOffset, endOffset, -1, -1);
     }
 
     /**
@@ -39,7 +51,7 @@ public final class Region implements Serializable {
      * Creates a new region with the specified start and end offsets.
      *
      * @param startOffset the zero-based offset of the start of the region
-     * @param endOffset the zero-based offset of the end of the region, exclusive
+     * @param endOffset   the zero-based offset of the end of the region, exclusive
      * @return the created region
      */
     public static Region fromOffsets(int startOffset, int endOffset) {
@@ -47,10 +59,35 @@ public final class Region implements Serializable {
     }
 
     /**
+     * Creates a new region with the specified start and end offsets, and a line number.
+     *
+     * @param startOffset the zero-based offset of the start of the region
+     * @param endOffset   the zero-based offset of the end of the region, exclusive
+     * @param line        the zero-based line number
+     * @return the created region
+     */
+    public static Region fromOffsets(int startOffset, int endOffset, int line) {
+        return new Region(startOffset, endOffset, line, line);
+    }
+
+    /**
+     * Creates a new region with the specified start and end offsets, and a starting and ending line number.
+     *
+     * @param startOffset the zero-based offset of the start of the region
+     * @param endOffset   the zero-based offset of the end of the region, exclusive
+     * @param startLine   the zero-based line number at the start of the region
+     * @param endLine     the zero-based line number at the end of the region, exclusive
+     * @return the created region
+     */
+    public static Region fromOffsets(int startOffset, int endOffset, int startLine, int endLine) {
+        return new Region(startOffset, endOffset, startLine, endLine);
+    }
+
+    /**
      * Creates a new region with the specified start and end offsets.
      *
      * @param startOffset the zero-based offset of the start of the region
-     * @param length the length of the region
+     * @param length      the length of the region
      * @return the created region
      */
     public static Region fromOffsetLength(int startOffset, int length) {
@@ -76,7 +113,7 @@ public final class Region implements Serializable {
                 final int endOffset = Integer.parseInt(end);
                 return Region.fromOffsets(startOffset, endOffset);
             }
-        } catch (IllegalArgumentException e) {
+        } catch(IllegalArgumentException e) {
             return null;
         }
     }
@@ -106,6 +143,17 @@ public final class Region implements Serializable {
 
 
     /**
+     * @return Inclusive starting line number with interval [0,#lines), or empty when the starting line is unknown.
+     */
+    public OptionalInt getStartLine() { return startLine >= 0 ? OptionalInt.of(startLine) : OptionalInt.empty(); }
+
+    /**
+     * @return Exclusive ending line number with interval [0,#lines], or empty when the ending line is unknown.
+     */
+    public OptionalInt getEndLine() { return endLine >= 0 ? OptionalInt.of(endLine) : OptionalInt.empty(); }
+
+
+    /**
      * Gets the number of characters in the region.
      *
      * @return the length of the region; which may be zero
@@ -124,12 +172,12 @@ public final class Region implements Serializable {
     /**
      * Checks if this region contains given region.
      * <p>
-     * Invariant: if (a contains b) and (b contains a) then (a == b).
-     * Invariant: if (a contains b) or (b contains a) then (a intersects b).
+     * Invariant: if (a contains b) and (b contains a) then (a == b). Invariant: if (a contains b) or (b contains a)
+     * then (a intersects b).
      * <p>
-     * Note that calling this implementation with an empty region is different from calling the other
-     * {@link #contains(int)} overload with an offset. In this implementation,
-     * an empty region is considered to be in a region when (start <= offset <= end).
+     * Note that calling this implementation with an empty region is different from calling the other {@link
+     * #contains(int)} overload with an offset. In this implementation, an empty region is considered to be in a region
+     * when (start <= offset <= end).
      * <p>
      * When this region is empty, it can only contain the other region when that is also empty.
      *
@@ -147,15 +195,14 @@ public final class Region implements Serializable {
     /**
      * Checks if this region contains the given offset.
      * <p>
-     * Note that calling this implementation with an offset is different from calling the other
-     * {@link #contains(Region)} overload with an empty region. In this implementation,
-     * an offset is considered to be in a region when (start <= offset < end).
+     * Note that calling this implementation with an offset is different from calling the other {@link
+     * #contains(Region)} overload with an empty region. In this implementation, an offset is considered to be in a
+     * region when (start <= offset < end).
      * <p>
      * When this region is empty, it contains no offsets.
      *
      * @param offset the offset to check
-     * @return {@code true} if this region contains the given offset;
-     * otherwise, {@code false}.
+     * @return {@code true} if this region contains the given offset; otherwise, {@code false}.
      */
     public boolean contains(int offset) {
         return this.getStartOffset() <= offset && offset < this.getEndOffset();
@@ -164,8 +211,8 @@ public final class Region implements Serializable {
     /**
      * Checks if this region intersects the given region.
      *
-     * Invariant: if this method returns {@code true},
-     * then {@link Region#intersectionOf(Region, Region)} )} will not return {@code null}.
+     * Invariant: if this method returns {@code true}, then {@link Region#intersectionOf(Region, Region)} )} will not
+     * return {@code null}.
      *
      * @param region the other region to check
      * @return {@code true} if this region intersects the given region; otherwise, {@code false}
@@ -180,38 +227,48 @@ public final class Region implements Serializable {
     /**
      * Gets the intersection of this region with the specified region.
      *
-     * Invariant: a contains (a intersectionWith b)
-     * Invariant: b contains (a intersectionWith b)
-     * Invariant: if (a intersectionWith b) == a then (b contains a).
-     * Invariant: if (a intersectionWith b) == b then (a contains b).
+     * Invariant: a contains (a intersectionWith b) Invariant: b contains (a intersectionWith b) Invariant: if (a
+     * intersectionWith b) == a then (b contains a). Invariant: if (a intersectionWith b) == b then (a contains b).
      *
      * @param a one region to find the intersection with
      * @param b another region to find the intersection with
      * @return the intersection of both regions, which may be empty; or {@code null} when there is no intersection
      */
     public static @Nullable Region intersectionOf(Region a, Region b) {
-        if (!a.intersectsWith(b)) return null;
+        if(!a.intersectsWith(b)) return null;
         return new Region(
             Math.max(a.startOffset, b.startOffset),
             Math.min(a.endOffset, b.endOffset)
         );
     }
 
-    @Override public boolean equals(@Nullable Object obj) {
-        if(this == obj) return true;
-        if(obj == null || getClass() != obj.getClass()) return false;
-        final Region other = (Region) obj;
-        // @formatter:off
-        return startOffset == other.startOffset
-            && endOffset == other.endOffset;
-        // @formatter:on
+
+    @Override public boolean equals(@Nullable Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        final Region region = (Region)o;
+        return startOffset == region.startOffset &&
+            endOffset == region.endOffset &&
+            startLine == region.startLine &&
+            endLine == region.endLine;
     }
 
     @Override public int hashCode() {
-        return Objects.hash(startOffset, endOffset);
+        return Objects.hash(startOffset, endOffset, startLine, endLine);
     }
 
     @Override public String toString() {
-        return isEmpty() ? "" + startOffset : startOffset + "-" + endOffset;
+        final StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(startOffset);
+        if(!isEmpty()) {
+            stringBuilder.append("-").append(endOffset);
+        }
+        if(startLine != -1) {
+            stringBuilder.append("@").append(startLine);
+        }
+        if(endLine != -1 && startLine != endLine) {
+            stringBuilder.append("-").append(endLine);
+        }
+        return stringBuilder.toString();
     }
 }

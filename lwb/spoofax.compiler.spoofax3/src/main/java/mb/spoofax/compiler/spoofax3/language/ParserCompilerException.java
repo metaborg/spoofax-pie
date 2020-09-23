@@ -16,7 +16,7 @@ public abstract class ParserCompilerException extends Exception {
 
         R checkFail(KeyedMessages messages);
 
-        R createParseTableFail(Exception cause);
+        R compilerFail(Exception cause);
     }
 
     public static ParserCompilerException mainFileFail(ResourceKey mainFile) {
@@ -31,8 +31,8 @@ public abstract class ParserCompilerException extends Exception {
         return ParserCompilerExceptions.checkFail(messages);
     }
 
-    public static ParserCompilerException createParseTableFail(Exception cause) {
-        final ParserCompilerException e = ParserCompilerExceptions.createParseTableFail(cause);
+    public static ParserCompilerException compilerFail(Exception cause) {
+        final ParserCompilerException e = ParserCompilerExceptions.compilerFail(cause);
         e.initCause(cause);
         return e;
     }
@@ -49,8 +49,8 @@ public abstract class ParserCompilerException extends Exception {
         return caseOf()
             .mainFileFail((mainFile) -> "Main file '" + mainFile + "' does not exist or is not a file")
             .rootDirectoryFail((rootDirectory) -> "Root directory '" + rootDirectory + "' does not exist or is not a directory")
-            .checkFail((messages) -> "Parsing or checking the syntax specification failed; see error messages")
-            .createParseTableFail((cause) -> "Creating the parse table failed; see cause")
+            .checkFail((messages) -> "Parsing or checking SDF3 source files failed; see error messages")
+            .compilerFail((cause) -> "Parse table compiler failed unexpectedly; see cause")
             ;
     }
 

@@ -21,6 +21,7 @@ import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.*
+import java.util.*
 
 open class Spoofax3LanguageProjectExtension(project: Project) {
   val compilerInput: Property<Spoofax3LanguageProjectCompilerInputBuilder> = project.objects.property()
@@ -142,17 +143,26 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
                 logger.error(message)
                 project.logMessages(it)
                 throw GradleException(message)
-              }.createParseTableFail {
+              }.compilerFail {
                 logger.error(message, it)
                 throw GradleException(message, it)
               }.otherwise {
                 logger.error(message)
                 throw GradleException(message)
               }
-            }.strategoRuntimeCompilerFail {
-              val message = e.message
-              logger.error(message, it)
-              throw GradleException(message, it)
+            }.strategoRuntimeCompilerFail { strategoCompilerException ->
+              val message = "${e.message}. ${strategoCompilerException.message}"
+              strategoCompilerException.caseOf().checkFail {
+                logger.error(message)
+                project.logMessages(it)
+                throw GradleException(message)
+              }.compilerFail {
+                logger.error(message, it)
+                throw GradleException(message, it)
+              }.otherwise {
+                logger.error(message)
+                throw GradleException(message)
+              }
             }
           }
         }
@@ -168,9 +178,11 @@ fun Project.logMessages(messages: KeyedMessages) {
   messages.messagesWithKey.forEach { (resource, messages) ->
     messages.forEach { message ->
       val region = message.region
+      val optionalLine = if(region == null) OptionalInt.empty() else region.startLine
+      val lineStr = if(optionalLine.isPresent) "${optionalLine.asInt + 1}:" else "" // + 1 because lines in most editors are not zero based.
       val severity = message.severity
       val exception = message.exception
-      val msg = "$resource:${if(region != null) "${region.startOffset}:" else ""} $severity: ${message.text}"
+      val msg = "$resource:$lineStr $severity: ${message.text}"
       @Suppress("WHEN_ENUM_CAN_BE_NULL_IN_JAVA")
       when(exception) {
         null -> when(severity) {

@@ -5,11 +5,11 @@ import org.spoofax.jsglr.client.imploder.IToken;
 
 public class RegionUtil {
     public static Region fromToken(IToken token) {
-        return Region.fromOffsets(token.getStartOffset(), token.getEndOffset() + 1);
+        return Region.fromOffsets(token.getStartOffset(), token.getEndOffset() + 1, token.getLine(), token.getEndLine());
     }
 
     public static Region fromTokens(IToken left, IToken right) {
-        return Region.fromOffsets(left.getStartOffset(), right.getEndOffset() + 1);
+        return Region.fromOffsets(left.getStartOffset(), right.getEndOffset() + 1, left.getLine(), right.getEndLine());
     }
 
     public static Region fromTokensLayout(IToken left, IToken right, boolean isNullable) {
@@ -25,6 +25,6 @@ public class RegionUtil {
             rightEndOffset++;
         }
 
-        return Region.fromOffsets(leftStartOffset, rightEndOffset + 1);
+        return Region.fromOffsets(leftStartOffset, rightEndOffset + 1, left.getLine(), right.getEndLine());
     }
 }

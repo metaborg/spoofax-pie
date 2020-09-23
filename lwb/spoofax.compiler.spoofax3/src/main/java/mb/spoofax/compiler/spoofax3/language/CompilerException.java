@@ -9,7 +9,7 @@ public abstract class CompilerException extends Exception {
     public interface Cases<R> {
         R parserCompilerFail(ParserCompilerException parserCompilerException);
 
-        R strategoRuntimeCompilerFail(Exception exception);
+        R strategoRuntimeCompilerFail(StrategoCompilerException strategoCompilerException);
     }
 
     public static CompilerException parserCompilerFail(ParserCompilerException cause) {
@@ -18,7 +18,7 @@ public abstract class CompilerException extends Exception {
         return e;
     }
 
-    public static CompilerException strategoRuntimeCompilerFail(Exception cause) {
+    public static CompilerException strategoRuntimeCompilerFail(StrategoCompilerException cause) {
         final CompilerException e = CompilerExceptions.strategoRuntimeCompilerFail(cause);
         e.initCause(cause);
         return e;
@@ -35,7 +35,7 @@ public abstract class CompilerException extends Exception {
     @Override public @NonNull String getMessage() {
         return caseOf()
             .parserCompilerFail((cause) -> "Parser compiler failed")
-            .strategoRuntimeCompilerFail((cause) -> "Stratego runtime compiler failed")
+            .strategoRuntimeCompilerFail((cause) -> "Stratego compiler failed")
             ;
     }
 
