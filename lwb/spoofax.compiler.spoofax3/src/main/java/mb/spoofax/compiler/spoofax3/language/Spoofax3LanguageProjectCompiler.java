@@ -1,9 +1,9 @@
 package mb.spoofax.compiler.spoofax3.language;
 
-import mb.common.result.AggregateException;
+import mb.common.message.KeyedMessages;
+import mb.common.message.KeyedMessagesBuilder;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
-import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.LanguageProjectCompilerInputBuilder;
@@ -11,11 +11,10 @@ import org.immutables.value.Value;
 
 import javax.inject.Inject;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Optional;
 
 @Value.Enclosing
-public class Spoofax3LanguageProjectCompiler implements TaskDef<Spoofax3LanguageProjectCompiler.Input, Result<None, AggregateException>> {
+public class Spoofax3LanguageProjectCompiler implements TaskDef<Spoofax3LanguageProjectCompiler.Input, Result<KeyedMessages, CompilerException>> {
     private final Spoofax3ParserLanguageCompiler parserCompiler;
     private final Spoofax3StrategoRuntimeLanguageCompiler strategoRuntimeCompiler;
 
@@ -32,14 +31,26 @@ public class Spoofax3LanguageProjectCompiler implements TaskDef<Spoofax3Language
         return getClass().getName();
     }
 
-    @Override public Result<None, AggregateException> exec(ExecContext context, Input input) throws Exception {
-        final ArrayList<Exception> exceptions = new ArrayList<>();
-        input.parser().ifPresent(i -> context.require(parserCompiler, i).ifErr(exceptions::add));
-        input.strategoRuntime().ifPresent(i -> context.require(strategoRuntimeCompiler, i).ifErr(exceptions::add));
-        if(!exceptions.isEmpty()) {
-            return Result.ofErr(new AggregateException(new ArrayList<>(), exceptions));
+    @Override public Result<KeyedMessages, CompilerException> exec(ExecContext context, Input input) throws Exception {
+        final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
+        if(input.parser().isPresent()) {
+            final Result<KeyedMessages, CompilerException> result = context.require(parserCompiler, input.parser().get())
+                .mapErr((e) -> CompilerException.parserCompilerFail(e));
+            if(result.isErr()) {
+                return result;
+            }
+            messagesBuilder.addMessages(result.get());
         }
-        return Result.ofOk(None.instance);
+        if(input.strategoRuntime().isPresent()) {
+            final Result<KeyedMessages, CompilerException> result = context.require(strategoRuntimeCompiler, input.strategoRuntime().get())
+                .map((n) -> KeyedMessages.of())
+                .mapErr((e) -> CompilerException.strategoRuntimeCompilerFail(e));
+            if(result.isErr()) {
+                return result;
+            }
+            messagesBuilder.addMessages(result.get());
+        }
+        return Result.ofOk(messagesBuilder.build());
     }
 
 

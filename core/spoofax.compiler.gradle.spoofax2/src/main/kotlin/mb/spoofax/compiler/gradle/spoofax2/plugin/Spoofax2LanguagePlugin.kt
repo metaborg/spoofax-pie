@@ -42,6 +42,9 @@ open class Spoofax2LanguageProjectExtension(project: Project) {
 @Suppress("unused")
 open class Spoofax2LanguagePlugin : Plugin<Project> {
   override fun apply(project: Project) {
+    // Apply Spoofax 2 Gradle base plugin to make its configurations and variants available.
+    project.plugins.apply("org.metaborg.spoofax.gradle.base")
+
     // First apply the language plugin to make its extension available.
     project.plugins.apply("org.metaborg.spoofax.compiler.gradle.language")
     val languageProjectExtension = project.extensions.getByType<LanguageProjectExtension>()
@@ -55,9 +58,6 @@ open class Spoofax2LanguagePlugin : Plugin<Project> {
 
     // Add a configuration closure to the language project that syncs our finalized input to their builder.
     languageProjectExtension.compilerInput { extension.compilerInputFinalized.syncTo(this) }
-
-    // Apply Spoofax 2 Gradle base plugin to make its configurations and variants available.
-    project.plugins.apply("org.metaborg.spoofax.gradle.base")
 
     project.afterEvaluate {
       configure(project, component, extension.compilerInputFinalized, languageProjectExtension.compilerInputFinalized)

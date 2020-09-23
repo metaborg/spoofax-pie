@@ -63,7 +63,7 @@ class Sdf3AnalyzerTest extends Sdf3TestBase {
         assertNotNull(result3.ast);
         assertNotNull(result3.analysis);
 
-        assertEquals(4, result.messages.size());
+        assertEquals(3, result.messages.size());
         assertTrue(result.messages.containsError());
         boolean foundCorrectMessage = result.messages.getMessagesWithKey().stream()
             .filter(msg -> resource3.equals(msg.getKey()))

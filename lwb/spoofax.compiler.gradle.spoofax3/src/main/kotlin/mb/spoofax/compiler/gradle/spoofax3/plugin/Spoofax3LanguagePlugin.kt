@@ -2,6 +2,8 @@
 
 package mb.spoofax.compiler.gradle.spoofax3.plugin
 
+import mb.common.message.KeyedMessages
+import mb.common.message.Severity
 import mb.log.noop.NoopLoggerFactory
 import mb.pie.runtime.PieBuilderImpl
 import mb.sdf3.spoofax.DaggerSdf3Component
@@ -129,11 +131,29 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
       }
 
       doLast {
-        project.deleteDirectory(input.generatedJavaSourcesDirectory(), component.resourceService)
-        project.deleteDirectory(input.generatedResourcesDirectory(), component.resourceService)
         component.pie.newSession().use { session ->
-          session.require(component.spoofax3LanguageProjectCompiler.createTask(input)).ifErr { e ->
-            throw GradleException("Failed to compile Spoofax 3 based language project", e)
+          val result = session.require(component.spoofax3LanguageProjectCompiler.createTask(input))
+          result.ifOk {
+            project.logMessages(it)
+          }.ifErr { e ->
+            e.caseOf().parserCompilerFail { parserCompilerException ->
+              val message = "${e.message}. ${parserCompilerException.message}"
+              parserCompilerException.caseOf().checkFail {
+                logger.error(message)
+                project.logMessages(it)
+                throw GradleException(message)
+              }.createParseTableFail {
+                logger.error(message, it)
+                throw GradleException(message, it)
+              }.otherwise {
+                logger.error(message)
+                throw GradleException(message)
+              }
+            }.strategoRuntimeCompilerFail {
+              val message = e.message
+              logger.error(message, it)
+              throw GradleException(message, it)
+            }
           }
         }
       }
@@ -141,5 +161,33 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
 
     // Make compileJava depend on our task, because we generate Java code.
     project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(compileTask)
+  }
+}
+
+fun Project.logMessages(messages: KeyedMessages) {
+  messages.messagesWithKey.forEach { (resource, messages) ->
+    messages.forEach { message ->
+      val region = message.region
+      val severity = message.severity
+      val exception = message.exception
+      val msg = "$resource:${if(region != null) "${region.startOffset}:" else ""} $severity: ${message.text}"
+      @Suppress("WHEN_ENUM_CAN_BE_NULL_IN_JAVA")
+      when(exception) {
+        null -> when(severity) {
+          Severity.Trace -> logger.trace(msg)
+          Severity.Debug -> logger.debug(msg)
+          Severity.Info -> logger.info(msg)
+          Severity.Warning -> logger.warn(msg)
+          Severity.Error -> logger.error(msg)
+        }
+        else -> when(severity) {
+          Severity.Trace -> logger.trace(msg, exception)
+          Severity.Debug -> logger.debug(msg, exception)
+          Severity.Info -> logger.info(msg, exception)
+          Severity.Warning -> logger.warn(msg, exception)
+          Severity.Error -> logger.error(msg, exception)
+        }
+      }
+    }
   }
 }

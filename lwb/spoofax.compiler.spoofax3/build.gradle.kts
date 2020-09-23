@@ -18,6 +18,8 @@ dependencies {
 
   compileOnly("org.checkerframework:checker-qual-android")
   compileOnly("org.immutables:value-annotations")
+  compileOnly("org.derive4j:derive4j-annotation")
 
   annotationProcessor("org.immutables:value")
+  annotationProcessor("org.derive4j:derive4j")
 }
