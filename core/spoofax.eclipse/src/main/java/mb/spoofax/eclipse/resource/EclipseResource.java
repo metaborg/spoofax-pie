@@ -312,7 +312,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
         }
     }
 
-    @Override public Stream<? extends EclipseResource> walk() throws IOException {
+    @Override public Stream<EclipseResource> walk() throws IOException {
         final Stream.Builder<EclipseResource> builder = Stream.builder();
         try {
             recursiveMembers(getContainer(), builder, null, null, null);
@@ -323,7 +323,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
     }
 
     @Override
-    public Stream<? extends EclipseResource> walk(ResourceWalker walker, ResourceMatcher matcher, @Nullable HierarchicalResourceAccess access) throws IOException {
+    public Stream<EclipseResource> walk(ResourceWalker walker, ResourceMatcher matcher, @Nullable HierarchicalResourceAccess access) throws IOException {
         final Stream.Builder<EclipseResource> builder = Stream.builder();
         try {
             recursiveMembers(getContainer(), builder, walker, matcher, access);
