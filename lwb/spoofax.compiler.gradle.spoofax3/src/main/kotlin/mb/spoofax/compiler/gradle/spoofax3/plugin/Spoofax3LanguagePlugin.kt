@@ -3,9 +3,13 @@
 package mb.spoofax.compiler.gradle.spoofax3.plugin
 
 import mb.common.message.KeyedMessages
+import mb.common.message.Message
+import mb.common.message.Messages
 import mb.common.message.Severity
-import mb.log.noop.NoopLoggerFactory
+import mb.log.slf4j.SLF4JLoggerFactory
 import mb.pie.runtime.PieBuilderImpl
+import mb.resource.ResourceKey
+import mb.resource.fs.FSPath
 import mb.sdf3.spoofax.DaggerSdf3Component
 import mb.spoofax.compiler.gradle.*
 import mb.spoofax.compiler.gradle.plugin.*
@@ -54,7 +58,7 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
     val languageProjectExtension = project.extensions.getByType<LanguageProjectExtension>()
 
     val platformComponent = DaggerPlatformComponent.builder()
-      .loggerFactoryModule(LoggerFactoryModule(NoopLoggerFactory()))
+      .loggerFactoryModule(LoggerFactoryModule(SLF4JLoggerFactory()))
       .platformPieModule(PlatformPieModule { PieBuilderImpl() })
       .build() // OPTO: cache instantiation of platform component?
     val component = DaggerSpoofax3CompilerGradleComponent.builder()
@@ -135,33 +139,39 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
         component.pie.newSession().use { session ->
           val result = session.require(component.spoofax3LanguageProjectCompiler.createTask(input))
           result.ifOk {
-            project.logMessages(it)
+            project.logMessages(it, FSPath(project.projectDir))
           }.ifErr { e ->
             e.caseOf().parserCompilerFail { parserCompilerException ->
               val message = "${e.message}. ${parserCompilerException.message}"
               parserCompilerException.caseOf().checkFail {
                 logger.error(message)
-                project.logMessages(it)
+                project.logMessages(it, FSPath(project.projectDir))
                 throw GradleException(message)
-              }.compilerFail {
-                logger.error(message, it)
-                throw GradleException(message, it)
               }.otherwise {
-                logger.error(message)
-                throw GradleException(message)
+                val cause = parserCompilerException.cause
+                if(cause != null) {
+                  logger.error("$message. See cause at the end of the build")
+                  throw GradleException(message, cause)
+                } else {
+                  logger.error(message)
+                  throw GradleException(message)
+                }
               }
             }.strategoRuntimeCompilerFail { strategoCompilerException ->
               val message = "${e.message}. ${strategoCompilerException.message}"
               strategoCompilerException.caseOf().checkFail {
                 logger.error(message)
-                project.logMessages(it)
+                project.logMessages(it, FSPath(project.projectDir))
                 throw GradleException(message)
-              }.compilerFail {
-                logger.error(message, it)
-                throw GradleException(message, it)
               }.otherwise {
-                logger.error(message)
-                throw GradleException(message)
+                val cause = strategoCompilerException.cause
+                if(cause != null) {
+                  logger.error("$message. See cause at the end of the build")
+                  throw GradleException(message, cause)
+                } else {
+                  logger.error(message)
+                  throw GradleException(message)
+                }
               }
             }
           }
@@ -174,32 +184,52 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
   }
 }
 
-fun Project.logMessages(messages: KeyedMessages) {
+fun Project.logMessages(messages: KeyedMessages, backupResource: ResourceKey) {
   messages.messagesWithKey.forEach { (resource, messages) ->
-    messages.forEach { message ->
-      val region = message.region
+    logMessages(messages, resource, backupResource)
+  }
+  messages.messagesWithoutKey.forEach { message ->
+    logMessage(message, null, backupResource)
+  }
+}
+
+fun Project.logMessages(messages: Messages, resource: ResourceKey?, backupResource: ResourceKey) {
+  messages.forEach { message -> logMessage(message, resource, backupResource) }
+}
+
+fun Project.logMessages(messages: Iterable<Message>, resource: ResourceKey?, backupResource: ResourceKey) {
+  messages.forEach { message -> logMessage(message, resource, backupResource) }
+}
+
+fun Project.logMessage(message: Message, resource: ResourceKey?, backupResource: ResourceKey) {
+  val region = message.region
+  val prefix = run {
+    if(resource != null) {
       val optionalLine = if(region == null) OptionalInt.empty() else region.startLine
       val lineStr = if(optionalLine.isPresent) "${optionalLine.asInt + 1}:" else "" // + 1 because lines in most editors are not zero based.
-      val severity = message.severity
-      val exception = message.exception
-      val msg = "$resource:$lineStr $severity: ${message.text}"
-      @Suppress("WHEN_ENUM_CAN_BE_NULL_IN_JAVA")
-      when(exception) {
-        null -> when(severity) {
-          Severity.Trace -> logger.trace(msg)
-          Severity.Debug -> logger.debug(msg)
-          Severity.Info -> logger.info(msg)
-          Severity.Warning -> logger.warn(msg)
-          Severity.Error -> logger.error(msg)
-        }
-        else -> when(severity) {
-          Severity.Trace -> logger.trace(msg, exception)
-          Severity.Debug -> logger.debug(msg, exception)
-          Severity.Info -> logger.info(msg, exception)
-          Severity.Warning -> logger.warn(msg, exception)
-          Severity.Error -> logger.error(msg, exception)
-        }
-      }
+      "$resource:$lineStr "
+    } else {
+      "in $backupResource (originating resource unknown) "
+    }
+  }
+  val severity = message.severity
+  val exception = message.exception
+  val msg = "$prefix$severity: ${message.text}"
+  @Suppress("WHEN_ENUM_CAN_BE_NULL_IN_JAVA")
+  when(exception) {
+    null -> when(severity) {
+      Severity.Trace -> logger.trace(msg)
+      Severity.Debug -> logger.debug(msg)
+      Severity.Info -> logger.info(msg)
+      Severity.Warning -> logger.warn(msg)
+      Severity.Error -> logger.error(msg)
+    }
+    else -> when(severity) {
+      Severity.Trace -> logger.trace(msg, exception)
+      Severity.Debug -> logger.debug(msg, exception)
+      Severity.Info -> logger.info(msg, exception)
+      Severity.Warning -> logger.warn(msg, exception)
+      Severity.Error -> logger.error(msg, exception)
     }
   }
 }

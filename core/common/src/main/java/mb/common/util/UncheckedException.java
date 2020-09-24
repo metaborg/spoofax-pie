@@ -11,4 +11,9 @@ public class UncheckedException extends RuntimeException {
     @Override public Exception getCause() {
         return (Exception)super.getCause();
     }
+
+
+    @Override public Throwable fillInStackTrace() {
+        return this; // Do nothing so that no stack trace is created, saving memory and CPU time.
+    }
 }

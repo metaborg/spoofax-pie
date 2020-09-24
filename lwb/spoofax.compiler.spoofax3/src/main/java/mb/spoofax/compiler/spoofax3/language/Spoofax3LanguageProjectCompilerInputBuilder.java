@@ -29,12 +29,14 @@ public class Spoofax3LanguageProjectCompilerInputBuilder {
     public Spoofax3LanguageProjectCompiler.Input build(LanguageProject languageProject) {
         final String directorySuffix = "spoofax3Language";
         final ResourcePath generatedResourcesDirectory = languageProject.project().buildGeneratedResourcesDirectory().appendRelativePath(directorySuffix);
-        final ResourcePath generatedJavaSourcesDirectory = languageProject.project().buildGeneratedSourcesDirectory().appendRelativePath(directorySuffix);
+        final ResourcePath generatedSourcesDirectory = languageProject.project().buildGeneratedSourcesDirectory().appendRelativePath(directorySuffix);
+        final ResourcePath generatedJavaSourcesDirectory = generatedSourcesDirectory.appendRelativePath("java");
+        final ResourcePath generatedStrategoSourcesDirectory = generatedSourcesDirectory.appendRelativePath("stratego");
 
-        final Spoofax3ParserLanguageCompiler.@Nullable Input parser = buildParser(languageProject, generatedResourcesDirectory);
+        final Spoofax3ParserLanguageCompiler.@Nullable Input parser = buildParser(languageProject, generatedResourcesDirectory, generatedStrategoSourcesDirectory);
         if(parser != null) project.parser(parser);
 
-        final Spoofax3StrategoRuntimeLanguageCompiler.@Nullable Input strategoRuntime = buildStrategoRuntime(languageProject, generatedJavaSourcesDirectory);
+        final Spoofax3StrategoRuntimeLanguageCompiler.@Nullable Input strategoRuntime = buildStrategoRuntime(languageProject, generatedJavaSourcesDirectory, parser);
         if(strategoRuntime != null) project.strategoRuntime(strategoRuntime);
 
         return project
@@ -46,20 +48,26 @@ public class Spoofax3LanguageProjectCompilerInputBuilder {
 
     private Spoofax3ParserLanguageCompiler.@Nullable Input buildParser(
         LanguageProject languageProject,
-        ResourcePath generatedResourcesDirectory
+        ResourcePath generatedResourcesDirectory,
+        ResourcePath generatedStrategoSourcesDirectory
     ) {
         if(!parserEnabled) return null;
         return parser
             .languageProject(languageProject)
             .generatedResourcesDirectory(generatedResourcesDirectory)
+            .generatedStrategoSourcesDirectory(generatedStrategoSourcesDirectory)
             .build();
     }
 
     private Spoofax3StrategoRuntimeLanguageCompiler.@Nullable Input buildStrategoRuntime(
         LanguageProject languageProject,
-        ResourcePath generatedJavaSourcesDirectory
+        ResourcePath generatedJavaSourcesDirectory,
+        Spoofax3ParserLanguageCompiler.@Nullable Input parserInput
     ) {
         if(!strategoRuntimeEnabled) return null;
+        if(parserInput != null) {
+            parserInput.syncTo(strategoRuntime);
+        }
         return strategoRuntime
             .languageProject(languageProject)
             .generatedJavaSourcesDirectory(generatedJavaSourcesDirectory)

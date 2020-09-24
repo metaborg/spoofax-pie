@@ -23,7 +23,7 @@ dependencies {
   api(project(":spoofax.compiler.spoofax3.dagger"))
   api("com.google.dagger:dagger")
   implementation("org.metaborg:pie.runtime")
-  implementation("org.metaborg:log.backend.noop")
+  implementation("org.metaborg:log.backend.slf4j")
 
   kapt("com.google.dagger:dagger-compiler")
   compileOnly("org.immutables:value-annotations") // Dagger accesses these annotations, which have class retention.

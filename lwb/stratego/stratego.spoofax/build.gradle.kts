@@ -52,6 +52,9 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   manualCheckMultiTaskDef(taskPackageId, "StrategoCheckMulti")
   addTaskDefs(taskPackageId, "StrategoAnalyze")
 
+  // Utility task definitions
+  addTaskDefs(taskPackageId, "StrategoPrettyPrint")
+
   // Stratego incremental compiler task definitions
   val strBuildTaskPackageId = "mb.stratego.build.strincr"
   addTaskDefs(strBuildTaskPackageId, "StrIncr")

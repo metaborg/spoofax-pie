@@ -7,6 +7,8 @@ import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Optional;
+
 @ADT
 public abstract class ParserCompilerException extends Exception {
     public interface Cases<R> {
@@ -16,7 +18,11 @@ public abstract class ParserCompilerException extends Exception {
 
         R checkFail(KeyedMessages messages);
 
-        R compilerFail(Exception cause);
+        R parseTableCompilerFail(Exception cause);
+
+        R signatureGeneratorFail(Exception cause);
+
+        R prettyPrinterGeneratorFail(Exception cause);
     }
 
     public static ParserCompilerException mainFileFail(ResourceKey mainFile) {
@@ -31,8 +37,20 @@ public abstract class ParserCompilerException extends Exception {
         return ParserCompilerExceptions.checkFail(messages);
     }
 
-    public static ParserCompilerException compilerFail(Exception cause) {
-        final ParserCompilerException e = ParserCompilerExceptions.compilerFail(cause);
+    public static ParserCompilerException parseTableCompilerFail(Exception cause) {
+        final ParserCompilerException e = ParserCompilerExceptions.parseTableCompilerFail(cause);
+        e.initCause(cause);
+        return e;
+    }
+
+    public static ParserCompilerException signatureGeneratorFail(Exception cause) {
+        final ParserCompilerException e = ParserCompilerExceptions.signatureGeneratorFail(cause);
+        e.initCause(cause);
+        return e;
+    }
+
+    public static ParserCompilerException prettyPrinterGeneratorFail(Exception cause) {
+        final ParserCompilerException e = ParserCompilerExceptions.prettyPrinterGeneratorFail(cause);
         e.initCause(cause);
         return e;
     }
@@ -50,7 +68,9 @@ public abstract class ParserCompilerException extends Exception {
             .mainFileFail((mainFile) -> "Main file '" + mainFile + "' does not exist or is not a file")
             .rootDirectoryFail((rootDirectory) -> "Root directory '" + rootDirectory + "' does not exist or is not a directory")
             .checkFail((messages) -> "Parsing or checking SDF3 source files failed; see error messages")
-            .compilerFail((cause) -> "Parse table compiler failed unexpectedly; see cause")
+            .parseTableCompilerFail((cause) -> "Parse table compiler failed unexpectedly")
+            .signatureGeneratorFail((cause) -> "Stratego signature generator failed unexpectedly")
+            .prettyPrinterGeneratorFail((cause) -> "Pretty-printer generator failed unexpectedly")
             ;
     }
 

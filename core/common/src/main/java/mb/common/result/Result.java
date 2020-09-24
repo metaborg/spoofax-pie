@@ -1,7 +1,7 @@
 package mb.common.result;
 
 import mb.common.option.Option;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import mb.common.util.UncheckedException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
@@ -105,7 +105,7 @@ public interface Result<T, E extends Exception> extends Serializable {
     default Result<T, E> throwUncheckedIfError() {
         if(isErr()) {
             // `getErr` is safe because error is present if `isErr` returns true.
-            throw new RuntimeException(getErr());
+            throw new UncheckedException(getErr());
         }
         return this;
     }
@@ -273,7 +273,7 @@ public interface Result<T, E extends Exception> extends Serializable {
 
     default T unwrapUnchecked() {
         // get is safe because error is present if not ok case
-        return ok().unwrapOrElseThrow(() -> new RuntimeException(err().get()));
+        return ok().unwrapOrElseThrow(() -> new UncheckedException(err().get()));
     }
 
     default T unwrapOr(T def) {

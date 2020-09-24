@@ -55,8 +55,8 @@ public abstract class StrategoCompilerException extends Exception {
             .mainFileFail((mainFile) -> "Main file '" + mainFile + "' does not exist or is not a file")
             .includeDirectoryFail((includeDirectory) -> "Include directory '" + includeDirectory + "' does not exist or is not a directory")
             .rootDirectoryFail((rootDirectory) -> "Root directory '" + rootDirectory + "' does not exist or is not a directory")
-            .checkFail((messages) -> "Parsing or checking Stratego source files failed; see error messages")
-            .compilerFail((cause) -> "Stratego compiler failed unexpectedly; see cause")
+            .checkFail((messages) -> "Parsing or checking Stratego source files failed")
+            .compilerFail((cause) -> "Stratego compiler failed unexpectedly")
             ;
     }
 

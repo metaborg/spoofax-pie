@@ -43,7 +43,8 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   // Utility task definitions
   val desugar = TypeInfo.of(taskPackageId, "Sdf3Desugar")
   val createSpec = TypeInfo.of(taskPackageId, "Sdf3CreateSpec")
-  addTaskDefs(desugar, createSpec)
+  val prettyPrint = TypeInfo.of(taskPackageId, "Sdf3PrettyPrint")
+  addTaskDefs(desugar, createSpec, prettyPrint)
 
 
   // Generation task definitions
