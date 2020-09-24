@@ -136,11 +136,15 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
                 }
             }
         }
-        //context.require(toParenthesizer, new Sdf3ParseTableToParenthesizer.Args(parseTableSupplier, "main"));
+
+        try {
+            toParenthesizer(context, input, parseTableSupplier);
+        } catch(Exception e) {
+            return Result.ofErr(ParserCompilerException.parenthesizerGeneratorFail(e));
+        }
 
         return Result.ofOk(messages);
 
-        // TODO: sdf3 to parenthesize, and pass that to origin task of the stratego compiler.
         // TODO: sdf3 to completer, and pass that to origin task of the stratego compiler.
     }
 
@@ -151,6 +155,11 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
 
     private void toPrettyPrinter(ExecContext context, Input input, Supplier<Result<IStrategoTerm, ?>> astSupplier) throws Exception {
         final Supplier<Result<IStrategoTerm, ?>> supplier = toPrettyPrinter.createSupplier(astSupplier);
+        writePrettyPrintedStrategoFile(context, input, supplier);
+    }
+
+    private void toParenthesizer(ExecContext context, Input input, Supplier<Result<ParseTable, ?>> parseTableSupplier) throws Exception {
+        final Supplier<Result<IStrategoTerm, ?>> supplier = toParenthesizer.createSupplier(new Sdf3ParseTableToParenthesizer.Args(parseTableSupplier, "main"));
         writePrettyPrintedStrategoFile(context, input, supplier);
     }
 

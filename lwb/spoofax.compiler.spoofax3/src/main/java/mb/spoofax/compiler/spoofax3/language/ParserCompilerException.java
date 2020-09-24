@@ -23,6 +23,8 @@ public abstract class ParserCompilerException extends Exception {
         R signatureGeneratorFail(Exception cause);
 
         R prettyPrinterGeneratorFail(Exception cause);
+
+        R parenthesizerGeneratorFail(Exception cause);
     }
 
     public static ParserCompilerException mainFileFail(ResourceKey mainFile) {
@@ -55,6 +57,13 @@ public abstract class ParserCompilerException extends Exception {
         return e;
     }
 
+    public static ParserCompilerException parenthesizerGeneratorFail(Exception cause) {
+        final ParserCompilerException e = ParserCompilerExceptions.parenthesizerGeneratorFail(cause);
+        e.initCause(cause);
+        return e;
+    }
+
+
 
     public abstract <R> R match(Cases<R> cases);
 
@@ -71,6 +80,7 @@ public abstract class ParserCompilerException extends Exception {
             .parseTableCompilerFail((cause) -> "Parse table compiler failed unexpectedly")
             .signatureGeneratorFail((cause) -> "Stratego signature generator failed unexpectedly")
             .prettyPrinterGeneratorFail((cause) -> "Pretty-printer generator failed unexpectedly")
+            .parenthesizerGeneratorFail((cause) -> "Parenthesizer generator failed unexpectedly")
             ;
     }
 
