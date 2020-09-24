@@ -37,7 +37,10 @@ public abstract class StrategoCompilerException extends Exception {
     }
 
     public static StrategoCompilerException compilerFail(Exception cause) {
-        final StrategoCompilerException e = StrategoCompilerExceptions.compilerFail(cause);
+        return withCause(StrategoCompilerExceptions.compilerFail(cause), cause);
+    }
+
+    private static StrategoCompilerException withCause(StrategoCompilerException e, Exception cause) {
         e.initCause(cause);
         return e;
     }

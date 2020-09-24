@@ -25,6 +25,8 @@ public abstract class ParserCompilerException extends Exception {
         R prettyPrinterGeneratorFail(Exception cause);
 
         R parenthesizerGeneratorFail(Exception cause);
+
+        R completionRuntimeGeneratorFail(Exception cause);
     }
 
     public static ParserCompilerException mainFileFail(ResourceKey mainFile) {
@@ -40,25 +42,26 @@ public abstract class ParserCompilerException extends Exception {
     }
 
     public static ParserCompilerException parseTableCompilerFail(Exception cause) {
-        final ParserCompilerException e = ParserCompilerExceptions.parseTableCompilerFail(cause);
-        e.initCause(cause);
-        return e;
+        return withCause(ParserCompilerExceptions.parseTableCompilerFail(cause), cause);
     }
 
     public static ParserCompilerException signatureGeneratorFail(Exception cause) {
-        final ParserCompilerException e = ParserCompilerExceptions.signatureGeneratorFail(cause);
-        e.initCause(cause);
-        return e;
+        return withCause(ParserCompilerExceptions.signatureGeneratorFail(cause), cause);
     }
 
     public static ParserCompilerException prettyPrinterGeneratorFail(Exception cause) {
-        final ParserCompilerException e = ParserCompilerExceptions.prettyPrinterGeneratorFail(cause);
-        e.initCause(cause);
-        return e;
+        return withCause(ParserCompilerExceptions.prettyPrinterGeneratorFail(cause), cause);
     }
 
     public static ParserCompilerException parenthesizerGeneratorFail(Exception cause) {
-        final ParserCompilerException e = ParserCompilerExceptions.parenthesizerGeneratorFail(cause);
+        return withCause(ParserCompilerExceptions.parenthesizerGeneratorFail(cause), cause);
+    }
+
+    public static ParserCompilerException completionRuntimeGeneratorFail(Exception cause) {
+        return withCause(ParserCompilerExceptions.completionRuntimeGeneratorFail(cause), cause);
+    }
+
+    private static ParserCompilerException withCause(ParserCompilerException e, Exception cause) {
         e.initCause(cause);
         return e;
     }
@@ -81,6 +84,7 @@ public abstract class ParserCompilerException extends Exception {
             .signatureGeneratorFail((cause) -> "Stratego signature generator failed unexpectedly")
             .prettyPrinterGeneratorFail((cause) -> "Pretty-printer generator failed unexpectedly")
             .parenthesizerGeneratorFail((cause) -> "Parenthesizer generator failed unexpectedly")
+            .completionRuntimeGeneratorFail((cause) -> "Completion runtime generator failed unexpectedly")
             ;
     }
 

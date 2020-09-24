@@ -24,6 +24,7 @@ import mb.sdf3.spoofax.task.Sdf3ParseTableToFile;
 import mb.sdf3.spoofax.task.Sdf3ParseTableToParenthesizer;
 import mb.sdf3.spoofax.task.Sdf3Spec;
 import mb.sdf3.spoofax.task.Sdf3SpecToParseTable;
+import mb.sdf3.spoofax.task.Sdf3ToCompletionRuntime;
 import mb.sdf3.spoofax.task.Sdf3ToPrettyPrinter;
 import mb.sdf3.spoofax.task.Sdf3ToSignature;
 import mb.sdf3.spoofax.task.util.Sdf3Util;
@@ -56,6 +57,7 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
     private final Sdf3ToSignature toSignature;
     private final Sdf3ToPrettyPrinter toPrettyPrinter;
     private final Sdf3ParseTableToParenthesizer toParenthesizer;
+    private final Sdf3ToCompletionRuntime toCompletionRuntime;
 
     @Inject public Spoofax3ParserLanguageCompiler(
         Sdf3Parse parse,
@@ -68,7 +70,8 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
         StrategoPrettyPrint strategoPrettyPrint,
         Sdf3ToSignature toSignature,
         Sdf3ToPrettyPrinter toPrettyPrinter,
-        Sdf3ParseTableToParenthesizer toParenthesizer
+        Sdf3ParseTableToParenthesizer toParenthesizer,
+        Sdf3ToCompletionRuntime toCompletionRuntime
     ) {
         this.parse = parse;
         this.desugar = desugar.createFunction();
@@ -81,6 +84,7 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
         this.toSignature = toSignature;
         this.toPrettyPrinter = toPrettyPrinter;
         this.toParenthesizer = toParenthesizer;
+        this.toCompletionRuntime = toCompletionRuntime;
     }
 
 
@@ -121,6 +125,7 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
         final Sdf3AnalyzeMulti.Input analyzeInput = new Sdf3AnalyzeMulti.Input(rootDirectory.getPath(), resourceWalker, resourceMatcher, desugar.mapInput((ctx, i) -> parse.createRecoverableAstSupplier(i)));
         try(final Stream<? extends HierarchicalResource> stream = rootDirectory.walk(resourceWalker, resourceMatcher)) {
             for(HierarchicalResource file : new StreamIterable<>(stream)) {
+                // TODO: enable signature generation when it works.
 //                final Supplier<Result<SingleFileOutput, ?>> singleFileAnalysisOutputSupplier = analyze.createSingleFileOutputSupplier(analyzeInput, file.getPath());
 //                try {
 //                    toSignature(context, input, singleFileAnalysisOutputSupplier);
@@ -133,6 +138,11 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
                     toPrettyPrinter(context, input, astSupplier);
                 } catch(Exception e) {
                     return Result.ofErr(ParserCompilerException.prettyPrinterGeneratorFail(e));
+                }
+                try {
+                    toCompletionRuntime(context, input, astSupplier);
+                } catch(Exception e) {
+                    return Result.ofErr(ParserCompilerException.completionRuntimeGeneratorFail(e));
                 }
             }
         }
@@ -160,6 +170,11 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
 
     private void toParenthesizer(ExecContext context, Input input, Supplier<Result<ParseTable, ?>> parseTableSupplier) throws Exception {
         final Supplier<Result<IStrategoTerm, ?>> supplier = toParenthesizer.createSupplier(new Sdf3ParseTableToParenthesizer.Args(parseTableSupplier, "main"));
+        writePrettyPrintedStrategoFile(context, input, supplier);
+    }
+
+    private void toCompletionRuntime(ExecContext context, Input input, Supplier<Result<IStrategoTerm, ?>> astSupplier) throws Exception {
+        final Supplier<Result<IStrategoTerm, ?>> supplier = toCompletionRuntime.createSupplier(astSupplier);
         writePrettyPrintedStrategoFile(context, input, supplier);
     }
 
