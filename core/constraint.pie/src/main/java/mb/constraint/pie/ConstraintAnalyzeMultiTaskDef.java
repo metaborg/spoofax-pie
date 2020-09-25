@@ -142,7 +142,7 @@ public abstract class ConstraintAnalyzeMultiTaskDef implements TaskDef<Constrain
             .ifErr((e) -> messagesBuilder.addMessage("Getting AST for analysis failed", e, Severity.Error, file.getKey()))
         );
         try {
-            final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext();
+            final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext(true, root.getPath());
             final ConstraintAnalyzer.MultiFileResult result = analyze(input.root, asts, constraintAnalyzerContext);
             return Result.ofOk(new Output(messagesBuilder.build(), constraintAnalyzerContext, result));
         } catch(ConstraintAnalyzerException e) {

@@ -10,7 +10,7 @@ import javax.inject.Provider;
 @Sdf3Scope
 public class Sdf3ToSignature extends AnalyzedStrategoTransformTaskDef {
     @Inject public Sdf3ToSignature(Provider<StrategoRuntime> strategoRuntimeProvider) {
-        super(strategoRuntimeProvider, "module-to-sig");
+        super(strategoRuntimeProvider, "desugar-templates", "module-to-sig");
     }
 
     @Override public String getId() {

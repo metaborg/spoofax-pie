@@ -71,7 +71,7 @@ public abstract class ConstraintAnalyzeTaskDef implements TaskDef<ConstraintAnal
     public Result<Output, ?> exec(ExecContext context, Input input) throws IOException {
         return context.require(input.astSupplier)
             .mapCatching((ast) -> {
-                final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext();
+                final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext(false, null);
                 final SingleFileResult result = analyze(input.resourceKey, ast, constraintAnalyzerContext);
                 return new Output(constraintAnalyzerContext, result);
             });

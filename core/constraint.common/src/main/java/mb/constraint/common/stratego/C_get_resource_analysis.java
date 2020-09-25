@@ -33,13 +33,7 @@ public class C_get_resource_analysis extends ConstraintContextPrimitive {
         }
         final String resourceStr = Tools.asJavaString(sterm);
         final ResourceKey resource = resourceService.getResourceKey(ResourceKeyString.parse(resourceStr));
-        final ConstraintAnalyzer.@Nullable Result result = context.getResult(resource);
-        final @Nullable IStrategoTerm analysis;
-        if(result != null) {
-            analysis = result.analysis;
-        } else {
-            analysis = null;
-        }
+        final @Nullable IStrategoTerm analysis = context.getAnalysisTerm(resource);
         return Optional.ofNullable(analysis);
     }
 }

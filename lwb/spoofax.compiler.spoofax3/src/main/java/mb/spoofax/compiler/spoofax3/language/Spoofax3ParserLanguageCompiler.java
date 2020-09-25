@@ -31,6 +31,7 @@ import mb.sdf3.spoofax.task.util.Sdf3Util;
 import mb.spoofax.compiler.language.LanguageProject;
 import mb.spoofax.compiler.language.ParserLanguageCompiler;
 import mb.str.spoofax.task.StrategoPrettyPrint;
+import mb.stratego.common.StrategoUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 import org.metaborg.sdf2table.parsetable.ParseTable;
@@ -122,16 +123,15 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
             return Result.ofErr(ParserCompilerException.parseTableCompilerFail(compileResult.getErr()));
         }
 
-        final Sdf3AnalyzeMulti.Input analyzeInput = new Sdf3AnalyzeMulti.Input(rootDirectory.getPath(), resourceWalker, resourceMatcher, desugar.mapInput((ctx, i) -> parse.createRecoverableAstSupplier(i)));
+        final Sdf3AnalyzeMulti.Input analyzeInput = new Sdf3AnalyzeMulti.Input(rootDirectory.getPath(), resourceWalker, resourceMatcher, parse.createRecoverableAstFunction());
         try(final Stream<? extends HierarchicalResource> stream = rootDirectory.walk(resourceWalker, resourceMatcher)) {
             for(HierarchicalResource file : new StreamIterable<>(stream)) {
-                // TODO: enable signature generation when it works.
-//                final Supplier<Result<SingleFileOutput, ?>> singleFileAnalysisOutputSupplier = analyze.createSingleFileOutputSupplier(analyzeInput, file.getPath());
-//                try {
-//                    toSignature(context, input, singleFileAnalysisOutputSupplier);
-//                } catch(Exception e) {
-//                    return Result.ofErr(ParserCompilerException.signatureGeneratorFail(e));
-//                }
+                final Supplier<Result<SingleFileOutput, ?>> singleFileAnalysisOutputSupplier = analyze.createSingleFileOutputSupplier(analyzeInput, file.getPath());
+                try {
+                    toSignature(context, input, singleFileAnalysisOutputSupplier);
+                } catch(Exception e) {
+                    return Result.ofErr(ParserCompilerException.signatureGeneratorFail(e));
+                }
 
                 final Supplier<Result<IStrategoTerm, ?>> astSupplier = desugar.createSupplier(parse.createAstSupplier(file.getPath()));
                 try {
@@ -154,8 +154,6 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
         }
 
         return Result.ofOk(messages);
-
-        // TODO: sdf3 to completer, and pass that to origin task of the stratego compiler.
     }
 
     private void toSignature(ExecContext context, Input input, Supplier<Result<SingleFileOutput, ?>> singleFileAnalysisOutputSupplier) throws Exception {
@@ -187,10 +185,10 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
         final IStrategoTerm prettyPrintedTerm = prettyPrintedResult.unwrap();
         final String prettyPrinted = TermUtils.toJavaString(prettyPrintedTerm);
 
-        final HierarchicalResource signatureFile = context.getHierarchicalResource(input.generatedStrategoSourcesDirectory().appendRelativePath(moduleName).appendToLeaf(".str"));
-        signatureFile.ensureFileExists();
-        signatureFile.writeString(prettyPrinted);
-        context.provide(signatureFile);
+        final HierarchicalResource file = context.getHierarchicalResource(input.generatedStrategoSourcesDirectory().appendRelativePath(moduleName).appendToLeaf(".str"));
+        file.ensureFileExists();
+        file.writeString(prettyPrinted);
+        context.provide(file);
     }
 
 

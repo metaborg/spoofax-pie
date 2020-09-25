@@ -22,7 +22,7 @@ class Sdf3AnalyzerTest extends Sdf3TestBase {
     @Test void analyzeSingleErrors() throws Exception {
         final ResourceKey resource = new DefaultResourceKey(qualifier, "a.sdf3");
         final JSGLR1ParseOutput parsed = parser.parse("module a syntax A = B", startSymbol, resource);
-        final SingleFileResult result = analyzer.analyze(rootKey, resource, parsed.ast, new ConstraintAnalyzerContext());
+        final SingleFileResult result = analyzer.analyze(rootKey, resource, parsed.ast, new ConstraintAnalyzerContext(true, rootKey));
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
         assertTrue(result.messages.containsError());
@@ -32,7 +32,7 @@ class Sdf3AnalyzerTest extends Sdf3TestBase {
         final ResourceKey resource = new DefaultResourceKey(qualifier, "a.sdf3");
         final JSGLR1ParseOutput parsed = parser.parse("module a", startSymbol, resource);
         final SingleFileResult result =
-            analyzer.analyze(rootKey, resource, parsed.ast, new ConstraintAnalyzerContext());
+            analyzer.analyze(rootKey, resource, parsed.ast, new ConstraintAnalyzerContext(true, rootKey));
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
         assertTrue(result.messages.isEmpty());
@@ -49,7 +49,7 @@ class Sdf3AnalyzerTest extends Sdf3TestBase {
         asts.put(resource1, parsed1.ast);
         asts.put(resource2, parsed2.ast);
         asts.put(resource3, parsed3.ast);
-        final MultiFileResult result = analyzer.analyze(rootKey, asts, new ConstraintAnalyzerContext());
+        final MultiFileResult result = analyzer.analyze(rootKey, asts, new ConstraintAnalyzerContext(true, rootKey));
         final ConstraintAnalyzer.@Nullable Result result1 = result.getResult(resource1);
         assertNotNull(result1);
         assertNotNull(result1.ast);
@@ -83,7 +83,7 @@ class Sdf3AnalyzerTest extends Sdf3TestBase {
         asts.put(resource1, parsed1.ast);
         asts.put(resource2, parsed2.ast);
         asts.put(resource3, parsed3.ast);
-        final MultiFileResult result = analyzer.analyze(rootKey, asts, new ConstraintAnalyzerContext());
+        final MultiFileResult result = analyzer.analyze(rootKey, asts, new ConstraintAnalyzerContext(true, rootKey));
         final ConstraintAnalyzer.@Nullable Result result1 = result.getResult(resource1);
         assertNotNull(result1);
         assertNotNull(result1.ast);
@@ -103,7 +103,7 @@ class Sdf3AnalyzerTest extends Sdf3TestBase {
     @Test void showScopeGraph() throws Exception, StrategoException {
         final ResourceKey resource = new DefaultResourceKey(qualifier, "a.sdf3");
         final JSGLR1ParseOutput parsed = parser.parse("module a", startSymbol, resource);
-        final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext();
+        final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext(true, rootKey);
         final SingleFileResult result = analyzer.analyze(rootKey, resource, parsed.ast, constraintAnalyzerContext);
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
