@@ -18,7 +18,6 @@ class ParseTest extends TestBase {
             final Result<JSGLR1ParseOutput, JSGLR1ParseException> result = session.require(languageComponent.getCalcParse().createTask(resourceStringSupplier(resource)));
             assertTrue(result.isOk());
             final JSGLR1ParseOutput output = result.unwrap();
-            log.info("{}", output);
             final IStrategoTerm ast = output.ast;
             assertNotNull(ast);
             assertTrue(isAppl(ast, "Program", 1));

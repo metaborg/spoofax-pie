@@ -4,6 +4,7 @@ import dagger.Component;
 import mb.sdf3.spoofax.Sdf3Component;
 import mb.spoofax.compiler.spoofax3.language.Spoofax3LanguageProjectCompiler;
 import mb.str.spoofax.StrategoComponent;
+import mb.str.spoofax.config.StrategoConfigurator;
 
 @Spoofax3CompilerScope
 @Component(

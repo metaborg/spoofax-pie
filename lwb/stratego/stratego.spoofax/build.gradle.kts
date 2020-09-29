@@ -37,11 +37,16 @@ languageAdapterProject {
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   val packageId = "mb.str.spoofax"
   val incrPackageId = "$packageId.incr"
+  val configPackageId = "$packageId.config"
   val taskPackageId = "$packageId.task"
   val commandPackageId = "$packageId.command"
 
+  // Custom component and additional modules
+  genComponent(packageId, "GeneratedStrategoComponent")
+  manualComponent(packageId, "StrategoComponent")
   addAdditionalModules(packageId, "JavaTasksModule")
   addAdditionalModules(incrPackageId, "StrategoIncrModule")
+  addAdditionalModules(configPackageId, "StrategoConfigModule")
 
   // Enable manual class implementation
   classKind(ClassKind.Extended)
@@ -78,7 +83,7 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   val compileToJavaCommand = CommandDefRepr.builder()
     .type(commandPackageId, compileToJavaEditor.id() + "Command")
     .taskDefType(compileToJavaEditor)
-    .argType(compileToJavaEditor.appendToId(".Args"))
+    .argType("mb.str.spoofax.config", "StrategoCompileConfig")
     .displayName("Compile to Java")
     .description("Compiles Stratego source files to Java source files")
     .addSupportedExecutionTypes(CommandExecutionType.ManualOnce)
@@ -88,8 +93,8 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
       ParamRepr.of("includeDirs", TypeInfo.of("java.util", "ArrayList"), false, ArgProviderRepr.value("new java.util.ArrayList<>()")),
       ParamRepr.of("builtinLibs", TypeInfo.of("java.util", "ArrayList"), false, ArgProviderRepr.value("new java.util.ArrayList<>()")),
       ParamRepr.of("cacheDir", resourcePathType, false),
-      ParamRepr.of("outputDir", resourcePathType, false),
-      ParamRepr.of("outputJavaPackageId", TypeInfo.ofString(), false)
+      ParamRepr.of("outputDir", resourcePathType, true),
+      ParamRepr.of("outputJavaPackageId", TypeInfo.ofString(), true)
     ))
     .build()
   addCommandDefs(compileToJavaCommand)

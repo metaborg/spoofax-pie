@@ -12,8 +12,8 @@ import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceKeyString;
 import mb.resource.ResourceService;
-import mb.resource.hierarchical.ResourcePath;
 import mb.str.spoofax.StrategoScope;
+import mb.str.spoofax.config.StrategoAnalyzeConfig;
 import mb.stratego.build.strincr.Analysis;
 import mb.stratego.build.strincr.Message;
 import mb.stratego.build.strincr.MessageSeverity;
@@ -26,41 +26,35 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 @StrategoScope
-public class StrategoAnalyze implements TaskDef<StrategoAnalyze.Args, KeyedMessages> {
-    public static class Args implements Serializable {
-        public final ResourcePath projectDir;
-        public final ResourcePath mainFile;
-        public final ArrayList<ResourcePath> includeDirs;
-        public final ArrayList<String> builtinLibs;
+public class StrategoAnalyze implements TaskDef<StrategoAnalyze.Input, KeyedMessages> {
+    public static class Input implements Serializable {
+        public final StrategoAnalyzeConfig config;
         public final ArrayList<STask> originTasks;
 
-        public Args(
-            ResourcePath projectDir,
-            ResourcePath mainFile,
-            ArrayList<ResourcePath> includeDirs,
-            ArrayList<String> builtinLibs,
+        public Input(
+            StrategoAnalyzeConfig config,
             ArrayList<STask> originTasks
         ) {
-            this.projectDir = projectDir;
-            this.mainFile = mainFile;
-            this.includeDirs = includeDirs;
-            this.builtinLibs = builtinLibs;
+            this.config = config;
             this.originTasks = originTasks;
         }
 
         @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
-            final Args args = (Args)o;
-            return projectDir.equals(args.projectDir) &&
-                mainFile.equals(args.mainFile) &&
-                includeDirs.equals(args.includeDirs) &&
-                builtinLibs.equals(args.builtinLibs) &&
-                originTasks.equals(args.originTasks);
+            final Input input = (Input)o;
+            return config.equals(input.config) && originTasks.equals(input.originTasks);
         }
 
         @Override public int hashCode() {
-            return Objects.hash(projectDir, mainFile, includeDirs, builtinLibs, originTasks);
+            return Objects.hash(config, originTasks);
+        }
+
+        @Override public String toString() {
+            return "Input{" +
+                "config=" + config +
+                ", originTasks=" + originTasks +
+                '}';
         }
     }
 
@@ -78,10 +72,10 @@ public class StrategoAnalyze implements TaskDef<StrategoAnalyze.Args, KeyedMessa
         return getClass().getName();
     }
 
-    @Override public KeyedMessages exec(ExecContext context, Args args) {
+    @Override public KeyedMessages exec(ExecContext context, Input input) {
         //noinspection ConstantConditions
         final Result<Analysis.Output, ?> result = Result.ofOkOrCatching(() -> context.require(analysis, new Analysis.Input(
-            args.mainFile, args.includeDirs, args.builtinLibs, args.originTasks, args.projectDir
+            input.config.mainFile, input.config.includeDirs, input.config.builtinLibs, input.originTasks, input.config.projectDir
         )));
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         result.ifElse(output -> {
@@ -91,7 +85,7 @@ public class StrategoAnalyze implements TaskDef<StrategoAnalyze.Args, KeyedMessa
                 final Severity severity = convertSeverity(message.severity);
                 messagesBuilder.addMessage(message.getMessage(), severity, resourceKey, region);
             }
-        }, ex -> messagesBuilder.addMessage("Stratego analysis failed unexpectedly", ex, Severity.Error, args.mainFile));
+        }, ex -> messagesBuilder.addMessage("Stratego analysis failed unexpectedly", ex, Severity.Error, input.config.mainFile));
         return messagesBuilder.build();
     }
 

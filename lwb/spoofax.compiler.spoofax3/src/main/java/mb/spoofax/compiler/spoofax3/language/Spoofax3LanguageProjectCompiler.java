@@ -4,6 +4,7 @@ import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
+import mb.pie.api.STask;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.LanguageProjectCompilerInputBuilder;
@@ -11,6 +12,7 @@ import org.immutables.value.Value;
 
 import javax.inject.Inject;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Value.Enclosing
@@ -33,7 +35,11 @@ public class Spoofax3LanguageProjectCompiler implements TaskDef<Spoofax3Language
 
     @Override public Result<KeyedMessages, CompilerException> exec(ExecContext context, Input input) throws Exception {
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
+
+        final ArrayList<STask> strategoOriginTask = new ArrayList<>();
+
         if(input.parser().isPresent()) {
+            strategoOriginTask.add(parserCompiler.createSupplier(input.parser().get()));
             final Result<KeyedMessages, CompilerException> result = context.require(parserCompiler, input.parser().get())
                 .mapErr((e) -> CompilerException.parserCompilerFail(e));
             if(result.isErr()) {
@@ -41,8 +47,9 @@ public class Spoofax3LanguageProjectCompiler implements TaskDef<Spoofax3Language
             }
             messagesBuilder.addMessages(result.get());
         }
+
         if(input.strategoRuntime().isPresent()) {
-            final Result<KeyedMessages, CompilerException> result = context.require(strategoRuntimeCompiler, input.strategoRuntime().get())
+            final Result<KeyedMessages, CompilerException> result = context.require(strategoRuntimeCompiler, new Spoofax3StrategoRuntimeLanguageCompiler.Args(input.strategoRuntime().get(), strategoOriginTask))
                 .map((n) -> KeyedMessages.of())
                 .mapErr((e) -> CompilerException.strategoRuntimeCompilerFail(e));
             if(result.isErr()) {
@@ -50,6 +57,7 @@ public class Spoofax3LanguageProjectCompiler implements TaskDef<Spoofax3Language
             }
             messagesBuilder.addMessages(result.get());
         }
+
         return Result.ofOk(messagesBuilder.build());
     }
 

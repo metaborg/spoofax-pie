@@ -1,5 +1,5 @@
 module main
 
-rules
+imports
 
-  main = !"Hello, world!"
+  to-java

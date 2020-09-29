@@ -25,7 +25,7 @@ class AnalyzeTest extends TestBase {
             includeDirs.add(projectDir.getPath());
             final ArrayList<String> builtinLibs = new ArrayList<>();
             builtinLibs.add("stratego-lib");
-            @SuppressWarnings("ConstantConditions") final KeyedMessages messages = session.require(analyze.createTask(new StrategoAnalyze.Args(
+            @SuppressWarnings("ConstantConditions") final KeyedMessages messages = session.require(analyze.createTask(new StrategoAnalyze.Input(
                 projectDir.getPath(),
                 mainFile.getPath(),
                 includeDirs,

@@ -4,6 +4,7 @@ import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Messages;
 import mb.pie.api.ExecContext;
+import mb.pie.api.STask;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.hierarchical.HierarchicalResource;
@@ -11,6 +12,8 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
 import mb.str.spoofax.StrategoScope;
+import mb.str.spoofax.config.StrategoAnalyzeConfig;
+import mb.str.spoofax.config.StrategoConfigurator;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -25,26 +28,40 @@ public class StrategoCheckMulti implements TaskDef<StrategoCheckMulti.Input, Key
         public final ResourcePath root;
         public final ResourceWalker walker;
         public final ResourceMatcher matcher;
+        public final ArrayList<STask> originTasks;
+
+        public Input(
+            ResourcePath root,
+            ResourceWalker walker,
+            ResourceMatcher matcher,
+            ArrayList<STask> originTasks
+        ) {
+            this.root = root;
+            this.walker = walker;
+            this.matcher = matcher;
+            this.originTasks = originTasks;
+        }
 
         public Input(
             ResourcePath root,
             ResourceWalker walker,
             ResourceMatcher matcher
         ) {
-            this.root = root;
-            this.walker = walker;
-            this.matcher = matcher;
+            this(root, walker, matcher, new ArrayList<>());
         }
 
         @Override public boolean equals(Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
-            final StrategoCheckMulti.Input input = (StrategoCheckMulti.Input)o;
-            return root.equals(input.root) && walker.equals(input.walker) && matcher.equals(input.matcher);
+            final Input input = (Input)o;
+            return root.equals(input.root) &&
+                walker.equals(input.walker) &&
+                matcher.equals(input.matcher) &&
+                originTasks.equals(input.originTasks);
         }
 
         @Override public int hashCode() {
-            return Objects.hash(root, walker, matcher);
+            return Objects.hash(root, walker, matcher, originTasks);
         }
 
         @Override public String toString() {
@@ -52,6 +69,7 @@ public class StrategoCheckMulti implements TaskDef<StrategoCheckMulti.Input, Key
                 "root=" + root +
                 ", walker=" + walker +
                 ", matcher=" + matcher +
+                ", originTasks=" + originTasks +
                 '}';
         }
     }
@@ -59,11 +77,17 @@ public class StrategoCheckMulti implements TaskDef<StrategoCheckMulti.Input, Key
 
     private final StrategoParse parse;
     private final StrategoAnalyze analyze;
+    private final StrategoConfigurator strategoConfigurator;
 
 
-    @Inject public StrategoCheckMulti(StrategoParse parse, StrategoAnalyze analyze) {
+    @Inject public StrategoCheckMulti(
+        StrategoParse parse,
+        StrategoAnalyze analyze,
+        StrategoConfigurator strategoConfigurator
+    ) {
         this.parse = parse;
         this.analyze = analyze;
+        this.strategoConfigurator = strategoConfigurator;
     }
 
 
@@ -89,15 +113,10 @@ public class StrategoCheckMulti implements TaskDef<StrategoCheckMulti.Input, Key
             throw e.getCause();
         }
 
-        final ResourcePath mainFilePath = input.root.appendRelativePath("main.str");
-        final HierarchicalResource mainFile = context.require(mainFilePath, ResourceStampers.<HierarchicalResource>exists());
+        final StrategoAnalyzeConfig config = strategoConfigurator.getAnalyzeConfig(input.root);
+        final HierarchicalResource mainFile = context.require(config.mainFile, ResourceStampers.<HierarchicalResource>exists());
         if(mainFile.exists()) {
-            // TODO: do not hardcode this
-            final ArrayList<ResourcePath> includeDirs = new ArrayList<>();
-            includeDirs.add(input.root);
-            final ArrayList<String> builtinLibs = new ArrayList<>();
-            builtinLibs.add("stratego-lib");
-            final KeyedMessages analysisMessages = context.require(analyze, new StrategoAnalyze.Args(input.root, mainFilePath, includeDirs, builtinLibs, new ArrayList<>()));
+            final KeyedMessages analysisMessages = context.require(analyze, new StrategoAnalyze.Input(config, input.originTasks));
             messagesBuilder.addMessages(analysisMessages);
         }
 
