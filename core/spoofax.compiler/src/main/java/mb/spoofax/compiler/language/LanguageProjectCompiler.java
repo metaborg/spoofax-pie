@@ -28,6 +28,7 @@ public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.
     private final MultilangAnalyzerLanguageCompiler multilangAnalyzerCompiler;
     private final StrategoRuntimeLanguageCompiler strategoRuntimeCompiler;
     private final CompleterLanguageCompiler completerCompiler;
+    private final ExportsLanguageCompiler exportsCompiler;
 
 
     @Inject public LanguageProjectCompiler(
@@ -38,10 +39,11 @@ public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.
         ConstraintAnalyzerLanguageCompiler constraintAnalyzerCompiler,
         MultilangAnalyzerLanguageCompiler multilangAnalyzerCompiler,
         StrategoRuntimeLanguageCompiler strategoRuntimeCompiler,
-        CompleterLanguageCompiler completerCompiler
+        CompleterLanguageCompiler completerCompiler,
+        ExportsLanguageCompiler exportsCompiler
     ) {
         templateCompiler = templateCompiler.loadingFromClass(getClass());
-        this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("language_project/package-info.java.mustache");
+        this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("package-info.java.mustache");
         this.classloaderResourcesCompiler = classloaderResourcesCompiler;
         this.parserCompiler = parserCompiler;
         this.stylerCompiler = stylerCompiler;
@@ -49,6 +51,7 @@ public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.
         this.multilangAnalyzerCompiler = multilangAnalyzerCompiler;
         this.strategoRuntimeCompiler = strategoRuntimeCompiler;
         this.completerCompiler = completerCompiler;
+        this.exportsCompiler = exportsCompiler;
     }
 
 
@@ -71,6 +74,7 @@ public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.
         input.multilangAnalyzer().ifPresent((i) -> context.require(multilangAnalyzerCompiler, i));
         input.strategoRuntime().ifPresent((i) -> context.require(strategoRuntimeCompiler, i));
         input.completer().ifPresent((i) -> context.require(completerCompiler, i));
+        input.exports().ifPresent((i) -> context.require(exportsCompiler, i));
 
         return None.instance;
     }
@@ -93,6 +97,7 @@ public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.
         input.multilangAnalyzer().ifPresent((i) -> multilangAnalyzerCompiler.getDependencies(i).addAllTo(dependencies));
         input.strategoRuntime().ifPresent((i) -> strategoRuntimeCompiler.getDependencies(i).addAllTo(dependencies));
         input.completer().ifPresent((i) -> completerCompiler.getDependencies(i).addAllTo(dependencies));
+        input.exports().ifPresent((i) -> exportsCompiler.getDependencies(i).addAllTo(dependencies));
         return dependencies;
     }
 
@@ -123,6 +128,8 @@ public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.
         Optional<StrategoRuntimeLanguageCompiler.Input> strategoRuntime();
 
         Optional<CompleterLanguageCompiler.Input> completer();
+
+        Optional<ExportsLanguageCompiler.Input> exports();
 
 
         /// Configuration
@@ -172,6 +179,7 @@ public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.
             multilangAnalyzer().ifPresent((i) -> i.providedFiles().addAllTo(providedFiles));
             strategoRuntime().ifPresent((i) -> i.providedFiles().addAllTo(providedFiles));
             completer().ifPresent((i) -> i.providedFiles().addAllTo(providedFiles));
+            exports().ifPresent((i) -> i.providedFiles().addAllTo(providedFiles));
             return providedFiles;
         }
 

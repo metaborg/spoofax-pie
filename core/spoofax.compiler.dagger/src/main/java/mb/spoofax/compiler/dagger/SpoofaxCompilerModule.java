@@ -14,6 +14,7 @@ import mb.spoofax.compiler.adapter.StylerAdapterCompiler;
 import mb.spoofax.compiler.language.ClassloaderResourcesCompiler;
 import mb.spoofax.compiler.language.CompleterLanguageCompiler;
 import mb.spoofax.compiler.language.ConstraintAnalyzerLanguageCompiler;
+import mb.spoofax.compiler.language.ExportsLanguageCompiler;
 import mb.spoofax.compiler.language.LanguageProjectCompiler;
 import mb.spoofax.compiler.language.MultilangAnalyzerLanguageCompiler;
 import mb.spoofax.compiler.language.ParserLanguageCompiler;
@@ -39,46 +40,53 @@ public class SpoofaxCompilerModule {
     @Provides @SpoofaxCompilerScope public TemplateCompiler provideTemplateCompiler() { return templateCompiler; }
 
     @Provides @SpoofaxCompilerScope @ElementsIntoSet static Set<TaskDef<?, ?>> provideTaskDefsSet(
-        AdapterProjectCompiler adapterProjectCompiler,
+        LanguageProjectCompiler languageProjectCompiler,
         ClassloaderResourcesCompiler classloaderResourcesCompiler,
-        CliProjectCompiler cliProjectCompiler,
-        CompleterAdapterCompiler completerAdapterCompiler,
-        CompleterLanguageCompiler completerLanguageCompiler,
-        ConstraintAnalyzerAdapterCompiler constraintAnalyzerAdapterCompiler,
+        ParserLanguageCompiler parserLanguageCompiler,
+        StylerLanguageCompiler stylerLanguageCompiler,
         ConstraintAnalyzerLanguageCompiler constraintAnalyzerLanguageCompiler,
+        MultilangAnalyzerLanguageCompiler multilangAnalyzerLanguageCompiler,
+        StrategoRuntimeLanguageCompiler strategoRuntimeLanguageCompiler,
+        CompleterLanguageCompiler completerLanguageCompiler,
+        ExportsLanguageCompiler exportsLanguageCompiler,
+
+        AdapterProjectCompiler adapterProjectCompiler,
+        ParserAdapterCompiler parserAdapterCompiler,
+        StylerAdapterCompiler stylerAdapterCompiler,
+        ConstraintAnalyzerAdapterCompiler constraintAnalyzerAdapterCompiler,
+        MultilangAnalyzerAdapterCompiler multilangAnalyzerAdapterCompiler,
+        CompleterAdapterCompiler completerAdapterCompiler,
+        StrategoRuntimeAdapterCompiler strategoRuntimeAdapterCompiler,
+
+        CliProjectCompiler cliProjectCompiler,
         EclipseExternaldepsProjectCompiler eclipseExternaldepsProjectCompiler,
         EclipseProjectCompiler eclipseProjectCompiler,
-        IntellijProjectCompiler intellijProjectCompiler,
-        LanguageProjectCompiler languageProjectCompiler,
-        MultilangAnalyzerAdapterCompiler multilangAnalyzerAdapterCompiler,
-        MultilangAnalyzerLanguageCompiler multilangAnalyzerLanguageCompiler,
-        ParserAdapterCompiler parserAdapterCompiler,
-        ParserLanguageCompiler parserLanguageCompiler,
-        StrategoRuntimeAdapterCompiler strategoRuntimeAdapterCompiler,
-        StrategoRuntimeLanguageCompiler strategoRuntimeLanguageCompiler,
-        StylerAdapterCompiler stylerAdapterCompiler,
-        StylerLanguageCompiler stylerLanguageCompiler
+        IntellijProjectCompiler intellijProjectCompiler
     ) {
         final HashSet<TaskDef<?, ?>> taskDefs = new HashSet<>();
-        taskDefs.add(adapterProjectCompiler);
+        taskDefs.add(languageProjectCompiler);
         taskDefs.add(classloaderResourcesCompiler);
-        taskDefs.add(cliProjectCompiler);
-        taskDefs.add(completerAdapterCompiler);
-        taskDefs.add(completerLanguageCompiler);
-        taskDefs.add(constraintAnalyzerAdapterCompiler);
+        taskDefs.add(parserLanguageCompiler);
+        taskDefs.add(stylerLanguageCompiler);
         taskDefs.add(constraintAnalyzerLanguageCompiler);
+        taskDefs.add(multilangAnalyzerLanguageCompiler);
+        taskDefs.add(strategoRuntimeLanguageCompiler);
+        taskDefs.add(completerLanguageCompiler);
+        taskDefs.add(exportsLanguageCompiler);
+
+        taskDefs.add(adapterProjectCompiler);
+        taskDefs.add(parserAdapterCompiler);
+        taskDefs.add(stylerAdapterCompiler);
+        taskDefs.add(constraintAnalyzerAdapterCompiler);
+        taskDefs.add(multilangAnalyzerAdapterCompiler);
+        taskDefs.add(strategoRuntimeAdapterCompiler);
+        taskDefs.add(completerAdapterCompiler);
+
+        taskDefs.add(cliProjectCompiler);
         taskDefs.add(eclipseExternaldepsProjectCompiler);
         taskDefs.add(eclipseProjectCompiler);
         taskDefs.add(intellijProjectCompiler);
-        taskDefs.add(languageProjectCompiler);
-        taskDefs.add(multilangAnalyzerAdapterCompiler);
-        taskDefs.add(multilangAnalyzerLanguageCompiler);
-        taskDefs.add(parserAdapterCompiler);
-        taskDefs.add(parserLanguageCompiler);
-        taskDefs.add(strategoRuntimeAdapterCompiler);
-        taskDefs.add(strategoRuntimeLanguageCompiler);
-        taskDefs.add(stylerAdapterCompiler);
-        taskDefs.add(stylerLanguageCompiler);
+
         return taskDefs;
     }
 }

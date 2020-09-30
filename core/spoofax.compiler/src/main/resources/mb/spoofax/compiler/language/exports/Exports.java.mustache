@@ -1,0 +1,17 @@
+package {{genExportsClass.packageId}};
+
+import mb.resource.hierarchical.HierarchicalResource;
+
+import java.util.ArrayList;
+
+public class {{genExportsClass.id}} {
+{{#combinedExports}}
+    public static ArrayList<HierarchicalResource> get{{languageIdCapitalized}}Exports(HierarchicalResource definitionDir) {
+        final ArrayList<HierarchicalResource> exports = new ArrayList<>();
+{{#relativePaths}}
+        exports.add(definitionDir.appendRelativePath("{{this}}"));
+{{/relativePaths}}
+        return exports;
+    }
+{{/combinedExports}}
+}

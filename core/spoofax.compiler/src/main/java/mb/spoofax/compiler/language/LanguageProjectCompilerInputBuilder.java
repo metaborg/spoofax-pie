@@ -19,6 +19,9 @@ public class LanguageProjectCompilerInputBuilder {
     public final StrategoRuntimeLanguageCompiler.Input.Builder strategoRuntime = StrategoRuntimeLanguageCompiler.Input.builder();
     private boolean strategoRuntimeEnabled = false;
     public final CompleterLanguageCompiler.Input.Builder completer = CompleterLanguageCompiler.Input.builder();
+    private boolean exportsEnabled = false;
+    public final ExportsLanguageCompiler.Input.Builder exports = ExportsLanguageCompiler.Input.builder();
+
     private boolean completerEnabled = false;
     public final LanguageProjectCompiler.Input.Builder project = LanguageProjectCompiler.Input.builder();
 
@@ -57,6 +60,11 @@ public class LanguageProjectCompilerInputBuilder {
         return completer;
     }
 
+    public ExportsLanguageCompiler.Input.Builder withExports() {
+        exportsEnabled = true;
+        return exports;
+    }
+
 
     public LanguageProjectCompiler.Input build(Shared shared, LanguageProject languageProject) {
         final ClassloaderResourcesCompiler.Input classloaderResources = buildClassLoaderResources(shared, languageProject);
@@ -79,6 +87,9 @@ public class LanguageProjectCompilerInputBuilder {
 
         final CompleterLanguageCompiler.@Nullable Input completer = buildCompleter(shared, languageProject);
         if(completer != null) project.completer(completer);
+
+        final ExportsLanguageCompiler.@Nullable Input exports = buildExports(shared, languageProject);
+        if(exports != null) project.exports(exports);
 
         return project
             .languageProject(languageProject)
@@ -143,6 +154,14 @@ public class LanguageProjectCompilerInputBuilder {
     private CompleterLanguageCompiler.@Nullable Input buildCompleter(Shared shared, LanguageProject languageProject) {
         if(!completerEnabled) return null;
         return completer
+            .shared(shared)
+            .languageProject(languageProject)
+            .build();
+    }
+
+    private ExportsLanguageCompiler.@Nullable Input buildExports(Shared shared, LanguageProject languageProject) {
+        if(!exportsEnabled) return null;
+        return exports
             .shared(shared)
             .languageProject(languageProject)
             .build();

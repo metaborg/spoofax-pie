@@ -36,6 +36,6 @@ spoofax2BasedLanguageProject {
       copyClasses(true)
     }
     project
-      .languageSpecificationDependency(GradleDependency.module("org.metaborg:org.metaborg.meta.lang.stratego:2.5.11"))
+      .languageSpecificationDependency(GradleDependency.module("org.metaborg.bootstraphack:org.metaborg.meta.lang.stratego:2.5.11"))
   }
 }
