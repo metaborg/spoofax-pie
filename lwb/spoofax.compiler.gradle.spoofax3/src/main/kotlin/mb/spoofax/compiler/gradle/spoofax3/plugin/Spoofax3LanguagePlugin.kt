@@ -29,6 +29,7 @@ import java.util.*
 
 open class Spoofax3LanguageProjectExtension(project: Project) {
   val compilerInput: Property<Spoofax3LanguageProjectCompilerInputBuilder> = project.objects.property()
+  val spoofax3LanguageProject: Property<Spoofax3LanguageProject.Builder> = project.objects.property()
 
   fun compilerInput(closure: Spoofax3LanguageProjectCompilerInputBuilder.() -> Unit) {
     compilerInput.get().closure()
@@ -36,6 +37,7 @@ open class Spoofax3LanguageProjectExtension(project: Project) {
 
   init {
     compilerInput.convention(Spoofax3LanguageProjectCompilerInputBuilder())
+    spoofax3LanguageProject.convention(Spoofax3LanguageProject.builder())
   }
 
   companion object {
@@ -43,10 +45,19 @@ open class Spoofax3LanguageProjectExtension(project: Project) {
     private const val name = "Spoofax3-based language project"
   }
 
+  internal val spoofax3LanguageProjectFinalized: Spoofax3LanguageProject by lazy {
+    project.logger.debug("Finalizing $name's project in $project")
+    spoofax3LanguageProject.finalizeValue()
+    val languageProject = project.extensions.getByType<LanguageProjectExtension>().languageProjectFinalized
+    spoofax3LanguageProject.get()
+      .languageProject(languageProject)
+      .build()
+  }
+
   val compilerInputFinalized: Spoofax3LanguageProjectCompiler.Input by lazy {
     project.logger.debug("Finalizing $name's compiler input in $project")
     compilerInput.finalizeValue()
-    compilerInput.get().build(project.extensions.getByType<LanguageProjectExtension>().languageProjectFinalized)
+    compilerInput.get().build(spoofax3LanguageProjectFinalized)
   }
 }
 
@@ -93,8 +104,8 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
     component: Spoofax3CompilerGradleComponent,
     input: Spoofax3LanguageProjectCompiler.Input
   ) {
-    project.addMainJavaSourceDirectory(input.generatedJavaSourcesDirectory(), component.resourceService)
-    project.addMainResourceDirectory(input.generatedResourcesDirectory(), component.resourceService)
+    project.addMainJavaSourceDirectory(input.spoofax3LanguageProject().generatedJavaSourcesDirectory(), component.resourceService)
+    project.addMainResourceDirectory(input.spoofax3LanguageProject().generatedResourcesDirectory(), component.resourceService)
   }
 
   private fun configureCompileTask(

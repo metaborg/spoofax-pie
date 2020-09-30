@@ -15,6 +15,7 @@ dependencies {
   api("org.metaborg:pie.api")
   api(project(":sdf3.spoofax"))
   api(project(":stratego.spoofax"))
+  api(project(":libspoofax2"))
 
   compileOnly("org.checkerframework:checker-qual-android")
   compileOnly("org.immutables:value-annotations")

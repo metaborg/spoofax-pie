@@ -7,6 +7,7 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.STask;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.language.LanguageProject;
 import mb.spoofax.compiler.language.LanguageProjectCompilerInputBuilder;
 import org.immutables.value.Value;
 
@@ -68,16 +69,16 @@ public class Spoofax3LanguageProjectCompiler implements TaskDef<Spoofax3Language
         static Builder builder() { return new Input.Builder(); }
 
 
+        /// Project
+
+        Spoofax3LanguageProject spoofax3LanguageProject();
+
+
         /// Sub-inputs
 
         Optional<Spoofax3ParserLanguageCompiler.Input> parser();
 
         Optional<Spoofax3StrategoRuntimeLanguageCompiler.Input> strategoRuntime();
-
-
-        ResourcePath generatedResourcesDirectory();
-
-        ResourcePath generatedJavaSourcesDirectory();
 
 
         default void syncTo(LanguageProjectCompilerInputBuilder builder) {

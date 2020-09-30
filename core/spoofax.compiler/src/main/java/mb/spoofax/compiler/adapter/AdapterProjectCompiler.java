@@ -188,6 +188,11 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
                 final NamedTypeInfo tokenizeInjection = uniqueNamer.makeUnique(input.parser().get().tokenizeTaskDef());
                 map.put("tokenizeInjection", tokenizeInjection);
                 injected.add(tokenizeInjection);
+            } else {
+                map.put("parseInjection", false);
+                final NamedTypeInfo tokenizeInjection = uniqueNamer.makeUnique(TypeInfo.of(NoneTokenizer.class));
+                map.put("tokenizeInjection", tokenizeInjection);
+                injected.add(tokenizeInjection);
             }
             final NamedTypeInfo checkInjection;
             if(input.multilangAnalyzer().isPresent()) { // isMultiLang will be true
@@ -212,7 +217,7 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
             map.put("styleInjection", styleInjection);
             injected.add(styleInjection);
             final NamedTypeInfo completeInjection;
-            if(input.completer().isPresent()) {
+            if(input.completer().isPresent() && input.parser().isPresent()) {
                 completeInjection = uniqueNamer.makeUnique(input.completer().get().completeTaskDef());
             } else {
                 completeInjection = uniqueNamer.makeUnique(TypeInfo.of(NullCompleteTaskDef.class));

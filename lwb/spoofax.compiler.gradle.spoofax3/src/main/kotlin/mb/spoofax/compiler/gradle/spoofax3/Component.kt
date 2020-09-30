@@ -3,6 +3,7 @@ package mb.spoofax.compiler.gradle.spoofax3
 import dagger.Component
 import dagger.Module
 import dagger.Provides
+import mb.libspoofax2.LibSpoofax2ClassloaderResources
 import mb.pie.api.MapTaskDefs
 import mb.pie.api.Pie
 import mb.pie.api.TaskDef
@@ -34,7 +35,9 @@ class Spoofax3CompilerGradleModule(
     @Sdf3Qualifier sdf3ResourceService: ResourceService,
     @StrategoQualifier strategoResourceService: ResourceService
   ): ResourceService {
-    return parentResourceService.createChild(sdf3ResourceService, strategoResourceService)
+    val registries = listOf(LibSpoofax2ClassloaderResources.createClassLoaderResourceRegistry())
+    val additionalAncestors = listOf(sdf3ResourceService, strategoResourceService)
+    return parentResourceService.createChild(registries, additionalAncestors)
   }
 
   @Provides

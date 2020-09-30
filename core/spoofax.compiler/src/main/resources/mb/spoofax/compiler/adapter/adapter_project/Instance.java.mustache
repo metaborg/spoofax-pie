@@ -6,6 +6,7 @@ import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.common.style.Styling;
 import mb.common.region.Region;
+import mb.common.token.Tokens;
 import mb.common.util.CollectionView;
 import mb.common.util.EntryView;
 import mb.common.util.ListView;
@@ -76,17 +77,27 @@ public class {{genInstance.id}} implements LanguageInstance {
     }
 
 
-    @Override public Task<Option<JSGLRTokens>> createTokenizeTask(ResourceKey resourceKey) {
+    @Override public Task<? extends Option<? extends Tokens<?>>> createTokenizeTask(ResourceKey resourceKey) {
         return {{tokenizeInjection.name}}.createTask(resourceKey);
     }
 
     @Override public Task<Option<Styling>> createStyleTask(ResourceKey resourceKey) {
-        return {{styleInjection.name}}.createTask({{parseInjection.name}}.createRecoverableTokensSupplier(resourceKey).map(Result::ok));
+{{#parseInjection}}
+        return {{styleInjection.name}}.createTask({{this.name}}.createRecoverableTokensSupplier(resourceKey).map(Result::ok));
+{{/parseInjection}}
+{{^parseInjection}}
+        return {{styleInjection.name}}.createTask((ctx) -> mb.pie.api.None.instance);
+{{/parseInjection}}
     }
 
     @Override
     public Task<@Nullable CompletionResult> createCompletionTask(ResourceKey resourceKey, Region primarySelection) {
-        return {{completeInjection.name}}.createTask(new {{completeInjection.type.qualifiedId}}.Input({{parseInjection.name}}.createRecoverableAstSupplier(resourceKey).map(Result::get))); // TODO: use Result
+{{#parseInjection}}
+        return {{completeInjection.name}}.createTask(new {{completeInjection.type.qualifiedId}}.Input({{this.name}}.createRecoverableAstSupplier(resourceKey).map(Result::get))); // TODO: use Result
+{{/parseInjection}}
+{{^parseInjection}}
+        return {{completeInjection.name}}.createTask(new {{completeInjection.type.qualifiedId}}.Input((ctx) -> mb.pie.api.None.instance)); // TODO: use Result
+{{/parseInjection}}
     }
 
     @Override public Task<KeyedMessages> createCheckTask(ResourcePath projectRoot) {
