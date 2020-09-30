@@ -7,6 +7,7 @@ import mb.common.util.ListView;
 import mb.pie.api.MixedSession;
 import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.ResourcePath;
+import mb.str.spoofax.config.StrategoAnalyzeConfig;
 import mb.str.spoofax.task.StrategoAnalyze;
 import org.junit.jupiter.api.Test;
 
@@ -25,11 +26,14 @@ class AnalyzeTest extends TestBase {
             includeDirs.add(projectDir.getPath());
             final ArrayList<String> builtinLibs = new ArrayList<>();
             builtinLibs.add("stratego-lib");
-            @SuppressWarnings("ConstantConditions") final KeyedMessages messages = session.require(analyze.createTask(new StrategoAnalyze.Input(
+            final StrategoAnalyzeConfig config = new StrategoAnalyzeConfig(
                 projectDir.getPath(),
                 mainFile.getPath(),
                 includeDirs,
-                builtinLibs,
+                builtinLibs
+            );
+            @SuppressWarnings("ConstantConditions") final KeyedMessages messages = session.require(analyze.createTask(new StrategoAnalyze.Input(
+                config,
                 new ArrayList<>()
             )));
             assertTrue(messages.containsError());

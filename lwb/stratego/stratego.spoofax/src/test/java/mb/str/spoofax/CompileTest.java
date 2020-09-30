@@ -8,6 +8,7 @@ import mb.pie.task.java.CompileJava;
 import mb.pie.task.java.CreateJar;
 import mb.resource.ResourceKey;
 import mb.resource.fs.FSResource;
+import mb.str.spoofax.config.StrategoCompileConfig;
 import mb.str.spoofax.task.StrategoCompileToJava;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
@@ -47,14 +48,17 @@ class CompileTest extends TestBase {
 
         try(final MixedSession session = newSession()) {
             // Compile Stratego source files to Java source files.
-            final Task<Result<None, ?>> strategoCompileTask = compile.createTask(new StrategoCompileToJava.Args(
+            final StrategoCompileConfig config = new StrategoCompileConfig(
                 strategoSourceDir.getPath(),
                 strategoMainFile.getPath(),
                 createList(strategoSourceDir.getPath()),
                 createList("stratego-lib"),
                 null,
                 strategoJavaPackageOutputDir.getPath(),
-                "mb.test",
+                "mb.test"
+            );
+            final Task<Result<None, ?>> strategoCompileTask = compile.createTask(new StrategoCompileToJava.Input(
+                config,
                 createList()
             ));
             @SuppressWarnings("ConstantConditions") final Result<None, ?> result = session.require(strategoCompileTask);
