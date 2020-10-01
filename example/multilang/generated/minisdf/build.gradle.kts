@@ -17,6 +17,7 @@ dependencies {
 languageProject {
   shared {
     name("MiniSdf")
+    fileExtensions(listOf("msdf"))
     defaultPackageId("mb.minisdf")
   }
   compilerInput {
@@ -29,6 +30,7 @@ languageProject {
     }
     withStrategoRuntime()
   }
+  statixDependencies.set(listOf(project(":module")))
 }
 
 spoofax2BasedLanguageProject {
