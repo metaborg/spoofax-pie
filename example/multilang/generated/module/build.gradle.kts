@@ -11,45 +11,26 @@ plugins {
 }
 
 dependencies {
-
+  api(project(":signature"))
 }
 
 languageProject {
   shared {
-    name("Signature")
-    defaultPackageId("mb.signature")
+    name("Module")
+    defaultPackageId("mb.module")
   }
   compilerInput {
-    /* withParser().run {
-      startSymbol("MSDFStart")
-    }
-    withStyler() */
-    /* withConstraintAnalyzer().run {
-      enableNaBL2(false)
-      enableStatix(true)
-      multiFile(true)
-    } */
-    withStrategoRuntime()
     withMultilangAnalyzer().run {
-      rootModules(listOf("cons-type-interface/conflicts/sorts", "cons-type-interface/conflicts/constructors"))
+      rootModules(listOf("module-interface/modules"))
     }
   }
-  statixDependencies.set(listOf())
+  statixDependencies.set(listOf(project(":signature")))
 }
 
 spoofax2BasedLanguageProject {
   compilerInput {
-    /* withParser()
-    withStyler() */
-    /* withConstraintAnalyzer().run {
-      copyStatix(true)
-    } */
-    withStrategoRuntime().run {
-      copyCtree(true)
-      copyClasses(false)
-    }
-    project
-      .languageSpecificationDependency(GradleDependency.project(":signature-interface.spoofaxcore"))
     withMultilangAnalyzer()
+    project
+      .languageSpecificationDependency(GradleDependency.project(":module-interface.spoofaxcore"))
   }
 }

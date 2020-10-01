@@ -1,0 +1,5 @@
+defaultGroupId=org.metaborg
+defaultClassPrefix=Module
+defaultBasePackageId=mb.module
+defaultArtifactId=module
+defaultVersion=0.1.0
