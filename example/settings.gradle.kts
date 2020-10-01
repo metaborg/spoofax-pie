@@ -61,6 +61,8 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   includeProject("module")
 
   includeProject("minisdf")
+
+  includeProject("ministr")
 }
 
 

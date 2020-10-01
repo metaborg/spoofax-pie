@@ -1,0 +1,5 @@
+defaultGroupId=org.metaborg
+defaultClassPrefix=MiniStr
+defaultBasePackageId=mb.ministr
+defaultArtifactId=ministr
+defaultVersion=0.1.0
