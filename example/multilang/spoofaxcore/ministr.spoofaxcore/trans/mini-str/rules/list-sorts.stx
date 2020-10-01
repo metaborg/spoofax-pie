@@ -1,0 +1,43 @@
+module mini-str/rules/list-sorts
+
+imports
+  cons-type-interface/sorts
+  signatures/mini-str/mini-str-sig
+
+signature
+
+  constructors // Create exact types for list build patterns
+    EMPTY 		: TYPE
+    SINGLETON	: TYPE -> TYPE
+    MULTI		: TYPE -> TYPE
+
+rules
+
+  typeEq(EMPTY(), TSTAR(_)).
+  typeEq(EMPTY(), TOPT(_)).
+
+  typeEq(SINGLETON(T), TOPT(T)).
+  typeEq(SINGLETON(T), TSTAR(T)).
+  typeEq(SINGLETON(T), TITER(T)).
+
+  typeEq(MULTI(T), TSTAR(T)).
+  typeEq(MULTI(T), TITER(T)).
+
+rules
+
+  typeOfList : Pattern -> TYPE
+
+  typeOfList(List([])) = EMPTY().
+  typeOfList(List([_])) = SINGLETON(_).
+  typeOfList(List([_ | _])) = MULTI(_).
+
+rules
+
+  typeOfContent: TYPE -> TYPE
+
+  typeOfContent(TSTAR(T)) 		= T.
+  typeOfContent(TITER(T)) 		= T.
+  typeOfContent(TOPT(T)) 		= T.
+  typeOfContent(SINGLETON(T))	= T.
+  typeOfContent(MULTI(T)) 		= T.
+  typeOfContent(EMPTY()) 		= _.

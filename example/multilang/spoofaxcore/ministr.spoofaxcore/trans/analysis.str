@@ -1,0 +1,37 @@
+module analysis
+
+imports
+
+  statixruntime
+  statix/api
+
+  pp
+
+  injections/-
+
+rules
+
+  // multi-file analysis
+  editor-analyze = stx-editor-analyze(pre-analyze, post-analyze |"mini-str/mini-str-typing", "mstrProjectOK", "mstrProgramOK")
+  pre-analyze = explicate-injections-ministr
+  post-analyze = strip-annos; implicate-injections-ministr
+
+rules // Editor Services
+
+  editor-resolve = stx-editor-resolve
+
+  editor-hover = stx-editor-hover
+
+rules // Debugging
+
+  // Prints the abstract syntax ATerm of a selection.
+  debug-show-aterm: (selected, _, _, path, project-path) -> (filename, result)
+    with filename := <guarantee-extension(|"aterm")> path
+       ; result   := selected
+
+rules
+
+  // Prints the analyzed annotated abstract syntax ATerm of a selection.
+  debug-show-analyzed: (selected, _, _, path, project-path) -> (filename, result)
+    with filename := <guarantee-extension(|"analyzed.aterm")> path
+       ; result   := selected

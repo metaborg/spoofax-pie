@@ -1,0 +1,5 @@
+module signature_interface
+
+rules
+
+  my-imported-strategy = fail

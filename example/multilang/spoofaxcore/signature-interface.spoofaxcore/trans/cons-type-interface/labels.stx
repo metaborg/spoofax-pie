@@ -1,0 +1,15 @@
+module cons-type-interface/labels
+
+signature
+  name-resolution
+    labels
+      P // lexical parent
+      I // Module import
+
+rules
+
+  scopesEqual: list(scope)
+
+  scopesEqual([_]).
+  scopesEqual([s, s]).
+  scopesEqual([s, s | tail]) :- scopesEqual([s | tail]).
