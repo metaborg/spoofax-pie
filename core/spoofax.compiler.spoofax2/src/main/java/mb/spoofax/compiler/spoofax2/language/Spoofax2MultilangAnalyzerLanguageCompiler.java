@@ -24,18 +24,16 @@ public class Spoofax2MultilangAnalyzerLanguageCompiler implements TaskDef<Spoofa
         return None.instance;
     }
 
-
     public ListView<String> getCopyResources(Input input) {
-        // TODO: requires constraint analyzer compiler with Statix enabled, which already copies Statix specs?
-        return ListView.of();
+        return ListView.of(input.statixSpecificationRelativePath());
     }
-
 
     @Value.Immutable public interface Input extends Serializable {
         class Builder extends Spoofax2MultilangAnalyzerLanguageCompilerData.Input.Builder {}
 
         static Builder builder() { return new Builder(); }
 
+        @Value.Default default String statixSpecificationRelativePath() { return "src-gen/statix/"; }
 
         default void syncTo(MultilangAnalyzerLanguageCompiler.Input.Builder builder) {
             // Nothing to sync right now.
