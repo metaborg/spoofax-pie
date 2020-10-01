@@ -71,6 +71,8 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   includeProject("ministr.eclipse.externaldeps")
   includeProject("ministr.eclipse")
   includeProject("ministr.cli")
+
+  includeProject("multilang.eclipse")
 }
 
 
