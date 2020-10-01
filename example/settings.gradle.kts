@@ -48,3 +48,13 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   includeProject("calc")
   includeProject("calc.spoofax")
 }
+
+"multilang/spoofaxcore".run {
+  includeProject("signature-interface.spoofaxcore")
+  includeProject("module-interface.spoofaxcore")
+  includeProject("minisdf.spoofaxcore")
+  includeProject("ministr.spoofaxcore")
+}
+
+
+
