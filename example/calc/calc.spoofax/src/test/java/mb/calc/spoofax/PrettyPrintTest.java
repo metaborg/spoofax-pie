@@ -13,20 +13,19 @@ import org.spoofax.interpreter.terms.ITermFactory;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.spoofax.terms.util.TermUtils.*;
 
-class StrategoRuntimeTest extends TestBase {
+class PrettyPrintTest extends TestBase {
     @Test void testParseTask() throws Exception {
-        final FSResource resource = createTextFile("1 + 2;", "test.calc");
+        final String text = "1 + 2 * 3;";
+        final FSResource resource = createTextFile(text, "test.calc");
         try(final MixedSession session = newSession()) {
             final Result<JSGLR1ParseOutput, JSGLR1ParseException> result = session.require(languageComponent.getCalcParse().createTask(resourceStringSupplier(resource)));
             assertTrue(result.isOk());
             final IStrategoTerm ast = result.unwrap().ast;
             final StrategoRuntime strategoRuntime = languageComponent.getStrategoRuntimeProvider().get();
-            final ITermFactory termFactory = strategoRuntime.getTermFactory();
-            final IStrategoTerm term = strategoRuntime.invoke("program-to-java", termFactory.makeTuple(ast, termFactory.makeString("Test")));
+            final IStrategoTerm term = strategoRuntime.invoke("pp-calc-string", ast);
             assertTrue(isString(term));
             final String str = toJavaString(term);
-            assertTrue(str.contains("public class Test"));
-            assertTrue(str.contains("new BigDecimal(\"1\").add(new BigDecimal(\"2\"))"));
+            assertEquals(text, str);
         }
     }
 }

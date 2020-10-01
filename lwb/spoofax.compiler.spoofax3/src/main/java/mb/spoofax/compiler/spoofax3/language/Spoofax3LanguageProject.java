@@ -44,18 +44,4 @@ public interface Spoofax3LanguageProject extends Serializable {
     /// Automatically provided sub-inputs
 
     LanguageProject languageProject();
-
-
-    default void syncTo(Spoofax3ParserLanguageCompiler.Input.Builder builder) {
-        builder.languageProject(languageProject())
-            .generatedResourcesDirectory(generatedResourcesDirectory())
-            .generatedStrategoSourcesDirectory(generatedStrategoSourcesDirectory())
-        ;
-    }
-
-    default void syncTo(Spoofax3StrategoRuntimeLanguageCompiler.Input.Builder builder) {
-        builder.languageProject(languageProject())
-            .generatedJavaSourcesDirectory(generatedJavaSourcesDirectory())
-        ;
-    }
 }

@@ -78,13 +78,13 @@ public class {{genModule.id}} {
         return resourceService;
     }
 
-    @Provides @Named("definition-dir") @{{scope.id}}
+    @Provides @{{scope.id}} @{{qualifier.id}}("definition-dir")
     static ClassLoaderResource provideDefinitionDir(ClassLoaderResourceRegistry registry) {
         return {{classloaderResources.classloaderResources.qualifiedId}}.createDefinitionDir(registry);
     }
 
-    @Provides @Named("definition-dir") @{{scope.id}}
-    static HierarchicalResource provideDefinitionDirAsHierarchicalResource(@Named("definition-dir") ClassLoaderResource definitionDir) {
+    @Provides @{{scope.id}} @{{qualifier.id}}("definition-dir")
+    static HierarchicalResource provideDefinitionDirAsHierarchicalResource(@{{qualifier.id}}("definition-dir") ClassLoaderResource definitionDir) {
         return definitionDir;
     }
 
@@ -92,7 +92,7 @@ public class {{genModule.id}} {
 
 
     @Provides @{{scope.id}}
-    static {{this.languageProjectInput.factory.qualifiedId}} provideParserFactory(@Named("definition-dir") HierarchicalResource definitionDir) {
+    static {{this.languageProjectInput.factory.qualifiedId}} provideParserFactory(@{{qualifier.id}}("definition-dir") HierarchicalResource definitionDir) {
         return new {{this.languageProjectInput.factory.qualifiedId}}(definitionDir);
     }
 
@@ -105,7 +105,7 @@ public class {{genModule.id}} {
 
 
     @Provides @{{scope.id}}
-    static {{this.languageProjectInput.factory.qualifiedId}} provideStylerFactory(LoggerFactory loggerFactory, @Named("definition-dir") HierarchicalResource definitionDir) {
+    static {{this.languageProjectInput.factory.qualifiedId}} provideStylerFactory(LoggerFactory loggerFactory, @{{qualifier.id}}("definition-dir") HierarchicalResource definitionDir) {
         return new {{this.languageProjectInput.factory.qualifiedId}}(loggerFactory, definitionDir);
     }
 
@@ -131,7 +131,7 @@ public class {{genModule.id}} {
 
 
     @Provides @{{scope.id}}
-    static {{this.languageProjectInput.factory.qualifiedId}} provideStrategoRuntimeBuilderFactory(LoggerFactory loggerFactory, ResourceService resourceService, @Named("definition-dir") HierarchicalResource definitionDir) {
+    static {{this.languageProjectInput.factory.qualifiedId}} provideStrategoRuntimeBuilderFactory(LoggerFactory loggerFactory, ResourceService resourceService, @{{qualifier.id}}("definition-dir") HierarchicalResource definitionDir) {
         return new {{this.languageProjectInput.factory.qualifiedId}}(loggerFactory, resourceService, definitionDir);
     }
 
@@ -313,7 +313,7 @@ public class {{genModule.id}} {
     @Provides @{{scope.id}}
     static LanguageMetadata getLanguageMetadata(
         @Named("prototype") StrategoRuntime strategoRuntime,
-        @Named("definition-dir") ClassLoaderResource definitionDir,
+        @{{qualifier.id}}("definition-dir") ClassLoaderResource definitionDir,
         {{preStatixTaskDef.qualifiedId}} preStatix,
         {{postStatixTaskDef.qualifiedId}} postStatix,
         {{indexAstTaskDef.qualifiedId}} indexAst,

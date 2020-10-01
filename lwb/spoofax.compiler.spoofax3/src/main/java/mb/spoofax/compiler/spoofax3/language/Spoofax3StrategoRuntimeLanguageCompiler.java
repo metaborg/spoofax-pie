@@ -2,14 +2,16 @@ package mb.spoofax.compiler.spoofax3.language;
 
 import mb.common.message.KeyedMessages;
 import mb.common.result.Result;
+import mb.libspoofax2.LibSpoofax2Exports;
+import mb.libspoofax2.spoofax.LibSpoofax2Qualifier;
 import mb.pie.api.ExecContext;
 import mb.pie.api.None;
 import mb.pie.api.STask;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.resource.classloader.ClassLoaderResource;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.language.LanguageProject;
 import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.util.Conversion;
 import mb.str.spoofax.config.StrategoAnalyzeConfig;
@@ -33,14 +35,18 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
     private final StrategoCompileToJava compileToJava;
     private final StrategoConfigurator configurator;
 
+    private final ClassLoaderResource libSpoofax2DefinitionDir;
+
     @Inject public Spoofax3StrategoRuntimeLanguageCompiler(
         StrategoCheckMulti check,
         StrategoCompileToJava compileToJava,
-        StrategoConfigurator configurator
+        StrategoConfigurator configurator,
+        @LibSpoofax2Qualifier("definition-dir") ClassLoaderResource libSpoofax2DefinitionDir
     ) {
         this.check = check;
         this.compileToJava = compileToJava;
         this.configurator = configurator;
+        this.libSpoofax2DefinitionDir = libSpoofax2DefinitionDir;
     }
 
 
@@ -71,6 +77,11 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
         // Set compile configuration
         final ArrayList<ResourcePath> includeDirs = new ArrayList<>(input.strategoIncludeDirs());
         includeDirs.add(input.strategoRootDirectory());
+        if(input.spoofax3LanguageProject().includeLibSpoofax2Exports()) {
+            for(HierarchicalResource export : LibSpoofax2Exports.getStrategoExports(libSpoofax2DefinitionDir)) {
+                includeDirs.add(export.getPath());
+            }
+        }
         final StrategoAnalyzeConfig analyzeConfig = new StrategoAnalyzeConfig(
             input.strategoRootDirectory(),
             input.strategoMainFile(),
@@ -118,7 +129,7 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
 
 
         @Value.Default default ResourcePath strategoRootDirectory() {
-            return languageProject().project().srcMainDirectory().appendRelativePath("str");
+            return spoofax3LanguageProject().languageProject().project().srcMainDirectory().appendRelativePath("str");
         }
 
         @Value.Default default ResourcePath strategoMainFile() {
@@ -130,21 +141,22 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
         @Value.Default default List<String> strategoBuiltinLibs() {
             final ArrayList<String> strategoBuiltinLibs = new ArrayList<>();
             strategoBuiltinLibs.add("stratego-lib");
+            strategoBuiltinLibs.add("stratego-gpp");
             return strategoBuiltinLibs;
         }
 
         @Value.Default default ResourcePath strategoCacheDir() {
-            return languageProject().project().buildDirectory().appendRelativePath("stratego-cache");
+            return spoofax3LanguageProject().languageProject().project().buildDirectory().appendRelativePath("stratego-cache");
         }
 
         @Value.Default default ResourcePath strategoOutputDir() {
-            return generatedJavaSourcesDirectory() // Generated Java sources directory, so that Gradle compiles the Java sources into classes.
+            return spoofax3LanguageProject().generatedJavaSourcesDirectory() // Generated Java sources directory, so that Gradle compiles the Java sources into classes.
                 .appendRelativePath(strategoOutputJavaPackagePath()) // Append package path.
                 ;
         }
 
         @Value.Default default String strategoOutputJavaPackageId() {
-            return languageProject().packageId() + ".strategies";
+            return spoofax3LanguageProject().languageProject().packageId() + ".strategies";
         }
 
         default String strategoOutputJavaPackagePath() {
@@ -154,9 +166,7 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
 
         /// Automatically provided sub-inputs
 
-        LanguageProject languageProject();
-
-        ResourcePath generatedJavaSourcesDirectory();
+        Spoofax3LanguageProject spoofax3LanguageProject();
 
 
         default void syncTo(StrategoRuntimeLanguageCompiler.Input.Builder builder) {

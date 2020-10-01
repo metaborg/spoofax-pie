@@ -3,7 +3,8 @@ package mb.spoofax.compiler.gradle.spoofax3
 import dagger.Component
 import dagger.Module
 import dagger.Provides
-import mb.libspoofax2.LibSpoofax2ClassloaderResources
+import mb.libspoofax2.spoofax.LibSpoofax2Component
+import mb.libspoofax2.spoofax.LibSpoofax2Qualifier
 import mb.pie.api.MapTaskDefs
 import mb.pie.api.Pie
 import mb.pie.api.TaskDef
@@ -17,7 +18,7 @@ import mb.str.spoofax.StrategoQualifier
 @Spoofax3CompilerScope
 @Component(
   modules = [Spoofax3CompilerModule::class, Spoofax3CompilerGradleModule::class],
-  dependencies = [Sdf3Component::class, StrategoComponent::class]
+  dependencies = [Sdf3Component::class, StrategoComponent::class, LibSpoofax2Component::class]
 )
 interface Spoofax3CompilerGradleComponent : Spoofax3CompilerComponent {
   val resourceService: ResourceService
@@ -33,11 +34,10 @@ class Spoofax3CompilerGradleModule(
   @Spoofax3CompilerScope
   fun provideResourceService(
     @Sdf3Qualifier sdf3ResourceService: ResourceService,
-    @StrategoQualifier strategoResourceService: ResourceService
+    @StrategoQualifier strategoResourceService: ResourceService,
+    @LibSpoofax2Qualifier libSpoofax2ResourceService: ResourceService
   ): ResourceService {
-    val registries = listOf(LibSpoofax2ClassloaderResources.createClassLoaderResourceRegistry())
-    val additionalAncestors = listOf(sdf3ResourceService, strategoResourceService)
-    return parentResourceService.createChild(registries, additionalAncestors)
+    return parentResourceService.createChild(sdf3ResourceService, strategoResourceService, libSpoofax2ResourceService)
   }
 
   @Provides
@@ -46,9 +46,10 @@ class Spoofax3CompilerGradleModule(
     resourceService: ResourceService,
     taskDefs: MutableSet<TaskDef<*, *>>,
     @Sdf3Qualifier sdf3Pie: Pie,
-    @StrategoQualifier strategoPie: Pie
+    @StrategoQualifier strategoPie: Pie,
+    @LibSpoofax2Qualifier libSpoofax2Pie: Pie
   ): Pie {
-    return parentPie.createChildBuilder(sdf3Pie, strategoPie)
+    return parentPie.createChildBuilder(sdf3Pie, strategoPie, libSpoofax2Pie)
       .withTaskDefs(MapTaskDefs(taskDefs))
       .withResourceService(resourceService)
       .build()

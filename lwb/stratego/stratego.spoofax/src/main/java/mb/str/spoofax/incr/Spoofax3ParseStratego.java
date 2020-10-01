@@ -3,7 +3,9 @@ package mb.str.spoofax.incr;
 import mb.common.util.IOUtil;
 import mb.jsglr1.common.JSGLR1ParseException;
 import mb.pie.api.ExecException;
+import mb.resource.ResourceKey;
 import mb.resource.ResourceKeyString;
+import mb.resource.ResourceRuntimeException;
 import mb.resource.ResourceService;
 import mb.str.StrategoParser;
 import mb.str.spoofax.StrategoScope;
@@ -39,10 +41,19 @@ public class Spoofax3ParseStratego implements ParseStratego {
 
     @Override
     public IStrategoTerm parse(InputStream inputStream, Charset charset, @Nullable String path) throws JSGLR1ParseException, IOException, InterruptedException {
-        final String text = new String(IOUtil.toByteArray(inputStream), charset);
         final StrategoParser parser = parserProvider.get();
-        if(path != null) {
-            return parser.parse(text, "Module", resourceService.getResourceKey(ResourceKeyString.parse(path))).ast;
+        final String text = new String(IOUtil.toByteArray(inputStream), charset);
+
+        @Nullable ResourceKey resourceKey;
+        try {
+            resourceKey = resourceService.getResourceKey(ResourceKeyString.parse(path));
+        } catch(ResourceRuntimeException e) {
+            // HACK: ignore exception and do not pass a resource key to the following parse method.
+            resourceKey = null;
+        }
+
+        if(resourceKey != null) {
+            return parser.parse(text, "Module", resourceKey).ast;
         } else {
             return parser.parse(text, "Module").ast;
         }

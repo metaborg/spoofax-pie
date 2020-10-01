@@ -4,6 +4,7 @@ import dagger.Component;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.platform.PlatformComponent;
 import mb.resource.ResourceService;
+import mb.resource.classloader.ClassLoaderResource;
 import mb.pie.api.Pie;
 {{#isMultiLang}}
 import mb.statix.multilang.MultiLangComponent;
@@ -22,6 +23,8 @@ public interface {{genComponent.id}} extends LanguageComponent{{#isMultiLang}}, 
     @Override {{genInstance.id}} getLanguageInstance();
 
     @Override @{{qualifier.id}} ResourceService getResourceService();
+
+    @{{qualifier.id}}("definition-dir") ClassLoaderResource getDefinitionDir();
 
     @Override @{{qualifier.id}} Pie getPie();
 {{#parser}}

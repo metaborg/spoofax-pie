@@ -6,6 +6,7 @@ import mb.common.message.KeyedMessages
 import mb.common.message.Message
 import mb.common.message.Messages
 import mb.common.message.Severity
+import mb.libspoofax2.spoofax.DaggerLibSpoofax2Component
 import mb.log.slf4j.SLF4JLoggerFactory
 import mb.pie.runtime.PieBuilderImpl
 import mb.resource.ResourceKey
@@ -74,9 +75,10 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
       .build() // OPTO: cache instantiation of platform component?
     val component = DaggerSpoofax3CompilerGradleComponent.builder()
       .spoofax3CompilerGradleModule(Spoofax3CompilerGradleModule(languageProjectExtension.component.resourceService, languageProjectExtension.component.pie))
-      // OPTO: cache instantiation of the SDF3 and Stratego components?
+      // OPTO: cache instantiation of the language components?
       .sdf3Component(DaggerSdf3Component.builder().platformComponent(platformComponent).build())
       .strategoComponent(DaggerStrategoComponent.builder().platformComponent(platformComponent).build())
+      .libSpoofax2Component(DaggerLibSpoofax2Component.builder().platformComponent(platformComponent).build())
       .build()
 
     val extension = Spoofax3LanguageProjectExtension(project)

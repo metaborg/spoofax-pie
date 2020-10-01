@@ -6,5 +6,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @Qualifier
+@Documented
 @Retention(RetentionPolicy.RUNTIME)
-public @interface {{genQualifier.id}} {}
+public @interface {{genQualifier.id}} {
+    String value() default "";
+}

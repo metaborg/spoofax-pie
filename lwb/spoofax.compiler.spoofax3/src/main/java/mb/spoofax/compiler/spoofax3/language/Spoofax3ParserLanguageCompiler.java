@@ -185,7 +185,7 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
         final IStrategoTerm prettyPrintedTerm = prettyPrintedResult.unwrap();
         final String prettyPrinted = TermUtils.toJavaString(prettyPrintedTerm);
 
-        final HierarchicalResource file = context.getHierarchicalResource(input.generatedStrategoSourcesDirectory().appendRelativePath(moduleName).appendToLeaf(".str"));
+        final HierarchicalResource file = context.getHierarchicalResource(input.spoofax3LanguageProject().generatedStrategoSourcesDirectory().appendRelativePath(moduleName).appendToLeaf(".str"));
         file.ensureFileExists();
         file.writeString(prettyPrinted);
         context.provide(file);
@@ -199,7 +199,7 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
 
 
         @Value.Default default ResourcePath sdf3RootDirectory() {
-            return languageProject().project().srcMainDirectory().appendRelativePath("sdf3");
+            return spoofax3LanguageProject().languageProject().project().srcMainDirectory().appendRelativePath("sdf3");
         }
 
         @Value.Default default ResourcePath sdf3MainFile() {
@@ -222,8 +222,8 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
         }
 
         default ResourcePath sdf3ParseTableOutputFile() {
-            return generatedResourcesDirectory() // Generated resources directory, so that Gradle includes the parse table in the JAR file.
-                .appendRelativePath(languageProject().packagePath()) // Append package path to make location unique, enabling JAR files to be merged.
+            return spoofax3LanguageProject().generatedResourcesDirectory() // Generated resources directory, so that Gradle includes the parse table in the JAR file.
+                .appendRelativePath(spoofax3LanguageProject().languageProject().packagePath()) // Append package path to make location unique, enabling JAR files to be merged.
                 .appendRelativePath(sdf3ParseTableRelativePath()) // Append the relative path to the parse table.
                 ;
         }
@@ -231,11 +231,7 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
 
         /// Automatically provided sub-inputs
 
-        LanguageProject languageProject();
-
-        ResourcePath generatedResourcesDirectory();
-
-        ResourcePath generatedStrategoSourcesDirectory();
+        Spoofax3LanguageProject spoofax3LanguageProject();
 
 
         default void syncTo(ParserLanguageCompiler.Input.Builder builder) {
@@ -243,7 +239,7 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
         }
 
         default void syncTo(Spoofax3StrategoRuntimeLanguageCompiler.Input.Builder builder) {
-            builder.addStrategoIncludeDirs(generatedStrategoSourcesDirectory());
+            builder.addStrategoIncludeDirs(spoofax3LanguageProject().generatedStrategoSourcesDirectory());
         }
     }
 }

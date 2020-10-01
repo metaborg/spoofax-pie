@@ -41,8 +41,8 @@ public class Spoofax3LanguageProjectCompilerInputBuilder {
         Spoofax3LanguageProject languageProject
     ) {
         if(!parserEnabled) return null;
-        languageProject.syncTo(parser);
         return parser
+            .spoofax3LanguageProject(languageProject)
             .build();
     }
 
@@ -51,11 +51,11 @@ public class Spoofax3LanguageProjectCompilerInputBuilder {
         Spoofax3ParserLanguageCompiler.@Nullable Input parserInput
     ) {
         if(!strategoRuntimeEnabled) return null;
-        languageProject.syncTo(strategoRuntime);
         if(parserInput != null) {
             parserInput.syncTo(strategoRuntime);
         }
         return strategoRuntime
+            .spoofax3LanguageProject(languageProject)
             .build();
     }
 }
