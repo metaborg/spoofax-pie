@@ -59,21 +59,6 @@ public class TestBase {
         .multiLangModule(new MultiLangModule(this::getAnalysisContextService))
         .build();
 
-    private AnalysisContextService getAnalysisContextService() {
-        HashMap<SpecFragmentId, SpecConfig> specConfigs = new HashMap<>();
-        specConfigs.putAll(miniSdfComponent.getSpecConfigs());
-        specConfigs.putAll(miniStrComponent.getSpecConfigs());
-        return ImmutableAnalysisContextService
-            .builder()
-            .putAllSpecConfigs(specConfigs)
-            .putLanguageMetadataSuppliers(new LanguageId("mb.minisdf"), miniSdfComponent::getLanguageMetadata)
-            .putLanguageMetadataSuppliers(new LanguageId("mb.ministr"), miniStrComponent::getLanguageMetadata)
-            .platformPie(platformComponent.getPie())
-            .putDefaultLanguageContexts(new LanguageId("mb.minisdf"), new ContextId("mb.multilang"))
-            .putDefaultLanguageContexts(new LanguageId("mb.ministr"), new ContextId("mb.multilang"))
-            .build();
-    }
-
     @SuppressWarnings({"deprecation", "InstantiationOfUtilityClass"})
     public final MiniSdfComponent miniSdfComponent = DaggerMiniSdfComponent
         .builder()
@@ -109,6 +94,22 @@ public class TestBase {
 
     public MixedSession newSession() {
         return pie.newSession();
+    }
+
+
+    private AnalysisContextService getAnalysisContextService() {
+        HashMap<SpecFragmentId, SpecConfig> specConfigs = new HashMap<>();
+        specConfigs.putAll(miniSdfComponent.getSpecConfigs());
+        specConfigs.putAll(miniStrComponent.getSpecConfigs());
+        return ImmutableAnalysisContextService
+            .builder()
+            .putAllSpecConfigs(specConfigs)
+            .putLanguageMetadataSuppliers(new LanguageId("mb.minisdf"), miniSdfComponent::getLanguageMetadata)
+            .putLanguageMetadataSuppliers(new LanguageId("mb.ministr"), miniStrComponent::getLanguageMetadata)
+            .platformPie(platformComponent.getPie())
+            .putDefaultLanguageContexts(new LanguageId("mb.minisdf"), new ContextId("mb.multilang"))
+            .putDefaultLanguageContexts(new LanguageId("mb.ministr"), new ContextId("mb.multilang"))
+            .build();
     }
 
     @AfterEach public void cleanupFs() throws IOException {
