@@ -2,5 +2,6 @@ module main
 
 imports
 
-  pp
   to-java
+  pp
+  completion

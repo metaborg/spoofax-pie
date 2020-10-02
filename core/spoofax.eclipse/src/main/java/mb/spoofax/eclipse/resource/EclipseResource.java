@@ -257,6 +257,10 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
         return new EclipseResource(registry, path.appendRelativePath(relativePath));
     }
 
+    @Override public EclipseResource appendString(String other) {
+        return new EclipseResource(registry, path.appendString(other));
+    }
+
     @Override public EclipseResource appendOrReplaceWithPath(String other) {
         return new EclipseResource(registry, path.appendOrReplaceWithPath(other));
     }

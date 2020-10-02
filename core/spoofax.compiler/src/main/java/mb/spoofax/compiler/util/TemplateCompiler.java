@@ -42,7 +42,7 @@ public class TemplateCompiler {
     private Reader reader(String resource) {
         final @Nullable InputStream inputStream = clazz.getResourceAsStream(resource);
         if(inputStream == null) {
-            throw new RuntimeException("Cannot create reader; cannot find '" + resource + "' in classloader resources");
+            throw new RuntimeException("Cannot create reader; cannot find '" + resource + "' in resources of '" + clazz + "'");
         }
         return new InputStreamReader(inputStream, StandardCharsets.UTF_8);
     }

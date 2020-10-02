@@ -40,6 +40,10 @@ public interface Spoofax3LanguageProject extends Serializable {
         return generatedSourcesDirectory().appendRelativePath("stratego");
     }
 
+    @Value.Default default ResourcePath unarchiveDirectory() {
+        return languageProject().project().buildDirectory().appendRelativePath("unarchive");
+    }
+
 
     /// Automatically provided sub-inputs
 

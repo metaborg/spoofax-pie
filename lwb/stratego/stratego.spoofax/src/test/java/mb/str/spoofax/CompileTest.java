@@ -4,9 +4,9 @@ import mb.common.result.Result;
 import mb.pie.api.MixedSession;
 import mb.pie.api.None;
 import mb.pie.api.Task;
+import mb.pie.task.archive.ArchiveDirectory;
+import mb.pie.task.archive.ArchiveToJar;
 import mb.pie.task.java.CompileJava;
-import mb.pie.task.java.CreateJar;
-import mb.resource.ResourceKey;
 import mb.resource.fs.FSResource;
 import mb.str.spoofax.config.StrategoCompileConfig;
 import mb.str.spoofax.task.StrategoCompileToJava;
@@ -110,10 +110,10 @@ class CompileTest extends TestBase {
             session.require(compileJavaTask);
 
             // Create a JAR from Java class files.
-            final FSResource jarFile = libsDir.appendRelativePath("stratego.jar").createFile(true);
-            final Task<ResourceKey> createJarTask = createJar.createTask(new CreateJar.Input(
+            final FSResource jarFile = libsDir.appendRelativePath("stratego.jar").ensureFileExists();
+            final Task<None> createJarTask = archiveToJar.createTask(new ArchiveToJar.Input(
                 null,
-                createList(CreateJar.ArchiveDirectory.ofClassFilesInDirectory(classFileOutputDir.getPath())),
+                createList(ArchiveDirectory.ofClassFilesInDirectory(classFileOutputDir.getPath())),
                 jarFile.getPath(),
                 createList(compileJavaTask.toSupplier())
             ));

@@ -1,0 +1,35 @@
+module pp
+
+imports
+
+  libstratego-gpp
+  libspoofax/sdf/pp
+  pp/{{name}}-parenthesize
+  pp/start-pp
+
+rules
+
+  pp-{{name}}-string =
+    parenthesize-{{name}}
+    ; prettyprint-{{ppName}}-start-symbols
+    ; !V([], <id>)
+    ; box2text-string(|120)
+
+  pp-partial-{{name}}-string =
+    parenthesize-{{name}}
+    ; prettyprint-{{ppName}}
+    ; !V([], <id>)
+    ; box2text-string(|120)
+
+  pp-partial-{{name}}-string(|sort) =
+    parenthesize-{{name}}
+    ; prettyprint-{{ppName}}(|sort)
+    ; !V([], <id>)
+    ; box2text-string(|120)
+
+  pp-debug :
+    ast -> result
+    with
+       result := <pp-{{name}}-string> ast
+    <+ <bottomup(try(not(is-string); not(is-list); not(pp-{{name}}-string); debug(!"cannot pp ")))> ast
+    ;  result := ""

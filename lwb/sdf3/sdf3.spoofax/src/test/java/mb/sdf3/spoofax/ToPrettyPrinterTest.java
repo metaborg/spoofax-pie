@@ -15,7 +15,7 @@ class ToPrettyPrinterTest extends TestBase {
         final TextResource resource = createTextResource("module nested/a context-free syntax A = <A>", "a.sdf3");
         final Sdf3ToPrettyPrinter taskDef = languageComponent.getSdf3ToPrettyPrinter();
         try(final MixedSession session = newSession()) {
-            final Result<IStrategoTerm, ?> result = session.require(taskDef.createTask(desugarSupplier(resource)));
+            final Result<IStrategoTerm, ?> result = session.require(taskDef.createTask(new Sdf3ToPrettyPrinter.Input(desugarSupplier(resource), "lang")));
             assertTrue(result.isOk());
             final IStrategoTerm output = result.unwrap();
             log.info("{}", output);

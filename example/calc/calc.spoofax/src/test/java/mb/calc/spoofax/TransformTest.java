@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.spoofax.terms.util.TermUtils.*;
 
 class TransformTest extends TestBase {
-    @Test void testParseTask() throws Exception {
+    @Test void testProgramToJava() throws Exception {
         final FSResource resource = createTextFile("1 + 2;", "test.calc");
         try(final MixedSession session = newSession()) {
             final Result<JSGLR1ParseOutput, JSGLR1ParseException> result = session.require(languageComponent.getCalcParse().createTask(resourceStringSupplier(resource)));

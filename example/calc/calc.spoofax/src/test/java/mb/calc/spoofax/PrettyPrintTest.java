@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.spoofax.terms.util.TermUtils.*;
 
 class PrettyPrintTest extends TestBase {
-    @Test void testParseTask() throws Exception {
+    @Test void testParsePrettyPrint() throws Exception {
         final String text = "1 + 2 * 3;";
         final FSResource resource = createTextFile(text, "test.calc");
         try(final MixedSession session = newSession()) {

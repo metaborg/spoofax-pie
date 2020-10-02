@@ -2,7 +2,6 @@
 
 package mb.spoofax.compiler.gradle.plugin
 
-import mb.common.util.Properties
 import mb.pie.runtime.PieBuilderImpl
 import mb.spoofax.compiler.dagger.*
 import mb.spoofax.compiler.gradle.*
@@ -15,7 +14,6 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.*
-import java.io.IOException
 import java.nio.charset.StandardCharsets
 
 open class LanguageProjectExtension(project: Project) {
@@ -59,33 +57,12 @@ open class LanguageProjectExtension(project: Project) {
     project.logger.debug("Finalizing $name shared settings in $project")
     shared.finalizeValue()
 
-    val spoofaxCompilerPropertiesFile = project.projectDir.resolve("spoofaxc.lock")
-    val spoofaxCompilerProperties = Properties()
-    if(spoofaxCompilerPropertiesFile.exists()) {
-      spoofaxCompilerPropertiesFile.bufferedReader().use {
-        try {
-          spoofaxCompilerProperties.load(it)
-        } catch(e: IOException) {
-          project.logger.warn("Failed to load shared settings from '$spoofaxCompilerPropertiesFile'", e)
-        }
-      }
-    }
-
+    val properties = project.loadLockFileProperties()
     val shared = shared.get()
-      .withPersistentProperties(spoofaxCompilerProperties)
+      .withPersistentProperties(properties)
       .build()
-
-    shared.savePersistentProperties(spoofaxCompilerProperties)
-    spoofaxCompilerPropertiesFile.parentFile.mkdirs()
-    spoofaxCompilerPropertiesFile.createNewFile()
-    spoofaxCompilerPropertiesFile.bufferedWriter().use {
-      try {
-        spoofaxCompilerProperties.storeWithoutDate(it)
-        it.flush()
-      } catch(e: IOException) {
-        project.logger.warn("Failed to save shared settings to '$spoofaxCompilerPropertiesFile'", e)
-      }
-    }
+    shared.savePersistentProperties(properties)
+    project.saveLockFileProperties(properties)
 
     shared
   }

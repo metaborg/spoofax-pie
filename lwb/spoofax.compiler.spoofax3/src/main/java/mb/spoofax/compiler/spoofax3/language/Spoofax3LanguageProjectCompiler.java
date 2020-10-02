@@ -6,8 +6,6 @@ import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.STask;
 import mb.pie.api.TaskDef;
-import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.language.LanguageProject;
 import mb.spoofax.compiler.language.LanguageProjectCompilerInputBuilder;
 import org.immutables.value.Value;
 
@@ -15,6 +13,7 @@ import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.Properties;
 
 @Value.Enclosing
 public class Spoofax3LanguageProjectCompiler implements TaskDef<Spoofax3LanguageProjectCompiler.Input, Result<KeyedMessages, CompilerException>> {
@@ -79,6 +78,11 @@ public class Spoofax3LanguageProjectCompiler implements TaskDef<Spoofax3Language
         Optional<Spoofax3ParserLanguageCompiler.Input> parser();
 
         Optional<Spoofax3StrategoRuntimeLanguageCompiler.Input> strategoRuntime();
+
+
+        default void savePersistentProperties(Properties properties) {
+            parser().ifPresent((i) -> i.savePersistentProperties(properties));
+        }
 
 
         default void syncTo(LanguageProjectCompilerInputBuilder builder) {

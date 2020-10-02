@@ -13,6 +13,7 @@ plugins {
 dependencies {
   api("org.metaborg:stratego.build")
   api("org.metaborg:pie.task.java")
+  api("org.metaborg:pie.task.archive")
 
   // Required because @Nullable has runtime retention (which includes classfile retention), and the Java compiler requires access to it.
   compileOnly("com.google.code.findbugs:jsr305")
@@ -71,8 +72,9 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
 
   // Java compiler task definitions
   val pieTaskJavaPackageId = "mb.pie.task.java"
+  val pieTaskArchivePackageId = "mb.pie.task.archive"
   addTaskDefs(pieTaskJavaPackageId, "CompileJava")
-  addTaskDefs(pieTaskJavaPackageId, "CreateJar")
+  addTaskDefs(pieTaskArchivePackageId, "ArchiveToJar")
 
   // Compilation task definitions
   val compileToJava = TypeInfo.of(taskPackageId, "StrategoCompileToJava")

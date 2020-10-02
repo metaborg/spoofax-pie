@@ -1,5 +1,7 @@
 package mb.spoofax.compiler.spoofax3.language;
 
+import mb.common.util.Properties;
+import mb.spoofax.compiler.util.Shared;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -24,8 +26,8 @@ public class Spoofax3LanguageProjectCompilerInputBuilder {
     }
 
 
-    public Spoofax3LanguageProjectCompiler.Input build(Spoofax3LanguageProject languageProject) {
-        final Spoofax3ParserLanguageCompiler.@Nullable Input parser = buildParser(languageProject);
+    public Spoofax3LanguageProjectCompiler.Input build(Properties persistentProperties, Shared shared, Spoofax3LanguageProject languageProject) {
+        final Spoofax3ParserLanguageCompiler.@Nullable Input parser = buildParser(persistentProperties, shared, languageProject);
         if(parser != null) project.parser(parser);
 
         final Spoofax3StrategoRuntimeLanguageCompiler.@Nullable Input strategoRuntime = buildStrategoRuntime(languageProject, parser);
@@ -38,10 +40,14 @@ public class Spoofax3LanguageProjectCompilerInputBuilder {
 
 
     private Spoofax3ParserLanguageCompiler.@Nullable Input buildParser(
+        Properties persistentProperties,
+        Shared shared,
         Spoofax3LanguageProject languageProject
     ) {
         if(!parserEnabled) return null;
         return parser
+            .withPersistentProperties(persistentProperties)
+            .shared(shared)
             .spoofax3LanguageProject(languageProject)
             .build();
     }

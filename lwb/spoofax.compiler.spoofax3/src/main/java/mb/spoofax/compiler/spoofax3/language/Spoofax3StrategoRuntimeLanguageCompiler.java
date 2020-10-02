@@ -7,9 +7,13 @@ import mb.libspoofax2.spoofax.LibSpoofax2Qualifier;
 import mb.pie.api.ExecContext;
 import mb.pie.api.None;
 import mb.pie.api.STask;
+import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.pie.task.archive.UnarchiveFromJar;
 import mb.resource.classloader.ClassLoaderResource;
+import mb.resource.classloader.ClassloaderResourceLocations;
+import mb.resource.classloader.JarFileWithPath;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
@@ -35,17 +39,20 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
     private final StrategoCompileToJava compileToJava;
     private final StrategoConfigurator configurator;
 
+    private final UnarchiveFromJar unarchiveFromJar;
     private final ClassLoaderResource libSpoofax2DefinitionDir;
 
     @Inject public Spoofax3StrategoRuntimeLanguageCompiler(
         StrategoCheckMulti check,
         StrategoCompileToJava compileToJava,
         StrategoConfigurator configurator,
+        UnarchiveFromJar unarchiveFromJar,
         @LibSpoofax2Qualifier("definition-dir") ClassLoaderResource libSpoofax2DefinitionDir
     ) {
         this.check = check;
         this.compileToJava = compileToJava;
         this.configurator = configurator;
+        this.unarchiveFromJar = unarchiveFromJar;
         this.libSpoofax2DefinitionDir = libSpoofax2DefinitionDir;
     }
 
@@ -74,14 +81,35 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
             }
         }
 
-        // Set compile configuration
-        final ArrayList<ResourcePath> includeDirs = new ArrayList<>(input.strategoIncludeDirs());
-        includeDirs.add(input.strategoRootDirectory());
+        // Gather origins for provided Stratego files.
+        final ArrayList<STask> originTasks = new ArrayList<>(args.originTasks);
+
+        // Determine libspoofax2 definition directories.
+        final ArrayList<HierarchicalResource> libSpoofax2DefinitionDirs = new ArrayList<>();
         if(input.spoofax3LanguageProject().includeLibSpoofax2Exports()) {
-            for(HierarchicalResource export : LibSpoofax2Exports.getStrategoExports(libSpoofax2DefinitionDir)) {
-                includeDirs.add(export.getPath());
+            final ClassloaderResourceLocations locations = libSpoofax2DefinitionDir.getLocations();
+            libSpoofax2DefinitionDirs.addAll(locations.directories);
+            final ResourcePath unarchiveDirectory = input.spoofax3LanguageProject().unarchiveDirectory().appendRelativePath("libspoofax2");
+            for(JarFileWithPath jarFileWithPath : locations.jarFiles) {
+                final Task<None> task = unarchiveFromJar.createTask(new UnarchiveFromJar.Input(jarFileWithPath.file.getPath(), unarchiveDirectory, false, false));
+                originTasks.add(task.toSupplier());
+                context.require(task);
+                libSpoofax2DefinitionDirs.add(context.getHierarchicalResource(unarchiveDirectory.appendAsRelativePath(jarFileWithPath.path)));
             }
         }
+
+        // Gather include directories.
+        final ArrayList<ResourcePath> includeDirs = new ArrayList<>(input.strategoIncludeDirs());
+        includeDirs.add(input.strategoRootDirectory());
+        for(HierarchicalResource definitionDir : libSpoofax2DefinitionDirs) {
+            for(HierarchicalResource export : LibSpoofax2Exports.getStrategoExports(definitionDir)) {
+                if(export.exists()) {
+                    includeDirs.add(export.getPath());
+                }
+            }
+        }
+
+        // Set compile configuration
         final StrategoAnalyzeConfig analyzeConfig = new StrategoAnalyzeConfig(
             input.strategoRootDirectory(),
             input.strategoMainFile(),
@@ -92,7 +120,7 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
 
         // Check Stratego source files.
         final @Nullable KeyedMessages messages = context.require(check.createTask(
-            new StrategoCheckMulti.Input(rootDirectory.getPath(), StrategoUtil.createResourceWalker(), StrategoUtil.createResourceMatcher(), args.originTasks)
+            new StrategoCheckMulti.Input(rootDirectory.getPath(), StrategoUtil.createResourceWalker(), StrategoUtil.createResourceMatcher(), originTasks)
         ));
         if(messages.containsError()) {
             return Result.ofErr(StrategoCompilerException.checkFail(messages));
@@ -110,7 +138,7 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
         );
         final StrategoCompileToJava.Input compileInput = new StrategoCompileToJava.Input(
             compileConfig,
-            args.originTasks
+            originTasks
         );
         final Result<None, ?> compileResult = context.require(compileToJava, compileInput);
         if(compileResult.isErr()) {

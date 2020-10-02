@@ -8,6 +8,7 @@ import mb.resource.ResourceKey;
 import mb.sdf3.spoofax.task.Sdf3Parse;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.stratego.common.StrategoRuntime;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Provider;
@@ -24,7 +25,7 @@ public abstract class ShowTaskDef extends ProvideOutputShared implements TaskDef
             this.concrete = concrete;
         }
 
-        @Override public boolean equals(Object o) {
+        @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             Args args = (Args)o;

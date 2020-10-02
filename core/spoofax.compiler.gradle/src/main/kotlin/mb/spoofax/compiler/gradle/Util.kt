@@ -1,5 +1,6 @@
 package mb.spoofax.compiler.gradle
 
+import mb.common.util.Properties
 import mb.resource.ResourceRuntimeException
 import mb.resource.ResourceService
 import mb.resource.fs.FSPath
@@ -11,6 +12,8 @@ import org.gradle.api.UnknownDomainObjectException
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.kotlin.dsl.*
+import java.io.File
+import java.io.IOException
 
 fun Project.toSpoofaxCompilerProject(): GradleProject {
   return GradleProject.builder()
@@ -61,6 +64,37 @@ fun Project.deleteDirectory(directory: ResourcePath, resourceService: ResourceSe
     genSourceDir.delete(true)
   } catch(e: ResourceRuntimeException) {
     project.logger.warn("Failed to delete directory", e)
+  }
+}
+
+val Project.lockFile: File get() = projectDir.resolve("spoofaxc.lock")
+
+fun Project.loadLockFileProperties(): Properties {
+  val file = lockFile
+  val properties = Properties()
+  if(file.exists()) {
+    file.bufferedReader().use {
+      try {
+        properties.load(it)
+      } catch(e: IOException) {
+        logger.warn("Failed to load properties from lock file '$file'", e)
+      }
+    }
+  }
+  return properties
+}
+
+fun Project.saveLockFileProperties(properties: Properties) {
+  val file = lockFile
+  file.parentFile.mkdirs()
+  file.createNewFile()
+  file.bufferedWriter().use {
+    try {
+      properties.storeWithoutDate(it)
+      it.flush()
+    } catch(e: IOException) {
+      project.logger.warn("Failed to store properties to lock file '$file'", e)
+    }
   }
 }
 

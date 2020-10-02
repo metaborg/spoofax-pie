@@ -18,8 +18,9 @@ dependencies {
 
 languageProject {
   shared {
-    name("Calc")
+    name("calc")
     defaultPackageId("mb.calc")
+    defaultClassPrefix("Calc")
   }
   compilerInput {
     withParser().run {

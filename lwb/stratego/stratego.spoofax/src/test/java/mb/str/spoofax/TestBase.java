@@ -11,8 +11,8 @@ import mb.pie.api.Pie;
 import mb.pie.api.ResourceStringSupplier;
 import mb.pie.api.Supplier;
 import mb.pie.runtime.PieBuilderImpl;
+import mb.pie.task.archive.ArchiveToJar;
 import mb.pie.task.java.CompileJava;
-import mb.pie.task.java.CreateJar;
 import mb.resource.Resource;
 import mb.resource.ResourceKey;
 import mb.resource.fs.FSResource;
@@ -54,7 +54,7 @@ public class TestBase {
     public final StrategoCompileToJava compile = languageComponent.getStrategoCompileToJava();
     public final StrategoAnalyze analyze = languageComponent.getStrategoAnalyze();
     public final CompileJava compileJava = languageComponent.getCompileJava();
-    public final CreateJar createJar = languageComponent.getCreateJar();
+    public final ArchiveToJar archiveToJar = languageComponent.getArchiveToJar();
     public final Pie pie = languageComponent.getPie();
 
 

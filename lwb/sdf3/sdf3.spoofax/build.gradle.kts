@@ -74,7 +74,6 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   val showNormalForm = TypeInfo.of(debugTaskPackageId, "Sdf3ShowNormalForm")
   val showSignature = TypeInfo.of(debugTaskPackageId, "Sdf3ShowSignature")
   val showDynsemSignature = TypeInfo.of(debugTaskPackageId, "Sdf3ShowDynsemSignature")
-  val showPrettyPrinter = TypeInfo.of(debugTaskPackageId, "Sdf3ShowPrettyPrinter")
   val showCompletion = TypeInfo.of(debugTaskPackageId, "Sdf3ShowCompletion")
   val showCompletionRuntime = TypeInfo.of(debugTaskPackageId, "Sdf3ShowCompletionRuntime")
   val showCompletionColorer = TypeInfo.of(debugTaskPackageId, "Sdf3ShowCompletionColorer")
@@ -86,7 +85,6 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
     showNormalForm,
     showSignature,
     showDynsemSignature,
-    showPrettyPrinter,
     showCompletion,
     showCompletionRuntime,
     showCompletionColorer,
@@ -130,7 +128,7 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   val showNormalFormCommand = showCommand(showNormalForm, "normal-form")
   val showSignatureCommand = showAnalyzedCommand(showSignature, "Stratego signatures")
   val showDynsemSignatureCommand = showAnalyzedCommand(showDynsemSignature, "DynSem signatures")
-  val showPrettyPrinterCommand = showCommand(showPrettyPrinter, "pretty-printer")
+
   val showCompletionCommand = showCommand(showCompletion, "completion insertions")
   val showCompletionRuntimeCommand = showCommand(showCompletionRuntime, "completion runtime")
   val showCompletionColorerCommand = showCommand(showCompletionColorer, "completion colorer")
@@ -152,7 +150,6 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
     showDesugarCommand,
     showPermissiveCommand,
     showNormalFormCommand,
-    showPrettyPrinterCommand,
     showCompletionCommand,
     showCompletionRuntimeCommand,
     showCompletionColorerCommand

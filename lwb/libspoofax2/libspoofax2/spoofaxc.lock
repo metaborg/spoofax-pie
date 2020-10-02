@@ -1,5 +1,5 @@
-defaultGroupId=org.metaborg
-defaultClassPrefix=LibSpoofax2
-defaultBasePackageId=mb.libspoofax2
-defaultArtifactId=libspoofax2
-defaultVersion=0.1.0
+shared.defaultVersion=0.1.0
+shared.defaultArtifactId=libspoofax2
+shared.defaultGroupId=org.metaborg
+shared.defaultPackageId=mb.libspoofax2
+shared.defaultClassPrefix=LibSpoofax2

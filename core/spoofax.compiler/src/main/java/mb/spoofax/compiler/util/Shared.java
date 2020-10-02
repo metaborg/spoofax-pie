@@ -13,12 +13,19 @@ import java.util.Properties;
 @Value.Immutable
 public interface Shared extends Serializable {
     class Builder extends ImmutableShared.Builder implements BuilderBase {
+        static final String propertiesPrefix = "shared.";
+        static final String defaultClassPrefix = propertiesPrefix + "defaultClassPrefix";
+        static final String defaultGroupId = propertiesPrefix + "defaultGroupId";
+        static final String defaultArtifactId = propertiesPrefix + "defaultArtifactId";
+        static final String defaultVersion = propertiesPrefix + "defaultVersion";
+        static final String defaultPackageId = propertiesPrefix + "defaultPackageId";
+
         public Builder withPersistentProperties(Properties properties) {
-            with(properties, "defaultClassPrefix", this::defaultClassPrefix);
-            with(properties, "defaultGroupId", this::defaultGroupId);
-            with(properties, "defaultArtifactId", this::defaultArtifactId);
-            with(properties, "defaultVersion", this::defaultVersion);
-            with(properties, "defaultPackageId", this::defaultPackageId);
+            with(properties, defaultClassPrefix, this::defaultClassPrefix);
+            with(properties, defaultGroupId, this::defaultGroupId);
+            with(properties, defaultArtifactId, this::defaultArtifactId);
+            with(properties, defaultVersion, this::defaultVersion);
+            with(properties, defaultPackageId, this::defaultPackageId);
             return this;
         }
     }
@@ -291,12 +298,13 @@ public interface Shared extends Serializable {
         return GradleDependency.module(Coordinate.of("org.metaborg", "statix.multilang.eclipse", spoofax3Version()));
     }
 
+
     default void savePersistentProperties(Properties properties) {
-        properties.setProperty("defaultClassPrefix", defaultClassPrefix());
-        properties.setProperty("defaultGroupId", defaultGroupId());
-        properties.setProperty("defaultArtifactId", defaultArtifactId());
-        properties.setProperty("defaultVersion", defaultVersion());
-        properties.setProperty("defaultBasePackageId", defaultPackageId());
+        properties.setProperty(Builder.defaultClassPrefix, defaultClassPrefix());
+        properties.setProperty(Builder.defaultGroupId, defaultGroupId());
+        properties.setProperty(Builder.defaultArtifactId, defaultArtifactId());
+        properties.setProperty(Builder.defaultVersion, defaultVersion());
+        properties.setProperty(Builder.defaultPackageId, defaultPackageId());
     }
 
     @Value.Check default void check() {

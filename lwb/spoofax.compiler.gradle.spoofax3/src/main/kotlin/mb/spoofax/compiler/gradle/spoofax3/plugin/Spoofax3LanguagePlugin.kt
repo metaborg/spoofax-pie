@@ -12,10 +12,13 @@ import mb.pie.runtime.PieBuilderImpl
 import mb.resource.ResourceKey
 import mb.resource.fs.FSPath
 import mb.sdf3.spoofax.DaggerSdf3Component
+import mb.spoofax.compiler.dagger.*
 import mb.spoofax.compiler.gradle.*
 import mb.spoofax.compiler.gradle.plugin.*
 import mb.spoofax.compiler.gradle.spoofax3.*
+import mb.spoofax.compiler.spoofax3.dagger.*
 import mb.spoofax.compiler.spoofax3.language.*
+import mb.spoofax.compiler.util.*
 import mb.spoofax.core.platform.DaggerPlatformComponent
 import mb.spoofax.core.platform.LoggerFactoryModule
 import mb.spoofax.core.platform.PlatformPieModule
@@ -26,6 +29,7 @@ import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.*
+import java.nio.charset.StandardCharsets
 import java.util.*
 
 open class Spoofax3LanguageProjectExtension(project: Project) {
@@ -58,7 +62,14 @@ open class Spoofax3LanguageProjectExtension(project: Project) {
   val compilerInputFinalized: Spoofax3LanguageProjectCompiler.Input by lazy {
     project.logger.debug("Finalizing $name's compiler input in $project")
     compilerInput.finalizeValue()
-    compilerInput.get().build(spoofax3LanguageProjectFinalized)
+    val shared = project.extensions.getByType<LanguageProjectExtension>().sharedFinalized
+
+    val properties = project.loadLockFileProperties()
+    val input = compilerInput.get().build(properties, shared, spoofax3LanguageProjectFinalized)
+    input.savePersistentProperties(properties)
+    project.saveLockFileProperties(properties)
+
+    input
   }
 }
 
@@ -74,6 +85,7 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
       .platformPieModule(PlatformPieModule { PieBuilderImpl() })
       .build() // OPTO: cache instantiation of platform component?
     val component = DaggerSpoofax3CompilerGradleComponent.builder()
+      .spoofax3CompilerModule(Spoofax3CompilerModule(TemplateCompiler(StandardCharsets.UTF_8)))
       .spoofax3CompilerGradleModule(Spoofax3CompilerGradleModule(languageProjectExtension.component.resourceService, languageProjectExtension.component.pie))
       // OPTO: cache instantiation of the language components?
       .sdf3Component(DaggerSdf3Component.builder().platformComponent(platformComponent).build())

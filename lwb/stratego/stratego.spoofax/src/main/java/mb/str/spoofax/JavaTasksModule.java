@@ -2,8 +2,8 @@ package mb.str.spoofax;
 
 import dagger.Module;
 import dagger.Provides;
+import mb.pie.task.archive.ArchiveToJar;
 import mb.pie.task.java.CompileJava;
-import mb.pie.task.java.CreateJar;
 
 @Module
 public class JavaTasksModule {
@@ -13,7 +13,7 @@ public class JavaTasksModule {
     }
 
     @Provides @StrategoScope
-    public static CreateJar provideCreateJar() {
-        return new CreateJar();
+    public static ArchiveToJar provideArchiveToJar() {
+        return new ArchiveToJar();
     }
 }
