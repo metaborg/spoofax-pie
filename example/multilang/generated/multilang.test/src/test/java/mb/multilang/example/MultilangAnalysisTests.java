@@ -33,8 +33,6 @@ public class MultilangAnalysisTests extends TestBase {
             assertNotNull(msdfMessages);
             assertNotNull(mstrMessages);
 
-            // Because message count and location is not deterministic
-            // We combine the message sets, and assert there are at least some
             assertEquals(0, msdfMessages.size());
             assertEquals(0, mstrMessages.size());
         }
