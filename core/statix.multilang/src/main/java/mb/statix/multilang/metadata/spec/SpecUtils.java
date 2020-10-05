@@ -1,10 +1,6 @@
 package mb.statix.multilang.metadata.spec;
 
 import mb.common.result.Result;
-import mb.nabl2.regexp.IAlphabet;
-import mb.nabl2.regexp.impl.FiniteAlphabet;
-import mb.nabl2.terms.ITerm;
-import mb.nabl2.terms.matching.TermMatch;
 import mb.nabl2.terms.matching.TermMatch.IMatcher;
 import mb.nabl2.terms.stratego.StrategoTerms;
 import mb.resource.hierarchical.HierarchicalResource;
@@ -25,11 +21,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static mb.nabl2.terms.matching.TermMatch.M;
 
 public class SpecUtils {
 
@@ -100,36 +97,20 @@ public class SpecUtils {
     }
 
     public static Result<Spec, SpecLoadException> mergeSpecs(Spec acc, Spec newSpec) {
-        // Error when EOP is not equal, throw exception
-        if(!acc.noRelationLabel().equals(newSpec.noRelationLabel())) {
-            return Result.ofErr(new SpecLoadException("No relation labels do not match:" +
-                acc.noRelationLabel() + " and " + newSpec.noRelationLabel()));
-        }
-
         Set<Rule> rules = new HashSet<>(acc.rules().getAllRules());
         rules.addAll(newSpec.rules().getAllRules());
-
-        Set<ITerm> labels = new HashSet<>(acc.labels().symbols());
-        labels.addAll(newSpec.labels().symbols());
 
         return Result.ofOk(Spec.builder()
             .from(acc)
             .rules(RuleSet.of(rules))
             .addAllEdgeLabels(newSpec.edgeLabels())
-            .addAllRelationLabels(newSpec.relationLabels())
-            .labels(new FiniteAlphabet<>(labels))
+            .addAllDataLabels(newSpec.dataLabels())
             .putAllScopeExtensions(newSpec.scopeExtensions())
             .build());
     }
 
     public static IMatcher<Spec> fileSpec() {
-        return TermMatch.M.appl6("FileSpec", TermMatch.M.list(), TermMatch.M.req(StatixTerms.labels()), TermMatch.M.req(StatixTerms.labels()), TermMatch.M.term(), StatixTerms.rules(), TermMatch.M.req(StatixTerms.scopeExtensions()),
-            (t, l, edgeLabels, relationLabels, noRelationLabel, rules, ext) -> {
-                List<ITerm> allTerms = new ArrayList<>(relationLabels);
-                Collections.addAll(allTerms, edgeLabels.toArray(new ITerm[0]));
-                allTerms.add(0, noRelationLabel);
-                final IAlphabet<ITerm> labels = new FiniteAlphabet<>(allTerms);
-                return Spec.of(rules, edgeLabels, relationLabels, noRelationLabel, labels, ext);
-            });
+        return M.appl6("FileSpec", M.list(), M.req(StatixTerms.labels()), M.req(StatixTerms.labels()), M.term(), StatixTerms.rules(), M.req(StatixTerms.scopeExtensions()),
+            (t, l, edgeLabels, dataLabels, noRelationLabel, rules, ext) -> Spec.of(rules, edgeLabels, dataLabels, ext));
     }
 }
