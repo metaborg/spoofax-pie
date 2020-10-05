@@ -1,0 +1,17 @@
+module mini-str/signatures/sorts
+
+imports
+  cons-type-interface/sorts
+  cons-type-interface/types
+
+  signatures/mini-str/mini-str-sig
+
+rules
+
+  sortsOk maps sortOk(*, list(*))
+
+  sortOk: scope * SMBL
+
+  sortOk(s, n) :-
+  	// Declare sort in module root scope
+  	declareSort(s, n).

@@ -1,0 +1,10 @@
+module ministr
+
+imports
+
+  mini-str/mini-str
+
+context-free start-symbols
+
+  MSTRStart
+

@@ -1,0 +1,14 @@
+module cons-type-interface/types
+
+signature
+
+  sorts TAG = scope
+
+  sorts TYPE constructors
+    TSORT 		: TAG * string -> TYPE
+    TOPT		: TYPE -> TYPE
+    TITER		: TYPE -> TYPE
+    TSTAR		: TYPE -> TYPE
+
+  sorts CONS constructors
+    CONS	: TYPE * list(TYPE) * int * TAG -> CONS // Arity stored explicitly to work around unresolved queries

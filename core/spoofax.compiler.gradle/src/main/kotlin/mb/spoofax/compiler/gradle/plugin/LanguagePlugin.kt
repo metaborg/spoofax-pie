@@ -135,8 +135,10 @@ open class LanguagePlugin : Plugin<Project> {
     project.plugins.apply(JavaLibraryPlugin::class.java)
 
     project.afterEvaluate {
-      extension.statixDependenciesFinalized.whenAllLanguageProjectsFinalized {
-        configure(project, extension.component, extension.compilerInputFinalized)
+      project.whenLanguageProjectFinalized {
+        extension.statixDependenciesFinalized.whenAllLanguageProjectsFinalized {
+          configure(project, extension.component, extension.compilerInputFinalized)
+        }
       }
     }
   }

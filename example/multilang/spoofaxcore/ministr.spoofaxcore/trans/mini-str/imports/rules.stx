@@ -1,0 +1,24 @@
+module mini-str/imports/rules
+
+imports
+  mini-str/rules/resolution
+
+rules
+
+  rulesImpOk: string * scope * scope
+
+  rulesImpOk(n, s_imp, s_mod) :- {rds}
+ 	ruleType of Rule{_} in s_mod |-> rds,
+    ruleMergesOk(n, s_imp, namesOfRules(rds)).
+
+rules
+
+  ruleMergesOk maps ruleMergeOk(*, *, list(*))
+
+  ruleMergeOk: string * scope * string
+
+  ruleMergeOk(m, s, rn) :- {rls T1 T2}
+    ruleType of Rule{rn} in s |-> rls,
+    typesOfRules(rls) == (T1, T2),
+    uniqType(T1) == [_],
+    uniqType(T2) == [_].

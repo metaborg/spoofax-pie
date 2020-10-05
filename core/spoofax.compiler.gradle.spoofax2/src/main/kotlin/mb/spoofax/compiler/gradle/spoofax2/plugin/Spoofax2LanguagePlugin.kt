@@ -60,7 +60,9 @@ open class Spoofax2LanguagePlugin : Plugin<Project> {
     languageProjectExtension.compilerInput { extension.compilerInputFinalized.syncTo(this) }
 
     project.afterEvaluate {
-      configure(project, component, extension.compilerInputFinalized, languageProjectExtension.compilerInputFinalized)
+      project.whenLanguageProjectFinalized {
+        configure(project, component, extension.compilerInputFinalized, languageProjectExtension.compilerInputFinalized)
+      }
     }
   }
 

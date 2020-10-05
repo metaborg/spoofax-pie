@@ -1,0 +1,28 @@
+module minisdf-common
+
+lexical syntax
+
+  LAYOUT         = [\ \t\n\r]
+  CommentChar    = [\*]
+  LAYOUT         = "/*" InsideComment* "*/"
+  InsideComment  = ~[\*]
+  InsideComment  = CommentChar
+  LAYOUT         = "//" ~[\n\r]* NewLineEOF
+  NewLineEOF     = [\n\r]
+  NewLineEOF     = EOF
+  EOF            =
+
+lexical restrictions
+
+  // Ensure greedy matching for lexicals
+  CommentChar   -/- [\/]
+
+  // EOF may not be followed by any char
+  EOF           -/- ~[]
+
+context-free restrictions
+
+  // Ensure greedy matching for comments
+  LAYOUT? -/- [\ \t\n\r]
+  LAYOUT? -/- [\/].[\/]
+  LAYOUT? -/- [\/].[\*]

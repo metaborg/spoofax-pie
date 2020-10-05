@@ -1,0 +1,5 @@
+defaultGroupId=org.metaborg
+defaultClassPrefix=Signature
+defaultBasePackageId=mb.signature
+defaultArtifactId=signature
+defaultVersion=0.1.0

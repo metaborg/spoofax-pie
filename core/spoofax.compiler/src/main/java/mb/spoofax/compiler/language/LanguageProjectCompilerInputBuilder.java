@@ -79,7 +79,7 @@ public class LanguageProjectCompilerInputBuilder {
         final ConstraintAnalyzerLanguageCompiler.@Nullable Input constraintAnalyzer = buildConstraintAnalyzer(shared, languageProject);
         if(constraintAnalyzer != null) project.constraintAnalyzer(constraintAnalyzer);
 
-        final MultilangAnalyzerLanguageCompiler.@Nullable Input multilangAnalyzer = buildMultilangAnalyzer(shared, languageProject);
+        final MultilangAnalyzerLanguageCompiler.@Nullable Input multilangAnalyzer = buildMultilangAnalyzer(shared, languageProject, classloaderResources);
         if(multilangAnalyzer != null) project.multilangAnalyzer(multilangAnalyzer);
 
         final StrategoRuntimeLanguageCompiler.@Nullable Input strategoRuntime = buildStrategoRuntime(shared, languageProject, constraintAnalyzer);
@@ -128,10 +128,11 @@ public class LanguageProjectCompilerInputBuilder {
             .build();
     }
 
-    private MultilangAnalyzerLanguageCompiler.@Nullable Input buildMultilangAnalyzer(Shared shared, LanguageProject languageProject) {
+    private MultilangAnalyzerLanguageCompiler.@Nullable Input buildMultilangAnalyzer(Shared shared, LanguageProject languageProject, ClassloaderResourcesCompiler.Input classloaderResourcesInput) {
         if(!multilangAnalyzerEnabled) return null;
         return multilangAnalyzer
             .shared(shared)
+            .classloaderResources(classloaderResourcesInput.classloaderResources())
             .languageProject(languageProject)
             .build();
     }

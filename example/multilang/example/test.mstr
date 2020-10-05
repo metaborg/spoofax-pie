@@ -1,0 +1,29 @@
+module test
+
+imports
+  arith
+
+rules
+    // Remove unnecesary brackets in Plus terms
+ 	remove-bracket-plus: Plus(Term(Factor(Bracket(a))), b) -> Plus(a, b)
+	// remove-bracket-plus: Plus(a, Factor(Bracket(Term(b)))) -> Plus(a, b)
+
+rules
+	// Remove unnecessary bracket in Times Terms
+  	remove-bracket-times: Times(a, Bracket(Term(Factor(b)))) -> Times(a, b)
+	// remove-bracket-times: Times(Factor(Bracket(Term(a))), b) -> Times(a, b)
+
+rules
+	// Incorrect src pattern
+    // remove-bracket: Plus(Factor(Bracket(a)), b) -> Plus(a, b)
+	// Incorrect var sort
+    // remove-bracket: Plus(Term(Factor(a)), b) -> Plus(a, b)
+    // Incorrect src arity
+ 	// remove-bracket: Plus(Term(Factor(Bracket(a))), b, superfluous) -> Plus(a, b)
+    // Incorrect dst arity
+ 	// remove-bracket: Plus(Term(Factor(Bracket(a))), b) -> Plus(a, b, a)
+
+rules
+
+  bracketize-expr: a -> Factor(Bracket(a))
+  bracketize-term: b -> Bracket(Term(b))

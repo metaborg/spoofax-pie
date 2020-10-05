@@ -1,0 +1,14 @@
+module arith
+
+sorts
+  Start Expr Fact Term Int
+
+context-free syntax
+
+  Start.Module  = <<Expr>>
+  Expr.Plus 	= <<Expr> + <Term>>
+  Expr.Term		= <<Term>>
+  Term.Times 	= <<Term> * <Fact>>
+  Term.Factor	= <<Fact>>
+  Fact.Bracket	= <(<Expr>)>
+  Fact.Lit 		= <<Int>>

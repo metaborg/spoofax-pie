@@ -1,0 +1,18 @@
+module mini-str/signatures/signatures
+
+imports
+  signatures/mini-str/mini-str-sig
+  mini-str/signatures/sorts
+  mini-str/signatures/constructors
+
+rules
+
+  signaturesOk maps signatureOk(*, list(*))
+
+  signatureOk: scope * SignatureSection
+
+  signatureOk(s_mod, Sorts(s)) :-
+  	sortsOk(s_mod, s).
+
+  signatureOk(s_mod, Constructors(c)) :-
+  	conssOk(s_mod, c).
