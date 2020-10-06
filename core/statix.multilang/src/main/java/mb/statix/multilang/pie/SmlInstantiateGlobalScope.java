@@ -85,7 +85,7 @@ public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalSc
     private Result<GlobalResult, MultiLangAnalysisException> instantiateGlobalScopeForSpec(Input input, Spec spec) {
         ITermVar globalScopeVar = TermVar.of("", "s");
         Set<ITermVar> scopeArgs = Collections.singleton(globalScopeVar);
-        IConstraint globalConstraint = new CExists(scopeArgs, new CNew(new HashSet<>(scopeArgs)));
+        IConstraint globalConstraint = new CExists(scopeArgs, new CNew(globalScopeVar, globalScopeVar));
         IState.Immutable state = State.of(spec);
         IDebugContext debug = TaskUtils.createDebugContext(input.logLevel);
 

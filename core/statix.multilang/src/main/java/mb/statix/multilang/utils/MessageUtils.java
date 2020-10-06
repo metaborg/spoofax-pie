@@ -105,7 +105,6 @@ public class MessageUtils {
             onNew -> Stream.empty(),
             onResolveQuery -> Stream.empty(),
             onTellEdge -> Stream.empty(),
-            onTellRel -> Stream.empty(),
             onTermId -> Stream.empty(),
             onTermProperty -> Stream.empty(),
             onTrue -> Stream.empty(),

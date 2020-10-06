@@ -37,7 +37,7 @@ public class SpecLoaderTest {
         assertNotNull(spec);
 
         assertEquals(0, spec.edgeLabels().size());
-        assertEquals(1, spec.relationLabels().size()); // Decl()
+        assertEquals(1, spec.dataLabels().size()); // Decl()
         RuleSet rules = spec.rules();
         assertEquals(1, rules.getRules("base!ok").size());
         assertEquals(1, rules.getRules("imported!rule").size());
@@ -57,7 +57,7 @@ public class SpecLoaderTest {
         Spec spec = SpecUtils.mergeSpecs(specFragment1.toSpec(), specFragment2.toSpec()).unwrap();
 
         assertEquals(0, spec.edgeLabels().size());
-        assertEquals(1, spec.relationLabels().size()); // Decl()
+        assertEquals(1, spec.dataLabels().size()); // Decl()
         RuleSet rules = spec.rules();
         assertEquals(1, rules.getRules("root!ok").size());
         assertEquals(2, rules.getRules("imported!rule").size());
