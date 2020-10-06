@@ -5,7 +5,7 @@ plugins {
 
 val logVersion = "0.3.0"
 val slf4jVersion = "1.7.30"
-val resourceVersion = "0.7.3"
+val resourceVersion = "0.8.1"
 val pieVersion = "0.12.2"
 
 // Needs to be kept in sync with spoofax2Version of Spoofax 2 releng and the Spoofax 2 Gradle plugin.
