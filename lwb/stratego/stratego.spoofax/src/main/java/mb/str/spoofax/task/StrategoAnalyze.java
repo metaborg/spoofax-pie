@@ -14,10 +14,11 @@ import mb.resource.ResourceKeyString;
 import mb.resource.ResourceService;
 import mb.str.spoofax.StrategoScope;
 import mb.str.spoofax.config.StrategoAnalyzeConfig;
-import mb.stratego.build.strincr.Analysis;
+import mb.stratego.build.strincr.Frontends;
 import mb.stratego.build.strincr.Message;
 import mb.stratego.build.strincr.MessageSeverity;
 import mb.stratego.build.strincr.StrIncrAnalysis;
+import mb.stratego.build.util.StrategoGradualSetting;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
@@ -29,11 +30,11 @@ import java.util.Objects;
 public class StrategoAnalyze implements TaskDef<StrategoAnalyze.Input, KeyedMessages> {
     public static class Input implements Serializable {
         public final StrategoAnalyzeConfig config;
-        public final ArrayList<STask> originTasks;
+        public final ArrayList<STask<?>> originTasks;
 
         public Input(
             StrategoAnalyzeConfig config,
-            ArrayList<STask> originTasks
+            ArrayList<STask<?>> originTasks
         ) {
             this.config = config;
             this.originTasks = originTasks;
@@ -74,8 +75,8 @@ public class StrategoAnalyze implements TaskDef<StrategoAnalyze.Input, KeyedMess
 
     @Override public KeyedMessages exec(ExecContext context, Input input) {
         //noinspection ConstantConditions
-        final Result<Analysis.Output, ?> result = Result.ofOkOrCatching(() -> context.require(analysis, new Analysis.Input(
-            input.config.mainFile, input.config.includeDirs, input.config.builtinLibs, input.originTasks, input.config.projectDir
+        final Result<Frontends.Output, ?> result = Result.ofOkOrCatching(() -> context.require(analysis, new Frontends.Input(
+            input.config.mainFile, input.config.includeDirs, input.config.builtinLibs, input.originTasks, input.config.projectDir, StrategoGradualSetting.NONE
         )));
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         result.ifElse(output -> {

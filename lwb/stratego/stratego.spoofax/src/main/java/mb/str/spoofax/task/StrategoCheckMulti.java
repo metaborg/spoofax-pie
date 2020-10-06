@@ -28,13 +28,13 @@ public class StrategoCheckMulti implements TaskDef<StrategoCheckMulti.Input, Key
         public final ResourcePath root;
         public final ResourceWalker walker;
         public final ResourceMatcher matcher;
-        public final ArrayList<STask> originTasks;
+        public final ArrayList<STask<?>> originTasks;
 
         public Input(
             ResourcePath root,
             ResourceWalker walker,
             ResourceMatcher matcher,
-            ArrayList<STask> originTasks
+            ArrayList<STask<?>> originTasks
         ) {
             this.root = root;
             this.walker = walker;

@@ -82,7 +82,7 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
         }
 
         // Gather origins for provided Stratego files.
-        final ArrayList<STask> originTasks = new ArrayList<>(args.originTasks);
+        final ArrayList<STask<?>> originTasks = new ArrayList<>(args.originTasks);
 
         // Determine libspoofax2 definition directories.
         final ArrayList<HierarchicalResource> libSpoofax2DefinitionDirs = new ArrayList<>();
@@ -204,9 +204,9 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
 
     public static class Args implements Serializable {
         public final Input input;
-        public final ArrayList<STask> originTasks;
+        public final ArrayList<STask<?>> originTasks;
 
-        public Args(Input input, ArrayList<STask> originTasks) {
+        public Args(Input input, ArrayList<STask<?>> originTasks) {
             this.input = input;
             this.originTasks = originTasks;
         }

@@ -36,7 +36,7 @@ public class Spoofax3LanguageProjectCompiler implements TaskDef<Spoofax3Language
     @Override public Result<KeyedMessages, CompilerException> exec(ExecContext context, Input input) throws Exception {
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
 
-        final ArrayList<STask> strategoOriginTask = new ArrayList<>();
+        final ArrayList<STask<?>> strategoOriginTask = new ArrayList<>();
 
         if(input.parser().isPresent()) {
             strategoOriginTask.add(parserCompiler.createSupplier(input.parser().get()));

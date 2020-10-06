@@ -8,6 +8,7 @@ import mb.pie.api.TaskDef;
 import mb.str.spoofax.StrategoScope;
 import mb.str.spoofax.config.StrategoCompileConfig;
 import mb.stratego.build.strincr.StrIncr;
+import mb.stratego.build.util.StrategoGradualSetting;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.cmd.Arguments;
 
@@ -20,9 +21,9 @@ import java.util.Objects;
 public class StrategoCompileToJava implements TaskDef<StrategoCompileToJava.Input, Result<None, ?>> {
     public static class Input implements Serializable {
         public final StrategoCompileConfig config;
-        public final ArrayList<STask> originTasks;
+        public final ArrayList<STask<?>> originTasks;
 
-        public Input(StrategoCompileConfig config, ArrayList<STask> originTasks) {
+        public Input(StrategoCompileConfig config, ArrayList<STask<?>> originTasks) {
             this.config = config;
             this.originTasks = originTasks;
         }
@@ -70,7 +71,8 @@ public class StrategoCompileToJava implements TaskDef<StrategoCompileToJava.Inpu
             new Arguments(),
             cfg.outputDir,
             input.originTasks,
-            cfg.projectDir
+            cfg.projectDir,
+            StrategoGradualSetting.NONE
         )));
     }
 }
