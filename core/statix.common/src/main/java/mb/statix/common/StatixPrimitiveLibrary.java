@@ -12,6 +12,7 @@ import mb.statix.spoofax.STX_is_analysis;
 import mb.statix.spoofax.STX_solve_constraint;
 import mb.statix.spoofax.STX_solve_multi_file;
 import mb.statix.spoofax.STX_solve_multi_project;
+import mb.stratego.common.primitive.FailingPrimitive;
 import org.spoofax.interpreter.library.AbstractStrategoOperatorRegistry;
 
 public class StatixPrimitiveLibrary extends AbstractStrategoOperatorRegistry {
@@ -28,6 +29,8 @@ public class StatixPrimitiveLibrary extends AbstractStrategoOperatorRegistry {
         add(new STX_solve_constraint());
         add(new STX_solve_multi_file());
         add(new STX_solve_multi_project());
+
+        add(new FailingPrimitive("STX_is_concurrent_enabled"));
     }
 
     @Override public String getOperatorRegistryName() {

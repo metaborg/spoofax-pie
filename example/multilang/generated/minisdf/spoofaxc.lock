@@ -1,5 +1,5 @@
-defaultGroupId=org.metaborg
-defaultClassPrefix=MiniSdf
-defaultBasePackageId=mb.minisdf
-defaultArtifactId=minisdf
-defaultVersion=0.1.0
+shared.defaultVersion=0.1.0
+shared.defaultArtifactId=minisdf
+shared.defaultGroupId=org.metaborg
+shared.defaultPackageId=mb.minisdf
+shared.defaultClassPrefix=MiniSdf

@@ -26,14 +26,14 @@ public abstract class ConstraintAnalyzerException extends Exception {
     }
 
 
+    @Override public Throwable fillInStackTrace() {
+        return this; // Do nothing so that no stack trace is created, saving memory and CPU time.
+    }
+
+
     @Override public abstract int hashCode();
 
     @Override public abstract boolean equals(@Nullable Object obj);
 
     @Override public abstract String toString();
-
-
-    protected ConstraintAnalyzerException() {
-        super(null, null, true, false);
-    }
 }

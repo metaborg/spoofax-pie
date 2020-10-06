@@ -1,5 +1,5 @@
-defaultGroupId=org.metaborg
-defaultClassPrefix=MiniStr
-defaultBasePackageId=mb.ministr
-defaultArtifactId=ministr
-defaultVersion=0.1.0
+shared.defaultVersion=0.1.0
+shared.defaultArtifactId=ministr
+shared.defaultGroupId=org.metaborg
+shared.defaultPackageId=mb.ministr
+shared.defaultClassPrefix=MiniStr
