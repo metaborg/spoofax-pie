@@ -13,18 +13,23 @@ imports
 
 rules
 
-  rulesOk maps ruleOk(*, list(*))
+  rulesOk: scope * scope * scope * list(RuleDef)
+  rulesOk(_, s_out, s_out, []).
+  rulesOk(s_root, s_seq, s_out, [h | t]) :- {s}
+    new s, s -S-> s_seq,
+    ruleOk(s_root, s_seq, h),
+    rulesOk(s_root, s, s_out, t).
 
-  ruleOk: scope * RuleDef
-  ruleOk(s_root, RewriteRuleDef(n, m, b, w)) :-
+  ruleOk: scope * scope * RuleDef
+  ruleOk(s_root, s_seq, RewriteRuleDef(n, m, b, w)) :-
     {s_match s_build s_with T1 T2}
       new s_match s_build s_with,
       s_match -P-> s_root,
       s_build -P-> s_with,
-      withOk(s_match, s_with, w),
-      typeOfMatch(s_match, m) == T1,
+      declareRule(s_root, s_seq, n, T1, T2),
       typeOfBuild(s_build, b) == T2,
-      declareRule(s_root, n, T1, T2).
+      withOk(s_match, s_with, w),
+      typeOfMatch(s_match, m) == T1.
 
 rules
 

@@ -6,7 +6,7 @@ imports
 
 signature
   namespaces
-  
+
     Sort : string
 
   relations
@@ -26,7 +26,7 @@ rules
   typeEq: TYPE * TYPE
 
   // Equal sorts match
-  typeEq(a, a).
+  typeEq(T, T).
 
 rules
 
@@ -47,6 +47,6 @@ rules
 rules
 
   typeOfSort: scope * string -> TYPE
-  typeOfSort(s, n) = T :- {res}
+  typeOfSort(s, n) = T :-
     sort of Sort{n} in s |-> [(_, (_, T)) | _]
         | error $[Sort [n] not declared].

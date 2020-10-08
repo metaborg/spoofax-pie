@@ -3,6 +3,7 @@ module mini-str/rules/list-sorts
 imports
   cons-type-interface/sorts
   signatures/mini-str/mini-str-sig
+  mini-str/rules/resolution
 
 signature
 
@@ -16,12 +17,22 @@ rules
   typeEq(EMPTY(), TSTAR(_)).
   typeEq(EMPTY(), TOPT(_)).
 
-  typeEq(SINGLETON(T), TOPT(T)).
-  typeEq(SINGLETON(T), TSTAR(T)).
-  typeEq(SINGLETON(T), TITER(T)).
+  typeEq(SINGLETON(T1), TOPT(T2)) :- typeEq(T1, T2).
+  typeEq(SINGLETON(T1), TSTAR(T2)) :- typeEq(T1, T2).
+  typeEq(SINGLETON(T1), TITER(T2)) :- typeEq(T1, T2).
 
-  typeEq(MULTI(T), TSTAR(T)).
-  typeEq(MULTI(T), TITER(T)).
+  typeEq(MULTI(T1), TSTAR(T2)) :- typeEq(T1, T2).
+  typeEq(MULTI(T1), TITER(T2)) :- typeEq(T1, T2).
+
+rules
+
+  typeEq(TOPT(T1), TSTAR(T2)) :- typeEq(T1, T2).
+  typeEq(TITER(T1), TSTAR(T2)) :- typeEq(T1, T2).
+
+  typeEq(T1, T2) :- {n1 n2}
+    nameOfSort(T1) == n1,
+    nameOfSort(T2) == n2,
+    false | error $[Type [n1] cannot be assigned to [n2]].
 
 rules
 

@@ -1,5 +1,7 @@
 languageContexts:
   'mb.minisdf': "debugContext"
   'mb.ministr': "debugContext"
-logging:
-  debugContext: "debug"
+contextConfigs:
+  'debugContext':
+    logging: "debug"
+    stripTraces: false

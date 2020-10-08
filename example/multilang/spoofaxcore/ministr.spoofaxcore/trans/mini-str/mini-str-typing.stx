@@ -8,6 +8,7 @@ imports
 
   mini-str/rules/rules
   mini-str/rules/resolution
+  mini-str/rules/list-sorts
   mini-str/signatures/signatures
   mini-str/imports/imports
 
@@ -20,23 +21,30 @@ rules
 
   mstrProgramOK : scope * MSTRStart
 
-  mstrProgramOK(s, MSTRModule(n, sec)) :- {s_mod}
-	new s_mod,
+  mstrProgramOK(s, MSTRModule(n, sec)) :- {s_mod s_seq}
+	new s_mod s_seq,
 	s_mod -P-> s,
     declareMod(s, n, s_mod, STRMod()),
-    declareRules(s_mod),
-    mstrSectionsOk(s_mod, sec).
+    // declareRules(s_mod),
+    mstrSectionsOk(s_mod, s_seq, _, sec).
 
 rules
 
-  mstrSectionsOk maps mstrSectionOk(*, list(*))
+  mstrSectionsOk: scope * scope * scope * list(MSTRSection)
 
-  mstrSectionOk: scope * MSTRSection
-  mstrSectionOk(s, Rules(rls)) :-
-    rulesOk(s, rls).
+  mstrSectionsOk(_, s_out, s_out, []).
 
-  mstrSectionOk(s, Signatures(sigs)) :-
+  mstrSectionsOk(s_root, s_seq, s_out, [h | t]) :- {s_int1 s_int2}
+    mstrSectionOk(s_root, s_seq, s_int1, h),
+    new s_int2, s_int2 -S-> s_int1,
+    mstrSectionsOk(s_root, s_int2, s_out, t).
+
+  mstrSectionOk: scope * scope * scope * MSTRSection
+  mstrSectionOk(s, s_in, s_out, Rules(rls)) :- 
+    rulesOk(s, s_in, s_out, rls).
+
+  mstrSectionOk(s, s_seq, s_seq, Signatures(sigs)) :-
     signaturesOk(s, sigs).
 
-  mstrSectionOk(s, Imports(i)) :-
+  mstrSectionOk(s, s_seq, s_seq, Imports(i)) :-
     strImportsOk(s, i).

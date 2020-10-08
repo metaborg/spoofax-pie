@@ -6,12 +6,12 @@ imports
 
 signature
   namespaces
-  
+
     Cons : string
 
   relations
 
-    cons: occurrence * CONS
+    cons: occurrence * int -> CONS
 
   name-resolution
 
@@ -23,40 +23,35 @@ rules
 
   declareCons : scope * TYPE * string * list(TYPE)
 
-  declareCons(s, T, n, y) :- {a ctag}
+  declareCons(s, T, n, S) :- {a ctag}
     new ctag,
-    a == arityOfSig(y),
-    s -> Cons{n} with cons CONS(T, y, a, ctag),
+    a == arityOfSig(S),
+    !cons[Cons{n}, a, CONS(T, S, a, ctag)] in s,
     // Check for constructors with same name in same scope
     query cons
-      filter e and { t :- t == (Cons{n}, CONS(_, _, a, _)) }
+      filter e and { t :- t == (Cons{n}, a) }
       in s |-> [_] | error $[Duplicate declaration of constructor [n]/[a].],
     // Check for constructors with same name in imported modules
     query cons
-      filter resolveMatch[Cons{n}] & ~e and { t :- t == (Cons{n}, CONS(_, _, a, _)) }
+      filter resolveMatch[Cons{n}] & ~e and { t :- t == (Cons{n}, a) }
       in s |-> [] | error $[Shadowing imported constructor [n]/[a].].
 
 rules
 
   typeOfCons : scope * int * string -> CONS
 
-  typeOfCons(s, a, n) = C :- {res}
+  typeOfCons(s, a, n) = C :-
     query cons
-      filter resolveMatch[Cons{n}] and { t :- t == (Cons{n}, CONS(_, _, a, _)) }
-      in s |-> [(_, (_, C))| _]
-          | error $[Constructor [n]/[a] not declared].
-
-//rules
-//
-//  arityMatch: (occurrence * CONS) * int
-//  arityMatch((Cons{n}, CONS(_, _, a, _)), a).
+      filter P* I* and { t :- t == (Cons{n}, a) }
+      in s |-> [(_, (_, _, C))| _]
+      | error $[Constructor [n]/[a] not declared].
 
 rules
 
   arityOfSig : list(TYPE) -> int
 
   arityOfSig([]) = 0.
-  arityOfSig([_]) = 1.  
+  arityOfSig([_]) = 1.
   arityOfSig([h|t]) = res :- {ts}
     ts == arityOfSig(t),
     res #= ts + 1.

@@ -37,9 +37,9 @@ rules
 rules
 
   typeInfosOfConss maps typeInfoOfCons(list(*)) = list(*)
-  typeInfoOfCons: (path * (occurrence * CONS)) -> CTI
+  typeInfoOfCons: (path * (occurrence * int * CONS)) -> CTI
 
-  typeInfoOfCons((_, (Cons{n}, CONS(_, _, a, id)))) = (n, a, id).
+  typeInfoOfCons((_, (Cons{n}, a, CONS(_, _, _, id)))) = (n, a, id).
 
 rules
   // Double maps to validate each pair

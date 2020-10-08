@@ -28,11 +28,13 @@ rules
 
   ptrnOk : scope * PATTERN * Pattern * TYPE
 
-  ptrnOk(s, pt, Constr(n, p), T) :- {T1 T2}
+  ptrnOk(s, pt, Constr(n, p), T) :- {T1 T2 n' n1}
     typeOfCons(s, arityOfCons(p), n) == CONS(T1, T2, _, _),
     ptrnsOk(s, pt, p, T2),
+    nameOfSort(T1) == n1,
+    nameOfSort(T) == n',
     typeEq(T, T1)
-        | error $[Expected constructor of sort [T], but was [T1]] @n.
+    | error $[Expected constructor of sort [n'], but was [n1]] @n.
 
   ptrnOk(s, pt, l@List(i), T) :- {T1}
     typeOfList(l) == T1,
@@ -47,6 +49,9 @@ rules
   ptrnOk(s, MATCH(), Var(n), T) :-
     declareVar(s, n, T).
 
-  ptrnOk(s, BUILD(), Var(n), T) :- {T1}
+  ptrnOk(s, BUILD(), Var(n), T) :- {T1 n' n1}
     typeOfVar(s, n) == T1,
-    typeEq(T, T1) | error $[Expected variable of sort [T], but was [T1]] @n.
+    nameOfSort(T1) == n1,
+    nameOfSort(T) == n',
+    typeEq(T1, T) | error $[Expected variable of sort [n'], but was [n1]] @n.
+

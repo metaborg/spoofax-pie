@@ -19,6 +19,9 @@ rules
 
   ruleMergeOk(m, s, rn) :- {rls T1 T2}
     ruleType of Rule{rn} in s |-> rls,
-    typesOfRules(rls) == (T1, T2),
-    uniqType(T1) == [_],
-    uniqType(T2) == [_].
+    ruleTypesOk(m, rn, typesOfRules(rls)).
+  
+  ruleTypesOk : string * string * (list(TYPE) * list(TYPE))
+  ruleTypesOk(_, _, ([_], [_])).
+  ruleTypesOk(m, r, (_, _)) :- false
+  | error $[Importing conflicting definitions for rule [r]]@m.

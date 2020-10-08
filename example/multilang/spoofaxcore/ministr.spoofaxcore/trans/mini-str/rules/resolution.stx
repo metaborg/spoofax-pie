@@ -6,6 +6,7 @@ imports
 
 signature
 
+  sorts RTDECL = (path * (occurrence * RTYPE))
   sorts RTYPE constructors
     // Rule type: input sort -> output sort
     RULE : TYPE * TYPE -> RTYPE
@@ -15,9 +16,11 @@ signature
     Rule : string  		// Module-unique declaration of rule
 
   name-resolution
+    labels S
+
     resolve RuleInst
-      filter e // Only find rule instances in same module
-    
+      filter S+ // Only find rule instances in same module
+
     resolve Rule
       filter P* I*
       min $ < P, $ < I, P < I
@@ -26,50 +29,51 @@ signature
     ruleInstType: occurrence -> RTYPE
     ruleType: occurrence -> RTYPE
 
+  // Sort used for prettyfying names
+  sorts SNAME constructors
+    R : string -> SNAME // raw
+    O : string -> SNAME // optional
+    I : string -> SNAME // iter
+    S : string -> SNAME // star
 rules
 
   // Declares a single rule instance in a scope
-  declareRule : scope * string * TYPE * TYPE
+  declareRule : scope * scope * string * TYPE * TYPE
 
-  declareRule(s, n, T1, T2) :- {rls rt rts}
+  declareRule(s, s_seq, n, T1, T2) :- {rls rt rts rits}
     rt == RULE(T1, T2),
-    s -> RuleInst{n} with ruleInstType rt,
+    ruleInstType of RuleInst{n} in s_seq |-> rits,
     query ruleType
       filter resolveMatch[Rule{n}] & ~e and { t :- t == Rule{n} }
       in s |-> rts,
-    parentOk(rts, rt).
+    declRule(s, s_seq, rts, rits, n, rt).
 
 rules
 
-  parentOk: list((path * (occurrence * RTYPE))) * RTYPE
+  declRule: scope * scope * list(RTDECL) * list(RTDECL) * string * RTYPE
 
   // Rule definition is valid when no parent rule specified
-  parentOk([], _).
+  declRule(s_mod, s_seq, [], [], n, T) :-
+    s_mod -> Rule{n} with ruleType T,
+    s_seq -> RuleInst{n} with ruleInstType T.
+
+  declRule(s_mod, s_seq, [(_, (_, T_decl)) | _], _, n, T) :-
+    equitype(T_decl, T).
 
   // Rule definition is valid when it complies with parent
-  parentOk([(_, (_, RULE(T1, T2))) | _], RULE(T3, T4)) :-
-    T1 == T3 | error $[Input type [T3] does not match with specified type [T1]],
-    T2 == T4 | error $[Output type [T4] does not match with specified type [T2]].
+  declRule(s_mod, s_seq, [], [(_, (_, T_decl)) | _], n, T) :-
+    equitype(T_decl, T).
 
 rules
+  equitype : RTYPE * RTYPE
 
-  // Declares a rule definition for a module
-  declareRules : scope
-
-  declareRules(s) :- {rls uns rds uds}
-    // Get names of rule instances declared in this scope
-    query ruleInstType
-      filter e
-      in s |-> rls,
-    unique(namesOfRules(rls)) == uns,
-    // Get visible rule definitions
-    query ruleType
-      filter resolveMatch[Rule{_}] & ~e
-      in s |-> rds,
-    unique(namesOfRules(rds)) == uds,
-    // Create definitions for new rules
-    declareRuleDefs(s, subtract(uds, uns)).
-
+  equitype(RULE(T1, T2), RULE(T3, T4)) :- {n1 n2 n3 n4}
+    nameOfSort(T1) == n1,
+    nameOfSort(T2) == n2,
+    nameOfSort(T3) == n3,
+    nameOfSort(T4) == n4,
+    T1 == T3 | error $[Input type [n3] does not match with specified type [n1]],
+    T2 == T4 | error $[Output type [n4] does not match with specified type [n2]].
 
 rules
 
@@ -78,42 +82,6 @@ rules
   nameOfRule : (path * (occurrence * RTYPE)) -> string
   nameOfRule((_, (RuleInst{n}, _))) = n.
   nameOfRule((_, (Rule{n}, _))) = n.
-
-rules
-
-  unique: list(string) -> list(string)
-
-  unique([]) = [].
-  unique([h | t]) = [h | unique(remove(h, t))].
-
-rules
-
-  subtract: list(string) * list(string) -> list(string)
-
-  subtract([], r) = r.
-  subtract([i | t], r) = subtract(t, remove(i, r)).
-
-rules
-
-  remove: string * list(string) -> list(string)
-
-  remove(_, []) = [].
-  remove(s, [s | l]) = remove(s, l).
-  remove(s1, [s2 | l]) = [s2 | remove(s1, l)] :-
-    s1 != s2.
-
-rules
-
-  declareRuleDefs maps declareRuleDef(*, list(*))
-
-  declareRuleDef : scope * string
-  
-  declareRuleDef(s, rn) :- {T1 T2 T3 T4 rls}
-    ruleInstType of RuleInst{rn} in s |-> rls,
-    typesOfRules(rls) == (T3, T4),
-    uniqType(T3) == [T1] | error $[Rule [rn] has different input sorts],
-    uniqType(T4) == [T2] | error $[Rule [rn] has different output sorts],
-    s -> Rule{rn} with ruleType RULE(T1, T2).
 
 rules
 
@@ -140,7 +108,22 @@ rules
 
 rules
 
-  resolveRule : scope * string -> RTYPE // TODO: rename resolveRule
+  resolveRule : scope * string -> RTYPE
 
   resolveRule(s, n) = rule :-
     ruleType of Rule{n} in s |-> [(_, (_, rule)) | _].
+
+rules
+
+  nameOfSortI: TYPE -> string
+  nameOfSortI(TSORT(_, n)) = n.
+  nameOfSortI(TOPT(T)) = nameOfSortI(T).
+  nameOfSortI(TSTAR(T)) = nameOfSortI(T).
+  nameOfSortI(TITER(T)) = nameOfSortI(T).
+
+  nameOfSort: TYPE -> SNAME
+
+  nameOfSort(TSORT(_, n)) = R(n).
+  nameOfSort(TOPT(T)) = O(nameOfSortI(T)).
+  nameOfSort(TSTAR(T)) = S(nameOfSortI(T)).
+  nameOfSort(TITER(T)) = I(nameOfSortI(T)).
