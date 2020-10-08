@@ -6,7 +6,7 @@ plugins {
 val logVersion = "0.3.0"
 val slf4jVersion = "1.7.30"
 val resourceVersion = "0.8.1"
-val pieVersion = "0.12.2"
+val pieVersion = "0.12.5"
 
 // Needs to be kept in sync with spoofax2Version of Spoofax 2 releng and the Spoofax 2 Gradle plugin.
 val spoofax2Version = try {
@@ -81,6 +81,7 @@ dependencies {
     api("org.metaborg:pie.runtime:$pieVersion")
     api("org.metaborg:pie.dagger:$pieVersion")
     api("org.metaborg:pie.task.java:$pieVersion")
+    api("org.metaborg:pie.task.archive:$pieVersion")
     /// Spoofax 2
     api("org.metaborg:org.spoofax.terms:$spoofax2Version")
     api("org.metaborg:org.spoofax.jsglr:$spoofax2Version")
