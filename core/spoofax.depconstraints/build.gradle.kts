@@ -8,25 +8,7 @@ val slf4jVersion = "1.7.30"
 val resourceVersion = "0.8.1"
 val pieVersion = "0.12.5"
 
-// Needs to be kept in sync with spoofax2Version of Spoofax 2 releng and the Spoofax 2 Gradle plugin.
-val spoofax2Version = try {
-  project.ext["spoofax2Version"]!! // Set by Gradle project property (see gradle.properties).
-} catch(e: ExtraPropertiesExtension.UnknownPropertyException) {
-  // Get spoofax2Version explicitly via gradle.properties, as project properties are not passed to included builds.
-  val path = "../../gradle.properties"
-  val file = rootDir.resolve(path)
-  if(file.exists() && file.isFile) {
-    val properties = java.util.Properties()
-    file.inputStream().buffered().use { inputStream ->
-      properties.load(inputStream)
-    }
-    properties.getProperty("spoofax2Version")
-      ?: throw GradleException("Cannot determine Spoofax 2 version: Gradle project property 'spoofax2Version' was not set (in this project's gradle.properties file), and was also not found in '$path'")
-  } else {
-    throw GradleException("Cannot determine Spoofax 2 version: Gradle project property 'spoofax2Version' was not set (in this project's gradle.properties file), and '$path' file of devenv was also not found")
-  }
-}
-
+val spoofax2Version = System.getProperty("spoofax2Version")
 val picocliVersion = "4.5.0"
 
 val javaxInjectVersion = "1"

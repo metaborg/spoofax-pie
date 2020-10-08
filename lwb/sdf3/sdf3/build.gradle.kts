@@ -54,8 +54,11 @@ spoofax2BasedLanguageProject {
     }
     project.run {
       addAdditionalCopyResources("target/metaborg/EditorService-pretty.pp.af")
-      // HACK: use different groupId for SDF3, as that is used to prevent bootstrapping issues.
-      languageSpecificationDependency(GradleDependency.module("org.metaborg.bootstraphack:org.metaborg.meta.lang.template:2.5.11"))
+      
+      // Use group ID "org.metaborg.bootstraphack" when building as part of devenv (not standalone).
+      val spoofax2GroupId = if(gradle.parent?.rootProject?.name == "spoofax3.root") "org.metaborg" else "org.metaborg.bootstraphack"
+      val spoofax2Version = System.getProperty("spoofax2Version")
+      languageSpecificationDependency(GradleDependency.module("$spoofax2GroupId:org.metaborg.meta.lang.template:$spoofax2Version"))
     }
   }
 }

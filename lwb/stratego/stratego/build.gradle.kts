@@ -35,7 +35,10 @@ spoofax2BasedLanguageProject {
       copyCtree(false)
       copyClasses(true)
     }
-    project
-      .languageSpecificationDependency(GradleDependency.module("org.metaborg.bootstraphack:org.metaborg.meta.lang.stratego:2.5.11"))
+
+    // Use group ID "org.metaborg.bootstraphack" when building as part of devenv (not standalone).
+    val spoofax2GroupId = if(gradle.parent?.rootProject?.name == "spoofax3.root") "org.metaborg" else "org.metaborg.bootstraphack"
+    val spoofax2Version = System.getProperty("spoofax2Version")
+    project.languageSpecificationDependency(GradleDependency.module("$spoofax2GroupId:org.metaborg.meta.lang.stratego:$spoofax2Version"))
   }
 }
