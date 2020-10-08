@@ -89,8 +89,9 @@ public class MultilangAnalysisTests extends TestBase {
             "  'mb.lang1': \"debugContext\"\n" +
             "  'mb.lang2': \"debugContext\"\n" +
             "  'mb.lang3': \"lang3\"\n" +
-            "logging:\n" +
-            "  debugContext: debug", "multilang.yaml");
+            "contextConfigs:\n" +
+            "  logging: debug\n" +
+            "  stripTraces: true", "multilang.yaml");
 
         try(MixedSession session = newSession()) {
             Result<ContextConfig, ConfigurationException> configResult = session.require(multiLangComponent
@@ -104,6 +105,7 @@ public class MultilangAnalysisTests extends TestBase {
             assertTrue(config.languages().contains(new LanguageId("mb.lang1")));
             assertTrue(config.languages().contains(new LanguageId("mb.lang2")));
             assertEquals(Level.Debug, config.parseLevel());
+            assertTrue(config.stripTraces());
         }
     }
 }
