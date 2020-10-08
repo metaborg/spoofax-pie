@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @MultiLangScope
 public class SmlReadConfigYaml implements TaskDef<ResourcePath, Result<MultiLangConfig, IOException>> {
@@ -52,11 +53,12 @@ public class SmlReadConfigYaml implements TaskDef<ResourcePath, Result<MultiLang
     // Local mutable bean used to parse yaml config
     private static class MutableMultilangConfig {
         private HashMap<LanguageId, ContextId> languageContexts;
-        private HashMap<ContextId, String> logging;
+        private HashMap<ContextId, MutableContextConfig> contextConfigs;
 
-        public MutableMultilangConfig(HashMap<LanguageId, ContextId> languageContexts, HashMap<ContextId, String> logging) {
+        public MutableMultilangConfig(HashMap<LanguageId, ContextId> languageContexts,
+                                      HashMap<ContextId, MutableContextConfig> contextConfigs) {
             this.languageContexts = languageContexts;
-            this.logging = logging;
+            this.contextConfigs = contextConfigs;
         }
 
         public MutableMultilangConfig() {
@@ -71,12 +73,12 @@ public class SmlReadConfigYaml implements TaskDef<ResourcePath, Result<MultiLang
             this.languageContexts = languageContexts;
         }
 
-        public Map<ContextId, String> getLogging() {
-            return Collections.unmodifiableMap(logging);
+        public Map<ContextId, MutableContextConfig> getContextConfigs() {
+            return Collections.unmodifiableMap(contextConfigs);
         }
 
-        public void setLogging(HashMap<ContextId, String> logging) {
-            this.logging = logging;
+        public void setLogging(HashMap<ContextId, MutableContextConfig> contextConfigs) {
+            this.contextConfigs = contextConfigs;
         }
 
         @Override public boolean equals(Object o) {
@@ -84,27 +86,83 @@ public class SmlReadConfigYaml implements TaskDef<ResourcePath, Result<MultiLang
             if(o == null || getClass() != o.getClass()) return false;
             MutableMultilangConfig that = (MutableMultilangConfig)o;
             return Objects.equals(languageContexts, that.languageContexts) &&
-                Objects.equals(logging, that.logging);
+                Objects.equals(contextConfigs, that.contextConfigs);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(languageContexts, logging);
+            return Objects.hash(languageContexts, contextConfigs);
         }
 
         @Override public String toString() {
             return "MultiLangConfig{" +
                 "languageContexts=" + languageContexts +
-                ", logging=" + logging +
+                ", contextConfigs=" + contextConfigs +
                 '}';
         }
 
         public MultiLangConfig asImmutable() {
+            Map<ContextId, ContextSettings> contextSettings = contextConfigs
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, c -> ImmutableContextSettings.builder()
+                        .stripTraces(c.getValue().stripTraces())
+                        .logLevel(c.getValue().getLogging())
+                        .build()));
+
             return ImmutableMultiLangConfig
                 .builder()
                 .languageContexts(languageContexts)
-                .logging(logging)
+                .contextSettings(contextSettings)
                 .build();
+        }
+    }
+
+    private static class MutableContextConfig {
+        private String logging;
+        private boolean stripTraces;
+
+        public MutableContextConfig(String logging, boolean stripTraces) {
+            this.logging = logging;
+            this.stripTraces = stripTraces;
+        }
+
+        public MutableContextConfig() { }
+
+        public String getLogging() {
+            return logging;
+        }
+
+        public boolean stripTraces() {
+            return stripTraces;
+        }
+
+        public void setLogging(String logging) {
+            this.logging = logging;
+        }
+
+        public void setStripTraces(boolean stripTraces) {
+            this.stripTraces = stripTraces;
+        }
+
+        @Override public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            MutableContextConfig that = (MutableContextConfig)o;
+            return stripTraces == that.stripTraces &&
+                logging.equals(that.logging);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(logging, stripTraces);
+        }
+
+        @Override public String toString() {
+            return "ContextConfig{" +
+                "logging='" + logging + '\'' +
+                ", stripTraces=" + stripTraces +
+                '}';
         }
     }
 }

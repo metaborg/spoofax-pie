@@ -21,4 +21,6 @@ public interface ContextConfig {
             .findFirst()
             .orElse(null);
     }
+
+    boolean stripTraces();
 }

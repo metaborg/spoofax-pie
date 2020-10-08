@@ -11,6 +11,7 @@ import mb.statix.multilang.metadata.ContextId;
 import mb.statix.multilang.metadata.LanguageId;
 import mb.statix.multilang.MultiLang;
 import mb.statix.multilang.MultiLangScope;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import java.io.Serializable;
@@ -83,9 +84,14 @@ public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConf
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toSet()));
 
+                final @Nullable ContextSettings settings = dynamicConfig.contextSettings().get(contextId);
+                final @Nullable String logLevel = settings == null ? null : settings.logLevel().orElse(null);
+                final boolean stripTraces = settings != null && settings.stripTraces();
+
                 final ContextConfig contextConfig = ImmutableContextConfig.builder()
                     .addAllLanguages(languages)
-                    .logLevel(dynamicConfig.logging().getOrDefault(contextId, null))
+                    .logLevel(logLevel)
+                    .stripTraces(stripTraces)
                     .build();
 
                 if(!contextConfig.languages().contains(input.languageId)) {

@@ -67,11 +67,11 @@ public abstract class SmlCheckTaskDef implements TaskDef<ResourcePath, KeyedMess
 
         context.require(configTask)
             .mapErr(MultiLangAnalysisException::wrapIfNeeded)
-            .map(contextInfo -> new SmlSolveProject.Input(projectPath, new HashSet<>(contextInfo.languages()), contextInfo.parseLevel()))
-            .map(solveProject::createTask)
-            .flatMap(solveTask -> TaskUtils.executeWrapped(() -> context.require(solveTask), "Exception executing analysis"))
-            .flatMap(results -> resourceKeysResult.map(resourceKeys -> resultsToMessages(results, resourceKeys, projectPath)))
-            .map(KeyedMessagesBuilder::build)
+            .flatMap(contextInfo -> context.require(solveProject
+                .createTask(new SmlSolveProject.Input(projectPath, new HashSet<>(contextInfo.languages()), contextInfo.parseLevel())))
+                .flatMap(results -> resourceKeysResult
+                    .map(resourceKeys -> resultsToMessages(results, resourceKeys, projectPath, contextInfo.stripTraces())))
+                .map(KeyedMessagesBuilder::build))
             .ifElse(builder::addMessages, err -> builder.addMessages(err.toKeyedMessages()));
 
         return builder.build();
@@ -90,7 +90,8 @@ public abstract class SmlCheckTaskDef implements TaskDef<ResourcePath, KeyedMess
         return builder;
     }
 
-    protected KeyedMessagesBuilder resultsToMessages(AnalysisResults results, Set<ResourceKey> fileKeys, ResourceKey projectPath) {
+    protected KeyedMessagesBuilder resultsToMessages(AnalysisResults results, Set<ResourceKey> fileKeys,
+                                                     ResourceKey projectPath, boolean stripTraces) {
         final IUniDisunifier resultUnifier = results.finalResult().state().unifier();
         final KeyedMessagesBuilder builder = new KeyedMessagesBuilder();
 
@@ -99,7 +100,7 @@ public abstract class SmlCheckTaskDef implements TaskDef<ResourcePath, KeyedMess
             .filter(entry -> entry.getKey().languageId().equals(getLanguageId()))
             .forEach(entry -> {
                 List<Message> resourceMessages = entry.getValue().result().messages().entrySet().stream()
-                    .map(e -> MessageUtils.formatMessage(e.getValue(), e.getKey(), resultUnifier))
+                    .map(e -> MessageUtils.formatMessage(e.getValue(), e.getKey(), resultUnifier, !stripTraces))
                     .collect(Collectors.toList());
                 builder.addMessages(entry.getKey().resourceKey(), resourceMessages);
             });
@@ -108,7 +109,7 @@ public abstract class SmlCheckTaskDef implements TaskDef<ResourcePath, KeyedMess
         results.finalResult().messages().entrySet().stream()
             .map(e -> new AbstractMap.SimpleImmutableEntry<>(
                 defaultIfNull(MessageUtils.tryGetResourceKey(e.getKey(), results.finalResult().state().unifier()), projectPath),
-                MessageUtils.formatMessage(e.getValue(), e.getKey(), resultUnifier)))
+                MessageUtils.formatMessage(e.getValue(), e.getKey(), resultUnifier, !stripTraces)))
             // For messages in the final result, it is not easily possible to determine which language they belong to
             // Therefore we include only messages on files which belong to this language
             // Messages without an origin are included on the project by default
