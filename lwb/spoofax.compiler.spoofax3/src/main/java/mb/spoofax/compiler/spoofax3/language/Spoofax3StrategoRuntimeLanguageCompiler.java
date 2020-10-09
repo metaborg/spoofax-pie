@@ -12,7 +12,7 @@ import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.pie.task.archive.UnarchiveFromJar;
 import mb.resource.classloader.ClassLoaderResource;
-import mb.resource.classloader.ClassloaderResourceLocations;
+import mb.resource.classloader.ClassLoaderResourceLocations;
 import mb.resource.classloader.JarFileWithPath;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
@@ -87,7 +87,7 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
         // Determine libspoofax2 definition directories.
         final ArrayList<HierarchicalResource> libSpoofax2DefinitionDirs = new ArrayList<>();
         if(input.spoofax3LanguageProject().includeLibSpoofax2Exports()) {
-            final ClassloaderResourceLocations locations = libSpoofax2DefinitionDir.getLocations();
+            final ClassLoaderResourceLocations locations = libSpoofax2DefinitionDir.getLocations();
             libSpoofax2DefinitionDirs.addAll(locations.directories);
             final ResourcePath unarchiveDirectory = input.spoofax3LanguageProject().unarchiveDirectory().appendRelativePath("libspoofax2");
             for(JarFileWithPath jarFileWithPath : locations.jarFiles) {
