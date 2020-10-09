@@ -1,0 +1,5 @@
+shared.defaultArtifactId=esv
+shared.defaultClassPrefix=Esv
+shared.defaultGroupId=org.metaborg
+shared.defaultPackageId=mb.esv
+shared.defaultVersion=0.1.0

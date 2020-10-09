@@ -16,6 +16,7 @@ dependencies {
   api("org.metaborg:pie.task.archive")
   api(project(":sdf3.spoofax"))
   api(project(":stratego.spoofax"))
+  api(project(":esv.spoofax"))
   api(project(":libspoofax2.spoofax"))
 
   compileOnly("org.checkerframework:checker-qual-android")

@@ -6,13 +6,13 @@ import mb.common.message.KeyedMessages
 import mb.common.message.Message
 import mb.common.message.Messages
 import mb.common.message.Severity
+import mb.esv.spoofax.DaggerEsvComponent
 import mb.libspoofax2.spoofax.DaggerLibSpoofax2Component
 import mb.log.slf4j.SLF4JLoggerFactory
 import mb.pie.runtime.PieBuilderImpl
 import mb.resource.ResourceKey
 import mb.resource.fs.FSPath
 import mb.sdf3.spoofax.DaggerSdf3Component
-import mb.spoofax.compiler.dagger.*
 import mb.spoofax.compiler.gradle.*
 import mb.spoofax.compiler.gradle.plugin.*
 import mb.spoofax.compiler.gradle.spoofax3.*
@@ -90,6 +90,7 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
       // OPTO: cache instantiation of the language components?
       .sdf3Component(DaggerSdf3Component.builder().platformComponent(platformComponent).build())
       .strategoComponent(DaggerStrategoComponent.builder().platformComponent(platformComponent).build())
+      .esvComponent(DaggerEsvComponent.builder().platformComponent(platformComponent).build())
       .libSpoofax2Component(DaggerLibSpoofax2Component.builder().platformComponent(platformComponent).build())
       .build()
 

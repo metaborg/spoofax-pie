@@ -3,6 +3,8 @@ package mb.spoofax.compiler.gradle.spoofax3
 import dagger.Component
 import dagger.Module
 import dagger.Provides
+import mb.esv.spoofax.EsvComponent
+import mb.esv.spoofax.EsvQualifier
 import mb.libspoofax2.spoofax.LibSpoofax2Component
 import mb.libspoofax2.spoofax.LibSpoofax2Qualifier
 import mb.pie.api.MapTaskDefs
@@ -18,7 +20,7 @@ import mb.str.spoofax.StrategoQualifier
 @Spoofax3CompilerScope
 @Component(
   modules = [Spoofax3CompilerModule::class, Spoofax3CompilerGradleModule::class],
-  dependencies = [Sdf3Component::class, StrategoComponent::class, LibSpoofax2Component::class]
+  dependencies = [Sdf3Component::class, StrategoComponent::class, EsvComponent::class, LibSpoofax2Component::class]
 )
 interface Spoofax3CompilerGradleComponent : Spoofax3CompilerComponent {
   val resourceService: ResourceService
@@ -35,9 +37,10 @@ class Spoofax3CompilerGradleModule(
   fun provideResourceService(
     @Sdf3Qualifier sdf3ResourceService: ResourceService,
     @StrategoQualifier strategoResourceService: ResourceService,
+    @EsvQualifier esvResourceService: ResourceService,
     @LibSpoofax2Qualifier libSpoofax2ResourceService: ResourceService
   ): ResourceService {
-    return parentResourceService.createChild(sdf3ResourceService, strategoResourceService, libSpoofax2ResourceService)
+    return parentResourceService.createChild(sdf3ResourceService, strategoResourceService, esvResourceService, libSpoofax2ResourceService)
   }
 
   @Provides
@@ -47,9 +50,10 @@ class Spoofax3CompilerGradleModule(
     taskDefs: MutableSet<TaskDef<*, *>>,
     @Sdf3Qualifier sdf3Pie: Pie,
     @StrategoQualifier strategoPie: Pie,
+    @EsvQualifier esvPie: Pie,
     @LibSpoofax2Qualifier libSpoofax2Pie: Pie
   ): Pie {
-    return parentPie.createChildBuilder(sdf3Pie, strategoPie, libSpoofax2Pie)
+    return parentPie.createChildBuilder(sdf3Pie, strategoPie, esvPie, libSpoofax2Pie)
       .withTaskDefs(MapTaskDefs(taskDefs))
       .withResourceService(resourceService)
       .build()
