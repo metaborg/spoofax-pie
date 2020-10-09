@@ -2,7 +2,7 @@ plugins {
   id("org.metaborg.gradle.config.java-library")
 }
 
-fun compositeBuild(name: String) = "$group:$name"
+fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
   api(platform(compositeBuild("spoofax.depconstraints")))

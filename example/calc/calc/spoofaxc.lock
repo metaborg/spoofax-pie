@@ -1,6 +1,6 @@
-shared.defaultVersion=0.1.0
 shared.defaultArtifactId=calc
-shared.defaultGroupId=org.metaborg
-spoofax3Parser.sdf3StrategyNameQualifier=calc
-shared.defaultPackageId=mb.calc
 shared.defaultClassPrefix=Calc
+shared.defaultGroupId=org.metaborg
+shared.defaultPackageId=mb.calc
+shared.defaultVersion=0.1.0
+spoofax3Parser.sdf3StrategyNameQualifier=calc

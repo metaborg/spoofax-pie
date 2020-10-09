@@ -5,7 +5,7 @@ plugins {
 
 val logVersion = "0.3.0"
 val slf4jVersion = "1.7.30"
-val resourceVersion = "0.8.1"
+val resourceVersion = "0.9.0"
 val pieVersion = "0.12.5"
 
 val spoofax2Version = System.getProperty("spoofax2Version")

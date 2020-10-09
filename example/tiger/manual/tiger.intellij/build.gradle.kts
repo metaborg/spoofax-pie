@@ -3,7 +3,7 @@ plugins {
   id("org.jetbrains.intellij")
 }
 
-fun compositeBuild(name: String) = "$group:$name"
+fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
   implementation(platform(compositeBuild("spoofax.depconstraints")))

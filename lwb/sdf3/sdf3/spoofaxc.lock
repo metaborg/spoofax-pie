@@ -1,5 +1,5 @@
-shared.defaultVersion=0.1.0
 shared.defaultArtifactId=sdf3
+shared.defaultClassPrefix=Sdf3
 shared.defaultGroupId=org.metaborg
 shared.defaultPackageId=mb.sdf3
-shared.defaultClassPrefix=Sdf3
+shared.defaultVersion=0.1.0

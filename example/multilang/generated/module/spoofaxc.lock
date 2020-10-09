@@ -1,5 +1,5 @@
-shared.defaultVersion=0.1.0
 shared.defaultArtifactId=module
+shared.defaultClassPrefix=Module
 shared.defaultGroupId=org.metaborg
 shared.defaultPackageId=mb.module
-shared.defaultClassPrefix=Module
+shared.defaultVersion=0.1.0

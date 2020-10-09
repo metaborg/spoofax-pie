@@ -3,7 +3,7 @@ plugins {
   id("org.metaborg.gradle.config.junit-testing")
 }
 
-fun compositeBuild(name: String) = "$group:$name"
+fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
   // Platforms

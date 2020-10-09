@@ -1,5 +1,5 @@
-shared.defaultVersion=0.1.0
 shared.defaultArtifactId=signature
+shared.defaultClassPrefix=Signature
 shared.defaultGroupId=org.metaborg
 shared.defaultPackageId=mb.signature
-shared.defaultClassPrefix=Signature
+shared.defaultVersion=0.1.0

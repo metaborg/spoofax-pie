@@ -21,7 +21,7 @@ graal {
   option("-H:ReflectionConfigurationFiles=src/main/gni/reflection.json") /* https://github.com/oracle/graal/blob/master/substratevm/REFLECTION.md */
 }
 
-fun compositeBuild(name: String) = "$group:$name"
+fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
   implementation(platform(compositeBuild("spoofax.depconstraints")))

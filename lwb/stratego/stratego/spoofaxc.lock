@@ -1,5 +1,5 @@
-shared.defaultVersion=0.1.0
 shared.defaultArtifactId=stratego
+shared.defaultClassPrefix=Stratego
 shared.defaultGroupId=org.metaborg
 shared.defaultPackageId=mb.str
-shared.defaultClassPrefix=Stratego
+shared.defaultVersion=0.1.0
