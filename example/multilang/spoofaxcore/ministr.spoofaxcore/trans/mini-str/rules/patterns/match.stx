@@ -23,5 +23,5 @@ rules
     ptrnOk(s, MATCH(), v, T).
 
   typeOfMatch(s, l@List(_)) = T :-
-    typeOfList(l) == T,
+    typeOfList(l, T) == T,
     ptrnOk(s, MATCH(), l, T).

@@ -3,6 +3,7 @@ module mini-str/rules/resolution
 imports
   cons-type-interface/sorts
   cons-type-interface/labels
+  mini-str/rules/list-sorts
 
 signature
 
@@ -31,10 +32,14 @@ signature
 
   // Sort used for prettyfying names
   sorts SNAME constructors
-    R : string -> SNAME // raw
-    O : string -> SNAME // optional
-    I : string -> SNAME // iter
-    S : string -> SNAME // star
+    Raw       : string -> SNAME // raw
+    Opt  	  : string -> SNAME // optional
+    Iter      : string -> SNAME // iter
+    Star      : string -> SNAME // star
+    Single    : string -> SNAME // singleton list
+    Multi     : string -> SNAME // list with multiple elements
+    Empty     : SNAME 			// empty list
+
 rules
 
   // Declares a single rule instance in a scope
@@ -110,8 +115,8 @@ rules
 
   resolveRule : scope * string -> RTYPE
 
-  resolveRule(s, n) = rule :-
-    ruleType of Rule{n} in s |-> [(_, (_, rule)) | _].
+  resolveRule(s, n) = R :-
+    ruleType of Rule{n} in s |-> [(_, (_, R)) | _].
 
 rules
 
@@ -121,9 +126,13 @@ rules
   nameOfSortI(TSTAR(T)) = nameOfSortI(T).
   nameOfSortI(TITER(T)) = nameOfSortI(T).
 
+  nameOfSorts maps nameOfSort(list(*)) = list(*)
   nameOfSort: TYPE -> SNAME
 
-  nameOfSort(TSORT(_, n)) = R(n).
-  nameOfSort(TOPT(T)) = O(nameOfSortI(T)).
-  nameOfSort(TSTAR(T)) = S(nameOfSortI(T)).
-  nameOfSort(TITER(T)) = I(nameOfSortI(T)).
+  nameOfSort(TSORT(_, n)) = Raw(n).
+  nameOfSort(TOPT(T)) = Opt(nameOfSortI(T)).
+  nameOfSort(TSTAR(T)) = Star(nameOfSortI(T)).
+  nameOfSort(TITER(T)) = Iter(nameOfSortI(T)).
+  nameOfSort(SINGLETON(T)) = Single(nameOfSortI(T)).
+  nameOfSort(MULTI(T)) = Multi(nameOfSortI(T)).
+  nameOfSort(EMPTY()) = Empty().

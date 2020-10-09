@@ -14,7 +14,7 @@ context-free sorts
 
 lexical syntax
   MOD 				= [a-zA-Z0-9\-\/]+
-  SMBL				= [a-zA-Z] [a-zA-Z0-9\-]*
+  SMBL				= [a-zA-Z] [a-zA-Z0-9\-\']*
 
   MOD			 	= "rules" 				{reject}
   MOD 				= "context-free" 		{reject}
@@ -23,9 +23,8 @@ lexical syntax
   SMBL				= "constructors" 		{reject}
 
 lexical restrictions
-  SMBL	 			-/- [a-zA-Z]
   MOD				-/- [a-zA-Z0-9\-\/]
-  SMBL				-/- [a-zA-Z0-9\-]
+  SMBL				-/- [a-zA-Z0-9\-\']
 
 context-free syntax
 

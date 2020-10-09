@@ -24,7 +24,7 @@ rules
     ptrnOk(s, BUILD(), v, T).
 
   typeOfBuild(s, l@List(_)) = T :-
-    typeOfList(l) == T,
+    typeOfList(l, T) == T,
     ptrnOk(s, BUILD(), l, T).
 
   typeOfBuild(s, c@RuleCall(n, _)) = T :-

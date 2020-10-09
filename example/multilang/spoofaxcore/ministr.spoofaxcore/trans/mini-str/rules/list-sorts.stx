@@ -29,18 +29,13 @@ rules
   typeEq(TOPT(T1), TSTAR(T2)) :- typeEq(T1, T2).
   typeEq(TITER(T1), TSTAR(T2)) :- typeEq(T1, T2).
 
-  typeEq(T1, T2) :- {n1 n2}
-    nameOfSort(T1) == n1,
-    nameOfSort(T2) == n2,
-    false | error $[Type [n1] cannot be assigned to [n2]].
-
 rules
 
-  typeOfList : Pattern -> TYPE
+  typeOfList : Pattern * TYPE -> TYPE
 
-  typeOfList(List([])) = EMPTY().
-  typeOfList(List([_])) = SINGLETON(_).
-  typeOfList(List([_ | _])) = MULTI(_).
+  typeOfList(List([]), _) = EMPTY().
+  typeOfList(List([_]), T) = SINGLETON(T).
+  typeOfList(List([_ | _]), T) = MULTI(T).
 
 rules
 

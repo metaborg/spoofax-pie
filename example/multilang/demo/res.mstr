@@ -1,0 +1,47 @@
+module res
+
+imports lists
+
+/* 
+rules // build list
+
+  rule: C1(s) -> Opt([])
+  rule: C1(s) -> Iter([])
+  rule: C1(s) -> Star([])
+
+  rule: C1(s) -> Opt([s])
+  rule: C1(s) -> Iter([s])
+  rule: C1(s) -> Star([s])
+
+  rule: C1(s) -> Opt([s | s])
+  rule: C1(s) -> Iter([s | s])
+  rule: C1(s) -> Star([s | s])
+
+rules // pass list
+
+  rule: Opt(l) -> Opt(l)
+  rule: Opt(l) -> Iter(l)
+  rule: Opt(l) -> Star(l)
+
+  rule: Iter(l) -> Opt(l)
+  rule: Iter(l) -> Iter(l)
+  rule: Iter(l) -> Star(l)
+
+  rule: Star(l) -> Opt(l)
+  rule: Star(l) -> Iter(l)
+  rule: Star(l) -> Star(l)
+
+ // match list
+
+  rule: Opt([]) 	-> C0()
+  rule: Opt([s]) 	-> C1(s)
+  rule: Opt([s|t])	-> C2(s, t)
+
+  rule: Iter([]) 	-> C0()
+  rule: Iter([s]) 	-> C1(s)
+  rule: Iter([s|t])	-> C2(s, t)
+
+  rule: Star([]) 	-> C0()
+  rule: Star([s]) 	-> C1(s)
+  rule: Star([s|t])	-> C2(s, t)
+ */

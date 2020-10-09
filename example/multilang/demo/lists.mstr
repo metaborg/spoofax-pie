@@ -1,0 +1,25 @@
+module lists
+
+signatures
+  sorts S constructors
+    C0   : S
+    C1   : S -> S
+    C2   : S * S -> S
+    Opt  : S? -> S
+    Iter : S+ -> S
+    Star : S* -> S
+
+rules
+
+  rule: C0() -> C0()
+
+rules
+
+
+
+
+
+
+
+
+

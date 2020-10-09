@@ -1,0 +1,22 @@
+module trans
+
+signatures
+  sorts Term Lit Expr
+  constructors
+    Plus	: Term * Expr	-> Expr
+    Term	: Term 			-> Expr
+    Bracket : Expr 			-> Term
+    Lit		: Lit   		-> Term
+
+rules
+
+  simplify-expr: Plus(Bracket(Term(l)), r) -> Plus(l, r)
+  simplify-expr: Plus(l, Term(Bracket(r))) -> Plus(l, r)
+  simplify-expr: a -> a
+
+rules
+  term-rm-bracket: Bracket(t) -> <expr-rm-bracket> t
+  term-rm-bracket: Lit(l)     -> Lit(l)
+
+  expr-rm-bracket: Term(t) 	  -> <term-rm-bracket> t
+  expr-rm-bracket: Plus(l, r) -> Plus(l, r)
