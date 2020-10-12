@@ -132,27 +132,52 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
     val compileTask = project.tasks.register("compileSpoofax3BasedLanguageProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
+
+      // Inputs and outputs
       input.parser().ifPresent { parserInput ->
+        // Input: all SDF3 files
         val sdf3RootDirectory = resourceService.toLocalFile(parserInput.sdf3RootDirectory())
         if(sdf3RootDirectory != null) {
           inputs.files(project.fileTree(sdf3RootDirectory) { include("**/*.sdf3") })
         } else {
-          logger.warn("Cannot set SDF3 files as task inputs, because ${parserInput.sdf3RootDirectory()} cannot be converted into a local file. This disables incrementality for this Gradle task")
+          logger.warn("Cannot set SDF3 files as task inputs, because ${parserInput.sdf3RootDirectory()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
         }
+
+        // Output: parse table file
         val sdf3ParseTableOutputFile = resourceService.toLocalFile(parserInput.sdf3ParseTableOutputFile())
         if(sdf3ParseTableOutputFile != null) {
           outputs.file(sdf3ParseTableOutputFile)
         } else {
-          logger.warn("Cannot set the SDF3 parse table as a task output, because ${parserInput.sdf3ParseTableOutputFile()} cannot be converted into a local file. This disables incrementality for this Gradle task")
+          logger.warn("Cannot set the SDF3 parse table as a task output, because ${parserInput.sdf3ParseTableOutputFile()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
+        }
+      }
+      input.styler().ifPresent { parserInput ->
+        // Input: all ESV files
+        val esvRootDirectory = resourceService.toLocalFile(parserInput.esvRootDirectory())
+        if(esvRootDirectory != null) {
+          inputs.files(project.fileTree(esvRootDirectory) { include("**/*.esv") })
+        } else {
+          logger.warn("Cannot set ESV files as task inputs, because ${parserInput.esvRootDirectory()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
+        }
+
+        // Output: ESV aterm format file
+        val esvAtermFormatOutputFile = resourceService.toLocalFile(parserInput.esvAtermFormatOutputFile())
+        if(esvAtermFormatOutputFile != null) {
+          outputs.file(esvAtermFormatOutputFile)
+        } else {
+          logger.warn("Cannot set the ESV aterm format file as a task output, because ${parserInput.esvAtermFormatOutputFile()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
         }
       }
       input.strategoRuntime().ifPresent { strategoRuntimeInput ->
+        // Input: all Stratego files
         val strategoRootDirectory = resourceService.toLocalFile(strategoRuntimeInput.strategoRootDirectory())
         if(strategoRootDirectory != null) {
           inputs.files(project.fileTree(strategoRootDirectory) { include("**/*.str") })
         } else {
-          logger.warn("Cannot set Stratego files as task inputs, because ${strategoRuntimeInput.strategoRootDirectory()} cannot be converted into a local file. This disables incrementality for this Gradle task")
+          logger.warn("Cannot set Stratego files as task inputs, because ${strategoRuntimeInput.strategoRootDirectory()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
         }
+
+        // Output: Stratego output directory
         val strategoOutputDir = resourceService.toLocalFile(strategoRuntimeInput.strategoOutputDir())
         if(strategoOutputDir != null) {
           outputs.dir(strategoOutputDir)
@@ -166,40 +191,12 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
           val result = session.require(component.spoofax3LanguageProjectCompiler.createTask(input))
           result.ifOk {
             project.logMessages(it, FSPath(project.projectDir))
-          }.ifErr { e ->
-            e.caseOf().parserCompilerFail { parserCompilerException ->
-              val message = "${e.message}. ${parserCompilerException.message}"
-              parserCompilerException.caseOf().checkFail {
-                logger.error(message)
-                project.logMessages(it, FSPath(project.projectDir))
-                throw GradleException(message)
-              }.otherwise {
-                val cause = parserCompilerException.cause
-                if(cause != null) {
-                  logger.error("$message. See cause at the end of the build")
-                  throw GradleException(message, cause)
-                } else {
-                  logger.error(message)
-                  throw GradleException(message)
-                }
-              }
-            }.strategoRuntimeCompilerFail { strategoCompilerException ->
-              val message = "${e.message}. ${strategoCompilerException.message}"
-              strategoCompilerException.caseOf().checkFail {
-                logger.error(message)
-                project.logMessages(it, FSPath(project.projectDir))
-                throw GradleException(message)
-              }.otherwise {
-                val cause = strategoCompilerException.cause
-                if(cause != null) {
-                  logger.error("$message. See cause at the end of the build")
-                  throw GradleException(message, cause)
-                } else {
-                  logger.error(message)
-                  throw GradleException(message)
-                }
-              }
-            }
+          }.ifErr { err ->
+            CompilerException.cases()
+              .parserCompilerFail { e -> project.handleError(err, e) { messages } }
+              .stylerCompilerFail { e -> project.handleError(err, e) { messages } }
+              .strategoRuntimeCompilerFail { e -> project.handleError(err, e) { messages } }
+              .apply(err)
           }
         }
       }
@@ -208,6 +205,21 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
     // Make compileJava depend on our task, because we generate Java code.
     project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(compileTask)
   }
+}
+
+fun <E : Exception> Project.handleError(err: CompilerException, e: E, msgFn: E.() -> Optional<KeyedMessages>) {
+  val message = "${err.message}. ${e.message}"
+  msgFn(e).ifPresent {
+    logger.error(message)
+    project.logMessages(it, FSPath(projectDir))
+    throw GradleException(message)
+  }
+  if(e.cause != null) {
+    logger.error("$message. See cause at the end of the build")
+    throw GradleException(message, e.cause)
+  }
+  logger.error(message)
+  throw GradleException(message)
 }
 
 fun Project.logMessages(messages: KeyedMessages, backupResource: ResourceKey) {

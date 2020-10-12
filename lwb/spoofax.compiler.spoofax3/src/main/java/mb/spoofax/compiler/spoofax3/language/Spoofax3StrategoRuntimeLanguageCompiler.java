@@ -30,6 +30,7 @@ import org.immutables.value.Value;
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -85,7 +86,7 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
         final ArrayList<STask<?>> originTasks = new ArrayList<>(args.originTasks);
 
         // Determine libspoofax2 definition directories.
-        final ArrayList<HierarchicalResource> libSpoofax2DefinitionDirs = new ArrayList<>();
+        final HashSet<HierarchicalResource> libSpoofax2DefinitionDirs = new HashSet<>(); // Set to remove duplicates.
         if(input.spoofax3LanguageProject().includeLibSpoofax2Exports()) {
             final ClassLoaderResourceLocations locations = libSpoofax2DefinitionDir.getLocations();
             libSpoofax2DefinitionDirs.addAll(locations.directories);

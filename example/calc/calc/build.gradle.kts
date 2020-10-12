@@ -26,6 +26,7 @@ languageProject {
     withParser().run {
       startSymbol("Program")
     }
+    withStyler()
     withStrategoRuntime()
   }
 }
@@ -33,6 +34,7 @@ languageProject {
 spoofax3BasedLanguageProject {
   compilerInput {
     withParser()
+    withStyler()
     withStrategoRuntime()
   }
 }
