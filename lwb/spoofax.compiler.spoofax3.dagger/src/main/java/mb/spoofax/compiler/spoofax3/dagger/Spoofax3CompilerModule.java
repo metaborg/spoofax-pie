@@ -8,7 +8,6 @@ import mb.pie.task.archive.UnarchiveFromJar;
 import mb.spoofax.compiler.spoofax3.language.Spoofax3LanguageProjectCompiler;
 import mb.spoofax.compiler.spoofax3.language.Spoofax3ParserLanguageCompiler;
 import mb.spoofax.compiler.spoofax3.language.Spoofax3StrategoRuntimeLanguageCompiler;
-import mb.spoofax.compiler.spoofax3.language.Spoofax3StylerLanguageCompiler;
 import mb.spoofax.compiler.util.TemplateCompiler;
 
 import java.util.HashSet;
@@ -29,14 +28,12 @@ import java.util.Set;
     @Provides @Spoofax3CompilerScope @ElementsIntoSet static Set<TaskDef<?, ?>> provideTaskDefsSet(
         Spoofax3LanguageProjectCompiler languageProjectCompiler,
         Spoofax3ParserLanguageCompiler parserLanguageCompiler,
-        Spoofax3StylerLanguageCompiler stylerLanguageCompiler,
         Spoofax3StrategoRuntimeLanguageCompiler strategoRuntimeLanguageCompiler,
         UnarchiveFromJar unarchiveFromJar
     ) {
         final HashSet<TaskDef<?, ?>> taskDefs = new HashSet<>();
         taskDefs.add(languageProjectCompiler);
         taskDefs.add(parserLanguageCompiler);
-        taskDefs.add(stylerLanguageCompiler);
         taskDefs.add(strategoRuntimeLanguageCompiler);
         taskDefs.add(unarchiveFromJar);
         return taskDefs;

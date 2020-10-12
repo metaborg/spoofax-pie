@@ -117,7 +117,6 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
         }
 
         // Check SDF3 source files.
-        // TODO: this does not check ESV files in include directories.
         final ResourceWalker resourceWalker = Sdf3Util.createResourceWalker();
         final ResourceMatcher resourceMatcher = new AllResourceMatcher(Sdf3Util.createResourceMatcher(), new FileResourceMatcher());
         final @Nullable KeyedMessages messages = context.require(check.createTask(

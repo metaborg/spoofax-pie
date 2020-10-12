@@ -6,8 +6,6 @@ import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Optional;
-
 @ADT
 public abstract class StrategoCompilerException extends Exception {
     public interface Cases<R> {
@@ -54,16 +52,12 @@ public abstract class StrategoCompilerException extends Exception {
         return StrategoCompilerExceptions.caseOf(this);
     }
 
-    public Optional<KeyedMessages> getMessages() {
-        return StrategoCompilerExceptions.getMessages(this);
-    }
-
 
     @Override public String getMessage() {
         return caseOf()
-            .mainFileFail((mainFile) -> "Stratego main file '" + mainFile + "' does not exist or is not a file")
-            .includeDirectoryFail((includeDirectory) -> "Stratego include directory '" + includeDirectory + "' does not exist or is not a directory")
-            .rootDirectoryFail((rootDirectory) -> "Stratego root directory '" + rootDirectory + "' does not exist or is not a directory")
+            .mainFileFail((mainFile) -> "Main file '" + mainFile + "' does not exist or is not a file")
+            .includeDirectoryFail((includeDirectory) -> "Include directory '" + includeDirectory + "' does not exist or is not a directory")
+            .rootDirectoryFail((rootDirectory) -> "Root directory '" + rootDirectory + "' does not exist or is not a directory")
             .checkFail((messages) -> "Parsing or checking Stratego source files failed")
             .compilerFail((cause) -> "Stratego compiler failed unexpectedly")
             ;

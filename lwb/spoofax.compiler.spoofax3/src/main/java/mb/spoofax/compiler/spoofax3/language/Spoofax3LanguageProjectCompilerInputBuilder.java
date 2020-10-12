@@ -11,8 +11,6 @@ public class Spoofax3LanguageProjectCompilerInputBuilder {
     public Spoofax3ParserLanguageCompiler.Input.Builder parser = Spoofax3ParserLanguageCompiler.Input.builder();
     private boolean parserEnabled = false;
     public Spoofax3StrategoRuntimeLanguageCompiler.Input.Builder strategoRuntime = Spoofax3StrategoRuntimeLanguageCompiler.Input.builder();
-    private boolean stylerEnabled = false;
-    public Spoofax3StylerLanguageCompiler.Input.Builder styler = Spoofax3StylerLanguageCompiler.Input.builder();
     private boolean strategoRuntimeEnabled = false;
     public Spoofax3LanguageProjectCompiler.Input.Builder project = Spoofax3LanguageProjectCompiler.Input.builder();
 
@@ -20,11 +18,6 @@ public class Spoofax3LanguageProjectCompilerInputBuilder {
     public Spoofax3ParserLanguageCompiler.Input.Builder withParser() {
         parserEnabled = true;
         return parser;
-    }
-
-    public Spoofax3StylerLanguageCompiler.Input.Builder withStyler() {
-        stylerEnabled = true;
-        return styler;
     }
 
     public Spoofax3StrategoRuntimeLanguageCompiler.Input.Builder withStrategoRuntime() {
@@ -36,9 +29,6 @@ public class Spoofax3LanguageProjectCompilerInputBuilder {
     public Spoofax3LanguageProjectCompiler.Input build(Properties persistentProperties, Shared shared, Spoofax3LanguageProject languageProject) {
         final Spoofax3ParserLanguageCompiler.@Nullable Input parser = buildParser(persistentProperties, shared, languageProject);
         if(parser != null) project.parser(parser);
-
-        final Spoofax3StylerLanguageCompiler.@Nullable Input styler = buildStyler(languageProject);
-        if(styler != null) project.styler(styler);
 
         final Spoofax3StrategoRuntimeLanguageCompiler.@Nullable Input strategoRuntime = buildStrategoRuntime(languageProject, parser);
         if(strategoRuntime != null) project.strategoRuntime(strategoRuntime);
@@ -58,15 +48,6 @@ public class Spoofax3LanguageProjectCompilerInputBuilder {
         return parser
             .withPersistentProperties(persistentProperties)
             .shared(shared)
-            .spoofax3LanguageProject(languageProject)
-            .build();
-    }
-
-    private Spoofax3StylerLanguageCompiler.@Nullable Input buildStyler(
-        Spoofax3LanguageProject languageProject
-    ) {
-        if(!stylerEnabled) return null;
-        return styler
             .spoofax3LanguageProject(languageProject)
             .build();
     }

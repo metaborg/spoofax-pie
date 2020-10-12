@@ -18,7 +18,7 @@ languageProject {
   compilerInput {
     withExports().run {
       addExports("Stratego", "trans")
-      addExports("Esv", "editor")
+      addExports("ESV", "editor")
     }
   }
 }
