@@ -3,22 +3,22 @@ package mb.esv.spoofax.task;
 import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.esv.spoofax.EsvScope;
+import mb.esv.spoofax.util.EsvUtil;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Function;
 import mb.pie.api.STask;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
+import mb.pie.api.stamp.output.OutputStampers;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.TermFactory;
-import org.spoofax.terms.util.TermUtils;
 
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 
 @EsvScope
@@ -67,6 +67,10 @@ public class EsvCompile implements TaskDef<EsvCompile.Input, Result<IStrategoTer
     }
 
     @Override public Result<IStrategoTerm, ?> exec(ExecContext context, Input input) throws IOException {
+        for(STask<?> origin : input.originTasks) {
+            context.require(origin, OutputStampers.inconsequential());
+        }
+
         final Result<IStrategoTerm, ?> mainAstResult = context.require(input.mainAstSupplier);
         if(mainAstResult.isErr()) {
             return mainAstResult;
@@ -102,33 +106,17 @@ public class EsvCompile implements TaskDef<EsvCompile.Input, Result<IStrategoTer
         HashSet<String> seenModules,
         IStrategoTerm ast
     ) throws Exception {
-        if(!isModule(ast)) throw new Exception("AST '" + ast + "' is not a Module/3 term");
-        seenModules.add(getNameFromModule(ast));
-        sections.addAll(getSectionsFromModule(ast));
+        if(!EsvUtil.isModuleTerm(ast)) throw new Exception("AST '" + ast + "' is not a Module/3 term");
+        seenModules.add(EsvUtil.getNameFromModuleTerm(ast));
+        sections.addAll(EsvUtil.getSectionsFromModuleTerm(ast));
         final IStrategoTerm importsTerm = ast.getSubterm(1);
-        if(isImports(importsTerm)) {
+        if(EsvUtil.isImportsTerm(importsTerm)) {
             for(IStrategoTerm imp : importsTerm.getSubterm(0)) {
-                final String importName = TermUtils.toJavaStringAt(imp, 0);
+                final String importName = EsvUtil.getNameFromImportTerm(imp);
                 if(seenModules.contains(importName)) continue; // Short-circuit cyclic imports.
                 final IStrategoTerm importedAst = context.require(importToAstFunction, importName).unwrap();
                 addToSectionsAndRecurseImports(context, importToAstFunction, sections, seenModules, importedAst);
             }
         }
-    }
-
-    private boolean isModule(IStrategoTerm ast) {
-        return TermUtils.isAppl(ast, "Module", 3);
-    }
-
-    private String getNameFromModule(IStrategoTerm ast) {
-        return TermUtils.toJavaStringAt(ast, 0);
-    }
-
-    private List<IStrategoTerm> getSectionsFromModule(IStrategoTerm ast) {
-        return ast.getSubterm(2).getSubterms();
-    }
-
-    private boolean isImports(IStrategoTerm ast) {
-        return TermUtils.isAppl(ast, "Imports", 1);
     }
 }
