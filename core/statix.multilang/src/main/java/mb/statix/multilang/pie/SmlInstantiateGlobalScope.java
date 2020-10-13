@@ -25,10 +25,9 @@ import org.metaborg.util.task.NullCancel;
 import org.metaborg.util.task.NullProgress;
 
 import javax.inject.Inject;
-import java.io.IOException;
 import java.io.Serializable;
+import java.io.UncheckedIOException;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -77,8 +76,8 @@ public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalSc
             return context.require(input.specSupplier)
                 .mapErr(MultiLangAnalysisException::wrapIfNeeded)
                 .flatMap(spec -> instantiateGlobalScopeForSpec(input, spec));
-        } catch(IOException e) {
-            return Result.ofErr(MultiLangAnalysisException.wrapIfNeeded("Error while creating global scope: cannot load specification", e));
+        } catch(UncheckedIOException e) {
+            return Result.ofErr(MultiLangAnalysisException.wrapIfNeeded("Error while creating global scope: cannot load specification", e.getCause()));
         }
     }
 

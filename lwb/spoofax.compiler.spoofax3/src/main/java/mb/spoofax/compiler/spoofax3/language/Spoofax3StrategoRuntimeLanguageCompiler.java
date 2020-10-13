@@ -30,6 +30,8 @@ import org.immutables.value.Value;
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -85,13 +87,15 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
         final ArrayList<STask<?>> originTasks = new ArrayList<>(args.originTasks);
 
         // Determine libspoofax2 definition directories.
-        final ArrayList<HierarchicalResource> libSpoofax2DefinitionDirs = new ArrayList<>();
+        final HashSet<HierarchicalResource> libSpoofax2DefinitionDirs = new LinkedHashSet<>(); // LinkedHashSet to remove duplicates while keeping insertion order.
         if(input.spoofax3LanguageProject().includeLibSpoofax2Exports()) {
             final ClassLoaderResourceLocations locations = libSpoofax2DefinitionDir.getLocations();
             libSpoofax2DefinitionDirs.addAll(locations.directories);
-            final ResourcePath unarchiveDirectory = input.spoofax3LanguageProject().unarchiveDirectory().appendRelativePath("libspoofax2");
+            final ResourcePath libSpoofax2UnarchiveDirectory = input.spoofax3LanguageProject().unarchiveDirectory().appendRelativePath("libspoofax2");
             for(JarFileWithPath jarFileWithPath : locations.jarFiles) {
-                final Task<None> task = unarchiveFromJar.createTask(new UnarchiveFromJar.Input(jarFileWithPath.file.getPath(), unarchiveDirectory, false, false));
+                final ResourcePath jarFilePath = jarFileWithPath.file.getPath();
+                final ResourcePath unarchiveDirectory = libSpoofax2UnarchiveDirectory.appendRelativePath(jarFilePath.getLeaf());
+                final Task<?> task = unarchiveFromJar.createTask(new UnarchiveFromJar.Input(jarFilePath, unarchiveDirectory, false, false));
                 originTasks.add(task.toSupplier());
                 context.require(task);
                 libSpoofax2DefinitionDirs.add(context.getHierarchicalResource(unarchiveDirectory.appendAsRelativePath(jarFileWithPath.path)));
@@ -101,10 +105,11 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
         // Gather include directories.
         final ArrayList<ResourcePath> includeDirs = new ArrayList<>(input.strategoIncludeDirs());
         includeDirs.add(input.strategoRootDirectory());
-        for(HierarchicalResource definitionDir : libSpoofax2DefinitionDirs) {
-            for(HierarchicalResource export : LibSpoofax2Exports.getStrategoExports(definitionDir)) {
-                if(export.exists()) {
-                    includeDirs.add(export.getPath());
+        for(String export : LibSpoofax2Exports.getStrategoExports()) {
+            for(HierarchicalResource definitionDir : libSpoofax2DefinitionDirs) {
+                final HierarchicalResource exportDirectory = definitionDir.appendAsRelativePath(export);
+                if(exportDirectory.exists()) {
+                    includeDirs.add(exportDirectory.getPath());
                 }
             }
         }

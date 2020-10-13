@@ -83,12 +83,8 @@ public class TigerIdeCheckMulti implements TaskDef<TigerIdeCheckMulti.Input, Key
         try {
             root.walk(input.walker, input.matcher).forEach(file -> {
                 final ResourcePath filePath = file.getPath();
-                try {
-                    final Messages messages = context.require(parse.createMessagesSupplier(filePath));
-                    messagesBuilder.addMessages(filePath, messages);
-                } catch(IOException e) {
-                    throw new UncheckedIOException(e);
-                }
+                final Messages messages = context.require(parse.createMessagesSupplier(filePath));
+                messagesBuilder.addMessages(filePath, messages);
             });
         } catch(UncheckedIOException e) {
             throw e.getCause();

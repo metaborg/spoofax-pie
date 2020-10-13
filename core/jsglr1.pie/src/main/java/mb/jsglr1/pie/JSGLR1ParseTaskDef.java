@@ -16,8 +16,8 @@ import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
-import java.io.IOException;
 import java.io.Serializable;
+import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 
 public abstract class JSGLR1ParseTaskDef implements TaskDef<Supplier<String>, Result<JSGLR1ParseOutput, JSGLR1ParseException>> {
@@ -27,8 +27,8 @@ public abstract class JSGLR1ParseTaskDef implements TaskDef<Supplier<String>, Re
     public Result<JSGLR1ParseOutput, JSGLR1ParseException> exec(ExecContext context, Supplier<String> stringSupplier) throws InterruptedException {
         try {
             return parse(context.require(stringSupplier));
-        } catch(IOException e) {
-            return Result.ofErr(JSGLR1ParseException.readStringFail(stringSupplier.toString(), e));
+        } catch(UncheckedIOException e) {
+            return Result.ofErr(JSGLR1ParseException.readStringFail(stringSupplier.toString(), e.getCause()));
         }
     }
 

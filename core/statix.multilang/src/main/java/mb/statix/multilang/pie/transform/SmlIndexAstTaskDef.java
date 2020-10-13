@@ -14,7 +14,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 
 import javax.inject.Provider;
-import java.io.IOException;
+import java.io.UncheckedIOException;
 
 public abstract class SmlIndexAstTaskDef<E extends Exception> implements TaskDef<ResourceKey, Result<IStrategoTerm, ?>> {
 
@@ -34,8 +34,8 @@ public abstract class SmlIndexAstTaskDef<E extends Exception> implements TaskDef
                     ResourceKeyAttachment.setResourceKey(ast, resourceKey);
                     return StrategoTermIndices.index(ast, resourceKey.toString(), termFactory);
                 });
-        } catch(IOException e) {
-            return Result.ofErr(e);
+        } catch(UncheckedIOException e) {
+            return Result.ofErr(e.getCause());
         }
     }
 }

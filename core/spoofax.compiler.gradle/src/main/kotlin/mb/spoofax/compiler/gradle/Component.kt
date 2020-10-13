@@ -11,6 +11,7 @@ import mb.resource.DefaultResourceService
 import mb.resource.ResourceService
 import mb.resource.fs.FSResourceRegistry
 import mb.spoofax.compiler.dagger.*
+import org.gradle.api.logging.Logger
 
 @SpoofaxCompilerScope
 @Component(modules = [SpoofaxCompilerModule::class, SpoofaxCompilerGradleModule::class])
@@ -21,7 +22,8 @@ interface SpoofaxCompilerGradleComponent : SpoofaxCompilerComponent {
 
 @Module
 class SpoofaxCompilerGradleModule(
-  val builderSupplier: () -> PieBuilder
+  private val logger: Logger,
+  private val builderSupplier: () -> PieBuilder
 ) {
   @Provides
   @SpoofaxCompilerScope
@@ -35,6 +37,7 @@ class SpoofaxCompilerGradleModule(
     val builder: PieBuilder = builderSupplier()
     builder.withTaskDefs(MapTaskDefs(taskDefs))
     builder.withResourceService(resourceService)
+    builder.withLogger(PieLogger(logger))
     return builder.build()
   }
 }

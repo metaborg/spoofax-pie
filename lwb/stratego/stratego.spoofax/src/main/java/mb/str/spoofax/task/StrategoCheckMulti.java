@@ -16,7 +16,6 @@ import mb.str.spoofax.config.StrategoAnalyzeConfig;
 import mb.str.spoofax.config.StrategoConfigurator;
 
 import javax.inject.Inject;
-import java.io.IOException;
 import java.io.Serializable;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
@@ -102,12 +101,8 @@ public class StrategoCheckMulti implements TaskDef<StrategoCheckMulti.Input, Key
         try {
             root.walk(input.walker, input.matcher).forEach(file -> {
                 final ResourcePath filePath = file.getPath();
-                try {
-                    final Messages messages = context.require(parse.createMessagesSupplier(filePath));
-                    messagesBuilder.addMessages(filePath, messages);
-                } catch(IOException e) {
-                    throw new UncheckedIOException(e);
-                }
+                final Messages messages = context.require(parse.createMessagesSupplier(filePath));
+                messagesBuilder.addMessages(filePath, messages);
             });
         } catch(UncheckedIOException e) {
             throw e.getCause();

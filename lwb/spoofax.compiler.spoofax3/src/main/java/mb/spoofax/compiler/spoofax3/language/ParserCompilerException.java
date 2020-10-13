@@ -74,17 +74,21 @@ public abstract class ParserCompilerException extends Exception {
         return ParserCompilerExceptions.caseOf(this);
     }
 
+    public Optional<KeyedMessages> getMessages() {
+        return ParserCompilerExceptions.getMessages(this);
+    }
+
 
     @Override public String getMessage() {
         return caseOf()
-            .mainFileFail((mainFile) -> "Main file '" + mainFile + "' does not exist or is not a file")
-            .rootDirectoryFail((rootDirectory) -> "Root directory '" + rootDirectory + "' does not exist or is not a directory")
+            .mainFileFail((mainFile) -> "SDF3 main file '" + mainFile + "' does not exist or is not a file")
+            .rootDirectoryFail((rootDirectory) -> "SDF3 root directory '" + rootDirectory + "' does not exist or is not a directory")
             .checkFail((messages) -> "Parsing or checking SDF3 source files failed; see error messages")
-            .parseTableCompilerFail((cause) -> "Parse table compiler failed unexpectedly")
-            .signatureGeneratorFail((cause) -> "Stratego signature generator failed unexpectedly")
-            .prettyPrinterGeneratorFail((cause) -> "Pretty-printer generator failed unexpectedly")
-            .parenthesizerGeneratorFail((cause) -> "Parenthesizer generator failed unexpectedly")
-            .completionRuntimeGeneratorFail((cause) -> "Completion runtime generator failed unexpectedly")
+            .parseTableCompilerFail((cause) -> "SDF3 to parse table compiler failed unexpectedly")
+            .signatureGeneratorFail((cause) -> "SDF3 to stratego signature generator failed unexpectedly")
+            .prettyPrinterGeneratorFail((cause) -> "SDF3 to pretty-printer generator failed unexpectedly")
+            .parenthesizerGeneratorFail((cause) -> "SDF3 to parenthesizer generator failed unexpectedly")
+            .completionRuntimeGeneratorFail((cause) -> "SDF3 to completion runtime generator failed unexpectedly")
             ;
     }
 

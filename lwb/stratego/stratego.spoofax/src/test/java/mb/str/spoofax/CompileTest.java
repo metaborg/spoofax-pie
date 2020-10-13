@@ -111,7 +111,7 @@ class CompileTest extends TestBase {
 
             // Create a JAR from Java class files.
             final FSResource jarFile = libsDir.appendRelativePath("stratego.jar").ensureFileExists();
-            final Task<None> createJarTask = archiveToJar.createTask(new ArchiveToJar.Input(
+            final Task<?> createJarTask = archiveToJar.createTask(new ArchiveToJar.Input(
                 null,
                 createList(ArchiveDirectory.ofClassFilesInDirectory(classFileOutputDir.getPath())),
                 jarFile.getPath(),

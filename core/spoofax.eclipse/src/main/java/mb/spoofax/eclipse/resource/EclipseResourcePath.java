@@ -154,10 +154,6 @@ public class EclipseResourcePath extends ResourcePathDefaults<EclipseResourcePat
         return new EclipseResourcePath(appendOrReplaceWithPath(Path.fromPortableString(other)));
     }
 
-    @Override public EclipseResourcePath appendString(String other) {
-        return new EclipseResourcePath(path.append(other));
-    }
-
     private IPath appendOrReplaceWithPath(IPath other) {
         if(other.isAbsolute()) {
             return other;

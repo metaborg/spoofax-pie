@@ -15,16 +15,16 @@ import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.statix.multilang.ConfigurationException;
-import mb.statix.multilang.pie.config.ContextConfig;
+import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.multilang.metadata.LanguageId;
 import mb.statix.multilang.metadata.LanguageMetadata;
 import mb.statix.multilang.metadata.LanguageMetadataManager;
-import mb.statix.multilang.MultiLangAnalysisException;
+import mb.statix.multilang.pie.config.ContextConfig;
 import mb.statix.multilang.pie.config.SmlBuildContextConfiguration;
 import mb.statix.multilang.utils.MessageUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.HashSet;
@@ -83,8 +83,8 @@ public abstract class SmlCheckTaskDef implements TaskDef<ResourcePath, KeyedMess
             try {
                 Messages messages = context.require(parseMessageFunction.createSupplier(resourceKey));
                 builder.addMessages(resourceKey, messages);
-            } catch(IOException e) {
-                builder.addMessage("IO Exception when parsing file", e, Severity.Error, resourceKey);
+            } catch(UncheckedIOException e) {
+                builder.addMessage("IO Exception when parsing file", e.getCause(), Severity.Error, resourceKey);
             }
         });
         return builder;

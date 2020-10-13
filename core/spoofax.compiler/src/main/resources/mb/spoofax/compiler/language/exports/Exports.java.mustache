@@ -6,12 +6,13 @@ import java.util.ArrayList;
 
 public class {{genExportsClass.id}} {
 {{#combinedExports}}
-    public static ArrayList<HierarchicalResource> get{{languageIdCapitalized}}Exports(HierarchicalResource definitionDir) {
-        final ArrayList<HierarchicalResource> exports = new ArrayList<>();
+    public static ArrayList<String> get{{languageIdCapitalized}}Exports() {
+        final ArrayList<String> exports = new ArrayList<>();
 {{#relativePaths}}
-        exports.add(definitionDir.appendRelativePath("{{this}}"));
+        exports.add("{{this}}");
 {{/relativePaths}}
         return exports;
     }
+
 {{/combinedExports}}
 }
