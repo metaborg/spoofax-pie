@@ -22,6 +22,7 @@ languageAdapterProject {
   languageProject.set(project(":calc"))
   compilerInput {
     withParser()
+    withStyler()
     withStrategoRuntime()
     project.configureCompilerInput()
   }
