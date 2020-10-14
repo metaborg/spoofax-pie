@@ -34,13 +34,12 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 
 @Value.Enclosing
-public class Spoofax3StylerLanguageCompiler implements TaskDef<Spoofax3StylerLanguageCompiler.Input, Result<KeyedMessages, StylerCompilerException>> {
+public class Spoofax3StylerLanguageCompiler implements TaskDef<Spoofax3StylerLanguageCompiler.Args, Result<KeyedMessages, StylerCompilerException>> {
     private final EsvParse parse;
     private final EsvCheckMulti check;
     private final EsvCompile compile;
@@ -69,7 +68,9 @@ public class Spoofax3StylerLanguageCompiler implements TaskDef<Spoofax3StylerLan
     }
 
     @Override
-    public Result<KeyedMessages, StylerCompilerException> exec(ExecContext context, Input input) throws Exception {
+    public Result<KeyedMessages, StylerCompilerException> exec(ExecContext context, Args args) throws Exception {
+        final Input input = args.input;
+
         // Check main file, root directory, and include directories.
         final HierarchicalResource mainFile = context.require(input.esvMainFile(), ResourceStampers.<HierarchicalResource>exists());
         if(!mainFile.exists() || !mainFile.isFile()) {
@@ -128,7 +129,11 @@ public class Spoofax3StylerLanguageCompiler implements TaskDef<Spoofax3StylerLan
         }
 
         // Compile ESV files to aterm format.
-        final Result<IStrategoTerm, ?> result = context.require(compile, new EsvCompile.Input(parse.createAstSupplier(input.esvMainFile()), new ImportFunction(includeDirSuppliers), ListView.of()));
+        final Result<IStrategoTerm, ?> result = context.require(compile, new EsvCompile.Input(
+            parse.createAstSupplier(input.esvMainFile()),
+            new ImportFunction(includeDirSuppliers, args.esvAdditionalAstSuppliers),
+            ListView.of()
+        ));
         if(result.isErr()) {
             return Result.ofErr(StylerCompilerException.compilerFail(result.unwrapErr()));
         }
@@ -157,8 +162,6 @@ public class Spoofax3StylerLanguageCompiler implements TaskDef<Spoofax3StylerLan
 
         List<ResourcePath> esvIncludeDirs();
 
-        List<Supplier<Result<IStrategoTerm, ?>>> esvAdditionalAstSuppliers();
-
 
         @Value.Default default String esvAtermFormatFileRelativePath() {
             return "editor.esv.af";
@@ -182,20 +185,44 @@ public class Spoofax3StylerLanguageCompiler implements TaskDef<Spoofax3StylerLan
         }
     }
 
+    public static class Args implements Serializable {
+        public final Input input;
+        public final ArrayList<Supplier<Result<IStrategoTerm, ?>>> esvAdditionalAstSuppliers;
 
-    private class ImportFunction implements Function<String, Result<IStrategoTerm, ?>> {
-        private final HashSet<Supplier<ResourcePath>> includeDirSuppliers;
-
-        public ImportFunction(
-            HashSet<Supplier<ResourcePath>> includeDirSuppliers
-        ) {
-            this.includeDirSuppliers = includeDirSuppliers;
+        public Args(Input input, ArrayList<Supplier<Result<IStrategoTerm, ?>>> esvAdditionalAstSuppliers) {
+            this.input = input;
+            this.esvAdditionalAstSuppliers = esvAdditionalAstSuppliers;
         }
 
-        @Override public Result<IStrategoTerm, ?> apply(ExecContext context, String input) {
-            final ArrayList<IOException> suppressedIoExceptions = new ArrayList<>();
+        @Override public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            final Args args = (Args)o;
+            return input.equals(args.input) && esvAdditionalAstSuppliers.equals(args.esvAdditionalAstSuppliers);
+        }
+
+        @Override public int hashCode() {
+            return Objects.hash(input, esvAdditionalAstSuppliers);
+        }
+    }
+
+
+    private class ImportFunction implements Function<String, Result<IStrategoTerm, ?>> {
+        private final LinkedHashSet<Supplier<ResourcePath>> includeDirSuppliers;
+        private final ArrayList<Supplier<Result<IStrategoTerm, ?>>> additionalAstSuppliers;
+
+        public ImportFunction(
+            LinkedHashSet<Supplier<ResourcePath>> includeDirSuppliers,
+            ArrayList<Supplier<Result<IStrategoTerm, ?>>> additionalAstSuppliers
+        ) {
+            this.includeDirSuppliers = includeDirSuppliers;
+            this.additionalAstSuppliers = additionalAstSuppliers;
+        }
+
+        @Override public Result<IStrategoTerm, ?> apply(ExecContext context, String importName) {
+            final ArrayList<Exception> suppressedExceptions = new ArrayList<>();
             for(Supplier<ResourcePath> includeDirSupplier : includeDirSuppliers) {
-                final Supplier<ResourcePath> pathSupplier = includeDirSupplier.map((includeDir) -> includeDir.appendRelativePath(input).ensureLeafExtension("esv").getNormalized());
+                final Supplier<ResourcePath> pathSupplier = includeDirSupplier.map((includeDir) -> includeDir.appendRelativePath(importName).ensureLeafExtension("esv").getNormalized());
                 try {
                     final ResourcePath path = context.require(pathSupplier);
                     final ReadableResource resource = context.require(path, ResourceStampers.<ReadableResource>exists());
@@ -208,13 +235,25 @@ public class Spoofax3StylerLanguageCompiler implements TaskDef<Spoofax3StylerLan
                         }
                     })));
                 } catch(IOException e) {
-                    suppressedIoExceptions.add(e);
+                    suppressedExceptions.add(e);
                 } catch(UncheckedIOException e) {
-                    suppressedIoExceptions.add(e.getCause());
+                    suppressedExceptions.add(e.getCause());
                 }
             }
-            final Exception exception = new Exception("Could not import '" + input + "', no ESV module found with that name in any import directory");
-            suppressedIoExceptions.forEach(exception::addSuppressed);
+            for(Supplier<Result<IStrategoTerm, ?>> astSupplier : additionalAstSuppliers) {
+                final Result<IStrategoTerm, ?> result = context.require(astSupplier);
+                if(result.isErr()) {
+                    suppressedExceptions.add(result.unwrapErr());
+                    continue;
+                }
+                final IStrategoTerm ast = result.unwrapUnchecked();
+                final String moduleName = EsvUtil.getNameFromModuleTerm(ast);
+                if(importName.equals(moduleName)) {
+                    return result;
+                }
+            }
+            final Exception exception = new Exception("Could not import '" + importName + "', no ESV module found with that name in any import directory nor in any additional supplied ASTs");
+            suppressedExceptions.forEach(exception::addSuppressed);
             return Result.ofErr(exception);
         }
 

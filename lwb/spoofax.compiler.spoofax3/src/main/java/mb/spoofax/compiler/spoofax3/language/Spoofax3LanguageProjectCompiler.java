@@ -5,13 +5,16 @@ import mb.common.message.KeyedMessagesBuilder;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.STask;
+import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.spoofax.compiler.language.LanguageProjectCompilerInputBuilder;
 import org.immutables.value.Value;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -39,19 +42,23 @@ public class Spoofax3LanguageProjectCompiler implements TaskDef<Spoofax3Language
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
 
         final ArrayList<STask<?>> strategoOriginTask = new ArrayList<>();
+        final ArrayList<Supplier<Result<IStrategoTerm, ?>>> esvAdditionalAstSuppliers = new ArrayList<>();
 
         if(input.parser().isPresent()) {
             strategoOriginTask.add(parserCompiler.createSupplier(input.parser().get()));
-            final Result<KeyedMessages, CompilerException> result = context.require(parserCompiler, input.parser().get())
+            final Result<Spoofax3ParserLanguageCompiler.Output, CompilerException> result = context.require(parserCompiler, input.parser().get())
                 .mapErr(CompilerException::parserCompilerFail);
             if(result.isErr()) {
-                return result;
+                return result.map(Spoofax3ParserLanguageCompiler.Output::messages);
             }
-            messagesBuilder.addMessages(result.get());
+            final Spoofax3ParserLanguageCompiler.Output output = result.get();
+            messagesBuilder.addMessages(output.messages());
+            esvAdditionalAstSuppliers.addAll(output.esvCompletionColorerAstSuppliers());
         }
 
         if(input.styler().isPresent()) {
-            final Result<KeyedMessages, CompilerException> result = context.require(stylerCompiler, input.styler().get())
+            final Spoofax3StylerLanguageCompiler.Args args = new Spoofax3StylerLanguageCompiler.Args(input.styler().get(), esvAdditionalAstSuppliers);
+            final Result<KeyedMessages, CompilerException> result = context.require(stylerCompiler, args)
                 .mapErr(CompilerException::stylerCompilerFail);
             if(result.isErr()) {
                 return result;

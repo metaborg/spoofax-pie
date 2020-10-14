@@ -24,6 +24,7 @@ import mb.sdf3.spoofax.task.Sdf3ParseTableToFile;
 import mb.sdf3.spoofax.task.Sdf3ParseTableToParenthesizer;
 import mb.sdf3.spoofax.task.Sdf3Spec;
 import mb.sdf3.spoofax.task.Sdf3SpecToParseTable;
+import mb.sdf3.spoofax.task.Sdf3ToCompletionColorer;
 import mb.sdf3.spoofax.task.Sdf3ToCompletionRuntime;
 import mb.sdf3.spoofax.task.Sdf3ToPrettyPrinter;
 import mb.sdf3.spoofax.task.Sdf3ToSignature;
@@ -44,14 +45,16 @@ import org.spoofax.terms.util.TermUtils;
 
 import javax.inject.Inject;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Properties;
 import java.util.stream.Stream;
 
 import static mb.constraint.pie.ConstraintAnalyzeMultiTaskDef.SingleFileOutput;
 
 @Value.Enclosing
-public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLanguageCompiler.Input, Result<KeyedMessages, ParserCompilerException>> {
+public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLanguageCompiler.Input, Result<Spoofax3ParserLanguageCompiler.Output, ParserCompilerException>> {
     private final TemplateWriter completionTemplate;
     private final TemplateWriter ppTemplate;
     private final Sdf3Parse parse;
@@ -66,6 +69,7 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
     private final Sdf3ToPrettyPrinter toPrettyPrinter;
     private final Sdf3ParseTableToParenthesizer toParenthesizer;
     private final Sdf3ToCompletionRuntime toCompletionRuntime;
+    private final Sdf3ToCompletionColorer toCompletionColorer;
 
     @Inject public Spoofax3ParserLanguageCompiler(
         TemplateCompiler templateCompiler,
@@ -80,7 +84,8 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
         Sdf3ToSignature toSignature,
         Sdf3ToPrettyPrinter toPrettyPrinter,
         Sdf3ParseTableToParenthesizer toParenthesizer,
-        Sdf3ToCompletionRuntime toCompletionRuntime
+        Sdf3ToCompletionRuntime toCompletionRuntime,
+        Sdf3ToCompletionColorer toCompletionColorer
     ) {
         templateCompiler = templateCompiler.loadingFromClass(getClass());
         this.completionTemplate = templateCompiler.getOrCompileToWriter("completion.str.mustache");
@@ -97,6 +102,7 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
         this.toPrettyPrinter = toPrettyPrinter;
         this.toParenthesizer = toParenthesizer;
         this.toCompletionRuntime = toCompletionRuntime;
+        this.toCompletionColorer = toCompletionColorer;
     }
 
 
@@ -105,7 +111,7 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
     }
 
     @Override
-    public Result<KeyedMessages, ParserCompilerException> exec(ExecContext context, Input input) throws Exception {
+    public Result<Output, ParserCompilerException> exec(ExecContext context, Input input) throws Exception {
         // Check main file and root directory.
         final HierarchicalResource mainFile = context.require(input.sdf3MainFile(), ResourceStampers.<HierarchicalResource>exists());
         if(!mainFile.exists() || !mainFile.isFile()) {
@@ -136,6 +142,7 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
         }
 
         // Compile each SDF3 source file to a Stratego signature, pretty-printer, and completion runtime module.
+        final ArrayList<Supplier<Result<IStrategoTerm, ?>>> esvCompletionColorerAstSuppliers = new ArrayList<>();
         final Sdf3AnalyzeMulti.Input analyzeInput = new Sdf3AnalyzeMulti.Input(rootDirectory.getPath(), resourceWalker, resourceMatcher, parse.createRecoverableAstFunction());
         try(final Stream<? extends HierarchicalResource> stream = rootDirectory.walk(resourceWalker, resourceMatcher)) {
             for(HierarchicalResource file : new StreamIterable<>(stream)) {
@@ -157,6 +164,7 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
                 } catch(Exception e) {
                     return Result.ofErr(ParserCompilerException.completionRuntimeGeneratorFail(e));
                 }
+                esvCompletionColorerAstSuppliers.add(toCompletionColorer.createSupplier(astSupplier));
             }
         }
 
@@ -176,7 +184,11 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
             ppTemplate.write(context, generatedStrategoSourcesDirectory.appendRelativePath("pp.str"), input, map);
         }
 
-        return Result.ofOk(messages);
+        return Result.ofOk(Output.builder()
+            .messages(messages)
+            .esvCompletionColorerAstSuppliers(esvCompletionColorerAstSuppliers)
+            .build()
+        );
     }
 
     private void toSignature(ExecContext context, Input input, Supplier<Result<SingleFileOutput, ?>> singleFileAnalysisOutputSupplier) throws Exception {
@@ -284,5 +296,16 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
         default void syncTo(Spoofax3StrategoRuntimeLanguageCompiler.Input.Builder builder) {
             builder.addStrategoIncludeDirs(spoofax3LanguageProject().generatedStrategoSourcesDirectory());
         }
+    }
+
+    @Value.Immutable public interface Output extends Serializable {
+        class Builder extends Spoofax3ParserLanguageCompilerData.Output.Builder {}
+
+        static Builder builder() { return new Builder(); }
+
+
+        KeyedMessages messages();
+
+        List<Supplier<Result<IStrategoTerm, ?>>> esvCompletionColorerAstSuppliers();
     }
 }
