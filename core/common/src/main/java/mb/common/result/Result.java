@@ -2,7 +2,9 @@ package mb.common.result;
 
 import mb.common.option.Option;
 import mb.common.util.UncheckedException;
+import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.dataflow.qual.Pure;
 
 import java.io.Serializable;
 import java.util.function.Consumer;
@@ -75,7 +77,9 @@ public interface Result<T, E extends Exception> extends Serializable {
     }
 
 
-    boolean isOk();
+    @EnsuresNonNullIf(expression = "get()", result = true)
+    @EnsuresNonNullIf(expression = "getErr()", result = false)
+    @Pure boolean isOk();
 
     Option<T> ok();
 
@@ -85,7 +89,9 @@ public interface Result<T, E extends Exception> extends Serializable {
     }
 
 
-    boolean isErr();
+    @EnsuresNonNullIf(expression = "get()", result = false)
+    @EnsuresNonNullIf(expression = "getErr()", result = true)
+    @Pure boolean isErr();
 
     Option<E> err();
 

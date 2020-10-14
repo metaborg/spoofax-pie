@@ -86,6 +86,8 @@ dependencies {
     api("javax.inject:javax.inject:$javaxInjectVersion")
     /// Checkerframework
     api("org.checkerframework:checker-qual-android:$checkerframeworkVersion") // Use android version: annotation retention policy is class instead of runtime.
+    /// FindBugs JSR305
+    api("com.google.code.findbugs:jsr305:3.0.2")
 
     // Annotation processor dependencies
     /// Dagger
