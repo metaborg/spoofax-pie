@@ -23,5 +23,9 @@ plugins {
 subprojects {
   metaborg {
     configureSubProject()
+    // Do not publish examples.
+    javaCreatePublication = false
+    javaCreateSourcesJar = false
+    javaCreateJavadocJar = false
   }
 }

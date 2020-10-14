@@ -24,5 +24,12 @@ plugins {
 subprojects {
   metaborg {
     configureSubProject()
+
+    if(name.contains(".cli") || name.contains(".eclipse") || name.contains(".intellij")) {
+      // Do not publish CLI, Eclipse plugin, and IntelliJ plugin for now.
+      javaCreatePublication = false
+      javaCreateSourcesJar = false
+      javaCreateJavadocJar = false
+    }
   }
 }
