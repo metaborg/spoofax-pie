@@ -8,6 +8,7 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import java.io.IOException;
@@ -16,27 +17,27 @@ import java.util.Objects;
 
 public abstract class ConstraintAnalyzeTaskDef implements TaskDef<ConstraintAnalyzeTaskDef.Input, Result<ConstraintAnalyzeTaskDef.Output, ?>> {
     public static class Input implements Serializable {
-        public final ResourceKey resourceKey;
+        public final ResourceKey resource;
         public final Supplier<? extends Result<IStrategoTerm, ?>> astSupplier;
 
-        public Input(ResourceKey resourceKey, Supplier<? extends Result<IStrategoTerm, ?>> astSupplier) {
-            this.resourceKey = resourceKey;
+        public Input(ResourceKey resource, Supplier<? extends Result<IStrategoTerm, ?>> astSupplier) {
+            this.resource = resource;
             this.astSupplier = astSupplier;
         }
 
-        @Override public boolean equals(Object o) {
+        @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             final Input input = (Input)o;
-            return resourceKey.equals(input.resourceKey) && astSupplier.equals(input.astSupplier);
+            return resource.equals(input.resource) && astSupplier.equals(input.astSupplier);
         }
 
         @Override public int hashCode() {
-            return Objects.hash(resourceKey, astSupplier);
+            return Objects.hash(resource, astSupplier);
         }
 
         @Override public String toString() {
-            return "Input(resourceKey=" + resourceKey + ", astProvider=" + astSupplier + ')';
+            return "Input(root=" + resource + ", astProvider=" + astSupplier + ')';
         }
     }
 
@@ -49,7 +50,7 @@ public abstract class ConstraintAnalyzeTaskDef implements TaskDef<ConstraintAnal
             this.context = context;
         }
 
-        @Override public boolean equals(Object o) {
+        @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             final Output output = (Output)o;
@@ -71,8 +72,8 @@ public abstract class ConstraintAnalyzeTaskDef implements TaskDef<ConstraintAnal
     public Result<Output, ?> exec(ExecContext context, Input input) throws IOException {
         return context.require(input.astSupplier)
             .mapCatching((ast) -> {
-                final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext(false, null);
-                final SingleFileResult result = analyze(input.resourceKey, ast, constraintAnalyzerContext);
+                final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext(false, input.resource);
+                final SingleFileResult result = analyze(input.resource, ast, constraintAnalyzerContext);
                 return new Output(constraintAnalyzerContext, result);
             });
     }

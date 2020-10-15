@@ -27,7 +27,7 @@ class TigerTestBase {
     protected final TigerStyler styler = new TigerStylerFactory(loggerFactory, definitionDir).create();
     protected final StrategoRuntimeBuilder strategoRuntimeBuilder = new TigerStrategoRuntimeBuilderFactory(loggerFactory, resourceService, definitionDir).create();
     protected final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.build();
-    protected final TigerConstraintAnalyzer analyzer = new TigerConstraintAnalyzerFactory(loggerFactory, resourceService, strategoRuntime).create();
+    protected final TigerConstraintAnalyzer analyzer = new TigerConstraintAnalyzerFactory(resourceService).create();
 
     protected final ITermFactory termFactory = new TermFactory();
 }

@@ -34,7 +34,11 @@ public abstract class ASpoofaxPrimitive extends AbstractPrimitive {
         return false;
     }
 
-    protected Spoofax2Context getSpoofax2Context(IContext env) {
-        return AdaptableContext.adaptContextObject(env.contextObject(), Spoofax2Context.class);
+    protected Spoofax2LanguageContext getSpoofax2LanguageContext(IContext env) {
+        return AdaptableContext.adaptContextObject(env.contextObject(), Spoofax2LanguageContext.class);
+    }
+
+    protected Spoofax2ProjectContext getSpoofax2ProjectContext(IContext env) {
+        return AdaptableContext.adaptContextObject(env.contextObject(), Spoofax2ProjectContext.class);
     }
 }

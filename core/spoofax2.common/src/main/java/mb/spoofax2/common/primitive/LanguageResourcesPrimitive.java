@@ -4,7 +4,7 @@ import mb.log.api.LoggerFactory;
 import mb.resource.ResourceRuntimeException;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
-import mb.spoofax2.common.primitive.generic.Spoofax2Context;
+import mb.spoofax2.common.primitive.generic.Spoofax2LanguageContext;
 
 import java.util.ArrayList;
 
@@ -13,7 +13,7 @@ public class LanguageResourcesPrimitive extends AResourcesPrimitive {
         super("language_resources", loggerFactory, resourceService);
     }
 
-    @Override protected ArrayList<HierarchicalResource> locations(Spoofax2Context context) {
+    @Override protected ArrayList<HierarchicalResource> locations(Spoofax2LanguageContext context) {
         final ArrayList<HierarchicalResource> paths = new ArrayList<>();
         try {
             final HierarchicalResource path = resourceService.getHierarchicalResource(context.languagePath);

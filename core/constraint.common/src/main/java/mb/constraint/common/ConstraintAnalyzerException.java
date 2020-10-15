@@ -21,7 +21,7 @@ public abstract class ConstraintAnalyzerException extends Exception {
 
     @Override public String getMessage() {
         return ConstraintAnalyzerExceptions.cases()
-            .strategoInvokeFail(StrategoException::getMessage)
+            .strategoInvokeFail((e) -> "Constraint analyzer failed unexpectedly due to failure in Stratego execution")
             .apply(this);
     }
 
@@ -34,6 +34,4 @@ public abstract class ConstraintAnalyzerException extends Exception {
     @Override public abstract int hashCode();
 
     @Override public abstract boolean equals(@Nullable Object obj);
-
-    @Override public abstract String toString();
 }

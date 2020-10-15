@@ -57,6 +57,16 @@ public class StrategoUtil {
         return createLegacyBuilderInputTerm(termFactory, ast, ast, fileString, dirString);
     }
 
+    public static IStrategoTerm createLegacyBuilderInputTerm(ITermFactory termFactory, IStrategoTerm ast, ResourcePath file, ResourcePath dir) {
+        return createLegacyBuilderInputTerm(termFactory, ast, ast, dir.relativize(file), dir.toString());
+    }
+
+
+
+    public static IStrategoTerm createLegacyBuilderInputTerm(ITermFactory termFactory, IStrategoTerm ast, ResourcePath path) {
+        return createLegacyBuilderInputTerm(termFactory, ast, ast, path);
+    }
+
     public static IStrategoTerm createLegacyBuilderInputTerm(ITermFactory termFactory, IStrategoTerm term, IStrategoTerm ast, ResourcePath path) {
         final @Nullable ResourcePath parent = path.getParent();
         final @Nullable String leaf = path.getLeaf();
@@ -69,9 +79,5 @@ public class StrategoUtil {
         } else {
             return createLegacyBuilderInputTerm(termFactory, term, ast, "", "");
         }
-    }
-
-    public static IStrategoTerm createLegacyBuilderInputTerm(ITermFactory termFactory, IStrategoTerm ast, ResourcePath path) {
-        return createLegacyBuilderInputTerm(termFactory, ast, ast, path);
     }
 }

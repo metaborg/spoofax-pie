@@ -53,7 +53,12 @@ public class StrategoRuntimeLanguageCompiler implements TaskDef<StrategoRuntimeL
         }
         if(input.addStatixPrimitives()) {
             dependencies.add(GradleConfiguredDependency.implementation(shared.statixCommonDep()));
+        }
+        if(input.requiresSpoofax2Primitives()) {
             dependencies.add(GradleConfiguredDependency.implementation(shared.spoofax2CommonDep()));
+        }
+        if(input.requiresConstraintSolverPrimitives()) {
+            dependencies.add(GradleConfiguredDependency.implementation(shared.constraintCommonDep()));
         }
         return new ListView<>(dependencies);
     }
@@ -71,11 +76,17 @@ public class StrategoRuntimeLanguageCompiler implements TaskDef<StrategoRuntimeL
 
         List<String> ctreeRelativePaths();
 
+        @Value.Default default boolean addSpoofax2Primitives() { return false; }
+
         @Value.Default default boolean addNaBL2Primitives() { return false; }
 
         @Value.Default default boolean addStatixPrimitives() { return false; }
 
-        default boolean addConstraintSolverPrimitives() {
+        default boolean requiresSpoofax2Primitives() {
+            return addSpoofax2Primitives() || addStatixPrimitives();
+        }
+
+        default boolean requiresConstraintSolverPrimitives() {
             return addNaBL2Primitives() || addStatixPrimitives();
         }
 

@@ -49,7 +49,11 @@ public abstract class Coordinate implements Serializable {
     @Value.Parameter public abstract Optional<String> version();
 
 
-    @Value.Derived public String toGradleNotation() {
+    public String versionOrUnspecified() {
+        return version().orElse("unspecified");
+    }
+
+    public String toGradleNotation() {
         return groupId() + ":" + artifactId() + version().map(v -> ":" + v).orElse("");
     }
 

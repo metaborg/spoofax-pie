@@ -118,8 +118,8 @@ public class {{genModule.id}} {
 
 
     @Provides @{{scope.id}}
-    static {{this.languageProjectInput.factory.qualifiedId}} provideConstraintAnalyzerFactory(LoggerFactory loggerFactory, ResourceService resourceService, StrategoRuntime prototypeStrategoRuntime) {
-        return new {{this.languageProjectInput.factory.qualifiedId}}(loggerFactory, resourceService, prototypeStrategoRuntime);
+    static {{this.languageProjectInput.factory.qualifiedId}} provideConstraintAnalyzerFactory(ResourceService resourceService) {
+        return new {{this.languageProjectInput.factory.qualifiedId}}(resourceService);
     }
 
     @Provides @{{scope.id}}

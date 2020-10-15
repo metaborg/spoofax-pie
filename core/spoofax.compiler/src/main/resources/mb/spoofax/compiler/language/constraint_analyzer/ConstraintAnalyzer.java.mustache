@@ -6,7 +6,7 @@ import mb.resource.ResourceService;
 import mb.stratego.common.StrategoRuntime;
 
 public class {{genConstraintAnalyzer.id}} extends ConstraintAnalyzer {
-    public {{genConstraintAnalyzer.id}}(LoggerFactory loggerFactory, ResourceService resourceService, StrategoRuntime strategoRuntime) {
-        super(loggerFactory, resourceService, strategoRuntime, "{{strategoStrategy}}", {{multiFile}});
+    public {{genConstraintAnalyzer.id}}(ResourceService resourceService) {
+        super(resourceService, "{{strategoStrategy}}", {{multiFile}});
     }
 }

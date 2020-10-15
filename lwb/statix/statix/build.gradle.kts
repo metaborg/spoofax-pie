@@ -27,7 +27,9 @@ languageProject {
       multiFile(true)
     }
     withStrategoRuntime().run {
-      addInteropRegisterersByReflection("statix.lang.InteropRegisterer")
+      addInteropRegisterersByReflection("statix.lang.strategies.InteropRegisterer")
+      addInteropRegisterersByReflection("statix.lang.trans.InteropRegisterer")
+      addSpoofax2Primitives(true)
     }
   }
 }

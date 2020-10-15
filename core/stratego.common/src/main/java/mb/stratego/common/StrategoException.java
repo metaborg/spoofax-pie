@@ -104,32 +104,29 @@ public abstract class StrategoException extends Exception {
     @Override public String getMessage() {
         return caseOf()
             .strategyFail((strategyName, input, trace) -> createMessage(strategyName, input, trace, ""))
-            .fatalFail((strategyName, input, trace) -> createMessage(strategyName, input, trace, ""))
-            .fatalFailWithTerm((strategyName, input, trace, term) -> createMessage(strategyName, input, trace, " at term:\n\t" + StrategoUtil.toString(term)))
-            .exitFail((strategyName, input, trace, exitCode) -> createMessage(strategyName, input, trace, " with exit code '" + exitCode + "'"))
-            .strategyUndefined((strategyName, input, trace, undefinedStrategyName) -> createMessage(strategyName, input, trace, "; strategy '" + undefinedStrategyName + "' is undefined"))
-            .exceptionalFail((strategyName, input, trace, cause) -> createMessage(strategyName, input, trace, "unexpectedly due to:\n\n" + cause.getMessage()))
+            .fatalFail((strategyName, input, trace) -> createMessage(strategyName, input, trace, "fatally"))
+            .fatalFailWithTerm((strategyName, input, trace, term) -> createMessage(strategyName, input, trace, " fatally at term:\n\t" + StrategoUtil.toString(term)))
+            .exitFail((strategyName, input, trace, exitCode) -> createMessage(strategyName, input, trace, "with exit code '" + exitCode + "'"))
+            .strategyUndefined((strategyName, input, trace, undefinedStrategyName) -> createMessage(strategyName, input, trace, "because strategy '" + undefinedStrategyName + "' is undefined"))
+            .exceptionalFail((strategyName, input, trace, cause) -> createMessage(strategyName, input, trace, "exceptionally"))
             ;
     }
 
-    private String createMessage(String strategyName, IStrategoTerm input, String[] trace, String postfix) {
+    private String createMessage(String strategyName, IStrategoTerm input, String[] trace, String prefix) {
         final StringBuilder sb = new StringBuilder();
         sb
             .append("Invoking Stratego strategy '")
             .append(strategyName)
-            .append("' failed on input:\n")
-            .append(StrategoUtil.toString(input))
-            .append("\n")
-            .append(postfix)
+            .append("' failed ")
+            .append(prefix)
         ;
-        if(!postfix.isEmpty()) {
-            sb.append('\n');
-        }
-        sb.append("Stratego stack trace:");
-        for(String line : trace) { // TODO: should be printed in reverse?
+        sb.append("\nStratego stack trace:");
+        for(String line : trace) {
             sb.append("\n\t");
             sb.append(line);
         }
+        sb.append("\nStratego input term:\n");
+        sb.append(StrategoUtil.toString(input));
         return sb.toString();
     }
 
@@ -141,6 +138,4 @@ public abstract class StrategoException extends Exception {
     @Override public abstract int hashCode();
 
     @Override public abstract boolean equals(@Nullable Object obj);
-
-    @Override public abstract String toString();
 }

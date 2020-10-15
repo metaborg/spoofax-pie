@@ -30,7 +30,7 @@ class Sdf3TestBase {
     protected final Sdf3Styler styler = new Sdf3StylerFactory(loggerFactory, definitionDir).create();
     protected final StrategoRuntimeBuilder strategoRuntimeBuilder = new Sdf3StrategoRuntimeBuilderFactory(loggerFactory, resourceService, definitionDir).create();
     protected final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.build();
-    protected final Sdf3ConstraintAnalyzer analyzer = new Sdf3ConstraintAnalyzerFactory(loggerFactory, resourceService, strategoRuntime).create();
+    protected final Sdf3ConstraintAnalyzer analyzer = new Sdf3ConstraintAnalyzerFactory(resourceService).create();
     protected final ResourceKey rootKey = new DefaultResourceKey(qualifier, "root");
 
     protected final ITermFactory termFactory = new TermFactory();

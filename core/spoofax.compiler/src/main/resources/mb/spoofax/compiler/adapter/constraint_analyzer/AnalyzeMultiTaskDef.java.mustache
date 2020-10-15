@@ -5,18 +5,23 @@ import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.constraint.common.ConstraintAnalyzerException;
 import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
 import mb.resource.ResourceKey;
+import mb.resource.hierarchical.ResourcePath;
+import mb.stratego.common.StrategoRuntime;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import java.util.HashMap;
 
 @{{adapterProject.scope.qualifiedId}}
 public class {{genAnalyzeMultiTaskDef.id}} extends ConstraintAnalyzeMultiTaskDef {
     private final {{languageProjectInput.constraintAnalyzer.qualifiedId}} constraintAnalyzer;
+    private final Provider<StrategoRuntime> strategoRuntimeProvider;
 
     @Inject
-    public {{genAnalyzeMultiTaskDef.id}}({{languageProjectInput.constraintAnalyzer.qualifiedId}} constraintAnalyzer) {
+    public {{genAnalyzeMultiTaskDef.id}}({{languageProjectInput.constraintAnalyzer.qualifiedId}} constraintAnalyzer, Provider<StrategoRuntime> strategoRuntimeProvider) {
         this.constraintAnalyzer = constraintAnalyzer;
+        this.strategoRuntimeProvider = strategoRuntimeProvider;
     }
 
     @Override
@@ -25,7 +30,7 @@ public class {{genAnalyzeMultiTaskDef.id}} extends ConstraintAnalyzeMultiTaskDef
     }
 
     @Override
-    protected MultiFileResult analyze(ResourceKey root, HashMap<ResourceKey, IStrategoTerm> asts, ConstraintAnalyzerContext context) throws ConstraintAnalyzerException {
-        return constraintAnalyzer.analyze(root, asts, context);
+    protected MultiFileResult analyze(ResourcePath root, HashMap<ResourceKey, IStrategoTerm> asts, ConstraintAnalyzerContext context) throws ConstraintAnalyzerException {
+        return constraintAnalyzer.analyze(root, asts, context, strategoRuntimeProvider.get());
     }
 }

@@ -81,7 +81,7 @@ public abstract class ConstraintAnalyzeMultiTaskDef implements TaskDef<Constrain
             this.context = context;
         }
 
-        @Override public boolean equals(Object o) {
+        @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             final Output output = (Output)o;
@@ -112,7 +112,7 @@ public abstract class ConstraintAnalyzeMultiTaskDef implements TaskDef<Constrain
             this.context = context;
         }
 
-        @Override public boolean equals(Object o) {
+        @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             final SingleFileOutput output = (SingleFileOutput)o;
@@ -131,7 +131,7 @@ public abstract class ConstraintAnalyzeMultiTaskDef implements TaskDef<Constrain
         }
     }
 
-    protected abstract ConstraintAnalyzer.MultiFileResult analyze(ResourceKey root, HashMap<ResourceKey, IStrategoTerm> asts, ConstraintAnalyzerContext context) throws ConstraintAnalyzerException;
+    protected abstract ConstraintAnalyzer.MultiFileResult analyze(ResourcePath root, HashMap<ResourceKey, IStrategoTerm> asts, ConstraintAnalyzerContext context) throws ConstraintAnalyzerException;
 
     @Override public Result<Output, ?> exec(ExecContext context, Input input) throws IOException {
         final HierarchicalResource root = context.require(input.root, ResourceStampers.modifiedDirRec(input.walker, input.matcher));
@@ -142,7 +142,7 @@ public abstract class ConstraintAnalyzeMultiTaskDef implements TaskDef<Constrain
             .ifErr((e) -> messagesBuilder.addMessage("Getting AST for analysis failed", e, Severity.Error, file.getKey()))
         );
         try {
-            final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext(true, root.getPath());
+            final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext(true, input.root);
             final ConstraintAnalyzer.MultiFileResult result = analyze(input.root, asts, constraintAnalyzerContext);
             return Result.ofOk(new Output(messagesBuilder.build(), constraintAnalyzerContext, result));
         } catch(ConstraintAnalyzerException e) {
@@ -170,14 +170,14 @@ class SingleFileMapper implements java.util.function.Function<Result<ConstraintA
             final ConstraintAnalyzer.@Nullable Result result = output.result.getResult(resource);
             if(result != null) {
                 final Messages messages = new Messages(output.result.messages.getMessagesOfKey(resource));
-                return new ConstraintAnalyzeMultiTaskDef.SingleFileOutput(output.context, new ConstraintAnalyzer.SingleFileResult(output.result.projectResult, result.ast, result.analysis, messages));
+                return new ConstraintAnalyzeMultiTaskDef.SingleFileOutput(output.context, new ConstraintAnalyzer.SingleFileResult(output.result.projectResult, result.resource, result.ast, result.analysis, messages));
             } else {
                 throw new RuntimeException("BUG: multi file result is missing a result for resource '" + resource + "' that was part of the input");
             }
         });
     }
 
-    @Override public boolean equals(Object o) {
+    @Override public boolean equals(@Nullable Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         final SingleFileMapper that = (SingleFileMapper)o;

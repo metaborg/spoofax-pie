@@ -5,17 +5,21 @@ import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.constraint.common.ConstraintAnalyzerException;
 import mb.constraint.pie.ConstraintAnalyzeTaskDef;
 import mb.resource.ResourceKey;
+import mb.stratego.common.StrategoRuntime;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 @{{adapterProject.scope.qualifiedId}}
 public class {{genAnalyzeTaskDef.id}} extends ConstraintAnalyzeTaskDef {
     private final {{languageProjectInput.constraintAnalyzer.qualifiedId}} constraintAnalyzer;
+    private final Provider<StrategoRuntime> strategoRuntimeProvider;
 
     @Inject
-    public {{genAnalyzeTaskDef.id}}({{languageProjectInput.constraintAnalyzer.qualifiedId}} constraintAnalyzer) {
+    public {{genAnalyzeTaskDef.id}}({{languageProjectInput.constraintAnalyzer.qualifiedId}} constraintAnalyzer, Provider<StrategoRuntime> strategoRuntimeProvider) {
         this.constraintAnalyzer = constraintAnalyzer;
+        this.strategoRuntimeProvider = strategoRuntimeProvider;
     }
 
     @Override
@@ -25,6 +29,6 @@ public class {{genAnalyzeTaskDef.id}} extends ConstraintAnalyzeTaskDef {
 
     @Override
     protected SingleFileResult analyze(ResourceKey resource, IStrategoTerm ast, ConstraintAnalyzerContext context) throws ConstraintAnalyzerException {
-        return constraintAnalyzer.analyze(resource, ast, context);
+        return constraintAnalyzer.analyze(resource, ast, context, strategoRuntimeProvider.get());
     }
 }

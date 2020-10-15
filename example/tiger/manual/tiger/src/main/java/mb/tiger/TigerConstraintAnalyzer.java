@@ -6,7 +6,7 @@ import mb.resource.ResourceService;
 import mb.stratego.common.StrategoRuntime;
 
 public class TigerConstraintAnalyzer extends ConstraintAnalyzer {
-    public TigerConstraintAnalyzer(LoggerFactory loggerFactory, ResourceService resourceService, StrategoRuntime strategoRuntime) {
-        super(loggerFactory, resourceService, strategoRuntime, "editor-analyze", false);
+    public TigerConstraintAnalyzer(ResourceService resourceService) {
+        super(resourceService, "editor-analyze", false);
     }
 }

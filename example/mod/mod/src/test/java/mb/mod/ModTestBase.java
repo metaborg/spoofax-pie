@@ -30,7 +30,7 @@ class ModTestBase {
     protected final ModStyler styler = new ModStylerFactory(loggerFactory, definitionDir).create();
     protected final StrategoRuntimeBuilder strategoRuntimeBuilder = new ModStrategoRuntimeBuilderFactory(loggerFactory, resourceService, definitionDir).create();
     protected final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.build();
-    protected final ModConstraintAnalyzer analyzer = new ModConstraintAnalyzerFactory(loggerFactory, resourceService, strategoRuntime).create();
+    protected final ModConstraintAnalyzer analyzer = new ModConstraintAnalyzerFactory(resourceService).create();
     protected final ResourceKey rootKey = new DefaultResourceKey(qualifier, "root");
 
     protected final ITermFactory termFactory = new TermFactory();

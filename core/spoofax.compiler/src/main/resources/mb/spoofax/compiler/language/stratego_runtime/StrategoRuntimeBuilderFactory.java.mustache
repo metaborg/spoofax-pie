@@ -26,24 +26,24 @@ public class {{genFactory.id}} implements StrategoRuntimeBuilderFactory {
         builder.addCtree(definitionDir.appendRelativePath("{{this}}"));
 {{/ctreeRelativePaths}}
         builder.withJarParentClassLoader({{factory.id}}.class.getClassLoader());
-{{#addConstraintSolverPrimitives}}
-        builder.addLibrary(new mb.constraint.common.stratego.ConstraintPrimitiveLibrary(resourceService));
-{{/addConstraintSolverPrimitives}}
 {{#addNaBL2Primitives}}
         builder.addLibrary(new mb.nabl2.common.NaBL2PrimitiveLibrary());
 {{/addNaBL2Primitives}}
 {{#addStatixPrimitives}}
-        {
-            builder.addLibrary(new mb.statix.common.StatixPrimitiveLibrary());
-            builder.addLibrary(new mb.spoofax2.common.primitive.Spoofax2PrimitiveLibrary(loggerFactory, resourceService));
-            builder.addContextObject(new mb.spoofax2.common.primitive.generic.Spoofax2Context(
-                "{{languageProject.project.coordinate.groupId}}",
-                "{{languageProject.project.coordinate.artifactId}}",
-                "{{languageProject.project.coordinate.version}}",
-                definitionDir.getPath()
-            ));
-        }
+        builder.addLibrary(new mb.statix.common.StatixPrimitiveLibrary());
 {{/addStatixPrimitives}}
+{{#requiresSpoofax2Primitives}}
+        builder.addLibrary(new mb.spoofax2.common.primitive.Spoofax2PrimitiveLibrary(loggerFactory, resourceService));
+        builder.addContextObject(new mb.spoofax2.common.primitive.generic.Spoofax2LanguageContext(
+            "{{languageProject.project.coordinate.groupId}}",
+            "{{languageProject.project.coordinate.artifactId}}",
+            "{{languageProject.project.coordinate.versionOrUnspecified}}",
+            definitionDir.getPath()
+        ));
+{{/requiresSpoofax2Primitives}}
+{{#requiresConstraintSolverPrimitives}}
+        builder.addLibrary(new mb.constraint.common.stratego.ConstraintPrimitiveLibrary(resourceService));
+{{/requiresConstraintSolverPrimitives}}
         return builder;
     }
 }

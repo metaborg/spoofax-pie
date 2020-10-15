@@ -5,7 +5,6 @@ import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Messages;
 import mb.common.message.Severity;
 import mb.jsglr.common.ResourceKeyAttachment;
-import mb.log.api.LoggerFactory;
 import mb.nabl2.terms.stratego.StrategoTermIndices;
 import mb.nabl2.terms.stratego.TermIndex;
 import mb.nabl2.terms.stratego.TermOrigin;
@@ -16,11 +15,9 @@ import mb.resource.ResourceService;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spoofax.interpreter.core.Tools;
-import org.spoofax.interpreter.terms.IStrategoAppl;
-import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
+import org.spoofax.terms.util.TermUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -57,12 +54,14 @@ public class ConstraintAnalyzer {
 
     public static class SingleFileResult implements Serializable {
         public final @Nullable ProjectResult projectResult;
+        public final ResourceKey resource;
         public final IStrategoTerm ast;
         public final IStrategoTerm analysis;
         public final Messages messages;
 
-        public SingleFileResult(@Nullable ProjectResult projectResult, IStrategoTerm ast, IStrategoTerm analysis, Messages messages) {
+        public SingleFileResult(@Nullable ProjectResult projectResult, ResourceKey resource, IStrategoTerm ast, IStrategoTerm analysis, Messages messages) {
             this.projectResult = projectResult;
+            this.resource = resource;
             this.ast = ast;
             this.analysis = analysis;
             this.messages = messages;
@@ -87,25 +86,17 @@ public class ConstraintAnalyzer {
     }
 
 
-    private final LoggerFactory loggerFactory;
     private final ResourceService resourceService;
-    private final StrategoRuntime strategoRuntime;
-    private final ITermFactory termFactory;
     private final String strategyId;
     private final boolean multiFile;
 
 
     public ConstraintAnalyzer(
-        LoggerFactory loggerFactory,
         ResourceService resourceService,
-        StrategoRuntime strategoRuntime,
         String strategyId,
         boolean multiFile
     ) {
-        this.loggerFactory = loggerFactory;
         this.resourceService = resourceService;
-        this.strategoRuntime = strategoRuntime;
-        this.termFactory = strategoRuntime.getTermFactory();
         this.strategyId = strategyId;
         this.multiFile = multiFile;
     }
@@ -114,43 +105,49 @@ public class ConstraintAnalyzer {
     public SingleFileResult analyze(
         ResourceKey resource,
         IStrategoTerm ast,
-        ConstraintAnalyzerContext context
+        ConstraintAnalyzerContext context,
+        StrategoRuntime strategoRuntime
     ) throws ConstraintAnalyzerException {
-        return analyze(null, resource, ast, context);
+        return analyze(null, resource, ast, context, strategoRuntime);
     }
 
     public SingleFileResult analyze(
         @Nullable ResourceKey root,
         ResourceKey resource,
         IStrategoTerm ast,
-        ConstraintAnalyzerContext context
+        ConstraintAnalyzerContext context,
+        StrategoRuntime strategoRuntime
     ) throws ConstraintAnalyzerException {
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>(1);
         asts.put(resource, ast);
-        final MultiFileResult multiFileResult = doAnalyze(root, asts, context);
+        final MultiFileResult multiFileResult = doAnalyze(root, asts, context, strategoRuntime);
         final @Nullable Result result;
         try {
             result = multiFileResult.results.get(0);
         } catch(IndexOutOfBoundsException e) {
             throw new RuntimeException("BUG: no analysis result was found for resource '" + resource + "'", e);
         }
-        return new SingleFileResult(multiFileResult.projectResult, result.ast, result.analysis, multiFileResult.messages.asMessages());
+        return new SingleFileResult(multiFileResult.projectResult, result.resource, result.ast, result.analysis, multiFileResult.messages.asMessages());
     }
 
     public MultiFileResult analyze(
         @Nullable ResourceKey root,
         HashMap<ResourceKey, IStrategoTerm> asts,
-        ConstraintAnalyzerContext context
+        ConstraintAnalyzerContext context,
+        StrategoRuntime strategoRuntime
     ) throws ConstraintAnalyzerException {
-        return doAnalyze(root, asts, context);
+        return doAnalyze(root, asts, context, strategoRuntime);
     }
 
 
     private MultiFileResult doAnalyze(
         @Nullable ResourceKey root,
         HashMap<ResourceKey, IStrategoTerm> asts,
-        ConstraintAnalyzerContext context
+        ConstraintAnalyzerContext context,
+        StrategoRuntime strategoRuntime
     ) throws ConstraintAnalyzerException {
+        final ITermFactory termFactory = strategoRuntime.getTermFactory();
+
         /// 1. Compute changeset from given asts and cache.
 
         final HashMap<ResourceKey, IStrategoTerm> addedOrChangedAsts = new HashMap<>();
@@ -171,20 +168,20 @@ public class ConstraintAnalyzer {
         // Root analysis.
         final @Nullable IStrategoTerm rootChange;
         if(multiFile && root != null) {
-            final IStrategoTerm ast = mkProjectTerm(root);
+            final IStrategoTerm ast = mkProjectTerm(termFactory, root);
             final IStrategoTerm change;
             final Expect expect;
             final @Nullable Result cachedResult = context.getResult(root);
             if(cachedResult != null) {
-                change = mkAppl("Cached", cachedResult.analysis);
+                change = termFactory.makeAppl("Cached", cachedResult.analysis);
                 expect = new ProjectUpdate(root);
                 context.removeProjectResult(root);
             } else {
-                change = mkAppl("Added", ast);
+                change = termFactory.makeAppl("Added", ast);
                 expect = new ProjectFull(root);
             }
             expects.put(root, expect);
-            rootChange = mkTuple(mkString(root), change);
+            rootChange = termFactory.makeTuple(termFactory.makeString(root.toString()), change);
         } else {
             rootChange = null;
         }
@@ -193,7 +190,7 @@ public class ConstraintAnalyzer {
         for(ResourceKey resource : removed) {
             final @Nullable Result cachedResult = context.getResult(resource);
             if(cachedResult != null) {
-                changeTerms.add(mkTuple(mkString(resource), mkAppl("Removed", cachedResult.analysis)));
+                changeTerms.add(termFactory.makeTuple(termFactory.makeString(resource.toString()), termFactory.makeAppl("Removed", cachedResult.analysis)));
                 context.removeResult(resource);
             }
         }
@@ -205,13 +202,13 @@ public class ConstraintAnalyzer {
             final IStrategoTerm change;
             final @Nullable Result cachedResult = context.getResult(resource);
             if(cachedResult != null) {
-                change = mkAppl("Changed", ast, cachedResult.analysis);
+                change = termFactory.makeAppl("Changed", ast, cachedResult.analysis);
                 context.removeResult(resource);
             } else {
-                change = mkAppl("Added", ast);
+                change = termFactory.makeAppl("Added", ast);
             }
             expects.put(resource, new Full(resource));
-            changeTerms.add(mkTuple(mkString(resource), change));
+            changeTerms.add(termFactory.makeTuple(termFactory.makeString(resource.toString()), change));
         }
 
         // Cached resources.
@@ -220,25 +217,25 @@ public class ConstraintAnalyzer {
                 final ResourceKey resource = entry.getKey();
                 final Result cachedResult = entry.getValue();
                 if(!addedOrChangedAsts.containsKey(resource)) {
-                    final IStrategoTerm change = mkAppl("Cached", cachedResult.analysis);
+                    final IStrategoTerm change = termFactory.makeAppl("Cached", cachedResult.analysis);
                     expects.put(resource, new Update(resource));
-                    changeTerms.add(mkTuple(mkString(resource), change));
+                    changeTerms.add(termFactory.makeTuple(termFactory.makeString(resource.toString()), change));
                 }
             }
         }
 
         // Progress and cancel terms
-        final IStrategoTerm progressTerm = mkTuple();   // ()
-        final IStrategoTerm cancelTerm = mkTuple();     // ()
+        final IStrategoTerm progressTerm = termFactory.makeTuple();   // ()
+        final IStrategoTerm cancelTerm = termFactory.makeTuple();     // ()
 
         /// 3. Call analysis, and list results.
 
         final Map<ResourceKey, IStrategoTerm> resultTerms = new HashMap<>();
         final IStrategoTerm action;
         if(multiFile && root != null) {
-            action = mkAppl("AnalyzeMulti", rootChange, termFactory.makeList(changeTerms), progressTerm, cancelTerm);
+            action = termFactory.makeAppl("AnalyzeMulti", rootChange, termFactory.makeList(changeTerms), progressTerm, cancelTerm);
         } else {
-            action = mkAppl("AnalyzeSingle", termFactory.makeList(changeTerms), progressTerm, cancelTerm);
+            action = termFactory.makeAppl("AnalyzeSingle", termFactory.makeList(changeTerms), progressTerm, cancelTerm);
         }
 
         final IStrategoTerm allResultsTerm;
@@ -254,18 +251,18 @@ public class ConstraintAnalyzer {
         }
 
         final IStrategoTerm resultsTerm = allResultTerms.get(0);
-        if(!Tools.isTermList(resultsTerm)) {
+        if(!TermUtils.isList(resultsTerm)) {
             throw new RuntimeException("BUG: expected list of results, got: " + resultsTerm);
         }
         for(IStrategoTerm entry : resultsTerm) {
-            if(!Tools.isTermTuple(entry) || entry.getSubtermCount() != 2) {
+            if(!TermUtils.isTuple(entry, 2)) {
                 throw new RuntimeException("BUG: expected tuple result, got " + entry);
             }
             final IStrategoTerm resourceTerm = entry.getSubterm(0);
-            if(!Tools.isTermString(resourceTerm)) {
+            if(!TermUtils.isString(resourceTerm)) {
                 throw new RuntimeException("BUG: expected resource string as first component, got " + resourceTerm);
             }
-            final String resourceString = Tools.asJavaString(resourceTerm);
+            final String resourceString = TermUtils.toJavaString(resourceTerm);
             final ResourceKey resource;
             try {
                 resource = resourceService.getResourceKey(ResourceKeyString.parse(resourceString));
@@ -439,23 +436,7 @@ public class ConstraintAnalyzer {
     }
 
 
-    private IStrategoTerm mkAppl(String op, IStrategoTerm... subterms) {
-        return termFactory.makeAppl(termFactory.makeConstructor(op, subterms.length), subterms);
-    }
-
-    private IStrategoTerm mkTuple(IStrategoTerm... subterms) {
-        return termFactory.makeTuple(subterms);
-    }
-
-    private IStrategoString mkString(ResourceKey resourceKey) {
-        return termFactory.makeString(resourceKey.asString());
-    }
-
-    private IStrategoString mkString(Object obj) {
-        return termFactory.makeString(obj.toString());
-    }
-
-    private IStrategoTerm mkProjectTerm(ResourceKey resourceKey) {
+    private IStrategoTerm mkProjectTerm(ITermFactory termFactory, ResourceKey resourceKey) {
         final String resourceStr = resourceKey.asString();
         IStrategoTerm ast = termFactory.makeTuple();
         ast = StrategoTermIndices.put(TermIndex.of(resourceStr, 0), ast, termFactory);
@@ -465,7 +446,7 @@ public class ConstraintAnalyzer {
 
 
     private static @Nullable List<IStrategoTerm> match(@Nullable IStrategoTerm term, String op, int n) {
-        if(term == null || !Tools.isTermAppl(term) || !Tools.hasConstructor((IStrategoAppl)term, op, n)) {
+        if(!TermUtils.isAppl(term, op, n)) {
             return null;
         }
         return Arrays.asList(term.getAllSubterms());

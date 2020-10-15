@@ -128,8 +128,8 @@ public class TigerModule {
 
 
     @Provides @TigerScope
-    static TigerConstraintAnalyzerFactory provideConstraintAnalyzerFactory(LoggerFactory loggerFactory, ResourceService resourceService, StrategoRuntime prototypeStrategoRuntime) {
-        return new TigerConstraintAnalyzerFactory(loggerFactory, resourceService, prototypeStrategoRuntime);
+    static TigerConstraintAnalyzerFactory provideConstraintAnalyzerFactory(ResourceService resourceService) {
+        return new TigerConstraintAnalyzerFactory(resourceService);
     }
 
     @Provides @TigerScope

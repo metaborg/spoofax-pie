@@ -10,8 +10,8 @@ import mb.resource.ResourceRuntimeException;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax2.common.primitive.generic.ASpoofaxContextPrimitive;
-import mb.spoofax2.common.primitive.generic.Spoofax2Context;
+import mb.spoofax2.common.primitive.generic.ASpoofaxPrimitive;
+import mb.spoofax2.common.primitive.generic.Spoofax2LanguageContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.core.InterpreterException;
@@ -32,7 +32,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public abstract class AResourcesPrimitive extends ASpoofaxContextPrimitive implements AutoCloseable {
+public abstract class AResourcesPrimitive extends ASpoofaxPrimitive implements AutoCloseable {
     private static class CacheEntry {
         public final Instant timestamp;
         public final IStrategoTerm term;
@@ -83,8 +83,7 @@ public abstract class AResourcesPrimitive extends ASpoofaxContextPrimitive imple
         Strategy[] svars,
         IStrategoTerm[] tvars,
         ITermFactory termFactory,
-        IContext strategoContext,
-        Spoofax2Context context
+        IContext context
     ) throws InterpreterException {
         final Strategy nameToPathStr = svars[0];
         final Strategy importStr = svars[1];
@@ -95,13 +94,13 @@ public abstract class AResourcesPrimitive extends ASpoofaxContextPrimitive imple
         while(!names.isEmpty()) {
             final IStrategoTerm name = names.pop();
             if(!resources.containsKey(name)) {
-                final String path = resourcePath(strategoContext, nameToPathStr, name);
-                final @Nullable IStrategoTerm resource = loadResource(locations(context), path, termReader).orElse(null);
+                final String path = resourcePath(context, nameToPathStr, name);
+                final @Nullable IStrategoTerm resource = loadResource(locations(getSpoofax2LanguageContext(context)), path, termReader).orElse(null);
                 if(resource == null) {
                     return null;
                 }
                 resources.put(name, resource);
-                names.addAll(resourceImports(strategoContext, importStr, resource));
+                names.addAll(resourceImports(context, importStr, resource));
             }
         }
 
@@ -110,7 +109,7 @@ public abstract class AResourcesPrimitive extends ASpoofaxContextPrimitive imple
             .collect(Collectors.toList()));
     }
 
-    protected abstract List<HierarchicalResource> locations(Spoofax2Context context);
+    protected abstract List<HierarchicalResource> locations(Spoofax2LanguageContext context);
 
     private Optional<IStrategoTerm> loadResource(List<HierarchicalResource> locations, String path, TermReader termReader) {
         for(HierarchicalResource location : locations) {

@@ -20,7 +20,7 @@ class TigerConstraintAnalyzerTest extends TigerTestBase {
     @Test void analyzeSingleErrors() throws Exception {
         final ResourceKey resource = new DefaultResourceKey(qualifier, "a.tig");
         final JSGLR1ParseOutput parsed = parser.parse("1 + nil", "Module", resource);
-        final SingleFileResult result = analyzer.analyze(resource, parsed.ast, new ConstraintAnalyzerContext(false, null));
+        final SingleFileResult result = analyzer.analyze(resource, parsed.ast, new ConstraintAnalyzerContext(false, null), strategoRuntime);
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
         assertTrue(result.messages.containsError());
@@ -29,7 +29,7 @@ class TigerConstraintAnalyzerTest extends TigerTestBase {
     @Test void analyzeSingleSuccess() throws Exception {
         final ResourceKey resource = new DefaultResourceKey(qualifier, "a.tig");
         final JSGLR1ParseOutput parsed = parser.parse("1 + 2", "Module", resource);
-        final SingleFileResult result = analyzer.analyze(resource, parsed.ast, new ConstraintAnalyzerContext(false, null));
+        final SingleFileResult result = analyzer.analyze(resource, parsed.ast, new ConstraintAnalyzerContext(false, null), strategoRuntime);
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
         assertTrue(result.messages.isEmpty());
@@ -46,7 +46,7 @@ class TigerConstraintAnalyzerTest extends TigerTestBase {
         asts.put(resource1, parsed1.ast);
         asts.put(resource2, parsed2.ast);
         asts.put(resource3, parsed3.ast);
-        final MultiFileResult result = analyzer.analyze(null, asts, new ConstraintAnalyzerContext(false, null));
+        final MultiFileResult result = analyzer.analyze(null, asts, new ConstraintAnalyzerContext(false, null), strategoRuntime);
         final ConstraintAnalyzer.@Nullable Result result1 = result.getResult(resource1);
         assertNotNull(result1);
         assertNotNull(result1.ast);
@@ -79,7 +79,7 @@ class TigerConstraintAnalyzerTest extends TigerTestBase {
         asts.put(resource1, parsed1.ast);
         asts.put(resource2, parsed2.ast);
         asts.put(resource3, parsed3.ast);
-        final MultiFileResult result = analyzer.analyze(null, asts, new ConstraintAnalyzerContext(false, null));
+        final MultiFileResult result = analyzer.analyze(null, asts, new ConstraintAnalyzerContext(false, null), strategoRuntime);
         final ConstraintAnalyzer.@Nullable Result result1 = result.getResult(resource1);
         assertNotNull(result1);
         assertNotNull(result1.ast);
