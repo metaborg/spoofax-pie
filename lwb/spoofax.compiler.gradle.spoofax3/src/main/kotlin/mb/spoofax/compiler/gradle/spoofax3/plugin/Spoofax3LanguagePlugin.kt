@@ -8,6 +8,7 @@ import mb.common.message.Messages
 import mb.common.message.Severity
 import mb.esv.spoofax.DaggerEsvComponent
 import mb.libspoofax2.spoofax.DaggerLibSpoofax2Component
+import mb.libstatix.spoofax.DaggerLibStatixComponent
 import mb.log.slf4j.SLF4JLoggerFactory
 import mb.pie.runtime.PieBuilderImpl
 import mb.resource.ResourceKey
@@ -94,6 +95,7 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
       .esvComponent(DaggerEsvComponent.builder().platformComponent(platformComponent).build())
       .statixComponent(DaggerStatixComponent.builder().platformComponent(platformComponent).build())
       .libSpoofax2Component(DaggerLibSpoofax2Component.builder().platformComponent(platformComponent).build())
+      .libStatixComponent(DaggerLibStatixComponent.builder().platformComponent(platformComponent).build())
       .build()
 
     val extension = Spoofax3LanguageProjectExtension(project)
@@ -136,55 +138,72 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
       inputs.property("input", input)
 
       // Inputs and outputs
-      input.parser().ifPresent { parserInput ->
+      input.parser().ifPresent {
         // Input: all SDF3 files
-        val sdf3RootDirectory = resourceService.toLocalFile(parserInput.sdf3RootDirectory())
-        if(sdf3RootDirectory != null) {
-          inputs.files(project.fileTree(sdf3RootDirectory) { include("**/*.sdf3") })
+        val rootDirectory = resourceService.toLocalFile(it.sdf3RootDirectory())
+        if(rootDirectory != null) {
+          inputs.files(project.fileTree(rootDirectory) { include("**/*.sdf3") })
         } else {
-          logger.warn("Cannot set SDF3 files as task inputs, because ${parserInput.sdf3RootDirectory()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
+          logger.warn("Cannot set SDF3 files as task inputs, because ${it.sdf3RootDirectory()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
         }
 
         // Output: parse table file
-        val sdf3ParseTableOutputFile = resourceService.toLocalFile(parserInput.sdf3ParseTableOutputFile())
-        if(sdf3ParseTableOutputFile != null) {
-          outputs.file(sdf3ParseTableOutputFile)
+        val outputFile = resourceService.toLocalFile(it.sdf3ParseTableOutputFile())
+        if(outputFile != null) {
+          outputs.file(outputFile)
         } else {
-          logger.warn("Cannot set the SDF3 parse table as a task output, because ${parserInput.sdf3ParseTableOutputFile()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
+          logger.warn("Cannot set the SDF3 parse table as a task output, because ${it.sdf3ParseTableOutputFile()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
         }
       }
-      input.styler().ifPresent { parserInput ->
+      input.styler().ifPresent {
         // Input: all ESV files
-        val esvRootDirectory = resourceService.toLocalFile(parserInput.esvRootDirectory())
-        if(esvRootDirectory != null) {
-          inputs.files(project.fileTree(esvRootDirectory) { include("**/*.esv") })
+        val rootDirectory = resourceService.toLocalFile(it.esvRootDirectory())
+        if(rootDirectory != null) {
+          inputs.files(project.fileTree(rootDirectory) { include("**/*.esv") })
         } else {
-          logger.warn("Cannot set ESV files as task inputs, because ${parserInput.esvRootDirectory()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
+          logger.warn("Cannot set ESV files as task inputs, because ${it.esvRootDirectory()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
         }
 
         // Output: ESV aterm format file
-        val esvAtermFormatOutputFile = resourceService.toLocalFile(parserInput.esvAtermFormatOutputFile())
-        if(esvAtermFormatOutputFile != null) {
-          outputs.file(esvAtermFormatOutputFile)
+        val outputFile = resourceService.toLocalFile(it.esvAtermFormatOutputFile())
+        if(outputFile != null) {
+          outputs.file(outputFile)
         } else {
-          logger.warn("Cannot set the ESV aterm format file as a task output, because ${parserInput.esvAtermFormatOutputFile()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
+          logger.warn("Cannot set the ESV aterm format file as a task output, because ${it.esvAtermFormatOutputFile()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
         }
       }
-      input.strategoRuntime().ifPresent { strategoRuntimeInput ->
-        // Input: all Stratego files
-        val strategoRootDirectory = resourceService.toLocalFile(strategoRuntimeInput.strategoRootDirectory())
-        if(strategoRootDirectory != null) {
-          inputs.files(project.fileTree(strategoRootDirectory) { include("**/*.str") })
+      input.constraintAnalyzer().ifPresent {
+        // Input: all Statix files
+        val rootDirectory = resourceService.toLocalFile(it.statixRootDirectory())
+        if(rootDirectory != null) {
+          inputs.files(project.fileTree(rootDirectory) { include("**/*.stx") })
         } else {
-          logger.warn("Cannot set Stratego files as task inputs, because ${strategoRuntimeInput.strategoRootDirectory()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
+          logger.warn("Cannot set Statix files as task inputs, because ${it.statixRootDirectory()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
+        }
+
+        // Output: Statix output directory
+        val outputDirectory = resourceService.toLocalFile(it.statixOutputDirectory())
+        if(outputDirectory != null) {
+          outputs.dir(outputDirectory)
+        } else {
+          logger.warn("Cannot set the Statix output directory as a task output, because ${it.statixOutputDirectory()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
+        }
+      }
+      input.strategoRuntime().ifPresent {
+        // Input: all Stratego files
+        val rootDirectory = resourceService.toLocalFile(it.strategoRootDirectory())
+        if(rootDirectory != null) {
+          inputs.files(project.fileTree(rootDirectory) { include("**/*.str") })
+        } else {
+          logger.warn("Cannot set Stratego files as task inputs, because ${it.strategoRootDirectory()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
         }
 
         // Output: Stratego output directory
-        val strategoOutputDir = resourceService.toLocalFile(strategoRuntimeInput.strategoOutputDir())
-        if(strategoOutputDir != null) {
-          outputs.dir(strategoOutputDir)
+        val outputDirectory = resourceService.toLocalFile(it.strategoOutputDir())
+        if(outputDirectory != null) {
+          outputs.dir(outputDirectory)
         } else {
-          logger.warn("Cannot set the Stratego output directory as a task output, because ${strategoRuntimeInput.strategoOutputDir()} cannot be converted into a local file. This disables incrementality for this Gradle task")
+          logger.warn("Cannot set the Stratego output directory as a task output, because ${it.strategoOutputDir()} cannot be converted into a local file. This disables incrementality for this Gradle task")
         }
       }
 

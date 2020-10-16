@@ -1,0 +1,5 @@
+shared.defaultArtifactId=libstatix
+shared.defaultClassPrefix=LibStatix
+shared.defaultGroupId=org.metaborg
+shared.defaultPackageId=mb.libstatix
+shared.defaultVersion=0.1.0

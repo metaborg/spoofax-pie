@@ -62,6 +62,11 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   includeProject("libspoofax2.spoofax")
 }
 
+"libstatix".run {
+  includeProject("libstatix")
+  includeProject("libstatix.spoofax")
+}
+
 include("spoofax.compiler.spoofax3")
 include("spoofax.compiler.spoofax3.dagger")
 include("spoofax.compiler.gradle.spoofax3")

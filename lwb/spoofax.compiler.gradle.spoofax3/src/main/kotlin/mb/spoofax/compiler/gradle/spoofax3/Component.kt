@@ -7,6 +7,8 @@ import mb.esv.spoofax.EsvComponent
 import mb.esv.spoofax.EsvQualifier
 import mb.libspoofax2.spoofax.LibSpoofax2Component
 import mb.libspoofax2.spoofax.LibSpoofax2Qualifier
+import mb.libstatix.spoofax.LibStatixComponent
+import mb.libstatix.spoofax.LibStatixQualifier
 import mb.pie.api.MapTaskDefs
 import mb.pie.api.Pie
 import mb.pie.api.TaskDef
@@ -22,7 +24,14 @@ import mb.str.spoofax.StrategoQualifier
 @Spoofax3CompilerScope
 @Component(
   modules = [Spoofax3CompilerModule::class, Spoofax3CompilerGradleModule::class],
-  dependencies = [Sdf3Component::class, StrategoComponent::class, EsvComponent::class, StatixComponent::class, LibSpoofax2Component::class]
+  dependencies = [
+    Sdf3Component::class,
+    StrategoComponent::class,
+    EsvComponent::class,
+    StatixComponent::class,
+    LibSpoofax2Component::class,
+    LibStatixComponent::class
+  ]
 )
 interface Spoofax3CompilerGradleComponent : Spoofax3CompilerComponent {
   val resourceService: ResourceService
@@ -41,9 +50,17 @@ class Spoofax3CompilerGradleModule(
     @StrategoQualifier strategoResourceService: ResourceService,
     @EsvQualifier esvResourceService: ResourceService,
     @StatixQualifier statixResourceService: ResourceService,
-    @LibSpoofax2Qualifier libSpoofax2ResourceService: ResourceService
+    @LibSpoofax2Qualifier libSpoofax2ResourceService: ResourceService,
+    @LibStatixQualifier libStatixResourceService: ResourceService
   ): ResourceService {
-    return parentResourceService.createChild(sdf3ResourceService, strategoResourceService, esvResourceService, statixResourceService, libSpoofax2ResourceService)
+    return parentResourceService.createChild(
+      sdf3ResourceService,
+      strategoResourceService,
+      esvResourceService,
+      statixResourceService,
+      libSpoofax2ResourceService,
+      libStatixResourceService
+    )
   }
 
   @Provides
@@ -55,9 +72,10 @@ class Spoofax3CompilerGradleModule(
     @StrategoQualifier strategoPie: Pie,
     @EsvQualifier esvPie: Pie,
     @StatixQualifier statixPie: Pie,
-    @LibSpoofax2Qualifier libSpoofax2Pie: Pie
+    @LibSpoofax2Qualifier libSpoofax2Pie: Pie,
+    @LibStatixQualifier libStatixPie: Pie
   ): Pie {
-    return parentPie.createChildBuilder(sdf3Pie, strategoPie, esvPie, statixPie, libSpoofax2Pie)
+    return parentPie.createChildBuilder(sdf3Pie, strategoPie, esvPie, statixPie, libSpoofax2Pie, libStatixPie)
       .withTaskDefs(MapTaskDefs(taskDefs))
       .withResourceService(resourceService)
       .build()

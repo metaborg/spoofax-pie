@@ -18,7 +18,9 @@ dependencies {
   api(project(":stratego.spoofax"))
   api(project(":esv.spoofax"))
   api(project(":statix.spoofax"))
+
   api(project(":libspoofax2.spoofax"))
+  api(project(":libstatix.spoofax"))
 
   compileOnly("org.checkerframework:checker-qual-android")
   compileOnly("org.immutables:value-annotations")

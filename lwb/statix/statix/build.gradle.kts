@@ -44,8 +44,6 @@ spoofax2BasedLanguageProject {
       copyClasses(true)
     }
 
-    // Use group ID "org.metaborg.bootstraphack" when building as part of devenv (not standalone).
-    //val spoofax2GroupId = if(gradle.parent?.rootProject?.name == "spoofax3.root") "org.metaborg" else "org.metaborg.bootstraphack"
     val spoofax2GroupId = "org.metaborg"
     val spoofax2Version = System.getProperty("spoofax2Version")
     project.languageSpecificationDependency(GradleDependency.module("$spoofax2GroupId:statix.lang:$spoofax2Version"))

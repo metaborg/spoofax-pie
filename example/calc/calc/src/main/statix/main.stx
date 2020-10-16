@@ -1,1 +1,11 @@
 module main
+
+signature
+
+  sorts Program constructors
+    Program : list(string) -> Program
+
+rules
+
+  programOk : Program
+  programOk(_).

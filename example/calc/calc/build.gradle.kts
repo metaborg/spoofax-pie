@@ -27,7 +27,7 @@ languageProject {
       startSymbol("Program")
     }
     withConstraintAnalyzer().run {
-      multiFile(true)
+      multiFile(false)
     }
     withStyler()
     withStrategoRuntime()

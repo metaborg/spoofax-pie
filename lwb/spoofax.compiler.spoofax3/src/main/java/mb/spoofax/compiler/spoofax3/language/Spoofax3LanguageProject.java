@@ -21,6 +21,10 @@ public interface Spoofax3LanguageProject extends Serializable {
         return true;
     }
 
+    @Value.Default default boolean includeLibStatixExports() {
+        return true;
+    }
+
 
     /// Directories
 
