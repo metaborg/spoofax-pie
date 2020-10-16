@@ -8,12 +8,14 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Facade for consistently building a {@link Spoofax3LanguageProjectCompiler.Input} instance.
  */
 public class Spoofax3LanguageProjectCompilerInputBuilder {
-    public Spoofax3ParserLanguageCompiler.Input.Builder parser = Spoofax3ParserLanguageCompiler.Input.builder();
     private boolean parserEnabled = false;
-    public Spoofax3StrategoRuntimeLanguageCompiler.Input.Builder strategoRuntime = Spoofax3StrategoRuntimeLanguageCompiler.Input.builder();
+    public Spoofax3ParserLanguageCompiler.Input.Builder parser = Spoofax3ParserLanguageCompiler.Input.builder();
     private boolean stylerEnabled = false;
     public Spoofax3StylerLanguageCompiler.Input.Builder styler = Spoofax3StylerLanguageCompiler.Input.builder();
+    private boolean constraintAnalyzerEnabled = false;
+    public Spoofax3ConstraintAnalyzerLanguageCompiler.Input.Builder constraintAnalyzer = Spoofax3ConstraintAnalyzerLanguageCompiler.Input.builder();
     private boolean strategoRuntimeEnabled = false;
+    public Spoofax3StrategoRuntimeLanguageCompiler.Input.Builder strategoRuntime = Spoofax3StrategoRuntimeLanguageCompiler.Input.builder();
     public Spoofax3LanguageProjectCompiler.Input.Builder project = Spoofax3LanguageProjectCompiler.Input.builder();
 
 
@@ -25,6 +27,11 @@ public class Spoofax3LanguageProjectCompilerInputBuilder {
     public Spoofax3StylerLanguageCompiler.Input.Builder withStyler() {
         stylerEnabled = true;
         return styler;
+    }
+
+    public Spoofax3ConstraintAnalyzerLanguageCompiler.Input.Builder withConstraintAnalyzer() {
+        constraintAnalyzerEnabled = true;
+        return constraintAnalyzer;
     }
 
     public Spoofax3StrategoRuntimeLanguageCompiler.Input.Builder withStrategoRuntime() {
@@ -39,6 +46,9 @@ public class Spoofax3LanguageProjectCompilerInputBuilder {
 
         final Spoofax3StylerLanguageCompiler.@Nullable Input styler = buildStyler(languageProject);
         if(styler != null) project.styler(styler);
+
+        final Spoofax3ConstraintAnalyzerLanguageCompiler.@Nullable Input constraintAnalyzer = buildConstraintAnalyzer(languageProject);
+        if(constraintAnalyzer != null) project.constraintAnalyzer(constraintAnalyzer);
 
         final Spoofax3StrategoRuntimeLanguageCompiler.@Nullable Input strategoRuntime = buildStrategoRuntime(languageProject, parser);
         if(strategoRuntime != null) project.strategoRuntime(strategoRuntime);
@@ -67,6 +77,15 @@ public class Spoofax3LanguageProjectCompilerInputBuilder {
     ) {
         if(!stylerEnabled) return null;
         return styler
+            .spoofax3LanguageProject(languageProject)
+            .build();
+    }
+
+    private Spoofax3ConstraintAnalyzerLanguageCompiler.@Nullable Input buildConstraintAnalyzer(
+        Spoofax3LanguageProject languageProject
+    ) {
+        if(!constraintAnalyzerEnabled) return null;
+        return constraintAnalyzer
             .spoofax3LanguageProject(languageProject)
             .build();
     }

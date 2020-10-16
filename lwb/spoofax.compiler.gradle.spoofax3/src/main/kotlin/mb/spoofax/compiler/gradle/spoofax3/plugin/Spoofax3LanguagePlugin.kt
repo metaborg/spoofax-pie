@@ -8,10 +8,8 @@ import mb.common.message.Messages
 import mb.common.message.Severity
 import mb.esv.spoofax.DaggerEsvComponent
 import mb.libspoofax2.spoofax.DaggerLibSpoofax2Component
-import mb.log.api.Logger
 import mb.log.slf4j.SLF4JLoggerFactory
 import mb.pie.runtime.PieBuilderImpl
-import mb.pie.runtime.logger.StreamLogger
 import mb.resource.ResourceKey
 import mb.resource.fs.FSPath
 import mb.sdf3.spoofax.DaggerSdf3Component
@@ -24,6 +22,7 @@ import mb.spoofax.compiler.util.*
 import mb.spoofax.core.platform.DaggerPlatformComponent
 import mb.spoofax.core.platform.LoggerFactoryModule
 import mb.spoofax.core.platform.PlatformPieModule
+import mb.statix.spoofax.DaggerStatixComponent
 import mb.str.spoofax.DaggerStrategoComponent
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -93,6 +92,7 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
       .sdf3Component(DaggerSdf3Component.builder().platformComponent(platformComponent).build())
       .strategoComponent(DaggerStrategoComponent.builder().platformComponent(platformComponent).build())
       .esvComponent(DaggerEsvComponent.builder().platformComponent(platformComponent).build())
+      .statixComponent(DaggerStatixComponent.builder().platformComponent(platformComponent).build())
       .libSpoofax2Component(DaggerLibSpoofax2Component.builder().platformComponent(platformComponent).build())
       .build()
 
@@ -193,12 +193,8 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
           val result = session.require(component.spoofax3LanguageProjectCompiler.createTask(input))
           result.ifOk {
             project.logMessages(it, FSPath(project.projectDir))
-          }.ifErr { err ->
-            CompilerException.cases()
-              .parserCompilerFail { e -> project.handleError(err, e) { messages } }
-              .stylerCompilerFail { e -> project.handleError(err, e) { messages } }
-              .strategoRuntimeCompilerFail { e -> project.handleError(err, e) { messages } }
-              .apply(err)
+          }.ifErr {
+            project.handleError(it)
           }
         }
       }
@@ -209,16 +205,16 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
   }
 }
 
-fun <E : Exception> Project.handleError(err: CompilerException, e: E, msgFn: E.() -> Optional<KeyedMessages>) {
-  val message = "${err.message}. ${e.message}"
-  msgFn(e).ifPresent {
+fun Project.handleError(err: CompilerException) {
+  val message = "${err.message}. ${err.subMessage}"
+  err.subMessages.ifPresent {
     logger.error(message)
     project.logMessages(it, FSPath(projectDir))
     throw GradleException(message)
   }
-  if(e.cause != null) {
+  if(err.subCause != null) {
     logger.error("$message. See cause at the end of the build")
-    throw GradleException(message, e.cause)
+    throw GradleException(message, err.subCause)
   }
   logger.error(message)
   throw GradleException(message)

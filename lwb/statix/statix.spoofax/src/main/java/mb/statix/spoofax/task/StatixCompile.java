@@ -11,14 +11,17 @@ import mb.statix.spoofax.util.StatixUtil;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoUtil;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.terms.util.TermUtils;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.io.Serializable;
+import java.util.Objects;
 
 @StatixScope
-public class StatixCompile implements TaskDef<StatixCompile.Input, Result<IStrategoTerm, ?>> {
+public class StatixCompile implements TaskDef<StatixCompile.Input, Result<StatixCompile.Output, ?>> {
     public static class Input implements Serializable {
         public final ResourcePath root;
         public final ResourcePath resource;
@@ -26,6 +29,52 @@ public class StatixCompile implements TaskDef<StatixCompile.Input, Result<IStrat
         public Input(ResourcePath root, ResourcePath resource) {
             this.root = root;
             this.resource = resource;
+        }
+
+        @Override public boolean equals(@Nullable Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            final Input input = (Input)o;
+            return root.equals(input.root) && resource.equals(input.resource);
+        }
+
+        @Override public int hashCode() {
+            return Objects.hash(root, resource);
+        }
+
+        @Override public String toString() {
+            return "Input{" +
+                "root=" + root +
+                ", resource=" + resource +
+                '}';
+        }
+    }
+
+    public static class Output implements Serializable {
+        public final String relativeOutputPath;
+        public final IStrategoTerm spec;
+
+        public Output(String relativeOutputPath, IStrategoTerm spec) {
+            this.relativeOutputPath = relativeOutputPath;
+            this.spec = spec;
+        }
+
+        @Override public boolean equals(@Nullable Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            final Output output = (Output)o;
+            return relativeOutputPath.equals(output.relativeOutputPath) && spec.equals(output.spec);
+        }
+
+        @Override public int hashCode() {
+            return Objects.hash(relativeOutputPath, spec);
+        }
+
+        @Override public String toString() {
+            return "Output{" +
+                "relativeOutputPath='" + relativeOutputPath + '\'' +
+                ", spec=" + spec +
+                '}';
         }
     }
 
@@ -48,7 +97,7 @@ public class StatixCompile implements TaskDef<StatixCompile.Input, Result<IStrat
         return getClass().getName();
     }
 
-    @Override public Result<IStrategoTerm, ?> exec(ExecContext context, Input input) throws Exception {
+    @Override public Result<Output, ?> exec(ExecContext context, Input input) throws Exception {
         final Supplier<Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?>> supplier = analyze.createSingleFileOutputSupplier(
             new ConstraintAnalyzeMultiTaskDef.Input(input.root, StatixUtil.createResourceWalker(), StatixUtil.createResourceMatcher(), parse.createAstFunction()),
             input.resource
@@ -60,7 +109,8 @@ public class StatixCompile implements TaskDef<StatixCompile.Input, Result<IStrat
             try {
                 final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get().addContextObject(output.context);
                 final IStrategoTerm term = StrategoUtil.createLegacyBuilderInputTerm(strategoRuntime.getTermFactory(), output.result.ast, input.resource, input.root);
-                return Result.ofOk(strategoRuntime.invoke("generate-aterm", term));
+                final IStrategoTerm outputTerm = strategoRuntime.invoke("generate-aterm", term);
+                return Result.ofOk(new Output(TermUtils.toJavaStringAt(outputTerm, 0), outputTerm.getSubterm(1)));
             } catch(StrategoException e) {
                 return Result.ofErr(e);
             }

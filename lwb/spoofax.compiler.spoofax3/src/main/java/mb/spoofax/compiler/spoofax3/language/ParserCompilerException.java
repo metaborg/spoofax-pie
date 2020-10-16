@@ -2,7 +2,6 @@ package mb.spoofax.compiler.spoofax3.language;
 
 import mb.common.message.KeyedMessages;
 import mb.common.util.ADT;
-import mb.resource.ReadableResource;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -67,7 +66,6 @@ public abstract class ParserCompilerException extends Exception {
     }
 
 
-
     public abstract <R> R match(Cases<R> cases);
 
     public ParserCompilerExceptions.CaseOfMatchers.TotalMatcher_MainFileFail caseOf() {
@@ -100,6 +98,4 @@ public abstract class ParserCompilerException extends Exception {
     @Override public abstract int hashCode();
 
     @Override public abstract boolean equals(@Nullable Object obj);
-
-    @Override public abstract String toString();
 }

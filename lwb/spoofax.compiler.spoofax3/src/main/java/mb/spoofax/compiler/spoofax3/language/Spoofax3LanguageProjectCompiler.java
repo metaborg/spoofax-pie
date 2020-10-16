@@ -14,7 +14,6 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -22,14 +21,18 @@ import java.util.Properties;
 public class Spoofax3LanguageProjectCompiler implements TaskDef<Spoofax3LanguageProjectCompiler.Input, Result<KeyedMessages, CompilerException>> {
     private final Spoofax3ParserLanguageCompiler parserCompiler;
     private final Spoofax3StylerLanguageCompiler stylerCompiler;
+    private final Spoofax3ConstraintAnalyzerLanguageCompiler constraintAnalyzerCompiler;
     private final Spoofax3StrategoRuntimeLanguageCompiler strategoRuntimeCompiler;
 
     @Inject public Spoofax3LanguageProjectCompiler(
         Spoofax3ParserLanguageCompiler parserCompiler,
-        Spoofax3StylerLanguageCompiler stylerCompiler, Spoofax3StrategoRuntimeLanguageCompiler strategoRuntimeCompiler
+        Spoofax3StylerLanguageCompiler stylerCompiler,
+        Spoofax3ConstraintAnalyzerLanguageCompiler constraintAnalyzerCompiler,
+        Spoofax3StrategoRuntimeLanguageCompiler strategoRuntimeCompiler
     ) {
         this.parserCompiler = parserCompiler;
         this.stylerCompiler = stylerCompiler;
+        this.constraintAnalyzerCompiler = constraintAnalyzerCompiler;
         this.strategoRuntimeCompiler = strategoRuntimeCompiler;
     }
 
@@ -60,6 +63,15 @@ public class Spoofax3LanguageProjectCompiler implements TaskDef<Spoofax3Language
             final Spoofax3StylerLanguageCompiler.Args args = new Spoofax3StylerLanguageCompiler.Args(input.styler().get(), esvAdditionalAstSuppliers);
             final Result<KeyedMessages, CompilerException> result = context.require(stylerCompiler, args)
                 .mapErr(CompilerException::stylerCompilerFail);
+            if(result.isErr()) {
+                return result;
+            }
+            messagesBuilder.addMessages(result.get());
+        }
+
+        if(input.constraintAnalyzer().isPresent()) {
+            final Result<KeyedMessages, CompilerException> result = context.require(constraintAnalyzerCompiler, input.constraintAnalyzer().get())
+                .mapErr(CompilerException::constraintAnalyzerCompilerFail);
             if(result.isErr()) {
                 return result;
             }
@@ -97,6 +109,8 @@ public class Spoofax3LanguageProjectCompiler implements TaskDef<Spoofax3Language
 
         Optional<Spoofax3StylerLanguageCompiler.Input> styler();
 
+        Optional<Spoofax3ConstraintAnalyzerLanguageCompiler.Input> constraintAnalyzer();
+
         Optional<Spoofax3StrategoRuntimeLanguageCompiler.Input> strategoRuntime();
 
 
@@ -108,6 +122,7 @@ public class Spoofax3LanguageProjectCompiler implements TaskDef<Spoofax3Language
         default void syncTo(LanguageProjectCompilerInputBuilder builder) {
             parser().ifPresent((i) -> i.syncTo(builder.parser));
             styler().ifPresent((i) -> i.syncTo(builder.styler));
+            constraintAnalyzer().ifPresent((i) -> i.syncTo(builder.constraintAnalyzer));
             strategoRuntime().ifPresent((i) -> i.syncTo(builder.strategoRuntime));
         }
     }

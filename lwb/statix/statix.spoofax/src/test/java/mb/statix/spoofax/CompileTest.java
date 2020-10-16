@@ -5,7 +5,6 @@ import mb.pie.api.MixedSession;
 import mb.resource.fs.FSResource;
 import mb.statix.spoofax.task.StatixCompile;
 import org.junit.jupiter.api.Test;
-import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.util.TermUtils;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,15 +34,17 @@ class CompileTest extends TestBase {
             "program.stx");
 
         try(final MixedSession session = newSession()) {
-            final Result<IStrategoTerm, ?> mainResult = session.require(compile.createTask(new StatixCompile.Input(root.getPath(), mainFile.getPath())));
+            final Result<StatixCompile.Output, ?> mainResult = session.require(compile.createTask(new StatixCompile.Input(root.getPath(), mainFile.getPath())));
             assertTrue(mainResult.isOk());
-            final IStrategoTerm mainAst = mainResult.unwrap();
-            assertTrue(TermUtils.isApplAt(mainAst, 1, "FileSpec", 6));
+            final StatixCompile.Output mainOutput = mainResult.unwrap();
+            assertEquals("src-gen/statix/main.spec.aterm", mainOutput.relativeOutputPath);
+            assertTrue(TermUtils.isAppl(mainOutput.spec, "FileSpec", 6));
 
-            final Result<IStrategoTerm, ?> programResult = session.require(compile.createTask(new StatixCompile.Input(root.getPath(), programFile.getPath())));
+            final Result<StatixCompile.Output, ?> programResult = session.require(compile.createTask(new StatixCompile.Input(root.getPath(), programFile.getPath())));
             assertTrue(programResult.isOk());
-            final IStrategoTerm programAst = programResult.unwrap();
-            assertTrue(TermUtils.isApplAt(programAst, 1, "FileSpec", 6));
+            final StatixCompile.Output programOutput = programResult.unwrap();
+            assertEquals("src-gen/statix/program.spec.aterm", programOutput.relativeOutputPath);
+            assertTrue(TermUtils.isAppl(programOutput.spec, "FileSpec", 6));
         }
     }
 }

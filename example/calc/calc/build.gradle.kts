@@ -26,6 +26,9 @@ languageProject {
     withParser().run {
       startSymbol("Program")
     }
+    withConstraintAnalyzer().run {
+      multiFile(true)
+    }
     withStyler()
     withStrategoRuntime()
   }
@@ -35,6 +38,7 @@ spoofax3BasedLanguageProject {
   compilerInput {
     withParser()
     withStyler()
+    withConstraintAnalyzer()
     withStrategoRuntime()
   }
 }

@@ -17,6 +17,7 @@ dependencies {
   api(project(":sdf3.spoofax"))
   api(project(":stratego.spoofax"))
   api(project(":esv.spoofax"))
+  api(project(":statix.spoofax"))
   api(project(":libspoofax2.spoofax"))
 
   compileOnly("org.checkerframework:checker-qual-android")

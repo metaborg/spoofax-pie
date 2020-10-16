@@ -5,6 +5,7 @@ import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
 import mb.pie.api.TaskDef;
 import mb.pie.task.archive.UnarchiveFromJar;
+import mb.spoofax.compiler.spoofax3.language.Spoofax3ConstraintAnalyzerLanguageCompiler;
 import mb.spoofax.compiler.spoofax3.language.Spoofax3LanguageProjectCompiler;
 import mb.spoofax.compiler.spoofax3.language.Spoofax3ParserLanguageCompiler;
 import mb.spoofax.compiler.spoofax3.language.Spoofax3StrategoRuntimeLanguageCompiler;
@@ -30,6 +31,7 @@ import java.util.Set;
         Spoofax3LanguageProjectCompiler languageProjectCompiler,
         Spoofax3ParserLanguageCompiler parserLanguageCompiler,
         Spoofax3StylerLanguageCompiler stylerLanguageCompiler,
+        Spoofax3ConstraintAnalyzerLanguageCompiler constraintAnalyzerCompiler,
         Spoofax3StrategoRuntimeLanguageCompiler strategoRuntimeLanguageCompiler,
         UnarchiveFromJar unarchiveFromJar
     ) {
@@ -37,6 +39,7 @@ import java.util.Set;
         taskDefs.add(languageProjectCompiler);
         taskDefs.add(parserLanguageCompiler);
         taskDefs.add(stylerLanguageCompiler);
+        taskDefs.add(constraintAnalyzerCompiler);
         taskDefs.add(strategoRuntimeLanguageCompiler);
         taskDefs.add(unarchiveFromJar);
         return taskDefs;

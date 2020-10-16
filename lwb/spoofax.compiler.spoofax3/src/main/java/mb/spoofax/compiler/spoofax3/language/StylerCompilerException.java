@@ -77,6 +77,4 @@ public abstract class StylerCompilerException extends Exception {
     @Override public abstract int hashCode();
 
     @Override public abstract boolean equals(@Nullable Object obj);
-
-    @Override public abstract String toString();
 }

@@ -51,7 +51,6 @@ public class Spoofax3StylerLanguageCompiler implements TaskDef<Spoofax3StylerLan
         EsvParse parse,
         EsvCheckMulti check,
         EsvCompile compile,
-        StrategoConfigurator configurator,
         UnarchiveFromJar unarchiveFromJar,
         @LibSpoofax2Qualifier("definition-dir") ClassLoaderResource libSpoofax2DefinitionDir
     ) {
