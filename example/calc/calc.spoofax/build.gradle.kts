@@ -30,5 +30,7 @@ languageAdapterProject {
 }
 
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
-
+  val packageId = "mb.calc.spoofax"
+  val taskPackageId = "$packageId.task"
+  val commandPackageId = "$packageId.command"
 }

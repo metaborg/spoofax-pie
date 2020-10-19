@@ -47,6 +47,10 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
 "calc".run {
   includeProject("calc")
   includeProject("calc.spoofax")
+  includeProject("calc.cli")
+  includeProject("calc.eclipse.externaldeps")
+  includeProject("calc.eclipse")
+  includeProject("calc.intellij")
 }
 
 "multilang/spoofaxcore".run {
