@@ -22,10 +22,6 @@ public abstract class StrategoTransformTaskDef<T> implements TaskDef<Supplier<? 
         this.strategyNames = ListView.of(strategyNames);
     }
 
-    public StrategoTransformTaskDef(String strategyName) {
-        this.strategyNames = ListView.of(strategyName);
-    }
-
 
     protected abstract StrategoRuntime getStrategoRuntime(T input);
 

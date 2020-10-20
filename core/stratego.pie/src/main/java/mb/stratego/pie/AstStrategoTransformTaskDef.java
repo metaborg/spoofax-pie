@@ -6,27 +6,13 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Provider;
 
-public abstract class AstStrategoTransformTaskDef extends StrategoTransformTaskDef<IStrategoTerm> {
-    private final Provider<StrategoRuntime> strategoRuntimeProvider;
-
+public abstract class AstStrategoTransformTaskDef extends ProviderStrategoTransformTaskDef<IStrategoTerm> {
     public AstStrategoTransformTaskDef(Provider<StrategoRuntime> strategoRuntimeProvider, ListView<String> strategyNames) {
-        super(strategyNames);
-        this.strategoRuntimeProvider = strategoRuntimeProvider;
+        super(strategoRuntimeProvider, strategyNames);
     }
 
     public AstStrategoTransformTaskDef(Provider<StrategoRuntime> strategoRuntimeProvider, String... strategyNames) {
-        super(strategyNames);
-        this.strategoRuntimeProvider = strategoRuntimeProvider;
-    }
-
-    public AstStrategoTransformTaskDef(Provider<StrategoRuntime> strategoRuntimeProvider, String strategyName) {
-        super(strategyName);
-        this.strategoRuntimeProvider = strategoRuntimeProvider;
-    }
-
-
-    @Override protected StrategoRuntime getStrategoRuntime(IStrategoTerm input) {
-        return strategoRuntimeProvider.get();
+        super(strategoRuntimeProvider, strategyNames);
     }
 
     @Override protected IStrategoTerm getAst(IStrategoTerm input) {

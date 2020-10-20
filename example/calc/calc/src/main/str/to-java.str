@@ -157,4 +157,7 @@ rules // hacks to get this working in Spoofax 3 right now
   program-to-java:
     (ast, classname) -> <program-to-java(|classname)> ast
 
+  program-to-java-fixed:
+    ast -> <program-to-java(|"Program")> ast
+
   nabl2-get-ast-type = !NumT()
