@@ -31,7 +31,7 @@ public interface AdapterProject extends Serializable {
         }
 
         public static String defaultProjectSuffix() {
-            return ".spoofax";
+            return "";
         }
 
         public static String defaultArtifactId(Shared shared) {
@@ -40,6 +40,35 @@ public interface AdapterProject extends Serializable {
 
         public static String defaultPackageId(Shared shared) {
             return shared.defaultPackageId() + defaultProjectSuffix();
+        }
+
+
+        public Builder withDefaultsSeparateProjectFromParentDirectory(ResourcePath parentDirectory, Shared shared) {
+            return withDefaultsSeparateProject(parentDirectory.appendRelativePath(defaultSeparateArtifactId(shared)), shared);
+        }
+
+        public Builder withDefaultsSeparateProject(ResourcePath baseDirectory, Shared shared) {
+            final GradleProject gradleProject = GradleProject.builder()
+                .coordinate(shared.defaultGroupId(), defaultSeparateArtifactId(shared), Optional.of(shared.defaultVersion()))
+                .baseDirectory(baseDirectory)
+                .build();
+            return this
+                .project(gradleProject)
+                .packageId(defaultSeparatePackageId(shared))
+                .shared(shared)
+                ;
+        }
+
+        public static String defaultSeparateProjectSuffix() {
+            return ".spoofax";
+        }
+
+        public static String defaultSeparateArtifactId(Shared shared) {
+            return shared.defaultArtifactId() + defaultSeparateProjectSuffix();
+        }
+
+        public static String defaultSeparatePackageId(Shared shared) {
+            return shared.defaultPackageId() + defaultSeparateProjectSuffix();
         }
     }
 

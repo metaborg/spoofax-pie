@@ -1,4 +1,4 @@
-package mb.calc.spoofax;
+package mb.calc;
 
 import mb.common.option.Option;
 import mb.common.region.Region;
@@ -7,17 +7,13 @@ import mb.common.style.Color;
 import mb.common.style.Styling;
 import mb.common.style.TokenStyle;
 import mb.common.token.TokenTypes;
-import mb.jsglr1.common.JSGLR1ParseException;
-import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.pie.api.MixedSession;
 import mb.resource.fs.FSResource;
 import org.junit.jupiter.api.Test;
-import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.spoofax.terms.util.TermUtils.*;
 
 class StyleTest extends TestBase {
     @Test void testParseTask() throws Exception {

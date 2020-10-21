@@ -1,5 +1,6 @@
 package mb.spoofax.compiler.platform;
 
+import mb.common.option.Option;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
@@ -129,7 +130,7 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
             bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.multilangEclipseDep()));
             bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.multilangEclipseExternaldepsDep()));
         }
-        bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(input.languageProjectDependency()));
+        input.languageProjectDependency().ifSome((d) -> bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(d)));
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(input.adapterProjectDependency()));
         return bundleDependencies;
     }
@@ -177,11 +178,12 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
 
         /// Gradle configuration
 
-        @Value.Default default GradleDependency languageProjectDependency() {
+        /* None indicates that the language project is the same project as the adapter project */
+        default Option<GradleDependency> languageProjectDependency() {
             return adapterProjectCompilerInput().languageProjectDependency();
         }
 
-        @Value.Default default GradleDependency adapterProjectDependency() {
+        default GradleDependency adapterProjectDependency() {
             return adapterProjectCompilerInput().adapterProject().project().asProjectDependency();
         }
 

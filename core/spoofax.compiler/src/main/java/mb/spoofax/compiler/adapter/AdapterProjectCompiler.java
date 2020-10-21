@@ -1,6 +1,7 @@
 package mb.spoofax.compiler.adapter;
 
 import com.samskivert.mustache.Mustache;
+import mb.common.option.Option;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
@@ -133,7 +134,11 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
 
         // Class files
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
-        packageInfoTemplate.write(context, input.packageInfo().file(generatedJavaSourcesDirectory), input);
+        if(input.languageProjectDependency().isSome()) {
+            // Only generate package-info.java if the language project is a separate project. Otherwise we will have
+            // two package-info.java files in the same package, which is an error.
+            packageInfoTemplate.write(context, input.packageInfo().file(generatedJavaSourcesDirectory), input);
+        }
         checkTaskDefTemplate.write(context, input.genCheckTaskDef().file(generatedJavaSourcesDirectory), input);
         checkMultiTaskDefTemplate.write(context, input.genCheckMultiTaskDef().file(generatedJavaSourcesDirectory), input);
         checkAggregatorTaskDefTemplate.write(context, input.genCheckAggregatorTaskDef().file(generatedJavaSourcesDirectory), input);
@@ -249,7 +254,7 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
         final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
         dependencies.add(GradleConfiguredDependency.apiPlatform(shared.spoofaxDependencyConstraintsDep()));
         dependencies.add(GradleConfiguredDependency.annotationProcessorPlatform(shared.spoofaxDependencyConstraintsDep()));
-        dependencies.add(GradleConfiguredDependency.api(input.languageProjectDependency()));
+        input.languageProjectDependency().ifSome((d) -> dependencies.add(GradleConfiguredDependency.api(d)));
         dependencies.add(GradleConfiguredDependency.api(shared.spoofaxCoreDep()));
         dependencies.add(GradleConfiguredDependency.api(shared.pieApiDep()));
         dependencies.add(GradleConfiguredDependency.api(shared.daggerDep()));
@@ -292,7 +297,8 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
 
         /// Configuration
 
-        GradleDependency languageProjectDependency();
+        /* None indicates that the language project is the same project as the adapter project */
+        Option<GradleDependency> languageProjectDependency();
 
         List<GradleConfiguredDependency> additionalDependencies();
 

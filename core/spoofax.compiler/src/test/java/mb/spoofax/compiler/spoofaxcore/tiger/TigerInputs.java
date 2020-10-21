@@ -1,9 +1,7 @@
 package mb.spoofax.compiler.spoofaxcore.tiger;
 
-import mb.common.util.IOUtil;
+import mb.common.option.Option;
 import mb.common.util.ListView;
-import mb.resource.ResourceService;
-import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.AdapterProject;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
@@ -30,6 +28,7 @@ import mb.spoofax.compiler.language.StylerLanguageCompiler;
 import mb.spoofax.compiler.platform.CliProjectCompiler;
 import mb.spoofax.compiler.platform.EclipseProjectCompiler;
 import mb.spoofax.compiler.platform.IntellijProjectCompiler;
+import mb.spoofax.compiler.util.GradleDependency;
 import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.StringUtil;
 import mb.spoofax.compiler.util.TypeInfo;
@@ -37,9 +36,6 @@ import mb.spoofax.core.language.command.CommandContextType;
 import mb.spoofax.core.language.command.CommandExecutionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -48,6 +44,7 @@ public class TigerInputs {
     public final Shared shared;
 
     public final LanguageProject languageProject;
+    public final boolean adapterProjectAsSeparateProject;
     public final AdapterProject adapterProject;
 
     public final LanguageProjectCompilerInputBuilder languageProjectCompilerInputBuilder;
@@ -56,7 +53,7 @@ public class TigerInputs {
     public final AdapterProjectCompilerInputBuilder adapterProjectCompilerInputBuilder;
     private AdapterProjectCompiler.@Nullable Input adapterProjectCompilerInput = null;
 
-    public TigerInputs(ResourcePath rootDirectory, Shared shared) {
+    public TigerInputs(ResourcePath rootDirectory, Shared shared, boolean adapterProjectAsSeparateProject) {
         this.rootDirectory = rootDirectory;
         this.shared = shared;
 
@@ -64,13 +61,15 @@ public class TigerInputs {
         this.languageProjectCompilerInputBuilder = new LanguageProjectCompilerInputBuilder();
         setLanguageProjectCompilerInput(rootDirectory, shared, this.languageProjectCompilerInputBuilder);
 
+        this.adapterProjectAsSeparateProject = adapterProjectAsSeparateProject;
+
         this.adapterProject = AdapterProject.builder().withDefaultsFromParentDirectory(rootDirectory, shared).build();
         this.adapterProjectCompilerInputBuilder = new AdapterProjectCompilerInputBuilder();
         setAdapterProjectCompilerInput(rootDirectory, shared, this.adapterProjectCompilerInputBuilder);
     }
 
-    public TigerInputs(ResourcePath rootDirectory) {
-        this(rootDirectory, sharedBuilder().build());
+    public TigerInputs(ResourcePath rootDirectory, boolean adapterProjectAsSeparateProject) {
+        this(rootDirectory, sharedBuilder().build(), adapterProjectAsSeparateProject);
     }
 
     public static Shared.Builder sharedBuilder() {
@@ -116,10 +115,18 @@ public class TigerInputs {
 
     public AdapterProjectCompiler.Input adapterProjectCompilerInput() {
         if(adapterProjectCompilerInput == null) {
-            adapterProjectCompilerInput = adapterProjectCompilerInputBuilder.build(languageProjectCompilerInput(), adapterProject);
+            final LanguageProjectCompiler.Input languageProjectCompilerInput = languageProjectCompilerInput();
+            final Option<GradleDependency> languageProjectDependency;
+            if(adapterProjectAsSeparateProject) {
+                languageProjectDependency = Option.ofSome(languageProjectCompilerInput.languageProject().project().asProjectDependency());
+            } else {
+                languageProjectDependency = Option.ofNone();
+            }
+            adapterProjectCompilerInput = adapterProjectCompilerInputBuilder.build(languageProjectCompilerInput, languageProjectDependency, adapterProject);
         }
         return adapterProjectCompilerInput;
     }
+
 
     public ParserAdapterCompiler.Input parserAdapterCompilerInput() {
         //noinspection OptionalGetWithoutIsPresent

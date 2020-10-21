@@ -1,8 +1,8 @@
-package mb.calc.spoofax.task.debug;
+package mb.calc.task.debug;
 
-import mb.calc.spoofax.task.CalcAnalyze;
-import mb.calc.spoofax.task.CalcParse;
-import mb.calc.spoofax.task.CalcToJava;
+import mb.calc.task.CalcAnalyze;
+import mb.calc.task.CalcParse;
+import mb.calc.task.CalcToJava;
 import mb.constraint.pie.ConstraintAnalyzeTaskDef;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
@@ -10,6 +10,7 @@ import mb.resource.ResourceKey;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
 import mb.stratego.common.StrategoUtil;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import java.io.Serializable;
@@ -23,7 +24,7 @@ public class CalcShowToJava implements TaskDef<CalcShowToJava.Args, CommandFeedb
             this.file = file;
         }
 
-        @Override public boolean equals(Object o) {
+        @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             final Args args = (Args)o;

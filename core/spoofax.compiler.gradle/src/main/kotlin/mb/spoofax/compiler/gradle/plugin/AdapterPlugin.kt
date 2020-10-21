@@ -2,6 +2,7 @@
 
 package mb.spoofax.compiler.gradle.plugin
 
+import mb.common.option.Option
 import mb.spoofax.compiler.adapter.*
 import mb.spoofax.compiler.gradle.*
 import org.gradle.api.GradleException
@@ -35,22 +36,26 @@ open class AdapterProjectExtension(project: Project) {
     private const val name = "language adapter project"
   }
 
-  internal val languageProjectFinalized: Project by lazy {
+  internal val languageProjectFinalized: Project? by lazy {
     project.logger.debug("Finalizing $name's language project reference in $project")
     languageProject.finalizeValue()
-    if(!languageProject.isPresent) {
-      throw GradleException("$name's language project reference in $project has not been set")
+    if(languageProject.isPresent) {
+      languageProject.get()
+    } else {
+      null
     }
-    languageProject.get()
   }
-  internal val languageProjectExtension get() = languageProjectFinalized.extensions.getByType<LanguageProjectExtension>()
+  internal val languageOrThisProjectFinalized: Project by lazy {
+    languageProjectFinalized ?: project
+  }
+  internal val languageProjectExtension get() = languageOrThisProjectFinalized.extensions.getByType<LanguageProjectExtension>()
 
   internal val adapterProjectFinalized: AdapterProject by lazy {
     project.logger.debug("Finalizing $name's project in $project")
     adapterProject.finalizeValue()
     val shared = languageProjectExtension.sharedFinalized
     adapterProject.get()
-      .packageId(AdapterProject.Builder.defaultPackageId(shared))
+      .packageId(if(languageProjectFinalized == null) AdapterProject.Builder.defaultPackageId(shared) else AdapterProject.Builder.defaultSeparatePackageId(shared))
       .shared(shared)
       .build()
   }
@@ -58,14 +63,15 @@ open class AdapterProjectExtension(project: Project) {
   internal val compilerInputFinalized: AdapterProjectCompiler.Input by lazy {
     project.logger.debug("Finalizing $name's compiler input in $project")
     compilerInput.finalizeValue()
-    compilerInput.get().build(languageProjectExtension.compilerInputFinalized, adapterProjectFinalized)
+    val languageProjectDependency = Option.ofNullable(languageProjectFinalized).map { it.toSpoofaxCompilerProject().asProjectDependency() }
+    compilerInput.get().build(languageProjectExtension.compilerInputFinalized, languageProjectDependency, adapterProjectFinalized)
   }
 }
 
 internal fun Project.whenAdapterProjectFinalized(closure: () -> Unit) = whenFinalized<AdapterProjectExtension> {
   val extension: AdapterProjectExtension = extensions.getByType()
-  // Adapter project is only fully finalized when its dependent language project is finalized as well
-  extension.languageProjectFinalized.whenLanguageProjectFinalized(closure)
+  // Adapter project is only fully finalized when its dependent language project is finalized as well.
+  extension.languageOrThisProjectFinalized.whenLanguageProjectFinalized(closure)
 }
 
 @Suppress("unused")
@@ -77,7 +83,7 @@ open class AdapterPlugin : Plugin<Project> {
     project.plugins.apply(JavaLibraryPlugin::class.java)
 
     project.afterEvaluate {
-      extension.languageProjectFinalized.whenLanguageProjectFinalized {
+      extension.languageOrThisProjectFinalized.whenLanguageProjectFinalized {
         configure(project, extension.languageProjectExtension.component, extension.compilerInputFinalized)
       }
     }

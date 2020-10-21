@@ -6,7 +6,7 @@ plugins {
 }
 
 languageIntellijProject {
-  adapterProject.set(project(":calc.spoofax"))
+  adapterProject.set(project(":calc"))
 }
 
 intellij {

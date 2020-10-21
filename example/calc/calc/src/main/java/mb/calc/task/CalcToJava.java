@@ -1,7 +1,7 @@
-package mb.calc.spoofax.task;
+package mb.calc.task;
 
-import mb.calc.spoofax.CalcScope;
-import mb.calc.spoofax.util.AnalyzedStrategoTransformTaskDef;
+import mb.calc.CalcScope;
+import mb.calc.util.AnalyzedStrategoTransformTaskDef;
 import mb.stratego.common.StrategoRuntime;
 
 import javax.inject.Inject;

@@ -1,4 +1,4 @@
-package mb.calc.spoofax.util;
+package mb.calc.util;
 
 import mb.common.util.ListView;
 import mb.constraint.pie.ConstraintAnalyzeTaskDef;

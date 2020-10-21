@@ -1,21 +1,12 @@
-package mb.calc.spoofax;
+package mb.calc;
 
-import mb.calc.spoofax.task.CalcAnalyze;
-import mb.calc.spoofax.task.CalcAnalyzeMulti;
+import mb.calc.task.CalcAnalyze;
 import mb.common.result.Result;
-import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
-import mb.constraint.pie.ConstraintAnalyzeTaskDef;
-import mb.jsglr1.common.JSGLR1ParseException;
-import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.pie.api.MixedSession;
 import mb.resource.fs.FSResource;
-import mb.stratego.common.StrategoRuntime;
 import org.junit.jupiter.api.Test;
-import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.interpreter.terms.ITermFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.spoofax.terms.util.TermUtils.*;
 
 class AnalysisTest extends TestBase {
     @Test void testAnalysis() throws Exception {

@@ -1,8 +1,10 @@
 package mb.spoofax.compiler.adapter;
 
+import mb.common.option.Option;
 import mb.spoofax.compiler.language.ClassloaderResourcesCompiler;
 import mb.spoofax.compiler.language.LanguageProject;
 import mb.spoofax.compiler.language.LanguageProjectCompiler;
+import mb.spoofax.compiler.util.GradleDependency;
 import mb.spoofax.compiler.util.Shared;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -61,7 +63,7 @@ public class AdapterProjectCompilerInputBuilder {
     }
 
 
-    public AdapterProjectCompiler.Input build(LanguageProjectCompiler.Input languageProjectInput, AdapterProject adapterProject) {
+    public AdapterProjectCompiler.Input build(LanguageProjectCompiler.Input languageProjectInput, Option<GradleDependency> languageProjectDependency, AdapterProject adapterProject) {
         final Shared shared = languageProjectInput.shared();
 
         final ClassloaderResourcesCompiler.Input classloaderResources = buildClassLoaderResources(shared, languageProjectInput.languageProject());
@@ -85,7 +87,7 @@ public class AdapterProjectCompilerInputBuilder {
         final CompleterAdapterCompiler.@Nullable Input completer = buildCompleter(shared, adapterProject, languageProjectInput);
 
         if(completer != null) project.completer(completer);
-        project.languageProjectDependency(languageProjectInput.languageProject().project().asProjectDependency());
+        project.languageProjectDependency(languageProjectDependency);
 
         return project
             .adapterProject(adapterProject)

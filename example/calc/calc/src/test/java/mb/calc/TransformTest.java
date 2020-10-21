@@ -1,4 +1,4 @@
-package mb.calc.spoofax;
+package mb.calc;
 
 import mb.common.result.Result;
 import mb.jsglr1.common.JSGLR1ParseException;
@@ -13,19 +13,20 @@ import org.spoofax.interpreter.terms.ITermFactory;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.spoofax.terms.util.TermUtils.*;
 
-class PrettyPrintTest extends TestBase {
-    @Test void testParsePrettyPrint() throws Exception {
-        final String text = "1 + 2 * 3;";
-        final FSResource resource = createTextFile(text, "test.calc");
+class TransformTest extends TestBase {
+    @Test void testProgramToJava() throws Exception {
+        final FSResource resource = createTextFile("1 + 2;", "test.calc");
         try(final MixedSession session = newSession()) {
             final Result<JSGLR1ParseOutput, JSGLR1ParseException> result = session.require(languageComponent.getCalcParse().createTask(resourceStringSupplier(resource)));
             assertTrue(result.isOk());
             final IStrategoTerm ast = result.unwrap().ast;
             final StrategoRuntime strategoRuntime = languageComponent.getStrategoRuntimeProvider().get();
-            final IStrategoTerm term = strategoRuntime.invoke("pp-calc-string", ast);
+            final ITermFactory termFactory = strategoRuntime.getTermFactory();
+            final IStrategoTerm term = strategoRuntime.invoke("program-to-java", termFactory.makeTuple(ast, termFactory.makeString("Test")));
             assertTrue(isString(term));
             final String str = toJavaString(term);
-            assertEquals(text, str);
+            assertTrue(str.contains("public class Test"));
+            assertTrue(str.contains("new BigDecimal(\"1\").add(new BigDecimal(\"2\"))"));
         }
     }
 }

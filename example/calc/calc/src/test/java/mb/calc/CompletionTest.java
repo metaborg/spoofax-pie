@@ -1,4 +1,4 @@
-package mb.calc.spoofax;
+package mb.calc;
 
 import mb.stratego.common.StrategoRuntime;
 import org.junit.jupiter.api.Test;

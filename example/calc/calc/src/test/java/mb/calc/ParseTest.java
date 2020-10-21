@@ -1,4 +1,4 @@
-package mb.calc.spoofax;
+package mb.calc;
 
 import mb.common.result.Result;
 import mb.jsglr1.common.JSGLR1ParseException;

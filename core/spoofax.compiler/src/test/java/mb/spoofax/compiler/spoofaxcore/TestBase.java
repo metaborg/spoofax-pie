@@ -36,11 +36,19 @@ class TestBase {
     }
 
     TigerInputs defaultInputs() {
-        return new TigerInputs(defaultRootDirectory());
+        return new TigerInputs(defaultRootDirectory(), false);
     }
 
     TigerInputs defaultInputs(Shared shared) {
-        return new TigerInputs(defaultRootDirectory(), shared);
+        return new TigerInputs(defaultRootDirectory(), shared, false);
+    }
+
+    TigerInputs defaultInputsWithSeparateAdapterProject() {
+        return new TigerInputs(defaultRootDirectory(), true);
+    }
+
+    TigerInputs defaultInputsWithSeparateAdapterProject(Shared shared) {
+        return new TigerInputs(defaultRootDirectory(), shared, true);
     }
 
 

@@ -1,4 +1,4 @@
-package mb.calc.spoofax;
+package mb.calc;
 
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
