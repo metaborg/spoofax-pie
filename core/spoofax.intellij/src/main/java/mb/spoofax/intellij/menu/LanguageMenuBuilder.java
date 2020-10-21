@@ -10,6 +10,8 @@ import mb.spoofax.core.language.menu.*;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +23,7 @@ public final class LanguageMenuBuilder {
 
     private final Provider<LanguageActionGroup> languageActionGroupProvider;
     private final EditorContextLanguageAction.Factory editorContextLanguageActionFactory;
+    private final HashSet<String> knownIds = new HashSet<>();
 
     /**
      * Initializes a new instance of the {@link LanguageMenuBuilder} class.
@@ -105,8 +108,7 @@ public final class LanguageMenuBuilder {
      */
     private AnAction createCommand(CommandAction command) {
         @SuppressWarnings("rawtypes") CommandRequest commandRequest = command.commandRequest();
-        // FIXME: Ensure ID is unique, as multiple commands may use the same command request.
-        String id = commandRequest.def().getId();
+        String id = ensureUniqueId(commandRequest.def().getId());
         return editorContextLanguageActionFactory.create(
             id, commandRequest,
             command.displayName(), command.description(), null);
@@ -120,6 +122,27 @@ public final class LanguageMenuBuilder {
      */
     private com.intellij.openapi.actionSystem.Separator createSeparator(String displayName) {
         return com.intellij.openapi.actionSystem.Separator.create(displayName);
+    }
+
+    /**
+     * Creates a unique ID from the given ID.
+     *
+     * @param id the base ID
+     * @return the unique ID
+     */
+    private String ensureUniqueId(String id) {
+        if (!knownIds.contains(id)) {
+            knownIds.add(id);
+            return id;
+        }
+        int counter = 0;
+        String proposedId;
+        do {
+            counter += 1;
+            proposedId = id + "-" + counter;
+        } while (knownIds.contains(proposedId));
+        knownIds.add(proposedId);
+        return proposedId;
     }
 
 }
