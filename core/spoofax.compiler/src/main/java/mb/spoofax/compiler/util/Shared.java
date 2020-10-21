@@ -278,20 +278,12 @@ public interface Shared extends Serializable {
         return GradleDependency.module(Coordinate.of("org.metaborg", "spoofax.eclipse", spoofax3Version()));
     }
 
-    @Value.Default default GradleDependency spoofaxEclipseExternaldepsDep() {
-        return GradleDependency.module(Coordinate.of("org.metaborg", "spoofax.eclipse.externaldeps", spoofax3Version()));
-    }
-
     @Value.Default default GradleDependency spoofaxIntellijDep() {
         return GradleDependency.module(Coordinate.of("org.metaborg", "spoofax.intellij", spoofax3Version()));
     }
 
     @Value.Default default GradleDependency multilangDep() {
         return GradleDependency.module(Coordinate.of("org.metaborg", "statix.multilang", spoofax3Version()));
-    }
-
-    @Value.Default default GradleDependency multilangEclipseExternaldepsDep() {
-        return GradleDependency.module(Coordinate.of("org.metaborg", "statix.multilang.eclipse.externaldeps", spoofax3Version()));
     }
 
     @Value.Default default GradleDependency multilangEclipseDep() {

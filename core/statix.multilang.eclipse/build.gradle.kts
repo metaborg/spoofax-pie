@@ -17,9 +17,39 @@ dependencies {
 
   bundleApi(project(":spoofax.eclipse"))
 
-  bundleApi(project(":statix.multilang.eclipse.externaldeps"))
+  bundleEmbedApi(project(":statix.multilang"))
 
   annotationProcessor("com.google.dagger:dagger-compiler")
-
   compileOnly("org.checkerframework:checker-qual-android")
+}
+
+// Use bnd to create a single OSGi bundle JAR that includes all dependencies.
+val exports = listOf(
+  // Provided by 'javax.inject' bundle.
+  "!javax.inject.*",
+  // Provided by 'spoofax.eclipse' bundle.
+  "!mb.log.*",
+  "!mb.resource.*",
+  "!mb.pie.*",
+  "!mb.common.*",
+  "!mb.spoofax.core.*",
+  // Do not export compile-time annotation packages.
+  "!org.checkerframework.*",
+  "!org.codehaus.mojo.animal_sniffer.*",
+  // Allow split package for 'mb.nabl2' and 'mb.statix'.
+  "mb.nabl2.*;-split-package:=merge-first",
+  "mb.statix.*;-split-package:=merge-first",
+  // Export packages from this project.
+  "mb.statix.multilang.eclipse.*",
+  // Export what is left, using a mandatory provider to prevent accidental imports via 'Import-Package'.
+  "*;provider=statix;mandatory:=provider"
+)
+tasks {
+  "jar"(Jar::class) {
+    manifest {
+      attributes(
+        Pair("Export-Package", exports.joinToString(", "))
+      )
+    }
+  }
 }

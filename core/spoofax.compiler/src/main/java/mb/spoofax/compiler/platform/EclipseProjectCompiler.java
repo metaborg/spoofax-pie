@@ -128,7 +128,6 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.spoofaxEclipseDep()));
         if(input.adapterProjectCompilerInput().multilangAnalyzer().isPresent()) {
             bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.multilangEclipseDep()));
-            bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.multilangEclipseExternaldepsDep()));
         }
         input.languageProjectDependency().ifSome((d) -> bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(d)));
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(input.adapterProjectDependency()));

@@ -26,7 +26,6 @@ languageProject {
   }
   statixDependencies.set(listOf(project(":signature")))
 }
-
 spoofax2BasedLanguageProject {
   compilerInput {
     withMultilangAnalyzer()

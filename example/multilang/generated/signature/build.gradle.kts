@@ -21,7 +21,6 @@ languageProject {
     }
   }
 }
-
 spoofax2BasedLanguageProject {
   compilerInput {
     withMultilangAnalyzer()
