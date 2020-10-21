@@ -85,7 +85,7 @@ public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConf
                     .collect(Collectors.toSet()));
 
                 final @Nullable ContextSettings settings = dynamicConfig.contextSettings().get(contextId);
-                final @Nullable String logLevel = settings == null ? null : settings.logLevel().orElse(null);
+                final @Nullable String logLevel = settings == null ? null : settings.logLevel();
                 final boolean stripTraces = settings != null && settings.stripTraces();
 
                 final ContextConfig contextConfig = ImmutableContextConfig.builder()

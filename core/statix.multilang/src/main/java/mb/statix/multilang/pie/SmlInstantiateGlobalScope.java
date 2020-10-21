@@ -93,7 +93,6 @@ public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalSc
             ITerm globalScope = result.state().unifier().findRecursive(result.existentials().get(globalScopeVar));
             return Result.ofOk(ImmutableGlobalResult.builder()
                 .globalScope(globalScope)
-                .globalScopeVar(globalScopeVar)
                 .result(result)
                 .build());
         } catch(InterruptedException e) {

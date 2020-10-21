@@ -10,5 +10,5 @@ public interface ContextSettings {
         return false;
     }
 
-    Optional<String> logLevel();
+    String logLevel();
 }

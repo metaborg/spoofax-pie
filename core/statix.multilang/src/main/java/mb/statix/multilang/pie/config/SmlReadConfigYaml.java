@@ -8,6 +8,7 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.statix.multilang.metadata.ContextId;
 import mb.statix.multilang.metadata.LanguageId;
 import mb.statix.multilang.MultiLangScope;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.introspector.BeanAccess;
@@ -119,7 +120,7 @@ public class SmlReadConfigYaml implements TaskDef<ResourcePath, Result<MultiLang
     }
 
     private static class MutableContextConfig {
-        private String logging;
+        private String logging = "WARN";
         private boolean stripTraces;
 
         public MutableContextConfig(String logging, boolean stripTraces) {
@@ -145,7 +146,7 @@ public class SmlReadConfigYaml implements TaskDef<ResourcePath, Result<MultiLang
             this.stripTraces = stripTraces;
         }
 
-        @Override public boolean equals(Object o) {
+        @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             MutableContextConfig that = (MutableContextConfig)o;

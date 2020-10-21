@@ -1,7 +1,7 @@
 package mb.statix.multilang.pie;
 
 import mb.common.result.Result;
-import mb.nabl2.terms.ITermVar;
+import mb.nabl2.terms.ITerm;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
@@ -81,7 +81,7 @@ public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.In
         return TaskUtils.executeWrapped(() -> context.require(input.globalResultSupplier)
             .mapErr(MultiLangAnalysisException::wrapIfNeeded)
             .flatMap(globalResult -> {
-                Set<ITermVar> scopeArgs = Collections.singleton(globalResult.globalScopeVar());
+                Set<ITerm> scopeArgs = Collections.singleton(globalResult.globalScope());
                 IConstraint projectConstraint = new CUser(input.projectConstraint, scopeArgs);
 
                 IDebugContext debug = TaskUtils.createDebugContext(input.logLevel);
