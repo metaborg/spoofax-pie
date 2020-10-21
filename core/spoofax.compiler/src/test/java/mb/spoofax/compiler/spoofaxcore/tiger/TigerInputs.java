@@ -28,7 +28,6 @@ import mb.spoofax.compiler.language.ParserLanguageCompiler;
 import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.language.StylerLanguageCompiler;
 import mb.spoofax.compiler.platform.CliProjectCompiler;
-import mb.spoofax.compiler.platform.EclipseExternaldepsProjectCompiler;
 import mb.spoofax.compiler.platform.EclipseProjectCompiler;
 import mb.spoofax.compiler.platform.IntellijProjectCompiler;
 import mb.spoofax.compiler.util.Shared;
@@ -156,18 +155,9 @@ public class TigerInputs {
             ;
     }
 
-    public EclipseExternaldepsProjectCompiler.Input.Builder eclipseExternaldepsProjectInput() {
-        return EclipseExternaldepsProjectCompiler.Input.builder()
-            .withDefaultProjectFromParentDirectory(rootDirectory, shared)
-            .shared(shared)
-            .adapterProjectCompilerInput(adapterProjectCompilerInput())
-            ;
-    }
-
     public EclipseProjectCompiler.Input.Builder eclipseProjectInput() {
         return EclipseProjectCompiler.Input.builder()
             .withDefaultProjectFromParentDirectory(rootDirectory, shared)
-            .eclipseExternaldepsDependency(eclipseExternaldepsProjectInput().build().project().asProjectDependency())
             .shared(shared)
             .languageProjectCompilerInput(languageProjectCompilerInput())
             .adapterProjectCompilerInput(adapterProjectCompilerInput())

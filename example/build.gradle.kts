@@ -13,7 +13,6 @@ plugins {
   id("org.metaborg.spoofax.compiler.gradle.language") apply false
   id("org.metaborg.spoofax.compiler.gradle.adapter") apply false
   id("org.metaborg.spoofax.compiler.gradle.cli") apply false
-  id("org.metaborg.spoofax.compiler.gradle.eclipse.externaldeps") apply false
   id("org.metaborg.spoofax.compiler.gradle.eclipse") apply false
   id("org.metaborg.spoofax.compiler.gradle.intellij") apply false
   id("org.metaborg.spoofax.compiler.gradle.spoofax2.language") apply false

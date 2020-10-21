@@ -29,7 +29,6 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   includeProject("tiger", "tiger/manual/tiger")
   includeProject("tiger.spoofax", "tiger/manual/tiger.spoofax")
   includeProject("tiger.cli", "tiger/manual/tiger.cli")
-  includeProject("tiger.eclipse.externaldeps", "tiger/manual/tiger.eclipse.externaldeps")
   includeProject("tiger.eclipse", "tiger/manual/tiger.eclipse")
   includeProject("tiger.intellij", "tiger/manual/tiger.intellij")
 }
@@ -39,7 +38,6 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   includeProject("mod")
   includeProject("mod.spoofax")
   includeProject("mod.cli")
-  includeProject("mod.eclipse.externaldeps")
   includeProject("mod.eclipse")
   includeProject("mod.intellij")
 }
@@ -48,7 +46,6 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   includeProject("calc")
   includeProject("calc.spoofax")
   includeProject("calc.cli")
-  includeProject("calc.eclipse.externaldeps")
   includeProject("calc.eclipse")
   includeProject("calc.intellij")
 }
@@ -66,13 +63,11 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
 
   includeProject("minisdf")
   includeProject("minisdf.spoofax")
-  includeProject("minisdf.eclipse.externaldeps")
   includeProject("minisdf.eclipse")
   includeProject("minisdf.cli")
 
   includeProject("ministr")
   includeProject("ministr.spoofax")
-  includeProject("ministr.eclipse.externaldeps")
   includeProject("ministr.eclipse")
   includeProject("ministr.cli")
 

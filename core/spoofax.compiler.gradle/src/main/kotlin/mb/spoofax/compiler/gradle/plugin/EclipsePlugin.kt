@@ -12,11 +12,11 @@ import org.gradle.api.Project
 import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
+import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.*
 
 open class EclipseProjectExtension(project: Project) {
   val adapterProject: Property<Project> = project.objects.property()
-  val eclipseExternaldepsProject: Property<Project> = project.objects.property()
   val compilerInput: Property<EclipseProjectCompiler.Input.Builder> = project.objects.property()
 
   fun compilerInput(closure: EclipseProjectCompiler.Input.Builder.() -> Unit) {
@@ -43,15 +43,6 @@ open class EclipseProjectExtension(project: Project) {
   internal val adapterProjectExtension get() = adapterProjectFinalized.extensions.getByType<AdapterProjectExtension>()
   internal val languageProjectExtension get() = adapterProjectExtension.languageProjectExtension
 
-  internal val eclipseExternaldepsProjectFinalized: Project by lazy {
-    project.logger.debug("Finalizing $name's external dependencies project reference in $project")
-    eclipseExternaldepsProject.finalizeValue()
-    if(!eclipseExternaldepsProject.isPresent) {
-      throw GradleException("$name's external dependencies project reference in $project has not been set")
-    }
-    eclipseExternaldepsProject.get()
-  }
-
   internal val compilerInputFinalized: EclipseProjectCompiler.Input by lazy {
     project.logger.debug("Finalizing $name's compiler input in $project")
     compilerInput.finalizeValue()
@@ -60,7 +51,6 @@ open class EclipseProjectExtension(project: Project) {
       .shared(shared)
       .project(project.toSpoofaxCompilerProject())
       .packageId(EclipseProjectCompiler.Input.Builder.defaultPackageId(shared))
-      .eclipseExternaldepsDependency(eclipseExternaldepsProjectFinalized.toSpoofaxCompilerProject().asProjectDependency())
       .languageProjectCompilerInput(languageProjectExtension.compilerInputFinalized)
       .adapterProjectCompilerInput(adapterProjectExtension.compilerInputFinalized)
       .build()
@@ -77,9 +67,7 @@ open class EclipsePlugin : Plugin<Project> {
 
     project.afterEvaluate {
       extension.adapterProjectFinalized.whenAdapterProjectFinalized {
-        extension.eclipseExternaldepsProjectFinalized.whenEclipseExternaldepsProjectFinalized {
-          configure(project, extension.languageProjectExtension.component, extension.compilerInputFinalized)
-        }
+        configure(project, extension.languageProjectExtension.component, extension.compilerInputFinalized)
       }
     }
   }
@@ -88,6 +76,7 @@ open class EclipsePlugin : Plugin<Project> {
     configureProject(project, component, input)
     configureCompilerTask(project, component, input)
     configureBundle(project, component, input)
+    configureJarTask(project, input)
   }
 
   private fun configureProject(project: Project, component: SpoofaxCompilerGradleComponent, input: EclipseProjectCompiler.Input) {
@@ -122,6 +111,42 @@ open class EclipsePlugin : Plugin<Project> {
       manifestFile.set(component.resourceService.toLocalFile(input.manifestMfFile())!!)
     }
     configureBundleDependencies(project, component.eclipseProjectCompiler.getBundleDependencies(input))
+  }
+
+  private fun configureJarTask(project: Project, input: EclipseProjectCompiler.Input) {
+    project.tasks.named<Jar>("jar").configure {
+      inputs.property("input", input)
+
+      val exports = listOf(
+        // Provided by 'javax.inject' bundle.
+        "!javax.inject.*",
+        // Provided by 'spoofax.eclipse' bundle.
+        "!mb.log.*",
+        "!mb.resource.*",
+        "!mb.pie.api.*",
+        "!mb.pie.runtime.*",
+        "!mb.common.*",
+        "!mb.spoofax.core.*",
+        "!dagger.*",
+        // Do not export testing packages.
+        "!junit.*",
+        "!org.junit.*",
+        // Do not export compile-time annotation packages.
+        "!org.checkerframework.*",
+        "!org.codehaus.mojo.animal_sniffer.*",
+        // Allow split package for 'mb.nabl2'.
+        "mb.nabl2.*;-split-package:=merge-first",
+        // Export packages from this project.
+        "${input.packageId()}.*",
+        // Export what is left, using a mandatory provider to prevent accidental imports via 'Import-Package'.
+        "*;provider=${input.project().coordinate().artifactId()};mandatory:=provider"
+      )
+      manifest {
+        attributes(
+          Pair("Export-Package", exports.joinToString(", "))
+        )
+      }
+    }
   }
 }
 

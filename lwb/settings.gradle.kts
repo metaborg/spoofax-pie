@@ -25,7 +25,6 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   includeProject("sdf3")
   includeProject("sdf3.spoofax")
   includeProject("sdf3.cli")
-  includeProject("sdf3.eclipse.externaldeps")
   includeProject("sdf3.eclipse")
   includeProject("sdf3.intellij")
 }
@@ -34,7 +33,6 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   includeProject("stratego")
   includeProject("stratego.spoofax")
   includeProject("stratego.cli")
-  includeProject("stratego.eclipse.externaldeps")
   includeProject("stratego.eclipse")
   includeProject("stratego.intellij")
 }
@@ -43,7 +41,6 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   includeProject("esv")
   includeProject("esv.spoofax")
   includeProject("esv.cli")
-  includeProject("esv.eclipse.externaldeps")
   includeProject("esv.eclipse")
   includeProject("esv.intellij")
 }
@@ -52,7 +49,6 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   includeProject("statix")
   includeProject("statix.spoofax")
   includeProject("statix.cli")
-  includeProject("statix.eclipse.externaldeps")
   includeProject("statix.eclipse")
   includeProject("statix.intellij")
 }

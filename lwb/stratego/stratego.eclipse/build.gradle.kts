@@ -9,6 +9,5 @@ dependencies {
 }
 
 languageEclipseProject {
-  eclipseExternaldepsProject.set(project(":stratego.eclipse.externaldeps"))
   adapterProject.set(project(":stratego.spoofax"))
 }

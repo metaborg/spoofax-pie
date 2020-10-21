@@ -9,6 +9,5 @@ dependencies {
 }
 
 languageEclipseProject {
-  eclipseExternaldepsProject.set(project(":esv.eclipse.externaldeps"))
   adapterProject.set(project(":esv.spoofax"))
 }

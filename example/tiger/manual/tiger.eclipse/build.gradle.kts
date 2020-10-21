@@ -10,9 +10,44 @@ dependencies {
   annotationProcessor(platform(compositeBuild("spoofax.depconstraints")))
 
   bundleApi(compositeBuild("spoofax.eclipse"))
-  bundleApi(project(":tiger.eclipse.externaldeps"))
+
+  bundleEmbedApi(project(":tiger"))
+  bundleEmbedApi(project(":tiger.spoofax"))
 
   compileOnly("org.checkerframework:checker-qual-android")
-
   annotationProcessor("com.google.dagger:dagger-compiler")
+}
+
+// Use bnd to create a single OSGi bundle JAR that includes all dependencies.
+val exports = listOf(
+  // Provided by 'javax.inject' bundle.
+  "!javax.inject.*",
+  // Provided by 'spoofax.eclipse.externaldeps' bundle.
+  "!mb.log.*",
+  "!mb.resource.*",
+  "!mb.pie.*",
+  "!mb.common.*",
+  "!mb.spoofax.core.*",
+  "!dagger.*",
+  // Do not export testing packages.
+  "!junit.*",
+  "!org.junit.*",
+  // Do not export compile-time annotation packages.
+  "!org.checkerframework.*",
+  "!org.codehaus.mojo.animal_sniffer.*",
+  // Allow split package for 'mb.nabl'.
+  "mb.nabl2.*;-split-package:=merge-first",
+  // Export packages from this project.
+  "mb.tiger.eclipse.*",
+  // Export what is left, using a mandatory provider to prevent accidental imports via 'Import-Package'.
+  "*;provider=tiger;mandatory:=provider"
+)
+tasks {
+  "jar"(Jar::class) {
+    manifest {
+      attributes(
+        Pair("Export-Package", exports.joinToString(", "))
+      )
+    }
+  }
 }

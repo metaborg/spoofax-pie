@@ -21,7 +21,6 @@ import mb.spoofax.compiler.language.ParserLanguageCompiler;
 import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.language.StylerLanguageCompiler;
 import mb.spoofax.compiler.platform.CliProjectCompiler;
-import mb.spoofax.compiler.platform.EclipseExternaldepsProjectCompiler;
 import mb.spoofax.compiler.platform.EclipseProjectCompiler;
 import mb.spoofax.compiler.platform.IntellijProjectCompiler;
 import mb.spoofax.compiler.util.TemplateCompiler;
@@ -59,7 +58,6 @@ public class SpoofaxCompilerModule {
         StrategoRuntimeAdapterCompiler strategoRuntimeAdapterCompiler,
 
         CliProjectCompiler cliProjectCompiler,
-        EclipseExternaldepsProjectCompiler eclipseExternaldepsProjectCompiler,
         EclipseProjectCompiler eclipseProjectCompiler,
         IntellijProjectCompiler intellijProjectCompiler
     ) {
@@ -83,7 +81,6 @@ public class SpoofaxCompilerModule {
         taskDefs.add(completerAdapterCompiler);
 
         taskDefs.add(cliProjectCompiler);
-        taskDefs.add(eclipseExternaldepsProjectCompiler);
         taskDefs.add(eclipseProjectCompiler);
         taskDefs.add(intellijProjectCompiler);
 

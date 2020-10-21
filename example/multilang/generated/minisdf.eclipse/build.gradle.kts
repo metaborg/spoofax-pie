@@ -4,6 +4,5 @@ plugins {
 }
 
 languageEclipseProject {
-  eclipseExternaldepsProject.set(project(":minisdf.eclipse.externaldeps"))
   adapterProject.set(project(":minisdf.spoofax"))
 }

@@ -11,12 +11,10 @@ class EclipseProjectCompilerTest extends TestBase {
 
         try(MixedSession session = pie.newSession()) {
             compileLanguageAndAdapterProject(session, inputs);
-            session.require(component.getEclipseExternaldepsProjectCompiler().createTask(inputs.eclipseExternaldepsProjectInput().build()));
-
             final EclipseProjectCompiler.Input input = inputs.eclipseProjectInput().build();
             session.require(component.getEclipseProjectCompiler().createTask(input));
             fileAssertions.asserts(input.pluginXmlFile(), (s) -> s.assertAll("plugin.xml", "<plugin>"));
-            fileAssertions.asserts(input.manifestMfFile(), (s) -> s.assertAll("MANIFEST.MF", "Export-Package"));
+            fileAssertions.asserts(input.manifestMfFile(), (s) -> s.assertAll("MANIFEST.MF", "Bundle-ManifestVersion"));
             fileAssertions.scopedExists(input.generatedJavaSourcesDirectory(), (s) -> {
                 s.asserts(input.packageInfo(), (a) -> a.assertAll("package-info.java", "@DefaultQualifier(NonNull.class)"));
                 s.assertPublicJavaClass(input.genPlugin(), "TigerPlugin");

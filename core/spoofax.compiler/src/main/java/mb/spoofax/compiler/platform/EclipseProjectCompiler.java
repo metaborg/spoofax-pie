@@ -125,10 +125,12 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
         final ArrayList<GradleConfiguredBundleDependency> bundleDependencies = new ArrayList<>(input.additionalBundleDependencies());
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleTargetPlatformApi("javax.inject", null));
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.spoofaxEclipseDep()));
-        bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(input.eclipseExternaldepsDependency()));
         if(input.adapterProjectCompilerInput().multilangAnalyzer().isPresent()) {
             bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.multilangEclipseDep()));
+            bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.multilangEclipseExternaldepsDep()));
         }
+        bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(input.languageProjectDependency()));
+        bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(input.adapterProjectDependency()));
         return bundleDependencies;
     }
 
@@ -175,7 +177,13 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
 
         /// Gradle configuration
 
-        GradleDependency eclipseExternaldepsDependency();
+        @Value.Default default GradleDependency languageProjectDependency() {
+            return adapterProjectCompilerInput().languageProjectDependency();
+        }
+
+        @Value.Default default GradleDependency adapterProjectDependency() {
+            return adapterProjectCompilerInput().adapterProject().project().asProjectDependency();
+        }
 
         List<GradleConfiguredDependency> additionalDependencies();
 

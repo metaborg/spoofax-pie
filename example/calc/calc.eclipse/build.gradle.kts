@@ -4,6 +4,5 @@ plugins {
 }
 
 languageEclipseProject {
-  eclipseExternaldepsProject.set(project(":calc.eclipse.externaldeps"))
   adapterProject.set(project(":calc.spoofax"))
 }

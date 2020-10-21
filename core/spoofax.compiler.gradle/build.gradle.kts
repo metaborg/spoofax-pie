@@ -48,10 +48,6 @@ gradlePlugin {
       id = "org.metaborg.spoofax.compiler.gradle.cli"
       implementationClass = "mb.spoofax.compiler.gradle.plugin.CliPlugin"
     }
-    create("spoofax-compiler-eclipse-externaldeps") {
-      id = "org.metaborg.spoofax.compiler.gradle.eclipse.externaldeps"
-      implementationClass = "mb.spoofax.compiler.gradle.plugin.EclipseExternaldepsPlugin"
-    }
     create("spoofax-compiler-eclipse") {
       id = "org.metaborg.spoofax.compiler.gradle.eclipse"
       implementationClass = "mb.spoofax.compiler.gradle.plugin.EclipsePlugin"
