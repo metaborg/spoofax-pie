@@ -5,8 +5,8 @@ plugins {
 
 dependencies {
   testCompile("org.metaborg:spoofax.core")
-  testCompile(project(":minisdf.spoofax"))
-  testCompile(project(":ministr.spoofax"))
+  testCompile(project(":minisdf"))
+  testCompile(project(":ministr"))
 
   testImplementation("org.metaborg:log.backend.slf4j")
   testImplementation("org.slf4j:slf4j-simple:1.7.30")

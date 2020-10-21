@@ -4,5 +4,5 @@ plugins {
 }
 
 languageCliProject {
-  adapterProject.set(project(":ministr.spoofax"))
+  adapterProject.set(project(":ministr"))
 }

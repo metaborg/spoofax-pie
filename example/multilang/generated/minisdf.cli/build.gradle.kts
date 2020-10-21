@@ -4,5 +4,5 @@ plugins {
 }
 
 languageCliProject {
-  adapterProject.set(project(":minisdf.spoofax"))
+  adapterProject.set(project(":minisdf"))
 }

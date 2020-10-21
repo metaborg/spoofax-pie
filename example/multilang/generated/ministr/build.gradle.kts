@@ -8,6 +8,7 @@ plugins {
   id("org.metaborg.gradle.config.java-library")
   id("org.metaborg.gradle.config.junit-testing")
   id("org.metaborg.spoofax.compiler.gradle.spoofax2.language")
+  id("org.metaborg.spoofax.compiler.gradle.adapter")
 }
 
 dependencies {
@@ -32,7 +33,6 @@ languageProject {
   }
   statixDependencies.set(listOf(project(":module")))
 }
-
 spoofax2BasedLanguageProject {
   compilerInput {
     withParser()
@@ -44,5 +44,21 @@ spoofax2BasedLanguageProject {
     withMultilangAnalyzer()
     project
       .languageSpecificationDependency(GradleDependency.project(":ministr.spoofaxcore"))
+  }
+}
+
+languageAdapterProject {
+  compilerInput {
+    withParser()
+    withStyler()
+    withStrategoRuntime()
+    withMultilangAnalyzer().run {
+      rootModule("mini-str/mini-str-typing")
+      preAnalysisStrategy("pre-analyze")
+      postAnalysisStrategy("post-analyze")
+      contextId("mini-sdf-str")
+      fileConstraint("mini-str/mini-str-typing!mstrProgramOK")
+      projectConstraint("mini-str/mini-str-typing!mstrProjectOK")
+    }
   }
 }

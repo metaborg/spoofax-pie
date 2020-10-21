@@ -4,5 +4,5 @@ plugins {
 }
 
 languageEclipseProject {
-  adapterProject.set(project(":minisdf.spoofax"))
+  adapterProject.set(project(":minisdf"))
 }
