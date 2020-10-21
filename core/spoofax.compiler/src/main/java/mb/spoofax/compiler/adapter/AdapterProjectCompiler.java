@@ -516,7 +516,11 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
             final ArrayList<ResourcePath> generatedFiles = new ArrayList<>();
             if(classKind().isGenerating()) {
                 final ResourcePath classesGenDirectory = generatedJavaSourcesDirectory();
-                generatedFiles.add(genPackageInfo().file(classesGenDirectory));
+                if(languageProjectDependency().isSome()) {
+                    // Only generate package-info.java if the language project is a separate project. Otherwise we will have
+                    // two package-info.java files in the same package, which is an error.
+                    generatedFiles.add(genPackageInfo().file(classesGenDirectory));
+                }
                 generatedFiles.add(genComponent().file(classesGenDirectory));
                 generatedFiles.add(genModule().file(classesGenDirectory));
                 generatedFiles.add(genInstance().file(classesGenDirectory));

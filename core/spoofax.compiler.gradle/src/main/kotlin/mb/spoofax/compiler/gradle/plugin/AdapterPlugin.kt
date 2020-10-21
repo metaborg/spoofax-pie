@@ -45,6 +45,9 @@ open class AdapterProjectExtension(project: Project) {
       null
     }
   }
+  internal val isSeparateProject: Boolean by lazy {
+    languageProjectFinalized != null
+  }
   internal val languageOrThisProjectFinalized: Project by lazy {
     languageProjectFinalized ?: project
   }
@@ -55,7 +58,7 @@ open class AdapterProjectExtension(project: Project) {
     adapterProject.finalizeValue()
     val shared = languageProjectExtension.sharedFinalized
     adapterProject.get()
-      .packageId(if(languageProjectFinalized == null) AdapterProject.Builder.defaultPackageId(shared) else AdapterProject.Builder.defaultSeparatePackageId(shared))
+      .packageId(if(!isSeparateProject) AdapterProject.Builder.defaultPackageId(shared) else AdapterProject.Builder.defaultSeparatePackageId(shared))
       .shared(shared)
       .build()
   }
