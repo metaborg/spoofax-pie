@@ -44,7 +44,7 @@ public class EclipseExternaldepsProjectCompiler implements TaskDef<EclipseExtern
         final Shared shared = input.shared();
         final ArrayList<GradleConfiguredBundleDependency> bundleDependencies = new ArrayList<>();
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleTargetPlatformApi("javax.inject", null));
-        bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.spoofaxEclipseExternaldepsDep()));
+        bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.spoofaxEclipseDep()));
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(input.languageProjectDependency()));
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(input.adapterProjectDependency()));
         if(input.adapterProjectCompilerInput().multilangAnalyzer().isPresent()) {

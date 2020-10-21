@@ -126,7 +126,6 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleTargetPlatformApi("javax.inject", null));
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.spoofaxEclipseDep()));
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(input.eclipseExternaldepsDependency()));
-        bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.spoofaxEclipseExternaldepsDep()));
         if(input.adapterProjectCompilerInput().multilangAnalyzer().isPresent()) {
             bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.multilangEclipseDep()));
         }

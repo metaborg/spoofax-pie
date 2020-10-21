@@ -7,7 +7,6 @@ dependencies {
   api(platform(project(":spoofax.depconstraints")))
 
   bundleTargetPlatformApi(eclipse("javax.inject"))
-  bundleApi(project(":spoofax.eclipse.externaldeps"))
 
   bundleEmbedApi(project(":common"))
   bundleEmbedApi(project(":statix.multilang"))

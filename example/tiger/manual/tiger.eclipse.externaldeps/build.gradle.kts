@@ -9,7 +9,6 @@ dependencies {
   api(platform(compositeBuild("spoofax.depconstraints")))
 
   bundleTargetPlatformApi(eclipse("javax.inject"))
-  bundleApi(compositeBuild("spoofax.eclipse.externaldeps"))
   bundleEmbedApi(project(":tiger"))
   bundleEmbedApi(project(":tiger.spoofax"))
 }

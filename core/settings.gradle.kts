@@ -36,7 +36,6 @@ include("spoofax.core")
 include("spoofax.cli")
 include("spoofax.intellij")
 include("spoofax.eclipse")
-include("spoofax.eclipse.externaldeps")
 
 include("spoofax.compiler")
 include("spoofax.compiler.dagger")

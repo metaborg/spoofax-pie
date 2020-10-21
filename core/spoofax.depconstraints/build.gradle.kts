@@ -42,7 +42,6 @@ dependencies {
     api(project(":spoofax.cli"))
     api(project(":spoofax.intellij"))
     api(project(":spoofax.eclipse")) // TODO: bundle versions are not picked up when consuming this platform
-    api(project(":spoofax.eclipse.externaldeps")) // TODO: bundle versions are not picked up when consuming this platform
     api(project(":spoofax.compiler"))
     api(project(":spoofax.compiler.interfaces"))
     api(project(":spoofax.compiler.gradle"))

@@ -10,7 +10,6 @@ dependencies {
   annotationProcessor(platform(compositeBuild("spoofax.depconstraints")))
 
   bundleApi(compositeBuild("spoofax.eclipse"))
-  bundleApi(compositeBuild("spoofax.eclipse.externaldeps"))
   bundleApi(project(":tiger.eclipse.externaldeps"))
 
   compileOnly("org.checkerframework:checker-qual-android")
