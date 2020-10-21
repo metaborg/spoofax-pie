@@ -6,7 +6,7 @@ plugins {
 }
 
 languageIntellijProject {
-  adapterProject.set(project(":sdf3.spoofax"))
+  adapterProject.set(project(":sdf3"))
 }
 
 intellij {

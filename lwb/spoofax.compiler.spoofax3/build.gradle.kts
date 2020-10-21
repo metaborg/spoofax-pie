@@ -14,13 +14,14 @@ dependencies {
   api("org.metaborg:resource")
   api("org.metaborg:pie.api")
   api("org.metaborg:pie.task.archive")
-  api(project(":sdf3.spoofax"))
-  api(project(":stratego.spoofax"))
-  api(project(":esv.spoofax"))
-  api(project(":statix.spoofax"))
 
-  api(project(":libspoofax2.spoofax"))
-  api(project(":libstatix.spoofax"))
+  api(project(":sdf3"))
+  api(project(":stratego"))
+  api(project(":esv"))
+  api(project(":statix"))
+
+  api(project(":libspoofax2"))
+  api(project(":libstatix"))
 
   compileOnly("org.checkerframework:checker-qual-android")
   compileOnly("org.immutables:value-annotations")

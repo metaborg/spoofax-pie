@@ -6,7 +6,7 @@ plugins {
 }
 
 languageIntellijProject {
-  adapterProject.set(project(":statix.spoofax"))
+  adapterProject.set(project(":statix"))
 }
 
 intellij {

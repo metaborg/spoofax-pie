@@ -4,5 +4,5 @@ plugins {
 }
 
 languageCliProject {
-  adapterProject.set(project(":stratego.spoofax"))
+  adapterProject.set(project(":stratego"))
 }

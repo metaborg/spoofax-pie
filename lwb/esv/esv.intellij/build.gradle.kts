@@ -6,7 +6,7 @@ plugins {
 }
 
 languageIntellijProject {
-  adapterProject.set(project(":esv.spoofax"))
+  adapterProject.set(project(":esv"))
 }
 
 intellij {

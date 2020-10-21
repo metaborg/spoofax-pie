@@ -23,7 +23,6 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
 
 "sdf3".run {
   includeProject("sdf3")
-  includeProject("sdf3.spoofax")
   includeProject("sdf3.cli")
   includeProject("sdf3.eclipse")
   includeProject("sdf3.intellij")
@@ -31,7 +30,6 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
 
 "stratego".run {
   includeProject("stratego")
-  includeProject("stratego.spoofax")
   includeProject("stratego.cli")
   includeProject("stratego.eclipse")
   includeProject("stratego.intellij")
@@ -39,7 +37,6 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
 
 "esv".run {
   includeProject("esv")
-  includeProject("esv.spoofax")
   includeProject("esv.cli")
   includeProject("esv.eclipse")
   includeProject("esv.intellij")
@@ -47,21 +44,13 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
 
 "statix".run {
   includeProject("statix")
-  includeProject("statix.spoofax")
   includeProject("statix.cli")
   includeProject("statix.eclipse")
   includeProject("statix.intellij")
 }
 
-"libspoofax2".run {
-  includeProject("libspoofax2")
-  includeProject("libspoofax2.spoofax")
-}
-
-"libstatix".run {
-  includeProject("libstatix")
-  includeProject("libstatix.spoofax")
-}
+include("libspoofax2")
+include("libstatix")
 
 include("spoofax.compiler.spoofax3")
 include("spoofax.compiler.spoofax3.dagger")

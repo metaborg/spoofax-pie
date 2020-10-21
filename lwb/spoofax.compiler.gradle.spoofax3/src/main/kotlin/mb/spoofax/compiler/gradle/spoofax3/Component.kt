@@ -3,23 +3,23 @@ package mb.spoofax.compiler.gradle.spoofax3
 import dagger.Component
 import dagger.Module
 import dagger.Provides
-import mb.esv.spoofax.EsvComponent
-import mb.esv.spoofax.EsvQualifier
-import mb.libspoofax2.spoofax.LibSpoofax2Component
-import mb.libspoofax2.spoofax.LibSpoofax2Qualifier
-import mb.libstatix.spoofax.LibStatixComponent
-import mb.libstatix.spoofax.LibStatixQualifier
+import mb.esv.EsvComponent
+import mb.esv.EsvQualifier
+import mb.libspoofax2.LibSpoofax2Component
+import mb.libspoofax2.LibSpoofax2Qualifier
+import mb.libstatix.LibStatixComponent
+import mb.libstatix.LibStatixQualifier
 import mb.pie.api.MapTaskDefs
 import mb.pie.api.Pie
 import mb.pie.api.TaskDef
 import mb.resource.ResourceService
-import mb.sdf3.spoofax.Sdf3Component
-import mb.sdf3.spoofax.Sdf3Qualifier
+import mb.sdf3.Sdf3Component
+import mb.sdf3.Sdf3Qualifier
 import mb.spoofax.compiler.spoofax3.dagger.*
-import mb.statix.spoofax.StatixComponent
-import mb.statix.spoofax.StatixQualifier
-import mb.str.spoofax.StrategoComponent
-import mb.str.spoofax.StrategoQualifier
+import mb.statix.StatixComponent
+import mb.statix.StatixQualifier
+import mb.str.StrategoComponent
+import mb.str.StrategoQualifier
 
 @Spoofax3CompilerScope
 @Component(

@@ -4,5 +4,5 @@ plugins {
 }
 
 languageCliProject {
-  adapterProject.set(project(":sdf3.spoofax"))
+  adapterProject.set(project(":sdf3"))
 }
