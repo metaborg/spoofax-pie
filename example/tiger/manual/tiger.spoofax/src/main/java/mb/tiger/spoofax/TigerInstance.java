@@ -181,7 +181,7 @@ public class TigerInstance implements LanguageInstance {
 
     @Override public ListView<MenuItem> getResourceContextMenuItems() {
         return ListView.of(
-            MenuItem.menu("Compile",
+            MenuItem.menu("Compile", "Compile commands.",
                 CommandAction.builder().manualOnce(compileFileCommand).fileRequired().buildItem(),
                 CommandAction.builder().manualOnce(compileDirectoryCommand).directoryRequired().buildItem(),
                 CommandAction.builder().manualOnce(altCompileFileCommand, "- default").fileRequired().buildItem(),
@@ -193,15 +193,15 @@ public class TigerInstance implements LanguageInstance {
                 CommandAction.builder().manualContinuous(altCompileFileCommand, "- base64 encode", new RawArgs(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))).fileRequired().buildItem(),
                 CommandAction.builder().manualContinuous(altCompileFileCommand, "- list literal values instead + base64 encode", new RawArgs(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt"))).fileRequired().buildItem()
             ),
-            MenuItem.menu("Debug",
-                MenuItem.menu("Syntax",
+            MenuItem.menu("Debug", "Debug commands.",
+                MenuItem.menu("Syntax", "Syntactic commands.",
                     CommandAction.builder().manualOnce(showParsedAstCommand).buildItem(),
                     CommandAction.builder().manualOnce(showPrettyPrintedTextCommand).buildItem()
                 ),
-                MenuItem.menu("Static Semantics",
+                MenuItem.menu("Static Semantics", "Static semantic commands.",
                     CommandAction.builder().manualOnce(showAnalyzedAstCommand).buildItem()
                 ),
-                MenuItem.menu("Transformations",
+                MenuItem.menu("Transformations", "Transformation commands.",
                     CommandAction.builder().manualOnce(showDesugaredAstCommand).buildItem()
                 )
             )
@@ -210,7 +210,7 @@ public class TigerInstance implements LanguageInstance {
 
     @Override public ListView<MenuItem> getEditorContextMenuItems() {
         return ListView.of(
-            MenuItem.menu("Compile",
+            MenuItem.menu("Compile", "Compile commands.",
                 CommandAction.builder().manualOnce(compileFileCommand).fileRequired().buildItem(),
                 CommandAction.builder().manualOnce(altCompileFileCommand, "- default").fileRequired().buildItem(),
                 CommandAction.builder().manualOnce(altCompileFileCommand, "- list literal values instead", new RawArgs(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))).fileRequired().buildItem(),
@@ -221,18 +221,18 @@ public class TigerInstance implements LanguageInstance {
                 CommandAction.builder().manualContinuous(altCompileFileCommand, "- base64 encode", new RawArgs(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))).fileRequired().buildItem(),
                 CommandAction.builder().manualContinuous(altCompileFileCommand, "- list literal values instead + base64 encode", new RawArgs(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt"))).fileRequired().buildItem()
             ),
-            MenuItem.menu("Debug",
-                MenuItem.menu("Syntax",
+            MenuItem.menu("Debug", "Debug commands.",
+                MenuItem.menu("Syntax", "Syntactic commands.",
                     CommandAction.builder().manualOnce(showParsedAstCommand).buildItem(),
                     CommandAction.builder().manualContinuous(showParsedAstCommand).buildItem(),
                     CommandAction.builder().manualOnce(showPrettyPrintedTextCommand).buildItem(),
                     CommandAction.builder().manualContinuous(showPrettyPrintedTextCommand).buildItem()
                 ),
-                MenuItem.menu("Static Semantics",
+                MenuItem.menu("Static Semantics", "Static semantic commands.",
                     CommandAction.builder().manualOnce(showAnalyzedAstCommand).buildItem(),
                     CommandAction.builder().manualContinuous(showAnalyzedAstCommand).buildItem()
                 ),
-                MenuItem.menu("Transformations",
+                MenuItem.menu("Transformations", "Transformation commands.",
                     CommandAction.builder().manualOnce(showDesugaredAstCommand).buildItem(),
                     CommandAction.builder().manualContinuous(showDesugaredAstCommand).buildItem()
                 )

@@ -21,5 +21,28 @@
       language="Tiger"
       implementationClass="mb.tiger.intellij.editor.TigerCompletionContributor"
     />
+
+    <editorTabTitleProvider implementation="mb.spoofax.intellij.editor.SpoofaxEditorTabTitleProvider"/>
   </extensions>
+
+  <actions>
+    <!-- Spoofax Main -->
+    <group id="spoofax.intellij.menu.main" text="Spoofax" popup="true">
+      <add-to-group group-id="MainMenu" anchor="after" relative-to-action="WindowMenu"/>
+      <group id="spoofax.intelij.menu.main.debug" text="Debug" popup="true">
+        <group id="spoofax.intellij.menu.main.debug.pie" text="PIE" popup="true">
+          <action id="spoofax.intellij.pie.dropstore"
+                  class="mb.spoofax.intellij.pie.DropStoreAction" text="Drop Store"
+                  description="Drops the PIE store.">
+          </action>
+        </group>
+      </group>
+    </group>
+  </actions>
+
+  <application-components>
+    <component>
+      <implementation-class>mb.tiger.intellij.menu.TigerMainMenuComponent</implementation-class>
+    </component>
+  </application-components>
 </idea-plugin>

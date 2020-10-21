@@ -5,7 +5,6 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import mb.resource.ReadableResource;
-import mb.resource.Resource;
 import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -27,17 +26,26 @@ public final class IntellijResource implements ReadableResource {
     /**
      * Initializes a new instance of the {@link IntellijResource} class.
      *
-     * @param file The IntelliJ virtual file representing the resource.
+     * @param file the IntelliJ virtual file representing the resource
      */
     /* package private */ IntellijResource(VirtualFile file) {
         this.file = file;
     }
 
     /**
+     * Gets the virtual file associated with this resource.
+     *
+     * @return the virtual file
+     */
+    public VirtualFile getVirtualFile() {
+        return this.file;
+    }
+
+    /**
      * Gets the document associated with this resource.
      *
-     * @return The associated document; or null when the file has no associated text document
-     * (e.g., it is a directory, binary file, or too large).
+     * @return the associated document; or null when the file has no associated text document
+     * (e.g., it is a directory, binary file, or too large)
      */
     @Nullable public Document getDocument() {
         return FileDocumentManager.getInstance().getDocument(this.file);
@@ -46,8 +54,8 @@ public final class IntellijResource implements ReadableResource {
     /**
      * Gets the text of the document associated with this resource.
      *
-     * @return The text of the associated document; or null when the file has no associated text document
-     * (e.g., it is a directory, binary file, or too large).
+     * @return the text of the associated document; or null when the file has no associated text document
+     * (e.g., it is a directory, binary file, or too large)
      */
     @Nullable public String getDocumentText() {
         @Nullable Document document = getDocument();
@@ -55,7 +63,7 @@ public final class IntellijResource implements ReadableResource {
         return ReadAction.compute(document::getText);
     }
 
-    @Override public void close() throws IOException {
+    @Override public void close() {
         // Nothing to close.
     }
 
@@ -86,8 +94,7 @@ public final class IntellijResource implements ReadableResource {
         }
     }
 
-    @Override
-    public InputStream openRead() throws IOException {
+    @Override public InputStream openRead() throws IOException {
         @Nullable String text = getDocumentText();
         if (text != null) {
             return new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_16BE));
@@ -97,8 +104,7 @@ public final class IntellijResource implements ReadableResource {
         }
     }
 
-    @Override
-    public String readString(Charset fromCharset) throws IOException {
+    @Override public String readString(Charset fromCharset) throws IOException {
         @Nullable String text = getDocumentText();
         if (text != null) { // Happy path
             // Ignore the character set, we do not need to decode from bytes.
@@ -112,6 +118,7 @@ public final class IntellijResource implements ReadableResource {
         return new IntellijResourceKey(this.file.getUrl());
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
