@@ -8,20 +8,16 @@ dependencies {
 
   bundleTargetPlatformApi(eclipse("javax.inject"))
 
-  bundleEmbedApi(project(":common"))
-  bundleEmbedApi(project(":statix.multilang"))
+  bundleApi(project(":spoofax.eclipse"))
 
-  bundleEmbedApi("org.metaborg:log.api")
-  bundleEmbedApi("org.metaborg:resource")
-  bundleEmbedApi("org.metaborg:pie.api")
-  bundleEmbedApi("org.metaborg:pie.runtime")
+  bundleEmbedApi(project(":statix.multilang"))
 }
 
 // Use bnd to create a single OSGi bundle JAR that includes all dependencies.
 val exports = listOf(
   // Provided by 'javax.inject' bundle.
   "!javax.inject.*",
-  // Provided by 'spoofax.eclipse.externaldeps' bundle.
+  // Provided by 'spoofax.eclipse' bundle.
   "!mb.log.*",
   "!mb.resource.*",
   "!mb.pie.*",
