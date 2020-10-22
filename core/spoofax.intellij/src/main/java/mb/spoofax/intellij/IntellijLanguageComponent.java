@@ -24,4 +24,5 @@ public interface IntellijLanguageComponent extends LanguageComponent {
     LanguageMenuBuilder getLanguageMenuBuilder();
 
     EditorContextLanguageAction.Factory getEditorContextLanguageActionFactory();
+
 }

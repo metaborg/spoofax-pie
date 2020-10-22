@@ -5,18 +5,13 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import mb.common.region.Selection;
 import mb.common.util.ListView;
-import mb.common.util.SerializationUtil;
 import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Pie;
 import mb.pie.api.exec.NullCancelableToken;
-import mb.resource.ResourceKey;
-import mb.resource.ResourceService;
 import mb.spoofax.core.language.command.CommandContext;
 import mb.spoofax.core.language.command.CommandExecutionType;
 import mb.spoofax.core.language.command.CommandRequest;
-import mb.spoofax.intellij.IntellijLanguageComponent;
-import mb.spoofax.intellij.SpoofaxPlugin;
 import mb.spoofax.intellij.editor.EditorUtils;
 import mb.spoofax.intellij.pie.PieRunner;
 import mb.spoofax.intellij.resource.IntellijResource;
@@ -25,12 +20,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import javax.swing.*;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * A language action executed in the context of an editor.
  */
+@SuppressWarnings("rawtypes")
 public class EditorContextLanguageAction extends LanguageAction {
 
     private final CommandRequest commandRequest;

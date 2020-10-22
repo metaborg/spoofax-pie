@@ -10,7 +10,6 @@ import mb.spoofax.core.language.menu.*;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;

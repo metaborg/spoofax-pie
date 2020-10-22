@@ -1,12 +1,9 @@
 package mb.spoofax.intellij.menu;
 
-import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.Anchor;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.actionSystem.IdeActions;
 import com.intellij.openapi.components.ApplicationComponent;
-import com.intellij.openapi.extensions.PluginId;
-import mb.common.util.ListView;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.menu.MenuItem;
 import mb.spoofax.intellij.IntellijLanguageComponent;
