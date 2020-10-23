@@ -82,14 +82,14 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
     project.plugins.apply("org.metaborg.spoofax.compiler.gradle.language")
     val languageProjectExtension = project.extensions.getByType<LanguageProjectExtension>()
 
+    // OPTO: cache instantiation components.
     val platformComponent = DaggerPlatformComponent.builder()
       .loggerFactoryModule(LoggerFactoryModule(SLF4JLoggerFactory()))
       .platformPieModule(PlatformPieModule { PieBuilderImpl() })
-      .build() // OPTO: cache instantiation of platform component?
-    val component = DaggerSpoofax3CompilerGradleComponent.builder()
+      .build()
+    val component = DaggerSpoofax3CompilerComponent.builder()
       .spoofax3CompilerModule(Spoofax3CompilerModule(TemplateCompiler(StandardCharsets.UTF_8)))
-      .spoofax3CompilerGradleModule(Spoofax3CompilerGradleModule(languageProjectExtension.component.resourceService, languageProjectExtension.component.pie))
-      // OPTO: cache instantiation of the language components?
+      .platformComponent(platformComponent)
       .sdf3Component(DaggerSdf3Component.builder().platformComponent(platformComponent).build())
       .strategoComponent(DaggerStrategoComponent.builder().platformComponent(platformComponent).build())
       .esvComponent(DaggerEsvComponent.builder().platformComponent(platformComponent).build())
@@ -111,7 +111,7 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
 
   private fun configure(
     project: Project,
-    component: Spoofax3CompilerGradleComponent,
+    component: Spoofax3CompilerComponent,
     input: Spoofax3LanguageProjectCompiler.Input
   ) {
     configureProject(project, component, input)
@@ -120,7 +120,7 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
 
   private fun configureProject(
     project: Project,
-    component: Spoofax3CompilerGradleComponent,
+    component: Spoofax3CompilerComponent,
     input: Spoofax3LanguageProjectCompiler.Input
   ) {
     project.addMainJavaSourceDirectory(input.spoofax3LanguageProject().generatedJavaSourcesDirectory(), component.resourceService)
@@ -129,7 +129,7 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
 
   private fun configureCompileTask(
     project: Project,
-    component: Spoofax3CompilerGradleComponent,
+    component: Spoofax3CompilerComponent,
     input: Spoofax3LanguageProjectCompiler.Input
   ) {
     val resourceService = component.resourceService

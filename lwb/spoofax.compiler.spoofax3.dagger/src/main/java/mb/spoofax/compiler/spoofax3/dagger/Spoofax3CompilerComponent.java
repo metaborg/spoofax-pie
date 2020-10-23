@@ -4,8 +4,11 @@ import dagger.Component;
 import mb.esv.EsvComponent;
 import mb.libspoofax2.LibSpoofax2Component;
 import mb.libstatix.LibStatixComponent;
+import mb.pie.api.Pie;
+import mb.resource.ResourceService;
 import mb.sdf3.Sdf3Component;
 import mb.spoofax.compiler.spoofax3.language.Spoofax3LanguageProjectCompiler;
+import mb.spoofax.core.platform.PlatformComponent;
 import mb.statix.StatixComponent;
 import mb.str.StrategoComponent;
 
@@ -18,9 +21,14 @@ import mb.str.StrategoComponent;
         EsvComponent.class,
         StatixComponent.class,
         LibSpoofax2Component.class,
-        LibStatixComponent.class
+        LibStatixComponent.class,
+        PlatformComponent.class
     }
 )
 public interface Spoofax3CompilerComponent {
+    ResourceService getResourceService();
+
+    Pie getPie();
+
     Spoofax3LanguageProjectCompiler getSpoofax3LanguageProjectCompiler();
 }
