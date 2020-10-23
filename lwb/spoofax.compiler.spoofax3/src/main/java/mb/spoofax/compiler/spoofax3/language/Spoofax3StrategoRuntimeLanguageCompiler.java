@@ -2,6 +2,7 @@ package mb.spoofax.compiler.spoofax3.language;
 
 import mb.common.message.KeyedMessages;
 import mb.common.result.Result;
+import mb.common.util.ListView;
 import mb.libspoofax2.LibSpoofax2Exports;
 import mb.libspoofax2.LibSpoofax2Qualifier;
 import mb.libstatix.LibStatixExports;
@@ -144,12 +145,14 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
             }
         }
 
-        // Set compile configuration
+        // Set analyze configuration.
+        final ListView<ResourcePath> finalIncludeDirs = ListView.copyOf(includeDirs);
+        final ListView<String> finalBuiltinLibs = ListView.copyOf(input.strategoBuiltinLibs());
         final StrategoAnalyzeConfig analyzeConfig = new StrategoAnalyzeConfig(
             input.strategoRootDirectory(),
             input.strategoMainFile(),
-            includeDirs,
-            new ArrayList<>(input.strategoBuiltinLibs())
+            finalIncludeDirs,
+            finalBuiltinLibs
         );
         configurator.setAnalyzeConfig(input.strategoRootDirectory(), analyzeConfig);
 
@@ -165,8 +168,8 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
         final StrategoCompileConfig compileConfig = new StrategoCompileConfig(
             input.strategoRootDirectory(),
             input.strategoMainFile(),
-            includeDirs,
-            new ArrayList<>(input.strategoBuiltinLibs()),
+            finalIncludeDirs,
+            finalBuiltinLibs,
             null, //input.strategoCacheDir().orElse(null), // TODO: this makes the compiler crash
             input.strategoOutputDir(),
             input.strategoOutputJavaPackageId()

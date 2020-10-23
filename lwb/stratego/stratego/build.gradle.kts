@@ -126,8 +126,8 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
     .addAllParams(listOf(
       ParamRepr.of("projectDir", resourcePathType, true, ArgProviderRepr.enclosingContext(EnclosingCommandContextType.Project)),
       ParamRepr.of("mainFile", resourcePathType, true, ArgProviderRepr.context(CommandContextType.File)),
-      ParamRepr.of("includeDirs", TypeInfo.of("java.util", "ArrayList"), false, ArgProviderRepr.value("new java.util.ArrayList<>()")),
-      ParamRepr.of("builtinLibs", TypeInfo.of("java.util", "ArrayList"), false, ArgProviderRepr.value("new java.util.ArrayList<>()")),
+      ParamRepr.of("includeDirs", TypeInfo.of("mb.common.util", "ListView"), false, ArgProviderRepr.value("mb.common.util.ListView.of()")),
+      ParamRepr.of("builtinLibs", TypeInfo.of("mb.common.util", "ListView"), false, ArgProviderRepr.value("mb.common.util.ListView.of()")),
       ParamRepr.of("cacheDir", resourcePathType, false),
       ParamRepr.of("outputDir", resourcePathType, true),
       ParamRepr.of("outputJavaPackageId", TypeInfo.ofString(), true)

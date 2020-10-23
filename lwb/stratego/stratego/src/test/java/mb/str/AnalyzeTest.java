@@ -23,15 +23,11 @@ class AnalyzeTest extends TestBase {
         final FSResource otherFile = createTextFile(projectDir, "module other rules world = !\"world\"", "other.str");
 
         try(final MixedSession session = newSession()) {
-            final ArrayList<ResourcePath> includeDirs = new ArrayList<>();
-            includeDirs.add(projectDir.getPath());
-            final ArrayList<String> builtinLibs = new ArrayList<>();
-            builtinLibs.add("stratego-lib");
             final StrategoAnalyzeConfig config = new StrategoAnalyzeConfig(
                 projectDir.getPath(),
                 mainFile.getPath(),
-                includeDirs,
-                builtinLibs
+                ListView.of(projectDir.getPath()),
+                ListView.of("stratego-lib")
             );
             @SuppressWarnings("ConstantConditions") final KeyedMessages messages = session.require(analyze.createTask(new StrategoAnalyze.Input(
                 config,

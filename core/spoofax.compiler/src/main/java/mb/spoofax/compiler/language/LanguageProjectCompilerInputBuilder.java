@@ -143,13 +143,23 @@ public class LanguageProjectCompilerInputBuilder {
         ConstraintAnalyzerLanguageCompiler.@Nullable Input constraintAnalyzer
     ) {
         if(!strategoRuntimeEnabled) return null;
-        if(constraintAnalyzer != null) {
-            constraintAnalyzer.syncTo(strategoRuntime);
-        }
-        return strategoRuntime
+
+        // Set required parts.
+        strategoRuntime
             .shared(shared)
             .languageProject(languageProject)
-            .build();
+        ;
+
+        final StrategoRuntimeLanguageCompiler.Input.Builder builder;
+        if(constraintAnalyzer != null) {
+            // Copy the builder before syncing to ensure that multiple builds do not cause a sync multiple times.
+            builder = StrategoRuntimeLanguageCompiler.Input.builder().from(strategoRuntime.build());
+            constraintAnalyzer.syncTo(builder);
+        } else {
+            builder = strategoRuntime;
+        }
+
+        return builder.build();
     }
 
     private CompleterLanguageCompiler.@Nullable Input buildCompleter(Shared shared, LanguageProject languageProject) {

@@ -1,6 +1,7 @@
 package mb.str;
 
 import mb.common.result.Result;
+import mb.common.util.ListView;
 import mb.pie.api.MixedSession;
 import mb.pie.api.None;
 import mb.pie.api.Task;
@@ -51,8 +52,8 @@ class CompileTest extends TestBase {
             final StrategoCompileConfig config = new StrategoCompileConfig(
                 strategoSourceDir.getPath(),
                 strategoMainFile.getPath(),
-                createList(strategoSourceDir.getPath()),
-                createList("stratego-lib"),
+                ListView.of(strategoSourceDir.getPath()),
+                ListView.of("stratego-lib"),
                 null,
                 strategoJavaPackageOutputDir.getPath(),
                 "mb.test"

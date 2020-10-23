@@ -1,23 +1,23 @@
 package mb.str.config;
 
+import mb.common.util.ListView;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Objects;
 
 public class StrategoAnalyzeConfig implements Serializable {
     public final ResourcePath projectDir;
     public final ResourcePath mainFile;
-    public final ArrayList<ResourcePath> includeDirs;
-    public final ArrayList<String> builtinLibs;
+    public final ListView<ResourcePath> includeDirs;
+    public final ListView<String> builtinLibs;
 
     public StrategoAnalyzeConfig(
         ResourcePath projectDir,
         ResourcePath mainFile,
-        ArrayList<ResourcePath> includeDirs,
-        ArrayList<String> builtinLibs
+        ListView<ResourcePath> includeDirs,
+        ListView<String> builtinLibs
     ) {
         this.projectDir = projectDir;
         this.mainFile = mainFile;
@@ -26,13 +26,11 @@ public class StrategoAnalyzeConfig implements Serializable {
     }
 
     public StrategoAnalyzeConfig(ResourcePath projectDir) {
-        this(projectDir, projectDir.appendRelativePath("src/main/str/main.str"), new ArrayList<>(), defaultBuiltinLibs());
+        this(projectDir, projectDir.appendRelativePath("src/main/str/main.str"), ListView.of(), defaultBuiltinLibs());
     }
 
-    private static ArrayList<String> defaultBuiltinLibs() {
-        final ArrayList<String> builtinLibs = new ArrayList<String>();
-        builtinLibs.add("stratego-lib");
-        return builtinLibs;
+    private static ListView<String> defaultBuiltinLibs() {
+        return ListView.of("stratego-lib");
     }
 
     @Override public boolean equals(@Nullable Object o) {

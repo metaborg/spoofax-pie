@@ -6,7 +6,9 @@ import mb.common.util.SetView;
 import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -63,7 +65,7 @@ public class KeyedMessages implements Serializable {
         return KeyedMessages.of(resource, messages.messages.asCopy(), ListView.of());
     }
 
-    public static KeyedMessages copyOf(ResourceKey resource,  Collection<? extends Message> messages) {
+    public static KeyedMessages copyOf(ResourceKey resource, Collection<? extends Message> messages) {
         return KeyedMessages.of(resource, new ArrayList<>(messages), ListView.of());
     }
 
@@ -181,12 +183,26 @@ public class KeyedMessages implements Serializable {
             ms.forEach(m -> {
                 sb.append("  ");
                 sb.append(m.toString());
+                if(m.exception != null) {
+                    sb.append('\n');
+                    final StringWriter stringWriter = new StringWriter();
+                    m.exception.printStackTrace(new PrintWriter(stringWriter));
+                    sb.append(stringWriter.toString());
+                }
                 sb.append('\n');
             });
         });
+        if(messagesWithoutKey.isEmpty()) return;
+        sb.append("\n\nmessages without key:\n");
         messagesWithoutKey.forEach((m) -> {
             sb.append(m.toString());
             sb.append('\n');
+            if(m.exception != null) {
+                sb.append('\n');
+                final StringWriter stringWriter = new StringWriter();
+                m.exception.printStackTrace(new PrintWriter(stringWriter));
+                sb.append(stringWriter.toString());
+            }
         });
     }
 

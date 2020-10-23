@@ -20,7 +20,8 @@ public class StrategoConfigurator {
     }
 
     public void setAnalyzeConfig(ResourcePath rootDirectory, StrategoAnalyzeConfig config) {
-        if(analyzeConfigs.containsKey(rootDirectory)) {
+        final @Nullable StrategoAnalyzeConfig existingConfig = analyzeConfigs.get(rootDirectory);
+        if(existingConfig != null && !existingConfig.equals(config)) {
             throw new RuntimeException("Cannot change analyze config once it is set, until we implement change detection for it in the PIE tasks");
         }
         analyzeConfigs.put(rootDirectory, config);

@@ -64,8 +64,8 @@ public class StrategoCompileToJava implements TaskDef<StrategoCompileToJava.Inpu
         return Result.ofOkOrCatching(() -> context.require(strIncr, new StrIncr.Input(
             cfg.mainFile,
             cfg.outputJavaPackageId,
-            cfg.includeDirs,
-            cfg.builtinLibs,
+            cfg.includeDirs.asUnmodifiable(),
+            cfg.builtinLibs.asUnmodifiable(),
             cfg.cacheDir,
             new ArrayList<>(),
             new Arguments(),

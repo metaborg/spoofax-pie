@@ -76,7 +76,12 @@ public class StrategoAnalyze implements TaskDef<StrategoAnalyze.Input, KeyedMess
     @Override public KeyedMessages exec(ExecContext context, Input input) {
         //noinspection ConstantConditions
         final Result<Frontends.Output, ?> result = Result.ofOkOrCatching(() -> context.require(analysis, new Frontends.Input(
-            input.config.mainFile, input.config.includeDirs, input.config.builtinLibs, input.originTasks, input.config.projectDir, StrategoGradualSetting.NONE
+            input.config.mainFile,
+            input.config.includeDirs.asUnmodifiable(),
+            input.config.builtinLibs.asUnmodifiable(),
+            input.originTasks,
+            input.config.projectDir,
+            StrategoGradualSetting.NONE
         )));
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         result.ifElse(output -> {

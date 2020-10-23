@@ -1,18 +1,17 @@
 package mb.str.config;
 
-import mb.pie.api.STask;
+import mb.common.util.ListView;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Objects;
 
 public class StrategoCompileConfig implements Serializable {
     public final ResourcePath projectDir;
     public final ResourcePath mainFile;
-    public final ArrayList<ResourcePath> includeDirs;
-    public final ArrayList<String> builtinLibs;
+    public final ListView<ResourcePath> includeDirs;
+    public final ListView<String> builtinLibs;
     public final @Nullable ResourcePath cacheDir;
     public final ResourcePath outputDir;
     public final String outputJavaPackageId;
@@ -20,8 +19,8 @@ public class StrategoCompileConfig implements Serializable {
     public StrategoCompileConfig(
         ResourcePath projectDir,
         ResourcePath mainFile,
-        ArrayList<ResourcePath> includeDirs,
-        ArrayList<String> builtinLibs,
+        ListView<ResourcePath> includeDirs,
+        ListView<String> builtinLibs,
         @Nullable ResourcePath cacheDir,
         ResourcePath outputDir,
         String outputJavaPackageId

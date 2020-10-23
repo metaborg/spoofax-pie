@@ -6,16 +6,21 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Facade for consistently building a {@link Spoofax2LanguageProjectCompiler.Input} instance.
  */
 public class Spoofax2LanguageProjectCompilerInputBuilder {
-    public Spoofax2ParserLanguageCompiler.Input.Builder parser = Spoofax2ParserLanguageCompiler.Input.builder();
     private boolean parserEnabled = false;
-    public Spoofax2StylerLanguageCompiler.Input.Builder styler = Spoofax2StylerLanguageCompiler.Input.builder();
+    public Spoofax2ParserLanguageCompiler.Input.Builder parser = Spoofax2ParserLanguageCompiler.Input.builder();
+
     private boolean stylerEnabled = false;
-    public Spoofax2ConstraintAnalyzerLanguageCompiler.Input.Builder constraintAnalyzer = Spoofax2ConstraintAnalyzerLanguageCompiler.Input.builder();
+    public Spoofax2StylerLanguageCompiler.Input.Builder styler = Spoofax2StylerLanguageCompiler.Input.builder();
+
     private boolean constraintAnalyzerEnabled = false;
-    public Spoofax2MultilangAnalyzerLanguageCompiler.Input.Builder multilangAnalyzer = Spoofax2MultilangAnalyzerLanguageCompiler.Input.builder();
+    public Spoofax2ConstraintAnalyzerLanguageCompiler.Input.Builder constraintAnalyzer = Spoofax2ConstraintAnalyzerLanguageCompiler.Input.builder();
+
     private boolean multilangAnalyzerEnabled = false;
-    public Spoofax2StrategoRuntimeLanguageCompiler.Input.Builder strategoRuntime = Spoofax2StrategoRuntimeLanguageCompiler.Input.builder();
+    public Spoofax2MultilangAnalyzerLanguageCompiler.Input.Builder multilangAnalyzer = Spoofax2MultilangAnalyzerLanguageCompiler.Input.builder();
+
     private boolean strategoRuntimeEnabled = false;
+    public Spoofax2StrategoRuntimeLanguageCompiler.Input.Builder strategoRuntime = Spoofax2StrategoRuntimeLanguageCompiler.Input.builder();
+
     public Spoofax2LanguageProjectCompiler.Input.Builder project = Spoofax2LanguageProjectCompiler.Input.builder();
 
 

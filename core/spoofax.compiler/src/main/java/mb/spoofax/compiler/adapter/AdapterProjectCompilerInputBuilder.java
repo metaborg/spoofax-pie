@@ -13,18 +13,25 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class AdapterProjectCompilerInputBuilder {
     public final ClassloaderResourcesCompiler.Input.Builder classloaderResources = ClassloaderResourcesCompiler.Input.builder();
-    public final ParserAdapterCompiler.Input.Builder parser = ParserAdapterCompiler.Input.builder();
+
     private boolean parserEnabled = false;
-    public final StylerAdapterCompiler.Input.Builder styler = StylerAdapterCompiler.Input.builder();
+    public final ParserAdapterCompiler.Input.Builder parser = ParserAdapterCompiler.Input.builder();
+
     private boolean stylerEnabled = false;
-    public final ConstraintAnalyzerAdapterCompiler.Input.Builder constraintAnalyzer = ConstraintAnalyzerAdapterCompiler.Input.builder();
+    public final StylerAdapterCompiler.Input.Builder styler = StylerAdapterCompiler.Input.builder();
+
     private boolean constraintAnalyzerEnabled = false;
-    public final MultilangAnalyzerAdapterCompiler.Input.Builder multilangAnalyzer = MultilangAnalyzerAdapterCompiler.Input.builder();
+    public final ConstraintAnalyzerAdapterCompiler.Input.Builder constraintAnalyzer = ConstraintAnalyzerAdapterCompiler.Input.builder();
+
     private boolean multilangAnalyzerEnabled = false;
-    public final StrategoRuntimeAdapterCompiler.Input.Builder strategoRuntime = StrategoRuntimeAdapterCompiler.Input.builder();
+    public final MultilangAnalyzerAdapterCompiler.Input.Builder multilangAnalyzer = MultilangAnalyzerAdapterCompiler.Input.builder();
+
     private boolean strategoRuntimeEnabled = false;
-    public final CompleterAdapterCompiler.Input.Builder completer = CompleterAdapterCompiler.Input.builder();
+    public final StrategoRuntimeAdapterCompiler.Input.Builder strategoRuntime = StrategoRuntimeAdapterCompiler.Input.builder();
+
     private boolean completerEnabled = false;
+    public final CompleterAdapterCompiler.Input.Builder completer = CompleterAdapterCompiler.Input.builder();
+
     public AdapterProjectCompiler.Input.Builder project = AdapterProjectCompiler.Input.builder();
 
 

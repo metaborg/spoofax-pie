@@ -10,12 +10,16 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class Spoofax3LanguageProjectCompilerInputBuilder {
     private boolean parserEnabled = false;
     public Spoofax3ParserLanguageCompiler.Input.Builder parser = Spoofax3ParserLanguageCompiler.Input.builder();
+
     private boolean stylerEnabled = false;
     public Spoofax3StylerLanguageCompiler.Input.Builder styler = Spoofax3StylerLanguageCompiler.Input.builder();
+
     private boolean constraintAnalyzerEnabled = false;
     public Spoofax3ConstraintAnalyzerLanguageCompiler.Input.Builder constraintAnalyzer = Spoofax3ConstraintAnalyzerLanguageCompiler.Input.builder();
+
     private boolean strategoRuntimeEnabled = false;
     public Spoofax3StrategoRuntimeLanguageCompiler.Input.Builder strategoRuntime = Spoofax3StrategoRuntimeLanguageCompiler.Input.builder();
+
     public Spoofax3LanguageProjectCompiler.Input.Builder project = Spoofax3LanguageProjectCompiler.Input.builder();
 
 
@@ -95,11 +99,21 @@ public class Spoofax3LanguageProjectCompilerInputBuilder {
         Spoofax3ParserLanguageCompiler.@Nullable Input parserInput
     ) {
         if(!strategoRuntimeEnabled) return null;
-        if(parserInput != null) {
-            parserInput.syncTo(strategoRuntime);
-        }
-        return strategoRuntime
+
+        // Set required parts.
+        strategoRuntime
             .spoofax3LanguageProject(languageProject)
-            .build();
+        ;
+
+        final Spoofax3StrategoRuntimeLanguageCompiler.Input.Builder builder;
+        if(parserInput != null) {
+            // Copy the builder before syncing to ensure that multiple builds do not cause a sync multiple times.
+            builder = Spoofax3StrategoRuntimeLanguageCompiler.Input.builder().from(strategoRuntime.build());
+            parserInput.syncTo(builder);
+        } else {
+            builder = strategoRuntime;
+        }
+
+        return builder.build();
     }
 }
