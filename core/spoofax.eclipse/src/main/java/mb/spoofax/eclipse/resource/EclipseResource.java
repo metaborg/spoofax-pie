@@ -235,6 +235,11 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
         return new EclipseResource(registry, getWorkspaceRoot());
     }
 
+    @Override public HierarchicalResource getNormalized() {
+        final EclipseResourcePath newPath = path.getNormalized();
+        return new EclipseResource(registry, newPath);
+    }
+
     private IWorkspaceRoot getWorkspaceRoot() {
         return ResourcesPlugin.getWorkspace().getRoot();
     }
