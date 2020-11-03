@@ -7,6 +7,8 @@ import mb.esv.task.EsvCheckMulti;
 import mb.esv.task.EsvCompile;
 import mb.esv.task.EsvParse;
 import mb.esv.util.EsvUtil;
+import mb.jsglr1.common.JSGLR1ParseException;
+import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.libspoofax2.LibSpoofax2Exports;
 import mb.libspoofax2.LibSpoofax2Qualifier;
 import mb.pie.api.ExecContext;
@@ -24,7 +26,6 @@ import mb.resource.classloader.JarFileWithPath;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.StylerLanguageCompiler;
-import mb.str.config.StrategoConfigurator;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -130,7 +131,7 @@ public class Spoofax3StylerLanguageCompiler implements TaskDef<Spoofax3StylerLan
         // Compile ESV files to aterm format.
         final Result<IStrategoTerm, ?> result = context.require(compile, new EsvCompile.Input(
             parse.createAstSupplier(input.esvMainFile()),
-            new ImportFunction(includeDirSuppliers, args.esvAdditionalAstSuppliers),
+            new ImportFunction(parse.createFunction(), includeDirSuppliers, args.esvAdditionalAstSuppliers),
             ListView.of()
         ));
         if(result.isErr()) {
@@ -196,7 +197,7 @@ public class Spoofax3StylerLanguageCompiler implements TaskDef<Spoofax3StylerLan
         @Override public boolean equals(Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
-            final Args args = (Args)o;
+            final Args args = (Args) o;
             return input.equals(args.input) && esvAdditionalAstSuppliers.equals(args.esvAdditionalAstSuppliers);
         }
 
@@ -206,14 +207,17 @@ public class Spoofax3StylerLanguageCompiler implements TaskDef<Spoofax3StylerLan
     }
 
 
-    private class ImportFunction implements Function<String, Result<IStrategoTerm, ?>> {
+    private static class ImportFunction implements Function<String, Result<IStrategoTerm, ?>> {
+        private final Function<Supplier<String>, Result<JSGLR1ParseOutput, JSGLR1ParseException>> parse;
         private final LinkedHashSet<Supplier<ResourcePath>> includeDirSuppliers;
         private final ArrayList<Supplier<Result<IStrategoTerm, ?>>> additionalAstSuppliers;
 
         public ImportFunction(
+            Function<Supplier<String>, Result<JSGLR1ParseOutput, JSGLR1ParseException>> parse,
             LinkedHashSet<Supplier<ResourcePath>> includeDirSuppliers,
             ArrayList<Supplier<Result<IStrategoTerm, ?>>> additionalAstSuppliers
         ) {
+            this.parse = parse;
             this.includeDirSuppliers = includeDirSuppliers;
             this.additionalAstSuppliers = additionalAstSuppliers;
         }
@@ -226,13 +230,7 @@ public class Spoofax3StylerLanguageCompiler implements TaskDef<Spoofax3StylerLan
                     final ResourcePath path = context.require(pathSupplier);
                     final ReadableResource resource = context.require(path, ResourceStampers.<ReadableResource>exists());
                     if(!resource.exists()) continue;
-                    return context.require(parse.createAstSupplier(pathSupplier.map((ctx, p) -> {
-                        try {
-                            return ctx.require(p).readString();
-                        } catch(IOException e) {
-                            throw new UncheckedIOException(e);
-                        }
-                    })));
+                    return context.require(parse, pathSupplier.map(this::readString)).map(this::getAst);
                 } catch(IOException e) {
                     suppressedExceptions.add(e);
                 } catch(UncheckedIOException e) {
@@ -256,15 +254,35 @@ public class Spoofax3StylerLanguageCompiler implements TaskDef<Spoofax3StylerLan
             return Result.ofErr(exception);
         }
 
-        @Override public boolean equals(@Nullable Object o) {
+        private String readString(ExecContext ctx, ResourcePath p) {
+            try {
+                return ctx.require(p).readString();
+            } catch(IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+
+        private IStrategoTerm getAst(JSGLR1ParseOutput output) {
+            return output.ast;
+        }
+
+        @Override public boolean equals(Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
-            final ImportFunction that = (ImportFunction)o;
-            return includeDirSuppliers.equals(that.includeDirSuppliers);
+            final ImportFunction that = (ImportFunction) o;
+            return parse.equals(that.parse) && includeDirSuppliers.equals(that.includeDirSuppliers) && additionalAstSuppliers.equals(that.additionalAstSuppliers);
         }
 
         @Override public int hashCode() {
-            return Objects.hash(includeDirSuppliers);
+            return Objects.hash(parse, includeDirSuppliers, additionalAstSuppliers);
+        }
+
+        @Override public String toString() {
+            return "ImportFunction{" +
+                "parse=" + parse +
+                ", includeDirSuppliers=" + includeDirSuppliers +
+                ", additionalAstSuppliers=" + additionalAstSuppliers +
+                '}';
         }
     }
 }

@@ -4,6 +4,7 @@ import dagger.Lazy;
 import mb.common.message.Messages;
 import mb.pie.api.Function;
 import mb.pie.api.ResourceStringSupplier;
+import mb.pie.api.SerializableFunction;
 import mb.pie.api.Supplier;
 import mb.resource.ResourceKey;
 import mb.statix.multilang.metadata.LanguageId;
@@ -24,7 +25,7 @@ public class {{genCheckTaskDef.id}} extends SmlCheckTaskDef {
         SmlSolveProject solveProject,
         Lazy<LanguageMetadataManager> languageMetadataManager
     ) {
-        super(messagesSupplier.mapInput((java.util.function.Function<ResourceKey, Supplier<String>>)ResourceStringSupplier::new),
+        super(messagesSupplier.mapInput((SerializableFunction<ResourceKey, Supplier<String>>)ResourceStringSupplier::new),
                 buildContextConfiguration, solveProject, languageMetadataManager);
     }
 
