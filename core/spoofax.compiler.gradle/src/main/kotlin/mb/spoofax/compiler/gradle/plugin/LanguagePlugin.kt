@@ -50,7 +50,7 @@ open class LanguageProjectExtension(project: Project) {
 
   val component = DaggerSpoofaxCompilerGradleComponent.builder()
     .spoofaxCompilerModule(SpoofaxCompilerModule(TemplateCompiler(StandardCharsets.UTF_8)))
-    .spoofaxCompilerGradleModule(SpoofaxCompilerGradleModule(project.logger) { PieBuilderImpl() })
+    .spoofaxCompilerGradleModule(SpoofaxCompilerGradleModule { PieBuilderImpl() })
     .build()
 
   val sharedFinalized: Shared by lazy {

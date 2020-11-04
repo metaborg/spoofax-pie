@@ -3,6 +3,7 @@ package mb.spoofax.compiler.gradle
 import dagger.Component
 import dagger.Module
 import dagger.Provides
+import mb.log.slf4j.SLF4JLoggerFactory
 import mb.pie.api.MapTaskDefs
 import mb.pie.api.Pie
 import mb.pie.api.PieBuilder
@@ -22,7 +23,6 @@ interface SpoofaxCompilerGradleComponent : SpoofaxCompilerComponent {
 
 @Module
 class SpoofaxCompilerGradleModule(
-  private val logger: Logger,
   private val builderSupplier: () -> PieBuilder
 ) {
   @Provides
@@ -37,7 +37,7 @@ class SpoofaxCompilerGradleModule(
     val builder: PieBuilder = builderSupplier()
     builder.withTaskDefs(MapTaskDefs(taskDefs))
     builder.withResourceService(resourceService)
-    builder.withLogger(PieLogger(logger))
+    builder.withLoggerFactory(SLF4JLoggerFactory())
     return builder.build()
   }
 }

@@ -3,7 +3,7 @@ plugins {
   `maven-publish`
 }
 
-val logVersion = "0.3.0"
+val logVersion = "0.4.0"
 val slf4jVersion = "1.7.30"
 val resourceVersion = "0.10.0"
 val pieVersion = "0.13.1"
@@ -50,7 +50,6 @@ dependencies {
     // Main dependencies
     /// Log
     api("org.metaborg:log.api:$logVersion")
-    api("org.metaborg:log.backend.noop:$logVersion")
     api("org.metaborg:log.backend.logback:$logVersion")
     api("org.metaborg:log.backend.slf4j:$logVersion")
     /// SLF4j

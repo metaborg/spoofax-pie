@@ -30,8 +30,6 @@ dependencies {
 
   compileOnly("org.checkerframework:checker-qual-android")
 
-  testImplementation("org.metaborg:log.backend.noop")
-
   testCompileOnly("org.checkerframework:checker-qual-android")
 }
 
