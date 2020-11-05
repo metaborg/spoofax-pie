@@ -35,7 +35,7 @@ public class MultilangAnalyzerLanguageCompiler implements TaskDef<MultilangAnaly
 
     @Override public Output exec(ExecContext context, Input input) throws IOException {
         final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
+        if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         specConfigFactoryTemplate.write(context, input.genSpecConfigFactory().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
@@ -84,7 +84,7 @@ public class MultilangAnalyzerLanguageCompiler implements TaskDef<MultilangAnaly
         // List of all provided files
 
         default ListView<ResourcePath> providedFiles() {
-            if(classKind().isManualOnly()) {
+            if(classKind().isManual()) {
                 return ListView.of();
             }
             return ListView.of(

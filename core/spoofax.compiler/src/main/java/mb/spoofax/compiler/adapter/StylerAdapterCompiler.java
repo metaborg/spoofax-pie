@@ -33,7 +33,7 @@ public class StylerAdapterCompiler implements TaskDef<StylerAdapterCompiler.Inpu
 
     @Override public Output exec(ExecContext context, Input input) throws IOException {
         final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
+        if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         styleTaskDefTemplate.write(context, input.genStyleTaskDef().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();

@@ -32,7 +32,7 @@ public class ClassloaderResourcesCompiler implements TaskDef<ClassloaderResource
 
     @Override public Output exec(ExecContext context, Input input) throws IOException {
         final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
+        if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         classloaderResourcesTemplate.write(context, input.genClassloaderResources().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
@@ -75,7 +75,7 @@ public class ClassloaderResourcesCompiler implements TaskDef<ClassloaderResource
         /// List of all provided files
 
         default ListView<ResourcePath> providedFiles() {
-            if(classKind().isManualOnly()) {
+            if(classKind().isManual()) {
                 return ListView.of();
             }
             return ListView.of(

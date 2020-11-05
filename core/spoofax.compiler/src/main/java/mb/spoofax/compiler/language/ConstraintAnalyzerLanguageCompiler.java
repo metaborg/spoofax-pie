@@ -34,7 +34,7 @@ public class ConstraintAnalyzerLanguageCompiler implements TaskDef<ConstraintAna
 
     @Override public Output exec(ExecContext context, Input input) throws Exception {
         final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
+        if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         constraintAnalyzerTemplate.write(context, input.genConstraintAnalyzer().file(generatedJavaSourcesDirectory), input);
         factoryTemplate.write(context, input.genConstraintAnalyzerFactory().file(generatedJavaSourcesDirectory), input);

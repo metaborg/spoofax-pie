@@ -35,7 +35,7 @@ public class StrategoRuntimeLanguageCompiler implements TaskDef<StrategoRuntimeL
     }
 
     @Override public None exec(ExecContext context, Input input) throws IOException {
-        if(input.classKind().isManualOnly()) return None.instance; // Nothing to generate: return.
+        if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         factoryTemplate.write(context, input.genStrategoRuntimeBuilderFactory().file(generatedJavaSourcesDirectory), input);
         return None.instance;

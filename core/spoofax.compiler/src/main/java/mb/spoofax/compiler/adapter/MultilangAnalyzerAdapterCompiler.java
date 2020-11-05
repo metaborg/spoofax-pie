@@ -43,7 +43,7 @@ public class MultilangAnalyzerAdapterCompiler implements TaskDef<MultilangAnalyz
 
     @Override public Output exec(ExecContext context, Input input) throws IOException {
         final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
+        if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         analyzeProjectTemplate.write(context, input.genAnalyzeTaskDef().file(generatedJavaSourcesDirectory), input);
         indexAstTaskDefTemplate.write(context, input.genIndexAstTaskDef().file(generatedJavaSourcesDirectory), input);
@@ -163,7 +163,7 @@ public class MultilangAnalyzerAdapterCompiler implements TaskDef<MultilangAnalyz
         // List of all generated files
 
         default ListView<ResourcePath> generatedFiles() {
-            if(classKind().isManualOnly()) {
+            if(classKind().isManual()) {
                 return ListView.of();
             }
             return ListView.of(

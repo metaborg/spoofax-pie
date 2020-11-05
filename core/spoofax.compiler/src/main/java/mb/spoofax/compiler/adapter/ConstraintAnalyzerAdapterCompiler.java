@@ -35,7 +35,7 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
 
     @Override public Output exec(ExecContext context, Input input) throws Exception {
         final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
+        if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         analyzeTaskDefTemplate.write(context, input.genAnalyzeTaskDef().file(generatedJavaSourcesDirectory), input);
         analyzeMultiTaskDefTemplate.write(context, input.genAnalyzeMultiTaskDef().file(generatedJavaSourcesDirectory), input);

@@ -37,7 +37,7 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
     }
 
     @Override public None exec(ExecContext context, Input input) throws IOException {
-        if(input.classKind().isManualOnly()) return None.instance; // Nothing to generate: return.
+        if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         tableTemplate.write(context, input.genTable().file(generatedJavaSourcesDirectory), input);
         parserTemplate.write(context, input.genParser().file(generatedJavaSourcesDirectory), input);

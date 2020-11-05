@@ -39,7 +39,7 @@ public class ExportsLanguageCompiler implements TaskDef<ExportsLanguageCompiler.
     }
 
     @Override public None exec(ExecContext context, Input input) throws IOException {
-        if(input.classKind().isManualOnly()) return None.instance; // Nothing to generate: return.
+        if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         { // Exports
             final HashMap<String, CombinedExport> combinedExports = new HashMap<>();
@@ -50,7 +50,7 @@ public class ExportsLanguageCompiler implements TaskDef<ExportsLanguageCompiler.
             final UniqueNamer uniqueNamer = new UniqueNamer();
             final HashMap<String, Object> map = new HashMap<>();
             map.put("combinedExports", combinedExports.values());
-            exportsTemplate.write(context, input.genExportsClass().file(generatedJavaSourcesDirectory), input, map);
+            exportsTemplate.write(context, input.genExports().file(generatedJavaSourcesDirectory), input, map);
         }
         return None.instance;
     }
