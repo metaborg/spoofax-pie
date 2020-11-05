@@ -62,30 +62,4 @@ class ParserCompilerTest extends TestBase {
         }
     }
 
-    @ParameterizedTest @EnumSource(value = ClassKind.class, names = {"Manual"})
-    void testManualRequiresClasses(ClassKind classKind) {
-        final TigerInputs inputs = defaultInputs();
-
-        inputs.languageProjectCompilerInputBuilder.withParser()
-            .classKind(classKind);
-        assertThrows(IllegalArgumentException.class, inputs::languageProjectCompilerInput); // Class kind is Manual but manual class names were not set: check fails.
-        inputs.clearBuiltInputs();
-
-        inputs.languageProjectCompilerInputBuilder.withParser()
-            .classKind(classKind)
-            .genParser("my.lang", "MyParser")
-            .genParserFactory("my.lang", "MyParserFactory");
-        inputs.languageProjectCompilerInput(); // Manual classes are set: no exception.
-
-        inputs.adapterProjectCompilerInputBuilder.withParser()
-            .classKind(classKind);
-        assertThrows(IllegalArgumentException.class, inputs::adapterProjectCompilerInput); // Class kind is Manual but manual class names were not set: check fails.
-        inputs.clearBuiltInputs();
-
-        inputs.adapterProjectCompilerInputBuilder.withParser()
-            .classKind(classKind)
-            .genParseTaskDef("my.adapter.taskdef", "MyParseTaskDef")
-            .genTokenizeTaskDef("my.adapter.taskdef", "MyTokenizeTaskDef");
-        inputs.adapterProjectCompilerInput(); // Manual classes are set: no exception.
-    }
 }
