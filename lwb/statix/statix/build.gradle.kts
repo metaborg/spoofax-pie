@@ -73,8 +73,6 @@ languageAdapterProject {
     withParser()
     withStyler()
     withConstraintAnalyzer().run {
-      // Enable manual class implementation
-      classKind(ClassKind.Extended)
       // Manual analyze multi implementation to add Spoofax2ProjectContext
       genAnalyzeMultiTaskDef(taskPackageId, "GeneratedStatixAnalyzeMulti")
       extendedAnalyzeMultiTaskDef(taskPackageId, "StatixAnalyzeMulti")

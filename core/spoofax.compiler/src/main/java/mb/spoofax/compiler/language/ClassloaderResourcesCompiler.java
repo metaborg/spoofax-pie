@@ -92,12 +92,7 @@ public class ClassloaderResourcesCompiler implements TaskDef<ClassloaderResource
 
 
         @Value.Check default void check() {
-            final ClassKind kind = classKind();
-            final boolean manual = kind.isManual();
-            if(!manual) return;
-            if(!manualClassloaderResources().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualClassloaderResources' has not been set");
-            }
+
         }
     }
 

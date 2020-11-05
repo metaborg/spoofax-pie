@@ -122,12 +122,7 @@ public class ExportsLanguageCompiler implements TaskDef<ExportsLanguageCompiler.
 
 
         @Value.Check default void check() {
-            final ClassKind kind = classKind();
-            final boolean manual = kind.isManualOnly();
-            if(!manual) return;
-            if(!manualExportsClass().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualExportsClass' has not been set");
-            }
+
         }
     }
 

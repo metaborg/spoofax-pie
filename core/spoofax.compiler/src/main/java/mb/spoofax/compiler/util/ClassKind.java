@@ -8,10 +8,6 @@ public enum ClassKind implements Serializable {
      */
     Generated,
     /**
-     * Manually implemented class that may extend generated class.
-     */
-    Extended,
-    /**
      * Manually implemented class.
      */
     Manual;

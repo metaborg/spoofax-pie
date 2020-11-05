@@ -83,9 +83,6 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   addAdditionalModules(incrPackageId, "StrategoIncrModule")
   addAdditionalModules(configPackageId, "StrategoConfigModule")
 
-  // Enable manual class implementation
-  classKind(ClassKind.Extended)
-
   // Manual multifile check implementation
   isMultiFile(true)
   genCheckMultiTaskDef(taskPackageId, "GeneratedStrategoCheckMulti")

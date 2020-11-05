@@ -113,12 +113,7 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
 
 
         @Value.Check default void check() {
-            final ClassKind kind = classKind();
-            final boolean manual = kind.isManualOnly();
-            if(!manual) return;
-            if(!manualAnalyzeTaskDef().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualAnalyzeTaskDef' has not been set");
-            }
+
         }
     }
 

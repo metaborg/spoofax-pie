@@ -93,12 +93,7 @@ public class CompleterLanguageCompiler implements TaskDef<CompleterLanguageCompi
 
 
         @Value.Check default void check() {
-            final ClassKind kind = classKind();
-            final boolean manual = kind.isManual();
-            if(!manual) return;
-            if(!manualCompleter().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualCompleter' has not been set");
-            }
+
         }
     }
 
