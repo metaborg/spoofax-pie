@@ -41,7 +41,7 @@ public class StylerLanguageCompiler implements TaskDef<StylerLanguageCompiler.In
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         rulesTemplate.write(context, input.genRules().file(generatedJavaSourcesDirectory), input);
         stylerTemplate.write(context, input.genStyler().file(generatedJavaSourcesDirectory), input);
-        factoryTemplate.write(context, input.genFactory().file(generatedJavaSourcesDirectory), input);
+        factoryTemplate.write(context, input.genStylerFactory().file(generatedJavaSourcesDirectory), input);
         return None.instance;
     }
 
@@ -89,41 +89,35 @@ public class StylerLanguageCompiler implements TaskDef<StylerLanguageCompiler.In
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "Styler");
         }
 
-        Optional<TypeInfo> manualStyler();
+        Optional<TypeInfo> extendedStyler();
 
         default TypeInfo styler() {
-            if(classKind().isManual() && manualStyler().isPresent()) {
-                return manualStyler().get();
-            }
-            return genStyler();
+            return extendedStyler().orElseGet(this::genStyler);
         }
 
         // Styler factory
 
-        @Value.Default default TypeInfo genFactory() {
+        @Value.Default default TypeInfo genStylerFactory() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "StylerFactory");
         }
 
-        Optional<TypeInfo> manualFactory();
+        Optional<TypeInfo> extendedStylerFactory();
 
-        default TypeInfo factory() {
-            if(classKind().isManual() && manualFactory().isPresent()) {
-                return manualFactory().get();
-            }
-            return genFactory();
+        default TypeInfo stylerFactory() {
+            return extendedStylerFactory().orElseGet(this::genStylerFactory);
         }
 
 
         /// List of all provided files
 
         default ListView<ResourcePath> providedFiles() {
-            if(classKind().isManualOnly()) {
+            if(classKind().isManual()) {
                 return ListView.of();
             }
             return ListView.of(
                 genRules().file(generatedJavaSourcesDirectory()),
                 genStyler().file(generatedJavaSourcesDirectory()),
-                genFactory().file(generatedJavaSourcesDirectory())
+                genStylerFactory().file(generatedJavaSourcesDirectory())
             );
         }
 

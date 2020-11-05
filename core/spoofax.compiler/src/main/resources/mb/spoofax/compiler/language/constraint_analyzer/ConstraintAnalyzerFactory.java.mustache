@@ -1,12 +1,12 @@
-package {{genFactory.packageId}};
+package {{genConstraintAnalyzerFactory.packageId}};
 
 import mb.resource.ResourceService;
 import mb.spoofax.compiler.interfaces.spoofaxcore.ConstraintAnalyzerFactory;
 
-public class {{genFactory.id}} implements ConstraintAnalyzerFactory {
+public class {{genConstraintAnalyzerFactory.id}} implements ConstraintAnalyzerFactory {
     private final ResourceService resourceService;
 
-    public {{genFactory.id}}(ResourceService resourceService) {
+    public {{genConstraintAnalyzerFactory.id}}(ResourceService resourceService) {
         this.resourceService = resourceService;
     }
 

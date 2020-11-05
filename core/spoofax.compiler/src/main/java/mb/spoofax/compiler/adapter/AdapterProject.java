@@ -118,13 +118,10 @@ public interface AdapterProject extends Serializable {
         return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "Scope");
     }
 
-    Optional<TypeInfo> manualScope();
+    Optional<TypeInfo> extendedScope();
 
     default TypeInfo scope() {
-        if(classKind().isManual() && manualScope().isPresent()) {
-            return manualScope().get();
-        }
-        return genScope();
+        return extendedScope().orElseGet(this::genScope);
     }
 
 

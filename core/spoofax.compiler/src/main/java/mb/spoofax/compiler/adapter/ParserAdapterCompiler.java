@@ -76,13 +76,10 @@ public class ParserAdapterCompiler implements TaskDef<ParserAdapterCompiler.Inpu
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "Parse");
         }
 
-        Optional<TypeInfo> manualParseTaskDef();
+        Optional<TypeInfo> extendedParseTaskDef();
 
         default TypeInfo parseTaskDef() {
-            if(classKind().isManual() && manualParseTaskDef().isPresent()) {
-                return manualParseTaskDef().get();
-            }
-            return genParseTaskDef();
+            return extendedParseTaskDef().orElseGet(this::genParseTaskDef);
         }
 
         // Tokenize task definition
@@ -91,20 +88,17 @@ public class ParserAdapterCompiler implements TaskDef<ParserAdapterCompiler.Inpu
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "Tokenize");
         }
 
-        Optional<TypeInfo> manualTokenizeTaskDef();
+        Optional<TypeInfo> extendedTokenizeTaskDef();
 
         default TypeInfo tokenizeTaskDef() {
-            if(classKind().isManual() && manualTokenizeTaskDef().isPresent()) {
-                return manualTokenizeTaskDef().get();
-            }
-            return genTokenizeTaskDef();
+            return extendedTokenizeTaskDef().orElseGet(this::genTokenizeTaskDef);
         }
 
 
         // List of all generated files
 
         default ListView<ResourcePath> generatedFiles() {
-            if(classKind().isManualOnly()) {
+            if(classKind().isManual()) {
                 return ListView.of();
             }
             return ListView.of(

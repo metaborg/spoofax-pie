@@ -1,10 +1,10 @@
-package {{genExportsClass.packageId}};
+package {{genExports.packageId}};
 
 import mb.resource.hierarchical.HierarchicalResource;
 
 import java.util.ArrayList;
 
-public class {{genExportsClass.id}} {
+public class {{genExports.id}} {
 {{#combinedExports}}
     public static ArrayList<String> get{{languageIdCapitalized}}Exports() {
         final ArrayList<String> exports = new ArrayList<>();

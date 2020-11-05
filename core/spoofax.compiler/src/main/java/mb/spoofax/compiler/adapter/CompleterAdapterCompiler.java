@@ -63,19 +63,16 @@ public class CompleterAdapterCompiler implements TaskDef<CompleterAdapterCompile
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "CompleteTaskDef");
         }
 
-        Optional<TypeInfo> manualCompleteTaskDef();
+        Optional<TypeInfo> extendedCompleteTaskDef();
 
         default TypeInfo completeTaskDef() {
-            if(classKind().isManual() && manualCompleteTaskDef().isPresent()) {
-                return manualCompleteTaskDef().get();
-            }
-            return genCompleteTaskDef();
+            return extendedCompleteTaskDef().orElseGet(this::genCompleteTaskDef);
         }
 
         // List of all generated files
 
         default ListView<ResourcePath> generatedFiles() {
-            if(classKind().isManualOnly()) {
+            if(classKind().isManual()) {
                 return ListView.of();
             }
             return ListView.of(

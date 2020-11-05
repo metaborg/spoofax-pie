@@ -1,4 +1,4 @@
-package {{genFactory.packageId}};
+package {{genStrategoRuntimeBuilderFactory.packageId}};
 
 import mb.log.api.LoggerFactory;
 import mb.resource.ResourceService;
@@ -6,12 +6,12 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.spoofax.compiler.interfaces.spoofaxcore.StrategoRuntimeBuilderFactory;
 import mb.stratego.common.StrategoRuntimeBuilder;
 
-public class {{genFactory.id}} implements StrategoRuntimeBuilderFactory {
+public class {{genStrategoRuntimeBuilderFactory.id}} implements StrategoRuntimeBuilderFactory {
     private final LoggerFactory loggerFactory;
     private final ResourceService resourceService;
     private final HierarchicalResource definitionDir;
 
-    public {{genFactory.id}}(LoggerFactory loggerFactory, ResourceService resourceService, HierarchicalResource definitionDir) {
+    public {{genStrategoRuntimeBuilderFactory.id}}(LoggerFactory loggerFactory, ResourceService resourceService, HierarchicalResource definitionDir) {
         this.loggerFactory = loggerFactory;
         this.resourceService = resourceService;
         this.definitionDir = definitionDir;
@@ -25,7 +25,7 @@ public class {{genFactory.id}} implements StrategoRuntimeBuilderFactory {
 {{#ctreeRelativePaths}}
         builder.addCtree(definitionDir.appendRelativePath("{{this}}"));
 {{/ctreeRelativePaths}}
-        builder.withJarParentClassLoader({{factory.id}}.class.getClassLoader());
+        builder.withJarParentClassLoader({{genStrategoRuntimeBuilderFactory.id}}.class.getClassLoader());
 {{#addNaBL2Primitives}}
         builder.addLibrary(new mb.nabl2.common.NaBL2PrimitiveLibrary());
 {{/addNaBL2Primitives}}

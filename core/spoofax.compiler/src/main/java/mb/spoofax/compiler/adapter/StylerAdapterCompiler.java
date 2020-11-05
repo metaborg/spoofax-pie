@@ -64,20 +64,17 @@ public class StylerAdapterCompiler implements TaskDef<StylerAdapterCompiler.Inpu
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "Style");
         }
 
-        Optional<TypeInfo> manualStyleTaskDef();
+        Optional<TypeInfo> extendedStyleTaskDef();
 
         default TypeInfo styleTaskDef() {
-            if(classKind().isManual() && manualStyleTaskDef().isPresent()) {
-                return manualStyleTaskDef().get();
-            }
-            return genStyleTaskDef();
+            return extendedStyleTaskDef().orElseGet(this::genStyleTaskDef);
         }
 
 
         /// List of all generated files
 
         default ListView<ResourcePath> generatedFiles() {
-            if(classKind().isManualOnly()) {
+            if(classKind().isManual()) {
                 return ListView.of();
             }
             return ListView.of(

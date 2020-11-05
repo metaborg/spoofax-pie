@@ -404,13 +404,10 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
             return TypeInfo.of(adapterProject().packageId(), shared().defaultClassPrefix() + "Qualifier");
         }
 
-        Optional<TypeInfo> manualQualifier();
+        Optional<TypeInfo> extendedQualifier();
 
         default TypeInfo qualifier() {
-            if(classKind().isManual() && manualQualifier().isPresent()) {
-                return manualQualifier().get();
-            }
-            return genQualifier();
+            return extendedQualifier().orElseGet(this::genQualifier);
         }
 
         // Dagger component
@@ -419,13 +416,10 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
             return TypeInfo.of(adapterProject().packageId(), shared().defaultClassPrefix() + "Component");
         }
 
-        Optional<TypeInfo> manualComponent();
+        Optional<TypeInfo> extendedComponent();
 
         default TypeInfo component() {
-            if(classKind().isManual() && manualComponent().isPresent()) {
-                return manualComponent().get();
-            }
-            return genComponent();
+            return extendedComponent().orElseGet(this::genComponent);
         }
 
         default TypeInfo daggerComponent() {
@@ -438,13 +432,10 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
             return TypeInfo.of(adapterProject().packageId(), shared().defaultClassPrefix() + "Module");
         }
 
-        Optional<TypeInfo> manualModule();
+        Optional<TypeInfo> extendedModule();
 
         default TypeInfo module() {
-            if(classKind().isManual() && manualModule().isPresent()) {
-                return manualModule().get();
-            }
-            return genModule();
+            return extendedModule().orElseGet(this::genModule);
         }
 
         // Language instance
@@ -453,13 +444,10 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
             return TypeInfo.of(adapterProject().packageId(), shared().defaultClassPrefix() + "Instance");
         }
 
-        Optional<TypeInfo> manualInstance();
+        Optional<TypeInfo> extendedInstance();
 
         default TypeInfo instance() {
-            if(classKind().isManual() && manualInstance().isPresent()) {
-                return manualInstance().get();
-            }
-            return genInstance();
+            return extendedInstance().orElseGet(this::genInstance);
         }
 
 
@@ -471,13 +459,10 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "Check");
         }
 
-        Optional<TypeInfo> manualCheckTaskDef();
+        Optional<TypeInfo> extendedCheckTaskDef();
 
         default TypeInfo checkTaskDef() {
-            if(classKind().isManual() && manualCheckTaskDef().isPresent()) {
-                return manualCheckTaskDef().get();
-            }
-            return genCheckTaskDef();
+            return extendedCheckTaskDef().orElseGet(this::genCheckTaskDef);
         }
 
         // Multi-file check task definition
@@ -486,13 +471,10 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "CheckMulti");
         }
 
-        Optional<TypeInfo> manualCheckMultiTaskDef();
+        Optional<TypeInfo> extendedCheckMultiTaskDef();
 
         default TypeInfo checkMultiTaskDef() {
-            if(classKind().isManual() && manualCheckMultiTaskDef().isPresent()) {
-                return manualCheckMultiTaskDef().get();
-            }
-            return genCheckMultiTaskDef();
+            return extendedCheckMultiTaskDef().orElseGet(this::genCheckMultiTaskDef);
         }
 
         // Single file check results aggregator task definition
@@ -501,13 +483,10 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "CheckAggregator");
         }
 
-        Optional<TypeInfo> manualCheckAggregatorTaskDef();
+        Optional<TypeInfo> extendedCheckAggregatorTaskDef();
 
         default TypeInfo checkAggregatorTaskDef() {
-            if(classKind().isManual() && manualCheckAggregatorTaskDef().isPresent()) {
-                return manualCheckAggregatorTaskDef().get();
-            }
-            return genCheckAggregatorTaskDef();
+            return extendedCheckAggregatorTaskDef().orElseGet(this::genCheckAggregatorTaskDef);
         }
 
         /// Provided files

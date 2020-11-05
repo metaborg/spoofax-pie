@@ -77,13 +77,10 @@ public class MultilangAnalyzerAdapterCompiler implements TaskDef<MultilangAnalyz
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "AnalyzeProject");
         }
 
-        Optional<TypeInfo> manualAnalyzeTaskDef();
+        Optional<TypeInfo> extendedAnalyzeTaskDef();
 
         default TypeInfo analyzeTaskDef() {
-            if(classKind().isManual() && manualAnalyzeTaskDef().isPresent()) {
-                return manualAnalyzeTaskDef().get();
-            }
-            return genAnalyzeTaskDef();
+            return extendedAnalyzeTaskDef().orElseGet(this::genAnalyzeTaskDef);
         }
 
         // Transformation tasks
@@ -92,52 +89,40 @@ public class MultilangAnalyzerAdapterCompiler implements TaskDef<MultilangAnalyz
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "IndexAst");
         }
 
-        Optional<TypeInfo> manualIndexAstTaskDef();
+        Optional<TypeInfo> extendedIndexAstTaskDef();
 
         default TypeInfo indexAstTaskDef() {
-            if(classKind().isManual() && manualIndexAstTaskDef().isPresent()) {
-                return manualIndexAstTaskDef().get();
-            }
-            return genIndexAstTaskDef();
+            return extendedIndexAstTaskDef().orElseGet(this::genIndexAstTaskDef);
         }
 
         @Value.Default default TypeInfo genPreStatixTaskDef() {
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "PreStatix");
         }
 
-        Optional<TypeInfo> manualPreStatixTaskDef();
+        Optional<TypeInfo> extendedPreStatixTaskDef();
 
         default TypeInfo preStatixTaskDef() {
-            if(classKind().isManual() && manualPreStatixTaskDef().isPresent()) {
-                return manualPreStatixTaskDef().get();
-            }
-            return genPreStatixTaskDef();
+            return extendedPreStatixTaskDef().orElseGet(this::genPreStatixTaskDef);
         }
 
         @Value.Default default TypeInfo genPostStatixTaskDef() {
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "PostStatix");
         }
 
-        Optional<TypeInfo> manualPostStatixTaskDef();
+        Optional<TypeInfo> extendedPostStatixTaskDef();
 
         default TypeInfo postStatixTaskDef() {
-            if(classKind().isManual() && manualPostStatixTaskDef().isPresent()) {
-                return manualPostStatixTaskDef().get();
-            }
-            return genPostStatixTaskDef();
+            return extendedPostStatixTaskDef().orElseGet(this::genPostStatixTaskDef);
         }
 
         @Value.Default default TypeInfo genCheckTaskDef() {
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "SmlCheck");
         }
 
-        Optional<TypeInfo> manualCheckTaskDef();
+        Optional<TypeInfo> extendedCheckTaskDef();
 
         default TypeInfo checkTaskDef() {
-            if(classKind().isManual() && manualCheckTaskDef().isPresent()) {
-                return manualCheckTaskDef().get();
-            }
-            return genCheckTaskDef();
+            return extendedCheckTaskDef().orElseGet(this::genCheckTaskDef);
         }
 
         // Transformation settings

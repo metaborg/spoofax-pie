@@ -91,28 +91,25 @@ public class ExportsLanguageCompiler implements TaskDef<ExportsLanguageCompiler.
 
         // Completer
 
-        @Value.Default default TypeInfo genExportsClass() {
+        @Value.Default default TypeInfo genExports() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "Exports");
         }
 
-        Optional<TypeInfo> manualExportsClass();
+        Optional<TypeInfo> extendedExports();
 
         default TypeInfo exportsClass() {
-            if(classKind().isManual() && manualExportsClass().isPresent()) {
-                return manualExportsClass().get();
-            }
-            return genExportsClass();
+            return extendedExports().orElseGet(this::genExports);
         }
 
 
         /// List of all provided files
 
         default ListView<ResourcePath> providedFiles() {
-            if(classKind().isManualOnly()) {
+            if(classKind().isManual()) {
                 return ListView.of();
             }
             return ListView.of(
-                genExportsClass().file(generatedJavaSourcesDirectory())
+                genExports().file(generatedJavaSourcesDirectory())
             );
         }
 

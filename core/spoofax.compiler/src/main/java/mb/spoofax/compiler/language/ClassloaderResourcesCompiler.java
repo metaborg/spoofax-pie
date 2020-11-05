@@ -62,13 +62,10 @@ public class ClassloaderResourcesCompiler implements TaskDef<ClassloaderResource
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "ClassloaderResources");
         }
 
-        Optional<TypeInfo> manualClassloaderResources();
+        Optional<TypeInfo> extendedClassloaderResources();
 
         default TypeInfo classloaderResources() {
-            if(classKind().isManual() && manualClassloaderResources().isPresent()) {
-                return manualClassloaderResources().get();
-            }
-            return genClassloaderResources();
+            return extendedClassloaderResources().orElseGet(this::genClassloaderResources);
         }
 
         @Value.Default default String qualifier() {

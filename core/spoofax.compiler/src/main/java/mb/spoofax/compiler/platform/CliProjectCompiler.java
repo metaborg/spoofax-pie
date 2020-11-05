@@ -143,13 +143,10 @@ public class CliProjectCompiler implements TaskDef<CliProjectCompiler.Input, Cli
             return TypeInfo.of(packageId(), "Main");
         }
 
-        Optional<TypeInfo> manualMain();
+        Optional<TypeInfo> extendedMain();
 
         default TypeInfo main() {
-            if(classKind().isManual() && manualMain().isPresent()) {
-                return manualMain().get();
-            }
-            return genMain();
+            return extendedMain().orElseGet(this::genMain);
         }
 
 

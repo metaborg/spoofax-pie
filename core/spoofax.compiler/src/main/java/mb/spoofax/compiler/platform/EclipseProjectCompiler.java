@@ -286,13 +286,10 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "Plugin");
         }
 
-        Optional<TypeInfo> manualPlugin();
+        Optional<TypeInfo> extendedPlugin();
 
         default TypeInfo plugin() {
-            if(classKind().isManual() && manualPlugin().isPresent()) {
-                return manualPlugin().get();
-            }
-            return genPlugin();
+            return extendedPlugin().orElseGet(this::genPlugin);
         }
 
         // Dagger component
@@ -301,13 +298,10 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "EclipseComponent");
         }
 
-        Optional<TypeInfo> manualEclipseComponent();
+        Optional<TypeInfo> extendedEclipseComponent();
 
         default TypeInfo eclipseComponent() {
-            if(classKind().isManual() && manualEclipseComponent().isPresent()) {
-                return manualEclipseComponent().get();
-            }
-            return genEclipseComponent();
+            return extendedEclipseComponent().orElseGet(this::genEclipseComponent);
         }
 
         default TypeInfo daggerEclipseComponent() {
@@ -320,13 +314,10 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "EclipseModule");
         }
 
-        Optional<TypeInfo> manualEclipseModule();
+        Optional<TypeInfo> extendedEclipseModule();
 
         default TypeInfo eclipseModule() {
-            if(classKind().isManual() && manualEclipseModule().isPresent()) {
-                return manualEclipseModule().get();
-            }
-            return genEclipseModule();
+            return extendedEclipseModule().orElseGet(this::genEclipseModule);
         }
 
         // Eclipse Identifiers
@@ -335,13 +326,10 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "EclipseIdentifiers");
         }
 
-        Optional<TypeInfo> manualEclipseIdentifiers();
+        Optional<TypeInfo> extendedEclipseIdentifiers();
 
         default TypeInfo eclipseIdentifiers() {
-            if(classKind().isManual() && manualEclipseIdentifiers().isPresent()) {
-                return manualEclipseIdentifiers().get();
-            }
-            return genEclipseIdentifiers();
+            return extendedEclipseIdentifiers().orElseGet(this::genEclipseIdentifiers);
         }
 
         // Document provider
@@ -350,13 +338,10 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "DocumentProvider");
         }
 
-        Optional<TypeInfo> manualDocumentProvider();
+        Optional<TypeInfo> extendedDocumentProvider();
 
         default TypeInfo documentProvider() {
-            if(classKind().isManual() && manualDocumentProvider().isPresent()) {
-                return manualDocumentProvider().get();
-            }
-            return genDocumentProvider();
+            return extendedDocumentProvider().orElseGet(this::genDocumentProvider);
         }
 
         // Editor
@@ -365,13 +350,10 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "Editor");
         }
 
-        Optional<TypeInfo> manualEditor();
+        Optional<TypeInfo> extendedEditor();
 
         default TypeInfo editor() {
-            if(classKind().isManual() && manualEditor().isPresent()) {
-                return manualEditor().get();
-            }
-            return genEditor();
+            return extendedEditor().orElseGet(this::genEditor);
         }
 
         // Editor Tracker
@@ -380,13 +362,10 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "EditorTracker");
         }
 
-        Optional<TypeInfo> manualEditorTracker();
+        Optional<TypeInfo> extendedEditorTracker();
 
         default TypeInfo editorTracker() {
-            if(classKind().isManual() && manualEditorTracker().isPresent()) {
-                return manualEditorTracker().get();
-            }
-            return genEditorTracker();
+            return extendedEditorTracker().orElseGet(this::genEditorTracker);
         }
 
         // Project nature
@@ -395,13 +374,10 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "Nature");
         }
 
-        Optional<TypeInfo> manualNature();
+        Optional<TypeInfo> extendedNature();
 
         default TypeInfo nature() {
-            if(classKind().isManual() && manualNature().isPresent()) {
-                return manualNature().get();
-            }
-            return genNature();
+            return extendedNature().orElseGet(this::genNature);
         }
 
         // Add nature handler
@@ -410,13 +386,10 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "AddNatureHandler");
         }
 
-        Optional<TypeInfo> manualAddNatureHandler();
+        Optional<TypeInfo> extendedAddNatureHandler();
 
         default TypeInfo addNatureHandler() {
-            if(classKind().isManual() && manualAddNatureHandler().isPresent()) {
-                return manualAddNatureHandler().get();
-            }
-            return genAddNatureHandler();
+            return extendedAddNatureHandler().orElseGet(this::genAddNatureHandler);
         }
 
         // Remove nature handler
@@ -425,13 +398,10 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "RemoveNatureHandler");
         }
 
-        Optional<TypeInfo> manualRemoveNatureHandler();
+        Optional<TypeInfo> extendedRemoveNatureHandler();
 
         default TypeInfo removeNatureHandler() {
-            if(classKind().isManual() && manualRemoveNatureHandler().isPresent()) {
-                return manualRemoveNatureHandler().get();
-            }
-            return genRemoveNatureHandler();
+            return extendedRemoveNatureHandler().orElseGet(this::genRemoveNatureHandler);
         }
 
         // Project builder
@@ -440,13 +410,10 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "ProjectBuilder");
         }
 
-        Optional<TypeInfo> manualProjectBuilder();
+        Optional<TypeInfo> extendedProjectBuilder();
 
         default TypeInfo projectBuilder() {
-            if(classKind().isManual() && manualProjectBuilder().isPresent()) {
-                return manualProjectBuilder().get();
-            }
-            return genProjectBuilder();
+            return extendedProjectBuilder().orElseGet(this::genProjectBuilder);
         }
 
         // Main menu
@@ -455,13 +422,10 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "MainMenu");
         }
 
-        Optional<TypeInfo> manualMainMenu();
+        Optional<TypeInfo> extendedMainMenu();
 
         default TypeInfo mainMenu() {
-            if(classKind().isManual() && manualMainMenu().isPresent()) {
-                return manualMainMenu().get();
-            }
-            return genMainMenu();
+            return extendedMainMenu().orElseGet(this::genMainMenu);
         }
 
         // Editor context menu
@@ -470,13 +434,10 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "EditorContextMenu");
         }
 
-        Optional<TypeInfo> manualEditorContextMenu();
+        Optional<TypeInfo> extendedEditorContextMenu();
 
         default TypeInfo editorContextMenu() {
-            if(classKind().isManual() && manualEditorContextMenu().isPresent()) {
-                return manualEditorContextMenu().get();
-            }
-            return genEditorContextMenu();
+            return extendedEditorContextMenu().orElseGet(this::genEditorContextMenu);
         }
 
         // Resource context menu
@@ -485,13 +446,10 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "ResourceContextMenu");
         }
 
-        Optional<TypeInfo> manualResourceContextMenu();
+        Optional<TypeInfo> extendedResourceContextMenu();
 
         default TypeInfo resourceContextMenu() {
-            if(classKind().isManual() && manualResourceContextMenu().isPresent()) {
-                return manualResourceContextMenu().get();
-            }
-            return genResourceContextMenu();
+            return extendedResourceContextMenu().orElseGet(this::genResourceContextMenu);
         }
 
         // Command handler
@@ -500,13 +458,10 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "RunCommandHandler");
         }
 
-        Optional<TypeInfo> manualRunCommandHandler();
+        Optional<TypeInfo> extendedRunCommandHandler();
 
         default TypeInfo runCommandHandler() {
-            if(classKind().isManual() && manualRunCommandHandler().isPresent()) {
-                return manualRunCommandHandler().get();
-            }
-            return genRunCommandHandler();
+            return extendedRunCommandHandler().orElseGet(this::genRunCommandHandler);
         }
 
         // Observe handler
@@ -515,13 +470,10 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "ObserveHandler");
         }
 
-        Optional<TypeInfo> manualObserveHandler();
+        Optional<TypeInfo> extendedObserveHandler();
 
         default TypeInfo observeHandler() {
-            if(classKind().isManual() && manualObserveHandler().isPresent()) {
-                return manualObserveHandler().get();
-            }
-            return genObserveHandler();
+            return extendedObserveHandler().orElseGet(this::genObserveHandler);
         }
 
         // Unobserve handler
@@ -530,13 +482,10 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "UnobserveHandler");
         }
 
-        Optional<TypeInfo> manualUnobserveHandler();
+        Optional<TypeInfo> extendedUnobserveHandler();
 
         default TypeInfo unobserveHandler() {
-            if(classKind().isManual() && manualUnobserveHandler().isPresent()) {
-                return manualUnobserveHandler().get();
-            }
-            return genUnobserveHandler();
+            return extendedUnobserveHandler().orElseGet(this::genUnobserveHandler);
         }
 
         // Language Metadata Provider
@@ -545,13 +494,10 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "MetadataProvider");
         }
 
-        Optional<TypeInfo> manualMetadataProvider();
+        Optional<TypeInfo> extendedMetadataProvider();
 
         default TypeInfo metadataProvider() {
-            if(classKind().isManual() && manualMetadataProvider().isPresent()) {
-                return manualMetadataProvider().get();
-            }
-            return genMetadataProvider();
+            return extendedMetadataProvider().orElseGet(this::genMetadataProvider);
         }
 
 

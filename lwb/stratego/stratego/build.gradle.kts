@@ -78,7 +78,7 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
 
   // Custom component and additional modules
   genComponent(packageId, "GeneratedStrategoComponent")
-  manualComponent(packageId, "StrategoComponent")
+  extendedComponent(packageId, "StrategoComponent")
   addAdditionalModules(packageId, "JavaTasksModule")
   addAdditionalModules(incrPackageId, "StrategoIncrModule")
   addAdditionalModules(configPackageId, "StrategoConfigModule")
@@ -89,7 +89,7 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   // Manual multifile check implementation
   isMultiFile(true)
   genCheckMultiTaskDef(taskPackageId, "GeneratedStrategoCheckMulti")
-  manualCheckMultiTaskDef(taskPackageId, "StrategoCheckMulti")
+  extendedCheckMultiTaskDef(taskPackageId, "StrategoCheckMulti")
   addTaskDefs(taskPackageId, "StrategoAnalyze")
 
   // Utility task definitions

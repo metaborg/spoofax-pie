@@ -66,20 +66,17 @@ public class CompleterLanguageCompiler implements TaskDef<CompleterLanguageCompi
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "Completer");
         }
 
-        Optional<TypeInfo> manualCompleter();
+        Optional<TypeInfo> extendedCompleter();
 
         default TypeInfo completer() {
-            if(classKind().isManual() && manualCompleter().isPresent()) {
-                return manualCompleter().get();
-            }
-            return genCompleter();
+            return extendedCompleter().orElseGet(this::genCompleter);
         }
 
 
         /// List of all provided files
 
         default ListView<ResourcePath> providedFiles() {
-            if(classKind().isManualOnly()) {
+            if(classKind().isManual()) {
                 return ListView.of();
             }
             return ListView.of(

@@ -189,13 +189,10 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "IntellijModule");
         }
 
-        Optional<TypeInfo> manualModule();
+        Optional<TypeInfo> extendedModule();
 
         default TypeInfo module() {
-            if(classKind().isManual() && manualModule().isPresent()) {
-                return manualModule().get();
-            }
-            return genModule();
+            return extendedModule().orElseGet(this::genModule);
         }
 
         // IntelliJ component
@@ -204,13 +201,10 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "IntellijComponent");
         }
 
-        Optional<TypeInfo> manualComponent();
+        Optional<TypeInfo> extendedComponent();
 
         default TypeInfo component() {
-            if(classKind().isManual() && manualComponent().isPresent()) {
-                return manualComponent().get();
-            }
-            return genComponent();
+            return extendedComponent().orElseGet(this::genComponent);
         }
 
         default TypeInfo daggerComponent() {
@@ -223,13 +217,10 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "Plugin");
         }
 
-        Optional<TypeInfo> manualPlugin();
+        Optional<TypeInfo> extendedPlugin();
 
         default TypeInfo plugin() {
-            if(classKind().isManual() && manualPlugin().isPresent()) {
-                return manualPlugin().get();
-            }
-            return genPlugin();
+            return extendedPlugin().orElseGet(this::genPlugin);
         }
 
         // Loader
@@ -238,13 +229,10 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "Loader");
         }
 
-        Optional<TypeInfo> manualLoader();
+        Optional<TypeInfo> extendedLoader();
 
         default TypeInfo loader() {
-            if(classKind().isManual() && manualLoader().isPresent()) {
-                return manualLoader().get();
-            }
-            return genLoader();
+            return extendedLoader().orElseGet(this::genLoader);
         }
 
         // Language
@@ -253,13 +241,10 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "Language");
         }
 
-        Optional<TypeInfo> manualLanguage();
+        Optional<TypeInfo> extendedLanguage();
 
         default TypeInfo language() {
-            if(classKind().isManual() && manualLanguage().isPresent()) {
-                return manualLanguage().get();
-            }
-            return genLanguage();
+            return extendedLanguage().orElseGet(this::genLanguage);
         }
 
         // File type
@@ -268,13 +253,10 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "FileType");
         }
 
-        Optional<TypeInfo> manualFileType();
+        Optional<TypeInfo> extendedFileType();
 
         default TypeInfo fileType() {
-            if(classKind().isManual() && manualFileType().isPresent()) {
-                return manualFileType().get();
-            }
-            return genFileType();
+            return extendedFileType().orElseGet(this::genFileType);
         }
 
         // File type
@@ -283,13 +265,10 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "FileElementType");
         }
 
-        Optional<TypeInfo> manualFileElementType();
+        Optional<TypeInfo> extendedFileElementType();
 
         default TypeInfo fileElementType() {
-            if(classKind().isManual() && manualFileElementType().isPresent()) {
-                return manualFileElementType().get();
-            }
-            return genFileElementType();
+            return extendedFileElementType().orElseGet(this::genFileElementType);
         }
 
         // File type factory
@@ -298,13 +277,10 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "FileTypeFactory");
         }
 
-        Optional<TypeInfo> manualFileTypeFactory();
+        Optional<TypeInfo> extendedFileTypeFactory();
 
         default TypeInfo fileTypeFactory() {
-            if(classKind().isManual() && manualFileTypeFactory().isPresent()) {
-                return manualFileTypeFactory().get();
-            }
-            return genFileTypeFactory();
+            return extendedFileTypeFactory().orElseGet(this::genFileTypeFactory);
         }
 
         // Syntax highlighter factory
@@ -313,13 +289,10 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "SyntaxHighlighterFactory");
         }
 
-        Optional<TypeInfo> manualSyntaxHighlighterFactory();
+        Optional<TypeInfo> extendedSyntaxHighlighterFactory();
 
         default TypeInfo syntaxHighlighterFactory() {
-            if(classKind().isManual() && manualSyntaxHighlighterFactory().isPresent()) {
-                return manualSyntaxHighlighterFactory().get();
-            }
-            return genSyntaxHighlighterFactory();
+            return extendedSyntaxHighlighterFactory().orElseGet(this::genSyntaxHighlighterFactory);
         }
 
         // Parser definition
@@ -328,13 +301,10 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "ParserDefinition");
         }
 
-        Optional<TypeInfo> manualParserDefinition();
+        Optional<TypeInfo> extendedParserDefinition();
 
         default TypeInfo parserDefinition() {
-            if(classKind().isManual() && manualParserDefinition().isPresent()) {
-                return manualParserDefinition().get();
-            }
-            return genParserDefinition();
+            return extendedParserDefinition().orElseGet(this::genParserDefinition);
         }
 
 

@@ -37,7 +37,7 @@ public class StrategoRuntimeLanguageCompiler implements TaskDef<StrategoRuntimeL
     @Override public None exec(ExecContext context, Input input) throws IOException {
         if(input.classKind().isManualOnly()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
-        factoryTemplate.write(context, input.genFactory().file(generatedJavaSourcesDirectory), input);
+        factoryTemplate.write(context, input.genStrategoRuntimeBuilderFactory().file(generatedJavaSourcesDirectory), input);
         return None.instance;
     }
 
@@ -104,28 +104,25 @@ public class StrategoRuntimeLanguageCompiler implements TaskDef<StrategoRuntimeL
 
         // Stratego runtime builder factory
 
-        @Value.Default default TypeInfo genFactory() {
+        @Value.Default default TypeInfo genStrategoRuntimeBuilderFactory() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "StrategoRuntimeBuilderFactory");
         }
 
-        Optional<TypeInfo> manualFactory();
+        Optional<TypeInfo> extendedStrategoRuntimeBuilderFactory();
 
-        default TypeInfo factory() {
-            if(classKind().isManual() && manualFactory().isPresent()) {
-                return manualFactory().get();
-            }
-            return genFactory();
+        default TypeInfo strategoRuntimeBuilderFactory() {
+            return extendedStrategoRuntimeBuilderFactory().orElseGet(this::genStrategoRuntimeBuilderFactory);
         }
 
 
         // List of all provided files
 
         default ListView<ResourcePath> providedFiles() {
-            if(classKind().isManualOnly()) {
+            if(classKind().isManual()) {
                 return ListView.of();
             }
             return ListView.of(
-                genFactory().file(generatedJavaSourcesDirectory())
+                genStrategoRuntimeBuilderFactory().file(generatedJavaSourcesDirectory())
             );
         }
 

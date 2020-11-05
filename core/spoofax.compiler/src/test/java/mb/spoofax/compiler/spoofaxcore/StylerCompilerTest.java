@@ -16,7 +16,7 @@ class StylerCompilerTest extends TestBase {
             fileAssertions.scopedExists(languageProjectInput.generatedJavaSourcesDirectory(), (s) -> {
                 s.assertPublicJavaClass(languageProjectInput.genRules(), "TigerStylingRules");
                 s.assertPublicJavaClass(languageProjectInput.genStyler(), "TigerStyler");
-                s.assertPublicJavaClass(languageProjectInput.genFactory(), "TigerStylerFactory");
+                s.assertPublicJavaClass(languageProjectInput.genStylerFactory(), "TigerStylerFactory");
             });
 
             final StylerAdapterCompiler.Input adapterProjectInput = inputs.stylerAdapterCompilerInput();

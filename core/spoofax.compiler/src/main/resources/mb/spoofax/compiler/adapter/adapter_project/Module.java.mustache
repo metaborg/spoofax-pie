@@ -92,12 +92,12 @@ public class {{genModule.id}} {
 
 
     @Provides @{{scope.id}}
-    static {{this.languageProjectInput.factory.qualifiedId}} provideParserFactory(@{{qualifier.id}}("definition-dir") HierarchicalResource definitionDir) {
-        return new {{this.languageProjectInput.factory.qualifiedId}}(definitionDir);
+    static {{this.languageProjectInput.parserFactory.qualifiedId}} provideParserFactory(@{{qualifier.id}}("definition-dir") HierarchicalResource definitionDir) {
+        return new {{this.languageProjectInput.parserFactory.qualifiedId}}(definitionDir);
     }
 
     @Provides /* Unscoped: parser has state, so create a new parser every call. */
-    static {{this.languageProjectInput.parser.qualifiedId}} provideParser({{this.languageProjectInput.factory.qualifiedId}} parserFactory) {
+    static {{this.languageProjectInput.parser.qualifiedId}} provideParser({{this.languageProjectInput.parserFactory.qualifiedId}} parserFactory) {
         return parserFactory.create();
     }
 {{/parser}}
@@ -105,12 +105,12 @@ public class {{genModule.id}} {
 
 
     @Provides @{{scope.id}}
-    static {{this.languageProjectInput.factory.qualifiedId}} provideStylerFactory(LoggerFactory loggerFactory, @{{qualifier.id}}("definition-dir") HierarchicalResource definitionDir) {
-        return new {{this.languageProjectInput.factory.qualifiedId}}(loggerFactory, definitionDir);
+    static {{this.languageProjectInput.stylerFactory.qualifiedId}} provideStylerFactory(LoggerFactory loggerFactory, @{{qualifier.id}}("definition-dir") HierarchicalResource definitionDir) {
+        return new {{this.languageProjectInput.stylerFactory.qualifiedId}}(loggerFactory, definitionDir);
     }
 
     @Provides @{{scope.id}}
-    static {{this.languageProjectInput.styler.qualifiedId}} provideStyler({{this.languageProjectInput.factory.qualifiedId}} stylerFactory) {
+    static {{this.languageProjectInput.styler.qualifiedId}} provideStyler({{this.languageProjectInput.stylerFactory.qualifiedId}} stylerFactory) {
         return stylerFactory.create();
     }
 {{/styler}}
@@ -118,12 +118,12 @@ public class {{genModule.id}} {
 
 
     @Provides @{{scope.id}}
-    static {{this.languageProjectInput.factory.qualifiedId}} provideConstraintAnalyzerFactory(ResourceService resourceService) {
-        return new {{this.languageProjectInput.factory.qualifiedId}}(resourceService);
+    static {{this.languageProjectInput.constraintAnalyzerFactory.qualifiedId}} provideConstraintAnalyzerFactory(ResourceService resourceService) {
+        return new {{this.languageProjectInput.constraintAnalyzerFactory.qualifiedId}}(resourceService);
     }
 
     @Provides @{{scope.id}}
-    static {{this.languageProjectInput.constraintAnalyzer.qualifiedId}} provideConstraintAnalyzer({{this.languageProjectInput.factory.qualifiedId}} factory) {
+    static {{this.languageProjectInput.constraintAnalyzer.qualifiedId}} provideConstraintAnalyzer({{this.languageProjectInput.constraintAnalyzerFactory.qualifiedId}} factory) {
         return factory.create();
     }
 {{/constraintAnalyzer}}
@@ -131,12 +131,12 @@ public class {{genModule.id}} {
 
 
     @Provides @{{scope.id}}
-    static {{this.languageProjectInput.factory.qualifiedId}} provideStrategoRuntimeBuilderFactory(LoggerFactory loggerFactory, ResourceService resourceService, @{{qualifier.id}}("definition-dir") HierarchicalResource definitionDir) {
-        return new {{this.languageProjectInput.factory.qualifiedId}}(loggerFactory, resourceService, definitionDir);
+    static {{this.languageProjectInput.strategoRuntimeBuilderFactory.qualifiedId}} provideStrategoRuntimeBuilderFactory(LoggerFactory loggerFactory, ResourceService resourceService, @{{qualifier.id}}("definition-dir") HierarchicalResource definitionDir) {
+        return new {{this.languageProjectInput.strategoRuntimeBuilderFactory.qualifiedId}}(loggerFactory, resourceService, definitionDir);
     }
 
     @Provides @{{scope.id}} @{{qualifier.id}}
-    static StrategoRuntimeBuilder provideQualifiedStrategoRuntimeBuilder({{this.languageProjectInput.factory.qualifiedId}} factory) {
+    static StrategoRuntimeBuilder provideQualifiedStrategoRuntimeBuilder({{this.languageProjectInput.strategoRuntimeBuilderFactory.qualifiedId}} factory) {
         return factory.create();
     }
 

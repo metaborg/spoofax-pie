@@ -1,12 +1,12 @@
-package {{genFactory.packageId}};
+package {{genParserFactory.packageId}};
 
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.spoofax.compiler.interfaces.spoofaxcore.ParserFactory;
 
-public class {{genFactory.id}} implements ParserFactory {
+public class {{genParserFactory.id}} implements ParserFactory {
     private final {{genTable.qualifiedId}} parseTable;
 
-    public {{genFactory.id}}(HierarchicalResource definitionDir) {
+    public {{genParserFactory.id}}(HierarchicalResource definitionDir) {
         this.parseTable = {{genTable.qualifiedId}}.fromDefinitionDir(definitionDir);
     }
 

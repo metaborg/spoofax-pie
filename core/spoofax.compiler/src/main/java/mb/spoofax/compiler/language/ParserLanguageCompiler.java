@@ -41,7 +41,7 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         tableTemplate.write(context, input.genTable().file(generatedJavaSourcesDirectory), input);
         parserTemplate.write(context, input.genParser().file(generatedJavaSourcesDirectory), input);
-        factoryTemplate.write(context, input.genFactory().file(generatedJavaSourcesDirectory), input);
+        factoryTemplate.write(context, input.genParserFactory().file(generatedJavaSourcesDirectory), input);
         return None.instance;
     }
 
@@ -97,41 +97,35 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "Parser");
         }
 
-        Optional<TypeInfo> manualParser();
+        Optional<TypeInfo> extendedParser();
 
         default TypeInfo parser() {
-            if(classKind().isManual() && manualParser().isPresent()) {
-                return manualParser().get();
-            }
-            return genParser();
+            return extendedParser().orElseGet(this::genParser);
         }
 
         // Parser factory
 
-        @Value.Default default TypeInfo genFactory() {
+        @Value.Default default TypeInfo genParserFactory() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "ParserFactory");
         }
 
-        Optional<TypeInfo> manualFactory();
+        Optional<TypeInfo> extendedParserFactory();
 
-        default TypeInfo factory() {
-            if(classKind().isManual() && manualFactory().isPresent()) {
-                return manualFactory().get();
-            }
-            return genFactory();
+        default TypeInfo parserFactory() {
+            return extendedParserFactory().orElseGet(this::genParserFactory);
         }
 
 
         /// List of all provided files
 
         default ListView<ResourcePath> providedFiles() {
-            if(classKind().isManualOnly()) {
+            if(classKind().isManual()) {
                 return ListView.of();
             }
             return ListView.of(
                 genTable().file(generatedJavaSourcesDirectory()),
                 genParser().file(generatedJavaSourcesDirectory()),
-                genFactory().file(generatedJavaSourcesDirectory())
+                genParserFactory().file(generatedJavaSourcesDirectory())
             );
         }
 

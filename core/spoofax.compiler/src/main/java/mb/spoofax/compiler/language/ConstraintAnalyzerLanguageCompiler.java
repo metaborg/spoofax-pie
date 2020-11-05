@@ -37,7 +37,7 @@ public class ConstraintAnalyzerLanguageCompiler implements TaskDef<ConstraintAna
         if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         constraintAnalyzerTemplate.write(context, input.genConstraintAnalyzer().file(generatedJavaSourcesDirectory), input);
-        factoryTemplate.write(context, input.genFactory().file(generatedJavaSourcesDirectory), input);
+        factoryTemplate.write(context, input.genConstraintAnalyzerFactory().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
     }
 
@@ -81,40 +81,34 @@ public class ConstraintAnalyzerLanguageCompiler implements TaskDef<ConstraintAna
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "ConstraintAnalyzer");
         }
 
-        Optional<TypeInfo> manualConstraintAnalyzer();
+        Optional<TypeInfo> extendedConstraintAnalyzer();
 
         default TypeInfo constraintAnalyzer() {
-            if(classKind().isManual() && manualConstraintAnalyzer().isPresent()) {
-                return manualConstraintAnalyzer().get();
-            }
-            return genConstraintAnalyzer();
+            return extendedConstraintAnalyzer().orElseGet(this::genConstraintAnalyzer);
         }
 
         // Constraint analyzer factory
 
-        @Value.Default default TypeInfo genFactory() {
+        @Value.Default default TypeInfo genConstraintAnalyzerFactory() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "ConstraintAnalyzerFactory");
         }
 
-        Optional<TypeInfo> manualFactory();
+        Optional<TypeInfo> extendedConstraintAnalyzerFactory();
 
-        default TypeInfo factory() {
-            if(classKind().isManual() && manualFactory().isPresent()) {
-                return manualFactory().get();
-            }
-            return genFactory();
+        default TypeInfo constraintAnalyzerFactory() {
+            return extendedConstraintAnalyzerFactory().orElseGet(this::genConstraintAnalyzerFactory);
         }
 
 
         // List of all provided files
 
         default ListView<ResourcePath> providedFiles() {
-            if(classKind().isManualOnly()) {
+            if(classKind().isManual()) {
                 return ListView.of();
             }
             return ListView.of(
                 genConstraintAnalyzer().file(generatedJavaSourcesDirectory()),
-                genFactory().file(generatedJavaSourcesDirectory())
+                genConstraintAnalyzerFactory().file(generatedJavaSourcesDirectory())
             );
         }
 

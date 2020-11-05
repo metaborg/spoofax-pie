@@ -71,13 +71,10 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "Analyze");
         }
 
-        Optional<TypeInfo> manualAnalyzeTaskDef();
+        Optional<TypeInfo> extendedAnalyzeTaskDef();
 
         default TypeInfo analyzeTaskDef() {
-            if(classKind().isManual() && manualAnalyzeTaskDef().isPresent()) {
-                return manualAnalyzeTaskDef().get();
-            }
-            return genAnalyzeTaskDef();
+            return extendedAnalyzeTaskDef().orElseGet(this::genAnalyzeTaskDef);
         }
 
         // Multi-file analyze
@@ -86,20 +83,17 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "AnalyzeMulti");
         }
 
-        Optional<TypeInfo> manualAnalyzeMultiTaskDef();
+        Optional<TypeInfo> extendedAnalyzeMultiTaskDef();
 
         default TypeInfo analyzeMultiTaskDef() {
-            if(classKind().isManual() && manualAnalyzeMultiTaskDef().isPresent()) {
-                return manualAnalyzeMultiTaskDef().get();
-            }
-            return genAnalyzeMultiTaskDef();
+            return extendedAnalyzeMultiTaskDef().orElseGet(this::genAnalyzeMultiTaskDef);
         }
 
 
         // List of all generated files
 
         default ListView<ResourcePath> generatedFiles() {
-            if(classKind().isManualOnly()) {
+            if(classKind().isManual()) {
                 return ListView.of();
             }
             return ListView.of(

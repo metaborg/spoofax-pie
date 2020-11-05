@@ -68,13 +68,10 @@ public class MultilangAnalyzerLanguageCompiler implements TaskDef<MultilangAnaly
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "SpecConfigFactory");
         }
 
-        Optional<TypeInfo> manualSpecConfigFactory();
+        Optional<TypeInfo> extendedSpecConfigFactory();
 
         default TypeInfo specConfigFactory() {
-            if(classKind().isManual() && manualSpecConfigFactory().isPresent()) {
-                return manualSpecConfigFactory().get();
-            }
-            return genSpecConfigFactory();
+            return extendedSpecConfigFactory().orElseGet(this::genSpecConfigFactory);
         }
 
         @Value.Default default String languageId() { return shared().defaultPackageId(); }

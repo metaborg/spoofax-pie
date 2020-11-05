@@ -77,7 +77,7 @@ languageAdapterProject {
       classKind(ClassKind.Extended)
       // Manual analyze multi implementation to add Spoofax2ProjectContext
       genAnalyzeMultiTaskDef(taskPackageId, "GeneratedStatixAnalyzeMulti")
-      manualAnalyzeMultiTaskDef(taskPackageId, "StatixAnalyzeMulti")
+      extendedAnalyzeMultiTaskDef(taskPackageId, "StatixAnalyzeMulti")
     }
     withStrategoRuntime()
     project.configureCompilerInput()
