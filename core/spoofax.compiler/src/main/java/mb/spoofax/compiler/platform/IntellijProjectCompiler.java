@@ -59,6 +59,9 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
     @Override public Output exec(ExecContext context, Input input) throws Exception {
         final Shared shared = input.shared();
 
+        final Output.Builder outputBuilder = Output.builder();
+        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
+
         // IntelliJ files
         pluginXmlTemplate.write(context, input.pluginXmlFile(), input);
 
@@ -76,7 +79,7 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
         syntaxHighlighterFactoryTemplate.write(context, input.syntaxHighlighterFactory().file(classesGenDirectory), input);
         parserDefinitionTemplate.write(context, input.parserDefinition().file(classesGenDirectory), input);
 
-        return Output.builder().build();
+        return outputBuilder.build();
     }
 
 

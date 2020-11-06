@@ -39,11 +39,14 @@ public class CliProjectCompiler implements TaskDef<CliProjectCompiler.Input, Cli
     @Override public Output exec(ExecContext context, Input input) throws Exception {
         final Shared shared = input.shared();
 
+        final Output.Builder outputBuilder = Output.builder();
+        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
+
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         packageInfoTemplate.write(context, input.genPackageInfo().file(generatedJavaSourcesDirectory), input);
         mainTemplate.write(context, input.genMain().file(generatedJavaSourcesDirectory), input);
 
-        return Output.builder().build();
+        return outputBuilder.build();
     }
 
 

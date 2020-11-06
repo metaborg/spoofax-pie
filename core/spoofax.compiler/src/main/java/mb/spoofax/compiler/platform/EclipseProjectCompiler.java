@@ -79,6 +79,9 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
     @Override public Output exec(ExecContext context, Input input) throws IOException {
         final Shared shared = input.shared();
 
+        final Output.Builder outputBuilder = Output.builder();
+        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
+
         // Eclipse files
         pluginXmlTemplate.write(context, input.pluginXmlFile(), input);
         manifestTemplate.write(context, input.manifestMfFile(), input);
@@ -107,7 +110,7 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
             metadataProviderTemplate.write(context, input.genMetadataProvider().file(classesGenDirectory), input);
         }
 
-        return Output.builder().build();
+        return outputBuilder.build();
     }
 
 

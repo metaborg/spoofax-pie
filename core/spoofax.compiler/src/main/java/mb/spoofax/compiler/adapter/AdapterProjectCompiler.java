@@ -98,6 +98,9 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
         input.constraintAnalyzer().ifPresent((i) -> context.require(constraintAnalyzerCompiler, i));
         input.multilangAnalyzer().ifPresent((i) -> context.require(multilangAnalyzerCompiler, i));
 
+        final Output.Builder outputBuilder = Output.builder();
+        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
+
         // Collect all task definitions.
         final ArrayList<TypeInfo> allTaskDefs = new ArrayList<>(input.taskDefs());
         if(input.parser().isPresent()) {
@@ -245,7 +248,7 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
             instanceTemplate.write(context, input.genInstance().file(generatedJavaSourcesDirectory), input, map);
         }
 
-        return Output.builder().build();
+        return outputBuilder.build();
     }
 
 
