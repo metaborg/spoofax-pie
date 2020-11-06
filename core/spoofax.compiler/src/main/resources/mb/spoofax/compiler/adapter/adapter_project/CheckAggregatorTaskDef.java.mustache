@@ -57,9 +57,9 @@ public class {{baseCheckAggregatorTaskDef.id}} implements TaskDef<{{baseCheckAgg
         }
     }
 
-    private final {{baseCheckTaskDef.id}} check;
+    private final {{checkTaskDef.qualifiedId}} check;
 
-    @Inject public {{baseCheckAggregatorTaskDef.id}}({{baseCheckTaskDef.id}} check){
+    @Inject public {{baseCheckAggregatorTaskDef.id}}({{checkTaskDef.qualifiedId}} check){
         this.check = check;
     }
 

@@ -7,12 +7,12 @@ import mb.resource.ResourceKey;
 import mb.spoofax.compiler.interfaces.spoofaxcore.Parser;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import {{baseParseTable.qualifiedId}};
+import {{parseTable.qualifiedId}};
 
 public class {{baseParser.id}} implements Parser {
     private final JSGLR1Parser parser;
 
-    public {{baseParser.id}}({{baseParseTable.id}} parseTable) {
+    public {{baseParser.id}}({{parseTable.id}} parseTable) {
         this.parser = new JSGLR1Parser(parseTable.parseTable);
     }
 

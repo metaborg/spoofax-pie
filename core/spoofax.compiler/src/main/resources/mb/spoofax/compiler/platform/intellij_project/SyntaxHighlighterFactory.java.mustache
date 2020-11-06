@@ -1,10 +1,10 @@
-package {{syntaxHighlighterFactory.packageId}};
+package {{baseSyntaxHighlighterFactory.packageId}};
 
 import mb.spoofax.intellij.editor.SpoofaxSyntaxHighlighterFactory;
 
-public class {{syntaxHighlighterFactory.id}} extends SpoofaxSyntaxHighlighterFactory {
+public class {{baseSyntaxHighlighterFactory.id}} extends SpoofaxSyntaxHighlighterFactory {
     // Instantiated by IntelliJ.
-    private {{syntaxHighlighterFactory.id}}() {
+    private {{baseSyntaxHighlighterFactory.id}}() {
         super({{plugin.qualifiedId}}.getComponent());
     }
 }

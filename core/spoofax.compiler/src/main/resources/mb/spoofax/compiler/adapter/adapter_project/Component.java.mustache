@@ -16,11 +16,11 @@ import {{qualifier.qualifiedId}};
 
 @{{scope.qualifiedId}}
 @Component(
-    modules = { {{baseModule.qualifiedId}}.class{{#additionalModules}}{{#-first}}, {{/-first}}{{qualifiedId}}.class{{^-last}}, {{/-last}}{{/additionalModules}} },
+    modules = { {{module.qualifiedId}}.class{{#additionalModules}}{{#-first}}, {{/-first}}{{qualifiedId}}.class{{^-last}}, {{/-last}}{{/additionalModules}} },
     dependencies = { PlatformComponent.class{{#isMultiLang}}, MultiLangComponent.class{{/isMultiLang}} }
 )
 public interface {{baseComponent.id}} extends LanguageComponent{{#isMultiLang}}, LanguageMetadataProvider{{/isMultiLang}}  {
-    @Override {{baseInstance.id}} getLanguageInstance();
+    @Override {{instance.qualifiedId}} getLanguageInstance();
 
     @Override @{{qualifier.id}} ResourceService getResourceService();
 

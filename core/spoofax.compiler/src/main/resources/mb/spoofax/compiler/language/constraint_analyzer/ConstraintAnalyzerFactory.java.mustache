@@ -10,7 +10,7 @@ public class {{baseConstraintAnalyzerFactory.id}} implements ConstraintAnalyzerF
         this.resourceService = resourceService;
     }
 
-    @Override public {{baseConstraintAnalyzer.qualifiedId}} create() {
-        return new {{baseConstraintAnalyzer.qualifiedId}}(resourceService);
+    @Override public {{constraintAnalyzer.qualifiedId}} create() {
+        return new {{constraintAnalyzer.qualifiedId}}(resourceService);
     }
 }

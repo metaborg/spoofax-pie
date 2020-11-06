@@ -4,13 +4,13 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.spoofax.compiler.interfaces.spoofaxcore.ParserFactory;
 
 public class {{baseParserFactory.id}} implements ParserFactory {
-    private final {{baseParseTable.qualifiedId}} parseTable;
+    private final {{parseTable.qualifiedId}} parseTable;
 
     public {{baseParserFactory.id}}(HierarchicalResource definitionDir) {
-        this.parseTable = {{baseParseTable.qualifiedId}}.fromDefinitionDir(definitionDir);
+        this.parseTable = {{parseTable.qualifiedId}}.fromDefinitionDir(definitionDir);
     }
 
-    @Override public {{baseParser.qualifiedId}} create() {
-        return new {{baseParser.qualifiedId}}(parseTable);
+    @Override public {{parser.qualifiedId}} create() {
+        return new {{parser.qualifiedId}}(parseTable);
     }
 }

@@ -5,15 +5,15 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.spoofax.compiler.interfaces.spoofaxcore.StylerFactory;
 
 public class {{baseStylerFactory.id}} implements StylerFactory {
-    private final {{baseStylingRules.qualifiedId}} stylingRules;
+    private final {{stylingRules.qualifiedId}} stylingRules;
     private final LoggerFactory loggerFactory;
 
     public {{baseStylerFactory.id}}(LoggerFactory loggerFactory, HierarchicalResource definitionDir) {
-        this.stylingRules = {{baseStylingRules.qualifiedId}}.fromDefinitionDir(definitionDir);
+        this.stylingRules = {{stylingRules.qualifiedId}}.fromDefinitionDir(definitionDir);
         this.loggerFactory = loggerFactory;
     }
 
-    @Override public {{baseStyler.qualifiedId}} create() {
-        return new {{baseStyler.qualifiedId}}(stylingRules, loggerFactory);
+    @Override public {{styler.qualifiedId}} create() {
+        return new {{styler.qualifiedId}}(stylingRules, loggerFactory);
     }
 }

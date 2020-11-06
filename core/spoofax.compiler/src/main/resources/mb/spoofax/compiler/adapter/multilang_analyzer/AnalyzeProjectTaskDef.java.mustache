@@ -11,9 +11,9 @@ import javax.inject.Inject;
 @{{adapterProject.scope.qualifiedId}}
 public class {{baseAnalyzeTaskDef.id}} implements TaskDef<ResourcePath, CommandFeedback> {
 
-    private final {{baseCheckTaskDef.qualifiedId}} check;
+    private final {{checkTaskDef.qualifiedId}} check;
 
-    @Inject public {{baseAnalyzeTaskDef.id}}({{baseCheckTaskDef.qualifiedId}} check) {
+    @Inject public {{baseAnalyzeTaskDef.id}}({{checkTaskDef.qualifiedId}} check) {
         this.check = check;
     }
 
