@@ -35,7 +35,7 @@ public class CompleterAdapterCompiler implements TaskDef<CompleterAdapterCompile
         final Output.Builder outputBuilder = Output.builder();
         if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
-        completeTaskDefTemplate.write(context, input.genCompleteTaskDef().file(generatedJavaSourcesDirectory), input);
+        completeTaskDefTemplate.write(context, input.baseCompleteTaskDef().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
     }
 
@@ -59,14 +59,14 @@ public class CompleterAdapterCompiler implements TaskDef<CompleterAdapterCompile
 
         // Complete task definition
 
-        @Value.Default default TypeInfo genCompleteTaskDef() {
+        @Value.Default default TypeInfo baseCompleteTaskDef() {
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "CompleteTaskDef");
         }
 
-        Optional<TypeInfo> extendedCompleteTaskDef();
+        Optional<TypeInfo> extendCompleteTaskDef();
 
         default TypeInfo completeTaskDef() {
-            return extendedCompleteTaskDef().orElseGet(this::genCompleteTaskDef);
+            return extendCompleteTaskDef().orElseGet(this::baseCompleteTaskDef);
         }
 
         // List of all generated files
@@ -76,7 +76,7 @@ public class CompleterAdapterCompiler implements TaskDef<CompleterAdapterCompile
                 return ListView.of();
             }
             return ListView.of(
-                genCompleteTaskDef().file(generatedJavaSourcesDirectory())
+                baseCompleteTaskDef().file(generatedJavaSourcesDirectory())
             );
         }
 

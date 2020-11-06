@@ -17,17 +17,17 @@ class IntellijProjectCompilerTest extends TestBase {
             fileAssertions.asserts(input.pluginXmlFile(), (a) -> a.assertAll("plugin.xml", "<idea-plugin>"));
             fileAssertions.scopedExists(input.generatedJavaSourcesDirectory(), (s) -> {
                 s.asserts(input.packageInfo(), (a) -> a.assertAll("package-info.java", "@DefaultQualifier(NonNull.class)"));
-                s.assertPublicJavaClass(input.genPlugin(), "TigerPlugin");
-                s.assertPublicJavaInterface(input.genComponent(), "TigerIntellijComponent");
-                s.assertPublicJavaClass(input.genModule(), "TigerIntellijModule");
-                s.assertPublicJavaClass(input.genPlugin(), "TigerPlugin");
-                s.assertPublicJavaClass(input.genLoader(), "TigerLoader");
-                s.assertPublicJavaClass(input.genLanguage(), "TigerLanguage");
-                s.assertPublicJavaClass(input.genFileType(), "TigerFileType");
-                s.assertPublicJavaClass(input.genFileElementType(), "TigerFileElementType");
-                s.assertPublicJavaClass(input.genFileTypeFactory(), "TigerFileTypeFactory");
-                s.assertPublicJavaClass(input.genSyntaxHighlighterFactory(), "TigerSyntaxHighlighterFactory");
-                s.assertPublicJavaClass(input.genParserDefinition(), "TigerParserDefinition");
+                s.assertPublicJavaClass(input.basePlugin(), "TigerPlugin");
+                s.assertPublicJavaInterface(input.baseComponent(), "TigerIntellijComponent");
+                s.assertPublicJavaClass(input.baseModule(), "TigerIntellijModule");
+                s.assertPublicJavaClass(input.basePlugin(), "TigerPlugin");
+                s.assertPublicJavaClass(input.baseLoader(), "TigerLoader");
+                s.assertPublicJavaClass(input.baseLanguage(), "TigerLanguage");
+                s.assertPublicJavaClass(input.baseFileType(), "TigerFileType");
+                s.assertPublicJavaClass(input.baseFileElementType(), "TigerFileElementType");
+                s.assertPublicJavaClass(input.baseFileTypeFactory(), "TigerFileTypeFactory");
+                s.assertPublicJavaClass(input.baseSyntaxHighlighterFactory(), "TigerSyntaxHighlighterFactory");
+                s.assertPublicJavaClass(input.baseParserDefinition(), "TigerParserDefinition");
             });
         }
     }

@@ -45,11 +45,11 @@ public class MultilangAnalyzerAdapterCompiler implements TaskDef<MultilangAnalyz
         final Output.Builder outputBuilder = Output.builder();
         if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
-        analyzeProjectTemplate.write(context, input.genAnalyzeTaskDef().file(generatedJavaSourcesDirectory), input);
-        indexAstTaskDefTemplate.write(context, input.genIndexAstTaskDef().file(generatedJavaSourcesDirectory), input);
-        preStatixTaskDefTemplate.write(context, input.genPreStatixTaskDef().file(generatedJavaSourcesDirectory), input);
-        postStatixTaskDefTemplate.write(context, input.genPostStatixTaskDef().file(generatedJavaSourcesDirectory), input);
-        checkTaskDefTemplate.write(context, input.genCheckTaskDef().file(generatedJavaSourcesDirectory), input);
+        analyzeProjectTemplate.write(context, input.baseAnalyzeTaskDef().file(generatedJavaSourcesDirectory), input);
+        indexAstTaskDefTemplate.write(context, input.baseIndexAstTaskDef().file(generatedJavaSourcesDirectory), input);
+        preStatixTaskDefTemplate.write(context, input.basePreStatixTaskDef().file(generatedJavaSourcesDirectory), input);
+        postStatixTaskDefTemplate.write(context, input.basePostStatixTaskDef().file(generatedJavaSourcesDirectory), input);
+        checkTaskDefTemplate.write(context, input.baseCheckTaskDef().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
     }
 
@@ -73,56 +73,56 @@ public class MultilangAnalyzerAdapterCompiler implements TaskDef<MultilangAnalyz
 
         // Analyze
 
-        @Value.Default default TypeInfo genAnalyzeTaskDef() {
+        @Value.Default default TypeInfo baseAnalyzeTaskDef() {
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "AnalyzeProject");
         }
 
-        Optional<TypeInfo> extendedAnalyzeTaskDef();
+        Optional<TypeInfo> extendAnalyzeTaskDef();
 
         default TypeInfo analyzeTaskDef() {
-            return extendedAnalyzeTaskDef().orElseGet(this::genAnalyzeTaskDef);
+            return extendAnalyzeTaskDef().orElseGet(this::baseAnalyzeTaskDef);
         }
 
         // Transformation tasks
 
-        @Value.Default default TypeInfo genIndexAstTaskDef() {
+        @Value.Default default TypeInfo baseIndexAstTaskDef() {
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "IndexAst");
         }
 
-        Optional<TypeInfo> extendedIndexAstTaskDef();
+        Optional<TypeInfo> extendIndexAstTaskDef();
 
         default TypeInfo indexAstTaskDef() {
-            return extendedIndexAstTaskDef().orElseGet(this::genIndexAstTaskDef);
+            return extendIndexAstTaskDef().orElseGet(this::baseIndexAstTaskDef);
         }
 
-        @Value.Default default TypeInfo genPreStatixTaskDef() {
+        @Value.Default default TypeInfo basePreStatixTaskDef() {
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "PreStatix");
         }
 
-        Optional<TypeInfo> extendedPreStatixTaskDef();
+        Optional<TypeInfo> extendPreStatixTaskDef();
 
         default TypeInfo preStatixTaskDef() {
-            return extendedPreStatixTaskDef().orElseGet(this::genPreStatixTaskDef);
+            return extendPreStatixTaskDef().orElseGet(this::basePreStatixTaskDef);
         }
 
-        @Value.Default default TypeInfo genPostStatixTaskDef() {
+        @Value.Default default TypeInfo basePostStatixTaskDef() {
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "PostStatix");
         }
 
-        Optional<TypeInfo> extendedPostStatixTaskDef();
+        Optional<TypeInfo> extendPostStatixTaskDef();
 
         default TypeInfo postStatixTaskDef() {
-            return extendedPostStatixTaskDef().orElseGet(this::genPostStatixTaskDef);
+            return extendPostStatixTaskDef().orElseGet(this::basePostStatixTaskDef);
         }
 
-        @Value.Default default TypeInfo genCheckTaskDef() {
+        @Value.Default default TypeInfo baseCheckTaskDef() {
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "SmlCheck");
         }
 
-        Optional<TypeInfo> extendedCheckTaskDef();
+        Optional<TypeInfo> extendCheckTaskDef();
 
         default TypeInfo checkTaskDef() {
-            return extendedCheckTaskDef().orElseGet(this::genCheckTaskDef);
+            return extendCheckTaskDef().orElseGet(this::baseCheckTaskDef);
         }
 
         // Transformation settings
@@ -167,11 +167,11 @@ public class MultilangAnalyzerAdapterCompiler implements TaskDef<MultilangAnalyz
                 return ListView.of();
             }
             return ListView.of(
-                genAnalyzeTaskDef().file(generatedJavaSourcesDirectory()),
-                genIndexAstTaskDef().file(generatedJavaSourcesDirectory()),
-                genPreStatixTaskDef().file(generatedJavaSourcesDirectory()),
-                genPostStatixTaskDef().file(generatedJavaSourcesDirectory()),
-                genCheckTaskDef().file(generatedJavaSourcesDirectory())
+                baseAnalyzeTaskDef().file(generatedJavaSourcesDirectory()),
+                baseIndexAstTaskDef().file(generatedJavaSourcesDirectory()),
+                basePreStatixTaskDef().file(generatedJavaSourcesDirectory()),
+                basePostStatixTaskDef().file(generatedJavaSourcesDirectory()),
+                baseCheckTaskDef().file(generatedJavaSourcesDirectory())
             );
         }
 

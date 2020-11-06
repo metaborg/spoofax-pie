@@ -34,7 +34,7 @@ public class ClassloaderResourcesCompiler implements TaskDef<ClassloaderResource
         final Output.Builder outputBuilder = Output.builder();
         if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
-        classloaderResourcesTemplate.write(context, input.genClassloaderResources().file(generatedJavaSourcesDirectory), input);
+        classloaderResourcesTemplate.write(context, input.baseClassloaderResources().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
     }
 
@@ -58,14 +58,14 @@ public class ClassloaderResourcesCompiler implements TaskDef<ClassloaderResource
 
         // Classloader resources
 
-        @Value.Default default TypeInfo genClassloaderResources() {
+        @Value.Default default TypeInfo baseClassloaderResources() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "ClassloaderResources");
         }
 
-        Optional<TypeInfo> extendedClassloaderResources();
+        Optional<TypeInfo> extendClassloaderResources();
 
         default TypeInfo classloaderResources() {
-            return extendedClassloaderResources().orElseGet(this::genClassloaderResources);
+            return extendClassloaderResources().orElseGet(this::baseClassloaderResources);
         }
 
         @Value.Default default String qualifier() {
@@ -79,7 +79,7 @@ public class ClassloaderResourcesCompiler implements TaskDef<ClassloaderResource
                 return ListView.of();
             }
             return ListView.of(
-                genClassloaderResources().file(generatedJavaSourcesDirectory())
+                baseClassloaderResources().file(generatedJavaSourcesDirectory())
             );
         }
 

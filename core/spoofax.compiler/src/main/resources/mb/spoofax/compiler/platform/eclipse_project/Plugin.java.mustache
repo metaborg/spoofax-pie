@@ -1,4 +1,4 @@
-package {{genPlugin.packageId}};
+package {{basePlugin.packageId}};
 
 import mb.pie.api.ExecException;
 import mb.spoofax.eclipse.SpoofaxPlugin;
@@ -17,7 +17,7 @@ import org.osgi.framework.BundleContext;
 
 import java.io.IOException;
 
-public class {{genPlugin.id}} extends AbstractUIPlugin {
+public class {{basePlugin.id}} extends AbstractUIPlugin {
     public static final String pluginId = "{{pluginId}}";
 
     private static {{eclipseComponent.nullableQualifiedId}} component;
@@ -25,7 +25,7 @@ public class {{genPlugin.id}} extends AbstractUIPlugin {
     public static {{eclipseComponent.qualifiedId}} getComponent() {
         if(component == null) {
             throw new RuntimeException(
-                "Cannot access {{eclipseComponent.id}}; {{genPlugin.id}} has not been started yet, or has been stopped");
+                "Cannot access {{eclipseComponent.id}}; {{basePlugin.id}} has not been started yet, or has been stopped");
         }
         return component;
     }

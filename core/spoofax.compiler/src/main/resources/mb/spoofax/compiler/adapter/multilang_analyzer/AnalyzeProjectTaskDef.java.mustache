@@ -1,4 +1,4 @@
-package {{genAnalyzeTaskDef.packageId}};
+package {{baseAnalyzeTaskDef.packageId}};
 
 import mb.common.message.KeyedMessages;
 import mb.pie.api.ExecContext;
@@ -9,16 +9,16 @@ import mb.spoofax.core.language.command.CommandFeedback;
 import javax.inject.Inject;
 
 @{{adapterProject.scope.qualifiedId}}
-public class {{genAnalyzeTaskDef.id}} implements TaskDef<ResourcePath, CommandFeedback> {
+public class {{baseAnalyzeTaskDef.id}} implements TaskDef<ResourcePath, CommandFeedback> {
 
-    private final {{genCheckTaskDef.qualifiedId}} check;
+    private final {{baseCheckTaskDef.qualifiedId}} check;
 
-    @Inject public {{genAnalyzeTaskDef.id}}({{genCheckTaskDef.qualifiedId}} check) {
+    @Inject public {{baseAnalyzeTaskDef.id}}({{baseCheckTaskDef.qualifiedId}} check) {
         this.check = check;
     }
 
     @Override public String getId() {
-        return "{{genAnalyzeTaskDef.qualifiedId}}";
+        return "{{baseAnalyzeTaskDef.qualifiedId}}";
     }
 
     @Override

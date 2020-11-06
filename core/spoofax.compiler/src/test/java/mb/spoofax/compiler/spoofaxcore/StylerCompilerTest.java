@@ -14,15 +14,15 @@ class StylerCompilerTest extends TestBase {
             final StylerLanguageCompiler.Input languageProjectInput = inputs.stylerLanguageCompilerInput();
             session.require(component.getStylerLanguageCompiler().createTask(languageProjectInput));
             fileAssertions.scopedExists(languageProjectInput.generatedJavaSourcesDirectory(), (s) -> {
-                s.assertPublicJavaClass(languageProjectInput.genRules(), "TigerStylingRules");
-                s.assertPublicJavaClass(languageProjectInput.genStyler(), "TigerStyler");
-                s.assertPublicJavaClass(languageProjectInput.genStylerFactory(), "TigerStylerFactory");
+                s.assertPublicJavaClass(languageProjectInput.baseStylingRules(), "TigerStylingRules");
+                s.assertPublicJavaClass(languageProjectInput.baseStyler(), "TigerStyler");
+                s.assertPublicJavaClass(languageProjectInput.baseStylerFactory(), "TigerStylerFactory");
             });
 
             final StylerAdapterCompiler.Input adapterProjectInput = inputs.stylerAdapterCompilerInput();
             session.require(component.getStylerAdapterCompiler().createTask(adapterProjectInput));
             fileAssertions.scopedExists(adapterProjectInput.generatedJavaSourcesDirectory(), (s) -> {
-                s.assertPublicJavaClass(adapterProjectInput.genStyleTaskDef(), "TigerStyle");
+                s.assertPublicJavaClass(adapterProjectInput.baseStyleTaskDef(), "TigerStyle");
             });
         }
     }

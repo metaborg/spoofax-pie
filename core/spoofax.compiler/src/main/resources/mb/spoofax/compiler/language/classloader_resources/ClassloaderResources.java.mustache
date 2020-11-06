@@ -1,12 +1,12 @@
-package {{genClassloaderResources.packageId}};
+package {{baseClassloaderResources.packageId}};
 
 import mb.resource.ResourceKeyString;
 import mb.resource.classloader.ClassLoaderResource;
 import mb.resource.classloader.ClassLoaderResourceRegistry;
 
-public class {{genClassloaderResources.id}} {
+public class {{baseClassloaderResources.id}} {
     public static ClassLoaderResourceRegistry createClassLoaderResourceRegistry() {
-        return new ClassLoaderResourceRegistry("{{qualifier}}", {{genClassloaderResources.id}}.class.getClassLoader());
+        return new ClassLoaderResourceRegistry("{{qualifier}}", {{baseClassloaderResources.id}}.class.getClassLoader());
     }
 
     public static ClassLoaderResource createDefinitionDir(ClassLoaderResourceRegistry classLoaderResourceRegistry) {

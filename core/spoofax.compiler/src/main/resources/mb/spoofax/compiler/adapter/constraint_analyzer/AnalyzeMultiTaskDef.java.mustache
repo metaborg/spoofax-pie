@@ -1,4 +1,4 @@
-package {{genAnalyzeMultiTaskDef.packageId}};
+package {{baseAnalyzeMultiTaskDef.packageId}};
 
 import mb.constraint.common.ConstraintAnalyzer.MultiFileResult;
 import mb.constraint.common.ConstraintAnalyzerContext;
@@ -14,19 +14,19 @@ import javax.inject.Provider;
 import java.util.HashMap;
 
 @{{adapterProject.scope.qualifiedId}}
-public class {{genAnalyzeMultiTaskDef.id}} extends ConstraintAnalyzeMultiTaskDef {
+public class {{baseAnalyzeMultiTaskDef.id}} extends ConstraintAnalyzeMultiTaskDef {
     private final {{languageProjectInput.constraintAnalyzer.qualifiedId}} constraintAnalyzer;
     private final Provider<StrategoRuntime> strategoRuntimeProvider;
 
     @Inject
-    public {{genAnalyzeMultiTaskDef.id}}({{languageProjectInput.constraintAnalyzer.qualifiedId}} constraintAnalyzer, Provider<StrategoRuntime> strategoRuntimeProvider) {
+    public {{baseAnalyzeMultiTaskDef.id}}({{languageProjectInput.constraintAnalyzer.qualifiedId}} constraintAnalyzer, Provider<StrategoRuntime> strategoRuntimeProvider) {
         this.constraintAnalyzer = constraintAnalyzer;
         this.strategoRuntimeProvider = strategoRuntimeProvider;
     }
 
     @Override
     public String getId() {
-        return "{{genAnalyzeMultiTaskDef.qualifiedId}}";
+        return "{{baseAnalyzeMultiTaskDef.qualifiedId}}";
     }
 
     @Override

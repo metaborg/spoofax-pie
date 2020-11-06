@@ -1,4 +1,4 @@
-package {{genAnalyzeTaskDef.packageId}};
+package {{baseAnalyzeTaskDef.packageId}};
 
 import mb.constraint.common.ConstraintAnalyzer.SingleFileResult;
 import mb.constraint.common.ConstraintAnalyzerContext;
@@ -12,19 +12,19 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 @{{adapterProject.scope.qualifiedId}}
-public class {{genAnalyzeTaskDef.id}} extends ConstraintAnalyzeTaskDef {
+public class {{baseAnalyzeTaskDef.id}} extends ConstraintAnalyzeTaskDef {
     private final {{languageProjectInput.constraintAnalyzer.qualifiedId}} constraintAnalyzer;
     private final Provider<StrategoRuntime> strategoRuntimeProvider;
 
     @Inject
-    public {{genAnalyzeTaskDef.id}}({{languageProjectInput.constraintAnalyzer.qualifiedId}} constraintAnalyzer, Provider<StrategoRuntime> strategoRuntimeProvider) {
+    public {{baseAnalyzeTaskDef.id}}({{languageProjectInput.constraintAnalyzer.qualifiedId}} constraintAnalyzer, Provider<StrategoRuntime> strategoRuntimeProvider) {
         this.constraintAnalyzer = constraintAnalyzer;
         this.strategoRuntimeProvider = strategoRuntimeProvider;
     }
 
     @Override
     public String getId() {
-        return "{{genAnalyzeTaskDef.qualifiedId}}";
+        return "{{baseAnalyzeTaskDef.qualifiedId}}";
     }
 
     @Override

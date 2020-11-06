@@ -37,7 +37,7 @@ public class StrategoRuntimeLanguageCompiler implements TaskDef<StrategoRuntimeL
     @Override public None exec(ExecContext context, Input input) throws IOException {
         if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
-        factoryTemplate.write(context, input.genStrategoRuntimeBuilderFactory().file(generatedJavaSourcesDirectory), input);
+        factoryTemplate.write(context, input.baseStrategoRuntimeBuilderFactory().file(generatedJavaSourcesDirectory), input);
         return None.instance;
     }
 
@@ -104,14 +104,14 @@ public class StrategoRuntimeLanguageCompiler implements TaskDef<StrategoRuntimeL
 
         // Stratego runtime builder factory
 
-        @Value.Default default TypeInfo genStrategoRuntimeBuilderFactory() {
+        @Value.Default default TypeInfo baseStrategoRuntimeBuilderFactory() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "StrategoRuntimeBuilderFactory");
         }
 
-        Optional<TypeInfo> extendedStrategoRuntimeBuilderFactory();
+        Optional<TypeInfo> extendStrategoRuntimeBuilderFactory();
 
         default TypeInfo strategoRuntimeBuilderFactory() {
-            return extendedStrategoRuntimeBuilderFactory().orElseGet(this::genStrategoRuntimeBuilderFactory);
+            return extendStrategoRuntimeBuilderFactory().orElseGet(this::baseStrategoRuntimeBuilderFactory);
         }
 
 
@@ -122,7 +122,7 @@ public class StrategoRuntimeLanguageCompiler implements TaskDef<StrategoRuntimeL
                 return ListView.of();
             }
             return ListView.of(
-                genStrategoRuntimeBuilderFactory().file(generatedJavaSourcesDirectory())
+                baseStrategoRuntimeBuilderFactory().file(generatedJavaSourcesDirectory())
             );
         }
 

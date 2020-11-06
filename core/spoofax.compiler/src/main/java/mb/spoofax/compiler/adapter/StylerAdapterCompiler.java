@@ -35,7 +35,7 @@ public class StylerAdapterCompiler implements TaskDef<StylerAdapterCompiler.Inpu
         final Output.Builder outputBuilder = Output.builder();
         if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
-        styleTaskDefTemplate.write(context, input.genStyleTaskDef().file(generatedJavaSourcesDirectory), input);
+        styleTaskDefTemplate.write(context, input.baseStyleTaskDef().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
     }
 
@@ -60,14 +60,14 @@ public class StylerAdapterCompiler implements TaskDef<StylerAdapterCompiler.Inpu
 
         // Style task definition
 
-        @Value.Default default TypeInfo genStyleTaskDef() {
+        @Value.Default default TypeInfo baseStyleTaskDef() {
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "Style");
         }
 
-        Optional<TypeInfo> extendedStyleTaskDef();
+        Optional<TypeInfo> extendStyleTaskDef();
 
         default TypeInfo styleTaskDef() {
-            return extendedStyleTaskDef().orElseGet(this::genStyleTaskDef);
+            return extendStyleTaskDef().orElseGet(this::baseStyleTaskDef);
         }
 
 
@@ -78,7 +78,7 @@ public class StylerAdapterCompiler implements TaskDef<StylerAdapterCompiler.Inpu
                 return ListView.of();
             }
             return ListView.of(
-                genStyleTaskDef().file(generatedJavaSourcesDirectory())
+                baseStyleTaskDef().file(generatedJavaSourcesDirectory())
             );
         }
 

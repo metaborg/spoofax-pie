@@ -17,10 +17,10 @@ class AdapterProjectCompilerTest extends TestBase {
             final AdapterProjectCompiler.Input input = compileLanguageAndAdapterProject(session, inputs);
             fileAssertions.scopedExists(input.generatedJavaSourcesDirectory(), (s) -> {
                 s.asserts(input.packageInfo(), FileAssertion::assertNotExists);
-                s.assertPublicJavaInterface(input.genComponent(), "TigerComponent");
-                s.assertPublicJavaClass(input.genModule(), "TigerModule");
-                s.assertPublicJavaClass(input.genInstance(), "TigerInstance");
-                s.assertPublicJavaClass(input.genCheckTaskDef(), "TigerCheck");
+                s.assertPublicJavaInterface(input.baseComponent(), "TigerComponent");
+                s.assertPublicJavaClass(input.baseModule(), "TigerModule");
+                s.assertPublicJavaClass(input.baseInstance(), "TigerInstance");
+                s.assertPublicJavaClass(input.baseCheckTaskDef(), "TigerCheck");
             });
         }
     }
@@ -32,10 +32,10 @@ class AdapterProjectCompilerTest extends TestBase {
             final AdapterProjectCompiler.Input input = compileLanguageAndAdapterProject(session, inputs);
             fileAssertions.scopedExists(input.generatedJavaSourcesDirectory(), (s) -> {
                 s.asserts(input.packageInfo(), (a) -> a.assertAll("package-info.java", "@DefaultQualifier(NonNull.class)"));
-                s.assertPublicJavaInterface(input.genComponent(), "TigerComponent");
-                s.assertPublicJavaClass(input.genModule(), "TigerModule");
-                s.assertPublicJavaClass(input.genInstance(), "TigerInstance");
-                s.assertPublicJavaClass(input.genCheckTaskDef(), "TigerCheck");
+                s.assertPublicJavaInterface(input.baseComponent(), "TigerComponent");
+                s.assertPublicJavaClass(input.baseModule(), "TigerModule");
+                s.assertPublicJavaClass(input.baseInstance(), "TigerInstance");
+                s.assertPublicJavaClass(input.baseCheckTaskDef(), "TigerCheck");
             });
         }
     }

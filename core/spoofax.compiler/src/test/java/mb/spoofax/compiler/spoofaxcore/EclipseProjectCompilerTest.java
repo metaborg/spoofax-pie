@@ -17,22 +17,22 @@ class EclipseProjectCompilerTest extends TestBase {
             fileAssertions.asserts(input.manifestMfFile(), (s) -> s.assertAll("MANIFEST.MF", "Bundle-ManifestVersion"));
             fileAssertions.scopedExists(input.generatedJavaSourcesDirectory(), (s) -> {
                 s.asserts(input.packageInfo(), (a) -> a.assertAll("package-info.java", "@DefaultQualifier(NonNull.class)"));
-                s.assertPublicJavaClass(input.genPlugin(), "TigerPlugin");
-                s.assertPublicJavaInterface(input.genEclipseComponent(), "TigerEclipseComponent");
-                s.assertPublicJavaClass(input.genEclipseModule(), "TigerEclipseModule");
-                s.assertPublicJavaClass(input.genEclipseIdentifiers(), "TigerEclipseIdentifiers");
-                s.assertPublicJavaClass(input.genEditor(), "TigerEditor");
-                s.assertPublicJavaClass(input.genEditorTracker(), "TigerEditorTracker");
-                s.assertPublicJavaClass(input.genNature(), "TigerNature");
-                s.assertPublicJavaClass(input.genAddNatureHandler(), "TigerAddNatureHandler");
-                s.assertPublicJavaClass(input.genRemoveNatureHandler(), "TigerRemoveNatureHandler");
-                s.assertPublicJavaClass(input.genProjectBuilder(), "TigerProjectBuilder");
-                s.assertPublicJavaClass(input.genMainMenu(), "TigerMainMenu");
-                s.assertPublicJavaClass(input.genEditorContextMenu(), "TigerEditorContextMenu");
-                s.assertPublicJavaClass(input.genResourceContextMenu(), "TigerResourceContextMenu");
-                s.assertPublicJavaClass(input.genRunCommandHandler(), "TigerRunCommandHandler");
-                s.assertPublicJavaClass(input.genObserveHandler(), "TigerObserveHandler");
-                s.assertPublicJavaClass(input.genUnobserveHandler(), "TigerUnobserveHandler");
+                s.assertPublicJavaClass(input.basePlugin(), "TigerPlugin");
+                s.assertPublicJavaInterface(input.baseEclipseComponent(), "TigerEclipseComponent");
+                s.assertPublicJavaClass(input.baseEclipseModule(), "TigerEclipseModule");
+                s.assertPublicJavaClass(input.baseEclipseIdentifiers(), "TigerEclipseIdentifiers");
+                s.assertPublicJavaClass(input.baseEditor(), "TigerEditor");
+                s.assertPublicJavaClass(input.baseEditorTracker(), "TigerEditorTracker");
+                s.assertPublicJavaClass(input.baseNature(), "TigerNature");
+                s.assertPublicJavaClass(input.baseAddNatureHandler(), "TigerAddNatureHandler");
+                s.assertPublicJavaClass(input.baseRemoveNatureHandler(), "TigerRemoveNatureHandler");
+                s.assertPublicJavaClass(input.baseProjectBuilder(), "TigerProjectBuilder");
+                s.assertPublicJavaClass(input.baseMainMenu(), "TigerMainMenu");
+                s.assertPublicJavaClass(input.baseEditorContextMenu(), "TigerEditorContextMenu");
+                s.assertPublicJavaClass(input.baseResourceContextMenu(), "TigerResourceContextMenu");
+                s.assertPublicJavaClass(input.baseRunCommandHandler(), "TigerRunCommandHandler");
+                s.assertPublicJavaClass(input.baseObserveHandler(), "TigerObserveHandler");
+                s.assertPublicJavaClass(input.baseUnobserveHandler(), "TigerUnobserveHandler");
             });
         }
     }

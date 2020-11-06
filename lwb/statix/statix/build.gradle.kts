@@ -74,8 +74,8 @@ languageAdapterProject {
     withStyler()
     withConstraintAnalyzer().run {
       // Manual analyze multi implementation to add Spoofax2ProjectContext
-      genAnalyzeMultiTaskDef(taskPackageId, "GeneratedStatixAnalyzeMulti")
-      extendedAnalyzeMultiTaskDef(taskPackageId, "StatixAnalyzeMulti")
+      baseAnalyzeMultiTaskDef(taskPackageId, "GeneratedStatixAnalyzeMulti")
+      extendAnalyzeMultiTaskDef(taskPackageId, "StatixAnalyzeMulti")
     }
     withStrategoRuntime()
     project.configureCompilerInput()

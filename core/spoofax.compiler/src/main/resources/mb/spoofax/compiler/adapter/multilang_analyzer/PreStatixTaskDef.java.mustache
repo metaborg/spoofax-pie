@@ -1,4 +1,4 @@
-package {{genPreStatixTaskDef.packageId}};
+package {{basePreStatixTaskDef.packageId}};
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
@@ -11,13 +11,13 @@ import javax.inject.Provider;
 import java.io.IOException;
 
 @{{adapterProject.scope.qualifiedId}}
-public class {{genPreStatixTaskDef.id}} extends AstStrategoTransformTaskDef {
-    @Inject public {{genPreStatixTaskDef.id}}(Provider<StrategoRuntime> strategoRuntimeProvider) {
+public class {{basePreStatixTaskDef.id}} extends AstStrategoTransformTaskDef {
+    @Inject public {{basePreStatixTaskDef.id}}(Provider<StrategoRuntime> strategoRuntimeProvider) {
         super(strategoRuntimeProvider, "{{preAnalysisStrategy}}");
     }
 
     @Override public String getId() {
-        return "{{genPreStatixTaskDef.qualifiedId}}";
+        return "{{basePreStatixTaskDef.qualifiedId}}";
     }
 
     @Override

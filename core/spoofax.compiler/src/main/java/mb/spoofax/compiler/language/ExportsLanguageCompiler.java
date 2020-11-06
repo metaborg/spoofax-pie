@@ -50,7 +50,7 @@ public class ExportsLanguageCompiler implements TaskDef<ExportsLanguageCompiler.
             final UniqueNamer uniqueNamer = new UniqueNamer();
             final HashMap<String, Object> map = new HashMap<>();
             map.put("combinedExports", combinedExports.values());
-            exportsTemplate.write(context, input.genExports().file(generatedJavaSourcesDirectory), input, map);
+            exportsTemplate.write(context, input.baseExports().file(generatedJavaSourcesDirectory), input, map);
         }
         return None.instance;
     }
@@ -91,14 +91,14 @@ public class ExportsLanguageCompiler implements TaskDef<ExportsLanguageCompiler.
 
         // Completer
 
-        @Value.Default default TypeInfo genExports() {
+        @Value.Default default TypeInfo baseExports() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "Exports");
         }
 
-        Optional<TypeInfo> extendedExports();
+        Optional<TypeInfo> extendExports();
 
         default TypeInfo exportsClass() {
-            return extendedExports().orElseGet(this::genExports);
+            return extendExports().orElseGet(this::baseExports);
         }
 
 
@@ -109,7 +109,7 @@ public class ExportsLanguageCompiler implements TaskDef<ExportsLanguageCompiler.
                 return ListView.of();
             }
             return ListView.of(
-                genExports().file(generatedJavaSourcesDirectory())
+                baseExports().file(generatedJavaSourcesDirectory())
             );
         }
 

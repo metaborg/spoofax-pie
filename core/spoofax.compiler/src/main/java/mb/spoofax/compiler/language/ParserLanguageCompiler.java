@@ -39,9 +39,9 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
     @Override public None exec(ExecContext context, Input input) throws IOException {
         if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
-        tableTemplate.write(context, input.genTable().file(generatedJavaSourcesDirectory), input);
-        parserTemplate.write(context, input.genParser().file(generatedJavaSourcesDirectory), input);
-        factoryTemplate.write(context, input.genParserFactory().file(generatedJavaSourcesDirectory), input);
+        tableTemplate.write(context, input.baseParseTable().file(generatedJavaSourcesDirectory), input);
+        parserTemplate.write(context, input.baseParser().file(generatedJavaSourcesDirectory), input);
+        factoryTemplate.write(context, input.baseParserFactory().file(generatedJavaSourcesDirectory), input);
         return None.instance;
     }
 
@@ -87,32 +87,38 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
 
         // Parse table
 
-        @Value.Default default TypeInfo genTable() {
+        @Value.Default default TypeInfo baseParseTable() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "ParseTable");
+        }
+
+        Optional<TypeInfo> extendParseTable();
+
+        default TypeInfo parseTable() {
+            return extendParseTable().orElseGet(this::baseParseTable);
         }
 
         // Parser
 
-        @Value.Default default TypeInfo genParser() {
+        @Value.Default default TypeInfo baseParser() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "Parser");
         }
 
-        Optional<TypeInfo> extendedParser();
+        Optional<TypeInfo> extendParser();
 
         default TypeInfo parser() {
-            return extendedParser().orElseGet(this::genParser);
+            return extendParser().orElseGet(this::baseParser);
         }
 
         // Parser factory
 
-        @Value.Default default TypeInfo genParserFactory() {
+        @Value.Default default TypeInfo baseParserFactory() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "ParserFactory");
         }
 
-        Optional<TypeInfo> extendedParserFactory();
+        Optional<TypeInfo> extendParserFactory();
 
         default TypeInfo parserFactory() {
-            return extendedParserFactory().orElseGet(this::genParserFactory);
+            return extendParserFactory().orElseGet(this::baseParserFactory);
         }
 
 
@@ -123,9 +129,9 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
                 return ListView.of();
             }
             return ListView.of(
-                genTable().file(generatedJavaSourcesDirectory()),
-                genParser().file(generatedJavaSourcesDirectory()),
-                genParserFactory().file(generatedJavaSourcesDirectory())
+                baseParseTable().file(generatedJavaSourcesDirectory()),
+                baseParser().file(generatedJavaSourcesDirectory()),
+                baseParserFactory().file(generatedJavaSourcesDirectory())
             );
         }
 

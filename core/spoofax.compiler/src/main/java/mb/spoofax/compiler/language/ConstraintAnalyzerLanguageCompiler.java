@@ -36,8 +36,8 @@ public class ConstraintAnalyzerLanguageCompiler implements TaskDef<ConstraintAna
         final Output.Builder outputBuilder = Output.builder();
         if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
-        constraintAnalyzerTemplate.write(context, input.genConstraintAnalyzer().file(generatedJavaSourcesDirectory), input);
-        factoryTemplate.write(context, input.genConstraintAnalyzerFactory().file(generatedJavaSourcesDirectory), input);
+        constraintAnalyzerTemplate.write(context, input.baseConstraintAnalyzer().file(generatedJavaSourcesDirectory), input);
+        factoryTemplate.write(context, input.baseConstraintAnalyzerFactory().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
     }
 
@@ -77,26 +77,26 @@ public class ConstraintAnalyzerLanguageCompiler implements TaskDef<ConstraintAna
 
         // Constraint analyzer
 
-        @Value.Default default TypeInfo genConstraintAnalyzer() {
+        @Value.Default default TypeInfo baseConstraintAnalyzer() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "ConstraintAnalyzer");
         }
 
-        Optional<TypeInfo> extendedConstraintAnalyzer();
+        Optional<TypeInfo> extendConstraintAnalyzer();
 
         default TypeInfo constraintAnalyzer() {
-            return extendedConstraintAnalyzer().orElseGet(this::genConstraintAnalyzer);
+            return extendConstraintAnalyzer().orElseGet(this::baseConstraintAnalyzer);
         }
 
         // Constraint analyzer factory
 
-        @Value.Default default TypeInfo genConstraintAnalyzerFactory() {
+        @Value.Default default TypeInfo baseConstraintAnalyzerFactory() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "ConstraintAnalyzerFactory");
         }
 
-        Optional<TypeInfo> extendedConstraintAnalyzerFactory();
+        Optional<TypeInfo> extendConstraintAnalyzerFactory();
 
         default TypeInfo constraintAnalyzerFactory() {
-            return extendedConstraintAnalyzerFactory().orElseGet(this::genConstraintAnalyzerFactory);
+            return extendConstraintAnalyzerFactory().orElseGet(this::baseConstraintAnalyzerFactory);
         }
 
 
@@ -107,8 +107,8 @@ public class ConstraintAnalyzerLanguageCompiler implements TaskDef<ConstraintAna
                 return ListView.of();
             }
             return ListView.of(
-                genConstraintAnalyzer().file(generatedJavaSourcesDirectory()),
-                genConstraintAnalyzerFactory().file(generatedJavaSourcesDirectory())
+                baseConstraintAnalyzer().file(generatedJavaSourcesDirectory()),
+                baseConstraintAnalyzerFactory().file(generatedJavaSourcesDirectory())
             );
         }
 

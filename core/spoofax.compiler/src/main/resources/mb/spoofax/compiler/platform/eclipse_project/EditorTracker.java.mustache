@@ -1,4 +1,4 @@
-package {{genEditorTracker.packageId}};
+package {{baseEditorTracker.packageId}};
 
 import mb.spoofax.eclipse.EclipseIdentifiers;
 import mb.spoofax.eclipse.editor.EditorTracker;
@@ -6,8 +6,8 @@ import mb.spoofax.eclipse.editor.EditorTracker;
 import javax.inject.Inject;
 
 @{{adapterProjectCompilerInput.scope.qualifiedId}}
-public class {{genEditorTracker.id}} extends EditorTracker {
-    @Inject public {{genEditorTracker.id}}(EclipseIdentifiers eclipseIdentifiers) {
+public class {{baseEditorTracker.id}} extends EditorTracker {
+    @Inject public {{baseEditorTracker.id}}(EclipseIdentifiers eclipseIdentifiers) {
         super(eclipseIdentifiers);
     }
 }

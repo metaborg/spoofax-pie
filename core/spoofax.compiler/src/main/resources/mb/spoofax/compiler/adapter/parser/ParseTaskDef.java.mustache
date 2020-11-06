@@ -1,4 +1,4 @@
-package {{genParseTaskDef.packageId}};
+package {{baseParseTaskDef.packageId}};
 
 import mb.common.result.Result;
 import mb.jsglr1.common.JSGLR1ParseException;
@@ -8,16 +8,16 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 @{{adapterProject.scope.qualifiedId}}
-public class {{genParseTaskDef.id}} extends JSGLR1ParseTaskDef {
+public class {{baseParseTaskDef.id}} extends JSGLR1ParseTaskDef {
     private final Provider<{{languageProjectInput.parser.qualifiedId}}> parserProvider;
 
     @Inject
-    public {{genParseTaskDef.id}}(Provider<{{languageProjectInput.parser.qualifiedId}}> parserProvider) {
+    public {{baseParseTaskDef.id}}(Provider<{{languageProjectInput.parser.qualifiedId}}> parserProvider) {
         this.parserProvider = parserProvider;
     }
 
     @Override public String getId() {
-        return "{{genParseTaskDef.qualifiedId}}";
+        return "{{baseParseTaskDef.qualifiedId}}";
     }
 
     @Override protected Result<JSGLR1ParseOutput, JSGLR1ParseException> parse(String text) throws InterruptedException {

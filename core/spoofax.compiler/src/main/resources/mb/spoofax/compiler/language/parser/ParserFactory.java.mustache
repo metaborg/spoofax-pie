@@ -1,16 +1,16 @@
-package {{genParserFactory.packageId}};
+package {{baseParserFactory.packageId}};
 
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.spoofax.compiler.interfaces.spoofaxcore.ParserFactory;
 
-public class {{genParserFactory.id}} implements ParserFactory {
-    private final {{genTable.qualifiedId}} parseTable;
+public class {{baseParserFactory.id}} implements ParserFactory {
+    private final {{baseParseTable.qualifiedId}} parseTable;
 
-    public {{genParserFactory.id}}(HierarchicalResource definitionDir) {
-        this.parseTable = {{genTable.qualifiedId}}.fromDefinitionDir(definitionDir);
+    public {{baseParserFactory.id}}(HierarchicalResource definitionDir) {
+        this.parseTable = {{baseParseTable.qualifiedId}}.fromDefinitionDir(definitionDir);
     }
 
-    @Override public {{genParser.qualifiedId}} create() {
-        return new {{genParser.qualifiedId}}(parseTable);
+    @Override public {{baseParser.qualifiedId}} create() {
+        return new {{baseParser.qualifiedId}}(parseTable);
     }
 }

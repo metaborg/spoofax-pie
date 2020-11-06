@@ -1,12 +1,12 @@
-package {{genConstraintAnalyzer.packageId}};
+package {{baseConstraintAnalyzer.packageId}};
 
 import mb.constraint.common.ConstraintAnalyzer;
 import mb.log.api.LoggerFactory;
 import mb.resource.ResourceService;
 import mb.stratego.common.StrategoRuntime;
 
-public class {{genConstraintAnalyzer.id}} extends ConstraintAnalyzer {
-    public {{genConstraintAnalyzer.id}}(ResourceService resourceService) {
+public class {{baseConstraintAnalyzer.id}} extends ConstraintAnalyzer {
+    public {{baseConstraintAnalyzer.id}}(ResourceService resourceService) {
         super(resourceService, "{{strategoStrategy}}", {{multiFile}});
     }
 }

@@ -1,4 +1,4 @@
-package {{genSpecConfigFactory.packageId}};
+package {{baseSpecConfigFactory.packageId}};
 
 import mb.statix.multilang.metadata.SpecFragmentId;
 import mb.statix.multilang.metadata.spec.ImmutableSpecConfig;
@@ -10,7 +10,7 @@ import org.spoofax.terms.TermFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-public class {{genSpecConfigFactory.id}} {
+public class {{baseSpecConfigFactory.id}} {
 
     public static SpecFragmentId getSpecId() {
         return new SpecFragmentId("{{languageId}}");

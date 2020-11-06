@@ -1,4 +1,4 @@
-package {{genModule.packageId}};
+package {{baseModule.packageId}};
 
 import com.intellij.openapi.util.IconLoader;
 import dagger.Module;
@@ -13,7 +13,7 @@ import {{adapterProjectCompilerInput.scope.qualifiedId}};
 import javax.swing.*;
 
 @Module
-public class {{genModule.id}} {
+public class {{baseModule.id}} {
     @Provides @{{adapterProjectCompilerInput.scope.id}}
     static IntellijLanguage provideSpoofaxLanguage({{language.qualifiedId}} language) {
         // Downcast because injections in spoofax.intellij require an IntellijLanguage, and dagger does not implicitly downcast.

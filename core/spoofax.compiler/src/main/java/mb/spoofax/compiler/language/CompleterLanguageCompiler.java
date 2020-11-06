@@ -62,14 +62,14 @@ public class CompleterLanguageCompiler implements TaskDef<CompleterLanguageCompi
 
         // Completer
 
-        @Value.Default default TypeInfo genCompleter() {
+        @Value.Default default TypeInfo baseCompleter() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "Completer");
         }
 
-        Optional<TypeInfo> extendedCompleter();
+        Optional<TypeInfo> extendCompleter();
 
         default TypeInfo completer() {
-            return extendedCompleter().orElseGet(this::genCompleter);
+            return extendCompleter().orElseGet(this::baseCompleter);
         }
 
 
@@ -80,7 +80,7 @@ public class CompleterLanguageCompiler implements TaskDef<CompleterLanguageCompi
                 return ListView.of();
             }
             return ListView.of(
-                genCompleter().file(generatedJavaSourcesDirectory())
+                baseCompleter().file(generatedJavaSourcesDirectory())
             );
         }
 

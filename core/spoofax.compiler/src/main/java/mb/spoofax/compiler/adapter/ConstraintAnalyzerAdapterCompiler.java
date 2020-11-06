@@ -37,8 +37,8 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
         final Output.Builder outputBuilder = Output.builder();
         if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
-        analyzeTaskDefTemplate.write(context, input.genAnalyzeTaskDef().file(generatedJavaSourcesDirectory), input);
-        analyzeMultiTaskDefTemplate.write(context, input.genAnalyzeMultiTaskDef().file(generatedJavaSourcesDirectory), input);
+        analyzeTaskDefTemplate.write(context, input.baseAnalyzeTaskDef().file(generatedJavaSourcesDirectory), input);
+        analyzeMultiTaskDefTemplate.write(context, input.baseAnalyzeMultiTaskDef().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
     }
 
@@ -67,26 +67,26 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
 
         // Analyze
 
-        @Value.Default default TypeInfo genAnalyzeTaskDef() {
+        @Value.Default default TypeInfo baseAnalyzeTaskDef() {
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "Analyze");
         }
 
-        Optional<TypeInfo> extendedAnalyzeTaskDef();
+        Optional<TypeInfo> extendAnalyzeTaskDef();
 
         default TypeInfo analyzeTaskDef() {
-            return extendedAnalyzeTaskDef().orElseGet(this::genAnalyzeTaskDef);
+            return extendAnalyzeTaskDef().orElseGet(this::baseAnalyzeTaskDef);
         }
 
         // Multi-file analyze
 
-        @Value.Default default TypeInfo genAnalyzeMultiTaskDef() {
+        @Value.Default default TypeInfo baseAnalyzeMultiTaskDef() {
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "AnalyzeMulti");
         }
 
-        Optional<TypeInfo> extendedAnalyzeMultiTaskDef();
+        Optional<TypeInfo> extendAnalyzeMultiTaskDef();
 
         default TypeInfo analyzeMultiTaskDef() {
-            return extendedAnalyzeMultiTaskDef().orElseGet(this::genAnalyzeMultiTaskDef);
+            return extendAnalyzeMultiTaskDef().orElseGet(this::baseAnalyzeMultiTaskDef);
         }
 
 
@@ -97,8 +97,8 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
                 return ListView.of();
             }
             return ListView.of(
-                genAnalyzeTaskDef().file(generatedJavaSourcesDirectory()),
-                genAnalyzeMultiTaskDef().file(generatedJavaSourcesDirectory())
+                baseAnalyzeTaskDef().file(generatedJavaSourcesDirectory()),
+                baseAnalyzeMultiTaskDef().file(generatedJavaSourcesDirectory())
             );
         }
 

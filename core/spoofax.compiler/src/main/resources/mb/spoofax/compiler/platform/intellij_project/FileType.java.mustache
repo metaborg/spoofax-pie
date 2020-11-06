@@ -5,8 +5,8 @@ import mb.spoofax.intellij.IntellijLanguageFileType;
 import javax.inject.Inject;
 
 @{{adapterProjectCompilerInput.scope.qualifiedId}}
-public class {{genFileType.id}} extends IntellijLanguageFileType {
-    @Inject protected {{genFileType.id}}() {
+public class {{baseFileType.id}} extends IntellijLanguageFileType {
+    @Inject protected {{baseFileType.id}}() {
         super({{plugin.qualifiedId}}.getComponent());
     }
 }

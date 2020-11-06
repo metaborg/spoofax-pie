@@ -1,4 +1,4 @@
-package {{genComponent.packageId}};
+package {{baseComponent.packageId}};
 
 import dagger.Component;
 import mb.spoofax.core.language.LanguageComponent;
@@ -16,11 +16,11 @@ import {{qualifier.qualifiedId}};
 
 @{{scope.qualifiedId}}
 @Component(
-    modules = { {{genModule.qualifiedId}}.class{{#additionalModules}}{{#-first}}, {{/-first}}{{qualifiedId}}.class{{^-last}}, {{/-last}}{{/additionalModules}} },
+    modules = { {{baseModule.qualifiedId}}.class{{#additionalModules}}{{#-first}}, {{/-first}}{{qualifiedId}}.class{{^-last}}, {{/-last}}{{/additionalModules}} },
     dependencies = { PlatformComponent.class{{#isMultiLang}}, MultiLangComponent.class{{/isMultiLang}} }
 )
-public interface {{genComponent.id}} extends LanguageComponent{{#isMultiLang}}, LanguageMetadataProvider{{/isMultiLang}}  {
-    @Override {{genInstance.id}} getLanguageInstance();
+public interface {{baseComponent.id}} extends LanguageComponent{{#isMultiLang}}, LanguageMetadataProvider{{/isMultiLang}}  {
+    @Override {{baseInstance.id}} getLanguageInstance();
 
     @Override @{{qualifier.id}} ResourceService getResourceService();
 

@@ -1,4 +1,4 @@
-package {{genModule.packageId}};
+package {{baseModule.packageId}};
 
 import dagger.Module;
 import dagger.Provides;
@@ -62,7 +62,7 @@ import java.util.Set;
 import java.util.Map;
 
 @Module
-public class {{genModule.id}} {
+public class {{baseModule.id}} {
     @Provides @{{scope.id}}
     static ClassLoaderResourceRegistry provideClassLoaderResourceRegistry() {
         return {{classloaderResources.classloaderResources.qualifiedId}}.createClassLoaderResourceRegistry();
@@ -211,7 +211,7 @@ public class {{genModule.id}} {
 
 
     @Provides @{{scope.id}}
-    static LanguageInstance provideLanguageInstance({{genInstance.id}} instance) {
+    static LanguageInstance provideLanguageInstance({{baseInstance.id}} instance) {
         return instance;
     }
 

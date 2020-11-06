@@ -39,9 +39,9 @@ public class StylerLanguageCompiler implements TaskDef<StylerLanguageCompiler.In
     @Override public None exec(ExecContext context, Input input) throws IOException {
         if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
-        rulesTemplate.write(context, input.genRules().file(generatedJavaSourcesDirectory), input);
-        stylerTemplate.write(context, input.genStyler().file(generatedJavaSourcesDirectory), input);
-        factoryTemplate.write(context, input.genStylerFactory().file(generatedJavaSourcesDirectory), input);
+        rulesTemplate.write(context, input.baseStylingRules().file(generatedJavaSourcesDirectory), input);
+        stylerTemplate.write(context, input.baseStyler().file(generatedJavaSourcesDirectory), input);
+        factoryTemplate.write(context, input.baseStylerFactory().file(generatedJavaSourcesDirectory), input);
         return None.instance;
     }
 
@@ -79,32 +79,38 @@ public class StylerLanguageCompiler implements TaskDef<StylerLanguageCompiler.In
 
         // Styling rules
 
-        @Value.Default default TypeInfo genRules() {
+        @Value.Default default TypeInfo baseStylingRules() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "StylingRules");
+        }
+
+        Optional<TypeInfo> extendStylingRules();
+
+        default TypeInfo stylingRules() {
+            return extendStylingRules().orElseGet(this::baseStylingRules);
         }
 
         // Styler
 
-        @Value.Default default TypeInfo genStyler() {
+        @Value.Default default TypeInfo baseStyler() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "Styler");
         }
 
-        Optional<TypeInfo> extendedStyler();
+        Optional<TypeInfo> extendStyler();
 
         default TypeInfo styler() {
-            return extendedStyler().orElseGet(this::genStyler);
+            return extendStyler().orElseGet(this::baseStyler);
         }
 
         // Styler factory
 
-        @Value.Default default TypeInfo genStylerFactory() {
+        @Value.Default default TypeInfo baseStylerFactory() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "StylerFactory");
         }
 
-        Optional<TypeInfo> extendedStylerFactory();
+        Optional<TypeInfo> extendStylerFactory();
 
         default TypeInfo stylerFactory() {
-            return extendedStylerFactory().orElseGet(this::genStylerFactory);
+            return extendStylerFactory().orElseGet(this::baseStylerFactory);
         }
 
 
@@ -115,9 +121,9 @@ public class StylerLanguageCompiler implements TaskDef<StylerLanguageCompiler.In
                 return ListView.of();
             }
             return ListView.of(
-                genRules().file(generatedJavaSourcesDirectory()),
-                genStyler().file(generatedJavaSourcesDirectory()),
-                genStylerFactory().file(generatedJavaSourcesDirectory())
+                baseStylingRules().file(generatedJavaSourcesDirectory()),
+                baseStyler().file(generatedJavaSourcesDirectory()),
+                baseStylerFactory().file(generatedJavaSourcesDirectory())
             );
         }
 

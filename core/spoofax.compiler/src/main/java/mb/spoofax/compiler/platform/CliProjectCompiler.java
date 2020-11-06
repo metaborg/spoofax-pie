@@ -40,8 +40,8 @@ public class CliProjectCompiler implements TaskDef<CliProjectCompiler.Input, Cli
         final Shared shared = input.shared();
 
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
-        packageInfoTemplate.write(context, input.genPackageInfo().file(generatedJavaSourcesDirectory), input);
-        mainTemplate.write(context, input.genMain().file(generatedJavaSourcesDirectory), input);
+        packageInfoTemplate.write(context, input.basePackageInfo().file(generatedJavaSourcesDirectory), input);
+        mainTemplate.write(context, input.baseMain().file(generatedJavaSourcesDirectory), input);
 
         return Output.builder().build();
     }
@@ -124,7 +124,7 @@ public class CliProjectCompiler implements TaskDef<CliProjectCompiler.Input, Cli
 
         // package-info
 
-        @Value.Default default TypeInfo genPackageInfo() {
+        @Value.Default default TypeInfo basePackageInfo() {
             return TypeInfo.of(packageId(), "package-info");
         }
 
@@ -134,19 +134,19 @@ public class CliProjectCompiler implements TaskDef<CliProjectCompiler.Input, Cli
             if(classKind().isManual() && manualPackageInfo().isPresent()) {
                 return manualPackageInfo().get();
             }
-            return genPackageInfo();
+            return basePackageInfo();
         }
 
         // Main
 
-        @Value.Default default TypeInfo genMain() {
+        @Value.Default default TypeInfo baseMain() {
             return TypeInfo.of(packageId(), "Main");
         }
 
-        Optional<TypeInfo> extendedMain();
+        Optional<TypeInfo> extendMain();
 
         default TypeInfo main() {
-            return extendedMain().orElseGet(this::genMain);
+            return extendMain().orElseGet(this::baseMain);
         }
 
 
@@ -155,8 +155,8 @@ public class CliProjectCompiler implements TaskDef<CliProjectCompiler.Input, Cli
         default ArrayList<ResourcePath> providedFiles() {
             final ArrayList<ResourcePath> generatedFiles = new ArrayList<>();
             if(classKind().isGenerating()) {
-                generatedFiles.add(genPackageInfo().file(generatedJavaSourcesDirectory()));
-                generatedFiles.add(genMain().file(generatedJavaSourcesDirectory()));
+                generatedFiles.add(basePackageInfo().file(generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseMain().file(generatedJavaSourcesDirectory()));
             }
             return generatedFiles;
         }

@@ -1,4 +1,4 @@
-package {{genCheckMultiTaskDef.packageId}};
+package {{baseCheckMultiTaskDef.packageId}};
 
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
@@ -19,7 +19,7 @@ import java.io.UncheckedIOException;
 import java.util.Objects;
 
 @{{scope.qualifiedId}}
-public class {{genCheckMultiTaskDef.id}} implements TaskDef<{{genCheckMultiTaskDef.id}}.Input, KeyedMessages> {
+public class {{baseCheckMultiTaskDef.id}} implements TaskDef<{{baseCheckMultiTaskDef.id}}.Input, KeyedMessages> {
     public static class Input implements Serializable {
         public final ResourcePath root;
         public final ResourceWalker walker;
@@ -59,7 +59,7 @@ public class {{genCheckMultiTaskDef.id}} implements TaskDef<{{genCheckMultiTaskD
         {{variable}};
     {{/checkMultiInjections}}
 
-    @Inject public {{genCheckMultiTaskDef.id}}(
+    @Inject public {{baseCheckMultiTaskDef.id}}(
     {{#checkMultiInjections}}
         {{variable}}{{^-last}},{{/-last}}
     {{/checkMultiInjections}}
@@ -70,7 +70,7 @@ public class {{genCheckMultiTaskDef.id}} implements TaskDef<{{genCheckMultiTaskD
     }
 
     @Override public String getId() {
-        return "{{genCheckMultiTaskDef.qualifiedId}}";
+        return "{{baseCheckMultiTaskDef.qualifiedId}}";
     }
 
     @Override public KeyedMessages exec(ExecContext context, Input input) throws IOException {

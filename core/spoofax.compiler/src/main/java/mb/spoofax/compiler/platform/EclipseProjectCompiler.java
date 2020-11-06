@@ -85,26 +85,26 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
 
         // Class files
         final ResourcePath classesGenDirectory = input.generatedJavaSourcesDirectory();
-        packageInfoTemplate.write(context, input.genPackageInfo().file(classesGenDirectory), input);
-        pluginTemplate.write(context, input.genPlugin().file(classesGenDirectory), input);
-        moduleTemplate.write(context, input.genEclipseModule().file(classesGenDirectory), input);
-        componentTemplate.write(context, input.genEclipseComponent().file(classesGenDirectory), input);
-        identifiersTemplate.write(context, input.genEclipseIdentifiers().file(classesGenDirectory), input);
-        documentProviderTemplate.write(context, input.genDocumentProvider().file(classesGenDirectory), input);
-        editorTemplate.write(context, input.genEditor().file(classesGenDirectory), input);
-        editorTrackerTemplate.write(context, input.genEditorTracker().file(classesGenDirectory), input);
-        natureTemplate.write(context, input.genNature().file(classesGenDirectory), input);
+        packageInfoTemplate.write(context, input.basePackageInfo().file(classesGenDirectory), input);
+        pluginTemplate.write(context, input.basePlugin().file(classesGenDirectory), input);
+        moduleTemplate.write(context, input.baseEclipseModule().file(classesGenDirectory), input);
+        componentTemplate.write(context, input.baseEclipseComponent().file(classesGenDirectory), input);
+        identifiersTemplate.write(context, input.baseEclipseIdentifiers().file(classesGenDirectory), input);
+        documentProviderTemplate.write(context, input.baseDocumentProvider().file(classesGenDirectory), input);
+        editorTemplate.write(context, input.baseEditor().file(classesGenDirectory), input);
+        editorTrackerTemplate.write(context, input.baseEditorTracker().file(classesGenDirectory), input);
+        natureTemplate.write(context, input.baseNature().file(classesGenDirectory), input);
         addNatureHandlerTemplate.write(context, input.addNatureHandler().file(classesGenDirectory), input);
         removeNatureHandlerTemplate.write(context, input.removeNatureHandler().file(classesGenDirectory), input);
-        projectBuilderTemplate.write(context, input.genProjectBuilder().file(classesGenDirectory), input);
-        mainMenuTemplate.write(context, input.genMainMenu().file(classesGenDirectory), input);
-        editorContextMenuTemplate.write(context, input.genEditorContextMenu().file(classesGenDirectory), input);
-        resourceContextMenuTemplate.write(context, input.genResourceContextMenu().file(classesGenDirectory), input);
-        runCommandHandlerTemplate.write(context, input.genRunCommandHandler().file(classesGenDirectory), input);
-        observeHandlerTemplate.write(context, input.genObserveHandler().file(classesGenDirectory), input);
-        unobserveHandlerTemplate.write(context, input.genUnobserveHandler().file(classesGenDirectory), input);
+        projectBuilderTemplate.write(context, input.baseProjectBuilder().file(classesGenDirectory), input);
+        mainMenuTemplate.write(context, input.baseMainMenu().file(classesGenDirectory), input);
+        editorContextMenuTemplate.write(context, input.baseEditorContextMenu().file(classesGenDirectory), input);
+        resourceContextMenuTemplate.write(context, input.baseResourceContextMenu().file(classesGenDirectory), input);
+        runCommandHandlerTemplate.write(context, input.baseRunCommandHandler().file(classesGenDirectory), input);
+        observeHandlerTemplate.write(context, input.baseObserveHandler().file(classesGenDirectory), input);
+        unobserveHandlerTemplate.write(context, input.baseUnobserveHandler().file(classesGenDirectory), input);
         if(input.adapterProjectCompilerInput().multilangAnalyzer().isPresent()) {
-            metadataProviderTemplate.write(context, input.genMetadataProvider().file(classesGenDirectory), input);
+            metadataProviderTemplate.write(context, input.baseMetadataProvider().file(classesGenDirectory), input);
         }
 
         return Output.builder().build();
@@ -269,7 +269,7 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
 
         // package-info
 
-        @Value.Default default TypeInfo genPackageInfo() { return TypeInfo.of(packageId(), "package-info"); }
+        @Value.Default default TypeInfo basePackageInfo() { return TypeInfo.of(packageId(), "package-info"); }
 
         Optional<TypeInfo> manualPackageInfo();
 
@@ -277,31 +277,31 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
             if(classKind().isManual() && manualPackageInfo().isPresent()) {
                 return manualPackageInfo().get();
             }
-            return genPackageInfo();
+            return basePackageInfo();
         }
 
         // Plugin
 
-        @Value.Default default TypeInfo genPlugin() {
+        @Value.Default default TypeInfo basePlugin() {
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "Plugin");
         }
 
-        Optional<TypeInfo> extendedPlugin();
+        Optional<TypeInfo> extendPlugin();
 
         default TypeInfo plugin() {
-            return extendedPlugin().orElseGet(this::genPlugin);
+            return extendPlugin().orElseGet(this::basePlugin);
         }
 
         // Dagger component
 
-        @Value.Default default TypeInfo genEclipseComponent() {
+        @Value.Default default TypeInfo baseEclipseComponent() {
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "EclipseComponent");
         }
 
-        Optional<TypeInfo> extendedEclipseComponent();
+        Optional<TypeInfo> extendEclipseComponent();
 
         default TypeInfo eclipseComponent() {
-            return extendedEclipseComponent().orElseGet(this::genEclipseComponent);
+            return extendEclipseComponent().orElseGet(this::baseEclipseComponent);
         }
 
         default TypeInfo daggerEclipseComponent() {
@@ -310,194 +310,194 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
 
         // Dagger module
 
-        @Value.Default default TypeInfo genEclipseModule() {
+        @Value.Default default TypeInfo baseEclipseModule() {
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "EclipseModule");
         }
 
-        Optional<TypeInfo> extendedEclipseModule();
+        Optional<TypeInfo> extendEclipseModule();
 
         default TypeInfo eclipseModule() {
-            return extendedEclipseModule().orElseGet(this::genEclipseModule);
+            return extendEclipseModule().orElseGet(this::baseEclipseModule);
         }
 
         // Eclipse Identifiers
 
-        @Value.Default default TypeInfo genEclipseIdentifiers() {
+        @Value.Default default TypeInfo baseEclipseIdentifiers() {
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "EclipseIdentifiers");
         }
 
-        Optional<TypeInfo> extendedEclipseIdentifiers();
+        Optional<TypeInfo> extendEclipseIdentifiers();
 
         default TypeInfo eclipseIdentifiers() {
-            return extendedEclipseIdentifiers().orElseGet(this::genEclipseIdentifiers);
+            return extendEclipseIdentifiers().orElseGet(this::baseEclipseIdentifiers);
         }
 
         // Document provider
 
-        @Value.Default default TypeInfo genDocumentProvider() {
+        @Value.Default default TypeInfo baseDocumentProvider() {
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "DocumentProvider");
         }
 
-        Optional<TypeInfo> extendedDocumentProvider();
+        Optional<TypeInfo> extendDocumentProvider();
 
         default TypeInfo documentProvider() {
-            return extendedDocumentProvider().orElseGet(this::genDocumentProvider);
+            return extendDocumentProvider().orElseGet(this::baseDocumentProvider);
         }
 
         // Editor
 
-        @Value.Default default TypeInfo genEditor() {
+        @Value.Default default TypeInfo baseEditor() {
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "Editor");
         }
 
-        Optional<TypeInfo> extendedEditor();
+        Optional<TypeInfo> extendEditor();
 
         default TypeInfo editor() {
-            return extendedEditor().orElseGet(this::genEditor);
+            return extendEditor().orElseGet(this::baseEditor);
         }
 
         // Editor Tracker
 
-        @Value.Default default TypeInfo genEditorTracker() {
+        @Value.Default default TypeInfo baseEditorTracker() {
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "EditorTracker");
         }
 
-        Optional<TypeInfo> extendedEditorTracker();
+        Optional<TypeInfo> extendEditorTracker();
 
         default TypeInfo editorTracker() {
-            return extendedEditorTracker().orElseGet(this::genEditorTracker);
+            return extendEditorTracker().orElseGet(this::baseEditorTracker);
         }
 
         // Project nature
 
-        @Value.Default default TypeInfo genNature() {
+        @Value.Default default TypeInfo baseNature() {
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "Nature");
         }
 
-        Optional<TypeInfo> extendedNature();
+        Optional<TypeInfo> extendNature();
 
         default TypeInfo nature() {
-            return extendedNature().orElseGet(this::genNature);
+            return extendNature().orElseGet(this::baseNature);
         }
 
         // Add nature handler
 
-        @Value.Default default TypeInfo genAddNatureHandler() {
+        @Value.Default default TypeInfo baseAddNatureHandler() {
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "AddNatureHandler");
         }
 
-        Optional<TypeInfo> extendedAddNatureHandler();
+        Optional<TypeInfo> extendAddNatureHandler();
 
         default TypeInfo addNatureHandler() {
-            return extendedAddNatureHandler().orElseGet(this::genAddNatureHandler);
+            return extendAddNatureHandler().orElseGet(this::baseAddNatureHandler);
         }
 
         // Remove nature handler
 
-        @Value.Default default TypeInfo genRemoveNatureHandler() {
+        @Value.Default default TypeInfo baseRemoveNatureHandler() {
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "RemoveNatureHandler");
         }
 
-        Optional<TypeInfo> extendedRemoveNatureHandler();
+        Optional<TypeInfo> extendRemoveNatureHandler();
 
         default TypeInfo removeNatureHandler() {
-            return extendedRemoveNatureHandler().orElseGet(this::genRemoveNatureHandler);
+            return extendRemoveNatureHandler().orElseGet(this::baseRemoveNatureHandler);
         }
 
         // Project builder
 
-        @Value.Default default TypeInfo genProjectBuilder() {
+        @Value.Default default TypeInfo baseProjectBuilder() {
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "ProjectBuilder");
         }
 
-        Optional<TypeInfo> extendedProjectBuilder();
+        Optional<TypeInfo> extendProjectBuilder();
 
         default TypeInfo projectBuilder() {
-            return extendedProjectBuilder().orElseGet(this::genProjectBuilder);
+            return extendProjectBuilder().orElseGet(this::baseProjectBuilder);
         }
 
         // Main menu
 
-        @Value.Default default TypeInfo genMainMenu() {
+        @Value.Default default TypeInfo baseMainMenu() {
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "MainMenu");
         }
 
-        Optional<TypeInfo> extendedMainMenu();
+        Optional<TypeInfo> extendMainMenu();
 
         default TypeInfo mainMenu() {
-            return extendedMainMenu().orElseGet(this::genMainMenu);
+            return extendMainMenu().orElseGet(this::baseMainMenu);
         }
 
         // Editor context menu
 
-        @Value.Default default TypeInfo genEditorContextMenu() {
+        @Value.Default default TypeInfo baseEditorContextMenu() {
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "EditorContextMenu");
         }
 
-        Optional<TypeInfo> extendedEditorContextMenu();
+        Optional<TypeInfo> extendEditorContextMenu();
 
         default TypeInfo editorContextMenu() {
-            return extendedEditorContextMenu().orElseGet(this::genEditorContextMenu);
+            return extendEditorContextMenu().orElseGet(this::baseEditorContextMenu);
         }
 
         // Resource context menu
 
-        @Value.Default default TypeInfo genResourceContextMenu() {
+        @Value.Default default TypeInfo baseResourceContextMenu() {
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "ResourceContextMenu");
         }
 
-        Optional<TypeInfo> extendedResourceContextMenu();
+        Optional<TypeInfo> extendResourceContextMenu();
 
         default TypeInfo resourceContextMenu() {
-            return extendedResourceContextMenu().orElseGet(this::genResourceContextMenu);
+            return extendResourceContextMenu().orElseGet(this::baseResourceContextMenu);
         }
 
         // Command handler
 
-        @Value.Default default TypeInfo genRunCommandHandler() {
+        @Value.Default default TypeInfo baseRunCommandHandler() {
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "RunCommandHandler");
         }
 
-        Optional<TypeInfo> extendedRunCommandHandler();
+        Optional<TypeInfo> extendRunCommandHandler();
 
         default TypeInfo runCommandHandler() {
-            return extendedRunCommandHandler().orElseGet(this::genRunCommandHandler);
+            return extendRunCommandHandler().orElseGet(this::baseRunCommandHandler);
         }
 
         // Observe handler
 
-        @Value.Default default TypeInfo genObserveHandler() {
+        @Value.Default default TypeInfo baseObserveHandler() {
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "ObserveHandler");
         }
 
-        Optional<TypeInfo> extendedObserveHandler();
+        Optional<TypeInfo> extendObserveHandler();
 
         default TypeInfo observeHandler() {
-            return extendedObserveHandler().orElseGet(this::genObserveHandler);
+            return extendObserveHandler().orElseGet(this::baseObserveHandler);
         }
 
         // Unobserve handler
 
-        @Value.Default default TypeInfo genUnobserveHandler() {
+        @Value.Default default TypeInfo baseUnobserveHandler() {
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "UnobserveHandler");
         }
 
-        Optional<TypeInfo> extendedUnobserveHandler();
+        Optional<TypeInfo> extendUnobserveHandler();
 
         default TypeInfo unobserveHandler() {
-            return extendedUnobserveHandler().orElseGet(this::genUnobserveHandler);
+            return extendUnobserveHandler().orElseGet(this::baseUnobserveHandler);
         }
 
         // Language Metadata Provider
 
-        @Value.Default default TypeInfo genMetadataProvider() {
+        @Value.Default default TypeInfo baseMetadataProvider() {
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "MetadataProvider");
         }
 
-        Optional<TypeInfo> extendedMetadataProvider();
+        Optional<TypeInfo> extendMetadataProvider();
 
         default TypeInfo metadataProvider() {
-            return extendedMetadataProvider().orElseGet(this::genMetadataProvider);
+            return extendMetadataProvider().orElseGet(this::baseMetadataProvider);
         }
 
 
@@ -508,26 +508,26 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
             generatedFiles.add(pluginXmlFile());
             generatedFiles.add(manifestMfFile());
             if(classKind().isGenerating()) {
-                generatedFiles.add(genPackageInfo().file(this.generatedJavaSourcesDirectory()));
-                generatedFiles.add(genPlugin().file(this.generatedJavaSourcesDirectory()));
-                generatedFiles.add(genEclipseComponent().file(this.generatedJavaSourcesDirectory()));
-                generatedFiles.add(genEclipseModule().file(this.generatedJavaSourcesDirectory()));
-                generatedFiles.add(genEclipseIdentifiers().file(this.generatedJavaSourcesDirectory()));
-                generatedFiles.add(genDocumentProvider().file(this.generatedJavaSourcesDirectory()));
-                generatedFiles.add(genEditor().file(this.generatedJavaSourcesDirectory()));
-                generatedFiles.add(genEditorTracker().file(this.generatedJavaSourcesDirectory()));
-                generatedFiles.add(genNature().file(this.generatedJavaSourcesDirectory()));
-                generatedFiles.add(genAddNatureHandler().file(this.generatedJavaSourcesDirectory()));
-                generatedFiles.add(genRemoveNatureHandler().file(this.generatedJavaSourcesDirectory()));
-                generatedFiles.add(genProjectBuilder().file(this.generatedJavaSourcesDirectory()));
-                generatedFiles.add(genMainMenu().file(this.generatedJavaSourcesDirectory()));
-                generatedFiles.add(genEditorContextMenu().file(this.generatedJavaSourcesDirectory()));
-                generatedFiles.add(genResourceContextMenu().file(this.generatedJavaSourcesDirectory()));
-                generatedFiles.add(genRunCommandHandler().file(this.generatedJavaSourcesDirectory()));
-                generatedFiles.add(genObserveHandler().file(this.generatedJavaSourcesDirectory()));
-                generatedFiles.add(genUnobserveHandler().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(basePackageInfo().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(basePlugin().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseEclipseComponent().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseEclipseModule().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseEclipseIdentifiers().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseDocumentProvider().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseEditor().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseEditorTracker().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseNature().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseAddNatureHandler().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseRemoveNatureHandler().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseProjectBuilder().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseMainMenu().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseEditorContextMenu().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseResourceContextMenu().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseRunCommandHandler().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseObserveHandler().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseUnobserveHandler().file(this.generatedJavaSourcesDirectory()));
                 if(adapterProjectCompilerInput().multilangAnalyzer().isPresent()) {
-                    generatedFiles.add(genMetadataProvider().file(this.generatedJavaSourcesDirectory()));
+                    generatedFiles.add(baseMetadataProvider().file(this.generatedJavaSourcesDirectory()));
                 }
             }
             return generatedFiles;

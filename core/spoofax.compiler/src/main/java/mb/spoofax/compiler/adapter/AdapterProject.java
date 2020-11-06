@@ -114,14 +114,14 @@ public interface AdapterProject extends Serializable {
 
     // Dagger Scope
 
-    @Value.Default default TypeInfo genScope() {
+    @Value.Default default TypeInfo baseScope() {
         return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "Scope");
     }
 
-    Optional<TypeInfo> extendedScope();
+    Optional<TypeInfo> extendScope();
 
     default TypeInfo scope() {
-        return extendedScope().orElseGet(this::genScope);
+        return extendScope().orElseGet(this::baseScope);
     }
 
 

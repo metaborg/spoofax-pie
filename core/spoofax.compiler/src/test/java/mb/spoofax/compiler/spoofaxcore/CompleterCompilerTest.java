@@ -21,7 +21,7 @@ class CompleterCompilerTest extends TestBase {
             final CompleterAdapterCompiler.Input adapterProjectInput = inputs.completerAdapterCompilerInput();
             session.require(component.getCompleterAdapterCompiler().createTask(adapterProjectInput));
             fileAssertions.scopedExists(adapterProjectInput.generatedJavaSourcesDirectory(), (s) -> {
-                s.assertPublicJavaClass(adapterProjectInput.genCompleteTaskDef(), "TigerCompleteTaskDef");
+                s.assertPublicJavaClass(adapterProjectInput.baseCompleteTaskDef(), "TigerCompleteTaskDef");
             });
         }
     }

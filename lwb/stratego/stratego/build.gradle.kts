@@ -77,16 +77,16 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   val commandPackageId = "$packageId.command"
 
   // Custom component and additional modules
-  genComponent(packageId, "GeneratedStrategoComponent")
-  extendedComponent(packageId, "StrategoComponent")
+  baseComponent(packageId, "GeneratedStrategoComponent")
+  extendComponent(packageId, "StrategoComponent")
   addAdditionalModules(packageId, "JavaTasksModule")
   addAdditionalModules(incrPackageId, "StrategoIncrModule")
   addAdditionalModules(configPackageId, "StrategoConfigModule")
 
   // Manual multifile check implementation
   isMultiFile(true)
-  genCheckMultiTaskDef(taskPackageId, "GeneratedStrategoCheckMulti")
-  extendedCheckMultiTaskDef(taskPackageId, "StrategoCheckMulti")
+  baseCheckMultiTaskDef(taskPackageId, "GeneratedStrategoCheckMulti")
+  extendCheckMultiTaskDef(taskPackageId, "StrategoCheckMulti")
   addTaskDefs(taskPackageId, "StrategoAnalyze")
 
   // Utility task definitions

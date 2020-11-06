@@ -1,9 +1,9 @@
-package {{genProjectBuilder.packageId}};
+package {{baseProjectBuilder.packageId}};
 
 import mb.spoofax.eclipse.build.SpoofaxProjectBuilder;
 
-public class {{genProjectBuilder.id}} extends SpoofaxProjectBuilder {
-    public {{genProjectBuilder.id}}() {
+public class {{baseProjectBuilder.id}} extends SpoofaxProjectBuilder {
+    public {{baseProjectBuilder.id}}() {
         super({{plugin.qualifiedId}}.getComponent());
     }
 }
