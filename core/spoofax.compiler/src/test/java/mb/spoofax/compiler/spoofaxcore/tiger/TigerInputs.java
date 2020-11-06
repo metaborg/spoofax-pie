@@ -250,7 +250,7 @@ public class TigerInputs {
             .addParams("compiledFileNameSuffix", TypeInfo.ofString(), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.value(StringUtil.doubleQuote("defnames.aterm"))))
             .build();
 
-        adapterProjectCompilerInputBuilder.project
+        adapterProjectCompilerInputBuilder
             .addTaskDefs(
                 showParsedAstTaskDef,
                 listDefNamesTaskDef,

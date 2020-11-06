@@ -16,7 +16,7 @@ languageAdapterProject {
     withStyler()
     withStrategoRuntime()
     withConstraintAnalyzer()
-    project.configureCompilerInput()
+    configureCompilerInput()
   }
 }
 

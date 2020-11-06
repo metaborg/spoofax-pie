@@ -273,7 +273,7 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
     @Value.Immutable public interface Input extends Serializable {
         class Builder extends AdapterProjectCompilerData.Input.Builder {}
 
-        static Builder builder() { return new Builder(); }
+        static AdapterProjectCompilerInputBuilder builder() { return new AdapterProjectCompilerInputBuilder(); }
 
 
         /// Project

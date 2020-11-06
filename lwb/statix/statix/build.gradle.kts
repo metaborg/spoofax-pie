@@ -80,7 +80,7 @@ languageAdapterProject {
       manualAnalyzeMultiTaskDef(taskPackageId, "StatixAnalyzeMulti")
     }
     withStrategoRuntime()
-    project.configureCompilerInput()
+    configureCompilerInput()
   }
 }
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {

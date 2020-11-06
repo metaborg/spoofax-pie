@@ -41,7 +41,7 @@ spoofax2BasedLanguageProject {
 
 languageAdapterProject {
   compilerInput {
-    project.configureCompilerInput()
+    configureCompilerInput()
   }
 }
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {

@@ -54,7 +54,7 @@ languageAdapterProject {
     withStyler()
     withConstraintAnalyzer()
     withStrategoRuntime()
-    project.configureCompilerInput()
+    configureCompilerInput()
   }
 }
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {

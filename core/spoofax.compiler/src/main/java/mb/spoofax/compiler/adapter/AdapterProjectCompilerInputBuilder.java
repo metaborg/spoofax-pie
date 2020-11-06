@@ -11,7 +11,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /**
  * Facade for consistently and easily building a {@link AdapterProjectCompiler.Input} instance.
  */
-public class AdapterProjectCompilerInputBuilder {
+public class AdapterProjectCompilerInputBuilder extends AdapterProjectCompiler.Input.Builder {
     public final ClassloaderResourcesCompiler.Input.Builder classloaderResources = ClassloaderResourcesCompiler.Input.builder();
 
     private boolean parserEnabled = false;
@@ -31,8 +31,6 @@ public class AdapterProjectCompilerInputBuilder {
 
     private boolean completerEnabled = false;
     public final CompleterAdapterCompiler.Input.Builder completer = CompleterAdapterCompiler.Input.builder();
-
-    public AdapterProjectCompiler.Input.Builder project = AdapterProjectCompiler.Input.builder();
 
 
     public ClassloaderResourcesCompiler.Input.Builder withClassloaderResources() {
@@ -74,29 +72,29 @@ public class AdapterProjectCompilerInputBuilder {
         final Shared shared = languageProjectInput.shared();
 
         final ClassloaderResourcesCompiler.Input classloaderResources = buildClassLoaderResources(shared, languageProjectInput.languageProject());
-        project.classloaderResources(classloaderResources);
+        this.classloaderResources(classloaderResources);
 
         final ParserAdapterCompiler.@Nullable Input parser = buildParser(shared, adapterProject, languageProjectInput);
-        if(parser != null) project.parser(parser);
+        if(parser != null) this.parser(parser);
 
         final StylerAdapterCompiler.@Nullable Input styler = buildStyler(shared, adapterProject, languageProjectInput);
-        if(styler != null) project.styler(styler);
+        if(styler != null) this.styler(styler);
 
         final ConstraintAnalyzerAdapterCompiler.@Nullable Input constraintAnalyzer = buildConstraintAnalyzer(shared, adapterProject, languageProjectInput);
-        if(constraintAnalyzer != null) project.constraintAnalyzer(constraintAnalyzer);
+        if(constraintAnalyzer != null) this.constraintAnalyzer(constraintAnalyzer);
 
         final MultilangAnalyzerAdapterCompiler.@Nullable Input multilangAnalyzer = buildMultilangAnalyzer(shared, adapterProject, languageProjectInput);
-        if(multilangAnalyzer != null) project.multilangAnalyzer(multilangAnalyzer);
+        if(multilangAnalyzer != null) this.multilangAnalyzer(multilangAnalyzer);
 
         final StrategoRuntimeAdapterCompiler.@Nullable Input strategoRuntime = buildStrategoRuntime(shared, adapterProject, languageProjectInput);
-        if(strategoRuntime != null) project.strategoRuntime(strategoRuntime);
+        if(strategoRuntime != null) this.strategoRuntime(strategoRuntime);
 
         final CompleterAdapterCompiler.@Nullable Input completer = buildCompleter(shared, adapterProject, languageProjectInput);
 
-        if(completer != null) project.completer(completer);
-        project.languageProjectDependency(languageProjectDependency);
+        if(completer != null) this.completer(completer);
+        this.languageProjectDependency(languageProjectDependency);
 
-        return project
+        return this
             .adapterProject(adapterProject)
             .shared(shared)
             .build();
