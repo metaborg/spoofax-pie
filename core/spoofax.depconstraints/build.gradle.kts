@@ -3,7 +3,7 @@ plugins {
   `maven-publish`
 }
 
-val logVersion = "0.4.0"
+val logVersion = "0.5.0"
 val slf4jVersion = "1.7.30"
 val resourceVersion = "0.10.0"
 val pieVersion = "0.13.1"
