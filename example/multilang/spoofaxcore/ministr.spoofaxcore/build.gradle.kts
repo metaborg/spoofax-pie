@@ -5,7 +5,10 @@ plugins {
 }
 
 ecj {
-  toolVersion = "3.20.0"
+  toolVersion = "3.21.0"
+}
+tasks.withType<JavaCompile> { // ECJ does not support headerOutputDirectory (-h argument).
+  options.headerOutputDirectory.convention(provider { null })
 }
 
 dependencies {
