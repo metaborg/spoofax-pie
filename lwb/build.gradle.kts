@@ -21,10 +21,9 @@ plugins {
 }
 
 subprojects {
-  val isApplication = name.contains(".cli") || name.contains(".eclipse") || name.contains(".intellij")
   metaborg {
     configureSubProject()
-    if(isApplication) {
+    if(name.contains(".cli") || name.contains(".eclipse") || name.contains(".intellij")) {
       // Do not publish CLI, Eclipse plugin, and IntelliJ plugin for now.
       javaCreatePublication = false
       javaCreateSourcesJar = false
