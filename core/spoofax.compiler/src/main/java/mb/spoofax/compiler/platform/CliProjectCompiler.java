@@ -40,7 +40,7 @@ public class CliProjectCompiler implements TaskDef<CliProjectCompiler.Input, Cli
         final Shared shared = input.shared();
 
         final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
+        if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
 
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         packageInfoTemplate.write(context, input.basePackageInfo().file(generatedJavaSourcesDirectory), input);

@@ -99,7 +99,7 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
         input.multilangAnalyzer().ifPresent((i) -> context.require(multilangAnalyzerCompiler, i));
 
         final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
+        if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
 
         // Collect all task definitions.
         final ArrayList<TypeInfo> allTaskDefs = new ArrayList<>(input.taskDefs());

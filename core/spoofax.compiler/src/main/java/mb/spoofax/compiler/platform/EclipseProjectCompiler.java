@@ -80,7 +80,7 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
         final Shared shared = input.shared();
 
         final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
+        if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
 
         // Eclipse files
         pluginXmlTemplate.write(context, input.pluginXmlFile(), input);
