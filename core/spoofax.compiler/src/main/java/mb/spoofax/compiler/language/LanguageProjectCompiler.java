@@ -64,7 +64,7 @@ public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.
 
         // Class files.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
-        packageInfoTemplate.write(context, input.genPackageInfo().file(generatedJavaSourcesDirectory), input);
+        packageInfoTemplate.write(context, input.basePackageInfo().file(generatedJavaSourcesDirectory), input);
 
         // Files from other compilers.
         context.require(classloaderResourcesCompiler, input.classloaderResources());
@@ -152,7 +152,7 @@ public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.
 
         // package-info
 
-        @Value.Default default TypeInfo genPackageInfo() {
+        @Value.Default default TypeInfo basePackageInfo() {
             return TypeInfo.of(languageProject().packageId(), "package-info");
         }
 
@@ -162,7 +162,7 @@ public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.
             if(classKind().isManual() && manualPackageInfo().isPresent()) {
                 return manualPackageInfo().get();
             }
-            return genPackageInfo();
+            return basePackageInfo();
         }
 
 
@@ -171,7 +171,7 @@ public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.
         default ArrayList<ResourcePath> providedFiles() {
             final ArrayList<ResourcePath> providedFiles = new ArrayList<>();
             if(classKind().isGenerating()) {
-                providedFiles.add(genPackageInfo().file(generatedJavaSourcesDirectory()));
+                providedFiles.add(basePackageInfo().file(generatedJavaSourcesDirectory()));
             }
             parser().ifPresent((i) -> i.providedFiles().addAllTo(providedFiles));
             styler().ifPresent((i) -> i.providedFiles().addAllTo(providedFiles));

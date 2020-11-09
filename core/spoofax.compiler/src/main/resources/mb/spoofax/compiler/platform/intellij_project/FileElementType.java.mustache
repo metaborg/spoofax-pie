@@ -1,12 +1,12 @@
-package {{genFileElementType.packageId}};
+package {{baseFileElementType.packageId}};
 
 import mb.spoofax.intellij.IntellijFileElementType;
 
 import javax.inject.Inject;
 
 @{{adapterProjectCompilerInput.scope.qualifiedId}}
-public class {{genFileElementType.id}} extends IntellijFileElementType {
-    @Inject public {{genFileElementType.id}}() {
+public class {{baseFileElementType.id}} extends IntellijFileElementType {
+    @Inject public {{baseFileElementType.id}}() {
         super({{plugin.qualifiedId}}.getComponent());
     }
 }

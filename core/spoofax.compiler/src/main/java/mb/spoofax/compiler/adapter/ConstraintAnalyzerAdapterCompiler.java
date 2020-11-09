@@ -35,10 +35,10 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
 
     @Override public Output exec(ExecContext context, Input input) throws Exception {
         final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
+        if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
-        analyzeTaskDefTemplate.write(context, input.genAnalyzeTaskDef().file(generatedJavaSourcesDirectory), input);
-        analyzeMultiTaskDefTemplate.write(context, input.genAnalyzeMultiTaskDef().file(generatedJavaSourcesDirectory), input);
+        analyzeTaskDefTemplate.write(context, input.baseAnalyzeTaskDef().file(generatedJavaSourcesDirectory), input);
+        analyzeMultiTaskDefTemplate.write(context, input.baseAnalyzeMultiTaskDef().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
     }
 
@@ -67,44 +67,38 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
 
         // Analyze
 
-        @Value.Default default TypeInfo genAnalyzeTaskDef() {
+        @Value.Default default TypeInfo baseAnalyzeTaskDef() {
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "Analyze");
         }
 
-        Optional<TypeInfo> manualAnalyzeTaskDef();
+        Optional<TypeInfo> extendAnalyzeTaskDef();
 
         default TypeInfo analyzeTaskDef() {
-            if(classKind().isManual() && manualAnalyzeTaskDef().isPresent()) {
-                return manualAnalyzeTaskDef().get();
-            }
-            return genAnalyzeTaskDef();
+            return extendAnalyzeTaskDef().orElseGet(this::baseAnalyzeTaskDef);
         }
 
         // Multi-file analyze
 
-        @Value.Default default TypeInfo genAnalyzeMultiTaskDef() {
+        @Value.Default default TypeInfo baseAnalyzeMultiTaskDef() {
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "AnalyzeMulti");
         }
 
-        Optional<TypeInfo> manualAnalyzeMultiTaskDef();
+        Optional<TypeInfo> extendAnalyzeMultiTaskDef();
 
         default TypeInfo analyzeMultiTaskDef() {
-            if(classKind().isManual() && manualAnalyzeMultiTaskDef().isPresent()) {
-                return manualAnalyzeMultiTaskDef().get();
-            }
-            return genAnalyzeMultiTaskDef();
+            return extendAnalyzeMultiTaskDef().orElseGet(this::baseAnalyzeMultiTaskDef);
         }
 
 
         // List of all generated files
 
         default ListView<ResourcePath> generatedFiles() {
-            if(classKind().isManualOnly()) {
+            if(classKind().isManual()) {
                 return ListView.of();
             }
             return ListView.of(
-                genAnalyzeTaskDef().file(generatedJavaSourcesDirectory()),
-                genAnalyzeMultiTaskDef().file(generatedJavaSourcesDirectory())
+                baseAnalyzeTaskDef().file(generatedJavaSourcesDirectory()),
+                baseAnalyzeMultiTaskDef().file(generatedJavaSourcesDirectory())
             );
         }
 
@@ -119,12 +113,7 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
 
 
         @Value.Check default void check() {
-            final ClassKind kind = classKind();
-            final boolean manual = kind.isManualOnly();
-            if(!manual) return;
-            if(!manualAnalyzeTaskDef().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualAnalyzeTaskDef' has not been set");
-            }
+
         }
     }
 

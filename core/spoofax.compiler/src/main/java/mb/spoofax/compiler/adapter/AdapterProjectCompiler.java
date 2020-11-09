@@ -142,12 +142,12 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
             // two package-info.java files in the same package, which is an error.
             packageInfoTemplate.write(context, input.packageInfo().file(generatedJavaSourcesDirectory), input);
         }
-        checkTaskDefTemplate.write(context, input.genCheckTaskDef().file(generatedJavaSourcesDirectory), input);
-        checkMultiTaskDefTemplate.write(context, input.genCheckMultiTaskDef().file(generatedJavaSourcesDirectory), input);
-        checkAggregatorTaskDefTemplate.write(context, input.genCheckAggregatorTaskDef().file(generatedJavaSourcesDirectory), input);
+        checkTaskDefTemplate.write(context, input.baseCheckTaskDef().file(generatedJavaSourcesDirectory), input);
+        checkMultiTaskDefTemplate.write(context, input.baseCheckMultiTaskDef().file(generatedJavaSourcesDirectory), input);
+        checkAggregatorTaskDefTemplate.write(context, input.baseCheckAggregatorTaskDef().file(generatedJavaSourcesDirectory), input);
 
-        scopeTemplate.write(context, input.adapterProject().genScope().file(generatedJavaSourcesDirectory), input);
-        qualifierTemplate.write(context, input.genQualifier().file(generatedJavaSourcesDirectory), input);
+        scopeTemplate.write(context, input.adapterProject().baseScope().file(generatedJavaSourcesDirectory), input);
+        qualifierTemplate.write(context, input.baseQualifier().file(generatedJavaSourcesDirectory), input);
 
         for(CommandDefRepr commandDef : input.commandDefs()) {
             final UniqueNamer uniqueNamer = new UniqueNamer();
@@ -162,7 +162,7 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
             final HashMap<String, Object> map = new HashMap<>();
             map.put("providedTaskDefs", allTaskDefs.stream().map(uniqueNamer::makeUnique).collect(Collectors.toList()));
             map.put("providedCommandDefs", input.commandDefs().stream().map(CommandDefRepr::type).map(uniqueNamer::makeUnique).collect(Collectors.toList()));
-            componentTemplate.write(context, input.genComponent().file(generatedJavaSourcesDirectory), input, map);
+            componentTemplate.write(context, input.baseComponent().file(generatedJavaSourcesDirectory), input, map);
         }
 
         { // Module
@@ -173,7 +173,7 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
             map.put("providedCommandDefs", input.commandDefs().stream().map(CommandDefRepr::type).map(uniqueNamer::makeUnique).collect(Collectors.toList()));
             uniqueNamer.reset(); // New method scope
             map.put("providedAutoCommandDefs", input.autoCommandDefs().stream().map((c) -> uniqueNamer.makeUnique(c, c.commandDef().asVariableId())).collect(Collectors.toList()));
-            moduleTemplate.write(context, input.genModule().file(generatedJavaSourcesDirectory), input, map);
+            moduleTemplate.write(context, input.baseModule().file(generatedJavaSourcesDirectory), input, map);
         }
 
         { // Instance
@@ -245,7 +245,7 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
                 out.write(name);
             });
 
-            instanceTemplate.write(context, input.genInstance().file(generatedJavaSourcesDirectory), input, map);
+            instanceTemplate.write(context, input.baseInstance().file(generatedJavaSourcesDirectory), input, map);
         }
 
         return outputBuilder.build();
@@ -382,7 +382,7 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
 
         // package-info
 
-        @Value.Default default TypeInfo genPackageInfo() {
+        @Value.Default default TypeInfo basePackageInfo() {
             return TypeInfo.of(adapterProject().packageId(), "package-info");
         }
 
@@ -392,43 +392,37 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
             if(classKind().isManual() && manualPackageInfo().isPresent()) {
                 return manualPackageInfo().get();
             }
-            return genPackageInfo();
+            return basePackageInfo();
         }
 
         // Dagger Scope (passthrough from AdapterProject)
 
-        default TypeInfo genScope() { return adapterProject().genScope(); }
+        default TypeInfo baseScope() { return adapterProject().baseScope(); }
 
         default TypeInfo scope() { return adapterProject().scope(); }
 
         // Dagger Qualifier
 
-        @Value.Default default TypeInfo genQualifier() {
+        @Value.Default default TypeInfo baseQualifier() {
             return TypeInfo.of(adapterProject().packageId(), shared().defaultClassPrefix() + "Qualifier");
         }
 
-        Optional<TypeInfo> manualQualifier();
+        Optional<TypeInfo> extendQualifier();
 
         default TypeInfo qualifier() {
-            if(classKind().isManual() && manualQualifier().isPresent()) {
-                return manualQualifier().get();
-            }
-            return genQualifier();
+            return extendQualifier().orElseGet(this::baseQualifier);
         }
 
         // Dagger component
 
-        @Value.Default default TypeInfo genComponent() {
+        @Value.Default default TypeInfo baseComponent() {
             return TypeInfo.of(adapterProject().packageId(), shared().defaultClassPrefix() + "Component");
         }
 
-        Optional<TypeInfo> manualComponent();
+        Optional<TypeInfo> extendComponent();
 
         default TypeInfo component() {
-            if(classKind().isManual() && manualComponent().isPresent()) {
-                return manualComponent().get();
-            }
-            return genComponent();
+            return extendComponent().orElseGet(this::baseComponent);
         }
 
         default TypeInfo daggerComponent() {
@@ -437,32 +431,26 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
 
         // Dagger module
 
-        @Value.Default default TypeInfo genModule() {
+        @Value.Default default TypeInfo baseModule() {
             return TypeInfo.of(adapterProject().packageId(), shared().defaultClassPrefix() + "Module");
         }
 
-        Optional<TypeInfo> manualModule();
+        Optional<TypeInfo> extendModule();
 
         default TypeInfo module() {
-            if(classKind().isManual() && manualModule().isPresent()) {
-                return manualModule().get();
-            }
-            return genModule();
+            return extendModule().orElseGet(this::baseModule);
         }
 
         // Language instance
 
-        @Value.Default default TypeInfo genInstance() {
+        @Value.Default default TypeInfo baseInstance() {
             return TypeInfo.of(adapterProject().packageId(), shared().defaultClassPrefix() + "Instance");
         }
 
-        Optional<TypeInfo> manualInstance();
+        Optional<TypeInfo> extendInstance();
 
         default TypeInfo instance() {
-            if(classKind().isManual() && manualInstance().isPresent()) {
-                return manualInstance().get();
-            }
-            return genInstance();
+            return extendInstance().orElseGet(this::baseInstance);
         }
 
 
@@ -470,47 +458,38 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
 
         // Check task definition
 
-        @Value.Default default TypeInfo genCheckTaskDef() {
+        @Value.Default default TypeInfo baseCheckTaskDef() {
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "Check");
         }
 
-        Optional<TypeInfo> manualCheckTaskDef();
+        Optional<TypeInfo> extendCheckTaskDef();
 
         default TypeInfo checkTaskDef() {
-            if(classKind().isManual() && manualCheckTaskDef().isPresent()) {
-                return manualCheckTaskDef().get();
-            }
-            return genCheckTaskDef();
+            return extendCheckTaskDef().orElseGet(this::baseCheckTaskDef);
         }
 
         // Multi-file check task definition
 
-        @Value.Default default TypeInfo genCheckMultiTaskDef() {
+        @Value.Default default TypeInfo baseCheckMultiTaskDef() {
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "CheckMulti");
         }
 
-        Optional<TypeInfo> manualCheckMultiTaskDef();
+        Optional<TypeInfo> extendCheckMultiTaskDef();
 
         default TypeInfo checkMultiTaskDef() {
-            if(classKind().isManual() && manualCheckMultiTaskDef().isPresent()) {
-                return manualCheckMultiTaskDef().get();
-            }
-            return genCheckMultiTaskDef();
+            return extendCheckMultiTaskDef().orElseGet(this::baseCheckMultiTaskDef);
         }
 
         // Single file check results aggregator task definition
 
-        @Value.Default default TypeInfo genCheckAggregatorTaskDef() {
+        @Value.Default default TypeInfo baseCheckAggregatorTaskDef() {
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "CheckAggregator");
         }
 
-        Optional<TypeInfo> manualCheckAggregatorTaskDef();
+        Optional<TypeInfo> extendCheckAggregatorTaskDef();
 
         default TypeInfo checkAggregatorTaskDef() {
-            if(classKind().isManual() && manualCheckAggregatorTaskDef().isPresent()) {
-                return manualCheckAggregatorTaskDef().get();
-            }
-            return genCheckAggregatorTaskDef();
+            return extendCheckAggregatorTaskDef().orElseGet(this::baseCheckAggregatorTaskDef);
         }
 
         /// Provided files
@@ -522,13 +501,13 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
                 if(languageProjectDependency().isSome()) {
                     // Only generate package-info.java if the language project is a separate project. Otherwise we will have
                     // two package-info.java files in the same package, which is an error.
-                    generatedFiles.add(genPackageInfo().file(classesGenDirectory));
+                    generatedFiles.add(basePackageInfo().file(classesGenDirectory));
                 }
-                generatedFiles.add(genComponent().file(classesGenDirectory));
-                generatedFiles.add(genModule().file(classesGenDirectory));
-                generatedFiles.add(genInstance().file(classesGenDirectory));
-                generatedFiles.add(genCheckTaskDef().file(classesGenDirectory));
-                generatedFiles.add(genCheckMultiTaskDef().file(classesGenDirectory));
+                generatedFiles.add(baseComponent().file(classesGenDirectory));
+                generatedFiles.add(baseModule().file(classesGenDirectory));
+                generatedFiles.add(baseInstance().file(classesGenDirectory));
+                generatedFiles.add(baseCheckTaskDef().file(classesGenDirectory));
+                generatedFiles.add(baseCheckMultiTaskDef().file(classesGenDirectory));
             }
             parser().ifPresent((i) -> i.generatedFiles().addAllTo(generatedFiles));
             styler().ifPresent((i) -> i.generatedFiles().addAllTo(generatedFiles));
@@ -545,21 +524,7 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
 
 
         @Value.Check default void check() {
-            final ClassKind kind = classKind();
-            final boolean manual = kind.isManualOnly();
-            if(!manual) return;
-            if(!manualComponent().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualComponent' has not been set");
-            }
-            if(!manualModule().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualModule' has not been set");
-            }
-            if(!manualInstance().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualInstance' has not been set");
-            }
-            if(!manualCheckTaskDef().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualCheckTaskDef' has not been set");
-            }
+
         }
     }
 

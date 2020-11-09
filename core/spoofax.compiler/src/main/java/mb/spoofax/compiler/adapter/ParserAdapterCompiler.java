@@ -36,10 +36,10 @@ public class ParserAdapterCompiler implements TaskDef<ParserAdapterCompiler.Inpu
 
     @Override public Output exec(ExecContext context, Input input) throws IOException {
         final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
+        if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
-        parseTaskDefTemplate.write(context, input.genParseTaskDef().file(generatedJavaSourcesDirectory), input);
-        tokenizeTaskDefTemplate.write(context, input.genTokenizeTaskDef().file(generatedJavaSourcesDirectory), input);
+        parseTaskDefTemplate.write(context, input.baseParseTaskDef().file(generatedJavaSourcesDirectory), input);
+        tokenizeTaskDefTemplate.write(context, input.baseTokenizeTaskDef().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
     }
 
@@ -72,44 +72,38 @@ public class ParserAdapterCompiler implements TaskDef<ParserAdapterCompiler.Inpu
 
         // Parse task definition
 
-        @Value.Default default TypeInfo genParseTaskDef() {
+        @Value.Default default TypeInfo baseParseTaskDef() {
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "Parse");
         }
 
-        Optional<TypeInfo> manualParseTaskDef();
+        Optional<TypeInfo> extendParseTaskDef();
 
         default TypeInfo parseTaskDef() {
-            if(classKind().isManual() && manualParseTaskDef().isPresent()) {
-                return manualParseTaskDef().get();
-            }
-            return genParseTaskDef();
+            return extendParseTaskDef().orElseGet(this::baseParseTaskDef);
         }
 
         // Tokenize task definition
 
-        @Value.Default default TypeInfo genTokenizeTaskDef() {
+        @Value.Default default TypeInfo baseTokenizeTaskDef() {
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "Tokenize");
         }
 
-        Optional<TypeInfo> manualTokenizeTaskDef();
+        Optional<TypeInfo> extendTokenizeTaskDef();
 
         default TypeInfo tokenizeTaskDef() {
-            if(classKind().isManual() && manualTokenizeTaskDef().isPresent()) {
-                return manualTokenizeTaskDef().get();
-            }
-            return genTokenizeTaskDef();
+            return extendTokenizeTaskDef().orElseGet(this::baseTokenizeTaskDef);
         }
 
 
         // List of all generated files
 
         default ListView<ResourcePath> generatedFiles() {
-            if(classKind().isManualOnly()) {
+            if(classKind().isManual()) {
                 return ListView.of();
             }
             return ListView.of(
-                genParseTaskDef().file(generatedJavaSourcesDirectory()),
-                genTokenizeTaskDef().file(generatedJavaSourcesDirectory())
+                baseParseTaskDef().file(generatedJavaSourcesDirectory()),
+                baseTokenizeTaskDef().file(generatedJavaSourcesDirectory())
             );
         }
 
@@ -124,15 +118,7 @@ public class ParserAdapterCompiler implements TaskDef<ParserAdapterCompiler.Inpu
 
 
         @Value.Check default void check() {
-            final ClassKind kind = classKind();
-            final boolean manual = kind.isManualOnly();
-            if(!manual) return;
-            if(!manualParseTaskDef().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualParseTaskDef' has not been set");
-            }
-            if(!manualTokenizeTaskDef().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualTokenizeTaskDef' has not been set");
-            }
+
         }
     }
 

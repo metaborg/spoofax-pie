@@ -1,4 +1,4 @@
-package {{genIndexAstTaskDef.packageId}};
+package {{baseIndexAstTaskDef.packageId}};
 
 import mb.common.result.Result;
 import mb.jsglr1.common.JSGLR1ParseException;
@@ -12,9 +12,9 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 @{{adapterProject.scope.qualifiedId}}
-public class {{genIndexAstTaskDef.id}} extends SmlIndexAstTaskDef<JSGLR1ParseException> {
+public class {{baseIndexAstTaskDef.id}} extends SmlIndexAstTaskDef<JSGLR1ParseException> {
 
-    @Inject public {{genIndexAstTaskDef.id}}(
+    @Inject public {{baseIndexAstTaskDef.id}}(
         Provider<StrategoRuntime> strategoRuntimeProvider,
         Function<Supplier<String>, Result<IStrategoTerm, JSGLR1ParseException>> astSupplier
     ) {
@@ -22,6 +22,6 @@ public class {{genIndexAstTaskDef.id}} extends SmlIndexAstTaskDef<JSGLR1ParseExc
     }
 
     @Override public String getId() {
-        return "{{genIndexAstTaskDef.qualifiedId}}";
+        return "{{baseIndexAstTaskDef.qualifiedId}}";
     }
 }

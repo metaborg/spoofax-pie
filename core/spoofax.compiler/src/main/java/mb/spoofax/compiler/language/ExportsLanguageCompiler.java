@@ -39,7 +39,7 @@ public class ExportsLanguageCompiler implements TaskDef<ExportsLanguageCompiler.
     }
 
     @Override public None exec(ExecContext context, Input input) throws IOException {
-        if(input.classKind().isManualOnly()) return None.instance; // Nothing to generate: return.
+        if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         { // Exports
             final HashMap<String, CombinedExport> combinedExports = new HashMap<>();
@@ -50,7 +50,7 @@ public class ExportsLanguageCompiler implements TaskDef<ExportsLanguageCompiler.
             final UniqueNamer uniqueNamer = new UniqueNamer();
             final HashMap<String, Object> map = new HashMap<>();
             map.put("combinedExports", combinedExports.values());
-            exportsTemplate.write(context, input.genExportsClass().file(generatedJavaSourcesDirectory), input, map);
+            exportsTemplate.write(context, input.baseExports().file(generatedJavaSourcesDirectory), input, map);
         }
         return None.instance;
     }
@@ -91,28 +91,25 @@ public class ExportsLanguageCompiler implements TaskDef<ExportsLanguageCompiler.
 
         // Completer
 
-        @Value.Default default TypeInfo genExportsClass() {
+        @Value.Default default TypeInfo baseExports() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "Exports");
         }
 
-        Optional<TypeInfo> manualExportsClass();
+        Optional<TypeInfo> extendExports();
 
         default TypeInfo exportsClass() {
-            if(classKind().isManual() && manualExportsClass().isPresent()) {
-                return manualExportsClass().get();
-            }
-            return genExportsClass();
+            return extendExports().orElseGet(this::baseExports);
         }
 
 
         /// List of all provided files
 
         default ListView<ResourcePath> providedFiles() {
-            if(classKind().isManualOnly()) {
+            if(classKind().isManual()) {
                 return ListView.of();
             }
             return ListView.of(
-                genExportsClass().file(generatedJavaSourcesDirectory())
+                baseExports().file(generatedJavaSourcesDirectory())
             );
         }
 
@@ -125,12 +122,7 @@ public class ExportsLanguageCompiler implements TaskDef<ExportsLanguageCompiler.
 
 
         @Value.Check default void check() {
-            final ClassKind kind = classKind();
-            final boolean manual = kind.isManualOnly();
-            if(!manual) return;
-            if(!manualExportsClass().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualExportsClass' has not been set");
-            }
+
         }
     }
 

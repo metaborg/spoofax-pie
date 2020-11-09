@@ -43,8 +43,8 @@ public class CliProjectCompiler implements TaskDef<CliProjectCompiler.Input, Cli
         if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
 
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
-        packageInfoTemplate.write(context, input.genPackageInfo().file(generatedJavaSourcesDirectory), input);
-        mainTemplate.write(context, input.genMain().file(generatedJavaSourcesDirectory), input);
+        packageInfoTemplate.write(context, input.basePackageInfo().file(generatedJavaSourcesDirectory), input);
+        mainTemplate.write(context, input.baseMain().file(generatedJavaSourcesDirectory), input);
 
         return outputBuilder.build();
     }
@@ -127,7 +127,7 @@ public class CliProjectCompiler implements TaskDef<CliProjectCompiler.Input, Cli
 
         // package-info
 
-        @Value.Default default TypeInfo genPackageInfo() {
+        @Value.Default default TypeInfo basePackageInfo() {
             return TypeInfo.of(packageId(), "package-info");
         }
 
@@ -137,22 +137,19 @@ public class CliProjectCompiler implements TaskDef<CliProjectCompiler.Input, Cli
             if(classKind().isManual() && manualPackageInfo().isPresent()) {
                 return manualPackageInfo().get();
             }
-            return genPackageInfo();
+            return basePackageInfo();
         }
 
         // Main
 
-        @Value.Default default TypeInfo genMain() {
+        @Value.Default default TypeInfo baseMain() {
             return TypeInfo.of(packageId(), "Main");
         }
 
-        Optional<TypeInfo> manualMain();
+        Optional<TypeInfo> extendMain();
 
         default TypeInfo main() {
-            if(classKind().isManual() && manualMain().isPresent()) {
-                return manualMain().get();
-            }
-            return genMain();
+            return extendMain().orElseGet(this::baseMain);
         }
 
 
@@ -161,8 +158,8 @@ public class CliProjectCompiler implements TaskDef<CliProjectCompiler.Input, Cli
         default ArrayList<ResourcePath> providedFiles() {
             final ArrayList<ResourcePath> generatedFiles = new ArrayList<>();
             if(classKind().isGenerating()) {
-                generatedFiles.add(genPackageInfo().file(generatedJavaSourcesDirectory()));
-                generatedFiles.add(genMain().file(generatedJavaSourcesDirectory()));
+                generatedFiles.add(basePackageInfo().file(generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseMain().file(generatedJavaSourcesDirectory()));
             }
             return generatedFiles;
         }
@@ -176,12 +173,7 @@ public class CliProjectCompiler implements TaskDef<CliProjectCompiler.Input, Cli
 
 
         @Value.Check default void check() {
-            final ClassKind kind = classKind();
-            final boolean manual = kind.isManualOnly();
-            if(!manual) return;
-            if(!manualMain().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualMain' has not been set");
-            }
+
         }
     }
 

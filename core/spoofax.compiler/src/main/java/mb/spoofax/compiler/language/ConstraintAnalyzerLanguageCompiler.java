@@ -34,10 +34,10 @@ public class ConstraintAnalyzerLanguageCompiler implements TaskDef<ConstraintAna
 
     @Override public Output exec(ExecContext context, Input input) throws Exception {
         final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
+        if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
-        constraintAnalyzerTemplate.write(context, input.genConstraintAnalyzer().file(generatedJavaSourcesDirectory), input);
-        factoryTemplate.write(context, input.genFactory().file(generatedJavaSourcesDirectory), input);
+        constraintAnalyzerTemplate.write(context, input.baseConstraintAnalyzer().file(generatedJavaSourcesDirectory), input);
+        factoryTemplate.write(context, input.baseConstraintAnalyzerFactory().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
     }
 
@@ -77,44 +77,38 @@ public class ConstraintAnalyzerLanguageCompiler implements TaskDef<ConstraintAna
 
         // Constraint analyzer
 
-        @Value.Default default TypeInfo genConstraintAnalyzer() {
+        @Value.Default default TypeInfo baseConstraintAnalyzer() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "ConstraintAnalyzer");
         }
 
-        Optional<TypeInfo> manualConstraintAnalyzer();
+        Optional<TypeInfo> extendConstraintAnalyzer();
 
         default TypeInfo constraintAnalyzer() {
-            if(classKind().isManual() && manualConstraintAnalyzer().isPresent()) {
-                return manualConstraintAnalyzer().get();
-            }
-            return genConstraintAnalyzer();
+            return extendConstraintAnalyzer().orElseGet(this::baseConstraintAnalyzer);
         }
 
         // Constraint analyzer factory
 
-        @Value.Default default TypeInfo genFactory() {
+        @Value.Default default TypeInfo baseConstraintAnalyzerFactory() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "ConstraintAnalyzerFactory");
         }
 
-        Optional<TypeInfo> manualFactory();
+        Optional<TypeInfo> extendConstraintAnalyzerFactory();
 
-        default TypeInfo factory() {
-            if(classKind().isManual() && manualFactory().isPresent()) {
-                return manualFactory().get();
-            }
-            return genFactory();
+        default TypeInfo constraintAnalyzerFactory() {
+            return extendConstraintAnalyzerFactory().orElseGet(this::baseConstraintAnalyzerFactory);
         }
 
 
         // List of all provided files
 
         default ListView<ResourcePath> providedFiles() {
-            if(classKind().isManualOnly()) {
+            if(classKind().isManual()) {
                 return ListView.of();
             }
             return ListView.of(
-                genConstraintAnalyzer().file(generatedJavaSourcesDirectory()),
-                genFactory().file(generatedJavaSourcesDirectory())
+                baseConstraintAnalyzer().file(generatedJavaSourcesDirectory()),
+                baseConstraintAnalyzerFactory().file(generatedJavaSourcesDirectory())
             );
         }
 
@@ -138,15 +132,7 @@ public class ConstraintAnalyzerLanguageCompiler implements TaskDef<ConstraintAna
 
 
         @Value.Check default void check() {
-            final ClassKind kind = classKind();
-            final boolean manual = kind.isManual();
-            if(!manual) return;
-            if(!manualConstraintAnalyzer().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualConstraintAnalyzer' has not been set");
-            }
-            if(!manualFactory().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualFactory' has not been set");
-            }
+
         }
     }
 

@@ -1,4 +1,4 @@
-package {{genCheckAggregatorTaskDef.packageId}};
+package {{baseCheckAggregatorTaskDef.packageId}};
 
 import mb.common.message.KeyedMessages;
 import mb.common.message.Messages;
@@ -19,7 +19,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @{{scope.qualifiedId}}
-public class {{genCheckAggregatorTaskDef.id}} implements TaskDef<{{genCheckAggregatorTaskDef.id}}.Input, @Nullable KeyedMessages> {
+public class {{baseCheckAggregatorTaskDef.id}} implements TaskDef<{{baseCheckAggregatorTaskDef.id}}.Input, @Nullable KeyedMessages> {
     public static class Input implements Serializable {
         public final ResourcePath root;
         public final ResourceWalker walker;
@@ -57,14 +57,14 @@ public class {{genCheckAggregatorTaskDef.id}} implements TaskDef<{{genCheckAggre
         }
     }
 
-    private final {{genCheckTaskDef.id}} check;
+    private final {{checkTaskDef.qualifiedId}} check;
 
-    @Inject public {{genCheckAggregatorTaskDef.id}}({{genCheckTaskDef.id}} check){
+    @Inject public {{baseCheckAggregatorTaskDef.id}}({{checkTaskDef.qualifiedId}} check){
         this.check = check;
     }
 
     @Override public String getId() {
-        return "{{genCheckAggregatorTaskDef.qualifiedId}}";
+        return "{{baseCheckAggregatorTaskDef.qualifiedId}}";
     }
 
     @Override public @Nullable KeyedMessages exec(ExecContext context, Input input) throws Exception {

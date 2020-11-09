@@ -33,9 +33,9 @@ public class StylerAdapterCompiler implements TaskDef<StylerAdapterCompiler.Inpu
 
     @Override public Output exec(ExecContext context, Input input) throws IOException {
         final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
+        if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
-        styleTaskDefTemplate.write(context, input.genStyleTaskDef().file(generatedJavaSourcesDirectory), input);
+        styleTaskDefTemplate.write(context, input.baseStyleTaskDef().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
     }
 
@@ -60,28 +60,25 @@ public class StylerAdapterCompiler implements TaskDef<StylerAdapterCompiler.Inpu
 
         // Style task definition
 
-        @Value.Default default TypeInfo genStyleTaskDef() {
+        @Value.Default default TypeInfo baseStyleTaskDef() {
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "Style");
         }
 
-        Optional<TypeInfo> manualStyleTaskDef();
+        Optional<TypeInfo> extendStyleTaskDef();
 
         default TypeInfo styleTaskDef() {
-            if(classKind().isManual() && manualStyleTaskDef().isPresent()) {
-                return manualStyleTaskDef().get();
-            }
-            return genStyleTaskDef();
+            return extendStyleTaskDef().orElseGet(this::baseStyleTaskDef);
         }
 
 
         /// List of all generated files
 
         default ListView<ResourcePath> generatedFiles() {
-            if(classKind().isManualOnly()) {
+            if(classKind().isManual()) {
                 return ListView.of();
             }
             return ListView.of(
-                genStyleTaskDef().file(generatedJavaSourcesDirectory())
+                baseStyleTaskDef().file(generatedJavaSourcesDirectory())
             );
         }
 
@@ -96,12 +93,7 @@ public class StylerAdapterCompiler implements TaskDef<StylerAdapterCompiler.Inpu
 
 
         @Value.Check default void check() {
-            final ClassKind kind = classKind();
-            final boolean manual = kind.isManualOnly();
-            if(!manual) return;
-            if(!manualStyleTaskDef().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualStyleTaskDef' has not been set");
-            }
+
         }
     }
 

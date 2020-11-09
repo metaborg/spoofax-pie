@@ -37,11 +37,11 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
     }
 
     @Override public None exec(ExecContext context, Input input) throws IOException {
-        if(input.classKind().isManualOnly()) return None.instance; // Nothing to generate: return.
+        if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
-        tableTemplate.write(context, input.genTable().file(generatedJavaSourcesDirectory), input);
-        parserTemplate.write(context, input.genParser().file(generatedJavaSourcesDirectory), input);
-        factoryTemplate.write(context, input.genFactory().file(generatedJavaSourcesDirectory), input);
+        tableTemplate.write(context, input.baseParseTable().file(generatedJavaSourcesDirectory), input);
+        parserTemplate.write(context, input.baseParser().file(generatedJavaSourcesDirectory), input);
+        factoryTemplate.write(context, input.baseParserFactory().file(generatedJavaSourcesDirectory), input);
         return None.instance;
     }
 
@@ -87,51 +87,51 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
 
         // Parse table
 
-        @Value.Default default TypeInfo genTable() {
+        @Value.Default default TypeInfo baseParseTable() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "ParseTable");
+        }
+
+        Optional<TypeInfo> extendParseTable();
+
+        default TypeInfo parseTable() {
+            return extendParseTable().orElseGet(this::baseParseTable);
         }
 
         // Parser
 
-        @Value.Default default TypeInfo genParser() {
+        @Value.Default default TypeInfo baseParser() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "Parser");
         }
 
-        Optional<TypeInfo> manualParser();
+        Optional<TypeInfo> extendParser();
 
         default TypeInfo parser() {
-            if(classKind().isManual() && manualParser().isPresent()) {
-                return manualParser().get();
-            }
-            return genParser();
+            return extendParser().orElseGet(this::baseParser);
         }
 
         // Parser factory
 
-        @Value.Default default TypeInfo genFactory() {
+        @Value.Default default TypeInfo baseParserFactory() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "ParserFactory");
         }
 
-        Optional<TypeInfo> manualFactory();
+        Optional<TypeInfo> extendParserFactory();
 
-        default TypeInfo factory() {
-            if(classKind().isManual() && manualFactory().isPresent()) {
-                return manualFactory().get();
-            }
-            return genFactory();
+        default TypeInfo parserFactory() {
+            return extendParserFactory().orElseGet(this::baseParserFactory);
         }
 
 
         /// List of all provided files
 
         default ListView<ResourcePath> providedFiles() {
-            if(classKind().isManualOnly()) {
+            if(classKind().isManual()) {
                 return ListView.of();
             }
             return ListView.of(
-                genTable().file(generatedJavaSourcesDirectory()),
-                genParser().file(generatedJavaSourcesDirectory()),
-                genFactory().file(generatedJavaSourcesDirectory())
+                baseParseTable().file(generatedJavaSourcesDirectory()),
+                baseParser().file(generatedJavaSourcesDirectory()),
+                baseParserFactory().file(generatedJavaSourcesDirectory())
             );
         }
 
@@ -144,15 +144,7 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
 
 
         @Value.Check default void check() {
-            final ClassKind kind = classKind();
-            final boolean manual = kind.isManual();
-            if(!manual) return;
-            if(!manualParser().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualParser' has not been set");
-            }
-            if(!manualFactory().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualFactory' has not been set");
-            }
+
         }
     }
 }

@@ -33,9 +33,9 @@ public class CompleterAdapterCompiler implements TaskDef<CompleterAdapterCompile
 
     @Override public Output exec(ExecContext context, Input input) throws IOException {
         final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
+        if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
-        completeTaskDefTemplate.write(context, input.genCompleteTaskDef().file(generatedJavaSourcesDirectory), input);
+        completeTaskDefTemplate.write(context, input.baseCompleteTaskDef().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
     }
 
@@ -59,27 +59,24 @@ public class CompleterAdapterCompiler implements TaskDef<CompleterAdapterCompile
 
         // Complete task definition
 
-        @Value.Default default TypeInfo genCompleteTaskDef() {
+        @Value.Default default TypeInfo baseCompleteTaskDef() {
             return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "CompleteTaskDef");
         }
 
-        Optional<TypeInfo> manualCompleteTaskDef();
+        Optional<TypeInfo> extendCompleteTaskDef();
 
         default TypeInfo completeTaskDef() {
-            if(classKind().isManual() && manualCompleteTaskDef().isPresent()) {
-                return manualCompleteTaskDef().get();
-            }
-            return genCompleteTaskDef();
+            return extendCompleteTaskDef().orElseGet(this::baseCompleteTaskDef);
         }
 
         // List of all generated files
 
         default ListView<ResourcePath> generatedFiles() {
-            if(classKind().isManualOnly()) {
+            if(classKind().isManual()) {
                 return ListView.of();
             }
             return ListView.of(
-                genCompleteTaskDef().file(generatedJavaSourcesDirectory())
+                baseCompleteTaskDef().file(generatedJavaSourcesDirectory())
             );
         }
 
@@ -94,12 +91,7 @@ public class CompleterAdapterCompiler implements TaskDef<CompleterAdapterCompile
 
 
         @Value.Check default void check() {
-            final ClassKind kind = classKind();
-            final boolean manual = kind.isManualOnly();
-            if(!manual) return;
-            if(!manualCompleteTaskDef().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualCompleteTaskDef' has not been set");
-            }
+
         }
     }
 

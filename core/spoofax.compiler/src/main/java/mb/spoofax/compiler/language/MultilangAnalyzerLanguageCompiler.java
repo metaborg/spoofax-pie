@@ -35,9 +35,9 @@ public class MultilangAnalyzerLanguageCompiler implements TaskDef<MultilangAnaly
 
     @Override public Output exec(ExecContext context, Input input) throws IOException {
         final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
+        if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
-        specConfigFactoryTemplate.write(context, input.genSpecConfigFactory().file(generatedJavaSourcesDirectory), input);
+        specConfigFactoryTemplate.write(context, input.baseSpecConfigFactory().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
     }
 
@@ -64,17 +64,14 @@ public class MultilangAnalyzerLanguageCompiler implements TaskDef<MultilangAnaly
 
         // Spec factory
 
-        @Value.Default default TypeInfo genSpecConfigFactory() {
+        @Value.Default default TypeInfo baseSpecConfigFactory() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "SpecConfigFactory");
         }
 
-        Optional<TypeInfo> manualSpecConfigFactory();
+        Optional<TypeInfo> extendSpecConfigFactory();
 
         default TypeInfo specConfigFactory() {
-            if(classKind().isManual() && manualSpecConfigFactory().isPresent()) {
-                return manualSpecConfigFactory().get();
-            }
-            return genSpecConfigFactory();
+            return extendSpecConfigFactory().orElseGet(this::baseSpecConfigFactory);
         }
 
         @Value.Default default String languageId() { return shared().defaultPackageId(); }
@@ -87,11 +84,11 @@ public class MultilangAnalyzerLanguageCompiler implements TaskDef<MultilangAnaly
         // List of all provided files
 
         default ListView<ResourcePath> providedFiles() {
-            if(classKind().isManualOnly()) {
+            if(classKind().isManual()) {
                 return ListView.of();
             }
             return ListView.of(
-                genSpecConfigFactory().file(generatedJavaSourcesDirectory())
+                baseSpecConfigFactory().file(generatedJavaSourcesDirectory())
             );
         }
 

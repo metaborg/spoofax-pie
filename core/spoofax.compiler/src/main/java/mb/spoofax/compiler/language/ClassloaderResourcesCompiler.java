@@ -32,9 +32,9 @@ public class ClassloaderResourcesCompiler implements TaskDef<ClassloaderResource
 
     @Override public Output exec(ExecContext context, Input input) throws IOException {
         final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
+        if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
-        classloaderResourcesTemplate.write(context, input.genClassloaderResources().file(generatedJavaSourcesDirectory), input);
+        classloaderResourcesTemplate.write(context, input.baseClassloaderResources().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
     }
 
@@ -58,17 +58,14 @@ public class ClassloaderResourcesCompiler implements TaskDef<ClassloaderResource
 
         // Classloader resources
 
-        @Value.Default default TypeInfo genClassloaderResources() {
+        @Value.Default default TypeInfo baseClassloaderResources() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "ClassloaderResources");
         }
 
-        Optional<TypeInfo> manualClassloaderResources();
+        Optional<TypeInfo> extendClassloaderResources();
 
         default TypeInfo classloaderResources() {
-            if(classKind().isManual() && manualClassloaderResources().isPresent()) {
-                return manualClassloaderResources().get();
-            }
-            return genClassloaderResources();
+            return extendClassloaderResources().orElseGet(this::baseClassloaderResources);
         }
 
         @Value.Default default String qualifier() {
@@ -78,11 +75,11 @@ public class ClassloaderResourcesCompiler implements TaskDef<ClassloaderResource
         /// List of all provided files
 
         default ListView<ResourcePath> providedFiles() {
-            if(classKind().isManualOnly()) {
+            if(classKind().isManual()) {
                 return ListView.of();
             }
             return ListView.of(
-                genClassloaderResources().file(generatedJavaSourcesDirectory())
+                baseClassloaderResources().file(generatedJavaSourcesDirectory())
             );
         }
 
@@ -95,12 +92,7 @@ public class ClassloaderResourcesCompiler implements TaskDef<ClassloaderResource
 
 
         @Value.Check default void check() {
-            final ClassKind kind = classKind();
-            final boolean manual = kind.isManual();
-            if(!manual) return;
-            if(!manualClassloaderResources().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualClassloaderResources' has not been set");
-            }
+
         }
     }
 

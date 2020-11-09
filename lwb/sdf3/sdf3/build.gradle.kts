@@ -46,8 +46,7 @@ languageProject {
     }
     withStrategoRuntime().run {
       addInteropRegisterersByReflection("org.metaborg.meta.lang.template.strategies.InteropRegisterer")
-      classKind(mb.spoofax.compiler.util.ClassKind.Extended)
-      manualFactory("mb.sdf3", "Sdf3ManualStrategoRuntimeBuilderFactory")
+      extendStrategoRuntimeBuilderFactory("mb.sdf3", "Sdf3ManualStrategoRuntimeBuilderFactory")
     }
   }
 }

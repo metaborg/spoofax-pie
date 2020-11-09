@@ -67,15 +67,15 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
 
         // Class files
         final ResourcePath classesGenDirectory = input.generatedJavaSourcesDirectory();
-        packageInfoTemplate.write(context, input.genPackageInfo().file(classesGenDirectory), input);
-        moduleTemplate.write(context, input.genModule().file(classesGenDirectory), input);
-        componentTemplate.write(context, input.genComponent().file(classesGenDirectory), input);
-        pluginTemplate.write(context, input.genPlugin().file(classesGenDirectory), input);
-        loaderTemplate.write(context, input.genLoader().file(classesGenDirectory), input);
-        languageTemplate.write(context, input.genLanguage().file(classesGenDirectory), input);
-        fileTypeTemplate.write(context, input.genFileType().file(classesGenDirectory), input);
-        fileElementTypeTemplate.write(context, input.genFileElementType().file(classesGenDirectory), input);
-        fileTypeFactoryTemplate.write(context, input.genFileTypeFactory().file(classesGenDirectory), input);
+        packageInfoTemplate.write(context, input.basePackageInfo().file(classesGenDirectory), input);
+        moduleTemplate.write(context, input.baseModule().file(classesGenDirectory), input);
+        componentTemplate.write(context, input.baseComponent().file(classesGenDirectory), input);
+        pluginTemplate.write(context, input.basePlugin().file(classesGenDirectory), input);
+        loaderTemplate.write(context, input.baseLoader().file(classesGenDirectory), input);
+        languageTemplate.write(context, input.baseLanguage().file(classesGenDirectory), input);
+        fileTypeTemplate.write(context, input.baseFileType().file(classesGenDirectory), input);
+        fileElementTypeTemplate.write(context, input.baseFileElementType().file(classesGenDirectory), input);
+        fileTypeFactoryTemplate.write(context, input.baseFileTypeFactory().file(classesGenDirectory), input);
         syntaxHighlighterFactoryTemplate.write(context, input.syntaxHighlighterFactory().file(classesGenDirectory), input);
         parserDefinitionTemplate.write(context, input.parserDefinition().file(classesGenDirectory), input);
 
@@ -173,7 +173,7 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
 
         // package-info
 
-        @Value.Default default TypeInfo genPackageInfo() {
+        @Value.Default default TypeInfo basePackageInfo() {
             return TypeInfo.of(packageId(), "package-info");
         }
 
@@ -183,37 +183,31 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
             if(classKind().isManual() && manualPackageInfo().isPresent()) {
                 return manualPackageInfo().get();
             }
-            return genPackageInfo();
+            return basePackageInfo();
         }
 
         // IntelliJ module
 
-        @Value.Default default TypeInfo genModule() {
+        @Value.Default default TypeInfo baseModule() {
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "IntellijModule");
         }
 
-        Optional<TypeInfo> manualModule();
+        Optional<TypeInfo> extendModule();
 
         default TypeInfo module() {
-            if(classKind().isManual() && manualModule().isPresent()) {
-                return manualModule().get();
-            }
-            return genModule();
+            return extendModule().orElseGet(this::baseModule);
         }
 
         // IntelliJ component
 
-        @Value.Default default TypeInfo genComponent() {
+        @Value.Default default TypeInfo baseComponent() {
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "IntellijComponent");
         }
 
-        Optional<TypeInfo> manualComponent();
+        Optional<TypeInfo> extendComponent();
 
         default TypeInfo component() {
-            if(classKind().isManual() && manualComponent().isPresent()) {
-                return manualComponent().get();
-            }
-            return genComponent();
+            return extendComponent().orElseGet(this::baseComponent);
         }
 
         default TypeInfo daggerComponent() {
@@ -222,122 +216,98 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
 
         // Plugin
 
-        @Value.Default default TypeInfo genPlugin() {
+        @Value.Default default TypeInfo basePlugin() {
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "Plugin");
         }
 
-        Optional<TypeInfo> manualPlugin();
+        Optional<TypeInfo> extendPlugin();
 
         default TypeInfo plugin() {
-            if(classKind().isManual() && manualPlugin().isPresent()) {
-                return manualPlugin().get();
-            }
-            return genPlugin();
+            return extendPlugin().orElseGet(this::basePlugin);
         }
 
         // Loader
 
-        @Value.Default default TypeInfo genLoader() {
+        @Value.Default default TypeInfo baseLoader() {
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "Loader");
         }
 
-        Optional<TypeInfo> manualLoader();
+        Optional<TypeInfo> extendLoader();
 
         default TypeInfo loader() {
-            if(classKind().isManual() && manualLoader().isPresent()) {
-                return manualLoader().get();
-            }
-            return genLoader();
+            return extendLoader().orElseGet(this::baseLoader);
         }
 
         // Language
 
-        @Value.Default default TypeInfo genLanguage() {
+        @Value.Default default TypeInfo baseLanguage() {
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "Language");
         }
 
-        Optional<TypeInfo> manualLanguage();
+        Optional<TypeInfo> extendLanguage();
 
         default TypeInfo language() {
-            if(classKind().isManual() && manualLanguage().isPresent()) {
-                return manualLanguage().get();
-            }
-            return genLanguage();
+            return extendLanguage().orElseGet(this::baseLanguage);
         }
 
         // File type
 
-        @Value.Default default TypeInfo genFileType() {
+        @Value.Default default TypeInfo baseFileType() {
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "FileType");
         }
 
-        Optional<TypeInfo> manualFileType();
+        Optional<TypeInfo> extendFileType();
 
         default TypeInfo fileType() {
-            if(classKind().isManual() && manualFileType().isPresent()) {
-                return manualFileType().get();
-            }
-            return genFileType();
+            return extendFileType().orElseGet(this::baseFileType);
         }
 
         // File type
 
-        @Value.Default default TypeInfo genFileElementType() {
+        @Value.Default default TypeInfo baseFileElementType() {
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "FileElementType");
         }
 
-        Optional<TypeInfo> manualFileElementType();
+        Optional<TypeInfo> extendFileElementType();
 
         default TypeInfo fileElementType() {
-            if(classKind().isManual() && manualFileElementType().isPresent()) {
-                return manualFileElementType().get();
-            }
-            return genFileElementType();
+            return extendFileElementType().orElseGet(this::baseFileElementType);
         }
 
         // File type factory
 
-        @Value.Default default TypeInfo genFileTypeFactory() {
+        @Value.Default default TypeInfo baseFileTypeFactory() {
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "FileTypeFactory");
         }
 
-        Optional<TypeInfo> manualFileTypeFactory();
+        Optional<TypeInfo> extendFileTypeFactory();
 
         default TypeInfo fileTypeFactory() {
-            if(classKind().isManual() && manualFileTypeFactory().isPresent()) {
-                return manualFileTypeFactory().get();
-            }
-            return genFileTypeFactory();
+            return extendFileTypeFactory().orElseGet(this::baseFileTypeFactory);
         }
 
         // Syntax highlighter factory
 
-        @Value.Default default TypeInfo genSyntaxHighlighterFactory() {
+        @Value.Default default TypeInfo baseSyntaxHighlighterFactory() {
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "SyntaxHighlighterFactory");
         }
 
-        Optional<TypeInfo> manualSyntaxHighlighterFactory();
+        Optional<TypeInfo> extendSyntaxHighlighterFactory();
 
         default TypeInfo syntaxHighlighterFactory() {
-            if(classKind().isManual() && manualSyntaxHighlighterFactory().isPresent()) {
-                return manualSyntaxHighlighterFactory().get();
-            }
-            return genSyntaxHighlighterFactory();
+            return extendSyntaxHighlighterFactory().orElseGet(this::baseSyntaxHighlighterFactory);
         }
 
         // Parser definition
 
-        @Value.Default default TypeInfo genParserDefinition() {
+        @Value.Default default TypeInfo baseParserDefinition() {
             return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "ParserDefinition");
         }
 
-        Optional<TypeInfo> manualParserDefinition();
+        Optional<TypeInfo> extendParserDefinition();
 
         default TypeInfo parserDefinition() {
-            if(classKind().isManual() && manualParserDefinition().isPresent()) {
-                return manualParserDefinition().get();
-            }
-            return genParserDefinition();
+            return extendParserDefinition().orElseGet(this::baseParserDefinition);
         }
 
 
@@ -347,16 +317,16 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
             final ArrayList<ResourcePath> generatedFiles = new ArrayList<>();
             generatedFiles.add(pluginXmlFile());
             if(classKind().isGenerating()) {
-                generatedFiles.add(genPackageInfo().file(generatedJavaSourcesDirectory()));
-                generatedFiles.add(genModule().file(generatedJavaSourcesDirectory()));
-                generatedFiles.add(genComponent().file(generatedJavaSourcesDirectory()));
-                generatedFiles.add(genPlugin().file(generatedJavaSourcesDirectory()));
-                generatedFiles.add(genLoader().file(generatedJavaSourcesDirectory()));
-                generatedFiles.add(genFileType().file(generatedJavaSourcesDirectory()));
-                generatedFiles.add(genFileElementType().file(generatedJavaSourcesDirectory()));
-                generatedFiles.add(genFileTypeFactory().file(generatedJavaSourcesDirectory()));
-                generatedFiles.add(genSyntaxHighlighterFactory().file(generatedJavaSourcesDirectory()));
-                generatedFiles.add(genParserDefinition().file(generatedJavaSourcesDirectory()));
+                generatedFiles.add(basePackageInfo().file(generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseModule().file(generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseComponent().file(generatedJavaSourcesDirectory()));
+                generatedFiles.add(basePlugin().file(generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseLoader().file(generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseFileType().file(generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseFileElementType().file(generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseFileTypeFactory().file(generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseSyntaxHighlighterFactory().file(generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseParserDefinition().file(generatedJavaSourcesDirectory()));
             }
             return generatedFiles;
         }

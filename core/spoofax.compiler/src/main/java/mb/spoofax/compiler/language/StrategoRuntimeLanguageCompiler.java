@@ -35,9 +35,9 @@ public class StrategoRuntimeLanguageCompiler implements TaskDef<StrategoRuntimeL
     }
 
     @Override public None exec(ExecContext context, Input input) throws IOException {
-        if(input.classKind().isManualOnly()) return None.instance; // Nothing to generate: return.
+        if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
-        factoryTemplate.write(context, input.genFactory().file(generatedJavaSourcesDirectory), input);
+        factoryTemplate.write(context, input.baseStrategoRuntimeBuilderFactory().file(generatedJavaSourcesDirectory), input);
         return None.instance;
     }
 
@@ -104,28 +104,25 @@ public class StrategoRuntimeLanguageCompiler implements TaskDef<StrategoRuntimeL
 
         // Stratego runtime builder factory
 
-        @Value.Default default TypeInfo genFactory() {
+        @Value.Default default TypeInfo baseStrategoRuntimeBuilderFactory() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "StrategoRuntimeBuilderFactory");
         }
 
-        Optional<TypeInfo> manualFactory();
+        Optional<TypeInfo> extendStrategoRuntimeBuilderFactory();
 
-        default TypeInfo factory() {
-            if(classKind().isManual() && manualFactory().isPresent()) {
-                return manualFactory().get();
-            }
-            return genFactory();
+        default TypeInfo strategoRuntimeBuilderFactory() {
+            return extendStrategoRuntimeBuilderFactory().orElseGet(this::baseStrategoRuntimeBuilderFactory);
         }
 
 
         // List of all provided files
 
         default ListView<ResourcePath> providedFiles() {
-            if(classKind().isManualOnly()) {
+            if(classKind().isManual()) {
                 return ListView.of();
             }
             return ListView.of(
-                genFactory().file(generatedJavaSourcesDirectory())
+                baseStrategoRuntimeBuilderFactory().file(generatedJavaSourcesDirectory())
             );
         }
 
@@ -138,12 +135,7 @@ public class StrategoRuntimeLanguageCompiler implements TaskDef<StrategoRuntimeL
 
 
         @Value.Check default void check() {
-            final ClassKind kind = classKind();
-            final boolean manual = kind.isManualOnly();
-            if(!manual) return;
-            if(!manualFactory().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualFactory' has not been set");
-            }
+
         }
     }
 }

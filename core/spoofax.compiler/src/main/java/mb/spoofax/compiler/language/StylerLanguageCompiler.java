@@ -37,11 +37,11 @@ public class StylerLanguageCompiler implements TaskDef<StylerLanguageCompiler.In
     }
 
     @Override public None exec(ExecContext context, Input input) throws IOException {
-        if(input.classKind().isManualOnly()) return None.instance; // Nothing to generate: return.
+        if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
-        rulesTemplate.write(context, input.genRules().file(generatedJavaSourcesDirectory), input);
-        stylerTemplate.write(context, input.genStyler().file(generatedJavaSourcesDirectory), input);
-        factoryTemplate.write(context, input.genFactory().file(generatedJavaSourcesDirectory), input);
+        rulesTemplate.write(context, input.baseStylingRules().file(generatedJavaSourcesDirectory), input);
+        stylerTemplate.write(context, input.baseStyler().file(generatedJavaSourcesDirectory), input);
+        factoryTemplate.write(context, input.baseStylerFactory().file(generatedJavaSourcesDirectory), input);
         return None.instance;
     }
 
@@ -79,51 +79,51 @@ public class StylerLanguageCompiler implements TaskDef<StylerLanguageCompiler.In
 
         // Styling rules
 
-        @Value.Default default TypeInfo genRules() {
+        @Value.Default default TypeInfo baseStylingRules() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "StylingRules");
+        }
+
+        Optional<TypeInfo> extendStylingRules();
+
+        default TypeInfo stylingRules() {
+            return extendStylingRules().orElseGet(this::baseStylingRules);
         }
 
         // Styler
 
-        @Value.Default default TypeInfo genStyler() {
+        @Value.Default default TypeInfo baseStyler() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "Styler");
         }
 
-        Optional<TypeInfo> manualStyler();
+        Optional<TypeInfo> extendStyler();
 
         default TypeInfo styler() {
-            if(classKind().isManual() && manualStyler().isPresent()) {
-                return manualStyler().get();
-            }
-            return genStyler();
+            return extendStyler().orElseGet(this::baseStyler);
         }
 
         // Styler factory
 
-        @Value.Default default TypeInfo genFactory() {
+        @Value.Default default TypeInfo baseStylerFactory() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "StylerFactory");
         }
 
-        Optional<TypeInfo> manualFactory();
+        Optional<TypeInfo> extendStylerFactory();
 
-        default TypeInfo factory() {
-            if(classKind().isManual() && manualFactory().isPresent()) {
-                return manualFactory().get();
-            }
-            return genFactory();
+        default TypeInfo stylerFactory() {
+            return extendStylerFactory().orElseGet(this::baseStylerFactory);
         }
 
 
         /// List of all provided files
 
         default ListView<ResourcePath> providedFiles() {
-            if(classKind().isManualOnly()) {
+            if(classKind().isManual()) {
                 return ListView.of();
             }
             return ListView.of(
-                genRules().file(generatedJavaSourcesDirectory()),
-                genStyler().file(generatedJavaSourcesDirectory()),
-                genFactory().file(generatedJavaSourcesDirectory())
+                baseStylingRules().file(generatedJavaSourcesDirectory()),
+                baseStyler().file(generatedJavaSourcesDirectory()),
+                baseStylerFactory().file(generatedJavaSourcesDirectory())
             );
         }
 
@@ -136,15 +136,7 @@ public class StylerLanguageCompiler implements TaskDef<StylerLanguageCompiler.In
 
 
         @Value.Check default void check() {
-            final ClassKind kind = classKind();
-            final boolean manual = kind.isManual();
-            if(!manual) return;
-            if(!manualStyler().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualStyler' has not been set");
-            }
-            if(!manualFactory().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualFactory' has not been set");
-            }
+
         }
     }
 }

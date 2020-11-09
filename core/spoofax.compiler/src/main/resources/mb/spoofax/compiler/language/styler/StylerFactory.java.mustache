@@ -1,19 +1,19 @@
-package {{genFactory.packageId}};
+package {{baseStylerFactory.packageId}};
 
 import mb.log.api.LoggerFactory;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.spoofax.compiler.interfaces.spoofaxcore.StylerFactory;
 
-public class {{genFactory.id}} implements StylerFactory {
-    private final {{genRules.qualifiedId}} stylingRules;
+public class {{baseStylerFactory.id}} implements StylerFactory {
+    private final {{stylingRules.qualifiedId}} stylingRules;
     private final LoggerFactory loggerFactory;
 
-    public {{genFactory.id}}(LoggerFactory loggerFactory, HierarchicalResource definitionDir) {
-        this.stylingRules = {{genRules.qualifiedId}}.fromDefinitionDir(definitionDir);
+    public {{baseStylerFactory.id}}(LoggerFactory loggerFactory, HierarchicalResource definitionDir) {
+        this.stylingRules = {{stylingRules.qualifiedId}}.fromDefinitionDir(definitionDir);
         this.loggerFactory = loggerFactory;
     }
 
-    @Override public {{genStyler.qualifiedId}} create() {
-        return new {{genStyler.qualifiedId}}(stylingRules, loggerFactory);
+    @Override public {{styler.qualifiedId}} create() {
+        return new {{styler.qualifiedId}}(stylingRules, loggerFactory);
     }
 }

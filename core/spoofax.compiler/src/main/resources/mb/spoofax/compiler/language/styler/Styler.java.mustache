@@ -1,4 +1,4 @@
-package {{genStyler.packageId}};
+package {{baseStyler.packageId}};
 
 import mb.common.style.Styling;
 import mb.common.token.Token;
@@ -7,10 +7,10 @@ import mb.log.api.LoggerFactory;
 import mb.spoofax.compiler.interfaces.spoofaxcore.Styler;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
-public class {{genStyler.id}} implements Styler {
+public class {{baseStyler.id}} implements Styler {
     private final ESVStyler styler;
 
-    public {{genStyler.id}}({{genRules.qualifiedId}} stylingRules, LoggerFactory loggerFactory) {
+    public {{baseStyler.id}}({{stylingRules.qualifiedId}} stylingRules, LoggerFactory loggerFactory) {
         this.styler = new ESVStyler(stylingRules.stylingRules, loggerFactory);
     }
 

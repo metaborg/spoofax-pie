@@ -1,4 +1,4 @@
-package {{genPostStatixTaskDef.packageId}};
+package {{basePostStatixTaskDef.packageId}};
 
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
@@ -12,13 +12,13 @@ import javax.inject.Provider;
 import java.io.IOException;
 
 @{{adapterProject.scope.qualifiedId}}
-public class {{genPostStatixTaskDef.id}} extends AstStrategoTransformTaskDef {
-    @Inject public {{genPostStatixTaskDef.id}}(Provider<StrategoRuntime> strategoRuntimeProvider) {
+public class {{basePostStatixTaskDef.id}} extends AstStrategoTransformTaskDef {
+    @Inject public {{basePostStatixTaskDef.id}}(Provider<StrategoRuntime> strategoRuntimeProvider) {
         super(strategoRuntimeProvider, "{{postAnalysisStrategy}}");
     }
 
     @Override public String getId() {
-        return "{{genPostStatixTaskDef.qualifiedId}}";
+        return "{{basePostStatixTaskDef.qualifiedId}}";
     }
 
     @Override

@@ -1,4 +1,4 @@
-package {{genInstance.packageId}};
+package {{baseInstance.packageId}};
 
 import mb.common.message.KeyedMessages;
 import mb.common.message.Messages;
@@ -43,7 +43,7 @@ import java.util.ArrayList;
 import java.util.Set;
 
 
-public class {{genInstance.id}} implements LanguageInstance {
+public class {{baseInstance.id}} implements LanguageInstance {
     private final static SetView<String> fileExtensions = SetView.of({{#shared.fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/shared.fileExtensions}});
 
 {{#injected}}
@@ -53,7 +53,7 @@ public class {{genInstance.id}} implements LanguageInstance {
     private final CollectionView<CommandDef<?>> commandDefs;
     private final CollectionView<AutoCommandRequest<?>> autoCommandDefs;
 
-    @Inject public {{genInstance.id}}(
+    @Inject public {{baseInstance.id}}(
 {{#injected}}
         {{variable}},
 {{/injected}}
