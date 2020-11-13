@@ -1,11 +1,7 @@
 package mb.statix.multilang.pie;
 
-import com.google.common.collect.ListMultimap;
 import dagger.Lazy;
 import mb.common.result.Result;
-import mb.common.result.ResultCollector;
-import mb.log.api.Logger;
-import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.statix.multilang.metadata.LanguageId;
@@ -18,6 +14,7 @@ import mb.statix.spec.Spec;
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 
@@ -35,6 +32,10 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
 
         public Input(Collection<LanguageId> languages) {
             this.languages = new HashSet<>(languages);
+        }
+
+        public Input(LanguageId language) {
+            this.languages = new HashSet<>(Collections.singleton(language));
         }
 
         @Override public boolean equals(Object o) {

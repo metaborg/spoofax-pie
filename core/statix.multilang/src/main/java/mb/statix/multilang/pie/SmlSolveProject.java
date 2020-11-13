@@ -59,7 +59,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
             this.logLevel = logLevel;
         }
 
-        @Override public boolean equals(Object o) {
+        @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             Input input = (Input)o;
@@ -107,12 +107,12 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
     }
 
     @Override public Result<AnalysisResults, MultiLangAnalysisException> exec(ExecContext context, Input input) {
-        return getLanguageMetadata(input.languages).flatMap(languageMetadataMap -> languageMetadataMap.values().stream()
-            .map(lmd -> context.require(partialSolveProject.createTask(new SmlPartialSolveProject.Input(
+        return getLanguageMetadata(input.languages).flatMap(languageMetadataMap -> languageMetadataMap.entrySet().stream()
+            .map(langEntry -> context.require(partialSolveProject.createTask(new SmlPartialSolveProject.Input(
                 globalResultSupplier(input.languages, input.logLevel),
-                specSupplier(input.languages),
-                lmd.projectConstraint(),
-                input.logLevel))).map(res -> pair(lmd.languageId(), res)))
+                langEntry.getKey(),
+                langEntry.getValue().projectConstraint(),
+                input.logLevel))).map(res -> pair(langEntry.getValue().languageId(), res)))
             .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("At least one project constraint has an unexpected exception", false)))
             .map(SmlSolveProject::entrySetToMap)
             .flatMap(projectResults -> analyzeFiles(context, input, languageMetadataMap, projectResults)));
@@ -188,9 +188,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
             // Mark Delays as Errors
             final ImmutableMap.Builder<IConstraint, IMessage> messages = ImmutableMap.builder();
             messages.putAll(result.messages());
-            result.delays().keySet().forEach(c -> {
-                messages.put(c, MessageUtil.findClosestMessage(c));
-            });
+            result.delays().keySet().forEach(c -> messages.put(c, MessageUtil.findClosestMessage(c)));
             final SolverResult newResult = result.withMessages(messages.build()).withDelays(ImmutableMap.of());
 
             return Result.ofOk(newResult);
@@ -229,8 +227,8 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
         return buildSpec.createSupplier(new SmlBuildSpec.Input(languages));
     }
 
-    private Supplier<Result<GlobalResult, MultiLangAnalysisException>> globalResultSupplier(Collection<LanguageId> languages, @Nullable Level logLevel) {
-        return instantiateGlobalScope.createSupplier(new SmlInstantiateGlobalScope.Input(logLevel, specSupplier(languages)));
+    private Supplier<Result<GlobalResult, MultiLangAnalysisException>> globalResultSupplier(Collection<LanguageId> languageIds, @Nullable Level logLevel) {
+        return instantiateGlobalScope.createSupplier(new SmlInstantiateGlobalScope.Input(logLevel, specSupplier(languageIds)));
     }
 
     private Supplier<Result<FileResult, ?>> fileResultSupplier(
@@ -243,7 +241,6 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
             new SmlPartialSolveFile.Input(
                 languageMetadata.languageId(),
                 resourceKey,
-                specSupplier(languages),
                 globalResultSupplier(languages, logLevel),
                 logLevel)
         )

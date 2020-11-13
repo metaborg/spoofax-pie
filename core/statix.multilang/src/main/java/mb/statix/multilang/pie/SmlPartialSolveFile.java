@@ -33,6 +33,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Objects;
 
 @MultiLangScope
@@ -41,7 +42,6 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
         private final LanguageId languageId;
         private final ResourceKey resourceKey;
 
-        private final Supplier<Result<Spec, SpecLoadException>> specSupplier;
         private final Supplier<Result<GlobalResult, MultiLangAnalysisException>> globalResultSupplier;
 
         private final @Nullable Level logLevel;
@@ -49,50 +49,49 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
         public Input(
             LanguageId languageId,
             ResourceKey resourceKey,
-            Supplier<Result<Spec, SpecLoadException>> specSupplier,
             Supplier<Result<GlobalResult, MultiLangAnalysisException>> globalResultSupplier,
             @Nullable Level logLevel
         ) {
             this.languageId = languageId;
             this.resourceKey = resourceKey;
-            this.specSupplier = specSupplier;
             this.globalResultSupplier = globalResultSupplier;
             this.logLevel = logLevel;
         }
 
-        @Override public boolean equals(Object o) {
+        @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             Input input = (Input)o;
             return Objects.equals(languageId, input.languageId) &&
                 Objects.equals(resourceKey, input.resourceKey) &&
-                Objects.equals(specSupplier, input.specSupplier) &&
                 Objects.equals(globalResultSupplier, input.globalResultSupplier);
         }
 
         @Override public int hashCode() {
-            return Objects.hash(languageId, resourceKey, specSupplier, globalResultSupplier);
+            return Objects.hash(languageId, resourceKey, globalResultSupplier);
         }
 
         @Override public String toString() {
             return "Input{" +
                 "languageId=" + languageId +
                 ", resourceKey=" + resourceKey +
-                ", specSupplier=" + specSupplier +
                 ", globalResultSupplier=" + globalResultSupplier +
                 '}';
         }
     }
 
     private final Lazy<LanguageMetadataManager> languageMetadataManager;
+    private final SmlBuildSpec buildSpec;
     private final Logger logger;
 
     @Inject public SmlPartialSolveFile(
         @MultiLang Lazy<LanguageMetadataManager> languageMetadataManager,
+        SmlBuildSpec buildSpec,
         LoggerFactory loggerFactory
     ) {
         this.languageMetadataManager = languageMetadataManager;
-        logger = loggerFactory.create(SmlPartialSolveFile.class);
+        this.buildSpec = buildSpec;
+        this.logger = loggerFactory.create(SmlPartialSolveFile.class);
     }
 
     @Override public String getId() {
@@ -117,7 +116,7 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
     }
 
     private Result<FileResult, MultiLangAnalysisException> analyzeForGlobal(ExecContext context, Input input, IStrategoTerm ast, GlobalResult globalResult) {
-        return TaskUtils.executeWrapped(() -> context.require(input.specSupplier)
+        return TaskUtils.executeWrapped(() -> context.require(buildSpec.createSupplier(new SmlBuildSpec.Input(input.languageId)))
             .mapErr(MultiLangAnalysisException::wrapIfNeeded)
             .flatMap(spec -> languageMetadataManager.get().getLanguageMetadataResult(input.languageId).flatMap(languageMetadata -> {
                 StrategoTerms st = new StrategoTerms(languageMetadata.termFactory());

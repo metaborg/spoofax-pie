@@ -43,7 +43,7 @@ public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalSc
             this.specSupplier = specSupplier;
         }
 
-        @Override public boolean equals(Object o) {
+        @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             Input input = (Input)o;

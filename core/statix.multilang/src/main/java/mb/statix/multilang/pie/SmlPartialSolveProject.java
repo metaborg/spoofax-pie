@@ -8,6 +8,7 @@ import mb.pie.api.TaskDef;
 import mb.statix.constraints.CUser;
 import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.multilang.MultiLangScope;
+import mb.statix.multilang.metadata.LanguageId;
 import mb.statix.multilang.metadata.spec.SpecLoadException;
 import mb.statix.multilang.utils.SolverUtils;
 import mb.statix.solver.IConstraint;
@@ -28,47 +29,50 @@ import java.util.Set;
 @MultiLangScope
 public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.Input, Result<SolverResult, MultiLangAnalysisException>> {
     public static class Input implements Serializable {
-        private final Supplier<Result<Spec, SpecLoadException>> specSupplier;
         private final Supplier<Result<GlobalResult, MultiLangAnalysisException>> globalResultSupplier;
+        private final LanguageId languageId;
 
         private final String projectConstraint;
         private final @Nullable Level logLevel;
 
         public Input(
             Supplier<Result<GlobalResult, MultiLangAnalysisException>> globalResultSupplier,
-            Supplier<Result<Spec, SpecLoadException>> specSupplier,
+            LanguageId languageId,
             String projectConstraint,
             @Nullable Level logLevel
         ) {
             this.globalResultSupplier = globalResultSupplier;
-            this.specSupplier = specSupplier;
+            this.languageId = languageId;
             this.projectConstraint = projectConstraint;
             this.logLevel = logLevel;
         }
 
-        @Override public boolean equals(Object o) {
+        @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             Input input = (Input)o;
             return globalResultSupplier.equals(input.globalResultSupplier) &&
-                specSupplier.equals(input.specSupplier) &&
+                languageId.equals(input.languageId) &&
                 projectConstraint.equals(input.projectConstraint);
         }
 
         @Override public int hashCode() {
-            return Objects.hash(globalResultSupplier, specSupplier, projectConstraint);
+            return Objects.hash(globalResultSupplier, languageId, projectConstraint);
         }
 
         @Override public String toString() {
             return "Input{" +
                 "globalResultSupplier=" + globalResultSupplier +
-                ", specSupplier=" + specSupplier +
+                ", languageId=" + languageId +
                 ", projectConstraint='" + projectConstraint + '\'' +
                 '}';
         }
     }
 
-    @Inject public SmlPartialSolveProject() {
+    private final SmlBuildSpec buildSpec;
+
+    @Inject public SmlPartialSolveProject(SmlBuildSpec buildSpec) {
+        this.buildSpec = buildSpec;
     }
 
     @Override
@@ -85,7 +89,7 @@ public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.In
                 IConstraint projectConstraint = new CUser(input.projectConstraint, scopeArgs);
 
                 IDebugContext debug = TaskUtils.createDebugContext(input.logLevel);
-                return TaskUtils.executeWrapped(() -> context.require(input.specSupplier)
+                return TaskUtils.executeWrapped(() -> context.require(buildSpec.createSupplier(new SmlBuildSpec.Input(input.languageId)))
                     .mapErr(MultiLangAnalysisException::wrapIfNeeded)
                     .flatMap(spec -> TaskUtils.executeWrapped(() -> {
                         SolverResult res = SolverUtils.partialSolve(spec, globalResult.result().state(),
