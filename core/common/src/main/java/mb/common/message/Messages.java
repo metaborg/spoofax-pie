@@ -1,7 +1,7 @@
 package mb.common.message;
 
 import mb.common.util.ListView;
-import mb.common.util.MultiHashMap;
+import mb.common.util.MultiMap;
 import mb.resource.ResourceKey;
 
 import java.io.Serializable;
@@ -105,7 +105,7 @@ public class Messages implements Iterable<Message>, Serializable {
 
 
     public KeyedMessages toKeyed(ResourceKey key) {
-        final MultiHashMap<ResourceKey, Message> map = new MultiHashMap<>();
+        final MultiMap<ResourceKey, Message> map = MultiMap.withLinkedHash();
         map.putAll(key, messages);
         return KeyedMessages.copyOf(map.getInnerMap());
     }

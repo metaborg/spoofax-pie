@@ -8,6 +8,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -15,9 +16,8 @@ public class ConstraintAnalyzerContext implements Serializable {
     private final boolean multiFile;
     private final @Nullable ResourceKey root;
 
-    // TODO: serializing hashmap may cause problems because it is not equal after a round-trip?
-    private final HashMap<ResourceKey, Result> results = new HashMap<>();
-    private final HashMap<ResourceKey, ProjectResult> projectResults = new HashMap<>();
+    private final LinkedHashMap<ResourceKey, Result> results = new LinkedHashMap<>();
+    private final LinkedHashMap<ResourceKey, ProjectResult> projectResults = new LinkedHashMap<>();
 
 
     public ConstraintAnalyzerContext(boolean multiFile, @Nullable ResourceKey root) {
@@ -84,5 +84,33 @@ public class ConstraintAnalyzerContext implements Serializable {
 
     void removeProjectResult(ResourceKey resource) {
         projectResults.remove(resource);
+    }
+
+
+    @Override public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        final ConstraintAnalyzerContext that = (ConstraintAnalyzerContext)o;
+        if(multiFile != that.multiFile) return false;
+        if(root != null ? !root.equals(that.root) : that.root != null) return false;
+        if(!results.equals(that.results)) return false;
+        return projectResults.equals(that.projectResults);
+    }
+
+    @Override public int hashCode() {
+        int result = (multiFile ? 1 : 0);
+        result = 31 * result + (root != null ? root.hashCode() : 0);
+        result = 31 * result + results.hashCode();
+        result = 31 * result + projectResults.hashCode();
+        return result;
+    }
+
+    @Override public String toString() {
+        return "ConstraintAnalyzerContext{" +
+            "multiFile=" + multiFile +
+            ", root=" + root +
+            ", results=" + results +
+            ", projectResults=" + projectResults +
+            '}';
     }
 }

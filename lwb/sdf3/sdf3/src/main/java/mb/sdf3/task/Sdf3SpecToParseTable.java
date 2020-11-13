@@ -81,6 +81,8 @@ public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Args, 
             if(!args.createCompletionTable) {
                 try {
                     normalizedGrammar = normGrammarReader.readGrammar(mainNormalizedGrammar);
+                } catch(RuntimeException e) {
+                    throw e; // Do not wrap runtime exceptions, rethrow them.
                 } catch(Exception e) {
                     return Result.ofErr(new Exception("Converting SDF3 normalized grammar ASTs to a NormGrammar failed", e));
                 }
@@ -100,6 +102,8 @@ public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Args, 
 
                 try {
                     normalizedGrammar = normGrammarReader.readGrammar(mainCompletionNormalizedGrammar);
+                } catch(RuntimeException e) {
+                    throw e; // Do not wrap runtime exceptions, rethrow them.
                 } catch(Exception e) {
                     return Result.ofErr(new Exception("Converting SDF3 completion normalized grammar ASTs to a completion NormGrammar failed", e));
                 }

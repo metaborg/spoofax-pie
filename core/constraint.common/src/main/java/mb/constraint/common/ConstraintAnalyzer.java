@@ -39,6 +39,30 @@ public class ConstraintAnalyzer {
             this.ast = ast;
             this.analysis = analysis;
         }
+
+        @Override public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            final Result result = (Result)o;
+            if(!resource.equals(result.resource)) return false;
+            if(!ast.equals(result.ast)) return false;
+            return analysis.equals(result.analysis);
+        }
+
+        @Override public int hashCode() {
+            int result = resource.hashCode();
+            result = 31 * result + ast.hashCode();
+            result = 31 * result + analysis.hashCode();
+            return result;
+        }
+
+        @Override public String toString() {
+            return "Result{" +
+                "resource=" + resource +
+                ", ast=" + ast +
+                ", analysis=" + analysis +
+                '}';
+        }
     }
 
     public static class ProjectResult implements Serializable {
@@ -48,6 +72,27 @@ public class ConstraintAnalyzer {
         public ProjectResult(ResourceKey resource, IStrategoTerm analysis) {
             this.resource = resource;
             this.analysis = analysis;
+        }
+
+        @Override public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            final ProjectResult that = (ProjectResult)o;
+            if(!resource.equals(that.resource)) return false;
+            return analysis.equals(that.analysis);
+        }
+
+        @Override public int hashCode() {
+            int result = resource.hashCode();
+            result = 31 * result + analysis.hashCode();
+            return result;
+        }
+
+        @Override public String toString() {
+            return "ProjectResult{" +
+                "resource=" + resource +
+                ", analysis=" + analysis +
+                '}';
         }
     }
 
@@ -66,6 +111,37 @@ public class ConstraintAnalyzer {
             this.analysis = analysis;
             this.messages = messages;
         }
+
+        @Override public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            final SingleFileResult that = (SingleFileResult)o;
+            if(projectResult != null ? !projectResult.equals(that.projectResult) : that.projectResult != null)
+                return false;
+            if(!resource.equals(that.resource)) return false;
+            if(!ast.equals(that.ast)) return false;
+            if(!analysis.equals(that.analysis)) return false;
+            return messages.equals(that.messages);
+        }
+
+        @Override public int hashCode() {
+            int result = projectResult != null ? projectResult.hashCode() : 0;
+            result = 31 * result + resource.hashCode();
+            result = 31 * result + ast.hashCode();
+            result = 31 * result + analysis.hashCode();
+            result = 31 * result + messages.hashCode();
+            return result;
+        }
+
+        @Override public String toString() {
+            return "SingleFileResult{" +
+                "projectResult=" + projectResult +
+                ", resource=" + resource +
+                ", ast=" + ast +
+                ", analysis=" + analysis +
+                ", messages=" + messages +
+                '}';
+        }
     }
 
     public static class MultiFileResult implements Serializable {
@@ -82,6 +158,31 @@ public class ConstraintAnalyzer {
         public @Nullable Result getResult(ResourceKey resource) {
             // OPTO: linear search to lookup. Cannot use HashMap because it does not serialize properly.
             return results.stream().filter((r) -> r.resource.equals(resource)).findFirst().orElse(null);
+        }
+
+        @Override public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            final MultiFileResult that = (MultiFileResult)o;
+            if(projectResult != null ? !projectResult.equals(that.projectResult) : that.projectResult != null)
+                return false;
+            if(!results.equals(that.results)) return false;
+            return messages.equals(that.messages);
+        }
+
+        @Override public int hashCode() {
+            int result = projectResult != null ? projectResult.hashCode() : 0;
+            result = 31 * result + results.hashCode();
+            result = 31 * result + messages.hashCode();
+            return result;
+        }
+
+        @Override public String toString() {
+            return "MultiFileResult{" +
+                "projectResult=" + projectResult +
+                ", results=" + results +
+                ", messages=" + messages +
+                '}';
         }
     }
 

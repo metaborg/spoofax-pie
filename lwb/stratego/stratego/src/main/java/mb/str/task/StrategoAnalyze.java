@@ -15,9 +15,9 @@ import mb.resource.ResourceService;
 import mb.str.StrategoScope;
 import mb.str.config.StrategoAnalyzeConfig;
 import mb.stratego.build.strincr.Frontends;
-import mb.stratego.build.strincr.Message;
 import mb.stratego.build.strincr.MessageSeverity;
 import mb.stratego.build.strincr.StrIncrAnalysis;
+import mb.stratego.build.strincr.message.Message;
 import mb.stratego.build.util.StrategoGradualSetting;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

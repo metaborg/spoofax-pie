@@ -13,6 +13,7 @@ import mb.libspoofax2.LibSpoofax2Exports;
 import mb.libspoofax2.LibSpoofax2Qualifier;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Function;
+import mb.pie.api.SerializableFunction;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.pie.api.ValueSupplier;
@@ -38,6 +39,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Value.Enclosing
 public class Spoofax3StylerLanguageCompiler implements TaskDef<Spoofax3StylerLanguageCompiler.Args, Result<KeyedMessages, StylerCompilerException>> {
@@ -99,7 +101,7 @@ public class Spoofax3StylerLanguageCompiler implements TaskDef<Spoofax3StylerLan
                 final ResourcePath unarchiveDirectory = libSpoofax2UnarchiveDirectory.appendRelativePath(jarFilePath.getLeaf()); // JAR files always have leaves.
                 libSpoofax2UnarchiveDirSuppliers.add(unarchiveFromJar
                     .createSupplier(new UnarchiveFromJar.Input(jarFilePath, unarchiveDirectory, false, false))
-                    .map((dir) -> dir.appendAsRelativePath(jarFileWithPath.path))
+                    .map(new AppendPath(jarFileWithPath.path))
                 );
             }
         }
@@ -115,7 +117,7 @@ public class Spoofax3StylerLanguageCompiler implements TaskDef<Spoofax3StylerLan
                 }
             }
             for(Supplier<ResourcePath> unarchiveDirSupplier : libSpoofax2UnarchiveDirSuppliers) {
-                includeDirSuppliers.add(unarchiveDirSupplier.map((unarchiveDir) -> unarchiveDir.appendAsRelativePath(export)));
+                includeDirSuppliers.add(unarchiveDirSupplier.map(new AppendPath(export)));
             }
         }
 
@@ -131,7 +133,7 @@ public class Spoofax3StylerLanguageCompiler implements TaskDef<Spoofax3StylerLan
         // Compile ESV files to aterm format.
         final Result<IStrategoTerm, ?> result = context.require(compile, new EsvCompile.Input(
             parse.createAstSupplier(input.esvMainFile()),
-            new ImportFunction(parse.createFunction(), includeDirSuppliers, args.esvAdditionalAstSuppliers),
+            new ImportFunction(parse.createFunction(), includeDirSuppliers.stream().collect(Collectors.toCollection(ArrayList::new)), args.esvAdditionalAstSuppliers),
             ListView.of()
         ));
         if(result.isErr()) {
@@ -197,7 +199,7 @@ public class Spoofax3StylerLanguageCompiler implements TaskDef<Spoofax3StylerLan
         @Override public boolean equals(Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
-            final Args args = (Args) o;
+            final Args args = (Args)o;
             return input.equals(args.input) && esvAdditionalAstSuppliers.equals(args.esvAdditionalAstSuppliers);
         }
 
@@ -207,14 +209,43 @@ public class Spoofax3StylerLanguageCompiler implements TaskDef<Spoofax3StylerLan
     }
 
 
+    private static class AppendPath implements SerializableFunction<ResourcePath, ResourcePath> {
+        private final String path;
+
+        private AppendPath(String path) {
+            this.path = path;
+        }
+
+        @Override public ResourcePath apply(ResourcePath dir) {
+            return dir.appendAsRelativePath(path);
+        }
+
+        @Override public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            final AppendPath that = (AppendPath)o;
+            return path.equals(that.path);
+        }
+
+        @Override public int hashCode() {
+            return path.hashCode();
+        }
+
+        @Override public String toString() {
+            return "AppendPath{" +
+                "path='" + path + '\'' +
+                '}';
+        }
+    }
+
     private static class ImportFunction implements Function<String, Result<IStrategoTerm, ?>> {
         private final Function<Supplier<String>, Result<JSGLR1ParseOutput, JSGLR1ParseException>> parse;
-        private final LinkedHashSet<Supplier<ResourcePath>> includeDirSuppliers;
+        private final ArrayList<Supplier<ResourcePath>> includeDirSuppliers;
         private final ArrayList<Supplier<Result<IStrategoTerm, ?>>> additionalAstSuppliers;
 
         public ImportFunction(
             Function<Supplier<String>, Result<JSGLR1ParseOutput, JSGLR1ParseException>> parse,
-            LinkedHashSet<Supplier<ResourcePath>> includeDirSuppliers,
+            ArrayList<Supplier<ResourcePath>> includeDirSuppliers,
             ArrayList<Supplier<Result<IStrategoTerm, ?>>> additionalAstSuppliers
         ) {
             this.parse = parse;
@@ -223,14 +254,15 @@ public class Spoofax3StylerLanguageCompiler implements TaskDef<Spoofax3StylerLan
         }
 
         @Override public Result<IStrategoTerm, ?> apply(ExecContext context, String importName) {
+            final EsvFileFromImport esvFileFromImport = new EsvFileFromImport(importName);
             final ArrayList<Exception> suppressedExceptions = new ArrayList<>();
             for(Supplier<ResourcePath> includeDirSupplier : includeDirSuppliers) {
-                final Supplier<ResourcePath> pathSupplier = includeDirSupplier.map((includeDir) -> includeDir.appendRelativePath(importName).ensureLeafExtension("esv").getNormalized());
+                final Supplier<ResourcePath> pathSupplier = includeDirSupplier.map(esvFileFromImport);
                 try {
                     final ResourcePath path = context.require(pathSupplier);
                     final ReadableResource resource = context.require(path, ResourceStampers.<ReadableResource>exists());
                     if(!resource.exists()) continue;
-                    return context.require(parse, pathSupplier.map(this::readString)).map(this::getAst);
+                    return context.require(parse, pathSupplier.map(new ReadString())).map(new GetAst());
                 } catch(IOException e) {
                     suppressedExceptions.add(e);
                 } catch(UncheckedIOException e) {
@@ -254,22 +286,10 @@ public class Spoofax3StylerLanguageCompiler implements TaskDef<Spoofax3StylerLan
             return Result.ofErr(exception);
         }
 
-        private String readString(ExecContext ctx, ResourcePath p) {
-            try {
-                return ctx.require(p).readString();
-            } catch(IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        }
-
-        private IStrategoTerm getAst(JSGLR1ParseOutput output) {
-            return output.ast;
-        }
-
         @Override public boolean equals(Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
-            final ImportFunction that = (ImportFunction) o;
+            final ImportFunction that = (ImportFunction)o;
             return parse.equals(that.parse) && includeDirSuppliers.equals(that.includeDirSuppliers) && additionalAstSuppliers.equals(that.additionalAstSuppliers);
         }
 
@@ -284,5 +304,64 @@ public class Spoofax3StylerLanguageCompiler implements TaskDef<Spoofax3StylerLan
                 ", additionalAstSuppliers=" + additionalAstSuppliers +
                 '}';
         }
+    }
+
+    private static class EsvFileFromImport implements SerializableFunction<ResourcePath, ResourcePath> {
+        private final String importName;
+
+        public EsvFileFromImport(String importName) {
+            this.importName = importName;
+        }
+
+        @Override public ResourcePath apply(ResourcePath includeDir) {
+            return includeDir.appendRelativePath(importName).ensureLeafExtension("esv").getNormalized();
+        }
+
+        @Override public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            final EsvFileFromImport that = (EsvFileFromImport)o;
+            return importName.equals(that.importName);
+        }
+
+        @Override public int hashCode() {
+            return importName.hashCode();
+        }
+
+        @Override public String toString() {
+            return "EsvFileFromImport{" +
+                "importName='" + importName + '\'' +
+                '}';
+        }
+    }
+
+    private static class ReadString implements Function<ResourcePath, String> {
+        @Override public String apply(ExecContext ctx, ResourcePath p) {
+            try {
+                return ctx.require(p).readString();
+            } catch(IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+
+        @Override public int hashCode() { return 0; }
+
+        @Override
+        public boolean equals(Object obj) { return this == obj || obj != null && this.getClass() == obj.getClass(); }
+
+        @Override public String toString() { return "ReadString()"; }
+    }
+
+    private static class GetAst implements SerializableFunction<JSGLR1ParseOutput, IStrategoTerm> {
+        @Override public IStrategoTerm apply(JSGLR1ParseOutput output) {
+            return output.ast;
+        }
+
+        @Override public int hashCode() { return 0; }
+
+        @Override
+        public boolean equals(Object obj) { return this == obj || obj != null && this.getClass() == obj.getClass(); }
+
+        @Override public String toString() { return "GetAst()"; }
     }
 }

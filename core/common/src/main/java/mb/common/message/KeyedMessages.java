@@ -46,7 +46,7 @@ public class KeyedMessages implements Serializable {
 
 
     public static KeyedMessages copyOf(Map<ResourceKey, ArrayList<Message>> keyedMessages, Collection<Message> messagesWithoutKey) {
-        return new KeyedMessages(MapView.copyOf(keyedMessages), ListView.copyOf(messagesWithoutKey));
+        return new KeyedMessages(MapView.copyOfWithLinkedHash(keyedMessages), ListView.copyOf(messagesWithoutKey));
     }
 
     public static KeyedMessages copyOf(Map<ResourceKey, ArrayList<Message>> keyedMessages) {
