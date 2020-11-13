@@ -99,7 +99,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
         this.partialSolveFile = partialSolveFile;
         this.buildSpec = buildSpec;
         this.languageMetadataManager = languageMetadataManager;
-        logger = loggerFactory.create(SmlSolveProject.class);
+        this.logger = loggerFactory.create(SmlSolveProject.class);
     }
 
     @Override public String getId() {
@@ -109,7 +109,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
     @Override public Result<AnalysisResults, MultiLangAnalysisException> exec(ExecContext context, Input input) {
         return getLanguageMetadata(input.languages).flatMap(languageMetadataMap -> languageMetadataMap.entrySet().stream()
             .map(langEntry -> context.require(partialSolveProject.createTask(new SmlPartialSolveProject.Input(
-                globalResultSupplier(input.languages, input.logLevel),
+                globalResultSupplier(input.logLevel),
                 langEntry.getKey(),
                 langEntry.getValue().projectConstraint(),
                 input.logLevel))).map(res -> pair(langEntry.getValue().languageId(), res)))
@@ -126,7 +126,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
     ) {
         return languageMetadataMap.values().stream()
             .flatMap(languageMetadata -> languageMetadata.resourcesSupplier().apply(context, input.projectPath).stream()
-                .map(resourceKey -> context.require(fileResultSupplier(languageMetadata, resourceKey, input.languages, input.logLevel))
+                .map(resourceKey -> context.require(fileResultSupplier(languageMetadata, resourceKey, input.logLevel))
                     .map(res -> pair((FileKey)ImmutableFileKey.builder()
                         .languageId(languageMetadata.languageId())
                         .resourceKey(resourceKey)
@@ -150,7 +150,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
             .reduce(IState.Immutable::add);
 
          // Solve all residual constraints
-         return combinedState.map(state -> context.require(globalResultSupplier(input.languages, input.logLevel))
+         return combinedState.map(state -> context.require(globalResultSupplier(input.logLevel))
                 .flatMap(globalResult -> TaskUtils.executeWrapped(() -> context.require(specSupplier(input.languages))
                     // Upcast to make typing work
                     .mapErr(MultiLangAnalysisException.class::cast)
@@ -200,7 +200,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
             .map(entry -> languageMetadataManager.get().getLanguageMetadataResult(entry.getKey().languageId())
                 .flatMap(lmd -> {
                     // Create supplier that partial file result with final solver result
-                    Supplier<Result<FileResult, ?>> resultWithFinalResultSupplier = fileResultSupplier(lmd, entry.getKey().resourceKey(), input.languages, input.logLevel)
+                    Supplier<Result<FileResult, ?>> resultWithFinalResultSupplier = fileResultSupplier(lmd, entry.getKey().resourceKey(), input.logLevel)
                         .map(rs -> rs.map(fileResult -> ImmutableFileResult.builder().from(fileResult).result(finalResult).build()));
                     // Apply post transformation
                     return lmd.postTransform().apply(context, resultWithFinalResultSupplier)
@@ -227,21 +227,20 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
         return buildSpec.createSupplier(new SmlBuildSpec.Input(languages));
     }
 
-    private Supplier<Result<GlobalResult, MultiLangAnalysisException>> globalResultSupplier(Collection<LanguageId> languageIds, @Nullable Level logLevel) {
-        return instantiateGlobalScope.createSupplier(new SmlInstantiateGlobalScope.Input(logLevel, specSupplier(languageIds)));
+    private Supplier<Result<GlobalResult, MultiLangAnalysisException>> globalResultSupplier(@Nullable Level logLevel) {
+        return instantiateGlobalScope.createSupplier(new SmlInstantiateGlobalScope.Input(logLevel));
     }
 
     private Supplier<Result<FileResult, ?>> fileResultSupplier(
         LanguageMetadata languageMetadata,
         mb.resource.ResourceKey resourceKey,
-        Collection<LanguageId> languages,
         @Nullable Level logLevel
     ) {
         return partialSolveFile.createSupplier(
             new SmlPartialSolveFile.Input(
                 languageMetadata.languageId(),
                 resourceKey,
-                globalResultSupplier(languages, logLevel),
+                globalResultSupplier(logLevel),
                 logLevel)
         )
         // Map MultilangException to ?

@@ -12,4 +12,12 @@ public interface SpecManager {
      * @return A valid spec for the given languages, or an error when laoding fails, or when the resulting spec is invalid
      */
     Result<Spec, SpecLoadException> getSpecResult(LanguageId... languageIds);
+
+    /**
+     * Used in {@link mb.statix.multilang.pie.SmlInstantiateGlobalScope} to create a global scope that is correct in
+     * all contexts. That is a hack, because Statix does not support extending scope graphs with new labels.
+     * Therefore, this method should be used nowhere else.
+     * @return Spec without rules, with all possible labels available.
+     */
+    Result<Spec, SpecLoadException> getSpecOfAllFragments();
 }

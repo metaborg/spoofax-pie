@@ -1,23 +1,23 @@
 package mb.statix.multilang.metadata;
 
+import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.ListMultimap;
 import mb.common.result.Result;
 import mb.common.result.ResultCollector;
 import mb.pie.api.Pie;
 import mb.statix.multilang.MultiLangAnalysisException;
-import mb.statix.multilang.metadata.spec.Module;
 import mb.statix.multilang.metadata.spec.OverlappingRulesException;
 import mb.statix.multilang.metadata.spec.SpecConfig;
 import mb.statix.multilang.metadata.spec.SpecFragment;
 import mb.statix.multilang.metadata.spec.SpecLoadException;
 import mb.statix.multilang.metadata.spec.SpecUtils;
 import mb.statix.spec.Rule;
+import mb.statix.spec.RuleSet;
 import mb.statix.spec.Spec;
 import org.immutables.value.Value;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -87,6 +87,18 @@ public abstract class AnalysisContextService implements LanguageMetadataManager,
 
     public static ImmutableAnalysisContextService.Builder builder() {
         return ImmutableAnalysisContextService.builder();
+    }
+
+    public Result<Spec, SpecLoadException> getSpecOfAllFragments() {
+        return specConfigs().values().stream()
+            .map(SpecConfig::load)
+            .collect(ResultCollector.getWithBaseException(new SpecLoadException("Error loading specs")))
+            .flatMap(specs -> specs.stream()
+                .map(SpecFragment::toSpecResult)
+                .reduce(SpecUtils::mergeSpecs)
+                .orElse(Result.ofErr(new SpecLoadException("Bug: no spec configs available"))))
+            .map(spec -> spec.withRules(RuleSet.of(Collections.emptySet()))
+                .withScopeExtensions(ImmutableSetMultimap.of()));
     }
 
     @Override public Result<Spec, SpecLoadException> getSpecResult(LanguageId... languageIds) {

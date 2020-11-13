@@ -1,5 +1,6 @@
 package mb.statix.multilang.pie;
 
+import dagger.Lazy;
 import mb.common.result.Result;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
@@ -9,8 +10,10 @@ import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.statix.constraints.CExists;
 import mb.statix.constraints.CNew;
+import mb.statix.multilang.MultiLang;
 import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.multilang.MultiLangScope;
+import mb.statix.multilang.metadata.SpecManager;
 import mb.statix.multilang.metadata.spec.SpecLoadException;
 import mb.statix.multilang.utils.SolverUtils;
 import mb.statix.solver.IConstraint;
@@ -36,33 +39,30 @@ public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalSc
 
     public static class Input implements Serializable {
         private final @Nullable Level logLevel;
-        private final Supplier<Result<Spec, SpecLoadException>> specSupplier;
 
-        public Input(@Nullable Level logLevel, Supplier<Result<Spec, SpecLoadException>> specSupplier) {
+        public Input(@Nullable Level logLevel) {
             this.logLevel = logLevel;
-            this.specSupplier = specSupplier;
         }
 
         @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
-            if(o == null || getClass() != o.getClass()) return false;
-            Input input = (Input)o;
+            return o != null && getClass() == o.getClass();
             // Debug context should not influence results, so consider inputs with different debug settings as equal.
-            return specSupplier.equals(input.specSupplier);
         }
 
         @Override public int hashCode() {
-            return Objects.hash(specSupplier);
+            return SmlInstantiateGlobalScope.class.hashCode();
         }
 
         @Override public String toString() {
-            return "Input{" +
-                "specSupplier=" + specSupplier +
-                '}';
+            return "Input{}";
         }
     }
 
-    @Inject public SmlInstantiateGlobalScope() {
+    private final Lazy<SpecManager> specManager;
+
+    @Inject public SmlInstantiateGlobalScope(@MultiLang Lazy<SpecManager> specManager) {
+        this.specManager = specManager;
     }
 
     @Override
@@ -73,7 +73,7 @@ public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalSc
     @Override
     public Result<GlobalResult, MultiLangAnalysisException> exec(ExecContext context, Input input) {
         try {
-            return context.require(input.specSupplier)
+            return specManager.get().getSpecOfAllFragments()
                 .mapErr(MultiLangAnalysisException::wrapIfNeeded)
                 .flatMap(spec -> instantiateGlobalScopeForSpec(input, spec));
         } catch(UncheckedIOException e) {
