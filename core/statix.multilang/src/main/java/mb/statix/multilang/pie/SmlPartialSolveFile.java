@@ -11,6 +11,8 @@ import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.statix.constraints.CUser;
+import mb.statix.multilang.metadata.FileResult;
+import mb.statix.multilang.metadata.ImmutableFileResult;
 import mb.statix.multilang.metadata.LanguageId;
 import mb.statix.multilang.metadata.LanguageMetadataManager;
 import mb.statix.multilang.MultiLang;
@@ -135,18 +137,11 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
                     );
                     long dt = System.currentTimeMillis() - t0;
                     logger.info("{} analyzed in {} ms", input.resourceKey, dt);
-                    return Result.ofOk(result);
-                }, "Analysis for input file " + input.resourceKey + " interrupted")
-                    .mapErr(MultiLangAnalysisException::wrapIfNeeded)
-                    .flatMap(fileResult -> {
-                        Supplier<Result<IStrategoTerm, ?>> astSupplier = languageMetadata.astFunction().createSupplier(input.resourceKey);
-                        return languageMetadata.postTransform().apply(context, astSupplier)
-                            .mapErr(MultiLangAnalysisException::wrapIfNeeded)
-                            .map(analyzedAst -> ImmutableFileResult.builder()
-                                .analyzedAst(analyzedAst)
-                                .result(fileResult)
-                                .build());
-                    });
+                    return Result.ofOk(ImmutableFileResult.builder()
+                        .ast(ast)
+                        .result(result)
+                        .build());
+                }, "Analysis for input file " + input.resourceKey + " interrupted");
             })), "Exception when resolving specification");
     }
 }

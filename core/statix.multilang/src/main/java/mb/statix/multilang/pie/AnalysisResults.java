@@ -2,6 +2,7 @@ package mb.statix.multilang.pie;
 
 import mb.nabl2.terms.ITerm;
 import mb.statix.multilang.metadata.LanguageId;
+import mb.statix.multilang.metadata.FileResult;
 import mb.statix.solver.persistent.SolverResult;
 import org.immutables.value.Value;
 
