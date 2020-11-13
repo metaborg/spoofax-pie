@@ -90,8 +90,9 @@ public class MultilangAnalysisTests extends TestBase {
             "  'mb.lang2': \"debugContext\"\n" +
             "  'mb.lang3': \"lang3\"\n" +
             "contextConfigs:\n" +
-            "  logging: debug\n" +
-            "  stripTraces: true", "multilang.yaml");
+            "  debugContext:\n" +
+            "    logging: debug\n" +
+            "    stripTraces: true", "multilang.yaml");
 
         try(MixedSession session = newSession()) {
             Result<ContextConfig, ConfigurationException> configResult = session.require(multiLangComponent
