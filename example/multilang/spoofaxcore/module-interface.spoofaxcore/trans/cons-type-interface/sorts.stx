@@ -21,15 +21,6 @@ signature
 
 rules
 
-  // Rule validating if sorts match (e.g. when adding injections)
-  // signature: expected sort at position * actual sort at position
-  typeEq: TYPE * TYPE
-
-  // Equal sorts match
-  typeEq(T, T).
-
-rules
-
   declareSort: scope * string
 
   declareSort(s, n) :- {stag}

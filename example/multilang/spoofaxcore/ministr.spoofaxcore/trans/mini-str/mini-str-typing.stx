@@ -22,10 +22,9 @@ rules
   mstrProgramOK : scope * MSTRStart
 
   mstrProgramOK(s, MSTRModule(n, sec)) :- {s_mod s_seq}
-	new s_mod s_seq,
-	s_mod -P-> s,
-    declareMod(s, n, s_mod, STRMod()),
-    // declareRules(s_mod),
+    new s_mod s_seq,
+    s_mod -P-> s,
+    declareMod(s, n, s_mod, CONSUME()),
     mstrSectionsOk(s_mod, s_seq, _, sec).
 
 rules

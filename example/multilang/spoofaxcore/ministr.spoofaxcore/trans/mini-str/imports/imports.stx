@@ -9,29 +9,13 @@ imports
 
   mini-str/imports/rules
 
-signature
-
-  // Add STR module type
-  constructors
-    STRMod : ModuleType
-
 rules
 
   strImportsOk maps strImportOk(*, list(*))
 
   strImportOk : scope * MOD
 
-  strImportOk(s, n) :-
-    import(s, n, STRMod()).
+  strImportOk(s, n) :- {s_mod}
+    import(s, n, _) == s_mod,
+    rulesImpOk(n, s, s_mod).
 
-rules
-
-  itemsOk(n, STRMod(), STRMod(), s_imp, s_mod) :-
-    sortsUnique(s_imp, s_mod),
-    conssUnique(s_imp, s_mod),
-    rulesImpOk(n, s_imp, s_mod).
-
-rules
-
-  // Allow STRMod to import any other module
-  modTypesOk(STRMod(), _).

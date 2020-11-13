@@ -14,6 +14,14 @@ signature
 
 rules
 
+  // Rule validating if sorts match
+  // signature: expected sort at position * actual sort at position
+  typeEq: TYPE * TYPE
+
+  // Equal sorts match
+  typeEq(T, T).
+
+
   typeEq(EMPTY(), TSTAR(_)).
   typeEq(EMPTY(), TOPT(_)).
 

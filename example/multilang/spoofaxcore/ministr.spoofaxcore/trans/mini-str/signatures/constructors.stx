@@ -30,6 +30,6 @@ rules
   sortOfParam: scope * ArgSort -> TYPE
 
   sortOfParam(s, Sort(n)) = typeOfSort(s, n).
-  sortOfParam(s, Opt(n))  = TOPT(typeOfSort(s, n)).
-  sortOfParam(s, Iter(n)) = TITER(typeOfSort(s, n)).
-  sortOfParam(s, Star(n)) = TSTAR(typeOfSort(s, n)).
+  sortOfParam(s, SOpt(n))  = TOPT(typeOfSort(s, n)).
+  sortOfParam(s, SIter(n)) = TITER(typeOfSort(s, n)).
+  sortOfParam(s, SStar(n)) = TSTAR(typeOfSort(s, n)).

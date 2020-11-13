@@ -15,6 +15,7 @@ import mb.statix.spec.Rule;
 import mb.statix.spec.Spec;
 import org.immutables.value.Value;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -144,10 +145,40 @@ public abstract class AnalysisContextService implements LanguageMetadataManager,
     private Result<Spec, SpecLoadException> toSpec(Set<SpecFragment> specFragments) {
         return specFragments.stream()
             .map(SpecFragment::toSpecResult)
-            .reduce(SpecUtils::mergeSpecs)
-            // When check holds, this orElse call will never be executed
-            .orElse(Result.ofErr(new SpecLoadException("Bug: Tried to build spec from 0 fragments")))
-            .flatMap(this::validateNoOverlappingRules);
+            .collect(ResultCollector.getWithBaseException(new SpecLoadException("Error loading spec fragments")))
+            .flatMap(this::validateNoRuleForConstraintFromOtherFragment)
+            .flatMap(specs -> specs.stream()
+                .reduce(SpecUtils::mergeSpecs)
+                // Method reference handles type erasure incorrectly here, hence the lambda
+                .map(x -> Result.<Spec, SpecLoadException>ofOk(x))
+                // When check holds, this orElse call will never be executed
+                .orElse(Result.ofErr(new SpecLoadException("Bug: Tried to build spec from 0 fragments")))
+                .flatMap(this::validateNoOverlappingRules));
+    }
+
+    private Result<Set<Spec>, SpecLoadException> validateNoRuleForConstraintFromOtherFragment(Set<Spec> specs) {
+        ArrayList<Spec> orderedSpecs = new ArrayList<>(specs);
+        Set<String> overlappingRuleNames = new HashSet<>();
+
+        for(int i = 0; i < orderedSpecs.size(); i++) {
+            Spec spec1 = orderedSpecs.get(i);
+            Set<String> spec1Rulenames = spec1.rules().getRuleNames();
+            for(int j = i + 1; j < orderedSpecs.size(); j++) {
+                Spec spec2 = orderedSpecs.get(j);
+                // Make copy of all rules in spec 2
+                HashSet<String> spec2Rulenames = new HashSet<>(spec2.rules().getRuleNames());
+                // Retain only rule names that are in spec 1 as well
+                spec2Rulenames.retainAll(spec1Rulenames);
+                // Save these rules
+                overlappingRuleNames.addAll(spec2Rulenames);
+            }
+        }
+
+        if(!overlappingRuleNames.isEmpty()) {
+            return Result.ofErr(new SpecLoadException(String.format("The constraints %s define rules in multiple fragments", overlappingRuleNames)));
+        }
+
+        return Result.ofOk(specs);
     }
 
     private Result<Spec, SpecLoadException> validateNoOverlappingRules(Spec combinedSpec) {

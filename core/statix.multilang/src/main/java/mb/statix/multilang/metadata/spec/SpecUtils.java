@@ -86,7 +86,7 @@ public class SpecUtils {
     }
 
     public static Result<Spec, SpecLoadException> mergeSpecs(Result<Spec, SpecLoadException> accResult, Result<Spec, SpecLoadException> newSpecResult) {
-        return accResult.mapOrElse(acc -> newSpecResult.mapOrElse(newSpec -> mergeSpecs(acc, newSpec), Result::ofErr),
+        return accResult.mapOrElse(acc -> newSpecResult.mapOrElse(newSpec -> Result.ofOk(mergeSpecs(acc, newSpec)), Result::ofErr),
             accErr -> newSpecResult.mapOrElse(
                 res -> Result.ofErr(accErr),
                 err -> {
@@ -96,17 +96,17 @@ public class SpecUtils {
             ));
     }
 
-    public static Result<Spec, SpecLoadException> mergeSpecs(Spec acc, Spec newSpec) {
+    public static Spec mergeSpecs(Spec acc, Spec newSpec) {
         Set<Rule> rules = new HashSet<>(acc.rules().getAllRules());
         rules.addAll(newSpec.rules().getAllRules());
 
-        return Result.ofOk(Spec.builder()
+        return Spec.builder()
             .from(acc)
             .rules(RuleSet.of(rules))
             .addAllEdgeLabels(newSpec.edgeLabels())
             .addAllDataLabels(newSpec.dataLabels())
             .putAllScopeExtensions(newSpec.scopeExtensions())
-            .build());
+            .build();
     }
 
     public static IMatcher<Spec> fileSpec() {

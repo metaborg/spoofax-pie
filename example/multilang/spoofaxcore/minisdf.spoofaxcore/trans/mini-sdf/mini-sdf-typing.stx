@@ -22,7 +22,7 @@ rules
   msdfProgramOK(s, MSDFModule(n, sec)) :- {s_mod}
 	new s_mod,
 	s_mod -P-> s,
-    declareMod(s, n, s_mod, SDFMod()),
+    declareMod(s, n, s_mod, SUPPLY()),
     sectionsOK(s_mod, sec).
 
 rules

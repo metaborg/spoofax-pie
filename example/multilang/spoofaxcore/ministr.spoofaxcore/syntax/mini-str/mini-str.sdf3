@@ -17,6 +17,7 @@ lexical syntax
   SMBL				= [a-zA-Z] [a-zA-Z0-9\-\']*
 
   MOD			 	= "rules" 				{reject}
+  MOD			 	= "signature" 				{reject}
   MOD 				= "context-free" 		{reject}
   SMBL				= "rules" 				{reject}
   SMBL				= "imports" 			{reject}
@@ -44,7 +45,7 @@ context-free syntax
   >
 
   MSTRSection.Signatures = <
-    signatures
+    signature
         <{SignatureSection "\n"}*>
   >
 
@@ -62,9 +63,9 @@ context-free syntax
   ConstructorDef.WithArgs = [[SMBL] : [{ArgSort "*"}+] -> [SMBL]]
 
   ArgSort.Sort		= <<SMBL>>
-  ArgSort.Opt 		= <<SMBL>?>
-  ArgSort.Iter 		= <<SMBL>+>
-  ArgSort.Star 		= <<SMBL>*>
+  ArgSort.SOpt 		= <<SMBL>?>
+  ArgSort.SIter 	= <<SMBL>+>
+  ArgSort.SStar 	= <<SMBL>*>
 
   RuleDef.RewriteRuleDef = [
     [SMBL]: [Pattern] -> [Pattern] [With]

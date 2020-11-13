@@ -8,12 +8,6 @@ imports
   cons-type-interface/conflicts/sorts
   cons-type-interface/conflicts/constructors
 
-signature
-
-  // Add SDF module type
-  constructors
-    SDFMod : ModuleType
-
 rules
 
   sdfImportsOk maps sdfImportOk(*, list(*))
@@ -21,10 +15,5 @@ rules
   sdfImportOk : scope * MODNAME
 
   sdfImportOk(s, n) :-
-    import(s, n, SDFMod()).
+    import(s, n, SUPPLY()) == _.
 
-rules
-
-  itemsOk(_, _, SDFMod(), s_imp, s_mod) :-
-    sortsUnique(s_imp, s_mod),
-    conssUnique(s_imp, s_mod).
