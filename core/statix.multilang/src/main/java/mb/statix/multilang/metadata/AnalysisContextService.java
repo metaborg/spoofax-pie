@@ -1,6 +1,5 @@
 package mb.statix.multilang.metadata;
 
-import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.ListMultimap;
 import mb.common.result.Result;
 import mb.common.result.ResultCollector;
@@ -12,7 +11,6 @@ import mb.statix.multilang.metadata.spec.SpecFragment;
 import mb.statix.multilang.metadata.spec.SpecLoadException;
 import mb.statix.multilang.metadata.spec.SpecUtils;
 import mb.statix.spec.Rule;
-import mb.statix.spec.RuleSet;
 import mb.statix.spec.Spec;
 import org.immutables.value.Value;
 
@@ -87,18 +85,6 @@ public abstract class AnalysisContextService implements LanguageMetadataManager,
 
     public static ImmutableAnalysisContextService.Builder builder() {
         return ImmutableAnalysisContextService.builder();
-    }
-
-    public Result<Spec, SpecLoadException> getSpecOfAllFragments() {
-        return specConfigs().values().stream()
-            .map(SpecConfig::load)
-            .collect(ResultCollector.getWithBaseException(new SpecLoadException("Error loading specs")))
-            .flatMap(specs -> specs.stream()
-                .map(SpecFragment::toSpecResult)
-                .reduce(SpecUtils::mergeSpecs)
-                .orElse(Result.ofErr(new SpecLoadException("Bug: no spec configs available"))))
-            .map(spec -> spec.withRules(RuleSet.of(Collections.emptySet()))
-                .withScopeExtensions(ImmutableSetMultimap.of()));
     }
 
     @Override public Result<Spec, SpecLoadException> getSpecResult(LanguageId... languageIds) {

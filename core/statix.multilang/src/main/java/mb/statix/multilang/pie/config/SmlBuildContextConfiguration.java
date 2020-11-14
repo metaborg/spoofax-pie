@@ -32,7 +32,7 @@ public class SmlBuildContextConfiguration implements TaskDef<SmlBuildContextConf
             this.languageId = languageId;
         }
 
-        @Override public boolean equals(Object o) {
+        @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             Input input = (Input)o;

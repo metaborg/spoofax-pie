@@ -14,6 +14,7 @@ import mb.statix.multilang.utils.SolverUtils;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.log.IDebugContext;
 import mb.statix.solver.persistent.SolverResult;
+import mb.statix.solver.persistent.State;
 import mb.statix.spec.Spec;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.log.Level;
@@ -92,7 +93,7 @@ public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.In
                 return TaskUtils.executeWrapped(() -> context.require(buildSpec.createSupplier(new SmlBuildSpec.Input(input.languageId)))
                     .mapErr(MultiLangAnalysisException::wrapIfNeeded)
                     .flatMap(spec -> TaskUtils.executeWrapped(() -> {
-                        SolverResult res = SolverUtils.partialSolve(spec, globalResult.result().state(),
+                        SolverResult res = SolverUtils.partialSolve(spec, State.of(spec).add(globalResult.result().state()),
                             projectConstraint, debug, new NullProgress(), new NullCancel());
                         return Result.ofOk(res);
                     }, "Project constraint solving interrupted")), "Error loading specification");

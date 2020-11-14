@@ -20,8 +20,10 @@ import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.multilang.MultiLangScope;
 import mb.statix.multilang.utils.SolverUtils;
 import mb.statix.solver.IConstraint;
+import mb.statix.solver.IState;
 import mb.statix.solver.log.IDebugContext;
 import mb.statix.solver.persistent.SolverResult;
+import mb.statix.solver.persistent.State;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.log.Level;
 import org.metaborg.util.task.NullCancel;
@@ -126,7 +128,9 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
                 return TaskUtils.executeWrapped(() -> {
                     long t0 = System.currentTimeMillis();
                     SolverResult result = SolverUtils.partialSolve(spec,
-                        globalResult.result().state().withResource(input.resourceKey.toString()),
+                        State.of(spec)
+                            .add(globalResult.result().state())
+                            .withResource(input.resourceKey.toString()),
                         fileConstraint,
                         debug,
                         new NullProgress(),
