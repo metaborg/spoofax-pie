@@ -151,11 +151,11 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
 
          // Solve all residual constraints
          return combinedState.map(state -> context.require(globalResultSupplier(input.logLevel))
-                .flatMap(globalResult -> TaskUtils.executeWrapped(() -> context.require(specSupplier(input.languages))
+                .flatMap(globalResult -> context.require(specSupplier(input.languages))
                     // Upcast to make typing work
                     .mapErr(MultiLangAnalysisException.class::cast)
                     // Solve resudial constraints
-                    .flatMap(combinedSpec -> solveWithSpec(projectResults, fileResults, state, globalResult, combinedSpec, input.logLevel)), "Solving final constraints interrupted")
+                    .flatMap(combinedSpec -> solveWithSpec(projectResults, fileResults, state, globalResult, combinedSpec, input.logLevel))
                     // Apply post transformation on all files
                     .flatMap(finalResult -> postTransform(context, input, fileResults, finalResult)
                         .map(newFileResults -> (AnalysisResults)ImmutableAnalysisResults.of(globalResult.globalScope(),
@@ -173,13 +173,14 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
         Spec combinedSpec,
         @Nullable Level logLevel
     ) {
-        return TaskUtils.executeWrapped(() -> {
-            IDebugContext debug = TaskUtils.createDebugContext(logLevel);
-            IConstraint combinedConstraint = Stream.concat(
-                projectResults.values().stream(),
-                fileResults.values().stream().map(FileResult::result))
-                .map(SolverResult::delayed)
-                .reduce(globalResult.result().delayed(), CConj::new);
+        IDebugContext debug = TaskUtils.createDebugContext(logLevel);
+        IConstraint combinedConstraint = Stream.concat(
+            projectResults.values().stream(),
+            fileResults.values().stream().map(FileResult::result))
+            .map(SolverResult::delayed)
+            .reduce(globalResult.result().delayed(), CConj::new);
+
+        try {
             long t0 = System.currentTimeMillis();
             SolverResult result = Solver.solve(combinedSpec, state, combinedConstraint, (s, l, st) -> true, debug, new NullProgress(), new NullCancel());
             long dt = System.currentTimeMillis() - t0;
@@ -192,7 +193,9 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
             final SolverResult newResult = result.withMessages(messages.build()).withDelays(ImmutableMap.of());
 
             return Result.ofOk(newResult);
-        });
+        } catch(InterruptedException e) {
+           return Result.ofErr(new MultiLangAnalysisException(e));
+        }
     }
 
     private Result<HashMap<FileKey, FileResult>, ?> postTransform(ExecContext context, Input input, Map<FileKey, FileResult> fileResults, SolverResult finalResult) {
@@ -216,7 +219,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
 
     private Result<Map<LanguageId, LanguageMetadata>, MultiLangAnalysisException> getLanguageMetadata(Collection<LanguageId> languages) {
         return languages.stream()
-            .map(languageId -> TaskUtils.executeWrapped(() -> Result.ofOk(languageMetadataManager.get().getLanguageMetadata(languageId)))
+            .map(languageId -> languageMetadataManager.get().getLanguageMetadataResult(languageId)
                 .map(res -> pair(languageId, res)))
             .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("Error when resolving language metadata", false)))
             .map(SmlSolveProject::entrySetToMap);

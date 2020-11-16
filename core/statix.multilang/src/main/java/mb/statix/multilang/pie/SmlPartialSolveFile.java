@@ -99,50 +99,49 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
     }
 
     @Override public Result<FileResult, MultiLangAnalysisException> exec(ExecContext context, Input input) {
-        return languageMetadataManager.get().getLanguageMetadataResult(input.languageId).flatMap(languageMetadata -> {
-            Supplier<Result<IStrategoTerm, ?>> astSupplier = languageMetadata.astFunction().createSupplier(input.resourceKey);
-            return TaskUtils.executeWrapped(() -> context.require(astSupplier)
-                    .mapErr(err -> MultiLangAnalysisException.wrapIfNeeded("No ast provided for " + input.resourceKey, err))
-                    .flatMap((IStrategoTerm ast) -> analyzeAst(context, input, ast)),
-                "Error loading file AST");
-        });
+        return languageMetadataManager.get().getLanguageMetadataResult(input.languageId)
+            .flatMap(languageMetadata -> context.require(languageMetadata.astFunction().createSupplier(input.resourceKey))
+                .mapErr(err -> MultiLangAnalysisException.wrapIfNeeded("No ast provided for " + input.resourceKey, err))
+                .flatMap((IStrategoTerm ast) -> analyzeAst(context, input, ast)));
     }
 
     private Result<FileResult, MultiLangAnalysisException> analyzeAst(ExecContext context, Input input, IStrategoTerm ast) {
-        return TaskUtils.executeWrapped(() -> context.require(input.globalResultSupplier)
+        return context.require(input.globalResultSupplier)
                 .mapErr(MultiLangAnalysisException::wrapIfNeeded)
-                .flatMap(globalResult -> analyzeForGlobal(context, input, ast, globalResult)),
-            "Exception when resolving global result");
+                .flatMap(globalResult -> analyzeForGlobal(context, input, ast, globalResult));
     }
 
     private Result<FileResult, MultiLangAnalysisException> analyzeForGlobal(ExecContext context, Input input, IStrategoTerm ast, GlobalResult globalResult) {
-        return TaskUtils.executeWrapped(() -> context.require(buildSpec.createSupplier(new SmlBuildSpec.Input(input.languageId)))
+        return context.require(buildSpec.createSupplier(new SmlBuildSpec.Input(input.languageId)))
             .mapErr(MultiLangAnalysisException::wrapIfNeeded)
-            .flatMap(spec -> languageMetadataManager.get().getLanguageMetadataResult(input.languageId).flatMap(languageMetadata -> {
-                StrategoTerms st = new StrategoTerms(languageMetadata.termFactory());
+            .flatMap(spec -> languageMetadataManager.get().getLanguageMetadataResult(input.languageId)
+                .flatMap(languageMetadata -> {
+                    StrategoTerms st = new StrategoTerms(languageMetadata.termFactory());
 
-                IDebugContext debug = TaskUtils.createDebugContext(input.logLevel);
-                Iterable<ITerm> constraintArgs = Arrays.asList(globalResult.globalScope(), st.fromStratego(ast));
-                IConstraint fileConstraint = new CUser(languageMetadata.fileConstraint(), constraintArgs, null);
+                    IDebugContext debug = TaskUtils.createDebugContext(input.logLevel);
+                    Iterable<ITerm> constraintArgs = Arrays.asList(globalResult.globalScope(), st.fromStratego(ast));
+                    IConstraint fileConstraint = new CUser(languageMetadata.fileConstraint(), constraintArgs, null);
 
-                return TaskUtils.executeWrapped(() -> {
                     long t0 = System.currentTimeMillis();
-                    SolverResult result = SolverUtils.partialSolve(spec,
-                        State.of(spec)
-                            .add(globalResult.result().state())
-                            .withResource(input.resourceKey.toString()),
-                        fileConstraint,
-                        debug,
-                        new NullProgress(),
-                        new NullCancel()
-                    );
-                    long dt = System.currentTimeMillis() - t0;
-                    logger.info("{} analyzed in {} ms", input.resourceKey, dt);
-                    return Result.ofOk(ImmutableFileResult.builder()
-                        .ast(ast)
-                        .result(result)
-                        .build());
-                }, "Analysis for input file " + input.resourceKey + " interrupted");
-            })), "Exception when resolving specification");
+                    try {
+                        SolverResult result = SolverUtils.partialSolve(spec,
+                            State.of(spec)
+                                .add(globalResult.result().state())
+                                .withResource(input.resourceKey.toString()),
+                            fileConstraint,
+                            debug,
+                            new NullProgress(),
+                            new NullCancel()
+                        );
+                        long dt = System.currentTimeMillis() - t0;
+                        logger.info("{} analyzed in {} ms", input.resourceKey, dt);
+                        return Result.ofOk(ImmutableFileResult.builder()
+                            .ast(ast)
+                            .result(result)
+                            .build());
+                    } catch(InterruptedException e) {
+                        return Result.ofErr(MultiLangAnalysisException.wrapIfNeeded(e));
+                    }
+                }));
     }
 }

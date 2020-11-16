@@ -83,20 +83,24 @@ public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.In
 
     @Override
     public Result<SolverResult, MultiLangAnalysisException> exec(ExecContext context, Input input) {
-        return TaskUtils.executeWrapped(() -> context.require(input.globalResultSupplier)
+        return context.require(input.globalResultSupplier)
             .mapErr(MultiLangAnalysisException::wrapIfNeeded)
             .flatMap(globalResult -> {
                 Set<ITerm> scopeArgs = Collections.singleton(globalResult.globalScope());
                 IConstraint projectConstraint = new CUser(input.projectConstraint, scopeArgs);
 
                 IDebugContext debug = TaskUtils.createDebugContext(input.logLevel);
-                return TaskUtils.executeWrapped(() -> context.require(buildSpec.createSupplier(new SmlBuildSpec.Input(input.languageId)))
+                return context.require(buildSpec.createSupplier(new SmlBuildSpec.Input(input.languageId)))
                     .mapErr(MultiLangAnalysisException::wrapIfNeeded)
-                    .flatMap(spec -> TaskUtils.executeWrapped(() -> {
-                        SolverResult res = SolverUtils.partialSolve(spec, State.of(spec).add(globalResult.result().state()),
-                            projectConstraint, debug, new NullProgress(), new NullCancel());
-                        return Result.ofOk(res);
-                    }, "Project constraint solving interrupted")), "Error loading specification");
-            }), "Exception getting global result");
+                    .flatMap(spec -> {
+                        try {
+                            SolverResult res = SolverUtils.partialSolve(spec, State.of(spec).add(globalResult.result().state()),
+                                projectConstraint, debug, new NullProgress(), new NullCancel());
+                            return Result.ofOk(res);
+                        } catch(InterruptedException e) {
+                            return Result.ofErr(new MultiLangAnalysisException(e));
+                        }
+                    });
+            });
     }
 }

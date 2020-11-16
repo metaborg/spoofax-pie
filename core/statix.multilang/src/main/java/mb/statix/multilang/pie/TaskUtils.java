@@ -1,8 +1,5 @@
 package mb.statix.multilang.pie;
 
-import mb.common.result.ExceptionalSupplier;
-import mb.common.result.Result;
-import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.solver.log.IDebugContext;
 import mb.statix.solver.log.LoggerDebugContext;
 import mb.statix.solver.log.NullDebugContext;
@@ -18,26 +15,5 @@ public final class TaskUtils {
         return logLevel != null ?
             // Statix solver still uses org.metaborg.util.log
             new LoggerDebugContext(LoggerUtils.logger("MLA"), logLevel) : new NullDebugContext();
-    }
-
-    public static <O> Result<O, MultiLangAnalysisException> executeWrapped(
-        ExceptionalSupplier<Result<O, MultiLangAnalysisException>, ? extends Exception> function,
-        String exceptionMessage
-    ) {
-        try {
-            return function.get();
-        } catch(Exception e) {
-            return Result.ofErr(MultiLangAnalysisException.wrapIfNeeded(exceptionMessage, e));
-        }
-    }
-
-    public static <O> Result<O, MultiLangAnalysisException> executeWrapped(
-        ExceptionalSupplier<Result<O, MultiLangAnalysisException>, ? extends Exception> function
-    ) {
-        try {
-            return function.get();
-        } catch(Exception e) {
-            return Result.ofErr(MultiLangAnalysisException.wrapIfNeeded(e));
-        }
     }
 }
