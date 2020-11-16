@@ -3,5 +3,5 @@ languageContexts:
   'mb.ministr': "debugContext"
 contextConfigs:
   'debugContext':
-    stripTraces: false
+    stripTraces: true
     logging: "debug"

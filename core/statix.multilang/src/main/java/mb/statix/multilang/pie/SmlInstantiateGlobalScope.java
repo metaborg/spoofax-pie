@@ -68,7 +68,7 @@ public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalSc
             Set<ITermVar> scopeArgs = Collections.singleton(globalScopeVar);
             IConstraint globalConstraint = new CExists(scopeArgs, new CNew(globalScopeVar, globalScopeVar));
             IState.Immutable state = State.of(Spec.of());
-            IDebugContext debug = TaskUtils.createDebugContext(input.logLevel);
+            IDebugContext debug = SolverUtils.createDebugContext(input.logLevel);
 
             try {
                 SolverResult result = SolverUtils.partialSolve(Spec.of(), state, globalConstraint, debug, new NullProgress(), new NullCancel());

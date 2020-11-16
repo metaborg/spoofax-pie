@@ -323,7 +323,7 @@ public class {{baseModule.id}} {
         return ImmutableLanguageMetadata.builder()
             .resourcesSupplier(MetadataUtils.resourcesSupplierForExtensions({{#shared.fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/shared.fileExtensions}}))
             .astFunction(preStatix.createFunction().mapInput(indexAst::createSupplier))
-            .postTransform(postStatix.createFunction().mapInput(java.util.function.Function.identity()))
+            .postTransform(postStatix.createFunction().mapInput(x -> x))
             .languageId(new LanguageId("{{languageId}}"))
             .languagePie(languagePie)
             .termFactory(termFactory)

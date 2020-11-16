@@ -89,7 +89,7 @@ public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.In
                 Set<ITerm> scopeArgs = Collections.singleton(globalResult.globalScope());
                 IConstraint projectConstraint = new CUser(input.projectConstraint, scopeArgs);
 
-                IDebugContext debug = TaskUtils.createDebugContext(input.logLevel);
+                IDebugContext debug = SolverUtils.createDebugContext(input.logLevel);
                 return context.require(buildSpec.createSupplier(new SmlBuildSpec.Input(input.languageId)))
                     .mapErr(MultiLangAnalysisException::wrapIfNeeded)
                     .flatMap(spec -> {

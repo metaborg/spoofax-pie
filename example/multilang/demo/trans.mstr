@@ -1,6 +1,6 @@
 module trans
 
-signatures
+signature
   sorts Term Lit Expr
   constructors
     Plus	: Term * Expr	-> Expr

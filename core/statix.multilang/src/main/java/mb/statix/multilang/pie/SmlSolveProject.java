@@ -22,11 +22,13 @@ import mb.statix.multilang.MultiLang;
 import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.multilang.MultiLangScope;
 import mb.statix.multilang.metadata.spec.SpecLoadException;
+import mb.statix.multilang.utils.SolverUtils;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.IState;
 import mb.statix.solver.log.IDebugContext;
 import mb.statix.solver.persistent.Solver;
 import mb.statix.solver.persistent.SolverResult;
+import mb.statix.solver.persistent.State;
 import mb.statix.spec.Spec;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.log.Level;
@@ -133,52 +135,54 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
                         .build(), res))))
             .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("At least one file constraint has an unexpected exception", false)))
             .map(SmlSolveProject::entrySetToMap)
-            .flatMap(fileResults -> solveCombined(context, input, projectResults, fileResults));
+            .flatMap(fileResults -> context.require(specSupplier(input.languages))
+                // Upcast to make typing work
+                .mapErr(MultiLangAnalysisException.class::cast)
+                .flatMap(combinedSpec -> solveCombined(context, input, combinedSpec, projectResults, fileResults)));
     }
 
     private Result<AnalysisResults, MultiLangAnalysisException> solveCombined(
         ExecContext context,
         Input input,
+        Spec combinedSpec,
         Map<LanguageId, SolverResult> projectResults,
         Map<FileKey, FileResult> fileResults
     ) {
          // Combine state of all intermediate results
-         Optional<IState.Immutable> combinedState = Stream.concat(
-            projectResults.values().stream(),
-            fileResults.values().stream().map(FileResult::result))
-            .map(SolverResult::state)
-            .reduce(IState.Immutable::add);
+         IState.Immutable combinedState = Stream.concat(
+             projectResults.values().stream(),
+             fileResults.values().stream().map(FileResult::result))
+             .map(SolverResult::state)
+             // When https://github.com/metaborg/nabl/commit/da4f60ca33cbd6566a0a4d42d00d39e9307e8d9d has landed in Spoofax 3
+             // The identity State.of(combinedSpec) may be removed
+             .reduce(State.of(combinedSpec), IState.Immutable::add);
 
          // Solve all residual constraints
-         return combinedState.map(state -> context.require(globalResultSupplier(input.logLevel))
-                .flatMap(globalResult -> context.require(specSupplier(input.languages))
-                    // Upcast to make typing work
-                    .mapErr(MultiLangAnalysisException.class::cast)
-                    // Solve resudial constraints
-                    .flatMap(combinedSpec -> solveWithSpec(projectResults, fileResults, state, globalResult, combinedSpec, input.logLevel))
-                    // Apply post transformation on all files
-                    .flatMap(finalResult -> postTransform(context, input, fileResults, finalResult)
-                        .map(newFileResults -> (AnalysisResults)ImmutableAnalysisResults.of(globalResult.globalScope(),
-                            new HashMap<>(projectResults), newFileResults, finalResult))
-                        .mapErr(MultiLangAnalysisException::wrapIfNeeded)
-                    )))
-            .orElseGet(() -> Result.ofErr(new MultiLangAnalysisException("BUG: Analysis gave no results")));
+         return context.require(globalResultSupplier(input.logLevel))
+            // Solve residual constraints
+            .flatMap(globalResult -> solveWithSpec(projectResults, fileResults, combinedState, globalResult.result().delayed(), combinedSpec, input.logLevel)
+                // Apply post transformation on all files
+                .flatMap(finalResult -> postTransform(context, input, fileResults, finalResult)
+                    .map(newFileResults -> (AnalysisResults)ImmutableAnalysisResults.of(globalResult.globalScope(),
+                        new HashMap<>(projectResults), newFileResults, finalResult))
+                    .mapErr(MultiLangAnalysisException::wrapIfNeeded)
+                ));
     }
 
     private Result<SolverResult, MultiLangAnalysisException> solveWithSpec(
         Map<LanguageId, SolverResult> projectResults,
         Map<FileKey, FileResult> fileResults,
         IState.Immutable state,
-        GlobalResult globalResult,
+        IConstraint globalConstraint,
         Spec combinedSpec,
         @Nullable Level logLevel
     ) {
-        IDebugContext debug = TaskUtils.createDebugContext(logLevel);
+        IDebugContext debug = SolverUtils.createDebugContext(logLevel);
         IConstraint combinedConstraint = Stream.concat(
             projectResults.values().stream(),
             fileResults.values().stream().map(FileResult::result))
             .map(SolverResult::delayed)
-            .reduce(globalResult.result().delayed(), CConj::new);
+            .reduce(globalConstraint, CConj::new);
 
         try {
             long t0 = System.currentTimeMillis();

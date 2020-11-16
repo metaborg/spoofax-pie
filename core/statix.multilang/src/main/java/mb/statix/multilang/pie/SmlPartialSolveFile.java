@@ -118,7 +118,7 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
                 .flatMap(languageMetadata -> {
                     StrategoTerms st = new StrategoTerms(languageMetadata.termFactory());
 
-                    IDebugContext debug = TaskUtils.createDebugContext(input.logLevel);
+                    IDebugContext debug = SolverUtils.createDebugContext(input.logLevel);
                     Iterable<ITerm> constraintArgs = Arrays.asList(globalResult.globalScope(), st.fromStratego(ast));
                     IConstraint fileConstraint = new CUser(languageMetadata.fileConstraint(), constraintArgs, null);
 

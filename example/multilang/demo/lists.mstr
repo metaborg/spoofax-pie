@@ -1,6 +1,6 @@
 module lists
 
-signatures
+signature
   sorts S constructors
     C0   : S
     C1   : S -> S
