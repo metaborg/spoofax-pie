@@ -112,7 +112,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
                 globalResultSupplier(input.logLevel),
                 langEntry.getKey(),
                 langEntry.getValue().projectConstraint(),
-                input.logLevel))).map(res -> pair(langEntry.getValue().languageId(), res)))
+                input.logLevel))).map(res -> pair(langEntry.getKey(), res)))
             .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("At least one project constraint has an unexpected exception", false)))
             .map(SmlSolveProject::entrySetToMap)
             .flatMap(projectResults -> analyzeFiles(context, input, languageMetadataMap, projectResults)));
@@ -231,7 +231,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
         return instantiateGlobalScope.createSupplier(new SmlInstantiateGlobalScope.Input(logLevel));
     }
 
-    private Supplier<Result<FileResult, ?>> fileResultSupplier(
+    private Supplier<? extends Result<FileResult, ?>> fileResultSupplier(
         LanguageMetadata languageMetadata,
         mb.resource.ResourceKey resourceKey,
         @Nullable Level logLevel
@@ -242,9 +242,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
                 resourceKey,
                 globalResultSupplier(logLevel),
                 logLevel)
-        )
-        // Map MultilangException to ?
-        .map(java.util.function.Function.identity());
+        );
     }
 
     private static <K, V> Map<K, V> entrySetToMap(Set<? extends Map.Entry<K, V>> entries) {
