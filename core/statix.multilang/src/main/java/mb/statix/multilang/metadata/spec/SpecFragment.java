@@ -34,6 +34,7 @@ public interface SpecFragment {
         return modules()
             .stream()
             .map(Module::toSpecResult)
+            // Merge without overlapping names check
             .reduce(SpecUtils::mergeSpecs)
             // Cannot occur when check holds
             .orElse(Result.ofErr(new SpecLoadException("Bug: No modules in spec fragment")));

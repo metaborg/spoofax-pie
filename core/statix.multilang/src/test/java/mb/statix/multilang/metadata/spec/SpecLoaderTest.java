@@ -54,7 +54,7 @@ public class SpecLoaderTest {
         SpecFragment specFragment2 = SpecUtils
             .loadSpec(root2, "compatible", termFactory);
 
-        Spec spec = SpecUtils.mergeSpecs(specFragment1.toSpec(), specFragment2.toSpec()).unwrap();
+        Spec spec = SpecUtils.mergeSpecs(specFragment1.toSpec(), specFragment2.toSpec());
 
         assertEquals(0, spec.edgeLabels().size());
         assertEquals(1, spec.dataLabels().size()); // Decl()

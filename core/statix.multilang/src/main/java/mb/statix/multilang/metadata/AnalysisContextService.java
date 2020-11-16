@@ -1,8 +1,10 @@
 package mb.statix.multilang.metadata;
 
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Sets;
 import mb.common.result.Result;
 import mb.common.result.ResultCollector;
+import mb.nabl2.terms.ITerm;
 import mb.pie.api.Pie;
 import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.multilang.metadata.spec.OverlappingRulesException;
@@ -11,10 +13,10 @@ import mb.statix.multilang.metadata.spec.SpecFragment;
 import mb.statix.multilang.metadata.spec.SpecLoadException;
 import mb.statix.multilang.metadata.spec.SpecUtils;
 import mb.statix.spec.Rule;
+import mb.statix.spec.RuleSet;
 import mb.statix.spec.Spec;
 import org.immutables.value.Value;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -22,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -112,71 +113,53 @@ public abstract class AnalysisContextService implements LanguageMetadataManager,
             .filter(module -> !providedModules.contains(module))
             .collect(Collectors.toSet());
 
-        // Check no duplicate module names
-        Set<String> duplicatedModules = providedModules.stream()
-            // Map all modules to their count
-            .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
-            .entrySet()
-            .stream()
-            // Filter to retain duplicate modules
-            .filter(x -> x.getValue() > 1)
-            .map(Map.Entry::getKey)
-            .collect(Collectors.toSet());
-
-        if(unresolvedModules.isEmpty() && duplicatedModules.isEmpty()) {
+        if(unresolvedModules.isEmpty()) {
             return Result.ofOk(specFragments);
         }
 
-        StringBuilder errorMessage = new StringBuilder(String.format("Specs from %s cannot be combined", ids));
-
-        if(!unresolvedModules.isEmpty()) {
-            errorMessage.append(String.format("%n- The following imported modules are not resolved: %s", unresolvedModules));
-        }
-
-        if(!duplicatedModules.isEmpty()) {
-            errorMessage.append(String.format("%n- The following modules are included multiple times: %s", duplicatedModules));
-        }
-
-        return Result.ofErr(new SpecLoadException(errorMessage.toString()));
+        String errorMessage = String.format("Specs from %s cannot be combined" +
+            "%n- The following imported modules are not resolved: %s", ids, unresolvedModules);
+        return Result.ofErr(new SpecLoadException(errorMessage));
     }
 
     private Result<Spec, SpecLoadException> toSpec(Set<SpecFragment> specFragments) {
         return specFragments.stream()
             .map(SpecFragment::toSpecResult)
             .collect(ResultCollector.getWithBaseException(new SpecLoadException("Error loading spec fragments")))
-            .flatMap(this::validateNoRuleForConstraintFromOtherFragment)
+            .flatMap(this::validateNoOverlap)
             .flatMap(specs -> specs.stream()
                 .reduce(SpecUtils::mergeSpecs)
                 // Method reference handles type erasure incorrectly here, hence the lambda
                 .map(x -> Result.<Spec, SpecLoadException>ofOk(x))
                 // When check holds, this orElse call will never be executed
-                .orElse(Result.ofErr(new SpecLoadException("Bug: Tried to build spec from 0 fragments")))
-                .flatMap(this::validateNoOverlappingRules));
+                .orElse(Result.ofErr(new SpecLoadException("Bug: Tried to build spec from 0 fragments"))))
+            .flatMap(this::validateNoOverlappingRules);
     }
 
-    private Result<Set<Spec>, SpecLoadException> validateNoRuleForConstraintFromOtherFragment(Set<Spec> specs) {
-        ArrayList<Spec> orderedSpecs = new ArrayList<>(specs);
-        Set<String> overlappingRuleNames = new HashSet<>();
+    private Result<Set<Spec>, SpecLoadException> validateNoOverlap(Set<Spec> specs) {
+        Set<String> overlappingRuleNames = specs.stream()
+            .map(Spec::rules)
+            .<Set<String>>map(RuleSet::getRuleNames)
+            .reduce(Collections.emptySet(), Sets::intersection);
 
-        for(int i = 0; i < orderedSpecs.size(); i++) {
-            Spec spec1 = orderedSpecs.get(i);
-            Set<String> spec1Rulenames = spec1.rules().getRuleNames();
-            for(int j = i + 1; j < orderedSpecs.size(); j++) {
-                Spec spec2 = orderedSpecs.get(j);
-                // Make copy of all rules in spec 2
-                HashSet<String> spec2Rulenames = new HashSet<>(spec2.rules().getRuleNames());
-                // Retain only rule names that are in spec 1 as well
-                spec2Rulenames.retainAll(spec1Rulenames);
-                // Save these rules
-                overlappingRuleNames.addAll(spec2Rulenames);
-            }
+        Set<ITerm> overlappingLabels = specs.stream()
+            .map(Spec::allLabels)
+            .reduce(Collections.emptySet(), Sets::intersection);
+
+        if(overlappingRuleNames.isEmpty() && overlappingLabels.isEmpty()) {
+            return Result.ofOk(specs);
         }
+
+        StringBuilder messageBuilder = new StringBuilder("Overlapping definitions in combined specification");
 
         if(!overlappingRuleNames.isEmpty()) {
-            return Result.ofErr(new SpecLoadException(String.format("The constraints %s define rules in multiple fragments", overlappingRuleNames)));
+            messageBuilder.append(String.format("%n- The constraints %s define rules in multiple fragments", overlappingRuleNames));
+        }
+        if(!overlappingLabels.isEmpty()) {
+            messageBuilder.append(String.format("%n- The labels %s are defined in multiple fragments", overlappingLabels));
         }
 
-        return Result.ofOk(specs);
+        return Result.ofErr(new SpecLoadException(messageBuilder.toString()));
     }
 
     private Result<Spec, SpecLoadException> validateNoOverlappingRules(Spec combinedSpec) {

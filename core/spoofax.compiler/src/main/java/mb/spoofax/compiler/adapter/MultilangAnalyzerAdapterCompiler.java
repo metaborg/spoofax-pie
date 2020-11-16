@@ -127,15 +127,15 @@ public class MultilangAnalyzerAdapterCompiler implements TaskDef<MultilangAnalyz
 
         // Transformation settings
 
-        @Value.Default default String preAnalysisStrategy() { return "pre"; }
+        @Value.Default default String preAnalysisStrategy() { return "pre-analyze"; }
 
-        @Value.Default default String postAnalysisStrategy() { return "post"; }
+        @Value.Default default String postAnalysisStrategy() { return "post-analyze"; }
 
         // Identifiers
 
         @Value.Default default String languageId() { return languageProjectInput().languageId(); }
 
-        @Value.Default default String contextId() { return shared().defaultPackageId(); }
+        @Value.Default default String contextId() { return languageId(); }
 
         // Statix spec metadata
 
