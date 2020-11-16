@@ -43,7 +43,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -109,24 +108,22 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
     }
 
     @Override public Result<AnalysisResults, MultiLangAnalysisException> exec(ExecContext context, Input input) {
-        return getLanguageMetadata(input.languages).flatMap(languageMetadataMap -> languageMetadataMap.entrySet().stream()
-            .map(langEntry -> context.require(partialSolveProject.createTask(new SmlPartialSolveProject.Input(
+        return input.languages.stream()
+            .map(languageId -> context.require(partialSolveProject.createTask(new SmlPartialSolveProject.Input(
                 globalResultSupplier(input.logLevel),
-                langEntry.getKey(),
-                langEntry.getValue().projectConstraint(),
-                input.logLevel))).map(res -> pair(langEntry.getKey(), res)))
+                languageId,
+                input.logLevel))).map(res -> pair(languageId, res)))
             .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("At least one project constraint has an unexpected exception", false)))
             .map(SmlSolveProject::entrySetToMap)
-            .flatMap(projectResults -> analyzeFiles(context, input, languageMetadataMap, projectResults)));
+            .flatMap(projectResults -> analyzeFiles(context, input, projectResults));
     }
 
     private Result<AnalysisResults, MultiLangAnalysisException> analyzeFiles(
         ExecContext context,
         Input input,
-        Map<LanguageId, LanguageMetadata> languageMetadataMap,
         Map<LanguageId, SolverResult> projectResults
     ) {
-        return languageMetadataMap.values().stream()
+        return getLanguageMetadata(input.languages).flatMap(lmds -> lmds.values().stream()
             .flatMap(languageMetadata -> languageMetadata.resourcesSupplier().apply(context, input.projectPath).stream()
                 .map(resourceKey -> context.require(fileResultSupplier(languageMetadata, resourceKey, input.logLevel))
                     .map(res -> pair((FileKey)ImmutableFileKey.builder()
@@ -138,7 +135,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
             .flatMap(fileResults -> context.require(specSupplier(input.languages))
                 // Upcast to make typing work
                 .mapErr(MultiLangAnalysisException.class::cast)
-                .flatMap(combinedSpec -> solveCombined(context, input, combinedSpec, projectResults, fileResults)));
+                .flatMap(combinedSpec -> solveCombined(context, input, combinedSpec, projectResults, fileResults))));
     }
 
     private Result<AnalysisResults, MultiLangAnalysisException> solveCombined(
