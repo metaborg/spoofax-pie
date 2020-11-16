@@ -5,6 +5,7 @@ import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
 import mb.nabl2.terms.build.TermVar;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.statix.constraints.CExists;
 import mb.statix.constraints.CNew;
@@ -83,5 +84,9 @@ public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalSc
         } catch(UncheckedIOException e) {
             return Result.ofErr(MultiLangAnalysisException.wrapIfNeeded("Error while creating global scope: cannot load specification", e.getCause()));
         }
+    }
+
+    public Task<Result<GlobalResult, MultiLangAnalysisException>> createTask(@Nullable Level logLevel) {
+        return createTask(new Input(logLevel));
     }
 }

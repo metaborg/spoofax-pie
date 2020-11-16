@@ -10,6 +10,7 @@ import mb.statix.multilang.MultiLangScope;
 import mb.statix.multilang.metadata.SpecManager;
 import mb.statix.multilang.metadata.spec.SpecLoadException;
 import mb.statix.spec.Spec;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import java.io.Serializable;
@@ -38,7 +39,7 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
             this.languages = new HashSet<>(Collections.singleton(language));
         }
 
-        @Override public boolean equals(Object o) {
+        @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             Input input = (Input)o;

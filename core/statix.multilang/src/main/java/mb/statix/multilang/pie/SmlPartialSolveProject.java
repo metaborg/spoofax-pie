@@ -31,17 +31,14 @@ import java.util.Set;
 @MultiLangScope
 public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.Input, Result<SolverResult, MultiLangAnalysisException>> {
     public static class Input implements Serializable {
-        private final Supplier<Result<GlobalResult, MultiLangAnalysisException>> globalResultSupplier;
         private final LanguageId languageId;
 
         private final @Nullable Level logLevel;
 
         public Input(
-            Supplier<Result<GlobalResult, MultiLangAnalysisException>> globalResultSupplier,
             LanguageId languageId,
             @Nullable Level logLevel
         ) {
-            this.globalResultSupplier = globalResultSupplier;
             this.languageId = languageId;
             this.logLevel = logLevel;
         }
@@ -50,26 +47,30 @@ public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.In
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             Input input = (Input)o;
-            return globalResultSupplier.equals(input.globalResultSupplier) &&
-                languageId.equals(input.languageId);
+            return languageId.equals(input.languageId);
         }
 
         @Override public int hashCode() {
-            return Objects.hash(globalResultSupplier, languageId);
+            return Objects.hash(languageId);
         }
 
         @Override public String toString() {
             return "Input{" +
-                "globalResultSupplier=" + globalResultSupplier +
                 ", languageId=" + languageId +
                 '}';
         }
     }
 
+    private final SmlInstantiateGlobalScope instantiateGlobalScope;
     private final SmlBuildSpec buildSpec;
     private final Lazy<LanguageMetadataManager> languageMetadataManager;
 
-    @Inject public SmlPartialSolveProject(SmlBuildSpec buildSpec, @MultiLang Lazy<LanguageMetadataManager> languageMetadataManager) {
+    @Inject public SmlPartialSolveProject(
+        SmlInstantiateGlobalScope instantiateGlobalScope,
+        SmlBuildSpec buildSpec,
+        @MultiLang Lazy<LanguageMetadataManager> languageMetadataManager
+    ) {
+        this.instantiateGlobalScope = instantiateGlobalScope;
         this.buildSpec = buildSpec;
         this.languageMetadataManager = languageMetadataManager;
     }
@@ -81,26 +82,25 @@ public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.In
 
     @Override
     public Result<SolverResult, MultiLangAnalysisException> exec(ExecContext context, Input input) {
-        return context.require(input.globalResultSupplier)
+        return context.require(instantiateGlobalScope.createTask(input.logLevel))
             .mapErr(MultiLangAnalysisException::wrapIfNeeded)
             .flatMap(globalResult -> {
                 Set<ITerm> scopeArgs = Collections.singleton(globalResult.globalScope());
-                return languageMetadataManager.get().getLanguageMetadataResult(input.languageId)
-                    .flatMap(lmd -> {
-                        IConstraint projectConstraint = new CUser(lmd.projectConstraint(), scopeArgs);
+                return languageMetadataManager.get().getLanguageMetadataResult(input.languageId).flatMap(lmd -> {
+                    IConstraint projectConstraint = new CUser(lmd.projectConstraint(), scopeArgs);
 
-                        IDebugContext debug = SolverUtils.createDebugContext(input.logLevel);
-                        return context.require(buildSpec.createSupplier(new SmlBuildSpec.Input(input.languageId)))
-                            .mapErr(MultiLangAnalysisException::wrapIfNeeded)
-                            .flatMap(spec -> {
-                                try {
-                                    SolverResult res = SolverUtils.partialSolve(spec, State.of(spec).add(globalResult.result().state()),
-                                        projectConstraint, debug, new NullProgress(), new NullCancel());
-                                    return Result.ofOk(res);
-                                } catch(InterruptedException e) {
-                                    return Result.ofErr(new MultiLangAnalysisException(e));
-                                }
-                            });
+                    IDebugContext debug = SolverUtils.createDebugContext(input.logLevel);
+                    return context.require(buildSpec.createSupplier(new SmlBuildSpec.Input(input.languageId)))
+                        .mapErr(MultiLangAnalysisException::wrapIfNeeded)
+                        .flatMap(spec -> {
+                            try {
+                                SolverResult res = SolverUtils.partialSolve(spec, State.of(spec).add(globalResult.result().state()),
+                                    projectConstraint, debug, new NullProgress(), new NullCancel());
+                                return Result.ofOk(res);
+                            } catch(InterruptedException e) {
+                                return Result.ofErr(new MultiLangAnalysisException(e));
+                            }
+                        });
                     });
             });
     }

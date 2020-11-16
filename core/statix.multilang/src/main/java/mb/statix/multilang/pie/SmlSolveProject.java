@@ -21,7 +21,6 @@ import mb.statix.multilang.metadata.LanguageMetadataManager;
 import mb.statix.multilang.MultiLang;
 import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.multilang.MultiLangScope;
-import mb.statix.multilang.metadata.spec.SpecLoadException;
 import mb.statix.multilang.utils.SolverUtils;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.IState;
@@ -109,10 +108,8 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
 
     @Override public Result<AnalysisResults, MultiLangAnalysisException> exec(ExecContext context, Input input) {
         return input.languages.stream()
-            .map(languageId -> context.require(partialSolveProject.createTask(new SmlPartialSolveProject.Input(
-                globalResultSupplier(input.logLevel),
-                languageId,
-                input.logLevel))).map(res -> pair(languageId, res)))
+            .map(languageId -> context.require(partialSolveProject.createTask(new SmlPartialSolveProject.Input(languageId,input.logLevel)))
+                .map(res -> pair(languageId, res)))
             .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("At least one project constraint has an unexpected exception", false)))
             .map(SmlSolveProject::entrySetToMap)
             .flatMap(projectResults -> analyzeFiles(context, input, projectResults));
@@ -123,16 +120,16 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
         Input input,
         Map<LanguageId, SolverResult> projectResults
     ) {
-        return getLanguageMetadata(input.languages).flatMap(lmds -> lmds.values().stream()
-            .flatMap(languageMetadata -> languageMetadata.resourcesSupplier().apply(context, input.projectPath).stream()
-                .map(resourceKey -> context.require(fileResultSupplier(languageMetadata, resourceKey, input.logLevel))
+        return getLanguageMetadata(input.languages).flatMap(lmds -> lmds.entrySet().stream()
+            .flatMap(lmd -> lmd.getValue().resourcesSupplier().apply(context, input.projectPath).stream()
+                .map(resourceKey -> context.require(fileResultSupplier(lmd.getKey(), resourceKey, input.logLevel))
                     .map(res -> pair((FileKey)ImmutableFileKey.builder()
-                        .languageId(languageMetadata.languageId())
+                        .languageId(lmd.getKey())
                         .resourceKey(resourceKey)
                         .build(), res))))
             .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("At least one file constraint has an unexpected exception", false)))
             .map(SmlSolveProject::entrySetToMap)
-            .flatMap(fileResults -> context.require(specSupplier(input.languages))
+            .flatMap(fileResults -> context.require(buildSpec.createSupplier(new SmlBuildSpec.Input(input.languages)))
                 // Upcast to make typing work
                 .mapErr(MultiLangAnalysisException.class::cast)
                 .flatMap(combinedSpec -> solveCombined(context, input, combinedSpec, projectResults, fileResults))));
@@ -155,7 +152,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
              .reduce(State.of(combinedSpec), IState.Immutable::add);
 
          // Solve all residual constraints
-         return context.require(globalResultSupplier(input.logLevel))
+         return context.require(instantiateGlobalScope.createTask(input.logLevel))
             // Solve residual constraints
             .flatMap(globalResult -> solveWithSpec(projectResults, fileResults, combinedState, globalResult.result().delayed(), combinedSpec, input.logLevel)
                 // Apply post transformation on all files
@@ -204,7 +201,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
             .map(entry -> languageMetadataManager.get().getLanguageMetadataResult(entry.getKey().languageId())
                 .flatMap(lmd -> {
                     // Create supplier that partial file result with final solver result
-                    Supplier<Result<FileResult, ?>> resultWithFinalResultSupplier = fileResultSupplier(lmd, entry.getKey().resourceKey(), input.logLevel)
+                    Supplier<Result<FileResult, ?>> resultWithFinalResultSupplier = fileResultSupplier(entry.getKey().languageId(), entry.getKey().resourceKey(), input.logLevel)
                         .map(rs -> rs.map(fileResult -> ImmutableFileResult.builder().from(fileResult).result(finalResult).build()));
                     // Apply post transformation
                     return lmd.postTransform().apply(context, resultWithFinalResultSupplier)
@@ -226,25 +223,15 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
             .map(SmlSolveProject::entrySetToMap);
     }
 
-    // TODO: Pass input fields
-    private Supplier<Result<Spec, SpecLoadException>> specSupplier(Collection<LanguageId> languages) {
-        return buildSpec.createSupplier(new SmlBuildSpec.Input(languages));
-    }
-
-    private Supplier<Result<GlobalResult, MultiLangAnalysisException>> globalResultSupplier(@Nullable Level logLevel) {
-        return instantiateGlobalScope.createSupplier(new SmlInstantiateGlobalScope.Input(logLevel));
-    }
-
     private Supplier<? extends Result<FileResult, ?>> fileResultSupplier(
-        LanguageMetadata languageMetadata,
+        LanguageId languageId,
         mb.resource.ResourceKey resourceKey,
         @Nullable Level logLevel
     ) {
         return partialSolveFile.createSupplier(
             new SmlPartialSolveFile.Input(
-                languageMetadata.languageId(),
+                languageId,
                 resourceKey,
-                globalResultSupplier(logLevel),
                 logLevel)
         );
     }
@@ -253,7 +240,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
         return entries.stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private static <K, V>  Map.Entry<K,V>  pair(K key, V value) {
+    private static <K, V>  Map.Entry<K,V> pair(K key, V value) {
         return new AbstractMap.SimpleImmutableEntry<>(key, value);
     }
 }

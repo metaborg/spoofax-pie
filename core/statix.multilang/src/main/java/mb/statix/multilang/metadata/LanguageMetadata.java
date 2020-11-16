@@ -14,8 +14,6 @@ import java.util.HashSet;
 
 @Value.Immutable
 public interface LanguageMetadata {
-    @Value.Parameter LanguageId languageId();
-
     // Use HashSet because should be serializable
     @Value.Parameter Function<ResourcePath, HashSet<ResourceKey>> resourcesSupplier();
 
