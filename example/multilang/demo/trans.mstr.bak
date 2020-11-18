@@ -1,6 +1,6 @@
 module trans
 
-signature
+signatures
   sorts Term Lit Expr
   constructors
     Plus	: Term * Expr	-> Expr
@@ -15,8 +15,8 @@ rules
   simplify-expr: a -> a
 
 rules
-  // term-rm-bracket: Bracket(t) -> <expr-rm-bracket> t
+  term-rm-bracket: Bracket(t) -> <expr-rm-bracket> t
   term-rm-bracket: Lit(l)     -> Lit(l)
 
-  // expr-rm-bracket: Term(t) 	  -> <term-rm-bracket> t
+  expr-rm-bracket: Term(t) 	  -> <term-rm-bracket> t
   expr-rm-bracket: Plus(l, r) -> Plus(l, r)

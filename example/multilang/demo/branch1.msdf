@@ -1,0 +1,10 @@
+module branch1
+
+imports root
+
+sorts S3
+
+// context-free syntax
+
+//  S.C   = <c>
+//  S.C1  = <c <S>>

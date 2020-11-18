@@ -14,12 +14,3 @@ rules
   rule: C0() -> C0()
 
 rules
-
-
-
-
-
-
-
-
-

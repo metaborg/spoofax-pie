@@ -1,0 +1,9 @@
+module join
+
+imports branch1 branch2
+
+signature 
+//  sorts S3
+  constructors
+    C  : S
+    C1 : S3
