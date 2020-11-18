@@ -121,7 +121,7 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
                     SolverResult result = SolverUtils.partialSolve(spec,
                         State.of(spec)
                             .add(globalResult.result().state())
-                            .withResource(input.resourceKey.toString()),
+                            .withResource(input.resourceKey.getIdAsString()),
                         fileConstraint,
                         debug,
                         new NullProgress(),

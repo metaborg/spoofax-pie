@@ -94,7 +94,8 @@ public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.In
                         .mapErr(MultiLangAnalysisException::wrapIfNeeded)
                         .flatMap(spec -> {
                             try {
-                                SolverResult res = SolverUtils.partialSolve(spec, State.of(spec).add(globalResult.result().state()),
+                                SolverResult res = SolverUtils.partialSolve(spec, State.of(spec).add(globalResult.result().state())
+                                    .withResource(input.languageId.getId()),
                                     projectConstraint, debug, new NullProgress(), new NullCancel());
                                 return Result.ofOk(res);
                             } catch(InterruptedException e) {
