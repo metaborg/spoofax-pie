@@ -16,12 +16,15 @@ import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.statix.multilang.ConfigurationException;
 import mb.statix.multilang.MultiLangAnalysisException;
+import mb.statix.multilang.metadata.FileResult;
 import mb.statix.multilang.metadata.LanguageId;
 import mb.statix.multilang.metadata.LanguageMetadata;
 import mb.statix.multilang.metadata.LanguageMetadataManager;
 import mb.statix.multilang.pie.config.ContextConfig;
 import mb.statix.multilang.pie.config.SmlBuildContextConfiguration;
 import mb.statix.multilang.utils.MessageUtils;
+import mb.statix.solver.IState;
+import mb.statix.solver.persistent.SolverResult;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.UncheckedIOException;
@@ -92,30 +95,51 @@ public abstract class SmlCheckTaskDef implements TaskDef<ResourcePath, KeyedMess
 
     protected KeyedMessagesBuilder resultsToMessages(AnalysisResults results, Set<ResourceKey> fileKeys,
                                                      ResourceKey projectPath, boolean stripTraces) {
-        final IUniDisunifier resultUnifier = results.finalResult().state().unifier();
         final KeyedMessagesBuilder builder = new KeyedMessagesBuilder();
+        final Result<IUniDisunifier, ?> resultUnifier = results.finalResult()
+            .map(SolverResult::state)
+            .map(IState.Immutable::unifier);
 
         // Add all file messages
         results.fileResults().entrySet().stream()
             .filter(entry -> entry.getKey().languageId().equals(getLanguageId()))
-            .forEach(entry -> {
-                List<Message> resourceMessages = entry.getValue().result().messages().entrySet().stream()
-                    .map(e -> MessageUtils.formatMessage(e.getValue(), e.getKey(), resultUnifier, !stripTraces))
+            .forEach(entry -> entry.getValue().ifElse(
+                (FileResult fileResult) -> {
+                    List<Message> resourceMessages = fileResult.result().messages().entrySet().stream()
+                        .map(e -> MessageUtils.formatMessage(e.getValue(), e.getKey(), resultUnifier.getOr(fileResult.result().state().unifier()), !stripTraces))
+                        .collect(Collectors.toList());
+                    builder.addMessages(entry.getKey().resourceKey(), resourceMessages);
+                },
+                err -> builder.addMessages(err.toKeyedMessages())
+            ));
+
+        // Add project messages (if present)
+        results.projectResults().computeIfPresent(getLanguageId(), (k, v) -> {
+            v.ifElse(result -> {
+                List<Message> resourceMessages = result.messages().entrySet().stream()
+                    .map(e -> MessageUtils.formatMessage(e.getValue(), e.getKey(), resultUnifier.getOr(result.state().unifier()), !stripTraces))
                     .collect(Collectors.toList());
-                builder.addMessages(entry.getKey().resourceKey(), resourceMessages);
-            });
+                builder.addMessages(projectPath, resourceMessages);
+                },
+                err -> builder.addMessages(err.toKeyedMessages())
+            );
+            return v;
+        });
 
         // Process final result messages
-        results.finalResult().messages().entrySet().stream()
-            .map(e -> new AbstractMap.SimpleImmutableEntry<>(
-                defaultIfNull(MessageUtils.tryGetResourceKey(e.getKey(), results.finalResult().state().unifier()), projectPath),
-                MessageUtils.formatMessage(e.getValue(), e.getKey(), resultUnifier, !stripTraces)))
-            // For messages in the final result, it is not easily possible to determine which language they belong to
-            // Therefore we include only messages on files which belong to this language
-            // Messages without an origin are included on the project by default
-            // These might be duplicated among languages
-            .filter(message -> projectPath.equals(message.getKey()) || fileKeys.contains(message.getKey()))
-            .forEach(entry -> builder.addMessage(entry.getValue(), entry.getKey()));
+        results.finalResult().ifElse(
+            result -> result.messages().entrySet().stream()
+                .map(e -> new AbstractMap.SimpleImmutableEntry<>(
+                    defaultIfNull(MessageUtils.tryGetResourceKey(e.getKey(), result.state().unifier()), projectPath),
+                    MessageUtils.formatMessage(e.getValue(), e.getKey(), result.state().unifier(), !stripTraces)))
+                // For messages in the final result, it is not easily possible to determine which language they belong to
+                // Therefore we include only messages on files which belong to this language
+                // Messages without an origin are included on the project by default
+                // These might be duplicated among languages
+                .filter(message -> projectPath.equals(message.getKey()) || fileKeys.contains(message.getKey()))
+                .forEach(entry -> builder.addMessage(entry.getValue(), entry.getKey())),
+            err -> builder.addMessages(err.toKeyedMessages())
+        );
 
         // Add empty message sets for project, to ensure old messages on project are cleared
         builder.addMessages(projectPath, Collections.emptySet());
