@@ -1,8 +1,8 @@
 module mini-str/rules/variables
 
 imports
-  cons-type-interface/types
-  cons-type-interface/labels
+  abstract-sig/types
+  abstract-sig/labels
   signatures/mini-str/mini-str-sig
 
 signature

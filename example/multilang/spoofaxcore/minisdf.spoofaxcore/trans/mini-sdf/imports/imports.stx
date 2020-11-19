@@ -1,12 +1,12 @@
 module mini-sdf/imports/imports
 
 imports
-  module-interface/modules
-  cons-type-interface/sorts
+  modules/modules
+  abstract-sig/sorts
   signatures/mini-sdf/mini-sdf-sig
 
-  cons-type-interface/conflicts/sorts
-  cons-type-interface/conflicts/constructors
+  abstract-sig/conflicts/sorts
+  abstract-sig/conflicts/constructors
 
 rules
 

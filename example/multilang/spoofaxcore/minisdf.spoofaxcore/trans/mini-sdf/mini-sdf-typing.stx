@@ -3,8 +3,8 @@ module mini-sdf/mini-sdf-typing
 imports
   signatures/mini-sdf/mini-sdf-sig
 
-  cons-type-interface/labels
-  module-interface/modules
+  abstract-sig/labels
+  modules/modules
 
   mini-sdf/sorts/sorts
   mini-sdf/productions/productions

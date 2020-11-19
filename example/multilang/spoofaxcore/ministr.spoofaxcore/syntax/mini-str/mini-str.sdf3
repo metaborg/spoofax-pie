@@ -68,10 +68,9 @@ context-free syntax
   ArgSort.SStar 	= <<SMBL>*>
 
   RuleDef.RewriteRuleDef = [
-    [SMBL]: [Pattern] -> [Pattern] [With]
+    [SMBL]: [Pattern] -> [Pattern] [With?]
   ]
 
-  With.NoWith =
   With.With = <
     with
       <Strategy>
@@ -79,8 +78,8 @@ context-free syntax
 
   Pattern.Constr 		= <<SMBL>(<{Pattern ","}*>)>
   Pattern.Var	 		= <<SMBL>>
-  Pattern.List	 		= <[<{Pattern "|"}*>]>
-  Pattern.RuleCall		= [<[SMBL]> [Pattern]]
+  Pattern.List	 		= <[<{Pattern ","}*>]>
+  Pattern.RuleCall		= [<[{SMBL ";"}+]> [Pattern]]
 
   Strategy.Assign		= <<SMBL> := <Pattern>>
   Strategy.Seq			= <

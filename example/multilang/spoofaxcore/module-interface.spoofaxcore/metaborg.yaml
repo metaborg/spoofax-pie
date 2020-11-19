@@ -7,12 +7,10 @@ dependencies:
 language:
   sdf:
     enabled: false
-debug:
-  typesmart: false
 exports:
 - language: ATerm
   directory: src-gen/statix
-  includes: "module-interface/**/*.aterm"
+  includes: "modules/**/*.aterm"
 - language: Statix
   directory: trans
-  includes: "module-interface/**/*.stx"
+  includes: "modules/**/*.stx"

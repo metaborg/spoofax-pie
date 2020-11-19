@@ -2,30 +2,30 @@ module mini-sdf/productions/terms
 
 imports
   signatures/mini-sdf/mini-sdf-sig
-  cons-type-interface/types
-  cons-type-interface/sorts
+  abstract-sig/types
+  abstract-sig/sorts
 
 rules
 
   // Filter away Terminals, since they do not have a sort
   // (and hence don't need type-checking, or a position in the constructor signature)
-  prodTerms: list(ProdTerm) -> list(ProdTerm)
+  prodTerms: list(Symbol) -> list(Symbol)
   prodTerms([]) = [].
   prodTerms([Terminal(_) | tl]) = prodTerms(tl).
-  prodTerms([s@SortTerm(_) | tl]) = [s | prodTerms(tl)].
+  prodTerms([s@Term(_) | tl]) = [s | prodTerms(tl)].
 
 rules
 
-  typeOfTerms maps typeOfTerm(*, list(*)) = list(*)
+  typeOfSymbols maps typeOfSymbol(*, list(*)) = list(*)
 
-  typeOfTerm: scope * ProdTerm -> TYPE
-  typeOfTerm(s_root, SortTerm(t)) = typeOfSortTerm(s_root, t).
+  typeOfSymbol: scope * Symbol -> TYPE
+  typeOfSymbol(s, Term(t)) = typeOfTerm(s, t).
 
 rules
 
-  typeOfSortTerm : scope * SortTerm -> TYPE
-
-  typeOfSortTerm(s, Plus(t)) 					= TITER(typeOfSortTerm(s, t)).
-  typeOfSortTerm(s, Option(t)) 					= TOPT(typeOfSortTerm(s, t)).
-  typeOfSortTerm(s, IterStar(t)) 				= TSTAR(typeOfSortTerm(s, t)).
-  typeOfSortTerm(s, Ref(SortRef(n)))	        = typeOfSort(s, n).
+  typeOfTerm : scope * Term -> TYPE
+  
+  typeOfTerm(s, Plus(t)) 		= ITER(sortOfSort(s, t)).
+  typeOfTerm(s, Option(t)) 		= OPT(sortOfSort(s, t)).
+  typeOfTerm(s, IterStar(t)) 	= STAR(sortOfSort(s, t)).
+  typeOfTerm(s, Ref(t))	        = SINGLE(sortOfSort(s, t)).

@@ -1,9 +1,9 @@
 module mini-str/rules/rules
 
 imports
-  cons-type-interface/types
-  cons-type-interface/labels
-  cons-type-interface/sorts
+  abstract-sig/types
+  abstract-sig/labels
+  abstract-sig/sorts
 
   signatures/mini-str/mini-str-sig
   mini-str/rules/variables
@@ -33,12 +33,12 @@ rules
 
 rules
 
-  withOk: scope * scope * With
+  withOk: scope * scope * list(With)
 
-  withOk(s_match, s_build, NoWith()) :-
+  withOk(s_match, s_build, []) :-
     s_build -P-> s_match.
 
-  withOk(s_match, s_build, With(str)) :-
+  withOk(s_match, s_build, [With(str)]) :-
     strategyOk(s_match, s_build, str).
 
 rules

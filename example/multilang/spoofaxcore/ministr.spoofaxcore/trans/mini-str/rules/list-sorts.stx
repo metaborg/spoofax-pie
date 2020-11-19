@@ -1,7 +1,7 @@
 module mini-str/rules/list-sorts
 
 imports
-  cons-type-interface/sorts
+  abstract-sig/sorts
   signatures/mini-str/mini-str-sig
   mini-str/rules/resolution
 
@@ -9,8 +9,8 @@ signature
 
   constructors // Create exact types for list build patterns
     EMPTY 		: TYPE
-    SINGLETON	: TYPE -> TYPE
-    MULTI		: TYPE -> TYPE
+    SINGLETON	: SORT -> TYPE
+    MULTI		: SORT -> TYPE
 
 rules
 
@@ -21,25 +21,24 @@ rules
   // Equal sorts match
   typeEq(T, T).
 
+  typeEq(EMPTY(), STAR(_)).
+  typeEq(EMPTY(), OPT(_)).
 
-  typeEq(EMPTY(), TSTAR(_)).
-  typeEq(EMPTY(), TOPT(_)).
+  typeEq(SINGLETON(T), OPT(T)).
+  typeEq(SINGLETON(T), STAR(T)).
+  typeEq(SINGLETON(T), ITER(T)).
 
-  typeEq(SINGLETON(T1), TOPT(T2)) :- typeEq(T1, T2).
-  typeEq(SINGLETON(T1), TSTAR(T2)) :- typeEq(T1, T2).
-  typeEq(SINGLETON(T1), TITER(T2)) :- typeEq(T1, T2).
-
-  typeEq(MULTI(T1), TSTAR(T2)) :- typeEq(T1, T2).
-  typeEq(MULTI(T1), TITER(T2)) :- typeEq(T1, T2).
-
-rules
-
-  typeEq(TOPT(T1), TSTAR(T2)) :- typeEq(T1, T2).
-  typeEq(TITER(T1), TSTAR(T2)) :- typeEq(T1, T2).
+  typeEq(MULTI(T), STAR(T)).
+  typeEq(MULTI(T), ITER(T)).
 
 rules
 
-  typeOfList : Pattern * TYPE -> TYPE
+  typeEq(OPT(T), STAR(T)).
+  typeEq(ITER(T), STAR(T)).
+
+rules
+
+  typeOfList : Pattern * SORT -> TYPE
 
   typeOfList(List([]), _) = EMPTY().
   typeOfList(List([_]), T) = SINGLETON(T).
@@ -47,11 +46,13 @@ rules
 
 rules
 
-  typeOfContent: TYPE -> TYPE
+  // TODO: rename sortOfContent
+  typeOfContent: TYPE -> SORT
 
-  typeOfContent(TSTAR(T)) 		= T.
-  typeOfContent(TITER(T)) 		= T.
-  typeOfContent(TOPT(T)) 		= T.
+  typeOfContent(SINGLE(T)) 		= T.
+  typeOfContent(STAR(T)) 		= T.
+  typeOfContent(ITER(T)) 		= T.
+  typeOfContent(OPT(T)) 		= T.
   typeOfContent(SINGLETON(T))	= T.
   typeOfContent(MULTI(T)) 		= T.
   typeOfContent(EMPTY()) 		= _.

@@ -3,7 +3,7 @@ id: org.metaborg:signature-interface:0.1.0-SNAPSHOT
 name: signature-interface
 dependencies:
   compile:
-  - org.metaborg:org.metaborg.meta.lang.template:${metaborgVersion}
+  - org.metaborg:statix.lang:${metaborgVersion}
 language:
   sdf:
     enabled: false
@@ -12,7 +12,7 @@ debug:
 exports:
 - language: ATerm
   directory: src-gen/statix
-  includes: "cons-type-interface/**/*.aterm"
+  includes: "abstract-sig/**/*.aterm"
 - language: Statix
   directory: trans
-  includes: "cons-type-interface/**/*.stx"
+  includes: "abstract-sig/**/*.stx"

@@ -1,40 +1,31 @@
-module cons-type-interface/constructors
+module abstract-sig/constructors
 
 imports
-  cons-type-interface/types
-  cons-type-interface/labels
+  abstract-sig/types
+  abstract-sig/labels
 
 signature
-  namespaces
-
-    Cons : string
 
   relations
-
-    cons: occurrence * int -> CONS
-
-  name-resolution
-
-    resolve Cons
-      filter P* I* // Transitive imports. If not: sort of imported cons might not be found
-      min $ < P, $ < I, P < I
+    cons: string * int -> CONS
 
 rules
 
-  declareCons : scope * TYPE * string * list(TYPE)
+  declareCons : scope * SORT * string * list(TYPE)
 
   declareCons(s, T, n, S) :- {a ctag}
     new ctag,
     a == arityOfSig(S),
-    !cons[Cons{n}, a, CONS(T, S, a, ctag)] in s,
+    !cons[n, a, CONS(T, S, ctag)] in s,
     // Check for constructors with same name in same scope
     query cons
-      filter e and { t :- t == (Cons{n}, a) }
+      filter e and { t :- t == (n, a) }
       in s |-> [_] | error $[Duplicate declaration of constructor [n]/[a].],
     // Check for constructors with same name in imported modules
     query cons
-      filter resolveMatch[Cons{n}] & ~e and { t :- t == (Cons{n}, a) }
-      in s |-> [] | error $[Shadowing imported constructor [n]/[a].].
+      filter P* I* & ~e and { t :- t == (n, a) }
+         min $ < P, $ < I, P < I
+          in s |-> [] | error $[Shadowing imported constructor [n]/[a].].
 
 rules
 
@@ -42,7 +33,7 @@ rules
 
   typeOfCons(s, a, n) = C :-
     query cons
-      filter P* I* and { t :- t == (Cons{n}, a) }
+      filter P* I* and { t :- t == (n, a) }
       in s |-> [(_, (_, _, C))| _]
       | error $[Constructor [n]/[a] not declared].
 

@@ -1,9 +1,9 @@
 module mini-sdf/productions/productions
 
 imports
-  cons-type-interface/types
-  cons-type-interface/constructors
-  cons-type-interface/sorts
+  abstract-sig/types
+  abstract-sig/constructors
+  abstract-sig/sorts
 
   signatures/mini-sdf/mini-sdf-sig
   mini-sdf/sorts/sorts
@@ -14,8 +14,7 @@ rules
   prodsOk maps prodOk(*, list(*))
 
   prodOk: scope * Production
-  prodOk(s, Production(sn, cn, t)) :-
-    {T T1}
-    typeOfSort(s, sn) == T,
-    typeOfTerms(s, prodTerms(t)) == T1,
+  prodOk(s, Production(sn, cn, t)) :- {T T1}
+    sortOfSort(s, sn) == T,
+    typeOfSymbols(s, prodTerms(t)) == T1,
     declareCons(s, T, cn, T1).

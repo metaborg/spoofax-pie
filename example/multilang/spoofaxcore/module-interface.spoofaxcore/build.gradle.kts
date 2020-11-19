@@ -7,6 +7,17 @@ plugins {
 ecj {
   toolVersion = "3.21.0"
 }
+
 tasks.withType<JavaCompile> { // ECJ does not support headerOutputDirectory (-h argument).
   options.headerOutputDirectory.convention(provider { null })
+}
+
+afterEvaluate {
+  val importSignature = tasks.register<Sync>("importSignature") {
+    from("../signature-interface.spoofaxcore/trans/abstract-sig")
+    into("trans/abstract-sig")
+  }
+  tasks.getByName("spoofaxGenerateSources") {
+    dependsOn(importSignature)
+  }
 }

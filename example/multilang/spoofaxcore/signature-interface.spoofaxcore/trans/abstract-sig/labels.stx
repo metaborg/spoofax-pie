@@ -1,0 +1,7 @@
+module abstract-sig/labels
+
+signature
+  name-resolution
+    labels
+      P // lexical parent
+      I // Module import

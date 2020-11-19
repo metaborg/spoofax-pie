@@ -3,8 +3,8 @@ module mini-str/mini-str-typing
 imports
   signatures/mini-str/mini-str-sig
 
-  cons-type-interface/labels
-  module-interface/modules
+  modules/modules
+  abstract-sig/labels
 
   mini-str/rules/rules
   mini-str/rules/resolution
@@ -39,7 +39,7 @@ rules
     mstrSectionsOk(s_root, s_int2, s_out, t).
 
   mstrSectionOk: scope * scope * scope * MSTRSection
-  mstrSectionOk(s, s_in, s_out, Rules(rls)) :- 
+  mstrSectionOk(s, s_in, s_out, Rules(rls)) :-
     rulesOk(s, s_in, s_out, rls).
 
   mstrSectionOk(s, s_seq, s_seq, Signatures(sigs)) :-

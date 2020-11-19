@@ -8,8 +8,7 @@ lexical sorts
 
 context-free sorts
   MSDFStart MSDFSection
-  SortTerm SortRef
-  ProdTerm Production
+  Symbol Term Production
 
 lexical syntax
   MODNAME 		= [a-zA-Z0-9\-\/]+
@@ -49,15 +48,13 @@ context-free syntax
     >
 
   Production.Production = [
-  	[ID].[ID] = <[{ProdTerm " "}*]>
+  	[ID].[ID] = <[{Symbol " "}*]>
   ]
 
-  ProdTerm.Terminal = <<KW>>
-  ProdTerm.SortTerm = [<[SortTerm]>]
+  Symbol.Terminal = <<KW>>
+  Symbol.Term	  = [<[Term]>]
 
-  SortTerm.Plus 	= <<SortTerm>+> 	{non-assoc}
-  SortTerm.Option	= <<SortTerm>?>		{non-assoc}
-  SortTerm.IterStar	= <<SortTerm>*>		{non-assoc}
-  SortTerm.Ref		= SortRef
-
-  SortRef.SortRef   = <<ID>>
+  Term.Plus 	= <<ID>+>
+  Term.Option	= <<ID>?>
+  Term.IterStar	= <<ID>*>
+  Term.Ref		= ID

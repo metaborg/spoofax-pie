@@ -1,7 +1,8 @@
-module cons-type-interface/conflicts/sorts
+module abstract-sig/conflicts/sorts
 
 imports
-  cons-type-interface/sorts
+  abstract-sig/labels
+  abstract-sig/sorts
 
 signature
 
@@ -21,7 +22,9 @@ rules
   sortsInScope : scope -> list(STI)
 
   sortsInScope(s) = typeInfosOfSorts(S) :-
-    sort of Sort{_} in s |-> S.
+    query sort 
+	  filter P* I*
+      in s |-> S.
 
 rules
 
@@ -29,15 +32,15 @@ rules
 
   importedSorts(s) = typeInfosOfSorts(S) :-
     query sort
-      filter resolveMatch[Sort{_}] & ~e
+      filter P* I* & ~e
       in s |-> S.
 
 rules
 
   typeInfosOfSorts maps typeInfoOfSort(list(*)) = list(*)
-  typeInfoOfSort: (path * (occurrence * TYPE)) -> STI
+  typeInfoOfSort: (path * (string * SORT)) -> STI
 
-  typeInfoOfSort((_, (Sort{n}, TSORT(id, _)))) = (n, id).
+  typeInfoOfSort((_, (n, SORT(id, _)))) = (n, id).
 
 
 rules

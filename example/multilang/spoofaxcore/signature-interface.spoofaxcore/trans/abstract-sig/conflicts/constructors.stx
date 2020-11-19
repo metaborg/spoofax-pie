@@ -1,7 +1,8 @@
-module cons-type-interface/conflicts/constructors
+module abstract-sig/conflicts/constructors
 
 imports
-  cons-type-interface/constructors
+  abstract-sig/labels
+  abstract-sig/constructors
 
 signature
 
@@ -22,7 +23,7 @@ rules
 
   conssInScope(s) = typeInfosOfConss(C) :-
     query cons
-      filter resolveMatch[Cons{_}]
+      filter P* I*
       in s |-> C.
 
 rules
@@ -31,15 +32,15 @@ rules
 
   importedConss(s) = typeInfosOfConss(C) :-
     query cons
-      filter resolveMatch[Cons{_}] & ~e
+      filter P* I* & ~e
       in s |-> C.
 
 rules
 
   typeInfosOfConss maps typeInfoOfCons(list(*)) = list(*)
-  typeInfoOfCons: (path * (occurrence * int * CONS)) -> CTI
+  typeInfoOfCons: (path * (string * int * CONS)) -> CTI
 
-  typeInfoOfCons((_, (Cons{n}, a, CONS(_, _, _, id)))) = (n, a, id).
+  typeInfoOfCons((_, (n, a, CONS(_, _, id)))) = (n, a, id).
 
 rules
   // Double maps to validate each pair

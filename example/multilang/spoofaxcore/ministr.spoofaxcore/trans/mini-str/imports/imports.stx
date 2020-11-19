@@ -1,11 +1,11 @@
 module mini-str/imports/imports
 
 imports
-  module-interface/modules
+  modules/modules
   signatures/mini-str/mini-str-sig
 
-  cons-type-interface/conflicts/sorts
-  cons-type-interface/conflicts/constructors
+  abstract-sig/conflicts/sorts
+  abstract-sig/conflicts/constructors
 
   mini-str/imports/rules
 

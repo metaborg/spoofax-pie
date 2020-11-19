@@ -13,4 +13,20 @@ tasks.withType<JavaCompile> { // ECJ does not support headerOutputDirectory (-h 
 
 dependencies {
   sourceLanguage(project(":signature-interface.spoofaxcore"))
+  sourceLanguage(project(":module-interface.spoofaxcore"))
+}
+
+afterEvaluate {
+  val importSignature = tasks.register<Sync>("importSignature") {
+    from("../signature-interface.spoofaxcore/trans/abstract-sig")
+    into("trans/abstract-sig")
+  }
+  val importModule = tasks.register<Sync>("importModule") {
+    from("../module-interface.spoofaxcore/trans/modules")
+    into("trans/modules")
+  }
+  tasks.getByName("spoofaxGenerateSources") {
+    dependsOn(importSignature)
+    dependsOn(importModule)
+  }
 }
