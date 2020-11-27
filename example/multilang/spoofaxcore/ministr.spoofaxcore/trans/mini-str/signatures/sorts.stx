@@ -4,7 +4,7 @@ imports
   abstract-sig/sorts
   abstract-sig/types
 
-  signatures/mini-str/mini-str-sig
+  signatures/ministr-sig
 
 rules
 

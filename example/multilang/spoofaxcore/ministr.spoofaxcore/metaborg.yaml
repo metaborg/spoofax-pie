@@ -45,3 +45,4 @@ exports:
   includes:
     - signatures/**/*.aterm
     - mini-str/**/*.aterm
+    - mini-str.spec.aterm

@@ -1,9 +1,22 @@
-module mini-sdf/productions/terms
+module mini-sdf/productions
 
 imports
-  signatures/mini-sdf/mini-sdf-sig
   abstract-sig/types
+  abstract-sig/constructors
   abstract-sig/sorts
+
+  signatures/minisdf-sig
+  mini-sdf/sorts
+
+rules
+
+  prodsOk maps prodOk(*, list(*))
+
+  prodOk: scope * Production
+  prodOk(s, Production(sn, cn, t)) :- {T T1}
+    sortOfSort(s, sn) == T,
+    typeOfSymbols(s, prodTerms(t)) == T1,
+    declareCons(s, T, cn, T1).
 
 rules
 
@@ -28,4 +41,4 @@ rules
   typeOfTerm(s, Plus(t)) 		= ITER(sortOfSort(s, t)).
   typeOfTerm(s, Option(t)) 		= OPT(sortOfSort(s, t)).
   typeOfTerm(s, IterStar(t)) 	= STAR(sortOfSort(s, t)).
-  typeOfTerm(s, Ref(t))	        = SINGLE(sortOfSort(s, t)).
+  typeOfTerm(s, Ref(t))	        = SINGLE(sortOfSort(s, t)).    

@@ -1,15 +1,20 @@
-module mini-str/rules/patterns/base
+module mini-str/rules/patterns
 
 imports
   abstract-sig/types
   abstract-sig/sorts
   abstract-sig/constructors
 
-  signatures/mini-str/mini-str-sig
+  signatures/ministr-sig
   mini-str/rules/resolution
   mini-str/rules/list-sorts
   mini-str/rules/variables
-  mini-str/pattern-type
+
+signature
+
+  sorts PATTERN constructors
+    MATCH	: PATTERN
+    BUILD	: PATTERN
 
 rules
 
@@ -21,7 +26,7 @@ rules
     ts == arityOfCons(t),
     res #= ts + 1.
 
-rules
+rules // Generic pattern rules
 
   ptrnsOk maps ptrnOk(*, *, list(*), list(*))
 
@@ -52,7 +57,7 @@ rules
     declareVar(s, n, T).
 
   ptrnOk(s, BUILD(), Var(n), T) :- {T1 n' n1}
-    typeOfVar(s, n) == T1,
+    resolveVar(s, n) == T1,
     nameOfType(T1) == n1,
     nameOfType(T) == n',
     typeEq(T1, T)
@@ -75,3 +80,10 @@ rules
 
   lptrnOk(s, P, p, S) :- ptrnOk(s, P, p, SINGLE(S)).
 
+rules
+
+  typeOfBuild : scope * Pattern -> TYPE
+  typeOfBuild(s, P) = T :- ptrnOk(s, BUILD(), P, T).
+
+  typeOfMatch : scope * Pattern -> TYPE
+  typeOfMatch(s, P) = T :- ptrnOk(s, MATCH(), P, T).  

@@ -1,7 +1,0 @@
-module mini-str/pattern-type
-
-signature
-
-  sorts PATTERN constructors
-    MATCH	: PATTERN
-    BUILD	: PATTERN

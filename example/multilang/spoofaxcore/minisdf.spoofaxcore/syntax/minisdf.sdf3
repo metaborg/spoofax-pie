@@ -1,9 +1,47 @@
 module minisdf
 
 imports
+  Common
 
-  mini-sdf/mini-sdf
-
+context-free sorts
+  Start Section
+  Symbol Term Production
+  
 context-free start-symbols
 
-  MSDFStart
+  Start
+
+context-free syntax
+
+  Start.Module = <
+    module <MOD>
+      <{Section "\n"}*>
+    >
+
+  Section.ImportSection = <
+  	imports
+    	<{MOD "\n"}*>
+    >
+
+  Section.SortsDecl = <
+  	sorts
+    	<{ID "\n"}*>
+    >
+
+  Section.ContextFreeSyntax = <
+  	context-free syntax
+    	<{Production "\n"}*>
+    >
+
+  Production.Production = [
+  	[ID].[ID] = <[{Symbol " "}*]>
+  ]
+
+  Symbol.Terminal = <<KW>>
+  Symbol.Term	  = [<[Term]>]
+
+  Term.Plus 	= <<ID>+>
+  Term.Option	= <<ID>?>
+  Term.IterStar	= <<ID>*>
+  Term.Ref		= ID
+

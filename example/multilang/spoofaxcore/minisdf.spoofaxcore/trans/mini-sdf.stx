@@ -1,25 +1,24 @@
-module mini-sdf/mini-sdf-typing
+module mini-sdf
 
 imports
-  signatures/mini-sdf/mini-sdf-sig
+  signatures/minisdf-sig
 
   abstract-sig/labels
   modules/modules
 
-  mini-sdf/sorts/sorts
-  mini-sdf/productions/productions
-  mini-sdf/imports/imports
+  mini-sdf/sorts
+  mini-sdf/productions
+  mini-sdf/imports
 
 rules
 
-  msdfProjectOK : scope
-
-  msdfProjectOK(_).
+  projectOk : scope
+  projectOk(_).
 
 rules
 
-  msdfProgramOK : scope * MSDFStart
-  msdfProgramOK(s, MSDFModule(n, sec)) :- {s_mod}
+  fileOk : scope * Start
+  fileOk(s, Module(n, sec)) :- {s_mod}
 	new s_mod,
 	s_mod -P-> s,
     declareMod(s, n, s_mod, SUPPLY()),
@@ -29,11 +28,11 @@ rules
 
   sectionsOK maps sectionOk(*, list(*))
 
-  sectionOk : scope * MSDFSection
+  sectionOk : scope * Section
 
   sectionOk(s, SortsDecl(str)) :-
     sortsOk(s, str).
   sectionOk(s, ContextFreeSyntax(prd)) :-
     prodsOk(s, prd).
   sectionOk(s, ImportSection(i)) :-
-    sdfImportsOk(s, i).
+    importsOk(s, i).

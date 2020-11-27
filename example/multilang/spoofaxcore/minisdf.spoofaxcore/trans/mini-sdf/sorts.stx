@@ -1,7 +1,7 @@
-module mini-sdf/sorts/sorts
+module mini-sdf/sorts
 
 imports
-  signatures/mini-sdf/mini-sdf-sig
+  signatures/minisdf-sig
   abstract-sig/types
   abstract-sig/sorts
 

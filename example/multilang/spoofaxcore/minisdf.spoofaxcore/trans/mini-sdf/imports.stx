@@ -1,0 +1,19 @@
+module mini-sdf/imports
+
+imports
+  modules/modules
+  abstract-sig/sorts
+  signatures/minisdf-sig
+
+  abstract-sig/conflicts/sorts
+  abstract-sig/conflicts/constructors
+
+rules
+
+  importsOk maps importOk(*, list(*))
+
+  importOk : scope * MOD
+
+  importOk(s, n) :-
+    import(s, n, SUPPLY()) == _.
+

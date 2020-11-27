@@ -1,4 +1,22 @@
-module ministr-common
+module Common
+
+lexical sorts // Identifiers etc.
+  MOD KW ID
+
+lexical syntax
+  MOD 		= [a-zA-Z0-9\-\/]+
+  KW			= ~[\<\>\ ]+
+  ID			= [a-zA-Z] [a-zA-Z0-9\-]*
+
+  MOD = "context-free" 		{reject}
+  MOD = "rules" 			{reject}
+  MOD = "signatures"	 	{reject}
+  MOD = "sorts"				{reject}
+
+lexical restrictions
+  KW	 		-/- ~[\<\>\ \r]
+  MOD	 	-/- [a-zA-Z0-9\-\/]
+  ID 			-/- [a-zA-Z0-9\-]
 
 lexical syntax
 

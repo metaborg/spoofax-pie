@@ -1,8 +1,24 @@
-module mini-str/imports/rules
+module mini-str/imports
 
 imports
+  modules/modules
+  signatures/ministr-sig
+
   abstract-sig/labels
+  abstract-sig/conflicts/sorts
+  abstract-sig/conflicts/constructors
+  
   mini-str/rules/resolution
+
+rules
+
+  importsOk maps importOk(*, list(*))
+
+  importOk : scope * MOD
+
+  importOk(s, n) :- {s_mod}
+    import(s, n, _) == s_mod,
+    rulesImpOk(n, s, s_mod).
 
 rules
 

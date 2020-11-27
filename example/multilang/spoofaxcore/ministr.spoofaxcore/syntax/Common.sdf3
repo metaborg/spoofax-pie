@@ -1,4 +1,23 @@
-module minisdf-common
+module Common
+
+lexical sorts // Identifiers etc.
+  MOD
+  SMBL
+
+lexical syntax
+  MOD 				= [a-zA-Z0-9\-\/]+
+  SMBL				= [a-zA-Z] [a-zA-Z0-9\-\']*
+
+  MOD			 	= "rules" 				{reject}
+  MOD			 	= "signature" 				{reject}
+  MOD 				= "context-free" 		{reject}
+  SMBL				= "rules" 				{reject}
+  SMBL				= "imports" 			{reject}
+  SMBL				= "constructors" 		{reject}
+
+lexical restrictions
+  MOD				-/- [a-zA-Z0-9\-\/]
+  SMBL				-/- [a-zA-Z0-9\-\']
 
 lexical syntax
 
