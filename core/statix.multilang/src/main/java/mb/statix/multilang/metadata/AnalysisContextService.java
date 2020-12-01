@@ -36,6 +36,8 @@ import java.util.stream.Stream;
 @Value.Immutable
 public abstract class AnalysisContextService implements LanguageMetadataManager, ContextPieManager, SpecManager {
 
+    private static final String MODULE_SEPARATOR = "!";
+
     @Value.Parameter public abstract Map<LanguageId, ContextId> defaultLanguageContexts();
 
     @Value.Parameter public abstract Map<LanguageId, Supplier<LanguageMetadata>> languageMetadataSuppliers();
@@ -97,6 +99,37 @@ public abstract class AnalysisContextService implements LanguageMetadataManager,
             .flatMap(this::toSpec));
     }
 
+    private Result<Spec, SpecLoadException> toSpec(Set<SpecFragment> specFragments) {
+        return specFragments.stream()
+            .map(this::toSpecResult)
+            .collect(ResultCollector.getWithBaseException(new SpecLoadException("Error loading spec fragments")))
+            .flatMap(this::validateNoOverlap)
+            .flatMap(specs -> specs.stream()
+                .reduce(SpecUtils::mergeSpecs)
+                // Method reference handles type erasure incorrectly here, hence the lambda
+                .map(x -> Result.<Spec, SpecLoadException>ofOk(x))
+                // When check holds, this orElse call will never be executed
+                .orElse(Result.ofErr(new SpecLoadException("Bug: Tried to build spec from 0 fragments"))))
+            .flatMap(this::validateNoOverlappingRules);
+    }
+
+    private Result<Spec, SpecLoadException> toSpecResult(SpecFragment specFragment) {
+        final Set<String> moduleNames = specFragment.providedModuleNames();
+        return specFragment.toSpecResult().flatMap(spec -> {
+            // Collect all rule names for a constraint that is not in this fragment.
+            Set<String> remoteConstraintExtensions = spec.rules().getRuleNames().stream()
+                .filter(ruleName -> !moduleNames.contains(ruleName.split(MODULE_SEPARATOR)[0]))
+                .collect(Collectors.toSet());
+
+            if(!remoteConstraintExtensions.isEmpty()) {
+                StringBuilder messageBuilder = new StringBuilder("Rules for predicates from other fragment found:");
+                remoteConstraintExtensions.forEach(name -> messageBuilder.append("%n- ").append(name));
+                return Result.ofErr(new SpecLoadException(messageBuilder.toString()));
+            }
+            return Result.ofOk(spec);
+        });
+    }
+
     private Result<Set<SpecFragment>, SpecLoadException> validateIntegrity(Set<SpecFragment> specFragments, Set<SpecFragmentId> ids) {
         List<String> providedModules  = specFragments.stream()
             .map(SpecFragment::providedModuleNames)
@@ -120,20 +153,6 @@ public abstract class AnalysisContextService implements LanguageMetadataManager,
         String errorMessage = String.format("Specs from %s cannot be combined" +
             "%n- The following imported modules are not resolved: %s", ids, unresolvedModules);
         return Result.ofErr(new SpecLoadException(errorMessage));
-    }
-
-    private Result<Spec, SpecLoadException> toSpec(Set<SpecFragment> specFragments) {
-        return specFragments.stream()
-            .map(SpecFragment::toSpecResult)
-            .collect(ResultCollector.getWithBaseException(new SpecLoadException("Error loading spec fragments")))
-            .flatMap(this::validateNoOverlap)
-            .flatMap(specs -> specs.stream()
-                .reduce(SpecUtils::mergeSpecs)
-                // Method reference handles type erasure incorrectly here, hence the lambda
-                .map(x -> Result.<Spec, SpecLoadException>ofOk(x))
-                // When check holds, this orElse call will never be executed
-                .orElse(Result.ofErr(new SpecLoadException("Bug: Tried to build spec from 0 fragments"))))
-            .flatMap(this::validateNoOverlappingRules);
     }
 
     private Result<Set<Spec>, SpecLoadException> validateNoOverlap(Set<Spec> specs) {
