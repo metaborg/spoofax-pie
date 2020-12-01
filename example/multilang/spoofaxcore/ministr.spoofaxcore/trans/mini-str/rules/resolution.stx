@@ -1,8 +1,8 @@
 module mini-str/rules/resolution
 
 imports
+  abstract-sig/types
   abstract-sig/sorts
-  abstract-sig/labels
   mini-str/rules/list-sorts
 
 signature

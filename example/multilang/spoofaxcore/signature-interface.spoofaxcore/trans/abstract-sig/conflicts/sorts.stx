@@ -1,7 +1,7 @@
 module abstract-sig/conflicts/sorts
 
 imports
-  abstract-sig/labels
+  abstract-sig/types
   abstract-sig/sorts
 
 signature

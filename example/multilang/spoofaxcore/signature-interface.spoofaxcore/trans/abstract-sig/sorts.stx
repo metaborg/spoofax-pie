@@ -2,7 +2,6 @@ module abstract-sig/sorts
 
 imports
   abstract-sig/types
-  abstract-sig/labels
 
 signature
 

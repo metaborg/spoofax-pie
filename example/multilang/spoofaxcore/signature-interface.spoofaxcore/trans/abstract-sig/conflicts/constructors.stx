@@ -1,7 +1,7 @@
 module abstract-sig/conflicts/constructors
 
 imports
-  abstract-sig/labels
+  abstract-sig/types
   abstract-sig/constructors
 
 signature

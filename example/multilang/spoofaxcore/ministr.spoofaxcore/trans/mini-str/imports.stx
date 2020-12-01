@@ -4,7 +4,7 @@ imports
   modules/modules
   signatures/ministr-sig
 
-  abstract-sig/labels
+  abstract-sig/types
   abstract-sig/conflicts/sorts
   abstract-sig/conflicts/constructors
   

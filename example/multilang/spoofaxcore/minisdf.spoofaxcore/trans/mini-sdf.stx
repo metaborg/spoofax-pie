@@ -3,7 +3,7 @@ module mini-sdf
 imports
   signatures/minisdf-sig
 
-  abstract-sig/labels
+  abstract-sig/types
   modules/modules
 
   mini-sdf/sorts

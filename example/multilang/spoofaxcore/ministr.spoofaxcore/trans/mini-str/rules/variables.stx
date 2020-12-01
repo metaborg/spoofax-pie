@@ -2,7 +2,6 @@ module mini-str/rules/variables
 
 imports
   abstract-sig/types
-  abstract-sig/labels
   signatures/ministr-sig
 
 signature

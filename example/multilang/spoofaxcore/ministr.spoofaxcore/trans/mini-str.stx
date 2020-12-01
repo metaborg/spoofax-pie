@@ -4,7 +4,7 @@ imports
   signatures/ministr-sig
 
   modules/modules
-  abstract-sig/labels
+  abstract-sig/types
 
   mini-str/rules/rules
   mini-str/rules/resolution

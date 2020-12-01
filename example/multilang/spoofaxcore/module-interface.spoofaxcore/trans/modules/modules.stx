@@ -2,7 +2,6 @@ module modules/modules
 
 imports
   abstract-sig/types
-  abstract-sig/labels
   
   abstract-sig/conflicts/sorts
   abstract-sig/conflicts/constructors
