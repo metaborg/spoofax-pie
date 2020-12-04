@@ -65,10 +65,10 @@ public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalSc
     @Override
     public Result<GlobalResult, MultiLangAnalysisException> exec(ExecContext context, Input input) {
         try {
-            ITermVar globalScopeVar = TermVar.of("", "s");
+            ITermVar globalScopeVar = TermVar.of("<global-scope>", "s");
             Set<ITermVar> scopeArgs = Collections.singleton(globalScopeVar);
             IConstraint globalConstraint = new CExists(scopeArgs, new CNew(globalScopeVar, globalScopeVar));
-            IState.Immutable state = State.of(Spec.of());
+            IState.Immutable state = State.of(Spec.of()).withResource("<global-scope>");
             IDebugContext debug = SolverUtils.createDebugContext(input.logLevel);
 
             try {
