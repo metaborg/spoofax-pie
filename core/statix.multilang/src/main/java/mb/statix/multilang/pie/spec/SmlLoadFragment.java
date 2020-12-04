@@ -46,7 +46,7 @@ public class SmlLoadFragment implements TaskDef<SpecFragmentId, Result<SpecFragm
     @Override public Result<SpecFragment, SpecLoadException> exec(ExecContext context, SpecFragmentId input) throws Exception {
         return specManager.get().getSpecConfig(input).flatMap(config -> {
             try {
-                return Result.ofOk(loadSpec(config, context));
+                return Result.ofOk(loadSpec(input, config, context));
             } catch(SpecLoadException e) {
                 return Result.ofErr(e);
             } catch(IOException e) {
@@ -55,7 +55,7 @@ public class SmlLoadFragment implements TaskDef<SpecFragmentId, Result<SpecFragm
         });
     }
 
-    private static SpecFragment loadSpec(SpecConfig config, ExecContext context) throws SpecLoadException, IOException {
+    private static SpecFragment loadSpec(SpecFragmentId id, SpecConfig config, ExecContext context) throws SpecLoadException, IOException {
         HierarchicalResource root = config.rootPackage();
         context.require(root);
         StrategoTerms strategoTerms = new StrategoTerms(config.termFactory());
@@ -106,6 +106,6 @@ public class SmlLoadFragment implements TaskDef<SpecFragmentId, Result<SpecFragm
         }
 
         // Create builder for files
-        return ImmutableSpecFragment.of(fileSpecs, delayedModules);
+        return ImmutableSpecFragment.of(id, fileSpecs, delayedModules);
     }
 }

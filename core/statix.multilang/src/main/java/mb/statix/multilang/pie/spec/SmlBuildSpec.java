@@ -99,8 +99,8 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
                 // Create SpecFragments from configs
                 .map(id -> context.require(loadFragment.createTask(id)))
                 .collect(ResultCollector.getWithBaseException(new SpecLoadException("Exception loading fragments")))
-                // Sanity check correctness of fragment combination
-                .flatMap(fragments -> this.validateIntegrity(fragments, fragmentIds))
+                // Sanity check correctness of fragment combination (i.e. that all imports resolve uniquely)
+                .flatMap(this::validateIntegrity)
                 // Load Spec from Fragments.
                 .flatMap(fragments -> fragments.stream()
                     .map(this::toSpecResult)
@@ -189,7 +189,7 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
      * @param ids Set of identifiers that belongs to the {@code specFragments}. Used to create good error messages.
      * @return {@code specFragments} when it is valid. Error otherwise.
      */
-    private Result<Set<SpecFragment>, SpecLoadException> validateIntegrity(Set<SpecFragment> specFragments, Set<SpecFragmentId> ids) {
+    private Result<Set<SpecFragment>, SpecLoadException> validateIntegrity(Set<SpecFragment> specFragments) {
         List<String> providedModules  = specFragments.stream()
             .map(SpecFragment::providedModuleNames)
             .flatMap(Set::stream)
@@ -209,9 +209,13 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
             return Result.ofOk(specFragments);
         }
 
+        final Set<SpecFragmentId> ids = specFragments.stream()
+            .map(SpecFragment::id)
+            .collect(Collectors.toSet());
+
         String errorMessage = String.format("Specs from %s cannot be combined" +
             "%n- The following imported modules are not resolved: %s" +
-            "%n Did you forget to declare a dependency on a fragment?", ids, unresolvedModules);
+            "%nDid you forget to declare a dependency on a fragment?", ids, unresolvedModules);
         return Result.ofErr(new SpecLoadException(errorMessage));
     }
 
