@@ -30,61 +30,6 @@ import static mb.nabl2.terms.matching.TermMatch.M;
 
 public class SpecUtils {
 
-    public static SpecFragment loadSpec(HierarchicalResource root, String initialModulePath, ITermFactory termFactory) throws SpecLoadException {
-        return loadSpec(root, Collections.singleton(initialModulePath), termFactory);
-    }
-
-    public static SpecFragment loadSpec(HierarchicalResource root, Collection<String> initialModulePaths, ITermFactory termFactory) throws SpecLoadException {
-        StrategoTerms strategoTerms = new StrategoTerms(termFactory);
-        ArrayList<String> loadedModules = new ArrayList<>();
-        ArrayList<String> delayedModules = new ArrayList<>();
-        ArrayList<Module> fileSpecs = new ArrayList<>();
-        Queue<String> modulesToLoad = new PriorityQueue<>(initialModulePaths);
-
-        while(!modulesToLoad.isEmpty()) {
-            String currentModule = modulesToLoad.remove();
-            // Load spec file content
-            HierarchicalResource res = root.appendRelativePath(currentModule).appendExtensionToLeaf("spec.aterm");
-            try {
-                if(!res.exists()) {
-                    delayedModules.add(currentModule);
-                    continue;
-                }
-            } catch(IOException e) {
-                throw new SpecLoadException(e);
-            }
-
-            try(BufferedReader specReader = new BufferedReader(new InputStreamReader(res.openRead()))) {
-                String specString = specReader.lines().collect(Collectors.joining("\n"));
-                IStrategoTerm stxFileSpec = termFactory.parseFromString(specString);
-
-                // Update pointers
-                fileSpecs.add(ImmutableModule.of(currentModule, strategoTerms.fromStratego(stxFileSpec)));
-                loadedModules.add(currentModule);
-
-                // Queue newly imported files
-                IStrategoTerm imports = stxFileSpec.getSubterm(0);
-                if(imports.getType() != TermType.LIST) {
-                    throw new SpecLoadException("Invalid spec file. Imports section should be a list, but was: " + imports);
-                }
-                for(IStrategoTerm importDecl : imports) {
-                    if(!TermUtils.isString(importDecl)) {
-                        throw new SpecLoadException("Invalid file spec. Import module should be string, but was: " + importDecl);
-                    }
-                    String importedModule = ((IStrategoString)importDecl).stringValue();
-                    if(!loadedModules.contains(importedModule) && !modulesToLoad.contains(importedModule) && !delayedModules.contains(importedModule)) {
-                        modulesToLoad.add(importedModule);
-                    }
-                }
-            } catch(IOException e) {
-                throw new SpecLoadException(e);
-            }
-        }
-
-        // Create builder for files
-        return ImmutableSpecFragment.of(fileSpecs, delayedModules);
-    }
-
     public static Result<Spec, SpecLoadException> mergeSpecs(Result<Spec, SpecLoadException> accResult, Result<Spec, SpecLoadException> newSpecResult) {
         return accResult.mapOrElse(acc -> newSpecResult.mapOrElse(newSpec -> Result.ofOk(mergeSpecs(acc, newSpec)), Result::ofErr),
             accErr -> newSpecResult.mapOrElse(

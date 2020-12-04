@@ -24,15 +24,6 @@ public class MetadataUtils {
     private MetadataUtils() {
     }
 
-    public static SpecFragment loadSpec(ClassLoaderResource definitionDir, ITermFactory termFactory, String initialModule) {
-        ClassLoaderResource specRoot = definitionDir.appendRelativePath("src-gen/statix");
-        try {
-            return SpecUtils.loadSpec(specRoot, initialModule, termFactory);
-        } catch(SpecLoadException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public static Function<ResourcePath, HashSet<ResourceKey>> resourcesSupplierForExtensions(String... extensions) {
         return (exec, projectDir) -> {
             HierarchicalResource res = exec.getHierarchicalResource(projectDir);

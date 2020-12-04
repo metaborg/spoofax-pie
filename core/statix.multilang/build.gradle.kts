@@ -1,6 +1,5 @@
 plugins {
   id("org.metaborg.gradle.config.java-library")
-  id("org.metaborg.gradle.config.junit-testing")
 }
 
 dependencies {
@@ -21,6 +20,4 @@ dependencies {
 
   annotationProcessor("com.google.dagger:dagger-compiler")
   annotationProcessor("org.immutables:value")
-
-  testAnnotationProcessor(platform(project(":spoofax.depconstraints")))
 }

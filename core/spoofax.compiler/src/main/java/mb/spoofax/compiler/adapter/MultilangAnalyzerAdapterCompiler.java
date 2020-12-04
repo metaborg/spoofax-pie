@@ -149,13 +149,15 @@ public class MultilangAnalyzerAdapterCompiler implements TaskDef<MultilangAnalyz
             ArrayList<TypeInfo> taskDefs = new ArrayList<>();
             String multilangTaskDefPackage = "mb.statix.multilang.pie";
             taskDefs.add(TypeInfo.of(multilangTaskDefPackage, "SmlSolveProject"));
-            taskDefs.add(TypeInfo.of(multilangTaskDefPackage, "SmlBuildSpec"));
             taskDefs.add(TypeInfo.of(multilangTaskDefPackage, "SmlInstantiateGlobalScope"));
             taskDefs.add(TypeInfo.of(multilangTaskDefPackage, "SmlPartialSolveFile"));
             taskDefs.add(TypeInfo.of(multilangTaskDefPackage, "SmlPartialSolveProject"));
             String multilangConfigTaskDefPackage = "mb.statix.multilang.pie.config";
             taskDefs.add(TypeInfo.of(multilangConfigTaskDefPackage, "SmlBuildContextConfiguration"));
             taskDefs.add(TypeInfo.of(multilangConfigTaskDefPackage, "SmlReadConfigYaml"));
+            String multilangSpecTaskDefPackage = "mb.statix.multilang.pie.spec";
+            taskDefs.add(TypeInfo.of(multilangSpecTaskDefPackage, "SmlLoadFragment"));
+            taskDefs.add(TypeInfo.of(multilangSpecTaskDefPackage, "SmlBuildSpec"));
             return taskDefs;
         }
 

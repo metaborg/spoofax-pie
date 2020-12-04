@@ -21,6 +21,7 @@ import mb.statix.multilang.metadata.LanguageMetadataManager;
 import mb.statix.multilang.MultiLang;
 import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.multilang.MultiLangScope;
+import mb.statix.multilang.pie.spec.SmlBuildSpec;
 import mb.statix.multilang.utils.SolverUtils;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.IState;
@@ -28,15 +29,12 @@ import mb.statix.solver.log.IDebugContext;
 import mb.statix.solver.persistent.Solver;
 import mb.statix.solver.persistent.SolverResult;
 import mb.statix.solver.persistent.State;
-import mb.statix.spec.Spec;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.log.Level;
 import org.metaborg.util.task.NullCancel;
 import org.metaborg.util.task.NullProgress;
 
 import javax.inject.Inject;
-import javax.swing.*;
-import javax.swing.text.html.parser.Entity;
 import java.io.Serializable;
 import java.util.AbstractMap;
 import java.util.Collection;
@@ -46,7 +44,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @MultiLangScope
 public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<AnalysisResults, MultiLangAnalysisException>> {
