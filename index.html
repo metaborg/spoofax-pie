@@ -281,9 +281,57 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#architecture_1" class="md-nav__link">
-    Architecture
+  <a href="#anatomy-of-a-spoofax-3-language-implementation" class="md-nav__link">
+    Anatomy of a Spoofax 3 language implementation
   </a>
+  
+    <nav class="md-nav" aria-label="Anatomy of a Spoofax 3 language implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    Overview
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#language-project" class="md-nav__link">
+    Language Project
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#spoofax-3-architecture-overview" class="md-nav__link">
+    Spoofax 3 architecture overview
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adapter-project" class="md-nav__link">
+    Adapter Project
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#platform-projects" class="md-nav__link">
+    Platform Projects
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#developing-language-implementations" class="md-nav__link">
+    Developing Language Implementations
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -382,9 +430,57 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#architecture_1" class="md-nav__link">
-    Architecture
+  <a href="#anatomy-of-a-spoofax-3-language-implementation" class="md-nav__link">
+    Anatomy of a Spoofax 3 language implementation
   </a>
+  
+    <nav class="md-nav" aria-label="Anatomy of a Spoofax 3 language implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    Overview
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#language-project" class="md-nav__link">
+    Language Project
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#spoofax-3-architecture-overview" class="md-nav__link">
+    Spoofax 3 architecture overview
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adapter-project" class="md-nav__link">
+    Adapter Project
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#platform-projects" class="md-nav__link">
+    Platform Projects
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#developing-language-implementations" class="md-nav__link">
+    Developing Language Implementations
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -516,13 +612,13 @@ Thereby configuration is centralized, has domain-specific checking, and editor s
 We also allow changing of defaults (conventions), and persist them to enable renaming.</p>
 <p>To improve error traceability, errors are reported inline where possible.
 Errors are traced through PIE pipelines and support origin tracking to easily support error traceability and inline errors for all language implementations.</p>
-<p>better builders:
+<p>TODO: better builders:
 non-Stratego commands
 incremental commands
 separate commands from how they are executed
 support command parameters/arguments
 continuous execution</p>
-<p>modular and incremental development of Spoofax 3 itself with Gradle</p>
+<p>TODO: modular and incremental development of Spoofax 3 itself with Gradle</p>
 <h2 id="current-status">Current Status<a class="headerlink" href="#current-status" title="Permanent link">&para;</a></h2>
 <p>We have stated our key ideas, but since Spoofax 3 is still under heavy development, they have not all been implemented yet.
 We now discuss the current status of Spoofax 3 by summarizing the key ideas and whether they has been implemented, along with any comments.</p>
@@ -536,13 +632,15 @@ We now discuss the current status of Spoofax 3 by summarizing the key ideas and 
 </ul>
 </li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Generate Java boilerplate</strong>: Generate the Java boilerplate that Spoofax 3 now requires due to the <code>LanguageInstance</code> interface and language implementations being plain JAR files.<ul>
-<li>An initial version of the Spoofax 3 compiler exists that generates the Java boilerplate based on a Spoofax 2 language.</li>
 <li>Configuration for the Spoofax 3 compiler is provided through a Gradle build script, which is verbose.</li>
 </ul>
 </li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Quick language prototyping</strong>: Support dynamic language loading in environments that support this, to enable quick language prototyping.</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Configuration DSL</strong>: Use a configuration DSL to improve the developer/user experience.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Error origin tracking</strong>: Perform origin tracking and propagation on errors to improve the developer/user experience.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Error origin tracking</strong>: Perform origin tracking and propagation on errors to improve the developer/user experience.<ul>
+<li>Errors are traced through most PIE tasks, but do not always contain specific origin information</li>
+</ul>
+</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Commands</strong>: More flexible and incremental version of "builders" from Spoofax 2.<ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Non-Stratego commands</strong>: Commands execute PIE tasks, which execute Java code.</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Incremental commands</strong>: Commands are incremental because they execute PIE tasks.</li>
@@ -554,31 +652,44 @@ We now discuss the current status of Spoofax 3 by summarizing the key ideas and 
 </ul>
 <p>Furthermore, we now discuss the status of features that were not new key ideas.</p>
 <ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Language builds<ul>
-<li>Spoofax 3 currently does not support <em>building languages</em> yet. It is only possible to convert a Spoofax 2 language into a Spoofax 3 language through the Spoofax 3 compiler.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Language builds<ul>
+<li>We have an initial version of a Spoofax 3 compiler which is completely based on Spoofax 3 and PIE (independent from Spoofax 2), but it is still unstable.</li>
 </ul>
 </li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Meta-language bootstrapping<ul>
-<li>Because Spoofax 3 does not yet support building languages, bootstrapping is not yet possible.</li>
+<li>Bootstrapping requires implementation of the meta-languages in Spoofax 3, which we have not done yet.</li>
 </ul>
 </li>
-<li>Meta-tools<ul class="task-list">
-<li>Parsing with<ul class="task-list">
+<li>Meta-tools<ul>
+<li>Syntax specification<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> SDF3</li>
+</ul>
+</li>
+<li>Parsing<ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> JSGLR1</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> JSGLR2<ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Incremental parsing</li>
 </ul>
 </li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> New water rules</li>
 </ul>
 </li>
-<li>Semantic analysis with<ul class="task-list">
+<li>Styling specification<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> ESV (syntax-based)</li>
+</ul>
+</li>
+<li>Semantic analysis<ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> NaBL2</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Statix</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Statix signature generation based on SDF3 specification</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> FlowSpec</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Stratego</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Stratego</li>
 </ul>
 </li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Transformation (compilation) with Stratego</li>
+<li>Transformation (compilation)<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Stratego</li>
+</ul>
+</li>
 </ul>
 </li>
 <li>Editor services<ul class="task-list">
@@ -586,7 +697,6 @@ We now discuss the current status of Spoofax 3 by summarizing the key ideas and 
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Inline error/warning/note messages</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Code completion</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Outline</li>
-<li>[ ]</li>
 </ul>
 </li>
 <li>Platforms<ul class="task-list">
@@ -606,11 +716,65 @@ We now discuss the current status of Spoofax 3 by summarizing the key ideas and 
 </ul>
 </li>
 </ul>
-<p>The following features will not be supported</p>
+<p>The following features are being prototyped/experimented with Spoofax 3:</p>
+<ul>
+<li>Multi-lingual semantic analysis with Statix (Aron Zwaan)</li>
+<li>Semantic code completion based on Statix specification (Daniel Pelsmaeker)</li>
+</ul>
+<p>The following features will most likely not be supported:</p>
 <ul>
 <li>Analysis with NaBL/TS</li>
 </ul>
-<h2 id="architecture_1">Architecture<a class="headerlink" href="#architecture_1" title="Permanent link">&para;</a></h2>
+<h2 id="anatomy-of-a-spoofax-3-language-implementation">Anatomy of a Spoofax 3 language implementation<a class="headerlink" href="#anatomy-of-a-spoofax-3-language-implementation" title="Permanent link">&para;</a></h2>
+<p>In this subsection, we give a high-level overview of what a Spoofax 3 language implementation is, dive into details, and explain how such a implementation can be manually written or completely generated from a high-level language specification</p>
+<h3 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h3>
+<p>In essence, a language implementation in Spoofax 3 is nothing more than a standard Java library (e.g., a JAR file) with Java classes implementing or delegating to the various functionalities of the language such as parsing and transformations, as well as bundled resources such as a parse table which is loaded and interpreted at runtime.</p>
+<p>Therefore, Spoofax 3 language implementations are very easy to use in the Java ecosystem by just distributing the JAR file of the language, or by publishing/consuming it as a library with a build system such as Gradle.
+Furthermore, since no classloading or class generation is used, GraalVM native image can be used to ahead-of-time compile your language implementation into native code which does not require a JVM at all, and significantly reduces the startup time of your language.</p>
+<p>Diving deeper, a language implementation is actually split into three parts: a <strong>language project</strong> that contains the base functionality of the language, an <strong>adapter project</strong> that adapts the language project to the interface of Spoofax, and <strong>platform projects</strong> that plug the adapter project into various other platforms such as a command-line interface (CLI) and Eclipse plugin (TODO: more details on supported platforms in a separate section).
+We will first explain these projects and why this separation was chosen.</p>
+<p>TODO: diagram?</p>
+<h3 id="language-project">Language Project<a class="headerlink" href="#language-project" title="Permanent link">&para;</a></h3>
+<p>A language project contains the <em>base functionality</em> of a language, such as a parser, syntax highlighter, analyzer, and compiler for the language.
+Such a project is <em>unstructured</em>: it does not have to adhere to any interface or data format. Therefore, it may use any tooling, libraries, and data structures to implement the base functionality.
+This facilitates integration of existing tools and minimal dependencies.</p>
+<p>A language project is just a Java library and can thus be used in a standalone fashion.
+However, there is no glue between base functionality, requiring manual implementation of a parse-analyze-compile pipeline for example.
+Furthermore, because the project is unstructured, we cannot provide any integration with other platforms such as a CLI and Eclipse plugin.
+Therefore, using a language project as a standalone library is a bit of a niche use case for when minimal dependencies or full control is absolutely necessary.
+Because it is such a niche use case, the default in Spoofax 3 is to merge it together with the adapter project.</p>
+<p>In essence, an adapter project adapts a language project to Spoofax 3.
+To understand why, we first explain the high-level architecture of Spoofax 3.</p>
+<h3 id="spoofax-3-architecture-overview">Spoofax 3 architecture overview<a class="headerlink" href="#spoofax-3-architecture-overview" title="Permanent link">&para;</a></h3>
+<p>Spoofax 3 provides a general interface for language implementations: <code>LanguageInstance</code>, which is used by platforms to automatically plug languages into their platform.
+For example, <code>LanguageInstance</code> has functionality for <em>syntax highlighting</em>, which when given a resource of the language, returns a syntax highlighting for that resource.
+(TODO: more details on the functionality in <code>LanguageInstance</code> in a separate section)</p>
+<p>Furthermore, Spoofax 3 uses <a href="https://github.com/metaborg/pie">PIE</a>; a framework for building incremental pipelines, build systems, and compilers; to incrementalize the language implementation.
+Instead of directly computing the syntax highlighting for a resource, we create a <em>task</em> that returns the syntax highlighting when demanded, with PIE taking care of whether it should recompute the syntax highlighting because the resource (or the syntax highlighting implementation) changed, or if it can just be returned from a cache.
+(TODO: more details on PIE in a separate section)</p>
+<p>A platform such as Eclipse or IntelliJ can then take a <code>LanguageInstance</code> implementation, demand the syntax highlighting task, and show the result it in the editor for your language.
+Therefore, any language that implements <code>LanguageInstance</code> can get syntax highlighting in Eclipse, IntelliJ, and any other supported platforms for free, with PIE taking care of coarse-grained incrementalization.</p>
+<p>To receive the benefits of Spoofax 3, the adapter project must thus be implemented for your language.</p>
+<h3 id="adapter-project">Adapter Project<a class="headerlink" href="#adapter-project" title="Permanent link">&para;</a></h3>
+<p>An adapter project implements Spoofax 3's <code>LanguageInstance</code> using the language project. This requires glue code between the unstructured language project and the <em>structured</em> <code>LanguageInstance</code> interface.
+For example, you would need to convert the data structure that the syntax highlighter of your language returns, to one that Spoofax 3 understands: the <code>Styling</code> class.
+Furthermore, because Spoofax 3 uses PIE, we also need to implement a PIE <em>task definition</em> that implements the (re)computing of syntax highlighting, as well as mark all dependencies that should cause the syntax highlighting to be recomputed.</p>
+<p>We also need to be able to instantiate your implementation of <code>LanguageInstance</code>.
+In case this is non-trivial, the recommended practice is to use dependency injection to achieve proper separation of concerns.
+A dependency injection framework such as <a href="https://dagger.dev/">Dagger</a> is recommended (we use it extensively in Spoofax 3) because it catches dependency injection errors at compile-time, and does not require runtime class loading or generation.</p>
+<p>This may sound like you would need to write a lot of boilerplate.
+However, we provide a compiler that generates all this boilerplate for you.
+It is only necessary to write this boilerplate if you are integrating existing tooling.
+Even then, the compiler can generate some of the boilerplate for you.
+More details on the compiler can be found in the developing language implementations section.</p>
+<h3 id="platform-projects">Platform Projects<a class="headerlink" href="#platform-projects" title="Permanent link">&para;</a></h3>
+<p>TODO: every language-platform combination is a separate project to support ahead-of-time compilation, static loading, and customization of the platform project.
+CLI: can be ahead-of-time compiled with GraalVM native image to create a native Windows/macOS/Linux CLI for your language
+Eclipse/IntelliJ: statically loaded plugin that can be deployed with Eclipse/IntelliJ, and can be fully customized.</p>
+<h3 id="developing-language-implementations">Developing Language Implementations<a class="headerlink" href="#developing-language-implementations" title="Permanent link">&para;</a></h3>
+<p>So far we have talked about what a language implementation is, but not yet how one is developed, which we will dive into now.</p>
+<p>Language implementations are by default fully generated from a high-level language specification using the Spoofax 3 compiler, thereby supporting iterative language development with low boilerplate. However, it is possible implement parts of or even the entire language/adapter project by hand, facilitating the integration of existing tools and languages.</p>
+<p>TODO: dynamic loading</p>
                 
               
               
