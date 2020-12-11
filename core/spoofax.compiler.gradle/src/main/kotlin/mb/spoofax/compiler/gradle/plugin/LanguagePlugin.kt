@@ -48,9 +48,8 @@ open class LanguageProjectExtension(project: Project) {
     private const val name = "language project"
   }
 
-  val component = DaggerSpoofaxCompilerGradleComponent.builder()
-    .spoofaxCompilerModule(SpoofaxCompilerModule(TemplateCompiler(StandardCharsets.UTF_8)))
-    .spoofaxCompilerGradleModule(SpoofaxCompilerGradleModule { PieBuilderImpl() })
+  val component = DaggerSpoofaxCompilerComponent.builder()
+    .spoofaxCompilerModule(SpoofaxCompilerModule(TemplateCompiler(StandardCharsets.UTF_8)) { PieBuilderImpl() })
     .build()
 
   val sharedFinalized: Shared by lazy {
@@ -143,23 +142,23 @@ open class LanguagePlugin : Plugin<Project> {
     }
   }
 
-  private fun configure(project: Project, component: SpoofaxCompilerGradleComponent, input: LanguageProjectCompiler.Input) {
+  private fun configure(project: Project, component: SpoofaxCompilerComponent, input: LanguageProjectCompiler.Input) {
     configureProject(project, component, input)
     configureCompileTask(project, component, input)
   }
 
-  private fun configureProject(project: Project, component: SpoofaxCompilerGradleComponent, input: LanguageProjectCompiler.Input) {
+  private fun configureProject(project: Project, component: SpoofaxCompilerComponent, input: LanguageProjectCompiler.Input) {
     project.addMainJavaSourceDirectory(input.languageProject().generatedJavaSourcesDirectory(), component.resourceService)
     component.languageProjectCompiler.getDependencies(input).forEach {
       it.addToDependencies(project)
     }
   }
 
-  private fun configureCompileTask(project: Project, component: SpoofaxCompilerGradleComponent, input: LanguageProjectCompiler.Input) {
+  private fun configureCompileTask(project: Project, component: SpoofaxCompilerComponent, input: LanguageProjectCompiler.Input) {
     val compileTask = project.tasks.register("compileLanguageProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
-      outputs.files(input.providedFiles().map { component.resourceService.toLocalFile(it) })
+      outputs.files(input.javaSourceFiles().map { component.resourceService.toLocalFile(it) })
 
       doLast {
         project.deleteDirectory(input.languageProject().generatedJavaSourcesDirectory(), component.resourceService)

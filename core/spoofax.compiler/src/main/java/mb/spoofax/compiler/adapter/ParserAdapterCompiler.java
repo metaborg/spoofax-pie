@@ -95,15 +95,16 @@ public class ParserAdapterCompiler implements TaskDef<ParserAdapterCompiler.Inpu
         }
 
 
-        // List of all generated files
+        /// Files information, known up-front for build systems with static dependencies such as Gradle.
 
-        default ListView<ResourcePath> generatedFiles() {
+        default ListView<ResourcePath> javaSourceFiles() {
             if(classKind().isManual()) {
                 return ListView.of();
             }
+            final ResourcePath generatedJavaSourcesDirectory = generatedJavaSourcesDirectory();
             return ListView.of(
-                baseParseTaskDef().file(generatedJavaSourcesDirectory()),
-                baseTokenizeTaskDef().file(generatedJavaSourcesDirectory())
+                baseParseTaskDef().file(generatedJavaSourcesDirectory),
+                baseTokenizeTaskDef().file(generatedJavaSourcesDirectory)
             );
         }
 

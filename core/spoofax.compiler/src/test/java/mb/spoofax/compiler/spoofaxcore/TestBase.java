@@ -23,8 +23,7 @@ import java.nio.file.FileSystem;
 class TestBase {
     final FileSystem fileSystem = Jimfs.newFileSystem(Configuration.unix());
     final SpoofaxCompilerTestComponent component = DaggerSpoofaxCompilerTestComponent.builder()
-        .spoofaxCompilerModule(new SpoofaxCompilerModule(new TemplateCompiler(StandardCharsets.UTF_8)))
-        .spoofaxCompilerTestModule(new SpoofaxCompilerTestModule(PieBuilderImpl::new))
+        .spoofaxCompilerModule(new SpoofaxCompilerModule(new TemplateCompiler(StandardCharsets.UTF_8), PieBuilderImpl::new))
         .build();
     final ResourceService resourceService = component.getResourceService();
     final Pie pie = component.getPie();

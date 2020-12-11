@@ -114,16 +114,17 @@ public class StylerLanguageCompiler implements TaskDef<StylerLanguageCompiler.In
         }
 
 
-        /// List of all provided files
+        /// Files information, known up-front for build systems with static dependencies such as Gradle.
 
-        default ListView<ResourcePath> providedFiles() {
+        default ListView<ResourcePath> javaSourceFiles() {
             if(classKind().isManual()) {
                 return ListView.of();
             }
+            final ResourcePath generatedJavaSourcesDirectory = generatedJavaSourcesDirectory();
             return ListView.of(
-                baseStylingRules().file(generatedJavaSourcesDirectory()),
-                baseStyler().file(generatedJavaSourcesDirectory()),
-                baseStylerFactory().file(generatedJavaSourcesDirectory())
+                baseStylingRules().file(generatedJavaSourcesDirectory),
+                baseStyler().file(generatedJavaSourcesDirectory),
+                baseStylerFactory().file(generatedJavaSourcesDirectory)
             );
         }
 

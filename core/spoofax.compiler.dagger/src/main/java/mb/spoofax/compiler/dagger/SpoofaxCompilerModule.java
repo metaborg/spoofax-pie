@@ -3,7 +3,13 @@ package mb.spoofax.compiler.dagger;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
+import mb.pie.api.MapTaskDefs;
+import mb.pie.api.Pie;
+import mb.pie.api.PieBuilder;
 import mb.pie.api.TaskDef;
+import mb.resource.DefaultResourceService;
+import mb.resource.ResourceService;
+import mb.resource.fs.FSResourceRegistry;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
 import mb.spoofax.compiler.adapter.CompleterAdapterCompiler;
 import mb.spoofax.compiler.adapter.ConstraintAnalyzerAdapterCompiler;
@@ -27,18 +33,35 @@ import mb.spoofax.compiler.util.TemplateCompiler;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Supplier;
 
 @Module
 public class SpoofaxCompilerModule {
     private final TemplateCompiler templateCompiler;
+    private final Supplier<PieBuilder> pieBuilderSupplier;
 
-    public SpoofaxCompilerModule(TemplateCompiler templateCompiler) {
+
+    public SpoofaxCompilerModule(
+        TemplateCompiler templateCompiler,
+        Supplier<PieBuilder> pieBuilderSupplier
+    ) {
         this.templateCompiler = templateCompiler;
+        this.pieBuilderSupplier = pieBuilderSupplier;
     }
 
-    @Provides @SpoofaxCompilerScope public TemplateCompiler provideTemplateCompiler() { return templateCompiler; }
 
-    @Provides @SpoofaxCompilerScope @ElementsIntoSet static Set<TaskDef<?, ?>> provideTaskDefsSet(
+    @Provides @SpoofaxCompilerScope
+    public TemplateCompiler provideTemplateCompiler() {
+        return templateCompiler;
+    }
+
+    @Provides @SpoofaxCompilerScope
+    public ResourceService provideResourceService() {
+        return new DefaultResourceService(new FSResourceRegistry());
+    }
+
+    @Provides @SpoofaxCompilerScope @ElementsIntoSet
+    static Set<TaskDef<?, ?>> provideTaskDefsSet(
         LanguageProjectCompiler languageProjectCompiler,
         ClassloaderResourcesCompiler classloaderResourcesCompiler,
         ParserLanguageCompiler parserLanguageCompiler,
@@ -85,5 +108,13 @@ public class SpoofaxCompilerModule {
         taskDefs.add(intellijProjectCompiler);
 
         return taskDefs;
+    }
+
+    @Provides @SpoofaxCompilerScope
+    public Pie providePie(ResourceService resourceService, Set<TaskDef<?, ?>> taskDefs) {
+        final PieBuilder builder = pieBuilderSupplier.get();
+        builder.withTaskDefs(new MapTaskDefs(taskDefs));
+        builder.withResourceService(resourceService);
+        return builder.build();
     }
 }

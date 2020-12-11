@@ -90,15 +90,16 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
         }
 
 
-        // List of all generated files
+        /// Files information, known up-front for build systems with static dependencies such as Gradle.
 
-        default ListView<ResourcePath> generatedFiles() {
+        default ListView<ResourcePath> javaSourceFiles() {
             if(classKind().isManual()) {
                 return ListView.of();
             }
+            final ResourcePath generatedJavaSourcesDirectory = generatedJavaSourcesDirectory();
             return ListView.of(
-                baseAnalyzeTaskDef().file(generatedJavaSourcesDirectory()),
-                baseAnalyzeMultiTaskDef().file(generatedJavaSourcesDirectory())
+                baseAnalyzeTaskDef().file(generatedJavaSourcesDirectory),
+                baseAnalyzeMultiTaskDef().file(generatedJavaSourcesDirectory)
             );
         }
 

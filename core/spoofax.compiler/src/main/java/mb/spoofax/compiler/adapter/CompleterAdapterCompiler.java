@@ -69,14 +69,16 @@ public class CompleterAdapterCompiler implements TaskDef<CompleterAdapterCompile
             return extendCompleteTaskDef().orElseGet(this::baseCompleteTaskDef);
         }
 
-        // List of all generated files
 
-        default ListView<ResourcePath> generatedFiles() {
+        /// Files information, known up-front for build systems with static dependencies such as Gradle.
+
+        default ListView<ResourcePath> javaSourceFiles() {
             if(classKind().isManual()) {
                 return ListView.of();
             }
+            final ResourcePath generatedJavaSourcesDirectory = generatedJavaSourcesDirectory();
             return ListView.of(
-                baseCompleteTaskDef().file(generatedJavaSourcesDirectory())
+                baseCompleteTaskDef().file(generatedJavaSourcesDirectory)
             );
         }
 

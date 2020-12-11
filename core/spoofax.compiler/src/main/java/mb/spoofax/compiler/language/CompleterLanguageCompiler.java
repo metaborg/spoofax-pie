@@ -73,14 +73,15 @@ public class CompleterLanguageCompiler implements TaskDef<CompleterLanguageCompi
         }
 
 
-        /// List of all provided files
+        /// Files information, known up-front for build systems with static dependencies such as Gradle.
 
-        default ListView<ResourcePath> providedFiles() {
+        default ListView<ResourcePath> javaSourceFiles() {
             if(classKind().isManual()) {
                 return ListView.of();
             }
+            final ResourcePath generatedJavaSourcesDirectory = generatedJavaSourcesDirectory();
             return ListView.of(
-                baseCompleter().file(generatedJavaSourcesDirectory())
+                baseCompleter().file(generatedJavaSourcesDirectory)
             );
         }
 
