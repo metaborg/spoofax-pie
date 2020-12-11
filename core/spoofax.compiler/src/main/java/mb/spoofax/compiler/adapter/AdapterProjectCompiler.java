@@ -3,6 +3,7 @@ package mb.spoofax.compiler.adapter;
 import com.samskivert.mustache.Mustache;
 import mb.common.option.Option;
 import mb.pie.api.ExecContext;
+import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.data.AutoCommandRequestRepr;
@@ -34,7 +35,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Value.Enclosing
-public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.Input, AdapterProjectCompiler.Output> {
+public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.Input, None> {
     private final TemplateWriter packageInfoTemplate;
     private final TemplateWriter checkTaskDefTemplate;
     private final TemplateWriter checkMultiTaskDefTemplate;
@@ -87,7 +88,7 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
         return getClass().getName();
     }
 
-    @Override public Output exec(ExecContext context, Input input) throws Exception {
+    @Override public None exec(ExecContext context, Input input) throws Exception {
         final Shared shared = input.shared();
 
         // Files from other compilers.
@@ -98,8 +99,7 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
         input.constraintAnalyzer().ifPresent((i) -> context.require(constraintAnalyzerCompiler, i));
         input.multilangAnalyzer().ifPresent((i) -> context.require(multilangAnalyzerCompiler, i));
 
-        final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
+        if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
 
         // Collect all task definitions.
         final ArrayList<TypeInfo> allTaskDefs = new ArrayList<>(input.taskDefs());
@@ -248,7 +248,7 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
             instanceTemplate.write(context, input.baseInstance().file(generatedJavaSourcesDirectory), input, map);
         }
 
-        return outputBuilder.build();
+        return None.instance;
     }
 
 
@@ -492,47 +492,41 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
             return extendCheckAggregatorTaskDef().orElseGet(this::baseCheckAggregatorTaskDef);
         }
 
-        /// Provided files
 
-        default ArrayList<ResourcePath> providedFiles() {
-            final ArrayList<ResourcePath> generatedFiles = new ArrayList<>();
+        /// Files information, known up-front for build systems with static dependencies such as Gradle.
+
+        default ArrayList<ResourcePath> javaSourceFiles() {
+            final ArrayList<ResourcePath> javaSourceFiles = new ArrayList<>();
             if(classKind().isGenerating()) {
-                final ResourcePath classesGenDirectory = generatedJavaSourcesDirectory();
+                final ResourcePath generatedJavaSourcesDirectory = generatedJavaSourcesDirectory();
                 if(languageProjectDependency().isSome()) {
                     // Only generate package-info.java if the language project is a separate project. Otherwise we will have
                     // two package-info.java files in the same package, which is an error.
-                    generatedFiles.add(basePackageInfo().file(classesGenDirectory));
+                    javaSourceFiles.add(basePackageInfo().file(generatedJavaSourcesDirectory));
                 }
-                generatedFiles.add(baseComponent().file(classesGenDirectory));
-                generatedFiles.add(baseModule().file(classesGenDirectory));
-                generatedFiles.add(baseInstance().file(classesGenDirectory));
-                generatedFiles.add(baseCheckTaskDef().file(classesGenDirectory));
-                generatedFiles.add(baseCheckMultiTaskDef().file(classesGenDirectory));
+                javaSourceFiles.add(baseScope().file(generatedJavaSourcesDirectory));
+                javaSourceFiles.add(baseQualifier().file(generatedJavaSourcesDirectory));
+                javaSourceFiles.add(baseComponent().file(generatedJavaSourcesDirectory));
+                javaSourceFiles.add(baseModule().file(generatedJavaSourcesDirectory));
+                javaSourceFiles.add(baseInstance().file(generatedJavaSourcesDirectory));
+                javaSourceFiles.add(baseCheckTaskDef().file(generatedJavaSourcesDirectory));
+                javaSourceFiles.add(baseCheckMultiTaskDef().file(generatedJavaSourcesDirectory));
+                javaSourceFiles.add(baseCheckAggregatorTaskDef().file(generatedJavaSourcesDirectory));
+                for(CommandDefRepr commandDef : commandDefs()) {
+                    javaSourceFiles.add(commandDef.type().file(generatedJavaSourcesDirectory));
+                }
             }
-            parser().ifPresent((i) -> i.generatedFiles().addAllTo(generatedFiles));
-            styler().ifPresent((i) -> i.generatedFiles().addAllTo(generatedFiles));
-            completer().ifPresent((i) -> i.generatedFiles().addAllTo(generatedFiles));
-            constraintAnalyzer().ifPresent((i) -> i.generatedFiles().addAllTo(generatedFiles));
-            multilangAnalyzer().ifPresent((i) -> i.generatedFiles().addAllTo(generatedFiles));
-            return generatedFiles;
+            parser().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
+            styler().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
+            completer().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
+            constraintAnalyzer().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
+            multilangAnalyzer().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
+            return javaSourceFiles;
         }
 
 
         /// Automatically provided sub-inputs
 
         Shared shared();
-
-
-        @Value.Check default void check() {
-
-        }
-    }
-
-    @Value.Immutable public interface Output extends Serializable {
-        class Builder extends AdapterProjectCompilerData.Output.Builder {}
-
-        static Builder builder() {
-            return new Builder();
-        }
     }
 }

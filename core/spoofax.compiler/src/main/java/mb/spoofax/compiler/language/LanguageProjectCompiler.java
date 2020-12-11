@@ -166,20 +166,21 @@ public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.
         }
 
 
-        /// Provided files
+        /// Files information, known up-front for build systems with static dependencies such as Gradle.
 
-        default ArrayList<ResourcePath> providedFiles() {
+        default ArrayList<ResourcePath> javaSourceFiles() {
             final ArrayList<ResourcePath> providedFiles = new ArrayList<>();
             if(classKind().isGenerating()) {
                 providedFiles.add(basePackageInfo().file(generatedJavaSourcesDirectory()));
             }
-            parser().ifPresent((i) -> i.providedFiles().addAllTo(providedFiles));
-            styler().ifPresent((i) -> i.providedFiles().addAllTo(providedFiles));
-            constraintAnalyzer().ifPresent((i) -> i.providedFiles().addAllTo(providedFiles));
-            multilangAnalyzer().ifPresent((i) -> i.providedFiles().addAllTo(providedFiles));
-            strategoRuntime().ifPresent((i) -> i.providedFiles().addAllTo(providedFiles));
-            completer().ifPresent((i) -> i.providedFiles().addAllTo(providedFiles));
-            exports().ifPresent((i) -> i.providedFiles().addAllTo(providedFiles));
+            classloaderResources().javaSourceFiles().addAllTo(providedFiles);
+            parser().ifPresent((i) -> i.javaSourceFiles().addAllTo(providedFiles));
+            styler().ifPresent((i) -> i.javaSourceFiles().addAllTo(providedFiles));
+            constraintAnalyzer().ifPresent((i) -> i.javaSourceFiles().addAllTo(providedFiles));
+            multilangAnalyzer().ifPresent((i) -> i.javaSourceFiles().addAllTo(providedFiles));
+            strategoRuntime().ifPresent((i) -> i.javaSourceFiles().addAllTo(providedFiles));
+            completer().ifPresent((i) -> i.javaSourceFiles().addAllTo(providedFiles));
+            exports().ifPresent((i) -> i.javaSourceFiles().addAllTo(providedFiles));
             return providedFiles;
         }
 
@@ -187,8 +188,5 @@ public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.
         /// Automatically provided sub-inputs
 
         Shared shared();
-
-
-        // TODO: add check
     }
 }

@@ -122,16 +122,17 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
         }
 
 
-        /// List of all provided files
+        /// Files information, known up-front for build systems with static dependencies such as Gradle.
 
-        default ListView<ResourcePath> providedFiles() {
+        default ListView<ResourcePath> javaSourceFiles() {
             if(classKind().isManual()) {
                 return ListView.of();
             }
+            final ResourcePath generatedJavaSourcesDirectory = generatedJavaSourcesDirectory();
             return ListView.of(
-                baseParseTable().file(generatedJavaSourcesDirectory()),
-                baseParser().file(generatedJavaSourcesDirectory()),
-                baseParserFactory().file(generatedJavaSourcesDirectory())
+                baseParseTable().file(generatedJavaSourcesDirectory),
+                baseParser().file(generatedJavaSourcesDirectory),
+                baseParserFactory().file(generatedJavaSourcesDirectory)
             );
         }
 

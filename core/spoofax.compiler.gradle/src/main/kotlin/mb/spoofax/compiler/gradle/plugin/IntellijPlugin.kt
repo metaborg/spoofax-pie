@@ -2,6 +2,7 @@
 
 package mb.spoofax.compiler.gradle.plugin
 
+import mb.spoofax.compiler.dagger.*
 import mb.spoofax.compiler.gradle.*
 import mb.spoofax.compiler.platform.*
 import org.gradle.api.GradleException
@@ -77,12 +78,12 @@ open class IntellijPlugin : Plugin<Project> {
     }
   }
 
-  private fun configure(project: Project, component: SpoofaxCompilerGradleComponent, input: IntellijProjectCompiler.Input) {
+  private fun configure(project: Project, component: SpoofaxCompilerComponent, input: IntellijProjectCompiler.Input) {
     configureProject(project, component, input)
     configureCompilerTask(project, component, input)
   }
 
-  private fun configureProject(project: Project, component: SpoofaxCompilerGradleComponent, input: IntellijProjectCompiler.Input) {
+  private fun configureProject(project: Project, component: SpoofaxCompilerComponent, input: IntellijProjectCompiler.Input) {
     project.addMainJavaSourceDirectory(input.generatedJavaSourcesDirectory(), component.resourceService)
     project.addMainResourceDirectory(input.generatedResourcesDirectory(), component.resourceService)
     component.intellijProjectCompiler.getDependencies(input).forEach {
@@ -93,7 +94,7 @@ open class IntellijPlugin : Plugin<Project> {
     })
   }
 
-  private fun configureCompilerTask(project: Project, component: SpoofaxCompilerGradleComponent, input: IntellijProjectCompiler.Input) {
+  private fun configureCompilerTask(project: Project, component: SpoofaxCompilerComponent, input: IntellijProjectCompiler.Input) {
     val compileTask = project.tasks.register("compileIntellijProject") {
       group = "spoofax compiler"
       inputs.property("input", input)

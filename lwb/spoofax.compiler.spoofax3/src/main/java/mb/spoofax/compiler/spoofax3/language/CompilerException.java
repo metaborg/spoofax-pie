@@ -9,12 +9,6 @@ import java.util.Optional;
 
 @ADT
 public abstract class CompilerException extends Exception {
-    public interface Common {
-        Optional<KeyedMessages> getMessages();
-
-        Throwable getCause();
-    }
-
     public interface Cases<R> {
         R parserCompilerFail(ParserCompilerException parserCompilerException);
 

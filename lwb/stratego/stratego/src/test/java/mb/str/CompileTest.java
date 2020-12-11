@@ -97,7 +97,7 @@ class CompileTest extends TestBase {
             for(String classPathPart : classPathProperty.split(File.pathSeparator)) {
                 classPath.add(new File(classPathPart));
             }
-            final Task<None> compileJavaTask = compileJava.createTask(new CompileJava.Input(
+            final Task<?> compileJavaTask = compileJava.createTask(new CompileJava.Input(
                 createList(mainJavaFile.getPath()),
                 createList(strategoJavaOutputDir.getPath()),
                 classPath,

@@ -72,14 +72,16 @@ public class ClassloaderResourcesCompiler implements TaskDef<ClassloaderResource
             return languageProject().packageId().replace(".", "-") + "-classloader-resource";
         }
 
-        /// List of all provided files
 
-        default ListView<ResourcePath> providedFiles() {
+        /// Files information, known up-front for build systems with static dependencies such as Gradle.
+
+        default ListView<ResourcePath> javaSourceFiles() {
             if(classKind().isManual()) {
                 return ListView.of();
             }
+            final ResourcePath generatedJavaSourcesDirectory = generatedJavaSourcesDirectory();
             return ListView.of(
-                baseClassloaderResources().file(generatedJavaSourcesDirectory())
+                baseClassloaderResources().file(generatedJavaSourcesDirectory)
             );
         }
 
