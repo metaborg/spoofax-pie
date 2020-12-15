@@ -54,7 +54,6 @@ languageAdapterProject {
     withStyler()
     withStrategoRuntime()
     withMultilangAnalyzer().run {
-      rootModule("mini-sdf")
       preAnalysisStrategy("pre-analyze")
       postAnalysisStrategy("post-analyze")
       contextId("mini-sdf-str")

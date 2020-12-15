@@ -139,11 +139,9 @@ public class MultilangAnalyzerAdapterCompiler implements TaskDef<MultilangAnalyz
 
         // Statix spec metadata
 
-        String rootModule();
+        @Value.Default default String fileConstraint() { return "statics!fileOk"; }
 
-        @Value.Default default String fileConstraint() { return "fileOk"; }
-
-        @Value.Default default String projectConstraint() { return "projectOk"; }
+        @Value.Default default String projectConstraint() { return "statics!projectOk"; }
 
         default Collection<TypeInfo> libraryTaskDefs() {
             ArrayList<TypeInfo> taskDefs = new ArrayList<>();

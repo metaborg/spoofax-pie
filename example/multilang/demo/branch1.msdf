@@ -4,7 +4,7 @@ imports root
 
 sorts S3
 
-// context-free syntax
+context-free syntax
 
-//  S.C   = <c>
-//  S.C1  = <c <S>>
+  // S.C   = <c>
+  S.C1  = <c <S>>
