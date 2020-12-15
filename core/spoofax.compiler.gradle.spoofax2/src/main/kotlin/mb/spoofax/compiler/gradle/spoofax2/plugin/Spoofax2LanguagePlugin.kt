@@ -85,6 +85,7 @@ open class Spoofax2LanguagePlugin : Plugin<Project> {
     val compileTask = project.tasks.register("compileSpoofax2BasedLanguageProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
+      outputs.upToDateWhen { true } // No outputs
 
       doLast {
         component.pie.newSession().use { session ->
