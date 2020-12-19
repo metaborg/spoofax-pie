@@ -28,14 +28,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static mb.nabl2.terms.build.TermBuild.B;
+import static mb.statix.multilang.metadata.spec.SpecUtils.pair;
+import static mb.statix.multilang.metadata.spec.SpecUtils.toMap;
 
 @MultiLangScope
 public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, SpecLoadException>> {
@@ -102,10 +106,9 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
                 // Sanity check correctness of fragment combination (i.e. that all imports resolve uniquely)
                 .flatMap(this::validateIntegrity)
                 // Load Spec from Fragments.
-                .flatMap(fragments -> fragments.stream()
-                    .map(this::toSpecResult)
-                    .collect(ResultCollector.getWithBaseException(new SpecLoadException("Exception loading fragment specs")))
-                    .flatMap(this::validateNoOverlap))
+                .flatMap(this::loadSpecs)
+                // Check for overlapping declarations
+                .flatMap(this::validateNoOverlap)
                 // Combine all fragments
                 .flatMap(specs -> specs.stream()
                     .reduce(SpecUtils::mergeSpecs)
@@ -136,6 +139,23 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
     }
 
     /**
+     * Loads the {@link Spec} objects of all fragments. This method takes care of qualifying labels and rules as well.
+     * @param fragments The fragments to load.
+     * @return A specification for each fragment.
+     */
+    private Result<Set<Spec>, SpecLoadException> loadSpecs(Set<SpecFragment> fragments) {
+        // Idea: for each fragment, collect all labels, and prefix them with the fragment id
+        // This solves accidental naming collisions for sibling fragments
+        final Map<SpecFragmentId, Map<String, String>> renames = fragments.stream()
+            .map(fragment -> pair(fragment.id(), fragment.qualifiedLabels().collect(toMap())))
+            .collect(toMap());
+
+        return fragments.stream()
+            .map(fragment -> this.toSpecResult(fragment, renames))
+            .collect(ResultCollector.getWithBaseException(new SpecLoadException("Exception loading fragment specs")));
+    }
+
+    /**
      * Transitively calculates the dependencies of the fragment identifier parameter.
      *
      * @param specFragmentId The fragment identifier to calculate the dependencies from
@@ -143,14 +163,7 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
      * indicate a bug.
      */
     private Result<Set<SpecFragmentId>, SpecLoadException> getRequiredFragments(SpecFragmentId specFragmentId) {
-        return specManager.get().getSpecConfig(specFragmentId).flatMap(config -> config.dependencies().stream()
-            .map(this::getRequiredFragments)
-            .collect(ResultCollector.getWithBaseException(new SpecLoadException("BUG: Error computing spec dependencies for " + specFragmentId)))
-            .map(sets -> {
-                final HashSet<SpecFragmentId> result = new HashSet<>(Collections.singleton(specFragmentId));
-                sets.forEach(result::addAll);
-                return result;
-            }));
+        return SpecUtils.getRequiredFragments(specFragmentId, specManager.get());
     }
 
     // Load fragments
@@ -161,11 +174,25 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
      * the module {@code "base"} must be in this fragment.
      *
      * @param specFragment The identifier of the fragment to load.
+     * @param allRenames For each fragment, it contains the declared labels in original and qualified form.
+     *                These are used to transform the compiled specification to have label declarations and references
+     *                  qualified with the fragment identifier. This solves accidental label name collisions.
      * @return The {@link Spec} of the fragment. Error when spec is invalid for composition, or when an IO error occured.
      */
-    private Result<Spec, SpecLoadException> toSpecResult(SpecFragment specFragment) {
+    private Result<Spec, SpecLoadException> toSpecResult(SpecFragment specFragment, Map<SpecFragmentId, Map<String, String>> allRenames) {
         final Set<String> moduleNames = specFragment.providedModuleNames();
-        return specFragment.toSpecResult().flatMap(spec -> {
+        // Collect labels that were available at compile time.
+        // All references labels should be included in this map,
+        // but all possible duplicates (that were not available at compile time) are not.
+        Map<String, String> fragmentRenames = SpecUtils.getRequiredFragments(specFragment.id(), specManager.get())
+            .map(dependencies -> dependencies.stream()
+                .flatMap(id -> allRenames.get(id).entrySet().stream())
+                .collect(toMap()))
+            // Ignores error when a spec is not available.
+            // This error will be emitted even before this code is reached.
+            .unwrapOr(new HashMap<>());
+
+        return specFragment.load(lbl -> fragmentRenames.getOrDefault(lbl, lbl)).flatMap(spec -> {
             // Collect all rule names for a constraint that is not in this fragment.
             Set<String> remoteConstraintExtensions = spec.rules().getRuleNames().stream()
                 .filter(ruleName -> !moduleNames.contains(ruleName.split(MODULE_SEPARATOR)[0]))
@@ -186,7 +213,6 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
      * Validates that all imports that cross fragment boundaries are satisfied when loading this set of fragments.
      *
      * @param specFragments The fragments to load.
-     * @param ids Set of identifiers that belongs to the {@code specFragments}. Used to create good error messages.
      * @return {@code specFragments} when it is valid. Error otherwise.
      */
     private Result<Set<SpecFragment>, SpecLoadException> validateIntegrity(Set<SpecFragment> specFragments) {
@@ -263,7 +289,7 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
             messageBuilder.append(String.format("%n- The constraints %s define rules in multiple fragments", overlappingRuleNames));
         }
         if(!overlappingLabels.isEmpty()) {
-            messageBuilder.append(String.format("%n- The labels %s are defined in multiple fragments", overlappingLabels));
+            messageBuilder.append(String.format("%n- BUG: The labels %s are defined in multiple fragments", overlappingLabels));
         }
 
         return Result.ofErr(new SpecLoadException(messageBuilder.toString()));
@@ -272,7 +298,7 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
     /**
      * Applies {@link RuleSet#getAllEquivalentRules()} on the rules of {@code combinedSpec} and returns an error when
      * overlap is reported. This should not occur when {@link this#validateNoOverlap(Set)} and
-     * {@link this#toSpecResult(SpecFragment)} pass already. When it does, it probably points to a bug there.
+     * {@link this#toSpecResult(SpecFragment, Map)} pass already. When it does, it probably points to a bug there.
      *
      * @param combinedSpec Result of combining specs of different fragments
      * @return {@code combinedSpec} when there are no overlapping rules, error otherwise.

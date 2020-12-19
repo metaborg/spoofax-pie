@@ -36,14 +36,14 @@ import org.metaborg.util.task.NullProgress;
 
 import javax.inject.Inject;
 import java.io.Serializable;
-import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
+
+import static mb.statix.multilang.metadata.spec.SpecUtils.pair;
+import static mb.statix.multilang.metadata.spec.SpecUtils.toMap;
 
 @MultiLangScope
 public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<AnalysisResults, MultiLangAnalysisException>> {
@@ -109,12 +109,11 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
         // Solve project constraints
         HashMap<LanguageId, Result<SolverResult, MultiLangAnalysisException>> projectResults = input.languages.stream()
             .map(languageId -> pair(languageId, context.require(partialSolveProject.createTask(new SmlPartialSolveProject.Input(languageId, input.logLevel)))))
-            //.collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("At least one project constraint has an unexpected exception", false)))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (p, n) -> n, HashMap::new));
+            .collect(toMap(HashMap::new));
 
         // Solve file constraints
         return analyzeFiles(context, input).map(fileResults -> {
-            // Collect results of all succesfull runs
+            // Collect results of all successful runs
             HashSet<SolverResult> initialResults = new HashSet<>();
             projectResults.values().forEach(r -> r.ifOk(initialResults::add));
             fileResults.values().forEach(r -> r.map(FileResult::result).ifOk(initialResults::add));
@@ -146,7 +145,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
                             .mapErr(MultiLangAnalysisException::wrapIfNeeded);
                         return pair(fk, res);
                     }))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (p, n) -> n, HashMap::new)));
+                .collect(toMap(HashMap::new)));
     }
 
     private Result<SolverResult, MultiLangAnalysisException> solveCombined(ExecContext context, Input input, HashSet<SolverResult> initialResults) {
@@ -208,7 +207,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
                         }));
             })
             .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("Error applying post-transformations")))
-            .map(SmlSolveProject::entrySetToMap);
+            .map(entries -> entries.stream().collect(toMap(HashMap::new)));
     }
 
     private Result<Map<LanguageId, LanguageMetadata>, MultiLangAnalysisException> getLanguageMetadata(Collection<LanguageId> languages) {
@@ -216,7 +215,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
             .map(languageId -> languageMetadataManager.get().getLanguageMetadataResult(languageId)
                 .map(res -> pair(languageId, res)))
             .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("Error when resolving language metadata", false)))
-            .map(SmlSolveProject::entrySetToMap);
+            .map(entries -> entries.stream().collect(toMap(HashMap::new)));
     }
 
     private Supplier<? extends Result<FileResult, ?>> fileResultSupplier(
@@ -230,13 +229,5 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
                 resourceKey,
                 logLevel)
         );
-    }
-
-    private static <K, V> HashMap<K, V> entrySetToMap(Set<? extends Map.Entry<K, V>> entries) {
-        return entries.stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (p, n) -> n, HashMap::new));
-    }
-
-    private static <K, V>  Map.Entry<K,V> pair(K key, V value) {
-        return new AbstractMap.SimpleImmutableEntry<>(key, value);
     }
 }
