@@ -221,7 +221,7 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
 
             if(!remoteConstraintExtensions.isEmpty()) {
                 StringBuilder messageBuilder = new StringBuilder("Rules for predicates from other fragment found:");
-                remoteConstraintExtensions.forEach(name -> messageBuilder.append("%n- ").append(name));
+                remoteConstraintExtensions.forEach(name -> messageBuilder.append("\n- ").append(name));
                 return Result.ofErr(new SpecLoadException(messageBuilder.toString()));
             }
             return Result.ofOk(spec);

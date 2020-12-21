@@ -4,7 +4,6 @@ import mb.common.result.Result;
 import mb.nabl2.terms.ITerm;
 import mb.statix.spec.Spec;
 import org.immutables.value.Value;
-import org.metaborg.util.functions.Function1;
 
 import java.util.Map;
 import java.util.Optional;

@@ -35,6 +35,7 @@ public class SpecUtils {
     private static final String FILESPEC_OP = "FileSpec";
     private static final String LABEL_OP = "Label";
     private static final String RULE_OP = "Rule";
+    private static final String DECL_OP = "Rule";
     private static final String CONSTRAINT_OP = "C";
 
     // Spec loading utils
@@ -125,25 +126,25 @@ public class SpecUtils {
     }
 
     public static ITerm qualifyFileSpec(ITerm spec, NameQualifier qualifier) {
-        return M.appl6(
+        return M.preserveAttachments(M.appl6(
             FILESPEC_OP,
             M.term(),
             renameTerm(qualifier.label()),
-            renameTerm(qualifier.label()),
+            M.cases(renameTerm(qualifier.label()), M.appl0(DECL_OP)),
             M.term(),
             renameTerm(M.cases(qualifier.label(), qualifier.constraintName())),
             renameScopeExtension(qualifier),
-            (a, i, e, d, n, r, s) -> (ITerm) B.newAppl(a.getOp(), Arrays.asList(i, e, d, n, r, s), a.getAttachments())
-        ).match(spec).orElse(spec);
+            (a, i, e, d, n, r, s) -> (ITerm) B.newAppl(a.getOp(), i, e, d, n, r, s)
+        )).match(spec).orElseThrow(() -> new IllegalArgumentException("spec"));
     }
 
     private static IMatcher<ITerm> renameScopeExtension(NameQualifier qualifier) {
         return M.listElems(
-            M.tuple3(
-                M.string(str -> B.newString(qualifier.renameConstraint(str.getValue()), str.getAttachments())),
+            M.preserveAttachments(M.tuple3(
+                M.preserveAttachments(M.string(str -> B.newString(qualifier.renameConstraint(str.getValue())))),
                 M.term(),
-                qualifier.label(),
-                (a, c, p, l) -> B.newTuple(Arrays.asList(c, p, l), a.getAttachments())),
+                M.cases(renameTerm(qualifier.label()), M.appl0(DECL_OP)),
+                (a, c, p, l) -> B.newTuple(c, p, l))),
             (l, elems) -> B.newList(elems)
         );
     }
@@ -181,15 +182,15 @@ public class SpecUtils {
 
         default ITerm renameLabel(IApplTerm appl, String lbl) {
             IStringTerm newLabel = B.newString(renameLabel(lbl));
-            return B.newAppl(LABEL_OP, Collections.singletonList(newLabel), appl.getAttachments());
+            return B.newAppl(LABEL_OP, newLabel);
         }
 
         default ITerm renameConstraint(IApplTerm appl, String lbl, ITerm params) {
-            return B.newAppl(CONSTRAINT_OP, Arrays.asList(B.newString(renameConstraint(lbl)), params), appl.getAttachments());
+            return B.newAppl(CONSTRAINT_OP, B.newString(renameConstraint(lbl)), params);
         }
 
         default ITerm renameConstraint(IApplTerm appl, String lbl, ITerm params, ITerm msg) {
-            return B.newAppl(CONSTRAINT_OP, Arrays.asList(B.newString(renameConstraint(lbl)), params, msg), appl.getAttachments());
+            return B.newAppl(CONSTRAINT_OP, B.newString(renameConstraint(lbl)), params, msg);
         }
 
     }
