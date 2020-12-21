@@ -35,7 +35,7 @@ public class SpecUtils {
     private static final String FILESPEC_OP = "FileSpec";
     private static final String LABEL_OP = "Label";
     private static final String RULE_OP = "Rule";
-    private static final String DECL_OP = "Rule";
+    private static final String DECL_OP = "Decl";
     private static final String CONSTRAINT_OP = "C";
 
     // Spec loading utils
