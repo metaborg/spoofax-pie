@@ -1,14 +1,10 @@
 package mb.statix.multilang.metadata.spec;
 
-import com.google.common.collect.Lists;
 import mb.common.result.Result;
 import mb.common.result.ResultCollector;
 import mb.nabl2.terms.IApplTerm;
-import mb.nabl2.terms.IListTerm;
 import mb.nabl2.terms.IStringTerm;
 import mb.nabl2.terms.ITerm;
-import mb.nabl2.terms.ListTerms;
-import mb.nabl2.terms.Terms;
 import mb.nabl2.terms.matching.TermMatch.IMatcher;
 import mb.statix.multilang.metadata.SpecFragmentId;
 import mb.statix.multilang.metadata.SpecManager;
@@ -19,6 +15,7 @@ import mb.statix.spoofax.StatixTerms;
 import org.immutables.value.Value;
 
 import java.util.AbstractMap;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -128,42 +125,39 @@ public class SpecUtils {
     }
 
     public static ITerm qualifyFileSpec(ITerm spec, NameQualifier qualifier) {
-        return M.req(M.appl6(
+        return M.appl6(
             FILESPEC_OP,
             M.term(),
-            M.term().map(t -> renameTerm(t, qualifier.label())),
-            M.term().map(t -> renameTerm(t, qualifier.label())),
+            renameTerm(qualifier.label()),
+            renameTerm(qualifier.label()),
             M.term(),
-            M.term().map(t -> renameTerm(t, M.cases(qualifier.label(), qualifier.constraintName()))),
+            renameTerm(M.cases(qualifier.label(), qualifier.constraintName())),
             renameScopeExtension(qualifier),
-            (a, i, e, d, n, r, s) -> (ITerm) B.newAppl(a.getOp(), Lists.newArrayList(i, e, d, n, r, s), a.getAttachments())
-        )).match(spec).orElse(spec);
+            (a, i, e, d, n, r, s) -> (ITerm) B.newAppl(a.getOp(), Arrays.asList(i, e, d, n, r, s), a.getAttachments())
+        ).match(spec).orElse(spec);
     }
 
     private static IMatcher<ITerm> renameScopeExtension(NameQualifier qualifier) {
         return M.listElems(
             M.tuple3(
-                M.string(str -> B.newString(qualifier.renameConstraint(str.getValue()))),
+                M.string(str -> B.newString(qualifier.renameConstraint(str.getValue()), str.getAttachments())),
                 M.term(),
                 qualifier.label(),
-                (a, c, p, l) -> B.newTuple(Lists.newArrayList(c, p, l), a.getAttachments())),
+                (a, c, p, l) -> B.newTuple(Arrays.asList(c, p, l), a.getAttachments())),
             (l, elems) -> B.newList(elems)
         );
     }
 
-    public static ITerm renameTerm(ITerm term, IMatcher<ITerm> renamingMatcher) {
-        return term.match(Terms.casesFix(
-            (m, appl) -> renamingMatcher.match(appl)
-                .orElseGet(() -> B.newAppl(appl.getOp(), appl.getArgs()
-                    .stream()
-                    .map(a -> a.match(m))
-                    .collect(Collectors.toList()), appl.getAttachments())),
-            (m, list) -> list.match(ListTerms.<IListTerm>casesFix(
-                (lm, cons) -> B.newCons(cons.getHead().match(m), cons.getTail().match(lm), cons.getAttachments()),
-                (lm, nil) -> nil,
-                (lm, var) -> var
-            )), (m, string) -> string, (m, integer) -> integer, (m, blob) -> blob, (m, var) -> var)
-        );
+    public static IMatcher<ITerm> renameTerm(IMatcher<ITerm> renamingMatcher) {
+        return M.casesFix(f -> Arrays.asList(
+            renamingMatcher,
+            M.preserveAttachments(M.appl(t -> (ITerm)B.newAppl(t.getOp(), t.getArgs().stream()
+                .map(f::match)
+                .map(Optional::get) // Base case M.term() ensures this is always safe
+                .collect(Collectors.toList())))),
+            M.preserveAttachments(M.listElems(f, (l, elems) -> B.newList(elems))),
+            M.term() // Preserve atoms
+        ));
     }
 
     // Utility class to rename
@@ -191,11 +185,11 @@ public class SpecUtils {
         }
 
         default ITerm renameConstraint(IApplTerm appl, String lbl, ITerm params) {
-            return B.newAppl(CONSTRAINT_OP, Lists.newArrayList(B.newString(renameConstraint(lbl)), params), appl.getAttachments());
+            return B.newAppl(CONSTRAINT_OP, Arrays.asList(B.newString(renameConstraint(lbl)), params), appl.getAttachments());
         }
 
         default ITerm renameConstraint(IApplTerm appl, String lbl, ITerm params, ITerm msg) {
-            return B.newAppl(CONSTRAINT_OP, Lists.newArrayList(B.newString(renameConstraint(lbl)), params, msg), appl.getAttachments());
+            return B.newAppl(CONSTRAINT_OP, Arrays.asList(B.newString(renameConstraint(lbl)), params, msg), appl.getAttachments());
         }
 
     }
