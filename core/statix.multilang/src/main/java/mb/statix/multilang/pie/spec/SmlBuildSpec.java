@@ -303,13 +303,13 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
             return Result.ofOk(specs);
         }
 
-        StringBuilder messageBuilder = new StringBuilder("Overlapping definitions in combined specification");
+        StringBuilder messageBuilder = new StringBuilder("BUG: Overlapping definitions in combined specification");
 
         if(!overlappingRuleNames.isEmpty()) {
             messageBuilder.append(String.format("%n- The constraints %s define rules in multiple fragments", overlappingRuleNames));
         }
         if(!overlappingLabels.isEmpty()) {
-            messageBuilder.append(String.format("%n- BUG: The labels %s are defined in multiple fragments", overlappingLabels));
+            messageBuilder.append(String.format("%n- The labels %s are defined in multiple fragments", overlappingLabels));
         }
 
         return Result.ofErr(new SpecLoadException(messageBuilder.toString()));
