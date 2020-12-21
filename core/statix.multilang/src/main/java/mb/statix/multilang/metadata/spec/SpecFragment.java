@@ -4,11 +4,9 @@ import mb.common.result.Result;
 import mb.statix.multilang.metadata.SpecFragmentId;
 import mb.statix.spec.Spec;
 import org.immutables.value.Value;
-import org.metaborg.util.functions.Function1;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -27,8 +25,8 @@ public interface SpecFragment {
      */
     @Value.Parameter Set<String> delayedModuleNames();
 
-    default Set<String> providedModuleNames() {
-        return modules().stream().map(Module::moduleName).collect(Collectors.toSet());
+    default Stream<String> providedModuleNames() {
+        return modules().stream().map(Module::moduleName);
     }
 
     @Value.Check default void checkNotEmpty() {
@@ -41,13 +39,18 @@ public interface SpecFragment {
         return modules().stream().flatMap(mod -> mod.qualifiedLabels(id().getId()));
     }
 
-    default Result<Spec, SpecLoadException> load(Function1<String, String> renameFunc) {
+    default Stream<Map.Entry<String, String>> qualifiedConstraints() {
+        return modules().stream().flatMap(mod -> mod.qualifiedConstraints(id().getId()));
+    }
+
+    default Result<Spec, SpecLoadException> load(SpecUtils.NameQualifier qualifier) {
         return modules()
             .stream()
-            .map(module -> module.load(renameFunc))
+            .map(module -> module.load(qualifier))
             // Merge without overlapping names check
             .reduce(SpecUtils::mergeSpecs)
             // Cannot occur when check holds
             .orElse(Result.ofErr(new SpecLoadException("Bug: No modules in spec fragment")));
     }
+
 }

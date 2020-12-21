@@ -146,12 +146,16 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
     private Result<Set<Spec>, SpecLoadException> loadSpecs(Set<SpecFragment> fragments) {
         // Idea: for each fragment, collect all labels, and prefix them with the fragment id
         // This solves accidental naming collisions for sibling fragments
-        final Map<SpecFragmentId, Map<String, String>> renames = fragments.stream()
+        final Map<SpecFragmentId, Map<String, String>> labelRenames = fragments.stream()
             .map(fragment -> pair(fragment.id(), fragment.qualifiedLabels().collect(toMap())))
             .collect(toMap());
 
+        final Map<SpecFragmentId, Map<String, String>> constraintRenames = fragments.stream()
+            .map(fragment -> pair(fragment.id(), fragment.qualifiedConstraints().collect(toMap())))
+            .collect(toMap());
+
         return fragments.stream()
-            .map(fragment -> this.toSpecResult(fragment, renames))
+            .map(fragment -> this.toSpecResult(fragment, labelRenames, constraintRenames))
             .collect(ResultCollector.getWithBaseException(new SpecLoadException("Exception loading fragment specs")));
     }
 
@@ -174,25 +178,42 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
      * the module {@code "base"} must be in this fragment.
      *
      * @param specFragment The identifier of the fragment to load.
-     * @param allRenames For each fragment, it contains the declared labels in original and qualified form.
+     * @param allLabelRenames For each fragment, it contains the declared labels in original and qualified form.
      *                These are used to transform the compiled specification to have label declarations and references
      *                  qualified with the fragment identifier. This solves accidental label name collisions.
+     * @param allConstraintRenames Similar to {@code allLabelRenames}, but for constraint names.
      * @return The {@link Spec} of the fragment. Error when spec is invalid for composition, or when an IO error occured.
      */
-    private Result<Spec, SpecLoadException> toSpecResult(SpecFragment specFragment, Map<SpecFragmentId, Map<String, String>> allRenames) {
-        final Set<String> moduleNames = specFragment.providedModuleNames();
+    private Result<Spec, SpecLoadException> toSpecResult(
+        SpecFragment specFragment,
+        Map<SpecFragmentId, Map<String, String>> allLabelRenames,
+        Map<SpecFragmentId, Map<String, String>> allConstraintRenames
+    ) {
+        final Set<String> moduleNames = specFragment.providedModuleNames()
+            .map(name -> String.format("%s:%s", specFragment.id().getId(), name))
+            .collect(Collectors.toSet());
+
+        final Result<Set<SpecFragmentId>, SpecLoadException> dependencies = SpecUtils.getRequiredFragments(specFragment.id(), specManager.get());
         // Collect labels that were available at compile time.
         // All references labels should be included in this map,
         // but all possible duplicates (that were not available at compile time) are not.
-        Map<String, String> fragmentRenames = SpecUtils.getRequiredFragments(specFragment.id(), specManager.get())
-            .map(dependencies -> dependencies.stream()
-                .flatMap(id -> allRenames.get(id).entrySet().stream())
+        Map<String, String> labelRenames = dependencies
+            .map(deps -> deps.stream()
+                .flatMap(id -> allLabelRenames.get(id).entrySet().stream())
                 .collect(toMap()))
             // Ignores error when a spec is not available.
             // This error will be emitted even before this code is reached.
             .unwrapOr(new HashMap<>());
 
-        return specFragment.load(lbl -> fragmentRenames.getOrDefault(lbl, lbl)).flatMap(spec -> {
+        Map<String, String> constraintRenames = dependencies
+            .map(deps -> deps.stream()
+                .flatMap(id -> allConstraintRenames.get(id).entrySet().stream())
+                .collect(toMap()))
+            // Ignores error when a spec is not available.
+            // This error will be emitted even before this code is reached.
+            .unwrapOr(new HashMap<>());
+
+        return specFragment.load(SpecUtils.MapBasedNameQualifier.from(labelRenames, constraintRenames)).flatMap(spec -> {
             // Collect all rule names for a constraint that is not in this fragment.
             Set<String> remoteConstraintExtensions = spec.rules().getRuleNames().stream()
                 .filter(ruleName -> !moduleNames.contains(ruleName.split(MODULE_SEPARATOR)[0]))
@@ -217,8 +238,7 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
      */
     private Result<Set<SpecFragment>, SpecLoadException> validateIntegrity(Set<SpecFragment> specFragments) {
         List<String> providedModules  = specFragments.stream()
-            .map(SpecFragment::providedModuleNames)
-            .flatMap(Set::stream)
+            .flatMap(SpecFragment::providedModuleNames)
             .collect(Collectors.toList());
 
         Set<String> delayedModules  = specFragments.stream()
@@ -298,7 +318,7 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
     /**
      * Applies {@link RuleSet#getAllEquivalentRules()} on the rules of {@code combinedSpec} and returns an error when
      * overlap is reported. This should not occur when {@link this#validateNoOverlap(Set)} and
-     * {@link this#toSpecResult(SpecFragment, Map)} pass already. When it does, it probably points to a bug there.
+     * {@link this#toSpecResult(SpecFragment, Map, Map)} pass already. When it does, it probably points to a bug there.
      *
      * @param combinedSpec Result of combining specs of different fragments
      * @return {@code combinedSpec} when there are no overlapping rules, error otherwise.

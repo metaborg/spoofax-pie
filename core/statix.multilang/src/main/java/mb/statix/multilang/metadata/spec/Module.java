@@ -23,8 +23,13 @@ public interface Module {
             .map(label -> pair(label, String.format("%s:%s", prefix, label)));
     }
 
-    default Result<Spec, SpecLoadException> load(Function1<String, String> renameFunc) {
-        ITerm renamedModule = SpecUtils.LabelRenamer.forRenameFunc(renameFunc).renameTerm(module());
+    default Stream<Map.Entry<String, String>> qualifiedConstraints(String prefix) {
+        return SpecUtils.allConstraints(module())
+            .map(label -> pair(label, String.format("%s:%s", prefix, label)));
+    }
+
+    default Result<Spec, SpecLoadException> load(SpecUtils.NameQualifier qualifier) {
+        ITerm renamedModule = SpecUtils.qualifyFileSpec(module(), qualifier);
         Optional<Result<Spec, SpecLoadException>> optionalSpecResult = SpecUtils.fileSpec().match(renamedModule).map(Result::ofOk);
         return optionalSpecResult.orElse(Result.ofErr(new SpecLoadException(String.format("Module %s does not contain a valid Statix spec", moduleName()))));
     }

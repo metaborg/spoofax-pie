@@ -1,6 +1,6 @@
 package mb.statix.multilang.metadata.spec;
 
-import com.google.common.collect.Multimap;
+import com.google.common.collect.Lists;
 import mb.common.result.Result;
 import mb.common.result.ResultCollector;
 import mb.nabl2.terms.IApplTerm;
@@ -10,8 +10,6 @@ import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ListTerms;
 import mb.nabl2.terms.Terms;
 import mb.nabl2.terms.matching.TermMatch.IMatcher;
-import mb.nabl2.util.Tuple2;
-import mb.pie.api.Supplier;
 import mb.statix.multilang.metadata.SpecFragmentId;
 import mb.statix.multilang.metadata.SpecManager;
 import mb.statix.spec.Rule;
@@ -19,14 +17,11 @@ import mb.statix.spec.RuleSet;
 import mb.statix.spec.Spec;
 import mb.statix.spoofax.StatixTerms;
 import org.immutables.value.Value;
-import org.metaborg.util.functions.Function1;
-import org.metaborg.util.functions.Function4;
 
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -39,26 +34,41 @@ import static mb.nabl2.terms.matching.TermMatch.M;
 
 @Value.Enclosing
 public class SpecUtils {
+
+    private static final String FILESPEC_OP = "FileSpec";
     private static final String LABEL_OP = "Label";
+    private static final String RULE_OP = "Rule";
+    private static final String CONSTRAINT_OP = "C";
 
     // Spec loading utils
 
     public static IMatcher<Spec> fileSpec() {
-        return fileSpec((edgeLabels, dataLabels, rules, ext) -> Spec.of(rules, edgeLabels, dataLabels, ext));
+        return M.appl6(FILESPEC_OP, M.list(), M.req(StatixTerms.labels()), M.req(StatixTerms.labels()), M.term(), StatixTerms.rules(), M.req(StatixTerms.scopeExtensions()),
+            (t, l, edgeLabels, dataLabels, noRelationLabel, rules, ext) -> Spec.of(rules, edgeLabels, dataLabels, ext));
     }
 
     public static Stream<String> allCustomLabels(ITerm module) {
-        return fileSpec((edgeLabels, dataLabels, rules, ext) -> Stream.concat(edgeLabels.stream(), dataLabels.stream())
-            .map(M.appl1(LABEL_OP, M.stringValue(), (a, s) -> s)::match)
-            .filter(Optional::isPresent)
-            .map(Optional::get))
+        return M.appl6(FILESPEC_OP, M.list(), M.req(StatixTerms.labels()), M.req(StatixTerms.labels()), M.term(), M.list(), M.list(),
+            (appl, i, edgeLabels, dataLabels, n, c, t) ->  Stream.concat(edgeLabels.stream(), dataLabels.stream())
+                .map(M.appl1(LABEL_OP, M.stringValue(), (a, s) -> s)::match)
+                .filter(Optional::isPresent)
+                .map(Optional::get))
             .match(module)
             .orElse(Stream.empty());
     }
 
-    public static <T> IMatcher<T> fileSpec(Function4<List<ITerm>, List<ITerm>, RuleSet, Multimap<String, Tuple2<Integer, ITerm>>, T> f) {
-        return M.appl6("FileSpec", M.list(), M.req(StatixTerms.labels()), M.req(StatixTerms.labels()), M.term(), StatixTerms.rules(), M.req(StatixTerms.scopeExtensions()),
-            (t, l, edgeLabels, dataLabels, noRelationLabel, rules, ext) -> f.apply(edgeLabels, dataLabels, rules, ext));
+    public static Stream<String> allConstraints(ITerm module) {
+        return M.appl6(FILESPEC_OP, M.list(), M.list(), M.list(), M.term(), M.listElems(rule()), M.list(), (a, i, e, r, n, c, t) -> c.stream().distinct())
+            .match(module)
+            .orElse(Stream.empty());
+    }
+
+    private static IMatcher<String> rule() {
+        return M.appl3(RULE_OP, M.term(), ruleHead(), M.term(), (a, h, s, b) -> s);
+    }
+
+    private static IMatcher<String> ruleHead() {
+        return M.appl2(CONSTRAINT_OP, M.stringValue(), M.list(), (a, s, p) -> s);
     }
 
     public static Result<Set<SpecFragmentId>, SpecLoadException> getRequiredFragments(SpecFragmentId specFragmentId, SpecManager specManager) {
@@ -72,7 +82,7 @@ public class SpecUtils {
             }));
     }
 
-    // Spec mergin utils
+    // Spec merging utils
 
     public static Result<Spec, SpecLoadException> mergeSpecs(Result<Spec, SpecLoadException> accResult, Result<Spec, SpecLoadException> newSpecResult) {
         return accResult.mapOrElse(acc -> newSpecResult.mapOrElse(newSpec -> Result.ofOk(mergeSpecs(acc, newSpec)), Result::ofErr),
@@ -117,43 +127,98 @@ public class SpecUtils {
         );
     }
 
+    public static ITerm qualifyFileSpec(ITerm spec, NameQualifier qualifier) {
+        return M.req(M.appl6(
+            FILESPEC_OP,
+            M.term(),
+            M.term().map(t -> renameTerm(t, qualifier.label())),
+            M.term().map(t -> renameTerm(t, qualifier.label())),
+            M.term(),
+            M.term().map(t -> renameTerm(t, M.cases(qualifier.label(), qualifier.constraintName()))),
+            renameScopeExtension(qualifier),
+            (a, i, e, d, n, r, s) -> (ITerm) B.newAppl(a.getOp(), Lists.newArrayList(i, e, d, n, r, s), a.getAttachments())
+        )).match(spec).orElse(spec);
+    }
+
+    private static IMatcher<ITerm> renameScopeExtension(NameQualifier qualifier) {
+        return M.listElems(
+            M.tuple3(
+                M.string(str -> B.newString(qualifier.renameConstraint(str.getValue()))),
+                M.term(),
+                qualifier.label(),
+                (a, c, p, l) -> B.newTuple(Lists.newArrayList(c, p, l), a.getAttachments())),
+            (l, elems) -> B.newList(elems)
+        );
+    }
+
+    public static ITerm renameTerm(ITerm term, IMatcher<ITerm> renamingMatcher) {
+        return term.match(Terms.casesFix(
+            (m, appl) -> renamingMatcher.match(appl)
+                .orElseGet(() -> B.newAppl(appl.getOp(), appl.getArgs()
+                    .stream()
+                    .map(a -> a.match(m))
+                    .collect(Collectors.toList()), appl.getAttachments())),
+            (m, list) -> list.match(ListTerms.<IListTerm>casesFix(
+                (lm, cons) -> B.newCons(cons.getHead().match(m), cons.getTail().match(lm), cons.getAttachments()),
+                (lm, nil) -> nil,
+                (lm, var) -> var
+            )), (m, string) -> string, (m, integer) -> integer, (m, blob) -> blob, (m, var) -> var)
+        );
+    }
+
     // Utility class to rename
 
-    @Value.Immutable
-    abstract static class LabelRenamer {
+    public interface NameQualifier {
+        String renameLabel(String baseName);
+        String renameConstraint(String baseName);
 
-        @Value.Parameter public abstract Function1<String, String> renameFunc();
+        default IMatcher<ITerm> label() {
+            return M.preserveAttachments(M.appl1(LABEL_OP, M.stringValue(), this::renameLabel));
+        }
 
-        public ITerm renameTerm(ITerm term) {
-            return term.match(Terms.casesFix(
-                (m, appl) -> label().match(appl)
-                    .orElseGet(() -> B.newAppl(appl.getOp(), appl.getArgs()
-                        .stream()
-                        .map(a -> a.match(m))
-                        .collect(Collectors.toList()), appl.getAttachments())),
-                (m, list) -> list.match(ListTerms.<IListTerm>casesFix(
-                    (lm, cons) -> B.newCons(cons.getHead().match(m), cons.getTail().match(lm), cons.getAttachments()),
-                    (lm, nil) -> nil,
-                    (lm, var) -> var
-                )),
-                (m, string) -> string,
-                (m, integer) -> integer,
-                (m, blob) -> blob,
-                (m, var) -> var
+        default IMatcher<ITerm> constraintName() {
+            return M.preserveAttachments(M.cases(
+                // C/2 term in rule head
+                M.appl2(CONSTRAINT_OP, M.stringValue(), M.term(), this::renameConstraint),
+                // C/3 term in constraint reference. May contain message.
+                M.appl3(CONSTRAINT_OP, M.stringValue(), M.term(), M.term(), this::renameConstraint)
             ));
         }
 
-        private IMatcher<ITerm> label() {
-            return M.appl1(LABEL_OP, M.stringValue(), this::renameLabel);
-        }
-
-        private ITerm renameLabel(IApplTerm appl, String lbl) {
-            IStringTerm newLabel = B.newString(renameFunc().apply(lbl));
+        default ITerm renameLabel(IApplTerm appl, String lbl) {
+            IStringTerm newLabel = B.newString(renameLabel(lbl));
             return B.newAppl(LABEL_OP, Collections.singletonList(newLabel), appl.getAttachments());
         }
 
-        public static LabelRenamer forRenameFunc(Function1<String, String> renameFunc) {
-            return ImmutableSpecUtils.LabelRenamer.of(renameFunc);
+        default ITerm renameConstraint(IApplTerm appl, String lbl, ITerm params) {
+            return B.newAppl(CONSTRAINT_OP, Lists.newArrayList(B.newString(renameConstraint(lbl)), params), appl.getAttachments());
+        }
+
+        default ITerm renameConstraint(IApplTerm appl, String lbl, ITerm params, ITerm msg) {
+            return B.newAppl(CONSTRAINT_OP, Lists.newArrayList(B.newString(renameConstraint(lbl)), params, msg), appl.getAttachments());
+        }
+
+    }
+
+    @Value.Immutable
+    public static abstract class MapBasedNameQualifier implements NameQualifier {
+
+        @Value.Parameter public abstract Map<String, String> labelRenames();
+
+        @Value.Parameter public abstract Map<String, String> constraintRenames();
+
+        @Override
+        public String renameLabel(String baseName) {
+            return labelRenames().getOrDefault(baseName, baseName);
+        }
+
+        @Override
+        public String renameConstraint(String baseName) {
+            return constraintRenames().getOrDefault(baseName, baseName);
+        }
+
+        public static MapBasedNameQualifier from(Map<String, String> labelRenames, Map<String, String> constraintRenames) {
+            return ImmutableSpecUtils.MapBasedNameQualifier.of(labelRenames, constraintRenames);
         }
     }
 }

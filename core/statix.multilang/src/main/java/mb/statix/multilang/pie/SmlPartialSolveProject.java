@@ -14,6 +14,7 @@ import mb.statix.multilang.metadata.LanguageMetadataManager;
 import mb.statix.multilang.pie.spec.SmlBuildSpec;
 import mb.statix.multilang.utils.SolverUtils;
 import mb.statix.solver.IConstraint;
+import mb.statix.solver.IState;
 import mb.statix.solver.log.IDebugContext;
 import mb.statix.solver.persistent.SolverResult;
 import mb.statix.solver.persistent.State;
@@ -87,16 +88,18 @@ public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.In
             .flatMap(globalResult -> {
                 Set<ITerm> scopeArgs = Collections.singleton(globalResult.globalScope());
                 return languageMetadataManager.get().getLanguageMetadataResult(input.languageId).flatMap(lmd -> {
-                    IConstraint projectConstraint = new CUser(lmd.projectConstraint(), scopeArgs);
+                    String qualifiedFileConstraintName = String.format("%s:%s", input.languageId.getId(), lmd.projectConstraint());
+                    IConstraint projectConstraint = new CUser(qualifiedFileConstraintName, scopeArgs);
 
                     IDebugContext debug = SolverUtils.createDebugContext(input.logLevel);
                     return context.require(buildSpec.createSupplier(new SmlBuildSpec.Input(input.languageId)))
                         .mapErr(MultiLangAnalysisException::wrapIfNeeded)
                         .flatMap(spec -> {
                             try {
-                                SolverResult res = SolverUtils.partialSolve(spec, State.of(spec).add(globalResult.result().state())
-                                    .withResource(input.languageId.getId()),
-                                    projectConstraint, debug, new NullProgress(), new NullCancel());
+                                IState.Immutable initialState = State.of(spec)
+                                    .add(globalResult.result().state())
+                                    .withResource(input.languageId.getId());
+                                SolverResult res = SolverUtils.partialSolve(spec, initialState, projectConstraint, debug, new NullProgress(), new NullCancel());
                                 return Result.ofOk(res);
                             } catch(InterruptedException e) {
                                 return Result.ofErr(new MultiLangAnalysisException(e));

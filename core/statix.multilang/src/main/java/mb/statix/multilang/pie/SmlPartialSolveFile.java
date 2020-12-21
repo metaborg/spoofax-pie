@@ -114,7 +114,8 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
 
                 IDebugContext debug = SolverUtils.createDebugContext(input.logLevel);
                 Iterable<ITerm> constraintArgs = Arrays.asList(globalResult.globalScope(), st.fromStratego(ast));
-                IConstraint fileConstraint = new CUser(languageMetadata.fileConstraint(), constraintArgs, null);
+                String qualifiedFileConstraintName = String.format("%s:%s", input.languageId.getId(), languageMetadata.fileConstraint());
+                IConstraint fileConstraint = new CUser(qualifiedFileConstraintName, constraintArgs, null);
 
                 long t0 = System.currentTimeMillis();
                 try {
