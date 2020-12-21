@@ -5,7 +5,6 @@ import mb.statix.multilang.metadata.SpecFragmentId;
 import mb.statix.spec.Spec;
 import org.immutables.value.Value;
 
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -35,14 +34,6 @@ public interface SpecFragment {
         }
     }
 
-    default Stream<Map.Entry<String, String>> qualifiedLabels() {
-        return modules().stream().flatMap(mod -> mod.qualifiedLabels(id().getId()));
-    }
-
-    default Stream<Map.Entry<String, String>> qualifiedConstraints() {
-        return modules().stream().flatMap(mod -> mod.qualifiedConstraints(id().getId()));
-    }
-
     default Result<Spec, SpecLoadException> load(SpecUtils.NameQualifier qualifier) {
         return modules()
             .stream()
@@ -52,5 +43,4 @@ public interface SpecFragment {
             // Cannot occur when check holds
             .orElse(Result.ofErr(new SpecLoadException("Bug: No modules in spec fragment")));
     }
-
 }

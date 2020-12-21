@@ -13,6 +13,7 @@ import mb.statix.multilang.MultiLang;
 import mb.statix.multilang.MultiLangScope;
 import mb.statix.multilang.metadata.SpecFragmentId;
 import mb.statix.multilang.metadata.SpecManager;
+import mb.statix.multilang.metadata.spec.Module;
 import mb.statix.multilang.metadata.spec.OverlappingRulesException;
 import mb.statix.multilang.metadata.spec.SpecFragment;
 import mb.statix.multilang.metadata.spec.SpecLoadException;
@@ -34,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -107,7 +109,7 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
                 .flatMap(this::validateIntegrity)
                 // Load Spec from Fragments.
                 .flatMap(this::loadSpecs)
-                // Check for overlapping declarations
+                // Sanity check for overlapping declarations
                 .flatMap(this::validateNoOverlap)
                 // Combine all fragments
                 .flatMap(specs -> specs.stream()
@@ -147,16 +149,24 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
         // Idea: for each fragment, collect all labels, and prefix them with the fragment id
         // This solves accidental naming collisions for sibling fragments
         final Map<SpecFragmentId, Map<String, String>> labelRenames = fragments.stream()
-            .map(fragment -> pair(fragment.id(), fragment.qualifiedLabels().collect(toMap())))
+            .map(fragment -> buildQualifiers(fragment, SpecUtils::allCustomLabels))
             .collect(toMap());
 
         final Map<SpecFragmentId, Map<String, String>> constraintRenames = fragments.stream()
-            .map(fragment -> pair(fragment.id(), fragment.qualifiedConstraints().collect(toMap())))
+            .map(fragment -> buildQualifiers(fragment, SpecUtils::allConstraints))
             .collect(toMap());
 
         return fragments.stream()
             .map(fragment -> this.toSpecResult(fragment, labelRenames, constraintRenames))
             .collect(ResultCollector.getWithBaseException(new SpecLoadException("Exception loading fragment specs")));
+    }
+
+    private Map.Entry<SpecFragmentId, Map<String, String>> buildQualifiers(SpecFragment fragment, Function<ITerm, Stream<String>> nameCollector) {
+        return pair(fragment.id(), fragment.modules().stream()
+            .map(Module::module)
+            .flatMap(nameCollector)
+            .map(label -> pair(label, String.format("%s:%s", fragment.id().getId(), label)))
+            .collect(toMap()));
     }
 
     /**
