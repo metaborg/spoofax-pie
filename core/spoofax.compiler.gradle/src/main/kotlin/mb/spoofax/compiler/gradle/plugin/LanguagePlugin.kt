@@ -107,7 +107,7 @@ open class LanguageProjectExtension(project: Project) {
   }
 }
 
-fun Project.whenLanguageProjectFinalized(closure: () -> Unit) = whenFinalized<LanguageProjectExtension> {
+fun Project.whenLanguageProjectFinalized(closure: () -> Unit) = whenFinalized(LanguageProjectExtension::class.java) {
   val extension: LanguageProjectExtension = extensions.getByType()
   // Project is fully finalized only iff all dependencies are finalized as well
   extension.statixDependenciesFinalized.whenAllLanguageProjectsFinalized(closure)

@@ -71,7 +71,7 @@ open class AdapterProjectExtension(project: Project) {
   }
 }
 
-internal fun Project.whenAdapterProjectFinalized(closure: () -> Unit) = whenFinalized<AdapterProjectExtension> {
+internal fun Project.whenAdapterProjectFinalized(closure: () -> Unit) = whenFinalized(AdapterProjectExtension::class.java) {
   val extension: AdapterProjectExtension = extensions.getByType()
   // Adapter project is only fully finalized when its dependent language project is finalized as well.
   extension.languageOrThisProjectFinalized.whenLanguageProjectFinalized(closure)

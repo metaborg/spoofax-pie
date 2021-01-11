@@ -6,9 +6,11 @@ plugins {
 val logVersion = "0.5.0"
 val slf4jVersion = "1.7.30"
 val resourceVersion = "0.10.0"
-val pieVersion = "0.13.1"
+val pieVersion = "0.14.0"
 
-val spoofax2Version = System.getProperty("spoofax2Version")
+val spoofax2Version: String by ext
+val spoofax2DevenvVersion: String by ext
+
 val picocliVersion = "4.5.0"
 
 val javaxInjectVersion = "1"
@@ -62,19 +64,22 @@ dependencies {
     api("org.metaborg:pie.dagger:$pieVersion")
     api("org.metaborg:pie.task.java:$pieVersion")
     api("org.metaborg:pie.task.archive:$pieVersion")
-    /// Spoofax 2
-    api("org.metaborg:org.spoofax.terms:$spoofax2Version")
-    api("org.metaborg:org.spoofax.jsglr:$spoofax2Version")
-    api("org.metaborg:sdf2table:$spoofax2Version")
-    api("org.metaborg:org.metaborg.parsetable:$spoofax2Version")
-    api("org.metaborg:sdf2parenthesize:$spoofax2Version")
-    api("org.metaborg:org.spoofax.interpreter.core:$spoofax2Version")
-    api("org.metaborg:org.strategoxt.strj:$spoofax2Version")
-    api("org.metaborg:stratego.build:$spoofax2Version")
-    api("org.metaborg:nabl2.solver:$spoofax2Version")
-    api("org.metaborg:nabl2.terms:$spoofax2Version")
-    api("org.metaborg:statix.solver:$spoofax2Version")
+    /// Spoofax 2.x
     runtime("org.metaborg:strategoxt-min-jar:$spoofax2Version")
+    /// Spoofax 2.x with devenv override
+    api("org.metaborg.devenv:org.strategoxt.strj:$spoofax2DevenvVersion")
+    api("org.metaborg.devenv:org.spoofax.terms:$spoofax2DevenvVersion")
+    api("org.metaborg.devenv:org.metaborg.util:$spoofax2DevenvVersion")
+    api("org.metaborg.devenv:org.spoofax.interpreter.core:$spoofax2DevenvVersion")
+    api("org.metaborg.devenv:org.spoofax.jsglr:$spoofax2DevenvVersion")
+    api("org.metaborg.devenv:sdf2table:$spoofax2DevenvVersion")
+    api("org.metaborg.devenv:sdf2parenthesize:$spoofax2DevenvVersion")
+    api("org.metaborg.devenv:org.metaborg.parsetable:$spoofax2DevenvVersion")
+    api("org.metaborg.devenv:stratego.build:$spoofax2DevenvVersion")
+    api("org.metaborg.devenv:nabl2.terms:$spoofax2DevenvVersion")
+    api("org.metaborg.devenv:nabl2.solver:$spoofax2DevenvVersion")
+    api("org.metaborg.devenv:statix.solver:$spoofax2DevenvVersion")
+
     /// Picocli
     api("info.picocli:picocli:$picocliVersion")
     api("info.picocli:picocli-codegen:$picocliVersion")
@@ -99,6 +104,9 @@ dependencies {
     api("org.immutables:value-annotations:$immutablesVersion")
     // Yaml
     api("org.yaml:snakeyaml:$yamlVersion")
+
+    // Gradle plugins
+    api("org.metaborg.devenv:spoofax.gradle:$spoofax2DevenvVersion")
 
 
     // Test dependencies // TODO: should be in a separate platform?

@@ -27,6 +27,7 @@ dependencies {
 
   // Dependencies to be able to use/configure the extensions provided by these Gradle plugins.
   compileOnly(project(":spoofax.compiler.gradle"))
+  compileOnly("org.metaborg.devenv:spoofax.gradle")
 }
 
 gradlePlugin {

@@ -44,7 +44,7 @@ open class Spoofax2LanguageProjectExtension(project: Project) {
 open class Spoofax2LanguagePlugin : Plugin<Project> {
   override fun apply(project: Project) {
     // Apply Spoofax 2 Gradle base plugin to make its configurations and variants available.
-    project.plugins.apply("org.metaborg.spoofax.gradle.base")
+    project.plugins.apply(mb.spoofax.gradle.plugin.SpoofaxBasePlugin::class)
 
     // First apply the language plugin to make its extension available.
     project.plugins.apply("org.metaborg.spoofax.compiler.gradle.language")
@@ -111,7 +111,7 @@ open class Spoofax2LanguagePlugin : Plugin<Project> {
     // Add language dependency.
     val languageDependency = input.languageSpecificationDependency().caseOf()
       .project<Dependency> { project.dependencies.project(it) }
-      .module { project.dependencies.module(it.toGradleNotation()) }
+      .module { project.dependencies.create(it.toGradleNotation()) }
       .files { project.dependencies.create(project.files(it)) }
     project.dependencies.add("compileLanguage", languageDependency)
 

@@ -7,7 +7,7 @@ dependencies {
 
   api(project(":common"))
 
-  api("org.metaborg:statix.solver")
+  api("org.metaborg.devenv:statix.solver")
 
   implementation(project(":stratego.common"))
 

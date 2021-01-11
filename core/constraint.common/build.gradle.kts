@@ -12,7 +12,7 @@ dependencies {
 
   api("org.metaborg:log.api")
 
-  implementation("org.metaborg:nabl2.terms")
+  implementation("org.metaborg.devenv:nabl2.terms")
 
   compileOnly("org.checkerframework:checker-qual-android")
   compileOnly("org.derive4j:derive4j-annotation")

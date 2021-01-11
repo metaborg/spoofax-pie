@@ -122,7 +122,7 @@ public interface Shared extends Serializable {
         final @Nullable InputStream inputStream = Shared.class.getClassLoader().getResourceAsStream("version.properties");
         if(inputStream != null) {
             try(final InputStream propertiesInputStream = inputStream) {
-                properties.load(inputStream);
+                properties.load(propertiesInputStream);
             } catch(IOException e) {
                 // Ignore
             }
@@ -186,12 +186,14 @@ public interface Shared extends Serializable {
 
     /// Spoofax 2.x
 
-    @Value.Default default GradleDependency orgStrategoXTStrjDep() {
-        return GradleDependency.module(Coordinate.of("org.metaborg", "org.strategoxt.strj"));
-    }
-
     @Value.Default default GradleDependency strategoXTMinJarDep() {
         return GradleDependency.module(Coordinate.of("org.metaborg", "strategoxt-min-jar"));
+    }
+
+    /// Spoofax 2.x with devenv override
+
+    @Value.Default default GradleDependency orgStrategoXTStrjDep() {
+        return GradleDependency.module(Coordinate.of("org.metaborg.devenv", "org.strategoxt.strj"));
     }
 
     /// PIE
