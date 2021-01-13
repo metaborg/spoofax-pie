@@ -22,7 +22,7 @@ if(gradle.parent == null) {
   includeBuildWithName("lwb", "spoofax3.lwb.root")
   // The 'example' composite build has example languages, some based on Gradle plugins from 'core', and some based on
   // Gradle plugins from 'lwb'.
-  includeBuildWithName("exmaple", "spoofax3.example.root")
+  includeBuildWithName("example", "spoofax3.example.root")
 }
 
 fun includeBuildWithName(dir: String, name: String) {
