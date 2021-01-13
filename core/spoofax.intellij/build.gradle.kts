@@ -10,7 +10,6 @@ dependencies {
   api(project(":spoofax.core"))
 
   api("org.metaborg:log.api")
-  implementation("org.metaborg:log.backend.noop")
   implementation("org.metaborg:pie.runtime")
   implementation("com.google.dagger:dagger")
 

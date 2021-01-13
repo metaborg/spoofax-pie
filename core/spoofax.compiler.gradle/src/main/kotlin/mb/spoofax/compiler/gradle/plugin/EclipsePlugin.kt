@@ -3,6 +3,7 @@
 package mb.spoofax.compiler.gradle.plugin
 
 import mb.coronium.plugin.BundleExtension
+import mb.spoofax.compiler.dagger.*
 import mb.spoofax.compiler.gradle.*
 import mb.spoofax.compiler.platform.*
 import mb.spoofax.compiler.util.*
@@ -72,14 +73,14 @@ open class EclipsePlugin : Plugin<Project> {
     }
   }
 
-  private fun configure(project: Project, component: SpoofaxCompilerGradleComponent, input: EclipseProjectCompiler.Input) {
+  private fun configure(project: Project, component: SpoofaxCompilerComponent, input: EclipseProjectCompiler.Input) {
     configureProject(project, component, input)
     configureCompilerTask(project, component, input)
     configureBundle(project, component, input)
     configureJarTask(project, input)
   }
 
-  private fun configureProject(project: Project, component: SpoofaxCompilerGradleComponent, input: EclipseProjectCompiler.Input) {
+  private fun configureProject(project: Project, component: SpoofaxCompilerComponent, input: EclipseProjectCompiler.Input) {
     project.addMainJavaSourceDirectory(input.generatedJavaSourcesDirectory(), component.resourceService)
     project.addMainResourceDirectory(input.generatedResourcesDirectory(), component.resourceService)
     component.eclipseProjectCompiler.getDependencies(input).forEach {
@@ -87,7 +88,7 @@ open class EclipsePlugin : Plugin<Project> {
     }
   }
 
-  private fun configureCompilerTask(project: Project, component: SpoofaxCompilerGradleComponent, input: EclipseProjectCompiler.Input) {
+  private fun configureCompilerTask(project: Project, component: SpoofaxCompilerComponent, input: EclipseProjectCompiler.Input) {
     val compileTask = project.tasks.register("compileEclipseProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
@@ -106,7 +107,7 @@ open class EclipsePlugin : Plugin<Project> {
     project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(compileTask)
   }
 
-  private fun configureBundle(project: Project, component: SpoofaxCompilerGradleComponent, input: EclipseProjectCompiler.Input) {
+  private fun configureBundle(project: Project, component: SpoofaxCompilerComponent, input: EclipseProjectCompiler.Input) {
     project.configure<BundleExtension> {
       manifestFile.set(component.resourceService.toLocalFile(input.manifestMfFile())!!)
     }

@@ -1,4 +1,4 @@
-package {{genRules.packageId}};
+package {{baseStylingRules.packageId}};
 
 import mb.esv.common.ESVStylingRules;
 import mb.resource.hierarchical.HierarchicalResource;
@@ -7,18 +7,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 
-public class {{genRules.id}} implements Serializable {
+public class {{baseStylingRules.id}} implements Serializable {
     final ESVStylingRules stylingRules;
 
-    private {{genRules.id}}(ESVStylingRules stylingRules) {
+    private {{baseStylingRules.id}}(ESVStylingRules stylingRules) {
         this.stylingRules = stylingRules;
     }
 
-    public static {{genRules.id}} fromDefinitionDir(HierarchicalResource definitionDir) {
+    public static {{baseStylingRules.id}} fromDefinitionDir(HierarchicalResource definitionDir) {
         final HierarchicalResource resource = definitionDir.appendRelativePath("{{packedEsvRelativePath}}");
         try(final InputStream inputStream = resource.openRead()) {
             final ESVStylingRules stylingRules = ESVStylingRules.fromStream(inputStream);
-            return new {{genRules.id}}(stylingRules);
+            return new {{baseStylingRules.id}}(stylingRules);
         } catch(IOException e) {
             throw new RuntimeException("Cannot create styling rules; cannot read styling rules from '" + resource + "' in classloader resources", e);
         }

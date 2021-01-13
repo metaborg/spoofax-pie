@@ -15,44 +15,44 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
- * A wrapper around a {@link MultiHashMap multi-map} with read-only operations. Only {@link Serializable serializable}
- * when the wrapped map is.
+ * A wrapper around a {@link MultiMap multi-map} with read-only operations. Only {@link Serializable serializable} when
+ * the wrapped map is.
  *
  * @param <K> The type of keys in this collection.
  * @param <V> The type of values in this collection.
  */
 @SuppressWarnings("unused")
 public class MultiMapView<K, V> implements Iterable<Map.Entry<K, ArrayList<V>>>, Serializable {
-    private final MultiHashMap<K, V> map;
+    private final MultiMap<K, V> map;
 
     private transient @MonotonicNonNull @Nullable SetView<K> keySet = null;
     private transient @MonotonicNonNull @Nullable CollectionView<ArrayList<V>> values = null;
     private transient @MonotonicNonNull @Nullable SetView<Map.Entry<K, ArrayList<V>>> entrySet = null;
 
 
-    public MultiMapView(MultiHashMap<K, V> map) {
+    public MultiMapView(MultiMap<K, V> map) {
         this.map = map;
     }
 
     public static <K, V> MultiMapView<K, V> of() {
-        return new MultiMapView<>(new MultiHashMap<>());
+        return new MultiMapView<>(MultiMap.withHash());
     }
 
     public static <K, V> MultiMapView<K, V> of(K key, V value) {
-        final MultiHashMap<K, V> map = new MultiHashMap<>();
+        final MultiMap<K, V> map = MultiMap.withHash();
         map.put(key, value);
         return new MultiMapView<>(map);
     }
 
     public static <K, V> MultiMapView<K, V> of(K key1, V value1, K key2, V value2) {
-        final MultiHashMap<K, V> map = new MultiHashMap<>();
+        final MultiMap<K, V> map = MultiMap.withHash();
         map.put(key1, value1);
         map.put(key2, value2);
         return new MultiMapView<>(map);
     }
 
     public static <K, V> MultiMapView<K, V> of(K key1, V value1, K key2, V value2, K key3, V value3) {
-        final MultiHashMap<K, V> map = new MultiHashMap<>();
+        final MultiMap<K, V> map = MultiMap.withHash();
         map.put(key1, value1);
         map.put(key2, value2);
         map.put(key3, value3);
@@ -60,28 +60,28 @@ public class MultiMapView<K, V> implements Iterable<Map.Entry<K, ArrayList<V>>>,
     }
 
     @SafeVarargs public static <K, V> MultiMapView<K, V> of(EntryView<? extends K, ? extends V>... entries) {
-        final MultiHashMap<K, V> map = new MultiHashMap<>();
+        final MultiMap<K, V> map = MultiMap.withHash();
         for(EntryView<? extends K, ? extends V> entry : entries) {
             map.put(entry.getKey(), entry.getValue());
         }
         return new MultiMapView<>(map);
     }
 
-    public static <K, V> MultiMapView<K, V> of(MultiHashMap<K, V> map) {
+    public static <K, V> MultiMapView<K, V> of(MultiMap<K, V> map) {
         return new MultiMapView<>(map);
     }
 
-    public static <K, V> MultiMapView<K, V> of(Supplier<MultiHashMap<K, V>> mapSupplier) {
+    public static <K, V> MultiMapView<K, V> of(Supplier<MultiMap<K, V>> mapSupplier) {
         return new MultiMapView<>(mapSupplier.get());
     }
 
 
-    public static <K, V> MultiMapView<K, V> copyOf(MultiHashMap<K, V> map) {
-        return new MultiMapView<>(new MultiHashMap<>(map));
+    public static <K, V> MultiMapView<K, V> copyOf(MultiMap<K, V> map) {
+        return new MultiMapView<>(new MultiMap<>(map));
     }
 
     public static <K, V> MultiMapView<K, V> copyOf(MultiMapView<K, V> map) {
-        return new MultiMapView<>(new MultiHashMap<>(map.map));
+        return new MultiMapView<>(new MultiMap<>(map.map));
     }
 
 
@@ -161,7 +161,7 @@ public class MultiMapView<K, V> implements Iterable<Map.Entry<K, ArrayList<V>>>,
     }
 
 
-    public void addAllTo(MultiHashMap<K, V> map) {
+    public void addAllTo(MultiMap<K, V> map) {
         map.putAll(this.map);
     }
 

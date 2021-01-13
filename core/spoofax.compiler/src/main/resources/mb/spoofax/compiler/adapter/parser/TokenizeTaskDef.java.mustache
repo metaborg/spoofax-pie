@@ -1,4 +1,4 @@
-package {{genTokenizeTaskDef.packageId}};
+package {{baseTokenizeTaskDef.packageId}};
 
 import mb.common.option.Option;
 import mb.jsglr.common.JSGLRTokens;
@@ -11,15 +11,15 @@ import javax.inject.Inject;
 import java.io.IOException;
 
 @{{adapterProject.scope.qualifiedId}}
-public class {{genTokenizeTaskDef.id}} implements TaskDef<ResourceKey, Option<JSGLRTokens>> {
+public class {{baseTokenizeTaskDef.id}} implements TaskDef<ResourceKey, Option<JSGLRTokens>> {
     private final {{parseTaskDef.qualifiedId}} parse;
 
-    @Inject public {{genTokenizeTaskDef.id}}({{parseTaskDef.qualifiedId}} parse) {
+    @Inject public {{baseTokenizeTaskDef.id}}({{parseTaskDef.qualifiedId}} parse) {
         this.parse = parse;
     }
 
     @Override public String getId() {
-        return "{{genTokenizeTaskDef.qualifiedId}}";
+        return "{{baseTokenizeTaskDef.qualifiedId}}";
     }
 
     @Override

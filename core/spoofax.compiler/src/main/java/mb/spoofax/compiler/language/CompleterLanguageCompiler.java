@@ -26,7 +26,7 @@ public class CompleterLanguageCompiler implements TaskDef<CompleterLanguageCompi
 
     @Override public Output exec(ExecContext context, Input input) throws IOException {
         final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManualOnly()) return outputBuilder.build(); // Nothing to generate: return.
+        if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         return outputBuilder.build();
     }
@@ -62,28 +62,26 @@ public class CompleterLanguageCompiler implements TaskDef<CompleterLanguageCompi
 
         // Completer
 
-        @Value.Default default TypeInfo genCompleter() {
+        @Value.Default default TypeInfo baseCompleter() {
             return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "Completer");
         }
 
-        Optional<TypeInfo> manualCompleter();
+        Optional<TypeInfo> extendCompleter();
 
         default TypeInfo completer() {
-            if(classKind().isManual() && manualCompleter().isPresent()) {
-                return manualCompleter().get();
-            }
-            return genCompleter();
+            return extendCompleter().orElseGet(this::baseCompleter);
         }
 
 
-        /// List of all provided files
+        /// Files information, known up-front for build systems with static dependencies such as Gradle.
 
-        default ListView<ResourcePath> providedFiles() {
-            if(classKind().isManualOnly()) {
+        default ListView<ResourcePath> javaSourceFiles() {
+            if(classKind().isManual()) {
                 return ListView.of();
             }
+            final ResourcePath generatedJavaSourcesDirectory = generatedJavaSourcesDirectory();
             return ListView.of(
-                genCompleter().file(generatedJavaSourcesDirectory())
+                baseCompleter().file(generatedJavaSourcesDirectory)
             );
         }
 
@@ -96,12 +94,7 @@ public class CompleterLanguageCompiler implements TaskDef<CompleterLanguageCompi
 
 
         @Value.Check default void check() {
-            final ClassKind kind = classKind();
-            final boolean manual = kind.isManual();
-            if(!manual) return;
-            if(!manualCompleter().isPresent()) {
-                throw new IllegalArgumentException("Kind '" + kind + "' indicates that a manual class will be used, but 'manualCompleter' has not been set");
-            }
+
         }
     }
 

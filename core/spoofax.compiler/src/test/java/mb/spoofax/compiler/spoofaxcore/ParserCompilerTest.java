@@ -19,15 +19,15 @@ class ParserCompilerTest extends TestBase {
             final ParserLanguageCompiler.Input languageProjectInput = inputs.parserLanguageCompilerInput();
             session.require(component.getParserLanguageCompiler().createTask(languageProjectInput));
             fileAssertions.scopedExists(languageProjectInput.generatedJavaSourcesDirectory(), (s) -> {
-                s.assertPublicJavaClass(languageProjectInput.genTable(), "TigerParseTable");
-                s.assertPublicJavaClass(languageProjectInput.genParser(), "TigerParser");
-                s.assertPublicJavaClass(languageProjectInput.genFactory(), "TigerParserFactory");
+                s.assertPublicJavaClass(languageProjectInput.baseParseTable(), "TigerParseTable");
+                s.assertPublicJavaClass(languageProjectInput.baseParser(), "TigerParser");
+                s.assertPublicJavaClass(languageProjectInput.baseParserFactory(), "TigerParserFactory");
             });
 
             final ParserAdapterCompiler.Input adapterProjectInput = inputs.parserAdapterCompilerInput();
             session.require(component.getParserAdapterCompiler().createTask(adapterProjectInput));
             fileAssertions.scopedExists(adapterProjectInput.generatedJavaSourcesDirectory(), (s) -> {
-                s.assertPublicJavaClass(adapterProjectInput.genParseTaskDef(), "TigerParse");
+                s.assertPublicJavaClass(adapterProjectInput.baseParseTaskDef(), "TigerParse");
                 s.assertPublicJavaClass(adapterProjectInput.tokenizeTaskDef(), "TigerTokenize");
             });
         }
@@ -39,53 +39,27 @@ class ParserCompilerTest extends TestBase {
         try(MixedSession session = pie.newSession()) {
             inputs.languageProjectCompilerInputBuilder.withParser()
                 .classKind(ClassKind.Manual)
-                .manualParser("my.lang", "MyParser")
-                .manualFactory("my.lang", "MyParserFactory");
+                .baseParser("my.lang", "MyParser")
+                .baseParserFactory("my.lang", "MyParserFactory");
             final ParserLanguageCompiler.Input languageProjectInput = inputs.parserLanguageCompilerInput();
             session.require(component.getParserLanguageCompiler().createTask(languageProjectInput));
             fileAssertions.scopedNotExists(languageProjectInput.generatedJavaSourcesDirectory(), (s) -> {
-                s.assertNotExists(languageProjectInput.genTable());
-                s.assertNotExists(languageProjectInput.genParser());
-                s.assertNotExists(languageProjectInput.genFactory());
+                s.assertNotExists(languageProjectInput.baseParseTable());
+                s.assertNotExists(languageProjectInput.baseParser());
+                s.assertNotExists(languageProjectInput.baseParserFactory());
             });
 
             inputs.adapterProjectCompilerInputBuilder.withParser()
                 .classKind(ClassKind.Manual)
-                .manualParseTaskDef("my.adapter.taskdef", "MyParseTaskDef")
-                .manualTokenizeTaskDef("my.adapter.taskdef", "MyTokenizeTaskDef");
+                .baseParseTaskDef("my.adapter.taskdef", "MyParseTaskDef")
+                .baseTokenizeTaskDef("my.adapter.taskdef", "MyTokenizeTaskDef");
             final ParserAdapterCompiler.Input adapterProjectInput = inputs.parserAdapterCompilerInput();
             session.require(component.getParserAdapterCompiler().createTask(adapterProjectInput));
             fileAssertions.scopedNotExists(adapterProjectInput.generatedJavaSourcesDirectory(), (s) -> {
-                s.assertNotExists(adapterProjectInput.genParseTaskDef());
+                s.assertNotExists(adapterProjectInput.baseParseTaskDef());
                 s.assertNotExists(adapterProjectInput.tokenizeTaskDef());
             });
         }
     }
 
-    @ParameterizedTest @EnumSource(value = ClassKind.class, names = {"Manual"})
-    void testManualRequiresClasses(ClassKind classKind) {
-        final TigerInputs inputs = defaultInputs();
-
-        inputs.languageProjectCompilerInputBuilder.withParser()
-            .classKind(classKind);
-        assertThrows(IllegalArgumentException.class, inputs::languageProjectCompilerInput); // Class kind is Manual but manual class names were not set: check fails.
-        inputs.clearBuiltInputs();
-
-        inputs.languageProjectCompilerInputBuilder.withParser()
-            .classKind(classKind)
-            .manualParser("my.lang", "MyParser")
-            .manualFactory("my.lang", "MyParserFactory");
-        inputs.languageProjectCompilerInput(); // Manual classes are set: no exception.
-
-        inputs.adapterProjectCompilerInputBuilder.withParser()
-            .classKind(classKind);
-        assertThrows(IllegalArgumentException.class, inputs::adapterProjectCompilerInput); // Class kind is Manual but manual class names were not set: check fails.
-        inputs.clearBuiltInputs();
-
-        inputs.adapterProjectCompilerInputBuilder.withParser()
-            .classKind(classKind)
-            .manualParseTaskDef("my.adapter.taskdef", "MyParseTaskDef")
-            .manualTokenizeTaskDef("my.adapter.taskdef", "MyTokenizeTaskDef");
-        inputs.adapterProjectCompilerInput(); // Manual classes are set: no exception.
-    }
 }

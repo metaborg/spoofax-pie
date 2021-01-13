@@ -1,4 +1,4 @@
-package {{genCompleteTaskDef.packageId}};
+package {{baseCompleteTaskDef.packageId}};
 
 import mb.common.style.StyleName;
 import mb.common.util.ListView;
@@ -15,7 +15,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @{{adapterProject.scope.qualifiedId}}
-public class {{genCompleteTaskDef.id}} implements TaskDef<{{genCompleteTaskDef.id}}.Input, @Nullable CompletionResult> {
+public class {{baseCompleteTaskDef.id}} implements TaskDef<{{baseCompleteTaskDef.id}}.Input, @Nullable CompletionResult> {
 
     public static class Input implements Serializable {
         public final Supplier<@Nullable IStrategoTerm> astSupplier;
@@ -44,11 +44,11 @@ public class {{genCompleteTaskDef.id}} implements TaskDef<{{genCompleteTaskDef.i
 
     }
 
-    @Inject public {{genCompleteTaskDef.id}}() {}
+    @Inject public {{baseCompleteTaskDef.id}}() {}
 
     @Override
     public String getId() {
-        return "{{genCompleteTaskDef.id}}";
+        return "{{baseCompleteTaskDef.id}}";
     }
 
     @Override

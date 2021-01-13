@@ -3,7 +3,7 @@ package mb.common.message;
 import mb.common.region.Region;
 import mb.common.util.ListView;
 import mb.common.util.MapView;
-import mb.common.util.MultiHashMap;
+import mb.common.util.MultiMap;
 import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.Map;
 
 public class KeyedMessagesBuilder {
-    private final MultiHashMap<ResourceKey, Message> messages = new MultiHashMap<>();
+    private final MultiMap<ResourceKey, Message> messages = MultiMap.withLinkedHash();
     private final ArrayList<Message> messagesWithoutKey = new ArrayList<>();
 
 
@@ -65,7 +65,7 @@ public class KeyedMessagesBuilder {
         this.messages.putAll(resourceKey, messages.messages);
     }
 
-    public void addMessages(MultiHashMap<ResourceKey, Message> messages) {
+    public void addMessages(MultiMap<ResourceKey, Message> messages) {
         this.messages.putAll(messages);
     }
 
@@ -132,11 +132,11 @@ public class KeyedMessagesBuilder {
 
 
     public KeyedMessages build() {
-        return new KeyedMessages(MapView.copyOf(messages.getInnerMap()), ListView.copyOf(messagesWithoutKey));
+        return new KeyedMessages(MapView.copyOfWithLinkedHash(messages.getInnerMap()), ListView.copyOf(messagesWithoutKey));
     }
 
     public KeyedMessages build(ResourceKey defaultKey) {
-        return new KeyedMessages(MapView.copyOf(messages.getInnerMap()), ListView.copyOf(messagesWithoutKey));
+        return new KeyedMessages(MapView.copyOfWithLinkedHash(messages.getInnerMap()), ListView.copyOf(messagesWithoutKey));
     }
 
     public boolean isEmpty() {

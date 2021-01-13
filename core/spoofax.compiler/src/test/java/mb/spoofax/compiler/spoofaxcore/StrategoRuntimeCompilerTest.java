@@ -13,7 +13,7 @@ class StrategoRuntimeCompilerTest extends TestBase {
         try(MixedSession session = pie.newSession()) {
             session.require(component.getStrategoRuntimeLanguageCompiler().createTask(input));
             fileAssertions.scopedExists(input.generatedJavaSourcesDirectory(), (s) -> {
-                s.assertPublicJavaClass(input.genFactory(), "TigerStrategoRuntimeBuilderFactory");
+                s.assertPublicJavaClass(input.baseStrategoRuntimeBuilderFactory(), "TigerStrategoRuntimeBuilderFactory");
             });
         }
     }

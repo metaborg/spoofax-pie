@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -76,12 +77,20 @@ public class MapView<K, V> implements Iterable<Map.Entry<K, V>>, Serializable {
     }
 
 
-    public static <K, V> MapView<K, V> copyOf(Map<? extends K, ? extends V> map) {
+    public static <K, V> MapView<K, V> copyOfWithHash(Map<? extends K, ? extends V> map) {
         return new MapView<>(new HashMap<>(map));
     }
 
-    public static <K, V> MapView<K, V> copyOf(MapView<? extends K, ? extends V> map) {
+    public static <K, V> MapView<K, V> copyOfWithHash(MapView<? extends K, ? extends V> map) {
         return new MapView<>(new HashMap<>(map.map));
+    }
+
+    public static <K, V> MapView<K, V> copyOfWithLinkedHash(Map<? extends K, ? extends V> map) {
+        return new MapView<>(new LinkedHashMap<>(map));
+    }
+
+    public static <K, V> MapView<K, V> copyOfWithLinkedHash(MapView<? extends K, ? extends V> map) {
+        return new MapView<>(new LinkedHashMap<>(map.map));
     }
 
 

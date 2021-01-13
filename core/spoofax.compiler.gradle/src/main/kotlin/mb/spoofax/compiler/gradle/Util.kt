@@ -23,12 +23,13 @@ fun Project.toSpoofaxCompilerProject(): GradleProject {
   // TODO: set src/main and build directory
 }
 
-inline fun <reified E : Any> Project.whenFinalized(crossinline closure: () -> Unit) {
+// Do not inline this function because it disables a Gradle plugin classpath optimization.
+fun <E : Any> Project.whenFinalized(clazz: Class<E>, closure: () -> Unit) {
   try {
-    extensions.getByType<E>()
+    extensions.getByType(clazz)
   } catch(e: UnknownDomainObjectException) {
     afterEvaluate {
-      extensions.getByType<E>()
+      extensions.getByType(clazz)
       closure()
     }
     return

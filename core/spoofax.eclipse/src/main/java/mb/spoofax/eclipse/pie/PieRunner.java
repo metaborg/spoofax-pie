@@ -18,7 +18,6 @@ import mb.pie.api.TaskKey;
 import mb.pie.api.TopDownSession;
 import mb.pie.api.exec.CancelToken;
 import mb.pie.api.exec.NullCancelableToken;
-import mb.pie.runtime.exec.Stats;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageInstance;
@@ -409,25 +408,19 @@ public class PieRunner {
 
     public <T extends @Nullable Serializable> T requireWithoutObserving(Task<T> task, Session session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
         logger.trace("Require (without observing) '{}'", task);
-        Stats.reset();
         final T result = session.requireWithoutObserving(task, monitorCancelled(monitor));
-        logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
         return result;
     }
 
     public <T extends @Nullable Serializable> T require(Task<T> task, Session session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
         logger.trace("Require '{}'", task);
-        Stats.reset();
         final T result = session.require(task, monitorCancelled(monitor));
-        logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
         return result;
     }
 
     public TopDownSession updateAffectedBy(Set<? extends ResourceKey> changedResources, MixedSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
         logger.trace("Update affected by '{}'", changedResources);
-        Stats.reset();
         final TopDownSession newSession = session.updateAffectedBy(changedResources, monitorCancelled(monitor));
-        logger.trace("Executed/required {}/{} tasks", Stats.executions, Stats.callReqs);
         return newSession;
     }
 

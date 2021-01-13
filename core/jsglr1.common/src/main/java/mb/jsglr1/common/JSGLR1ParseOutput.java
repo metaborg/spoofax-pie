@@ -35,7 +35,7 @@ public class JSGLR1ParseOutput implements Serializable {
     }
 
     @Override public String toString() {
-        return "JSGLR1Parse{" +
+        return "JSGLR1ParseOutput{" +
             "ast=" + ast +
             ", tokens=" + tokens +
             ", messages=" + messages +

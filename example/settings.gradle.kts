@@ -13,8 +13,20 @@ if(org.gradle.util.VersionNumber.parse(gradle.gradleVersion).major < 6) {
 // Only include composite builds when this is the root project (it has no parent), for example when running Gradle tasks
 // from the command-line. Otherwise, the parent project (spoofax.root) will include these composite builds.
 if(gradle.parent == null) {
-  includeBuild("../core")
-  includeBuild("../lwb")
+  includeBuildWithName("../core", "spoofax3.core.root")
+  includeBuildWithName("../lwb", "spoofax3.lwb.root")
+}
+
+fun includeBuildWithName(dir: String, name: String) {
+  includeBuild(dir) {
+    try {
+      ConfigurableIncludedBuild::class.java
+        .getDeclaredMethod("setName", String::class.java)
+        .invoke(this, name)
+    } catch(e: NoSuchMethodException) {
+      // Running Gradle < 6, no need to set the name, ignore.
+    }
+  }
 }
 
 fun String.includeProject(id: String, path: String = "$this/$id") {

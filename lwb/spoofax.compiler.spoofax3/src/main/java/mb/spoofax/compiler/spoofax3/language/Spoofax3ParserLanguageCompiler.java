@@ -171,11 +171,13 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
         // Compile SDF3 spec to a parenthesizer.
         try {
             toParenthesizer(context, input, parseTableSupplier);
+        } catch(RuntimeException e) {
+            throw e; // Do not wrap runtime exceptions, rethrow them.
         } catch(Exception e) {
             return Result.ofErr(ParserCompilerException.parenthesizerGeneratorFail(e));
         }
 
-        {// Generate pp and completion Stratego module.
+        { // Generate pp and completion Stratego module.
             final HashMap<String, Object> map = new HashMap<>();
             map.put("name", input.sdf3StrategyNameQualifier());
             map.put("ppName", input.sdf3StrategyNameQualifier());
@@ -279,7 +281,7 @@ public class Spoofax3ParserLanguageCompiler implements TaskDef<Spoofax3ParserLan
 
         /// Automatically provided sub-inputs
 
-        Shared shared();
+        @Value.Auxiliary Shared shared();
 
         Spoofax3LanguageProject spoofax3LanguageProject();
 

@@ -6,3 +6,10 @@ plugins {
 languageCliProject {
   adapterProject.set(project(":minisdf"))
 }
+
+tasks {
+  // Disable currently unused distribution tasks.
+  distZip.configure { enabled = false }
+  distTar.configure { enabled = false }
+  startScripts.configure { enabled = false }
+}

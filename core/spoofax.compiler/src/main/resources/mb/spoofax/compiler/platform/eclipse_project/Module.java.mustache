@@ -1,4 +1,4 @@
-package {{genEclipseModule.packageId}};
+package {{baseEclipseModule.packageId}};
 
 import dagger.Module;
 import dagger.Provides;
@@ -14,7 +14,7 @@ import {{adapterProjectCompilerInput.scope.qualifiedId}};
 import javax.inject.Named;
 
 @Module
-public class {{genEclipseModule.id}} {
+public class {{baseEclipseModule.id}} {
     @Provides @{{adapterProjectCompilerInput.scope.id}}
     static EclipseIdentifiers provideEclipseIdentifiers() {
         return new {{eclipseIdentifiers.qualifiedId}}();

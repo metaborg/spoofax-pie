@@ -14,8 +14,8 @@ class ConstraintAnalyzerCompilerTest extends TestBase {
             final ConstraintAnalyzerLanguageCompiler.Input languageProjectInput = inputs.constraintAnalyzerLanguageCompilerInput();
             session.require(component.getConstraintAnalyzerLanguageCompiler().createTask(languageProjectInput));
             fileAssertions.scopedExists(languageProjectInput.generatedJavaSourcesDirectory(), (s) -> {
-                s.assertPublicJavaClass(languageProjectInput.genConstraintAnalyzer(), "TigerConstraintAnalyzer");
-                s.assertPublicJavaClass(languageProjectInput.genFactory(), "TigerConstraintAnalyzerFactory");
+                s.assertPublicJavaClass(languageProjectInput.baseConstraintAnalyzer(), "TigerConstraintAnalyzer");
+                s.assertPublicJavaClass(languageProjectInput.baseConstraintAnalyzerFactory(), "TigerConstraintAnalyzerFactory");
             });
 
             final ConstraintAnalyzerAdapterCompiler.Input adapterProjectInput = inputs.constraintAnalyzerAdapterCompilerInput();

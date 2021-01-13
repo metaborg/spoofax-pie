@@ -11,6 +11,7 @@ import mb.constraint.common.ConstraintAnalyzerException;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Function;
 import mb.pie.api.ResourceStringSupplier;
+import mb.pie.api.SerializableFunction;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
@@ -49,7 +50,7 @@ public abstract class ConstraintAnalyzeMultiTaskDef implements TaskDef<Constrain
         @Override public boolean equals(Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
-            final Input input = (Input)o;
+            final Input input = (Input) o;
             return root.equals(input.root) &&
                 walker.equals(input.walker) &&
                 matcher.equals(input.matcher) &&
@@ -84,7 +85,7 @@ public abstract class ConstraintAnalyzeMultiTaskDef implements TaskDef<Constrain
         @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
-            final Output output = (Output)o;
+            final Output output = (Output) o;
             return messagesFromAstProviders.equals(output.messagesFromAstProviders) &&
                 context.equals(output.context) &&
                 result.equals(output.result);
@@ -115,7 +116,7 @@ public abstract class ConstraintAnalyzeMultiTaskDef implements TaskDef<Constrain
         @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
-            final SingleFileOutput output = (SingleFileOutput)o;
+            final SingleFileOutput output = (SingleFileOutput) o;
             return context.equals(output.context) && result.equals(output.result);
         }
 
@@ -157,7 +158,7 @@ public abstract class ConstraintAnalyzeMultiTaskDef implements TaskDef<Constrain
 }
 
 
-class SingleFileMapper implements java.util.function.Function<Result<ConstraintAnalyzeMultiTaskDef.Output, ?>, Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?>>, Serializable {
+class SingleFileMapper implements SerializableFunction<Result<ConstraintAnalyzeMultiTaskDef.Output, ?>, Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?>> {
     private final ResourceKey resource;
 
     SingleFileMapper(ResourceKey resource) {
@@ -180,7 +181,7 @@ class SingleFileMapper implements java.util.function.Function<Result<ConstraintA
     @Override public boolean equals(@Nullable Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
-        final SingleFileMapper that = (SingleFileMapper)o;
+        final SingleFileMapper that = (SingleFileMapper) o;
         return resource.equals(that.resource);
     }
 

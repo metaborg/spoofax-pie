@@ -15,7 +15,7 @@ class CliProjectCompilerTest extends TestBase {
             session.require(component.getCliProjectCompiler().createTask(input));
             fileAssertions.scopedExists(input.generatedJavaSourcesDirectory(), (s) -> {
                 s.asserts(input.packageInfo(), (a) -> a.assertAll("package-info.java", "@DefaultQualifier(NonNull.class)"));
-                s.assertPublicJavaClass(input.genMain(), "Main");
+                s.assertPublicJavaClass(input.baseMain(), "Main");
             });
         }
     }

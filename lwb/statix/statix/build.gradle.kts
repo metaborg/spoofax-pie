@@ -59,10 +59,7 @@ spoofax2BasedLanguageProject {
       copyCtree(false)
       copyClasses(true)
     }
-
-    val spoofax2GroupId = "org.metaborg"
-    val spoofax2Version = System.getProperty("spoofax2Version")
-    project.languageSpecificationDependency(GradleDependency.module("$spoofax2GroupId:statix.lang:$spoofax2Version"))
+    project.languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:statix.lang:${ext["spoofax2DevenvVersion"]}"))
   }
 }
 
@@ -73,11 +70,9 @@ languageAdapterProject {
     withParser()
     withStyler()
     withConstraintAnalyzer().run {
-      // Enable manual class implementation
-      classKind(ClassKind.Extended)
       // Manual analyze multi implementation to add Spoofax2ProjectContext
-      genAnalyzeMultiTaskDef(taskPackageId, "GeneratedStatixAnalyzeMulti")
-      manualAnalyzeMultiTaskDef(taskPackageId, "StatixAnalyzeMulti")
+      baseAnalyzeMultiTaskDef(taskPackageId, "GeneratedStatixAnalyzeMulti")
+      extendAnalyzeMultiTaskDef(taskPackageId, "StatixAnalyzeMulti")
     }
     withStrategoRuntime()
     project.configureCompilerInput()

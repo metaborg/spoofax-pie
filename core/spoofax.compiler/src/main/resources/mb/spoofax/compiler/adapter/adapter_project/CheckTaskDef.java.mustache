@@ -1,4 +1,4 @@
-package {{genCheckTaskDef.packageId}};
+package {{baseCheckTaskDef.packageId}};
 
 import mb.common.message.Messages;
 import mb.common.message.MessagesBuilder;
@@ -12,13 +12,13 @@ import javax.inject.Inject;
 import java.io.IOException;
 
 @{{scope.qualifiedId}}
-public class {{genCheckTaskDef.id}} implements TaskDef<ResourceKey, Messages> {
+public class {{baseCheckTaskDef.id}} implements TaskDef<ResourceKey, Messages> {
 
 {{#checkInjections}}
     {{variable}};
 {{/checkInjections}}
 
-    @Inject public {{genCheckTaskDef.id}}(
+    @Inject public {{baseCheckTaskDef.id}}(
 {{#checkInjections}}
     {{variable}}{{^-last}},{{/-last}}
 {{/checkInjections}}
@@ -29,7 +29,7 @@ public class {{genCheckTaskDef.id}} implements TaskDef<ResourceKey, Messages> {
     }
 
     @Override public String getId() {
-        return "{{genCheckTaskDef.qualifiedId}}";
+        return "{{baseCheckTaskDef.qualifiedId}}";
     }
 
     @Override public Messages exec(ExecContext context, ResourceKey key) throws IOException {

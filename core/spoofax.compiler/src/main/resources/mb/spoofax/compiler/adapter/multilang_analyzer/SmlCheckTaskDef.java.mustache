@@ -1,9 +1,10 @@
-package {{genCheckTaskDef.packageId}};
+package {{baseCheckTaskDef.packageId}};
 
 import dagger.Lazy;
 import mb.common.message.Messages;
 import mb.pie.api.Function;
 import mb.pie.api.ResourceStringSupplier;
+import mb.pie.api.SerializableFunction;
 import mb.pie.api.Supplier;
 import mb.resource.ResourceKey;
 import mb.statix.multilang.metadata.LanguageId;
@@ -16,20 +17,20 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import javax.inject.Inject;
 
 @{{adapterProject.scope.qualifiedId}}
-public class {{genCheckTaskDef.id}} extends SmlCheckTaskDef {
+public class {{baseCheckTaskDef.id}} extends SmlCheckTaskDef {
 
-    @Inject public {{genCheckTaskDef.id}}(
+    @Inject public {{baseCheckTaskDef.id}}(
         Function<Supplier<String>, Messages> messagesSupplier,
         SmlBuildContextConfiguration buildContextConfiguration,
         SmlSolveProject solveProject,
         Lazy<LanguageMetadataManager> languageMetadataManager
     ) {
-        super(messagesSupplier.mapInput((java.util.function.Function<ResourceKey, Supplier<String>>)ResourceStringSupplier::new),
+        super(messagesSupplier.mapInput((SerializableFunction<ResourceKey, Supplier<String>>)ResourceStringSupplier::new),
                 buildContextConfiguration, solveProject, languageMetadataManager);
     }
 
     @Override public String getId() {
-        return "{{genCheckTaskDef.qualifiedId}}";
+        return "{{baseCheckTaskDef.qualifiedId}}";
     }
 
     @Override protected LanguageId getLanguageId() {

@@ -5,5 +5,5 @@ gradlePipeline(
   buildOtherBranch: false,
   buildTag: false,
   slack: true,
-  slackChannel: '#pie-dev'
+  slackChannel: '#spoofax3-dev'
 )

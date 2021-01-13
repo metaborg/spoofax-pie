@@ -4,8 +4,8 @@ package mb.spoofax.compiler.gradle.plugin
 
 import mb.common.option.Option
 import mb.spoofax.compiler.adapter.*
+import mb.spoofax.compiler.dagger.*
 import mb.spoofax.compiler.gradle.*
-import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaLibraryPlugin
@@ -71,7 +71,7 @@ open class AdapterProjectExtension(project: Project) {
   }
 }
 
-internal fun Project.whenAdapterProjectFinalized(closure: () -> Unit) = whenFinalized<AdapterProjectExtension> {
+internal fun Project.whenAdapterProjectFinalized(closure: () -> Unit) = whenFinalized(AdapterProjectExtension::class.java) {
   val extension: AdapterProjectExtension = extensions.getByType()
   // Adapter project is only fully finalized when its dependent language project is finalized as well.
   extension.languageOrThisProjectFinalized.whenLanguageProjectFinalized(closure)
@@ -92,23 +92,23 @@ open class AdapterPlugin : Plugin<Project> {
     }
   }
 
-  private fun configure(project: Project, component: SpoofaxCompilerGradleComponent, input: AdapterProjectCompiler.Input) {
+  private fun configure(project: Project, component: SpoofaxCompilerComponent, input: AdapterProjectCompiler.Input) {
     configureProject(project, component, input)
     configureCompileTask(project, component, input)
   }
 
-  private fun configureProject(project: Project, component: SpoofaxCompilerGradleComponent, input: AdapterProjectCompiler.Input) {
+  private fun configureProject(project: Project, component: SpoofaxCompilerComponent, input: AdapterProjectCompiler.Input) {
     project.addMainJavaSourceDirectory(input.adapterProject().generatedJavaSourcesDirectory(), component.resourceService)
     component.adapterProjectCompiler.getDependencies(input).forEach {
       it.addToDependencies(project)
     }
   }
 
-  private fun configureCompileTask(project: Project, component: SpoofaxCompilerGradleComponent, input: AdapterProjectCompiler.Input) {
+  private fun configureCompileTask(project: Project, component: SpoofaxCompilerComponent, input: AdapterProjectCompiler.Input) {
     val compileTask = project.tasks.register("compileAdapterProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
-      outputs.files(input.providedFiles().map { component.resourceService.toLocalFile(it) })
+      outputs.files(input.javaSourceFiles().map { component.resourceService.toLocalFile(it) })
 
       doLast {
         project.deleteDirectory(input.adapterProject().generatedJavaSourcesDirectory(), component.resourceService)

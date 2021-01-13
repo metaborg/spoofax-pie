@@ -2,6 +2,7 @@
 
 package mb.spoofax.compiler.gradle.plugin
 
+import mb.spoofax.compiler.dagger.*
 import mb.spoofax.compiler.gradle.*
 import mb.spoofax.compiler.platform.*
 import org.gradle.api.GradleException
@@ -75,23 +76,24 @@ open class CliPlugin : Plugin<Project> {
     }
   }
 
-  private fun configure(project: Project, component: SpoofaxCompilerGradleComponent, input: CliProjectCompiler.Input) {
+  private fun configure(project: Project, component: SpoofaxCompilerComponent, input: CliProjectCompiler.Input) {
     configureProject(project, component, input)
     configureCompileTask(project, component, input)
     configureExecutableJarTask(project)
   }
 
-  private fun configureProject(project: Project, component: SpoofaxCompilerGradleComponent, input: CliProjectCompiler.Input) {
+  private fun configureProject(project: Project, component: SpoofaxCompilerComponent, input: CliProjectCompiler.Input) {
     project.addMainJavaSourceDirectory(input.generatedJavaSourcesDirectory(), component.resourceService)
     component.cliProjectCompiler.getDependencies(input).forEach {
       it.addToDependencies(project)
     }
     project.configure<JavaApplication> {
+      @Suppress("DEPRECATION") // Use deprecated property to stay compatible with Gradle 5.6.4
       mainClassName = input.main().qualifiedId()
     }
   }
 
-  private fun configureCompileTask(project: Project, component: SpoofaxCompilerGradleComponent, input: CliProjectCompiler.Input) {
+  private fun configureCompileTask(project: Project, component: SpoofaxCompilerComponent, input: CliProjectCompiler.Input) {
     val compileTask = project.tasks.register("compileCliProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
@@ -127,7 +129,7 @@ open class CliPlugin : Plugin<Project> {
 
       doFirst { // Delay setting Main-Class attribute to just before execution, to ensure that mainClassName is set.
         manifest {
-          @Suppress("UnstableApiUsage")
+          @Suppress("UnstableApiUsage", "DEPRECATION") // Use deprecated property to stay compatible with Gradle 5.6.4
           attributes["Main-Class"] = project.the<JavaApplication>().mainClassName
         }
       }

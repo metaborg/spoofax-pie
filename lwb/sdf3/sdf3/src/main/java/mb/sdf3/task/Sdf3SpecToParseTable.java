@@ -2,8 +2,6 @@ package mb.sdf3.task;
 
 import mb.common.result.ExpectException;
 import mb.common.result.Result;
-import mb.log.api.Logger;
-import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.Task;
@@ -47,18 +45,15 @@ public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Args, 
         }
     }
 
-    private final Logger log;
     private final Sdf3ToPermissive toPermissive;
     private final Sdf3ToCompletion toCompletion;
     private final Sdf3ToNormalForm toNormalForm;
 
     @Inject public Sdf3SpecToParseTable(
-        LoggerFactory loggerFactory,
         Sdf3ToPermissive toPermissive,
         Sdf3ToCompletion toCompletion,
         Sdf3ToNormalForm toNormalForm
     ) {
-        this.log = loggerFactory.create(Sdf3SpecToParseTable.class);
         this.toPermissive = toPermissive;
         this.toCompletion = toCompletion;
         this.toNormalForm = toNormalForm;
@@ -74,13 +69,11 @@ public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Args, 
         try {
             final IStrategoTerm mainNormalizedGrammar = context.require(toNormalized(spec.mainModuleAstSupplier))
                 .expect(e -> new ExpectException("Transforming SDF3 grammar of main module " + spec.mainModuleAstSupplier + " to normal form failed", e));
-            log.info("Main: {}", mainNormalizedGrammar);
 
             final NormGrammarReader normGrammarReader = new NormGrammarReader();
             for(Supplier<? extends Result<IStrategoTerm, ?>> astSupplier : spec.modulesAstSuppliers) {
                 final IStrategoTerm normalizedGrammarTerm = context.require(toNormalized(astSupplier))
                     .expect(e -> new ExpectException("Transforming SDF3 grammar of " + astSupplier + " to normal form failed", e));
-                log.info("Other: {}", normalizedGrammarTerm);
                 normGrammarReader.addModuleAst(normalizedGrammarTerm);
             }
 
@@ -88,6 +81,8 @@ public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Args, 
             if(!args.createCompletionTable) {
                 try {
                     normalizedGrammar = normGrammarReader.readGrammar(mainNormalizedGrammar);
+                } catch(RuntimeException e) {
+                    throw e; // Do not wrap runtime exceptions, rethrow them.
                 } catch(Exception e) {
                     return Result.ofErr(new Exception("Converting SDF3 normalized grammar ASTs to a NormGrammar failed", e));
                 }
@@ -98,17 +93,17 @@ public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Args, 
 
                 final IStrategoTerm mainCompletionNormalizedGrammar = context.require(toCompletionNormalized(spec.mainModuleAstSupplier))
                     .expect(e -> new ExpectException("Transforming SDF3 grammar of main module " + spec.mainModuleAstSupplier + " to completion normal form failed", e));
-                log.info("Main completion: {}", mainCompletionNormalizedGrammar);
 
                 for(Supplier<? extends Result<IStrategoTerm, ?>> astSupplier : spec.modulesAstSuppliers) {
                     final IStrategoTerm normalizedGrammarTerm = context.require(toCompletionNormalized(astSupplier))
                         .expect(e -> new ExpectException("Transforming SDF3 grammar of " + astSupplier + " to completion normal form failed", e));
-                    log.info("Other completion: {}", normalizedGrammarTerm);
                     normGrammarReader.addModuleAst(normalizedGrammarTerm);
                 }
 
                 try {
                     normalizedGrammar = normGrammarReader.readGrammar(mainCompletionNormalizedGrammar);
+                } catch(RuntimeException e) {
+                    throw e; // Do not wrap runtime exceptions, rethrow them.
                 } catch(Exception e) {
                     return Result.ofErr(new Exception("Converting SDF3 completion normalized grammar ASTs to a completion NormGrammar failed", e));
                 }

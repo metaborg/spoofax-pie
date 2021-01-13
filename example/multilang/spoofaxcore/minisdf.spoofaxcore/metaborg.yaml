@@ -1,15 +1,10 @@
 ---
 id: org.metaborg:lang-minisdf:0.1.0-SNAPSHOT
 name: minisdf
-dependencies:
+dependencies: # Additional dependencies specified in build.gradle.kts.
   compile:
-  - org.metaborg:org.metaborg.meta.lang.esv:${metaborgVersion}
   - org.metaborg:org.metaborg.meta.lang.template:${metaborgVersion}
-  - org.metaborg:statix.lang:${metaborgVersion}
   - org.metaborg:sdf3.ext.statix:${metaborgVersion}
-  source:
-  - org.metaborg:meta.lib.spoofax:${metaborgVersion}
-  - org.metaborg:statix.runtime:${metaborgVersion}
 pardonedLanguages:
 - EditorService
 - Stratego-Sugar

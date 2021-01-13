@@ -1,6 +1,6 @@
 package mb.spoofax.eclipse.editor;
 
-import mb.common.util.MultiHashMap;
+import mb.common.util.MultiMap;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
@@ -8,12 +8,11 @@ import org.eclipse.ui.IWorkbenchWindow;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 @Singleton
 public class PartClosedCallback extends EditorTrackerBase {
-    private final MultiHashMap<IWorkbenchPart, Consumer<IWorkbenchPart>> callbacks = new MultiHashMap<>(new ConcurrentHashMap<>());
+    private final MultiMap<IWorkbenchPart, Consumer<IWorkbenchPart>> callbacks = MultiMap.withConcurrentHash();
 
     @Inject public PartClosedCallback() {}
 

@@ -17,7 +17,7 @@ import org.spoofax.terms.TermFactory;
 class TigerTestBase {
     protected static final String qualifier = "test";
 
-    protected final LoggerFactory loggerFactory = new NoopLoggerFactory();
+    protected final LoggerFactory loggerFactory = NoopLoggerFactory.instance;
 
     protected final ClassLoaderResourceRegistry classLoaderResourceRegistry = TigerClassloaderResources.createClassLoaderResourceRegistry();
     protected final HierarchicalResource definitionDir = TigerClassloaderResources.createDefinitionDir(classLoaderResourceRegistry);

@@ -79,6 +79,8 @@ public class EsvCompile implements TaskDef<EsvCompile.Input, Result<IStrategoTer
         final ArrayList<IStrategoTerm> sections;
         try {
             sections = addToSectionsAndRecurseImports(context, input.importToAstFunction, mainAstResult.unwrapUnchecked());
+        } catch(RuntimeException e) {
+            throw e; // Do not wrap runtime exceptions, rethrow them.
         } catch(Exception e) {
             return Result.ofErr(e);
         }

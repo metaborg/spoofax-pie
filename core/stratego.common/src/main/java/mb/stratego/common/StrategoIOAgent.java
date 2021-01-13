@@ -4,7 +4,7 @@ import com.google.common.collect.Maps;
 import mb.log.api.Level;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
-import mb.log.api.LoggingOutputStream;
+import mb.log.stream.LoggingOutputStream;
 import mb.resource.ResourceService;
 import mb.resource.WritableResource;
 import mb.resource.fs.FSResource;

@@ -5,6 +5,7 @@ package mb.spoofax.compiler.gradle.spoofax2.plugin
 import mb.spoofax.compiler.gradle.plugin.*
 import mb.spoofax.compiler.gradle.spoofax2.*
 import mb.spoofax.compiler.language.*
+import mb.spoofax.compiler.spoofax2.dagger.*
 import mb.spoofax.compiler.spoofax2.language.*
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -43,14 +44,14 @@ open class Spoofax2LanguageProjectExtension(project: Project) {
 open class Spoofax2LanguagePlugin : Plugin<Project> {
   override fun apply(project: Project) {
     // Apply Spoofax 2 Gradle base plugin to make its configurations and variants available.
-    project.plugins.apply("org.metaborg.spoofax.gradle.base")
+    project.plugins.apply(mb.spoofax.gradle.plugin.SpoofaxBasePlugin::class)
 
     // First apply the language plugin to make its extension available.
     project.plugins.apply("org.metaborg.spoofax.compiler.gradle.language")
     val languageProjectExtension = project.extensions.getByType<LanguageProjectExtension>()
 
-    val component = DaggerSpoofax2CompilerGradleComponent.builder()
-      .spoofax2CompilerGradleModule(Spoofax2CompilerGradleModule(languageProjectExtension.component.resourceService, languageProjectExtension.component.pie))
+    val component = DaggerSpoofax2CompilerComponent.builder()
+      .spoofax2CompilerModule(Spoofax2CompilerModule(languageProjectExtension.component.resourceService, languageProjectExtension.component.pie))
       .build()
 
     val extension = Spoofax2LanguageProjectExtension(project)
@@ -68,7 +69,7 @@ open class Spoofax2LanguagePlugin : Plugin<Project> {
 
   private fun configure(
     project: Project,
-    component: Spoofax2CompilerGradleComponent,
+    component: Spoofax2CompilerComponent,
     input: Spoofax2LanguageProjectCompiler.Input,
     sharedInput: LanguageProjectCompiler.Input
   ) {
@@ -78,12 +79,13 @@ open class Spoofax2LanguagePlugin : Plugin<Project> {
 
   private fun configureCompileTask(
     project: Project,
-    component: Spoofax2CompilerGradleComponent,
+    component: Spoofax2CompilerComponent,
     input: Spoofax2LanguageProjectCompiler.Input
   ) {
     val compileTask = project.tasks.register("compileSpoofax2BasedLanguageProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
+      outputs.upToDateWhen { true } // No outputs
 
       doLast {
         component.pie.newSession().use { session ->
@@ -98,7 +100,7 @@ open class Spoofax2LanguagePlugin : Plugin<Project> {
 
   private fun configureCopySpoofaxLanguageTasks(
     project: Project,
-    component: Spoofax2CompilerGradleComponent,
+    component: Spoofax2CompilerComponent,
     input: Spoofax2LanguageProjectCompiler.Input,
     sharedInput: LanguageProjectCompiler.Input
   ) {
@@ -109,7 +111,7 @@ open class Spoofax2LanguagePlugin : Plugin<Project> {
     // Add language dependency.
     val languageDependency = input.languageSpecificationDependency().caseOf()
       .project<Dependency> { project.dependencies.project(it) }
-      .module { project.dependencies.module(it.toGradleNotation()) }
+      .module { project.dependencies.create(it.toGradleNotation()) }
       .files { project.dependencies.create(project.files(it)) }
     project.dependencies.add("compileLanguage", languageDependency)
 

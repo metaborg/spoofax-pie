@@ -35,7 +35,7 @@ public class PlatformPieModule {
         @Platform ResourceService resourceService
     ) {
         final PieBuilder builder = builderSupplier.get();
-        builder.withLogger(new PieLogger(loggerFactory.create("PIE")));
+        builder.withLoggerFactory(loggerFactory);
         builder.withTaskDefs(new MapTaskDefs(taskDefs));
         builder.withResourceService(resourceService);
         return builder.build();

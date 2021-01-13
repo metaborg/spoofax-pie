@@ -1,16 +1,16 @@
-package {{genFactory.packageId}};
+package {{baseConstraintAnalyzerFactory.packageId}};
 
 import mb.resource.ResourceService;
 import mb.spoofax.compiler.interfaces.spoofaxcore.ConstraintAnalyzerFactory;
 
-public class {{genFactory.id}} implements ConstraintAnalyzerFactory {
+public class {{baseConstraintAnalyzerFactory.id}} implements ConstraintAnalyzerFactory {
     private final ResourceService resourceService;
 
-    public {{genFactory.id}}(ResourceService resourceService) {
+    public {{baseConstraintAnalyzerFactory.id}}(ResourceService resourceService) {
         this.resourceService = resourceService;
     }
 
-    @Override public {{genConstraintAnalyzer.qualifiedId}} create() {
-        return new {{genConstraintAnalyzer.qualifiedId}}(resourceService);
+    @Override public {{constraintAnalyzer.qualifiedId}} create() {
+        return new {{constraintAnalyzer.qualifiedId}}(resourceService);
     }
 }

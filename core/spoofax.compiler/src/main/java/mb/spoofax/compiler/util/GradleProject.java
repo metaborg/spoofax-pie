@@ -37,8 +37,21 @@ public interface GradleProject extends Serializable {
         return buildDirectory().appendRelativePath("generated/sources");
     }
 
+    @Value.Default default ResourcePath buildGeneratedSourcesAnnotationProcessorJavaMainDirectory() {
+        return buildGeneratedSourcesDirectory().appendRelativePath("annotationProcessor/java/main");
+    }
+
     @Value.Default default ResourcePath buildGeneratedResourcesDirectory() {
         return buildDirectory().appendRelativePath("generated/resources");
+    }
+
+
+    @Value.Default default ResourcePath buildClassesDirectory() {
+        return buildDirectory().appendRelativePath("classes");
+    }
+
+    @Value.Default default ResourcePath buildClassesJavaMainDirectory() {
+        return buildClassesDirectory().appendRelativePath("java/main");
     }
 
 

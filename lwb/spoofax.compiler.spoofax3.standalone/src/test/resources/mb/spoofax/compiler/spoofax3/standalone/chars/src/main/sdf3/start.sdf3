@@ -1,0 +1,19 @@
+module test
+
+context-free syntax
+
+  Start.Start = <<CHARS>>
+
+context-free start-symbols
+
+  Start
+
+lexical syntax
+
+  CHARS  = ~[\ \t\n\v\f\r]*
+  LAYOUT = [\ \t\n\v\f\r]
+
+context-free restrictions
+
+  CHARS   -/- ~[\ \t\n\v\f\r]
+  LAYOUT? -/- [\ \t\n\v\f\r]

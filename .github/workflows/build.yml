@@ -12,7 +12,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-18.04, windows-2019, macos-10.15]
-        gradle: [5.6.4, 6.5]
+        java: [8]
+        gradle: [5.6.4, 6.8]
         experimental: [false]
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.experimental }}
@@ -20,7 +21,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v1
         with:
-          java-version: 8
+          java-version: ${{ matrix.java }}
       - uses: actions/cache@v2
         id: cache-mavenize
         with:

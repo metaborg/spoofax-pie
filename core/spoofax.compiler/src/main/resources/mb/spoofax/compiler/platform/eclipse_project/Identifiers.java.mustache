@@ -1,9 +1,9 @@
-package {{genEclipseIdentifiers.packageId}};
+package {{baseEclipseIdentifiers.packageId}};
 
 import mb.spoofax.eclipse.EclipseIdentifiers;
 
 @{{adapterProjectCompilerInput.scope.qualifiedId}}
-public class {{genEclipseIdentifiers.id}} implements EclipseIdentifiers {
+public class {{baseEclipseIdentifiers.id}} implements EclipseIdentifiers {
     @Override public String getPlugin() {
         return "{{pluginId}}";
     }

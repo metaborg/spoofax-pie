@@ -7,8 +7,8 @@ plugins {
 }
 
 metaborg {
-  kotlinApiVersion = "1.2"
-  kotlinLanguageVersion = "1.2"
+  kotlinApiVersion = "1.3"
+  kotlinLanguageVersion = "1.3"
 }
 
 dependencies {
@@ -27,6 +27,7 @@ dependencies {
 
   // Dependencies to be able to use/configure the extensions provided by these Gradle plugins.
   compileOnly(project(":spoofax.compiler.gradle"))
+  compileOnly("org.metaborg.devenv:spoofax.gradle")
 }
 
 gradlePlugin {

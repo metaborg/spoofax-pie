@@ -1,5 +1,4 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-import org.jetbrains.kotlin.gradle.internal.ensureParentDirsCreated
 import java.util.*
 
 plugins {
@@ -70,7 +69,7 @@ val generateVersionPropertiesTask = tasks.register("generateVersionProperties") 
   doLast {
     val properties = NonShittyProperties()
     properties.setProperty("spoofax3", project.version.toString())
-    versionsPropertiesFile.ensureParentDirsCreated()
+    versionsPropertiesFile.parentFile.run { if(!exists()) mkdirs() }
     versionsPropertiesFile.bufferedWriter().use {
       properties.storeWithoutDate(it)
     }

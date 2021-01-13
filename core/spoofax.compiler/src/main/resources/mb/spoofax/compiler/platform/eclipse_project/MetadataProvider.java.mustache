@@ -1,4 +1,4 @@
-package {{genMetadataProvider.packageId}};
+package {{baseMetadataProvider.packageId}};
 
 import mb.statix.multilang.metadata.ContextId;
 import mb.statix.multilang.metadata.LanguageId;
@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class {{genMetadataProvider.id}} implements LanguageMetadataProvider {
+public class {{baseMetadataProvider.id}} implements LanguageMetadataProvider {
     // Don't inline this method into getLanguageMetadataSuppliers
     // Because call to getComponent should be delayed for concurrency reasons
     private LanguageMetadata getLanguageMetadata() {

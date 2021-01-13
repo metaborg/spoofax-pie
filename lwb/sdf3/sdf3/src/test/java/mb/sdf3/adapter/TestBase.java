@@ -8,6 +8,7 @@ import mb.log.api.LoggerFactory;
 import mb.log.slf4j.SLF4JLoggerFactory;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Pie;
+import mb.pie.api.SerializableFunction;
 import mb.pie.api.Supplier;
 import mb.pie.api.ValueSupplier;
 import mb.pie.runtime.PieBuilderImpl;
@@ -89,7 +90,7 @@ class TestBase {
 
 
     Supplier<? extends Result<Sdf3AnalyzeMulti.SingleFileOutput, ?>> singleFileAnalysisResultSupplier(ResourcePath project, ResourceKey file) {
-        return analyze.createSingleFileOutputSupplier(new Sdf3AnalyzeMulti.Input(project, Sdf3Util.createResourceWalker(), Sdf3Util.createResourceMatcher(), desugar.createFunction().mapInput((ctx, i) -> parse.createRecoverableAstSupplier(i))), file);
+        return analyze.createSingleFileOutputSupplier(new Sdf3AnalyzeMulti.Input(project, Sdf3Util.createResourceWalker(), Sdf3Util.createResourceMatcher(), desugar.createFunction().mapInput((SerializableFunction<Supplier<String>, Supplier<? extends Result<IStrategoTerm, ?>>>) parse::createRecoverableAstSupplier)), file);
     }
 
     Supplier<? extends Result<Sdf3AnalyzeMulti.SingleFileOutput, ?>> singleFileAnalysisResultSupplier(Resource file) {

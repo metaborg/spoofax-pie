@@ -8,6 +8,7 @@ import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Function;
 import mb.pie.api.ResourceStringSupplier;
+import mb.pie.api.SerializableFunction;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.ResourceStamper;
@@ -179,7 +180,7 @@ public abstract class JSGLR1ParseTaskDef implements TaskDef<Supplier<String>, Re
 }
 
 
-abstract class Mapper<T, R> implements java.util.function.Function<T, R>, Serializable {
+abstract class Mapper<T, R extends Serializable> implements SerializableFunction<T, R> {
     @Override public boolean equals(@Nullable Object other) {
         return this == other || other != null && this.getClass() == other.getClass();
     }

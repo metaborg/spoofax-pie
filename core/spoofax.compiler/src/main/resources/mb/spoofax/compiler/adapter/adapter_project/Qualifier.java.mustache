@@ -1,4 +1,4 @@
-package {{genQualifier.packageId}};
+package {{baseQualifier.packageId}};
 
 import javax.inject.Qualifier;
 import java.lang.annotation.Documented;
@@ -8,6 +8,6 @@ import java.lang.annotation.RetentionPolicy;
 @Qualifier
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-public @interface {{genQualifier.id}} {
+public @interface {{baseQualifier.id}} {
     String value() default "";
 }
