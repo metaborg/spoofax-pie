@@ -168,11 +168,12 @@ class CompileToJavaClassFilesTest {
             }
             classPath.add(file.toURI().toURL());
         }
-        final URLClassLoader classLoader = new URLClassLoader(classPath.toArray(new URL[0]), getClass().getClassLoader());
-        final Class<?> mainClass = classLoader.loadClass(packageId + ".Main");
-        final FSResource fileToParse = temporaryDirectory.appendSegment("test.chars");
-        fileToParse.ensureFileExists().writeString("abcdefg");
-        mainClass.getDeclaredMethod("main", String[].class).invoke(null, new Object[]{new String[]{fileToParse.getJavaPath().toString()}});
+        try(final URLClassLoader classLoader = new URLClassLoader(classPath.toArray(new URL[0]), getClass().getClassLoader())) {
+            final Class<?> mainClass = classLoader.loadClass(packageId + ".Main");
+            final FSResource fileToParse = temporaryDirectory.appendSegment("test.chars");
+            fileToParse.ensureFileExists().writeString("abcdefg");
+            mainClass.getDeclaredMethod("main", String[].class).invoke(null, new Object[]{new String[]{fileToParse.getJavaPath().toString()}});
+        }
     }
 
 
