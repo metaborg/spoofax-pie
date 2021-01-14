@@ -1,19 +1,20 @@
 package mb.common.style;
 
 import mb.common.token.Token;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class TokenStyleImpl implements TokenStyle {
-    private final Token token;
+    private final Token<?> token;
     private final Style style;
 
 
-    public TokenStyleImpl(Token token, Style style) {
+    public TokenStyleImpl(Token<?> token, Style style) {
         this.token = token;
         this.style = style;
     }
 
 
-    @Override public Token getToken() {
+    @Override public Token<?> getToken() {
         return token;
     }
 
@@ -22,7 +23,7 @@ public class TokenStyleImpl implements TokenStyle {
     }
 
 
-    @Override public boolean equals(Object o) {
+    @Override public boolean equals(@Nullable Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         final TokenStyleImpl that = (TokenStyleImpl) o;

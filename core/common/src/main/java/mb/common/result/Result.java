@@ -18,7 +18,7 @@ import java.util.function.Supplier;
  * @param <E> Type of errors, descendants of {@link Exception}.
  * @apiNote Only {@link Serializable} when {@link T} and {@link E} are {@link Serializable}.
  */
-public interface Result<T, E extends Exception> extends Serializable {
+@SuppressWarnings("unused") public interface Result<T, E extends Exception> extends Serializable {
     static <T, E extends Exception> Result<T, E> ofOk(T value) {
         return new Ok<>(value);
     }
@@ -68,7 +68,7 @@ public interface Result<T, E extends Exception> extends Serializable {
         }
     }
 
-    static <T, E extends Exception> Result<T, ?> ofOkOrCatching(ExceptionalSupplier<? extends T, E> supplier) {
+    static <T, E extends Exception> Result<T, ? extends Exception> ofOkOrCatching(ExceptionalSupplier<? extends T, E> supplier) {
         return Catcher.tryCatch(() -> Result.ofOk(supplier.get()), Result::ofErr);
     }
 
@@ -110,7 +110,7 @@ public interface Result<T, E extends Exception> extends Serializable {
 
     default Result<T, E> throwUncheckedIfError() {
         if(isErr()) {
-            // `getErr` is safe because error is present if `isErr` returns true.
+            // noinspection ConstantConditions (`getErr` is safe because error is present if `isErr` returns true)
             throw new UncheckedException(getErr());
         }
         return this;
@@ -145,7 +145,7 @@ public interface Result<T, E extends Exception> extends Serializable {
 
     default <U, F extends Exception> Result<U, E> mapThrowing(ExceptionalFunction<? super T, ? extends U, F> mapper) throws F {
         if(isOk()) {
-            //noinspection ConstantConditions (`get` is safe because value is present if `isOk` returns true)
+            // noinspection ConstantConditions (`get` is safe because value is present if `isOk` returns true)
             return Result.ofOk(mapper.apply(get()));
         } else {
             // noinspection unchecked (cast is safe because it is impossible to get a value of type U in the err case)
@@ -153,13 +153,13 @@ public interface Result<T, E extends Exception> extends Serializable {
         }
     }
 
-    default <U> Result<U, ?> mapCatching(ExceptionalFunction<? super T, ? extends U, ?> mapper) {
+    default <U> Result<U, ? extends Exception> mapCatching(ExceptionalFunction<? super T, ? extends U, ? extends Exception> mapper) {
         if(isOk()) {
-            //noinspection ConstantConditions (`get` is safe because value is present if `isOk` returns true)
+            // noinspection ConstantConditions (`get` is safe because value is present if `isOk` returns true)
             return Catcher.tryCatch(() -> Result.ofOk(mapper.apply(get())), Result::ofErr);
         } else {
             // noinspection unchecked (cast is safe because it is impossible to get a value of type U in the err case
-            return (Result<U, ?>)this;
+            return (Result<U, ? extends Exception>)this;
         }
     }
 
@@ -273,12 +273,12 @@ public interface Result<T, E extends Exception> extends Serializable {
 
 
     default T unwrap() throws E {
-        // get is safe because error is present if not ok case
+        // noinspection ConstantConditions (`get` is safe because error is present if not ok case)
         return ok().unwrapOrElseThrow(() -> err().get());
     }
 
     default T unwrapUnchecked() {
-        // get is safe because error is present if not ok case
+        // noinspection ConstantConditions (`get` is safe because error is present if not ok case)
         return ok().unwrapOrElseThrow(() -> new UncheckedException(err().get()));
     }
 
@@ -299,6 +299,7 @@ public interface Result<T, E extends Exception> extends Serializable {
     }
 
     default <F extends Exception> T expect(Function<E, F> mapper) throws F {
+        // noinspection ConstantConditions (`get` is safe because error is present if not ok case)
         return ok().unwrapOrElseThrow(() -> mapper.apply(err().get()));
     }
 
@@ -375,10 +376,10 @@ public interface Result<T, E extends Exception> extends Serializable {
         }
 
 
-        @Override public boolean equals(Object o) {
+        @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
-            final Ok<?, ?> ok = (Ok<?, ?>)o;
+            final Ok<?, ? extends Exception> ok = (Ok<?, ? extends Exception>)o;
             return value.equals(ok.value);
         }
 
@@ -416,10 +417,10 @@ public interface Result<T, E extends Exception> extends Serializable {
         }
 
 
-        @Override public boolean equals(Object o) {
+        @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
-            final Err<?, ?> err = (Err<?, ?>)o;
+            final Err<?, ? extends Exception> err = (Err<?, ? extends Exception>)o;
             return error.equals(err.error);
         }
 

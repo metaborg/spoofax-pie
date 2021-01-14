@@ -3,6 +3,7 @@ package mb.common.message;
 import mb.common.util.ListView;
 import mb.common.util.MultiMap;
 import mb.resource.ResourceKey;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -119,7 +120,7 @@ public class Messages implements Iterable<Message>, Serializable {
         return messages.iterator();
     }
 
-    @Override public boolean equals(Object o) {
+    @Override public boolean equals(@Nullable Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         final Messages that = (Messages)o;

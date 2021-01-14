@@ -2,6 +2,7 @@ package mb.common.editing;
 
 import mb.common.region.Region;
 import mb.common.region.Selection;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -43,7 +44,7 @@ public final class TextEdit implements Serializable {
         return newText;
     }
 
-    @Override public boolean equals(Object o) {
+    @Override public boolean equals(@Nullable Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         TextEdit textEdit = (TextEdit)o;

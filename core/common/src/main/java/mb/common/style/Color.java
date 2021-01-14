@@ -1,12 +1,14 @@
 package mb.common.style;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.io.Serializable;
 
 public class Color implements Serializable {
     public final static Color white = new Color(255, 255, 255);
     public final static Color black = new Color(0, 0, 0);
 
-    private int argb;
+    private final int argb;
 
 
     public Color(int r, int g, int b) {
@@ -34,14 +36,14 @@ public class Color implements Serializable {
     }
 
     public int getBlue() {
-        return (argb >> 0) & 0xFF;
+        return argb & 0xFF;
     }
 
 
-    @Override public boolean equals(Object o) {
+    @Override public boolean equals(@Nullable Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
-        final Color color = (Color) o;
+        final Color color = (Color)o;
         return argb == color.argb;
     }
 

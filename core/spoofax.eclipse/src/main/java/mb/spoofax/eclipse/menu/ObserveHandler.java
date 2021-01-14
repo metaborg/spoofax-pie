@@ -1,7 +1,6 @@
 package mb.spoofax.eclipse.menu;
 
 import mb.common.util.SetView;
-import mb.pie.api.ExecException;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.pie.PieRunner;

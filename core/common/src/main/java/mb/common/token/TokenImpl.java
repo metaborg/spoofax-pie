@@ -24,7 +24,7 @@ public class TokenImpl<F> implements Token<F> {
         return region;
     }
 
-    @Nullable @Override public F getFragment() {
+    @Override public @Nullable F getFragment() {
         return fragment;
     }
 

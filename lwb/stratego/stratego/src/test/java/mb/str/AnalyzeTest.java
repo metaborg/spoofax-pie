@@ -6,7 +6,6 @@ import mb.common.message.Severity;
 import mb.common.util.ListView;
 import mb.pie.api.MixedSession;
 import mb.resource.fs.FSResource;
-import mb.resource.hierarchical.ResourcePath;
 import mb.str.config.StrategoAnalyzeConfig;
 import mb.str.task.StrategoAnalyze;
 import org.junit.jupiter.api.Disabled;

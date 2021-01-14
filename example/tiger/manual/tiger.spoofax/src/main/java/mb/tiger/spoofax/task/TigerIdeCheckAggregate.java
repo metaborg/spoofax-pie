@@ -80,7 +80,7 @@ public class TigerIdeCheckAggregate implements TaskDef<TigerIdeCheckAggregate.In
         } catch(Exception e) {
             builder.addMessage("Aggregating messages for '" + input.root + "' failed", e, Severity.Error);
         }
-        return builder.build(input.root);
+        return builder.build();
     }
 }
 

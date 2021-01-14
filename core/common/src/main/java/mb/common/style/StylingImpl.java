@@ -1,5 +1,7 @@
 package mb.common.style;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.ArrayList;
 
 public class StylingImpl implements Styling {
@@ -16,7 +18,7 @@ public class StylingImpl implements Styling {
     }
 
 
-    @Override public boolean equals(Object o) {
+    @Override public boolean equals(@Nullable Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         final StylingImpl styling = (StylingImpl) o;

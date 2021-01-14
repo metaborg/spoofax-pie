@@ -13,6 +13,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
+/**
+ * A map where keys can map to multiple values.
+ *
+ * @param <K> The type of keys in this collection.
+ * @param <V> The type of values in this collection.
+ */
 public class MultiMap<K, V> implements Serializable {
     private final Map<K, ArrayList<V>> map;
     private final Function<Map<? extends K, ArrayList<V>>, Map<K, ArrayList<V>>> mapFunction;
