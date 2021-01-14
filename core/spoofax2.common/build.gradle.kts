@@ -5,7 +5,7 @@ plugins {
 dependencies {
   api(platform(project(":spoofax.depconstraints")))
 
-  implementation(project(":common"))
+  implementation("org.metaborg:common")
   implementation(project(":stratego.common"))
 
   api("org.metaborg:resource")

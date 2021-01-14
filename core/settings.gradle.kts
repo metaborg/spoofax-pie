@@ -12,8 +12,6 @@ if(org.gradle.util.VersionNumber.parse(gradle.gradleVersion).major < 6) {
 
 include("spoofax.depconstraints")
 
-include("common")
-
 include("completions.common")
 include("jsglr.common")
 include("jsglr1.common")

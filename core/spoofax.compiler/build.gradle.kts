@@ -17,7 +17,7 @@ dependencies {
   annotationProcessor(platform(project(":spoofax.depconstraints")))
   testAnnotationProcessor(platform(project(":spoofax.depconstraints")))
 
-  api(project(":common"))
+  api("org.metaborg:common")
   api(project(":spoofax.core"))
   api("org.metaborg:resource")
   api("org.metaborg:pie.api")

@@ -26,7 +26,7 @@ dependencies {
   bundleTargetPlatformApi(eclipse("com.ibm.icu"))
   bundleTargetPlatformImplementation(eclipse("org.eclipse.ui.views.log"))
 
-  bundleEmbedApi(project(":common"))
+  bundleEmbedApi("org.metaborg:common")
   bundleEmbedApi(project(":spoofax.core"))
   bundleEmbedApi("org.metaborg:log.api")
   bundleEmbedApi("org.metaborg:resource")

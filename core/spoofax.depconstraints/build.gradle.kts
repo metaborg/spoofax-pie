@@ -3,6 +3,7 @@ plugins {
   `maven-publish`
 }
 
+val commonVersion = "0.6.1"
 val logVersion = "0.5.0"
 val slf4jVersion = "1.7.30"
 val resourceVersion = "0.10.0"
@@ -25,8 +26,6 @@ val yamlVersion = "1.26"
 dependencies {
   constraints {
     // Own projects
-    api(project(":common"))
-
     api(project(":completions.common"))
     api(project(":jsglr.common"))
     api(project(":jsglr1.common"))
@@ -50,6 +49,8 @@ dependencies {
 
 
     // Main dependencies
+    /// Common
+    api("org.metaborg:common:$commonVersion")
     /// Log
     api("org.metaborg:log.api:$logVersion")
     api("org.metaborg:log.backend.logback:$logVersion")
