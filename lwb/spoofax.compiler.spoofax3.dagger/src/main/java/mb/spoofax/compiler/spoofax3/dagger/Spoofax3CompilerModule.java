@@ -32,12 +32,22 @@ import java.util.Set;
         this.templateCompiler = templateCompiler;
     }
 
-    @Provides @Spoofax3CompilerScope public TemplateCompiler provideTemplateCompiler() { return templateCompiler; }
+    @Provides
+    @Spoofax3CompilerScope
+    public TemplateCompiler provideTemplateCompiler() {
+        return templateCompiler;
+    }
 
-    @Provides @Spoofax3CompilerScope
-    public UnarchiveFromJar provideUnarchiveFromJar() { return new UnarchiveFromJar(); }
+    @Provides
+    @Spoofax3CompilerScope
+    public UnarchiveFromJar provideUnarchiveFromJar() {
+        return new UnarchiveFromJar();
+    }
 
-    @Provides @Spoofax3CompilerScope @ElementsIntoSet static Set<TaskDef<?, ?>> provideTaskDefsSet(
+    @Provides
+    @Spoofax3CompilerScope
+    @ElementsIntoSet
+    static Set<TaskDef<?, ?>> provideTaskDefsSet(
         Spoofax3LanguageProjectCompiler languageProjectCompiler,
         Spoofax3ParserLanguageCompiler parserLanguageCompiler,
         Spoofax3StylerLanguageCompiler stylerLanguageCompiler,
@@ -55,7 +65,10 @@ import java.util.Set;
         return taskDefs;
     }
 
-    @Provides @Spoofax3CompilerScope public ResourceService provideResourceService(
+    @Provides
+    @Spoofax3CompilerScope
+    @Spoofax3CompilerQualifier
+    public ResourceService provideResourceService(
         @Platform ResourceService platformResourceService,
         @Sdf3Qualifier ResourceService sdf3ResourceService,
         @StrategoQualifier ResourceService strategoResourceService,
@@ -74,8 +87,11 @@ import java.util.Set;
         );
     }
 
-    @Provides @Spoofax3CompilerScope public Pie providePie(
-        ResourceService resourceService,
+    @Provides
+    @Spoofax3CompilerScope
+    @Spoofax3CompilerQualifier
+    public Pie providePie(
+        @Spoofax3CompilerQualifier ResourceService resourceService,
         Set<TaskDef<?, ?>> taskDefs,
         @Platform Pie platformPie,
         @Sdf3Qualifier Pie sdf3Pie,

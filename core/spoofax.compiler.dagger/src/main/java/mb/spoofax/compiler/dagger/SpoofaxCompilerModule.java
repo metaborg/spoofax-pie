@@ -50,17 +50,22 @@ public class SpoofaxCompilerModule {
     }
 
 
-    @Provides @SpoofaxCompilerScope
+    @Provides
+    @SpoofaxCompilerScope
     public TemplateCompiler provideTemplateCompiler() {
         return templateCompiler;
     }
 
-    @Provides @SpoofaxCompilerScope
+    @Provides
+    @SpoofaxCompilerScope
+    @SpoofaxCompilerQualifier
     public ResourceService provideResourceService() {
         return new DefaultResourceService(new FSResourceRegistry());
     }
 
-    @Provides @SpoofaxCompilerScope @ElementsIntoSet
+    @Provides
+    @SpoofaxCompilerScope
+    @ElementsIntoSet
     static Set<TaskDef<?, ?>> provideTaskDefsSet(
         LanguageProjectCompiler languageProjectCompiler,
         ClassloaderResourcesCompiler classloaderResourcesCompiler,
@@ -110,8 +115,10 @@ public class SpoofaxCompilerModule {
         return taskDefs;
     }
 
-    @Provides @SpoofaxCompilerScope
-    public Pie providePie(ResourceService resourceService, Set<TaskDef<?, ?>> taskDefs) {
+    @Provides
+    @SpoofaxCompilerScope
+    @SpoofaxCompilerQualifier
+    public Pie providePie(@SpoofaxCompilerQualifier ResourceService resourceService, Set<TaskDef<?, ?>> taskDefs) {
         final PieBuilder builder = pieBuilderSupplier.get();
         builder.withTaskDefs(new MapTaskDefs(taskDefs));
         builder.withResourceService(resourceService);

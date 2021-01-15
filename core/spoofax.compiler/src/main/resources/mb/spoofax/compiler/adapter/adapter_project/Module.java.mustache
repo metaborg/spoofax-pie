@@ -174,9 +174,14 @@ public class {{baseModule.id}} {
         return taskDefs;
     }
 
-    @Provides @{{scope.id}}
-    static TaskDefs provideTaskDefs(Set<TaskDef<?, ?>> taskDefs) {
+    @Provides @{{scope.id}} @{{qualifier.id}}
+    static TaskDefs provideQualifiedTaskDefs(Set<TaskDef<?, ?>> taskDefs) {
         return new MapTaskDefs(taskDefs);
+    }
+
+    @Provides @{{scope.id}}
+    static TaskDefs provideTaskDefs(@{{qualifier.id}} TaskDefs taskDefs) {
+        return taskDefs;
     }
 
     @Provides @{{scope.id}} @Named("prototype")
