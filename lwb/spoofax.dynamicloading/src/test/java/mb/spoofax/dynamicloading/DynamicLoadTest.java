@@ -11,12 +11,16 @@ import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
 import mb.pie.runtime.PieBuilderImpl;
 import mb.pie.task.archive.UnarchiveCommon;
+import mb.resource.ResourceKey;
+import mb.resource.ResourceService;
+import mb.resource.WritableResource;
 import mb.resource.classloader.ClassLoaderResource;
 import mb.resource.classloader.ClassLoaderResourceLocations;
 import mb.resource.classloader.ClassLoaderResourceRegistry;
 import mb.resource.classloader.JarFileWithPath;
 import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.HierarchicalResource;
+import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.AdapterProject;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
 import mb.spoofax.compiler.adapter.AdapterProjectCompilerInputBuilder;
@@ -34,12 +38,14 @@ import mb.spoofax.core.platform.LoggerFactoryModule;
 import mb.spoofax.core.platform.PlatformComponent;
 import mb.spoofax.core.platform.PlatformPieModule;
 import mb.spoofax.core.platform.ResourceRegistriesModule;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -50,6 +56,7 @@ class DynamicLoadTest {
         .resourceRegistriesModule(new ResourceRegistriesModule(classLoaderResourceRegistry))
         .platformPieModule(new PlatformPieModule(PieBuilderImpl::new))
         .build();
+    final ResourceService resourceService = platformComponent.getResourceService();
 
     @Test void testDynamicLoadCharsLanguage(@TempDir Path temporaryDirectoryPath) throws Exception {
         // Copy language specification sources to the temporary directory.
@@ -91,35 +98,97 @@ class DynamicLoadTest {
             .adapterProjectInput(adapterProjectInput)
             .build();
 
-        // Create the dynamic language component.
+        // Write test file.
+        final FSResource file = temporaryDirectory.appendSegment("test.chars");
+        file.ensureFileExists().writeString("abcdefg");
+
         try(final DynamicLoader dynamicLoader = new DynamicLoader(platformComponent)) {
-            final DynamicLanguage dynamicLanguage = dynamicLoader.require("chars", input);
-            final LanguageComponent languageComponent = dynamicLanguage.getLanguageComponent();
-            final FSResource file = temporaryDirectory.appendSegment("test.chars");
-            file.ensureFileExists().writeString("abcdefg");
-            try(final MixedSession session = languageComponent.getPie().newSession()) {
-                final Option<Styling> result = session.require(languageComponent.getLanguageInstance().createStyleTask(file.getPath()));
-                assertTrue(result.isSome());
-                final Styling styling = result.unwrap();
-                final ArrayList<TokenStyle> stylingPerToken = styling.getStylePerToken();
-                assertEquals(1, stylingPerToken.size());
-                final Style style = stylingPerToken.get(0).getStyle();
-                assertNotNull(style.getColor());
-                assertNull(style.getBackgroundColor());
-                assertEquals(new Color(0, 0, 150), style.getColor());
-                assertTrue(style.isBold());
-                assertFalse(style.isItalic());
-                assertFalse(style.isUnderscore());
-                assertFalse(style.isStrikeout());
-            } catch(ExecException e) {
-                if(e.getCause() instanceof CompileToJavaClassFiles.CompileException) {
-                    final CompileToJavaClassFiles.CompileException compilerException = (CompileToJavaClassFiles.CompileException)e.getCause();
-                    System.err.println(compilerException.getMessage());
-                    compilerException.getSubMessage().ifPresent(System.err::println);
-                    compilerException.getSubMessages().ifPresent(System.err::println);
+            @Nullable DynamicLanguage dynamicLanguageCached1;
+            {
+                // Dynamically load language.
+                final DynamicLanguage dynamicLanguage = dynamicLoader.load("chars", input);
+                dynamicLanguageCached1 = dynamicLanguage;
+                final LanguageComponent languageComponent = dynamicLanguage.getLanguageComponent();
+                // Style test file with dynamically loaded language.
+                try(final MixedSession session = languageComponent.getPie().newSession()) {
+                    final Option<Styling> result = session.require(languageComponent.getLanguageInstance().createStyleTask(file.getPath()));
+                    assertTrue(result.isSome());
+                    final Styling styling = result.unwrap();
+                    final ArrayList<TokenStyle> stylingPerToken = styling.getStylePerToken();
+                    assertEquals(1, stylingPerToken.size());
+                    final Style style = stylingPerToken.get(0).getStyle();
+                    assertNotNull(style.getColor());
+                    assertNull(style.getBackgroundColor());
+                    assertEquals(new Color(0, 0, 150), style.getColor());
+                    assertTrue(style.isBold());
+                    assertFalse(style.isItalic());
+                    assertFalse(style.isUnderscore());
+                    assertFalse(style.isStrikeout());
+                } catch(ExecException e) {
+                    logAndRethrow(e);
                 }
-                throw e;
             }
+
+            // Dynamic language has not yet been closed.
+            assertNotNull(dynamicLanguageCached1.getClassLoader());
+            assertNotNull(dynamicLanguageCached1.getLanguageComponent());
+            assertFalse(dynamicLanguageCached1.isClosed());
+
+            // Change the language specification.
+            final ResourcePath esvMainFilePath = input.spoofax3LanguageProjectInput().styler().get().esvMainFile();
+            final WritableResource esvMainFile = resourceService.getWritableResource(esvMainFilePath);
+            final String esvMainString = esvMainFile.readString().replace("0 0 150 bold", "255 255 0 italic");
+            esvMainFile.writeString(esvMainString);
+            final HashSet<ResourceKey> changedResources = new HashSet<>();
+            changedResources.add(esvMainFilePath);
+            dynamicLoader.updateAffectedBy(changedResources);
+
+            @Nullable DynamicLanguage dynamicLanguageCached2;
+            {
+                // Dynamically load language again.
+                final DynamicLanguage dynamicLanguage = dynamicLoader.load("chars", input);
+                dynamicLanguageCached2 = dynamicLanguage;
+                final LanguageComponent languageComponent = dynamicLanguage.getLanguageComponent();
+                // Style test file with dynamically loaded language again
+                try(final MixedSession session = languageComponent.getPie().newSession()) {
+                    final Option<Styling> result = session.require(languageComponent.getLanguageInstance().createStyleTask(file.getPath()));
+                    assertTrue(result.isSome());
+                    final Styling styling = result.unwrap();
+                    final ArrayList<TokenStyle> stylingPerToken = styling.getStylePerToken();
+                    assertEquals(1, stylingPerToken.size());
+                    final Style style = stylingPerToken.get(0).getStyle();
+                    assertNotNull(style.getColor());
+                    assertNull(style.getBackgroundColor());
+                    assertEquals(new Color(255, 255, 0), style.getColor());
+                    assertFalse(style.isBold());
+                    assertTrue(style.isItalic());
+                    assertFalse(style.isUnderscore());
+                    assertFalse(style.isStrikeout());
+                } catch(ExecException e) {
+                    logAndRethrow(e);
+                }
+            }
+
+            // New dynamic language has not yet been closed.
+            assertNotNull(dynamicLanguageCached2.getClassLoader());
+            assertNotNull(dynamicLanguageCached2.getLanguageComponent());
+            assertFalse(dynamicLanguageCached2.isClosed());
+            // Previous dynamic language should be closed.
+            assertThrows(IllegalStateException.class, dynamicLanguageCached1::getClassLoader);
+            assertThrows(IllegalStateException.class, dynamicLanguageCached1::getLanguageComponent);
+            assertTrue(dynamicLanguageCached1.isClosed());
+            dynamicLanguageCached1 = null;
+
+            // Unload the new dynamic language.
+            dynamicLoader.unload("chars");
+            // New dynamic language should be closed.
+            assertThrows(IllegalStateException.class, dynamicLanguageCached2::getClassLoader);
+            assertThrows(IllegalStateException.class, dynamicLanguageCached2::getLanguageComponent);
+            assertTrue(dynamicLanguageCached2.isClosed());
+            dynamicLanguageCached2 = null;
+
+            // Cleanup cache.
+            dynamicLoader.deleteCacheForUnloadedLanguages();
         }
     }
 
@@ -132,5 +201,15 @@ class DynamicLoadTest {
         for(JarFileWithPath jarFileWithPath : locations.jarFiles) {
             UnarchiveCommon.unarchiveJar(jarFileWithPath.file, temporaryDirectory, false, false);
         }
+    }
+
+    void logAndRethrow(ExecException e) throws ExecException {
+        if(e.getCause() instanceof CompileToJavaClassFiles.CompileException) {
+            final CompileToJavaClassFiles.CompileException compilerException = (CompileToJavaClassFiles.CompileException)e.getCause();
+            System.err.println(compilerException.getMessage());
+            compilerException.getSubMessage().ifPresent(System.err::println);
+            compilerException.getSubMessages().ifPresent(System.err::println);
+        }
+        throw e;
     }
 }

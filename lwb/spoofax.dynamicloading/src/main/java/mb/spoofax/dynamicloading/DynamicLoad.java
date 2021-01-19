@@ -7,6 +7,8 @@ import mb.pie.api.OutTransientImpl;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.hierarchical.ResourcePath;
+import mb.resource.hierarchical.match.FileResourceMatcher;
+import mb.resource.hierarchical.walk.TrueResourceWalker;
 import mb.spoofax.compiler.spoofax3.standalone.CompileToJavaClassFiles;
 import mb.spoofax.core.platform.PlatformComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -78,7 +80,7 @@ public class DynamicLoad implements TaskDef<DynamicLoad.Input, OutTransient<Dyna
         final ArrayList<URL> classPath = new ArrayList<>();
         for(ResourcePath path : output.classPath()) {
             // TODO: properly handle error
-            context.require(path, ResourceStampers.hashDirRec());
+            context.require(path, ResourceStampers.hashDirRec(new TrueResourceWalker(), new FileResourceMatcher()));
             final @Nullable File file = context.getResourceService().toLocalFile(path);
             if(file == null) {
                 // TODO: properly handle error

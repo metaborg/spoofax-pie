@@ -39,26 +39,43 @@ public class DynamicLoader implements AutoCloseable {
         pie.close();
     }
 
-    public DynamicLanguage require(String id, CompileToJavaClassFiles.Input compilerInput) throws ExecException, InterruptedException {
+    /**
+     * Incrementally compiles, and(re))loads the compiled language with given {@code id} and {@code compilerInput}.
+     */
+    public DynamicLanguage load(String id, CompileToJavaClassFiles.Input compilerInput) throws ExecException, InterruptedException {
         try(final MixedSession session = pie.newSession()) {
             return session.require(createTask(id, compilerInput)).getValue();
         }
     }
 
+    /**
+     * Incrementally compiles all dynamically loaded languages that are affected by given {@code changedResources}.
+     */
     public void updateAffectedBy(Set<? extends ResourceKey> changedResources) throws ExecException, InterruptedException {
         try(final MixedSession session = pie.newSession()) {
             session.updateAffectedBy(changedResources);
         }
     }
 
-    public void remove(String id) throws IOException {
+    /**
+     * Unloads language with given {@code id}.
+     */
+    public void unload(String id) throws IOException {
         try(final MixedSession session = pie.newSession()) {
             session.unobserve(createTaskKey(id));
-            session.deleteUnobservedTasks(task -> true, (task, resource) -> true);
         }
         final @Nullable DynamicLanguage dynamicLanguage = dynamicLanguages.remove(id);
         if(dynamicLanguage != null) {
             dynamicLanguage.close();
+        }
+    }
+
+    /**
+     * Cleans up cached data for unloaded languages.
+     */
+    public void deleteCacheForUnloadedLanguages() throws IOException {
+        try(final MixedSession session = pie.newSession()) {
+            session.deleteUnobservedTasks(task -> true, (task, resource) -> false);
         }
     }
 

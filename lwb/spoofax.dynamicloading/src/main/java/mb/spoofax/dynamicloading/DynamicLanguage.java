@@ -11,6 +11,7 @@ import java.net.URLClassLoader;
 public class DynamicLanguage {
     private final URLClassLoader classLoader;
     private final LanguageComponent languageComponent;
+    private boolean closed = false;
 
     public DynamicLanguage(URL[] classPath, String daggerComponentClassName, PlatformComponent platformComponent) throws ReflectiveOperationException {
         this.classLoader = new URLClassLoader(classPath, DynamicLanguage.class.getClassLoader());
@@ -22,15 +23,26 @@ public class DynamicLanguage {
     }
 
     public void close() throws IOException {
-        languageComponent.getPie().close();
-        classLoader.close();
+        if(closed) return;
+        try {
+            languageComponent.getPie().close();
+            classLoader.close();
+        } finally {
+            closed = true;
+        }
     }
 
     public URLClassLoader getClassLoader() {
+        if(closed) throw new IllegalStateException("Cannot get class loader, dynamic language has been closed");
         return classLoader;
     }
 
     public LanguageComponent getLanguageComponent() {
+        if(closed) throw new IllegalStateException("Cannot get language component, dynamic language has been closed");
         return languageComponent;
+    }
+
+    public boolean isClosed() {
+        return closed;
     }
 }
