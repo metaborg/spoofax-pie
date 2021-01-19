@@ -6,11 +6,14 @@ import mb.common.style.Style;
 import mb.common.style.Styling;
 import mb.common.style.TokenStyle;
 import mb.common.util.Properties;
+import mb.log.stream.StreamLoggerFactory;
 import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
+import mb.pie.runtime.PieBuilderImpl;
 import mb.pie.task.archive.UnarchiveCommon;
 import mb.resource.classloader.ClassLoaderResource;
 import mb.resource.classloader.ClassLoaderResourceLocations;
+import mb.resource.classloader.ClassLoaderResourceRegistry;
 import mb.resource.classloader.JarFileWithPath;
 import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.HierarchicalResource;
@@ -25,6 +28,12 @@ import mb.spoofax.compiler.spoofax3.language.Spoofax3LanguageProjectCompiler;
 import mb.spoofax.compiler.spoofax3.language.Spoofax3LanguageProjectCompilerInputBuilder;
 import mb.spoofax.compiler.spoofax3.standalone.CompileToJavaClassFiles;
 import mb.spoofax.compiler.util.Shared;
+import mb.spoofax.core.language.LanguageComponent;
+import mb.spoofax.core.platform.DaggerPlatformComponent;
+import mb.spoofax.core.platform.LoggerFactoryModule;
+import mb.spoofax.core.platform.PlatformComponent;
+import mb.spoofax.core.platform.PlatformPieModule;
+import mb.spoofax.core.platform.ResourceRegistriesModule;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -35,7 +44,12 @@ import java.util.ArrayList;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DynamicLoadTest {
-    private final DynamicLoader dynamicLoader = new DynamicLoader();
+    final ClassLoaderResourceRegistry classLoaderResourceRegistry = new ClassLoaderResourceRegistry("spoofax3.standalone", DynamicLoadTest.class.getClassLoader());
+    final PlatformComponent platformComponent = DaggerPlatformComponent.builder()
+        .loggerFactoryModule(new LoggerFactoryModule(StreamLoggerFactory.stdOutVeryVerbose()))
+        .resourceRegistriesModule(new ResourceRegistriesModule(classLoaderResourceRegistry))
+        .platformPieModule(new PlatformPieModule(PieBuilderImpl::new))
+        .build();
 
     @Test void testDynamicLoadCharsLanguage(@TempDir Path temporaryDirectoryPath) throws Exception {
         // Copy language specification sources to the temporary directory.
@@ -78,7 +92,9 @@ class DynamicLoadTest {
             .build();
 
         // Create the dynamic language component.
-        try(final DynamicLanguageComponent languageComponent = dynamicLoader.createDynamicLanguageComponent(input)) {
+        try(final DynamicLoader dynamicLoader = new DynamicLoader(platformComponent)) {
+            final DynamicLanguage dynamicLanguage = dynamicLoader.require("chars", input);
+            final LanguageComponent languageComponent = dynamicLanguage.getLanguageComponent();
             final FSResource file = temporaryDirectory.appendSegment("test.chars");
             file.ensureFileExists().writeString("abcdefg");
             try(final MixedSession session = languageComponent.getPie().newSession()) {
@@ -108,7 +124,7 @@ class DynamicLoadTest {
     }
 
     void copyResourcesToTemporaryDirectory(String sourceFilesPath, HierarchicalResource temporaryDirectory) throws IOException {
-        final ClassLoaderResource sourceFilesDirectory = dynamicLoader.classLoaderResourceRegistry.getResource(sourceFilesPath);
+        final ClassLoaderResource sourceFilesDirectory = classLoaderResourceRegistry.getResource(sourceFilesPath);
         final ClassLoaderResourceLocations locations = sourceFilesDirectory.getLocations();
         for(FSResource directory : locations.directories) {
             directory.copyRecursivelyTo(temporaryDirectory);
