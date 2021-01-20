@@ -6,10 +6,16 @@ import mb.common.style.Style;
 import mb.common.style.Styling;
 import mb.common.style.TokenStyle;
 import mb.common.util.Properties;
+import mb.log.api.LoggerFactory;
 import mb.log.stream.StreamLoggerFactory;
 import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
+import mb.pie.api.PieBuilder;
+import mb.pie.api.Tracer;
 import mb.pie.runtime.PieBuilderImpl;
+import mb.pie.runtime.store.InMemoryStore;
+import mb.pie.runtime.store.SerializingStore;
+import mb.pie.runtime.tracer.LoggingTracer;
 import mb.pie.task.archive.UnarchiveCommon;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
@@ -46,22 +52,29 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class DynamicLoadTest {
     final ClassLoaderResourceRegistry classLoaderResourceRegistry = new ClassLoaderResourceRegistry("spoofax3.standalone", DynamicLoadTest.class.getClassLoader());
-    final PlatformComponent platformComponent = DaggerPlatformComponent.builder()
-        .loggerFactoryModule(new LoggerFactoryModule(StreamLoggerFactory.stdOutVeryVerbose()))
-        .resourceRegistriesModule(new ResourceRegistriesModule(classLoaderResourceRegistry))
-        .platformPieModule(new PlatformPieModule(PieBuilderImpl::new))
-        .build();
-    final ResourceService resourceService = platformComponent.getResourceService();
 
     @Test void testDynamicLoadCharsLanguage(@TempDir Path temporaryDirectoryPath) throws Exception {
         // Copy language specification sources to the temporary directory.
         final FSResource temporaryDirectory = new FSResource(temporaryDirectoryPath);
         copyResourcesToTemporaryDirectory("mb/spoofax/dynamicloading/chars", temporaryDirectory);
+
+        // Create platform component.
+        final WritableResource pieStore = temporaryDirectory.appendRelativePath("pie.store");
+        // TODO: use serializing store to serialize/deserialize store after language reload
+        final PieBuilder.StoreFactory storeFactory = null; // (serde, __, ___) -> new SerializingStore<>(serde, pieStore, InMemoryStore::new, InMemoryStore.class, false);
+        final Function<LoggerFactory, Tracer> tracerFactory = LoggingTracer::new;
+        final PlatformComponent platformComponent = DaggerPlatformComponent.builder()
+            .loggerFactoryModule(new LoggerFactoryModule(StreamLoggerFactory.stdOutVeryVerbose()))
+            .resourceRegistriesModule(new ResourceRegistriesModule(classLoaderResourceRegistry))
+            .platformPieModule(new PlatformPieModule(PieBuilderImpl::new, storeFactory, tracerFactory))
+            .build();
+        final ResourceService resourceService = platformComponent.getResourceService();
 
         // Create the compiler inputs.
         final String packageId = "mb.chars";

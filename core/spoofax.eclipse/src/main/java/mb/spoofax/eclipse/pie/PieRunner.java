@@ -28,7 +28,6 @@ import mb.spoofax.core.language.command.CommandRequest;
 import mb.spoofax.core.language.command.HierarchicalResourceType;
 import mb.spoofax.core.language.command.ShowFeedback;
 import mb.spoofax.core.language.command.arg.ArgConverters;
-import mb.spoofax.core.platform.Platform;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.command.CommandUtil;
 import mb.spoofax.eclipse.editor.NamedEditorInput;
@@ -73,7 +72,6 @@ import java.util.function.Predicate;
 @Singleton
 public class PieRunner {
     private final Logger logger;
-    private final Pie pie;
     private final ArgConverters argConverters;
     private final EclipseResourceRegistry resourceRegistry;
     private final WorkspaceUpdate.Factory workspaceUpdateFactory;
@@ -86,7 +84,6 @@ public class PieRunner {
     @Inject
     public PieRunner(
         LoggerFactory loggerFactory,
-        @Platform Pie pie,
         ArgConverters argConverters,
         EclipseResourceRegistry resourceRegistry,
         WorkspaceUpdate.Factory workspaceUpdateFactory,
@@ -96,7 +93,6 @@ public class PieRunner {
         this.logger = loggerFactory.create(getClass());
         this.argConverters = argConverters;
         this.resourceUtil = resourceUtil;
-        this.pie = pie;
         this.resourceRegistry = resourceRegistry;
         this.workspaceUpdateFactory = workspaceUpdateFactory;
         this.partClosedCallback = partClosedCallback;
@@ -225,6 +221,7 @@ public class PieRunner {
         IProject eclipseProject,
         @Nullable IProgressMonitor monitor
     ) throws IOException {
+        final Pie pie = languageComponent.getPie();
         final EclipseResource projectResource = new EclipseResource(resourceRegistry, eclipseProject);
         final ResourcePath project = projectResource.getPath();
         final ResourceChanges resourceChanges = new ResourceChanges(projectResource, languageComponent.getLanguageInstance().getFileExtensions());
@@ -287,6 +284,7 @@ public class PieRunner {
         Session session,
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException {
+        final Pie pie = languageComponent.getPie();
         final ArrayList<CommandContextAndFeedback> contextsAndFeedbacks = new ArrayList<>();
         switch(request.executionType()) {
             case ManualOnce:
@@ -586,6 +584,7 @@ public class PieRunner {
         Session session,
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException, IOException {
+        final Pie pie = languageComponent.getPie();
         final AutoCommandRequests autoCommandRequests = new AutoCommandRequests(languageComponent); // OPTO: calculate once per language component
         for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.project) {
             final CommandRequest<?> request = autoCommandRequest.toCommandRequest();
@@ -628,6 +627,7 @@ public class PieRunner {
         Session session,
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException {
+        final Pie pie = languageComponent.getPie();
         final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
         final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
         try {

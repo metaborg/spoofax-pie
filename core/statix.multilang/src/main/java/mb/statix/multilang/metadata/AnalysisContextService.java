@@ -4,6 +4,7 @@ import com.google.common.collect.ListMultimap;
 import mb.common.result.Result;
 import mb.common.result.ResultCollector;
 import mb.pie.api.Pie;
+import mb.pie.api.PieBuilder;
 import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.multilang.metadata.spec.Module;
 import mb.statix.multilang.metadata.spec.OverlappingRulesException;
@@ -42,7 +43,7 @@ public abstract class AnalysisContextService implements LanguageMetadataManager,
 
     @Value.Parameter public abstract Map<SpecFragmentId, SpecConfig> specConfigs();
 
-    @Value.Parameter public abstract Pie platformPie();
+    @Value.Parameter public abstract PieBuilder platformPieBuilder();
 
     // Map used to cache language metadata instances, so that they will not be recomputed by subsequent accesses.
     private final ConcurrentHashMap<LanguageId, LanguageMetadata> languageMetadataCache = new ConcurrentHashMap<>();
@@ -79,7 +80,8 @@ public abstract class AnalysisContextService implements LanguageMetadataManager,
             .map(LanguageMetadata::languagePie)
             .toArray(Pie[]::new);
 
-        return platformPie()
+        return platformPieBuilder()
+            .build()
             .createChildBuilder(languagePies)
             .build();
     }

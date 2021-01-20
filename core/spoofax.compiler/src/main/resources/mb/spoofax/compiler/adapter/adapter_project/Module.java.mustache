@@ -13,10 +13,12 @@ import mb.log.api.LoggerFactory;
 import mb.pie.api.Function;
 import mb.pie.api.MapTaskDefs;
 import mb.pie.api.Pie;
+import mb.pie.api.PieBuilder;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.pie.api.TaskDefs;
+import mb.pie.api.serde.JavaSerde;
 import mb.resource.ResourceKeyString;
 import mb.resource.ResourceService;
 import mb.resource.classloader.ClassLoaderResource;
@@ -185,8 +187,12 @@ public class {{baseModule.id}} {
     }
 
     @Provides @{{scope.id}} @Named("prototype")
-    static Pie providePrototypePie(@Platform Pie pie, TaskDefs taskDefs, ResourceService resourceService) {
-        return pie.createChildBuilder().withTaskDefs(taskDefs).withResourceService(resourceService).build();
+    static Pie providePrototypePie(@Platform PieBuilder pieBuilder, TaskDefs taskDefs, ResourceService resourceService) {
+        return pieBuilder
+            .addTaskDefs(taskDefs)
+            .withResourceService(resourceService)
+            .withSerdeFactory(loggerFactory -> new JavaSerde({{classloaderResources.classloaderResources.qualifiedId}}.class.getClassLoader()))
+            .build();
     }
 {{#multilangAnalyzer}}
     @Provides @{{scope.id}}

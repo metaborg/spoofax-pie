@@ -106,7 +106,7 @@ public class TestBase {
             .putAllSpecConfigs(specConfigs)
             .putLanguageMetadataSuppliers(new LanguageId("mb.minisdf"), miniSdfComponent::getLanguageMetadata)
             .putLanguageMetadataSuppliers(new LanguageId("mb.ministr"), miniStrComponent::getLanguageMetadata)
-            .platformPie(platformComponent.getPie())
+            .platformPieBuilder(platformComponent.getPieBuilder())
             .putDefaultLanguageContexts(new LanguageId("mb.minisdf"), new ContextId("mb.multilang"))
             .putDefaultLanguageContexts(new LanguageId("mb.ministr"), new ContextId("mb.multilang"))
             .build();

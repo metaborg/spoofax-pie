@@ -8,6 +8,7 @@ import mb.libspoofax2.LibSpoofax2Qualifier;
 import mb.libstatix.LibStatixQualifier;
 import mb.pie.api.MapTaskDefs;
 import mb.pie.api.Pie;
+import mb.pie.api.PieBuilder;
 import mb.pie.api.TaskDef;
 import mb.pie.task.archive.UnarchiveFromJar;
 import mb.resource.ResourceService;
@@ -93,7 +94,7 @@ import java.util.Set;
     public Pie providePie(
         @Spoofax3CompilerQualifier ResourceService resourceService,
         Set<TaskDef<?, ?>> taskDefs,
-        @Platform Pie platformPie,
+        @Platform PieBuilder pieBuilder,
         @Sdf3Qualifier Pie sdf3Pie,
         @StrategoQualifier Pie strategoPie,
         @EsvQualifier Pie esvPie,
@@ -101,7 +102,8 @@ import java.util.Set;
         @LibSpoofax2Qualifier Pie libSpoofax2Pie,
         @LibStatixQualifier Pie libStatixPie
     ) {
-        return platformPie.createChildBuilder(sdf3Pie, strategoPie, esvPie, statixPie, libSpoofax2Pie, libStatixPie)
+        return pieBuilder.build()
+            .createChildBuilder(sdf3Pie, strategoPie, esvPie, statixPie, libSpoofax2Pie, libStatixPie)
             .withTaskDefs(new MapTaskDefs(taskDefs))
             .withResourceService(resourceService)
             .build();
