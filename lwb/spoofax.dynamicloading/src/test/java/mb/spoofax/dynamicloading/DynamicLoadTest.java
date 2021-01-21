@@ -67,7 +67,7 @@ class DynamicLoadTest {
         // Create platform component.
         final WritableResource pieStore = temporaryDirectory.appendRelativePath("pie.store");
         // TODO: use serializing store to serialize/deserialize store after language reload
-        final PieBuilder.StoreFactory storeFactory = null; // (serde, __, ___) -> new SerializingStore<>(serde, pieStore, InMemoryStore::new, InMemoryStore.class, false);
+        final PieBuilder.StoreFactory storeFactory = (serde, __, ___) -> new SerializingStore<>(serde, pieStore, InMemoryStore::new, InMemoryStore.class, false);
         final Function<LoggerFactory, Tracer> tracerFactory = LoggingTracer::new;
         final PlatformComponent platformComponent = DaggerPlatformComponent.builder()
             .loggerFactoryModule(new LoggerFactoryModule(StreamLoggerFactory.stdOutVeryVerbose()))

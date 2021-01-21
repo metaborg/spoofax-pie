@@ -124,6 +124,17 @@ public interface AdapterProject extends Serializable {
         return extendScope().orElseGet(this::baseScope);
     }
 
+    // Dagger Qualifier
+
+    @Value.Default default TypeInfo baseQualifier() {
+        return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "Qualifier");
+    }
+
+    Optional<TypeInfo> extendQualifier();
+
+    default TypeInfo qualifier() {
+        return extendQualifier().orElseGet(this::baseQualifier);
+    }
 
     /// Automatically provided sub-inputs
 

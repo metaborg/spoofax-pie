@@ -401,17 +401,11 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
 
         default TypeInfo scope() { return adapterProject().scope(); }
 
-        // Dagger Qualifier
+        // Dagger Qualifier (passthrough from AdapterProject)
 
-        @Value.Default default TypeInfo baseQualifier() {
-            return TypeInfo.of(adapterProject().packageId(), shared().defaultClassPrefix() + "Qualifier");
-        }
+        default TypeInfo baseQualifier() { return adapterProject().baseQualifier(); }
 
-        Optional<TypeInfo> extendQualifier();
-
-        default TypeInfo qualifier() {
-            return extendQualifier().orElseGet(this::baseQualifier);
-        }
+        default TypeInfo qualifier() { return adapterProject().qualifier(); }
 
         // Dagger component
 

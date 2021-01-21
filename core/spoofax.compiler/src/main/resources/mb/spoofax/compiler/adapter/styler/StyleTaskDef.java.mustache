@@ -7,14 +7,25 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
+import mb.resource.classloader.ClassLoaderResourceRegistry;
+import mb.resource.hierarchical.HierarchicalResource;
+
 import javax.inject.Inject;
 import java.io.IOException;
 
 @{{adapterProject.scope.qualifiedId}}
 public class {{baseStyleTaskDef.id}} implements TaskDef<Supplier<Option<JSGLRTokens>>, Option<Styling>> {
+    private final ClassLoaderResourceRegistry classLoaderResourceRegistry;
+    private final HierarchicalResource definitionDir;
     private final {{languageProjectInput.styler.qualifiedId}} styler;
 
-    @Inject public {{baseStyleTaskDef.id}}({{languageProjectInput.styler.qualifiedId}} styler) {
+    @Inject public {{baseStyleTaskDef.id}}(
+        ClassLoaderResourceRegistry classLoaderResourceRegistry,
+        @{{adapterProject.qualifier.qualifiedId}}("definition-dir") HierarchicalResource definitionDir,
+        {{languageProjectInput.styler.qualifiedId}} styler
+    ) {
+        this.classLoaderResourceRegistry = classLoaderResourceRegistry;
+        this.definitionDir = definitionDir;
         this.styler = styler;
     }
 
@@ -24,6 +35,10 @@ public class {{baseStyleTaskDef.id}} implements TaskDef<Supplier<Option<JSGLRTok
 
     @Override
     public Option<Styling> exec(ExecContext context, Supplier<Option<JSGLRTokens>> tokensSupplier) throws ExecException, IOException, InterruptedException {
+        context.require(classLoaderResourceRegistry.getResource({{baseStyleTaskDef.id}}.class));
+        context.require(classLoaderResourceRegistry.getResource({{languageProjectInput.styler.qualifiedId}}.class));
+        context.require(classLoaderResourceRegistry.getResource({{languageProjectInput.stylingRules.qualifiedId}}.class));
+        context.require(definitionDir.appendRelativePath("{{languageProjectInput.packedEsvRelativePath}}"));
         return context.require(tokensSupplier).map(t -> styler.style(t.tokens));
     }
 }
