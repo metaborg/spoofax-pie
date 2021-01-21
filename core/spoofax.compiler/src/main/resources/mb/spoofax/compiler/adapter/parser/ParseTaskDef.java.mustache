@@ -28,11 +28,11 @@ public class {{baseParseTaskDef.id}} extends JSGLR1ParseTaskDef {
     }
 
     @Override protected Result<JSGLR1ParseOutput, JSGLR1ParseException> parse(ExecContext context, String text) throws Exception {
+        context.require(classloaderResources.definitionDirectory.appendRelativePath("{{languageProjectInput.parseTableRelativePath}}"));
         context.require(classloaderResources.getResource({{baseParseTaskDef.id}}.class));
         context.require(classloaderResources.getResource({{languageProjectInput.parser.qualifiedId}}.class));
         context.require(classloaderResources.getResource({{languageProjectInput.parserFactory.qualifiedId}}.class));
         context.require(classloaderResources.getResource({{languageProjectInput.parseTable.qualifiedId}}.class));
-        context.require(classloaderResources.definitionDirectory.appendRelativePath("{{languageProjectInput.parseTableRelativePath}}"));
         final {{languageProjectInput.parser.qualifiedId}} parser = parserProvider.get();
         try {
             return Result.ofOk(parser.parse(text, "{{languageProjectInput.startSymbol}}"));
