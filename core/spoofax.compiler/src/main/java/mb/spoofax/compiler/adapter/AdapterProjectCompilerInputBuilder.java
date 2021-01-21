@@ -76,10 +76,10 @@ public class AdapterProjectCompilerInputBuilder {
         final ClassloaderResourcesCompiler.Input classloaderResources = buildClassLoaderResources(shared, languageProjectInput.languageProject());
         project.classloaderResources(classloaderResources);
 
-        final ParserAdapterCompiler.@Nullable Input parser = buildParser(shared, adapterProject, languageProjectInput);
+        final ParserAdapterCompiler.@Nullable Input parser = buildParser(shared, adapterProject, languageProjectInput, classloaderResources);
         if(parser != null) project.parser(parser);
 
-        final StylerAdapterCompiler.@Nullable Input styler = buildStyler(shared, adapterProject, languageProjectInput);
+        final StylerAdapterCompiler.@Nullable Input styler = buildStyler(shared, adapterProject, languageProjectInput, classloaderResources);
         if(styler != null) project.styler(styler);
 
         final ConstraintAnalyzerAdapterCompiler.@Nullable Input constraintAnalyzer = buildConstraintAnalyzer(shared, adapterProject, languageProjectInput);
@@ -113,26 +113,30 @@ public class AdapterProjectCompilerInputBuilder {
     private ParserAdapterCompiler.@Nullable Input buildParser(
         Shared shared,
         AdapterProject adapterProject,
-        LanguageProjectCompiler.Input languageProjectInput
+        LanguageProjectCompiler.Input languageProjectInput,
+        ClassloaderResourcesCompiler.Input classloaderResources
     ) {
         if(!parserEnabled) return null;
         return parser
             .shared(shared)
             .adapterProject(adapterProject)
             .languageProjectInput(languageProjectInput.parser().orElseThrow(() -> new RuntimeException("Mismatch between presence of parser input between language project and adapter project")))
+            .classloaderResourcesInput(classloaderResources)
             .build();
     }
 
     private StylerAdapterCompiler.@Nullable Input buildStyler(
         Shared shared,
         AdapterProject adapterProject,
-        LanguageProjectCompiler.Input languageProjectInput
+        LanguageProjectCompiler.Input languageProjectInput,
+        ClassloaderResourcesCompiler.Input classloaderResources
     ) {
         if(!stylerEnabled) return null;
         return styler
             .shared(shared)
             .adapterProject(adapterProject)
             .languageProjectInput(languageProjectInput.styler().orElseThrow(() -> new RuntimeException("Mismatch between presence of styler input between language project and adapter project")))
+            .classloaderResourcesInput(classloaderResources)
             .build();
     }
 

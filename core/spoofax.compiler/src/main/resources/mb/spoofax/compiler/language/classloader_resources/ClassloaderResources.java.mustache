@@ -1,15 +1,24 @@
 package {{baseClassloaderResources.packageId}};
 
-import mb.resource.ResourceKeyString;
 import mb.resource.classloader.ClassLoaderResource;
 import mb.resource.classloader.ClassLoaderResourceRegistry;
+import mb.resource.hierarchical.SegmentsPath;
 
 public class {{baseClassloaderResources.id}} {
-    public static ClassLoaderResourceRegistry createClassLoaderResourceRegistry() {
-        return new ClassLoaderResourceRegistry("{{qualifier}}", {{baseClassloaderResources.id}}.class.getClassLoader());
+    public final ClassLoaderResourceRegistry resourceRegistry = new ClassLoaderResourceRegistry("{{qualifier}}", {{baseClassloaderResources.id}}.class.getClassLoader());
+
+    public ClassLoaderResource getResource(String path) {
+        return resourceRegistry.getResource(path);
     }
 
-    public static ClassLoaderResource createDefinitionDir(ClassLoaderResourceRegistry classLoaderResourceRegistry) {
-        return classLoaderResourceRegistry.getResource(ResourceKeyString.of("{{languageProject.packagePath}}"));
+    public ClassLoaderResource getResource(Class<?> clazz) {
+        return resourceRegistry.getResource(clazz);
     }
+
+    public ClassLoaderResource getResource(SegmentsPath path) {
+        return resourceRegistry.getResource(path);
+    }
+
+
+    public final ClassLoaderResource definitionDirectory = resourceRegistry.getResource("{{languageProject.packagePath}}");
 }

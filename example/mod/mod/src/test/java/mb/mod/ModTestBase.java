@@ -7,7 +7,6 @@ import mb.resource.DefaultResourceService;
 import mb.resource.DummyResourceRegistry;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
-import mb.resource.classloader.ClassLoaderResourceRegistry;
 import mb.resource.fs.FSResourceRegistry;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.url.URLResourceRegistry;
@@ -21,9 +20,9 @@ class ModTestBase {
 
     protected final LoggerFactory loggerFactory = new SLF4JLoggerFactory();
 
-    protected final ClassLoaderResourceRegistry classLoaderResourceRegistry = ModClassloaderResources.createClassLoaderResourceRegistry();
-    protected final HierarchicalResource definitionDir = ModClassloaderResources.createDefinitionDir(classLoaderResourceRegistry);
-    protected final ResourceService resourceService = new DefaultResourceService(new DummyResourceRegistry(qualifier), new FSResourceRegistry(), new URLResourceRegistry(), classLoaderResourceRegistry);
+    protected final ModClassloaderResources classloaderResources = new ModClassloaderResources();
+    protected final HierarchicalResource definitionDir = classloaderResources.definitionDirectory;
+    protected final ResourceService resourceService = new DefaultResourceService(new DummyResourceRegistry(qualifier), new FSResourceRegistry(), new URLResourceRegistry(), classloaderResources.resourceRegistry);
 
     protected final ModParser parser = new ModParserFactory(definitionDir).create();
     protected final String startSymbol = "Start";

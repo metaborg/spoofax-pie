@@ -25,7 +25,7 @@ public interface {{baseComponent.id}} extends LanguageComponent{{#isMultiLang}},
 
     @Override @{{qualifier.id}} ResourceService getResourceService();
 
-    @{{qualifier.id}}("definition-dir") ClassLoaderResource getDefinitionDir();
+    @{{qualifier.id}}("definition-directory") ClassLoaderResource getDefinitionDir();
 
     @Override @{{qualifier.id}} Pie getPie();
 {{#parser}}

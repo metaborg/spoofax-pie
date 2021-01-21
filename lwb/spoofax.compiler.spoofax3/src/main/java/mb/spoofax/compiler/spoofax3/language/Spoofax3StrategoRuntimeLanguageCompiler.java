@@ -53,8 +53,8 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
         StrategoCompileToJava compileToJava,
         StrategoConfigurator configurator,
         UnarchiveFromJar unarchiveFromJar,
-        @LibSpoofax2Qualifier("definition-dir") ClassLoaderResource libSpoofax2DefinitionDir,
-        @LibStatixQualifier("definition-dir") ClassLoaderResource libStatixDefinitionDir
+        @LibSpoofax2Qualifier("definition-directory") ClassLoaderResource libSpoofax2DefinitionDir,
+        @LibStatixQualifier("definition-directory") ClassLoaderResource libStatixDefinitionDir
     ) {
         this.check = check;
         this.compileToJava = compileToJava;

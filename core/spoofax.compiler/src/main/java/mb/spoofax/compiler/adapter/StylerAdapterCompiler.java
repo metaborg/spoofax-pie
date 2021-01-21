@@ -4,6 +4,7 @@ import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.language.ClassloaderResourcesCompiler;
 import mb.spoofax.compiler.language.StylerLanguageCompiler;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.Shared;
@@ -91,6 +92,8 @@ public class StylerAdapterCompiler implements TaskDef<StylerAdapterCompiler.Inpu
         AdapterProject adapterProject();
 
         StylerLanguageCompiler.Input languageProjectInput();
+
+        ClassloaderResourcesCompiler.Input classloaderResourcesInput();
 
 
         @Value.Check default void check() {
