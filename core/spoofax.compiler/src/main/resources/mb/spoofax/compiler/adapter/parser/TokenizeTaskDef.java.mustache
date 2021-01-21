@@ -12,9 +12,14 @@ import java.io.IOException;
 
 @{{adapterProject.scope.qualifiedId}}
 public class {{baseTokenizeTaskDef.id}} implements TaskDef<ResourceKey, Option<JSGLRTokens>> {
+    private final {{classloaderResourcesInput.classloaderResources.qualifiedId}} classloaderResources;
     private final {{parseTaskDef.qualifiedId}} parse;
 
-    @Inject public {{baseTokenizeTaskDef.id}}({{parseTaskDef.qualifiedId}} parse) {
+    @Inject public {{baseTokenizeTaskDef.id}}(
+        {{classloaderResourcesInput.classloaderResources.qualifiedId}} classloaderResources,
+        {{parseTaskDef.qualifiedId}} parse
+    ) {
+        this.classloaderResources = classloaderResources;
         this.parse = parse;
     }
 
@@ -24,6 +29,7 @@ public class {{baseTokenizeTaskDef.id}} implements TaskDef<ResourceKey, Option<J
 
     @Override
     public @Nullable Option<JSGLRTokens> exec(ExecContext context, ResourceKey key) throws IOException {
+        context.require(classloaderResources.getResource({{baseTokenizeTaskDef.id}}.class));
         return context.require(parse.createTokensSupplier(key)).ok();
     }
 }
