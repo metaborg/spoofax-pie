@@ -15,7 +15,9 @@ import mb.pie.api.Tracer;
 import mb.pie.runtime.PieBuilderImpl;
 import mb.pie.runtime.store.InMemoryStore;
 import mb.pie.runtime.store.SerializingStore;
+import mb.pie.runtime.tracer.CompositeTracer;
 import mb.pie.runtime.tracer.LoggingTracer;
+import mb.pie.runtime.tracer.MetricsTracer;
 import mb.pie.task.archive.UnarchiveCommon;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
@@ -68,7 +70,8 @@ class DynamicLoadTest {
         final WritableResource pieStore = temporaryDirectory.appendRelativePath("pie.store");
         // TODO: use serializing store to serialize/deserialize store after language reload
         final PieBuilder.StoreFactory storeFactory = (serde, __, ___) -> new SerializingStore<>(serde, pieStore, InMemoryStore::new, InMemoryStore.class, false);
-        final Function<LoggerFactory, Tracer> tracerFactory = LoggingTracer::new;
+        final MetricsTracer metricsTracer = new MetricsTracer();
+        final Function<LoggerFactory, Tracer> tracerFactory = loggerFactory -> new CompositeTracer(new LoggingTracer(loggerFactory), metricsTracer);
         final PlatformComponent platformComponent = DaggerPlatformComponent.builder()
             .loggerFactoryModule(new LoggerFactoryModule(StreamLoggerFactory.stdOutVeryVerbose()))
             .resourceRegistriesModule(new ResourceRegistriesModule(classLoaderResourceRegistry))
@@ -125,6 +128,7 @@ class DynamicLoadTest {
                 // Style test file with dynamically loaded language.
                 try(final MixedSession session = languageComponent.getPie().newSession()) {
                     final Option<Styling> result = session.require(languageComponent.getLanguageInstance().createStyleTask(file.getPath()));
+                    // Check styling.
                     assertTrue(result.isSome());
                     final Styling styling = result.unwrap();
                     final ArrayList<TokenStyle> stylingPerToken = styling.getStylePerToken();
@@ -164,7 +168,13 @@ class DynamicLoadTest {
                 final LanguageComponent languageComponent = dynamicLanguage.getLanguageComponent();
                 // Style test file with dynamically loaded language again
                 try(final MixedSession session = languageComponent.getPie().newSession()) {
+                    metricsTracer.reset();
                     final Option<Styling> result = session.require(languageComponent.getLanguageInstance().createStyleTask(file.getPath()));
+                    final MetricsTracer.Report report = metricsTracer.reportAndReset();
+                    // Check that styling task has been executed, and parser task has not.
+                    assertTrue(report.executedPerTaskDefinition.containsKey(adapterProjectInput.styler().get().styleTaskDef().qualifiedId()));
+                    assertFalse(report.executedPerTaskDefinition.containsKey(adapterProjectInput.parser().get().parseTaskDef().qualifiedId()));
+                    // Check styling.
                     assertTrue(result.isSome());
                     final Styling styling = result.unwrap();
                     final ArrayList<TokenStyle> stylingPerToken = styling.getStylePerToken();

@@ -13,6 +13,8 @@ dependencies {
   api(project(":spoofax.compiler.spoofax3.standalone.dagger"))
 
   compileOnly("org.checkerframework:checker-qual-android")
+
+  testImplementation("org.slf4j:slf4j-simple:1.7.30")
 }
 
 tasks.test {
@@ -21,5 +23,4 @@ tasks.test {
     events(org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_OUT, org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR)
     showStandardStreams = true
   }
-  //debug = true
 }
