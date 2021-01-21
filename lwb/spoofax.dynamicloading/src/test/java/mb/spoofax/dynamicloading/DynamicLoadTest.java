@@ -19,7 +19,6 @@ import mb.pie.runtime.tracer.CompositeTracer;
 import mb.pie.runtime.tracer.LoggingTracer;
 import mb.pie.runtime.tracer.MetricsTracer;
 import mb.pie.task.archive.UnarchiveCommon;
-import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
 import mb.resource.WritableResource;
 import mb.resource.classloader.ClassLoaderResource;
@@ -53,7 +52,6 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -146,27 +144,23 @@ class DynamicLoadTest {
                 }
             }
 
-            // Dynamic language has not yet been closed.
+            // Dynamic language 1 has not yet been closed.
             assertNotNull(dynamicLanguageCached1.getClassLoader());
             assertNotNull(dynamicLanguageCached1.getLanguageComponent());
             assertFalse(dynamicLanguageCached1.isClosed());
 
-            // Change the language specification.
+            // Change the language specification: change the styler.
             final ResourcePath esvMainFilePath = input.spoofax3LanguageProjectInput().styler().get().esvMainFile();
             final WritableResource esvMainFile = resourceService.getWritableResource(esvMainFilePath);
             final String esvMainString = esvMainFile.readString().replace("0 0 150 bold", "255 255 0 italic");
             esvMainFile.writeString(esvMainString);
-            final HashSet<ResourceKey> changedResources = new HashSet<>();
-            changedResources.add(esvMainFilePath);
-            dynamicLoader.updateAffectedBy(changedResources);
+            dynamicLoader.updateAffectedBy(esvMainFilePath);
 
             @Nullable DynamicLanguage dynamicLanguageCached2;
             {
-                // Dynamically load language again.
                 final DynamicLanguage dynamicLanguage = dynamicLoader.load("chars", input);
                 dynamicLanguageCached2 = dynamicLanguage;
                 final LanguageComponent languageComponent = dynamicLanguage.getLanguageComponent();
-                // Style test file with dynamically loaded language again
                 try(final MixedSession session = languageComponent.getPie().newSession()) {
                     metricsTracer.reset();
                     final Option<Styling> result = session.require(languageComponent.getLanguageInstance().createStyleTask(file.getPath()));
@@ -192,23 +186,56 @@ class DynamicLoadTest {
                 }
             }
 
-            // New dynamic language has not yet been closed.
+            // Dynamic language 2 has not yet been closed.
             assertNotNull(dynamicLanguageCached2.getClassLoader());
             assertNotNull(dynamicLanguageCached2.getLanguageComponent());
             assertFalse(dynamicLanguageCached2.isClosed());
-            // Previous dynamic language should be closed.
+            // Dynamic language 1 should be closed.
             assertThrows(IllegalStateException.class, dynamicLanguageCached1::getClassLoader);
             assertThrows(IllegalStateException.class, dynamicLanguageCached1::getLanguageComponent);
             assertTrue(dynamicLanguageCached1.isClosed());
             dynamicLanguageCached1 = null;
 
-            // Unload the new dynamic language.
-            dynamicLoader.unload("chars");
-            // New dynamic language should be closed.
+            // Change the language specification: change the parser.
+            final ResourcePath sdf3MainFilePath = input.spoofax3LanguageProjectInput().parser().get().sdf3MainFile();
+            final WritableResource sdf3MainFile = resourceService.getWritableResource(sdf3MainFilePath);
+            final String sdf3MainString = sdf3MainFile.readString().replace("\\ ", "\\ \\t");
+            sdf3MainFile.writeString(sdf3MainString);
+            dynamicLoader.updateAffectedBy(sdf3MainFilePath);
+
+            @Nullable DynamicLanguage dynamicLanguageCached3;
+            {
+                final DynamicLanguage dynamicLanguage = dynamicLoader.load("chars", input);
+                dynamicLanguageCached3 = dynamicLanguage;
+                final LanguageComponent languageComponent = dynamicLanguage.getLanguageComponent();
+                try(final MixedSession session = languageComponent.getPie().newSession()) {
+                    metricsTracer.reset();
+                    session.require(languageComponent.getLanguageInstance().createTokenizeTask(file.getPath()));
+                    final MetricsTracer.Report report = metricsTracer.reportAndReset();
+                    // Check that parser task has been executed.
+                    assertTrue(report.executedPerTaskDefinition.containsKey(adapterProjectInput.parser().get().parseTaskDef().qualifiedId()));
+                } catch(ExecException e) {
+                    logAndRethrow(e);
+                }
+            }
+
+            // Dynamic language 3 has not yet been closed.
+            assertNotNull(dynamicLanguageCached3.getClassLoader());
+            assertNotNull(dynamicLanguageCached3.getLanguageComponent());
+            assertFalse(dynamicLanguageCached3.isClosed());
+            // Dynamic language 2 should be closed.
             assertThrows(IllegalStateException.class, dynamicLanguageCached2::getClassLoader);
             assertThrows(IllegalStateException.class, dynamicLanguageCached2::getLanguageComponent);
             assertTrue(dynamicLanguageCached2.isClosed());
             dynamicLanguageCached2 = null;
+
+            // Unload dynamic language.
+            dynamicLoader.unload("chars");
+            // Dynamic language 3 should be closed.
+            assertThrows(IllegalStateException.class, dynamicLanguageCached3::getClassLoader);
+            assertThrows(IllegalStateException.class, dynamicLanguageCached3::getLanguageComponent);
+            assertTrue(dynamicLanguageCached3.isClosed());
+            dynamicLanguageCached3 = null;
 
             // Cleanup cache.
             dynamicLoader.deleteCacheForUnloadedLanguages();

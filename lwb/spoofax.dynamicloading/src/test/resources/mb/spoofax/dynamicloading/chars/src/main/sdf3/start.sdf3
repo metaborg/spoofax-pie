@@ -10,10 +10,10 @@ context-free start-symbols
 
 lexical syntax
 
-  CHARS  = ~[\ \t\n\v\f\r]*
-  LAYOUT = [\ \t\n\v\f\r]
+  CHARS  = ~[\ \n\v\f\r]*
+  LAYOUT = [\ \n\v\f\r]
 
 context-free restrictions
 
-  CHARS   -/- ~[\ \t\n\v\f\r]
-  LAYOUT? -/- [\ \t\n\v\f\r]
+  CHARS   -/- ~[\ \n\v\f\r]
+  LAYOUT? -/- [\ \n\v\f\r]

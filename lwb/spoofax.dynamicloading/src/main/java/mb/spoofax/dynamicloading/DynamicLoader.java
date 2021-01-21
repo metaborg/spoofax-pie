@@ -14,7 +14,9 @@ import mb.spoofax.core.platform.PlatformComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 public class DynamicLoader implements AutoCloseable {
@@ -55,6 +57,12 @@ public class DynamicLoader implements AutoCloseable {
         try(final MixedSession session = pie.newSession()) {
             session.updateAffectedBy(changedResources);
         }
+    }
+
+    public void updateAffectedBy(ResourceKey... changedResources) throws ExecException, InterruptedException {
+        final HashSet<ResourceKey> changedResourcesSet = new HashSet<>();
+        Collections.addAll(changedResourcesSet, changedResources);
+        updateAffectedBy(changedResourcesSet);
     }
 
     /**
