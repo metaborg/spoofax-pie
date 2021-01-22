@@ -22,6 +22,12 @@ public class DynamicLanguage {
         this.languageComponent = (LanguageComponent)builder.getClass().getDeclaredMethod("build").invoke(builder);
     }
 
+    /**
+     * Closes the dynamic language, closing the {@link URLClassLoader classloader} and {@link LanguageComponent language
+     * component}, freeing any resources they hold. This dynamic language cannot be used any more after closing it.
+     *
+     * @throws IOException when {@link URLClassLoader#close() closing the classloader} fails.
+     */
     public void close() throws IOException {
         if(closed) return;
         try {
@@ -32,16 +38,29 @@ public class DynamicLanguage {
         }
     }
 
+    /**
+     * Gets the {@link URLClassLoader classloader} of this dynamic language.
+     *
+     * @throws IllegalStateException if the dynamic language has been closed with {@link #close}.
+     */
     public URLClassLoader getClassLoader() {
         if(closed) throw new IllegalStateException("Cannot get class loader, dynamic language has been closed");
         return classLoader;
     }
 
+    /**
+     * Gets the {@link LanguageComponent language component} of this dynamic language.
+     *
+     * @throws IllegalStateException if the dynamic language has been closed with {@link #close}.
+     */
     public LanguageComponent getLanguageComponent() {
         if(closed) throw new IllegalStateException("Cannot get language component, dynamic language has been closed");
         return languageComponent;
     }
 
+    /**
+     * @return true if the dynamic language has been closed with {@link #close}.
+     */
     public boolean isClosed() {
         return closed;
     }

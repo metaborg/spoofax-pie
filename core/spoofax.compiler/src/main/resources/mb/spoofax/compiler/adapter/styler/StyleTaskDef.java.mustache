@@ -30,11 +30,11 @@ public class {{baseStyleTaskDef.id}} implements TaskDef<Supplier<Option<JSGLRTok
 
     @Override
     public Option<Styling> exec(ExecContext context, Supplier<Option<JSGLRTokens>> tokensSupplier) throws ExecException, IOException, InterruptedException {
-        context.require(classloaderResources.definitionDirectory.appendRelativePath("{{languageProjectInput.packedEsvRelativePath}}"));
-        context.require(classloaderResources.getResource({{baseStyleTaskDef.id}}.class));
-        context.require(classloaderResources.getResource({{languageProjectInput.styler.qualifiedId}}.class));
-        context.require(classloaderResources.getResource({{languageProjectInput.stylerFactory.qualifiedId}}.class));
-        context.require(classloaderResources.getResource({{languageProjectInput.stylingRules.qualifiedId}}.class));
+        context.require(classloaderResources.tryGetAsLocalDefinitionResource("{{languageProjectInput.packedEsvRelativePath}}"));
+        context.require(classloaderResources.tryGetAsLocalResource({{baseStyleTaskDef.id}}.class));
+        context.require(classloaderResources.tryGetAsLocalResource({{languageProjectInput.styler.qualifiedId}}.class));
+        context.require(classloaderResources.tryGetAsLocalResource({{languageProjectInput.stylerFactory.qualifiedId}}.class));
+        context.require(classloaderResources.tryGetAsLocalResource({{languageProjectInput.stylingRules.qualifiedId}}.class));
         return context.require(tokensSupplier).map(t -> styler.style(t.tokens));
     }
 }

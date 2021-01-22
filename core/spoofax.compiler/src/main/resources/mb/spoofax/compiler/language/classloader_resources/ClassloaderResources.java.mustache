@@ -1,5 +1,6 @@
 package {{baseClassloaderResources.packageId}};
 
+import mb.resource.ReadableResource;
 import mb.resource.classloader.ClassLoaderResource;
 import mb.resource.classloader.ClassLoaderResourceRegistry;
 import mb.resource.hierarchical.SegmentsPath;
@@ -19,6 +20,26 @@ public class {{baseClassloaderResources.id}} {
         return resourceRegistry.getResource(path);
     }
 
+    public ReadableResource tryGetAsLocalResource(String path) {
+        return getResource(path).tryAsLocalResource();
+    }
+
+    public ReadableResource tryGetAsLocalResource(Class<?> clazz) {
+        return getResource(clazz).tryAsLocalResource();
+    }
+
+    public ReadableResource tryGetAsLocalResource(SegmentsPath path) {
+        return getResource(path).tryAsLocalResource();
+    }
+
 
     public final ClassLoaderResource definitionDirectory = resourceRegistry.getResource("{{languageProject.packagePath}}");
+
+    public ClassLoaderResource getDefinitionResource(String path) {
+        return definitionDirectory.appendAsRelativePath(path);
+    }
+
+    public ReadableResource tryGetAsLocalDefinitionResource(String path) {
+        return getDefinitionResource(path).tryAsLocalResource();
+    }
 }
