@@ -214,8 +214,9 @@ class DynamicLoadTest {
                     metricsTracer.reset();
                     session.updateAffectedBy(providedResources);
                     final MetricsTracer.Report report = metricsTracer.reportAndReset();
-                    // Check that parser task has been executed.
+                    // Check that parser task has been executed, and styler task has not.
                     assertTrue(report.executedPerTaskDefinition.containsKey(adapterProjectInput.parser().get().parseTaskDef().qualifiedId()));
+                    assertFalse(report.executedPerTaskDefinition.containsKey(adapterProjectInput.styler().get().styleTaskDef().qualifiedId()));
                 } catch(ExecException e) {
                     logAndRethrow(e);
                 }
