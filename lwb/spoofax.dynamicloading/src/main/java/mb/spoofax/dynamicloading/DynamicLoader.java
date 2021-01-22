@@ -52,17 +52,25 @@ public class DynamicLoader implements AutoCloseable {
 
     /**
      * Incrementally compiles all dynamically loaded languages that are affected by given {@code changedResources}.
+     *
+     * @return Read-only set of provided resources.
      */
-    public void updateAffectedBy(Set<? extends ResourceKey> changedResources) throws ExecException, InterruptedException {
+    public Set<ResourceKey> updateAffectedBy(Set<? extends ResourceKey> changedResources) throws ExecException, InterruptedException {
         try(final MixedSession session = pie.newSession()) {
             session.updateAffectedBy(changedResources);
+            return session.getProvidedResources();
         }
     }
 
-    public void updateAffectedBy(ResourceKey... changedResources) throws ExecException, InterruptedException {
+    /**
+     * Incrementally compiles all dynamically loaded languages that are affected by given {@code changedResources}.
+     *
+     * @return Read-only set of provided resources.
+     */
+    public Set<ResourceKey> updateAffectedBy(ResourceKey... changedResources) throws ExecException, InterruptedException {
         final HashSet<ResourceKey> changedResourcesSet = new HashSet<>();
         Collections.addAll(changedResourcesSet, changedResources);
-        updateAffectedBy(changedResourcesSet);
+        return updateAffectedBy(changedResourcesSet);
     }
 
     /**

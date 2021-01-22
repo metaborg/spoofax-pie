@@ -19,6 +19,7 @@ import mb.pie.runtime.tracer.CompositeTracer;
 import mb.pie.runtime.tracer.LoggingTracer;
 import mb.pie.runtime.tracer.MetricsTracer;
 import mb.pie.task.archive.UnarchiveCommon;
+import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
 import mb.resource.WritableResource;
 import mb.resource.classloader.ClassLoaderResource;
@@ -52,6 +53,7 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -201,16 +203,16 @@ class DynamicLoadTest {
             final WritableResource sdf3MainFile = resourceService.getWritableResource(sdf3MainFilePath);
             final String sdf3MainString = sdf3MainFile.readString().replace("\\ ", "\\ \\t");
             sdf3MainFile.writeString(sdf3MainString);
-            dynamicLoader.updateAffectedBy(sdf3MainFilePath);
 
             @Nullable DynamicLanguage dynamicLanguageCached3;
             {
+                final Set<ResourceKey> providedResources = dynamicLoader.updateAffectedBy(sdf3MainFilePath);
                 final DynamicLanguage dynamicLanguage = dynamicLoader.load("chars", input);
                 dynamicLanguageCached3 = dynamicLanguage;
                 final LanguageComponent languageComponent = dynamicLanguage.getLanguageComponent();
                 try(final MixedSession session = languageComponent.getPie().newSession()) {
                     metricsTracer.reset();
-                    session.require(languageComponent.getLanguageInstance().createTokenizeTask(file.getPath()));
+                    session.updateAffectedBy(providedResources);
                     final MetricsTracer.Report report = metricsTracer.reportAndReset();
                     // Check that parser task has been executed.
                     assertTrue(report.executedPerTaskDefinition.containsKey(adapterProjectInput.parser().get().parseTaskDef().qualifiedId()));
