@@ -112,8 +112,10 @@ open class AdapterPlugin : Plugin<Project> {
 
       doLast {
         project.deleteDirectory(input.adapterProject().generatedJavaSourcesDirectory(), component.resourceService)
-        component.pie.newSession().use { session ->
-          session.require(component.adapterProjectCompiler.createTask(input))
+        synchronized(component.pie) {
+          component.pie.newSession().use { session ->
+            session.require(component.adapterProjectCompiler.createTask(input))
+          }
         }
       }
     }

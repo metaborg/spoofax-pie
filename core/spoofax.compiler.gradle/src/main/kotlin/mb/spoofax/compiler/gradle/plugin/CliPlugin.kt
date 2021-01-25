@@ -101,8 +101,10 @@ open class CliPlugin : Plugin<Project> {
 
       doLast {
         project.deleteDirectory(input.generatedJavaSourcesDirectory(), component.resourceService)
-        component.pie.newSession().use { session ->
-          session.require(component.cliProjectCompiler.createTask(input))
+        synchronized(component.pie) {
+          component.pie.newSession().use { session ->
+            session.require(component.cliProjectCompiler.createTask(input))
+          }
         }
       }
     }

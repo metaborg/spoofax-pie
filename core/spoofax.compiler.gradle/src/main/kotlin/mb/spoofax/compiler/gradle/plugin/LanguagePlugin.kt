@@ -162,8 +162,10 @@ open class LanguagePlugin : Plugin<Project> {
 
       doLast {
         project.deleteDirectory(input.languageProject().generatedJavaSourcesDirectory(), component.resourceService)
-        component.pie.newSession().use { session ->
-          session.require(component.languageProjectCompiler.createTask(input))
+        synchronized(component.pie) {
+          component.pie.newSession().use { session ->
+            session.require(component.languageProjectCompiler.createTask(input))
+          }
         }
       }
     }
