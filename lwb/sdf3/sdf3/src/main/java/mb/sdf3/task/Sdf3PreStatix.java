@@ -9,8 +9,8 @@ import javax.inject.Provider;
 
 @Sdf3Scope
 public class Sdf3PreStatix extends AstStrategoTransformTaskDef {
-    @Inject public Sdf3PreStatix(Provider<StrategoRuntime> strategoRuntimeProvider) {
-        super(strategoRuntimeProvider, "statix-pre");
+    @Inject public Sdf3PreStatix(Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider) {
+        super(getStrategoRuntimeProvider, "statix-pre");
     }
 
     @Override public String getId() {

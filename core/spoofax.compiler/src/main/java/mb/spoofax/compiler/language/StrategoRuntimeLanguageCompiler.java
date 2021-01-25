@@ -6,6 +6,7 @@ import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
+import mb.spoofax.compiler.util.Conversion;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TemplateCompiler;
@@ -19,6 +20,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Value.Enclosing
 public class StrategoRuntimeLanguageCompiler implements TaskDef<StrategoRuntimeLanguageCompiler.Input, None> {
@@ -71,6 +73,12 @@ public class StrategoRuntimeLanguageCompiler implements TaskDef<StrategoRuntimeL
 
 
         /// Configuration
+
+        List<String> strategyPackageIds();
+
+        default List<String> strategyPackagePaths() {
+            return strategyPackageIds().stream().map(Conversion::packageIdToPath).collect(Collectors.toList());
+        }
 
         List<String> interopRegisterersByReflection();
 

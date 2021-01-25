@@ -9,8 +9,8 @@ import javax.inject.Provider;
 
 @Sdf3Scope
 public class Sdf3ToCompletionColorer extends AstStrategoTransformTaskDef {
-    @Inject public Sdf3ToCompletionColorer(Provider<StrategoRuntime> strategoRuntimeProvider) {
-        super(strategoRuntimeProvider, "module-to-cmp-colorer");
+    @Inject public Sdf3ToCompletionColorer(Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider) {
+        super(getStrategoRuntimeProvider, "module-to-cmp-colorer");
     }
 
     @Override public String getId() {

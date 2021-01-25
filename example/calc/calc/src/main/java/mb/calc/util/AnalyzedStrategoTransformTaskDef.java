@@ -1,27 +1,27 @@
 package mb.calc.util;
 
+import mb.calc.task.CalcGetStrategoRuntimeProvider;
 import mb.common.util.ListView;
 import mb.constraint.pie.ConstraintAnalyzeTaskDef;
+import mb.pie.api.ExecContext;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.pie.ProviderStrategoTransformTaskDef;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
-import javax.inject.Provider;
-
 public abstract class AnalyzedStrategoTransformTaskDef extends ProviderStrategoTransformTaskDef<ConstraintAnalyzeTaskDef.Output> {
-    public AnalyzedStrategoTransformTaskDef(Provider<StrategoRuntime> strategoRuntimeProvider, ListView<String> strategyNames) {
-        super(strategoRuntimeProvider, strategyNames);
+    public AnalyzedStrategoTransformTaskDef(CalcGetStrategoRuntimeProvider getStrategoRuntimeProvider, ListView<String> strategyNames) {
+        super(getStrategoRuntimeProvider, strategyNames);
     }
 
-    public AnalyzedStrategoTransformTaskDef(Provider<StrategoRuntime> strategoRuntimeProvider, String... strategyNames) {
-        super(strategoRuntimeProvider, strategyNames);
+    public AnalyzedStrategoTransformTaskDef(CalcGetStrategoRuntimeProvider getStrategoRuntimeProvider, String... strategyNames) {
+        super(getStrategoRuntimeProvider, strategyNames);
     }
 
-    @Override protected StrategoRuntime getStrategoRuntime(ConstraintAnalyzeTaskDef.Output input) {
-        return super.getStrategoRuntime(input).addContextObject(input.context);
+    @Override protected StrategoRuntime getStrategoRuntime(ExecContext context, ConstraintAnalyzeTaskDef.Output input) {
+        return super.getStrategoRuntime(context, input).addContextObject(input.context);
     }
 
-    @Override protected IStrategoTerm getAst(ConstraintAnalyzeTaskDef.Output input) {
+    @Override protected IStrategoTerm getAst(ExecContext context, ConstraintAnalyzeTaskDef.Output input) {
         return input.result.ast;
     }
 }

@@ -9,8 +9,8 @@ import javax.inject.Provider;
 
 @Sdf3Scope
 public class Sdf3Desugar extends AstStrategoTransformTaskDef {
-    @Inject public Sdf3Desugar(Provider<StrategoRuntime> strategoRuntimeProvider) {
-        super(strategoRuntimeProvider, "lifting", "desugar-templates");
+    @Inject public Sdf3Desugar(Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider) {
+        super(getStrategoRuntimeProvider, "lifting", "desugar-templates");
     }
 
     @Override public String getId() {

@@ -10,6 +10,7 @@ import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 
 import javax.inject.Inject;
@@ -184,6 +185,8 @@ public class MultilangAnalyzerAdapterCompiler implements TaskDef<MultilangAnalyz
         AdapterProject adapterProject();
 
         MultilangAnalyzerLanguageCompiler.Input languageProjectInput();
+
+        StrategoRuntimeAdapterCompiler.Input strategoRuntimeInput();
     }
 
     @Value.Immutable public interface Output extends Serializable {

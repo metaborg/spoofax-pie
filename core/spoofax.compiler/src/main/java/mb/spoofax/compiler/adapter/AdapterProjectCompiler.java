@@ -119,6 +119,9 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
         } else {
             allTaskDefs.add(TypeInfo.of(NullCompleteTaskDef.class));
         }
+        input.strategoRuntime().ifPresent((i) -> {
+            allTaskDefs.add(i.getStrategoRuntimeProviderTaskDef());
+        });
         input.constraintAnalyzer().ifPresent((i) -> {
             allTaskDefs.add(i.analyzeTaskDef());
             allTaskDefs.add(i.analyzeMultiTaskDef());
@@ -513,6 +516,7 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
             parser().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             styler().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             completer().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
+            strategoRuntime().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             constraintAnalyzer().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             multilangAnalyzer().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             return javaSourceFiles;

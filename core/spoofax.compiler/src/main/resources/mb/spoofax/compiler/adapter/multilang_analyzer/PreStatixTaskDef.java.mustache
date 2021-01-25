@@ -12,8 +12,8 @@ import java.io.IOException;
 
 @{{adapterProject.scope.qualifiedId}}
 public class {{basePreStatixTaskDef.id}} extends AstStrategoTransformTaskDef {
-    @Inject public {{basePreStatixTaskDef.id}}(Provider<StrategoRuntime> strategoRuntimeProvider) {
-        super(strategoRuntimeProvider, "{{preAnalysisStrategy}}");
+    @Inject public {{basePreStatixTaskDef.id}}({{strategoRuntimeInput.getStrategoRuntimeProviderTaskDef.qualifiedId}} getStrategoRuntimeProvider) {
+        super(getStrategoRuntimeProvider, "{{preAnalysisStrategy}}");
     }
 
     @Override public String getId() {

@@ -8,6 +8,7 @@ import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.Sdf3Scope;
 import mb.sdf3.task.Sdf3CreateSpec;
+import mb.sdf3.task.Sdf3GetStrategoRuntimeProvider;
 import mb.sdf3.task.Sdf3ParseTableToParenthesizer;
 import mb.sdf3.task.Sdf3SpecToParseTable;
 import mb.spoofax.core.language.command.CommandFeedback;
@@ -56,12 +57,12 @@ public class Sdf3ShowSpecParenthesizer extends ProvideOutputShared implements Ta
     private final Sdf3ParseTableToParenthesizer specToParenthesizer;
 
     @Inject public Sdf3ShowSpecParenthesizer(
-        Provider<StrategoRuntime> strategoRuntimeProvider,
+        Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider,
         Sdf3CreateSpec createSpec,
         Sdf3SpecToParseTable specToParseTable,
         Sdf3ParseTableToParenthesizer sdf3ParseTableToParenthesizer
     ) {
-        super(strategoRuntimeProvider, "pp-stratego-string", "parenthesizer");
+        super(getStrategoRuntimeProvider, "pp-stratego-string", "parenthesizer");
         this.createSpec = createSpec;
         this.specToParseTable = specToParseTable;
         this.specToParenthesizer = sdf3ParseTableToParenthesizer;
@@ -78,6 +79,6 @@ public class Sdf3ShowSpecParenthesizer extends ProvideOutputShared implements Ta
             false
         ));
         return context.require(specToParenthesizer, new Sdf3ParseTableToParenthesizer.Args(parseTableSupplier, "parenthesizer"))
-            .mapOrElse(ast -> provideOutput(args.concrete, ast, args.mainFile), e -> CommandFeedback.ofTryExtractMessagesFrom(e, args.mainFile));
+            .mapOrElse(ast -> provideOutput(context, args.concrete, ast, args.mainFile), e -> CommandFeedback.ofTryExtractMessagesFrom(e, args.mainFile));
     }
 }

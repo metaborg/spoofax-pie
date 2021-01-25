@@ -1,9 +1,15 @@
 package {{baseClassloaderResources.packageId}};
 
+import mb.common.result.ExceptionalConsumer;
 import mb.resource.ReadableResource;
 import mb.resource.classloader.ClassLoaderResource;
+import mb.resource.classloader.ClassLoaderResourceLocations;
 import mb.resource.classloader.ClassLoaderResourceRegistry;
+import mb.resource.classloader.JarFileWithPath;
+import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.SegmentsPath;
+
+import java.io.IOException;
 
 public class {{baseClassloaderResources.id}} {
     public final ClassLoaderResourceRegistry resourceRegistry = new ClassLoaderResourceRegistry("{{qualifier}}", {{baseClassloaderResources.id}}.class.getClassLoader());
@@ -30,6 +36,21 @@ public class {{baseClassloaderResources.id}} {
 
     public ReadableResource tryGetAsLocalResource(SegmentsPath path) {
         return getResource(path).tryAsLocalResource();
+    }
+
+    public void performWithResourceLocations(
+        String path,
+        ExceptionalConsumer<FSResource, IOException> directoriesConsumer,
+        ExceptionalConsumer<JarFileWithPath, IOException> jarFileWithPathConsumer
+    ) throws IOException {
+        final ClassLoaderResource classLoaderResource = resourceRegistry.getResource(path);
+        final ClassLoaderResourceLocations locations = classLoaderResource.getLocations();
+        for(FSResource directory : locations.directories) {
+            directoriesConsumer.accept(directory);
+        }
+        for(JarFileWithPath jarFileWithPath : locations.jarFiles) {
+            jarFileWithPathConsumer.accept(jarFileWithPath);
+        }
     }
 
 

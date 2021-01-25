@@ -9,8 +9,8 @@ import javax.inject.Provider;
 
 @Sdf3Scope
 public class Sdf3ToDynsemSignature extends AnalyzedStrategoTransformTaskDef {
-    @Inject public Sdf3ToDynsemSignature(Provider<StrategoRuntime> strategoRuntimeProvider) {
-        super(strategoRuntimeProvider, "module-to-ds-sig");
+    @Inject public Sdf3ToDynsemSignature(Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider) {
+        super(getStrategoRuntimeProvider, "module-to-ds-sig");
     }
 
     @Override public String getId() {

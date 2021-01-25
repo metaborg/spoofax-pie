@@ -41,6 +41,7 @@ languageProject {
     }
     withStyler()
     withStrategoRuntime().run {
+      addStrategyPackageIds("org.metaborg.meta.lang.stratego.trans")
       addInteropRegisterersByReflection("org.metaborg.meta.lang.stratego.trans.InteropRegisterer")
     }
   }

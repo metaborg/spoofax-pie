@@ -13,8 +13,8 @@ import java.io.IOException;
 
 @{{adapterProject.scope.qualifiedId}}
 public class {{basePostStatixTaskDef.id}} extends AstStrategoTransformTaskDef {
-    @Inject public {{basePostStatixTaskDef.id}}(Provider<StrategoRuntime> strategoRuntimeProvider) {
-        super(strategoRuntimeProvider, "{{postAnalysisStrategy}}");
+    @Inject public {{basePostStatixTaskDef.id}}({{strategoRuntimeInput.getStrategoRuntimeProviderTaskDef.qualifiedId}} getStrategoRuntimeProvider) {
+        super(getStrategoRuntimeProvider, "{{postAnalysisStrategy}}");
     }
 
     @Override public String getId() {

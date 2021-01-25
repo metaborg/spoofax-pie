@@ -44,6 +44,8 @@ languageProject {
       multiFile(true)
     }
     withStrategoRuntime().run {
+      addStrategyPackageIds("statix.lang.strategies")
+      addStrategyPackageIds("statix.lang.trans")
       addInteropRegisterersByReflection("statix.lang.strategies.InteropRegisterer")
       addInteropRegisterersByReflection("statix.lang.trans.InteropRegisterer")
       addSpoofax2Primitives(true)

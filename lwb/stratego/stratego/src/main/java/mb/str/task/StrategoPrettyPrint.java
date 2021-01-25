@@ -9,8 +9,8 @@ import javax.inject.Provider;
 
 @StrategoScope
 public class StrategoPrettyPrint extends AstStrategoTransformTaskDef {
-    @Inject public StrategoPrettyPrint(Provider<StrategoRuntime> strategoRuntimeProvider) {
-        super(strategoRuntimeProvider, "pp-stratego-string");
+    @Inject public StrategoPrettyPrint(StrategoGetStrategoRuntimeProvider getStrategoRuntimeProvider) {
+        super(getStrategoRuntimeProvider, "pp-stratego-string");
     }
 
     @Override public String getId() {

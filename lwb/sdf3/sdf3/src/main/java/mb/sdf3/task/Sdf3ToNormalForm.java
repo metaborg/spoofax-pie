@@ -9,8 +9,8 @@ import javax.inject.Provider;
 
 @Sdf3Scope
 public class Sdf3ToNormalForm extends AstStrategoTransformTaskDef {
-    @Inject public Sdf3ToNormalForm(Provider<StrategoRuntime> strategoRuntimeProvider) {
-        super(strategoRuntimeProvider, "module-to-normal-form");
+    @Inject public Sdf3ToNormalForm(Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider) {
+        super(getStrategoRuntimeProvider, "module-to-normal-form");
     }
 
     @Override public String getId() {

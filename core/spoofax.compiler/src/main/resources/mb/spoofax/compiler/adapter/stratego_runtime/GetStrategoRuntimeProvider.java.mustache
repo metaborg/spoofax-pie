@@ -1,0 +1,46 @@
+package {{baseGetStrategoRuntimeProviderTaskDef.packageId}};
+
+import mb.pie.api.ExecContext;
+import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.resource.hierarchical.match.PathResourceMatcher;
+import mb.resource.hierarchical.match.path.ExtensionPathMatcher;
+import mb.resource.hierarchical.walk.TrueResourceWalker;
+import mb.stratego.common.StrategoRuntime;
+import mb.stratego.pie.GetStrategoRuntimeProvider;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
+
+@{{adapterProject.scope.qualifiedId}}
+public class {{baseGetStrategoRuntimeProviderTaskDef.id}} extends GetStrategoRuntimeProvider {
+    private final {{classloaderResourcesInput.classloaderResources.qualifiedId}} classloaderResources;
+    private final Provider<StrategoRuntime> strategoRuntimeProvider;
+
+    @Inject
+    public {{baseGetStrategoRuntimeProviderTaskDef.id}}(
+        {{classloaderResourcesInput.classloaderResources.qualifiedId}} classloaderResources,
+        Provider<StrategoRuntime> strategoRuntimeProvider
+    ) {
+        this.classloaderResources = classloaderResources;
+        this.strategoRuntimeProvider = strategoRuntimeProvider;
+    }
+
+    @Override public String getId() {
+        return "{{baseGetStrategoRuntimeProviderTaskDef.qualifiedId}}";
+    }
+
+    @Override protected Provider<StrategoRuntime> getStrategoRuntimeProvider(ExecContext context) throws Exception {
+        context.require(classloaderResources.tryGetAsLocalResource({{baseGetStrategoRuntimeProviderTaskDef.id}}.class));
+{{#languageProjectInput.strategyPackagePaths}}
+        classloaderResources.performWithResourceLocations(
+            "{{this}}",
+            (p) -> context.require(p, ResourceStampers.modifiedDirRec(new TrueResourceWalker(), new PathResourceMatcher(new ExtensionPathMatcher("class")))),
+            (j) -> context.require(j.file)
+        );
+{{/languageProjectInput.strategyPackagePaths}}
+{{#languageProjectInput.ctreeRelativePaths}}
+        context.require(classloaderResources.tryGetAsLocalDefinitionResource("{{this}}"));
+{{/languageProjectInput.ctreeRelativePaths}}
+        return strategoRuntimeProvider;
+    }
+}

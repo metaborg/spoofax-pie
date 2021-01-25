@@ -136,6 +136,7 @@ public interface AdapterProject extends Serializable {
         return extendQualifier().orElseGet(this::baseQualifier);
     }
 
+
     /// Automatically provided sub-inputs
 
     Shared shared();

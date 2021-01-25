@@ -2,6 +2,7 @@ package mb.sdf3.task.debug;
 
 import mb.sdf3.Sdf3Scope;
 import mb.sdf3.task.Sdf3Desugar;
+import mb.sdf3.task.Sdf3GetStrategoRuntimeProvider;
 import mb.sdf3.task.Sdf3Parse;
 import mb.sdf3.task.Sdf3ToPermissive;
 import mb.stratego.common.StrategoRuntime;
@@ -15,9 +16,9 @@ public class Sdf3ShowPermissive extends ShowTaskDef {
         Sdf3Parse parse,
         Sdf3Desugar desugar,
         Sdf3ToPermissive operation,
-        Provider<StrategoRuntime> strategoRuntimeProvider
+        Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider
     ) {
-        super(parse, desugar, operation, strategoRuntimeProvider, "pp-SDF3-string", "permissive grammar");
+        super(parse, desugar, operation, getStrategoRuntimeProvider, "pp-SDF3-string", "permissive grammar");
     }
 
     @Override public String getId() {
