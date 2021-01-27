@@ -3,53 +3,46 @@ package mb.stratego.pie;
 import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
+import mb.pie.api.None;
+import mb.pie.api.OutTransient;
 import mb.pie.api.Supplier;
-import mb.pie.api.TaskDef;
-import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
-import java.io.IOException;
+import javax.inject.Provider;
 
 /**
- * Abstract task definition class that executes a sequence of Stratego strategies. The Stratego runtime to execute with
- * is provided by {@link #getStrategoRuntime(ExecContext, Object)}, and the initial AST to apply it to with {@link
- * #getAst(ExecContext, Object)}.
+ * Abstract task definition that gets the Stratego runtime provider with the provided implementation of {@link
+ * GetStrategoRuntimeProvider}, gets a Stratego runtime, and then executes in sequence the provided strategies on the
+ * supplied {@link IStrategoTerm AST} extracted from the {@link T input}.
  *
- * This task definition is normally used through {@link ProviderStrategoTransformTaskDef} and transitively through
- * {@link AstStrategoTransformTaskDef}.
+ * Inputs of this task are of type {@code Supplier<? extends Result<T, ?>>} such that {@link IStrategoTerm ASTs} can be
+ * {@link Supplier incrementally supplied}, and support {@link Result failure}.
  *
- * @param <T> Type of inputs to this task definition.
+ * Outputs are of type {@code Result<IStrategoTerm, ?>}.
+ *
+ * This class should be implemented by language developers to create task definitions that run Stratego strategies on
+ * {@link IStrategoTerm ASTs} extracted from the {@link T input} by providing the {@link GetStrategoRuntimeProvider}
+ * task definition and strategies to execute in the constructor, by overriding {@link #getAst(ExecContext, T)} to
+ * extract the {@link IStrategoTerm AST}, and by overriding {@link #getId()} to give the task definition a unique ID.
+ *
+ * @param <T> Type of wrapped inputs to this task definition. The actual input is {@code Supplier<Result<T, ?>>}.
  */
-public abstract class StrategoTransformTaskDef<T> implements TaskDef<Supplier<? extends Result<T, ?>>, Result<IStrategoTerm, ?>> {
-    private final ListView<String> strategyNames;
+public abstract class StrategoTransformTaskDef<T> extends BaseStrategoTransformTaskDef<T> {
+    private final GetStrategoRuntimeProvider getStrategoRuntimeProvider;
 
-    public StrategoTransformTaskDef(ListView<String> strategyNames) {
-        this.strategyNames = strategyNames;
+    public StrategoTransformTaskDef(GetStrategoRuntimeProvider getStrategoRuntimeProvider, ListView<String> strategyNames) {
+        super(strategyNames);
+        this.getStrategoRuntimeProvider = getStrategoRuntimeProvider;
     }
 
-    public StrategoTransformTaskDef(String... strategyNames) {
-        this.strategyNames = ListView.of(strategyNames);
+    public StrategoTransformTaskDef(GetStrategoRuntimeProvider getStrategoRuntimeProvider, String... strategyNames) {
+        super(strategyNames);
+        this.getStrategoRuntimeProvider = getStrategoRuntimeProvider;
     }
 
-
-    protected abstract StrategoRuntime getStrategoRuntime(ExecContext context, T input);
-
-    protected abstract IStrategoTerm getAst(ExecContext context, T input);
-
-    @Override
-    public Result<IStrategoTerm, ?> exec(ExecContext context, Supplier<? extends Result<T, ?>> supplier) throws IOException {
-        return context.require(supplier).flatMapOrElse((t) -> {
-            final StrategoRuntime strategoRuntime = getStrategoRuntime(context, t);
-            IStrategoTerm ast = getAst(context, t);
-            for(String strategyName : strategyNames) {
-                try {
-                    ast = strategoRuntime.invoke(strategyName, ast);
-                } catch(StrategoException e) {
-                    return Result.ofErr(e);
-                }
-            }
-            return Result.ofOk(ast);
-        }, Result::ofErr);
+    @Override protected StrategoRuntime getStrategoRuntime(ExecContext context, T input) {
+        final OutTransient<Provider<StrategoRuntime>> provider = context.require(getStrategoRuntimeProvider, None.instance);
+        return provider.getValue().get();
     }
 }

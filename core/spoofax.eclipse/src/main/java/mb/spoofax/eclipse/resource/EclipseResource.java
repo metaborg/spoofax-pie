@@ -294,7 +294,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
     }
 
 
-    @Override public Stream<? extends EclipseResource> list() throws IOException {
+    @Override public Stream<EclipseResource> list() throws IOException {
         try {
             final IResource[] members = getContainer().members();
             return Arrays.stream(members).map(resource1 -> new EclipseResource(registry, resource1));
@@ -303,7 +303,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
         }
     }
 
-    @Override public Stream<? extends EclipseResource> list(ResourceMatcher matcher) throws IOException {
+    @Override public Stream<EclipseResource> list(ResourceMatcher matcher) throws IOException {
         try {
             final IResource[] members = getContainer().members();
             return Arrays.stream(members).map(resource1 -> new EclipseResource(registry, resource1)).filter((r) -> {

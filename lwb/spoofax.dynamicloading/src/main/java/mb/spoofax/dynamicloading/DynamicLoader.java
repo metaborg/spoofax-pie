@@ -1,23 +1,14 @@
 package mb.spoofax.dynamicloading;
 
-import mb.pie.api.ExecException;
 import mb.pie.api.MapTaskDefs;
 import mb.pie.api.MixedSession;
-import mb.pie.api.OutTransient;
 import mb.pie.api.Pie;
-import mb.pie.api.Task;
-import mb.pie.api.TaskKey;
-import mb.resource.ResourceKey;
-import mb.spoofax.compiler.spoofax3.standalone.CompileToJavaClassFiles;
 import mb.spoofax.compiler.spoofax3.standalone.dagger.Spoofax3CompilerStandalone;
 import mb.spoofax.core.platform.PlatformComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 public class DynamicLoader implements AutoCloseable {
     private final Spoofax3CompilerStandalone spoofax3CompilerStandalone;
@@ -41,59 +32,17 @@ public class DynamicLoader implements AutoCloseable {
         pie.close();
     }
 
-    /**
-     * Incrementally compiles, and(re))loads the compiled language with given {@code id} and {@code compilerInput}.
-     */
-    public DynamicLanguage load(String id, CompileToJavaClassFiles.Input compilerInput) throws ExecException, InterruptedException {
-        try(final MixedSession session = pie.newSession()) {
-            return session.require(createTask(id, compilerInput)).getValue();
-        }
-    }
 
     /**
-     * Incrementally compiles all dynamically loaded languages that are affected by given {@code changedResources}.
+     * Creates a new session for dynamically (re)loading languages, mimicking {@link MixedSession PIE's MixedSession}.
      *
-     * @return Read-only set of provided resources.
+     * @return Session for dynamically (re)loading languages. Must be closed after use with {@link
+     * DynamicLoaderMixedSession#close}.
      */
-    public Set<ResourceKey> updateAffectedBy(Set<? extends ResourceKey> changedResources) throws ExecException, InterruptedException {
-        try(final MixedSession session = pie.newSession()) {
-            session.updateAffectedBy(changedResources);
-            return session.getProvidedResources();
-        }
+    public DynamicLoaderMixedSession newSession() {
+        return new DynamicLoaderMixedSession(pie.newSession(), this, dynamicLoad);
     }
 
-    /**
-     * Incrementally compiles all dynamically loaded languages that are affected by given {@code changedResources}.
-     *
-     * @return Read-only set of provided resources.
-     */
-    public Set<ResourceKey> updateAffectedBy(ResourceKey... changedResources) throws ExecException, InterruptedException {
-        final HashSet<ResourceKey> changedResourcesSet = new HashSet<>();
-        Collections.addAll(changedResourcesSet, changedResources);
-        return updateAffectedBy(changedResourcesSet);
-    }
-
-    /**
-     * Unloads language with given {@code id}.
-     */
-    public void unload(String id) throws IOException {
-        try(final MixedSession session = pie.newSession()) {
-            session.unobserve(createTaskKey(id));
-        }
-        final @Nullable DynamicLanguage dynamicLanguage = dynamicLanguages.remove(id);
-        if(dynamicLanguage != null) {
-            dynamicLanguage.close();
-        }
-    }
-
-    /**
-     * Cleans up cached data for unloaded languages.
-     */
-    public void deleteCacheForUnloadedLanguages() throws IOException {
-        try(final MixedSession session = pie.newSession()) {
-            session.deleteUnobservedTasks(task -> true, (task, resource) -> false);
-        }
-    }
 
     void register(String id, DynamicLanguage dynamicLanguage) throws IOException {
         final @Nullable DynamicLanguage previousDynamicLanguage = dynamicLanguages.put(id, dynamicLanguage);
@@ -102,11 +51,10 @@ public class DynamicLoader implements AutoCloseable {
         }
     }
 
-    private Task<OutTransient<DynamicLanguage>> createTask(String id, CompileToJavaClassFiles.Input compilerInput) {
-        return dynamicLoad.createTask(new DynamicLoad.Input(id, compilerInput));
-    }
-
-    private TaskKey createTaskKey(String id) {
-        return new TaskKey(dynamicLoad.getId(), id);
+    void unregister(String id) throws IOException {
+        final @Nullable DynamicLanguage dynamicLanguage = dynamicLanguages.remove(id);
+        if(dynamicLanguage != null) {
+            dynamicLanguage.close();
+        }
     }
 }

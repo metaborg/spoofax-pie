@@ -492,6 +492,12 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
 
         /// Files information, known up-front for build systems with static dependencies such as Gradle.
 
+        default ArrayList<ResourcePath> javaSourcePaths() {
+            final ArrayList<ResourcePath> sourcePaths = new ArrayList<>();
+            sourcePaths.add(generatedJavaSourcesDirectory());
+            return sourcePaths;
+        }
+
         default ArrayList<ResourcePath> javaSourceFiles() {
             final ArrayList<ResourcePath> javaSourceFiles = new ArrayList<>();
             if(classKind().isGenerating()) {

@@ -33,6 +33,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -67,6 +69,7 @@ public class CompileToJavaClassFiles implements TaskDef<CompileToJavaClassFiles.
 
     @Override public Result<Output, CompileException> exec(ExecContext context, Input input) throws Exception {
         final ArrayList<ResourcePath> sourceFiles = new ArrayList<>();
+        // Add all Java source files from the user-defined source path.
         for(ResourcePath sourcePath : input.sourcePath()) {
             final HierarchicalResource directory = resourceService.getHierarchicalResource(sourcePath);
             if(directory.exists() && directory.isDirectory()) {
@@ -75,7 +78,7 @@ public class CompileToJavaClassFiles implements TaskDef<CompileToJavaClassFiles.
                 }
             }
         }
-        final ArrayList<ResourcePath> sourcePath = new ArrayList<>(input.sourcePath());
+        final LinkedHashSet<ResourcePath> sourcePath = new LinkedHashSet<>(input.sourcePath()); // LinkedHashSet to preserve insertion order.
         final ArrayList<Supplier<?>> suppliers = new ArrayList<>();
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
 
@@ -83,11 +86,13 @@ public class CompileToJavaClassFiles implements TaskDef<CompileToJavaClassFiles.
         context.require(languageProjectCompilerTask);
         suppliers.add(languageProjectCompilerTask.toSupplier());
         sourceFiles.addAll(input.languageProjectInput().javaSourceFiles());
+        sourcePath.addAll(input.languageProjectInput().javaSourcePaths());
 
         final Task<Result<KeyedMessages, CompilerException>> spoofax3LanguageProjectCompilerTask = spoofax3LanguageProjectCompiler.createTask(input.spoofax3LanguageProjectInput());
         @SuppressWarnings("ConstantConditions") final Result<KeyedMessages, CompilerException> spoofax3CompilerResult = context.require(spoofax3LanguageProjectCompilerTask);
         suppliers.add(spoofax3LanguageProjectCompilerTask.toSupplier());
-        sourcePath.add(input.spoofax3LanguageProjectInput().spoofax3LanguageProject().generatedJavaSourcesDirectory());
+        sourceFiles.addAll(input.spoofax3LanguageProjectInput().javaSourceFiles());
+        sourcePath.addAll(input.spoofax3LanguageProjectInput().javaSourcePaths());
         if(spoofax3CompilerResult.isErr()) {
             return Result.ofErr(CompileException.spoofax3LanguageProjectCompilerFail(spoofax3CompilerResult.getErr()));
         } else {
@@ -98,10 +103,11 @@ public class CompileToJavaClassFiles implements TaskDef<CompileToJavaClassFiles.
         context.require(adapterProjectCompilerTask);
         suppliers.add(adapterProjectCompilerTask.toSupplier());
         sourceFiles.addAll(input.adapterProjectInput().javaSourceFiles());
+        sourcePath.addAll(input.adapterProjectInput().javaSourcePaths());
 
         final ArrayList<CompileJava.Message> javaCompilationMessages = context.require(compileJava, new CompileJava.Input(
             sourceFiles,
-            sourcePath,
+            new ArrayList<>(sourcePath),
             new ArrayList<>(input.classPath()),
             new ArrayList<>(input.annotationProcessorPath()),
             input.sourceRelease(),

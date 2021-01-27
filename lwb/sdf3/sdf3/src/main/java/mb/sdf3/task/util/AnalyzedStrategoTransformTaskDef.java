@@ -5,10 +5,10 @@ import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
 import mb.pie.api.ExecContext;
 import mb.sdf3.task.Sdf3GetStrategoRuntimeProvider;
 import mb.stratego.common.StrategoRuntime;
-import mb.stratego.pie.ProviderStrategoTransformTaskDef;
+import mb.stratego.pie.StrategoTransformTaskDef;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
-public abstract class AnalyzedStrategoTransformTaskDef extends ProviderStrategoTransformTaskDef<ConstraintAnalyzeMultiTaskDef.SingleFileOutput> {
+public abstract class AnalyzedStrategoTransformTaskDef extends StrategoTransformTaskDef<ConstraintAnalyzeMultiTaskDef.SingleFileOutput> {
     public AnalyzedStrategoTransformTaskDef(Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider, ListView<String> strategyNames) {
         super(getStrategoRuntimeProvider, strategyNames);
     }

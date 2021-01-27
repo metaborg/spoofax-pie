@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface CommandRequest<A extends Serializable> {
     class Builder<A extends Serializable> extends ImmutableCommandRequest.Builder<A> {}
 
-    static Builder builder() { return new Builder(); }
+    static <A extends Serializable> Builder<A> builder() { return new Builder<>(); }
 
     static <A extends Serializable> CommandRequest<A> of(CommandDef<A> def, CommandExecutionType executionType, @Nullable RawArgs initialArgs) {
         return ImmutableCommandRequest.of(def, executionType, Optional.ofNullable(initialArgs));

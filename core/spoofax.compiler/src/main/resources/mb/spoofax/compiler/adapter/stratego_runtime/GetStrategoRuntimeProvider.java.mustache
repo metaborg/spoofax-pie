@@ -1,15 +1,19 @@
 package {{baseGetStrategoRuntimeProviderTaskDef.packageId}};
 
 import mb.pie.api.ExecContext;
-import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.resource.hierarchical.HierarchicalResource;
+import mb.resource.hierarchical.match.AllResourceMatcher;
+import mb.resource.hierarchical.match.FileResourceMatcher;
 import mb.resource.hierarchical.match.PathResourceMatcher;
 import mb.resource.hierarchical.match.path.ExtensionPathMatcher;
-import mb.resource.hierarchical.walk.TrueResourceWalker;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.pie.GetStrategoRuntimeProvider;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.stream.Stream;
 
 @{{adapterProject.scope.qualifiedId}}
 public class {{baseGetStrategoRuntimeProviderTaskDef.id}} extends GetStrategoRuntimeProvider {
@@ -32,11 +36,27 @@ public class {{baseGetStrategoRuntimeProviderTaskDef.id}} extends GetStrategoRun
     @Override protected Provider<StrategoRuntime> getStrategoRuntimeProvider(ExecContext context) throws Exception {
         context.require(classloaderResources.tryGetAsLocalResource({{baseGetStrategoRuntimeProviderTaskDef.id}}.class));
 {{#languageProjectInput.strategyPackagePaths}}
-        classloaderResources.performWithResourceLocations(
+        try {
+            classloaderResources.performWithResourceLocations(
             "{{this}}",
-            (p) -> context.require(p, ResourceStampers.modifiedDirRec(new TrueResourceWalker(), new PathResourceMatcher(new ExtensionPathMatcher("class")))),
-            (j) -> context.require(j.file)
-        );
+                directory -> {
+                    try(final Stream<? extends HierarchicalResource> stream = directory.walk(
+                        new AllResourceMatcher(new FileResourceMatcher(), new PathResourceMatcher(new ExtensionPathMatcher("class")))
+                    )) {
+                        stream.forEach(resource -> {
+                            try {
+                                context.provide(resource);
+                            } catch(IOException e) {
+                                throw new UncheckedIOException(e);
+                            }
+                        });
+                    }
+                },
+                jarFileWithPath -> context.require(jarFileWithPath.file)
+            );
+        } catch(UncheckedIOException e) {
+            throw e.getCause();
+        }
 {{/languageProjectInput.strategyPackagePaths}}
 {{#languageProjectInput.ctreeRelativePaths}}
         context.require(classloaderResources.tryGetAsLocalDefinitionResource("{{this}}"));

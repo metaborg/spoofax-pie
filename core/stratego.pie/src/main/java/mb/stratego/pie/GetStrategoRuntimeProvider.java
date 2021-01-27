@@ -3,7 +3,7 @@ package mb.stratego.pie;
 import mb.pie.api.ExecContext;
 import mb.pie.api.None;
 import mb.pie.api.OutTransient;
-import mb.pie.api.OutTransientImpl;
+import mb.pie.api.OutTransientEquatableImpl;
 import mb.pie.api.TaskDef;
 import mb.stratego.common.StrategoRuntime;
 
@@ -20,6 +20,8 @@ public abstract class GetStrategoRuntimeProvider implements TaskDef<None, OutTra
     protected abstract Provider<StrategoRuntime> getStrategoRuntimeProvider(ExecContext context) throws Exception;
 
     @Override public OutTransient<Provider<StrategoRuntime>> exec(ExecContext context, None input) throws Exception {
-        return new OutTransientImpl<>(getStrategoRuntimeProvider(context), true);
+        // Use OutTransientEquatableImpl with System.currentTimeMillis() as equatable value, to ensure that tasks that
+        // depend on this task get re-executed whenever this task gets executed, because its timestamp will change.
+        return new OutTransientEquatableImpl<>(getStrategoRuntimeProvider(context), System.currentTimeMillis(), true);
     }
 }

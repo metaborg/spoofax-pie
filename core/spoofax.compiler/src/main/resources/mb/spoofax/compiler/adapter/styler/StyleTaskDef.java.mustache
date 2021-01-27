@@ -7,6 +7,7 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
+import mb.pie.api.stamp.resource.ResourceStampers;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -31,10 +32,10 @@ public class {{baseStyleTaskDef.id}} implements TaskDef<Supplier<Option<JSGLRTok
     @Override
     public Option<Styling> exec(ExecContext context, Supplier<Option<JSGLRTokens>> tokensSupplier) throws ExecException, IOException, InterruptedException {
         context.require(classloaderResources.tryGetAsLocalDefinitionResource("{{languageProjectInput.packedEsvRelativePath}}"));
-        context.require(classloaderResources.tryGetAsLocalResource({{baseStyleTaskDef.id}}.class));
-        context.require(classloaderResources.tryGetAsLocalResource({{languageProjectInput.styler.qualifiedId}}.class));
-        context.require(classloaderResources.tryGetAsLocalResource({{languageProjectInput.stylerFactory.qualifiedId}}.class));
-        context.require(classloaderResources.tryGetAsLocalResource({{languageProjectInput.stylingRules.qualifiedId}}.class));
+        context.require(classloaderResources.tryGetAsLocalResource({{baseStyleTaskDef.id}}.class), ResourceStampers.hashFile());
+        context.require(classloaderResources.tryGetAsLocalResource({{languageProjectInput.styler.qualifiedId}}.class), ResourceStampers.hashFile());
+        context.require(classloaderResources.tryGetAsLocalResource({{languageProjectInput.stylerFactory.qualifiedId}}.class), ResourceStampers.hashFile());
+        context.require(classloaderResources.tryGetAsLocalResource({{languageProjectInput.stylingRules.qualifiedId}}.class), ResourceStampers.hashFile());
         return context.require(tokensSupplier).map(t -> styler.style(t.tokens));
     }
 }

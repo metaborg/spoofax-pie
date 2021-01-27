@@ -14,7 +14,7 @@ dependencies {
 
   compileOnly("org.checkerframework:checker-qual-android")
 
-  testImplementation("org.slf4j:slf4j-simple:1.7.30")
+  testImplementation("org.slf4j:slf4j-nop:1.7.30")
 }
 
 tasks.test {

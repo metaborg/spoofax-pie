@@ -20,6 +20,7 @@ import mb.resource.classloader.ClassLoaderResourceRegistry;
 import mb.resource.classloader.JarFileWithPath;
 import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.HierarchicalResource;
+import mb.spoofax.compiler.spoofax3.language.CompilerException;
 import mb.spoofax.compiler.spoofax3.standalone.CompileToJavaClassFiles;
 import mb.spoofax.core.platform.DaggerPlatformComponent;
 import mb.spoofax.core.platform.LoggerFactoryModule;
@@ -76,13 +77,12 @@ class TestBase {
         }
     }
 
-    void logAndRethrow(ExecException e) throws ExecException {
+    void logException(Exception e) {
         if(e.getCause() instanceof CompileToJavaClassFiles.CompileException) {
             final CompileToJavaClassFiles.CompileException compilerException = (CompileToJavaClassFiles.CompileException)e.getCause();
             System.err.println(compilerException.getMessage());
             compilerException.getSubMessage().ifPresent(System.err::println);
             compilerException.getSubMessages().ifPresent(System.err::println);
         }
-        throw e;
     }
 }

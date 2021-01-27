@@ -3,13 +3,17 @@ package mb.spoofax.dynamicloading;
 import mb.common.option.Option;
 import mb.common.util.Properties;
 import mb.pie.api.ExecException;
-import mb.resource.ResourceKey;
+import mb.pie.api.Task;
+import mb.pie.runtime.tracer.MetricsTracer;
 import mb.resource.WritableResource;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.AdapterProject;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
 import mb.spoofax.compiler.adapter.AdapterProjectCompilerInputBuilder;
+import mb.spoofax.compiler.adapter.data.ArgProviderRepr;
+import mb.spoofax.compiler.adapter.data.CommandDefRepr;
+import mb.spoofax.compiler.adapter.data.ParamRepr;
 import mb.spoofax.compiler.language.LanguageProject;
 import mb.spoofax.compiler.language.LanguageProjectCompiler;
 import mb.spoofax.compiler.language.LanguageProjectCompilerInputBuilder;
@@ -18,15 +22,24 @@ import mb.spoofax.compiler.spoofax3.language.Spoofax3LanguageProjectCompiler;
 import mb.spoofax.compiler.spoofax3.language.Spoofax3LanguageProjectCompilerInputBuilder;
 import mb.spoofax.compiler.spoofax3.standalone.CompileToJavaClassFiles;
 import mb.spoofax.compiler.util.Shared;
+import mb.spoofax.compiler.util.TypeInfo;
+import mb.spoofax.core.language.LanguageInstance;
+import mb.spoofax.core.language.command.CommandContext;
+import mb.spoofax.core.language.command.CommandContextType;
+import mb.spoofax.core.language.command.CommandDef;
+import mb.spoofax.core.language.command.CommandExecutionType;
+import mb.spoofax.core.language.command.CommandFeedback;
+import mb.spoofax.core.language.command.arg.ArgConverters;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Set;
+import java.util.Optional;
 
 class CharsTestBase extends TestBase {
     LanguageProjectCompiler.Input languageProjectInput;
     AdapterProjectCompiler.Input adapterProjectInput;
     CompileToJavaClassFiles.Input input;
+    ResourcePath charsFilePath;
     HierarchicalResource charsFile;
 
     void setup(Path temporaryDirectoryPath) throws IOException {
@@ -51,15 +64,35 @@ class CharsTestBase extends TestBase {
 
         spoofax3LanguageProjectInputBuilder.withParser();
         spoofax3LanguageProjectInputBuilder.withStyler();
+        spoofax3LanguageProjectInputBuilder.withStrategoRuntime();
         final Spoofax3LanguageProjectCompiler.Input spoofax3LanguageProjectInput = spoofax3LanguageProjectInputBuilder.build(new Properties(), shared, spoofax3LanguageProject);
         spoofax3LanguageProjectInput.syncTo(languageProjectInputBuilder);
 
         languageProjectInputBuilder.withParser().startSymbol("Start");
         languageProjectInputBuilder.withStyler();
+        languageProjectInputBuilder.withStrategoRuntime();
         this.languageProjectInput = languageProjectInputBuilder.build(shared, languageProject);
 
         adapterProjectCompilerInputBuilder.withParser();
         adapterProjectCompilerInputBuilder.withStyler();
+        adapterProjectCompilerInputBuilder.withStrategoRuntime();
+
+        final TypeInfo removeA = TypeInfo.of(packageId, "CharsRemoveA");
+        final TypeInfo debugRemoveA = TypeInfo.of(packageId, "CharsDebugRemoveA");
+        adapterProjectCompilerInputBuilder.project.addTaskDefs(removeA, debugRemoveA);
+        final CommandDefRepr debugRemoveACommand = CommandDefRepr.builder()
+            .type(packageId, "CharsDebugRemoveACommand")
+            .taskDefType(debugRemoveA)
+            .argType(debugRemoveA.appendToId(".Args"))
+            .displayName("Show AST with A characters removed")
+            .description("Shows the AST with A characters removed")
+            .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
+            .addParams(
+                ParamRepr.of("file", TypeInfo.of("mb.resource", "ResourceKey"), true, ArgProviderRepr.context(CommandContextType.File))
+            )
+            .build();
+        adapterProjectCompilerInputBuilder.project.addCommandDefs(debugRemoveACommand);
+
         this.adapterProjectInput = adapterProjectCompilerInputBuilder.build(languageProjectInput, Option.ofNone(), adapterProject);
 
         this.input = CompileToJavaClassFiles.Input.builder()
@@ -69,6 +102,7 @@ class CharsTestBase extends TestBase {
             .build();
 
         this.charsFile = temporaryDirectory.appendSegment("test.chars").ensureFileExists();
+        this.charsFilePath = charsFile.getPath();
         charsFile.writeString("abcdefg");
     }
 
@@ -81,19 +115,57 @@ class CharsTestBase extends TestBase {
     }
 
 
-    Set<ResourceKey> modifyStyler() throws IOException, ExecException, InterruptedException {
-        final ResourcePath esvMainFilePath = input.spoofax3LanguageProjectInput().styler().get().esvMainFile();
-        final WritableResource esvMainFile = resourceService.getWritableResource(esvMainFilePath);
-        final String esvMainString = esvMainFile.readString().replace("0 0 150 bold", "255 255 0 italic");
-        esvMainFile.writeString(esvMainString);
-        return dynamicLoader.updateAffectedBy(esvMainFilePath);
+    Task<CommandFeedback> getTaskForFirstCommand(LanguageInstance languageInstance) {
+        final Optional<CommandDef<?>> debugRemoveACommandOption = languageInstance.getCommandDefs().stream().findFirst();
+        final CommandDef<?> debugRemoveACommand = debugRemoveACommandOption.get();
+        return debugRemoveACommand
+            .request(CommandExecutionType.ManualOnce)
+            .createTask(CommandContext.ofFile(charsFilePath), new ArgConverters(resourceService));
     }
 
-    Set<ResourceKey> modifyParser() throws IOException, ExecException, InterruptedException {
-        final ResourcePath sdf3MainFilePath = input.spoofax3LanguageProjectInput().parser().get().sdf3MainFile();
-        final WritableResource sdf3MainFile = resourceService.getWritableResource(sdf3MainFilePath);
-        final String sdf3MainString = sdf3MainFile.readString().replace("\\ ", "\\ \\t");
-        sdf3MainFile.writeString(sdf3MainString);
-        return dynamicLoader.updateAffectedBy(sdf3MainFilePath);
+
+    boolean hasTokenizeTaskDefExecuted(MetricsTracer.Report report) {
+        return report.executedPerTaskDefinition.containsKey(adapterProjectInput.parser().get().tokenizeTaskDef().qualifiedId());
+    }
+
+    boolean hasParseTaskDefExecuted(MetricsTracer.Report report) {
+        return report.executedPerTaskDefinition.containsKey(adapterProjectInput.parser().get().parseTaskDef().qualifiedId());
+    }
+
+    boolean hasStyleTaskDefExecuted(MetricsTracer.Report report) {
+        return report.executedPerTaskDefinition.containsKey(adapterProjectInput.styler().get().styleTaskDef().qualifiedId());
+    }
+
+    boolean hasRemoveATaskDefExecuted(MetricsTracer.Report report) {
+        return report.executedPerTaskDefinition.containsKey("mb.chars.CharsRemoveA");
+    }
+
+    boolean hasDebugRemoveATaskDefExecuted(MetricsTracer.Report report) {
+        return report.executedPerTaskDefinition.containsKey("mb.chars.CharsDebugRemoveA");
+    }
+
+
+    DynamicLoaderReloadSession modifyStyler(DynamicLoaderMixedSession session) throws IOException, ExecException, InterruptedException {
+        final ResourcePath path = input.spoofax3LanguageProjectInput().styler().get().esvMainFile();
+        final WritableResource file = resourceService.getWritableResource(path);
+        final String text = file.readString().replace("0 0 150 bold", "255 255 0 italic");
+        file.writeString(text);
+        return session.updateAffectedBy(path);
+    }
+
+    DynamicLoaderReloadSession modifyParser(DynamicLoaderMixedSession session) throws IOException, ExecException, InterruptedException {
+        final ResourcePath path = input.spoofax3LanguageProjectInput().parser().get().sdf3MainFile();
+        final WritableResource file = resourceService.getWritableResource(path);
+        final String text = file.readString().replace("\\ ", "\\ \\t");
+        file.writeString(text);
+        return session.updateAffectedBy(path);
+    }
+
+    DynamicLoaderReloadSession modifyTransformation(DynamicLoaderMixedSession session) throws IOException, ExecException, InterruptedException {
+        final ResourcePath path = input.spoofax3LanguageProjectInput().strategoRuntime().get().strategoRootDirectory().appendRelativePath("transform.str");
+        final WritableResource file = resourceService.getWritableResource(path);
+        final String text = file.readString().replace("string-replace(|\"a\", \"a\")", "string-replace(|\"a\", \"\")");
+        file.writeString(text);
+        return session.updateAffectedBy(path);
     }
 }

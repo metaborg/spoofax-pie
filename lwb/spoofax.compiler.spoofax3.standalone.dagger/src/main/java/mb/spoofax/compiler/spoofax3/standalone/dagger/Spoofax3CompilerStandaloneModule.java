@@ -53,7 +53,7 @@ public abstract class Spoofax3CompilerStandaloneModule {
         @Spoofax3CompilerQualifier Pie spoofax3CompilerPie,
         Set<TaskDef<?, ?>> taskDefs
     ) {
-        return spoofaxCompilerPie.createChildBuilder(spoofax3CompilerPie)
+        return spoofax3CompilerPie.createChildBuilder(spoofaxCompilerPie)
             .withTaskDefs(new MapTaskDefs(taskDefs))
             .withResourceService(resourceService)
             .build();
