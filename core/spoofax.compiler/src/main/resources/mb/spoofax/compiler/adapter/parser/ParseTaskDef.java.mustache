@@ -30,7 +30,7 @@ public class {{baseParseTaskDef.id}} extends JSGLR1ParseTaskDef {
 
     @Override protected Result<JSGLR1ParseOutput, JSGLR1ParseException> parse(ExecContext context, String text) throws Exception {
         context.require(classloaderResources.tryGetAsLocalDefinitionResource("{{languageProjectInput.parseTableRelativePath}}"));
-        context.require(classloaderResources.tryGetAsLocalResource({{baseParseTaskDef.id}}.class), ResourceStampers.hashFile());
+        context.require(classloaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
         context.require(classloaderResources.tryGetAsLocalResource({{languageProjectInput.parser.qualifiedId}}.class), ResourceStampers.hashFile());
         context.require(classloaderResources.tryGetAsLocalResource({{languageProjectInput.parserFactory.qualifiedId}}.class), ResourceStampers.hashFile());
         context.require(classloaderResources.tryGetAsLocalResource({{languageProjectInput.parseTable.qualifiedId}}.class), ResourceStampers.hashFile());

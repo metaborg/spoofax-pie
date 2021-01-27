@@ -33,12 +33,15 @@ public abstract class BaseStrategoTransformTaskDef<T> implements TaskDef<Supplie
     }
 
 
+    protected void createDependencies(ExecContext context) throws Exception {}
+
     protected abstract StrategoRuntime getStrategoRuntime(ExecContext context, T input);
 
     protected abstract IStrategoTerm getAst(ExecContext context, T input);
 
     @Override
-    public Result<IStrategoTerm, ?> exec(ExecContext context, Supplier<? extends Result<T, ?>> supplier) throws IOException {
+    public Result<IStrategoTerm, ?> exec(ExecContext context, Supplier<? extends Result<T, ?>> supplier) throws Exception {
+        createDependencies(context);
         return context.require(supplier).flatMapOrElse((t) -> {
             final StrategoRuntime strategoRuntime = getStrategoRuntime(context, t);
             IStrategoTerm ast = getAst(context, t);

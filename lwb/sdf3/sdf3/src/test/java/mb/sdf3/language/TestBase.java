@@ -10,7 +10,7 @@ import mb.resource.ResourceService;
 import mb.resource.classloader.ClassLoaderResource;
 import mb.resource.fs.FSResourceRegistry;
 import mb.resource.url.URLResourceRegistry;
-import mb.sdf3.Sdf3ClassloaderResources;
+import mb.sdf3.Sdf3ClassLoaderResources;
 import mb.sdf3.Sdf3ConstraintAnalyzer;
 import mb.sdf3.Sdf3ConstraintAnalyzerFactory;
 import mb.sdf3.Sdf3Parser;
@@ -28,7 +28,7 @@ class TestBase {
 
     protected final LoggerFactory loggerFactory = new SLF4JLoggerFactory();
 
-    protected final Sdf3ClassloaderResources classloaderResources = new Sdf3ClassloaderResources();
+    protected final Sdf3ClassLoaderResources classloaderResources = new Sdf3ClassLoaderResources();
     protected final ClassLoaderResource definitionDirectory = classloaderResources.definitionDirectory;
     protected final ResourceService resourceService = new DefaultResourceService(new DummyResourceRegistry(qualifier), new FSResourceRegistry(), new URLResourceRegistry(), classloaderResources.resourceRegistry);
 

@@ -4,7 +4,7 @@ import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.language.ClassloaderResourcesCompiler;
+import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
 import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
@@ -100,7 +100,7 @@ public class StrategoRuntimeAdapterCompiler implements TaskDef<StrategoRuntimeAd
 
         StrategoRuntimeLanguageCompiler.Input languageProjectInput();
 
-        ClassloaderResourcesCompiler.Input classloaderResourcesInput();
+        ClassLoaderResourcesCompiler.Input classloaderResourcesInput();
     }
 
     @Value.Immutable public interface Output extends Serializable {

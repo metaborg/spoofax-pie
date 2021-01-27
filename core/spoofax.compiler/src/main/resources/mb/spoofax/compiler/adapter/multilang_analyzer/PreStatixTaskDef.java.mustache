@@ -21,7 +21,7 @@ public class {{basePreStatixTaskDef.id}} extends AstStrategoTransformTaskDef {
     }
 
     @Override
-    public Result<IStrategoTerm, ?> exec(ExecContext context, Supplier<? extends Result<IStrategoTerm, ?>> supplier) {
+    public Result<IStrategoTerm, ?> exec(ExecContext context, Supplier<? extends Result<IStrategoTerm, ?>> supplier) throws Exception {
         try {
             return super.exec(context, supplier);
         } catch(IOException e) {

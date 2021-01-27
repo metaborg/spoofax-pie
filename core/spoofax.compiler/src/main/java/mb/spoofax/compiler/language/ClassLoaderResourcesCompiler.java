@@ -4,8 +4,8 @@ import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.ClassKind;
+import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
@@ -17,12 +17,12 @@ import java.io.Serializable;
 import java.util.Optional;
 
 @Value.Enclosing
-public class ClassloaderResourcesCompiler implements TaskDef<ClassloaderResourcesCompiler.Input, ClassloaderResourcesCompiler.Output> {
+public class ClassLoaderResourcesCompiler implements TaskDef<ClassLoaderResourcesCompiler.Input, ClassLoaderResourcesCompiler.Output> {
     private final TemplateWriter classloaderResourcesTemplate;
 
-    @Inject public ClassloaderResourcesCompiler(TemplateCompiler templateCompiler) {
+    @Inject public ClassLoaderResourcesCompiler(TemplateCompiler templateCompiler) {
         templateCompiler = templateCompiler.loadingFromClass(getClass());
-        this.classloaderResourcesTemplate = templateCompiler.getOrCompileToWriter("classloader_resources/ClassloaderResources.java.mustache");
+        this.classloaderResourcesTemplate = templateCompiler.getOrCompileToWriter("classloader_resources/ClassLoaderResources.java.mustache");
     }
 
 
@@ -40,7 +40,7 @@ public class ClassloaderResourcesCompiler implements TaskDef<ClassloaderResource
 
 
     @Value.Immutable public interface Input extends Serializable {
-        class Builder extends ClassloaderResourcesCompilerData.Input.Builder {}
+        class Builder extends ClassLoaderResourcesCompilerData.Input.Builder {}
 
         static Builder builder() { return new Builder(); }
 
@@ -59,7 +59,7 @@ public class ClassloaderResourcesCompiler implements TaskDef<ClassloaderResource
         // Classloader resources
 
         @Value.Default default TypeInfo baseClassloaderResources() {
-            return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "ClassloaderResources");
+            return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "ClassLoaderResources");
         }
 
         Optional<TypeInfo> extendClassloaderResources();
@@ -99,7 +99,7 @@ public class ClassloaderResourcesCompiler implements TaskDef<ClassloaderResource
     }
 
     @Value.Immutable public interface Output extends Serializable {
-        class Builder extends ClassloaderResourcesCompilerData.Output.Builder {}
+        class Builder extends ClassLoaderResourcesCompilerData.Output.Builder {}
 
         static Builder builder() { return new Builder(); }
     }

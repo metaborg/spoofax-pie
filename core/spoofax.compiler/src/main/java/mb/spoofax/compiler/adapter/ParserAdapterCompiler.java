@@ -4,7 +4,7 @@ import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.language.ClassloaderResourcesCompiler;
+import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
 import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.language.ParserLanguageCompiler;
 import mb.spoofax.compiler.util.ClassKind;
@@ -118,7 +118,7 @@ public class ParserAdapterCompiler implements TaskDef<ParserAdapterCompiler.Inpu
 
         ParserLanguageCompiler.Input languageProjectInput();
 
-        ClassloaderResourcesCompiler.Input classloaderResourcesInput();
+        ClassLoaderResourcesCompiler.Input classloaderResourcesInput();
 
 
         @Value.Check default void check() {

@@ -168,4 +168,12 @@ class CharsTestBase extends TestBase {
         file.writeString(text);
         return session.updateAffectedBy(path);
     }
+
+    DynamicLoaderReloadSession modifyCommand(DynamicLoaderMixedSession session) throws IOException, ExecException, InterruptedException {
+        final ResourcePath path = input.sourcePath().get(0).appendRelativePath("mb/chars/CharsDebugRemoveA.java");
+        final WritableResource file = resourceService.getWritableResource(path);
+        final String text = file.readString().replace("A characters", "'A' characters");
+        file.writeString(text);
+        return session.updateAffectedBy(path);
+    }
 }

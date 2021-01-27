@@ -17,7 +17,7 @@ import mb.spoofax.compiler.adapter.MultilangAnalyzerAdapterCompiler;
 import mb.spoofax.compiler.adapter.ParserAdapterCompiler;
 import mb.spoofax.compiler.adapter.StrategoRuntimeAdapterCompiler;
 import mb.spoofax.compiler.adapter.StylerAdapterCompiler;
-import mb.spoofax.compiler.language.ClassloaderResourcesCompiler;
+import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
 import mb.spoofax.compiler.language.CompleterLanguageCompiler;
 import mb.spoofax.compiler.language.ConstraintAnalyzerLanguageCompiler;
 import mb.spoofax.compiler.language.ExportsLanguageCompiler;
@@ -68,7 +68,7 @@ public class SpoofaxCompilerModule {
     @ElementsIntoSet
     static Set<TaskDef<?, ?>> provideTaskDefsSet(
         LanguageProjectCompiler languageProjectCompiler,
-        ClassloaderResourcesCompiler classloaderResourcesCompiler,
+        ClassLoaderResourcesCompiler classloaderResourcesCompiler,
         ParserLanguageCompiler parserLanguageCompiler,
         StylerLanguageCompiler stylerLanguageCompiler,
         ConstraintAnalyzerLanguageCompiler constraintAnalyzerLanguageCompiler,

@@ -10,7 +10,7 @@ import mb.spoofax.compiler.adapter.StylerAdapterCompiler;
 import mb.spoofax.compiler.dagger.SpoofaxCompilerComponent;
 import mb.spoofax.compiler.dagger.SpoofaxCompilerModule;
 import mb.spoofax.compiler.dagger.SpoofaxCompilerScope;
-import mb.spoofax.compiler.language.ClassloaderResourcesCompiler;
+import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
 import mb.spoofax.compiler.language.CompleterLanguageCompiler;
 import mb.spoofax.compiler.language.ConstraintAnalyzerLanguageCompiler;
 import mb.spoofax.compiler.language.MultilangAnalyzerLanguageCompiler;
@@ -20,7 +20,7 @@ import mb.spoofax.compiler.language.StylerLanguageCompiler;
 
 @SpoofaxCompilerScope @Component(modules = {SpoofaxCompilerModule.class})
 public interface SpoofaxCompilerTestComponent extends SpoofaxCompilerComponent {
-    ClassloaderResourcesCompiler getClassloaderResourcesCompiler();
+    ClassLoaderResourcesCompiler getClassloaderResourcesCompiler();
 
 
     ParserLanguageCompiler getParserLanguageCompiler();

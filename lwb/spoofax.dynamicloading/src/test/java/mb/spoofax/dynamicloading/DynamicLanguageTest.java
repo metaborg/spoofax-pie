@@ -18,12 +18,8 @@ import mb.pie.runtime.tracer.MetricsTracer;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.language.LanguageInstance;
-import mb.spoofax.core.language.command.CommandContext;
-import mb.spoofax.core.language.command.CommandDef;
-import mb.spoofax.core.language.command.CommandExecutionType;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
-import mb.spoofax.core.language.command.arg.ArgConverters;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -33,7 +29,6 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -208,6 +203,44 @@ class DynamicLanguageTest extends CharsTestBase {
                 assertFalse(hasParseTaskDefExecuted(report));
                 assertFalse(hasStyleTaskDefExecuted(report));
                 assertTrue(hasRemoveATaskDefExecuted(report));
+                assertTrue(hasDebugRemoveATaskDefExecuted(report));
+            } catch(ExecException | RuntimeException e) {
+                logException(e);
+                throw e;
+            }
+        }
+
+        {
+            System.err.println("Change command and reload");
+            final DynamicLanguage dynamicLanguage;
+            final Set<ResourceKey> providedResources;
+            try(final DynamicLoaderMixedSession session = dynamicLoader.newSession()) {
+                final DynamicLoaderReloadSession reloadSession = modifyCommand(session);
+                dynamicLanguage = reloadSession.reload("chars", input);
+                providedResources = reloadSession.getProvidedResources();
+            } catch(ExecException | RuntimeException e) {
+                logException(e);
+                throw e;
+            }
+
+            System.err.println("Change command test");
+            final LanguageComponent languageComponent = dynamicLanguage.getLanguageComponent();
+            try(final MixedSession session = languageComponent.getPie().newSession()) {
+                metricsTracer.reset();
+                final TopDownSession topDownSession = session.updateAffectedBy(providedResources);
+                // Run command and check.
+                final Task<CommandFeedback> debugRemoveATask = getTaskForFirstCommand(languageComponent.getLanguageInstance());
+                final CommandFeedback debugRemoveAFeedback = topDownSession.require(debugRemoveATask);
+                assertFalse(debugRemoveAFeedback.hasErrorMessagesOrException());
+                final ListView<ShowFeedback> debugRemoveAShowFeedbacks = debugRemoveAFeedback.getShowFeedbacks();
+                assertEquals(1, debugRemoveAShowFeedbacks.size());
+                assertTrue(debugRemoveAShowFeedbacks.get(0).getName().get().contains("'A' characters removed from"));
+                // Check executed tasks.
+                final MetricsTracer.Report report = metricsTracer.reportAndReset();
+                assertFalse(hasTokenizeTaskDefExecuted(report));
+                assertFalse(hasParseTaskDefExecuted(report));
+                assertFalse(hasStyleTaskDefExecuted(report));
+                assertFalse(hasRemoveATaskDefExecuted(report));
                 assertTrue(hasDebugRemoveATaskDefExecuted(report));
             } catch(ExecException | RuntimeException e) {
                 logException(e);

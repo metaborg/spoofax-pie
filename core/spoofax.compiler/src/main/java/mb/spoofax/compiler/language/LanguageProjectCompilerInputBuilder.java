@@ -7,7 +7,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Facade for consistently and easily building a {@link LanguageProjectCompiler.Input} instance.
  */
 public class LanguageProjectCompilerInputBuilder {
-    public final ClassloaderResourcesCompiler.Input.Builder classloaderResources = ClassloaderResourcesCompiler.Input.builder();
+    public final ClassLoaderResourcesCompiler.Input.Builder classloaderResources = ClassLoaderResourcesCompiler.Input.builder();
     public final ParserLanguageCompiler.Input.Builder parser = ParserLanguageCompiler.Input.builder();
     private boolean parserEnabled = false;
     public final StylerLanguageCompiler.Input.Builder styler = StylerLanguageCompiler.Input.builder();
@@ -26,7 +26,7 @@ public class LanguageProjectCompilerInputBuilder {
     public final LanguageProjectCompiler.Input.Builder project = LanguageProjectCompiler.Input.builder();
 
 
-    public ClassloaderResourcesCompiler.Input.Builder withClassloaderResources() {
+    public ClassLoaderResourcesCompiler.Input.Builder withClassloaderResources() {
         return classloaderResources;
     }
 
@@ -67,7 +67,7 @@ public class LanguageProjectCompilerInputBuilder {
 
 
     public LanguageProjectCompiler.Input build(Shared shared, LanguageProject languageProject) {
-        final ClassloaderResourcesCompiler.Input classloaderResources = buildClassLoaderResources(shared, languageProject);
+        final ClassLoaderResourcesCompiler.Input classloaderResources = buildClassLoaderResources(shared, languageProject);
         project.classloaderResources(classloaderResources);
 
         final ParserLanguageCompiler.@Nullable Input parser = buildParser(shared, languageProject);
@@ -97,7 +97,7 @@ public class LanguageProjectCompilerInputBuilder {
             .build();
     }
 
-    private ClassloaderResourcesCompiler.Input buildClassLoaderResources(Shared shared, LanguageProject languageProject) {
+    private ClassLoaderResourcesCompiler.Input buildClassLoaderResources(Shared shared, LanguageProject languageProject) {
         return classloaderResources
             .shared(shared)
             .languageProject(languageProject)
@@ -128,7 +128,7 @@ public class LanguageProjectCompilerInputBuilder {
             .build();
     }
 
-    private MultilangAnalyzerLanguageCompiler.@Nullable Input buildMultilangAnalyzer(Shared shared, LanguageProject languageProject, ClassloaderResourcesCompiler.Input classloaderResourcesInput) {
+    private MultilangAnalyzerLanguageCompiler.@Nullable Input buildMultilangAnalyzer(Shared shared, LanguageProject languageProject, ClassLoaderResourcesCompiler.Input classloaderResourcesInput) {
         if(!multilangAnalyzerEnabled) return null;
         return multilangAnalyzer
             .shared(shared)

@@ -3,6 +3,7 @@ package mb.chars;
 import mb.chars.task.CharsParse;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
+import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
@@ -40,10 +41,17 @@ public class CharsDebugRemoveA implements TaskDef<CharsDebugRemoveA.Args, Comman
     }
 
 
+    private final CharsClassLoaderResources classloaderResources;
     private final CharsParse parse;
     private final CharsRemoveA removeA;
 
-    @Inject public CharsDebugRemoveA(CharsParse parse, CharsRemoveA removeA) {
+    @Inject
+    public CharsDebugRemoveA(
+        CharsClassLoaderResources classloaderResources,
+        CharsParse parse,
+        CharsRemoveA removeA
+    ) {
+        this.classloaderResources = classloaderResources;
         this.parse = parse;
         this.removeA = removeA;
     }
@@ -54,6 +62,7 @@ public class CharsDebugRemoveA implements TaskDef<CharsDebugRemoveA.Args, Comman
     }
 
     @Override public CommandFeedback exec(ExecContext context, Args args) throws Exception {
+        context.require(classloaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
         final ResourceKey file = args.file;
         return context
             .require(removeA, parse.createAstSupplier(file))

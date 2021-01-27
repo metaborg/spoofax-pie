@@ -21,7 +21,7 @@ import java.util.Optional;
 @Value.Enclosing
 public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.Input, None> {
     private final TemplateWriter packageInfoTemplate;
-    private final ClassloaderResourcesCompiler classloaderResourcesCompiler;
+    private final ClassLoaderResourcesCompiler classloaderResourcesCompiler;
     private final ParserLanguageCompiler parserCompiler;
     private final StylerLanguageCompiler stylerCompiler;
     private final ConstraintAnalyzerLanguageCompiler constraintAnalyzerCompiler;
@@ -33,7 +33,7 @@ public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.
 
     @Inject public LanguageProjectCompiler(
         TemplateCompiler templateCompiler,
-        ClassloaderResourcesCompiler classloaderResourcesCompiler,
+        ClassLoaderResourcesCompiler classloaderResourcesCompiler,
         ParserLanguageCompiler parserCompiler,
         StylerLanguageCompiler stylerCompiler,
         ConstraintAnalyzerLanguageCompiler constraintAnalyzerCompiler,
@@ -115,7 +115,7 @@ public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.
 
         /// Sub-inputs
 
-        ClassloaderResourcesCompiler.Input classloaderResources();
+        ClassLoaderResourcesCompiler.Input classloaderResources();
 
         Optional<ParserLanguageCompiler.Input> parser();
 

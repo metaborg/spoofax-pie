@@ -20,7 +20,7 @@ class ModTestBase {
 
     protected final LoggerFactory loggerFactory = new SLF4JLoggerFactory();
 
-    protected final ModClassloaderResources classloaderResources = new ModClassloaderResources();
+    protected final ModClassLoaderResources classloaderResources = new ModClassLoaderResources();
     protected final HierarchicalResource definitionDir = classloaderResources.definitionDirectory;
     protected final ResourceService resourceService = new DefaultResourceService(new DummyResourceRegistry(qualifier), new FSResourceRegistry(), new URLResourceRegistry(), classloaderResources.resourceRegistry);
 

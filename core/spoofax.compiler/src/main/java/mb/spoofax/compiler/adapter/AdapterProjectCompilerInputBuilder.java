@@ -1,7 +1,7 @@
 package mb.spoofax.compiler.adapter;
 
 import mb.common.option.Option;
-import mb.spoofax.compiler.language.ClassloaderResourcesCompiler;
+import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
 import mb.spoofax.compiler.language.LanguageProject;
 import mb.spoofax.compiler.language.LanguageProjectCompiler;
 import mb.spoofax.compiler.util.GradleDependency;
@@ -12,7 +12,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Facade for consistently and easily building a {@link AdapterProjectCompiler.Input} instance.
  */
 public class AdapterProjectCompilerInputBuilder {
-    public final ClassloaderResourcesCompiler.Input.Builder classloaderResources = ClassloaderResourcesCompiler.Input.builder();
+    public final ClassLoaderResourcesCompiler.Input.Builder classloaderResources = ClassLoaderResourcesCompiler.Input.builder();
 
     private boolean parserEnabled = false;
     public final ParserAdapterCompiler.Input.Builder parser = ParserAdapterCompiler.Input.builder();
@@ -35,7 +35,7 @@ public class AdapterProjectCompilerInputBuilder {
     public AdapterProjectCompiler.Input.Builder project = AdapterProjectCompiler.Input.builder();
 
 
-    public ClassloaderResourcesCompiler.Input.Builder withClassloaderResources() {
+    public ClassLoaderResourcesCompiler.Input.Builder withClassloaderResources() {
         return classloaderResources;
     }
 
@@ -73,7 +73,7 @@ public class AdapterProjectCompilerInputBuilder {
     public AdapterProjectCompiler.Input build(LanguageProjectCompiler.Input languageProjectInput, Option<GradleDependency> languageProjectDependency, AdapterProject adapterProject) {
         final Shared shared = languageProjectInput.shared();
 
-        final ClassloaderResourcesCompiler.Input classloaderResources = buildClassLoaderResources(shared, languageProjectInput.languageProject());
+        final ClassLoaderResourcesCompiler.Input classloaderResources = buildClassLoaderResources(shared, languageProjectInput.languageProject());
         project.classloaderResources(classloaderResources);
 
         final ParserAdapterCompiler.@Nullable Input parser = buildParser(shared, adapterProject, languageProjectInput, classloaderResources);
@@ -103,7 +103,7 @@ public class AdapterProjectCompilerInputBuilder {
     }
 
 
-    private ClassloaderResourcesCompiler.Input buildClassLoaderResources(Shared shared, LanguageProject languageProject) {
+    private ClassLoaderResourcesCompiler.Input buildClassLoaderResources(Shared shared, LanguageProject languageProject) {
         return classloaderResources
             .shared(shared)
             .languageProject(languageProject)
@@ -114,7 +114,7 @@ public class AdapterProjectCompilerInputBuilder {
         Shared shared,
         AdapterProject adapterProject,
         LanguageProjectCompiler.Input languageProjectInput,
-        ClassloaderResourcesCompiler.Input classloaderResources
+        ClassLoaderResourcesCompiler.Input classloaderResources
     ) {
         if(!parserEnabled) return null;
         return parser
@@ -129,7 +129,7 @@ public class AdapterProjectCompilerInputBuilder {
         Shared shared,
         AdapterProject adapterProject,
         LanguageProjectCompiler.Input languageProjectInput,
-        ClassloaderResourcesCompiler.Input classloaderResources
+        ClassLoaderResourcesCompiler.Input classloaderResources
     ) {
         if(!stylerEnabled) return null;
         return styler
@@ -144,7 +144,7 @@ public class AdapterProjectCompilerInputBuilder {
         Shared shared,
         AdapterProject adapterProject,
         LanguageProjectCompiler.Input languageProjectInput,
-        ClassloaderResourcesCompiler.Input classloaderResources
+        ClassLoaderResourcesCompiler.Input classloaderResources
     ) {
         if(!strategoRuntimeEnabled) return null;
         return strategoRuntime

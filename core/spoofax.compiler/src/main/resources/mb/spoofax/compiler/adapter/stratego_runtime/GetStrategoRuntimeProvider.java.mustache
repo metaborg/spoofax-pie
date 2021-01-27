@@ -1,6 +1,7 @@
 package {{baseGetStrategoRuntimeProviderTaskDef.packageId}};
 
 import mb.pie.api.ExecContext;
+import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.match.AllResourceMatcher;
 import mb.resource.hierarchical.match.FileResourceMatcher;
@@ -34,7 +35,7 @@ public class {{baseGetStrategoRuntimeProviderTaskDef.id}} extends GetStrategoRun
     }
 
     @Override protected Provider<StrategoRuntime> getStrategoRuntimeProvider(ExecContext context) throws Exception {
-        context.require(classloaderResources.tryGetAsLocalResource({{baseGetStrategoRuntimeProviderTaskDef.id}}.class));
+        context.require(classloaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
 {{#languageProjectInput.strategyPackagePaths}}
         try {
             classloaderResources.performWithResourceLocations(
@@ -45,7 +46,7 @@ public class {{baseGetStrategoRuntimeProviderTaskDef.id}} extends GetStrategoRun
                     )) {
                         stream.forEach(resource -> {
                             try {
-                                context.provide(resource);
+                                context.provide(resource, ResourceStampers.hashFile());
                             } catch(IOException e) {
                                 throw new UncheckedIOException(e);
                             }

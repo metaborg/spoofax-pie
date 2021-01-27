@@ -22,9 +22,15 @@ import javax.inject.Provider;
  * Outputs are of type {@code Result<IStrategoTerm, ?>}.
  *
  * This class should be implemented by language developers to create task definitions that run Stratego strategies on
- * {@link IStrategoTerm ASTs} extracted from the {@link T input} by providing the {@link GetStrategoRuntimeProvider}
- * task definition and strategies to execute in the constructor, by overriding {@link #getAst(ExecContext, T)} to
- * extract the {@link IStrategoTerm AST}, and by overriding {@link #getId()} to give the task definition a unique ID.
+ * {@link IStrategoTerm ASTs} extracted from the {@link T input} by:
+ *
+ * <ul>
+ * <li>Providing the {@link GetStrategoRuntimeProvider} task definition in the constructor</li>
+ * <li>Providing the strategies to execute in the constructor</li>
+ * <li>Overriding {@link #getAst(ExecContext, T)} to extract the {@link IStrategoTerm AST}</li>
+ * <li>Overriding {@link #getId()} to give the task definition a unique ID</li>
+ * <li>Overriding {@link #createDependencies(ExecContext)} to create a self-dependency to your class</li>
+ * </ul>
  *
  * @param <T> Type of wrapped inputs to this task definition. The actual input is {@code Supplier<Result<T, ?>>}.
  */
