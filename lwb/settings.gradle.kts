@@ -55,4 +55,7 @@ include("libstatix")
 include("spoofax.compiler.spoofax3")
 include("spoofax.compiler.spoofax3.dagger")
 include("spoofax.compiler.spoofax3.standalone")
+include("spoofax.compiler.spoofax3.standalone.dagger")
 include("spoofax.compiler.gradle.spoofax3")
+
+include("spoofax.dynamicloading")

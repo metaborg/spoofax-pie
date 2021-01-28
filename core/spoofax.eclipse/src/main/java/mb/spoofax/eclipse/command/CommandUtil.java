@@ -1,12 +1,8 @@
 package mb.spoofax.eclipse.command;
 
 import mb.common.util.ListView;
-import mb.pie.api.Task;
 import mb.spoofax.core.language.command.*;
-import mb.spoofax.core.language.command.arg.RawArgs;
-import mb.spoofax.core.language.command.arg.RawArgsBuilder;
 
-import java.io.Serializable;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 

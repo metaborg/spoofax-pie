@@ -6,12 +6,12 @@ dependencies {
   api(platform(project(":spoofax.depconstraints")))
   annotationProcessor(platform(project(":spoofax.depconstraints")))
 
-  api(project(":common"))
+  api("org.metaborg:common")
   api(project(":jsglr.common"))
   api(project(":stratego.common"))
   api(project(":spoofax.core"))
 
-  api("org.metaborg:statix.solver")
+  api("org.metaborg.devenv:statix.solver")
   api("org.metaborg:pie.api")
   api("org.yaml:snakeyaml")
 

@@ -13,10 +13,12 @@ import mb.log.api.LoggerFactory;
 import mb.pie.api.Function;
 import mb.pie.api.MapTaskDefs;
 import mb.pie.api.Pie;
+import mb.pie.api.PieBuilder;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.pie.api.TaskDefs;
+import mb.pie.api.serde.JavaSerde;
 import mb.resource.ResourceKeyString;
 import mb.resource.ResourceRegistry;
 import mb.resource.ResourceService;
@@ -66,8 +68,13 @@ import java.util.Map;
 @Module
 public class {{baseModule.id}} {
     @Provides @{{scope.id}}
-    static ClassLoaderResourceRegistry provideClassLoaderResourceRegistry() {
-        return {{classloaderResources.classloaderResources.qualifiedId}}.createClassLoaderResourceRegistry();
+    static {{classLoaderResources.classLoaderResources.qualifiedId}} provideClassLoaderResources() {
+        return new {{classLoaderResources.classLoaderResources.qualifiedId}}();
+    }
+
+    @Provides @{{scope.id}}
+    static ClassLoaderResourceRegistry provideClassLoaderResourceRegistry({{classLoaderResources.classLoaderResources.qualifiedId}} classLoaderResources) {
+        return classLoaderResources.resourceRegistry;
     }
 
     @Provides @{{scope.id}} @{{qualifier.id}}
@@ -78,25 +85,24 @@ public class {{baseModule.id}} {
     }
 
     @Provides @{{scope.id}}
-    static ResourceService provideResourceRegistry(@{{qualifier.id}} ResourceService resourceService) {
+    static ResourceService provideResourceService(@{{qualifier.id}} ResourceService resourceService) {
         return resourceService;
     }
 
-    @Provides @{{scope.id}} @{{qualifier.id}}("definition-dir")
-    static ClassLoaderResource provideDefinitionDir(ClassLoaderResourceRegistry registry) {
-        return {{classloaderResources.classloaderResources.qualifiedId}}.createDefinitionDir(registry);
+    @Provides @{{scope.id}} @{{qualifier.id}}("definition-directory")
+    static ClassLoaderResource provideDefinitionDirectory({{classLoaderResources.classLoaderResources.qualifiedId}} classLoaderResources) {
+        return classLoaderResources.definitionDirectory;
     }
 
-    @Provides @{{scope.id}} @{{qualifier.id}}("definition-dir")
-    static HierarchicalResource provideDefinitionDirAsHierarchicalResource(@{{qualifier.id}}("definition-dir") ClassLoaderResource definitionDir) {
+    @Provides @{{scope.id}} @{{qualifier.id}}("definition-directory")
+    static HierarchicalResource provideDefinitionDirectoryAsHierarchicalResource(@{{qualifier.id}}("definition-directory") ClassLoaderResource definitionDir) {
         return definitionDir;
     }
-
 {{#parser}}
 
 
     @Provides @{{scope.id}}
-    static {{this.languageProjectInput.parserFactory.qualifiedId}} provideParserFactory(@{{qualifier.id}}("definition-dir") HierarchicalResource definitionDir) {
+    static {{this.languageProjectInput.parserFactory.qualifiedId}} provideParserFactory(@{{qualifier.id}}("definition-directory") HierarchicalResource definitionDir) {
         return new {{this.languageProjectInput.parserFactory.qualifiedId}}(definitionDir);
     }
 
@@ -109,7 +115,7 @@ public class {{baseModule.id}} {
 
 
     @Provides @{{scope.id}}
-    static {{this.languageProjectInput.stylerFactory.qualifiedId}} provideStylerFactory(LoggerFactory loggerFactory, @{{qualifier.id}}("definition-dir") HierarchicalResource definitionDir) {
+    static {{this.languageProjectInput.stylerFactory.qualifiedId}} provideStylerFactory(LoggerFactory loggerFactory, @{{qualifier.id}}("definition-directory") HierarchicalResource definitionDir) {
         return new {{this.languageProjectInput.stylerFactory.qualifiedId}}(loggerFactory, definitionDir);
     }
 
@@ -135,7 +141,7 @@ public class {{baseModule.id}} {
 
 
     @Provides @{{scope.id}}
-    static {{this.languageProjectInput.strategoRuntimeBuilderFactory.qualifiedId}} provideStrategoRuntimeBuilderFactory(LoggerFactory loggerFactory, ResourceService resourceService, @{{qualifier.id}}("definition-dir") HierarchicalResource definitionDir) {
+    static {{this.languageProjectInput.strategoRuntimeBuilderFactory.qualifiedId}} provideStrategoRuntimeBuilderFactory(LoggerFactory loggerFactory, ResourceService resourceService, @{{qualifier.id}}("definition-directory") HierarchicalResource definitionDir) {
         return new {{this.languageProjectInput.strategoRuntimeBuilderFactory.qualifiedId}}(loggerFactory, resourceService, definitionDir);
     }
 
@@ -178,14 +184,23 @@ public class {{baseModule.id}} {
         return taskDefs;
     }
 
-    @Provides @{{scope.id}}
-    static TaskDefs provideTaskDefs(Set<TaskDef<?, ?>> taskDefs) {
+    @Provides @{{scope.id}} @{{qualifier.id}}
+    static TaskDefs provideQualifiedTaskDefs(Set<TaskDef<?, ?>> taskDefs) {
         return new MapTaskDefs(taskDefs);
     }
 
+    @Provides @{{scope.id}}
+    static TaskDefs provideTaskDefs(@{{qualifier.id}} TaskDefs taskDefs) {
+        return taskDefs;
+    }
+
     @Provides @{{scope.id}} @Named("prototype")
-    static Pie providePrototypePie(@Platform Pie pie, TaskDefs taskDefs, ResourceService resourceService) {
-        return pie.createChildBuilder().withTaskDefs(taskDefs).withResourceService(resourceService).build();
+    static Pie providePrototypePie(@Platform PieBuilder pieBuilder, TaskDefs taskDefs, ResourceService resourceService) {
+        return pieBuilder
+            .addTaskDefs(taskDefs)
+            .withResourceService(resourceService)
+            .withSerdeFactory(loggerFactory -> new JavaSerde({{classLoaderResources.classLoaderResources.qualifiedId}}.class.getClassLoader()))
+            .build();
     }
 {{#multilangAnalyzer}}
     @Provides @{{scope.id}}
@@ -322,7 +337,7 @@ public class {{baseModule.id}} {
     @Provides @{{scope.id}}
     static LanguageMetadata getLanguageMetadata(
         @Named("prototype") StrategoRuntime strategoRuntime,
-        @{{qualifier.id}}("definition-dir") ClassLoaderResource definitionDir,
+        @{{qualifier.id}}("definition-directory") ClassLoaderResource definitionDir,
         {{preStatixTaskDef.qualifiedId}} preStatix,
         {{postStatixTaskDef.qualifiedId}} postStatix,
         {{indexAstTaskDef.qualifiedId}} indexAst,

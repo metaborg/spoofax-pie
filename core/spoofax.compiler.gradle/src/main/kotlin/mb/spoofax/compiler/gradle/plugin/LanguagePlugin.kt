@@ -107,7 +107,7 @@ open class LanguageProjectExtension(project: Project) {
   }
 }
 
-fun Project.whenLanguageProjectFinalized(closure: () -> Unit) = whenFinalized<LanguageProjectExtension> {
+fun Project.whenLanguageProjectFinalized(closure: () -> Unit) = whenFinalized(LanguageProjectExtension::class.java) {
   val extension: LanguageProjectExtension = extensions.getByType()
   // Project is fully finalized only iff all dependencies are finalized as well
   extension.statixDependenciesFinalized.whenAllLanguageProjectsFinalized(closure)
@@ -162,8 +162,10 @@ open class LanguagePlugin : Plugin<Project> {
 
       doLast {
         project.deleteDirectory(input.languageProject().generatedJavaSourcesDirectory(), component.resourceService)
-        component.pie.newSession().use { session ->
-          session.require(component.languageProjectCompiler.createTask(input))
+        synchronized(component.pie) {
+          component.pie.newSession().use { session ->
+            session.require(component.languageProjectCompiler.createTask(input))
+          }
         }
       }
     }

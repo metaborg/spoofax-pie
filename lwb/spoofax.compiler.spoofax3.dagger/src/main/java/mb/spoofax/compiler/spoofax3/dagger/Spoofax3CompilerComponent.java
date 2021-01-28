@@ -8,6 +8,7 @@ import mb.pie.api.Pie;
 import mb.resource.ResourceService;
 import mb.sdf3.Sdf3Component;
 import mb.spoofax.compiler.spoofax3.language.Spoofax3LanguageProjectCompiler;
+import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.core.platform.PlatformComponent;
 import mb.statix.StatixComponent;
 import mb.str.StrategoComponent;
@@ -26,9 +27,9 @@ import mb.str.StrategoComponent;
     }
 )
 public interface Spoofax3CompilerComponent {
-    ResourceService getResourceService();
+    @Spoofax3CompilerQualifier ResourceService getResourceService();
 
-    Pie getPie();
+    @Spoofax3CompilerQualifier Pie getPie();
 
     Spoofax3LanguageProjectCompiler getSpoofax3LanguageProjectCompiler();
 }

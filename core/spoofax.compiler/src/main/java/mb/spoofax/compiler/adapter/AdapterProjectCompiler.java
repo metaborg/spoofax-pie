@@ -10,7 +10,7 @@ import mb.spoofax.compiler.adapter.data.AutoCommandRequestRepr;
 import mb.spoofax.compiler.adapter.data.CliCommandRepr;
 import mb.spoofax.compiler.adapter.data.CommandDefRepr;
 import mb.spoofax.compiler.adapter.data.MenuItemRepr;
-import mb.spoofax.compiler.language.ClassloaderResourcesCompiler;
+import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.GradleDependency;
@@ -119,6 +119,9 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
         } else {
             allTaskDefs.add(TypeInfo.of(NullCompleteTaskDef.class));
         }
+        input.strategoRuntime().ifPresent((i) -> {
+            allTaskDefs.add(i.getStrategoRuntimeProviderTaskDef());
+        });
         input.constraintAnalyzer().ifPresent((i) -> {
             allTaskDefs.add(i.analyzeTaskDef());
             allTaskDefs.add(i.analyzeMultiTaskDef());
@@ -283,7 +286,7 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
 
         /// Sub-inputs
 
-        ClassloaderResourcesCompiler.Input classloaderResources();
+        ClassLoaderResourcesCompiler.Input classLoaderResources();
 
         Optional<ParserAdapterCompiler.Input> parser();
 
@@ -340,23 +343,17 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
 
         default List<NamedTypeInfo> checkInjections() {
             ArrayList<NamedTypeInfo> results = new ArrayList<>();
-            parser().ifPresent((i) -> {
-                results.add(NamedTypeInfo.of("parse", i.parseTaskDef()));
-            });
-            constraintAnalyzer().ifPresent((i) -> {
-                results.add(NamedTypeInfo.of("analyze", i.analyzeTaskDef()));
-            });
+            results.add(NamedTypeInfo.of("classLoaderResources", classLoaderResources().classLoaderResources()));
+            parser().ifPresent(i -> results.add(NamedTypeInfo.of("parse", i.parseTaskDef())));
+            constraintAnalyzer().ifPresent(i -> results.add(NamedTypeInfo.of("analyze", i.analyzeTaskDef())));
             return results;
         }
 
         default List<NamedTypeInfo> checkMultiInjections() {
             ArrayList<NamedTypeInfo> results = new ArrayList<>();
-            parser().ifPresent((i) -> {
-                results.add(NamedTypeInfo.of("parse", i.parseTaskDef()));
-            });
-            constraintAnalyzer().ifPresent((i) -> {
-                results.add(NamedTypeInfo.of("analyze", i.analyzeMultiTaskDef()));
-            });
+            results.add(NamedTypeInfo.of("classLoaderResources", classLoaderResources().classLoaderResources()));
+            parser().ifPresent(i -> results.add(NamedTypeInfo.of("parse", i.parseTaskDef())));
+            constraintAnalyzer().ifPresent(i -> results.add(NamedTypeInfo.of("analyze", i.analyzeMultiTaskDef())));
             return results;
         }
 
@@ -401,17 +398,11 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
 
         default TypeInfo scope() { return adapterProject().scope(); }
 
-        // Dagger Qualifier
+        // Dagger Qualifier (passthrough from AdapterProject)
 
-        @Value.Default default TypeInfo baseQualifier() {
-            return TypeInfo.of(adapterProject().packageId(), shared().defaultClassPrefix() + "Qualifier");
-        }
+        default TypeInfo baseQualifier() { return adapterProject().baseQualifier(); }
 
-        Optional<TypeInfo> extendQualifier();
-
-        default TypeInfo qualifier() {
-            return extendQualifier().orElseGet(this::baseQualifier);
-        }
+        default TypeInfo qualifier() { return adapterProject().qualifier(); }
 
         // Dagger component
 
@@ -495,6 +486,12 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
 
         /// Files information, known up-front for build systems with static dependencies such as Gradle.
 
+        default ArrayList<ResourcePath> javaSourcePaths() {
+            final ArrayList<ResourcePath> sourcePaths = new ArrayList<>();
+            sourcePaths.add(generatedJavaSourcesDirectory());
+            return sourcePaths;
+        }
+
         default ArrayList<ResourcePath> javaSourceFiles() {
             final ArrayList<ResourcePath> javaSourceFiles = new ArrayList<>();
             if(classKind().isGenerating()) {
@@ -519,6 +516,7 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
             parser().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             styler().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             completer().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
+            strategoRuntime().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             constraintAnalyzer().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             multilangAnalyzer().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             return javaSourceFiles;

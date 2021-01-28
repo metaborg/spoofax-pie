@@ -1,0 +1,21 @@
+module start
+
+context-free syntax
+
+  Start.Program = <<{Expr " "}*>>
+
+  Expr.Chars = <<CHARS>>
+
+context-free start-symbols
+
+  Start
+
+lexical syntax
+
+  CHARS  = ~[\ \n\v\f\r]+
+  LAYOUT = [\ \n\v\f\r]
+
+context-free restrictions
+
+  CHARS   -/- ~[\ \n\v\f\r]
+  LAYOUT? -/- [\ \n\v\f\r]

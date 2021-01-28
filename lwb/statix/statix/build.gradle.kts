@@ -44,9 +44,12 @@ languageProject {
       multiFile(true)
     }
     withStrategoRuntime().run {
+      addStrategyPackageIds("statix.lang.strategies")
+      addStrategyPackageIds("statix.lang.trans")
       addInteropRegisterersByReflection("statix.lang.strategies.InteropRegisterer")
       addInteropRegisterersByReflection("statix.lang.trans.InteropRegisterer")
       addSpoofax2Primitives(true)
+      addStatixPrimitives(true) // Requires the STX_compare_patterns primitive.
     }
   }
 }
@@ -59,10 +62,7 @@ spoofax2BasedLanguageProject {
       copyCtree(false)
       copyClasses(true)
     }
-
-    val spoofax2GroupId = "org.metaborg"
-    val spoofax2Version = System.getProperty("spoofax2Version")
-    project.languageSpecificationDependency(GradleDependency.module("$spoofax2GroupId:statix.lang:$spoofax2Version"))
+    project.languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:statix.lang:${ext["spoofax2DevenvVersion"]}"))
   }
 }
 

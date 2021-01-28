@@ -2,6 +2,7 @@ package mb.sdf3.task.debug;
 
 import mb.sdf3.Sdf3Scope;
 import mb.sdf3.task.Sdf3Desugar;
+import mb.sdf3.task.Sdf3GetStrategoRuntimeProvider;
 import mb.sdf3.task.Sdf3Parse;
 import mb.sdf3.task.Sdf3ToCompletionRuntime;
 import mb.stratego.common.StrategoRuntime;
@@ -15,9 +16,9 @@ public class Sdf3ShowCompletionRuntime extends ShowTaskDef {
         Sdf3Parse parse,
         Sdf3Desugar desugar,
         Sdf3ToCompletionRuntime operation,
-        Provider<StrategoRuntime> strategoRuntimeProvider
+        Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider
     ) {
-        super(parse, desugar, operation, strategoRuntimeProvider, "pp-stratego-string", "completion runtime");
+        super(parse, desugar, operation, getStrategoRuntimeProvider, "pp-stratego-string", "completion runtime");
     }
 
     @Override public String getId() {

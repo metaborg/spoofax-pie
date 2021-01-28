@@ -13,7 +13,6 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
 import mb.sdf3.Sdf3Scope;
-import mb.sdf3.task.Sdf3Parse;
 import mb.sdf3.task.util.Sdf3Util;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 

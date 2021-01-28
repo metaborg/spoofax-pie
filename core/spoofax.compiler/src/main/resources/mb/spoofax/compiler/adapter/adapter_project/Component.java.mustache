@@ -6,6 +6,7 @@ import mb.spoofax.core.platform.PlatformComponent;
 import mb.resource.ResourceService;
 import mb.resource.classloader.ClassLoaderResource;
 import mb.pie.api.Pie;
+import mb.pie.api.TaskDefs;
 {{#isMultiLang}}
 import mb.statix.multilang.MultiLangComponent;
 import mb.statix.multilang.metadata.LanguageMetadataProvider;
@@ -24,7 +25,7 @@ public interface {{baseComponent.id}} extends LanguageComponent{{#isMultiLang}},
 
     @Override @{{qualifier.id}} ResourceService getResourceService();
 
-    @{{qualifier.id}}("definition-dir") ClassLoaderResource getDefinitionDir();
+    @{{qualifier.id}}("definition-directory") ClassLoaderResource getDefinitionDir();
 
     @Override @{{qualifier.id}} Pie getPie();
 {{#parser}}

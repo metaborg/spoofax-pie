@@ -66,15 +66,15 @@ public abstract class ConstraintAnalyzeTaskDef implements TaskDef<ConstraintAnal
         }
     }
 
-    protected abstract SingleFileResult analyze(ResourceKey resource, IStrategoTerm ast, ConstraintAnalyzerContext context) throws ConstraintAnalyzerException;
+    protected abstract SingleFileResult analyze(ExecContext context, ResourceKey resource, IStrategoTerm ast, ConstraintAnalyzerContext constraintAnalyzerContext) throws Exception;
 
     @Override
-    public Result<Output, ?> exec(ExecContext context, Input input) throws IOException {
+    public Result<Output, ?> exec(ExecContext context, Input input) throws Exception {
         return context.require(input.astSupplier)
-            .mapCatching((ast) -> {
+            .mapCatchingOrRethrow((ast) -> {
                 final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext(false, input.resource);
-                final SingleFileResult result = analyze(input.resource, ast, constraintAnalyzerContext);
+                final SingleFileResult result = analyze(context, input.resource, ast, constraintAnalyzerContext);
                 return new Output(constraintAnalyzerContext, result);
-            });
+            }, ConstraintAnalyzerException.class);
     }
 }

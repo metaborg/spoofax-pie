@@ -21,6 +21,7 @@ import java.util.ArrayList;
 public class StrategoRuntimeBuilder {
     private ITermFactory termFactory;
     private StrategoIOAgent ioAgent;
+    private ClassLoader interopRegistererByReflectionClassLoader;
     private @Nullable ClassLoader jarParentClassLoader;
     private AdaptableContext contextObject;
 
@@ -35,6 +36,7 @@ public class StrategoRuntimeBuilder {
     public StrategoRuntimeBuilder(LoggerFactory loggerFactory, ResourceService resourceService, HierarchicalResource definitionDir) {
         this.termFactory = defaultTermFactory();
         this.ioAgent = defaultIoAgent(loggerFactory, resourceService, definitionDir);
+        this.interopRegistererByReflectionClassLoader = StrategoRuntimeBuilder.class.getClassLoader();
         this.jarParentClassLoader = null;
         this.contextObject = new AdaptableContext();
 
@@ -49,6 +51,7 @@ public class StrategoRuntimeBuilder {
     public StrategoRuntimeBuilder(StrategoRuntimeBuilder other) {
         this.termFactory = other.termFactory;
         this.ioAgent = new StrategoIOAgent(other.ioAgent);
+        this.interopRegistererByReflectionClassLoader = other.interopRegistererByReflectionClassLoader;
         this.jarParentClassLoader = other.jarParentClassLoader;
         this.contextObject = new AdaptableContext(other.contextObject);
 
@@ -130,6 +133,11 @@ public class StrategoRuntimeBuilder {
         return this;
     }
 
+    public StrategoRuntimeBuilder withInteropRegistererByReflectionClassLoader(ClassLoader interopRegistererByReflectionClassLoader) {
+        this.interopRegistererByReflectionClassLoader = interopRegistererByReflectionClassLoader;
+        return this;
+    }
+
     public StrategoRuntimeBuilder addInteropRegistererByReflection(String className) {
         this.interopRegisterersByReflection.add(className);
         return this;
@@ -198,7 +206,7 @@ public class StrategoRuntimeBuilder {
 
         for(String interopRegistererClassName : interopRegisterersByReflection) {
             try {
-                final Class<?> interopRegistererClass = Class.forName(interopRegistererClassName);
+                final Class<?> interopRegistererClass = Class.forName(interopRegistererClassName, true, interopRegistererByReflectionClassLoader);
                 final InteropRegisterer interopRegisterer = (InteropRegisterer)interopRegistererClass.newInstance();
                 hybridInterpreter.registerClass(interopRegisterer, jarParentClassLoader);
             } catch(IllegalAccessException | InstantiationException | ClassNotFoundException e) {

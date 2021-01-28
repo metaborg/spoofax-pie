@@ -15,8 +15,9 @@ plugins {
 }
 
 dependencies {
-  api("org.metaborg:sdf2parenthesize")
-  api("org.metaborg:statix.solver")
+  api("org.metaborg.devenv:sdf2table")
+  api("org.metaborg.devenv:sdf2parenthesize")
+  api("org.metaborg.devenv:statix.solver")
   api("org.metaborg:statix.common")
   api("org.metaborg:statix.multilang")
 
@@ -45,6 +46,7 @@ languageProject {
       multiFile(true)
     }
     withStrategoRuntime().run {
+      addStrategyPackageIds("org.metaborg.meta.lang.template.strategies")
       addInteropRegisterersByReflection("org.metaborg.meta.lang.template.strategies.InteropRegisterer")
       extendStrategoRuntimeBuilderFactory("mb.sdf3", "Sdf3ManualStrategoRuntimeBuilderFactory")
     }
@@ -63,11 +65,7 @@ spoofax2BasedLanguageProject {
     }
     project.run {
       addAdditionalCopyResources("target/metaborg/EditorService-pretty.pp.af")
-
-      // Use group ID "org.metaborg.bootstraphack" when building as part of devenv (not standalone).
-      val spoofax2GroupId = if(gradle.parent?.rootProject?.name == "spoofax3.root") "org.metaborg" else "org.metaborg.bootstraphack"
-      val spoofax2Version = System.getProperty("spoofax2Version")
-      languageSpecificationDependency(GradleDependency.module("$spoofax2GroupId:org.metaborg.meta.lang.template:$spoofax2Version"))
+      languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:org.metaborg.meta.lang.template:${ext["spoofax2DevenvVersion"]}"))
     }
   }
 }

@@ -6,6 +6,7 @@ import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
+import java.util.Optional;
 
 @ADT
 public abstract class ShowFeedback implements Serializable {
@@ -40,6 +41,23 @@ public abstract class ShowFeedback implements Serializable {
 
     public ShowFeedbacks.CaseOfMatchers.TotalMatcher_ShowFile caseOf() {
         return ShowFeedbacks.caseOf(this);
+    }
+
+    public Optional<ResourceKey> getFile() {
+        return ShowFeedbacks.getFile(this);
+    }
+
+    public Optional<String> getName() {
+        return ShowFeedbacks.getName(this);
+    }
+
+    public Optional<String> getText() {
+        return ShowFeedbacks.getText(this);
+    }
+
+    public Optional<Region> getRegion() {
+        final @Nullable Region region = ShowFeedbacks.getRegion(this);
+        return Optional.ofNullable(region);
     }
 
 

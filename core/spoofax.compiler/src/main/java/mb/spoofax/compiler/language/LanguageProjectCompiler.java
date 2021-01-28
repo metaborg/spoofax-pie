@@ -21,7 +21,7 @@ import java.util.Optional;
 @Value.Enclosing
 public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.Input, None> {
     private final TemplateWriter packageInfoTemplate;
-    private final ClassloaderResourcesCompiler classloaderResourcesCompiler;
+    private final ClassLoaderResourcesCompiler classLoaderResourcesCompiler;
     private final ParserLanguageCompiler parserCompiler;
     private final StylerLanguageCompiler stylerCompiler;
     private final ConstraintAnalyzerLanguageCompiler constraintAnalyzerCompiler;
@@ -33,7 +33,7 @@ public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.
 
     @Inject public LanguageProjectCompiler(
         TemplateCompiler templateCompiler,
-        ClassloaderResourcesCompiler classloaderResourcesCompiler,
+        ClassLoaderResourcesCompiler classLoaderResourcesCompiler,
         ParserLanguageCompiler parserCompiler,
         StylerLanguageCompiler stylerCompiler,
         ConstraintAnalyzerLanguageCompiler constraintAnalyzerCompiler,
@@ -44,7 +44,7 @@ public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.
     ) {
         templateCompiler = templateCompiler.loadingFromClass(getClass());
         this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("package-info.java.mustache");
-        this.classloaderResourcesCompiler = classloaderResourcesCompiler;
+        this.classLoaderResourcesCompiler = classLoaderResourcesCompiler;
         this.parserCompiler = parserCompiler;
         this.stylerCompiler = stylerCompiler;
         this.constraintAnalyzerCompiler = constraintAnalyzerCompiler;
@@ -67,7 +67,7 @@ public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.
         packageInfoTemplate.write(context, input.basePackageInfo().file(generatedJavaSourcesDirectory), input);
 
         // Files from other compilers.
-        context.require(classloaderResourcesCompiler, input.classloaderResources());
+        context.require(classLoaderResourcesCompiler, input.classLoaderResources());
         input.parser().ifPresent((i) -> context.require(parserCompiler, i));
         input.styler().ifPresent((i) -> context.require(stylerCompiler, i));
         input.constraintAnalyzer().ifPresent((i) -> context.require(constraintAnalyzerCompiler, i));
@@ -115,7 +115,7 @@ public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.
 
         /// Sub-inputs
 
-        ClassloaderResourcesCompiler.Input classloaderResources();
+        ClassLoaderResourcesCompiler.Input classLoaderResources();
 
         Optional<ParserLanguageCompiler.Input> parser();
 
@@ -168,12 +168,18 @@ public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.
 
         /// Files information, known up-front for build systems with static dependencies such as Gradle.
 
+        default ArrayList<ResourcePath> javaSourcePaths() {
+            final ArrayList<ResourcePath> sourcePaths = new ArrayList<>();
+            sourcePaths.add(generatedJavaSourcesDirectory());
+            return sourcePaths;
+        }
+
         default ArrayList<ResourcePath> javaSourceFiles() {
             final ArrayList<ResourcePath> providedFiles = new ArrayList<>();
             if(classKind().isGenerating()) {
                 providedFiles.add(basePackageInfo().file(generatedJavaSourcesDirectory()));
             }
-            classloaderResources().javaSourceFiles().addAllTo(providedFiles);
+            classLoaderResources().javaSourceFiles().addAllTo(providedFiles);
             parser().ifPresent((i) -> i.javaSourceFiles().addAllTo(providedFiles));
             styler().ifPresent((i) -> i.javaSourceFiles().addAllTo(providedFiles));
             constraintAnalyzer().ifPresent((i) -> i.javaSourceFiles().addAllTo(providedFiles));

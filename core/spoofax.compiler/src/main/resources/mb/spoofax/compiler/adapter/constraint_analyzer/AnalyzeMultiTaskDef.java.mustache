@@ -2,24 +2,39 @@ package {{baseAnalyzeMultiTaskDef.packageId}};
 
 import mb.constraint.common.ConstraintAnalyzer.MultiFileResult;
 import mb.constraint.common.ConstraintAnalyzerContext;
-import mb.constraint.common.ConstraintAnalyzerException;
 import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
+import mb.pie.api.ExecContext;
+import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
+import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
+import mb.resource.hierarchical.match.AllResourceMatcher;
+import mb.resource.hierarchical.match.FileResourceMatcher;
+import mb.resource.hierarchical.match.PathResourceMatcher;
+import mb.resource.hierarchical.match.path.ExtensionPathMatcher;
 import mb.stratego.common.StrategoRuntime;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.HashMap;
+import java.util.stream.Stream;
 
 @{{adapterProject.scope.qualifiedId}}
 public class {{baseAnalyzeMultiTaskDef.id}} extends ConstraintAnalyzeMultiTaskDef {
+    private final {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources;
     private final {{languageProjectInput.constraintAnalyzer.qualifiedId}} constraintAnalyzer;
     private final Provider<StrategoRuntime> strategoRuntimeProvider;
 
     @Inject
-    public {{baseAnalyzeMultiTaskDef.id}}({{languageProjectInput.constraintAnalyzer.qualifiedId}} constraintAnalyzer, Provider<StrategoRuntime> strategoRuntimeProvider) {
+    public {{baseAnalyzeMultiTaskDef.id}}(
+        {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources,
+        {{languageProjectInput.constraintAnalyzer.qualifiedId}} constraintAnalyzer,
+        Provider<StrategoRuntime> strategoRuntimeProvider
+    ) {
+        this.classLoaderResources = classLoaderResources;
         this.constraintAnalyzer = constraintAnalyzer;
         this.strategoRuntimeProvider = strategoRuntimeProvider;
     }
@@ -30,7 +45,33 @@ public class {{baseAnalyzeMultiTaskDef.id}} extends ConstraintAnalyzeMultiTaskDe
     }
 
     @Override
-    protected MultiFileResult analyze(ResourcePath root, HashMap<ResourceKey, IStrategoTerm> asts, ConstraintAnalyzerContext context) throws ConstraintAnalyzerException {
-        return constraintAnalyzer.analyze(root, asts, context, strategoRuntimeProvider.get());
+    protected MultiFileResult analyze(ExecContext context, ResourcePath root, HashMap<ResourceKey, IStrategoTerm> asts, ConstraintAnalyzerContext constraintAnalyzerContext) throws Exception {
+        {{#languageProjectInput.enableStatix}}
+        try {
+            classLoaderResources.performWithDefinitionResourceLocations(
+                "src-gen/statix",
+                directory -> {
+                    try(final Stream<? extends HierarchicalResource> stream = directory.walk(
+                        new AllResourceMatcher(new FileResourceMatcher(), new PathResourceMatcher(new ExtensionPathMatcher("aterm")))
+                    )) {
+                        stream.forEach(statixSpecResource -> {
+                            try {
+                                context.require(statixSpecResource, ResourceStampers.hashFile());
+                            } catch(IOException e) {
+                                throw new UncheckedIOException(e);
+                            }
+                        });
+                    }
+                },
+                jarFileWithPath -> context.require(jarFileWithPath.file)
+            );
+        } catch(UncheckedIOException e) {
+            throw e.getCause();
+        }
+        {{/languageProjectInput.enableStatix}}
+        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsLocalResource({{languageProjectInput.constraintAnalyzer.qualifiedId}}.class), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsLocalResource({{languageProjectInput.constraintAnalyzerFactory.qualifiedId}}.class), ResourceStampers.hashFile());
+        return constraintAnalyzer.analyze(root, asts, constraintAnalyzerContext, strategoRuntimeProvider.get());
     }
 }

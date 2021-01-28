@@ -9,8 +9,8 @@ import javax.inject.Provider;
 
 @Sdf3Scope
 public class Sdf3PrettyPrint extends AstStrategoTransformTaskDef {
-    @Inject public Sdf3PrettyPrint(Provider<StrategoRuntime> strategoRuntimeProvider) {
-        super(strategoRuntimeProvider, "pp-SDF3-string");
+    @Inject public Sdf3PrettyPrint(Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider) {
+        super(getStrategoRuntimeProvider, "pp-SDF3-string");
     }
 
     @Override public String getId() {

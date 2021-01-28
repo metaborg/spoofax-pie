@@ -18,7 +18,6 @@ import mb.statix.task.StatixCompile;
 import mb.statix.util.StatixUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
-import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 import java.io.Serializable;

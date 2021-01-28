@@ -6,8 +6,10 @@ import dagger.multibindings.ElementsIntoSet;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.MapTaskDefs;
 import mb.pie.api.Pie;
+import mb.pie.api.PieBuilder;
 import mb.pie.api.TaskDef;
 import mb.pie.api.TaskDefs;
+import mb.pie.api.serde.JavaSerde;
 import mb.resource.ResourceService;
 import mb.resource.classloader.ClassLoaderResource;
 import mb.resource.classloader.ClassLoaderResourceRegistry;
@@ -195,8 +197,12 @@ public class TigerModule {
     }
 
     @Provides @TigerScope @Named("prototype")
-    static Pie providePrototypePie(@Platform Pie pie, TaskDefs taskDefs, ResourceService resourceService) {
-        return pie.createChildBuilder().withTaskDefs(taskDefs).withResourceService(resourceService).build();
+    static Pie providePrototypePie(@Platform PieBuilder pieBuilder, TaskDefs taskDefs, ResourceService resourceService) {
+        return pieBuilder
+            .addTaskDefs(taskDefs)
+            .withResourceService(resourceService)
+            .withSerdeFactory(loggerFactory -> new JavaSerde(TigerClassloaderResources.class.getClassLoader()))
+            .build();
     }
 
     @Provides @TigerScope @TigerQualifier

@@ -5,6 +5,7 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
+import mb.sdf3.task.Sdf3GetStrategoRuntimeProvider;
 import mb.sdf3.task.Sdf3Parse;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.stratego.common.StrategoRuntime;
@@ -50,11 +51,11 @@ public abstract class ShowTaskDef extends ProvideOutputShared implements TaskDef
         Sdf3Parse parse,
         TaskDef<Supplier<? extends Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> desugar,
         TaskDef<Supplier<? extends Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> operation,
-        Provider<StrategoRuntime> strategoRuntimeProvider,
+        Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider,
         String prettyPrintStrategy,
         String resultName
     ) {
-        super(strategoRuntimeProvider, prettyPrintStrategy, resultName);
+        super(getStrategoRuntimeProvider, prettyPrintStrategy, resultName);
         this.parse = parse;
         this.desugar = desugar;
         this.operation = operation;
@@ -62,6 +63,6 @@ public abstract class ShowTaskDef extends ProvideOutputShared implements TaskDef
 
     @Override public CommandFeedback exec(ExecContext context, Args args) {
         return context.require(operation.createTask(desugar.createSupplier(parse.createAstSupplier(args.file))))
-            .mapOrElse(ast -> provideOutput(args.concrete, ast, args.file), e -> CommandFeedback.ofTryExtractMessagesFrom(e, args.file));
+            .mapOrElse(ast -> provideOutput(context, args.concrete, ast, args.file), e -> CommandFeedback.ofTryExtractMessagesFrom(e, args.file));
     }
 }

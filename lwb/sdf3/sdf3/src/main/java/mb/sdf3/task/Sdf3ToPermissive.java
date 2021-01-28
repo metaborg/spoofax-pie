@@ -9,8 +9,8 @@ import javax.inject.Provider;
 
 @Sdf3Scope
 public class Sdf3ToPermissive extends AstStrategoTransformTaskDef {
-    @Inject public Sdf3ToPermissive(Provider<StrategoRuntime> strategoRuntimeProvider) {
-        super(strategoRuntimeProvider, "module-to-permissive");
+    @Inject public Sdf3ToPermissive(Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider) {
+        super(getStrategoRuntimeProvider, "module-to-permissive");
     }
 
     @Override public String getId() {

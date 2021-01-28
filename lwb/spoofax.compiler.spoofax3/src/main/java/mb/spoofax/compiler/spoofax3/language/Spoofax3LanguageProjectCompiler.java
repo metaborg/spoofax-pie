@@ -7,6 +7,7 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.STask;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
+import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.LanguageProjectCompilerInputBuilder;
 import org.immutables.value.Value;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -114,16 +115,31 @@ public class Spoofax3LanguageProjectCompiler implements TaskDef<Spoofax3Language
         Optional<Spoofax3StrategoRuntimeLanguageCompiler.Input> strategoRuntime();
 
 
+        /// Files information, known up-front for build systems with static dependencies such as Gradle.
+
+        default ArrayList<ResourcePath> javaSourcePaths() {
+            final ArrayList<ResourcePath> sourcePaths = new ArrayList<>();
+            sourcePaths.add(spoofax3LanguageProject().generatedJavaSourcesDirectory());
+            return sourcePaths;
+        }
+
+        default ArrayList<ResourcePath> javaSourceFiles() {
+            final ArrayList<ResourcePath> javaSourceFiles = new ArrayList<>();
+            strategoRuntime().ifPresent(i -> i.javaSourceFiles().addAllTo(javaSourceFiles));
+            return javaSourceFiles;
+        }
+
+
         default void savePersistentProperties(Properties properties) {
-            parser().ifPresent((i) -> i.savePersistentProperties(properties));
+            parser().ifPresent(i -> i.savePersistentProperties(properties));
         }
 
 
         default void syncTo(LanguageProjectCompilerInputBuilder builder) {
-            parser().ifPresent((i) -> i.syncTo(builder.parser));
-            styler().ifPresent((i) -> i.syncTo(builder.styler));
-            constraintAnalyzer().ifPresent((i) -> i.syncTo(builder.constraintAnalyzer));
-            strategoRuntime().ifPresent((i) -> i.syncTo(builder.strategoRuntime));
+            parser().ifPresent(i -> i.syncTo(builder.parser));
+            styler().ifPresent(i -> i.syncTo(builder.styler));
+            constraintAnalyzer().ifPresent(i -> i.syncTo(builder.constraintAnalyzer));
+            strategoRuntime().ifPresent(i -> i.syncTo(builder.strategoRuntime));
         }
     }
 }

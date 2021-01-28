@@ -9,8 +9,8 @@ import javax.inject.Provider;
 
 @Sdf3Scope
 public class Sdf3ToCompletion extends AstStrategoTransformTaskDef {
-    @Inject public Sdf3ToCompletion(Provider<StrategoRuntime> strategoRuntimeProvider) {
-        super(strategoRuntimeProvider, "module-to-sdf3-completions");
+    @Inject public Sdf3ToCompletion(Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider) {
+        super(getStrategoRuntimeProvider, "module-to-sdf3-completions");
     }
 
     @Override public String getId() {

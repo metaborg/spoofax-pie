@@ -3,12 +3,11 @@ package mb.sdf3.task.debug;
 import mb.sdf3.Sdf3Scope;
 import mb.sdf3.task.Sdf3AnalyzeMulti;
 import mb.sdf3.task.Sdf3Desugar;
+import mb.sdf3.task.Sdf3GetStrategoRuntimeProvider;
 import mb.sdf3.task.Sdf3Parse;
 import mb.sdf3.task.Sdf3ToDynsemSignature;
-import mb.stratego.common.StrategoRuntime;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 @Sdf3Scope
 public class Sdf3ShowDynsemSignature extends ShowAnalyzedTaskDef {
@@ -17,9 +16,9 @@ public class Sdf3ShowDynsemSignature extends ShowAnalyzedTaskDef {
         Sdf3Desugar desugar,
         Sdf3AnalyzeMulti analyzeMulti,
         Sdf3ToDynsemSignature operation,
-        Provider<StrategoRuntime> strategoRuntimeProvider
+        Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider
     ) {
-        super(parse, desugar.createFunction(), analyzeMulti, operation.createFunction(), strategoRuntimeProvider, "pp-ds-to-string", "DynSem signatures");
+        super(parse, desugar.createFunction(), analyzeMulti, operation.createFunction(), getStrategoRuntimeProvider, "pp-ds-to-string", "DynSem signatures");
     }
 
     @Override public String getId() {

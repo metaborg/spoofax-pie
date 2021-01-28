@@ -26,14 +26,14 @@ dependencies {
   bundleTargetPlatformApi(eclipse("com.ibm.icu"))
   bundleTargetPlatformImplementation(eclipse("org.eclipse.ui.views.log"))
 
-  bundleEmbedApi(project(":common"))
+  bundleEmbedApi("org.metaborg:common")
   bundleEmbedApi(project(":spoofax.core"))
   bundleEmbedApi("org.metaborg:log.api")
   bundleEmbedApi("org.metaborg:resource")
   bundleEmbedApi("org.metaborg:pie.api")
   bundleEmbedApi("org.metaborg:pie.runtime")
   bundleEmbedApi("org.metaborg:pie.dagger")
-  bundleEmbedApi("org.metaborg:org.spoofax.terms")
+  bundleEmbedApi("org.metaborg.devenv:org.spoofax.terms")
   bundleEmbedApi("com.google.dagger:dagger")
 
   compileOnly("org.checkerframework:checker-qual-android")

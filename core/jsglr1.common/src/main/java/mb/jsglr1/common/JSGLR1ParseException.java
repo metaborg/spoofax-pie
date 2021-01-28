@@ -53,7 +53,7 @@ public abstract class JSGLR1ParseException extends Exception {
     @Override public Throwable fillInStackTrace() {
         return this; // Do nothing so that no stack trace is created, saving memory and CPU time.
     }
-    
+
 
     @Override public abstract int hashCode();
 

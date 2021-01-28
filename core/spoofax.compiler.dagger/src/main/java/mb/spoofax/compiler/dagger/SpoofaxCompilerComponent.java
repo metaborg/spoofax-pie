@@ -11,9 +11,9 @@ import mb.spoofax.compiler.platform.IntellijProjectCompiler;
 
 @SpoofaxCompilerScope @Component(modules = SpoofaxCompilerModule.class)
 public interface SpoofaxCompilerComponent {
-    ResourceService getResourceService();
+    @SpoofaxCompilerQualifier ResourceService getResourceService();
 
-    Pie getPie();
+    @SpoofaxCompilerQualifier Pie getPie();
 
 
     LanguageProjectCompiler getLanguageProjectCompiler();

@@ -14,6 +14,8 @@ import mb.common.util.MapView;
 import mb.common.util.SetView;
 import mb.completions.common.CompletionResult;
 import mb.jsglr.common.JSGLRTokens;
+import mb.jsglr1.common.JSGLR1ParseException;
+import mb.pie.api.StatelessSerializableFunction;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
@@ -83,7 +85,7 @@ public class {{baseInstance.id}} implements LanguageInstance {
 
     @Override public Task<Option<Styling>> createStyleTask(ResourceKey resourceKey) {
 {{#parseInjection}}
-        return {{styleInjection.name}}.createTask({{this.name}}.createRecoverableTokensSupplier(resourceKey).map(Result::ok));
+        return {{styleInjection.name}}.createTask({{this.name}}.createRecoverableTokensSupplier(resourceKey).map(TokensResultToOkFunction.instance));
 {{/parseInjection}}
 {{^parseInjection}}
         return {{styleInjection.name}}.createTask((ctx) -> mb.pie.api.None.instance);
@@ -151,4 +153,16 @@ public class {{baseInstance.id}} implements LanguageInstance {
 {{/editorContextMenuItems}}
         );
     }
+}
+
+class TokensResultToOkFunction extends StatelessSerializableFunction<Result<JSGLRTokens, JSGLR1ParseException>, Option<JSGLRTokens>> {
+    public static final TokensResultToOkFunction instance = new TokensResultToOkFunction();
+
+    @Override public Option<JSGLRTokens> apply(Result<JSGLRTokens, JSGLR1ParseException> result) {
+        return result.ok();
+    }
+
+    protected Object readResolve() { return instance; }
+
+    private TokensResultToOkFunction() {}
 }

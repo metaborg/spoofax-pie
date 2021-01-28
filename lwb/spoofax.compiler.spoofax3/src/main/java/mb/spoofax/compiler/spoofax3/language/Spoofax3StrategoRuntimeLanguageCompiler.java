@@ -53,8 +53,8 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
         StrategoCompileToJava compileToJava,
         StrategoConfigurator configurator,
         UnarchiveFromJar unarchiveFromJar,
-        @LibSpoofax2Qualifier("definition-dir") ClassLoaderResource libSpoofax2DefinitionDir,
-        @LibStatixQualifier("definition-dir") ClassLoaderResource libStatixDefinitionDir
+        @LibSpoofax2Qualifier("definition-directory") ClassLoaderResource libSpoofax2DefinitionDir,
+        @LibStatixQualifier("definition-directory") ClassLoaderResource libStatixDefinitionDir
     ) {
         this.check = check;
         this.compileToJava = compileToJava;
@@ -229,6 +229,22 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
             return Conversion.packageIdToPath(strategoOutputJavaPackageId());
         }
 
+        default ResourcePath strategoOutputJavaInteropRegistererFile() {
+            return strategoOutputDir().appendRelativePath("InteropRegisterer.java");
+        }
+
+        default ResourcePath strategoOutputJavaMainFile() {
+            return strategoOutputDir().appendRelativePath("Main.java");
+        }
+
+
+        default ListView<ResourcePath> javaSourceFiles() {
+            return ListView.of(
+                strategoOutputJavaInteropRegistererFile(),
+                strategoOutputJavaMainFile()
+            );
+        }
+
 
         /// Automatically provided sub-inputs
 
@@ -236,6 +252,7 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
 
 
         default void syncTo(StrategoRuntimeLanguageCompiler.Input.Builder builder) {
+            builder.addStrategyPackageIds(strategoOutputJavaPackageId());
             builder.addInteropRegisterersByReflection(strategoOutputJavaPackageId() + ".InteropRegisterer");
         }
     }

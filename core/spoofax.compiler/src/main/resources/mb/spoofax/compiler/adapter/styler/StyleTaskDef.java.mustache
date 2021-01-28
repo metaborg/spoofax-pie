@@ -7,14 +7,21 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
+import mb.pie.api.stamp.resource.ResourceStampers;
+
 import javax.inject.Inject;
 import java.io.IOException;
 
 @{{adapterProject.scope.qualifiedId}}
 public class {{baseStyleTaskDef.id}} implements TaskDef<Supplier<Option<JSGLRTokens>>, Option<Styling>> {
+    private final {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources;
     private final {{languageProjectInput.styler.qualifiedId}} styler;
 
-    @Inject public {{baseStyleTaskDef.id}}({{languageProjectInput.styler.qualifiedId}} styler) {
+    @Inject public {{baseStyleTaskDef.id}}(
+        {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources,
+        {{languageProjectInput.styler.qualifiedId}} styler
+    ) {
+        this.classLoaderResources = classLoaderResources;
         this.styler = styler;
     }
 
@@ -24,6 +31,11 @@ public class {{baseStyleTaskDef.id}} implements TaskDef<Supplier<Option<JSGLRTok
 
     @Override
     public Option<Styling> exec(ExecContext context, Supplier<Option<JSGLRTokens>> tokensSupplier) throws ExecException, IOException, InterruptedException {
+        context.require(classLoaderResources.tryGetAsLocalDefinitionResource("{{languageProjectInput.packedEsvRelativePath}}"));
+        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsLocalResource({{languageProjectInput.styler.qualifiedId}}.class), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsLocalResource({{languageProjectInput.stylerFactory.qualifiedId}}.class), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsLocalResource({{languageProjectInput.stylingRules.qualifiedId}}.class), ResourceStampers.hashFile());
         return context.require(tokensSupplier).map(t -> styler.style(t.tokens));
     }
 }

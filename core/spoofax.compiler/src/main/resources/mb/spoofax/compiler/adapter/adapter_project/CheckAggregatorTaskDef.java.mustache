@@ -57,9 +57,14 @@ public class {{baseCheckAggregatorTaskDef.id}} implements TaskDef<{{baseCheckAgg
         }
     }
 
+    private final {{classLoaderResources.classLoaderResources.qualifiedId}} classLoaderResources;
     private final {{checkTaskDef.qualifiedId}} check;
 
-    @Inject public {{baseCheckAggregatorTaskDef.id}}({{checkTaskDef.qualifiedId}} check){
+    @Inject public {{baseCheckAggregatorTaskDef.id}}(
+        {{classLoaderResources.classLoaderResources.qualifiedId}} classLoaderResources,
+        {{checkTaskDef.qualifiedId}} check
+    ){
+        this.classLoaderResources = classLoaderResources;
         this.check = check;
     }
 
@@ -68,6 +73,7 @@ public class {{baseCheckAggregatorTaskDef.id}} implements TaskDef<{{baseCheckAgg
     }
 
     @Override public @Nullable KeyedMessages exec(ExecContext context, Input input) throws Exception {
+        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
         final HierarchicalResource root = context.require(input.root, ResourceStampers.modifiedDirRec(input.walker, input.matcher));
         final KeyedMessagesBuilder builder = new KeyedMessagesBuilder();
         try {

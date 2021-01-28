@@ -9,8 +9,8 @@ import javax.inject.Provider;
 
 @Sdf3Scope
 public class Sdf3ToCompletionRuntime extends AstStrategoTransformTaskDef {
-    @Inject public Sdf3ToCompletionRuntime(Provider<StrategoRuntime> strategoRuntimeProvider) {
-        super(strategoRuntimeProvider, "module-to-new-cmp");
+    @Inject public Sdf3ToCompletionRuntime(Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider) {
+        super(getStrategoRuntimeProvider, "module-to-new-cmp");
     }
 
     @Override public String getId() {

@@ -56,7 +56,7 @@ public class {{baseCheckMultiTaskDef.id}} implements TaskDef<{{baseCheckMultiTas
     }
 
     {{#checkMultiInjections}}
-        {{variable}};
+    {{variable}};
     {{/checkMultiInjections}}
 
     @Inject public {{baseCheckMultiTaskDef.id}}(
@@ -74,6 +74,7 @@ public class {{baseCheckMultiTaskDef.id}} implements TaskDef<{{baseCheckMultiTas
     }
 
     @Override public KeyedMessages exec(ExecContext context, Input input) throws IOException {
+        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         final HierarchicalResource root = context.require(input.root, ResourceStampers.modifiedDirRec(input.walker, input.matcher));
 {{#parser}}

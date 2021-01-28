@@ -88,6 +88,7 @@ open class CliPlugin : Plugin<Project> {
       it.addToDependencies(project)
     }
     project.configure<JavaApplication> {
+      @Suppress("DEPRECATION") // Use deprecated property to stay compatible with Gradle 5.6.4
       mainClassName = input.main().qualifiedId()
     }
   }
@@ -100,8 +101,10 @@ open class CliPlugin : Plugin<Project> {
 
       doLast {
         project.deleteDirectory(input.generatedJavaSourcesDirectory(), component.resourceService)
-        component.pie.newSession().use { session ->
-          session.require(component.cliProjectCompiler.createTask(input))
+        synchronized(component.pie) {
+          component.pie.newSession().use { session ->
+            session.require(component.cliProjectCompiler.createTask(input))
+          }
         }
       }
     }
@@ -128,7 +131,7 @@ open class CliPlugin : Plugin<Project> {
 
       doFirst { // Delay setting Main-Class attribute to just before execution, to ensure that mainClassName is set.
         manifest {
-          @Suppress("UnstableApiUsage")
+          @Suppress("UnstableApiUsage", "DEPRECATION") // Use deprecated property to stay compatible with Gradle 5.6.4
           attributes["Main-Class"] = project.the<JavaApplication>().mainClassName
         }
       }

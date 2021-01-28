@@ -1,11 +1,5 @@
 import mb.spoofax.compiler.adapter.*
-import mb.spoofax.compiler.adapter.data.*
-import mb.spoofax.compiler.gradle.plugin.*
-import mb.spoofax.compiler.gradle.spoofax2.plugin.*
-import mb.spoofax.compiler.language.*
-import mb.spoofax.compiler.spoofax2.language.*
 import mb.spoofax.compiler.util.*
-import mb.spoofax.core.language.command.*
 
 plugins {
   id("org.metaborg.gradle.config.java-library")
@@ -31,10 +25,7 @@ spoofax2BasedLanguageProject {
     project.run {
       addAdditionalCopyResources("trans/**/*.str")
       addAdditionalCopyResources("src-gen/**/*.str")
-
-      val spoofax2GroupId = "org.metaborg"
-      val spoofax2Version = System.getProperty("spoofax2Version")
-      project.languageSpecificationDependency(GradleDependency.module("$spoofax2GroupId:statix.runtime:$spoofax2Version"))
+      languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:statix.runtime:${ext["spoofax2DevenvVersion"]}"))
     }
   }
 }

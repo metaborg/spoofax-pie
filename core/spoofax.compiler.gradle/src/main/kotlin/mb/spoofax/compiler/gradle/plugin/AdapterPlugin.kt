@@ -71,7 +71,7 @@ open class AdapterProjectExtension(project: Project) {
   }
 }
 
-internal fun Project.whenAdapterProjectFinalized(closure: () -> Unit) = whenFinalized<AdapterProjectExtension> {
+internal fun Project.whenAdapterProjectFinalized(closure: () -> Unit) = whenFinalized(AdapterProjectExtension::class.java) {
   val extension: AdapterProjectExtension = extensions.getByType()
   // Adapter project is only fully finalized when its dependent language project is finalized as well.
   extension.languageOrThisProjectFinalized.whenLanguageProjectFinalized(closure)
@@ -112,8 +112,10 @@ open class AdapterPlugin : Plugin<Project> {
 
       doLast {
         project.deleteDirectory(input.adapterProject().generatedJavaSourcesDirectory(), component.resourceService)
-        component.pie.newSession().use { session ->
-          session.require(component.adapterProjectCompiler.createTask(input))
+        synchronized(component.pie) {
+          component.pie.newSession().use { session ->
+            session.require(component.adapterProjectCompiler.createTask(input))
+          }
         }
       }
     }

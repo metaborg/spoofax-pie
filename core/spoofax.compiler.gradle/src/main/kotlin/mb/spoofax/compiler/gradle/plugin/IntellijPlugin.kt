@@ -103,8 +103,10 @@ open class IntellijPlugin : Plugin<Project> {
       doLast {
         project.deleteDirectory(input.generatedJavaSourcesDirectory(), component.resourceService)
         project.deleteDirectory(input.generatedResourcesDirectory(), component.resourceService)
-        component.pie.newSession().use { session ->
-          session.require(component.intellijProjectCompiler.createTask(input))
+        synchronized(component.pie) {
+          component.pie.newSession().use { session ->
+            session.require(component.intellijProjectCompiler.createTask(input))
+          }
         }
       }
     }

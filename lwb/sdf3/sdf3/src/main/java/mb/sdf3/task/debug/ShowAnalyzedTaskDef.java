@@ -10,6 +10,7 @@ import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.task.Sdf3AnalyzeMulti;
+import mb.sdf3.task.Sdf3GetStrategoRuntimeProvider;
 import mb.sdf3.task.Sdf3Parse;
 import mb.sdf3.task.util.Sdf3Util;
 import mb.spoofax.core.language.command.CommandFeedback;
@@ -60,11 +61,11 @@ public abstract class ShowAnalyzedTaskDef extends ProvideOutputShared implements
         Function<Supplier<? extends Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> desugar,
         Sdf3AnalyzeMulti analyze,
         Function<Supplier<? extends Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?>>, Result<IStrategoTerm, ?>> operation,
-        Provider<StrategoRuntime> strategoRuntimeProvider,
+        Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider,
         String prettyPrintStrategy,
         String resultName
     ) {
-        super(strategoRuntimeProvider, prettyPrintStrategy, resultName);
+        super(getStrategoRuntimeProvider, prettyPrintStrategy, resultName);
         this.parse = parse;
         this.desugar = desugar;
         this.analyze = analyze;
@@ -74,6 +75,6 @@ public abstract class ShowAnalyzedTaskDef extends ProvideOutputShared implements
     @Override public CommandFeedback exec(ExecContext context, Args args) {
         return context
             .require(operation, analyze.createSingleFileOutputSupplier(new Sdf3AnalyzeMulti.Input(args.project, Sdf3Util.createResourceWalker(), Sdf3Util.createResourceMatcher(), desugar.mapInput((SerializableFunction<Supplier<String>, Supplier<? extends Result<IStrategoTerm, ?>>>) parse::createRecoverableAstSupplier)), args.file))
-            .mapOrElse(ast -> provideOutput(args.concrete, ast, args.file), e -> CommandFeedback.ofTryExtractMessagesFrom(e, args.file));
+            .mapOrElse(ast -> provideOutput(context, args.concrete, ast, args.file), e -> CommandFeedback.ofTryExtractMessagesFrom(e, args.file));
     }
 }

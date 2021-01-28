@@ -22,12 +22,12 @@ import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 
 public abstract class JSGLR1ParseTaskDef implements TaskDef<Supplier<String>, Result<JSGLR1ParseOutput, JSGLR1ParseException>> {
-    protected abstract Result<JSGLR1ParseOutput, JSGLR1ParseException> parse(String text) throws InterruptedException;
+    protected abstract Result<JSGLR1ParseOutput, JSGLR1ParseException> parse(ExecContext context, String text) throws Exception;
 
     @Override
-    public Result<JSGLR1ParseOutput, JSGLR1ParseException> exec(ExecContext context, Supplier<String> stringSupplier) throws InterruptedException {
+    public Result<JSGLR1ParseOutput, JSGLR1ParseException> exec(ExecContext context, Supplier<String> stringSupplier) throws Exception {
         try {
-            return parse(context.require(stringSupplier));
+            return parse(context, context.require(stringSupplier));
         } catch(UncheckedIOException e) {
             return Result.ofErr(JSGLR1ParseException.readStringFail(stringSupplier.toString(), e.getCause()));
         }

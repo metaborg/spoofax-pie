@@ -3,6 +3,7 @@ package mb.spoofax.core.platform;
 import dagger.Component;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.Pie;
+import mb.pie.api.PieBuilder;
 import mb.resource.ResourceService;
 import mb.resource.text.TextResourceRegistry;
 
@@ -22,5 +23,5 @@ public interface PlatformComponent {
 
     @Platform TextResourceRegistry getTextResourceRegistry();
 
-    @Platform Pie getPie();
+    @Platform PieBuilder getPieBuilder();
 }

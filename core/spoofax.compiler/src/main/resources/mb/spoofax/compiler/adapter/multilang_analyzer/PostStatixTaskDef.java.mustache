@@ -15,8 +15,8 @@ import java.io.IOException;
 
 @{{adapterProject.scope.qualifiedId}}
 public class {{basePostStatixTaskDef.id}} extends ProviderStrategoTransformTaskDef<FileResult> {
-    @Inject public {{basePostStatixTaskDef.id}}(Provider<StrategoRuntime> strategoRuntimeProvider) {
-        super(strategoRuntimeProvider, "{{postAnalysisStrategy}}");
+    @Inject public {{basePostStatixTaskDef.id}}({{strategoRuntimeInput.getStrategoRuntimeProviderTaskDef.qualifiedId}} getStrategoRuntimeProvider) {
+        super(getStrategoRuntimeProvider, "{{postAnalysisStrategy}}");
     }
 
     @Override public String getId() {
@@ -28,7 +28,7 @@ public class {{basePostStatixTaskDef.id}} extends ProviderStrategoTransformTaskD
     }
 
     @Override
-    public Result<IStrategoTerm, ?> exec(ExecContext context, Supplier<? extends Result<FileResult, ?>> supplier) {
+    public Result<IStrategoTerm, ?> exec(ExecContext context, Supplier<? extends Result<FileResult, ?>> supplier) throws Exception {
         try {
             return super.exec(context, supplier);
         } catch(IOException e) {

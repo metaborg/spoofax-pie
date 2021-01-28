@@ -4,6 +4,7 @@ import mb.common.option.Option;
 import mb.jsglr.common.JSGLRTokens;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
+import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -12,9 +13,14 @@ import java.io.IOException;
 
 @{{adapterProject.scope.qualifiedId}}
 public class {{baseTokenizeTaskDef.id}} implements TaskDef<ResourceKey, Option<JSGLRTokens>> {
+    private final {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources;
     private final {{parseTaskDef.qualifiedId}} parse;
 
-    @Inject public {{baseTokenizeTaskDef.id}}({{parseTaskDef.qualifiedId}} parse) {
+    @Inject public {{baseTokenizeTaskDef.id}}(
+        {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources,
+        {{parseTaskDef.qualifiedId}} parse
+    ) {
+        this.classLoaderResources = classLoaderResources;
         this.parse = parse;
     }
 
@@ -24,6 +30,7 @@ public class {{baseTokenizeTaskDef.id}} implements TaskDef<ResourceKey, Option<J
 
     @Override
     public @Nullable Option<JSGLRTokens> exec(ExecContext context, ResourceKey key) throws IOException {
+        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
         return context.require(parse.createTokensSupplier(key)).ok();
     }
 }

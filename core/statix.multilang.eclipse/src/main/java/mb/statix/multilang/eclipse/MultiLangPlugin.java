@@ -10,7 +10,6 @@ import mb.statix.multilang.metadata.SpecFragmentId;
 import mb.statix.multilang.metadata.spec.SpecConfig;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
@@ -94,7 +93,7 @@ public class MultiLangPlugin extends Plugin {
             .forEach(analysisContextServiceBuilder::putAllDefaultLanguageContexts);
 
         return analysisContextServiceBuilder
-            .platformPie(SpoofaxPlugin.getComponent().getPie())
+            .platformPieBuilder(SpoofaxPlugin.getComponent().getPieBuilder())
             .build();
     }
 

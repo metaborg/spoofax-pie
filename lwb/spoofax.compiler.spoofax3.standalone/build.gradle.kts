@@ -14,9 +14,10 @@ dependencies {
   api(compositeBuild("spoofax.compiler.dagger"))
   api("org.metaborg:pie.task.java")
 
-  // Using implementation configuration to make these annotations and processors available to javac that we call during compilation.
-  implementation("org.checkerframework:checker-qual-android")
-  implementation("com.google.dagger:dagger-compiler")
+  // Using api configuration to make these annotations and processors available to javac that we call during
+  // compilation, and to users of this library as well.
+  api("org.checkerframework:checker-qual-android")
+  api("com.google.dagger:dagger-compiler")
 
   compileOnly("org.immutables:value-annotations")
   compileOnly("org.derive4j:derive4j-annotation")
@@ -26,6 +27,7 @@ dependencies {
 
   testImplementation("org.junit.jupiter:junit-jupiter-params:${metaborg.junitVersion}")
   testImplementation("org.metaborg:pie.runtime")
+  testImplementation(project(":spoofax.compiler.spoofax3.standalone.dagger"))
   testCompileOnly("org.checkerframework:checker-qual-android")
 }
 
