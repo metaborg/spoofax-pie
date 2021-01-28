@@ -98,6 +98,8 @@ class DynamicLanguageTest extends CharsTestBase {
                 assertTrue(hasStyleTaskDefExecuted(report));
                 assertTrue(hasRemoveATaskDefExecuted(report));
                 assertTrue(hasDebugRemoveATaskDefExecuted(report));
+                assertTrue(hasConstraintAnalysisTaskExecuted(report));
+                assertTrue(hasCheckTaskExecuted(report));
             } catch(ExecException | RuntimeException e) {
                 logException(e);
                 throw e;
@@ -126,6 +128,8 @@ class DynamicLanguageTest extends CharsTestBase {
                 assertTrue(hasStyleTaskDefExecuted(report));
                 assertFalse(hasRemoveATaskDefExecuted(report));
                 assertFalse(hasDebugRemoveATaskDefExecuted(report));
+                assertFalse(hasConstraintAnalysisTaskExecuted(report));
+                assertFalse(hasCheckTaskExecuted(report));
                 // Check styling.
                 assertTrue(result.isSome());
                 final Styling styling = result.unwrap();
@@ -165,11 +169,13 @@ class DynamicLanguageTest extends CharsTestBase {
                 session.updateAffectedBy(providedResources);
                 // Check executed tasks.
                 final MetricsTracer.Report report = metricsTracer.reportAndReset();
-                assertFalse(hasTokenizeTaskDefExecuted(report)); // TODO: should the tokenizer re-execute here, because the parse table changed?
+                assertFalse(hasTokenizeTaskDefExecuted(report));
                 assertTrue(hasParseTaskDefExecuted(report));
                 assertFalse(hasStyleTaskDefExecuted(report));
                 assertFalse(hasRemoveATaskDefExecuted(report));
                 assertFalse(hasDebugRemoveATaskDefExecuted(report));
+                assertFalse(hasConstraintAnalysisTaskExecuted(report));
+                assertFalse(hasCheckTaskExecuted(report));
             } catch(ExecException | RuntimeException e) {
                 logException(e);
                 throw e;
@@ -208,6 +214,8 @@ class DynamicLanguageTest extends CharsTestBase {
                 assertFalse(hasStyleTaskDefExecuted(report));
                 assertTrue(hasRemoveATaskDefExecuted(report));
                 assertTrue(hasDebugRemoveATaskDefExecuted(report));
+                assertTrue(hasConstraintAnalysisTaskExecuted(report)); // Unfortunately this is re-executed, because the Stratego runtime has changed. We cannot know if this affects the constraint analysis or not.
+                assertTrue(hasCheckTaskExecuted(report)); // TODO: this is executed because the result of constraint analysis changes, but we are only interested in the messages, which do not change.
             } catch(ExecException | RuntimeException e) {
                 logException(e);
                 throw e;
@@ -246,6 +254,8 @@ class DynamicLanguageTest extends CharsTestBase {
                 assertFalse(hasStyleTaskDefExecuted(report));
                 assertFalse(hasRemoveATaskDefExecuted(report));
                 assertTrue(hasDebugRemoveATaskDefExecuted(report));
+                assertFalse(hasConstraintAnalysisTaskExecuted(report));
+                assertFalse(hasCheckTaskExecuted(report));
             } catch(ExecException | RuntimeException e) {
                 logException(e);
                 throw e;
@@ -280,6 +290,8 @@ class DynamicLanguageTest extends CharsTestBase {
                 assertFalse(hasStyleTaskDefExecuted(report));
                 assertFalse(hasRemoveATaskDefExecuted(report));
                 assertFalse(hasDebugRemoveATaskDefExecuted(report));
+                assertTrue(hasConstraintAnalysisTaskExecuted(report));
+                assertTrue(hasCheckTaskExecuted(report));
                 // TODO: check execution here and in previous steps.
             } catch(ExecException | RuntimeException e) {
                 logException(e);
