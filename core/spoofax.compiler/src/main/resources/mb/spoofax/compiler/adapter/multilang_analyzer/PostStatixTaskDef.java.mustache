@@ -5,7 +5,7 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.statix.multilang.metadata.FileResult;
 import mb.stratego.common.StrategoRuntime;
-import mb.stratego.pie.ProviderStrategoTransformTaskDef;
+import mb.stratego.pie.StrategoTransformTaskDef;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 
@@ -14,7 +14,7 @@ import javax.inject.Provider;
 import java.io.IOException;
 
 @{{adapterProject.scope.qualifiedId}}
-public class {{basePostStatixTaskDef.id}} extends ProviderStrategoTransformTaskDef<FileResult> {
+public class {{basePostStatixTaskDef.id}} extends StrategoTransformTaskDef<FileResult> {
     @Inject public {{basePostStatixTaskDef.id}}({{strategoRuntimeInput.getStrategoRuntimeProviderTaskDef.qualifiedId}} getStrategoRuntimeProvider) {
         super(getStrategoRuntimeProvider, "{{postAnalysisStrategy}}");
     }
@@ -23,7 +23,7 @@ public class {{basePostStatixTaskDef.id}} extends ProviderStrategoTransformTaskD
         return "{{basePostStatixTaskDef.qualifiedId}}";
     }
 
-    @Override protected IStrategoTerm getAst(FileResult input) {
+    @Override protected IStrategoTerm getAst(ExecContext context, FileResult input) {
         return input.ast();
     }
 

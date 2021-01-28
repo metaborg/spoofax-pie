@@ -43,10 +43,14 @@ public class {{baseSpecConfigFactory.id}} {
         return result;
     }
 
-    public static Set<ResourceRegistry> getResourceRegistries() {
+    public static Set<ResourceRegistry> getResourceRegistries({{classLoaderResources.qualifiedId}} classLoaderResources) {
         HashSet<ResourceRegistry> registries = new HashSet<>(getParentResourceRegistries());
-        registries.add({{classloaderResources.id}}.createClassLoaderResourceRegistry());
+        registries.add(classLoaderResources.resourceRegistry);
         return registries;
+    }
+
+    public static Set<ResourceRegistry> getResourceRegistries() {
+        return getResourceRegistries(new {{classLoaderResources.qualifiedId}}());
     }
 
     public static Set<ResourceRegistry> getParentResourceRegistries() {
