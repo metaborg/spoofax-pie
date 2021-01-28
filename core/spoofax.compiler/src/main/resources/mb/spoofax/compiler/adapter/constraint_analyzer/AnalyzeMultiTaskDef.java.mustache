@@ -4,6 +4,7 @@ import mb.constraint.common.ConstraintAnalyzer.MultiFileResult;
 import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
 import mb.pie.api.ExecContext;
+import mb.pie.api.None;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.HierarchicalResource;
@@ -26,17 +27,17 @@ import java.util.stream.Stream;
 public class {{baseAnalyzeMultiTaskDef.id}} extends ConstraintAnalyzeMultiTaskDef {
     private final {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources;
     private final {{languageProjectInput.constraintAnalyzer.qualifiedId}} constraintAnalyzer;
-    private final Provider<StrategoRuntime> strategoRuntimeProvider;
+    private final {{strategoRuntimeInput.getStrategoRuntimeProviderTaskDef.qualifiedId}} getStrategoRuntimeProvider;
 
     @Inject
     public {{baseAnalyzeMultiTaskDef.id}}(
         {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources,
         {{languageProjectInput.constraintAnalyzer.qualifiedId}} constraintAnalyzer,
-        Provider<StrategoRuntime> strategoRuntimeProvider
+        {{strategoRuntimeInput.getStrategoRuntimeProviderTaskDef.qualifiedId}} getStrategoRuntimeProvider
     ) {
         this.classLoaderResources = classLoaderResources;
         this.constraintAnalyzer = constraintAnalyzer;
-        this.strategoRuntimeProvider = strategoRuntimeProvider;
+        this.getStrategoRuntimeProvider = getStrategoRuntimeProvider;
     }
 
     @Override
@@ -72,6 +73,7 @@ public class {{baseAnalyzeMultiTaskDef.id}} extends ConstraintAnalyzeMultiTaskDe
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
         context.require(classLoaderResources.tryGetAsLocalResource({{languageProjectInput.constraintAnalyzer.qualifiedId}}.class), ResourceStampers.hashFile());
         context.require(classLoaderResources.tryGetAsLocalResource({{languageProjectInput.constraintAnalyzerFactory.qualifiedId}}.class), ResourceStampers.hashFile());
-        return constraintAnalyzer.analyze(root, asts, constraintAnalyzerContext, strategoRuntimeProvider.get());
+        final StrategoRuntime strategoRuntime = context.require(getStrategoRuntimeProvider, None.instance).getValue().get();
+        return constraintAnalyzer.analyze(root, asts, constraintAnalyzerContext, strategoRuntime);
     }
 }

@@ -85,7 +85,7 @@ public class AdapterProjectCompilerInputBuilder {
         final StrategoRuntimeAdapterCompiler.@Nullable Input strategoRuntime = buildStrategoRuntime(shared, adapterProject, languageProjectInput, classLoaderResources);
         if(strategoRuntime != null) project.strategoRuntime(strategoRuntime);
 
-        final ConstraintAnalyzerAdapterCompiler.@Nullable Input constraintAnalyzer = buildConstraintAnalyzer(shared, adapterProject, languageProjectInput, classLoaderResources);
+        final ConstraintAnalyzerAdapterCompiler.@Nullable Input constraintAnalyzer = buildConstraintAnalyzer(shared, adapterProject, languageProjectInput, classLoaderResources, strategoRuntime);
         if(constraintAnalyzer != null) project.constraintAnalyzer(constraintAnalyzer);
 
         final MultilangAnalyzerAdapterCompiler.@Nullable Input multilangAnalyzer = buildMultilangAnalyzer(shared, adapterProject, languageProjectInput, strategoRuntime);
@@ -159,14 +159,19 @@ public class AdapterProjectCompilerInputBuilder {
         Shared shared,
         AdapterProject adapterProject,
         LanguageProjectCompiler.Input languageProjectInput,
-        ClassLoaderResourcesCompiler.Input classloaderResources
+        ClassLoaderResourcesCompiler.Input classloaderResources,
+        StrategoRuntimeAdapterCompiler.@Nullable Input strategoRuntimeInput
     ) {
         if(!constraintAnalyzerEnabled) return null;
+        if(strategoRuntimeInput == null) {
+            throw new RuntimeException("Constraint analyzer input requires a Stratego runtime, but the Stratego runtime has not been set");
+        }
         return constraintAnalyzer
             .shared(shared)
             .adapterProject(adapterProject)
             .languageProjectInput(languageProjectInput.constraintAnalyzer().orElseThrow(() -> new RuntimeException("Mismatch between presence of constraint analyzer input between language project and adapter project")))
             .classLoaderResourcesInput(classloaderResources)
+            .strategoRuntimeInput(strategoRuntimeInput)
             .build();
     }
 

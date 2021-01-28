@@ -115,6 +115,8 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
 
         ClassLoaderResourcesCompiler.Input classLoaderResourcesInput();
 
+        StrategoRuntimeAdapterCompiler.Input strategoRuntimeInput();
+
 
         @Value.Check default void check() {
 

@@ -133,23 +133,31 @@ class CharsTestBase extends TestBase {
 
 
     boolean hasTokenizeTaskDefExecuted(MetricsTracer.Report report) {
-        return report.executedPerTaskDefinition.containsKey(adapterProjectInput.parser().get().tokenizeTaskDef().qualifiedId());
+        return report.hasTaskDefExecuted(adapterProjectInput.parser().get().tokenizeTaskDef().qualifiedId());
     }
 
     boolean hasParseTaskDefExecuted(MetricsTracer.Report report) {
-        return report.executedPerTaskDefinition.containsKey(adapterProjectInput.parser().get().parseTaskDef().qualifiedId());
+        return report.hasTaskDefExecuted(adapterProjectInput.parser().get().parseTaskDef().qualifiedId());
     }
 
     boolean hasStyleTaskDefExecuted(MetricsTracer.Report report) {
-        return report.executedPerTaskDefinition.containsKey(adapterProjectInput.styler().get().styleTaskDef().qualifiedId());
+        return report.hasTaskDefExecuted(adapterProjectInput.styler().get().styleTaskDef().qualifiedId());
     }
 
     boolean hasRemoveATaskDefExecuted(MetricsTracer.Report report) {
-        return report.executedPerTaskDefinition.containsKey("mb.chars.CharsRemoveA");
+        return report.hasTaskDefExecuted("mb.chars.CharsRemoveA");
     }
 
     boolean hasDebugRemoveATaskDefExecuted(MetricsTracer.Report report) {
-        return report.executedPerTaskDefinition.containsKey("mb.chars.CharsDebugRemoveA");
+        return report.hasTaskDefExecuted("mb.chars.CharsDebugRemoveA");
+    }
+
+    boolean hasConstraintAnalysisTaskExecuted(MetricsTracer.Report report) {
+        return report.hasTaskDefExecuted(adapterProjectInput.constraintAnalyzer().get().analyzeTaskDef().qualifiedId());
+    }
+
+    boolean hasCheckTaskExecuted(MetricsTracer.Report report) {
+        return report.hasTaskDefExecuted(adapterProjectInput.checkTaskDef().qualifiedId());
     }
 
 
@@ -190,8 +198,7 @@ class CharsTestBase extends TestBase {
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString()
             .replace("Chars(\"\")", "Chars(\"abcdefg\")")
-            .replace("combination '' is", "combination 'abcdefg' is")
-            ;
+            .replace("combination '' is", "combination 'abcdefg' is");
         file.writeString(text);
         return session.updateAffectedBy(path);
     }
