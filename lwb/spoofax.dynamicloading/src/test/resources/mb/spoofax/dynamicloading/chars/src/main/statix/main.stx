@@ -1,0 +1,19 @@
+module main
+
+signature
+
+  sorts Program constructors
+    Program : list(Expr) -> Program
+
+  sorts Expr constructors
+    Chars : string -> Expr
+
+rules
+
+  programOk : Program
+  programOk(Program(exprs)) :- exprsOk(exprs).
+
+  exprOk : Expr
+  exprOk(Chars("")) :- false | error $[The character combination '' is not allowed].
+  exprOk(_).
+  exprsOk maps exprOk(list(*))

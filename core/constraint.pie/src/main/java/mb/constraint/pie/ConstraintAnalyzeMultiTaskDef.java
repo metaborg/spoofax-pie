@@ -132,9 +132,9 @@ public abstract class ConstraintAnalyzeMultiTaskDef implements TaskDef<Constrain
         }
     }
 
-    protected abstract ConstraintAnalyzer.MultiFileResult analyze(ResourcePath root, HashMap<ResourceKey, IStrategoTerm> asts, ConstraintAnalyzerContext context) throws ConstraintAnalyzerException;
+    protected abstract ConstraintAnalyzer.MultiFileResult analyze(ExecContext context, ResourcePath root, HashMap<ResourceKey, IStrategoTerm> asts, ConstraintAnalyzerContext constraintAnalyzerContext) throws Exception;
 
-    @Override public Result<Output, ?> exec(ExecContext context, Input input) throws IOException {
+    @Override public Result<Output, ?> exec(ExecContext context, Input input) throws Exception {
         final HierarchicalResource root = context.require(input.root, ResourceStampers.modifiedDirRec(input.walker, input.matcher));
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
@@ -144,7 +144,7 @@ public abstract class ConstraintAnalyzeMultiTaskDef implements TaskDef<Constrain
         );
         try {
             final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext(true, input.root);
-            final ConstraintAnalyzer.MultiFileResult result = analyze(input.root, asts, constraintAnalyzerContext);
+            final ConstraintAnalyzer.MultiFileResult result = analyze(context, input.root, asts, constraintAnalyzerContext);
             return Result.ofOk(new Output(messagesBuilder.build(), constraintAnalyzerContext, result));
         } catch(ConstraintAnalyzerException e) {
             return Result.ofErr(e);

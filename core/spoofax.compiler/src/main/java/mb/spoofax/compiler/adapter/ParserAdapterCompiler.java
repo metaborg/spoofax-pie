@@ -118,7 +118,7 @@ public class ParserAdapterCompiler implements TaskDef<ParserAdapterCompiler.Inpu
 
         ParserLanguageCompiler.Input languageProjectInput();
 
-        ClassLoaderResourcesCompiler.Input classloaderResourcesInput();
+        ClassLoaderResourcesCompiler.Input classLoaderResourcesInput();
 
 
         @Value.Check default void check() {

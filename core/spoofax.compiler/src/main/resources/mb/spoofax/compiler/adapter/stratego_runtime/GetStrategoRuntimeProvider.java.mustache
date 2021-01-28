@@ -18,15 +18,15 @@ import java.util.stream.Stream;
 
 @{{adapterProject.scope.qualifiedId}}
 public class {{baseGetStrategoRuntimeProviderTaskDef.id}} extends GetStrategoRuntimeProvider {
-    private final {{classloaderResourcesInput.classloaderResources.qualifiedId}} classloaderResources;
+    private final {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources;
     private final Provider<StrategoRuntime> strategoRuntimeProvider;
 
     @Inject
     public {{baseGetStrategoRuntimeProviderTaskDef.id}}(
-        {{classloaderResourcesInput.classloaderResources.qualifiedId}} classloaderResources,
+        {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources,
         Provider<StrategoRuntime> strategoRuntimeProvider
     ) {
-        this.classloaderResources = classloaderResources;
+        this.classLoaderResources = classLoaderResources;
         this.strategoRuntimeProvider = strategoRuntimeProvider;
     }
 
@@ -35,10 +35,10 @@ public class {{baseGetStrategoRuntimeProviderTaskDef.id}} extends GetStrategoRun
     }
 
     @Override protected Provider<StrategoRuntime> getStrategoRuntimeProvider(ExecContext context) throws Exception {
-        context.require(classloaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
 {{#languageProjectInput.strategyPackagePaths}}
         try {
-            classloaderResources.performWithResourceLocations(
+            classLoaderResources.performWithResourceLocations(
             "{{this}}",
                 directory -> {
                     try(final Stream<? extends HierarchicalResource> stream = directory.walk(
@@ -46,7 +46,7 @@ public class {{baseGetStrategoRuntimeProviderTaskDef.id}} extends GetStrategoRun
                     )) {
                         stream.forEach(resource -> {
                             try {
-                                context.provide(resource, ResourceStampers.hashFile());
+                                context.require(resource, ResourceStampers.hashFile());
                             } catch(IOException e) {
                                 throw new UncheckedIOException(e);
                             }
@@ -60,7 +60,7 @@ public class {{baseGetStrategoRuntimeProviderTaskDef.id}} extends GetStrategoRun
         }
 {{/languageProjectInput.strategyPackagePaths}}
 {{#languageProjectInput.ctreeRelativePaths}}
-        context.require(classloaderResources.tryGetAsLocalDefinitionResource("{{this}}"));
+        context.require(classLoaderResources.tryGetAsLocalDefinitionResource("{{this}}"));
 {{/languageProjectInput.ctreeRelativePaths}}
         return strategoRuntimeProvider;
     }

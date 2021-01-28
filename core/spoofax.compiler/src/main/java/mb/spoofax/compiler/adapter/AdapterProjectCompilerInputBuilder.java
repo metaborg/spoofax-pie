@@ -12,7 +12,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Facade for consistently and easily building a {@link AdapterProjectCompiler.Input} instance.
  */
 public class AdapterProjectCompilerInputBuilder {
-    public final ClassLoaderResourcesCompiler.Input.Builder classloaderResources = ClassLoaderResourcesCompiler.Input.builder();
+    public final ClassLoaderResourcesCompiler.Input.Builder classLoaderResources = ClassLoaderResourcesCompiler.Input.builder();
 
     private boolean parserEnabled = false;
     public final ParserAdapterCompiler.Input.Builder parser = ParserAdapterCompiler.Input.builder();
@@ -36,7 +36,7 @@ public class AdapterProjectCompilerInputBuilder {
 
 
     public ClassLoaderResourcesCompiler.Input.Builder withClassloaderResources() {
-        return classloaderResources;
+        return classLoaderResources;
     }
 
     public ParserAdapterCompiler.Input.Builder withParser() {
@@ -73,19 +73,19 @@ public class AdapterProjectCompilerInputBuilder {
     public AdapterProjectCompiler.Input build(LanguageProjectCompiler.Input languageProjectInput, Option<GradleDependency> languageProjectDependency, AdapterProject adapterProject) {
         final Shared shared = languageProjectInput.shared();
 
-        final ClassLoaderResourcesCompiler.Input classloaderResources = buildClassLoaderResources(shared, languageProjectInput.languageProject());
-        project.classloaderResources(classloaderResources);
+        final ClassLoaderResourcesCompiler.Input classLoaderResources = buildClassLoaderResources(shared, languageProjectInput.languageProject());
+        project.classLoaderResources(classLoaderResources);
 
-        final ParserAdapterCompiler.@Nullable Input parser = buildParser(shared, adapterProject, languageProjectInput, classloaderResources);
+        final ParserAdapterCompiler.@Nullable Input parser = buildParser(shared, adapterProject, languageProjectInput, classLoaderResources);
         if(parser != null) project.parser(parser);
 
-        final StylerAdapterCompiler.@Nullable Input styler = buildStyler(shared, adapterProject, languageProjectInput, classloaderResources);
+        final StylerAdapterCompiler.@Nullable Input styler = buildStyler(shared, adapterProject, languageProjectInput, classLoaderResources);
         if(styler != null) project.styler(styler);
 
-        final StrategoRuntimeAdapterCompiler.@Nullable Input strategoRuntime = buildStrategoRuntime(shared, adapterProject, languageProjectInput, classloaderResources);
+        final StrategoRuntimeAdapterCompiler.@Nullable Input strategoRuntime = buildStrategoRuntime(shared, adapterProject, languageProjectInput, classLoaderResources);
         if(strategoRuntime != null) project.strategoRuntime(strategoRuntime);
 
-        final ConstraintAnalyzerAdapterCompiler.@Nullable Input constraintAnalyzer = buildConstraintAnalyzer(shared, adapterProject, languageProjectInput);
+        final ConstraintAnalyzerAdapterCompiler.@Nullable Input constraintAnalyzer = buildConstraintAnalyzer(shared, adapterProject, languageProjectInput, classLoaderResources);
         if(constraintAnalyzer != null) project.constraintAnalyzer(constraintAnalyzer);
 
         final MultilangAnalyzerAdapterCompiler.@Nullable Input multilangAnalyzer = buildMultilangAnalyzer(shared, adapterProject, languageProjectInput, strategoRuntime);
@@ -104,7 +104,7 @@ public class AdapterProjectCompilerInputBuilder {
 
 
     private ClassLoaderResourcesCompiler.Input buildClassLoaderResources(Shared shared, LanguageProject languageProject) {
-        return classloaderResources
+        return classLoaderResources
             .shared(shared)
             .languageProject(languageProject)
             .build();
@@ -121,7 +121,7 @@ public class AdapterProjectCompilerInputBuilder {
             .shared(shared)
             .adapterProject(adapterProject)
             .languageProjectInput(languageProjectInput.parser().orElseThrow(() -> new RuntimeException("Mismatch between presence of parser input between language project and adapter project")))
-            .classloaderResourcesInput(classloaderResources)
+            .classLoaderResourcesInput(classloaderResources)
             .build();
     }
 
@@ -136,7 +136,7 @@ public class AdapterProjectCompilerInputBuilder {
             .shared(shared)
             .adapterProject(adapterProject)
             .languageProjectInput(languageProjectInput.styler().orElseThrow(() -> new RuntimeException("Mismatch between presence of styler input between language project and adapter project")))
-            .classloaderResourcesInput(classloaderResources)
+            .classLoaderResourcesInput(classloaderResources)
             .build();
     }
 
@@ -151,20 +151,22 @@ public class AdapterProjectCompilerInputBuilder {
             .shared(shared)
             .adapterProject(adapterProject)
             .languageProjectInput(languageProjectInput.strategoRuntime().orElseThrow(() -> new RuntimeException("Mismatch between presence of stratego runtime input between language project and adapter project")))
-            .classloaderResourcesInput(classloaderResources)
+            .classLoaderResourcesInput(classloaderResources)
             .build();
     }
 
     private ConstraintAnalyzerAdapterCompiler.@Nullable Input buildConstraintAnalyzer(
         Shared shared,
         AdapterProject adapterProject,
-        LanguageProjectCompiler.Input languageProjectInput
+        LanguageProjectCompiler.Input languageProjectInput,
+        ClassLoaderResourcesCompiler.Input classloaderResources
     ) {
         if(!constraintAnalyzerEnabled) return null;
         return constraintAnalyzer
             .shared(shared)
             .adapterProject(adapterProject)
             .languageProjectInput(languageProjectInput.constraintAnalyzer().orElseThrow(() -> new RuntimeException("Mismatch between presence of constraint analyzer input between language project and adapter project")))
+            .classLoaderResourcesInput(classloaderResources)
             .build();
     }
 

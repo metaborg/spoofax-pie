@@ -93,7 +93,7 @@ public class StylerAdapterCompiler implements TaskDef<StylerAdapterCompiler.Inpu
 
         StylerLanguageCompiler.Input languageProjectInput();
 
-        ClassLoaderResourcesCompiler.Input classloaderResourcesInput();
+        ClassLoaderResourcesCompiler.Input classLoaderResourcesInput();
 
 
         @Value.Check default void check() {

@@ -1,5 +1,6 @@
 package mb.spoofax.dynamicloading;
 
+import mb.common.message.KeyedMessages;
 import mb.common.option.Option;
 import mb.common.region.Region;
 import mb.common.style.Color;
@@ -80,6 +81,9 @@ class DynamicLanguageTest extends CharsTestBase {
                 assertFalse(style.isItalic());
                 assertFalse(style.isUnderscore());
                 assertFalse(style.isStrikeout());
+                // Run check task and check.
+                final KeyedMessages messages = session.require(languageInstance.createCheckTask(charsProjectPath));
+                assertFalse(messages.containsError());
                 // Run command and check.
                 final Task<CommandFeedback> debugRemoveATask = getTaskForFirstCommand(languageInstance);
                 final CommandFeedback debugRemoveAFeedback = session.require(debugRemoveATask);
@@ -242,6 +246,41 @@ class DynamicLanguageTest extends CharsTestBase {
                 assertFalse(hasStyleTaskDefExecuted(report));
                 assertFalse(hasRemoveATaskDefExecuted(report));
                 assertTrue(hasDebugRemoveATaskDefExecuted(report));
+            } catch(ExecException | RuntimeException e) {
+                logException(e);
+                throw e;
+            }
+        }
+
+        {
+            System.err.println("Change analyzer and reload");
+            final DynamicLanguage dynamicLanguage;
+            final Set<ResourceKey> providedResources;
+            try(final DynamicLoaderMixedSession session = dynamicLoader.newSession()) {
+                final DynamicLoaderReloadSession reloadSession = modifyAnalyzer(session);
+                dynamicLanguage = reloadSession.reload("chars", input);
+                providedResources = reloadSession.getProvidedResources();
+            } catch(ExecException | RuntimeException e) {
+                logException(e);
+                throw e;
+            }
+
+            System.err.println("Change analyzer test");
+            final LanguageComponent languageComponent = dynamicLanguage.getLanguageComponent();
+            try(final MixedSession session = languageComponent.getPie().newSession()) {
+                metricsTracer.reset();
+                final TopDownSession topDownSession = session.updateAffectedBy(providedResources);
+                // Run check task and check.
+                final KeyedMessages messages = topDownSession.require(languageComponent.getLanguageInstance().createCheckTask(charsProjectPath));
+                assertTrue(messages.containsError());
+                // Check executed tasks.
+                final MetricsTracer.Report report = metricsTracer.reportAndReset();
+                assertFalse(hasTokenizeTaskDefExecuted(report));
+                assertFalse(hasParseTaskDefExecuted(report));
+                assertFalse(hasStyleTaskDefExecuted(report));
+                assertFalse(hasRemoveATaskDefExecuted(report));
+                assertFalse(hasDebugRemoveATaskDefExecuted(report));
+                // TODO: check execution here and in previous steps.
             } catch(ExecException | RuntimeException e) {
                 logException(e);
                 throw e;

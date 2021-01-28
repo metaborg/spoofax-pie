@@ -66,13 +66,13 @@ import java.util.Map;
 @Module
 public class {{baseModule.id}} {
     @Provides @{{scope.id}}
-    static {{classloaderResources.classloaderResources.qualifiedId}} provideClassLoaderResources() {
-        return new {{classloaderResources.classloaderResources.qualifiedId}}();
+    static {{classLoaderResources.classLoaderResources.qualifiedId}} provideClassLoaderResources() {
+        return new {{classLoaderResources.classLoaderResources.qualifiedId}}();
     }
 
     @Provides @{{scope.id}}
-    static ClassLoaderResourceRegistry provideClassLoaderResourceRegistry({{classloaderResources.classloaderResources.qualifiedId}} classloaderResources) {
-        return classloaderResources.resourceRegistry;
+    static ClassLoaderResourceRegistry provideClassLoaderResourceRegistry({{classLoaderResources.classLoaderResources.qualifiedId}} classLoaderResources) {
+        return classLoaderResources.resourceRegistry;
     }
 
     @Provides @{{scope.id}} @{{qualifier.id}}
@@ -86,8 +86,8 @@ public class {{baseModule.id}} {
     }
 
     @Provides @{{scope.id}} @{{qualifier.id}}("definition-directory")
-    static ClassLoaderResource provideDefinitionDirectory({{classloaderResources.classloaderResources.qualifiedId}} classloaderResources) {
-        return classloaderResources.definitionDirectory;
+    static ClassLoaderResource provideDefinitionDirectory({{classLoaderResources.classLoaderResources.qualifiedId}} classLoaderResources) {
+        return classLoaderResources.definitionDirectory;
     }
 
     @Provides @{{scope.id}} @{{qualifier.id}}("definition-directory")
@@ -195,7 +195,7 @@ public class {{baseModule.id}} {
         return pieBuilder
             .addTaskDefs(taskDefs)
             .withResourceService(resourceService)
-            .withSerdeFactory(loggerFactory -> new JavaSerde({{classloaderResources.classloaderResources.qualifiedId}}.class.getClassLoader()))
+            .withSerdeFactory(loggerFactory -> new JavaSerde({{classLoaderResources.classLoaderResources.qualifiedId}}.class.getClassLoader()))
             .build();
     }
 {{#multilangAnalyzer}}

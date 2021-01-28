@@ -1,4 +1,4 @@
-package {{baseClassloaderResources.packageId}};
+package {{baseClassLoaderResources.packageId}};
 
 import mb.common.result.ExceptionalConsumer;
 import mb.resource.ReadableResource;
@@ -11,8 +11,8 @@ import mb.resource.hierarchical.SegmentsPath;
 
 import java.io.IOException;
 
-public class {{baseClassloaderResources.id}} {
-    public final ClassLoaderResourceRegistry resourceRegistry = new ClassLoaderResourceRegistry("{{qualifier}}", {{baseClassloaderResources.id}}.class.getClassLoader());
+public class {{baseClassLoaderResources.id}} {
+    public final ClassLoaderResourceRegistry resourceRegistry = new ClassLoaderResourceRegistry("{{qualifier}}", {{baseClassLoaderResources.id}}.class.getClassLoader());
 
     public ClassLoaderResource getResource(String path) {
         return resourceRegistry.getResource(path);
@@ -62,5 +62,20 @@ public class {{baseClassloaderResources.id}} {
 
     public ReadableResource tryGetAsLocalDefinitionResource(String path) {
         return getDefinitionResource(path).tryAsLocalResource();
+    }
+
+    public void performWithDefinitionResourceLocations(
+        String path,
+        ExceptionalConsumer<FSResource, IOException> directoriesConsumer,
+        ExceptionalConsumer<JarFileWithPath, IOException> jarFileWithPathConsumer
+    ) throws IOException {
+        final ClassLoaderResource classLoaderResource = definitionDirectory.appendAsRelativePath(path);
+        final ClassLoaderResourceLocations locations = classLoaderResource.getLocations();
+        for(FSResource directory : locations.directories) {
+            directoriesConsumer.accept(directory);
+        }
+        for(JarFileWithPath jarFileWithPath : locations.jarFiles) {
+            jarFileWithPathConsumer.accept(jarFileWithPath);
+        }
     }
 }

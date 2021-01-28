@@ -49,6 +49,7 @@ languageProject {
       addInteropRegisterersByReflection("statix.lang.strategies.InteropRegisterer")
       addInteropRegisterersByReflection("statix.lang.trans.InteropRegisterer")
       addSpoofax2Primitives(true)
+      addStatixPrimitives(true) // Requires the STX_compare_patterns primitive.
     }
   }
 }

@@ -18,7 +18,7 @@ public class {{baseSpecConfigFactory.id}} {
 
     public static SpecConfig getSpecConfig(ITermFactory termFactory) {
         return ImmutableSpecConfig.builder()
-            .rootPackage(new {{classloaderResources.id}}().definitionDirectory.appendRelativePath("src-gen/statix"))
+            .rootPackage(new {{classLoaderResources.id}}().definitionDirectory.appendRelativePath("src-gen/statix"))
             .termFactory(termFactory)
             .addRootModules({{#rootModules}}"{{this}}"{{^-last}}, {{/-last}}{{/rootModules}})
             {{#dependencyFactories}}

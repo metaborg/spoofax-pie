@@ -96,7 +96,7 @@ public class MultilangAnalyzerLanguageCompiler implements TaskDef<MultilangAnaly
 
         // Subinputs
 
-        TypeInfo classloaderResources();
+        TypeInfo classLoaderResources();
 
 
         /// Automatically provided sub-inputs

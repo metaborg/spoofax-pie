@@ -14,14 +14,14 @@ import java.io.IOException;
 
 @{{adapterProject.scope.qualifiedId}}
 public class {{baseStyleTaskDef.id}} implements TaskDef<Supplier<Option<JSGLRTokens>>, Option<Styling>> {
-    private final {{classloaderResourcesInput.classloaderResources.qualifiedId}} classloaderResources;
+    private final {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources;
     private final {{languageProjectInput.styler.qualifiedId}} styler;
 
     @Inject public {{baseStyleTaskDef.id}}(
-        {{classloaderResourcesInput.classloaderResources.qualifiedId}} classloaderResources,
+        {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources,
         {{languageProjectInput.styler.qualifiedId}} styler
     ) {
-        this.classloaderResources = classloaderResources;
+        this.classLoaderResources = classLoaderResources;
         this.styler = styler;
     }
 
@@ -31,11 +31,11 @@ public class {{baseStyleTaskDef.id}} implements TaskDef<Supplier<Option<JSGLRTok
 
     @Override
     public Option<Styling> exec(ExecContext context, Supplier<Option<JSGLRTokens>> tokensSupplier) throws ExecException, IOException, InterruptedException {
-        context.require(classloaderResources.tryGetAsLocalDefinitionResource("{{languageProjectInput.packedEsvRelativePath}}"));
-        context.require(classloaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
-        context.require(classloaderResources.tryGetAsLocalResource({{languageProjectInput.styler.qualifiedId}}.class), ResourceStampers.hashFile());
-        context.require(classloaderResources.tryGetAsLocalResource({{languageProjectInput.stylerFactory.qualifiedId}}.class), ResourceStampers.hashFile());
-        context.require(classloaderResources.tryGetAsLocalResource({{languageProjectInput.stylingRules.qualifiedId}}.class), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsLocalDefinitionResource("{{languageProjectInput.packedEsvRelativePath}}"));
+        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsLocalResource({{languageProjectInput.styler.qualifiedId}}.class), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsLocalResource({{languageProjectInput.stylerFactory.qualifiedId}}.class), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsLocalResource({{languageProjectInput.stylingRules.qualifiedId}}.class), ResourceStampers.hashFile());
         return context.require(tokensSupplier).map(t -> styler.style(t.tokens));
     }
 }

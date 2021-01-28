@@ -39,8 +39,10 @@ class CharsTestBase extends TestBase {
     LanguageProjectCompiler.Input languageProjectInput;
     AdapterProjectCompiler.Input adapterProjectInput;
     CompileToJavaClassFiles.Input input;
-    ResourcePath charsFilePath;
+    HierarchicalResource charsProject;
+    ResourcePath charsProjectPath;
     HierarchicalResource charsFile;
+    ResourcePath charsFilePath;
 
     void setup(Path temporaryDirectoryPath) throws IOException {
         super.setup(temporaryDirectoryPath);
@@ -50,6 +52,7 @@ class CharsTestBase extends TestBase {
         final String packageId = "mb.chars";
         final Shared shared = Shared.builder()
             .name("Chars")
+            .addFileExtensions("chars")
             .defaultPackageId(packageId)
             .defaultClassPrefix("Chars")
             .build();
@@ -65,17 +68,20 @@ class CharsTestBase extends TestBase {
         spoofax3LanguageProjectInputBuilder.withParser();
         spoofax3LanguageProjectInputBuilder.withStyler();
         spoofax3LanguageProjectInputBuilder.withStrategoRuntime();
+        spoofax3LanguageProjectInputBuilder.withConstraintAnalyzer();
         final Spoofax3LanguageProjectCompiler.Input spoofax3LanguageProjectInput = spoofax3LanguageProjectInputBuilder.build(new Properties(), shared, spoofax3LanguageProject);
         spoofax3LanguageProjectInput.syncTo(languageProjectInputBuilder);
 
         languageProjectInputBuilder.withParser().startSymbol("Start");
         languageProjectInputBuilder.withStyler();
         languageProjectInputBuilder.withStrategoRuntime();
+        languageProjectInputBuilder.withConstraintAnalyzer();
         this.languageProjectInput = languageProjectInputBuilder.build(shared, languageProject);
 
         adapterProjectCompilerInputBuilder.withParser();
         adapterProjectCompilerInputBuilder.withStyler();
         adapterProjectCompilerInputBuilder.withStrategoRuntime();
+        adapterProjectCompilerInputBuilder.withConstraintAnalyzer();
 
         final TypeInfo removeA = TypeInfo.of(packageId, "CharsRemoveA");
         final TypeInfo debugRemoveA = TypeInfo.of(packageId, "CharsDebugRemoveA");
@@ -84,8 +90,8 @@ class CharsTestBase extends TestBase {
             .type(packageId, "CharsDebugRemoveACommand")
             .taskDefType(debugRemoveA)
             .argType(debugRemoveA.appendToId(".Args"))
-            .displayName("Show AST with A characters removed")
-            .description("Shows the AST with A characters removed")
+            .displayName("Show AST with 'A' characters removed")
+            .description("Shows the AST with 'A' characters removed")
             .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
             .addParams(
                 ParamRepr.of("file", TypeInfo.of("mb.resource", "ResourceKey"), true, ArgProviderRepr.context(CommandContextType.File))
@@ -101,7 +107,9 @@ class CharsTestBase extends TestBase {
             .adapterProjectInput(adapterProjectInput)
             .build();
 
-        this.charsFile = temporaryDirectory.appendSegment("test.chars").ensureFileExists();
+        this.charsProject = temporaryDirectory.appendRelativePath("test");
+        this.charsProjectPath = charsProject.getPath();
+        this.charsFile = charsProject.appendSegment("test.chars").ensureFileExists();
         this.charsFilePath = charsFile.getPath();
         charsFile.writeString("abcdefg");
     }
@@ -173,6 +181,17 @@ class CharsTestBase extends TestBase {
         final ResourcePath path = input.sourcePath().get(0).appendRelativePath("mb/chars/CharsDebugRemoveA.java");
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString().replace("A characters", "'A' characters");
+        file.writeString(text);
+        return session.updateAffectedBy(path);
+    }
+
+    DynamicLoaderReloadSession modifyAnalyzer(DynamicLoaderMixedSession session) throws IOException, ExecException, InterruptedException {
+        final ResourcePath path = input.spoofax3LanguageProjectInput().constraintAnalyzer().get().statixMainFile();
+        final WritableResource file = resourceService.getWritableResource(path);
+        final String text = file.readString()
+            .replace("Chars(\"\")", "Chars(\"abcdefg\")")
+            .replace("combination '' is", "combination 'abcdefg' is")
+            ;
         file.writeString(text);
         return session.updateAffectedBy(path);
     }

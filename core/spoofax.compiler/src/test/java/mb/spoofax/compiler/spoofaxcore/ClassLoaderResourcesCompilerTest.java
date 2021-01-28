@@ -9,11 +9,11 @@ class ClassLoaderResourcesCompilerTest extends TestBase {
     @Test void testCompilerDefaults() throws Exception {
         final TigerInputs inputs = defaultInputs();
 
-        final ClassLoaderResourcesCompiler.Input input = inputs.languageProjectCompilerInput().classloaderResources();
+        final ClassLoaderResourcesCompiler.Input input = inputs.languageProjectCompilerInput().classLoaderResources();
         try(MixedSession session = pie.newSession()) {
             session.require(component.getClassloaderResourcesCompiler().createTask(input));
             fileAssertions.scopedExists(input.generatedJavaSourcesDirectory(), (s) -> {
-                s.assertPublicJavaClass(input.classloaderResources(), "TigerClassLoaderResources");
+                s.assertPublicJavaClass(input.classLoaderResources(), "TigerClassLoaderResources");
             });
         }
     }

@@ -100,7 +100,7 @@ public class StrategoRuntimeAdapterCompiler implements TaskDef<StrategoRuntimeAd
 
         StrategoRuntimeLanguageCompiler.Input languageProjectInput();
 
-        ClassLoaderResourcesCompiler.Input classloaderResourcesInput();
+        ClassLoaderResourcesCompiler.Input classLoaderResourcesInput();
     }
 
     @Value.Immutable public interface Output extends Serializable {

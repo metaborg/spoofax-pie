@@ -7,15 +7,15 @@ import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ResourceStringSupplier;
 import mb.pie.api.TaskDef;
+import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
 import javax.inject.Inject;
 import java.io.IOException;
 
 @{{scope.qualifiedId}}
 public class {{baseCheckTaskDef.id}} implements TaskDef<ResourceKey, Messages> {
-
 {{#checkInjections}}
-    {{variable}};
+{{variable}};
 {{/checkInjections}}
 
     @Inject public {{baseCheckTaskDef.id}}(
@@ -33,6 +33,7 @@ public class {{baseCheckTaskDef.id}} implements TaskDef<ResourceKey, Messages> {
     }
 
     @Override public Messages exec(ExecContext context, ResourceKey key) throws IOException {
+        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
         final MessagesBuilder messagesBuilder = new MessagesBuilder();
         final ResourceStringSupplier stringSupplier = new ResourceStringSupplier(key);
 {{#parser}}

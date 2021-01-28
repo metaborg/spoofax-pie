@@ -286,7 +286,7 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
 
         /// Sub-inputs
 
-        ClassLoaderResourcesCompiler.Input classloaderResources();
+        ClassLoaderResourcesCompiler.Input classLoaderResources();
 
         Optional<ParserAdapterCompiler.Input> parser();
 
@@ -343,23 +343,17 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
 
         default List<NamedTypeInfo> checkInjections() {
             ArrayList<NamedTypeInfo> results = new ArrayList<>();
-            parser().ifPresent((i) -> {
-                results.add(NamedTypeInfo.of("parse", i.parseTaskDef()));
-            });
-            constraintAnalyzer().ifPresent((i) -> {
-                results.add(NamedTypeInfo.of("analyze", i.analyzeTaskDef()));
-            });
+            results.add(NamedTypeInfo.of("classLoaderResources", classLoaderResources().classLoaderResources()));
+            parser().ifPresent(i -> results.add(NamedTypeInfo.of("parse", i.parseTaskDef())));
+            constraintAnalyzer().ifPresent(i -> results.add(NamedTypeInfo.of("analyze", i.analyzeTaskDef())));
             return results;
         }
 
         default List<NamedTypeInfo> checkMultiInjections() {
             ArrayList<NamedTypeInfo> results = new ArrayList<>();
-            parser().ifPresent((i) -> {
-                results.add(NamedTypeInfo.of("parse", i.parseTaskDef()));
-            });
-            constraintAnalyzer().ifPresent((i) -> {
-                results.add(NamedTypeInfo.of("analyze", i.analyzeMultiTaskDef()));
-            });
+            results.add(NamedTypeInfo.of("classLoaderResources", classLoaderResources().classLoaderResources()));
+            parser().ifPresent(i -> results.add(NamedTypeInfo.of("parse", i.parseTaskDef())));
+            constraintAnalyzer().ifPresent(i -> results.add(NamedTypeInfo.of("analyze", i.analyzeMultiTaskDef())));
             return results;
         }
 

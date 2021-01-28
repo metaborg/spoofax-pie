@@ -4,6 +4,7 @@ import mb.constraint.common.ConstraintAnalyzer;
 import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.constraint.common.ConstraintAnalyzerException;
 import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
+import mb.pie.api.ExecContext;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax2.common.primitive.generic.Spoofax2ProjectContext;
@@ -33,7 +34,7 @@ public class StatixAnalyzeMulti extends ConstraintAnalyzeMultiTaskDef {
     }
 
     @Override
-    protected ConstraintAnalyzer.MultiFileResult analyze(ResourcePath root, HashMap<ResourceKey, IStrategoTerm> asts, ConstraintAnalyzerContext context) throws ConstraintAnalyzerException {
-        return constraintAnalyzer.analyze(root, asts, context, strategoRuntimeProvider.get().addContextObject(new Spoofax2ProjectContext(root)));
+    protected ConstraintAnalyzer.MultiFileResult analyze(ExecContext context, ResourcePath root, HashMap<ResourceKey, IStrategoTerm> asts, ConstraintAnalyzerContext constraintAnalyzerContext) throws ConstraintAnalyzerException {
+        return constraintAnalyzer.analyze(root, asts, constraintAnalyzerContext, strategoRuntimeProvider.get().addContextObject(new Spoofax2ProjectContext(root)));
     }
 }

@@ -3,3 +3,4 @@ module main
 imports
 
   transform
+  analysis

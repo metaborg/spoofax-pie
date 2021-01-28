@@ -7,7 +7,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Facade for consistently and easily building a {@link LanguageProjectCompiler.Input} instance.
  */
 public class LanguageProjectCompilerInputBuilder {
-    public final ClassLoaderResourcesCompiler.Input.Builder classloaderResources = ClassLoaderResourcesCompiler.Input.builder();
+    public final ClassLoaderResourcesCompiler.Input.Builder classLoaderResources = ClassLoaderResourcesCompiler.Input.builder();
     public final ParserLanguageCompiler.Input.Builder parser = ParserLanguageCompiler.Input.builder();
     private boolean parserEnabled = false;
     public final StylerLanguageCompiler.Input.Builder styler = StylerLanguageCompiler.Input.builder();
@@ -27,7 +27,7 @@ public class LanguageProjectCompilerInputBuilder {
 
 
     public ClassLoaderResourcesCompiler.Input.Builder withClassloaderResources() {
-        return classloaderResources;
+        return classLoaderResources;
     }
 
     public ParserLanguageCompiler.Input.Builder withParser() {
@@ -67,8 +67,8 @@ public class LanguageProjectCompilerInputBuilder {
 
 
     public LanguageProjectCompiler.Input build(Shared shared, LanguageProject languageProject) {
-        final ClassLoaderResourcesCompiler.Input classloaderResources = buildClassLoaderResources(shared, languageProject);
-        project.classloaderResources(classloaderResources);
+        final ClassLoaderResourcesCompiler.Input classLoaderResources = buildClassLoaderResources(shared, languageProject);
+        project.classLoaderResources(classLoaderResources);
 
         final ParserLanguageCompiler.@Nullable Input parser = buildParser(shared, languageProject);
         if(parser != null) project.parser(parser);
@@ -79,7 +79,7 @@ public class LanguageProjectCompilerInputBuilder {
         final ConstraintAnalyzerLanguageCompiler.@Nullable Input constraintAnalyzer = buildConstraintAnalyzer(shared, languageProject);
         if(constraintAnalyzer != null) project.constraintAnalyzer(constraintAnalyzer);
 
-        final MultilangAnalyzerLanguageCompiler.@Nullable Input multilangAnalyzer = buildMultilangAnalyzer(shared, languageProject, classloaderResources);
+        final MultilangAnalyzerLanguageCompiler.@Nullable Input multilangAnalyzer = buildMultilangAnalyzer(shared, languageProject, classLoaderResources);
         if(multilangAnalyzer != null) project.multilangAnalyzer(multilangAnalyzer);
 
         final StrategoRuntimeLanguageCompiler.@Nullable Input strategoRuntime = buildStrategoRuntime(shared, languageProject, constraintAnalyzer);
@@ -98,7 +98,7 @@ public class LanguageProjectCompilerInputBuilder {
     }
 
     private ClassLoaderResourcesCompiler.Input buildClassLoaderResources(Shared shared, LanguageProject languageProject) {
-        return classloaderResources
+        return classLoaderResources
             .shared(shared)
             .languageProject(languageProject)
             .build();
@@ -128,11 +128,11 @@ public class LanguageProjectCompilerInputBuilder {
             .build();
     }
 
-    private MultilangAnalyzerLanguageCompiler.@Nullable Input buildMultilangAnalyzer(Shared shared, LanguageProject languageProject, ClassLoaderResourcesCompiler.Input classloaderResourcesInput) {
+    private MultilangAnalyzerLanguageCompiler.@Nullable Input buildMultilangAnalyzer(Shared shared, LanguageProject languageProject, ClassLoaderResourcesCompiler.Input classLoaderResourcesInput) {
         if(!multilangAnalyzerEnabled) return null;
         return multilangAnalyzer
             .shared(shared)
-            .classloaderResources(classloaderResourcesInput.classloaderResources())
+            .classLoaderResources(classLoaderResourcesInput.classLoaderResources())
             .languageProject(languageProject)
             .build();
     }
