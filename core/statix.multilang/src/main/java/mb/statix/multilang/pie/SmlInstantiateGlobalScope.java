@@ -39,14 +39,13 @@ public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalSc
             this.logLevel = logLevel;
         }
 
-        @Override public boolean equals(@Nullable Object o) {
-            if(this == o) return true;
-            return o != null && getClass() == o.getClass();
+        @Override public boolean equals(@Nullable Object other) {
             // Debug context should not influence results, so consider inputs with different debug settings as equal.
+            return this == other || other != null && this.getClass() == other.getClass();
         }
 
         @Override public int hashCode() {
-            return SmlInstantiateGlobalScope.class.hashCode();
+            return 0;
         }
 
         @Override public String toString() {
