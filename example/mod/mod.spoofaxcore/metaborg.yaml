@@ -1,9 +1,7 @@
 ---
 id: org.metaborg:mod.spoofaxcore:0.1.0-SNAPSHOT
 name: mod
-dependencies: # Additional dependencies specified in build.gradle.kts.
-  compile:
-  - org.metaborg:org.metaborg.meta.lang.template:${metaborgVersion}
+dependencies: # Dependencies specified in build.gradle.kts.
 pardonedLanguages:
 - EditorService
 - Stratego-Sugar
