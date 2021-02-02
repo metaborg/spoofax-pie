@@ -1,9 +1,6 @@
 ---
 id: org.metaborg:module-interface:0.1.0-SNAPSHOT
 name: module-interface
-dependencies:
-  compile:
-  - org.metaborg:statix.lang:${metaborgVersion}
 language:
   sdf:
     enabled: false

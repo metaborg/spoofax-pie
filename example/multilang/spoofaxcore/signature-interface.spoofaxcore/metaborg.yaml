@@ -1,9 +1,6 @@
 ---
 id: org.metaborg:signature-interface:0.1.0-SNAPSHOT
 name: signature-interface
-dependencies:
-  compile:
-  - org.metaborg:statix.lang:${metaborgVersion}
 language:
   sdf:
     enabled: false
