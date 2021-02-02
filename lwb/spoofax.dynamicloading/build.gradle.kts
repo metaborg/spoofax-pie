@@ -17,10 +17,10 @@ dependencies {
   testImplementation("org.slf4j:slf4j-nop:1.7.30")
 }
 
-tasks.test {
-  // Show standard out and err in tests.
-  testLogging {
-    events(org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_OUT, org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR)
-    showStandardStreams = true
-  }
-}
+//tasks.test {
+//  // Show standard out and err in tests.
+//  testLogging {
+//    events(org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_OUT, org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR)
+//    showStandardStreams = true
+//  }
+//}
