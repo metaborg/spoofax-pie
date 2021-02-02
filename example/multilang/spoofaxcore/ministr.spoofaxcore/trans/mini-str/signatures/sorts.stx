@@ -1,10 +1,10 @@
 module mini-str/signatures/sorts
 
 imports
-  cons-type-interface/sorts
-  cons-type-interface/types
+  abstract-sig/sorts
+  abstract-sig/types
 
-  signatures/mini-str/mini-str-sig
+  signatures/ministr-sig
 
 rules
 

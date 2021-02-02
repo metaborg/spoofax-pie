@@ -1,39 +1,42 @@
 module mini-str/rules/rules
 
 imports
-  cons-type-interface/types
-  cons-type-interface/labels
-  cons-type-interface/sorts
+  abstract-sig/types
+  abstract-sig/sorts
 
-  signatures/mini-str/mini-str-sig
+  signatures/ministr-sig
   mini-str/rules/variables
   mini-str/rules/resolution
-  mini-str/rules/patterns/match
-  mini-str/rules/patterns/build
+  mini-str/rules/patterns
 
 rules
 
-  rulesOk maps ruleOk(*, list(*))
+  rulesOk: scope * scope * scope * list(RuleDef)
+  rulesOk(_, s_out, s_out, []).
+  rulesOk(s_root, s_seq, s_out, [h | t]) :- {s}
+    new s, s -S-> s_seq,
+    ruleOk(s_root, s_seq, h),
+    rulesOk(s_root, s, s_out, t).
 
-  ruleOk: scope * RuleDef
-  ruleOk(s_root, RewriteRuleDef(n, m, b, w)) :-
+  ruleOk: scope * scope * RuleDef
+  ruleOk(s_root, s_seq, RewriteRuleDef(n, m, b, w)) :-
     {s_match s_build s_with T1 T2}
       new s_match s_build s_with,
       s_match -P-> s_root,
       s_build -P-> s_with,
-      withOk(s_match, s_with, w),
-      typeOfMatch(s_match, m) == T1,
+      declareRule(s_root, s_seq, n, T1, T2),
       typeOfBuild(s_build, b) == T2,
-      declareRule(s_root, n, T1, T2).
+      withOk(s_match, s_with, w),
+      typeOfMatch(s_match, m) == T1.
 
 rules
 
-  withOk: scope * scope * With
+  withOk: scope * scope * list(With)
 
-  withOk(s_match, s_build, NoWith()) :-
+  withOk(s_match, s_build, []) :-
     s_build -P-> s_match.
 
-  withOk(s_match, s_build, With(str)) :-
+  withOk(s_match, s_build, [With(str)]) :-
     strategyOk(s_match, s_build, str).
 
 rules

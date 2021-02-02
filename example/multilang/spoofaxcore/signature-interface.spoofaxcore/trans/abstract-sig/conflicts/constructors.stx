@@ -1,0 +1,54 @@
+module abstract-sig/conflicts/constructors
+
+imports
+  abstract-sig/types
+  abstract-sig/constructors
+
+signature
+
+  sorts CTI = (string * int * TAG) // Constructor type info
+
+rules
+
+  conssUnique: scope * scope
+
+  conssUnique(s_imp, s_mod) :- {CM CI}
+    conssInScope(s_mod) == CM, // Constructors in imported module scope
+    importedConss(s_imp) == CI, // Constructors imported in importing module scope
+    conssDisjoint(CM, CI).
+
+rules
+
+  conssInScope : scope -> list(CTI)
+
+  conssInScope(s) = typeInfosOfConss(C) :-
+    query cons
+      filter P* I*
+      in s |-> C.
+
+rules
+
+  importedConss : scope -> list(CTI)
+
+  importedConss(s) = typeInfosOfConss(C) :-
+    query cons
+      filter P* I* & ~e
+      in s |-> C.
+
+rules
+
+  typeInfosOfConss maps typeInfoOfCons(list(*)) = list(*)
+  typeInfoOfCons: (path * (string * int * CONS)) -> CTI
+
+  typeInfoOfCons((_, (n, a, CONS(_, _, id)))) = (n, a, id).
+
+rules
+  // Double maps to validate each pair
+  conssDisjoint maps consDisjoint(list(*), *)
+  consDisjoint maps consPairDisjoint(*, list(*))
+
+  consPairDisjoint: CTI * CTI
+
+  consPairDisjoint((n, a, id1), (n, a, id2)) :-
+    id1 == id2 | error $[Duplicate import of cons [n]/[a]].
+  consPairDisjoint((n1, _, _), (n2, _, _)).

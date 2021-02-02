@@ -1,11 +1,11 @@
 module mini-str/signatures/constructors
 
 imports
-  cons-type-interface/types
-  cons-type-interface/sorts
-  cons-type-interface/constructors
+  abstract-sig/types
+  abstract-sig/sorts
+  abstract-sig/constructors
 
-  signatures/mini-str/mini-str-sig
+  signatures/ministr-sig
   mini-str/signatures/sorts
 
 rules
@@ -15,11 +15,11 @@ rules
   consOk: scope * ConstructorDef
 
   consOk(s, NoArgs(cn, sn)) :- {T}
-    typeOfSort(s, sn) == T,
+    sortOfSort(s, sn) == T,
     declareCons(s, T, cn, []).
 
   consOk(s, WithArgs(cn, p, sn)) :- {T T1}
-    typeOfSort(s, sn) == T,
+    sortOfSort(s, sn) == T,
     sortsOfParams(s, p) == T1,
     declareCons(s, T, cn, T1).
 
@@ -29,7 +29,7 @@ rules
 
   sortOfParam: scope * ArgSort -> TYPE
 
-  sortOfParam(s, Sort(n)) = typeOfSort(s, n).
-  sortOfParam(s, Opt(n))  = TOPT(typeOfSort(s, n)).
-  sortOfParam(s, Iter(n)) = TITER(typeOfSort(s, n)).
-  sortOfParam(s, Star(n)) = TSTAR(typeOfSort(s, n)).
+  sortOfParam(s, Sort(n)) = SINGLE(sortOfSort(s, n)).
+  sortOfParam(s, SOpt(n))  = OPT(sortOfSort(s, n)).
+  sortOfParam(s, SIter(n)) = ITER(sortOfSort(s, n)).
+  sortOfParam(s, SStar(n)) = STAR(sortOfSort(s, n)).

@@ -40,3 +40,4 @@ exports:
   includes:
     - signatures/**/*.aterm
     - mini-sdf/**/*.aterm
+    - mini-sdf.spec.aterm

@@ -1,125 +1,89 @@
 module mini-str/rules/resolution
 
 imports
-  cons-type-interface/sorts
-  cons-type-interface/labels
+  abstract-sig/types
+  abstract-sig/sorts
+  mini-str/rules/list-sorts
 
 signature
 
-  sorts RTYPE constructors
+  sorts RTDECL = (path * (string * RULE))
+  sorts RULE constructors
     // Rule type: input sort -> output sort
-    RULE : TYPE * TYPE -> RTYPE
-
-  namespaces
-    RuleInst : string 	// Declaration of single rewrite rule
-    Rule : string  		// Module-unique declaration of rule
+    RULE : TYPE * TYPE -> RULE
 
   name-resolution
-    resolve RuleInst
-      filter e // Only find rule instances in same module
-    
-    resolve Rule
-      filter P* I*
-      min $ < P, $ < I, P < I
+    labels S
 
   relations
-    ruleInstType: occurrence -> RTYPE
-    ruleType: occurrence -> RTYPE
+    // Declaration of single rewrite rule
+    ruleInstType: string -> RULE
+    // Module-unique declaration of rule
+    ruleType: string -> RULE
+
+  // Sort used for prettyfying names
+  sorts TNAME constructors
+    Single    : string -> TNAME // single
+    Opt  	  : string -> TNAME // optional
+    Iter      : string -> TNAME // iter
+    Star      : string -> TNAME // star
+    Singleton : string -> TNAME // singleton list
+    Multi     : string -> TNAME // list with multiple elements
+    Empty     : TNAME 			// empty list
 
 rules
 
   // Declares a single rule instance in a scope
-  declareRule : scope * string * TYPE * TYPE
+  declareRule : scope * scope * string * TYPE * TYPE
 
-  declareRule(s, n, T1, T2) :- {rls rt rts}
-    rt == RULE(T1, T2),
-    s -> RuleInst{n} with ruleInstType rt,
+  declareRule(s, s_seq, n, T1, T2) :- {rls rts rits}
     query ruleType
-      filter resolveMatch[Rule{n}] & ~e and { t :- t == Rule{n} }
+      filter P* I* & ~e and { n' :- n' == n }
       in s |-> rts,
-    parentOk(rts, rt).
+    query ruleInstType
+      filter S+ and { n' :- n' == n }
+      in s_seq |-> rits,
+    declRule(s, s_seq, rts, rits, n, RULE(T1, T2)).
 
 rules
 
-  parentOk: list((path * (occurrence * RTYPE))) * RTYPE
+  declRule: scope * scope * list(RTDECL) * list(RTDECL) * string * RULE
 
   // Rule definition is valid when no parent rule specified
-  parentOk([], _).
+  declRule(s_mod, s_seq, [], [], n, T) :-
+    !ruleType[n, T] in s_mod,
+    !ruleInstType[n, T] in s_seq.
+
+  declRule(s_mod, s_seq, [(_, (_, T_decl)) | _], _, n, T) :-
+    equitype(T_decl, T).
 
   // Rule definition is valid when it complies with parent
-  parentOk([(_, (_, RULE(T1, T2))) | _], RULE(T3, T4)) :-
-    T1 == T3 | error $[Input type [T3] does not match with specified type [T1]],
-    T2 == T4 | error $[Output type [T4] does not match with specified type [T2]].
+  declRule(s_mod, s_seq, [], [(_, (_, T_decl)) | _], n, T) :-
+    equitype(T_decl, T).
 
 rules
+  equitype : RULE * RULE
 
-  // Declares a rule definition for a module
-  declareRules : scope
-
-  declareRules(s) :- {rls uns rds uds}
-    // Get names of rule instances declared in this scope
-    query ruleInstType
-      filter e
-      in s |-> rls,
-    unique(namesOfRules(rls)) == uns,
-    // Get visible rule definitions
-    query ruleType
-      filter resolveMatch[Rule{_}] & ~e
-      in s |-> rds,
-    unique(namesOfRules(rds)) == uds,
-    // Create definitions for new rules
-    declareRuleDefs(s, subtract(uds, uns)).
-
+  equitype(RULE(T1, T2), RULE(T3, T4)) :- {n1 n2 n3 n4}
+    nameOfType(T1) == n1,
+    nameOfType(T2) == n2,
+    nameOfType(T3) == n3,
+    nameOfType(T4) == n4,
+    T1 == T3 | error $[Input type [n3] does not match with specified type [n1]],
+    T2 == T4 | error $[Output type [n4] does not match with specified type [n2]].
 
 rules
 
   namesOfRules maps nameOfRule(list(*)) = list(*)
 
-  nameOfRule : (path * (occurrence * RTYPE)) -> string
-  nameOfRule((_, (RuleInst{n}, _))) = n.
-  nameOfRule((_, (Rule{n}, _))) = n.
-
-rules
-
-  unique: list(string) -> list(string)
-
-  unique([]) = [].
-  unique([h | t]) = [h | unique(remove(h, t))].
-
-rules
-
-  subtract: list(string) * list(string) -> list(string)
-
-  subtract([], r) = r.
-  subtract([i | t], r) = subtract(t, remove(i, r)).
-
-rules
-
-  remove: string * list(string) -> list(string)
-
-  remove(_, []) = [].
-  remove(s, [s | l]) = remove(s, l).
-  remove(s1, [s2 | l]) = [s2 | remove(s1, l)] :-
-    s1 != s2.
-
-rules
-
-  declareRuleDefs maps declareRuleDef(*, list(*))
-
-  declareRuleDef : scope * string
-  
-  declareRuleDef(s, rn) :- {T1 T2 T3 T4 rls}
-    ruleInstType of RuleInst{rn} in s |-> rls,
-    typesOfRules(rls) == (T3, T4),
-    uniqType(T3) == [T1] | error $[Rule [rn] has different input sorts],
-    uniqType(T4) == [T2] | error $[Rule [rn] has different output sorts],
-    s -> Rule{rn} with ruleType RULE(T1, T2).
+  nameOfRule : (path * (string * RULE)) -> string
+  nameOfRule((_, (n, _))) = n.
 
 rules
 
   typesOfRules maps typeOfRule(list(*)) = (list(*), list(*))
 
-  typeOfRule: (path * (occurrence * RTYPE)) -> (TYPE * TYPE)
+  typeOfRule: (path * (string * RULE)) -> (TYPE * TYPE)
   typeOfRule((_, (_, RULE(T1, T2)))) = (T1, T2).
 
 rules
@@ -140,7 +104,26 @@ rules
 
 rules
 
-  resolveRule : scope * string -> RTYPE // TODO: rename resolveRule
+  resolveRule : scope * string -> RULE
 
-  resolveRule(s, n) = rule :-
-    ruleType of Rule{n} in s |-> [(_, (_, rule)) | _].
+  resolveRule(s, n) = R :-
+  	query ruleType
+  	   filter P* I* and { n' :- n' == n }
+  	      min $ < P, $ < I, P < I
+  	       in s |-> [(_, (_, R)) | _].
+
+rules
+
+  nameOfType: TYPE -> TNAME
+
+  nameOfType(SINGLE(T)) = Single(nameOfSort(T)).
+  nameOfType(STAR(T)) = Star(nameOfSort(T)).
+  nameOfType(ITER(T)) = Iter(nameOfSort(T)).
+  nameOfType(SINGLETON(T)) = Singleton(nameOfSort(T)).
+  nameOfType(MULTI(T)) = Multi(nameOfSort(T)).
+  nameOfType(EMPTY()) = Empty().
+
+  nameOfSorts maps nameOfSort(list(*)) = list(*)
+  nameOfSort: SORT -> string
+
+  nameOfSort(SORT(_, n)) = n.

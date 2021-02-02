@@ -21,7 +21,7 @@ languageProject {
   }
   compilerInput {
     withMultilangAnalyzer().run {
-      rootModules(listOf("module-interface/modules"))
+      rootModules(listOf("modules/modules"))
     }
   }
   statixDependencies.set(listOf(project(":signature")))

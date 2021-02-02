@@ -1,0 +1,36 @@
+module abstract-sig/sorts
+
+imports
+  abstract-sig/types
+
+signature
+
+  relations
+    // Map sort declaration to its type
+	sort: string -> SORT
+
+rules
+
+  declareSort: scope * string
+
+  declareSort(s, n) :- {stag}
+    new stag,
+    !sort[n, SORT(stag, n)] in s,
+    // Check for srts with same name in same scope
+    query sort
+      filter e and { n' :- n' == n }
+          in s |-> [_] | error $[Duplicate declaration of sort [n]],
+    // Check for sorts with same name in imported modules
+    query sort
+      filter P* I* & ~e and { n' :- n' == n }
+          in s |-> [] | error $[Shadowing imported sort [n]].
+
+rules
+
+  sortOfSort: scope * string -> SORT
+  sortOfSort(s, n) = T :-
+    query sort
+      filter P* I* and { n' :- n' == n }
+         min $ < P, $ < I, P < I
+          in s |-> [(_, (_, T)) | _]
+    | error $[Sort [n] not declared].

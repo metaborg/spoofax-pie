@@ -1,0 +1,14 @@
+module mini-sdf/sorts
+
+imports
+  signatures/minisdf-sig
+  abstract-sig/types
+  abstract-sig/sorts
+
+rules
+
+  sortsOk maps sortOk(*, list(*))
+
+  sortOk: scope * ID
+  sortOk(s, n) :-
+    declareSort(s, n).

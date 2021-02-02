@@ -23,16 +23,17 @@ languageProject {
   }
   compilerInput {
     withParser().run {
-      startSymbol("MSTRStart")
+      startSymbol("Start")
     }
     withStyler()
     withMultilangAnalyzer().run {
-      rootModules(listOf("mini-str/mini-str-typing"))
+      rootModules(listOf("mini-str"))
     }
     withStrategoRuntime()
   }
   statixDependencies.set(listOf(project(":module")))
 }
+
 spoofax2BasedLanguageProject {
   compilerInput {
     withParser()
@@ -53,12 +54,11 @@ languageAdapterProject {
     withStyler()
     withStrategoRuntime()
     withMultilangAnalyzer().run {
-      rootModule("mini-str/mini-str-typing")
       preAnalysisStrategy("pre-analyze")
       postAnalysisStrategy("post-analyze")
       contextId("mini-sdf-str")
-      fileConstraint("mini-str/mini-str-typing!mstrProgramOK")
-      projectConstraint("mini-str/mini-str-typing!mstrProjectOK")
+      fileConstraint("mini-str!fileOk")
+      projectConstraint("mini-str!projectOk")
     }
   }
 }

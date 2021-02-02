@@ -1,0 +1,55 @@
+module abstract-sig/conflicts/sorts
+
+imports
+  abstract-sig/types
+  abstract-sig/sorts
+
+signature
+
+  sorts STI = (string * TAG) // Sort type info
+
+rules
+
+  sortsUnique: scope * scope
+
+  sortsUnique(s_imp, s_mod) :- {SM SI}
+    sortsInScope(s_mod) == SM, // Sorts in imported module scope
+    importedSorts(s_imp) == SI, // Sorts imported in importing module scope
+    sortsDisjoint(SM, SI).
+
+rules
+
+  sortsInScope : scope -> list(STI)
+
+  sortsInScope(s) = typeInfosOfSorts(S) :-
+    query sort 
+	  filter P* I*
+      in s |-> S.
+
+rules
+
+  importedSorts : scope -> list(STI)
+
+  importedSorts(s) = typeInfosOfSorts(S) :-
+    query sort
+      filter P* I* & ~e
+      in s |-> S.
+
+rules
+
+  typeInfosOfSorts maps typeInfoOfSort(list(*)) = list(*)
+  typeInfoOfSort: (path * (string * SORT)) -> STI
+
+  typeInfoOfSort((_, (n, SORT(id, _)))) = (n, id).
+
+
+rules
+  // Double maps to validate each pair
+  sortsDisjoint maps sortDisjoint(list(*), *)
+  sortDisjoint maps sortPairDisjoint(*, list(*))
+
+  sortPairDisjoint: STI * STI
+
+  sortPairDisjoint((n, id1), (n, id2)) :-
+    id1 == id2 | error $[Duplicate import of sort [n]].
+  sortPairDisjoint((n1, _), (n2, _)).

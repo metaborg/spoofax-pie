@@ -7,13 +7,14 @@ import mb.statix.multilang.metadata.ContextDataManager;
 import mb.statix.multilang.metadata.ContextPieManager;
 import mb.statix.multilang.metadata.LanguageMetadataManager;
 import mb.statix.multilang.metadata.SpecManager;
-import mb.statix.multilang.pie.SmlBuildSpec;
+import mb.statix.multilang.pie.spec.SmlBuildSpec;
 import mb.statix.multilang.pie.SmlInstantiateGlobalScope;
 import mb.statix.multilang.pie.SmlPartialSolveFile;
 import mb.statix.multilang.pie.SmlPartialSolveProject;
 import mb.statix.multilang.pie.SmlSolveProject;
 import mb.statix.multilang.pie.config.SmlBuildContextConfiguration;
 import mb.statix.multilang.pie.config.SmlReadConfigYaml;
+import mb.statix.multilang.pie.spec.SmlLoadFragment;
 
 import java.util.function.Supplier;
 
@@ -63,6 +64,11 @@ public class MultiLangModule {
     @Provides @MultiLangScope @MultiLang
     public SmlBuildSpec provideBuildSpec(SmlBuildSpec buildSpec) {
         return buildSpec;
+    }
+
+    @Provides @MultiLangScope @MultiLang
+    public SmlLoadFragment provideLoadFragment(SmlLoadFragment loadFragment) {
+        return loadFragment;
     }
 
     @Provides @MultiLangScope @MultiLang

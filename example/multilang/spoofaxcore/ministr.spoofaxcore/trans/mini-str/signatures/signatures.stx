@@ -1,7 +1,7 @@
 module mini-str/signatures/signatures
 
 imports
-  signatures/mini-str/mini-str-sig
+  signatures/ministr-sig
   mini-str/signatures/sorts
   mini-str/signatures/constructors
 

@@ -20,6 +20,7 @@ import mb.pie.api.TaskDef;
 import mb.pie.api.TaskDefs;
 import mb.pie.api.serde.JavaSerde;
 import mb.resource.ResourceKeyString;
+import mb.resource.ResourceRegistry;
 import mb.resource.ResourceService;
 import mb.resource.classloader.ClassLoaderResource;
 import mb.resource.classloader.ClassLoaderResourceRegistry;
@@ -43,12 +44,13 @@ import mb.statix.multilang.MultiLang;
 import mb.statix.multilang.metadata.SpecFragmentId;
 import mb.statix.multilang.metadata.spec.SpecConfig;
 import mb.statix.multilang.pie.SmlSolveProject;
-import mb.statix.multilang.pie.SmlBuildSpec;
 import mb.statix.multilang.pie.SmlInstantiateGlobalScope;
 import mb.statix.multilang.pie.SmlPartialSolveFile;
 import mb.statix.multilang.pie.SmlPartialSolveProject;
 import mb.statix.multilang.pie.config.SmlBuildContextConfiguration;
 import mb.statix.multilang.pie.config.SmlReadConfigYaml;
+import mb.statix.multilang.pie.spec.SmlBuildSpec;
+import mb.statix.multilang.pie.spec.SmlLoadFragment;
 import mb.statix.multilang.utils.MetadataUtils;
 {{/isMultiLang}}
 import mb.stratego.common.StrategoRuntime;
@@ -76,8 +78,10 @@ public class {{baseModule.id}} {
     }
 
     @Provides @{{scope.id}} @{{qualifier.id}}
-    static ResourceService provideQualifiedResourceService(@Platform ResourceService resourceService, ClassLoaderResourceRegistry classLoaderResourceRegistry) {
-        return resourceService.createChild(classLoaderResourceRegistry);
+    static ResourceService provideQualifiedResourceRegistry(@Platform ResourceService resourceService, ClassLoaderResourceRegistry classLoaderResourceRegistry, Set<ResourceRegistry> additionalRegistries) {
+        Set<ResourceRegistry> registries = new HashSet<>(additionalRegistries);
+        registries.add(classLoaderResourceRegistry);
+        return resourceService.createChild(registries);
     }
 
     @Provides @{{scope.id}}
@@ -258,6 +262,11 @@ public class {{baseModule.id}} {
     }
 {{#isMultiLang}}
     @Provides @{{scope.id}}
+    static SmlLoadFragment provideLoadFragment(@MultiLang SmlLoadFragment loadFragment) {
+        return loadFragment;
+    }
+
+    @Provides @{{scope.id}}
     static SmlBuildSpec provideBuildSpec(@MultiLang SmlBuildSpec buildSpec) {
         return buildSpec;
     }
@@ -338,8 +347,7 @@ public class {{baseModule.id}} {
         return ImmutableLanguageMetadata.builder()
             .resourcesSupplier(MetadataUtils.resourcesSupplierForExtensions({{#shared.fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/shared.fileExtensions}}))
             .astFunction(preStatix.createFunction().mapInput(indexAst::createSupplier))
-            .postTransform(postStatix.createFunction())
-            .languageId(new LanguageId("{{languageId}}"))
+            .postTransform(postStatix.createFunction().mapInput(x -> x))
             .languagePie(languagePie)
             .termFactory(termFactory)
             .fileConstraint("{{fileConstraint}}")
@@ -351,6 +359,16 @@ public class {{baseModule.id}} {
     static Map<SpecFragmentId, SpecConfig> getSpecConfig(@Named("prototype") StrategoRuntime strategoRuntime) {
         return {{languageProjectInput.specConfigFactory.qualifiedId}}.getSpecConfigs(strategoRuntime.getTermFactory());
     }
+
+    @Provides @{{scope.id}} @ElementsIntoSet
+    static Set<ResourceRegistry> provideParentResourceRegistries() {
+        return {{languageProjectInput.specConfigFactory.qualifiedId}}.getParentResourceRegistries();
+    }
     {{/multilangAnalyzer}}
 {{/isMultiLang}}
+
+    @Provides @{{scope.id}} @ElementsIntoSet
+    static Set<ResourceRegistry> provideDefaultAdditionalResourceRegistries() {
+        return new HashSet<>();
+    }
 }

@@ -4,6 +4,11 @@ plugins {
   `maven-publish`
 }
 
+val spoofax2DevenvVersion: String by ext
+dependencies {
+  compileLanguage("org.metaborg.devenv:statix.lang:$spoofax2DevenvVersion")
+}
+
 ecj {
   toolVersion = "3.21.0"
 }

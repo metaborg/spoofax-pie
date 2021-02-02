@@ -10,5 +10,5 @@ import java.util.Map;
 public interface MultiLangConfig {
     @Value.Parameter Map<LanguageId, ContextId> languageContexts();
 
-    @Value.Parameter Map<ContextId, String> logging();
+    @Value.Parameter Map<ContextId, ContextSettings> contextSettings();
 }

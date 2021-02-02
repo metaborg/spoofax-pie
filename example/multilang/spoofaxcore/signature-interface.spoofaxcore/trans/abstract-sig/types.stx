@@ -1,0 +1,22 @@
+module abstract-sig/types
+
+signature
+
+  sorts TAG = scope
+  
+  sorts SORT constructors
+    SORT 		: TAG * string -> SORT
+
+  sorts TYPE constructors
+    SINGLE 		: SORT -> TYPE
+    OPT			: SORT -> TYPE
+    ITER		: SORT -> TYPE
+    STAR		: SORT -> TYPE
+
+  sorts CONS constructors
+    CONS	: SORT * list(TYPE) * TAG -> CONS // Arity stored explicitly to work around unresolved queries
+
+  name-resolution
+    labels
+      P // lexical parent
+      I // Module import

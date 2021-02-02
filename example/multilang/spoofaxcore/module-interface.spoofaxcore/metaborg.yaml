@@ -3,20 +3,14 @@ id: org.metaborg:module-interface:0.1.0-SNAPSHOT
 name: module-interface
 dependencies:
   compile:
-  - org.metaborg:org.metaborg.meta.lang.template:${metaborgVersion}
   - org.metaborg:statix.lang:${metaborgVersion}
 language:
   sdf:
-    sdf2table: java
-debug:
-  typesmart: false
+    enabled: false
 exports:
 - language: ATerm
   directory: src-gen/statix
-  includes: "module-interface/**/*.aterm"
+  includes: "modules/**/*.aterm"
 - language: Statix
   directory: trans
-  includes: "module-interface/**/*.stx"
-- language: Stratego-Sugar
-  directory: trans
-  includes: "**/*.str"
+  includes: "modules/**/*.stx"

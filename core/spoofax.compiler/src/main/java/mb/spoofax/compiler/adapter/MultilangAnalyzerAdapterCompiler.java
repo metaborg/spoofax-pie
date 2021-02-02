@@ -128,35 +128,35 @@ public class MultilangAnalyzerAdapterCompiler implements TaskDef<MultilangAnalyz
 
         // Transformation settings
 
-        @Value.Default default String preAnalysisStrategy() { return "pre"; }
+        @Value.Default default String preAnalysisStrategy() { return "pre-analyze"; }
 
-        @Value.Default default String postAnalysisStrategy() { return "post"; }
+        @Value.Default default String postAnalysisStrategy() { return "post-analyze"; }
 
         // Identifiers
 
         @Value.Default default String languageId() { return languageProjectInput().languageId(); }
 
-        @Value.Default default String contextId() { return shared().defaultPackageId(); }
+        @Value.Default default String contextId() { return languageId(); }
 
         // Statix spec metadata
 
-        String rootModule();
+        @Value.Default default String fileConstraint() { return "statics!fileOk"; }
 
-        @Value.Default default String fileConstraint() { return "fileOk"; }
-
-        @Value.Default default String projectConstraint() { return "projectOk"; }
+        @Value.Default default String projectConstraint() { return "statics!projectOk"; }
 
         default Collection<TypeInfo> libraryTaskDefs() {
             ArrayList<TypeInfo> taskDefs = new ArrayList<>();
             String multilangTaskDefPackage = "mb.statix.multilang.pie";
             taskDefs.add(TypeInfo.of(multilangTaskDefPackage, "SmlSolveProject"));
-            taskDefs.add(TypeInfo.of(multilangTaskDefPackage, "SmlBuildSpec"));
             taskDefs.add(TypeInfo.of(multilangTaskDefPackage, "SmlInstantiateGlobalScope"));
             taskDefs.add(TypeInfo.of(multilangTaskDefPackage, "SmlPartialSolveFile"));
             taskDefs.add(TypeInfo.of(multilangTaskDefPackage, "SmlPartialSolveProject"));
             String multilangConfigTaskDefPackage = "mb.statix.multilang.pie.config";
             taskDefs.add(TypeInfo.of(multilangConfigTaskDefPackage, "SmlBuildContextConfiguration"));
             taskDefs.add(TypeInfo.of(multilangConfigTaskDefPackage, "SmlReadConfigYaml"));
+            String multilangSpecTaskDefPackage = "mb.statix.multilang.pie.spec";
+            taskDefs.add(TypeInfo.of(multilangSpecTaskDefPackage, "SmlLoadFragment"));
+            taskDefs.add(TypeInfo.of(multilangSpecTaskDefPackage, "SmlBuildSpec"));
             return taskDefs;
         }
 

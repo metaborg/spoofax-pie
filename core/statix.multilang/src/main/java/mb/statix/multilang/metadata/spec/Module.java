@@ -13,9 +13,9 @@ public interface Module {
 
     @Value.Parameter ITerm module();
 
-    @Value.Lazy default Result<Spec, SpecLoadException> toSpecResult() {
-        // One intermediate variable needed to work around type erase quirk when type checking
-        Optional<Result<Spec, SpecLoadException>> optionalSpecResult = SpecUtils.fileSpec().match(module()).map(Result::ofOk);
+    default Result<Spec, SpecLoadException> load(SpecUtils.NameQualifier qualifier) {
+        ITerm renamedModule = SpecUtils.qualifyFileSpec(module(), qualifier);
+        Optional<Result<Spec, SpecLoadException>> optionalSpecResult = SpecUtils.fileSpec().match(renamedModule).map(Result::ofOk);
         return optionalSpecResult.orElse(Result.ofErr(new SpecLoadException(String.format("Module %s does not contain a valid Statix spec", moduleName()))));
     }
 }

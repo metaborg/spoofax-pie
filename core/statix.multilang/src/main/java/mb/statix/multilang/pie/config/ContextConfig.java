@@ -15,10 +15,12 @@ public interface ContextConfig {
     // String to enable case-insensitive parsing
     @Nullable String logLevel();
 
-    @Value.Lazy default @Nullable Level parseLevel() {
+    default @Nullable Level parseLevel() {
         return Stream.of(Level.values())
             .filter(level -> level.toString().equalsIgnoreCase(logLevel()))
             .findFirst()
             .orElse(null);
     }
+
+    boolean stripTraces();
 }

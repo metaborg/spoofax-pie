@@ -13,19 +13,22 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.statix.constraints.CConj;
 import mb.statix.constraints.messages.IMessage;
 import mb.statix.constraints.messages.MessageUtil;
+import mb.statix.multilang.metadata.FileResult;
+import mb.statix.multilang.metadata.ImmutableFileResult;
 import mb.statix.multilang.metadata.LanguageId;
 import mb.statix.multilang.metadata.LanguageMetadata;
 import mb.statix.multilang.metadata.LanguageMetadataManager;
 import mb.statix.multilang.MultiLang;
 import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.multilang.MultiLangScope;
-import mb.statix.multilang.metadata.spec.SpecLoadException;
+import mb.statix.multilang.pie.spec.SmlBuildSpec;
+import mb.statix.multilang.utils.SolverUtils;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.IState;
 import mb.statix.solver.log.IDebugContext;
 import mb.statix.solver.persistent.Solver;
 import mb.statix.solver.persistent.SolverResult;
-import mb.statix.spec.Spec;
+import mb.statix.solver.persistent.State;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.log.Level;
 import org.metaborg.util.task.NullCancel;
@@ -33,15 +36,14 @@ import org.metaborg.util.task.NullProgress;
 
 import javax.inject.Inject;
 import java.io.Serializable;
-import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import static mb.statix.multilang.metadata.spec.SpecUtils.pair;
+import static mb.statix.multilang.metadata.spec.SpecUtils.toMap;
 
 @MultiLangScope
 public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<AnalysisResults, MultiLangAnalysisException>> {
@@ -56,7 +58,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
             this.logLevel = logLevel;
         }
 
-        @Override public boolean equals(Object o) {
+        @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             Input input = (Input)o;
@@ -96,7 +98,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
         this.partialSolveFile = partialSolveFile;
         this.buildSpec = buildSpec;
         this.languageMetadataManager = languageMetadataManager;
-        logger = loggerFactory.create(SmlSolveProject.class);
+        this.logger = loggerFactory.create(SmlSolveProject.class);
     }
 
     @Override public String getId() {
@@ -104,112 +106,128 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
     }
 
     @Override public Result<AnalysisResults, MultiLangAnalysisException> exec(ExecContext context, Input input) {
-        return getLanguageMetadata(input.languages).flatMap(languageMetadataMap -> languageMetadataMap.values().stream()
-            .map(lmd -> context.require(partialSolveProject.createTask(new SmlPartialSolveProject.Input(
-                globalResultSupplier(input),
-                specSupplier(input),
-                lmd.projectConstraint(),
-                input.logLevel))).map(res -> new AbstractMap.SimpleImmutableEntry<>(lmd.languageId(), res)))
-            .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("At least one project constraint has an unexpected exception", false)))
-            .map(SmlSolveProject::entrySetToMap)
-            .flatMap(projectResults -> analyzeFiles(context, input, languageMetadataMap, projectResults)));
-    }
+        // Solve project constraints
+        HashMap<LanguageId, Result<SolverResult, MultiLangAnalysisException>> projectResults = input.languages.stream()
+            .map(languageId -> pair(languageId, context.require(partialSolveProject.createTask(new SmlPartialSolveProject.Input(languageId, input.logLevel)))))
+            .collect(toMap(HashMap::new));
 
-    private Result<AnalysisResults, MultiLangAnalysisException> analyzeFiles(
-        ExecContext context,
-        Input input,
-        Map<LanguageId, LanguageMetadata> languageMetadataMap,
-        Map<LanguageId, SolverResult> projectResults
-    ) {
-        return languageMetadataMap.values().stream()
-            .flatMap(languageMetadata -> languageMetadata.resourcesSupplier().apply(context, input.projectPath).stream()
-                .map(resourceKey -> context.require(partialSolveFile.createTask(new SmlPartialSolveFile.Input(
-                    languageMetadata.languageId(),
-                    resourceKey,
-                    specSupplier(input),
-                    globalResultSupplier(input),
-                    input.logLevel)))
-                    .map(res -> new AbstractMap.SimpleImmutableEntry<FileKey, FileResult>(ImmutableFileKey.builder()
-                        .languageId(languageMetadata.languageId())
-                        .resourceKey(resourceKey)
-                        .build(), res))))
-            .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("At least one file constraint has an unexpected exception", false)))
-            .map(SmlSolveProject::entrySetToMap)
-            .flatMap(fileResults -> solveCombined(context, input, projectResults, fileResults));
-    }
+        // Solve file constraints
+        return analyzeFiles(context, input).map(fileResults -> {
+            // Collect results of all successful runs
+            HashSet<SolverResult> initialResults = new HashSet<>();
+            projectResults.values().forEach(r -> r.ifOk(initialResults::add));
+            fileResults.values().forEach(r -> r.map(FileResult::result).ifOk(initialResults::add));
 
-    private Result<AnalysisResults, MultiLangAnalysisException> solveCombined(
-        ExecContext context,
-        Input input,
-        Map<LanguageId, SolverResult> projectResults,
-        Map<FileKey, FileResult> fileResults
-    ) {
-        return Stream.concat(
-            projectResults.values().stream(),
-            fileResults.values().stream().map(FileResult::result))
-            .map(SolverResult::state)
-            .reduce(IState.Immutable::add)
-            .<Result<AnalysisResults, MultiLangAnalysisException>>map(state ->
-                TaskUtils.executeWrapped(() -> context.require(globalResultSupplier(input))
-                        .flatMap(globalResult -> TaskUtils.executeWrapped(() -> context.require(specSupplier(input))
-                            // Upcast to make typing work
-                            .mapErr(MultiLangAnalysisException.class::cast)
-                            .flatMap(combinedSpec -> solveWithSpec(projectResults, fileResults, state, globalResult, combinedSpec, input.logLevel)), "Solving final constraints interrupted")
-                            .map(finalResult -> ImmutableAnalysisResults.of(globalResult.globalScope(),
-                                new HashMap<>(projectResults), new HashMap<>(fileResults), finalResult))),
-                    "IO exception while requiring global result"))
-            .orElseGet(() -> Result.ofErr(new MultiLangAnalysisException("BUG: Analysis gave no results")));
-    }
+            Result<SolverResult, MultiLangAnalysisException> finalResult = solveCombined(context, input, initialResults);
 
-    private Result<SolverResult, MultiLangAnalysisException> solveWithSpec(
-        Map<LanguageId, SolverResult> projectResults,
-        Map<FileKey, FileResult> fileResults,
-        IState.Immutable state,
-        GlobalResult globalResult,
-        Spec combinedSpec,
-        @Nullable Level logLevel
-    ) {
-        return TaskUtils.executeWrapped(() -> {
-            IDebugContext debug = TaskUtils.createDebugContext(logLevel);
-            IConstraint combinedConstraint = Stream.concat(
-                projectResults.values().stream(),
-                fileResults.values().stream().map(FileResult::result))
-                .map(SolverResult::delayed)
-                .reduce(globalResult.result().delayed(), CConj::new);
-            long t0 = System.currentTimeMillis();
-            SolverResult result = Solver.solve(combinedSpec, state, combinedConstraint, (s, l, st) -> true, debug, new NullProgress(), new NullCancel());
-            long dt = System.currentTimeMillis() - t0;
-            logger.info("Project analyzed in {} ms", dt);
+            HashMap<FileKey, Result<FileResult, MultiLangAnalysisException>> transFormedFileResults = finalResult
+                .flatMap(result -> postTransform(context, input, fileResults, result))
+                .getOr(fileResults);
 
-            // Mark Delays as Errors
-            final ImmutableMap.Builder<IConstraint, IMessage> messages = ImmutableMap.builder();
-            messages.putAll(result.messages());
-            result.delays().keySet().forEach(c -> {
-                messages.put(c, MessageUtil.findClosestMessage(c));
-            });
-            final SolverResult newResult = result.withMessages(messages.build()).withDelays(ImmutableMap.of());
-
-            return Result.ofOk(newResult);
+            return ImmutableAnalysisResults.of(projectResults, transFormedFileResults, finalResult);
         });
+    }
+
+    private Result<HashMap<FileKey, Result<FileResult, MultiLangAnalysisException>>, MultiLangAnalysisException> analyzeFiles(
+        ExecContext context,
+        Input input
+    ) {
+        return getLanguageMetadata(input.languages)
+            .map(lmds -> lmds.entrySet().stream()
+                .flatMap(lmd -> lmd.getValue().resourcesSupplier().apply(context, input.projectPath).stream()
+                    .map(resourceKey -> {
+                        final FileKey fk = ImmutableFileKey.builder()
+                            .languageId(lmd.getKey())
+                            .resourceKey(resourceKey)
+                            .build();
+                        final Result<FileResult, MultiLangAnalysisException> res = context
+                            .require(fileResultSupplier(lmd.getKey(), resourceKey, input.logLevel))
+                            .mapErr(MultiLangAnalysisException::wrapIfNeeded);
+                        return pair(fk, res);
+                    }))
+                .collect(toMap(HashMap::new)));
+    }
+
+    private Result<SolverResult, MultiLangAnalysisException> solveCombined(ExecContext context, Input input, HashSet<SolverResult> initialResults) {
+        return context.require(buildSpec.createTask(new SmlBuildSpec.Input(input.languages)))
+            // Upcast to make typing work
+            .mapErr(MultiLangAnalysisException.class::cast)
+            .flatMap(combinedSpec -> context.require(instantiateGlobalScope.createTask(input.logLevel)).flatMap(globalResult -> {
+                // Combine state of all intermediate results
+                final IState.Immutable combinedState = initialResults.stream()
+                    .map(SolverResult::state)
+                    // When https://github.com/metaborg/nabl/commit/da4f60ca33cbd6566a0a4d42d00d39e9307e8d9d has landed in Spoofax 3
+                    // The identity State.of(combinedSpec) may be removed
+                    .reduce(State.of(combinedSpec), IState.Immutable::add);
+                final IConstraint combinedConstraint = initialResults.stream()
+                    .map(SolverResult::delayed)
+                    .reduce(globalResult.result().delayed(), CConj::new);
+
+                try {
+                    long t0 = System.currentTimeMillis();
+                    IDebugContext debug = SolverUtils.createDebugContext(input.logLevel);
+                    SolverResult result = Solver.solve(combinedSpec, combinedState, combinedConstraint, (s, l, st) -> true, debug, new NullProgress(), new NullCancel());
+                    long dt = System.currentTimeMillis() - t0;
+                    logger.info("Project analyzed in {} ms", dt);
+
+                    // Mark Delays as Errors
+                    final ImmutableMap.Builder<IConstraint, IMessage> messages = ImmutableMap.builder();
+                    messages.putAll(result.messages());
+                    result.delays().keySet().forEach(c -> messages.put(c, MessageUtil.findClosestMessage(c)));
+                    final SolverResult newResult = result.withMessages(messages.build()).withDelays(ImmutableMap.of());
+
+                    return Result.ofOk(newResult);
+                } catch(InterruptedException e) {
+                    return Result.ofErr(new MultiLangAnalysisException(e));
+                }
+            }));
+    }
+
+    private Result<HashMap<FileKey, Result<FileResult, MultiLangAnalysisException>>, MultiLangAnalysisException> postTransform(
+        ExecContext context,
+        Input input, Map<FileKey, Result<FileResult, MultiLangAnalysisException>> fileResults,
+        SolverResult finalResult
+    ) {
+        return fileResults.entrySet().stream()
+            .map(entry -> {
+                FileKey key = entry.getKey();
+                return entry.getValue()
+                    .flatMap(fileResult -> languageMetadataManager.get().getLanguageMetadataResult(key.languageId())
+                        .map(lmd -> {
+                            // Create supplier that partial file result with final solver result
+                            Supplier<Result<FileResult, ?>> resultWithFinalResultSupplier = fileResultSupplier(key.languageId(), key.resourceKey(), input.logLevel)
+                                .map(rs -> rs.map(fr -> ImmutableFileResult.builder().from(fr).result(finalResult).build()));
+                            // Apply post transformation
+                            Result<FileResult, MultiLangAnalysisException> transformResult = lmd.postTransform().apply(context, resultWithFinalResultSupplier)
+                                // Build file result with transformed AST and original result
+                                .map(ast -> (FileResult)ImmutableFileResult.builder().ast(ast).result(fileResult.result()).build())
+                                .map(newResult -> newResult)
+                                .mapErr(MultiLangAnalysisException::wrapIfNeeded);
+                            return pair(key, transformResult);
+                        }));
+            })
+            .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("Error applying post-transformations")))
+            .map(entries -> entries.stream().collect(toMap(HashMap::new)));
     }
 
     private Result<Map<LanguageId, LanguageMetadata>, MultiLangAnalysisException> getLanguageMetadata(Collection<LanguageId> languages) {
         return languages.stream()
-            .map(languageId -> TaskUtils.executeWrapped(() -> Result.ofOk(languageMetadataManager.get().getLanguageMetadata(languageId)))
-                .map(res -> new AbstractMap.SimpleImmutableEntry<>(languageId, res)))
+            .map(languageId -> languageMetadataManager.get().getLanguageMetadataResult(languageId)
+                .map(res -> pair(languageId, res)))
             .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("Error when resolving language metadata", false)))
-            .map(SmlSolveProject::entrySetToMap);
+            .map(entries -> entries.stream().collect(toMap(HashMap::new)));
     }
 
-    private Supplier<Result<Spec, SpecLoadException>> specSupplier(Input input) {
-        return buildSpec.createSupplier(new SmlBuildSpec.Input(input.languages));
-    }
-
-    private Supplier<Result<GlobalResult, MultiLangAnalysisException>> globalResultSupplier(Input input) {
-        return instantiateGlobalScope.createSupplier(new SmlInstantiateGlobalScope.Input(input.logLevel, specSupplier(input)));
-    }
-
-    private static <K, V> Map<K, V> entrySetToMap(Set<? extends Map.Entry<K, V>> entries) {
-        return entries.stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    private Supplier<? extends Result<FileResult, ?>> fileResultSupplier(
+        LanguageId languageId,
+        mb.resource.ResourceKey resourceKey,
+        @Nullable Level logLevel
+    ) {
+        return partialSolveFile.createSupplier(
+            new SmlPartialSolveFile.Input(
+                languageId,
+                resourceKey,
+                logLevel)
+        );
     }
 }

@@ -1,12 +1,12 @@
 package mb.statix.multilang.metadata.spec;
 
 import mb.common.result.Result;
-import mb.common.result.ResultCollector;
+import mb.statix.multilang.metadata.SpecFragmentId;
 import mb.statix.spec.Spec;
 import org.immutables.value.Value;
 
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A partial specification (for which dependent specifications are not resolved yet).
@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 @Value.Immutable
 public interface SpecFragment {
 
+    @Value.Parameter SpecFragmentId id();
+
     @Value.Parameter Set<Module> modules();
 
     /**
@@ -22,26 +24,23 @@ public interface SpecFragment {
      */
     @Value.Parameter Set<String> delayedModuleNames();
 
-    default Set<String> providedModuleNames() {
-        return modules().stream().map(Module::moduleName).collect(Collectors.toSet());
-    }
-
-    default Spec toSpec() throws SpecLoadException {
-        return toSpecResult().unwrap();
-    }
-
-    @Value.Lazy default Result<Spec, SpecLoadException> toSpecResult() {
-        return modules()
-            .stream()
-            .map(Module::toSpecResult)
-            .reduce(SpecUtils::mergeSpecs)
-            // Cannot occur when check holds
-            .orElse(Result.ofErr(new SpecLoadException("Bug: No modules in spec fragment")));
+    default Stream<String> providedModuleNames() {
+        return modules().stream().map(Module::moduleName);
     }
 
     @Value.Check default void checkNotEmpty() {
         if(modules().isEmpty()) {
             throw new IllegalStateException("At least one module should be provided");
         }
+    }
+
+    default Result<Spec, SpecLoadException> load(SpecUtils.NameQualifier qualifier) {
+        return modules()
+            .stream()
+            .map(module -> module.load(qualifier))
+            // Merge without overlapping names check
+            .reduce(SpecUtils::mergeSpecs)
+            // Cannot occur when check holds
+            .orElse(Result.ofErr(new SpecLoadException("Bug: No modules in spec fragment")));
     }
 }

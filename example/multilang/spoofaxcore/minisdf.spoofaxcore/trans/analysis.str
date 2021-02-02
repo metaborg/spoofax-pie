@@ -12,7 +12,7 @@ imports
 rules
 
   // multi-file analysis
-  editor-analyze = stx-editor-analyze(pre-analyze, post-analyze |"mini-sdf/mini-sdf-typing", "msdfProjectOK", "msdfProgramOK")
+  editor-analyze = stx-editor-analyze(pre-analyze, post-analyze |"mini-sdf", "projectOk", "fileOk")
   pre-analyze = explicate-injections-minisdf
   post-analyze = strip-annos; implicate-injections-minisdf
 

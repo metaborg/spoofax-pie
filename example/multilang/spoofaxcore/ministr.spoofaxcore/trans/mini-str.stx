@@ -1,0 +1,48 @@
+module mini-str
+
+imports
+  signatures/ministr-sig
+
+  modules/modules
+  abstract-sig/types
+
+  mini-str/rules/rules
+  mini-str/rules/resolution
+  mini-str/rules/list-sorts
+  mini-str/signatures/signatures
+  mini-str/imports
+
+rules
+
+  projectOk: scope
+  projectOk(_).
+
+rules
+
+  fileOk : scope * Start
+  fileOk(s, Module(n, sec)) :- {s_mod s_seq}
+    new s_mod s_seq,
+    s_mod -P-> s,
+    declareMod(s, n, s_mod, CONSUME()),
+    sectionsOk(s_mod, s_seq, _, sec).
+
+rules
+
+  sectionsOk: scope * scope * scope * list(Section)
+  sectionOk: scope * scope * scope * Section
+
+  sectionsOk(_, s_out, s_out, []).
+
+  sectionsOk(s_root, s_seq, s_out, [h | t]) :- {s_int1 s_int2}
+    sectionOk(s_root, s_seq, s_int1, h),
+    new s_int2, s_int2 -S-> s_int1,
+    sectionsOk(s_root, s_int2, s_out, t).
+
+  sectionOk(s, s_in, s_out, Rules(rls)) :-
+    rulesOk(s, s_in, s_out, rls).
+
+  sectionOk(s, s_seq, s_seq, Signatures(sigs)) :-
+    signaturesOk(s, sigs).
+
+  sectionOk(s, s_seq, s_seq, Imports(i)) :-
+    importsOk(s, i).

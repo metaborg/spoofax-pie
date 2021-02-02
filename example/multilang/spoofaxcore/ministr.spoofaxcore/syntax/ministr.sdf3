@@ -1,10 +1,73 @@
 module ministr
 
 imports
+  Common
 
-  mini-str/mini-str
+context-free sorts
+  Start Section SignatureSection
+  ConstructorDef ArgSort
+  RuleDef With Pattern Strategy
 
 context-free start-symbols
 
-  MSTRStart
+  Start
 
+context-free syntax
+
+  Start.Module = <
+    module <MOD>
+      <{Section "\n"}*>
+    >
+
+  Section.Imports = <
+    imports
+        <{MOD "\n"}*>
+  >
+
+  Section.Rules = <
+    rules
+        <{RuleDef "\n"}*>
+  >
+
+  Section.Signatures = <
+    signature
+        <{SignatureSection "\n"}*>
+  >
+
+  SignatureSection.Sorts = <
+  	sorts
+  		<{SMBL " "}*>
+  >
+
+  SignatureSection.Constructors = <
+  	constructors
+  		<{ConstructorDef "\n"}*>
+  	>
+
+  ConstructorDef.NoArgs = <<SMBL> : <SMBL>>
+  ConstructorDef.WithArgs = [[SMBL] : [{ArgSort "*"}+] -> [SMBL]]
+
+  ArgSort.Sort		= <<SMBL>>
+  ArgSort.SOpt 		= <<SMBL>?>
+  ArgSort.SIter 	= <<SMBL>+>
+  ArgSort.SStar 	= <<SMBL>*>
+
+  RuleDef.RewriteRuleDef = [
+    [SMBL]: [Pattern] -> [Pattern] [With?]
+  ]
+
+  With.With = <
+    with
+      <Strategy>
+  >
+
+  Pattern.Constr 		= <<SMBL>(<{Pattern ","}*>)>
+  Pattern.Var	 		= <<SMBL>>
+  Pattern.List	 		= <[<{Pattern ","}*>]>
+  Pattern.RuleCall		= [<[{SMBL ";"}+]> [Pattern]]
+
+  Strategy.Assign		= <<SMBL> := <Pattern>>
+  Strategy.Seq			= <
+  	<Strategy>;
+  	<Strategy>
+  > {right}

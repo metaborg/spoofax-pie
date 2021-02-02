@@ -1,0 +1,89 @@
+module mini-str/rules/patterns
+
+imports
+  abstract-sig/types
+  abstract-sig/sorts
+  abstract-sig/constructors
+
+  signatures/ministr-sig
+  mini-str/rules/resolution
+  mini-str/rules/list-sorts
+  mini-str/rules/variables
+
+signature
+
+  sorts PATTERN constructors
+    MATCH	: PATTERN
+    BUILD	: PATTERN
+
+rules
+
+  arityOfCons : list(Pattern) -> int
+
+  arityOfCons([]) = 0.
+  arityOfCons([_]) = 1.
+  arityOfCons([h | t]) = res :- {ts}
+    ts == arityOfCons(t),
+    res #= ts + 1.
+
+rules // Generic pattern rules
+
+  ptrnsOk maps ptrnOk(*, *, list(*), list(*))
+
+  ptrnOk : scope * PATTERN * Pattern * TYPE
+
+  ptrnOk(s, pt, Constr(n, p), SINGLE(T)) :- {T1 T2 n' n1 n2}
+    typeOfCons(s, arityOfCons(p), n) == CONS(T1, T2, _),
+    ptrnsOk(s, pt, p, T2),
+    nameOfSort(T1) == n1,
+    nameOfSort(T) == n',
+    T ==  T1 | error $[Expected constructor of sort [n'], but was [n1]] @n.
+
+  ptrnOk(s, pt, l@List(i), T) :- {T1 Tc n1 n}
+    typeOfContent(T) == Tc,
+    typeOfList(l, Tc) == T1,
+    typeEq(T1, T)
+    | error $[Expected list of type [n], but was [n1]],
+    nameOfType(T1) == n1,
+    nameOfType(T) == n,
+    lptrnsOk(s, pt, i, Tc).
+
+  ptrnOk(s, pt, c@RuleCall(n, op), T) :- {T1 T2}
+    typeOfRules(s, n) == RULE(T1, T2),
+    ptrnOk(s, pt, op, T1),
+    typeEq(T, T2).
+
+  ptrnOk(s, MATCH(), Var(n), T) :-
+    declareVar(s, n, T).
+
+  ptrnOk(s, BUILD(), Var(n), T) :- {T1 n' n1}
+    resolveVar(s, n) == T1,
+    nameOfType(T1) == n1,
+    nameOfType(T) == n',
+    typeEq(T1, T)
+    | error $[Expected variable of sort [n'], but was [n1]] @n.
+
+rules
+  typeOfRules : scope * list(string) -> RULE
+
+  typeOfRules(s, [n]) = R :-
+    resolveRule(s, n) == R.
+
+  typeOfRules(s, [n|t]) = RULE(Tin, Tout) :- {T}
+    resolveRule(s, n) == RULE(Tin, T),
+    typeOfRules(s, t) == RULE(T, Tout).
+
+rules
+
+  lptrnsOk maps lptrnOk(*, *, list(*), *)
+  lptrnOk : scope * PATTERN * Pattern * SORT
+
+  lptrnOk(s, P, p, S) :- ptrnOk(s, P, p, SINGLE(S)).
+
+rules
+
+  typeOfBuild : scope * Pattern -> TYPE
+  typeOfBuild(s, P) = T :- ptrnOk(s, BUILD(), P, T).
+
+  typeOfMatch : scope * Pattern -> TYPE
+  typeOfMatch(s, P) = T :- ptrnOk(s, MATCH(), P, T).  

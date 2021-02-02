@@ -1,0 +1,38 @@
+module mini-sdf
+
+imports
+  signatures/minisdf-sig
+
+  abstract-sig/types
+  modules/modules
+
+  mini-sdf/sorts
+  mini-sdf/productions
+  mini-sdf/imports
+
+rules
+
+  projectOk : scope
+  projectOk(_).
+
+rules
+
+  fileOk : scope * Start
+  fileOk(s, Module(n, sec)) :- {s_mod}
+	new s_mod,
+	s_mod -P-> s,
+    declareMod(s, n, s_mod, SUPPLY()),
+    sectionsOK(s_mod, sec).
+
+rules
+
+  sectionsOK maps sectionOk(*, list(*))
+
+  sectionOk : scope * Section
+
+  sectionOk(s, SortsDecl(str)) :-
+    sortsOk(s, str).
+  sectionOk(s, ContextFreeSyntax(prd)) :-
+    prodsOk(s, prd).
+  sectionOk(s, ImportSection(i)) :-
+    importsOk(s, i).

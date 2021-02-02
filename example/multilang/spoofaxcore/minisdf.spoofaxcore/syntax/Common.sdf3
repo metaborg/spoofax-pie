@@ -1,0 +1,46 @@
+module Common
+
+lexical sorts // Identifiers etc.
+  MOD KW ID
+
+lexical syntax
+  MOD 		= [a-zA-Z0-9\-\/]+
+  KW			= ~[\<\>\ ]+
+  ID			= [a-zA-Z] [a-zA-Z0-9\-]*
+
+  MOD = "context-free" 		{reject}
+  MOD = "rules" 			{reject}
+  MOD = "signatures"	 	{reject}
+  MOD = "sorts"				{reject}
+
+lexical restrictions
+  KW	 		-/- ~[\<\>\ \r]
+  MOD	 	-/- [a-zA-Z0-9\-\/]
+  ID 			-/- [a-zA-Z0-9\-]
+
+lexical syntax
+
+  LAYOUT         = [\ \t\n\r]
+  CommentChar    = [\*]
+  LAYOUT         = "/*" InsideComment* "*/"
+  InsideComment  = ~[\*]
+  InsideComment  = CommentChar
+  LAYOUT         = "//" ~[\n\r]* NewLineEOF
+  NewLineEOF     = [\n\r]
+  NewLineEOF     = EOF
+  EOF            =
+
+lexical restrictions
+
+  // Ensure greedy matching for lexicals
+  CommentChar   -/- [\/]
+
+  // EOF may not be followed by any char
+  EOF           -/- ~[]
+
+context-free restrictions
+
+  // Ensure greedy matching for comments
+  LAYOUT? -/- [\ \t\n\r]
+  LAYOUT? -/- [\/].[\/]
+  LAYOUT? -/- [\/].[\*]

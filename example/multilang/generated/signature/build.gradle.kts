@@ -17,7 +17,7 @@ languageProject {
   }
   compilerInput {
     withMultilangAnalyzer().run {
-      rootModules(listOf("cons-type-interface/conflicts/sorts", "cons-type-interface/conflicts/constructors"))
+      rootModules(listOf("abstract-sig/conflicts/sorts", "abstract-sig/conflicts/constructors"))
     }
   }
 }

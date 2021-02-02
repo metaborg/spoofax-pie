@@ -12,7 +12,7 @@ public class OverlappingRulesException extends SpecLoadException {
     }
 
     private static String createMessage(Multimap<String, Rule> rulesWithEquivalentPatterns) {
-        StringBuilder messageBuilder = new StringBuilder("Combined spec has rules with equivalent patterns\n");
+        StringBuilder messageBuilder = new StringBuilder("BUG: Combined spec has rules with equivalent patterns\n");
         for(Map.Entry<String, Collection<Rule>> entry : rulesWithEquivalentPatterns.asMap().entrySet()) {
             messageBuilder.append(String.format("| Overlapping rules for: %s%n", entry.getKey()));
             for(Rule rule : entry.getValue()) {

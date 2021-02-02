@@ -1,0 +1,47 @@
+module abstract-sig/constructors
+
+imports
+  abstract-sig/types
+
+signature
+
+  relations
+    cons: string * int -> CONS
+
+rules
+
+  declareCons : scope * SORT * string * list(TYPE)
+
+  declareCons(s, T, n, S) :- {a ctag}
+    new ctag,
+    a == arityOfSig(S),
+    !cons[n, a, CONS(T, S, ctag)] in s,
+    // Check for constructors with same name in same scope
+    query cons
+      filter e and { t :- t == (n, a) }
+      in s |-> [_] | error $[Duplicate declaration of constructor [n]/[a].],
+    // Check for constructors with same name in imported modules
+    query cons
+      filter P* I* & ~e and { t :- t == (n, a) }
+         min $ < P, $ < I, P < I
+          in s |-> [] | error $[Shadowing imported constructor [n]/[a].].
+
+rules
+
+  typeOfCons : scope * int * string -> CONS
+
+  typeOfCons(s, a, n) = C :-
+    query cons
+      filter P* I* and { t :- t == (n, a) }
+      in s |-> [(_, (_, _, C))| _]
+      | error $[Constructor [n]/[a] not declared].
+
+rules
+
+  arityOfSig : list(TYPE) -> int
+
+  arityOfSig([]) = 0.
+  arityOfSig([_]) = 1.
+  arityOfSig([h|t]) = res :- {ts}
+    ts == arityOfSig(t),
+    res #= ts + 1.

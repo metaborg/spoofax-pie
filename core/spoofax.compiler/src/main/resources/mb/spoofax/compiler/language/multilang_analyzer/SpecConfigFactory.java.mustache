@@ -1,5 +1,6 @@
 package {{baseSpecConfigFactory.packageId}};
 
+import mb.resource.ResourceRegistry;
 import mb.statix.multilang.metadata.SpecFragmentId;
 import mb.statix.multilang.metadata.spec.ImmutableSpecConfig;
 import mb.statix.multilang.metadata.spec.SpecConfig;
@@ -8,7 +9,9 @@ import org.spoofax.jsglr.client.imploder.ImploderOriginTermFactory;
 import org.spoofax.terms.TermFactory;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class {{baseSpecConfigFactory.id}} {
 
@@ -38,5 +41,23 @@ public class {{baseSpecConfigFactory.id}} {
         {{/dependencyFactories}}
         result.put(getSpecId(), getSpecConfig(termFactory));
         return result;
+    }
+
+    public static Set<ResourceRegistry> getResourceRegistries({{classLoaderResources.qualifiedId}} classLoaderResources) {
+        HashSet<ResourceRegistry> registries = new HashSet<>(getParentResourceRegistries());
+        registries.add(classLoaderResources.resourceRegistry);
+        return registries;
+    }
+
+    public static Set<ResourceRegistry> getResourceRegistries() {
+        return getResourceRegistries(new {{classLoaderResources.qualifiedId}}());
+    }
+
+    public static Set<ResourceRegistry> getParentResourceRegistries() {
+        HashSet<ResourceRegistry> registries = new HashSet<>();
+        {{#dependencyFactories}}
+        registries.addAll({{qualifiedId}}.getResourceRegistries());
+        {{/dependencyFactories}}
+        return registries;
     }
 }

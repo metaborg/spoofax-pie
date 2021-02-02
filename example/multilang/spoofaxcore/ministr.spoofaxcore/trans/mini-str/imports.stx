@@ -1,0 +1,50 @@
+module mini-str/imports
+
+imports
+  modules/modules
+  signatures/ministr-sig
+
+  abstract-sig/types
+  abstract-sig/conflicts/sorts
+  abstract-sig/conflicts/constructors
+  
+  mini-str/rules/resolution
+
+rules
+
+  importsOk maps importOk(*, list(*))
+
+  importOk : scope * MOD
+
+  importOk(s, n) :- {s_mod}
+    import(s, n, _) == s_mod,
+    rulesImpOk(n, s, s_mod).
+
+rules
+
+  rulesImpOk: string * scope * scope
+
+  rulesImpOk(n, s_imp, s_mod) :- {rds}
+    query ruleType
+       filter P* I*
+          min $ < P, $ < I, P < I
+           in s_mod |-> rds,
+    ruleMergesOk(n, s_imp, namesOfRules(rds)).
+
+rules
+
+  ruleMergesOk maps ruleMergeOk(*, *, list(*))
+
+  ruleMergeOk: string * scope * string
+
+  ruleMergeOk(m, s, rn) :- {rls T1 T2}
+    query ruleType
+       filter P* I*
+          min $ < P, $ < I, P < I
+           in s |-> rls,
+    ruleTypesOk(m, rn, typesOfRules(rls)).
+  
+  ruleTypesOk : string * string * (list(TYPE) * list(TYPE))
+  ruleTypesOk(_, _, ([_], [_])).
+  ruleTypesOk(m, r, (_, _)) :- false
+  | error $[Importing conflicting definitions for rule [r]]@m.

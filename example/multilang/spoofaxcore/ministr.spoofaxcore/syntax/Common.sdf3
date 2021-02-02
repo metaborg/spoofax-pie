@@ -1,0 +1,47 @@
+module Common
+
+lexical sorts // Identifiers etc.
+  MOD
+  SMBL
+
+lexical syntax
+  MOD 				= [a-zA-Z0-9\-\/]+
+  SMBL				= [a-zA-Z] [a-zA-Z0-9\-\']*
+
+  MOD			 	= "rules" 				{reject}
+  MOD			 	= "signature" 				{reject}
+  MOD 				= "context-free" 		{reject}
+  SMBL				= "rules" 				{reject}
+  SMBL				= "imports" 			{reject}
+  SMBL				= "constructors" 		{reject}
+
+lexical restrictions
+  MOD				-/- [a-zA-Z0-9\-\/]
+  SMBL				-/- [a-zA-Z0-9\-\']
+
+lexical syntax
+
+  LAYOUT         = [\ \t\n\r]
+  CommentChar    = [\*]
+  LAYOUT         = "/*" InsideComment* "*/"
+  InsideComment  = ~[\*]
+  InsideComment  = CommentChar
+  LAYOUT         = "//" ~[\n\r]* NewLineEOF
+  NewLineEOF     = [\n\r]
+  NewLineEOF     = EOF
+  EOF            =
+
+lexical restrictions
+
+  // Ensure greedy matching for lexicals
+  CommentChar   -/- [\/]
+
+  // EOF may not be followed by any char
+  EOF           -/- ~[]
+
+context-free restrictions
+
+  // Ensure greedy matching for comments
+  LAYOUT? -/- [\ \t\n\r]
+  LAYOUT? -/- [\/].[\/]
+  LAYOUT? -/- [\/].[\*]

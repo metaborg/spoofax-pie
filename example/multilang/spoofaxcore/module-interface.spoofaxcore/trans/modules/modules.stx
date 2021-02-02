@@ -1,0 +1,55 @@
+module modules/modules
+
+imports
+  abstract-sig/types
+  
+  abstract-sig/conflicts/sorts
+  abstract-sig/conflicts/constructors
+
+signature
+
+  sorts MODULE constructors
+    MODULE : scope * ModuleType -> MODULE
+
+  sorts ModuleType constructors
+    SUPPLY : ModuleType
+    CONSUME : ModuleType
+  
+  relations
+    modType : string -> MODULE
+
+rules
+
+  // Rule used for validating unique import of sorts/conss/rules
+  itemsOk: string * scope * scope
+
+  itemsOk(_, s_imp, s_mod) :-
+    sortsUnique(s_imp, s_mod),
+    conssUnique(s_imp, s_mod).
+
+rules
+
+  declareMod: scope * string * scope * ModuleType
+
+  declareMod(s, n, s_mod, T) :-
+    !modType[n, MODULE(s_mod, T)] in s,
+    // Validate module name unique
+    query modType 
+       filter P* and { n' :- n' == n }
+           in s |-> [_]
+    | error $[Module [n] declared multiple times].
+
+rules
+
+  import: scope * string * ModuleType -> scope
+
+  import(s_imp, n, T) = s_mod :- {T1}
+    s_imp -I-> s_mod,
+    query modType 
+       filter P* and {n' :- n' == n } 
+           in s_imp |-> [(_, (_, MODULE(s_mod, T1))) | _]
+    | error $[Module [n] could not be found],
+    // Validate module type combination is correct.
+    T1 == T | error $[Module of type [T] cannot import module of type [T1]],
+    // Validate no conflicts in imported constructs
+    itemsOk(n, s_imp, s_mod).

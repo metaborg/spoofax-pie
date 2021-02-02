@@ -12,7 +12,5 @@ import java.util.Objects;
 public interface GlobalResult extends Serializable {
     ITerm globalScope();
 
-    ITermVar globalScopeVar();
-
     SolverResult result();
 }

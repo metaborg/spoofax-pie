@@ -1,37 +1,31 @@
 module mini-str/rules/variables
 
 imports
-  cons-type-interface/types
-  cons-type-interface/labels
-  signatures/mini-str/mini-str-sig
+  abstract-sig/types
+  signatures/ministr-sig
 
 signature
 
-  namespaces
-
-    Var: string
-
-  name-resolution
-    resolve Var
-      filter P*
-
   relations
-
-    varType : occurrence -> TYPE
+    var : string -> TYPE
 
 rules
 
   declareVar : scope * string * TYPE
 
   declareVar(s, n, T) :-
-    s -> Var{n} with varType T,
-    varType of Var{n} in s |-> [_]
-      | error $[Variable [n] declared multiple times].
+    !var[n, T] in s,
+    query var
+      filter P* and { n' :- n' == n }
+      in s |-> [_]
+    | error $[Variable [n] declared multiple times].
 
 rules
 
-  typeOfVar : scope * string -> TYPE
+  resolveVar : scope * string -> TYPE
 
-  typeOfVar(s, n) = T :-
-    varType of Var{n} in s |-> [(_, (_, T)) | _]
+  resolveVar(s, n) = T :-
+    query var
+      filter P* and { n' :- n' == n }
+      in s |-> [(_, (_, T)) | _]
       | error $[Variabe [n] not declared] @n.

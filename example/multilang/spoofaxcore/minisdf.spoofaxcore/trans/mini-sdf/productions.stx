@@ -1,0 +1,44 @@
+module mini-sdf/productions
+
+imports
+  abstract-sig/types
+  abstract-sig/constructors
+  abstract-sig/sorts
+
+  signatures/minisdf-sig
+  mini-sdf/sorts
+
+rules
+
+  prodsOk maps prodOk(*, list(*))
+
+  prodOk: scope * Production
+  prodOk(s, Production(sn, cn, t)) :- {T T1}
+    sortOfSort(s, sn) == T,
+    typeOfSymbols(s, prodTerms(t)) == T1,
+    declareCons(s, T, cn, T1).
+
+rules
+
+  // Filter away Terminals, since they do not have a sort
+  // (and hence don't need type-checking, or a position in the constructor signature)
+  prodTerms: list(Symbol) -> list(Symbol)
+  prodTerms([]) = [].
+  prodTerms([Terminal(_) | tl]) = prodTerms(tl).
+  prodTerms([s@Term(_) | tl]) = [s | prodTerms(tl)].
+
+rules
+
+  typeOfSymbols maps typeOfSymbol(*, list(*)) = list(*)
+
+  typeOfSymbol: scope * Symbol -> TYPE
+  typeOfSymbol(s, Term(t)) = typeOfTerm(s, t).
+
+rules
+
+  typeOfTerm : scope * Term -> TYPE
+  
+  typeOfTerm(s, Plus(t)) 		= ITER(sortOfSort(s, t)).
+  typeOfTerm(s, Option(t)) 		= OPT(sortOfSort(s, t)).
+  typeOfTerm(s, IterStar(t)) 	= STAR(sortOfSort(s, t)).
+  typeOfTerm(s, Ref(t))	        = SINGLE(sortOfSort(s, t)).    

@@ -3,16 +3,18 @@ package {{basePostStatixTaskDef.packageId}};
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
+import mb.statix.multilang.metadata.FileResult;
 import mb.stratego.common.StrategoRuntime;
-import mb.stratego.pie.AstStrategoTransformTaskDef;
+import mb.stratego.pie.StrategoTransformTaskDef;
 import org.spoofax.interpreter.terms.IStrategoTerm;
+
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.io.IOException;
 
 @{{adapterProject.scope.qualifiedId}}
-public class {{basePostStatixTaskDef.id}} extends AstStrategoTransformTaskDef {
+public class {{basePostStatixTaskDef.id}} extends StrategoTransformTaskDef<FileResult> {
     @Inject public {{basePostStatixTaskDef.id}}({{strategoRuntimeInput.getStrategoRuntimeProviderTaskDef.qualifiedId}} getStrategoRuntimeProvider) {
         super(getStrategoRuntimeProvider, "{{postAnalysisStrategy}}");
     }
@@ -21,8 +23,12 @@ public class {{basePostStatixTaskDef.id}} extends AstStrategoTransformTaskDef {
         return "{{basePostStatixTaskDef.qualifiedId}}";
     }
 
+    @Override protected IStrategoTerm getAst(ExecContext context, FileResult input) {
+        return input.ast();
+    }
+
     @Override
-    public Result<IStrategoTerm, ?> exec(ExecContext context, Supplier<? extends Result<IStrategoTerm, ?>> supplier) throws Exception {
+    public Result<IStrategoTerm, ?> exec(ExecContext context, Supplier<? extends Result<FileResult, ?>> supplier) throws Exception {
         try {
             return super.exec(context, supplier);
         } catch(IOException e) {

@@ -38,8 +38,11 @@ public class MessageUtils {
 
     private static final int MAX_TRACE = 5;
 
-    public static Message formatMessage(final IMessage message, final IConstraint constraint, final IUniDisunifier unifier) {
+    public static Message formatMessage(final IMessage message, final IConstraint constraint,
+                                        final IUniDisunifier unifier, boolean includeTraces) {
         final TermFormatter formatter = Solver.shallowTermFormatter(unifier);
+
+        int maxTraceCount = includeTraces ? MAX_TRACE : 0;
 
         @Nullable ITerm originTerm = message.origin().flatMap(t -> getOriginTerm(t, unifier)).orElse(null);
         final Deque<String> trace = new ArrayDeque<>();
@@ -49,12 +52,12 @@ public class MessageUtils {
             if(originTerm == null) {
                 originTerm = findOriginArgument(current, unifier).orElse(null);
             }
-            if(traceCount++ < MAX_TRACE) {
+            if(traceCount++ < maxTraceCount) {
                 trace.addLast(current.toString(formatter));
             }
             current = current.cause().orElse(null);
         }
-        if(traceCount >= MAX_TRACE) {
+        if(includeTraces && traceCount >= maxTraceCount) {
             trace.addLast("... trace truncated ...");
         }
 
@@ -64,7 +67,13 @@ public class MessageUtils {
         }
 
         // add constraint message
-        trace.addFirst(message.toString(formatter));
+        // When there is no message, and trace is empty, add failing constraint as message
+        String messageString = message.toString(formatter);
+        if (!messageString.matches("^\\s*$")) {
+            trace.addFirst(messageString);
+        } else if(trace.isEmpty()) {
+            trace.add(constraint.toString(formatter));
+        }
 
         final String messageText = trace.stream().filter(s -> !s.isEmpty()).map(MessageUtils::cleanupString)
             .collect(Collectors.joining("<br>\n&gt;&nbsp;"));
