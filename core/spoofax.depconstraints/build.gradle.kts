@@ -102,6 +102,7 @@ dependencies {
     api("org.derive4j:derive4j-annotation:$derive4jVersion")
     /// org.immutables
     api("org.immutables:value:$immutablesVersion")
+    api("org.immutables:builder:$immutablesVersion")
     api("org.immutables:value-annotations:$immutablesVersion")
     // Yaml
     api("org.yaml:snakeyaml:$yamlVersion")

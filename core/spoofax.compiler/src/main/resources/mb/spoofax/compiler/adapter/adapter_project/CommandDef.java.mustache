@@ -63,7 +63,7 @@ public class {{type.id}} implements CommandDef<{{argType.qualifiedId}}> {
         final {{type.nullableQualifiedId}} {{id}} = rawArgs.getOrNull("{{id}}");
  {{/required}}
 {{/params}}
-        return new {{argType.qualifiedId}}({{#params}}{{id}}{{^-last}}, {{/-last}}{{/params}});
+        return new {{argType.qualifiedId}}({{#args}}{{toJava}}{{^-last}}, {{/-last}}{{/args}});
     }
 
     @Override public Task<CommandFeedback> createTask({{argType.qualifiedId}} args) {

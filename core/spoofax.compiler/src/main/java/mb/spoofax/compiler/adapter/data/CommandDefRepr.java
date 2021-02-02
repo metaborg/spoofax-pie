@@ -8,10 +8,23 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.io.Serializable;
+import java.util.stream.Collectors;
 
 @Value.Immutable
 public interface CommandDefRepr extends Serializable {
-    class Builder extends ImmutableCommandDefRepr.Builder {}
+    @org.immutables.builder.Builder.AccessibleFields
+    class Builder extends ImmutableCommandDefRepr.Builder {
+
+        @Override
+        public ImmutableCommandDefRepr build() {
+            if (args.isEmpty()) {
+                // Copy the parameters as arguments by default
+                addAllArgs(params.stream().map(p -> VarRepr.of(p.id())).collect(Collectors.toList()));
+            }
+            return super.build();
+        }
+    }
 
     static Builder builder() {
         return new Builder();
@@ -32,6 +45,7 @@ public interface CommandDefRepr extends Serializable {
 
     List<ParamRepr> params();
 
+    List<ArgRepr> args();
 
     default CommandRequestRepr request(CommandExecutionType executionType, Map<String, String> initialArgs) {
         return CommandRequestRepr.of(type(), executionType, initialArgs);
