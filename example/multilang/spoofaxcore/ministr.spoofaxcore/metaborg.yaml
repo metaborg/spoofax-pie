@@ -4,7 +4,6 @@ name: ministr
 dependencies: # Additional dependencies specified in build.gradle.kts.
   compile:
     - org.metaborg:org.metaborg.meta.lang.template:${metaborgVersion}
-    - org.metaborg:sdf3.ext.statix:${metaborgVersion}
 pardonedLanguages:
 - EditorService
 - Stratego-Sugar
