@@ -32,8 +32,6 @@ public class JSGLR1Parser {
 
         this.parser = new SGLR(treeBuilder, parseTable.internalParseTable);
         this.parser.setUseStructureRecovery(true);
-        this.parser.setTimeout(5000);
-        this.parser.setDisambiguatorTimeout(5000);
         this.parser.setApplyCompletionProd(false);
         this.parser.setNewCompletionMode(false);
 
