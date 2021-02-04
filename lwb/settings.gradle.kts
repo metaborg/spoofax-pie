@@ -59,3 +59,4 @@ include("spoofax.compiler.spoofax3.standalone.dagger")
 include("spoofax.compiler.gradle.spoofax3")
 
 include("spoofax.dynamicloading")
+include("spoofax.dynamicloading.eclipse")

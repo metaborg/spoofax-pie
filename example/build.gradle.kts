@@ -5,7 +5,7 @@ plugins {
   // Set versions for plugins to use, only applying them in subprojects (apply false here).
   id("org.metaborg.devenv.spoofax.gradle.langspec") version "0.1.0" apply false
   id("de.set.ecj") version "1.4.1" apply false
-  id("org.metaborg.coronium.bundle") version "0.3.4" apply false
+  id("org.metaborg.coronium.bundle") version "0.3.5" apply false
   id("biz.aQute.bnd.builder") version "5.2.0" apply false
   id("org.jetbrains.intellij") version "0.6.5" apply false
   id("com.palantir.graal") version "0.7.1" apply false
