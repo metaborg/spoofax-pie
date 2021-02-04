@@ -2,7 +2,6 @@ package mb.spoofax.dynamicloading;
 
 import mb.log.api.LoggerFactory;
 import mb.log.stream.StreamLoggerFactory;
-import mb.pie.api.ExecException;
 import mb.pie.api.PieBuilder;
 import mb.pie.api.Tracer;
 import mb.pie.runtime.PieBuilderImpl;
@@ -20,8 +19,8 @@ import mb.resource.classloader.ClassLoaderResourceRegistry;
 import mb.resource.classloader.JarFileWithPath;
 import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.HierarchicalResource;
-import mb.spoofax.compiler.spoofax3.language.CompilerException;
 import mb.spoofax.compiler.spoofax3.standalone.CompileToJavaClassFiles;
+import mb.spoofax.compiler.spoofax3.standalone.dagger.Spoofax3CompilerStandalone;
 import mb.spoofax.core.platform.DaggerPlatformComponent;
 import mb.spoofax.core.platform.LoggerFactoryModule;
 import mb.spoofax.core.platform.PlatformComponent;
@@ -53,7 +52,7 @@ class TestBase {
             .platformPieModule(new PlatformPieModule(PieBuilderImpl::new, storeFactory, tracerFactory))
             .build();
         this.resourceService = platformComponent.getResourceService();
-        this.dynamicLoader = new DynamicLoader(platformComponent);
+        this.dynamicLoader = new DynamicLoader(new Spoofax3CompilerStandalone(platformComponent));
     }
 
     void teardown() throws Exception {

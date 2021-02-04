@@ -17,7 +17,8 @@ dependencies {
   bundleImplementation(project(":stratego.eclipse"))
   bundleImplementation(project(":statix.eclipse"))
 
-  //bundleImplementation(project(":libspoofax2.eclipse"))
+  bundleImplementation(project(":libspoofax2.eclipse"))
+  bundleImplementation(project(":libstatix.eclipse"))
 
   bundleEmbedImplementation(compositeBuild("spoofax.dynamicloading"))
 
