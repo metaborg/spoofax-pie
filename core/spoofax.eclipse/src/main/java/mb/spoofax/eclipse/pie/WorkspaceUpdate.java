@@ -148,6 +148,7 @@ public class WorkspaceUpdate {
             for(ClearMessages clear : clears) {
                 if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return;
                 final IResource resource = resourceUtil.getEclipseResource(clear.origin);
+                if(!resource.exists()) continue;
                 MarkerUtil.clear(languageComponent.getEclipseIdentifiers(), resource, clear.recursive);
             }
             try {
