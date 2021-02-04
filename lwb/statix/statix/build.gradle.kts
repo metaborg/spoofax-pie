@@ -30,6 +30,7 @@ dependencies {
 languageProject {
   shared {
     name("Statix")
+    addFileExtensions("stx", "stxtest")
     defaultClassPrefix("Statix")
     defaultPackageId("mb.statix")
   }
