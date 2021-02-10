@@ -6,32 +6,28 @@ import mb.resource.ResourceKey;
 import mb.resource.ResourceKeyString;
 import mb.resource.ResourceRegistry;
 import mb.resource.ResourceRuntimeException;
+import mb.spoofax.core.platform.ResourceServiceScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Singleton
+@ResourceServiceScope
 public class EclipseDocumentResourceRegistry implements ResourceRegistry {
     static final String qualifier = "eclipse-document";
 
-    private final Logger logger;
     private final ConcurrentHashMap<String, EclipseDocumentResource> resources = new ConcurrentHashMap<>();
 
 
-    @Inject public EclipseDocumentResourceRegistry(LoggerFactory loggerFactory) {
-        this.logger = loggerFactory.create(getClass());
-    }
+    @Inject public EclipseDocumentResourceRegistry() {}
 
 
     public void putDocumentResource(EclipseDocumentResource resource) {
-        logger.trace("Putting document resource '{}'", resource);
         resources.put(resource.getKey().getId(), resource);
     }
 
     public void removeDocumentResource(EclipseDocumentResource resource) {
-        logger.trace("Removing document resource '{}'", resource);
         resources.remove(resource.getKey().getId());
     }
 

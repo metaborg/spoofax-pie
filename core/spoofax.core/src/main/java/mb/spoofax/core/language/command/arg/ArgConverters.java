@@ -8,6 +8,7 @@ import mb.resource.ResourceRuntimeException;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.platform.Platform;
+import mb.spoofax.core.platform.PlatformScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
@@ -15,12 +16,12 @@ import javax.inject.Singleton;
 import java.io.Serializable;
 import java.util.HashMap;
 
-@Singleton
+@PlatformScope
 public class ArgConverters {
     private final ResourceService resourceService;
 
 
-    @Inject public ArgConverters(@Platform ResourceService resourceService) {
+    @Inject public ArgConverters(ResourceService resourceService) {
         this.resourceService = resourceService;
     }
 

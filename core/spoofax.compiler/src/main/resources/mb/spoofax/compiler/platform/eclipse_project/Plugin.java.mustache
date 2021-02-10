@@ -1,11 +1,10 @@
 package {{basePlugin.packageId}};
 
 import mb.pie.api.ExecException;
+import mb.spoofax.core.platform.DaggerResourceServiceComponent;
+import mb.spoofax.core.platform.ResourceServiceComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.util.StatusUtil;
-{{#this.adapterProjectCompilerInput.isMultiLang}}
-import mb.statix.multilang.eclipse.MultiLangPlugin;
-{{/this.adapterProjectCompilerInput.isMultiLang}}
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.WorkspaceJob;
@@ -20,24 +19,36 @@ import java.io.IOException;
 public class {{basePlugin.id}} extends AbstractUIPlugin {
     public static final String pluginId = "{{pluginId}}";
 
+    private static {{adapterProjectCompilerInput.resourcesComponent.nullableQualifiedId}} resourcesComponent;
     private static {{eclipseComponent.nullableQualifiedId}} component;
+
+    public static {{adapterProjectCompilerInput.resourcesComponent.qualifiedId}} getResourcesComponent() {
+        if(resourcesComponent == null) {
+            throw new RuntimeException("Cannot access {{adapterProjectCompilerInput.resourcesComponent.id}}; {{basePlugin.id}} has not been started yet, or has been stopped");
+        }
+        return resourcesComponent;
+    }
 
     public static {{eclipseComponent.qualifiedId}} getComponent() {
         if(component == null) {
-            throw new RuntimeException(
-                "Cannot access {{eclipseComponent.id}}; {{basePlugin.id}} has not been started yet, or has been stopped");
+            throw new RuntimeException("Cannot access {{eclipseComponent.id}}; {{basePlugin.id}} has not been started yet, or has been stopped");
         }
         return component;
     }
 
     @Override public void start(@NonNull BundleContext context) throws Exception {
         super.start(context);
-        component = {{daggerEclipseComponent.qualifiedId}}
-            .builder()
-            .platformComponent(SpoofaxPlugin.getComponent())
-            {{#this.adapterProjectCompilerInput.multilangAnalyzer}}
-            .multiLangEclipseComponent(MultiLangPlugin.getComponent())
-            {{/this.adapterProjectCompilerInput.multilangAnalyzer}}
+        resourcesComponent = {{adapterProjectCompilerInput.daggerResourcesComponent.qualifiedId}}.create();
+        final ResourceServiceComponent resourceServiceComponent = DaggerResourceServiceComponent.builder()
+            .resourceServiceModule(SpoofaxPlugin.getResourceServiceComponent().createParentModule().addRegistriesFrom(resourcesComponent))
+            .build();
+        component = {{daggerEclipseComponent.qualifiedId}}.builder()
+            .{{adapterProjectCompilerInput.resourcesComponent.idAsCamelCase}}(resourcesComponent)
+            {{#adapterProjectCompilerInput.multilangAnalyzer}}
+            .multiLangEclipseComponent(mb.statix.multilang.eclipse.MultiLangPlugin.getComponent())
+            {{/adapterProjectCompilerInput.multilangAnalyzer}}
+            .resourceServiceComponent(resourceServiceComponent)
+            .eclipsePlatformComponent(SpoofaxPlugin.getPlatformComponent())
             .build();
 
         component.getEditorTracker().register();
@@ -45,7 +56,7 @@ public class {{basePlugin.id}} extends AbstractUIPlugin {
         WorkspaceJob job = new WorkspaceJob("{{shared.name}} startup") {
             @Override public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
                 try {
-                    SpoofaxPlugin.getComponent().getPieRunner().startup(component, monitor);
+                    SpoofaxPlugin.getPlatformComponent().getPieRunner().startup(component, monitor);
                 } catch(IOException | ExecException | InterruptedException e) {
                     throw new CoreException(StatusUtil.error("{{shared.name}} startup job failed unexpectedly", e));
                 }
@@ -59,5 +70,6 @@ public class {{basePlugin.id}} extends AbstractUIPlugin {
     @Override public void stop(@NonNull BundleContext context) throws Exception {
         super.stop(context);
         component = null;
+        resourcesComponent = null;
     }
 }

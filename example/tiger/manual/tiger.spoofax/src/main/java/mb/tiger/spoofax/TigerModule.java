@@ -62,33 +62,7 @@ import java.util.Set;
 @Module
 public class TigerModule {
     @Provides @TigerScope
-    static ClassLoaderResourceRegistry provideClassLoaderResourceRegistry() {
-        return TigerClassloaderResources.createClassLoaderResourceRegistry();
-    }
-
-    @Provides @TigerScope @TigerQualifier
-    static ResourceService provideQualifiedResourceRegistry(@Platform ResourceService resourceService, ClassLoaderResourceRegistry classLoaderResourceRegistry) {
-        return resourceService.createChild(classLoaderResourceRegistry);
-    }
-
-    @Provides @TigerScope
-    static ResourceService provideResourceRegistry(@TigerQualifier ResourceService resourceService) {
-        return resourceService;
-    }
-
-    @Provides @Named("definition-dir") @TigerScope
-    static ClassLoaderResource provideDefinitionDir(ClassLoaderResourceRegistry registry) {
-        return TigerClassloaderResources.createDefinitionDir(registry);
-    }
-
-    @Provides @Named("definition-dir") @TigerScope
-    static HierarchicalResource provideDefinitionDirAsHierarchicalResource(@Named("definition-dir") ClassLoaderResource definitionDir) {
-        return definitionDir;
-    }
-
-
-    @Provides @TigerScope
-    static TigerParserFactory provideParserFactory(@Named("definition-dir") HierarchicalResource definitionDir) {
+    static TigerParserFactory provideParserFactory(@TigerQualifier("definition-directory") HierarchicalResource definitionDir) {
         return new TigerParserFactory(definitionDir);
     }
 
@@ -99,7 +73,7 @@ public class TigerModule {
 
 
     @Provides @TigerScope
-    static TigerStylerFactory provideStylerFactory(LoggerFactory loggerFactory, @Named("definition-dir") HierarchicalResource definitionDir) {
+    static TigerStylerFactory provideStylerFactory(LoggerFactory loggerFactory, @TigerQualifier("definition-directory") HierarchicalResource definitionDir) {
         return new TigerStylerFactory(loggerFactory, definitionDir);
     }
 
@@ -109,7 +83,7 @@ public class TigerModule {
     }
 
     @Provides @TigerScope
-    static TigerStrategoRuntimeBuilderFactory provideStrategoRuntimeBuilderFactory(LoggerFactory loggerFactory, ResourceService resourceService, @Named("definition-dir") HierarchicalResource definitionDir) {
+    static TigerStrategoRuntimeBuilderFactory provideStrategoRuntimeBuilderFactory(LoggerFactory loggerFactory, ResourceService resourceService, @TigerQualifier("definition-directory") HierarchicalResource definitionDir) {
         return new TigerStrategoRuntimeBuilderFactory(loggerFactory, resourceService, definitionDir);
     }
 

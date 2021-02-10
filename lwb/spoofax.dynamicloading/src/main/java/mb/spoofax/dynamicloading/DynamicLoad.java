@@ -11,6 +11,7 @@ import mb.resource.hierarchical.match.FileResourceMatcher;
 import mb.resource.hierarchical.walk.TrueResourceWalker;
 import mb.spoofax.compiler.spoofax3.standalone.CompileToJavaClassFiles;
 import mb.spoofax.core.platform.PlatformComponent;
+import mb.spoofax.core.platform.ResourceServiceComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.File;
@@ -51,11 +52,18 @@ public class DynamicLoad implements TaskDef<DynamicLoad.Input, OutTransient<Dyna
         }
     }
 
+    private final ResourceServiceComponent resourceServiceComponent;
     private final PlatformComponent platformComponent;
     private final CompileToJavaClassFiles compiler;
     private final DynamicLoader dynamicLoader;
 
-    public DynamicLoad(PlatformComponent platformComponent, CompileToJavaClassFiles compiler, DynamicLoader dynamicLoader) {
+    public DynamicLoad(
+        ResourceServiceComponent resourceServiceComponent,
+        PlatformComponent platformComponent,
+        CompileToJavaClassFiles compiler,
+        DynamicLoader dynamicLoader
+    ) {
+        this.resourceServiceComponent = resourceServiceComponent;
         this.platformComponent = platformComponent;
         this.compiler = compiler;
         this.dynamicLoader = dynamicLoader;
@@ -88,7 +96,15 @@ public class DynamicLoad implements TaskDef<DynamicLoad.Input, OutTransient<Dyna
             }
             classPath.add(file.toURI().toURL());
         }
-        final DynamicLanguage dynamicLanguage = new DynamicLanguage(classPath.toArray(new URL[0]), compilerInput.adapterProjectInput().daggerComponent().qualifiedId(), platformComponent);
+        final DynamicLanguage dynamicLanguage = new DynamicLanguage(
+            classPath.toArray(new URL[0]),
+            compilerInput.adapterProjectInput().daggerResourcesComponent().qualifiedId(),
+            compilerInput.adapterProjectInput().daggerComponent().qualifiedId(),
+            compilerInput.adapterProjectInput().resourcesComponent().qualifiedId(),
+            compilerInput.adapterProjectInput().resourcesComponent().idAsCamelCase(),
+            resourceServiceComponent,
+            platformComponent
+        );
         dynamicLoader.register(input.id, dynamicLanguage);
         return new OutTransientImpl<>(dynamicLanguage, true);
     }

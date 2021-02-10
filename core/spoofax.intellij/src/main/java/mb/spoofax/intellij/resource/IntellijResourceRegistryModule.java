@@ -4,18 +4,15 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
 import mb.resource.ResourceRegistry;
-
-import javax.inject.Singleton;
+import mb.spoofax.core.platform.ResourceServiceScope;
 
 @Module
-public class IntellijResourceRegistryModule {
-    private final IntellijResourceRegistry registry = new IntellijResourceRegistry();
-
-    @Provides @Singleton IntellijResourceRegistry provide() {
-        return registry;
+public abstract class IntellijResourceRegistryModule {
+    @Provides @ResourceServiceScope static IntellijResourceRegistry provide() {
+        return new IntellijResourceRegistry();
     }
 
-    @Provides @Singleton @IntoSet ResourceRegistry provideIntoSet() {
+    @Provides @ResourceServiceScope @IntoSet static ResourceRegistry provideIntoSet(IntellijResourceRegistry registry) {
         return registry;
     }
 }

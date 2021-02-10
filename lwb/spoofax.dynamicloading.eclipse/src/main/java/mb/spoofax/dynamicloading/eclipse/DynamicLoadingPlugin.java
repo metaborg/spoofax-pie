@@ -3,7 +3,9 @@ package mb.spoofax.dynamicloading.eclipse;
 import mb.esv.eclipse.EsvPlugin;
 import mb.libspoofax2.eclipse.LibSpoofax2Plugin;
 import mb.libstatix.eclipse.LibStatixPlugin;
+import mb.pie.runtime.PieBuilderImpl;
 import mb.sdf3.eclipse.Sdf3Plugin;
+import mb.spoofax.compiler.spoofax3.dagger.Spoofax3Compiler;
 import mb.spoofax.compiler.spoofax3.standalone.dagger.Spoofax3CompilerStandalone;
 import mb.spoofax.dynamicloading.DynamicLoader;
 import mb.spoofax.eclipse.SpoofaxPlugin;
@@ -32,15 +34,20 @@ public class DynamicLoadingPlugin extends AbstractUIPlugin {
     @Override public void start(@NonNull BundleContext context) throws Exception {
         super.start(context);
         plugin = this;
-        spoofax3CompilerStandalone = new Spoofax3CompilerStandalone(
-            SpoofaxPlugin.getComponent(),
+        final Spoofax3Compiler spoofax3Compiler = new Spoofax3Compiler(
+            SpoofaxPlugin.getResourceServiceComponent(),
+            SpoofaxPlugin.getPlatformComponent(),
+            PieBuilderImpl::new,
             Sdf3Plugin.getComponent(),
             StrategoPlugin.getComponent(),
             EsvPlugin.getComponent(),
             StatixPlugin.getComponent(),
             LibSpoofax2Plugin.getComponent(),
-            LibStatixPlugin.getComponent()
+            LibSpoofax2Plugin.getResourcesComponent(),
+            LibStatixPlugin.getComponent(),
+            LibStatixPlugin.getResourcesComponent()
         );
+        spoofax3CompilerStandalone = new Spoofax3CompilerStandalone(spoofax3Compiler);
         dynamicLoader = new DynamicLoader(spoofax3CompilerStandalone);
     }
 

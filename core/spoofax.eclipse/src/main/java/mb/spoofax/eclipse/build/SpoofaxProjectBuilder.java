@@ -23,8 +23,8 @@ public abstract class SpoofaxProjectBuilder extends IncrementalProjectBuilder {
 
     public SpoofaxProjectBuilder(EclipseLanguageComponent languageComponent) {
         this.languageComponent = languageComponent;
-        this.logger = SpoofaxPlugin.getComponent().getLoggerFactory().create(getClass());
-        this.pieRunner = SpoofaxPlugin.getComponent().getPieRunner();
+        this.logger = SpoofaxPlugin.getPlatformComponent().getLoggerFactory().create(getClass());
+        this.pieRunner = SpoofaxPlugin.getPlatformComponent().getPieRunner();
     }
 
     @Override

@@ -51,7 +51,7 @@ open class Spoofax2LanguagePlugin : Plugin<Project> {
     val languageProjectExtension = project.extensions.getByType<LanguageProjectExtension>()
 
     val component = DaggerSpoofax2CompilerComponent.builder()
-      .spoofax2CompilerModule(Spoofax2CompilerModule(languageProjectExtension.component.resourceService, languageProjectExtension.component.pie))
+      .spoofax2CompilerModule(Spoofax2CompilerModule(languageProjectExtension.resourceServiceComponent.resourceService, languageProjectExtension.component.pie))
       .build()
 
     val extension = Spoofax2LanguageProjectExtension(project)

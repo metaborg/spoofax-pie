@@ -5,6 +5,7 @@ package mb.spoofax.compiler.gradle.plugin
 import mb.spoofax.compiler.dagger.*
 import mb.spoofax.compiler.gradle.*
 import mb.spoofax.compiler.platform.*
+import mb.spoofax.core.platform.ResourceServiceComponent
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -73,19 +74,29 @@ open class IntellijPlugin : Plugin<Project> {
 
     project.afterEvaluate {
       extension.adapterProjectFinalized.whenAdapterProjectFinalized {
-        configure(project, extension.languageProjectExtension.component, extension.compilerInputFinalized)
+        configure(project, extension.languageProjectExtension.resourceServiceComponent, extension.languageProjectExtension.component, extension.compilerInputFinalized)
       }
     }
   }
 
-  private fun configure(project: Project, component: SpoofaxCompilerComponent, input: IntellijProjectCompiler.Input) {
-    configureProject(project, component, input)
-    configureCompilerTask(project, component, input)
+  private fun configure(
+    project: Project,
+    resourceServiceComponent: ResourceServiceComponent,
+    component: SpoofaxCompilerComponent,
+    input: IntellijProjectCompiler.Input
+  ) {
+    configureProject(project, resourceServiceComponent, component, input)
+    configureCompilerTask(project, resourceServiceComponent, component, input)
   }
 
-  private fun configureProject(project: Project, component: SpoofaxCompilerComponent, input: IntellijProjectCompiler.Input) {
-    project.addMainJavaSourceDirectory(input.generatedJavaSourcesDirectory(), component.resourceService)
-    project.addMainResourceDirectory(input.generatedResourcesDirectory(), component.resourceService)
+  private fun configureProject(
+    project: Project,
+    resourceServiceComponent: ResourceServiceComponent,
+    component: SpoofaxCompilerComponent,
+    input: IntellijProjectCompiler.Input
+  ) {
+    project.addMainJavaSourceDirectory(input.generatedJavaSourcesDirectory(), resourceServiceComponent.resourceService)
+    project.addMainResourceDirectory(input.generatedResourcesDirectory(), resourceServiceComponent.resourceService)
     component.intellijProjectCompiler.getDependencies(input).forEach {
       it.addToDependencies(project)
     }
@@ -94,15 +105,20 @@ open class IntellijPlugin : Plugin<Project> {
     })
   }
 
-  private fun configureCompilerTask(project: Project, component: SpoofaxCompilerComponent, input: IntellijProjectCompiler.Input) {
+  private fun configureCompilerTask(
+    project: Project,
+    resourceServiceComponent: ResourceServiceComponent,
+    component: SpoofaxCompilerComponent,
+    input: IntellijProjectCompiler.Input
+  ) {
     val compileTask = project.tasks.register("compileIntellijProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
-      outputs.files(input.providedFiles().map { component.resourceService.toLocalFile(it) })
+      outputs.files(input.providedFiles().map { resourceServiceComponent.resourceService.toLocalFile(it) })
 
       doLast {
-        project.deleteDirectory(input.generatedJavaSourcesDirectory(), component.resourceService)
-        project.deleteDirectory(input.generatedResourcesDirectory(), component.resourceService)
+        project.deleteDirectory(input.generatedJavaSourcesDirectory(), resourceServiceComponent.resourceService)
+        project.deleteDirectory(input.generatedResourcesDirectory(), resourceServiceComponent.resourceService)
         synchronized(component.pie) {
           component.pie.newSession().use { session ->
             session.require(component.intellijProjectCompiler.createTask(input))

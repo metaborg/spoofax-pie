@@ -19,8 +19,9 @@ class TigerTestBase {
 
     protected final LoggerFactory loggerFactory = NoopLoggerFactory.instance;
 
-    protected final ClassLoaderResourceRegistry classLoaderResourceRegistry = TigerClassloaderResources.createClassLoaderResourceRegistry();
-    protected final HierarchicalResource definitionDir = TigerClassloaderResources.createDefinitionDir(classLoaderResourceRegistry);
+    protected final TigerClassloaderResources classloaderResources = new TigerClassloaderResources();
+    protected final ClassLoaderResourceRegistry classLoaderResourceRegistry = classloaderResources.resourceRegistry;
+    protected final HierarchicalResource definitionDir = classloaderResources.definitionDirectory;
     protected final ResourceService resourceService = new DefaultResourceService(new DummyResourceRegistry(qualifier), new FSResourceRegistry(), new URLResourceRegistry(), classLoaderResourceRegistry);
 
     protected final TigerParser parser = new TigerParserFactory(definitionDir).create();

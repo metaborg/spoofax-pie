@@ -6,11 +6,15 @@ import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.log.slf4j.SLF4JLoggerFactory;
 import mb.minisdf.DaggerMiniSdfComponent;
+import mb.minisdf.DaggerMiniSdfResourcesComponent;
 import mb.minisdf.MiniSdfComponent;
 import mb.minisdf.MiniSdfModule;
+import mb.minisdf.MiniSdfResourcesComponent;
 import mb.ministr.DaggerMiniStrComponent;
+import mb.ministr.DaggerMiniStrResourcesComponent;
 import mb.ministr.MiniStrComponent;
 import mb.ministr.MiniStrModule;
+import mb.ministr.MiniStrResourcesComponent;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Pie;
 import mb.pie.api.ResourceStringSupplier;
@@ -18,6 +22,9 @@ import mb.pie.runtime.PieBuilderImpl;
 import mb.resource.ResourceKey;
 import mb.resource.fs.FSResource;
 import mb.resource.text.TextResourceRegistry;
+import mb.spoofax.core.platform.BaseResourceServiceComponent;
+import mb.spoofax.core.platform.BaseResourceServiceModule;
+import mb.spoofax.core.platform.DaggerBaseResourceServiceComponent;
 import mb.spoofax.core.platform.DaggerPlatformComponent;
 import mb.spoofax.core.platform.LoggerFactoryModule;
 import mb.spoofax.core.platform.PlatformComponent;
@@ -42,34 +49,45 @@ public class TestBase {
 
     public final FileSystem fileSystem = Jimfs.newFileSystem("multilang-test", Configuration.unix());
     public final FSResource rootDirectory = new FSResource(fileSystem.getPath("/", "virtual-project-dir"));
+    public final TextResourceRegistry textResourceRegistry = new TextResourceRegistry();
 
-    public final PlatformComponent platformComponent = DaggerPlatformComponent
-        .builder()
+    final MiniSdfResourcesComponent miniSdfResourcesComponent = DaggerMiniSdfResourcesComponent.create();
+    final MiniStrResourcesComponent miniStrResourcesComponent = DaggerMiniStrResourcesComponent.create();
+    final BaseResourceServiceModule resourceServiceModule = new BaseResourceServiceModule()
+        .addRegistry(textResourceRegistry)
+        .addRegistries(miniSdfResourcesComponent.getResourceRegistries())
+        .addRegistries(miniStrResourcesComponent.getResourceRegistries());
+    final BaseResourceServiceComponent resourceServiceComponent = DaggerBaseResourceServiceComponent.builder()
+        .baseResourceServiceModule(resourceServiceModule)
+        .build();
+
+    public final PlatformComponent platformComponent = DaggerPlatformComponent.builder()
         .loggerFactoryModule(new LoggerFactoryModule(new SLF4JLoggerFactory()))
         .platformPieModule(new PlatformPieModule(PieBuilderImpl::new))
+        .resourceServiceComponent(resourceServiceComponent)
         .build();
 
     public final LoggerFactory loggerFactory = platformComponent.getLoggerFactory();
     public final Logger log = loggerFactory.create(TestBase.class);
-    public final TextResourceRegistry textResourceRegistry = platformComponent.getTextResourceRegistry();
 
-    public final MultiLangComponent multiLangComponent = DaggerMultiLangComponent
-        .builder()
+    public final MultiLangComponent multiLangComponent = DaggerMultiLangComponent.builder()
         .platformComponent(platformComponent)
         .multiLangModule(new MultiLangModule(this::getAnalysisContextService))
         .build();
 
     @SuppressWarnings({"deprecation", "InstantiationOfUtilityClass"})
-    public final MiniSdfComponent miniSdfComponent = DaggerMiniSdfComponent
-        .builder()
+    public final MiniSdfComponent miniSdfComponent = DaggerMiniSdfComponent.builder()
+        .miniSdfResourcesComponent(miniSdfResourcesComponent)
+        .resourceServiceComponent(resourceServiceComponent)
         .platformComponent(platformComponent)
         .multiLangComponent(multiLangComponent)
         .miniSdfModule(new MiniSdfModule())
         .build();
 
     @SuppressWarnings({"deprecation", "InstantiationOfUtilityClass"})
-    public final MiniStrComponent miniStrComponent = DaggerMiniStrComponent
-        .builder()
+    public final MiniStrComponent miniStrComponent = DaggerMiniStrComponent.builder()
+        .miniStrResourcesComponent(miniStrResourcesComponent)
+        .resourceServiceComponent(resourceServiceComponent)
         .platformComponent(platformComponent)
         .multiLangComponent(multiLangComponent)
         .miniStrModule(new MiniStrModule())
@@ -106,7 +124,7 @@ public class TestBase {
             .putAllSpecConfigs(specConfigs)
             .putLanguageMetadataSuppliers(new LanguageId("mb.minisdf"), miniSdfComponent::getLanguageMetadata)
             .putLanguageMetadataSuppliers(new LanguageId("mb.ministr"), miniStrComponent::getLanguageMetadata)
-            .platformPieBuilder(platformComponent.getPieBuilder())
+            .platformPieBuilder(platformComponent.newPieBuilder())
             .putDefaultLanguageContexts(new LanguageId("mb.minisdf"), new ContextId("mb.multilang"))
             .putDefaultLanguageContexts(new LanguageId("mb.ministr"), new ContextId("mb.multilang"))
             .build();

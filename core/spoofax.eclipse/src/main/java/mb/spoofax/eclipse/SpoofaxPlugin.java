@@ -13,7 +13,8 @@ public class SpoofaxPlugin extends AbstractUIPlugin {
     public static final String id = "spoofax.eclipse";
 
     private static @Nullable SpoofaxPlugin plugin;
-    private static @Nullable SpoofaxEclipseComponent component;
+    private static @Nullable EclipseResourceServiceComponent resourceServiceComponent;
+    private static @Nullable EclipsePlatformComponent platformComponent;
 
 
     public static SpoofaxPlugin getPlugin() {
@@ -24,32 +25,42 @@ public class SpoofaxPlugin extends AbstractUIPlugin {
         return plugin;
     }
 
-    public static SpoofaxEclipseComponent getComponent() {
-        if(component == null) {
+    public static EclipseResourceServiceComponent getResourceServiceComponent() {
+        if(resourceServiceComponent == null) {
+            throw new RuntimeException(
+                "Cannot access EclipseResourceServiceComponent; SpoofaxPlugin has not been started yet, or has been stopped");
+        }
+        return resourceServiceComponent;
+    }
+
+    public static EclipsePlatformComponent getPlatformComponent() {
+        if(platformComponent == null) {
             throw new RuntimeException(
                 "Cannot access SpoofaxEclipseComponent; SpoofaxPlugin has not been started yet, or has been stopped");
         }
-        return component;
+        return platformComponent;
     }
 
 
     @Override public void start(@NonNull BundleContext context) throws Exception {
         super.start(context);
         plugin = this;
-        component = DaggerSpoofaxEclipseComponent
-            .builder()
+        resourceServiceComponent = DaggerEclipseResourceServiceComponent.create();
+        platformComponent = DaggerEclipsePlatformComponent.builder()
             .loggerFactoryModule(new LoggerFactoryModule(new EclipseLoggerFactory()))
             .platformPieModule(new PlatformPieModule(PieBuilderImpl::new))
+            .eclipseResourceServiceComponent(resourceServiceComponent)
             .build();
-
-        component.getPartClosedCallback().register();
+        platformComponent.getPartClosedCallback().register();
     }
 
     @Override public void stop(@NonNull BundleContext context) throws Exception {
         super.stop(context);
-        if(component != null) {
-            component.getColorShare().dispose();
+        if(platformComponent != null) {
+            platformComponent.getColorShare().dispose();
+            platformComponent = null;
         }
+        resourceServiceComponent = null;
         plugin = null;
     }
 }

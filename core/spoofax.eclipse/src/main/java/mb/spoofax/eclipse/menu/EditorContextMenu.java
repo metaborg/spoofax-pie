@@ -12,7 +12,7 @@ import mb.spoofax.core.language.command.ResourcePathWithKinds;
 import mb.spoofax.core.language.menu.MenuItem;
 import mb.spoofax.eclipse.EclipseIdentifiers;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
-import mb.spoofax.eclipse.SpoofaxEclipseComponent;
+import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.command.EnclosingCommandContextProvider;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
@@ -33,7 +33,7 @@ public class EditorContextMenu extends MenuShared {
 
 
     public EditorContextMenu(EclipseLanguageComponent languageComponent) {
-        final SpoofaxEclipseComponent component = SpoofaxPlugin.getComponent();
+        final EclipsePlatformComponent component = SpoofaxPlugin.getPlatformComponent();
         enclosingCommandContextProvider = component.getEnclosingCommandContextProvider();
         this.languageComponent = languageComponent;
     }

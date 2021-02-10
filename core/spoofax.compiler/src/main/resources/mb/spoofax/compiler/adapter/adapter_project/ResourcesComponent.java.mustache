@@ -1,0 +1,24 @@
+package {{baseResourcesComponent.packageId}};
+
+import dagger.Component;
+import mb.resource.ResourceRegistry;
+import mb.resource.classloader.ClassLoaderResource;
+import mb.resource.classloader.ClassLoaderResourceRegistry;
+import mb.resource.hierarchical.HierarchicalResource;
+import mb.spoofax.core.language.LanguageResourcesComponent;
+
+import java.util.Set;
+
+@{{resourcesScope.qualifiedId}}
+@Component(modules = {{resourcesModule.qualifiedId}}.class)
+public interface {{baseResourcesComponent.id}} extends LanguageResourcesComponent {
+    {{classLoaderResources.classLoaderResources.qualifiedId}} getClassloaderResources();
+
+    @{{qualifier.qualifiedId}} ClassLoaderResourceRegistry getClassLoaderResourceRegistry();
+
+    @{{qualifier.qualifiedId}}("definition-directory") ClassLoaderResource getDefinitionDirectory();
+
+    @{{qualifier.qualifiedId}}("definition-directory") HierarchicalResource getDefinitionDirectoryAsHierarchicalResource();
+
+    @{{qualifier.qualifiedId}} Set<ResourceRegistry> getResourceRegistries();
+}

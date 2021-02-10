@@ -3,6 +3,7 @@ package {{baseComponent.packageId}};
 import dagger.Component;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.platform.PlatformComponent;
+import mb.spoofax.core.platform.ResourceServiceComponent;
 import mb.resource.ResourceService;
 import mb.resource.classloader.ClassLoaderResource;
 import mb.pie.api.Pie;
@@ -17,15 +18,20 @@ import {{qualifier.qualifiedId}};
 
 @{{scope.qualifiedId}}
 @Component(
-    modules = { {{module.qualifiedId}}.class{{#additionalModules}}{{#-first}}, {{/-first}}{{qualifiedId}}.class{{^-last}}, {{/-last}}{{/additionalModules}} },
-    dependencies = { PlatformComponent.class{{#isMultiLang}}, MultiLangComponent.class{{/isMultiLang}} }
+    modules = {
+        {{module.qualifiedId}}.class{{#additionalModules}}{{#-first}}, {{/-first}}
+        {{qualifiedId}}.class{{^-last}},
+{{/-last}}{{/additionalModules}}
+    },
+    dependencies = {
+        {{resourcesComponent.qualifiedId}}.class,
+        ResourceServiceComponent.class,
+        PlatformComponent.class{{#isMultiLang}},
+        MultiLangComponent.class{{/isMultiLang}}
+    }
 )
 public interface {{baseComponent.id}} extends LanguageComponent{{#isMultiLang}}, LanguageMetadataProvider{{/isMultiLang}}  {
     @Override {{instance.qualifiedId}} getLanguageInstance();
-
-    @Override @{{qualifier.id}} ResourceService getResourceService();
-
-    @{{qualifier.id}}("definition-directory") ClassLoaderResource getDefinitionDir();
 
     @Override @{{qualifier.id}} Pie getPie();
 {{#parser}}

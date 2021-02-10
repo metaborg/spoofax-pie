@@ -121,7 +121,7 @@ class CompileTest extends TestBase {
             session.require(createJarTask);
 
             // Run the `hello` strategy from the compiled JAR.
-            final StrategoRuntimeBuilder strategoRuntimeBuilder = new StrategoRuntimeBuilder(loggerFactory, platformComponent.getResourceService(), rootDirectory);
+            final StrategoRuntimeBuilder strategoRuntimeBuilder = new StrategoRuntimeBuilder(loggerFactory, resourceServiceComponent.getResourceService(), rootDirectory);
             strategoRuntimeBuilder.withJarParentClassLoader(getClass().getClassLoader());
             strategoRuntimeBuilder.addJar(jarFile.getURI().toURL());
             final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.build();

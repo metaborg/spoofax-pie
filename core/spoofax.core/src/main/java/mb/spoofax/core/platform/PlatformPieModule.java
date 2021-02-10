@@ -42,7 +42,7 @@ public class PlatformPieModule {
         this.tracerFactory = tracerFactory;
     }
 
-    @Provides @Platform @Singleton @ElementsIntoSet
+    @Provides @Platform @PlatformScope @ElementsIntoSet
     static Set<TaskDef<?, ?>> provideTaskDefs() {
         return new HashSet<>();
     }
@@ -51,7 +51,7 @@ public class PlatformPieModule {
     public PieBuilder providePieBuilder(
         LoggerFactory loggerFactory,
         @Platform Set<TaskDef<?, ?>> taskDefs,
-        @Platform ResourceService resourceService
+        ResourceService resourceService
     ) {
         final PieBuilder builder = builderSupplier.get();
         builder.withTaskDefs(new MapTaskDefs(taskDefs));

@@ -28,6 +28,7 @@ import mb.spoofax.core.language.command.CommandRequest;
 import mb.spoofax.core.language.command.HierarchicalResourceType;
 import mb.spoofax.core.language.command.ShowFeedback;
 import mb.spoofax.core.language.command.arg.ArgConverters;
+import mb.spoofax.core.platform.PlatformScope;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.command.CommandUtil;
 import mb.spoofax.eclipse.editor.NamedEditorInput;
@@ -69,7 +70,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-@Singleton
+@PlatformScope
 public class PieRunner {
     private final Logger logger;
     private final ArgConverters argConverters;

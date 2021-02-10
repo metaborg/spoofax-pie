@@ -5,6 +5,7 @@ import mb.common.style.TokenStyle;
 import mb.common.token.Token;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
+import mb.spoofax.core.platform.PlatformScope;
 import mb.spoofax.eclipse.editor.ScopeManager;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.jface.text.IRegion;
@@ -22,7 +23,7 @@ import java.util.Iterator;
 /**
  * Utility functions for creating Eclipse text styles.
  */
-@Singleton
+@PlatformScope
 public final class StyleUtil {
     private final ColorShare colorShare;
     private final ScopeManager scopeManager;

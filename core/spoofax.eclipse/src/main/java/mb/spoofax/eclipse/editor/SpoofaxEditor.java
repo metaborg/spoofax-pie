@@ -6,7 +6,7 @@ import mb.common.region.Selections;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
-import mb.spoofax.eclipse.SpoofaxEclipseComponent;
+import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.pie.PieRunner;
 import mb.spoofax.eclipse.util.EditorInputUtil;
@@ -143,7 +143,7 @@ public abstract class SpoofaxEditor extends TextEditor {
 
         this.jobManager = Job.getJobManager();
 
-        final SpoofaxEclipseComponent component = SpoofaxPlugin.getComponent();
+        final EclipsePlatformComponent component = SpoofaxPlugin.getPlatformComponent();
         this.loggerFactory = component.getLoggerFactory();
         this.logger = loggerFactory.create(getClass());
         this.pieRunner = component.getPieRunner();

@@ -5,6 +5,7 @@ package mb.spoofax.compiler.gradle.plugin
 import mb.spoofax.compiler.dagger.*
 import mb.spoofax.compiler.gradle.*
 import mb.spoofax.compiler.platform.*
+import mb.spoofax.core.platform.ResourceServiceComponent
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -71,19 +72,29 @@ open class CliPlugin : Plugin<Project> {
 
     project.afterEvaluate {
       extension.adapterProjectFinalized.whenAdapterProjectFinalized {
-        configure(project, extension.languageProjectExtension.component, extension.compilerInputFinalized)
+        configure(project, extension.languageProjectExtension.resourceServiceComponent, extension.languageProjectExtension.component, extension.compilerInputFinalized)
       }
     }
   }
 
-  private fun configure(project: Project, component: SpoofaxCompilerComponent, input: CliProjectCompiler.Input) {
-    configureProject(project, component, input)
-    configureCompileTask(project, component, input)
+  private fun configure(
+    project: Project,
+    resourceServiceComponent: ResourceServiceComponent,
+    component: SpoofaxCompilerComponent,
+    input: CliProjectCompiler.Input
+  ) {
+    configureProject(project, resourceServiceComponent, component, input)
+    configureCompileTask(project, resourceServiceComponent, component, input)
     configureExecutableJarTask(project)
   }
 
-  private fun configureProject(project: Project, component: SpoofaxCompilerComponent, input: CliProjectCompiler.Input) {
-    project.addMainJavaSourceDirectory(input.generatedJavaSourcesDirectory(), component.resourceService)
+  private fun configureProject(
+    project: Project,
+    resourceServiceComponent: ResourceServiceComponent,
+    component: SpoofaxCompilerComponent,
+    input: CliProjectCompiler.Input
+  ) {
+    project.addMainJavaSourceDirectory(input.generatedJavaSourcesDirectory(), resourceServiceComponent.resourceService)
     component.cliProjectCompiler.getDependencies(input).forEach {
       it.addToDependencies(project)
     }
@@ -93,14 +104,19 @@ open class CliPlugin : Plugin<Project> {
     }
   }
 
-  private fun configureCompileTask(project: Project, component: SpoofaxCompilerComponent, input: CliProjectCompiler.Input) {
+  private fun configureCompileTask(
+    project: Project,
+    resourceServiceComponent: ResourceServiceComponent,
+    component: SpoofaxCompilerComponent,
+    input: CliProjectCompiler.Input
+  ) {
     val compileTask = project.tasks.register("compileCliProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
-      outputs.files(input.providedFiles().map { component.resourceService.toLocalFile(it) })
+      outputs.files(input.providedFiles().map { resourceServiceComponent.resourceService.toLocalFile(it) })
 
       doLast {
-        project.deleteDirectory(input.generatedJavaSourcesDirectory(), component.resourceService)
+        project.deleteDirectory(input.generatedJavaSourcesDirectory(), resourceServiceComponent.resourceService)
         synchronized(component.pie) {
           component.pie.newSession().use { session ->
             session.require(component.cliProjectCompiler.createTask(input))

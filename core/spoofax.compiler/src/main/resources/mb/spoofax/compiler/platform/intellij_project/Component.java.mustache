@@ -1,11 +1,24 @@
 package {{baseComponent.packageId}};
 
 import dagger.Component;
+import mb.spoofax.core.platform.ResourceServiceComponent;
 import mb.spoofax.intellij.IntellijLanguageComponent;
-import mb.spoofax.intellij.SpoofaxIntellijComponent;
+import mb.spoofax.intellij.IntellijPlatformComponent;
 
 @{{adapterProjectCompilerInput.scope.qualifiedId}}
-@Component(modules = { {{adapterProjectCompilerInput.module.qualifiedId}}.class, {{module.qualifiedId}}.class{{#adapterProjectCompilerInput.additionalModules}}{{#-first}}, {{/-first}}{{qualifiedId}}.class{{^-last}}, {{/-last}}{{/adapterProjectCompilerInput.additionalModules}} }, dependencies = SpoofaxIntellijComponent.class)
+@Component(
+    modules = {
+        {{adapterProjectCompilerInput.module.qualifiedId}}.class,
+        {{module.qualifiedId}}.class{{#adapterProjectCompilerInput.additionalModules}}{{#-first}}, {{/-first}}
+        {{qualifiedId}}.class{{^-last}},
+{{/-last}}{{/adapterProjectCompilerInput.additionalModules}}
+    },
+    dependencies = {
+        {{adapterProjectCompilerInput.resourcesComponent.qualifiedId}}.class,
+        ResourceServiceComponent.class,
+        IntellijPlatformComponent.class
+    }
+)
 public interface {{baseComponent.id}} extends IntellijLanguageComponent, {{adapterProjectCompilerInput.component.qualifiedId}} {
     @Override {{language.qualifiedId}} getLanguage();
 

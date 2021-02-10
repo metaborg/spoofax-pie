@@ -1,10 +1,20 @@
 package {{basePlugin.packageId}};
 
+import mb.spoofax.core.platform.DaggerResourceServiceComponent;
+import mb.spoofax.core.platform.ResourceServiceComponent;
 import mb.spoofax.intellij.SpoofaxPlugin;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class {{basePlugin.id}} {
+    private static {{adapterProjectCompilerInput.resourcesComponent.nullableQualifiedId}} resourcesComponent;
     private static {{component.nullableQualifiedId}} component;
+
+    public static {{adapterProjectCompilerInput.resourcesComponent.qualifiedId}} getResourcesComponent() {
+        if(resourcesComponent == null) {
+            throw new RuntimeException("Cannot access {{adapterProjectCompilerInput.resourcesComponent.id}}; {{basePlugin.id}} has not been started yet, or has been stopped");
+        }
+        return resourcesComponent;
+    }
 
     public static {{component.qualifiedId}} getComponent() {
         if(component == null) {
@@ -14,9 +24,14 @@ public class {{basePlugin.id}} {
     }
 
     public static void init() {
-        component = {{daggerComponent.id}}
-            .builder()
-            .spoofaxIntellijComponent(SpoofaxPlugin.getComponent())
+        resourcesComponent = {{adapterProjectCompilerInput.daggerResourcesComponent.qualifiedId}}.create();
+        final ResourceServiceComponent resourceServiceComponent = DaggerResourceServiceComponent.builder()
+            .resourceServiceModule(SpoofaxPlugin.getResourceServiceComponent().createParentModule().addRegistriesFrom(resourcesComponent))
+            .build();
+        component = {{daggerComponent.id}}.builder()
+            .{{adapterProjectCompilerInput.resourcesComponent.idAsCamelCase}}(resourcesComponent)
+            .resourceServiceComponent(resourceServiceComponent)
+            .intellijPlatformComponent(SpoofaxPlugin.getPlatformComponent())
             .build();
     }
 }

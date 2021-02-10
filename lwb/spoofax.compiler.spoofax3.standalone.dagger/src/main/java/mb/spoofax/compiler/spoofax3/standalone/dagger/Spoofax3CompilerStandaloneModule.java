@@ -38,15 +38,6 @@ public abstract class Spoofax3CompilerStandaloneModule {
 
     @Provides
     @Spoofax3CompilerStandaloneScope
-    static ResourceService provideResourceService(
-        @SpoofaxCompilerQualifier ResourceService spoofaxCompilerResourceService,
-        @Spoofax3CompilerQualifier ResourceService spoofax3CompilerResourceService
-    ) {
-        return spoofaxCompilerResourceService.createChild(spoofax3CompilerResourceService);
-    }
-
-    @Provides
-    @Spoofax3CompilerStandaloneScope
     static Pie providePie(
         ResourceService resourceService,
         @SpoofaxCompilerQualifier Pie spoofaxCompilerPie,

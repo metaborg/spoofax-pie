@@ -25,6 +25,7 @@ import mb.spoofax.compiler.adapter.data.ParamRepr;
 import mb.spoofax.compiler.language.LanguageProject;
 import mb.spoofax.compiler.language.LanguageProjectCompiler;
 import mb.spoofax.compiler.language.LanguageProjectCompilerInputBuilder;
+import mb.spoofax.compiler.spoofax3.dagger.Spoofax3Compiler;
 import mb.spoofax.compiler.spoofax3.language.Spoofax3LanguageProject;
 import mb.spoofax.compiler.spoofax3.language.Spoofax3LanguageProjectCompiler;
 import mb.spoofax.compiler.spoofax3.language.Spoofax3LanguageProjectCompilerInputBuilder;
@@ -33,11 +34,10 @@ import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.core.language.command.CommandContextType;
 import mb.spoofax.core.language.command.CommandExecutionType;
-import mb.spoofax.core.platform.DaggerPlatformComponent;
+import mb.spoofax.core.platform.BaseResourceServiceComponent;
+import mb.spoofax.core.platform.DaggerBaseResourceServiceComponent;
 import mb.spoofax.core.platform.LoggerFactoryModule;
-import mb.spoofax.core.platform.PlatformComponent;
 import mb.spoofax.core.platform.PlatformPieModule;
-import mb.spoofax.core.platform.ResourceRegistriesModule;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -50,15 +50,16 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 
 class CompileToJavaClassFilesTest {
+    final BaseResourceServiceComponent baseResourceServiceComponent = DaggerBaseResourceServiceComponent.create();
     final ClassLoaderResourceRegistry classLoaderResourceRegistry =
         new ClassLoaderResourceRegistry("spoofax3.standalone", CompileToJavaClassFilesTest.class.getClassLoader());
-    final PlatformComponent platformComponent = DaggerPlatformComponent.builder()
-        .loggerFactoryModule(new LoggerFactoryModule(StreamLoggerFactory.stdOutVeryVerbose()))
-        .resourceRegistriesModule(new ResourceRegistriesModule(classLoaderResourceRegistry))
-        .platformPieModule(new PlatformPieModule(PieBuilderImpl::new))
-        .build();
-    final Spoofax3CompilerStandalone compiler = new Spoofax3CompilerStandalone(platformComponent);
-    final ResourceService resourceService = compiler.component.getResourceService();
+    final Spoofax3Compiler spoofax3Compiler = new Spoofax3Compiler(
+        baseResourceServiceComponent.createParentModule(classLoaderResourceRegistry),
+        new LoggerFactoryModule(StreamLoggerFactory.stdOutVeryVerbose()),
+        new PlatformPieModule(PieBuilderImpl::new)
+    );
+    final ResourceService resourceService = spoofax3Compiler.resourceServiceComponent.getResourceService();
+    final Spoofax3CompilerStandalone compiler = new Spoofax3CompilerStandalone(spoofax3Compiler);
     final Pie pie = compiler.component.getPie();
     final CompileToJavaClassFiles compileToJavaClassFiles = compiler.component.getCompileToJavaClassFiles();
 

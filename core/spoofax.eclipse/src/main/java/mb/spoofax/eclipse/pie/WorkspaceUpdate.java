@@ -7,6 +7,7 @@ import mb.common.style.Styling;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.resource.ResourceKey;
+import mb.spoofax.core.platform.PlatformScope;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.eclipse.util.MarkerUtil;
@@ -30,7 +31,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class WorkspaceUpdate {
-    @Singleton
+    @PlatformScope
     public static class Factory {
         private final LoggerFactory loggerFactory;
         private final ResourceUtil resourceUtil;

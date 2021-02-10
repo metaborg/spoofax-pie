@@ -5,6 +5,7 @@ import mb.resource.ResourceKey;
 import mb.resource.ResourceRuntimeException;
 import mb.resource.ResourceService;
 import mb.spoofax.core.platform.Platform;
+import mb.spoofax.core.platform.PlatformScope;
 import mb.spoofax.eclipse.resource.WrapsEclipseResource;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IFile;
@@ -13,12 +14,12 @@ import org.eclipse.core.resources.IResource;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-@Singleton
+@PlatformScope
 public class ResourceUtil {
     private final ResourceService resourceService;
 
 
-    @Inject public ResourceUtil(@Platform ResourceService resourceService) {
+    @Inject public ResourceUtil(ResourceService resourceService) {
         this.resourceService = resourceService;
     }
 

@@ -34,7 +34,7 @@ public class SpoofaxCli {
     private final ResourceService resourceService;
     private final ArgConverters argConverters;
 
-    @Inject public SpoofaxCli(@Platform ResourceService resourceService, ArgConverters argConverters) {
+    @Inject public SpoofaxCli(ResourceService resourceService, ArgConverters argConverters) {
         this.resourceService = resourceService;
         this.argConverters = argConverters;
     }

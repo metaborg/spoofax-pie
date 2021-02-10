@@ -1,7 +1,7 @@
 package mb.statix.multilang.eclipse;
 
 import mb.log.api.Logger;
-import mb.spoofax.eclipse.SpoofaxEclipseComponent;
+import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.statix.multilang.metadata.AnalysisContextService;
 import mb.statix.multilang.metadata.ImmutableAnalysisContextService;
@@ -25,7 +25,7 @@ import java.util.stream.Stream;
 public class MultiLangPlugin extends Plugin {
     public static final String id = "statix.multilang.eclipse";
     private static final String ANALYSIS_CONTEXT_ID = "mb.statix.multilang.analysiscontext";
-    private static final Logger logger = SpoofaxPlugin.getComponent().getLoggerFactory().create(MultiLangPlugin.class);
+    private static final Logger logger = SpoofaxPlugin.getPlatformComponent().getLoggerFactory().create(MultiLangPlugin.class);
 
     private static @Nullable MultiLangPlugin plugin;
     private static @Nullable MultiLangEclipseComponent component;
@@ -48,7 +48,7 @@ public class MultiLangPlugin extends Plugin {
     @Override public void start(@NonNull BundleContext context) throws Exception {
         super.start(context);
         plugin = this;
-        SpoofaxEclipseComponent platformComponent = SpoofaxPlugin.getComponent();
+        EclipsePlatformComponent platformComponent = SpoofaxPlugin.getPlatformComponent();
 
         component = DaggerMultiLangEclipseComponent
             .builder()
@@ -93,7 +93,7 @@ public class MultiLangPlugin extends Plugin {
             .forEach(analysisContextServiceBuilder::putAllDefaultLanguageContexts);
 
         return analysisContextServiceBuilder
-            .platformPieBuilder(SpoofaxPlugin.getComponent().getPieBuilder())
+            .platformPieBuilder(SpoofaxPlugin.getPlatformComponent().newPieBuilder())
             .build();
     }
 

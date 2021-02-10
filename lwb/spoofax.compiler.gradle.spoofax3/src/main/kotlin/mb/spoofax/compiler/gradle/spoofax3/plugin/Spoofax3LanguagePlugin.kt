@@ -6,32 +6,23 @@ import mb.common.message.KeyedMessages
 import mb.common.message.Message
 import mb.common.message.Messages
 import mb.common.message.Severity
-import mb.esv.DaggerEsvComponent
-import mb.libspoofax2.DaggerLibSpoofax2Component
-import mb.libstatix.DaggerLibStatixComponent
 import mb.log.slf4j.SLF4JLoggerFactory
 import mb.pie.runtime.PieBuilderImpl
 import mb.resource.ResourceKey
 import mb.resource.fs.FSPath
-import mb.sdf3.DaggerSdf3Component
 import mb.spoofax.compiler.gradle.*
 import mb.spoofax.compiler.gradle.plugin.*
-import mb.spoofax.compiler.gradle.spoofax3.*
 import mb.spoofax.compiler.spoofax3.dagger.*
 import mb.spoofax.compiler.spoofax3.language.*
-import mb.spoofax.compiler.util.*
-import mb.spoofax.core.platform.DaggerPlatformComponent
 import mb.spoofax.core.platform.LoggerFactoryModule
 import mb.spoofax.core.platform.PlatformPieModule
-import mb.statix.DaggerStatixComponent
-import mb.str.DaggerStrategoComponent
+import mb.spoofax.core.platform.ResourceServiceModule
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.*
-import java.nio.charset.StandardCharsets
 import java.util.*
 
 open class Spoofax3LanguageProjectExtension(project: Project) {
@@ -83,20 +74,11 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
     val languageProjectExtension = project.extensions.getByType<LanguageProjectExtension>()
 
     // OPTO: cache instantiation components.
-    val platformComponent = DaggerPlatformComponent.builder()
-      .loggerFactoryModule(LoggerFactoryModule(SLF4JLoggerFactory()))
-      .platformPieModule(PlatformPieModule { PieBuilderImpl() })
-      .build()
-    val component = DaggerSpoofax3CompilerComponent.builder()
-      .spoofax3CompilerModule(Spoofax3CompilerModule(TemplateCompiler(StandardCharsets.UTF_8)))
-      .platformComponent(platformComponent)
-      .sdf3Component(DaggerSdf3Component.builder().platformComponent(platformComponent).build())
-      .strategoComponent(DaggerStrategoComponent.builder().platformComponent(platformComponent).build())
-      .esvComponent(DaggerEsvComponent.builder().platformComponent(platformComponent).build())
-      .statixComponent(DaggerStatixComponent.builder().platformComponent(platformComponent).build())
-      .libSpoofax2Component(DaggerLibSpoofax2Component.builder().platformComponent(platformComponent).build())
-      .libStatixComponent(DaggerLibStatixComponent.builder().platformComponent(platformComponent).build())
-      .build()
+    val spoofax3Compiler = Spoofax3Compiler(
+      languageProjectExtension.resourceServiceComponent.createParentModule(),
+      LoggerFactoryModule(SLF4JLoggerFactory()),
+      PlatformPieModule { PieBuilderImpl() }
+    )
 
     val extension = Spoofax3LanguageProjectExtension(project)
     project.extensions.add(Spoofax3LanguageProjectExtension.id, extension)
@@ -105,34 +87,35 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
     languageProjectExtension.compilerInput { extension.compilerInputFinalized.syncTo(this) }
 
     project.afterEvaluate {
-      configure(project, component, extension.compilerInputFinalized)
+      configure(project, spoofax3Compiler, extension.compilerInputFinalized)
     }
   }
 
   private fun configure(
     project: Project,
-    component: Spoofax3CompilerComponent,
+    spoofax3Compiler: Spoofax3Compiler,
     input: Spoofax3LanguageProjectCompiler.Input
   ) {
-    configureProject(project, component, input)
-    configureCompileTask(project, component, input)
+    configureProject(project, spoofax3Compiler, input)
+    configureCompileTask(project, spoofax3Compiler, input)
   }
 
   private fun configureProject(
     project: Project,
-    component: Spoofax3CompilerComponent,
+    spoofax3Compiler: Spoofax3Compiler,
     input: Spoofax3LanguageProjectCompiler.Input
   ) {
-    project.addMainJavaSourceDirectory(input.spoofax3LanguageProject().generatedJavaSourcesDirectory(), component.resourceService)
-    project.addMainResourceDirectory(input.spoofax3LanguageProject().generatedResourcesDirectory(), component.resourceService)
+    val resourceService = spoofax3Compiler.resourceServiceComponent.resourceService
+    project.addMainJavaSourceDirectory(input.spoofax3LanguageProject().generatedJavaSourcesDirectory(), resourceService)
+    project.addMainResourceDirectory(input.spoofax3LanguageProject().generatedResourcesDirectory(), resourceService)
   }
 
   private fun configureCompileTask(
     project: Project,
-    component: Spoofax3CompilerComponent,
+    spoofax3Compiler: Spoofax3Compiler,
     input: Spoofax3LanguageProjectCompiler.Input
   ) {
-    val resourceService = component.resourceService
+    val resourceService = spoofax3Compiler.resourceServiceComponent.resourceService
     val compileTask = project.tasks.register("compileSpoofax3BasedLanguageProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
@@ -208,8 +191,8 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
       }
 
       doLast {
-        component.pie.newSession().use { session ->
-          val result = session.require(component.spoofax3LanguageProjectCompiler.createTask(input))
+        spoofax3Compiler.component.pie.newSession().use { session ->
+          val result = session.require(spoofax3Compiler.component.spoofax3LanguageProjectCompiler.createTask(input))
           result.ifOk {
             project.logMessages(it, FSPath(project.projectDir))
           }.ifErr {

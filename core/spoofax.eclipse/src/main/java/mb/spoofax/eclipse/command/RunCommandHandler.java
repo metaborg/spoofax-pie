@@ -11,7 +11,7 @@ import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.CommandRequest;
 import mb.spoofax.core.language.command.ResourcePathWithKind;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
-import mb.spoofax.eclipse.SpoofaxEclipseComponent;
+import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.pie.CommandContextAndFeedback;
 import mb.spoofax.eclipse.pie.PieRunner;
@@ -49,7 +49,7 @@ public class RunCommandHandler extends AbstractHandler {
     public RunCommandHandler(EclipseLanguageComponent languageComponent) {
         this.languageComponent = languageComponent;
 
-        final SpoofaxEclipseComponent component = SpoofaxPlugin.getComponent();
+        final EclipsePlatformComponent component = SpoofaxPlugin.getPlatformComponent();
         this.pieRunner = component.getPieRunner();
 
         final HashMap<String, CommandDef> transformDefsPerId = new HashMap<>();

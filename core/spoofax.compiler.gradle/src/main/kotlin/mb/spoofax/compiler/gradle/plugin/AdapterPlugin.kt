@@ -6,6 +6,7 @@ import mb.common.option.Option
 import mb.spoofax.compiler.adapter.*
 import mb.spoofax.compiler.dagger.*
 import mb.spoofax.compiler.gradle.*
+import mb.spoofax.core.platform.ResourceServiceComponent
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaLibraryPlugin
@@ -87,31 +88,46 @@ open class AdapterPlugin : Plugin<Project> {
 
     project.afterEvaluate {
       extension.languageOrThisProjectFinalized.whenLanguageProjectFinalized {
-        configure(project, extension.languageProjectExtension.component, extension.compilerInputFinalized)
+        configure(project, extension.languageProjectExtension.resourceServiceComponent, extension.languageProjectExtension.component, extension.compilerInputFinalized)
       }
     }
   }
 
-  private fun configure(project: Project, component: SpoofaxCompilerComponent, input: AdapterProjectCompiler.Input) {
-    configureProject(project, component, input)
-    configureCompileTask(project, component, input)
+  private fun configure(
+    project: Project,
+    resourceServiceComponent: ResourceServiceComponent,
+    component: SpoofaxCompilerComponent,
+    input: AdapterProjectCompiler.Input
+  ) {
+    configureProject(project, resourceServiceComponent, component, input)
+    configureCompileTask(project, resourceServiceComponent, component, input)
   }
 
-  private fun configureProject(project: Project, component: SpoofaxCompilerComponent, input: AdapterProjectCompiler.Input) {
-    project.addMainJavaSourceDirectory(input.adapterProject().generatedJavaSourcesDirectory(), component.resourceService)
+  private fun configureProject(
+    project: Project,
+    resourceServiceComponent: ResourceServiceComponent,
+    component: SpoofaxCompilerComponent,
+    input: AdapterProjectCompiler.Input
+  ) {
+    project.addMainJavaSourceDirectory(input.adapterProject().generatedJavaSourcesDirectory(), resourceServiceComponent.resourceService)
     component.adapterProjectCompiler.getDependencies(input).forEach {
       it.addToDependencies(project)
     }
   }
 
-  private fun configureCompileTask(project: Project, component: SpoofaxCompilerComponent, input: AdapterProjectCompiler.Input) {
+  private fun configureCompileTask(
+    project: Project,
+    resourceServiceComponent: ResourceServiceComponent,
+    component: SpoofaxCompilerComponent,
+    input: AdapterProjectCompiler.Input
+  ) {
     val compileTask = project.tasks.register("compileAdapterProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
-      outputs.files(input.javaSourceFiles().map { component.resourceService.toLocalFile(it) })
+      outputs.files(input.javaSourceFiles().map { resourceServiceComponent.resourceService.toLocalFile(it) })
 
       doLast {
-        project.deleteDirectory(input.adapterProject().generatedJavaSourcesDirectory(), component.resourceService)
+        project.deleteDirectory(input.adapterProject().generatedJavaSourcesDirectory(), resourceServiceComponent.resourceService)
         synchronized(component.pie) {
           component.pie.newSession().use { session ->
             session.require(component.adapterProjectCompiler.createTask(input))

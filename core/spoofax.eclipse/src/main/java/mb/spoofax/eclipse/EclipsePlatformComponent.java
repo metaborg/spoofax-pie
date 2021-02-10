@@ -4,28 +4,26 @@ import dagger.Component;
 import mb.spoofax.core.platform.LoggerFactoryModule;
 import mb.spoofax.core.platform.PlatformComponent;
 import mb.spoofax.core.platform.PlatformPieModule;
-import mb.spoofax.core.platform.ResourceRegistriesModule;
-import mb.spoofax.core.platform.ResourceServiceModule;
+import mb.spoofax.core.platform.PlatformScope;
 import mb.spoofax.eclipse.command.EnclosingCommandContextProvider;
 import mb.spoofax.eclipse.editor.PartClosedCallback;
 import mb.spoofax.eclipse.editor.ScopeManager;
 import mb.spoofax.eclipse.pie.PieRunner;
-import mb.spoofax.eclipse.resource.EclipseResourceRegistryModule;
 import mb.spoofax.eclipse.util.ColorShare;
 import mb.spoofax.eclipse.util.ResourceUtil;
 import mb.spoofax.eclipse.util.StyleUtil;
 
-import javax.inject.Singleton;
-
-@Singleton
-@Component(modules = {
-    LoggerFactoryModule.class,
-    ResourceRegistriesModule.class,
-    EclipseResourceRegistryModule.class,
-    ResourceServiceModule.class,
-    PlatformPieModule.class
-})
-public interface SpoofaxEclipseComponent extends PlatformComponent {
+@PlatformScope
+@Component(
+    modules = {
+        LoggerFactoryModule.class,
+        PlatformPieModule.class
+    },
+    dependencies = {
+        EclipseResourceServiceComponent.class
+    }
+)
+public interface EclipsePlatformComponent extends PlatformComponent {
     PieRunner getPieRunner();
 
     ResourceUtil getResourceUtil();

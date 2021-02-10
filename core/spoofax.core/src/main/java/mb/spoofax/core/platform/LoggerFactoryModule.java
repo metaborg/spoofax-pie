@@ -14,7 +14,7 @@ public class LoggerFactoryModule {
         this.loggerFactory = loggerFactory;
     }
 
-    @Provides @Singleton LoggerFactory provideLoggerFactory() {
+    @Provides @PlatformScope LoggerFactory provideLoggerFactory() {
         return loggerFactory;
     }
 }

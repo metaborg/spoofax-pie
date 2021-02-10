@@ -48,7 +48,7 @@ public abstract class SpoofaxCompletionContributor extends CompletionContributor
     private final Provider<MixedSession> pieSessionProvider;
 
     protected SpoofaxCompletionContributor(IntellijLanguageComponent languageComponent) {
-        this.resourceRegistry = SpoofaxPlugin.getComponent().getResourceRegistry();
+        this.resourceRegistry = SpoofaxPlugin.getResourceServiceComponent().getResourceRegistry();
         this.languageInstance = languageComponent.getLanguageInstance();
         this.pieSessionProvider = () -> languageComponent.getPie().newSession();
 

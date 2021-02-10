@@ -1,5 +1,6 @@
 package mb.spoofax.eclipse.util;
 
+import mb.spoofax.core.platform.PlatformScope;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.swt.graphics.Color;
@@ -10,7 +11,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.HashMap;
 
-@Singleton
+@PlatformScope
 public class ColorShare implements ISharedTextColors {
     private HashMap<RGB, Color> colors = new HashMap<>();
 

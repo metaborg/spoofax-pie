@@ -21,7 +21,7 @@ public class ObserveHandler extends AbstractHandler {
 
 
     public ObserveHandler(EclipseLanguageComponent languageComponent) {
-        this.pieRunner = SpoofaxPlugin.getComponent().getPieRunner();
+        this.pieRunner = SpoofaxPlugin.getPlatformComponent().getPieRunner();
 
         this.languageComponent = languageComponent;
     }

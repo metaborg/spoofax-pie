@@ -7,6 +7,8 @@ import mb.spoofax.compiler.dagger.*
 import mb.spoofax.compiler.gradle.*
 import mb.spoofax.compiler.language.*
 import mb.spoofax.compiler.util.*
+import mb.spoofax.core.platform.DaggerBaseResourceServiceComponent
+import mb.spoofax.core.platform.ResourceServiceComponent
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaLibraryPlugin
@@ -48,8 +50,10 @@ open class LanguageProjectExtension(project: Project) {
     private const val name = "language project"
   }
 
+  val resourceServiceComponent = DaggerBaseResourceServiceComponent.create()
   val component = DaggerSpoofaxCompilerComponent.builder()
     .spoofaxCompilerModule(SpoofaxCompilerModule(TemplateCompiler(StandardCharsets.UTF_8)) { PieBuilderImpl() })
+    .resourceServiceComponent(resourceServiceComponent)
     .build()
 
   val sharedFinalized: Shared by lazy {
@@ -136,32 +140,46 @@ open class LanguagePlugin : Plugin<Project> {
     project.afterEvaluate {
       project.whenLanguageProjectFinalized {
         extension.statixDependenciesFinalized.whenAllLanguageProjectsFinalized {
-          configure(project, extension.component, extension.compilerInputFinalized)
+          configure(project, extension.resourceServiceComponent, extension.component, extension.compilerInputFinalized)
         }
       }
     }
   }
 
-  private fun configure(project: Project, component: SpoofaxCompilerComponent, input: LanguageProjectCompiler.Input) {
-    configureProject(project, component, input)
-    configureCompileTask(project, component, input)
+  private fun configure(
+    project: Project,
+    resourceServiceComponent: ResourceServiceComponent,
+    component: SpoofaxCompilerComponent,
+    input: LanguageProjectCompiler.Input
+  ) {
+    configureProject(project, resourceServiceComponent, component, input)
+    configureCompileTask(project, resourceServiceComponent, component, input)
   }
 
-  private fun configureProject(project: Project, component: SpoofaxCompilerComponent, input: LanguageProjectCompiler.Input) {
-    project.addMainJavaSourceDirectory(input.languageProject().generatedJavaSourcesDirectory(), component.resourceService)
+  private fun configureProject(
+    project: Project,
+    resourceServiceComponent: ResourceServiceComponent,
+    component: SpoofaxCompilerComponent,
+    input: LanguageProjectCompiler.Input
+  ) {
+    project.addMainJavaSourceDirectory(input.languageProject().generatedJavaSourcesDirectory(), resourceServiceComponent.resourceService)
     component.languageProjectCompiler.getDependencies(input).forEach {
       it.addToDependencies(project)
     }
   }
 
-  private fun configureCompileTask(project: Project, component: SpoofaxCompilerComponent, input: LanguageProjectCompiler.Input) {
+  private fun configureCompileTask(
+    project: Project,
+    resourceServiceComponent: ResourceServiceComponent,
+    component: SpoofaxCompilerComponent,
+    input: LanguageProjectCompiler.Input) {
     val compileTask = project.tasks.register("compileLanguageProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
-      outputs.files(input.javaSourceFiles().map { component.resourceService.toLocalFile(it) })
+      outputs.files(input.javaSourceFiles().map { resourceServiceComponent.resourceService.toLocalFile(it) })
 
       doLast {
-        project.deleteDirectory(input.languageProject().generatedJavaSourcesDirectory(), component.resourceService)
+        project.deleteDirectory(input.languageProject().generatedJavaSourcesDirectory(), resourceServiceComponent.resourceService)
         synchronized(component.pie) {
           component.pie.newSession().use { session ->
             session.require(component.languageProjectCompiler.createTask(input))

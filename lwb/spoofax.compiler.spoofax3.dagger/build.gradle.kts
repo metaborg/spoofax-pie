@@ -12,6 +12,7 @@ dependencies {
   annotationProcessor(platform(compositeBuild("spoofax.depconstraints")))
 
   api(project(":spoofax.compiler.spoofax3"))
+  api(compositeBuild("spoofax.compiler.dagger"))
   api("com.google.dagger:dagger")
 
   compileOnly("org.immutables:value-annotations") // Dagger accesses these annotations, which have class retention.

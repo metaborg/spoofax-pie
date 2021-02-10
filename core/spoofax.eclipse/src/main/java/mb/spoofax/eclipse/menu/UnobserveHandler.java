@@ -20,7 +20,7 @@ public class UnobserveHandler extends AbstractHandler {
 
 
     public UnobserveHandler(EclipseLanguageComponent languageComponent) {
-        this.pieRunner = SpoofaxPlugin.getComponent().getPieRunner();
+        this.pieRunner = SpoofaxPlugin.getPlatformComponent().getPieRunner();
 
         this.languageComponent = languageComponent;
     }

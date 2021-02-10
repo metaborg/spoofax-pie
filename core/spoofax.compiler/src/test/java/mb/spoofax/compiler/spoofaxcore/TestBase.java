@@ -10,22 +10,28 @@ import mb.resource.ResourceService;
 import mb.resource.fs.FSPath;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
+import mb.spoofax.compiler.dagger.DaggerSpoofaxCompilerComponent;
+import mb.spoofax.compiler.dagger.SpoofaxCompilerComponent;
 import mb.spoofax.compiler.dagger.SpoofaxCompilerModule;
 import mb.spoofax.compiler.language.LanguageProjectCompiler;
 import mb.spoofax.compiler.spoofaxcore.tiger.TigerInputs;
 import mb.spoofax.compiler.spoofaxcore.util.FileAssertions;
 import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TemplateCompiler;
+import mb.spoofax.core.platform.BaseResourceServiceComponent;
+import mb.spoofax.core.platform.DaggerBaseResourceServiceComponent;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 
 class TestBase {
     final FileSystem fileSystem = Jimfs.newFileSystem(Configuration.unix());
-    final SpoofaxCompilerTestComponent component = DaggerSpoofaxCompilerTestComponent.builder()
+    final BaseResourceServiceComponent resourceServiceComponent = DaggerBaseResourceServiceComponent.create();
+    final SpoofaxCompilerComponent component = DaggerSpoofaxCompilerComponent.builder()
         .spoofaxCompilerModule(new SpoofaxCompilerModule(new TemplateCompiler(StandardCharsets.UTF_8), PieBuilderImpl::new))
+        .resourceServiceComponent(resourceServiceComponent)
         .build();
-    final ResourceService resourceService = component.getResourceService();
+    final ResourceService resourceService = resourceServiceComponent.getResourceService();
     final Pie pie = component.getPie();
     final FileAssertions fileAssertions = new FileAssertions(resourceService);
 

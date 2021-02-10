@@ -1,16 +1,24 @@
 package {{baseEclipseComponent.packageId}};
 
 import dagger.Component;
-import mb.spoofax.core.platform.PlatformComponent;
+import mb.spoofax.core.platform.ResourceServiceComponent;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
-{{#this.adapterProjectCompilerInput.isMultiLang}}
-import mb.statix.multilang.eclipse.MultiLangEclipseComponent;
-{{/this.adapterProjectCompilerInput.isMultiLang}}
+import mb.spoofax.eclipse.EclipsePlatformComponent;
 
 @{{adapterProjectCompilerInput.scope.qualifiedId}}
 @Component(
-    modules = { {{adapterProjectCompilerInput.module.qualifiedId}}.class, {{eclipseModule.qualifiedId}}.class{{#adapterProjectCompilerInput.additionalModules}}{{#-first}}, {{/-first}}{{qualifiedId}}.class{{^-last}}, {{/-last}}{{/adapterProjectCompilerInput.additionalModules}} },
-    dependencies = { PlatformComponent.class{{#this.adapterProjectCompilerInput.isMultiLang}}, MultiLangEclipseComponent.class{{/this.adapterProjectCompilerInput.isMultiLang}} }
+    modules = {
+        {{adapterProjectCompilerInput.module.qualifiedId}}.class,
+        {{eclipseModule.qualifiedId}}.class{{#adapterProjectCompilerInput.additionalModules}}{{#-first}}, {{/-first}}
+        {{qualifiedId}}.class{{^-last}},
+{{/-last}}{{/adapterProjectCompilerInput.additionalModules}}
+    },
+    dependencies = {
+        {{adapterProjectCompilerInput.resourcesComponent.qualifiedId}}.class,
+        ResourceServiceComponent.class,
+        EclipsePlatformComponent.class{{#adapterProjectCompilerInput.isMultiLang}},
+        mb.statix.multilang.eclipse.MultiLangEclipseComponent.class{{/adapterProjectCompilerInput.isMultiLang}}
+    }
 )
 public interface {{baseEclipseComponent.id}} extends EclipseLanguageComponent, {{adapterProjectCompilerInput.component.qualifiedId}} {
     {{editorTracker.qualifiedId}} getEditorTracker();

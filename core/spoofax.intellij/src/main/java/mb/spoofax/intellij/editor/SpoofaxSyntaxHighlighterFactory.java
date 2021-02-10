@@ -21,7 +21,7 @@ public abstract class SpoofaxSyntaxHighlighterFactory extends SyntaxHighlighterF
 
 
     protected SpoofaxSyntaxHighlighterFactory(IntellijLanguageComponent languageComponent) {
-        this.resourceRegistry = SpoofaxPlugin.getComponent().getResourceRegistry();
+        this.resourceRegistry = SpoofaxPlugin.getResourceServiceComponent().getResourceRegistry();
         this.lexerFactory = languageComponent.getLexerFactory();
         this.highlighterFactory = languageComponent.getHighlighterFactory();
     }

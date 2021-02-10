@@ -7,6 +7,7 @@ import mb.resource.ResourceKey;
 import mb.resource.ResourceKeyString;
 import mb.resource.ResourceRegistry;
 import mb.resource.ResourceRuntimeException;
+import mb.spoofax.core.platform.ResourceServiceScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.jface.text.IDocument;
 
@@ -15,26 +16,21 @@ import javax.inject.Singleton;
 import java.io.File;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Singleton
+@ResourceServiceScope
 public class EclipseResourceRegistry implements ResourceRegistry {
     static final String qualifier = "eclipse-resource";
 
-    private final Logger logger;
     private final ConcurrentHashMap<EclipseResourcePath, IDocument> documentOverrides = new ConcurrentHashMap<>();
 
 
-    @Inject public EclipseResourceRegistry(LoggerFactory loggerFactory) {
-        this.logger = loggerFactory.create(EclipseResourceRegistry.class);
-    }
+    @Inject public EclipseResourceRegistry() {}
 
 
     public void putDocumentOverride(EclipseResourcePath path, IDocument document) {
-        logger.trace("Overriding path '{}' to document '{}'", path, document);
         documentOverrides.put(path, document);
     }
 
     public void removeDocumentOverride(EclipseResourcePath path) {
-        logger.trace("Removing document override of path '{}'", path);
         documentOverrides.remove(path);
     }
 

@@ -1,7 +1,7 @@
 package mb.spoofax.eclipse.editor;
 
 import mb.spoofax.eclipse.EclipseIdentifiers;
-import mb.spoofax.eclipse.SpoofaxEclipseComponent;
+import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -18,7 +18,7 @@ public class EditorTracker extends EditorTrackerBase {
 
 
     public EditorTracker(EclipseIdentifiers eclipseIdentifiers) {
-        final SpoofaxEclipseComponent component = SpoofaxPlugin.getComponent();
+        final EclipsePlatformComponent component = SpoofaxPlugin.getPlatformComponent();
         this.eclipseIdentifiers = eclipseIdentifiers;
     }
 

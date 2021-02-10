@@ -67,37 +67,6 @@ import java.util.Map;
 
 @Module
 public class {{baseModule.id}} {
-    @Provides @{{scope.id}}
-    static {{classLoaderResources.classLoaderResources.qualifiedId}} provideClassLoaderResources() {
-        return new {{classLoaderResources.classLoaderResources.qualifiedId}}();
-    }
-
-    @Provides @{{scope.id}}
-    static ClassLoaderResourceRegistry provideClassLoaderResourceRegistry({{classLoaderResources.classLoaderResources.qualifiedId}} classLoaderResources) {
-        return classLoaderResources.resourceRegistry;
-    }
-
-    @Provides @{{scope.id}} @{{qualifier.id}}
-    static ResourceService provideQualifiedResourceRegistry(@Platform ResourceService resourceService, ClassLoaderResourceRegistry classLoaderResourceRegistry, Set<ResourceRegistry> additionalRegistries) {
-        Set<ResourceRegistry> registries = new HashSet<>(additionalRegistries);
-        registries.add(classLoaderResourceRegistry);
-        return resourceService.createChild(registries);
-    }
-
-    @Provides @{{scope.id}}
-    static ResourceService provideResourceService(@{{qualifier.id}} ResourceService resourceService) {
-        return resourceService;
-    }
-
-    @Provides @{{scope.id}} @{{qualifier.id}}("definition-directory")
-    static ClassLoaderResource provideDefinitionDirectory({{classLoaderResources.classLoaderResources.qualifiedId}} classLoaderResources) {
-        return classLoaderResources.definitionDirectory;
-    }
-
-    @Provides @{{scope.id}} @{{qualifier.id}}("definition-directory")
-    static HierarchicalResource provideDefinitionDirectoryAsHierarchicalResource(@{{qualifier.id}}("definition-directory") ClassLoaderResource definitionDir) {
-        return definitionDir;
-    }
 {{#parser}}
 
 

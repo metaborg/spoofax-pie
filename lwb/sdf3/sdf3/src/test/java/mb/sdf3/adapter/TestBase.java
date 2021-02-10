@@ -19,13 +19,18 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.resource.text.TextResource;
 import mb.resource.text.TextResourceRegistry;
 import mb.sdf3.DaggerSdf3Component;
+import mb.sdf3.DaggerSdf3ResourcesComponent;
 import mb.sdf3.Sdf3Component;
+import mb.sdf3.Sdf3ResourcesComponent;
 import mb.sdf3.task.Sdf3AnalyzeMulti;
 import mb.sdf3.task.Sdf3CreateSpec;
 import mb.sdf3.task.Sdf3Desugar;
 import mb.sdf3.task.Sdf3Parse;
 import mb.sdf3.task.Sdf3Spec;
 import mb.sdf3.task.util.Sdf3Util;
+import mb.spoofax.core.platform.BaseResourceServiceComponent;
+import mb.spoofax.core.platform.BaseResourceServiceModule;
+import mb.spoofax.core.platform.DaggerBaseResourceServiceComponent;
 import mb.spoofax.core.platform.DaggerPlatformComponent;
 import mb.spoofax.core.platform.LoggerFactoryModule;
 import mb.spoofax.core.platform.PlatformComponent;
@@ -39,18 +44,27 @@ import java.nio.file.FileSystem;
 class TestBase {
     final FileSystem fileSystem = Jimfs.newFileSystem(Configuration.unix());
     final FSResource rootDirectory = new FSResource(fileSystem.getPath("/"));
+    final TextResourceRegistry textResourceRegistry = new TextResourceRegistry();
 
-    final PlatformComponent platformComponent = DaggerPlatformComponent
-        .builder()
+    final Sdf3ResourcesComponent resourcesComponent = DaggerSdf3ResourcesComponent.create();
+    final BaseResourceServiceModule resourceServiceModule = new BaseResourceServiceModule()
+        .addRegistry(textResourceRegistry)
+        .addRegistriesFrom(resourcesComponent);
+    final BaseResourceServiceComponent resourceServiceComponent = DaggerBaseResourceServiceComponent.builder()
+        .baseResourceServiceModule(resourceServiceModule)
+        .build();
+
+    final PlatformComponent platformComponent = DaggerPlatformComponent.builder()
         .loggerFactoryModule(new LoggerFactoryModule(new SLF4JLoggerFactory()))
         .platformPieModule(new PlatformPieModule(PieBuilderImpl::new))
+        .resourceServiceComponent(resourceServiceComponent)
         .build();
     final LoggerFactory loggerFactory = platformComponent.getLoggerFactory();
     final Logger log = loggerFactory.create(TestBase.class);
-    final TextResourceRegistry textResourceRegistry = platformComponent.getTextResourceRegistry();
 
-    final Sdf3Component languageComponent = DaggerSdf3Component
-        .builder()
+    final Sdf3Component languageComponent = DaggerSdf3Component.builder()
+        .sdf3ResourcesComponent(resourcesComponent)
+        .resourceServiceComponent(resourceServiceComponent)
         .platformComponent(platformComponent)
         .build();
     final Sdf3Parse parse = languageComponent.getSdf3Parse();
@@ -90,7 +104,7 @@ class TestBase {
 
 
     Supplier<? extends Result<Sdf3AnalyzeMulti.SingleFileOutput, ?>> singleFileAnalysisResultSupplier(ResourcePath project, ResourceKey file) {
-        return analyze.createSingleFileOutputSupplier(new Sdf3AnalyzeMulti.Input(project, Sdf3Util.createResourceWalker(), Sdf3Util.createResourceMatcher(), desugar.createFunction().mapInput((SerializableFunction<Supplier<String>, Supplier<? extends Result<IStrategoTerm, ?>>>) parse::createRecoverableAstSupplier)), file);
+        return analyze.createSingleFileOutputSupplier(new Sdf3AnalyzeMulti.Input(project, Sdf3Util.createResourceWalker(), Sdf3Util.createResourceMatcher(), desugar.createFunction().mapInput((SerializableFunction<Supplier<String>, Supplier<? extends Result<IStrategoTerm, ?>>>)parse::createRecoverableAstSupplier)), file);
     }
 
     Supplier<? extends Result<Sdf3AnalyzeMulti.SingleFileOutput, ?>> singleFileAnalysisResultSupplier(Resource file) {

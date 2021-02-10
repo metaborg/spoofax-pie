@@ -2,9 +2,10 @@ package mb.tiger.spoofax;
 
 import dagger.Component;
 import mb.pie.api.Pie;
-import mb.resource.ResourceService;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.platform.PlatformComponent;
+import mb.spoofax.core.platform.ResourceServiceComponent;
+import mb.tiger.spoofax.command.TigerShowScopeGraphCommand;
 import mb.tiger.spoofax.task.TigerShowScopeGraph;
 
 /**
@@ -12,14 +13,22 @@ import mb.tiger.spoofax.task.TigerShowScopeGraph;
  * TigerModule}, which may inject objects from a {@link PlatformComponent}. Task definitions are overridden to concrete
  * types so that Dagger can use constructor injection on those types.
  */
-@TigerScope @Component(modules = TigerModule.class, dependencies = PlatformComponent.class)
+@TigerScope
+@Component(
+    modules = TigerModule.class,
+    dependencies = {
+        TigerResourcesComponent.class,
+        ResourceServiceComponent.class,
+        PlatformComponent.class
+    }
+)
 public interface TigerComponent extends LanguageComponent {
     @Override TigerInstance getLanguageInstance();
-
-    @Override @TigerQualifier ResourceService getResourceService();
 
     @Override @TigerQualifier Pie getPie();
 
 
-    TigerShowScopeGraph getTigerShowScopeGraph();
+    TigerShowScopeGraph getShowScopeGraph();
+
+    TigerShowScopeGraphCommand getShowScopeGraphCommand();
 }

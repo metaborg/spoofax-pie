@@ -40,6 +40,9 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
     private final TemplateWriter checkTaskDefTemplate;
     private final TemplateWriter checkMultiTaskDefTemplate;
     private final TemplateWriter checkAggregatorTaskDefTemplate;
+    private final TemplateWriter resourcesScopeTemplate;
+    private final TemplateWriter resourcesComponentTemplate;
+    private final TemplateWriter resourcesModuleTemplate;
     private final TemplateWriter scopeTemplate;
     private final TemplateWriter qualifierTemplate;
     private final TemplateWriter componentTemplate;
@@ -68,6 +71,9 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
         this.checkTaskDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/CheckTaskDef.java.mustache");
         this.checkMultiTaskDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/CheckMultiTaskDef.java.mustache");
         this.checkAggregatorTaskDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/CheckAggregatorTaskDef.java.mustache");
+        this.resourcesScopeTemplate = templateCompiler.getOrCompileToWriter("adapter_project/ResourcesScope.java.mustache");
+        this.resourcesComponentTemplate = templateCompiler.getOrCompileToWriter("adapter_project/ResourcesComponent.java.mustache");
+        this.resourcesModuleTemplate = templateCompiler.getOrCompileToWriter("adapter_project/ResourcesModule.java.mustache");
         this.scopeTemplate = templateCompiler.getOrCompileToWriter("adapter_project/Scope.java.mustache");
         this.qualifierTemplate = templateCompiler.getOrCompileToWriter("adapter_project/Qualifier.java.mustache");
         this.componentTemplate = templateCompiler.getOrCompileToWriter("adapter_project/Component.java.mustache");
@@ -148,6 +154,10 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
         checkTaskDefTemplate.write(context, input.baseCheckTaskDef().file(generatedJavaSourcesDirectory), input);
         checkMultiTaskDefTemplate.write(context, input.baseCheckMultiTaskDef().file(generatedJavaSourcesDirectory), input);
         checkAggregatorTaskDefTemplate.write(context, input.baseCheckAggregatorTaskDef().file(generatedJavaSourcesDirectory), input);
+
+        resourcesScopeTemplate.write(context, input.baseResourcesScope().file(generatedJavaSourcesDirectory), input);
+        resourcesComponentTemplate.write(context, input.baseResourcesComponent().file(generatedJavaSourcesDirectory), input);
+        resourcesModuleTemplate.write(context, input.baseResourcesModule().file(generatedJavaSourcesDirectory), input);
 
         scopeTemplate.write(context, input.adapterProject().baseScope().file(generatedJavaSourcesDirectory), input);
         qualifierTemplate.write(context, input.baseQualifier().file(generatedJavaSourcesDirectory), input);
@@ -392,6 +402,40 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
             return basePackageInfo();
         }
 
+        // Dagger resources scope (passthrough from AdapterProject)
+
+        default TypeInfo baseResourcesScope() { return adapterProject().baseResourcesScope(); }
+
+        default TypeInfo resourcesScope() { return adapterProject().resourcesScope(); }
+
+        // Dagger resources component
+
+        @Value.Default default TypeInfo baseResourcesComponent() {
+            return TypeInfo.of(adapterProject().packageId(), shared().defaultClassPrefix() + "ResourcesComponent");
+        }
+
+        Optional<TypeInfo> extendResourcesComponent();
+
+        default TypeInfo resourcesComponent() {
+            return extendResourcesComponent().orElseGet(this::baseResourcesComponent);
+        }
+
+        default TypeInfo daggerResourcesComponent() {
+            return TypeInfo.of(resourcesComponent().packageId(), "Dagger" + resourcesComponent().id());
+        }
+
+        // Dagger resources module
+
+        @Value.Default default TypeInfo baseResourcesModule() {
+            return TypeInfo.of(adapterProject().packageId(), shared().defaultClassPrefix() + "ResourcesModule");
+        }
+
+        Optional<TypeInfo> extendResourcesModule();
+
+        default TypeInfo resourcesModule() {
+            return extendResourcesModule().orElseGet(this::baseResourcesModule);
+        }
+
         // Dagger Scope (passthrough from AdapterProject)
 
         default TypeInfo baseScope() { return adapterProject().baseScope(); }
@@ -501,6 +545,9 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
                     // two package-info.java files in the same package, which is an error.
                     javaSourceFiles.add(basePackageInfo().file(generatedJavaSourcesDirectory));
                 }
+                javaSourceFiles.add(baseResourcesScope().file(generatedJavaSourcesDirectory));
+                javaSourceFiles.add(baseResourcesComponent().file(generatedJavaSourcesDirectory));
+                javaSourceFiles.add(baseResourcesModule().file(generatedJavaSourcesDirectory));
                 javaSourceFiles.add(baseScope().file(generatedJavaSourcesDirectory));
                 javaSourceFiles.add(baseQualifier().file(generatedJavaSourcesDirectory));
                 javaSourceFiles.add(baseComponent().file(generatedJavaSourcesDirectory));

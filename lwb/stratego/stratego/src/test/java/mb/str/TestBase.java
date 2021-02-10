@@ -18,12 +18,13 @@ import mb.resource.ResourceKey;
 import mb.resource.fs.FSResource;
 import mb.resource.text.TextResource;
 import mb.resource.text.TextResourceRegistry;
+import mb.spoofax.core.platform.BaseResourceServiceComponent;
+import mb.spoofax.core.platform.BaseResourceServiceModule;
+import mb.spoofax.core.platform.DaggerBaseResourceServiceComponent;
 import mb.spoofax.core.platform.DaggerPlatformComponent;
 import mb.spoofax.core.platform.LoggerFactoryModule;
 import mb.spoofax.core.platform.PlatformComponent;
 import mb.spoofax.core.platform.PlatformPieModule;
-import mb.str.DaggerStrategoComponent;
-import mb.str.StrategoComponent;
 import mb.str.task.StrategoAnalyze;
 import mb.str.task.StrategoCompileToJava;
 import mb.str.task.StrategoParse;
@@ -38,18 +39,27 @@ import java.util.Collections;
 public class TestBase {
     public final FileSystem fileSystem = Jimfs.newFileSystem(Configuration.unix());
     public final FSResource rootDirectory = new FSResource(fileSystem.getPath("/"));
+    public final TextResourceRegistry textResourceRegistry = new TextResourceRegistry();
 
-    public final PlatformComponent platformComponent = DaggerPlatformComponent
-        .builder()
+    final StrategoResourcesComponent resourcesComponent = DaggerStrategoResourcesComponent.create();
+    final BaseResourceServiceModule resourceServiceModule = new BaseResourceServiceModule()
+        .addRegistry(textResourceRegistry)
+        .addRegistriesFrom(resourcesComponent);
+    final BaseResourceServiceComponent resourceServiceComponent = DaggerBaseResourceServiceComponent.builder()
+        .baseResourceServiceModule(resourceServiceModule)
+        .build();
+
+    public final PlatformComponent platformComponent = DaggerPlatformComponent.builder()
         .loggerFactoryModule(new LoggerFactoryModule(new SLF4JLoggerFactory()))
         .platformPieModule(new PlatformPieModule(PieBuilderImpl::new))
+        .resourceServiceComponent(resourceServiceComponent)
         .build();
     public final LoggerFactory loggerFactory = platformComponent.getLoggerFactory();
     public final Logger log = loggerFactory.create(TestBase.class);
-    public final TextResourceRegistry textResourceRegistry = platformComponent.getTextResourceRegistry();
 
-    public final StrategoComponent languageComponent = DaggerStrategoComponent
-        .builder()
+    public final StrategoComponent languageComponent = DaggerStrategoComponent.builder()
+        .strategoResourcesComponent(resourcesComponent)
+        .resourceServiceComponent(resourceServiceComponent)
         .platformComponent(platformComponent)
         .build();
     public final StrategoParse parse = languageComponent.getStrategoParse();

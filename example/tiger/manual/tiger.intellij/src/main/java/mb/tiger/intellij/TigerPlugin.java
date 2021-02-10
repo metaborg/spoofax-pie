@@ -1,10 +1,15 @@
 package mb.tiger.intellij;
 
+import mb.spoofax.core.platform.DaggerResourceServiceComponent;
+import mb.spoofax.core.platform.ResourceServiceComponent;
 import mb.spoofax.intellij.SpoofaxPlugin;
+import mb.tiger.spoofax.DaggerTigerResourcesComponent;
 import mb.tiger.spoofax.TigerModule;
+import mb.tiger.spoofax.TigerResourcesComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class TigerPlugin {
+    private static @Nullable TigerResourcesComponent resourcesComponent;
     private static @Nullable TigerIntellijComponent component;
 
     public static TigerIntellijComponent getComponent() {
@@ -15,11 +20,15 @@ public class TigerPlugin {
     }
 
     public static void init() {
-        component = DaggerTigerIntellijComponent
-            .builder()
-            .spoofaxIntellijComponent(SpoofaxPlugin.getComponent())
+        resourcesComponent = DaggerTigerResourcesComponent.create();
+        final ResourceServiceComponent resourceServiceComponent = DaggerResourceServiceComponent.builder()
+            .resourceServiceModule(SpoofaxPlugin.getResourceServiceComponent().createParentModule().addRegistriesFrom(resourcesComponent))
+            .build();
+        component = DaggerTigerIntellijComponent.builder()
             .tigerModule(new TigerModule())
-            .tigerIntellijModule(new TigerIntellijModule())
+            .tigerResourcesComponent(resourcesComponent)
+            .resourceServiceComponent(resourceServiceComponent)
+            .intellijPlatformComponent(SpoofaxPlugin.getPlatformComponent())
             .build();
     }
 }

@@ -7,9 +7,7 @@ import mb.pie.api.MapTaskDefs;
 import mb.pie.api.Pie;
 import mb.pie.api.PieBuilder;
 import mb.pie.api.TaskDef;
-import mb.resource.DefaultResourceService;
 import mb.resource.ResourceService;
-import mb.resource.fs.FSResourceRegistry;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
 import mb.spoofax.compiler.adapter.CompleterAdapterCompiler;
 import mb.spoofax.compiler.adapter.ConstraintAnalyzerAdapterCompiler;
@@ -54,13 +52,6 @@ public class SpoofaxCompilerModule {
     @SpoofaxCompilerScope
     public TemplateCompiler provideTemplateCompiler() {
         return templateCompiler;
-    }
-
-    @Provides
-    @SpoofaxCompilerScope
-    @SpoofaxCompilerQualifier
-    public ResourceService provideResourceService() {
-        return new DefaultResourceService(new FSResourceRegistry());
     }
 
     @Provides
@@ -118,7 +109,7 @@ public class SpoofaxCompilerModule {
     @Provides
     @SpoofaxCompilerScope
     @SpoofaxCompilerQualifier
-    public Pie providePie(@SpoofaxCompilerQualifier ResourceService resourceService, Set<TaskDef<?, ?>> taskDefs) {
+    public Pie providePie(ResourceService resourceService, Set<TaskDef<?, ?>> taskDefs) {
         final PieBuilder builder = pieBuilderSupplier.get();
         builder.withTaskDefs(new MapTaskDefs(taskDefs));
         builder.withResourceService(resourceService);

@@ -1,6 +1,7 @@
 package mb.spoofax.eclipse.editor;
 
 import mb.common.style.Style;
+import mb.spoofax.core.platform.PlatformScope;
 import mb.spoofax.eclipse.util.ColorShare;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.jface.text.TextAttribute;
@@ -15,7 +16,7 @@ import javax.inject.Singleton;
 /**
  * Manages the scope names and their styles.
  */
-@Singleton
+@PlatformScope
 public final class ScopeManager {
 
     /** The default scope name. */

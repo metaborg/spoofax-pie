@@ -1,0 +1,37 @@
+package {{baseResourcesModule.packageId}};
+
+import dagger.Module;
+import dagger.Provides;
+import dagger.multibindings.IntoSet;
+import mb.resource.ResourceRegistry;
+import mb.resource.classloader.ClassLoaderResourceRegistry;
+import mb.resource.classloader.ClassLoaderResource;
+import mb.resource.hierarchical.HierarchicalResource;
+
+@Module
+public class {{baseResourcesModule.id}} {
+    @Provides @{{resourcesScope.qualifiedId}}
+    static {{classLoaderResources.classLoaderResources.qualifiedId}} provideClassLoaderResources() {
+        return new {{classLoaderResources.classLoaderResources.qualifiedId}}();
+    }
+
+    @Provides @{{resourcesScope.qualifiedId}} @{{qualifier.qualifiedId}}
+    static ClassLoaderResourceRegistry provideClassLoaderResourceRegistry({{classLoaderResources.classLoaderResources.qualifiedId}} classLoaderResources) {
+        return classLoaderResources.resourceRegistry;
+    }
+
+    @Provides @{{resourcesScope.qualifiedId}} @{{qualifier.qualifiedId}}("definition-directory")
+    static ClassLoaderResource provideDefinitionDirectory({{classLoaderResources.classLoaderResources.qualifiedId}} classLoaderResources) {
+        return classLoaderResources.definitionDirectory;
+    }
+
+    @Provides @{{resourcesScope.qualifiedId}} @{{qualifier.qualifiedId}}("definition-directory")
+    static HierarchicalResource provideDefinitionDirectoryAsHierarchicalResource(@{{qualifier.qualifiedId}}("definition-directory") ClassLoaderResource definitionDirectory) {
+        return definitionDirectory;
+    }
+
+    @Provides @{{resourcesScope.qualifiedId}} @{{qualifier.qualifiedId}} @IntoSet
+    static ResourceRegistry provideClassLoaderResourceRegistryIntoSet(@{{qualifier.qualifiedId}} ClassLoaderResourceRegistry registry) {
+        return registry;
+    }
+}

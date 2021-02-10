@@ -69,30 +69,8 @@ import java.util.Set;
     @Provides
     @Spoofax3CompilerScope
     @Spoofax3CompilerQualifier
-    public ResourceService provideResourceService(
-        @Platform ResourceService platformResourceService,
-        @Sdf3Qualifier ResourceService sdf3ResourceService,
-        @StrategoQualifier ResourceService strategoResourceService,
-        @EsvQualifier ResourceService esvResourceService,
-        @StatixQualifier ResourceService statixResourceService,
-        @LibSpoofax2Qualifier ResourceService libSpoofax2ResourceService,
-        @LibStatixQualifier ResourceService libStatixResourceService
-    ) {
-        return platformResourceService.createChild(
-            sdf3ResourceService,
-            strategoResourceService,
-            esvResourceService,
-            statixResourceService,
-            libSpoofax2ResourceService,
-            libStatixResourceService
-        );
-    }
-
-    @Provides
-    @Spoofax3CompilerScope
-    @Spoofax3CompilerQualifier
     public Pie providePie(
-        @Spoofax3CompilerQualifier ResourceService resourceService,
+        ResourceService resourceService,
         Set<TaskDef<?, ?>> taskDefs,
         @Platform PieBuilder pieBuilder,
         @Sdf3Qualifier Pie sdf3Pie,

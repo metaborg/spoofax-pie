@@ -112,6 +112,18 @@ public interface AdapterProject extends Serializable {
     }
 
 
+    // Dagger resources scope
+
+    @Value.Default default TypeInfo baseResourcesScope() {
+        return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "ResourcesScope");
+    }
+
+    Optional<TypeInfo> extendResourcesScope();
+
+    default TypeInfo resourcesScope() {
+        return extendResourcesScope().orElseGet(this::baseResourcesScope);
+    }
+
     // Dagger Scope
 
     @Value.Default default TypeInfo baseScope() {

@@ -1,6 +1,7 @@
 package mb.spoofax.eclipse.editor;
 
 import mb.common.util.MultiMap;
+import mb.spoofax.core.platform.PlatformScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
@@ -10,7 +11,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.function.Consumer;
 
-@Singleton
+@PlatformScope
 public class PartClosedCallback extends EditorTrackerBase {
     private final MultiMap<IWorkbenchPart, Consumer<IWorkbenchPart>> callbacks = MultiMap.withConcurrentHash();
 

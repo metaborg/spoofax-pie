@@ -7,20 +7,30 @@ import mb.spoofax.intellij.log.IntellijLoggerFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class SpoofaxPlugin {
-    private static @Nullable SpoofaxIntellijComponent component;
+    private static @Nullable IntellijResourceServiceComponent resourceServiceComponent;
+    private static @Nullable IntellijPlatformComponent platformComponent;
 
-    public static SpoofaxIntellijComponent getComponent() {
-        if(component == null) {
+    public static IntellijResourceServiceComponent getResourceServiceComponent() {
+        if(resourceServiceComponent == null) {
             init();
         }
-        return component;
+        return resourceServiceComponent;
+    }
+
+    public static IntellijPlatformComponent getPlatformComponent() {
+        if(platformComponent == null) {
+            init();
+        }
+        return platformComponent;
     }
 
     public static void init() {
-        component = DaggerSpoofaxIntellijComponent
+        resourceServiceComponent = DaggerIntellijResourceServiceComponent.create();
+        platformComponent = DaggerIntellijPlatformComponent
             .builder()
             .loggerFactoryModule(new LoggerFactoryModule(new IntellijLoggerFactory()))
             .platformPieModule(new PlatformPieModule(PieBuilderImpl::new))
+            .intellijResourceServiceComponent(resourceServiceComponent)
             .build();
     }
 }

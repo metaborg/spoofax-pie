@@ -9,7 +9,7 @@ import mb.spoofax.core.language.command.ResourcePathWithKind;
 import mb.spoofax.core.language.menu.MenuItem;
 import mb.spoofax.eclipse.EclipseIdentifiers;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
-import mb.spoofax.eclipse.SpoofaxEclipseComponent;
+import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.command.EnclosingCommandContextProvider;
 import mb.spoofax.eclipse.pie.PieRunner;
@@ -38,7 +38,7 @@ public abstract class ResourceContextMenu extends MenuShared {
 
 
     public ResourceContextMenu(EclipseLanguageComponent languageComponent) {
-        final SpoofaxEclipseComponent component = SpoofaxPlugin.getComponent();
+        final EclipsePlatformComponent component = SpoofaxPlugin.getPlatformComponent();
         this.enclosingCommandContextProvider = component.getEnclosingCommandContextProvider();
         this.pieRunner = component.getPieRunner();
         this.languageComponent = languageComponent;
