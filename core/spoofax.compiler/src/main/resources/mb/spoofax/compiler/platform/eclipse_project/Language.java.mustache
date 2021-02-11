@@ -1,0 +1,90 @@
+package {{baseLanguage.packageId}};
+
+import mb.pie.api.ExecException;
+import mb.spoofax.core.platform.ResourceServiceComponent;
+import mb.spoofax.eclipse.EclipseLanguage;
+import mb.spoofax.eclipse.EclipsePlatformComponent;
+import mb.spoofax.eclipse.util.StatusUtil;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.eclipse.core.resources.WorkspaceJob;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+
+import java.io.IOException;
+
+public class {{baseLanguage.id}} implements EclipseLanguage {
+    private static @Nullable {{baseLanguage.id}} instance;
+    private {{adapterProjectCompilerInput.resourcesComponent.nullableQualifiedId}} resourcesComponent;
+    private {{eclipseComponent.nullableQualifiedId}} component;
+
+    private {{baseLanguage.id}}() {}
+
+
+    public static {{baseLanguage.id}} getInstance() {
+        if(instance == null) {
+            instance = new {{baseLanguage.id}}();
+        }
+        return instance;
+    }
+
+
+    public {{adapterProjectCompilerInput.resourcesComponent.qualifiedId}} getResourcesComponent() {
+        if(resourcesComponent == null) {
+            throw new RuntimeException("{{adapterProjectCompilerInput.resourcesComponent.id}} has not been initialized yet");
+        }
+        return resourcesComponent;
+    }
+
+    public {{eclipseComponent.qualifiedId}} getComponent() {
+        if(component == null) {
+            throw new RuntimeException("{{eclipseComponent.id}} has not been initialized yet");
+        }
+        return component;
+    }
+
+
+    @Override public {{adapterProjectCompilerInput.resourcesComponent.qualifiedId}} createResourcesComponent() {
+        if(resourcesComponent == null) {
+            resourcesComponent = {{adapterProjectCompilerInput.daggerResourcesComponent.qualifiedId}}.create();
+        }
+        return resourcesComponent;
+    }
+
+    @Override public {{eclipseComponent.qualifiedId}} createComponent(
+        ResourceServiceComponent resourceServiceComponent,
+        EclipsePlatformComponent platformComponent
+    ) {
+        if(component == null) {
+            component = {{daggerEclipseComponent.qualifiedId}}.builder()
+                .{{adapterProjectCompilerInput.resourcesComponent.idAsCamelCase}}(getResourcesComponent())
+                {{#adapterProjectCompilerInput.multilangAnalyzer}}
+                .multiLangEclipseComponent(mb.statix.multilang.eclipse.MultiLangPlugin.getComponent())
+                {{/adapterProjectCompilerInput.multilangAnalyzer}}
+                .resourceServiceComponent(resourceServiceComponent)
+                .eclipsePlatformComponent(platformComponent)
+                .build();
+        }
+        return component;
+    }
+
+    @Override public void start(
+        ResourceServiceComponent resourceServiceComponent,
+        EclipsePlatformComponent platformComponent
+    ) {
+        final {{eclipseComponent.qualifiedId}} component = getComponent();
+        component.getEditorTracker().register();
+        final WorkspaceJob job = new WorkspaceJob("{{shared.name}} startup") {
+            @Override public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
+                try {
+                    platformComponent.getPieRunner().startup(component, monitor);
+                } catch(IOException | ExecException | InterruptedException e) {
+                    throw new CoreException(StatusUtil.error("{{shared.name}} startup job failed unexpectedly", e));
+                }
+                return StatusUtil.success();
+            }
+        };
+        job.setRule(component.startupWriteLockRule());
+        job.schedule();
+    }
+}

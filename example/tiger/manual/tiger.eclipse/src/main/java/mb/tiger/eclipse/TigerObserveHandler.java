@@ -4,6 +4,6 @@ import mb.spoofax.eclipse.menu.ObserveHandler;
 
 public class TigerObserveHandler extends ObserveHandler {
     public TigerObserveHandler() {
-        super(TigerPlugin.getComponent());
+        super(TigerLanguage.getInstance().getComponent());
     }
 }

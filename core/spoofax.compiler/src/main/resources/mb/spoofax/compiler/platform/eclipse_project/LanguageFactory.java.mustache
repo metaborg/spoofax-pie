@@ -1,0 +1,9 @@
+package {{baseLanguageFactory.packageId}};
+
+import org.eclipse.core.runtime.IExecutableExtensionFactory;
+
+public class {{baseLanguageFactory.id}} implements IExecutableExtensionFactory {
+    @Override public {{language.qualifiedId}} create() {
+        return {{language.qualifiedId}}.getInstance();
+    }
+}

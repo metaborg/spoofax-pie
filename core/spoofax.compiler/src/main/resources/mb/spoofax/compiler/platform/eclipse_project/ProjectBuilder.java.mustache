@@ -4,6 +4,6 @@ import mb.spoofax.eclipse.build.SpoofaxProjectBuilder;
 
 public class {{baseProjectBuilder.id}} extends SpoofaxProjectBuilder {
     public {{baseProjectBuilder.id}}() {
-        super({{plugin.qualifiedId}}.getComponent());
+        super({{language.qualifiedId}}.getInstance().getComponent());
     }
 }

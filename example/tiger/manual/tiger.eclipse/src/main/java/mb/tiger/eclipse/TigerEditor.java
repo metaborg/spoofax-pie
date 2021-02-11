@@ -4,6 +4,6 @@ import mb.spoofax.eclipse.editor.SpoofaxEditor;
 
 public class TigerEditor extends SpoofaxEditor {
     public TigerEditor() {
-        super(TigerPlugin.getComponent());
+        super(TigerLanguage.getInstance().getComponent());
     }
 }

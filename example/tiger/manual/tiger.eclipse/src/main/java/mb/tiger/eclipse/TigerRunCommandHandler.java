@@ -4,6 +4,6 @@ import mb.spoofax.eclipse.command.RunCommandHandler;
 
 public class TigerRunCommandHandler extends RunCommandHandler {
     public TigerRunCommandHandler() {
-        super(TigerPlugin.getComponent());
+        super(TigerLanguage.getInstance().getComponent());
     }
 }

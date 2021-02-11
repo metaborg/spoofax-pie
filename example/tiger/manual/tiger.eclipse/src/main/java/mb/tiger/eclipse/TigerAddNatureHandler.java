@@ -4,6 +4,6 @@ import mb.spoofax.eclipse.nature.AddNatureHandler;
 
 public class TigerAddNatureHandler extends AddNatureHandler {
     public TigerAddNatureHandler() {
-        super(TigerPlugin.getComponent());
+        super(TigerLanguage.getInstance().getComponent());
     }
 }

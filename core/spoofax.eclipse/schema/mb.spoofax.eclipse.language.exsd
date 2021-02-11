@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<schema targetNamespace="org.metaborg.spoofax.eclipse" xmlns="http://www.w3.org/2001/XMLSchema">
+  <annotation>
+    <appinfo>
+      <meta.schema
+        plugin="mb.spoofax.eclipse"
+        id="mb.spoofax.eclipse.language"
+        name="Spoofax language registration"
+      />
+    </appinfo>
+    <documentation>
+      Extension point for registering languages.
+    </documentation>
+  </annotation>
+
+  <element name="extension">
+    <annotation>
+      <appinfo>
+        <meta.element/>
+      </appinfo>
+    </annotation>
+    <complexType>
+      <choice minOccurs="1" maxOccurs="unbounded">
+        <element ref="language"/>
+      </choice>
+      <attribute name="point" type="string" use="required"/>
+      <attribute name="id" type="string"/>
+      <attribute name="name" type="string"/>
+    </complexType>
+  </element>
+
+  <element name="language">
+    <complexType>
+      <attribute name="group" type="string"/>
+      <attribute name="class" type="string" use="required">
+        <annotation>
+          <documentation/>
+          <appinfo>
+            <meta.attribute kind="java" basedOn=":mb.spoofax.eclipse.EclipseLanguage"/>
+          </appinfo>
+        </annotation>
+      </attribute>
+    </complexType>
+  </element>
+</schema>

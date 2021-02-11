@@ -10,4 +10,7 @@ dependencies {
 
 languageEclipseProject {
   adapterProject.set(project(":esv"))
+  compilerInput {
+    languageGroup("mb.spoofax.lwb")
+  }
 }

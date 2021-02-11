@@ -4,6 +4,6 @@ import mb.spoofax.eclipse.command.RunCommandHandler;
 
 public class {{baseRunCommandHandler.id}} extends RunCommandHandler {
     public {{baseRunCommandHandler.id}}() {
-        super({{plugin.qualifiedId}}.getComponent());
+        super({{language.qualifiedId}}.getInstance().getComponent());
     }
 }

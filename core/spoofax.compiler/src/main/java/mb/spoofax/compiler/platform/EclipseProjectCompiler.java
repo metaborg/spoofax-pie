@@ -29,6 +29,8 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
     private final TemplateWriter pluginXmlTemplate;
     private final TemplateWriter manifestTemplate;
     private final TemplateWriter packageInfoTemplate;
+    private final TemplateWriter languageTemplate;
+    private final TemplateWriter languageFactoryTemplate;
     private final TemplateWriter pluginTemplate;
     private final TemplateWriter moduleTemplate;
     private final TemplateWriter componentTemplate;
@@ -53,6 +55,8 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
         this.pluginXmlTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/plugin.xml.mustache");
         this.manifestTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/MANIFEST.MF.mustache");
         this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/package-info.java.mustache");
+        this.languageTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/Language.java.mustache");
+        this.languageFactoryTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/LanguageFactory.java.mustache");
         this.pluginTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/Plugin.java.mustache");
         this.moduleTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/Module.java.mustache");
         this.componentTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/Component.java.mustache");
@@ -89,6 +93,8 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
         // Class files
         final ResourcePath classesGenDirectory = input.generatedJavaSourcesDirectory();
         packageInfoTemplate.write(context, input.basePackageInfo().file(classesGenDirectory), input);
+        languageTemplate.write(context, input.baseLanguage().file(classesGenDirectory), input);
+        languageFactoryTemplate.write(context, input.baseLanguageFactory().file(classesGenDirectory), input);
         pluginTemplate.write(context, input.basePlugin().file(classesGenDirectory), input);
         moduleTemplate.write(context, input.baseEclipseModule().file(classesGenDirectory), input);
         componentTemplate.write(context, input.baseEclipseComponent().file(classesGenDirectory), input);
@@ -176,6 +182,10 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
         GradleProject project();
 
         String packageId();
+
+        @Value.Default default String languageGroup() {
+            return packageId();
+        }
 
 
         /// Gradle configuration
@@ -281,6 +291,30 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
                 return manualPackageInfo().get();
             }
             return basePackageInfo();
+        }
+
+        // Language
+
+        @Value.Default default TypeInfo baseLanguage() {
+            return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "Language");
+        }
+
+        Optional<TypeInfo> extendLanguage();
+
+        default TypeInfo language() {
+            return extendLanguage().orElseGet(this::baseLanguage);
+        }
+
+        // LanguageFactory
+
+        @Value.Default default TypeInfo baseLanguageFactory() {
+            return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "LanguageFactory");
+        }
+
+        Optional<TypeInfo> extendLanguageFactory();
+
+        default TypeInfo languageFactory() {
+            return extendLanguageFactory().orElseGet(this::baseLanguageFactory);
         }
 
         // Plugin
@@ -512,6 +546,8 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
             generatedFiles.add(manifestMfFile());
             if(classKind().isGenerating()) {
                 generatedFiles.add(basePackageInfo().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseLanguage().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseLanguageFactory().file(this.generatedJavaSourcesDirectory()));
                 generatedFiles.add(basePlugin().file(this.generatedJavaSourcesDirectory()));
                 generatedFiles.add(baseEclipseComponent().file(this.generatedJavaSourcesDirectory()));
                 generatedFiles.add(baseEclipseModule().file(this.generatedJavaSourcesDirectory()));

@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+  <!-- Extension point for registering language groups -->
+  <extension-point
+    id="mb.spoofax.eclipse.language"
+    name="Spoofax language registration"
+    schema="schema/mb.spoofax.eclipse.language.exsd"
+  />
+
   <!-- Register NamedDocumentProvider as the default document provider for NamedEditorInput -->
   <extension point="org.eclipse.ui.editors.documentProviders">
     <provider

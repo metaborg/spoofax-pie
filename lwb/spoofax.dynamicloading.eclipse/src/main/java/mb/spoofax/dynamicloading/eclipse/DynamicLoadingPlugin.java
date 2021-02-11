@@ -1,16 +1,16 @@
 package mb.spoofax.dynamicloading.eclipse;
 
-import mb.esv.eclipse.EsvPlugin;
-import mb.libspoofax2.eclipse.LibSpoofax2Plugin;
-import mb.libstatix.eclipse.LibStatixPlugin;
+import mb.esv.eclipse.EsvLanguage;
+import mb.libspoofax2.eclipse.LibSpoofax2Language;
+import mb.libstatix.eclipse.LibStatixLanguage;
 import mb.pie.runtime.PieBuilderImpl;
-import mb.sdf3.eclipse.Sdf3Plugin;
+import mb.sdf3.eclipse.Sdf3Language;
 import mb.spoofax.compiler.spoofax3.dagger.Spoofax3Compiler;
 import mb.spoofax.compiler.spoofax3.standalone.dagger.Spoofax3CompilerStandalone;
 import mb.spoofax.dynamicloading.DynamicLoader;
 import mb.spoofax.eclipse.SpoofaxPlugin;
-import mb.statix.eclipse.StatixPlugin;
-import mb.str.eclipse.StrategoPlugin;
+import mb.statix.eclipse.StatixLanguage;
+import mb.str.eclipse.StrategoLanguage;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -38,14 +38,14 @@ public class DynamicLoadingPlugin extends AbstractUIPlugin {
             SpoofaxPlugin.getResourceServiceComponent(),
             SpoofaxPlugin.getPlatformComponent(),
             PieBuilderImpl::new,
-            Sdf3Plugin.getComponent(),
-            StrategoPlugin.getComponent(),
-            EsvPlugin.getComponent(),
-            StatixPlugin.getComponent(),
-            LibSpoofax2Plugin.getComponent(),
-            LibSpoofax2Plugin.getResourcesComponent(),
-            LibStatixPlugin.getComponent(),
-            LibStatixPlugin.getResourcesComponent()
+            Sdf3Language.getInstance().getComponent(),
+            StrategoLanguage.getInstance().getComponent(),
+            EsvLanguage.getInstance().getComponent(),
+            StatixLanguage.getInstance().getComponent(),
+            LibSpoofax2Language.getInstance().getComponent(),
+            LibSpoofax2Language.getInstance().getResourcesComponent(),
+            LibStatixLanguage.getInstance().getComponent(),
+            LibStatixLanguage.getInstance().getResourcesComponent()
         );
         spoofax3CompilerStandalone = new Spoofax3CompilerStandalone(spoofax3Compiler);
         dynamicLoader = new DynamicLoader(spoofax3CompilerStandalone);

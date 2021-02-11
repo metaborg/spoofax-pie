@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+  <!-- Language registration -->
+  <extension point="mb.spoofax.eclipse.language">
+    <language group="mb.tiger" class="mb.tiger.eclipse.TigerLanguageFactory"/>
+  </extension>
+
   <!-- Context -->
   <extension point="org.eclipse.ui.contexts">
     <context

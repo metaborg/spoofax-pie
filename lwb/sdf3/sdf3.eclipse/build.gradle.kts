@@ -5,4 +5,7 @@ plugins {
 
 languageEclipseProject {
   adapterProject.set(project(":sdf3"))
+  compilerInput {
+    languageGroup("mb.spoofax.lwb")
+  }
 }

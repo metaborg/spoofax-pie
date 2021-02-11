@@ -4,6 +4,6 @@ import mb.spoofax.eclipse.menu.EditorContextMenu;
 
 public class TigerEditorContextMenu extends EditorContextMenu {
     public TigerEditorContextMenu() {
-        super(TigerPlugin.getComponent());
+        super(TigerLanguage.getInstance().getComponent());
     }
 }

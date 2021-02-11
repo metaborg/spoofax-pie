@@ -6,6 +6,6 @@ public class TigerNature extends SpoofaxNature {
     public static final String id = TigerPlugin.pluginId + ".nature";
 
     public TigerNature() {
-        super(TigerPlugin.getComponent());
+        super(TigerLanguage.getInstance().getComponent());
     }
 }
