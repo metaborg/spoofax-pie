@@ -68,7 +68,7 @@ public class SpoofaxPlugin extends AbstractUIPlugin {
         for(Map.Entry<String, ArrayList<EclipseLanguage>> entry : languageGroups.entrySet()) {
             final String group = entry.getKey();
             final ArrayList<EclipseLanguage> eclipseLanguages = entry.getValue();
-            final ResourceServiceModule resourceServiceModule = resourceServiceComponent.createParentModule();
+            final ResourceServiceModule resourceServiceModule = resourceServiceComponent.createChildModule();
             for(EclipseLanguage eclipseLanguage : eclipseLanguages) {
                 resourceServiceModule.addRegistriesFrom(eclipseLanguage.createResourcesComponent());
             }

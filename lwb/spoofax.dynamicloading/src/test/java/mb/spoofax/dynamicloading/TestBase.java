@@ -51,7 +51,7 @@ class TestBase {
         final Function<LoggerFactory, Tracer> tracerFactory = loggerFactory -> new CompositeTracer(new LoggingTracer(loggerFactory), metricsTracer);
         final BaseResourceServiceComponent baseResourceServiceComponent = DaggerBaseResourceServiceComponent.create();
         final Spoofax3Compiler spoofax3Compiler = new Spoofax3Compiler(
-            baseResourceServiceComponent.createParentModule(classLoaderResourceRegistry),
+            baseResourceServiceComponent.createChildModule(classLoaderResourceRegistry),
             new LoggerFactoryModule(StreamLoggerFactory.stdOutVeryVerbose()),
             new PlatformPieModule(PieBuilderImpl::new, storeFactory, tracerFactory)
         );

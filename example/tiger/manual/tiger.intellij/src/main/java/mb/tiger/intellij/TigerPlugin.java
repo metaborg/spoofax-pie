@@ -22,7 +22,7 @@ public class TigerPlugin {
     public static void init() {
         resourcesComponent = DaggerTigerResourcesComponent.create();
         final ResourceServiceComponent resourceServiceComponent = DaggerResourceServiceComponent.builder()
-            .resourceServiceModule(SpoofaxPlugin.getResourceServiceComponent().createParentModule().addRegistriesFrom(resourcesComponent))
+            .resourceServiceModule(SpoofaxPlugin.getResourceServiceComponent().createChildModule().addRegistriesFrom(resourcesComponent))
             .build();
         component = DaggerTigerIntellijComponent.builder()
             .tigerModule(new TigerModule())

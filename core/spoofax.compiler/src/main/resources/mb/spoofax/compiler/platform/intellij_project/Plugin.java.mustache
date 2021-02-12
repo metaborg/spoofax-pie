@@ -26,7 +26,7 @@ public class {{basePlugin.id}} {
     public static void init() {
         resourcesComponent = {{adapterProjectCompilerInput.daggerResourcesComponent.qualifiedId}}.create();
         final ResourceServiceComponent resourceServiceComponent = DaggerResourceServiceComponent.builder()
-            .resourceServiceModule(SpoofaxPlugin.getResourceServiceComponent().createParentModule().addRegistriesFrom(resourcesComponent))
+            .resourceServiceModule(SpoofaxPlugin.getResourceServiceComponent().createChildModule().addRegistriesFrom(resourcesComponent))
             .build();
         component = {{daggerComponent.id}}.builder()
             .{{adapterProjectCompilerInput.resourcesComponent.idAsCamelCase}}(resourcesComponent)

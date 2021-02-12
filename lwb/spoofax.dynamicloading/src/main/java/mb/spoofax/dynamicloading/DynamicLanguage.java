@@ -36,7 +36,7 @@ public class DynamicLanguage {
         }
 
         this.resourceServiceComponent = DaggerResourceServiceComponent.builder()
-            .resourceServiceModule(parentResourceServiceComponent.createParentModule(languageResourcesComponent.getResourceRegistries()))
+            .resourceServiceModule(parentResourceServiceComponent.createChildModule(languageResourcesComponent.getResourceRegistries()))
             .build();
 
         {

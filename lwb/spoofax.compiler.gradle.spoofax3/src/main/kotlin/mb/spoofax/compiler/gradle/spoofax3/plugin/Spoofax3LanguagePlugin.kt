@@ -16,7 +16,6 @@ import mb.spoofax.compiler.spoofax3.dagger.*
 import mb.spoofax.compiler.spoofax3.language.*
 import mb.spoofax.core.platform.LoggerFactoryModule
 import mb.spoofax.core.platform.PlatformPieModule
-import mb.spoofax.core.platform.ResourceServiceModule
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -75,7 +74,7 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
 
     // OPTO: cache instantiation components.
     val spoofax3Compiler = Spoofax3Compiler(
-      languageProjectExtension.resourceServiceComponent.createParentModule(),
+      languageProjectExtension.resourceServiceComponent.createChildModule(),
       LoggerFactoryModule(SLF4JLoggerFactory()),
       PlatformPieModule { PieBuilderImpl() }
     )

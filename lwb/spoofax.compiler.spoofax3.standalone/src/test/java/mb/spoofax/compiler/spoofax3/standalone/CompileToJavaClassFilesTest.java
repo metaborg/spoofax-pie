@@ -54,7 +54,7 @@ class CompileToJavaClassFilesTest {
     final ClassLoaderResourceRegistry classLoaderResourceRegistry =
         new ClassLoaderResourceRegistry("spoofax3.standalone", CompileToJavaClassFilesTest.class.getClassLoader());
     final Spoofax3Compiler spoofax3Compiler = new Spoofax3Compiler(
-        baseResourceServiceComponent.createParentModule(classLoaderResourceRegistry),
+        baseResourceServiceComponent.createChildModule(classLoaderResourceRegistry),
         new LoggerFactoryModule(StreamLoggerFactory.stdOutVeryVerbose()),
         new PlatformPieModule(PieBuilderImpl::new)
     );

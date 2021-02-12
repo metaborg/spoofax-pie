@@ -15,23 +15,23 @@ public interface ResourceServiceComponent {
     ResourceService getResourceService();
 
 
-    default ResourceServiceModule createParentModule() {
+    default ResourceServiceModule createChildModule() {
         return new ResourceServiceModule(getResourceService());
     }
 
-    default ResourceServiceModule createParentModule(Set<ResourceRegistry> registries) {
+    default ResourceServiceModule createChildModule(Set<ResourceRegistry> registries) {
         return new ResourceServiceModule(getResourceService(), registries);
     }
 
-    default ResourceServiceModule createParentModule(ResourceRegistry... registries) {
+    default ResourceServiceModule createChildModule(ResourceRegistry... registries) {
         return new ResourceServiceModule(getResourceService(), registries);
     }
 
-    default ResourceServiceModule createParentModuleWithDefault(ResourceRegistry defaultRegistry, Set<ResourceRegistry> registries) {
+    default ResourceServiceModule createChildModuleWithDefault(ResourceRegistry defaultRegistry, Set<ResourceRegistry> registries) {
         return new ResourceServiceModule(getResourceService(), defaultRegistry, registries);
     }
 
-    default ResourceServiceModule createParentModuleWithDefault(ResourceRegistry defaultRegistry, ResourceRegistry... registries) {
+    default ResourceServiceModule createChildModuleWithDefault(ResourceRegistry defaultRegistry, ResourceRegistry... registries) {
         return new ResourceServiceModule(getResourceService(), defaultRegistry, registries);
     }
 }
