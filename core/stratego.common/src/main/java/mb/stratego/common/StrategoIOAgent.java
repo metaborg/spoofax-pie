@@ -1,6 +1,5 @@
 package mb.stratego.common;
 
-import com.google.common.collect.Maps;
 import mb.log.api.Level;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
@@ -29,6 +28,7 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.util.HashMap;
 import java.util.Map;
 
 public class StrategoIOAgent extends IOAgent {
@@ -60,7 +60,7 @@ public class StrategoIOAgent extends IOAgent {
     private final ResourceService resourceService;
     private final HierarchicalResource tempDir;
 
-    private final Map<Integer, ResourceHandle> openFiles = Maps.newHashMap();
+    private final Map<Integer, ResourceHandle> openFiles = new HashMap<>();
 
     private final OutputStream stdout;
     private final Writer stdoutWriter;
