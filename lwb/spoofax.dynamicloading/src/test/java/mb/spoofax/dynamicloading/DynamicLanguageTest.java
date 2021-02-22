@@ -298,6 +298,12 @@ class DynamicLanguageTest extends CharsTestBase {
                 throw e;
             }
         }
+
+        try(final DynamicLoaderMixedSession session = dynamicLoader.newSession()) {
+            System.err.println("Unload language");
+            session.unload("chars");
+            session.deleteCacheForUnloadedLanguages();
+        }
     }
 
     @Disabled @Test void testCloseLanguage() throws Exception {
