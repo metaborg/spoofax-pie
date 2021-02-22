@@ -67,16 +67,33 @@ open class IntellijPlugin : Plugin<Project> {
     project.plugins.apply(JavaLibraryPlugin::class.java)
     project.pluginManager.apply("org.jetbrains.intellij")
 
-    // Disable some IntelliJ plugin functionality to increase incrementality.
-    project.configure<IntelliJPluginExtension> {
-      instrumentCode = false
-    }
-    project.tasks.getByName("buildSearchableOptions").enabled = false
+    configureIntelliJPlugin(project) // Configure IntelliJ plugin early, before afterEvaluate.
 
     project.afterEvaluate {
       extension.adapterProjectFinalized.whenAdapterProjectFinalized {
         val components = extension.languageProjectExtension.components
         configure(project, components.resourceServiceComponent, components.component, components.pieComponent, extension.compilerInputFinalized)
+      }
+    }
+  }
+
+  private fun configureIntelliJPlugin(project: Project) {
+    // Disable some IntelliJ plugin functionality to increase incrementality.
+    project.configure<IntelliJPluginExtension> {
+      version = "2020.3.2"
+      instrumentCode = false // Skip non-incremental and slow code instrumentation.
+    }
+    project.tasks {
+      named("buildSearchableOptions") {
+        enabled = false // Skip non-incremental and slow `buildSearchableOptions` task from `org.jetbrains.intellij`.
+      }
+
+      named<org.jetbrains.intellij.tasks.RunIdeTask>("runIde") {
+        jbrVersion("11_0_2b159") // Set JBR version because the latest one cannot be downloaded.
+        // HACK: make task depend on the runtime classpath to forcefully make it depend on `spoofax.intellij`, which
+        //       `org.jetbrains.intellij` seems to ignore. This is probably because `spoofax.intellij` is a plugin
+        //       but is not listed as a plugin dependency. This hack may not work when publishing this plugin.
+        dependsOn(project.configurations.getByName("runtimeClasspath"))
       }
     }
   }
