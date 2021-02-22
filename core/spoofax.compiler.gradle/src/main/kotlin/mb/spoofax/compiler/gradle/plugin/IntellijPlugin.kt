@@ -80,7 +80,7 @@ open class IntellijPlugin : Plugin<Project> {
   private fun configureIntelliJPlugin(project: Project) {
     // Disable some IntelliJ plugin functionality to increase incrementality.
     project.configure<IntelliJPluginExtension> {
-      version = "2020.3.2"
+      version = "2020.2.4" // 2020.2.4 is the last version that can be built with Java 8.
       instrumentCode = false // Skip non-incremental and slow code instrumentation.
     }
     project.tasks {
