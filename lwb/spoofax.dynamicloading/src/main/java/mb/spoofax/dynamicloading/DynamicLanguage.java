@@ -1,10 +1,15 @@
 package mb.spoofax.dynamicloading;
 
+import mb.log.dagger.LoggerComponent;
+import mb.pie.api.serde.JavaSerde;
+import mb.pie.dagger.DaggerRootPieComponent;
+import mb.pie.dagger.PieComponent;
+import mb.pie.dagger.RootPieModule;
+import mb.resource.dagger.DaggerResourceServiceComponent;
+import mb.resource.dagger.ResourceRegistriesProvider;
+import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.core.language.LanguageComponent;
-import mb.spoofax.core.language.LanguageResourcesComponent;
-import mb.spoofax.core.platform.DaggerResourceServiceComponent;
 import mb.spoofax.core.platform.PlatformComponent;
-import mb.spoofax.core.platform.ResourceServiceComponent;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -13,9 +18,10 @@ import java.net.URLClassLoader;
 
 public class DynamicLanguage {
     private final URLClassLoader classLoader;
-    private final LanguageResourcesComponent languageResourcesComponent;
+    private final ResourceRegistriesProvider languageResourcesComponent;
     private final ResourceServiceComponent resourceServiceComponent;
     private final LanguageComponent languageComponent;
+    private final PieComponent pieComponent;
     private boolean closed = false;
 
     public DynamicLanguage(
@@ -24,19 +30,22 @@ public class DynamicLanguage {
         String daggerComponentClassQualifiedId,
         String resourcesComponentClassQualifiedId,
         String resourcesComponentMethodName,
+        LoggerComponent loggerComponent,
         ResourceServiceComponent parentResourceServiceComponent,
-        PlatformComponent platformComponent
+        PlatformComponent platformComponent,
+        RootPieModule pieModule
     ) throws ReflectiveOperationException {
         this.classLoader = new URLClassLoader(classPath, DynamicLanguage.class.getClassLoader());
 
         {
             final Class<?> daggerClass = classLoader.loadClass(daggerResourcesComponentClassQualifiedId);
             final Method createMethod = daggerClass.getDeclaredMethod("create");
-            this.languageResourcesComponent = (LanguageResourcesComponent) createMethod.invoke(null);
+            this.languageResourcesComponent = (ResourceRegistriesProvider)createMethod.invoke(null);
         }
 
         this.resourceServiceComponent = DaggerResourceServiceComponent.builder()
             .resourceServiceModule(parentResourceServiceComponent.createChildModule(languageResourcesComponent.getResourceRegistries()))
+            .loggerComponent(loggerComponent)
             .build();
 
         {
@@ -44,11 +53,21 @@ public class DynamicLanguage {
             final Method builderMethod = daggerClass.getDeclaredMethod("builder");
             final Object builder = builderMethod.invoke(null);
             final Class<?> resourcesComponentClass = classLoader.loadClass(resourcesComponentClassQualifiedId);
+            builder.getClass().getDeclaredMethod("loggerComponent", LoggerComponent.class).invoke(builder, loggerComponent);
             builder.getClass().getDeclaredMethod(resourcesComponentMethodName, resourcesComponentClass).invoke(builder, languageResourcesComponent);
             builder.getClass().getDeclaredMethod("resourceServiceComponent", ResourceServiceComponent.class).invoke(builder, resourceServiceComponent);
             builder.getClass().getDeclaredMethod("platformComponent", PlatformComponent.class).invoke(builder, platformComponent);
-            this.languageComponent = (LanguageComponent) builder.getClass().getDeclaredMethod("build").invoke(builder);
+            this.languageComponent = (LanguageComponent)builder.getClass().getDeclaredMethod("build").invoke(builder);
         }
+
+        this.pieComponent = DaggerRootPieComponent.builder()
+            .loggerComponent(loggerComponent)
+            .resourceServiceComponent(resourceServiceComponent)
+            .rootPieModule(pieModule
+                .addTaskDefsFrom(languageComponent)
+                .withSerdeFactory(__ -> JavaSerde.createWithClassLoaderOverride(classLoader))
+            )
+            .build();
     }
 
     /**
@@ -58,9 +77,9 @@ public class DynamicLanguage {
      * @throws IOException when {@link URLClassLoader#close() closing the classloader} fails.
      */
     public void close() throws IOException {
-        if (closed) return;
+        if(closed) return;
         try {
-            languageComponent.getPie().close();
+            pieComponent.close();
             classLoader.close();
         } finally {
             closed = true;
@@ -73,8 +92,30 @@ public class DynamicLanguage {
      * @throws IllegalStateException if the dynamic language has been closed with {@link #close}.
      */
     public URLClassLoader getClassLoader() {
-        if (closed) throw new IllegalStateException("Cannot get class loader, dynamic language has been closed");
+        if(closed) throw new IllegalStateException("Cannot get class loader, dynamic language has been closed");
         return classLoader;
+    }
+
+    /**
+     * Gets the {@link ResourceRegistriesProvider language resources component} of this dynamic language.
+     *
+     * @throws IllegalStateException if the dynamic language has been closed with {@link #close}.
+     */
+    public ResourceRegistriesProvider getLanguageResourcesComponent() {
+        if(closed)
+            throw new IllegalStateException("Cannot get language resources component, dynamic language has been closed");
+        return languageResourcesComponent;
+    }
+
+    /**
+     * Gets the {@link ResourceServiceComponent resource service component} of this dynamic language.
+     *
+     * @throws IllegalStateException if the dynamic language has been closed with {@link #close}.
+     */
+    public ResourceServiceComponent getResourceServiceComponent() {
+        if(closed)
+            throw new IllegalStateException("Cannot get resource service component, dynamic language has been closed");
+        return resourceServiceComponent;
     }
 
     /**
@@ -83,8 +124,18 @@ public class DynamicLanguage {
      * @throws IllegalStateException if the dynamic language has been closed with {@link #close}.
      */
     public LanguageComponent getLanguageComponent() {
-        if (closed) throw new IllegalStateException("Cannot get language component, dynamic language has been closed");
+        if(closed) throw new IllegalStateException("Cannot get language component, dynamic language has been closed");
         return languageComponent;
+    }
+
+    /**
+     * Gets the {@link PieComponent PIE component} of this dynamic language.
+     *
+     * @throws IllegalStateException if the dynamic language has been closed with {@link #close}.
+     */
+    public PieComponent getPieComponent() {
+        if(closed) throw new IllegalStateException("Cannot get PIE component, dynamic language has been closed");
+        return pieComponent;
     }
 
     /**

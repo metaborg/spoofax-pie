@@ -32,6 +32,7 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
     private final TemplateWriter fileTypeTemplate;
     private final TemplateWriter fileElementTypeTemplate;
     private final TemplateWriter fileTypeFactoryTemplate;
+    private final TemplateWriter lexerFactoryTemplate;
     private final TemplateWriter syntaxHighlighterFactoryTemplate;
     private final TemplateWriter parserDefinitionTemplate;
 
@@ -47,6 +48,7 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
         this.fileTypeTemplate = templateCompiler.getOrCompileToWriter("intellij_project/FileType.java.mustache");
         this.fileElementTypeTemplate = templateCompiler.getOrCompileToWriter("intellij_project/FileElementType.java.mustache");
         this.fileTypeFactoryTemplate = templateCompiler.getOrCompileToWriter("intellij_project/FileTypeFactory.java.mustache");
+        this.lexerFactoryTemplate = templateCompiler.getOrCompileToWriter("intellij_project/LexerFactory.java.mustache");
         this.syntaxHighlighterFactoryTemplate = templateCompiler.getOrCompileToWriter("intellij_project/SyntaxHighlighterFactory.java.mustache");
         this.parserDefinitionTemplate = templateCompiler.getOrCompileToWriter("intellij_project/ParserDefinition.java.mustache");
     }
@@ -76,6 +78,7 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
         fileTypeTemplate.write(context, input.baseFileType().file(classesGenDirectory), input);
         fileElementTypeTemplate.write(context, input.baseFileElementType().file(classesGenDirectory), input);
         fileTypeFactoryTemplate.write(context, input.baseFileTypeFactory().file(classesGenDirectory), input);
+        lexerFactoryTemplate.write(context, input.baseLexerFactory().file(classesGenDirectory), input);
         syntaxHighlighterFactoryTemplate.write(context, input.syntaxHighlighterFactory().file(classesGenDirectory), input);
         parserDefinitionTemplate.write(context, input.parserDefinition().file(classesGenDirectory), input);
 
@@ -88,6 +91,7 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
         final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>(input.additionalDependencies());
         dependencies.add(GradleConfiguredDependency.apiPlatform(shared.spoofaxDependencyConstraintsDep()));
         dependencies.add(GradleConfiguredDependency.annotationProcessorPlatform(shared.spoofaxDependencyConstraintsDep()));
+        dependencies.add(GradleConfiguredDependency.implementation(shared.pieRuntimeDep()));
         // HACK: exclude adapter project dependency, as slf4j must be excluded from it for the IntelliJ plugin to work, which is not possible with 'GradleConfiguredDependency'.
         //dependencies.add(GradleConfiguredDependency.implementation(input.adapterProjectDependency()));
         dependencies.add(GradleConfiguredDependency.implementation(shared.spoofaxIntellijDep()));
@@ -286,6 +290,18 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
             return extendFileTypeFactory().orElseGet(this::baseFileTypeFactory);
         }
 
+        // Lexer factory
+
+        @Value.Default default TypeInfo baseLexerFactory() {
+            return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "LexerFactory");
+        }
+
+        Optional<TypeInfo> extendLexerFactory();
+
+        default TypeInfo lexerFactory() {
+            return extendLexerFactory().orElseGet(this::baseLexerFactory);
+        }
+
         // Syntax highlighter factory
 
         @Value.Default default TypeInfo baseSyntaxHighlighterFactory() {
@@ -325,6 +341,7 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
                 generatedFiles.add(baseFileType().file(generatedJavaSourcesDirectory()));
                 generatedFiles.add(baseFileElementType().file(generatedJavaSourcesDirectory()));
                 generatedFiles.add(baseFileTypeFactory().file(generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseLexerFactory().file(generatedJavaSourcesDirectory()));
                 generatedFiles.add(baseSyntaxHighlighterFactory().file(generatedJavaSourcesDirectory()));
                 generatedFiles.add(baseParserDefinition().file(generatedJavaSourcesDirectory()));
             }

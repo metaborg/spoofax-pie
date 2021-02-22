@@ -18,6 +18,7 @@ import mb.pie.api.TaskKey;
 import mb.pie.api.TopDownSession;
 import mb.pie.api.exec.CancelToken;
 import mb.pie.api.exec.NullCancelableToken;
+import mb.pie.dagger.PieComponent;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageInstance;
@@ -60,7 +61,6 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -104,6 +104,7 @@ public class PieRunner {
 
     public <D extends IDocument & IDocumentExtension4> void addOrUpdateEditor(
         EclipseLanguageComponent languageComponent,
+        Pie pie,
         @Nullable IProject project,
         IFile file,
         IDocument document,
@@ -117,7 +118,7 @@ public class PieRunner {
 
         final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
 
-        try(final MixedSession session = languageComponent.getPie().newSession()) {
+        try(final MixedSession session = pie.newSession()) {
             // First run a bottom-up build, to ensure that tasks affected by changed file are brought up-to-date.
             final HashSet<ResourceKey> changedResources = new HashSet<>();
             changedResources.add(path);
@@ -155,14 +156,25 @@ public class PieRunner {
         workspaceUpdate.update(file, file, monitor);
     }
 
-    public WorkspaceUpdate requireCheck(IProject project, @Nullable IProgressMonitor monitor, TopDownSession session, EclipseLanguageComponent languageComponent) throws ExecException, InterruptedException {
+    public WorkspaceUpdate requireCheck(
+        IProject project,
+        @Nullable IProgressMonitor monitor,
+        TopDownSession session,
+        EclipseLanguageComponent languageComponent
+    ) throws ExecException, InterruptedException {
         WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
         LanguageInstance languageInstance = languageComponent.getLanguageInstance();
         requireCheck(project, monitor, workspaceUpdate, session, languageInstance);
         return workspaceUpdate;
     }
 
-    private void requireCheck(IProject project, @Nullable IProgressMonitor monitor, WorkspaceUpdate workspaceUpdate, TopDownSession session, LanguageInstance languageInstance) throws ExecException, InterruptedException {
+    private void requireCheck(
+        IProject project,
+        @Nullable IProgressMonitor monitor,
+        WorkspaceUpdate workspaceUpdate,
+        TopDownSession session,
+        LanguageInstance languageInstance
+    ) throws ExecException, InterruptedException {
         final EclipseResourcePath resourcePath = new EclipseResourcePath(project);
         final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(resourcePath);
         final KeyedMessages messages = requireWithoutObserving(checkTask, session, monitor);
@@ -179,6 +191,7 @@ public class PieRunner {
 
     public void fullBuild(
         EclipseLanguageComponent languageComponent,
+        Pie pie,
         IProject eclipseProject,
         @Nullable IProgressMonitor monitor
     ) throws IOException, ExecException, InterruptedException {
@@ -188,15 +201,16 @@ public class PieRunner {
         final ResourceChanges resourceChanges = new ResourceChanges(project, languageComponent.getLanguageInstance().getFileExtensions());
         resourceChanges.newProjects.add(project.getKey());
 
-        try(final MixedSession session = languageComponent.getPie().newSession()) {
+        try(final MixedSession session = pie.newSession()) {
             final TopDownSession afterSession = updateAffectedBy(resourceChanges.changed, session, monitor);
-            observeAndUnobserveAutoTransforms(languageComponent, resourceChanges, afterSession, monitor);
-            observeAndUnobserveInspections(languageComponent, resourceChanges, afterSession, monitor);
+            observeAndUnobserveAutoTransforms(languageComponent, resourceChanges, pie, afterSession, monitor);
+            observeAndUnobserveInspections(languageComponent, resourceChanges, pie, afterSession, monitor);
         }
     }
 
     public void incrementalBuild(
         EclipseLanguageComponent languageComponent,
+        Pie pie,
         IProject project,
         IResourceDelta delta,
         @Nullable IProgressMonitor monitor
@@ -205,10 +219,10 @@ public class PieRunner {
 
         final ResourceChanges resourceChanges = new ResourceChanges(delta);
         bottomUpWorkspaceUpdate = workspaceUpdateFactory.create(languageComponent);
-        try(final MixedSession session = languageComponent.getPie().newSession()) {
+        try(final MixedSession session = pie.newSession()) {
             final TopDownSession afterSession = updateAffectedBy(resourceChanges.changed, session, monitor);
-            observeAndUnobserveAutoTransforms(languageComponent, resourceChanges, afterSession, monitor);
-            observeAndUnobserveInspections(languageComponent, resourceChanges, afterSession, monitor);
+            observeAndUnobserveAutoTransforms(languageComponent, resourceChanges, pie, afterSession, monitor);
+            observeAndUnobserveInspections(languageComponent, resourceChanges, pie, afterSession, monitor);
         }
         bottomUpWorkspaceUpdate.update(project, null, monitor);
         bottomUpWorkspaceUpdate = null;
@@ -219,16 +233,16 @@ public class PieRunner {
 
     public void clean(
         EclipseLanguageComponent languageComponent,
+        Pie pie,
         IProject eclipseProject,
         @Nullable IProgressMonitor monitor
     ) throws IOException {
-        final Pie pie = languageComponent.getPie();
         final EclipseResource projectResource = new EclipseResource(resourceRegistry, eclipseProject);
         final ResourcePath project = projectResource.getPath();
         final ResourceChanges resourceChanges = new ResourceChanges(projectResource, languageComponent.getLanguageInstance().getFileExtensions());
         resourceChanges.newProjects.add(project);
         final AutoCommandRequests autoCommandRequests = new AutoCommandRequests(languageComponent); // OPTO: calculate once per language component
-        try(final MixedSession session = languageComponent.getPie().newSession()) {
+        try(final MixedSession session = pie.newSession()) {
             // Unobserve auto transforms.
             for(AutoCommandRequest<?> request : autoCommandRequests.project) {
                 final Task<CommandFeedback> task = request.createTask(CommandContext.ofProject(project), argConverters);
@@ -263,14 +277,16 @@ public class PieRunner {
 
     public void startup(
         EclipseLanguageComponent languageComponent,
+        PieComponent pieComponent,
         @Nullable IProgressMonitor monitor
     ) throws IOException, CoreException, ExecException, InterruptedException {
         for(IProject eclipseProject : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
             if(!eclipseProject.hasNature(languageComponent.getEclipseIdentifiers().getNature())) continue;
             final ResourceChanges resourceChanges = new ResourceChanges(eclipseProject, languageComponent.getLanguageInstance().getFileExtensions(), resourceRegistry);
-            try(final MixedSession session = languageComponent.getPie().newSession()) {
-                observeAndUnobserveAutoTransforms(languageComponent, resourceChanges, session, monitor);
-                observeAndUnobserveInspections(languageComponent, resourceChanges, session, monitor);
+            final Pie pie = pieComponent.getPie();
+            try(final MixedSession session = pie.newSession()) {
+                observeAndUnobserveAutoTransforms(languageComponent, resourceChanges, pie, session, monitor);
+                observeAndUnobserveInspections(languageComponent, resourceChanges, pie, session, monitor);
             }
         }
     }
@@ -279,13 +295,12 @@ public class PieRunner {
     // Requiring commands
 
     public ArrayList<CommandContextAndFeedback> requireCommand(
-        EclipseLanguageComponent languageComponent,
         CommandRequest<?> request,
         ListView<? extends CommandContext> contexts,
+        Pie pie,
         Session session,
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException {
-        final Pie pie = languageComponent.getPie();
         final ArrayList<CommandContextAndFeedback> contextsAndFeedbacks = new ArrayList<>();
         switch(request.executionType()) {
             case ManualOnce:
@@ -304,14 +319,14 @@ public class PieRunner {
                     processShowFeedbacks(feedback, true, (p) -> {
                         // POTI: this opens a new PIE session, which may be used concurrently with other sessions, which
                         // may not be (thread-)safe.
-                        try(final MixedSession newSession = languageComponent.getPie().newSession()) {
+                        try(final MixedSession newSession = pie.newSession()) {
                             unobserve(task, pie, newSession, monitor);
                         }
                         pie.removeCallback(task);
                     });
                     if(feedback.hasErrorMessagesOrException()) {
                         // Command feedback indicates failure, unobserve to cancel continuous execution.
-                        try(final MixedSession newSession = languageComponent.getPie().newSession()) {
+                        try(final MixedSession newSession = pie.newSession()) {
                             unobserve(task, pie, newSession, monitor);
                         }
                     } else {
@@ -582,15 +597,15 @@ public class PieRunner {
     private void observeAndUnobserveAutoTransforms(
         EclipseLanguageComponent languageComponent,
         ResourceChanges resourceChanges,
+        Pie pie,
         Session session,
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException, IOException {
-        final Pie pie = languageComponent.getPie();
         final AutoCommandRequests autoCommandRequests = new AutoCommandRequests(languageComponent); // OPTO: calculate once per language component
         for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.project) {
             final CommandRequest<?> request = autoCommandRequest.toCommandRequest();
             for(ResourcePath newProject : resourceChanges.newProjects) {
-                requireCommand(languageComponent, request, CommandUtil.context(CommandContext.ofProject(newProject)), session, monitor);
+                requireCommand(request, CommandUtil.context(CommandContext.ofProject(newProject)), pie, session, monitor);
             }
             for(ResourcePath removedProject : resourceChanges.removedProjects) {
                 final Task<CommandFeedback> task = request.createTask(CommandContext.ofProject(removedProject), argConverters);
@@ -600,7 +615,7 @@ public class PieRunner {
         for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.directory) {
             final CommandRequest<?> request = autoCommandRequest.toCommandRequest();
             for(ResourcePath newDirectory : resourceChanges.newDirectories) {
-                requireCommand(languageComponent, request, CommandUtil.context(CommandContext.ofDirectory(newDirectory)), session, monitor);
+                requireCommand(request, CommandUtil.context(CommandContext.ofDirectory(newDirectory)), pie, session, monitor);
             }
             for(ResourcePath removedDirectory : resourceChanges.removedDirectories) {
                 final Task<CommandFeedback> task = request.createTask(CommandContext.ofDirectory(removedDirectory), argConverters);
@@ -610,7 +625,7 @@ public class PieRunner {
         for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.file) {
             final CommandRequest<?> request = autoCommandRequest.toCommandRequest();
             for(ResourcePath newFile : resourceChanges.newFiles) {
-                requireCommand(languageComponent, request, CommandUtil.context(CommandContext.ofFile(newFile)), session, monitor);
+                requireCommand(request, CommandUtil.context(CommandContext.ofFile(newFile)), pie, session, monitor);
             }
             for(ResourcePath removedFile : resourceChanges.removedFiles) {
                 final Task<CommandFeedback> task = request.createTask(CommandContext.ofFile(removedFile), argConverters);
@@ -625,10 +640,10 @@ public class PieRunner {
     private void observeAndUnobserveInspections(
         EclipseLanguageComponent languageComponent,
         ResourceChanges resourceChanges,
+        Pie pie,
         Session session,
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException {
-        final Pie pie = languageComponent.getPie();
         final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
         final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
         try {

@@ -56,7 +56,7 @@ class DynamicLanguageTest extends CharsTestBase {
 
             System.err.println("Initial test");
             final LanguageComponent languageComponent = dynamicLanguage.getLanguageComponent();
-            try(final MixedSession session = languageComponent.getPie().newSession()) {
+            try(final MixedSession session = dynamicLanguage.getPieComponent().newSession()) {
                 final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
                 metricsTracer.reset();
                 // Get tokens and check.
@@ -118,7 +118,7 @@ class DynamicLanguageTest extends CharsTestBase {
 
             System.err.println("Change styler test");
             final LanguageComponent languageComponent = dynamicLanguage.getLanguageComponent();
-            try(final MixedSession session = languageComponent.getPie().newSession()) {
+            try(final MixedSession session = dynamicLanguage.getPieComponent().newSession()) {
                 metricsTracer.reset();
                 final Option<Styling> result = session.require(languageComponent.getLanguageInstance().createStyleTask(charsFile.getPath()));
                 // Check executed tasks.
@@ -164,7 +164,7 @@ class DynamicLanguageTest extends CharsTestBase {
 
             System.err.println("Change parser test");
             final LanguageComponent languageComponent = dynamicLanguage.getLanguageComponent();
-            try(final MixedSession session = languageComponent.getPie().newSession()) {
+            try(final MixedSession session = dynamicLanguage.getPieComponent().newSession()) {
                 metricsTracer.reset();
                 session.updateAffectedBy(providedResources);
                 // Check executed tasks.
@@ -197,7 +197,7 @@ class DynamicLanguageTest extends CharsTestBase {
 
             System.err.println("Change transformation test");
             final LanguageComponent languageComponent = dynamicLanguage.getLanguageComponent();
-            try(final MixedSession session = languageComponent.getPie().newSession()) {
+            try(final MixedSession session = dynamicLanguage.getPieComponent().newSession()) {
                 metricsTracer.reset();
                 final TopDownSession topDownSession = session.updateAffectedBy(providedResources);
                 // Run command and check.
@@ -237,7 +237,7 @@ class DynamicLanguageTest extends CharsTestBase {
 
             System.err.println("Change command test");
             final LanguageComponent languageComponent = dynamicLanguage.getLanguageComponent();
-            try(final MixedSession session = languageComponent.getPie().newSession()) {
+            try(final MixedSession session = dynamicLanguage.getPieComponent().newSession()) {
                 metricsTracer.reset();
                 final TopDownSession topDownSession = session.updateAffectedBy(providedResources);
                 // Run command and check.
@@ -277,7 +277,7 @@ class DynamicLanguageTest extends CharsTestBase {
 
             System.err.println("Change analyzer test");
             final LanguageComponent languageComponent = dynamicLanguage.getLanguageComponent();
-            try(final MixedSession session = languageComponent.getPie().newSession()) {
+            try(final MixedSession session = dynamicLanguage.getPieComponent().newSession()) {
                 metricsTracer.reset();
                 final TopDownSession topDownSession = session.updateAffectedBy(providedResources);
                 // Run check task and check.

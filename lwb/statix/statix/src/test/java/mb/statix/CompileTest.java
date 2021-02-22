@@ -11,8 +11,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CompileTest extends TestBase {
     @Test void testCompile() throws Exception {
-        final FSResource root = createDir(rootDirectory, "stx");
-        final FSResource mainFile = createTextFile(root, "" +
+        final FSResource root = directory(rootDirectory, "stx");
+        final FSResource mainFile = textFile(root, "main.stx", "" +
                 "module main\n" +
                 "imports program\n" +
                 "rules\n" +
@@ -21,17 +21,17 @@ class CompileTest extends TestBase {
                 "\n" +
                 "  fileOk : scope * Program\n" +
                 "  fileOk(s, p) :-\n" +
-                "    programOk(s, p).\n",
-            "main.stx");
-        final FSResource programFile = createTextFile(root, "" +
+                "    programOk(s, p).\n"
+        );
+        final FSResource programFile = textFile(root, "program.stx", "" +
                 "module program\n" +
                 "signature\n" +
                 "  sorts Program constructors\n" +
                 "    Program : Program\n" +
                 "rules\n" +
                 "  programOk : scope * Program\n" +
-                "  programOk(s, Program()).\n",
-            "program.stx");
+                "  programOk(s, Program()).\n"
+        );
 
         try(final MixedSession session = newSession()) {
             final Result<StatixCompile.Output, ?> mainResult = session.require(compile.createTask(new StatixCompile.Input(root.getPath(), mainFile.getPath())));

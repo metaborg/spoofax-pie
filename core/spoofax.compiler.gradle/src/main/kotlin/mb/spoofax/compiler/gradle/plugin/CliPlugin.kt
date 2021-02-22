@@ -2,10 +2,11 @@
 
 package mb.spoofax.compiler.gradle.plugin
 
+import mb.pie.dagger.PieComponent
 import mb.spoofax.compiler.dagger.*
 import mb.spoofax.compiler.gradle.*
 import mb.spoofax.compiler.platform.*
-import mb.spoofax.core.platform.ResourceServiceComponent
+import mb.resource.dagger.ResourceServiceComponent
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -72,7 +73,8 @@ open class CliPlugin : Plugin<Project> {
 
     project.afterEvaluate {
       extension.adapterProjectFinalized.whenAdapterProjectFinalized {
-        configure(project, extension.languageProjectExtension.resourceServiceComponent, extension.languageProjectExtension.component, extension.compilerInputFinalized)
+        val components = extension.languageProjectExtension.components
+        configure(project, components.resourceServiceComponent, components.component, components.pieComponent, extension.compilerInputFinalized)
       }
     }
   }
@@ -81,10 +83,11 @@ open class CliPlugin : Plugin<Project> {
     project: Project,
     resourceServiceComponent: ResourceServiceComponent,
     component: SpoofaxCompilerComponent,
+    pieComponent: PieComponent,
     input: CliProjectCompiler.Input
   ) {
     configureProject(project, resourceServiceComponent, component, input)
-    configureCompileTask(project, resourceServiceComponent, component, input)
+    configureCompileTask(project, resourceServiceComponent, component, pieComponent, input)
     configureExecutableJarTask(project)
   }
 
@@ -108,6 +111,7 @@ open class CliPlugin : Plugin<Project> {
     project: Project,
     resourceServiceComponent: ResourceServiceComponent,
     component: SpoofaxCompilerComponent,
+    pieComponent: PieComponent,
     input: CliProjectCompiler.Input
   ) {
     val compileTask = project.tasks.register("compileCliProject") {
@@ -117,8 +121,8 @@ open class CliPlugin : Plugin<Project> {
 
       doLast {
         project.deleteDirectory(input.generatedJavaSourcesDirectory(), resourceServiceComponent.resourceService)
-        synchronized(component.pie) {
-          component.pie.newSession().use { session ->
+        synchronized(pieComponent.pie) {
+          pieComponent.pie.newSession().use { session ->
             session.require(component.cliProjectCompiler.createTask(input))
           }
         }

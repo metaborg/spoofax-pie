@@ -1,9 +1,11 @@
 package mb.tiger.eclipse;
 
 import mb.pie.api.ExecException;
-import mb.spoofax.core.platform.ResourceServiceComponent;
+import mb.pie.dagger.PieComponent;
+import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.eclipse.EclipseLanguage;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
+import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import mb.spoofax.eclipse.util.StatusUtil;
 import mb.tiger.spoofax.DaggerTigerResourcesComponent;
 import mb.tiger.spoofax.TigerResourcesComponent;
@@ -19,6 +21,7 @@ public class TigerLanguage implements EclipseLanguage {
     private static @Nullable TigerLanguage instance;
     private @Nullable TigerResourcesComponent resourcesComponent;
     private @Nullable TigerEclipseComponent component;
+    private @Nullable PieComponent pieComponent;
 
     private TigerLanguage() {}
 
@@ -33,16 +36,23 @@ public class TigerLanguage implements EclipseLanguage {
 
     public TigerResourcesComponent getResourcesComponent() {
         if(resourcesComponent == null) {
-            throw new RuntimeException("TigerResourcesComponent has not been initialized yet");
+            throw new RuntimeException("TigerResourcesComponent has not been initialized yet or has been closed");
         }
         return resourcesComponent;
     }
 
     public TigerEclipseComponent getComponent() {
         if(component == null) {
-            throw new RuntimeException("TigerEclipseComponent has not been initialized yet");
+            throw new RuntimeException("TigerEclipseComponent has not been initialized yet or has been closed");
         }
         return component;
+    }
+
+    public PieComponent getPieComponent() {
+        if(pieComponent == null) {
+            throw new RuntimeException("PieComponent of Tiger has not been initialized yet or has been closed");
+        }
+        return pieComponent;
     }
 
 
@@ -54,11 +64,13 @@ public class TigerLanguage implements EclipseLanguage {
     }
 
     @Override public TigerEclipseComponent createComponent(
+        EclipseLoggerComponent loggerComponent,
         ResourceServiceComponent resourceServiceComponent,
         EclipsePlatformComponent platformComponent
     ) {
         if(component == null) {
             component = DaggerTigerEclipseComponent.builder()
+                .eclipseLoggerComponent(loggerComponent)
                 .tigerResourcesComponent(createResourcesComponent())
                 .resourceServiceComponent(resourceServiceComponent)
                 .eclipsePlatformComponent(platformComponent)
@@ -68,15 +80,18 @@ public class TigerLanguage implements EclipseLanguage {
     }
 
     @Override public void start(
+        EclipseLoggerComponent loggerComponent,
         ResourceServiceComponent resourceServiceComponent,
-        EclipsePlatformComponent platformComponent
+        EclipsePlatformComponent platformComponent,
+        PieComponent pieComponent
     ) {
+        this.pieComponent = pieComponent;
         final TigerEclipseComponent component = getComponent();
         component.getEditorTracker().register();
         final WorkspaceJob job = new WorkspaceJob("Tiger startup") {
             @Override public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
                 try {
-                    platformComponent.getPieRunner().startup(component, monitor);
+                    platformComponent.getPieRunner().startup(component, pieComponent, monitor);
                 } catch(IOException | ExecException | InterruptedException e) {
                     throw new CoreException(StatusUtil.error("Tiger startup job failed unexpectedly", e));
                 }
@@ -85,5 +100,17 @@ public class TigerLanguage implements EclipseLanguage {
         };
         job.setRule(component.startupWriteLockRule());
         job.schedule();
+    }
+
+    @Override public void close() throws Exception {
+        if(pieComponent != null) {
+            // PIE component is closed by SpoofaxPlugin.
+            pieComponent = null;
+        }
+        if(component != null) {
+            component.close();
+            component = null;
+        }
+        resourcesComponent = null;
     }
 }

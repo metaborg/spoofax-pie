@@ -18,6 +18,7 @@ import mb.completions.common.CompletionResult;
 import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Task;
+import mb.pie.dagger.PieComponent;
 import mb.resource.Resource;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageInstance;
@@ -47,10 +48,10 @@ public abstract class SpoofaxCompletionContributor extends CompletionContributor
     private final LanguageInstance languageInstance;
     private final Provider<MixedSession> pieSessionProvider;
 
-    protected SpoofaxCompletionContributor(IntellijLanguageComponent languageComponent) {
+    protected SpoofaxCompletionContributor(IntellijLanguageComponent languageComponent, PieComponent pieComponent) {
         this.resourceRegistry = SpoofaxPlugin.getResourceServiceComponent().getResourceRegistry();
         this.languageInstance = languageComponent.getLanguageInstance();
-        this.pieSessionProvider = () -> languageComponent.getPie().newSession();
+        this.pieSessionProvider = () -> pieComponent.getPie().newSession();
 
     }
 

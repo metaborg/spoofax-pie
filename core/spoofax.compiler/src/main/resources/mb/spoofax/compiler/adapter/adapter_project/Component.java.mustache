@@ -2,12 +2,12 @@ package {{baseComponent.packageId}};
 
 import dagger.Component;
 import mb.spoofax.core.language.LanguageComponent;
+import mb.log.dagger.LoggerComponent;
 import mb.spoofax.core.platform.PlatformComponent;
-import mb.spoofax.core.platform.ResourceServiceComponent;
+import mb.resource.dagger.ResourceServiceComponent;
 import mb.resource.ResourceService;
 import mb.resource.classloader.ClassLoaderResource;
-import mb.pie.api.Pie;
-import mb.pie.api.TaskDefs;
+import mb.pie.api.TaskDef;
 {{#isMultiLang}}
 import mb.statix.multilang.MultiLangComponent;
 import mb.statix.multilang.metadata.LanguageMetadataProvider;
@@ -16,14 +16,16 @@ import javax.inject.Provider;
 
 import {{qualifier.qualifiedId}};
 
+import java.util.Set;
+
 @{{scope.qualifiedId}}
 @Component(
     modules = {
         {{module.qualifiedId}}.class{{#additionalModules}}{{#-first}}, {{/-first}}
-        {{qualifiedId}}.class{{^-last}},
-{{/-last}}{{/additionalModules}}
+        {{qualifiedId}}.class{{^-last}},{{/-last}}{{/additionalModules}}
     },
     dependencies = {
+        LoggerComponent.class,
         {{resourcesComponent.qualifiedId}}.class,
         ResourceServiceComponent.class,
         PlatformComponent.class{{#isMultiLang}},
@@ -33,7 +35,7 @@ import {{qualifier.qualifiedId}};
 public interface {{baseComponent.id}} extends LanguageComponent{{#isMultiLang}}, LanguageMetadataProvider{{/isMultiLang}}  {
     @Override {{instance.qualifiedId}} getLanguageInstance();
 
-    @Override @{{qualifier.id}} Pie getPie();
+    @Override @{{qualifier.id}} Set<TaskDef<?, ?>> getTaskDefs();
 {{#parser}}
 
 

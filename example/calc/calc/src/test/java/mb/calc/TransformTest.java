@@ -15,12 +15,12 @@ import static org.spoofax.terms.util.TermUtils.*;
 
 class TransformTest extends TestBase {
     @Test void testProgramToJava() throws Exception {
-        final FSResource resource = createTextFile("1 + 2;", "test.calc");
+        final FSResource resource = textFile("test.calc", "1 + 2;");
         try(final MixedSession session = newSession()) {
-            final Result<JSGLR1ParseOutput, JSGLR1ParseException> result = session.require(languageComponent.getCalcParse().createTask(resourceStringSupplier(resource)));
+            final Result<JSGLR1ParseOutput, JSGLR1ParseException> result = session.require(component.getCalcParse().createTask(resourceStringSupplier(resource)));
             assertTrue(result.isOk());
             final IStrategoTerm ast = result.unwrap().ast;
-            final StrategoRuntime strategoRuntime = languageComponent.getStrategoRuntimeProvider().get();
+            final StrategoRuntime strategoRuntime = component.getStrategoRuntimeProvider().get();
             final ITermFactory termFactory = strategoRuntime.getTermFactory();
             final IStrategoTerm term = strategoRuntime.invoke("program-to-java", termFactory.makeTuple(ast, termFactory.makeString("Test")));
             assertTrue(isString(term));

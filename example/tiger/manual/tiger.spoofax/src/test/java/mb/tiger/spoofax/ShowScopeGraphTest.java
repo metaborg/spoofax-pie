@@ -14,8 +14,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class ShowScopeGraphTest extends TestBase {
     @Test void test() throws ExecException, InterruptedException {
         final TextResource resource = textResourceRegistry.createResource("1 + 1", "a.tig");
-        final TigerShowScopeGraphCommand command = languageComponent.getShowScopeGraphCommand();
-        try(final MixedSession session = languageComponent.getPie().newSession()) {
+        final TigerShowScopeGraphCommand command = component.getShowScopeGraphCommand();
+        try(final MixedSession session = newSession()) {
             final CommandFeedback output = session.require(command.createTask(new TigerShowArgs(resource.key, null)));
             assertFalse(output.getShowFeedbacks().isEmpty());
             final ShowFeedback showFeedback = output.getShowFeedbacks().get(0);

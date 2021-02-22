@@ -1,0 +1,12 @@
+package {{baseLexerFactory.packageId}};
+
+import mb.spoofax.intellij.editor.SpoofaxLexerFactory;
+
+import javax.inject.Inject;
+
+@{{adapterProjectCompilerInput.scope.qualifiedId}}
+public class {{baseLexerFactory.id}} extends SpoofaxLexerFactory {
+    @Inject public {{baseLexerFactory.id}}() {
+        super({{plugin.qualifiedId}}.getComponent(), {{plugin.qualifiedId}}.getResourceServiceComponent(), {{plugin.qualifiedId}}.getPieComponent());
+    }
+}

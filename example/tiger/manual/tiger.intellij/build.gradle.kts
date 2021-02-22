@@ -9,6 +9,7 @@ dependencies {
   implementation(platform(compositeBuild("spoofax.depconstraints")))
   annotationProcessor(platform(compositeBuild("spoofax.depconstraints")))
 
+  implementation("org.metaborg:pie.runtime")
   implementation(compositeBuild("spoofax.core"))
   implementation(compositeBuild("spoofax.intellij"))
   implementation(project(":tiger.spoofax")) {

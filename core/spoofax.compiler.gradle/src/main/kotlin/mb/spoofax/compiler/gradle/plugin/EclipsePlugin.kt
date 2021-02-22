@@ -3,11 +3,12 @@
 package mb.spoofax.compiler.gradle.plugin
 
 import mb.coronium.plugin.BundleExtension
+import mb.pie.dagger.PieComponent
 import mb.spoofax.compiler.dagger.*
 import mb.spoofax.compiler.gradle.*
 import mb.spoofax.compiler.platform.*
 import mb.spoofax.compiler.util.*
-import mb.spoofax.core.platform.ResourceServiceComponent
+import mb.resource.dagger.ResourceServiceComponent
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -69,7 +70,8 @@ open class EclipsePlugin : Plugin<Project> {
 
     project.afterEvaluate {
       extension.adapterProjectFinalized.whenAdapterProjectFinalized {
-        configure(project, extension.languageProjectExtension.resourceServiceComponent, extension.languageProjectExtension.component, extension.compilerInputFinalized)
+        val components = extension.languageProjectExtension.components
+        configure(project, components.resourceServiceComponent, components.component, components.pieComponent, extension.compilerInputFinalized)
       }
     }
   }
@@ -78,10 +80,11 @@ open class EclipsePlugin : Plugin<Project> {
     project: Project,
     resourceServiceComponent: ResourceServiceComponent,
     component: SpoofaxCompilerComponent,
+    pieComponent: PieComponent,
     input: EclipseProjectCompiler.Input
   ) {
     configureProject(project, resourceServiceComponent, component, input)
-    configureCompilerTask(project, resourceServiceComponent, component, input)
+    configureCompilerTask(project, resourceServiceComponent, component, pieComponent, input)
     configureBundle(project, resourceServiceComponent, component, input)
     configureJarTask(project, input)
   }
@@ -103,6 +106,7 @@ open class EclipsePlugin : Plugin<Project> {
     project: Project,
     resourceServiceComponent: ResourceServiceComponent,
     component: SpoofaxCompilerComponent,
+    pieComponent: PieComponent,
     input: EclipseProjectCompiler.Input
   ) {
     val compileTask = project.tasks.register("compileEclipseProject") {
@@ -113,8 +117,8 @@ open class EclipsePlugin : Plugin<Project> {
       doLast {
         project.deleteDirectory(input.generatedJavaSourcesDirectory(), resourceServiceComponent.resourceService)
         project.deleteDirectory(input.generatedResourcesDirectory(), resourceServiceComponent.resourceService)
-        synchronized(component.pie) {
-          component.pie.newSession().use { session ->
+        synchronized(pieComponent.pie) {
+          pieComponent.pie.newSession().use { session ->
             session.require(component.eclipseProjectCompiler.createTask(input))
           }
         }

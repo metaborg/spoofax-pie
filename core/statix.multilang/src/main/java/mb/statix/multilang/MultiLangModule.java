@@ -4,7 +4,6 @@ import dagger.Module;
 import dagger.Provides;
 import mb.statix.multilang.metadata.AnalysisContextService;
 import mb.statix.multilang.metadata.ContextDataManager;
-import mb.statix.multilang.metadata.ContextPieManager;
 import mb.statix.multilang.metadata.LanguageMetadataManager;
 import mb.statix.multilang.metadata.SpecManager;
 import mb.statix.multilang.pie.spec.SmlBuildSpec;
@@ -33,11 +32,6 @@ public class MultiLangModule {
 
     @Provides @MultiLangScope @MultiLang
     public LanguageMetadataManager provideLanguageMetadataManager(@MultiLang AnalysisContextService analysisContextService) {
-        return analysisContextService;
-    }
-
-    @Provides @MultiLangScope @MultiLang
-    public ContextPieManager provideContextPieManager(@MultiLang AnalysisContextService analysisContextService) {
         return analysisContextService;
     }
 

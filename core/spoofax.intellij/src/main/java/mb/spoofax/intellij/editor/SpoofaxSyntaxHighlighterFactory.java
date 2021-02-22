@@ -16,7 +16,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public abstract class SpoofaxSyntaxHighlighterFactory extends SyntaxHighlighterFactory {
     private final IntellijResourceRegistry resourceRegistry;
-    private final SpoofaxLexer.Factory lexerFactory;
+    private final SpoofaxLexerFactory lexerFactory;
     private final SpoofaxSyntaxHighlighter.Factory highlighterFactory;
 
 

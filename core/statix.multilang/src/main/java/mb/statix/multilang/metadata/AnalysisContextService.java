@@ -1,9 +1,6 @@
 package mb.statix.multilang.metadata;
 
 import mb.common.result.Result;
-import mb.common.result.ResultCollector;
-import mb.pie.api.Pie;
-import mb.pie.api.PieBuilder;
 import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.multilang.metadata.spec.SpecConfig;
 import mb.statix.multilang.metadata.spec.SpecLoadException;
@@ -21,15 +18,13 @@ import java.util.stream.Collectors;
  * yaml config}) can override these values.
  */
 @Value.Immutable
-public abstract class AnalysisContextService implements LanguageMetadataManager, ContextPieManager, SpecManager {
+public abstract class AnalysisContextService implements LanguageMetadataManager, SpecManager, ContextDataManager {
 
     @Value.Parameter public abstract Map<LanguageId, ContextId> defaultLanguageContexts();
 
     @Value.Parameter public abstract Map<LanguageId, Supplier<LanguageMetadata>> languageMetadataSuppliers();
 
     @Value.Parameter public abstract Map<SpecFragmentId, SpecConfig> specConfigs();
-
-    @Value.Parameter public abstract PieBuilder platformPieBuilder();
 
     // Map used to cache language metadata instances, so that they will not be recomputed by subsequent accesses.
     private final ConcurrentHashMap<LanguageId, LanguageMetadata> languageMetadataCache = new ConcurrentHashMap<>();
@@ -55,21 +50,6 @@ public abstract class AnalysisContextService implements LanguageMetadataManager,
 
     @Override public ContextId getDefaultContextId(LanguageId languageId) {
         return defaultLanguageContexts().getOrDefault(languageId, new ContextId(languageId.getId()));
-    }
-
-    @Override public Pie buildPieForContext() throws MultiLangAnalysisException {
-        Pie[] languagePies = languageMetadataSuppliers().keySet().stream()
-            .map(this::getLanguageMetadataResult)
-            .collect(ResultCollector.getWithBaseException(new MultiLangAnalysisException("Exception fetching language metadata")))
-            .unwrap()
-            .stream()
-            .map(LanguageMetadata::languagePie)
-            .toArray(Pie[]::new);
-
-        return platformPieBuilder()
-            .build()
-            .createChildBuilder(languagePies)
-            .build();
     }
 
     @Value.Check public void checkSpecDependenciesSatisfiable() {

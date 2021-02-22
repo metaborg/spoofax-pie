@@ -1,9 +1,10 @@
 package {{baseComponent.packageId}};
 
 import dagger.Component;
-import mb.spoofax.core.platform.ResourceServiceComponent;
+import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.intellij.IntellijLanguageComponent;
 import mb.spoofax.intellij.IntellijPlatformComponent;
+import mb.spoofax.intellij.log.IntellijLoggerComponent;
 
 @{{adapterProjectCompilerInput.scope.qualifiedId}}
 @Component(
@@ -14,6 +15,7 @@ import mb.spoofax.intellij.IntellijPlatformComponent;
 {{/-last}}{{/adapterProjectCompilerInput.additionalModules}}
     },
     dependencies = {
+        IntellijLoggerComponent.class,
         {{adapterProjectCompilerInput.resourcesComponent.qualifiedId}}.class,
         ResourceServiceComponent.class,
         IntellijPlatformComponent.class

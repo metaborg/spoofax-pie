@@ -10,7 +10,7 @@ import static org.spoofax.terms.util.TermUtils.*;
 
 class CompletionTest extends TestBase {
     @Test void testCompletion() throws Exception {
-        final StrategoRuntime strategoRuntime = languageComponent.getStrategoRuntimeProvider().get();
+        final StrategoRuntime strategoRuntime = component.getStrategoRuntimeProvider().get();
         final ITermFactory tf = strategoRuntime.getTermFactory();
         final IStrategoTerm input = tf.makeTuple(tf.makeString("Program"), tf.makeAppl(tf.makeConstructor("Program-Plhdr", 0)));
         final IStrategoTerm completionTerm = strategoRuntime.invoke("get-proposals-empty-program-calc", input);

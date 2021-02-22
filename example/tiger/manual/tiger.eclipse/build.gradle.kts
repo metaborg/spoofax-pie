@@ -22,7 +22,7 @@ dependencies {
 val exports = listOf(
   // Provided by 'javax.inject' bundle.
   "!javax.inject.*",
-  // Provided by 'spoofax.eclipse.externaldeps' bundle.
+  // Provided by 'spoofax.eclipse' bundle.
   "!mb.log.*",
   "!mb.resource.*",
   "!mb.pie.*",

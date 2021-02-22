@@ -6,36 +6,18 @@ import dagger.multibindings.ElementsIntoSet;
 import mb.common.result.Result;
 import mb.jsglr1.common.JSGLR1ParseException;
 import mb.log.api.LoggerFactory;
-import mb.common.util.MapView;
-import mb.common.util.EntryView;
 import mb.common.message.Messages;
-import mb.log.api.LoggerFactory;
 import mb.pie.api.Function;
-import mb.pie.api.MapTaskDefs;
-import mb.pie.api.Pie;
-import mb.pie.api.PieBuilder;
-import mb.pie.api.MixedSession;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
-import mb.pie.api.TaskDefs;
-import mb.pie.api.serde.JavaSerde;
-import mb.resource.ResourceKeyString;
-import mb.resource.ResourceRegistry;
 import mb.resource.ResourceService;
-import mb.resource.classloader.ClassLoaderResource;
-import mb.resource.classloader.ClassLoaderResourceRegistry;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
-import mb.spoofax.core.language.command.HierarchicalResourceType;
-import mb.spoofax.core.language.command.arg.RawArgs;
-import mb.spoofax.core.platform.Platform;
 {{#isMultiLang}}
-import mb.statix.multilang.MultiLangAnalysisException;
 import mb.statix.multilang.metadata.AnalysisContextService;
 import mb.statix.multilang.metadata.ContextDataManager;
-import mb.statix.multilang.metadata.ContextPieManager;
 import mb.statix.multilang.metadata.ImmutableLanguageMetadata;
 import mb.statix.multilang.metadata.LanguageId;
 import mb.statix.multilang.metadata.LanguageMetadata;
@@ -59,6 +41,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 
 import {{scope.qualifiedId}};
+import {{qualifier.qualifiedId}};
 
 import javax.inject.Named;
 import java.util.HashSet;
@@ -68,8 +51,6 @@ import java.util.Map;
 @Module
 public class {{baseModule.id}} {
 {{#parser}}
-
-
     @Provides @{{scope.id}}
     static {{this.languageProjectInput.parserFactory.qualifiedId}} provideParserFactory(@{{qualifier.id}}("definition-directory") HierarchicalResource definitionDir) {
         return new {{this.languageProjectInput.parserFactory.qualifiedId}}(definitionDir);
@@ -140,8 +121,8 @@ public class {{baseModule.id}} {
     }
 {{/strategoRuntime}}
 
-    @Provides @{{scope.id}} @ElementsIntoSet
-    static Set<TaskDef<?, ?>> provideTaskDefsSet(
+    @Provides @{{scope.id}} @{{qualifier.id}} @ElementsIntoSet
+    static Set<TaskDef<?, ?>> provideTaskDefs(
 {{#providedTaskDefs}}
         {{variable}}{{^-last}},{{/-last}}
 {{/providedTaskDefs}}
@@ -152,51 +133,12 @@ public class {{baseModule.id}} {
 {{/providedTaskDefs}}
         return taskDefs;
     }
-
-    @Provides @{{scope.id}} @{{qualifier.id}}
-    static TaskDefs provideQualifiedTaskDefs(Set<TaskDef<?, ?>> taskDefs) {
-        return new MapTaskDefs(taskDefs);
-    }
-
-    @Provides @{{scope.id}}
-    static TaskDefs provideTaskDefs(@{{qualifier.id}} TaskDefs taskDefs) {
-        return taskDefs;
-    }
-
-    @Provides @{{scope.id}} @Named("prototype")
-    static Pie providePrototypePie(@Platform PieBuilder pieBuilder, TaskDefs taskDefs, ResourceService resourceService) {
-        return pieBuilder
-            .addTaskDefs(taskDefs)
-            .withResourceService(resourceService)
-            .withSerdeFactory(loggerFactory -> new JavaSerde({{classLoaderResources.classLoaderResources.qualifiedId}}.class.getClassLoader()))
-            .build();
-    }
 {{#multilangAnalyzer}}
     @Provides @{{scope.id}}
     static LanguageId provideLanguageId() {
         return new LanguageId("{{languageId}}");
     }
-    @Provides @{{scope.id}} @{{qualifier.id}}
-    static Pie provideQualifiedPie(ContextPieManager pieManager) {
-        try {
-            return pieManager.buildPieForContext();
-        } catch(MultiLangAnalysisException e) {
-            throw new RuntimeException("Cannot build shared Pie", e);
-        }
-    }
 {{/multilangAnalyzer}}
-{{^multilangAnalyzer}}
-    @Provides @{{scope.id}} @{{qualifier.id}}
-    static Pie provideQualifiedPie(@Named("prototype") Pie languagePie) {
-        return languagePie;
-    }
-{{/multilangAnalyzer}}
-
-    @Provides @{{scope.id}}
-    static Pie providePie(@{{qualifier.id}} Pie languagePie) {
-        return languagePie;
-    }
-
 
     @Provides @{{scope.id}}
     static LanguageInstance provideLanguageInstance({{instance.qualifiedId}} instance) {
@@ -281,11 +223,6 @@ public class {{baseModule.id}} {
     }
 
     @Provides @{{scope.id}}
-    static ContextPieManager provideContextPieManager(@MultiLang AnalysisContextService analysisContextService) {
-        return analysisContextService;
-    }
-
-    @Provides @{{scope.id}}
     static ContextDataManager provideContextDataManager(@MultiLang AnalysisContextService analysisContextService) {
         return analysisContextService;
     }
@@ -306,18 +243,15 @@ public class {{baseModule.id}} {
     @Provides @{{scope.id}}
     static LanguageMetadata getLanguageMetadata(
         @Named("prototype") StrategoRuntime strategoRuntime,
-        @{{qualifier.id}}("definition-directory") ClassLoaderResource definitionDir,
         {{preStatixTaskDef.qualifiedId}} preStatix,
         {{postStatixTaskDef.qualifiedId}} postStatix,
-        {{indexAstTaskDef.qualifiedId}} indexAst,
-        @Named("prototype") Pie languagePie
+        {{indexAstTaskDef.qualifiedId}} indexAst
     ) {
         ITermFactory termFactory = strategoRuntime.getTermFactory();
         return ImmutableLanguageMetadata.builder()
             .resourcesSupplier(MetadataUtils.resourcesSupplierForExtensions({{#shared.fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/shared.fileExtensions}}))
             .astFunction(preStatix.createFunction().mapInput(indexAst::createSupplier))
             .postTransform(postStatix.createFunction().mapInput(x -> x))
-            .languagePie(languagePie)
             .termFactory(termFactory)
             .fileConstraint("{{fileConstraint}}")
             .projectConstraint("{{projectConstraint}}")
@@ -328,16 +262,6 @@ public class {{baseModule.id}} {
     static Map<SpecFragmentId, SpecConfig> getSpecConfig(@Named("prototype") StrategoRuntime strategoRuntime) {
         return {{languageProjectInput.specConfigFactory.qualifiedId}}.getSpecConfigs(strategoRuntime.getTermFactory());
     }
-
-    @Provides @{{scope.id}} @ElementsIntoSet
-    static Set<ResourceRegistry> provideParentResourceRegistries() {
-        return {{languageProjectInput.specConfigFactory.qualifiedId}}.getParentResourceRegistries();
-    }
     {{/multilangAnalyzer}}
 {{/isMultiLang}}
-
-    @Provides @{{scope.id}} @ElementsIntoSet
-    static Set<ResourceRegistry> provideDefaultAdditionalResourceRegistries() {
-        return new HashSet<>();
-    }
 }

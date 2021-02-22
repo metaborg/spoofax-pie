@@ -1,9 +1,11 @@
 package {{baseLanguage.packageId}};
 
 import mb.pie.api.ExecException;
-import mb.spoofax.core.platform.ResourceServiceComponent;
+import mb.pie.dagger.PieComponent;
+import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.eclipse.EclipseLanguage;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
+import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import mb.spoofax.eclipse.util.StatusUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.WorkspaceJob;
@@ -17,6 +19,7 @@ public class {{baseLanguage.id}} implements EclipseLanguage {
     private static @Nullable {{baseLanguage.id}} instance;
     private {{adapterProjectCompilerInput.resourcesComponent.nullableQualifiedId}} resourcesComponent;
     private {{eclipseComponent.nullableQualifiedId}} component;
+    private @Nullable PieComponent pieComponent;
 
     private {{baseLanguage.id}}() {}
 
@@ -43,6 +46,13 @@ public class {{baseLanguage.id}} implements EclipseLanguage {
         return component;
     }
 
+    public PieComponent getPieComponent() {
+        if(pieComponent == null) {
+            throw new RuntimeException("PieComponent has not been initialized yet");
+        }
+        return pieComponent;
+    }
+
 
     @Override public {{adapterProjectCompilerInput.resourcesComponent.qualifiedId}} createResourcesComponent() {
         if(resourcesComponent == null) {
@@ -52,11 +62,13 @@ public class {{baseLanguage.id}} implements EclipseLanguage {
     }
 
     @Override public {{eclipseComponent.qualifiedId}} createComponent(
+        EclipseLoggerComponent loggerComponent,
         ResourceServiceComponent resourceServiceComponent,
         EclipsePlatformComponent platformComponent
     ) {
         if(component == null) {
             component = {{daggerEclipseComponent.qualifiedId}}.builder()
+                .eclipseLoggerComponent(loggerComponent)
                 .{{adapterProjectCompilerInput.resourcesComponent.idAsCamelCase}}(getResourcesComponent())
                 {{#adapterProjectCompilerInput.multilangAnalyzer}}
                 .multiLangEclipseComponent(mb.statix.multilang.eclipse.MultiLangPlugin.getComponent())
@@ -69,15 +81,18 @@ public class {{baseLanguage.id}} implements EclipseLanguage {
     }
 
     @Override public void start(
+        EclipseLoggerComponent loggerComponent,
         ResourceServiceComponent resourceServiceComponent,
-        EclipsePlatformComponent platformComponent
+        EclipsePlatformComponent platformComponent,
+        PieComponent pieComponent
     ) {
+        this.pieComponent = pieComponent;
         final {{eclipseComponent.qualifiedId}} component = getComponent();
         component.getEditorTracker().register();
         final WorkspaceJob job = new WorkspaceJob("{{shared.name}} startup") {
             @Override public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
                 try {
-                    platformComponent.getPieRunner().startup(component, monitor);
+                    platformComponent.getPieRunner().startup(component, pieComponent, monitor);
                 } catch(IOException | ExecException | InterruptedException e) {
                     throw new CoreException(StatusUtil.error("{{shared.name}} startup job failed unexpectedly", e));
                 }
@@ -86,5 +101,17 @@ public class {{baseLanguage.id}} implements EclipseLanguage {
         };
         job.setRule(component.startupWriteLockRule());
         job.schedule();
+    }
+
+    @Override public void close() throws Exception {
+        if(pieComponent != null) {
+            pieComponent.close();
+            pieComponent = null;
+        }
+        if(component != null) {
+            component.close();
+            component = null;
+        }
+        resourcesComponent = null;
     }
 }

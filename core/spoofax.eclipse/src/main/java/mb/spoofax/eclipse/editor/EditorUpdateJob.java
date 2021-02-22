@@ -3,6 +3,7 @@ package mb.spoofax.eclipse.editor;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecException;
+import mb.pie.dagger.PieComponent;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.pie.PieRunner;
 import mb.spoofax.eclipse.util.StatusUtil;
@@ -19,6 +20,7 @@ public class EditorUpdateJob extends Job {
     private final Logger logger;
     private final PieRunner pieRunner;
     private final EclipseLanguageComponent languageComponent;
+    private final PieComponent pieComponent;
     private final String languageDisplayName;
     private final @Nullable IProject project;
     private final IFile file;
@@ -29,6 +31,7 @@ public class EditorUpdateJob extends Job {
         LoggerFactory loggerFactory,
         PieRunner pieRunner,
         EclipseLanguageComponent languageComponent,
+        PieComponent pieComponent,
         @Nullable IProject project,
         IFile file,
         IDocument document,
@@ -38,6 +41,7 @@ public class EditorUpdateJob extends Job {
         this.logger = loggerFactory.create(getClass());
         this.pieRunner = pieRunner;
         this.languageComponent = languageComponent;
+        this.pieComponent = pieComponent;
         this.languageDisplayName = languageComponent.getLanguageInstance().getDisplayName();
         this.project = project;
         this.file = file;
@@ -63,7 +67,7 @@ public class EditorUpdateJob extends Job {
     }
 
     private IStatus update(IProgressMonitor monitor) throws ExecException, InterruptedException {
-        pieRunner.addOrUpdateEditor(languageComponent, project, file, document, editor, monitor);
+        pieRunner.addOrUpdateEditor(languageComponent, pieComponent.getPie(), project, file, document, editor, monitor);
         return StatusUtil.success();
     }
 }

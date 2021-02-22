@@ -9,19 +9,20 @@ import com.intellij.psi.tree.IFileElementType;
 import mb.resource.Resource;
 import mb.spoofax.intellij.IntellijLanguage;
 import mb.spoofax.intellij.editor.SpoofaxLexer;
+import mb.spoofax.intellij.editor.SpoofaxLexerFactory;
 import mb.spoofax.intellij.resource.IntellijResourceRegistry;
 
 import javax.inject.Inject;
 
 public class SpoofaxFileElementType extends IFileElementType {
-    private final SpoofaxLexer.Factory lexerFactory;
+    private final SpoofaxLexerFactory lexerFactory;
     private final IntellijResourceRegistry resourceRegistry;
     private final SpoofaxAstBuilder.Factory astBuilderFactory;
 
 
     @Inject public SpoofaxFileElementType(
         IntellijLanguage language,
-        SpoofaxLexer.Factory lexerFactory,
+        SpoofaxLexerFactory lexerFactory,
         IntellijResourceRegistry resourceRegistry,
         SpoofaxAstBuilder.Factory astBuilderFactory
     ) {

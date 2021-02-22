@@ -1,9 +1,10 @@
 package {{baseEclipseComponent.packageId}};
 
 import dagger.Component;
-import mb.spoofax.core.platform.ResourceServiceComponent;
+import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
+import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 
 @{{adapterProjectCompilerInput.scope.qualifiedId}}
 @Component(
@@ -14,6 +15,7 @@ import mb.spoofax.eclipse.EclipsePlatformComponent;
 {{/-last}}{{/adapterProjectCompilerInput.additionalModules}}
     },
     dependencies = {
+        EclipseLoggerComponent.class,
         {{adapterProjectCompilerInput.resourcesComponent.qualifiedId}}.class,
         ResourceServiceComponent.class,
         EclipsePlatformComponent.class{{#adapterProjectCompilerInput.isMultiLang}},

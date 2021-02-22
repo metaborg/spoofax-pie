@@ -1,8 +1,10 @@
 package mb.spoofax.compiler.dagger;
 
 import dagger.Component;
-import mb.pie.api.Pie;
-import mb.resource.ResourceService;
+import mb.log.dagger.LoggerComponent;
+import mb.pie.api.TaskDef;
+import mb.pie.dagger.TaskDefsProvider;
+import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
 import mb.spoofax.compiler.adapter.CompleterAdapterCompiler;
 import mb.spoofax.compiler.adapter.ConstraintAnalyzerAdapterCompiler;
@@ -21,7 +23,8 @@ import mb.spoofax.compiler.language.StylerLanguageCompiler;
 import mb.spoofax.compiler.platform.CliProjectCompiler;
 import mb.spoofax.compiler.platform.EclipseProjectCompiler;
 import mb.spoofax.compiler.platform.IntellijProjectCompiler;
-import mb.spoofax.core.platform.ResourceServiceComponent;
+
+import java.util.Set;
 
 @SpoofaxCompilerScope
 @Component(
@@ -29,13 +32,11 @@ import mb.spoofax.core.platform.ResourceServiceComponent;
         SpoofaxCompilerModule.class
     },
     dependencies = {
+        LoggerComponent.class,
         ResourceServiceComponent.class
     }
 )
-public interface SpoofaxCompilerComponent {
-    @SpoofaxCompilerQualifier Pie getPie();
-
-
+public interface SpoofaxCompilerComponent extends TaskDefsProvider {
     ClassLoaderResourcesCompiler getClassloaderResourcesCompiler();
 
 
@@ -74,4 +75,7 @@ public interface SpoofaxCompilerComponent {
     EclipseProjectCompiler getEclipseProjectCompiler();
 
     IntellijProjectCompiler getIntellijProjectCompiler();
+
+
+    @Override @SpoofaxCompilerQualifier Set<TaskDef<?, ?>> getTaskDefs();
 }

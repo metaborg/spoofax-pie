@@ -1,119 +1,46 @@
 package mb.str;
 
-import com.google.common.jimfs.Configuration;
-import com.google.common.jimfs.Jimfs;
 import mb.common.result.Result;
-import mb.log.api.Logger;
-import mb.log.api.LoggerFactory;
-import mb.log.slf4j.SLF4JLoggerFactory;
-import mb.pie.api.MixedSession;
-import mb.pie.api.Pie;
-import mb.pie.api.ResourceStringSupplier;
+import mb.log.dagger.DaggerLoggerComponent;
+import mb.log.dagger.LoggerModule;
 import mb.pie.api.Supplier;
-import mb.pie.runtime.PieBuilderImpl;
 import mb.pie.task.archive.ArchiveToJar;
 import mb.pie.task.java.CompileJava;
 import mb.resource.Resource;
 import mb.resource.ResourceKey;
-import mb.resource.fs.FSResource;
-import mb.resource.text.TextResource;
-import mb.resource.text.TextResourceRegistry;
-import mb.spoofax.core.platform.BaseResourceServiceComponent;
-import mb.spoofax.core.platform.BaseResourceServiceModule;
-import mb.spoofax.core.platform.DaggerBaseResourceServiceComponent;
-import mb.spoofax.core.platform.DaggerPlatformComponent;
-import mb.spoofax.core.platform.LoggerFactoryModule;
-import mb.spoofax.core.platform.PlatformComponent;
-import mb.spoofax.core.platform.PlatformPieModule;
+import mb.spoofax.test.SingleLanguageTestBase;
 import mb.str.task.StrategoAnalyze;
 import mb.str.task.StrategoCompileToJava;
 import mb.str.task.StrategoParse;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystem;
-import java.util.ArrayList;
-import java.util.Collections;
-
-public class TestBase {
-    public final FileSystem fileSystem = Jimfs.newFileSystem(Configuration.unix());
-    public final FSResource rootDirectory = new FSResource(fileSystem.getPath("/"));
-    public final TextResourceRegistry textResourceRegistry = new TextResourceRegistry();
-
-    final StrategoResourcesComponent resourcesComponent = DaggerStrategoResourcesComponent.create();
-    final BaseResourceServiceModule resourceServiceModule = new BaseResourceServiceModule()
-        .addRegistry(textResourceRegistry)
-        .addRegistriesFrom(resourcesComponent);
-    final BaseResourceServiceComponent resourceServiceComponent = DaggerBaseResourceServiceComponent.builder()
-        .baseResourceServiceModule(resourceServiceModule)
-        .build();
-
-    public final PlatformComponent platformComponent = DaggerPlatformComponent.builder()
-        .loggerFactoryModule(new LoggerFactoryModule(new SLF4JLoggerFactory()))
-        .platformPieModule(new PlatformPieModule(PieBuilderImpl::new))
-        .resourceServiceComponent(resourceServiceComponent)
-        .build();
-    public final LoggerFactory loggerFactory = platformComponent.getLoggerFactory();
-    public final Logger log = loggerFactory.create(TestBase.class);
-
-    public final StrategoComponent languageComponent = DaggerStrategoComponent.builder()
-        .strategoResourcesComponent(resourcesComponent)
-        .resourceServiceComponent(resourceServiceComponent)
-        .platformComponent(platformComponent)
-        .build();
-    public final StrategoParse parse = languageComponent.getStrategoParse();
-    public final StrategoCompileToJava compile = languageComponent.getStrategoCompileToJava();
-    public final StrategoAnalyze analyze = languageComponent.getStrategoAnalyze();
-    public final CompileJava compileJava = languageComponent.getCompileJava();
-    public final ArchiveToJar archiveToJar = languageComponent.getArchiveToJar();
-    public final Pie pie = languageComponent.getPie();
-
-
-    @SafeVarargs public final <T> ArrayList<T> createList(T... items) {
-        final ArrayList<T> list = new ArrayList<>();
-        Collections.addAll(list, items);
-        return list;
-    }
-
-    public FSResource createDir(FSResource parent, String relativePath) throws IOException {
-        return parent.appendRelativePath(relativePath).createDirectory(true);
-    }
-
-    public FSResource createTextFile(FSResource rootDirectory, String text, String relativePath) throws IOException {
-        final FSResource resource = rootDirectory.appendRelativePath(relativePath);
-        resource.writeString(text, StandardCharsets.UTF_8);
-        return resource;
-    }
-
-    public FSResource createTextFile(String text, String relativePath) throws IOException {
-        return createTextFile(this.rootDirectory, text, relativePath);
-    }
-
-    public TextResource createTextResource(String text, String id) {
-        return textResourceRegistry.createResource(text, id);
+class TestBase extends SingleLanguageTestBase<StrategoResourcesComponent, StrategoComponent> {
+    protected TestBase() {
+        super(
+            DaggerLoggerComponent.builder().loggerModule(LoggerModule.stdOutVerbose()).build(),
+            DaggerStrategoResourcesComponent::create,
+            (loggerComponent, resourcesComponent, resourceServiceComponent, platformComponent) -> DaggerStrategoComponent.builder()
+                .loggerComponent(loggerComponent)
+                .strategoResourcesComponent(resourcesComponent)
+                .resourceServiceComponent(resourceServiceComponent)
+                .platformComponent(platformComponent)
+                .build()
+        );
     }
 
 
-    public ResourceStringSupplier resourceStringSupplier(ResourceKey resourceKey) {
-        return new ResourceStringSupplier(resourceKey);
-    }
-
-    public ResourceStringSupplier resourceStringSupplier(Resource resource) {
-        return resourceStringSupplier(resource.getKey());
-    }
+    final StrategoParse parse = component.getStrategoParse();
+    final StrategoCompileToJava compile = component.getStrategoCompileToJava();
+    final StrategoAnalyze analyze = component.getStrategoAnalyze();
+    final CompileJava compileJava = component.getCompileJava();
+    final ArchiveToJar archiveToJar = component.getArchiveToJar();
 
 
-    public Supplier<? extends Result<IStrategoTerm, ?>> parsedAstSupplier(ResourceKey resourceKey) {
+    Supplier<? extends Result<IStrategoTerm, ?>> parsedAstSupplier(ResourceKey resourceKey) {
         return parse.createAstSupplier(resourceKey);
     }
 
-    public Supplier<? extends Result<IStrategoTerm, ?>> parsedAstSupplier(Resource resource) {
+    Supplier<? extends Result<IStrategoTerm, ?>> parsedAstSupplier(Resource resource) {
         return parsedAstSupplier(resource.getKey());
-    }
-
-
-    public MixedSession newSession() {
-        return pie.newSession();
     }
 }

@@ -14,8 +14,8 @@ import static org.spoofax.terms.util.TermUtils.*;
 
 class ToDynsemSignatureTest extends TestBase {
     @Test void testTask() throws Exception {
-        final FSResource resource = createTextFile("module nested/a context-free syntax A = <A>", "a.sdf3");
-        final Sdf3ToDynsemSignature taskDef = languageComponent.getSdf3ToDynsemSignature();
+        final FSResource resource = textFile("a.sdf3", "module nested/a context-free syntax A = <A>");
+        final Sdf3ToDynsemSignature taskDef = component.getSdf3ToDynsemSignature();
         try(final MixedSession session = newSession()) {
             final Supplier<? extends Result<Sdf3AnalyzeMulti.SingleFileOutput, ?>> supplier = singleFileAnalysisResultSupplier(resource);
             final Result<IStrategoTerm, ?> result = session.require(taskDef.createTask(supplier));

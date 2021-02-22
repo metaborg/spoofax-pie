@@ -6,6 +6,6 @@ import mb.tiger.intellij.TigerPlugin;
 public class TigerCompletionContributor extends SpoofaxCompletionContributor {
     // Instantiated by IntelliJ.
     protected TigerCompletionContributor() {
-        super(TigerPlugin.getComponent());
+        super(TigerPlugin.getComponent(), TigerPlugin.getPieComponent());
     }
 }

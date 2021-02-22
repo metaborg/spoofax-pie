@@ -5,9 +5,11 @@ import mb.common.region.Selection;
 import mb.common.region.Selections;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
+import mb.pie.dagger.PieComponent;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
+import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import mb.spoofax.eclipse.pie.PieRunner;
 import mb.spoofax.eclipse.util.EditorInputUtil;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -53,6 +55,7 @@ public abstract class SpoofaxEditor extends TextEditor {
     private final PresentationMerger presentationMerger = new PresentationMerger();
 
     private final EclipseLanguageComponent languageComponent;
+    private final PieComponent pieComponent;
 
     /*
     Do NOT initialize any of the following fields to null, as TextEditor's constructor will call 'initializeEditor' to
@@ -76,9 +79,10 @@ public abstract class SpoofaxEditor extends TextEditor {
     private @Nullable IFile file;
 
 
-    protected SpoofaxEditor(EclipseLanguageComponent languageComponent) {
+    protected SpoofaxEditor(EclipseLanguageComponent languageComponent, PieComponent pieComponent) {
         super();
         this.languageComponent = languageComponent;
+        this.pieComponent = pieComponent;
     }
 
 
@@ -143,10 +147,12 @@ public abstract class SpoofaxEditor extends TextEditor {
 
         this.jobManager = Job.getJobManager();
 
-        final EclipsePlatformComponent component = SpoofaxPlugin.getPlatformComponent();
-        this.loggerFactory = component.getLoggerFactory();
+        final EclipseLoggerComponent loggerComponent = SpoofaxPlugin.getLoggerComponent();
+        this.loggerFactory = loggerComponent.getLoggerFactory();
         this.logger = loggerFactory.create(getClass());
-        this.pieRunner = component.getPieRunner();
+
+        final EclipsePlatformComponent platformComponent = SpoofaxPlugin.getPlatformComponent();
+        this.pieRunner = platformComponent.getPieRunner();
 
         setDocumentProvider(new SpoofaxDocumentProvider());
         setSourceViewerConfiguration(new SpoofaxSourceViewerConfiguration());
@@ -217,7 +223,7 @@ public abstract class SpoofaxEditor extends TextEditor {
     private void scheduleJob(boolean initialUpdate) {
         if(document == null || file == null) return; // TODO: support case where file is null but document is not.
         cancelJobs();
-        final Job job = new EditorUpdateJob(loggerFactory, pieRunner, languageComponent, project, file, document, this);
+        final Job job = new EditorUpdateJob(loggerFactory, pieRunner, languageComponent, pieComponent, project, file, document, this);
         job.setRule(MultiRule.combine(file /* May return null, but null is a valid scheduling rule */, languageComponent.startupReadLockRule()));
         job.schedule(initialUpdate ? 0 : 300);
     }

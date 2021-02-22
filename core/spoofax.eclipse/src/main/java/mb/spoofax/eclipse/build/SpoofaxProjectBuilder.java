@@ -2,6 +2,7 @@ package mb.spoofax.eclipse.build;
 
 import mb.log.api.Logger;
 import mb.pie.api.ExecException;
+import mb.pie.dagger.PieComponent;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.pie.PieRunner;
@@ -18,12 +19,14 @@ import java.util.Map;
 
 public abstract class SpoofaxProjectBuilder extends IncrementalProjectBuilder {
     private final EclipseLanguageComponent languageComponent;
+    private final PieComponent pieComponent;
     private final Logger logger;
     private final PieRunner pieRunner;
 
-    public SpoofaxProjectBuilder(EclipseLanguageComponent languageComponent) {
+    public SpoofaxProjectBuilder(EclipseLanguageComponent languageComponent, PieComponent pieComponent) {
         this.languageComponent = languageComponent;
-        this.logger = SpoofaxPlugin.getPlatformComponent().getLoggerFactory().create(getClass());
+        this.pieComponent = pieComponent;
+        this.logger = SpoofaxPlugin.getLoggerComponent().getLoggerFactory().create(getClass());
         this.pieRunner = SpoofaxPlugin.getPlatformComponent().getPieRunner();
     }
 
@@ -53,11 +56,11 @@ public abstract class SpoofaxProjectBuilder extends IncrementalProjectBuilder {
     }
 
     private void fullBuild(IProject eclipseProject, @Nullable IProgressMonitor monitor) throws IOException, ExecException, InterruptedException {
-        pieRunner.fullBuild(languageComponent, eclipseProject, monitor);
+        pieRunner.fullBuild(languageComponent, pieComponent.getPie(), eclipseProject, monitor);
     }
 
     private void incrBuild(IProject eclipseProject, IResourceDelta delta, @Nullable IProgressMonitor monitor) throws CoreException, ExecException, InterruptedException, IOException {
-        pieRunner.incrementalBuild(languageComponent, eclipseProject, delta, monitor);
+        pieRunner.incrementalBuild(languageComponent, pieComponent.getPie(), eclipseProject, delta, monitor);
     }
 
     private void cancel(@Nullable IProgressMonitor monitor) {
@@ -70,7 +73,7 @@ public abstract class SpoofaxProjectBuilder extends IncrementalProjectBuilder {
     protected void clean(@Nullable IProgressMonitor monitor) throws CoreException {
         final IProject project = getProject();
         try {
-            pieRunner.clean(languageComponent, project, monitor);
+            pieRunner.clean(languageComponent, pieComponent.getPie(), project, monitor);
         } catch(IOException e) {
             cancel(monitor);
             final String message = "Cleaning project '" + project + "' failed unexpectedly";

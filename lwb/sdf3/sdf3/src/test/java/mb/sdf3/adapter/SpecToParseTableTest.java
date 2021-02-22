@@ -3,7 +3,6 @@ package mb.sdf3.adapter;
 import mb.common.result.Result;
 import mb.pie.api.MixedSession;
 import mb.resource.text.TextResource;
-import mb.sdf3.task.Sdf3Parse;
 import mb.sdf3.task.Sdf3SpecToParseTable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -23,13 +22,12 @@ class SpecToParseTableTest extends TestBase {
     @ParameterizedTest
     @ValueSource(booleans = {false, true})
     void testTask(boolean createCompletionTable) throws Exception {
-        final TextResource resourceMain = createTextResource("module test imports lex nested/a nested/b context-free start-symbols Start context-free syntax Start.Start = <<A> <B>>", "test.sdf3");
-        final TextResource resourceLex = createTextResource("module lex lexical syntax LAYOUT = [\\ \\t\\n\\r]", "lex.sdf3");
-        final TextResource resourceA = createTextResource("module nested/a context-free syntax A.A = <key>", "nested/a.sdf3");
-        final TextResource resourceB = createTextResource("module nested/b context-free syntax B.B = <word>", "nested/b.sdf3");
-        final Sdf3SpecToParseTable taskDef = languageComponent.getSdf3SpecToParseTable();
+        final TextResource resourceMain = textResource("test.sdf3", "module test imports lex nested/a nested/b context-free start-symbols Start context-free syntax Start.Start = <<A> <B>>");
+        final TextResource resourceLex = textResource("lex.sdf3", "module lex lexical syntax LAYOUT = [\\ \\t\\n\\r]");
+        final TextResource resourceA = textResource("nested/a.sdf3", "module nested/a context-free syntax A.A = <key>");
+        final TextResource resourceB = textResource("nested/b.sdf3", "module nested/b context-free syntax B.B = <word>");
+        final Sdf3SpecToParseTable taskDef = component.getSdf3SpecToParseTable();
         try(final MixedSession session = newSession()) {
-            final Sdf3Parse parse = languageComponent.getSdf3Parse();
             final Sdf3SpecToParseTable.Args args = new Sdf3SpecToParseTable.Args(
                 specSupplier(desugarSupplier(resourceMain), desugarSupplier(resourceLex), desugarSupplier(resourceA), desugarSupplier(resourceB)),
                 new ParseTableConfiguration(false, false, true, false, false, false),

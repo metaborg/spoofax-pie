@@ -2,13 +2,18 @@
 
 package mb.spoofax.compiler.gradle.plugin
 
+import mb.log.dagger.DaggerLoggerComponent
+import mb.log.dagger.LoggerModule
+import mb.pie.dagger.DaggerRootPieComponent
+import mb.pie.dagger.PieComponent
+import mb.pie.dagger.RootPieModule
 import mb.pie.runtime.PieBuilderImpl
+import mb.resource.dagger.DaggerRootResourceServiceComponent
+import mb.resource.dagger.ResourceServiceComponent
 import mb.spoofax.compiler.dagger.*
 import mb.spoofax.compiler.gradle.*
 import mb.spoofax.compiler.language.*
 import mb.spoofax.compiler.util.*
-import mb.spoofax.core.platform.DaggerBaseResourceServiceComponent
-import mb.spoofax.core.platform.ResourceServiceComponent
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaLibraryPlugin
@@ -17,6 +22,25 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.*
 import java.nio.charset.StandardCharsets
+
+open class Components {
+  val loggerComponent = DaggerLoggerComponent.builder()
+    .loggerModule(LoggerModule.stdErrErrorsAndWarnings())
+    .build()
+  val resourceServiceComponent = DaggerRootResourceServiceComponent.builder()
+    .loggerComponent(loggerComponent)
+    .build()
+  val component = DaggerSpoofaxCompilerComponent.builder()
+    .spoofaxCompilerModule(SpoofaxCompilerModule(TemplateCompiler(StandardCharsets.UTF_8)))
+    .loggerComponent(loggerComponent)
+    .resourceServiceComponent(resourceServiceComponent)
+    .build()
+  val pieComponent = DaggerRootPieComponent.builder()
+    .loggerComponent(loggerComponent)
+    .resourceServiceComponent(resourceServiceComponent)
+    .rootPieModule(RootPieModule { PieBuilderImpl() }.addTaskDefsFrom(component))
+    .build()
+}
 
 open class LanguageProjectExtension(project: Project) {
   val shared: Property<Shared.Builder> = project.objects.property()
@@ -50,11 +74,7 @@ open class LanguageProjectExtension(project: Project) {
     private const val name = "language project"
   }
 
-  val resourceServiceComponent = DaggerBaseResourceServiceComponent.create()
-  val component = DaggerSpoofaxCompilerComponent.builder()
-    .spoofaxCompilerModule(SpoofaxCompilerModule(TemplateCompiler(StandardCharsets.UTF_8)) { PieBuilderImpl() })
-    .resourceServiceComponent(resourceServiceComponent)
-    .build()
+  val components: Components by lazy { Components() }
 
   val sharedFinalized: Shared by lazy {
     project.logger.debug("Finalizing $name shared settings in $project")
@@ -140,7 +160,8 @@ open class LanguagePlugin : Plugin<Project> {
     project.afterEvaluate {
       project.whenLanguageProjectFinalized {
         extension.statixDependenciesFinalized.whenAllLanguageProjectsFinalized {
-          configure(project, extension.resourceServiceComponent, extension.component, extension.compilerInputFinalized)
+          val components = extension.components
+          configure(project, components.resourceServiceComponent, components.component, components.pieComponent, extension.compilerInputFinalized)
         }
       }
     }
@@ -150,10 +171,11 @@ open class LanguagePlugin : Plugin<Project> {
     project: Project,
     resourceServiceComponent: ResourceServiceComponent,
     component: SpoofaxCompilerComponent,
+    pieComponent: PieComponent,
     input: LanguageProjectCompiler.Input
   ) {
     configureProject(project, resourceServiceComponent, component, input)
-    configureCompileTask(project, resourceServiceComponent, component, input)
+    configureCompileTask(project, resourceServiceComponent, component, pieComponent, input)
   }
 
   private fun configureProject(
@@ -172,7 +194,9 @@ open class LanguagePlugin : Plugin<Project> {
     project: Project,
     resourceServiceComponent: ResourceServiceComponent,
     component: SpoofaxCompilerComponent,
-    input: LanguageProjectCompiler.Input) {
+    pieComponent: PieComponent,
+    input: LanguageProjectCompiler.Input
+  ) {
     val compileTask = project.tasks.register("compileLanguageProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
@@ -180,8 +204,8 @@ open class LanguagePlugin : Plugin<Project> {
 
       doLast {
         project.deleteDirectory(input.languageProject().generatedJavaSourcesDirectory(), resourceServiceComponent.resourceService)
-        synchronized(component.pie) {
-          component.pie.newSession().use { session ->
+        synchronized(pieComponent.pie) {
+          pieComponent.pie.newSession().use { session ->
             session.require(component.languageProjectCompiler.createTask(input))
           }
         }

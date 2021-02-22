@@ -1,28 +1,34 @@
 package mb.spoofax.dynamicloading;
 
-import mb.pie.api.MapTaskDefs;
 import mb.pie.api.MixedSession;
-import mb.pie.api.Pie;
+import mb.pie.dagger.DaggerPieComponent;
+import mb.pie.dagger.PieComponent;
+import mb.pie.dagger.RootPieModule;
 import mb.spoofax.compiler.spoofax3.standalone.dagger.Spoofax3CompilerStandalone;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.function.Supplier;
 
 public class DynamicLoader implements AutoCloseable {
-    private final Pie pie;
+    private final PieComponent pieComponent;
     private final DynamicLoad dynamicLoad;
     private final HashMap<String, DynamicLanguage> dynamicLanguages = new HashMap<>();
 
-    public DynamicLoader(Spoofax3CompilerStandalone spoofax3CompilerStandalone) {
-        this.dynamicLoad = new DynamicLoad(
+    public DynamicLoader(Spoofax3CompilerStandalone spoofax3CompilerStandalone, Supplier<RootPieModule> basePieModuleSupplier) {
+        dynamicLoad = new DynamicLoad(
+            spoofax3CompilerStandalone.spoofax3Compiler.loggerComponent,
             spoofax3CompilerStandalone.spoofax3Compiler.resourceServiceComponent,
             spoofax3CompilerStandalone.spoofax3Compiler.platformComponent,
             spoofax3CompilerStandalone.component.getCompileToJavaClassFiles(),
-            this
+            this,
+            basePieModuleSupplier
         );
-        this.pie = spoofax3CompilerStandalone.component.getPie().createChildBuilder()
-            .addTaskDefs(new MapTaskDefs(dynamicLoad))
+        pieComponent = DaggerPieComponent.builder()
+            .pieModule(spoofax3CompilerStandalone.pieComponent.createChildModule(dynamicLoad))
+            .loggerComponent(spoofax3CompilerStandalone.spoofax3Compiler.loggerComponent)
+            .resourceServiceComponent(spoofax3CompilerStandalone.spoofax3Compiler.resourceServiceComponent)
             .build();
     }
 
@@ -31,7 +37,7 @@ public class DynamicLoader implements AutoCloseable {
             dynamicLanguage.close();
         }
         dynamicLanguages.clear();
-        pie.close();
+        pieComponent.close();
     }
 
 
@@ -42,7 +48,7 @@ public class DynamicLoader implements AutoCloseable {
      * DynamicLoaderMixedSession#close}.
      */
     public DynamicLoaderMixedSession newSession() {
-        return new DynamicLoaderMixedSession(pie.newSession(), this, dynamicLoad);
+        return new DynamicLoaderMixedSession(pieComponent.getPie().newSession(), this, dynamicLoad);
     }
 
 

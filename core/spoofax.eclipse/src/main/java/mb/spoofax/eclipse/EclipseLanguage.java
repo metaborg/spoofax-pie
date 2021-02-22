@@ -1,18 +1,23 @@
 package mb.spoofax.eclipse;
 
-import mb.spoofax.core.language.LanguageResourcesComponent;
-import mb.spoofax.core.platform.ResourceServiceComponent;
+import mb.pie.dagger.PieComponent;
+import mb.resource.dagger.ResourceRegistriesProvider;
+import mb.resource.dagger.ResourceServiceComponent;
+import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 
-public interface EclipseLanguage {
-    LanguageResourcesComponent createResourcesComponent();
+public interface EclipseLanguage extends AutoCloseable {
+    ResourceRegistriesProvider createResourcesComponent();
 
     EclipseLanguageComponent createComponent(
+        EclipseLoggerComponent loggerComponent,
         ResourceServiceComponent resourceServiceComponent,
         EclipsePlatformComponent platformComponent
     );
 
     void start(
+        EclipseLoggerComponent loggerComponent,
         ResourceServiceComponent resourceServiceComponent,
-        EclipsePlatformComponent platformComponent
+        EclipsePlatformComponent platformComponent,
+        PieComponent pieComponent
     );
 }

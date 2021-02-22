@@ -1,8 +1,10 @@
 package mb.spoofax.intellij;
 
 import mb.spoofax.core.language.LanguageComponent;
-import mb.spoofax.intellij.editor.SpoofaxLexer;
+import mb.spoofax.intellij.editor.ScopeManager;
+import mb.spoofax.intellij.editor.SpoofaxLexerFactory;
 import mb.spoofax.intellij.editor.SpoofaxSyntaxHighlighter;
+import mb.spoofax.intellij.psi.SpoofaxTokenTypeManager;
 
 import javax.swing.*;
 
@@ -15,7 +17,11 @@ public interface IntellijLanguageComponent extends LanguageComponent {
 
     Icon getFileIcon();
 
-    SpoofaxLexer.Factory getLexerFactory();
+    SpoofaxLexerFactory getLexerFactory();
 
     SpoofaxSyntaxHighlighter.Factory getHighlighterFactory();
+
+    ScopeManager getScopeManager();
+
+    SpoofaxTokenTypeManager getTokenTypeManager();
 }

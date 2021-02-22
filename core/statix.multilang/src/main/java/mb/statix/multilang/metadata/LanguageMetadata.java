@@ -25,7 +25,5 @@ public interface LanguageMetadata {
 
     @Value.Parameter String projectConstraint();
 
-    @Value.Parameter Pie languagePie();
-
     @Value.Parameter ITermFactory termFactory();
 }

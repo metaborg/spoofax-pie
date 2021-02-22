@@ -1,19 +1,32 @@
 package {{basePlugin.packageId}};
 
-import mb.spoofax.core.platform.DaggerResourceServiceComponent;
-import mb.spoofax.core.platform.ResourceServiceComponent;
+import mb.pie.dagger.DaggerPieComponent;
+import mb.pie.dagger.PieComponent;
+import mb.pie.dagger.PieModule;
+import mb.pie.runtime.PieBuilderImpl;
+import mb.resource.dagger.DaggerResourceServiceComponent;
+import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.intellij.SpoofaxPlugin;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class {{basePlugin.id}} {
     private static {{adapterProjectCompilerInput.resourcesComponent.nullableQualifiedId}} resourcesComponent;
+    private static @Nullable ResourceServiceComponent resourceServiceComponent;
     private static {{component.nullableQualifiedId}} component;
+    private static @Nullable PieComponent pieComponent;
 
     public static {{adapterProjectCompilerInput.resourcesComponent.qualifiedId}} getResourcesComponent() {
         if(resourcesComponent == null) {
             throw new RuntimeException("Cannot access {{adapterProjectCompilerInput.resourcesComponent.id}}; {{basePlugin.id}} has not been started yet, or has been stopped");
         }
         return resourcesComponent;
+    }
+
+    public static ResourceServiceComponent getResourceServiceComponent() {
+        if(resourceServiceComponent == null) {
+            throw new RuntimeException("Cannot access ResourceServiceComponent; TigerPlugin has not been started yet, or has been stopped");
+        }
+        return resourceServiceComponent;
     }
 
     public static {{component.qualifiedId}} getComponent() {
@@ -23,15 +36,29 @@ public class {{basePlugin.id}} {
         return component;
     }
 
+    public static PieComponent getPieComponent() {
+        if(pieComponent == null) {
+            throw new RuntimeException("Cannot access PieComponent; TigerPlugin has not been started yet, or has been stopped");
+        }
+        return pieComponent;
+    }
+
     public static void init() {
         resourcesComponent = {{adapterProjectCompilerInput.daggerResourcesComponent.qualifiedId}}.create();
-        final ResourceServiceComponent resourceServiceComponent = DaggerResourceServiceComponent.builder()
+        resourceServiceComponent = DaggerResourceServiceComponent.builder()
             .resourceServiceModule(SpoofaxPlugin.getResourceServiceComponent().createChildModule().addRegistriesFrom(resourcesComponent))
+            .loggerComponent(SpoofaxPlugin.getLoggerComponent())
             .build();
         component = {{daggerComponent.id}}.builder()
+            .intellijLoggerComponent(SpoofaxPlugin.getLoggerComponent())
             .{{adapterProjectCompilerInput.resourcesComponent.idAsCamelCase}}(resourcesComponent)
             .resourceServiceComponent(resourceServiceComponent)
             .intellijPlatformComponent(SpoofaxPlugin.getPlatformComponent())
+            .build();
+        pieComponent = DaggerPieComponent.builder()
+            .pieModule(new PieModule(PieBuilderImpl::new, component))
+            .loggerComponent(SpoofaxPlugin.getLoggerComponent())
+            .resourceServiceComponent(resourceServiceComponent)
             .build();
     }
 }

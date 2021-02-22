@@ -4,6 +4,6 @@ import mb.spoofax.eclipse.editor.SpoofaxEditor;
 
 public class {{baseEditor.id}} extends SpoofaxEditor {
     public {{baseEditor.id}}() {
-        super({{language.qualifiedId}}.getInstance().getComponent());
+        super({{language.qualifiedId}}.getInstance().getComponent(), {{language.qualifiedId}}.getInstance().getPieComponent());
     }
 }

@@ -6,16 +6,12 @@ import mb.common.message.KeyedMessages
 import mb.common.message.Message
 import mb.common.message.Messages
 import mb.common.message.Severity
-import mb.log.slf4j.SLF4JLoggerFactory
-import mb.pie.runtime.PieBuilderImpl
 import mb.resource.ResourceKey
 import mb.resource.fs.FSPath
 import mb.spoofax.compiler.gradle.*
 import mb.spoofax.compiler.gradle.plugin.*
 import mb.spoofax.compiler.spoofax3.dagger.*
 import mb.spoofax.compiler.spoofax3.language.*
-import mb.spoofax.core.platform.LoggerFactoryModule
-import mb.spoofax.core.platform.PlatformPieModule
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -73,10 +69,11 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
     val languageProjectExtension = project.extensions.getByType<LanguageProjectExtension>()
 
     // OPTO: cache instantiation components.
+    val components = languageProjectExtension.components
     val spoofax3Compiler = Spoofax3Compiler(
-      languageProjectExtension.resourceServiceComponent.createChildModule(),
-      LoggerFactoryModule(SLF4JLoggerFactory()),
-      PlatformPieModule { PieBuilderImpl() }
+      components.loggerComponent,
+      components.resourceServiceComponent.createChildModule(),
+      components.pieComponent.createChildModule()
     )
 
     val extension = Spoofax3LanguageProjectExtension(project)
@@ -190,7 +187,7 @@ open class Spoofax3LanguagePlugin : Plugin<Project> {
       }
 
       doLast {
-        spoofax3Compiler.component.pie.newSession().use { session ->
+        spoofax3Compiler.pieComponent.pie.newSession().use { session ->
           val result = session.require(spoofax3Compiler.component.spoofax3LanguageProjectCompiler.createTask(input))
           result.ifOk {
             project.logMessages(it, FSPath(project.projectDir))

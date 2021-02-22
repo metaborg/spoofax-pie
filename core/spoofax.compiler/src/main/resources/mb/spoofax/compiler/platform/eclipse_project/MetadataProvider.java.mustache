@@ -1,9 +1,9 @@
 package {{baseMetadataProvider.packageId}};
 
+import mb.statix.multilang.eclipse.LanguageMetadataProvider;
 import mb.statix.multilang.metadata.ContextId;
 import mb.statix.multilang.metadata.LanguageId;
 import mb.statix.multilang.metadata.LanguageMetadata;
-import mb.statix.multilang.eclipse.LanguageMetadataProvider;
 import mb.statix.multilang.metadata.SpecFragmentId;
 import mb.statix.multilang.metadata.spec.SpecConfig;
 
@@ -25,8 +25,7 @@ public class {{baseMetadataProvider.id}} implements LanguageMetadataProvider {
         return result;
     }
 
-    @Override
-    public Map<SpecFragmentId, SpecConfig> getSpecConfigs() {
+    @Override public Map<SpecFragmentId, SpecConfig> getSpecConfigs() {
         return {{language.id}}.getInstance().getComponent().getSpecConfigs();
     }
 

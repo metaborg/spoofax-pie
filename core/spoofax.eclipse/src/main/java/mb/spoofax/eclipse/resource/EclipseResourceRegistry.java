@@ -1,18 +1,15 @@
 package mb.spoofax.eclipse.resource;
 
-import mb.log.api.Logger;
-import mb.log.api.LoggerFactory;
 import mb.resource.Resource;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceKeyString;
 import mb.resource.ResourceRegistry;
 import mb.resource.ResourceRuntimeException;
-import mb.spoofax.core.platform.ResourceServiceScope;
+import mb.resource.dagger.ResourceServiceScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.jface.text.IDocument;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.File;
 import java.util.concurrent.ConcurrentHashMap;
 

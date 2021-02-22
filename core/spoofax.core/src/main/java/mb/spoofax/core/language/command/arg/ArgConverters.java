@@ -7,12 +7,10 @@ import mb.resource.ResourceKeyString;
 import mb.resource.ResourceRuntimeException;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.core.platform.Platform;
 import mb.spoofax.core.platform.PlatformScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.Serializable;
 import java.util.HashMap;
 

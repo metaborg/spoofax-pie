@@ -17,8 +17,8 @@ class ToSignatureTest extends TestBase {
     @Test
     @Disabled("For some reason, SingleLineTemplate are not getting a type annotation on the AST, even though there is a Statix type rule for them")
     void testTask() throws Exception {
-        final FSResource resource = createTextFile("module nested/a context-free syntax A = <A>", "a.sdf3");
-        final Sdf3ToSignature taskDef = languageComponent.getSdf3ToSignature();
+        final FSResource resource = textFile("a.sdf3", "module nested/a context-free syntax A = <A>");
+        final Sdf3ToSignature taskDef = component.getSdf3ToSignature();
         try(final MixedSession session = newSession()) {
             final Supplier<? extends Result<Sdf3AnalyzeMulti.SingleFileOutput, ?>> supplier = singleFileAnalysisResultSupplier(resource);
             final Result<IStrategoTerm, ?> result = session.require(taskDef.createTask(supplier));

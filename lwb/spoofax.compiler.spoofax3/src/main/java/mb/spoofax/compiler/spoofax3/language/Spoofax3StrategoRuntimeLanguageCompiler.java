@@ -3,10 +3,10 @@ package mb.spoofax.compiler.spoofax3.language;
 import mb.common.message.KeyedMessages;
 import mb.common.result.Result;
 import mb.common.util.ListView;
+import mb.libspoofax2.LibSpoofax2ClassLoaderResources;
 import mb.libspoofax2.LibSpoofax2Exports;
-import mb.libspoofax2.LibSpoofax2Qualifier;
+import mb.libstatix.LibStatixClassLoaderResources;
 import mb.libstatix.LibStatixExports;
-import mb.libstatix.LibStatixQualifier;
 import mb.pie.api.ExecContext;
 import mb.pie.api.None;
 import mb.pie.api.STask;
@@ -14,7 +14,6 @@ import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.pie.task.archive.UnarchiveFromJar;
-import mb.resource.classloader.ClassLoaderResource;
 import mb.resource.classloader.ClassLoaderResourceLocations;
 import mb.resource.classloader.JarFileWithPath;
 import mb.resource.hierarchical.HierarchicalResource;
@@ -45,23 +44,23 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
     private final StrategoConfigurator configurator;
 
     private final UnarchiveFromJar unarchiveFromJar;
-    private final ClassLoaderResource libSpoofax2DefinitionDir;
-    private final ClassLoaderResource libStatixDefinitionDir;
+    private final LibSpoofax2ClassLoaderResources libSpoofax2ClassLoaderResources;
+    private final LibStatixClassLoaderResources libStatixClassLoaderResources;
 
     @Inject public Spoofax3StrategoRuntimeLanguageCompiler(
         StrategoCheckMulti check,
         StrategoCompileToJava compileToJava,
         StrategoConfigurator configurator,
         UnarchiveFromJar unarchiveFromJar,
-        @LibSpoofax2Qualifier("definition-directory") ClassLoaderResource libSpoofax2DefinitionDir,
-        @LibStatixQualifier("definition-directory") ClassLoaderResource libStatixDefinitionDir
+        LibSpoofax2ClassLoaderResources libSpoofax2ClassLoaderResources,
+        LibStatixClassLoaderResources libStatixClassLoaderResources
     ) {
         this.check = check;
         this.compileToJava = compileToJava;
         this.configurator = configurator;
         this.unarchiveFromJar = unarchiveFromJar;
-        this.libSpoofax2DefinitionDir = libSpoofax2DefinitionDir;
-        this.libStatixDefinitionDir = libStatixDefinitionDir;
+        this.libSpoofax2ClassLoaderResources = libSpoofax2ClassLoaderResources;
+        this.libStatixClassLoaderResources = libStatixClassLoaderResources;
     }
 
 
@@ -100,7 +99,7 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
         // Determine libspoofax2 definition directories.
         final HashSet<HierarchicalResource> libSpoofax2DefinitionDirs = new LinkedHashSet<>(); // LinkedHashSet to remove duplicates while keeping insertion order.
         if(input.spoofax3LanguageProject().includeLibSpoofax2Exports()) {
-            final ClassLoaderResourceLocations locations = libSpoofax2DefinitionDir.getLocations();
+            final ClassLoaderResourceLocations locations = libSpoofax2ClassLoaderResources.definitionDirectory.getLocations();
             libSpoofax2DefinitionDirs.addAll(locations.directories);
             final ResourcePath unarchiveDirectoryBase = input.spoofax3LanguageProject().unarchiveDirectory().appendRelativePath("libspoofax2");
             for(JarFileWithPath jarFileWithPath : locations.jarFiles) {
@@ -124,7 +123,7 @@ public class Spoofax3StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax3
         // Determine libstatix definition directories.
         final HashSet<HierarchicalResource> libStatixDefinitionDirs = new LinkedHashSet<>(); // LinkedHashSet to remove duplicates while keeping insertion order.
         if(input.spoofax3LanguageProject().includeLibStatixExports()) {
-            final ClassLoaderResourceLocations locations = libStatixDefinitionDir.getLocations();
+            final ClassLoaderResourceLocations locations = libStatixClassLoaderResources.definitionDirectory.getLocations();
             libStatixDefinitionDirs.addAll(locations.directories);
             final ResourcePath unarchiveDirectoryBase = input.spoofax3LanguageProject().unarchiveDirectory().appendRelativePath("libstatix");
             for(JarFileWithPath jarFileWithPath : locations.jarFiles) {

@@ -1,12 +1,15 @@
 package mb.tiger.spoofax;
 
 import dagger.Component;
-import mb.pie.api.Pie;
+import mb.log.dagger.LoggerComponent;
+import mb.pie.api.TaskDef;
+import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.platform.PlatformComponent;
-import mb.spoofax.core.platform.ResourceServiceComponent;
 import mb.tiger.spoofax.command.TigerShowScopeGraphCommand;
 import mb.tiger.spoofax.task.TigerShowScopeGraph;
+
+import java.util.Set;
 
 /**
  * A {@link LanguageComponent} that contributes Tiger task definitions. All objects are provided by a {@link
@@ -17,6 +20,7 @@ import mb.tiger.spoofax.task.TigerShowScopeGraph;
 @Component(
     modules = TigerModule.class,
     dependencies = {
+        LoggerComponent.class,
         TigerResourcesComponent.class,
         ResourceServiceComponent.class,
         PlatformComponent.class
@@ -25,7 +29,7 @@ import mb.tiger.spoofax.task.TigerShowScopeGraph;
 public interface TigerComponent extends LanguageComponent {
     @Override TigerInstance getLanguageInstance();
 
-    @Override @TigerQualifier Pie getPie();
+    @Override @TigerQualifier Set<TaskDef<?, ?>> getTaskDefs();
 
 
     TigerShowScopeGraph getShowScopeGraph();

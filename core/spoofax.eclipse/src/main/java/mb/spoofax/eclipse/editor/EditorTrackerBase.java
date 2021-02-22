@@ -15,6 +15,11 @@ public abstract class EditorTrackerBase implements IWindowListener, IPartListene
         });
     }
 
+    public void unregister() {
+        final IWorkbench workbench = PlatformUI.getWorkbench();
+        workbench.removeWindowListener(this);
+    }
+
 
     // IWindowListener implementation
 

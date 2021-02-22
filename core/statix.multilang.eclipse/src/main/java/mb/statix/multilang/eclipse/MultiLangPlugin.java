@@ -3,9 +3,10 @@ package mb.statix.multilang.eclipse;
 import mb.log.api.Logger;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
+import mb.spoofax.eclipse.log.EclipseLoggerComponent;
+import mb.statix.multilang.MultiLangModule;
 import mb.statix.multilang.metadata.AnalysisContextService;
 import mb.statix.multilang.metadata.ImmutableAnalysisContextService;
-import mb.statix.multilang.MultiLangModule;
 import mb.statix.multilang.metadata.SpecFragmentId;
 import mb.statix.multilang.metadata.spec.SpecConfig;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -25,7 +26,6 @@ import java.util.stream.Stream;
 public class MultiLangPlugin extends Plugin {
     public static final String id = "statix.multilang.eclipse";
     private static final String ANALYSIS_CONTEXT_ID = "mb.statix.multilang.analysiscontext";
-    private static final Logger logger = SpoofaxPlugin.getPlatformComponent().getLoggerFactory().create(MultiLangPlugin.class);
 
     private static @Nullable MultiLangPlugin plugin;
     private static @Nullable MultiLangEclipseComponent component;
@@ -48,12 +48,14 @@ public class MultiLangPlugin extends Plugin {
     @Override public void start(@NonNull BundleContext context) throws Exception {
         super.start(context);
         plugin = this;
-        EclipsePlatformComponent platformComponent = SpoofaxPlugin.getPlatformComponent();
+
+        final EclipseLoggerComponent eclipseLoggerComponent = SpoofaxPlugin.getLoggerComponent();
+        final Logger logger = eclipseLoggerComponent.getLoggerFactory().create(MultiLangPlugin.class);
 
         component = DaggerMultiLangEclipseComponent
             .builder()
-            .multiLangModule(new MultiLangModule(() -> initializeExtensionPoint(Platform.getExtensionRegistry())))
-            .platformComponent(platformComponent)
+            .multiLangModule(new MultiLangModule(() -> initializeExtensionPoint(Platform.getExtensionRegistry(), logger)))
+            .loggerComponent(eclipseLoggerComponent)
             .build();
     }
 
@@ -62,14 +64,14 @@ public class MultiLangPlugin extends Plugin {
         plugin = null;
     }
 
-    private static AnalysisContextService initializeExtensionPoint(IExtensionRegistry registry) {
+    private static AnalysisContextService initializeExtensionPoint(IExtensionRegistry registry, Logger logger) {
         IConfigurationElement[] extensions = registry.getConfigurationElementsFor(ANALYSIS_CONTEXT_ID);
         ImmutableAnalysisContextService.Builder analysisContextServiceBuilder = AnalysisContextService.builder();
 
         // Initialize language metadata providers
         List<LanguageMetadataProvider> languageMetadataProviders = Stream.of(extensions)
             .filter(conf -> conf.getName().equals("languagemetadata"))
-            .map(MultiLangPlugin::loadClass)
+            .map(c -> loadClass(c, logger))
             .filter(LanguageMetadataProvider.class::isInstance)
             .map(LanguageMetadataProvider.class::cast)
             .collect(Collectors.toList());
@@ -92,12 +94,10 @@ public class MultiLangPlugin extends Plugin {
             .map(LanguageMetadataProvider::getDefaultLanguageContexts)
             .forEach(analysisContextServiceBuilder::putAllDefaultLanguageContexts);
 
-        return analysisContextServiceBuilder
-            .platformPieBuilder(SpoofaxPlugin.getPlatformComponent().newPieBuilder())
-            .build();
+        return analysisContextServiceBuilder.build();
     }
 
-    private static @Nullable Object loadClass(IConfigurationElement conf) {
+    private static @Nullable Object loadClass(IConfigurationElement conf, Logger logger) {
         try {
             return conf.createExecutableExtension("class");
         } catch(CoreException e) {

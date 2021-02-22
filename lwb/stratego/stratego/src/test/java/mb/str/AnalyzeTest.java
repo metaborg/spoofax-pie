@@ -18,8 +18,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class AnalyzeTest extends TestBase {
     @Disabled("Temporarily disable") @Test void testCompileTask() throws Exception {
         final FSResource projectDir = rootDirectory.appendRelativePath("project").createDirectory(true);
-        final FSResource mainFile = createTextFile(projectDir, "module main imports libstratego-lib rules hello = !$[hello [<world>]]; debug", "main.str");
-        final FSResource otherFile = createTextFile(projectDir, "module other rules world = !\"world\"", "other.str");
+        final FSResource mainFile = textFile(projectDir, "main.str", "module main imports libstratego-lib rules hello = !$[hello [<world>]]; debug");
+        final FSResource otherFile = textFile(projectDir, "other.str", "module other rules world = !\"world\"");
 
         try(final MixedSession session = newSession()) {
             final StrategoAnalyzeConfig config = new StrategoAnalyzeConfig(

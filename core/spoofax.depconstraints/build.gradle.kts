@@ -4,9 +4,9 @@ plugins {
 }
 
 val commonVersion = "0.6.1"
-val logVersion = "0.5.0"
+val logVersion = "0.5.1"
 val slf4jVersion = "1.7.30"
-val resourceVersion = "0.10.0"
+val resourceVersion = "0.10.1"
 val pieVersion = "0.14.1"
 
 val spoofax2Version: String by ext
@@ -15,9 +15,9 @@ val spoofax2DevenvVersion: String by ext
 val picocliVersion = "4.5.0"
 
 val javaxInjectVersion = "1"
-val checkerframeworkVersion = "3.6.0"
+val checkerframeworkVersion = "3.10.0"
 
-val daggerVersion = "2.31.2"
+val daggerVersion = "2.32"
 val derive4jVersion = "1.1.1"
 val immutablesVersion = "2.8.2"
 
@@ -55,10 +55,12 @@ dependencies {
     api("org.metaborg:log.api:$logVersion")
     api("org.metaborg:log.backend.logback:$logVersion")
     api("org.metaborg:log.backend.slf4j:$logVersion")
+    api("org.metaborg:log.dagger:$logVersion")
     /// SLF4j
     api("org.slf4j:slf4j-simple:$slf4jVersion")
     /// Resource
     api("org.metaborg:resource:$resourceVersion")
+    api("org.metaborg:resource.dagger:$resourceVersion")
     /// PIE
     api("org.metaborg:pie.api:$pieVersion")
     api("org.metaborg:pie.runtime:$pieVersion")
@@ -111,7 +113,7 @@ dependencies {
 
 
     // Test dependencies // TODO: should be in a separate platform?
-    api("org.junit.jupiter:junit-jupiter-api:5.3.1")
+    api("org.junit.jupiter:junit-jupiter-api:${metaborg.junitVersion}")
     api("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
     api("com.google.jimfs:jimfs:1.1")
     api("nl.jqno.equalsverifier:equalsverifier:3.1.12")

@@ -5,13 +5,13 @@ import mb.resource.ResourceRegistry;
 import mb.resource.classloader.ClassLoaderResource;
 import mb.resource.classloader.ClassLoaderResourceRegistry;
 import mb.resource.hierarchical.HierarchicalResource;
-import mb.spoofax.core.language.LanguageResourcesComponent;
+import mb.resource.dagger.ResourceRegistriesProvider;
 
 import java.util.Set;
 
 @{{resourcesScope.qualifiedId}}
 @Component(modules = {{resourcesModule.qualifiedId}}.class)
-public interface {{baseResourcesComponent.id}} extends LanguageResourcesComponent {
+public interface {{baseResourcesComponent.id}} extends ResourceRegistriesProvider {
     {{classLoaderResources.classLoaderResources.qualifiedId}} getClassloaderResources();
 
     @{{qualifier.qualifiedId}} ClassLoaderResourceRegistry getClassLoaderResourceRegistry();

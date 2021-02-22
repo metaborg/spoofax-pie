@@ -20,8 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class MultilangAnalysisTests extends TestBase {
 
     @Test public void testMultilangAnalysisSucceeds() throws IOException, ExecException, InterruptedException {
-        createTextFile("module a sorts ID A context-free syntax A.B = <<ID*>>", "a.msdf");
-        createTextFile("module b imports a rules rw: B(lid) -> B([])", "b.mstr");
+        textFile("a.msdf", "module a sorts ID A context-free syntax A.B = <<ID*>>");
+        textFile("b.mstr", "module b imports a rules rw: B(lid) -> B([])");
 
         try(MixedSession session = newSession()) {
             KeyedMessages msdfMessages = session.require(miniSdfComponent
@@ -39,8 +39,8 @@ public class MultilangAnalysisTests extends TestBase {
     }
 
     @Test public void testMultilangAnalysisFails() throws IOException, ExecException, InterruptedException {
-        createTextFile("module a sorts ID A context-free syntax A.B = <<ID*>>", "a.msdf");
-        createTextFile("module b imports a rules rw: B(lid) -> B()", "b.mstr");
+        textFile("a.msdf", "module a sorts ID A context-free syntax A.B = <<ID*>>");
+        textFile("b.mstr", "module b imports a rules rw: B(lid) -> B()");
 
         try(MixedSession session = newSession()) {
             KeyedMessages msdfMessages = session.require(miniSdfComponent
@@ -59,12 +59,12 @@ public class MultilangAnalysisTests extends TestBase {
     }
 
     @Test public void testMultilangAnalysisWithConfigFails() throws IOException, ExecException, InterruptedException {
-        createTextFile("module a sorts ID A context-free syntax A.B = <<ID*>>", "a.msdf");
-        createTextFile("module b imports a rules rw: B(lid) -> B([])", "b.mstr");
-        createTextFile("\n" +
+        textFile("a.msdf", "module a sorts ID A context-free syntax A.B = <<ID*>>");
+        textFile("b.mstr", "module b imports a rules rw: B(lid) -> B([])");
+        textFile("multilang.yaml", "\n" +
             "languageContexts:\n" +
             "  'mb.minisdf': \"mb.minisdf\"\n" +
-            "  'mb.ministr': \"mb.ministr\"", "multilang.yaml");
+            "  'mb.ministr': \"mb.ministr\"");
 
         try(MixedSession session = newSession()) {
             KeyedMessages msdfMessages = session.require(miniSdfComponent
@@ -84,7 +84,7 @@ public class MultilangAnalysisTests extends TestBase {
 
 
     @Test public void readConfig() throws IOException, ExecException, InterruptedException, ConfigurationException {
-        createTextFile("\n" +
+        textFile("multilang.yaml", "\n" +
             "languageContexts:\n" +
             "  'mb.lang1': \"debugContext\"\n" +
             "  'mb.lang2': \"debugContext\"\n" +
@@ -92,7 +92,7 @@ public class MultilangAnalysisTests extends TestBase {
             "contextConfigs:\n" +
             "  debugContext:\n" +
             "    logging: debug\n" +
-            "    stripTraces: true", "multilang.yaml");
+            "    stripTraces: true");
 
         try(MixedSession session = newSession()) {
             Result<ContextConfig, ConfigurationException> configResult = session.require(multiLangComponent

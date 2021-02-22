@@ -8,6 +8,7 @@ plugins {
   id("org.metaborg.gradle.config.java-library")
   id("org.metaborg.gradle.config.junit-testing")
   id("org.metaborg.spoofax.compiler.gradle.spoofax2.language")
+  id("org.metaborg.spoofax.compiler.gradle.adapter")
 }
 
 languageProject {
@@ -21,10 +22,14 @@ languageProject {
     }
   }
 }
+
 spoofax2BasedLanguageProject {
   compilerInput {
     withMultilangAnalyzer()
-    project
-      .languageSpecificationDependency(GradleDependency.project(":signature-interface.spoofaxcore"))
+    project.languageSpecificationDependency(GradleDependency.project(":signature-interface.spoofaxcore"))
   }
+}
+
+languageAdapterProject {
+
 }

@@ -3,6 +3,7 @@ package mb.spoofax.cli;
 import mb.common.util.ListView;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Pie;
+import mb.pie.dagger.PieComponent;
 import mb.resource.ResourceService;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.language.LanguageInstance;
@@ -15,7 +16,6 @@ import mb.spoofax.core.language.command.arg.ArgConverters;
 import mb.spoofax.core.language.command.arg.Param;
 import mb.spoofax.core.language.command.arg.ParamDef;
 import mb.spoofax.core.language.command.arg.RawArgFromProviders;
-import mb.spoofax.core.platform.Platform;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import picocli.CommandLine;
 import picocli.CommandLine.Model.ArgSpec;
@@ -39,11 +39,8 @@ public class SpoofaxCli {
         this.argConverters = argConverters;
     }
 
-    public int run(String[] args, LanguageComponent languageComponent) {
-        final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
-        final Pie pie = languageComponent.getPie();
-
-        return run(args, pie, languageInstance.getCliCommand());
+    public int run(String[] args, LanguageComponent languageComponent, PieComponent pieComponent) {
+        return run(args, pieComponent.getPie(), languageComponent.getLanguageInstance().getCliCommand());
     }
 
     public int run(String[] args, Pie pie, String prefix, LanguageInstance... languageInstances) {

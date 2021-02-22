@@ -25,27 +25,27 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CompileTest extends TestBase {
     @Test void testCompileAndRun() throws Exception {
-        final FSResource strategoSourceDir = createDir(rootDirectory, "str");
-        final FSResource strategoMainFile = createTextFile(strategoSourceDir, "" +
+        final FSResource strategoSourceDir = directory(rootDirectory, "str");
+        final FSResource strategoMainFile = textFile(strategoSourceDir, "hello.str", "" +
                 "module hello " +
                 "imports " +
                 "  libstratego-lib " +
                 "  world " +
                 "rules " +
-                "  hello = !$[Hello, [<world>]]; debug",
-            "hello.str");
-        final FSResource strategoWorldFile = createTextFile(strategoSourceDir, "" +
+                "  hello = !$[Hello, [<world>]]; debug"
+        );
+        final FSResource strategoWorldFile = textFile(strategoSourceDir, "world.str", "" +
                 "module world " +
                 "imports " +
                 "  libstratego-lib " +
                 "rules " +
-                "  world = !\"world!\"",
-            "world.str");
+                "  world = !\"world!\""
+        );
 
-        final FSResource buildDir = createDir(rootDirectory, "build");
+        final FSResource buildDir = directory(rootDirectory, "build");
 
-        final FSResource strategoJavaOutputDir = createDir(buildDir, "str/src/main/java/");
-        final FSResource strategoJavaPackageOutputDir = createDir(strategoJavaOutputDir, "mb/test");
+        final FSResource strategoJavaOutputDir = directory(buildDir, "str/src/main/java/");
+        final FSResource strategoJavaPackageOutputDir = directory(strategoJavaOutputDir, "mb/test");
 
         try(final MixedSession session = newSession()) {
             // Compile Stratego source files to Java source files.
@@ -60,7 +60,7 @@ class CompileTest extends TestBase {
             );
             final Task<Result<None, ?>> strategoCompileTask = compile.createTask(new StrategoCompileToJava.Input(
                 config,
-                createList()
+                list()
             ));
             @SuppressWarnings("ConstantConditions") final Result<None, ?> result = session.require(strategoCompileTask);
             assertTrue(result.isOk());
@@ -88,25 +88,25 @@ class CompileTest extends TestBase {
             assertTrue(testPackageJavaFile.readString().contains("test"));
 
             // Compile Java source files to Java class files.
-            final FSResource sourceFileOutputDir = createDir(buildDir, "generated/sources/annotationProcessor/java/main");
-            final FSResource classFileOutputDir = createDir(buildDir, "classes/java/main");
-            final FSResource libsDir = createDir(buildDir, "libs");
+            final FSResource sourceFileOutputDir = directory(buildDir, "generated/sources/annotationProcessor/java/main");
+            final FSResource classFileOutputDir = directory(buildDir, "classes/java/main");
+            final FSResource libsDir = directory(buildDir, "libs");
             final @Nullable String classPathProperty = System.getProperty("classPath");
             assertNotNull(classPathProperty);
-            final ArrayList<File> classPath = createList();
+            final ArrayList<File> classPath = list();
             for(String classPathPart : classPathProperty.split(File.pathSeparator)) {
                 classPath.add(new File(classPathPart));
             }
             final Task<?> compileJavaTask = compileJava.createTask(new CompileJava.Input(
-                createList(mainJavaFile.getPath()),
-                createList(strategoJavaOutputDir.getPath()),
+                list(mainJavaFile.getPath()),
+                list(strategoJavaOutputDir.getPath()),
                 classPath,
-                createList(),
+                list(),
                 null,
                 null,
                 sourceFileOutputDir.getPath(),
                 classFileOutputDir.getPath(),
-                createList(strategoCompileTask.toSupplier())
+                list(strategoCompileTask.toSupplier())
             ));
             session.require(compileJavaTask);
 
@@ -114,9 +114,9 @@ class CompileTest extends TestBase {
             final FSResource jarFile = libsDir.appendRelativePath("stratego.jar").ensureFileExists();
             final Task<?> createJarTask = archiveToJar.createTask(new ArchiveToJar.Input(
                 null,
-                createList(ArchiveDirectory.ofClassFilesInDirectory(classFileOutputDir.getPath())),
+                list(ArchiveDirectory.ofClassFilesInDirectory(classFileOutputDir.getPath())),
                 jarFile.getPath(),
-                createList(compileJavaTask.toSupplier())
+                list(compileJavaTask.toSupplier())
             ));
             session.require(createJarTask);
 

@@ -32,7 +32,6 @@ dependencies {
   bundleEmbedApi("org.metaborg:resource")
   bundleEmbedApi("org.metaborg:pie.api")
   bundleEmbedApi("org.metaborg:pie.runtime")
-  bundleEmbedApi("org.metaborg:pie.dagger")
   bundleEmbedApi("org.metaborg.devenv:org.spoofax.terms")
   bundleEmbedApi("com.google.dagger:dagger")
 

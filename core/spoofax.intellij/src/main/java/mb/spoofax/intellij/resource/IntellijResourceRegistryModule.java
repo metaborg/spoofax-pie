@@ -4,7 +4,7 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
 import mb.resource.ResourceRegistry;
-import mb.spoofax.core.platform.ResourceServiceScope;
+import mb.resource.dagger.ResourceServiceScope;
 
 @Module
 public abstract class IntellijResourceRegistryModule {

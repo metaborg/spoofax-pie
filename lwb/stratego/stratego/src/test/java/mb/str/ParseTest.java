@@ -13,7 +13,7 @@ import static org.spoofax.terms.util.TermUtils.*;
 
 class ParseTest extends TestBase {
     @Test void testParseTask() throws Exception {
-        final FSResource resource = createTextFile("module a", "a.str");
+        final FSResource resource = textFile("a.str", "module a");
         try(final MixedSession session = newSession()) {
             final Result<JSGLR1ParseOutput, JSGLR1ParseException> result = session.require(parse.createTask(resourceStringSupplier(resource)));
             assertTrue(result.isOk());

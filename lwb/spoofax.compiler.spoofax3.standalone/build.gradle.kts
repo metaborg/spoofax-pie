@@ -37,5 +37,4 @@ tasks.test {
     events(org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_OUT, org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR)
     showStandardStreams = true
   }
-  //debug = true
 }

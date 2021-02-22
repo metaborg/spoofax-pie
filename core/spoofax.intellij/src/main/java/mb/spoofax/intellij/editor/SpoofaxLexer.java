@@ -43,7 +43,7 @@ public final class SpoofaxLexer extends LexerBase {
     private final SpoofaxTokenTypeManager tokenTypeManager;
     private final ScopeManager scopeManager;
     private final ResourceService resourceService;
-    private final Lazy<Pie> pieProvider;
+    private final Pie pie;
     private final LanguageInstance languageInstance;
 
     @Nullable private CharSequence buffer = null;
@@ -52,60 +52,16 @@ public final class SpoofaxLexer extends LexerBase {
     private List<SpoofaxIntellijToken> tokens = Collections.emptyList();
     private int tokenIndex = 0;
 
-
-    /**
-     * Factory class.
-     */
-    public static class Factory {
-
-        private final LoggerFactory loggerFactory;
-        private final SpoofaxTokenTypeManager tokenTypeManager;
-        private final ScopeManager scopeManager;
-        private final ResourceService resourceService;
-        private final Lazy<Pie> pieProvider;
-        private final LanguageInstance languageInstance;
-
-        @Inject
-        public Factory(
-                LoggerFactory loggerFactory,
-                SpoofaxTokenTypeManager tokenTypeManager,
-                ScopeManager scopeManager,
-                ResourceService resourceService,
-                Lazy<Pie> pieProvider,
-                LanguageInstance languageInstance
-        ) {
-            this.loggerFactory = loggerFactory;
-            this.tokenTypeManager = tokenTypeManager;
-            this.scopeManager = scopeManager;
-            this.resourceService = resourceService;
-            this.pieProvider = pieProvider;
-            this.languageInstance = languageInstance;
-        }
-
-        public SpoofaxLexer create(ResourceKey resourceKey) {
-            return new SpoofaxLexer(
-                    resourceKey,
-                    loggerFactory,
-                    tokenTypeManager,
-                    scopeManager,
-                    resourceService,
-                    pieProvider,
-                    languageInstance);
-        }
-
-    }
-
-
     /**
      * Initializes a new instance of the {@link SpoofaxLexer} class.
      */
-    private SpoofaxLexer(
+    public SpoofaxLexer(
             ResourceKey resourceKey,
             LoggerFactory loggerFactory,
             SpoofaxTokenTypeManager tokenTypeManager,
             ScopeManager scopeManager,
             ResourceService resourceService,
-            Lazy<Pie> pieProvider,
+            Pie pie,
             LanguageInstance languageInstance
     ) {
         this.resourceKey = resourceKey;
@@ -113,7 +69,7 @@ public final class SpoofaxLexer extends LexerBase {
         this.tokenTypeManager = tokenTypeManager;
         this.scopeManager = scopeManager;
         this.resourceService = resourceService;
-        this.pieProvider = pieProvider;
+        this.pie = pie;
         this.languageInstance = languageInstance;
     }
 
@@ -142,7 +98,7 @@ public final class SpoofaxLexer extends LexerBase {
             this.tokens = Collections.emptyList();
         } else {
             // GK: what is syntax coloring information doing here?
-            try (final MixedSession session = this.pieProvider.get().newSession()) {
+            try (final MixedSession session = pie.newSession()) {
                 final Task<? extends Option<? extends Tokens<?>>> tokenizerTask =
                         this.languageInstance.createTokenizeTask(this.resourceKey);
                 final Option<? extends Tokens<?>> tokens = session.require(tokenizerTask);

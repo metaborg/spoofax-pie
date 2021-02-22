@@ -9,7 +9,6 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.command.CommandContext;
 import mb.spoofax.core.language.command.EnclosingCommandContextType;
 import mb.spoofax.core.language.command.ResourcePathWithKind;
-import mb.spoofax.core.platform.Platform;
 import mb.spoofax.core.platform.PlatformScope;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;

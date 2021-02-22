@@ -4,24 +4,15 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
 import mb.log.api.LoggerFactory;
-import mb.pie.api.MapTaskDefs;
-import mb.pie.api.Pie;
-import mb.pie.api.PieBuilder;
 import mb.pie.api.TaskDef;
-import mb.pie.api.TaskDefs;
-import mb.pie.api.serde.JavaSerde;
 import mb.resource.ResourceService;
-import mb.resource.classloader.ClassLoaderResource;
-import mb.resource.classloader.ClassLoaderResourceRegistry;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.HierarchicalResourceType;
-import mb.spoofax.core.platform.Platform;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
-import mb.tiger.TigerClassloaderResources;
 import mb.tiger.TigerConstraintAnalyzer;
 import mb.tiger.TigerConstraintAnalyzerFactory;
 import mb.tiger.TigerParser;
@@ -114,7 +105,7 @@ public class TigerModule {
     }
 
 
-    @Provides @TigerScope @ElementsIntoSet
+    @Provides @TigerScope @TigerQualifier @ElementsIntoSet
     static Set<TaskDef<?, ?>> provideTaskDefsSet(
         TigerParse parse,
         TigerStyle style,
@@ -164,31 +155,6 @@ public class TigerModule {
 
         return taskDefs;
     }
-
-    @Provides @TigerScope
-    TaskDefs provideTaskDefs(Set<TaskDef<?, ?>> taskDefs) {
-        return new MapTaskDefs(taskDefs);
-    }
-
-    @Provides @TigerScope @Named("prototype")
-    static Pie providePrototypePie(@Platform PieBuilder pieBuilder, TaskDefs taskDefs, ResourceService resourceService) {
-        return pieBuilder
-            .addTaskDefs(taskDefs)
-            .withResourceService(resourceService)
-            .withSerdeFactory(loggerFactory -> new JavaSerde(TigerClassloaderResources.class.getClassLoader()))
-            .build();
-    }
-
-    @Provides @TigerScope @TigerQualifier
-    static Pie provideQualifiedPie(@Named("prototype") Pie languagePie) {
-        return languagePie;
-    }
-
-    @Provides @TigerScope
-    static Pie providePie(@TigerQualifier Pie languagePie) {
-        return languagePie;
-    }
-
 
     @Provides @TigerScope @ElementsIntoSet
     static Set<CommandDef<?>> provideCommandDefsSet(

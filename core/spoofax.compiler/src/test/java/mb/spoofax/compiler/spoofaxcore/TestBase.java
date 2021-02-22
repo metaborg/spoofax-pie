@@ -2,11 +2,19 @@ package mb.spoofax.compiler.spoofaxcore;
 
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
+import mb.log.dagger.DaggerLoggerComponent;
+import mb.log.dagger.LoggerComponent;
+import mb.log.dagger.LoggerModule;
 import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Pie;
+import mb.pie.dagger.DaggerRootPieComponent;
+import mb.pie.dagger.RootPieComponent;
+import mb.pie.dagger.RootPieModule;
 import mb.pie.runtime.PieBuilderImpl;
 import mb.resource.ResourceService;
+import mb.resource.dagger.DaggerRootResourceServiceComponent;
+import mb.resource.dagger.RootResourceServiceComponent;
 import mb.resource.fs.FSPath;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
@@ -18,21 +26,30 @@ import mb.spoofax.compiler.spoofaxcore.tiger.TigerInputs;
 import mb.spoofax.compiler.spoofaxcore.util.FileAssertions;
 import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TemplateCompiler;
-import mb.spoofax.core.platform.BaseResourceServiceComponent;
-import mb.spoofax.core.platform.DaggerBaseResourceServiceComponent;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 
 class TestBase {
+    final LoggerComponent loggerComponent = DaggerLoggerComponent.builder()
+        .loggerModule(LoggerModule.stdOutVerbose())
+        .build();
     final FileSystem fileSystem = Jimfs.newFileSystem(Configuration.unix());
-    final BaseResourceServiceComponent resourceServiceComponent = DaggerBaseResourceServiceComponent.create();
-    final SpoofaxCompilerComponent component = DaggerSpoofaxCompilerComponent.builder()
-        .spoofaxCompilerModule(new SpoofaxCompilerModule(new TemplateCompiler(StandardCharsets.UTF_8), PieBuilderImpl::new))
-        .resourceServiceComponent(resourceServiceComponent)
+    final RootResourceServiceComponent resourceServiceComponent = DaggerRootResourceServiceComponent.builder()
+        .loggerComponent(loggerComponent)
         .build();
     final ResourceService resourceService = resourceServiceComponent.getResourceService();
-    final Pie pie = component.getPie();
+    final SpoofaxCompilerComponent component = DaggerSpoofaxCompilerComponent.builder()
+        .spoofaxCompilerModule(new SpoofaxCompilerModule(new TemplateCompiler(StandardCharsets.UTF_8)))
+        .loggerComponent(loggerComponent)
+        .resourceServiceComponent(resourceServiceComponent)
+        .build();
+    final RootPieComponent rootPieComponent = DaggerRootPieComponent.builder()
+        .rootPieModule(new RootPieModule(PieBuilderImpl::new, component))
+        .loggerComponent(loggerComponent)
+        .resourceServiceComponent(resourceServiceComponent)
+        .build();
+    final Pie pie = rootPieComponent.getPie();
     final FileAssertions fileAssertions = new FileAssertions(resourceService);
 
 

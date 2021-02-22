@@ -3,11 +3,7 @@ package mb.spoofax.compiler.dagger;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
-import mb.pie.api.MapTaskDefs;
-import mb.pie.api.Pie;
-import mb.pie.api.PieBuilder;
 import mb.pie.api.TaskDef;
-import mb.resource.ResourceService;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
 import mb.spoofax.compiler.adapter.CompleterAdapterCompiler;
 import mb.spoofax.compiler.adapter.ConstraintAnalyzerAdapterCompiler;
@@ -31,32 +27,21 @@ import mb.spoofax.compiler.util.TemplateCompiler;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Supplier;
 
 @Module
 public class SpoofaxCompilerModule {
     private final TemplateCompiler templateCompiler;
-    private final Supplier<PieBuilder> pieBuilderSupplier;
 
-
-    public SpoofaxCompilerModule(
-        TemplateCompiler templateCompiler,
-        Supplier<PieBuilder> pieBuilderSupplier
-    ) {
+    public SpoofaxCompilerModule(TemplateCompiler templateCompiler) {
         this.templateCompiler = templateCompiler;
-        this.pieBuilderSupplier = pieBuilderSupplier;
     }
 
-
-    @Provides
-    @SpoofaxCompilerScope
-    public TemplateCompiler provideTemplateCompiler() {
+    @Provides @SpoofaxCompilerScope
+    TemplateCompiler provideTemplateCompiler() {
         return templateCompiler;
     }
 
-    @Provides
-    @SpoofaxCompilerScope
-    @ElementsIntoSet
+    @Provides @SpoofaxCompilerQualifier @SpoofaxCompilerScope @ElementsIntoSet
     static Set<TaskDef<?, ?>> provideTaskDefsSet(
         LanguageProjectCompiler languageProjectCompiler,
         ClassLoaderResourcesCompiler classloaderResourcesCompiler,
@@ -104,15 +89,5 @@ public class SpoofaxCompilerModule {
         taskDefs.add(intellijProjectCompiler);
 
         return taskDefs;
-    }
-
-    @Provides
-    @SpoofaxCompilerScope
-    @SpoofaxCompilerQualifier
-    public Pie providePie(ResourceService resourceService, Set<TaskDef<?, ?>> taskDefs) {
-        final PieBuilder builder = pieBuilderSupplier.get();
-        builder.withTaskDefs(new MapTaskDefs(taskDefs));
-        builder.withResourceService(resourceService);
-        return builder.build();
     }
 }

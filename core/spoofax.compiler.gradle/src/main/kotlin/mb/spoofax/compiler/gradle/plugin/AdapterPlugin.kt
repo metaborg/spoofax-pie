@@ -3,10 +3,11 @@
 package mb.spoofax.compiler.gradle.plugin
 
 import mb.common.option.Option
+import mb.pie.dagger.PieComponent
 import mb.spoofax.compiler.adapter.*
 import mb.spoofax.compiler.dagger.*
 import mb.spoofax.compiler.gradle.*
-import mb.spoofax.core.platform.ResourceServiceComponent
+import mb.resource.dagger.ResourceServiceComponent
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaLibraryPlugin
@@ -88,7 +89,8 @@ open class AdapterPlugin : Plugin<Project> {
 
     project.afterEvaluate {
       extension.languageOrThisProjectFinalized.whenLanguageProjectFinalized {
-        configure(project, extension.languageProjectExtension.resourceServiceComponent, extension.languageProjectExtension.component, extension.compilerInputFinalized)
+        val components = extension.languageProjectExtension.components
+        configure(project, components.resourceServiceComponent, components.component, components.pieComponent, extension.compilerInputFinalized)
       }
     }
   }
@@ -97,10 +99,11 @@ open class AdapterPlugin : Plugin<Project> {
     project: Project,
     resourceServiceComponent: ResourceServiceComponent,
     component: SpoofaxCompilerComponent,
+    pieComponent: PieComponent,
     input: AdapterProjectCompiler.Input
   ) {
     configureProject(project, resourceServiceComponent, component, input)
-    configureCompileTask(project, resourceServiceComponent, component, input)
+    configureCompileTask(project, resourceServiceComponent, component, pieComponent, input)
   }
 
   private fun configureProject(
@@ -119,6 +122,7 @@ open class AdapterPlugin : Plugin<Project> {
     project: Project,
     resourceServiceComponent: ResourceServiceComponent,
     component: SpoofaxCompilerComponent,
+    pieComponent: PieComponent,
     input: AdapterProjectCompiler.Input
   ) {
     val compileTask = project.tasks.register("compileAdapterProject") {
@@ -128,8 +132,8 @@ open class AdapterPlugin : Plugin<Project> {
 
       doLast {
         project.deleteDirectory(input.adapterProject().generatedJavaSourcesDirectory(), resourceServiceComponent.resourceService)
-        synchronized(component.pie) {
-          component.pie.newSession().use { session ->
+        synchronized(pieComponent.pie) {
+          pieComponent.pie.newSession().use { session ->
             session.require(component.adapterProjectCompiler.createTask(input))
           }
         }

@@ -25,12 +25,6 @@ dependencies {
   annotationProcessor("com.google.dagger:dagger-compiler")
 
   // Test
-  testImplementation("org.metaborg:log.backend.slf4j")
-  testImplementation("org.slf4j:slf4j-simple:1.7.30")
-  testImplementation("org.metaborg:pie.runtime")
-  testImplementation("org.metaborg:pie.dagger")
-
+  testImplementation(compositeBuild("spoofax.test"))
   testCompileOnly("org.checkerframework:checker-qual-android")
-
-  testAnnotationProcessor("com.google.dagger:dagger-compiler")
 }

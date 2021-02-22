@@ -3,6 +3,7 @@ package mb.spoofax.dynamicloading.eclipse;
 import mb.esv.eclipse.EsvLanguage;
 import mb.libspoofax2.eclipse.LibSpoofax2Language;
 import mb.libstatix.eclipse.LibStatixLanguage;
+import mb.pie.dagger.RootPieModule;
 import mb.pie.runtime.PieBuilderImpl;
 import mb.sdf3.eclipse.Sdf3Language;
 import mb.spoofax.compiler.spoofax3.dagger.Spoofax3Compiler;
@@ -35,6 +36,7 @@ public class DynamicLoadingPlugin extends AbstractUIPlugin {
         super.start(context);
         plugin = this;
         final Spoofax3Compiler spoofax3Compiler = new Spoofax3Compiler(
+            SpoofaxPlugin.getLoggerComponent(),
             SpoofaxPlugin.getResourceServiceComponent(),
             SpoofaxPlugin.getPlatformComponent(),
             PieBuilderImpl::new,
@@ -48,7 +50,7 @@ public class DynamicLoadingPlugin extends AbstractUIPlugin {
             LibStatixLanguage.getInstance().getResourcesComponent()
         );
         spoofax3CompilerStandalone = new Spoofax3CompilerStandalone(spoofax3Compiler);
-        dynamicLoader = new DynamicLoader(spoofax3CompilerStandalone);
+        dynamicLoader = new DynamicLoader(spoofax3CompilerStandalone, () -> new RootPieModule(PieBuilderImpl::new));
     }
 
     @Override public void stop(@NonNull BundleContext context) throws Exception {

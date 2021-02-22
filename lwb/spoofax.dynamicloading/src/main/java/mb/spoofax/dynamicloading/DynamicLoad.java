@@ -1,17 +1,19 @@
 package mb.spoofax.dynamicloading;
 
 import mb.common.result.Result;
+import mb.log.dagger.LoggerComponent;
 import mb.pie.api.ExecContext;
 import mb.pie.api.OutTransient;
 import mb.pie.api.OutTransientImpl;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.pie.dagger.RootPieModule;
+import mb.resource.dagger.ResourceServiceComponent;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.FileResourceMatcher;
 import mb.resource.hierarchical.walk.TrueResourceWalker;
 import mb.spoofax.compiler.spoofax3.standalone.CompileToJavaClassFiles;
 import mb.spoofax.core.platform.PlatformComponent;
-import mb.spoofax.core.platform.ResourceServiceComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.File;
@@ -19,6 +21,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.function.Supplier;
 
 public class DynamicLoad implements TaskDef<DynamicLoad.Input, OutTransient<DynamicLanguage>> {
     public static class Input implements Serializable {
@@ -52,21 +55,27 @@ public class DynamicLoad implements TaskDef<DynamicLoad.Input, OutTransient<Dyna
         }
     }
 
+    private final LoggerComponent loggerComponent;
     private final ResourceServiceComponent resourceServiceComponent;
     private final PlatformComponent platformComponent;
     private final CompileToJavaClassFiles compiler;
     private final DynamicLoader dynamicLoader;
+    private final Supplier<RootPieModule> basePieModuleSupplier;
 
     public DynamicLoad(
+        LoggerComponent loggerComponent,
         ResourceServiceComponent resourceServiceComponent,
         PlatformComponent platformComponent,
         CompileToJavaClassFiles compiler,
-        DynamicLoader dynamicLoader
+        DynamicLoader dynamicLoader,
+        Supplier<RootPieModule> basePieModuleSupplier
     ) {
+        this.loggerComponent = loggerComponent;
         this.resourceServiceComponent = resourceServiceComponent;
         this.platformComponent = platformComponent;
         this.compiler = compiler;
         this.dynamicLoader = dynamicLoader;
+        this.basePieModuleSupplier = basePieModuleSupplier;
     }
 
     @Override
@@ -102,8 +111,10 @@ public class DynamicLoad implements TaskDef<DynamicLoad.Input, OutTransient<Dyna
             compilerInput.adapterProjectInput().daggerComponent().qualifiedId(),
             compilerInput.adapterProjectInput().resourcesComponent().qualifiedId(),
             compilerInput.adapterProjectInput().resourcesComponent().idAsCamelCase(),
+            loggerComponent,
             resourceServiceComponent,
-            platformComponent
+            platformComponent,
+            basePieModuleSupplier.get()
         );
         dynamicLoader.register(input.id, dynamicLanguage);
         return new OutTransientImpl<>(dynamicLanguage, true);
