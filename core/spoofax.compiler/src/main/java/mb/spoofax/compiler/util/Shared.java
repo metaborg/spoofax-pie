@@ -168,6 +168,12 @@ public interface Shared extends Serializable {
         return GradleDependency.module(Coordinate.of("org.slf4j", "slf4j-simple"));
     }
 
+    /// Metaborg common
+
+    @Value.Default default GradleDependency commonDep() {
+        return GradleDependency.module(Coordinate.of("org.metaborg", "common"));
+    }
+
     /// Metaborg log
 
     @Value.Default default GradleDependency logApiDep() {
@@ -207,10 +213,6 @@ public interface Shared extends Serializable {
     }
 
     /// Spoofax 3.x
-
-    @Value.Default default GradleDependency commonDep() {
-        return GradleDependency.module(Coordinate.of("org.metaborg", "common", spoofax3Version()));
-    }
 
     @Value.Default default GradleDependency completionsCommonDep() {
         return GradleDependency.module(Coordinate.of("org.metaborg", "completions.common", spoofax3Version()));
