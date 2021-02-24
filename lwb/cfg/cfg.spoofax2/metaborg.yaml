@@ -1,0 +1,34 @@
+---
+id: org.metaborg:cfg:0.1.0-SNAPSHOT
+name: cfg
+dependencies:
+  compile:
+  - org.metaborg:org.metaborg.meta.lang.esv:${metaborgVersion}
+  - org.metaborg:org.metaborg.meta.lang.template:${metaborgVersion}
+  - org.metaborg:statix.lang:${metaborgVersion}
+  - org.metaborg:sdf3.ext.statix:${metaborgVersion}
+  source:
+  - org.metaborg:meta.lib.spoofax:${metaborgVersion}
+  - org.metaborg:statix.runtime:${metaborgVersion}
+pardonedLanguages:
+- EditorService
+- Stratego-Sugar
+- SDF
+debug:
+  typesmart: false
+language:
+  sdf:
+    pretty-print: cfg
+    sdf2table: java
+    placeholder:
+      prefix: "$"
+  stratego:
+    format: ctree
+    args:
+    - -la
+    - stratego-lib
+    - -la
+    - stratego-gpp
+exports:
+- language: ATerm
+  directory: src-gen/statix

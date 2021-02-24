@@ -1,0 +1,16 @@
+module statics
+
+imports
+
+  signatures/lex/comment-sig
+  signatures/lex/layout-sig
+  signatures/lex/path-sig
+  signatures/cfg-sig
+
+rules
+
+  projectOk : scope
+  projectOk(s).
+
+  fileOk : scope * Module
+  fileOk(s, Module(_)).

@@ -20,19 +20,16 @@ dependencies {
 
 languageProject {
   shared {
-    name("ESV")
-    defaultClassPrefix("Esv")
-    defaultPackageId("mb.esv")
+    name("CFG")
+    defaultClassPrefix("Cfg")
+    defaultPackageId("mb.cfg")
   }
   compilerInput {
     withParser().run {
       startSymbol("Module")
     }
     withStyler()
-    withStrategoRuntime().run {
-      addStrategyPackageIds("org.metaborg.meta.lang.stratego.esv.trans")
-      addInteropRegisterersByReflection("org.metaborg.meta.lang.stratego.esv.trans.InteropRegisterer")
-    }
+    withStrategoRuntime()
   }
 }
 spoofax2BasedLanguageProject {
@@ -40,10 +37,10 @@ spoofax2BasedLanguageProject {
     withParser()
     withStyler()
     withStrategoRuntime().run {
-      copyCtree(false)
-      copyClasses(true)
+      copyCtree(true)
+      copyClasses(false)
     }
-    project.languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:org.metaborg.meta.lang.esv:${ext["spoofax2DevenvVersion"]}"))
+    project.languageSpecificationDependency(GradleDependency.project(":cfg.spoofax2"))
   }
 }
 
@@ -56,9 +53,6 @@ languageAdapterProject {
   }
 }
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
-  val packageId = "mb.esv"
+  val packageId = "mb.cfg"
   val taskPackageId = "$packageId.task"
-
-  val compile = TypeInfo.of(taskPackageId, "EsvCompile")
-  addTaskDefs(compile)
 }

@@ -1,0 +1,12 @@
+module Main
+
+imports
+
+  Syntax
+  Analysis
+
+language
+
+  extensions : cfg
+
+  provider : target/metaborg/stratego.ctree

@@ -21,6 +21,14 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   project(":$id").projectDir = file(path)
 }
 
+"cfg".run {
+  includeProject("cfg")
+  includeProject("cfg.cli")
+  includeProject("cfg.eclipse")
+  includeProject("cfg.intellij")
+  includeProject("cfg.spoofax2")
+}
+
 "sdf3".run {
   includeProject("sdf3")
   includeProject("sdf3.cli")

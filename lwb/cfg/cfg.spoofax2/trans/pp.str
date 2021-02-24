@@ -1,0 +1,45 @@
+module pp
+
+imports
+
+  libstratego-gpp
+  libspoofax/sdf/pp
+  libspoofax/editor/refactoring/-
+  pp/cfg-parenthesize
+  pp/cfg-pp
+
+rules
+
+  editor-format:
+    (node, _, ast, path, project-path) -> (filename, result)
+    with
+      ext      := <get-extension> path
+    ; filename := <guarantee-extension(|$[pp.[ext]])> path
+    ; result   := <pp-debug> node
+
+rules
+  
+  pp-cfg-string =
+    parenthesize-cfg
+    ; prettyprint-cfg-start-symbols
+    ; !V([], <id>)
+    ; box2text-string(|120)
+      
+  pp-partial-cfg-string =
+    parenthesize-cfg
+    ; prettyprint-cfg
+    ; !V([], <id>)
+    ; box2text-string(|120)
+    
+  pp-partial-cfg-string(|sort) =
+    parenthesize-cfg
+    ; prettyprint-cfg(|sort)
+    ; !V([], <id>)
+    ; box2text-string(|120)  
+      
+  pp-debug :
+    ast -> result
+    with
+       result := <pp-cfg-string> ast
+    <+ <bottomup(try(not(is-string); not(is-list); not(pp-cfg-string); debug(!"cannot pp ")))> ast
+    ;  result := ""

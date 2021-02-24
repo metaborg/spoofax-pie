@@ -1,0 +1,5 @@
+shared.defaultArtifactId=cfg
+shared.defaultClassPrefix=Cfg
+shared.defaultGroupId=org.metaborg
+shared.defaultPackageId=mb.cfg
+shared.defaultVersion=0.1.0

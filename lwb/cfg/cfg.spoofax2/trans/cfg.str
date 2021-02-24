@@ -1,0 +1,14 @@
+module cfg
+
+imports
+  
+  pp
+  analysis
+
+rules
+  
+  debug-show-aterm:
+    (node, _, _, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"aterm")> path
+    ; result   := node

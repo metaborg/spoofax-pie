@@ -1,0 +1,25 @@
+module lex/comment
+
+lexical syntax // Multi-line comment
+
+  LAYOUT        = "/*" InsideComment* "*/" 
+  InsideComment = ~[\*] 
+  InsideComment = CommentChar
+  CommentChar   = [\*]
+
+lexical syntax // Single-line comment
+
+  LAYOUT     = "//" ~[\n\r]* NewLineEOF 
+  NewLineEOF = [\n\r] 
+  NewLineEOF = EOF 
+  EOF        =  
+
+lexical restrictions
+
+  CommentChar -/- [\/]  
+  EOF         -/- ~[]
+
+context-free restrictions
+
+  LAYOUT? -/- [\/].[\/]
+  LAYOUT? -/- [\/].[\*]
