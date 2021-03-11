@@ -1,0 +1,96 @@
+module part/language_adapter
+
+imports
+
+  lex/string
+  lex/java_id
+  lex/path
+  configuration
+  section
+  boolean
+
+context-free sorts
+
+  TaskDef
+  CommandDef
+  CommandDefProperty
+
+context-free syntax
+
+  Part.TaskDefs = <task-defs {
+  <{TaskDef "\n"}*>
+}>
+
+  TaskDef.TaskDef = JavaQIdLit
+
+context-free syntax
+
+  Part.CommandDef = <command-def {
+  <{CommandDefProperty "\n"}*>
+}>
+
+  CommandDefProperty.CommandDefType                    = <type = <JavaQIdLit>>
+  CommandDefProperty.CommandDefTaskDefType             = <task-def-type = <JavaQIdLit>>
+  CommandDefProperty.CommandDefArgsType                = <args-type = <JavaQIdLit>>
+  CommandDefProperty.CommandDefDisplayName             = <display-name = <StringLit>>
+  CommandDefProperty.CommandDefDescription             = <description = <StringLit>>
+  CommandDefProperty.CommandDefSupportedExecutionTypes = <supported-execution-types = <{ExecutionType ","}+>>
+  CommandDefProperty.CommandDefParameters              = <parameters = {
+  <{Parameter "\n"}*>
+}>
+  
+context-free sorts
+
+  ExecutionType
+  
+context-free syntax
+
+  ExecutionType.ManualOnce          = <ManualOnce>
+  ExecutionType.ManualContinuous    = <ManualContinuous>
+  ExecutionType.AutomaticContinuous = <AutomaticContinuous>
+
+context-free sorts
+
+  Parameter
+  ParameterProperty
+  
+context-free syntax
+
+  Parameter.Parameter = <<JavaIdLit> = {
+  <{ParameterProperty "\n"}*>
+}>
+
+  ParameterProperty.ParameterType      = <type = <JavaQIdLit>>
+  ParameterProperty.ParameterRequired  = <required = <BooleanLit>>
+  ParameterProperty.ParameterConverter = <converter-type = <JavaQIdLit>>
+  ParameterProperty.ParameterArgumentProviders = <argument-providers = {
+  <{ArgumentProvider "\n"}*>
+}>
+
+context-free sorts
+
+  ArgumentProvider
+
+context-free syntax
+
+  ArgumentProvider.ValueArgumentProvider            = <Value(<StringLit>)>
+  ArgumentProvider.ContextArgumentProvider          = <Context(<CommandContext>)>
+  ArgumentProvider.EnclosingContextArgumentProvider = <EnclosingContext(<EnclosingCommandContext>)>
+
+context-free sorts
+
+  CommandContext
+  EnclosingCommandContext
+  
+context-free syntax
+
+  CommandContext.ProjectContext      = <Project>
+  CommandContext.DirectoryContext    = <Directory>
+  CommandContext.FileContext         = <File>
+  CommandContext.ResourcePathContext = <ResourcePath>
+  CommandContext.ResourceKeyContext  = <ResourceKey>
+  CommandContext.RegionContext       = <Region>
+  CommandContext.OffsetContext       = <Offset>  
+  
+  EnclosingCommandContext.ProjectEnclosingContext   = <Project>
+  EnclosingCommandContext.DirectoryEnclosingContext = <Directory>

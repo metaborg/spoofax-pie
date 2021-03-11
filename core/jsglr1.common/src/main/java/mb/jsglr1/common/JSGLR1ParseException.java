@@ -1,6 +1,7 @@
 package mb.jsglr1.common;
 
-import mb.common.message.Messages;
+import mb.common.message.HasOptionalMessages;
+import mb.common.message.KeyedMessages;
 import mb.common.util.ADT;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -8,13 +9,13 @@ import java.io.IOException;
 import java.util.Optional;
 
 @ADT
-public abstract class JSGLR1ParseException extends Exception {
+public abstract class JSGLR1ParseException extends Exception implements HasOptionalMessages {
     public interface Cases<R> {
         R readStringFail(String source, IOException cause);
 
-        R parseFail(Messages messages);
+        R parseFail(KeyedMessages messages);
 
-        R recoveryDisallowedFail(Messages messages);
+        R recoveryDisallowedFail(KeyedMessages messages);
     }
 
     public static JSGLR1ParseException readStringFail(String source, IOException cause) {
@@ -23,23 +24,23 @@ public abstract class JSGLR1ParseException extends Exception {
         return e;
     }
 
-    public static JSGLR1ParseException parseFail(Messages messages) {
+    public static JSGLR1ParseException parseFail(KeyedMessages messages) {
         return JSGLR1ParseExceptions.parseFail(messages);
     }
 
-    public static JSGLR1ParseException recoveryDisallowedFail(Messages messages) {
+    public static JSGLR1ParseException recoveryDisallowedFail(KeyedMessages messages) {
         return JSGLR1ParseExceptions.recoveryDisallowedFail(messages);
     }
 
 
     public abstract <R> R match(Cases<R> cases);
 
-    public JSGLR1ParseExceptions.CaseOfMatchers.TotalMatcher_ReadStringFail caseOf() {
-        return JSGLR1ParseExceptions.caseOf(this);
+    public JSGLR1ParseExceptions.CasesMatchers.TotalMatcher_ReadStringFail cases() {
+        return JSGLR1ParseExceptions.cases();
     }
 
-    public Optional<Messages> getMessages() {
-        return JSGLR1ParseExceptions.getMessages(this);
+    public JSGLR1ParseExceptions.CaseOfMatchers.TotalMatcher_ReadStringFail caseOf() {
+        return JSGLR1ParseExceptions.caseOf(this);
     }
 
 
@@ -54,10 +55,12 @@ public abstract class JSGLR1ParseException extends Exception {
         return this; // Do nothing so that no stack trace is created, saving memory and CPU time.
     }
 
+    @Override public Optional<KeyedMessages> getOptionalMessages() {
+        return JSGLR1ParseExceptions.getMessages(this);
+    }
 
+    
     @Override public abstract int hashCode();
 
     @Override public abstract boolean equals(@Nullable Object obj);
-
-    @Override public abstract String toString();
 }

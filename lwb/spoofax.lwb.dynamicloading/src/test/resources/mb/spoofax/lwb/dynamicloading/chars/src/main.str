@@ -1,0 +1,12 @@
+module main
+
+imports
+
+  statixruntime
+  statix/api
+
+  transform/remove-a
+
+rules // Analysis boilerplate
+
+  editor-analyze = stx-editor-analyze(id, id|"main", "programOk")

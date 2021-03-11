@@ -1,0 +1,79 @@
+module start
+imports lex/lex
+
+context-free start-symbols Program Exp
+
+sorts Program Stat
+context-free syntax
+
+  Program.Program = <<{Stat "\n"}+>>
+
+  Stat.Exp  = <<Exp>;>
+  Stat.Bind = <<ID> = <Exp>;>
+
+sorts Exp
+context-free syntax // numbers
+
+  Exp = <(<Exp>)> {bracket}
+
+  Exp.Num = NUM
+  Exp.Min = <-<Exp>>
+  Exp.Pow = <<Exp> ^ <Exp>> {right}
+  Exp.Mul = <<Exp> * <Exp>> {left}
+  Exp.Div = <<Exp> / <Exp>> {left}
+  Exp.Sub = <<Exp> - <Exp>> {left, prefer}
+  Exp.Add = <<Exp> + <Exp>> {left}
+
+  Exp.Eq  = <<Exp> == <Exp>> {non-assoc}
+  Exp.Neq = <<Exp> != <Exp>> {non-assoc}
+  Exp.Gt  = [[Exp] > [Exp]]  {non-assoc}
+  Exp.Lt  = [[Exp] < [Exp]]  {non-assoc}
+
+context-free syntax // booleans
+
+  Exp.True  = <true>
+  Exp.False = <false>
+  Exp.Not   = <!<Exp>>
+  Exp.And   = <<Exp> & <Exp>> {left}
+  Exp.Or    = <<Exp> | <Exp>> {left}
+
+  Exp.If = <
+    if(<Exp>)
+      <Exp>
+    else
+      <Exp>
+  >
+
+context-free syntax // variables and functions
+
+  Exp.Var = ID
+  Exp.Let = <
+    let <ID> = <Exp> in
+    <Exp>
+  >
+  Exp.Fun = <\\ <ID+> . <Exp>>
+  Exp.App = <<Exp> <Exp>> {left}
+
+context-free priorities
+  Exp.Min
+  > Exp.App
+  > Exp.Pow
+  > {left: Exp.Mul Exp.Div}
+  > {left: Exp.Add Exp.Sub}
+  > {non-assoc: Exp.Eq Exp.Neq Exp.Gt Exp.Lt}
+  > Exp.Not
+  > Exp.And
+  > Exp.Or
+  > Exp.If
+  > Exp.Let
+  > Exp.Fun
+
+sorts Type
+context-free syntax
+  Type.NumT  = <Num>
+  Type.BoolT = <Bool>
+  Type.FunT  = [[Exp] -> [Exp]] {right}
+  Type       = <(<Type>)> {bracket}
+
+template options
+  ID = keyword {reject}

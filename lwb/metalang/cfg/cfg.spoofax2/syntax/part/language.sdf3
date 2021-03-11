@@ -1,0 +1,38 @@
+module part/language
+
+imports
+
+  lex/path
+  lex/str_id
+  configuration
+
+context-free sorts
+
+  Sdf3Option EsvOption StatixOption StrategoOption
+
+context-free syntax
+
+  Part.Sdf3Section = <sdf3 {
+  <{Sdf3Option "\n"}*>
+}>
+  Sdf3Option.Sdf3SourceDirectory = <source-directory = <PathLit>>
+  Sdf3Option.Sdf3MainFile        = <main-file = <PathLit>>
+  Sdf3Option.Sdf3StrategoStrategyAffix = <stratego-strategy-affix = <StrStrategyIdLit>>
+
+  Part.EsvSection = <esv {
+  <{EsvOption "\n"}*>
+}>
+  EsvOption.EsvSourceDirectory = <source-directory = <PathLit>>
+  EsvOption.EsvMainFile        = <main-file = <PathLit>>
+
+  Part.StatixSection = <statix {
+  <{StatixOption "\n"}*>
+}>
+  StatixOption.StatixSourceDirectory = <source-directory = <PathLit>>
+  StatixOption.StatixMainFile        = <main-file = <PathLit>>
+
+  Part.StrategoSection = <stratego {
+  <{StrategoOption "\n"}*>
+}>
+  StrategoOption.StrategoSourceDirectory = <source-directory = <PathLit>>
+  StrategoOption.StrategoMainFile        = <main-file = <PathLit>>

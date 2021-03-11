@@ -1,0 +1,25 @@
+module lex/sdf3_id
+
+lexical sorts
+
+  Sdf3SortIdLit Sdf3SortIdChars Sdf3Keyword
+
+lexical syntax
+
+  Sdf3SortIdLit  = Sdf3SortIdChars
+  
+  Sdf3SortIdChars = [a-zA-Z0-9\-\_\$]+ // TODO: check if this is correct
+  Sdf3SortIdChars = Sdf3Keyword {reject}
+
+lexical restrictions
+
+  Sdf3SortIdChars -/- [a-zA-Z0-9\-\_\$]
+
+lexical syntax // TODO: add all SDF3 keywords
+
+  Sdf3Keyword = "lexical"
+  Sdf3Keyword = "context-free"
+  Sdf3Keyword = "sorts"
+  Sdf3Keyword = "syntax"
+  Sdf3Keyword = "start-symbols"
+  Sdf3Keyword = "main"

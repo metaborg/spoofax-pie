@@ -1,0 +1,76 @@
+module lex/java_id
+
+lexical sorts
+
+  JavaIdLit JavaQIdLit JavaQIdPart JavaIdChars JavaKeyword
+
+lexical syntax
+
+  JavaIdLit  = JavaIdChars
+  
+  JavaQIdLit  = JavaIdChars JavaQIdPart*
+  JavaQIdPart = "." JavaIdChars
+  
+  JavaIdChars = [a-zA-Z\_\$] [a-zA-Z0-9\_\$]*
+
+  JavaIdChars = JavaKeyword {reject}
+  JavaIdChars = "true"      {reject}
+  JavaIdChars = "false"     {reject}
+  JavaIdChars = "null"      {reject}
+  
+lexical restrictions
+
+  JavaIdChars -/- [a-zA-Z0-9\_\$]
+
+lexical syntax
+
+  JavaKeyword = "abstract"
+  JavaKeyword = "assert"
+  JavaKeyword = "boolean"
+  JavaKeyword = "break"
+  JavaKeyword = "byte"
+  JavaKeyword = "case"
+  JavaKeyword = "catch"
+  JavaKeyword = "char"
+  JavaKeyword = "class"
+  JavaKeyword = "const"
+  JavaKeyword = "continue"
+  JavaKeyword = "default"
+  JavaKeyword = "do"
+  JavaKeyword = "double"
+  JavaKeyword = "else"
+  JavaKeyword = "enum"
+  JavaKeyword = "extends"
+  JavaKeyword = "final"
+  JavaKeyword = "finally"
+  JavaKeyword = "float"
+  JavaKeyword = "for"
+  JavaKeyword = "goto"
+  JavaKeyword = "if"
+  JavaKeyword = "implements"
+  JavaKeyword = "import"
+  JavaKeyword = "instanceof"
+  JavaKeyword = "int"
+  JavaKeyword = "interface"
+  JavaKeyword = "long"
+  JavaKeyword = "native"
+  JavaKeyword = "new"
+  JavaKeyword = "package"
+  JavaKeyword = "private"
+  JavaKeyword = "protected"
+  JavaKeyword = "public"
+  JavaKeyword = "return"
+  JavaKeyword = "short"
+  JavaKeyword = "static"
+  JavaKeyword = "strictfp"
+  JavaKeyword = "super"
+  JavaKeyword = "switch"
+  JavaKeyword = "synchronized"
+  JavaKeyword = "this"
+  JavaKeyword = "throw"
+  JavaKeyword = "throws"
+  JavaKeyword = "transient"
+  JavaKeyword = "try"
+  JavaKeyword = "void"
+  JavaKeyword = "volatile"
+  JavaKeyword = "while"

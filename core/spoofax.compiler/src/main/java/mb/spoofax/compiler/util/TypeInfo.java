@@ -15,6 +15,17 @@ public interface TypeInfo extends Serializable {
         return ImmutableTypeInfo.of(packageId, id);
     }
 
+    static ImmutableTypeInfo of(String qualifiedId) {
+        final int dotIndex = qualifiedId.lastIndexOf('.');
+        if(dotIndex != -1) {
+            final String packageId = qualifiedId.substring(0, dotIndex);
+            final String id = qualifiedId.substring(dotIndex + 1);
+            return of(packageId, id);
+        } else {
+            return of("", qualifiedId);
+        }
+    }
+
     static ImmutableTypeInfo of(Class<?> cls) {
         if(cls.isAnonymousClass())
             throw new IllegalArgumentException("The class is anonymous, and therefore it is impossible to refer to it: " + cls.getName());

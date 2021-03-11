@@ -16,7 +16,8 @@ plugins {
   id("org.metaborg.spoofax.compiler.gradle.eclipse") apply false
   id("org.metaborg.spoofax.compiler.gradle.intellij") apply false
   id("org.metaborg.spoofax.compiler.gradle.spoofax2.language") apply false
-  id("org.metaborg.spoofax.compiler.gradle.spoofax3.language") apply false
+
+  id("org.metaborg.spoofax.lwb.compiler.gradle.language") apply false
 }
 
 subprojects {

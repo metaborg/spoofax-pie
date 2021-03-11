@@ -1,0 +1,12 @@
+module lex/string
+
+lexical sorts
+
+  StringLit StringChar
+
+lexical syntax
+
+  StringLit = "\"" StringChar* "\""
+
+  StringChar = ~[\"\$\n\r\\]
+  StringChar = "\\" ~[\n\r]

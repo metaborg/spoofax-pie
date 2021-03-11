@@ -49,7 +49,7 @@ class CommandRunner<A extends Serializable> implements Callable {
         final Task<CommandFeedback> task = commandDef.createTask(args);
         final CommandFeedback feedback = session.requireWithoutObserving(task);
 
-        final @Nullable Exception exception = feedback.getException();
+        final @Nullable Throwable exception = feedback.getException();
         if(exception != null) {
             System.err.println("An exception occurred while executing command '" + commandDef.getDisplayName() + "':");
             exception.printStackTrace(System.err);

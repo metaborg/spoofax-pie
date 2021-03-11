@@ -1,0 +1,25 @@
+module lex/str_id
+
+lexical sorts
+
+  StrStrategyIdLit StrStrategyIdChars StrKeyword
+
+lexical syntax
+
+  StrStrategyIdLit  = StrStrategyIdChars
+  
+  StrStrategyIdChars = [a-zA-Z0-9\-\_\$]+ // TODO: check if this is correct
+  StrStrategyIdChars = StrKeyword {reject}
+
+lexical restrictions
+
+  StrStrategyIdChars -/- [a-zA-Z0-9\-\_\$]
+
+lexical syntax // TODO: add all Stratego keywords
+
+  StrKeyword = "lexical"
+  StrKeyword = "context-free"
+  StrKeyword = "sorts"
+  StrKeyword = "syntax"
+  StrKeyword = "start-symbols"
+  StrKeyword = "main"

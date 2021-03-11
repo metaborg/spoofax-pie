@@ -1,0 +1,22 @@
+module part/shared
+
+imports
+
+  lex/string
+  lex/path
+  lex/java_id
+  configuration
+
+context-free syntax
+
+  Part.Group   = <group = <StringLit>>
+  Part.Name    = <name = <StringLit>>
+  Part.Version = <version = <StringLit>>
+  
+  Part.FileExtension = <file-extension = <PathSegmentLit>>
+  
+  Part.JavaPackageIdPrefix = <java-package-id-prefix = <JavaQIdLit>>
+  Part.JavaClassIdPrefix   = <java-class-id-prefix = <JavaIdLit>>
+
+  Part.SourceDirectory = <source-directory = <PathLit>>
+  Part.BuildDirectory = <build-directory = <PathLit>>

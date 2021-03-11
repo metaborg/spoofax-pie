@@ -1,0 +1,45 @@
+module section
+
+imports
+
+  configuration
+
+context-free sorts
+
+  ParserOption 
+  StylerOption 
+  ConstraintAnalyzerOption
+  MultilangAnalyzerOption
+  StrategoRuntimeOption
+  CompleterOption
+  ExportsOption
+
+context-free syntax
+
+  Part.ParserSection = <parser {
+  <{ParserOption "\n"}*>
+}>
+
+  Part.StylerSection = <styler {
+  <{StylerOption "\n"}*>
+}>
+
+  Part.ConstraintAnalyzerSection = <constraint-analyzer {
+  <{ConstraintAnalyzerOption "\n"}*>
+}>
+
+  Part.MultilangAnalyzerSection = <multilang-analyzer {
+  <{MultilangAnalyzerOption "\n"}*>
+}>
+
+  Part.StrategoRuntimeSection = <stratego-runtime {
+  <{StrategoRuntimeOption "\n"}*>
+}>
+
+  Part.CompleterSection = <completer {
+  <{CompleterOption "\n"}*>
+}>
+
+  Part.ExportsSection = <exports {
+  <{ExportsOption "\n"}*>
+}>

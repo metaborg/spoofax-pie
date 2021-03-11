@@ -1,0 +1,10 @@
+module transform/remove-a
+
+imports
+
+  signatures/-
+
+rules
+
+  remove-a: Program(exprs) -> Program(<map(remove-a)> exprs)
+  remove-a: Chars(chars)   -> Chars(<string-replace(|"a", "a")> chars)

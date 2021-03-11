@@ -1,6 +1,6 @@
 package {{baseClassLoaderResources.packageId}};
 
-import mb.common.result.ExceptionalConsumer;
+import mb.common.result.ThrowingConsumer;
 import mb.resource.ReadableResource;
 import mb.resource.classloader.ClassLoaderResource;
 import mb.resource.classloader.ClassLoaderResourceLocations;
@@ -40,8 +40,8 @@ public class {{baseClassLoaderResources.id}} {
 
     public void performWithResourceLocations(
         String path,
-        ExceptionalConsumer<FSResource, IOException> directoriesConsumer,
-        ExceptionalConsumer<JarFileWithPath, IOException> jarFileWithPathConsumer
+        ThrowingConsumer<FSResource, IOException> directoriesConsumer,
+        ThrowingConsumer<JarFileWithPath, IOException> jarFileWithPathConsumer
     ) throws IOException {
         final ClassLoaderResource classLoaderResource = resourceRegistry.getResource(path);
         final ClassLoaderResourceLocations locations = classLoaderResource.getLocations();
@@ -66,8 +66,8 @@ public class {{baseClassLoaderResources.id}} {
 
     public void performWithDefinitionResourceLocations(
         String path,
-        ExceptionalConsumer<FSResource, IOException> directoriesConsumer,
-        ExceptionalConsumer<JarFileWithPath, IOException> jarFileWithPathConsumer
+        ThrowingConsumer<FSResource, IOException> directoriesConsumer,
+        ThrowingConsumer<JarFileWithPath, IOException> jarFileWithPathConsumer
     ) throws IOException {
         final ClassLoaderResource classLoaderResource = definitionDirectory.appendAsRelativePath(path);
         final ClassLoaderResourceLocations locations = classLoaderResource.getLocations();

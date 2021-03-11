@@ -1,5 +1,6 @@
 package mb.jsglr1.pie;
 
+import mb.common.message.KeyedMessages;
 import mb.common.message.Messages;
 import mb.common.result.Result;
 import mb.jsglr.common.JSGLRTokens;
@@ -22,12 +23,16 @@ import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 
 public abstract class JSGLR1ParseTaskDef implements TaskDef<Supplier<String>, Result<JSGLR1ParseOutput, JSGLR1ParseException>> {
-    protected abstract Result<JSGLR1ParseOutput, JSGLR1ParseException> parse(ExecContext context, String text) throws Exception;
+    protected abstract Result<JSGLR1ParseOutput, JSGLR1ParseException> parse(ExecContext context, String text, @Nullable String startSymbol, @Nullable ResourceKey resource) throws Exception;
 
     @Override
     public Result<JSGLR1ParseOutput, JSGLR1ParseException> exec(ExecContext context, Supplier<String> stringSupplier) throws Exception {
         try {
-            return parse(context, context.require(stringSupplier));
+            // TODO: make start symbol configurable
+            // TODO: allow passing in a resource as a hint. Only try to get from supplier if no hint was passed.
+            // TODO: like `Has(Optional)Messages`, create and use a `Has(Optional)ResourceKey` interface as well?
+            final @Nullable ResourceKey resourceKey = tryGetResourceKeyFromStringSupplier(stringSupplier);
+            return parse(context, context.require(stringSupplier), null, resourceKey);
         } catch(UncheckedIOException e) {
             return Result.ofErr(JSGLR1ParseException.readStringFail(stringSupplier.toString(), e.getCause()));
         }
@@ -177,6 +182,15 @@ public abstract class JSGLR1ParseTaskDef implements TaskDef<Supplier<String>, Re
     private ResourceStringSupplier rsp(ResourceKey key, ResourceStamper<ReadableResource> stamper, Charset charset) {
         return new ResourceStringSupplier(key, stamper, charset);
     }
+
+
+    private static @Nullable ResourceKey tryGetResourceKeyFromStringSupplier(Supplier<String> stringSupplier) {
+        if(stringSupplier instanceof ResourceStringSupplier) {
+            return ((ResourceStringSupplier)stringSupplier).key;
+        } else {
+            return null;
+        }
+    }
 }
 
 
@@ -252,7 +266,8 @@ class MessagesMapper extends Mapper<Result<JSGLR1ParseOutput, JSGLR1ParseExcepti
     public static final MessagesMapper instance = new MessagesMapper();
 
     @Override public Messages apply(Result<JSGLR1ParseOutput, JSGLR1ParseException> result) {
-        return result.mapOrElse(v -> v.messages, e -> e.getMessages().orElseGet(Messages::of));
+        // TODO: output KeyedMessages instead.
+        return result.mapOrElse(v -> v.messages.asMessages(), e -> e.getOptionalMessages().map(KeyedMessages::asMessages).orElseGet(Messages::of));
     }
 
     private MessagesMapper() {}

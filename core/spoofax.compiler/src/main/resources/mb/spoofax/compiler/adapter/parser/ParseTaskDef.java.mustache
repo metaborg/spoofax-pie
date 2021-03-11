@@ -6,6 +6,8 @@ import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.jsglr1.pie.JSGLR1ParseTaskDef;
 import mb.pie.api.ExecContext;
 import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.resource.ResourceKey;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -15,8 +17,7 @@ public class {{baseParseTaskDef.id}} extends JSGLR1ParseTaskDef {
     private final {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources;
     private final Provider<{{languageProjectInput.parser.qualifiedId}}> parserProvider;
 
-    @Inject
-    public {{baseParseTaskDef.id}}(
+    @Inject public {{baseParseTaskDef.id}}(
         {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources,
         Provider<{{languageProjectInput.parser.qualifiedId}}> parserProvider
     ) {
@@ -28,7 +29,12 @@ public class {{baseParseTaskDef.id}} extends JSGLR1ParseTaskDef {
         return "{{baseParseTaskDef.qualifiedId}}";
     }
 
-    @Override protected Result<JSGLR1ParseOutput, JSGLR1ParseException> parse(ExecContext context, String text) throws Exception {
+    @Override protected Result<JSGLR1ParseOutput, JSGLR1ParseException> parse(
+        ExecContext context,
+        String text,
+        @Nullable String startSymbol,
+        @Nullable ResourceKey resource
+    ) throws Exception {
         context.require(classLoaderResources.tryGetAsLocalDefinitionResource("{{languageProjectInput.parseTableRelativePath}}"));
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
         context.require(classLoaderResources.tryGetAsLocalResource({{languageProjectInput.parser.qualifiedId}}.class), ResourceStampers.hashFile());
@@ -36,7 +42,7 @@ public class {{baseParseTaskDef.id}} extends JSGLR1ParseTaskDef {
         context.require(classLoaderResources.tryGetAsLocalResource({{languageProjectInput.parseTable.qualifiedId}}.class), ResourceStampers.hashFile());
         final {{languageProjectInput.parser.qualifiedId}} parser = parserProvider.get();
         try {
-            return Result.ofOk(parser.parse(text, "{{languageProjectInput.startSymbol}}"));
+            return Result.ofOk(parser.parse(text, startSymbol != null ? startSymbol : "{{languageProjectInput.startSymbol}}", resource));
         } catch(JSGLR1ParseException e) {
             return Result.ofErr(e);
         }

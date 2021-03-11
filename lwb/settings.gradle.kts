@@ -21,59 +21,51 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   project(":$id").projectDir = file(path)
 }
 
-"cfg".run {
+"metalang/cfg".run {
   includeProject("cfg")
   includeProject("cfg.cli")
   includeProject("cfg.eclipse")
   includeProject("cfg.intellij")
   includeProject("cfg.spoofax2")
 }
-
-"sdf3".run {
+"metalang/sdf3".run {
   includeProject("sdf3")
   includeProject("sdf3.cli")
   includeProject("sdf3.eclipse")
   includeProject("sdf3.intellij")
 }
-
-"stratego".run {
+"metalang/stratego".run {
   includeProject("stratego")
   includeProject("stratego.cli")
   includeProject("stratego.eclipse")
   includeProject("stratego.intellij")
 }
-
-"esv".run {
+"metalang/esv".run {
   includeProject("esv")
   includeProject("esv.cli")
   includeProject("esv.eclipse")
   includeProject("esv.intellij")
 }
-
-"statix".run {
+"metalang/statix".run {
   includeProject("statix")
   includeProject("statix.cli")
   includeProject("statix.eclipse")
   includeProject("statix.intellij")
 }
-
-"libspoofax2".run {
+"metalib/libspoofax2".run {
   includeProject("libspoofax2")
   includeProject("libspoofax2.eclipse")
 }
-
-"libstatix".run {
+"metalib/libstatix".run {
   includeProject("libstatix")
   includeProject("libstatix.eclipse")
 }
 
+include("spoofax.lwb.compiler")
+include("spoofax.lwb.compiler.cfg")
+include("spoofax.lwb.compiler.dagger")
+include("spoofax.lwb.compiler.gradle")
 
+include("spoofax.lwb.dynamicloading")
 
-include("spoofax.compiler.spoofax3")
-include("spoofax.compiler.spoofax3.dagger")
-include("spoofax.compiler.spoofax3.standalone")
-include("spoofax.compiler.spoofax3.standalone.dagger")
-include("spoofax.compiler.gradle.spoofax3")
-
-include("spoofax.dynamicloading")
-include("spoofax.dynamicloading.eclipse")
+include("spoofax.lwb.eclipse")

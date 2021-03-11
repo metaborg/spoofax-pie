@@ -1,0 +1,20 @@
+module lex/path
+
+lexical sorts
+
+  PathLit PathSegmentLit PathStart PathChar
+
+lexical syntax
+
+  PathLit        = PathStart PathChars
+  PathSegmentLit = PathChar PathChars
+  
+  PathStart = "/"
+  PathStart = "./"
+
+  PathChars = PathChar*
+  PathChar  = ~[\n\r\,\;\]\)\}\ ]
+
+lexical restrictions
+
+  PathChars -/- ~[\n\r\,\;\]\)\}\ ]

@@ -3,18 +3,17 @@ package mb.spoofax.core.language.command;
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Messages;
-import mb.common.result.KeyedMessagesException;
-import mb.common.result.MessagesException;
 import mb.common.util.ListView;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 
 public class CommandFeedbackBuilder {
     private final ArrayList<ShowFeedback> showFeedbacks = new ArrayList<>();
     private final KeyedMessagesBuilder keyedMessagesBuilder = new KeyedMessagesBuilder();
-    private @Nullable Exception mainException = null;
+    private @Nullable Throwable mainException = null;
 
 
     public CommandFeedbackBuilder withShowFeedbacks(ArrayList<ShowFeedback> showFeedbacks) {
@@ -53,21 +52,18 @@ public class CommandFeedbackBuilder {
     }
 
 
-    public CommandFeedbackBuilder withMainException(@Nullable Exception mainException) {
+    public CommandFeedbackBuilder withMainException(@Nullable Throwable mainException) {
         this.mainException = mainException;
         return this;
     }
 
 
-    public CommandFeedbackBuilder withException(Exception exception) {
-        if(exception instanceof KeyedMessagesException) {
-            final KeyedMessagesException keyedMessagesException = (KeyedMessagesException)exception;
-            withKeyedMessages(keyedMessagesException.getMessages()); // TODO: default key?
-        } else if(exception instanceof MessagesException) {
-            final MessagesException messagesException = (MessagesException)exception;
-            withMessages(messagesException.getMessages()); // TODO: key where messages belong to?
+    public CommandFeedbackBuilder withException(Throwable throwable) {
+        final Optional<KeyedMessages> messages = KeyedMessages.ofTryExtractMessagesFrom(throwable);
+        if(messages.isPresent()) {
+            messages.ifPresent(this::withKeyedMessages);
         } else {
-            withMainException(exception);
+            withMainException(throwable);
         }
         return this;
     }

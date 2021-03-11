@@ -1,0 +1,10 @@
+module boolean
+
+context-free sorts
+
+  BooleanLit
+  
+context-free syntax
+
+  BooleanLit.True  = "true"
+  BooleanLit.False = "false"

@@ -1,0 +1,26 @@
+module part/language_base
+
+imports
+
+  lex/sdf3_id
+  lex/str_id
+  lex/java_id
+  lex/path
+  configuration
+  section
+  boolean
+
+context-free syntax
+
+  ParserOption.DefaultStartSymbol = <default-start-symbol = <Sdf3SortIdLit>>
+
+  ConstraintAnalyzerOption.ConstraintAnalyzerEnableNaBL2      = <enable-nabl2 = <BooleanLit>>
+  ConstraintAnalyzerOption.ConstraintAnalyzerEnableStatix     = <enable-statix = <BooleanLit>>
+  ConstraintAnalyzerOption.ConstraintAnalyzerMultiFile        = <multi-file = <BooleanLit>>
+  ConstraintAnalyzerOption.ConstraintAnalyzerStrategoStrategy = <stratego-strategy = <StrStrategyIdLit>>
+
+  StrategoRuntimeOption.StrategoRuntimeStrategyPackageId             = <strategy-package-id = <JavaQIdLit>>
+  StrategoRuntimeOption.StrategoRuntimeInteropRegistererByReflection = <interop-registerer-by-reflection = <JavaQIdLit>>
+  StrategoRuntimeOption.StrategoRuntimeAddSpoofax2Primitives         = <add-spoofax2-primitives = <BooleanLit>>
+  StrategoRuntimeOption.StrategoRuntimeAddNaBL2Primitives            = <add-nabl2-primitives = <BooleanLit>>
+  StrategoRuntimeOption.StrategoRuntimeAddStatixPrimitives           = <add-statix-primitives = <BooleanLit>>

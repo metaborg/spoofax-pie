@@ -1,0 +1,30 @@
+module analysis
+
+imports
+
+  statixruntime
+  statix/api
+  injections/-
+
+rules
+
+  pre-analyze  = explicate-injections-cfg-Configuration
+  post-analyze = implicate-injections-cfg-Configuration
+
+  editor-analyze = stx-editor-analyze(pre-analyze, post-analyze|"statics", "projectOk", "fileOk")
+  editor-resolve = stx-editor-resolve
+  editor-hover   = stx-editor-hover
+
+rules
+
+  debug-show-pre-analyzed:
+    (selected, _, _, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"pre-analyzed.aterm")> path
+    ; result   := <pre-analyze> selected
+
+  debug-show-analyzed:
+    (selected, _, _, path, project-path) -> (filename, result)
+    with 
+      filename := <guarantee-extension(|"analyzed.aterm")> path
+    ; result   := selected

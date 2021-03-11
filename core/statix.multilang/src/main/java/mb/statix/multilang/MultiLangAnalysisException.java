@@ -93,7 +93,7 @@ public class MultiLangAnalysisException extends Exception implements Serializabl
         }
         final Message message = new Message(throwable.getMessage(), throwable, Severity.Error);
         if(this.resourceKey != null) {
-            return KeyedMessages.of(resourceKey, new ArrayList<>(Collections.singleton(message)));
+            return KeyedMessages.of(new ArrayList<>(Collections.singleton(message)), resourceKey);
         }
         return KeyedMessages.of(Messages.of(message));
     }

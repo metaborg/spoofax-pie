@@ -1,0 +1,17 @@
+module cfg
+
+imports
+
+  lex/comment
+  lex/layout
+
+  configuration
+
+  part/shared
+  part/language_base
+  part/language
+  part/language_adapter
+
+context-free start-symbols
+  
+  Configuration

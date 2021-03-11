@@ -117,7 +117,7 @@ public interface Shared extends Serializable {
     /**
      * Gets the version properties provided by the build.
      */
-    @Value.Default default Properties versionProperties() {
+    @Value.Auxiliary @Value.Default default Properties versionProperties() {
         final Properties properties = new Properties();
         final @Nullable InputStream inputStream = Shared.class.getClassLoader().getResourceAsStream("version.properties");
         if(inputStream != null) {

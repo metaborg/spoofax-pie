@@ -120,10 +120,12 @@ public abstract class StrategoException extends Exception {
             .append("' failed ")
             .append(prefix)
         ;
-        sb.append("\nStratego stack trace:");
-        for(String line : trace) {
-            sb.append("\n\t");
-            sb.append(line);
+        if(trace.length > 0) {
+            sb.append("\nStratego stack trace:");
+            for(String line : trace) {
+                sb.append("\n\t");
+                sb.append(line);
+            }
         }
         sb.append("\nStratego input term:\n");
         sb.append(StrategoUtil.toString(input));

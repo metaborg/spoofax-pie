@@ -1,0 +1,29 @@
+module statics
+
+imports
+
+  signatures/cfg-sig
+
+  signatures/lex/comment-sig
+  signatures/lex/layout-sig
+  signatures/lex/path-sig
+  signatures/lex/string-sig
+  signatures/lex/java_id-sig
+  signatures/lex/sdf3_id-sig
+  signatures/lex/str_id-sig
+  
+  signatures/configuration-sig
+  signatures/boolean-sig
+  
+  signatures/part/shared-sig
+  signatures/part/language_base-sig
+  signatures/part/language-sig
+  signatures/part/language_adapter-sig
+
+rules
+
+  projectOk : scope
+  projectOk(s).
+
+  fileOk : scope * Configuration
+  fileOk(s, Configuration(_)).

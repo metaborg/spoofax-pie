@@ -1,5 +1,6 @@
 package mb.jsglr1.common;
 
+import mb.common.message.KeyedMessages;
 import mb.common.message.Messages;
 import mb.jsglr.common.JSGLRTokens;
 import mb.jsglr.common.ResourceKeyAttachment;
@@ -61,12 +62,20 @@ public class JSGLR1Parser {
             messagesUtil.gatherNonFatalErrors(ast);
             final Messages messages = messagesUtil.getMessages();
             final boolean recovered = messages.containsError();
-            return new JSGLR1ParseOutput(ast, tokens, messages, recovered);
+            return new JSGLR1ParseOutput(ast, tokens, toMessages(messages, resource), recovered);
         } catch(SGLRException e) {
             final MessagesUtil messagesUtil = new MessagesUtil(true, true, parser.getCollectedErrors());
             messagesUtil.processFatalException(new NullTokenizer(text, null), e);
             final Messages messages = messagesUtil.getMessages();
-            throw JSGLR1ParseException.parseFail(messages);
+            throw JSGLR1ParseException.parseFail(toMessages(messages, resource));
+        }
+    }
+
+    private static KeyedMessages toMessages(Messages messages, @Nullable ResourceKey resource) {
+        if(resource != null) {
+            return messages.toKeyed(resource);
+        } else {
+            return messages.toKeyed();
         }
     }
 }

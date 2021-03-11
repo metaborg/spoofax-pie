@@ -80,7 +80,7 @@ public class RunCommandHandler extends AbstractHandler {
         // TODO: run this in a Job, both to enable progress/cancellation, and better error reporting.
         try(final MixedSession session = pie.newSession()) {
             final ArrayList<CommandContextAndFeedback> contextsAndFeedbacks = pieRunner.requireCommand(request, data.contexts, pie, session, null);
-            final ArrayList<Exception> exceptions = new ArrayList<>();
+            final ArrayList<Throwable> exceptions = new ArrayList<>();
             final StringBuilder sb = new StringBuilder();
             boolean error = false;
             for(CommandContextAndFeedback contextAndFeedback : contextsAndFeedbacks) {
@@ -103,7 +103,7 @@ public class RunCommandHandler extends AbstractHandler {
                     sb.append("\nThe following messages were produced:\n");
                     feedback.getMessages().addToStringBuilder(sb);
                 }
-                final @Nullable Exception exception = feedback.getException();
+                final @Nullable Throwable exception = feedback.getException();
                 if(exception != null) {
                     exceptions.add(exception);
                 }
@@ -113,7 +113,7 @@ public class RunCommandHandler extends AbstractHandler {
                 status = new Status(IStatus.ERROR, pluginId, sb.toString());
             } else {
                 final MultiStatus multiStatus = new MultiStatus(pluginId, IStatus.ERROR, sb.toString(), null);
-                for(Exception e : exceptions) {
+                for(Throwable e : exceptions) {
                     multiStatus.add(exceptionToStatus(e, pluginId));
                 }
                 status = multiStatus;
