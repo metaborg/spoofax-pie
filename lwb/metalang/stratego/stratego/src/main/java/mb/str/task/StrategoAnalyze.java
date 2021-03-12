@@ -14,7 +14,6 @@ import mb.resource.ResourceKeyString;
 import mb.resource.ResourceService;
 import mb.str.StrategoScope;
 import mb.str.config.StrategoAnalyzeConfig;
-import mb.stratego.build.strincr.Frontends;
 import mb.stratego.build.strincr.MessageSeverity;
 import mb.stratego.build.strincr.StrIncrAnalysis;
 import mb.stratego.build.strincr.message.Message;
@@ -75,7 +74,7 @@ public class StrategoAnalyze implements TaskDef<StrategoAnalyze.Input, KeyedMess
 
     @Override public KeyedMessages exec(ExecContext context, Input input) {
         //noinspection ConstantConditions
-        final Result<Frontends.Output, ?> result = Result.ofOkOrCatching(() -> context.require(analysis, new Frontends.Input(
+        final Result<StrIncrAnalysis.Output, ?> result = Result.ofOkOrCatching(() -> context.require(analysis, new StrIncrAnalysis.Input(
             input.config.mainFile,
             input.config.includeDirs.asUnmodifiable(),
             input.config.builtinLibs.asUnmodifiable(),
