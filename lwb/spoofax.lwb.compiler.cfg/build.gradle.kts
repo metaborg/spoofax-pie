@@ -9,7 +9,6 @@ dependencies {
   annotationProcessor(platform(compositeBuild("spoofax.depconstraints")))
 
   api(compositeBuild("spoofax.compiler.dagger"))
-  api(compositeBuild("spoofax.compiler.dagger"))
 
   compileOnly("org.checkerframework:checker-qual-android")
   compileOnly("org.immutables:value-annotations")

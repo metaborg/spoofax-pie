@@ -115,21 +115,21 @@ public class CompileSdf3 implements TaskDef<CompileSdf3Input, Result<CompileSdf3
     @Override
     public Result<Output, Sdf3CompileException> exec(ExecContext context, CompileSdf3Input input) throws Exception {
         // Check main file and root directory.
-        final HierarchicalResource mainFile = context.require(input.sdf3MainFile(), ResourceStampers.<HierarchicalResource>exists());
+        final HierarchicalResource mainFile = context.require(input.mainFile(), ResourceStampers.<HierarchicalResource>exists());
         if(!mainFile.exists() || !mainFile.isFile()) {
             return Result.ofErr(Sdf3CompileException.mainFileFail(mainFile.getPath()));
         }
-        final HierarchicalResource rootDirectory = context.require(input.sdf3RootDirectory(), ResourceStampers.<HierarchicalResource>exists());
-        if(!rootDirectory.exists() || !rootDirectory.isDirectory()) {
-            return Result.ofErr(Sdf3CompileException.rootDirectoryFail(rootDirectory.getPath()));
+        final HierarchicalResource sourceDirectory = context.require(input.sourceDirectory(), ResourceStampers.<HierarchicalResource>exists());
+        if(!sourceDirectory.exists() || !sourceDirectory.isDirectory()) {
+            return Result.ofErr(Sdf3CompileException.sourceDirectoryFail(sourceDirectory.getPath()));
         }
+        final ResourcePath rootDirectory = input.rootDirectory();
 
         // Check SDF3 source files.
-        // TODO: this does not check ESV files in include directories.
         final ResourceWalker resourceWalker = Sdf3Util.createResourceWalker();
         final ResourceMatcher resourceMatcher = new AllResourceMatcher(Sdf3Util.createResourceMatcher(), new FileResourceMatcher());
         final @Nullable KeyedMessages messages = context.require(check.createTask(
-            new Sdf3CheckMulti.Input(rootDirectory.getPath(), resourceWalker, resourceMatcher)
+            new Sdf3CheckMulti.Input(rootDirectory, resourceWalker, resourceMatcher)
         ));
         if(messages.containsError()) {
             return Result.ofErr(Sdf3CompileException.checkFail(messages));
@@ -144,7 +144,7 @@ public class CompileSdf3 implements TaskDef<CompileSdf3Input, Result<CompileSdf3
             input.checkPrioritiesInParseTable(),
             input.createLayoutSensitiveParseTable()
         );
-        final Supplier<Result<Sdf3SpecConfig, ?>> specConfigSupplier = new ValueSupplier<>(Result.ofOk(new Sdf3SpecConfig(input.sdf3RootDirectory(), input.sdf3MainFile(), parseTableConfiguration)));
+        final Supplier<Result<Sdf3SpecConfig, ?>> specConfigSupplier = new ValueSupplier<>(Result.ofOk(new Sdf3SpecConfig(input.sourceDirectory(), input.mainFile(), parseTableConfiguration)));
         final Supplier<Result<Sdf3Spec, ?>> specSupplier = createSpec.createSupplier(specConfigSupplier);
         final Supplier<Result<ParseTable, ?>> parseTableSupplier = toParseTable.createSupplier(new Sdf3SpecToParseTable.Input(specSupplier, false));
         final Result<None, ? extends Exception> compileResult = context.require(parseTableToFile, new Sdf3ParseTableToFile.Args(parseTableSupplier, input.sdf3ParseTableOutputFile()));
@@ -154,8 +154,8 @@ public class CompileSdf3 implements TaskDef<CompileSdf3Input, Result<CompileSdf3
 
         // Compile each SDF3 source file to a Stratego signature, pretty-printer, and completion runtime module.
         final ArrayList<Supplier<Result<IStrategoTerm, ?>>> esvCompletionColorerAstSuppliers = new ArrayList<>();
-        final Sdf3AnalyzeMulti.Input analyzeInput = new Sdf3AnalyzeMulti.Input(rootDirectory.getPath(), resourceWalker, resourceMatcher, parse.createRecoverableAstFunction());
-        try(final Stream<? extends HierarchicalResource> stream = rootDirectory.walk(resourceWalker, resourceMatcher)) {
+        final Sdf3AnalyzeMulti.Input analyzeInput = new Sdf3AnalyzeMulti.Input(sourceDirectory.getPath(), resourceWalker, resourceMatcher, parse.createRecoverableAstFunction());
+        try(final Stream<? extends HierarchicalResource> stream = sourceDirectory.walk(resourceWalker, resourceMatcher)) {
             for(HierarchicalResource file : new StreamIterable<>(stream)) {
                 final Supplier<Result<SingleFileOutput, ?>> singleFileAnalysisOutputSupplier = analyze.createSingleFileOutputSupplier(analyzeInput, file.getPath());
                 try {
@@ -257,7 +257,7 @@ public class CompileSdf3 implements TaskDef<CompileSdf3Input, Result<CompileSdf3
         public interface Cases<R> {
             R mainFileFail(ResourceKey mainFile);
 
-            R rootDirectoryFail(ResourcePath rootDirectory);
+            R sourceDirectoryFail(ResourcePath rootDirectory);
 
             R checkFail(KeyedMessages messages);
 
@@ -276,8 +276,8 @@ public class CompileSdf3 implements TaskDef<CompileSdf3Input, Result<CompileSdf3
             return Sdf3CompileExceptions.mainFileFail(mainFile);
         }
 
-        public static Sdf3CompileException rootDirectoryFail(ResourcePath rootDirectory) {
-            return Sdf3CompileExceptions.rootDirectoryFail(rootDirectory);
+        public static Sdf3CompileException sourceDirectoryFail(ResourcePath rootDirectory) {
+            return Sdf3CompileExceptions.sourceDirectoryFail(rootDirectory);
         }
 
         public static Sdf3CompileException checkFail(KeyedMessages messages) {
@@ -324,7 +324,7 @@ public class CompileSdf3 implements TaskDef<CompileSdf3Input, Result<CompileSdf3
         @Override public String getMessage() {
             return caseOf()
                 .mainFileFail((mainFile) -> "SDF3 main file '" + mainFile + "' does not exist or is not a file")
-                .rootDirectoryFail((rootDirectory) -> "SDF3 root directory '" + rootDirectory + "' does not exist or is not a directory")
+                .sourceDirectoryFail((sourceDirectory) -> "SDF3 source directory '" + sourceDirectory + "' does not exist or is not a directory")
                 .checkFail((messages) -> "Parsing or checking SDF3 source files failed; see error messages")
                 .parseTableCompileFail((cause) -> "Compile parse table from SDF3 failed unexpectedly")
                 .signatureGenerateFail((cause) -> "Generate stratego signature from SDF3 failed unexpectedly")

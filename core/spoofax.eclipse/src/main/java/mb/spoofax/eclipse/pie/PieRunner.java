@@ -137,7 +137,7 @@ public class PieRunner {
 
             try {
                 if(project == null) {
-                    logger.warn("Cannot run inspections for resource '\" + file + \"' of language '\" + languageInstance.getDisplayName() + \"', because it requires multi-file analysis but no project was given");
+                    logger.warn("Cannot run inspections for resource '" + file + "' of language '" + languageInstance.getDisplayName() + "', because it requires multi-file analysis but no project was given");
                 } else {
                     requireCheck(project, monitor, workspaceUpdate, postSession, languageInstance);
                 }

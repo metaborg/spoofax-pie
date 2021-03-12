@@ -131,7 +131,12 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
         IStrategoTerm ast,
         Properties properties
     ) throws InvalidAstShapeException {
-        final AstToObject.Output output = AstToObject.convert(rootDirectory, cfgFile, ast, properties);
+        final AstToObject.Output output;
+        try {
+            output = AstToObject.convert(rootDirectory, cfgFile, ast, properties);
+        } catch(IllegalStateException e) {
+            return Result.ofErr(CfgToObjectException.buildConfigObjectFail(e));
+        }
         if(output.messages.containsError()) {
             return Result.ofErr(CfgToObjectException.validationFail(output.messages));
         } else {

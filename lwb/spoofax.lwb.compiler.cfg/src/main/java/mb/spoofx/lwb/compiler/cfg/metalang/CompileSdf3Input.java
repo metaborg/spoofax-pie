@@ -26,12 +26,16 @@ public interface CompileSdf3Input extends Serializable {
     static Builder builder() { return new Builder(); }
 
 
-    @Value.Default default ResourcePath sdf3RootDirectory() {
+    default ResourcePath rootDirectory() {
+        return compileLanguageShared().languageProject().project().baseDirectory();
+    }
+
+    @Value.Default default ResourcePath sourceDirectory() {
         return compileLanguageShared().languageProject().project().srcDirectory();
     }
 
-    @Value.Default default ResourcePath sdf3MainFile() {
-        return sdf3RootDirectory().appendRelativePath("start.sdf3");
+    @Value.Default default ResourcePath mainFile() {
+        return sourceDirectory().appendRelativePath("start.sdf3");
     }
 
 

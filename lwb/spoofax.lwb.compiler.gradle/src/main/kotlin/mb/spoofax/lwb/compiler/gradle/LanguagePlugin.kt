@@ -72,7 +72,7 @@ open class LanguagePlugin : Plugin<Project> {
   ): CompileLanguageToJavaClassPathInput {
     spoofax3Compiler.pieComponent.pie.newSession().use {
       return it.require(spoofax3Compiler.cfgComponent.cfgRootDirectoryToObject.createTask(FSPath(project.projectDir)))
-        .unwrap() // TODO: proper error handling
+        .unwrap().compileLanguageToJavaClassPathInput // TODO: proper error handling
     }
   }
 
@@ -157,11 +157,11 @@ open class LanguagePlugin : Plugin<Project> {
       // Inputs and outputs
       input.sdf3().ifPresent {
         // Input: all SDF3 files
-        val rootDirectory = resourceService.toLocalFile(it.sdf3RootDirectory())
+        val rootDirectory = resourceService.toLocalFile(it.sourceDirectory())
         if(rootDirectory != null) {
           inputs.files(project.fileTree(rootDirectory) { include("**/*.sdf3") })
         } else {
-          logger.warn("Cannot set SDF3 files as task inputs, because ${it.sdf3RootDirectory()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
+          logger.warn("Cannot set SDF3 files as task inputs, because ${it.sourceDirectory()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
         }
 
         // Output: parse table file
@@ -228,10 +228,13 @@ open class LanguagePlugin : Plugin<Project> {
         synchronized(pie) {
           pie.newSession().use { session ->
             val result = session.require(compiler.createTask(input))
+            val projectDir = FSPath(project.projectDir)
             result.ifOk {
-              project.logMessages(it, FSPath(project.projectDir))
+              project.logMessages(it, projectDir)
             }.ifErr {
-              project.logger.error(ExceptionPrinter.printExceptionToString(it))
+              val exceptionPrinter = ExceptionPrinter()
+              exceptionPrinter.addCurrentDirectoryContext(projectDir)
+              project.logger.error(exceptionPrinter.printExceptionToString(it))
             }
           }
         }

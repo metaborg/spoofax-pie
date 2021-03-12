@@ -92,6 +92,8 @@ class TestBase {
     }
 
     void printThrowable(Throwable throwable) {
-        ExceptionPrinter.printException(throwable, System.err);
+        final ExceptionPrinter exceptionPrinter = new ExceptionPrinter();
+        exceptionPrinter.addCurrentDirectoryContext(temporaryDirectory);
+        exceptionPrinter.printException(throwable, System.err);
     }
 }

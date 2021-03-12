@@ -3,3 +3,4 @@ Bundle-ManifestVersion: 2
 Bundle-Activator: mb.spoofax.eclipse.SpoofaxPlugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
+Eclipse-BuddyPolicy: registered

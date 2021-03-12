@@ -2,6 +2,7 @@ package mb.spoofax.lwb.dynamicloading;
 
 import mb.cfg.task.CfgRootDirectoryToObject;
 import mb.cfg.task.CfgRootDirectoryToObjectException;
+import mb.cfg.task.CfgToObject;
 import mb.common.result.Result;
 import mb.log.dagger.LoggerComponent;
 import mb.pie.api.ExecContext;
@@ -60,8 +61,8 @@ public class DynamicLoad implements TaskDef<ResourcePath, OutTransient<DynamicLa
 
     @Override
     public OutTransient<DynamicLanguage> exec(ExecContext context, ResourcePath rootDirectory) throws Exception {
-        final Result<CompileLanguageToJavaClassPathInput, CfgRootDirectoryToObjectException> inputResult = context.require(cfgRootDirectoryToObject, rootDirectory);
-        final CompileLanguageToJavaClassPathInput compileInput = inputResult.unwrap(); // TODO: properly handle error.
+        final Result<CfgToObject.Output, CfgRootDirectoryToObjectException> cfgResult = context.require(cfgRootDirectoryToObject, rootDirectory);
+        final CompileLanguageToJavaClassPathInput compileInput = cfgResult.unwrap().compileLanguageToJavaClassPathInput; // TODO: properly handle error.
         final Result<CompileLanguageToJavaClassPath.Output, CompileLanguageToJavaClassPathException> result = context.require(compileLanguageToJavaClassPath, compileInput);
         final CompileLanguageToJavaClassPath.Output output = result.unwrap(); // TODO: properly handle error
         final ArrayList<URL> classPath = new ArrayList<>();

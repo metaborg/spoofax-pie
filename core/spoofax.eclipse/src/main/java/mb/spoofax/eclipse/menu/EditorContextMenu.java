@@ -26,7 +26,7 @@ import org.eclipse.ui.PlatformUI;
 
 import java.util.Optional;
 
-public class EditorContextMenu extends MenuShared {
+public class EditorContextMenu extends CommandMenuShared {
     private final EnclosingCommandContextProvider enclosingCommandContextProvider;
 
     private final EclipseLanguageComponent languageComponent;

@@ -76,7 +76,7 @@ public class AstToObject {
         @Nullable ResourceKey cfgFile,
         IStrategoTerm ast,
         Properties properties
-    ) throws InvalidAstShapeException {
+    ) throws InvalidAstShapeException, IllegalStateException {
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         final IStrategoList partsList = TermUtils.asListAt(ast, 0).orElseThrow(() -> new InvalidAstShapeException("part list as first subterm", ast));
         final Parts parts = new Parts(messagesBuilder, cfgFile, partsList);

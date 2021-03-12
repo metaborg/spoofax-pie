@@ -144,8 +144,7 @@ open class EclipsePlugin : Plugin<Project> {
   private fun configureJarTask(project: Project, input: EclipseProjectCompiler.Input) {
     project.tasks.named<Jar>("jar").configure {
       inputs.property("input", input)
-
-      val exports = listOf(
+      val exportPackage = listOf(
         // Provided by 'javax.inject' bundle.
         "!javax.inject.*",
         // Provided by 'spoofax.eclipse' bundle.
@@ -171,7 +170,7 @@ open class EclipsePlugin : Plugin<Project> {
       )
       manifest {
         attributes(
-          Pair("Export-Package", exports.joinToString(", "))
+          Pair("Export-Package", exportPackage.joinToString(", "))
         )
       }
     }

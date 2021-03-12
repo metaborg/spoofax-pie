@@ -1,11 +1,5 @@
 import mb.spoofax.compiler.adapter.*
-import mb.spoofax.compiler.adapter.data.*
-import mb.spoofax.compiler.gradle.plugin.*
-import mb.spoofax.compiler.gradle.spoofax2.plugin.*
-import mb.spoofax.compiler.language.*
-import mb.spoofax.compiler.spoofax2.language.*
 import mb.spoofax.compiler.util.*
-import mb.spoofax.core.language.command.*
 
 plugins {
   id("org.metaborg.gradle.config.java-library")
@@ -62,7 +56,14 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   val packageId = "mb.cfg"
   val taskPackageId = "$packageId.task"
 
+  // Config object creation tasks.
   val toObject = TypeInfo.of(taskPackageId, "CfgToObject")
   val rootDirectoryToObject = TypeInfo.of(taskPackageId, "CfgRootDirectoryToObject")
   addTaskDefs(toObject, rootDirectoryToObject)
+
+  // Manual multi-file check implementation.
+  isMultiFile(true)
+  val spoofaxTaskPackageId = "$taskPackageId.spoofax"
+  baseCheckMultiTaskDef(spoofaxTaskPackageId, "GeneratedCfgCheckMulti")
+  extendCheckMultiTaskDef(spoofaxTaskPackageId, "CfgCheckMulti")
 }

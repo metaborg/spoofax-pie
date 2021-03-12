@@ -2,9 +2,11 @@ package mb.sdf3.task.spoofax;
 
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
+import mb.common.message.Message;
 import mb.common.message.Messages;
 import mb.common.message.Severity;
 import mb.common.result.Result;
+import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
@@ -100,9 +102,7 @@ public class Sdf3CheckMulti implements TaskDef<Sdf3CheckMulti.Input, KeyedMessag
                 c -> check(context, c),
                 KeyedMessages::of // SDF3 is not configured, do not need to check.
             ),
-            // TODO: should we propagate configuration errors here? Every task that requires some configuration will
-            //       propagate the same configuration errors, which would lead to duplicates.
-            e -> KeyedMessages.ofTryExtractMessagesFrom(e, input.root).orElse(KeyedMessages.of())
+            e -> KeyedMessages.of(ListView.of(new Message("Cannot check SDF3 files; reading configuration failed unexpectedly", e)), input.root)
         );
     }
 

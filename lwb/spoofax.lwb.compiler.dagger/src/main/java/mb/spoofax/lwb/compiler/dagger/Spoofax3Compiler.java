@@ -5,6 +5,7 @@ import mb.cfg.CfgResourcesComponent;
 import mb.cfg.DaggerCfgComponent;
 import mb.cfg.DaggerCfgResourcesComponent;
 import mb.cfg.task.CfgRootDirectoryToObjectException;
+import mb.cfg.task.CfgToObject;
 import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.esv.DaggerEsvComponent;
@@ -44,7 +45,6 @@ import mb.spoofax.compiler.dagger.SpoofaxCompilerModule;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.core.platform.DaggerPlatformComponent;
 import mb.spoofax.core.platform.PlatformComponent;
-import mb.spoofx.lwb.compiler.cfg.CompileLanguageToJavaClassPathInput;
 import mb.statix.DaggerStatixComponent;
 import mb.statix.DaggerStatixResourcesComponent;
 import mb.statix.StatixComponent;
@@ -280,16 +280,16 @@ public class Spoofax3Compiler implements AutoCloseable {
     }
 
     private static class Sdf3CfgFunction implements Function<ResourcePath, Result<Option<Sdf3SpecConfig>, ?>> {
-        private final Function<ResourcePath, Result<CompileLanguageToJavaClassPathInput, CfgRootDirectoryToObjectException>> cfgRootDirectoryToObject;
+        private final Function<ResourcePath, Result<CfgToObject.Output, CfgRootDirectoryToObjectException>> cfgRootDirectoryToObject;
 
-        private Sdf3CfgFunction(Function<ResourcePath, Result<CompileLanguageToJavaClassPathInput, CfgRootDirectoryToObjectException>> cfgRootDirectoryToObject) {
+        private Sdf3CfgFunction(Function<ResourcePath, Result<CfgToObject.Output, CfgRootDirectoryToObjectException>> cfgRootDirectoryToObject) {
             this.cfgRootDirectoryToObject = cfgRootDirectoryToObject;
         }
 
         @Override public Result<Option<Sdf3SpecConfig>, ?> apply(ExecContext context, ResourcePath rootDirectory) {
-            final Result<CompileLanguageToJavaClassPathInput, CfgRootDirectoryToObjectException> result = context.require(cfgRootDirectoryToObject, rootDirectory);
-            return result.map(c -> Option.ofOptional(c.compileLanguageInput().sdf3().map(sdf3 ->
-                new Sdf3SpecConfig(sdf3.sdf3RootDirectory(), sdf3.sdf3MainFile(), new ParseTableConfiguration(
+            final Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result = context.require(cfgRootDirectoryToObject, rootDirectory);
+            return result.map(o -> Option.ofOptional(o.compileLanguageToJavaClassPathInput.compileLanguageInput().sdf3().map(sdf3 ->
+                new Sdf3SpecConfig(sdf3.sourceDirectory(), sdf3.mainFile(), new ParseTableConfiguration(
                     sdf3.createDynamicParseTable(),
                     sdf3.createDataDependentParseTable(),
                     sdf3.solveDeepConflictsInParseTable(),

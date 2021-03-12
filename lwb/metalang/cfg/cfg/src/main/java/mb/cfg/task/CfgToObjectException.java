@@ -14,6 +14,8 @@ public abstract class CfgToObjectException extends Exception implements HasOptio
 
         R propertiesSupplyFail(Exception propertiesSupplyException);
 
+        R buildConfigObjectFail(IllegalStateException illegalStateException);
+
         R validationFail(KeyedMessages messages);
     }
 
@@ -23,6 +25,10 @@ public abstract class CfgToObjectException extends Exception implements HasOptio
 
     public static CfgToObjectException propertiesSupplyFail(Exception propertiesSupplyException) {
         return withCause(CfgToObjectExceptions.propertiesSupplyFail(propertiesSupplyException), propertiesSupplyException);
+    }
+
+    public static CfgToObjectException buildConfigObjectFail(IllegalStateException illegalStateException) {
+        return withCause(CfgToObjectExceptions.buildConfigObjectFail(illegalStateException), illegalStateException);
     }
 
     public static CfgToObjectException validationFail(KeyedMessages messages) {
@@ -50,6 +56,7 @@ public abstract class CfgToObjectException extends Exception implements HasOptio
         return caseOf()
             .astSupplyFail((e) -> "Failed to supply AST of CFG language")
             .propertiesSupplyFail((e) -> "Failed to supply configuration properties")
+            .buildConfigObjectFail((e) -> "Failed to build configuration object")
             .validationFail((m) -> "Failed to build configuration objects; validation produced errors")
             ;
     }

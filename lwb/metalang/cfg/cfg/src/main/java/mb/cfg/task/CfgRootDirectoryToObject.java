@@ -11,7 +11,6 @@ import mb.resource.ReadableResource;
 import mb.resource.ResourceService;
 import mb.resource.WritableResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofx.lwb.compiler.cfg.CompileLanguageToJavaClassPathInput;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -24,7 +23,7 @@ import java.io.OutputStreamWriter;
 import java.io.Serializable;
 
 @CfgScope
-public class CfgRootDirectoryToObject implements TaskDef<ResourcePath, Result<CompileLanguageToJavaClassPathInput, CfgRootDirectoryToObjectException>> {
+public class CfgRootDirectoryToObject implements TaskDef<ResourcePath, Result<CfgToObject.Output, CfgRootDirectoryToObjectException>> {
     private final ResourceService resourceService;
     private final CfgParse parse;
     private final CfgToObject toObject;
@@ -41,14 +40,14 @@ public class CfgRootDirectoryToObject implements TaskDef<ResourcePath, Result<Co
     }
 
     @Override
-    public Result<CompileLanguageToJavaClassPathInput, CfgRootDirectoryToObjectException> exec(ExecContext context, ResourcePath rootDirectory) throws Exception {
-        final ResourcePath configFile = rootDirectory.appendRelativePath("spoofaxc.cfg");
-        final Supplier<Result<IStrategoTerm, JSGLR1ParseException>> astSupplier = parse.createAstSupplier(configFile);
+    public Result<CfgToObject.Output, CfgRootDirectoryToObjectException> exec(ExecContext context, ResourcePath rootDirectory) throws Exception {
+        final ResourcePath cfgFile = rootDirectory.appendRelativePath("spoofaxc.cfg");
+        final Supplier<Result<IStrategoTerm, JSGLR1ParseException>> astSupplier = parse.createAstSupplier(cfgFile);
         final ResourcePath lockFilePath = rootDirectory.appendRelativePath("spoofaxc.lock");
         final WritableResource lockFile = resourceService.getWritableResource(lockFilePath);
         final Supplier<Result<Properties, IOException>> propertiesSupplier = new PropertiesSupplier(lockFile);
-        return context.require(toObject, new CfgToObject.Input(rootDirectory, configFile, astSupplier, propertiesSupplier))
-            .mapErr(e -> CfgRootDirectoryToObjectException.convertFail(e, configFile, lockFilePath))
+        return context.require(toObject, new CfgToObject.Input(rootDirectory, cfgFile, astSupplier, propertiesSupplier))
+            .mapErr(e -> CfgRootDirectoryToObjectException.convertFail(e, cfgFile, lockFilePath))
             .flatMap(output -> {
                 try {
                     try(final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(lockFile.openWrite()))) {
@@ -59,16 +58,18 @@ public class CfgRootDirectoryToObject implements TaskDef<ResourcePath, Result<Co
                     // manually changed, which is what we desire.
                     context.require(lockFile);
                 } catch(IOException e) {
-                    return Result.ofErr(CfgRootDirectoryToObjectException.lockFileWriteFail(e, lockFilePath));
+                    return Result.ofErr(CfgRootDirectoryToObjectException.lockFileWriteFail(e, cfgFile, lockFilePath));
                 }
-                return Result.ofOk(output.compileLanguageToJavaClassPathInput);
+                return Result.ofOk(output);
             });
     }
 
     private static class PropertiesSupplier implements Supplier<Result<Properties, IOException>>, Serializable {
         private final ReadableResource lockFile;
 
-        public PropertiesSupplier(ReadableResource lockFile) {this.lockFile = lockFile;}
+        public PropertiesSupplier(ReadableResource lockFile) {
+            this.lockFile = lockFile;
+        }
 
         @Override public Result<Properties, IOException> get(ExecContext ctx) {
             final Properties properties = new Properties();

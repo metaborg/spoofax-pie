@@ -33,7 +33,7 @@ public class CompileLanguageWithCfgToJavaClassPath implements TaskDef<ResourcePa
     public Result<CompileLanguageToJavaClassPath.Output, CompileLanguageWithCfgToJavaClassPathException> exec(ExecContext context, ResourcePath rootDirectory) {
         return context.require(cfgRootDirectoryToObject, rootDirectory)
             .mapErr(CompileLanguageWithCfgToJavaClassPathException::createInputFail)
-            .flatMap(i -> context.require(compileLanguageToJavaClassPath, i).mapErr(CompileLanguageWithCfgToJavaClassPathException::languageCompilerFail))
+            .flatMap(o -> context.require(compileLanguageToJavaClassPath, o.compileLanguageToJavaClassPathInput).mapErr(CompileLanguageWithCfgToJavaClassPathException::languageCompilerFail))
             ;
     }
 }

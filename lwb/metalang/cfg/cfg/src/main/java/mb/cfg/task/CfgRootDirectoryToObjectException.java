@@ -1,7 +1,7 @@
 package mb.cfg.task;
 
 import mb.common.util.ADT;
-import mb.resource.hierarchical.ResourcePath;
+import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
@@ -9,25 +9,25 @@ import java.io.IOException;
 @ADT
 public abstract class CfgRootDirectoryToObjectException extends Exception {
     public interface Cases<R> {
-        R convertFail(CfgToObjectException cfgToObjectException, ResourcePath configFile, ResourcePath lockfile);
+        R convertFail(CfgToObjectException cfgToObjectException, ResourceKey cfgFile, ResourceKey lockFile);
 
-        R lockFileWriteFail(IOException ioException, ResourcePath lockfile);
+        R lockFileWriteFail(IOException ioException, ResourceKey cfgFile, ResourceKey lockfile);
     }
 
     public static CfgRootDirectoryToObjectException convertFail(
         CfgToObjectException cfgToObjectException,
-        ResourcePath configFile,
-        ResourcePath lockfile
+        ResourceKey cfgFile,
+        ResourceKey lockFile
     ) {
         return withCause(CfgRootDirectoryToObjectExceptions.convertFail(
             cfgToObjectException,
-            configFile,
-            lockfile
+            cfgFile,
+            lockFile
         ), cfgToObjectException);
     }
 
-    public static CfgRootDirectoryToObjectException lockFileWriteFail(IOException ioException, ResourcePath lockfile) {
-        return withCause(CfgRootDirectoryToObjectExceptions.lockFileWriteFail(ioException, lockfile), ioException);
+    public static CfgRootDirectoryToObjectException lockFileWriteFail(IOException ioException, ResourceKey cfgFile, ResourceKey lockFile) {
+        return withCause(CfgRootDirectoryToObjectExceptions.lockFileWriteFail(ioException, cfgFile, lockFile), ioException);
     }
 
 
@@ -47,11 +47,15 @@ public abstract class CfgRootDirectoryToObjectException extends Exception {
         return CfgRootDirectoryToObjectExceptions.caseOf(this);
     }
 
+    public ResourceKey getCfgFile() {
+        return CfgRootDirectoryToObjectExceptions.getCfgFile(this);
+    }
+
 
     @Override public String getMessage() {
         return caseOf()
-            .convertFail((e, configFile, lockFile) -> "Failed to convert CFG file '" + configFile + "' with lock file '" + lockFile + "' to a language compiler input object")
-            .lockFileWriteFail((e, lockFile) -> "Failed to write to lock file '" + lockFile + "'")
+            .convertFail((e, cfgFile, lockFile) -> "Failed to convert CFG file '" + cfgFile + "' with lock file '" + lockFile + "' to a language compiler input object")
+            .lockFileWriteFail((e, cfgFile, lockFile) -> "Failed to write to lock file '" + lockFile + "'")
             ;
     }
 

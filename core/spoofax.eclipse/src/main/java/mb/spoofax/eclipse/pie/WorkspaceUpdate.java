@@ -26,7 +26,6 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jface.text.TextPresentation;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -95,9 +94,9 @@ public class WorkspaceUpdate {
         keyedMessagesBuilder.addMessages(origin, messages);
     }
 
-    public void addMessages(KeyedMessages keyedMessages, @Nullable ResourceKey defaultOrigin) {
-        if(defaultOrigin != null) {
-            keyedMessagesBuilder.addMessagesWithDefaultKey(keyedMessages, defaultOrigin);
+    public void addMessages(KeyedMessages keyedMessages, @Nullable ResourceKey fallbackResource) {
+        if(fallbackResource != null) {
+            keyedMessagesBuilder.addMessagesWithFallbackKey(keyedMessages, fallbackResource);
         } else {
             keyedMessagesBuilder.addMessages(keyedMessages);
         }
@@ -109,11 +108,15 @@ public class WorkspaceUpdate {
         addMessages(origin, messages);
     }
 
-    public void replaceMessages(KeyedMessages keyedMessages, @Nullable ResourceKey defaultOrigin) {
+    public void replaceMessages(KeyedMessages keyedMessages, @Nullable ResourceKey fallbackResource) {
         for(ResourceKey origin : keyedMessages.getKeys()) {
             clearMessages(origin, false);
         }
-        addMessages(keyedMessages, defaultOrigin);
+        final @Nullable ResourceKey resourceForMessagesWithoutKey = keyedMessages.getResourceForMessagesWithoutKeys();
+        if(resourceForMessagesWithoutKey != null && !keyedMessages.getMessagesWithoutKey().isEmpty()) {
+            clearMessages(resourceForMessagesWithoutKey, false);
+        }
+        addMessages(keyedMessages, fallbackResource);
     }
 
 

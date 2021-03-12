@@ -30,7 +30,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public abstract class ResourceContextMenu extends MenuShared {
+public abstract class ResourceContextMenu extends CommandMenuShared {
     private final EnclosingCommandContextProvider enclosingCommandContextProvider;
     private final PieRunner pieRunner;
 

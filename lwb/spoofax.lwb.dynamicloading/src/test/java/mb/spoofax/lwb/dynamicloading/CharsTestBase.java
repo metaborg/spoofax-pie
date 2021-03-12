@@ -93,7 +93,7 @@ class CharsTestBase extends TestBase {
     }
 
     DynamicLoaderReloadSession modifyParser(DynamicLoaderMixedSession session, CompileLanguageToJavaClassPathInput input) throws IOException, ExecException, InterruptedException {
-        final ResourcePath path = input.compileLanguageInput().sdf3().get().sdf3MainFile();
+        final ResourcePath path = input.compileLanguageInput().sdf3().get().mainFile();
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString().replace("\\ ", "\\ \\t");
         file.writeString(text);

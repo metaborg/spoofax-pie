@@ -1,4 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+  <!-- Nature and commands -->
+  <extension
+    id="nature"
+    name="Spoofax LWB nature"
+    point="org.eclipse.core.resources.natures"
+  >
+    <runtime>
+      <run class="mb.spoofax.lwb.eclipse.SpoofaxLwbNature"/>
+    </runtime>
+    <!--    <builder id="mb.spoofax.lwb.eclipse.builder" />-->
+  </extension>
+  <extension point="org.eclipse.ui.commands">
+    <command id="spoofax.lwb.eclipse.nature.add" name="Add Spoofax LWB nature"/>
+    <command id="spoofax.lwb.eclipse.nature.remove" name="Remove Spoofax LWB nature"/>
+  </extension>
+  <extension point="org.eclipse.ui.handlers">
+    <handler
+      commandId="spoofax.lwb.eclipse.nature.add"
+      class="mb.spoofax.lwb.eclipse.SpoofaxLwbNature$AddHandler"
+    />
+    <handler
+      commandId="spoofax.lwb.eclipse.nature.remove"
+      class="mb.spoofax.lwb.eclipse.SpoofaxLwbNature$RemoveHandler"
+    />
+  </extension>
+
+  <!-- Menus -->
+  <extension point="org.eclipse.ui.menus">
+    <!-- Project Explorer context menu -->
+    <menuContribution locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
+      <dynamic id="spoofax.lwb.eclipse.resource" class="mb.spoofax.lwb.eclipse.ResourceContextMenu"/>
+    </menuContribution>
+    <!-- Package Explorer context menu -->
+    <menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=additions">
+      <dynamic id="spoofax.lwb.eclipse.resource" class="mb.spoofax.lwb.eclipse.ResourceContextMenu"/>
+    </menuContribution>
+  </extension>
 </plugin>
