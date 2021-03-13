@@ -120,13 +120,13 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
                 long t0 = System.currentTimeMillis();
                 try {
                     SolverResult result = SolverUtils.partialSolve(spec,
-                        State.of(spec)
+                        State.of()
                             .add(globalResult.result().state())
                             .withResource(input.resourceKey.getIdAsString()),
                         fileConstraint,
                         debug,
-                        new NullProgress(),
-                        new NullCancel()
+                        new NullCancel(),
+                        new NullProgress()
                     );
                     long dt = System.currentTimeMillis() - t0;
                     logger.info("{} analyzed in {} ms", input.resourceKey, dt);

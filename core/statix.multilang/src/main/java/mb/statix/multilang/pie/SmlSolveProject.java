@@ -158,7 +158,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
                     .map(SolverResult::state)
                     // When https://github.com/metaborg/nabl/commit/da4f60ca33cbd6566a0a4d42d00d39e9307e8d9d has landed in Spoofax 3
                     // The identity State.of(combinedSpec) may be removed
-                    .reduce(State.of(combinedSpec), IState.Immutable::add);
+                    .reduce(State.of(), IState.Immutable::add);
                 final IConstraint combinedConstraint = initialResults.stream()
                     .map(SolverResult::delayed)
                     .reduce(globalResult.result().delayed(), CConj::new);
@@ -166,7 +166,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
                 try {
                     long t0 = System.currentTimeMillis();
                     IDebugContext debug = SolverUtils.createDebugContext(input.logLevel);
-                    SolverResult result = Solver.solve(combinedSpec, combinedState, combinedConstraint, (s, l, st) -> true, debug, new NullProgress(), new NullCancel());
+                    SolverResult result = Solver.solve(combinedSpec, combinedState, combinedConstraint, (s, l, st) -> true, debug, new NullCancel(), new NullProgress());
                     long dt = System.currentTimeMillis() - t0;
                     logger.info("Project analyzed in {} ms", dt);
 

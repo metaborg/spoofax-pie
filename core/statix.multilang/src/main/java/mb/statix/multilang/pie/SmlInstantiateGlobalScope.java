@@ -67,11 +67,11 @@ public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalSc
             ITermVar globalScopeVar = TermVar.of("<global-scope>", "s");
             Set<ITermVar> scopeArgs = Collections.singleton(globalScopeVar);
             IConstraint globalConstraint = new CExists(scopeArgs, new CNew(globalScopeVar, globalScopeVar));
-            IState.Immutable state = State.of(Spec.of()).withResource("<global-scope>");
+            IState.Immutable state = State.of().withResource("<global-scope>");
             IDebugContext debug = SolverUtils.createDebugContext(input.logLevel);
 
             try {
-                SolverResult result = SolverUtils.partialSolve(Spec.of(), state, globalConstraint, debug, new NullProgress(), new NullCancel());
+                SolverResult result = SolverUtils.partialSolve(Spec.of(), state, globalConstraint, debug, new NullCancel(), new NullProgress());
                 ITerm globalScope = result.state().unifier().findRecursive(result.existentials().get(globalScopeVar));
                 return Result.ofOk(ImmutableGlobalResult.builder()
                     .globalScope(globalScope)

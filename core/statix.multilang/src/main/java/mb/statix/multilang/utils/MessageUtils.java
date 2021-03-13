@@ -40,7 +40,7 @@ public class MessageUtils {
 
     public static Message formatMessage(final IMessage message, final IConstraint constraint,
                                         final IUniDisunifier unifier, boolean includeTraces) {
-        final TermFormatter formatter = Solver.shallowTermFormatter(unifier);
+        final TermFormatter formatter = Solver.shallowTermFormatter(unifier, Solver.TERM_FORMAT_DEPTH);
 
         int maxTraceCount = includeTraces ? MAX_TRACE : 0;
 
@@ -63,7 +63,7 @@ public class MessageUtils {
 
         // use empty origin if none was found
         if(originTerm == null) {
-            originTerm = TermBuild.B.EMPTY_TUPLE;
+            originTerm = TermBuild.B.newTuple();
         }
 
         // add constraint message
@@ -82,7 +82,7 @@ public class MessageUtils {
     }
 
     private static @Nullable Region getRegion(ITerm originTerm) {
-        @Nullable AStrategoAnnotations strategoAnnotations = originTerm.getAttachments().getInstance(AStrategoAnnotations.class);
+        @Nullable AStrategoAnnotations strategoAnnotations = originTerm.getAttachments().get(AStrategoAnnotations.class);
         if(strategoAnnotations == null) {
             return null;
         }
@@ -131,7 +131,7 @@ public class MessageUtils {
         return Optional.of(unifier.findTerm(term))
             .filter(t -> TermIndex.get(t).isPresent())
             .filter(t -> TermOrigin.get(t).isPresent()) // HACK Ignore terms without origin, such as empty lists
-            .map(t -> TermBuild.B.EMPTY_TUPLE.withAttachments(t.getAttachments()));
+            .map(t -> TermBuild.B.newTuple().withAttachments(t.getAttachments()));
         // @formatter:on
     }
 
@@ -140,12 +140,9 @@ public class MessageUtils {
     }
 
     public static @Nullable ResourceKey resourceKeyFromOrigin(ITerm origin) {
-        if(origin.getAttachments().containsKey(TermOrigin.class)) {
-            TermOrigin termOrigin = (TermOrigin)origin.getAttachments().get(TermOrigin.class);
-            ITermAttachment parent = termOrigin.getImploderAttachment();
-            return getResourceKeyFromParentAttachments(parent);
-        }
-        return null;
+        return TermOrigin.get(origin.getAttachments()).map(
+            termOrigin -> getResourceKeyFromParentAttachments(termOrigin.getImploderAttachment())
+        ).orElse(null);
     }
 
     private static @Nullable ResourceKey getResourceKeyFromParentAttachments(@Nullable ITermAttachment attachment) {

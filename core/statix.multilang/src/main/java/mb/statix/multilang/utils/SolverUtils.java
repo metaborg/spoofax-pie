@@ -18,9 +18,9 @@ import org.metaborg.util.task.IProgress;
 public class SolverUtils {
 
     public static SolverResult partialSolve(Spec spec, IState.Immutable state, IConstraint constraint, IDebugContext debug,
-                                            IProgress progress, ICancel cancel) throws InterruptedException {
+                                            ICancel cancel, IProgress progress) throws InterruptedException {
         final IsComplete isComplete = (s, l, st) -> !state.scopes().contains(s);
-        return Solver.solve(spec, state, constraint, isComplete, debug, progress, cancel);
+        return Solver.solve(spec, state, constraint, isComplete, debug, cancel, progress);
     }
 
     public static IDebugContext createDebugContext(@Nullable Level logLevel) {
