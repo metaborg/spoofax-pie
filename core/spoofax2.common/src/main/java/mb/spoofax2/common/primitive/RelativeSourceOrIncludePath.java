@@ -43,7 +43,7 @@ public class RelativeSourceOrIncludePath extends ASpoofaxPrimitive {
                 break;
             }
         }
-        final String relativePath = path.relativize(base);
+        final String relativePath = base.relativize(path);
         return termFactory.makeString(relativePath);
     }
 }
