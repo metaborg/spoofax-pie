@@ -1,4 +1,4 @@
-package mb.statix.task;
+package mb.statix.task.spoofax;
 
 import mb.constraint.common.ConstraintAnalyzer;
 import mb.constraint.common.ConstraintAnalyzerContext;

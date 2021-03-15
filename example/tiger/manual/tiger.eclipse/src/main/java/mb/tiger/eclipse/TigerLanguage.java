@@ -6,9 +6,11 @@ import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.eclipse.EclipseLanguage;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
+import mb.spoofax.eclipse.resource.EclipseClassLoaderUrlResolver;
 import mb.spoofax.eclipse.util.StatusUtil;
 import mb.tiger.spoofax.DaggerTigerResourcesComponent;
 import mb.tiger.spoofax.TigerResourcesComponent;
+import mb.tiger.spoofax.TigerResourcesModule;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -58,7 +60,9 @@ public class TigerLanguage implements EclipseLanguage {
 
     @Override public TigerResourcesComponent createResourcesComponent() {
         if(resourcesComponent == null) {
-            resourcesComponent = DaggerTigerResourcesComponent.create();
+            resourcesComponent = DaggerTigerResourcesComponent.builder()
+                .tigerResourcesModule(new TigerResourcesModule(new EclipseClassLoaderUrlResolver()))
+                .build();
         }
         return resourcesComponent;
     }

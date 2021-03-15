@@ -14,10 +14,11 @@ import mb.statix.eclipse.StatixLanguage;
 import mb.str.eclipse.StrategoLanguage;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.eclipse.ui.IStartup;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
-public class SpoofaxLwbPlugin extends AbstractUIPlugin {
+public class SpoofaxLwbPlugin extends AbstractUIPlugin implements IStartup {
     public static final String id = "spoofax.lwb.eclipse";
 
     private static @Nullable SpoofaxLwbPlugin plugin;
@@ -49,12 +50,13 @@ public class SpoofaxLwbPlugin extends AbstractUIPlugin {
     @Override public void start(@NonNull BundleContext context) throws Exception {
         super.start(context);
         plugin = this;
+        final String lwbGroup = "mb.spoofax.lwb";
         spoofax3Compiler = new Spoofax3Compiler(
             SpoofaxPlugin.getLoggerComponent(),
-            SpoofaxPlugin.getBaseResourceServiceComponent(),
+            SpoofaxPlugin.getResourceServiceComponentOfGroup(lwbGroup),
             SpoofaxPlugin.getPlatformComponent(),
 
-            PieBuilderImpl::new,
+            SpoofaxPlugin.getPieComponentOfGroup(lwbGroup).createChildModule(),
 
             CfgLanguage.getInstance().getComponent(),
             Sdf3Language.getInstance().getComponent(),
@@ -69,6 +71,10 @@ public class SpoofaxLwbPlugin extends AbstractUIPlugin {
         dynamicLoader = new DynamicLoader(spoofax3Compiler, () -> new RootPieModule(PieBuilderImpl::new));
     }
 
+    @Override public void earlyStartup() {
+        // Early startup forces this plugin to be started when Eclipse starts.
+    }
+
     @Override public void stop(@NonNull BundleContext context) throws Exception {
         super.stop(context);
         if(dynamicLoader != null) {
@@ -78,4 +84,5 @@ public class SpoofaxLwbPlugin extends AbstractUIPlugin {
         spoofax3Compiler = null;
         plugin = null;
     }
+
 }

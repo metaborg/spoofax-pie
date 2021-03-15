@@ -68,14 +68,15 @@ spoofax2BasedLanguageProject {
 
 val packageId = "mb.statix"
 val taskPackageId = "$packageId.task"
+val spoofaxPackageId = "$taskPackageId.spoofax"
 languageAdapterProject {
   compilerInput {
     withParser()
     withStyler()
     withConstraintAnalyzer().run {
       // Manual analyze multi implementation to add Spoofax2ProjectContext
-      baseAnalyzeMultiTaskDef(taskPackageId, "GeneratedStatixAnalyzeMulti")
-      extendAnalyzeMultiTaskDef(taskPackageId, "StatixAnalyzeMulti")
+      baseAnalyzeMultiTaskDef(spoofaxPackageId, "GeneratedStatixAnalyzeMulti")
+      extendAnalyzeMultiTaskDef(spoofaxPackageId, "StatixAnalyzeMulti")
     }
     withStrategoRuntime()
     project.configureCompilerInput()

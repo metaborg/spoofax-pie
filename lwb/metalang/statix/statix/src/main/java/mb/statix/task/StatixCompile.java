@@ -7,6 +7,7 @@ import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.statix.StatixScope;
+import mb.statix.task.spoofax.StatixAnalyzeMulti;
 import mb.statix.util.StatixUtil;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;

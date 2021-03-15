@@ -123,20 +123,28 @@ public class AstToObject {
         final CompileLanguageInputBuilder languageCompilerInputBuilder = new CompileLanguageInputBuilder();
         parts.getAllSubTermsInListAsParts("Sdf3Section").ifPresent(subParts -> {
             final CompileSdf3Input.Builder builder = languageCompilerInputBuilder.withSdf3();
+            subParts.forOneSubtermAsPath("Sdf3SourceDirectory", rootDirectory, builder::sourceDirectory);
+            subParts.forOneSubtermAsPath("Sdf3MainFile", rootDirectory, builder::mainFile);
             subParts.forOneSubtermAsString("Sdf3StrategoStrategyAffix", builder::strategoStrategyIdAffix);
             // TODO: more SDF3 properties
         });
         parts.getAllSubTermsInListAsParts("EsvSection").ifPresent(subParts -> {
             final CompileEsvInput.Builder builder = languageCompilerInputBuilder.withEsv();
-            // TODO: ESV properties
+            subParts.forOneSubtermAsPath("EsvSourceDirectory", rootDirectory, builder::esvRootDirectory);
+            subParts.forOneSubtermAsPath("EsvMainFile", rootDirectory, builder::esvMainFile);
+            // TODO: more ESV properties
         });
         parts.getAllSubTermsInListAsParts("StatixSection").ifPresent(subParts -> {
             final CompileStatixInput.Builder builder = languageCompilerInputBuilder.withStatix();
-            // TODO: Statix properties
+            subParts.forOneSubtermAsPath("StatixSourceDirectory", rootDirectory, builder::statixRootDirectory);
+            subParts.forOneSubtermAsPath("StatixMainFile", rootDirectory, builder::statixMainFile);
+            // TODO: more Statix properties
         });
         parts.getAllSubTermsInListAsParts("StrategoSection").ifPresent(subParts -> {
             final CompileStrategoInput.Builder builder = languageCompilerInputBuilder.withStratego();
-            // TODO: Stratego properties
+            subParts.forOneSubtermAsPath("StrategoSourceDirectory", rootDirectory, builder::strategoRootDirectory);
+            subParts.forOneSubtermAsPath("StrategoMainFile", rootDirectory, builder::strategoMainFile);
+            // TODO: more Stratego properties
         });
         final CompileLanguageInput languageCompilerInput = languageCompilerInputBuilder.build(properties, shared, languageShared);
         languageCompilerInput.syncTo(baseBuilder);
@@ -391,6 +399,14 @@ class Parts {
         getOneSubtermAsString(name).ifPresent(consumer);
     }
 
+    Optional<ResourcePath> getOneSubtermAsPath(String name, ResourcePath base) {
+        return getOneSubtermAsString(name).map(base::appendRelativePath).map(ResourcePath::getNormalized);
+    }
+
+    void forOneSubtermAsPath(String name, ResourcePath base, Consumer<ResourcePath> consumer) {
+        getOneSubtermAsPath(name, base).ifPresent(consumer);
+    }
+
     Optional<TypeInfo> getOneSubtermAsTypeInfo(String name) {
         return getOneSubtermAsString(name).map(TypeInfo::of);
     }
@@ -439,6 +455,14 @@ class Parts {
 
     void forAllSubtermsAsStrings(String name, Consumer<String> consumer) {
         getAllSubTermsAsStrings(name).forEach(consumer);
+    }
+
+    Stream<ResourcePath> getAllSubTermsAsPaths(String name, ResourcePath base) {
+        return getAllSubTermsAsStrings(name).map(base::appendRelativePath).map(ResourcePath::getNormalized);
+    }
+
+    void forAllSubtermsAsPaths(String name, ResourcePath base, Consumer<ResourcePath> consumer) {
+        getAllSubTermsAsPaths(name, base).forEach(consumer);
     }
 
     Stream<TypeInfo> getAllSubtermsAsTypeInfo(String name) {

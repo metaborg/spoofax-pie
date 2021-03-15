@@ -5,7 +5,9 @@ import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Messages;
 import mb.pie.api.ExecContext;
 import mb.pie.api.STask;
+import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
+import mb.pie.api.stamp.output.OutputStampers;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
@@ -14,8 +16,10 @@ import mb.resource.hierarchical.walk.ResourceWalker;
 import mb.str.StrategoScope;
 import mb.str.config.StrategoAnalyzeConfig;
 import mb.str.config.StrategoConfigurator;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.io.Serializable;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
@@ -101,7 +105,8 @@ public class StrategoCheckMulti implements TaskDef<StrategoCheckMulti.Input, Key
         try {
             root.walk(input.walker, input.matcher).forEach(file -> {
                 final ResourcePath filePath = file.getPath();
-                final Messages messages = context.require(parse.createMessagesSupplier(filePath));
+                // TODO: instead of requiring all suppliers for each file to parse, only require the supplier that corresponds to a certain file.
+                final Messages messages = context.require(parse.createMessagesSupplier(new ResourceStringSupplierWithOriginTasks(filePath, input.originTasks)));
                 messagesBuilder.addMessages(filePath, messages);
             });
         } catch(UncheckedIOException e) {
@@ -116,5 +121,45 @@ public class StrategoCheckMulti implements TaskDef<StrategoCheckMulti.Input, Key
         }
 
         return messagesBuilder.build();
+    }
+}
+
+class ResourceStringSupplierWithOriginTasks implements Supplier<String> {
+    private final ResourcePath resource;
+    private final ArrayList<STask<?>> originTasks;
+
+    ResourceStringSupplierWithOriginTasks(ResourcePath resource, ArrayList<STask<?>> originTasks) {
+        this.resource = resource;
+        this.originTasks = originTasks;
+    }
+
+    @Override public String get(ExecContext context) {
+        originTasks.forEach(t -> context.require(t, OutputStampers.inconsequential()));
+        try {
+            return context.require(resource).readString();
+        } catch(IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    @Override public boolean equals(@Nullable Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        final ResourceStringSupplierWithOriginTasks that = (ResourceStringSupplierWithOriginTasks)o;
+        if(!resource.equals(that.resource)) return false;
+        return originTasks.equals(that.originTasks);
+    }
+
+    @Override public int hashCode() {
+        int result = resource.hashCode();
+        result = 31 * result + originTasks.hashCode();
+        return result;
+    }
+
+    @Override public String toString() {
+        return "ResourceStringSupplierWithOriginTasks{" +
+            "resource=" + resource +
+            ", originTasks=" + originTasks +
+            '}';
     }
 }

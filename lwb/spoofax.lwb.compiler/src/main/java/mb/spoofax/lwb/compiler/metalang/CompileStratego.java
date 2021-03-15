@@ -191,7 +191,7 @@ public class CompileStratego implements TaskDef<CompileStratego.Args, Result<Key
             new StrategoCheckMulti.Input(rootDirectory.getPath(), StrategoUtil.createResourceWalker(), StrategoUtil.createResourceMatcher(), originTasks)
         ));
         if(messages.containsError()) {
-            return Result.ofErr(StrategoCompileException.checkFail(messages));
+            return Result.ofErr(StrategoCompileException.checkFail(messages, analyzeConfig));
         }
 
         // Compile Stratego sources to Java sources.
@@ -210,7 +210,7 @@ public class CompileStratego implements TaskDef<CompileStratego.Args, Result<Key
         );
         final Result<None, ?> compileResult = context.require(compileToJava, compileInput);
         if(compileResult.isErr()) {
-            return Result.ofErr(StrategoCompileException.compileFail(compileResult.getErr()));
+            return Result.ofErr(StrategoCompileException.compileFail(compileResult.getErr(), compileConfig));
         }
 
         return Result.ofOk(messages);
@@ -226,9 +226,9 @@ public class CompileStratego implements TaskDef<CompileStratego.Args, Result<Key
 
             R rootDirectoryFail(ResourcePath rootDirectory);
 
-            R checkFail(KeyedMessages messages);
+            R checkFail(KeyedMessages messages, StrategoAnalyzeConfig checkConfig);
 
-            R compileFail(Exception cause);
+            R compileFail(Exception cause, StrategoCompileConfig compileConfig);
         }
 
         public static StrategoCompileException mainFileFail(ResourceKey mainFile) {
@@ -243,12 +243,12 @@ public class CompileStratego implements TaskDef<CompileStratego.Args, Result<Key
             return StrategoCompileExceptions.rootDirectoryFail(rootDirectory);
         }
 
-        public static StrategoCompileException checkFail(KeyedMessages messages) {
-            return StrategoCompileExceptions.checkFail(messages);
+        public static StrategoCompileException checkFail(KeyedMessages messages, StrategoAnalyzeConfig checkConfig) {
+            return StrategoCompileExceptions.checkFail(messages, checkConfig);
         }
 
-        public static StrategoCompileException compileFail(Exception cause) {
-            return withCause(StrategoCompileExceptions.compileFail(cause), cause);
+        public static StrategoCompileException compileFail(Exception cause, StrategoCompileConfig compileConfig) {
+            return withCause(StrategoCompileExceptions.compileFail(cause, compileConfig), cause);
         }
 
         private static StrategoCompileException withCause(StrategoCompileException e, Exception cause) {
@@ -273,8 +273,8 @@ public class CompileStratego implements TaskDef<CompileStratego.Args, Result<Key
                 .mainFileFail((mainFile) -> "Stratego main file '" + mainFile + "' does not exist or is not a file")
                 .includeDirectoryFail((includeDirectory) -> "Stratego include directory '" + includeDirectory + "' does not exist or is not a directory")
                 .rootDirectoryFail((rootDirectory) -> "Stratego root directory '" + rootDirectory + "' does not exist or is not a directory")
-                .checkFail((messages) -> "Parsing or checking Stratego source files failed")
-                .compileFail((cause) -> "Stratego compiler failed unexpectedly")
+                .checkFail((messages, checkConfig) -> "Checking Stratego source files with config " + checkConfig + " failed")
+                .compileFail((cause, compileConfig) -> "Compiling Stratego with config " + compileConfig + " failed unexpectedly")
                 ;
         }
 

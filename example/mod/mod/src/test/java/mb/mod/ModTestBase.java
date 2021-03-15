@@ -7,6 +7,7 @@ import mb.resource.DefaultResourceService;
 import mb.resource.DummyResourceRegistry;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
+import mb.resource.classloader.NoopClassLoaderUrlResolver;
 import mb.resource.fs.FSResourceRegistry;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.url.URLResourceRegistry;
@@ -20,7 +21,7 @@ class ModTestBase {
 
     protected final LoggerFactory loggerFactory = new SLF4JLoggerFactory();
 
-    protected final ModClassLoaderResources classloaderResources = new ModClassLoaderResources();
+    protected final ModClassLoaderResources classloaderResources = new ModClassLoaderResources(new NoopClassLoaderUrlResolver());
     protected final HierarchicalResource definitionDir = classloaderResources.definitionDirectory;
     protected final ResourceService resourceService = new DefaultResourceService(new DummyResourceRegistry(qualifier), new FSResourceRegistry(), new URLResourceRegistry(), classloaderResources.resourceRegistry);
 

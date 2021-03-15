@@ -5,6 +5,7 @@ import mb.resource.ReadableResource;
 import mb.resource.classloader.ClassLoaderResource;
 import mb.resource.classloader.ClassLoaderResourceLocations;
 import mb.resource.classloader.ClassLoaderResourceRegistry;
+import mb.resource.classloader.ClassLoaderUrlResolver;
 import mb.resource.classloader.JarFileWithPath;
 import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.SegmentsPath;
@@ -12,7 +13,15 @@ import mb.resource.hierarchical.SegmentsPath;
 import java.io.IOException;
 
 public class TigerClassloaderResources {
-    public final ClassLoaderResourceRegistry resourceRegistry = new ClassLoaderResourceRegistry("mb-tiger-classloader-resource", TigerClassloaderResources.class.getClassLoader());
+    public final ClassLoaderResourceRegistry resourceRegistry;
+    public final ClassLoaderResource definitionDirectory;
+
+
+    public TigerClassloaderResources(ClassLoaderUrlResolver classLoaderUrlResolver) {
+        this.resourceRegistry = new ClassLoaderResourceRegistry("mb-tiger-classloader-resource", TigerClassloaderResources.class.getClassLoader(), classLoaderUrlResolver);
+        this.definitionDirectory = resourceRegistry.getResource("mb/tiger");
+    }
+
 
     public ClassLoaderResource getResource(String path) {
         return resourceRegistry.getResource(path);
@@ -53,8 +62,6 @@ public class TigerClassloaderResources {
         }
     }
 
-
-    public final ClassLoaderResource definitionDirectory = resourceRegistry.getResource("mb/tiger");
 
     public ClassLoaderResource getDefinitionResource(String path) {
         return definitionDirectory.appendAsRelativePath(path);

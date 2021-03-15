@@ -9,7 +9,6 @@ import mb.pie.api.Pie;
 import mb.pie.dagger.PieModule;
 import mb.pie.runtime.PieBuilderImpl;
 import mb.pie.task.archive.UnarchiveCommon;
-import mb.resource.ResourceService;
 import mb.resource.classloader.ClassLoaderResource;
 import mb.resource.classloader.ClassLoaderResourceLocations;
 import mb.resource.classloader.ClassLoaderResourceRegistry;

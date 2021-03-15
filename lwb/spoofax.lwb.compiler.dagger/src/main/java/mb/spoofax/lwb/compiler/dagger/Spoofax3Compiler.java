@@ -105,13 +105,6 @@ public class Spoofax3Compiler implements AutoCloseable {
 
         final RootPieModule pieModule = new RootPieModule(pieBuilderSupplier);
 
-        spoofaxCompilerComponent = DaggerSpoofaxCompilerComponent.builder()
-            .spoofaxCompilerModule(new SpoofaxCompilerModule(templateCompiler))
-            .loggerComponent(loggerComponent)
-            .resourceServiceComponent(resourceServiceComponent)
-            .build();
-        pieModule.addTaskDefsFrom(spoofaxCompilerComponent);
-
         this.cfgComponent = cfgComponent;
         pieModule.addTaskDefsFrom(cfgComponent);
         this.sdf3Component = sdf3Component;
@@ -122,14 +115,23 @@ public class Spoofax3Compiler implements AutoCloseable {
         pieModule.addTaskDefsFrom(esvComponent);
         this.statixComponent = statixComponent;
         pieModule.addTaskDefsFrom(statixComponent);
+
         this.libSpoofax2Component = libSpoofax2Component;
         pieModule.addTaskDefsFrom(libSpoofax2Component);
         this.libSpoofax2ResourcesComponent = libSpoofax2ResourcesComponent;
+
         this.libStatixComponent = libStatixComponent;
         pieModule.addTaskDefsFrom(libStatixComponent);
         this.libStatixResourcesComponent = libStatixResourcesComponent;
 
-        component = DaggerSpoofax3CompilerComponent.builder()
+        this.spoofaxCompilerComponent = DaggerSpoofaxCompilerComponent.builder()
+            .spoofaxCompilerModule(new SpoofaxCompilerModule(templateCompiler))
+            .loggerComponent(loggerComponent)
+            .resourceServiceComponent(resourceServiceComponent)
+            .build();
+        pieModule.addTaskDefsFrom(spoofaxCompilerComponent);
+
+        this.component = DaggerSpoofax3CompilerComponent.builder()
             .spoofax3CompilerModule(new Spoofax3CompilerModule(templateCompiler))
             .loggerComponent(loggerComponent)
             .resourceServiceComponent(resourceServiceComponent)
@@ -145,8 +147,72 @@ public class Spoofax3Compiler implements AutoCloseable {
             .build();
         pieModule.addTaskDefsFrom(component);
 
-        pieComponent = DaggerRootPieComponent.builder()
+        this.pieComponent = DaggerRootPieComponent.builder()
             .rootPieModule(pieModule)
+            .loggerComponent(loggerComponent)
+            .resourceServiceComponent(resourceServiceComponent)
+            .build();
+
+        setSdf3SpecConfigFunction(sdf3Component, cfgComponent);
+    }
+
+    public Spoofax3Compiler(
+        LoggerComponent loggerComponent,
+        ResourceServiceComponent resourceServiceComponent,
+        PlatformComponent platformComponent,
+        PieModule pieModule,
+
+        CfgComponent cfgComponent,
+        Sdf3Component sdf3Component,
+        StrategoComponent strategoComponent,
+        EsvComponent esvComponent,
+        StatixComponent statixComponent,
+        LibSpoofax2Component libSpoofax2Component,
+        LibSpoofax2ResourcesComponent libSpoofax2ResourcesComponent,
+        LibStatixComponent libStatixComponent,
+        LibStatixResourcesComponent libStatixResourcesComponent
+    ) {
+        this.loggerComponent = loggerComponent;
+        this.resourceServiceComponent = resourceServiceComponent;
+        this.platformComponent = platformComponent;
+
+        this.templateCompiler = new TemplateCompiler(StandardCharsets.UTF_8);
+
+        this.cfgComponent = cfgComponent;
+        this.sdf3Component = sdf3Component;
+        this.strategoComponent = strategoComponent;
+        this.esvComponent = esvComponent;
+        this.statixComponent = statixComponent;
+        this.libSpoofax2Component = libSpoofax2Component;
+        this.libSpoofax2ResourcesComponent = libSpoofax2ResourcesComponent;
+        this.libStatixComponent = libStatixComponent;
+        this.libStatixResourcesComponent = libStatixResourcesComponent;
+
+        this.spoofaxCompilerComponent = DaggerSpoofaxCompilerComponent.builder()
+            .spoofaxCompilerModule(new SpoofaxCompilerModule(templateCompiler))
+            .loggerComponent(loggerComponent)
+            .resourceServiceComponent(resourceServiceComponent)
+            .build();
+        pieModule.addTaskDefsFrom(spoofaxCompilerComponent);
+
+        this.component = DaggerSpoofax3CompilerComponent.builder()
+            .spoofax3CompilerModule(new Spoofax3CompilerModule(templateCompiler))
+            .loggerComponent(loggerComponent)
+            .resourceServiceComponent(resourceServiceComponent)
+            .cfgComponent(cfgComponent)
+            .sdf3Component(sdf3Component)
+            .strategoComponent(strategoComponent)
+            .esvComponent(esvComponent)
+            .statixComponent(statixComponent)
+            .libSpoofax2Component(libSpoofax2Component)
+            .libSpoofax2ResourcesComponent(libSpoofax2ResourcesComponent)
+            .libStatixComponent(libStatixComponent)
+            .libStatixResourcesComponent(libStatixResourcesComponent)
+            .build();
+        pieModule.addTaskDefsFrom(component);
+
+        this.pieComponent = DaggerPieComponent.builder()
+            .pieModule(pieModule)
             .loggerComponent(loggerComponent)
             .resourceServiceComponent(resourceServiceComponent)
             .build();

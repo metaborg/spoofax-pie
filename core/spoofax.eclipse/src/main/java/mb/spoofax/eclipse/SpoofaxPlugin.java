@@ -3,6 +3,7 @@ package mb.spoofax.eclipse;
 import mb.common.util.MultiMap;
 import mb.log.api.Logger;
 import mb.pie.dagger.DaggerRootPieComponent;
+import mb.pie.dagger.PieComponent;
 import mb.pie.dagger.RootPieComponent;
 import mb.pie.dagger.RootPieModule;
 import mb.pie.runtime.PieBuilderImpl;
@@ -62,11 +63,25 @@ public class SpoofaxPlugin extends AbstractUIPlugin {
         return baseResourceServiceComponent;
     }
 
+    public static ResourceServiceComponent getResourceServiceComponentOfGroup(String group) {
+        if(resourceServiceComponentsPerGroup == null) {
+            throw new RuntimeException("Cannot access resource service components of language groups; SpoofaxPlugin has not been started yet, or has been stopped");
+        }
+        return resourceServiceComponentsPerGroup.get(group);
+    }
+
     public static EclipsePlatformComponent getPlatformComponent() {
         if(platformComponent == null) {
             throw new RuntimeException("Cannot access EclipsePlatformComponent; SpoofaxPlugin has not been started yet, or has been stopped");
         }
         return platformComponent;
+    }
+
+    public static PieComponent getPieComponentOfGroup(String group) {
+        if(pieComponentsPerGroup == null) {
+            throw new RuntimeException("Cannot access PIE components of language groups; SpoofaxPlugin has not been started yet, or has been stopped");
+        }
+        return pieComponentsPerGroup.get(group);
     }
 
 

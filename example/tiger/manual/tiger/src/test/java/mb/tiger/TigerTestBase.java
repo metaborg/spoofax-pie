@@ -6,6 +6,7 @@ import mb.resource.DefaultResourceService;
 import mb.resource.DummyResourceRegistry;
 import mb.resource.ResourceService;
 import mb.resource.classloader.ClassLoaderResourceRegistry;
+import mb.resource.classloader.NoopClassLoaderUrlResolver;
 import mb.resource.fs.FSResourceRegistry;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.url.URLResourceRegistry;
@@ -19,7 +20,7 @@ class TigerTestBase {
 
     protected final LoggerFactory loggerFactory = NoopLoggerFactory.instance;
 
-    protected final TigerClassloaderResources classloaderResources = new TigerClassloaderResources();
+    protected final TigerClassloaderResources classloaderResources = new TigerClassloaderResources(new NoopClassLoaderUrlResolver());
     protected final ClassLoaderResourceRegistry classLoaderResourceRegistry = classloaderResources.resourceRegistry;
     protected final HierarchicalResource definitionDir = classloaderResources.definitionDirectory;
     protected final ResourceService resourceService = new DefaultResourceService(new DummyResourceRegistry(qualifier), new FSResourceRegistry(), new URLResourceRegistry(), classLoaderResourceRegistry);
