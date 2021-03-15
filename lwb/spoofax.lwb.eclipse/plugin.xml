@@ -10,7 +10,7 @@
     <runtime>
       <run class="mb.spoofax.lwb.eclipse.SpoofaxLwbNature"/>
     </runtime>
-    <!--    <builder id="mb.spoofax.lwb.eclipse.builder" />-->
+    <builder id="spoofax.lwb.eclipse.builder"/>
   </extension>
   <extension point="org.eclipse.ui.commands">
     <command id="spoofax.lwb.eclipse.nature.add" name="Add Spoofax LWB nature"/>
@@ -26,6 +26,23 @@
       class="mb.spoofax.lwb.eclipse.SpoofaxLwbNature$RemoveHandler"
     />
   </extension>
+
+  <!-- Builder -->
+  <extension
+    point="org.eclipse.core.resources.builders"
+    name="Spoofax LWB builder"
+    id="builder"
+  >
+    <builder
+      hasNature="true"
+      isConfigurable="false"
+      callOnEmptyDelta="false"
+      supportsConfigurations="false"
+    >
+      <run class="mb.spoofax.lwb.eclipse.SpoofaxLwbBuilder"/>
+    </builder>
+  </extension>
+
 
   <!-- Menus -->
   <extension point="org.eclipse.ui.menus">

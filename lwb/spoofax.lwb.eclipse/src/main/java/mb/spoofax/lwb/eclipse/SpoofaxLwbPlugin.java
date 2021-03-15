@@ -7,9 +7,9 @@ import mb.libstatix.eclipse.LibStatixLanguage;
 import mb.pie.dagger.RootPieModule;
 import mb.pie.runtime.PieBuilderImpl;
 import mb.sdf3.eclipse.Sdf3Language;
+import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.lwb.compiler.dagger.Spoofax3Compiler;
 import mb.spoofax.lwb.dynamicloading.DynamicLoader;
-import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.statix.eclipse.StatixLanguage;
 import mb.str.eclipse.StrategoLanguage;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -26,9 +26,23 @@ public class SpoofaxLwbPlugin extends AbstractUIPlugin {
 
     public static SpoofaxLwbPlugin getPlugin() {
         if(plugin == null) {
-            throw new RuntimeException("Cannot access SpoofaxLwbPlugin instance; it has not been started yet, or has been stopped");
+            throw new RuntimeException("Cannot access SpoofaxLwbPlugin instance; plugin has not been started yet, or has been stopped");
         }
         return plugin;
+    }
+
+    public static Spoofax3Compiler getSpoofax3Compiler() {
+        if(spoofax3Compiler == null) {
+            throw new RuntimeException("Cannot access Spoofax3Compiler instance; plugin has not been started yet, or has been stopped");
+        }
+        return spoofax3Compiler;
+    }
+
+    public static DynamicLoader getDynamicLoader() {
+        if(dynamicLoader == null) {
+            throw new RuntimeException("Cannot access DynamicLoader instance; plugin has not been started yet, or has been stopped");
+        }
+        return dynamicLoader;
     }
 
 
@@ -37,7 +51,7 @@ public class SpoofaxLwbPlugin extends AbstractUIPlugin {
         plugin = this;
         spoofax3Compiler = new Spoofax3Compiler(
             SpoofaxPlugin.getLoggerComponent(),
-            SpoofaxPlugin.getResourceServiceComponent(),
+            SpoofaxPlugin.getBaseResourceServiceComponent(),
             SpoofaxPlugin.getPlatformComponent(),
 
             PieBuilderImpl::new,

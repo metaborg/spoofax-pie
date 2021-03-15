@@ -55,7 +55,7 @@ public class SpoofaxPlugin extends AbstractUIPlugin {
         return loggerComponent;
     }
 
-    public static EclipseResourceServiceComponent getResourceServiceComponent() {
+    public static EclipseResourceServiceComponent getBaseResourceServiceComponent() {
         if(baseResourceServiceComponent == null) {
             throw new RuntimeException("Cannot access EclipseResourceServiceComponent; SpoofaxPlugin has not been started yet, or has been stopped");
         }

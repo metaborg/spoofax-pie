@@ -1,6 +1,7 @@
 package mb.spoofax.lwb.eclipse;
 
 import mb.spoofax.eclipse.util.AbstractHandlerUtil;
+import mb.spoofax.eclipse.util.BuilderUtil;
 import mb.spoofax.eclipse.util.NatureUtil;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -19,11 +20,11 @@ public class SpoofaxLwbNature implements IProjectNature {
 
 
     @Override public void configure() throws CoreException {
-        //BuilderUtil.append(languageComponent.getEclipseIdentifiers().getProjectBuilder(), getProject(), null);
+        BuilderUtil.append(SpoofaxLwbBuilder.id, getProject(), null);
     }
 
     @Override public void deconfigure() throws CoreException {
-        //BuilderUtil.removeFrom(languageComponent.getEclipseIdentifiers().getProjectBuilder(), getProject(), null);
+        BuilderUtil.removeFrom(SpoofaxLwbBuilder.id, getProject(), null);
     }
 
     @Override public @Nullable IProject getProject() {
