@@ -16,6 +16,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourceAttributes;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -38,8 +39,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.stream.Stream;
-
-import static org.eclipse.core.resources.IResourceStatus.RESOURCE_EXISTS;
 
 public class EclipseResource extends HierarchicalResourceDefaults<EclipseResource> implements HierarchicalResource, WrapsEclipseResource {
     final EclipseResourceRegistry registry;
@@ -413,7 +412,8 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
         try {
             getFile().create(new ByteArrayInputStream(new byte[0]), true, null);
         } catch(CoreException e) {
-            if(e.getStatus().getCode() == RESOURCE_EXISTS) {
+            final int code = e.getStatus().getCode();
+            if(code == IResourceStatus.PATH_OCCUPIED || code == IResourceStatus.RESOURCE_EXISTS || code == IResourceStatus.CASE_VARIANT_EXISTS) {
                 throw new FileAlreadyExistsException("The resource already exists: " + path);
             } else {
                 throw new IOException("Creating file '" + path + "' failed unexpectedly", e);
