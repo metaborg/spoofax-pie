@@ -114,7 +114,7 @@ public class EclipseResourcePath extends ResourcePathDefaults<EclipseResourcePat
     }
 
     public String relativize(EclipseResourcePath other) {
-        return path.makeRelativeTo(other.path).toPortableString();
+        return other.path.makeRelativeTo(path).toPortableString();
     }
 
 
