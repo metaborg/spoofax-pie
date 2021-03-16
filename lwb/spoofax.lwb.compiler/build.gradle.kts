@@ -19,6 +19,7 @@ dependencies {
   api("org.metaborg:pie.task.archive")
   api("org.metaborg:pie.task.java")
 
+  // TODO: should the meta-languages use implementation configuration? We don't expose their API AFAICS.
   api(project(":cfg"))
   api(project(":sdf3"))
   api(project(":stratego"))
@@ -28,11 +29,15 @@ dependencies {
   api(project(":libspoofax2"))
   api(project(":libstatix"))
 
-
   // Using api configuration to make these annotations and processors available to javac that we call during
   // compilation, and to users of this library as well.
   api("org.checkerframework:checker-qual-android")
   api("com.google.dagger:dagger-compiler")
+
+  // Convenient library to get the current classpath, which works under OSGi (Eclipse) as well. Used to pass the current
+  // classpath to the Java compiler.
+  // TODO: only using this to extract a classpath, can we just copy that functionality without a dependency?
+  implementation("io.github.classgraph:classgraph:4.8.102")
 
 
   compileOnly("org.immutables:value-annotations")

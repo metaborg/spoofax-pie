@@ -1,5 +1,6 @@
 package mb.spoofax.lwb.compiler;
 
+import io.github.classgraph.ClassGraph;
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
@@ -26,6 +27,7 @@ import org.immutables.value.Value;
 
 import javax.inject.Inject;
 import javax.tools.Diagnostic;
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -121,10 +123,13 @@ public class CompileLanguageToJavaClassPath implements TaskDef<CompileLanguageTo
         javaSourceFiles.addAll(input.adapterProjectInput().javaSourceFiles());
         javaSourcePath.addAll(input.adapterProjectInput().javaSourcePaths());
 
+        final ArrayList<File> classPath = new ArrayList<>(input.javaClassPath());
+        classPath.addAll(new ClassGraph().getClasspathFiles());
+
         final ArrayList<CompileJava.Message> javaCompilationMessages = context.require(compileJava, new CompileJava.Input(
             javaSourceFiles,
             new ArrayList<>(javaSourcePath),
-            new ArrayList<>(input.javaClassPath()),
+            classPath,
             new ArrayList<>(input.javaAnnotationProcessorPath()),
             input.javaRelease(),
             input.javaRelease(),

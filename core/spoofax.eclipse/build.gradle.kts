@@ -32,7 +32,7 @@ dependencies {
   bundleEmbedApi("org.metaborg:resource")
   bundleEmbedApi("org.metaborg:pie.api")
   bundleEmbedApi("org.metaborg:pie.runtime")
-  bundleEmbedApi("org.metaborg.devenv:org.spoofax.terms")
+  bundleEmbedApi("org.metaborg.devenv:org.spoofax.terms") // TODO: why is terms a dependency?
   bundleEmbedApi("com.google.dagger:dagger")
 
   compileOnly("org.checkerframework:checker-qual-android")
