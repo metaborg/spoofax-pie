@@ -29,6 +29,7 @@ import mb.resource.classloader.JarFileWithPath;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.cfg.metalang.CompileEsvInput;
+import mb.resource.hierarchical.match.path.string.PathStringMatcher;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -124,7 +125,7 @@ public class CompileEsv implements TaskDef<CompileEsv.Args, Result<KeyedMessages
                 final ResourcePath jarFilePath = jarFileWithPath.file.getPath();
                 final ResourcePath unarchiveDirectory = libSpoofax2UnarchiveDirectory.appendRelativePath(jarFilePath.getLeaf()); // JAR files always have leaves.
                 libSpoofax2UnarchiveDirSuppliers.add(unarchiveFromJar
-                    .createSupplier(new UnarchiveFromJar.Input(jarFilePath, unarchiveDirectory, false, false))
+                    .createSupplier(new UnarchiveFromJar.Input(jarFilePath, unarchiveDirectory, PathStringMatcher.ofExtension("esv"), false, false))
                     .map(new AppendPath(jarFileWithPath.path))
                 );
             }

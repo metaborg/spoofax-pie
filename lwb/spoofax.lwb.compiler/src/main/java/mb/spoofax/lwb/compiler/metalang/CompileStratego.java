@@ -22,6 +22,7 @@ import mb.resource.classloader.JarFileWithPath;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.cfg.metalang.CompileStrategoInput;
+import mb.resource.hierarchical.match.path.string.PathStringMatcher;
 import mb.str.config.StrategoAnalyzeConfig;
 import mb.str.config.StrategoCompileConfig;
 import mb.str.config.StrategoConfigurator;
@@ -136,7 +137,7 @@ public class CompileStratego implements TaskDef<CompileStratego.Args, Result<Key
             for(JarFileWithPath jarFileWithPath : locations.jarFiles) {
                 final ResourcePath jarFilePath = jarFileWithPath.file.getPath();
                 final ResourcePath unarchiveDirectory = unarchiveDirectoryBase.appendRelativePath(jarFilePath.getLeaf());
-                final Task<?> task = unarchiveFromJar.createTask(new UnarchiveFromJar.Input(jarFilePath, unarchiveDirectory, false, false));
+                final Task<?> task = unarchiveFromJar.createTask(new UnarchiveFromJar.Input(jarFilePath, unarchiveDirectory, PathStringMatcher.ofExtension("str"), false, false));
                 originTasks.add(task.toSupplier());
                 context.require(task);
                 libSpoofax2DefinitionDirs.add(context.getHierarchicalResource(unarchiveDirectory.appendAsRelativePath(jarFileWithPath.path)));
@@ -160,7 +161,7 @@ public class CompileStratego implements TaskDef<CompileStratego.Args, Result<Key
             for(JarFileWithPath jarFileWithPath : locations.jarFiles) {
                 final ResourcePath jarFilePath = jarFileWithPath.file.getPath();
                 final ResourcePath unarchiveDirectory = unarchiveDirectoryBase.appendRelativePath(jarFilePath.getLeaf());
-                final Task<?> task = unarchiveFromJar.createTask(new UnarchiveFromJar.Input(jarFilePath, unarchiveDirectory, false, false));
+                final Task<?> task = unarchiveFromJar.createTask(new UnarchiveFromJar.Input(jarFilePath, unarchiveDirectory, PathStringMatcher.ofExtension("str"), false, false));
                 originTasks.add(task.toSupplier());
                 context.require(task);
                 libStatixDefinitionDirs.add(context.getHierarchicalResource(unarchiveDirectory.appendAsRelativePath(jarFileWithPath.path)));
