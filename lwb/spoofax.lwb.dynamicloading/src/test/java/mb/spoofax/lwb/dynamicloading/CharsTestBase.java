@@ -12,7 +12,7 @@ import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandExecutionType;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.arg.ArgConverters;
-import mb.spoofx.lwb.compiler.cfg.CompileLanguageToJavaClassPathInput;
+import mb.cfg.CompileLanguageToJavaClassPathInput;
 
 import java.io.IOException;
 import java.nio.file.Path;

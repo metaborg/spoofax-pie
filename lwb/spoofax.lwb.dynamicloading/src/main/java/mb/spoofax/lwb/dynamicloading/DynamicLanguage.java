@@ -10,7 +10,7 @@ import mb.resource.dagger.ResourceRegistriesProvider;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.platform.PlatformComponent;
-import mb.spoofx.lwb.compiler.cfg.CompileLanguageToJavaClassPathInput;
+import mb.cfg.CompileLanguageToJavaClassPathInput;
 
 import java.io.IOException;
 import java.lang.reflect.Method;

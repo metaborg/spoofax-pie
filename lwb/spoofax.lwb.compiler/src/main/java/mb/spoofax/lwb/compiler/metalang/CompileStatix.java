@@ -15,7 +15,7 @@ import mb.resource.hierarchical.match.AllResourceMatcher;
 import mb.resource.hierarchical.match.FileResourceMatcher;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
-import mb.spoofx.lwb.compiler.cfg.metalang.CompileStatixInput;
+import mb.cfg.metalang.CompileStatixInput;
 import mb.statix.task.StatixCheckMulti;
 import mb.statix.task.StatixCompile;
 import mb.statix.util.StatixUtil;

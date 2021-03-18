@@ -9,3 +9,25 @@ languageEclipseProject {
     languageGroup("mb.spoofax.lwb")
   }
 }
+
+tasks {
+  "jar"(Jar::class) {
+    val exportPackages = LinkedHashSet<String>()
+    val existingExportPackages = manifest.attributes.get("Export-Package")
+    if(existingExportPackages != null) {
+      exportPackages.add(existingExportPackages.toString())
+    }
+    val privatePackages = LinkedHashSet<String>()
+    val existingPrivatePackages = manifest.attributes.get("Private-Package")
+    if(existingPrivatePackages != null) {
+      privatePackages.add(existingPrivatePackages.toString())
+    }
+    privatePackages.add("org.metaborg.sdf2parenthesize.*") // Embed `sdf2parenthesize` because `sdf3` depends on it.
+    manifest {
+      attributes(
+        Pair("Export-Package", exportPackages.joinToString(", ")),
+        Pair("Private-Package", privatePackages.joinToString(", "))
+      )
+    }
+  }
+}

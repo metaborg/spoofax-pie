@@ -21,7 +21,7 @@ import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
-import mb.spoofx.lwb.compiler.cfg.CompileLanguageToJavaClassPathInput;
+import mb.cfg.CompileLanguageToJavaClassPathInput;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;

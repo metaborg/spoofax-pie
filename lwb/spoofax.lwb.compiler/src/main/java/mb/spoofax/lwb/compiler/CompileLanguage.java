@@ -12,8 +12,8 @@ import mb.spoofax.lwb.compiler.metalang.CompileEsv;
 import mb.spoofax.lwb.compiler.metalang.CompileSdf3;
 import mb.spoofax.lwb.compiler.metalang.CompileStatix;
 import mb.spoofax.lwb.compiler.metalang.CompileStratego;
-import mb.spoofx.lwb.compiler.cfg.CompileLanguageInput;
-import mb.spoofx.lwb.compiler.cfg.CompileLanguageShared;
+import mb.cfg.CompileLanguageInput;
+import mb.cfg.CompileLanguageShared;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
@@ -21,7 +21,6 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
-import java.util.Optional;
 
 /**
  * Compiles a {@link CompileLanguageShared} by running the meta-language compilers.
@@ -152,7 +151,7 @@ public class CompileLanguage implements TaskDef<CompileLanguageInput, Result<Key
         public CompileExceptions.CaseOfMatchers.TotalMatcher_Sdf3CompileFail caseOf() {
             return CompileExceptions.caseOf(this);
         }
-        
+
 
         @Override public @NonNull String getMessage() {
             return cases()

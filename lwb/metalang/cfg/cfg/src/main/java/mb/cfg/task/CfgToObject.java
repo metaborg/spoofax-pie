@@ -9,7 +9,7 @@ import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofx.lwb.compiler.cfg.CompileLanguageToJavaClassPathInput;
+import mb.cfg.CompileLanguageToJavaClassPathInput;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 

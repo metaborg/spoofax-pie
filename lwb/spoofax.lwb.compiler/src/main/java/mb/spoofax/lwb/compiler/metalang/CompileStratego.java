@@ -21,7 +21,7 @@ import mb.resource.classloader.ClassLoaderResourceLocations;
 import mb.resource.classloader.JarFileWithPath;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofx.lwb.compiler.cfg.metalang.CompileStrategoInput;
+import mb.cfg.metalang.CompileStrategoInput;
 import mb.str.config.StrategoAnalyzeConfig;
 import mb.str.config.StrategoCompileConfig;
 import mb.str.config.StrategoConfigurator;

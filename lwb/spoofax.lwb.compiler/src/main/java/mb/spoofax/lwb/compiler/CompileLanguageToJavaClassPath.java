@@ -1,11 +1,12 @@
 package mb.spoofax.lwb.compiler;
 
-import io.github.classgraph.ClassGraph;
+import mb.cfg.CompileLanguageToJavaClassPathInput;
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
 import mb.common.region.Region;
 import mb.common.result.Result;
+import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.None;
 import mb.pie.api.Supplier;
@@ -21,7 +22,6 @@ import mb.resource.hierarchical.match.path.ExtensionPathMatcher;
 import mb.resource.hierarchical.walk.TrueResourceWalker;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
 import mb.spoofax.compiler.language.LanguageProjectCompiler;
-import mb.spoofx.lwb.compiler.cfg.CompileLanguageToJavaClassPathInput;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 
@@ -37,20 +37,66 @@ import java.util.stream.Stream;
 
 /**
  * Fully compiles a Spoofax language by running the {@link LanguageProjectCompiler language project compiler}, {@link
- * CompileLanguage language specification compiler}, {@link AdapterProjectCompiler adapter project
- * compiler}, and the {@link CompileJava Java compiler}. This fully compiles a Spoofax language from its sources to Java
- * class files and corresponding resources.
+ * CompileLanguage language specification compiler}, {@link AdapterProjectCompiler adapter project compiler}, and the
+ * {@link CompileJava Java compiler}. This fully compiles a Spoofax language from its sources to Java class files and
+ * corresponding resources.
  *
- * Takes a {@link CompileLanguageToJavaClassPathInput} as input, configuring the various compilers.
+ * Takes an {@link CompileLanguageToJavaClassPath.Args} as input, which contains the {@link
+ * CompileLanguageToJavaClassPathInput compile input} configuring the various compilers, and fields to add additional
+ * Java class and annotation processor paths.
  *
- * Produces a {@link Result} that is either an {@link Output} or a {@link CompileLanguageToJavaClassPathException} when compilation fails. The
- * {@link Output} contains all {@link KeyedMessages messages} produced during compilation, and the Java class path that
- * can be used to run the language, dynamically load it, or to package it into a JAR file.
+ * Produces a {@link Result} that is either an {@link Output} or a {@link CompileLanguageToJavaClassPathException} when
+ * compilation fails. The {@link Output} contains all {@link KeyedMessages messages} produced during compilation, and
+ * the Java class path that can be used to run the language, dynamically load it, or to package it into a JAR file.
  *
  * @see CompileLanguageWithCfgToJavaClassPath for a version of this builder that is configured via the CFG meta-DSL.
  */
 @Value.Enclosing
-public class CompileLanguageToJavaClassPath implements TaskDef<CompileLanguageToJavaClassPathInput, Result<CompileLanguageToJavaClassPath.Output, CompileLanguageToJavaClassPathException>> {
+public class CompileLanguageToJavaClassPath implements TaskDef<CompileLanguageToJavaClassPath.Args, Result<CompileLanguageToJavaClassPath.Output, CompileLanguageToJavaClassPathException>> {
+    public static class Args implements Serializable {
+        public final CompileLanguageToJavaClassPathInput input;
+        public final ListView<File> additionalJavaClassPath;
+        public final ListView<File> additionalJavaAnnotationProcessorPath;
+
+        public Args(CompileLanguageToJavaClassPathInput input, ListView<File> additionalJavaClassPath, ListView<File> additionalJavaAnnotationProcessorPath) {
+            this.input = input;
+            this.additionalJavaClassPath = additionalJavaClassPath;
+            this.additionalJavaAnnotationProcessorPath = additionalJavaAnnotationProcessorPath;
+        }
+
+        public Args(CompileLanguageToJavaClassPathInput input, ListView<File> additionalJavaClassPath) {
+            this(input, additionalJavaClassPath, ListView.of());
+        }
+
+        public Args(CompileLanguageToJavaClassPathInput input) {
+            this(input, ListView.of());
+        }
+
+        @Override public boolean equals(@Nullable Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            final Args args = (Args)o;
+            if(!input.equals(args.input)) return false;
+            if(!additionalJavaClassPath.equals(args.additionalJavaClassPath)) return false;
+            return additionalJavaAnnotationProcessorPath.equals(args.additionalJavaAnnotationProcessorPath);
+        }
+
+        @Override public int hashCode() {
+            int result = input.hashCode();
+            result = 31 * result + additionalJavaClassPath.hashCode();
+            result = 31 * result + additionalJavaAnnotationProcessorPath.hashCode();
+            return result;
+        }
+
+        @Override public String toString() {
+            return "CompileLanguageToJavaClassPath$Args{" +
+                "input=" + input +
+                ", additionalJavaClassPath=" + additionalJavaClassPath +
+                ", additionalJavaAnnotationProcessorPath=" + additionalJavaAnnotationProcessorPath +
+                '}';
+        }
+    }
+
     private final ResourceService resourceService;
     private final LanguageProjectCompiler languageProjectCompiler;
     private final CompileLanguage compileLanguage;
@@ -78,7 +124,8 @@ public class CompileLanguageToJavaClassPath implements TaskDef<CompileLanguageTo
     }
 
     @Override
-    public Result<Output, CompileLanguageToJavaClassPathException> exec(ExecContext context, CompileLanguageToJavaClassPathInput input) {
+    public Result<Output, CompileLanguageToJavaClassPathException> exec(ExecContext context, CompileLanguageToJavaClassPath.Args args) {
+        final CompileLanguageToJavaClassPathInput input = args.input;
         final ArrayList<ResourcePath> javaSourceFiles = new ArrayList<>();
         // Add all Java source files from the user-defined source path.
         for(ResourcePath javaSourcePath : input.javaSourcePath()) {
@@ -124,13 +171,15 @@ public class CompileLanguageToJavaClassPath implements TaskDef<CompileLanguageTo
         javaSourcePath.addAll(input.adapterProjectInput().javaSourcePaths());
 
         final ArrayList<File> classPath = new ArrayList<>(input.javaClassPath());
-        classPath.addAll(new ClassGraph().getClasspathFiles());
+        args.additionalJavaClassPath.addAllTo(classPath);
+        final ArrayList<File> annotationProcessorPath = new ArrayList<>(input.javaAnnotationProcessorPath());
+        args.additionalJavaAnnotationProcessorPath.addAllTo(annotationProcessorPath);
 
         final ArrayList<CompileJava.Message> javaCompilationMessages = context.require(compileJava, new CompileJava.Input(
             javaSourceFiles,
             new ArrayList<>(javaSourcePath),
             classPath,
-            new ArrayList<>(input.javaAnnotationProcessorPath()),
+            annotationProcessorPath,
             input.javaRelease(),
             input.javaRelease(),
             input.javaSourceFileOutputDirectory(),

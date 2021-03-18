@@ -4,11 +4,11 @@ package mb.spoofax.compiler.gradle.plugin
 
 import mb.coronium.plugin.BundleExtension
 import mb.pie.dagger.PieComponent
+import mb.resource.dagger.ResourceServiceComponent
 import mb.spoofax.compiler.dagger.*
 import mb.spoofax.compiler.gradle.*
 import mb.spoofax.compiler.platform.*
 import mb.spoofax.compiler.util.*
-import mb.resource.dagger.ResourceServiceComponent
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -86,7 +86,7 @@ open class EclipsePlugin : Plugin<Project> {
     configureProject(project, resourceServiceComponent, component, input)
     configureCompilerTask(project, resourceServiceComponent, component, pieComponent, input)
     configureBundle(project, resourceServiceComponent, component, input)
-    configureJarTask(project, input)
+    configureJarTask(project, component, input)
   }
 
   private fun configureProject(
@@ -141,36 +141,27 @@ open class EclipsePlugin : Plugin<Project> {
     configureBundleDependencies(project, component.eclipseProjectCompiler.getBundleDependencies(input))
   }
 
-  private fun configureJarTask(project: Project, input: EclipseProjectCompiler.Input) {
+  private fun configureJarTask(
+    project: Project,
+    component: SpoofaxCompilerComponent,
+    input: EclipseProjectCompiler.Input
+  ) {
     project.tasks.named<Jar>("jar").configure {
       inputs.property("input", input)
-      val exportPackage = listOf(
-        // Provided by 'javax.inject' bundle.
-        "!javax.inject.*",
-        // Provided by 'spoofax.eclipse' bundle.
-        "!mb.log.*",
-        "!mb.resource.*",
-        "!mb.pie.api.*",
-        "!mb.pie.runtime.*",
-        "!mb.common.*",
-        "!mb.spoofax.core.*",
-        "!dagger.*",
-        // Do not export testing packages.
-        "!junit.*",
-        "!org.junit.*",
-        // Do not export compile-time annotation packages.
-        "!org.checkerframework.*",
-        "!org.codehaus.mojo.animal_sniffer.*",
-        // Allow split package for 'mb.nabl2'.
-        "mb.nabl2.*;-split-package:=merge-first",
-        // Export packages from this project.
-        "${input.packageId()}.*",
-        // Export what is left, using a mandatory provider to prevent accidental imports via 'Import-Package'.
-        "*;provider=${input.project().coordinate().artifactId()};mandatory:=provider"
-      )
+      val exportPackages = component.eclipseProjectCompiler.getExportPackages(input).map { "$it.*" }.toCollection(LinkedHashSet())
+      val existingExportPackages = manifest.attributes.get("Export-Package")
+      if(existingExportPackages != null) {
+        exportPackages.add(existingExportPackages.toString())
+      }
+      val privatePackages = component.eclipseProjectCompiler.getPrivatePackages(input).map { "$it.*" }.toCollection(LinkedHashSet())
+      val existingPrivatePackages = manifest.attributes.get("Private-Package")
+      if(existingPrivatePackages != null) {
+        privatePackages.add(existingPrivatePackages.toString())
+      }
       manifest {
         attributes(
-          Pair("Export-Package", exportPackage.joinToString(", "))
+          Pair("Export-Package", exportPackages.joinToString(", ")),
+          Pair("Private-Package", privatePackages.joinToString(", "))
         )
       }
     }

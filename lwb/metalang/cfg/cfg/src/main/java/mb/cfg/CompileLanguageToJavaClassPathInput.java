@@ -1,4 +1,4 @@
-package mb.spoofx.lwb.compiler.cfg;
+package mb.cfg;
 
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;

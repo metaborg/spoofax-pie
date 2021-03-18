@@ -18,7 +18,7 @@ import mb.resource.hierarchical.walk.TrueResourceWalker;
 import mb.spoofax.core.platform.PlatformComponent;
 import mb.spoofax.lwb.compiler.CompileLanguageToJavaClassPath;
 import mb.spoofax.lwb.compiler.CompileLanguageToJavaClassPathException;
-import mb.spoofx.lwb.compiler.cfg.CompileLanguageToJavaClassPathInput;
+import mb.cfg.CompileLanguageToJavaClassPathInput;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Provider;
@@ -63,7 +63,8 @@ public class DynamicLoad implements TaskDef<ResourcePath, OutTransient<DynamicLa
     public OutTransient<DynamicLanguage> exec(ExecContext context, ResourcePath rootDirectory) throws Exception {
         final Result<CfgToObject.Output, CfgRootDirectoryToObjectException> cfgResult = context.require(cfgRootDirectoryToObject, rootDirectory);
         final CompileLanguageToJavaClassPathInput compileInput = cfgResult.unwrap().compileLanguageToJavaClassPathInput; // TODO: properly handle error.
-        final Result<CompileLanguageToJavaClassPath.Output, CompileLanguageToJavaClassPathException> result = context.require(compileLanguageToJavaClassPath, compileInput);
+        final Result<CompileLanguageToJavaClassPath.Output, CompileLanguageToJavaClassPathException> result =
+            context.require(compileLanguageToJavaClassPath, new CompileLanguageToJavaClassPath.Args(compileInput)); // TODO: pass in additional class/annotation processor paths?
         final CompileLanguageToJavaClassPath.Output output = result.unwrap(); // TODO: properly handle error
         final ArrayList<URL> classPath = new ArrayList<>();
         for(ResourcePath path : output.classPath()) {

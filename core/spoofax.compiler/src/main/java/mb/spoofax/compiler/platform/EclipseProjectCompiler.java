@@ -21,6 +21,7 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -135,12 +136,27 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
         final ArrayList<GradleConfiguredBundleDependency> bundleDependencies = new ArrayList<>(input.additionalBundleDependencies());
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleTargetPlatformApi("javax.inject", null));
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.spoofaxEclipseDep()));
+        bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.toolingEclipseBundleDep()));
         if(input.adapterProjectCompilerInput().multilangAnalyzer().isPresent()) {
             bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.multilangEclipseDep()));
         }
         input.languageProjectDependency().ifSome((d) -> bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(d)));
         bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(input.adapterProjectDependency()));
         return bundleDependencies;
+    }
+
+    public LinkedHashSet<String> getExportPackages(Input input) {
+        final LinkedHashSet<String> packages = new LinkedHashSet<>();
+        packages.add(input.languageProjectCompilerInput().languageProject().packageId());
+        packages.add(input.adapterProjectCompilerInput().adapterProject().packageId());
+        packages.add(input.packageId());
+        return packages;
+    }
+
+    public LinkedHashSet<String> getPrivatePackages(Input input) {
+        final LinkedHashSet<String> packages = new LinkedHashSet<>();
+        input.languageProjectCompilerInput().strategoRuntime().ifPresent(i -> packages.addAll(i.strategyPackageIds()));
+        return packages;
     }
 
 

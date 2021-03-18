@@ -14,3 +14,27 @@ languageEclipseProject {
     languageGroup("mb.spoofax.lwb")
   }
 }
+
+tasks {
+  "jar"(Jar::class) {
+    val exportPackages = LinkedHashSet<String>()
+    // Allow split package because `statix.solver` also includes the `mb.statix` package. Add before existing exports so
+    // that this takes precedence
+    exportPackages.add("mb.statix.*;-split-package:=merge-first")
+    val existingExportPackages = manifest.attributes.get("Export-Package")
+    if(existingExportPackages != null) {
+      exportPackages.add(existingExportPackages.toString())
+    }
+    val privatePackages = LinkedHashSet<String>()
+    val existingPrivatePackages = manifest.attributes.get("Private-Package")
+    if(existingPrivatePackages != null) {
+      privatePackages.add(existingPrivatePackages.toString())
+    }
+    manifest {
+      attributes(
+        Pair("Export-Package", exportPackages.joinToString(", ")),
+        Pair("Private-Package", privatePackages.joinToString(", "))
+      )
+    }
+  }
+}

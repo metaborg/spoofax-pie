@@ -19,9 +19,6 @@ fun compositeBuild(name: String) = "$group:$name:$version"
 dependencies {
   api("org.metaborg.devenv:sdf2table")
   api("org.metaborg.devenv:sdf2parenthesize")
-  api("org.metaborg.devenv:statix.solver")
-  api("org.metaborg:statix.common")
-  api("org.metaborg:statix.multilang")
 
   testImplementation(compositeBuild("spoofax.test"))
   testCompileOnly("org.checkerframework:checker-qual-android")

@@ -9,7 +9,7 @@ included build, as Gradle plugins are only available through included builds.
 ```
 .
 ├── metalang                     # Meta-languages
-│   ├── cfg                        # Language/compiler configuration meta-DSL
+│   ├── cfg                        # Compiler configuration meta-DSL
 │   ├── esv                        # Wrapper around Spoofax 2's ESV
 │   ├── sdf3                       # Wrapper around Spoofax 2's SDF3
 │   ├── statix                     # Wrapper around Spoofax 2's Statix
@@ -18,8 +18,6 @@ included build, as Gradle plugins are only available through included builds.
 │   ├── libspoofax2                # Wrapper around Spoofax 2's meta.lib.spoofax
 │   ├── libstatix                  # Wrapper around Spoofax 2's statix.runtime
 ├── spoofax.lwb.compiler         # Incremental compilation from language specification to Java library
-├── spoofax.lwb.compiler.cfg     # Compiler configuration. Separate project so that the cfg meta-DSL
-│                                  can provide this configuration, and the compiler can consume it
 ├── spoofax.lwb.compiler.dagger  # Compiler Dagger integration. Separate project to resolve ordering
 │                                  problems between annotation processors.
 ├── spoofax.lwb.compiler.gradle  # Compiler Gradle plugin

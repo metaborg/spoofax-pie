@@ -13,7 +13,6 @@ dependencies {
   api(compositeBuild("common"))
   api(compositeBuild("spoofax.core"))
   api(compositeBuild("spoofax.compiler"))
-  api(project(":spoofax.lwb.compiler.cfg"))
   api("org.metaborg:resource")
   api("org.metaborg:pie.api")
   api("org.metaborg:pie.task.archive")
@@ -33,11 +32,6 @@ dependencies {
   // compilation, and to users of this library as well.
   api("org.checkerframework:checker-qual-android")
   api("com.google.dagger:dagger-compiler")
-
-  // Convenient library to get the current classpath, which works under OSGi (Eclipse) as well. Used to pass the current
-  // classpath to the Java compiler.
-  // TODO: only using this to extract a classpath, can we just copy that functionality without a dependency?
-  implementation("io.github.classgraph:classgraph:4.8.102")
 
 
   compileOnly("org.immutables:value-annotations")

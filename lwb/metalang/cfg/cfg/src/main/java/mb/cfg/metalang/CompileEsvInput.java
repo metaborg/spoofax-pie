@@ -1,8 +1,8 @@
-package mb.spoofx.lwb.compiler.cfg.metalang;
+package mb.cfg.metalang;
 
+import mb.cfg.CompileLanguageShared;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.language.StylerLanguageCompiler;
-import mb.spoofx.lwb.compiler.cfg.CompileLanguageShared;
+import mb.spoofax.compiler.language.StylerLanguageCompiler;;
 import org.immutables.value.Value;
 
 import java.io.Serializable;

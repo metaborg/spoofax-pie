@@ -53,6 +53,6 @@ public class DynamicLoaderSession {
     }
 
     protected TaskKey createTaskKey(ResourcePath rootDirectory) {
-        return new TaskKey(dynamicLoad.getId(), rootDirectory);
+        return new TaskKey(dynamicLoad.getId(), dynamicLoad.key(rootDirectory));
     }
 }

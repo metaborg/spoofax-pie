@@ -1,6 +1,5 @@
 package mb.spoofax.lwb.compiler.metalang;
 
-import mb.cfg.task.CfgToObjectExceptions;
 import mb.common.message.HasOptionalMessages;
 import mb.common.message.KeyedMessages;
 import mb.common.result.Result;
@@ -29,8 +28,7 @@ import mb.resource.classloader.ClassLoaderResourceLocations;
 import mb.resource.classloader.JarFileWithPath;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.lwb.compiler.CompileLanguageToJavaClassPathExceptions;
-import mb.spoofx.lwb.compiler.cfg.metalang.CompileEsvInput;
+import mb.cfg.metalang.CompileEsvInput;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 import org.spoofax.interpreter.terms.IStrategoTerm;

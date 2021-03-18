@@ -14,3 +14,29 @@ languageEclipseProject {
     languageGroup("mb.spoofax.lwb")
   }
 }
+
+tasks {
+  "jar"(Jar::class) {
+    val exportPackages = LinkedHashSet<String>()
+    val existingExportPackages = manifest.attributes.get("Export-Package")
+    if(existingExportPackages != null) {
+      exportPackages.add(existingExportPackages.toString())
+    }
+    val privatePackages = LinkedHashSet<String>()
+    val existingPrivatePackages = manifest.attributes.get("Private-Package")
+    if(existingPrivatePackages != null) {
+      privatePackages.add(existingPrivatePackages.toString())
+    }
+    // Export `stratego.build` because `stratego` depends on it. Allow split package because dagger generates classes in
+    // the same package
+    exportPackages.add("mb.stratego.build.*;-split-package:=merge-first")
+    // Embed `stratego.compiler.pack` because `stratego` depends on it
+    privatePackages.add("mb.stratego.compiler.pack.*")
+    manifest {
+      attributes(
+        Pair("Export-Package", exportPackages.joinToString(", ")),
+        Pair("Private-Package", privatePackages.joinToString(", "))
+      )
+    }
+  }
+}

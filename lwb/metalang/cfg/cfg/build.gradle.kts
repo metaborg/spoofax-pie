@@ -7,14 +7,20 @@ plugins {
   id("org.metaborg.spoofax.compiler.gradle.adapter")
 }
 
+fun compositeBuild(name: String) = "$group:$name:$version"
+
 dependencies {
-  api(project(":spoofax.lwb.compiler.cfg"))
+  api(compositeBuild("spoofax.compiler"))
+  api(compositeBuild("spoofax.compiler.dagger"))
 
   compileOnly("org.derive4j:derive4j-annotation")
 
   // Required because @Nullable has runtime retention (which includes classfile retention), and the Java compiler requires access to it.
   compileOnly("com.google.code.findbugs:jsr305")
 
+  compileOnly("org.checkerframework:checker-qual-android")
+  compileOnly("org.immutables:value-annotations")
+  annotationProcessor("org.immutables:value")
   annotationProcessor("org.derive4j:derive4j")
 }
 

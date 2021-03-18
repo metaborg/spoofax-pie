@@ -1,11 +1,11 @@
-package mb.spoofx.lwb.compiler.cfg;
+package mb.cfg;
 
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.LanguageProjectCompilerInputBuilder;
-import mb.spoofx.lwb.compiler.cfg.metalang.CompileEsvInput;
-import mb.spoofx.lwb.compiler.cfg.metalang.CompileSdf3Input;
-import mb.spoofx.lwb.compiler.cfg.metalang.CompileStatixInput;
-import mb.spoofx.lwb.compiler.cfg.metalang.CompileStrategoInput;
+import mb.cfg.metalang.CompileEsvInput;
+import mb.cfg.metalang.CompileSdf3Input;
+import mb.cfg.metalang.CompileStatixInput;
+import mb.cfg.metalang.CompileStrategoInput;
 import org.immutables.value.Value;
 
 import java.io.Serializable;

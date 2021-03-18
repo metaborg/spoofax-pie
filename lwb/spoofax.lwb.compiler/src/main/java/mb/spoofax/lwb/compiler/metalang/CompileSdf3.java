@@ -36,7 +36,7 @@ import mb.sdf3.task.spoofax.Sdf3CheckMulti;
 import mb.sdf3.task.util.Sdf3Util;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
-import mb.spoofx.lwb.compiler.cfg.metalang.CompileSdf3Input;
+import mb.cfg.metalang.CompileSdf3Input;
 import mb.str.task.StrategoPrettyPrint;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;

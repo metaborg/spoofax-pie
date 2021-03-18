@@ -23,8 +23,8 @@ import mb.spoofax.compiler.language.*
 import mb.spoofax.compiler.util.*
 import mb.spoofax.lwb.compiler.dagger.Spoofax3Compiler
 import mb.spoofax.lwb.compiler.CompileLanguage
-import mb.spoofx.lwb.compiler.cfg.CompileLanguageInput
-import mb.spoofx.lwb.compiler.cfg.CompileLanguageToJavaClassPathInput
+import mb.cfg.CompileLanguageInput
+import mb.cfg.CompileLanguageToJavaClassPathInput
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
