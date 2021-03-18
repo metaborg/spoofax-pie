@@ -2,6 +2,7 @@
 [![Jenkins](https://img.shields.io/jenkins/build/https/buildfarm.metaborg.org/job/metaborg/job/spoofax-pie/job/master)](https://buildfarm.metaborg.org/job/metaborg/job/spoofax-pie/job/master/lastBuild)
 [![Jenkins Tests](https://img.shields.io/jenkins/tests/https/buildfarm.metaborg.org/job/metaborg/job/spoofax-pie/job/master)](https://buildfarm.metaborg.org/job/metaborg/job/spoofax-pie/job/master/lastBuild/testReport/)
 [![Spoofax 3 core](https://img.shields.io/maven-metadata/v?label=spoofax.core&metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fspoofax.core%2Fmaven-metadata.xml)](https://mvnrepository.com/artifact/org.metaborg/spoofax.core?repo=metaborg-releases)
+[![Documentation](https://img.shields.io/badge/docs-latest-brightgreen)](https://metaborg.github.io/spoofax-pie/)
 
 # Spoofax 3
 
