@@ -1,5 +1,6 @@
 package mb.spoofax.lwb.dynamicloading;
 
+import mb.cfg.CompileLanguageToJavaClassPathInput;
 import mb.cfg.task.CfgRootDirectoryToObject;
 import mb.cfg.task.CfgRootDirectoryToObjectException;
 import mb.cfg.task.CfgToObject;
@@ -18,40 +19,48 @@ import mb.resource.hierarchical.walk.TrueResourceWalker;
 import mb.spoofax.core.platform.PlatformComponent;
 import mb.spoofax.lwb.compiler.CompileLanguageToJavaClassPath;
 import mb.spoofax.lwb.compiler.CompileLanguageToJavaClassPathException;
-import mb.cfg.CompileLanguageToJavaClassPathInput;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import javax.inject.Inject;
 import javax.inject.Provider;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 
-public class DynamicLoad implements TaskDef<ResourcePath, OutTransient<DynamicLanguage>> {
+@DynamicLoadingScope
+public class DynamicLoad implements TaskDef<ResourcePath, OutTransient<DynamicLanguage>>, AutoCloseable {
+    private final HashMap<ResourcePath, DynamicLanguage> dynamicLanguages = new HashMap<>();
+
     private final LoggerComponent loggerComponent;
     private final ResourceServiceComponent resourceServiceComponent;
     private final PlatformComponent platformComponent;
     private final CfgRootDirectoryToObject cfgRootDirectoryToObject;
     private final CompileLanguageToJavaClassPath compileLanguageToJavaClassPath;
-    private final DynamicLoader dynamicLoader;
-    private final Provider<RootPieModule> basePieModuleProvider;
+    private final Provider<RootPieModule> rootPieModuleProvider;
 
-    public DynamicLoad(
+    @Inject public DynamicLoad(
         LoggerComponent loggerComponent,
         ResourceServiceComponent resourceServiceComponent,
         PlatformComponent platformComponent,
         CfgRootDirectoryToObject cfgRootDirectoryToObject,
         CompileLanguageToJavaClassPath compileLanguageToJavaClassPath,
-        DynamicLoader dynamicLoader,
-        Provider<RootPieModule> basePieModuleProvider
+        Provider<RootPieModule> rootPieModuleProvider
     ) {
         this.loggerComponent = loggerComponent;
         this.resourceServiceComponent = resourceServiceComponent;
         this.platformComponent = platformComponent;
         this.cfgRootDirectoryToObject = cfgRootDirectoryToObject;
         this.compileLanguageToJavaClassPath = compileLanguageToJavaClassPath;
-        this.dynamicLoader = dynamicLoader;
-        this.basePieModuleProvider = basePieModuleProvider;
+        this.rootPieModuleProvider = rootPieModuleProvider;
+    }
+
+    @Override public void close() throws IOException {
+        for(DynamicLanguage dynamicLanguage : dynamicLanguages.values()) {
+            dynamicLanguage.close();
+        }
+        dynamicLanguages.clear();
     }
 
     @Override
@@ -83,9 +92,24 @@ public class DynamicLoad implements TaskDef<ResourcePath, OutTransient<DynamicLa
             loggerComponent,
             resourceServiceComponent,
             platformComponent,
-            basePieModuleProvider.get()
+            rootPieModuleProvider.get()
         );
-        dynamicLoader.register(rootDirectory, dynamicLanguage);
+        register(rootDirectory, dynamicLanguage);
         return new OutTransientImpl<>(dynamicLanguage, true);
+    }
+
+
+    void register(ResourcePath rootDirectory, DynamicLanguage dynamicLanguage) throws IOException {
+        final @Nullable DynamicLanguage previousDynamicLanguage = dynamicLanguages.put(rootDirectory, dynamicLanguage);
+        if(previousDynamicLanguage != null) {
+            previousDynamicLanguage.close();
+        }
+    }
+
+    void unregister(ResourcePath rootDirectory) throws IOException {
+        final @Nullable DynamicLanguage dynamicLanguage = dynamicLanguages.remove(rootDirectory);
+        if(dynamicLanguage != null) {
+            dynamicLanguage.close();
+        }
     }
 }

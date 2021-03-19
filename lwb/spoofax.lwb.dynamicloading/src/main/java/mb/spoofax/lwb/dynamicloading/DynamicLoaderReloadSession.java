@@ -11,8 +11,8 @@ import mb.resource.hierarchical.ResourcePath;
 public class DynamicLoaderReloadSession extends DynamicLoaderSession {
     private final TopDownSession session;
 
-    public DynamicLoaderReloadSession(TopDownSession session, DynamicLoader dynamicLoader, DynamicLoad dynamicLoad) {
-        super(session, dynamicLoader, dynamicLoad);
+    public DynamicLoaderReloadSession(TopDownSession session, DynamicLoad dynamicLoad) {
+        super(session, dynamicLoad);
         this.session = session;
     }
 

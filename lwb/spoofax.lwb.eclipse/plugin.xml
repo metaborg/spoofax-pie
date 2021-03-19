@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-  <!-- Startup -->
-  <extension
-    point="org.eclipse.ui.startup"
-  >
-    <startup class="mb.spoofax.lwb.eclipse.SpoofaxLwbPlugin"/>
+  <!-- Lifecycle participant -->
+  <extension point="mb.spoofax.eclipse.lifecycle">
+    <participant group="mb.spoofax.lwb" class="mb.spoofax.lwb.eclipse.SpoofaxLwbLifecycleParticipant$Factory"/>
   </extension>
+
 
   <!-- Nature and commands -->
   <extension

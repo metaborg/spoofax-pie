@@ -1,12 +1,9 @@
 package mb.spoofax.lwb.dynamicloading;
 
-import mb.common.result.Result;
 import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
-import mb.pie.api.Supplier;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.lwb.compiler.CompileLanguageToJavaClassPath;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -20,12 +17,12 @@ import java.util.Set;
 public class DynamicLoaderMixedSession extends DynamicLoaderSession implements AutoCloseable {
     private final MixedSession session;
 
-    public DynamicLoaderMixedSession(MixedSession session, DynamicLoader dynamicLoader, DynamicLoad dynamicLoad) {
-        super(session, dynamicLoader, dynamicLoad);
+    public DynamicLoaderMixedSession(MixedSession session, DynamicLoad dynamicLoad) {
+        super(session, dynamicLoad);
         this.session = session;
     }
 
-    @Override public void close() throws Exception {
+    @Override public void close() {
         session.close();
     }
 
@@ -48,7 +45,7 @@ public class DynamicLoaderMixedSession extends DynamicLoaderSession implements A
      * @return A {@link DynamicLoaderReloadSession reload session} which may only be used to (re)load languages.
      */
     public DynamicLoaderReloadSession updateAffectedBy(Set<? extends ResourceKey> changedResources) throws ExecException, InterruptedException {
-        return new DynamicLoaderReloadSession(session.updateAffectedBy(changedResources), dynamicLoader, dynamicLoad);
+        return new DynamicLoaderReloadSession(session.updateAffectedBy(changedResources), dynamicLoad);
     }
 
     /**

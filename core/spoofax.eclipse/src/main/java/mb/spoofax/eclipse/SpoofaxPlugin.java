@@ -6,11 +6,11 @@ import mb.pie.dagger.DaggerRootPieComponent;
 import mb.pie.dagger.PieComponent;
 import mb.pie.dagger.RootPieComponent;
 import mb.pie.dagger.RootPieModule;
+import mb.pie.dagger.TaskDefsProvider;
 import mb.pie.runtime.PieBuilderImpl;
 import mb.resource.dagger.DaggerResourceServiceComponent;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.resource.dagger.ResourceServiceModule;
-import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.eclipse.log.DaggerEclipseLoggerComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -22,23 +22,24 @@ import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.ui.IStartup;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
-public class SpoofaxPlugin extends AbstractUIPlugin {
+public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
     public static final String id = "spoofax.eclipse";
 
     private static @Nullable SpoofaxPlugin plugin;
     private static @Nullable EclipseLoggerComponent loggerComponent;
     private static @Nullable Logger logger;
     private static @Nullable EclipseResourceServiceComponent baseResourceServiceComponent;
-    private static @Nullable MultiMap<String, EclipseLanguage> languagesPerGroup;
+    private static @Nullable MultiMap<String, EclipseLifecycleParticipant> languagesPerGroup;
     private static @Nullable HashMap<String, ResourceServiceComponent> resourceServiceComponentsPerGroup;
     private static @Nullable EclipsePlatformComponent platformComponent;
-    private static @Nullable MultiMap<String, LanguageComponent> languageComponentsPerGroup;
+    private static @Nullable MultiMap<String, TaskDefsProvider> taskDefsProvidersPerGroup;
     private static @Nullable HashMap<String, RootPieComponent> pieComponentsPerGroup;
 
 
@@ -99,7 +100,7 @@ public class SpoofaxPlugin extends AbstractUIPlugin {
             .build();
         SpoofaxPlugin.baseResourceServiceComponent = baseResourceServiceComponent;
 
-        final MultiMap<String, EclipseLanguage> languagesPerGroup = gatherLanguageGroups(logger);
+        final MultiMap<String, EclipseLifecycleParticipant> languagesPerGroup = gatherLanguageGroups(logger);
         SpoofaxPlugin.languagesPerGroup = languagesPerGroup;
 
         // Create resource service components for each language group.
@@ -107,8 +108,8 @@ public class SpoofaxPlugin extends AbstractUIPlugin {
         SpoofaxPlugin.resourceServiceComponentsPerGroup = resourceServiceComponentsPerGroup;
         languagesPerGroup.forEach((group, languages) -> {
             final ResourceServiceModule resourceServiceModule = baseResourceServiceComponent.createChildModule();
-            for(EclipseLanguage language : languages) {
-                resourceServiceModule.addRegistriesFrom(language.createResourcesComponent());
+            for(EclipseLifecycleParticipant language : languages) {
+                resourceServiceModule.addRegistriesFrom(language.getResourceRegistriesProvider());
             }
             final ResourceServiceComponent resourceServiceComponent = DaggerResourceServiceComponent.builder()
                 .loggerComponent(loggerComponent)
@@ -125,30 +126,30 @@ public class SpoofaxPlugin extends AbstractUIPlugin {
         platformComponent.init();
 
         // Create language components for each language, using the resource service component of their group.
-        final MultiMap<String, LanguageComponent> languageComponentsPerGroup = MultiMap.withLinkedHash();
-        SpoofaxPlugin.languageComponentsPerGroup = languageComponentsPerGroup;
+        final MultiMap<String, TaskDefsProvider> taskDefsProvidersPerGroup = MultiMap.withLinkedHash();
+        SpoofaxPlugin.taskDefsProvidersPerGroup = taskDefsProvidersPerGroup;
         languagesPerGroup.forEach((group, languages) -> {
             final ResourceServiceComponent resourceServiceComponent = resourceServiceComponentsPerGroup.get(group);
             if(resourceServiceComponent == null) {
                 throw new RuntimeException("BUG: Cannot get resource service component for language group '" + group + "' which should have been created before");
             }
-            for(EclipseLanguage language : languages) {
-                final LanguageComponent languageComponent = language.createComponent(loggerComponent, resourceServiceComponent, platformComponent);
-                languageComponentsPerGroup.put(group, languageComponent);
+            for(EclipseLifecycleParticipant language : languages) {
+                final TaskDefsProvider languageComponent = language.getTaskDefsProvider(loggerComponent, resourceServiceComponent, platformComponent);
+                taskDefsProvidersPerGroup.put(group, languageComponent);
             }
         });
 
         // Create PIE components for each language group, using the task definitions from the languages of the group.
         final HashMap<String, RootPieComponent> pieComponentsPerGroup = new LinkedHashMap<>();
         SpoofaxPlugin.pieComponentsPerGroup = pieComponentsPerGroup;
-        languageComponentsPerGroup.forEach((group, languageComponents) -> {
+        taskDefsProvidersPerGroup.forEach((group, taskDefsProviders) -> {
             final ResourceServiceComponent resourceServiceComponent = resourceServiceComponentsPerGroup.get(group);
             if(resourceServiceComponent == null) {
                 throw new RuntimeException("BUG: Cannot get resource service component for language group '" + group + "' which should have been created before");
             }
             final RootPieModule pieModule = new RootPieModule(PieBuilderImpl::new);
-            for(LanguageComponent languageComponent : languageComponents) {
-                pieModule.addTaskDefsFrom(languageComponent);
+            for(TaskDefsProvider taskDefsProvider : taskDefsProviders) {
+                pieModule.addTaskDefsFrom(taskDefsProvider);
             }
             final RootPieComponent pieComponent = DaggerRootPieComponent.builder()
                 .rootPieModule(pieModule)
@@ -172,6 +173,10 @@ public class SpoofaxPlugin extends AbstractUIPlugin {
         });
     }
 
+    @Override public void earlyStartup() {
+        // Force early startup.
+    }
+
     @Override public void stop(@NonNull BundleContext context) throws Exception {
         super.stop(context);
         if(pieComponentsPerGroup != null) {
@@ -187,10 +192,10 @@ public class SpoofaxPlugin extends AbstractUIPlugin {
             pieComponentsPerGroup.clear();
             pieComponentsPerGroup = null;
         }
-        if(languageComponentsPerGroup != null) {
+        if(taskDefsProvidersPerGroup != null) {
             // Not closing language components here. Registered languages close it their selves in EclipseLanguage.
-            languageComponentsPerGroup.clear();
-            languageComponentsPerGroup = null;
+            taskDefsProvidersPerGroup.clear();
+            taskDefsProvidersPerGroup = null;
         }
         if(platformComponent != null) {
             platformComponent.close();
@@ -238,34 +243,34 @@ public class SpoofaxPlugin extends AbstractUIPlugin {
     }
 
 
-    private static MultiMap<String, EclipseLanguage> gatherLanguageGroups(Logger logger) {
-        final MultiMap<String, EclipseLanguage> languageGroups = MultiMap.withLinkedHash();
+    private static MultiMap<String, EclipseLifecycleParticipant> gatherLanguageGroups(Logger logger) {
+        final MultiMap<String, EclipseLifecycleParticipant> eclipseLifecycleParticipants = MultiMap.withLinkedHash();
         final IExtensionRegistry registry = Platform.getExtensionRegistry();
-        final IExtensionPoint point = registry.getExtensionPoint("mb.spoofax.eclipse.language");
+        final IExtensionPoint point = registry.getExtensionPoint("mb.spoofax.eclipse.lifecycle");
         final IContributor contributor = point.getContributor();
         for(IConfigurationElement config : point.getConfigurationElements()) {
-            if(config.getName().equals("language")) {
+            if(config.getName().equals("participant")) {
                 final String group = config.getAttribute("group");
                 if(group == null) {
-                    logger.error("Found language registration extension point in '{}', but it does not have a 'group' attribute; skipping...", contributor);
+                    logger.error("Found participant in '{}', but it does not have a 'group' attribute; skipping...", contributor);
                     continue;
                 }
                 try {
-                    final Object languageObject = config.createExecutableExtension("class");
-                    if(languageObject == null) {
-                        logger.error("Found language registration extension point in '{}', but it does not have a 'class' property; skipping...", contributor);
+                    final Object lifecycleParticipantObject = config.createExecutableExtension("class");
+                    if(lifecycleParticipantObject == null) {
+                        logger.error("Found participant in '{}', but it does not have a 'class' property; skipping...", contributor);
                     }
-                    if(languageObject instanceof EclipseLanguage) {
-                        final EclipseLanguage language = (EclipseLanguage)languageObject;
-                        languageGroups.put(group, language);
+                    if(lifecycleParticipantObject instanceof EclipseLifecycleParticipant) {
+                        final EclipseLifecycleParticipant eclipseLifecycleParticipant = (EclipseLifecycleParticipant)lifecycleParticipantObject;
+                        eclipseLifecycleParticipants.put(group, eclipseLifecycleParticipant);
                     } else {
-                        logger.error("Found language registration extension point in '{}', but the object '{}' instantiated from its 'class' property does not implement 'EclipseLanguage'; skipping...", contributor, languageObject);
+                        logger.error("Found participant in '{}', but the object '{}' instantiated from its 'class' property does not implement 'EclipseLifecycleParticipant'; skipping...", contributor, lifecycleParticipantObject);
                     }
                 } catch(CoreException | InvalidRegistryObjectException e) {
-                    logger.error("Found language registration extension point in '{}', but instantiating an object of its 'class' property failed unexpectedly; skipping...", e, contributor);
+                    logger.error("Found participant in '{}', but instantiating an object of its 'class' property failed unexpectedly; skipping...", e, contributor);
                 }
             }
         }
-        return languageGroups;
+        return eclipseLifecycleParticipants;
     }
 }

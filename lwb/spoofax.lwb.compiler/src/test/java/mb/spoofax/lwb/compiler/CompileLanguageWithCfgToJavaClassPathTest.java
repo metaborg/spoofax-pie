@@ -18,7 +18,7 @@ import mb.resource.dagger.RootResourceServiceComponent;
 import mb.resource.dagger.RootResourceServiceModule;
 import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.HierarchicalResource;
-import mb.spoofax.lwb.compiler.dagger.Spoofax3Compiler;
+import mb.spoofax.lwb.compiler.dagger.StandaloneSpoofax3Compiler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -35,13 +35,13 @@ class CompileLanguageWithCfgToJavaClassPathTest {
         .rootResourceServiceModule(new RootResourceServiceModule(classLoaderResourceRegistry))
         .loggerComponent(loggerComponent)
         .build();
-    final Spoofax3Compiler compiler = new Spoofax3Compiler(
+    final StandaloneSpoofax3Compiler compiler = new StandaloneSpoofax3Compiler(
         loggerComponent,
         rootResourceServiceComponent.createChildModule(classLoaderResourceRegistry),
         new PieModule(PieBuilderImpl::new)
     );
     final Pie pie = compiler.pieComponent.getPie();
-    final CompileLanguageWithCfgToJavaClassPath compileLanguageWithCfgToJavaClassPath = compiler.component.getCompileLanguageWithCfgToJavaClassPath();
+    final CompileLanguageWithCfgToJavaClassPath compileLanguageWithCfgToJavaClassPath = compiler.compiler.component.getCompileLanguageWithCfgToJavaClassPath();
 
     @Test void testCompileCharsLanguage(@TempDir Path temporaryDirectoryPath) throws Exception {
         // Copy language specification sources to the temporary directory.

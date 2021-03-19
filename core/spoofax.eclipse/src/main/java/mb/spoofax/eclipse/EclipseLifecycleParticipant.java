@@ -1,14 +1,15 @@
 package mb.spoofax.eclipse;
 
 import mb.pie.dagger.PieComponent;
+import mb.pie.dagger.TaskDefsProvider;
 import mb.resource.dagger.ResourceRegistriesProvider;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 
-public interface EclipseLanguage extends AutoCloseable {
-    ResourceRegistriesProvider createResourcesComponent();
+public interface EclipseLifecycleParticipant extends AutoCloseable {
+    ResourceRegistriesProvider getResourceRegistriesProvider();
 
-    EclipseLanguageComponent createComponent(
+    TaskDefsProvider getTaskDefsProvider(
         EclipseLoggerComponent loggerComponent,
         ResourceServiceComponent resourceServiceComponent,
         EclipsePlatformComponent platformComponent

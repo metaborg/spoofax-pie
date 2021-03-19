@@ -7,6 +7,8 @@ import mb.log.dagger.LoggerComponent;
 import mb.log.dagger.LoggerModule;
 import mb.pie.api.PieBuilder;
 import mb.pie.api.Tracer;
+import mb.pie.dagger.DaggerPieComponent;
+import mb.pie.dagger.PieComponent;
 import mb.pie.dagger.PieModule;
 import mb.pie.dagger.RootPieModule;
 import mb.pie.runtime.PieBuilderImpl;
@@ -27,7 +29,7 @@ import mb.resource.dagger.RootResourceServiceComponent;
 import mb.resource.dagger.RootResourceServiceModule;
 import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.HierarchicalResource;
-import mb.spoofax.lwb.compiler.dagger.Spoofax3Compiler;
+import mb.spoofax.lwb.compiler.dagger.StandaloneSpoofax3Compiler;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -39,44 +41,73 @@ class TestBase {
     HierarchicalResource temporaryDirectory;
     MetricsTracer metricsTracer;
     LoggerComponent loggerComponent;
+    RootResourceServiceComponent rootResourceServiceComponent;
+    StandaloneSpoofax3Compiler standaloneSpoofax3Compiler;
     ResourceService resourceService;
+    DynamicLoadingComponent dynamicLoadingComponent;
     DynamicLoader dynamicLoader;
+    PieComponent pieComponent;
 
     void setup(Path temporaryDirectoryPath) throws IOException {
-        this.temporaryDirectory = new FSResource(temporaryDirectoryPath);
+        temporaryDirectory = new FSResource(temporaryDirectoryPath);
 
         final WritableResource pieStore = temporaryDirectory.appendRelativePath("pie.store");
         final PieBuilder.StoreFactory storeFactory = (serde, __, ___) -> new SerializingStore<>(serde, pieStore, InMemoryStore::new, InMemoryStore.class, false);
-        this.metricsTracer = new MetricsTracer();
+        metricsTracer = new MetricsTracer();
         final Function<LoggerFactory, Tracer> tracerFactory = loggerFactory -> new CompositeTracer(new LoggingTracer(loggerFactory), metricsTracer);
 
-        this.loggerComponent = DaggerLoggerComponent.builder()
+        loggerComponent = DaggerLoggerComponent.builder()
             .loggerModule(LoggerModule.stdOutErrorsAndWarnings())
             .build();
-        final RootResourceServiceComponent rootResourceServiceComponent = DaggerRootResourceServiceComponent.builder()
+        rootResourceServiceComponent = DaggerRootResourceServiceComponent.builder()
             .rootResourceServiceModule(new RootResourceServiceModule(classLoaderResourceRegistry))
             .loggerComponent(loggerComponent)
             .build();
-        final Spoofax3Compiler spoofax3Compiler = new Spoofax3Compiler(
+        standaloneSpoofax3Compiler = new StandaloneSpoofax3Compiler(
             loggerComponent,
             rootResourceServiceComponent.createChildModule(classLoaderResourceRegistry),
             new PieModule(PieBuilderImpl::new)
         );
-        this.resourceService = spoofax3Compiler.resourceServiceComponent.getResourceService();
-        this.dynamicLoader = new DynamicLoader(
-            spoofax3Compiler,
-            () -> new RootPieModule(PieBuilderImpl::new)
+        resourceService = standaloneSpoofax3Compiler.compiler.resourceServiceComponent.getResourceService();
+        dynamicLoadingComponent = DaggerDynamicLoadingComponent.builder()
+            .dynamicLoadingModule(new DynamicLoadingModule(() -> new RootPieModule(PieBuilderImpl::new)
                 .withStoreFactory(storeFactory)
-                .withTracerFactory(tracerFactory)
-        );
+                .withTracerFactory(tracerFactory))
+            )
+            .loggerComponent(loggerComponent)
+            .resourceServiceComponent(standaloneSpoofax3Compiler.compiler.resourceServiceComponent)
+            .platformComponent(standaloneSpoofax3Compiler.compiler.platformComponent)
+            .cfgComponent(standaloneSpoofax3Compiler.compiler.cfgComponent)
+            .spoofax3CompilerComponent(standaloneSpoofax3Compiler.compiler.component)
+            .build();
+        dynamicLoader = dynamicLoadingComponent.getDynamicLoader();
+        pieComponent = DaggerPieComponent.builder()
+            .pieModule(standaloneSpoofax3Compiler.pieComponent.createChildModule(dynamicLoadingComponent))
+            .loggerComponent(loggerComponent)
+            .resourceServiceComponent(standaloneSpoofax3Compiler.compiler.resourceServiceComponent)
+            .build();
     }
 
     void teardown() throws Exception {
-        this.dynamicLoader.close();
-        this.dynamicLoader = null;
-        this.resourceService = null;
-        this.metricsTracer = null;
-        this.temporaryDirectory = null;
+        pieComponent.close();
+        pieComponent = null;
+        dynamicLoader = null;
+        dynamicLoadingComponent.close();
+        dynamicLoadingComponent = null;
+        resourceService = null;
+        standaloneSpoofax3Compiler.close();
+        standaloneSpoofax3Compiler = null;
+        rootResourceServiceComponent.close();
+        rootResourceServiceComponent = null;
+        loggerComponent = null;
+        metricsTracer = null;
+        temporaryDirectory.close();
+        temporaryDirectory = null;
+    }
+
+
+    DynamicLoaderMixedSession newSession() {
+        return dynamicLoader.newSession(pieComponent.getPie());
     }
 
 

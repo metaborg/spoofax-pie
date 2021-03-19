@@ -18,7 +18,8 @@ import mb.spoofax.lwb.compiler.metalang.CompileStratego;
 import java.util.HashSet;
 import java.util.Set;
 
-@Module public class Spoofax3CompilerModule {
+@Module
+public class Spoofax3CompilerModule {
     private final TemplateCompiler templateCompiler;
 
     public Spoofax3CompilerModule(TemplateCompiler templateCompiler) {

@@ -1,5 +1,6 @@
 package mb.spoofax.lwb.dynamicloading;
 
+import mb.cfg.CompileLanguageToJavaClassPathInput;
 import mb.pie.api.ExecException;
 import mb.pie.api.Task;
 import mb.pie.runtime.tracer.MetricsTracer;
@@ -12,7 +13,6 @@ import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandExecutionType;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.arg.ArgConverters;
-import mb.cfg.CompileLanguageToJavaClassPathInput;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -28,11 +28,11 @@ class CharsTestBase extends TestBase {
     void setup(Path temporaryDirectoryPath) throws IOException {
         super.setup(temporaryDirectoryPath);
         copyResourcesToTemporaryDirectory("mb/spoofax/lwb/dynamicloading/chars");
-        this.rootDirectory = temporaryDirectory.getPath();
-        this.charsProject = temporaryDirectory.appendRelativePath("test");
-        this.charsProjectPath = charsProject.getPath();
-        this.charsFile = charsProject.appendSegment("test.chars").ensureFileExists();
-        this.charsFilePath = charsFile.getPath();
+        rootDirectory = temporaryDirectory.getPath();
+        charsProject = temporaryDirectory.appendRelativePath("test");
+        charsProjectPath = charsProject.getPath();
+        charsFile = charsProject.appendSegment("test.chars").ensureFileExists();
+        charsFilePath = charsFile.getPath();
         charsFile.writeString("abcdefg");
     }
 

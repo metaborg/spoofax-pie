@@ -7,6 +7,7 @@ import mb.common.util.ListView;
 import mb.log.api.Logger;
 import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
+import mb.pie.dagger.PieComponent;
 import mb.spoofax.compiler.eclipsebundle.SpoofaxCompilerEclipseBundle;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
@@ -30,11 +31,9 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
     public static final String id = SpoofaxLwbPlugin.id + ".builder";
 
     private final Logger logger;
-    private final Spoofax3Compiler spoofax3Compiler;
 
     public SpoofaxLwbBuilder() {
         this.logger = SpoofaxPlugin.getLoggerComponent().getLoggerFactory().create(getClass());
-        this.spoofax3Compiler = SpoofaxLwbPlugin.getSpoofax3Compiler();
     }
 
     @Override
@@ -58,13 +57,17 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
     }
 
     private void fullBuild(IProject eclipseProject, @Nullable IProgressMonitor monitor) throws CoreException, InterruptedException {
+        final Spoofax3Compiler spoofax3Compiler = SpoofaxLwbLifecycleParticipant.getInstance().getSpoofax3Compiler();
+        final PieComponent pieComponent = SpoofaxLwbLifecycleParticipant.getInstance().getPieComponent();
+
         final EclipseResourcePath project = new EclipseResourcePath(eclipseProject);
         final ClassGraph classGraph = new ClassGraph()
             .addClassLoader(SpoofaxLwbPlugin.class.getClassLoader())
             .addClassLoader(SpoofaxPlugin.class.getClassLoader())
             .addClassLoader(ToolingEclipseBundle.class.getClassLoader())
             .addClassLoader(SpoofaxCompilerEclipseBundle.class.getClassLoader());
-        try(final MixedSession session = spoofax3Compiler.pieComponent.getPie().newSession()) {
+
+        try(final MixedSession session = pieComponent.getPie().newSession()) {
             final CompileLanguageWithCfgToJavaClassPath.Args args = new CompileLanguageWithCfgToJavaClassPath.Args(
                 project,
                 ListView.of(classGraph.getClasspathFiles())

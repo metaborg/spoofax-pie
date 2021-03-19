@@ -21,10 +21,10 @@ import mb.resource.hierarchical.ResourcePath
 import mb.spoofax.compiler.adapter.*
 import mb.spoofax.compiler.language.*
 import mb.spoofax.compiler.util.*
-import mb.spoofax.lwb.compiler.dagger.Spoofax3Compiler
 import mb.spoofax.lwb.compiler.CompileLanguage
 import mb.cfg.CompileLanguageInput
 import mb.cfg.CompileLanguageToJavaClassPathInput
+import mb.spoofax.lwb.compiler.dagger.StandaloneSpoofax3Compiler
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -50,7 +50,7 @@ open class LanguagePlugin : Plugin<Project> {
     val resourceServiceComponent = DaggerRootResourceServiceComponent.builder()
       .loggerComponent(loggerComponent)
       .build()
-    val spoofax3Compiler = Spoofax3Compiler(
+    val spoofax3Compiler = StandaloneSpoofax3Compiler(
       loggerComponent,
       resourceServiceComponent.createChildModule(),
       PieModule { PieBuilderImpl() }
@@ -68,23 +68,23 @@ open class LanguagePlugin : Plugin<Project> {
 
   private fun getInput(
     project: Project,
-    spoofax3Compiler: Spoofax3Compiler
+    spoofax3Compiler: StandaloneSpoofax3Compiler
   ): CompileLanguageToJavaClassPathInput {
     spoofax3Compiler.pieComponent.pie.newSession().use {
-      return it.require(spoofax3Compiler.cfgComponent.cfgRootDirectoryToObject.createTask(FSPath(project.projectDir)))
+      return it.require(spoofax3Compiler.compiler.cfgComponent.cfgRootDirectoryToObject.createTask(FSPath(project.projectDir)))
         .unwrap().compileLanguageToJavaClassPathInput // TODO: proper error handling
     }
   }
 
   private fun configure(
     project: Project,
-    spoofax3Compiler: Spoofax3Compiler,
+    spoofax3Compiler: StandaloneSpoofax3Compiler,
     input: CompileLanguageToJavaClassPathInput
   ) {
-    val resourceService = spoofax3Compiler.resourceServiceComponent.resourceService
-    val languageProjectCompiler = spoofax3Compiler.spoofaxCompilerComponent.languageProjectCompiler
-    val compileLanguage = spoofax3Compiler.component.compileLanguage
-    val adapterProjectCompiler = spoofax3Compiler.spoofaxCompilerComponent.adapterProjectCompiler
+    val resourceService = spoofax3Compiler.compiler.resourceServiceComponent.resourceService
+    val languageProjectCompiler = spoofax3Compiler.compiler.spoofaxCompilerComponent.languageProjectCompiler
+    val compileLanguage = spoofax3Compiler.compiler.component.compileLanguage
+    val adapterProjectCompiler = spoofax3Compiler.compiler.spoofaxCompilerComponent.adapterProjectCompiler
     val pie = spoofax3Compiler.pieComponent.pie
     configureProject(project, resourceService, languageProjectCompiler, adapterProjectCompiler, input)
     configureCompileLanguageProjectTask(project, resourceService, pie, languageProjectCompiler, input.languageProjectInput())

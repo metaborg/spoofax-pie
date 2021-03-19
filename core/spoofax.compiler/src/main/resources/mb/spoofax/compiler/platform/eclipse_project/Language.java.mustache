@@ -3,7 +3,7 @@ package {{baseLanguage.packageId}};
 import mb.pie.api.ExecException;
 import mb.pie.dagger.PieComponent;
 import mb.resource.dagger.ResourceServiceComponent;
-import mb.spoofax.eclipse.EclipseLanguage;
+import mb.spoofax.eclipse.EclipseLifecycleParticipant;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import mb.spoofax.eclipse.resource.EclipseClassLoaderUrlResolver;
@@ -16,7 +16,7 @@ import org.eclipse.core.runtime.IStatus;
 
 import java.io.IOException;
 
-public class {{baseLanguage.id}} implements EclipseLanguage {
+public class {{baseLanguage.id}} implements EclipseLifecycleParticipant {
     private static @Nullable {{baseLanguage.id}} instance;
     private {{adapterProjectCompilerInput.resourcesComponent.nullableQualifiedId}} resourcesComponent;
     private {{eclipseComponent.nullableQualifiedId}} component;
@@ -55,7 +55,7 @@ public class {{baseLanguage.id}} implements EclipseLanguage {
     }
 
 
-    @Override public {{adapterProjectCompilerInput.resourcesComponent.qualifiedId}} createResourcesComponent() {
+    @Override public {{adapterProjectCompilerInput.resourcesComponent.qualifiedId}} getResourceRegistriesProvider() {
         if(resourcesComponent == null) {
             resourcesComponent = {{adapterProjectCompilerInput.daggerResourcesComponent.qualifiedId}}.builder()
                 .{{adapterProjectCompilerInput.resourcesModule.idAsCamelCase}}(new {{adapterProjectCompilerInput.resourcesModule.qualifiedId}}(new EclipseClassLoaderUrlResolver()))
@@ -64,7 +64,7 @@ public class {{baseLanguage.id}} implements EclipseLanguage {
         return resourcesComponent;
     }
 
-    @Override public {{eclipseComponent.qualifiedId}} createComponent(
+    @Override public {{eclipseComponent.qualifiedId}} getTaskDefsProvider(
         EclipseLoggerComponent loggerComponent,
         ResourceServiceComponent resourceServiceComponent,
         EclipsePlatformComponent platformComponent

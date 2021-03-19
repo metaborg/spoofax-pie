@@ -12,12 +12,10 @@ import java.util.Set;
 
 public class DynamicLoaderSession {
     private final Session session;
-    protected final DynamicLoader dynamicLoader;
     protected final DynamicLoad dynamicLoad;
 
-    protected DynamicLoaderSession(Session session, DynamicLoader dynamicLoader, DynamicLoad dynamicLoad) {
+    protected DynamicLoaderSession(Session session, DynamicLoad dynamicLoad) {
         this.session = session;
-        this.dynamicLoader = dynamicLoader;
         this.dynamicLoad = dynamicLoad;
     }
 
@@ -27,7 +25,7 @@ public class DynamicLoaderSession {
      */
     public void unload(ResourcePath rootDirectory) throws IOException {
         session.unobserve(createTaskKey(rootDirectory));
-        dynamicLoader.unregister(rootDirectory);
+        dynamicLoad.unregister(rootDirectory);
     }
 
     /**

@@ -1,5 +1,6 @@
 package mb.spoofax.lwb.dynamicloading;
 
+import mb.cfg.CompileLanguageToJavaClassPathInput;
 import mb.common.message.KeyedMessages;
 import mb.common.option.Option;
 import mb.common.region.Region;
@@ -21,7 +22,6 @@ import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
-import mb.cfg.CompileLanguageToJavaClassPathInput;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -50,7 +50,7 @@ class DynamicLanguageTest extends CharsTestBase {
         {
             System.out.println("Initial dynamic load");
             final DynamicLanguage dynamicLanguage;
-            try(final DynamicLoaderMixedSession session = dynamicLoader.newSession()) {
+            try(final DynamicLoaderMixedSession session = newSession()) {
                 dynamicLanguage = session.reload(rootDirectory);
                 previousInput = dynamicLanguage.getCompileInput();
             } catch(ExecException | RuntimeException e) {
@@ -113,7 +113,7 @@ class DynamicLanguageTest extends CharsTestBase {
         {
             System.out.println("Change styler and reload");
             final DynamicLanguage dynamicLanguage;
-            try(final DynamicLoaderMixedSession session = dynamicLoader.newSession()) {
+            try(final DynamicLoaderMixedSession session = newSession()) {
                 dynamicLanguage = modifyStyler(session, previousInput).reload(rootDirectory);
                 previousInput = dynamicLanguage.getCompileInput();
             } catch(ExecException | RuntimeException e) {
@@ -158,7 +158,7 @@ class DynamicLanguageTest extends CharsTestBase {
             System.out.println("Change parser and reload");
             final DynamicLanguage dynamicLanguage;
             final Set<ResourceKey> providedResources;
-            try(final DynamicLoaderMixedSession session = dynamicLoader.newSession()) {
+            try(final DynamicLoaderMixedSession session = newSession()) {
                 final DynamicLoaderReloadSession reloadSession = modifyParser(session, previousInput);
                 dynamicLanguage = reloadSession.reload(rootDirectory);
                 previousInput = dynamicLanguage.getCompileInput();
@@ -191,7 +191,7 @@ class DynamicLanguageTest extends CharsTestBase {
             System.out.println("Change transformation and reload");
             final DynamicLanguage dynamicLanguage;
             final Set<ResourceKey> providedResources;
-            try(final DynamicLoaderMixedSession session = dynamicLoader.newSession()) {
+            try(final DynamicLoaderMixedSession session = newSession()) {
                 final DynamicLoaderReloadSession reloadSession = modifyTransformation(session, previousInput);
                 dynamicLanguage = reloadSession.reload(rootDirectory);
                 previousInput = dynamicLanguage.getCompileInput();
@@ -232,7 +232,7 @@ class DynamicLanguageTest extends CharsTestBase {
             System.out.println("Change command and reload");
             final DynamicLanguage dynamicLanguage;
             final Set<ResourceKey> providedResources;
-            try(final DynamicLoaderMixedSession session = dynamicLoader.newSession()) {
+            try(final DynamicLoaderMixedSession session = newSession()) {
                 final DynamicLoaderReloadSession reloadSession = modifyCommand(session, previousInput);
                 dynamicLanguage = reloadSession.reload(rootDirectory);
                 previousInput = dynamicLanguage.getCompileInput();
@@ -273,7 +273,7 @@ class DynamicLanguageTest extends CharsTestBase {
             System.out.println("Change analyzer and reload");
             final DynamicLanguage dynamicLanguage;
             final Set<ResourceKey> providedResources;
-            try(final DynamicLoaderMixedSession session = dynamicLoader.newSession()) {
+            try(final DynamicLoaderMixedSession session = newSession()) {
                 final DynamicLoaderReloadSession reloadSession = modifyAnalyzer(session, previousInput);
                 dynamicLanguage = reloadSession.reload(rootDirectory);
                 previousInput = dynamicLanguage.getCompileInput();
@@ -307,7 +307,7 @@ class DynamicLanguageTest extends CharsTestBase {
             }
         }
 
-        try(final DynamicLoaderMixedSession session = dynamicLoader.newSession()) {
+        try(final DynamicLoaderMixedSession session = newSession()) {
             System.out.println("Unload language");
             session.unload(rootDirectory);
             previousInput = null;
@@ -319,7 +319,7 @@ class DynamicLanguageTest extends CharsTestBase {
         CompileLanguageToJavaClassPathInput previousInput;
 
         DynamicLanguage lang1a;
-        try(DynamicLoaderMixedSession session = dynamicLoader.newSession()) {
+        try(DynamicLoaderMixedSession session = newSession()) {
             // Load language.
             lang1a = session.reload(rootDirectory);
             previousInput = lang1a.getCompileInput();
@@ -330,7 +330,7 @@ class DynamicLanguageTest extends CharsTestBase {
         }
 
         DynamicLanguage lang1b;
-        try(DynamicLoaderMixedSession session = dynamicLoader.newSession()) {
+        try(DynamicLoaderMixedSession session = newSession()) {
             // Load language again, but nothing has changed.
             lang1b = session.reload(rootDirectory);
             previousInput = lang1b.getCompileInput();
@@ -341,7 +341,7 @@ class DynamicLanguageTest extends CharsTestBase {
         }
 
         DynamicLanguage lang2;
-        try(DynamicLoaderMixedSession session = dynamicLoader.newSession()) {
+        try(DynamicLoaderMixedSession session = newSession()) {
             // Modify language specification and reload language.
             lang2 = modifyStyler(session, previousInput).reload(rootDirectory);
             previousInput = lang2.getCompileInput();
@@ -361,7 +361,7 @@ class DynamicLanguageTest extends CharsTestBase {
         }
 
         DynamicLanguage lang3;
-        try(DynamicLoaderMixedSession session = dynamicLoader.newSession()) {
+        try(DynamicLoaderMixedSession session = newSession()) {
             // Modify language specification and reload language.
             lang3 = modifyParser(session, previousInput).reload(rootDirectory);
             previousInput = lang3.getCompileInput();
@@ -376,7 +376,7 @@ class DynamicLanguageTest extends CharsTestBase {
             lang2 = null;
         }
 
-        try(DynamicLoaderMixedSession session = dynamicLoader.newSession()) {
+        try(DynamicLoaderMixedSession session = newSession()) {
             // Unload dynamic language.
             session.unload(rootDirectory);
             previousInput = null;
@@ -387,7 +387,7 @@ class DynamicLanguageTest extends CharsTestBase {
             lang3 = null;
         }
 
-        try(DynamicLoaderMixedSession session = dynamicLoader.newSession()) {
+        try(DynamicLoaderMixedSession session = newSession()) {
             // Cleanup cache.
             session.deleteCacheForUnloadedLanguages();
         }

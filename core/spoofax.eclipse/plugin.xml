@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-  <!-- Extension point for registering language groups -->
+  <!-- Extension point for participating in the lifecycle of resource service and PIE components -->
   <extension-point
-    id="mb.spoofax.eclipse.language"
-    name="Spoofax language registration"
-    schema="schema/mb.spoofax.eclipse.language.exsd"
+    id="mb.spoofax.eclipse.lifecycle"
+    name="Spoofax Eclipse lifecycle participant"
+    schema="schema/mb.spoofax.eclipse.lifecycle.exsd"
   />
+
+  <!-- Early startup -->
+  <extension
+    point="org.eclipse.ui.startup"
+  >
+    <startup class="mb.spoofax.eclipse.SpoofaxPlugin"/>
+  </extension>
 
   <!-- Register NamedDocumentProvider as the default document provider for NamedEditorInput -->
   <extension point="org.eclipse.ui.editors.documentProviders">

@@ -3,7 +3,7 @@ package mb.tiger.eclipse;
 import mb.pie.api.ExecException;
 import mb.pie.dagger.PieComponent;
 import mb.resource.dagger.ResourceServiceComponent;
-import mb.spoofax.eclipse.EclipseLanguage;
+import mb.spoofax.eclipse.EclipseLifecycleParticipant;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import mb.spoofax.eclipse.resource.EclipseClassLoaderUrlResolver;
@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.IStatus;
 
 import java.io.IOException;
 
-public class TigerLanguage implements EclipseLanguage {
+public class TigerLanguage implements EclipseLifecycleParticipant {
     private static @Nullable TigerLanguage instance;
     private @Nullable TigerResourcesComponent resourcesComponent;
     private @Nullable TigerEclipseComponent component;
@@ -58,7 +58,7 @@ public class TigerLanguage implements EclipseLanguage {
     }
 
 
-    @Override public TigerResourcesComponent createResourcesComponent() {
+    @Override public TigerResourcesComponent getResourceRegistriesProvider() {
         if(resourcesComponent == null) {
             resourcesComponent = DaggerTigerResourcesComponent.builder()
                 .tigerResourcesModule(new TigerResourcesModule(new EclipseClassLoaderUrlResolver()))
@@ -67,7 +67,7 @@ public class TigerLanguage implements EclipseLanguage {
         return resourcesComponent;
     }
 
-    @Override public TigerEclipseComponent createComponent(
+    @Override public TigerEclipseComponent getTaskDefsProvider(
         EclipseLoggerComponent loggerComponent,
         ResourceServiceComponent resourceServiceComponent,
         EclipsePlatformComponent platformComponent
@@ -75,7 +75,7 @@ public class TigerLanguage implements EclipseLanguage {
         if(component == null) {
             component = DaggerTigerEclipseComponent.builder()
                 .eclipseLoggerComponent(loggerComponent)
-                .tigerResourcesComponent(createResourcesComponent())
+                .tigerResourcesComponent(getResourceRegistriesProvider())
                 .resourceServiceComponent(resourceServiceComponent)
                 .eclipsePlatformComponent(platformComponent)
                 .build();
