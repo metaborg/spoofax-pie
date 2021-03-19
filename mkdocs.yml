@@ -1,4 +1,5 @@
 site_name: Spoofax 3
+site_description: Spoofax 3 user guide and reference.
 
 nav:
   - Introduction: index.md
@@ -9,11 +10,14 @@ theme:
   palette:
     primary: indigo
     accent: indigo
+  font:
+    code: JetBrains Mono
 
 repo_name: metaborg/spoofax-pie
 repo_url: https://github.com/metaborg/spoofax-pie
 
 markdown_extensions:
+  - abbr
   - admonition
   - codehilite:
       guess_lang: false
@@ -23,14 +27,19 @@ markdown_extensions:
       smart_enable: all
   - pymdownx.caret
   - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
   - pymdownx.inlinehilite
+  - pymdownx.keys
   - pymdownx.magiclink
   - pymdownx.mark
+  - pymdownx.saneheaders
   - pymdownx.smartsymbols
   - pymdownx.superfences
+  - pymdownx.tabbed
   - pymdownx.tasklist:
       custom_checkbox: true
-  - pymdownx.tabbed
   - pymdownx.tilde
 
 plugins:
