@@ -83,6 +83,11 @@ languageAdapterProject {
   }
 }
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
+  val packageId = "mb.statix"
+
+  // Add config function module
+  addAdditionalModules(TypeInfo.of(packageId, "StatixConfigFunctionModule"))
+
   isMultiFile(true)
   addTaskDefs(taskPackageId, "StatixCompile")
 }

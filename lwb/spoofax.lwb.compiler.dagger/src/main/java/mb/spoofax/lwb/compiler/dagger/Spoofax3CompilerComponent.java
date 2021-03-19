@@ -17,7 +17,7 @@ import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.compiler.CompileLanguageWithCfgToJavaClassPath;
 import mb.spoofax.lwb.compiler.metalang.CompileEsv;
 import mb.spoofax.lwb.compiler.sdf3.CompileSdf3;
-import mb.spoofax.lwb.compiler.metalang.CompileStatix;
+import mb.spoofax.lwb.compiler.statix.CompileStatix;
 import mb.spoofax.lwb.compiler.metalang.CompileStratego;
 import mb.statix.StatixComponent;
 import mb.str.StrategoComponent;

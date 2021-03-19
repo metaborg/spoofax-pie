@@ -22,9 +22,14 @@ import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import mb.spoofax.lwb.compiler.dagger.Spoofax3Compiler;
 import mb.spoofax.lwb.compiler.sdf3.Sdf3ConfigFunction;
+import mb.spoofax.lwb.compiler.statix.StatixConfigFunction;
 import mb.spoofax.lwb.dynamicloading.DaggerDynamicLoadingComponent;
 import mb.spoofax.lwb.dynamicloading.DynamicLoadingComponent;
 import mb.spoofax.lwb.dynamicloading.DynamicLoadingModule;
+import mb.statix.DaggerStatixResourcesComponent;
+import mb.statix.StatixConfigFunctionModule;
+import mb.statix.eclipse.DaggerStatixEclipseComponent;
+import mb.statix.eclipse.StatixComponentCustomizer;
 import mb.statix.eclipse.StatixLanguage;
 import mb.str.eclipse.StrategoLanguage;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -32,7 +37,7 @@ import org.eclipse.core.runtime.IExecutableExtensionFactory;
 
 import java.util.HashSet;
 
-public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipant, Sdf3ComponentCustomizer {
+public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipant, Sdf3ComponentCustomizer, StatixComponentCustomizer {
     private static @Nullable SpoofaxLwbLifecycleParticipant instance;
 
     private SpoofaxLwbLifecycleParticipant() {}
@@ -151,6 +156,16 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
 
     @Override public void customize(DaggerSdf3EclipseComponent.Builder builder) {
         builder.sdf3SpecConfigFunctionModule(new Sdf3SpecConfigFunctionModule(new Sdf3ConfigFunction(
+            CfgLanguage.getInstance().getComponent().getCfgRootDirectoryToObject().createFunction()
+        )));
+    }
+
+    @Override public void customize(DaggerStatixResourcesComponent.Builder builder) {
+        // Nothing to customize.
+    }
+
+    @Override public void customize(DaggerStatixEclipseComponent.Builder builder) {
+        builder.statixConfigFunctionModule(new StatixConfigFunctionModule(new StatixConfigFunction(
             CfgLanguage.getInstance().getComponent().getCfgRootDirectoryToObject().createFunction()
         )));
     }

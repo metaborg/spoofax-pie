@@ -191,11 +191,11 @@ open class LanguagePlugin : Plugin<Project> {
       }
       input.statix().ifPresent {
         // Input: all Statix files
-        val rootDirectory = resourceService.toLocalFile(it.statixRootDirectory())
+        val rootDirectory = resourceService.toLocalFile(it.sourceDirectory())
         if(rootDirectory != null) {
           inputs.files(project.fileTree(rootDirectory) { include("**/*.stx") })
         } else {
-          logger.warn("Cannot set Statix files as task inputs, because ${it.statixRootDirectory()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
+          logger.warn("Cannot set Statix files as task inputs, because ${it.sourceDirectory()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
         }
 
         // Output: Statix output directory

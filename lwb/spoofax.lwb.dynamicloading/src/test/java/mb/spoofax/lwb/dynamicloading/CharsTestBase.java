@@ -117,7 +117,7 @@ class CharsTestBase extends TestBase {
     }
 
     DynamicLoaderReloadSession modifyAnalyzer(DynamicLoaderMixedSession session, CompileLanguageToJavaClassPathInput input) throws IOException, ExecException, InterruptedException {
-        final ResourcePath path = input.compileLanguageInput().statix().get().statixMainFile();
+        final ResourcePath path = input.compileLanguageInput().statix().get().mainFile();
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString()
             .replace("Chars(\"\")", "Chars(\"abcdefg\")")

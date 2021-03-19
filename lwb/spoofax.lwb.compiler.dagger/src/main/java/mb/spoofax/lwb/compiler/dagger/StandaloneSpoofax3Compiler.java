@@ -4,6 +4,9 @@ import mb.cfg.CfgComponent;
 import mb.cfg.CfgResourcesComponent;
 import mb.cfg.DaggerCfgComponent;
 import mb.cfg.DaggerCfgResourcesComponent;
+import mb.cfg.task.CfgRootDirectoryToObjectException;
+import mb.cfg.task.CfgToObject;
+import mb.common.result.Result;
 import mb.esv.DaggerEsvComponent;
 import mb.esv.DaggerEsvResourcesComponent;
 import mb.esv.EsvComponent;
@@ -17,12 +20,14 @@ import mb.libstatix.DaggerLibStatixResourcesComponent;
 import mb.libstatix.LibStatixComponent;
 import mb.libstatix.LibStatixResourcesComponent;
 import mb.log.dagger.LoggerComponent;
+import mb.pie.api.Function;
 import mb.pie.dagger.DaggerPieComponent;
 import mb.pie.dagger.PieComponent;
 import mb.pie.dagger.PieModule;
 import mb.resource.dagger.DaggerResourceServiceComponent;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.resource.dagger.ResourceServiceModule;
+import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.DaggerSdf3Component;
 import mb.sdf3.DaggerSdf3ResourcesComponent;
 import mb.sdf3.Sdf3Component;
@@ -35,9 +40,11 @@ import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.core.platform.DaggerPlatformComponent;
 import mb.spoofax.core.platform.PlatformComponent;
 import mb.spoofax.lwb.compiler.sdf3.Sdf3ConfigFunction;
+import mb.spoofax.lwb.compiler.statix.StatixConfigFunction;
 import mb.statix.DaggerStatixComponent;
 import mb.statix.DaggerStatixResourcesComponent;
 import mb.statix.StatixComponent;
+import mb.statix.StatixConfigFunctionModule;
 import mb.statix.StatixResourcesComponent;
 import mb.str.DaggerStrategoComponent;
 import mb.str.DaggerStrategoResourcesComponent;
@@ -97,9 +104,11 @@ public class StandaloneSpoofax3Compiler implements AutoCloseable {
             .resourceServiceComponent(resourceServiceComponent)
             .platformComponent(platformComponent)
             .build();
+        final Function<ResourcePath, Result<CfgToObject.Output, CfgRootDirectoryToObjectException>> cfgFunction =
+            cfgComponent.getCfgRootDirectoryToObject().createFunction();
         pieModule.addTaskDefsFrom(cfgComponent);
         final Sdf3Component sdf3Component = DaggerSdf3Component.builder()
-            .sdf3SpecConfigFunctionModule(new Sdf3SpecConfigFunctionModule(new Sdf3ConfigFunction(cfgComponent.getCfgRootDirectoryToObject().createFunction())))
+            .sdf3SpecConfigFunctionModule(new Sdf3SpecConfigFunctionModule(new Sdf3ConfigFunction(cfgFunction)))
             .loggerComponent(loggerComponent)
             .sdf3ResourcesComponent(sdf3ResourcesComponent)
             .resourceServiceComponent(resourceServiceComponent)
@@ -121,6 +130,7 @@ public class StandaloneSpoofax3Compiler implements AutoCloseable {
             .build();
         pieModule.addTaskDefsFrom(esvComponent);
         final StatixComponent statixComponent = DaggerStatixComponent.builder()
+            .statixConfigFunctionModule(new StatixConfigFunctionModule(new StatixConfigFunction(cfgFunction)))
             .loggerComponent(loggerComponent)
             .statixResourcesComponent(statixResourcesComponent)
             .resourceServiceComponent(resourceServiceComponent)

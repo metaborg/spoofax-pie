@@ -15,15 +15,19 @@ public interface CompileStatixInput extends Serializable {
     static Builder builder() { return new Builder(); }
 
 
-    @Value.Default default ResourcePath statixRootDirectory() {
+    default ResourcePath rootDirectory() {
+        return compileLanguageShared().languageProject().project().baseDirectory();
+    }
+
+    @Value.Default default ResourcePath sourceDirectory() {
         return compileLanguageShared().languageProject().project().srcDirectory();
     }
 
-    @Value.Default default ResourcePath statixMainFile() {
-        return statixRootDirectory().appendRelativePath("main.stx");
+    @Value.Default default ResourcePath mainFile() {
+        return sourceDirectory().appendRelativePath("main.stx");
     }
 
-    List<ResourcePath> statixIncludeDirs();
+    List<ResourcePath> includeDirectories();
 
 
     default ResourcePath statixOutputDirectory() {

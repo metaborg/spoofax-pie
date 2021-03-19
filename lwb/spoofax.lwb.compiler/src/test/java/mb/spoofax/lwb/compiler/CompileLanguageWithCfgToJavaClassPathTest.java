@@ -57,7 +57,6 @@ class CompileLanguageWithCfgToJavaClassPathTest {
         }
     }
 
-
     void copyResourcesToTemporaryDirectory(String sourceFilesPath, HierarchicalResource temporaryDirectory) throws IOException {
         final ClassLoaderResource sourceFilesDirectory = classLoaderResourceRegistry.getResource(sourceFilesPath);
         final ClassLoaderResourceLocations locations = sourceFilesDirectory.getLocations();

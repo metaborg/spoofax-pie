@@ -155,6 +155,18 @@ public class ConstraintAnalyzer {
             this.messages = messages;
         }
 
+        public MultiFileResult(ArrayList<Result> results, KeyedMessages messages) {
+            this(null, results, messages);
+        }
+
+        public MultiFileResult(KeyedMessages messages) {
+            this(new ArrayList<>(), messages);
+        }
+
+        public MultiFileResult() {
+            this(KeyedMessages.of());
+        }
+
         public @Nullable Result getResult(ResourceKey resource) {
             // OPTO: linear search to lookup. Cannot use HashMap because it does not serialize properly.
             return results.stream().filter((r) -> r.resource.equals(resource)).findFirst().orElse(null);

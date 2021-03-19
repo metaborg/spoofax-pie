@@ -10,12 +10,13 @@ import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.spoofax.lwb.compiler.metalang.CompileEsv;
 import mb.spoofax.lwb.compiler.sdf3.CompileSdf3;
-import mb.spoofax.lwb.compiler.metalang.CompileStatix;
+import mb.spoofax.lwb.compiler.statix.CompileStatix;
 import mb.spoofax.lwb.compiler.metalang.CompileStratego;
 import mb.cfg.CompileLanguageInput;
 import mb.cfg.CompileLanguageShared;
 import mb.spoofax.lwb.compiler.sdf3.Sdf3CompileException;
 import mb.spoofax.lwb.compiler.sdf3.Sdf3CompileOutput;
+import mb.spoofax.lwb.compiler.statix.StatixCompileException;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
@@ -117,7 +118,7 @@ public class CompileLanguage implements TaskDef<CompileLanguageInput, Result<Key
 
             R esvCompileFail(CompileEsv.EsvCompileException esvCompileException);
 
-            R statixCompileFail(CompileStatix.StatixCompileException statixCompileException);
+            R statixCompileFail(StatixCompileException statixCompileException);
 
             R strategoCompileFail(CompileStratego.StrategoCompileException strategoCompileException);
         }
@@ -130,7 +131,7 @@ public class CompileLanguage implements TaskDef<CompileLanguageInput, Result<Key
             return withCause(CompileExceptions.esvCompileFail(cause), cause);
         }
 
-        public static CompileException statixCompileFail(CompileStatix.StatixCompileException cause) {
+        public static CompileException statixCompileFail(StatixCompileException cause) {
             return withCause(CompileExceptions.statixCompileFail(cause), cause);
         }
 

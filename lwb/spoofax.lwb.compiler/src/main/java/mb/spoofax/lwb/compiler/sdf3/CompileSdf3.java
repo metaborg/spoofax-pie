@@ -122,7 +122,7 @@ public class CompileSdf3 implements TaskDef<CompileSdf3Input, Result<Sdf3Compile
         final ResourceWalker resourceWalker = Sdf3Util.createResourceWalker();
         final ResourceMatcher resourceMatcher = new AllResourceMatcher(Sdf3Util.createResourceMatcher(), new FileResourceMatcher());
         final @Nullable KeyedMessages messages = context.require(check.createTask(
-            new Sdf3CheckMulti.Input(rootDirectory, resourceWalker, resourceMatcher)
+            new Sdf3CheckMulti.Input(rootDirectory, resourceWalker, resourceMatcher) // HACK: Run check on root directory so it can pick up the CFG file.
         ));
         if(messages.containsError()) {
             return Result.ofErr(Sdf3CompileException.checkFail(messages));

@@ -136,8 +136,8 @@ public class AstToObject {
         });
         parts.getAllSubTermsInListAsParts("StatixSection").ifPresent(subParts -> {
             final CompileStatixInput.Builder builder = languageCompilerInputBuilder.withStatix();
-            subParts.forOneSubtermAsPath("StatixSourceDirectory", rootDirectory, builder::statixRootDirectory);
-            subParts.forOneSubtermAsPath("StatixMainFile", rootDirectory, builder::statixMainFile);
+            subParts.forOneSubtermAsPath("StatixSourceDirectory", rootDirectory, builder::sourceDirectory);
+            subParts.forOneSubtermAsPath("StatixMainFile", rootDirectory, builder::mainFile);
             // TODO: more Statix properties
         });
         parts.getAllSubTermsInListAsParts("StrategoSection").ifPresent(subParts -> {
