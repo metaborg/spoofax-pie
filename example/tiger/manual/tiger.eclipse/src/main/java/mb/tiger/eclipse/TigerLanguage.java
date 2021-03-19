@@ -58,7 +58,7 @@ public class TigerLanguage implements EclipseLifecycleParticipant {
     }
 
 
-    @Override public TigerResourcesComponent getResourceRegistriesProvider() {
+    @Override public TigerResourcesComponent getResourceRegistriesProvider(EclipseLoggerComponent loggerComponent) {
         if(resourcesComponent == null) {
             resourcesComponent = DaggerTigerResourcesComponent.builder()
                 .tigerResourcesModule(new TigerResourcesModule(new EclipseClassLoaderUrlResolver()))
@@ -75,7 +75,7 @@ public class TigerLanguage implements EclipseLifecycleParticipant {
         if(component == null) {
             component = DaggerTigerEclipseComponent.builder()
                 .eclipseLoggerComponent(loggerComponent)
-                .tigerResourcesComponent(getResourceRegistriesProvider())
+                .tigerResourcesComponent(getResourceRegistriesProvider(loggerComponent))
                 .resourceServiceComponent(resourceServiceComponent)
                 .eclipsePlatformComponent(platformComponent)
                 .build();

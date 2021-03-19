@@ -2,7 +2,7 @@
 <?eclipse version="3.4"?>
 <plugin>
   <!-- Language registration -->
-  <extension point="mb.spoofax.eclipse.language">
+  <extension point="spoofax.eclipse.language">
     <language group="mb.tiger" class="mb.tiger.eclipse.TigerLanguageFactory"/>
   </extension>
 

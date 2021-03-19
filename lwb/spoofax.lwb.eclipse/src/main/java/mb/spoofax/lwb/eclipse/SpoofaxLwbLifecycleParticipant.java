@@ -12,11 +12,16 @@ import mb.pie.runtime.PieBuilderImpl;
 import mb.resource.dagger.EmptyResourceRegistriesProvider;
 import mb.resource.dagger.ResourceRegistriesProvider;
 import mb.resource.dagger.ResourceServiceComponent;
+import mb.sdf3.DaggerSdf3ResourcesComponent;
+import mb.sdf3.Sdf3SpecConfigFunctionModule;
+import mb.sdf3.eclipse.DaggerSdf3EclipseComponent;
+import mb.sdf3.eclipse.Sdf3ComponentCustomizer;
 import mb.sdf3.eclipse.Sdf3Language;
 import mb.spoofax.eclipse.EclipseLifecycleParticipant;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import mb.spoofax.lwb.compiler.dagger.Spoofax3Compiler;
+import mb.spoofax.lwb.compiler.sdf3.Sdf3ConfigFunction;
 import mb.spoofax.lwb.dynamicloading.DaggerDynamicLoadingComponent;
 import mb.spoofax.lwb.dynamicloading.DynamicLoadingComponent;
 import mb.spoofax.lwb.dynamicloading.DynamicLoadingModule;
@@ -27,7 +32,7 @@ import org.eclipse.core.runtime.IExecutableExtensionFactory;
 
 import java.util.HashSet;
 
-public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipant {
+public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipant, Sdf3ComponentCustomizer {
     private static @Nullable SpoofaxLwbLifecycleParticipant instance;
 
     private SpoofaxLwbLifecycleParticipant() {}
@@ -73,7 +78,9 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
     }
 
 
-    @Override public ResourceRegistriesProvider getResourceRegistriesProvider() {
+    @Override public ResourceRegistriesProvider getResourceRegistriesProvider(
+        EclipseLoggerComponent loggerComponent
+    ) {
         return new EmptyResourceRegistriesProvider();
     }
 
@@ -135,5 +142,16 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
         dynamicLoadingComponent = null;
         spoofax3Compiler.close();
         spoofax3Compiler = null;
+    }
+
+
+    @Override public void customize(DaggerSdf3ResourcesComponent.Builder builder) {
+        // Nothing to customize.
+    }
+
+    @Override public void customize(DaggerSdf3EclipseComponent.Builder builder) {
+        builder.sdf3SpecConfigFunctionModule(new Sdf3SpecConfigFunctionModule(new Sdf3ConfigFunction(
+            CfgLanguage.getInstance().getComponent().getCfgRootDirectoryToObject().createFunction()
+        )));
     }
 }

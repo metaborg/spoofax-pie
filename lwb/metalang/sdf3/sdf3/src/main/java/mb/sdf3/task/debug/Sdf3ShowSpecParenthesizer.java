@@ -1,13 +1,14 @@
 package mb.sdf3.task.debug;
 
+import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Function;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.pie.api.ValueSupplier;
 import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.Sdf3Scope;
-import mb.sdf3.Sdf3SpecConfigFunctionWrapper;
 import mb.sdf3.task.Sdf3GetStrategoRuntimeProvider;
 import mb.sdf3.task.spec.Sdf3CreateSpec;
 import mb.sdf3.task.spec.Sdf3ParseTableToParenthesizer;
@@ -55,14 +56,14 @@ public class Sdf3ShowSpecParenthesizer extends ProvideOutputShared implements Ta
         }
     }
 
-    private final Sdf3SpecConfigFunctionWrapper configFunction;
+    private final Function<ResourcePath, Result<Option<Sdf3SpecConfig>, ?>> configFunction;
     private final Sdf3CreateSpec createSpec;
     private final Sdf3SpecToParseTable specToParseTable;
     private final Sdf3ParseTableToParenthesizer specToParenthesizer;
 
     @Inject public Sdf3ShowSpecParenthesizer(
         Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider,
-        Sdf3SpecConfigFunctionWrapper configFunction,
+        Function<ResourcePath, Result<Option<Sdf3SpecConfig>, ?>> configFunction,
         Sdf3CreateSpec createSpec,
         Sdf3SpecToParseTable specToParseTable,
         Sdf3ParseTableToParenthesizer sdf3ParseTableToParenthesizer
@@ -79,7 +80,7 @@ public class Sdf3ShowSpecParenthesizer extends ProvideOutputShared implements Ta
     }
 
     @Override public CommandFeedback exec(ExecContext context, Args args) throws Exception {
-        return context.require(configFunction.get(), args.root).mapOrElse(o ->
+        return context.require(configFunction, args.root).mapOrElse(o ->
             o.mapOrElse(c ->
                 run(context, c, args),
                 () -> CommandFeedback.of(ShowFeedback.showText("Cannot show parenthesizer; SDF3 was not configured in '" + args.root + "'", getName(args.concrete, args.root)))

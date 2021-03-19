@@ -5,9 +5,11 @@ import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Message;
 import mb.common.message.Messages;
 import mb.common.message.Severity;
+import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Function;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.hierarchical.HierarchicalResource;
@@ -16,7 +18,6 @@ import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
 import mb.sdf3.Sdf3ClassLoaderResources;
 import mb.sdf3.Sdf3Scope;
-import mb.sdf3.Sdf3SpecConfigFunctionWrapper;
 import mb.sdf3.task.Sdf3AnalyzeMulti;
 import mb.sdf3.task.Sdf3Parse;
 import mb.sdf3.task.spec.Sdf3SpecConfig;
@@ -73,14 +74,14 @@ public class Sdf3CheckMulti implements TaskDef<Sdf3CheckMulti.Input, KeyedMessag
 
 
     private final Sdf3ClassLoaderResources classLoaderResources;
-    private final Sdf3SpecConfigFunctionWrapper configFunction;
+    private final Function<ResourcePath, Result<Option<Sdf3SpecConfig>, ?>> configFunction;
     private final Sdf3Parse parse;
     private final Sdf3AnalyzeMulti analyze;
 
 
     @Inject public Sdf3CheckMulti(
         Sdf3ClassLoaderResources classLoaderResources,
-        Sdf3SpecConfigFunctionWrapper configFunction,
+        Function<ResourcePath, Result<Option<Sdf3SpecConfig>, ?>> configFunction,
         Sdf3Parse parse,
         Sdf3AnalyzeMulti analyze
     ) {
@@ -97,7 +98,7 @@ public class Sdf3CheckMulti implements TaskDef<Sdf3CheckMulti.Input, KeyedMessag
 
     @Override public KeyedMessages exec(ExecContext context, Input input) throws IOException {
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
-        return configFunction.get().apply(context, input.root).mapThrowingOrElse(
+        return configFunction.apply(context, input.root).mapThrowingOrElse(
             o -> o.mapThrowingOrElse(
                 c -> check(context, c),
                 KeyedMessages::of // SDF3 is not configured, do not need to check.

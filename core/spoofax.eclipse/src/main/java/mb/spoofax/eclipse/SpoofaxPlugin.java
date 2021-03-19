@@ -109,7 +109,7 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
         languagesPerGroup.forEach((group, languages) -> {
             final ResourceServiceModule resourceServiceModule = baseResourceServiceComponent.createChildModule();
             for(EclipseLifecycleParticipant language : languages) {
-                resourceServiceModule.addRegistriesFrom(language.getResourceRegistriesProvider());
+                resourceServiceModule.addRegistriesFrom(language.getResourceRegistriesProvider(loggerComponent));
             }
             final ResourceServiceComponent resourceServiceComponent = DaggerResourceServiceComponent.builder()
                 .loggerComponent(loggerComponent)
@@ -246,7 +246,7 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
     private static MultiMap<String, EclipseLifecycleParticipant> gatherLanguageGroups(Logger logger) {
         final MultiMap<String, EclipseLifecycleParticipant> eclipseLifecycleParticipants = MultiMap.withLinkedHash();
         final IExtensionRegistry registry = Platform.getExtensionRegistry();
-        final IExtensionPoint point = registry.getExtensionPoint("mb.spoofax.eclipse.lifecycle");
+        final IExtensionPoint point = registry.getExtensionPoint("spoofax.eclipse.lifecycle");
         final IContributor contributor = point.getContributor();
         for(IConfigurationElement config : point.getConfigurationElements()) {
             if(config.getName().equals("participant")) {

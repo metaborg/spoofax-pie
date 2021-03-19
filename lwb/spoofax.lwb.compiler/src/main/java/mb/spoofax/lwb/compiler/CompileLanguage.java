@@ -9,11 +9,13 @@ import mb.pie.api.STask;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.spoofax.lwb.compiler.metalang.CompileEsv;
-import mb.spoofax.lwb.compiler.metalang.CompileSdf3;
+import mb.spoofax.lwb.compiler.sdf3.CompileSdf3;
 import mb.spoofax.lwb.compiler.metalang.CompileStatix;
 import mb.spoofax.lwb.compiler.metalang.CompileStratego;
 import mb.cfg.CompileLanguageInput;
 import mb.cfg.CompileLanguageShared;
+import mb.spoofax.lwb.compiler.sdf3.Sdf3CompileException;
+import mb.spoofax.lwb.compiler.sdf3.Sdf3CompileOutput;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
@@ -65,12 +67,12 @@ public class CompileLanguage implements TaskDef<CompileLanguageInput, Result<Key
 
         if(input.sdf3().isPresent()) {
             strategoOriginTask.add(parserCompiler.createSupplier(input.sdf3().get()));
-            final Result<CompileSdf3.Output, CompileException> result = context.require(parserCompiler, input.sdf3().get())
+            final Result<Sdf3CompileOutput, CompileException> result = context.require(parserCompiler, input.sdf3().get())
                 .mapErr(CompileLanguage.CompileException::sdf3CompileFail);
             if(result.isErr()) {
-                return result.map(CompileSdf3.Output::messages);
+                return result.map(Sdf3CompileOutput::messages);
             }
-            final CompileSdf3.Output output = result.get();
+            final Sdf3CompileOutput output = result.get();
             messagesBuilder.addMessages(output.messages());
             esvAdditionalAstSuppliers.addAll(output.esvCompletionColorerAstSuppliers());
         }
@@ -111,7 +113,7 @@ public class CompileLanguage implements TaskDef<CompileLanguageInput, Result<Key
     @ADT
     public abstract static class CompileException extends Exception {
         public interface Cases<R> {
-            R sdf3CompileFail(CompileSdf3.Sdf3CompileException sdf3CompileException);
+            R sdf3CompileFail(Sdf3CompileException sdf3CompileException);
 
             R esvCompileFail(CompileEsv.EsvCompileException esvCompileException);
 
@@ -120,7 +122,7 @@ public class CompileLanguage implements TaskDef<CompileLanguageInput, Result<Key
             R strategoCompileFail(CompileStratego.StrategoCompileException strategoCompileException);
         }
 
-        public static CompileException sdf3CompileFail(CompileSdf3.Sdf3CompileException cause) {
+        public static CompileException sdf3CompileFail(Sdf3CompileException cause) {
             return withCause(CompileExceptions.sdf3CompileFail(cause), cause);
         }
 

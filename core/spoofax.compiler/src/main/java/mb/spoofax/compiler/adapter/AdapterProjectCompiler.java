@@ -450,6 +450,10 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
 
         // Dagger component
 
+        @Value.Default default boolean addComponentAnnotationToBaseComponent() {
+            return true;
+        }
+
         @Value.Default default TypeInfo baseComponent() {
             return TypeInfo.of(adapterProject().packageId(), shared().defaultClassPrefix() + "Component");
         }

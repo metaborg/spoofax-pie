@@ -7,7 +7,9 @@ import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 
 public interface EclipseLifecycleParticipant extends AutoCloseable {
-    ResourceRegistriesProvider getResourceRegistriesProvider();
+    ResourceRegistriesProvider getResourceRegistriesProvider(
+        EclipseLoggerComponent loggerComponent
+    );
 
     TaskDefsProvider getTaskDefsProvider(
         EclipseLoggerComponent loggerComponent,

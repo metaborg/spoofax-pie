@@ -79,9 +79,8 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   val packageId = "mb.sdf3"
 
 
-  // Custom component
-  baseComponent(packageId, "GeneratedSdf3Component")
-  extendComponent(packageId, "Sdf3Component")
+  // Add config function module
+  addAdditionalModules(TypeInfo.of(packageId, "Sdf3SpecConfigFunctionModule"))
 
 
   /// Tasks

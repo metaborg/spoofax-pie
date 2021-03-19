@@ -1,0 +1,7 @@
+package {{baseComponentCustomizer.packageId}};
+
+public interface {{baseComponentCustomizer.id}} {
+    void customize({{adapterProjectCompilerInput.daggerResourcesComponent.qualifiedId}}.Builder builder);
+
+    void customize({{daggerEclipseComponent.qualifiedId}}.Builder builder);
+}

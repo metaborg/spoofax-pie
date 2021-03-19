@@ -27,12 +27,14 @@ import mb.sdf3.DaggerSdf3Component;
 import mb.sdf3.DaggerSdf3ResourcesComponent;
 import mb.sdf3.Sdf3Component;
 import mb.sdf3.Sdf3ResourcesComponent;
+import mb.sdf3.Sdf3SpecConfigFunctionModule;
 import mb.spoofax.compiler.dagger.DaggerSpoofaxCompilerComponent;
 import mb.spoofax.compiler.dagger.SpoofaxCompilerComponent;
 import mb.spoofax.compiler.dagger.SpoofaxCompilerModule;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.core.platform.DaggerPlatformComponent;
 import mb.spoofax.core.platform.PlatformComponent;
+import mb.spoofax.lwb.compiler.sdf3.Sdf3ConfigFunction;
 import mb.statix.DaggerStatixComponent;
 import mb.statix.DaggerStatixResourcesComponent;
 import mb.statix.StatixComponent;
@@ -97,6 +99,7 @@ public class StandaloneSpoofax3Compiler implements AutoCloseable {
             .build();
         pieModule.addTaskDefsFrom(cfgComponent);
         final Sdf3Component sdf3Component = DaggerSdf3Component.builder()
+            .sdf3SpecConfigFunctionModule(new Sdf3SpecConfigFunctionModule(new Sdf3ConfigFunction(cfgComponent.getCfgRootDirectoryToObject().createFunction())))
             .loggerComponent(loggerComponent)
             .sdf3ResourcesComponent(sdf3ResourcesComponent)
             .resourceServiceComponent(resourceServiceComponent)

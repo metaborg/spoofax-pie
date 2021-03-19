@@ -1,12 +1,13 @@
 package mb.sdf3.task.debug;
 
+import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Function;
 import mb.pie.api.TaskDef;
 import mb.pie.api.ValueSupplier;
 import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.Sdf3Scope;
-import mb.sdf3.Sdf3SpecConfigFunctionWrapper;
 import mb.sdf3.task.spec.Sdf3CreateSpec;
 import mb.sdf3.task.spec.Sdf3SpecConfig;
 import mb.sdf3.task.spec.Sdf3SpecToParseTable;
@@ -48,12 +49,12 @@ public class Sdf3ShowSpecParseTable implements TaskDef<Sdf3ShowSpecParseTable.Ar
         }
     }
 
-    private final Sdf3SpecConfigFunctionWrapper configFunction;
+    private final Function<ResourcePath, Result<Option<Sdf3SpecConfig>, ?>> configFunction;
     private final Sdf3CreateSpec createSpec;
     private final Sdf3SpecToParseTable specToParseTable;
 
     @Inject public Sdf3ShowSpecParseTable(
-        Sdf3SpecConfigFunctionWrapper configFunction,
+        Function<ResourcePath, Result<Option<Sdf3SpecConfig>, ?>> configFunction,
         Sdf3CreateSpec createSpec,
         Sdf3SpecToParseTable specToParseTable
     ) {
@@ -68,7 +69,7 @@ public class Sdf3ShowSpecParseTable implements TaskDef<Sdf3ShowSpecParseTable.Ar
 
     @Override public CommandFeedback exec(ExecContext context, Args args) {
         final String name = "Parse table for project '" + args.root + "'";
-        return context.require(configFunction.get(), args.root).mapOrElse(o ->
+        return context.require(configFunction, args.root).mapOrElse(o ->
                 o.mapOrElse(c ->
                         run(context, c, args, name),
                     () -> CommandFeedback.of(ShowFeedback.showText("Cannot show parse table; SDF3 was not configured in '" + args.root + "'", name))

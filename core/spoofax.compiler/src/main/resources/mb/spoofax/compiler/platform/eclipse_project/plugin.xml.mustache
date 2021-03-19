@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+  <!-- Extension point for customizing {{shared.name}} components -->
+  <extension-point
+    id="{{componentExtensionPointId}}"
+    name="{{shared.name}} component customization"
+    schema="schema/{{componentExtensionPointId}}.exsd"
+  />
+
   <!-- Lifecycle participant -->
-  <extension point="mb.spoofax.eclipse.lifecycle">
+  <extension point="spoofax.eclipse.lifecycle">
     <participant group="{{languageGroup}}" class="{{languageFactory.qualifiedId}}"/>
   </extension>
 

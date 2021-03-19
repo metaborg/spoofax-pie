@@ -43,7 +43,6 @@ val provider = "spoofax.eclipse"
 val exportPackage = listOf(
   "mb.spoofax.eclipse.*",
   "mb.*;provider=$provider;mandatory:=provider",
-  "org.spoofax.*;provider=$provider;mandatory:=provider",
   "dagger;provider=$provider;mandatory:=provider",
   "dagger.*;provider=$provider;mandatory:=provider"
 )

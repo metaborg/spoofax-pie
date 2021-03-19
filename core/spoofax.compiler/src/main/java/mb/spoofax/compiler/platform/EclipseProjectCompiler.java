@@ -30,6 +30,8 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
     private final TemplateWriter pluginXmlTemplate;
     private final TemplateWriter manifestTemplate;
     private final TemplateWriter packageInfoTemplate;
+    private final TemplateWriter componentExtensionSchemaTemplate;
+    private final TemplateWriter componentCustomizerTemplate;
     private final TemplateWriter languageTemplate;
     private final TemplateWriter languageFactoryTemplate;
     private final TemplateWriter pluginTemplate;
@@ -56,6 +58,8 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
         this.pluginXmlTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/plugin.xml.mustache");
         this.manifestTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/MANIFEST.MF.mustache");
         this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/package-info.java.mustache");
+        this.componentExtensionSchemaTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/component.exsd.mustache");
+        this.componentCustomizerTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/ComponentCustomizer.java.mustache");
         this.languageTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/Language.java.mustache");
         this.languageFactoryTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/LanguageFactory.java.mustache");
         this.pluginTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/Plugin.java.mustache");
@@ -89,11 +93,13 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
 
         // Eclipse files
         pluginXmlTemplate.write(context, input.pluginXmlFile(), input);
+        componentExtensionSchemaTemplate.write(context, input.componentExtensionSchemaFile(), input);
         manifestTemplate.write(context, input.manifestMfFile(), input);
 
         // Class files
         final ResourcePath classesGenDirectory = input.generatedJavaSourcesDirectory();
         packageInfoTemplate.write(context, input.basePackageInfo().file(classesGenDirectory), input);
+        componentCustomizerTemplate.write(context, input.baseComponentCustomizer().file(classesGenDirectory), input);
         languageTemplate.write(context, input.baseLanguage().file(classesGenDirectory), input);
         languageFactoryTemplate.write(context, input.baseLanguageFactory().file(classesGenDirectory), input);
         pluginTemplate.write(context, input.basePlugin().file(classesGenDirectory), input);
@@ -224,6 +230,8 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
 
         @Value.Default default String pluginId() { return project().coordinate().artifactId(); }
 
+        @Value.Default default String componentExtensionPointId() { return pluginId() + ".component"; }
+
         @Value.Default default String contextId() { return pluginId() + ".context"; }
 
         @Value.Default default String documentProviderId() { return pluginId() + ".documentprovider"; }
@@ -280,6 +288,10 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
             return generatedResourcesDirectory().appendRelativePath("plugin.xml");
         }
 
+        default ResourcePath componentExtensionSchemaFile() {
+            return generatedResourcesDirectory().appendRelativePath("schema/" + componentExtensionPointId() + ".exsd");
+        }
+
         default ResourcePath manifestMfFile() {
             return generatedResourcesDirectory().appendRelativePath("META-INF/MANIFEST.MF");
         }
@@ -307,6 +319,16 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
                 return manualPackageInfo().get();
             }
             return basePackageInfo();
+        }
+
+        @Value.Default default TypeInfo baseComponentCustomizer() {
+            return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "ComponentCustomizer");
+        }
+
+        Optional<TypeInfo> extendComponentCustomizer();
+
+        default TypeInfo componentCustomizer() {
+            return extendComponentCustomizer().orElseGet(this::baseComponentCustomizer);
         }
 
         // Language
