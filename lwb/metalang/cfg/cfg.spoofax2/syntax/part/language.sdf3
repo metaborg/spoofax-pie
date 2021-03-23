@@ -22,8 +22,9 @@ context-free syntax
   Part.EsvSection = <esv {
   <{EsvOption "\n"}*>
 }>
-  EsvOption.EsvSourceDirectory = <source-directory = <PathLit>>
-  EsvOption.EsvMainFile        = <main-file = <PathLit>>
+  EsvOption.EsvMainSourceDirectory = <main-source-directory = <PathLit>>
+  EsvOption.EsvMainFile            = <main-file = <PathLit>>
+  EsvOption.EsvIncludeDirectory    = <include-directory = <PathLit>>
 
   Part.StatixSection = <statix {
   <{StatixOption "\n"}*>

@@ -2,7 +2,7 @@ package mb.cfg.metalang;
 
 import mb.cfg.CompileLanguageShared;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.language.StylerLanguageCompiler;;
+import mb.spoofax.compiler.language.StylerLanguageCompiler;
 import org.immutables.value.Value;
 
 import java.io.Serializable;
@@ -15,25 +15,29 @@ public interface CompileEsvInput extends Serializable {
     static Builder builder() { return new Builder(); }
 
 
-    @Value.Default default ResourcePath esvRootDirectory() {
-        return compileLanguageShared().languageProject().project().srcDirectory();
+    default ResourcePath rootDirectory() {
+        return compileLanguageShared().languageProject().project().baseDirectory();
     }
 
-    @Value.Default default ResourcePath esvMainFile() {
-        return esvRootDirectory().appendRelativePath("main.esv");
+    @Value.Default default ResourcePath mainSourceDirectory() {
+        return rootDirectory().appendRelativePath("src");
     }
 
-    List<ResourcePath> esvIncludeDirs();
+    @Value.Default default ResourcePath mainFile() {
+        return mainSourceDirectory().appendRelativePath("main.esv");
+    }
+
+    List<ResourcePath> includeDirectories();
 
 
-    @Value.Default default String esvAtermFormatFileRelativePath() {
+    @Value.Default default String atermFormatFileRelativePath() {
         return "editor.esv.af";
     }
 
-    default ResourcePath esvAtermFormatOutputFile() {
+    default ResourcePath atermFormatOutputFile() {
         return compileLanguageShared().generatedResourcesDirectory() // Generated resources directory, so that Gradle includes the aterm format file in the JAR file.
             .appendRelativePath(compileLanguageShared().languageProject().packagePath()) // Append package path to make location unique, enabling JAR files to be merged.
-            .appendRelativePath(esvAtermFormatFileRelativePath()) // Append the relative path to the aterm format file.
+            .appendRelativePath(atermFormatFileRelativePath()) // Append the relative path to the aterm format file.
             ;
     }
 
@@ -44,6 +48,6 @@ public interface CompileEsvInput extends Serializable {
 
 
     default void syncTo(StylerLanguageCompiler.Input.Builder builder) {
-        builder.packedEsvRelativePath(esvAtermFormatFileRelativePath());
+        builder.packedEsvRelativePath(atermFormatFileRelativePath());
     }
 }

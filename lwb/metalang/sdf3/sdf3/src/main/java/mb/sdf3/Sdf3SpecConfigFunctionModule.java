@@ -42,6 +42,8 @@ public class Sdf3SpecConfigFunctionModule {
 
         @Override public int hashCode() { return 0; }
 
+        @Override public String toString() { return "Sdf3DefaultSpecConfigFunction()"; }
+
         private Object readResolve() { return instance; }
     }
 }

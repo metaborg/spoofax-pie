@@ -130,9 +130,9 @@ public class AstToObject {
         });
         parts.getAllSubTermsInListAsParts("EsvSection").ifPresent(subParts -> {
             final CompileEsvInput.Builder builder = languageCompilerInputBuilder.withEsv();
-            subParts.forOneSubtermAsPath("EsvSourceDirectory", rootDirectory, builder::esvRootDirectory);
-            subParts.forOneSubtermAsPath("EsvMainFile", rootDirectory, builder::esvMainFile);
-            // TODO: more ESV properties
+            subParts.forOneSubtermAsPath("EsvMainSourceDirectory", rootDirectory, builder::mainSourceDirectory);
+            subParts.forOneSubtermAsPath("EsvMainFile", rootDirectory, builder::mainFile);
+            subParts.forAllSubtermsAsPaths("EsvIncludeDirectory", rootDirectory, builder::addIncludeDirectories);
         });
         parts.getAllSubTermsInListAsParts("StatixSection").ifPresent(subParts -> {
             final CompileStatixInput.Builder builder = languageCompilerInputBuilder.withStatix();

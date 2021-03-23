@@ -1,26 +1,25 @@
 package mb.spoofax.lwb.compiler;
 
+import mb.cfg.CompileLanguageInput;
+import mb.cfg.CompileLanguageShared;
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.result.Result;
 import mb.common.util.ADT;
 import mb.pie.api.ExecContext;
 import mb.pie.api.STask;
-import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
-import mb.spoofax.lwb.compiler.metalang.CompileEsv;
-import mb.spoofax.lwb.compiler.sdf3.CompileSdf3;
-import mb.spoofax.lwb.compiler.statix.CompileStatix;
+import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.lwb.compiler.esv.CompileEsv;
+import mb.spoofax.lwb.compiler.esv.EsvCompileException;
 import mb.spoofax.lwb.compiler.metalang.CompileStratego;
-import mb.cfg.CompileLanguageInput;
-import mb.cfg.CompileLanguageShared;
+import mb.spoofax.lwb.compiler.sdf3.CompileSdf3;
 import mb.spoofax.lwb.compiler.sdf3.Sdf3CompileException;
-import mb.spoofax.lwb.compiler.sdf3.Sdf3CompileOutput;
+import mb.spoofax.lwb.compiler.statix.CompileStatix;
 import mb.spoofax.lwb.compiler.statix.StatixCompileException;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
-import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -28,30 +27,30 @@ import java.util.ArrayList;
 /**
  * Compiles a {@link CompileLanguageShared} by running the meta-language compilers.
  *
- * Takes an {@link CompileLanguageInput} describing the language specification and inputs for the
- * meta-language compilers. Meta-language compiler inputs are optional where absence causes the meta-language compiler
- * to not be executed.
+ * Takes an {@link CompileLanguageInput} describing the language specification and inputs for the meta-language
+ * compilers. Meta-language compiler inputs are optional where absence causes the meta-language compiler to not be
+ * executed.
  *
  * Produces a {@link Result} that is either an output with all {@link KeyedMessages messages} produced by the
  * meta-language compilers, or a {@link CompileException} when compilation fails.
  */
 @Value.Enclosing
 public class CompileLanguage implements TaskDef<CompileLanguageInput, Result<KeyedMessages, CompileLanguage.CompileException>> {
-    private final CompileSdf3 parserCompiler;
-    private final CompileEsv stylerCompiler;
-    private final CompileStatix constraintAnalyzerCompiler;
-    private final CompileStratego strategoRuntimeCompiler;
+    private final CompileSdf3 compileSdf3;
+    private final CompileEsv compileEsv;
+    private final CompileStatix compileStatix;
+    private final CompileStratego compileStratego;
 
     @Inject public CompileLanguage(
-        CompileSdf3 parserCompiler,
-        CompileEsv stylerCompiler,
-        CompileStatix constraintAnalyzerCompiler,
-        CompileStratego strategoRuntimeCompiler
+        CompileSdf3 compileSdf3,
+        CompileEsv compileEsv,
+        CompileStatix compileStatix,
+        CompileStratego compileStratego
     ) {
-        this.parserCompiler = parserCompiler;
-        this.stylerCompiler = stylerCompiler;
-        this.constraintAnalyzerCompiler = constraintAnalyzerCompiler;
-        this.strategoRuntimeCompiler = strategoRuntimeCompiler;
+        this.compileSdf3 = compileSdf3;
+        this.compileEsv = compileEsv;
+        this.compileStatix = compileStatix;
+        this.compileStratego = compileStratego;
     }
 
 
@@ -61,35 +60,31 @@ public class CompileLanguage implements TaskDef<CompileLanguageInput, Result<Key
 
     @Override
     public Result<KeyedMessages, CompileException> exec(ExecContext context, CompileLanguageInput input) {
+        final ResourcePath rootDirectory = input.compileLanguageShared().languageProject().project().baseDirectory(); // HACK: get root directory from config for now.
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
 
         final ArrayList<STask<?>> strategoOriginTask = new ArrayList<>();
-        final ArrayList<Supplier<Result<IStrategoTerm, ?>>> esvAdditionalAstSuppliers = new ArrayList<>();
 
         if(input.sdf3().isPresent()) {
-            strategoOriginTask.add(parserCompiler.createSupplier(input.sdf3().get()));
-            final Result<Sdf3CompileOutput, CompileException> result = context.require(parserCompiler, input.sdf3().get())
+            strategoOriginTask.add(compileSdf3.createSupplier(input.sdf3().get()));
+            final Result<KeyedMessages, CompileException> result = context.require(compileSdf3, input.sdf3().get())
+                .ifOk(messagesBuilder::addMessages)
                 .mapErr(CompileLanguage.CompileException::sdf3CompileFail);
-            if(result.isErr()) {
-                return result.map(Sdf3CompileOutput::messages);
-            }
-            final Sdf3CompileOutput output = result.get();
-            messagesBuilder.addMessages(output.messages());
-            esvAdditionalAstSuppliers.addAll(output.esvCompletionColorerAstSuppliers());
-        }
-
-        if(input.esv().isPresent()) {
-            final CompileEsv.Args args = new CompileEsv.Args(input.esv().get(), esvAdditionalAstSuppliers);
-            final Result<KeyedMessages, CompileException> result = context.require(stylerCompiler, args)
-                .mapErr(CompileLanguage.CompileException::esvCompileFail);
             if(result.isErr()) {
                 return result;
             }
-            messagesBuilder.addMessages(result.get());
+        }
+
+        final Result<KeyedMessages, CompileException> compileEsvResult = context.require(compileEsv, rootDirectory)
+            .ifOk(messagesBuilder::addMessages)
+            .mapErr(CompileLanguage.CompileException::esvCompileFail);
+        if(compileEsvResult.isErr()) {
+            return compileEsvResult;
         }
 
         if(input.statix().isPresent()) {
-            final Result<KeyedMessages, CompileException> result = context.require(constraintAnalyzerCompiler, input.statix().get())
+            final Result<KeyedMessages, CompileException> result = context.require(compileStatix, input.statix().get())
+                .ifOk(messagesBuilder::addMessages)
                 .mapErr(CompileLanguage.CompileException::statixCompileFail);
             if(result.isErr()) {
                 return result;
@@ -98,13 +93,12 @@ public class CompileLanguage implements TaskDef<CompileLanguageInput, Result<Key
         }
 
         if(input.stratego().isPresent()) {
-            final Result<KeyedMessages, CompileException> result = context.require(strategoRuntimeCompiler, new CompileStratego.Args(input.stratego().get(), strategoOriginTask))
-                .map((n) -> KeyedMessages.of())
+            final Result<KeyedMessages, CompileException> result = context.require(compileStratego, new CompileStratego.Args(input.stratego().get(), strategoOriginTask))
+                .ifOk(messagesBuilder::addMessages)
                 .mapErr(CompileLanguage.CompileException::strategoCompileFail);
             if(result.isErr()) {
                 return result;
             }
-            messagesBuilder.addMessages(result.get());
         }
 
         return Result.ofOk(messagesBuilder.build());
@@ -116,7 +110,7 @@ public class CompileLanguage implements TaskDef<CompileLanguageInput, Result<Key
         public interface Cases<R> {
             R sdf3CompileFail(Sdf3CompileException sdf3CompileException);
 
-            R esvCompileFail(CompileEsv.EsvCompileException esvCompileException);
+            R esvCompileFail(EsvCompileException esvCompileException);
 
             R statixCompileFail(StatixCompileException statixCompileException);
 
@@ -127,7 +121,7 @@ public class CompileLanguage implements TaskDef<CompileLanguageInput, Result<Key
             return withCause(CompileExceptions.sdf3CompileFail(cause), cause);
         }
 
-        public static CompileException esvCompileFail(CompileEsv.EsvCompileException cause) {
+        public static CompileException esvCompileFail(EsvCompileException cause) {
             return withCause(CompileExceptions.esvCompileFail(cause), cause);
         }
 
@@ -158,9 +152,9 @@ public class CompileLanguage implements TaskDef<CompileLanguageInput, Result<Key
 
         @Override public @NonNull String getMessage() {
             return cases()
-                .sdf3CompileFail((cause) -> "Parser compiler failed")
-                .esvCompileFail((cause) -> "Styler compiler failed")
-                .statixCompileFail((cause) -> "Constraint analyzer compiler failed")
+                .sdf3CompileFail((cause) -> "SDF3 compiler failed")
+                .esvCompileFail((cause) -> "ESV compiler failed")
+                .statixCompileFail((cause) -> "Statix compiler failed")
                 .strategoCompileFail((cause) -> "Stratego compiler failed")
                 .apply(this);
         }

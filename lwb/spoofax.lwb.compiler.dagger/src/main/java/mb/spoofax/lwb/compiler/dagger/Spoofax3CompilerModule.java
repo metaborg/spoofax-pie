@@ -10,10 +10,11 @@ import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.compiler.CompileLanguageToJavaClassPath;
 import mb.spoofax.lwb.compiler.CompileLanguageWithCfgToJavaClassPath;
-import mb.spoofax.lwb.compiler.metalang.CompileEsv;
+import mb.spoofax.lwb.compiler.esv.CompileEsv;
+import mb.spoofax.lwb.compiler.esv.ConfigureEsv;
+import mb.spoofax.lwb.compiler.metalang.CompileStratego;
 import mb.spoofax.lwb.compiler.sdf3.CompileSdf3;
 import mb.spoofax.lwb.compiler.statix.CompileStatix;
-import mb.spoofax.lwb.compiler.metalang.CompileStratego;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -50,10 +51,11 @@ public class Spoofax3CompilerModule {
         CompileLanguageWithCfgToJavaClassPath compileLanguageWithCfgToJavaClassPath,
         CompileLanguage languageProjectCompiler,
 
-        CompileSdf3 parserLanguageCompiler,
-        CompileEsv stylerLanguageCompiler,
-        CompileStatix constraintAnalyzerCompiler,
-        CompileStratego strategoRuntimeLanguageCompiler,
+        CompileSdf3 compileSdf3,
+        ConfigureEsv configureEsv,
+        CompileEsv compileEsv,
+        CompileStatix compileStatix,
+        CompileStratego compileStratego,
 
         CompileJava compileJava,
         UnarchiveFromJar unarchiveFromJar
@@ -63,10 +65,11 @@ public class Spoofax3CompilerModule {
         taskDefs.add(compileLanguageWithCfgToJavaClassPath);
         taskDefs.add(languageProjectCompiler);
 
-        taskDefs.add(parserLanguageCompiler);
-        taskDefs.add(stylerLanguageCompiler);
-        taskDefs.add(constraintAnalyzerCompiler);
-        taskDefs.add(strategoRuntimeLanguageCompiler);
+        taskDefs.add(compileSdf3);
+        taskDefs.add(configureEsv);
+        taskDefs.add(compileEsv);
+        taskDefs.add(compileStatix);
+        taskDefs.add(compileStratego);
 
         taskDefs.add(compileJava);
         taskDefs.add(unarchiveFromJar);

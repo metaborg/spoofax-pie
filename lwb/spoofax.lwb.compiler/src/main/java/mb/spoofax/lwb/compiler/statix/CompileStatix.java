@@ -68,7 +68,7 @@ public class CompileStatix implements TaskDef<CompileStatixInput, Result<KeyedMe
             return Result.ofErr(StatixCompileException.checkFail(messages));
         }
 
-        final HierarchicalResource outputDirectory = context.getHierarchicalResource(input.statixOutputDirectory()).ensureDirectoryExists();
+        final HierarchicalResource outputDirectory = context.getHierarchicalResource(input.outputDirectory()).ensureDirectoryExists();
         try(final Stream<? extends HierarchicalResource> stream = sourceDirectory.walk(resourceWalker, resourceMatcher)) {
             for(HierarchicalResource inputFile : new StreamIterable<>(stream)) {
                 // HACK: Run compile on root directory so it can pick up the CFG file.

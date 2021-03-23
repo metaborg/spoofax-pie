@@ -69,14 +69,14 @@ public interface CompileSdf3Input extends Serializable {
         return Conversion.nameToJavaId(shared().name().toLowerCase());
     }
 
-    @Value.Default default String sdf3ParseTableRelativePath() {
+    @Value.Default default String parseTableRelativePath() {
         return "sdf.tbl";
     }
 
-    default ResourcePath sdf3ParseTableOutputFile() {
+    default ResourcePath parseTableOutputFile() {
         return compileLanguageShared().generatedResourcesDirectory() // Generated resources directory, so that Gradle includes the parse table in the JAR file.
             .appendRelativePath(compileLanguageShared().languageProject().packagePath()) // Append package path to make location unique, enabling JAR files to be merged.
-            .appendRelativePath(sdf3ParseTableRelativePath()) // Append the relative path to the parse table.
+            .appendRelativePath(parseTableRelativePath()) // Append the relative path to the parse table.
             ;
     }
 
@@ -94,7 +94,7 @@ public interface CompileSdf3Input extends Serializable {
 
 
     default void syncTo(ParserLanguageCompiler.Input.Builder builder) {
-        builder.parseTableRelativePath(sdf3ParseTableRelativePath());
+        builder.parseTableRelativePath(parseTableRelativePath());
     }
 
     default void syncTo(CompileStrategoInput.Builder builder) {

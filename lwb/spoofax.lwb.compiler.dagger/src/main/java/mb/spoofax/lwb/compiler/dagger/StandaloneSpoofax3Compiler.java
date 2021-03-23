@@ -10,6 +10,7 @@ import mb.common.result.Result;
 import mb.esv.DaggerEsvComponent;
 import mb.esv.DaggerEsvResourcesComponent;
 import mb.esv.EsvComponent;
+import mb.esv.EsvConfigFunctionModule;
 import mb.esv.EsvResourcesComponent;
 import mb.libspoofax2.DaggerLibSpoofax2Component;
 import mb.libspoofax2.DaggerLibSpoofax2ResourcesComponent;
@@ -123,6 +124,7 @@ public class StandaloneSpoofax3Compiler implements AutoCloseable {
             .build();
         pieModule.addTaskDefsFrom(strategoComponent);
         final EsvComponent esvComponent = DaggerEsvComponent.builder()
+            .esvConfigFunctionModule(new EsvConfigFunctionModule())
             .loggerComponent(loggerComponent)
             .esvResourcesComponent(esvResourcesComponent)
             .resourceServiceComponent(resourceServiceComponent)

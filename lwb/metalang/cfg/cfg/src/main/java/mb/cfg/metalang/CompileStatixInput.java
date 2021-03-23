@@ -30,7 +30,7 @@ public interface CompileStatixInput extends Serializable {
     List<ResourcePath> includeDirectories();
 
 
-    default ResourcePath statixOutputDirectory() {
+    default ResourcePath outputDirectory() {
         return compileLanguageShared().generatedResourcesDirectory() // Generated resources directory, so that Gradle includes the aterm format file in the JAR file.
             .appendRelativePath(compileLanguageShared().languageProject().packagePath()) // Append package path to make location unique, enabling JAR files to be merged.
             ;

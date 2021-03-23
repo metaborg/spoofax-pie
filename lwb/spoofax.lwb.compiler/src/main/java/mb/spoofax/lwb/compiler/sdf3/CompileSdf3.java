@@ -1,5 +1,6 @@
 package mb.spoofax.lwb.compiler.sdf3;
 
+import mb.cfg.metalang.CompileSdf3Input;
 import mb.common.message.KeyedMessages;
 import mb.common.result.Result;
 import mb.common.util.StreamIterable;
@@ -19,7 +20,6 @@ import mb.resource.hierarchical.walk.ResourceWalker;
 import mb.sdf3.task.Sdf3AnalyzeMulti;
 import mb.sdf3.task.Sdf3Desugar;
 import mb.sdf3.task.Sdf3Parse;
-import mb.sdf3.task.Sdf3ToCompletionColorer;
 import mb.sdf3.task.Sdf3ToCompletionRuntime;
 import mb.sdf3.task.Sdf3ToPrettyPrinter;
 import mb.sdf3.task.Sdf3ToSignature;
@@ -33,23 +33,20 @@ import mb.sdf3.task.spoofax.Sdf3CheckMulti;
 import mb.sdf3.task.util.Sdf3Util;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
-import mb.cfg.metalang.CompileSdf3Input;
 import mb.str.task.StrategoPrettyPrint;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.immutables.value.Value;
 import org.metaborg.sdf2table.parsetable.ParseTable;
 import org.metaborg.sdf2table.parsetable.ParseTableConfiguration;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.util.TermUtils;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.stream.Stream;
 
 import static mb.constraint.pie.ConstraintAnalyzeMultiTaskDef.SingleFileOutput;
 
-public class CompileSdf3 implements TaskDef<CompileSdf3Input, Result<Sdf3CompileOutput, Sdf3CompileException>> {
+public class CompileSdf3 implements TaskDef<CompileSdf3Input, Result<KeyedMessages, Sdf3CompileException>> {
     private final TemplateWriter completionTemplate;
     private final TemplateWriter ppTemplate;
     private final Sdf3Parse parse;
@@ -64,7 +61,6 @@ public class CompileSdf3 implements TaskDef<CompileSdf3Input, Result<Sdf3Compile
     private final Sdf3ToPrettyPrinter toPrettyPrinter;
     private final Sdf3ParseTableToParenthesizer toParenthesizer;
     private final Sdf3ToCompletionRuntime toCompletionRuntime;
-    private final Sdf3ToCompletionColorer toCompletionColorer;
 
     @Inject public CompileSdf3(
         TemplateCompiler templateCompiler,
@@ -79,8 +75,7 @@ public class CompileSdf3 implements TaskDef<CompileSdf3Input, Result<Sdf3Compile
         Sdf3ToSignature toSignature,
         Sdf3ToPrettyPrinter toPrettyPrinter,
         Sdf3ParseTableToParenthesizer toParenthesizer,
-        Sdf3ToCompletionRuntime toCompletionRuntime,
-        Sdf3ToCompletionColorer toCompletionColorer
+        Sdf3ToCompletionRuntime toCompletionRuntime
     ) {
         templateCompiler = templateCompiler.loadingFromClass(getClass());
         this.completionTemplate = templateCompiler.getOrCompileToWriter("completion.str.mustache");
@@ -97,7 +92,6 @@ public class CompileSdf3 implements TaskDef<CompileSdf3Input, Result<Sdf3Compile
         this.toPrettyPrinter = toPrettyPrinter;
         this.toParenthesizer = toParenthesizer;
         this.toCompletionRuntime = toCompletionRuntime;
-        this.toCompletionColorer = toCompletionColorer;
     }
 
 
@@ -106,7 +100,7 @@ public class CompileSdf3 implements TaskDef<CompileSdf3Input, Result<Sdf3Compile
     }
 
     @Override
-    public Result<Sdf3CompileOutput, Sdf3CompileException> exec(ExecContext context, CompileSdf3Input input) throws Exception {
+    public Result<KeyedMessages, Sdf3CompileException> exec(ExecContext context, CompileSdf3Input input) throws Exception {
         // Check main file and root directory.
         final HierarchicalResource mainFile = context.require(input.mainFile(), ResourceStampers.<HierarchicalResource>exists());
         if(!mainFile.exists() || !mainFile.isFile()) {
@@ -122,7 +116,8 @@ public class CompileSdf3 implements TaskDef<CompileSdf3Input, Result<Sdf3Compile
         final ResourceWalker resourceWalker = Sdf3Util.createResourceWalker();
         final ResourceMatcher resourceMatcher = new AllResourceMatcher(Sdf3Util.createResourceMatcher(), new FileResourceMatcher());
         final @Nullable KeyedMessages messages = context.require(check.createTask(
-            new Sdf3CheckMulti.Input(rootDirectory, resourceWalker, resourceMatcher) // HACK: Run check on root directory so it can pick up the CFG file.
+            // HACK: Run check on root directory so it can pick up the CFG file.
+            new Sdf3CheckMulti.Input(rootDirectory, resourceWalker, resourceMatcher)
         ));
         if(messages.containsError()) {
             return Result.ofErr(Sdf3CompileException.checkFail(messages));
@@ -140,13 +135,12 @@ public class CompileSdf3 implements TaskDef<CompileSdf3Input, Result<Sdf3Compile
         final Supplier<Result<Sdf3SpecConfig, ?>> specConfigSupplier = new ValueSupplier<>(Result.ofOk(new Sdf3SpecConfig(input.sourceDirectory(), input.mainFile(), parseTableConfiguration)));
         final Supplier<Result<Sdf3Spec, ?>> specSupplier = createSpec.createSupplier(specConfigSupplier);
         final Supplier<Result<ParseTable, ?>> parseTableSupplier = toParseTable.createSupplier(new Sdf3SpecToParseTable.Input(specSupplier, false));
-        final Result<None, ? extends Exception> compileResult = context.require(parseTableToFile, new Sdf3ParseTableToFile.Args(parseTableSupplier, input.sdf3ParseTableOutputFile()));
+        final Result<None, ? extends Exception> compileResult = context.require(parseTableToFile, new Sdf3ParseTableToFile.Args(parseTableSupplier, input.parseTableOutputFile()));
         if(compileResult.isErr()) {
             return Result.ofErr(Sdf3CompileException.parseTableCompileFail(compileResult.getErr()));
         }
 
         // Compile each SDF3 source file to a Stratego signature, pretty-printer, and completion runtime module.
-        final ArrayList<Supplier<Result<IStrategoTerm, ?>>> esvCompletionColorerAstSuppliers = new ArrayList<>();
         final Sdf3AnalyzeMulti.Input analyzeInput = new Sdf3AnalyzeMulti.Input(sourceDirectory.getPath(), resourceWalker, resourceMatcher, parse.createRecoverableAstFunction());
         try(final Stream<? extends HierarchicalResource> stream = sourceDirectory.walk(resourceWalker, resourceMatcher)) {
             for(HierarchicalResource file : new StreamIterable<>(stream)) {
@@ -168,7 +162,6 @@ public class CompileSdf3 implements TaskDef<CompileSdf3Input, Result<Sdf3Compile
                 } catch(Exception e) {
                     return Result.ofErr(Sdf3CompileException.completionRuntimeGenerateFail(e));
                 }
-                esvCompletionColorerAstSuppliers.add(toCompletionColorer.createSupplier(astSupplier));
             }
         }
 
@@ -190,11 +183,7 @@ public class CompileSdf3 implements TaskDef<CompileSdf3Input, Result<Sdf3Compile
             ppTemplate.write(context, generatedStrategoSourcesDirectory.appendRelativePath("pp.str"), input, map);
         }
 
-        return Result.ofOk(Sdf3CompileOutput.builder()
-            .messages(messages)
-            .esvCompletionColorerAstSuppliers(esvCompletionColorerAstSuppliers)
-            .build()
-        );
+        return Result.ofOk(messages);
     }
 
     private void toSignature(ExecContext context, CompileSdf3Input input, Supplier<Result<SingleFileOutput, ?>> singleFileAnalysisOutputSupplier) throws Exception {

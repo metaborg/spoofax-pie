@@ -85,7 +85,7 @@ class CharsTestBase extends TestBase {
 
 
     DynamicLoaderReloadSession modifyStyler(DynamicLoaderMixedSession session, CompileLanguageToJavaClassPathInput input) throws IOException, ExecException, InterruptedException {
-        final ResourcePath path = input.compileLanguageInput().esv().get().esvMainFile();
+        final ResourcePath path = input.compileLanguageInput().esv().get().mainFile();
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString().replace("0 0 150 bold", "255 255 0 italic");
         file.writeString(text);

@@ -15,7 +15,7 @@ import mb.sdf3.Sdf3Component;
 import mb.spoofax.lwb.compiler.CompileLanguageToJavaClassPath;
 import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.compiler.CompileLanguageWithCfgToJavaClassPath;
-import mb.spoofax.lwb.compiler.metalang.CompileEsv;
+import mb.spoofax.lwb.compiler.esv.CompileEsv;
 import mb.spoofax.lwb.compiler.sdf3.CompileSdf3;
 import mb.spoofax.lwb.compiler.statix.CompileStatix;
 import mb.spoofax.lwb.compiler.metalang.CompileStratego;
@@ -49,15 +49,6 @@ public interface Spoofax3CompilerComponent extends TaskDefsProvider {
     CompileLanguageWithCfgToJavaClassPath getCompileLanguageWithCfgToJavaClassPath();
 
     CompileLanguage getCompileLanguage();
-
-
-    CompileSdf3 getCompileSdf3();
-
-    CompileEsv getCompileEsv();
-
-    CompileStatix getCompileStatix();
-
-    CompileStratego getCompileStratego();
 
 
     @Override @Spoofax3CompilerQualifier Set<TaskDef<?, ?>> getTaskDefs();

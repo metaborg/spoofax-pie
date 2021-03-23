@@ -165,28 +165,28 @@ open class LanguagePlugin : Plugin<Project> {
         }
 
         // Output: parse table file
-        val outputFile = resourceService.toLocalFile(it.sdf3ParseTableOutputFile())
+        val outputFile = resourceService.toLocalFile(it.parseTableOutputFile())
         if(outputFile != null) {
           outputs.file(outputFile)
         } else {
-          logger.warn("Cannot set the SDF3 parse table as a task output, because ${it.sdf3ParseTableOutputFile()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
+          logger.warn("Cannot set the SDF3 parse table as a task output, because ${it.parseTableOutputFile()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
         }
       }
       input.esv().ifPresent {
         // Input: all ESV files
-        val rootDirectory = resourceService.toLocalFile(it.esvRootDirectory())
+        val rootDirectory = resourceService.toLocalFile(it.mainSourceDirectory())
         if(rootDirectory != null) {
           inputs.files(project.fileTree(rootDirectory) { include("**/*.esv") })
         } else {
-          logger.warn("Cannot set ESV files as task inputs, because ${it.esvRootDirectory()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
+          logger.warn("Cannot set ESV files as task inputs, because ${it.mainSourceDirectory()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
         }
 
         // Output: ESV aterm format file
-        val outputFile = resourceService.toLocalFile(it.esvAtermFormatOutputFile())
+        val outputFile = resourceService.toLocalFile(it.atermFormatOutputFile())
         if(outputFile != null) {
           outputs.file(outputFile)
         } else {
-          logger.warn("Cannot set the ESV aterm format file as a task output, because ${it.esvAtermFormatOutputFile()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
+          logger.warn("Cannot set the ESV aterm format file as a task output, because ${it.atermFormatOutputFile()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
         }
       }
       input.statix().ifPresent {
@@ -199,11 +199,11 @@ open class LanguagePlugin : Plugin<Project> {
         }
 
         // Output: Statix output directory
-        val outputDirectory = resourceService.toLocalFile(it.statixOutputDirectory())
+        val outputDirectory = resourceService.toLocalFile(it.outputDirectory())
         if(outputDirectory != null) {
           outputs.dir(outputDirectory)
         } else {
-          logger.warn("Cannot set the Statix output directory as a task output, because ${it.statixOutputDirectory()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
+          logger.warn("Cannot set the Statix output directory as a task output, because ${it.outputDirectory()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
         }
       }
       input.stratego().ifPresent {

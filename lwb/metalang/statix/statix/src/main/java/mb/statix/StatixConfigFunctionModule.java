@@ -18,7 +18,7 @@ public class StatixConfigFunctionModule {
     }
 
     public StatixConfigFunctionModule() {
-        this(StatixDefaultSpecConfigFunction.instance);
+        this(StatixDefaultConfigFunction.instance);
     }
 
     @Provides @StatixScope
@@ -26,10 +26,10 @@ public class StatixConfigFunctionModule {
         return function;
     }
 
-    private static class StatixDefaultSpecConfigFunction implements Function<ResourcePath, Result<Option<StatixConfig>, ?>> {
-        private static final StatixDefaultSpecConfigFunction instance = new StatixDefaultSpecConfigFunction();
+    private static class StatixDefaultConfigFunction implements Function<ResourcePath, Result<Option<StatixConfig>, ?>> {
+        private static final StatixDefaultConfigFunction instance = new StatixDefaultConfigFunction();
 
-        private StatixDefaultSpecConfigFunction() {}
+        private StatixDefaultConfigFunction() {}
 
         @Override public Result<Option<StatixConfig>, ?> apply(ExecContext context, ResourcePath root) {
             return Result.ofOk(Option.ofSome(new StatixConfig(root)));
