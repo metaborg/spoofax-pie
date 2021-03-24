@@ -1,31 +1,36 @@
-package mb.esv;
+package mb.esv.task.spoofax;
 
-import dagger.Module;
-import dagger.Provides;
 import mb.common.option.Option;
 import mb.common.result.Result;
+import mb.esv.EsvScope;
 import mb.esv.task.EsvConfig;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Function;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-@Module
-public class EsvConfigFunctionModule {
-    private final Function<ResourcePath, Result<Option<EsvConfig>, ?>> function;
+import javax.inject.Inject;
 
-    public EsvConfigFunctionModule(Function<ResourcePath, Result<Option<EsvConfig>, ?>> function) {
-        this.function = function;
-    }
-
-    public EsvConfigFunctionModule() {
-        this(EsvDefaultConfigFunction.instance);
-    }
+@EsvScope
+public class EsvConfigFunctionWrapper {
+    private @Nullable Function<ResourcePath, ? extends Result<Option<EsvConfig>, ?>> function = null;
 
 
-    @Provides @EsvScope
-    Function<ResourcePath, Result<Option<EsvConfig>, ?>> provideCheckConfigFunction() {
+    @Inject public EsvConfigFunctionWrapper() {}
+
+
+    public Function<ResourcePath, ? extends Result<Option<EsvConfig>, ?>> get() {
+        if(function == null) {
+            function = EsvDefaultConfigFunction.instance;
+        }
         return function;
+    }
+
+    public void set(Function<ResourcePath, ? extends Result<Option<EsvConfig>, ?>> function) {
+        if(this.function != null) {
+            throw new IllegalStateException("Function in EsvConfigFunctionWrapper was already set or used. After setting or using the function, it may not be changed any more to guarantee sound incrementality");
+        }
+        this.function = function;
     }
 
 

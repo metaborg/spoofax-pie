@@ -2,15 +2,12 @@ package mb.esv.task.spoofax;
 
 import mb.common.message.KeyedMessages;
 import mb.common.message.Message;
-import mb.common.option.Option;
-import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.esv.EsvClassLoaderResources;
 import mb.esv.EsvScope;
 import mb.esv.task.EsvCheck;
 import mb.esv.task.EsvConfig;
 import mb.pie.api.ExecContext;
-import mb.pie.api.Function;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.hierarchical.ResourcePath;
@@ -24,7 +21,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @EsvScope
-public class EsvCheckWrapper implements TaskDef<EsvCheckWrapper.Input, KeyedMessages> {
+public class EsvCheckMultiWrapper implements TaskDef<EsvCheckMultiWrapper.Input, KeyedMessages> {
     public static class Input implements Serializable {
         public final ResourcePath root;
         public final ResourceWalker walker;
@@ -61,20 +58,20 @@ public class EsvCheckWrapper implements TaskDef<EsvCheckWrapper.Input, KeyedMess
     }
 
     private final EsvClassLoaderResources classLoaderResources;
-    private final Function<ResourcePath, Result<Option<EsvConfig>, ?>> configFunction;
+    private final EsvConfigFunctionWrapper configFunctionWrapper;
     private final EsvCheck check;
-    private final GeneratedEsvCheckMulti defaultCheck;
+    private final BaseEsvCheckMulti baseCheckMulti;
 
-    @Inject public EsvCheckWrapper(
+    @Inject public EsvCheckMultiWrapper(
         EsvClassLoaderResources classLoaderResources,
-        Function<ResourcePath, Result<Option<EsvConfig>, ?>> configFunction,
+        EsvConfigFunctionWrapper configFunctionWrapper,
         EsvCheck check,
-        GeneratedEsvCheckMulti defaultCheck
+        BaseEsvCheckMulti baseCheckMulti
     ) {
         this.classLoaderResources = classLoaderResources;
-        this.configFunction = configFunction;
+        this.configFunctionWrapper = configFunctionWrapper;
         this.check = check;
-        this.defaultCheck = defaultCheck;
+        this.baseCheckMulti = baseCheckMulti;
     }
 
     @Override public String getId() {
@@ -83,7 +80,7 @@ public class EsvCheckWrapper implements TaskDef<EsvCheckWrapper.Input, KeyedMess
 
     @Override public KeyedMessages exec(ExecContext context, Input input) throws IOException {
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
-        return configFunction.apply(context, input.root).mapOrElse(
+        return configFunctionWrapper.get().apply(context, input.root).mapOrElse(
             o -> o.mapOrElse(
                 c -> checkWithConfig(context, c),
                 KeyedMessages::of // ESV is not configured, do not need to check.
@@ -96,7 +93,7 @@ public class EsvCheckWrapper implements TaskDef<EsvCheckWrapper.Input, KeyedMess
         return context.require(check, config);
     }
 
-    private KeyedMessages checkDefault(ExecContext context, EsvCheckWrapper.Input input) {
-        return context.require(defaultCheck, new GeneratedEsvCheckMulti.Input(input.root, input.walker, input.matcher));
+    private KeyedMessages checkDefault(ExecContext context, EsvCheckMultiWrapper.Input input) {
+        return context.require(baseCheckMulti, new BaseEsvCheckMulti.Input(input.root, input.walker, input.matcher));
     }
 }

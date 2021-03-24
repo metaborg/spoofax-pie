@@ -139,7 +139,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
     @Override public long getSize() throws IOException {
         final @Nullable IDocument document = getDocument();
         if(document != null) {
-            return document.getLength() * 2; // Java Strings are UTF-16: 2 bytes per character.
+            return document.getLength() * 2L; // Java Strings are UTF-16: 2 bytes per character.
         } else {
             return getFileStore().fetchInfo().getLength();
         }

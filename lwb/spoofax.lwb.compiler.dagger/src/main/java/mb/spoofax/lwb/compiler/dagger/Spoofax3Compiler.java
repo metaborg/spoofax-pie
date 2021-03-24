@@ -87,6 +87,9 @@ public class Spoofax3Compiler implements AutoCloseable {
             .libStatixComponent(libStatixComponent)
             .libStatixResourcesComponent(libStatixResourcesComponent)
             .build();
+
+        // Inject ESV config function.
+        this.esvComponent.getEsvConfigFunctionWrapper().set(this.component.getConfigureEsv().createFunction());
     }
 
     @Override public void close() throws Exception {

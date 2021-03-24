@@ -59,16 +59,18 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   val packageId = "mb.esv"
   val taskPackageId = "$packageId.task"
 
-  // Add config function module
-  addAdditionalModules(TypeInfo.of(packageId, "EsvConfigFunctionModule"))
+  // Extend component
+  baseComponent(packageId, "BaseEsvComponent")
+  extendComponent(packageId, "EsvComponent")
 
   // Manual multi-file check implementation
   isMultiFile(true)
   val spoofaxTaskPackageId = "$taskPackageId.spoofax"
-  baseCheckTaskDef(spoofaxTaskPackageId, "GeneratedEsvCheck")
-  baseCheckMultiTaskDef(spoofaxTaskPackageId, "GeneratedEsvCheckMulti")
-  extendCheckMultiTaskDef(spoofaxTaskPackageId, "EsvCheckWrapper")
+  baseCheckTaskDef(spoofaxTaskPackageId, "BaseEsvCheck")
+  baseCheckMultiTaskDef(spoofaxTaskPackageId, "BaseEsvCheckMulti")
+  extendCheckMultiTaskDef(spoofaxTaskPackageId, "EsvCheckMultiWrapper")
 
+  // Internal task definitions
   val check = TypeInfo.of(taskPackageId, "EsvCheck")
   val compile = TypeInfo.of(taskPackageId, "EsvCompile")
   addTaskDefs(check, compile)

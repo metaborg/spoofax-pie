@@ -16,9 +16,11 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.jface.text.DocumentEvent;
@@ -224,7 +226,23 @@ public abstract class SpoofaxEditor extends TextEditor {
         if(document == null || file == null) return; // TODO: support case where file is null but document is not.
         cancelJobs();
         final Job job = new EditorUpdateJob(loggerFactory, pieRunner, languageComponent, pieComponent, project, file, document, this);
-        job.setRule(MultiRule.combine(file /* May return null, but null is a valid scheduling rule */, languageComponent.startupReadLockRule()));
+
+        // HACK: try to pass the build directory as a scheduling rule, because sometimes an editor update may require
+        //       unarchiving files into the build directory (usually for meta-languages). This is fine, but the build
+        //       directory should not be hard coded!
+        final @Nullable IFolder buildDirectory;
+        if(project != null) {
+            buildDirectory = project.getFolder("build");
+        } else {
+            buildDirectory = null;
+        }
+
+        //noinspection ConstantConditions
+        job.setRule(MultiRule.combine(new ISchedulingRule[]{
+            buildDirectory, // May be null, but hat is a valid scheduling rule
+            file, // May be null, but hat is a valid scheduling rule
+            languageComponent.startupReadLockRule()
+        }));
         job.schedule(initialUpdate ? 0 : 300);
     }
 
