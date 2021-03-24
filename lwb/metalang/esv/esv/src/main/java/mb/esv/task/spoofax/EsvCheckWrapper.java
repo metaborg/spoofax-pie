@@ -83,8 +83,8 @@ public class EsvCheckWrapper implements TaskDef<EsvCheckWrapper.Input, KeyedMess
 
     @Override public KeyedMessages exec(ExecContext context, Input input) throws IOException {
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
-        return configFunction.apply(context, input.root).mapThrowingOrElse(
-            o -> o.mapThrowingOrElse(
+        return configFunction.apply(context, input.root).mapOrElse(
+            o -> o.mapOrElse(
                 c -> checkWithConfig(context, c),
                 KeyedMessages::of // ESV is not configured, do not need to check.
             ),
