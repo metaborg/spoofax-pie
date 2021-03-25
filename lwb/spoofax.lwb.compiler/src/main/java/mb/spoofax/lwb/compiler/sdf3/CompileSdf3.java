@@ -1,20 +1,19 @@
 package mb.spoofax.lwb.compiler.sdf3;
 
 import mb.cfg.metalang.CompileSdf3Input;
+import mb.cfg.task.CfgRootDirectoryToObject;
 import mb.common.message.KeyedMessages;
+import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.common.util.StreamIterable;
+import mb.jsglr1.pie.JSGLR1ParseTaskInput;
 import mb.pie.api.ExecContext;
-import mb.pie.api.Function;
 import mb.pie.api.None;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
-import mb.pie.api.ValueSupplier;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.resource.hierarchical.match.AllResourceMatcher;
-import mb.resource.hierarchical.match.FileResourceMatcher;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
 import mb.sdf3.task.Sdf3AnalyzeMulti;
@@ -23,37 +22,38 @@ import mb.sdf3.task.Sdf3Parse;
 import mb.sdf3.task.Sdf3ToCompletionRuntime;
 import mb.sdf3.task.Sdf3ToPrettyPrinter;
 import mb.sdf3.task.Sdf3ToSignature;
-import mb.sdf3.task.spec.Sdf3CreateSpec;
+import mb.sdf3.task.spec.Sdf3CheckSpec;
 import mb.sdf3.task.spec.Sdf3ParseTableToFile;
 import mb.sdf3.task.spec.Sdf3ParseTableToParenthesizer;
-import mb.sdf3.task.spec.Sdf3Spec;
 import mb.sdf3.task.spec.Sdf3SpecConfig;
 import mb.sdf3.task.spec.Sdf3SpecToParseTable;
-import mb.sdf3.task.spoofax.Sdf3CheckMulti;
 import mb.sdf3.task.util.Sdf3Util;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.str.task.StrategoPrettyPrint;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.sdf2table.parsetable.ParseTable;
-import org.metaborg.sdf2table.parsetable.ParseTableConfiguration;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.util.TermUtils;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.stream.Stream;
 
 import static mb.constraint.pie.ConstraintAnalyzeMultiTaskDef.SingleFileOutput;
 
-public class CompileSdf3 implements TaskDef<CompileSdf3Input, Result<KeyedMessages, Sdf3CompileException>> {
+public class CompileSdf3 implements TaskDef<ResourcePath, Result<KeyedMessages, Sdf3CompileException>> {
     private final TemplateWriter completionTemplate;
     private final TemplateWriter ppTemplate;
+
+    private final CfgRootDirectoryToObject cfgRootDirectoryToObject;
+
+    private final ConfigureSdf3 configure;
+
+    private final Sdf3CheckSpec check;
     private final Sdf3Parse parse;
-    private final Function<Supplier<? extends Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> desugar;
+    private final Sdf3Desugar desugar;
     private final Sdf3AnalyzeMulti analyze;
-    private final Sdf3CheckMulti check;
-    private final Sdf3CreateSpec createSpec;
     private final Sdf3SpecToParseTable toParseTable;
     private final Sdf3ParseTableToFile parseTableToFile;
     private final StrategoPrettyPrint strategoPrettyPrint;
@@ -64,11 +64,15 @@ public class CompileSdf3 implements TaskDef<CompileSdf3Input, Result<KeyedMessag
 
     @Inject public CompileSdf3(
         TemplateCompiler templateCompiler,
+
+        CfgRootDirectoryToObject cfgRootDirectoryToObject,
+
+        ConfigureSdf3 configure,
+
+        Sdf3CheckSpec check,
         Sdf3Parse parse,
         Sdf3Desugar desugar,
         Sdf3AnalyzeMulti analyze,
-        Sdf3CreateSpec createSpec,
-        Sdf3CheckMulti check,
         Sdf3SpecToParseTable toParseTable,
         Sdf3ParseTableToFile parseTableToFile,
         StrategoPrettyPrint strategoPrettyPrint,
@@ -80,11 +84,15 @@ public class CompileSdf3 implements TaskDef<CompileSdf3Input, Result<KeyedMessag
         templateCompiler = templateCompiler.loadingFromClass(getClass());
         this.completionTemplate = templateCompiler.getOrCompileToWriter("completion.str.mustache");
         this.ppTemplate = templateCompiler.getOrCompileToWriter("pp.str.mustache");
+
+        this.cfgRootDirectoryToObject = cfgRootDirectoryToObject;
+
+        this.configure = configure;
+
         this.parse = parse;
-        this.desugar = desugar.createFunction();
+        this.desugar = desugar;
         this.analyze = analyze;
         this.check = check;
-        this.createSpec = createSpec;
         this.toParseTable = toParseTable;
         this.parseTableToFile = parseTableToFile;
         this.strategoPrettyPrint = strategoPrettyPrint;
@@ -100,49 +108,40 @@ public class CompileSdf3 implements TaskDef<CompileSdf3Input, Result<KeyedMessag
     }
 
     @Override
-    public Result<KeyedMessages, Sdf3CompileException> exec(ExecContext context, CompileSdf3Input input) throws Exception {
-        // Check main file and root directory.
-        final HierarchicalResource mainFile = context.require(input.mainFile(), ResourceStampers.<HierarchicalResource>exists());
-        if(!mainFile.exists() || !mainFile.isFile()) {
-            return Result.ofErr(Sdf3CompileException.mainFileFail(mainFile.getPath()));
-        }
-        final HierarchicalResource sourceDirectory = context.require(input.sourceDirectory(), ResourceStampers.<HierarchicalResource>exists());
-        if(!sourceDirectory.exists() || !sourceDirectory.isDirectory()) {
-            return Result.ofErr(Sdf3CompileException.sourceDirectoryFail(sourceDirectory.getPath()));
-        }
-        final ResourcePath rootDirectory = input.rootDirectory();
+    public Result<KeyedMessages, Sdf3CompileException> exec(ExecContext context, ResourcePath rootDirectory) throws IOException {
+        return context.require(cfgRootDirectoryToObject, rootDirectory)
+            .mapErr(Sdf3CompileException::getLanguageCompilerConfigurationFail)
+            .flatMapThrowing(o1 -> Option.ofOptional(o1.compileLanguageToJavaClassPathInput.compileLanguageInput().sdf3()).mapThrowingOr(
+                i -> context.require(configure, rootDirectory)
+                    .mapErr(Sdf3CompileException::configureFail)
+                    .flatMapThrowing(o2 -> o2.mapThrowingOr(
+                        c -> checkAndCompile(context, c, i),
+                        Result.ofOk(KeyedMessages.of())
+                    )),
+                Result.ofOk(KeyedMessages.of())
+            ));
+    }
 
-        // Check SDF3 source files.
-        final ResourceWalker resourceWalker = Sdf3Util.createResourceWalker();
-        final ResourceMatcher resourceMatcher = new AllResourceMatcher(Sdf3Util.createResourceMatcher(), new FileResourceMatcher());
-        final @Nullable KeyedMessages messages = context.require(check.createTask(
-            // HACK: Run check on root directory so it can pick up the CFG file.
-            new Sdf3CheckMulti.Input(rootDirectory, resourceWalker, resourceMatcher)
-        ));
+    public Result<KeyedMessages, Sdf3CompileException> checkAndCompile(ExecContext context, Sdf3SpecConfig config, CompileSdf3Input input) throws IOException {
+        final KeyedMessages messages = context.require(check, config);
         if(messages.containsError()) {
             return Result.ofErr(Sdf3CompileException.checkFail(messages));
         }
 
-        // Compile SDF3 spec to a parse table.
-        final ParseTableConfiguration parseTableConfiguration = new ParseTableConfiguration(
-            input.createDynamicParseTable(),
-            input.createDataDependentParseTable(),
-            input.solveDeepConflictsInParseTable(),
-            input.checkOverlapInParseTable(),
-            input.checkPrioritiesInParseTable(),
-            input.createLayoutSensitiveParseTable()
-        );
-        final Supplier<Result<Sdf3SpecConfig, ?>> specConfigSupplier = new ValueSupplier<>(Result.ofOk(new Sdf3SpecConfig(input.sourceDirectory(), input.mainFile(), parseTableConfiguration)));
-        final Supplier<Result<Sdf3Spec, ?>> specSupplier = createSpec.createSupplier(specConfigSupplier);
-        final Supplier<Result<ParseTable, ?>> parseTableSupplier = toParseTable.createSupplier(new Sdf3SpecToParseTable.Input(specSupplier, false));
+        // Compile SDF3 to a parse table.
+        final Supplier<Result<ParseTable, ?>> parseTableSupplier = toParseTable.createSupplier(new Sdf3SpecToParseTable.Input(config, false));
         final Result<None, ? extends Exception> compileResult = context.require(parseTableToFile, new Sdf3ParseTableToFile.Args(parseTableSupplier, input.parseTableOutputFile()));
         if(compileResult.isErr()) {
             return Result.ofErr(Sdf3CompileException.parseTableCompileFail(compileResult.getErr()));
         }
 
         // Compile each SDF3 source file to a Stratego signature, pretty-printer, and completion runtime module.
-        final Sdf3AnalyzeMulti.Input analyzeInput = new Sdf3AnalyzeMulti.Input(sourceDirectory.getPath(), parse.createRecoverableMultiAstSupplierFunction(resourceWalker, resourceMatcher));
-        try(final Stream<? extends HierarchicalResource> stream = sourceDirectory.walk(resourceWalker, resourceMatcher)) {
+        final ResourceWalker walker = Sdf3Util.createResourceWalker();
+        final ResourceMatcher matcher = Sdf3Util.createResourceMatcher();
+        final JSGLR1ParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().rootDirectoryHint(config.rootDirectory);
+        final Sdf3AnalyzeMulti.Input analyzeInput = new Sdf3AnalyzeMulti.Input(config.mainSourceDirectory, parse.createRecoverableMultiAstSupplierFunction(walker, matcher));
+        final HierarchicalResource mainSourceDirectory = context.require(config.mainSourceDirectory, ResourceStampers.modifiedDirRec(walker, matcher));
+        try(final Stream<? extends HierarchicalResource> stream = mainSourceDirectory.walk(walker, matcher)) {
             for(HierarchicalResource file : new StreamIterable<>(stream)) {
                 final Supplier<Result<SingleFileOutput, ?>> singleFileAnalysisOutputSupplier = analyze.createSingleFileOutputSupplier(analyzeInput, file.getPath());
                 try {
@@ -151,7 +150,7 @@ public class CompileSdf3 implements TaskDef<CompileSdf3Input, Result<KeyedMessag
                     return Result.ofErr(Sdf3CompileException.signatureGenerateFail(e));
                 }
 
-                final Supplier<Result<IStrategoTerm, ?>> astSupplier = desugar.createSupplier(parse.inputBuilder().withFile(file.getPath()).rootDirectoryHint(rootDirectory).buildAstSupplier());
+                final Supplier<Result<IStrategoTerm, ?>> astSupplier = desugar.createSupplier(parseInputBuilder.withFile(file.getPath()).buildAstSupplier());
                 try {
                     toPrettyPrinter(context, input, astSupplier);
                 } catch(Exception e) {

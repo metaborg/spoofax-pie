@@ -155,7 +155,7 @@ public class ConfigureEsv implements TaskDef<ResourcePath, Result<Option<EsvConf
         // SDF3 to completion colorer (if SDF3 is enabled).
         final ArrayList<Supplier<Result<IStrategoTerm, ?>>> includeAstSuppliers = new ArrayList<>();
         Option.ofOptional(compileLanguageInput.sdf3()).ifSomeThrowing(sdf3Input -> {
-            final HierarchicalResource sdf3SourceDirectory = context.getHierarchicalResource(sdf3Input.sourceDirectory());
+            final HierarchicalResource sdf3SourceDirectory = context.getHierarchicalResource(sdf3Input.mainSourceDirectory());
             final ResourceWalker resourceWalker = Sdf3Util.createResourceWalker();
             final ResourceMatcher resourceMatcher = new AllResourceMatcher(Sdf3Util.createResourceMatcher(), new FileResourceMatcher());
             context.require(sdf3SourceDirectory, ResourceStampers.modifiedDirRec(resourceWalker, resourceMatcher));
@@ -167,7 +167,7 @@ public class ConfigureEsv implements TaskDef<ResourcePath, Result<Option<EsvConf
             }
         });
 
-        return Result.ofOk(new EsvConfig(esvInput.mainFile(), rootDirectory, ListView.copyOf(sourceFileOrigins), ListView.copyOf(includeDirectorySuppliers), ListView.of(includeAstSuppliers)));
+        return Result.ofOk(new EsvConfig(rootDirectory, esvInput.mainFile(), ListView.copyOf(sourceFileOrigins), ListView.copyOf(includeDirectorySuppliers), ListView.of(includeAstSuppliers)));
     }
 
 

@@ -63,16 +63,15 @@ public class CompileLanguage implements TaskDef<CompileLanguageInput, Result<Key
         final ResourcePath rootDirectory = input.compileLanguageShared().languageProject().project().baseDirectory(); // HACK: get root directory from config for now.
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
 
-        final ArrayList<STask<?>> strategoOriginTask = new ArrayList<>();
+        final ArrayList<STask<?>> strategoOriginTasks = new ArrayList<>();
 
-        if(input.sdf3().isPresent()) {
-            strategoOriginTask.add(compileSdf3.createSupplier(input.sdf3().get()));
-            final Result<KeyedMessages, CompileException> result = context.require(compileSdf3, input.sdf3().get())
-                .ifOk(messagesBuilder::addMessages)
-                .mapErr(CompileLanguage.CompileException::sdf3CompileFail);
-            if(result.isErr()) {
-                return result;
-            }
+        final STask<Result<KeyedMessages, Sdf3CompileException>> compileSdf3Task = compileSdf3.createSupplier(rootDirectory);
+        strategoOriginTasks.add(compileSdf3Task);
+        final Result<KeyedMessages, CompileException> compileSdf3Result = context.require(compileSdf3Task)
+            .ifOk(messagesBuilder::addMessages)
+            .mapErr(CompileLanguage.CompileException::sdf3CompileFail);
+        if(compileSdf3Result.isErr()) {
+            return compileSdf3Result;
         }
 
         final Result<KeyedMessages, CompileException> compileEsvResult = context.require(compileEsv, rootDirectory)
@@ -93,7 +92,7 @@ public class CompileLanguage implements TaskDef<CompileLanguageInput, Result<Key
         }
 
         if(input.stratego().isPresent()) {
-            final Result<KeyedMessages, CompileException> result = context.require(compileStratego, new CompileStratego.Args(input.stratego().get(), strategoOriginTask))
+            final Result<KeyedMessages, CompileException> result = context.require(compileStratego, new CompileStratego.Args(input.stratego().get(), strategoOriginTasks))
                 .ifOk(messagesBuilder::addMessages)
                 .mapErr(CompileLanguage.CompileException::strategoCompileFail);
             if(result.isErr()) {

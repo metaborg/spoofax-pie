@@ -2,14 +2,22 @@ package mb.sdf3.task.spec;
 
 import mb.common.result.ExpectException;
 import mb.common.result.Result;
+import mb.jsglr1.pie.JSGLR1ParseTaskInput;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
+import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.resource.hierarchical.HierarchicalResource;
+import mb.resource.hierarchical.match.ResourceMatcher;
+import mb.resource.hierarchical.walk.ResourceWalker;
 import mb.sdf3.Sdf3Scope;
+import mb.sdf3.task.Sdf3Desugar;
+import mb.sdf3.task.Sdf3Parse;
 import mb.sdf3.task.Sdf3ToCompletion;
 import mb.sdf3.task.Sdf3ToNormalForm;
 import mb.sdf3.task.Sdf3ToPermissive;
+import mb.sdf3.task.util.Sdf3Util;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.sdf2table.grammar.NormGrammar;
 import org.metaborg.sdf2table.io.NormGrammarReader;
@@ -19,15 +27,18 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Sdf3Scope
 public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Input, Result<ParseTable, ?>> {
     public static class Input implements Serializable {
-        private final Supplier<Result<Sdf3Spec, ?>> specSupplier;
+        private final Sdf3SpecConfig config;
         private final boolean createCompletionTable;
 
-        public Input(Supplier<Result<Sdf3Spec, ?>> specSupplier, boolean createCompletionTable) {
-            this.specSupplier = specSupplier;
+        public Input(Sdf3SpecConfig config, boolean createCompletionTable) {
+            this.config = config;
             this.createCompletionTable = createCompletionTable;
         }
 
@@ -36,32 +47,38 @@ public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Input,
             if(o == null || getClass() != o.getClass()) return false;
             final Input input = (Input)o;
             if(createCompletionTable != input.createCompletionTable) return false;
-            return specSupplier.equals(input.specSupplier);
+            return config.equals(input.config);
         }
 
         @Override public int hashCode() {
-            int result = specSupplier.hashCode();
+            int result = config.hashCode();
             result = 31 * result + (createCompletionTable ? 1 : 0);
             return result;
         }
 
         @Override public String toString() {
-            return "Input{" +
-                "specSupplier=" + specSupplier +
+            return "Sdf3SpecToParseTable$Input{" +
+                "config=" + config +
                 ", createCompletionTable=" + createCompletionTable +
                 '}';
         }
     }
 
+    private final Sdf3Parse parse;
+    private final Sdf3Desugar desugar;
     private final Sdf3ToPermissive toPermissive;
     private final Sdf3ToCompletion toCompletion;
     private final Sdf3ToNormalForm toNormalForm;
 
     @Inject public Sdf3SpecToParseTable(
+        Sdf3Parse parse,
+        Sdf3Desugar desugar,
         Sdf3ToPermissive toPermissive,
         Sdf3ToCompletion toCompletion,
         Sdf3ToNormalForm toNormalForm
     ) {
+        this.parse = parse;
+        this.desugar = desugar;
         this.toPermissive = toPermissive;
         this.toCompletion = toCompletion;
         this.toNormalForm = toNormalForm;
@@ -72,18 +89,27 @@ public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Input,
     }
 
     @Override public Result<ParseTable, ?> exec(ExecContext context, Input input) throws IOException {
-        final Result<Sdf3Spec, ?> specResult = context.require(input.specSupplier);
-        if(specResult.isErr()) {
-            return Result.ofErr(specResult.getErr());
+        final JSGLR1ParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().rootDirectoryHint(input.config.rootDirectory);
+        final Supplier<Result<IStrategoTerm, ?>> mainModuleAstSupplier = desugar.createSupplier(parseInputBuilder.withFile(input.config.mainFile).buildAstSupplier());
+
+        final ResourceWalker walker = Sdf3Util.createResourceWalker();
+        final ResourceMatcher matcher = Sdf3Util.createResourceMatcher();
+        final HierarchicalResource mainSourceDirectory = context.require(input.config.mainSourceDirectory, ResourceStampers.modifiedDirRec(walker, matcher));
+        context.require(mainSourceDirectory, ResourceStampers.modifiedDirRec(walker, matcher));
+        final ArrayList<Supplier<Result<IStrategoTerm, ?>>> modulesAstSuppliers;
+        try(final Stream<? extends HierarchicalResource> stream = mainSourceDirectory.walk(walker, matcher)) {
+            modulesAstSuppliers = stream
+                .filter(file -> !file.getPath().equals(input.config.mainFile)) // Filter out main module, as it is supplied separately.
+                .map(file -> desugar.createSupplier(parseInputBuilder.withFile(file.getKey()).buildAstSupplier()))
+                .collect(Collectors.toCollection(ArrayList::new));
         }
-        final Sdf3Spec spec = specResult.get();
 
         try {
-            final IStrategoTerm mainNormalizedGrammar = context.require(toNormalized(spec.mainModuleAstSupplier))
-                .expect(e -> new ExpectException("Transforming SDF3 grammar of main module " + spec.mainModuleAstSupplier + " to normal form failed", e));
+            final IStrategoTerm mainNormalizedGrammar = context.require(toNormalized(mainModuleAstSupplier))
+                .expect(e -> new ExpectException("Transforming SDF3 grammar of main module " + mainModuleAstSupplier + " to normal form failed", e));
 
             final NormGrammarReader normGrammarReader = new NormGrammarReader();
-            for(Supplier<? extends Result<IStrategoTerm, ?>> astSupplier : spec.modulesAstSuppliers) {
+            for(Supplier<? extends Result<IStrategoTerm, ?>> astSupplier : modulesAstSuppliers) {
                 final IStrategoTerm normalizedGrammarTerm = context.require(toNormalized(astSupplier))
                     .expect(e -> new ExpectException("Transforming SDF3 grammar of " + astSupplier + " to normal form failed", e));
                 normGrammarReader.addModuleAst(normalizedGrammarTerm);
@@ -103,10 +129,10 @@ public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Input,
                 // main module is the actual main module in case of creating a completion parse table.
                 normGrammarReader.addModuleAst(mainNormalizedGrammar);
 
-                final IStrategoTerm mainCompletionNormalizedGrammar = context.require(toCompletionNormalized(spec.mainModuleAstSupplier))
-                    .expect(e -> new ExpectException("Transforming SDF3 grammar of main module " + spec.mainModuleAstSupplier + " to completion normal form failed", e));
+                final IStrategoTerm mainCompletionNormalizedGrammar = context.require(toCompletionNormalized(mainModuleAstSupplier))
+                    .expect(e -> new ExpectException("Transforming SDF3 grammar of main module " + mainModuleAstSupplier + " to completion normal form failed", e));
 
-                for(Supplier<? extends Result<IStrategoTerm, ?>> astSupplier : spec.modulesAstSuppliers) {
+                for(Supplier<? extends Result<IStrategoTerm, ?>> astSupplier : modulesAstSuppliers) {
                     final IStrategoTerm normalizedGrammarTerm = context.require(toCompletionNormalized(astSupplier))
                         .expect(e -> new ExpectException("Transforming SDF3 grammar of " + astSupplier + " to completion normal form failed", e));
                     normGrammarReader.addModuleAst(normalizedGrammarTerm);
@@ -121,7 +147,7 @@ public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Input,
                 }
             }
 
-            return Result.ofOk(new ParseTable(normalizedGrammar, spec.parseTableConfig));
+            return Result.ofOk(new ParseTable(normalizedGrammar, input.config.parseTableConfig));
         } catch(ExpectException e) {
             return Result.ofErr(e);
         }

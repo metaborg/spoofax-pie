@@ -79,8 +79,9 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   val packageId = "mb.sdf3"
 
 
-  // Add config function module
-  addAdditionalModules(TypeInfo.of(packageId, "Sdf3SpecConfigFunctionModule"))
+  // Extend component
+  baseComponent(packageId, "BaseSdf3Component")
+  extendComponent(packageId, "Sdf3Component")
 
 
   /// Tasks
@@ -106,13 +107,13 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   addTaskDefs(toCompletionColorer, toCompletionRuntime, toCompletion, toSignature, toDynsemSignature,
     toPrettyPrinter, toPermissive, toNormalForm, preStatix, postStatix, indexAst)
 
-  // Per-spec transformations
+  // Per-spec tasks
   val specTaskPackageId = "$taskPackageId.spec"
-  val createSpec = TypeInfo.of(specTaskPackageId, "Sdf3CreateSpec")
+  val checkSpec = TypeInfo.of(specTaskPackageId, "Sdf3CheckSpec")
   val specToParseTable = TypeInfo.of(specTaskPackageId, "Sdf3SpecToParseTable")
   val parseTableToParenthesizer = TypeInfo.of(specTaskPackageId, "Sdf3ParseTableToParenthesizer")
   val parseTableToFile = TypeInfo.of(specTaskPackageId, "Sdf3ParseTableToFile")
-  addTaskDefs(createSpec, specToParseTable, parseTableToParenthesizer, parseTableToFile)
+  addTaskDefs(checkSpec, specToParseTable, parseTableToParenthesizer, parseTableToFile)
 
   // Debugging task definitions
   val debugTaskPackageId = "$taskPackageId.debug"
@@ -139,11 +140,12 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
     showSpecParenthesizer
   )
 
-  // Manual multi-file check implementation
-  isMultiFile(true)
+  // Wrap CheckMulti and rename base tasks
   val spoofaxTaskPackageId = "$taskPackageId.spoofax"
-  baseCheckMultiTaskDef(spoofaxTaskPackageId, "GeneratedSdf3CheckMulti")
-  extendCheckMultiTaskDef(spoofaxTaskPackageId, "Sdf3CheckMulti")
+  isMultiFile(true)
+  baseCheckTaskDef(spoofaxTaskPackageId, "BaseSdf3Check")
+  baseCheckMultiTaskDef(spoofaxTaskPackageId, "BaseSdf3CheckMulti")
+  extendCheckMultiTaskDef(spoofaxTaskPackageId, "Sdf3CheckMultiWrapper")
 
 
   /// Commands

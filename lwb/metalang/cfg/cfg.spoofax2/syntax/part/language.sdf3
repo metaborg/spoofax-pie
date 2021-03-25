@@ -15,8 +15,8 @@ context-free syntax
   Part.Sdf3Section = <sdf3 {
   <{Sdf3Option "\n"}*>
 }>
-  Sdf3Option.Sdf3SourceDirectory = <source-directory = <PathLit>>
-  Sdf3Option.Sdf3MainFile        = <main-file = <PathLit>>
+  Sdf3Option.Sdf3MainSourceDirectory   = <main-source-directory = <PathLit>>
+  Sdf3Option.Sdf3MainFile              = <main-file = <PathLit>>
   Sdf3Option.Sdf3StrategoStrategyAffix = <stratego-strategy-affix = <StrStrategyIdLit>>
 
   Part.EsvSection = <esv {

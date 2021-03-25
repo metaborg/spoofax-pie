@@ -40,6 +40,13 @@ public class Sdf3ParseTableToFile implements TaskDef<Sdf3ParseTableToFile.Args, 
         public int hashCode() {
             return Objects.hash(parseTableSupplier, outputFile);
         }
+
+        @Override public String toString() {
+            return "Sdf3ParseTableToFile$Args{" +
+                "parseTableSupplier=" + parseTableSupplier +
+                ", outputFile=" + outputFile +
+                '}';
+        }
     }
 
     @Inject public Sdf3ParseTableToFile() { /* Default @Inject constructor required */ }

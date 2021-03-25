@@ -123,7 +123,7 @@ public class AstToObject {
         final CompileLanguageInputBuilder languageCompilerInputBuilder = new CompileLanguageInputBuilder();
         parts.getAllSubTermsInListAsParts("Sdf3Section").ifPresent(subParts -> {
             final CompileSdf3Input.Builder builder = languageCompilerInputBuilder.withSdf3();
-            subParts.forOneSubtermAsPath("Sdf3SourceDirectory", rootDirectory, builder::sourceDirectory);
+            subParts.forOneSubtermAsPath("Sdf3MainSourceDirectory", rootDirectory, builder::mainSourceDirectory);
             subParts.forOneSubtermAsPath("Sdf3MainFile", rootDirectory, builder::mainFile);
             subParts.forOneSubtermAsString("Sdf3StrategoStrategyAffix", builder::strategoStrategyIdAffix);
             // TODO: more SDF3 properties

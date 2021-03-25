@@ -5,6 +5,7 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.sdf3.Sdf3Scope;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.sdf2parenthesize.parenthesizer.Parenthesizer;
 import org.metaborg.sdf2table.parsetable.ParseTable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -25,7 +26,7 @@ public class Sdf3ParseTableToParenthesizer implements TaskDef<Sdf3ParseTableToPa
             this.moduleName = moduleName;
         }
 
-        @Override public boolean equals(Object o) {
+        @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             Args args = (Args)o;
@@ -36,6 +37,13 @@ public class Sdf3ParseTableToParenthesizer implements TaskDef<Sdf3ParseTableToPa
         @Override
         public int hashCode() {
             return Objects.hash(parseTableSupplier, moduleName);
+        }
+
+        @Override public String toString() {
+            return "Sdf3ParseTableToParenthesizer$Args{" +
+                "parseTableSupplier=" + parseTableSupplier +
+                ", moduleName='" + moduleName + '\'' +
+                '}';
         }
     }
 

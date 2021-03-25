@@ -4,7 +4,6 @@ import mb.common.result.Result;
 import mb.log.dagger.DaggerLoggerComponent;
 import mb.log.dagger.LoggerModule;
 import mb.pie.api.Supplier;
-import mb.pie.api.ValueSupplier;
 import mb.resource.Resource;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
@@ -16,8 +15,6 @@ import mb.sdf3.task.Sdf3AnalyzeMulti;
 import mb.sdf3.task.Sdf3Desugar;
 import mb.sdf3.task.Sdf3Parse;
 import mb.sdf3.task.debug.MultiAstDesugarFunction;
-import mb.sdf3.task.spec.Sdf3CreateSpec;
-import mb.sdf3.task.spec.Sdf3Spec;
 import mb.sdf3.task.spec.Sdf3SpecConfig;
 import mb.sdf3.task.util.Sdf3Util;
 import mb.spoofax.test.SingleLanguageTestBase;
@@ -39,7 +36,6 @@ class TestBase extends SingleLanguageTestBase<Sdf3ResourcesComponent, Sdf3Compon
 
     final Sdf3Parse parse = component.getSdf3Parse();
     final Sdf3Desugar desugar = component.getSdf3Desugar();
-    final Sdf3CreateSpec createSpec = component.getSdf3CreateSpec();
     final Sdf3AnalyzeMulti analyze = component.getSdf3AnalyzeMulti();
 
 
@@ -70,16 +66,11 @@ class TestBase extends SingleLanguageTestBase<Sdf3ResourcesComponent, Sdf3Compon
     }
 
 
-    Supplier<Result<Sdf3SpecConfig, ?>> specConfigSupplier(ResourcePath rootDirectory, ResourceKey mainFile) {
-        return new ValueSupplier<>(Result.ofOk(new Sdf3SpecConfig(rootDirectory, mainFile, Sdf3SpecConfig.createDefaultParseTableConfiguration())));
+    Sdf3SpecConfig specConfig(ResourcePath rootDirectory, ResourcePath mainSourceDirectory, ResourceKey mainFile) {
+        return new Sdf3SpecConfig(rootDirectory, mainSourceDirectory, mainFile, Sdf3SpecConfig.createDefaultParseTableConfiguration());
     }
 
-    Supplier<Result<Sdf3Spec, ?>> specSupplier(Supplier<Result<Sdf3SpecConfig, ?>> specConfigSupplier) {
-        return createSpec.createSupplier(specConfigSupplier);
-    }
-
-    @SafeVarargs
-    final Supplier<Result<Sdf3Spec, ?>> specSupplier(Supplier<Result<IStrategoTerm, ?>> mainModuleAstSupplier, Supplier<Result<IStrategoTerm, ?>>... modulesAstSuppliers) {
-        return new ValueSupplier<>(Result.ofOk(new Sdf3Spec(Sdf3SpecConfig.createDefaultParseTableConfiguration(), mainModuleAstSupplier, modulesAstSuppliers)));
+    Sdf3SpecConfig specConfig(ResourcePath rootDirectory) {
+        return Sdf3SpecConfig.createDefault(rootDirectory);
     }
 }

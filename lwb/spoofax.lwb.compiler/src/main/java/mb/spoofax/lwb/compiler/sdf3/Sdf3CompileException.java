@@ -1,10 +1,9 @@
 package mb.spoofax.lwb.compiler.sdf3;
 
+import mb.cfg.task.CfgRootDirectoryToObjectException;
 import mb.common.message.HasOptionalMessages;
 import mb.common.message.KeyedMessages;
 import mb.common.util.ADT;
-import mb.resource.ResourceKey;
-import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -12,9 +11,9 @@ import java.util.Optional;
 @ADT
 public abstract class Sdf3CompileException extends Exception implements HasOptionalMessages {
     public interface Cases<R> {
-        R mainFileFail(ResourceKey mainFile);
+        R getLanguageCompilerConfigurationFail(CfgRootDirectoryToObjectException cfgRootDirectoryToObjectException);
 
-        R sourceDirectoryFail(ResourcePath rootDirectory);
+        R configureFail(Sdf3ConfigureException sdf3ConfigureException);
 
         R checkFail(KeyedMessages messages);
 
@@ -29,12 +28,12 @@ public abstract class Sdf3CompileException extends Exception implements HasOptio
         R completionRuntimeGenerateFail(Exception cause);
     }
 
-    public static Sdf3CompileException mainFileFail(ResourceKey mainFile) {
-        return Sdf3CompileExceptions.mainFileFail(mainFile);
+    public static Sdf3CompileException getLanguageCompilerConfigurationFail(CfgRootDirectoryToObjectException cfgRootDirectoryToObjectException) {
+        return withCause(Sdf3CompileExceptions.getLanguageCompilerConfigurationFail(cfgRootDirectoryToObjectException), cfgRootDirectoryToObjectException);
     }
 
-    public static Sdf3CompileException sourceDirectoryFail(ResourcePath rootDirectory) {
-        return Sdf3CompileExceptions.sourceDirectoryFail(rootDirectory);
+    public static Sdf3CompileException configureFail(Sdf3ConfigureException sdf3ConfigureException) {
+        return withCause(Sdf3CompileExceptions.configureFail(sdf3ConfigureException), sdf3ConfigureException);
     }
 
     public static Sdf3CompileException checkFail(KeyedMessages messages) {
@@ -69,19 +68,19 @@ public abstract class Sdf3CompileException extends Exception implements HasOptio
 
     public abstract <R> R match(Cases<R> cases);
 
-    public Sdf3CompileExceptions.CasesMatchers.TotalMatcher_MainFileFail cases() {
+    public Sdf3CompileExceptions.CasesMatchers.TotalMatcher_GetLanguageCompilerConfigurationFail cases() {
         return Sdf3CompileExceptions.cases();
     }
 
-    public Sdf3CompileExceptions.CaseOfMatchers.TotalMatcher_MainFileFail caseOf() {
+    public Sdf3CompileExceptions.CaseOfMatchers.TotalMatcher_GetLanguageCompilerConfigurationFail caseOf() {
         return Sdf3CompileExceptions.caseOf(this);
     }
 
 
     @Override public String getMessage() {
         return caseOf()
-            .mainFileFail((mainFile) -> "SDF3 main file '" + mainFile + "' does not exist or is not a file")
-            .sourceDirectoryFail((sourceDirectory) -> "SDF3 source directory '" + sourceDirectory + "' does not exist or is not a directory")
+            .getLanguageCompilerConfigurationFail((cause) -> "Getting language compiler configuration failed")
+            .configureFail((cause) -> "Configuring SDF3 failed")
             .checkFail((messages) -> "Parsing or checking SDF3 source files failed; see error messages")
             .parseTableCompileFail((cause) -> "Compile parse table from SDF3 failed unexpectedly")
             .signatureGenerateFail((cause) -> "Generate stratego signature from SDF3 failed unexpectedly")

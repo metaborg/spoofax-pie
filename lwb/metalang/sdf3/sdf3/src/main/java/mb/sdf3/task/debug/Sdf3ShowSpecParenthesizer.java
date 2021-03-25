@@ -1,19 +1,16 @@
 package mb.sdf3.task.debug;
 
-import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
-import mb.pie.api.Function;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
-import mb.pie.api.ValueSupplier;
 import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.Sdf3Scope;
 import mb.sdf3.task.Sdf3GetStrategoRuntimeProvider;
-import mb.sdf3.task.spec.Sdf3CreateSpec;
 import mb.sdf3.task.spec.Sdf3ParseTableToParenthesizer;
 import mb.sdf3.task.spec.Sdf3SpecConfig;
 import mb.sdf3.task.spec.Sdf3SpecToParseTable;
+import mb.sdf3.task.spoofax.Sdf3SpecConfigFunctionWrapper;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -56,21 +53,18 @@ public class Sdf3ShowSpecParenthesizer extends ProvideOutputShared implements Ta
         }
     }
 
-    private final Function<ResourcePath, Result<Option<Sdf3SpecConfig>, ?>> configFunction;
-    private final Sdf3CreateSpec createSpec;
+    private final Sdf3SpecConfigFunctionWrapper configFunctionWrapper;
     private final Sdf3SpecToParseTable specToParseTable;
     private final Sdf3ParseTableToParenthesizer specToParenthesizer;
 
     @Inject public Sdf3ShowSpecParenthesizer(
         Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider,
-        Function<ResourcePath, Result<Option<Sdf3SpecConfig>, ?>> configFunction,
-        Sdf3CreateSpec createSpec,
+        Sdf3SpecConfigFunctionWrapper configFunctionWrapper,
         Sdf3SpecToParseTable specToParseTable,
         Sdf3ParseTableToParenthesizer sdf3ParseTableToParenthesizer
     ) {
         super(getStrategoRuntimeProvider, "pp-stratego-string", "parenthesizer");
-        this.configFunction = configFunction;
-        this.createSpec = createSpec;
+        this.configFunctionWrapper = configFunctionWrapper;
         this.specToParseTable = specToParseTable;
         this.specToParenthesizer = sdf3ParseTableToParenthesizer;
     }
@@ -80,9 +74,9 @@ public class Sdf3ShowSpecParenthesizer extends ProvideOutputShared implements Ta
     }
 
     @Override public CommandFeedback exec(ExecContext context, Args args) throws Exception {
-        return context.require(configFunction, args.root).mapOrElse(o ->
-            o.mapOrElse(c ->
-                run(context, c, args),
+        return context.require(configFunctionWrapper.get(), args.root).mapOrElse(
+            o -> o.mapOrElse(
+                c -> run(context, c, args),
                 () -> CommandFeedback.of(ShowFeedback.showText("Cannot show parenthesizer; SDF3 was not configured in '" + args.root + "'", getName(args.concrete, args.root)))
             ),
             // TODO: should we propagate configuration errors here? Every task that requires some configuration will
@@ -93,7 +87,7 @@ public class Sdf3ShowSpecParenthesizer extends ProvideOutputShared implements Ta
 
     private CommandFeedback run(ExecContext context, Sdf3SpecConfig config, Args args) {
         final Supplier<? extends Result<ParseTable, ?>> parseTableSupplier = specToParseTable.createSupplier(new Sdf3SpecToParseTable.Input(
-            createSpec.createSupplier(new ValueSupplier<>(Result.ofOk(config))),
+            config,
             false
         ));
         return context.require(specToParenthesizer, new Sdf3ParseTableToParenthesizer.Args(parseTableSupplier, "parenthesizer")).mapOrElse(

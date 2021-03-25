@@ -14,6 +14,7 @@ import mb.spoofax.lwb.compiler.esv.CompileEsv;
 import mb.spoofax.lwb.compiler.esv.ConfigureEsv;
 import mb.spoofax.lwb.compiler.metalang.CompileStratego;
 import mb.spoofax.lwb.compiler.sdf3.CompileSdf3;
+import mb.spoofax.lwb.compiler.sdf3.ConfigureSdf3;
 import mb.spoofax.lwb.compiler.statix.CompileStatix;
 
 import java.util.HashSet;
@@ -51,6 +52,7 @@ public class Spoofax3CompilerModule {
         CompileLanguageWithCfgToJavaClassPath compileLanguageWithCfgToJavaClassPath,
         CompileLanguage languageProjectCompiler,
 
+        ConfigureSdf3 configureSdf3,
         CompileSdf3 compileSdf3,
         ConfigureEsv configureEsv,
         CompileEsv compileEsv,
@@ -65,6 +67,7 @@ public class Spoofax3CompilerModule {
         taskDefs.add(compileLanguageWithCfgToJavaClassPath);
         taskDefs.add(languageProjectCompiler);
 
+        taskDefs.add(configureSdf3);
         taskDefs.add(compileSdf3);
         taskDefs.add(configureEsv);
         taskDefs.add(compileEsv);

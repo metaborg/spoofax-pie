@@ -1,16 +1,13 @@
 package mb.sdf3.task.debug;
 
-import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
-import mb.pie.api.Function;
 import mb.pie.api.TaskDef;
-import mb.pie.api.ValueSupplier;
 import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.Sdf3Scope;
-import mb.sdf3.task.spec.Sdf3CreateSpec;
 import mb.sdf3.task.spec.Sdf3SpecConfig;
 import mb.sdf3.task.spec.Sdf3SpecToParseTable;
+import mb.sdf3.task.spoofax.Sdf3SpecConfigFunctionWrapper;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
 import mb.stratego.common.StrategoUtil;
@@ -49,17 +46,14 @@ public class Sdf3ShowSpecParseTable implements TaskDef<Sdf3ShowSpecParseTable.Ar
         }
     }
 
-    private final Function<ResourcePath, Result<Option<Sdf3SpecConfig>, ?>> configFunction;
-    private final Sdf3CreateSpec createSpec;
+    private final Sdf3SpecConfigFunctionWrapper configFunctionWrapper;
     private final Sdf3SpecToParseTable specToParseTable;
 
     @Inject public Sdf3ShowSpecParseTable(
-        Function<ResourcePath, Result<Option<Sdf3SpecConfig>, ?>> configFunction,
-        Sdf3CreateSpec createSpec,
+        Sdf3SpecConfigFunctionWrapper configFunctionWrapper,
         Sdf3SpecToParseTable specToParseTable
     ) {
-        this.configFunction = configFunction;
-        this.createSpec = createSpec;
+        this.configFunctionWrapper = configFunctionWrapper;
         this.specToParseTable = specToParseTable;
     }
 
@@ -69,11 +63,11 @@ public class Sdf3ShowSpecParseTable implements TaskDef<Sdf3ShowSpecParseTable.Ar
 
     @Override public CommandFeedback exec(ExecContext context, Args args) {
         final String name = "Parse table for project '" + args.root + "'";
-        return context.require(configFunction, args.root).mapOrElse(o ->
-                o.mapOrElse(c ->
-                        run(context, c, args, name),
-                    () -> CommandFeedback.of(ShowFeedback.showText("Cannot show parse table; SDF3 was not configured in '" + args.root + "'", name))
-                ),
+        return context.require(configFunctionWrapper.get(), args.root).mapOrElse(
+            o -> o.mapOrElse(
+                c -> run(context, c, args, name),
+                () -> CommandFeedback.of(ShowFeedback.showText("Cannot show parse table; SDF3 was not configured in '" + args.root + "'", name))
+            ),
             // TODO: should we propagate configuration errors here? Every task that requires some configuration will
             //       propagate the same configuration errors, which would lead to duplicates.
             e -> CommandFeedback.ofTryExtractMessagesFrom(e, args.root)
@@ -82,7 +76,7 @@ public class Sdf3ShowSpecParseTable implements TaskDef<Sdf3ShowSpecParseTable.Ar
 
     private CommandFeedback run(ExecContext context, Sdf3SpecConfig config, Args args, String name) {
         final Result<ParseTable, ?> parseTableResult = context.require(specToParseTable, new Sdf3SpecToParseTable.Input(
-            createSpec.createSupplier(new ValueSupplier<>(Result.ofOk(config))),
+            config,
             false
         ));
         return parseTableResult

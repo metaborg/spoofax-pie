@@ -12,14 +12,11 @@ import mb.pie.api.TaskDef;
 import mb.pie.dagger.TaskDefsProvider;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.sdf3.Sdf3Component;
-import mb.spoofax.lwb.compiler.CompileLanguageToJavaClassPath;
 import mb.spoofax.lwb.compiler.CompileLanguage;
+import mb.spoofax.lwb.compiler.CompileLanguageToJavaClassPath;
 import mb.spoofax.lwb.compiler.CompileLanguageWithCfgToJavaClassPath;
-import mb.spoofax.lwb.compiler.esv.CompileEsv;
 import mb.spoofax.lwb.compiler.esv.ConfigureEsv;
-import mb.spoofax.lwb.compiler.sdf3.CompileSdf3;
-import mb.spoofax.lwb.compiler.statix.CompileStatix;
-import mb.spoofax.lwb.compiler.metalang.CompileStratego;
+import mb.spoofax.lwb.compiler.sdf3.ConfigureSdf3;
 import mb.statix.StatixComponent;
 import mb.str.StrategoComponent;
 
@@ -53,6 +50,8 @@ public interface Spoofax3CompilerComponent extends TaskDefsProvider {
 
 
     ConfigureEsv getConfigureEsv();
+
+    ConfigureSdf3 getConfigureSdf3();
 
 
     @Override @Spoofax3CompilerQualifier Set<TaskDef<?, ?>> getTaskDefs();

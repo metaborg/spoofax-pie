@@ -30,12 +30,12 @@ public interface CompileSdf3Input extends Serializable {
         return compileLanguageShared().languageProject().project().baseDirectory();
     }
 
-    @Value.Default default ResourcePath sourceDirectory() {
-        return compileLanguageShared().languageProject().project().srcDirectory();
+    @Value.Default default ResourcePath mainSourceDirectory() {
+        return rootDirectory().appendRelativePath("src");
     }
 
     @Value.Default default ResourcePath mainFile() {
-        return sourceDirectory().appendRelativePath("start.sdf3");
+        return mainSourceDirectory().appendRelativePath("start.sdf3");
     }
 
 
